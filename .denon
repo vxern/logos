@@ -1,0 +1,14 @@
+{
+  "scripts": {
+    "start": {
+      "cmd": "deno run mod.ts",
+      "desc": "Starts the bot",
+      "unstable": true
+    }
+  },
+  "allow": [
+    "read",
+    "net",
+    "env"
+  ]
+}
