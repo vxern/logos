@@ -23,5 +23,23 @@ function unimplemented(
   });
 }
 
-export { unimplemented };
+function mergeCommands(...commands: Command[]): Command {
+  const executeRouter = Object.fromEntries(
+    commands.map((command) => [command.name, command.execute]),
+  );
+  const command = commands.reduce((command, current) => {
+    if (current.options) {
+      command.options = Array<ApplicationCommandOption>().concat(
+        command.options!,
+        current.options,
+      );
+    }
+    return command;
+  });
+  command.execute = (interaction) =>
+    executeRouter[interaction.name](interaction);
+  return command;
+}
+
+export { mergeCommands, unimplemented };
 export type { Command };
