@@ -8,8 +8,11 @@ const config = {
 
 const command: Command = {
   name: "volume",
-  description: "Displays the volume of playback.",
   options: [{
+    type: "SUB_COMMAND",
+    name: "display",
+    description: "Displays the volume of playback.",
+  }, {
     type: "SUB_COMMAND",
     name: "set",
     description: "Sets the volume of playback.",
@@ -18,7 +21,7 @@ const command: Command = {
       name: "volume",
       description: `A value between 0 and ${config.volume.maximum}`,
       required: true,
-    }],
+    }]
   }],
   execute: unimplemented,
 };
