@@ -1,4 +1,3 @@
-import { ApplicationCommandOption } from "../../deps.ts";
 import { Command, mergeCommands } from "./command.ts";
 import information from "./information/information.ts";
 import moderation from "./moderation/moderation.ts";

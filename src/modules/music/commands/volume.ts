@@ -21,7 +21,7 @@ const command: Command = {
       name: "volume",
       description: `A value between 0 and ${config.volume.maximum}`,
       required: true,
-    }]
+    }],
   }],
   execute: unimplemented,
 };
