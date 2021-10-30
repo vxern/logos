@@ -5,7 +5,7 @@ const command: Command = {
   name: "profile",
   description: "Displays the user's profile.",
   options: [user],
-  execute: unimplemented,
+  handle: unimplemented,
 };
 
 export default command;

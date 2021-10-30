@@ -6,7 +6,7 @@ const command: Command = {
   name: "reprimand",
   description: "Reprimands the user.",
   options: [user, reason],
-  execute: unimplemented,
+  handle: unimplemented,
 };
 
 export default command;

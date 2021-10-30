@@ -6,7 +6,7 @@ const command: Command = {
   name: "mute",
   description: "Mutes a user, making them unable to interact on the server.",
   options: [user, reason, duration],
-  execute: unimplemented,
+  handle: unimplemented,
 };
 
 export default command;

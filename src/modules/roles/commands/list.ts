@@ -1,13 +1,15 @@
-import { Command, unimplemented } from "../../command.ts";
+import { ApplicationCommandOptionType } from "../../../../deps.ts";
+import { Command, noneAvailable, unimplemented } from "../../command.ts";
 
 const command: Command = {
   name: "list",
+  description: noneAvailable,
   options: [{
-    type: "SUB_COMMAND",
     name: "roles",
     description: "Lists available roles.",
+    type: ApplicationCommandOptionType.SUB_COMMAND,
+    handle: unimplemented,
   }],
-  execute: unimplemented,
 };
 
 export default command;

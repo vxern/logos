@@ -6,7 +6,7 @@ const command: Command = {
   name: "kick",
   description: "Kicks a user from the server.",
   options: [user, reason],
-  execute: unimplemented,
+  handle: unimplemented,
 };
 
 export default command;

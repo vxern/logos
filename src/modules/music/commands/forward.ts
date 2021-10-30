@@ -5,7 +5,7 @@ const command: Command = {
   name: "forward",
   description: "Fast-forwards the currently playing song.",
   options: [by, to],
-  execute: unimplemented,
+  handle: unimplemented,
 };
 
 export default command;

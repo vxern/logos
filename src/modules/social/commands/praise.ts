@@ -5,7 +5,7 @@ const command: Command = {
   name: "praise",
   description: "Praises a user for their contribution.",
   options: [user],
-  execute: unimplemented,
+  handle: unimplemented,
 };
 
 export default command;

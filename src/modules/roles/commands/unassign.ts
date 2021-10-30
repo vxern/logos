@@ -5,7 +5,7 @@ const command: Command = {
   name: "unassign",
   description: "Unassigns a role.",
   options: [role],
-  execute: unimplemented,
+  handle: unimplemented,
 };
 
 export default command;

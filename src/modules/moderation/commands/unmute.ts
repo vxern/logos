@@ -6,7 +6,7 @@ const command: Command = {
   name: "unmute",
   description: "Unmutes a user, allowing them to interact on the server again.",
   options: [user, reason],
-  execute: unimplemented,
+  handle: unimplemented,
 };
 
 export default command;

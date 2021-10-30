@@ -5,7 +5,7 @@ const command: Command = {
   name: "purge",
   description: "Deletes a number of messages from a channel.",
   options: [elements],
-  execute: unimplemented,
+  handle: unimplemented,
 };
 
 export default command;
