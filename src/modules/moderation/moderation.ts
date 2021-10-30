@@ -2,6 +2,7 @@ import { Command } from "../command.ts";
 import ban from "./commands/ban.ts";
 import cite from "./commands/cite.ts";
 import kick from "./commands/kick.ts";
+import list from "./commands/list.ts";
 import mute from "./commands/mute.ts";
 import pardon from "./commands/pardon.ts";
 import purge from "./commands/purge.ts";
@@ -14,6 +15,7 @@ const commands: Record<string, Command> = {
   ban,
   cite,
   kick,
+  list,
   mute,
   pardon,
   purge,
