@@ -1,18 +1,22 @@
 import {
   ApplicationCommand,
   ApplicationCommandInteraction,
-  ApplicationCommandOption,
   ApplicationCommandOptionType,
   InteractionResponseType,
 } from "../../deps.ts";
+import { areOptionsIdentical, Option } from "./option.ts";
+
+const noneAvailable = "No information available.";
+
+type InteractionHandler = (
+  interaction: ApplicationCommandInteraction,
+) => Promise<ApplicationCommandInteraction>;
 
 interface Command {
   name: string;
-  description?: string;
-  options?: ApplicationCommandOption[];
-  execute: (
-    interaction: ApplicationCommandInteraction,
-  ) => Promise<ApplicationCommandInteraction>;
+  description: string;
+  options?: Option[];
+  handle?: InteractionHandler;
 }
 
 function unimplemented(
@@ -26,20 +30,10 @@ function unimplemented(
 }
 
 function mergeCommands(...commands: Command[]): Command {
-  const executeRouter = Object.fromEntries(
-    commands.map((command) => [command.name, command.execute]),
+  const command = commands[0];
+  command.options = Array<Option>().concat(
+    ...commands.map((command) => command.options ?? []),
   );
-  const command = commands.reduce((command, current) => {
-    if (current.options) {
-      command.options = Array<ApplicationCommandOption>().concat(
-        command.options!,
-        current.options,
-      );
-    }
-    return command;
-  });
-  command.execute = (interaction) =>
-    executeRouter[interaction.name](interaction);
   return command;
 }
 
@@ -55,41 +49,45 @@ function areCommandsIdentical(
   return equalities.every((x) => x);
 }
 
-function areOptionsIdentical(
-  existent: ApplicationCommandOption | ApplicationCommandOption[] | undefined,
-  introduced: ApplicationCommandOption | ApplicationCommandOption[] | undefined,
-): boolean {
-  const existentIsEmpty = Array.isArray(existent)
-    ? (existent as ApplicationCommandOption[]).length === 0
-    : false;
-  // If `existent` is empty or undefined and `introduced` is `undefined`
-  if ((!existent || existentIsEmpty) && !introduced) {
-    return true;
+function constructHandler(
+  command: Command,
+): InteractionHandler {
+  if (command.handle) return command.handle;
+  if (!command.options) return unimplemented;
+
+  const handlers = new Map<
+    string | undefined,
+    Map<string | undefined, InteractionHandler>
+  >([[undefined, new Map()]]);
+  for (const option of command.options) {
+    switch (option.type) {
+      case ApplicationCommandOptionType.SUB_COMMAND_GROUP:
+        handlers.set(
+          option.name,
+          new Map(
+            option.options!.map((
+              option,
+            ) => [option.name, option.handle || unimplemented]),
+          ),
+        );
+        break;
+      case ApplicationCommandOptionType.SUB_COMMAND:
+        const commandMap = handlers.get(undefined)!;
+        commandMap.set(option.name, option.handle || unimplemented);
+        break;
+    }
   }
-  // If exclusively `existent` is empty or undefined or if exclusively `introduced` is `undefined`
-  if (!(existent && introduced)) {
-    return false;
-  }
-  if (Array.isArray(existent) || Array.isArray(introduced)) {
-    const existentOptions = existent as ApplicationCommandOption[];
-    const introducedOptions = introduced as ApplicationCommandOption[];
-    return existentOptions.length === introducedOptions.length &&
-      existentOptions.every((option, index) =>
-        areOptionsIdentical(option, introducedOptions[index])
-      );
-  }
-  const equalities = [
-    existent!.name === introduced.name,
-    existent!.description === introduced.description,
-    Object.values(ApplicationCommandOptionType).at(
-      existent!.type as number - 1,
-    ) === introduced.type,
-    existent!.required === (introduced.required ? true : undefined),
-    existent!.default === introduced.default,
-    areOptionsIdentical(existent!.options, introduced.options),
-  ];
-  return equalities.every((x) => x);
+  return (interaction) =>
+    handlers.get(interaction.subCommandGroup)!.get(interaction.subCommand)!(
+      interaction,
+    );
 }
 
-export { areCommandsIdentical, mergeCommands, unimplemented };
-export type { Command };
+export {
+  areCommandsIdentical,
+  constructHandler,
+  mergeCommands,
+  noneAvailable,
+  unimplemented,
+};
+export type { Command, InteractionHandler };
