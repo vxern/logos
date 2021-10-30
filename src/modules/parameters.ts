@@ -1,24 +1,25 @@
-import { ApplicationCommandOption as Option } from "../../deps.ts";
+import { ApplicationCommandOptionType } from "../../deps.ts";
+import { Option } from "./option.ts";
 
 const elements: Option = {
-  type: "INTEGER",
   name: "number",
   description: "The number of elements to manage.",
   required: true,
+  type: ApplicationCommandOptionType.INTEGER,
 };
 
 const index: Option = {
-  type: "INTEGER",
   name: "index",
   description: "The index of the element.",
   required: true,
+  type: ApplicationCommandOptionType.INTEGER,
 };
 
 const user: Option = {
-  type: "STRING",
   name: "user",
   description: "The user's name, tag, ID or mention.",
   required: true,
+  type: ApplicationCommandOptionType.STRING,
 };
 
 export { elements, index, user };
