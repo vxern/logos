@@ -2,7 +2,7 @@ import "https://deno.land/x/dotenv@v3.1.0/load.ts";
 import { colors, Intents } from "./deps.ts";
 import { Client } from "./src/client.ts";
 
-const required = ["DISCORD_SECRET"];
+const required = ["DISCORD_SECRET", "TEMPLATE_GUILD_ID"];
 const supplied = Object.fromEntries(
   required.map((env) => [env, Deno.env.get(env)]),
 );
