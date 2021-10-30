@@ -5,8 +5,8 @@ const command: Command = {
   name: "list",
   description: noneAvailable,
   options: [{
-    name: "roles",
-    description: "Lists available roles.",
+    name: "reprimands",
+    description: "Lists a user's reprimands.",
     type: ApplicationCommandOptionType.SUB_COMMAND,
     handle: unimplemented,
   }],

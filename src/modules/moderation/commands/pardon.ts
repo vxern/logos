@@ -6,7 +6,7 @@ const command: Command = {
   name: "pardon",
   description: "Pardons the user from the last given reprimand.",
   options: [user, reason],
-  execute: unimplemented,
+  handle: unimplemented,
 };
 
 export default command;

@@ -5,7 +5,7 @@ const command: Command = {
   name: "cite",
   description: "Cites a server rule.",
   options: [index],
-  execute: unimplemented,
+  handle: unimplemented,
 };
 
 export default command;

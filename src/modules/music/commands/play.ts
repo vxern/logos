@@ -1,20 +1,33 @@
-import { Command, unimplemented } from "../../command.ts";
+import { ApplicationCommandOptionType } from "../../../../deps.ts";
+import {
+  Command,
+  InteractionHandler,
+  noneAvailable,
+  unimplemented,
+} from "../../command.ts";
+import { Option } from "../../option.ts";
 import { title, url } from "../parameters.ts";
 
-const platforms: string[] = ["YouTube", "Spotify"];
+const platforms = ["Spotify", "YouTube"] as const;
+type Platform = (typeof platforms)[number];
+
+const handlers: Record<Platform, InteractionHandler> = {
+  "Spotify": unimplemented,
+  "YouTube": unimplemented,
+};
 
 const command: Command = {
   name: "play",
-  description: "Requests to play a song.",
+  description: noneAvailable,
   options: platforms.map((platform) => {
     return {
-      type: "SUB_COMMAND",
       name: platform.toLowerCase(),
-      description: `From ${platform}`,
+      description: `Requests to play a song from ${platform}.`,
       options: [title, url],
+      type: ApplicationCommandOptionType.SUB_COMMAND,
+      handle: handlers[platform],
     };
-  }),
-  execute: unimplemented,
+  }) as Option[],
 };
 
 export default command;

@@ -5,7 +5,7 @@ const command: Command = {
   name: "rewind",
   description: "Rewinds the currently playing song.",
   options: [by, to],
-  execute: unimplemented,
+  handle: unimplemented,
 };
 
 export default command;

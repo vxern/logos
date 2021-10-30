@@ -3,7 +3,7 @@ import { Command, unimplemented } from "../../command.ts";
 const command: Command = {
   name: "unpause",
   description: "Unpauses the currently playing song.",
-  execute: unimplemented,
+  handle: unimplemented,
 };
 
 export default command;

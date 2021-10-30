@@ -6,7 +6,7 @@ const command: Command = {
   name: "unban",
   description: "Unbans a user, allowing them to join the server again.",
   options: [user, reason],
-  execute: unimplemented,
+  handle: unimplemented,
 };
 
 export default command;

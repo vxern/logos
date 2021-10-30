@@ -5,7 +5,7 @@ const command: Command = {
   name: "slowmode",
   description: "Enables slowmode in a channel.",
   options: [duration],
-  execute: unimplemented,
+  handle: unimplemented,
 };
 
 export default command;

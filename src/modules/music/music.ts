@@ -1,7 +1,6 @@
 import { Command } from "../command.ts";
 import forward from "./commands/forward.ts";
 import history from "./commands/history.ts";
-import list from "./commands/list.ts";
 import now from "./commands/now.ts";
 import pause from "./commands/pause.ts";
 import play from "./commands/play.ts";
@@ -17,7 +16,6 @@ import volume from "./commands/volume.ts";
 const commands: Record<string, Command> = {
   forward,
   history,
-  list,
   now,
   pause,
   play,

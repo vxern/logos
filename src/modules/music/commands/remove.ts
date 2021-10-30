@@ -5,7 +5,7 @@ const command: Command = {
   name: "remove",
   description: "Removes a song from the queue.",
   options: [index, title],
-  execute: unimplemented,
+  handle: unimplemented,
 };
 
 export default command;
