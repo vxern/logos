@@ -1,4 +1,5 @@
 import {
+  ApplicationCommandOption,
   ApplicationCommandPartial,
   Client as DiscordClient,
   colors,
@@ -6,6 +7,7 @@ import {
 } from "../deps.ts";
 import { areCommandsIdentical } from "./modules/command.ts";
 import modules from "./modules/modules.ts";
+import { constructHandler } from "./modules/command.ts";
 
 class Client extends DiscordClient {
   @event()
@@ -20,6 +22,31 @@ class Client extends DiscordClient {
     );
 
     const commands = modules.commands;
+
+    console.info(
+      colors.cyan("Constructing handlers for commands with subcommands..."),
+    );
+    for (const command of commands) {
+      command.handle = constructHandler(command);
+    }
+
+    console.info(
+      colors.cyan("Assigning handlers to commands..."),
+    );
+    for (const command of commands) {
+      this.interactions.handle(command.name, (interaction) => {
+        if (interaction.user.tag !== "vxern#7031") return;
+        console.info(
+          colors.magenta(
+            `Handling interaction '${interaction.name}' from ${
+              colors.bold(interaction.user.username)
+            }...`,
+          ),
+        );
+        command.handle!(interaction);
+      }, "CHAT_INPUT");
+    }
+
     const updates = [];
     for (const guild of guilds) {
       console.info(
@@ -27,13 +54,10 @@ class Client extends DiscordClient {
       );
       const guildCommands = (await guild.commands.all()).array();
       for (const command of commands) {
-        if (!command.description) {
-          command.description = "No information available.";
-        }
         const commandPartial: ApplicationCommandPartial = {
           name: command.name,
           description: command.description,
-          options: command.options,
+          options: command.options as ApplicationCommandOption[],
           type: "CHAT_INPUT",
         };
 
@@ -64,26 +88,6 @@ class Client extends DiscordClient {
         }
       }
     }
-
-    console.info(
-      colors.cyan(`Assigning handlers to commands...`),
-    );
-    for (const command of commands) {
-      this.interactions.handle(command.name, (interaction) => {
-        if (interaction.user.tag !== "vxern#7031") return;
-        console.info(
-          colors.magenta(
-            `Handling interaction '${interaction.name}' from ${
-              colors.bold(interaction.user.username)
-            }...`,
-          ),
-        );
-        command.execute(interaction);
-      }, "CHAT_INPUT");
-    }
-    console.info(
-      colors.green(`Assigned handlers to commands.`),
-    );
 
     Promise.all(updates).then((changes) => {
       console.info(
