@@ -1,4 +1,4 @@
-import { Command } from "../command.ts";
+import { Command } from "../../commands/command.ts";
 import forward from "./commands/forward.ts";
 import history from "./commands/history.ts";
 import now from "./commands/now.ts";

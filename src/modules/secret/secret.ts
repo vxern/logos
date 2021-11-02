@@ -1,5 +1,5 @@
 import { CategoryChannel, Guild, GuildChannels } from "../../../deps.ts";
-import { Command } from "../command.ts";
+import { Command } from "../../commands/command.ts";
 import compare from "./commands/compare.ts";
 
 const commands: Record<string, Command> = {

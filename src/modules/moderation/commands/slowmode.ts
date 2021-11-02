@@ -1,11 +1,10 @@
-import { Command, unimplemented } from "../../command.ts";
+import { Command } from "../../../commands/command.ts";
 import { duration } from "../parameters.ts";
 
 const command: Command = {
   name: "slowmode",
   description: "Enables slowmode in a channel.",
   options: [duration],
-  handle: unimplemented,
 };
 
 export default command;

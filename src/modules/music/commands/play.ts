@@ -1,11 +1,6 @@
-import { ApplicationCommandOptionType } from "../../../../deps.ts";
-import {
-  Command,
-  InteractionHandler,
-  noneAvailable,
-  unimplemented,
-} from "../../command.ts";
-import { Option } from "../../option.ts";
+import { InteractionHandler } from "../../../client.ts";
+import { Command, unimplemented } from "../../../commands/command.ts";
+import { Option, OptionType } from "../../../commands/option.ts";
 import { title, url } from "../parameters.ts";
 
 const platforms = ["Spotify", "YouTube"] as const;
@@ -18,13 +13,12 @@ const handlers: Record<Platform, InteractionHandler> = {
 
 const command: Command = {
   name: "play",
-  description: noneAvailable,
   options: platforms.map((platform) => {
     return {
       name: platform.toLowerCase(),
       description: `Requests to play a song from ${platform}.`,
+      type: OptionType.SUB_COMMAND,
       options: [title, url],
-      type: ApplicationCommandOptionType.SUB_COMMAND,
       handle: handlers[platform],
     };
   }) as Option[],

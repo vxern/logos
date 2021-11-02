@@ -1,24 +1,20 @@
-import { ApplicationCommandOptionType } from "../../../../deps.ts";
-import { Command, noneAvailable, unimplemented } from "../../command.ts";
+import { Command } from "../../../commands/command.ts";
+import { OptionType } from "../../../commands/option.ts";
 
 const command: Command = {
   name: "information",
-  description: noneAvailable,
   options: [{
     name: "bot",
     description: "Displays information about the bot.",
-    handle: unimplemented,
-    type: ApplicationCommandOptionType.SUB_COMMAND,
+    type: OptionType.SUB_COMMAND,
   }, {
     name: "server",
     description: "Displays information about the server.",
-    handle: unimplemented,
-    type: ApplicationCommandOptionType.SUB_COMMAND,
+    type: OptionType.SUB_COMMAND,
   }, {
     name: "myself",
     description: "Displays information about the user.",
-    handle: unimplemented,
-    type: ApplicationCommandOptionType.SUB_COMMAND,
+    type: OptionType.SUB_COMMAND,
   }],
 };
 

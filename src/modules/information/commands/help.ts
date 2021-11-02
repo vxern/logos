@@ -1,9 +1,8 @@
-import { Command, unimplemented } from "../../command.ts";
+import { Command } from "../../../commands/command.ts";
 
 const command: Command = {
   name: "help",
   description: "Displays helpful information on how to use the bot.",
-  handle: unimplemented,
 };
 
 export default command;
