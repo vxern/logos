@@ -2,13 +2,12 @@ import {
   _,
   ApplicationCommand,
   ApplicationCommandInteraction,
-  ApplicationCommandOptionType,
   ApplicationCommandPartialBase,
   InteractionResponseType,
 } from "../../deps.ts";
 import { InteractionHandler } from "../client.ts";
 import config from "../config.ts";
-import { areOptionsEqual, Option } from "./option.ts";
+import { Option, OptionType } from "./option.ts";
 
 /** An application command with an optional handler for its execution. */
 interface Command extends ApplicationCommandPartialBase<Option> {
@@ -26,10 +25,7 @@ async function unimplemented(
 ): Promise<void> {
   interaction.respond({
     type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-    embeds: [{
-      title: "​",
-      description: config.failsafes.description,
-    }],
+    embeds: [config.failsafes.unimplemented],
     ephemeral: true,
   });
 }
@@ -49,38 +45,12 @@ function mergeCommandOptions(commands: Command[]): Command {
 }
 
 /**
- * Compares an application command on the Discord API with an application
- * command defined on the {@link Client}.
- *
- * @param existent - The existent application command saved in the Discord API.
- * @param introduced - The local application command not yet saved to the API.
- * @returns The result of the comparison.
- */
-function areCommandsEqual(
-  existent: ApplicationCommand,
-  introduced: Command,
-): boolean {
-  // Check which keys are not equal between the two commands.
-  const unequalKeys = _.reduce(
-    existent,
-    (result: string[], value: any, key: keyof Command) => {
-      return _.isEqual(value, introduced[key]) ? result : result.concat(key);
-    },
-    [],
-  ) as string[];
-  // If any of the keys apart from 'handle' are unequal, yield `false`.
-  return unequalKeys.some((inequality) => inequality !== "handle");
-}
-
-/**
  * Unifies the command's option handlers into a single handler.
  *
  * @param command - The command whose handlers to unify.
  * @returns The unified handler.
  */
-function unifyHandlers(
-  command: Command,
-): InteractionHandler {
+function unifyHandlers(command: Command): InteractionHandler {
   if (command.handle) return command.handle;
   if (!command.options) return unimplemented;
 
@@ -90,7 +60,7 @@ function unifyHandlers(
   >([[undefined, new Map()]]);
   for (const option of command.options) {
     switch (option.type) {
-      case ApplicationCommandOptionType.SUB_COMMAND_GROUP:
+      case OptionType.SUB_COMMAND_GROUP:
         handlers.set(
           option.name,
           new Map(
@@ -100,7 +70,7 @@ function unifyHandlers(
           ),
         );
         break;
-      case ApplicationCommandOptionType.SUB_COMMAND:
+      case OptionType.SUB_COMMAND:
         const commandMap = handlers.get(undefined)!;
         commandMap.set(option.name, option.handle || unimplemented);
         break;
@@ -112,5 +82,5 @@ function unifyHandlers(
     );
 }
 
-export { areCommandsEqual, mergeCommandOptions, unifyHandlers, unimplemented };
+export { mergeCommandOptions, unifyHandlers, unimplemented };
 export type { Command };

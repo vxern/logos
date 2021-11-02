@@ -6,8 +6,9 @@ import {
   colors,
   event,
 } from "../deps.ts";
-import { areCommandsEqual, unifyHandlers } from "./commands/command.ts";
+import { unifyHandlers } from "./commands/command.ts";
 import modules from "./modules/modules.ts";
+import { areEqual } from "./utils.ts";
 
 /** The core of the application, used for interacting with the Discord API. */
 class Client extends DiscordClient {
@@ -80,7 +81,7 @@ class Client extends DiscordClient {
             .create(commandPartial, guild.id));
           continue;
         }
-        if (!areCommandsEqual(guildCommand, command)) {
+        if (!areEqual(guildCommand, command)) {
           console.info(
             colors.cyan(
               `Command ${
@@ -108,7 +109,7 @@ class Client extends DiscordClient {
 }
 
 /**
- * Describes a handler of an interaction.
+ * Describes the handler of an interaction.
  *
  * @param interaction - The interaction to be handled.
  */
