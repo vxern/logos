@@ -4,13 +4,12 @@ import {
   unimplemented,
 } from "../commands/command.ts";
 import { Option, OptionType } from "../commands/option.ts";
-import config from "../config.ts";
-import information from "./information/information.ts";
-import moderation from "./moderation/moderation.ts";
-import music from "./music/music.ts";
-import roles from "./roles/roles.ts";
-import secret from "./secret/secret.ts";
-import social from "./social/social.ts";
+import information from "./information/module.ts";
+import moderation from "./moderation/module.ts";
+import music from "./music/module.ts";
+import roles from "./roles/module.ts";
+import secret from "./secret/module.ts";
+import social from "./social/module.ts";
 
 const modules: Record<string, Command>[] = [
   information,
@@ -58,13 +57,14 @@ function supplyMissingProperties<T extends Command | Option>(
   elements: T[],
 ): T[] {
   for (const element of elements) {
-    element.description ??= config.failsafes.interactions.description;
+    element.description ??= "No information available.";
     switch (element.type) {
       // An object represented by the Command interface will __not__ have the
       // 'type' property assigned, therefore an [element.type] of `undefined`
       // implies [element] is a command.
       case undefined:
         if (element.options && element.options.length > 0) break;
+        /* falls through */
       // Only options of type [OptionType.SUB_COMMAND] may have handlers.
       case OptionType.SUB_COMMAND:
         if (!element.handle) {

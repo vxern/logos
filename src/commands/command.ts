@@ -1,12 +1,10 @@
 import {
   _,
-  ApplicationCommand,
   ApplicationCommandInteraction,
   ApplicationCommandPartialBase,
   InteractionResponseType,
 } from "../../deps.ts";
 import { InteractionHandler } from "../client.ts";
-import config from "../config.ts";
 import { Option, OptionType } from "./option.ts";
 
 /** An application command with an optional handler for its execution. */
@@ -20,12 +18,15 @@ interface Command extends ApplicationCommandPartialBase<Option> {
  *
  * @param interaction The interaction to be handled.
  */
-async function unimplemented(
+function unimplemented(
   interaction: ApplicationCommandInteraction,
-): Promise<void> {
+): void {
   interaction.respond({
     type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-    embeds: [config.failsafes.unimplemented],
+    embeds: [{
+      title: "Unimplemented",
+      description: "This command is missing a handler.",
+    }],
     ephemeral: true,
   });
 }
@@ -60,7 +61,7 @@ function unifyHandlers(command: Command): InteractionHandler {
   >([[undefined, new Map()]]);
   for (const option of command.options) {
     switch (option.type) {
-      case OptionType.SUB_COMMAND_GROUP:
+      case OptionType.SUB_COMMAND_GROUP: {
         handlers.set(
           option.name,
           new Map(
@@ -70,10 +71,12 @@ function unifyHandlers(command: Command): InteractionHandler {
           ),
         );
         break;
-      case OptionType.SUB_COMMAND:
+      }
+      case OptionType.SUB_COMMAND: {
         const commandMap = handlers.get(undefined)!;
         commandMap.set(option.name, option.handle || unimplemented);
         break;
+      }
     }
   }
   return (interaction) =>
