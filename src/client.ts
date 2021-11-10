@@ -2,16 +2,21 @@ import {
   ApplicationCommandInteraction,
   ApplicationCommandOption,
   ApplicationCommandPartial,
+  ApplicationCommandType,
   Client as DiscordClient,
   colors,
   event,
+  Guild,
 } from "../deps.ts";
 import { unifyHandlers } from "./commands/command.ts";
 import modules from "./modules/modules.ts";
+import config from "./config.ts";
 import { areEqual } from "./utils.ts";
 
 /** The core of the application, used for interacting with the Discord API. */
 class Client extends DiscordClient {
+  public static readonly managed: Map<string, string> = new Map();
+
   /**
    * Called when {@link Client} is authenticated by Discord, and is ready to use
    * the API.
@@ -22,13 +27,15 @@ class Client extends DiscordClient {
   @event()
   protected async ready() {
     const guilds = await this.guilds.array();
-    console.info(
-      colors.cyan(
-        `Guilds member of: ${
-          colors.bold(guilds.map((guild) => guild.name).join(", "))
-        }`,
-      ),
-    );
+    for (const guild of guilds) {
+      if (Client.isManagedGuild(guild)) {
+        Client.managed.set(
+          guild.id,
+          config.guilds.name.exec(guild.name!)![1].toLowerCase(),
+        );
+      }
+      await guild.roles.fetchAll();
+    }
 
     const commands = modules.commands;
 
@@ -53,7 +60,7 @@ class Client extends DiscordClient {
           ),
         );
         command.handle!(interaction);
-      }, "CHAT_INPUT");
+      }, ApplicationCommandType.CHAT_INPUT);
     }
 
     const updates = [];
@@ -67,7 +74,7 @@ class Client extends DiscordClient {
           name: command.name,
           description: command.description,
           options: command.options as ApplicationCommandOption[],
-          type: "CHAT_INPUT",
+          type: ApplicationCommandType.CHAT_INPUT,
         };
 
         const guildCommand = guildCommands.find((guildCommand) =>
@@ -106,6 +113,20 @@ class Client extends DiscordClient {
       );
     });
   }
+
+  /**
+   * Checks if the guild is part of the language network.
+   *
+   * @param guild - The guild whose status to check.
+   * @return The result of the check.
+   */
+  static isManagedGuild(guild: Guild): boolean {
+    const equalities = [
+      config.guilds.name.test(guild.name!),
+      guild.ownerID === config.guilds.owner.id,
+    ];
+    return equalities.every((x) => x);
+  }
 }
 
 /**
@@ -115,7 +136,7 @@ class Client extends DiscordClient {
  */
 type InteractionHandler = (
   interaction: ApplicationCommandInteraction,
-) => Promise<unknown>;
+) => unknown;
 
 /**
  * Modifies a string of text to appear italicised within Discord.
@@ -167,5 +188,5 @@ function codeMultiline(target: string): string {
   return "```" + target + "```";
 }
 
-export { bold, Client, code, codeMultiline, underlined };
+export { bold, Client, code, codeMultiline, italic, underlined };
 export type { InteractionHandler };
