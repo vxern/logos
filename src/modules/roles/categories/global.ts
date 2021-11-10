@@ -1,14 +1,20 @@
 import { underlined } from "../../../client.ts";
-import { fromHex, RoleCollection } from "../roles.ts";
+import { fromHex } from "../../../utils.ts";
+import { RoleCategory, RoleCategoryType } from "../structures/category.ts";
+import { RoleCollectionType } from "../structures/collection.ts";
 
-const base: RoleCollection = {
-  proficiency: {
-    limit: 1,
-    description: "Roles defining one's proficiency.",
+const base: RoleCategory[] = [
+  {
+    type: RoleCategoryType.CATEGORY,
+    name: "Proficiency",
+    description:
+      "Roles representing the user's language proficiency and knowledge of the language.",
     color: fromHex("#1c1c1c"),
     emoji: "🎓",
-    isGradual: true,
-    roles: {
+    limit: 1,
+    collection: {
+      type: RoleCollectionType.COLLECTION,
+      isGradual: true,
       onAssignMessage: (name) =>
         `Your language proficiency is now ${name.toLowerCase()}.`,
       list: [{
@@ -34,19 +40,23 @@ const base: RoleCollection = {
       }],
     },
   },
-  personalisation: {
-    limit: -1,
+  {
+    type: RoleCategoryType.CATEGORY_GROUP,
+    name: "Personalisation",
     description: "Roles used to personalise one's server profile.",
     color: fromHex("#ffe548"),
     emoji: "🌈",
-    categories: {
-      gender: {
-        limit: 1,
+    categories: [
+      {
+        type: RoleCategoryType.CATEGORY,
+        name: "Gender",
         description: "Roles defining one's gender.",
         color: fromHex("#ff4b3e"),
         // TODO(vxern): Use '⚧️' instead when Discord supports it.
         emoji: "⚧",
-        roles: {
+        limit: 1,
+        collection: {
+          type: RoleCollectionType.COLLECTION,
           description: (name) =>
             `I am of the ${name.toLowerCase()} persuasion.`,
           onAssignMessage: (name) =>
@@ -67,30 +77,41 @@ const base: RoleCollection = {
           }],
         },
       },
-      abroad: {
-        limit: -1,
+      {
+        type: RoleCategoryType.CATEGORY,
+        name: "Abroad",
         description: "Roles related to the abroad.",
         color: fromHex("#d6e3f8"),
         emoji: "🌎",
-        roles: {
+        limit: -1,
+        collection: {
+          type: RoleCollectionType.COLLECTION,
           onAssignMessage: (name) => `You are now a ${name}.`,
           onUnassignMessage: (name) => `You are no longer a ${name}.`,
           list: [{
             name: "Diasporan",
             description:
-              "I am a native, or a child of natives, who has been brought up abroad.",
+              "I am a native, or a child of natives, who had been brought up abroad.",
             emoji: "🌎",
+          }, {
+            name: "Emigrant",
+            description:
+              "I emigrated from my country of origin to live and/or work abroad.",
+            emoji: "💼",
           }],
         },
       },
-    },
+    ],
   },
-  learning: {
-    limit: -1,
+  {
+    type: RoleCategoryType.CATEGORY,
+    name: "Learning",
     description: "Roles applied in teaching and learning the language.",
     color: fromHex("#daddd8"),
     emoji: "📖",
-    roles: {
+    limit: -1,
+    collection: {
+      type: RoleCollectionType.COLLECTION,
       list: [{
         name: "Correct Me",
         onAssignMessage: (_) =>
@@ -104,13 +125,16 @@ const base: RoleCollection = {
       }],
     },
   },
-  pingable: {
-    limit: -1,
+  {
+    type: RoleCategoryType.CATEGORY,
+    name: "Pingable",
     description:
-      "Roles that allow one to be notified at various occassions, such as VC sessions and lessons.",
+      "Roles that allow one to be notified at various occassions, such as during VC sessions and before language lessons.",
     color: fromHex("#9d5c63"),
     emoji: "💡",
-    roles: {
+    limit: -1,
+    collection: {
+      type: RoleCollectionType.COLLECTION,
       list: [{
         name: "Classroom Attendee",
         onAssignMessage: (_) =>
@@ -131,6 +155,6 @@ const base: RoleCollection = {
       }],
     },
   },
-};
+];
 
 export default base;
