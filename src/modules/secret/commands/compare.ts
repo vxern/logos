@@ -7,8 +7,7 @@ import {
 import { Command } from "../../../commands/command.ts";
 import { OptionType } from "../../../commands/option.ts";
 import { bold, codeMultiline } from "../../../client.ts";
-import config from "../../../config.ts";
-import { analyseStructure, GuildStructure } from "../secret.ts";
+import { analyseStructure, GuildStructure } from "../module.ts";
 
 const command: Command = {
   name: "compare",
@@ -26,7 +25,14 @@ const command: Command = {
         ))!;
         const target = interaction.guild!;
 
-        const comparison = await compareStructures({
+        console.log(
+          colors.yellow(
+            `Analysing structural differences between template guild and ${
+              colors.bold(target.name!)
+            } as per ${bold(interaction.user.username)}'s request...'`,
+          ),
+        );
+        const comparison = await analyseStructuralDifferences({
           source: source,
           target: target,
         });
@@ -70,6 +76,7 @@ const command: Command = {
 
         interaction.respond({
           type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+          ephemeral: true,
           embeds: [
             embed,
           ],
@@ -84,19 +91,12 @@ const command: Command = {
   }],
 };
 
-async function compareStructures(
+async function analyseStructuralDifferences(
   { source, target }: { source: Guild; target: Guild },
 ): Promise<GuildStructure> {
   const sourceStructure = await analyseStructure(source);
   const targetStructure = await analyseStructure(target);
 
-  console.log(
-    colors.yellow(
-      `Analysing structure difference between template guild and ${
-        colors.bold(target.name!)
-      }...`,
-    ),
-  );
   const missingChannels = sourceStructure.channels.filter((sourceChannel) =>
     !targetStructure.channels.some((targetChannel) =>
       targetChannel.name === sourceChannel.name
