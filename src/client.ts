@@ -112,6 +112,30 @@ class Client extends DiscordClient {
         ),
       );
     });
+
+    const dm = await this.createDM(config.guilds.owner.id);
+    dm.send({
+      embeds: [{
+        title: "The bot is up and working.",
+        type: "rich",
+        description: "Below is additional information about the bot.",
+        thumbnail: {
+          url: this.user!.avatarURL(),
+          height: 64,
+          width: 64,
+        },
+        fields: [{
+          name: "Guilds",
+          value: guilds.map((guild) => guild.name).join(", "),
+        }],
+      }],
+    });
+    this.setPresence({
+      activity: {
+        name: `Deno v${Deno.version.deno}`,
+        type: "COMPETING",
+      },
+    });
   }
 
   /**
