@@ -61,5 +61,16 @@ function getUnequalKeys<T extends Object>(left: Object, right: T): string[] {
   ) as string[]).filter((key) => right.hasOwnProperty(key));
 }
 
-export { areEqual };
+/**
+ * Parses a 6-digit hex value prefixed with a hashtag to a number.
+ *
+ * @param color - The color represented as a 6-digit hexadecimal value prefixed
+ * with a hashtag.
+ * @returns The decimal form.
+ */
+function fromHex(color: string): number {
+  return parseInt(color.replace("#", "0x"));
+}
+
+export { areEqual, fromHex };
 export type { Optional };
