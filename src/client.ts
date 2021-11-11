@@ -62,13 +62,13 @@ class Client extends DiscordClient {
       }, ApplicationCommandType.CHAT_INPUT);
     }
 
-    const updates = [];
+    const updates: Promise<unknown>[] = [];
     for (const guild of guilds) {
       console.info(
         colors.cyan(`Checking commands of ${colors.bold(guild.name!)}...`),
       );
       const guildCommands = (await guild.commands.all()).array();
-      // TODO(vxern): Remove inexistent commands
+
       for (const command of commands) {
         const commandPartial: ApplicationCommandPartial = {
           name: command.name,
@@ -77,9 +77,13 @@ class Client extends DiscordClient {
           type: ApplicationCommandType.CHAT_INPUT,
         };
 
-        const guildCommand = guildCommands.find((guildCommand) =>
-          guildCommand.name === command.name
-        );
+        const guildCommand = guildCommands.splice(
+          guildCommands.findIndex((guildCommand) =>
+            guildCommand.name === command.name
+          ),
+          1,
+        )[0];
+
         if (!guildCommand) {
           console.info(
             colors.cyan(`Creating command ${colors.bold(command.name)}...`),
@@ -88,6 +92,7 @@ class Client extends DiscordClient {
             .create(commandPartial, guild.id));
           continue;
         }
+
         if (!areEqual(guildCommand, command)) {
           console.info(
             colors.cyan(
@@ -102,6 +107,20 @@ class Client extends DiscordClient {
             guild.id,
           ));
         }
+      }
+
+      for (const guildCommand of guildCommands) {
+        console.info(
+          colors.cyan(
+            `Command ${
+              colors.bold(guildCommand.name)
+            } had been removed. Removing...`,
+          ),
+        );
+        updates.push(this.interactions.commands.delete(
+          guildCommand.id,
+          guild.id,
+        ));
       }
     }
 
