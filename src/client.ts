@@ -132,7 +132,7 @@ class Client extends DiscordClient {
     });
     this.setPresence({
       activity: {
-        name: `Deno v${Deno.version.deno}`,
+        name: "Deno",
         type: "COMPETING",
       },
     });
