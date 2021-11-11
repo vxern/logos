@@ -7,14 +7,14 @@ import { roles } from "../../module.ts";
 import { RoleCategory, RoleCategoryType } from "../../structures/category.ts";
 import { getMemberRoles } from "../../structures/collection.ts";
 import { modifyRoles, RoleAction } from "../../structures/role.ts";
-import { browse } from "./selection/navigate.ts";
+import { browse } from "./selection/browse.ts";
 
 const command: Command = {
   name: "profile",
   options: [{
     name: "roles",
     type: OptionType.SUB_COMMAND,
-    description: "Opens a role selection menu.",
+    description: "Opens the role selection menu.",
     handle: selectRoles,
   }],
 };
