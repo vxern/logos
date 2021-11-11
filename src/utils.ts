@@ -41,6 +41,10 @@ function areEqual(
       return false;
     }
 
+    if (right.options!.length !== left.options!.length) {
+      return false;
+    }
+
     return left.options!.every((option, index) =>
       areEqual(option, right.options![index])
     );
