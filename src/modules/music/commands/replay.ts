@@ -1,9 +1,8 @@
-import { Command, unimplemented } from "../../command.ts";
+import { Command } from "../../../commands/command.ts";
 
 const command: Command = {
   name: "replay",
   description: "Begins playing the currently playing song from the start.",
-  handle: unimplemented,
 };
 
 export default command;

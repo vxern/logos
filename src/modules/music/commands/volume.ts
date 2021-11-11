@@ -1,5 +1,5 @@
-import { ApplicationCommandOptionType } from "../../../../deps.ts";
-import { Command, noneAvailable, unimplemented } from "../../command.ts";
+import { Command } from "../../../commands/command.ts";
+import { OptionType } from "../../../commands/option.ts";
 
 const config = {
   volume: {
@@ -9,23 +9,20 @@ const config = {
 
 const command: Command = {
   name: "volume",
-  description: noneAvailable,
   options: [{
     name: "display",
     description: "Displays the volume of playback.",
-    type: ApplicationCommandOptionType.SUB_COMMAND,
-    handle: unimplemented,
+    type: OptionType.SUB_COMMAND,
   }, {
     name: "set",
     description: "Sets the volume of playback.",
+    type: OptionType.SUB_COMMAND,
     options: [{
       name: "volume",
       description: `A value between 0 and ${config.volume.maximum}`,
       required: true,
-      type: ApplicationCommandOptionType.INTEGER,
+      type: OptionType.INTEGER,
     }],
-    type: ApplicationCommandOptionType.SUB_COMMAND,
-    handle: unimplemented,
   }],
 };
 

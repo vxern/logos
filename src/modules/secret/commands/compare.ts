@@ -1,33 +1,38 @@
 import {
-  ApplicationCommandOptionType,
   colors,
   Embed,
   Guild,
   InteractionResponseType,
 } from "../../../../deps.ts";
-import { Command, noneAvailable, unimplemented } from "../../command.ts";
+import { Command } from "../../../commands/command.ts";
+import { OptionType } from "../../../commands/option.ts";
 import { bold, codeMultiline } from "../../../client.ts";
-import {
-  analyseStructure,
-  GuildStructure,
-} from "../secret.ts";
+import { analyseStructure, GuildStructure } from "../module.ts";
 
 const command: Command = {
   name: "compare",
-  description: noneAvailable,
   options: [{
     name: "server",
-    description: noneAvailable,
+    type: OptionType.SUB_COMMAND_GROUP,
     options: [{
       name: "structures",
       description:
         "Compares the server's server structure to that of the template guild.",
-      type: ApplicationCommandOptionType.SUB_COMMAND,
+      type: OptionType.SUB_COMMAND,
       handle: async (interaction) => {
-        const source = (await interaction.client.guilds.get(Deno.env.get("TEMPLATE_GUILD_ID")!))!;
+        const source = (await interaction.client.guilds.get(
+          Deno.env.get("TEMPLATE_GUILD_ID")!,
+        ))!;
         const target = interaction.guild!;
 
-        const comparison = await compareStructures({
+        console.log(
+          colors.yellow(
+            `Analysing structural differences between template guild and ${
+              colors.bold(target.name!)
+            } as per ${bold(interaction.user.username)}'s request...'`,
+          ),
+        );
+        const comparison = await analyseStructuralDifferences({
           source: source,
           target: target,
         });
@@ -69,8 +74,9 @@ const command: Command = {
           }));
         }
 
-        return interaction.respond({
+        interaction.respond({
           type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+          ephemeral: true,
           embeds: [
             embed,
           ],
@@ -80,26 +86,17 @@ const command: Command = {
       name: "roles",
       description:
         "Compares the server's role list to that of the template guild.",
-      type: ApplicationCommandOptionType.SUB_COMMAND,
-      handle: unimplemented,
+      type: OptionType.SUB_COMMAND,
     }],
-    type: ApplicationCommandOptionType.SUB_COMMAND_GROUP,
   }],
 };
 
-async function compareStructures(
+async function analyseStructuralDifferences(
   { source, target }: { source: Guild; target: Guild },
 ): Promise<GuildStructure> {
   const sourceStructure = await analyseStructure(source);
   const targetStructure = await analyseStructure(target);
 
-  console.log(
-    colors.yellow(
-      `Analysing structure difference between template guild and ${
-        colors.bold(target.name!)
-      }...`,
-    ),
-  );
   const missingChannels = sourceStructure.channels.filter((sourceChannel) =>
     !targetStructure.channels.some((targetChannel) =>
       targetChannel.name === sourceChannel.name
