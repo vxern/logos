@@ -51,7 +51,6 @@ class Client extends DiscordClient {
     );
     for (const command of commands) {
       this.interactions.handle(command.name, (interaction) => {
-        if (interaction.user.tag !== "vxern#7031") return;
         console.info(
           colors.magenta(
             `Handling interaction '${interaction.name}' from ${
@@ -69,6 +68,7 @@ class Client extends DiscordClient {
         colors.cyan(`Checking commands of ${colors.bold(guild.name!)}...`),
       );
       const guildCommands = (await guild.commands.all()).array();
+      // TODO(vxern): Remove inexistent commands
       for (const command of commands) {
         const commandPartial: ApplicationCommandPartial = {
           name: command.name,

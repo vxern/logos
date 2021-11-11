@@ -4,20 +4,20 @@ import {
   unimplemented,
 } from "../commands/command.ts";
 import { Option, OptionType } from "../commands/option.ts";
-import information from "./information/module.ts";
-import moderation from "./moderation/module.ts";
-import music from "./music/module.ts";
+// import information from "./information/module.ts";
+// import moderation from "./moderation/module.ts";
+// import music from "./music/module.ts";
 import roles from "./roles/module.ts";
-import secret from "./secret/module.ts";
-import social from "./social/module.ts";
+// import secret from "./secret/module.ts";
+// import social from "./social/module.ts";
 
 const modules: Record<string, Command>[] = [
-  information,
-  moderation,
-  music,
+  // information,
+  // moderation,
+  // music,
   roles,
-  secret,
-  social,
+  // secret,
+  // social,
 ];
 
 const commands = mergeModules(modules);
