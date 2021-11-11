@@ -1,12 +1,12 @@
 import { Command } from "../../commands/command.ts";
-import help from "./commands/help.ts";
+// import help from "./commands/help.ts";
 import information from "./commands/information.ts";
-import list from "./commands/list.ts";
+// import list from "./commands/list.ts";
 
 const commands: Record<string, Command> = {
-  help,
+  // help,
   information,
-  list,
+  // list,
 };
 
 export default commands;
