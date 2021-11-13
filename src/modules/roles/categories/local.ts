@@ -3,10 +3,12 @@ import { fromHex } from "../../../utils.ts";
 import { RoleCategory, RoleCategoryType } from "../structures/category.ts";
 import { RoleCollectionType } from "../structures/collection.ts";
 import armenian from "./servers/armenian.ts";
+import belarusian from "./servers/belarusian.ts";
 import romanian from "./servers/romanian.ts";
 
 const languages: Record<string, Partial<RoleCategory>[]> = {
   armenian,
+  belarusian,
   romanian,
 };
 
