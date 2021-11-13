@@ -5,10 +5,13 @@ import {
   InteractionResponseType,
 } from "../../deps.ts";
 import { InteractionHandler } from "../client.ts";
+import { Availability } from "./availability.ts";
 import { Option, OptionType } from "./option.ts";
 
 /** An application command with an optional handler for its execution. */
 interface Command extends ApplicationCommandPartialBase<Option> {
+  /** Defines the group of users to whom the command is available. */
+  availability: Availability;
   /** The function to be executed when this command is selected. */
   handle?: InteractionHandler;
 }
