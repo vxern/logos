@@ -106,5 +106,5 @@ async function modifyRoles(action: RoleAction): Promise<boolean> {
   return true;
 }
 
-export { modifyRoles };
+export { modifyRoles, resolveGuildRole };
 export type { Assignable, DescriptionGenerator, Role, RoleAction };
