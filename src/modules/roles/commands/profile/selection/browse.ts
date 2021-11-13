@@ -178,7 +178,9 @@ async function displaySelectionMenu(
         type: MessageComponentType.SELECT,
         customID: "role-selection-menu",
         options: selections,
-        placeholder: "Choose a role category.",
+        placeholder: category.type === RoleCategoryType.CATEGORY_GROUP
+          ? "Choose a category."
+          : "Choose a role.",
       }],
     }],
     ephemeral: true,
