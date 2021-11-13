@@ -1,4 +1,11 @@
-import { _, ApplicationCommand, ApplicationCommandOption } from "../deps.ts";
+import {
+  _,
+  ApplicationCommand,
+  ApplicationCommandOption,
+  Guild,
+  GuildChannel,
+  Invite,
+} from "../deps.ts";
 import { Command } from "./commands/command.ts";
 import { Option } from "./commands/option.ts";
 
@@ -65,6 +72,24 @@ function getUnequalKeys<T extends Object>(left: Object, right: T): string[] {
   ) as string[]).filter((key) => right.hasOwnProperty(key));
 }
 
+async function findChannelByName(
+  guild: Guild,
+  name: string,
+): Promise<GuildChannel | undefined> {
+  const channels = await guild.channels.array();
+  return channels.find((channel) => channel.name.includes(name));
+}
+
+async function getInvite(guild: Guild): Promise<Invite> {
+  const invites = await guild.invites.array();
+  return invites.find((invite) =>
+    invite.inviter?.id === guild.client.user?.id
+  ) ??
+    await guild.invites.create(
+      (await findChannelByName(guild, "discussion"))!.id,
+    );
+}
+
 /**
  * Parses a 6-digit hex value prefixed with a hashtag to a number.
  *
@@ -76,5 +101,5 @@ function fromHex(color: string): number {
   return parseInt(color.replace("#", "0x"));
 }
 
-export { areEqual, fromHex };
+export { areEqual, findChannelByName, fromHex, getInvite };
 export type { Optional };
