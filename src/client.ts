@@ -1,4 +1,5 @@
 import {
+  ApplicationCommand,
   ApplicationCommandInteraction,
   ApplicationCommandOption,
   ApplicationCommandPartial,
@@ -8,7 +9,7 @@ import {
   event,
   Guild,
 } from "../deps.ts";
-import { unifyHandlers } from "./commands/command.ts";
+import { Command, unifyHandlers } from "./commands/command.ts";
 import modules from "./modules/modules.ts";
 import config from "./config.ts";
 import { areEqual } from "./utils.ts";
@@ -53,8 +54,10 @@ class Client extends DiscordClient {
       this.interactions.handle(command.name, (interaction) => {
         console.info(
           colors.magenta(
-            `Handling interaction '${interaction.name}' from ${
-              colors.bold(interaction.user.username)
+            `Handling interaction '${
+              Client.displayCommand(interaction)
+            }' from ${colors.bold(interaction.user.tag)} on ${
+              colors.bold(interaction.guild!.name!)
             }...`,
           ),
         );
@@ -62,98 +65,105 @@ class Client extends DiscordClient {
       }, ApplicationCommandType.CHAT_INPUT);
     }
 
-    const updates: Promise<unknown>[] = [];
     for (const guild of guilds) {
-      console.info(
-        colors.cyan(`Checking commands of ${colors.bold(guild.name!)}...`),
-      );
-      const guildCommands = (await guild.commands.all()).array();
-
-      for (const command of commands) {
-        const commandPartial: ApplicationCommandPartial = {
-          name: command.name,
-          description: command.description,
-          options: command.options as ApplicationCommandOption[],
-          type: ApplicationCommandType.CHAT_INPUT,
-        };
-
-        const guildCommand = guildCommands.splice(
-          guildCommands.findIndex((guildCommand) =>
-            guildCommand.name === command.name
-          ),
-          1,
-        )[0];
-
-        if (!guildCommand) {
-          console.info(
-            colors.cyan(`Creating command ${colors.bold(command.name)}...`),
-          );
-          updates.push(this.interactions.commands
-            .create(commandPartial, guild.id));
-          continue;
-        }
-
-        if (!areEqual(guildCommand, command)) {
-          console.info(
-            colors.cyan(
-              `Command ${
-                colors.bold(command.name)
-              } had been altered. Editing...`,
-            ),
-          );
-          updates.push(this.interactions.commands.edit(
-            guildCommand.id,
-            commandPartial,
-            guild.id,
-          ));
-        }
-      }
-
-      for (const guildCommand of guildCommands) {
-        console.info(
-          colors.cyan(
-            `Command ${
-              colors.bold(guildCommand.name)
-            } had been removed. Removing...`,
-          ),
-        );
-        updates.push(this.interactions.commands.delete(
-          guildCommand.id,
-          guild.id,
-        ));
-      }
+      await this.synchroniseGuildCommands(guild, commands);
     }
 
-    Promise.all(updates).then((changes) => {
-      console.info(
-        colors.green(
-          `Finished setting up commands. Commands created or altered: ${changes.length}`,
-        ),
-      );
+    this.setPresence({
+      activity: {
+        name: "Deno",
+        type: "PLAYING",
+      },
     });
 
-    const dm = await this.createDM(config.guilds.owner.id);
-    dm.send({
+    this.notifyReady();
+  }
+
+  /**
+   * Synchronises a guild's slash commands with slash commands defined in the
+   * source code of the application to ensure that slash commands are always
+   * up-to-date.
+   *
+   * @param guild - The guild whose slash commands to synchronise.
+   * @param commands - The source code slash commands.
+   */
+  async synchroniseGuildCommands(
+    guild: Guild,
+    commands: Command[],
+  ): Promise<void> {
+    console.info(
+      colors.cyan(`Synchronising commands of ${colors.bold(guild.name!)}...`),
+    );
+
+    const guildCommands = (await guild.commands.all()).array();
+    const added = [];
+    const altered = [];
+    for (const command of commands) {
+      const commandPartial: ApplicationCommandPartial = {
+        name: command.name,
+        description: command.description,
+        options: command.options as ApplicationCommandOption[],
+        type: ApplicationCommandType.CHAT_INPUT,
+      };
+
+      const guildCommand = guildCommands.splice(
+        guildCommands.findIndex((guildCommand) =>
+          guildCommand.name === command.name
+        ),
+        1,
+      )[0];
+
+      if (!guildCommand) {
+        this.interactions.commands.create(commandPartial, guild.id);
+        added.push(command.name);
+        continue;
+      }
+
+      if (!areEqual(guildCommand, command)) {
+        this.interactions.commands.edit(
+          guildCommand.id,
+          commandPartial,
+          guild.id,
+        );
+        altered.push(command.name);
+      }
+    }
+    if (added.length !== 0) {
+      console.info(colors.green(`+ ${altered}`));
+    }
+    if (altered.length !== 0) {
+      console.info(colors.yellow(`/ ${altered}`));
+    }
+
+    for (const guildCommand of guildCommands) {
+      this.interactions.commands.delete(
+        guildCommand.id,
+        guild.id,
+      );
+    }
+    const removed = guildCommands
+      .map((guildCommand) => guildCommand.name)
+      .join(", ");
+    if (removed.length !== 0) {
+      console.info(colors.red(`- ${removed}`));
+    }
+  }
+
+  /**
+   * Writes a message to the owner, notifying them of the bot being operational.
+   */
+  async notifyReady(): Promise<void> {
+    const directMessageChannel = await this.createDM(config.guilds.owner.id);
+    directMessageChannel.send({
       embeds: [{
-        title: "The bot is up and working.",
-        type: "rich",
-        description: "Below is additional information about the bot.",
+        title: "Ready",
+        description: "The bot is up and working.",
         thumbnail: {
           url: this.user!.avatarURL(),
           height: 64,
           width: 64,
         },
-        fields: [{
-          name: "Guilds",
-          value: guilds.map((guild) => guild.name).join(", "),
-        }],
       }],
-    });
-    this.setPresence({
-      activity: {
-        name: "Deno",
-        type: "COMPETING",
-      },
     });
   }
 
@@ -169,6 +179,18 @@ class Client extends DiscordClient {
       guild.ownerID === config.guilds.owner.id,
     ];
     return equalities.every((x) => x);
+  }
+
+  /**
+   * Concatenates the command's name, subcommand group and subcommand into a
+   * single string representing the whole command name.
+   *
+   * @param command - The interaction whose command to display.
+   * @returns The full command name.
+   */
+  static displayCommand(command: ApplicationCommandInteraction): string {
+    const parts = [command.name, command.subCommandGroup, command.subCommand];
+    return parts.filter((part) => part).join(" ");
   }
 }
 
