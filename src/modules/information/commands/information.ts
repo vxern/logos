@@ -44,7 +44,7 @@ async function bot(interaction: Interaction): Promise<void> {
       fields: [{
         name: "What am I?",
         value:
-          `I am ${bot.username}, a Discord application created to provide language-learning servers with the highest quality features.`,
+          `I am ${bot.username}, a Discord application created to provide language-learning servers with the highest quality features, such as rich social interactions, intuitive role management, translation and morphology look-ups, event scheduling, music playback, article creation, server structure synchronisation and more.`,
       }, {
         name: "How was I made?",
         value:
