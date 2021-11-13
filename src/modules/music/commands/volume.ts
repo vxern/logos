@@ -1,3 +1,4 @@
+import { Availability } from "../../../commands/availability.ts";
 import { Command } from "../../../commands/command.ts";
 import { OptionType } from "../../../commands/option.ts";
 
@@ -9,6 +10,7 @@ const config = {
 
 const command: Command = {
   name: "volume",
+  availability: Availability.MEMBERS,
   options: [{
     name: "display",
     description: "Displays the volume of playback.",

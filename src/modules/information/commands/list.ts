@@ -1,8 +1,10 @@
+import { Availability } from "../../../commands/availability.ts";
 import { Command } from "../../../commands/command.ts";
 import { OptionType } from "../../../commands/option.ts";
 
 const command: Command = {
   name: "list",
+  availability: Availability.MEMBERS,
   options: [{
     name: "modules",
     description: "Lists installed modules.",

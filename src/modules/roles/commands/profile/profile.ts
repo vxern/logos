@@ -1,5 +1,6 @@
 import { Interaction } from "../../../../../deps.ts";
 import { Client } from "../../../../client.ts";
+import { Availability } from "../../../../commands/availability.ts";
 import { Command } from "../../../../commands/command.ts";
 import { OptionType } from "../../../../commands/option.ts";
 import { bold } from "../../../../formatting.ts";
@@ -12,6 +13,7 @@ import { browse } from "./selection/browse.ts";
 
 const command: Command = {
   name: "profile",
+  availability: Availability.MEMBERS,
   options: [{
     name: "roles",
     type: OptionType.SUB_COMMAND,

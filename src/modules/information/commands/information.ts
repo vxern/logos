@@ -2,12 +2,14 @@ import dayjs from "https://cdn.skypack.dev/dayjs";
 import relativeTime from "https://cdn.skypack.dev/dayjs/plugin/relativeTime";
 dayjs.extend(relativeTime);
 import { Interaction } from "../../../../deps.ts";
+import { Availability } from "../../../commands/availability.ts";
 import { Command } from "../../../commands/command.ts";
 import { OptionType } from "../../../commands/option.ts";
 import { fromHex } from "../../../utils.ts";
 
 const command: Command = {
   name: "information",
+  availability: Availability.MEMBERS,
   options: [{
     name: "bot",
     description: "Displays information about the bot.",
