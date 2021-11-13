@@ -3,16 +3,22 @@ import {
   ApplicationCommandInteraction,
   ApplicationCommandOption,
   ApplicationCommandPartial,
+  ApplicationCommandPermission,
+  ApplicationCommandPermissionType,
   ApplicationCommandType,
   Client as DiscordClient,
   colors,
   event,
   Guild,
+  GuildSlashCommmandPermissionsPartial,
 } from "../deps.ts";
 import { Command, unifyHandlers } from "./commands/command.ts";
 import modules from "./modules/modules.ts";
 import config from "./config.ts";
 import { areEqual } from "./utils.ts";
+import { Availability } from "./commands/availability.ts";
+import { resolveGuildRole } from "./modules/roles/structures/role.ts";
+import { roles } from "./modules/roles/module.ts";
 
 /** The core of the application, used for interacting with the Discord API. */
 class Client extends DiscordClient {
@@ -96,14 +102,14 @@ class Client extends DiscordClient {
     );
 
     const guildCommands = (await guild.commands.all()).array();
-    const added = [];
-    const altered = [];
+    const altered: [ApplicationCommand, Availability][] = [];
     for (const command of commands) {
       const commandPartial: ApplicationCommandPartial = {
         name: command.name,
         description: command.description,
         options: command.options as ApplicationCommandOption[],
         type: ApplicationCommandType.CHAT_INPUT,
+        defaultPermission: false,
       };
 
       const guildCommand = guildCommands.splice(
@@ -114,25 +120,93 @@ class Client extends DiscordClient {
       )[0];
 
       if (!guildCommand) {
-        this.interactions.commands.create(commandPartial, guild.id);
-        added.push(command.name);
+        altered.push(
+          [
+            await this.interactions.commands.create(commandPartial, guild.id),
+            command.availability,
+          ],
+        );
         continue;
       }
 
       if (!areEqual(guildCommand, command)) {
-        this.interactions.commands.edit(
-          guildCommand.id,
-          commandPartial,
-          guild.id,
+        altered.push(
+          [
+            await this.interactions.commands.edit(
+              guildCommand.id,
+              commandPartial,
+              guild.id,
+            ),
+            command.availability,
+          ],
         );
-        altered.push(command.name);
       }
     }
-    if (added.length !== 0) {
-      console.info(colors.green(`+ ${altered}`));
+
+    const commandPermissions: GuildSlashCommmandPermissionsPartial[] = [];
+    for (const [command, availability] of altered) {
+      const permissions: ApplicationCommandPermission[] = [];
+      switch (availability) {
+        case Availability.EVERYONE: {
+          permissions.push({
+            id:
+              (await resolveGuildRole({ guild: guild, name: "@everyone" }))!.id,
+            type: ApplicationCommandPermissionType.ROLE,
+            permission: true,
+          });
+          break;
+        }
+        case Availability.MEMBERS: {
+          const proficiencies = roles.scopes.global.find((category) =>
+            category.name === "Proficiency"
+          )!.collection!.list!.map((role) => role.name);
+          for (const proficiency of proficiencies) {
+            // TODO(vxern): This code will throw an error in a guild without
+            // proficiency roles.
+            permissions.push({
+              id: (await resolveGuildRole({ guild: guild, name: proficiency }))!
+                .id,
+              type: ApplicationCommandPermissionType.ROLE,
+              permission: true,
+            });
+          }
+          break;
+        }
+        case Availability.GUIDES: {
+          permissions.push({
+            id:
+              (await resolveGuildRole({ guild: guild, name: roles.moderator }))!
+                .id,
+            type: ApplicationCommandPermissionType.ROLE,
+            permission: true,
+          });
+          break;
+        }
+        case Availability.OWNER: {
+          permissions.push({
+            id: config.guilds.owner.id,
+            type: ApplicationCommandPermissionType.USER,
+            permission: true,
+          });
+          break;
+        }
+      }
+      commandPermissions.push({
+        id: command.id,
+        permissions: permissions,
+      });
     }
+    this.interactions.commands.permissions.bulkEdit(
+      commandPermissions,
+      guild.id,
+    );
+
     if (altered.length !== 0) {
-      console.info(colors.yellow(`/ ${altered}`));
+      console.info(
+        colors.yellow(
+          `~ ${altered.map(([command, _]) => command.name).join(", ")}`,
+        ),
+      );
     }
 
     for (const guildCommand of guildCommands) {
