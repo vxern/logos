@@ -203,55 +203,5 @@ type InteractionHandler = (
   interaction: ApplicationCommandInteraction,
 ) => unknown;
 
-/**
- * Modifies a string of text to appear italicised within Discord.
- *
- * @param target - String of text to format.
- * @returns The formatted string of text.
- */
-function italic(target: string): string {
-  return `*${target}*`;
-}
-
-/**
- * Modifies a string of text to appear bold within Discord.
- *
- * @param target - String of text to format.
- * @returns The formatted string of text.
- */
-function bold(target: string): string {
-  return `**${target}**`;
-}
-
-/**
- * Modifies a string of text to appear underlined within Discord.
- *
- * @param target - String of text to format.
- * @returns The formatted string of text.
- */
-function underlined(target: string): string {
-  return `__${target}__`;
-}
-
-/**
- * Modifies a string of text to appear within Discord as an embedded code block.
- *
- * @param target - String of text to format.
- * @returns The formatted string of text.
- */
-function code(target: string): string {
-  return "`" + target + "`";
-}
-
-/**
- * Modifies a string of text to appear within Discord as a multi-line code block
- * which expands to fill up entire rows and columns within a text box.
- *
- * @param target - String of text to format.
- */
-function codeMultiline(target: string): string {
-  return "```" + target + "```";
-}
-
-export { bold, Client, code, codeMultiline, italic, underlined };
+export { Client };
 export type { InteractionHandler };

@@ -1,4 +1,3 @@
-import { underlined } from "../../../client.ts";
 import { fromHex } from "../../../utils.ts";
 import { RoleCategory, RoleCategoryType } from "../structures/category.ts";
 import { RoleCollectionType } from "../structures/collection.ts";
@@ -118,9 +117,8 @@ const base: RoleCategory[] = [
           `Other users will now be able to see that you demand additional corrections.`,
         onUnassignMessage: (_) =>
           `Other users will no longer be able to see that you demand additional corrections.`,
-        description: `"I think, therefore I make mistakes." Please ${
-          underlined("do correct me")
-        }`,
+        description:
+          `"I think, therefore I make mistakes." - Please do correct me.`,
         emoji: "✍️",
       }],
     },

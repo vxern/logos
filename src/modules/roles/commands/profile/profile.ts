@@ -1,7 +1,8 @@
 import { Interaction } from "../../../../../deps.ts";
-import { bold, Client } from "../../../../client.ts";
+import { Client } from "../../../../client.ts";
 import { Command } from "../../../../commands/command.ts";
 import { OptionType } from "../../../../commands/option.ts";
+import { bold } from "../../../../formatting.ts";
 import { fromHex } from "../../../../utils.ts";
 import { roles } from "../../module.ts";
 import { RoleCategory, RoleCategoryType } from "../../structures/category.ts";
@@ -62,6 +63,8 @@ async function selectRoles(interaction: Interaction): Promise<void> {
     const alreadyHasRole = memberRoles.some((memberRole) =>
       memberRole.name === role.name
     );
+
+    console.log(alreadyHasRole);
 
     if (!alreadyHasRole) {
       if (

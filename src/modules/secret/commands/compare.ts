@@ -6,7 +6,7 @@ import {
 } from "../../../../deps.ts";
 import { Command } from "../../../commands/command.ts";
 import { OptionType } from "../../../commands/option.ts";
-import { bold, codeMultiline } from "../../../client.ts";
+import { bold, codeMultiline } from "../../../formatting.ts";
 import { analyseStructure, GuildStructure } from "../module.ts";
 
 const command: Command = {
