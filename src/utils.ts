@@ -18,60 +18,57 @@ import { Option } from "./commands/option.ts";
 type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
 
 /**
- * Compares an application command or option on the Discord API with an application
- * command or option defined on the {@link Client}.
+ * Compares two command or option objects to determine which keys one or the
+ * other is missing.
  *
- * @param existent - The existent object saved in the Discord API.
- * @param introduced - The local object not yet saved to the API.
- * @returns The result of the comparison.
+ * @param left - The Harmony object.
+ * @param right - The source object.
+ * @returns An array of keys which differ between the objects.
  */
-function areEqual(
-  left: ApplicationCommand | ApplicationCommandOption | undefined,
-  right: Command | Option | undefined,
-): boolean {
-  // If both [left] and [right] are `undefined`, raise equality.
-  if (!left && !right) {
-    return true;
-  }
-  // If only one of either [left] or [right] is `undefined`, raise inequality.
-  if (!(left && right)) {
-    return false;
-  }
-  // Check which keys are not equal between the two objects.
-  const unequalKeys = getUnequalKeys(left, right);
-  if (unequalKeys.length === 1) {
-    if (unequalKeys[0] !== "options") {
-      return false;
-    }
+function getMissingKeys(
+  left: ApplicationCommand | ApplicationCommandOption,
+  right: Command | Option,
+): string[];
+function getMissingKeys<
+  L extends ApplicationCommand | ApplicationCommandOption,
+  R extends Partial<L>,
+>(
+  left: L,
+  right: R,
+): string[] {
+  const leftKeys = Object.keys(left);
+  const rightKeys = Object.keys(right);
+  const keysToIgnore = [
+    ...leftKeys.filter((leftKey) => !rightKeys.includes(leftKey)),
+    ...rightKeys.filter((rightKey) =>
+      !leftKeys.includes(rightKey) && rightKey !== "options"
+    ),
+  ];
 
-    if (!right.options && (!left.options || left.options.length !== 0)) {
-      return false;
-    }
-
-    if (right.options!.length !== left.options!.length) {
-      return false;
-    }
-
-    return left.options!.every((option, index) =>
-      areEqual(option, right.options![index])
-    );
-  }
-  // If any of the keys are unequal, yield `false`.
-  return unequalKeys.length === 0;
-}
-
-function getUnequalKeys<T extends Object>(left: Object, right: T): string[] {
-  return (_.reduce(
-    left,
-    (result: string[], value: unknown, key: keyof T) => {
-      return _.isEqual(value, right[key])
+  const unequalKeys = _.reduce(
+    right,
+    (result: string[], value: unknown, key: keyof L) => {
+      return _.isEqual(value, left[key])
         ? result
         : result.concat(key.toString());
     },
     [],
-  ) as string[]).filter((key) => right.hasOwnProperty(key));
+  ) as string[];
+
+  const missingKeys = unequalKeys.filter((unequalKey) =>
+    !keysToIgnore.includes(unequalKey)
+  );
+
+  return missingKeys;
 }
 
+/**
+ * Finds a channel within a guild by its name.
+ *
+ * @param guild - The guild where to find the channel.
+ * @param name - The name of the channel.
+ * @returns The channel or `undefined` if not found.
+ */
 async function findChannelByName(
   guild: Guild,
   name: string,
@@ -80,6 +77,12 @@ async function findChannelByName(
   return channels.find((channel) => channel.name.includes(name));
 }
 
+/**
+ * Gets the most viable invite link to a guild.
+ *
+ * @param guild - The guild to which the invite link to find.
+ * @returns The invite link.
+ */
 async function getInvite(guild: Guild): Promise<Invite> {
   const invites = await guild.invites.array();
   return invites.find((invite) =>
@@ -101,5 +104,5 @@ function fromHex(color: string): number {
   return parseInt(color.replace("#", "0x"));
 }
 
-export { areEqual, findChannelByName, fromHex, getInvite };
+export { findChannelByName, fromHex, getInvite, getMissingKeys };
 export type { Optional };
