@@ -10,7 +10,6 @@ import { Command } from "../../../commands/command.ts";
 import { OptionType } from "../../../commands/option.ts";
 import { capitalise } from "../../../formatting.ts";
 import { fromHex } from "../../../utils.ts";
-import { roles } from "../../roles/module.ts";
 import information, { getChannelMention } from "../information/information.ts";
 
 const command: Command = {
@@ -43,37 +42,7 @@ async function rules(interaction: Interaction) {
 }
 
 async function welcome(interaction: Interaction) {
-  const proficiencies = roles.scopes.global.find((category) =>
-    category.name === "Proficiency"
-  )!.collection!.list!;
-
-  const proficiencyButtons = proficiencies.map((proficiency, index) => {
-    return {
-      type: MessageComponentType.BUTTON,
-      style: ButtonStyle.GREY,
-      label: proficiency.name,
-      emoji: { name: proficiency.emoji },
-      customID: index.toString(),
-    };
-  });
-
   const language = Client.getLanguage(interaction.guild!)!;
-
-  interaction.client.on("interactionCreate", (interaction) => {
-    interaction.respond({
-      embeds: [{
-        title: "Language Proficiency",
-        description: `Select the role which best describes your ${
-          capitalise(language)
-        } language proficiency.`,
-      }],
-      components: [{
-        type: MessageComponentType.ACTION_ROW,
-        components: proficiencyButtons,
-      }],
-      ephemeral: true,
-    });
-  });
 
   interaction.respond({
     embeds: [{
@@ -103,7 +72,6 @@ async function welcome(interaction: Interaction) {
         },
       }],
     }],
-    ephemeral: true,
   });
 }
 

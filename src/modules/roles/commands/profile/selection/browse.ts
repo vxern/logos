@@ -96,7 +96,7 @@ async function* browse(
     timeout: 10 * 60 * 1000, // 10 minutes
   });
 
-  collector.init(data.interaction.client).collect();
+  collector.collect();
 
   while (true) {
     try {

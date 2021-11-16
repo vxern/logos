@@ -1,7 +1,6 @@
 import { EmbedPayload, Guild } from "../../../../deps.ts";
 import { bold, mention, MentionType } from "../../../formatting.ts";
 import { findChannelByName, fromHex, getInvite } from "../../../utils.ts";
-import categories from "./categories.ts";
 import rules from "./rules.ts";
 
 interface Section {
