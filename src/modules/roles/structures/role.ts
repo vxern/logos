@@ -39,10 +39,11 @@ interface Role extends Assignable {
  * @returns The Discord role object.
  */
 async function resolveGuildRole(
-  { guild, name }: { guild: Guild; name: string },
-): Promise<DiscordRole> {
+  guild: Guild,
+  name: string,
+): Promise<DiscordRole | undefined> {
   const guildRoles = await guild.roles.array();
-  return guildRoles.find((role) => role.name === name)!;
+  return guildRoles.find((role) => role.name === name);
 }
 
 /**
@@ -72,12 +73,12 @@ async function modifyRoles(action: RoleAction): Promise<boolean> {
 
   if (action.roles.add) {
     for (const role of action.roles.add) {
-      const guildRole = await resolveGuildRole({
-        guild: action.interaction.guild!,
-        name: role.name,
-      });
+      const guildRole = await resolveGuildRole(
+        action.interaction.guild!,
+        role.name,
+      );
       // Assign role to member
-      action.interaction.member.roles.add(guildRole.id);
+      action.interaction.member.roles.add(guildRole!.id);
       // Fetch Discord role and cache it
       action.interaction.client.cache.set(
         action.interaction.member.roles.cacheName,
@@ -94,12 +95,12 @@ async function modifyRoles(action: RoleAction): Promise<boolean> {
       ...action.roles.remove.map((role) => role.name),
     );
     for (const role of action.roles.remove) {
-      const guildRole = await resolveGuildRole({
-        guild: action.interaction.guild!,
-        name: role.name,
-      });
+      const guildRole = await resolveGuildRole(
+        action.interaction.guild!,
+        role.name,
+      );
       // Unassign role from member
-      action.interaction.member.roles.remove(guildRole.id);
+      action.interaction.member.roles.remove(guildRole!.id);
     }
   }
 
