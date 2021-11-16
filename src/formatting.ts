@@ -1,3 +1,5 @@
+import { SnowflakeBase } from "../deps.ts";
+
 /**
  * Modifies a string of text to appear bold within Discord.
  *
@@ -75,8 +77,8 @@ enum MentionType {
  * @param type - What the mention mentions.
  * @returns The formatted string of text.
  */
-function mention(target: any, type: MentionType): string {
-  let prefix: string = "";
+function mention(target: SnowflakeBase, type: MentionType): string {
+  let prefix: string;
   switch (type) {
     case MentionType.CHANNEL:
       prefix = "#";

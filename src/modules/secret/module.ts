@@ -1,10 +1,10 @@
 import { CategoryChannel, Guild, GuildChannels } from "../../../deps.ts";
 import { Command } from "../../commands/command.ts";
-//import compare from "./commands/compare.ts";
+import compare from "./commands/compare.ts";
 import post from "./commands/post.ts";
 
 const commands: Record<string, Command> = {
-  //compare,
+  compare,
   post,
 };
 
