@@ -1,4 +1,7 @@
 import { Guild, Interaction, Role as DiscordRole } from "../../../../deps.ts";
+import { bold } from "../../../formatting.ts";
+import { RoleCategory } from "./category.ts";
+import { getMemberRoles } from "./collection.ts";
 
 /**
  * Describes the generator of a description; a function which takes a role name
@@ -62,6 +65,53 @@ interface RoleAction {
   };
 }
 
+async function tryAssignRole(
+  interaction: Interaction,
+  language: string,
+  category: RoleCategory,
+  role: Role,
+): Promise<void> {
+  const memberRoles = await getMemberRoles(
+    interaction.member!,
+    language,
+    { within: category.collection! },
+  );
+
+  const action: RoleAction = { interaction: interaction, roles: {} };
+  const alreadyHasRole = memberRoles.some((memberRole) =>
+    memberRole.name === role.name
+  );
+
+  if (!alreadyHasRole) {
+    if (
+      memberRoles.length >= category.limit! && category.limit !== 1 &&
+      category.limit !== -1
+    ) {
+      interaction.send({
+        embeds: [{
+          title: `Reached the role limit in ${bold(category.name)}.`,
+          description:
+            `You have reached the limit of roles you can assign from within the ${
+              bold(category.name)
+            } category. To choose a new role, unassign one of your roles.`,
+        }],
+        ephemeral: true,
+      });
+      return;
+    }
+
+    action.roles.add = [role];
+  } else {
+    action.roles.remove = [role];
+  }
+
+  if (category.limit === 1 && memberRoles.length > 0) {
+    action.roles.remove = memberRoles;
+  }
+
+  modifyRoles(action);
+}
+
 /**
  * Modifies the member's roles as per the {@link RoleAction}.
  *
@@ -107,5 +157,5 @@ async function modifyRoles(action: RoleAction): Promise<boolean> {
   return true;
 }
 
-export { modifyRoles, resolveGuildRole };
+export { modifyRoles, resolveGuildRole, tryAssignRole };
 export type { Assignable, DescriptionGenerator, Role, RoleAction };
