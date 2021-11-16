@@ -13,7 +13,8 @@ import {
   unifyHandlers,
 } from "./commands/command.ts";
 import modules from "./modules/modules.ts";
-import config from "./config.ts";
+import configuration from "./configuration.ts";
+import services from "./services/service.ts";
 
 /** The core of the application, used for interacting with the Discord API. */
 class Client extends DiscordClient {
@@ -58,6 +59,7 @@ class Client extends DiscordClient {
     const promises = [
       this.setupGuilds(),
       this.setupCommands(),
+      this.setupServices(),
     ];
 
     await Promise.all(promises);
@@ -68,14 +70,15 @@ class Client extends DiscordClient {
   }
 
   async setupGuilds(): Promise<unknown> {
-    const promises = [];
+    const promises: Promise<unknown>[] = [];
 
     const guilds = await this.guilds.array();
     for (const guild of guilds) {
-      promises.push(...[
-        guild.roles.fetchAll,
-        guild.members.fetchList,
-      ]);
+      promises.push(
+        guild.roles.fetchAll(),
+        guild.members.fetchList(),
+        guild.invites.fetchAll(),
+      );
 
       if (Client.isManagedGuild(guild)) {
         this.manageGuild(guild);
@@ -86,7 +89,8 @@ class Client extends DiscordClient {
   }
 
   manageGuild(guild: Guild): void {
-    const language = config.guilds.name.exec(guild.name!)![1].toLowerCase();
+    const language = configuration.guilds.name.exec(guild.name!)![1]
+      .toLowerCase();
 
     Client.languages.set(guild.id, language);
   }
@@ -114,6 +118,12 @@ class Client extends DiscordClient {
       (interaction) => command.handle!(interaction),
       ApplicationCommandType.CHAT_INPUT,
     );
+  }
+
+  setupServices(): void {
+    for (const startService of services) {
+      startService(this);
+    }
   }
 
   /**
@@ -146,7 +156,9 @@ class Client extends DiscordClient {
    * Writes a message to the owner, notifying them of the bot being operational.
    */
   async notifyReady(): Promise<void> {
-    const directMessageChannel = await this.createDM(config.guilds.owner.id);
+    const directMessageChannel = await this.createDM(
+      configuration.guilds.owner.id,
+    );
     directMessageChannel.send({
       embeds: [{
         title: "Ready",
@@ -168,8 +180,8 @@ class Client extends DiscordClient {
    */
   static isManagedGuild(guild: Guild): boolean {
     const equalities = [
-      config.guilds.name.test(guild.name!),
-      guild.ownerID === config.guilds.owner.id,
+      configuration.guilds.name.test(guild.name!),
+      guild.ownerID === configuration.guilds.owner.id,
     ];
     return equalities.every((x) => x);
   }

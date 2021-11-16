@@ -14,7 +14,7 @@ import {
   InteractionResponseType,
 } from "../../deps.ts";
 import { InteractionHandler } from "../client.ts";
-//import config from "../config.ts";
+import configuration from "../configuration.ts";
 import { roles } from "../modules/roles/module.ts";
 import { resolveGuildRole } from "../modules/roles/structures/role.ts";
 import { Availability } from "./availability.ts";
@@ -169,15 +169,13 @@ async function createPermissions(
         });
         break;
       }
-        /*
       case Availability.OWNER: {
         guildCommandPermissions.push({
-          id: config.guilds.owner.id,
+          id: configuration.guilds.owner.id,
           type: ApplicationCommandPermissionType.USER,
           permission: true,
         });
       }
-      */
     }
 
     permissions.push({ id: id, permissions: guildCommandPermissions });
