@@ -22,7 +22,4 @@ if (Object.values(supplied).includes(undefined)) {
 }
 
 const client = new Client();
-client.connect(Deno.env.get("DISCORD_SECRET")!, [
-  ...Intents.Presence,
-  ...Intents.GuildMembers,
-]);
+client.connect();
