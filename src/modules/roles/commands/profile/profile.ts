@@ -13,6 +13,8 @@ import { browse } from "./selection/browse.ts";
 
 const command: Command = {
   name: "profile",
+  // TODO(vxern): Possible availability disparity when commands are merged, as the
+  // availability of the first command overrides that of others' with the same name.
   availability: Availability.MEMBERS,
   options: [{
     name: "roles",
@@ -46,7 +48,7 @@ async function selectRoles(interaction: Interaction): Promise<void> {
     index: 0,
   };
 
-  const language = Client.managed.get(interaction.guild!.id) || undefined;
+  const language = Client.languages.get(interaction.guild!.id) || undefined;
 
   const browsing = {
     interaction: interaction,
@@ -65,8 +67,6 @@ async function selectRoles(interaction: Interaction): Promise<void> {
     const alreadyHasRole = memberRoles.some((memberRole) =>
       memberRole.name === role.name
     );
-
-    console.log(alreadyHasRole);
 
     if (!alreadyHasRole) {
       if (

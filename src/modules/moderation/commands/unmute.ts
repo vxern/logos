@@ -5,7 +5,7 @@ import { reason } from "../parameters.ts";
 
 const command: Command = {
   name: "unmute",
-  availability: Availability.GUIDES,
+  availability: Availability.MODERATORS,
   description: "Unmutes a user, allowing them to interact on the server again.",
   options: [user, reason],
 };

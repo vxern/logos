@@ -4,7 +4,7 @@ import { elements } from "../../parameters.ts";
 
 const command: Command = {
   name: "purge",
-  availability: Availability.GUIDES,
+  availability: Availability.MODERATORS,
   description: "Deletes a number of messages from a channel.",
   options: [elements],
 };

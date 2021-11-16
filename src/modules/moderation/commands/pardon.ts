@@ -5,7 +5,7 @@ import { reason } from "../parameters.ts";
 
 const command: Command = {
   name: "pardon",
-  availability: Availability.GUIDES,
+  availability: Availability.MODERATORS,
   description: "Pardons the user from the last given reprimand.",
   options: [user, reason],
 };

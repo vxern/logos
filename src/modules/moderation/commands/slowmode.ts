@@ -4,7 +4,7 @@ import { duration } from "../parameters.ts";
 
 const command: Command = {
   name: "slowmode",
-  availability: Availability.GUIDES,
+  availability: Availability.MODERATORS,
   description: "Enables slowmode in a channel.",
   options: [duration],
 };

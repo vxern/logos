@@ -5,7 +5,7 @@ import { reason } from "../parameters.ts";
 
 const command: Command = {
   name: "kick",
-  availability: Availability.GUIDES,
+  availability: Availability.MODERATORS,
   description: "Kicks a user from the server.",
   options: [user, reason],
 };

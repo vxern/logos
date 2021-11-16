@@ -4,7 +4,7 @@ import { OptionType } from "../../../commands/option.ts";
 
 const command: Command = {
   name: "list",
-  availability: Availability.GUIDES,
+  availability: Availability.MODERATORS,
   options: [{
     name: "reprimands",
     description: "Lists a user's reprimands.",

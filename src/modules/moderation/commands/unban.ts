@@ -5,7 +5,7 @@ import { reason } from "../parameters.ts";
 
 const command: Command = {
   name: "unban",
-  availability: Availability.GUIDES,
+  availability: Availability.MODERATORS,
   description: "Unbans a user, allowing them to join the server again.",
   options: [user, reason],
 };

@@ -5,7 +5,7 @@ import { reason } from "../parameters.ts";
 
 const command: Command = {
   name: "ban",
-  availability: Availability.GUIDES,
+  availability: Availability.MODERATORS,
   description: "Bans a user from the server, making them unable to rejoin it.",
   options: [user, reason],
 };

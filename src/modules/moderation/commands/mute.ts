@@ -5,7 +5,7 @@ import { duration, reason } from "../parameters.ts";
 
 const command: Command = {
   name: "mute",
-  availability: Availability.GUIDES,
+  availability: Availability.MODERATORS,
   description: "Mutes a user, making them unable to interact on the server.",
   options: [user, reason, duration],
 };

@@ -4,7 +4,7 @@ import { index } from "../../parameters.ts";
 
 const command: Command = {
   name: "cite",
-  availability: Availability.GUIDES,
+  availability: Availability.MODERATORS,
   description: "Cites a server rule.",
   options: [index],
 };
