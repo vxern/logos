@@ -1,5 +1,3 @@
-import { GuildChannel, Role, User } from "../deps.ts";
-
 /**
  * Modifies a string of text to appear bold within Discord.
  *
@@ -8,6 +6,16 @@ import { GuildChannel, Role, User } from "../deps.ts";
  */
 function bold(target: string): string {
   return `**${target}**`;
+}
+
+/**
+ * Capitalises the first letter of the given text.
+ *
+ * @param target - String of text to format.
+ * @returns The formatted string of text.
+ */
+function capitalise(target: string): string {
+  return target[0].toUpperCase() + target.slice(1);
 }
 
 /**
@@ -50,19 +58,46 @@ function underlined(target: string): string {
   return `__${target}__`;
 }
 
-function mention(user: User): string;
-function mention(channel: GuildChannel): string;
-function mention(role: Role): string;
-function mention(target: any): string {
+/** Defines the type of Discord mention. */
+enum MentionType {
+  /** A channel mention. */
+  CHANNEL,
+  /** A role mention. */
+  ROLE,
+  /** A user mention. */
+  USER,
+}
+
+/**
+ * Creates a Discord mention by formatting an ID using the appropriate symbol.
+ *
+ * @param target - The object to mention by ID.
+ * @param type - What the mention mentions.
+ * @returns The formatted string of text.
+ */
+function mention(target: any, type: MentionType): string {
   let prefix: string = "";
-  if (target instanceof User) {
-    prefix = "@";
-  } else if (target instanceof MessageChannel) {
-    prefix = "#";
-  } else if (target instanceof Role) {
-    prefix = "@&";
+  switch (type) {
+    case MentionType.CHANNEL:
+      prefix = "#";
+      break;
+    case MentionType.ROLE:
+      prefix = "@&";
+      break;
+    case MentionType.USER:
+      prefix = "@";
+      break;
   }
   return `<${prefix}${target.id}>`;
 }
 
-export { bold, code, codeMultiline, italic, mention, underlined };
+export {
+  bold,
+  capitalise,
+  code,
+  codeMultiline,
+  italic,
+  mention,
+  MentionType,
+  underlined,
+};
