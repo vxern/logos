@@ -4,13 +4,15 @@ import {
   Guild,
   InteractionResponseType,
 } from "../../../../deps.ts";
+import { Availability } from "../../../commands/availability.ts";
 import { Command } from "../../../commands/command.ts";
 import { OptionType } from "../../../commands/option.ts";
-import { bold, codeMultiline } from "../../../client.ts";
+import { bold, codeMultiline } from "../../../formatting.ts";
 import { analyseStructure, GuildStructure } from "../module.ts";
 
 const command: Command = {
   name: "compare",
+  availability: Availability.OWNER,
   options: [{
     name: "server",
     type: OptionType.SUB_COMMAND_GROUP,

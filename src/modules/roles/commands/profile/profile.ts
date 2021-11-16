@@ -1,7 +1,9 @@
 import { Interaction } from "../../../../../deps.ts";
-import { bold, Client } from "../../../../client.ts";
+import { Client } from "../../../../client.ts";
+import { Availability } from "../../../../commands/availability.ts";
 import { Command } from "../../../../commands/command.ts";
 import { OptionType } from "../../../../commands/option.ts";
+import { bold } from "../../../../formatting.ts";
 import { fromHex } from "../../../../utils.ts";
 import { roles } from "../../module.ts";
 import { RoleCategory, RoleCategoryType } from "../../structures/category.ts";
@@ -11,6 +13,9 @@ import { browse } from "./selection/browse.ts";
 
 const command: Command = {
   name: "profile",
+  // TODO(vxern): Possible availability disparity when commands are merged, as the
+  // availability of the first command overrides that of others' with the same name.
+  availability: Availability.MEMBERS,
   options: [{
     name: "roles",
     type: OptionType.SUB_COMMAND,
@@ -43,7 +48,7 @@ async function selectRoles(interaction: Interaction): Promise<void> {
     index: 0,
   };
 
-  const language = Client.managed.get(interaction.guild!.id) || undefined;
+  const language = Client.languages.get(interaction.guild!.id) || undefined;
 
   const browsing = {
     interaction: interaction,

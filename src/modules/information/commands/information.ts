@@ -2,12 +2,14 @@ import dayjs from "https://cdn.skypack.dev/dayjs";
 import relativeTime from "https://cdn.skypack.dev/dayjs/plugin/relativeTime";
 dayjs.extend(relativeTime);
 import { Interaction } from "../../../../deps.ts";
+import { Availability } from "../../../commands/availability.ts";
 import { Command } from "../../../commands/command.ts";
 import { OptionType } from "../../../commands/option.ts";
 import { fromHex } from "../../../utils.ts";
 
 const command: Command = {
   name: "information",
+  availability: Availability.MEMBERS,
   options: [{
     name: "bot",
     description: "Displays information about the bot.",
@@ -44,7 +46,7 @@ async function bot(interaction: Interaction): Promise<void> {
       fields: [{
         name: "What am I?",
         value:
-          `I am ${bot.username}, a Discord application created to provide language-learning servers with the highest quality features.`,
+          `I am ${bot.username}, a Discord application created to provide language-learning servers with the highest quality features, such as rich social interactions, intuitive role management, translation and morphology look-ups, event scheduling, music playback, article creation, server structure synchronisation and more.`,
       }, {
         name: "How was I made?",
         value:

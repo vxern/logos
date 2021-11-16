@@ -166,7 +166,6 @@ async function displaySelectionMenu(
   }
 
   return {
-    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
     embeds: [{
       title: `${category.emoji}  ${category.name}`,
       description: category.description,
@@ -176,7 +175,7 @@ async function displaySelectionMenu(
       type: MessageComponentType.ACTION_ROW,
       components: [{
         type: MessageComponentType.SELECT,
-        customID: "role-selection-menu",
+        customID: "ROLE_SELECTION_MENU",
         options: selections,
         placeholder: category.type === RoleCategoryType.CATEGORY_GROUP
           ? "Choose a category."

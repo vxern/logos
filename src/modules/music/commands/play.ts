@@ -1,4 +1,5 @@
 import { InteractionHandler } from "../../../client.ts";
+import { Availability } from "../../../commands/availability.ts";
 import { Command, unimplemented } from "../../../commands/command.ts";
 import { Option, OptionType } from "../../../commands/option.ts";
 import { title, url } from "../parameters.ts";
@@ -13,6 +14,7 @@ const handlers: Record<Platform, InteractionHandler> = {
 
 const command: Command = {
   name: "play",
+  availability: Availability.MEMBERS,
   options: platforms.map((platform) => {
     return {
       name: platform.toLowerCase(),

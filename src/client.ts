@@ -1,22 +1,49 @@
 import {
-  ApplicationCommand,
   ApplicationCommandInteraction,
-  ApplicationCommandOption,
-  ApplicationCommandPartial,
   ApplicationCommandType,
   Client as DiscordClient,
-  colors,
   event,
   Guild,
+  Intents,
 } from "../deps.ts";
-import { Command, unifyHandlers } from "./commands/command.ts";
+import {
+  Command,
+  createApplicationCommand,
+  createPermissions,
+  unifyHandlers,
+} from "./commands/command.ts";
 import modules from "./modules/modules.ts";
 import config from "./config.ts";
-import { areEqual } from "./utils.ts";
 
 /** The core of the application, used for interacting with the Discord API. */
 class Client extends DiscordClient {
-  public static readonly managed: Map<string, string> = new Map();
+  public static readonly languages: Map<string, string> = new Map();
+
+  constructor() {
+    super({
+      id: Deno.env.get("APPLICATION_ID")!,
+      token: Deno.env.get("DISCORD_SECRET")!,
+      intents: Intents.GuildMembers,
+      forceNewSession: false,
+      presence: {
+        activity: {
+          name: "Deno",
+          type: "PLAYING",
+        },
+      },
+      canary: true,
+      clientProperties: {
+        os: "linux",
+        browser: "cards",
+        device: "cards",
+      },
+      enableSlash: true,
+      disableEnvToken: true,
+      fetchGatewayInfo: true,
+      compress: true,
+      messageCacheMax: 500,
+    });
+  }
 
   /**
    * Called when {@link Client} is authenticated by Discord, and is ready to use
@@ -27,56 +54,66 @@ class Client extends DiscordClient {
    */
   @event()
   protected async ready() {
-    const guilds = await this.guilds.array();
-    for (const guild of guilds) {
-      if (Client.isManagedGuild(guild)) {
-        Client.managed.set(
-          guild.id,
-          config.guilds.name.exec(guild.name!)![1].toLowerCase(),
-        );
-      }
-      await guild.roles.fetchAll();
-    }
+    const then = Date.now();
+    const promises = [
+      this.setupGuilds(),
+      this.setupCommands(),
+    ];
 
-    const commands = modules.commands;
-
-    console.info(
-      colors.cyan("Constructing handlers for commands with subcommands..."),
-    );
-    for (const command of commands) {
-      command.handle = unifyHandlers(command);
-    }
-
-    console.info(
-      colors.cyan("Assigning handlers to commands..."),
-    );
-    for (const command of commands) {
-      this.interactions.handle(command.name, (interaction) => {
-        console.info(
-          colors.magenta(
-            `Handling interaction '${
-              Client.displayCommand(interaction)
-            }' from ${colors.bold(interaction.user.tag)} on ${
-              colors.bold(interaction.guild!.name!)
-            }...`,
-          ),
-        );
-        command.handle!(interaction);
-      }, ApplicationCommandType.CHAT_INPUT);
-    }
-
-    for (const guild of guilds) {
-      await this.synchroniseGuildCommands(guild, commands);
-    }
-
-    this.setPresence({
-      activity: {
-        name: "Deno",
-        type: "PLAYING",
-      },
-    });
+    await Promise.all(promises);
+    const now = Date.now();
+    console.log(`Setup took ${now - then}ms`);
 
     this.notifyReady();
+  }
+
+  async setupGuilds(): Promise<unknown> {
+    const promises = [];
+
+    const guilds = await this.guilds.array();
+    for (const guild of guilds) {
+      promises.push(...[
+        guild.roles.fetchAll,
+        guild.members.fetchList,
+      ]);
+
+      if (Client.isManagedGuild(guild)) {
+        this.manageGuild(guild);
+      }
+    }
+
+    return Promise.all(promises);
+  }
+
+  manageGuild(guild: Guild): void {
+    const language = config.guilds.name.exec(guild.name!)![1].toLowerCase();
+
+    Client.languages.set(guild.id, language);
+  }
+
+  async setupCommands(): Promise<unknown> {
+    const commands = modules.commands;
+    for (const command of commands) {
+      command.handle = unifyHandlers(command);
+      this.manageCommand(command);
+    }
+
+    const promises = [];
+
+    const guilds = await this.guilds.array();
+    for (const guild of guilds) {
+      promises.push(this.synchroniseGuildCommands(guild, commands));
+    }
+
+    return Promise.all(promises);
+  }
+
+  manageCommand(command: Command) {
+    this.interactions.handle(
+      command.name,
+      (interaction) => command.handle!(interaction),
+      ApplicationCommandType.CHAT_INPUT,
+    );
   }
 
   /**
@@ -90,63 +127,19 @@ class Client extends DiscordClient {
   async synchroniseGuildCommands(
     guild: Guild,
     commands: Command[],
-  ): Promise<void> {
-    console.info(
-      colors.cyan(`Synchronising commands of ${colors.bold(guild.name!)}...`),
-    );
-
-    const guildCommands = (await guild.commands.all()).array();
-    const added = [];
-    const altered = [];
+  ): Promise<unknown> {
+    const applicationCommands = [];
     for (const command of commands) {
-      const commandPartial: ApplicationCommandPartial = {
-        name: command.name,
-        description: command.description,
-        options: command.options as ApplicationCommandOption[],
-        type: ApplicationCommandType.CHAT_INPUT,
-      };
+      applicationCommands.push(createApplicationCommand(command));
+    }
+    const guildCommands = await guild.commands.bulkEdit(applicationCommands);
 
-      const guildCommand = guildCommands.splice(
-        guildCommands.findIndex((guildCommand) =>
-          guildCommand.name === command.name
-        ),
-        1,
-      )[0];
-
-      if (!guildCommand) {
-        this.interactions.commands.create(commandPartial, guild.id);
-        added.push(command.name);
-        continue;
-      }
-
-      if (!areEqual(guildCommand, command)) {
-        this.interactions.commands.edit(
-          guildCommand.id,
-          commandPartial,
-          guild.id,
-        );
-        altered.push(command.name);
-      }
-    }
-    if (added.length !== 0) {
-      console.info(colors.green(`+ ${altered}`));
-    }
-    if (altered.length !== 0) {
-      console.info(colors.yellow(`/ ${altered}`));
-    }
-
-    for (const guildCommand of guildCommands) {
-      this.interactions.commands.delete(
-        guildCommand.id,
-        guild.id,
-      );
-    }
-    const removed = guildCommands
-      .map((guildCommand) => guildCommand.name)
-      .join(", ");
-    if (removed.length !== 0) {
-      console.info(colors.red(`- ${removed}`));
-    }
+    const commandPermissions = await createPermissions(
+      guild,
+      guildCommands,
+      commands,
+    );
+    return guild.commands.permissions.bulkEdit(commandPermissions);
   }
 
   /**
@@ -192,6 +185,16 @@ class Client extends DiscordClient {
     const parts = [command.name, command.subCommandGroup, command.subCommand];
     return parts.filter((part) => part).join(" ");
   }
+
+  /**
+   * Returns the language of the guild.
+   *
+   * @param guild - The guild whose language to return.
+   * @returns The guild's language.
+   */
+  static getLanguage(guild: Guild) {
+    return Client.languages.get(guild.id);
+  }
 }
 
 /**
@@ -203,55 +206,5 @@ type InteractionHandler = (
   interaction: ApplicationCommandInteraction,
 ) => unknown;
 
-/**
- * Modifies a string of text to appear italicised within Discord.
- *
- * @param target - String of text to format.
- * @returns The formatted string of text.
- */
-function italic(target: string): string {
-  return `*${target}*`;
-}
-
-/**
- * Modifies a string of text to appear bold within Discord.
- *
- * @param target - String of text to format.
- * @returns The formatted string of text.
- */
-function bold(target: string): string {
-  return `**${target}**`;
-}
-
-/**
- * Modifies a string of text to appear underlined within Discord.
- *
- * @param target - String of text to format.
- * @returns The formatted string of text.
- */
-function underlined(target: string): string {
-  return `__${target}__`;
-}
-
-/**
- * Modifies a string of text to appear within Discord as an embedded code block.
- *
- * @param target - String of text to format.
- * @returns The formatted string of text.
- */
-function code(target: string): string {
-  return "`" + target + "`";
-}
-
-/**
- * Modifies a string of text to appear within Discord as a multi-line code block
- * which expands to fill up entire rows and columns within a text box.
- *
- * @param target - String of text to format.
- */
-function codeMultiline(target: string): string {
-  return "```" + target + "```";
-}
-
-export { bold, Client, code, codeMultiline, italic, underlined };
+export { Client };
 export type { InteractionHandler };

@@ -1,9 +1,11 @@
+import { Availability } from "../../../commands/availability.ts";
 import { Command } from "../../../commands/command.ts";
 import { user } from "../../parameters.ts";
 import { reason } from "../parameters.ts";
 
 const command: Command = {
   name: "unmute",
+  availability: Availability.MODERATORS,
   description: "Unmutes a user, allowing them to interact on the server again.",
   options: [user, reason],
 };
