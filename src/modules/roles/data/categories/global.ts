@@ -1,6 +1,6 @@
-import { fromHex } from "../../../utils.ts";
-import { RoleCategory, RoleCategoryType } from "../structures/category.ts";
-import { RoleCollectionType } from "../structures/collection.ts";
+import { fromHex } from "../../../../utils.ts";
+import { RoleCategory, RoleCategoryType } from "../structures/role-category.ts";
+import { RoleCollectionType } from "../structures/role-collection.ts";
 
 const base: RoleCategory[] = [
   {

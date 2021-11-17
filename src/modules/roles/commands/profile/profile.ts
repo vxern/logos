@@ -5,8 +5,11 @@ import { Command } from "../../../../commands/command.ts";
 import { OptionType } from "../../../../commands/option.ts";
 import { fromHex } from "../../../../utils.ts";
 import { roles } from "../../module.ts";
-import { RoleCategory, RoleCategoryType } from "../../structures/category.ts";
-import { tryAssignRole } from "../../structures/role.ts";
+import {
+  RoleCategory,
+  RoleCategoryType,
+} from "../../data/structures/role-category.ts";
+import { tryAssignRole } from "../../data/structures/role.ts";
 import { browse } from "./selection/browse.ts";
 
 const command: Command = {

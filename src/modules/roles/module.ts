@@ -1,10 +1,10 @@
 import { Command } from "../../commands/command.ts";
-import global from "./categories/global.ts";
-import local from "./categories/local.ts";
 import select from "./commands/profile/profile.ts";
-import { RoleCategory } from "./structures/category.ts";
-import { RoleCollectionType } from "./structures/collection.ts";
-import { Role } from "./structures/role.ts";
+import global from "./data/categories/global.ts";
+import local from "./data/categories/local.ts";
+import { RoleCategory } from "./data/structures/role-category.ts";
+import { RoleCollectionType } from "./data/structures/role-collection.ts";
+import { Role } from "./data/structures/role.ts";
 
 const commands: Record<string, Command> = {
   select,

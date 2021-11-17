@@ -16,7 +16,7 @@ import {
 import { InteractionHandler } from "../client.ts";
 import configuration from "../configuration.ts";
 import { roles } from "../modules/roles/module.ts";
-import { resolveGuildRole } from "../modules/roles/structures/role.ts";
+import { resolveGuildRole } from "../modules/roles/data/structures/role.ts";
 import { Availability } from "./availability.ts";
 import { Option, OptionType } from "./option.ts";
 

@@ -1,4 +1,4 @@
-import { RoleCollection } from "./collection.ts";
+import { RoleCollection } from "./role-collection.ts";
 
 /**
  * The type of a category helps determine how it should be managed in a

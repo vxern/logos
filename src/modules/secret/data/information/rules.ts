@@ -1,4 +1,4 @@
-import { Guild } from "../../../../deps.ts";
+import { Guild } from "../../../../../deps.ts";
 import { getChannelMention } from "./information.ts";
 
 interface Rules {

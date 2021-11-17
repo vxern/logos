@@ -1,7 +1,11 @@
-import { Guild, Interaction, Role as DiscordRole } from "../../../../deps.ts";
-import { bold } from "../../../formatting.ts";
-import { RoleCategory } from "./category.ts";
-import { getMemberRoles } from "./collection.ts";
+import {
+  Guild,
+  Interaction,
+  Role as DiscordRole,
+} from "../../../../../deps.ts";
+import { bold } from "../../../../formatting.ts";
+import { RoleCategory } from "./role-category.ts";
+import { getMemberRoles } from "./role-collection.ts";
 
 /**
  * Describes the generator of a description; a function which takes a role name

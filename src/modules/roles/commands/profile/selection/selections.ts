@@ -2,12 +2,12 @@ import { Member, MessageComponentOption } from "../../../../../../deps.ts";
 import {
   RoleCategory,
   RoleCategoryType,
-} from "../../../structures/category.ts";
+} from "../../../data/structures/role-category.ts";
 import {
   getMemberRoles,
   resolveRoles,
   RoleCollection,
-} from "../../../structures/collection.ts";
+} from "../../../data/structures/role-collection.ts";
 
 async function displaySelections(
   member: Member,

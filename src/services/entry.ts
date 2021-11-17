@@ -9,7 +9,7 @@ import {
 import { Client } from "../client.ts";
 import { capitalise } from "../formatting.ts";
 import { roles } from "../modules/roles/module.ts";
-import { tryAssignRole } from "../modules/roles/structures/role.ts";
+import { tryAssignRole } from "../modules/roles/data/structures/role.ts";
 import { ServiceStarter } from "./service.ts";
 
 const steps = ["ACCEPTED_RULES", "LANGUAGE_PROFICIENCY"];

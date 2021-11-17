@@ -23,7 +23,7 @@ const command: Command = {
       options: [title, url],
       handle: handlers[platform],
     };
-  }) as Option[],
+  }),
 };
 
 export default command;

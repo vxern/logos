@@ -1,5 +1,5 @@
-import { Guild } from "../../../../deps.ts";
-import { Client } from "../../../client.ts";
+import { Guild } from "../../../../../deps.ts";
+import { Client } from "../../../../client.ts";
 import { getChannelMention } from "./information.ts";
 
 interface Categories {

@@ -9,9 +9,9 @@ import {
 import {
   RoleCategory,
   RoleCategoryType,
-} from "../../../structures/category.ts";
-import { Role } from "../../../structures/role.ts";
-import { resolveRoles } from "../../../structures/collection.ts";
+} from "../../../data/structures/role-category.ts";
+import { resolveRoles } from "../../../data/structures/role-collection.ts";
+import { Role } from "../../../data/structures/role.ts";
 import { displaySelections } from "./selections.ts";
 
 /**

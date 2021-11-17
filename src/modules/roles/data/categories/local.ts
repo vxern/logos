@@ -1,7 +1,7 @@
-import { _ } from "../../../../deps.ts";
-import { fromHex } from "../../../utils.ts";
-import { RoleCategory, RoleCategoryType } from "../structures/category.ts";
-import { RoleCollectionType } from "../structures/collection.ts";
+import { _ } from "../../../../../deps.ts";
+import { fromHex } from "../../../../utils.ts";
+import { RoleCategory, RoleCategoryType } from "../structures/role-category.ts";
+import { RoleCollectionType } from "../structures/role-collection.ts";
 import armenian from "./servers/armenian.ts";
 import belarusian from "./servers/belarusian.ts";
 import romanian from "./servers/romanian.ts";

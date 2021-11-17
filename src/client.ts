@@ -77,7 +77,6 @@ class Client extends DiscordClient {
       promises.push(
         guild.roles.fetchAll(),
         guild.members.fetchList(),
-        guild.invites.fetchAll(),
       );
 
       if (Client.isManagedGuild(guild)) {

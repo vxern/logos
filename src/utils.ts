@@ -85,13 +85,14 @@ async function findChannelByName(
  * @returns The invite link.
  */
 async function getInvite(guild: Guild): Promise<Invite> {
-  const invites = await guild.invites.array();
+  const invites = await guild.invites.fetchAll();
   return invites.find((invite) =>
     invite.inviter?.id === configuration.guilds.owner.id &&
     invite.maxAge === 0
   ) ??
     await guild.invites.create(
       (await findChannelByName(guild, "discussion"))!.id,
+      { maxAge: 0, maxUses: 0, temporary: false },
     );
 }
 

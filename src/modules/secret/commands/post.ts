@@ -10,7 +10,9 @@ import { Command } from "../../../commands/command.ts";
 import { OptionType } from "../../../commands/option.ts";
 import { capitalise } from "../../../formatting.ts";
 import { fromHex } from "../../../utils.ts";
-import information, { getChannelMention } from "../information/information.ts";
+import information, {
+  getChannelMention,
+} from "../data/information/information.ts";
 
 const command: Command = {
   name: "post",

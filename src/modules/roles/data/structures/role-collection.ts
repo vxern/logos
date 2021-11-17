@@ -1,4 +1,4 @@
-import { Member } from "../../../../deps.ts";
+import { Member } from "../../../../../deps.ts";
 import { Assignable, DescriptionGenerator, Role } from "./role.ts";
 
 /**

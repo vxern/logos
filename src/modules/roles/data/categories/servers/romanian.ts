@@ -1,6 +1,6 @@
-import { fromNames } from "../../module.ts";
-import { RoleCategory } from "../../structures/category.ts";
-import { RoleCollectionType } from "../../structures/collection.ts";
+import { fromNames } from "../../../module.ts";
+import { RoleCategory } from "../../structures/role-category.ts";
+import { RoleCollectionType } from "../../structures/role-collection.ts";
 
 const categories: Partial<RoleCategory>[] = [
   {
