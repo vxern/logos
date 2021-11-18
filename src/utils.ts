@@ -91,7 +91,7 @@ async function getInvite(guild: Guild): Promise<Invite> {
     invite.maxAge === 0
   ) ??
     await guild.invites.create(
-      (await findChannelByName(guild, "discussion"))!.id,
+      (await findChannelByName(guild, "welcome"))!.id,
       { maxAge: 0, maxUses: 0, temporary: false },
     );
 }

@@ -2,6 +2,7 @@ import {
   ApplicationCommandInteraction,
   ApplicationCommandType,
   Client as DiscordClient,
+  Collection,
   event,
   Guild,
   Intents,
@@ -13,12 +14,12 @@ import {
   unifyHandlers,
 } from "./commands/command.ts";
 import modules from "./modules/modules.ts";
+import services from "./modules/services.ts";
 import configuration from "./configuration.ts";
-import services from "./services/service.ts";
 
 /** The core of the application, used for interacting with the Discord API. */
 class Client extends DiscordClient {
-  public static readonly languages: Map<string, string> = new Map();
+  static readonly languages: Collection<string, string> = new Collection();
 
   constructor() {
     super({

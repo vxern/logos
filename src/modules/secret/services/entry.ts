@@ -5,12 +5,12 @@ import {
   InteractionMessageComponentData,
   InteractionResponseType,
   MessageComponentType,
-} from "../../deps.ts";
-import { Client } from "../client.ts";
-import { capitalise } from "../formatting.ts";
-import { roles } from "../modules/roles/module.ts";
-import { tryAssignRole } from "../modules/roles/data/structures/role.ts";
-import { ServiceStarter } from "./service.ts";
+} from "../../../../deps.ts";
+import { Client } from "../../../client.ts";
+import { capitalise } from "../../../formatting.ts";
+import { roles } from "../../../modules/roles/module.ts";
+import { tryAssignRole } from "../../../modules/roles/data/structures/role.ts";
+import { ServiceStarter } from "../../services.ts";
 
 const steps = ["ACCEPTED_RULES", "LANGUAGE_PROFICIENCY"];
 
