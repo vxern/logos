@@ -1,4 +1,5 @@
 import { EmbedPayload, Guild } from "../../../../../deps.ts";
+import { Client } from "../../../../client.ts";
 import { bold, mention, MentionType } from "../../../../formatting.ts";
 import { findChannelByName, fromHex, getInvite } from "../../../../utils.ts";
 import rules from "./rules.ts";
@@ -6,7 +7,7 @@ import rules from "./rules.ts";
 interface Section {
   image: string;
   color: number;
-  generateEmbed: (guild: Guild) => Promise<EmbedPayload>;
+  generateEmbed: (guild: Guild) => Promise<EmbedPayload | undefined>;
 }
 
 interface Information {
@@ -57,6 +58,9 @@ const information: Information = {
     image: "https://i.imgur.com/snJaKYm.png",
     color: fromHex("#637373"),
     generateEmbed: async (guild: Guild) => {
+      const language = Client.getLanguage(guild);
+      if (!language) return;
+
       const invite = await getInvite(guild);
       return {
         title: "INVITE LINK",
