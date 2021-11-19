@@ -1,3 +1,4 @@
+import { Interaction } from "../../../../deps.ts";
 import { InteractionHandler } from "../../../client.ts";
 import { Availability } from "../../../commands/availability.ts";
 import { Command, unimplemented } from "../../../commands/command.ts";
@@ -24,6 +25,13 @@ const command: Command = {
       handle: handlers[platform],
     };
   }),
+  handle: play,
 };
+
+async function play(interaction: Interaction): Promise<void> {
+  /// TODO(vxern):
+  /// If the queue is full, reject interaction nicely.
+  /// Otherwise, add the requested song to the queue.
+}
 
 export default command;
