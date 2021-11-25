@@ -1,8 +1,14 @@
+import { fromHex } from "./utils.ts";
+
 export default {
   guilds: {
-    name: new RegExp("^Learn ([A-Z][a-z]*)$"),
     owner: {
       id: "217319536485990400",
+    },
+  },
+  responses: {
+    colors: {
+      red: fromHex("#b42f2f"),
     },
   },
 };
