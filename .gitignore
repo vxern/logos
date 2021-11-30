@@ -3,4 +3,4 @@
 .env
 
 # Application-specific ignores
-/src/modules/music/lavalink
+/src/modules/music/lavalink/application.yml
