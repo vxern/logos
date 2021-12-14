@@ -1,6 +1,6 @@
 import { EmbedPayload, Guild } from "../../../../../deps.ts";
 import { Client } from "../../../../client.ts";
-import { bold, mention, MentionType } from "../../../../formatting.ts";
+import { bold, italic, mention, MentionType } from "../../../../formatting.ts";
 import { findChannelByName, fromHex, getInvite } from "../../../../utils.ts";
 import rules from "./rules.ts";
 
@@ -21,9 +21,10 @@ const information: Information = {
     generateEmbed: async (guild) => {
       const fields = [];
       for (const [title, generateRule] of Object.entries(rules)) {
+        const rule = await generateRule(guild);
         fields.push({
           name: `💠 ${bold(title.toUpperCase())}`,
-          value: await generateRule(guild),
+          value: rule.paragraph,
           inline: false,
         });
       }
