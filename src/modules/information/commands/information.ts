@@ -72,7 +72,7 @@ async function guild(interaction: Interaction): Promise<void> {
       color: fromHex("#303434"),
       fields: [{
         name: "🖋️ Description",
-        value: guild.description!,
+        value: guild.description ?? 'No description provided.',
         inline: true,
       }, {
         name: "⏱️ Created",
@@ -80,6 +80,7 @@ async function guild(interaction: Interaction): Promise<void> {
         inline: true,
       }],
     }],
+    ephemeral: true,
   });
 }
 
