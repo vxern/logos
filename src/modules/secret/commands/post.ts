@@ -60,7 +60,7 @@ async function welcome(interaction: Interaction) {
           interaction.guild!,
           "rules",
         ))} to get yourself familiarised with what you should expect from the server, and press 'I have read the rules' below.`,
-      color: fromHex("#F28123"),
+      color: fromHex("#f28123"),
       /* image: {
         url: "https://i.imgur.com/nxcnx7j.png",
       },*/
