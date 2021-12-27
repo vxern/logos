@@ -3,7 +3,6 @@ import { Client } from "../../../../client.ts";
 import { Availability } from "../../../../commands/availability.ts";
 import { Command } from "../../../../commands/command.ts";
 import { OptionType } from "../../../../commands/option.ts";
-import { fromHex } from "../../../../utils.ts";
 import { roles } from "../../module.ts";
 import {
   RoleCategory,
@@ -11,6 +10,7 @@ import {
 } from "../../data/structures/role-category.ts";
 import { tryAssignRole } from "../../data/structures/role.ts";
 import { browse } from "./selection/browse.ts";
+import configuration from "../../../../configuration.ts";
 
 const command: Command = {
   name: "profile",
@@ -38,7 +38,7 @@ async function selectRoles(interaction: Interaction): Promise<void> {
       name: "No Category Selected",
       description:
         "Please select a role category to obtain a list of available roles within it.",
-      color: fromHex("#303434"),
+      color: configuration.responses.colors.invisible,
       emoji: "💭",
       limit: -1,
       categories: Client.isManagedGuild(interaction.guild!)

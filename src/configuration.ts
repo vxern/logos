@@ -9,6 +9,7 @@ export default {
   responses: {
     colors: {
       red: fromHex("#b42f2f"),
+      invisible: fromHex("#36393F"),
     },
   },
 };
