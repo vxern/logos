@@ -13,7 +13,6 @@ const base: RoleCategory[] = [
     limit: 1,
     collection: {
       type: RoleCollectionType.COLLECTION,
-      isGradual: true,
       onAssignMessage: (name) =>
         `Your language proficiency is now ${name.toLowerCase()}.`,
       list: [{

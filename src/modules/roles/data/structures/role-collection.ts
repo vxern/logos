@@ -21,10 +21,6 @@ interface RoleCollection extends Assignable {
   type: RoleCollectionType;
   /** Description applied to roles in this collection without a description. */
   description?: DescriptionGenerator;
-  /**
-   * Whether the roles in this collection are to be characterised by graduality.
-   */
-  isGradual?: boolean;
   /** List of roles within this collection. */
   list?: Role[];
   /** Lists of roles with languages as keys. */
