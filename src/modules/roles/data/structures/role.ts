@@ -135,9 +135,8 @@ async function tryAssignRole(
 async function modifyRoles(action: RoleAction): Promise<boolean> {
   if (!action.interaction.member || !action.interaction.guild) return false;
 
-  console.log(action.roles);
-
   if (action.roles.add) {
+    console.log(`${action.interaction.user.username} assigned roles: ${action.roles.add.map((role) => role.name).join(", ")}`);
     for (const role of action.roles.add) {
       const guildRole = await resolveGuildRole(
         action.interaction.guild!,
@@ -155,6 +154,7 @@ async function modifyRoles(action: RoleAction): Promise<boolean> {
   }
 
   if (action.roles.remove) {
+    console.log(`${action.interaction.user.username} unassigned roles: ${action.roles.remove.map((role) => role.name).join(", ")}`);
     // Fetch Discord role and cache it
     action.interaction.client.cache.delete(
       action.interaction.member.roles.cacheName,
