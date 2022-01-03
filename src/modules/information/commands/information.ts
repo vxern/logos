@@ -14,7 +14,7 @@ const command: Command = {
   availability: Availability.MEMBERS,
   options: [{
     name: "bot",
-    description: "Displays information about the bot.",
+    description: "Displays application information.",
     type: OptionType.SUB_COMMAND,
     handle: bot,
   }, {
@@ -22,12 +22,12 @@ const command: Command = {
     type: OptionType.SUB_COMMAND_GROUP,
     options: [{
       name: "information",
-      description: "Displays information about the server.",
+      description: "Displays server information.",
       type: OptionType.SUB_COMMAND,
       handle: guild,
     }, {
       name: "statistics",
-      description: "Displays statistics of the server.",
+      description: "Displays server statistics.",
       type: OptionType.SUB_COMMAND,
       handle: statistics,
     }],
@@ -84,7 +84,7 @@ async function statistics(interaction: Interaction): Promise<void> {
 
   interaction.respond({
     embeds: [{
-      title: `Information about ${guild.name!}`,
+      title: `${guild.name!}'s Statistics`,
       thumbnail: { url: guild.iconURL() },
       color: configuration.responses.colors.invisible,
       fields: [{

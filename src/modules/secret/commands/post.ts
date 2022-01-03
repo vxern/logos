@@ -51,9 +51,7 @@ async function welcome(interaction: Interaction) {
     embeds: [{
       title: `Welcome to ${bold(interaction.guild!.name!)}` +
         (language
-          ? ` - The largest Discord server dedicated to teaching and learning the ${
-            capitalise(language!)
-          } language.`
+          ? ` - The largest Discord server dedicated to teaching and learning the ${capitalise(language!)} language.`
           : "."),
       description:
         `To enter the server and become its official member, read the information contained within ${(await getChannelMention(

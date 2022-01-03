@@ -17,7 +17,6 @@ import {
 import modules from "./modules/modules.ts";
 import services from "./modules/services.ts";
 import { MusicController } from "./modules/music/controller.ts";
-import configuration from "./configuration.ts";
 
 const guildName = new RegExp("^Learn ([A-Z][a-z]*)$");
 
@@ -182,7 +181,7 @@ class Client extends DiscordClient {
   static isManagedGuild(guild: Guild): boolean {
     const equalities = [
       guildName.test(guild.name!),
-      guild.ownerID === configuration.guilds.owner.id,
+      // guild.ownerID === configuration.guilds.owner.id,
     ];
     return equalities.every((x) => x);
   }
