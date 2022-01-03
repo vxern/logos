@@ -111,6 +111,8 @@ class Client extends DiscordClient {
   }
 
   async setupCommands(): Promise<unknown> {
+    this.interactions.on('interactionError', console.error);
+    
     const commands = modules.commands;
     for (const command of commands) {
       command.handle = unifyHandlers(command);
@@ -130,7 +132,7 @@ class Client extends DiscordClient {
   manageCommand(command: Command) {
     this.interactions.handle(
       command.name,
-      (interaction) => command.handle!(interaction),
+      command.handle!,
       ApplicationCommandType.CHAT_INPUT,
     );
   }
