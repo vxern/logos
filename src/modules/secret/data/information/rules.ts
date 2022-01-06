@@ -40,14 +40,13 @@ const rules: Rules = {
         "Contributions made to the server must be suitable for minors. NSFW and NSFL content will not be tolerated.",
     };
   },
-  /*
   exclusivity: (_) => {
     return {
       summary: "Do not advertise.",
       paragraph:
         "Advertising of other Discord servers is not allowed, and any attempts at advertising (including profile descriptions) will not be tolerated.",
     };
-  },*/
+  },
 };
 
 export default rules;
