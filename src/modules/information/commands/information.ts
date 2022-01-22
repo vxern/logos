@@ -35,17 +35,17 @@ const command: Command = {
 };
 
 function bot(interaction: Interaction): void {
-  const bot = interaction.client.user!;
+  const application = interaction.client.user!;
 
   interaction.respond({
     embeds: [{
-      title: bot.username,
-      thumbnail: { url: bot.avatarURL() },
+      title: application.username,
+      thumbnail: { url: application.avatarURL() },
       color: configuration.responses.colors.invisible,
       fields: [{
         name: "What am I?",
         value:
-          `I am ${bot.username}, a Discord application created to provide language-learning servers with the highest quality features, such as rich social interactions, intuitive role management, translation and morphology look-ups, event scheduling, music playback, article creation, server structure synchronisation and more.`,
+          `I am ${application.username}, a Discord application created to provide language-learning servers with the highest quality features, such as rich social interactions, intuitive role management, translation and morphology look-ups, event scheduling, music playback, article creation, server structure synchronisation and more.`,
       }, {
         name: "How was I made?",
         value:
@@ -61,7 +61,7 @@ function guild(interaction: Interaction): void {
 
   interaction.respond({
     embeds: [{
-      title: `Information about ${guild.name!}`,
+      title: `Information about '${guild.name!}'`,
       thumbnail: { url: guild.iconURL() },
       color: configuration.responses.colors.invisible,
       fields: [{
@@ -84,7 +84,7 @@ async function statistics(interaction: Interaction): Promise<void> {
 
   interaction.respond({
     embeds: [{
-      title: `${guild.name!}'s Statistics`,
+      title: `Statistics for '${guild.name!}'`,
       thumbnail: { url: guild.iconURL() },
       color: configuration.responses.colors.invisible,
       fields: [{
@@ -107,11 +107,15 @@ async function statistics(interaction: Interaction): Promise<void> {
 
 async function getProficiencyDistribution(guild: Guild): Promise<string> {
   const members = (await guild.members.fetchList()).filter((member) => !member.user.bot);
+  console.log(members);
 
-  const proficiencies = getProficiencyCategory().collection!.list!
+  const proficiencies = getProficiencyCategory().collection!.list!;
+  console.log(proficiencies);
   const proficiencyNames = proficiencies.map((proficiency) => proficiency.name);
+  console.log(proficiencyNames);
 
   const distribution = new Array(proficiencyNames.length).fill(0);
+  console.log(distribution);
 
   for (const member of members) {
     const roleNames = (await member.roles.array()).map((role) => role.name);
@@ -126,12 +130,14 @@ async function getProficiencyDistribution(guild: Guild): Promise<string> {
   const proficiencyTags = (await guild.roles.fetchAll())
     .filter((role) => proficiencyNames.includes(role.name))
     .map((role) => mention(role.id, MentionType.ROLE));
+    console.log(proficiencyTags);
 
   return displayProficiencyDistribution(proficiencyTags, members.length, distribution);
 }
 
 function displayProficiencyDistribution(proficiencyTags: string[], memberCount: number, distribution: number[]): string {
   const without = memberCount - distribution.reduce((a, b) => a + b, 0);
+  console.log(without);
 
   distribution.unshift(without);
   proficiencyTags.unshift(`without a proficiency role.`);
@@ -139,6 +145,7 @@ function displayProficiencyDistribution(proficiencyTags: string[], memberCount: 
   const proficiencyDistributionPrinted = distribution.map(
     (count, index) => `${getPercentageComposition(count, memberCount)}% ${proficiencyTags[index]}`
   ).reverse();
+  console.log(proficiencyDistributionPrinted);
 
   return proficiencyDistributionPrinted.join("\n");
 }
