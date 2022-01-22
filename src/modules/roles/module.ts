@@ -49,5 +49,11 @@ function supplyMissingProperties(categories: RoleCategory[]): RoleCategory[] {
   return categories;
 }
 
-export { fromNames, roles };
+function getProficiencyCategory(): RoleCategory {
+  return roles.scopes.global.find((category) =>
+    category.name === "Proficiency"
+  )!;
+}
+
+export { fromNames, roles, getProficiencyCategory };
 export default commands;

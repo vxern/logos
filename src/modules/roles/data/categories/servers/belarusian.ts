@@ -15,12 +15,12 @@ const categories: Partial<RoleCategory>[] = [
     collection: {
       type: RoleCollectionType.COLLECTION_LOCALISED,
       list: fromNames([
-        "Brest",
-        "Hrodna",
-        "Homel",
-        "Mahilyow",
-        "Minsk",
-        "Vitsebsk",
+        "Brest / Брэсцкая",
+        "Hrodna / Гродзенская",
+        "Homel / Гомельская",
+        "Mahilyow / Магілёўская",
+        "Minsk / Мінская",
+        "Vitsebsk / Вiцебская",
       ]),
     },
   },

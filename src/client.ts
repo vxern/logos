@@ -7,6 +7,7 @@ import {
   Guild,
   Intents,
 } from "../deps.ts";
+import { Node } from "https://deno.land/x/lavadeno@3.2.2/mod.ts";
 import {
   Command,
   createApplicationCommand,
@@ -15,15 +16,19 @@ import {
 } from "./commands/command.ts";
 import modules from "./modules/modules.ts";
 import services from "./modules/services.ts";
-import configuration from "./configuration.ts";
+import { MusicController } from "./modules/music/controller.ts";
+
+const guildName = new RegExp("^Learn ([A-Z][a-z]*)$");
 
 /** The core of the application, used for interacting with the Discord API. */
 class Client extends DiscordClient {
+  static node: Node;
+
   static readonly languages: Collection<string, string> = new Collection();
+  static readonly music: Collection<string, MusicController> = new Collection();
 
   constructor() {
     super({
-      id: Deno.env.get("APPLICATION_ID")!,
       token: Deno.env.get("DISCORD_SECRET")!,
       intents: Intents.GuildMembers,
       forceNewSession: false,
@@ -57,6 +62,16 @@ class Client extends DiscordClient {
   @event()
   protected async ready() {
     const then = Date.now();
+    Client.node = new Node({
+      connection: {
+        host: Deno.env.get("LAVALINK_HOST")!,
+        port: Number(Deno.env.get("LAVALINK_PORT")!),
+        password: Deno.env.get("LAVALINK_PASSWORD")!,
+      },
+      sendGatewayPayload: (_, payload) => this.gateway.send(payload),
+    });
+    await Client.node.connect(BigInt(this.user!.id));
+
     const promises = [
       this.setupGuilds(),
       this.setupCommands(),
@@ -66,8 +81,6 @@ class Client extends DiscordClient {
     await Promise.all(promises);
     const now = Date.now();
     console.log(`Setup took ${now - then}ms`);
-
-    this.notifyReady();
   }
 
   async setupGuilds(): Promise<unknown> {
@@ -83,19 +96,22 @@ class Client extends DiscordClient {
       if (Client.isManagedGuild(guild)) {
         this.manageGuild(guild);
       }
+
+      this.setupControllers(guild);
     }
 
     return Promise.all(promises);
   }
 
   manageGuild(guild: Guild): void {
-    const language = configuration.guilds.name.exec(guild.name!)![1]
-      .toLowerCase();
+    const language = guildName.exec(guild.name!)![1].toLowerCase();
 
     Client.languages.set(guild.id, language);
   }
 
   async setupCommands(): Promise<unknown> {
+    this.interactions.on('interactionError', console.error);
+    
     const commands = modules.commands;
     for (const command of commands) {
       command.handle = unifyHandlers(command);
@@ -115,9 +131,13 @@ class Client extends DiscordClient {
   manageCommand(command: Command) {
     this.interactions.handle(
       command.name,
-      (interaction) => command.handle!(interaction),
+      command.handle!,
       ApplicationCommandType.CHAT_INPUT,
     );
+  }
+
+  setupControllers(guild: Guild): void {
+    Client.music.set(guild.id, new MusicController(guild));
   }
 
   setupServices(): void {
@@ -153,26 +173,6 @@ class Client extends DiscordClient {
   }
 
   /**
-   * Writes a message to the owner, notifying them of the bot being operational.
-   */
-  async notifyReady(): Promise<void> {
-    const directMessageChannel = await this.createDM(
-      configuration.guilds.owner.id,
-    );
-    directMessageChannel.send({
-      embeds: [{
-        title: "Ready",
-        description: "The bot is up and working.",
-        thumbnail: {
-          url: this.user!.avatarURL(),
-          height: 64,
-          width: 64,
-        },
-      }],
-    });
-  }
-
-  /**
    * Checks if the guild is part of the language network.
    *
    * @param guild - The guild whose status to check.
@@ -180,8 +180,8 @@ class Client extends DiscordClient {
    */
   static isManagedGuild(guild: Guild): boolean {
     const equalities = [
-      configuration.guilds.name.test(guild.name!),
-      guild.ownerID === configuration.guilds.owner.id,
+      guildName.test(guild.name!),
+      // guild.ownerID === configuration.guilds.owner.id,
     ];
     return equalities.every((x) => x);
   }

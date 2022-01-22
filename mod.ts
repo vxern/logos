@@ -2,7 +2,16 @@ import "https://deno.land/x/dotenv@v3.1.0/load.ts";
 import { colors } from "./deps.ts";
 import { Client } from "./src/client.ts";
 
-const required = ["APPLICATION_ID", "DISCORD_SECRET", "TEMPLATE_GUILD_ID"];
+const required = [
+  "TEMPLATE_GUILD_ID",
+  "DISCORD_SECRET",
+  "YOUTUBE_SECRET",
+  "SPOTIFY_ID",
+  "SPOTIFY_SECRET",
+  "LAVALINK_HOST",
+  "LAVALINK_PORT",
+  "LAVALINK_PASSWORD",
+];
 const supplied = Object.fromEntries(
   required.map((env) => [env, Deno.env.get(env)]),
 );

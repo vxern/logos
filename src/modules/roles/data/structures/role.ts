@@ -21,9 +21,9 @@ type DescriptionGenerator = (name: string) => string;
  * assignment and unassignment.
  */
 interface Assignable {
-  /** When the user is assigned a role from the category. */
+  /** When the member is assigned a role from the category. */
   onAssignMessage?: DescriptionGenerator;
-  /** When the user is unassigned the role from the category. */
+  /** When the member is unassigned the role from the category. */
   onUnassignMessage?: DescriptionGenerator;
 }
 
@@ -69,6 +69,16 @@ interface RoleAction {
   };
 }
 
+/**
+ * Given a {@link Role}, carries out the adequate checks, such as for limits
+ * of roles that a member may select from a given category, and proceeds to
+ * assign or unassign the role accordingly.
+ *
+ * @param interaction - The interaction associated with the attempt.
+ * @param language - The language of the guild the interaction was made in.
+ * @param category - The role category to which the role belongs.
+ * @param role - The role to be assigned.
+ */
 async function tryAssignRole(
   interaction: Interaction,
   language: string,
@@ -126,6 +136,7 @@ async function modifyRoles(action: RoleAction): Promise<boolean> {
   if (!action.interaction.member || !action.interaction.guild) return false;
 
   if (action.roles.add) {
+    console.log(`${action.interaction.user.username} assigned roles: ${action.roles.add.map((role) => role.name).join(", ")}`);
     for (const role of action.roles.add) {
       const guildRole = await resolveGuildRole(
         action.interaction.guild!,
@@ -143,6 +154,7 @@ async function modifyRoles(action: RoleAction): Promise<boolean> {
   }
 
   if (action.roles.remove) {
+    console.log(`${action.interaction.user.username} unassigned roles: ${action.roles.remove.map((role) => role.name).join(", ")}`);
     // Fetch Discord role and cache it
     action.interaction.client.cache.delete(
       action.interaction.member.roles.cacheName,

@@ -1,4 +1,5 @@
 import { EmbedPayload, Guild } from "../../../../../deps.ts";
+import { Client } from "../../../../client.ts";
 import { bold, mention, MentionType } from "../../../../formatting.ts";
 import { findChannelByName, fromHex, getInvite } from "../../../../utils.ts";
 import rules from "./rules.ts";
@@ -6,7 +7,7 @@ import rules from "./rules.ts";
 interface Section {
   image: string;
   color: number;
-  generateEmbed: (guild: Guild) => Promise<EmbedPayload>;
+  generateEmbed: (guild: Guild) => Promise<EmbedPayload | undefined>;
 }
 
 interface Information {
@@ -16,13 +17,14 @@ interface Information {
 const information: Information = {
   rules: {
     image: "https://i.imgur.com/wRBpXcY.png",
-    color: fromHex("#FF9A76"),
+    color: fromHex("#ff9a76"),
     generateEmbed: async (guild) => {
       const fields = [];
       for (const [title, generateRule] of Object.entries(rules)) {
+        const rule = await generateRule(guild);
         fields.push({
           name: `💠 ${bold(title.toUpperCase())}`,
-          value: await generateRule(guild),
+          value: rule.paragraph,
           inline: false,
         });
       }
@@ -57,6 +59,9 @@ const information: Information = {
     image: "https://i.imgur.com/snJaKYm.png",
     color: fromHex("#637373"),
     generateEmbed: async (guild: Guild) => {
+      const language = Client.getLanguage(guild);
+      if (!language) return;
+
       const invite = await getInvite(guild);
       return {
         title: "INVITE LINK",
@@ -68,7 +73,7 @@ const information: Information = {
 
 async function getChannelMention(guild: Guild, name: string): Promise<string> {
   return mention(
-    (await findChannelByName(guild, name))!,
+    (await findChannelByName(guild, name))!.id,
     MentionType.CHANNEL,
   );
 }

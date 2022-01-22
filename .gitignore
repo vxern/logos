@@ -1,2 +1,6 @@
+# General ignores
 /.vscode
 .env
+
+# Application-specific ignores
+/src/modules/music/lavalink/application.yml

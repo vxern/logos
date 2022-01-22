@@ -13,7 +13,6 @@ const base: RoleCategory[] = [
     limit: 1,
     collection: {
       type: RoleCollectionType.COLLECTION,
-      isGradual: true,
       onAssignMessage: (name) =>
         `Your language proficiency is now ${name.toLowerCase()}.`,
       list: [{
@@ -112,28 +111,6 @@ const base: RoleCategory[] = [
     collection: {
       type: RoleCollectionType.COLLECTION,
       list: [{
-        name: "Correct Me",
-        onAssignMessage: (_) =>
-          `Other users will now be able to see that you demand additional corrections.`,
-        onUnassignMessage: (_) =>
-          `Other users will no longer be able to see that you demand additional corrections.`,
-        description:
-          `"I think, therefore I make mistakes." - Please do correct me.`,
-        emoji: "✍️",
-      }],
-    },
-  },
-  {
-    type: RoleCategoryType.CATEGORY,
-    name: "Pingable",
-    description:
-      "Roles that allow one to be notified at various occassions, such as during VC sessions and before language lessons.",
-    color: fromHex("#9d5c63"),
-    emoji: "💡",
-    limit: -1,
-    collection: {
-      type: RoleCollectionType.COLLECTION,
-      list: [{
         name: "Classroom Attendee",
         onAssignMessage: (_) =>
           `You will now be notified of each lesson before it begins.`,
@@ -142,6 +119,23 @@ const base: RoleCategory[] = [
         description:
           "I attend sessions in the classroom channel and would like to be notified when a session takes place.",
         emoji: "📖",
+      }, {
+        name: "Correct Me",
+        onAssignMessage: (_) =>
+          `Other users will now be able to see that you demand additional corrections.`,
+        onUnassignMessage: (_) =>
+          `Other users will no longer be able to see that you demand additional corrections.`,
+        description:
+          `"I think, therefore I make mistakes." - Please do correct me.`,
+        emoji: "✍️",
+      }, {
+        name: "Daily Phrase",
+        onAssignMessage: (_) => `You will now be notified when a daily phrase is posted.`,
+        onUnassignMessage: (_) =>
+          "You will no longer be notified of new daily phrases.",
+        description:
+          "I want to be notified when a new daily phrase is posted.",
+        emoji: "🌞",
       }, {
         name: "Voicechatter",
         onAssignMessage: (_) => `You can now be notified of a VC session.`,
