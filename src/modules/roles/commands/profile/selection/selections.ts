@@ -53,9 +53,9 @@ async function createSelectionsFromCollection(
       memberRole.name === role.name
     );
     return {
-      label: role.name,
+      label: `${memberHasRole ? '[Assigned] ' : ''}${role.name}`,
       value: index.toString(),
-      description: !memberHasRole ? role.description : undefined,
+      description: role.description,
       emoji: { name: role.emoji },
     };
   });
