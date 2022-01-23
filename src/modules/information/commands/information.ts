@@ -14,23 +14,14 @@ const command: Command = {
   availability: Availability.MEMBERS,
   options: [{
     name: "bot",
-    description: "Displays application information.",
+    description: "Displays information about the bot.",
     type: OptionType.SUB_COMMAND,
     handle: bot,
   }, {
     name: "server",
-    type: OptionType.SUB_COMMAND_GROUP,
-    options: [{
-      name: "information",
-      description: "Displays server information.",
-      type: OptionType.SUB_COMMAND,
-      handle: guild,
-    }, {
-      name: "statistics",
-      description: "Displays server statistics.",
-      type: OptionType.SUB_COMMAND,
-      handle: statistics,
-    }],
+    description: "Displays information about the server.",
+    type: OptionType.SUB_COMMAND,
+    handle: guild,
   }],
 };
 
@@ -70,8 +61,9 @@ ${list([
   });
 }
 
-function guild(interaction: Interaction): void {
+async function guild(interaction: Interaction): Promise<void> {
   const guild = interaction.guild!;
+  const createdAt = dayjs(guild.timestamp);
 
   interaction.respond({
     embeds: [{
@@ -83,25 +75,6 @@ function guild(interaction: Interaction): void {
         value: guild.description ?? 'No description provided.',
         inline: true,
       }, {
-        name: "👑 Owner",
-        value: mention(guild.ownerID!, MentionType.USER),
-        inline: true,
-      }],
-    }],
-    ephemeral: true,
-  });
-}
-
-async function statistics(interaction: Interaction): Promise<void> {
-  const guild = interaction.guild!;
-  const createdAt = dayjs(guild.timestamp);
-
-  interaction.respond({
-    embeds: [{
-      title: `Statistics for '${guild.name!}'`,
-      thumbnail: { url: guild.iconURL() },
-      color: configuration.responses.colors.invisible,
-      fields: [{
         name: "🧑 Members",
         value: guild.memberCount!.toString(),
         inline: true,
@@ -112,7 +85,11 @@ async function statistics(interaction: Interaction): Promise<void> {
       }, {
         name: "🎓 Proficiency Distribution",
         value: (await getProficiencyDistribution(guild)).toString(),
-        inline: false,
+        inline: true,
+      }, {
+        name: "👑 Owner",
+        value: mention(guild.ownerID!, MentionType.USER),
+        inline: true,
       }],
     }],
     ephemeral: true,
