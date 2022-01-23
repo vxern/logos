@@ -6,7 +6,7 @@ import { Availability } from "../../../commands/availability.ts";
 import { Command } from "../../../commands/command.ts";
 import { OptionType } from "../../../commands/option.ts";
 import configuration from "../../../configuration.ts";
-import { mention, MentionType } from "../../../formatting.ts";
+import { bold, italic, list, mention, MentionType } from "../../../formatting.ts";
 import { getProficiencyCategory } from "../../roles/module.ts";
 
 const command: Command = {
@@ -14,23 +14,14 @@ const command: Command = {
   availability: Availability.MEMBERS,
   options: [{
     name: "bot",
-    description: "Displays application information.",
+    description: "Displays information about the bot.",
     type: OptionType.SUB_COMMAND,
     handle: bot,
   }, {
     name: "server",
-    type: OptionType.SUB_COMMAND_GROUP,
-    options: [{
-      name: "information",
-      description: "Displays server information.",
-      type: OptionType.SUB_COMMAND,
-      handle: guild,
-    }, {
-      name: "statistics",
-      description: "Displays server statistics.",
-      type: OptionType.SUB_COMMAND,
-      handle: statistics,
-    }],
+    description: "Displays information about the server.",
+    type: OptionType.SUB_COMMAND,
+    handle: guild,
   }],
 };
 
@@ -45,19 +36,37 @@ function bot(interaction: Interaction): void {
       fields: [{
         name: "What am I?",
         value:
+          `I am ${bold(application.username)}, a Discord application created to provide language-learning servers with the highest quality features, such as:
+${list([
+  "Rich social interactions", 
+  "Intuitive role management",
+  "Translation and morphology look-ups",
+  "Event scheduling",
+  "Music playback",
+  "Article creation",
+  "Server structure synchronisation",
+])}`, }, {
+=======
           `I am ${application.username}, a Discord application created to provide language-learning servers with the highest quality features, such as rich social interactions, intuitive role management, translation and morphology look-ups, event scheduling, music playback, article creation, server structure synchronisation and more.`,
       }, {
         name: "How was I made?",
         value:
           "I am powered by [TypeScript](https://www.typescriptlang.org/) running within [Deno](https://deno.land/). I interact with [Discord's API](https://discord.com/developers/docs/intro) with the help of [Harmony](https://github.com/harmonyland/harmony).",
+      }, {
+        name: "How can you add me to your server?",
+        value: "You cannot *juuust* yet. I was made for the purpose of managing a select few language-learning servers, such as the [Armenian](https://discord.me/learnarmenian), [Belarusian](https://discord.me/learnbelarusian) and [Romanian](https://discord.me/learnromanian) communities.",
+      }, {
+        name: "Am I open-source?",
+        value: `Unfortunately, no. However, my predecessor, Talon, ${italic("is")}. You can view his source code [here](https://github.com/vxern/talon).`,
       }],
     }],
     ephemeral: true,
   });
 }
 
-function guild(interaction: Interaction): void {
+async function guild(interaction: Interaction): Promise<void> {
   const guild = interaction.guild!;
+  const createdAt = dayjs(guild.timestamp);
 
   interaction.respond({
     embeds: [{
@@ -69,25 +78,6 @@ function guild(interaction: Interaction): void {
         value: guild.description ?? 'No description provided.',
         inline: true,
       }, {
-        name: "👑 Owner",
-        value: mention(guild.ownerID!, MentionType.USER),
-        inline: true,
-      }],
-    }],
-    ephemeral: true,
-  });
-}
-
-async function statistics(interaction: Interaction): Promise<void> {
-  const guild = interaction.guild!;
-  const createdAt = dayjs(guild.timestamp);
-
-  interaction.respond({
-    embeds: [{
-      title: `Statistics for '${guild.name!}'`,
-      thumbnail: { url: guild.iconURL() },
-      color: configuration.responses.colors.invisible,
-      fields: [{
         name: "🧑 Members",
         value: guild.memberCount!.toString(),
         inline: true,
@@ -98,7 +88,11 @@ async function statistics(interaction: Interaction): Promise<void> {
       }, {
         name: "🎓 Proficiency Distribution",
         value: (await getProficiencyDistribution(guild)).toString(),
-        inline: false,
+        inline: true,
+      }, {
+        name: "👑 Owner",
+        value: mention(guild.ownerID!, MentionType.USER),
+        inline: true,
       }],
     }],
     ephemeral: true,
@@ -110,12 +104,9 @@ async function getProficiencyDistribution(guild: Guild): Promise<string> {
   console.log(members);
 
   const proficiencies = getProficiencyCategory().collection!.list!;
-  console.log(proficiencies);
   const proficiencyNames = proficiencies.map((proficiency) => proficiency.name);
-  console.log(proficiencyNames);
 
   const distribution = new Array(proficiencyNames.length).fill(0);
-  console.log(distribution);
 
   for (const member of members) {
     const roleNames = (await member.roles.array()).map((role) => role.name);
@@ -130,14 +121,12 @@ async function getProficiencyDistribution(guild: Guild): Promise<string> {
   const proficiencyTags = (await guild.roles.fetchAll())
     .filter((role) => proficiencyNames.includes(role.name))
     .map((role) => mention(role.id, MentionType.ROLE));
-    console.log(proficiencyTags);
 
   return displayProficiencyDistribution(proficiencyTags, members.length, distribution);
 }
 
 function displayProficiencyDistribution(proficiencyTags: string[], memberCount: number, distribution: number[]): string {
   const without = memberCount - distribution.reduce((a, b) => a + b, 0);
-  console.log(without);
 
   distribution.unshift(without);
   proficiencyTags.unshift(`without a proficiency role.`);
@@ -145,7 +134,6 @@ function displayProficiencyDistribution(proficiencyTags: string[], memberCount: 
   const proficiencyDistributionPrinted = distribution.map(
     (count, index) => `${getPercentageComposition(count, memberCount)}% ${proficiencyTags[index]}`
   ).reverse();
-  console.log(proficiencyDistributionPrinted);
 
   return proficiencyDistributionPrinted.join("\n");
 }

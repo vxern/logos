@@ -58,6 +58,16 @@ function underlined(target: string): string {
   return `__${target}__`;
 }
 
+/**
+ * Taking a list of items, puts them in a list format.
+ *
+ * @param items - Items in the list.
+ * @returns The formatted string of text.
+ */
+function list(items: string[]): string {
+  return items.map((item) => `• ${item}`).join("\n");
+}
+
 /** Defines the type of Discord mention. */
 enum MentionType {
   /** A channel mention. */
@@ -97,6 +107,7 @@ export {
   code,
   codeMultiline,
   italic,
+  list,
   mention,
   MentionType,
   underlined,
