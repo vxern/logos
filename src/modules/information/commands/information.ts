@@ -46,6 +46,9 @@ ${list([
   "Article creation",
   "Server structure synchronisation",
 ])}`, }, {
+=======
+          `I am ${application.username}, a Discord application created to provide language-learning servers with the highest quality features, such as rich social interactions, intuitive role management, translation and morphology look-ups, event scheduling, music playback, article creation, server structure synchronisation and more.`,
+      }, {
         name: "How was I made?",
         value:
           "I am powered by [TypeScript](https://www.typescriptlang.org/) running within [Deno](https://deno.land/). I interact with [Discord's API](https://discord.com/developers/docs/intro) with the help of [Harmony](https://github.com/harmonyland/harmony).",
@@ -98,6 +101,7 @@ async function guild(interaction: Interaction): Promise<void> {
 
 async function getProficiencyDistribution(guild: Guild): Promise<string> {
   const members = (await guild.members.fetchList()).filter((member) => !member.user.bot);
+  console.log(members);
 
   const proficiencies = getProficiencyCategory().collection!.list!;
   const proficiencyNames = proficiencies.map((proficiency) => proficiency.name);

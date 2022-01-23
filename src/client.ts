@@ -41,8 +41,8 @@ class Client extends DiscordClient {
       canary: true,
       clientProperties: {
         os: "linux",
-        browser: "cards",
-        device: "cards",
+        browser: "none",
+        device: "server",
       },
       enableSlash: true,
       disableEnvToken: true,

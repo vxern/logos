@@ -103,7 +103,7 @@ async function tryAssignRole(
     ) {
       interaction.send({
         embeds: [{
-          title: `Reached the role limit in ${bold(category.name)}.`,
+          title: `Reached the role limit in the role category '${bold(category.name)}'.`,
           description:
             `You have reached the limit of roles you can assign from within the ${
               bold(category.name)
@@ -136,12 +136,16 @@ async function modifyRoles(action: RoleAction): Promise<boolean> {
   if (!action.interaction.member || !action.interaction.guild) return false;
 
   if (action.roles.add) {
-    console.log(`${action.interaction.user.username} assigned roles: ${action.roles.add.map((role) => role.name).join(", ")}`);
+    console.log(`${action.interaction.user.username} assigned roles: ${action.roles.add.map((role) => `'${role.name}'`).join(", ")}`);
     for (const role of action.roles.add) {
       const guildRole = await resolveGuildRole(
         action.interaction.guild!,
         role.name,
       );
+      if (!guildRole) {
+        console.error(`A role with the name '${role.name}' does not exist in the guild '${action.interaction.guild!.name!}'.`);
+        continue;
+      }
       // Assign role to member
       action.interaction.member.roles.add(guildRole!.id);
       // Fetch Discord role and cache it
@@ -154,7 +158,7 @@ async function modifyRoles(action: RoleAction): Promise<boolean> {
   }
 
   if (action.roles.remove) {
-    console.log(`${action.interaction.user.username} unassigned roles: ${action.roles.remove.map((role) => role.name).join(", ")}`);
+    console.log(`${action.interaction.user.username} unassigned roles: ${action.roles.remove.map((role) => `'${role.name}'`).join(", ")}`);
     // Fetch Discord role and cache it
     action.interaction.client.cache.delete(
       action.interaction.member.roles.cacheName,
