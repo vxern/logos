@@ -6,7 +6,7 @@ import { Availability } from "../../../commands/availability.ts";
 import { Command } from "../../../commands/command.ts";
 import { OptionType } from "../../../commands/option.ts";
 import configuration from "../../../configuration.ts";
-import { mention, MentionType } from "../../../formatting.ts";
+import { bold, italic, list, mention, MentionType } from "../../../formatting.ts";
 import { getProficiencyCategory } from "../../roles/module.ts";
 
 const command: Command = {
@@ -35,21 +35,35 @@ const command: Command = {
 };
 
 function bot(interaction: Interaction): void {
-  const bot = interaction.client.user!;
+  const application = interaction.client.user!;
 
   interaction.respond({
     embeds: [{
-      title: bot.username,
-      thumbnail: { url: bot.avatarURL() },
+      title: application.username,
+      thumbnail: { url: application.avatarURL() },
       color: configuration.responses.colors.invisible,
       fields: [{
         name: "What am I?",
         value:
-          `I am ${bot.username}, a Discord application created to provide language-learning servers with the highest quality features, such as rich social interactions, intuitive role management, translation and morphology look-ups, event scheduling, music playback, article creation, server structure synchronisation and more.`,
-      }, {
+          `I am ${bold(application.username)}, a Discord application created to provide language-learning servers with the highest quality features, such as:
+${list([
+  "Rich social interactions", 
+  "Intuitive role management",
+  "Translation and morphology look-ups",
+  "Event scheduling",
+  "Music playback",
+  "Article creation",
+  "Server structure synchronisation",
+])}`, }, {
         name: "How was I made?",
         value:
           "I am powered by [TypeScript](https://www.typescriptlang.org/) running within [Deno](https://deno.land/). I interact with [Discord's API](https://discord.com/developers/docs/intro) with the help of [Harmony](https://github.com/harmonyland/harmony).",
+      }, {
+        name: "How can you add me to your server?",
+        value: "You cannot *juuust* yet. I was made for the purpose of managing a select few language-learning servers, such as the [Armenian](https://discord.me/learnarmenian), [Belarusian](https://discord.me/learnbelarusian) and [Romanian](https://discord.me/learnromanian) communities.",
+      }, {
+        name: "Am I open-source?",
+        value: `Unfortunately, no. However, my predecessor, Talon, ${italic("is")}. You can view his source code [here](https://github.com/vxern/talon).`,
       }],
     }],
     ephemeral: true,
@@ -61,7 +75,7 @@ function guild(interaction: Interaction): void {
 
   interaction.respond({
     embeds: [{
-      title: `Information about ${guild.name!}`,
+      title: `Information about '${guild.name!}'`,
       thumbnail: { url: guild.iconURL() },
       color: configuration.responses.colors.invisible,
       fields: [{
@@ -84,7 +98,7 @@ async function statistics(interaction: Interaction): Promise<void> {
 
   interaction.respond({
     embeds: [{
-      title: `${guild.name!}'s Statistics`,
+      title: `Statistics for '${guild.name!}'`,
       thumbnail: { url: guild.iconURL() },
       color: configuration.responses.colors.invisible,
       fields: [{
@@ -108,7 +122,7 @@ async function statistics(interaction: Interaction): Promise<void> {
 async function getProficiencyDistribution(guild: Guild): Promise<string> {
   const members = (await guild.members.fetchList()).filter((member) => !member.user.bot);
 
-  const proficiencies = getProficiencyCategory().collection!.list!
+  const proficiencies = getProficiencyCategory().collection!.list!;
   const proficiencyNames = proficiencies.map((proficiency) => proficiency.name);
 
   const distribution = new Array(proficiencyNames.length).fill(0);
