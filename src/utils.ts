@@ -6,6 +6,7 @@ import {
   GuildChannel,
   Invite,
 } from "../deps.ts";
+import languages from "https://deno.land/x/language@v0.1.0/languages.ts";
 import { Command } from "./commands/command.ts";
 import { Option } from "./commands/option.ts";
 import configuration from "./configuration.ts";
@@ -107,5 +108,15 @@ function fromHex(color: string): number {
   return parseInt(color.replace("#", "0x"));
 }
 
-export { findChannelByName, fromHex, getInvite, getMissingKeys };
+/**
+ * Returns the ISO-693-1 language code of a language.
+ * 
+ * @param language - The language whose code to return.
+ * @returns ISO-693-1 language code.
+ */
+function getLanguageCode(language: string): string {
+  return Object.entries(languages.lang).find(([_, [name]]) => name.toLowerCase() === language)![0];
+} 
+
+export { findChannelByName, fromHex, getInvite, getMissingKeys, getLanguageCode };
 export type { Optional };
