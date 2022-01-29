@@ -1,3 +1,5 @@
+import { EmbedField } from "../../../../deps.ts";
+
 /** The language scope / audience of the dictionary. */
 enum DictionaryScope {
   /** 
@@ -53,6 +55,40 @@ interface DictionaryEntry {
   antonyms?: string[];
 }
 
+/**
+ * Builds embed fields from a {@link DictionaryEntry} corresponding to the
+ * different pieces of data.
+ * 
+ * @param entry - The entry to build fields from.
+ * @returns The fields.
+ */
+function toFields(entry: DictionaryEntry): EmbedField[] {
+  const fields: Partial<EmbedField>[] = [{
+    name: "Translation",
+    value: entry.translations?.join(', '),
+  }, {
+    name: "Pronunciation",
+    value: entry.pronunciation,
+  }, {
+    name: "Definition",
+    value: entry.definition,
+  }, {
+    name: "Etymology",
+    value: entry.etymology,
+  }, {
+    name: "Synonyms",
+    value: entry.synonyms?.join(', '),
+  }, {
+    name: "Antonyms",
+    value: entry.antonyms?.join(', '),
+  }];
+  
+  const filled = fields.filter((field) => !!field.value) as EmbedField[];
+  const truncated = filled.map((field) => {return {...field, value: field.value.slice(0, 1024)}});
+
+  return truncated;
+}
+
 type PartialDictionaryEntry = Omit<DictionaryEntry, "headword">;
 
 interface SearchQuery {
@@ -73,5 +109,5 @@ abstract class Dictionary {
   abstract lookup(headword: string, native: string): Promise<PartialDictionaryEntry>;
 }
 
-export { Dictionary, DictionaryScope, DictionaryType };
+export { Dictionary, DictionaryScope, DictionaryType, toFields };
 export type { DictionaryEntry, PartialDictionaryEntry, SearchQuery }
