@@ -103,6 +103,7 @@ interface SearchQuery {
 abstract class Dictionary {
   abstract scopes: DictionaryScope[];
   abstract types: DictionaryType[];
+  languages?: string[];
 
   abstract query: (query: SearchQuery) => string;
 

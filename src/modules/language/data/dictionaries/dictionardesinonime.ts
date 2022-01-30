@@ -4,6 +4,7 @@ import { Dictionary, PartialDictionaryEntry, DictionaryScope, DictionaryType, Se
 class DictionarDeSinonime extends Dictionary {
   scopes = [DictionaryScope.MONOLINGUAL];
   types = [DictionaryType.DEFINING, DictionaryType.SYNONYM];
+  languages = ['romanian'];
 
   query = (query: SearchQuery) => `https://www.dictionardesinonime.ro/?c=${query.word}`;
 

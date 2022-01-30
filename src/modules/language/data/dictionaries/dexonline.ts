@@ -3,6 +3,7 @@ import { Dictionary, PartialDictionaryEntry, DictionaryScope, DictionaryType, Se
 class Dexonline extends Dictionary {
   scopes = [DictionaryScope.MONOLINGUAL];
   types = [DictionaryType.DEFINING, DictionaryType.ETYMOLOGICAL];
+  languages = ['romanian'];
 
   query = (query: SearchQuery) => `https://dexonline.ro/definitie/${query.word}/json`;
 
