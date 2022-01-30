@@ -1,7 +1,7 @@
 import { Dictionary, PartialDictionaryEntry, DictionaryScope, DictionaryType, SearchQuery } from '../dictionary.ts';
 
 class Dexonline extends Dictionary {
-  scopes = [DictionaryScope.MONOLINGUAL];
+  scope = DictionaryScope.MONOLINGUAL;
   types = [DictionaryType.DEFINING, DictionaryType.ETYMOLOGICAL];
   languages = ['romanian'];
 

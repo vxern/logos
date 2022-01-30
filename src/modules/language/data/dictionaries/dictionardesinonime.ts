@@ -2,7 +2,7 @@ import { cheerio } from "../../../../../deps.ts";
 import { Dictionary, PartialDictionaryEntry, DictionaryScope, DictionaryType, SearchQuery } from '../dictionary.ts';
 
 class DictionarDeSinonime extends Dictionary {
-  scopes = [DictionaryScope.MONOLINGUAL];
+  scope = DictionaryScope.MONOLINGUAL;
   types = [DictionaryType.DEFINING, DictionaryType.SYNONYM];
   languages = ['romanian'];
 

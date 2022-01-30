@@ -62,7 +62,7 @@ interface DictionaryEntry {
  * @param entry - The entry to build fields from.
  * @returns The fields.
  */
-function toFields(entry: DictionaryEntry): EmbedField[] {
+function toFields(entry: DictionaryEntry, {verbose}: {verbose: boolean}): EmbedField[] {
   const fields: Partial<EmbedField>[] = [{
     name: "Translation",
     value: entry.translations?.join(', '),
@@ -77,14 +77,14 @@ function toFields(entry: DictionaryEntry): EmbedField[] {
     value: entry.etymology,
   }, {
     name: "Synonyms",
-    value: entry.synonyms?.join(', '),
+    value: (verbose ? entry.synonyms : entry.synonyms?.slice(0, 5))?.join(', '),
   }, {
     name: "Antonyms",
-    value: entry.antonyms?.join(', '),
+    value: (verbose ? entry.antonyms : entry.antonyms?.slice(0, 5))?.join(', '),
   }];
   
   const filled = fields.filter((field) => !!field.value) as EmbedField[];
-  const truncated = filled.map((field) => {return {...field, value: field.value.slice(0, 1024)}});
+  const truncated = filled.map((field) => {return {...field, value: field.value.slice(0, verbose ? 1024 : 256)}});
 
   return truncated;
 }
@@ -101,7 +101,7 @@ interface SearchQuery {
 }
 
 abstract class Dictionary {
-  abstract scopes: DictionaryScope[];
+  abstract scope: DictionaryScope;
   abstract types: DictionaryType[];
   languages?: string[];
 
