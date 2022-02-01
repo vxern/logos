@@ -51,10 +51,10 @@ ${list([
           "I am powered by [TypeScript](https://www.typescriptlang.org/) running within [Deno](https://deno.land/). I interact with [Discord's API](https://discord.com/developers/docs/intro) with the help of [Harmony](https://github.com/harmonyland/harmony).",
       }, {
         name: "How can you add me to your server?",
-        value: "You cannot *juuust* yet. I was made for the purpose of managing a select few language-learning servers, such as the [Armenian](https://discord.me/learnarmenian), [Belarusian](https://discord.me/learnbelarusian) and [Romanian](https://discord.me/learnromanian) communities.",
+        value: "You cannot just yet. I was made for the purpose of managing a select few language-learning servers, such as the [Armenian](https://discord.me/learnarmenian), [Belarusian](https://discord.me/learnbelarusian) and [Romanian](https://discord.me/learnromanian) communities.",
       }, {
         name: "Am I open-source?",
-        value: `Unfortunately, no. However, my predecessor, Talon, ${italic("is")}. You can view his source code [here](https://github.com/vxern/talon).`,
+        value: `No, unfortunately. However, my predecessor, Talon, ${italic("is")}. You can view his source code [here](https://github.com/vxern/talon).`,
       }],
     }],
     ephemeral: true,
@@ -84,7 +84,7 @@ async function guild(interaction: Interaction): Promise<void> {
         inline: true,
       }, {
         name: "🎓 Proficiency Distribution",
-        value: (await getProficiencyDistribution(guild)).toString(),
+        value: await getProficiencyDistribution(guild),
         inline: true,
       }, {
         name: "👑 Owner",
@@ -103,11 +103,11 @@ async function getProficiencyDistribution(guild: Guild): Promise<string> {
   const proficiencies = getProficiencyCategory().collection!.list!;
   const proficiencyNames = proficiencies.map((proficiency) => proficiency.name);
 
-  const distribution = new Array(proficiencyNames.length).fill(0);
+  const distribution = Array.from({ length: proficiencies.length }, () => 0);
 
   for (const member of members) {
     const roleNames = (await member.roles.array()).map((role) => role.name);
-    for (let i = 0; i < proficiencyNames.length; i++) {
+    for (let i = 0; i < proficiencies.length; i++) {
       if (roleNames.includes(proficiencyNames[i])) {
         distribution[i]++;
         continue;
