@@ -12,11 +12,17 @@ class Dexonline extends Dictionary {
     const content = await response.text();
     const data = JSON.parse(content);
 
-    const raw = data.definitions[0].internalRep;
-    const definition = raw.replaceAll('#', '__')
-      .replaceAll('@', '**')
-      .replaceAll('%', '**')
-      .replaceAll('$', '*');
+    const raw = data.definitions[0].internalRep as string;
+    const definition = raw
+      .replaceAll(' ** ', ' ⬥ ') // Filled diamond
+      .replaceAll(' * ', ' ⬦ ') // Diamond outline
+      .replaceAll(
+        /%.+?%/g, 
+        (match) => match.substring(1, match.length - 1).split('').join(' ')
+      ) // Spread letters out
+      .replaceAll('#', '__') // Underline
+      .replaceAll('@', '**') // Bolden
+      .replaceAll('$', '*'); // Italicise
 
     return { definition: definition };
   }
