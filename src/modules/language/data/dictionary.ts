@@ -77,10 +77,10 @@ function toFields(entry: DictionaryEntry, {verbose}: {verbose: boolean}): EmbedF
     value: entry.etymology,
   }, {
     name: "Synonyms",
-    value: (verbose ? entry.synonyms : entry.synonyms?.slice(0, 5))?.join(', '),
+    value: (verbose ? entry.synonyms : entry.synonyms?.slice(0, 10))?.join(', '),
   }, {
     name: "Antonyms",
-    value: (verbose ? entry.antonyms : entry.antonyms?.slice(0, 5))?.join(', '),
+    value: (verbose ? entry.antonyms : entry.antonyms?.slice(0, 10))?.join(', '),
   }];
   
   const filled = fields.filter((field) => !!field.value) as EmbedField[];
