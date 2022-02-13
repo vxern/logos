@@ -15,7 +15,7 @@ const rules: Rules = {
     return {
       summary: "Try to be nice.",
       paragraph:
-        "Members are to be treated with respect, consideration and understanding. Abuse, discrimination, harassment and other forms of hurtful or toxic behavior will not be tolerated.",
+        "All members should be treated with respect, consideration and understanding. Abuse, discrimination, harassment and other forms of hurtful or toxic behavior will not be tolerated.",
     };
   },
   quality: async (guild: Guild) => {

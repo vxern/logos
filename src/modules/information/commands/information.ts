@@ -51,10 +51,10 @@ ${list([
           "I am powered by [TypeScript](https://www.typescriptlang.org/) running within [Deno](https://deno.land/). I interact with [Discord's API](https://discord.com/developers/docs/intro) with the help of [Harmony](https://github.com/harmonyland/harmony).",
       }, {
         name: "How can you add me to your server?",
-        value: "You cannot *juuust* yet. I was made for the purpose of managing a select few language-learning servers, such as the [Armenian](https://discord.me/learnarmenian), [Belarusian](https://discord.me/learnbelarusian) and [Romanian](https://discord.me/learnromanian) communities.",
+        value: "You cannot just yet. I was made for the purpose of managing a select few language-learning servers, such as the [Armenian](https://discord.me/learnarmenian), [Belarusian](https://discord.me/learnbelarusian) and [Romanian](https://discord.me/learnromanian) communities.",
       }, {
         name: "Am I open-source?",
-        value: `Unfortunately, no. However, my predecessor, Talon, ${italic("is")}. You can view his source code [here](https://github.com/vxern/talon).`,
+        value: `No, unfortunately. However, my predecessor, Talon, ${italic("is")}. You can view his source code [here](https://github.com/vxern/talon).`,
       }],
     }],
     ephemeral: true,
@@ -65,9 +65,12 @@ async function guild(interaction: Interaction): Promise<void> {
   const guild = interaction.guild!;
   const createdAt = dayjs(guild.timestamp);
 
+  const owner = (await guild.members.resolve(guild.ownerID!))!;
+  const hasDistinctOwner = owner.user.username !== guild.name!;
+
   interaction.respond({
     embeds: [{
-      title: `Information about '${guild.name!}'`,
+      title: `Information about ${guild.name!}`,
       thumbnail: { url: guild.iconURL() },
       color: configuration.responses.colors.invisible,
       fields: [{
@@ -84,30 +87,37 @@ async function guild(interaction: Interaction): Promise<void> {
         inline: true,
       }, {
         name: "🎓 Proficiency Distribution",
-        value: (await getProficiencyDistribution(guild)).toString(),
-        inline: true,
-      }, {
-        name: "👑 Owner",
-        value: mention(guild.ownerID!, MentionType.USER),
-        inline: true,
-      }],
+        value: await getProficiencyDistribution(guild),
+        inline: false,
+      },
+      hasDistinctOwner
+        ? {
+          name: "👑 Owner",
+          value: mention(guild.ownerID!, MentionType.USER),
+          inline: true,
+        } 
+        : {
+          name: "⚖️ Guides",
+          value: `This server is overseen by a collective of guides, rather than a single owner.`,
+          inline: true,
+        }
+      ],
     }],
     ephemeral: true,
   });
 }
 
 async function getProficiencyDistribution(guild: Guild): Promise<string> {
-  const members = (await guild.members.fetchList()).filter((member) => !member.user.bot);
-  console.log(members);
+  const members = (await guild.members.fetchList(1000)).filter((member) => !member.user.bot);
 
   const proficiencies = getProficiencyCategory().collection!.list!;
   const proficiencyNames = proficiencies.map((proficiency) => proficiency.name);
 
-  const distribution = new Array(proficiencyNames.length).fill(0);
+  const distribution = Array.from({ length: proficiencies.length }, () => 0);
 
   for (const member of members) {
     const roleNames = (await member.roles.array()).map((role) => role.name);
-    for (let i = 0; i < proficiencyNames.length; i++) {
+    for (let i = 0; i < proficiencies.length; i++) {
       if (roleNames.includes(proficiencyNames[i])) {
         distribution[i]++;
         continue;
@@ -129,7 +139,7 @@ function displayProficiencyDistribution(proficiencyTags: string[], memberCount: 
   proficiencyTags.unshift(`without a proficiency role.`);
 
   const proficiencyDistributionPrinted = distribution.map(
-    (count, index) => `${getPercentageComposition(count, memberCount)}% ${proficiencyTags[index]}`
+    (count, index) => `${count} (${getPercentageComposition(count, memberCount)}%) ${proficiencyTags[index]}`
   ).reverse();
 
   return proficiencyDistributionPrinted.join("\n");

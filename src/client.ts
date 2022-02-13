@@ -17,6 +17,7 @@ import {
 import modules from "./modules/modules.ts";
 import services from "./modules/services.ts";
 import { MusicController } from "./modules/music/controller.ts";
+import { loadDictionaries } from "./modules/language/module.ts";
 
 const guildName = new RegExp("^Learn ([A-Z][a-z]*)$");
 
@@ -76,6 +77,7 @@ class Client extends DiscordClient {
       this.setupGuilds(),
       this.setupCommands(),
       this.setupServices(),
+      loadDictionaries(),
     ];
 
     await Promise.all(promises);
