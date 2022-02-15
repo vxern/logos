@@ -18,7 +18,11 @@ const service: ServiceStarter = (client) => {
   const collector = new Collector({
     event: "interactionCreate",
     client: client,
-    filter: (selection: Interaction) => {
+    filter: (selection) => {
+      if (!(selection instanceof Interaction)) {
+        return false;
+      }
+      
       if (!selection.isMessageComponent()) {
         return false;
       }
