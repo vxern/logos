@@ -16,6 +16,7 @@ import {
 } from "./commands/command.ts";
 import modules from "./modules/modules.ts";
 import services from "./modules/services.ts";
+import { LoggingController } from "./modules/logging/controller.ts";
 import { MusicController } from "./modules/music/controller.ts";
 import { loadDictionaries } from "./modules/language/module.ts";
 
@@ -26,6 +27,7 @@ class Client extends DiscordClient {
   static node: Node;
 
   static readonly languages: Collection<string, string> = new Collection();
+  static readonly logging: Collection<string, LoggingController> = new Collection();
   static readonly music: Collection<string, MusicController> = new Collection();
 
   constructor() {
@@ -90,9 +92,10 @@ class Client extends DiscordClient {
 
     const guilds = await this.guilds.array();
     for (const guild of guilds) {
+
       promises.push(
+        guild.chunk({}, true),
         guild.roles.fetchAll(),
-        guild.members.fetchList(),
       );
 
       if (Client.isManagedGuild(guild)) {
@@ -139,6 +142,7 @@ class Client extends DiscordClient {
   }
 
   setupControllers(guild: Guild): void {
+    Client.logging.set(guild.id, new LoggingController(guild));
     Client.music.set(guild.id, new MusicController(guild));
   }
 
