@@ -52,7 +52,7 @@ ${bold("BEFORE")}
 ${codeMultiline(before.content)}
 ${bold("AFTER")}
 ${codeMultiline(after.content)}`,
-    filter: (origin: Guild, _, message: Message) => origin.id === message.guild!.id && !message.author.bot,
+    filter: (origin: Guild, _, message: Message) => origin.id === message.guild?.id && !message.author.bot,
     color: configuration.responses.colors.blue,
   },
   'messageDelete': {
@@ -61,7 +61,7 @@ ${codeMultiline(after.content)}`,
 
 ${bold("CONTENT")}
 ${codeMultiline(message.content)}`,
-    filter: (origin: Guild, message: Message) => origin.id === message.guild!.id && !message.author.bot,
+    filter: (origin: Guild, message: Message) => origin.id === message.guild?.id && !message.author.bot,
     color: configuration.responses.colors.red,
   },
 }
