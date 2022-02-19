@@ -72,35 +72,39 @@ async function word(interaction: Interaction): Promise<void> {
 	}
 
 	let entry: DictionaryEntry = { headword: word };
-
-	dictionaries.map((dictionary) =>
+	const responses = dictionaries.map((dictionary) =>
 		dictionary.lookup(word, language)
 			.then((result) => {
 				entry = { ...result, ...entry };
 
 				const fields = toFields(entry, { verbose: verbose });
 				const hasEntry = fields.length > 0;
-				if (fields.length === 0) {
-					console.log(
-						`${interaction.user.username} attempted to look up '${word}' in ${
-							capitalise(language)
-						}, but no results came up.`,
-					);
-				}
+
+				if (!hasEntry) return;
 
 				response.editResponse({
 					embeds: [{
 						title: entry.headword,
-						description: !hasEntry
-							? `No results found for '${entry.headword}'.`
-							: undefined,
 						fields: fields,
 						color: fromHex('#d6e3f8'),
 					}],
 				});
 			})
-			.catch((error) => console.error(error))
+			.catch(() => {})
 	);
+
+	await Promise.all(responses).catch();
+
+	const hasEntry = toFields(entry, { verbose: verbose }).length > 0;
+	if (hasEntry) return;
+
+	response.editResponse({
+		embeds: [{
+			title: 'No results found.',
+			description: `There are no results for the word '${word}'.`,
+			color: configuration.responses.colors.red,
+		}],
+	});
 }
 
 export default command;
