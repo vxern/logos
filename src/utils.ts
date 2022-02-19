@@ -1,15 +1,15 @@
 import {
-  _,
-  ApplicationCommand,
-  ApplicationCommandOption,
-  Guild,
-  GuildChannel,
-  Invite,
-} from "../deps.ts";
-import languages from "https://deno.land/x/language@v0.1.0/languages.ts";
-import { Command } from "./commands/command.ts";
-import { Option } from "./commands/option.ts";
-import configuration from "./configuration.ts";
+	_,
+	ApplicationCommand,
+	ApplicationCommandOption,
+	Guild,
+	GuildChannel,
+	Invite,
+} from '../deps.ts';
+import languages from 'https://deno.land/x/language@v0.1.0/languages.ts';
+import { Command } from './commands/command.ts';
+import { Option } from './commands/option.ts';
+import configuration from './configuration.ts';
 
 /**
  * Makes one or more properties of `T` optional.
@@ -28,40 +28,40 @@ type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
  * @returns An array of keys which differ between the objects.
  */
 function getMissingKeys(
-  left: ApplicationCommand | ApplicationCommandOption,
-  right: Command | Option,
+	left: ApplicationCommand | ApplicationCommandOption,
+	right: Command | Option,
 ): string[];
 function getMissingKeys<
-  L extends ApplicationCommand | ApplicationCommandOption,
-  R extends Partial<L>,
+	L extends ApplicationCommand | ApplicationCommandOption,
+	R extends Partial<L>,
 >(
-  left: L,
-  right: R,
+	left: L,
+	right: R,
 ): string[] {
-  const leftKeys = Object.keys(left);
-  const rightKeys = Object.keys(right);
-  const keysToIgnore = [
-    ...leftKeys.filter((leftKey) => !rightKeys.includes(leftKey)),
-    ...rightKeys.filter((rightKey) =>
-      !leftKeys.includes(rightKey) && rightKey !== "options"
-    ),
-  ];
+	const leftKeys = Object.keys(left);
+	const rightKeys = Object.keys(right);
+	const keysToIgnore = [
+		...leftKeys.filter((leftKey) => !rightKeys.includes(leftKey)),
+		...rightKeys.filter((rightKey) =>
+			!leftKeys.includes(rightKey) && rightKey !== 'options'
+		),
+	];
 
-  const unequalKeys = _.reduce(
-    right,
-    (result: string[], value: unknown, key: keyof L) => {
-      return _.isEqual(value, left[key])
-        ? result
-        : result.concat(key.toString());
-    },
-    [],
-  ) as string[];
+	const unequalKeys = _.reduce(
+		right,
+		(result: string[], value: unknown, key: keyof L) => {
+			return _.isEqual(value, left[key])
+				? result
+				: result.concat(key.toString());
+		},
+		[],
+	) as string[];
 
-  const missingKeys = unequalKeys.filter((unequalKey) =>
-    !keysToIgnore.includes(unequalKey)
-  );
+	const missingKeys = unequalKeys.filter((unequalKey) =>
+		!keysToIgnore.includes(unequalKey)
+	);
 
-  return missingKeys;
+	return missingKeys;
 }
 
 /**
@@ -72,11 +72,11 @@ function getMissingKeys<
  * @returns The channel or `undefined` if not found.
  */
 async function findChannelByName(
-  guild: Guild,
-  name: string,
+	guild: Guild,
+	name: string,
 ): Promise<GuildChannel | undefined> {
-  const channels = await guild.channels.array();
-  return channels.find((channel) => channel.name.includes(name));
+	const channels = await guild.channels.array();
+	return channels.find((channel) => channel.name.includes(name));
 }
 
 /**
@@ -86,15 +86,15 @@ async function findChannelByName(
  * @returns The invite link.
  */
 async function getInvite(guild: Guild): Promise<Invite> {
-  const invites = await guild.invites.fetchAll();
-  return invites.find((invite) =>
-    invite.inviter?.id === configuration.guilds.owner.id &&
-    invite.maxAge === 0
-  ) ??
-    await guild.invites.create(
-      (await findChannelByName(guild, "welcome"))!.id,
-      { maxAge: 0, maxUses: 0, temporary: false },
-    );
+	const invites = await guild.invites.fetchAll();
+	return invites.find((invite) =>
+		invite.inviter?.id === configuration.guilds.owner.id &&
+		invite.maxAge === 0
+	) ??
+		await guild.invites.create(
+			(await findChannelByName(guild, 'welcome'))!.id,
+			{ maxAge: 0, maxUses: 0, temporary: false },
+		);
 }
 
 /**
@@ -105,18 +105,26 @@ async function getInvite(guild: Guild): Promise<Invite> {
  * @returns The decimal form.
  */
 function fromHex(color: string): number {
-  return parseInt(color.replace("#", "0x"));
+	return parseInt(color.replace('#', '0x'));
 }
 
 /**
  * Returns the ISO-693-1 language code of a language.
- * 
+ *
  * @param language - The language whose code to return.
  * @returns ISO-693-1 language code.
  */
 function getLanguageCode(language: string): string {
-  return Object.entries(languages.lang).find(([_, [name]]) => name.toLowerCase() === language)![0];
-} 
+	return Object.entries(languages.lang).find(([_, [name]]) =>
+		name.toLowerCase() === language
+	)![0];
+}
 
-export { findChannelByName, fromHex, getInvite, getMissingKeys, getLanguageCode };
+export {
+	findChannelByName,
+	fromHex,
+	getInvite,
+	getLanguageCode,
+	getMissingKeys,
+};
 export type { Optional };

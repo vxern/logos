@@ -1,11 +1,11 @@
-import { Guild } from "../../deps.ts";
+import { Guild } from '../../deps.ts';
 
 abstract class Controller {
-  readonly guild: Guild;
+	readonly guild: Guild;
 
-  constructor(guild: Guild) {
-    this.guild = guild;
-  }
+	constructor(guild: Guild) {
+		this.guild = guild;
+	}
 }
 
 export { Controller };

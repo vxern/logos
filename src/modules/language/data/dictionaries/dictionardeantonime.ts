@@ -1,24 +1,31 @@
-import { cheerio } from "../../../../../deps.ts";
-import { Dictionary, PartialDictionaryEntry, DictionaryScope, DictionaryType, SearchQuery } from '../dictionary.ts';
+import { cheerio } from '../../../../../deps.ts';
+import {
+	Dictionary,
+	DictionaryScope,
+	DictionaryType,
+	PartialDictionaryEntry,
+	SearchQuery,
+} from '../dictionary.ts';
 
 class DictionarDeAntonime extends Dictionary {
-  scope = DictionaryScope.MONOLINGUAL;
-  types = [DictionaryType.DEFINING, DictionaryType.SYNONYM];
-  languages = ['romanian'];
+	scope = DictionaryScope.MONOLINGUAL;
+	types = [DictionaryType.DEFINING, DictionaryType.SYNONYM];
+	languages = ['romanian'];
 
-  query = (query: SearchQuery) => `https://www.dictionardeantonime.ro/?c=${query.word}`;
+	query = (query: SearchQuery) =>
+		`https://www.dictionardeantonime.ro/?c=${query.word}`;
 
-  async lookup(word: string): Promise<PartialDictionaryEntry> {
-    const response = await fetch(this.query({ word }));
-    const content = await response.text();
-    const $ = cheerio.load(content);
+	async lookup(word: string): Promise<PartialDictionaryEntry> {
+		const response = await fetch(this.query({ word }));
+		const content = await response.text();
+		const $ = cheerio.load(content);
 
-    const definition = $('#content > div.content_page_simple > span').text();
+		const definition = $('#content > div.content_page_simple > span').text();
 
-    return {
-      antonyms: [definition]
-    };
-  }
+		return {
+			antonyms: [definition],
+		};
+	}
 }
 
 export { DictionarDeAntonime };

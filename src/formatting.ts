@@ -5,7 +5,7 @@
  * @returns The formatted string of text.
  */
 function bold(target: string): string {
-  return `**${target}**`;
+	return `**${target}**`;
 }
 
 /**
@@ -15,7 +15,7 @@ function bold(target: string): string {
  * @returns The formatted string of text.
  */
 function capitalise(target: string): string {
-  return target[0].toUpperCase() + target.slice(1);
+	return target[0].toUpperCase() + target.slice(1);
 }
 
 /**
@@ -25,7 +25,7 @@ function capitalise(target: string): string {
  * @returns The formatted string of text.
  */
 function code(target: string): string {
-  return "`" + target + "`";
+	return '`' + target + '`';
 }
 
 /**
@@ -35,7 +35,7 @@ function code(target: string): string {
  * @param target - String of text to format.
  */
 function codeMultiline(target: string): string {
-  return "```" + target + "```";
+	return '```' + target + '```';
 }
 
 /**
@@ -45,7 +45,7 @@ function codeMultiline(target: string): string {
  * @returns The formatted string of text.
  */
 function italic(target: string): string {
-  return `*${target}*`;
+	return `*${target}*`;
 }
 
 /**
@@ -55,7 +55,7 @@ function italic(target: string): string {
  * @returns The formatted string of text.
  */
 function underlined(target: string): string {
-  return `__${target}__`;
+	return `__${target}__`;
 }
 
 /**
@@ -65,17 +65,17 @@ function underlined(target: string): string {
  * @returns The formatted string of text.
  */
 function list(items: string[]): string {
-  return items.map((item) => `• ${item}`).join("\n");
+	return items.map((item) => `• ${item}`).join('\n');
 }
 
 /** Defines the type of Discord mention. */
 enum MentionType {
-  /** A channel mention. */
-  CHANNEL,
-  /** A role mention. */
-  ROLE,
-  /** A user mention. */
-  USER,
+	/** A channel mention. */
+	CHANNEL,
+	/** A role mention. */
+	ROLE,
+	/** A user mention. */
+	USER,
 }
 
 /**
@@ -86,29 +86,29 @@ enum MentionType {
  * @returns The formatted string of text.
  */
 function mention(target: string, type: MentionType): string {
-  let prefix: string;
-  switch (type) {
-    case MentionType.CHANNEL:
-      prefix = "#";
-      break;
-    case MentionType.ROLE:
-      prefix = "@&";
-      break;
-    case MentionType.USER:
-      prefix = "@";
-      break;
-  }
-  return `<${prefix}${target}>`;
+	let prefix: string;
+	switch (type) {
+		case MentionType.CHANNEL:
+			prefix = '#';
+			break;
+		case MentionType.ROLE:
+			prefix = '@&';
+			break;
+		case MentionType.USER:
+			prefix = '@';
+			break;
+	}
+	return `<${prefix}${target}>`;
 }
 
 export {
-  bold,
-  capitalise,
-  code,
-  codeMultiline,
-  italic,
-  list,
-  mention,
-  MentionType,
-  underlined,
+	bold,
+	capitalise,
+	code,
+	codeMultiline,
+	italic,
+	list,
+	mention,
+	MentionType,
+	underlined,
 };

@@ -1,90 +1,90 @@
 import {
-  ButtonStyle,
-  Collector,
-  Interaction,
-  InteractionMessageComponentData,
-  InteractionResponseType,
-  MessageComponentType,
-} from "../../../../deps.ts";
-import { Client } from "../../../client.ts";
-import { capitalise } from "../../../formatting.ts";
-import { getProficiencyCategory } from "../../../modules/roles/module.ts";
-import { tryAssignRole } from "../../../modules/roles/data/structures/role.ts";
-import { ServiceStarter } from "../../services.ts";
+	ButtonStyle,
+	Collector,
+	Interaction,
+	InteractionMessageComponentData,
+	InteractionResponseType,
+	MessageComponentType,
+} from '../../../../deps.ts';
+import { Client } from '../../../client.ts';
+import { capitalise } from '../../../formatting.ts';
+import { getProficiencyCategory } from '../../../modules/roles/module.ts';
+import { tryAssignRole } from '../../../modules/roles/data/structures/role.ts';
+import { ServiceStarter } from '../../services.ts';
 
-const steps = ["ACCEPTED_RULES", "LANGUAGE_PROFICIENCY"];
+const steps = ['ACCEPTED_RULES', 'LANGUAGE_PROFICIENCY'];
 
 const service: ServiceStarter = (client) => {
-  const collector = new Collector({
-    event: "interactionCreate",
-    client: client,
-    filter: (selection) => {
-      if (!(selection instanceof Interaction)) {
-        return false;
-      }
-      
-      if (!selection.isMessageComponent()) {
-        return false;
-      }
-      const customID = selection.data.custom_id;
-      if (!steps.some((step) => customID.startsWith(step))) {
-        return false;
-      }
-      return true;
-    },
-    deinitOnEnd: true,
-  });
+	const collector = new Collector({
+		event: 'interactionCreate',
+		client: client,
+		filter: (selection) => {
+			if (!(selection instanceof Interaction)) {
+				return false;
+			}
 
-  const proficiencyCategory = getProficiencyCategory();
-  const proficiencies = proficiencyCategory.collection!.list!;
+			if (!selection.isMessageComponent()) {
+				return false;
+			}
+			const customID = selection.data.custom_id;
+			if (!steps.some((step) => customID.startsWith(step))) {
+				return false;
+			}
+			return true;
+		},
+		deinitOnEnd: true,
+	});
 
-  const proficiencyButtons = proficiencies.map((proficiency, index) => {
-    return {
-      type: MessageComponentType.BUTTON,
-      style: ButtonStyle.GREY,
-      label: proficiency.name,
-      emoji: { name: proficiency.emoji },
-      customID: `LANGUAGE_PROFICIENCY|${index}`,
-    };
-  });
+	const proficiencyCategory = getProficiencyCategory();
+	const proficiencies = proficiencyCategory.collection!.list!;
 
-  collector.on("collect", (interaction: Interaction) => {
-    const data = interaction.data! as InteractionMessageComponentData;
-    const [step, index] = data.custom_id.split("|");
+	const proficiencyButtons = proficiencies.map((proficiency, index) => {
+		return {
+			type: MessageComponentType.BUTTON,
+			style: ButtonStyle.GREY,
+			label: proficiency.name,
+			emoji: { name: proficiency.emoji },
+			customID: `LANGUAGE_PROFICIENCY|${index}`,
+		};
+	});
 
-    const language = Client.getLanguage(interaction.guild!)!;
+	collector.on('collect', (interaction: Interaction) => {
+		const data = interaction.data! as InteractionMessageComponentData;
+		const [step, index] = data.custom_id.split('|');
 
-    switch (step) {
-      case "ACCEPTED_RULES": {
-        interaction.respond({
-          embeds: [{
-            title: "Language Proficiency",
-            description: `Select the role which best describes your ${
-              capitalise(language)
-            } language proficiency.`,
-          }],
-          components: [{
-            type: MessageComponentType.ACTION_ROW,
-            components: proficiencyButtons,
-          }],
-          ephemeral: true,
-        });
-        break;
-      }
-      case "LANGUAGE_PROFICIENCY": {
-        const proficiency = proficiencies[parseInt(index)];
-        tryAssignRole(interaction, language, proficiencyCategory, proficiency);
-        interaction.respond({
-          type: InteractionResponseType.DEFERRED_MESSAGE_UPDATE,
-        });
-        break;
-      }
-    }
+		const language = Client.getLanguage(interaction.guild!)!;
 
-    return;
-  });
+		switch (step) {
+			case 'ACCEPTED_RULES': {
+				interaction.respond({
+					embeds: [{
+						title: 'Language Proficiency',
+						description: `Select the role which best describes your ${
+							capitalise(language)
+						} language proficiency.`,
+					}],
+					components: [{
+						type: MessageComponentType.ACTION_ROW,
+						components: proficiencyButtons,
+					}],
+					ephemeral: true,
+				});
+				break;
+			}
+			case 'LANGUAGE_PROFICIENCY': {
+				const proficiency = proficiencies[parseInt(index)];
+				tryAssignRole(interaction, language, proficiencyCategory, proficiency);
+				interaction.respond({
+					type: InteractionResponseType.DEFERRED_MESSAGE_UPDATE,
+				});
+				break;
+			}
+		}
 
-  collector.collect();
+		return;
+	});
+
+	collector.collect();
 };
 
 export default service;

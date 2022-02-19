@@ -1,5 +1,5 @@
-import { Client } from "../client.ts";
-import entry from "./secret/services/entry.ts";
+import { Client } from '../client.ts';
+import entry from './secret/services/entry.ts';
 
 const services: ServiceStarter[] = [entry];
 
