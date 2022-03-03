@@ -31,7 +31,7 @@ const command: Command = {
 					colors.yellow(
 						`Analysing structural differences between template guild and ${
 							colors.bold(target.name!)
-						} as per ${bold(interaction.user.username)}'s request...'`,
+						} as per ${colors.bold(interaction.user.username)}'s request...'`,
 					),
 				);
 				const comparison = await analyseStructuralDifferences({
