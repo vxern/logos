@@ -11,7 +11,7 @@ import configuration from '../../../configuration.ts';
 import { capitalise } from '../../../formatting.ts';
 import { fromHex } from '../../../utils.ts';
 import { DictionaryEntry, toFields } from '../data/dictionary.ts';
-import { languages } from '../module.ts';
+import { dictionaryLists } from '../module.ts';
 
 const command: Command = {
 	name: 'word',
@@ -44,16 +44,16 @@ async function word(interaction: Interaction): Promise<void> {
 	const show = data.options.find((option) => option.name === 'show')?.value ??
 		false;
 
-	const language = Client.getLanguage(interaction.guild!) || 'english';
-	const dictionaries = Object.values(languages[language] ?? {});
-	const hasDictionary = dictionaries.length > 0;
+	const language = Client.getLanguage(interaction.guild!);
+	const dictionaries = Object.values(dictionaryLists[language] ?? {});
+	const hasDictionaries = dictionaries.length > 0;
 
 	const response = await interaction.respond({
 		type: InteractionResponseType.DEFERRED_CHANNEL_MESSAGE,
-		ephemeral: !hasDictionary || !show,
+		ephemeral: !hasDictionaries || !show,
 	});
 
-	if (dictionaries.length === 0) {
+	if (!hasDictionaries) {
 		console.log(
 			`${interaction.user.username} attempted to look up '${word}' in ${
 				capitalise(language)
