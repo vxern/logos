@@ -59,9 +59,6 @@ const information: Information = {
 		image: 'https://i.imgur.com/snJaKYm.png',
 		color: fromHex('#637373'),
 		generateEmbed: async (guild: Guild) => {
-			const language = Client.getLanguage(guild);
-			if (!language) return;
-
 			const invite = await getInvite(guild);
 			return {
 				title: 'INVITE LINK',

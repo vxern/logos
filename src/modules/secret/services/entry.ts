@@ -7,7 +7,7 @@ import {
 	MessageComponentType,
 } from '../../../../deps.ts';
 import { Client } from '../../../client.ts';
-import { capitalise } from '../../../formatting.ts';
+import { capitalise, code } from '../../../formatting.ts';
 import { getProficiencyCategory } from '../../../modules/roles/module.ts';
 import { tryAssignRole } from '../../../modules/roles/data/structures/role.ts';
 import { ServiceStarter } from '../../services.ts';
@@ -52,7 +52,7 @@ const service: ServiceStarter = (client) => {
 		const data = interaction.data! as InteractionMessageComponentData;
 		const [step, index] = data.custom_id.split('|');
 
-		const language = Client.getLanguage(interaction.guild!)!;
+		const language = Client.getLanguage(interaction.guild!);
 
 		switch (step) {
 			case 'ACCEPTED_RULES': {
@@ -61,7 +61,7 @@ const service: ServiceStarter = (client) => {
 						title: 'Language Proficiency',
 						description: `Select the role which best describes your ${
 							capitalise(language)
-						} language proficiency.`,
+						} language proficiency.\n\nYou may always change it later using the ${code('/profile roles')} command.`,
 					}],
 					components: [{
 						type: MessageComponentType.ACTION_ROW,

@@ -83,13 +83,13 @@ async function* browse(
 			if (!selection.isMessageComponent()) {
 				return false;
 			}
-			if (selection.user.id !== data.interaction.user.id) return false;
-			if (
-				selection.message.interaction?.id !==
-					data.interaction.id
-			) {
-				return false;
-			}
+      if (selection.user.id !== data.interaction.user.id) return false;
+      if (
+        selection.message.interaction?.id !==
+          data.interaction.id
+      ) {
+        return false;
+      }
 			return true;
 		},
 		deinitOnEnd: true,
@@ -138,7 +138,7 @@ async function* browse(
 
 			data.navigation.indexes.push(index);
 		} catch (error) {
-			console.log(error);
+			console.error(error);
 			break;
 		}
 	}

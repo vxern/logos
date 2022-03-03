@@ -18,7 +18,7 @@ import modules from './modules/modules.ts';
 import services from './modules/services.ts';
 import { LoggingController } from './modules/logging/controller.ts';
 import { MusicController } from './modules/music/controller.ts';
-import { loadDictionaries } from './modules/language/module.ts';
+import { loadLanguages } from './modules/language/module.ts';
 
 const guildName = new RegExp('^Learn ([A-Z][a-z]*)$');
 
@@ -80,7 +80,7 @@ class Client extends DiscordClient {
 			this.setupGuilds(),
 			this.setupCommands(),
 			this.setupServices(),
-			loadDictionaries(),
+			loadLanguages(),
 		];
 
 		await Promise.all(promises);
@@ -211,7 +211,7 @@ class Client extends DiscordClient {
 	 * @returns The guild's language.
 	 */
 	static getLanguage(guild: Guild) {
-		return Client.languages.get(guild.id);
+		return Client.languages.get(guild.id) ?? 'english';
 	}
 }
 
