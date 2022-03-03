@@ -47,10 +47,10 @@ async function learn(interaction: Interaction): Promise<void> {
 		event: 'interactionCreate',
 		client: interaction.client,
 		filter: (selection) => {
-			if (!selection.data.custom_id.startsWith('LANGUAGE_GAME')) {
+			if (!(selection instanceof Interaction)) {
 				return false;
 			}
-			if (!(selection instanceof Interaction)) {
+			if (!(selection.data as InteractionMessageComponentData)?.custom_id?.startsWith('LANGUAGE_GAME')) {
 				return false;
 			}
 			if (!selection.isMessageComponent()) {
