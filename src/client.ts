@@ -185,11 +185,7 @@ class Client extends DiscordClient {
 	 * @return The result of the check.
 	 */
 	static isManagedGuild(guild: Guild): boolean {
-		const equalities = [
-			guildName.test(guild.name!),
-			// guild.ownerID === configuration.guilds.owner.id,
-		];
-		return equalities.every((x) => x);
+		return guildName.test(guild.name!);
 	}
 
 	/**
