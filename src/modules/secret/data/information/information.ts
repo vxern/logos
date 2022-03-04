@@ -1,5 +1,4 @@
 import { EmbedPayload, Guild } from '../../../../../deps.ts';
-import { Client } from '../../../../client.ts';
 import { bold, mention, MentionType } from '../../../../formatting.ts';
 import { findChannelByName, fromHex, getInvite } from '../../../../utils.ts';
 import rules from './rules.ts';

@@ -1,14 +1,14 @@
-import { parse } from "https://deno.land/std@0.127.0/encoding/csv.ts";
+import { parse } from 'https://deno.land/std@0.127.0/encoding/csv.ts';
 import { Command } from '../../commands/command.ts';
 import { Dictionary, DictionaryScope } from './data/dictionary.ts';
-import learn from "./commands/learn.ts";
+import learn from './commands/learn.ts';
 import resources from './commands/resources.ts';
 import word from './commands/word.ts';
 import { Client } from '../../client.ts';
-import { SentencePair } from "./data/sentence.ts";
+import { SentencePair } from './data/sentence.ts';
 
 const commands: Record<string, Command> = {
-  learn,
+	learn,
 	resources,
 	word,
 };
@@ -43,23 +43,30 @@ async function loadLanguages(): Promise<void> {
 		}
 	}
 
-  for await (const entry of Deno.readDir('./src/modules/language/data/languages')) {
-    const language = entry.name.split('.')[0];
-    
-    const records: string[][] = await parse(
-      await Deno.readTextFile(`./src/modules/language/data/languages/${entry.name}`), 
-      {
-        lazyQuotes: true,
-        separator: '\t',
-      }
-    );
+	for await (
+		const entry of Deno.readDir('./src/modules/language/data/languages')
+	) {
+		const language = entry.name.split('.')[0];
 
-    sentenceLists[language] = [];
-    for (const record of records) {
-      sentenceLists[language].push({sentence: record[1], translation: record[3]});
-    }
-  }
+		const records: string[][] = await parse(
+			await Deno.readTextFile(
+				`./src/modules/language/data/languages/${entry.name}`,
+			),
+			{
+				lazyQuotes: true,
+				separator: '\t',
+			},
+		);
+
+		sentenceLists[language] = [];
+		for (const record of records) {
+			sentenceLists[language].push({
+				sentence: record[1],
+				translation: record[3],
+			});
+		}
+	}
 }
 
-export { dictionaryLists, sentenceLists, loadLanguages };
+export { dictionaryLists, loadLanguages, sentenceLists };
 export default commands;

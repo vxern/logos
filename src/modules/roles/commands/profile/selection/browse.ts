@@ -83,13 +83,13 @@ async function* browse(
 			if (!selection.isMessageComponent()) {
 				return false;
 			}
-      if (selection.user.id !== data.interaction.user.id) return false;
-      if (
-        selection.message.interaction?.id !==
-          data.interaction.id
-      ) {
-        return false;
-      }
+			if (selection.user.id !== data.interaction.user.id) return false;
+			if (
+				selection.message.interaction?.id !==
+					data.interaction.id
+			) {
+				return false;
+			}
 			return true;
 		},
 		deinitOnEnd: true,

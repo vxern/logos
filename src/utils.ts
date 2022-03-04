@@ -122,20 +122,20 @@ function getLanguageCode(language: string): string {
 
 /**
  * Generates a pseudo-random number.
- * 
+ *
  * @param max - The maximum value to generate.
  * @returns A pseudo-random number between 0 and {@link max}.
  */
 function random(max: number): number {
-  return Math.floor(Math.random() * max);
+	return Math.floor(Math.random() * max);
 }
 
 export {
 	findChannelByName,
 	fromHex,
 	getInvite,
-	getMissingKeys,
 	getLanguageCode,
-  random,
+	getMissingKeys,
+	random,
 };
 export type { Optional };

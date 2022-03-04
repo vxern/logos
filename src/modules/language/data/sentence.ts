@@ -1,9 +1,9 @@
 /** Represents a pair of a sentence and its translation. */
 interface SentencePair {
-  /** The source sentence. */
-  sentence: string;
-  /** The translation of the sentence. */
-  translation: string;
+	/** The source sentence. */
+	sentence: string;
+	/** The translation of the sentence. */
+	translation: string;
 }
 
 /**
@@ -11,12 +11,12 @@ interface SentencePair {
  * picking the correct word to fit into the blank space.
  */
 interface SentenceSelection {
-  /** The selected sentence pair. */
-  pair: SentencePair;
-  /** The word which fits into the blank in the word. */
-  word: string;
-  /** Words to choose from to fit into the blank. */
-  choices: string[];
+	/** The selected sentence pair. */
+	pair: SentencePair;
+	/** The word which fits into the blank in the word. */
+	word: string;
+	/** Words to choose from to fit into the blank. */
+	choices: string[];
 }
 
 export type { SentencePair, SentenceSelection };

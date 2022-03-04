@@ -61,7 +61,9 @@ const service: ServiceStarter = (client) => {
 						title: 'Language Proficiency',
 						description: `Select the role which best describes your ${
 							capitalise(language)
-						} language proficiency.\n\nYou may always change it later using the ${code('/profile roles')} command.`,
+						} language proficiency.\n\nYou may always change it later using the ${
+							code('/profile roles')
+						} command.`,
 					}],
 					components: [{
 						type: MessageComponentType.ACTION_ROW,
