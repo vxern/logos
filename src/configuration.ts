@@ -1,7 +1,10 @@
 import { fromHex } from './utils.ts';
 
 export default {
-  guilds: {
+	guilds: {
+    moderation: {
+      role: 'Guide',
+    },
 		owner: {
 			id: '217319536485990400',
 		},
