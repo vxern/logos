@@ -1,4 +1,4 @@
-import { franc } from 'https://cdn.skypack.dev/franc@6.0.0';
+import isEnglish from 'https://cdn.skypack.dev/is-english@1.3.0';
 import {
 	Interaction,
 	InteractionApplicationCommandData,
@@ -77,7 +77,7 @@ async function translate(interaction: Interaction): Promise<void> {
 			embeds: [{
 				title: 'Unsupported language.',
 				description:
-					`The ${language} language does not have support for translation yet.`,
+					`The ${capitalise(language)} language does not have support for translation yet.`,
 				color: configuration.responses.colors.red,
 			}],
 		});
@@ -85,7 +85,7 @@ async function translate(interaction: Interaction): Promise<void> {
 	}
 
 	const languageCode = getLanguageCode(language);
-	const targetCode = franc(text) === 'eng' ? languageCode : 'en';
+	const targetCode = isEnglish(text) ? languageCode : 'en';
 
 	const translationRequest = await fetch(
 		addParametersToURL('https://api-free.deepl.com/v2/translate', {
