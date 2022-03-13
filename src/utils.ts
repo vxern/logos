@@ -109,6 +109,16 @@ function fromHex(color: string): number {
 }
 
 /**
+ * Returns a language from its ISO-693-1 language code.
+ * 
+ * @param languageCode - The ISO-693-1 language code of a language.
+ * @returns The language.
+ */
+function getLanguage(languageCode: string): string {
+	return Object.entries(languages.lang).find(([key, _]) => key === languageCode)![1][0];
+}
+
+/**
  * Returns the ISO-693-1 language code of a language.
  *
  * @param language - The language whose code to return.
@@ -130,10 +140,31 @@ function random(max: number): number {
 	return Math.floor(Math.random() * max);
 }
 
+/**
+ * Taking a URL and a list of parameters, returns the URL with the parameters appended
+ * to it.
+ *
+ * @param url - The URL to format.
+ * @param parameters - The parameters to append to the URL.
+ * @returns The formatted URL.
+ */
+function addParametersToURL(
+	url: string,
+	parameters: Record<string, string>,
+): string {
+	const query = Object.entries(parameters)
+		.map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+		.join('&');
+
+	return `${url}?${query}`;
+}
+
 export {
+	addParametersToURL,
 	findChannelByName,
 	fromHex,
 	getInvite,
+  getLanguage,
 	getLanguageCode,
 	getMissingKeys,
 	random,
