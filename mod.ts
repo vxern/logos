@@ -11,6 +11,7 @@ const required = [
 	'LAVALINK_HOST',
 	'LAVALINK_PORT',
 	'LAVALINK_PASSWORD',
+	'DEEPL_SECRET',
 ];
 const supplied = Object.fromEntries(
 	required.map((env) => [env, Deno.env.get(env)]),

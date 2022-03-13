@@ -1,11 +1,5 @@
 import { ClientEvents, Guild, Member, Message, User } from '../../../deps.ts';
-import {
-	bold,
-	code,
-	codeMultiline,
-	mention,
-	MentionType,
-} from '../../formatting.ts';
+import { bold, code, codeMultiline } from '../../formatting.ts';
 import configuration from '../../configuration.ts';
 
 interface LogEntry<T extends keyof ClientEvents> {
