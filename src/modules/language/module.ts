@@ -6,10 +6,12 @@ import resources from './commands/resources.ts';
 import word from './commands/word.ts';
 import { Client } from '../../client.ts';
 import { SentencePair } from './data/sentence.ts';
+import translate from './commands/translate.ts';
 
 const commands: Record<string, Command> = {
 	learn,
 	resources,
+	translate,
 	word,
 };
 
