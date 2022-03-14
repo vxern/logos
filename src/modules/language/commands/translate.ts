@@ -1,4 +1,3 @@
-import isEnglish from 'https://cdn.skypack.dev/is-english@1.3.0';
 import {
 	Interaction,
 	InteractionApplicationCommandData,
@@ -84,8 +83,19 @@ async function translate(interaction: Interaction): Promise<void> {
 		return;
 	}
 
-	const languageCode = getLanguageCode(language);
-	const targetCode = isEnglish(text) ? languageCode : 'en';
+  const detectionRequest = await fetch(
+    addParametersToURL('https://language-detection10.p.rapidapi.com/detect_language', {'text': text}),
+    {
+      method: 'GET',
+      headers: {
+        'x-rapidapi-host': 'language-detection10.p.rapidapi.com',
+        'x-rapidapi-key': Deno.env.get('LANGUAGE_DETECTION_SECRET')!,
+      },
+    }
+  );
+  const detectionJson = await detectionRequest.json();
+  const sourceCode = detectionJson.language!;
+  const targetCode = sourceCode === 'en' ? getLanguageCode(language) : 'en';
 
 	const translationRequest = await fetch(
 		addParametersToURL('https://api-free.deepl.com/v2/translate', {
@@ -96,7 +106,6 @@ async function translate(interaction: Interaction): Promise<void> {
 	);
 	const translationJson = await translationRequest.json();
 	const translation = translationJson.translations[0] as TranslationResponse;
-  const sourceCode = translation.detected_source_language.toLowerCase();
 
   const source = getLanguage(sourceCode);
   const target = getLanguage(targetCode);
