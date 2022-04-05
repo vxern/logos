@@ -8,11 +8,12 @@ import { Availability } from '../../../commands/availability.ts';
 import { Command } from '../../../commands/command.ts';
 import { OptionType } from '../../../commands/option.ts';
 import configuration from '../../../configuration.ts';
-import { addParametersToURL, getLanguage } from '../../../utils.ts';
+import { addParametersToURL } from '../../../utils.ts';
 
 interface SupportedLanguage {
 	language: string;
 	name: string;
+	// deno-lint-ignore camelcase
 	supports_formality: boolean;
 }
 
@@ -22,12 +23,18 @@ const supportedLanguagesRequest = await fetch(
 		'type': 'target',
 	}),
 );
-const supportedLanguages =
-	(await supportedLanguagesRequest.json()) as SupportedLanguage[];
+const supportedLanguagesJson = await supportedLanguagesRequest.json();
+const supportedLanguages = (supportedLanguagesJson as SupportedLanguage[])
+	.filter((supportedLanguage, index, array) =>
+		index ===
+			array.findIndex((language) =>
+				language.language.startsWith(supportedLanguage.language.split('-')[0]!)
+			)
+	);
 const supportedLanguagesChoices = supportedLanguages.map(
 	(supportedLanguage) => {
 		return {
-			name: supportedLanguage.name,
+			name: supportedLanguage.name.split('(')[0]!,
 			value: supportedLanguage.language,
 		};
 	},
@@ -65,15 +72,16 @@ const command: Command = {
 };
 
 interface TranslationResponse {
+	// deno-lint-ignore camelcase
 	detected_source_language: string;
 	text: string;
 }
 
 async function translate(interaction: Interaction): Promise<void> {
 	const data = interaction.data! as InteractionApplicationCommandData;
-	const sourceCode = data.options[0].value! as string;
-	const targetCode = data.options[1].value! as string;
-	const text = data.options[2].value! as string;
+	const sourceCode = data.options[0]!.value! as string;
+	const targetCode = data.options[1]!.value! as string;
+	const text = data.options[2]!.value! as string;
 	const show = data.options.find((option) => option.name === 'show')?.value ??
 		false;
 
