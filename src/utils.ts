@@ -110,12 +110,14 @@ function fromHex(color: string): number {
 
 /**
  * Returns a language from its ISO-693-1 language code.
- * 
+ *
  * @param languageCode - The ISO-693-1 language code of a language.
  * @returns The language.
  */
 function getLanguage(languageCode: string): string {
-	return Object.entries(languages.lang).find(([key, _]) => key === languageCode)![1][0];
+	return Object.entries(languages.lang).find(([key, _]) =>
+		key === languageCode
+	)![1][0];
 }
 
 /**
@@ -159,14 +161,25 @@ function addParametersToURL(
 	return `${url}?${query}`;
 }
 
+async function time(
+	message: (ms: number) => string,
+	execution: () => unknown | Promise<unknown>,
+): Promise<void> {
+	const then = Date.now();
+	await execution();
+	const now = Date.now();
+	console.log(message(now - then));
+}
+
 export {
 	addParametersToURL,
 	findChannelByName,
 	fromHex,
 	getInvite,
-  getLanguage,
+	getLanguage,
 	getLanguageCode,
 	getMissingKeys,
 	random,
+	time,
 };
 export type { Optional };
