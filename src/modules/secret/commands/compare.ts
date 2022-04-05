@@ -4,6 +4,7 @@ import {
 	Guild,
 	InteractionResponseType,
 } from '../../../../deps.ts';
+import secrets from '../../../../secrets.ts';
 import { Availability } from '../../../commands/availability.ts';
 import { Command } from '../../../commands/command.ts';
 import { OptionType } from '../../../commands/option.ts';
@@ -23,7 +24,7 @@ const command: Command = {
 			type: OptionType.SUB_COMMAND,
 			handle: async (interaction) => {
 				const source = (await interaction.client.guilds.get(
-					Deno.env.get('TEMPLATE_GUILD_ID')!,
+					secrets.modules.secret.template.guild.id,
 				))!;
 				const target = interaction.guild!;
 

@@ -1,6 +1,7 @@
 # General ignores
 /.vscode
 .env
+secrets.ts
 
 # Application-specific ignores
 /src/modules/music/lavalink/application.yml

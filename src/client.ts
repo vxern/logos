@@ -2,12 +2,11 @@ import {
 	ApplicationCommandInteraction,
 	ApplicationCommandType,
 	Client as DiscordClient,
-	Collection,
 	event,
 	Guild,
 	Intents,
+	lavadeno,
 } from '../deps.ts';
-import { Node } from 'https://deno.land/x/lavadeno@3.2.2/mod.ts';
 import {
 	Command,
 	createApplicationCommand,
@@ -19,21 +18,22 @@ import services from './modules/services.ts';
 import { LoggingController } from './modules/logging/controller.ts';
 import { MusicController } from './modules/music/controller.ts';
 import { loadLanguages } from './modules/language/module.ts';
+import { time } from './utils.ts';
+import secrets from '../secrets.ts';
 
 const guildName = new RegExp('^Learn ([A-Z][a-z]*)$');
 
 /** The core of the application, used for interacting with the Discord API. */
 class Client extends DiscordClient {
-	static node: Node;
+	static node: lavadeno.Node;
 
-	static readonly languages: Collection<string, string> = new Collection();
-	static readonly logging: Collection<string, LoggingController> =
-		new Collection();
-	static readonly music: Collection<string, MusicController> = new Collection();
+	static readonly languages: Map<string, string> = new Map();
+	static readonly logging: Map<string, LoggingController> = new Map();
+	static readonly music: Map<string, MusicController> = new Map();
 
 	constructor() {
 		super({
-			token: Deno.env.get('DISCORD_SECRET')!,
+			token: secrets.core.discord.secret,
 			intents: Intents.GuildMembers,
 			forceNewSession: false,
 			presence: {
@@ -64,28 +64,26 @@ class Client extends DiscordClient {
 	 * This function should __not__ be called externally.
 	 */
 	@event()
-	protected async ready() {
-		const then = Date.now();
-		Client.node = new Node({
-			connection: {
-				host: Deno.env.get('LAVALINK_HOST')!,
-				port: Number(Deno.env.get('LAVALINK_PORT')!),
-				password: Deno.env.get('LAVALINK_PASSWORD')!,
+	protected ready(): void {
+		time(
+			(ms) => `Setup took ${ms}ms`,
+			async () => {
+				Client.node = new lavadeno.Node({
+					connection: secrets.modules.music.lavalink,
+					sendGatewayPayload: (_, payload) => this.gateway.send(payload),
+				});
+				await Client.node.connect(BigInt(this.user!.id));
+
+				const promises = [
+					this.setupGuilds(),
+					this.setupCommands(),
+					this.setupServices(),
+					loadLanguages(),
+				];
+
+				await Promise.all(promises);
 			},
-			sendGatewayPayload: (_, payload) => this.gateway.send(payload),
-		});
-		await Client.node.connect(BigInt(this.user!.id));
-
-		const promises = [
-			this.setupGuilds(),
-			this.setupCommands(),
-			this.setupServices(),
-			loadLanguages(),
-		];
-
-		await Promise.all(promises);
-		const now = Date.now();
-		console.log(`Setup took ${now - then}ms`);
+		);
 	}
 
 	async setupGuilds(): Promise<unknown> {
@@ -122,6 +120,7 @@ class Client extends DiscordClient {
 			command.handle = unifyHandlers(command);
 			this.manageCommand(command);
 		}
+    this.interactions.autocomplete('*', '*', (interaction) => {console.log(interaction)});
 
 		const promises = [];
 
