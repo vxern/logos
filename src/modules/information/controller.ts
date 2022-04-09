@@ -1,9 +1,4 @@
-import {
-	ClientEvents,
-	Collector,
-	Guild,
-	GuildTextChannel,
-} from '../../../deps.ts';
+import { Collector, Guild, GuildTextChannel } from '../../../deps.ts';
 import { Controller } from '../controller.ts';
 import generators from './generators.ts';
 
