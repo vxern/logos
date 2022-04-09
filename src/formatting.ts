@@ -15,7 +15,9 @@ function bold(target: string): string {
  * @returns The formatted string of text.
  */
 function capitalise(target: string): string {
-	return target[0].toUpperCase() + target.slice(1);
+	if (target.length === 0) return target;
+
+	return target[0]!.toUpperCase() + target.slice(1);
 }
 
 /**
