@@ -2,11 +2,11 @@ import { fromHex } from './utils.ts';
 
 export default {
 	guilds: {
-		moderation: {
+		moderator: {
 			role: 'Guide',
 		},
-		owner: {
-			id: '217319536485990400',
+		entry: {
+			minimumRequiredAge: 60 * 60 * 24 * 1000, // Two days
 		},
 	},
 	responses: {
