@@ -15,7 +15,7 @@ import {
 } from './commands/command.ts';
 import modules from './modules/modules.ts';
 import services from './modules/services.ts';
-import { LoggingController } from './modules/logging/controller.ts';
+import { LoggingController } from './modules/information/controller.ts';
 import { MusicController } from './modules/music/controller.ts';
 import { loadLanguages } from './modules/language/module.ts';
 import { time } from './utils.ts';
@@ -120,7 +120,9 @@ class Client extends DiscordClient {
 			command.handle = unifyHandlers(command);
 			this.manageCommand(command);
 		}
-    this.interactions.autocomplete('*', '*', (interaction) => {console.log(interaction)});
+		this.interactions.autocomplete('*', '*', (interaction) => {
+			console.log(interaction);
+		});
 
 		const promises = [];
 
