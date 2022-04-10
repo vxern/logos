@@ -33,7 +33,7 @@ const information: Information = {
 
 			const guildRoles = await guild.roles.array();
 			const moderatorRole = guildRoles.find((role) =>
-				role.name === configuration.guilds.moderation.role
+				role.name === configuration.guilds.moderator.role
 			)!;
 
 			fields.push({

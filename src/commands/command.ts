@@ -14,7 +14,6 @@ import {
 	InteractionResponseType,
 } from '../../deps.ts';
 import { InteractionHandler } from '../client.ts';
-import configuration from '../configuration.ts';
 import { roles } from '../modules/roles/module.ts';
 import { resolveGuildRole } from '../modules/roles/data/structures/role.ts';
 import { Availability } from './availability.ts';
@@ -171,7 +170,7 @@ async function createPermissions(
 			}
 			case Availability.OWNER: {
 				guildCommandPermissions.push({
-					id: configuration.guilds.owner.id,
+					id: guild.ownerID!,
 					type: ApplicationCommandPermissionType.USER,
 					permission: true,
 				});
