@@ -5,6 +5,9 @@ export default {
 		moderator: {
 			role: 'Guide',
 		},
+		manager: {
+			id: '217319536485990400',
+		},
 		entry: {
 			minimumRequiredAge: 60 * 60 * 24 * 1000, // Two days
 		},

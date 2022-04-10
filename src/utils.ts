@@ -9,7 +9,6 @@ import {
 import languages from 'https://deno.land/x/language@v0.1.0/languages.ts';
 import { Command } from './commands/command.ts';
 import { Option } from './commands/option.ts';
-import configuration from './configuration.ts';
 
 /**
  * Makes one or more properties of `T` optional.
@@ -88,7 +87,7 @@ async function findChannelByName(
 async function getInvite(guild: Guild): Promise<Invite> {
 	const invites = await guild.invites.fetchAll();
 	return invites.find((invite) =>
-		invite.inviter?.id === configuration.guilds.owner.id &&
+		invite.inviter?.id === guild.ownerID! &&
 		invite.maxAge === 0
 	) ??
 		await guild.invites.create(

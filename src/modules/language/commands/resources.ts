@@ -29,7 +29,7 @@ function resources(interaction: Interaction): void {
 Feel free to contribute to the project by forking the repository, adding your own resources, and creating a pull request.
 
 If you don't know how to use git, you can still contribute by listing the resources and tagging ${
-					mention(configuration.guilds.owner.id, MentionType.USER)
+					mention(configuration.guilds.manager.id, MentionType.USER)
 				}.`
 				: 'This server does not have a designated language, and therefore no resources are available for it.',
 			color: fromHex('#d6e3f8'),
