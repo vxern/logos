@@ -22,7 +22,7 @@ function resources(interaction: Interaction): void {
 			description: language
 				? `Resources to learn the ${
 					capitalise(language)
-				} language are available [here](https://github.com/vxern/${
+				} language are available [here](https://github.com/Linguition/${
 					language?.toLowerCase()
 				}).
 
