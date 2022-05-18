@@ -11,7 +11,6 @@ import {
 import {
 	Command,
 	createApplicationCommand,
-	createPermissions,
 	unifyHandlers,
 } from './commands/command.ts';
 import modules from './modules/modules.ts';
@@ -126,10 +125,51 @@ class Client extends DiscordClient {
 		for (const command of commands) {
 			command.handle = unifyHandlers(command);
 			this.manageCommand(command);
+
+			if (!command.options) continue;
+
+			const autocompleteOptions = command.options!.filter((option) =>
+				option.autocomplete
+			);
+
+			for (const option of autocompleteOptions) {
+				this.interactions.autocomplete(
+					command.name,
+					option.name,
+					command.handle!,
+				);
+			}
+
+			const handlers = new Map<string, Map<string, InteractionHandler>>();
+			for (const option of command.options) {
+				if (!option.options) continue;
+
+				const autocompleteSubOptions = option.options!.filter((subOption) =>
+					subOption.autocomplete
+				);
+
+				for (const subOption of autocompleteSubOptions) {
+					if (handlers.has(subOption.name)) {
+						handlers.get(subOption.name)!.set(option.name, option.handle!);
+						continue;
+					}
+
+					handlers.set(
+						subOption.name,
+						new Map([[option.name, option.handle!]]),
+					);
+				}
+			}
+
+			for (const [subOption, options] of handlers.entries()) {
+				this.interactions.autocomplete(
+					command.name,
+					subOption,
+					(interaction) =>
+						options.get(interaction.subCommandGroup!)!.call(this, interaction),
+				);
+			}
 		}
-		this.interactions.autocomplete('*', '*', (interaction) => {
-			console.log(interaction);
-		});
 
 		const promises = [];
 
