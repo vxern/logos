@@ -34,7 +34,7 @@ const supportedLanguages = (supportedLanguagesJson as SupportedLanguage[])
 const supportedLanguagesChoices = supportedLanguages.map(
 	(supportedLanguage) => {
 		return {
-			name: supportedLanguage.name.split('(')[0]!,
+			name: supportedLanguage.name.split('(')[0]!.trimEnd(),
 			value: supportedLanguage.language,
 		};
 	},
@@ -49,13 +49,13 @@ const command: Command = {
 		name: 'from',
 		description: 'The source language.',
 		required: true,
-		choices: supportedLanguagesChoices,
+		autocomplete: true,
 		type: OptionType.STRING,
 	}, {
 		name: 'to',
 		description: 'The target language.',
 		required: true,
-		choices: supportedLanguagesChoices,
+		autocomplete: true,
 		type: OptionType.STRING,
 	}, {
 		name: 'text',
@@ -78,6 +78,30 @@ interface TranslationResponse {
 }
 
 async function translate(interaction: Interaction): Promise<void> {
+	if (interaction.isAutocomplete()) {
+		const argument = interaction.data.options.find((option) => option.focused)!;
+		const value = argument.value as string;
+
+		const options = argument.value.length === 0
+			? []
+			: supportedLanguagesChoices.filter((language) => {
+				return language.name.toLowerCase().startsWith(
+					value.toLowerCase(),
+				);
+			});
+
+		interaction.respond({
+			type: InteractionResponseType.APPLICATION_COMMAND_AUTOCOMPLETE_RESULT,
+			choices: options.map((option) => {
+				return {
+					name: option.name,
+					value: option.value,
+				};
+			}),
+		});
+		return;
+	}
+
 	const data = interaction.data! as InteractionApplicationCommandData;
 	const sourceCode = data.options[0]!.value! as string;
 	const targetCode = data.options[1]!.value! as string;
@@ -94,7 +118,7 @@ async function translate(interaction: Interaction): Promise<void> {
 		addParametersToURL('https://api-free.deepl.com/v2/translate', {
 			'auth_key': secrets.modules.language.deepL.secret,
 			'text': text,
-			'source_lang': sourceCode,
+			'source_lang': sourceCode.split('-')[0]!,
 			'target_lang': targetCode,
 		}),
 	);
@@ -110,14 +134,14 @@ async function translate(interaction: Interaction): Promise<void> {
 
 	response.editResponse({
 		embeds: [{
-			title: `${source} → ${target}`,
+			title: `${source.name} → ${target.name}`,
 			color: configuration.responses.colors.blue,
 			fields: [{
-				name: source.language,
+				name: source.name,
 				value: text,
 				inline: false,
 			}, {
-				name: target.language,
+				name: target.name,
 				value: translation.text,
 				inline: false,
 			}],
