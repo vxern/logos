@@ -4,6 +4,7 @@ import {
 	Interaction,
 	InteractionMessageComponentData,
 	InteractionResponseType,
+	MessageComponentData,
 	MessageComponentType,
 } from '../../../../deps.ts';
 import { Client } from '../../../client.ts';
@@ -83,14 +84,16 @@ async function learn(interaction: Interaction): Promise<void> {
 		try {
 			const sentenceSelection = createSentenceSelection(sentencePairs);
 
-			const buttons = sentenceSelection.choices.map((choice, index) => {
-				return {
-					type: MessageComponentType.BUTTON,
-					style: ButtonStyle.GREEN,
-					label: choice,
-					customID: `LANGUAGE_GAME|${index}`,
-				};
-			});
+			const buttons = sentenceSelection.choices.map<MessageComponentData>(
+				(choice, index) => {
+					return {
+						type: MessageComponentType.BUTTON,
+						style: ButtonStyle.GREEN,
+						label: choice,
+						customID: `LANGUAGE_GAME|${index}`,
+					};
+				},
+			);
 
 			response.editResponse({
 				embeds: [{
@@ -139,10 +142,10 @@ function createSentenceSelection(
 ): SentenceSelection {
 	const indexes = Array.from({ length: 4 }, () => random(sentencePairs.length));
 
-	const pair = sentencePairs[indexes[0]];
+	const pair = sentencePairs[indexes[0]!]!;
 	const words = pair.sentence.split(' ');
 	const wordIndex = random(words.length);
-	const word = words[wordIndex];
+	const word = words[wordIndex]!;
 	words[wordIndex] = '\\_'.repeat(word.split('').length);
 	pair.sentence = words.join(' ');
 
@@ -150,8 +153,8 @@ function createSentenceSelection(
 
 	const choices: string[] = [word];
 	for (const index of indexes) {
-		const words = sentencePairs[index].sentence.split(' ');
-		choices.push(words[random(words.length)]);
+		const words = sentencePairs[index]!.sentence.split(' ');
+		choices.push(words[random(words.length)]!);
 	}
 
 	return {
