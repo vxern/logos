@@ -160,6 +160,13 @@ function addParametersToURL(
 	return `${url}?${query}`;
 }
 
+/**
+ * Times how long it takes to execute a piece of code, and upon completion, prints a message
+ * with the amount of time it took.
+ *
+ * @param message - The message to send upon completion.
+ * @param execution
+ */
 async function time(
 	message: (ms: number) => string,
 	execution: () => unknown | Promise<unknown>,
