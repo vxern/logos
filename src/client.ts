@@ -1,6 +1,7 @@
 import {
 	ApplicationCommandInteraction,
 	ApplicationCommandType,
+	AutocompleteInteraction,
 	Client as DiscordClient,
 	event,
 	Guild,
@@ -27,32 +28,37 @@ const guildName = new RegExp('^Learn ([A-Z][a-z]*)$');
 class Client extends DiscordClient {
 	static node: lavadeno.Node;
 
+	/** Languages of the guilds managed by this client. */
 	static readonly languages: Map<string, string> = new Map();
+
+	/** Logging controllers pertaining to the guilds managed by this client. */
 	static readonly logging: Map<string, LoggingController> = new Map();
+
+	/** Music controllers pertaining to the guilds managed by this client. */
 	static readonly music: Map<string, MusicController> = new Map();
 
+	/** Constructs an instance of {@link Client}. */
 	constructor() {
 		super({
 			token: secrets.core.discord.secret,
 			intents: Intents.GuildMembers,
-			forceNewSession: false,
 			presence: {
 				activity: {
-					name: 'Deno',
+					name: 'Deno.',
 					type: 'PLAYING',
 				},
 			},
 			canary: true,
 			clientProperties: {
-				os: 'linux',
-				browser: 'none',
-				device: 'server',
+				os: 'vxern#7031',
+				browser: 'vxern#7031',
+				device: 'vxern#7031',
 			},
 			enableSlash: true,
 			disableEnvToken: true,
 			fetchGatewayInfo: true,
 			compress: true,
-			messageCacheMax: 500,
+			messageCacheMax: 2000,
 		});
 	}
 
@@ -86,6 +92,7 @@ class Client extends DiscordClient {
 		);
 	}
 
+	/** Sets up guilds for managing. */
 	async setupGuilds(): Promise<unknown> {
 		const promises: Promise<unknown>[] = [];
 
@@ -107,7 +114,7 @@ class Client extends DiscordClient {
 	}
 
 	manageGuild(guild: Guild): void {
-		const language = guildName.exec(guild.name!)![1].toLowerCase();
+		const language = guildName.exec(guild.name!)![1]!.toLowerCase();
 
 		Client.languages.set(guild.id, language);
 	}
@@ -134,7 +141,7 @@ class Client extends DiscordClient {
 		return Promise.all(promises);
 	}
 
-	manageCommand(command: Command) {
+	manageCommand(command: Command): void {
 		this.interactions.handle(
 			command.name,
 			command.handle!,
@@ -161,7 +168,7 @@ class Client extends DiscordClient {
 	 * @param guild - The guild whose slash commands to synchronise.
 	 * @param commands - The source code slash commands.
 	 */
-	async synchroniseGuildCommands(
+	synchroniseGuildCommands(
 		guild: Guild,
 		commands: Command[],
 	): Promise<unknown> {
@@ -169,6 +176,9 @@ class Client extends DiscordClient {
 		for (const command of commands) {
 			applicationCommands.push(createApplicationCommand(command));
 		}
+
+		// TODO(vxern): Add default permissions once Harmony supports them.
+		/*
 		const guildCommands = await guild.commands.bulkEdit(applicationCommands);
 
 		const commandPermissions = await createPermissions(
@@ -177,6 +187,9 @@ class Client extends DiscordClient {
 			commands,
 		);
 		return guild.commands.permissions.bulkEdit(commandPermissions);
+    */
+
+		return guild.commands.bulkEdit(applicationCommands);
 	}
 
 	/**
@@ -207,7 +220,7 @@ class Client extends DiscordClient {
 	 * @param guild - The guild whose language to return.
 	 * @returns The guild's language.
 	 */
-	static getLanguage(guild: Guild) {
+	static getLanguage(guild: Guild): string {
 		return Client.languages.get(guild.id) ?? 'english';
 	}
 }
@@ -218,7 +231,7 @@ class Client extends DiscordClient {
  * @param interaction - The interaction to be handled.
  */
 type InteractionHandler = (
-	interaction: ApplicationCommandInteraction,
+	interaction: ApplicationCommandInteraction | AutocompleteInteraction,
 ) => unknown;
 
 export { Client };
