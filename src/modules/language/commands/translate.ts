@@ -1,4 +1,5 @@
 import {
+	ApplicationCommandChoice,
 	Interaction,
 	InteractionApplicationCommandData,
 	InteractionResponseType,
@@ -9,36 +10,6 @@ import { Command } from '../../../commands/command.ts';
 import { OptionType } from '../../../commands/option.ts';
 import configuration from '../../../configuration.ts';
 import { addParametersToURL } from '../../../utils.ts';
-
-interface SupportedLanguage {
-	language: string;
-	name: string;
-	// deno-lint-ignore camelcase
-	supports_formality: boolean;
-}
-
-const supportedLanguagesRequest = await fetch(
-	addParametersToURL('https://api-free.deepl.com/v2/languages', {
-		'auth_key': secrets.modules.language.deepL.secret,
-		'type': 'target',
-	}),
-);
-const supportedLanguagesJson = await supportedLanguagesRequest.json();
-const supportedLanguages = (supportedLanguagesJson as SupportedLanguage[])
-	.filter((supportedLanguage, index, array) =>
-		index ===
-			array.findIndex((language) =>
-				language.language.startsWith(supportedLanguage.language.split('-')[0]!)
-			)
-	);
-const supportedLanguagesChoices = supportedLanguages.map(
-	(supportedLanguage) => {
-		return {
-			name: supportedLanguage.name.split('(')[0]!.trimEnd(),
-			value: supportedLanguage.language,
-		};
-	},
-);
 
 const command: Command = {
 	name: 'translate',
@@ -71,12 +42,52 @@ const command: Command = {
 	handle: translate,
 };
 
+/** Represents a response to a translation query. */
 interface TranslationResponse {
+	/** The language detected from the text sent to be translated. */
 	// deno-lint-ignore camelcase
 	detected_source_language: string;
+	/** The translated text. */
 	text: string;
 }
 
+/** Represents a supported language object sent by DeepL. */
+interface SupportedLanguage {
+	/** The language code. */
+	language: string;
+	/** The language name */
+	name: string;
+	/** Whether the formality option is supported for this language. */
+	// deno-lint-ignore camelcase
+	supports_formality: boolean;
+}
+
+const supportedLanguagesRequest: Response = await fetch(
+	addParametersToURL('https://api-free.deepl.com/v2/languages', {
+		'auth_key': secrets.modules.language.deepL.secret,
+		'type': 'target',
+	}),
+);
+const supportedLanguagesRaw: SupportedLanguage[] =
+	(await supportedLanguagesRequest.json()) as SupportedLanguage[];
+const supportedLanguages: SupportedLanguage[] = supportedLanguagesRaw
+	.filter((supportedLanguage, index, array) =>
+		index ===
+			array.findIndex((language) =>
+				language.language.startsWith(supportedLanguage.language.split('-')[0]!)
+			)
+	);
+const supportedLanguagesChoices: ApplicationCommandChoice[] = supportedLanguages
+	.map(
+		(supportedLanguage) => {
+			return {
+				name: supportedLanguage.name.split('(')[0]!.trimEnd(),
+				value: supportedLanguage.language,
+			};
+		},
+	);
+
+/** Allows the user to translate text from one language to another through the DeepL API. */
 async function translate(interaction: Interaction): Promise<void> {
 	if (interaction.isAutocomplete()) {
 		const argument = interaction.data.options.find((option) => option.focused)!;
@@ -92,12 +103,7 @@ async function translate(interaction: Interaction): Promise<void> {
 
 		interaction.respond({
 			type: InteractionResponseType.APPLICATION_COMMAND_AUTOCOMPLETE_RESULT,
-			choices: options.map((option) => {
-				return {
-					name: option.name,
-					value: option.value,
-				};
-			}),
+			choices: options,
 		});
 		return;
 	}

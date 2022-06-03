@@ -102,10 +102,7 @@ class Client extends DiscordClient {
 				guild.roles.fetchAll(),
 			);
 
-			if (Client.isManagedGuild(guild)) {
-				this.manageGuild(guild);
-			}
-
+			this.manageGuild(guild);
 			this.setupControllers(guild);
 		}
 
@@ -113,7 +110,11 @@ class Client extends DiscordClient {
 	}
 
 	manageGuild(guild: Guild): void {
-		const language = guildName.exec(guild.name!)![1]!.toLowerCase();
+		const guildNameMatch = guildName.exec(guild.name!) || undefined;
+
+		const language = !guildNameMatch
+			? 'english'
+			: guildNameMatch![1]!.toLowerCase();
 
 		Client.languages.set(guild.id, language);
 	}
@@ -166,7 +167,7 @@ class Client extends DiscordClient {
 					command.name,
 					subOption,
 					(interaction) =>
-						options.get(interaction.subCommandGroup!)!.call(this, interaction),
+						options.get(interaction.subCommand!)!.call(this, interaction),
 				);
 			}
 		}
@@ -261,7 +262,7 @@ class Client extends DiscordClient {
 	 * @returns The guild's language.
 	 */
 	static getLanguage(guild: Guild): string {
-		return Client.languages.get(guild.id) ?? 'english';
+		return Client.languages.get(guild.id)!;
 	}
 }
 
