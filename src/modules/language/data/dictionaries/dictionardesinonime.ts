@@ -22,6 +22,7 @@ class DictionarDeSinonime extends Dictionary {
 
 		const definitions = $('#content > div.content_page_simple > span')
 			.toArray();
+
 		for (const definition of definitions) {
 			const content = $(definition).text();
 
@@ -35,14 +36,17 @@ class DictionarDeSinonime extends Dictionary {
 				)
 				.filter((synonym) => synonym.length > 0);
 			synonyms.shift(); // Remove the headword.
-			return { synonyms: synonyms };
+			return {
+				synonyms: synonyms,
+			};
 		}
 
 		return {};
 	}
 }
 
-function uniformise(target: string) {
+/** Converts cedillas to commas, in line with the standard Romanian orthography. */
+function uniformise(target: string): string {
 	return target
 		.replaceAll('ş', 'ș')
 		.replaceAll('ţ', 'ț')

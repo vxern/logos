@@ -11,6 +11,13 @@ const categories: Partial<RoleCategory>[] = [
 		},
 	},
 	{
+		name: 'Branch',
+		collection: {
+			type: RoleCollectionType.COLLECTION_LOCALISED,
+			list: [],
+		},
+	},
+	{
 		name: 'Regions',
 		collection: {
 			type: RoleCollectionType.COLLECTION_LOCALISED,

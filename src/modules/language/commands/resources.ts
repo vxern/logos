@@ -13,6 +13,7 @@ const command: Command = {
 	handle: resources,
 };
 
+/** Displays a message with information on where to find the resources for a given language. */
 function resources(interaction: Interaction): void {
 	const language = Client.getLanguage(interaction.guild!);
 

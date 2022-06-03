@@ -16,6 +16,16 @@ const categories: Partial<RoleCategory>[] = [
 		},
 	},
 	{
+		name: 'Branch',
+		collection: {
+			type: RoleCollectionType.COLLECTION_LOCALISED,
+			list: fromNames([
+				'Eastern Armenian',
+				'Western Armenian',
+			]),
+		},
+	},
+	{
 		name: 'Regions',
 		collection: {
 			type: RoleCollectionType.COLLECTION_LOCALISED,

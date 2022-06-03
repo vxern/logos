@@ -29,6 +29,20 @@ const base: RoleCategory[] = [
 	},
 	{
 		type: RoleCategoryType.CATEGORY,
+		name: 'Branch',
+		description:
+			'Roles specifying which branch of the language one is learning.',
+		color: fromHex('#00cc66'),
+		emoji: '🏷️',
+		collection: {
+			type: RoleCollectionType.COLLECTION_LOCALISED,
+			onAssignMessage: (name) => `You are now learning ${name}.`,
+			onUnassignMessage: (name) => `You are no longer learning ${name}.`,
+			description: (name) => `I am learning ${name}.`,
+		},
+	},
+	{
+		type: RoleCategoryType.CATEGORY,
 		name: 'Regions',
 		description: 'Roles specifying which area of the country one is from.',
 		color: fromHex('#c5e0d8'),
@@ -37,7 +51,7 @@ const base: RoleCategory[] = [
 		collection: {
 			type: RoleCollectionType.COLLECTION_LOCALISED,
 			onAssignMessage: (name) => `You are now from ${name}.`,
-			onUnassignMessage: (name) => `You are no longer from ${name}`,
+			onUnassignMessage: (name) => `You are no longer from ${name}.`,
 			description: (name) => `I am from ${name}.`,
 		},
 	},
@@ -45,12 +59,16 @@ const base: RoleCategory[] = [
 
 const local: RoleCategory[] = _.merge(
 	base,
-	base.map((_, index) => {
+	base.map((baseCategory) => {
 		return {
 			collection: {
 				lists: Object.fromEntries(
 					Object.entries(languages).map(([language, categories]) => {
-						return [language, categories[index].collection!.list!];
+						return [
+							language,
+							categories.find((category) => category.name === baseCategory.name)
+								?.collection?.list ?? [],
+						];
 					}),
 				),
 			},

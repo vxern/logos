@@ -50,7 +50,7 @@ const base: RoleCategory[] = [
 				name: 'Gender',
 				description: 'Roles defining one\'s gender.',
 				color: fromHex('#ff4b3e'),
-				// TODO(vxern): Use '⚧️' instead when Discord supports it.
+				// TODO: Use '⚧️' instead when Discord supports it.
 				emoji: '⚧',
 				limit: 1,
 				collection: {
@@ -67,7 +67,7 @@ const base: RoleCategory[] = [
 						emoji: '♀️',
 					}, {
 						name: 'Transgender',
-						// TODO(vxern): Use '⚧️' instead when Discord supports it.
+						// TODO: Use '⚧️' instead when Discord supports it.
 						emoji: '⚧',
 					}, {
 						name: 'Non-binary',
