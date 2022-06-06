@@ -17,21 +17,19 @@ import { SentencePair, SentenceSelection } from '../data/sentence.ts';
 import { sentenceLists } from '../module.ts';
 
 const command: Command = {
-	name: 'learn',
+	name: 'game',
 	availability: Availability.MEMBERS,
 	description: 'Pick the correct word out of four to fit in the blank.',
-	handle: learn,
+	handle: game,
 };
 
-async function learn(interaction: Interaction): Promise<void> {
+/** Starts a simple game of 'choose the correct word to fit in the blank'. */
+async function game(interaction: Interaction): Promise<void> {
 	const language = Client.getLanguage(interaction.guild!);
 	const sentencePairs = Object.values(sentenceLists[language] ?? {});
 	const hasSentencePairs = sentencePairs.length > 0;
 
-	const response = await interaction.respond({
-		type: InteractionResponseType.DEFERRED_CHANNEL_MESSAGE,
-		ephemeral: true,
-	});
+	const response = await interaction.defer(true);
 
 	if (!hasSentencePairs) {
 		console.log(
@@ -78,8 +76,7 @@ async function learn(interaction: Interaction): Promise<void> {
 
 	collector.collect();
 
-	let color = configuration.responses.colors.blue;
-
+	let ribbonColor = configuration.responses.colors.blue;
 	while (true) {
 		try {
 			const sentenceSelection = createSentenceSelection(sentencePairs);
@@ -97,7 +94,7 @@ async function learn(interaction: Interaction): Promise<void> {
 
 			response.editResponse({
 				embeds: [{
-					color: color,
+					color: ribbonColor,
 					fields: [{
 						name: 'Sentence',
 						value: sentenceSelection.pair.sentence,
@@ -126,8 +123,9 @@ async function learn(interaction: Interaction): Promise<void> {
 			);
 
 			const choice = sentenceSelection.choices[index];
+			const isCorrect = choice === sentenceSelection.word;
 
-			color = choice === sentenceSelection.word
+			ribbonColor = isCorrect
 				? configuration.responses.colors.green
 				: configuration.responses.colors.red;
 		} catch (error) {
