@@ -7,10 +7,12 @@ import {
 	GuildChannel,
 	GuildTextChannel,
 	Invite,
+	User,
 } from '../deps.ts';
 import languages from 'https://deno.land/x/language@v0.1.0/languages.ts';
 import { Command } from './commands/command.ts';
 import { Option } from './commands/option.ts';
+import { code } from './formatting.ts';
 
 /**
  * Makes one or more properties of `T` optional.
@@ -215,6 +217,16 @@ async function getChannel(
 		| undefined;
 }
 
+/**
+ * Taking a user object, creates an informational mention for the user.
+ *
+ * @param user - The user object.
+ * @returns The mention.
+ */
+function mentionUser(user: User): string {
+	return `${code(user.tag)} ~ ${code(user.id)}`;
+}
+
 export {
 	addParametersToURL,
 	displayCommand,
@@ -225,6 +237,7 @@ export {
 	getLanguage,
 	getLanguageCode,
 	getMissingKeys,
+	mentionUser,
 	random,
 	time,
 };
