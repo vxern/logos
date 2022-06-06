@@ -1,9 +1,11 @@
 import {
 	_,
 	ApplicationCommand,
+	ApplicationCommandInteraction,
 	ApplicationCommandOption,
 	Guild,
 	GuildChannel,
+	GuildTextChannel,
 	Invite,
 } from '../deps.ts';
 import languages from 'https://deno.land/x/language@v0.1.0/languages.ts';
@@ -177,10 +179,48 @@ async function time(
 	console.log(message(now - then));
 }
 
+/**
+ * Concatenates a command's name, subcommand group and subcommand into a
+ * single string representing the whole command name.
+ *
+ * @param command - The interaction whose command to display.
+ * @returns The full command name.
+ */
+function displayCommand(command: ApplicationCommandInteraction): string {
+	const parts = [command.name, command.subCommandGroup, command.subCommand];
+
+	return parts.filter((part) => part).join(' ');
+}
+
+/**
+ * Taking a guild and the name of a channel, finds the channel with that name
+ * and returns it.
+ *
+ * @param guild - The guild whose channels to look through.
+ * @param name - The name of the channel to find.
+ * @returns The found channel.
+ */
+async function getChannel(
+	guild: Guild,
+	name: string,
+): Promise<GuildTextChannel | undefined> {
+	const channels = await guild.channels.array();
+
+	const nameAsLowercase = name.toLowerCase();
+
+	return channels.find((channel) =>
+		channel.name.toLowerCase().includes(nameAsLowercase)
+	) as
+		| GuildTextChannel
+		| undefined;
+}
+
 export {
 	addParametersToURL,
+	displayCommand,
 	findChannelByName,
 	fromHex,
+	getChannel,
 	getInvite,
 	getLanguage,
 	getLanguageCode,
