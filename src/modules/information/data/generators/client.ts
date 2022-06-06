@@ -1,21 +1,17 @@
-import { ClientEvents, Guild, Member, Message, User } from '../../../deps.ts';
-import { bold, code, codeMultiline } from '../../formatting.ts';
-import configuration from '../../configuration.ts';
+import {
+	ClientEvents,
+	Guild,
+	Member,
+	Message,
+	User,
+} from '../../../../../deps.ts';
+import configuration from '../../../../configuration.ts';
+import { bold, code, codeMultiline } from '../../../../formatting.ts';
+import { mentionUser } from '../../../../utils.ts';
+import { MessageGenerators } from './generator.ts';
 
-interface LogEntry<T extends keyof ClientEvents> {
-	title: string;
-	message: (...args: ClientEvents[T]) => Promise<string> | string | undefined;
-	filter: (origin: Guild, ...args: ClientEvents[T]) => boolean;
-	color: number;
-}
-
-type Generators = Partial<
-	{
-		[key in keyof ClientEvents]: LogEntry<key>;
-	}
->;
-
-const generators: Generators = {
+/** Contains the message generators for client events. */
+const client: MessageGenerators<ClientEvents> = {
 	'guildBanAdd': {
 		title: 'User banned',
 		message: (_, user: User) => `${mentionUser(user)} has been banned.`,
@@ -80,44 +76,51 @@ ${codeMultiline(message.content)}`,
 		color: configuration.responses.colors.red,
 	},
 };
+/** Represents a log message generator for a member update event. */
+interface MemberUpdateLogEntry {
+	/** The condition that must be met for the message to be logged. */
+	condition: boolean;
 
-const memberUpdates: (before: Member, after: Member) => [boolean, string][] = (
+	/** The message to log. */
+	message: string;
+}
+
+type MemberUpdateMessageGenerators = (
+	before: Member,
+	after: Member,
+) => MemberUpdateLogEntry[];
+
+const memberUpdates: MemberUpdateMessageGenerators = (
 	before,
 	after,
 ) => [
-	[
-		before.nick !== after.nick && !before.nick,
-		`${mentionUser(before.user)} has set their nickname to ${
+	{
+		condition: before.nick !== after.nick && !before.nick,
+		message: `${mentionUser(before.user)} has set their nickname to ${
 			code(after.nick!)
 		}.`,
-	],
-	[
-		before.nick !== after.nick && !!after.nick,
-		`${mentionUser(before.user)} has changed their nickname to ${
+	},
+	{
+		condition: before.nick !== after.nick && !!after.nick,
+		message: `${mentionUser(before.user)} has changed their nickname to ${
 			code(after.nick!)
 		}.`,
-	],
-	[
-		before.nick !== after.nick && !after.nick,
-		`${mentionUser(before.user)} has removed their nickname.`,
-	],
+	},
+	{
+		condition: before.nick !== after.nick && !after.nick,
+		message: `${mentionUser(before.user)} has removed their nickname.`,
+	},
 ];
 
 function resolveMemberUpdate(
 	before: Member,
 	after: Member,
 ): string | undefined {
-	for (const [filter, message] of memberUpdates(before, after)) {
-		if (filter) {
-			return message;
-		}
+	for (const entry of memberUpdates(before, after)) {
+		if (entry.condition) return entry.message;
 	}
 
 	return undefined;
 }
 
-function mentionUser(user: User): string {
-	return `${code(user.tag)} ~ ${code(user.id)}`;
-}
-
-export default generators;
+export default client;
