@@ -1,4 +1,6 @@
 import { Collector, Guild, GuildTextChannel } from '../../../deps.ts';
+import configuration from '../../configuration.ts';
+import { getChannel } from '../../utils.ts';
 import { Controller } from '../controller.ts';
 import generators from './generators.ts';
 
@@ -11,13 +13,13 @@ class LoggingController extends Controller {
 	}
 
 	async setupChannel(guild: Guild): Promise<void> {
-		const channels = await guild.channels.array();
-		this.channel = channels.find((channel) =>
-			channel.name.includes('journal')
-		) as GuildTextChannel | undefined;
+		this.channel = await getChannel(
+			guild,
+			configuration.guilds.channels.logging,
+		);
 	}
 
-	async startListening(guild: Guild): Promise<void> {
+	startListening(guild: Guild): void {
 		if (!this.channel) {
 			console.error(
 				`Failed to set up log service for guild '${guild
