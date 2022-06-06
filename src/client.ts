@@ -20,20 +20,35 @@ import { MusicController } from './modules/music/controller.ts';
 import { loadLanguages } from './modules/language/module.ts';
 import { time } from './utils.ts';
 import secrets from '../secrets.ts';
-
-const guildName = new RegExp('^Learn ([A-Z][a-z]*)$');
+import { Database } from './database/database.ts';
+import configuration from './configuration.ts';
 
 /** The core of the application, used for interacting with the Discord API. */
 class Client extends DiscordClient {
 	static node: lavadeno.Node;
 
-	/** Languages of the guilds managed by this client. */
+	/** Database connection. */
+	static readonly database: Database = new Database();
+
+	/**
+	 * Languages of the guilds managed by this client.
+	 *
+	 * The keys are guild IDs, and the values are their respective topic language.
+	 */
 	static readonly languages: Map<string, string> = new Map();
 
-	/** Logging controllers pertaining to the guilds managed by this client. */
+	/**
+	 * Logging controllers pertaining to the guilds managed by this client.
+	 *
+	 * The keys are guild IDs, and the values are their respective logging controller.
+	 */
 	static readonly logging: Map<string, LoggingController> = new Map();
 
-	/** Music controllers pertaining to the guilds managed by this client. */
+	/**
+	 * Music controllers pertaining to the guilds managed by this client.
+	 *
+	 * The keys are guild IDs, and the values are their respective music controller.
+	 */
 	static readonly music: Map<string, MusicController> = new Map();
 
 	/** Constructs an instance of {@link Client}. */
@@ -47,15 +62,12 @@ class Client extends DiscordClient {
 					type: 'PLAYING',
 				},
 			},
-			canary: true,
 			clientProperties: {
 				os: 'vxern#7031',
 				browser: 'vxern#7031',
 				device: 'vxern#7031',
 			},
-			enableSlash: true,
 			disableEnvToken: true,
-			fetchGatewayInfo: true,
 			compress: true,
 			messageCacheMax: 2000,
 		});
@@ -110,7 +122,8 @@ class Client extends DiscordClient {
 	}
 
 	manageGuild(guild: Guild): void {
-		const guildNameMatch = guildName.exec(guild.name!) || undefined;
+		const guildNameMatch =
+			configuration.guilds.nameExpression.exec(guild.name!) || undefined;
 
 		const language = !guildNameMatch
 			? 'english'
@@ -240,19 +253,7 @@ class Client extends DiscordClient {
 	 * @return The result of the check.
 	 */
 	static isManagedGuild(guild: Guild): boolean {
-		return guildName.test(guild.name!);
-	}
-
-	/**
-	 * Concatenates the command's name, subcommand group and subcommand into a
-	 * single string representing the whole command name.
-	 *
-	 * @param command - The interaction whose command to display.
-	 * @returns The full command name.
-	 */
-	static displayCommand(command: ApplicationCommandInteraction): string {
-		const parts = [command.name, command.subCommandGroup, command.subCommand];
-		return parts.filter((part) => part).join(' ');
+		return configuration.guilds.nameExpression.test(guild.name!);
 	}
 
 	/**
