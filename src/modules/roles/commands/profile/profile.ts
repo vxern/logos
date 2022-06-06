@@ -49,7 +49,7 @@ async function selectRoles(interaction: Interaction): Promise<void> {
 		index: 0,
 	};
 
-	const language = Client.languages.get(interaction.guild!.id);
+	const language = Client.getLanguage(interaction.guild!);
 
 	const browsing = {
 		interaction: interaction,
