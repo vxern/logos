@@ -25,31 +25,31 @@ import configuration from './configuration.ts';
 
 /** The core of the application, used for interacting with the Discord API. */
 class Client extends DiscordClient {
-	static node: lavadeno.Node;
+	node!: lavadeno.Node;
 
 	/** Database connection. */
-	static readonly database: Database = new Database();
+	readonly database: Database = new Database();
 
 	/**
 	 * Languages of the guilds managed by this client.
 	 *
 	 * The keys are guild IDs, and the values are their respective topic language.
 	 */
-	static readonly languages: Map<string, string> = new Map();
+	readonly languages: Map<string, string> = new Map();
 
 	/**
 	 * Logging controllers pertaining to the guilds managed by this client.
 	 *
 	 * The keys are guild IDs, and the values are their respective logging controller.
 	 */
-	static readonly logging: Map<string, LoggingController> = new Map();
+	readonly logging: Map<string, LoggingController> = new Map();
 
 	/**
 	 * Music controllers pertaining to the guilds managed by this client.
 	 *
 	 * The keys are guild IDs, and the values are their respective music controller.
 	 */
-	static readonly music: Map<string, MusicController> = new Map();
+	readonly music: Map<string, MusicController> = new Map();
 
 	/** Constructs an instance of {@link Client}. */
 	constructor() {
@@ -85,17 +85,17 @@ class Client extends DiscordClient {
 		time(
 			(ms) => `Setup took ${ms}ms`,
 			async () => {
-				Client.node = new lavadeno.Node({
+				this.node = new lavadeno.Node({
 					connection: secrets.modules.music.lavalink,
 					sendGatewayPayload: (_, payload) => this.gateway.send(payload),
 				});
-				await Client.node.connect(BigInt(this.user!.id));
+				await this.node.connect(BigInt(this.user!.id));
 
 				const promises = [
 					this.setupGuilds(),
 					this.setupCommands(),
 					this.setupServices(),
-					loadLanguages(),
+					loadLanguages(this),
 				];
 
 				await Promise.all(promises);
@@ -129,7 +129,7 @@ class Client extends DiscordClient {
 			? 'english'
 			: guildNameMatch![1]!.toLowerCase();
 
-		Client.languages.set(guild.id, language);
+		this.languages.set(guild.id, language);
 	}
 
 	async setupCommands(): Promise<unknown> {
@@ -150,7 +150,7 @@ class Client extends DiscordClient {
 				this.interactions.autocomplete(
 					command.name,
 					option.name,
-					command.handle!,
+					(interaction) => command.handle!(this, interaction),
 				);
 			}
 
@@ -180,7 +180,7 @@ class Client extends DiscordClient {
 					command.name,
 					subOption,
 					(interaction) =>
-						options.get(interaction.subCommand!)!.call(this, interaction),
+						options.get(interaction.subCommand!)!.call(this, this, interaction),
 				);
 			}
 		}
@@ -198,14 +198,14 @@ class Client extends DiscordClient {
 	manageCommand(command: Command): void {
 		this.interactions.handle(
 			command.name,
-			command.handle!,
+			(interaction) => command.handle!(this, interaction),
 			ApplicationCommandType.CHAT_INPUT,
 		);
 	}
 
 	setupControllers(guild: Guild): void {
-		Client.logging.set(guild.id, new LoggingController(guild));
-		Client.music.set(guild.id, new MusicController(guild));
+		this.logging.set(guild.id, new LoggingController(guild));
+		this.music.set(guild.id, new MusicController(guild));
 	}
 
 	setupServices(): void {
@@ -262,8 +262,8 @@ class Client extends DiscordClient {
 	 * @param guild - The guild whose language to return.
 	 * @returns The guild's language.
 	 */
-	static getLanguage(guild: Guild): string {
-		return Client.languages.get(guild.id)!;
+	getLanguage(guild: Guild): string {
+		return this.languages.get(guild.id)!;
 	}
 }
 
@@ -273,6 +273,7 @@ class Client extends DiscordClient {
  * @param interaction - The interaction to be handled.
  */
 type InteractionHandler = (
+	client: Client,
 	interaction: ApplicationCommandInteraction | AutocompleteInteraction,
 ) => unknown;
 
