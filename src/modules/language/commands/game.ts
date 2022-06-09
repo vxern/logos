@@ -12,7 +12,7 @@ import { Availability } from '../../../commands/availability.ts';
 import { Command } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
 import { capitalise } from '../../../formatting.ts';
-import { random } from '../../../utils.ts';
+import { random, shuffle } from '../../../utils.ts';
 import { SentencePair, SentenceSelection } from '../data/sentence.ts';
 import { sentenceLists } from '../module.ts';
 
@@ -24,8 +24,8 @@ const command: Command = {
 };
 
 /** Starts a simple game of 'choose the correct word to fit in the blank'. */
-async function game(interaction: Interaction): Promise<void> {
-	const language = Client.getLanguage(interaction.guild!);
+async function game(client: Client, interaction: Interaction): Promise<void> {
+	const language = client.getLanguage(interaction.guild!);
 	const sentencePairs = Object.values(sentenceLists[language] ?? {});
 	const hasSentencePairs = sentencePairs.length > 0;
 
@@ -155,10 +155,12 @@ function createSentenceSelection(
 		choices.push(words[random(words.length)]!);
 	}
 
+	const shuffled = shuffle(choices);
+
 	return {
 		pair: pair,
 		word: word,
-		choices: choices,
+		choices: shuffled,
 	};
 }
 
