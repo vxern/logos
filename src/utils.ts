@@ -6,7 +6,11 @@ import {
 	Guild,
 	GuildChannel,
 	GuildTextChannel,
+	InteractionResponseModal,
 	Invite,
+	MessageComponentData,
+	MessageComponentType,
+	TextInputStyle,
 	User,
 } from '../deps.ts';
 import languages from 'https://deno.land/x/language@v0.1.0/languages.ts';
@@ -227,6 +231,88 @@ function mentionUser(user: User): string {
 	return `${code(user.tag)} ~ ${code(user.id)}`;
 }
 
+/** Represents an interactable form. */
+interface Form {
+	/** The title of a form. */
+	title: string;
+
+	/** The text fields defined within the form. */
+	fields: {
+		[key: string]: {
+			/** The label on a particular text field. */
+			label: string;
+
+			/** The 'style' of this text field. */
+			style: TextInputStyle;
+
+			/**
+			 * The minimum number of characters required to be inputted into this
+			 * text field.
+			 */
+			minimum: number;
+
+			/**
+			 * The maximum number of characters allowed to be inputted into this
+			 * text field.
+			 */
+			maximum: number;
+		};
+	};
+}
+
+/**
+ * Taking a form object, converts it to a modal.
+ *
+ * @param form - The form to convert.
+ * @returns The form converted into a modal.
+ */
+function toModal(form: Form): InteractionResponseModal {
+	const id = form.title.toLowerCase().split(' ').join('_');
+
+	const components = Object.entries(form.fields).map<MessageComponentData>(
+		([name, field]) => {
+			return {
+				type: MessageComponentType.ACTION_ROW,
+				components: [
+					{
+						type: MessageComponentType.TEXT_INPUT,
+						customID: `${id}_${name}`,
+						label: field.label,
+						style: field.style,
+						minLength: field.minimum === 0 ? undefined : field.minimum,
+						maxLength: field.maximum,
+					},
+				],
+			};
+		},
+	);
+
+	return {
+		title: form.title,
+		customID: id,
+		components: components,
+	};
+}
+
+/**
+ * Takes an array, duplicates it, shuffles it and returns the shuffled view.
+ *
+ * @param array - The array to shuffle.
+ * @returns The shuffled array.
+ */
+function shuffle<T>(array: T[]): T[] {
+	const shuffled = Array.from(array);
+
+	for (let index = 0; index < array.length - 1; index++) {
+		const random = Math.floor(Math.random() * (index + 1));
+		const temporary = shuffled[index]!;
+		shuffled[index] = shuffled[random]!;
+		shuffled[random] = temporary!;
+	}
+
+	return shuffled;
+}
+
 export {
 	addParametersToURL,
 	displayCommand,
@@ -239,6 +325,8 @@ export {
 	getMissingKeys,
 	mentionUser,
 	random,
+	shuffle,
 	time,
+	toModal,
 };
 export type { Optional };
