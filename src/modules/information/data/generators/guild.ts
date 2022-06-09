@@ -1,5 +1,6 @@
 import { Guild, Member, User } from '../../../../../deps.ts';
 import configuration from '../../../../configuration.ts';
+import { Article } from '../../../../database/structs/article.ts';
 import { bold, codeMultiline } from '../../../../formatting.ts';
 import { mentionUser } from '../../../../utils.ts';
 import { MessageGenerators } from './generators.ts';
@@ -17,6 +18,15 @@ type GuildEvents = {
 
 	/** An entry request has been rejected. */
 	entryRequestReject: [member: Member, reason: string];
+
+	/** An article has been submitted. */
+	articleAdd: [article: Article];
+
+	/** An article has been edited. */
+	articleUpdate: [article: Article];
+
+	/** An article has been locked. */
+	articleLock: [article: Article];
 };
 
 /** Contains the message generators for (custom) guild events. */
