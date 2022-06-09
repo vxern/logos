@@ -5,15 +5,17 @@ import { GuildEvents } from './generators/guild.ts';
 type Events = GuildEvents & ClientEvents;
 
 /** Represents an entry in the log channel. */
-interface LogEntry<T extends keyof Events> {
+interface LogEntry<E extends ClientEvents | GuildEvents, K extends keyof E> {
 	/** Title of this entry. */
 	title: string;
 
 	/** Content of this entry. */
-	message: (...args: Events[T]) => Promise<string> | string | undefined;
+	// @ts-ignore Values of Events are arrays.
+	message: (...args: E[K]) => Promise<string> | string | undefined;
 
 	/** A condition that must be met for this entry to be logged. */
-	filter: (origin: Guild, ...args: Events[T]) => boolean;
+	// @ts-ignore Values of Events are arrays.
+	filter: (origin: Guild, ...args: E[K]) => boolean;
 
 	/** The colour of this entry. */
 	color: number;

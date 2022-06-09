@@ -7,7 +7,7 @@ import {
 import configuration from '../../configuration.ts';
 import { getChannel } from '../../utils.ts';
 import { Controller } from '../controller.ts';
-import { MessageGenerators } from './data/generators/generator.ts';
+import { MessageGenerators } from './data/generators/generators.ts';
 import generators from './data/generators/generators.ts';
 import { Events } from './data/log-entry.ts';
 
@@ -20,12 +20,12 @@ class LoggingController extends Controller {
 	};
 
 	/** The channel used for logging events. */
-	private channel!: GuildTextChannel;
+	private channel?: GuildTextChannel;
 
 	/** Constructs a {@link LoggingController}. */
 	constructor(guild: Guild) {
 		super(guild);
-		this.setupChannel(guild).then(() => this.startListening(guild));
+		this.setupChannel(guild);
 	}
 
 	private async setupChannel(guild: Guild): Promise<void> {
@@ -33,14 +33,20 @@ class LoggingController extends Controller {
 			guild,
 			configuration.guilds.channels.logging,
 		);
-	}
 
-	private startListening(guild: Guild): void {
 		if (!this.channel) {
 			console.error(
 				`Failed to set up log service for guild '${guild
 					.name!}': No journal channel found.`,
 			);
+			return;
+		}
+
+		this.startListening(guild);
+	}
+
+	private startListening(guild: Guild): void {
+		if (!this.channel) {
 			return;
 		}
 
@@ -52,7 +58,11 @@ class LoggingController extends Controller {
 
 			collector.on(
 				'collect',
-				(...args) => this.log(event as keyof ClientEvents, ...args),
+				(...args) =>
+					this.log(
+						event as keyof ClientEvents,
+						...(args as ClientEvents[keyof ClientEvents]),
+					),
 			);
 
 			collector.collect();
@@ -66,10 +76,12 @@ class LoggingController extends Controller {
 	 * @param event - The event to log.
 	 * @param args - The array of parameters required by the event.
 	 */
-	async log<T extends keyof Events>(
-		event: T,
-		...args: Events[T]
+	async log<K extends keyof Events>(
+		event: K,
+		...args: Events[K]
 	): Promise<void> {
+		if (!this.channel) return;
+
 		const entry = this.messageGenerators[event];
 
 		if (!entry) {

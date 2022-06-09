@@ -8,7 +8,7 @@ import {
 import configuration from '../../../../configuration.ts';
 import { bold, code, codeMultiline } from '../../../../formatting.ts';
 import { mentionUser } from '../../../../utils.ts';
-import { MessageGenerators } from './generator.ts';
+import { MessageGenerators } from './generators.ts';
 
 /** Contains the message generators for client events. */
 const client: MessageGenerators<ClientEvents> = {
@@ -47,8 +47,8 @@ const client: MessageGenerators<ClientEvents> = {
 	'guildMemberUpdate': {
 		title: 'User updated',
 		message: resolveMemberUpdate,
-		filter: (origin: Guild, _, member: Member) =>
-			origin.id === member.guild.id && !member.user.bot,
+		filter: (origin: Guild, _, after: Member) =>
+			origin.id === after.guild.id && !after.user.bot,
 		color: configuration.responses.colors.blue,
 	},
 	'messageUpdate': {
@@ -60,8 +60,9 @@ ${bold('BEFORE')}
 ${codeMultiline(before.content)}
 ${bold('AFTER')}
 ${codeMultiline(after.content)}`,
-		filter: (origin: Guild, _, message: Message) =>
-			origin.id === message.guild?.id && !message.author.bot,
+		filter: (origin: Guild, before: Message, after: Message) =>
+			origin.id === before.guild?.id && !before.author.bot &&
+			before.content !== after.content,
 		color: configuration.responses.colors.blue,
 	},
 	'messageDelete': {
@@ -76,6 +77,7 @@ ${codeMultiline(message.content)}`,
 		color: configuration.responses.colors.red,
 	},
 };
+
 /** Represents a log message generator for a member update event. */
 interface MemberUpdateLogEntry {
 	/** The condition that must be met for the message to be logged. */

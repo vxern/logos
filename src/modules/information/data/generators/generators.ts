@@ -1,7 +1,17 @@
 import { ClientEvents } from '../../../../../deps.ts';
+import { LogEntry } from '../log-entry.ts';
 import client from './client.ts';
-import { MessageGenerators } from './generator.ts';
 import guild, { GuildEvents } from './guild.ts';
+
+/**
+ * Represents a list of supported log message generators for various client
+ * and guild events.
+ */
+type MessageGenerators<E extends ClientEvents | GuildEvents> = Partial<
+	{
+		[key in keyof E]: LogEntry<E, key>;
+	}
+>;
 
 /**
  * Represents the full collection of message generators for both the client and
@@ -22,3 +32,4 @@ const generators: LogEntryGenerators = {
 };
 
 export default generators;
+export type { MessageGenerators };
