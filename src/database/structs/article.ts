@@ -1,7 +1,11 @@
 /** Represents a change to an article. */
-interface ArticleUpdate {
+interface ArticleChange {
 	/** The previous state of an article. */
 	before: Article;
+
+	/** ID of the author of this change. */
+	author: string;
+
 	/** Timestamp of when this change was made. */
 	createdAt: number;
 }
@@ -10,18 +14,25 @@ interface ArticleUpdate {
 interface Article {
 	/** Title of this article. */
 	title: string;
+
 	/** ID of this article's author. */
 	author: string;
+
 	/** Language this article is written for. */
 	language: string;
+
 	/** List of IDs of the users that have contributed to this article. */
 	contributors: string[];
+
 	/** Body of this article. */
 	body: string;
+
 	/** Footer of this article. */
-	footer: string;
+	footer?: string;
+
 	/** List of changes made to this article. */
-	changes?: ArticleUpdate[];
+	changes?: ArticleChange[];
+
 	/** Timestamp of when this article was posted. */
 	createdAt?: number;
 }
