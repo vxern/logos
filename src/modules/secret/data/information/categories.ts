@@ -2,12 +2,12 @@ import { Guild } from '../../../../../deps.ts';
 import { Client } from '../../../../client.ts';
 import { getChannelMention } from './information.ts';
 
-interface Categories {
-	[key: string]: (guild: Guild) => Promise<string>;
+interface CategorySections {
+	[key: string]: (client: Client, guild: Guild) => Promise<string>;
 }
 
-const categories: Categories = {
-	information: async (guild: Guild) => {
+const categories: CategorySections = {
+	information: async (_, guild) => {
 		const mentions = await getChannelMentions(guild, [
 			'rules',
 			'announcements',
@@ -17,8 +17,8 @@ const categories: Categories = {
 			mentions[0]
 		}, ${mentions[1]} and member ${mentions[2]} are found here.`;
 	},
-	discussion: async (guild: Guild) => {
-		const language = Client.getLanguage(guild);
+	discussion: async (client, guild) => {
+		const language = client.getLanguage(guild);
 		if (!language) {
 			return 'This description generator requires an established language.';
 		}
@@ -31,7 +31,7 @@ const categories: Categories = {
 			mentions[0]
 		}), ${mentions[1]} or in ${mentions[2]}.`;
 	},
-	education: async (guild: Guild) => {
+	education: async (_, guild) => {
 		const mentions = await getChannelMentions(guild, [
 			'resources',
 			'classroom',
@@ -40,15 +40,16 @@ const categories: Categories = {
 			mentions[0]
 		} and the ${mentions[1]} channels are contained here.`;
 	},
-	miscellaneous: async (guild: Guild) => {
+	miscellaneous: async (_, guild) => {
 		const mentions = await getChannelMentions(guild, [
-			'history',
+			'off topic',
 			'music',
 			'memes',
 		]);
-		return `Topics which do not concern the teaching of the language, but ones which members may enjoy speaking about and sharing, such as ${
+
+		return `Topics that do not concern the teaching of the language, but ones that members may enjoy speaking about and sharing, such as ${
 			mentions[0]
-		}, ${mentions[1]} and ${mentions[2]}.`;
+		} discussions, ${mentions[1]} and ${mentions[2]}.`;
 	},
 };
 

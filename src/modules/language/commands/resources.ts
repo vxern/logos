@@ -14,8 +14,8 @@ const command: Command = {
 };
 
 /** Displays a message with information on where to find the resources for a given language. */
-function resources(interaction: Interaction): void {
-	const language = Client.getLanguage(interaction.guild!);
+function resources(client: Client, interaction: Interaction): void {
+	const language = client.getLanguage(interaction.guild!);
 
 	interaction.respond({
 		embeds: [{
@@ -30,7 +30,7 @@ function resources(interaction: Interaction): void {
 Feel free to contribute to the project by forking the repository, adding your own resources, and creating a pull request.
 
 If you don't know how to use git, you can still contribute by listing the resources and tagging ${
-					mention(configuration.guilds.manager.id, MentionType.USER)
+					mention(configuration.guilds.owner.id, MentionType.USER)
 				}.`
 				: 'This server does not have a designated language, and therefore no resources are available for it.',
 			color: fromHex('#d6e3f8'),

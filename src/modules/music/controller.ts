@@ -35,23 +35,23 @@ class MusicController extends Controller {
 	/** The volume at which the song is being played. */
 	private volume = 1;
 
-	constructor(guild: Guild) {
+	constructor(client: Client, guild: Guild) {
 		super(guild);
-		this.player = Client.node.createPlayer(BigInt(guild.id));
+		this.player = client.node.createPlayer(BigInt(guild.id));
 	}
 
-	/** Checks whether the queue holds less items than the limit. */
+	/** Checks whether the queue holds fewer items than the limit. */
 	get canAddToQueue(): boolean {
 		return this.queue.length < MusicController.limit;
 	}
 
 	/**
-	 * Gets the voice state of the application within the guild.
+	 * Gets the voice state of a member within a guild.
 	 *
-	 * @param guild - The guild.
+	 * @param member - The member whose voice state to get.
 	 * @returns The voice state or `undefined`.
 	 */
-	async getState(member: Member): Promise<VoiceState | undefined> {
+	getState(member: Member): Promise<VoiceState | undefined> {
 		return this.guild.voiceStates.resolve(member.user.id);
 	}
 
@@ -71,8 +71,11 @@ class MusicController extends Controller {
 	 * @param listing - The song listing to add to queue.
 	 * @returns
 	 */
-	addToQueue(listing: SongListing): unknown {
-		if (this.current) return this.queue.push(listing);
+	addToQueue(listing: SongListing): void {
+		if (this.current) {
+			this.queue.push(listing);
+			return;
+		}
 		this.current = listing;
 	}
 

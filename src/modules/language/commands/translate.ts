@@ -1,5 +1,6 @@
 import {
 	ApplicationCommandChoice,
+	Client,
 	Interaction,
 	InteractionApplicationCommandData,
 	InteractionResponseType,
@@ -15,7 +16,7 @@ const command: Command = {
 	name: 'translate',
 	availability: Availability.MEMBERS,
 	description:
-		'Translates a given text from the server language to English or vice-versa.',
+		'Translates a text from the source language to the target language.',
 	options: [{
 		name: 'from',
 		description: 'The source language.',
@@ -47,6 +48,7 @@ interface TranslationResponse {
 	/** The language detected from the text sent to be translated. */
 	// deno-lint-ignore camelcase
 	detected_source_language: string;
+
 	/** The translated text. */
 	text: string;
 }
@@ -55,8 +57,10 @@ interface TranslationResponse {
 interface SupportedLanguage {
 	/** The language code. */
 	language: string;
+
 	/** The language name */
 	name: string;
+
 	/** Whether the formality option is supported for this language. */
 	// deno-lint-ignore camelcase
 	supports_formality: boolean;
@@ -88,7 +92,10 @@ const supportedLanguagesChoices: ApplicationCommandChoice[] = supportedLanguages
 	);
 
 /** Allows the user to translate text from one language to another through the DeepL API. */
-async function translate(interaction: Interaction): Promise<void> {
+async function translate(
+	_: Client,
+	interaction: Interaction,
+): Promise<void> {
 	if (interaction.isAutocomplete()) {
 		const argument = interaction.data.options.find((option) => option.focused)!;
 		const value = argument.value as string;

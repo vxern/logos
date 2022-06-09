@@ -36,15 +36,15 @@ const command: Command = {
 	handle: word,
 };
 
-async function word(interaction: Interaction): Promise<void> {
+async function word(client: Client, interaction: Interaction): Promise<void> {
 	const data = interaction.data! as InteractionApplicationCommandData;
-	const word = data.options[0].value! as string;
+	const word = data.options[0]!.value! as string;
 	const verbose =
 		data.options.find((option) => option.name === 'verbose')?.value ?? true;
 	const show = data.options.find((option) => option.name === 'show')?.value ??
 		false;
 
-	const language = Client.getLanguage(interaction.guild!);
+	const language = client.getLanguage(interaction.guild!);
 	const dictionaries = Object.values(dictionaryLists[language] ?? {});
 	const hasDictionaries = dictionaries.length > 0;
 

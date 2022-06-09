@@ -1,15 +1,17 @@
 import { parse } from 'https://deno.land/std@0.127.0/encoding/csv.ts';
 import { Command } from '../../commands/command.ts';
 import { Dictionary, DictionaryScope } from './data/dictionary.ts';
-import learn from './commands/learn.ts';
+import game from './commands/game.ts';
 import resources from './commands/resources.ts';
 import word from './commands/word.ts';
 import { Client } from '../../client.ts';
 import { SentencePair } from './data/sentence.ts';
 import translate from './commands/translate.ts';
+import article from './commands/article.ts';
 
 const commands: Record<string, Command> = {
-	learn,
+	article,
+	game,
 	resources,
 	translate,
 	word,
@@ -18,8 +20,8 @@ const commands: Record<string, Command> = {
 const dictionaryLists: Record<string, Dictionary[]> = {};
 const sentenceLists: Record<string, SentencePair[]> = {};
 
-async function loadLanguages(): Promise<void> {
-	for (const language of Client.languages.values()) {
+async function loadLanguages(client: Client): Promise<void> {
+	for (const language of client.languages.values()) {
 		dictionaryLists[language] = [];
 	}
 

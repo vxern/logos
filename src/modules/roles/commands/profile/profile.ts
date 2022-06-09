@@ -31,7 +31,10 @@ const command: Command = {
  *
  * @param interaction - The interaction made by the user.
  */
-async function selectRoles(interaction: Interaction): Promise<void> {
+async function selectRoles(
+	client: Client,
+	interaction: Interaction,
+): Promise<void> {
 	const navigation = {
 		root: {
 			type: RoleCategoryType.CATEGORY_GROUP,
@@ -49,7 +52,7 @@ async function selectRoles(interaction: Interaction): Promise<void> {
 		index: 0,
 	};
 
-	const language = Client.getLanguage(interaction.guild!);
+	const language = client.getLanguage(interaction.guild!);
 
 	const browsing = {
 		interaction: interaction,

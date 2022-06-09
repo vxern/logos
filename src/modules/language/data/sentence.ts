@@ -2,6 +2,7 @@
 interface SentencePair {
 	/** The source sentence. */
 	sentence: string;
+
 	/** The translation of the sentence. */
 	translation: string;
 }
@@ -13,8 +14,10 @@ interface SentencePair {
 interface SentenceSelection {
 	/** The selected sentence pair. */
 	pair: SentencePair;
+
 	/** The word which fits into the blank in the word. */
 	word: string;
+
 	/** Words to choose from to fit into the blank. */
 	choices: string[];
 }

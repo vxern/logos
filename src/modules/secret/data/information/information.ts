@@ -7,14 +7,14 @@ import rules from './rules.ts';
 interface Section {
 	image: string;
 	color: number;
-	generateEmbed: (guild: Guild) => Promise<EmbedPayload | undefined>;
+	generateEmbed: (guild: Guild) => Promise<EmbedPayload>;
 }
 
-interface Information {
+interface InformationSections {
 	[key: string]: Section;
 }
 
-const information: Information = {
+const information: InformationSections = {
 	rules: {
 		image: 'https://i.imgur.com/wRBpXcY.png',
 		color: fromHex('#ff9a76'),
@@ -62,7 +62,7 @@ const information: Information = {
       ) {
         fields.push({
           name: `${bold(title.toUpperCase())}`,
-          value: await generateCategoryDescription(guild),
+          value: await generateCategoryDescription(client, guild),
           inline: false,
         });
       }
@@ -75,8 +75,9 @@ const information: Information = {
 	invite: {
 		image: 'https://i.imgur.com/snJaKYm.png',
 		color: fromHex('#637373'),
-		generateEmbed: async (guild: Guild) => {
+		generateEmbed: async (guild) => {
 			const invite = await getInvite(guild);
+
 			return {
 				fields: [{
 					name: '🔗  PERMANENT INVITE LINK',
@@ -94,5 +95,6 @@ async function getChannelMention(guild: Guild, name: string): Promise<string> {
 	);
 }
 
-export { getChannelMention };
 export default information;
+export { getChannelMention };
+export type { Section };

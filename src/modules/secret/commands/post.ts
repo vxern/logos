@@ -12,6 +12,7 @@ import { bold, capitalise } from '../../../formatting.ts';
 import { fromHex } from '../../../utils.ts';
 import information, {
 	getChannelMention,
+	Section,
 } from '../data/information/information.ts';
 
 const command: Command = {
@@ -28,24 +29,37 @@ const command: Command = {
 	}],
 };
 
-async function rules(interaction: Interaction) {
-	const embeds: EmbedPayload[] = [];
-	for (const [_, section] of Object.entries(information)) {
-		const embed = await section.generateEmbed(interaction.guild!);
-		if (!embed) continue;
+async function rules(_: Client, interaction: Interaction): Promise<void> {
+	const rawEmbeds = await Promise.all(
+		Object.values(information).map<Promise<[Section, EmbedPayload]>>(
+			(section) => {
+				return new Promise((resolve) => {
+					section.generateEmbed(interaction.guild!).then((embed) => {
+						resolve([section, embed]);
+					});
+				});
+			},
+		),
+	);
+
+	const embeds = rawEmbeds.map(([section, embed]) => {
 		// embed.title = name.toUpperCase();
 		embed.color = section.color;
 		// embed.image = { url: section.image };
-		embeds.push(embed);
-	}
+
+		return embed;
+	});
 
 	interaction.respond({
 		embeds: embeds,
 	});
 }
 
-async function welcome(interaction: Interaction) {
-	const language = Client.getLanguage(interaction.guild!);
+async function welcome(
+	client: Client,
+	interaction: Interaction,
+): Promise<void> {
+	const language = client.getLanguage(interaction.guild!);
 
 	interaction.respond({
 		embeds: [{

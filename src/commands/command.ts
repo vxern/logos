@@ -18,6 +18,7 @@ import { roles } from '../modules/roles/module.ts';
 import { resolveGuildRole } from '../modules/roles/data/structures/role.ts';
 import { Availability } from './availability.ts';
 import { Option, OptionType } from './option.ts';
+import configuration from '../configuration.ts';
 
 /** An application command with an optional handler for its execution. */
 interface Command extends ApplicationCommandPartialBase<Option> {
@@ -32,9 +33,7 @@ interface Command extends ApplicationCommandPartialBase<Option> {
  *
  * @param interaction The interaction to be handled.
  */
-function unimplemented(
-	interaction: ApplicationCommandInteraction,
-): void {
+function unimplemented(interaction: ApplicationCommandInteraction): void {
 	interaction.respond({
 		type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
 		embeds: [{
@@ -106,8 +105,9 @@ function unifyHandlers(command: Command): InteractionHandler {
 		}
 	}
 
-	return (interaction) =>
+	return (client, interaction) =>
 		handlers.get(interaction.subCommandGroup)!.get(interaction.subCommand)!(
+			client,
 			interaction,
 		);
 }
@@ -130,7 +130,8 @@ async function createPermissions(
 
 		memberRoleIDs.push(role.id);
 	}
-	const moderatorRoleID = (await resolveGuildRole(guild, roles.moderator))?.id;
+	const moderatorRoleID =
+		(await resolveGuildRole(guild, configuration.guilds.moderator.role))?.id;
 
 	for (const [id, guildCommand] of guildCommands) {
 		const guildCommandPermissions: ApplicationCommandPermissionPayload[] = [];

@@ -39,7 +39,7 @@ function resolveRoles(
 	language: string | undefined,
 ): Role[] {
 	if (collection.type === RoleCollectionType.COLLECTION_LOCALISED) {
-		return collection.lists![language!];
+		return collection.lists![language!]!;
 	}
 	return collection.list!;
 }

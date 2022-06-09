@@ -1,7 +1,5 @@
-import dayjs from 'https://cdn.skypack.dev/dayjs';
-import relativeTime from 'https://cdn.skypack.dev/dayjs/plugin/relativeTime';
-dayjs.extend(relativeTime);
-import { Guild, Interaction } from '../../../../deps.ts';
+import { dayjs, Guild, Interaction } from '../../../../deps.ts';
+import { Client } from '../../../client.ts';
 import { Availability } from '../../../commands/availability.ts';
 import { Command } from '../../../commands/command.ts';
 import { OptionType } from '../../../commands/option.ts';
@@ -31,7 +29,7 @@ const command: Command = {
 	}],
 };
 
-function bot(interaction: Interaction): void {
+function bot(_: Client, interaction: Interaction): void {
 	const application = interaction.client.user!;
 
 	interaction.respond({
@@ -49,7 +47,6 @@ ${
 						'Rich social interactions',
 						'Intuitive role management',
 						'Translation and morphology look-ups',
-						'Event scheduling',
 						'Music playback',
 						'Article creation',
 						'Server structure synchronisation',
@@ -74,7 +71,7 @@ ${
 	});
 }
 
-async function guild(interaction: Interaction): Promise<void> {
+async function guild(_: Client, interaction: Interaction): Promise<void> {
 	const guild = interaction.guild!;
 	const createdAt = dayjs(guild.timestamp);
 
@@ -126,33 +123,42 @@ async function guild(interaction: Interaction): Promise<void> {
 }
 
 async function getProficiencyDistribution(guild: Guild): Promise<string> {
-	const members = (await guild.members.fetchList(1000)).filter((member) =>
-		!member.user.bot
+	const memberList = await guild.members.fetchList(1000);
+	const userMembers = memberList.filter((member) => !member.user.bot);
+	const memberRoles = await Promise.all(
+		userMembers.map((member) =>
+			member.roles.array().then((roles) => roles.map((role) => role.name))
+		),
 	);
 
 	const proficiencies = getProficiencyCategory().collection!.list!;
 	const proficiencyNames = proficiencies.map((proficiency) => proficiency.name);
 
-	const distribution = Array.from({ length: proficiencies.length }, () => 0);
-
-	for (const member of members) {
-		const roleNames = (await member.roles.array()).map((role) => role.name);
-		for (let i = 0; i < proficiencies.length; i++) {
-			if (roleNames.includes(proficiencyNames[i])) {
-				distribution[i]++;
-				continue;
+	const proficiencyDistribution = memberRoles.reduce(
+		(distribution, roles) => {
+			for (let i = 0; i < proficiencyNames.length; i++) {
+				if (roles.includes(proficiencyNames[i]!)) {
+					distribution[i] += 1;
+				}
 			}
-		}
-	}
 
-	const proficiencyTags = (await guild.roles.fetchAll())
+			return distribution;
+		},
+		Array.from(
+			{ length: proficiencies.length },
+			() => 0,
+		),
+	);
+
+	const roles = await guild.roles.fetchAll();
+	const proficiencyTags = roles
 		.filter((role) => proficiencyNames.includes(role.name))
 		.map((role) => mention(role.id, MentionType.ROLE));
 
 	return displayProficiencyDistribution(
 		proficiencyTags,
-		members.length,
-		distribution,
+		userMembers.length,
+		proficiencyDistribution,
 	);
 }
 
@@ -161,9 +167,10 @@ function displayProficiencyDistribution(
 	memberCount: number,
 	distribution: number[],
 ): string {
-	const without = memberCount - distribution.reduce((a, b) => a + b, 0);
+	const withoutProficiencyRoleCount = memberCount -
+		distribution.reduce((a, b) => a + b, 0);
 
-	distribution.unshift(without);
+	distribution.unshift(withoutProficiencyRoleCount);
 	proficiencyTags.unshift(`without a proficiency role.`);
 
 	const proficiencyDistributionPrinted = distribution.map(

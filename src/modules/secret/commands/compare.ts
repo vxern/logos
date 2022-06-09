@@ -1,7 +1,9 @@
 import {
+	Client,
 	colors,
 	Embed,
 	Guild,
+	Interaction,
 	InteractionResponseType,
 } from '../../../../deps.ts';
 import secrets from '../../../../secrets.ts';
@@ -22,69 +24,7 @@ const command: Command = {
 			description:
 				'Compares the server\'s server structure to that of the template guild.',
 			type: OptionType.SUB_COMMAND,
-			handle: async (interaction) => {
-				const source = (await interaction.client.guilds.get(
-					secrets.modules.secret.template.guild.id,
-				))!;
-				const target = interaction.guild!;
-
-				console.log(
-					colors.yellow(
-						`Analysing structural differences between template guild and ${
-							colors.bold(target.name!)
-						} as per ${colors.bold(interaction.user.username)}'s request...'`,
-					),
-				);
-				const comparison = await analyseStructuralDifferences({
-					source: source,
-					target: target,
-				});
-
-				const embed = new Embed();
-				embed.setTitle(
-					(comparison.categories.length === 0 &&
-							comparison.channels.length === 0)
-						? 'Structure match'
-						: 'Missing channels',
-				);
-				if (comparison.channels.length !== 0) {
-					embed.setDescription(
-						codeMultiline(
-							comparison.channels.map((channel) => channel.name).join('\n'),
-						),
-					);
-				} else {
-					if (comparison.categories.length === 0) {
-						embed.setDescription(
-							`The server structure of ${
-								bold(target.name!)
-							} matches that of the template guild.`,
-						);
-					}
-				}
-
-				if (comparison.categories.length !== 0) {
-					embed.setFields(comparison.categories.map((category) => {
-						return {
-							name: category.category.name,
-							value: codeMultiline(
-								category.channels.map((channel) => channel.name)
-									.join(
-										'\n',
-									),
-							),
-						};
-					}));
-				}
-
-				interaction.respond({
-					type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-					ephemeral: true,
-					embeds: [
-						embed,
-					],
-				});
-			},
+			handle: compareServerStructures,
 		}, {
 			name: 'roles',
 			description:
@@ -93,6 +33,73 @@ const command: Command = {
 		}],
 	}],
 };
+
+async function compareServerStructures(
+	_: Client,
+	interaction: Interaction,
+): Promise<void> {
+	const source = (await interaction.client.guilds.get(
+		secrets.modules.secret.template.guild.id,
+	))!;
+	const target = interaction.guild!;
+
+	console.log(
+		colors.yellow(
+			`Analysing structural differences between template guild and ${
+				colors.bold(target.name!)
+			} as per ${colors.bold(interaction.user.username)}'s request...'`,
+		),
+	);
+	const comparison = await analyseStructuralDifferences({
+		source: source,
+		target: target,
+	});
+
+	const embed = new Embed();
+	embed.setTitle(
+		(comparison.categories.length === 0 &&
+				comparison.channels.length === 0)
+			? 'Structure match'
+			: 'Missing channels',
+	);
+	if (comparison.channels.length !== 0) {
+		embed.setDescription(
+			codeMultiline(
+				comparison.channels.map((channel) => channel.name).join('\n'),
+			),
+		);
+	} else {
+		if (comparison.categories.length === 0) {
+			embed.setDescription(
+				`The server structure of ${
+					bold(target.name!)
+				} matches that of the template guild.`,
+			);
+		}
+	}
+
+	if (comparison.categories.length !== 0) {
+		embed.setFields(comparison.categories.map((category) => {
+			return {
+				name: category.category.name,
+				value: codeMultiline(
+					category.channels.map((channel) => channel.name)
+						.join(
+							'\n',
+						),
+				),
+			};
+		}));
+	}
+
+	interaction.respond({
+		type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+		ephemeral: true,
+		embeds: [
+			embed,
+		],
+	});
+}
 
 async function analyseStructuralDifferences(
 	{ source, target }: { source: Guild; target: Guild },

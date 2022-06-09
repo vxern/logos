@@ -205,7 +205,7 @@ class Client extends DiscordClient {
 
 	setupControllers(guild: Guild): void {
 		this.logging.set(guild.id, new LoggingController(guild));
-		this.music.set(guild.id, new MusicController(guild));
+		this.music.set(guild.id, new MusicController(this, guild));
 	}
 
 	setupServices(): void {
