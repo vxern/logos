@@ -1,3 +1,5 @@
+import { dayjs } from '../deps.ts';
+
 /**
  * Modifies a string of text to appear bold within Discord.
  *
@@ -70,6 +72,18 @@ function list(items: string[]): string {
 	return items.map((item) => `• ${item}`).join('\n');
 }
 
+/**
+ * Taking a unix timestamp, returns a formatted, human-readable time expression.
+ *
+ * @param unix - Unix timestamp.
+ * @returns The formatted, human-readable time expression.
+ */
+function time(unix: number): string {
+	const dateTime = dayjs(unix);
+
+	return `${dateTime.format('D MMMM YYYY')} (${dateTime.fromNow()})`;
+}
+
 /** Defines the type of Discord mention. */
 enum MentionType {
 	/** A channel mention. */
@@ -112,5 +126,6 @@ export {
 	list,
 	mention,
 	MentionType,
+	time,
 	underlined,
 };

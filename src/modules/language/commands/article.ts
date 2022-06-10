@@ -1,7 +1,6 @@
 import {
 	AutocompleteInteraction,
 	Collector,
-	dayjs,
 	Interaction,
 	InteractionApplicationCommandData,
 	InteractionModalSubmitData,
@@ -13,7 +12,7 @@ import { Command } from '../../../commands/command.ts';
 import { OptionType } from '../../../commands/option.ts';
 import configuration from '../../../configuration.ts';
 import { Article } from '../../../database/structs/article.ts';
-import { mention, MentionType } from '../../../formatting.ts';
+import { mention, MentionType, time } from '../../../formatting.ts';
 import { paginate, toModal } from '../../../utils.ts';
 
 const command: Command = {
@@ -189,7 +188,7 @@ function showArticle({
 			title: article.title,
 			description: `
 Contributors: ${contributorsString}
-Last updated: ${dayjs(article.createdAt!).fromNow()}.`,
+Last updated: ${time(article.createdAt!)}).`,
 			color: configuration.responses.colors.blue,
 		},
 		view: {
