@@ -69,21 +69,20 @@ ${codeMultiline(reason)}`,
 	'articleSubmit': {
 		title: 'Article submitted',
 		message: (article, by) =>
-			`An article has been submitted by ${mentionUser(by.user)}.
+			`An article has been submitted by ${mentionUser(by.user)}:
 
-${codeMultiline(`${article.title}\n\n${article.body}`)}`,
+${bold(article.title)}
+
+${article.body}`,
 		filter: (origin, _article, by) => origin.id === by.guild.id,
 		color: configuration.responses.colors.green,
 	},
 	'articleUpdate': {
 		title: 'Article updated',
 		message: (before, after, by) =>
-			`An article has been updated by ${mentionUser(by.user)}.
+			`The article ${code(before.title)} has been updated by ${mentionUser(by.user)}:
 
-${bold('BEFORE')}
-${codeMultiline(`${before.title}\n\n${before.body}`)}
-${bold('AFTER')}
-${codeMultiline(`${after.title}\n\n${after.body}`)}`,
+${after.body}`,
 		filter: (origin, _before, _after, by) => origin.id === by.guild.id,
 		color: configuration.responses.colors.blue,
 	},
