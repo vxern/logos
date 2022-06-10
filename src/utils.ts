@@ -89,7 +89,7 @@ async function findChannelByName(
 	name: string,
 ): Promise<GuildChannel | undefined> {
 	const channels = await guild.channels.array();
-	return channels.find((channel) => channel.name.includes(name));
+	return channels.find((channel) => channel.name.toLowerCase().includes(name.toLowerCase()));
 }
 
 /**
