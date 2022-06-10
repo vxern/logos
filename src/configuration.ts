@@ -44,14 +44,13 @@ export default {
 					minimum: 30,
 					maximum: 4000, // The maximum length of a field is 4,000.
 				},
-				/*
 				footer: {
 					label: 'Additional information / notes',
 					style: TextInputStyle.PARAGRAPH,
+          required: false,
 					minimum: 10,
 					maximum: 500,
 				},
-        */
 			},
 		},
 		// Configuration settings pertaining to user verification.
