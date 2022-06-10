@@ -327,24 +327,40 @@ async function paginate<T>(
 	{
 		interaction,
 		elements,
-		generateView,
+		embed,
+		view,
 	}: {
 		interaction: Interaction;
 		elements: T[];
-		generateView: (element: T, index: number) => EmbedPayload;
+		embed: Omit<EmbedPayload, 'fields' | 'footer'>;
+		view: {
+			title: string;
+			generate: (element: T) => string;
+		};
 	},
 ): Promise<void> {
 	let index = 0;
 
+	const isFirst = () => index === 0;
+	const isLast = () => index === elements.length - 1;
+
 	function generateEmbed(): EmbedPayload {
-		return generateView(elements[index]!, index);
+		const field = view.generate(elements[index]!);
+
+		return {
+			...embed,
+			fields: [{
+				name: elements.length === 1
+					? view.title
+					: `${view.title} ~ Page ${index + 1}/${elements.length}`,
+				value: field,
+			}],
+			footer: isLast() ? undefined : { text: 'Continued on the next page...' },
+		};
 	}
 
 	const response = await interaction.respond({ embeds: [generateEmbed()] });
 	const message = await response.fetchResponse();
-
-	const isFirst = () => index === 0;
-	const isLast = () => index === elements.length - 1;
 
 	async function setReactions(): Promise<void> {
 		await message.reactions.removeAll();
