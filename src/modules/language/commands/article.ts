@@ -202,7 +202,7 @@ function showArticle({
 			description: `
 Contributors: ${contributorsString}
 Created: ${time(article.createdAt!)}
-Last updated: ${time(lastUpdated)}).`,
+Last updated: ${time(lastUpdated)}.`,
 			color: configuration.responses.colors.blue,
 		},
 		view: {

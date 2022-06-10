@@ -331,7 +331,7 @@ function shuffle<T>(array: T[]): T[] {
  * Paginates an array of elements, allowing the user to browse between pages
  * in an embed view.
  */
-function paginate<T>(
+async function paginate<T>(
 	{
 		interaction,
 		elements,
@@ -348,7 +348,7 @@ function paginate<T>(
 		};
 		show: boolean;
 	},
-): void {
+): Promise<void> {
 	let index = 0;
 
 	const isFirst = () => index === 0;
@@ -396,17 +396,20 @@ function paginate<T>(
 		};
 	}
 
-	interaction.respond({
+	const response = await interaction.respond({
 		embeds: [generateEmbed()],
 		components: [generateButtons()],
 		ephemeral: !show,
 	});
+  const message = await response.fetchResponse();
 
 	const collector = new Collector({
 		event: 'interactionCreate',
 		client: interaction.client,
 		filter: (selection: Interaction) => {
 			if (!selection.isMessageComponent()) return false;
+
+      if (selection.message.id !== message.id) return false;
 
 			if (selection.user.id !== interaction.user.id) return false;
 
