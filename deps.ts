@@ -1,5 +1,5 @@
 /** Discord API library. */
-export * from 'https://raw.githubusercontent.com/harmonyland/harmony/main/mod.ts';
+export * from 'https://raw.githubusercontent.com/vxern/harmony/main/mod.ts';
 
 /** Database connection. */
 export * as faunadb from 'https://deno.land/x/fauna@5.0.0-deno-alpha9/mod.ts';
