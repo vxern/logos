@@ -329,6 +329,7 @@ async function paginate<T>(
 		elements,
 		embed,
 		view,
+		show,
 	}: {
 		interaction: Interaction;
 		elements: T[];
@@ -337,6 +338,7 @@ async function paginate<T>(
 			title: string;
 			generate: (element: T) => string;
 		};
+		show: boolean;
 	},
 ): Promise<void> {
 	let index = 0;
@@ -359,7 +361,10 @@ async function paginate<T>(
 		};
 	}
 
-	const response = await interaction.respond({ embeds: [generateEmbed()] });
+	const response = await interaction.respond({
+		embeds: [generateEmbed()],
+		ephemeral: !show,
+	});
 	const message = await response.fetchResponse();
 
 	async function setReactions(): Promise<void> {
