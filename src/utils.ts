@@ -3,13 +3,17 @@ import {
 	ApplicationCommand,
 	ApplicationCommandInteraction,
 	ApplicationCommandOption,
+	Collector,
+	EmbedPayload,
 	Guild,
 	GuildChannel,
 	GuildTextChannel,
+	Interaction,
 	InteractionResponseModal,
 	Invite,
 	MessageComponentData,
 	MessageComponentType,
+	MessageReaction,
 	TextInputStyle,
 	User,
 } from '../deps.ts';
@@ -313,6 +317,75 @@ function shuffle<T>(array: T[]): T[] {
 	return shuffled;
 }
 
+const validReactions = ['⬅️', '➡️'];
+
+/**
+ * Paginates an array of elements, allowing the user to browse between pages
+ * in an embed view.
+ */
+async function paginate<T>(
+	{
+		interaction,
+		elements,
+		generateView,
+	}: {
+		interaction: Interaction;
+		elements: T[];
+		generateView: (element: T, index: number) => EmbedPayload;
+	},
+): Promise<void> {
+	let index = 0;
+
+	function generateEmbed(): EmbedPayload {
+		return generateView(elements[index]!, index);
+	}
+
+	const response = await interaction.respond({ embeds: [generateEmbed()] });
+	const message = await response.fetchResponse();
+
+	const isFirst = () => index === 0;
+	const isLast = () => index === elements.length - 1;
+
+	async function setReactions(): Promise<void> {
+		await message.reactions.removeAll();
+		if (!isFirst()) await message.addReaction('⬅️');
+		if (!isLast()) await message.addReaction('➡️');
+	}
+
+	setReactions();
+
+	const collector = new Collector({
+		event: 'messageReactionAdd',
+		client: interaction.client,
+		filter: (reaction: MessageReaction, user: User) => {
+			if (user.id !== interaction.user.id) return false;
+
+			if (reaction.message.id !== message.id) return false;
+
+			if (!validReactions.includes(reaction.emoji.name!)) return false;
+
+			return true;
+		},
+		deinitOnEnd: true,
+	});
+
+	collector.on('collect', (reaction: MessageReaction, _) => {
+		switch (reaction.emoji.name) {
+			case '⬅️':
+				if (!isFirst()) index--;
+				break;
+			case '➡️':
+				if (!isLast()) index++;
+				break;
+		}
+
+		setReactions();
+		message.edit({ embeds: [generateEmbed()] });
+	});
+
+	collector.collect();
+}
+
 export {
 	addParametersToURL,
 	displayCommand,
@@ -324,6 +397,7 @@ export {
 	getLanguageCode,
 	getMissingKeys,
 	mentionUser,
+	paginate,
 	random,
 	shuffle,
 	time,
