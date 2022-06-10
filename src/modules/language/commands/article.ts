@@ -81,7 +81,11 @@ async function create(client: Client, interaction: Interaction): Promise<void> {
 
 	await client.database.createArticle(article);
 
-	client.logging.get(interaction.guild!.id)?.log('articleAdd', article);
+	client.logging.get(interaction.guild!.id)?.log(
+		'articleSubmit',
+		article,
+		submission.member!,
+	);
 
 	submission.respond({
 		type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
@@ -110,11 +114,14 @@ async function view(client: Client, interaction: Interaction): Promise<void> {
 
 	const data = interaction.data as InteractionApplicationCommandData;
 	const index = parseInt(data.options[0]!.options![0]!.value!);
+	const show = data.options[0]!.options!.find((option) => option.name === 'show')?.value ??
+		false;
 	const article = articles[index]! as Article;
 
 	return showArticle({
 		interaction: interaction,
 		article: article,
+		show: show,
 	});
 }
 
@@ -147,9 +154,11 @@ function showResults(
 function showArticle({
 	interaction,
 	article,
+	show,
 }: {
 	interaction: Interaction;
 	article: Article;
+	show: boolean;
 }): void {
 	const contributorsString = article.contributors.map((id) =>
 		mention(id, MentionType.USER)
@@ -181,6 +190,10 @@ function showArticle({
 		[],
 	);
 
+	const lastUpdated = (!article.changes || article.changes.length === 0)
+		? article.createdAt!
+		: article.changes[article.changes.length - 1]!.createdAt;
+
 	paginate({
 		interaction: interaction,
 		elements: pages,
@@ -188,13 +201,15 @@ function showArticle({
 			title: article.title,
 			description: `
 Contributors: ${contributorsString}
-Last updated: ${time(article.createdAt!)}).`,
+Created: ${time(article.createdAt!)}
+Last updated: ${time(lastUpdated)}).`,
 			color: configuration.responses.colors.blue,
 		},
 		view: {
 			title: 'Answer',
 			generate: (page) => page,
 		},
+		show: show,
 	});
 }
 
