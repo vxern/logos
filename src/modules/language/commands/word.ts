@@ -1,7 +1,6 @@
 import {
 	Interaction,
 	InteractionApplicationCommandData,
-	InteractionResponseType,
 } from '../../../../deps.ts';
 import { Client } from '../../../client.ts';
 import { Availability } from '../../../commands/availability.ts';
@@ -48,10 +47,7 @@ async function word(client: Client, interaction: Interaction): Promise<void> {
 	const dictionaries = Object.values(dictionaryLists[language] ?? {});
 	const hasDictionaries = dictionaries.length > 0;
 
-	const response = await interaction.respond({
-		type: InteractionResponseType.DEFERRED_CHANNEL_MESSAGE,
-		ephemeral: !hasDictionaries || !show,
-	});
+	const response = await interaction.defer(!hasDictionaries || !show);
 
 	if (!hasDictionaries) {
 		console.log(
