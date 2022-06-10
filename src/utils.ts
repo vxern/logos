@@ -3,6 +3,7 @@ import {
 	ApplicationCommand,
 	ApplicationCommandInteraction,
 	ApplicationCommandOption,
+	ButtonStyle,
 	Collector,
 	EmbedPayload,
 	Guild,
@@ -12,10 +13,11 @@ import {
 	InteractionResponseModal,
 	Invite,
 	MessageComponentData,
+	MessageComponentInteraction,
 	MessageComponentType,
-	MessageReaction,
 	TextInputStyle,
 	User,
+InteractionResponseType,
 } from '../deps.ts';
 import languages from 'https://deno.land/x/language@v0.1.0/languages.ts';
 import { Command } from './commands/command.ts';
@@ -255,6 +257,12 @@ interface Form {
 			 */
 			minimum: number;
 
+      /** Whether this text field is required to be filled or not. */
+      required?: boolean;
+
+      /** The filled content of this text field. */
+      value?: string;
+
 			/**
 			 * The maximum number of characters allowed to be inputted into this
 			 * text field.
@@ -283,6 +291,8 @@ function toModal(form: Form): InteractionResponseModal {
 						customID: `${id}_${name}`,
 						label: field.label,
 						style: field.style,
+            value: field.value,
+            required: field.required,
 						minLength: field.minimum === 0 ? undefined : field.minimum,
 						maxLength: field.maximum,
 					},
@@ -317,13 +327,11 @@ function shuffle<T>(array: T[]): T[] {
 	return shuffled;
 }
 
-const validReactions = ['⬅️', '➡️'];
-
 /**
  * Paginates an array of elements, allowing the user to browse between pages
  * in an embed view.
  */
-async function paginate<T>(
+function paginate<T>(
 	{
 		interaction,
 		elements,
@@ -340,7 +348,7 @@ async function paginate<T>(
 		};
 		show: boolean;
 	},
-): Promise<void> {
+): void {
 	let index = 0;
 
 	const isFirst = () => index === 0;
@@ -361,47 +369,74 @@ async function paginate<T>(
 		};
 	}
 
-	const response = await interaction.respond({
-		embeds: [generateEmbed()],
-		ephemeral: !show,
-	});
-	const message = await response.fetchResponse();
+	function generateButtons(): MessageComponentData {
+		const buttons: MessageComponentData[] = [];
 
-	async function setReactions(): Promise<void> {
-		await message.reactions.removeAll();
-		if (!isFirst()) await message.addReaction('⬅️');
-		if (!isLast()) await message.addReaction('➡️');
+		if (!isFirst()) {
+			buttons.push({
+				type: MessageComponentType.BUTTON,
+				customID: 'ARTICLE|PREVIOUS',
+				style: ButtonStyle.GREY,
+				label: '🡨',
+			});
+		}
+
+		if (!isLast()) {
+			buttons.push({
+				type: MessageComponentType.BUTTON,
+				customID: 'ARTICLE|NEXT',
+				style: ButtonStyle.GREY,
+				label: '🡪',
+			});
+		}
+
+		return {
+			type: MessageComponentType.ACTION_ROW,
+			components: buttons,
+		};
 	}
 
-	setReactions();
+	interaction.respond({
+		embeds: [generateEmbed()],
+		components: [generateButtons()],
+		ephemeral: !show,
+	});
 
 	const collector = new Collector({
-		event: 'messageReactionAdd',
+		event: 'interactionCreate',
 		client: interaction.client,
-		filter: (reaction: MessageReaction, user: User) => {
-			if (user.id !== interaction.user.id) return false;
+		filter: (selection: Interaction) => {
+			if (!selection.isMessageComponent()) return false;
 
-			if (reaction.message.id !== message.id) return false;
+			if (selection.user.id !== interaction.user.id) return false;
 
-			if (!validReactions.includes(reaction.emoji.name!)) return false;
+			if (!selection.customID.startsWith('ARTICLE')) return false;
 
 			return true;
 		},
 		deinitOnEnd: true,
 	});
 
-	collector.on('collect', (reaction: MessageReaction, _) => {
-		switch (reaction.emoji.name) {
-			case '⬅️':
+	collector.on('collect', (selection: MessageComponentInteraction) => {
+		const action = selection.customID.split('|')[1]!;
+
+		switch (action) {
+			case 'PREVIOUS':
 				if (!isFirst()) index--;
 				break;
-			case '➡️':
+			case 'NEXT':
 				if (!isLast()) index++;
 				break;
 		}
 
-		setReactions();
-		message.edit({ embeds: [generateEmbed()] });
+    selection.respond({
+      type: InteractionResponseType.DEFERRED_MESSAGE_UPDATE,
+    });
+
+		interaction.editResponse({
+			embeds: [generateEmbed()],
+			components: [generateButtons()],
+		});
 	});
 
 	collector.collect();
