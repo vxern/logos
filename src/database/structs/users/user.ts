@@ -1,5 +1,4 @@
 import { Article } from '../articles/article.ts';
-import { ArticleUpdate } from '../articles/article-update.ts';
 import { Praise } from './praise.ts';
 
 /** Represents a user account. */
@@ -10,19 +9,19 @@ interface Account {
 	/** Data pertaining to articles. */
 	articles?: {
 		/** Articles submitted by this user. */
-		submissions: Article[];
+		submissions?: Article[];
 
-		/** Article edits made by this user. */
-		edits: ArticleUpdate[];
+		/** Timestamps of article updates made by this user. */
+		updatesTimestamps?: number[];
 	};
 
 	/** Data pertaining to praises. */
 	praises?: {
 		/** List of praises this user has received. */
-		received: Praise[];
+		received?: Praise[];
 
 		/** Timestamp of when this user last praised another user. */
-		lastSent: number;
+		lastSent?: number;
 	};
 }
 

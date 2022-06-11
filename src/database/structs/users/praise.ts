@@ -7,9 +7,6 @@ interface Praise {
 
 	/** Comment attached to this praise. */
 	comment: string;
-
-	/** Timestamp of when this praise was given. */
-	timestamp?: number;
 }
 
 export type { Praise };
