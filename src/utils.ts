@@ -33,6 +33,16 @@ import { code } from './formatting.ts';
 type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
 
 /**
+ * 'Unpacks' a nested type from an array, function or promise.
+ *
+ * @typeParam T - The type from which to extract the nested type.
+ */
+type Unpacked<T> = T extends (infer U)[] ? U
+	: T extends (...args: unknown[]) => infer U ? U
+	: T extends Promise<infer U> ? U
+	: T;
+
+/**
  * Compares two command or option objects to determine which keys one or the
  * other is missing.
  *
@@ -464,4 +474,4 @@ export {
 	time,
 	toModal,
 };
-export type { Form, Optional };
+export type { Form, Optional, Unpacked };
