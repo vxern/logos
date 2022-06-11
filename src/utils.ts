@@ -11,13 +11,13 @@ import {
 	GuildTextChannel,
 	Interaction,
 	InteractionResponseModal,
+	InteractionResponseType,
 	Invite,
 	MessageComponentData,
 	MessageComponentInteraction,
 	MessageComponentType,
 	TextInputStyle,
 	User,
-InteractionResponseType,
 } from '../deps.ts';
 import languages from 'https://deno.land/x/language@v0.1.0/languages.ts';
 import { Command } from './commands/command.ts';
@@ -89,7 +89,9 @@ async function findChannelByName(
 	name: string,
 ): Promise<GuildChannel | undefined> {
 	const channels = await guild.channels.array();
-	return channels.find((channel) => channel.name.toLowerCase().includes(name.toLowerCase()));
+	return channels.find((channel) =>
+		channel.name.toLowerCase().includes(name.toLowerCase())
+	);
 }
 
 /**
@@ -257,11 +259,11 @@ interface Form {
 			 */
 			minimum: number;
 
-      /** Whether this text field is required to be filled or not. */
-      required?: boolean;
+			/** Whether this text field is required to be filled or not. */
+			required?: boolean;
 
-      /** The filled content of this text field. */
-      value?: string;
+			/** The filled content of this text field. */
+			value?: string;
 
 			/**
 			 * The maximum number of characters allowed to be inputted into this
@@ -291,8 +293,8 @@ function toModal(form: Form): InteractionResponseModal {
 						customID: `${id}_${name}`,
 						label: field.label,
 						style: field.style,
-            value: field.value,
-            required: field.required,
+						value: field.value,
+						required: field.required,
 						minLength: field.minimum === 0 ? undefined : field.minimum,
 						maxLength: field.maximum,
 					},
@@ -369,7 +371,7 @@ async function paginate<T>(
 		};
 	}
 
-	function generateButtons(): MessageComponentData {
+	function generateButtons(): MessageComponentData[] {
 		const buttons: MessageComponentData[] = [];
 
 		if (!isFirst()) {
@@ -390,18 +392,18 @@ async function paginate<T>(
 			});
 		}
 
-		return {
+		return buttons.length === 0 ? [] : [{
 			type: MessageComponentType.ACTION_ROW,
 			components: buttons,
-		};
+		}];
 	}
 
 	const response = await interaction.respond({
 		embeds: [generateEmbed()],
-		components: [generateButtons()],
+		components: generateButtons(),
 		ephemeral: !show,
 	});
-  const message = await response.fetchResponse();
+	const message = await response.fetchResponse();
 
 	const collector = new Collector({
 		event: 'interactionCreate',
@@ -409,7 +411,7 @@ async function paginate<T>(
 		filter: (selection: Interaction) => {
 			if (!selection.isMessageComponent()) return false;
 
-      if (selection.message.id !== message.id) return false;
+			if (selection.message.id !== message.id) return false;
 
 			if (selection.user.id !== interaction.user.id) return false;
 
@@ -432,13 +434,13 @@ async function paginate<T>(
 				break;
 		}
 
-    selection.respond({
-      type: InteractionResponseType.DEFERRED_MESSAGE_UPDATE,
-    });
+		selection.respond({
+			type: InteractionResponseType.DEFERRED_MESSAGE_UPDATE,
+		});
 
 		interaction.editResponse({
 			embeds: [generateEmbed()],
-			components: [generateButtons()],
+			components: generateButtons(),
 		});
 	});
 
@@ -462,4 +464,4 @@ export {
 	time,
 	toModal,
 };
-export type { Optional };
+export type { Form, Optional };
