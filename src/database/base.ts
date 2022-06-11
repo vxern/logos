@@ -1,5 +1,7 @@
 import { faunadb } from '../../deps.ts';
 import secrets from '../../secrets.ts';
+import { Unpacked } from '../utils.ts';
+import { Document } from './structs/document.ts';
 
 /**
  * Provides a layer of abstraction over the database solution used to store data,
@@ -26,15 +28,19 @@ class Base {
 	 * @param expression - Fauna expression (query).
 	 * @returns The response object.
 	 */
-	async dispatchQuery(expression: faunadb.Expr): Promise<any> {
+	async dispatchQuery<
+		T extends unknown | unknown[],
+		R = T extends [] ? Document<Unpacked<T>>[] : Document<T>,
+	>(
+		expression: faunadb.Expr,
+	): Promise<R | undefined> {
 		try {
-			const queryResult = (await this.client.query(expression)) as any;
+			const queryResult = (await this.client.query(expression)) as Record<
+				string,
+				unknown
+			>;
 
-			// TODO: Use a precise data type for the query response.
-
-			console.log(queryResult);
-
-			return queryResult;
+			return queryResult! as R;
 		} catch (error) {
 			if (error.description === 'Set not found.') return undefined;
 
