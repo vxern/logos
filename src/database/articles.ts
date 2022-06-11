@@ -1,7 +1,7 @@
-import { faunadb } from "../../deps.ts";
-import { capitalise } from "../formatting.ts";
-import { Base } from "./base.ts";
-import { Article } from "./structs/article.ts";
+import { faunadb } from '../../deps.ts';
+import { capitalise } from '../formatting.ts';
+import { Base } from './base.ts';
+import { Article } from './structs/articles/article.ts';
 
 const $ = faunadb.query;
 
@@ -19,8 +19,8 @@ class Articles extends Base {
 	 * @param language - The language of the articles to fetch.
 	 * @returns The array of articles.
 	 */
-  private async fetchArticles(language: string): Promise<Article[]> {
-    console.log(`Fetching articles for ${capitalise(language)}...`)
+	private async fetchArticles(language: string): Promise<Article[]> {
+		console.log(`Fetching articles for ${capitalise(language)}...`);
 
 		const result = await this.dispatchQuery(
 			$.Map(
@@ -35,12 +35,12 @@ class Articles extends Base {
 			? []
 			: (result.data as any[]).map((result: any) => result.data as Article);
 
-    this.articles.set(language, articles);
+		this.articles.set(language, articles);
 
-    console.log(`Fetched ${articles.length} articles.`);
-    
-    return articles;
-  }
+		console.log(`Fetched ${articles.length} articles.`);
+
+		return articles;
+	}
 
 	/**
 	 * Creates an article document in the database.
@@ -74,4 +74,4 @@ class Articles extends Base {
 	}
 }
 
-export { Articles }
+export { Articles };

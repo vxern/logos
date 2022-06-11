@@ -1,3 +1,5 @@
+import { Article } from '../articles/article.ts';
+import { ArticleUpdate } from '../articles/article-update.ts';
 import { Praise } from './praise.ts';
 
 /** Represents a user account. */
@@ -5,13 +7,22 @@ interface Account {
 	/** User's Discord ID. */
 	id: string;
 
-	/** Data concerning praises given to this user. */
+	/** Data pertaining to articles. */
+	articles?: {
+		/** Articles submitted by this user. */
+		submissions: Article[];
+
+		/** Article edits made by this user. */
+		edits: ArticleUpdate[];
+	};
+
+	/** Data pertaining to praises. */
 	praises?: {
 		/** List of praises this user has received. */
 		received: Praise[];
 
 		/** Timestamp of when this user last praised another user. */
-		lastSent: Date;
+		lastSent: number;
 	};
 }
 
@@ -21,7 +32,7 @@ interface Profile {
 	emoji?: string;
 }
 
-/** Represents a user record. */
+/** Represents a user. */
 interface User {
 	/** User's account data. */
 	account: Account;

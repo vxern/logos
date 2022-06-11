@@ -1,6 +1,6 @@
 import { Member, User } from '../../../../../deps.ts';
 import configuration from '../../../../configuration.ts';
-import { Article } from '../../../../database/structs/article.ts';
+import { Article } from '../../../../database/structs/articles/article.ts';
 import { bold, code, codeMultiline } from '../../../../formatting.ts';
 import { mentionUser } from '../../../../utils.ts';
 import { MessageGenerators } from './generators.ts';
@@ -80,7 +80,9 @@ ${article.body}`,
 	'articleUpdate': {
 		title: 'Article updated',
 		message: (before, after, by) =>
-			`The article ${code(before.title)} has been updated by ${mentionUser(by.user)}:
+			`The article ${code(before.title)} has been updated by ${
+				mentionUser(by.user)
+			}:
 
 ${after.body}`,
 		filter: (origin, _before, _after, by) => origin.id === by.guild.id,
