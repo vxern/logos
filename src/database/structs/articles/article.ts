@@ -1,4 +1,4 @@
-import { Document } from "../document.ts";
+import { Document } from '../document.ts';
 import { ArticleChange } from './article-change.ts';
 
 /** Represents the text content of an article. */
@@ -25,4 +25,21 @@ type Article = ArticleTextContent & {
 	changes?: Document<ArticleChange>[];
 };
 
+function getLastContent(article: Article): ArticleTextContent {
+	const lastChange = (article.changes && article.changes.length !== 0)
+		? article.changes[article.changes.length - 1]!.data.content
+		: undefined;
+
+	if (!lastChange) {
+		return {
+			title: article.title,
+			body: article.body,
+			footer: article.footer,
+		};
+	}
+
+	return lastChange;
+}
+
+export { getLastContent };
 export type { Article, ArticleTextContent };
