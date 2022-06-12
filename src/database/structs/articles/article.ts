@@ -1,3 +1,4 @@
+import { Document } from "../document.ts";
 import { ArticleChange } from './article-change.ts';
 
 /** Represents the text content of an article. */
@@ -21,7 +22,7 @@ type Article = ArticleTextContent & {
 	language: string;
 
 	/** List of changes made to this article. */
-	changes?: ArticleChange[];
+	changes?: Document<ArticleChange>[];
 };
 
 export type { Article, ArticleTextContent };

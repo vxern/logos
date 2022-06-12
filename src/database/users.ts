@@ -1,6 +1,7 @@
-import { faunadb } from "../../deps.ts";
-import { Base } from "./base.ts";
-import { User } from "./structs/users/user.ts";
+import { faunadb } from '../../deps.ts';
+import { Base } from './base.ts';
+import { Document } from './structs/document.ts';
+import { User } from './structs/users/user.ts';
 
 const $ = faunadb.query;
 
@@ -10,22 +11,22 @@ class Users extends Base {
 	 *
 	 * The keys are user IDs, and the values are the bearer of the ID.
 	 */
-	protected readonly users: Map<string, User> = new Map();
+	protected readonly users: Map<string, Document<User>> = new Map();
 
 	/**
 	 * Fetches a user document from the database.
 	 *
 	 * @param id - The user's Discord ID.
-	 * @returns The user or undefined.
+	 * @returns The user document or undefined.
 	 */
-	private async fetchUser(id: string): Promise<User | undefined> {
-		const response = await this.dispatchQuery(
+	private async fetchUser(id: string): Promise<Document<User> | undefined> {
+		const response = await this.dispatchQuery<User>(
 			$.Get($.Match($.FaunaIndex('GetUserByID'), id)),
 		);
 
 		if (!response) return undefined;
 
-		const user = response as User;
+		const user = response;
 
 		this.users.set(id, user);
 
@@ -35,21 +36,17 @@ class Users extends Base {
 	/**
 	 * Creates a user document in the database.
 	 *
-	 * @param id - The user's Discord ID.
-	 * @returns The created user.
+	 * @param user - The user object.
+	 * @returns The created user document.
 	 */
-	private async createUser(id: string): Promise<User> {
-		const userSkeleton: User = { account: { id: id } };
-
-		const response = await this.dispatchQuery(
-			$.Call('CreateUser', userSkeleton),
+	private async createUser(user: User): Promise<Document<User>> {
+		const document = await this.dispatchQuery<User>(
+			$.Call('CreateUser', user),
 		);
 
-		const user = response as User;
+		this.users.set(user.account.id, document!);
 
-		this.users.set(id, user);
-
-		return user;
+		return document!;
 	}
 
 	/**
@@ -60,24 +57,24 @@ class Users extends Base {
 	 * @param id - The ID of the user to get.
 	 * @returns The user.
 	 */
-	async getUser(id: string): Promise<User> {
+	async getUser(id: string): Promise<Document<User>> {
 		return this.preprocessUser(
 			this.users.get(id) ?? await this.fetchUser(id) ??
-				await this.createUser(id),
+				await this.createUser({ account: { id: id } }),
 		);
 	}
 
 	/**
-	 * Taking a user, carries out checks on the data before returning the fixed user
-	 * object.
+	 * Taking a user document, carries out checks on the data before returning the
+	 * fixed user object.
 	 *
-	 * @param user - The user object to process.
+	 * @param document - The user document to process.
 	 * @returns The processed user document.
 	 */
-	private preprocessUser(user: User): User {
+	private preprocessUser(document: Document<User>): Document<User> {
 		// TODO: Implement user preprocessing.
 
-		return user;
+		return document;
 	}
 }
 
