@@ -42,7 +42,13 @@ class Base {
 			>;
 
 			if (!Array.isArray(queryResult.data)) {
+				queryResult.ts = (queryResult.ts as number) / 1000;
+
 				return queryResult! as R;
+			}
+
+			for (const element of queryResult.data) {
+				element.ts = (element.ts as number) / 1000;
 			}
 
 			return queryResult!.data! as unknown as R;
