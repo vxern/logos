@@ -30,7 +30,8 @@ class Base {
 	 */
 	async dispatchQuery<
 		T extends unknown | unknown[],
-		R = T extends [] ? Document<Unpacked<T>>[] : Document<T>,
+		B = Unpacked<T>,
+		R = T extends Array<B> ? Document<B>[] : Document<T>,
 	>(
 		expression: faunadb.Expr,
 	): Promise<R | undefined> {
@@ -40,7 +41,11 @@ class Base {
 				unknown
 			>;
 
-			return queryResult! as R;
+			if (!Array.isArray(queryResult.data)) {
+				return queryResult! as R;
+			}
+
+			return queryResult!.data! as unknown as R;
 		} catch (error) {
 			if (error.description === 'Set not found.') return undefined;
 
