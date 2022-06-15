@@ -51,5 +51,25 @@ function getMostRecentArticleContent({
 	return mostRecentChange.data.content;
 }
 
-export { getMostRecentArticleContent };
+function getContributorReferences({
+	article,
+	changes,
+}: {
+	article: Article;
+	changes: Document<ArticleChange>[];
+}): Reference[] {
+	const contributorsReferences: Reference[] = [article.author];
+	const contributorsIDs: string[] = [article.author.value.id];
+
+	for (const change of changes) {
+		if (!contributorsIDs.includes(change.data.author.value.id)) {
+			contributorsReferences.push(change.data.author);
+			contributorsIDs.push(change.data.author.value.id);
+		}
+	}
+
+	return contributorsReferences;
+}
+
+export { getContributorReferences, getMostRecentArticleContent };
 export type { Article, ArticleTextContent };
