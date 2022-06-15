@@ -59,19 +59,22 @@ export default {
 			// Definitions of fields in the verification form.
 			fields: {
 				reason: {
-					label: 'What is your reason for learning Armenian?',
+					label: (language: string) =>
+						`What is your reason for learning ${language}?`,
 					style: TextInputStyle.PARAGRAPH,
 					minimum: 20,
 					maximum: 300,
 				},
 				aim: {
-					label: 'How will you benefit from being a member?',
+					label: (_language: string) =>
+						'How will you benefit from being a member?',
 					style: TextInputStyle.PARAGRAPH,
 					minimum: 20,
 					maximum: 300,
 				},
 				whereFound: {
-					label: 'How did you find out about Learn Armenian?',
+					label: (language: string) =>
+						`How did you find out about Learn ${language}?`,
 					style: TextInputStyle.SHORT,
 					minimum: 5,
 					maximum: 50,

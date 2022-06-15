@@ -258,7 +258,7 @@ interface Form {
 	fields: {
 		[key: string]: {
 			/** The label on a particular text field. */
-			label: string;
+			label: (language: string) => string;
 
 			/** The 'style' of this text field. */
 			style: TextInputStyle;
@@ -290,7 +290,7 @@ interface Form {
  * @param form - The form to convert.
  * @returns The form converted into a modal.
  */
-function toModal(form: Form): InteractionResponseModal {
+function toModal(form: Form, language: string): InteractionResponseModal {
 	const id = form.title.toLowerCase().split(' ').join('_');
 
 	const components = Object.entries(form.fields).map<MessageComponentData>(
@@ -300,8 +300,8 @@ function toModal(form: Form): InteractionResponseModal {
 				components: [
 					{
 						type: MessageComponentType.TEXT_INPUT,
-						customID: `${id}_${name}`,
-						label: field.label,
+						customID: `${id}|${name}`,
+						label: field.label(language),
 						style: field.style,
 						value: field.value,
 						required: field.required,
