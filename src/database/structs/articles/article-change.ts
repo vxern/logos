@@ -1,12 +1,16 @@
+import { Reference } from '../document.ts';
 import { ArticleTextContent } from './article.ts';
 
 /** Represents a change made to an article. */
 type ArticleChange = {
+	/** The document reference to the author of this change. */
+	author: Reference;
+
+	/** The document reference to the article this change was made to. */
+	article: Reference;
+
 	/** The new text content of this article. */
 	content: ArticleTextContent;
-
-	/** The ID of the author of this change. */
-	author: string;
 };
 
 export type { ArticleChange };

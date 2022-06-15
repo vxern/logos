@@ -1,12 +1,15 @@
-import { User } from './user.ts';
+import { Reference } from '../document.ts';
 
-/** Represents a praise given to another user. */
+/** Represents a praise given by a user to another user. */
 interface Praise {
-	/** The user who gave this praise. */
-	author: User;
+	/** The document reference to the user that gave this praise. */
+	author: Reference;
 
-	/** Comment attached to this praise. */
-	comment: string;
+	/** The document reference to the user that this praise was given to. */
+	subject: Reference;
+
+	/** An optional comment attached to this praise. */
+	comment?: string;
 }
 
 export type { Praise };

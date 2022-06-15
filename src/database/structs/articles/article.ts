@@ -1,45 +1,55 @@
-import { Document } from '../document.ts';
+import { Document, Reference } from '../document.ts';
 import { ArticleChange } from './article-change.ts';
 
 /** Represents the text content of an article. */
 interface ArticleTextContent {
-	/** Title of this article. */
+	/** The title of this article. */
 	title: string;
 
-	/** Body of this article. */
+	/** The body of this article. */
 	body: string;
 
-	/** Footer of this article. */
+	/** The footer of this article. */
 	footer?: string;
 }
 
 /** Represents an article explaining a concept or a difference between terms. */
-type Article = ArticleTextContent & {
-	/** ID of this article's author. */
-	author: string;
+type Article = {
+	/** The document reference to the author of this article. */
+	author: Reference;
 
-	/** Language this article is written for. */
+	/** The language this article was written for. */
 	language: string;
 
-	/** List of changes made to this article. */
-	changes?: Document<ArticleChange>[];
+	/** The text content of this article. */
+	content: ArticleTextContent;
 };
 
-function getLastContent(article: Article): ArticleTextContent {
-	const lastChange = (article.changes && article.changes.length !== 0)
-		? article.changes[article.changes.length - 1]!.data.content
-		: undefined;
-
-	if (!lastChange) {
-		return {
-			title: article.title,
-			body: article.body,
-			footer: article.footer,
-		};
+/**
+ * Taking an article and an array of changes made to it, gets the most
+ * up-to-date content.
+ */
+function getMostRecentArticleContent({
+	article,
+	changes,
+}: {
+	article: Article;
+	changes: Document<ArticleChange>[];
+}): ArticleTextContent {
+	if (changes.length === 0) {
+		return article.content;
 	}
 
-	return lastChange;
+	const mostRecentChange = changes.reduce((change, current) => {
+		if (current.ts > change.ts) {
+			return current;
+		}
+
+		return change;
+	});
+
+	return mostRecentChange.data.content;
 }
 
-export { getLastContent };
+export { getMostRecentArticleContent };
 export type { Article, ArticleTextContent };
