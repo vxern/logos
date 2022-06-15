@@ -156,8 +156,6 @@ const service: ServiceStarter = (client) => {
 								configuration.forms.verification.fields,
 							);
 
-							console.log(fields);
-
 							const question = fields.find(([name]) =>
 								name === field.custom_id.split('|')[1]!
 							)![1].label(language);
