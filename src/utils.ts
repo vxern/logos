@@ -258,7 +258,7 @@ interface Form {
 	fields: {
 		[key: string]: {
 			/** The label on a particular text field. */
-			label: (language: string) => string;
+			label: string | ((language: string) => string);
 
 			/** The 'style' of this text field. */
 			style: TextInputStyle;
@@ -301,7 +301,9 @@ function toModal(form: Form, language: string): InteractionResponseModal {
 					{
 						type: MessageComponentType.TEXT_INPUT,
 						customID: `${id}|${name}`,
-						label: field.label(language),
+						label: typeof field.label === 'function'
+							? field.label(language)
+							: field.label,
 						style: field.style,
 						value: field.value,
 						required: field.required,

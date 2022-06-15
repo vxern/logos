@@ -66,8 +66,7 @@ export default {
 					maximum: 300,
 				},
 				aim: {
-					label: (_language: string) =>
-						'How will you benefit from being a member?',
+					label: 'How will you benefit from being a member?',
 					style: TextInputStyle.PARAGRAPH,
 					minimum: 20,
 					maximum: 300,
