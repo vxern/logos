@@ -41,12 +41,12 @@ const information: InformationSections = {
 				value:
 					`The server abides by a 3-warn moderation policy, enforced by the server's ${
 						mention(moderatorRole.id, MentionType.ROLE)
-					}s. The above rules apply to the entirety of the server, and a breach thereof will cause a warning to be issued.\n\nDepending on the circumstances, a timeout may be issued to the member for the duration of 5, 15, or 60 minutes.\n\nIf a member received three warnings, and a situation occurs where a fourth warning would be issued, the member will be kicked instead.\n\nFor members who show no regard for the server rules, and are not interested in making useful contributions, a permanent ban may be issued.`,
+					}s. The above rules apply to the entirety of the server, and a breach thereof will cause a warning to be issued.\n\nDepending on the circumstances, a timeout may be issued to the member for the duration of 5, 10, or 60 minutes respectively.\n\nIf a member received three warnings, and a situation occurs where a fourth warning would be issued, the member will be kicked instead.\n\nFor members who show no regard for the server rules, and are not interested in making useful contributions, a permanent ban may be issued.`,
 				inline: false,
 			});
 
 			return {
-				description: italic('Last updated: 11th March 2022'),
+				description: italic('Last updated: 15th June 2022'),
 				fields: fields,
 			};
 		},
