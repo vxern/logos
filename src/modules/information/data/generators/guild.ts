@@ -1,5 +1,6 @@
 import { Member, User } from '../../../../../deps.ts';
 import configuration from '../../../../configuration.ts';
+import { ArticleChange } from '../../../../database/structs/articles/article-change.ts';
 import { Article } from '../../../../database/structs/articles/article.ts';
 import { bold, code, codeMultiline } from '../../../../formatting.ts';
 import { mentionUser } from '../../../../utils.ts';
@@ -23,7 +24,7 @@ type GuildEvents = {
 	articleSubmit: [article: Article, by: Member];
 
 	/** An article has been edited. */
-	articleUpdate: [before: Article, after: Article, by: Member];
+	articleEdit: [article: Article, change: ArticleChange, by: Member];
 
 	/** An article has been locked. */
 	articleLock: [article: Article, by: Member];
@@ -71,27 +72,27 @@ ${codeMultiline(reason)}`,
 		message: (article, by) =>
 			`An article has been submitted by ${mentionUser(by.user)}:
 
-${bold(article.title)}
+${bold(article.content.title)}
 
-${article.body}`,
+${article.content.body}`,
 		filter: (origin, _article, by) => origin.id === by.guild.id,
 		color: configuration.responses.colors.green,
 	},
-	'articleUpdate': {
+	'articleEdit': {
 		title: 'Article updated',
 		message: (before, after, by) =>
-			`The article ${code(before.title)} has been updated by ${
+			`The article ${code(before.content.title)} has been updated by ${
 				mentionUser(by.user)
 			}:
 
-${after.body}`,
+${after.content.body}`,
 		filter: (origin, _before, _after, by) => origin.id === by.guild.id,
 		color: configuration.responses.colors.blue,
 	},
 	'articleLock': {
 		title: 'Article locked',
 		message: (article, by) =>
-			`The article ${code(article.title)} has been locked by ${
+			`The article ${code(article.content.title)} has been locked by ${
 				mentionUser(by.user)
 			}.`,
 		filter: (origin, _article, by) => origin.id === by.guild.id,
