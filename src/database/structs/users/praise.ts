@@ -1,10 +1,15 @@
-/** Represents a praise given to another user. */
-interface Praise {
-	/** The user who gave this praise. */
-	author: string;
+import { Reference } from '../document.ts';
 
-	/** Comment attached to this praise. */
-	comment: string;
+/** Represents a praise given by a user to another user. */
+interface Praise {
+	/** The document reference to the user that gave this praise. */
+	author: Reference;
+
+	/** The document reference to the user that this praise was given to. */
+	subject: Reference;
+
+	/** An optional comment attached to this praise. */
+	comment?: string;
 }
 
 export type { Praise };

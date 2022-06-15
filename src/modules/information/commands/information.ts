@@ -1,4 +1,4 @@
-import { dayjs, Guild, Interaction } from '../../../../deps.ts';
+import { Guild, Interaction } from '../../../../deps.ts';
 import { Client } from '../../../client.ts';
 import { Availability } from '../../../commands/availability.ts';
 import { Command } from '../../../commands/command.ts';
@@ -10,6 +10,7 @@ import {
 	list,
 	mention,
 	MentionType,
+	time,
 } from '../../../formatting.ts';
 import { getProficiencyCategory } from '../../roles/module.ts';
 
@@ -73,7 +74,6 @@ ${
 
 async function guild(_: Client, interaction: Interaction): Promise<void> {
 	const guild = interaction.guild!;
-	const createdAt = dayjs(guild.timestamp);
 
 	const owner = (await guild.members.resolve(guild.ownerID!))!;
 	const hasDistinctOwner = owner.user.username !== guild.name!;
@@ -96,7 +96,7 @@ async function guild(_: Client, interaction: Interaction): Promise<void> {
 				},
 				{
 					name: '⏱️ Created',
-					value: `${createdAt.format('D MMMM YYYY')} (${createdAt.fromNow()})`,
+					value: `${time(guild.timestamp.getTime() / 1000 | 0)}`,
 					inline: true,
 				},
 				{

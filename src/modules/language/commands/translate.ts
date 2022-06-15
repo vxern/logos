@@ -122,10 +122,7 @@ async function translate(
 	const show = data.options.find((option) => option.name === 'show')?.value ??
 		false;
 
-	const response = await interaction.respond({
-		type: InteractionResponseType.DEFERRED_CHANNEL_MESSAGE,
-		ephemeral: !show,
-	});
+	const response = await interaction.defer(!show);
 
 	const translationRequest = await fetch(
 		addParametersToURL('https://api-free.deepl.com/v2/translate', {

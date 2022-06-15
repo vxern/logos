@@ -44,14 +44,13 @@ export default {
 					minimum: 30,
 					maximum: 4000, // The maximum length of a field is 4,000.
 				},
-				/*
 				footer: {
 					label: 'Additional information / notes',
 					style: TextInputStyle.PARAGRAPH,
+					required: false,
 					minimum: 10,
 					maximum: 500,
 				},
-        */
 			},
 		},
 		// Configuration settings pertaining to user verification.
@@ -103,6 +102,20 @@ export default {
 				requiresVerification: false,
 			},
 		},
+		articles: {
+			create: {
+				// The maximum number of articles that can be created...
+				maximum: 3,
+				// ... in the interval:
+				interval: 60 * 60 * 24 * 1000, // One day.
+			},
+			edit: {
+				// The maximum number of edits that can be made...
+				maximum: 5,
+				// ... in the interval:
+				interval: 60 * 60 * 12 * 1000, // 12 hours.
+			},
+		},
 		// Configuration settings pertaining to the de facto owner of the managed guilds.
 		owner: {
 			id: '217319536485990400',
@@ -113,7 +126,7 @@ export default {
 		},
 		// Configuration settings pertaining to entry to the guild.
 		entry: {
-			minimumRequiredAge: 60 * 60 * 24 * 1000, // Two days.
+			minimumRequiredAge: 2 * 60 * 60 * 24 * 1000, // Two days.
 		},
 	},
 };

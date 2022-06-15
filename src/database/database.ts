@@ -1,9 +1,28 @@
 import { faunadb } from '../../deps.ts';
 import secrets from '../../secrets.ts';
-import { Article } from './structs/article.ts';
+import { Unpacked } from '../utils.ts';
+import { Article } from './structs/articles/article.ts';
+import { ArticleChange } from './structs/articles/article-change.ts';
 import { User } from './structs/users/user.ts';
+import { Document, Reference } from './structs/document.ts';
+import { capitalise } from '../formatting.ts';
 
 const $ = faunadb.query;
+
+type ArticleIndexParameters = {
+	language: string;
+	author: Reference;
+};
+
+type ArticleChangeIndexParameters = {
+	articleReference: Reference;
+	author: Reference;
+};
+
+type UserIndexParameters = {
+	reference: Reference;
+	id: string;
+};
 
 /**
  * Provides a layer of abstraction over the database solution used to store data,
@@ -11,25 +30,62 @@ const $ = faunadb.query;
  */
 class Database {
 	/** Client used to interface with the Fauna database. */
-	readonly #client: faunadb.Client;
-
-	/**
-	 * Cached articles.
-	 *
-	 * The keys are language names, and the values are their respective articles.
-	 */
-	readonly articles: Map<string, Article[]> = new Map();
+	private readonly client: faunadb.Client;
 
 	/**
 	 * Cached users.
 	 *
-	 * The keys are user IDs, and the values are the bearer of the ID.
+	 * The keys are user references, and the values are the corresponding user documents.
 	 */
-	readonly users: Map<string, User> = new Map();
+	private readonly users: Map<string, Document<User>> = new Map();
+
+	/**
+	 * Cached articles.
+	 *
+	 * The keys are language names, and the values are maps with article references as keys
+	 * and article documents as values.
+	 */
+	private readonly articlesByLanguage: Map<
+		string,
+		Map<string, Document<Article>>
+	> = new Map();
+
+	private articlesFetched = false;
+
+	/**
+	 * Cached articles.
+	 *
+	 * The keys are user references, and the values are maps with article references as keys
+	 * and article documents as values.
+	 */
+	private readonly articlesByUser: Map<
+		string,
+		Map<string, Document<Article>>
+	> = new Map();
+
+	/**
+	 * Cached article changes.
+	 *
+	 * The keys are article references, and the values are their respective article changes.
+	 */
+	private readonly articleChangesByArticleReference: Map<
+		string,
+		Document<ArticleChange>[]
+	> = new Map();
+
+	/**
+	 * Cached article changes.
+	 *
+	 * The keys are user IDs, and the values are the user's respective article changes.
+	 */
+	private readonly articleChangesByUser: Map<
+		string,
+		Document<ArticleChange>[]
+	> = new Map();
 
 	/** Constructs a database. */
 	constructor() {
-		this.#client = new faunadb.Client({
+		this.client = new faunadb.Client({
 			secret: secrets.core.database.secret,
 			domain: 'db.us.fauna.com',
 			scheme: 'https',
@@ -44,15 +100,30 @@ class Database {
 	 * @param expression - Fauna expression (query).
 	 * @returns The response object.
 	 */
-	async dispatchQuery(expression: faunadb.Expr): Promise<any> {
+	async dispatchQuery<
+		T extends unknown | unknown[],
+		B = Unpacked<T>,
+		R = T extends Array<B> ? Document<B>[] : Document<T>,
+	>(
+		expression: faunadb.Expr,
+	): Promise<R | undefined> {
 		try {
-			const queryResult = (await this.#client.query(expression)) as any;
+			const queryResult = (await this.client.query(expression)) as Record<
+				string,
+				unknown
+			>;
 
-			// TODO: Use a precise data type for the query response.
+			if (!Array.isArray(queryResult.data)) {
+				queryResult.ts = (queryResult.ts as number) / 1000;
 
-			console.log(queryResult);
+				return queryResult! as R;
+			}
 
-			return queryResult;
+			for (const element of queryResult.data) {
+				element.ts = (element.ts as number) / 1000;
+			}
+
+			return queryResult!.data! as unknown as R;
 		} catch (error) {
 			if (error.description === 'Set not found.') return undefined;
 
@@ -63,116 +134,340 @@ class Database {
 	}
 
 	/**
-	 * Gets a list of articles from the database by their language.
+	 * Fetches a user document from the database.
 	 *
-	 * @param language - The language of the articles to fetch.
-	 * @returns An array of articles for the language.
+	 * @param parameter - The parameter for indexing the database.
+	 * @param value - The value corresponding to the parameter.
+	 * @returns An array of user documents or undefined.
 	 */
-	async getArticlesByLanguage(language: string): Promise<Article[]> {
-		const result = await this.dispatchQuery(
-			$.Map(
-				$.Paginate($.Match($.FaunaIndex('GetArticlesByLanguage'), language)),
-				$.Lambda('article', $.Get($.Var('article'))),
+	private async fetchUser<
+		K extends keyof UserIndexParameters,
+		V extends UserIndexParameters[K],
+	>(
+		parameter: K,
+		value: V,
+	): Promise<Document<User> | undefined> {
+		const document = await this.dispatchQuery<User>(
+			$.Get(
+				parameter === 'reference'
+					? value
+					: $.Match($.FaunaIndex('GetUserByID'), value),
 			),
 		);
 
-		// TODO: Use a more precise data type than 'any'.
+		if (!document) {
+			console.error(
+				`Failed to fetch user with ${`${parameter} ${value}`} from the database.`,
+			);
+			return undefined;
+		}
 
-		const articles = !result
-			? []
-			: (result.data as any[]).map((result: any) => result.data as Article);
+		this.users.set(document.ref.value.id, document);
 
-		this.articles.set(language, articles);
+		return document;
+	}
 
-		return articles;
+	/**
+	 * Creates a user document in the database.
+	 *
+	 * @param user - The user object.
+	 * @returns The created user document.
+	 */
+	private async createUser(user: User): Promise<Document<User> | undefined> {
+		const document = await this.dispatchQuery<User>(
+			$.Call('CreateUser', user),
+		);
+
+		if (!document) {
+			console.error(
+				`Failed to create a document for user ${user.account.id} in the database.`,
+			);
+			return undefined;
+		}
+
+		this.users.set(document.ref.value.id, document);
+
+		return document;
+	}
+
+	/**
+	 * Attempts to get a user object from cache, and if the user object does not
+	 * exist, attempts to fetch it from the database. If the user object does not exist
+	 * in the database, this method will create one.
+	 *
+	 * @param parameter - The parameter for indexing the database.
+	 * @param value - The value corresponding to the parameter.
+	 * @returns The user document or undefined.
+	 */
+	async getOrCreateUser<
+		K extends keyof UserIndexParameters,
+		V extends UserIndexParameters[K],
+	>(
+		parameter: K,
+		value: V,
+	): Promise<Document<User> | undefined> {
+		const cacheValue = parameter === 'reference'
+			? this.users.get((value as Reference).value.id)
+			: Array.from(this.users.values()).find((document) =>
+				document.data.account.id === value
+			);
+
+		const cacheOrFetch = cacheValue ?? await this.fetchUser(parameter, value);
+
+		if (cacheOrFetch) return cacheOrFetch;
+
+		if (parameter === 'id') {
+			return await this.createUser({ account: { id: value as string } });
+		}
+
+		return undefined;
+	}
+
+	/**
+	 * Fetches an array of article documents from the database written for the given
+	 * language.
+	 *
+	 * @param parameter - The parameter for indexing the database.
+	 * @param value - The value corresponding to the parameter.
+	 * @returns The array of articles.
+	 */
+	private async fetchArticles<
+		K extends keyof ArticleIndexParameters,
+		V extends ArticleIndexParameters[K],
+	>(
+		parameter: K,
+		value: V,
+	): Promise<Document<Article>[] | undefined> {
+		const parameterCapitalised = capitalise(parameter);
+		const faunaFunction = `GetArticlesBy${parameterCapitalised}`;
+
+		const documents = await this.dispatchQuery<Article[]>(
+			$.Call($.FaunaFunction(faunaFunction), value),
+		);
+
+		if (!documents) {
+			console.error(`Failed to fetch articles for ${parameter} ${value}.`);
+			return undefined;
+		}
+
+		const argument =
+			(typeof value === 'object'
+				? (value as Reference).value.id
+				: value) as string;
+
+		const cache = parameter === 'language'
+			? this.articlesByLanguage
+			: this.articlesByUser;
+
+		if (!cache.has(argument)) {
+			cache.set(argument, new Map());
+		}
+
+		const map = cache.get(argument)!;
+
+		for (const document of documents) {
+			map.set(
+				document.ref.value.id,
+				document,
+			);
+		}
+
+		this.articlesFetched = true;
+
+		console.log(
+			`Fetched ${documents.length} articles for ${parameter} ${value}.`,
+		);
+
+		return documents;
+	}
+
+	/**
+	 * Attempts to get a list of articles from cache, and if the articles do not
+	 * exist, attempts to fetch them from the database.
+	 *
+	 * @param parameter - The parameter for indexing the database.
+	 * @param value - The value corresponding to the parameter.
+	 * @returns An array of articles for the language.
+	 */
+	async getArticles<
+		K extends keyof ArticleIndexParameters,
+		V extends ArticleIndexParameters[K],
+	>(
+		parameter: K,
+		value: V,
+	): Promise<Document<Article>[] | undefined> {
+		if (parameter === 'language' && !this.articlesFetched) {
+			return await this.fetchArticles(parameter, value);
+		}
+
+		const argument =
+			(typeof value === 'object'
+				? (value as Reference).value.id
+				: value) as string;
+
+		const cache = parameter === 'language'
+			? this.articlesByLanguage
+			: this.articlesByUser;
+
+		return (!cache.has(argument)
+			? undefined
+			: Array.from(cache.get(argument)!.values())) ??
+			await this.fetchArticles(parameter, value);
 	}
 
 	/**
 	 * Creates an article document in the database.
 	 *
 	 * @param article - The article to create.
-	 * @returns The created article.
+	 * @returns The created article document.
 	 */
-	async createArticle(article: Article): Promise<Article> {
-		const result = await this.dispatchQuery(
+	async createArticle(
+		article: Article,
+	): Promise<Document<Article> | undefined> {
+		const document = await this.dispatchQuery<Article>(
 			$.Call('CreateArticle', article),
 		);
 
-		if (!this.articles.has(article.language)) {
-			this.articles.set(article.language, []);
+		if (!document) {
+			console.error(`Failed to create article ${article.content.title}.`);
+			return undefined;
 		}
 
-		this.articles.get(article.language)!.push(article);
+		if (!this.articlesByLanguage.has(article.language)) {
+			this.articlesByLanguage.set(article.language, new Map());
+		}
 
-		return result as Article;
-	}
-
-	/**
-	 * Gets a user document from the database.
-	 *
-	 * @param id - The user's Discord ID.
-	 * @returns The user or undefined.
-	 */
-	async getUser(id: string): Promise<User | undefined> {
-		const response = await this.dispatchQuery(
-			$.Get($.Match($.FaunaIndex('GetUserByID'), id)),
+		this.articlesByLanguage.get(article.language)!.set(
+			document.ref.value.id,
+			document,
 		);
 
-		if (!response) return undefined;
+		if (!this.articlesByUser.has(article.author.value.id)) {
+			this.articlesByUser.set(article.author.value.id, new Map());
+		}
 
-		const user = response as User;
-
-		this.users.set(id, user);
-
-		return user;
-	}
-
-	/**
-	 * Creates a user document in the database.
-	 *
-	 * @param id - The user's Discord ID.
-	 * @returns The created user.
-	 */
-	async createUser(id: string): Promise<User> {
-		const userSkeleton: User = { account: { id: id } };
-
-		const response = await this.dispatchQuery(
-			$.Call('CreateUser', userSkeleton),
+		this.articlesByUser.get(article.author.value.id)!.set(
+			document.ref.value.id,
+			document,
 		);
 
-		const user = response as User;
+		console.error(`Created article ${article.content.title}.`);
 
-		this.users.set(id, user);
-
-		return user;
+		return document;
 	}
 
 	/**
-	 * Attempts to get a user object from cache, and if the user object does not
-	 * exist, attempts to get it from the database. If the user object does not exist
-	 * in the database, the method will create one.
+	 * Makes a change to an existing article.
 	 *
-	 * @param id - The ID of the user to fetch.
+	 * @param change - The change to be made.
+	 * @returns The change made to the article or undefined.
+	 */
+	async changeArticle(
+		change: ArticleChange,
+	): Promise<Document<ArticleChange> | undefined> {
+		const document = await this.dispatchQuery<ArticleChange>(
+			$.Call($.FaunaFunction('CreateArticleChange'), change),
+		);
+
+		if (!document) {
+			console.error(`Failed to create article change.`);
+			return undefined;
+		}
+
+		if (
+			!this.articleChangesByArticleReference.has(document.data.article.value.id)
+		) {
+			this.articleChangesByArticleReference.set(
+				document.data.article.value.id,
+				[],
+			);
+		}
+
+		this.articleChangesByArticleReference.get(document.data.article.value.id)!
+			.push(
+				document,
+			);
+
+		if (!this.articleChangesByUser.has(document.data.author.value.id)) {
+			this.articleChangesByUser.set(document.data.author.value.id, []);
+		}
+
+		this.articleChangesByUser.get(document.data.author.value.id)!.push(
+			document,
+		);
+
+		return document;
+	}
+
+	/**
+	 * Fetches article changes from the database.
+	 *
+	 * @param parameter - The parameter for indexing the database.
+	 * @param value - The value corresponding to the parameter.
+	 * @returns An array of article change documents or undefined.
+	 */
+	private async fetchArticleChanges<
+		K extends keyof ArticleChangeIndexParameters,
+		V extends ArticleChangeIndexParameters[K],
+	>(
+		parameter: K,
+		value: V,
+	): Promise<Document<ArticleChange>[] | undefined> {
+		const parameterCapitalised = capitalise(parameter);
+		const faunaFunction = `GetArticleChangesBy${parameterCapitalised}`;
+
+		const documents = await this.dispatchQuery<ArticleChange[]>(
+			$.Call(
+				$.FaunaFunction(faunaFunction),
+				value,
+			),
+		);
+
+		if (!documents) {
+			console.error(
+				`Failed to fetch article changes by ${parameterCapitalised}.`,
+			);
+			return undefined;
+		}
+
+		const cache = parameter === 'articleReference'
+			? this.articleChangesByArticleReference
+			: this.articleChangesByUser;
+
+		cache.set(
+			typeof value === 'object' ? (value as Reference).value.id : value,
+			documents,
+		);
+
+		return documents;
+	}
+
+	/**
+	 * Attempts to get article changes from cache, and if the article changes do not
+	 * exist, attempts to fetch them from the database.
+	 *
+	 * @param parameter - The parameter for indexing the database.
+	 * @param value - The value corresponding to the parameter.
 	 * @returns The user.
 	 */
-	async fetchUser(id: string): Promise<User> {
-		return this.preprocessUser(
-			this.users.get(id) ?? await this.getUser(id) ??
-				await this.createUser(id),
-		);
-	}
+	async getArticleChanges<
+		K extends keyof ArticleChangeIndexParameters,
+		V extends ArticleChangeIndexParameters[K],
+	>(
+		parameter: K,
+		value: V,
+	): Promise<Document<ArticleChange>[] | undefined> {
+		const argument =
+			(typeof value === 'object'
+				? (value as Reference).value.id
+				: value) as string;
 
-	/**
-	 * Taking a user, carries out checks on the data before returning the fixed user
-	 * object.
-	 *
-	 * @param user - The user object to process.
-	 * @returns The processed user document.
-	 */
-	preprocessUser(user: User): User {
-		// TODO: Implement user preprocessing.
+		const cache = parameter === 'articleReference'
+			? this.articleChangesByArticleReference
+			: this.articleChangesByUser;
 
-		return user;
+		return cache.get(argument) ??
+			await this.fetchArticleChanges(parameter, value);
 	}
 }
 

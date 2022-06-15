@@ -1,18 +1,7 @@
-import { Praise } from './praise.ts';
-
 /** Represents a user account. */
 interface Account {
 	/** User's Discord ID. */
 	id: string;
-
-	/** Data concerning praises given to this user. */
-	praises?: {
-		/** List of praises this user has received. */
-		received: Praise[];
-
-		/** Timestamp of when this user last praised another user. */
-		lastSent: Date;
-	};
 }
 
 /** Represents a customisable user profile. */
@@ -21,7 +10,7 @@ interface Profile {
 	emoji?: string;
 }
 
-/** Represents a user record. */
+/** Represents a user. */
 interface User {
 	/** User's account data. */
 	account: Account;

@@ -3,12 +3,18 @@ import {
 	ApplicationCommand,
 	ApplicationCommandInteraction,
 	ApplicationCommandOption,
+	ButtonStyle,
+	Collector,
+	EmbedPayload,
 	Guild,
 	GuildChannel,
 	GuildTextChannel,
+	Interaction,
 	InteractionResponseModal,
+	InteractionResponseType,
 	Invite,
 	MessageComponentData,
+	MessageComponentInteraction,
 	MessageComponentType,
 	TextInputStyle,
 	User,
@@ -25,6 +31,16 @@ import { code } from './formatting.ts';
  * @param K - The property to make partial.
  */
 type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
+
+/**
+ * 'Unpacks' a nested type from an array, function or promise.
+ *
+ * @typeParam T - The type from which to extract the nested type.
+ */
+type Unpacked<T> = T extends (infer U)[] ? U
+	: T extends (...args: unknown[]) => infer U ? U
+	: T extends Promise<infer U> ? U
+	: T;
 
 /**
  * Compares two command or option objects to determine which keys one or the
@@ -83,7 +99,9 @@ async function findChannelByName(
 	name: string,
 ): Promise<GuildChannel | undefined> {
 	const channels = await guild.channels.array();
-	return channels.find((channel) => channel.name.includes(name));
+	return channels.find((channel) =>
+		channel.name.toLowerCase().includes(name.toLowerCase())
+	);
 }
 
 /**
@@ -251,6 +269,12 @@ interface Form {
 			 */
 			minimum: number;
 
+			/** Whether this text field is required to be filled or not. */
+			required?: boolean;
+
+			/** The filled content of this text field. */
+			value?: string;
+
 			/**
 			 * The maximum number of characters allowed to be inputted into this
 			 * text field.
@@ -279,6 +303,8 @@ function toModal(form: Form): InteractionResponseModal {
 						customID: `${id}_${name}`,
 						label: field.label,
 						style: field.style,
+						value: field.value,
+						required: field.required,
 						minLength: field.minimum === 0 ? undefined : field.minimum,
 						maxLength: field.maximum,
 					},
@@ -313,6 +339,124 @@ function shuffle<T>(array: T[]): T[] {
 	return shuffled;
 }
 
+/**
+ * Paginates an array of elements, allowing the user to browse between pages
+ * in an embed view.
+ */
+async function paginate<T>(
+	{
+		interaction,
+		elements,
+		embed,
+		view,
+		show,
+	}: {
+		interaction: Interaction;
+		elements: T[];
+		embed: Omit<EmbedPayload, 'fields' | 'footer'>;
+		view: {
+			title: string;
+			generate: (element: T) => string;
+		};
+		show: boolean;
+	},
+): Promise<void> {
+	let index = 0;
+
+	const isFirst = () => index === 0;
+	const isLast = () => index === elements.length - 1;
+
+	function generateEmbed(): EmbedPayload {
+		const field = view.generate(elements[index]!);
+
+		return {
+			...embed,
+			fields: [{
+				name: elements.length === 1
+					? view.title
+					: `${view.title} ~ Page ${index + 1}/${elements.length}`,
+				value: field,
+			}],
+			footer: isLast() ? undefined : { text: 'Continued on the next page...' },
+		};
+	}
+
+	function generateButtons(): MessageComponentData[] {
+		const buttons: MessageComponentData[] = [];
+
+		if (!isFirst()) {
+			buttons.push({
+				type: MessageComponentType.BUTTON,
+				customID: 'ARTICLE|PREVIOUS',
+				style: ButtonStyle.GREY,
+				label: '🡨',
+			});
+		}
+
+		if (!isLast()) {
+			buttons.push({
+				type: MessageComponentType.BUTTON,
+				customID: 'ARTICLE|NEXT',
+				style: ButtonStyle.GREY,
+				label: '🡪',
+			});
+		}
+
+		return buttons.length === 0 ? [] : [{
+			type: MessageComponentType.ACTION_ROW,
+			components: buttons,
+		}];
+	}
+
+	const response = await interaction.respond({
+		embeds: [generateEmbed()],
+		components: generateButtons(),
+		ephemeral: !show,
+	});
+	const message = await response.fetchResponse();
+
+	const collector = new Collector({
+		event: 'interactionCreate',
+		client: interaction.client,
+		filter: (selection: Interaction) => {
+			if (!selection.isMessageComponent()) return false;
+
+			if (selection.message.id !== message.id) return false;
+
+			if (selection.user.id !== interaction.user.id) return false;
+
+			if (!selection.customID.startsWith('ARTICLE')) return false;
+
+			return true;
+		},
+		deinitOnEnd: true,
+	});
+
+	collector.on('collect', (selection: MessageComponentInteraction) => {
+		const action = selection.customID.split('|')[1]!;
+
+		switch (action) {
+			case 'PREVIOUS':
+				if (!isFirst()) index--;
+				break;
+			case 'NEXT':
+				if (!isLast()) index++;
+				break;
+		}
+
+		selection.respond({
+			type: InteractionResponseType.DEFERRED_MESSAGE_UPDATE,
+		});
+
+		interaction.editResponse({
+			embeds: [generateEmbed()],
+			components: generateButtons(),
+		});
+	});
+
+	collector.collect();
+}
+
 export {
 	addParametersToURL,
 	displayCommand,
@@ -324,9 +468,10 @@ export {
 	getLanguageCode,
 	getMissingKeys,
 	mentionUser,
+	paginate,
 	random,
 	shuffle,
 	time,
 	toModal,
 };
-export type { Optional };
+export type { Form, Optional, Unpacked };
