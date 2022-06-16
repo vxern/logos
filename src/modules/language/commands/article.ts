@@ -175,18 +175,25 @@ async function create(client: Client, interaction: Interaction): Promise<void> {
 /** Allows the user to edit an existing article. */
 async function edit(client: Client, interaction: Interaction): Promise<void> {
 	const language = client.getLanguage(interaction.guild!);
-	const documents = await client.database.getArticles('language', language);
+	const documentsUnprocessed = await client.database.getArticles(
+		'language',
+		language,
+	);
+
+	if (!documentsUnprocessed) {
+		return;
+	}
+
+	const documents = await client.database.processArticles(documentsUnprocessed);
 
 	if (!documents) {
 		return;
 	}
 
-	const articles = documents.map((document) => document.data);
-
 	if (interaction.isAutocomplete()) {
 		return showResults({
 			interaction: interaction,
-			articles: articles,
+			documents: documents,
 		});
 	}
 
@@ -335,45 +342,18 @@ async function view(client: Client, interaction: Interaction): Promise<void> {
 		return;
 	}
 
-	if (interaction.isAutocomplete()) {
-		const articles = documentsUnprocessed.map((document) => document.data);
+	const documents = await client.database.processArticles(documentsUnprocessed);
 
-		return showResults({
-			interaction: interaction,
-			articles: articles,
-		});
-	}
-
-	const documentsChanges = await Promise.all(
-		documentsUnprocessed.map((document) =>
-			new Promise<[Document<Article>, Document<ArticleChange>[] | undefined]>((
-				resolve,
-			) =>
-				client.database.getArticleChanges(
-					'articleReference',
-					document.ref,
-				)
-					.then((changes) => {
-						resolve([document, changes]);
-					})
-			)
-		),
-	);
-
-	if (
-		documentsChanges.map(([_document, change]) => change).includes(undefined)
-	) {
+	if (!documents) {
 		return;
 	}
 
-	const documents = documentsChanges.map(([document, changes]) => {
-		document.data.content = getMostRecentArticleContent({
-			article: document.data,
-			changes: changes!,
+	if (interaction.isAutocomplete()) {
+		return showResults({
+			interaction: interaction,
+			documents: documents,
 		});
-
-		return document;
-	});
+	}
 
 	const data = interaction.data as InteractionApplicationCommandData;
 	const index = parseInt(data.options[0]!.options![0]!.value!);
@@ -420,9 +400,9 @@ async function view(client: Client, interaction: Interaction): Promise<void> {
 }
 
 function showResults(
-	{ interaction, articles }: {
+	{ interaction, documents }: {
 		interaction: AutocompleteInteraction;
-		articles: Article[];
+		documents: Document<Article>[];
 	},
 ): void {
 	const argument = interaction.data!.options[0]!.options!.find((option) =>
@@ -430,9 +410,9 @@ function showResults(
 	)!;
 
 	const value = argument.value as string;
-	const articlesByName = articles.filter((article) =>
-		article.content.title.toLowerCase().includes(value.toLowerCase())
-	);
+	const articlesByName = documents.map((document) => document.data).filter((
+		document,
+	) => document.content.title.toLowerCase().includes(value.toLowerCase()));
 
 	interaction.respond({
 		type: InteractionResponseType.APPLICATION_COMMAND_AUTOCOMPLETE_RESULT,

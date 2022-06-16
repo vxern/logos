@@ -1,7 +1,10 @@
 import { faunadb } from '../../deps.ts';
 import secrets from '../../secrets.ts';
 import { Unpacked } from '../utils.ts';
-import { Article } from './structs/articles/article.ts';
+import {
+	Article,
+	getMostRecentArticleContent,
+} from './structs/articles/article.ts';
 import { ArticleChange } from './structs/articles/article-change.ts';
 import { User } from './structs/users/user.ts';
 import { Document, Reference } from './structs/document.ts';
@@ -468,6 +471,42 @@ class Database {
 
 		return cache.get(argument) ??
 			await this.fetchArticleChanges(parameter, value);
+	}
+
+	async processArticles(
+		documents: Document<Article>[],
+	): Promise<Document<Article>[] | undefined> {
+		const documentsChanges = await Promise.all(
+			documents.map((document) =>
+				new Promise<[Document<Article>, Document<ArticleChange>[] | undefined]>(
+					(
+						resolve,
+					) =>
+						this.getArticleChanges(
+							'articleReference',
+							document.ref,
+						)
+							.then((changes) => {
+								resolve([document, changes]);
+							}),
+				)
+			),
+		);
+
+		if (
+			documentsChanges.map(([_document, change]) => change).includes(undefined)
+		) {
+			return;
+		}
+
+		return documentsChanges.map(([document, changes]) => {
+			document.data.content = getMostRecentArticleContent({
+				article: document.data,
+				changes: changes!,
+			});
+
+			return document;
+		});
 	}
 }
 
