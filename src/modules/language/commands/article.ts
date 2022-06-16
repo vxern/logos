@@ -1,11 +1,11 @@
 import {
 	_,
 	AutocompleteInteraction,
-	Collector,
 	Interaction,
 	InteractionApplicationCommandData,
 	InteractionModalSubmitData,
 	InteractionResponseType,
+	InteractionType,
 } from '../../../../deps.ts';
 import { Client } from '../../../client.ts';
 import { Availability } from '../../../commands/availability.ts';
@@ -21,7 +21,12 @@ import {
 import { Document } from '../../../database/structs/document.ts';
 import { User } from '../../../database/structs/users/user.ts';
 import { mention, MentionType } from '../../../formatting.ts';
-import { Form, paginate, toModal } from '../../../utils.ts';
+import {
+	createInteractionCollector,
+	Form,
+	paginate,
+	toModal,
+} from '../../../utils.ts';
 
 const command: Command = {
 	name: 'article',
@@ -73,13 +78,14 @@ async function create(client: Client, interaction: Interaction): Promise<void> {
 
 	const timestampSlice = articleTimestamps.slice(
 		0,
-		configuration.guilds.articles.create.maximum,
+		configuration.interactions.articles.create.maximum,
 	);
 
-	const canCreateArticle =
-		timestampSlice.length < configuration.guilds.articles.create.maximum ||
+	const canCreateArticle = timestampSlice.length <
+			configuration.interactions.articles.create.maximum ||
 		timestampSlice.some((timestamp) =>
-			(Date.now() - timestamp) >= configuration.guilds.articles.create.interval
+			(Date.now() - timestamp) >=
+				configuration.interactions.articles.create.interval
 		);
 
 	if (!canCreateArticle) {
@@ -89,34 +95,22 @@ async function create(client: Client, interaction: Interaction): Promise<void> {
 			embeds: [{
 				title: 'Maximum number of articles reached',
 				description: `You must wait before submitting another article.`,
-				color: configuration.responses.colors.red,
+				color: configuration.interactions.responses.colors.red,
 			}],
 		});
 		return;
 	}
 
-	interaction.showModal(toModal(configuration.forms.article));
-
-	const collector = new Collector({
-		event: 'interactionCreate',
-		client: interaction.client,
-		filter: (selection: Interaction) => {
-			if (!selection.isModalSubmit()) return false;
-
-			if (selection.user.id !== interaction.user.id) return false;
-
-			if (selection.data.custom_id !== 'article_editor') return false;
-
-			return true;
-		},
-		deinitOnEnd: true,
+	const [collector, customID] = createInteractionCollector(client, {
+		type: InteractionType.MODAL_SUBMIT,
+		user: interaction.user,
 	});
 
-	collector.collect();
+	interaction.showModal(
+		toModal(configuration.interactions.forms.article, customID),
+	);
 
 	const submission = (await collector.waitFor('collect'))[0] as Interaction;
-
-	collector.end();
 
 	const data = submission.data! as InteractionModalSubmitData;
 	const components = data.components;
@@ -128,7 +122,7 @@ async function create(client: Client, interaction: Interaction): Promise<void> {
 			embeds: [{
 				title: 'Failed to submit article',
 				description: `Your article failed to be submitted.`,
-				color: configuration.responses.colors.red,
+				color: configuration.interactions.responses.colors.red,
 			}],
 		});
 	}
@@ -173,7 +167,7 @@ async function create(client: Client, interaction: Interaction): Promise<void> {
 			title: 'Article submitted successfully!',
 			description:
 				`Your article, \`${document.data.content.title}\`, has been submitted successfully.`,
-			color: configuration.responses.colors.green,
+			color: configuration.interactions.responses.colors.green,
 		}],
 	});
 }
@@ -213,13 +207,14 @@ async function edit(client: Client, interaction: Interaction): Promise<void> {
 
 	const timestampSlice = articleTimestamps.slice(
 		0,
-		configuration.guilds.articles.edit.maximum,
+		configuration.interactions.articles.edit.maximum,
 	);
 
 	const canCreateArticleChange =
-		timestampSlice.length < configuration.guilds.articles.edit.maximum ||
+		timestampSlice.length < configuration.interactions.articles.edit.maximum ||
 		timestampSlice.some((timestamp) =>
-			(Date.now() - timestamp) >= configuration.guilds.articles.edit.interval
+			(Date.now() - timestamp) >=
+				configuration.interactions.articles.edit.interval
 		);
 
 	if (!canCreateArticleChange) {
@@ -229,7 +224,7 @@ async function edit(client: Client, interaction: Interaction): Promise<void> {
 			embeds: [{
 				title: 'Maximum number of edits reached',
 				description: `You must wait before trying to edit another article.`,
-				color: configuration.responses.colors.red,
+				color: configuration.interactions.responses.colors.red,
 			}],
 		});
 		return;
@@ -254,7 +249,7 @@ async function edit(client: Client, interaction: Interaction): Promise<void> {
 	});
 
 	const prefilledForm = _.merge(
-		configuration.forms.article,
+		_.cloneDeep(configuration.interactions.forms.article),
 		{
 			fields: Object.fromEntries(
 				Object.entries(content).map(([field, value]) => {
@@ -264,24 +259,14 @@ async function edit(client: Client, interaction: Interaction): Promise<void> {
 		},
 	) as Form;
 
-	interaction.showModal(toModal(prefilledForm));
-
-	const collector = new Collector({
-		event: 'interactionCreate',
-		client: interaction.client,
-		filter: (selection: Interaction) => {
-			if (!selection.isModalSubmit()) return false;
-
-			if (selection.user.id !== interaction.user.id) return false;
-
-			if (selection.data.custom_id !== 'article_editor') return false;
-
-			return true;
-		},
-		deinitOnEnd: true,
+	const [collector, customID] = createInteractionCollector(client, {
+		type: InteractionType.MODAL_SUBMIT,
+		user: interaction.user,
 	});
 
-	collector.collect();
+	interaction.showModal(
+		toModal(prefilledForm, customID),
+	);
 
 	const submission = (await collector.waitFor('collect'))[0] as Interaction;
 
@@ -294,7 +279,7 @@ async function edit(client: Client, interaction: Interaction): Promise<void> {
 			embeds: [{
 				title: 'Failed to update article',
 				description: `Failed to edit article..`,
-				color: configuration.responses.colors.red,
+				color: configuration.interactions.responses.colors.red,
 			}],
 		});
 	}
@@ -333,7 +318,7 @@ async function edit(client: Client, interaction: Interaction): Promise<void> {
 		embeds: [{
 			title: 'Article edited successfully!',
 			description: `Your edit was saved.`,
-			color: configuration.responses.colors.green,
+			color: configuration.interactions.responses.colors.green,
 		}],
 	});
 }
@@ -515,7 +500,7 @@ function showArticle({
 			title: content.title,
 			description: `
 Contributors: ${contributorsString}`,
-			color: configuration.responses.colors.blue,
+			color: configuration.interactions.responses.colors.blue,
 		},
 		view: {
 			title: 'Answer',

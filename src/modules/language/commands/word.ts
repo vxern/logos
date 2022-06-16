@@ -61,7 +61,7 @@ async function word(client: Client, interaction: Interaction): Promise<void> {
 				description: `There are no dictionary adapters installed for the ${
 					capitalise(language)
 				} language.`,
-				color: configuration.responses.colors.red,
+				color: configuration.interactions.responses.colors.red,
 			}],
 		});
 		return;
@@ -98,7 +98,7 @@ async function word(client: Client, interaction: Interaction): Promise<void> {
 		embeds: [{
 			title: 'No results found.',
 			description: `There are no results for the word '${word}'.`,
-			color: configuration.responses.colors.red,
+			color: configuration.interactions.responses.colors.red,
 		}],
 	});
 }

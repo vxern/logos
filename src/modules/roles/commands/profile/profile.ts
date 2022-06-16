@@ -41,7 +41,7 @@ async function selectRoles(
 			name: 'No Category Selected',
 			description:
 				'Please select a role category to obtain a list of available roles within it.',
-			color: configuration.responses.colors.invisible,
+			color: configuration.interactions.responses.colors.invisible,
 			emoji: '💭',
 			limit: -1,
 			categories: Client.isManagedGuild(interaction.guild!)

@@ -145,7 +145,7 @@ async function translate(
 	response.editResponse({
 		embeds: [{
 			title: `${source.name} → ${target.name}`,
-			color: configuration.responses.colors.blue,
+			color: configuration.interactions.responses.colors.blue,
 			fields: [{
 				name: source.name,
 				value: text,

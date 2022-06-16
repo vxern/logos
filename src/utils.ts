@@ -12,10 +12,12 @@ import {
 	Interaction,
 	InteractionResponseModal,
 	InteractionResponseType,
+	InteractionType,
 	Invite,
 	MessageComponentData,
 	MessageComponentInteraction,
 	MessageComponentType,
+	Snowflake,
 	TextInputStyle,
 	User,
 } from '../deps.ts';
@@ -23,6 +25,8 @@ import languages from 'https://deno.land/x/language@v0.1.0/languages.ts';
 import { Command } from './commands/command.ts';
 import { Option } from './commands/option.ts';
 import { code } from './formatting.ts';
+import { Client } from './client.ts';
+import configuration from './configuration.ts';
 
 /**
  * Makes one or more properties of `T` optional.
@@ -288,11 +292,15 @@ interface Form {
  * Taking a form object, converts it to a modal.
  *
  * @param form - The form to convert.
+ * @param customID - The custom ID of the modal.
+ * @param language - (Optional) The language of the guild the modal is being created for.
  * @returns The form converted into a modal.
  */
-function toModal(form: Form, language: string): InteractionResponseModal {
-	const id = form.title.toLowerCase().split(' ').join('_');
-
+function toModal(
+	form: Form,
+	customID: string,
+	language?: string,
+): InteractionResponseModal {
 	const components = Object.entries(form.fields).map<MessageComponentData>(
 		([name, field]) => {
 			return {
@@ -300,9 +308,9 @@ function toModal(form: Form, language: string): InteractionResponseModal {
 				components: [
 					{
 						type: MessageComponentType.TEXT_INPUT,
-						customID: `${id}|${name}`,
+						customID: `${customID}|${name}`,
 						label: typeof field.label === 'function'
-							? field.label(language)
+							? field.label(language!)
 							: field.label,
 						style: field.style,
 						value: field.value,
@@ -317,7 +325,7 @@ function toModal(form: Form, language: string): InteractionResponseModal {
 
 	return {
 		title: form.title,
-		customID: id,
+		customID: customID,
 		components: components,
 	};
 }
@@ -459,8 +467,59 @@ async function paginate<T>(
 	collector.collect();
 }
 
+type ConditionChecker = (interaction: Interaction) => boolean;
+
+/** Settings for interaction collection. */
+interface InteractionCollectorSettings {
+	/** The type of interaction to listen for. */
+	type: InteractionType;
+
+	/** The accepted respondent to the collector. `undefined` signifies any user. */
+	user?: User;
+
+	/** The ID of the interaction to listen for. */
+	id?: string;
+}
+
+function createInteractionCollector(
+	client: Client,
+	settings: InteractionCollectorSettings,
+): [collector: Collector, customID: string] {
+	const customID = settings.id ?? Snowflake.generate();
+
+	const conditionsUnfiltered: (ConditionChecker | undefined)[] = [
+		(interaction) => interaction.type === settings.type,
+		(interaction) =>
+			!!interaction.data && 'custom_id' in interaction.data &&
+			interaction.data.custom_id === customID,
+		settings.user
+			? (interaction) => interaction.user.id === (settings.user as User).id
+			: undefined,
+	];
+
+	const conditions = conditionsUnfiltered?.filter((condition) =>
+		condition
+	) as ConditionChecker[];
+
+	const condition = (interaction: Interaction) =>
+		conditions.every((condition) => condition(interaction));
+
+	const collector = new Collector<Interaction[]>({
+		event: 'interactionCreate',
+		client: client,
+		filter: condition,
+		deinitOnEnd: true,
+		timeout: configuration.core.collectors.maxima.timeout,
+	});
+
+	collector.collect();
+
+	return [collector, customID];
+}
+
 export {
 	addParametersToURL,
+	createInteractionCollector,
 	displayCommand,
 	findChannelByName,
 	fromHex,
