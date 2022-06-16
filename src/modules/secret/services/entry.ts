@@ -156,9 +156,13 @@ const service: ServiceStarter = (client) => {
 								configuration.forms.verification.fields,
 							);
 
-							const question = fields.find(([name]) =>
+							const label = fields.find(([name]) =>
 								name === field.custom_id.split('|')[1]!
-							)![1].label(language);
+							)![1].label;
+
+							const question = typeof label === 'function'
+								? label(language)
+								: label;
 
 							return [question, field.value];
 						},
