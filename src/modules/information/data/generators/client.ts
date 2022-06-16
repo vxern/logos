@@ -10,20 +10,20 @@ const client: MessageGenerators<ClientEvents> = {
 		title: 'User banned',
 		message: (_guild, user) => `${mentionUser(user)} has been banned.`,
 		filter: (origin, guild, user) => origin.id === guild.id && !user.bot,
-		color: configuration.responses.colors.red,
+		color: configuration.interactions.responses.colors.red,
 	},
 	'guildBanRemove': {
 		title: 'User unbanned',
 		message: (_guild, user) => `${mentionUser(user)} has been unbanned.`,
 		filter: (origin, guild, user) => origin.id === guild.id && !user.bot,
-		color: configuration.responses.colors.yellow,
+		color: configuration.interactions.responses.colors.yellow,
 	},
 	'guildMemberAdd': {
 		title: 'User joined',
 		message: (member) => `${mentionUser(member.user)} has joined the server.`,
 		filter: (origin, member) =>
 			origin.id === member.guild.id && !member.user.bot,
-		color: configuration.responses.colors.green,
+		color: configuration.interactions.responses.colors.green,
 	},
 	'guildMemberRemove': {
 		title: 'User kicked or left',
@@ -33,14 +33,14 @@ const client: MessageGenerators<ClientEvents> = {
 			} has left the server, or they have been kicked.`,
 		filter: (origin, member) =>
 			origin.id === member.guild.id && !member.user.bot,
-		color: configuration.responses.colors.yellow,
+		color: configuration.interactions.responses.colors.yellow,
 	},
 	'guildMemberUpdate': {
 		title: 'User updated',
 		message: resolveMemberUpdate,
 		filter: (origin, _before, after) =>
 			origin.id === after.guild.id && !after.user.bot,
-		color: configuration.responses.colors.blue,
+		color: configuration.interactions.responses.colors.blue,
 	},
 	'messageUpdate': {
 		title: 'Message updated',
@@ -54,7 +54,7 @@ ${codeMultiline(after.content)}`,
 		filter: (origin, before, after) =>
 			origin.id === before.guild?.id && !before.author.bot &&
 			before.content !== after.content,
-		color: configuration.responses.colors.blue,
+		color: configuration.interactions.responses.colors.blue,
 	},
 	'messageDelete': {
 		title: 'Message deleted',
@@ -65,7 +65,7 @@ ${bold('CONTENT')}
 ${codeMultiline(message.content)}`,
 		filter: (origin, message) =>
 			origin.id === message.guild?.id && !message.author.bot,
-		color: configuration.responses.colors.red,
+		color: configuration.interactions.responses.colors.red,
 	},
 };
 

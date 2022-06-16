@@ -16,7 +16,7 @@ const resolver: ListingResolver = async (interaction, option) => {
 					title: 'The URL is invalid.',
 					description:
 						'The provided link is not of a valid YouTube URL format.',
-					color: configuration.responses.colors.red,
+					color: configuration.interactions.responses.colors.red,
 				}],
 			});
 			return undefined;

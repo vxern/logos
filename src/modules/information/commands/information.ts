@@ -37,7 +37,7 @@ function bot(_: Client, interaction: Interaction): void {
 		embeds: [{
 			title: application.username,
 			thumbnail: { url: application.avatarURL() },
-			color: configuration.responses.colors.invisible,
+			color: configuration.interactions.responses.colors.invisible,
 			fields: [{
 				name: 'What am I?',
 				value: `I am ${
@@ -82,7 +82,7 @@ async function guild(_: Client, interaction: Interaction): Promise<void> {
 		embeds: [{
 			title: `Information about ${guild.name!}`,
 			thumbnail: { url: guild.iconURL() },
-			color: configuration.responses.colors.invisible,
+			color: configuration.interactions.responses.colors.invisible,
 			fields: [
 				{
 					name: '🖋️ Description',

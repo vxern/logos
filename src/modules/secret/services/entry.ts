@@ -109,7 +109,7 @@ const service: ServiceStarter = (client) => {
 
 				if (requiresVerification) {
 					interaction.showModal(
-						toModal(configuration.forms.verification, language),
+						toModal(configuration.interactions.forms.verification, language),
 					);
 
 					const collector = new Collector({
@@ -143,7 +143,7 @@ const service: ServiceStarter = (client) => {
 							title: 'Answers submitted!',
 							description:
 								'Your answers to the verification questions have been submitted.\n\nYour request to join the server will be reviewed by a staff member, and you will be notified via DMs when your entry request is accepted.',
-							color: configuration.responses.colors.green,
+							color: configuration.interactions.responses.colors.green,
 						}],
 						ephemeral: true,
 					});
@@ -153,7 +153,7 @@ const service: ServiceStarter = (client) => {
 							const field = component.components[0]!;
 
 							const fields = Object.entries(
-								configuration.forms.verification.fields,
+								configuration.interactions.forms.verification.fields,
 							);
 
 							const question = fields.find(([name]) =>

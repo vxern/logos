@@ -39,7 +39,7 @@ const generators: MessageGenerators<GuildEvents> = {
 				mentionUser(by.user)
 			}`,
 		filter: (origin, _user, by) => origin.id === by.guild.id,
-		color: configuration.responses.colors.green,
+		color: configuration.interactions.responses.colors.green,
 	},
 	'verificationRequestReject': {
 		title: 'Verification request rejected',
@@ -48,14 +48,14 @@ const generators: MessageGenerators<GuildEvents> = {
 				mentionUser(by.user)
 			}`,
 		filter: (origin, _user, by) => origin.id === by.guild.id,
-		color: configuration.responses.colors.red,
+		color: configuration.interactions.responses.colors.red,
 	},
 	'entryRequestAccept': {
 		title: 'Entry granted',
 		message: (member) =>
 			`Entry has been granted to ${mentionUser(member.user)}.`,
 		filter: (origin, member) => origin.id === member.guild.id,
-		color: configuration.responses.colors.green,
+		color: configuration.interactions.responses.colors.green,
 	},
 	'entryRequestReject': {
 		title: 'Entry refused',
@@ -65,7 +65,7 @@ const generators: MessageGenerators<GuildEvents> = {
 ${bold('REASON')}
 ${codeMultiline(reason)}`,
 		filter: (origin, member, _reason) => origin.id === member.guild.id,
-		color: configuration.responses.colors.green,
+		color: configuration.interactions.responses.colors.green,
 	},
 	'articleSubmit': {
 		title: 'Article submitted',
@@ -76,7 +76,7 @@ ${bold(article.content.title)}
 
 ${article.content.body}`,
 		filter: (origin, _article, by) => origin.id === by.guild.id,
-		color: configuration.responses.colors.green,
+		color: configuration.interactions.responses.colors.green,
 	},
 	'articleEdit': {
 		title: 'Article updated',
@@ -87,7 +87,7 @@ ${article.content.body}`,
 
 ${after.content.body}`,
 		filter: (origin, _before, _after, by) => origin.id === by.guild.id,
-		color: configuration.responses.colors.blue,
+		color: configuration.interactions.responses.colors.blue,
 	},
 	'articleLock': {
 		title: 'Article locked',
@@ -96,7 +96,7 @@ ${after.content.body}`,
 				mentionUser(by.user)
 			}.`,
 		filter: (origin, _article, by) => origin.id === by.guild.id,
-		color: configuration.responses.colors.yellow,
+		color: configuration.interactions.responses.colors.yellow,
 	},
 };
 

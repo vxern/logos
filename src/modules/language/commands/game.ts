@@ -26,6 +26,7 @@ const command: Command = {
 /** Starts a simple game of 'choose the correct word to fit in the blank'. */
 async function game(client: Client, interaction: Interaction): Promise<void> {
 	const language = client.getLanguage(interaction.guild!);
+
 	const sentencePairs = Object.values(sentenceLists[language] ?? {});
 	const hasSentencePairs = sentencePairs.length > 0;
 
@@ -43,7 +44,7 @@ async function game(client: Client, interaction: Interaction): Promise<void> {
 				description: `There are no sentences available for the ${
 					capitalise(language)
 				} language to learn from.`,
-				color: configuration.responses.colors.red,
+				color: configuration.interactions.responses.colors.red,
 			}],
 		});
 		return;
@@ -76,7 +77,7 @@ async function game(client: Client, interaction: Interaction): Promise<void> {
 
 	collector.collect();
 
-	let ribbonColor = configuration.responses.colors.blue;
+	let ribbonColor = configuration.interactions.responses.colors.blue;
 	while (true) {
 		try {
 			const sentenceSelection = createSentenceSelection(sentencePairs);
@@ -126,8 +127,8 @@ async function game(client: Client, interaction: Interaction): Promise<void> {
 			const isCorrect = choice === sentenceSelection.word;
 
 			ribbonColor = isCorrect
-				? configuration.responses.colors.green
-				: configuration.responses.colors.red;
+				? configuration.interactions.responses.colors.green
+				: configuration.interactions.responses.colors.red;
 		} catch (error) {
 			console.error(error);
 			return;
