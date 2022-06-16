@@ -101,7 +101,7 @@ export default {
 						label: 'Body of your article',
 						style: TextInputStyle.PARAGRAPH,
 						minimum: 30,
-						maximum: 4000, // The maximum length of a field is 4,000.
+						maximum: 3000,
 					},
 					footer: {
 						label: 'Additional information / notes',
