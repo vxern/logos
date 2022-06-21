@@ -1,10 +1,7 @@
 import { ModalSubmitInteraction } from 'https://raw.githubusercontent.com/vxern/harmony/main/src/structures/modalSubmitInteraction.ts';
 import {
 	ButtonStyle,
-	Collector,
 	Guild,
-	Interaction,
-	InteractionMessageComponentData,
 	InteractionType,
 	MessageComponentInteraction,
 	MessageComponentType,
@@ -80,16 +77,14 @@ async function onSelectLanguageProficiency(
 			},
 		);
 
-		if (
-			!(await verifyUser(
-				client,
-				submission.guild!,
-				submission.user,
-				answers,
-			))
-		) {
-			return;
-		}
+		const verificationResult = await verifyUser(
+			client,
+			submission.guild!,
+			submission.user,
+			answers,
+		);
+
+		if (!verificationResult) return;
 	}
 
 	const proficiency = proficiencies[parseInt(parameter)]!;
@@ -115,32 +110,19 @@ async function verifyUser(
 		configuration.guilds.channels.verification,
 	))!;
 
-	const collector = new Collector({
-		event: 'interactionCreate',
-		client: guild.client,
-		filter: (selection: Interaction) => {
-			if (!selection.isMessageComponent()) {
-				return false;
-			}
-
-			if (!selection.data.custom_id.startsWith('VERIFICATION')) {
-				return false;
-			}
-
-			return true;
-		},
-		deinitOnEnd: true,
+	const [collector] = createInteractionCollector(client, {
+		type: InteractionType.MESSAGE_COMPONENT,
+		endless: true,
+		limit: 1,
 	});
 
 	const verificationMessage = await verificationChannel.send({
 		embeds: [{
 			title: `${user.username} ~ ${user.tag}`,
-			fields: answers.map(([question, answer]) => {
-				return {
-					name: question,
-					value: answer,
-				};
-			}),
+			fields: answers.map(([question, answer]) => ({
+				name: question,
+				value: answer,
+			})),
 		}],
 		components: [{
 			type: MessageComponentType.ACTION_ROW,
@@ -158,20 +140,15 @@ async function verifyUser(
 		}],
 	});
 
-	collector.collect();
+	const selection =
+		(await collector.waitFor('collect'))[0] as MessageComponentInteraction;
 
-	const selection = (await collector.waitFor('collect'))[0] as Interaction;
-
-	collector.end();
-
-	const data = selection.data! as InteractionMessageComponentData;
-
-	const [_, accepted] = data.custom_id.split('|') as [string, boolean];
+	const accepted = selection.data!.custom_id.split('|')[1]! === 'true';
 
 	verificationMessage.delete();
 
 	client.logging.get(guild.id)?.log(
-		'verificationRequestAccept',
+		accepted ? 'verificationRequestAccept' : 'verificationRequestReject',
 		user,
 		selection.member!,
 	);
