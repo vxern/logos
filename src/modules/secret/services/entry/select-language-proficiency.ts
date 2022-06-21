@@ -18,7 +18,7 @@ import {
 	getChannel,
 	toModal,
 } from '../../../../utils.ts';
-import { getProficiencyCategory } from "../../../roles/module.ts";
+import { getProficiencyCategory } from '../../../roles/module.ts';
 
 const proficiencyCategory = getProficiencyCategory();
 const proficiencies = proficiencyCategory.collection!.list!;
@@ -35,14 +35,18 @@ async function onSelectLanguageProficiency(
 	).find(([key]) => key === language)![1].requiresVerification;
 
 	if (requiresVerification) {
-		const [collector] = createInteractionCollector(client, {
+		const [collector, customID] = createInteractionCollector(client, {
 			type: InteractionType.MODAL_SUBMIT,
 			user: interaction.user,
 			limit: 1,
 		});
 
 		interaction.showModal(
-			toModal(configuration.interactions.forms.verification, language),
+			toModal(
+				configuration.interactions.forms.verification,
+				customID,
+				language,
+			),
 		);
 
 		const submission =

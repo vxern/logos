@@ -302,25 +302,23 @@ function toModal(
 	language?: string,
 ): InteractionResponseModal {
 	const components = Object.entries(form.fields).map<MessageComponentData>(
-		([name, field]) => {
-			return {
-				type: MessageComponentType.ACTION_ROW,
-				components: [
-					{
-						type: MessageComponentType.TEXT_INPUT,
-						customID: `${customID}|${name}`,
-						label: typeof field.label === 'function'
-							? field.label(language!)
-							: field.label,
-						style: field.style,
-						value: field.value,
-						required: field.required,
-						minLength: field.minimum === 0 ? undefined : field.minimum,
-						maxLength: field.maximum,
-					},
-				],
-			};
-		},
+		([name, field]) => ({
+			type: MessageComponentType.ACTION_ROW,
+			components: [
+				{
+					type: MessageComponentType.TEXT_INPUT,
+					customID: `${customID}|${name}`,
+					label: typeof field.label === 'function'
+						? field.label(language!)
+						: field.label,
+					style: field.style,
+					value: field.value,
+					required: field.required,
+					minLength: field.minimum === 0 ? undefined : field.minimum,
+					maxLength: field.maximum,
+				},
+			],
+		}),
 	);
 
 	return {
