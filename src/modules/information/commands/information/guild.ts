@@ -32,7 +32,7 @@ async function displayGuildInformation(
 				},
 				{
 					name: '⏱️ Created',
-					value: `${time(guild.timestamp.getTime() / 1000 | 0)}`,
+					value: `${time(guild.timestamp.getTime())}`,
 					inline: true,
 				},
 				{
