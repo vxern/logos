@@ -219,14 +219,8 @@ async function modifyRoles(action: RoleAction): Promise<boolean> {
 		);
 
 		for (const role of resolvedRoles) {
-			// Assign role to member.
-			action.interaction.member.roles.add(role!.id);
-			// Fetch Discord role and cache it.
-			action.interaction.client.cache.set(
-				action.interaction.member.roles.cacheName,
-				role.name,
-				role,
-			);
+			// Unassign role from member.
+			action.interaction.member.roles.remove(role!.id);
 		}
 	}
 
