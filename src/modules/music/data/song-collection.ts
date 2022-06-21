@@ -1,16 +1,18 @@
 import { Song } from './song.ts';
 
 /**
- * A representation of a collection of songs, which occupies a single place in
- * music queues, but contains multiple, playable songs which would normally each
+ * Represents a collection of songs that occupies a single position in music
+ * queues, but contains multiple, playable songs that would normally each
  * occupy a separate place in the queue.
  */
 interface SongCollection {
 	/** The title of the collection. */
 	title: string;
+
 	/** The songs in the collection. */
 	songs: Song[];
-	/** The index of the song which is currently playing. */
+
+	/** The index of the song that is currently playing. */
 	position: number;
 }
 

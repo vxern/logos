@@ -1,6 +1,7 @@
 import { Interaction } from '../../../../deps.ts';
-import { Availability } from '../../../commands/availability.ts';
-import { Command } from '../../../commands/command.ts';
+import { Client } from '../../../client.ts';
+import { Availability } from '../../../commands/structs/availability.ts';
+import { Command } from '../../../commands/structs/command.ts';
 
 const command: Command = {
 	name: 'history',
@@ -9,7 +10,10 @@ const command: Command = {
 	handle: history,
 };
 
-async function history(interaction: Interaction) {
+async function history(
+	_client: Client,
+	_interaction: Interaction,
+): Promise<void> {
 	/// TODO(vxern):
 	/// Display list of played songs in a browsable list.
 }

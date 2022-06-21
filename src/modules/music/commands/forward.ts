@@ -1,6 +1,7 @@
 import { Interaction } from '../../../../deps.ts';
-import { Availability } from '../../../commands/availability.ts';
-import { Command } from '../../../commands/command.ts';
+import { Client } from '../../../client.ts';
+import { Availability } from '../../../commands/structs/availability.ts';
+import { Command } from '../../../commands/structs/command.ts';
 import { by, to } from '../parameters.ts';
 
 const command: Command = {
@@ -11,7 +12,10 @@ const command: Command = {
 	handle: forward,
 };
 
-async function forward(interaction: Interaction) {
+async function forward(
+	_client: Client,
+	_interaction: Interaction,
+): Promise<void> {
 	/// TODO(vxern):
 	/// If neither option has been supplied, reject interaction.
 	/// If either option is not valid, reject interaction.

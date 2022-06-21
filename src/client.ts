@@ -86,6 +86,14 @@ class Client extends DiscordClient {
 				});
 				await this.node.connect(BigInt(this.user!.id));
 
+				this.on('raw', (event, payload) => {
+					if (
+						event === 'VOICE_SERVER_UPDATE' || event === 'VOICE_STATE_UPDATE'
+					) {
+						this.node.handleVoiceUpdate(payload);
+					}
+				});
+
 				const promises = [
 					this.setupGuilds().then(() => loadComponents(this)),
 					this.setupCommands(),

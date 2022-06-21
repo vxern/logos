@@ -5,3 +5,4 @@ secrets.ts
 
 # Application-specific ignores
 /src/modules/music/lavalink/application.yml
+/src/modules/music/lavalink/logs/

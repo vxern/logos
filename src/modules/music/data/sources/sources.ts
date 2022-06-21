@@ -5,20 +5,18 @@ import {
 import { SongListing } from '../song-listing.ts';
 import youtube from './youtube.ts';
 
-const sources = ['Spotify', 'YouTube'] as const;
-type Source = (typeof sources)[number];
+type Source = 'YouTube';
 
+/** Resolves a song listing from a source. */
 type ListingResolver = (
 	interaction: Interaction,
 	data: InteractionApplicationCommandOption,
 ) => Promise<SongListing | undefined>;
 
-const blank: ListingResolver = async (_) => undefined;
-
-const handlers: Record<Source, ListingResolver> = {
-	'Spotify': blank,
+/** Defines the available sources. */
+const sources: Record<Source, ListingResolver> = {
 	'YouTube': youtube,
 };
 
-export { handlers };
+export { sources };
 export type { ListingResolver, Source };

@@ -1,12 +1,7 @@
-import { Availability } from '../../../commands/availability.ts';
-import { Command } from '../../../commands/command.ts';
-import { OptionType } from '../../../commands/option.ts';
-
-const config = {
-	volume: {
-		maximum: 150,
-	},
-};
+import { ApplicationCommandOptionType } from '../../../../deps.ts';
+import { Availability } from '../../../commands/structs/availability.ts';
+import { Command } from '../../../commands/structs/command.ts';
+import configuration from '../../../configuration.ts';
 
 const command: Command = {
 	name: 'volume',
@@ -14,16 +9,16 @@ const command: Command = {
 	options: [{
 		name: 'display',
 		description: 'Displays the volume of playback.',
-		type: OptionType.SUB_COMMAND,
+		type: ApplicationCommandOptionType.SUB_COMMAND,
 	}, {
 		name: 'set',
 		description: 'Sets the volume of playback.',
-		type: OptionType.SUB_COMMAND,
+		type: ApplicationCommandOptionType.SUB_COMMAND,
 		options: [{
 			name: 'volume',
-			description: `A value between 0 and ${config.volume.maximum}`,
+			description: `A value between 0 and ${configuration.music.maxima.volume}`,
 			required: true,
-			type: OptionType.INTEGER,
+			type: ApplicationCommandOptionType.INTEGER,
 		}],
 	}],
 };

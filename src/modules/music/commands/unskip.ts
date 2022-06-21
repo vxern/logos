@@ -1,6 +1,7 @@
 import { Interaction } from '../../../../deps.ts';
-import { Availability } from '../../../commands/availability.ts';
-import { Command } from '../../../commands/command.ts';
+import { Client } from '../../../client.ts';
+import { Availability } from '../../../commands/structs/availability.ts';
+import { Command } from '../../../commands/structs/command.ts';
 
 const command: Command = {
 	name: 'unskip',
@@ -9,7 +10,10 @@ const command: Command = {
 	handle: unskip,
 };
 
-async function unskip(interaction: Interaction) {
+async function unskip(
+	_client: Client,
+	_interaction: Interaction,
+): Promise<void> {
 	/// TODO(vxern):
 	/// If there is no song in history, reject interaction nicely.
 	/// Otherwise, unskip the song.

@@ -1,6 +1,7 @@
 import { Interaction } from '../../../../deps.ts';
-import { Availability } from '../../../commands/availability.ts';
-import { Command } from '../../../commands/command.ts';
+import { Client } from '../../../client.ts';
+import { Availability } from '../../../commands/structs/availability.ts';
+import { Command } from '../../../commands/structs/command.ts';
 
 const command: Command = {
 	name: 'remove',
@@ -9,7 +10,10 @@ const command: Command = {
 	handle: remove,
 };
 
-async function remove(interaction: Interaction) {
+async function remove(
+	_client: Client,
+	_interaction: Interaction,
+): Promise<void> {
 	/// TODO(vxern):
 	/// Open a selection menu and allow the user to select the song listing to remove.
 }
