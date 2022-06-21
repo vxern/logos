@@ -87,10 +87,9 @@ class Client extends DiscordClient {
 				await this.node.connect(BigInt(this.user!.id));
 
 				const promises = [
-					this.setupGuilds(),
+					this.setupGuilds().then(() => loadComponents(this)),
 					this.setupCommands(),
 					this.setupServices(),
-					loadComponents(this),
 				];
 
 				await Promise.all(promises);
@@ -121,7 +120,7 @@ class Client extends DiscordClient {
 			configuration.guilds.nameExpression.exec(guild.name!) || undefined;
 
 		const language = !guildNameMatch
-			? 'english'
+			? 'romanian'
 			: guildNameMatch![1]!.toLowerCase();
 
 		this.languages.set(guild.id, language);
