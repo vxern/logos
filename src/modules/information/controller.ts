@@ -25,7 +25,7 @@ class LoggingController extends Controller {
 	/** Constructs a {@link LoggingController}. */
 	constructor(guild: Guild) {
 		super(guild);
-		this.setupChannel(guild).then(this.startListening);
+		this.setupChannel(guild).then(() => this.startListening());
 	}
 
 	private async setupChannel(guild: Guild): Promise<void> {

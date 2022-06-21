@@ -10,7 +10,7 @@ import configuration from '../../../configuration.ts';
 import { capitalise } from '../../../formatting.ts';
 import { fromHex } from '../../../utils.ts';
 import { DictionaryEntry, toFields } from '../data/dictionary.ts';
-import { dictionaryLists } from '../module.ts';
+import { dictionaryAdapterLists } from '../module.ts';
 
 const command: Command = {
 	name: 'word',
@@ -44,7 +44,7 @@ async function word(client: Client, interaction: Interaction): Promise<void> {
 		false;
 
 	const language = client.getLanguage(interaction.guild!);
-	const dictionaries = Object.values(dictionaryLists[language] ?? {});
+	const dictionaries = Object.values(dictionaryAdapterLists[language] ?? {});
 	const hasDictionaries = dictionaries.length > 0;
 
 	const response = await interaction.defer(!hasDictionaries || !show);
@@ -69,7 +69,7 @@ async function word(client: Client, interaction: Interaction): Promise<void> {
 
 	let entry: DictionaryEntry = { headword: word };
 	const responses = dictionaries.map((dictionary) =>
-		dictionary.lookup(word, language)
+		dictionary.lookup({ word: word, native: language }, dictionary.queryBuilder)
 			.then((result) => {
 				entry = { ...result, ...entry };
 

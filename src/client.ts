@@ -1,20 +1,14 @@
 import {
-	ApplicationCommandInteraction,
 	ApplicationCommandType,
-	AutocompleteInteraction,
 	Client as DiscordClient,
 	event,
 	Guild,
 	Intents,
 	lavadeno,
 } from '../deps.ts';
-import {
-	Command,
-	createApplicationCommand,
-	unifyHandlers,
-} from './commands/command.ts';
+import { createApplicationCommand, unifyHandlers } from './commands/command.ts';
 import modules from './modules/modules.ts';
-import services from './modules/services.ts';
+import services from './modules/service.ts';
 import { LoggingController } from './modules/information/controller.ts';
 import { MusicController } from './modules/music/controller.ts';
 import { loadComponents } from './modules/language/module.ts';
@@ -22,6 +16,7 @@ import { time } from './utils.ts';
 import secrets from '../secrets.ts';
 import { Database } from './database/database.ts';
 import configuration from './configuration.ts';
+import { Command, InteractionHandler } from './commands/structs/command.ts';
 
 /** The core of the application, used for interacting with the Discord API. */
 class Client extends DiscordClient {

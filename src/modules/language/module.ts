@@ -62,7 +62,7 @@ async function loadComponents(client: Client): Promise<void> {
 
 		const records = await parseCSV(
 			await Deno.readTextFile(
-				`./src/modules/language/data/languages/${entry.name}`,
+				`./src/modules/language/data/sentences/${entry.name}`,
 			),
 			{
 				lazyQuotes: true,
