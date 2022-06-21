@@ -1,6 +1,6 @@
-import { Availability } from '../../../commands/availability.ts';
-import { Command } from '../../../commands/command.ts';
-import { OptionType } from '../../../commands/option.ts';
+import { ApplicationCommandOptionType } from '../../../../deps.ts';
+import { Availability } from '../../../commands/structs/availability.ts';
+import { Command } from '../../../commands/structs/command.ts';
 import { user } from '../../parameters.ts';
 
 const command: Command = {
@@ -8,7 +8,7 @@ const command: Command = {
 	availability: Availability.MEMBERS,
 	options: [{
 		name: 'view',
-		type: OptionType.SUB_COMMAND,
+		type: ApplicationCommandOptionType.SUB_COMMAND,
 		description: 'Displays the user\'s profile.',
 		options: [user],
 	}],

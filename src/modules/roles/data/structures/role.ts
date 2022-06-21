@@ -23,6 +23,7 @@ type DescriptionGenerator = (name: string) => string;
 interface Assignable {
 	/** When the member is assigned a role from the category. */
 	onAssignMessage?: DescriptionGenerator;
+
 	/** When the member is unassigned the role from the category. */
 	onUnassignMessage?: DescriptionGenerator;
 }
@@ -31,8 +32,10 @@ interface Assignable {
 interface Role extends Assignable {
 	/** Role name corresponding to the guild role name. */
 	name: string;
+
 	/** Description of this role's purpose. */
 	description?: string;
+
 	/** Emoji to be displayed next to its selection. */
 	emoji?: string;
 }
@@ -60,10 +63,12 @@ async function resolveGuildRole(
 interface RoleAction {
 	/** The interaction associated with this action. */
 	interaction: Interaction;
+
 	/** Roles to modify. */
 	roles: {
 		/** Roles to assign to the member. */
 		add?: Role[];
+
 		/** Roles to unassign from the member. */
 		remove?: Role[];
 	};
@@ -90,11 +95,11 @@ async function tryAssignRole(
 		language,
 		{ within: category.collection! },
 	);
-
-	const action: RoleAction = { interaction: interaction, roles: {} };
 	const alreadyHasRole = memberRoles.some((memberRole) =>
 		memberRole.name === role.name
 	);
+
+	const action: RoleAction = { interaction: interaction, roles: {} };
 
 	if (!alreadyHasRole) {
 		if (
@@ -137,53 +142,91 @@ async function tryAssignRole(
 async function modifyRoles(action: RoleAction): Promise<boolean> {
 	if (!action.interaction.member || !action.interaction.guild) return false;
 
-	if (action.roles.add) {
+	const unresolvedRolesToAdd = action.roles.add?.map((role) =>
+		resolveGuildRole(action.interaction.guild!, role.name)
+	);
+
+	if (unresolvedRolesToAdd) {
 		console.log(
 			`${action.interaction.user.username} assigned roles: ${
-				action.roles.add.map((role) => `'${role.name}'`).join(', ')
+				action.roles.add!.map((role) => `'${role.name}'`).join(', ')
 			}`,
 		);
-		for (const role of action.roles.add) {
-			const guildRole = await resolveGuildRole(
-				action.interaction.guild!,
-				role.name,
+
+		const resolvedRolesToAdd = await Promise.all(unresolvedRolesToAdd);
+
+		const unresolvedRoles = resolvedRolesToAdd.map<
+			[DiscordRole | undefined, number]
+		>((role, index) => [role, index]).filter(([role, _index]) => !role).map((
+			[_role, index],
+		) => action.roles.add![index]!);
+
+		for (const role of unresolvedRoles) {
+			console.error(
+				`A role with the name '${role.name}' does not exist in the guild '${action
+					.interaction.guild!.name!}'.`,
 			);
-			if (!guildRole) {
-				console.error(
-					`A role with the name '${role.name}' does not exist in the guild '${action
-						.interaction.guild!.name!}'.`,
-				);
-				continue;
-			}
-			// Assign role to member
-			action.interaction.member.roles.add(guildRole!.id);
-			// Fetch Discord role and cache it
+		}
+
+		for (
+			const role of resolvedRolesToAdd.filter((role) => role) as DiscordRole[]
+		) {
+			// Assign role to member.
+			action.interaction.member.roles.add(role!.id);
+			// Fetch Discord role and cache it.
 			action.interaction.client.cache.set(
 				action.interaction.member.roles.cacheName,
 				role.name,
-				guildRole,
+				role,
 			);
 		}
 	}
 
-	if (action.roles.remove) {
+	const unresolvedRolesToRemove = action.roles.remove?.map((role) =>
+		resolveGuildRole(action.interaction.guild!, role.name)
+	);
+
+	if (unresolvedRolesToRemove) {
 		console.log(
 			`${action.interaction.user.username} unassigned roles: ${
-				action.roles.remove.map((role) => `'${role.name}'`).join(', ')
+				action.roles.remove!.map((role) => `'${role.name}'`).join(', ')
 			}`,
 		);
-		// Fetch Discord role and cache it
+
+		const resolvedRolesToRemove = await Promise.all(unresolvedRolesToRemove);
+
+		const unresolvedRoles = resolvedRolesToRemove.map<
+			[DiscordRole | undefined, number]
+		>((role, index) => [role, index]).filter(([role, _index]) => !role).map((
+			[_role, index],
+		) => action.roles.add![index]!);
+
+		for (const role of unresolvedRoles) {
+			console.error(
+				`A role with the name '${role.name}' does not exist in the guild '${action
+					.interaction.guild!.name!}'.`,
+			);
+		}
+
+		const resolvedRoles = resolvedRolesToRemove.filter((role) =>
+			role
+		) as DiscordRole[];
+
+		// Remove cached roles for a member.
 		action.interaction.client.cache.delete(
 			action.interaction.member.roles.cacheName,
-			...action.roles.remove.map((role) => role.name),
+			...resolvedRoles.map((role) => role.name),
 		);
-		for (const role of action.roles.remove) {
-			const guildRole = await resolveGuildRole(
-				action.interaction.guild!,
+
+		for (const role of resolvedRoles) {
+			// Assign role to member.
+			action.interaction.member.roles.add(role!.id);
+			// Fetch Discord role and cache it.
+			action.interaction.client.cache.set(
+				action.interaction.member.roles.cacheName,
 				role.name,
+				role,
 			);
-			// Unassign role from member
-			action.interaction.member.roles.remove(guildRole!.id);
 		}
 	}
 

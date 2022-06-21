@@ -1,19 +1,19 @@
 import {
 	ButtonStyle,
-	Collector,
 	Interaction,
-	InteractionMessageComponentData,
 	InteractionResponseType,
+	InteractionType,
 	MessageComponentData,
+	MessageComponentInteraction,
 	MessageComponentType,
 } from '../../../../deps.ts';
 import { Client } from '../../../client.ts';
-import { Availability } from '../../../commands/availability.ts';
-import { Command } from '../../../commands/command.ts';
+import { Availability } from '../../../commands/structs/availability.ts';
+import { Command } from '../../../commands/structs/command.ts';
 import configuration from '../../../configuration.ts';
 import { capitalise } from '../../../formatting.ts';
-import { random, shuffle } from '../../../utils.ts';
-import { SentencePair, SentenceSelection } from '../data/sentence.ts';
+import { createInteractionCollector, random, shuffle } from '../../../utils.ts';
+import { SentencePair } from '../data/sentence.ts';
 import { sentenceLists } from '../module.ts';
 
 const command: Command = {
@@ -28,7 +28,7 @@ async function game(client: Client, interaction: Interaction): Promise<void> {
 	const language = client.getLanguage(interaction.guild!);
 
 	const sentencePairs = Object.values(sentenceLists[language] ?? {});
-	const hasSentencePairs = sentencePairs.length > 0;
+	const hasSentencePairs = sentencePairs.length !== 0;
 
 	const response = await interaction.defer(true);
 
@@ -50,48 +50,15 @@ async function game(client: Client, interaction: Interaction): Promise<void> {
 		return;
 	}
 
-	const collector = new Collector({
-		event: 'interactionCreate',
-		client: interaction.client,
-		filter: (selection) => {
-			if (!(selection instanceof Interaction)) {
-				return false;
-			}
-			if (
-				!(selection.data as InteractionMessageComponentData)?.custom_id
-					?.startsWith('LANGUAGE_GAME')
-			) {
-				return false;
-			}
-			if (!selection.isMessageComponent()) {
-				return false;
-			}
-			if (selection.user.id !== interaction.user.id) return false;
-			if (selection.message.interaction?.id !== interaction.id) {
-				return false;
-			}
-			return true;
-		},
-		deinitOnEnd: true,
+	const [collector, customID] = createInteractionCollector(client, {
+		type: InteractionType.MESSAGE_COMPONENT,
+		user: interaction.user,
 	});
-
-	collector.collect();
 
 	let ribbonColor = configuration.interactions.responses.colors.blue;
 	while (true) {
 		try {
 			const sentenceSelection = createSentenceSelection(sentencePairs);
-
-			const buttons = sentenceSelection.choices.map<MessageComponentData>(
-				(choice, index) => {
-					return {
-						type: MessageComponentType.BUTTON,
-						style: ButtonStyle.GREEN,
-						label: choice,
-						customID: `LANGUAGE_GAME|${index}`,
-					};
-				},
-			);
 
 			response.editResponse({
 				embeds: [{
@@ -106,23 +73,26 @@ async function game(client: Client, interaction: Interaction): Promise<void> {
 				}],
 				components: [{
 					type: MessageComponentType.ACTION_ROW,
-					components: buttons,
+					components: sentenceSelection.choices.map<MessageComponentData>(
+						(choice, index) => ({
+							type: MessageComponentType.BUTTON,
+							style: ButtonStyle.GREEN,
+							label: choice,
+							customID: `${customID}|${index}`,
+						}),
+					),
 				}],
 				ephemeral: true,
 			});
 
-			const collected = await collector.waitFor('collect');
-
-			const selection = collected[0] as Interaction;
+			const selection =
+				// deno-lint-ignore no-await-in-loop
+				(await collector.waitFor('collect'))[0] as MessageComponentInteraction;
 			selection.respond({
 				type: InteractionResponseType.DEFERRED_MESSAGE_UPDATE,
 			});
-			const index = Number(
-				(selection.data! as InteractionMessageComponentData).custom_id.split(
-					'|',
-				)[1],
-			);
 
+			const index = Number(selection.data!.custom_id.split('|')[1]!);
 			const choice = sentenceSelection.choices[index];
 			const isCorrect = choice === sentenceSelection.word;
 
@@ -134,6 +104,21 @@ async function game(client: Client, interaction: Interaction): Promise<void> {
 			return;
 		}
 	}
+}
+
+/**
+ * Represents a selection of a sentence to be used for the language game of
+ * picking the correct word to fit into the blank space.
+ */
+interface SentenceSelection {
+	/** The selected sentence pair. */
+	pair: SentencePair;
+
+	/** The word which fits into the blank in the word. */
+	word: string;
+
+	/** Words to choose from to fit into the blank. */
+	choices: string[];
 }
 
 function createSentenceSelection(

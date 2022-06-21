@@ -1,6 +1,11 @@
-import { ApplicationCommand, ApplicationCommandOption } from '../../deps.ts';
-import { Command, mergeOptions, unimplemented } from '../commands/command.ts';
-import { Option, OptionType } from '../commands/option.ts';
+import {
+	ApplicationCommand,
+	ApplicationCommandOption,
+	ApplicationCommandOptionType,
+} from '../../deps.ts';
+import { Command } from '../commands/structs/command.ts';
+import { mergeOptions, unimplemented } from '../commands/command.ts';
+import { Option } from '../commands/structs/option.ts';
 import { getMissingKeys } from '../utils.ts';
 import information from './information/module.ts';
 import language from './language/module.ts';
@@ -34,13 +39,16 @@ function mergeModules(modules: Record<string, Command>[]): Command[] {
 	const commands = Array<Command>().concat(
 		...modules.map((module) => Object.values(module)),
 	);
+
 	// Merge commands with the same name.
 	return supplyMissingProperties(commands.filter((command, index, array) => {
 		const firstIndex = array.findIndex((first) => first.name === command.name);
+
 		if (firstIndex !== index) {
-			array[firstIndex] = mergeOptions([array[firstIndex], command]);
+			array[firstIndex] = mergeOptions([array[firstIndex]!, command])!;
 			return false;
 		}
+
 		return true;
 	}));
 }
@@ -64,9 +72,12 @@ function supplyMissingProperties<T extends Command | Option>(
 			// implies [element] is a command.
 			case undefined:
 				if (element.options && element.options.length > 0) break;
-				/* falls through */
+				if (!element.handle) {
+					element.handle = unimplemented;
+				}
+				break;
 			// Only options of type [OptionType.SUB_COMMAND] may have handlers.
-			case OptionType.SUB_COMMAND:
+			case ApplicationCommandOptionType.SUB_COMMAND:
 				if (!element.handle) {
 					element.handle = unimplemented;
 				}
@@ -86,36 +97,29 @@ function supplyMissingProperties<T extends Command | Option>(
  * @returns The result of the comparison.
  */
 function areEqual(
-	left: ApplicationCommand | ApplicationCommandOption | undefined,
-	right: Command | Option | undefined,
+	existent: ApplicationCommand | ApplicationCommandOption | undefined,
+	introduced: Command | Option | undefined,
 ): boolean {
 	// If both [left] and [right] are `undefined`, raise equality.
-	if (!left && !right) {
-		return true;
-	}
+	if (!existent && !introduced) return true;
+
 	// If only one of either [left] or [right] is `undefined`, raise inequality.
-	if (!(left && right)) {
-		return false;
-	}
+	if (!(existent && introduced)) return false;
+
 	// Check which keys are not equal between the two objects.
-	const unequalKeys = getMissingKeys(left, right);
+	const unequalKeys = getMissingKeys(existent, introduced);
 	if (unequalKeys.length === 1) {
-		if (unequalKeys[0] !== 'options') {
-			return false;
-		}
+		if (unequalKeys[0] !== 'options') return false;
 
-		if (!(left.options && right.options)) {
-			return false;
-		}
+		if (!(existent.options && introduced.options)) return false;
 
-		if (right.options!.length !== left.options!.length) {
-			return false;
-		}
+		if (introduced.options!.length !== existent.options!.length) return false;
 
-		return left.options.every((option, index) =>
-			areEqual(option, right.options![index])
+		return existent.options.every((option, index) =>
+			areEqual(option, introduced.options![index])
 		);
 	}
+
 	// If any of the keys are unequal, yield `false`.
 	return unequalKeys.length === 0;
 }

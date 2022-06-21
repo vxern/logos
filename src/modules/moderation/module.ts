@@ -1,4 +1,4 @@
-import { Command } from '../../commands/command.ts';
+import { Command } from '../../commands/structs/command.ts';
 import ban from './commands/ban.ts';
 import cite from './commands/cite.ts';
 import kick from './commands/kick.ts';

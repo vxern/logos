@@ -70,7 +70,7 @@ ${codeMultiline(message.content)}`,
 };
 
 /** Represents a log message generator for a member update event. */
-interface MemberUpdateLogEntry {
+interface MemberUpdateLogGenerator {
 	/** The condition that must be met for the message to be logged. */
 	condition: boolean;
 
@@ -78,12 +78,20 @@ interface MemberUpdateLogEntry {
 	message: string;
 }
 
-type MemberUpdateMessageGenerators = (
+/**
+ * Represents a delegator of member updates to log message generators.
+ *
+ * @param before - The previous state of the member.
+ * @param after - The current state of the member.
+ * @returns An array of message generators as per the input values.
+ */
+type MemberUpdateLogDelegator = (
 	before: Member,
 	after: Member,
-) => MemberUpdateLogEntry[];
+) => MemberUpdateLogGenerator[];
 
-const memberUpdates: MemberUpdateMessageGenerators = (
+/** Provided inputs, generates an array of log entry messages. */
+const memberUpdates: MemberUpdateLogDelegator = (
 	before,
 	after,
 ) => [
@@ -105,6 +113,7 @@ const memberUpdates: MemberUpdateMessageGenerators = (
 	},
 ];
 
+/** Provided inputs, resolves them to a member update message. */
 function resolveMemberUpdate(
 	before: Member,
 	after: Member,

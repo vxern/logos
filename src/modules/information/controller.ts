@@ -25,7 +25,7 @@ class LoggingController extends Controller {
 	/** Constructs a {@link LoggingController}. */
 	constructor(guild: Guild) {
 		super(guild);
-		this.setupChannel(guild);
+		this.setupChannel(guild).then(this.startListening);
 	}
 
 	private async setupChannel(guild: Guild): Promise<void> {
@@ -41,11 +41,9 @@ class LoggingController extends Controller {
 			);
 			return;
 		}
-
-		this.startListening(guild);
 	}
 
-	private startListening(guild: Guild): void {
+	private startListening(): void {
 		if (!this.channel) {
 			return;
 		}
@@ -53,7 +51,7 @@ class LoggingController extends Controller {
 		for (const event of Object.keys(generators.client)) {
 			const collector = new Collector({
 				event: event,
-				client: guild.client,
+				client: this.guild.client,
 			});
 
 			collector.on(
@@ -83,24 +81,20 @@ class LoggingController extends Controller {
 		if (!this.channel) return;
 
 		const entry = this.messageGenerators[event];
-
 		if (!entry) {
 			return console.error(
 				`Attempted to log event '${event}', however, this event is not handled.`,
 			);
 		}
 
-		// TODO: Use other type than 'any'.
-
-		const filter = (entry.filter as (...args: any[]) => boolean)(
+		const filter = (entry.filter as (...args: unknown[]) => boolean)(
 			this.channel.guild,
 			...args,
 		);
-
 		if (!filter) return;
 
 		const message = await (entry.message as (
-			...args: any[]
+			...args: unknown[]
 		) => Promise<string> | string | undefined)(...args);
 		if (!message) return;
 

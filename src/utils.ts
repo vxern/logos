@@ -22,8 +22,8 @@ import {
 	User,
 } from '../deps.ts';
 import languages from 'https://deno.land/x/language@v0.1.0/languages.ts';
-import { Command } from './commands/command.ts';
-import { Option } from './commands/option.ts';
+import { Command } from './commands/structs/command.ts';
+import { Option } from './commands/structs/option.ts';
 import { code } from './formatting.ts';
 import { Client } from './client.ts';
 import configuration from './configuration.ts';
@@ -478,20 +478,32 @@ interface InteractionCollectorSettings {
 	user?: User;
 
 	/** The ID of the interaction to listen for. */
-	id?: string;
+	customID?: string;
+
+	/** Whether this collector is to last forever or not. */
+	endless?: boolean;
+
+	/** How many interactions to collect before de-initialising. */
+	limit?: number;
 }
 
+/**
+ * Taking a {@link Client} and {@link InteractionCollectorSettings}, creates an
+ * interaction collector.
+ */
 function createInteractionCollector(
 	client: Client,
 	settings: InteractionCollectorSettings,
-): [collector: Collector, customID: string] {
-	const customID = settings.id ?? Snowflake.generate();
+): [collector: Collector, customID: string, isEnded: () => boolean] {
+	const customID = settings.customID ?? Snowflake.generate();
 
 	const conditionsUnfiltered: (ConditionChecker | undefined)[] = [
 		(interaction) => interaction.type === settings.type,
 		(interaction) =>
 			!!interaction.data && 'custom_id' in interaction.data &&
-			interaction.data.custom_id === customID,
+			(interaction.data.custom_id.split('|')[0] ??
+					interaction.data.custom_id) ===
+				(customID.split('|')[0] ?? customID),
 		settings.user
 			? (interaction) => interaction.user.id === (settings.user as User).id
 			: undefined,
@@ -509,12 +521,28 @@ function createInteractionCollector(
 		client: client,
 		filter: condition,
 		deinitOnEnd: true,
-		timeout: configuration.core.collectors.maxima.timeout,
+		timeout: !settings.endless
+			? undefined
+			: configuration.core.collectors.maxima.timeout,
+	});
+
+	let isEnded = false;
+	collector.on('end', () => {
+		isEnded = true;
+	});
+
+	let collected = 0;
+	collector.on('collect', () => {
+		collected++;
+
+		if (!settings.limit) return;
+
+		if (collected === settings.limit) collector.end();
 	});
 
 	collector.collect();
 
-	return [collector, customID];
+	return [collector, customID, () => isEnded];
 }
 
 export {

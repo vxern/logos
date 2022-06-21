@@ -1,13 +1,12 @@
+import { SelectComponentOption } from '../../../../../deps.ts';
 import { RoleCollection } from './role-collection.ts';
 
-/**
- * The type of a category helps determine how it should be managed in a
- * role navigation tree.
- */
+/** Defines the type of a role category. */
 enum RoleCategoryType {
-	/** A category with subcategories. */
+	/** A category group containing other categories or category groups. */
 	CATEGORY_GROUP,
-	/** A category with a list of roles. */
+
+	/** A category containing a list of roles. */
 	CATEGORY,
 }
 
@@ -15,26 +14,53 @@ enum RoleCategoryType {
 interface RoleCategory {
 	/** The type of this category. */
 	type: RoleCategoryType;
-	/** Name of this group of roles. */
+
+	/** The name of this category. */
 	name: string;
-	/** Description of the roles this group of roles comprises. */
+
+	/** The description for the roles contained within this category. */
 	description: string;
-	/** Colour to be displayed in the embed when this category is selected. */
+
+	/** The colour to be displayed in the embed message when this category is selected. */
 	color: number;
-	/** Emoji to be displayed next to this selection in a selection menu. */
+
+	/** The emoji to be displayed next to this category in a selection menu. */
 	emoji: string;
+
 	/**
-	 * Limit of roles from within this group that a user can assign.
+	 * The maximum number of roles from within this group that a user can assign.
 	 *
 	 * @remarks
 	 * -1 = No limit
 	 */
 	limit?: number;
-	/** Subcategories of this category. */
+
+	/** The subcategories of this category. */
 	categories?: RoleCategory[];
-	/** This category's role collection. */
+
+	/** The collection of roles defined within this category. */
 	collection?: RoleCollection;
 }
 
-export { RoleCategoryType };
+/**
+ * Taking an array of categories, create a list of options for it.
+ *
+ * @param categories - The role categories.
+ * @returns The created selections.
+ */
+function createSelectionsFromCategories(
+	categories: RoleCategory[],
+): SelectComponentOption[] {
+	return categories.map((category, index) => ({
+		label: category.name,
+		value: index.toString(),
+		description: category.description.length > 100
+			? category.description.slice(0, 97) + '...'
+			: category.description,
+		emoji: { name: category.emoji },
+		disabled: true,
+	}));
+}
+
+export { createSelectionsFromCategories, RoleCategoryType };
 export type { RoleCategory };

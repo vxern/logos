@@ -1,11 +1,11 @@
 import {
+	ApplicationCommandOptionType,
 	Interaction,
 	InteractionApplicationCommandData,
 } from '../../../../deps.ts';
 import { Client } from '../../../client.ts';
-import { Availability } from '../../../commands/availability.ts';
-import { Command } from '../../../commands/command.ts';
-import { OptionType } from '../../../commands/option.ts';
+import { Availability } from '../../../commands/structs/availability.ts';
+import { Command } from '../../../commands/structs/command.ts';
 import configuration from '../../../configuration.ts';
 import { capitalise } from '../../../formatting.ts';
 import { fromHex } from '../../../utils.ts';
@@ -20,17 +20,17 @@ const command: Command = {
 		name: 'word',
 		description: 'The word too look up.',
 		required: true,
-		type: OptionType.STRING,
+		type: ApplicationCommandOptionType.STRING,
 	}, {
 		name: 'verbose',
 		description:
 			'If set to true, the dictionary entry will be displayed in a more verbose format.',
-		type: OptionType.BOOLEAN,
+		type: ApplicationCommandOptionType.BOOLEAN,
 	}, {
 		name: 'show',
 		description:
 			'If set to true, the dictionary entry will be shown to other users.',
-		type: OptionType.BOOLEAN,
+		type: ApplicationCommandOptionType.BOOLEAN,
 	}],
 	handle: word,
 };
@@ -86,7 +86,7 @@ async function word(client: Client, interaction: Interaction): Promise<void> {
 					}],
 				});
 			})
-			.catch(() => {})
+			.catch()
 	);
 
 	await Promise.all(responses).catch();

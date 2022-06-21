@@ -21,6 +21,7 @@ import dayjs from 'https://cdn.skypack.dev/dayjs';
 import relativeTime from 'https://cdn.skypack.dev/dayjs/plugin/relativeTime';
 dayjs.extend(relativeTime);
 
+/** Generating unique IDs. */
 export * as Snowflake from 'https://deno.land/x/deno_snowflake@v1.0.1/snowflake.ts';
 
 export { dayjs };

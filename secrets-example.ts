@@ -1,15 +1,8 @@
 const secrets = {
 	core: {
-		databases: [
-			{
-				name: 'Users',
-				secret: 'SECRET_HERE',
-			},
-			{
-				name: 'Content',
-				secret: 'SECRET_HERE',
-			},
-		],
+		database: {
+			secret: 'SECRET_HERE',
+		},
 		discord: {
 			secret: 'SECRET_HERE',
 		},

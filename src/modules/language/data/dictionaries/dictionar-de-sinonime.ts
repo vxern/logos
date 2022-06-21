@@ -1,22 +1,21 @@
 import { cheerio } from '../../../../../deps.ts';
 import {
-	Dictionary,
+	DictionaryAdapter,
 	DictionaryScope,
 	DictionaryType,
-	PartialDictionaryEntry,
 	SearchQuery,
 } from '../dictionary.ts';
 
-class DictionarDeSinonime extends Dictionary {
-	scope = DictionaryScope.MONOLINGUAL;
-	types = [DictionaryType.DEFINING, DictionaryType.SYNONYM];
-	languages = ['romanian'];
+const adapter: DictionaryAdapter = {
+	scope: DictionaryScope.MONOLINGUAL,
+	types: [DictionaryType.DEFINING, DictionaryType.SYNONYM],
+	languages: ['romanian'],
 
-	query = (query: SearchQuery) =>
-		`https://www.dictionardesinonime.ro/?c=${query.word}`;
+	queryBuilder: (query: SearchQuery) =>
+		`https://www.dictionardesinonime.ro/?c=${query.word}`,
 
-	async lookup(word: string): Promise<PartialDictionaryEntry> {
-		const response = await fetch(this.query({ word }));
+	lookup: async (query, builder) => {
+		const response = await fetch(builder(query));
 		const content = await response.text();
 		const $ = cheerio.load(content);
 
@@ -26,7 +25,7 @@ class DictionarDeSinonime extends Dictionary {
 		for (const definition of definitions) {
 			const content = $(definition).text();
 
-			if (!content.startsWith(`${word.toUpperCase()} `)) continue;
+			if (!content.startsWith(`${query.word.toUpperCase()} `)) continue;
 
 			const uniformised = uniformise(content);
 
@@ -42,8 +41,8 @@ class DictionarDeSinonime extends Dictionary {
 		}
 
 		return {};
-	}
-}
+	},
+};
 
 /** Converts cedillas to commas, in line with the standard Romanian orthography. */
 function uniformise(target: string): string {
@@ -54,4 +53,4 @@ function uniformise(target: string): string {
 		.replaceAll('Ţ', 'Ț');
 }
 
-export { DictionarDeSinonime };
+export default adapter;

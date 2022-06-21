@@ -17,7 +17,7 @@ import modules from './modules/modules.ts';
 import services from './modules/services.ts';
 import { LoggingController } from './modules/information/controller.ts';
 import { MusicController } from './modules/music/controller.ts';
-import { loadLanguages } from './modules/language/module.ts';
+import { loadComponents } from './modules/language/module.ts';
 import { time } from './utils.ts';
 import secrets from '../secrets.ts';
 import { Database } from './database/database.ts';
@@ -95,7 +95,7 @@ class Client extends DiscordClient {
 					this.setupGuilds(),
 					this.setupCommands(),
 					this.setupServices(),
-					loadLanguages(this),
+					loadComponents(this),
 				];
 
 				await Promise.all(promises);
@@ -267,15 +267,4 @@ class Client extends DiscordClient {
 	}
 }
 
-/**
- * Describes the handler of an interaction.
- *
- * @param interaction - The interaction to be handled.
- */
-type InteractionHandler = (
-	client: Client,
-	interaction: ApplicationCommandInteraction | AutocompleteInteraction,
-) => unknown;
-
 export { Client };
-export type { InteractionHandler };
