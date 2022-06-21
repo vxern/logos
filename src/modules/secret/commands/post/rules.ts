@@ -6,14 +6,14 @@ import information, {
 
 /** Posts the rule message. */
 async function postRules(
-	_client: Client,
+	client: Client,
 	interaction: Interaction,
 ): Promise<void> {
 	const rawEmbeds = await Promise.all(
 		Object.values(information).map<Promise<[InformationSection, EmbedPayload]>>(
 			(section) => {
 				return new Promise((resolve) => {
-					section.generateEmbed(interaction.guild!).then((embed) => {
+					section.generateEmbed(client, interaction.guild!).then((embed) => {
 						resolve([section, embed]);
 					});
 				});
