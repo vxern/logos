@@ -3,39 +3,33 @@ import {
 	ApplicationCommand,
 	ApplicationCommandInteraction,
 	ApplicationCommandOption,
+	ApplicationCommandOptionType,
 	ApplicationCommandPartial,
-	ApplicationCommandPartialBase,
 	ApplicationCommandPermissionPayload,
 	ApplicationCommandPermissionType,
 	ApplicationCommandType,
 	Collection,
 	Guild,
 	GuildSlashCommmandPermissionsPartial,
-	InteractionResponseType,
 } from '../../deps.ts';
-import { InteractionHandler } from '../client.ts';
+import { Client } from '../client.ts';
 import { roles } from '../modules/roles/module.ts';
 import { resolveGuildRole } from '../modules/roles/data/structures/role.ts';
-import { Availability } from './availability.ts';
-import { Option, OptionType } from './option.ts';
+import { Availability } from './structs/availability.ts';
+import { Command, InteractionHandler } from './structs/command.ts';
+import { Option } from './structs/option.ts';
 import configuration from '../configuration.ts';
 
-/** An application command with an optional handler for its execution. */
-interface Command extends ApplicationCommandPartialBase<Option> {
-	/** Defines the group of users to whom the command is available. */
-	availability: Availability;
-	/** The function to be executed when this command is selected. */
-	handle?: InteractionHandler;
-}
-
 /**
- * A handler for interactions which are missing a handler.
+ * A handler for interactions that are missing a handler.
  *
- * @param interaction The interaction to be handled.
+ * @param interaction - The interaction to be handled.
  */
-function unimplemented(interaction: ApplicationCommandInteraction): void {
+function unimplemented(
+	_client: Client,
+	interaction: ApplicationCommandInteraction,
+): void {
 	interaction.respond({
-		type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
 		embeds: [{
 			title: 'Unimplemented',
 			description: 'This command is missing a handler.',
@@ -44,6 +38,7 @@ function unimplemented(interaction: ApplicationCommandInteraction): void {
 	});
 }
 
+/** Taking a locally defined command, converts it into an application command. */
 function createApplicationCommand(command: Command): ApplicationCommandPartial {
 	return {
 		name: command.name,
@@ -60,11 +55,14 @@ function createApplicationCommand(command: Command): ApplicationCommandPartial {
  * @param commands - The commands whose options to merge.
  * @returns The merged command.
  */
-function mergeOptions(commands: Command[]): Command {
-	const command = commands[0];
+function mergeOptions(commands: Command[]): Command | undefined {
+	if (commands.length === 0) return undefined;
+
+	const command = commands[0]!;
 	command.options = Array<Option>().concat(
 		...commands.map((command) => command.options ?? []),
 	);
+
 	return command;
 }
 
@@ -85,22 +83,20 @@ function unifyHandlers(command: Command): InteractionHandler {
 		new Map([[undefined, command.handle ?? unimplemented]]),
 	);
 
-	if (command.options) {
-		for (const option of command.options) {
-			switch (option.type) {
-				case OptionType.SUB_COMMAND_GROUP: {
-					const commandMap = handlers.get(option.name) ??
-						handlers.set(option.name, new Map())!.get(option.name)!;
-					for (const command of option.options!) {
-						commandMap.set(command.name, command.handle ?? unimplemented);
-					}
-					break;
+	for (const option of command.options ?? []) {
+		switch (option.type) {
+			case ApplicationCommandOptionType.SUB_COMMAND_GROUP: {
+				const commandMap = handlers.get(option.name) ??
+					handlers.set(option.name, new Map())!.get(option.name)!;
+				for (const command of option.options!) {
+					commandMap.set(command.name, command.handle ?? unimplemented);
 				}
-				case OptionType.SUB_COMMAND: {
-					const commandMap = handlers.get(undefined)!;
-					commandMap.set(option.name, option.handle ?? unimplemented);
-					break;
-				}
+				break;
+			}
+			case ApplicationCommandOptionType.SUB_COMMAND: {
+				const commandMap = handlers.get(undefined)!;
+				commandMap.set(option.name, option.handle ?? unimplemented);
+				break;
 			}
 		}
 	}
@@ -112,35 +108,50 @@ function unifyHandlers(command: Command): InteractionHandler {
 		);
 }
 
-async function createPermissions(
+/**
+ * Generates permissions for an array of commands.
+ *
+ * @param guild - The target guild.
+ * @param guildCommands - The existent guild commands.
+ * @param commands - The local defined application commands.
+ */
+async function generatePermissions(
 	guild: Guild,
 	guildCommands: Collection<string, ApplicationCommand>,
 	commands: Command[],
 ): Promise<GuildSlashCommmandPermissionsPartial[]> {
-	const permissions: GuildSlashCommmandPermissionsPartial[] = [];
+	const proficiencyCategory = roles.scopes.global.find((category) =>
+		category.name === 'Proficiency'
+	)!;
+	const proficiencyRoleNames = proficiencyCategory.collection!.list!.map((
+		role,
+	) => role.name);
+	const proficiencyRoles = await Promise.all(
+		proficiencyRoleNames.map((proficiencyRoleName) =>
+			resolveGuildRole(guild, proficiencyRoleName)
+		),
+	);
 
 	const everyoneRoleID = (await guild.getEveryoneRole()).id;
-	const proficiencies = roles.scopes.global.find((category) =>
-		category.name === 'Proficiency'
-	)!.collection!.list!.map((role) => role.name);
-	const memberRoleIDs = [];
-	for (const proficiency of proficiencies) {
-		const role = await resolveGuildRole(guild, proficiency);
-		if (!role) continue;
-
-		memberRoleIDs.push(role.id);
-	}
+	const memberRoleIDs = proficiencyRoles
+		.filter((proficiencyRole) => proficiencyRole)
+		.map((proficiencyRole) => proficiencyRole!.id);
 	const moderatorRoleID =
 		(await resolveGuildRole(guild, configuration.guilds.moderator.role))?.id;
 
+	const permissions: GuildSlashCommmandPermissionsPartial[] = [];
 	for (const [id, guildCommand] of guildCommands) {
 		const guildCommandPermissions: ApplicationCommandPermissionPayload[] = [];
 
-		const command = commands.find((command) =>
+		const correspondingCommand = commands.find((command) =>
 			command.name === guildCommand.name
-		)!;
+		);
 
-		switch (command.availability) {
+		if (!correspondingCommand) {
+			return [];
+		}
+
+		switch (correspondingCommand.availability) {
 			case Availability.EVERYONE: {
 				guildCommandPermissions.push({
 					id: everyoneRoleID,
@@ -175,6 +186,7 @@ async function createPermissions(
 					type: ApplicationCommandPermissionType.USER,
 					permission: true,
 				});
+				break;
 			}
 		}
 
@@ -186,9 +198,8 @@ async function createPermissions(
 
 export {
 	createApplicationCommand,
-	createPermissions,
+	generatePermissions,
 	mergeOptions,
 	unifyHandlers,
 	unimplemented,
 };
-export type { Command };

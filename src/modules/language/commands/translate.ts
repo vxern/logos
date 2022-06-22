@@ -1,14 +1,14 @@
 import {
 	ApplicationCommandChoice,
+	ApplicationCommandOptionType,
 	Client,
 	Interaction,
 	InteractionApplicationCommandData,
 	InteractionResponseType,
 } from '../../../../deps.ts';
 import secrets from '../../../../secrets.ts';
-import { Availability } from '../../../commands/availability.ts';
-import { Command } from '../../../commands/command.ts';
-import { OptionType } from '../../../commands/option.ts';
+import { Availability } from '../../../commands/structs/availability.ts';
+import { Command } from '../../../commands/structs/command.ts';
 import configuration from '../../../configuration.ts';
 import { addParametersToURL } from '../../../utils.ts';
 
@@ -22,23 +22,23 @@ const command: Command = {
 		description: 'The source language.',
 		required: true,
 		autocomplete: true,
-		type: OptionType.STRING,
+		type: ApplicationCommandOptionType.STRING,
 	}, {
 		name: 'to',
 		description: 'The target language.',
 		required: true,
 		autocomplete: true,
-		type: OptionType.STRING,
+		type: ApplicationCommandOptionType.STRING,
 	}, {
 		name: 'text',
 		description: 'The text to translate.',
 		required: true,
-		type: OptionType.STRING,
+		type: ApplicationCommandOptionType.STRING,
 	}, {
 		name: 'show',
 		description:
 			'If set to true, the translation will be shown to other users.',
-		type: OptionType.BOOLEAN,
+		type: ApplicationCommandOptionType.BOOLEAN,
 	}],
 	handle: translate,
 };
@@ -99,7 +99,6 @@ async function translate(
 	if (interaction.isAutocomplete()) {
 		const argument = interaction.data.options.find((option) => option.focused)!;
 		const value = argument.value as string;
-
 		const options = argument.value.length === 0
 			? []
 			: supportedLanguagesChoices.filter((language) => {

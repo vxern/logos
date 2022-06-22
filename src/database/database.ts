@@ -12,23 +12,35 @@ import { capitalise } from '../formatting.ts';
 
 const $ = faunadb.query;
 
+/** Defines parameters used in indexing articles. */
 type ArticleIndexParameters = {
+	/** The language of the article. */
 	language: string;
+
+	/** The author of the article. */
 	author: Reference;
 };
 
+/** Defines parameters used in indexing article changes. */
 type ArticleChangeIndexParameters = {
+	/** The reference to the article this change was made to. */
 	articleReference: Reference;
+
+	/** The author of the article change. */
 	author: Reference;
 };
 
+/** Defines parameters used in indexing users. */
 type UserIndexParameters = {
+	/** The reference to the user. */
 	reference: Reference;
+
+	/** The ID of the user. */
 	id: string;
 };
 
 /**
- * Provides a layer of abstraction over the database solution used to store data,
+ * Provides a layer of abstraction over the database solution used to store data
  * and the Discord application.
  */
 class Database {
@@ -473,6 +485,7 @@ class Database {
 			await this.fetchArticleChanges(parameter, value);
 	}
 
+	/** Taking an array of articles, sets their content to their current form. */
 	async processArticles(
 		documents: Document<Article>[],
 	): Promise<Document<Article>[] | undefined> {

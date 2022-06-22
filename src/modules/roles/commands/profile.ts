@@ -1,16 +1,15 @@
-import { Interaction } from '../../../../../deps.ts';
-import { Client } from '../../../../client.ts';
-import { Availability } from '../../../../commands/availability.ts';
-import { Command } from '../../../../commands/command.ts';
-import { OptionType } from '../../../../commands/option.ts';
-import { roles } from '../../module.ts';
+import { ApplicationCommandOptionType, Interaction } from '../../../../deps.ts';
+import { Client } from '../../../client.ts';
+import { Availability } from '../../../commands/structs/availability.ts';
+import { Command } from '../../../commands/structs/command.ts';
+import { roles } from '../module.ts';
 import {
 	RoleCategory,
 	RoleCategoryType,
-} from '../../data/structures/role-category.ts';
-import { tryAssignRole } from '../../data/structures/role.ts';
-import { browse } from './selection/browse.ts';
-import configuration from '../../../../configuration.ts';
+} from '../data/structures/role-category.ts';
+import { tryAssignRole } from '../data/structures/role.ts';
+import { browse } from './profile/browse.ts';
+import configuration from '../../../configuration.ts';
 
 const command: Command = {
 	name: 'profile',
@@ -19,7 +18,7 @@ const command: Command = {
 	availability: Availability.MEMBERS,
 	options: [{
 		name: 'roles',
-		type: OptionType.SUB_COMMAND,
+		type: ApplicationCommandOptionType.SUB_COMMAND,
 		description: 'Opens the role selection menu.',
 		handle: selectRoles,
 	}],
@@ -55,6 +54,7 @@ async function selectRoles(
 	const language = client.getLanguage(interaction.guild!);
 
 	const browsing = {
+		client: client,
 		interaction: interaction,
 		navigation: navigation,
 		language: language,

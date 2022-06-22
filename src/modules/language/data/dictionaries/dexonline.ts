@@ -1,21 +1,34 @@
 import {
-	Dictionary,
+	DictionaryAdapter,
 	DictionaryScope,
 	DictionaryType,
-	PartialDictionaryEntry,
-	SearchQuery,
 } from '../dictionary.ts';
 
-class Dexonline extends Dictionary {
-	scope = DictionaryScope.MONOLINGUAL;
-	types = [DictionaryType.DEFINING, DictionaryType.ETYMOLOGICAL];
-	languages = ['romanian'];
+/** Maps numbers to their superscript variants. */
+const superscript = {
+	'0': '⁰',
+	'1': '¹',
+	'2': '²',
+	'3': '³',
+	'4': '⁴',
+	'5': '⁵',
+	'6': '⁶',
+	'7': '⁷',
+	'8': '⁸',
+	'9': '⁹',
+} as { [key: string]: string };
 
-	query = (query: SearchQuery) =>
-		`https://dexonline.ro/definitie/${query.word}/json`;
+const adapter: DictionaryAdapter = {
+	scope: DictionaryScope.MONOLINGUAL,
+	types: [DictionaryType.DEFINING, DictionaryType.ETYMOLOGICAL],
+	languages: ['romanian'],
 
-	async lookup(word: string): Promise<PartialDictionaryEntry> {
-		const response = await fetch(this.query({ word }));
+	queryBuilder: (query) => `https://dexonline.ro/definitie/${query.word}/json`,
+
+	lookup: async (query, builder) => {
+		const response = await fetch(builder(query));
+		if (!response.ok) return undefined;
+
 		const content = await response.text();
 		const data = JSON.parse(content);
 
@@ -27,12 +40,19 @@ class Dexonline extends Dictionary {
 				/%.+?%/g,
 				(match) => match.substring(1, match.length - 1).split('').join(' '),
 			) // Spread letters out
+			.replaceAll(
+				/\^[0-9]+/g,
+				(match) =>
+					match.substring(1, match.length).split('').map((number) =>
+						superscript[number]!
+					).join(''),
+			) // Spread letters out
 			.replaceAll('#', '__') // Underline
 			.replaceAll('@', '**') // Bolden
 			.replaceAll('$', '*'); // Italicise
 
 		return { definition: definition };
-	}
-}
+	},
+};
 
-export { Dexonline };
+export default adapter;

@@ -1,14 +1,12 @@
-import { Member } from '../../../../../deps.ts';
+import { Member, SelectComponentOption } from '../../../../../deps.ts';
 import { Assignable, DescriptionGenerator, Role } from './role.ts';
 
-/**
- * The type of a role list helps determine how it should be managed in a
- * role navigation tree.
- */
+/** Defines the type of a role collection. */
 enum RoleCollectionType {
-	/** A role collection whose list of roles is determined through its key. */
+	/** A role collection whose list of roles is determined through its key (language). */
 	COLLECTION_LOCALISED,
-	/** A role collection whose list of roles applies to all servers. */
+
+	/** A role collection whose list of roles applies to all guilds. */
 	COLLECTION,
 }
 
@@ -19,12 +17,38 @@ enum RoleCollectionType {
 interface RoleCollection extends Assignable {
 	/** The type of this collection. */
 	type: RoleCollectionType;
+
 	/** Description applied to roles in this collection without a description. */
 	description?: DescriptionGenerator;
+
 	/** List of roles within this collection. */
 	list?: Role[];
+
 	/** Lists of roles with languages as keys. */
 	lists?: Record<string, Role[]>;
+}
+
+async function createSelectionsFromCollection(
+	member: Member,
+	language: string | undefined,
+	collection: RoleCollection,
+): Promise<SelectComponentOption[]> {
+	const memberRoles =
+		(await getMemberRoles(member, language, { within: collection }));
+	const roles = resolveRoles(collection, language);
+
+	return roles.map((role, index) => {
+		const memberHasRole = memberRoles.some((memberRole) =>
+			memberRole.name === role.name
+		);
+
+		return {
+			label: memberHasRole ? `[Assigned] ${role.name}` : role.name,
+			value: index.toString(),
+			description: role.description,
+			emoji: { name: role.emoji },
+		};
+	});
 }
 
 /**
@@ -62,5 +86,10 @@ async function getMemberRoles(
 	);
 }
 
-export { getMemberRoles, resolveRoles, RoleCollectionType };
+export {
+	createSelectionsFromCollection,
+	getMemberRoles,
+	resolveRoles,
+	RoleCollectionType,
+};
 export type { RoleCollection };

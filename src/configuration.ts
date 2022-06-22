@@ -63,7 +63,7 @@ export default {
 	music: {
 		maxima: {
 			// The maximum volume
-			volume: 1.5,
+			volume: 150,
 			songs: {
 				history: 100,
 				queue: 20,

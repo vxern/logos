@@ -1,13 +1,16 @@
-import { parse } from 'https://deno.land/std@0.127.0/encoding/csv.ts';
-import { Command } from '../../commands/command.ts';
-import { Dictionary, DictionaryScope } from './data/dictionary.ts';
+import { parse as parseCSV } from 'https://deno.land/std@0.127.0/encoding/csv.ts';
+import { Client } from '../../client.ts';
+import { Command } from '../../commands/structs/command.ts';
 import game from './commands/game.ts';
 import resources from './commands/resources.ts';
 import word from './commands/word.ts';
-import { Client } from '../../client.ts';
-import { SentencePair } from './data/sentence.ts';
 import translate from './commands/translate.ts';
 import article from './commands/article.ts';
+import { DictionaryAdapter, DictionaryScope } from './data/dictionary.ts';
+import dexonline from './data/dictionaries/dexonline.ts';
+import dictionarDeSinonime from './data/dictionaries/dictionar-de-antonime.ts';
+import dictionarDeAntonime from './data/dictionaries/dictionar-de-sinonime.ts';
+import { SentencePair } from './data/sentence.ts';
 
 const commands: Record<string, Command> = {
 	article,
@@ -17,60 +20,67 @@ const commands: Record<string, Command> = {
 	word,
 };
 
-const dictionaryLists: Record<string, Dictionary[]> = {};
+const dictionaryAdapters = [
+	dexonline,
+	dictionarDeAntonime,
+	dictionarDeSinonime,
+];
+
+const dictionaryAdapterLists: Record<string, DictionaryAdapter[]> = {};
 const sentenceLists: Record<string, SentencePair[]> = {};
 
-async function loadLanguages(client: Client): Promise<void> {
+/** Loads dictionary adapters and sentence lists. */
+async function loadComponents(client: Client): Promise<void> {
 	for (const language of client.languages.values()) {
-		dictionaryLists[language] = [];
+		if (language in dictionaryAdapterLists) continue;
+
+		dictionaryAdapterLists[language] = [];
 	}
 
-	for await (
-		const entry of Deno.readDir('./src/modules/language/data/dictionaries')
-	) {
-		const module = await import(`./data/dictionaries/${entry.name}`);
-		const dictionary = Object.entries(module)[0][1] as { new (): Dictionary };
-		const instance = Object.create(new dictionary()) as Dictionary;
-
-		if (instance.scope === DictionaryScope.OMNILINGUAL) {
-			for (const language of Object.keys(dictionaryLists)) {
-				dictionaryLists[language].push(instance);
+	for (const dictionaryAdapter of dictionaryAdapters) {
+		if (dictionaryAdapter.scope === DictionaryScope.OMNILINGUAL) {
+			for (const language of Object.keys(dictionaryAdapterLists)) {
+				dictionaryAdapterLists[language]!.push(dictionaryAdapter);
 			}
 			continue;
 		}
 
-		for (const language of instance.languages!) {
-			if (!dictionaryLists[language]) {
-				dictionaryLists[language] = [];
-			}
-			dictionaryLists[language].push(instance);
+		for (const language of dictionaryAdapter.languages!) {
+			// Ignore unsupported languages.
+			if (!(language in dictionaryAdapterLists)) continue;
+
+			dictionaryAdapterLists[language]!.push(dictionaryAdapter);
 		}
 	}
 
 	for await (
-		const entry of Deno.readDir('./src/modules/language/data/languages')
+		const entry of Deno.readDir('./src/modules/language/data/sentences')
 	) {
-		const language = entry.name.split('.')[0];
+		if (!entry.isFile) continue;
 
-		const records: string[][] = await parse(
+		const language = entry.name.split('.')[0]!;
+
+		const records = await parseCSV(
 			await Deno.readTextFile(
-				`./src/modules/language/data/languages/${entry.name}`,
+				`./src/modules/language/data/sentences/${entry.name}`,
 			),
 			{
 				lazyQuotes: true,
 				separator: '\t',
 			},
-		);
+		) as [string, string, string, string][];
 
 		sentenceLists[language] = [];
-		for (const record of records) {
-			sentenceLists[language].push({
-				sentence: record[1],
-				translation: record[3],
+		for (
+			const [_sentenceID, sentence, _translationID, translation] of records
+		) {
+			sentenceLists[language]!.push({
+				sentence: sentence!,
+				translation: translation!,
 			});
 		}
 	}
 }
 
-export { dictionaryLists, loadLanguages, sentenceLists };
+export { dictionaryAdapterLists, loadComponents, sentenceLists };
 export default commands;

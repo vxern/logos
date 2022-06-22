@@ -14,7 +14,7 @@ interface ArticleTextContent {
 }
 
 /** Represents an article explaining a concept or a difference between terms. */
-type Article = {
+interface Article {
 	/** The document reference to the author of this article. */
 	author: Reference;
 
@@ -23,7 +23,7 @@ type Article = {
 
 	/** The text content of this article. */
 	content: ArticleTextContent;
-};
+}
 
 /**
  * Taking an article and an array of changes made to it, gets the most
@@ -51,6 +51,10 @@ function getMostRecentArticleContent({
 	return mostRecentChange.data.content;
 }
 
+/**
+ * Taking an article and an array of changes made to it, gets references to
+ * the contributors to the article.
+ */
 function getContributorReferences({
 	article,
 	changes,

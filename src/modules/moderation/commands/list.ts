@@ -1,6 +1,6 @@
-import { Availability } from '../../../commands/availability.ts';
-import { Command } from '../../../commands/command.ts';
-import { OptionType } from '../../../commands/option.ts';
+import { ApplicationCommandOptionType } from "../../../../deps.ts";
+import { Availability } from '../../../commands/structs/availability.ts';
+import { Command } from '../../../commands/structs/command.ts';
 
 const command: Command = {
 	name: 'list',
@@ -8,7 +8,7 @@ const command: Command = {
 	options: [{
 		name: 'reprimands',
 		description: 'Lists a user\'s reprimands.',
-		type: OptionType.SUB_COMMAND,
+		type: ApplicationCommandOptionType.SUB_COMMAND,
 	}],
 };
 

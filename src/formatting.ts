@@ -94,6 +94,12 @@ enum MentionType {
 	USER,
 }
 
+const prefixes = {
+	[MentionType.CHANNEL]: '#',
+	[MentionType.ROLE]: '@&',
+	[MentionType.USER]: '@',
+};
+
 /**
  * Creates a Discord mention by formatting an ID using the appropriate symbol.
  *
@@ -102,18 +108,8 @@ enum MentionType {
  * @returns The formatted string of text.
  */
 function mention(target: string, type: MentionType): string {
-	let prefix: string;
-	switch (type) {
-		case MentionType.CHANNEL:
-			prefix = '#';
-			break;
-		case MentionType.ROLE:
-			prefix = '@&';
-			break;
-		case MentionType.USER:
-			prefix = '@';
-			break;
-	}
+	const prefix = prefixes[type];
+
 	return `<${prefix}${target}>`;
 }
 

@@ -1,6 +1,7 @@
 import { Interaction } from '../../../../deps.ts';
-import { Availability } from '../../../commands/availability.ts';
-import { Command } from '../../../commands/command.ts';
+import { Client } from '../../../client.ts';
+import { Availability } from '../../../commands/structs/availability.ts';
+import { Command } from '../../../commands/structs/command.ts';
 
 const command: Command = {
 	name: 'now',
@@ -9,7 +10,7 @@ const command: Command = {
 	handle: now,
 };
 
-async function now(interaction: Interaction) {
+async function now(_client: Client, _interaction: Interaction): Promise<void> {
 	/// TODO(vxern):
 	/// Display the current playing song.
 }

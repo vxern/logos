@@ -1,5 +1,5 @@
-import { Availability } from '../../../commands/availability.ts';
-import { Command } from '../../../commands/command.ts';
+import { Availability } from '../../../commands/structs/availability.ts';
+import { Command } from '../../../commands/structs/command.ts';
 import { user } from '../../parameters.ts';
 import { reason } from '../parameters.ts';
 

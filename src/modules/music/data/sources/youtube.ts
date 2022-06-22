@@ -1,6 +1,5 @@
 import { Video, YouTube } from 'https://cdn.skypack.dev/youtube-sr@v4.0.1?dts';
 import configuration from '../../../../configuration.ts';
-import { MusicController } from '../../controller.ts';
 import { SongListing } from '../song-listing.ts';
 import { ListingResolver } from './sources.ts';
 
@@ -28,7 +27,7 @@ const resolver: ListingResolver = async (interaction, option) => {
 	}
 
 	const videos = await YouTube.search(option.value, {
-		limit: MusicController.limit,
+		limit: 10,
 		type: 'video',
 		safeSearch: true,
 	});
@@ -37,7 +36,7 @@ const resolver: ListingResolver = async (interaction, option) => {
 
 	// TODO(vxern): Allow the user to pick the specific video using a selection menu.
 
-	return fromYouTubeVideo(videos[0], requestedBy, managedBy);
+	return fromYouTubeVideo(videos[0]!, requestedBy, managedBy);
 };
 
 /**

@@ -1,82 +1,48 @@
-import ytdl from 'https://deno.land/x/ytdl_core@v0.0.2/mod.ts';
 import {
+	ApplicationCommandOptionType,
 	Interaction,
 	InteractionApplicationCommandData,
-	VoiceState,
 } from '../../../../deps.ts';
-import { Client } from '../../../client.ts';
-import { Availability } from '../../../commands/availability.ts';
-import { Command } from '../../../commands/command.ts';
-import { OptionType } from '../../../commands/option.ts';
+import { Availability } from '../../../commands/structs/availability.ts';
+import { Command } from '../../../commands/structs/command.ts';
 import configuration from '../../../configuration.ts';
-import { handlers } from '../data/sources/sources.ts';
-import { SongListing } from '../data/song-listing.ts';
+import { ListingResolver, sources } from '../data/sources/sources.ts';
 import { title, url } from '../parameters.ts';
-import { MusicController } from '../controller.ts';
+import { Client } from '../../../client.ts';
 
 const command: Command = {
 	name: 'play',
 	availability: Availability.MEMBERS,
-	options: Object.entries(handlers).map(([name, resolve]) => {
-		return {
-			name: name.toLowerCase(),
-			description: `Requests to play a song from ${name}.`,
-			type: OptionType.SUB_COMMAND,
-			options: [title, url],
-			handle: async (interaction) => {
-				// Set up information for the controller.
-				const controller = Client.music.get(interaction.guild!.id)!;
-				const data = interaction.data! as InteractionApplicationCommandData;
-
-				// Check if the user can play music.
-				if (!(await controller.canPlay(interaction, data))) return;
-
-				// Find the song.
-				const listing = await resolve(interaction, data.options[0].options![0]);
-				console.log(listing);
-				if (!listing) return notFound(interaction);
-
-				// Play the song.
-				play(controller, interaction, listing);
-			},
-		};
-	}),
+	options: Object.entries(sources).map(([name, resolve]) => ({
+		name: name.toLowerCase(),
+		description: `Requests to play a song from ${name}.`,
+		type: ApplicationCommandOptionType.SUB_COMMAND,
+		options: [title, url],
+		handle: (client, interaction) => play(client, interaction, resolve),
+	})),
 };
 
-/**
- * Tells the user that the song they requested was not found.
- *
- * @param interaction - The interaction.
- */
-async function notFound(interaction: Interaction): Promise<void> {
-	if (interaction.responded) return;
-
-	interaction.respond({
-		embeds: [{
-			title: 'Couldn\'t find the requested song.',
-			description:
-				'You could try an alternative search, or request a different song.',
-			color: configuration.responses.colors.red,
-		}],
-	});
-}
-
-/**
- * Taking a song listing and the 'state' of the voice connection, plays the song.
- *
- * @param controller - The music controller.
- * @param interaction - The interaction.
- * @param state - The voice state / voice connection.
- * @param listing - The song listing.
- */
 async function play(
-	controller: MusicController,
+	client: Client,
 	interaction: Interaction,
-	listing: SongListing | undefined,
+	resolve: ListingResolver,
 ): Promise<void> {
+	// Set up information for the controller.
+	const controller = client.music.get(interaction.guild!.id)!;
+	const data = interaction.data! as InteractionApplicationCommandData;
+
+	// Check if the user can play music.
+	if (!(await controller.canPlay(interaction, data))) return;
+
+	// Find the song.
+	const listing = await resolve(interaction, data.options[0]!.options![0]!);
+	if (!listing) return notFound(interaction);
+
+	// Play the song.
 	const state = await interaction.guild!.voiceStates.get(
 		interaction.user.id,
 	);
+
 	if (!state) {
 		console.error(
 			`Attempted to play listing requested by ${listing
@@ -89,14 +55,25 @@ async function play(
 		controller.addToQueue(listing);
 	}
 
-	/*
-  if (!(await controller.getState(interaction.guild!))) {
-    await controller.client.voice.join(state.channelID!);
-  }
-  */
-
-	//const applicationState = await controller.getState(interaction.guild!);
 	controller.play(state.channel!);
+}
+
+/**
+ * Tells the user that the song they requested was not found.
+ *
+ * @param interaction - The interaction.
+ */
+function notFound(interaction: Interaction): void {
+	if (interaction.responded) return;
+
+	interaction.respond({
+		embeds: [{
+			title: 'Couldn\'t find the requested song.',
+			description:
+				'You could try an alternative search, or request a different song.',
+			color: configuration.interactions.responses.colors.red,
+		}],
+	});
 }
 
 export { play };

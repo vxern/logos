@@ -1,27 +1,22 @@
 import {
-	ApplicationCommandInteraction,
 	ApplicationCommandType,
-	AutocompleteInteraction,
 	Client as DiscordClient,
 	event,
 	Guild,
 	Intents,
 	lavadeno,
 } from '../deps.ts';
-import {
-	Command,
-	createApplicationCommand,
-	unifyHandlers,
-} from './commands/command.ts';
+import { createApplicationCommand, unifyHandlers } from './commands/command.ts';
 import modules from './modules/modules.ts';
-import services from './modules/services.ts';
+import services from './modules/service.ts';
 import { LoggingController } from './modules/information/controller.ts';
 import { MusicController } from './modules/music/controller.ts';
-import { loadLanguages } from './modules/language/module.ts';
+import { loadComponents } from './modules/language/module.ts';
 import { time } from './utils.ts';
 import secrets from '../secrets.ts';
 import { Database } from './database/database.ts';
 import configuration from './configuration.ts';
+import { Command, InteractionHandler } from './commands/structs/command.ts';
 
 /** The core of the application, used for interacting with the Discord API. */
 class Client extends DiscordClient {
@@ -91,11 +86,18 @@ class Client extends DiscordClient {
 				});
 				await this.node.connect(BigInt(this.user!.id));
 
+				this.on('raw', (event, payload) => {
+					if (
+						event === 'VOICE_SERVER_UPDATE' || event === 'VOICE_STATE_UPDATE'
+					) {
+						this.node.handleVoiceUpdate(payload);
+					}
+				});
+
 				const promises = [
-					this.setupGuilds(),
+					this.setupGuilds().then(() => loadComponents(this)),
 					this.setupCommands(),
 					this.setupServices(),
-					loadLanguages(this),
 				];
 
 				await Promise.all(promises);
@@ -267,15 +269,4 @@ class Client extends DiscordClient {
 	}
 }
 
-/**
- * Describes the handler of an interaction.
- *
- * @param interaction - The interaction to be handled.
- */
-type InteractionHandler = (
-	client: Client,
-	interaction: ApplicationCommandInteraction | AutocompleteInteraction,
-) => unknown;
-
 export { Client };
-export type { InteractionHandler };

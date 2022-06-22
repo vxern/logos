@@ -59,21 +59,17 @@ const base: RoleCategory[] = [
 
 const local: RoleCategory[] = _.merge(
 	base,
-	base.map((baseCategory) => {
-		return {
-			collection: {
-				lists: Object.fromEntries(
-					Object.entries(languages).map(([language, categories]) => {
-						return [
-							language,
-							categories.find((category) => category.name === baseCategory.name)
-								?.collection?.list ?? [],
-						];
-					}),
-				),
-			},
-		};
-	}),
+	base.map((baseCategory) => ({
+		collection: {
+			lists: Object.fromEntries(
+				Object.entries(languages).map(([language, categories]) => [
+					language,
+					categories.find((category) => category.name === baseCategory.name)
+						?.collection?.list ?? [],
+				]),
+			),
+		},
+	})),
 );
 
 export default local;

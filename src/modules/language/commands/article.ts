@@ -1,403 +1,59 @@
 import {
 	_,
+	ApplicationCommandOptionType,
 	AutocompleteInteraction,
 	Interaction,
-	InteractionApplicationCommandData,
-	InteractionModalSubmitData,
 	InteractionResponseType,
-	InteractionType,
 } from '../../../../deps.ts';
-import { Client } from '../../../client.ts';
-import { Availability } from '../../../commands/availability.ts';
-import { Command } from '../../../commands/command.ts';
-import { OptionType } from '../../../commands/option.ts';
+import { Availability } from '../../../commands/structs/availability.ts';
+import { Command } from '../../../commands/structs/command.ts';
 import configuration from '../../../configuration.ts';
 import { ArticleChange } from '../../../database/structs/articles/article-change.ts';
 import {
 	Article,
-	getContributorReferences,
 	getMostRecentArticleContent,
 } from '../../../database/structs/articles/article.ts';
 import { Document } from '../../../database/structs/document.ts';
 import { User } from '../../../database/structs/users/user.ts';
 import { mention, MentionType } from '../../../formatting.ts';
-import {
-	createInteractionCollector,
-	Form,
-	paginate,
-	toModal,
-} from '../../../utils.ts';
+import { paginate } from '../../../utils.ts';
+import { createArticle } from './article/create.ts';
+import { editArticle } from './article/edit.ts';
+import { viewArticle } from './article/view.ts';
 
 const command: Command = {
 	name: 'article',
 	availability: Availability.MEMBERS,
 	options: [{
 		name: 'create',
-		type: OptionType.SUB_COMMAND,
-		handle: create,
+		type: ApplicationCommandOptionType.SUB_COMMAND,
+		handle: createArticle,
 	}, {
 		name: 'edit',
-		type: OptionType.SUB_COMMAND,
+		type: ApplicationCommandOptionType.SUB_COMMAND,
 		options: [{
 			name: 'title',
-			type: OptionType.STRING,
+			type: ApplicationCommandOptionType.STRING,
 			required: true,
 			autocomplete: true,
 		}],
-		handle: edit,
+		handle: editArticle,
 	}, {
 		name: 'view',
-		type: OptionType.SUB_COMMAND,
+		type: ApplicationCommandOptionType.SUB_COMMAND,
 		options: [{
 			name: 'title',
-			type: OptionType.STRING,
+			type: ApplicationCommandOptionType.STRING,
 			required: true,
 			autocomplete: true,
 		}, {
 			name: 'show',
-			type: OptionType.BOOLEAN,
+			type: ApplicationCommandOptionType.BOOLEAN,
 			required: false,
 		}],
-		handle: view,
+		handle: viewArticle,
 	}],
 };
-
-/** Allows the user to write and submit an article. */
-async function create(client: Client, interaction: Interaction): Promise<void> {
-	const user = await client.database.getOrCreateUser('id', interaction.user.id);
-
-	if (!user) return;
-
-	const articles = await client.database.getArticles('author', user.ref);
-
-	if (!articles) return;
-
-	const articleTimestamps = articles
-		.map((document) => document.ts)
-		.sort((a, b) => b - a); // From most recent to least recent.
-
-	const timestampSlice = articleTimestamps.slice(
-		0,
-		configuration.interactions.articles.create.maximum,
-	);
-
-	const canCreateArticle = timestampSlice.length <
-			configuration.interactions.articles.create.maximum ||
-		timestampSlice.some((timestamp) =>
-			(Date.now() - timestamp) >=
-				configuration.interactions.articles.create.interval
-		);
-
-	if (!canCreateArticle) {
-		interaction.respond({
-			type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-			ephemeral: true,
-			embeds: [{
-				title: 'Maximum number of articles reached',
-				description: `You must wait before submitting another article.`,
-				color: configuration.interactions.responses.colors.red,
-			}],
-		});
-		return;
-	}
-
-	const [collector, customID] = createInteractionCollector(client, {
-		type: InteractionType.MODAL_SUBMIT,
-		user: interaction.user,
-	});
-
-	interaction.showModal(
-		toModal(configuration.interactions.forms.article, customID),
-	);
-
-	const submission = (await collector.waitFor('collect'))[0] as Interaction;
-
-	const data = submission.data! as InteractionModalSubmitData;
-	const components = data.components;
-
-	function showArticleSubmissionFailure(): void {
-		submission.respond({
-			type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-			ephemeral: true,
-			embeds: [{
-				title: 'Failed to submit article',
-				description: `Your article failed to be submitted.`,
-				color: configuration.interactions.responses.colors.red,
-			}],
-		});
-	}
-
-	const author = await client.database.getOrCreateUser(
-		'id',
-		submission.user.id,
-	);
-
-	if (!author) {
-		return showArticleSubmissionFailure();
-	}
-
-	const footer = components[2]?.components[0]?.value;
-
-	const article: Article = {
-		author: author.ref,
-		language: client.getLanguage(submission.guild!),
-		content: {
-			title: components[0]!.components[0]!.value!,
-			body: components[1]!.components[0]!.value!,
-			footer: (footer && footer.length !== 0) ? footer : undefined,
-		},
-	};
-
-	const document = await client.database.createArticle(article);
-
-	if (!document) {
-		return showArticleSubmissionFailure();
-	}
-
-	client.logging.get(interaction.guild!.id)?.log(
-		'articleSubmit',
-		document.data,
-		submission.member!,
-	);
-
-	submission.respond({
-		type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-		ephemeral: true,
-		embeds: [{
-			title: 'Article submitted successfully!',
-			description:
-				`Your article, \`${document.data.content.title}\`, has been submitted successfully.`,
-			color: configuration.interactions.responses.colors.green,
-		}],
-	});
-}
-
-/** Allows the user to edit an existing article. */
-async function edit(client: Client, interaction: Interaction): Promise<void> {
-	const language = client.getLanguage(interaction.guild!);
-	const documentsUnprocessed = await client.database.getArticles(
-		'language',
-		language,
-	);
-
-	if (!documentsUnprocessed) {
-		return;
-	}
-
-	const documents = await client.database.processArticles(documentsUnprocessed);
-
-	if (!documents) {
-		return;
-	}
-
-	if (interaction.isAutocomplete()) {
-		return showResults({
-			interaction: interaction,
-			documents: documents,
-		});
-	}
-
-	const user = await client.database.getOrCreateUser('id', interaction.user.id);
-
-	if (!user) return;
-
-	const articleChanges = await client.database.getArticleChanges(
-		'author',
-		user.ref,
-	);
-
-	if (!articleChanges) return;
-
-	const articleTimestamps = articleChanges
-		.map((document) => document.ts)
-		.sort((a, b) => b - a); // From most recent to least recent.
-
-	const timestampSlice = articleTimestamps.slice(
-		0,
-		configuration.interactions.articles.edit.maximum,
-	);
-
-	const canCreateArticleChange =
-		timestampSlice.length < configuration.interactions.articles.edit.maximum ||
-		timestampSlice.some((timestamp) =>
-			(Date.now() - timestamp) >=
-				configuration.interactions.articles.edit.interval
-		);
-
-	if (!canCreateArticleChange) {
-		interaction.respond({
-			type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-			ephemeral: true,
-			embeds: [{
-				title: 'Maximum number of edits reached',
-				description: `You must wait before trying to edit another article.`,
-				color: configuration.interactions.responses.colors.red,
-			}],
-		});
-		return;
-	}
-
-	const data = interaction.data as InteractionApplicationCommandData;
-	const index = parseInt(data.options[0]!.options![0]!.value!);
-
-	const document = documents[index]!;
-	const changes = await client.database.getArticleChanges(
-		'articleReference',
-		document.ref,
-	);
-
-	if (!changes) {
-		return;
-	}
-
-	const content = getMostRecentArticleContent({
-		article: document.data,
-		changes: changes,
-	});
-
-	const prefilledForm = _.merge(
-		_.cloneDeep(configuration.interactions.forms.article),
-		{
-			fields: Object.fromEntries(
-				Object.entries(content).map(([field, value]) => {
-					return [field, { value: value }];
-				}),
-			),
-		},
-	) as Form;
-
-	const [collector, customID] = createInteractionCollector(client, {
-		type: InteractionType.MODAL_SUBMIT,
-		user: interaction.user,
-	});
-
-	interaction.showModal(
-		toModal(prefilledForm, customID),
-	);
-
-	const submission = (await collector.waitFor('collect'))[0] as Interaction;
-
-	collector.end();
-
-	function showArticleEditFailure(): void {
-		submission.respond({
-			type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-			ephemeral: true,
-			embeds: [{
-				title: 'Failed to update article',
-				description: `Failed to edit article..`,
-				color: configuration.interactions.responses.colors.red,
-			}],
-		});
-	}
-
-	if (!user) {
-		return showArticleEditFailure();
-	}
-
-	const modalData = submission.data! as InteractionModalSubmitData;
-	const components = modalData.components;
-
-	const change = await client.database.changeArticle({
-		author: user.ref,
-		article: document.ref,
-		content: {
-			title: components[0]!.components[0]!.value!,
-			body: components[1]!.components[0]!.value!,
-			footer: components[2]!.components[0]!.value,
-		},
-	});
-
-	if (!change) {
-		return showArticleEditFailure();
-	}
-
-	client.logging.get(interaction.guild!.id)?.log(
-		'articleEdit',
-		document.data,
-		change.data,
-		submission.member!,
-	);
-
-	submission.respond({
-		type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-		ephemeral: true,
-		embeds: [{
-			title: 'Article edited successfully!',
-			description: `Your edit was saved.`,
-			color: configuration.interactions.responses.colors.green,
-		}],
-	});
-}
-
-/** Displays an available article to the user. */
-async function view(client: Client, interaction: Interaction): Promise<void> {
-	const language = client.getLanguage(interaction.guild!);
-	const documentsUnprocessed = await client.database.getArticles(
-		'language',
-		language,
-	);
-
-	if (!documentsUnprocessed) {
-		return;
-	}
-
-	const documents = await client.database.processArticles(documentsUnprocessed);
-
-	if (!documents) {
-		return;
-	}
-
-	if (interaction.isAutocomplete()) {
-		return showResults({
-			interaction: interaction,
-			documents: documents,
-		});
-	}
-
-	const data = interaction.data as InteractionApplicationCommandData;
-	const index = parseInt(data.options[0]!.options![0]!.value!);
-	const show =
-		data.options[0]!.options!.find((option) => option.name === 'show')?.value ??
-			false;
-	const document = documents[index];
-
-	if (!document) {
-		return;
-	}
-
-	const changes = await client.database.getArticleChanges(
-		'articleReference',
-		document.ref,
-	);
-
-	if (!changes) {
-		return;
-	}
-
-	const contributorReferences = getContributorReferences({
-		article: document.data,
-		changes: changes,
-	});
-
-	const contributors = await Promise.all(
-		contributorReferences.map((reference) =>
-			client.database.getOrCreateUser('reference', reference)
-		),
-	);
-
-	if (contributors.includes(undefined)) {
-		return;
-	}
-
-	return showArticle({
-		interaction: interaction,
-		document: document,
-		changes: changes,
-		contributors: contributors as Document<User>[],
-		show: show,
-	});
-}
 
 function showResults(
 	{ interaction, documents }: {
@@ -416,12 +72,10 @@ function showResults(
 
 	interaction.respond({
 		type: InteractionResponseType.APPLICATION_COMMAND_AUTOCOMPLETE_RESULT,
-		choices: articlesByName.map((article, index) => {
-			return {
-				name: article.content.title,
-				value: index.toString(),
-			};
-		}),
+		choices: articlesByName.map((article, index) => ({
+			name: article.content.title,
+			value: index.toString(),
+		})),
 	});
 }
 
@@ -491,3 +145,4 @@ Contributors: ${contributorsString}`,
 }
 
 export default command;
+export { showArticle, showResults };

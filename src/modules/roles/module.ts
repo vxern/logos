@@ -1,5 +1,5 @@
-import { Command } from '../../commands/command.ts';
-import select from './commands/profile/profile.ts';
+import { Command } from '../../commands/structs/command.ts';
+import select from './commands/profile.ts';
 import global from './data/categories/global.ts';
 import local from './data/categories/local.ts';
 import { RoleCategory } from './data/structures/role-category.ts';

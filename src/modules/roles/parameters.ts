@@ -1,10 +1,11 @@
-import { Option, OptionType } from '../../commands/option.ts';
+import { ApplicationCommandOptionType } from '../../../deps.ts';
+import { Option } from '../../commands/structs/option.ts';
 
 const role: Option = {
 	name: 'role',
 	description: 'The name of the role.',
 	required: true,
-	type: OptionType.ROLE,
+	type: ApplicationCommandOptionType.ROLE,
 };
 
 export { role };

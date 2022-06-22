@@ -16,6 +16,7 @@ interface Reference {
 	value: {
 		/** The ID of this reference. */
 		id: string;
+
 		/** The collection in which the referenced document lies. */
 		collection?: Reference;
 	};
