@@ -110,7 +110,7 @@ async function verifyUser(
 		configuration.guilds.channels.verification,
 	))!;
 
-	const [collector] = createInteractionCollector(client, {
+	const [collector, customID] = createInteractionCollector(client, {
 		type: InteractionType.MESSAGE_COMPONENT,
 		endless: true,
 		limit: 1,
@@ -130,12 +130,12 @@ async function verifyUser(
 				type: MessageComponentType.BUTTON,
 				style: ButtonStyle.GREEN,
 				label: 'Accept',
-				customID: `VERIFICATION|true`,
+				customID: `${customID}|true`,
 			}, {
 				type: MessageComponentType.BUTTON,
 				style: ButtonStyle.RED,
 				label: 'Reject',
-				customID: `VERIFICATION|false`,
+				customID: `${customID}|false`,
 			}],
 		}],
 	});
