@@ -397,7 +397,7 @@ async function paginate<T>(
 				type: MessageComponentType.BUTTON,
 				customID: 'ARTICLE|PREVIOUS',
 				style: ButtonStyle.GREY,
-				label: '🡨',
+				label: '«',
 			});
 		}
 
@@ -406,7 +406,7 @@ async function paginate<T>(
 				type: MessageComponentType.BUTTON,
 				customID: 'ARTICLE|NEXT',
 				style: ButtonStyle.GREY,
-				label: '🡪',
+				label: '»',
 			});
 		}
 
@@ -499,15 +499,15 @@ function createInteractionCollector(
 		(interaction) => interaction.type === settings.type,
 		(interaction) =>
 			!!interaction.data && 'custom_id' in interaction.data &&
-			(interaction.data.custom_id.split('|')[0] ??
-					interaction.data.custom_id) ===
-				(customID.split('|')[0] ?? customID),
-		settings.user
-			? (interaction) => interaction.user.id === (settings.user as User).id
-			: undefined,
+			(!interaction.data.custom_id.includes('|')
+					? interaction.data.custom_id
+					: interaction.data.custom_id.split('|')[0]) ===
+				(!customID.includes('|') ? customID : customID.split('|')[0]),
+		!settings.user ? undefined
+		: (interaction) => interaction.user.id === settings.user!.id,
 	];
 
-	const conditions = conditionsUnfiltered?.filter((condition) =>
+	const conditions = conditionsUnfiltered.filter((condition) =>
 		condition
 	) as ConditionChecker[];
 
@@ -518,8 +518,9 @@ function createInteractionCollector(
 		event: 'interactionCreate',
 		client: client,
 		filter: condition,
+		max: settings.limit ?? undefined,
 		deinitOnEnd: true,
-		timeout: !settings.endless
+		timeout: settings.endless
 			? undefined
 			: configuration.core.collectors.maxima.timeout,
 	});
@@ -527,15 +528,6 @@ function createInteractionCollector(
 	let isEnded = false;
 	collector.on('end', () => {
 		isEnded = true;
-	});
-
-	let collected = 0;
-	collector.on('collect', () => {
-		collected++;
-
-		if (!settings.limit) return;
-
-		if (collected === settings.limit) collector.end();
 	});
 
 	collector.collect();
