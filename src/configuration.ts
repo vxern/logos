@@ -140,7 +140,16 @@ export default {
 				},
 			},
 		},
+		// Configuration settings pertaining to articles.
 		articles: {
+			restrictions: {
+				newlines: {
+					body: 0.03,
+					footer: 0.01,
+					consecutive: 2,
+				},
+				paragraphLength: 400,
+			},
 			create: {
 				// The maximum number of articles that can be created...
 				maximum: 3,
