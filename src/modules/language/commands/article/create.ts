@@ -1,14 +1,12 @@
 import {
 	_,
 	Interaction,
-	InteractionModalSubmitData,
 	InteractionResponseType,
-	InteractionType,
 } from '../../../../../deps.ts';
 import { Client } from '../../../../client.ts';
 import configuration from '../../../../configuration.ts';
 import { Article } from '../../../../database/structs/articles/article.ts';
-import { createInteractionCollector, toModal } from '../../../../utils.ts';
+import { openArticleEditor } from '../article.ts';
 
 /** Allows the user to write and submit an article. */
 async function createArticle(
@@ -17,7 +15,6 @@ async function createArticle(
 ): Promise<void> {
 	function showArticleSubmissionFailure(interaction: Interaction): void {
 		interaction.respond({
-			type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
 			ephemeral: true,
 			embeds: [{
 				title: 'Failed to submit article',
@@ -51,7 +48,6 @@ async function createArticle(
 
 	if (!canCreateArticle) {
 		interaction.respond({
-			type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
 			ephemeral: true,
 			embeds: [{
 				title: 'Maximum number of articles reached',
@@ -62,41 +58,26 @@ async function createArticle(
 		return;
 	}
 
-	const [collector, customID] = createInteractionCollector(client, {
-		type: InteractionType.MODAL_SUBMIT,
-		user: interaction.user,
-	});
-
-	interaction.showModal(
-		toModal(configuration.interactions.forms.article, customID),
-	);
-
-	const submission = (await collector.waitFor('collect'))[0] as Interaction;
-	const data = submission.data! as InteractionModalSubmitData;
-	const components = data.components;
-
 	const author = await client.database.getOrCreateUser(
 		'id',
-		submission.user.id,
+		interaction.user.id,
 	);
-	if (!author) return showArticleSubmissionFailure(submission);
+	if (!author) return showArticleSubmissionFailure(interaction);
 
-	const footer = components[2]?.components[0]?.value;
+	const [submission, content] = await openArticleEditor(client, interaction);
+	if (!content) return showArticleSubmissionFailure(submission);
+
 	const article: Article = {
 		author: author.ref,
 		language: client.getLanguage(submission.guild!),
-		content: {
-			title: components[0]!.components[0]!.value!,
-			body: components[1]!.components[0]!.value!,
-			footer: (footer && footer.length !== 0) ? footer : undefined,
-		},
+		content: content,
 	};
 
 	const document = await client.database.createArticle(article);
 	if (!document) return showArticleSubmissionFailure(submission);
 
-	client.logging.get(interaction.guild!.id)?.log(
-		'articleSubmit',
+	client.logging.get(submission.guild!.id)?.log(
+		'articleCreate',
 		document.data,
 		submission.member!,
 	);

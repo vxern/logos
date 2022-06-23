@@ -2,21 +2,14 @@ import {
 	_,
 	Interaction,
 	InteractionApplicationCommandData,
-	InteractionModalSubmitData,
 	InteractionResponseType,
-	InteractionType,
 } from '../../../../../deps.ts';
 import { Client } from '../../../../client.ts';
 import configuration from '../../../../configuration.ts';
 import {
 	getMostRecentArticleContent,
 } from '../../../../database/structs/articles/article.ts';
-import {
-	createInteractionCollector,
-	Form,
-	toModal,
-} from '../../../../utils.ts';
-import { showResults } from '../article.ts';
+import { openArticleEditor, showResults } from '../article.ts';
 
 /** Allows the user to edit an existing article. */
 async function editArticle(
@@ -106,42 +99,20 @@ async function editArticle(
 		changes: changes,
 	});
 
-	const prefilledForm = _.merge(
-		_.cloneDeep(configuration.interactions.forms.article),
-		{
-			fields: Object.fromEntries(
-				Object.entries(content).map((
-					[field, value],
-				) => [field, { value: value }]),
-			),
-		},
-	) as Form;
-
-	const [collector, customID] = createInteractionCollector(client, {
-		type: InteractionType.MODAL_SUBMIT,
-		user: interaction.user,
-	});
-
-	interaction.showModal(
-		toModal(prefilledForm, customID),
+	const [submission, newContent] = await openArticleEditor(
+		client,
+		interaction,
+		content,
 	);
-
-	const submission = (await collector.waitFor('collect'))[0] as Interaction;
-	const modalData = submission.data! as InteractionModalSubmitData;
-	const components = modalData.components;
 
 	const change = await client.database.changeArticle({
 		author: user.ref,
 		article: document.ref,
-		content: {
-			title: components[0]!.components[0]!.value!,
-			body: components[1]!.components[0]!.value!,
-			footer: components[2]!.components[0]!.value,
-		},
+		content: newContent,
 	});
 	if (!change) return showArticleEditFailure(submission);
 
-	client.logging.get(interaction.guild!.id)?.log(
+	client.logging.get(submission.guild!.id)?.log(
 		'articleEdit',
 		document.data,
 		change.data,
@@ -149,7 +120,6 @@ async function editArticle(
 	);
 
 	submission.respond({
-		type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
 		ephemeral: true,
 		embeds: [{
 			title: 'Article edited successfully!',
