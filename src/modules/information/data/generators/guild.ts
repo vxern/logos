@@ -20,8 +20,8 @@ type GuildEvents = {
 	/** An entry request has been rejected. */
 	entryRequestReject: [member: Member, reason: string];
 
-	/** An article has been submitted. */
-	articleSubmit: [article: Article, by: Member];
+	/** An article has been created. */
+	articleCreate: [article: Article, by: Member];
 
 	/** An article has been edited. */
 	articleEdit: [article: Article, change: ArticleChange, by: Member];
@@ -67,7 +67,7 @@ ${codeMultiline(reason)}`,
 		filter: (origin, member, _reason) => origin.id === member.guild.id,
 		color: configuration.interactions.responses.colors.green,
 	},
-	'articleSubmit': {
+	'articleCreate': {
 		title: 'Article submitted',
 		message: (article, by) =>
 			`An article has been submitted by ${mentionUser(by.user)}:
