@@ -23,8 +23,20 @@ type GuildEvents = {
 	/** An article has been created. */
 	articleCreate: [article: Article, by: Member];
 
+	/** An article creation request has been accepted. */
+	articleCreateAccept: [article: Article, by: Member];
+
+	/** An article creation request has been rejected. */
+	articleCreateReject: [article: Article, by: Member];
+
 	/** An article has been edited. */
 	articleEdit: [article: Article, change: ArticleChange, by: Member];
+
+	/** An article edit request has been accepted. */
+	articleEditAccept: [article: Article, change: ArticleChange, by: Member];
+
+	/** An article edit request been rejected. */
+	articleEditReject: [article: Article, change: ArticleChange, by: Member];
 
 	/** An article has been locked. */
 	articleLock: [article: Article, by: Member];
@@ -68,15 +80,37 @@ ${codeMultiline(reason)}`,
 		color: configuration.interactions.responses.colors.green,
 	},
 	'articleCreate': {
-		title: 'Article submitted',
+		title: 'Article created',
 		message: (article, by) =>
-			`An article has been submitted by ${mentionUser(by.user)}:
+			`An article has been created by ${mentionUser(by.user)}:
 
 ${bold(article.content.title)}
 
 ${article.content.body}`,
 		filter: (origin, _article, by) => origin.id === by.guild.id,
 		color: configuration.interactions.responses.colors.green,
+	},
+	'articleCreateAccept': {
+		title: 'Article verified',
+		message: (article, by) =>
+			`An article submission has been verified by ${mentionUser(by.user)}:
+
+${bold(article.content.title)}
+
+${article.content.body}`,
+		filter: (origin, _article, by) => origin.id === by.guild.id,
+		color: configuration.interactions.responses.colors.green,
+	},
+	'articleCreateReject': {
+		title: 'Article rejected',
+		message: (article, by) =>
+			`An article submission has been rejected by ${mentionUser(by.user)}:
+
+${bold(article.content.title)}
+
+${article.content.body}`,
+		filter: (origin, _article, by) => origin.id === by.guild.id,
+		color: configuration.interactions.responses.colors.red,
 	},
 	'articleEdit': {
 		title: 'Article updated',
@@ -88,6 +122,28 @@ ${article.content.body}`,
 ${after.content.body}`,
 		filter: (origin, _before, _after, by) => origin.id === by.guild.id,
 		color: configuration.interactions.responses.colors.blue,
+	},
+	'articleEditAccept': {
+		title: 'Article edit accepted',
+		message: (_article, change, by) =>
+			`An article edit has been verified by ${mentionUser(by.user)}:
+
+${bold(change.content.title)}
+
+${change.content.body}`,
+		filter: (origin, _article, _change, by) => origin.id === by.guild.id,
+		color: configuration.interactions.responses.colors.green,
+	},
+	'articleEditReject': {
+		title: 'Article edit rejected',
+		message: (_article, change, by) =>
+			`An article edit has been rejected by ${mentionUser(by.user)}:
+
+${bold(change.content.title)}
+
+${change.content.body}`,
+		filter: (origin, _article, _change, by) => origin.id === by.guild.id,
+		color: configuration.interactions.responses.colors.red,
 	},
 	'articleLock': {
 		title: 'Article locked',
