@@ -1,11 +1,8 @@
-import {
-	_,
-	Interaction,
-	InteractionResponseType,
-} from '../../../../../deps.ts';
+import { _, Interaction } from '../../../../../deps.ts';
 import { Client } from '../../../../client.ts';
 import configuration from '../../../../configuration.ts';
 import { Article } from '../../../../database/structs/articles/article.ts';
+import { createVerificationPrompt, messageUser } from '../../../../utils.ts';
 import { openArticleEditor } from '../article.ts';
 
 /** Allows the user to write and submit an article. */
@@ -27,10 +24,13 @@ async function createArticle(
 	const user = await client.database.getOrCreateUser('id', interaction.user.id);
 	if (!user) return showArticleSubmissionFailure(interaction);
 
-	const articles = await client.database.getArticles('author', user.ref);
-	if (!articles) return showArticleSubmissionFailure(interaction);
+	const articlesByAuthor = await client.database.getArticles(
+		'author',
+		user.ref,
+	);
+	if (!articlesByAuthor) return showArticleSubmissionFailure(interaction);
 
-	const articleTimestamps = articles
+	const articleTimestamps = articlesByAuthor
 		.map((document) => document.ts)
 		.sort((a, b) => b - a); // From most recent to least recent.
 
@@ -64,14 +64,82 @@ async function createArticle(
 	);
 	if (!author) return showArticleSubmissionFailure(interaction);
 
-	const [submission, content] = await openArticleEditor(client, interaction);
+	const articles = await client.database.getArticles(
+		'language',
+		client.getLanguage(interaction.guild!),
+	);
+	if (!articles) return showArticleSubmissionFailure(interaction);
+
+	const [submission, content] = await openArticleEditor(
+		client,
+		interaction,
+		undefined,
+		articles.map((article) => article.data),
+	);
 	if (!content) return showArticleSubmissionFailure(submission);
+
+	const language = client.getLanguage(submission.guild!);
 
 	const article: Article = {
 		author: author.ref,
-		language: client.getLanguage(submission.guild!),
+		language: language,
 		content: content,
 	};
+
+	submission.respond({
+		ephemeral: true,
+		embeds: [{
+			title: 'Submission received.',
+			description:
+				`Your article, \`${article.content.title}\`, is awaiting verification.`,
+			color: configuration.interactions.responses.colors.yellow,
+		}],
+	});
+
+	const [isAccepted, by] = await createVerificationPrompt(
+		client,
+		submission.guild!,
+		{
+			title: content.title,
+			fields: [
+				{ name: 'Body', value: content.body },
+				...(!content.footer ? [] : [{
+					name: 'Footer',
+					value: content.footer.length >= 300
+						? `${content.footer.slice(0, 297)}...`
+						: content.footer,
+				}]),
+			],
+		},
+	);
+
+	messageUser(
+		interaction.user!,
+		interaction.guild!,
+		isAccepted
+			? {
+				title: '🥳 Your article creation request has been accepted.',
+				description:
+					`Your article is now available to be read by everybody on ${interaction
+						.guild!.name!}.`,
+				color: configuration.interactions.responses.colors.green,
+			}
+			: {
+				title:
+					'😔 Unfortunately, your article creation request has been rejected.',
+				description:
+					'This is likely because the article content was inappropriate or incorrect.',
+				color: configuration.interactions.responses.colors.red,
+			},
+	);
+
+	client.logging.get(submission.guild!.id)?.log(
+		isAccepted ? 'articleCreateAccept' : 'articleCreateReject',
+		article,
+		by,
+	);
+
+	if (!isAccepted) return;
 
 	const document = await client.database.createArticle(article);
 	if (!document) return showArticleSubmissionFailure(submission);
@@ -81,17 +149,6 @@ async function createArticle(
 		document.data,
 		submission.member!,
 	);
-
-	submission.respond({
-		type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-		ephemeral: true,
-		embeds: [{
-			title: 'Article submitted successfully!',
-			description:
-				`Your article, \`${document.data.content.title}\`, has been submitted successfully.`,
-			color: configuration.interactions.responses.colors.green,
-		}],
-	});
 }
 
 export { createArticle };

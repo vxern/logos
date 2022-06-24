@@ -9,6 +9,7 @@ import configuration from '../../../../configuration.ts';
 import {
 	getMostRecentArticleContent,
 } from '../../../../database/structs/articles/article.ts';
+import { createVerificationPrompt, messageUser } from '../../../../utils.ts';
 import { openArticleEditor, showResults } from '../article.ts';
 
 /** Allows the user to edit an existing article. */
@@ -105,11 +106,66 @@ async function editArticle(
 		content,
 	);
 
-	const change = await client.database.changeArticle({
+	submission.respond({
+		ephemeral: true,
+		embeds: [{
+			title: 'Edit received.',
+			description:
+				`Your article edit has been received and is awaiting verification.`,
+			color: configuration.interactions.responses.colors.yellow,
+		}],
+	});
+
+	const [isAccepted, by] = await createVerificationPrompt(
+		client,
+		submission.guild!,
+		{
+			title: newContent.title,
+			fields: [
+				{ name: 'Body', value: newContent.body },
+				...(!newContent.footer ? [] : [{
+					name: 'Footer',
+					value: newContent.footer.length >= 300
+						? `${newContent.footer.slice(0, 297)}...`
+						: newContent.footer,
+				}]),
+			],
+		},
+	);
+
+	messageUser(
+		interaction.user!,
+		interaction.guild!,
+		isAccepted
+			? {
+				title: '🥳 Your article edit has been applied.',
+				description: `Your edit is now featured.`,
+				color: configuration.interactions.responses.colors.green,
+			}
+			: {
+				title: '😔 Unfortunately, your article edit has been rejected.',
+				description:
+					'This is likely because the edit was inappropriate or incorrect.',
+				color: configuration.interactions.responses.colors.red,
+			},
+	);
+
+	const articleChange = {
 		author: user.ref,
 		article: document.ref,
 		content: newContent,
-	});
+	};
+
+	client.logging.get(submission.guild!.id)?.log(
+		isAccepted ? 'articleEditAccept' : 'articleEditReject',
+		document.data,
+		articleChange,
+		by,
+	);
+
+	if (!isAccepted) return;
+
+	const change = await client.database.changeArticle(articleChange);
 	if (!change) return showArticleEditFailure(submission);
 
 	client.logging.get(submission.guild!.id)?.log(
