@@ -20,8 +20,6 @@ import { Command, InteractionHandler } from './commands/structs/command.ts';
 
 /** The core of the application, used for interacting with the Discord API. */
 class Client extends DiscordClient {
-	node!: lavadeno.Node;
-
 	/** Database connection. */
 	readonly database: Database = new Database();
 
@@ -45,6 +43,9 @@ class Client extends DiscordClient {
 	 * The keys are guild IDs, and the values are their respective music controller.
 	 */
 	readonly music: Map<string, MusicController> = new Map();
+
+	/** The Lavalink node serving this client. */
+	node!: lavadeno.Node;
 
 	/** Constructs an instance of {@link Client}. */
 	constructor() {
