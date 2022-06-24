@@ -43,10 +43,12 @@ const command: Command = {
 	options: [{
 		name: 'create',
 		type: ApplicationCommandOptionType.SUB_COMMAND,
+		description: 'Submit a new article.',
 		handle: createArticle,
 	}, {
 		name: 'edit',
 		type: ApplicationCommandOptionType.SUB_COMMAND,
+		description: 'Edit an existing article.',
 		options: [{
 			name: 'title',
 			type: ApplicationCommandOptionType.STRING,
@@ -57,6 +59,7 @@ const command: Command = {
 	}, {
 		name: 'view',
 		type: ApplicationCommandOptionType.SUB_COMMAND,
+		description: 'View one of the available articles.',
 		options: [{
 			name: 'title',
 			type: ApplicationCommandOptionType.STRING,
