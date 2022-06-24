@@ -2,7 +2,6 @@ import {
 	_,
 	Interaction,
 	InteractionApplicationCommandData,
-	InteractionResponseType,
 } from '../../../../../deps.ts';
 import { Client } from '../../../../client.ts';
 import configuration from '../../../../configuration.ts';
@@ -20,11 +19,10 @@ async function viewArticle(
 
 	function showArticleViewFailure(): void {
 		interaction.respond({
-			type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
 			ephemeral: true,
 			embeds: [{
-				title: 'Failed to update article',
-				description: `Failed to edit article..`,
+				title: 'Failed to view article',
+				description: `Failed to view article.`,
 				color: configuration.interactions.responses.colors.red,
 			}],
 		});
