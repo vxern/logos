@@ -174,15 +174,6 @@ async function editArticle(
 		change.data,
 		submission.member!,
 	);
-
-	submission.respond({
-		ephemeral: true,
-		embeds: [{
-			title: 'Article edited successfully!',
-			description: `Your edit was saved.`,
-			color: configuration.interactions.responses.colors.green,
-		}],
-	});
 }
 
 export { editArticle };
