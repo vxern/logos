@@ -5,6 +5,7 @@ import {
 	ApplicationCommandOption,
 	ButtonStyle,
 	Collector,
+	EmbedField,
 	EmbedPayload,
 	Guild,
 	GuildChannel,
@@ -14,6 +15,7 @@ import {
 	InteractionResponseType,
 	InteractionType,
 	Invite,
+	Member,
 	MessageComponentData,
 	MessageComponentInteraction,
 	MessageComponentType,
@@ -535,9 +537,73 @@ function createInteractionCollector(
 	return [collector, customID, () => isEnded];
 }
 
+/** Creates a verification prompt in the verifications channel. */
+async function createVerificationPrompt(
+	client: Client,
+	guild: Guild,
+	settings: { title: string; fields: EmbedField[] },
+): Promise<[boolean, Member]> {
+	const verificationChannel = (await getChannel(
+		guild,
+		configuration.guilds.channels.verification,
+	))!;
+
+	const [collector, customID] = createInteractionCollector(client, {
+		type: InteractionType.MESSAGE_COMPONENT,
+		endless: true,
+		limit: 1,
+	});
+
+	const verificationMessage = await verificationChannel.send({
+		embeds: [{
+			title: settings.title,
+			fields: settings.fields,
+		}],
+		components: [{
+			type: MessageComponentType.ACTION_ROW,
+			components: [{
+				type: MessageComponentType.BUTTON,
+				style: ButtonStyle.GREEN,
+				label: 'Accept',
+				customID: `${customID}|true`,
+			}, {
+				type: MessageComponentType.BUTTON,
+				style: ButtonStyle.RED,
+				label: 'Reject',
+				customID: `${customID}|false`,
+			}],
+		}],
+	});
+
+	const selection =
+		(await collector.waitFor('collect'))[0] as MessageComponentInteraction;
+
+	const accepted = selection.data!.custom_id.split('|')[1]! === 'true';
+
+	verificationMessage.delete();
+
+	return [accepted, selection.member!];
+}
+
+/** Creates a DM with the given user. */
+function messageUser(user: User, guild: Guild, field: EmbedPayload): void {
+	const guildName = guild!.name!;
+
+	user.send({
+		thumbnail: {
+			url: guild!.iconURL(),
+		},
+		embeds: [field],
+		footer: {
+			text: `This message originated from ${guildName}.`,
+		},
+	});
+}
+
 export {
 	addParametersToURL,
 	createInteractionCollector,
+	createVerificationPrompt,
 	displayCommand,
 	findChannelByName,
 	fromHex,
@@ -547,6 +613,7 @@ export {
 	getLanguageCode,
 	getMissingKeys,
 	mentionUser,
+	messageUser,
 	paginate,
 	random,
 	shuffle,
