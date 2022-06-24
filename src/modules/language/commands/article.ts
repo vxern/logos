@@ -8,6 +8,7 @@ import {
 	Interaction,
 	InteractionResponseType,
 	InteractionType,
+	MessageComponentInteraction,
 	MessageComponentType,
 } from '../../../../deps.ts';
 import { Client } from '../../../client.ts';
@@ -22,7 +23,7 @@ import {
 } from '../../../database/structs/articles/article.ts';
 import { Document } from '../../../database/structs/document.ts';
 import { User } from '../../../database/structs/users/user.ts';
-import { mention, MentionType } from '../../../formatting.ts';
+import { list, mention, MentionType } from '../../../formatting.ts';
 import {
 	createInteractionCollector,
 	paginate,
@@ -75,7 +76,8 @@ async function openArticleEditor(
 	client: Client,
 	interaction: Interaction,
 	initial?: ArticleTextContent,
-): Promise<[ModalSubmitInteraction, ArticleTextContent]> {
+	articles?: Article[],
+): Promise<[Interaction, ArticleTextContent]> {
 	function showArticleEditFailure(
 		interaction: Interaction,
 		message?: string,
@@ -130,12 +132,15 @@ async function openArticleEditor(
 			{
 				type: InteractionType.MESSAGE_COMPONENT,
 				user: modalAnchor.user,
+				endless: true,
+				limit: 1,
 			},
 		);
 	}
 
 	let modalAnchor = interaction;
 
+	let overrideInteraction: Interaction | undefined = undefined;
 	let submission!: ModalSubmitInteraction;
 	while (!isEnded()) {
 		if (hasProvidedIncorrectData) {
@@ -254,7 +259,84 @@ async function openArticleEditor(
 			continue;
 		}
 
-    
+		const titleWords = content.title.split(' ');
+		const similarArticleTitles = articles?.filter((article) => {
+			const articleTitleWords = article.content.title.split(' ');
+
+			const matchingWords = articleTitleWords.reduce((matchingWords, word) => {
+				if (titleWords.includes(word)) {
+					return matchingWords + 1;
+				} else {
+					return matchingWords;
+				}
+			}, 0);
+
+			return (matchingWords / articleTitleWords.length) > 0.4;
+		});
+
+		if (similarArticleTitles && similarArticleTitles.length !== 0) {
+			const [continueCollector, continueCustomID] = createInteractionCollector(
+				client,
+				{
+					type: InteractionType.MESSAGE_COMPONENT,
+					user: modalAnchor.user,
+					endless: true,
+					limit: 1,
+				},
+			);
+
+			const [returnCollector, returnCustomID] = createInteractionCollector(
+				client,
+				{
+					type: InteractionType.MESSAGE_COMPONENT,
+					user: modalAnchor.user,
+					endless: true,
+					limit: 1,
+				},
+			);
+
+			submission.respond({
+				ephemeral: true,
+				embeds: [{
+					title: 'Similar articles exist',
+					description:
+						`Below is a list of articles with a similar title to yours. Please ensure that an article for your concept does not already exist:
+
+${list(articles!.map((article) => article.content.title))}`,
+					color: configuration.interactions.responses.colors.yellow,
+				}],
+				components: [{
+					type: MessageComponentType.ACTION_ROW,
+					components: [{
+						type: MessageComponentType.BUTTON,
+						style: ButtonStyle.GREEN,
+						label: 'Continue',
+						customID: continueCustomID,
+					}, {
+						type: MessageComponentType.BUTTON,
+						style: ButtonStyle.GREY,
+						label: 'Return',
+						customID: returnCustomID,
+					}],
+				}],
+			});
+
+			// deno-lint-ignore no-await-in-loop
+			const interaction = await Promise.any<MessageComponentInteraction>([
+				continueCollector.waitFor('collect').then((collected) => collected[0]),
+				returnCollector.waitFor('collect').then((collected) => collected[0]),
+			]);
+
+			continueCollector.end();
+			returnCollector.end();
+
+			if (interaction.customID === returnCustomID) {
+				modalAnchor = interaction;
+				continue;
+			}
+
+			overrideInteraction = interaction;
+		}
 
 		collector.end();
 
@@ -263,7 +345,7 @@ async function openArticleEditor(
 		}
 	}
 
-	return [submission, content];
+	return [overrideInteraction ?? submission, content];
 }
 
 function showResults(
