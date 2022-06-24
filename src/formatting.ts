@@ -94,9 +94,15 @@ enum MentionType {
 	USER,
 }
 
+/** Defines the formatting prefix corresponding to the mention type. */
 const prefixes = {
+	/** Channel prefix. */
 	[MentionType.CHANNEL]: '#',
+
+	/** Role prefix. */
 	[MentionType.ROLE]: '@&',
+
+	/** User prefix. */
 	[MentionType.USER]: '@',
 };
 
