@@ -141,12 +141,12 @@ async function verifyEnforcer(
 			components: [{
 				type: MessageComponentType.BUTTON,
 				style: ButtonStyle.GREEN,
-				label: 'Accept',
+				label: 'Pass',
 				customID: `${customID}|true`,
 			}, {
 				type: MessageComponentType.BUTTON,
 				style: ButtonStyle.RED,
-				label: 'Reject',
+				label: 'Fail',
 				customID: `${customID}|false`,
 			}],
 		}],
@@ -166,9 +166,14 @@ async function verifyEnforcer(
 	);
 
 	if (!verified) {
+    actionsByUserID.delete(enforcer.user.id);
+
 		enforcer.ban('Intentional abuse of moderation powers.');
+    
     return;
 	}
+
+  actionsByUserID.set(enforcer.user.id, []);
 
 	modifyRoles({
 		member: enforcer,
