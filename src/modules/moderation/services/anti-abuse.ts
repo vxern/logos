@@ -155,7 +155,18 @@ async function verifyEnforcer(
 
 	if (!verified) {
 		enforcer.ban('Intentional abuse of moderation powers.');
+    return;
 	}
+
+	modifyRoles({
+		member: enforcer,
+		roles: {
+			add: [{
+				name: configuration.guilds.moderation.enforcer,
+			}],
+			remove: [{ name: configuration.guilds.moderation.antiAbuse.replacementRole }],
+		},
+	});
 }
 
 async function resolveAuditLogEntry(
