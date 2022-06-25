@@ -7,26 +7,26 @@ import { MessageGenerators } from './generators.ts';
 /** Contains the message generators for client events. */
 const client: MessageGenerators<ClientEvents> = {
 	'guildBanAdd': {
-		title: 'User banned',
+		title: '⚔️ User banned',
 		message: (_guild, user) => `${mentionUser(user)} has been banned.`,
 		filter: (origin, guild, user) => origin.id === guild.id && !user.bot,
 		color: configuration.interactions.responses.colors.red,
 	},
 	'guildBanRemove': {
-		title: 'User unbanned',
+		title: '😇 User unbanned',
 		message: (_guild, user) => `${mentionUser(user)} has been unbanned.`,
 		filter: (origin, guild, user) => origin.id === guild.id && !user.bot,
 		color: configuration.interactions.responses.colors.yellow,
 	},
 	'guildMemberAdd': {
-		title: 'User joined',
+		title: '😁 User joined',
 		message: (member) => `${mentionUser(member.user)} has joined the server.`,
 		filter: (origin, member) =>
 			origin.id === member.guild.id && !member.user.bot,
 		color: configuration.interactions.responses.colors.green,
 	},
 	'guildMemberRemove': {
-		title: 'User kicked or left',
+		title: '😔 User kicked or left',
 		message: (member) =>
 			`${
 				mentionUser(member.user)
@@ -36,14 +36,14 @@ const client: MessageGenerators<ClientEvents> = {
 		color: configuration.interactions.responses.colors.yellow,
 	},
 	'guildMemberUpdate': {
-		title: 'User updated',
+		title: '👆 User updated',
 		message: resolveMemberUpdate,
 		filter: (origin, _before, after) =>
 			origin.id === after.guild.id && !after.user.bot,
 		color: configuration.interactions.responses.colors.blue,
 	},
 	'messageUpdate': {
-		title: 'Message updated',
+		title: '👆 Message updated',
 		message: (before, after) =>
 			`${mentionUser(after.author)} updated their message in ${after.channel}.
 
@@ -57,7 +57,7 @@ ${codeMultiline(after.content)}`,
 		color: configuration.interactions.responses.colors.blue,
 	},
 	'messageDelete': {
-		title: 'Message deleted',
+		title: '❌ Message deleted',
 		message: (message) =>
 			`${mentionUser(message.author)} deleted their message.
 
