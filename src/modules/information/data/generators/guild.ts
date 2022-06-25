@@ -42,13 +42,13 @@ type GuildEvents = {
 	articleLock: [article: Article, by: Member];
 
   /** An inquest has been started into a moderator. */
-  moderatorInquest: [member: Member, by: Member];
+  moderatorInquest: [member: Member, by: User];
 
   /** A moderator has passed an inquest. */
-  moderatorInquestPass: [member: Member, by: Member];
+  moderatorInquestPass: [member: Member, by: User];
 
   /** A moderator has failed an inquest. */
-  moderatorInquestFail: [member: Member, by: Member];
+  moderatorInquestFail: [member: Member, by: User];
 };
 
 /** Contains the message generators for (custom) guild events. */
@@ -165,20 +165,20 @@ ${change.content.body}`,
 	},
   'moderatorInquest': {
     title: '❗ Inquest initiated',
-    message: (member, by) => `An inquest has been launched into ${mentionUser(member.user)} by ${mentionUser(by.user)}.`,
-		filter: (origin, _member, by) => origin.id === by.guild.id,
+    message: (member, by) => `An inquest has been launched into ${mentionUser(member.user)} by ${mentionUser(by)}.`,
+		filter: (origin, member, _by) => origin.id === member.guild.id,
 		color: configuration.interactions.responses.colors.darkRed,
   },
   'moderatorInquestPass': {
     title: '✔️ Inquest resulted in acquittance',
-    message: (member, by) => `An inquest into ${mentionUser(member.user)} has been reviewed by ${mentionUser(by.user)}, and resulted in a pass.`,
-		filter: (origin, _member, by) => origin.id === by.guild.id,
+    message: (member, by) => `An inquest into ${mentionUser(member.user)} has been reviewed by ${mentionUser(by)}, and resulted in a pass.`,
+		filter: (origin, member, _by) => origin.id === member.guild.id,
 		color: configuration.interactions.responses.colors.green,
   },
   'moderatorInquestFail': {
     title: '❌ Inquest resulted in failure',
-    message: (member, by) => `An inquest into ${mentionUser(member.user)} has been reviewed by ${mentionUser(by.user)}, and resulted in a failure.`,
-		filter: (origin, _member, by) => origin.id === by.guild.id,
+    message: (member, by) => `An inquest into ${mentionUser(member.user)} has been reviewed by ${mentionUser(by)}, and resulted in a failure.`,
+		filter: (origin, member, _by) => origin.id === member.guild.id,
 		color: configuration.interactions.responses.colors.red,
   }
 };

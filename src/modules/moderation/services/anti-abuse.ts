@@ -92,13 +92,6 @@ async function verifyEnforcer(
 		(await action.member.guild.members.get(action.entry.userID)) ??
 			(await action.member.guild.members.fetch(action.entry.userID));
 
-	messageUser(enforcer.user, action.member.guild, {
-		title: 'D\'oh!',
-		description:
-			'Your account has taken too much enforcement action recently. Your account has been placed under review.',
-		color: configuration.interactions.responses.colors.red,
-	});
-
 	modifyRoles({
 		member: enforcer,
 		roles: {
@@ -108,6 +101,19 @@ async function verifyEnforcer(
 			remove: [{ name: configuration.guilds.moderation.enforcer }],
 		},
 	});
+
+	messageUser(enforcer.user, action.member.guild, {
+		title: 'D\'oh!',
+		description:
+			'Your account has taken too much enforcement action recently. Your account has been placed under review.',
+		color: configuration.interactions.responses.colors.red,
+	});
+
+	client.logging.get(action.member.guild.id)?.log(
+		'moderatorInquest',
+		enforcer,
+		client.user!,
+	);
 
 	const owner =
 		(await action.member.guild.members.get(configuration.guilds.owner.id)) ??
@@ -152,6 +158,12 @@ async function verifyEnforcer(
 	const verified = selection.data!.custom_id.split('|')[1]! === 'true';
 
 	verificationMessage.delete();
+
+	client.logging.get(action.member.guild.id)?.log(
+		verified ? 'moderatorInquestPass' : 'moderatorInquestFail',
+		enforcer,
+		selection.user,
+	);
 
 	if (!verified) {
 		enforcer.ban('Intentional abuse of moderation powers.');
