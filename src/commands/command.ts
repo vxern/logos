@@ -137,7 +137,8 @@ async function generatePermissions(
 		.filter((proficiencyRole) => proficiencyRole)
 		.map((proficiencyRole) => proficiencyRole!.id);
 	const moderatorRoleID =
-		(await resolveGuildRole(guild, configuration.guilds.moderator.role))?.id;
+		(await resolveGuildRole(guild, configuration.guilds.moderation.enforcer))
+			?.id;
 
 	const permissions: GuildSlashCommmandPermissionsPartial[] = [];
 	for (const [id, guildCommand] of guildCommands) {

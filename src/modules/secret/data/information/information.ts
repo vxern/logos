@@ -45,7 +45,7 @@ const information: InformationSections = {
 
 			const guildRoles = await guild.roles.array();
 			const moderatorRole = guildRoles.find((role) =>
-				role.name === configuration.guilds.moderator.role
+				role.name === configuration.guilds.moderation.enforcer
 			)!;
 
 			fields.push({
