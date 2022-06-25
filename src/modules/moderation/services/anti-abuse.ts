@@ -70,7 +70,7 @@ async function verifyEnforcer(
 
 	const targets = actionsInInterval.map((action) => action.member);
 
-	let passedThreshold: { age: number; maximum: number } | undefined = undefined;
+	let passedThreshold: { age: number; string: string; maximum: number; } | undefined = undefined;
 
 	for (
 		const threshold of configuration.guilds.moderation.antiAbuse.thresholds
@@ -127,7 +127,7 @@ async function verifyEnforcer(
 			title: '❗ Moderator infraction detected.',
 			description: `${
 				mentionUser(enforcer.user)
-			} has taken too many moderation actions in a short span of time, and has been placed under review. (${passedThreshold.maximum} bans/kicks)`,
+			} has taken too many moderation actions in a short span of time, and has been placed under review. (${passedThreshold.maximum} bans/kicks of accounts that were ${passedThreshold.string} old, with ${actionsInInterval} bans/kicks in the past day)`,
 			color: configuration.interactions.responses.colors.red,
 		},
 		[{
