@@ -16,6 +16,7 @@ import {
 	InteractionType,
 	Invite,
 	Member,
+	Message,
 	MessageComponentData,
 	MessageComponentInteraction,
 	MessageComponentType,
@@ -586,14 +587,20 @@ async function createVerificationPrompt(
 }
 
 /** Creates a DM with the given user. */
-function messageUser(user: User, guild: Guild, field: EmbedPayload): void {
+function messageUser(
+	user: User,
+	guild: Guild,
+	field: EmbedPayload,
+	components?: MessageComponentData[],
+): Promise<Message> {
 	const guildName = guild!.name!;
 
-	user.send({
+	return user.send({
 		thumbnail: {
 			url: guild!.iconURL(),
 		},
 		embeds: [field],
+		components: components,
 		footer: {
 			text: `This message originated from ${guildName}.`,
 		},

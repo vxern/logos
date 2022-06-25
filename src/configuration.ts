@@ -1,6 +1,14 @@
 import { TextInputStyle } from '../deps.ts';
 import { fromHex } from './utils.ts';
 
+const second = 1000;
+const minute = 60 * second;
+const hour = 60 * minute;
+const day = 24 * hour;
+const week = 7 * day;
+const month = 30 * day;
+const year = 365 * day;
+
 export default {
 	// Configuration settings pertaining to core functions of the application.
 	core: {
@@ -8,7 +16,7 @@ export default {
 		collectors: {
 			maxima: {
 				// How long it should take before a collector is automatically deinitialised.
-				timeout: 60 * 60 * 6 * 1000, // 6 hours.
+				timeout: 6 * hour,
 			},
 		},
 		// Configuration settings pertaining to the database.
@@ -40,7 +48,7 @@ export default {
 				requiresVerification: false,
 			},
 			english: {
-				requiresVerification: true,
+				requiresVerification: false,
 			},
 			romanian: {
 				requiresVerification: false,
@@ -51,12 +59,44 @@ export default {
 			id: '217319536485990400',
 		},
 		// Configuration settings pertaining to guild moderators.
-		moderator: {
-			role: 'Guide',
+		moderation: {
+			// The role responsible for taking moderation action.
+			enforcer: 'Guide',
+			// Configuration settings pertaining to moderation abuse prevention.
+			antiAbuse: {
+				replacementRole: 'Under Review',
+				// The proportion of messages a given user must have posted in the past year for
+				// the anti-abuse system to trigger.
+				allowance: 0.1,
+				// The interval within which the enforcements must have taken place.
+				interval: day,
+				// The thresholds at which the anti-abuse system operates.
+				thresholds: [{
+					age: year,
+          string: 'a year',
+					maximum: 1,
+				}, {
+					age: 6 * month,
+          string: 'six months',
+					maximum: 2,
+				}, {
+					age: month,
+          string: 'a month',
+					maximum: 3,
+				}, {
+					age: week,
+          string: 'a week',
+					maximum: 4,
+				}, {
+					age: day,
+          string: 'a day',
+					maximum: 6,
+				}],
+			},
 		},
 		// Configuration settings pertaining to entry to the guild.
 		entry: {
-			minimumRequiredAge: 2 * 60 * 60 * 24 * 1000, // Two days.
+			minimumRequiredAge: 2 * day,
 		},
 	},
 	// Configuration settings pertaining to music.
@@ -82,6 +122,7 @@ export default {
 				// This colour matches the colour of an embed message,
 				// making it seem like there is no colour stripe.
 				invisible: fromHex('#36393f'),
+				darkRed: fromHex('#820000'),
 			},
 		},
 		// Configuration settings pertaining to user forms.
@@ -154,13 +195,13 @@ export default {
 				// The maximum number of articles that can be created...
 				maximum: 3,
 				// ... in the interval:
-				interval: 60 * 60 * 24 * 1000, // One day.
+				interval: day,
 			},
 			edit: {
 				// The maximum number of edits that can be made...
 				maximum: 5,
 				// ... in the interval:
-				interval: 60 * 60 * 12 * 1000, // 12 hours.
+				interval: day / 2,
 			},
 		},
 	},
