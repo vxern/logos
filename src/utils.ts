@@ -23,6 +23,7 @@ import {
 	Snowflake,
 	TextInputStyle,
 	User,
+	VoiceState,
 } from '../deps.ts';
 import languages from 'https://deno.land/x/language@v0.1.0/languages.ts';
 import { Command } from './commands/structs/command.ts';
@@ -367,7 +368,7 @@ async function paginate<T>(
 		embed: Omit<EmbedPayload, 'fields' | 'footer'>;
 		view: {
 			title: string;
-			generate: (element: T) => string;
+			generate: (element: T, index: number) => string;
 		};
 		show: boolean;
 	},
@@ -378,7 +379,7 @@ async function paginate<T>(
 	const isLast = () => index === elements.length - 1;
 
 	function generateEmbed(): EmbedPayload {
-		const field = view.generate(elements[index]!);
+		const field = view.generate(elements[index]!, index);
 
 		return {
 			...embed,
@@ -607,8 +608,36 @@ function messageUser(
 	});
 }
 
+/**
+ * Gets the voice state of a member within a guild.
+ *
+ * @param member - The member whose voice state to get.
+ * @returns The voice state or `undefined`.
+ */
+function getVoiceState(member: Member): Promise<VoiceState | undefined> {
+	return member.guild.voiceStates.resolve(member.user.id);
+}
+
+/**
+ * Taking an array, splits it into parts of equal sizes.
+ *
+ * @param array - The array to chunk.
+ * @param size - The size of each chunk.
+ * @returns The chunked array.
+ */
+function chunk<T>(array: T[], size: number): T[][] {
+	if (array.length === 0) return [[]];
+
+	const chunks = [];
+	for (let index = 0; index < array.length; index += size) {
+		chunks.push(array.slice(index, index + size));
+	}
+	return chunks;
+}
+
 export {
 	addParametersToURL,
+	chunk,
 	createInteractionCollector,
 	createVerificationPrompt,
 	displayCommand,
@@ -619,6 +648,7 @@ export {
 	getLanguage,
 	getLanguageCode,
 	getMissingKeys,
+	getVoiceState,
 	mentionUser,
 	messageUser,
 	paginate,

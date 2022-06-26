@@ -10,7 +10,7 @@ import { getMissingKeys } from '../utils.ts';
 import information from './information/module.ts';
 import language from './language/module.ts';
 //import moderation from "./moderation/module.ts";
-//import music from './music/module.ts';
+import music from './music/module.ts';
 import roles from './roles/module.ts';
 import secret from './secret/module.ts';
 //import social from "./social/module.ts";
@@ -19,7 +19,7 @@ const modules: Record<string, Command>[] = [
 	information,
 	language,
 	//moderation,
-	//music,
+	music,
 	roles,
 	secret,
 	//social,

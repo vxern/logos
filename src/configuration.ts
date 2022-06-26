@@ -73,23 +73,23 @@ export default {
 				// The thresholds at which the anti-abuse system operates.
 				thresholds: [{
 					age: year,
-          string: 'a year',
+					string: 'a year',
 					maximum: 1,
 				}, {
 					age: 6 * month,
-          string: 'six months',
+					string: 'six months',
 					maximum: 2,
 				}, {
 					age: month,
-          string: 'a month',
+					string: 'a month',
 					maximum: 3,
 				}, {
 					age: week,
-          string: 'a week',
+					string: 'a week',
 					maximum: 4,
 				}, {
 					age: day,
-          string: 'a day',
+					string: 'a day',
 					maximum: 6,
 				}],
 			},
@@ -107,6 +107,7 @@ export default {
 			songs: {
 				history: 100,
 				queue: 20,
+				page: 10,
 			},
 		},
 	},
