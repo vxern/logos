@@ -267,7 +267,7 @@ class MusicController extends Controller {
 			title: !wasLooped ? '🎶 Playing song' : '🎶 Replaying song',
 			description: `${!wasLooped ? 'Now playing' : 'Replaying'} [${
 				bold(currentSong.title)
-			}](${currentSong.url}), requested by ${
+			}](${currentSong.url}) as requested by ${
 				mention(this.current.requestedBy, MentionType.USER)
 			}.`,
 			color: configuration.interactions.responses.colors.invisible,
