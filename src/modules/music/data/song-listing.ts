@@ -7,23 +7,17 @@ import { Source } from './sources/sources.ts';
  * that contains key information about the listing.
  */
 interface SongListing {
+	/** The type of this song listing. */
+	type: 'SONG' | 'SONG_COLLECTION';
+
 	/** The source of the song listing. */
 	source: Source;
 
 	/** The ID of the user who requested the song listing. */
 	requestedBy: string;
 
-	/**
-	 * A list of IDs of users who had been present at the time of the request of
-	 * the song listing, and thus can manage it. (skip it, remove it, etc.)
-	 */
-	managedBy: string[];
-
-	/** The song which the song listing is for. */
-	song?: Song;
-
-	/** The collection of songs which the song listing is for. */
-	collection?: SongCollection;
+	/** The content of this song listing. */
+	content: Song | SongCollection;
 }
 
 export type { SongListing };
