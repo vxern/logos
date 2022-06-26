@@ -428,8 +428,7 @@ function showArticle({
 		elements: pages,
 		embed: {
 			title: content.title,
-			description: `
-Contributors: ${contributorsString}`,
+			description: `Contributors: ${contributorsString}`,
 			color: configuration.interactions.responses.colors.blue,
 		},
 		view: {
