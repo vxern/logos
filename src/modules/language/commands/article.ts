@@ -252,12 +252,10 @@ async function openArticleEditor(
 		);
 
 		if (lengthBreach) {
-			const [field, _content] = lengthBreach;
-
 			hasProvidedIncorrectData = true;
 			showArticleEditFailure(
 				submission,
-				`Your article ${field} contains too many consecutive newlines. There can only be ${configuration.interactions.articles.restrictions.newlines.consecutive} consecutive newlines.`,
+				`The maximum length of an article paragraph is ${configuration.interactions.articles.restrictions.paragraphLength} characters, but one of your paragraphs is longer than that. Try breaking your paragraph into smaller bits.`,
 				true,
 				awarenessCustomID,
 			);
