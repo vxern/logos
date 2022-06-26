@@ -34,7 +34,9 @@ import { editArticle } from './article/edit.ts';
 import { viewArticle } from './article/view.ts';
 
 const newlineOverflow = new RegExp(
-	`\n{${configuration.interactions.articles.restrictions.newlines.consecutive},}`,
+	`\n{${
+		configuration.interactions.articles.restrictions.newlines.consecutive + 1
+	},}`,
 );
 
 const command: Command = {
