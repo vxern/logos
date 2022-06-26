@@ -2,6 +2,7 @@ import { Interaction } from '../../../../deps.ts';
 import { Client } from '../../../client.ts';
 import { Availability } from '../../../commands/structs/availability.ts';
 import { Command } from '../../../commands/structs/command.ts';
+import configuration from '../../../configuration.ts';
 
 const command: Command = {
 	name: 'replay',
@@ -10,13 +11,25 @@ const command: Command = {
 	handle: replay,
 };
 
-async function replay(
-	_client: Client,
-	_interaction: Interaction,
-): Promise<void> {
-	/// TODO(vxern):
-	/// If there is no song playing, reject interaction nicely.
-	/// Otherwise, start playing the current song from the start.
+function replay(
+	client: Client,
+	interaction: Interaction,
+): void {
+	const controller = client.music.get(interaction.guild!.id)!;
+
+	if (!controller.isOccupied) {
+		interaction.respond({
+			ephemeral: true,
+			embeds: [{
+				title: 'Nothing to replay',
+				description: 'There is no song to replay.',
+				color: configuration.interactions.responses.colors.yellow,
+			}],
+		});
+		return;
+	}
+
+	controller.replay();
 }
 
 export default command;
