@@ -2,6 +2,7 @@ import { Interaction } from '../../../../deps.ts';
 import { Client } from '../../../client.ts';
 import { Availability } from '../../../commands/structs/availability.ts';
 import { Command } from '../../../commands/structs/command.ts';
+import configuration from '../../../configuration.ts';
 
 const command: Command = {
 	name: 'pause',
@@ -10,14 +11,37 @@ const command: Command = {
 	handle: pause,
 };
 
-async function pause(
-	_client: Client,
-	_interaction: Interaction,
-): Promise<void> {
-	/// TODO(vxern):
-	/// If there is no song playing, reject interaction nicely.
-	/// If the song had already been paused a couple of times, ???
-	/// Otherwise, pause the song.
+function pause(
+	client: Client,
+	interaction: Interaction,
+): void {
+	const controller = client.music.get(interaction.guild!.id)!;
+
+	if (!controller.isOccupied) {
+		interaction.respond({
+			ephemeral: true,
+			embeds: [{
+				title: 'Nothing to pause',
+				description: 'There is no song to pause.',
+				color: configuration.interactions.responses.colors.yellow,
+			}],
+		});
+		return;
+	}
+
+	if (controller.isPaused) {
+		interaction.respond({
+			ephemeral: true,
+			embeds: [{
+				title: 'Already paused',
+				description: 'The current song is already paused.',
+				color: configuration.interactions.responses.colors.yellow,
+			}],
+		});
+		return;
+	}
+
+	controller.pause(interaction);
 }
 
 export default command;
