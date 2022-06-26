@@ -311,10 +311,18 @@ class MusicController extends Controller {
 	}
 
 	/** Sets the volume of the player. */
-	setVolume(volume: number): void {
+	setVolume(interaction: Interaction, volume: number): void {
 		this.volume = volume;
 
 		this.player.setVolume(this.volume);
+
+		interaction.respond({
+			embeds: [{
+				title: '🔊 Volume set',
+				description: `The volume has been set to ${volume}%.`,
+				color: configuration.interactions.responses.colors.invisible,
+			}],
+		});
 	}
 
 	pause(interaction: Interaction): void {
