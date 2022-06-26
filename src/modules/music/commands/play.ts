@@ -28,6 +28,8 @@ async function play(
 	interaction: ApplicationCommandInteraction,
 	resolve: ListingResolver,
 ): Promise<void> {
+	await interaction.defer();
+
 	const controller = client.music.get(interaction.guild!.id)!;
 
 	const voiceState = await getVoiceState(interaction.member!);
@@ -47,7 +49,7 @@ async function play(
 	if (!listing) {
 		if (interaction.responded) return;
 
-		interaction.respond({
+		interaction.editResponse({
 			ephemeral: true,
 			embeds: [{
 				title: 'Couldn\'t find the requested song.',

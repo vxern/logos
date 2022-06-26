@@ -192,7 +192,7 @@ class MusicController extends Controller {
 		}
 
 		if (this.isOccupied) {
-			interaction.respond({
+			interaction.editResponse({
 				embeds: [{
 					title: '👍 Listing queued.',
 					description: `Your listing, ${
@@ -260,7 +260,7 @@ class MusicController extends Controller {
 		this.player.play(track);
 
 		const method: (embed: EmbedPayload) => unknown = interaction
-			? (embed) => interaction.respond({ embeds: [embed] })
+			? (embed) => interaction.editResponse({ embeds: [embed] })
 			: (embed) => this.textChannel!.send({ embeds: [embed] });
 
 		method({
