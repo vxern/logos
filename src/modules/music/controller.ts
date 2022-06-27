@@ -295,9 +295,9 @@ class MusicController extends Controller {
 
 		this.current = undefined;
 
-		if (!this.player.track) {
+		if (this.player.track) {
 			this.player.stop();
-
+		} else {
 			this.advanceQueueAndPlay();
 		}
 
