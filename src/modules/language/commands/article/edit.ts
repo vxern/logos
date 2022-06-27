@@ -47,42 +47,53 @@ async function editArticle(
 		});
 	}
 
-	const user = await client.database.getOrCreateUser('id', interaction.user.id);
+	const user = await client.database.getOrCreateUser(
+		'id',
+		interaction.user.id,
+	);
 	if (!user) return showArticleEditFailure(interaction);
 
-	const articleChanges = await client.database.getArticleChanges(
-		'author',
-		user.ref,
-	);
-	if (!articleChanges) return showArticleEditFailure(interaction);
-
-	const articleTimestamps = articleChanges
-		.map((document) => document.ts)
-		.sort((a, b) => b - a); // From most recent to least recent.
-
-	const timestampSlice = articleTimestamps.slice(
-		0,
-		configuration.interactions.articles.edit.maximum,
+	const isCheckExempt = (await interaction.member!.roles.array()).map((
+		role,
+	) => role.name).some((roleName) =>
+		configuration.interactions.articles.verification.exempt.includes(roleName)
 	);
 
-	const canEditArticle =
-		timestampSlice.length < configuration.interactions.articles.edit.maximum ||
-		timestampSlice.some((timestamp) =>
-			(Date.now() - timestamp) >=
-				configuration.interactions.articles.edit.interval
+	if (!isCheckExempt) {
+		const articleChanges = await client.database.getArticleChanges(
+			'author',
+			user.ref,
+		);
+		if (!articleChanges) return showArticleEditFailure(interaction);
+
+		const articleTimestamps = articleChanges
+			.map((document) => document.ts)
+			.sort((a, b) => b - a); // From most recent to least recent.
+
+		const timestampSlice = articleTimestamps.slice(
+			0,
+			configuration.interactions.articles.edit.maximum,
 		);
 
-	if (!canEditArticle) {
-		interaction.respond({
-			type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-			ephemeral: true,
-			embeds: [{
-				title: 'Maximum number of edits reached',
-				description: `You must wait before trying to edit another article.`,
-				color: configuration.interactions.responses.colors.red,
-			}],
-		});
-		return;
+		const canEditArticle = timestampSlice.length <
+				configuration.interactions.articles.edit.maximum ||
+			timestampSlice.some((timestamp) =>
+				(Date.now() - timestamp) >=
+					configuration.interactions.articles.edit.interval
+			);
+
+		if (!canEditArticle) {
+			interaction.respond({
+				type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+				ephemeral: true,
+				embeds: [{
+					title: 'Maximum number of edits reached',
+					description: `You must wait before trying to edit another article.`,
+					color: configuration.interactions.responses.colors.red,
+				}],
+			});
+			return;
+		}
 	}
 
 	const data = interaction.data as InteractionApplicationCommandData;
@@ -106,64 +117,82 @@ async function editArticle(
 		content,
 	);
 
-	submission.respond({
-		ephemeral: true,
-		embeds: [{
-			title: 'Edit received.',
-			description:
-				`Your article edit has been received and is awaiting verification.`,
-			color: configuration.interactions.responses.colors.yellow,
-		}],
-	});
-
-	const [isAccepted, by] = await createVerificationPrompt(
-		client,
-		submission.guild!,
-		{
-			title: newContent.title,
-			fields: [
-				{ name: 'Body', value: newContent.body },
-				...(!newContent.footer ? [] : [{
-					name: 'Footer',
-					value: newContent.footer.length >= 300
-						? `${newContent.footer.slice(0, 297)}...`
-						: newContent.footer,
-				}]),
-			],
-		},
-	);
-
-	messageUser(
-		interaction.user!,
-		interaction.guild!,
-		isAccepted
-			? {
-				title: '🥳 Your article edit has been applied.',
-				description: `Your edit is now featured.`,
-				color: configuration.interactions.responses.colors.green,
-			}
-			: {
-				title: '😔 Unfortunately, your article edit has been rejected.',
-				description:
-					'This is likely because the edit was inappropriate or incorrect.',
-				color: configuration.interactions.responses.colors.red,
-			},
-	);
-
 	const articleChange = {
 		author: user.ref,
 		article: document.ref,
 		content: newContent,
 	};
 
-	client.logging.get(submission.guild!.id)?.log(
-		isAccepted ? 'articleEditAccept' : 'articleEditReject',
-		document.data,
-		articleChange,
-		by,
-	);
+	let [isAccepted, by] = [true, interaction.member!];
 
-	if (!isAccepted) return;
+	if (isCheckExempt) {
+		submission.respond({
+			ephemeral: true,
+			embeds: [{
+				title: 'Edit received.',
+				description:
+					`Your article edit has been received and is awaiting verification.`,
+				color: configuration.interactions.responses.colors.yellow,
+			}],
+		});
+
+		[isAccepted, by] = await createVerificationPrompt(
+			client,
+			submission.guild!,
+			{
+				title: newContent.title,
+				fields: [
+					{
+						name: 'Body',
+						value: newContent.body.length >= 300
+							? `${newContent.body.slice(0, 297)}...`
+							: newContent.body,
+					},
+					...(!newContent.footer ? [] : [{
+						name: 'Footer',
+						value: newContent.footer.length >= 300
+							? `${newContent.footer.slice(0, 297)}...`
+							: newContent.footer,
+					}]),
+				],
+			},
+		);
+
+		messageUser(
+			interaction.user!,
+			interaction.guild!,
+			isAccepted
+				? {
+					title: '🥳 Your article edit has been applied.',
+					description: `Your edit is now featured.`,
+					color: configuration.interactions.responses.colors.green,
+				}
+				: {
+					title: '😔 Unfortunately, your article edit has been rejected.',
+					description:
+						'This is likely because the edit was inappropriate or incorrect.',
+					color: configuration.interactions.responses.colors.red,
+				},
+		);
+
+		client.logging.get(submission.guild!.id)?.log(
+			isAccepted ? 'articleEditAccept' : 'articleEditReject',
+			document.data,
+			articleChange,
+			by,
+		);
+
+		if (!isAccepted) return;
+	} else {
+		submission.respond({
+			ephemeral: true,
+			embeds: [{
+				title: 'Article edit made.',
+				description: `Your article edit has been saved.`,
+				color: configuration.interactions.responses.colors.green,
+			}],
+		});
+	}
 
 	const change = await client.database.changeArticle(articleChange);
 	if (!change) return showArticleEditFailure(submission);

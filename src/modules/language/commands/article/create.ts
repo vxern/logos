@@ -21,41 +21,52 @@ async function createArticle(
 		});
 	}
 
-	const user = await client.database.getOrCreateUser('id', interaction.user.id);
-	if (!user) return showArticleSubmissionFailure(interaction);
-
-	const articlesByAuthor = await client.database.getArticles(
-		'author',
-		user.ref,
-	);
-	if (!articlesByAuthor) return showArticleSubmissionFailure(interaction);
-
-	const articleTimestamps = articlesByAuthor
-		.map((document) => document.ts)
-		.sort((a, b) => b - a); // From most recent to least recent.
-
-	const timestampSlice = articleTimestamps.slice(
-		0,
-		configuration.interactions.articles.create.maximum,
+	const isCheckExempt = (await interaction.member!.roles.array()).map((
+		role,
+	) => role.name).some((roleName) =>
+		configuration.interactions.articles.verification.exempt.includes(roleName)
 	);
 
-	const canCreateArticle = timestampSlice.length <
-			configuration.interactions.articles.create.maximum ||
-		timestampSlice.some((timestamp) =>
-			(Date.now() - timestamp) >=
-				configuration.interactions.articles.create.interval
+	if (!isCheckExempt) {
+		const user = await client.database.getOrCreateUser(
+			'id',
+			interaction.user.id,
+		);
+		if (!user) return showArticleSubmissionFailure(interaction);
+
+		const articlesByAuthor = await client.database.getArticles(
+			'author',
+			user.ref,
+		);
+		if (!articlesByAuthor) return showArticleSubmissionFailure(interaction);
+
+		const articleTimestamps = articlesByAuthor
+			.map((document) => document.ts)
+			.sort((a, b) => b - a); // From most recent to least recent.
+
+		const timestampSlice = articleTimestamps.slice(
+			0,
+			configuration.interactions.articles.create.maximum,
 		);
 
-	if (!canCreateArticle) {
-		interaction.respond({
-			ephemeral: true,
-			embeds: [{
-				title: 'Maximum number of articles reached',
-				description: `You must wait before submitting another article.`,
-				color: configuration.interactions.responses.colors.red,
-			}],
-		});
-		return;
+		const canCreateArticle = timestampSlice.length <
+				configuration.interactions.articles.create.maximum ||
+			timestampSlice.some((timestamp) =>
+				(Date.now() - timestamp) >=
+					configuration.interactions.articles.create.interval
+			);
+
+		if (!canCreateArticle) {
+			interaction.respond({
+				ephemeral: true,
+				embeds: [{
+					title: 'Maximum number of articles reached',
+					description: `You must wait before submitting another article.`,
+					color: configuration.interactions.responses.colors.red,
+				}],
+			});
+			return;
+		}
 	}
 
 	const author = await client.database.getOrCreateUser(
@@ -86,60 +97,79 @@ async function createArticle(
 		content: content,
 	};
 
-	submission.respond({
-		ephemeral: true,
-		embeds: [{
-			title: 'Submission received.',
-			description:
-				`Your article, \`${article.content.title}\`, is awaiting verification.`,
-			color: configuration.interactions.responses.colors.yellow,
-		}],
-	});
+	let [isAccepted, by] = [true, interaction.member!];
 
-	const [isAccepted, by] = await createVerificationPrompt(
-		client,
-		submission.guild!,
-		{
-			title: content.title,
-			fields: [
-				{ name: 'Body', value: content.body },
-				...(!content.footer ? [] : [{
-					name: 'Footer',
-					value: content.footer.length >= 300
-						? `${content.footer.slice(0, 297)}...`
-						: content.footer,
-				}]),
-			],
-		},
-	);
+	if (!isCheckExempt) {
+		submission.respond({
+			ephemeral: true,
+			embeds: [{
+				title: 'Submission received.',
+				description:
+					`Your article, \`${article.content.title}\`, is awaiting verification.`,
+				color: configuration.interactions.responses.colors.yellow,
+			}],
+		});
 
-	messageUser(
-		interaction.user!,
-		interaction.guild!,
-		isAccepted
-			? {
-				title: '🥳 Your article creation request has been accepted.',
-				description:
-					`Your article is now available to be read by everybody on ${interaction
-						.guild!.name!}.`,
-				color: configuration.interactions.responses.colors.green,
-			}
-			: {
-				title:
-					'😔 Unfortunately, your article creation request has been rejected.',
-				description:
-					'This is likely because the article content was inappropriate or incorrect.',
-				color: configuration.interactions.responses.colors.red,
+		[isAccepted, by] = await createVerificationPrompt(
+			client,
+			submission.guild!,
+			{
+				title: content.title,
+				fields: [
+					{
+						name: 'Body',
+						value: content.body.length >= 300
+							? `${content.body.slice(0, 297)}...`
+							: content.body,
+					},
+					...(!content.footer ? [] : [{
+						name: 'Footer',
+						value: content.footer.length >= 300
+							? `${content.footer.slice(0, 297)}...`
+							: content.footer,
+					}]),
+				],
 			},
-	);
+		);
 
-	client.logging.get(submission.guild!.id)?.log(
-		isAccepted ? 'articleCreateAccept' : 'articleCreateReject',
-		article,
-		by,
-	);
+		messageUser(
+			interaction.user!,
+			interaction.guild!,
+			isAccepted
+				? {
+					title: '🥳 Your article creation request has been accepted.',
+					description:
+						`Your article is now available to be read by everybody on ${interaction
+							.guild!.name!}.`,
+					color: configuration.interactions.responses.colors.green,
+				}
+				: {
+					title:
+						'😔 Unfortunately, your article creation request has been rejected.',
+					description:
+						'This is likely because the article content was inappropriate or incorrect.',
+					color: configuration.interactions.responses.colors.red,
+				},
+		);
 
-	if (!isAccepted) return;
+		client.logging.get(submission.guild!.id)?.log(
+			isAccepted ? 'articleCreateAccept' : 'articleCreateReject',
+			article,
+			by,
+		);
+
+		if (!isAccepted) return;
+	} else {
+		submission.respond({
+			ephemeral: true,
+			embeds: [{
+				title: 'Article created.',
+				description:
+					`Your article, \`${article.content.title}\`, has been submitted.`,
+				color: configuration.interactions.responses.colors.green,
+			}],
+		});
+	}
 
 	const document = await client.database.createArticle(article);
 	if (!document) return showArticleSubmissionFailure(submission);

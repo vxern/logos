@@ -184,6 +184,9 @@ export default {
 		},
 		// Configuration settings pertaining to articles.
 		articles: {
+			verification: {
+				exempt: ['Guide'],
+			},
 			restrictions: {
 				newlines: {
 					body: 0.03,
