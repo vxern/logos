@@ -31,6 +31,15 @@ async function stop(client: Client, interaction: Interaction): Promise<void> {
 	}
 
 	controller.reset();
+
+	interaction.respond({
+		embeds: [{
+			title: 'Session ended',
+			description:
+				'The listening session has been ended, and the song queue and history have been cleared.',
+			color: configuration.interactions.responses.colors.blue,
+		}],
+	});
 }
 
 export default command;
