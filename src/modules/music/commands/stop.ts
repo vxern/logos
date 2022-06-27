@@ -5,16 +5,14 @@ import { Command } from '../../../commands/structs/command.ts';
 import configuration from '../../../configuration.ts';
 
 const command: Command = {
-	name: 'pause',
+	name: 'stop',
 	availability: Availability.MEMBERS,
-	description: 'Pauses the currently playing song.',
-	handle: pause,
+	description:
+		'Stops the current listening session, clearing the queue and song history.',
+	handle: stop,
 };
 
-async function pause(
-	client: Client,
-	interaction: Interaction,
-): Promise<void> {
+async function stop(client: Client, interaction: Interaction): Promise<void> {
 	const controller = client.music.get(interaction.guild!.id)!;
 
 	const [canAct, _] = await controller.verifyMemberVoiceState(interaction);
@@ -24,35 +22,15 @@ async function pause(
 		interaction.respond({
 			ephemeral: true,
 			embeds: [{
-				title: 'Nothing to pause',
-				description: 'There is no song to pause.',
+				title: 'Nothing to stop',
+				description: 'There is no active listening session.',
 				color: configuration.interactions.responses.colors.yellow,
 			}],
 		});
 		return;
 	}
 
-	if (controller.isPaused) {
-		interaction.respond({
-			ephemeral: true,
-			embeds: [{
-				title: 'Already paused',
-				description: 'The current song is already paused.',
-				color: configuration.interactions.responses.colors.yellow,
-			}],
-		});
-		return;
-	}
-
-	controller.pause();
-
-	interaction.respond({
-		embeds: [{
-			title: '⏸️ Paused',
-			description: 'The current song has been paused.',
-			color: configuration.interactions.responses.colors.invisible,
-		}],
-	});
+	controller.reset();
 }
 
 export default command;

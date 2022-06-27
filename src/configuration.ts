@@ -101,6 +101,7 @@ export default {
 	},
 	// Configuration settings pertaining to music.
 	music: {
+		disconnectTimeout: 10 * minute,
 		maxima: {
 			// The maximum volume
 			volume: 150,

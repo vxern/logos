@@ -9,7 +9,6 @@ import configuration from '../../../configuration.ts';
 import { ListingResolver, sources } from '../data/sources/sources.ts';
 import { title, url } from '../parameters.ts';
 import { Client } from '../../../client.ts';
-import { getVoiceState } from '../../../utils.ts';
 
 const command: Command = {
 	name: 'play',
@@ -32,13 +31,7 @@ async function play(
 
 	const controller = client.music.get(interaction.guild!.id)!;
 
-	const voiceState = await getVoiceState(interaction.member!);
-
-	const canPlay = controller.verifyCanQueueListing(interaction, {
-		data: interaction.data!,
-		voiceState: voiceState,
-	});
-
+	const [canPlay, voiceState] = await controller.verifyCanPlay(interaction);
 	if (!canPlay) return;
 
 	const listing = await resolve(

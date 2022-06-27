@@ -10,6 +10,7 @@ import play from './commands/play.ts';
 import queue from './commands/queue.ts';
 import replay from './commands/replay.ts';
 import skip from './commands/skip.ts';
+import stop from './commands/stop.ts';
 import unpause from './commands/unpause.ts';
 import unskip from './commands/unskip.ts';
 import volume from './commands/volume.ts';
@@ -23,6 +24,7 @@ const commands: Record<string, Command> = {
 	queue,
 	replay,
 	skip,
+	stop,
 	unpause,
 	unskip,
 	volume,
@@ -46,7 +48,7 @@ function displayListings(
 			color: configuration.interactions.responses.colors.blue,
 		},
 		view: {
-			title: 'Page',
+			title: 'Listings',
 			generate: (page, pageIndex) =>
 				page.length !== 0
 					? list(

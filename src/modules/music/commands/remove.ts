@@ -11,9 +11,14 @@ const command: Command = {
 };
 
 async function remove(
-	_client: Client,
-	_interaction: Interaction,
+	client: Client,
+	interaction: Interaction,
 ): Promise<void> {
+	const controller = client.music.get(interaction.guild!.id)!;
+
+	const [canAct, _] = await controller.verifyMemberVoiceState(interaction);
+	if (!canAct) return;
+
 	/// TODO(vxern):
 	/// Open a selection menu and allow the user to select the song listing to remove.
 }

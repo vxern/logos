@@ -11,11 +11,14 @@ const command: Command = {
 	handle: unskip,
 };
 
-function unskip(
+async function unskip(
 	client: Client,
 	interaction: Interaction,
-): void {
+): Promise<void> {
 	const controller = client.music.get(interaction.guild!.id)!;
+
+	const [canAct, _] = await controller.verifyMemberVoiceState(interaction);
+	if (!canAct) return;
 
 	if (controller.history.length === 0) {
 		interaction.respond({
@@ -42,7 +45,15 @@ function unskip(
 		return;
 	}
 
-	controller.unskip(interaction);
+	controller.unskip();
+
+	interaction.respond({
+		embeds: [{
+			title: '⏮️ Unskipped',
+			description: 'The last played song has been brought back.',
+			color: configuration.interactions.responses.colors.invisible,
+		}],
+	});
 }
 
 export default command;

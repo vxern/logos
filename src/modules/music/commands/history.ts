@@ -1,4 +1,5 @@
 import {
+	_,
 	ApplicationCommandInteraction,
 	ApplicationCommandOptionType,
 	Interaction,
@@ -32,10 +33,14 @@ function history(
 		) => option.name === 'show')?.value ??
 			false;
 
+	const history = _.cloneDeep(controller.history);
+
+	history.reverse();
+
 	displayListings({
 		interaction: interaction,
 		title: '📋 History',
-		listings: controller.history,
+		listings: history,
 		show: show,
 	});
 }
