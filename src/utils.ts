@@ -635,6 +635,19 @@ function chunk<T>(array: T[], size: number): T[][] {
 	return chunks;
 }
 
+/**
+ * Taking a string, trims it to the desired length and returns it.
+ *
+ * @param string - The string to trim.
+ * @param length - The desired length.
+ * @returns The trimmed string.
+ */
+function trim(string: string, length: number): string {
+	return string.length <= length
+		? string
+		: `${string.slice(0, Math.max(length - 3, 0))}...`;
+}
+
 export {
 	addParametersToURL,
 	chunk,
@@ -656,5 +669,6 @@ export {
 	shuffle,
 	time,
 	toModal,
+	trim,
 };
 export type { Form, Optional, Unpacked };

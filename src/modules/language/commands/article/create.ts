@@ -2,8 +2,16 @@ import { _, Interaction } from '../../../../../deps.ts';
 import { Client } from '../../../../client.ts';
 import configuration from '../../../../configuration.ts';
 import { Article } from '../../../../database/structs/articles/article.ts';
-import { createVerificationPrompt, messageUser } from '../../../../utils.ts';
-import { openArticleEditor } from '../article.ts';
+import {
+	createVerificationPrompt,
+	messageUser,
+	trim,
+} from '../../../../utils.ts';
+import {
+	openArticleEditor,
+	verifyCanAct,
+	verifyIsContributor,
+} from '../article.ts';
 
 /** Allows the user to write and submit an article. */
 async function createArticle(
@@ -21,59 +29,32 @@ async function createArticle(
 		});
 	}
 
-	const isCheckExempt = (await interaction.member!.roles.array()).map((
-		role,
-	) => role.name).some((roleName) =>
-		configuration.interactions.articles.verification.exempt.includes(roleName)
-	);
-
-	if (!isCheckExempt) {
-		const user = await client.database.getOrCreateUser(
-			'id',
-			interaction.user.id,
-		);
-		if (!user) return showArticleSubmissionFailure(interaction);
-
-		const articlesByAuthor = await client.database.getArticles(
-			'author',
-			user.ref,
-		);
-		if (!articlesByAuthor) return showArticleSubmissionFailure(interaction);
-
-		const articleTimestamps = articlesByAuthor
-			.map((document) => document.ts)
-			.sort((a, b) => b - a); // From most recent to least recent.
-
-		const timestampSlice = articleTimestamps.slice(
-			0,
-			configuration.interactions.articles.create.maximum,
-		);
-
-		const canCreateArticle = timestampSlice.length <
-				configuration.interactions.articles.create.maximum ||
-			timestampSlice.some((timestamp) =>
-				(Date.now() - timestamp) >=
-					configuration.interactions.articles.create.interval
-			);
-
-		if (!canCreateArticle) {
-			interaction.respond({
-				ephemeral: true,
-				embeds: [{
-					title: 'Maximum number of articles reached',
-					description: `You must wait before submitting another article.`,
-					color: configuration.interactions.responses.colors.red,
-				}],
-			});
-			return;
-		}
-	}
+	const isContributor = await verifyIsContributor(interaction.member!);
 
 	const author = await client.database.getOrCreateUser(
 		'id',
 		interaction.user.id,
 	);
 	if (!author) return showArticleSubmissionFailure(interaction);
+
+	const canAct = await verifyCanAct({
+		client: client,
+		user: author,
+		action: 'CREATE',
+		isContributor: isContributor,
+	});
+	if (canAct === undefined) return showArticleSubmissionFailure(interaction);
+	if (canAct === false) {
+		interaction.respond({
+			ephemeral: true,
+			embeds: [{
+				title: 'Maximum number of articles reached',
+				description: `You must wait before submitting another article.`,
+				color: configuration.interactions.responses.colors.red,
+			}],
+		});
+		return;
+	}
 
 	const articles = await client.database.getArticles(
 		'language',
@@ -99,7 +80,7 @@ async function createArticle(
 
 	let [isAccepted, by] = [true, interaction.member!];
 
-	if (!isCheckExempt) {
+	if (!isContributor) {
 		submission.respond({
 			ephemeral: true,
 			embeds: [{
@@ -118,15 +99,11 @@ async function createArticle(
 				fields: [
 					{
 						name: 'Body',
-						value: content.body.length >= 300
-							? `${content.body.slice(0, 297)}...`
-							: content.body,
+						value: trim(content.body, 300),
 					},
 					...(!content.footer ? [] : [{
 						name: 'Footer',
-						value: content.footer.length >= 300
-							? `${content.footer.slice(0, 297)}...`
-							: content.footer,
+						value: trim(content.footer, 300),
 					}]),
 				],
 			},
@@ -137,7 +114,7 @@ async function createArticle(
 			interaction.guild!,
 			isAccepted
 				? {
-					title: '🥳 Your article creation request has been accepted.',
+					title: '🥳 Your article has been created.',
 					description:
 						`Your article is now available to be read by everybody on ${interaction
 							.guild!.name!}.`,
@@ -163,9 +140,10 @@ async function createArticle(
 		submission.respond({
 			ephemeral: true,
 			embeds: [{
-				title: 'Article created.',
+				title: '🥳 Your article has been created.',
 				description:
-					`Your article, \`${article.content.title}\`, has been submitted.`,
+					`Your article is now available to be read by everybody on ${interaction
+						.guild!.name!}.`,
 				color: configuration.interactions.responses.colors.green,
 			}],
 		});

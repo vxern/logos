@@ -3,7 +3,7 @@ import configuration from '../../../../configuration.ts';
 import { ArticleChange } from '../../../../database/structs/articles/article-change.ts';
 import { Article } from '../../../../database/structs/articles/article.ts';
 import { bold, code, codeMultiline } from '../../../../formatting.ts';
-import { mentionUser } from '../../../../utils.ts';
+import { mentionUser, trim } from '../../../../utils.ts';
 import { MessageGenerators } from './generators.ts';
 
 /** Type representing events that occur within a guild. */
@@ -41,14 +41,14 @@ type GuildEvents = {
 	/** An article has been locked. */
 	articleLock: [article: Article, by: Member];
 
-  /** An inquest has been started into a moderator. */
-  moderatorInquest: [member: Member, by: User];
+	/** An inquest has been started into a moderator. */
+	moderatorInquest: [member: Member, by: User];
 
-  /** A moderator has passed an inquest. */
-  moderatorInquestPass: [member: Member, by: User];
+	/** A moderator has passed an inquest. */
+	moderatorInquestPass: [member: Member, by: User];
 
-  /** A moderator has failed an inquest. */
-  moderatorInquestFail: [member: Member, by: User];
+	/** A moderator has failed an inquest. */
+	moderatorInquestFail: [member: Member, by: User];
 };
 
 /** Contains the message generators for (custom) guild events. */
@@ -95,7 +95,7 @@ ${codeMultiline(reason)}`,
 
 ${bold(article.content.title)}
 
-${article.content.body}`,
+${trim(article.content.body, 300)}`,
 		filter: (origin, _article, by) => origin.id === by.guild.id,
 		color: configuration.interactions.responses.colors.green,
 	},
@@ -106,7 +106,7 @@ ${article.content.body}`,
 
 ${bold(article.content.title)}
 
-${article.content.body}`,
+${trim(article.content.body, 300)}`,
 		filter: (origin, _article, by) => origin.id === by.guild.id,
 		color: configuration.interactions.responses.colors.green,
 	},
@@ -117,7 +117,7 @@ ${article.content.body}`,
 
 ${bold(article.content.title)}
 
-${article.content.body}`,
+${trim(article.content.body, 300)}`,
 		filter: (origin, _article, by) => origin.id === by.guild.id,
 		color: configuration.interactions.responses.colors.red,
 	},
@@ -128,7 +128,9 @@ ${article.content.body}`,
 				mentionUser(by.user)
 			}:
 
-${after.content.body}`,
+${bold(after.content.title)}
+
+${trim(after.content.body, 300)}`,
 		filter: (origin, _before, _after, by) => origin.id === by.guild.id,
 		color: configuration.interactions.responses.colors.blue,
 	},
@@ -139,7 +141,7 @@ ${after.content.body}`,
 
 ${bold(change.content.title)}
 
-${change.content.body}`,
+${trim(change.content.body, 300)}`,
 		filter: (origin, _article, _change, by) => origin.id === by.guild.id,
 		color: configuration.interactions.responses.colors.green,
 	},
@@ -150,7 +152,7 @@ ${change.content.body}`,
 
 ${bold(change.content.title)}
 
-${change.content.body}`,
+${trim(change.content.body, 300)}`,
 		filter: (origin, _article, _change, by) => origin.id === by.guild.id,
 		color: configuration.interactions.responses.colors.red,
 	},
@@ -163,24 +165,33 @@ ${change.content.body}`,
 		filter: (origin, _article, by) => origin.id === by.guild.id,
 		color: configuration.interactions.responses.colors.yellow,
 	},
-  'moderatorInquest': {
-    title: '❗ Inquest initiated',
-    message: (member, by) => `An inquest has been launched into ${mentionUser(member.user)} by ${mentionUser(by)}.`,
+	'moderatorInquest': {
+		title: '❗ Inquest initiated',
+		message: (member, by) =>
+			`An inquest has been launched into ${mentionUser(member.user)} by ${
+				mentionUser(by)
+			}.`,
 		filter: (origin, member, _by) => origin.id === member.guild.id,
 		color: configuration.interactions.responses.colors.darkRed,
-  },
-  'moderatorInquestPass': {
-    title: '✔️ Inquest resulted in acquittance',
-    message: (member, by) => `An inquest into ${mentionUser(member.user)} has been reviewed by ${mentionUser(by)}, and resulted in a pass.`,
+	},
+	'moderatorInquestPass': {
+		title: '✔️ Inquest resulted in acquittance',
+		message: (member, by) =>
+			`An inquest into ${mentionUser(member.user)} has been reviewed by ${
+				mentionUser(by)
+			}, and resulted in a pass.`,
 		filter: (origin, member, _by) => origin.id === member.guild.id,
 		color: configuration.interactions.responses.colors.green,
-  },
-  'moderatorInquestFail': {
-    title: '❌ Inquest resulted in failure',
-    message: (member, by) => `An inquest into ${mentionUser(member.user)} has been reviewed by ${mentionUser(by)}, and resulted in a failure.`,
+	},
+	'moderatorInquestFail': {
+		title: '❌ Inquest resulted in failure',
+		message: (member, by) =>
+			`An inquest into ${mentionUser(member.user)} has been reviewed by ${
+				mentionUser(by)
+			}, and resulted in a failure.`,
 		filter: (origin, member, _by) => origin.id === member.guild.id,
 		color: configuration.interactions.responses.colors.red,
-  }
+	},
 };
 
 export default generators;

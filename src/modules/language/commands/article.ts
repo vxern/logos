@@ -8,6 +8,7 @@ import {
 	Interaction,
 	InteractionResponseType,
 	InteractionType,
+	Member,
 	MessageComponentInteraction,
 	MessageComponentType,
 } from '../../../../deps.ts';
@@ -439,5 +440,62 @@ function showArticle({
 	});
 }
 
+/**
+ * Taking a member, checks if they're considered to be a contributor by
+ * verifying their roles and matching them against the contributor roles.
+ *
+ * @param member - The member to check.
+ * @returns A promise resolving to the value of whether a member is a
+ * contributor or not.
+ */
+async function verifyIsContributor(member: Member): Promise<boolean> {
+	const roles = await member.roles.array();
+	const roleNames = roles.map((role) => role.name);
+
+	return roleNames.some((roleName) =>
+		configuration.interactions.articles.contributors.includes(
+			roleName,
+		)
+	);
+}
+
+async function verifyCanAct(
+	{ client, user, isContributor, action }: {
+		client: Client;
+		user: Document<User>;
+		action: 'CREATE' | 'EDIT';
+		isContributor: boolean;
+	},
+): Promise<boolean | undefined> {
+	const articlesByAuthor = await client.database.getArticles(
+		'author',
+		user.ref,
+	);
+	if (!articlesByAuthor) return undefined;
+
+	const articleTimestamps = articlesByAuthor
+		.map((document) => document.ts)
+		.sort((a, b) => b - a); // From most recent to least recent.
+	const maximumNumberOfActions = configuration.interactions
+		.articles[action.toLowerCase() as 'create' | 'edit']
+		.maximum[isContributor ? 'contributors' : 'members'];
+	const timestampSlice = articleTimestamps.slice(0, maximumNumberOfActions);
+
+	const canAct = timestampSlice.length <
+			maximumNumberOfActions ||
+		timestampSlice.some((timestamp) =>
+			(Date.now() - timestamp) >=
+				configuration.interactions.articles.create.interval
+		);
+
+	return canAct;
+}
+
 export default command;
-export { openArticleEditor, showArticle, showResults };
+export {
+	openArticleEditor,
+	showArticle,
+	showResults,
+	verifyCanAct,
+	verifyIsContributor,
+};

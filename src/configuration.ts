@@ -184,9 +184,7 @@ export default {
 		},
 		// Configuration settings pertaining to articles.
 		articles: {
-			verification: {
-				exempt: ['Guide'],
-			},
+			contributors: ['Guide'],
 			restrictions: {
 				newlines: {
 					body: 0.03,
@@ -197,13 +195,19 @@ export default {
 			},
 			create: {
 				// The maximum number of articles that can be created...
-				maximum: 3,
+				maximum: {
+					contributors: 20,
+					members: 3,
+				},
 				// ... in the interval:
 				interval: day,
 			},
 			edit: {
 				// The maximum number of edits that can be made...
-				maximum: 5,
+				maximum: {
+					contributors: 40,
+					members: 5,
+				},
 				// ... in the interval:
 				interval: day / 2,
 			},
