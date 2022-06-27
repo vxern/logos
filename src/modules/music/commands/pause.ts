@@ -11,11 +11,14 @@ const command: Command = {
 	handle: pause,
 };
 
-function pause(
+async function pause(
 	client: Client,
 	interaction: Interaction,
-): void {
+): Promise<void> {
 	const controller = client.music.get(interaction.guild!.id)!;
+
+	const [canAct, _] = await controller.verifyMemberVoiceState(interaction);
+	if (!canAct) return;
 
 	if (!controller.isOccupied) {
 		interaction.respond({
@@ -41,7 +44,15 @@ function pause(
 		return;
 	}
 
-	controller.pause(interaction);
+	controller.pause();
+
+	interaction.respond({
+		embeds: [{
+			title: '⏸️ Paused',
+			description: 'The current song has been paused.',
+			color: configuration.interactions.responses.colors.invisible,
+		}],
+	});
 }
 
 export default command;

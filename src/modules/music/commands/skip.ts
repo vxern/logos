@@ -11,8 +11,11 @@ const command: Command = {
 	handle: skip,
 };
 
-function skip(client: Client, interaction: Interaction): void {
+async function skip(client: Client, interaction: Interaction): Promise<void> {
 	const controller = client.music.get(interaction.guild!.id)!;
+
+	const [canAct, _] = await controller.verifyMemberVoiceState(interaction);
+	if (!canAct) return;
 
 	if (!controller.isOccupied) {
 		interaction.respond({
@@ -26,7 +29,15 @@ function skip(client: Client, interaction: Interaction): void {
 		return;
 	}
 
-	controller.skip(interaction);
+	controller.skip();
+
+	interaction.respond({
+		embeds: [{
+			title: '⏭️ Skipped',
+			description: 'The current song has been skipped.',
+			color: configuration.interactions.responses.colors.invisible,
+		}],
+	});
 }
 
 export default command;

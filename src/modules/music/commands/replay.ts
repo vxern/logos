@@ -11,11 +11,14 @@ const command: Command = {
 	handle: replay,
 };
 
-function replay(
+async function replay(
 	client: Client,
 	interaction: Interaction,
-): void {
+): Promise<void> {
 	const controller = client.music.get(interaction.guild!.id)!;
+
+	const [canAct, _] = await controller.verifyMemberVoiceState(interaction);
+	if (!canAct) return;
 
 	if (!controller.isOccupied) {
 		interaction.respond({

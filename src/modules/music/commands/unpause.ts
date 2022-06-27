@@ -11,11 +11,14 @@ const command: Command = {
 	handle: unpause,
 };
 
-function unpause(
+async function unpause(
 	client: Client,
 	interaction: Interaction,
-): void {
+): Promise<void> {
 	const controller = client.music.get(interaction.guild!.id)!;
+
+	const [canAct, _] = await controller.verifyMemberVoiceState(interaction);
+	if (!canAct) return;
 
 	if (!controller.isOccupied) {
 		interaction.respond({
@@ -41,7 +44,15 @@ function unpause(
 		return;
 	}
 
-	controller.unpause(interaction);
+	controller.unpause();
+
+	interaction.respond({
+		embeds: [{
+			title: '▶️ Unpaused',
+			description: 'The current song has been unpaused.',
+			color: configuration.interactions.responses.colors.invisible,
+		}],
+	});
 }
 
 export default command;

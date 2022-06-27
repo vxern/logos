@@ -56,14 +56,17 @@ function display(
 	});
 }
 
-function set(
+async function set(
 	client: Client,
 	interaction: Interaction,
-): void {
+): Promise<void> {
 	const controller = client.music.get(interaction.guild!.id)!;
 
+	const [canAct, _] = await controller.verifyMemberVoiceState(interaction);
+	if (!canAct) return;
+
 	const volume = Number(
-		(<ApplicationCommandInteraction> interaction).data.options[0]!
+		(<ApplicationCommandInteraction> interaction).data.options[0]!.options![0]!
 			.value! as string,
 	);
 
@@ -79,7 +82,15 @@ function set(
 		return;
 	}
 
-	controller.setVolume(interaction, volume);
+	controller.setVolume(volume);
+
+	interaction.respond({
+		embeds: [{
+			title: '🔊 Volume set',
+			description: `The volume has been set to ${volume}%.`,
+			color: configuration.interactions.responses.colors.invisible,
+		}],
+	});
 }
 
 export default command;

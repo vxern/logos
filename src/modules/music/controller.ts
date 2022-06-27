@@ -1,10 +1,10 @@
 import { Player } from 'https://deno.land/x/lavadeno@3.2.2/mod.ts';
 import {
+	ApplicationCommandInteraction,
 	EmbedPayload,
 	Guild,
 	GuildTextChannel,
 	Interaction,
-	InteractionApplicationCommandData,
 	VoiceChannel,
 	VoiceState,
 } from '../../../deps.ts';
@@ -15,6 +15,9 @@ import { Song } from './data/song.ts';
 import { SongListing } from './data/song-listing.ts';
 import { SongCollection } from './data/song-collection.ts';
 import { bold, mention, MentionType } from '../../formatting.ts';
+import { getVoiceState } from '../../utils.ts';
+
+const defaultVolume = 100;
 
 class MusicController extends Controller {
 	/** The audio player associated with this controller. */
@@ -33,12 +36,14 @@ class MusicController extends Controller {
 	queue: SongListing[] = [];
 
 	/** The volume at which the song is being played. */
-	volume = 100;
+	volume = defaultVolume;
 
 	/**
 	 * Indicates whether the current song is to be played again once it ends.
 	 */
 	private isLoop = false;
+
+	private disconnectTimeoutID: number | undefined = undefined;
 
 	/** Constructs a {@link MusicController}. */
 	constructor(client: Client, guild: Guild) {
@@ -68,7 +73,7 @@ class MusicController extends Controller {
 	}
 
 	get isOccupied(): boolean {
-		return !!this.current;
+		return !!this.player.playingSince;
 	}
 
 	/** Indicates whether the controller is paused or not. */
@@ -76,21 +81,12 @@ class MusicController extends Controller {
 		return this.player.paused;
 	}
 
-	/**
-	 * Checks if the user can play music by verifying several factors, such as
-	 * whether or not the user is in a voice channel, and if they have provided
-	 * the correct arguments.
-	 *
-	 * @param interaction - The interaction.
-	 * @returns Whether the user can play music.
-	 */
-	verifyCanQueueListing(
+	/** Checks the user's voice state, ensuring it is valid for playing music. */
+	async verifyMemberVoiceState(
 		interaction: Interaction,
-		{
-			data,
-			voiceState,
-		}: { data: InteractionApplicationCommandData; voiceState?: VoiceState },
-	): boolean {
+	): Promise<[boolean, VoiceState | undefined]> {
+		const voiceState = await getVoiceState(interaction.member!);
+
 		// The user is not in a voice channel.
 		if (!voiceState || !voiceState.channel) {
 			interaction.respond({
@@ -101,10 +97,10 @@ class MusicController extends Controller {
 					color: configuration.interactions.responses.colors.red,
 				}],
 			});
-			return false;
+			return [false, voiceState];
 		}
 
-		if (this.player.track && this.voiceChannel.id !== voiceState.channel.id) {
+		if (this.isOccupied && this.voiceChannel.id !== voiceState.channel.id) {
 			interaction.respond({
 				ephemeral: true,
 				embeds: [{
@@ -114,11 +110,32 @@ class MusicController extends Controller {
 					color: configuration.interactions.responses.colors.red,
 				}],
 			});
-			return false;
+			return [false, voiceState];
 		}
 
+		return [true, voiceState];
+	}
+
+	/**
+	 * Checks if the user can play music by verifying several factors, such as
+	 * whether or not the user is in a voice channel, and if they have provided
+	 * the correct arguments.
+	 *
+	 * @param interaction - The command interaction.
+	 * @returns A tuple with the first item indicating whether the user can play
+	 * music, and the second being the user's voice state.
+	 */
+	async verifyCanPlay(
+		interaction: ApplicationCommandInteraction,
+	): Promise<[boolean, VoiceState | undefined]> {
+		const [canPlay, voiceState] = await this.verifyMemberVoiceState(
+			interaction,
+		);
+
+		if (!canPlay) return [false, voiceState];
+
 		// No arguments provided.
-		if (!data.options[0]?.options) {
+		if (!interaction.data.options[0]?.options) {
 			interaction.respond({
 				ephemeral: true,
 				embeds: [{
@@ -129,11 +146,11 @@ class MusicController extends Controller {
 					color: configuration.interactions.responses.colors.red,
 				}],
 			});
-			return false;
+			return [false, voiceState];
 		}
 
 		// More than one argument provided, when only one is accepted by the command.
-		if (data.options[0]?.options.length !== 1) {
+		if (interaction.data.options[0]?.options.length !== 1) {
 			interaction.respond({
 				ephemeral: true,
 				embeds: [{
@@ -144,7 +161,7 @@ class MusicController extends Controller {
 					color: configuration.interactions.responses.colors.red,
 				}],
 			});
-			return false;
+			return [false, voiceState];
 		}
 
 		// The user cannot add to the queue due to one reason or another.
@@ -158,10 +175,10 @@ class MusicController extends Controller {
 					color: configuration.interactions.responses.colors.red,
 				}],
 			});
-			return false;
+			return [false, voiceState];
 		}
 
-		return true;
+		return [true, voiceState];
 	}
 
 	private moveToHistory(listing: SongListing): void {
@@ -183,6 +200,8 @@ class MusicController extends Controller {
 			channels: { voice: VoiceChannel; text: GuildTextChannel };
 		},
 	): void {
+		clearTimeout(this.disconnectTimeoutID);
+
 		this.queue.push(listing);
 
 		// If the player is not connected to a voice channel, or if it is connected
@@ -211,6 +230,8 @@ class MusicController extends Controller {
 	}
 
 	private async advanceQueueAndPlay(interaction?: Interaction): Promise<void> {
+		clearTimeout(this.disconnectTimeoutID);
+
 		const wasLooped = this.isLoop;
 
 		if (!this.isLoop) {
@@ -246,6 +267,12 @@ class MusicController extends Controller {
 					color: configuration.interactions.responses.colors.blue,
 				}],
 			});
+
+			this.disconnectTimeoutID = setTimeout(
+				() => this.player.disconnect(),
+				configuration.music.disconnectTimeout,
+			);
+
 			return;
 		}
 
@@ -274,19 +301,11 @@ class MusicController extends Controller {
 		});
 	}
 
-	skip(interaction: Interaction): void {
+	skip(): void {
 		this.player.stop();
-
-		interaction.respond({
-			embeds: [{
-				title: '⏭️ Skipped',
-				description: 'The current song has been skipped.',
-				color: configuration.interactions.responses.colors.invisible,
-			}],
-		});
 	}
 
-	unskip(interaction: Interaction): void {
+	unskip(): void {
 		if (this.current) {
 			this.queue.unshift(this.current);
 		}
@@ -300,53 +319,21 @@ class MusicController extends Controller {
 		} else {
 			this.advanceQueueAndPlay();
 		}
-
-		interaction.respond({
-			embeds: [{
-				title: '⏮️ Unskipped',
-				description: 'The last played song has been brought back.',
-				color: configuration.interactions.responses.colors.invisible,
-			}],
-		});
 	}
 
 	/** Sets the volume of the player. */
-	setVolume(interaction: Interaction, volume: number): void {
+	setVolume(volume: number): void {
 		this.volume = volume;
 
 		this.player.setVolume(this.volume);
-
-		interaction.respond({
-			embeds: [{
-				title: '🔊 Volume set',
-				description: `The volume has been set to ${volume}%.`,
-				color: configuration.interactions.responses.colors.invisible,
-			}],
-		});
 	}
 
-	pause(interaction: Interaction): void {
+	pause(): void {
 		this.player.pause(true);
-
-		interaction.respond({
-			embeds: [{
-				title: '⏸️ Paused',
-				description: 'The current song has been paused.',
-				color: configuration.interactions.responses.colors.invisible,
-			}],
-		});
 	}
 
-	unpause(interaction: Interaction): void {
+	unpause(): void {
 		this.player.pause(false);
-
-		interaction.respond({
-			embeds: [{
-				title: '▶️ Unpaused',
-				description: 'The current song has been unpaused.',
-				color: configuration.interactions.responses.colors.invisible,
-			}],
-		});
 	}
 
 	replay(): void {
@@ -356,6 +343,19 @@ class MusicController extends Controller {
 
 		this.player.once('trackStart', () => this.isLoop = previousLoopState);
 		this.player.stop();
+	}
+
+	reset(): void {
+		this.history = [];
+		this.current = undefined;
+		this.queue = [];
+
+		this.isLoop = false;
+
+		this.player.stop();
+		this.player.disconnect();
+
+		this.setVolume(defaultVolume);
 	}
 }
 
