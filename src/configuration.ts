@@ -72,25 +72,29 @@ export default {
 				interval: day,
 				// The thresholds at which the anti-abuse system operates.
 				thresholds: [{
-					age: year,
-					string: 'a year',
-					maximum: 1,
+					age: 0,
+					string: 'less than a day',
+					maximum: 8,
 				}, {
-					age: 6 * month,
-					string: 'six months',
-					maximum: 2,
-				}, {
-					age: month,
-					string: 'a month',
-					maximum: 3,
+					age: day,
+					string: 'a day',
+					maximum: 6,
 				}, {
 					age: week,
 					string: 'a week',
 					maximum: 4,
 				}, {
-					age: day,
-					string: 'a day',
-					maximum: 6,
+					age: month,
+					string: 'a month',
+					maximum: 3,
+				}, {
+					age: 6 * month,
+					string: 'six months',
+					maximum: 2,
+				}, {
+					age: year,
+					string: 'a year',
+					maximum: 1,
 				}],
 			},
 		},

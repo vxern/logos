@@ -68,21 +68,45 @@ async function verifyEnforcer(
 			configuration.guilds.moderation.antiAbuse.interval
 	);
 
-	const targets = actionsInInterval.map((action) => action.member);
+	const members = actionsInInterval.map((action) => action.member);
 
-	let passedThreshold: { age: number; string: string; maximum: number; } | undefined = undefined;
+	let passedThreshold:
+		| { age: number; string: string; maximum: number }
+		| undefined = undefined;
+
+	const membersInThresholds = configuration.guilds.moderation.antiAbuse
+		.thresholds.reduce<string[][]>(
+			(membersInThresholds, threshold) => {
+				const applicableMembers = members.filter((member) => {
+					const joinDate = new Date(member.joinedAt).getTime();
+
+					return ((Date.now() - joinDate) * 1000 >= threshold.age);
+				}).map((member) => member.id);
+
+				const previousThreshold =
+					membersInThresholds[membersInThresholds.length - 1] ?? [];
+				const inThreshold = applicableMembers.filter((member) =>
+					!previousThreshold.includes(member)
+				);
+
+				membersInThresholds.push(inThreshold);
+
+				return membersInThresholds;
+			},
+			[],
+		);
 
 	for (
-		const threshold of configuration.guilds.moderation.antiAbuse.thresholds
+		let i = 0;
+		i < configuration.guilds.moderation.antiAbuse.thresholds.length;
+		i++
 	) {
-		const applicableMembers = targets.filter((member) => {
-			const joinDate = new Date(member.joinedAt).getTime();
+		const threshold = configuration.guilds.moderation.antiAbuse.thresholds[i]!;
+		const members = membersInThresholds[i]!;
 
-			return joinDate >= threshold.age;
-		});
-
-		if (applicableMembers.length > threshold.maximum) {
+		if (members.length > threshold.maximum) {
 			passedThreshold = threshold;
+			break;
 		}
 	}
 
@@ -133,7 +157,7 @@ async function verifyEnforcer(
 			title: '❗ Moderator infraction detected.',
 			description: `${
 				mentionUser(enforcer.user)
-			} has taken too many moderation actions in a short span of time, and has been placed under review. (${passedThreshold.maximum} bans/kicks of accounts that were ${passedThreshold.string} old, with ${actionsInInterval.length} bans/kicks in the past day)`,
+			} has taken too many moderation actions in a short span of time, and has been placed under review. (More than ${passedThreshold.maximum} bans/kicks of accounts that were ${passedThreshold.string} old, with ${actionsInInterval.length} bans/kicks in the past day)`,
 			color: configuration.interactions.responses.colors.red,
 		},
 		[{
@@ -166,14 +190,14 @@ async function verifyEnforcer(
 	);
 
 	if (!verified) {
-    actionsByUserID.delete(enforcer.user.id);
+		actionsByUserID.delete(enforcer.user.id);
 
 		enforcer.ban('Intentional abuse of moderation powers.');
-    
-    return;
+
+		return;
 	}
 
-  actionsByUserID.set(enforcer.user.id, []);
+	actionsByUserID.set(enforcer.user.id, []);
 
 	modifyRoles({
 		member: enforcer,
@@ -181,7 +205,9 @@ async function verifyEnforcer(
 			add: [{
 				name: configuration.guilds.moderation.enforcer,
 			}],
-			remove: [{ name: configuration.guilds.moderation.antiAbuse.replacementRole }],
+			remove: [{
+				name: configuration.guilds.moderation.antiAbuse.replacementRole,
+			}],
 		},
 	});
 }
