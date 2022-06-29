@@ -2,4 +2,5 @@
 .env
 secrets.ts
 
-/lavalink
+lavalink/logs/
+lavalink/application.yml
