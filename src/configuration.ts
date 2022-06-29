@@ -108,7 +108,7 @@ export default {
 		disconnectTimeout: 10 * minute,
 		maxima: {
 			// The maximum volume
-			volume: 150,
+			volume: 100,
 			songs: {
 				history: 100,
 				queue: 20,
