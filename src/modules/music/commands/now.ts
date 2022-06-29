@@ -32,7 +32,7 @@ function now(client: Client, interaction: Interaction): void {
 			embeds: [{
 				title: 'No song playing',
 				description: 'There is no song to display the details of.',
-				color: configuration.interactions.responses.colors.red,
+				color: configuration.interactions.responses.colors.yellow,
 			}],
 		});
 		return;
@@ -58,7 +58,7 @@ function now(client: Client, interaction: Interaction): void {
 						value: (<SongCollection> current.content).title,
 					}, {
 						name: 'Track',
-						value: `${(<SongCollection> current.content).position}/${
+						value: `${(<SongCollection> current.content).position + 1}/${
 							(<SongCollection> current.content).songs.length
 						}`,
 					}]
