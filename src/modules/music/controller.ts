@@ -45,13 +45,13 @@ class MusicController extends Controller {
 
 	private disconnectTimeoutID: number | undefined = undefined;
 
+	private breakPreviousLoop = false;
+
 	/** Constructs a {@link MusicController}. */
 	constructor(client: Client, guild: Guild) {
 		super(guild);
 
 		this.player = client.node.createPlayer(BigInt(this.guild.id));
-
-		this.player.on('trackEnd', (_track, _reason) => this.advanceQueueAndPlay());
 	}
 
 	/** Gets the current song from the current listing. */
@@ -85,30 +85,29 @@ class MusicController extends Controller {
 	async verifyMemberVoiceState(
 		interaction: Interaction,
 	): Promise<[boolean, VoiceState | undefined]> {
+		const method: (embed: EmbedPayload) => unknown = interaction.deferred
+			? (embed) =>
+				interaction.editResponse({ ephemeral: true, embeds: [embed] })
+			: (embed) => interaction.respond({ ephemeral: true, embeds: [embed] });
+
 		const voiceState = await getVoiceState(interaction.member!);
 
 		// The user is not in a voice channel.
 		if (!voiceState || !voiceState.channel) {
-			interaction.respond({
-				ephemeral: true,
-				embeds: [{
-					title: 'You are not in a voice channel',
-					description: 'To play music, you must be in a voice channel.',
-					color: configuration.interactions.responses.colors.red,
-				}],
+			method({
+				title: 'You are not in a voice channel',
+				description: 'To play music, you must be in a voice channel.',
+				color: configuration.interactions.responses.colors.red,
 			});
 			return [false, voiceState];
 		}
 
 		if (this.isOccupied && this.voiceChannel.id !== voiceState.channel.id) {
-			interaction.respond({
-				ephemeral: true,
-				embeds: [{
-					title: 'The bot is playing music in another voice channel',
-					description:
-						'Join the channel the bot is already playing music in, or wait for the bot to free up.',
-					color: configuration.interactions.responses.colors.red,
-				}],
+			method({
+				title: 'The bot is playing music in another voice channel',
+				description:
+					'Join the channel the bot is already playing music in, or wait for the bot to free up.',
+				color: configuration.interactions.responses.colors.red,
 			});
 			return [false, voiceState];
 		}
@@ -134,46 +133,42 @@ class MusicController extends Controller {
 
 		if (!canPlay) return [false, voiceState];
 
+		const method: (embed: EmbedPayload) => unknown = interaction.deferred
+			? (embed) =>
+				interaction.editResponse({ ephemeral: true, embeds: [embed] })
+			: (embed) => interaction.respond({ ephemeral: true, embeds: [embed] });
+
 		// No arguments provided.
 		if (!interaction.data.options[0]?.options) {
-			interaction.respond({
-				ephemeral: true,
-				embeds: [{
-					title: 'You must provide the song\'s title or URL',
-					description: `To find a song, ${
-						interaction.client.user!.username
-					} needs to know its title or a path to it. Please provide the song's title or a link to it.`,
-					color: configuration.interactions.responses.colors.red,
-				}],
+			method({
+				title: 'You must provide the song\'s title or URL',
+				description: `To find a song, ${
+					interaction.client.user!.username
+				} needs to know its title or a path to it. Please provide the song's title or a link to it.`,
+				color: configuration.interactions.responses.colors.red,
 			});
 			return [false, voiceState];
 		}
 
 		// More than one argument provided, when only one is accepted by the command.
 		if (interaction.data.options[0]?.options.length !== 1) {
-			interaction.respond({
-				ephemeral: true,
-				embeds: [{
-					title: 'You may only provide one piece of information about a song',
-					description: `${
-						interaction.client.user!.username
-					} uses only one piece of information to find a song; either its title or the link to it. Multiple pieces of information are redundant, and possibly disparate.`,
-					color: configuration.interactions.responses.colors.red,
-				}],
+			method({
+				title: 'You may only provide one piece of information about a song',
+				description: `${
+					interaction.client.user!.username
+				} uses only one piece of information to find a song; either its title or the link to it. Multiple pieces of information are redundant, and possibly disparate.`,
+				color: configuration.interactions.responses.colors.red,
 			});
 			return [false, voiceState];
 		}
 
 		// The user cannot add to the queue due to one reason or another.
 		if (!this.canPushToQueue) {
-			interaction.respond({
-				ephemeral: true,
-				embeds: [{
-					title: 'The queue is full',
-					description:
-						'Try removing a song from the song queue, skip the current song to advance the queue immediately, or wait until the current song stops playing.',
-					color: configuration.interactions.responses.colors.red,
-				}],
+			method({
+				title: 'The queue is full',
+				description:
+					'Try removing a song from the song queue, skip the current song to advance the queue immediately, or wait until the current song stops playing.',
+				color: configuration.interactions.responses.colors.red,
 			});
 			return [false, voiceState];
 		}
@@ -184,6 +179,10 @@ class MusicController extends Controller {
 	private moveToHistory(listing: SongListing): void {
 		if (this.history.length === configuration.music.maxima.songs.history) {
 			this.history.shift();
+		}
+
+		if (listing.type === 'SONG_COLLECTION') {
+			(<SongCollection> listing.content).position--;
 		}
 
 		this.history.push(listing);
@@ -245,7 +244,9 @@ class MusicController extends Controller {
 			}
 		}
 
-		if (this.current && this.current.type !== 'SONG') {
+		const isSong = this.current?.type === 'SONG';
+
+		if (this.current && !isSong) {
 			const collection = <SongCollection> this.current.content;
 
 			if (collection.position !== collection.songs.length - 1) {
@@ -254,6 +255,7 @@ class MusicController extends Controller {
 				if (this.isLoop) {
 					collection.position = 0;
 				} else {
+					this.moveToHistory(this.current);
 					this.current = undefined;
 				}
 			}
@@ -284,35 +286,116 @@ class MusicController extends Controller {
 
 		const track = tracksResponse.tracks[0]!.track;
 
+		this.player.once(
+			'trackEnd',
+			(_track, _reason) => {
+				if (this.breakPreviousLoop) {
+					this.breakPreviousLoop = false;
+					return;
+				}
+
+				this.advanceQueueAndPlay();
+			},
+		);
+
 		this.player.play(track);
 
-		const method: (embed: EmbedPayload) => unknown = interaction
-			? (embed) => interaction.editResponse({ embeds: [embed] })
-			: (embed) => this.textChannel!.send({ embeds: [embed] });
+		const method: (data: { embeds: EmbedPayload[] }) => unknown = interaction
+			? interaction.deferred
+				? (data) => interaction.editResponse(data)
+				: (data) => interaction.respond(data)
+			: (data) => this.textChannel!.send(data);
+
+		const collection = (<SongCollection> this.current?.content);
 
 		method({
-			title: !wasLooped ? '🎶 Playing song' : '🎶 Replaying song',
-			description: `${!wasLooped ? 'Now playing' : 'Replaying'} [${
-				bold(currentSong.title)
-			}](${currentSong.url}) as requested by ${
-				mention(this.current.requestedBy, MentionType.USER)
-			}.`,
-			color: configuration.interactions.responses.colors.invisible,
+			embeds: [{
+				title: `${isSong ? '🎵' : '🎶'} ${
+					!wasLooped ? 'Playing' : 'Replaying'
+				} song`,
+				description: `${!wasLooped ? 'Now playing' : 'Replaying'} ${
+					isSong
+						? ''
+						: `track ${
+							bold(`${collection.position + 1}/${collection.songs.length}`)
+						} of ${bold(collection.title)}: `
+				} [${bold(currentSong.title)}](${currentSong.url}) as requested by ${
+					mention(this.current.requestedBy, MentionType.USER)
+				}.`,
+				color: configuration.interactions.responses.colors.invisible,
+			}],
 		});
 	}
 
-	skip(): void {
+	skip(
+		skipCollection: boolean,
+		{ by, to }: { by: number | undefined; to: number | undefined },
+	): void {
+		if (this.current?.type === 'SONG_COLLECTION') {
+			const collection = <SongCollection> this.current!.content;
+
+			if (
+				skipCollection || collection.position === collection.songs.length - 1
+			) {
+				this.moveToHistory(this.current!);
+
+				this.current = undefined;
+			} else {
+				if (by) {
+					(<SongCollection> this.current!.content).position += by - 1;
+				}
+
+				if (to) {
+					(<SongCollection> this.current!.content).position = to! - 2;
+				}
+			}
+		}
+
+		const songsToMoveToHistory = Math.min(by ?? to ?? 0, this.queue.length);
+
+		for (let i = 0; i < songsToMoveToHistory; i++) {
+			this.moveToHistory(this.queue.shift()!);
+		}
+
 		this.player.stop();
 	}
 
-	unskip(): void {
-		if (this.current) {
-			this.queue.unshift(this.current);
+	unskip(
+		unskipCollection: boolean,
+		{ by, to }: { by: number | undefined; to: number | undefined },
+	): void {
+		if (this.current?.type === 'SONG_COLLECTION') {
+			if (
+				unskipCollection ||
+				(<SongCollection> this.current!.content).position === 0
+			) {
+				if (this.current) {
+					this.queue.unshift(this.current);
+				}
+
+				this.queue.unshift(this.history.pop()!);
+
+				this.current = undefined;
+			} else {
+				if (by) {
+					(<SongCollection> this.current!.content).position -= by + 1;
+				}
+
+				if (to) {
+					(<SongCollection> this.current!.content).position = to! - 2;
+				}
+
+				if (!by && !to) {
+					(<SongCollection> this.current!.content).position -= 2;
+				}
+			}
 		}
 
-		this.queue.unshift(this.history.pop()!);
+		const songsToMoveToQueue = Math.min(by ?? to ?? 1, this.history.length);
 
-		this.current = undefined;
+		for (let i = 0; i < songsToMoveToQueue; i++) {
+			this.queue.unshift(this.history.pop()!);
+		}
 
 		if (this.player.track) {
 			this.player.stop();
@@ -336,13 +419,23 @@ class MusicController extends Controller {
 		this.player.pause(false);
 	}
 
-	replay(): void {
+	replay(
+		interaction: Interaction,
+		replayCollection: boolean,
+	): void {
 		const previousLoopState = this.isLoop;
-
 		this.isLoop = true;
-
 		this.player.once('trackStart', () => this.isLoop = previousLoopState);
+
+		if (replayCollection) {
+			(<SongCollection> this.current!.content).position = -1;
+		} else if (this.current?.type === 'SONG_COLLECTION') {
+			(<SongCollection> this.current!.content).position--;
+		}
+
+		this.breakPreviousLoop = true;
 		this.player.stop();
+		this.advanceQueueAndPlay(interaction);
 	}
 
 	reset(): void {
