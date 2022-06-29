@@ -27,12 +27,12 @@ async function play(
 	interaction: ApplicationCommandInteraction,
 	resolve: ListingResolver,
 ): Promise<void> {
-	await interaction.defer();
-
 	const controller = client.music.get(interaction.guild!.id)!;
 
 	const [canPlay, voiceState] = await controller.verifyCanPlay(interaction);
 	if (!canPlay) return;
+
+	await interaction.defer();
 
 	const listing = await resolve(
 		interaction,

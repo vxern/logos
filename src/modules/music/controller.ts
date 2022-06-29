@@ -85,29 +85,32 @@ class MusicController extends Controller {
 	async verifyMemberVoiceState(
 		interaction: Interaction,
 	): Promise<[boolean, VoiceState | undefined]> {
-		const method: (embed: EmbedPayload) => unknown = interaction.deferred
-			? (embed) =>
-				interaction.editResponse({ ephemeral: true, embeds: [embed] })
-			: (embed) => interaction.respond({ ephemeral: true, embeds: [embed] });
-
 		const voiceState = await getVoiceState(interaction.member!);
 
 		// The user is not in a voice channel.
 		if (!voiceState || !voiceState.channel) {
-			method({
-				title: 'You are not in a voice channel',
-				description: 'To play music, you must be in a voice channel.',
-				color: configuration.interactions.responses.colors.red,
+			interaction.respond({
+				ephemeral: true,
+				embeds: [
+					{
+						title: 'You are not in a voice channel',
+						description: 'To play music, you must be in a voice channel.',
+						color: configuration.interactions.responses.colors.red,
+					},
+				],
 			});
 			return [false, voiceState];
 		}
 
 		if (this.isOccupied && this.voiceChannel.id !== voiceState.channel.id) {
-			method({
-				title: 'The bot is playing music in another voice channel',
-				description:
-					'Join the channel the bot is already playing music in, or wait for the bot to free up.',
-				color: configuration.interactions.responses.colors.red,
+			interaction.respond({
+				ephemeral: true,
+				embeds: [{
+					title: 'The bot is playing music in another voice channel',
+					description:
+						'Join the channel the bot is already playing music in, or wait for the bot to free up.',
+					color: configuration.interactions.responses.colors.red,
+				}],
 			});
 			return [false, voiceState];
 		}
@@ -133,42 +136,46 @@ class MusicController extends Controller {
 
 		if (!canPlay) return [false, voiceState];
 
-		const method: (embed: EmbedPayload) => unknown = interaction.deferred
-			? (embed) =>
-				interaction.editResponse({ ephemeral: true, embeds: [embed] })
-			: (embed) => interaction.respond({ ephemeral: true, embeds: [embed] });
-
 		// No arguments provided.
 		if (!interaction.data.options[0]?.options) {
-			method({
-				title: 'You must provide the song\'s title or URL',
-				description: `To find a song, ${
-					interaction.client.user!.username
-				} needs to know its title or a path to it. Please provide the song's title or a link to it.`,
-				color: configuration.interactions.responses.colors.red,
+			interaction.respond({
+				ephemeral: true,
+				embeds: [{
+					title: 'You must provide the song\'s title or URL',
+					description: `To find a song, ${
+						interaction.client.user!.username
+					} needs to know its title or a path to it. Please provide the song's title or a link to it.`,
+					color: configuration.interactions.responses.colors.red,
+				}],
 			});
 			return [false, voiceState];
 		}
 
 		// More than one argument provided, when only one is accepted by the command.
 		if (interaction.data.options[0]?.options.length !== 1) {
-			method({
-				title: 'You may only provide one piece of information about a song',
-				description: `${
-					interaction.client.user!.username
-				} uses only one piece of information to find a song; either its title or the link to it. Multiple pieces of information are redundant, and possibly disparate.`,
-				color: configuration.interactions.responses.colors.red,
+			interaction.respond({
+				ephemeral: true,
+				embeds: [{
+					title: 'You may only provide one piece of information about a song',
+					description: `${
+						interaction.client.user!.username
+					} uses only one piece of information to find a song; either its title or the link to it. Multiple pieces of information are redundant, and possibly disparate.`,
+					color: configuration.interactions.responses.colors.red,
+				}],
 			});
 			return [false, voiceState];
 		}
 
 		// The user cannot add to the queue due to one reason or another.
 		if (!this.canPushToQueue) {
-			method({
-				title: 'The queue is full',
-				description:
-					'Try removing a song from the song queue, skip the current song to advance the queue immediately, or wait until the current song stops playing.',
-				color: configuration.interactions.responses.colors.red,
+			interaction.respond({
+				ephemeral: true,
+				embeds: [{
+					title: 'The queue is full',
+					description:
+						'Try removing a song from the song queue, skip the current song to advance the queue immediately, or wait until the current song stops playing.',
+					color: configuration.interactions.responses.colors.red,
+				}],
 			});
 			return [false, voiceState];
 		}
@@ -229,8 +236,6 @@ class MusicController extends Controller {
 	}
 
 	private async advanceQueueAndPlay(interaction?: Interaction): Promise<void> {
-		clearTimeout(this.disconnectTimeoutID);
-
 		const wasLooped = this.isLoop;
 
 		if (!this.isLoop) {
@@ -270,11 +275,6 @@ class MusicController extends Controller {
 				}],
 			});
 
-			this.disconnectTimeoutID = setTimeout(
-				() => this.player.disconnect(),
-				configuration.music.disconnectTimeout,
-			);
-
 			return;
 		}
 
@@ -294,11 +294,18 @@ class MusicController extends Controller {
 					return;
 				}
 
+				this.disconnectTimeoutID = setTimeout(
+					() => this.player.disconnect(),
+					configuration.music.disconnectTimeout,
+				);
+
 				this.advanceQueueAndPlay();
 			},
 		);
 
 		this.player.play(track);
+
+		clearTimeout(this.disconnectTimeoutID);
 
 		const method: (data: { embeds: EmbedPayload[] }) => unknown = interaction
 			? interaction.deferred
