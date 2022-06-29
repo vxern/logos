@@ -73,7 +73,9 @@ const supportedLanguagesRequest: Response = await fetch(
 	}),
 );
 const supportedLanguagesRaw: SupportedLanguage[] =
-	(await supportedLanguagesRequest.json()) as SupportedLanguage[];
+	(supportedLanguagesRequest.ok
+		? await supportedLanguagesRequest.json()
+		: []) as SupportedLanguage[];
 const supportedLanguages: SupportedLanguage[] = supportedLanguagesRaw
 	.filter((supportedLanguage, index, array) =>
 		index ===
