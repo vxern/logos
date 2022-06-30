@@ -93,11 +93,11 @@ function now(client: Client, interaction: Interaction): void {
 							const isCurrent = pageIndex * 10 + index === collection.position;
 							const songString = `[${
 								trim(
-									song.title.replaceAll('(', '~ ').replaceAll(')', ' ~')
-										.replaceAll(
-											'[',
-											'~ ',
-										).replaceAll(']', ' ~'),
+									song.title
+										.replaceAll('(', '❨')
+										.replaceAll(')', '❩')
+										.replaceAll('[', '⁅')
+										.replaceAll(']', '⁆'),
 									50,
 								)
 							}](${song.url})`;
