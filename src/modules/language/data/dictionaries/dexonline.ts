@@ -18,6 +18,45 @@ const superscript = {
 	'9': '⁹',
 } as { [key: string]: string };
 
+/** Represents a Dexonline definition entry. */
+interface Definition {
+	/** The type of this definition. */
+	type: string;
+
+	/** The internal ID of this definition. */
+	id: string;
+
+	/** The internal representation of the content of this definition. */
+	internalRep: string;
+
+	/** The HTML representation of the content of this definition. */
+	htmlRep: string;
+
+	/** The username of the user who submitted this definition. */
+	userNick: string;
+
+	/** The name of the source from which this definition was taken. */
+	sourceName: string;
+
+	/** The creation time of this definition. */
+	createDate: string;
+
+	/** The time this definition was last edited at. */
+	modDate: string;
+}
+
+/** Represents a Dexonline search results object. */
+interface SearchResults {
+	/** The type of this query. */
+	type: string;
+
+	/** The word in question in this query. */
+	word: string;
+
+	/** The definitions matched by this query. */
+	definitions: Definition[];
+}
+
 const adapter: DictionaryAdapter = {
 	scope: DictionaryScope.MONOLINGUAL,
 	types: [DictionaryType.DEFINING, DictionaryType.ETYMOLOGICAL],
@@ -30,10 +69,11 @@ const adapter: DictionaryAdapter = {
 		if (!response.ok) return undefined;
 
 		const content = await response.text();
-		const data = JSON.parse(content);
 
-		const raw = data.definitions[0].internalRep as string;
-		const definition = raw
+		const data = <SearchResults> JSON.parse(content);
+		if (data.definitions.length === 0) return undefined;
+
+		const definition = data.definitions[0]!.internalRep
 			.replaceAll(' ** ', ' ⬥ ') // Filled diamond
 			.replaceAll(' * ', ' ⬦ ') // Diamond outline
 			.replaceAll(
