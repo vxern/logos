@@ -60,7 +60,7 @@ function now(client: Client, interaction: Interaction): void {
 	if (showCollection) {
 		if (current.type !== 'SONG_COLLECTION') {
 			const additionalTooltip = controller.isOccupied
-				? ' Try skipping the current song instead.'
+				? ' Try requesting information about the current song instead.'
 				: '';
 
 			interaction.respond({
@@ -68,7 +68,7 @@ function now(client: Client, interaction: Interaction): void {
 				embeds: [{
 					title: 'Not playing a collection',
 					description:
-						`There is no song collection to skip.${additionalTooltip}`,
+						`There is no song collection to show the details of.${additionalTooltip}`,
 					color: configuration.interactions.responses.colors.yellow,
 				}],
 			});
