@@ -7,7 +7,8 @@ import { Client } from '../../../client.ts';
 import { Availability } from '../../../commands/structs/availability.ts';
 import { Command } from '../../../commands/structs/command.ts';
 import configuration from '../../../configuration.ts';
-import { mention, MentionType } from '../../../formatting.ts';
+import { bold, mention, MentionType } from '../../../formatting.ts';
+import { chunk, paginate } from '../../../utils.ts';
 import { SongCollection } from '../data/song-collection.ts';
 
 const command: Command = {
@@ -16,9 +17,14 @@ const command: Command = {
 	description: 'Displays the currently playing song.',
 	handle: now,
 	options: [{
+		name: 'collection',
+		description:
+			'If set to true, information about the current collection will be shown instead.',
+		type: ApplicationCommandOptionType.BOOLEAN,
+	}, {
 		name: 'show',
 		description:
-			'If set to true, information about the current song will be shown to others.',
+			'If set to true, the information will be shown to others in chat.',
 		type: ApplicationCommandOptionType.BOOLEAN,
 	}],
 };
@@ -38,6 +44,11 @@ function now(client: Client, interaction: Interaction): void {
 		return;
 	}
 
+	const showCollection =
+		(<ApplicationCommandInteraction> interaction).data.options?.find((
+			option,
+		) => option.name === 'collection')?.value ??
+			false;
 	const show =
 		(<ApplicationCommandInteraction> interaction).data.options?.find((
 			option,
@@ -45,6 +56,55 @@ function now(client: Client, interaction: Interaction): void {
 			false;
 
 	const current = controller.current!;
+
+	if (showCollection) {
+		if (current.type !== 'SONG_COLLECTION') {
+			const additionalTooltip = controller.isOccupied
+				? ' Try skipping the current song instead.'
+				: '';
+
+			interaction.respond({
+				ephemeral: true,
+				embeds: [{
+					title: 'Not playing a collection',
+					description:
+						`There is no song collection to skip.${additionalTooltip}`,
+					color: configuration.interactions.responses.colors.yellow,
+				}],
+			});
+
+			return;
+		}
+
+		const collection = <SongCollection> controller.current!.content;
+
+		paginate({
+			interaction: interaction,
+			elements: chunk(collection.songs, configuration.music.maxima.songs.page),
+			embed: {
+				title: '⬇️ Now playing',
+				color: configuration.interactions.responses.colors.blue,
+			},
+			view: {
+				title: 'Songs',
+				generate: (songs, pageIndex) =>
+					songs.length !== 0
+						? songs.map((song, index) => {
+							const isCurrent = pageIndex * 10 + index === collection.position;
+							const songString = `[${song.title}](${song.url})`;
+
+							return `${pageIndex * 10 + (index + 1)}. ${
+								isCurrent ? bold(songString) : songString
+							}`;
+						}).join('\n')
+						: 'This list is empty.',
+			},
+			show: show,
+		});
+
+		return;
+	}
+
 	const currentSong = controller.currentSong!;
 
 	interaction.respond({
