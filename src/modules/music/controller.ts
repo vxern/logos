@@ -409,6 +409,12 @@ class MusicController extends Controller {
 
 		const songsToMoveToQueue = Math.min(by ?? to ?? 1, this.history.length);
 
+		if (this.current) {
+			this.queue.unshift(this.current);
+
+			this.current = undefined;
+		}
+
 		for (let i = 0; i < songsToMoveToQueue; i++) {
 			this.queue.unshift(this.history.pop()!);
 		}
