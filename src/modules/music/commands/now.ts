@@ -8,7 +8,7 @@ import { Availability } from '../../../commands/structs/availability.ts';
 import { Command } from '../../../commands/structs/command.ts';
 import configuration from '../../../configuration.ts';
 import { bold, mention, MentionType } from '../../../formatting.ts';
-import { chunk, paginate } from '../../../utils.ts';
+import { chunk, paginate, trim } from '../../../utils.ts';
 import { SongCollection } from '../data/song-collection.ts';
 
 const command: Command = {
@@ -91,7 +91,16 @@ function now(client: Client, interaction: Interaction): void {
 					songs.length !== 0
 						? songs.map((song, index) => {
 							const isCurrent = pageIndex * 10 + index === collection.position;
-							const songString = `[${song.title}](${song.url})`;
+							const songString = `[${
+								trim(
+									song.title.replaceAll('(', '~ ').replaceAll(')', ' ~')
+										.replaceAll(
+											'[',
+											'~ ',
+										).replaceAll(']', ' ~'),
+									50,
+								)
+							}](${song.url})`;
 
 							return `${pageIndex * 10 + (index + 1)}. ${
 								isCurrent ? bold(songString) : songString
