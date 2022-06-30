@@ -54,7 +54,9 @@ function displayListings(
 					? list(
 						page.map((listing, index) =>
 							`${pageIndex * 10 + (index + 1)}. ${
-								listing.type === 'SONG' ? '🎵' : '🎶'
+								listing.type === 'SONG'
+									? configuration.music.symbols.song
+									: configuration.music.symbols.collection
 							} ~ ${listing.content.title}`
 						),
 					)

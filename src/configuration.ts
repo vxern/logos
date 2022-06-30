@@ -105,6 +105,11 @@ export default {
 	},
 	// Configuration settings pertaining to music.
 	music: {
+		symbols: {
+			song: '🎵',
+			collection: '🎶',
+			stream: '🌊',
+		},
 		disconnectTimeout: 10 * minute,
 		maxima: {
 			// The maximum volume
