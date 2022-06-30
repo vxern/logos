@@ -32,9 +32,8 @@ async function play(
 	const [canPlay, voiceState] = await controller.verifyCanPlay(interaction);
 	if (!canPlay) return;
 
-	await interaction.defer();
-
 	const listing = await resolve(
+		client,
 		interaction,
 		interaction.data.options[0]!.options![0]!,
 	);
@@ -42,7 +41,7 @@ async function play(
 	if (!listing) {
 		if (interaction.responded) return;
 
-		interaction.editResponse({
+		interaction.respond({
 			ephemeral: true,
 			embeds: [{
 				title: 'Couldn\'t find the requested song.',
@@ -54,8 +53,12 @@ async function play(
 		return;
 	}
 
+	if (!interaction.responded) {
+		await interaction.defer();
+	}
+
 	controller.play({
-		interaction: interaction,
+		interaction: interaction.deferred ? interaction : undefined,
 		listing: listing,
 		channels: {
 			text: interaction.channel as GuildTextChannel,
