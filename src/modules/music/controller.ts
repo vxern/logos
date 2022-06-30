@@ -201,7 +201,7 @@ class MusicController extends Controller {
 	 */
 	play(
 		{ interaction, listing, channels }: {
-			interaction: Interaction;
+			interaction: Interaction | undefined;
 			listing: SongListing;
 			channels: { voice: VoiceChannel; text: GuildTextChannel };
 		},
@@ -216,8 +216,12 @@ class MusicController extends Controller {
 			this.player.connect(BigInt(channels.voice.id), { deafen: true });
 		}
 
+		const method: (data: { embeds: EmbedPayload[] }) => unknown = interaction
+			? (data) => interaction.editResponse(data)
+			: (data) => this.textChannel!.send(data);
+
 		if (this.isOccupied) {
-			interaction.editResponse({
+			method({
 				embeds: [{
 					title: '👍 Listing queued.',
 					description: `Your listing, ${
@@ -236,6 +240,8 @@ class MusicController extends Controller {
 	}
 
 	private async advanceQueueAndPlay(interaction?: Interaction): Promise<void> {
+		clearTimeout(this.disconnectTimeoutID);
+
 		const wasLooped = this.isLoop;
 
 		if (!this.isLoop) {
@@ -244,14 +250,17 @@ class MusicController extends Controller {
 				this.current = undefined;
 			}
 
-			if (this.queue.length !== 0) {
+			if (
+				this.queue.length !== 0 &&
+				(!this.current || this.current?.type !== 'SONG_COLLECTION')
+			) {
 				this.current = this.queue.shift()!;
 			}
 		}
 
 		const isSong = this.current?.type === 'SONG';
 
-		if (this.current && !isSong) {
+		if (this.current && this.current?.type === 'SONG_COLLECTION') {
 			const collection = <SongCollection> this.current.content;
 
 			if (collection.position !== collection.songs.length - 1) {
@@ -275,6 +284,11 @@ class MusicController extends Controller {
 				}],
 			});
 
+			this.disconnectTimeoutID = setTimeout(
+				() => this.player.disconnect(),
+				configuration.music.disconnectTimeout,
+			);
+
 			return;
 		}
 
@@ -294,18 +308,11 @@ class MusicController extends Controller {
 					return;
 				}
 
-				this.disconnectTimeoutID = setTimeout(
-					() => this.player.disconnect(),
-					configuration.music.disconnectTimeout,
-				);
-
 				this.advanceQueueAndPlay();
 			},
 		);
 
 		this.player.play(track);
-
-		clearTimeout(this.disconnectTimeoutID);
 
 		const method: (data: { embeds: EmbedPayload[] }) => unknown = interaction
 			? interaction.deferred
@@ -317,9 +324,11 @@ class MusicController extends Controller {
 
 		method({
 			embeds: [{
-				title: `${isSong ? '🎵' : '🎶'} ${
-					!wasLooped ? 'Playing' : 'Replaying'
-				} song`,
+				title: `${
+					isSong
+						? configuration.music.symbols.song
+						: configuration.music.symbols.collection
+				} ${!wasLooped ? 'Playing' : 'Replaying'} song`,
 				description: `${!wasLooped ? 'Now playing' : 'Replaying'} ${
 					isSong
 						? ''
