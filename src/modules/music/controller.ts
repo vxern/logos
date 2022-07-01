@@ -13,11 +13,9 @@ import configuration from '../../configuration.ts';
 import { Controller } from '../controller.ts';
 import { Song } from './data/song.ts';
 import { SongListing } from './data/song-listing.ts';
-import { SongCollection } from './data/song-collection.ts';
 import { bold, mention, MentionType } from '../../formatting.ts';
 import { getVoiceState } from '../../utils.ts';
-
-const defaultVolume = 100;
+import { SongStream } from './data/song-stream.ts';
 
 class MusicController extends Controller {
 	/** The audio player associated with this controller. */
@@ -36,7 +34,7 @@ class MusicController extends Controller {
 	queue: SongListing[] = [];
 
 	/** The volume at which the song is being played. */
-	volume = defaultVolume;
+	volume = configuration.music.maxima.volume;
 
 	/**
 	 * Indicates whether the current song is to be played again once it ends.
@@ -55,16 +53,14 @@ class MusicController extends Controller {
 	}
 
 	/** Gets the current song from the current listing. */
-	get currentSong(): Song | undefined {
+	get currentSong(): Song | SongStream | undefined {
 		if (!this.current) return undefined;
 
-		if (this.current.content.type === 'SONG') {
-			return this.current.content;
+		if (this.current.content.type === 'COLLECTION') {
+			return this.current.content.songs[this.current.content.position];
 		}
 
-		const collection = <SongCollection> this.current.content;
-
-		return collection.songs[collection.position];
+		return this.current.content;
 	}
 
 	/** Checks whether the queue holds fewer items than the limit. */
@@ -318,8 +314,6 @@ class MusicController extends Controller {
 				: (data) => interaction.respond(data)
 			: (data) => this.textChannel!.send(data);
 
-		const collection = (<SongCollection> this.current?.content);
-
 		method({
 			embeds: [{
 				title: `${
@@ -328,11 +322,13 @@ class MusicController extends Controller {
 					]
 				} ${!wasLooped ? 'Playing' : 'Replaying'} song`,
 				description: `${!wasLooped ? 'Now playing' : 'Replaying'} ${
-					this.current.content.type !== 'COLLECTION'
-						? ''
-						: `track ${
-							bold(`${collection.position + 1}/${collection.songs.length}`)
-						} of ${bold(collection.title)}: `
+					this.current.content.type !== 'COLLECTION' ? '' : `track ${
+						bold(
+							`${
+								this.current.content.position + 1
+							}/${this.current.content.songs.length}`,
+						)
+					} of ${bold(this.current.content.title)}: `
 				} [${bold(currentSong.title)}](${currentSong.url}) as requested by ${
 					mention(this.current.requestedBy, MentionType.USER)
 				}.`,
@@ -355,11 +351,11 @@ class MusicController extends Controller {
 				this.current = undefined;
 			} else {
 				if (by) {
-					(<SongCollection> this.current!.content).position += by - 1;
+					this.current.content.position += by - 1;
 				}
 
 				if (to) {
-					(<SongCollection> this.current!.content).position = to! - 2;
+					this.current.content.position = to! - 2;
 				}
 			}
 		}
@@ -391,15 +387,15 @@ class MusicController extends Controller {
 				this.current = undefined;
 			} else {
 				if (by) {
-					(<SongCollection> this.current!.content).position -= by + 1;
+					this.current.content.position -= by + 1;
 				}
 
 				if (to) {
-					(<SongCollection> this.current!.content).position = to! - 2;
+					this.current.content.position = to! - 2;
 				}
 
 				if (!by && !to) {
-					(<SongCollection> this.current!.content).position -= 2;
+					this.current.content.position -= 2;
 				}
 			}
 		}
@@ -469,7 +465,7 @@ class MusicController extends Controller {
 		this.player.stop();
 		this.player.disconnect();
 
-		this.setVolume(defaultVolume);
+		this.setVolume(configuration.music.maxima.volume);
 	}
 }
 

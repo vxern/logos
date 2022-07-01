@@ -54,9 +54,9 @@ function displayListings(
 					? list(
 						page.map((listing, index) =>
 							`${pageIndex * 10 + (index + 1)}. ${
-								listing.type === 'SONG'
-									? configuration.music.symbols.song
-									: configuration.music.symbols.collection
+								(configuration.music.symbols as { [key: string]: string })[
+									listing.content.type.toLowerCase()
+								]
 							} ~ ${listing.content.title}`
 						),
 					)
