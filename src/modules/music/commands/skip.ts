@@ -8,7 +8,6 @@ import { Availability } from '../../../commands/structs/availability.ts';
 import { Command } from '../../../commands/structs/command.ts';
 import configuration from '../../../configuration.ts';
 import { underlined } from '../../../formatting.ts';
-import { SongCollection } from '../data/song-collection.ts';
 
 const command: Command = {
 	name: 'skip',
@@ -65,9 +64,7 @@ async function skip(client: Client, interaction: Interaction): Promise<void> {
 		return;
 	}
 
-	const isCollection = controller.current!.type === 'SONG_COLLECTION';
-
-	if (skipCollection && !isCollection) {
+	if (skipCollection && controller.current?.content.type !== 'COLLECTION') {
 		const additionalTooltip = controller.isOccupied
 			? ' Try skipping the current song instead.'
 			: '';
@@ -111,20 +108,20 @@ async function skip(client: Client, interaction: Interaction): Promise<void> {
 	}
 
 	if (!Number.isNaN(by)) {
-		if (isCollection && !skipCollection) {
-			const collection = <SongCollection> controller.current!.content;
-
-			by = Math.min(by, collection.songs.length - (collection.position + 1));
+		if (controller.current?.content.type === 'COLLECTION' && !skipCollection) {
+			by = Math.min(
+				by,
+				controller.current.content.songs.length -
+					(controller.current.content.position + 1),
+			);
 		} else {
 			by = Math.min(by, controller.queue.length);
 		}
 	}
 
 	if (!Number.isNaN(to)) {
-		if (isCollection && !skipCollection) {
-			const collection = <SongCollection> controller.current!.content;
-
-			to = Math.min(to, collection.songs.length);
+		if (controller.current?.content.type === 'COLLECTION' && !skipCollection) {
+			to = Math.min(to, controller.current.content.songs.length);
 		} else {
 			to = Math.min(to, controller.queue.length);
 		}

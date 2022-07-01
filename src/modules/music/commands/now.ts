@@ -58,7 +58,7 @@ function now(client: Client, interaction: Interaction): void {
 	const current = controller.current!;
 
 	if (showCollection) {
-		if (current.type !== 'SONG_COLLECTION') {
+		if (current.content?.type !== 'COLLECTION') {
 			const additionalTooltip = controller.isOccupied
 				? ' Try requesting information about the current song instead.'
 				: '';
@@ -121,15 +121,15 @@ function now(client: Client, interaction: Interaction): void {
 		embeds: [{
 			title: '⬇️ Now playing',
 			fields: [
-				...current.type === 'SONG_COLLECTION'
+				...current.content.type === 'COLLECTION'
 					? [{
 						name: 'Collection',
-						value: (<SongCollection> current.content).title,
+						value: current.content.title,
 					}, {
 						name: 'Track',
-						value: `${(<SongCollection> current.content).position + 1}/${
-							(<SongCollection> current.content).songs.length
-						}`,
+						value: `${
+							current.content.position + 1
+						}/${current.content.songs.length}`,
 					}]
 					: [],
 				{

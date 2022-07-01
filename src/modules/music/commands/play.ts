@@ -9,17 +9,43 @@ import configuration from '../../../configuration.ts';
 import { ListingResolver, sources } from '../data/sources/sources.ts';
 import { title, url } from '../parameters.ts';
 import { Client } from '../../../client.ts';
+import { Option } from '../../../commands/structs/option.ts';
 
 const command: Command = {
 	name: 'play',
 	availability: Availability.MEMBERS,
-	options: Object.entries(sources).map(([name, resolve]) => ({
-		name: name.toLowerCase(),
-		description: `Requests to play a song from ${name}.`,
-		type: ApplicationCommandOptionType.SUB_COMMAND,
-		options: [title, url],
-		handle: (client, interaction) => play(client, interaction, resolve),
-	})),
+	options: [
+		{
+			name: 'stream',
+			description: 'Play an audio stream.',
+			type: ApplicationCommandOptionType.SUB_COMMAND,
+			options: [url],
+			handle: (client, interaction) =>
+				play(
+					client,
+					interaction,
+					(_client, interaction, option) =>
+						new Promise((resolve) =>
+							resolve({
+								source: 'Stream',
+								requestedBy: interaction.user.id,
+								content: {
+									type: 'STREAM',
+									title: 'Song stream',
+									url: option.value,
+								},
+							})
+						),
+				),
+		},
+		...Object.entries(sources).map<Option>(([name, resolve]) => ({
+			name: name.toLowerCase(),
+			description: `Requests to play a song from ${name}.`,
+			type: ApplicationCommandOptionType.SUB_COMMAND,
+			options: [title, url],
+			handle: (client, interaction) => play(client, interaction, resolve),
+		})),
+	],
 };
 
 async function play(

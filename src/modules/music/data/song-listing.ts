@@ -1,7 +1,6 @@
 import { SongCollection } from './song-collection.ts';
-import { SongStream } from "./song-stream.ts";
+import { SongStream } from './song-stream.ts';
 import { Song } from './song.ts';
-import { Source } from './sources/sources.ts';
 
 /**
  * Represents a playable object in the form of a song or a collection of songs
@@ -9,7 +8,7 @@ import { Source } from './sources/sources.ts';
  */
 interface SongListing {
 	/** The source of the song listing. */
-	source: Source;
+	source: string;
 
 	/** The ID of the user who requested the song listing. */
 	requestedBy: string;

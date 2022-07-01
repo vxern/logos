@@ -48,7 +48,7 @@ async function replay(
 		return;
 	}
 
-	if (replayCollection && controller.current!.type !== 'SONG_COLLECTION') {
+	if (replayCollection && controller.current?.content.type !== 'COLLECTION') {
 		const additionalTooltip = controller.isOccupied
 			? ' Try replaying the current song instead.'
 			: '';

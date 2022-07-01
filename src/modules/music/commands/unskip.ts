@@ -8,7 +8,6 @@ import { Availability } from '../../../commands/structs/availability.ts';
 import { Command } from '../../../commands/structs/command.ts';
 import configuration from '../../../configuration.ts';
 import { underlined } from '../../../formatting.ts';
-import { SongCollection } from '../data/song-collection.ts';
 
 const command: Command = {
 	name: 'unskip',
@@ -56,9 +55,7 @@ async function unskip(
 		) => option.name === 'to')?.value,
 	);
 
-	const isCollection = controller.current?.type === 'SONG_COLLECTION';
-
-	if (unskipCollection && !isCollection) {
+	if (unskipCollection && controller.current?.content.type !== 'COLLECTION') {
 		const additionalTooltip = controller.isOccupied
 			? ' Try unskipping the current song instead.'
 			: '';
@@ -77,8 +74,8 @@ async function unskip(
 
 	if (
 		unskipCollection ||
-		(isCollection &&
-			(<SongCollection> controller.current!.content).position === 0)
+		(controller.current?.content.type === 'COLLECTION' &&
+			(controller.current.content.position === 0))
 	) {
 		if (controller.history.length === 0) {
 			interaction.respond({
@@ -121,17 +118,19 @@ async function unskip(
 	}
 
 	if (!Number.isNaN(by)) {
-		if (isCollection && !unskipCollection) {
-			const collection = <SongCollection> controller.current!.content;
-
-			by = Math.min(by, collection.position);
+		if (
+			controller.current?.content.type === 'COLLECTION' && !unskipCollection
+		) {
+			by = Math.min(by, controller.current.content.position);
 		} else {
 			by = Math.min(by, controller.history.length);
 		}
 	}
 
 	if (!Number.isNaN(to)) {
-		if (isCollection && !unskipCollection) {
+		if (
+			controller.current?.content.type === 'COLLECTION' && !unskipCollection
+		) {
 			to = Math.max(to, 1);
 		} else {
 			to = Math.min(to, controller.history.length);
