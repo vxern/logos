@@ -1,5 +1,7 @@
-/** Represents of a musical piece, playable singly by the music controller. */
+/** Represents a musical piece, playable singly by the music controller. */
 interface Song {
+	type: 'SONG';
+
 	/** The title of the song. */
 	title: string;
 

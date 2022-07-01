@@ -121,10 +121,10 @@ function fromYouTubeVideo(
 	if (!video.id) return undefined;
 
 	return {
-		type: 'SONG',
 		source: 'YouTube',
 		requestedBy: requestedBy,
 		content: {
+			type: 'SONG',
 			title: video.title!,
 			url: video.url!,
 			duration: video.duration,
@@ -142,12 +142,13 @@ function fromYouTubePlaylist(
 	if (!playlist.id) return undefined;
 
 	return {
-		type: 'SONG_COLLECTION',
 		source: 'YouTube',
 		requestedBy: requestedBy,
 		content: {
+			type: 'COLLECTION',
 			title: playlist.title!,
 			songs: playlist.videos.map((video) => ({
+				type: 'SONG',
 				title: video.title!,
 				url: video.url!,
 				duration: video.duration,

@@ -6,14 +6,16 @@ import { Song } from './song.ts';
  * occupy a separate place in the queue.
  */
 interface SongCollection {
+	type: 'COLLECTION';
+
 	/** The title of the collection. */
 	title: string;
 
-	/** The songs in the collection. */
-	songs: Song[];
-
 	/** The index of the song that is currently playing. */
 	position: number;
+
+	/** The songs in the collection. */
+	songs: Song[];
 }
 
 export type { SongCollection };

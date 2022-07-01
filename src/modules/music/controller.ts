@@ -58,8 +58,8 @@ class MusicController extends Controller {
 	get currentSong(): Song | undefined {
 		if (!this.current) return undefined;
 
-		if (this.current.type === 'SONG') {
-			return <Song> this.current.content;
+		if (this.current.content.type === 'SONG') {
+			return this.current.content;
 		}
 
 		const collection = <SongCollection> this.current.content;
@@ -188,8 +188,8 @@ class MusicController extends Controller {
 			this.history.shift();
 		}
 
-		if (listing.type === 'SONG_COLLECTION') {
-			(<SongCollection> listing.content).position--;
+		if (listing.content.type === 'COLLECTION') {
+			listing.content.position--;
 		}
 
 		this.history.push(listing);
@@ -245,29 +245,27 @@ class MusicController extends Controller {
 		const wasLooped = this.isLoop;
 
 		if (!this.isLoop) {
-			if (this.current && this.current?.type === 'SONG') {
+			if (this.current && this.current.content.type === 'SONG') {
 				this.moveToHistory(this.current);
 				this.current = undefined;
 			}
 
 			if (
 				this.queue.length !== 0 &&
-				(!this.current || this.current?.type !== 'SONG_COLLECTION')
+				(!this.current || this.current.content.type !== 'COLLECTION')
 			) {
 				this.current = this.queue.shift()!;
 			}
 		}
 
-		const isSong = this.current?.type === 'SONG';
-
-		if (this.current && this.current?.type === 'SONG_COLLECTION') {
-			const collection = <SongCollection> this.current.content;
-
-			if (collection.position !== collection.songs.length - 1) {
-				(<SongCollection> this.current.content).position++;
+		if (this.current && this.current.content.type === 'COLLECTION') {
+			if (
+				this.current.content.position !== this.current.content.songs.length - 1
+			) {
+				this.current.content.position++;
 			} else {
 				if (this.isLoop) {
-					collection.position = 0;
+					this.current.content.position = 0;
 				} else {
 					this.moveToHistory(this.current);
 					this.current = undefined;
@@ -325,12 +323,12 @@ class MusicController extends Controller {
 		method({
 			embeds: [{
 				title: `${
-					isSong
-						? configuration.music.symbols.song
-						: configuration.music.symbols.collection
+					(configuration.music.symbols as { [key: string]: string })[
+						this.current.content.type.toLowerCase()
+					]
 				} ${!wasLooped ? 'Playing' : 'Replaying'} song`,
 				description: `${!wasLooped ? 'Now playing' : 'Replaying'} ${
-					isSong
+					this.current.content.type !== 'COLLECTION'
 						? ''
 						: `track ${
 							bold(`${collection.position + 1}/${collection.songs.length}`)
@@ -347,11 +345,10 @@ class MusicController extends Controller {
 		skipCollection: boolean,
 		{ by, to }: { by: number | undefined; to: number | undefined },
 	): void {
-		if (this.current?.type === 'SONG_COLLECTION') {
-			const collection = <SongCollection> this.current!.content;
-
+		if (this.current?.content.type === 'COLLECTION') {
 			if (
-				skipCollection || collection.position === collection.songs.length - 1
+				skipCollection ||
+				this.current.content.position === this.current.content.songs.length - 1
 			) {
 				this.moveToHistory(this.current!);
 
@@ -380,10 +377,10 @@ class MusicController extends Controller {
 		unskipCollection: boolean,
 		{ by, to }: { by: number | undefined; to: number | undefined },
 	): void {
-		if (this.current?.type === 'SONG_COLLECTION') {
+		if (this.current?.content.type === 'COLLECTION') {
 			if (
 				unskipCollection ||
-				(<SongCollection> this.current!.content).position === 0
+				this.current.content.position === 0
 			) {
 				if (this.current) {
 					this.queue.unshift(this.current);
@@ -449,10 +446,12 @@ class MusicController extends Controller {
 		this.isLoop = true;
 		this.player.once('trackStart', () => this.isLoop = previousLoopState);
 
-		if (replayCollection) {
-			(<SongCollection> this.current!.content).position = -1;
-		} else if (this.current?.type === 'SONG_COLLECTION') {
-			(<SongCollection> this.current!.content).position--;
+		if (this.current?.content.type === 'COLLECTION') {
+			if (replayCollection) {
+				this.current.content.position = -1;
+			} else {
+				this.current!.content.position--;
+			}
 		}
 
 		this.breakPreviousLoop = true;

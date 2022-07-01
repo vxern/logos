@@ -1,4 +1,5 @@
 import { SongCollection } from './song-collection.ts';
+import { SongStream } from "./song-stream.ts";
 import { Song } from './song.ts';
 import { Source } from './sources/sources.ts';
 
@@ -7,9 +8,6 @@ import { Source } from './sources/sources.ts';
  * that contains key information about the listing.
  */
 interface SongListing {
-	/** The type of this song listing. */
-	type: 'SONG' | 'SONG_COLLECTION';
-
 	/** The source of the song listing. */
 	source: Source;
 
@@ -17,7 +15,7 @@ interface SongListing {
 	requestedBy: string;
 
 	/** The content of this song listing. */
-	content: Song | SongCollection;
+	content: Song | SongCollection | SongStream;
 }
 
 export type { SongListing };
