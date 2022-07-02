@@ -143,7 +143,9 @@ function now(client: Client, interaction: Interaction): void {
 				},
 			],
 			footer: {
-				text: `This listing was sourced from ${current.source}.`,
+				text: `This listing was sourced from ${
+					current.source ?? 'the internet'
+				}.`,
 			},
 		}],
 	});

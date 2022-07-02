@@ -8,7 +8,7 @@ import { Song } from './song.ts';
  */
 interface SongListing {
 	/** The source of the song listing. */
-	source: string;
+	source?: string;
 
 	/** The ID of the user who requested the song listing. */
 	requestedBy: string;

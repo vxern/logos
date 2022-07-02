@@ -27,7 +27,6 @@ const command: Command = {
 					(_client, interaction, option) =>
 						new Promise((resolve) =>
 							resolve({
-								source: 'Stream',
 								requestedBy: interaction.user.id,
 								content: {
 									type: 'STREAM',

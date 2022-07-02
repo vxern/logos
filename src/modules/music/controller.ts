@@ -16,6 +16,7 @@ import { SongListing } from './data/song-listing.ts';
 import { bold, mention, MentionType } from '../../formatting.ts';
 import { getVoiceState } from '../../utils.ts';
 import { SongStream } from './data/song-stream.ts';
+import { LoadType } from 'https://deno.land/x/lavalink_types@2.0.6/mod.ts';
 
 class MusicController extends Controller {
 	/** The audio player associated with this controller. */
@@ -210,6 +211,9 @@ class MusicController extends Controller {
 		// to a different voice channel, connect to the new voice channel.
 		if (!this.player.connected) {
 			this.player.connect(BigInt(channels.voice.id), { deafen: true });
+
+			this.voiceChannel = channels.voice;
+			this.textChannel = channels.text;
 		}
 
 		const method: (data: { embeds: EmbedPayload[] }) => unknown = interaction
@@ -228,9 +232,6 @@ class MusicController extends Controller {
 			});
 			return;
 		}
-
-		this.voiceChannel = channels.voice;
-		this.textChannel = channels.text;
 
 		this.advanceQueueAndPlay(interaction);
 	}
@@ -279,7 +280,7 @@ class MusicController extends Controller {
 			});
 
 			this.disconnectTimeoutID = setTimeout(
-				() => this.player.disconnect(),
+				() => this.reset(),
 				configuration.music.disconnectTimeout,
 			);
 
@@ -292,7 +293,33 @@ class MusicController extends Controller {
 			currentSong.url,
 		);
 
-		const track = tracksResponse.tracks[0]!.track;
+		const method: (data: { embeds: EmbedPayload[] }) => unknown = interaction
+			? interaction.deferred
+				? (data) => interaction.editResponse(data)
+				: (data) => interaction.respond(data)
+			: (data) => this.textChannel!.send(data);
+
+		if (
+			tracksResponse.loadType === LoadType.LoadFailed ||
+			tracksResponse.loadType === LoadType.NoMatches
+		) {
+			method({
+				embeds: [{
+					title: 'Couldn\'t load track',
+					description: `The track, ${
+						bold(currentSong.title)
+					}, could not be loaded.`,
+					color: configuration.interactions.responses.colors.red,
+				}],
+			});
+			return;
+		}
+
+		const track = tracksResponse.tracks[0]!;
+
+		if (this.current?.content.type === 'STREAM') {
+			this.current.content.title = track.info.title;
+		}
 
 		this.player.once(
 			'trackEnd',
@@ -306,13 +333,7 @@ class MusicController extends Controller {
 			},
 		);
 
-		this.player.play(track);
-
-		const method: (data: { embeds: EmbedPayload[] }) => unknown = interaction
-			? interaction.deferred
-				? (data) => interaction.editResponse(data)
-				: (data) => interaction.respond(data)
-			: (data) => this.textChannel!.send(data);
+		this.player.play(track.track);
 
 		method({
 			embeds: [{
@@ -320,7 +341,9 @@ class MusicController extends Controller {
 					(configuration.music.symbols as { [key: string]: string })[
 						this.current.content.type.toLowerCase()
 					]
-				} ${!wasLooped ? 'Playing' : 'Replaying'} song`,
+				} ${
+					!wasLooped ? 'Playing' : 'Replaying'
+				} ${this.current.content.type.toLowerCase()}`,
 				description: `${!wasLooped ? 'Now playing' : 'Replaying'} ${
 					this.current.content.type !== 'COLLECTION' ? '' : `track ${
 						bold(
