@@ -9,6 +9,7 @@ import { ArticleChange } from './structs/articles/article-change.ts';
 import { User } from './structs/users/user.ts';
 import { Document, Reference } from './structs/document.ts';
 import { capitalise } from '../formatting.ts';
+import { Warning } from './structs/users/warning.ts';
 
 const $ = faunadb.query;
 
@@ -97,6 +98,13 @@ class Database {
 		string,
 		Document<ArticleChange>[]
 	> = new Map();
+
+	/**
+	 * Cached user warnings.
+	 *
+	 * The keys are user IDs, and the values are the user's respective warnings.
+	 */
+	private readonly warningsByUser: Map<string, Document<Warning>[]> = new Map();
 
 	/** Constructs a database. */
 	constructor() {
@@ -366,7 +374,7 @@ class Database {
 			document,
 		);
 
-		console.error(`Created article ${article.content.title}.`);
+		console.log(`Created article ${article.content.title}.`);
 
 		return document;
 	}
@@ -485,7 +493,7 @@ class Database {
 			await this.fetchArticleChanges(parameter, value);
 	}
 
-	/** Taking an array of articles, sets their content to their current form. */
+	/** Taking an array of articles, gets their most up-to-date state. */
 	async processArticles(
 		documents: Document<Article>[],
 	): Promise<Document<Article>[] | undefined> {
@@ -520,6 +528,110 @@ class Database {
 
 			return document;
 		});
+	}
+
+	/**
+	 * Fetches warnings from the database.
+	 *
+	 * @param user - The user to use for indexing the database.
+	 * @returns An array of article change documents or undefined.
+	 */
+	private async fetchWarnings(
+		user: Reference,
+	): Promise<Document<Warning>[] | undefined> {
+		const documents = await this.dispatchQuery<Warning[]>(
+			$.Call(
+				$.FaunaFunction('GetWarningsBySubject'),
+				user,
+			),
+		);
+
+		if (!documents) {
+			console.error(`Failed to fetch warnings by user.`);
+			return undefined;
+		}
+
+		this.warningsByUser.set(user.value.id, documents);
+
+		return documents;
+	}
+
+	/**
+	 * Attempts to get user warnings from cache, and if the warnings do not exist,
+	 * attempts to fetch them from the database.
+	 *
+	 * @param user - The reference to the user for indexing the database.
+	 * @returns The user.
+	 */
+	async getWarnings(
+		user: Reference,
+	): Promise<Document<Warning>[] | undefined> {
+		return this.warningsByUser.get(user.value.id) ??
+			await this.fetchWarnings(user);
+	}
+
+	/**
+	 * Creates an warning document in the database.
+	 *
+	 * @param warning - The warning to create.
+	 * @returns The created warning document.
+	 */
+	async createWarning(
+		warning: Warning,
+	): Promise<Document<Warning> | undefined> {
+		const document = await this.dispatchQuery<Warning>(
+			$.Call('CreateWarning', warning),
+		);
+
+		if (!document) {
+			console.error(`Failed to create warning for user ${warning.subject}.`);
+			return undefined;
+		}
+
+		if (!this.warningsByUser.has(warning.subject.value.id)) {
+			this.warningsByUser.set(warning.subject.value.id, []);
+		}
+
+		this.warningsByUser.get(warning.subject.value.id)!.push(document);
+
+		console.log(`Created warning ${document.ref}.`);
+
+		return document;
+	}
+
+	/**
+	 * Deletes an warning document in the database.
+	 *
+	 * @param warning - The warning to delete.
+	 * @returns The deleted warning document.
+	 */
+	async deleteWarning(
+		warning: Document<Warning>,
+	): Promise<Document<Warning> | undefined> {
+		const document = await this.dispatchQuery<Warning>($.Delete(warning.ref));
+
+		if (!document) {
+			console.error(
+				`Failed to delete warning given to user ${warning.data.subject}.`,
+			);
+			return undefined;
+		}
+
+		const indexOfWarningToRemove = this.warningsByUser.get(
+			warning.data.subject.value.id,
+		)!.findIndex((warning) => warning.ref.value.id === document.ref.value.id)!;
+
+		this.warningsByUser.set(
+			warning.data.subject.value.id,
+			this.warningsByUser.get(warning.data.subject.value.id)!.splice(
+				indexOfWarningToRemove,
+				indexOfWarningToRemove,
+			),
+		);
+
+		console.log(`Deleted warning ${document.ref}.`);
+
+		return document;
 	}
 }
 
