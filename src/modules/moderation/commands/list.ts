@@ -77,10 +77,7 @@ async function warnings(
 	paginate({
 		interaction: interaction,
 		elements: pages,
-		embed: {
-			title: `${member.nick ?? member.user.username}'s warnings:`,
-			color: configuration.interactions.responses.colors.blue,
-		},
+		embed: { color: configuration.interactions.responses.colors.blue },
 		view: {
 			title: 'Warnings',
 			generate: (warnings) =>
