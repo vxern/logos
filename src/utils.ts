@@ -253,8 +253,10 @@ async function getChannel(
  * @param user - The user object.
  * @returns The mention.
  */
-function mentionUser(user: User): string {
-	return `${code(user.tag)} ~ ${code(user.id)}`;
+function mentionUser(user: User, plain?: boolean): string {
+	if (plain) return `${user.tag} (${user.id})`;
+
+	return `${code(user.tag)} (${code(user.id)})`;
 }
 
 /** Represents an interactable form. */
@@ -591,20 +593,20 @@ async function createVerificationPrompt(
 function messageUser(
 	user: User,
 	guild: Guild,
-	field: EmbedPayload,
+	embed: Omit<EmbedPayload, 'thumbnail' | 'footer'>,
 	components?: MessageComponentData[],
 ): Promise<Message> {
 	const guildName = guild!.name!;
 
 	return user.send({
-		thumbnail: {
-			url: guild!.iconURL(),
-		},
-		embeds: [field],
+		embeds: [{
+			thumbnail: { url: guild!.iconURL(undefined, 64) },
+			...embed,
+			footer: {
+				text: `This message originated from ${guildName}.`,
+			},
+		}],
 		components: components,
-		footer: {
-			text: `This message originated from ${guildName}.`,
-		},
 	});
 }
 
@@ -648,12 +650,45 @@ function trim(string: string, length: number): string {
 		: `${string.slice(0, Math.max(length - 3, 0))}...`;
 }
 
+/** The maximum number of members that can be fetched at any one time. */
+const maximumMembersPerFetch = 1000;
+
+/**
+ * Fetches the complete list of guild members.
+ *
+ * @param guild - The guild to fetch the members for.
+ * @return The members of the guild.
+ */
+async function fetchGuildMembers(guild: Guild): Promise<Member[]> {
+	const memberList: Member[] = [];
+
+	let fetchedMembersNumber = -1;
+	while (
+		fetchedMembersNumber === -1 ||
+		fetchedMembersNumber === maximumMembersPerFetch
+	) {
+		const last = memberList.length === 0
+			? undefined
+			: memberList[memberList.length - 1];
+		// deno-lint-ignore no-await-in-loop
+		const fetchedMembers = await guild.members.fetchList(
+			maximumMembersPerFetch,
+			last?.id,
+		);
+		fetchedMembersNumber = fetchedMembers.length;
+		memberList.push(...fetchedMembers);
+	}
+
+	return memberList;
+}
+
 export {
 	addParametersToURL,
 	chunk,
 	createInteractionCollector,
 	createVerificationPrompt,
 	displayCommand,
+	fetchGuildMembers,
 	findChannelByName,
 	fromHex,
 	getChannel,

@@ -1,7 +1,8 @@
-import { Guild, Interaction, Member } from '../../../../../deps.ts';
+import { Guild, Interaction } from '../../../../../deps.ts';
 import { Client } from '../../../../client.ts';
 import configuration from '../../../../configuration.ts';
 import { mention, MentionType, time } from '../../../../formatting.ts';
+import { fetchGuildMembers } from '../../../../utils.ts';
 import { getProficiencyCategory } from '../../../roles/module.ts';
 
 /** Displays information about the guild which this command was executed in. */
@@ -102,38 +103,6 @@ async function getProficiencyDistribution(guild: Guild): Promise<string> {
 		userMembers.length,
 		proficiencyDistribution,
 	);
-}
-
-/** The maximum number of members that can be fetched at any one time. */
-const maximumMembersPerFetch = 1000;
-
-/**
- * Fetches the complete list of guild members.
- *
- * @param guild - The guild to fetch the members for.
- * @return The members of the guild.
- */
-async function fetchGuildMembers(guild: Guild): Promise<Member[]> {
-	const memberList: Member[] = [];
-
-	let fetchedMembersNumber = -1;
-	while (
-		fetchedMembersNumber === -1 ||
-		fetchedMembersNumber === maximumMembersPerFetch
-	) {
-		const last = memberList.length === 0
-			? undefined
-			: memberList[memberList.length - 1];
-		// deno-lint-ignore no-await-in-loop
-		const fetchedMembers = await guild.members.fetchList(
-			maximumMembersPerFetch,
-			last?.id,
-		);
-		fetchedMembersNumber = fetchedMembers.length;
-		memberList.push(...fetchedMembers);
-	}
-
-	return memberList;
 }
 
 /**
