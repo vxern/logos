@@ -10,7 +10,8 @@ const duration: Option = {
 
 const reason: Option = {
 	name: 'reason',
-	description: 'The reason for the sanction or its repeal.',
+	description:
+		'The reason for the sanction or its repeal. It should be descriptive.',
 	required: true,
 	type: ApplicationCommandOptionType.STRING,
 };
