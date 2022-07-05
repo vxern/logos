@@ -9,7 +9,17 @@ const week = 7 * day;
 const month = 30 * day;
 const year = 365 * day;
 
-export default {
+const timeDescriptors: [string[], number][] = [
+	[['s', 'sec', 'second', 'seconds'], second],
+	[['m', 'min', 'minute', 'minutes'], minute],
+	[['h', 'hr', 'hour', 'hours'], hour],
+	[['d', 'day', 'days'], day],
+	[['w', 'wk', 'week', 'weeks'], week],
+	[['M', 'month', 'months'], month],
+	[['y', 'year', 'years'], year],
+];
+
+const settings = {
 	// Configuration settings pertaining to core functions of the application.
 	core: {
 		// Configuration settings pertaining to event collectors.
@@ -230,3 +240,6 @@ export default {
 		},
 	},
 };
+
+export default settings;
+export { day, hour, minute, month, second, timeDescriptors, week, year };
