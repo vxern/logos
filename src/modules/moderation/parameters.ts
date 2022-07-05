@@ -5,6 +5,7 @@ const duration: Option = {
 	name: 'duration',
 	description: 'The duration of the sanction.',
 	required: true,
+	autocomplete: true,
 	type: ApplicationCommandOptionType.STRING,
 };
 

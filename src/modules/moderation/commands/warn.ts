@@ -119,7 +119,7 @@ async function warn(client: Client, interaction: Interaction): Promise<void> {
 
 		member!.kick(reason);
 	} else {
-		await messageUser(member!.user, interaction.guild!, {
+		messageUser(member!.user, interaction.guild!, {
 			title: 'You have been warned',
 			description:
 				`You have received a warning for: ${reason}\n\nThis is warning ${relevantWarnings.length}/${configuration.guilds.moderation.warnings.maximum}.`,
