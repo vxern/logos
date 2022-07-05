@@ -62,6 +62,10 @@ export default {
 		moderation: {
 			// The role responsible for taking moderation action.
 			enforcer: 'Guide',
+			warnings: {
+				interval: 2 * month,
+				maximum: 3,
+			},
 			// Configuration settings pertaining to moderation abuse prevention.
 			antiAbuse: {
 				replacementRole: 'Under Review',
@@ -124,6 +128,8 @@ export default {
 	interactions: {
 		// Configuration settings pertaining to responses to commands.
 		responses: {
+			// The standard number of results to display per page.
+			resultsPerPage: 10,
 			// The standardised, available set of colours the bot can utilise for its embed messages.
 			colors: {
 				red: fromHex('#b42f2f'),

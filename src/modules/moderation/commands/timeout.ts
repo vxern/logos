@@ -4,9 +4,10 @@ import { user } from '../../parameters.ts';
 import { duration, reason } from '../parameters.ts';
 
 const command: Command = {
-	name: 'mute',
+	name: 'timeout',
 	availability: Availability.MODERATORS,
-	description: 'Mutes a user, making them unable to interact on the server.',
+	description:
+		'Gives a user a timeout, making them unable to interact on the server.',
 	options: [user, reason, duration],
 };
 
