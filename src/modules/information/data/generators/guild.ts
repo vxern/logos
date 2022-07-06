@@ -1,4 +1,4 @@
-import { Member, User } from '../../../../../deps.ts';
+import { dayjs, Member, User } from '../../../../../deps.ts';
 import configuration from '../../../../configuration.ts';
 import { ArticleChange } from '../../../../database/structs/articles/article-change.ts';
 import { Article } from '../../../../database/structs/articles/article.ts';
@@ -56,6 +56,12 @@ type GuildEvents = {
 
 	/** A member has had a warning removed from their account. */
 	memberWarnRemove: [member: Member, warning: Warning, by: User];
+
+	/** A member has been timed out. */
+	memberTimeoutAdd: [member: Member, until: Date, reason: string, by: User];
+
+	/** A member's timeout has been cleared. */
+	memberTimeoutRemove: [member: Member, by: User];
 };
 
 /** Contains the message generators for (custom) guild events. */
@@ -215,6 +221,25 @@ ${trim(change.content.body, 300)}`,
 				mentionUser(by)
 			} regarding their warning for: ${warning.reason}`,
 		filter: (origin, member, _warning, _by) => origin.id === member.guild.id,
+		color: configuration.interactions.responses.colors.blue,
+	},
+	'memberTimeoutAdd': {
+		title: '⏳ Member timed out',
+		message: (member, until, reason, by) =>
+			`${mentionUser(member.user)} has been timed out by ${
+				mentionUser(by)
+			} for a duration of ${dayjs(until).fromNow(true)} for: ${reason}`,
+		filter: (origin, member, _until, _reason, _by) =>
+			origin.id === member.guild.id,
+		color: configuration.interactions.responses.colors.yellow,
+	},
+	'memberTimeoutRemove': {
+		title: `😇 Member's timeout cleared`,
+		message: (member, by) =>
+			`The timeout of ${mentionUser(member.user)} has been cleared by: ${
+				mentionUser(by)
+			}`,
+		filter: (origin, member, _by) => origin.id === member.guild.id,
 		color: configuration.interactions.responses.colors.blue,
 	},
 };
