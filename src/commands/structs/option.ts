@@ -1,6 +1,6 @@
 import { _, ApplicationCommandOptionBase } from '../../../deps.ts';
 import { Optional } from '../../utils.ts';
-import { InteractionHandler } from "./command.ts";
+import { InteractionHandler } from './command.ts';
 
 /** A command option with an optional handler for its execution. */
 interface Option

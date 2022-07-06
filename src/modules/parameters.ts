@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionType } from "../../deps.ts";
+import { ApplicationCommandOptionType } from '../../deps.ts';
 import { Option } from '../commands/structs/option.ts';
 
 const elements: Option = {
@@ -19,6 +19,7 @@ const user: Option = {
 	name: 'user',
 	description: 'The user\'s name, tag, ID or mention.',
 	required: true,
+	autocomplete: true,
 	type: ApplicationCommandOptionType.STRING,
 };
 
