@@ -4,23 +4,15 @@ import configuration, { timeDescriptors } from '../../configuration.ts';
 import { Document } from '../../database/structs/document.ts';
 import { Warning } from '../../database/structs/users/warning.ts';
 import { fetchGuildMembers } from '../../utils.ts';
-import ban from './commands/ban.ts';
 import cite from './commands/cite.ts';
-import kick from './commands/kick.ts';
 import list from './commands/list.ts';
-import purge from './commands/purge.ts';
-import slowmode from './commands/slowmode.ts';
 import timeout from './commands/timeout.ts';
 import unwarn from './commands/unwarn.ts';
 import warn from './commands/warn.ts';
 
 const commands: Record<string, Command> = {
-	ban,
 	cite,
-	kick,
 	list,
-	purge,
-	slowmode,
 	timeout,
 	unwarn,
 	warn,
