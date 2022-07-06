@@ -135,7 +135,7 @@ async function unwarn(
 
 	client.logging.get(interaction.guild!.id)?.log(
 		'memberWarnRemove',
-		member!,
+		member,
 		warning.data,
 		interaction.user,
 	);

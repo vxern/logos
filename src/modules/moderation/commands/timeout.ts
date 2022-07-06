@@ -1,4 +1,5 @@
 import {
+	ApplicationCommandOptionType,
 	dayjs,
 	Interaction,
 	InteractionApplicationCommandData,
@@ -20,27 +21,36 @@ import { duration, reason } from '../parameters.ts';
 const command: Command = {
 	name: 'timeout',
 	availability: Availability.MODERATORS,
-	description:
-		'Gives a user a timeout, making them unable to interact on the server.',
-	options: [user, duration, reason],
-	handle: timeout,
+	options: [{
+		name: 'set',
+		type: ApplicationCommandOptionType.SUB_COMMAND,
+		description:
+			'Times out a user, making them unable to interact on the server.',
+		options: [user, duration, reason],
+		handle: setTimeout,
+	}, {
+		name: 'clear',
+		type: ApplicationCommandOptionType.SUB_COMMAND,
+		description: `Clear's a user's timeout.`,
+		options: [user],
+		handle: clearTimeout,
+	}],
+	handle: setTimeout,
 };
 
-async function timeout(
-	_client: Client,
+async function setTimeout(
+	client: Client,
 	interaction: Interaction,
 ): Promise<void> {
 	const data = interaction.data as InteractionApplicationCommandData;
+	const options = data.options[0]!.options!;
 
-	const userIdentifierOption = data.options.find((option) =>
-		option.name === 'user'
-	);
-	const durationIdentifier = <string> data.options.find((option) =>
+	const userIdentifierOption = options.find((option) => option.name === 'user');
+	const durationIdentifier = <string> options.find((option) =>
 		option.name === 'duration'
 	)?.value;
-	const reason = <string> data.options.find((option) =>
-		option.name === 'reason'
-	)!.value!;
+	const reason = <string> options.find((option) => option.name === 'reason')!
+		.value!;
 
 	const [member, matchingMembers] = !userIdentifierOption
 		? [undefined, undefined]
@@ -136,7 +146,13 @@ async function timeout(
 		color: configuration.interactions.responses.colors.yellow,
 	}).catch(() => messageSent = false);
 
-	// TODO: Log timeout event.
+	client.logging.get(interaction.guild!.id)?.log(
+		'memberTimeoutAdd',
+		member,
+		until,
+		reason,
+		interaction.user,
+	);
 
 	interaction.respond({
 		ephemeral: true,
@@ -159,6 +175,75 @@ async function timeout(
 				dayjs(until).fromNow(true)
 			} for: ${reason}`,
 			color: configuration.interactions.responses.colors.yellow,
+		}],
+	});
+}
+
+async function clearTimeout(
+	client: Client,
+	interaction: Interaction,
+): Promise<void> {
+	const data = interaction.data as InteractionApplicationCommandData;
+
+	const userIdentifier = <string> data.options[0]!.options![0]!.value!;
+
+	const [member, matchingMembers] = await resolveUserIdentifier(
+		interaction.guild!,
+		userIdentifier,
+	);
+
+	if (interaction.isAutocomplete()) {
+		interaction.respond({
+			type: InteractionResponseType.APPLICATION_COMMAND_AUTOCOMPLETE_RESULT,
+			choices: (member ? [member] : matchingMembers!).map((member) => ({
+				name: mentionUser(member.user, true),
+				value: member.user.id,
+			})),
+		});
+		return;
+	}
+
+	if (!member) {
+		interaction.respond({
+			ephemeral: true,
+			embeds: [{
+				title: 'Invalid user',
+				description:
+					'The provided user identifier is invalid, and does not match to a guild member.',
+				color: configuration.interactions.responses.colors.yellow,
+			}],
+		});
+		return;
+	}
+
+	if (!member.communicationDisabledUntil) {
+		interaction.respond({
+			ephemeral: true,
+			embeds: [{
+				title: 'User not timed out',
+				description: 'The provided user is not currently timed out.',
+				color: configuration.interactions.responses.colors.yellow,
+			}],
+		});
+		return;
+	}
+
+	member.resetTimeout().catch();
+
+	client.logging.get(interaction.guild!.id)?.log(
+		'memberTimeoutRemove',
+		member,
+		interaction.user,
+	);
+
+	interaction.respond({
+		ephemeral: true,
+		embeds: [{
+			title: 'Cleared user timeout',
+			description: `The timeout of member ${
+				mentionUser(member.user)
+			} has been cleared.`,
+			color: configuration.interactions.responses.colors.blue,
 		}],
 	});
 }
