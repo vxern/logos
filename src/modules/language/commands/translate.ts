@@ -153,7 +153,7 @@ async function translate(
 				inline: false,
 			}, {
 				name: target.name,
-				value: translation.text,
+				value: translation.text.trim().length === 0 ? '⠀' : translation.text,
 				inline: false,
 			}],
 		}],
