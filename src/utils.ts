@@ -195,23 +195,6 @@ function addParametersToURL(
 }
 
 /**
- * Times how long it takes to execute a piece of code, and upon completion, prints a message
- * with the amount of time it took.
- *
- * @param message - The message to send upon completion.
- * @param execution
- */
-async function time(
-	message: (ms: number) => string,
-	execution: () => unknown | Promise<unknown>,
-): Promise<void> {
-	const then = Date.now();
-	await execution();
-	const now = Date.now();
-	console.log(message(now - then));
-}
-
-/**
  * Concatenates a command's name, subcommand group and subcommand into a
  * single string representing the whole command name.
  *
@@ -702,7 +685,6 @@ export {
 	paginate,
 	random,
 	shuffle,
-	time,
 	toModal,
 	trim,
 };
