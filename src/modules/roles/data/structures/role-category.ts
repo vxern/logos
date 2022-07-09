@@ -1,14 +1,9 @@
 import { SelectComponentOption } from '../../../../../deps.ts';
+import { trim } from '../../../../utils.ts';
 import { RoleCollection } from './role-collection.ts';
 
 /** Defines the type of a role category. */
-enum RoleCategoryType {
-	/** A category group containing other categories or category groups. */
-	CATEGORY_GROUP,
-
-	/** A category containing a list of roles. */
-	CATEGORY,
-}
+type RoleCategoryType = 'CATEGORY' | 'CATEGORY_GROUP';
 
 /** Represents a thematic selection of {@link Role}s. */
 interface RoleCategory {
@@ -54,13 +49,11 @@ function createSelectionsFromCategories(
 	return categories.map((category, index) => ({
 		label: category.name,
 		value: index.toString(),
-		description: category.description.length > 100
-			? category.description.slice(0, 97) + '...'
-			: category.description,
+		description: trim(category.description, 100),
 		emoji: { name: category.emoji },
 		disabled: true,
 	}));
 }
 
-export { createSelectionsFromCategories, RoleCategoryType };
+export { createSelectionsFromCategories };
 export type { RoleCategory };

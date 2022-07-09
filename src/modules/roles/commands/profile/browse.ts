@@ -13,7 +13,6 @@ import { createInteractionCollector } from '../../../../utils.ts';
 import {
 	createSelectionsFromCategories,
 	RoleCategory,
-	RoleCategoryType,
 } from '../../data/structures/role-category.ts';
 import {
 	createSelectionsFromCollection,
@@ -124,7 +123,7 @@ async function* browse(
 				continue;
 			}
 
-			if (category.type === RoleCategoryType.CATEGORY) {
+			if (category.type === 'CATEGORY') {
 				yield [
 					resolveRoles(category!.collection!, data.language)[index]!,
 					category,
@@ -153,7 +152,7 @@ async function getSelections(
 	language: string | undefined,
 	category: RoleCategory,
 ): Promise<SelectComponentOption[]> {
-	if (category.type === RoleCategoryType.CATEGORY_GROUP) {
+	if (category.type === 'CATEGORY_GROUP') {
 		return createSelectionsFromCategories(category.categories!);
 	}
 
@@ -201,7 +200,7 @@ async function displaySelectionMenu(
 				type: MessageComponentType.SELECT,
 				customID: customID,
 				options: selections,
-				placeholder: category.type === RoleCategoryType.CATEGORY_GROUP
+				placeholder: category.type === 'CATEGORY_GROUP'
 					? 'Choose a role category.'
 					: 'Choose a role.',
 			}],
@@ -211,3 +210,4 @@ async function displaySelectionMenu(
 }
 
 export { browse };
+export type { NavigationData };

@@ -1,4 +1,5 @@
 import {
+	colors,
 	Guild,
 	Interaction,
 	Member,
@@ -52,8 +53,25 @@ async function resolveGuildRole(
 	guild: Guild,
 	name: string,
 ): Promise<DiscordRole | undefined> {
-	const guildRoles = await guild.roles.array();
-	return guildRoles.find((role) => role.name === name);
+	const guildRoles = await guild.roles.array().catch(() => undefined);
+	if (!guildRoles) {
+		console.error(
+			`Failed to fetch roles for guild ${colors.bold(guild.name!)}.`,
+		);
+		return undefined;
+	}
+
+	const role = guildRoles.find((role) => role.name === name);
+	if (!role) {
+		console.error(
+			`Failed to fetch role with name '${name}' for guild ${
+				colors.bold(guild.name!)
+			}.`,
+		);
+		return undefined;
+	}
+
+	return role;
 }
 
 /**
@@ -95,6 +113,8 @@ async function tryAssignRole(
 		language,
 		{ within: category.collection! },
 	);
+	if (!memberRoles) return;
+
 	const alreadyHasRole = memberRoles.some((memberRole) =>
 		memberRole.name === role.name
 	);

@@ -3,12 +3,9 @@ import { Client } from '../../../client.ts';
 import { Availability } from '../../../commands/structs/availability.ts';
 import { Command } from '../../../commands/structs/command.ts';
 import { roles } from '../module.ts';
-import {
-	RoleCategory,
-	RoleCategoryType,
-} from '../data/structures/role-category.ts';
+import { RoleCategory } from '../data/structures/role-category.ts';
 import { tryAssignRole } from '../data/structures/role.ts';
-import { browse } from './profile/browse.ts';
+import { browse, NavigationData } from './profile/browse.ts';
 import configuration from '../../../configuration.ts';
 
 const command: Command = {
@@ -34,9 +31,9 @@ async function selectRoles(
 	client: Client,
 	interaction: Interaction,
 ): Promise<void> {
-	const navigation = {
+	const navigation: NavigationData = {
 		root: {
-			type: RoleCategoryType.CATEGORY_GROUP,
+			type: 'CATEGORY_GROUP',
 			name: 'No Category Selected',
 			description:
 				'Please select a role category to obtain a list of available roles within it.',

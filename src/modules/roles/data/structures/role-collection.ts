@@ -1,14 +1,8 @@
-import { Member, SelectComponentOption } from '../../../../../deps.ts';
+import { colors, Member, SelectComponentOption } from '../../../../../deps.ts';
 import { Assignable, DescriptionGenerator, Role } from './role.ts';
 
 /** Defines the type of a role collection. */
-enum RoleCollectionType {
-	/** A role collection whose list of roles is determined through its key (language). */
-	COLLECTION_LOCALISED,
-
-	/** A role collection whose list of roles applies to all guilds. */
-	COLLECTION,
-}
+type RoleCollectionType = 'COLLECTION' | 'COLLECTION_LOCALISED';
 
 /**
  * Represents a collection of {@link Role}s with an optional description applied
@@ -33,12 +27,13 @@ async function createSelectionsFromCollection(
 	language: string | undefined,
 	collection: RoleCollection,
 ): Promise<SelectComponentOption[]> {
-	const memberRoles =
-		(await getMemberRoles(member, language, { within: collection }));
+	const memberRoles = await getMemberRoles(member, language, {
+		within: collection,
+	});
 	const roles = resolveRoles(collection, language);
 
 	return roles.map((role, index) => {
-		const memberHasRole = memberRoles.some((memberRole) =>
+		const memberHasRole = memberRoles?.some((memberRole) =>
 			memberRole.name === role.name
 		);
 
@@ -62,7 +57,7 @@ function resolveRoles(
 	collection: RoleCollection,
 	language: string | undefined,
 ): Role[] {
-	if (collection.type === RoleCollectionType.COLLECTION_LOCALISED) {
+	if (collection.type === 'COLLECTION_LOCALISED') {
 		return collection.lists![language!]!;
 	}
 	return collection.list!;
@@ -79,17 +74,23 @@ async function getMemberRoles(
 	member: Member,
 	language: string | undefined,
 	options: { within: RoleCollection },
-): Promise<Role[]> {
-	const memberRoles = (await member.roles.array()) ?? [];
-	return resolveRoles(options.within, language).filter((role) =>
+): Promise<Role[] | undefined> {
+	const memberRoles = await member.roles.array().catch(() => undefined);
+	if (!memberRoles) {
+		console.error(
+			`Failed to fetch roles for member ${
+				colors.bold(member.user.username)
+			} of guild ${colors.bold(member.guild.name!)}.`,
+		);
+		return undefined;
+	}
+
+	const categoryRoles = resolveRoles(options.within, language);
+
+	return categoryRoles.filter((role) =>
 		memberRoles.some((memberRole) => memberRole.name === role.name)
 	);
 }
 
-export {
-	createSelectionsFromCollection,
-	getMemberRoles,
-	resolveRoles,
-	RoleCollectionType,
-};
+export { createSelectionsFromCollection, getMemberRoles, resolveRoles };
 export type { RoleCollection };
