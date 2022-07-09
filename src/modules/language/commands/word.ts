@@ -36,8 +36,8 @@ const command: Command = {
 };
 
 async function word(client: Client, interaction: Interaction): Promise<void> {
-	const data = interaction.data! as InteractionApplicationCommandData;
-	const word = data.options[0]!.value! as string;
+	const data = <InteractionApplicationCommandData> interaction.data!;
+	const word = <string> data.options[0]!.value!;
 	const verbose =
 		data.options.find((option) => option.name === 'verbose')?.value ?? true;
 	const show = data.options.find((option) => option.name === 'show')?.value ??
@@ -50,11 +50,12 @@ async function word(client: Client, interaction: Interaction): Promise<void> {
 	const response = await interaction.defer(!hasDictionaries || !show);
 
 	if (!hasDictionaries) {
-		console.log(
+		console.error(
 			`${interaction.user.username} attempted to look up '${word}' in ${
 				capitalise(language)
-			}, but there are no available dictionaries for the language.`,
+			}, but there are no available dictionaries for that language.`,
 		);
+
 		response.editResponse({
 			embeds: [{
 				title: 'No available dictionaries.',
@@ -75,7 +76,6 @@ async function word(client: Client, interaction: Interaction): Promise<void> {
 
 				const fields = toFields(entry, { verbose: verbose });
 				const hasEntry = fields.length > 0;
-
 				if (!hasEntry) return;
 
 				response.editResponse({

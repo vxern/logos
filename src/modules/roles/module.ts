@@ -3,7 +3,6 @@ import select from './commands/profile.ts';
 import global from './data/categories/global.ts';
 import local from './data/categories/local.ts';
 import { RoleCategory } from './data/structures/role-category.ts';
-import { RoleCollectionType } from './data/structures/role-collection.ts';
 import { Role } from './data/structures/role.ts';
 
 const commands: Record<string, Command> = {
@@ -48,7 +47,7 @@ function supplyMissingProperties(categories: RoleCategory[]): RoleCategory[] {
 		const collection = category.collection!;
 
 		for (
-			const list of collection.type === RoleCollectionType.COLLECTION_LOCALISED
+			const list of collection.type === 'COLLECTION_LOCALISED'
 				? Object.values(collection.lists!)
 				: [collection.list!]
 		) {

@@ -9,7 +9,7 @@ import { Client } from '../../../client.ts';
 import { Availability } from '../../../commands/structs/availability.ts';
 import { Command } from '../../../commands/structs/command.ts';
 import configuration, { minute, week } from '../../../configuration.ts';
-import { mention, MentionType } from '../../../formatting.ts';
+import { mention } from '../../../formatting.ts';
 import { mentionUser, messageUser } from '../../../utils.ts';
 import { user } from '../../parameters.ts';
 import {
@@ -42,7 +42,7 @@ async function setTimeout(
 	client: Client,
 	interaction: Interaction,
 ): Promise<void> {
-	const data = interaction.data as InteractionApplicationCommandData;
+	const data = <InteractionApplicationCommandData> interaction.data;
 	const options = data.options[0]!.options!;
 
 	const userIdentifierOption = options.find((option) => option.name === 'user');
@@ -161,7 +161,7 @@ async function setTimeout(
 		embeds: [{
 			title: 'Member timed out',
 			description: `Member ${
-				mention(member!.id, MentionType.USER)
+				mention(member!.id, 'USER')
 			} has been timed out for a duration of ${dayjs(until).fromNow(true)}.`,
 			color: configuration.interactions.responses.colors.blue,
 		}],
@@ -172,7 +172,7 @@ async function setTimeout(
 	interaction.channel!.send({
 		embeds: [{
 			description: `${
-				mention(member!.id, MentionType.USER)
+				mention(member!.id, 'USER')
 			} has been timed out for a duration of ${
 				dayjs(until).fromNow(true)
 			} for: ${reason}`,
@@ -185,7 +185,7 @@ async function clearTimeout(
 	client: Client,
 	interaction: Interaction,
 ): Promise<void> {
-	const data = interaction.data as InteractionApplicationCommandData;
+	const data = <InteractionApplicationCommandData> interaction.data;
 
 	const userIdentifier = <string> data.options[0]!.options![0]!.value!;
 

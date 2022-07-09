@@ -43,7 +43,7 @@ function createApplicationCommand(command: Command): ApplicationCommandPartial {
 	return {
 		name: command.name,
 		description: command.description,
-		options: command.options as ApplicationCommandOption[],
+		options: <ApplicationCommandOption[]> command.options,
 		type: ApplicationCommandType.CHAT_INPUT,
 		defaultPermission: false,
 	};

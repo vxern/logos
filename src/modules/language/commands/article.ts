@@ -24,7 +24,7 @@ import {
 } from '../../../database/structs/articles/article.ts';
 import { Document } from '../../../database/structs/document.ts';
 import { User } from '../../../database/structs/users/user.ts';
-import { list, mention, MentionType } from '../../../formatting.ts';
+import { list, mention } from '../../../formatting.ts';
 import {
 	createInteractionCollector,
 	paginate,
@@ -43,6 +43,7 @@ const newlineOverflow = new RegExp(
 const command: Command = {
 	name: 'article',
 	availability: Availability.MEMBERS,
+	description: 'Allows the user to interact with the server articles.',
 	options: [{
 		name: 'create',
 		type: ApplicationCommandOptionType.SUB_COMMAND,
@@ -55,6 +56,7 @@ const command: Command = {
 		options: [{
 			name: 'title',
 			type: ApplicationCommandOptionType.STRING,
+			description: 'The title of the article.',
 			required: true,
 			autocomplete: true,
 		}],
@@ -66,11 +68,13 @@ const command: Command = {
 		options: [{
 			name: 'title',
 			type: ApplicationCommandOptionType.STRING,
+			description: 'The title of the article.',
 			required: true,
 			autocomplete: true,
 		}, {
 			name: 'show',
 			type: ApplicationCommandOptionType.BOOLEAN,
+			description: 'If set to true, the article will be shown to other users.',
 			required: false,
 		}],
 		handle: viewArticle,
@@ -188,19 +192,19 @@ async function openArticleEditor(
 			continue;
 		}
 
-		const newlineProportions = (Object.entries(content) as [
-			keyof ArticleTextContent,
-			string | undefined,
-		][]).map<
-			[keyof ArticleTextContent, number | undefined]
-		>(([field, content]) => [field, getProportionOfNewlines(content)]);
+		const newlineProportions =
+			(<[keyof ArticleTextContent, string | undefined][]> Object.entries(
+				content,
+			)).map<
+				[keyof ArticleTextContent, number | undefined]
+			>(([field, content]) => [field, getProportionOfNewlines(content)]);
 
 		const newlineProportionBreach = newlineProportions.find((
 			[field, proportion],
 		) =>
 			proportion && proportion >
 				configuration.interactions.articles.restrictions
-					.newlines[field as 'body' | 'footer']!
+					.newlines[<'body' | 'footer'> field]!
 		);
 
 		if (newlineProportionBreach) {
@@ -211,7 +215,7 @@ async function openArticleEditor(
 				submission,
 				`Your article ${field} contains too many newlines. The maximum is ${
 					configuration.interactions.articles.restrictions
-						.newlines[field as 'body' | 'footer'] * 100
+						.newlines[<'body' | 'footer'> field] * 100
 				}% per article ${field}.`,
 				true,
 				awarenessCustomID,
@@ -219,12 +223,12 @@ async function openArticleEditor(
 			continue;
 		}
 
-		const newlineOverflowBreach = (Object.entries(content) as [
-			keyof ArticleTextContent,
-			string | undefined,
-		][]).find((
-			[_field, content],
-		) => content && newlineOverflow.test(content));
+		const newlineOverflowBreach =
+			(<[keyof ArticleTextContent, string | undefined][]> Object.entries(
+				content,
+			)).find((
+				[_field, content],
+			) => content && newlineOverflow.test(content));
 
 		if (newlineOverflowBreach) {
 			const [field, _content] = newlineOverflowBreach;
@@ -239,18 +243,18 @@ async function openArticleEditor(
 			continue;
 		}
 
-		const lengthBreach = (Object.entries(content) as [
-			keyof ArticleTextContent,
-			string | undefined,
-		][]).find((
-			[_field, content],
-		) =>
-			content &&
-			content.split('\n\n').some((paragraph) =>
-				paragraph.length >
-					configuration.interactions.articles.restrictions.paragraphLength
-			)
-		);
+		const lengthBreach =
+			(<[keyof ArticleTextContent, string | undefined][]> Object.entries(
+				content,
+			)).find((
+				[_field, content],
+			) =>
+				content &&
+				content.split('\n\n').some((paragraph) =>
+					paragraph.length >
+						configuration.interactions.articles.restrictions.paragraphLength
+				)
+			);
 
 		if (lengthBreach) {
 			hasProvidedIncorrectData = true;
@@ -362,7 +366,7 @@ function showResults(
 		option.focused
 	)!;
 
-	const value = argument.value as string;
+	const value = <string> argument.value;
 	const articlesByName = documents.map((document) => document.data).filter((
 		document,
 	) => document.content.title.toLowerCase().includes(value.toLowerCase()));
@@ -390,7 +394,7 @@ function showArticle({
 	show: boolean;
 }): void {
 	const contributorsString = contributors.map((document) =>
-		mention(document.data.account.id, MentionType.USER)
+		mention(document.data.account.id, 'USER')
 	).join(', ');
 
 	const content = getMostRecentArticleContent({
@@ -477,7 +481,7 @@ async function verifyCanAct(
 		.map((document) => document.ts)
 		.sort((a, b) => b - a); // From most recent to least recent.
 	const maximumNumberOfActions = configuration.interactions
-		.articles[action.toLowerCase() as 'create' | 'edit']
+		.articles[<'create' | 'edit'> action.toLowerCase()]
 		.maximum[isContributor ? 'contributors' : 'members'];
 	const timestampSlice = articleTimestamps.slice(0, maximumNumberOfActions);
 

@@ -1,10 +1,9 @@
 import { fromHex } from '../../../../utils.ts';
-import { RoleCategory, RoleCategoryType } from '../structures/role-category.ts';
-import { RoleCollectionType } from '../structures/role-collection.ts';
+import { RoleCategory } from '../structures/role-category.ts';
 
 const base: RoleCategory[] = [
 	{
-		type: RoleCategoryType.CATEGORY,
+		type: 'CATEGORY',
 		name: 'Proficiency',
 		description:
 			'Roles representing the user\'s language proficiency and knowledge of the language.',
@@ -12,7 +11,7 @@ const base: RoleCategory[] = [
 		emoji: '🎓',
 		limit: 1,
 		collection: {
-			type: RoleCollectionType.COLLECTION,
+			type: 'COLLECTION',
 			onAssignMessage: (name) =>
 				`Your language proficiency is now ${name.toLowerCase()}.`,
 			list: [{
@@ -39,21 +38,21 @@ const base: RoleCategory[] = [
 		},
 	},
 	{
-		type: RoleCategoryType.CATEGORY_GROUP,
+		type: 'CATEGORY_GROUP',
 		name: 'Personalisation',
 		description: 'Roles used to personalise one\'s server profile.',
 		color: fromHex('#ffe548'),
 		emoji: '🌈',
 		categories: [
 			{
-				type: RoleCategoryType.CATEGORY,
+				type: 'CATEGORY',
 				name: 'Gender',
 				description: 'Roles defining one\'s gender.',
 				color: fromHex('#ff4b3e'),
 				emoji: '⚧',
 				limit: 1,
 				collection: {
-					type: RoleCollectionType.COLLECTION,
+					type: 'COLLECTION',
 					description: (name) =>
 						`I am of the ${name.toLowerCase()} persuasion.`,
 					onAssignMessage: (name) =>
@@ -74,14 +73,14 @@ const base: RoleCategory[] = [
 				},
 			},
 			{
-				type: RoleCategoryType.CATEGORY,
+				type: 'CATEGORY',
 				name: 'Abroad',
 				description: 'Roles related to the abroad.',
 				color: fromHex('#d6e3f8'),
 				emoji: '🌎',
 				limit: -1,
 				collection: {
-					type: RoleCollectionType.COLLECTION,
+					type: 'COLLECTION',
 					onAssignMessage: (name) => `You are now a ${name}.`,
 					onUnassignMessage: (name) => `You are no longer a ${name}.`,
 					list: [{
@@ -100,14 +99,14 @@ const base: RoleCategory[] = [
 		],
 	},
 	{
-		type: RoleCategoryType.CATEGORY,
+		type: 'CATEGORY',
 		name: 'Learning',
 		description: 'Roles applied in teaching and learning the language.',
 		color: fromHex('#daddd8'),
 		emoji: '📖',
 		limit: -1,
 		collection: {
-			type: RoleCollectionType.COLLECTION,
+			type: 'COLLECTION',
 			list: [{
 				name: 'Classroom Attendee',
 				onAssignMessage: (_) =>

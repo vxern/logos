@@ -1,23 +1,32 @@
-import { Guild, Interaction } from '../../../../../deps.ts';
+import { colors, Guild, Interaction } from '../../../../../deps.ts';
 import { Client } from '../../../../client.ts';
 import configuration from '../../../../configuration.ts';
-import { mention, MentionType, time } from '../../../../formatting.ts';
+import { displayTime, mention } from '../../../../formatting.ts';
 import { fetchGuildMembers } from '../../../../utils.ts';
 import { getProficiencyCategory } from '../../../roles/module.ts';
 
-/** Displays information about the guild which this command was executed in. */
+/** Displays information about the guild that this command was executed in. */
 async function displayGuildInformation(
-	_: Client,
+	_client: Client,
 	interaction: Interaction,
 ): Promise<void> {
 	const guild = interaction.guild!;
 
-	const owner = (await guild.members.resolve(guild.ownerID!))!;
-	const hasDistinctOwner = owner.user.username !== guild.name!;
+	const owner = await guild.members.resolve(guild.ownerID!).catch(() => {});
+	if (!owner) {
+		console.error(
+			`Failed to fetch information about the owner of guild ${
+				colors.bold(guild.name!)
+			}.`,
+		);
+	}
+
+	const hasDistinctOwner = owner && owner.user.username !== guild.name!;
 
 	interaction.respond({
+		ephemeral: true,
 		embeds: [{
-			title: `Information about ${guild.name!}`,
+			title: `Information about **${guild.name!}**`,
 			thumbnail: { url: guild.iconURL() },
 			color: configuration.interactions.responses.colors.invisible,
 			fields: [
@@ -33,7 +42,7 @@ async function displayGuildInformation(
 				},
 				{
 					name: '⏱️ Created',
-					value: `${time(guild.timestamp.getTime())}`,
+					value: displayTime(guild.timestamp.getTime()),
 					inline: true,
 				},
 				{
@@ -44,18 +53,17 @@ async function displayGuildInformation(
 				hasDistinctOwner
 					? {
 						name: '👑 Owner',
-						value: mention(guild.ownerID!, MentionType.USER),
+						value: mention(owner.id, 'USER'),
 						inline: true,
 					}
-					: {
-						name: '⚖️ Guides',
+					: ((enforcerRoleName) => ({
+						name: `⚖️ ${enforcerRoleName}s`,
 						value:
-							`This server is overseen by a collective of guides, rather than a single owner.`,
+							`This server is overseen by a collective of ${enforcerRoleName}s, rather than a single owner.`,
 						inline: true,
-					},
+					}))(configuration.guilds.moderation.enforcer.toLowerCase()),
 			],
 		}],
-		ephemeral: true,
 	});
 }
 
@@ -96,7 +104,7 @@ async function getProficiencyDistribution(guild: Guild): Promise<string> {
 	const roles = await guild.roles.fetchAll();
 	const proficiencyTags = roles
 		.filter((role) => proficiencyNames.includes(role.name))
-		.map((role) => mention(role.id, MentionType.ROLE));
+		.map((role) => mention(role.id, 'ROLE'));
 
 	return displayProficiencyDistribution(
 		proficiencyTags,

@@ -66,8 +66,9 @@ async function set(
 	if (!canAct) return;
 
 	const volume = Number(
-		(<ApplicationCommandInteraction> interaction).data.options[0]!.options![0]!
-			.value! as string,
+		<string> ((<ApplicationCommandInteraction> interaction).data.options[0]!
+			.options![0]!
+			.value!),
 	);
 
 	if (volume < 0 || volume > configuration.music.maxima.volume) {

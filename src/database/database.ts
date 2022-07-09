@@ -1,6 +1,5 @@
 import { faunadb } from '../../deps.ts';
 import secrets from '../../secrets.ts';
-import { Unpacked } from '../utils.ts';
 import {
 	Article,
 	getMostRecentArticleContent,
@@ -10,6 +9,16 @@ import { User } from './structs/users/user.ts';
 import { Document, Reference } from './structs/document.ts';
 import { capitalise } from '../formatting.ts';
 import { Warning } from './structs/users/warning.ts';
+
+/**
+ * 'Unpacks' a nested type from an array, function or promise.
+ *
+ * @typeParam T - The type from which to extract the nested type.
+ */
+type Unpacked<T> = T extends (infer U)[] ? U
+	: T extends (...args: unknown[]) => infer U ? U
+	: T extends Promise<infer U> ? U
+	: T;
 
 const $ = faunadb.query;
 
@@ -131,25 +140,23 @@ class Database {
 		expression: faunadb.Expr,
 	): Promise<R | undefined> {
 		try {
-			const queryResult = (await this.client.query(expression)) as Record<
+			const queryResult = <Record<
 				string,
 				unknown
-			>;
+			>> (await this.client.query(expression));
 
 			if (!Array.isArray(queryResult.data)) {
-				queryResult.ts = (queryResult.ts as number) / 1000;
+				queryResult.ts = <number> queryResult.ts / 1000;
 
-				return queryResult! as R;
+				return <R> queryResult;
 			}
 
 			for (const element of queryResult.data) {
-				element.ts = (element.ts as number) / 1000;
+				element.ts = <number> element.ts / 1000;
 			}
 
-			return queryResult!.data! as unknown as R;
+			return <R> (<unknown> queryResult.data);
 		} catch (error) {
-			if (error.description === 'Set not found.') return undefined;
-
 			console.error(`${error.message} ~ ${error.description}`);
 		}
 
@@ -230,17 +237,16 @@ class Database {
 		value: V,
 	): Promise<Document<User> | undefined> {
 		const cacheValue = parameter === 'reference'
-			? this.users.get((value as Reference).value.id)
+			? this.users.get((<Reference> value).value.id)
 			: Array.from(this.users.values()).find((document) =>
 				document.data.account.id === value
 			);
 
 		const cacheOrFetch = cacheValue ?? await this.fetchUser(parameter, value);
-
 		if (cacheOrFetch) return cacheOrFetch;
 
 		if (parameter === 'id') {
-			return await this.createUser({ account: { id: value as string } });
+			return await this.createUser({ account: { id: <string> value } });
 		}
 
 		return undefined;
@@ -274,9 +280,9 @@ class Database {
 		}
 
 		const argument =
-			(typeof value === 'object'
-				? (value as Reference).value.id
-				: value) as string;
+			<string> (typeof value === 'object'
+				? (<Reference> value).value.id
+				: value);
 
 		const cache = parameter === 'language'
 			? this.articlesByLanguage
@@ -324,9 +330,9 @@ class Database {
 		}
 
 		const argument =
-			(typeof value === 'object'
-				? (value as Reference).value.id
-				: value) as string;
+			<string> (typeof value === 'object'
+				? (<Reference> value).value.id
+				: value);
 
 		const cache = parameter === 'language'
 			? this.articlesByLanguage
@@ -458,7 +464,7 @@ class Database {
 			: this.articleChangesByUser;
 
 		cache.set(
-			typeof value === 'object' ? (value as Reference).value.id : value,
+			typeof value === 'object' ? (<Reference> value).value.id : value,
 			documents,
 		);
 
@@ -481,9 +487,9 @@ class Database {
 		value: V,
 	): Promise<Document<ArticleChange>[] | undefined> {
 		const argument =
-			(typeof value === 'object'
-				? (value as Reference).value.id
-				: value) as string;
+			<string> (typeof value === 'object'
+				? (<Reference> value).value.id
+				: value);
 
 		const cache = parameter === 'articleReference'
 			? this.articleChangesByArticleReference

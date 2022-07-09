@@ -1,4 +1,5 @@
 import {
+	_,
 	ApplicationCommand,
 	ApplicationCommandOption,
 	ApplicationCommandOptionType,
@@ -6,7 +7,6 @@ import {
 import { Command } from '../commands/structs/command.ts';
 import { mergeOptions, unimplemented } from '../commands/command.ts';
 import { Option } from '../commands/structs/option.ts';
-import { getMissingKeys } from '../utils.ts';
 import information from './information/module.ts';
 import language from './language/module.ts';
 import moderation from './moderation/module.ts';
@@ -26,6 +26,51 @@ const modules: Record<string, Command>[] = [
 ];
 
 const commands = mergeModules(modules);
+
+/**
+ * Compares two command or option objects to determine which keys one or the
+ * other is missing.
+ *
+ * @param left - The Harmony object.
+ * @param right - The source object.
+ * @returns An array of keys which differ between the objects.
+ */
+function getMissingKeys(
+	left: ApplicationCommand | ApplicationCommandOption,
+	right: Command | Option,
+): string[];
+function getMissingKeys<
+	L extends ApplicationCommand | ApplicationCommandOption,
+	R extends Partial<L>,
+>(
+	left: L,
+	right: R,
+): string[] {
+	const leftKeys = Object.keys(left);
+	const rightKeys = Object.keys(right);
+	const keysToIgnore = [
+		...leftKeys.filter((leftKey) => !rightKeys.includes(leftKey)),
+		...rightKeys.filter((rightKey) =>
+			!leftKeys.includes(rightKey) && rightKey !== 'options'
+		),
+	];
+
+	const unequalKeys = <string[]> _.reduce(
+		right,
+		(result: string[], value: unknown, key: keyof L) => {
+			return _.isEqual(value, left[key])
+				? result
+				: result.concat(key.toString());
+		},
+		[],
+	);
+
+	const missingKeys = unequalKeys.filter((unequalKey) =>
+		!keysToIgnore.includes(unequalKey)
+	);
+
+	return missingKeys;
+}
 
 /**
  * Combines modules into a single array of {@link Command}s, merging commands
@@ -83,7 +128,7 @@ function supplyMissingProperties<T extends Command | Option>(
 				}
 		}
 		if (!element.options) continue;
-		supplyMissingProperties((element as Option).options!);
+		supplyMissingProperties((<Option> element).options!);
 	}
 	return elements;
 }
@@ -124,5 +169,5 @@ function areEqual(
 	return unequalKeys.length === 0;
 }
 
-export { areEqual };
 export default { modules: modules, commands: commands };
+export { areEqual };

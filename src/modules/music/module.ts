@@ -54,7 +54,7 @@ function displayListings(
 					? list(
 						page.map((listing, index) =>
 							`${pageIndex * 10 + (index + 1)}. ${
-								(configuration.music.symbols as { [key: string]: string })[
+								(<Record<string, string>> configuration.music.symbols)[
 									listing.content.type.toLowerCase()
 								]
 							} ~ ${listing.content.title}`

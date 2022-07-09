@@ -33,11 +33,11 @@ function onAcceptRules(
 
 	if (!screening.canEnter) {
 		interaction.respond({
+			ephemeral: true,
 			embeds: [{
 				title: 'Entry denied.',
 				description: screening.reason!,
 			}],
-			ephemeral: true,
 		});
 		return;
 	}
@@ -49,9 +49,9 @@ function onAcceptRules(
 			title: 'Language Proficiency',
 			description: `Select the role that most accurately describes your ${
 				capitalise(language)
-			} language proficiency.\n\nYou can always change it later using the ${
+			} language proficiency.\n\n__You can always change this later using the ${
 				code('/profile roles')
-			} command.`,
+			} command.__`,
 		}],
 		components: [{
 			type: MessageComponentType.ACTION_ROW,

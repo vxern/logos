@@ -36,12 +36,10 @@ const service: ServiceStarter = (client) => {
 		collector.on(
 			'collect',
 			(interaction: MessageComponentInteraction) => {
-				const [step, parameter] = interaction.data!.custom_id.split('|') as [
-					Step,
-					string,
-				];
+				const [step, parameter] = <[Step, string]> interaction.data!.custom_id
+					.split('|');
 
-				interactionHandlers[step]!(client, interaction, parameter);
+				interactionHandlers[step](client, interaction, parameter);
 			},
 		);
 	}

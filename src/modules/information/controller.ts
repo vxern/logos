@@ -11,14 +11,14 @@ import { MessageGenerators } from './data/generators/generators.ts';
 import generators from './data/generators/generators.ts';
 import { Events } from './data/log-entry.ts';
 
+/** Stores the message generators for all handled events. */
+const messageGenerators: MessageGenerators<Events> = {
+	...generators.client,
+	...generators.guild,
+};
+
 /** Controller responsible for logging client and guild events. */
 class LoggingController extends Controller {
-	/** Contains message generators for all handled events. */
-	private readonly messageGenerators: MessageGenerators<Events> = {
-		...generators.client,
-		...generators.guild,
-	};
-
 	/** The channel used for logging events. */
 	private channel?: GuildTextChannel;
 
@@ -58,8 +58,8 @@ class LoggingController extends Controller {
 				'collect',
 				(...args) =>
 					this.log(
-						event as keyof ClientEvents,
-						...(args as ClientEvents[keyof ClientEvents]),
+						<keyof ClientEvents> event,
+						...(<ClientEvents[keyof ClientEvents]> args),
 					),
 			);
 
@@ -80,22 +80,17 @@ class LoggingController extends Controller {
 	): Promise<void> {
 		if (!this.channel) return;
 
-		const entry = this.messageGenerators[event];
+		const entry = messageGenerators[event];
 		if (!entry) {
 			return console.error(
 				`Attempted to log event '${event}', however, this event is not handled.`,
 			);
 		}
 
-		const filter = (entry.filter as (...args: unknown[]) => boolean)(
-			this.channel.guild,
-			...args,
-		);
+		const filter = entry.filter(this.channel.guild, ...args);
 		if (!filter) return;
 
-		const message = await (entry.message as (
-			...args: unknown[]
-		) => Promise<string> | string | undefined)(...args);
+		const message = await entry.message(...args);
 		if (!message) return;
 
 		this.channel!.send({

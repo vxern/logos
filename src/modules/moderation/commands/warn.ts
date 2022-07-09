@@ -7,7 +7,7 @@ import { Client } from '../../../client.ts';
 import { Availability } from '../../../commands/structs/availability.ts';
 import { Command } from '../../../commands/structs/command.ts';
 import configuration from '../../../configuration.ts';
-import { mention, MentionType } from '../../../formatting.ts';
+import { mention } from '../../../formatting.ts';
 import { mentionUser, messageUser } from '../../../utils.ts';
 import { user } from '../../parameters.ts';
 import { getRelevantWarnings, resolveUserIdentifier } from '../module.ts';
@@ -22,7 +22,7 @@ const command: Command = {
 };
 
 async function warn(client: Client, interaction: Interaction): Promise<void> {
-	const data = interaction.data as InteractionApplicationCommandData;
+	const data = <InteractionApplicationCommandData> interaction.data;
 
 	const userIdentifier = <string> data.options[0]!.value!;
 	const reason = <string> data.options[1]!.value!;
@@ -139,7 +139,7 @@ async function warn(client: Client, interaction: Interaction): Promise<void> {
 		embeds: [{
 			title: 'Member warned',
 			description: `Member ${
-				mention(member!.id, MentionType.USER)
+				mention(member!.id, 'USER')
 			} has been warned. They now have ${relevantWarnings.length} warnings.`,
 			color: configuration.interactions.responses.colors.blue,
 		}],
@@ -150,7 +150,7 @@ async function warn(client: Client, interaction: Interaction): Promise<void> {
 	interaction.channel!.send({
 		embeds: [{
 			description: `${
-				mention(member!.id, MentionType.USER)
+				mention(member!.id, 'USER')
 			} has been warned for: ${document.data.reason}\n\n${
 				passedMaximum
 					? 'They have passed the maximum number of warnings, and have been kicked.'

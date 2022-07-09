@@ -12,7 +12,6 @@ import services from './modules/service.ts';
 import { LoggingController } from './modules/information/controller.ts';
 import { MusicController } from './modules/music/controller.ts';
 import { loadComponents } from './modules/language/module.ts';
-import { time } from './utils.ts';
 import secrets from '../secrets.ts';
 import { Database } from './database/database.ts';
 import configuration from './configuration.ts';
@@ -77,33 +76,32 @@ class Client extends DiscordClient {
 	 * This function should __not__ be called externally.
 	 */
 	@event()
-	protected ready(): void {
-		time(
-			(ms) => `Setup took ${ms}ms`,
-			async () => {
-				this.node = new lavadeno.Node({
-					connection: secrets.modules.music.lavalink,
-					sendGatewayPayload: (_, payload) => this.gateway.send(payload),
-				});
-				await this.node.connect(BigInt(this.user!.id));
+	protected async ready(): Promise<void> {
+		console.time('SETUP');
 
-				this.on('raw', (event, payload) => {
-					if (
-						event === 'VOICE_SERVER_UPDATE' || event === 'VOICE_STATE_UPDATE'
-					) {
-						this.node.handleVoiceUpdate(payload);
-					}
-				});
+		this.node = new lavadeno.Node({
+			connection: secrets.modules.music.lavalink,
+			sendGatewayPayload: (_, payload) => this.gateway.send(payload),
+		});
+		await this.node.connect(BigInt(this.user!.id));
 
-				const promises = [
-					this.setupGuilds().then(() => loadComponents(this)),
-					this.setupCommands(),
-					this.setupServices(),
-				];
+		this.on('raw', (event, payload) => {
+			if (
+				event === 'VOICE_SERVER_UPDATE' || event === 'VOICE_STATE_UPDATE'
+			) {
+				this.node.handleVoiceUpdate(payload);
+			}
+		});
 
-				await Promise.all(promises);
-			},
-		);
+		const promises = [
+			this.setupGuilds().then(() => loadComponents(this)),
+			this.setupCommands(),
+			this.setupServices(),
+		];
+
+		await Promise.all(promises);
+
+		console.timeEnd('SETUP');
 	}
 
 	/** Sets up guilds for managing. */

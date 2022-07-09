@@ -13,7 +13,6 @@ import { createInteractionCollector } from '../../../../utils.ts';
 import {
 	createSelectionsFromCategories,
 	RoleCategory,
-	RoleCategoryType,
 } from '../../data/structures/role-category.ts';
 import {
 	createSelectionsFromCollection,
@@ -100,11 +99,11 @@ async function* browse(
 	while (!isEnded()) {
 		try {
 			const category = traverse(data.navigation);
-			const method = (data.interaction.responded
+			const method = <(
+				data: InteractionResponse,
+			) => Promise<Interaction>> (data.interaction.responded
 				? data.interaction.editResponse
-				: data.interaction.respond) as (
-					data: InteractionResponse,
-				) => Promise<Interaction>;
+				: data.interaction.respond);
 
 			// deno-lint-ignore no-await-in-loop
 			const menu = await displaySelectionMenu(data, customID, category);
@@ -112,7 +111,7 @@ async function* browse(
 
 			const selection =
 				// deno-lint-ignore no-await-in-loop
-				(await collector.waitFor('collect'))[0] as MessageComponentInteraction;
+				<MessageComponentInteraction> (await collector.waitFor('collect'))[0];
 			selection.respond({
 				type: InteractionResponseType.DEFERRED_MESSAGE_UPDATE,
 			});
@@ -124,7 +123,7 @@ async function* browse(
 				continue;
 			}
 
-			if (category.type === RoleCategoryType.CATEGORY) {
+			if (category.type === 'CATEGORY') {
 				yield [
 					resolveRoles(category!.collection!, data.language)[index]!,
 					category,
@@ -153,8 +152,8 @@ async function getSelections(
 	language: string | undefined,
 	category: RoleCategory,
 ): Promise<SelectComponentOption[]> {
-	if (category.type === RoleCategoryType.CATEGORY_GROUP) {
-		return createSelectionsFromCategories(category.categories!);
+	if (category.type === 'CATEGORY_GROUP') {
+		return createSelectionsFromCategories(category.categories!, language);
 	}
 
 	return await createSelectionsFromCollection(
@@ -190,6 +189,7 @@ async function displaySelectionMenu(
 	}
 
 	return {
+		ephemeral: true,
 		embeds: [{
 			title: `${category.emoji}  ${category.name}`,
 			description: category.description,
@@ -201,13 +201,13 @@ async function displaySelectionMenu(
 				type: MessageComponentType.SELECT,
 				customID: customID,
 				options: selections,
-				placeholder: category.type === RoleCategoryType.CATEGORY_GROUP
+				placeholder: category.type === 'CATEGORY_GROUP'
 					? 'Choose a role category.'
 					: 'Choose a role.',
 			}],
 		}],
-		ephemeral: true,
 	};
 }
 
 export { browse };
+export type { NavigationData };

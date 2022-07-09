@@ -5,6 +5,7 @@ import {
 	Guild,
 	GuildTextChannel,
 	Interaction,
+	Member,
 	VoiceChannel,
 	VoiceState,
 } from '../../../deps.ts';
@@ -13,8 +14,7 @@ import configuration from '../../configuration.ts';
 import { Controller } from '../controller.ts';
 import { Song } from './data/song.ts';
 import { SongListing } from './data/song-listing.ts';
-import { bold, mention, MentionType } from '../../formatting.ts';
-import { getVoiceState } from '../../utils.ts';
+import { mention } from '../../formatting.ts';
 import { SongStream } from './data/song-stream.ts';
 import { LoadType } from 'https://deno.land/x/lavalink_types@2.0.6/mod.ts';
 
@@ -224,9 +224,8 @@ class MusicController extends Controller {
 			method({
 				embeds: [{
 					title: '👍 Listing queued.',
-					description: `Your listing, ${
-						bold(listing.content.title)
-					}, has been added to the queue.`,
+					description:
+						`Your listing, **${listing.content.title}**, has been added to the queue.`,
 					color: configuration.interactions.responses.colors.green,
 				}],
 			});
@@ -306,9 +305,8 @@ class MusicController extends Controller {
 			method({
 				embeds: [{
 					title: 'Couldn\'t load track',
-					description: `The track, ${
-						bold(currentSong.title)
-					}, could not be loaded.`,
+					description:
+						`The track, **${currentSong.title}**, could not be loaded.`,
 					color: configuration.interactions.responses.colors.red,
 				}],
 			});
@@ -338,22 +336,20 @@ class MusicController extends Controller {
 		method({
 			embeds: [{
 				title: `${
-					(configuration.music.symbols as { [key: string]: string })[
+					(<Record<string, string>> configuration.music.symbols)[
 						this.current.content.type.toLowerCase()
 					]
 				} ${
 					!wasLooped ? 'Playing' : 'Replaying'
 				} ${this.current.content.type.toLowerCase()}`,
 				description: `${!wasLooped ? 'Now playing' : 'Replaying'} ${
-					this.current.content.type !== 'COLLECTION' ? '' : `track ${
-						bold(
-							`${
-								this.current.content.position + 1
-							}/${this.current.content.songs.length}`,
-						)
-					} of ${bold(this.current.content.title)}: `
-				} [${bold(currentSong.title)}](${currentSong.url}) as requested by ${
-					mention(this.current.requestedBy, MentionType.USER)
+					this.current.content.type !== 'COLLECTION'
+						? ''
+						: `track **${
+							this.current.content.position + 1
+						}/${this.current.content.songs.length}** of **${this.current.content.title}**: `
+				} [**${currentSong.title}**](${currentSong.url}) as requested by ${
+					mention(this.current.requestedBy, 'USER')
 				}.`,
 				color: configuration.interactions.responses.colors.invisible,
 			}],
@@ -490,6 +486,16 @@ class MusicController extends Controller {
 
 		this.setVolume(configuration.music.maxima.volume);
 	}
+}
+
+/**
+ * Gets the voice state of a member within a guild.
+ *
+ * @param member - The member whose voice state to get.
+ * @returns The voice state or `undefined`.
+ */
+function getVoiceState(member: Member): Promise<VoiceState | undefined> {
+	return member.guild.voiceStates.resolve(member.user.id);
 }
 
 export { MusicController };

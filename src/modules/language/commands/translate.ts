@@ -10,7 +10,6 @@ import secrets from '../../../../secrets.ts';
 import { Availability } from '../../../commands/structs/availability.ts';
 import { Command } from '../../../commands/structs/command.ts';
 import configuration from '../../../configuration.ts';
-import { addParametersToURL } from '../../../utils.ts';
 
 const command: Command = {
 	name: 'translate',
@@ -44,7 +43,7 @@ const command: Command = {
 };
 
 /** Represents a response to a translation query. */
-interface TranslationResponse {
+interface Translation {
 	/** The language detected from the text sent to be translated. */
 	// deno-lint-ignore camelcase
 	detected_source_language: string;
@@ -66,16 +65,15 @@ interface SupportedLanguage {
 	supports_formality: boolean;
 }
 
-const supportedLanguagesRequest: Response = await fetch(
+const supportedLanguagesResponse = await fetch(
 	addParametersToURL('https://api-free.deepl.com/v2/languages', {
 		'auth_key': secrets.modules.language.deepL.secret,
 		'type': 'target',
 	}),
 );
-const supportedLanguagesRaw: SupportedLanguage[] =
-	(supportedLanguagesRequest.ok
-		? await supportedLanguagesRequest.json()
-		: []) as SupportedLanguage[];
+const supportedLanguagesRaw: SupportedLanguage[] = supportedLanguagesResponse.ok
+	? await supportedLanguagesResponse.json()
+	: [];
 const supportedLanguages: SupportedLanguage[] = supportedLanguagesRaw
 	.filter((supportedLanguage, index, array) =>
 		index ===
@@ -100,7 +98,7 @@ async function translate(
 ): Promise<void> {
 	if (interaction.isAutocomplete()) {
 		const argument = interaction.data.options.find((option) => option.focused)!;
-		const value = argument.value as string;
+		const value = <string> argument.value;
 		const options = argument.value.length === 0
 			? []
 			: supportedLanguagesChoices.filter((language) => {
@@ -116,10 +114,10 @@ async function translate(
 		return;
 	}
 
-	const data = interaction.data! as InteractionApplicationCommandData;
-	const sourceCode = data.options[0]!.value! as string;
-	const targetCode = data.options[1]!.value! as string;
-	const text = data.options[2]!.value! as string;
+	const data = <InteractionApplicationCommandData> interaction.data!;
+	const sourceCode = <string> data.options[0]!.value!;
+	const targetCode = <string> data.options[1]!.value!;
+	const text = <string> data.options[2]!.value!;
 	const show = data.options.find((option) => option.name === 'show')?.value ??
 		false;
 
@@ -134,7 +132,7 @@ async function translate(
 		}),
 	);
 	const translationJson = await translationRequest.json();
-	const translation = translationJson.translations[0] as TranslationResponse;
+	const translation = <Translation> translationJson.translations[0];
 
 	const source = supportedLanguages.find((supportedLanguage) =>
 		supportedLanguage.language === sourceCode
@@ -158,6 +156,25 @@ async function translate(
 			}],
 		}],
 	});
+}
+
+/**
+ * Taking a URL and a list of parameters, returns the URL with the parameters appended
+ * to it.
+ *
+ * @param url - The URL to format.
+ * @param parameters - The parameters to append to the URL.
+ * @returns The formatted URL.
+ */
+function addParametersToURL(
+	url: string,
+	parameters: Record<string, string>,
+): string {
+	const query = Object.entries(parameters)
+		.map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+		.join('&');
+
+	return `${url}?${query}`;
 }
 
 export default command;

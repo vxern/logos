@@ -7,7 +7,7 @@ import { Client } from '../../../client.ts';
 import { Availability } from '../../../commands/structs/availability.ts';
 import { Command } from '../../../commands/structs/command.ts';
 import configuration from '../../../configuration.ts';
-import { bold, mention, MentionType } from '../../../formatting.ts';
+import { mention } from '../../../formatting.ts';
 import { chunk, paginate, trim } from '../../../utils.ts';
 import { SongCollection } from '../data/song-collection.ts';
 
@@ -103,7 +103,7 @@ function now(client: Client, interaction: Interaction): void {
 							}](${song.url})`;
 
 							return `${pageIndex * 10 + (index + 1)}. ${
-								isCurrent ? bold(songString) : songString
+								isCurrent ? `**${songString}**` : songString
 							}`;
 						}).join('\n')
 						: 'This list is empty.',
@@ -139,7 +139,7 @@ function now(client: Client, interaction: Interaction): void {
 				},
 				{
 					name: 'Requested By',
-					value: mention(current.requestedBy, MentionType.USER),
+					value: mention(current.requestedBy, 'USER'),
 				},
 			],
 			footer: {

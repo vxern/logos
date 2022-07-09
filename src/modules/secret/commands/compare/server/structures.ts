@@ -8,7 +8,7 @@ import {
 	Interaction,
 } from '../../../../../../deps.ts';
 import secrets from '../../../../../../secrets.ts';
-import { bold, codeMultiline } from '../../../../../formatting.ts';
+import { codeMultiline } from '../../../../../formatting.ts';
 
 /** Represents the channel structure */
 interface ChannelStructure {
@@ -60,9 +60,8 @@ async function compareGuildChannelStructures(
 			comparison.channels.map((channel) => channel.name).join('\n'),
 		);
 	} else if (comparison.categories.length === 0) {
-		embed.description = `The server structure of ${
-			bold(target.name!)
-		} matches that of the template guild.`;
+		embed.description = `The server structure of ${target
+			.name!} matches that of the template guild.`;
 	}
 
 	if (comparison.categories.length !== 0) {
@@ -90,9 +89,9 @@ async function getGuildStructure(guild: Guild): Promise<ChannelStructure> {
 		!channel.parentID && !channel.isCategory()
 	);
 
-	const categoryChannels = channels.filter((channel) =>
+	const categoryChannels = <CategoryChannel[]> channels.filter((channel) =>
 		channel.isCategory()
-	) as CategoryChannel[];
+	);
 	const channelCategories = categoryChannels.map((
 		parentChannel,
 	) => ({

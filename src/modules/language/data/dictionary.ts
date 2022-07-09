@@ -106,7 +106,7 @@ function toFields(
 		),
 	}];
 
-	const filled = fields.filter((field) => field.value) as EmbedField[];
+	const filled = <EmbedField[]> fields.filter((field) => field.value);
 	const truncated = filled.map((field) => {
 		return { ...field, value: field.value.slice(0, verbose ? 1024 : 256) };
 	});

@@ -1,10 +1,10 @@
 import {
+	colors,
 	Guild,
 	Interaction,
 	Member,
 	Role as DiscordRole,
 } from '../../../../../deps.ts';
-import { bold } from '../../../../formatting.ts';
 import { RoleCategory } from './role-category.ts';
 import { getMemberRoles } from './role-collection.ts';
 
@@ -53,8 +53,25 @@ async function resolveGuildRole(
 	guild: Guild,
 	name: string,
 ): Promise<DiscordRole | undefined> {
-	const guildRoles = await guild.roles.array();
-	return guildRoles.find((role) => role.name === name);
+	const guildRoles = await guild.roles.array().catch(() => undefined);
+	if (!guildRoles) {
+		console.error(
+			`Failed to fetch roles for guild ${colors.bold(guild.name!)}.`,
+		);
+		return undefined;
+	}
+
+	const role = guildRoles.find((role) => role.name === name);
+	if (!role) {
+		console.error(
+			`Failed to fetch role with name '${name}' for guild ${
+				colors.bold(guild.name!)
+			}.`,
+		);
+		return undefined;
+	}
+
+	return role;
 }
 
 /**
@@ -96,6 +113,8 @@ async function tryAssignRole(
 		language,
 		{ within: category.collection! },
 	);
+	if (!memberRoles) return;
+
 	const alreadyHasRole = memberRoles.some((memberRole) =>
 		memberRole.name === role.name
 	);
@@ -109,13 +128,9 @@ async function tryAssignRole(
 		) {
 			interaction.send({
 				embeds: [{
-					title: `Reached the role limit in the role category '${
-						bold(category.name)
-					}'.`,
+					title: `Reached the role limit in the '${category.name}' category.`,
 					description:
-						`You have reached the limit of roles you can assign from within the ${
-							bold(category.name)
-						} category. To choose a new role, unassign one of your roles.`,
+						`You have reached the limit of roles you can assign from within the '${category.name}' category. To choose a new role, unassign one of your roles.`,
 				}],
 				ephemeral: true,
 			});
@@ -141,8 +156,6 @@ async function tryAssignRole(
  * @returns The success of the modification.
  */
 async function modifyRoles(action: RoleAction): Promise<boolean> {
-	if (!action.member) return false;
-
 	const unresolvedRolesToAdd = action.roles.add?.map((role) =>
 		resolveGuildRole(action.member.guild!, role.name)
 	);
@@ -170,10 +183,10 @@ async function modifyRoles(action: RoleAction): Promise<boolean> {
 		}
 
 		for (
-			const role of resolvedRolesToAdd.filter((role) => role) as DiscordRole[]
+			const role of <DiscordRole[]> resolvedRolesToAdd.filter((role) => role)
 		) {
 			// Assign role to member.
-			action.member.roles.add(role!.id);
+			action.member.roles.add(role!.id).catch();
 			// Fetch Discord role and cache it.
 			action.member.client.cache.set(
 				action.member.roles.cacheName,
@@ -209,9 +222,9 @@ async function modifyRoles(action: RoleAction): Promise<boolean> {
 			);
 		}
 
-		const resolvedRoles = resolvedRolesToRemove.filter((role) =>
+		const resolvedRoles = <DiscordRole[]> resolvedRolesToRemove.filter((role) =>
 			role
-		) as DiscordRole[];
+		);
 
 		// Remove cached roles for a member.
 		action.member.client.cache.delete(
@@ -221,7 +234,7 @@ async function modifyRoles(action: RoleAction): Promise<boolean> {
 
 		for (const role of resolvedRoles) {
 			// Unassign role from member.
-			action.member.roles.remove(role!.id);
+			action.member.roles.remove(role!.id).catch();
 		}
 	}
 

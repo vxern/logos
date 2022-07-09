@@ -177,7 +177,7 @@ async function verifyEnforcer(
 	);
 
 	const selection =
-		(await collector.waitFor('collect'))[0] as MessageComponentInteraction;
+		<MessageComponentInteraction> (await collector.waitFor('collect'))[0];
 
 	const verified = selection.data!.custom_id.split('|')[1]! === 'true';
 

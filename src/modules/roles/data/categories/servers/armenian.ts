@@ -1,12 +1,11 @@
 import { fromNames } from '../../../module.ts';
 import { RoleCategory } from '../../structures/role-category.ts';
-import { RoleCollectionType } from '../../structures/role-collection.ts';
 
 const categories: Partial<RoleCategory>[] = [
 	{
 		name: 'Ethnicities',
 		collection: {
-			type: RoleCollectionType.COLLECTION_LOCALISED,
+			type: 'COLLECTION_LOCALISED',
 			list: fromNames([
 				'Armeno-Tat',
 				'Circassian',
@@ -18,7 +17,7 @@ const categories: Partial<RoleCategory>[] = [
 	{
 		name: 'Branch',
 		collection: {
-			type: RoleCollectionType.COLLECTION_LOCALISED,
+			type: 'COLLECTION_LOCALISED',
 			list: fromNames([
 				'Eastern Armenian',
 				'Western Armenian',
@@ -28,7 +27,7 @@ const categories: Partial<RoleCategory>[] = [
 	{
 		name: 'Regions',
 		collection: {
-			type: RoleCollectionType.COLLECTION_LOCALISED,
+			type: 'COLLECTION_LOCALISED',
 			list: fromNames([
 				'Aragats\'otn / Արագածոտն',
 				'Ararat / Արարատ',

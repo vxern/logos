@@ -84,7 +84,7 @@ async function editArticle(
 		return;
 	}
 
-	const data = interaction.data as InteractionApplicationCommandData;
+	const data = <InteractionApplicationCommandData> interaction.data;
 	const index = parseInt(data.options[0]!.options![0]!.value!);
 	const document = documents[index]!;
 

@@ -9,17 +9,13 @@ async function postRules(
 	client: Client,
 	interaction: Interaction,
 ): Promise<void> {
-	const rawEmbeds = await Promise.all(
-		Object.values(information).map<Promise<[InformationSection, EmbedPayload]>>(
-			(section) => {
-				return new Promise((resolve) => {
-					section.generateEmbed(client, interaction.guild!).then((embed) => {
-						resolve([section, embed]);
-					});
-				});
-			},
+	const rawEmbedsWithUndefined = await Promise.all(
+		Object.values(information).map(
+			(section) => section.generateEmbed(client, interaction.guild!)?.then((embed) => !embed ? undefined : [section, embed])
 		),
 	);
+  
+  const rawEmbeds = <[InformationSection, EmbedPayload][]> rawEmbedsWithUndefined.filter((embed) => embed);
 
 	const embeds = rawEmbeds.map(([section, embed]) => {
 		// embed.title = name.toUpperCase();

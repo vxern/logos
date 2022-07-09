@@ -1,14 +1,9 @@
 import { SelectComponentOption } from '../../../../../deps.ts';
+import { trim } from '../../../../utils.ts';
 import { RoleCollection } from './role-collection.ts';
 
 /** Defines the type of a role category. */
-enum RoleCategoryType {
-	/** A category group containing other categories or category groups. */
-	CATEGORY_GROUP,
-
-	/** A category containing a list of roles. */
-	CATEGORY,
-}
+type RoleCategoryType = 'CATEGORY' | 'CATEGORY_GROUP';
 
 /** Represents a thematic selection of {@link Role}s. */
 interface RoleCategory {
@@ -46,21 +41,43 @@ interface RoleCategory {
  * Taking an array of categories, create a list of options for it.
  *
  * @param categories - The role categories.
+ * @param language - The language of the guild.
  * @returns The created selections.
  */
 function createSelectionsFromCategories(
 	categories: RoleCategory[],
+	language: string | undefined,
 ): SelectComponentOption[] {
-	return categories.map((category, index) => ({
-		label: category.name,
-		value: index.toString(),
-		description: category.description.length > 100
-			? category.description.slice(0, 97) + '...'
-			: category.description,
-		emoji: { name: category.emoji },
-		disabled: true,
-	}));
+	const categorySelections = getCategorySelections(categories, language);
+
+	const options = categorySelections.map(([category, shouldDisplay], index) =>
+		!shouldDisplay ? undefined : ({
+			label: category.name,
+			value: index.toString(),
+			description: trim(category.description, 100),
+			emoji: { name: category.emoji },
+			disabled: true,
+		})
+	);
+
+	return <SelectComponentOption[]> options.filter((option) => option);
 }
 
-export { createSelectionsFromCategories, RoleCategoryType };
+function getCategorySelections(
+	categories: RoleCategory[],
+	language: string | undefined,
+): [RoleCategory, boolean][] {
+	return categories.map<[RoleCategory, boolean]>(
+		(category) => {
+			const shouldDisplay = !!category.categories ||
+				category.collection!.type === 'COLLECTION' ||
+				(category.collection!.type === 'COLLECTION_LOCALISED' && !!language &&
+					Object.keys(category.collection!.lists!).includes(language));
+
+			return [category, shouldDisplay];
+		},
+	);
+}
+
+export { createSelectionsFromCategories, getCategorySelections };
 export type { RoleCategory };

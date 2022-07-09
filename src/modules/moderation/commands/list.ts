@@ -30,8 +30,7 @@ async function warnings(
 	client: Client,
 	interaction: Interaction,
 ): Promise<void> {
-	const data = interaction.data as InteractionApplicationCommandData;
-
+	const data = <InteractionApplicationCommandData> interaction.data;
 	const userIdentifier = <string> data.options[0]!.options![0]!.value!;
 
 	const [member, matchingMembers] = await resolveUserIdentifier(

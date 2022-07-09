@@ -8,7 +8,6 @@ import { Client } from '../../../client.ts';
 import { Availability } from '../../../commands/structs/availability.ts';
 import { Command } from '../../../commands/structs/command.ts';
 import configuration from '../../../configuration.ts';
-import { italic } from '../../../formatting.ts';
 import rules from '../../secret/data/information/rules.ts';
 
 const command: Command = {
@@ -18,6 +17,7 @@ const command: Command = {
 	options: [{
 		name: 'rule',
 		type: ApplicationCommandOptionType.STRING,
+		description: 'The rule to cite.',
 		required: true,
 		autocomplete: true,
 	}],
@@ -39,7 +39,7 @@ async function cite(
 		return;
 	}
 
-	const data = interaction.data as InteractionApplicationCommandData;
+	const data = <InteractionApplicationCommandData> interaction.data;
 	const index = Number(data.options[0]!.value!);
 	const [title, ruleGenerator] = Object.entries(rules)[index]!;
 
@@ -47,7 +47,7 @@ async function cite(
 
 	interaction.respond({
 		embeds: [{
-			title: `${title.toUpperCase()} ~ TLDR: ${italic(rule.summary)}`,
+			title: `${title.toUpperCase()} ~ TLDR: *${rule.summary}*`,
 			description: rule.content,
 			color: configuration.interactions.responses.colors.blue,
 		}],

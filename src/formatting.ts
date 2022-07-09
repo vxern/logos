@@ -1,16 +1,6 @@
 import { dayjs } from '../deps.ts';
 
 /**
- * Modifies a string of text to appear bold within Discord.
- *
- * @param target - String of text to format.
- * @returns The formatted string of text.
- */
-function bold(target: string): string {
-	return `**${target}**`;
-}
-
-/**
  * Capitalises the first letter of the given text.
  *
  * @param target - String of text to format.
@@ -43,26 +33,6 @@ function codeMultiline(target: string): string {
 }
 
 /**
- * Modifies a string of text to appear italicised within Discord.
- *
- * @param target - String of text to format.
- * @returns The formatted string of text.
- */
-function italic(target: string): string {
-	return `*${target}*`;
-}
-
-/**
- * Modifies a string of text to appear underlined within Discord.
- *
- * @param target - String of text to format.
- * @returns The formatted string of text.
- */
-function underlined(target: string): string {
-	return `__${target}__`;
-}
-
-/**
  * Taking a list of items, puts them in a list format.
  *
  * @param items - Items in the list.
@@ -75,35 +45,23 @@ function list(items: string[]): string {
 /**
  * Taking a unix timestamp, returns a formatted, human-readable time expression.
  *
- * @param unix - Unix timestamp.
+ * @param timestamp - Unix timestamp.
  * @returns The formatted, human-readable time expression.
  */
-function time(unix: number): string {
-	const dateTime = dayjs(unix);
+function displayTime(timestamp: number): string {
+	const dateTime = dayjs(timestamp);
 
 	return `${dateTime.format('D MMMM YYYY')} (${dateTime.fromNow()})`;
 }
 
 /** Defines the type of Discord mention. */
-enum MentionType {
-	/** A channel mention. */
-	CHANNEL,
-	/** A role mention. */
-	ROLE,
-	/** A user mention. */
-	USER,
-}
+type MentionType = 'CHANNEL' | 'ROLE' | 'USER';
 
-/** Defines the formatting prefix corresponding to the mention type. */
-const prefixes = {
-	/** Channel prefix. */
-	[MentionType.CHANNEL]: '#',
-
-	/** Role prefix. */
-	[MentionType.ROLE]: '@&',
-
-	/** User prefix. */
-	[MentionType.USER]: '@',
+/** Defines the formatting prefix corresponding to the type of mention. */
+const prefixes: Record<MentionType, string> = {
+	'CHANNEL': '#',
+	'ROLE': '@&',
+	'USER': '@',
 };
 
 /**
@@ -114,20 +72,14 @@ const prefixes = {
  * @returns The formatted string of text.
  */
 function mention(target: string, type: MentionType): string {
-	const prefix = prefixes[type];
-
-	return `<${prefix}${target}>`;
+	return `<${prefixes[type]}${target}>`;
 }
 
 export {
-	bold,
 	capitalise,
 	code,
 	codeMultiline,
-	italic,
 	list,
 	mention,
-	MentionType,
-	time,
-	underlined,
+	displayTime,
 };
