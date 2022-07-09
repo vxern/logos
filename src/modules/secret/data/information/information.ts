@@ -1,8 +1,8 @@
-import { colors, EmbedPayload, Guild, Invite } from '../../../../../deps.ts';
+import { colors, EmbedPayload, Guild, GuildChannel, Invite } from '../../../../../deps.ts';
 import { Client } from '../../../../client.ts';
 import configuration from '../../../../configuration.ts';
 import { mention } from '../../../../formatting.ts';
-import { findChannelByName, fromHex } from '../../../../utils.ts';
+import { fromHex } from '../../../../utils.ts';
 // import categories from './channel-categories.ts';
 import rules from './rules.ts';
 
@@ -107,6 +107,34 @@ const information: InformationSections = {
 };
 
 /**
+ * Finds a channel within a guild by its name.
+ *
+ * @param guild - The guild where to find the channel.
+ * @param name - The name of the channel.
+ * @returns The channel or `undefined` if not found.
+ */
+async function getChannelByName(
+	guild: Guild,
+	name: string,
+): Promise<GuildChannel | undefined> {
+	const channels = await guild.channels.array().catch(() => undefined);
+  if (!channels) {
+    console.error(`Failed to fetch channels for guild ${colors.bold(guild.name!)}.`);
+    return undefined;
+  }
+
+  const channel = channels.find((channel) =>
+    channel.name.toLowerCase().includes(name.toLowerCase())
+  );
+  if (!channel) {
+    console.error(`Failed to fetch channel with name '${name}' for guild ${colors.bold(guild.name!)}.`);
+    return undefined;
+  }
+
+  return channel;
+}
+
+/**
  * Gets the most viable invite link to a guild.
  *
  * @param guild - The guild to which the invite link to find.
@@ -122,7 +150,7 @@ async function getInvite(guild: Guild): Promise<Invite | undefined> {
   const invite = invites.find((invite) => invite.inviter?.id === guild.ownerID! && invite.maxAge === 0);
   if (invite) return invite;
 
-  const welcomeChannel = await findChannelByName(guild, 'welcome');
+  const welcomeChannel = await getChannelByName(guild, 'welcome');
   if (!welcomeChannel) return undefined;
 
   const newInvite = await guild.invites.create(welcomeChannel.id, { maxAge: 0, maxUses: 0, temporary: false }).catch(() => undefined);
@@ -135,7 +163,7 @@ async function getInvite(guild: Guild): Promise<Invite | undefined> {
 }
 
 async function getChannelMention(guild: Guild, name: string): Promise<string> {
-	const channel = await findChannelByName(guild, name);
+	const channel = await getChannelByName(guild, name);
 	if (!channel) return name;
 
 	return mention(channel.id, 'CHANNEL');

@@ -5,7 +5,6 @@ import {
 	EmbedField,
 	EmbedPayload,
 	Guild,
-	GuildChannel,
 	GuildTextChannel,
 	Interaction,
 	InteractionResponseModal,
@@ -20,40 +19,11 @@ import {
 	TextInputStyle,
 	User,
 	VoiceState,
-  colors,
 } from '../deps.ts';
 import languages from 'https://deno.land/x/language@v0.1.0/languages.ts';
 import { code } from './formatting.ts';
 import { Client } from './client.ts';
 import configuration from './configuration.ts';
-
-/**
- * Finds a channel within a guild by its name.
- *
- * @param guild - The guild where to find the channel.
- * @param name - The name of the channel.
- * @returns The channel or `undefined` if not found.
- */
-async function findChannelByName(
-	guild: Guild,
-	name: string,
-): Promise<GuildChannel | undefined> {
-	const channels = await guild.channels.array().catch(() => undefined);
-  if (!channels) {
-    console.error(`Failed to fetch channels for guild ${colors.bold(guild.name!)}.`);
-    return undefined;
-  }
-
-  const channel = channels.find((channel) =>
-    channel.name.toLowerCase().includes(name.toLowerCase())
-  );
-  if (!channel) {
-    console.error(`Failed to fetch channel with name '${name}' for guild ${colors.bold(guild.name!)}.`);
-    return undefined;
-  }
-
-  return channel;
-}
 
 /**
  * Parses a 6-digit hex value prefixed with a hashtag to a number.
@@ -583,7 +553,6 @@ export {
 	createInteractionCollector,
 	createVerificationPrompt,
 	fetchGuildMembers,
-	findChannelByName,
 	fromHex,
 	getChannel,
 	getLanguage,
