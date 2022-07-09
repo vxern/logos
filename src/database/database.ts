@@ -1,6 +1,5 @@
 import { faunadb } from '../../deps.ts';
 import secrets from '../../secrets.ts';
-import { Unpacked } from '../utils.ts';
 import {
 	Article,
 	getMostRecentArticleContent,
@@ -10,6 +9,16 @@ import { User } from './structs/users/user.ts';
 import { Document, Reference } from './structs/document.ts';
 import { capitalise } from '../formatting.ts';
 import { Warning } from './structs/users/warning.ts';
+
+/**
+ * 'Unpacks' a nested type from an array, function or promise.
+ *
+ * @typeParam T - The type from which to extract the nested type.
+ */
+type Unpacked<T> = T extends (infer U)[] ? U
+	: T extends (...args: unknown[]) => infer U ? U
+	: T extends Promise<infer U> ? U
+	: T;
 
 const $ = faunadb.query;
 

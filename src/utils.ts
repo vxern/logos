@@ -29,24 +29,6 @@ import { Client } from './client.ts';
 import configuration from './configuration.ts';
 
 /**
- * Makes one or more properties of `T` optional.
- *
- * @typeParam T - The type whose property to make partial.
- * @param K - The property to make partial.
- */
-type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
-
-/**
- * 'Unpacks' a nested type from an array, function or promise.
- *
- * @typeParam T - The type from which to extract the nested type.
- */
-type Unpacked<T> = T extends (infer U)[] ? U
-	: T extends (...args: unknown[]) => infer U ? U
-	: T extends Promise<infer U> ? U
-	: T;
-
-/**
  * Finds a channel within a guild by its name.
  *
  * @param guild - The guild where to find the channel.
@@ -638,4 +620,4 @@ export {
 	toModal,
 	trim,
 };
-export type { Form, Optional, Unpacked };
+export type { Form };
