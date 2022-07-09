@@ -11,14 +11,14 @@ import { MessageGenerators } from './data/generators/generators.ts';
 import generators from './data/generators/generators.ts';
 import { Events } from './data/log-entry.ts';
 
+/** Stores the message generators for all handled events. */
+const messageGenerators: MessageGenerators<Events> = {
+	...generators.client,
+	...generators.guild,
+};
+
 /** Controller responsible for logging client and guild events. */
 class LoggingController extends Controller {
-	/** Contains message generators for all handled events. */
-	private readonly messageGenerators: MessageGenerators<Events> = {
-		...generators.client,
-		...generators.guild,
-	};
-
 	/** The channel used for logging events. */
 	private channel?: GuildTextChannel;
 
@@ -80,7 +80,7 @@ class LoggingController extends Controller {
 	): Promise<void> {
 		if (!this.channel) return;
 
-		const entry = this.messageGenerators[event];
+		const entry = messageGenerators[event];
 		if (!entry) {
 			return console.error(
 				`Attempted to log event '${event}', however, this event is not handled.`,

@@ -4,30 +4,22 @@ import {
 	MessageComponentType,
 } from '../../../../../deps.ts';
 import { Client } from '../../../../client.ts';
-import { capitalise } from '../../../../formatting.ts';
 import { fromHex } from '../../../../utils.ts';
 import { getChannelMention } from '../../data/information/information.ts';
 
 /** Posts the welcome message. */
 async function postWelcome(
-	client: Client,
+	_client: Client,
 	interaction: Interaction,
 ): Promise<void> {
-	const language = client.getLanguage(interaction.guild!);
-
 	interaction.respond({
 		embeds: [{
-			title: `Welcome to **${interaction.guild!.name!}**` +
-				(language
-					? ` - The largest Discord server dedicated to teaching and learning the ${
-						capitalise(language!)
-					} language.`
-					: '.'),
+			title: `Welcome to **${interaction.guild!.name!}**`,
 			description:
-				`To enter the server and become its official member, read the information contained within ${(await getChannelMention(
+				`To enter the server and become its official member, read the information in the ${(await getChannelMention(
 					interaction.guild!,
 					'rules',
-				))} to get yourself familiarised with what you should expect from the server, and press 'I have read the rules' below.`,
+				))} channel to get yourself familiarised with the server guidelines, and then press the button below.`,
 			color: fromHex('#f28123'),
 			/* image: {
         url: "https://i.imgur.com/nxcnx7j.png",

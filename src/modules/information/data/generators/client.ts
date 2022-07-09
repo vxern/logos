@@ -4,7 +4,7 @@ import { code, codeMultiline } from '../../../../formatting.ts';
 import { mentionUser } from '../../../../utils.ts';
 import { MessageGenerators } from './generators.ts';
 
-/** Contains the message generators for client events. */
+/** Stores the message generators for client events. */
 const client: MessageGenerators<ClientEvents> = {
 	'guildBanAdd': {
 		title: '⚔️ User banned',
@@ -118,11 +118,7 @@ function resolveMemberUpdate(
 	before: Member,
 	after: Member,
 ): string | undefined {
-	for (const entry of memberUpdates(before, after)) {
-		if (entry.condition) return entry.message;
-	}
-
-	return undefined;
+	return memberUpdates(before, after).find((entry) => entry.condition)?.message;
 }
 
 export default client;

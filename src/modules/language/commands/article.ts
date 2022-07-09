@@ -43,6 +43,7 @@ const newlineOverflow = new RegExp(
 const command: Command = {
 	name: 'article',
 	availability: Availability.MEMBERS,
+	description: 'Allows the user to interact with the server articles.',
 	options: [{
 		name: 'create',
 		type: ApplicationCommandOptionType.SUB_COMMAND,

@@ -16,6 +16,8 @@ const adapter: DictionaryAdapter = {
 
 	lookup: async (query, builder) => {
 		const response = await fetch(builder(query));
+		if (!response.ok) return undefined;
+
 		const content = await response.text();
 		const $ = cheerio.load(content);
 
@@ -24,17 +26,16 @@ const adapter: DictionaryAdapter = {
 
 		for (const definition of definitions) {
 			const content = $(definition).text();
-
 			if (!content.startsWith(`${query.word.toUpperCase()} `)) continue;
 
 			const uniformised = uniformise(content);
-
 			const synonyms = uniformised.split(/\d+\./)
 				.map((synonym) =>
 					/ v\. ([a-zA-Z0-9_-ăâșțîĂÂȘȚÎ,]+)\./.exec(synonym)?.[1] ?? ''
 				)
 				.filter((synonym) => synonym.length > 0);
 			synonyms.shift(); // Remove the headword.
+
 			return {
 				synonyms: synonyms,
 			};

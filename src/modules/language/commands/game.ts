@@ -33,11 +33,12 @@ async function game(client: Client, interaction: Interaction): Promise<void> {
 	const response = await interaction.defer(true);
 
 	if (!hasSentencePairs) {
-		console.log(
+		console.error(
 			`${interaction.user.username} attempted to start playing the language game in ${
 				capitalise(language)
-			}, but there are no available sentences for the language.`,
+			}, but there are no available sentences for that language.`,
 		);
+
 		response.editResponse({
 			embeds: [{
 				title: 'No available sentences.',

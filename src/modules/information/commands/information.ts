@@ -6,6 +6,7 @@ import { displayGuildInformation } from './information/guild.ts';
 
 const command: Command = {
 	name: 'information',
+	description: 'Used to display various information.',
 	availability: Availability.MEMBERS,
 	options: [{
 		name: 'bot',
