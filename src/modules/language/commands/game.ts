@@ -12,7 +12,7 @@ import { Availability } from '../../../commands/structs/availability.ts';
 import { Command } from '../../../commands/structs/command.ts';
 import configuration from '../../../configuration.ts';
 import { capitalise } from '../../../formatting.ts';
-import { createInteractionCollector, random, shuffle } from '../../../utils.ts';
+import { createInteractionCollector } from '../../../utils.ts';
 import { SentencePair } from '../data/sentence.ts';
 import { sentenceLists } from '../module.ts';
 
@@ -119,6 +119,35 @@ interface SentenceSelection {
 
 	/** Words to choose from to fit into the blank. */
 	choices: string[];
+}
+
+/**
+ * Generates a pseudo-random number.
+ *
+ * @param max - The maximum value to generate.
+ * @returns A pseudo-random number between 0 and {@link max}.
+ */
+function random(max: number): number {
+	return Math.floor(Math.random() * max);
+}
+
+/**
+ * Takes an array, duplicates it, shuffles it and returns the shuffled view.
+ *
+ * @param array - The array to shuffle.
+ * @returns The shuffled array.
+ */
+function shuffle<T>(array: T[]): T[] {
+	const shuffled = Array.from(array);
+
+	for (let index = 0; index < array.length - 1; index++) {
+		const random = Math.floor(Math.random() * (index + 1));
+		const temporary = shuffled[index]!;
+		shuffled[index] = shuffled[random]!;
+		shuffled[random] = temporary!;
+	}
+
+	return shuffled;
 }
 
 function createSentenceSelection(

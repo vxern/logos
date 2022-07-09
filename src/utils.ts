@@ -18,7 +18,6 @@ import {
 	Snowflake,
 	TextInputStyle,
 	User,
-	VoiceState,
 } from '../deps.ts';
 import { code } from './formatting.ts';
 import { Client } from './client.ts';
@@ -33,35 +32,6 @@ import configuration from './configuration.ts';
  */
 function fromHex(color: string): number {
 	return parseInt(color.replace('#', '0x'));
-}
-
-/**
- * Generates a pseudo-random number.
- *
- * @param max - The maximum value to generate.
- * @returns A pseudo-random number between 0 and {@link max}.
- */
-function random(max: number): number {
-	return Math.floor(Math.random() * max);
-}
-
-/**
- * Taking a URL and a list of parameters, returns the URL with the parameters appended
- * to it.
- *
- * @param url - The URL to format.
- * @param parameters - The parameters to append to the URL.
- * @returns The formatted URL.
- */
-function addParametersToURL(
-	url: string,
-	parameters: Record<string, string>,
-): string {
-	const query = Object.entries(parameters)
-		.map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
-		.join('&');
-
-	return `${url}?${query}`;
 }
 
 /**
@@ -172,25 +142,6 @@ function toModal(
 		customID: customID,
 		components: components,
 	};
-}
-
-/**
- * Takes an array, duplicates it, shuffles it and returns the shuffled view.
- *
- * @param array - The array to shuffle.
- * @returns The shuffled array.
- */
-function shuffle<T>(array: T[]): T[] {
-	const shuffled = Array.from(array);
-
-	for (let index = 0; index < array.length - 1; index++) {
-		const random = Math.floor(Math.random() * (index + 1));
-		const temporary = shuffled[index]!;
-		shuffled[index] = shuffled[random]!;
-		shuffled[random] = temporary!;
-	}
-
-	return shuffled;
 }
 
 /**
@@ -451,16 +402,6 @@ function messageUser(
 }
 
 /**
- * Gets the voice state of a member within a guild.
- *
- * @param member - The member whose voice state to get.
- * @returns The voice state or `undefined`.
- */
-function getVoiceState(member: Member): Promise<VoiceState | undefined> {
-	return member.guild.voiceStates.resolve(member.user.id);
-}
-
-/**
  * Taking an array, splits it into parts of equal sizes.
  *
  * @param array - The array to chunk.
@@ -523,19 +464,15 @@ async function fetchGuildMembers(guild: Guild): Promise<Member[]> {
 }
 
 export {
-	addParametersToURL,
 	chunk,
 	createInteractionCollector,
 	createVerificationPrompt,
 	fetchGuildMembers,
 	fromHex,
 	getChannel,
-	getVoiceState,
 	mentionUser,
 	messageUser,
 	paginate,
-	random,
-	shuffle,
 	toModal,
 	trim,
 };

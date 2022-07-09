@@ -5,6 +5,7 @@ import {
 	Guild,
 	GuildTextChannel,
 	Interaction,
+	Member,
 	VoiceChannel,
 	VoiceState,
 } from '../../../deps.ts';
@@ -14,7 +15,6 @@ import { Controller } from '../controller.ts';
 import { Song } from './data/song.ts';
 import { SongListing } from './data/song-listing.ts';
 import { mention } from '../../formatting.ts';
-import { getVoiceState } from '../../utils.ts';
 import { SongStream } from './data/song-stream.ts';
 import { LoadType } from 'https://deno.land/x/lavalink_types@2.0.6/mod.ts';
 
@@ -482,6 +482,16 @@ class MusicController extends Controller {
 
 		this.setVolume(configuration.music.maxima.volume);
 	}
+}
+
+/**
+ * Gets the voice state of a member within a guild.
+ *
+ * @param member - The member whose voice state to get.
+ * @returns The voice state or `undefined`.
+ */
+function getVoiceState(member: Member): Promise<VoiceState | undefined> {
+	return member.guild.voiceStates.resolve(member.user.id);
 }
 
 export { MusicController };
