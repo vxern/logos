@@ -3,20 +3,6 @@ import { RoleCategory } from '../../structures/role-category.ts';
 
 const categories: Partial<RoleCategory>[] = [
 	{
-		name: 'Ethnicities',
-		collection: {
-			type: 'COLLECTION_LOCALISED',
-			list: [],
-		},
-	},
-	{
-		name: 'Branch',
-		collection: {
-			type: 'COLLECTION_LOCALISED',
-			list: [],
-		},
-	},
-	{
 		name: 'Regions',
 		collection: {
 			type: 'COLLECTION_LOCALISED',

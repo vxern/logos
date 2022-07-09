@@ -77,31 +77,31 @@ class Client extends DiscordClient {
 	 */
 	@event()
 	protected async ready(): Promise<void> {
-    console.time('SETUP');
+		console.time('SETUP');
 
 		this.node = new lavadeno.Node({
-      connection: secrets.modules.music.lavalink,
-      sendGatewayPayload: (_, payload) => this.gateway.send(payload),
-    });
-    await this.node.connect(BigInt(this.user!.id));
+			connection: secrets.modules.music.lavalink,
+			sendGatewayPayload: (_, payload) => this.gateway.send(payload),
+		});
+		await this.node.connect(BigInt(this.user!.id));
 
-    this.on('raw', (event, payload) => {
-      if (
-        event === 'VOICE_SERVER_UPDATE' || event === 'VOICE_STATE_UPDATE'
-      ) {
-        this.node.handleVoiceUpdate(payload);
-      }
-    });
+		this.on('raw', (event, payload) => {
+			if (
+				event === 'VOICE_SERVER_UPDATE' || event === 'VOICE_STATE_UPDATE'
+			) {
+				this.node.handleVoiceUpdate(payload);
+			}
+		});
 
-    const promises = [
-      this.setupGuilds().then(() => loadComponents(this)),
-      this.setupCommands(),
-      this.setupServices(),
-    ];
+		const promises = [
+			this.setupGuilds().then(() => loadComponents(this)),
+			this.setupCommands(),
+			this.setupServices(),
+		];
 
-    await Promise.all(promises);
+		await Promise.all(promises);
 
-    console.timeEnd('SETUP');
+		console.timeEnd('SETUP');
 	}
 
 	/** Sets up guilds for managing. */

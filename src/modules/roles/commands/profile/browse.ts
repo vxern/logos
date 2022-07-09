@@ -153,7 +153,7 @@ async function getSelections(
 	category: RoleCategory,
 ): Promise<SelectComponentOption[]> {
 	if (category.type === 'CATEGORY_GROUP') {
-		return createSelectionsFromCategories(category.categories!);
+		return createSelectionsFromCategories(category.categories!, language);
 	}
 
 	return await createSelectionsFromCollection(
@@ -189,6 +189,7 @@ async function displaySelectionMenu(
 	}
 
 	return {
+		ephemeral: true,
 		embeds: [{
 			title: `${category.emoji}  ${category.name}`,
 			description: category.description,
@@ -205,7 +206,6 @@ async function displaySelectionMenu(
 					: 'Choose a role.',
 			}],
 		}],
-		ephemeral: true,
 	};
 }
 

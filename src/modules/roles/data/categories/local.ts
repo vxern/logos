@@ -64,8 +64,8 @@ const local: RoleCategory[] = _.merge(
 				Object.entries(languages).map(([language, categories]) => [
 					language,
 					categories.find((category) => category.name === baseCategory.name)
-						?.collection?.list ?? [],
-				]),
+						?.collection?.list,
+				]).filter(([_language, categories]) => categories),
 			),
 		},
 	})),
