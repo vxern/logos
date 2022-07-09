@@ -13,7 +13,7 @@ import configuration from '../../configuration.ts';
 import { Controller } from '../controller.ts';
 import { Song } from './data/song.ts';
 import { SongListing } from './data/song-listing.ts';
-import { bold, mention, MentionType } from '../../formatting.ts';
+import { mention, MentionType } from '../../formatting.ts';
 import { getVoiceState } from '../../utils.ts';
 import { SongStream } from './data/song-stream.ts';
 import { LoadType } from 'https://deno.land/x/lavalink_types@2.0.6/mod.ts';
@@ -224,9 +224,7 @@ class MusicController extends Controller {
 			method({
 				embeds: [{
 					title: '👍 Listing queued.',
-					description: `Your listing, ${
-						bold(listing.content.title)
-					}, has been added to the queue.`,
+					description: `Your listing, **${listing.content.title}**, has been added to the queue.`,
 					color: configuration.interactions.responses.colors.green,
 				}],
 			});
@@ -306,9 +304,7 @@ class MusicController extends Controller {
 			method({
 				embeds: [{
 					title: 'Couldn\'t load track',
-					description: `The track, ${
-						bold(currentSong.title)
-					}, could not be loaded.`,
+					description: `The track, **${currentSong.title}**, could not be loaded.`,
 					color: configuration.interactions.responses.colors.red,
 				}],
 			});
@@ -345,14 +341,10 @@ class MusicController extends Controller {
 					!wasLooped ? 'Playing' : 'Replaying'
 				} ${this.current.content.type.toLowerCase()}`,
 				description: `${!wasLooped ? 'Now playing' : 'Replaying'} ${
-					this.current.content.type !== 'COLLECTION' ? '' : `track ${
-						bold(
-							`${
+					this.current.content.type !== 'COLLECTION' ? '' : `track **${
 								this.current.content.position + 1
-							}/${this.current.content.songs.length}`,
-						)
-					} of ${bold(this.current.content.title)}: `
-				} [${bold(currentSong.title)}](${currentSong.url}) as requested by ${
+							}/${this.current.content.songs.length}** of **${this.current.content.title}**: `
+				} [**${currentSong.title}**](${currentSong.url}) as requested by ${
 					mention(this.current.requestedBy, MentionType.USER)
 				}.`,
 				color: configuration.interactions.responses.colors.invisible,

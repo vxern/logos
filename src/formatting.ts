@@ -1,16 +1,6 @@
 import { dayjs } from '../deps.ts';
 
 /**
- * Modifies a string of text to appear bold within Discord.
- *
- * @param target - String of text to format.
- * @returns The formatted string of text.
- */
-function bold(target: string): string {
-	return `**${target}**`;
-}
-
-/**
  * Capitalises the first letter of the given text.
  *
  * @param target - String of text to format.
@@ -40,26 +30,6 @@ function code(target: string): string {
  */
 function codeMultiline(target: string): string {
 	return '```' + target + '```';
-}
-
-/**
- * Modifies a string of text to appear italicised within Discord.
- *
- * @param target - String of text to format.
- * @returns The formatted string of text.
- */
-function italic(target: string): string {
-	return `*${target}*`;
-}
-
-/**
- * Modifies a string of text to appear underlined within Discord.
- *
- * @param target - String of text to format.
- * @returns The formatted string of text.
- */
-function underlined(target: string): string {
-	return `__${target}__`;
 }
 
 /**
@@ -120,14 +90,11 @@ function mention(target: string, type: MentionType): string {
 }
 
 export {
-	bold,
 	capitalise,
 	code,
 	codeMultiline,
-	italic,
 	list,
 	mention,
 	MentionType,
 	time,
-	underlined,
 };

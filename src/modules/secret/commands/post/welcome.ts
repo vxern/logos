@@ -4,7 +4,7 @@ import {
 	MessageComponentType,
 } from '../../../../../deps.ts';
 import { Client } from '../../../../client.ts';
-import { bold, capitalise } from '../../../../formatting.ts';
+import { capitalise } from '../../../../formatting.ts';
 import { fromHex } from '../../../../utils.ts';
 import { getChannelMention } from '../../data/information/information.ts';
 
@@ -17,7 +17,7 @@ async function postWelcome(
 
 	interaction.respond({
 		embeds: [{
-			title: `Welcome to ${bold(interaction.guild!.name!)}` +
+			title: `Welcome to **${interaction.guild!.name!}**` +
 				(language
 					? ` - The largest Discord server dedicated to teaching and learning the ${
 						capitalise(language!)

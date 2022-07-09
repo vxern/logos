@@ -3,7 +3,7 @@ import configuration from '../../../../configuration.ts';
 import { ArticleChange } from '../../../../database/structs/articles/article-change.ts';
 import { Article } from '../../../../database/structs/articles/article.ts';
 import { Warning } from '../../../../database/structs/users/warning.ts';
-import { bold, code, codeMultiline } from '../../../../formatting.ts';
+import { code, codeMultiline } from '../../../../formatting.ts';
 import { mentionUser, trim } from '../../../../utils.ts';
 import { MessageGenerators } from './generators.ts';
 
@@ -96,7 +96,7 @@ const generators: MessageGenerators<GuildEvents> = {
 		message: (member, reason) =>
 			`Entry has been refused to ${mentionUser(member.user)}.
 
-${bold('REASON')}
+**REASON**
 ${codeMultiline(reason)}`,
 		filter: (origin, member, _reason) => origin.id === member.guild.id,
 		color: configuration.interactions.responses.colors.green,
@@ -106,7 +106,7 @@ ${codeMultiline(reason)}`,
 		message: (article, by) =>
 			`An article has been created by ${mentionUser(by.user)}:
 
-${bold(article.content.title)}
+**${article.content.title}**
 
 ${trim(article.content.body, 300)}`,
 		filter: (origin, _article, by) => origin.id === by.guild.id,
@@ -117,7 +117,7 @@ ${trim(article.content.body, 300)}`,
 		message: (article, by) =>
 			`An article submission has been verified by ${mentionUser(by.user)}:
 
-${bold(article.content.title)}
+**${article.content.title}**
 
 ${trim(article.content.body, 300)}`,
 		filter: (origin, _article, by) => origin.id === by.guild.id,
@@ -128,7 +128,7 @@ ${trim(article.content.body, 300)}`,
 		message: (article, by) =>
 			`An article submission has been rejected by ${mentionUser(by.user)}:
 
-${bold(article.content.title)}
+**${article.content.title}**
 
 ${trim(article.content.body, 300)}`,
 		filter: (origin, _article, by) => origin.id === by.guild.id,
@@ -141,7 +141,7 @@ ${trim(article.content.body, 300)}`,
 				mentionUser(by.user)
 			}:
 
-${bold(after.content.title)}
+**${after.content.title}**
 
 ${trim(after.content.body, 300)}`,
 		filter: (origin, _before, _after, by) => origin.id === by.guild.id,
@@ -152,7 +152,7 @@ ${trim(after.content.body, 300)}`,
 		message: (_article, change, by) =>
 			`An article edit has been verified by ${mentionUser(by.user)}:
 
-${bold(change.content.title)}
+**${change.content.title}**
 
 ${trim(change.content.body, 300)}`,
 		filter: (origin, _article, _change, by) => origin.id === by.guild.id,
@@ -163,7 +163,7 @@ ${trim(change.content.body, 300)}`,
 		message: (_article, change, by) =>
 			`An article edit has been rejected by ${mentionUser(by.user)}:
 
-${bold(change.content.title)}
+**${change.content.title}**
 
 ${trim(change.content.body, 300)}`,
 		filter: (origin, _article, _change, by) => origin.id === by.guild.id,

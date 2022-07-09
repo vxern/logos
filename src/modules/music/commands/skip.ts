@@ -7,7 +7,6 @@ import { Client } from '../../../client.ts';
 import { Availability } from '../../../commands/structs/availability.ts';
 import { Command } from '../../../commands/structs/command.ts';
 import configuration from '../../../configuration.ts';
-import { underlined } from '../../../formatting.ts';
 
 const command: Command = {
 	name: 'skip',
@@ -85,9 +84,7 @@ async function skip(client: Client, interaction: Interaction): Promise<void> {
 			ephemeral: true,
 			embeds: [{
 				title: 'Too many skip operations',
-				description: `You may not skip by a number of songs ${
-					underlined('and')
-				} skip to a certain song in the same query.`,
+				description: `You may not skip by a number of songs __and__ skip to a certain song in the same query.`,
 				color: configuration.interactions.responses.colors.red,
 			}],
 		});

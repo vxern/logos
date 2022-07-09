@@ -4,7 +4,6 @@ import {
 	Member,
 	Role as DiscordRole,
 } from '../../../../../deps.ts';
-import { bold } from '../../../../formatting.ts';
 import { RoleCategory } from './role-category.ts';
 import { getMemberRoles } from './role-collection.ts';
 
@@ -109,13 +108,9 @@ async function tryAssignRole(
 		) {
 			interaction.send({
 				embeds: [{
-					title: `Reached the role limit in the role category '${
-						bold(category.name)
-					}'.`,
+					title: `Reached the role limit in the '${category.name}' category.`,
 					description:
-						`You have reached the limit of roles you can assign from within the ${
-							bold(category.name)
-						} category. To choose a new role, unassign one of your roles.`,
+						`You have reached the limit of roles you can assign from within the '${category.name}' category. To choose a new role, unassign one of your roles.`,
 				}],
 				ephemeral: true,
 			});
