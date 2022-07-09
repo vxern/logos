@@ -20,7 +20,6 @@ import {
 	User,
 	VoiceState,
 } from '../deps.ts';
-import languages from 'https://deno.land/x/language@v0.1.0/languages.ts';
 import { code } from './formatting.ts';
 import { Client } from './client.ts';
 import configuration from './configuration.ts';
@@ -34,30 +33,6 @@ import configuration from './configuration.ts';
  */
 function fromHex(color: string): number {
 	return parseInt(color.replace('#', '0x'));
-}
-
-/**
- * Returns a language from its ISO-693-1 language code.
- *
- * @param languageCode - The ISO-693-1 language code of a language.
- * @returns The language.
- */
-function getLanguage(languageCode: string): string {
-	return Object.entries(languages.lang).find(([key, _]) =>
-		key === languageCode
-	)![1][0];
-}
-
-/**
- * Returns the ISO-693-1 language code of a language.
- *
- * @param language - The language whose code to return.
- * @returns ISO-693-1 language code.
- */
-function getLanguageCode(language: string): string {
-	return Object.entries(languages.lang).find(([_, [name]]) =>
-		name.toLowerCase() === language
-	)![0];
 }
 
 /**
@@ -555,8 +530,6 @@ export {
 	fetchGuildMembers,
 	fromHex,
 	getChannel,
-	getLanguage,
-	getLanguageCode,
 	getVoiceState,
 	mentionUser,
 	messageUser,
