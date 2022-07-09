@@ -9,7 +9,7 @@ import { Client } from '../../../client.ts';
 import { Availability } from '../../../commands/structs/availability.ts';
 import { Command } from '../../../commands/structs/command.ts';
 import configuration, { minute, week } from '../../../configuration.ts';
-import { mention, MentionType } from '../../../formatting.ts';
+import { mention } from '../../../formatting.ts';
 import { mentionUser, messageUser } from '../../../utils.ts';
 import { user } from '../../parameters.ts';
 import {
@@ -161,7 +161,7 @@ async function setTimeout(
 		embeds: [{
 			title: 'Member timed out',
 			description: `Member ${
-				mention(member!.id, MentionType.USER)
+				mention(member!.id, 'USER')
 			} has been timed out for a duration of ${dayjs(until).fromNow(true)}.`,
 			color: configuration.interactions.responses.colors.blue,
 		}],
@@ -172,7 +172,7 @@ async function setTimeout(
 	interaction.channel!.send({
 		embeds: [{
 			description: `${
-				mention(member!.id, MentionType.USER)
+				mention(member!.id, 'USER')
 			} has been timed out for a duration of ${
 				dayjs(until).fromNow(true)
 			} for: ${reason}`,

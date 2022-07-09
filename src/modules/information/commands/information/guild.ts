@@ -1,7 +1,7 @@
 import { Guild, Interaction } from '../../../../../deps.ts';
 import { Client } from '../../../../client.ts';
 import configuration from '../../../../configuration.ts';
-import { mention, MentionType, time } from '../../../../formatting.ts';
+import { mention, displayTime } from '../../../../formatting.ts';
 import { fetchGuildMembers } from '../../../../utils.ts';
 import { getProficiencyCategory } from '../../../roles/module.ts';
 
@@ -33,7 +33,7 @@ async function displayGuildInformation(
 				},
 				{
 					name: '⏱️ Created',
-					value: `${time(guild.timestamp.getTime())}`,
+					value: `${displayTime(guild.timestamp.getTime())}`,
 					inline: true,
 				},
 				{
@@ -44,7 +44,7 @@ async function displayGuildInformation(
 				hasDistinctOwner
 					? {
 						name: '👑 Owner',
-						value: mention(guild.ownerID!, MentionType.USER),
+						value: mention(guild.ownerID!, 'USER'),
 						inline: true,
 					}
 					: {
@@ -96,7 +96,7 @@ async function getProficiencyDistribution(guild: Guild): Promise<string> {
 	const roles = await guild.roles.fetchAll();
 	const proficiencyTags = roles
 		.filter((role) => proficiencyNames.includes(role.name))
-		.map((role) => mention(role.id, MentionType.ROLE));
+		.map((role) => mention(role.id, 'ROLE'));
 
 	return displayProficiencyDistribution(
 		proficiencyTags,

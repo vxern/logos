@@ -13,7 +13,7 @@ import configuration from '../../configuration.ts';
 import { Controller } from '../controller.ts';
 import { Song } from './data/song.ts';
 import { SongListing } from './data/song-listing.ts';
-import { mention, MentionType } from '../../formatting.ts';
+import { mention } from '../../formatting.ts';
 import { getVoiceState } from '../../utils.ts';
 import { SongStream } from './data/song-stream.ts';
 import { LoadType } from 'https://deno.land/x/lavalink_types@2.0.6/mod.ts';
@@ -345,7 +345,7 @@ class MusicController extends Controller {
 								this.current.content.position + 1
 							}/${this.current.content.songs.length}** of **${this.current.content.title}**: `
 				} [**${currentSong.title}**](${currentSong.url}) as requested by ${
-					mention(this.current.requestedBy, MentionType.USER)
+					mention(this.current.requestedBy, 'USER')
 				}.`,
 				color: configuration.interactions.responses.colors.invisible,
 			}],

@@ -24,7 +24,7 @@ import {
 } from '../../../database/structs/articles/article.ts';
 import { Document } from '../../../database/structs/document.ts';
 import { User } from '../../../database/structs/users/user.ts';
-import { list, mention, MentionType } from '../../../formatting.ts';
+import { list, mention } from '../../../formatting.ts';
 import {
 	createInteractionCollector,
 	paginate,
@@ -390,7 +390,7 @@ function showArticle({
 	show: boolean;
 }): void {
 	const contributorsString = contributors.map((document) =>
-		mention(document.data.account.id, MentionType.USER)
+		mention(document.data.account.id, 'USER')
 	).join(', ');
 
 	const content = getMostRecentArticleContent({

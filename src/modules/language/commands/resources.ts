@@ -3,7 +3,7 @@ import { Client } from '../../../client.ts';
 import { Availability } from '../../../commands/structs/availability.ts';
 import { Command } from '../../../commands/structs/command.ts';
 import configuration from '../../../configuration.ts';
-import { mention, MentionType } from '../../../formatting.ts';
+import { mention } from '../../../formatting.ts';
 
 const command: Command = {
 	name: 'resources',
@@ -25,7 +25,7 @@ function resources(client: Client, interaction: Interaction): void {
 Feel free to contribute to the project by forking the repository, adding your own resources, and creating a pull request.
 
 If you don't know how to use git, you can still contribute by listing the resources and tagging ${
-					mention(configuration.guilds.owner.id, MentionType.USER)
+					mention(configuration.guilds.owner.id, 'USER')
 				}.`,
 			color: configuration.interactions.responses.colors.blue,
 		}],

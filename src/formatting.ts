@@ -45,35 +45,23 @@ function list(items: string[]): string {
 /**
  * Taking a unix timestamp, returns a formatted, human-readable time expression.
  *
- * @param unix - Unix timestamp.
+ * @param timestamp - Unix timestamp.
  * @returns The formatted, human-readable time expression.
  */
-function time(unix: number): string {
-	const dateTime = dayjs(unix);
+function displayTime(timestamp: number): string {
+	const dateTime = dayjs(timestamp);
 
 	return `${dateTime.format('D MMMM YYYY')} (${dateTime.fromNow()})`;
 }
 
 /** Defines the type of Discord mention. */
-enum MentionType {
-	/** A channel mention. */
-	CHANNEL,
-	/** A role mention. */
-	ROLE,
-	/** A user mention. */
-	USER,
-}
+type MentionType = 'CHANNEL' | 'ROLE' | 'USER';
 
-/** Defines the formatting prefix corresponding to the mention type. */
-const prefixes = {
-	/** Channel prefix. */
-	[MentionType.CHANNEL]: '#',
-
-	/** Role prefix. */
-	[MentionType.ROLE]: '@&',
-
-	/** User prefix. */
-	[MentionType.USER]: '@',
+/** Defines the formatting prefix corresponding to the type of mention. */
+const prefixes: Record<MentionType, string> = {
+	'CHANNEL': '#',
+	'ROLE': '@&',
+	'USER': '@',
 };
 
 /**
@@ -84,9 +72,7 @@ const prefixes = {
  * @returns The formatted string of text.
  */
 function mention(target: string, type: MentionType): string {
-	const prefix = prefixes[type];
-
-	return `<${prefix}${target}>`;
+	return `<${prefixes[type]}${target}>`;
 }
 
 export {
@@ -95,6 +81,5 @@ export {
 	codeMultiline,
 	list,
 	mention,
-	MentionType,
-	time,
+	displayTime,
 };
