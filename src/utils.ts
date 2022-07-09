@@ -1,8 +1,6 @@
 import {
 	_,
-	ApplicationCommand,
 	ApplicationCommandInteraction,
-	ApplicationCommandOption,
 	ButtonStyle,
 	Collector,
 	EmbedField,
@@ -26,8 +24,6 @@ import {
 	VoiceState,
 } from '../deps.ts';
 import languages from 'https://deno.land/x/language@v0.1.0/languages.ts';
-import { Command } from './commands/structs/command.ts';
-import { Option } from './commands/structs/option.ts';
 import { code } from './formatting.ts';
 import { Client } from './client.ts';
 import configuration from './configuration.ts';
@@ -49,51 +45,6 @@ type Unpacked<T> = T extends (infer U)[] ? U
 	: T extends (...args: unknown[]) => infer U ? U
 	: T extends Promise<infer U> ? U
 	: T;
-
-/**
- * Compares two command or option objects to determine which keys one or the
- * other is missing.
- *
- * @param left - The Harmony object.
- * @param right - The source object.
- * @returns An array of keys which differ between the objects.
- */
-function getMissingKeys(
-	left: ApplicationCommand | ApplicationCommandOption,
-	right: Command | Option,
-): string[];
-function getMissingKeys<
-	L extends ApplicationCommand | ApplicationCommandOption,
-	R extends Partial<L>,
->(
-	left: L,
-	right: R,
-): string[] {
-	const leftKeys = Object.keys(left);
-	const rightKeys = Object.keys(right);
-	const keysToIgnore = [
-		...leftKeys.filter((leftKey) => !rightKeys.includes(leftKey)),
-		...rightKeys.filter((rightKey) =>
-			!leftKeys.includes(rightKey) && rightKey !== 'options'
-		),
-	];
-
-	const unequalKeys = _.reduce(
-		right,
-		(result: string[], value: unknown, key: keyof L) => {
-			return _.isEqual(value, left[key])
-				? result
-				: result.concat(key.toString());
-		},
-		[],
-	) as string[];
-
-	const missingKeys = unequalKeys.filter((unequalKey) =>
-		!keysToIgnore.includes(unequalKey)
-	);
-
-	return missingKeys;
-}
 
 /**
  * Finds a channel within a guild by its name.
@@ -678,7 +629,6 @@ export {
 	getInvite,
 	getLanguage,
 	getLanguageCode,
-	getMissingKeys,
 	getVoiceState,
 	mentionUser,
 	messageUser,
