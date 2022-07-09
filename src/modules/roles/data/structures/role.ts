@@ -165,7 +165,7 @@ async function modifyRoles(action: RoleAction): Promise<boolean> {
 		}
 
 		for (
-			const role of resolvedRolesToAdd.filter((role) => role) as DiscordRole[]
+			const role of <DiscordRole[]> resolvedRolesToAdd.filter((role) => role)
 		) {
 			// Assign role to member.
 			action.member.roles.add(role!.id);
@@ -204,9 +204,9 @@ async function modifyRoles(action: RoleAction): Promise<boolean> {
 			);
 		}
 
-		const resolvedRoles = resolvedRolesToRemove.filter((role) =>
+		const resolvedRoles = <DiscordRole[]> resolvedRolesToRemove.filter((role) =>
 			role
-		) as DiscordRole[];
+		);
 
 		// Remove cached roles for a member.
 		action.member.client.cache.delete(

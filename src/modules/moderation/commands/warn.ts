@@ -22,7 +22,7 @@ const command: Command = {
 };
 
 async function warn(client: Client, interaction: Interaction): Promise<void> {
-	const data = interaction.data as InteractionApplicationCommandData;
+	const data = <InteractionApplicationCommandData> interaction.data;
 
 	const userIdentifier = <string> data.options[0]!.value!;
 	const reason = <string> data.options[1]!.value!;

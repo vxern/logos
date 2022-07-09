@@ -20,7 +20,7 @@ const videoExpression = new RegExp(
 
 const resolver: ListingResolver = async (client, interaction, option) => {
 	if (option.name !== 'url') {
-		const results = await YouTube.search(option.value, {
+		const results = <(Video | Playlist)[]> await YouTube.search(option.value, {
 			limit: 20,
 			type: 'all',
 			safeSearch: false,
@@ -28,8 +28,7 @@ const resolver: ListingResolver = async (client, interaction, option) => {
 			result.filter((element) =>
 				element.type === 'video' || element.type === 'playlist'
 			)
-		) as (Video | Playlist)[];
-
+		);
 		if (results.length === 0) return undefined;
 
 		const [collector, customID] = createInteractionCollector(client, {
@@ -65,7 +64,7 @@ const resolver: ListingResolver = async (client, interaction, option) => {
 		});
 
 		const selection =
-			(await collector.waitFor('collect'))[0] as MessageComponentInteraction;
+			<MessageComponentInteraction> (await collector.waitFor('collect'))[0];
 
 		collector.end();
 
@@ -73,16 +72,13 @@ const resolver: ListingResolver = async (client, interaction, option) => {
 			type: InteractionResponseType.DEFERRED_MESSAGE_UPDATE,
 		});
 
-		const index = Number(selection.data.values![0]! as string);
-
+		const index = Number(<string> selection.data.values![0]!);
 		const result = results[index]!;
-
 		if (result.type === 'video') {
 			return fromYouTubeVideo(result, interaction.user.id);
 		}
 
 		const playlist = await YouTube.getPlaylist(result.url!);
-
 		return fromYouTubePlaylist(playlist, interaction.user.id);
 	}
 

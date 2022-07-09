@@ -86,7 +86,7 @@ async function play(
 		interaction: interaction.deferred ? interaction : undefined,
 		listing: listing,
 		channels: {
-			text: interaction.channel as GuildTextChannel,
+			text: <GuildTextChannel> interaction.channel,
 			voice: voiceState!.channel!,
 		},
 	});

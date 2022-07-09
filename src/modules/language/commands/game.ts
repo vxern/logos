@@ -87,7 +87,7 @@ async function game(client: Client, interaction: Interaction): Promise<void> {
 
 			const selection =
 				// deno-lint-ignore no-await-in-loop
-				(await collector.waitFor('collect'))[0] as MessageComponentInteraction;
+				<MessageComponentInteraction> (await collector.waitFor('collect'))[0];
 			selection.respond({
 				type: InteractionResponseType.DEFERRED_MESSAGE_UPDATE,
 			});

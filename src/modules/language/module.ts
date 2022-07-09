@@ -60,7 +60,7 @@ async function loadComponents(client: Client): Promise<void> {
 
 		const language = entry.name.split('.')[0]!;
 
-		const records = await parseCSV(
+		const records = <[string, string, string, string][]> await parseCSV(
 			await Deno.readTextFile(
 				`./src/modules/language/data/sentences/${entry.name}`,
 			),
@@ -68,7 +68,7 @@ async function loadComponents(client: Client): Promise<void> {
 				lazyQuotes: true,
 				separator: '\t',
 			},
-		) as [string, string, string, string][];
+		);
 
 		sentenceLists[language] = [];
 		for (

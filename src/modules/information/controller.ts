@@ -58,8 +58,8 @@ class LoggingController extends Controller {
 				'collect',
 				(...args) =>
 					this.log(
-						event as keyof ClientEvents,
-						...(args as ClientEvents[keyof ClientEvents]),
+						<keyof ClientEvents> event,
+						...(<ClientEvents[keyof ClientEvents]> args),
 					),
 			);
 
@@ -87,15 +87,10 @@ class LoggingController extends Controller {
 			);
 		}
 
-		const filter = (entry.filter as (...args: unknown[]) => boolean)(
-			this.channel.guild,
-			...args,
-		);
+		const filter = entry.filter(this.channel.guild, ...args);
 		if (!filter) return;
 
-		const message = await (entry.message as (
-			...args: unknown[]
-		) => Promise<string> | string | undefined)(...args);
+		const message = await entry.message(...args);
 		if (!message) return;
 
 		this.channel!.send({

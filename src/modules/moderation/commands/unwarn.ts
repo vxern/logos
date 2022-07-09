@@ -34,7 +34,7 @@ async function unwarn(
 	client: Client,
 	interaction: Interaction,
 ): Promise<void> {
-	const data = interaction.data as InteractionApplicationCommandData;
+	const data = <InteractionApplicationCommandData> interaction.data;
 
 	const userIdentifierOption = data.options[0]!;
 	const warningOption = data.options[1]!;
@@ -103,8 +103,7 @@ async function unwarn(
 		return;
 	}
 
-	const warningReferenceID = warningOption.value! as string;
-
+	const warningReferenceID = <string> warningOption.value!;
 	const warningToRemove = relevantWarnings.find((warning) =>
 		warning.ref.value.id === warningReferenceID
 	);

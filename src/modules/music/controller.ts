@@ -224,7 +224,8 @@ class MusicController extends Controller {
 			method({
 				embeds: [{
 					title: '👍 Listing queued.',
-					description: `Your listing, **${listing.content.title}**, has been added to the queue.`,
+					description:
+						`Your listing, **${listing.content.title}**, has been added to the queue.`,
 					color: configuration.interactions.responses.colors.green,
 				}],
 			});
@@ -304,7 +305,8 @@ class MusicController extends Controller {
 			method({
 				embeds: [{
 					title: 'Couldn\'t load track',
-					description: `The track, **${currentSong.title}**, could not be loaded.`,
+					description:
+						`The track, **${currentSong.title}**, could not be loaded.`,
 					color: configuration.interactions.responses.colors.red,
 				}],
 			});
@@ -334,16 +336,18 @@ class MusicController extends Controller {
 		method({
 			embeds: [{
 				title: `${
-					(configuration.music.symbols as { [key: string]: string })[
+					(<Record<string, string>> configuration.music.symbols)[
 						this.current.content.type.toLowerCase()
 					]
 				} ${
 					!wasLooped ? 'Playing' : 'Replaying'
 				} ${this.current.content.type.toLowerCase()}`,
 				description: `${!wasLooped ? 'Now playing' : 'Replaying'} ${
-					this.current.content.type !== 'COLLECTION' ? '' : `track **${
-								this.current.content.position + 1
-							}/${this.current.content.songs.length}** of **${this.current.content.title}**: `
+					this.current.content.type !== 'COLLECTION'
+						? ''
+						: `track **${
+							this.current.content.position + 1
+						}/${this.current.content.songs.length}** of **${this.current.content.title}**: `
 				} [**${currentSong.title}**](${currentSong.url}) as requested by ${
 					mention(this.current.requestedBy, 'USER')
 				}.`,

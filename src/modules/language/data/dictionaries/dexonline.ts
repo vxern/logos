@@ -5,7 +5,7 @@ import {
 } from '../dictionary.ts';
 
 /** Maps numbers to their superscript variants. */
-const superscript = {
+const superscript: Record<string, string> = {
 	'0': '⁰',
 	'1': '¹',
 	'2': '²',
@@ -16,7 +16,7 @@ const superscript = {
 	'7': '⁷',
 	'8': '⁸',
 	'9': '⁹',
-} as { [key: string]: string };
+};
 
 /** Represents a Dexonline definition entry. */
 interface Definition {
@@ -87,6 +87,7 @@ const adapter: DictionaryAdapter = {
 						superscript[number]!
 					).join(''),
 			) // Spread letters out
+			.replaceAll('&quot;', '"') // Remove XHTML relics.
 			.replaceAll('#', '__') // Underline
 			.replaceAll('@', '**') // Bolden
 			.replaceAll('$', '*'); // Italicise

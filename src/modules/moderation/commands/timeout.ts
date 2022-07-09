@@ -42,7 +42,7 @@ async function setTimeout(
 	client: Client,
 	interaction: Interaction,
 ): Promise<void> {
-	const data = interaction.data as InteractionApplicationCommandData;
+	const data = <InteractionApplicationCommandData> interaction.data;
 	const options = data.options[0]!.options!;
 
 	const userIdentifierOption = options.find((option) => option.name === 'user');
@@ -185,7 +185,7 @@ async function clearTimeout(
 	client: Client,
 	interaction: Interaction,
 ): Promise<void> {
-	const data = interaction.data as InteractionApplicationCommandData;
+	const data = <InteractionApplicationCommandData> interaction.data;
 
 	const userIdentifier = <string> data.options[0]!.options![0]!.value!;
 

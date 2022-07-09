@@ -300,13 +300,14 @@ function createInteractionCollector(
 					? interaction.data.custom_id
 					: interaction.data.custom_id.split('|')[0]) ===
 				(!customID.includes('|') ? customID : customID.split('|')[0]),
-		!settings.user ? undefined
-		: (interaction) => interaction.user.id === settings.user!.id,
+		!settings.user
+			? undefined
+			: (interaction) => interaction.user.id === settings.user!.id,
 	];
 
-	const conditions = conditionsUnfiltered.filter((condition) =>
-		condition
-	) as ConditionChecker[];
+	const conditions = <ConditionChecker[]> conditionsUnfiltered.filter((
+		condition,
+	) => condition);
 
 	const condition = (interaction: Interaction) =>
 		conditions.every((condition) => condition(interaction));
@@ -371,9 +372,9 @@ async function createVerificationPrompt(
 	});
 
 	const selection =
-		(await collector.waitFor('collect'))[0] as MessageComponentInteraction;
+		<MessageComponentInteraction> (await collector.waitFor('collect'))[0];
 
-	const accepted = selection.data!.custom_id.split('|')[1]! === 'true';
+	const accepted = selection.data.custom_id.split('|')[1]! === 'true';
 
 	verificationMessage.delete();
 

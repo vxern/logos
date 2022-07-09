@@ -36,8 +36,8 @@ const command: Command = {
 };
 
 async function word(client: Client, interaction: Interaction): Promise<void> {
-	const data = interaction.data! as InteractionApplicationCommandData;
-	const word = data.options[0]!.value! as string;
+	const data = <InteractionApplicationCommandData> interaction.data!;
+	const word = <string> data.options[0]!.value!;
 	const verbose =
 		data.options.find((option) => option.name === 'verbose')?.value ?? true;
 	const show = data.options.find((option) => option.name === 'show')?.value ??

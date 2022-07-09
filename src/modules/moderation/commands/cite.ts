@@ -17,6 +17,7 @@ const command: Command = {
 	options: [{
 		name: 'rule',
 		type: ApplicationCommandOptionType.STRING,
+		description: 'The rule to cite.',
 		required: true,
 		autocomplete: true,
 	}],
@@ -38,7 +39,7 @@ async function cite(
 		return;
 	}
 
-	const data = interaction.data as InteractionApplicationCommandData;
+	const data = <InteractionApplicationCommandData> interaction.data;
 	const index = Number(data.options[0]!.value!);
 	const [title, ruleGenerator] = Object.entries(rules)[index]!;
 

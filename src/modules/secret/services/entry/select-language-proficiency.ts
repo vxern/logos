@@ -47,7 +47,7 @@ async function onSelectLanguageProficiency(
 		);
 
 		const submission =
-			(await collector.waitFor('collect'))[0] as ModalSubmitInteraction;
+			<ModalSubmitInteraction> (await collector.waitFor('collect'))[0];
 
 		submission.respond({
 			embeds: [{
@@ -141,7 +141,7 @@ async function verifyUser(
 	});
 
 	const selection =
-		(await collector.waitFor('collect'))[0] as MessageComponentInteraction;
+		<MessageComponentInteraction> (await collector.waitFor('collect'))[0];
 
 	const accepted = selection.data!.custom_id.split('|')[1]! === 'true';
 

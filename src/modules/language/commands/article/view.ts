@@ -44,7 +44,7 @@ async function viewArticle(
 		});
 	}
 
-	const data = interaction.data as InteractionApplicationCommandData;
+	const data = <InteractionApplicationCommandData> interaction.data;
 	const index = parseInt(data.options[0]!.options![0]!.value!);
 	const show =
 		data.options[0]!.options!.find((option) => option.name === 'show')?.value ??
@@ -73,7 +73,7 @@ async function viewArticle(
 		interaction: interaction,
 		document: document,
 		changes: changes,
-		contributors: contributors as Document<User>[],
+		contributors: <Document<User>[]> contributors,
 		show: show,
 	});
 }

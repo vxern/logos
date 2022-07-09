@@ -1,8 +1,8 @@
 import {
+	_,
 	ApplicationCommand,
 	ApplicationCommandOption,
 	ApplicationCommandOptionType,
-_,
 } from '../../deps.ts';
 import { Command } from '../commands/structs/command.ts';
 import { mergeOptions, unimplemented } from '../commands/command.ts';
@@ -55,7 +55,7 @@ function getMissingKeys<
 		),
 	];
 
-	const unequalKeys = _.reduce(
+	const unequalKeys = <string[]> _.reduce(
 		right,
 		(result: string[], value: unknown, key: keyof L) => {
 			return _.isEqual(value, left[key])
@@ -63,7 +63,7 @@ function getMissingKeys<
 				: result.concat(key.toString());
 		},
 		[],
-	) as string[];
+	);
 
 	const missingKeys = unequalKeys.filter((unequalKey) =>
 		!keysToIgnore.includes(unequalKey)
@@ -128,7 +128,7 @@ function supplyMissingProperties<T extends Command | Option>(
 				}
 		}
 		if (!element.options) continue;
-		supplyMissingProperties((element as Option).options!);
+		supplyMissingProperties((<Option> element).options!);
 	}
 	return elements;
 }

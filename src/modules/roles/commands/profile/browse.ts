@@ -100,11 +100,11 @@ async function* browse(
 	while (!isEnded()) {
 		try {
 			const category = traverse(data.navigation);
-			const method = (data.interaction.responded
+			const method = <(
+				data: InteractionResponse,
+			) => Promise<Interaction>> (data.interaction.responded
 				? data.interaction.editResponse
-				: data.interaction.respond) as (
-					data: InteractionResponse,
-				) => Promise<Interaction>;
+				: data.interaction.respond);
 
 			// deno-lint-ignore no-await-in-loop
 			const menu = await displaySelectionMenu(data, customID, category);
@@ -112,7 +112,7 @@ async function* browse(
 
 			const selection =
 				// deno-lint-ignore no-await-in-loop
-				(await collector.waitFor('collect'))[0] as MessageComponentInteraction;
+				<MessageComponentInteraction> (await collector.waitFor('collect'))[0];
 			selection.respond({
 				type: InteractionResponseType.DEFERRED_MESSAGE_UPDATE,
 			});
