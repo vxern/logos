@@ -40,9 +40,7 @@ async function postWelcome(
 				style: ButtonStyle.GREY,
 				label: 'I have read the rules, and agree to abide by them',
 				customID: 'ACCEPTED_RULES',
-				emoji: {
-					name: '✅',
-				},
+				emoji: { name: '✅' },
 			}],
 		}],
 	});

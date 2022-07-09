@@ -1,6 +1,5 @@
 import {
 	_,
-	ApplicationCommandInteraction,
 	ButtonStyle,
 	Collector,
 	EmbedField,
@@ -12,7 +11,6 @@ import {
 	InteractionResponseModal,
 	InteractionResponseType,
 	InteractionType,
-	Invite,
 	Member,
 	Message,
 	MessageComponentData,
@@ -22,6 +20,7 @@ import {
 	TextInputStyle,
 	User,
 	VoiceState,
+  colors,
 } from '../deps.ts';
 import languages from 'https://deno.land/x/language@v0.1.0/languages.ts';
 import { code } from './formatting.ts';
@@ -39,28 +38,21 @@ async function findChannelByName(
 	guild: Guild,
 	name: string,
 ): Promise<GuildChannel | undefined> {
-	const channels = await guild.channels.array();
-	return channels.find((channel) =>
-		channel.name.toLowerCase().includes(name.toLowerCase())
-	);
-}
+	const channels = await guild.channels.array().catch(() => undefined);
+  if (!channels) {
+    console.error(`Failed to fetch channels for guild ${colors.bold(guild.name!)}.`);
+    return undefined;
+  }
 
-/**
- * Gets the most viable invite link to a guild.
- *
- * @param guild - The guild to which the invite link to find.
- * @returns The invite link.
- */
-async function getInvite(guild: Guild): Promise<Invite> {
-	const invites = await guild.invites.fetchAll();
-	return invites.find((invite) =>
-		invite.inviter?.id === guild.ownerID! &&
-		invite.maxAge === 0
-	) ??
-		await guild.invites.create(
-			(await findChannelByName(guild, 'welcome'))!.id,
-			{ maxAge: 0, maxUses: 0, temporary: false },
-		);
+  const channel = channels.find((channel) =>
+    channel.name.toLowerCase().includes(name.toLowerCase())
+  );
+  if (!channel) {
+    console.error(`Failed to fetch channel with name '${name}' for guild ${colors.bold(guild.name!)}.`);
+    return undefined;
+  }
+
+  return channel;
 }
 
 /**
@@ -125,19 +117,6 @@ function addParametersToURL(
 		.join('&');
 
 	return `${url}?${query}`;
-}
-
-/**
- * Concatenates a command's name, subcommand group and subcommand into a
- * single string representing the whole command name.
- *
- * @param command - The interaction whose command to display.
- * @returns The full command name.
- */
-function displayCommand(command: ApplicationCommandInteraction): string {
-	const parts = [command.name, command.subCommandGroup, command.subCommand];
-
-	return parts.filter((part) => part).join(' ');
 }
 
 /**
@@ -603,12 +582,10 @@ export {
 	chunk,
 	createInteractionCollector,
 	createVerificationPrompt,
-	displayCommand,
 	fetchGuildMembers,
 	findChannelByName,
 	fromHex,
 	getChannel,
-	getInvite,
 	getLanguage,
 	getLanguageCode,
 	getVoiceState,
