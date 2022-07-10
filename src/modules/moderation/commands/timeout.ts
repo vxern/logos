@@ -139,13 +139,14 @@ async function setTimeout(
 
 	let messageSent = true;
 	if (!member.communicationDisabledUntil) {
-		await messageUser(member!.user, interaction.guild!, {
+		const message = await messageUser(member!.user, interaction.guild!, {
 			title: 'You have been timed out',
 			description: `You have been timed out for a duration of ${
 				dayjs(until).fromNow(true)
 			} for: ${reason}`,
 			color: configuration.interactions.responses.colors.yellow,
-		}).catch(() => messageSent = false);
+		});
+    messageSent = !!message;
 	}
 
 	client.logging.get(interaction.guild!.id)?.log(

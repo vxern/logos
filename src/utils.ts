@@ -390,13 +390,13 @@ async function createVerificationPrompt(
 	return [accepted, selection.member!];
 }
 
-/** Creates a DM with the given user. */
+/** Writes a DM message to a given user. */
 function messageUser(
 	user: User,
 	guild: Guild,
 	embed: Omit<EmbedPayload, 'thumbnail' | 'footer'>,
 	components?: MessageComponentData[],
-): Promise<Message> {
+): Promise<Message | undefined> {
 	const guildName = guild!.name!;
 
 	return user.send({
@@ -408,7 +408,7 @@ function messageUser(
 			},
 		}],
 		components: components,
-	});
+	}).catch(() => undefined);
 }
 
 /**

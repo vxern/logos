@@ -2,6 +2,7 @@ import {
 	AuditLogEntry,
 	AuditLogEvents,
 	ButtonStyle,
+	colors,
 	InteractionType,
 	Member,
 	MessageComponentInteraction,
@@ -175,13 +176,20 @@ async function verifyEnforcer(
 			}],
 		}],
 	);
+	if (!verificationMessage) {
+		console.error(
+			`Failed to send verification message to the owner concerning guild ${
+				colors.bold(owner.guild.name!)
+			}.`,
+		);
+	}
 
 	const selection =
 		<MessageComponentInteraction> (await collector.waitFor('collect'))[0];
 
 	const verified = selection.data!.custom_id.split('|')[1]! === 'true';
 
-	verificationMessage.delete();
+	verificationMessage?.delete();
 
 	client.logging.get(action.member.guild.id)?.log(
 		verified ? 'moderatorInquestPass' : 'moderatorInquestFail',
