@@ -5,6 +5,8 @@ import {
 	Member,
 	Role as DiscordRole,
 } from '../../../../../deps.ts';
+import configuration from '../../../../configuration.ts';
+import { messageUser } from '../../../../utils.ts';
 import { RoleCategory } from './role-category.ts';
 import { getMemberRoles } from './role-collection.ts';
 
@@ -127,12 +129,12 @@ async function tryAssignRole(
 			category.limit !== -1
 		) {
 			interaction.send({
+				ephemeral: true,
 				embeds: [{
 					title: `Reached the role limit in the '${category.name}' category.`,
 					description:
 						`You have reached the limit of roles you can assign from within the '${category.name}' category. To choose a new role, unassign one of your roles.`,
 				}],
-				ephemeral: true,
 			});
 			return;
 		}
@@ -147,6 +149,30 @@ async function tryAssignRole(
 	}
 
 	modifyRoles(action);
+
+	const assignMessage = !action.roles.add
+		? ''
+		: (role.onAssignMessage!(role.name) + (action.roles.remove ? '\n\n' : ''));
+	const unassignMessage = !action.roles.remove || category.limit === 1
+		? ''
+		: role.onUnassignMessage!(role.name);
+
+	const embed = {
+		description: assignMessage + unassignMessage,
+		color: configuration.interactions.responses.colors.green,
+	};
+
+	const message = await messageUser(
+		interaction.user,
+		interaction.guild!,
+		embed,
+	);
+	if (message) return;
+
+	interaction.send({
+		ephemeral: true,
+		embeds: [embed],
+	});
 }
 
 /**
