@@ -1,7 +1,7 @@
 import { colors, Guild, Interaction } from '../../../../../deps.ts';
 import { Client } from '../../../../client.ts';
 import configuration from '../../../../configuration.ts';
-import { displayTime, mention } from '../../../../formatting.ts';
+import { capitalise, displayTime, mention } from '../../../../formatting.ts';
 import { fetchGuildMembers } from '../../../../utils.ts';
 import { getProficiencyCategory } from '../../../roles/module.ts';
 
@@ -57,7 +57,7 @@ async function displayGuildInformation(
 						inline: true,
 					}
 					: ((enforcerRoleName) => ({
-						name: `⚖️ ${enforcerRoleName}s`,
+						name: `⚖️ ${capitalise(enforcerRoleName)}s`,
 						value:
 							`This server is overseen by a collective of ${enforcerRoleName}s, rather than a single owner.`,
 						inline: true,
