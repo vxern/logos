@@ -12,7 +12,7 @@ import { Availability } from '../../../commands/structs/availability.ts';
 import { Command } from '../../../commands/structs/command.ts';
 import configuration from '../../../configuration.ts';
 import { capitalise } from '../../../formatting.ts';
-import { createInteractionCollector } from '../../../utils.ts';
+import { createInteractionCollector, random } from '../../../utils.ts';
 import { SentencePair } from '../data/sentence.ts';
 import { sentenceLists } from '../module.ts';
 
@@ -120,16 +120,6 @@ interface SentenceSelection {
 
 	/** Words to choose from to fit into the blank. */
 	choices: string[];
-}
-
-/**
- * Generates a pseudo-random number.
- *
- * @param max - The maximum value to generate.
- * @returns A pseudo-random number between 0 and {@link max}.
- */
-function random(max: number): number {
-	return Math.floor(Math.random() * max);
 }
 
 /**

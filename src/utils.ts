@@ -2,6 +2,7 @@ import {
 	_,
 	ButtonStyle,
 	Collector,
+	colors,
 	EmbedField,
 	EmbedPayload,
 	Guild,
@@ -42,15 +43,23 @@ function fromHex(color: string): number {
  * @param name - The name of the channel to find.
  * @returns The found channel.
  */
-async function getChannel(
+async function getTextChannel(
 	guild: Guild,
 	name: string,
 ): Promise<GuildTextChannel | undefined> {
-	const channels = await guild.channels.array();
+	const channels = await guild.channels.array().catch(() => undefined);
+	if (!channels) {
+		console.error(
+			`Failed to fetch channels for guild ${colors.bold(guild.name!)}.`,
+		);
+		return undefined;
+	}
 
 	const nameAsLowercase = name.toLowerCase();
 
 	return channels.find((channel) =>
+		channel.isGuildText() &&
+		!channel.isThread() &&
 		channel.name.toLowerCase().includes(nameAsLowercase)
 	) as
 		| GuildTextChannel
@@ -339,7 +348,7 @@ async function createVerificationPrompt(
 	guild: Guild,
 	settings: { title: string; fields: EmbedField[] },
 ): Promise<[boolean, Member]> {
-	const verificationChannel = (await getChannel(
+	const verificationChannel = (await getTextChannel(
 		guild,
 		configuration.guilds.channels.verification,
 	))!;
@@ -464,16 +473,27 @@ async function fetchGuildMembers(guild: Guild): Promise<Member[]> {
 	return memberList;
 }
 
+/**
+ * Generates a pseudo-random number.
+ *
+ * @param max - The maximum value to generate.
+ * @returns A pseudo-random number between 0 and {@link max}.
+ */
+function random(max: number): number {
+	return Math.floor(Math.random() * max);
+}
+
 export {
 	chunk,
 	createInteractionCollector,
 	createVerificationPrompt,
 	fetchGuildMembers,
 	fromHex,
-	getChannel,
+	getTextChannel,
 	mentionUser,
 	messageUser,
 	paginate,
+	random,
 	toModal,
 	trim,
 };

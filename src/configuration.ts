@@ -48,6 +48,7 @@ const settings = {
 		channels: {
 			logging: 'journal',
 			verification: 'verifications',
+			welcomeMessage: 'discussion',
 		},
 		// Configuration settings pertaining to the topic languages of managed guilds.
 		languages: {
@@ -115,6 +116,20 @@ const settings = {
 		// Configuration settings pertaining to entry to the guild.
 		entry: {
 			minimumRequiredAge: 2 * day,
+			welcomeMessages: [
+				(mention: string) => `Welcome ${mention}. Say hi!`,
+				(mention: string) => `Welcome, ${mention}. We hope you brought pizza.`,
+				(mention: string) => `${mention} just landed.`,
+				(mention: string) => `${mention} just slid into the server.`,
+				(mention: string) => `${mention} joined the party.`,
+				(mention: string) => `${mention} hopped into the server.`,
+				(mention: string) => `${mention} just showed up!`,
+				(mention: string) => `A wild ${mention} appeared.`,
+				(mention: string) => `Glad you're here, ${mention}.`,
+				(mention: string) => `Everyone welcome ${mention}!`,
+				(mention: string) => `Good to see you, ${mention}.`,
+				(mention: string) => `Yay! You made it, ${mention}!`,
+			],
 		},
 	},
 	// Configuration settings pertaining to music.

@@ -5,7 +5,7 @@ import {
 	GuildTextChannel,
 } from '../../../deps.ts';
 import configuration from '../../configuration.ts';
-import { getChannel } from '../../utils.ts';
+import { getTextChannel } from '../../utils.ts';
 import { Controller } from '../controller.ts';
 import { MessageGenerators } from './data/generators/generators.ts';
 import generators from './data/generators/generators.ts';
@@ -29,7 +29,7 @@ class LoggingController extends Controller {
 	}
 
 	private async setupChannel(guild: Guild): Promise<void> {
-		this.channel = await getChannel(
+		this.channel = await getTextChannel(
 			guild,
 			configuration.guilds.channels.logging,
 		);
