@@ -12,10 +12,12 @@ import { tryAssignRole } from '../../../../modules/roles/data/structures/role.ts
 import configuration from '../../../../configuration.ts';
 import {
 	createInteractionCollector,
-	getChannel,
+	getTextChannel,
+	random,
 	toModal,
 } from '../../../../utils.ts';
 import { getProficiencyCategory } from '../../../roles/module.ts';
+import { mention } from '../../../../formatting.ts';
 
 const proficiencyCategory = getProficiencyCategory();
 const proficiencies = proficiencyCategory.collection!.list!;
@@ -87,6 +89,22 @@ async function onSelectLanguageProficiency(
 		if (!verificationResult) return;
 	}
 
+	const discussionChannel = await getTextChannel(
+		interaction.guild!,
+		configuration.guilds.channels.welcomeMessage,
+	);
+	if (discussionChannel) {
+		discussionChannel.send({
+			embeds: [{
+				description: configuration.guilds.entry
+					.welcomeMessages[
+						random(configuration.guilds.entry.welcomeMessages.length)
+					]!(mention(interaction.user.id, 'USER')),
+				color: configuration.interactions.responses.colors.green,
+			}],
+		});
+	}
+
 	const proficiency = proficiencies[parseInt(parameter)]!;
 
 	tryAssignRole(interaction, language, proficiencyCategory, proficiency);
@@ -105,7 +123,7 @@ async function verifyUser(
 	user: User,
 	answers: Array<[string, string]>,
 ): Promise<boolean> {
-	const verificationChannel = (await getChannel(
+	const verificationChannel = (await getTextChannel(
 		guild,
 		configuration.guilds.channels.verification,
 	))!;
