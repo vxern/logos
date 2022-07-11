@@ -62,7 +62,7 @@ async function createArticle(
 	);
 	if (!articles) return showArticleSubmissionFailure(interaction);
 
-	const [submission, content] = await openArticleEditor(
+	const [submission, content, dialect] = await openArticleEditor(
 		client,
 		interaction,
 		undefined,
@@ -75,6 +75,7 @@ async function createArticle(
 	const article: Article = {
 		author: author.ref,
 		language: language,
+		dialect: dialect,
 		content: content,
 	};
 

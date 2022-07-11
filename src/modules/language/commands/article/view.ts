@@ -2,6 +2,7 @@ import {
 	_,
 	Interaction,
 	InteractionApplicationCommandData,
+	InteractionResponseType,
 } from '../../../../../deps.ts';
 import { Client } from '../../../../client.ts';
 import configuration from '../../../../configuration.ts';
@@ -34,17 +35,60 @@ async function viewArticle(
 	);
 	if (!documentsUnprocessed) return showArticleViewFailure();
 
-	const documents = await client.database.processArticles(documentsUnprocessed);
-	if (!documents) return showArticleViewFailure();
+	const documentsAll = await client.database.processArticles(
+		documentsUnprocessed,
+	);
+	if (!documentsAll) return showArticleViewFailure();
+
+	const dialects = <
+		| string[]
+		| undefined
+	> (<Record<string, Record<string, unknown>>> configuration.guilds
+		.languages)[language]?.dialects;
+
+	const data = <InteractionApplicationCommandData> interaction.data;
+	const dialectIndex = data.options[0]?.options?.find((option) =>
+		option.name === 'dialect'
+	)?.value;
+	const dialect = !dialects ? undefined : dialects[dialectIndex];
+
+	const documents = !dialect
+		? documentsAll
+		: documentsAll.filter((document) => document.data.dialect === dialect);
 
 	if (interaction.isAutocomplete()) {
+		if (interaction.focusedOption.name === 'dialect') {
+			const argument = (<string> interaction.focusedOption.value!)
+				.toLowerCase();
+
+			const selectedDialects = dialects?.map<[string, number]>((
+				dialect,
+				index,
+			) => [dialect, index]).filter(([dialect, _index]) =>
+				dialect.toLowerCase().includes(argument)
+			);
+
+			interaction.respond({
+				type: InteractionResponseType.APPLICATION_COMMAND_AUTOCOMPLETE_RESULT,
+				choices: !selectedDialects
+					? []
+					: [
+						...selectedDialects.map(([dialect, index]) => ({
+							name: dialect,
+							value: index.toString(),
+						})),
+						{ name: 'None', value: '-1' },
+					],
+			});
+			return;
+		}
+
 		return showResults({
 			interaction: interaction,
 			documents: documents,
 		});
 	}
 
-	const data = <InteractionApplicationCommandData> interaction.data;
 	const index = parseInt(data.options[0]!.options![0]!.value!);
 	const show =
 		data.options[0]!.options!.find((option) => option.name === 'show')?.value ??
