@@ -16,6 +16,7 @@ import {
 	MessageComponentData,
 	MessageComponentInteraction,
 	MessageComponentType,
+	SelectComponentOption,
 	Snowflake,
 	TextInputStyle,
 	User,
@@ -85,31 +86,46 @@ interface Form {
 
 	/** The text fields defined within the form. */
 	fields: {
-		[key: string]: {
-			/** The label on a particular text field. */
-			label: string | ((language: string) => string);
+		[key: string]:
+			& {
+				/** The label on a particular text field. */
+				label: string | ((language: string) => string);
+			}
+			& ({
+				type: 'TEXT_INPUT';
 
-			/** The 'style' of this text field. */
-			style: TextInputStyle;
+				/** The 'style' of this text field. */
+				style: TextInputStyle;
 
-			/**
-			 * The minimum number of characters required to be inputted into this
-			 * text field.
-			 */
-			minimum: number;
+				/** Whether this text field is required to be filled or not. */
+				required?: boolean;
 
-			/** Whether this text field is required to be filled or not. */
-			required?: boolean;
+				/** The filled content of this text field. */
+				value?: string;
 
-			/** The filled content of this text field. */
-			value?: string;
+				/**
+				 * The minimum number of characters required to be inputted into this
+				 * text field.
+				 */
+				minimum: number;
 
-			/**
-			 * The maximum number of characters allowed to be inputted into this
-			 * text field.
-			 */
-			maximum: number;
-		};
+				/**
+				 * The maximum number of characters allowed to be inputted into this
+				 * text field.
+				 */
+				maximum: number;
+			} | {
+				type: 'SELECT';
+
+				/** The available selection options. */
+				options: SelectComponentOption[];
+
+				/** The minimum number of selections to be made. */
+				minimum: number | undefined;
+
+				/** The maximum number of selections to be made. */
+				maximum: number | undefined;
+			});
 	};
 }
 
@@ -127,23 +143,37 @@ function toModal(
 	language?: string,
 ): InteractionResponseModal {
 	const components = Object.entries(form.fields).map<MessageComponentData>(
-		([name, field]) => ({
-			type: MessageComponentType.ACTION_ROW,
-			components: [
-				{
-					type: MessageComponentType.TEXT_INPUT,
-					customID: `${customID}|${name}`,
-					label: typeof field.label === 'function'
-						? field.label(language!)
-						: field.label,
-					style: field.style,
-					value: field.value,
-					required: field.required,
-					minLength: field.minimum === 0 ? undefined : field.minimum,
-					maxLength: field.maximum,
-				},
-			],
-		}),
+		([name, field]) => {
+			const id = `${customID}|${name}`;
+			const label = typeof field.label === 'function'
+				? field.label(language!)
+				: field.label;
+
+			return {
+				type: MessageComponentType.ACTION_ROW,
+				components: [
+					field.type === 'TEXT_INPUT'
+						? {
+							type: MessageComponentType.TEXT_INPUT,
+							customID: id,
+							label: label,
+							style: field.style,
+							value: field.value,
+							required: field.required,
+							minLength: field.minimum === 0 ? undefined : field.minimum,
+							maxLength: field.maximum,
+						}
+						: {
+							type: MessageComponentType.SELECT,
+							customID: id,
+							placeholder: label,
+							minValues: field.minimum,
+							maxValues: field.maximum,
+							options: field.options,
+						},
+				],
+			};
+		},
 	);
 
 	return {
