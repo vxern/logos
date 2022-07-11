@@ -27,6 +27,9 @@ type ArticleIndexParameters = {
 	/** The language of the article. */
 	language: string;
 
+	/** The dialect of the article. */
+	dialect: string;
+
 	/** The author of the article. */
 	author: Reference;
 };
@@ -205,7 +208,7 @@ class Database {
 	 */
 	private async createUser(user: User): Promise<Document<User> | undefined> {
 		const document = await this.dispatchQuery<User>(
-			$.Call('CreateUser', user),
+			$.Create($.Collection('Users'), { data: user }),
 		);
 
 		if (!document) {
@@ -268,10 +271,13 @@ class Database {
 		value: V,
 	): Promise<Document<Article>[] | undefined> {
 		const parameterCapitalised = capitalise(parameter);
-		const faunaFunction = `GetArticlesBy${parameterCapitalised}`;
+		const index = `GetArticlesBy${parameterCapitalised}`;
 
 		const documents = await this.dispatchQuery<Article[]>(
-			$.Call($.FaunaFunction(faunaFunction), value),
+			$.Map(
+				$.Paginate($.Match($.FaunaIndex(index), value)),
+				$.Lambda('article', $.Get($.Var('article'))),
+			),
 		);
 
 		if (!documents) {
@@ -354,7 +360,7 @@ class Database {
 		article: Article,
 	): Promise<Document<Article> | undefined> {
 		const document = await this.dispatchQuery<Article>(
-			$.Call('CreateArticle', article),
+			$.Create($.Collection('Articles'), { data: article }),
 		);
 
 		if (!document) {
@@ -395,7 +401,7 @@ class Database {
 		change: ArticleChange,
 	): Promise<Document<ArticleChange> | undefined> {
 		const document = await this.dispatchQuery<ArticleChange>(
-			$.Call($.FaunaFunction('CreateArticleChange'), change),
+			$.Create($.Collection('ArticleChanges'), { data: change }),
 		);
 
 		if (!document) {
@@ -443,12 +449,12 @@ class Database {
 		value: V,
 	): Promise<Document<ArticleChange>[] | undefined> {
 		const parameterCapitalised = capitalise(parameter);
-		const faunaFunction = `GetArticleChangesBy${parameterCapitalised}`;
+		const index = `GetArticleChangesBy${parameterCapitalised}`;
 
 		const documents = await this.dispatchQuery<ArticleChange[]>(
-			$.Call(
-				$.FaunaFunction(faunaFunction),
-				value,
+			$.Map(
+				$.Paginate($.Match($.FaunaIndex(index), value)),
+				$.Lambda('articleChange', $.Get($.Var('articleChange'))),
 			),
 		);
 
@@ -546,9 +552,9 @@ class Database {
 		user: Reference,
 	): Promise<Document<Warning>[] | undefined> {
 		const documents = await this.dispatchQuery<Warning[]>(
-			$.Call(
-				$.FaunaFunction('GetWarningsBySubject'),
-				user,
+			$.Map(
+				$.Paginate($.Match($.FaunaIndex('GetWarningsBySubject'), user)),
+				$.Lambda('warning', $.Get($.Var('warning'))),
 			),
 		);
 
@@ -586,7 +592,7 @@ class Database {
 		warning: Warning,
 	): Promise<Document<Warning> | undefined> {
 		const document = await this.dispatchQuery<Warning>(
-			$.Call('CreateWarning', warning),
+			$.Create($.Collection('Warnings'), { data: warning }),
 		);
 
 		if (!document) {

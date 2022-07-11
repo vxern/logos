@@ -54,15 +54,19 @@ const settings = {
 		languages: {
 			armenian: {
 				requiresVerification: true,
+				dialects: ['Western Armenian', 'Eastern Armenian', 'Karabakh Dialect'],
 			},
 			belarusian: {
 				requiresVerification: false,
+				dialects: [],
 			},
 			english: {
 				requiresVerification: false,
+				dialects: [],
 			},
 			romanian: {
 				requiresVerification: false,
+				dialects: [],
 			},
 		},
 		// Configuration settings pertaining to the de facto owner of the managed guilds.
@@ -175,18 +179,21 @@ const settings = {
 				// Definitions of fields in the article editor form.
 				fields: {
 					title: {
+						type: 'TEXT_INPUT',
 						label: 'Title of your article',
 						style: TextInputStyle.SHORT,
 						minimum: 10,
 						maximum: 50,
 					},
 					body: {
+						type: 'TEXT_INPUT',
 						label: 'Body of your article',
 						style: TextInputStyle.PARAGRAPH,
 						minimum: 30,
 						maximum: 3000,
 					},
 					footer: {
+						type: 'TEXT_INPUT',
 						label: 'Additional information / notes',
 						style: TextInputStyle.PARAGRAPH,
 						required: false,
@@ -201,6 +208,7 @@ const settings = {
 				// Definitions of fields in the verification form.
 				fields: {
 					reason: {
+						type: 'TEXT_INPUT',
 						label: (language: string) =>
 							`What is your reason for learning ${language}?`,
 						style: TextInputStyle.PARAGRAPH,
@@ -208,12 +216,14 @@ const settings = {
 						maximum: 300,
 					},
 					aim: {
+						type: 'TEXT_INPUT',
 						label: 'How will you benefit from being a member?',
 						style: TextInputStyle.PARAGRAPH,
 						minimum: 20,
 						maximum: 300,
 					},
 					whereFound: {
+						type: 'TEXT_INPUT',
 						label: (language: string) =>
 							`How did you find out about Learn ${language}?`,
 						style: TextInputStyle.SHORT,

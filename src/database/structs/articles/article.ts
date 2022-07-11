@@ -21,6 +21,9 @@ interface Article {
 	/** The language this article was written for. */
 	language: string;
 
+	/** (Optional) The dialect this article was written for. */
+	dialect?: string;
+
 	/** The text content of this article. */
 	content: ArticleTextContent;
 }

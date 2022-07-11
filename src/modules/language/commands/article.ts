@@ -14,7 +14,7 @@ import {
 } from '../../../../deps.ts';
 import { Client } from '../../../client.ts';
 import { Availability } from '../../../commands/structs/availability.ts';
-import { Command } from '../../../commands/structs/command.ts';
+import { CommandBuilder } from '../../../commands/structs/command.ts';
 import configuration from '../../../configuration.ts';
 import { ArticleChange } from '../../../database/structs/articles/article-change.ts';
 import {
@@ -40,7 +40,7 @@ const newlineOverflow = new RegExp(
 	},}`,
 );
 
-const command: Command = {
+const command: CommandBuilder = (language) => ({
 	name: 'article',
 	availability: Availability.MEMBERS,
 	description: 'Allows the user to interact with the server articles.',
@@ -65,21 +65,43 @@ const command: Command = {
 		name: 'view',
 		type: ApplicationCommandOptionType.SUB_COMMAND,
 		description: 'View one of the available articles.',
-		options: [{
-			name: 'title',
-			type: ApplicationCommandOptionType.STRING,
-			description: 'The title of the article.',
-			required: true,
-			autocomplete: true,
-		}, {
-			name: 'show',
-			type: ApplicationCommandOptionType.BOOLEAN,
-			description: 'If set to true, the article will be shown to other users.',
-			required: false,
-		}],
+		options: [
+			...(() => {
+				const dialects = <
+					| string[]
+					| undefined
+				> (<Record<string, Record<string, unknown>>> configuration.guilds
+					.languages)[language]?.dialects;
+
+				if (!dialects || dialects.length === 0) return [];
+
+				return [{
+					name: 'dialect',
+					type: ApplicationCommandOptionType.STRING,
+					description:
+						'The dialect of the language the article has been written for.',
+					required: true,
+					autocomplete: true,
+				}];
+			})(),
+			{
+				name: 'title',
+				type: ApplicationCommandOptionType.STRING,
+				description: 'The title of the article.',
+				required: true,
+				autocomplete: true,
+			},
+			{
+				name: 'show',
+				type: ApplicationCommandOptionType.BOOLEAN,
+				description:
+					'If set to true, the article will be shown to other users.',
+				required: false,
+			},
+		],
 		handle: viewArticle,
 	}],
-};
+});
 
 /** Opens the article editor, allowing the user to create or edit an article. */
 async function openArticleEditor(
@@ -87,7 +109,7 @@ async function openArticleEditor(
 	interaction: Interaction,
 	initial?: ArticleTextContent,
 	articles?: Article[],
-): Promise<[Interaction, ArticleTextContent]> {
+): Promise<[Interaction, ArticleTextContent, string | undefined]> {
 	function showArticleEditFailure(
 		interaction: Interaction,
 		message?: string,
@@ -130,6 +152,7 @@ async function openArticleEditor(
 	}
 
 	const content: ArticleTextContent = initial ? _.clone(initial) : {};
+	let selectedDialect: string | undefined = undefined;
 
 	let hasProvidedIncorrectData = false;
 
@@ -148,6 +171,14 @@ async function openArticleEditor(
 		);
 	}
 
+	const language = client.getLanguage(interaction.guild!);
+
+	const dialects = <
+		| string[]
+		| undefined
+	> (<Record<string, Record<string, unknown>>> configuration.guilds
+		.languages)[language]?.dialects;
+
 	let modalAnchor = interaction;
 
 	let overrideInteraction: Interaction | undefined = undefined;
@@ -165,6 +196,25 @@ async function openArticleEditor(
 			{
 				fields: {
 					title: { value: content.title },
+					...(!!initial || !dialects || dialects.length === 0 ? {} : {
+						language: {
+							type: 'SELECT',
+							label: 'Dialect (leave empty if irrelevant)',
+							minimum: 0,
+							maximum: 1,
+							options: [
+								...dialects.map((dialect, index) => ({
+									label: dialect,
+									value: index.toString(),
+									default: dialect === selectedDialect,
+								})),
+								{
+									label: 'None',
+									value: '-1',
+								},
+							],
+						},
+					}),
 					body: { value: content.body },
 					footer: { value: content.footer },
 				},
@@ -179,7 +229,14 @@ async function openArticleEditor(
 
 		content.title = components[0]!.components[0]!.value!;
 		content.body = components[1]!.components[0]!.value!;
-		content.footer = components[2]?.components[0]?.value;
+		const footer = components[2]!.components[0]!.value!;
+		content.footer = footer.length === 0 ? undefined : footer;
+		const dialectIndex =
+			(<Record<string, string>> (<unknown> components[3]!.components[0]!))
+				.values![0];
+		selectedDialect = !dialectIndex
+			? undefined
+			: dialects![Number(dialectIndex)];
 
 		if (content.title.includes('\n')) {
 			hasProvidedIncorrectData = true;
@@ -353,7 +410,7 @@ ${list(articles!.map((article) => article.content.title))}`,
 		}
 	}
 
-	return [overrideInteraction ?? submission, content];
+	return [overrideInteraction ?? submission, content, selectedDialect];
 }
 
 function showResults(
@@ -362,11 +419,7 @@ function showResults(
 		documents: Document<Article>[];
 	},
 ): void {
-	const argument = interaction.data!.options[0]!.options!.find((option) =>
-		option.focused
-	)!;
-
-	const value = <string> argument.value;
+	const value = <string> interaction.focusedOption.value;
 	const articlesByName = documents.map((document) => document.data).filter((
 		document,
 	) => document.content.title.toLowerCase().includes(value.toLowerCase()));

@@ -86,13 +86,8 @@ const base: RoleCategory[] = [
 					list: [{
 						name: 'Diasporan',
 						description:
-							'I am a native, or a child of natives, who had been brought up abroad.',
+							'I am a native, or a child of natives, who has been brought up abroad.',
 						emoji: '🌎',
-					}, {
-						name: 'Emigrant',
-						description:
-							'I emigrated from my country of origin to live and/or work abroad.',
-						emoji: '💼',
 					}],
 				},
 			},

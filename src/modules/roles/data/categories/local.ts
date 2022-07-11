@@ -28,9 +28,9 @@ const base: RoleCategory[] = [
 	},
 	{
 		type: 'CATEGORY',
-		name: 'Branch',
+		name: 'Dialects',
 		description:
-			'Roles specifying which branch of the language one is learning.',
+			'Roles specifying which dialect of the language one is learning.',
 		color: fromHex('#00cc66'),
 		emoji: '🏷️',
 		collection: {

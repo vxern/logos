@@ -136,60 +136,66 @@ class Client extends DiscordClient {
 	async setupCommands(): Promise<unknown> {
 		this.interactions.on('interactionError', console.error);
 
-		const commands = modules.commands;
-		for (const command of commands) {
-			command.handle = unifyHandlers(command);
-			this.manageCommand(command);
-
-			if (!command.options) continue;
-
-			const autocompleteOptions = command.options!.filter((option) =>
-				option.autocomplete
-			);
-
-			for (const option of autocompleteOptions) {
-				this.interactions.autocomplete(
-					command.name,
-					option.name,
-					(interaction) => command.handle!(this, interaction),
-				);
-			}
-
-			const handlers = new Map<string, Map<string, InteractionHandler>>();
-			for (const option of command.options) {
-				if (!option.options) continue;
-
-				const autocompleteSubOptions = option.options!.filter((subOption) =>
-					subOption.autocomplete
-				);
-
-				for (const subOption of autocompleteSubOptions) {
-					if (handlers.has(subOption.name)) {
-						handlers.get(subOption.name)!.set(option.name, option.handle!);
-						continue;
-					}
-
-					handlers.set(
-						subOption.name,
-						new Map([[option.name, option.handle!]]),
-					);
-				}
-			}
-
-			for (const [subOption, options] of handlers.entries()) {
-				this.interactions.autocomplete(
-					command.name,
-					subOption,
-					(interaction) =>
-						options.get(interaction.subCommand!)!.call(this, this, interaction),
-				);
-			}
-		}
-
 		const promises = [];
 
 		const guilds = await this.guilds.array();
 		for (const guild of guilds) {
+			const language = this.getLanguage(guild);
+
+			const commands = modules.generateCommands(language);
+			for (const command of commands) {
+				command.handle = unifyHandlers(command);
+				this.manageCommand(command);
+
+				if (!command.options) continue;
+
+				const autocompleteOptions = command.options!.filter((option) =>
+					option.autocomplete
+				);
+
+				for (const option of autocompleteOptions) {
+					this.interactions.autocomplete(
+						command.name,
+						option.name,
+						(interaction) => command.handle!(this, interaction),
+					);
+				}
+
+				const handlers = new Map<string, Map<string, InteractionHandler>>();
+				for (const option of command.options) {
+					if (!option.options) continue;
+
+					const autocompleteSubOptions = option.options!.filter((subOption) =>
+						subOption.autocomplete
+					);
+
+					for (const subOption of autocompleteSubOptions) {
+						if (handlers.has(subOption.name)) {
+							handlers.get(subOption.name)!.set(option.name, option.handle!);
+							continue;
+						}
+
+						handlers.set(
+							subOption.name,
+							new Map([[option.name, option.handle!]]),
+						);
+					}
+				}
+
+				for (const [subOption, options] of handlers.entries()) {
+					this.interactions.autocomplete(
+						command.name,
+						subOption,
+						(interaction) =>
+							options.get(interaction.subCommand!)!.call(
+								this,
+								this,
+								interaction,
+							),
+					);
+				}
+			}
+
 			promises.push(this.synchroniseGuildCommands(guild, commands));
 		}
 
