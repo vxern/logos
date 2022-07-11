@@ -431,7 +431,7 @@ function messageUser(
 
 	return user.send({
 		embeds: [{
-			thumbnail: { url: guild!.iconURL(undefined, 64) },
+			thumbnail: { url: guild!.iconURL(undefined, 32) },
 			...embed,
 			footer: {
 				text: `This message originated from ${guildName}.`,
