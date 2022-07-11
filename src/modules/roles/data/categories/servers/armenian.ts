@@ -1,3 +1,4 @@
+import configuration from '../../../../../configuration.ts';
 import { fromNames } from '../../../module.ts';
 import { RoleCategory } from '../../structures/role-category.ts';
 
@@ -15,13 +16,10 @@ const categories: Partial<RoleCategory>[] = [
 		},
 	},
 	{
-		name: 'Branch',
+		name: 'Dialect',
 		collection: {
 			type: 'COLLECTION_LOCALISED',
-			list: fromNames([
-				'Eastern Armenian',
-				'Western Armenian',
-			]),
+			list: fromNames(configuration.guilds.languages.armenian.dialects),
 		},
 	},
 	{
