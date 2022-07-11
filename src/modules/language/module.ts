@@ -1,6 +1,6 @@
 import { parse as parseCSV } from 'https://deno.land/std@0.127.0/encoding/csv.ts';
 import { Client } from '../../client.ts';
-import { Command } from '../../commands/structs/command.ts';
+import { Command, CommandBuilder } from '../../commands/structs/command.ts';
 import game from './commands/game.ts';
 import resources from './commands/resources.ts';
 import word from './commands/word.ts';
@@ -12,7 +12,7 @@ import dictionarDeSinonime from './data/dictionaries/dictionar-de-antonime.ts';
 import dictionarDeAntonime from './data/dictionaries/dictionar-de-sinonime.ts';
 import { SentencePair } from './data/sentence.ts';
 
-const commands: Record<string, Command> = {
+const commands: Record<string, Command | CommandBuilder> = {
 	article,
 	game,
 	resources,

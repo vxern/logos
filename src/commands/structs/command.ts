@@ -27,4 +27,6 @@ interface Command extends ApplicationCommandPartialBase<Option> {
 	handle?: InteractionHandler;
 }
 
-export type { Command, InteractionHandler };
+type CommandBuilder = (language: string) => Command;
+
+export type { Command, CommandBuilder, InteractionHandler };

@@ -4,7 +4,7 @@ import {
 	ApplicationCommandOption,
 	ApplicationCommandOptionType,
 } from '../../deps.ts';
-import { Command } from '../commands/structs/command.ts';
+import { Command, CommandBuilder } from '../commands/structs/command.ts';
 import { mergeOptions, unimplemented } from '../commands/command.ts';
 import { Option } from '../commands/structs/option.ts';
 import information from './information/module.ts';
@@ -15,7 +15,7 @@ import roles from './roles/module.ts';
 import secret from './secret/module.ts';
 //import social from "./social/module.ts";
 
-const modules: Record<string, Command>[] = [
+const modules: Record<string, Command | CommandBuilder>[] = [
 	information,
 	language,
 	moderation,
@@ -25,7 +25,7 @@ const modules: Record<string, Command>[] = [
 	//social,
 ];
 
-const commands = mergeModules(modules);
+const generateCommands = (language: string) => mergeModules(modules, language);
 
 /**
  * Compares two command or option objects to determine which keys one or the
@@ -79,10 +79,23 @@ function getMissingKeys<
  * @param modules - The modules to merge.
  * @returns The array of merged {@link Command}s.
  */
-function mergeModules(modules: Record<string, Command>[]): Command[] {
+function mergeModules(
+	modules: Record<string, Command | CommandBuilder>[],
+	language: string,
+): Command[] {
+	const moduleCommands = modules.map((module) => Object.values(module)).map((
+		commands,
+	) =>
+		commands.map((commandOrBuilder) =>
+			typeof commandOrBuilder === 'function'
+				? (<CommandBuilder> commandOrBuilder)(language)
+				: commandOrBuilder
+		)
+	);
+
 	// Obtain the array of separate commands.
 	const commands = Array<Command>().concat(
-		...modules.map((module) => Object.values(module)),
+		...moduleCommands.map((module) => Object.values(module)),
 	);
 
 	// Merge commands with the same name.
@@ -169,5 +182,5 @@ function areEqual(
 	return unequalKeys.length === 0;
 }
 
-export default { modules: modules, commands: commands };
+export default { modules: modules, generateCommands: generateCommands };
 export { areEqual };
