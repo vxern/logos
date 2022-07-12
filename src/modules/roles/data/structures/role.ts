@@ -158,6 +158,7 @@ async function tryAssignRole(
 		: role.onUnassignMessage!(role.name);
 
 	const embed = {
+		title: 'Roles updated',
 		description: assignMessage + unassignMessage,
 		color: configuration.interactions.responses.colors.green,
 	};
