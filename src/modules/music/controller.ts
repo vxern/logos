@@ -91,8 +91,8 @@ class MusicController extends Controller {
 				embeds: [
 					{
 						title: 'You are not in a voice channel',
-						description: 'To play music, you must be in a voice channel.',
-						color: configuration.interactions.responses.colors.red,
+						description: 'To manipulate music, you must be in a voice channel.',
+						color: configuration.interactions.responses.colors.yellow,
 					},
 				],
 			});
@@ -106,7 +106,7 @@ class MusicController extends Controller {
 					title: 'The bot is playing music in another voice channel',
 					description:
 						'Join the channel the bot is already playing music in, or wait for the bot to free up.',
-					color: configuration.interactions.responses.colors.red,
+					color: configuration.interactions.responses.colors.yellow,
 				}],
 			});
 			return [false, voiceState];
@@ -171,7 +171,7 @@ class MusicController extends Controller {
 					title: 'The queue is full',
 					description:
 						'Try removing a song from the song queue, skip the current song to advance the queue immediately, or wait until the current song stops playing.',
-					color: configuration.interactions.responses.colors.red,
+					color: configuration.interactions.responses.colors.yellow,
 				}],
 			});
 			return [false, voiceState];
