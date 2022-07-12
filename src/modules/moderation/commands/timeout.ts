@@ -10,12 +10,13 @@ import { Availability } from '../../../commands/structs/availability.ts';
 import { Command } from '../../../commands/structs/command.ts';
 import configuration, { minute, week } from '../../../configuration.ts';
 import { mention } from '../../../formatting.ts';
-import { mentionUser, messageUser } from '../../../utils.ts';
-import { user } from '../../parameters.ts';
 import {
-	getTimestampFromExpression,
+	mentionUser,
+	messageUser,
 	resolveUserIdentifier,
-} from '../module.ts';
+} from '../../../utils.ts';
+import { user } from '../../parameters.ts';
+import { getTimestampFromExpression } from '../module.ts';
 import { duration, reason } from '../parameters.ts';
 
 const command: Command = {
@@ -146,7 +147,7 @@ async function setTimeout(
 			} for: ${reason}`,
 			color: configuration.interactions.responses.colors.yellow,
 		});
-    messageSent = !!message;
+		messageSent = !!message;
 	}
 
 	client.logging.get(interaction.guild!.id)?.log(

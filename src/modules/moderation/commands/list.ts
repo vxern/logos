@@ -10,9 +10,14 @@ import { Availability } from '../../../commands/structs/availability.ts';
 import { Command } from '../../../commands/structs/command.ts';
 import configuration from '../../../configuration.ts';
 import { list } from '../../../formatting.ts';
-import { chunk, mentionUser, paginate, trim } from '../../../utils.ts';
+import {
+	chunk,
+	mentionUser,
+	paginate,
+	resolveUserIdentifier,
+	trim,
+} from '../../../utils.ts';
 import { user } from '../../parameters.ts';
-import { resolveUserIdentifier } from '../module.ts';
 
 const command: Command = {
 	name: 'list',

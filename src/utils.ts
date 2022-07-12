@@ -513,6 +513,41 @@ function random(max: number): number {
 	return Math.floor(Math.random() * max);
 }
 
+const userMentionExpression = new RegExp(/^<@!?([0-9]{18})>$/);
+const userIDExpression = new RegExp(/^[0-9]{18}$/);
+
+async function resolveUserIdentifier(guild: Guild, identifier: string): Promise<
+	[Member | undefined, Member[] | undefined]
+> {
+	const isMention = userMentionExpression.test(identifier);
+	const isId = userIDExpression.test(identifier);
+
+	let id: string | undefined = undefined;
+	if (isMention) {
+		id = userMentionExpression.exec(identifier)![1]!;
+	} else if (isId) {
+		id = userIDExpression.exec(identifier)![0];
+	}
+
+	let member: Member | undefined = undefined;
+	let matchingMembers: Member[] | undefined = undefined;
+	if (id) {
+		member = await guild.members.get(id) ??
+			await guild.members.fetch(id);
+	} else {
+		const members = await fetchGuildMembers(guild);
+
+		const searchParameter = identifier.toLowerCase();
+
+		matchingMembers = members.filter((member) =>
+			member.user.username.toLowerCase().includes(searchParameter) ||
+			member.nick?.toLowerCase().includes(searchParameter)
+		);
+	}
+
+	return [member, matchingMembers?.slice(0, 20)];
+}
+
 export {
 	chunk,
 	createInteractionCollector,
@@ -524,6 +559,7 @@ export {
 	messageUser,
 	paginate,
 	random,
+	resolveUserIdentifier,
 	toModal,
 	trim,
 };

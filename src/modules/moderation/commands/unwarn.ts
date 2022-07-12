@@ -9,9 +9,13 @@ import { Client } from '../../../client.ts';
 import { Availability } from '../../../commands/structs/availability.ts';
 import { Command } from '../../../commands/structs/command.ts';
 import configuration from '../../../configuration.ts';
-import { mentionUser, messageUser } from '../../../utils.ts';
+import {
+	mentionUser,
+	messageUser,
+	resolveUserIdentifier,
+} from '../../../utils.ts';
 import { user } from '../../parameters.ts';
-import { getRelevantWarnings, resolveUserIdentifier } from '../module.ts';
+import { getRelevantWarnings } from '../module.ts';
 
 const command: Command = {
 	name: 'unwarn',
