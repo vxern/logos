@@ -414,21 +414,37 @@ ${list(articles!.map((article) => article.content.title))}`,
 	return [overrideInteraction ?? submission, content, selectedDialect];
 }
 
+interface ArticleWrapped {
+	article: Article;
+	displayDialect: boolean;
+}
+
 function showResults(
-	{ interaction, documents }: {
+	{ interaction, articlesWrapped }: {
 		interaction: AutocompleteInteraction;
-		documents: Document<Article>[];
+		articlesWrapped: ArticleWrapped[];
 	},
 ): void {
 	const value = <string> interaction.focusedOption.value;
-	const articlesByName = documents.map((document) => document.data).filter((
-		document,
-	) => document.content.title.toLowerCase().includes(value.toLowerCase()));
+	const valueLowerCase = value.toLowerCase();
+	const wrappedArticlesByName = articlesWrapped.map<
+		[ArticleWrapped, number]
+	>((articleWrapped, index) => [articleWrapped, index]).filter((
+		[articleWrapped, _index],
+	) =>
+		articleWrapped.article.content.title.toLowerCase().includes(
+			valueLowerCase,
+		)
+	);
 
 	interaction.respond({
 		type: InteractionResponseType.APPLICATION_COMMAND_AUTOCOMPLETE_RESULT,
-		choices: articlesByName.map((article, index) => ({
-			name: article.content.title,
+		choices: wrappedArticlesByName.map((
+			[wrappedArticle, index],
+		) => ({
+			name: !wrappedArticle.displayDialect || !wrappedArticle.article.dialect
+				? wrappedArticle.article.content.title
+				: `${wrappedArticle.article.content.title} (${wrappedArticle.article.dialect})`,
 			value: index.toString(),
 		})),
 	});

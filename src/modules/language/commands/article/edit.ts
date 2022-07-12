@@ -52,7 +52,10 @@ async function editArticle(
 	if (interaction.isAutocomplete()) {
 		return showResults({
 			interaction: interaction,
-			documents: documents,
+			articlesWrapped: documents.map((document) => ({
+				article: document.data,
+				displayDialect: false,
+			})),
 		});
 	}
 

@@ -6,7 +6,10 @@ import {
 } from '../../../../../deps.ts';
 import { Client } from '../../../../client.ts';
 import configuration from '../../../../configuration.ts';
-import { getContributorReferences } from '../../../../database/structs/articles/article.ts';
+import {
+	Article,
+	getContributorReferences,
+} from '../../../../database/structs/articles/article.ts';
 import { Document } from '../../../../database/structs/document.ts';
 import { User } from '../../../../database/structs/users/user.ts';
 import { showArticle, showResults } from '../article.ts';
@@ -35,10 +38,10 @@ async function viewArticle(
 	);
 	if (!documentsUnprocessed) return showArticleViewFailure();
 
-	const documentsAll = await client.database.processArticles(
+	const documents = await client.database.processArticles(
 		documentsUnprocessed,
 	);
-	if (!documentsAll) return showArticleViewFailure();
+	if (!documents) return showArticleViewFailure();
 
 	const dialects = <
 		| string[]
@@ -52,9 +55,26 @@ async function viewArticle(
 	)?.value;
 	const dialect = !dialects ? undefined : dialects[dialectIndex];
 
-	const documents = !dialect
-		? documentsAll
-		: documentsAll.filter((document) => document.data.dialect === dialect);
+	const documentsFiltered = !dialect
+		? documents
+		: documents.filter((document) => document.data.dialect === dialect);
+
+	const documentsWrapped: {
+		document: Document<Article>;
+		displayDialect: boolean;
+	}[] = documentsFiltered
+		.map<[Document<Article>, string]>((
+			document,
+		) => [document, document.data.content.title])
+		.map(([document, title], _index, tuples) => {
+			const titles = tuples.map(([_document, title]) => title);
+
+			const isUnique = titles.findIndex((_title) =>
+				_title === title
+			)! === titles.findLastIndex((_title) => _title === title)!;
+
+			return { document: document, displayDialect: !isUnique };
+		});
 
 	if (interaction.isAutocomplete()) {
 		if (interaction.focusedOption.name === 'dialect') {
@@ -70,30 +90,33 @@ async function viewArticle(
 
 			interaction.respond({
 				type: InteractionResponseType.APPLICATION_COMMAND_AUTOCOMPLETE_RESULT,
-				choices: !selectedDialects
-					? []
-					: [
-						...selectedDialects.map(([dialect, index]) => ({
-							name: dialect,
-							value: index.toString(),
-						})),
-						{ name: 'None', value: '-1' },
-					],
+				choices: !selectedDialects ? [] : [
+					...selectedDialects.map(([dialect, index]) => ({
+						name: dialect,
+						value: index.toString(),
+					})),
+					{ name: 'None', value: '-1' },
+				],
 			});
 			return;
 		}
 
 		return showResults({
 			interaction: interaction,
-			documents: documents,
+			articlesWrapped: documentsWrapped.map((documentWrapped) => ({
+				article: documentWrapped.document.data,
+				displayDialect: documentWrapped.displayDialect,
+			})),
 		});
 	}
 
-	const index = parseInt(data.options[0]!.options![0]!.value!);
+	const index = parseInt(
+		data.options[0]!.options!.find((option) => option.name === 'title')!.value!,
+	);
 	const show =
 		data.options[0]!.options!.find((option) => option.name === 'show')?.value ??
 			false;
-	const document = documents[index];
+	const document = documentsFiltered[index];
 	if (!document) return showArticleViewFailure();
 
 	const changes = await client.database.getArticleChanges(
