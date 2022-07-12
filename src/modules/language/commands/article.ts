@@ -27,6 +27,7 @@ import { User } from '../../../database/structs/users/user.ts';
 import { list, mention } from '../../../formatting.ts';
 import {
 	createInteractionCollector,
+	Form,
 	paginate,
 	toModal,
 } from '../../../utils.ts';
@@ -191,7 +192,7 @@ async function openArticleEditor(
 
 		createAwarenessCollector();
 
-		const formView = _.merge(
+		const formView = <Form> _.merge(
 			_.cloneDeep(configuration.interactions.forms.article),
 			{
 				fields: {

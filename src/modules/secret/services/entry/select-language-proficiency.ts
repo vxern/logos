@@ -12,12 +12,11 @@ import { tryAssignRole } from '../../../../modules/roles/data/structures/role.ts
 import configuration from '../../../../configuration.ts';
 import {
 	createInteractionCollector,
+	Form,
 	getTextChannel,
-	random,
 	toModal,
 } from '../../../../utils.ts';
 import { getProficiencyCategory } from '../../../roles/module.ts';
-import { mention } from '../../../../formatting.ts';
 
 const proficiencyCategory = getProficiencyCategory();
 const proficiencies = proficiencyCategory.collection!.list!;
@@ -42,7 +41,7 @@ async function onSelectLanguageProficiency(
 
 		interaction.showModal(
 			toModal(
-				configuration.interactions.forms.verification,
+				<Form> configuration.interactions.forms.verification,
 				customID,
 				language,
 			),
@@ -87,22 +86,6 @@ async function onSelectLanguageProficiency(
 		);
 
 		if (!verificationResult) return;
-	}
-
-	const discussionChannel = await getTextChannel(
-		interaction.guild!,
-		configuration.guilds.channels.welcomeMessage,
-	);
-	if (discussionChannel) {
-		discussionChannel.send({
-			embeds: [{
-				description: configuration.guilds.entry
-					.welcomeMessages[
-						random(configuration.guilds.entry.welcomeMessages.length)
-					]!(mention(interaction.user.id, 'USER')),
-				color: configuration.interactions.responses.colors.green,
-			}],
-		});
 	}
 
 	const proficiency = proficiencies[parseInt(parameter)]!;
