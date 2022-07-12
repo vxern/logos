@@ -16,7 +16,7 @@ const categories: Partial<RoleCategory>[] = [
 		},
 	},
 	{
-		name: 'Dialect',
+		name: 'Dialects',
 		collection: {
 			type: 'COLLECTION_LOCALISED',
 			list: fromNames(configuration.guilds.languages.armenian.dialects),
