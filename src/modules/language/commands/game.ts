@@ -51,59 +51,54 @@ async function game(client: Client, interaction: Interaction): Promise<void> {
 		return;
 	}
 
-	const [collector, customID] = createInteractionCollector(client, {
+	const [collector, customID, isEnded] = createInteractionCollector(client, {
 		type: InteractionType.MESSAGE_COMPONENT,
 		user: interaction.user,
 	});
 
 	let ribbonColor = configuration.interactions.responses.colors.blue;
-	while (true) {
-		try {
-			const sentenceSelection = createSentenceSelection(sentencePairs);
+	while (!isEnded()) {
+		const sentenceSelection = createSentenceSelection(sentencePairs);
 
-			response.editResponse({
-				embeds: [{
-					color: ribbonColor,
-					fields: [{
-						name: 'Sentence',
-						value: sentenceSelection.pair.sentence,
-					}, {
-						name: 'Translation',
-						value: sentenceSelection.pair.translation,
-					}],
+		response.editResponse({
+			ephemeral: true,
+			embeds: [{
+				color: ribbonColor,
+				fields: [{
+					name: 'Sentence',
+					value: sentenceSelection.pair.sentence,
+				}, {
+					name: 'Translation',
+					value: sentenceSelection.pair.translation,
 				}],
-				components: [{
-					type: MessageComponentType.ACTION_ROW,
-					components: sentenceSelection.choices.map<MessageComponentData>(
-						(choice, index) => ({
-							type: MessageComponentType.BUTTON,
-							style: ButtonStyle.GREEN,
-							label: choice,
-							customID: `${customID}|${index}`,
-						}),
-					),
-				}],
-				ephemeral: true,
-			});
+			}],
+			components: [{
+				type: MessageComponentType.ACTION_ROW,
+				components: sentenceSelection.choices.map<MessageComponentData>(
+					(choice, index) => ({
+						type: MessageComponentType.BUTTON,
+						style: ButtonStyle.GREEN,
+						label: choice,
+						customID: `${customID}|${index}`,
+					}),
+				),
+			}],
+		});
 
-			const selection =
-				// deno-lint-ignore no-await-in-loop
-				<MessageComponentInteraction> (await collector.waitFor('collect'))[0];
-			selection.respond({
-				type: InteractionResponseType.DEFERRED_MESSAGE_UPDATE,
-			});
+		const selection =
+			// deno-lint-ignore no-await-in-loop
+			<MessageComponentInteraction> (await collector.waitFor('collect'))[0];
+		selection.respond({
+			type: InteractionResponseType.DEFERRED_MESSAGE_UPDATE,
+		});
 
-			const index = Number(selection.data!.custom_id.split('|')[1]!);
-			const choice = sentenceSelection.choices[index];
-			const isCorrect = choice === sentenceSelection.word;
+		const index = Number(selection.data!.custom_id.split('|')[1]!);
+		const choice = sentenceSelection.choices[index];
+		const isCorrect = choice === sentenceSelection.word;
 
-			ribbonColor = isCorrect
-				? configuration.interactions.responses.colors.green
-				: configuration.interactions.responses.colors.red;
-		} catch (error) {
-			console.error(error);
-			return;
-		}
+		ribbonColor = isCorrect
+			? configuration.interactions.responses.colors.green
+			: configuration.interactions.responses.colors.red;
 	}
 }
 
