@@ -44,9 +44,7 @@ class LoggingController extends Controller {
 	}
 
 	private startListening(): void {
-		if (!this.channel) {
-			return;
-		}
+		if (!this.channel) return;
 
 		for (const event of Object.keys(generators.client)) {
 			const collector = new Collector({

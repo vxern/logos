@@ -18,7 +18,7 @@ const command: Command = {
 	description: 'Looks up a word in a dictionary.',
 	options: [{
 		name: 'word',
-		description: 'The word too look up.',
+		description: 'The word to look up.',
 		required: true,
 		type: ApplicationCommandOptionType.STRING,
 	}, {
@@ -35,6 +35,7 @@ const command: Command = {
 	handle: word,
 };
 
+/** Allows the user to look up a word and get information about it. */
 async function word(client: Client, interaction: Interaction): Promise<void> {
 	const data = <InteractionApplicationCommandData> interaction.data!;
 	const word = <string> data.options[0]!.value!;
