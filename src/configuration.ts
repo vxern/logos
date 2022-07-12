@@ -49,6 +49,7 @@ const settings = {
 			logging: 'journal',
 			verification: 'verifications',
 		},
+		defaultLanguage: 'english',
 		// Configuration settings pertaining to the topic languages of managed guilds.
 		languages: {
 			armenian: {

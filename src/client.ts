@@ -127,7 +127,7 @@ class Client extends DiscordClient {
 			configuration.guilds.nameExpression.exec(guild.name!) || undefined;
 
 		const language = !guildNameMatch
-			? 'english'
+			? configuration.guilds.defaultLanguage
 			: guildNameMatch![1]!.toLowerCase();
 
 		this.languages.set(guild.id, language);
