@@ -19,7 +19,9 @@ export * as _ from 'https://deno.land/x/lodash@4.17.15-es/lodash.js';
 /** Date/time library for dealing with time. */
 import dayjs from 'https://cdn.skypack.dev/dayjs';
 import relativeTime from 'https://cdn.skypack.dev/dayjs/plugin/relativeTime';
+import advancedFormat from 'https://cdn.skypack.dev/dayjs/plugin/advancedFormat';
 dayjs.extend(relativeTime);
+dayjs.extend(advancedFormat);
 
 /** Generating unique IDs. */
 export * as Snowflake from 'https://deno.land/x/deno_snowflake@v1.0.1/snowflake.ts';
