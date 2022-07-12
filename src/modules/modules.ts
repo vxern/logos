@@ -13,7 +13,7 @@ import moderation from './moderation/module.ts';
 import music from './music/module.ts';
 import roles from './roles/module.ts';
 import secret from './secret/module.ts';
-//import social from "./social/module.ts";
+import social from './social/module.ts';
 
 const modules: Record<string, Command | CommandBuilder>[] = [
 	information,
@@ -22,7 +22,7 @@ const modules: Record<string, Command | CommandBuilder>[] = [
 	music,
 	roles,
 	secret,
-	//social,
+	social,
 ];
 
 const generateCommands = (language: string) => mergeModules(modules, language);
