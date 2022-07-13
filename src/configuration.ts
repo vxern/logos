@@ -69,6 +69,10 @@ const settings = {
 				dialects: [],
 			},
 		},
+		praises: {
+			interval: hour,
+			maximum: 1,
+		},
 		// Configuration settings pertaining to the de facto owner of the managed guilds.
 		owner: {
 			id: '217319536485990400',
