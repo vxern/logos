@@ -1,6 +1,5 @@
 import {
 	ApplicationCommandOptionType,
-	colors,
 	dayjs,
 	Interaction,
 	InteractionApplicationCommandData,
@@ -29,7 +28,7 @@ const command: Command = {
 };
 
 async function viewProfile(
-	_client: Client,
+	client: Client,
 	interaction: Interaction,
 ): Promise<void> {
 	const data = <InteractionApplicationCommandData> interaction.data;
@@ -51,8 +50,10 @@ async function viewProfile(
 		return;
 	}
 
+  interaction.defer(true);
+
 	if (!member) {
-		interaction.respond({
+		interaction.editResponse({
 			ephemeral: true,
 			embeds: [{
 				title: 'Invalid user',
@@ -64,15 +65,19 @@ async function viewProfile(
 		return;
 	}
 
-	const memberRoles = await member.roles.array().catch(() => {});
-	if (!memberRoles) {
-		console.error(
-			`Failed to fetch roles for member ${
-				colors.bold(member.user.username)
-			} in guild ${colors.bold(member.guild.name!)}.`,
-		);
-		return;
+	function showProfileViewFailure(): void {
+		interaction.editResponse({
+			ephemeral: true,
+			embeds: [{
+				title: 'Failed to show profile',
+				description: 'Failed to show information about the chosen member.',
+				color: configuration.interactions.responses.colors.red,
+			}],
+		});
 	}
+
+	const memberRoles = await member.roles.array().catch(() => {});
+	if (!memberRoles) return showProfileViewFailure();
 
 	// Remove @everyone role.
 	memberRoles.shift();
@@ -80,8 +85,22 @@ async function viewProfile(
 	const createdAt = dayjs(member.user.timestamp);
 	const joinedAt = dayjs(member.joinedAt);
 
-	interaction.respond({
-		ephemeral: true,
+	const subject = await client.database.getOrCreateUser('id', member.id);
+	if (!subject) return showProfileViewFailure();
+
+	const praisesReceived = await client.database.getPraises(
+		'subject',
+		subject.ref,
+	);
+	if (!praisesReceived) return showProfileViewFailure();
+
+	const praisesGiven = await client.database.getPraises('author', subject.ref);
+	if (!praisesGiven) return showProfileViewFailure();
+
+	const warnings = await client.database.getWarnings(subject.ref);
+	if (!warnings) return showProfileViewFailure();
+
+	interaction.editResponse({
 		embeds: [{
 			title: `Information for ${member.user.username}`,
 			thumbnail: {
@@ -92,16 +111,21 @@ async function viewProfile(
 				value: memberRoles.map((role) => mention(role.id, 'ROLE')).join(' '),
 				inline: false,
 			}, {
-				name: '📅 Created Account',
-				value: `${
+				name: '📅 Dates',
+				value: `Joined server: ${
+					joinedAt.format('Do [of] MMMM YYYY')
+				} (${joinedAt.fromNow()})\nCreated account: ${
 					createdAt.format('Do [of] MMMM YYYY')
 				} (${createdAt.fromNow()})`,
+				inline: false,
+			}, {
+				name: '🙏 Praises',
+				value:
+					`Received: ${praisesReceived.length}\nGiven: ${praisesGiven.length}`,
 				inline: true,
 			}, {
-				name: '📅 Joined Server',
-				value: `${
-					joinedAt.format('Do [of] MMMM YYYY')
-				} (${joinedAt.fromNow()})`,
+				name: `😖 Warnings`,
+				value: `Received: ${warnings.length}`,
 				inline: true,
 			}],
 		}],

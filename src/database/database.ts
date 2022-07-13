@@ -8,6 +8,7 @@ import { ArticleChange } from './structs/articles/article-change.ts';
 import { User } from './structs/users/user.ts';
 import { Document, Reference } from './structs/document.ts';
 import { capitalise } from '../formatting.ts';
+import { Praise } from './structs/users/praise.ts';
 import { Warning } from './structs/users/warning.ts';
 
 /**
@@ -23,7 +24,7 @@ type Unpacked<T> = T extends (infer U)[] ? U
 const $ = faunadb.query;
 
 /** Defines parameters used in indexing articles. */
-type ArticleIndexParameters = {
+interface ArticleIndexParameters {
 	/** The language of the article. */
 	language: string;
 
@@ -32,25 +33,34 @@ type ArticleIndexParameters = {
 
 	/** The author of the article. */
 	author: Reference;
-};
+}
 
 /** Defines parameters used in indexing article changes. */
-type ArticleChangeIndexParameters = {
+interface ArticleChangeIndexParameters {
 	/** The reference to the article this change was made to. */
 	articleReference: Reference;
 
 	/** The author of the article change. */
 	author: Reference;
-};
+}
 
 /** Defines parameters used in indexing users. */
-type UserIndexParameters = {
+interface UserIndexParameters {
 	/** The reference to the user. */
 	reference: Reference;
 
 	/** The ID of the user. */
 	id: string;
-};
+}
+
+/** Defines parameters used in indexing praises. */
+interface PraiseIndexParameters {
+	/** The reference to the author of this praise. */
+	author: Reference;
+
+	/** The reference to the recipient of this praise. */
+	subject: Reference;
+}
 
 /**
  * Provides a layer of abstraction over the database solution used to store data
@@ -86,7 +96,7 @@ class Database {
 	 * The keys are user references, and the values are maps with article references as keys
 	 * and article documents as values.
 	 */
-	private readonly articlesByUser: Map<
+	private readonly articlesByAuthor: Map<
 		string,
 		Map<string, Document<Article>>
 	> = new Map();
@@ -106,7 +116,7 @@ class Database {
 	 *
 	 * The keys are user IDs, and the values are the user's respective article changes.
 	 */
-	private readonly articleChangesByUser: Map<
+	private readonly articleChangesByAuthor: Map<
 		string,
 		Document<ArticleChange>[]
 	> = new Map();
@@ -116,7 +126,23 @@ class Database {
 	 *
 	 * The keys are user IDs, and the values are the user's respective warnings.
 	 */
-	private readonly warningsByUser: Map<string, Document<Warning>[]> = new Map();
+	private readonly warningsBySubject: Map<string, Document<Warning>[]> =
+		new Map();
+
+	/**
+	 * Cached user praises.
+	 *
+	 * The keys are user IDs, and the values are the praises given by that same user.
+	 */
+	private readonly praisesByAuthor: Map<string, Document<Praise>[]> = new Map();
+
+	/**
+	 * Cached user praises.
+	 *
+	 * The keys are user IDs, and the values are the praises given to that same user.
+	 */
+	private readonly praisesBySubject: Map<string, Document<Praise>[]> =
+		new Map();
 
 	/** Constructs a database. */
 	constructor() {
@@ -292,7 +318,7 @@ class Database {
 
 		const cache = parameter === 'language'
 			? this.articlesByLanguage
-			: this.articlesByUser;
+			: this.articlesByAuthor;
 
 		if (!cache.has(argument)) {
 			cache.set(argument, new Map());
@@ -342,7 +368,7 @@ class Database {
 
 		const cache = parameter === 'language'
 			? this.articlesByLanguage
-			: this.articlesByUser;
+			: this.articlesByAuthor;
 
 		return (!cache.has(argument)
 			? undefined
@@ -369,7 +395,7 @@ class Database {
 		}
 
 		if (!this.articlesByLanguage.has(article.language)) {
-			this.articlesByLanguage.set(article.language, new Map());
+			await this.fetchArticles('language', article.language);
 		}
 
 		this.articlesByLanguage.get(article.language)!.set(
@@ -377,11 +403,11 @@ class Database {
 			document,
 		);
 
-		if (!this.articlesByUser.has(article.author.value.id)) {
-			this.articlesByUser.set(article.author.value.id, new Map());
+		if (!this.articlesByAuthor.has(article.author.value.id)) {
+			await this.fetchArticles('author', article.author);
 		}
 
-		this.articlesByUser.get(article.author.value.id)!.set(
+		this.articlesByAuthor.get(article.author.value.id)!.set(
 			document.ref.value.id,
 			document,
 		);
@@ -412,10 +438,7 @@ class Database {
 		if (
 			!this.articleChangesByArticleReference.has(document.data.article.value.id)
 		) {
-			this.articleChangesByArticleReference.set(
-				document.data.article.value.id,
-				[],
-			);
+			await this.fetchArticleChanges('articleReference', document.data.article);
 		}
 
 		this.articleChangesByArticleReference.get(document.data.article.value.id)!
@@ -423,11 +446,11 @@ class Database {
 				document,
 			);
 
-		if (!this.articleChangesByUser.has(document.data.author.value.id)) {
-			this.articleChangesByUser.set(document.data.author.value.id, []);
+		if (!this.articleChangesByAuthor.has(document.data.author.value.id)) {
+			await this.fetchArticleChanges('author', document.data.author);
 		}
 
-		this.articleChangesByUser.get(document.data.author.value.id)!.push(
+		this.articleChangesByAuthor.get(document.data.author.value.id)!.push(
 			document,
 		);
 
@@ -467,7 +490,7 @@ class Database {
 
 		const cache = parameter === 'articleReference'
 			? this.articleChangesByArticleReference
-			: this.articleChangesByUser;
+			: this.articleChangesByAuthor;
 
 		cache.set(
 			typeof value === 'object' ? (<Reference> value).value.id : value,
@@ -499,7 +522,7 @@ class Database {
 
 		const cache = parameter === 'articleReference'
 			? this.articleChangesByArticleReference
-			: this.articleChangesByUser;
+			: this.articleChangesByAuthor;
 
 		return cache.get(argument) ??
 			await this.fetchArticleChanges(parameter, value);
@@ -563,7 +586,7 @@ class Database {
 			return undefined;
 		}
 
-		this.warningsByUser.set(user.value.id, documents);
+		this.warningsBySubject.set(user.value.id, documents);
 
 		return documents;
 	}
@@ -573,17 +596,17 @@ class Database {
 	 * attempts to fetch them from the database.
 	 *
 	 * @param user - The reference to the user for indexing the database.
-	 * @returns The user.
+	 * @returns The warnings.
 	 */
 	async getWarnings(
 		user: Reference,
 	): Promise<Document<Warning>[] | undefined> {
-		return this.warningsByUser.get(user.value.id) ??
+		return this.warningsBySubject.get(user.value.id) ??
 			await this.fetchWarnings(user);
 	}
 
 	/**
-	 * Creates an warning document in the database.
+	 * Creates a warning document in the database.
 	 *
 	 * @param warning - The warning to create.
 	 * @returns The created warning document.
@@ -600,11 +623,11 @@ class Database {
 			return undefined;
 		}
 
-		if (!this.warningsByUser.has(warning.subject.value.id)) {
-			this.warningsByUser.set(warning.subject.value.id, []);
+		if (!this.warningsBySubject.has(warning.subject.value.id)) {
+			await this.fetchWarnings(warning.subject);
 		}
 
-		this.warningsByUser.get(warning.subject.value.id)!.push(document);
+		this.warningsBySubject.get(warning.subject.value.id)!.push(document);
 
 		console.log(`Created warning ${document.ref}.`);
 
@@ -612,7 +635,7 @@ class Database {
 	}
 
 	/**
-	 * Deletes an warning document in the database.
+	 * Deletes a warning document in the database.
 	 *
 	 * @param warning - The warning to delete.
 	 * @returns The deleted warning document.
@@ -629,19 +652,120 @@ class Database {
 			return undefined;
 		}
 
-		const indexOfWarningToRemove = this.warningsByUser.get(
+		const indexOfWarningToRemove = this.warningsBySubject.get(
 			warning.data.subject.value.id,
 		)!.findIndex((warning) => warning.ref.value.id === document.ref.value.id)!;
 
-		this.warningsByUser.set(
+		this.warningsBySubject.set(
 			warning.data.subject.value.id,
-			this.warningsByUser.get(warning.data.subject.value.id)!.splice(
+			this.warningsBySubject.get(warning.data.subject.value.id)!.splice(
 				indexOfWarningToRemove,
 				indexOfWarningToRemove,
 			),
 		);
 
 		console.log(`Deleted warning ${document.ref}.`);
+
+		return document;
+	}
+
+	/**
+	 * Fetches praises from the database.
+	 *
+	 * @param parameter - The parameter for indexing the database.
+	 * @param value - The value corresponding to the parameter.
+	 * @returns An array of praise documents or undefined.
+	 */
+	private async fetchPraises<
+		K extends keyof PraiseIndexParameters,
+		V extends PraiseIndexParameters[K],
+	>(
+		parameter: K,
+		value: V,
+	): Promise<Document<Praise>[] | undefined> {
+		const parameterCapitalised = capitalise(parameter);
+		const index = `GetPraisesBy${parameterCapitalised}`;
+
+		const documents = await this.dispatchQuery<Praise[]>(
+			$.Map(
+				$.Paginate($.Match($.FaunaIndex(index), value)),
+				$.Lambda('praise', $.Get($.Var('praise'))),
+			),
+		);
+
+		if (!documents) {
+			console.error(
+				`Failed to fetch praises by ${parameterCapitalised}.`,
+			);
+			return undefined;
+		}
+
+		const cache = parameter === 'author'
+			? this.praisesByAuthor
+			: this.praisesBySubject;
+
+		cache.set(
+			value.value.id,
+			documents,
+		);
+
+		return documents;
+	}
+
+	/**
+	 * Attempts to get praises from cache, and if the praises do not exist, attempts
+	 * to fetch them from the database.
+	 *
+	 * @param parameter - The parameter for indexing the database.
+	 * @param value - The value corresponding to the parameter.
+	 * @returns The praises.
+	 */
+	async getPraises<
+		K extends keyof PraiseIndexParameters,
+		V extends PraiseIndexParameters[K],
+	>(
+		parameter: K,
+		value: V,
+	): Promise<Document<Praise>[] | undefined> {
+		const cache = parameter === 'author'
+			? this.praisesByAuthor
+			: this.praisesBySubject;
+
+		return cache.get(value.value.id) ??
+			await this.fetchPraises(parameter, value);
+	}
+
+	/**
+	 * Creates a praise document in the database.
+	 *
+	 * @param praise - The praise to create.
+	 * @returns The created praise document.
+	 */
+	async createPraise(
+		praise: Praise,
+	): Promise<Document<Praise> | undefined> {
+		const document = await this.dispatchQuery<Warning>(
+			$.Create($.Collection('Praises'), { data: praise }),
+		);
+
+		if (!document) {
+			console.error(`Failed to create praises for user ${praise.subject}.`);
+			return undefined;
+		}
+
+		if (!this.praisesByAuthor.has(praise.author.value.id)) {
+			await this.fetchPraises('author', praise.author);
+		}
+
+		this.praisesByAuthor.get(praise.author.value.id)!.push(document);
+
+		if (!this.praisesBySubject.has(praise.subject.value.id)) {
+			await this.fetchPraises('subject', praise.subject);
+		}
+
+		this.praisesBySubject.get(praise.subject.value.id)!.push(document);
+
+		console.log(`Created praise ${document.ref}.`);
 
 		return document;
 	}

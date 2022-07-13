@@ -2,6 +2,7 @@ import { dayjs, Member, User } from '../../../../../deps.ts';
 import configuration from '../../../../configuration.ts';
 import { ArticleChange } from '../../../../database/structs/articles/article-change.ts';
 import { Article } from '../../../../database/structs/articles/article.ts';
+import { Praise } from '../../../../database/structs/users/praise.ts';
 import { Warning } from '../../../../database/structs/users/warning.ts';
 import { code, codeMultiline } from '../../../../formatting.ts';
 import { mentionUser, trim } from '../../../../utils.ts';
@@ -62,6 +63,9 @@ type GuildEvents = {
 
 	/** A member's timeout has been cleared. */
 	memberTimeoutRemove: [member: Member, by: User];
+
+	/** A member has been praised. */
+	praiseAdd: [member: Member, praise: Praise, by: User];
 };
 
 /** Contains the message generators for (custom) guild events. */
@@ -241,6 +245,15 @@ ${trim(change.content.body, 300)}`,
 			}`,
 		filter: (origin, member, _by) => origin.id === member.guild.id,
 		color: configuration.interactions.responses.colors.blue,
+	},
+	'praiseAdd': {
+		title: `🙏 Member praised`,
+		message: (member, praise, by) =>
+			`${mentionUser(member.user)} has been praised by ${by}. Comment: ${
+				praise.comment ?? 'None.'
+			}`,
+		filter: (origin, member, _praise, _by) => origin.id === member.guild.id,
+		color: configuration.interactions.responses.colors.green,
 	},
 };
 
