@@ -60,6 +60,30 @@ async function warn(client: Client, interaction: Interaction): Promise<void> {
 		return;
 	}
 
+	if (member.user.bot) {
+		interaction.respond({
+			ephemeral: true,
+			embeds: [{
+				title: 'Invalid user',
+				description: 'You cannot warn bots.',
+				color: configuration.interactions.responses.colors.red,
+			}],
+		});
+		return;
+	}
+
+	if (member.id) {
+		interaction.respond({
+			ephemeral: true,
+			embeds: [{
+				title: 'Invalid user',
+				description: 'You cannot warn yourself!',
+				color: configuration.interactions.responses.colors.red,
+			}],
+		});
+		return;
+	}
+
 	const isGuide = !!(await member.roles.array()).find((role) =>
 		role.name === configuration.guilds.moderation.enforcer
 	);

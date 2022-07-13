@@ -32,7 +32,7 @@ const command: Command = {
 	}, {
 		name: 'clear',
 		type: ApplicationCommandOptionType.SUB_COMMAND,
-		description: `Clear's a user's timeout.`,
+		description: `Clears a user's timeout.`,
 		options: [user],
 		handle: clearTimeout,
 	}],
@@ -91,6 +91,42 @@ async function setTimeout(
 				description:
 					'The provided user identifier is invalid, and does not match to a guild member.',
 				color: configuration.interactions.responses.colors.yellow,
+			}],
+		});
+		return;
+	}
+
+	if (member.user.bot) {
+		interaction.respond({
+			ephemeral: true,
+			embeds: [{
+				title: 'Invalid user',
+				description: 'You cannot time bots out.',
+				color: configuration.interactions.responses.colors.red,
+			}],
+		});
+		return;
+	}
+
+	if (member.id) {
+		interaction.respond({
+			ephemeral: true,
+			embeds: [{
+				title: 'Invalid user',
+				description: 'You cannot time yourself out!',
+				color: configuration.interactions.responses.colors.red,
+			}],
+		});
+		return;
+	}
+
+	if (interaction.user.id === member.id) {
+		interaction.respond({
+			ephemeral: true,
+			embeds: [{
+				title: 'Invalid user',
+				description: 'You cannot time yourself out!',
+				color: configuration.interactions.responses.colors.red,
 			}],
 		});
 		return;

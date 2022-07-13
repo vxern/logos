@@ -540,8 +540,10 @@ async function resolveUserIdentifier(guild: Guild, identifier: string): Promise<
 		const searchParameter = identifier.toLowerCase();
 
 		matchingMembers = members.filter((member) =>
-			member.user.username.toLowerCase().includes(searchParameter) ||
-			member.nick?.toLowerCase().includes(searchParameter)
+			!member.user.bot && (
+				member.user.username.toLowerCase().includes(searchParameter) ||
+				member.nick?.toLowerCase().includes(searchParameter)
+			)
 		);
 	}
 
