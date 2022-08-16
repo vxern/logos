@@ -1,146 +1,179 @@
-import { colors, Guild, Interaction } from '../../../../../deps.ts';
+import {
+	colors,
+	fetchMembers,
+	Guild,
+	guildIconURL,
+	Interaction,
+	InteractionResponseTypes,
+	sendInteractionResponse,
+} from '../../../../../deps.ts';
 import { Client } from '../../../../client.ts';
 import configuration from '../../../../configuration.ts';
 import { capitalise, displayTime, mention } from '../../../../formatting.ts';
-import { fetchGuildMembers } from '../../../../utils.ts';
+import { snowflakeToTimestamp } from "../../../../utils.ts";
 import { getProficiencyCategory } from '../../../roles/module.ts';
 
 /** Displays information about the guild that this command was executed in. */
 async function displayGuildInformation(
-	_client: Client,
+	client: Client,
 	interaction: Interaction,
-): Promise<void> {
-	const guild = interaction.guild!;
+): Promise<unknown> {
+	const guild = client.guilds.get(interaction.guildId!);
+	if (!guild) return;
 
-	const owner = await guild.members.resolve(guild.ownerID!).catch(() => {});
+	const owner = client.users.get(guild.ownerId);
 	if (!owner) {
-		console.error(
+		return console.error(
 			`Failed to fetch information about the owner of guild ${
 				colors.bold(guild.name!)
 			}.`,
 		);
 	}
 
-	const hasDistinctOwner = owner && owner.user.username !== guild.name!;
+	const hasDistinctOwner = owner && owner.username !== guild.name!;
 
-	interaction.respond({
-		ephemeral: true,
-		embeds: [{
-			title: `Information about **${guild.name!}**`,
-			thumbnail: { url: guild.iconURL() },
-			color: configuration.interactions.responses.colors.invisible,
-			fields: [
-				{
-					name: '🖋️ Description',
-					value: guild.description ?? 'No description provided.',
-					inline: true,
-				},
-				{
-					name: '🧑 Members',
-					value: guild.memberCount!.toString(),
-					inline: true,
-				},
-				{
-					name: '⏱️ Created',
-					value: displayTime(guild.timestamp.getTime()),
-					inline: true,
-				},
-				{
-					name: '🎓 Proficiency Distribution',
-					value: await getProficiencyDistribution(guild),
-					inline: false,
-				},
-				hasDistinctOwner
-					? {
-						name: '👑 Owner',
-						value: mention(owner.id, 'USER'),
-						inline: true,
-					}
-					: ((enforcerRoleName) => ({
-						name: `⚖️ ${capitalise(enforcerRoleName)}s`,
-						value:
-							`This server is overseen by a collective of ${enforcerRoleName}s, rather than a single owner.`,
-						inline: true,
-					}))(configuration.guilds.moderation.enforcer.toLowerCase()),
-			],
-		}],
-	});
+	const proficiencyRoleFrequencies = await getProficiencyRoleFrequencies(
+		client,
+		guild,
+	);
+
+	return sendInteractionResponse(
+		client.bot,
+		interaction.id,
+		interaction.token,
+		{
+			type: InteractionResponseTypes.ChannelMessageWithSource,
+			data: {
+				embeds: [{
+					title: `Information about **${guild.name!}**`,
+					thumbnail: (() => {
+						const iconURL = guildIconURL(client.bot, guild.id, guild.icon);
+						if (!iconURL) return undefined;
+
+						return {
+							url: iconURL,
+						};
+					})(),
+					color: configuration.interactions.responses.colors.invisible,
+					fields: [
+						{
+							name: '🖋️ Description',
+							value: guild.description ?? 'No description provided.',
+							inline: true,
+						},
+						{
+							name: '🧑 Members',
+							value: guild.memberCount!.toString(),
+							inline: true,
+						},
+						{
+							name: '⏱️ Created',
+							value: displayTime(snowflakeToTimestamp(guild.id)),
+							inline: true,
+						},
+						{
+							name: '🎓 Proficiency Distribution',
+							value: displayProficiencyRoleDistribution(
+								proficiencyRoleFrequencies,
+							),
+							inline: false,
+						},
+						hasDistinctOwner
+							? {
+								name: '👑 Owner',
+								value: mention(owner.id, 'USER'),
+								inline: true,
+							}
+							: ((enforcerRoleName) => ({
+								name: `⚖️ ${capitalise(enforcerRoleName)}s`,
+								value:
+									`This server is overseen by a collective of ${enforcerRoleName}s, rather than a single owner.`,
+								inline: true,
+							}))(configuration.guilds.moderation.enforcer.toLowerCase()),
+					],
+				}],
+			},
+		},
+	);
 }
 
 /**
  * Taking a guild object, gets a distribution of the proficiencies of its members.
  *
- * @param guild - The guild to get the proficiency distribution for.
- * @returns A formatted string representation of the proficiency distribution.
+ * @param client - The client instance to use.
+ * @param guild - The guild of which the role frequencies to get.
+ * @returns A map where the keys represent the proficiency role ID, and the values
+ * represent the frequency of members that have that role.
  */
-async function getProficiencyDistribution(guild: Guild): Promise<string> {
-	const memberList = await fetchGuildMembers(guild);
-	const userMembers = memberList.filter((member) => !member.user.bot);
-	const memberRoles = await Promise.all(
-		userMembers.map((member) =>
-			member.roles.array().then((roles) => roles.map((role) => role.name))
-		),
-	);
+async function getProficiencyRoleFrequencies(
+	client: Client,
+	guild: Guild,
+): Promise<Map<bigint, number>> {
+	await fetchMembers(client.bot, guild.id, { limit: 0, query: '' });
 
 	const proficiencies = getProficiencyCategory().collection!.list!;
 	const proficiencyNames = proficiencies.map((proficiency) => proficiency.name);
+	const proficiencyRoleIds = guild.roles.array().filter((role) =>
+		proficiencyNames.includes(role.name)
+	).map((role) => role.id);
 
-	const proficiencyDistribution = memberRoles.reduce(
-		(distribution, roles) => {
-			for (let i = 0; i < proficiencyNames.length; i++) {
-				if (roles.includes(proficiencyNames[i]!)) {
-					distribution[i] += 1;
-				}
-			}
-
-			return distribution;
-		},
-		Array.from(
-			{ length: proficiencies.length },
-			() => 0,
-		),
+	const membersIndiscriminate = Array.from(client.members.values());
+	const members = membersIndiscriminate.filter((member) =>
+		!client.users.get(member.id)?.toggles.bot && member.guildId === guild.id
 	);
 
-	const roles = await guild.roles.fetchAll();
-	const proficiencyTags = roles
-		.filter((role) => proficiencyNames.includes(role.name))
-		.map((role) => mention(role.id, 'ROLE'));
+	const roleFrequencies = new Map<bigint, number>();
+	roleFrequencies.set(-1n, 0);
+	for (const proficiencyRoleId of proficiencyRoleIds) {
+		roleFrequencies.set(proficiencyRoleId, 0);
+	}
 
-	return displayProficiencyDistribution(
-		proficiencyTags,
-		userMembers.length,
-		proficiencyDistribution,
-	);
+	for (const member of members) {
+		const relevantRoleIds = member.roles.filter((roleId) =>
+			proficiencyRoleIds.includes(roleId)
+		);
+
+		if (relevantRoleIds.length === 0) {
+			relevantRoleIds.push(-1n);
+		}
+
+		for (const roleId of relevantRoleIds) {
+			roleFrequencies.set(roleId, roleFrequencies.get(roleId)! + 1);
+		}
+	}
+
+	return roleFrequencies;
 }
 
 /**
- * Taking a list of proficiency tags, the number of members and the distribution
- * of members in each corresponding proficiency.
- *
- * @param proficiencyTags - An array of proficiency tags.
- * @param memberCount - The number of members in a guild.
- * @param distribution - Number of members per each proficiency.
+ * @param proficiencyRoleFrequencies - The frequencies of proficiency roles found
+ * in members of a certain guild.
  * @returns A string representation of the proficiency distribution.
  */
-function displayProficiencyDistribution(
-	proficiencyTags: string[],
-	memberCount: number,
-	distribution: number[],
+function displayProficiencyRoleDistribution(
+	proficiencyRoleFrequencies: Map<bigint, number>,
 ): string {
-	const withoutProficiencyRoleCount = memberCount -
-		distribution.reduce((a, b) => a + b, 0);
+	const total = Array.from(proficiencyRoleFrequencies.values()).reduce((a, b) =>
+		a + b
+	);
 
-	distribution.unshift(withoutProficiencyRoleCount);
-	proficiencyTags.unshift(`without a proficiency role.`);
+	const strings: string[] = [];
+	for (
+		const [roleId, frequency] of Array.from(
+			proficiencyRoleFrequencies.entries(),
+		)
+	) {
+		const percentageComposition = getPercentageComposition(frequency, total);
+		const roleMention = roleId === -1n
+			? 'without a proficiency role.'
+			: mention(roleId, 'ROLE');
 
-	const proficiencyDistributionPrinted = distribution.map(
-		(count, index) =>
-			`${count} (${getPercentageComposition(count, memberCount)}%) ${
-				proficiencyTags[index]
-			}`,
-	).reverse();
+		strings.push(`${frequency} (${percentageComposition}%) ${roleMention}`);
+	}
 
-	return proficiencyDistributionPrinted.join('\n');
+	strings.reverse();
+
+	return strings.join('\n');
 }
 
 /**
