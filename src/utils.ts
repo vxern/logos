@@ -471,38 +471,6 @@ function trim(string: string, length: number): string {
 		: `${string.slice(0, Math.max(length - 3, 0))}...`;
 }
 
-/** The maximum number of members that can be fetched at any one time. */
-const maximumMembersPerFetch = 1000;
-
-/**
- * Fetches the complete list of guild members.
- *
- * @param guild - The guild to fetch the members for.
- * @return The members of the guild.
- */
-async function fetchGuildMembers(guild: Guild): Promise<Member[]> {
-	const memberList: Member[] = [];
-
-	let fetchedMembersNumber = -1;
-	while (
-		fetchedMembersNumber === -1 ||
-		fetchedMembersNumber === maximumMembersPerFetch
-	) {
-		const last = memberList.length === 0
-			? undefined
-			: memberList[memberList.length - 1];
-		// deno-lint-ignore no-await-in-loop
-		const fetchedMembers = await guild.members.fetchList(
-			maximumMembersPerFetch,
-			last?.id,
-		);
-		fetchedMembersNumber = fetchedMembers.length;
-		memberList.push(...fetchedMembers);
-	}
-
-	return memberList;
-}
-
 /**
  * Generates a pseudo-random number.
  *
@@ -550,11 +518,19 @@ async function resolveUserIdentifier(guild: Guild, identifier: string): Promise<
 	return [member, matchingMembers?.slice(0, 20)];
 }
 
+const beginningOfDiscordEpoch = 1420070400000n;
+const snowflakeBitsToDiscard = 22n;
+
+function snowflakeToTimestamp(snowflake: bigint): number {
+	return Number(
+		(snowflake >> snowflakeBitsToDiscard) + beginningOfDiscordEpoch,
+	);
+}
+
 export {
 	chunk,
 	createInteractionCollector,
 	createVerificationPrompt,
-	fetchGuildMembers,
 	fromHex,
 	getTextChannel,
 	mentionUser,
@@ -562,6 +538,7 @@ export {
 	paginate,
 	random,
 	resolveUserIdentifier,
+	snowflakeToTimestamp,
 	toModal,
 	trim,
 };
