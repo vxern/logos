@@ -1,54 +1,113 @@
 import {
-	ApplicationCommandOptionType,
+	ApplicationCommandFlags,
+	ApplicationCommandOptionTypes,
+	editInteractionResponse,
 	Interaction,
-	InteractionApplicationCommandData,
+	InteractionResponseTypes,
+	sendInteractionResponse,
 } from '../../../../deps.ts';
-import { Client } from '../../../client.ts';
-import { Availability } from '../../../commands/structs/availability.ts';
-import { Command } from '../../../commands/structs/command.ts';
+import { Client, getLanguage } from '../../../client.ts';
+import { CommandBuilder } from '../../../commands/structs/command.ts';
 import configuration from '../../../configuration.ts';
 import { capitalise } from '../../../formatting.ts';
 import { fromHex } from '../../../utils.ts';
 import { DictionaryEntry, toFields } from '../data/dictionary.ts';
 import { dictionaryAdapterLists } from '../module.ts';
 
-const command: Command = {
+const command: CommandBuilder = {
 	name: 'word',
-	availability: Availability.MEMBERS,
-	description: 'Looks up a word in a dictionary.',
+	nameLocalizations: {
+		pl: 'słowo',
+		ro: 'cuvânt',
+	},
+	description: 'Displays information about a given word.',
+	descriptionLocalizations: {
+		pl: 'Wyświetla informacje o danym słowie.',
+		ro: 'Afișează informații despre un cuvânt dat.',
+	},
+	defaultMemberPermissions: ['VIEW_CHANNEL'],
+	handle: word,
 	options: [{
 		name: 'word',
-		description: 'The word to look up.',
+		nameLocalizations: {
+			pl: 'słowo',
+			ro: 'cuvânt',
+		},
+		description: 'The word to display information about.',
+		descriptionLocalizations: {
+			pl: 'Słowo, o którym mają być wyświetlone informacje.',
+			ro: 'Cuvântul despre care să fie afișate informații.',
+		},
+		type: ApplicationCommandOptionTypes.String,
 		required: true,
-		type: ApplicationCommandOptionType.STRING,
 	}, {
 		name: 'verbose',
+		nameLocalizations: {
+			pl: 'tryb-rozwlekły',
+			ro: 'mod-prolix',
+		},
 		description:
-			'If set to true, the dictionary entry will be displayed in a more verbose format.',
-		type: ApplicationCommandOptionType.BOOLEAN,
+			'If set to true, more (perhaps unnecessary) information will be shown.',
+		descriptionLocalizations: {
+			pl:
+				'Jeśli tak, więcej (możliwie niepotrzebnych) informacji będzie pokazanych.',
+			ro: 'Dacă da, mai multe (posibil inutile) informații vor fi afișate.',
+		},
+		type: ApplicationCommandOptionTypes.Boolean,
 	}, {
 		name: 'show',
+		nameLocalizations: {
+			pl: 'wyświetlić-innym',
+			ro: 'arată-le-celorlalți',
+		},
 		description:
 			'If set to true, the dictionary entry will be shown to other users.',
-		type: ApplicationCommandOptionType.BOOLEAN,
+		descriptionLocalizations: {
+			pl: 'Jeśli tak, artykuł będzie wyświetlony innym użytkownikom.',
+			ro: 'Dacă da, articolul va fi afișat altor utilizatori.',
+		},
+		type: ApplicationCommandOptionTypes.Boolean,
 	}],
-	handle: word,
 };
 
 /** Allows the user to look up a word and get information about it. */
-async function word(client: Client, interaction: Interaction): Promise<void> {
-	const data = <InteractionApplicationCommandData> interaction.data!;
-	const word = <string> data.options[0]!.value!;
-	const verbose =
-		data.options.find((option) => option.name === 'verbose')?.value ?? true;
-	const show = data.options.find((option) => option.name === 'show')?.value ??
-		false;
+async function word(
+	client: Client,
+	interaction: Interaction,
+): Promise<unknown> {
+	const data = interaction.data;
+	if (!data) return;
 
-	const language = client.getLanguage(interaction.guild!);
+	const word = <string | undefined> data.options?.at(0)?.value;
+	if (!word) return;
+
+	const verbose =
+		<boolean> data.options?.find((option) => option.name === 'verbose')
+			?.value ??
+			false;
+	const show =
+		<boolean> data.options?.find((option) => option.name === 'show')?.value ??
+			false;
+
+	const language = getLanguage(client, interaction.guildId!);
+
 	const dictionaries = Object.values(dictionaryAdapterLists[language] ?? {});
 	const hasDictionaries = dictionaries.length > 0;
 
-	const response = await interaction.defer(!hasDictionaries || !show);
+	const response = await sendInteractionResponse(
+		client.bot,
+		interaction.id,
+		interaction.token,
+		{
+			type: InteractionResponseTypes.DeferredChannelMessageWithSource,
+			data: {
+				flags: (!hasDictionaries || !show)
+					? ApplicationCommandFlags.Ephemeral
+					: undefined,
+			},
+		},
+	);
+	if (!response) return;
 
 	if (!hasDictionaries) {
 		console.error(
@@ -57,7 +116,8 @@ async function word(client: Client, interaction: Interaction): Promise<void> {
 			}, but there are no available dictionaries for that language.`,
 		);
 
-		response.editResponse({
+		return editInteractionResponse(client.bot, interaction.token, {
+			messageId: response.id,
 			embeds: [{
 				title: 'No available dictionaries.',
 				description: `There are no dictionary adapters installed for the ${
@@ -66,7 +126,6 @@ async function word(client: Client, interaction: Interaction): Promise<void> {
 				color: configuration.interactions.responses.colors.red,
 			}],
 		});
-		return;
 	}
 
 	let entry: DictionaryEntry = { headword: word };
@@ -79,7 +138,8 @@ async function word(client: Client, interaction: Interaction): Promise<void> {
 				const hasEntry = fields.length > 0;
 				if (!hasEntry) return;
 
-				response.editResponse({
+				editInteractionResponse(client.bot, interaction.token, {
+					messageId: response.id,
 					embeds: [{
 						title: entry.headword,
 						fields: fields,
@@ -95,7 +155,7 @@ async function word(client: Client, interaction: Interaction): Promise<void> {
 	const hasEntry = toFields(entry, { verbose: verbose }).length > 0;
 	if (hasEntry) return;
 
-	response.editResponse({
+	return editInteractionResponse(client.bot, interaction.token, {
 		embeds: [{
 			title: 'No results found.',
 			description: `There are no results for the word '${word}'.`,
