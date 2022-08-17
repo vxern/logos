@@ -1,23 +1,39 @@
 import {
-	ApplicationCommandOptionType,
+	ApplicationCommandOptionTypes,
 	Interaction,
-	InteractionApplicationCommandData,
-	InteractionResponseType,
+	InteractionResponseTypes,
+	InteractionTypes,
+	sendInteractionResponse,
 } from '../../../../deps.ts';
 import { Client } from '../../../client.ts';
-import { Availability } from '../../../commands/structs/availability.ts';
-import { Command } from '../../../commands/structs/command.ts';
+import { CommandBuilder } from '../../../commands/structs/command.ts';
 import configuration from '../../../configuration.ts';
 import rules from '../../secret/data/information/rules.ts';
 
-const command: Command = {
+const command: CommandBuilder = {
 	name: 'cite',
-	availability: Availability.MODERATORS,
+	nameLocalizations: {
+		pl: 'zacytuj',
+		ro: 'citează',
+	},
 	description: 'Cites a server rule.',
+	descriptionLocalizations: {
+		pl: 'Cytuje jedną z reguł serwera.',
+		ro: 'Citează una dintre regulile serverului.',
+	},
+	defaultMemberPermissions: ['VIEW_CHANNEL'],
 	options: [{
 		name: 'rule',
-		type: ApplicationCommandOptionType.STRING,
+		nameLocalizations: {
+			pl: 'reguła',
+			ro: 'regulă',
+		},
 		description: 'The rule to cite.',
+		descriptionLocalizations: {
+			pl: 'Reguła, która ma być zacytowana.',
+			ro: 'Regula care să fie citată.',
+		},
+		type: ApplicationCommandOptionTypes.String,
 		required: true,
 		autocomplete: true,
 	}],
@@ -25,33 +41,60 @@ const command: Command = {
 };
 
 async function cite(
-	_client: Client,
+	client: Client,
 	interaction: Interaction,
-): Promise<void> {
-	if (interaction.isAutocomplete()) {
-		interaction.respond({
-			type: InteractionResponseType.APPLICATION_COMMAND_AUTOCOMPLETE_RESULT,
-			choices: Object.keys(rules).map((name, index) => ({
-				name: name.toUpperCase(),
-				value: index.toString(),
-			})),
-		});
-		return;
+): Promise<unknown> {
+	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete) {
+		return sendInteractionResponse(
+			client.bot,
+			interaction.id,
+			interaction.token,
+			{
+				type: InteractionResponseTypes.ApplicationCommandAutocompleteResult,
+				data: {
+					choices: Object.keys(rules).map((name, index) => ({
+						name: name.toUpperCase(),
+						value: index.toString(),
+					})),
+				},
+			},
+		);
 	}
 
-	const data = <InteractionApplicationCommandData> interaction.data;
-	const index = Number(data.options[0]!.value!);
-	const [title, ruleGenerator] = Object.entries(rules)[index]!;
+	const data = interaction.data;
+	if (!data) return;
 
-	const rule = await ruleGenerator(interaction.guild!);
+	const indexString = data.options?.at(0)?.value;
+	if (!indexString) return;
 
-	interaction.respond({
-		embeds: [{
-			title: `${title.toUpperCase()} ~ TLDR: *${rule.summary}*`,
-			description: rule.content,
-			color: configuration.interactions.responses.colors.blue,
-		}],
-	});
+	const index = Number(indexString);
+	if (isNaN(index)) return;
+
+	const titleRuleTuples = Object.entries(rules)[index];
+	if (!titleRuleTuples) return;
+
+	const [title, ruleGenerator] = titleRuleTuples;
+
+	const guild = client.guilds.get(interaction.guildId!);
+	if (!guild) return;
+
+	const rule = await ruleGenerator(guild);
+
+	return sendInteractionResponse(
+		client.bot,
+		interaction.id,
+		interaction.token,
+		{
+			type: InteractionResponseTypes.ChannelMessageWithSource,
+			data: {
+				embeds: [{
+					title: `${title.toUpperCase()} ~ TLDR: *${rule.summary}*`,
+					description: rule.content,
+					color: configuration.interactions.responses.colors.blue,
+				}],
+			},
+		},
+	);
 }
 
 export default command;
