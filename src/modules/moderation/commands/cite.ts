@@ -37,10 +37,10 @@ const command: CommandBuilder = {
 		required: true,
 		autocomplete: true,
 	}],
-	handle: cite,
+	handle: citeRule,
 };
 
-async function cite(
+async function citeRule(
 	client: Client,
 	interaction: Interaction,
 ): Promise<unknown> {
