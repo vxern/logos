@@ -1,110 +1,176 @@
 import {
-	ApplicationCommandOptionType,
+	ApplicationCommandFlags,
+	ApplicationCommandOptionTypes,
 	dayjs,
+	fetchMembers,
+	getDmChannel,
+	guildIconURL,
 	Interaction,
-	InteractionApplicationCommandData,
-	InteractionResponseType,
+	InteractionResponseTypes,
+	InteractionTypes,
+	sendInteractionResponse,
+	sendMessage,
 } from '../../../../deps.ts';
 import { Client } from '../../../client.ts';
-import { Availability } from '../../../commands/structs/availability.ts';
-import { Command } from '../../../commands/structs/command.ts';
+import { CommandBuilder } from '../../../commands/structs/command.ts';
 import configuration from '../../../configuration.ts';
-import {
-	mentionUser,
-	messageUser,
-	resolveUserIdentifier,
-} from '../../../utils.ts';
+import { mentionUser, resolveUserIdentifier } from '../../../utils.ts';
 import { user } from '../../parameters.ts';
 import { getRelevantWarnings } from '../module.ts';
 
-const command: Command = {
+const command: CommandBuilder = {
 	name: 'unwarn',
-	availability: Availability.MODERATORS,
+	nameLocalizations: {
+		pl: 'usuń-ostrzeżenie',
+		ro: 'șterge-un-avertisment',
+	},
 	description: 'Removes the last given warning to a user.',
-	handle: unwarn,
+	descriptionLocalizations: {
+		pl: 'Usuwa ostatnie ostrzeżenie dane użytkownikowi.',
+		ro: 'Șterge ultimul avertisment dat unui utilizator.',
+	},
+	defaultMemberPermissions: ['MODERATE_MEMBERS'],
+	handle: unwarnUser,
 	options: [
 		user,
 		{
 			name: 'warning',
+			nameLocalizations: {
+				pl: 'ostrzeżenie',
+				ro: 'avertisment',
+			},
 			description: 'The warning to remove.',
+			descriptionLocalizations: {
+				pl: 'Ostrzeżenie, które ma zostać usunięte.',
+				ro: 'Avertismentul care să fie șters.',
+			},
+			type: ApplicationCommandOptionTypes.String,
 			required: true,
 			autocomplete: true,
-			type: ApplicationCommandOptionType.STRING,
 		},
 	],
 };
 
-async function unwarn(
+async function unwarnUser(
 	client: Client,
 	interaction: Interaction,
 ): Promise<void> {
-	const data = <InteractionApplicationCommandData> interaction.data;
+	const data = interaction.data;
+	if (!data) return;
 
-	const userIdentifierOption = data.options[0]!;
-	const warningOption = data.options[1]!;
+	const userIdentifierOption = data.options?.at(0);
+	const warningOption = data.options?.at(1);
+	if (!userIdentifierOption || !warningOption) return;
 
-	const [member, matchingMembers] = await resolveUserIdentifier(
-		interaction.guild!,
-		<string> userIdentifierOption.value!,
+	const userIdentifier = <string | undefined> userIdentifierOption.value;
+	if (!userIdentifier) return;
+
+	await fetchMembers(client.bot, interaction.guildId!, { limit: 0, query: '' });
+
+	const members = Array.from(client.members.values()).filter((member) =>
+		member.guildId === interaction.guildId!
 	);
 
-	if (interaction.isAutocomplete() && userIdentifierOption.focused) {
-		interaction.respond({
-			type: InteractionResponseType.APPLICATION_COMMAND_AUTOCOMPLETE_RESULT,
-			choices: (member ? [member] : matchingMembers!).map((member) => ({
-				name: mentionUser(member.user, true),
-				value: member.user.id,
-			})),
-		});
-		return;
+	const matchingUsers = resolveUserIdentifier(
+		client,
+		interaction.guildId!,
+		members,
+		userIdentifier,
+	);
+	if (!matchingUsers) return;
+
+	if (
+		interaction.type === InteractionTypes.ApplicationCommandAutocomplete &&
+		userIdentifierOption.focused
+	) {
+		return void sendInteractionResponse(
+			client.bot,
+			interaction.id,
+			interaction.token,
+			{
+				type: InteractionResponseTypes.ApplicationCommandAutocompleteResult,
+				data: {
+					choices: matchingUsers.slice(0, 20).map((user) => ({
+						name: mentionUser(user, true),
+						value: user.id.toString(),
+					})),
+				},
+			},
+		);
 	}
 
-	function showUnwarnFailure(): void {
-		interaction.respond({
-			ephemeral: true,
-			embeds: [{
-				title: 'Failed to pardon user',
-				description: `The member may have already left the server.`,
-				color: configuration.interactions.responses.colors.red,
-			}],
-		});
+	function showUnwarnFailure(): unknown {
+		return void sendInteractionResponse(
+			client.bot,
+			interaction.id,
+			interaction.token,
+			{
+				type: InteractionResponseTypes.ChannelMessageWithSource,
+				data: {
+					flags: ApplicationCommandFlags.Ephemeral,
+					embeds: [{
+						title: 'Failed to pardon user',
+						description: `The member may have already left the server.`,
+						color: configuration.interactions.responses.colors.red,
+					}],
+				},
+			},
+		);
 	}
 
-	if (!member) return showUnwarnFailure();
+	if (matchingUsers.length === 0) return void showUnwarnFailure();
 
-	function displayEmptyChoices(): void {
-		interaction.respond({
-			type: InteractionResponseType.APPLICATION_COMMAND_AUTOCOMPLETE_RESULT,
-			choices: [],
-		});
+	function displayEmptyChoices(): unknown {
+		return sendInteractionResponse(
+			client.bot,
+			interaction.id,
+			interaction.token,
+			{
+				type: InteractionResponseTypes.ApplicationCommandAutocompleteResult,
+				data: { choices: [] },
+			},
+		);
 	}
 
-	const subject = await client.database.getOrCreateUser('id', member.id);
+	const user = matchingUsers[0]!;
+
+	const subject = await client.database.getOrCreateUser(
+		'id',
+		user.id.toString(),
+	);
 	if (!subject) {
-		return interaction.isAutocomplete()
+		return void (interaction.type ===
+				InteractionTypes.ApplicationCommandAutocomplete
 			? displayEmptyChoices()
-			: showUnwarnFailure();
+			: showUnwarnFailure());
 	}
 
 	const warnings = await client.database.getWarnings(subject.ref);
 	if (!warnings) {
-		return interaction.isAutocomplete()
+		return void (interaction.type ===
+				InteractionTypes.ApplicationCommandAutocomplete
 			? displayEmptyChoices()
-			: showUnwarnFailure();
+			: showUnwarnFailure());
 	}
 
 	const relevantWarnings = getRelevantWarnings(warnings);
 	relevantWarnings.reverse();
 
-	if (interaction.isAutocomplete()) {
-		interaction.respond({
-			type: InteractionResponseType.APPLICATION_COMMAND_AUTOCOMPLETE_RESULT,
-			choices: relevantWarnings.map((warning) => ({
-				name: `${warning.data.reason} (${dayjs(warning.ts).fromNow()})`,
-				value: warning.ref.value.id,
-			})),
-		});
-		return;
+	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete) {
+		return void sendInteractionResponse(
+			client.bot,
+			interaction.id,
+			interaction.token,
+			{
+				type: InteractionResponseTypes.ApplicationCommandAutocompleteResult,
+				data: {
+					choices: relevantWarnings.map((warning) => ({
+						name: `${warning.data.reason} (${dayjs(warning.ts).fromNow()})`,
+						value: warning.ref.value.id,
+					})),
+				},
+			},
+		);
 	}
 
 	const warningReferenceID = <string> warningOption.value!;
@@ -112,53 +178,96 @@ async function unwarn(
 		warning.ref.value.id === warningReferenceID
 	);
 	if (!warningToRemove) {
-		interaction.respond({
-			ephemeral: true,
-			embeds: [{
-				title: 'Warning already removed',
-				description: `The selected warning has already been removed.`,
-				color: configuration.interactions.responses.colors.red,
-			}],
-		});
-		return;
+		return void sendInteractionResponse(
+			client.bot,
+			interaction.id,
+			interaction.token,
+			{
+				type: InteractionResponseTypes.ChannelMessageWithSource,
+				data: {
+					flags: ApplicationCommandFlags.Ephemeral,
+					embeds: [{
+						title: 'Warning already removed',
+						description: `The selected warning has already been removed.`,
+						color: configuration.interactions.responses.colors.red,
+					}],
+				},
+			},
+		);
 	}
 
 	const warning = await client.database.deleteWarning(warningToRemove);
 	if (!warning) {
-		interaction.respond({
-			ephemeral: true,
-			embeds: [{
-				title: 'Failed to remove warning',
-				description: `The selected warning failed to be removed.`,
-				color: configuration.interactions.responses.colors.red,
-			}],
-		});
-		return;
+		return void sendInteractionResponse(
+			client.bot,
+			interaction.id,
+			interaction.token,
+			{
+				type: InteractionResponseTypes.ChannelMessageWithSource,
+				data: {
+					flags: ApplicationCommandFlags.Ephemeral,
+					embeds: [{
+						title: 'Failed to remove warning',
+						description: `The selected warning failed to be removed.`,
+						color: configuration.interactions.responses.colors.red,
+					}],
+				},
+			},
+		);
 	}
 
-	client.logging.get(interaction.guild!.id)?.log(
+	const member = client.members.get(user.id);
+	if (!member) return;
+
+	client.logging.get(interaction.guildId!)?.log(
 		'memberWarnRemove',
 		member,
 		warning.data,
 		interaction.user,
 	);
 
-	messageUser(member.user, interaction.guild!, {
-		title: 'You have been pardoned',
-		description: `The warning for '${warning.data.reason}' given to you ${
-			dayjs(warning.ts).fromNow()
-		} has been dispelled.`,
-		color: configuration.interactions.responses.colors.green,
-	}).catch();
+	sendInteractionResponse(
+		client.bot,
+		interaction.id,
+		interaction.token,
+		{
+			type: InteractionResponseTypes.ChannelMessageWithSource,
+			data: {
+				flags: ApplicationCommandFlags.Ephemeral,
+				embeds: [{
+					title: 'User pardoned',
+					description:
+						`The user has been pardoned from their warning for: ${warning.data.reason}`,
+					color: configuration.interactions.responses.colors.green,
+				}],
+			},
+		},
+	);
 
-	interaction.respond({
-		ephemeral: true,
-		embeds: [{
-			title: 'User pardoned',
-			description:
-				`The user has been pardoned from their warning for: ${warning.data.reason}`,
-			color: configuration.interactions.responses.colors.green,
-		}],
+	const dmChannel = await getDmChannel(client.bot, interaction.user.id);
+	if (!dmChannel) return;
+
+	const guild = client.guilds.get(interaction.guildId!);
+	if (!guild) return;
+
+	return void sendMessage(client.bot, dmChannel.id, {
+		embeds: [
+			{
+				thumbnail: (() => {
+					const iconURL = guildIconURL(client.bot, guild.id, guild.icon);
+					if (!iconURL) return undefined;
+
+					return {
+						url: iconURL,
+					};
+				})(),
+				title: 'You have been pardoned',
+				description: `The warning for '${warning.data.reason}' given to you ${
+					dayjs(warning.ts).fromNow()
+				} has been dispelled.`,
+				color: configuration.interactions.responses.colors.green,
+			},
+		],
 	});
 }
 
