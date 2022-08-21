@@ -1,13 +1,15 @@
 import {
-	ApplicationCommandOptionType,
+	ApplicationCommandFlags,
+	ApplicationCommandOptionTypes,
 	dayjs,
+	fetchMembers,
 	Interaction,
-	InteractionApplicationCommandData,
-	InteractionResponseType,
+	InteractionResponseTypes,
+	InteractionTypes,
+	sendInteractionResponse,
 } from '../../../../deps.ts';
 import { Client } from '../../../client.ts';
-import { Availability } from '../../../commands/structs/availability.ts';
-import { Command } from '../../../commands/structs/command.ts';
+import { CommandBuilder } from '../../../commands/structs/command.ts';
 import configuration from '../../../configuration.ts';
 import { list } from '../../../formatting.ts';
 import {
@@ -19,66 +21,118 @@ import {
 } from '../../../utils.ts';
 import { user } from '../../parameters.ts';
 
-const command: Command = {
+const command: CommandBuilder = {
 	name: 'list',
-	availability: Availability.MODERATORS,
+	nameLocalizations: {
+		pl: 'spisz',
+		ro: 'enumerează',
+	},
+	description: 'Allows the viewing of various information about users.',
+	descriptionLocalizations: {
+		pl: 'Pozwala na wyświetlanie różnych informacji o użytkownikach.',
+		ro: 'Permite afișarea diverselor informații despre utilizatori.',
+	},
+	defaultMemberPermissions: ['MODERATE_MEMBERS'],
 	options: [{
 		name: 'warnings',
+		nameLocalizations: {
+			pl: 'ostrzeżenia',
+			ro: 'avertismente',
+		},
 		description: 'Lists the warnings issued to a user.',
-		type: ApplicationCommandOptionType.SUB_COMMAND,
-		handle: warnings,
+		descriptionLocalizations: {
+			pl: 'Wyświetla ostrzeżenia dane użytkownikowi.',
+			ro: 'Afișează avertismentele date unui utilizator.',
+		},
+		type: ApplicationCommandOptionTypes.SubCommand,
+		handle: listWarnings,
 		options: [user],
 	}],
 };
 
-async function warnings(
+async function listWarnings(
 	client: Client,
 	interaction: Interaction,
 ): Promise<void> {
-	const data = <InteractionApplicationCommandData> interaction.data;
-	const userIdentifier = <string> data.options[0]!.options![0]!.value!;
+	const data = interaction.data;
+	if (!data) return;
 
-	const [member, matchingMembers] = await resolveUserIdentifier(
-		interaction.guild!,
-		userIdentifier,
+	const userIdentifier = <string | undefined> data.options?.at(0)?.options?.at(
+		0,
+	)?.value;
+	if (!userIdentifier) return;
+
+	await fetchMembers(client.bot, interaction.guildId!, { limit: 0, query: '' });
+
+	const members = Array.from(client.members.values()).filter((member) =>
+		member.guildId === interaction.guildId!
 	);
 
-	if (interaction.isAutocomplete()) {
-		interaction.respond({
-			type: InteractionResponseType.APPLICATION_COMMAND_AUTOCOMPLETE_RESULT,
-			choices: (member ? [member] : matchingMembers!).map((member) => ({
-				name: mentionUser(member.user, true),
-				value: member.user.id,
-			})),
-		});
-		return;
+	const matchingUsers = resolveUserIdentifier(
+		client,
+		interaction.guildId!,
+		members,
+		userIdentifier,
+	);
+	if (!matchingUsers) return;
+
+	if (
+		interaction.type === InteractionTypes.ApplicationCommandAutocomplete
+	) {
+		return void sendInteractionResponse(
+			client.bot,
+			interaction.id,
+			interaction.token,
+			{
+				type: InteractionResponseTypes.ApplicationCommandAutocompleteResult,
+				data: {
+					choices: matchingUsers.slice(0, 20).map((user) => ({
+						name: mentionUser(user, true),
+						value: user.id.toString(),
+					})),
+				},
+			},
+		);
 	}
 
-	function showListFailure(): void {
-		interaction.respond({
-			ephemeral: true,
-			embeds: [{
-				title: 'Failed to display warnings',
-				description: `The warnings for the given user could not be shown.`,
-				color: configuration.interactions.responses.colors.red,
-			}],
-		});
+	function showListFailure(): unknown {
+		return void sendInteractionResponse(
+			client.bot,
+			interaction.id,
+			interaction.token,
+			{
+				type: InteractionResponseTypes.ChannelMessageWithSource,
+				data: {
+					flags: ApplicationCommandFlags.Ephemeral,
+					embeds: [{
+						title: 'Failed to display warnings',
+						description: `The warnings for the given user could not be shown.`,
+						color: configuration.interactions.responses.colors.red,
+					}],
+				},
+			},
+		);
 	}
 
-	if (!member) return showListFailure();
+	if (matchingUsers.length === 0) return void showListFailure();
 
-	const subject = await client.database.getOrCreateUser('id', member.id);
-	if (!subject) return showListFailure();
+	const user = matchingUsers[0]!;
+
+	const subject = await client.database.getOrCreateUser(
+		'id',
+		user.id.toString(),
+	);
+	if (!subject) return void showListFailure();
 
 	const warnings = await client.database.getWarnings(subject.ref);
-	if (!warnings) return showListFailure();
+	if (!warnings) return void showListFailure();
 
 	const pages = chunk(
 		warnings,
 		configuration.interactions.responses.resultsPerPage,
 	);
 
-	paginate({
+	return paginate({
 		interaction: interaction,
 		elements: pages,
 		embed: { color: configuration.interactions.responses.colors.blue },
