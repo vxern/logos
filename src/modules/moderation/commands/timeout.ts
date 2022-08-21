@@ -14,11 +14,14 @@ import {
 } from '../../../../deps.ts';
 import { Client } from '../../../client.ts';
 import { CommandBuilder } from '../../../commands/structs/command.ts';
-import configuration, { minute, week } from '../../../configuration.ts';
+import configuration, {
+	minute,
+	timeDescriptors,
+	week,
+} from '../../../configuration.ts';
 import { mention } from '../../../formatting.ts';
 import { mentionUser, resolveUserIdentifier } from '../../../utils.ts';
 import { user } from '../../parameters.ts';
-import { getTimestampFromExpression } from '../module.ts';
 import { duration, reason } from '../parameters.ts';
 
 const command: CommandBuilder = {
@@ -426,6 +429,95 @@ async function clearTimeout(
 			},
 		},
 	);
+}
+
+const digitsExpression = new RegExp(/\d+/g);
+const stringsExpression = new RegExp(/[a-zA-Z]+/g);
+
+function extractNumbers(expression: string): number[] {
+	return (expression.match(digitsExpression) ?? []).map((digits) =>
+		Number(digits)
+	);
+}
+
+function extractStrings(expression: string): string[] {
+	return expression.match(stringsExpression) ?? [];
+}
+
+const timeDescriptorUnits = timeDescriptors.map(([descriptors, _value]) =>
+	descriptors
+);
+const allValidTimeDescriptors = timeDescriptors.reduce<string[]>(
+	(timeDescriptors, [next, _value]) => {
+		timeDescriptors.push(...next);
+		return timeDescriptors;
+	},
+	[],
+);
+
+function getTimestampFromExpression(
+	expression: string,
+): [string, number] | undefined {
+	// Extract the digits present in the expression.
+	const values = extractNumbers(expression).map((string) => Number(string));
+	// Extract the strings present in the expression.
+	const keys = extractStrings(expression);
+
+	// No parameters have been provided for both keys and values.
+	if (keys.length === 0 || values.length === 0) return undefined;
+
+	// The number of values does not match the number of keys.
+	if (values.length !== keys.length) return undefined;
+
+	// One of the values is equal to 0.
+	if (values.includes(0)) return undefined;
+
+	// If one of the keys is invalid.
+	if (keys.some((key) => !allValidTimeDescriptors.includes(key))) {
+		return undefined;
+	}
+
+	const distributionOfKeysInTimeDescriptorUnits = keys.reduce(
+		(distribution, key) => {
+			const index = timeDescriptorUnits.findIndex((distribution) =>
+				distribution.includes(key)
+			);
+
+			distribution[index]++;
+
+			return distribution;
+		},
+		Array.from({ length: timeDescriptors.length }, () => 0),
+	);
+
+	// If one of the keys is duplicate.
+	if (distributionOfKeysInTimeDescriptorUnits.some((count) => count > 1)) {
+		return undefined;
+	}
+
+	const keysWithValues: [string, [number, number]][] = keys.map(
+		(key, index) => {
+			const [descriptors, milliseconds] = timeDescriptors.find((
+				[descriptors, _value],
+			) => descriptors.includes(key))!;
+
+			return [descriptors[descriptors.length - 1]!, [
+				values[index]!,
+				values[index]! * milliseconds,
+			]];
+		},
+	);
+
+	const timeExpressions = [];
+	let total = 0;
+	for (const [key, [nominal, milliseconds]] of keysWithValues) {
+		timeExpressions.push(`${nominal} ${key}`);
+		total += milliseconds;
+	}
+
+	const timeExpression = timeExpressions.join(' ');
+
+	return [timeExpression, total];
 }
 
 export default command;
