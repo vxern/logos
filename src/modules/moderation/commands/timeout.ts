@@ -72,7 +72,7 @@ const command: CommandBuilder = {
 async function setTimeout(
 	client: Client,
 	interaction: Interaction,
-): Promise<unknown> {
+): Promise<void> {
 	const data = interaction.data;
 	if (!data) return;
 
@@ -106,7 +106,7 @@ async function setTimeout(
 
 	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete) {
 		if (userIdentifierOption.focused) {
-			return sendInteractionResponse(
+			return void sendInteractionResponse(
 				client.bot,
 				interaction.id,
 				interaction.token,
@@ -124,7 +124,7 @@ async function setTimeout(
 
 		const timestamp = getTimestampFromExpression(durationIdentifier);
 
-		return sendInteractionResponse(
+		return void sendInteractionResponse(
 			client.bot,
 			interaction.id,
 			interaction.token,
@@ -140,7 +140,7 @@ async function setTimeout(
 	}
 
 	if (matchingUsers.length === 0) {
-		return sendInteractionResponse(
+		return void sendInteractionResponse(
 			client.bot,
 			interaction.id,
 			interaction.token,
@@ -162,7 +162,7 @@ async function setTimeout(
 	const user = matchingUsers[0]!;
 
 	if (user.id === interaction.member?.id) {
-		return sendInteractionResponse(
+		return void sendInteractionResponse(
 			client.bot,
 			interaction.id,
 			interaction.token,
@@ -183,7 +183,7 @@ async function setTimeout(
 	const duration = Number(durationIdentifier);
 
 	if (Number.isNaN(duration)) {
-		return sendInteractionResponse(
+		return void sendInteractionResponse(
 			client.bot,
 			interaction.id,
 			interaction.token,
@@ -202,7 +202,7 @@ async function setTimeout(
 	}
 
 	if (duration < minute) {
-		return sendInteractionResponse(
+		return void sendInteractionResponse(
 			client.bot,
 			interaction.id,
 			interaction.token,
@@ -221,7 +221,7 @@ async function setTimeout(
 	}
 
 	if (duration > week) {
-		return sendInteractionResponse(
+		return void sendInteractionResponse(
 			client.bot,
 			interaction.id,
 			interaction.token,
@@ -273,7 +273,7 @@ async function setTimeout(
 		const textChannel = client.channels.get(interaction.channelId!);
 		if (!textChannel) return;
 
-		return sendMessage(client.bot, textChannel.id, {
+		return void sendMessage(client.bot, textChannel.id, {
 			embeds: [{
 				description: `${
 					mentionUser(user)
@@ -288,7 +288,7 @@ async function setTimeout(
 	const guild = client.guilds.get(interaction.guildId!);
 	if (!guild) return;
 
-	return sendMessage(client.bot, dmChannel.id, {
+	return void sendMessage(client.bot, dmChannel.id, {
 		embeds: [
 			{
 				thumbnail: (() => {
@@ -312,7 +312,7 @@ async function setTimeout(
 async function clearTimeout(
 	client: Client,
 	interaction: Interaction,
-): Promise<unknown> {
+): Promise<void> {
 	const data = interaction.data;
 	if (!data) return;
 
@@ -320,6 +320,8 @@ async function clearTimeout(
 		0,
 	)?.value;
 	if (!userIdentifier) return;
+
+	await fetchMembers(client.bot, interaction.guildId!, { limit: 0, query: '' });
 
 	const members = Array.from(client.members.values()).filter((member) =>
 		member.guildId === interaction.guildId!
@@ -334,7 +336,7 @@ async function clearTimeout(
 	if (!matchingUsers) return undefined;
 
 	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete) {
-		return sendInteractionResponse(
+		return void sendInteractionResponse(
 			client.bot,
 			interaction.id,
 			interaction.token,
@@ -351,7 +353,7 @@ async function clearTimeout(
 	}
 
 	if (matchingUsers.length === 0) {
-		return sendInteractionResponse(
+		return void sendInteractionResponse(
 			client.bot,
 			interaction.id,
 			interaction.token,
@@ -376,7 +378,7 @@ async function clearTimeout(
 	if (!member) return;
 
 	if (!member.communicationDisabledUntil) {
-		return sendInteractionResponse(
+		return void sendInteractionResponse(
 			client.bot,
 			interaction.id,
 			interaction.token,
@@ -395,7 +397,7 @@ async function clearTimeout(
 	}
 
 	await editMember(client.bot, interaction.guildId!, member.id, {
-		// TODO(vxern): Remove once the type is made nullable.
+		// TODO: Remove once the type is made nullable.
 		// @ts-ignore: Library issue.
 		communicationDisabledUntil: null,
 	});
@@ -406,7 +408,7 @@ async function clearTimeout(
 		interaction.user,
 	);
 
-	return sendInteractionResponse(
+	return void sendInteractionResponse(
 		client.bot,
 		interaction.id,
 		interaction.token,
