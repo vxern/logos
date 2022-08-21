@@ -1,192 +1,261 @@
 import {
+	ApplicationCommandFlags,
+	fetchMembers,
+	getDmChannel,
+	guildIconURL,
 	Interaction,
-	InteractionApplicationCommandData,
-	InteractionResponseType,
+	InteractionResponseTypes,
+	InteractionTypes,
+	kickMember,
+	sendInteractionResponse,
+	sendMessage,
 } from '../../../../deps.ts';
 import { Client } from '../../../client.ts';
-import { Availability } from '../../../commands/structs/availability.ts';
-import { Command } from '../../../commands/structs/command.ts';
+import { CommandBuilder } from '../../../commands/structs/command.ts';
 import configuration from '../../../configuration.ts';
 import { mention } from '../../../formatting.ts';
-import {
-	mentionUser,
-	messageUser,
-	resolveUserIdentifier,
-} from '../../../utils.ts';
+import { mentionUser, resolveUserIdentifier } from '../../../utils.ts';
 import { user } from '../../parameters.ts';
 import { getRelevantWarnings } from '../module.ts';
 import { reason } from '../parameters.ts';
 
-const command: Command = {
+const command: CommandBuilder = {
 	name: 'warn',
-	availability: Availability.MODERATORS,
-	description: 'Warns the user.',
+	nameLocalizations: {
+		pl: 'ostrzeż',
+		ro: 'avertizează',
+	},
+	description: 'Warns a user.',
+	descriptionLocalizations: {
+		pl: 'Ostrzega użytkownika.',
+		ro: 'Avertizează un utilizator.',
+	},
+	defaultMemberPermissions: ['MODERATE_MEMBERS'],
+	handle: warnUser,
 	options: [user, reason],
-	handle: warn,
 };
 
-async function warn(client: Client, interaction: Interaction): Promise<void> {
-	const data = <InteractionApplicationCommandData> interaction.data;
+async function warnUser(
+	client: Client,
+	interaction: Interaction,
+): Promise<void> {
+	const data = interaction.data;
+	if (!data) return;
 
-	const userIdentifier = <string> data.options[0]!.value!;
-	const reason = <string> data.options[1]!.value!;
+	const userIdentifier = <string | undefined> data.options?.at(0)?.value;
+	const reason = <string | undefined> data.options?.at(0)?.value;
+	if (!userIdentifier || !reason) return;
 
-	const [member, matchingMembers] = await resolveUserIdentifier(
-		interaction.guild!,
+	await fetchMembers(client.bot, interaction.guildId!, { limit: 0, query: '' });
+
+	const members = Array.from(client.members.values()).filter((member) =>
+		member.guildId === interaction.guildId!
+	);
+
+	const matchingUsers = resolveUserIdentifier(
+		client,
+		interaction.guildId!,
+		members,
 		userIdentifier,
 	);
+	if (!matchingUsers) return;
 
-	if (interaction.isAutocomplete()) {
-		interaction.respond({
-			type: InteractionResponseType.APPLICATION_COMMAND_AUTOCOMPLETE_RESULT,
-			choices: (member ? [member] : matchingMembers!).map((member) => ({
-				name: mentionUser(member.user, true),
-				value: member.user.id,
-			})),
-		});
-		return;
+	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete) {
+		return void sendInteractionResponse(
+			client.bot,
+			interaction.id,
+			interaction.token,
+			{
+				type: InteractionResponseTypes.ApplicationCommandAutocompleteResult,
+				data: {
+					choices: matchingUsers.slice(0, 20).map((user) => ({
+						name: mentionUser(user, true),
+						value: user.id.toString(),
+					})),
+				},
+			},
+		);
 	}
 
-	if (!member) {
-		interaction.respond({
-			ephemeral: true,
-			embeds: [{
-				title: 'Invalid user',
-				description:
-					'The provided user identifier is invalid, and does not match to a guild member.',
-				color: configuration.interactions.responses.colors.yellow,
-			}],
-		});
-		return;
+	if (matchingUsers.length === 0) {
+		return void sendInteractionResponse(
+			client.bot,
+			interaction.id,
+			interaction.token,
+			{
+				type: InteractionResponseTypes.ChannelMessageWithSource,
+				data: {
+					flags: ApplicationCommandFlags.Ephemeral,
+					embeds: [{
+						title: 'Invalid user',
+						description:
+							'The provided user identifier is invalid, and does not match to a guild member.',
+						color: configuration.interactions.responses.colors.yellow,
+					}],
+				},
+			},
+		);
 	}
 
-	if (member.user.bot) {
-		interaction.respond({
-			ephemeral: true,
-			embeds: [{
-				title: 'Invalid user',
-				description: 'You cannot warn bots.',
-				color: configuration.interactions.responses.colors.red,
-			}],
-		});
-		return;
+	const user = matchingUsers[0]!;
+
+	if (user.id === interaction.member?.id) {
+		return void sendInteractionResponse(
+			client.bot,
+			interaction.id,
+			interaction.token,
+			{
+				type: InteractionResponseTypes.ChannelMessageWithSource,
+				data: {
+					flags: ApplicationCommandFlags.Ephemeral,
+					embeds: [{
+						title: 'Invalid user',
+						description: 'You cannot time yourself out!',
+						color: configuration.interactions.responses.colors.red,
+					}],
+				},
+			},
+		);
 	}
 
-	if (member.id) {
-		interaction.respond({
-			ephemeral: true,
-			embeds: [{
-				title: 'Invalid user',
-				description: 'You cannot warn yourself!',
-				color: configuration.interactions.responses.colors.red,
-			}],
-		});
-		return;
-	}
+	const guild = client.guilds.get(interaction.guildId!);
+	if (!guild) return;
 
-	const isGuide = !!(await member.roles.array()).find((role) =>
+	const enforcerRoleId = guild.roles.find((role) =>
 		role.name === configuration.guilds.moderation.enforcer
+	)?.id;
+	if (!enforcerRoleId) return;
+
+	const member = client.members.get(user.id);
+	if (!member) return;
+
+	const isGuide = member.roles.includes(enforcerRoleId);
+	if (isGuide) {
+		return void sendInteractionResponse(
+			client.bot,
+			interaction.id,
+			interaction.token,
+			{
+				type: InteractionResponseTypes.ChannelMessageWithSource,
+				data: {
+					flags: ApplicationCommandFlags.Ephemeral,
+					embeds: [{
+						title: 'Invalid user',
+						description:
+							`Bots and server ${configuration.guilds.moderation.enforcer.toLowerCase()}s cannot be warned.`,
+						color: configuration.interactions.responses.colors.yellow,
+					}],
+				},
+			},
+		);
+	}
+
+	function showWarnFailure(interaction: Interaction): unknown {
+		return void sendInteractionResponse(
+			client.bot,
+			interaction.id,
+			interaction.token,
+			{
+				type: InteractionResponseTypes.ChannelMessageWithSource,
+				data: {
+					flags: ApplicationCommandFlags.Ephemeral,
+					embeds: [{
+						title: 'Failed to warn user',
+						description: `Your warning failed to be submitted.`,
+						color: configuration.interactions.responses.colors.red,
+					}],
+				},
+			},
+		);
+	}
+
+	const subject = await client.database.getOrCreateUser(
+		'id',
+		member.id.toString(),
 	);
-
-	if (member.user.bot || isGuide) {
-		interaction.respond({
-			ephemeral: true,
-			embeds: [{
-				title: 'Invalid user',
-				description:
-					`Bots and server ${configuration.guilds.moderation.enforcer.toLowerCase()}s cannot be warned.`,
-				color: configuration.interactions.responses.colors.yellow,
-			}],
-		});
-		return;
-	}
-
-	function showWarnFailure(interaction: Interaction): void {
-		interaction.respond({
-			ephemeral: true,
-			embeds: [{
-				title: 'Failed to warn user',
-				description: `Your warning failed to be submitted.`,
-				color: configuration.interactions.responses.colors.red,
-			}],
-		});
-	}
-
-	const subject = await client.database.getOrCreateUser('id', member!.user.id);
-	if (!subject) return showWarnFailure(interaction);
+	if (!subject) return void showWarnFailure(interaction);
 
 	const author = await client.database.getOrCreateUser(
 		'id',
-		interaction.user.id,
+		interaction.user.id.toString(),
 	);
-	if (!author) return showWarnFailure(interaction);
+	if (!author) return void showWarnFailure(interaction);
 
 	const warnings = await client.database.getWarnings(subject.ref);
-	if (!warnings) return showWarnFailure(interaction);
+	if (!warnings) return void showWarnFailure(interaction);
 
 	const document = await client.database.createWarning({
 		author: author.ref,
 		subject: subject.ref,
 		reason: reason,
 	});
-	if (!document) return showWarnFailure(interaction);
+	if (!document) return void showWarnFailure(interaction);
 
-	const relevantWarnings = getRelevantWarnings(warnings);
-
-	const passedMaximum =
-		relevantWarnings.length > configuration.guilds.moderation.warnings.maximum;
-
-	let messageSent = true;
-	if (passedMaximum) {
-		await messageUser(member!.user, interaction.guild!, {
-			title: 'You have been kicked',
-			description:
-				`You have received a warning for: ${reason}\n\nYou have surpassed the maximum number of warnings, and have subsequently been kicked.`,
-			color: configuration.interactions.responses.colors.red,
-		}).catch();
-
-		member!.kick(reason);
-	} else {
-		messageUser(member!.user, interaction.guild!, {
-			title: 'You have been warned',
-			description:
-				`You have received a warning for: ${reason}\n\nThis is warning ${relevantWarnings.length}/${configuration.guilds.moderation.warnings.maximum}.`,
-			color: configuration.interactions.responses.colors.yellow,
-		}).catch(() => messageSent = false);
-	}
-
-	client.logging.get(interaction.guild!.id)?.log(
+	client.logging.get(interaction.guildId!)?.log(
 		'memberWarnAdd',
 		member!,
 		document.data,
 		interaction.user,
 	);
 
-	interaction.respond({
-		ephemeral: true,
-		embeds: [{
-			title: 'Member warned',
-			description: `Member ${
-				mention(member!.id, 'USER')
-			} has been warned. They now have ${relevantWarnings.length} warnings.`,
-			color: configuration.interactions.responses.colors.blue,
-		}],
+	const relevantWarnings = getRelevantWarnings(warnings);
+
+	sendInteractionResponse(client.bot, interaction.id, interaction.token, {
+		type: InteractionResponseTypes.ChannelMessageWithSource,
+		data: {
+			flags: ApplicationCommandFlags.Ephemeral,
+			embeds: [{
+				title: 'Member warned',
+				description: `Member ${
+					mention(member!.id, 'USER')
+				} has been warned. They now have ${relevantWarnings.length} warnings.`,
+				color: configuration.interactions.responses.colors.blue,
+			}],
+		},
 	});
 
-	if (messageSent) return;
+	const passedMaximum =
+		relevantWarnings.length > configuration.guilds.moderation.warnings.maximum;
 
-	interaction.channel!.send({
-		embeds: [{
-			description: `${
-				mention(member!.id, 'USER')
-			} has been warned for: ${document.data.reason}\n\n${
-				passedMaximum
-					? 'They have passed the maximum number of warnings, and have been kicked.'
-					: `This is warning ${relevantWarnings.length}/${configuration.guilds.moderation.warnings.maximum}.`
-			}`,
-			color: configuration.interactions.responses.colors.yellow,
-		}],
-	});
+	const dmChannel = await getDmChannel(client.bot, interaction.user.id);
+	if (dmChannel) {
+		sendMessage(client.bot, dmChannel.id, {
+			embeds: [
+				{
+					thumbnail: (() => {
+						const iconURL = guildIconURL(client.bot, guild.id, guild.icon);
+						if (!iconURL) return undefined;
+
+						return {
+							url: iconURL,
+						};
+					})(),
+					...(passedMaximum
+						? {
+							title: 'You have been kicked',
+							description:
+								`You have received a warning for: ${reason}\n\nYou have surpassed the maximum number of warnings, and have subsequently been kicked.`,
+							color: configuration.interactions.responses.colors.red,
+						}
+						: {
+							title: 'You have been warned',
+							description:
+								`You have received a warning for: ${reason}\n\nThis is warning ${relevantWarnings.length}/${configuration.guilds.moderation.warnings.maximum}.`,
+							color: configuration.interactions.responses.colors.yellow,
+						}),
+				},
+			],
+		});
+	}
+
+	if (passedMaximum) {
+		return kickMember(
+			client.bot,
+			interaction.guildId!,
+			user.id,
+			'Kicked due to having received too many warnings.',
+		);
+	}
 }
 
 export default command;
