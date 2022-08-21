@@ -43,9 +43,9 @@ const command: CommandBuilder = {
 async function citeRule(
 	client: Client,
 	interaction: Interaction,
-): Promise<unknown> {
+): Promise<void> {
 	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete) {
-		return sendInteractionResponse(
+		return void sendInteractionResponse(
 			client.bot,
 			interaction.id,
 			interaction.token,
@@ -80,7 +80,7 @@ async function citeRule(
 
 	const rule = await ruleGenerator(guild);
 
-	return sendInteractionResponse(
+	return void sendInteractionResponse(
 		client.bot,
 		interaction.id,
 		interaction.token,
