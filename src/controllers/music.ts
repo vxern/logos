@@ -1,40 +1,44 @@
 import { Player } from 'https://deno.land/x/lavadeno@3.2.2/mod.ts';
-import {
-	ApplicationCommandInteraction,
-	EmbedPayload,
-	Guild,
-	GuildTextChannel,
-	Interaction,
-	Member,
-	VoiceChannel,
-	VoiceState,
-} from '../../../deps.ts';
-import { Client } from '../../client.ts';
-import configuration from '../../configuration.ts';
-import { Controller } from '../controller.ts';
-import { Song } from './data/song.ts';
-import { SongListing } from './data/song-listing.ts';
-import { mention } from '../../formatting.ts';
-import { SongStream } from './data/song-stream.ts';
 import { LoadType } from 'https://deno.land/x/lavalink_types@2.0.6/mod.ts';
+import {
+	ApplicationCommandFlags,
+	Channel,
+	editInteractionResponse,
+	Guild,
+	Interaction,
+	InteractionResponseTypes,
+	sendInteractionResponse,
+	sendMessage,
+	VoiceState,
+} from '../../deps.ts';
+import { Client } from '../client.ts';
+import configuration from '../configuration.ts';
+import { Controller } from './controller.ts';
+import { Song } from '../commands/music/data/song.ts';
+import {
+	SongListing,
+	SongListingContentTypes,
+} from '../commands/music/data/song-listing.ts';
+import { SongStream } from '../commands/music/data/song-stream.ts';
+import { mention, MentionTypes } from '../formatting.ts';
 
 class MusicController extends Controller {
 	/** The audio player associated with this controller. */
 	private player: Player;
 
-	/** The voice channel the music is being played in. */
-	private voiceChannel!: VoiceChannel;
+	/** The voice channel music is being played in. */
+	private voiceChannel!: Channel;
 	/** The text channel associated with the playback. */
-	private textChannel!: GuildTextChannel;
+	private textChannel!: Channel;
 
 	/** List of songs which have already been played. */
 	history: SongListing[] = [];
-	/** The current song being played. */
+	/** The current song listing being played. */
 	current?: SongListing;
-	/** List of songs which are due to be played. */
+	/** List of song listings due to be played. */
 	queue: SongListing[] = [];
 
-	/** The volume at which the song is being played. */
+	/** The volume at which music is being played. */
 	volume = configuration.music.maxima.volume;
 
 	/**
@@ -48,16 +52,16 @@ class MusicController extends Controller {
 
 	/** Constructs a {@link MusicController}. */
 	constructor(client: Client, guild: Guild) {
-		super(guild);
+		super(client, guild);
 
-		this.player = client.node.createPlayer(BigInt(this.guild.id));
+		this.player = this.client.node.createPlayer(BigInt(this.guild.id));
 	}
 
 	/** Gets the current song from the current listing. */
 	get currentSong(): Song | SongStream | undefined {
 		if (!this.current) return undefined;
 
-		if (this.current.content.type === 'COLLECTION') {
+		if (this.current.content.type === SongListingContentTypes.Collection) {
 			return this.current.content.songs[this.current.content.position];
 		}
 
@@ -79,36 +83,53 @@ class MusicController extends Controller {
 	}
 
 	/** Checks the user's voice state, ensuring it is valid for playing music. */
-	async verifyMemberVoiceState(
+	verifyMemberVoiceState(
 		interaction: Interaction,
-	): Promise<[boolean, VoiceState | undefined]> {
-		const voiceState = await getVoiceState(interaction.member!);
+	): [boolean, VoiceState | undefined] {
+		const voiceState = this.guild.voiceStates.get(interaction.member!.id);
 
 		// The user is not in a voice channel.
-		if (!voiceState || !voiceState.channel) {
-			interaction.respond({
-				ephemeral: true,
-				embeds: [
-					{
-						title: 'You are not in a voice channel',
-						description: 'To manipulate music, you must be in a voice channel.',
-						color: configuration.interactions.responses.colors.yellow,
+		if (!voiceState || !voiceState.channelId) {
+			sendInteractionResponse(
+				this.client.bot,
+				interaction.id,
+				interaction.token,
+				{
+					type: InteractionResponseTypes.ChannelMessageWithSource,
+					data: {
+						flags: ApplicationCommandFlags.Ephemeral,
+						embeds: [
+							{
+								title: 'You are not in a voice channel',
+								description:
+									'To manipulate music, you must be in a voice channel.',
+								color: configuration.interactions.responses.colors.yellow,
+							},
+						],
 					},
-				],
-			});
+				},
+			);
 			return [false, voiceState];
 		}
 
-		if (this.isOccupied && this.voiceChannel.id !== voiceState.channel.id) {
-			interaction.respond({
-				ephemeral: true,
-				embeds: [{
-					title: 'The bot is playing music in another voice channel',
-					description:
-						'Join the channel the bot is already playing music in, or wait for the bot to free up.',
-					color: configuration.interactions.responses.colors.yellow,
-				}],
-			});
+		if (this.isOccupied && this.voiceChannel.id !== voiceState.channelId) {
+			sendInteractionResponse(
+				this.client.bot,
+				interaction.id,
+				interaction.token,
+				{
+					type: InteractionResponseTypes.ChannelMessageWithSource,
+					data: {
+						flags: ApplicationCommandFlags.Ephemeral,
+						embeds: [{
+							title: 'The bot is playing music in another voice channel',
+							description:
+								'Join the channel the bot is already playing music in, or wait for the bot to free up.',
+							color: configuration.interactions.responses.colors.yellow,
+						}],
+					},
+				},
+			);
 			return [false, voiceState];
 		}
 
@@ -124,56 +145,34 @@ class MusicController extends Controller {
 	 * @returns A tuple with the first item indicating whether the user can play
 	 * music, and the second being the user's voice state.
 	 */
-	async verifyCanPlay(
-		interaction: ApplicationCommandInteraction,
-	): Promise<[boolean, VoiceState | undefined]> {
-		const [canPlay, voiceState] = await this.verifyMemberVoiceState(
+	verifyCanPlay(
+		interaction: Interaction,
+	): [boolean, VoiceState | undefined] {
+		const [canPlay, voiceState] = this.verifyMemberVoiceState(
 			interaction,
 		);
 
-		if (!canPlay) return [false, voiceState];
-
-		// No arguments provided.
-		if (!interaction.data.options[0]?.options) {
-			interaction.respond({
-				ephemeral: true,
-				embeds: [{
-					title: 'You must provide the song\'s title or URL',
-					description: `To find a song, ${
-						interaction.client.user!.username
-					} needs to know its title or a path to it. Please provide the song's title or a link to it.`,
-					color: configuration.interactions.responses.colors.red,
-				}],
-			});
-			return [false, voiceState];
-		}
-
-		// More than one argument provided, when only one is accepted by the command.
-		if (interaction.data.options[0]?.options.length !== 1) {
-			interaction.respond({
-				ephemeral: true,
-				embeds: [{
-					title: 'You may only provide one piece of information about a song',
-					description: `${
-						interaction.client.user!.username
-					} uses only one piece of information to find a song; either its title or the link to it. Multiple pieces of information are redundant, and possibly disparate.`,
-					color: configuration.interactions.responses.colors.red,
-				}],
-			});
-			return [false, voiceState];
-		}
+		if (!canPlay) return [canPlay, voiceState];
 
 		// The user cannot add to the queue due to one reason or another.
 		if (!this.canPushToQueue) {
-			interaction.respond({
-				ephemeral: true,
-				embeds: [{
-					title: 'The queue is full',
-					description:
-						'Try removing a song from the song queue, skip the current song to advance the queue immediately, or wait until the current song stops playing.',
-					color: configuration.interactions.responses.colors.yellow,
-				}],
-			});
+			sendInteractionResponse(
+				this.client.bot,
+				interaction.id,
+				interaction.token,
+				{
+					type: InteractionResponseTypes.ChannelMessageWithSource,
+					data: {
+						flags: ApplicationCommandFlags.Ephemeral,
+						embeds: [{
+							title: 'The queue is full',
+							description:
+								'Try removing a song from the song queue, skip the current song to advance the queue immediately, or wait until the current song stops playing.',
+							color: configuration.interactions.responses.colors.yellow,
+						}],
+					},
+				},
+			);
 			return [false, voiceState];
 		}
 
@@ -185,7 +184,7 @@ class MusicController extends Controller {
 			this.history.shift();
 		}
 
-		if (listing.content.type === 'COLLECTION') {
+		if (listing.content.type === SongListingContentTypes.Collection) {
 			listing.content.position--;
 		}
 
@@ -197,15 +196,16 @@ class MusicController extends Controller {
 	 * queues the listing, and optionally plays it.
 	 */
 	play(
-		{ interaction, listing, channels }: {
+		client: Client,
+		{ interaction, songListing, channels }: {
 			interaction: Interaction | undefined;
-			listing: SongListing;
-			channels: { voice: VoiceChannel; text: GuildTextChannel };
+			songListing: SongListing;
+			channels: { voice: Channel; text: Channel };
 		},
-	): void {
+	): Promise<unknown> {
 		clearTimeout(this.disconnectTimeoutID);
 
-		this.queue.push(listing);
+		this.queue.push(songListing);
 
 		// If the player is not connected to a voice channel, or if it is connected
 		// to a different voice channel, connect to the new voice channel.
@@ -216,45 +216,54 @@ class MusicController extends Controller {
 			this.textChannel = channels.text;
 		}
 
-		const method: (data: { embeds: EmbedPayload[] }) => unknown = interaction
-			? (data) => interaction.editResponse(data)
-			: (data) => this.textChannel!.send(data);
+		const embeds = [{
+			title: '👍 Listing queued.',
+			description:
+				`Your listing, **${songListing.content.title}**, has been added to the queue.`,
+			color: configuration.interactions.responses.colors.green,
+		}];
 
 		if (this.isOccupied) {
-			method({
-				embeds: [{
-					title: '👍 Listing queued.',
-					description:
-						`Your listing, **${listing.content.title}**, has been added to the queue.`,
-					color: configuration.interactions.responses.colors.green,
-				}],
-			});
-			return;
+			if (!interaction) {
+				return sendMessage(client.bot, this.textChannel.id, { embeds });
+			}
+
+			return editInteractionResponse(client.bot, interaction.token, { embeds });
 		}
 
-		this.advanceQueueAndPlay(interaction);
+		return this.advanceQueueAndPlay(interaction);
 	}
 
-	private async advanceQueueAndPlay(interaction?: Interaction): Promise<void> {
+	private async advanceQueueAndPlay(
+		interaction?: Interaction,
+		isDeferred?: boolean,
+	): Promise<unknown> {
 		clearTimeout(this.disconnectTimeoutID);
 
 		const wasLooped = this.isLoop;
 
 		if (!this.isLoop) {
-			if (this.current && this.current.content.type === 'SONG') {
+			if (
+				this.current &&
+				this.current.content.type !== SongListingContentTypes.Collection
+			) {
 				this.moveToHistory(this.current);
 				this.current = undefined;
 			}
 
 			if (
 				this.queue.length !== 0 &&
-				(!this.current || this.current.content.type !== 'COLLECTION')
+				(!this.current ||
+					this.current.content.type !== SongListingContentTypes.Collection)
 			) {
 				this.current = this.queue.shift()!;
 			}
 		}
 
-		if (this.current && this.current.content.type === 'COLLECTION') {
+		if (
+			this.current &&
+			this.current.content.type === SongListingContentTypes.Collection
+		) {
 			if (
 				this.current.content.position !== this.current.content.songs.length - 1
 			) {
@@ -270,20 +279,18 @@ class MusicController extends Controller {
 		}
 
 		if (!this.current) {
-			this.textChannel.send({
+			this.disconnectTimeoutID = setTimeout(
+				() => this.reset(),
+				configuration.music.disconnectTimeout,
+			);
+
+			return sendMessage(this.client.bot, this.textChannel.id, {
 				embeds: [{
 					title: '👏 All done!',
 					description: 'Can I go home for today?',
 					color: configuration.interactions.responses.colors.blue,
 				}],
 			});
-
-			this.disconnectTimeoutID = setTimeout(
-				() => this.reset(),
-				configuration.music.disconnectTimeout,
-			);
-
-			return;
 		}
 
 		const currentSong = this.currentSong!;
@@ -292,30 +299,41 @@ class MusicController extends Controller {
 			currentSong.url,
 		);
 
-		const method: (data: { embeds: EmbedPayload[] }) => unknown = interaction
-			? interaction.deferred
-				? (data) => interaction.editResponse(data)
-				: (data) => interaction.respond(data)
-			: (data) => this.textChannel!.send(data);
-
 		if (
 			tracksResponse.loadType === LoadType.LoadFailed ||
 			tracksResponse.loadType === LoadType.NoMatches
 		) {
-			method({
-				embeds: [{
-					title: 'Couldn\'t load track',
-					description:
-						`The track, **${currentSong.title}**, could not be loaded.`,
-					color: configuration.interactions.responses.colors.red,
-				}],
-			});
-			return;
+			const embeds = [{
+				title: 'Couldn\'t load track',
+				description:
+					`The track, **${currentSong.title}**, could not be loaded.`,
+				color: configuration.interactions.responses.colors.red,
+			}];
+
+			if (!interaction) {
+				return sendMessage(this.client.bot, this.textChannel.id, { embeds });
+			}
+
+			if (isDeferred) {
+				return editInteractionResponse(this.client.bot, interaction.token, {
+					embeds,
+				});
+			}
+
+			return sendInteractionResponse(
+				this.client.bot,
+				interaction.id,
+				interaction.token,
+				{
+					type: InteractionResponseTypes.ChannelMessageWithSource,
+					data: { embeds },
+				},
+			);
 		}
 
 		const track = tracksResponse.tracks[0]!;
 
-		if (this.current?.content.type === 'STREAM') {
+		if (this.current?.content.type === SongListingContentTypes.Stream) {
 			this.current.content.title = track.info.title;
 		}
 
@@ -333,34 +351,48 @@ class MusicController extends Controller {
 
 		this.player.play(track.track);
 
-		method({
-			embeds: [{
-				title: `${
-					(<Record<string, string>> configuration.music.symbols)[
-						this.current.content.type.toLowerCase()
-					]
-				} ${
-					!wasLooped ? 'Playing' : 'Replaying'
-				} ${this.current.content.type.toLowerCase()}`,
-				description: `${!wasLooped ? 'Now playing' : 'Replaying'} ${
-					this.current.content.type !== 'COLLECTION'
-						? ''
-						: `track **${
-							this.current.content.position + 1
-						}/${this.current.content.songs.length}** of **${this.current.content.title}**: `
-				} [**${currentSong.title}**](${currentSong.url}) as requested by ${
-					mention(this.current.requestedBy, 'USER')
-				}.`,
-				color: configuration.interactions.responses.colors.invisible,
-			}],
-		});
+		const embeds = [{
+			title: `${configuration.music.symbols[this.current.content.type]} ${
+				!wasLooped ? 'Playing' : 'Replaying'
+			} ${SongListingContentTypes[this.current.content.type]!.toLowerCase()}`,
+			description: `${!wasLooped ? 'Now playing' : 'Replaying'} ${
+				this.current.content.type !== SongListingContentTypes.Collection
+					? ''
+					: `track **${
+						this.current.content.position + 1
+					}/${this.current.content.songs.length}** of **${this.current.content.title}**: `
+			} [**${currentSong.title}**](${currentSong.url}) as requested by ${
+				mention(this.current.requestedBy, MentionTypes.User)
+			}.`,
+			color: configuration.interactions.responses.colors.invisible,
+		}];
+
+		if (!interaction) {
+			return sendMessage(this.client.bot, this.textChannel.id, { embeds });
+		}
+
+		if (isDeferred) {
+			return editInteractionResponse(this.client.bot, interaction.token, {
+				embeds,
+			});
+		}
+
+		return sendInteractionResponse(
+			this.client.bot,
+			interaction.id,
+			interaction.token,
+			{
+				type: InteractionResponseTypes.ChannelMessageWithSource,
+				data: { embeds },
+			},
+		);
 	}
 
 	skip(
 		skipCollection: boolean,
 		{ by, to }: { by: number | undefined; to: number | undefined },
 	): void {
-		if (this.current?.content.type === 'COLLECTION') {
+		if (this.current?.content.type === SongListingContentTypes.Collection) {
 			if (
 				skipCollection ||
 				this.current.content.position === this.current.content.songs.length - 1
@@ -392,7 +424,7 @@ class MusicController extends Controller {
 		unskipCollection: boolean,
 		{ by, to }: { by: number | undefined; to: number | undefined },
 	): void {
-		if (this.current?.content.type === 'COLLECTION') {
+		if (this.current?.content.type === SongListingContentTypes.Collection) {
 			if (
 				unskipCollection ||
 				this.current.content.position === 0
@@ -461,7 +493,7 @@ class MusicController extends Controller {
 		this.isLoop = true;
 		this.player.once('trackStart', () => this.isLoop = previousLoopState);
 
-		if (this.current?.content.type === 'COLLECTION') {
+		if (this.current?.content.type === SongListingContentTypes.Collection) {
 			if (replayCollection) {
 				this.current.content.position = -1;
 			} else {
@@ -486,16 +518,6 @@ class MusicController extends Controller {
 
 		this.setVolume(configuration.music.maxima.volume);
 	}
-}
-
-/**
- * Gets the voice state of a member within a guild.
- *
- * @param member - The member whose voice state to get.
- * @returns The voice state or `undefined`.
- */
-function getVoiceState(member: Member): Promise<VoiceState | undefined> {
-	return member.guild.voiceStates.resolve(member.user.id);
 }
 
 export { MusicController };
