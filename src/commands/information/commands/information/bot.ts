@@ -14,11 +14,11 @@ import { list } from '../../../../formatting.ts';
 async function displayBotInformation(
 	client: Client,
 	interaction: Interaction,
-): Promise<unknown> {
+): Promise<void> {
 	const botUser = await getBotUser(client);
 	if (!botUser) return;
 
-	return sendInteractionResponse(
+	return void sendInteractionResponse(
 		client.bot,
 		interaction.id,
 		interaction.token,
