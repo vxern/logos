@@ -1,6 +1,5 @@
-import { ClientEvents } from '../../../../../deps.ts';
 import { LogEntry } from '../log-entry.ts';
-import client from './client.ts';
+import client, { ClientEvents } from './client.ts';
 import guild, { GuildEvents } from './guild.ts';
 
 /**
