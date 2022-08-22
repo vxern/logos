@@ -1,5 +1,4 @@
 import {
-	colors,
 	fetchMembers,
 	Guild,
 	guildIconURL,
@@ -9,26 +8,25 @@ import {
 } from '../../../../../deps.ts';
 import { Client } from '../../../../client.ts';
 import configuration from '../../../../configuration.ts';
-import { capitalise, displayTime, mention } from '../../../../formatting.ts';
-import { snowflakeToTimestamp } from "../../../../utils.ts";
+import {
+	capitalise,
+	displayTime,
+	mention,
+	MentionTypes,
+} from '../../../../formatting.ts';
+import { snowflakeToTimestamp } from '../../../../utils.ts';
 import { getProficiencyCategory } from '../../../roles/module.ts';
 
 /** Displays information about the guild that this command was executed in. */
 async function displayGuildInformation(
 	client: Client,
 	interaction: Interaction,
-): Promise<unknown> {
+): Promise<void> {
 	const guild = client.guilds.get(interaction.guildId!);
 	if (!guild) return;
 
 	const owner = client.users.get(guild.ownerId);
-	if (!owner) {
-		return console.error(
-			`Failed to fetch information about the owner of guild ${
-				colors.bold(guild.name!)
-			}.`,
-		);
-	}
+	if (!owner) return;
 
 	const hasDistinctOwner = owner && owner.username !== guild.name!;
 
@@ -37,7 +35,7 @@ async function displayGuildInformation(
 		guild,
 	);
 
-	return sendInteractionResponse(
+	return void sendInteractionResponse(
 		client.bot,
 		interaction.id,
 		interaction.token,
@@ -81,7 +79,7 @@ async function displayGuildInformation(
 						hasDistinctOwner
 							? {
 								name: '👑 Owner',
-								value: mention(owner.id, 'USER'),
+								value: mention(owner.id, MentionTypes.User),
 								inline: true,
 							}
 							: ((enforcerRoleName) => ({
@@ -98,7 +96,7 @@ async function displayGuildInformation(
 }
 
 /**
- * Taking a guild object, gets a distribution of the proficiencies of its members.
+ * Taking a guild object, gets a distribution of proficiency roles of its members.
  *
  * @param client - The client instance to use.
  * @param guild - The guild of which the role frequencies to get.
@@ -111,7 +109,8 @@ async function getProficiencyRoleFrequencies(
 ): Promise<Map<bigint, number>> {
 	await fetchMembers(client.bot, guild.id, { limit: 0, query: '' });
 
-	const proficiencies = getProficiencyCategory().collection!.list!;
+	const proficiencyCategory = getProficiencyCategory();
+	const proficiencies = proficiencyCategory.collection!.list!;
 	const proficiencyNames = proficiencies.map((proficiency) => proficiency.name);
 	const proficiencyRoleIds = guild.roles.array().filter((role) =>
 		proficiencyNames.includes(role.name)
@@ -166,7 +165,7 @@ function displayProficiencyRoleDistribution(
 		const percentageComposition = getPercentageComposition(frequency, total);
 		const roleMention = roleId === -1n
 			? 'without a proficiency role.'
-			: mention(roleId, 'ROLE');
+			: mention(roleId, MentionTypes.Role);
 
 		strings.push(`${frequency} (${percentageComposition}%) ${roleMention}`);
 	}
