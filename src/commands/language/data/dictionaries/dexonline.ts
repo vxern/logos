@@ -1,7 +1,7 @@
 import {
 	DictionaryAdapter,
-	DictionaryScope,
-	DictionaryType,
+	DictionaryScopes,
+	DictionaryTypes,
 } from '../dictionary.ts';
 
 /** Maps numbers to their superscript variants. */
@@ -58,9 +58,9 @@ interface SearchResults {
 }
 
 const adapter: DictionaryAdapter = {
-	scope: DictionaryScope.MONOLINGUAL,
-	types: [DictionaryType.DEFINING, DictionaryType.ETYMOLOGICAL],
-	languages: ['romanian'],
+	scope: DictionaryScopes.Monolingual,
+	types: [DictionaryTypes.Defining, DictionaryTypes.Etymological],
+	languages: ['Romanian'],
 
 	queryBuilder: (query) => `https://dexonline.ro/definitie/${query.word}/json`,
 

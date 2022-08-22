@@ -1,47 +1,48 @@
-import { EmbedField } from '../../../../deps.ts';
+import { DiscordEmbedField } from '../../../../deps.ts';
+import { Language } from '../../../types.ts';
 
 /** The language scope / audience of the dictionary. */
-enum DictionaryScope {
+enum DictionaryScopes {
 	/**
 	 * The dictionary provides definitions in the same language as the headword.
 	 */
-	MONOLINGUAL,
+	Monolingual,
 
 	/**
 	 * The dictionary provides definitions in a different language to the
 	 * headword.
 	 */
-	BILINGUAL,
+	Bilingual,
 
 	/**
 	 * The dictionary provides definitions in multiple different languages to
 	 * the headword.
 	 */
-	MULTILINGUAL,
+	Multilingual,
 
 	/**
 	 * The dictionary provides definitions in a very large number of different
 	 * languages to the headword.
 	 */
-	OMNILINGUAL,
+	Omnilingual,
 }
 
 /** The type of the dictionary. */
-enum DictionaryType {
+enum DictionaryTypes {
 	/** The dictionary furnishes definitions to the headword. */
-	DEFINING,
+	Defining,
 
 	/** The dictionary furnishes the headword's etymology. */
-	ETYMOLOGICAL,
+	Etymological,
 
 	/** The dictionary furnishes the pronunciation of the headword. */
-	PHONETIC,
+	Phonetic,
 
 	/** The dictionary furnishes synonyms of the headword in the language. */
-	SYNONYM,
+	Synonym,
 
 	/** The dictionary furnishes antonyms of the headword in the language. */
-	ANTONYM,
+	Antonym,
 }
 
 /** Defines the content of a dictionary entry. */
@@ -81,8 +82,8 @@ type DictionaryEntry = DictionaryEntryContent & {
 function toFields(
 	entry: DictionaryEntry,
 	{ verbose }: { verbose: boolean },
-): EmbedField[] {
-	const fields: Partial<EmbedField>[] = [{
+): DiscordEmbedField[] {
+	const fields: Partial<DiscordEmbedField>[] = [{
 		name: 'Translation',
 		value: entry.translations?.join(', '),
 	}, {
@@ -106,7 +107,7 @@ function toFields(
 		),
 	}];
 
-	const filled = <EmbedField[]> fields.filter((field) => field.value);
+	const filled = <DiscordEmbedField[]> fields.filter((field) => field.value);
 	const truncated = filled.map((field) => {
 		return { ...field, value: field.value.slice(0, verbose ? 1024 : 256) };
 	});
@@ -120,10 +121,10 @@ interface SearchQuery {
 	word: string;
 
 	/** The language of the headword. */
-	native?: string;
+	native?: Language;
 
 	/** The language of the translation or definition. */
-	target?: string;
+	target?: Language;
 }
 
 /** Models a URL generator for a given query. */
@@ -135,13 +136,13 @@ type QueryBuilder = (query: SearchQuery) => string;
  */
 type DictionaryAdapter = Readonly<{
 	/** The linguistic scope of the dictionary being adapted. */
-	scope: DictionaryScope;
+	scope: DictionaryScopes;
 
 	/** The types of the dictionary being adapter. */
-	types: DictionaryType[];
+	types: DictionaryTypes[];
 
 	/** The languages supported by the dictionary being adapted. */
-	languages?: string[];
+	languages?: Language[];
 
 	/** The query builder for a certain term in the dictionary. */
 	queryBuilder: QueryBuilder;
@@ -153,7 +154,7 @@ type DictionaryAdapter = Readonly<{
 	) => Promise<DictionaryEntryContent | undefined>;
 }>;
 
-export { DictionaryScope, DictionaryType, toFields };
+export { DictionaryScopes, DictionaryTypes, toFields };
 export type {
 	DictionaryAdapter,
 	DictionaryEntry,

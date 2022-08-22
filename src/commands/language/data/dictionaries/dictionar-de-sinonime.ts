@@ -1,15 +1,15 @@
 import { cheerio } from '../../../../../deps.ts';
 import {
 	DictionaryAdapter,
-	DictionaryScope,
-	DictionaryType,
+	DictionaryScopes,
+	DictionaryTypes,
 	SearchQuery,
 } from '../dictionary.ts';
 
 const adapter: DictionaryAdapter = {
-	scope: DictionaryScope.MONOLINGUAL,
-	types: [DictionaryType.DEFINING, DictionaryType.SYNONYM],
-	languages: ['romanian'],
+	scope: DictionaryScopes.Monolingual,
+	types: [DictionaryTypes.Defining, DictionaryTypes.Synonym],
+	languages: ['Romanian'],
 
 	queryBuilder: (query: SearchQuery) =>
 		`https://www.dictionardesinonime.ro/?c=${query.word}`,
