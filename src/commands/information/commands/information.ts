@@ -1,5 +1,5 @@
 import { ApplicationCommandOptionTypes } from '../../../../deps.ts';
-import { CommandBuilder } from '../../../commands/structs/command.ts';
+import { CommandBuilder } from '../../command.ts';
 import { displayBotInformation } from './information/bot.ts';
 import { displayGuildInformation } from './information/guild.ts';
 
