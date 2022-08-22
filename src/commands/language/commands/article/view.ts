@@ -1,10 +1,12 @@
 import {
 	_,
+	ApplicationCommandFlags,
 	Interaction,
-	InteractionApplicationCommandData,
-	InteractionResponseType,
+	InteractionResponseTypes,
+	InteractionTypes,
+	sendInteractionResponse,
 } from '../../../../../deps.ts';
-import { Client } from '../../../../client.ts';
+import { Client, getLanguage } from '../../../../client.ts';
 import configuration from '../../../../configuration.ts';
 import {
 	Article,
@@ -19,17 +21,25 @@ async function viewArticle(
 	client: Client,
 	interaction: Interaction,
 ): Promise<void> {
-	const language = client.getLanguage(interaction.guild!);
+	const language = getLanguage(client, interaction.guildId!);
 
 	function showArticleViewFailure(): void {
-		interaction.respond({
-			ephemeral: true,
-			embeds: [{
-				title: 'Failed to view article',
-				description: `Failed to view article.`,
-				color: configuration.interactions.responses.colors.red,
-			}],
-		});
+		return void sendInteractionResponse(
+			client.bot,
+			interaction.id,
+			interaction.token,
+			{
+				type: InteractionResponseTypes.ChannelMessageWithSource,
+				data: {
+					flags: ApplicationCommandFlags.Ephemeral,
+					embeds: [{
+						title: 'Failed to view article',
+						description: `Failed to view article.`,
+						color: configuration.interactions.responses.colors.red,
+					}],
+				},
+			},
+		);
 	}
 
 	const documentsUnprocessed = await client.database.getArticles(
@@ -49,10 +59,20 @@ async function viewArticle(
 	> (<Record<string, Record<string, unknown>>> configuration.guilds
 		.languages)[language]?.dialects;
 
-	const data = <InteractionApplicationCommandData> interaction.data;
-	const dialectIndex = data.options[0]?.options?.find((option) =>
-		option.name === 'dialect'
-	)?.value;
+	const data = interaction.data;
+	if (!data) return;
+
+	const dialectOption = data.options?.at(0)?.options?.find((
+		option,
+	) => option.name === 'dialect');
+	if (!dialectOption) return;
+
+	const dialectIndexString = <string | undefined> dialectOption.value;
+	if (!dialectIndexString) return;
+
+	const dialectIndex = Number(dialectIndexString);
+	if (isNaN(dialectIndex)) return;
+
 	const dialect = !dialects ? undefined : dialects[dialectIndex];
 
 	const documentsFiltered = !dialect
@@ -76,29 +96,36 @@ async function viewArticle(
 			return { document: document, displayDialect: !isUnique };
 		});
 
-	if (interaction.isAutocomplete()) {
-		if (interaction.focusedOption.name === 'dialect') {
-			const argument = (<string> interaction.focusedOption.value!)
-				.toLowerCase();
+	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete) {
+		if (dialectOption.focused) {
+			const parameter = (<string | undefined> dialectOption.value)
+				?.toLowerCase();
+			if (!parameter) return;
 
 			const selectedDialects = dialects?.map<[string, number]>((
 				dialect,
 				index,
 			) => [dialect, index]).filter(([dialect, _index]) =>
-				dialect.toLowerCase().includes(argument)
+				dialect.toLowerCase().includes(parameter)
 			);
 
-			interaction.respond({
-				type: InteractionResponseType.APPLICATION_COMMAND_AUTOCOMPLETE_RESULT,
-				choices: !selectedDialects ? [] : [
-					...selectedDialects.map(([dialect, index]) => ({
-						name: dialect,
-						value: index.toString(),
-					})),
-					{ name: 'None', value: '-1' },
-				],
-			});
-			return;
+			return void sendInteractionResponse(
+				client.bot,
+				interaction.id,
+				interaction.token,
+				{
+					type: InteractionResponseTypes.ApplicationCommandAutocompleteResult,
+					data: {
+						choices: !selectedDialects ? [] : [
+							...selectedDialects.map(([dialect, index]) => ({
+								name: dialect,
+								value: index.toString(),
+							})),
+							{ name: 'None', value: '-1' },
+						],
+					},
+				},
+			);
 		}
 
 		return showResults({
@@ -110,12 +137,19 @@ async function viewArticle(
 		});
 	}
 
-	const index = parseInt(
-		data.options[0]!.options!.find((option) => option.name === 'title')!.value!,
-	);
+	const indexString = <string | undefined> data.options?.at(0)?.options?.find((
+		option,
+	) => option.name === 'title')?.value;
+	if (!indexString) return;
+
+	const index = parseInt(indexString);
+	if (isNaN(index)) return;
+
 	const show =
-		data.options[0]!.options!.find((option) => option.name === 'show')?.value ??
-			false;
+		(<boolean | undefined> data.options?.at(0)?.options?.find((option) =>
+			option.name === 'show'
+		)?.value) ?? false;
+
 	const document = documentsFiltered[index];
 	if (!document) return showArticleViewFailure();
 
