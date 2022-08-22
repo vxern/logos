@@ -7,7 +7,7 @@ import {
 	sendInteractionResponse,
 } from '../../../../deps.ts';
 import { Client, getLanguage } from '../../../client.ts';
-import { CommandBuilder } from '../../../commands/structs/command.ts';
+import { CommandBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
 import { capitalise } from '../../../formatting.ts';
 import { fromHex } from '../../../utils.ts';
@@ -74,7 +74,7 @@ const command: CommandBuilder = {
 async function word(
 	client: Client,
 	interaction: Interaction,
-): Promise<unknown> {
+): Promise<void> {
 	const data = interaction.data;
 	if (!data) return;
 
@@ -116,7 +116,7 @@ async function word(
 			}, but there are no available dictionaries for that language.`,
 		);
 
-		return editInteractionResponse(client.bot, interaction.token, {
+		return void editInteractionResponse(client.bot, interaction.token, {
 			messageId: response.id,
 			embeds: [{
 				title: 'No available dictionaries.',
@@ -155,7 +155,7 @@ async function word(
 	const hasEntry = toFields(entry, { verbose: verbose }).length > 0;
 	if (hasEntry) return;
 
-	return editInteractionResponse(client.bot, interaction.token, {
+	return void editInteractionResponse(client.bot, interaction.token, {
 		embeds: [{
 			title: 'No results found.',
 			description: `There are no results for the word '${word}'.`,
