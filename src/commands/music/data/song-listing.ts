@@ -2,6 +2,12 @@ import { SongCollection } from './song-collection.ts';
 import { SongStream } from './song-stream.ts';
 import { Song } from './song.ts';
 
+enum SongListingContentTypes {
+	Song,
+	Stream,
+	Collection,
+}
+
 /**
  * Represents a playable object in the form of a song or a collection of songs
  * that contains key information about the listing.
@@ -11,10 +17,11 @@ interface SongListing {
 	source?: string;
 
 	/** The ID of the user who requested the song listing. */
-	requestedBy: string;
+	requestedBy: bigint;
 
 	/** The content of this song listing. */
 	content: Song | SongCollection | SongStream;
 }
 
+export { SongListingContentTypes };
 export type { SongListing };

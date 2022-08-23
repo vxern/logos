@@ -1,3 +1,4 @@
+import { SongListingContentTypes } from './song-listing.ts';
 import { Song } from './song.ts';
 
 /**
@@ -6,7 +7,7 @@ import { Song } from './song.ts';
  * occupy a separate place in the queue.
  */
 interface SongCollection {
-	type: 'COLLECTION';
+	type: SongListingContentTypes.Collection;
 
 	/** The title of the collection. */
 	title: string;
