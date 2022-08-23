@@ -1,6 +1,8 @@
+import { SongListingContentTypes } from './song-listing.ts';
+
 /** Represents a musical piece in stream format. */
 interface SongStream {
-	type: 'STREAM';
+	type: SongListingContentTypes.Stream;
 
 	/** The title of the stream. */
 	title: string;

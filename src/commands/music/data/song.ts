@@ -1,6 +1,8 @@
+import { SongListingContentTypes } from './song-listing.ts';
+
 /** Represents a musical piece, playable singly by the music controller. */
 interface Song {
-	type: 'SONG';
+	type: SongListingContentTypes.Song;
 
 	/** The title of the song. */
 	title: string;
