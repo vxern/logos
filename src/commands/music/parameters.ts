@@ -1,5 +1,5 @@
 import { ApplicationCommandOptionTypes } from '../../../deps.ts';
-import { OptionBuilder } from '../../commands/structs/command.ts';
+import { OptionBuilder } from '../../commands/command.ts';
 
 const index: OptionBuilder = {
 	name: 'index',
