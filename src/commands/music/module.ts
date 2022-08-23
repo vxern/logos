@@ -1,5 +1,4 @@
 import { Interaction } from '../../../deps.ts';
-import { Command } from '../../commands/structs/command.ts';
 import configuration from '../../configuration.ts';
 import { list } from '../../formatting.ts';
 import { chunk, paginate } from '../../utils.ts';
@@ -16,7 +15,7 @@ import unskip from './commands/unskip.ts';
 import volume from './commands/volume.ts';
 import { SongListing } from './data/song-listing.ts';
 
-const commands: Record<string, Command> = {
+const commands = [
 	history,
 	now,
 	pause,
@@ -28,17 +27,17 @@ const commands: Record<string, Command> = {
 	unpause,
 	unskip,
 	volume,
-};
+];
 
 function displayListings(
-	{ interaction, title, listings, show }: {
+	{ interaction, title, songListings, show }: {
 		interaction: Interaction;
 		title: string;
-		listings: SongListing[];
+		songListings: SongListing[];
 		show: boolean;
 	},
 ): void {
-	const pages = chunk(listings, configuration.music.maxima.songs.page);
+	const pages = chunk(songListings, configuration.music.maxima.songs.page);
 
 	paginate({
 		interaction: interaction,
@@ -50,17 +49,13 @@ function displayListings(
 		view: {
 			title: 'Listings',
 			generate: (page, pageIndex) =>
-				page.length !== 0
-					? list(
-						page.map((listing, index) =>
-							`${pageIndex * 10 + (index + 1)}. ${
-								(<Record<string, string>> configuration.music.symbols)[
-									listing.content.type.toLowerCase()
-								]
-							} ~ ${listing.content.title}`
-						),
-					)
-					: 'This list is empty.',
+				page.length === 0 ? 'This list is empty.' : list(
+					page.map((listing, index) =>
+						`${pageIndex * 10 + (index + 1)}. ${
+							(configuration.music.symbols)[listing.content.type]
+						} ~ ${listing.content.title}`
+					),
+				),
 		},
 		show: show,
 	});
