@@ -1,19 +1,16 @@
-import {
-	Interaction,
-	InteractionApplicationCommandOption,
-} from '../../../../../deps.ts';
+import { Interaction } from '../../../../../deps.ts';
 import { Client } from '../../../../client.ts';
 import { SongListing } from '../song-listing.ts';
 import youtube from './youtube.ts';
 
-/** Resolves a song listing from a source. */
+/** Obtains a song listing from a source. */
 type ListingResolver = (
 	client: Client,
 	interaction: Interaction,
-	data: InteractionApplicationCommandOption,
+	query: string,
 ) => Promise<SongListing | undefined>;
 
-/** Defines the available sources. */
+/** Stores the available music sources. */
 const sources: Record<string, ListingResolver> = {
 	'YouTube': youtube,
 };
