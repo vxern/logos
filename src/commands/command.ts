@@ -37,10 +37,12 @@ type OptionLocalised = WithRequired<
 	LocalisationFields
 >;
 
-type Command = Omit<CommandLocalised, 'options'> & {
-	handle?: InteractionHandler;
-	options?: Option[];
-};
+type Command =
+	& WithRequired<Omit<CommandLocalised, 'options'>, 'defaultMemberPermissions'>
+	& {
+		handle?: InteractionHandler;
+		options?: Option[];
+	};
 
 type Option = Omit<OptionLocalised, 'options'> & {
 	handle?: InteractionHandler;
