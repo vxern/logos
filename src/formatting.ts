@@ -9,7 +9,7 @@ import { dayjs } from '../deps.ts';
 function capitalise(target: string): string {
 	if (target.length === 0) return target;
 
-	return target[0]!.toUpperCase() + target.slice(1);
+	return target.at(0)!.toUpperCase() + target.slice(1);
 }
 
 /**
@@ -48,38 +48,43 @@ function list(items: string[]): string {
  * @param timestamp - Unix timestamp.
  * @returns The formatted, human-readable time expression.
  */
-function displayTime(timestamp: number): string {
+function displayTime(timestamp: number | bigint): string {
 	const dateTime = dayjs(timestamp);
 
 	return `${dateTime.format('D MMMM YYYY')} (${dateTime.fromNow()})`;
 }
 
 /** Defines the type of Discord mention. */
-type MentionType = 'CHANNEL' | 'ROLE' | 'USER';
+enum MentionTypes {
+	Channel,
+	Role,
+	User,
+}
 
 /** Defines the formatting prefix corresponding to the type of mention. */
-const prefixes: Record<MentionType, string> = {
-	'CHANNEL': '#',
-	'ROLE': '@&',
-	'USER': '@',
+const prefixes: Record<string, string> = {
+	[MentionTypes.Channel]: '#',
+	[MentionTypes.Role]: '@&',
+	[MentionTypes.User]: '@',
 };
 
 /**
  * Creates a Discord mention by formatting an ID using the appropriate symbol.
  *
- * @param target - The object to mention by ID.
+ * @param id - The object to mention by ID.
  * @param type - What the mention mentions.
  * @returns The formatted string of text.
  */
-function mention(target: string, type: MentionType): string {
-	return `<${prefixes[type]}${target}>`;
+function mention(id: bigint, type: MentionTypes): string {
+	return `<${prefixes[type]}${id}>`;
 }
 
 export {
 	capitalise,
 	code,
 	codeMultiline,
+	displayTime,
 	list,
 	mention,
-	displayTime,
+	MentionTypes,
 };
