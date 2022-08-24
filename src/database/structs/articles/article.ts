@@ -1,3 +1,4 @@
+import { Language } from '../../../types.ts';
 import { Document, Reference } from '../document.ts';
 import { ArticleChange } from './article-change.ts';
 
@@ -19,7 +20,7 @@ interface Article {
 	author: Reference;
 
 	/** The language this article was written for. */
-	language: string;
+	language: Language;
 
 	/** (Optional) The dialect this article was written for. */
 	dialect?: string;
