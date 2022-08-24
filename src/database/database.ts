@@ -10,6 +10,7 @@ import { Document, Reference } from './structs/document.ts';
 import { capitalise } from '../formatting.ts';
 import { Praise } from './structs/users/praise.ts';
 import { Warning } from './structs/users/warning.ts';
+import { Language } from '../types.ts';
 
 /**
  * 'Unpacks' a nested type from an array, function or promise.
@@ -26,7 +27,7 @@ const $ = faunadb.query;
 /** Defines parameters used in indexing articles. */
 interface ArticleIndexParameters {
 	/** The language of the article. */
-	language: string;
+	language: Language;
 
 	/** The dialect of the article. */
 	dialect: string;
@@ -84,7 +85,7 @@ class Database {
 	 * and article documents as values.
 	 */
 	private readonly articlesByLanguage: Map<
-		string,
+		Language,
 		Map<string, Document<Article>>
 	> = new Map();
 
