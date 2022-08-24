@@ -1,4 +1,5 @@
-import { TextInputStyle } from '../deps.ts';
+import { TextStyles } from '../deps.ts';
+import { SongListingContentTypes } from './commands/music/data/song-listing.ts';
 import { fromHex } from './utils.ts';
 
 const second = 1000;
@@ -75,7 +76,7 @@ const settings = {
 		},
 		// Configuration settings pertaining to the de facto owner of the managed guilds.
 		owner: {
-			id: '217319536485990400',
+			id: 217319536485990400n,
 		},
 		// Configuration settings pertaining to guild moderators.
 		moderation: {
@@ -128,10 +129,10 @@ const settings = {
 	},
 	// Configuration settings pertaining to music.
 	music: {
-		symbols: {
-			song: '🎵',
-			collection: '🎶',
-			stream: '🌊',
+		symbols: <Record<string, string>> {
+			[SongListingContentTypes.Song]: '🎵',
+			[SongListingContentTypes.Stream]: '🌊',
+			[SongListingContentTypes.Collection]: '🎶',
 		},
 		disconnectTimeout: 10 * minute,
 		maxima: {
@@ -171,21 +172,21 @@ const settings = {
 					title: {
 						type: 'TEXT_INPUT',
 						label: 'Title of your article',
-						style: TextInputStyle.SHORT,
+						style: TextStyles.Short,
 						minimum: 10,
 						maximum: 50,
 					},
 					body: {
 						type: 'TEXT_INPUT',
 						label: 'Body of your article',
-						style: TextInputStyle.PARAGRAPH,
+						style: TextStyles.Paragraph,
 						minimum: 30,
 						maximum: 3000,
 					},
 					footer: {
 						type: 'TEXT_INPUT',
 						label: 'Additional information / notes',
-						style: TextInputStyle.PARAGRAPH,
+						style: TextStyles.Paragraph,
 						required: false,
 						minimum: 10,
 						maximum: 500,
@@ -201,14 +202,14 @@ const settings = {
 						type: 'TEXT_INPUT',
 						label: (language: string) =>
 							`What is your reason for learning ${language}?`,
-						style: TextInputStyle.PARAGRAPH,
+						style: TextStyles.Paragraph,
 						minimum: 20,
 						maximum: 300,
 					},
 					aim: {
 						type: 'TEXT_INPUT',
 						label: 'How will you benefit from being a member?',
-						style: TextInputStyle.PARAGRAPH,
+						style: TextStyles.Paragraph,
 						minimum: 20,
 						maximum: 300,
 					},
@@ -216,7 +217,7 @@ const settings = {
 						type: 'TEXT_INPUT',
 						label: (language: string) =>
 							`How did you find out about Learn ${language}?`,
-						style: TextInputStyle.SHORT,
+						style: TextStyles.Short,
 						minimum: 5,
 						maximum: 50,
 					},
