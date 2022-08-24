@@ -6,6 +6,7 @@ import {
 import { Client, getLanguage } from '../../../client.ts';
 import { CommandBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
+import { links } from '../../../constants.ts';
 
 const command: CommandBuilder = {
 	name: 'resources',
@@ -25,7 +26,7 @@ const command: CommandBuilder = {
 /** Displays a message with information on where to find the resources for a given language. */
 function resources(client: Client, interaction: Interaction): void {
 	const language = getLanguage(client, interaction.guildId!);
-	const repositoryLink = configuration.guilds.generateRepositoryLink(language);
+	const repositoryLink = links.generateLanguageRepositoryLink(language);
 
 	return void sendInteractionResponse(
 		client.bot,
