@@ -1,24 +1,65 @@
 import {
-	ApplicationCommandType,
-	Client as DiscordClient,
-	event,
+	Bot,
+	Channel,
+	createBot,
+	EventHandlers,
+	getUser,
 	Guild,
 	Intents,
 	lavadeno,
+	Member,
+	Message,
+	sendShardMessage,
+	upsertApplicationCommands,
+	User,
 } from '../deps.ts';
-import { createApplicationCommand, unifyHandlers } from './commands/command.ts';
-import modules from './modules/modules.ts';
-import services from './modules/service.ts';
-import { LoggingController } from './modules/information/controller.ts';
-import { MusicController } from './modules/music/controller.ts';
-import { loadComponents } from './modules/language/module.ts';
+import services from './services/service.ts';
+import { LoggingController } from './controllers/logging.ts';
+import { MusicController } from './controllers/music.ts';
+import { loadComponents } from './commands/language/module.ts';
 import secrets from '../secrets.ts';
 import { Database } from './database/database.ts';
 import configuration from './configuration.ts';
-import { Command, InteractionHandler } from './commands/structs/command.ts';
+import {
+	Command,
+	CommandBuilder,
+	InteractionHandler,
+} from './commands/command.ts';
+import { defaultLanguage, Language, supportedLanguages } from './types.ts';
+import { commandBuilders } from './commands/modules.ts';
+
+interface Collector<
+	E extends keyof EventHandlers,
+	P extends unknown[] = Parameters<EventHandlers[E]>,
+> {
+	filter: (...args: P) => boolean;
+	limit?: number;
+	removeAfter?: number;
+	onCollect: (...args: P) => void;
+	onEnd: () => void;
+}
 
 /** The core of the application, used for interacting with the Discord API. */
-class Client extends DiscordClient {
+class Client {
+	readonly bot: Bot;
+
+	readonly collectors: Map<
+		keyof EventHandlers,
+		Set<Collector<keyof EventHandlers>>
+	> = new Map();
+
+	readonly commands: Map<string, InteractionHandler> = new Map();
+
+	readonly guilds: Map<bigint, Guild> = new Map();
+
+	readonly users: Map<bigint, User> = new Map();
+
+	readonly members: Map<bigint, Member> = new Map();
+
+	readonly channels: Map<bigint, Channel> = new Map();
+
+	readonly messages: Map<bigint, Message> = new Map();
+
 	/** Database connection. */
 	readonly database: Database = new Database();
 
@@ -27,45 +68,131 @@ class Client extends DiscordClient {
 	 *
 	 * The keys are guild IDs, and the values are their respective topic language.
 	 */
-	readonly languages: Map<string, string> = new Map();
+	readonly languages: Map<bigint, Language> = new Map();
 
 	/**
 	 * Logging controllers pertaining to the guilds managed by this client.
 	 *
 	 * The keys are guild IDs, and the values are their respective logging controller.
 	 */
-	readonly logging: Map<string, LoggingController> = new Map();
+	readonly logging: Map<bigint, LoggingController> = new Map();
 
 	/**
 	 * Music controllers pertaining to the guilds managed by this client.
 	 *
 	 * The keys are guild IDs, and the values are their respective music controller.
 	 */
-	readonly music: Map<string, MusicController> = new Map();
+	readonly music: Map<bigint, MusicController> = new Map();
 
 	/** The Lavalink node serving this client. */
 	node!: lavadeno.Node;
 
 	/** Constructs an instance of {@link Client}. */
 	constructor() {
-		super({
+		this.bot = createBot({
 			token: secrets.core.discord.secret,
-			intents: Intents.GuildMembers,
-			presence: {
-				activity: {
-					name: 'Deno.',
-					type: 'PLAYING',
-				},
+			intents: Intents.Guilds | Intents.GuildMembers,
+			events: {
+				ready: (bot) => this.setupBot(bot),
 			},
-			clientProperties: {
-				os: 'vxern#7031',
-				browser: 'vxern#7031',
-				device: 'vxern#7031',
-			},
-			disableEnvToken: true,
-			compress: true,
-			messageCacheMax: 2000,
 		});
+
+		this.setupCache(this.bot);
+	}
+
+	protected setupCache(bot: Bot): void {
+		const { guild, user, member, channel, message, role } = bot.transformers;
+
+		bot.transformers.guild = (bot, payload) => {
+			const result = guild(bot, payload);
+
+			this.guilds.set(result.id, result);
+
+			payload.guild.channels?.forEach((channel) => {
+				bot.transformers.channel(bot, { channel, guildId: result.id });
+			});
+
+			const guildNameMatch =
+				configuration.guilds.nameExpression.exec(result.name) || undefined;
+
+			if (!guildNameMatch) return result;
+
+			const languageString = guildNameMatch[1]!.toLowerCase();
+			const language = supportedLanguages.find((language) =>
+				languageString === language
+			);
+			if (!language) return result;
+
+			this.languages.set(result.id, language);
+
+			this.setupControllers(result);
+
+			loadComponents(this);
+
+			registerCommands(this, result.id, commandBuilders);
+
+			return result;
+		};
+
+		bot.transformers.user = (...args) => {
+			const result = user(...args);
+
+			this.users.set(result.id, result);
+
+			return result;
+		};
+
+		bot.transformers.member = (...args) => {
+			const result = member(...args);
+
+			const memberId = `${result.id}${result.guildId}`;
+			const memberSnowflake = bot.transformers.snowflake(memberId);
+
+			this.members.set(memberSnowflake, result);
+
+			return result;
+		};
+
+		bot.transformers.channel = (...args) => {
+			const result = channel(...args);
+
+			this.channels.set(result.id, result);
+
+			return result;
+		};
+
+		bot.transformers.message = (bot, payload) => {
+			const result = message(bot, payload);
+
+			this.messages.set(result.id, result);
+
+			const user = bot.transformers.user(bot, payload.author);
+
+			this.users.set(user.id, user);
+
+			if (payload.member && payload.guild_id) {
+				const guildId = bot.transformers.snowflake(payload.guild_id);
+
+				const member = bot.transformers.member(
+					bot,
+					payload.member,
+					guildId,
+					user.id,
+				);
+
+				this.members.set(member.id, member);
+			}
+
+			return result;
+		};
+
+		bot.transformers.role = (bot, payload) => {
+			const result = role(bot, payload);
+
+			this.guilds.get(result.guildId)?.roles.set(result.id, result);
+
+			return result;
+		};
 	}
 
 	/**
@@ -75,139 +202,42 @@ class Client extends DiscordClient {
 	 * @remarks
 	 * This function should __not__ be called externally.
 	 */
-	@event()
-	protected async ready(): Promise<void> {
+	protected async setupBot(bot: Bot): Promise<void> {
 		console.time('SETUP');
 
 		this.node = new lavadeno.Node({
 			connection: secrets.modules.music.lavalink,
-			sendGatewayPayload: (_, payload) => this.gateway.send(payload),
+			sendGatewayPayload: (id, payload) => {
+				const shardId = this.guilds.get(id)?.shardId;
+				if (!shardId) return;
+
+				const shard = bot.gateway.manager.shards.find((shard) =>
+					shard.id === shardId
+				);
+				if (!shard) return;
+
+				sendShardMessage(shard, payload, true);
+			},
 		});
-		await this.node.connect(BigInt(this.user!.id));
+		await this.node.connect(bot.id);
 
-		this.on('raw', (event, payload) => {
-			if (
-				event === 'VOICE_SERVER_UPDATE' || event === 'VOICE_STATE_UPDATE'
-			) {
-				this.node.handleVoiceUpdate(payload);
-			}
-		});
+		bot.events.voiceStateUpdate = (_bot, payload) =>
+			this.node.handleVoiceUpdate({
+				session_id: payload.sessionId,
+				channel_id: payload.channelId ? `${payload.channelId}` : null,
+				guild_id: `${payload.guildId}`,
+				user_id: `${payload.userId}`,
+			});
+		bot.events.voiceServerUpdate = (_bot, payload) =>
+			this.node.handleVoiceUpdate({
+				token: payload.token,
+				endpoint: payload.endpoint!,
+				guild_id: `${payload.guildId}`,
+			});
 
-		const promises = [
-			this.setupGuilds().then(() => loadComponents(this)),
-			this.setupCommands(),
-			this.setupServices(),
-		];
-
-		await Promise.all(promises);
+		this.setupServices();
 
 		console.timeEnd('SETUP');
-	}
-
-	/** Sets up guilds for managing. */
-	async setupGuilds(): Promise<unknown> {
-		const promises: Promise<unknown>[] = [];
-
-		const guilds = await this.guilds.array();
-		for (const guild of guilds) {
-			promises.push(
-				guild.chunk({}, true),
-				guild.roles.fetchAll(),
-			);
-
-			this.manageGuild(guild);
-			this.setupControllers(guild);
-		}
-
-		return Promise.all(promises);
-	}
-
-	manageGuild(guild: Guild): void {
-		const guildNameMatch =
-			configuration.guilds.nameExpression.exec(guild.name!) || undefined;
-
-		const language = !guildNameMatch
-			? configuration.guilds.defaultLanguage
-			: guildNameMatch![1]!.toLowerCase();
-
-		this.languages.set(guild.id, language);
-	}
-
-	async setupCommands(): Promise<unknown> {
-		this.interactions.on('interactionError', console.error);
-
-		const promises = [];
-
-		const guilds = await this.guilds.array();
-		for (const guild of guilds) {
-			const language = this.getLanguage(guild);
-
-			const commands = modules.generateCommands(language);
-			for (const command of commands) {
-				command.handle = unifyHandlers(command);
-				this.manageCommand(command);
-
-				if (!command.options) continue;
-
-				const autocompleteOptions = command.options!.filter((option) =>
-					option.autocomplete
-				);
-
-				for (const option of autocompleteOptions) {
-					this.interactions.autocomplete(
-						command.name,
-						option.name,
-						(interaction) => command.handle!(this, interaction),
-					);
-				}
-
-				const handlers = new Map<string, Map<string, InteractionHandler>>();
-				for (const option of command.options) {
-					if (!option.options) continue;
-
-					const autocompleteSubOptions = option.options!.filter((subOption) =>
-						subOption.autocomplete
-					);
-
-					for (const subOption of autocompleteSubOptions) {
-						if (handlers.has(subOption.name)) {
-							handlers.get(subOption.name)!.set(option.name, option.handle!);
-							continue;
-						}
-
-						handlers.set(
-							subOption.name,
-							new Map([[option.name, option.handle!]]),
-						);
-					}
-				}
-
-				for (const [subOption, options] of handlers.entries()) {
-					this.interactions.autocomplete(
-						command.name,
-						subOption,
-						(interaction) =>
-							options.get(interaction.subCommand!)!.call(
-								this,
-								this,
-								interaction,
-							),
-					);
-				}
-			}
-
-			promises.push(this.synchroniseGuildCommands(guild, commands));
-		}
-
-		return Promise.all(promises);
-	}
-
-	manageCommand(command: Command): void {
-		this.interactions.handle(
-			command.name,
-			(interaction) => command.handle!(this, interaction),
-			ApplicationCommandType.CHAT_INPUT,
-		);
 	}
 
 	setupControllers(guild: Guild): void {
@@ -220,58 +250,135 @@ class Client extends DiscordClient {
 			startService(this);
 		}
 	}
-
-	/**
-	 * Synchronises a guild's slash commands with slash commands defined in the
-	 * source code of the application to ensure that slash commands are always
-	 * up-to-date.
-	 *
-	 * @param guild - The guild whose slash commands to synchronise.
-	 * @param commands - The source code slash commands.
-	 */
-	synchroniseGuildCommands(
-		guild: Guild,
-		commands: Command[],
-	): Promise<unknown> {
-		const applicationCommands = [];
-		for (const command of commands) {
-			applicationCommands.push(createApplicationCommand(command));
-		}
-
-		// TODO(vxern): Add default permissions once Harmony supports them.
-		/*
-		const guildCommands = await guild.commands.bulkEdit(applicationCommands);
-
-		const commandPermissions = await createPermissions(
-			guild,
-			guildCommands,
-			commands,
-		);
-		return guild.commands.permissions.bulkEdit(commandPermissions);
-    */
-
-		return guild.commands.bulkEdit(applicationCommands);
-	}
-
-	/**
-	 * Checks if the guild is part of the language network.
-	 *
-	 * @param guild - The guild whose status to check.
-	 * @return The result of the check.
-	 */
-	static isManagedGuild(guild: Guild): boolean {
-		return configuration.guilds.nameExpression.test(guild.name!);
-	}
-
-	/**
-	 * Returns the language of the guild.
-	 *
-	 * @param guild - The guild whose language to return.
-	 * @returns The guild's language.
-	 */
-	getLanguage(guild: Guild): string {
-		return this.languages.get(guild.id)!;
-	}
 }
 
-export { Client };
+function registerCommands(
+	client: Client,
+	guildId: bigint,
+	commandBuilders: CommandBuilder[],
+): void {
+	const language = client.languages.get(guildId) ?? defaultLanguage;
+
+	const commands: Command[] = [];
+	for (const commandBuilder of commandBuilders) {
+		const command = typeof commandBuilder === 'function'
+			? commandBuilder(language)
+			: commandBuilder;
+
+		commands.push(command);
+	}
+
+	const onInteractionCreate = client.bot.events['interactionCreate'];
+	client.bot.events['interactionCreate'] = (bot, interaction) => {
+		onInteractionCreate(bot, interaction);
+
+		const commandName = interaction.data?.name;
+		if (!commandName) return;
+
+		const handler = client.commands.get(commandName);
+		if (!handler) return;
+
+		try {
+			handler(client, interaction);
+		} catch (exception) {
+			console.error(exception);
+		}
+	};
+
+	upsertApplicationCommands(client.bot, commands, guildId);
+}
+
+function addCollector<T extends keyof EventHandlers>(
+	client: Client,
+	event: T,
+	collector: Collector<T>,
+): void {
+	const onEnd = collector.onEnd;
+	collector.onEnd = () => {
+		collectors.delete(collector);
+		onEnd();
+	};
+
+	if (collector.limit) {
+		let emitCount = 0;
+		const onCollect = collector.onCollect;
+		collector.onCollect = (...args) => {
+			emitCount++;
+
+			if (emitCount === collector.limit) {
+				collector.onEnd();
+			}
+
+			onCollect(...args);
+		};
+	}
+
+	if (collector.removeAfter) {
+		setTimeout(collector.onEnd, collector.removeAfter!);
+	}
+
+	if (!client.collectors.has(event)) {
+		client.collectors.set(event, new Set());
+
+		const eventHandler = client.bot.events[event];
+		client.bot.events[event] =
+			<EventHandlers[T]> ((...args: Parameters<EventHandlers[T]>) => {
+				const collectors = <Set<Collector<T>>> client.collectors.get(event)!;
+
+				for (const collector of collectors) {
+					if (!collector.filter(...args)) {
+						continue;
+					}
+
+					collector.onCollect(...args);
+				}
+
+				// @ts-ignore: Fuck you, TypeScript.
+				eventHandler(...args);
+			});
+	}
+
+	const collectors = <Set<Collector<T>>> client.collectors.get(event)!;
+	collectors.add(collector);
+}
+
+/**
+ * Checks if the guild is part of the language network.
+ *
+ * @param client - The client instance to use.
+ * @param guildId - The ID of the guild whose status to check.
+ * @return The result of the check.
+ */
+function isManagedGuild(client: Client, guildId: bigint): boolean {
+	const guild = client.guilds.get(guildId);
+	if (!guild) return false;
+
+	return configuration.guilds.nameExpression.test(guild.name!);
+}
+
+/**
+ * Returns the topic language of a guild.
+ *
+ * @param client - The client instance to use.
+ * @param guildId - The ID of the guild to get.
+ * @returns The guild's language.
+ */
+function getLanguage(client: Client, guildId: bigint): Language {
+	return client.languages.get(guildId) ?? defaultLanguage;
+}
+
+/**
+ * Returns the bot user.
+ *
+ * @param client - The client instance to use.
+ * @returns A promise resolving to the bot user or undefined.
+ */
+function getBotUser(client: Client): Promise<User | undefined> {
+	const cachedUser = client.users.get(client.bot.id);
+	if (cachedUser) return new Promise(() => cachedUser);
+
+	return getUser(client.bot, client.bot.id);
+}
+
+export { addCollector, Client, getBotUser, getLanguage, isManagedGuild };
+export type { Collector };
