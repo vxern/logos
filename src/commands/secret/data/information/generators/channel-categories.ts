@@ -1,6 +1,6 @@
-import { Guild } from '../../../../../deps.ts';
-import { Client, getLanguage } from '../../../../client.ts';
-import { getChannelMention } from './information.ts';
+import { Guild } from '../../../../../../deps.ts';
+import { Client, getLanguage } from '../../../../../client.ts';
+import { getChannelMention } from './../information-sections.ts';
 
 /** The information for channel categories for the guilds. */
 const channelCategoryGenerators: Record<
