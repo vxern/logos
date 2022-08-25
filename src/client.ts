@@ -241,7 +241,7 @@ class Client {
 	}
 
 	setupControllers(guild: Guild): void {
-		this.logging.set(guild.id, new LoggingController(guild));
+		this.logging.set(guild.id, new LoggingController(this, guild));
 		this.music.set(guild.id, new MusicController(this, guild));
 	}
 
