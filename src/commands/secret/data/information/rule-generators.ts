@@ -10,27 +10,20 @@ interface Rule {
 	content: string;
 }
 
-/** Represents a collection of rules. */
-interface Rules {
-	[key: string]: (guild: Guild) => Promise<Rule> | Rule;
-}
-
 /** The defined guild rules. */
-const rules: Rules = {
+const ruleGenerators: Record<string, (guild: Guild) => Rule> = {
 	behavior: (_) => ({
 		summary: 'Try to be nice.',
 		content:
 			'It is expected of members to treat each other with respect, consideration and understanding. Malicious behaviour in the form of verbal abuse, discrimination, harassment and other forms of hurtful or toxic behaviour will not be tolerated.',
 	}),
-	quality: async (guild: Guild) => {
-		const memesChannel = await getChannelMention(guild, 'memes');
-
-		return {
-			summary: 'Do not be obnoxious.',
-			content:
-				`It is expected of contributions made to the server to be of decent quality. Trolling, spamming, flooding, shitposting (outside of the ${memesChannel} channel) and other forms of annoying behaviour are sorely discouraged.`,
-		};
-	},
+	quality: (guild: Guild) => ({
+		summary: 'Do not be obnoxious.',
+		content:
+			`It is expected of contributions made to the server to be of decent quality. Trolling, spamming, flooding, shitposting (outside of the ${
+				getChannelMention(guild, 'memes')
+			} channel) and other forms of annoying behaviour are sorely discouraged.`,
+	}),
 	relevance: (_) => ({
 		summary: 'Post relevant content.',
 		content:
@@ -48,4 +41,4 @@ const rules: Rules = {
 	}),
 };
 
-export default rules;
+export default ruleGenerators;
