@@ -1,18 +1,16 @@
-import {
-	ClientEvents,
-	Collector,
-	Guild,
-	GuildTextChannel,
-} from '../../../deps.ts';
-import configuration from '../../configuration.ts';
-import { getTextChannel } from '../../utils.ts';
-import { Controller } from '../controller.ts';
-import { MessageGenerators } from './data/generators/generators.ts';
-import generators from './data/generators/generators.ts';
-import { Events } from './data/log-entry.ts';
+import { Channel, Guild, sendMessage } from '../../deps.ts';
+import { Client } from '../client.ts';
+import configuration from '../configuration.ts';
+import { getTextChannel } from '../utils.ts';
+import { Controller } from './controller.ts';
+import generators, {
+	Events,
+	MessageGenerators,
+} from '../commands/information/data/generators/generators.ts';
+import { ClientEvents } from '../commands/information/data/generators/client.ts';
 
 /** Stores the message generators for all handled events. */
-const messageGenerators: MessageGenerators<Events> = {
+const messageGenerators: MessageGenerators = {
 	...generators.client,
 	...generators.guild,
 };
@@ -20,11 +18,11 @@ const messageGenerators: MessageGenerators<Events> = {
 /** Controller responsible for logging client and guild events. */
 class LoggingController extends Controller {
 	/** The channel used for logging events. */
-	private channel?: GuildTextChannel;
+	private channel?: Channel;
 
 	/** Constructs a {@link LoggingController}. */
-	constructor(guild: Guild) {
-		super(guild);
+	constructor(client: Client, guild: Guild) {
+		super(client, guild);
 		this.setupChannel(guild).then(() => this.startListening());
 	}
 
@@ -46,22 +44,17 @@ class LoggingController extends Controller {
 	private startListening(): void {
 		if (!this.channel) return;
 
-		for (const event of Object.keys(generators.client)) {
-			const collector = new Collector({
-				event: event,
-				client: this.guild.client,
-			});
+		const eventNames = <(keyof ClientEvents)[]> Object.keys(generators.client);
 
-			collector.on(
-				'collect',
-				(...args) =>
-					this.log(
-						<keyof ClientEvents> event,
-						...(<ClientEvents[keyof ClientEvents]> args),
-					),
-			);
-
-			collector.collect();
+		for (const eventName of eventNames) {
+			const eventHandler = this.client.bot.events[eventName]!;
+			this.client.bot.events[eventName]! = (
+				...args: ClientEvents[keyof ClientEvents]
+			) => {
+				// @ts-ignore
+				eventHandler(...args);
+				this.log(eventName, ...args);
+			};
 		}
 	}
 
@@ -85,18 +78,18 @@ class LoggingController extends Controller {
 			);
 		}
 
-		const filter = entry.filter(this.channel.guild, ...args);
+		const filter = entry.filter(this.client, this.channel.guildId, ...args);
 		if (!filter) return;
 
-		const message = await entry.message(...args);
+		const message = await entry.message(this.client, ...args);
 		if (!message) return;
 
-		this.channel!.send({
-			embed: {
+		return void sendMessage(this.client.bot, this.channel!.id, {
+			embeds: [{
 				title: entry.title,
 				description: message,
 				color: entry.color,
-			},
+			}],
 		});
 	}
 }
