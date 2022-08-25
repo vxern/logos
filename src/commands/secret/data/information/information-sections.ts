@@ -3,8 +3,7 @@ import { Client } from '../../../../client.ts';
 import configuration from '../../../../configuration.ts';
 import { mention, MentionTypes } from '../../../../formatting.ts';
 import { fromHex, getTextChannel } from '../../../../utils.ts';
-// import categories from './channel-categories.ts';
-import ruleGenerators from './rule-generators.ts';
+import ruleGenerators from './generators/rules.ts';
 
 /** Represents a section of guild information. */
 interface InformationSection {
@@ -19,7 +18,7 @@ interface InformationSection {
 }
 
 /** The defined sections of information for guilds. */
-const information: Record<string, InformationSection> = {
+const informationSections: Record<string, InformationSection> = {
 	rules: {
 		image: 'https://i.imgur.com/wRBpXcY.png',
 		color: fromHex('#ff9a76'),
@@ -62,27 +61,6 @@ const information: Record<string, InformationSection> = {
 			};
 		},
 	},
-	/*
-	categories: {
-		image: 'https://i.imgur.com/NRTrDdO.png',
-		color: fromHex('#679B9B'),
-		generateEmbed: async (client, guild) => {
-			const fields = [];
-			for (
-				const [title, generateCategoryDescription] of Object.entries(categories)
-			) {
-				fields.push({
-					name: `${bold(title.toUpperCase())}`,
-					// deno-lint-ignore no-await-in-loop
-					value: await generateCategoryDescription(client, guild),
-					inline: false,
-				});
-			}
-
-			return { fields: fields };
-		},
-	},
-  */
 	// TODO: Reimplement invite category once invite helpers and types are fixed in discordeno.
 	/*
 	invite: {
@@ -143,4 +121,4 @@ function getChannelMention(guild: Guild, name: string): string {
 
 export { getChannelMention };
 export type { InformationSection };
-export default information;
+export default informationSections;
