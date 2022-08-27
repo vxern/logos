@@ -1,17 +1,21 @@
 import { fromHex } from '../../../../utils.ts';
-import { RoleCategory } from '../structures/role-category.ts';
+import {
+	RoleCategory,
+	RoleCategoryTypes,
+} from '../structures/role-category.ts';
+import { RoleCollectionTypes } from '../structures/role-collection.ts';
 
-const base: RoleCategory[] = [
+const categories: RoleCategory[] = [
 	{
-		type: 'CATEGORY',
 		name: 'Proficiency',
 		description:
 			'Roles representing the user\'s language proficiency and knowledge of the language.',
+		type: RoleCategoryTypes.Category,
 		color: fromHex('#1c1c1c'),
 		emoji: '🎓',
-		limit: 1,
+		isSingle: true,
 		collection: {
-			type: 'COLLECTION',
+			type: RoleCollectionTypes.Collection,
 			onAssignMessage: (name) =>
 				`Your language proficiency is now ${name.toLowerCase()}.`,
 			list: [{
@@ -38,21 +42,21 @@ const base: RoleCategory[] = [
 		},
 	},
 	{
-		type: 'CATEGORY_GROUP',
 		name: 'Personalisation',
 		description: 'Roles used to personalise one\'s server profile.',
 		color: fromHex('#ffe548'),
 		emoji: '🌈',
+		type: RoleCategoryTypes.CategoryGroup,
 		categories: [
 			{
-				type: 'CATEGORY',
 				name: 'Gender',
 				description: 'Roles defining one\'s gender.',
+				type: RoleCategoryTypes.Category,
 				color: fromHex('#ff4b3e'),
 				emoji: '⚧',
-				limit: 1,
+				isSingle: true,
 				collection: {
-					type: 'COLLECTION',
+					type: RoleCollectionTypes.Collection,
 					description: (name) =>
 						`I am of the ${name.toLowerCase()} persuasion.`,
 					onAssignMessage: (name) =>
@@ -73,14 +77,14 @@ const base: RoleCategory[] = [
 				},
 			},
 			{
-				type: 'CATEGORY',
 				name: 'Abroad',
 				description: 'Roles related to the abroad.',
+				type: RoleCategoryTypes.Category,
 				color: fromHex('#d6e3f8'),
 				emoji: '🌎',
-				limit: -1,
+				isSingle: false,
 				collection: {
-					type: 'COLLECTION',
+					type: RoleCollectionTypes.Collection,
 					onAssignMessage: (name) => `You are now a ${name}.`,
 					onUnassignMessage: (name) => `You are no longer a ${name}.`,
 					list: [{
@@ -94,51 +98,51 @@ const base: RoleCategory[] = [
 		],
 	},
 	{
-		type: 'CATEGORY',
 		name: 'Learning',
 		description: 'Roles applied in teaching and learning the language.',
+		type: RoleCategoryTypes.Category,
 		color: fromHex('#daddd8'),
 		emoji: '📖',
-		limit: -1,
+		isSingle: false,
 		collection: {
-			type: 'COLLECTION',
+			type: RoleCollectionTypes.Collection,
 			list: [{
 				name: 'Classroom Attendee',
+				description:
+					'I attend sessions in the classroom channel and would like to be notified when a session takes place.',
 				onAssignMessage: (_) =>
 					`You will now be notified of each lesson before it begins.`,
 				onUnassignMessage: (_) =>
 					`You will no longer be notified before each lesson.`,
-				description:
-					'I attend sessions in the classroom channel and would like to be notified when a session takes place.',
 				emoji: '📖',
 			}, {
 				name: 'Correct Me',
+				description:
+					`"I think, therefore I make mistakes." - Please do correct me.`,
 				onAssignMessage: (_) =>
 					`Other users will now be able to see that you demand additional corrections.`,
 				onUnassignMessage: (_) =>
 					`Other users will no longer be able to see that you demand additional corrections.`,
-				description:
-					`"I think, therefore I make mistakes." - Please do correct me.`,
 				emoji: '✍️',
 			}, {
 				name: 'Daily Phrase',
+				description: 'I want to be notified when a new daily phrase is posted.',
 				onAssignMessage: (_) =>
 					`You will now be notified when a daily phrase is posted.`,
 				onUnassignMessage: (_) =>
 					'You will no longer be notified of new daily phrases.',
-				description: 'I want to be notified when a new daily phrase is posted.',
 				emoji: '🌞',
 			}, {
 				name: 'Voicechatter',
+				description:
+					'I enjoy attending (un)announced VC sessions and speaking with other people.',
 				onAssignMessage: (_) => `You can now be notified of a VC session.`,
 				onUnassignMessage: (_) =>
 					'You will no longer be notified of VC sessions.',
-				description:
-					'I enjoy attending (un)announced VC sessions and speaking with other people.',
 				emoji: '🗣️',
 			}],
 		},
 	},
 ];
 
-export default base;
+export default categories;
