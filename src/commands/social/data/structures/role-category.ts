@@ -47,6 +47,8 @@ type RoleCategory =
 				collection: RoleCollection;
 
 				limit?: number;
+
+				isSingle: false;
 			})
 		)
 	);
