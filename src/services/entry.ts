@@ -13,7 +13,7 @@ type Step = (typeof entrySteps)[number];
 
 type EntryInteractionHandler = (
 	client: Client,
-	interaction: Interaction,
+	interaction: Interaction & { type: InteractionTypes.MessageComponent },
 	parameter: string,
 ) => Promise<void> | void;
 
@@ -37,7 +37,13 @@ const service: ServiceStarter = (client) => {
 
 				const [step, parameter] = <[Step, string]> stepAndParameter;
 
-				interactionHandlers[step](client, interaction, parameter);
+				interactionHandlers[step](
+					client,
+					<Interaction & {
+						type: InteractionTypes.MessageComponent;
+					}> interaction,
+					parameter,
+				);
 			},
 		});
 	}

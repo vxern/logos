@@ -27,7 +27,7 @@ const proficiencies = proficiencyCategory.collection.list;
 
 async function onSelectLanguageProficiency(
 	client: Client,
-	interaction: Interaction,
+	interaction: Interaction & { type: InteractionTypes.MessageComponent },
 	parameter: string,
 ): Promise<void> {
 	const language = getLanguage(client, interaction.guildId!);
