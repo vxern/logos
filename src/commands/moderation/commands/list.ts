@@ -2,7 +2,6 @@ import {
 	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
 	dayjs,
-	fetchMembers,
 	Interaction,
 	InteractionResponseTypes,
 	InteractionTypes,
@@ -11,6 +10,8 @@ import {
 import { Client } from '../../../client.ts';
 import { CommandBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
+import { Document } from '../../../database/structs/document.ts';
+import { Warning } from '../../../database/structs/users/warning.ts';
 import { list } from '../../../formatting.ts';
 import {
 	chunk,
@@ -54,15 +55,11 @@ async function listWarnings(
 	client: Client,
 	interaction: Interaction,
 ): Promise<void> {
-	const data = interaction.data;
-	if (!data) return;
-
-	const userIdentifier = <string | undefined> data.options?.at(0)?.options?.at(
-		0,
-	)?.value;
-	if (!userIdentifier) return;
-
-	await fetchMembers(client.bot, interaction.guildId!, { limit: 0, query: '' });
+	const userIdentifier = <string | undefined> interaction.data?.options?.at(0)
+		?.options?.at(
+			0,
+		)?.value;
+	if (userIdentifier === undefined) return;
 
 	const members = Array.from(client.members.values()).filter((member) =>
 		member.guildId === interaction.guildId!
@@ -95,7 +92,7 @@ async function listWarnings(
 		);
 	}
 
-	function showListFailure(): unknown {
+	const displayWarningDisplayError = (): void => {
 		return void sendInteractionResponse(
 			client.bot,
 			interaction.id,
@@ -105,16 +102,15 @@ async function listWarnings(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						title: 'Failed to display warnings',
-						description: `The warnings for the given user could not be shown.`,
+						description: 'The warnings for the given user could not be shown.',
 						color: configuration.interactions.responses.colors.red,
 					}],
 				},
 			},
 		);
-	}
+	};
 
-	if (matchingUsers.length === 0) return void showListFailure();
+	if (matchingUsers.length === 0) return displayWarningDisplayError();
 
 	const user = matchingUsers[0]!;
 
@@ -122,32 +118,38 @@ async function listWarnings(
 		'id',
 		user.id.toString(),
 	);
-	if (!subject) return void showListFailure();
+	if (!subject) return displayWarningDisplayError();
 
 	const warnings = await client.database.getWarnings(subject.ref);
-	if (!warnings) return void showListFailure();
+	if (!warnings) return displayWarningDisplayError();
 
 	const pages = chunk(
 		warnings,
 		configuration.interactions.responses.resultsPerPage,
 	);
 
-	return paginate({
-		interaction: interaction,
+	const generateWarningsPage = (
+		warnings: Document<Warning>[],
+		_index: number,
+	): string => {
+		if (warnings.length === 0) {
+			return 'This user has not received any warnings.';
+		}
+
+		return list(
+			warnings.map(
+				(warning) =>
+					`${trim(warning.data.reason, 50)} (${dayjs(warning.ts).fromNow()})`,
+			),
+		);
+	};
+
+	return paginate(client, interaction, {
 		elements: pages,
 		embed: { color: configuration.interactions.responses.colors.blue },
 		view: {
 			title: 'Warnings',
-			generate: (warnings) =>
-				warnings.length === 0
-					? `This user hasn't received any warnings.`
-					: list(
-						warnings.map((warning) =>
-							`${trim(warning.data.reason, 50)} (${
-								dayjs(warning.ts).fromNow()
-							})`
-						),
-					),
+			generate: generateWarningsPage,
 		},
 		show: false,
 	});
