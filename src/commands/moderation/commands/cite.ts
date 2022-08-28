@@ -1,4 +1,5 @@
 import {
+	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
 	Interaction,
 	InteractionResponseTypes,
@@ -8,6 +9,7 @@ import {
 import { Client } from '../../../client.ts';
 import { CommandBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
+import { capitalise } from '../../../formatting.ts';
 import ruleGenerators from '../../secret/data/information/generators/rules.ts';
 
 const command: CommandBuilder = {
@@ -40,46 +42,60 @@ const command: CommandBuilder = {
 	handle: citeRule,
 };
 
-async function citeRule(
+function citeRule(
 	client: Client,
 	interaction: Interaction,
-): Promise<void> {
+): void {
 	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete) {
+		const choices = Object.keys(ruleGenerators).map((name, index) => ({
+			name: capitalise(name.toLowerCase()),
+			value: index.toString(),
+		}));
+
 		return void sendInteractionResponse(
 			client.bot,
 			interaction.id,
 			interaction.token,
 			{
 				type: InteractionResponseTypes.ApplicationCommandAutocompleteResult,
-				data: {
-					choices: Object.keys(ruleGenerators).map((name, index) => ({
-						name: name.toUpperCase(),
-						value: index.toString(),
-					})),
-				},
+				data: { choices },
 			},
 		);
 	}
 
-	const data = interaction.data;
-	if (!data) return;
+	const displayInvalidRuleError = (): void => {
+		return void sendInteractionResponse(
+			client.bot,
+			interaction.id,
+			interaction.token,
+			{
+				type: InteractionResponseTypes.ChannelMessageWithSource,
+				data: {
+					flags: ApplicationCommandFlags.Ephemeral,
+					embeds: [{
+						description: 'Invalid rule.',
+						color: configuration.interactions.responses.colors.red,
+					}],
+				},
+			},
+		);
+	};
 
-	const indexString = data.options?.at(0)?.value;
-	if (!indexString) return;
+	const indexString = interaction.data?.options?.at(0)?.value;
+	if (!indexString) return displayInvalidRuleError();
 
 	const index = Number(indexString);
-	if (isNaN(index)) return;
+	if (isNaN(index)) return displayInvalidRuleError();
 
 	const titleRuleTuples = Object.entries(ruleGenerators)[index];
-	if (!titleRuleTuples) return;
+	if (!titleRuleTuples) return displayInvalidRuleError();
 
-	const [title, ruleGenerator] = titleRuleTuples;
+	const [title, generateRule] = titleRuleTuples;
 
 	const guild = client.guilds.get(interaction.guildId!);
 	if (!guild) return;
 
-	const rule = await ruleGenerator(guild);
-
+	const rule = generateRule(guild);
 	return void sendInteractionResponse(
 		client.bot,
 		interaction.id,
