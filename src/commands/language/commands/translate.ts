@@ -150,7 +150,7 @@ async function getTranslation(
 	targetLanguageCode: string,
 	text: string,
 ): Promise<Translation | undefined> {
-	const sourceLanguageCodeBase = sourceLanguageCode.split('-')!.at(0)!;
+	const sourceLanguageCodeBase = sourceLanguageCode.split('-').at(0)!;
 
 	const response = await fetch(
 		addParametersToURL(deepLApiEndpoints.translate, {
