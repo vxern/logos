@@ -2,7 +2,7 @@ import {
 	_,
 	ApplicationCommandFlags,
 	getDmChannel,
-	guildIconURL,
+	getGuildIconURL,
 	Interaction,
 	InteractionResponseTypes,
 	sendInteractionResponse,
@@ -42,7 +42,8 @@ async function createArticle(
 		);
 	}
 
-	const isContributor = await verifyIsContributor(interaction.member!);
+	const isContributor = verifyIsContributor(client, interaction.member!);
+	if (isContributor === undefined) return;
 
 	const author = await client.database.getOrCreateUser(
 		'id',
@@ -50,8 +51,7 @@ async function createArticle(
 	);
 	if (!author) return showArticleSubmissionFailure(interaction);
 
-	const canAct = await verifyCanAct({
-		client: client,
+	const canAct = await verifyCanAct(client, {
 		user: author,
 		action: 'CREATE',
 		isContributor: isContributor,
@@ -146,7 +146,7 @@ async function createArticle(
 			embeds: [
 				{
 					thumbnail: (() => {
-						const iconURL = guildIconURL(client.bot, guild.id, guild.icon);
+						const iconURL = getGuildIconURL(client.bot, guild.id, guild.icon);
 						if (!iconURL) return undefined;
 
 						return {
