@@ -58,16 +58,18 @@ async function editArticle(
 	if (!documents) return showArticleEditFailure(interaction);
 
 	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete) {
-		return showResults({
-			interaction: interaction,
-			articlesWrapped: documents.map((document) => ({
+		return showResults(
+			client,
+			interaction,
+			documents.map((document) => ({
 				article: document.data,
 				displayDialect: false,
 			})),
-		});
+		);
 	}
 
-	const isContributor = await verifyIsContributor(interaction.member!);
+	const isContributor = verifyIsContributor(client, interaction.member!);
+	if (isContributor === undefined) return;
 
 	const author = await client.database.getOrCreateUser(
 		'id',
@@ -75,12 +77,14 @@ async function editArticle(
 	);
 	if (!author) return showArticleEditFailure(interaction);
 
-	const canAct = await verifyCanAct({
-		client: client,
-		user: author,
-		action: 'EDIT',
-		isContributor: isContributor,
-	});
+	const canAct = await verifyCanAct(
+		client,
+		{
+			user: author,
+			action: 'EDIT',
+			isContributor: isContributor,
+		},
+	);
 	if (canAct === undefined) return showArticleEditFailure(interaction);
 	if (canAct === false) {
 		return void sendInteractionResponse(

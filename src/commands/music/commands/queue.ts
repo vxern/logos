@@ -46,8 +46,7 @@ function displaySongQueue(
 			option.name === 'show'
 		)?.value) ?? false;
 
-	return displayListings({
-		interaction: interaction,
+	return displayListings(client, interaction, {
 		title: '📋 Queue',
 		songListings: musicController.queue,
 		show: show,

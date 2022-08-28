@@ -117,8 +117,7 @@ function displayNowPlaying(client: Client, interaction: Interaction): void {
 
 		const collection = currentListing.content;
 
-		return void paginate({
-			interaction: interaction,
+		return void paginate(client, interaction, {
 			elements: chunk(collection.songs, configuration.music.maxima.songs.page),
 			embed: {
 				title: '⬇️ Now playing',
