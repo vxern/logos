@@ -128,13 +128,14 @@ async function viewArticle(
 			);
 		}
 
-		return showResults({
-			interaction: interaction,
-			articlesWrapped: documentsWrapped.map((documentWrapped) => ({
+		return showResults(
+			client,
+			interaction,
+			documentsWrapped.map((documentWrapped) => ({
 				article: documentWrapped.document.data,
 				displayDialect: documentWrapped.displayDialect,
 			})),
-		});
+		);
 	}
 
 	const indexString = <string | undefined> data.options?.at(0)?.options?.find((
@@ -170,8 +171,7 @@ async function viewArticle(
 	);
 	if (contributors.includes(undefined)) return showArticleViewFailure();
 
-	return showArticle({
-		interaction: interaction,
+	return showArticle(client, interaction, {
 		document: document,
 		changes: changes,
 		contributors: <Document<User>[]> contributors,
