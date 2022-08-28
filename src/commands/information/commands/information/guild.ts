@@ -45,7 +45,10 @@ async function displayGuildInformation(
 				embeds: [{
 					title: `Information about **${guild.name!}**`,
 					thumbnail: (() => {
-						const iconURL = getGuildIconURL(client.bot, guild.id, guild.icon);
+						const iconURL = getGuildIconURL(client.bot, guild.id, guild.icon, {
+							size: 4096,
+							format: 'png',
+						});
 						if (!iconURL) return undefined;
 
 						return {
