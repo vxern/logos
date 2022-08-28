@@ -2,7 +2,9 @@ import {
 	ApplicationCommandFlags,
 	ButtonComponent,
 	ButtonStyles,
+	editInteractionResponse,
 	Interaction,
+	InteractionApplicationCommandCallbackData,
 	InteractionResponseTypes,
 	InteractionTypes,
 	MessageComponentTypes,
@@ -13,7 +15,7 @@ import { CommandBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
 import { createInteractionCollector, random } from '../../../utils.ts';
 import { SentencePair } from '../data/sentence.ts';
-import { sentenceLists } from '../module.ts';
+import { sentencePairsByLanguage } from '../module.ts';
 
 const command: CommandBuilder = {
 	name: 'game',
@@ -36,8 +38,25 @@ async function initialiseGame(
 	interaction: Interaction,
 ): Promise<void> {
 	const language = getLanguage(client, interaction.guildId!);
-	const sentencePairs = Object.values(sentenceLists[language] ?? {});
-	const hasSentencePairs = sentencePairs.length !== 0;
+	const sentencePairs = sentencePairsByLanguage.get(language);
+	if (!sentencePairs) {
+		return void sendInteractionResponse(
+			client.bot,
+			interaction.id,
+			interaction.token,
+			{
+				type: InteractionResponseTypes.ChannelMessageWithSource,
+				data: {
+					flags: ApplicationCommandFlags.Ephemeral,
+					embeds: [{
+						description:
+							`There are no sentences available in ${language} to learn from.`,
+						color: configuration.interactions.responses.colors.yellow,
+					}],
+				},
+			},
+		);
+	}
 
 	await sendInteractionResponse(
 		client.bot,
@@ -49,23 +68,40 @@ async function initialiseGame(
 		},
 	);
 
-	if (!hasSentencePairs) {
-		return void sendInteractionResponse(
-			client.bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.DeferredUpdateMessage,
-				data: {
-					embeds: [{
-						description:
-							`There are no sentences available in ${language} to learn from.`,
-						color: configuration.interactions.responses.colors.red,
-					}],
-				},
-			},
-		);
-	}
+	let sentenceSelection: SentenceSelection;
+
+	const createGameView = (): InteractionApplicationCommandCallbackData => {
+		sentenceSelection = createSentenceSelection(sentencePairs);
+
+		return {
+			embeds: [{
+				color: ribbonColor,
+				fields: [{
+					name: 'Sentence',
+					value: sentenceSelection.pair.sentence,
+				}, {
+					name: 'Translation',
+					value: sentenceSelection.pair.translation,
+				}],
+			}],
+			components: [{
+				type: MessageComponentTypes.ActionRow,
+				components: <[
+					ButtonComponent,
+					ButtonComponent,
+					ButtonComponent,
+					ButtonComponent,
+				]> (<unknown> sentenceSelection.choices.map(
+					(choice, index) => ({
+						type: MessageComponentTypes.Button,
+						style: ButtonStyles.Success,
+						label: choice,
+						customId: `${customId}|${index}`,
+					}),
+				)),
+			}],
+		};
+	};
 
 	let ribbonColor = configuration.interactions.responses.colors.blue;
 
@@ -73,41 +109,7 @@ async function initialiseGame(
 		type: InteractionTypes.MessageComponent,
 		userId: interaction.user.id,
 		onCollect: (bot, selection) => {
-			const sentenceSelection = createSentenceSelection(sentencePairs);
-
 			sendInteractionResponse(bot, selection.id, selection.token, {
-				type: InteractionResponseTypes.DeferredUpdateMessage,
-				data: {
-					embeds: [{
-						color: ribbonColor,
-						fields: [{
-							name: 'Sentence',
-							value: sentenceSelection.pair.sentence,
-						}, {
-							name: 'Translation',
-							value: sentenceSelection.pair.translation,
-						}],
-					}],
-					components: [{
-						type: MessageComponentTypes.ActionRow,
-						components: <[
-							ButtonComponent,
-							ButtonComponent,
-							ButtonComponent,
-							ButtonComponent,
-						]> (<unknown> sentenceSelection.choices.map(
-							(choice, index) => ({
-								type: MessageComponentTypes.Button,
-								style: ButtonStyles.Success,
-								label: choice,
-								customId: `${customId}|${index}`,
-							}),
-						)),
-					}],
-				},
-			});
-
-			sendInteractionResponse(bot, interaction.id, interaction.token, {
 				type: InteractionResponseTypes.DeferredUpdateMessage,
 			});
 
@@ -128,10 +130,24 @@ async function initialiseGame(
 			ribbonColor = isCorrect
 				? configuration.interactions.responses.colors.green
 				: configuration.interactions.responses.colors.red;
+
+			return void editInteractionResponse(
+				client.bot,
+				interaction.token,
+				createGameView(),
+			);
 		},
 	});
 
-	return;
+	return void sendInteractionResponse(
+		client.bot,
+		interaction.id,
+		interaction.token,
+		{
+			type: InteractionResponseTypes.ChannelMessageWithSource,
+			data: createGameView(),
+		},
+	);
 }
 
 /**
