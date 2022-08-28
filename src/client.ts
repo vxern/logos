@@ -2,8 +2,10 @@ import {
 	ApplicationCommandOptionTypes,
 	Bot,
 	Channel,
+	colors,
 	createBot,
 	EventHandlers,
+	fetchMembers,
 	Guild,
 	Intents,
 	lavadeno,
@@ -123,6 +125,16 @@ class Client {
 			registerCommands(this, result.id, commandBuilders);
 
 			this.setupControllers(result);
+
+			console.info(
+				`Fetching ~ ${result.memberCount} members for guild ${
+					colors.bold(result.name)
+				}...`,
+			);
+			console.time(`MEMBERS (${result.name})`);
+			fetchMembers(bot, result.id!, { limit: 0, query: '' }).then(
+				() => console.timeEnd(`MEMBERS (${result.name})`),
+			);
 
 			const guildNameMatch =
 				configuration.guilds.nameExpression.exec(result.name) || undefined;
@@ -289,7 +301,7 @@ class Client {
 
 	setupControllers(guild: Guild): void {
 		this.logging.set(guild.id, new LoggingController(this, guild));
-		this.music.set(guild.id, new MusicController(this, guild));
+		//this.music.set(guild.id, new MusicController(this, guild));
 	}
 
 	setupServices(): void {
