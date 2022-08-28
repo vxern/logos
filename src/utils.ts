@@ -471,14 +471,14 @@ function resolveUserIdentifier(
 	options: { includeBots: boolean } = { includeBots: false },
 ): User[] | undefined {
 	let id: string | undefined = undefined;
-	id = userMentionExpression.exec(identifier)?.at(1);
-	id = userIDExpression.exec(identifier)?.at(0);
+	id ??= userMentionExpression.exec(identifier)?.at(1);
+	id ??= userIDExpression.exec(identifier)?.at(0);
 
 	if (!id) {
 		const users: User[] = [];
 		for (const member of members) {
 			const user = client.users.get(member.id);
-			if (!user) return undefined;
+			if (!user) continue;
 
 			users.push(user);
 		}
