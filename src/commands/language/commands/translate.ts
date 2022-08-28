@@ -1,8 +1,8 @@
+// deno-lint-ignore-file camelcase
 import {
 	ApplicationCommandFlags,
 	ApplicationCommandOptionChoice,
 	ApplicationCommandOptionTypes,
-	editInteractionResponse,
 	Interaction,
 	InteractionResponseTypes,
 	InteractionTypes,
@@ -72,8 +72,8 @@ const command: CommandBuilder = {
 	}, {
 		name: 'show',
 		nameLocalizations: {
-			pl: 'wyświetlić-innym',
-			ro: 'arată-le-celorlalți',
+			pl: 'wyświetl',
+			ro: 'afișează',
 		},
 		description:
 			'If set to true, the translation will be shown to other users.',
@@ -85,54 +85,103 @@ const command: CommandBuilder = {
 	}],
 };
 
+interface DeepLSupportedLanguage {
+	language: string;
+	name: string;
+	supports_formality: boolean;
+}
+
+/** Represents a supported language object sent by DeepL. */
+interface SupportedLanguage {
+	/** The language name */
+	name: string;
+
+	/** The language code. */
+	code: string;
+
+	/** Whether the formality option is supported for this language. */
+	supportsFormality: boolean;
+}
+
+const supportedLanguages = await getSupportedLanguages();
+const supportedLanguagesChoices = supportedLanguages.map<
+	ApplicationCommandOptionChoice
+>((language) => ({
+	name: language.name,
+	value: language.code,
+}));
+
+async function getSupportedLanguages(): Promise<SupportedLanguage[]> {
+	const response = await fetch(
+		addParametersToURL(deepLApiEndpoints.languages, {
+			'auth_key': secrets.modules.language.deepL.secret,
+			'type': 'target',
+		}),
+	);
+	if (!response.ok) return [];
+
+	const results = <DeepLSupportedLanguage[]> await response.json().catch(
+		() => [],
+	);
+
+	return results.map((result) => ({
+		name: result.name,
+		code: result.language,
+		supportsFormality: result.supports_formality,
+	}));
+}
+
+interface DeepLTranslation {
+	detected_source_language: string;
+	text: string;
+}
+
 /** Represents a response to a translation query. */
 interface Translation {
 	/** The language detected from the text sent to be translated. */
-	// deno-lint-ignore camelcase
-	detected_source_language: string;
+	detectedSourceLanguage: string;
 
 	/** The translated text. */
 	text: string;
 }
 
-/** Represents a supported language object sent by DeepL. */
-interface SupportedLanguage {
-	/** The language code. */
-	language: string;
+async function getTranslation(
+	sourceLanguageCode: string,
+	targetLanguageCode: string,
+	text: string,
+): Promise<Translation | undefined> {
+	const sourceLanguageCodeBase = sourceLanguageCode.split('-')!.at(0)!;
 
-	/** The language name */
-	name: string;
+	const response = await fetch(
+		addParametersToURL(deepLApiEndpoints.translate, {
+			'auth_key': secrets.modules.language.deepL.secret,
+			'text': text,
+			'source_lang': sourceLanguageCodeBase,
+			'target_lang': targetLanguageCode,
+		}),
+	);
+	if (!response.ok) return;
 
-	/** Whether the formality option is supported for this language. */
-	// deno-lint-ignore camelcase
-	supports_formality: boolean;
+	const results =
+		(<{ translations: DeepLTranslation[] }> await response.json()).translations;
+	if (results.length !== 1) return;
+
+	const result = results[0]!;
+	return {
+		detectedSourceLanguage: result.detected_source_language,
+		text: result.text,
+	};
 }
 
-const supportedLanguagesResponse = await fetch(
-	addParametersToURL(deepLApiEndpoints.languages, {
-		'auth_key': secrets.modules.language.deepL.secret,
-		'type': 'target',
-	}),
-);
-const supportedLanguagesRaw: SupportedLanguage[] = supportedLanguagesResponse.ok
-	? await supportedLanguagesResponse.json()
-	: [];
-const supportedLanguages: SupportedLanguage[] = supportedLanguagesRaw
-	.filter((supportedLanguage, index, array) =>
-		index ===
-			array.findIndex((language) =>
-				language.language.startsWith(supportedLanguage.language.split('-')[0]!)
-			)
+function resolveToSupportedLanguage(
+	languageOrCode: string,
+): SupportedLanguage | undefined {
+	const languageOrCodeLowercase = languageOrCode.toLowerCase();
+	return supportedLanguages.find((language) =>
+		language.code.toLowerCase() === languageOrCodeLowercase ||
+		language.name.toLowerCase() === languageOrCode
 	);
-// TODO: Do not combine language variants into single choices.
-const supportedLanguagesChoices: ApplicationCommandOptionChoice[] =
-	supportedLanguages
-		.map(
-			(supportedLanguage) => ({
-				name: supportedLanguage.name.split('(')[0]!.trimEnd(),
-				value: supportedLanguage.language,
-			}),
-		);
+}
 
 /** Allows the user to translate text from one language to another through the DeepL API. */
 async function translate(
@@ -143,11 +192,11 @@ async function translate(
 		const input = <string | undefined> interaction.data?.options?.find((
 			option,
 		) => option.focused)?.value;
-		if (!input) return;
+		if (input === undefined) return;
 
 		let choices: ApplicationCommandOptionChoice[];
 		if (input.length === 0) {
-			choices = supportedLanguagesChoices.slice(25);
+			choices = supportedLanguagesChoices.slice(0, 25);
 		} else {
 			const inputLowercase = input.toLowerCase();
 			choices = supportedLanguagesChoices.filter((language) =>
@@ -169,16 +218,80 @@ async function translate(
 	const data = interaction.data;
 	if (!data) return;
 
-	const sourceLanguageCode = <string | undefined> data.options?.at(0)?.value;
-	const targetLanguageCode = <string | undefined> data.options?.at(1)?.value;
+	const sourceLanguageOrCode = <string | undefined> data.options?.at(0)?.value;
+	const targetLanguageOrCode = <string | undefined> data.options?.at(1)?.value;
 	const text = <string | undefined> data.options?.at(2)?.value;
-	if (!(sourceLanguageCode && targetLanguageCode && text)) return;
+	if (!(sourceLanguageOrCode && targetLanguageOrCode && text)) return;
+
+	if (sourceLanguageOrCode === targetLanguageOrCode) {
+		return void sendInteractionResponse(
+			client.bot,
+			interaction.id,
+			interaction.token,
+			{
+				type: InteractionResponseTypes.ChannelMessageWithSource,
+				data: {
+					flags: ApplicationCommandFlags.Ephemeral,
+					embeds: [{
+						description:
+							'The target language may not be the same as the source language.',
+						color: configuration.interactions.responses.colors.yellow,
+					}],
+				},
+			},
+		);
+	}
+
+	const isSourceTextEmpty = text.trim().length === 0;
+	if (isSourceTextEmpty) {
+		return void sendInteractionResponse(
+			client.bot,
+			interaction.id,
+			interaction.token,
+			{
+				type: InteractionResponseTypes.ChannelMessageWithSource,
+				data: {
+					flags: ApplicationCommandFlags.Ephemeral,
+					embeds: [{
+						description: 'The source text may not be empty.',
+						color: configuration.interactions.responses.colors.yellow,
+					}],
+				},
+			},
+		);
+	}
+
+	const sourceLanguage = resolveToSupportedLanguage(sourceLanguageOrCode);
+	const targetLanguage = resolveToSupportedLanguage(targetLanguageOrCode);
+	if (!sourceLanguage || !targetLanguage) {
+		return void sendInteractionResponse(
+			client.bot,
+			interaction.id,
+			interaction.token,
+			{
+				type: InteractionResponseTypes.ChannelMessageWithSource,
+				data: {
+					flags: ApplicationCommandFlags.Ephemeral,
+					embeds: [{
+						description: !sourceLanguage
+							? (
+								!targetLanguage
+									? 'Both the source language and the target language are invalid.'
+									: 'The source language is invalid.'
+							)
+							: 'The target language is invalid.',
+						color: configuration.interactions.responses.colors.red,
+					}],
+				},
+			},
+		);
+	}
 
 	const show =
 		<boolean> data.options?.find((option) => option.name === 'show')?.value ??
 			false;
 
-	const response = await sendInteractionResponse(
+	await sendInteractionResponse(
 		client.bot,
 		interaction.id,
 		interaction.token,
@@ -187,42 +300,57 @@ async function translate(
 			data: { flags: !show ? ApplicationCommandFlags.Ephemeral : undefined },
 		},
 	);
-	if (!response) return;
 
-	const translationRequest = await fetch(
-		addParametersToURL(deepLApiEndpoints.translate, {
-			'auth_key': secrets.modules.language.deepL.secret,
-			'text': text,
-			'source_lang': sourceLanguageCode.split('-')[0]!,
-			'target_lang': targetLanguageCode,
-		}),
+	const translation = await getTranslation(
+		sourceLanguage.code,
+		targetLanguage.code,
+		text,
 	);
-	const translationJson = await translationRequest.json();
-	const translation = <Translation> translationJson.translations[0];
+	if (!translation) {
+		return void sendInteractionResponse(
+			client.bot,
+			interaction.id,
+			interaction.token,
+			{
+				type: InteractionResponseTypes.ChannelMessageWithSource,
+				data: {
+					embeds: [{
+						description: 'Failed to translate text.',
+						color: configuration.interactions.responses.colors.red,
+					}],
+				},
+			},
+		);
+	}
 
-	const source = supportedLanguages.find((supportedLanguage) =>
-		supportedLanguage.language === sourceLanguageCode
-	)!;
-	const target = supportedLanguages.find((supportedLanguage) =>
-		supportedLanguage.language === targetLanguageCode
-	)!;
+	// Ensures that an empty translation string doesn't result in embed failure.
+	const translatedText = translation.text.trim().length !== 0
+		? translation.text
+		: '⠀';
 
-	return void editInteractionResponse(client.bot, interaction.token, {
-		messageId: response.id,
-		embeds: [{
-			title: `${source.name} → ${target.name}`,
-			color: configuration.interactions.responses.colors.blue,
-			fields: [{
-				name: source.name,
-				value: text,
-				inline: false,
-			}, {
-				name: target.name,
-				value: translation.text.trim().length === 0 ? '⠀' : translation.text,
-				inline: false,
-			}],
-		}],
-	});
+	return void sendInteractionResponse(
+		client.bot,
+		interaction.id,
+		interaction.token,
+		{
+			type: InteractionResponseTypes.ChannelMessageWithSource,
+			data: {
+				embeds: [{
+					title: `${sourceLanguage.name} → ${targetLanguage.name}`,
+					color: configuration.interactions.responses.colors.blue,
+					fields: [{
+						name: sourceLanguage.name,
+						value: text,
+						inline: false,
+					}, {
+						name: targetLanguage.name,
+						value: translatedText,
+						inline: false,
+					}],
+				}],
+			},
+		},
+	);
 }
 
 /**
