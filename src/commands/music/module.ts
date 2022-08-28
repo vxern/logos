@@ -1,4 +1,5 @@
 import { Interaction } from '../../../deps.ts';
+import { Client } from '../../client.ts';
 import configuration from '../../configuration.ts';
 import { list } from '../../formatting.ts';
 import { chunk, paginate } from '../../utils.ts';
@@ -30,8 +31,9 @@ const commands = [
 ];
 
 function displayListings(
-	{ interaction, title, songListings, show }: {
-		interaction: Interaction;
+	client: Client,
+	interaction: Interaction,
+	{ title, songListings, show }: {
 		title: string;
 		songListings: SongListing[];
 		show: boolean;
@@ -39,8 +41,7 @@ function displayListings(
 ): void {
 	const pages = chunk(songListings, configuration.music.maxima.songs.page);
 
-	paginate({
-		interaction: interaction,
+	paginate(client, interaction, {
 		elements: pages,
 		embed: {
 			title: title,
