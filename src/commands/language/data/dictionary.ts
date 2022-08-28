@@ -134,25 +134,36 @@ type QueryBuilder = (query: SearchQuery) => string;
  * Models a dictionary adapter to allow extracting data in a normalised format
  * from various dictionaries.
  */
-type DictionaryAdapter = Readonly<{
-	/** The linguistic scope of the dictionary being adapted. */
-	scope: DictionaryScopes;
+type DictionaryAdapter = Readonly<
+	& {
+		/** The types of the dictionary being adapter. */
+		types: DictionaryTypes[];
 
-	/** The types of the dictionary being adapter. */
-	types: DictionaryTypes[];
+		/** The query builder for a certain term in the dictionary. */
+		queryBuilder: QueryBuilder;
 
-	/** The languages supported by the dictionary being adapted. */
-	languages?: Language[];
+		/** Implementation of the method for searching up a term in a dictionary. */
+		lookup: (
+			query: SearchQuery,
+			builder: QueryBuilder,
+		) => Promise<DictionaryEntryContent | undefined>;
+	}
+	& ({
+		scope: DictionaryScopes.Omnilingual;
+	} | {
+		scope: DictionaryScopes.Monolingual;
 
-	/** The query builder for a certain term in the dictionary. */
-	queryBuilder: QueryBuilder;
+		languages: [Language];
+	} | {
+		scope: DictionaryScopes.Bilingual;
 
-	/** Implementation of the method for searching up a term in a dictionary. */
-	lookup: (
-		query: SearchQuery,
-		builder: QueryBuilder,
-	) => Promise<DictionaryEntryContent | undefined>;
-}>;
+		languages: [Language, Language];
+	} | {
+		scope: DictionaryScopes.Multilingual;
+
+		languages: Language[];
+	})
+>;
 
 export { DictionaryScopes, DictionaryTypes, toFields };
 export type {
