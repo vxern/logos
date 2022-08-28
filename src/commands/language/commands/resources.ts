@@ -1,11 +1,13 @@
 import {
+	ApplicationCommandFlags,
+	ButtonStyles,
 	Interaction,
 	InteractionResponseTypes,
+	MessageComponentTypes,
 	sendInteractionResponse,
 } from '../../../../deps.ts';
 import { Client, getLanguage } from '../../../client.ts';
 import { CommandBuilder } from '../../../commands/command.ts';
-import configuration from '../../../configuration.ts';
 import { links } from '../../../constants.ts';
 
 const command: CommandBuilder = {
@@ -35,10 +37,15 @@ function resources(client: Client, interaction: Interaction): void {
 		{
 			type: InteractionResponseTypes.ChannelMessageWithSource,
 			data: {
-				embeds: [{
-					title: 'Resources',
-					description: `Click [here](${repositoryLink}) for resources.`,
-					color: configuration.interactions.responses.colors.blue,
+				flags: ApplicationCommandFlags.Ephemeral,
+				components: [{
+					type: MessageComponentTypes.ActionRow,
+					components: [{
+						type: MessageComponentTypes.Button,
+						label: 'Click here for resources',
+						style: ButtonStyles.Link,
+						url: repositoryLink,
+					}],
 				}],
 			},
 		},
