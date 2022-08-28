@@ -8,7 +8,7 @@ import {
 import { Client } from '../../../client.ts';
 import { CommandBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
-import rules from '../../secret/data/information/rules.ts';
+import ruleGenerators from '../../secret/data/information/generators/rules.ts';
 
 const command: CommandBuilder = {
 	name: 'cite',
@@ -52,7 +52,7 @@ async function citeRule(
 			{
 				type: InteractionResponseTypes.ApplicationCommandAutocompleteResult,
 				data: {
-					choices: Object.keys(rules).map((name, index) => ({
+					choices: Object.keys(ruleGenerators).map((name, index) => ({
 						name: name.toUpperCase(),
 						value: index.toString(),
 					})),
@@ -70,7 +70,7 @@ async function citeRule(
 	const index = Number(indexString);
 	if (isNaN(index)) return;
 
-	const titleRuleTuples = Object.entries(rules)[index];
+	const titleRuleTuples = Object.entries(ruleGenerators)[index];
 	if (!titleRuleTuples) return;
 
 	const [title, ruleGenerator] = titleRuleTuples;

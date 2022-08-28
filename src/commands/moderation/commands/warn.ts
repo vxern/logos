@@ -2,7 +2,7 @@ import {
 	ApplicationCommandFlags,
 	fetchMembers,
 	getDmChannel,
-	guildIconURL,
+	getGuildIconURL,
 	Interaction,
 	InteractionResponseTypes,
 	InteractionTypes,
@@ -122,7 +122,7 @@ async function warnUser(
 	if (!guild) return;
 
 	const enforcerRoleId = guild.roles.find((role) =>
-		role.name === configuration.guilds.moderation.enforcer
+		role.name === configuration.guilds.moderation.moderator
 	)?.id;
 	if (!enforcerRoleId) return;
 
@@ -142,7 +142,7 @@ async function warnUser(
 					embeds: [{
 						title: 'Invalid user',
 						description:
-							`Bots and server ${configuration.guilds.moderation.enforcer.toLowerCase()}s cannot be warned.`,
+							`Bots and server ${configuration.guilds.moderation.moderator.toLowerCase()}s cannot be warned.`,
 						color: configuration.interactions.responses.colors.yellow,
 					}],
 				},
@@ -223,7 +223,7 @@ async function warnUser(
 			embeds: [
 				{
 					thumbnail: (() => {
-						const iconURL = guildIconURL(client.bot, guild.id, guild.icon);
+						const iconURL = getGuildIconURL(client.bot, guild.id, guild.icon);
 						if (!iconURL) return undefined;
 
 						return {
