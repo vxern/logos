@@ -2,7 +2,6 @@ import {
 	ApplicationCommandFlags,
 	ButtonComponent,
 	ButtonStyles,
-	editInteractionResponse,
 	Interaction,
 	InteractionResponseTypes,
 	InteractionTypes,
@@ -42,16 +41,15 @@ async function initialiseGame(
 	const sentencePairs = Object.values(sentenceLists[language] ?? {});
 	const hasSentencePairs = sentencePairs.length !== 0;
 
-	const response = await sendInteractionResponse(
+	await sendInteractionResponse(
 		client.bot,
 		interaction.id,
 		interaction.token,
 		{
-			type: InteractionResponseTypes.DeferredUpdateMessage,
+			type: InteractionResponseTypes.DeferredChannelMessageWithSource,
 			data: { flags: ApplicationCommandFlags.Ephemeral },
 		},
 	);
-	if (!response) return;
 
 	if (!hasSentencePairs) {
 		console.error(
@@ -60,15 +58,22 @@ async function initialiseGame(
 			}, but there are no available sentences for that language.`,
 		);
 
-		return void editInteractionResponse(client.bot, interaction.token, {
-			messageId: response.id,
-			embeds: [{
-				title: 'No available sentences.',
-				description:
-					`There are no sentences available to learn from for ${language}.`,
-				color: configuration.interactions.responses.colors.red,
-			}],
-		});
+		return void sendInteractionResponse(
+			client.bot,
+			interaction.id,
+			interaction.token,
+			{
+				type: InteractionResponseTypes.DeferredUpdateMessage,
+				data: {
+					embeds: [{
+						title: 'No available sentences.',
+						description:
+							`There are no sentences available to learn from for ${language}.`,
+						color: configuration.interactions.responses.colors.red,
+					}],
+				},
+			},
+		);
 	}
 
 	let ribbonColor = configuration.interactions.responses.colors.blue;
@@ -79,34 +84,36 @@ async function initialiseGame(
 		onCollect: (bot, selection) => {
 			const sentenceSelection = createSentenceSelection(sentencePairs);
 
-			editInteractionResponse(bot, interaction.token, {
-				messageId: response.id,
-				embeds: [{
-					color: ribbonColor,
-					fields: [{
-						name: 'Sentence',
-						value: sentenceSelection.pair.sentence,
-					}, {
-						name: 'Translation',
-						value: sentenceSelection.pair.translation,
+			sendInteractionResponse(bot, selection.id, selection.token, {
+				type: InteractionResponseTypes.DeferredUpdateMessage,
+				data: {
+					embeds: [{
+						color: ribbonColor,
+						fields: [{
+							name: 'Sentence',
+							value: sentenceSelection.pair.sentence,
+						}, {
+							name: 'Translation',
+							value: sentenceSelection.pair.translation,
+						}],
 					}],
-				}],
-				components: [{
-					type: MessageComponentTypes.ActionRow,
-					components: <[
-						ButtonComponent,
-						ButtonComponent,
-						ButtonComponent,
-						ButtonComponent,
-					]> (<unknown> sentenceSelection.choices.map(
-						(choice, index) => ({
-							type: MessageComponentTypes.Button,
-							style: ButtonStyles.Success,
-							label: choice,
-							customId: `${customId}|${index}`,
-						}),
-					)),
-				}],
+					components: [{
+						type: MessageComponentTypes.ActionRow,
+						components: <[
+							ButtonComponent,
+							ButtonComponent,
+							ButtonComponent,
+							ButtonComponent,
+						]> (<unknown> sentenceSelection.choices.map(
+							(choice, index) => ({
+								type: MessageComponentTypes.Button,
+								style: ButtonStyles.Success,
+								label: choice,
+								customId: `${customId}|${index}`,
+							}),
+						)),
+					}],
+				},
 			});
 
 			sendInteractionResponse(bot, interaction.id, interaction.token, {
