@@ -10,13 +10,13 @@ import {
 	Member,
 	Message,
 	sendShardMessage,
+	startBot,
 	upsertApplicationCommands,
 	User,
 } from '../deps.ts';
 import services from './services/service.ts';
 import { LoggingController } from './controllers/logging.ts';
 import { MusicController } from './controllers/music.ts';
-import { loadComponents } from './commands/language/module.ts';
 import secrets from '../secrets.ts';
 import { Database } from './database/database.ts';
 import configuration from './configuration.ts';
@@ -89,6 +89,8 @@ class Client {
 
 	/** Constructs an instance of {@link Client}. */
 	constructor() {
+		console.log('Creating bot...');
+
 		this.bot = createBot({
 			token: secrets.core.discord.secret,
 			intents: Intents.Guilds | Intents.GuildMembers,
@@ -97,7 +99,13 @@ class Client {
 			},
 		});
 
+		console.log('Setting up cache...');
+
 		this.setupCache(this.bot);
+	}
+
+	start(): void {
+		return void startBot(this.bot);
 	}
 
 	protected setupCache(bot: Bot): void {
@@ -112,9 +120,12 @@ class Client {
 				bot.transformers.channel(bot, { channel, guildId: result.id });
 			});
 
+			registerCommands(this, result.id, commandBuilders);
+
+			this.setupControllers(result);
+
 			const guildNameMatch =
 				configuration.guilds.nameExpression.exec(result.name) || undefined;
-
 			if (!guildNameMatch) return result;
 
 			const languageString = guildNameMatch[1]!.toLowerCase();
@@ -124,12 +135,6 @@ class Client {
 			if (!language) return result;
 
 			this.languages.set(result.id, language);
-
-			this.setupControllers(result);
-
-			loadComponents(this);
-
-			registerCommands(this, result.id, commandBuilders);
 
 			return result;
 		};
@@ -205,6 +210,23 @@ class Client {
 	protected async setupBot(bot: Bot): Promise<void> {
 		console.time('SETUP');
 
+		const onInteractionCreate = bot.events['interactionCreate'];
+		bot.events['interactionCreate'] = (bot, interaction) => {
+			onInteractionCreate(bot, interaction);
+
+			const commandName = interaction.data?.name;
+			if (!commandName) return;
+
+			const handler = this.commands.get(commandName);
+			if (!handler) return;
+
+			try {
+				handler(this, interaction);
+			} catch (exception) {
+				console.error(exception);
+			}
+		};
+
 		this.node = new lavadeno.Node({
 			connection: secrets.modules.music.lavalink,
 			sendGatewayPayload: (id, payload) => {
@@ -268,22 +290,34 @@ function registerCommands(
 		commands.push(command);
 	}
 
-	const onInteractionCreate = client.bot.events['interactionCreate'];
-	client.bot.events['interactionCreate'] = (bot, interaction) => {
-		onInteractionCreate(bot, interaction);
-
-		const commandName = interaction.data?.name;
-		if (!commandName) return;
-
-		const handler = client.commands.get(commandName);
-		if (!handler) return;
-
-		try {
-			handler(client, interaction);
-		} catch (exception) {
-			console.error(exception);
+	for (const command of commands) {
+		if (command.handle) {
+			client.commands.set(command.name, command.handle);
 		}
-	};
+
+		if (!command.options) {
+			continue;
+		}
+
+		for (const option of command.options) {
+			if (option.handle) {
+				client.commands.set(`${command.name} ${option.name}`, option.handle);
+			}
+
+			if (!option.options) {
+				continue;
+			}
+
+			for (const subOption of option.options) {
+				if (subOption.handle) {
+					client.commands.set(
+						`${command.name} ${option.name} ${subOption.name}`,
+						subOption.handle,
+					);
+				}
+			}
+		}
+	}
 
 	upsertApplicationCommands(client.bot, commands, guildId);
 }
