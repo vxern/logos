@@ -48,8 +48,7 @@ function displaySongHistory(client: Client, interaction: Interaction): void {
 
 	listingHistory.reverse();
 
-	return displayListings({
-		interaction: interaction,
+	return displayListings(client, interaction, {
 		title: '📋 Playback History',
 		songListings: listingHistory,
 		show: show,
