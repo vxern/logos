@@ -1,4 +1,5 @@
 import {
+	ApplicationCommandOptionTypes,
 	Bot,
 	Channel,
 	createBot,
@@ -217,7 +218,32 @@ class Client {
 			const commandName = interaction.data?.name;
 			if (!commandName) return;
 
-			const handler = this.commands.get(commandName);
+			const subCommandGroupOption = interaction.data?.options?.find((option) =>
+				option.type === ApplicationCommandOptionTypes.SubCommandGroup
+			);
+
+			let commandNameFull: string;
+			if (subCommandGroupOption) {
+				const subCommandGroupName = subCommandGroupOption.name;
+				const subCommandName = subCommandGroupOption.options?.find((option) =>
+					option.type === ApplicationCommandOptionTypes.SubCommand
+				);
+				if (!subCommandName) return;
+
+				commandNameFull =
+					`${commandName} ${subCommandGroupName} ${subCommandName}`;
+			} else {
+				const subCommandName = interaction.data?.options?.find((option) =>
+					option.type === ApplicationCommandOptionTypes.SubCommand
+				)?.name;
+				if (!subCommandName) {
+					commandNameFull = commandName;
+				} else {
+					commandNameFull = `${commandName} ${subCommandName}`;
+				}
+			}
+
+			const handler = this.commands.get(commandNameFull);
 			if (!handler) return;
 
 			try {
