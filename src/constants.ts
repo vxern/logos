@@ -14,10 +14,10 @@ const links = {
 		`https://github.com/linguition/${language.toLowerCase()}`,
 };
 
-const deepLApiBaseLink = 'https://api-free.deepl.com/v2/';
+const deepLApiBaseLink = 'https://api-free.deepl.com/v2';
 const deepLApiEndpoints = {
-	languages: `${deepLApiBaseLink}languages`,
-	translate: `${deepLApiBaseLink}translate`,
+	languages: `${deepLApiBaseLink}/languages`,
+	translate: `${deepLApiBaseLink}/translate`,
 };
 
 export { deepLApiEndpoints, links };
