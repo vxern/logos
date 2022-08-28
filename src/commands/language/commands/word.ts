@@ -12,7 +12,7 @@ import configuration from '../../../configuration.ts';
 import { capitalise } from '../../../formatting.ts';
 import { fromHex } from '../../../utils.ts';
 import { DictionaryEntry, toFields } from '../data/dictionary.ts';
-import { dictionaryAdapterLists } from '../module.ts';
+import { dictionaryAdaptersByLanguage } from '../module.ts';
 
 const command: CommandBuilder = {
 	name: 'word',
@@ -57,8 +57,8 @@ const command: CommandBuilder = {
 	}, {
 		name: 'show',
 		nameLocalizations: {
-			pl: 'wyświetlić-innym',
-			ro: 'arată-le-celorlalți',
+			pl: 'wyświetl',
+			ro: 'afișează',
 		},
 		description:
 			'If set to true, the dictionary entry will be shown to other users.',
@@ -90,78 +90,86 @@ async function word(
 			false;
 
 	const language = getLanguage(client, interaction.guildId!);
+	const dictionaries = dictionaryAdaptersByLanguage.get(language);
+	if (!dictionaries) {
+		return void sendInteractionResponse(
+			client.bot,
+			interaction.id,
+			interaction.token,
+			{
+				type: InteractionResponseTypes.ChannelMessageWithSource,
+				data: {
+					flags: ApplicationCommandFlags.Ephemeral,
+					embeds: [{
+						description: `There are no dictionary adapters installed for the ${
+							capitalise(language)
+						} language.`,
+						color: configuration.interactions.responses.colors.yellow,
+					}],
+				},
+			},
+		);
+	}
 
-	const dictionaries = Object.values(dictionaryAdapterLists[language] ?? {});
-	const hasDictionaries = dictionaries.length > 0;
-
-	const response = await sendInteractionResponse(
+	await sendInteractionResponse(
 		client.bot,
 		interaction.id,
 		interaction.token,
 		{
 			type: InteractionResponseTypes.DeferredChannelMessageWithSource,
 			data: {
-				flags: (!hasDictionaries || !show)
-					? ApplicationCommandFlags.Ephemeral
-					: undefined,
+				flags: !show ? ApplicationCommandFlags.Ephemeral : undefined,
 			},
 		},
 	);
-	if (!response) return;
-
-	if (!hasDictionaries) {
-		console.error(
-			`${interaction.user.username} attempted to look up '${word}' in ${
-				capitalise(language)
-			}, but there are no available dictionaries for that language.`,
-		);
-
-		return void editInteractionResponse(client.bot, interaction.token, {
-			messageId: response.id,
-			embeds: [{
-				title: 'No available dictionaries.',
-				description: `There are no dictionary adapters installed for the ${
-					capitalise(language)
-				} language.`,
-				color: configuration.interactions.responses.colors.red,
-			}],
-		});
-	}
 
 	let entry: DictionaryEntry = { headword: word };
-	const responses = dictionaries.map((dictionary) =>
-		dictionary.lookup({ word: word, native: language }, dictionary.queryBuilder)
-			.then((result) => {
-				entry = { ...result, ...entry };
 
-				const fields = toFields(entry, { verbose: verbose });
-				const hasEntry = fields.length > 0;
-				if (!hasEntry) return;
+	const promises = [];
+	for (const dictionary of dictionaries) {
+		const promise = dictionary.lookup(
+			{ word, native: language },
+			dictionary.queryBuilder,
+		).catch();
 
-				editInteractionResponse(client.bot, interaction.token, {
-					messageId: response.id,
-					embeds: [{
-						title: entry.headword,
-						fields: fields,
-						color: fromHex('#d6e3f8'),
-					}],
-				});
-			})
-			.catch()
+		promise.then((result) => {
+			entry = { ...result, ...entry };
+
+			const fields = toFields(entry, { verbose: verbose });
+			const hasEntry = fields.length > 0;
+			if (!hasEntry) return;
+
+			editInteractionResponse(client.bot, interaction.token, {
+				embeds: [{
+					title: entry.headword,
+					fields: fields,
+					color: fromHex('#d6e3f8'),
+				}],
+			});
+		});
+
+		promises.push(promise);
+	}
+
+	await Promise.all(promises).catch();
+
+	const responded = toFields(entry, { verbose: verbose }).length > 0;
+	if (responded) return;
+
+	return void sendInteractionResponse(
+		client.bot,
+		interaction.id,
+		interaction.token,
+		{
+			type: InteractionResponseTypes.ChannelMessageWithSource,
+			data: {
+				embeds: [{
+					description: `No results found.`,
+					color: configuration.interactions.responses.colors.red,
+				}],
+			},
+		},
 	);
-
-	await Promise.all(responses).catch();
-
-	const hasEntry = toFields(entry, { verbose: verbose }).length > 0;
-	if (hasEntry) return;
-
-	return void editInteractionResponse(client.bot, interaction.token, {
-		embeds: [{
-			title: 'No results found.',
-			description: `There are no results for the word '${word}'.`,
-			color: configuration.interactions.responses.colors.red,
-		}],
-	});
 }
 
 export default command;
