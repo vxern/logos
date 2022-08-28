@@ -11,7 +11,7 @@ const links = {
 
 	talonRepositoryLink: 'https://github.com/linguition/talon',
 	generateLanguageRepositoryLink: (language: Language) =>
-		`https://github.com/linguition/${language}`,
+		`https://github.com/linguition/${language.toLowerCase()}`,
 };
 
 const deepLApiBaseLink = 'https://api-free.deepl.com/v2/';
