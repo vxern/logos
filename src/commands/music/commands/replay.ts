@@ -40,14 +40,14 @@ const command: CommandBuilder = {
 	}],
 };
 
-async function replaySong(
+function replaySong(
 	client: Client,
 	interaction: Interaction,
-): Promise<void> {
+): void {
 	const musicController = client.music.get(interaction.guildId!);
 	if (!musicController) return;
 
-	const [canAct, _voiceState] = await musicController.verifyMemberVoiceState(
+	const [canAct, _voiceState] = musicController.verifyMemberVoiceState(
 		interaction,
 	);
 	if (!canAct) return;
