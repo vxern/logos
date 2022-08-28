@@ -1,11 +1,12 @@
 import {
 	ApplicationCommandFlags,
 	getAvatarURL,
+	getUser,
 	Interaction,
 	InteractionResponseTypes,
 	sendInteractionResponse,
 } from '../../../../../deps.ts';
-import { Client, getBotUser } from '../../../../client.ts';
+import { Client } from '../../../../client.ts';
 import configuration from '../../../../configuration.ts';
 import { links } from '../../../../constants.ts';
 import { list } from '../../../../formatting.ts';
@@ -15,7 +16,8 @@ async function displayBotInformation(
 	client: Client,
 	interaction: Interaction,
 ): Promise<void> {
-	const botUser = await getBotUser(client);
+	const botUser = client.users.get(client.bot.id) ??
+		await getUser(client.bot, client.bot.id);
 	if (!botUser) return;
 
 	return void sendInteractionResponse(

@@ -4,7 +4,6 @@ import {
 	Channel,
 	createBot,
 	EventHandlers,
-	getUser,
 	Guild,
 	Intents,
 	lavadeno,
@@ -427,18 +426,5 @@ function getLanguage(client: Client, guildId: bigint): Language {
 	return client.languages.get(guildId) ?? defaultLanguage;
 }
 
-/**
- * Returns the bot user.
- *
- * @param client - The client instance to use.
- * @returns A promise resolving to the bot user or undefined.
- */
-function getBotUser(client: Client): Promise<User | undefined> {
-	const cachedUser = client.users.get(client.bot.id);
-	if (cachedUser) return new Promise(() => cachedUser);
-
-	return getUser(client.bot, client.bot.id);
-}
-
-export { addCollector, Client, getBotUser, getLanguage, isManagedGuild };
+export { addCollector, Client, getLanguage, isManagedGuild };
 export type { Collector };
