@@ -1,29 +1,35 @@
 import {
 	_,
-	ButtonStyle,
-	Collector,
-	colors,
-	EmbedField,
-	EmbedPayload,
+	ActionRow,
+	ApplicationCommandFlags,
+	ButtonComponent,
+	ButtonStyles,
+	Channel,
+	ChannelTypes,
+	deleteMessage,
+	DiscordEmbedField,
+	editInteractionResponse,
+	Embed,
+	EventHandlers,
 	Guild,
-	GuildTextChannel,
 	Interaction,
-	InteractionResponseModal,
-	InteractionResponseType,
-	InteractionType,
+	InteractionApplicationCommandCallbackData,
+	InteractionResponseTypes,
+	InteractionTypes,
 	Member,
-	Message,
-	MessageComponentData,
-	MessageComponentInteraction,
-	MessageComponentType,
-	SelectComponentOption,
+	MessageComponents,
+	MessageComponentTypes,
+	SelectOption,
+	sendInteractionResponse,
+	sendMessage,
 	Snowflake,
-	TextInputStyle,
+	TextStyles,
 	User,
 } from '../deps.ts';
 import { code } from './formatting.ts';
-import { Client } from './client.ts';
+import { addCollector, Client } from './client.ts';
 import configuration from './configuration.ts';
+import { Language } from './types.ts';
 
 /**
  * Parses a 6-digit hex value prefixed with a hashtag to a number.
@@ -44,27 +50,19 @@ function fromHex(color: string): number {
  * @param name - The name of the channel to find.
  * @returns The found channel.
  */
-async function getTextChannel(
+function getTextChannel(
 	guild: Guild,
 	name: string,
-): Promise<GuildTextChannel | undefined> {
-	const channels = await guild.channels.array().catch(() => undefined);
-	if (!channels) {
-		console.error(
-			`Failed to fetch channels for guild ${colors.bold(guild.name!)}.`,
-		);
-		return undefined;
-	}
-
+): Channel | undefined {
 	const nameAsLowercase = name.toLowerCase();
 
-	return channels.find((channel) =>
-		channel.isGuildText() &&
-		!channel.isThread() &&
-		channel.name.toLowerCase().includes(nameAsLowercase)
-	) as
-		| GuildTextChannel
-		| undefined;
+	const textChannels = guild.channels.array().filter((channel) =>
+		channel.type === ChannelTypes.GuildText
+	);
+
+	return textChannels.find((channel) =>
+		channel.name!.toLowerCase().includes(nameAsLowercase)
+	);
 }
 
 /**
@@ -74,9 +72,11 @@ async function getTextChannel(
  * @returns The mention.
  */
 function mentionUser(user: User, plain?: boolean): string {
-	if (plain) return `${user.tag} (${user.id})`;
+	const tag = `${user.username}#${user.discriminator}`;
 
-	return `${code(user.tag)} (${code(user.id)})`;
+	if (plain) return `${tag} (${user.id})`;
+
+	return `${code(tag)} (${code(user.id.toString())})`;
 }
 
 /** Represents an interactable form. */
@@ -95,7 +95,7 @@ interface Form {
 				type: 'TEXT_INPUT';
 
 				/** The 'style' of this text field. */
-				style: TextInputStyle;
+				style: TextStyles;
 
 				/** Whether this text field is required to be filled or not. */
 				required?: boolean;
@@ -118,7 +118,7 @@ interface Form {
 				type: 'SELECT';
 
 				/** The available selection options. */
-				options: SelectComponentOption[];
+				options: SelectOption[];
 
 				/** The minimum number of selections to be made. */
 				minimum: number | undefined;
@@ -133,29 +133,29 @@ interface Form {
  * Taking a form object, converts it to a modal.
  *
  * @param form - The form to convert.
- * @param customID - The custom ID of the modal.
+ * @param customId - The custom ID of the modal.
  * @param language - (Optional) The language of the guild the modal is being created for.
  * @returns The form converted into a modal.
  */
 function toModal(
 	form: Form,
-	customID: string,
-	language?: string,
-): InteractionResponseModal {
-	const components = Object.entries(form.fields).map<MessageComponentData>(
+	customId: string,
+	language?: Language,
+): InteractionApplicationCommandCallbackData {
+	const components = Object.entries(form.fields).map<ActionRow>(
 		([name, field]) => {
-			const id = `${customID}|${name}`;
+			const idWithFieldName = `${customId}|${name}`;
 			const label = typeof field.label === 'function'
 				? field.label(language!)
 				: field.label;
 
 			return {
-				type: MessageComponentType.ACTION_ROW,
+				type: MessageComponentTypes.ActionRow,
 				components: [
 					field.type === 'TEXT_INPUT'
 						? {
-							type: MessageComponentType.TEXT_INPUT,
-							customID: id,
+							type: MessageComponentTypes.InputText,
+							customId: idWithFieldName,
 							label: label,
 							style: field.style,
 							value: field.value,
@@ -164,8 +164,8 @@ function toModal(
 							maxLength: field.maximum,
 						}
 						: {
-							type: MessageComponentType.SELECT,
-							customID: id,
+							type: MessageComponentTypes.SelectMenu,
+							customId: idWithFieldName,
 							placeholder: label,
 							minValues: field.minimum,
 							maxValues: field.maximum,
@@ -178,7 +178,7 @@ function toModal(
 
 	return {
 		title: form.title,
-		customID: customID,
+		customId: customId,
 		components: components,
 	};
 }
@@ -187,138 +187,133 @@ function toModal(
  * Paginates an array of elements, allowing the user to browse between pages
  * in an embed view.
  */
-async function paginate<T>(
+function paginate<T>(
+	client: Client,
+	interaction: Interaction,
 	{
-		interaction,
 		elements,
 		embed,
 		view,
 		show,
 	}: {
-		interaction: Interaction;
 		elements: T[];
-		embed: Omit<EmbedPayload, 'fields' | 'footer'>;
+		embed: Omit<Embed, 'fields' | 'footer'>;
 		view: {
 			title: string;
 			generate: (element: T, index: number) => string;
 		};
 		show: boolean;
 	},
-): Promise<void> {
+): void {
 	let index = 0;
 
 	const isFirst = () => index === 0;
 	const isLast = () => index === elements.length - 1;
 
-	function generateEmbed(): EmbedPayload {
-		const field = view.generate(elements[index]!, index);
+	const generateEmbed: () => Embed[] = () => [{
+		...embed,
+		fields: [{
+			name: elements.length === 1
+				? view.title
+				: `${view.title} ~ Page ${index + 1}/${elements.length}`,
+			value: view.generate(elements[index]!, index),
+		}],
+		footer: isLast() ? undefined : { text: 'Continued on the next page...' },
+	}];
 
-		return {
-			...embed,
-			fields: [{
-				name: elements.length === 1
-					? view.title
-					: `${view.title} ~ Page ${index + 1}/${elements.length}`,
-				value: field,
-			}],
-			footer: isLast() ? undefined : { text: 'Continued on the next page...' },
-		};
-	}
-
-	function generateButtons(): MessageComponentData[] {
-		const buttons: MessageComponentData[] = [];
+	function generateButtons(): MessageComponents {
+		const buttons: ButtonComponent[] = [];
 
 		if (!isFirst()) {
 			buttons.push({
-				type: MessageComponentType.BUTTON,
-				customID: 'ARTICLE|PREVIOUS',
-				style: ButtonStyle.GREY,
+				type: MessageComponentTypes.Button,
+				customId: `${customId}|PREVIOUS`,
+				style: ButtonStyles.Secondary,
 				label: '«',
 			});
 		}
 
 		if (!isLast()) {
 			buttons.push({
-				type: MessageComponentType.BUTTON,
-				customID: 'ARTICLE|NEXT',
-				style: ButtonStyle.GREY,
+				type: MessageComponentTypes.Button,
+				customId: `${customId}|NEXT`,
+				style: ButtonStyles.Secondary,
 				label: '»',
 			});
 		}
 
 		return buttons.length === 0 ? [] : [{
-			type: MessageComponentType.ACTION_ROW,
-			components: buttons,
+			type: MessageComponentTypes.ActionRow,
+			components: <[ButtonComponent] | [
+				ButtonComponent | ButtonComponent,
+			]> buttons,
 		}];
 	}
 
-	const response = await interaction.respond({
-		embeds: [generateEmbed()],
-		components: generateButtons(),
-		ephemeral: !show,
-	});
-	const message = await response.fetchResponse();
+	const customId = createInteractionCollector(client, {
+		type: InteractionTypes.MessageComponent,
+		doesNotExpire: true,
+		limit: 1,
+		onCollect: (bot, selection) => {
+			if (!selection.data) return;
+			const action = selection.data.customId!.split('|')[1]!;
 
-	const collector = new Collector({
-		event: 'interactionCreate',
-		client: interaction.client,
-		filter: (selection: Interaction) => {
-			if (!selection.isMessageComponent()) return false;
+			switch (action) {
+				case 'PREVIOUS':
+					if (!isFirst()) index--;
+					break;
+				case 'NEXT':
+					if (!isLast()) index++;
+					break;
+			}
 
-			if (selection.message.id !== message.id) return false;
+			sendInteractionResponse(bot, selection.id, selection.token, {
+				type: InteractionResponseTypes.DeferredUpdateMessage,
+			});
 
-			if (selection.user.id !== interaction.user.id) return false;
-
-			if (!selection.customID.startsWith('ARTICLE')) return false;
-
-			return true;
+			editInteractionResponse(bot, interaction.token, {
+				embeds: generateEmbed(),
+				components: generateButtons(),
+			});
 		},
-		deinitOnEnd: true,
 	});
 
-	collector.on('collect', (selection: MessageComponentInteraction) => {
-		const action = selection.customID.split('|')[1]!;
-
-		switch (action) {
-			case 'PREVIOUS':
-				if (!isFirst()) index--;
-				break;
-			case 'NEXT':
-				if (!isLast()) index++;
-				break;
-		}
-
-		selection.respond({
-			type: InteractionResponseType.DEFERRED_MESSAGE_UPDATE,
-		});
-
-		interaction.editResponse({
-			embeds: [generateEmbed()],
-			components: generateButtons(),
-		});
-	});
-
-	collector.collect();
+	return void sendInteractionResponse(
+		client.bot,
+		interaction.id,
+		interaction.token,
+		{
+			type: InteractionResponseTypes.ChannelMessageWithSource,
+			data: {
+				flags: !show ? ApplicationCommandFlags.Ephemeral : undefined,
+				embeds: generateEmbed(),
+			},
+		},
+	);
 }
-
-type ConditionChecker = (interaction: Interaction) => boolean;
 
 /** Settings for interaction collection. */
 interface InteractionCollectorSettings {
 	/** The type of interaction to listen for. */
-	type: InteractionType;
+	type: InteractionTypes;
 
-	/** The accepted respondent to the collector. `undefined` signifies any user. */
-	user?: User;
+	/**
+	 * The accepted respondent to the collector. If unset, any user will be able
+	 * to respond.
+	 */
+	userId?: bigint;
 
 	/** The ID of the interaction to listen for. */
-	customID?: string;
+	customId?: string;
 
 	/** Whether this collector is to last forever or not. */
-	endless?: boolean;
+	doesNotExpire?: boolean;
 
 	/** How many interactions to collect before de-initialising. */
 	limit?: number;
+
+	onCollect?: (...args: Parameters<EventHandlers['interactionCreate']>) => void;
+	onEnd?: () => void;
 }
 
 /**
@@ -328,117 +323,101 @@ interface InteractionCollectorSettings {
 function createInteractionCollector(
 	client: Client,
 	settings: InteractionCollectorSettings,
-): [collector: Collector, customID: string, isEnded: () => boolean] {
-	const customID = settings.customID ?? Snowflake.generate();
+): string {
+	const customId = settings.customId ?? Snowflake.generate();
 
-	const conditionsUnfiltered: (ConditionChecker | undefined)[] = [
-		(interaction) => interaction.type === settings.type,
-		(interaction) =>
-			!!interaction.data && 'custom_id' in interaction.data &&
-			(!interaction.data.custom_id.includes('|')
-					? interaction.data.custom_id
-					: interaction.data.custom_id.split('|')[0]) ===
-				(!customID.includes('|') ? customID : customID.split('|')[0]),
-		!settings.user
-			? undefined
-			: (interaction) => interaction.user.id === settings.user!.id,
+	const conditions: (interaction: Interaction) => boolean[] = (interaction) => [
+		interaction.type === settings.type,
+		!!interaction.data && !!interaction.data.customId &&
+		(
+				!interaction.data.customId.includes('|')
+					? interaction.data.customId
+					: interaction.data.customId.split('|')[0]!
+			) === (
+				!customId.includes('|') ? customId : customId.split('|')[0]!
+			),
+		!settings.userId ? true : interaction.user.id === settings.userId,
 	];
 
-	const conditions = <ConditionChecker[]> conditionsUnfiltered.filter((
-		condition,
-	) => condition);
-
-	const condition = (interaction: Interaction) =>
-		conditions.every((condition) => condition(interaction));
-
-	const collector = new Collector<Interaction[]>({
-		event: 'interactionCreate',
-		client: client,
-		filter: condition,
-		max: settings.limit ?? undefined,
-		deinitOnEnd: true,
-		timeout: settings.endless
+	addCollector(client, 'interactionCreate', {
+		filter: (_bot, interaction) =>
+			conditions(interaction).every((condition) => condition),
+		limit: settings.limit,
+		removeAfter: settings.doesNotExpire
 			? undefined
 			: configuration.core.collectors.maxima.timeout,
+		onCollect: settings.onCollect ?? (() => {}),
+		onEnd: settings.onEnd ?? (() => {}),
 	});
 
-	let isEnded = false;
-	collector.on('end', () => {
-		isEnded = true;
-	});
-
-	collector.collect();
-
-	return [collector, customID, () => isEnded];
+	return customId;
 }
 
 /** Creates a verification prompt in the verifications channel. */
-async function createVerificationPrompt(
+function createVerificationPrompt(
 	client: Client,
-	guild: Guild,
-	settings: { title: string; fields: EmbedField[] },
-): Promise<[boolean, Member]> {
-	const verificationChannel = (await getTextChannel(
-		guild,
-		configuration.guilds.channels.verification,
-	))!;
+	guildId: bigint,
+	settings: { title: string; fields: DiscordEmbedField[] },
+): Promise<[boolean, Member] | undefined> {
+	const guild = client.guilds.get(guildId);
+	if (!guild) return new Promise(() => undefined);
 
-	const [collector, customID] = createInteractionCollector(client, {
-		type: InteractionType.MESSAGE_COMPONENT,
-		endless: true,
-		limit: 1,
-	});
+	const verificationChannel = guild.channels.array().find((channel) =>
+		channel.type === ChannelTypes.GuildText &&
+		channel.name?.toLowerCase().includes(
+			configuration.guilds.channels.verification,
+		)
+	);
+	if (!verificationChannel) return new Promise(() => undefined);
 
-	const verificationMessage = await verificationChannel.send({
-		embeds: [{
-			title: settings.title,
-			fields: settings.fields,
-		}],
-		components: [{
-			type: MessageComponentType.ACTION_ROW,
-			components: [{
-				type: MessageComponentType.BUTTON,
-				style: ButtonStyle.GREEN,
-				label: 'Accept',
-				customID: `${customID}|true`,
-			}, {
-				type: MessageComponentType.BUTTON,
-				style: ButtonStyle.RED,
-				label: 'Reject',
-				customID: `${customID}|false`,
-			}],
-		}],
-	});
+	return new Promise((resolve) => {
+		const customId = createInteractionCollector(client, {
+			type: InteractionTypes.MessageComponent,
+			doesNotExpire: true,
+			limit: 1,
+			onCollect: async (bot, interaction) => {
+				const verificationMessage = await verificationMessagePromise;
 
-	const selection =
-		<MessageComponentInteraction> (await collector.waitFor('collect'))[0];
+				deleteMessage(
+					bot,
+					verificationMessage.channelId,
+					verificationMessage.id,
+				);
 
-	const accepted = selection.data.custom_id.split('|')[1]! === 'true';
+				const customId = interaction.data?.customId;
+				if (!customId) return;
 
-	verificationMessage.delete();
+				const accepted = customId.split('|')[1]! === 'true';
 
-	return [accepted, selection.member!];
-}
-
-/** Writes a DM message to a given user. */
-function messageUser(
-	user: User,
-	guild: Guild,
-	embed: Omit<EmbedPayload, 'thumbnail' | 'footer'>,
-	components?: MessageComponentData[],
-): Promise<Message | undefined> {
-	const guildName = guild!.name!;
-
-	return user.send({
-		embeds: [{
-			thumbnail: { url: guild!.iconURL(undefined, 32) },
-			...embed,
-			footer: {
-				text: `This message originated from ${guildName}.`,
+				resolve([accepted, interaction.member!]);
 			},
-		}],
-		components: components,
-	}).catch(() => undefined);
+		});
+
+		const verificationMessagePromise = sendMessage(
+			client.bot,
+			verificationChannel.id,
+			{
+				embeds: [{
+					title: settings.title,
+					fields: settings.fields,
+				}],
+				components: [{
+					type: MessageComponentTypes.ActionRow,
+					components: [{
+						type: MessageComponentTypes.Button,
+						label: 'Accept',
+						customId: `${customId}|true`,
+						style: ButtonStyles.Success,
+					}, {
+						type: MessageComponentTypes.Button,
+						label: 'Reject',
+						customId: `${customId}|false`,
+						style: ButtonStyles.Danger,
+					}],
+				}],
+			},
+		);
+	});
 }
 
 /**
@@ -484,38 +463,46 @@ function random(max: number): number {
 const userMentionExpression = new RegExp(/^<@!?([0-9]{18})>$/);
 const userIDExpression = new RegExp(/^[0-9]{18}$/);
 
-async function resolveUserIdentifier(guild: Guild, identifier: string): Promise<
-	[Member | undefined, Member[] | undefined]
-> {
-	const isMention = userMentionExpression.test(identifier);
-	const isId = userIDExpression.test(identifier);
-
+function resolveUserIdentifier(
+	client: Client,
+	guildId: bigint,
+	members: Member[],
+	identifier: string,
+	options: { includeBots: boolean } = { includeBots: false },
+): User[] | undefined {
 	let id: string | undefined = undefined;
-	if (isMention) {
-		id = userMentionExpression.exec(identifier)![1]!;
-	} else if (isId) {
-		id = userIDExpression.exec(identifier)![0];
+	id = userMentionExpression.exec(identifier)?.at(1);
+	id = userIDExpression.exec(identifier)?.at(0);
+
+	if (!id) {
+		const users: User[] = [];
+		for (const member of members) {
+			const user = client.users.get(member.id);
+			if (!user) return undefined;
+
+			users.push(user);
+		}
+
+		const identifierLowercase = identifier.toLowerCase();
+		return users.filter((user, index) => {
+			if (!options.includeBots && user.toggles.bot) return false;
+			if (user.username.toLowerCase().includes(identifierLowercase)) {
+				return true;
+			}
+			if (members[index]!.nick?.toLowerCase().includes(identifierLowercase)) {
+				return true;
+			}
+			return false;
+		});
 	}
 
-	let member: Member | undefined = undefined;
-	let matchingMembers: Member[] | undefined = undefined;
-	if (id) {
-		member = await guild.members.get(id) ??
-			await guild.members.fetch(id);
-	} else {
-		const members = await fetchGuildMembers(guild);
+	const guild = client.guilds.get(guildId);
+	if (!guild) return;
 
-		const searchParameter = identifier.toLowerCase();
+	const user = client.users.get(BigInt(id));
+	if (!user) return;
 
-		matchingMembers = members.filter((member) =>
-			!member.user.bot && (
-				member.user.username.toLowerCase().includes(searchParameter) ||
-				member.nick?.toLowerCase().includes(searchParameter)
-			)
-		);
-	}
-
-	return [member, matchingMembers?.slice(0, 20)];
+	return [user];
 }
 
 const beginningOfDiscordEpoch = 1420070400000n;
@@ -534,7 +521,6 @@ export {
 	fromHex,
 	getTextChannel,
 	mentionUser,
-	messageUser,
 	paginate,
 	random,
 	resolveUserIdentifier,
