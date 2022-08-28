@@ -1,5 +1,6 @@
 import { TextStyles } from '../deps.ts';
 import { SongListingContentTypes } from './commands/music/data/song-listing.ts';
+import { Language } from './types.ts';
 import { fromHex } from './utils.ts';
 
 const second = 1000;
@@ -52,20 +53,23 @@ const settings = {
 		},
 		defaultLanguage: 'english',
 		// Configuration settings pertaining to the topic languages of managed guilds.
-		languages: {
-			armenian: {
+		languages: <Record<
+			Language,
+			{ requiresVerification: boolean; dialects: string[] }
+		>> {
+			'Armenian': {
 				requiresVerification: true,
 				dialects: ['Western Armenian', 'Eastern Armenian', 'Karabakh Dialect'],
 			},
-			belarusian: {
+			'Belarusian': {
 				requiresVerification: false,
 				dialects: [],
 			},
-			english: {
+			'English': {
 				requiresVerification: false,
 				dialects: [],
 			},
-			romanian: {
+			'Romanian': {
 				requiresVerification: false,
 				dialects: [],
 			},
@@ -81,7 +85,7 @@ const settings = {
 		// Configuration settings pertaining to guild moderators.
 		moderation: {
 			// The role responsible for taking moderation action.
-			enforcer: 'Guide',
+			moderator: 'Guide',
 			warnings: {
 				interval: 2 * month,
 				maximum: 3,
