@@ -11,7 +11,6 @@ import {
 import { Client, getLanguage } from '../../../client.ts';
 import { CommandBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
-import { capitalise } from '../../../formatting.ts';
 import { createInteractionCollector, random } from '../../../utils.ts';
 import { SentencePair } from '../data/sentence.ts';
 import { sentenceLists } from '../module.ts';
@@ -37,7 +36,6 @@ async function initialiseGame(
 	interaction: Interaction,
 ): Promise<void> {
 	const language = getLanguage(client, interaction.guildId!);
-
 	const sentencePairs = Object.values(sentenceLists[language] ?? {});
 	const hasSentencePairs = sentencePairs.length !== 0;
 
@@ -52,12 +50,6 @@ async function initialiseGame(
 	);
 
 	if (!hasSentencePairs) {
-		console.error(
-			`${interaction.user.username} attempted to start playing the language game in ${
-				capitalise(language)
-			}, but there are no available sentences for that language.`,
-		);
-
 		return void sendInteractionResponse(
 			client.bot,
 			interaction.id,
@@ -66,9 +58,8 @@ async function initialiseGame(
 				type: InteractionResponseTypes.DeferredUpdateMessage,
 				data: {
 					embeds: [{
-						title: 'No available sentences.',
 						description:
-							`There are no sentences available to learn from for ${language}.`,
+							`There are no sentences available in ${language} to learn from.`,
 						color: configuration.interactions.responses.colors.red,
 					}],
 				},
