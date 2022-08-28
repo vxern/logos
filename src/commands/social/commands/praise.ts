@@ -3,7 +3,7 @@ import {
 	ApplicationCommandOptionTypes,
 	fetchMembers,
 	getDmChannel,
-	guildIconURL,
+	getGuildIconURL,
 	Interaction,
 	InteractionResponseTypes,
 	InteractionTypes,
@@ -220,7 +220,7 @@ async function praise(
 			embeds: [
 				{
 					thumbnail: (() => {
-						const iconURL = guildIconURL(client.bot, guild.id, guild.icon);
+						const iconURL = getGuildIconURL(client.bot, guild.id, guild.icon);
 						if (!iconURL) return undefined;
 
 						return {

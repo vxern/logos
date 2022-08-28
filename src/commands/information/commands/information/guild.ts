@@ -1,7 +1,7 @@
 import {
 	fetchMembers,
+	getGuildIconURL,
 	Guild,
-	guildIconURL,
 	Interaction,
 	InteractionResponseTypes,
 	sendInteractionResponse,
@@ -15,7 +15,7 @@ import {
 	MentionTypes,
 } from '../../../../formatting.ts';
 import { snowflakeToTimestamp } from '../../../../utils.ts';
-import { getProficiencyCategory } from '../../../roles/module.ts';
+import { getProficiencyCategory } from '../../../social/module.ts';
 
 /** Displays information about the guild that this command was executed in. */
 async function displayGuildInformation(
@@ -45,7 +45,7 @@ async function displayGuildInformation(
 				embeds: [{
 					title: `Information about **${guild.name!}**`,
 					thumbnail: (() => {
-						const iconURL = guildIconURL(client.bot, guild.id, guild.icon);
+						const iconURL = getGuildIconURL(client.bot, guild.id, guild.icon);
 						if (!iconURL) return undefined;
 
 						return {
@@ -87,7 +87,7 @@ async function displayGuildInformation(
 								value:
 									`This server is overseen by a collective of ${enforcerRoleName}s, rather than a single owner.`,
 								inline: true,
-							}))(configuration.guilds.moderation.enforcer.toLowerCase()),
+							}))(configuration.guilds.moderation.moderator.toLowerCase()),
 					],
 				}],
 			},

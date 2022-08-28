@@ -4,7 +4,7 @@ import {
 	dayjs,
 	fetchMembers,
 	getDmChannel,
-	guildIconURL,
+	getGuildIconURL,
 	Interaction,
 	InteractionResponseTypes,
 	InteractionTypes,
@@ -254,7 +254,7 @@ async function unwarnUser(
 		embeds: [
 			{
 				thumbnail: (() => {
-					const iconURL = guildIconURL(client.bot, guild.id, guild.icon);
+					const iconURL = getGuildIconURL(client.bot, guild.id, guild.icon);
 					if (!iconURL) return undefined;
 
 					return {

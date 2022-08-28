@@ -1,6 +1,6 @@
 import {
 	ApplicationCommandFlags,
-	avatarURL,
+	getAvatarURL,
 	Interaction,
 	InteractionResponseTypes,
 	sendInteractionResponse,
@@ -29,9 +29,14 @@ async function displayBotInformation(
 				embeds: [{
 					title: botUser.username,
 					thumbnail: {
-						url: avatarURL(client.bot, client.bot.id, botUser.discriminator, {
-							avatar: botUser.avatar,
-						}),
+						url: getAvatarURL(
+							client.bot,
+							client.bot.id,
+							botUser.discriminator,
+							{
+								avatar: botUser.avatar,
+							},
+						),
 					},
 					color: configuration.interactions.responses.colors.invisible,
 					fields: [{
