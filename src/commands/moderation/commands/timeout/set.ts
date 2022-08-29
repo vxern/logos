@@ -36,15 +36,22 @@ async function setTimeout(
 	const reason = <string | undefined> options.find((option) =>
 		option.name === 'reason'
 	)?.value;
-	if (!(userIdentifierOption && durationIdentifier && reason)) return;
+	if (reason === undefined) return;
 
-	const userIdentifier = <string> userIdentifierOption.value;
+	if (
+		interaction.type !== InteractionTypes.ApplicationCommandAutocomplete &&
+		userIdentifierOption === undefined && durationIdentifier === undefined
+	) {
+		return;
+	}
+
+	const userIdentifier = <string | undefined> userIdentifierOption?.value;
 
 	if (
 		interaction.type === InteractionTypes.ApplicationCommandAutocomplete &&
-		!userIdentifierOption.focused
+		!userIdentifierOption?.focused
 	) {
-		const timestamp = getTimestampFromExpression(durationIdentifier);
+		const timestamp = getTimestampFromExpression(durationIdentifier!);
 
 		return void sendInteractionResponse(
 			client.bot,
@@ -64,7 +71,7 @@ async function setTimeout(
 	const member = resolveInteractionToMember(
 		client,
 		interaction,
-		userIdentifier,
+		userIdentifier!,
 	);
 	if (!member) return;
 
@@ -104,17 +111,17 @@ async function setTimeout(
 		return displayError('The duration must not be longer than a week.');
 	}
 
-	const until = new Date(Date.now() + duration);
+	const until = Date.now() + duration;
 
 	await editMember(client.bot, interaction.guildId!, member.id, {
 		// TODO: Verify works.
-		communicationDisabledUntil: until.getUTCMilliseconds(),
+		communicationDisabledUntil: until,
 	});
 
 	client.logging.get(interaction.guildId!)?.log(
 		'memberTimeoutAdd',
 		member,
-		until,
+		new Date(until),
 		reason,
 		interaction.user,
 	);
@@ -132,7 +139,7 @@ async function setTimeout(
 		},
 	});
 
-	const dmChannel = await getDmChannel(client.bot, interaction.user.id);
+	const dmChannel = await getDmChannel(client.bot, member.id);
 	if (!dmChannel) {
 		const textChannel = client.channels.get(interaction.channelId!);
 		if (!textChannel) return;
