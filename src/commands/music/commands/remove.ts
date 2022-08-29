@@ -1,9 +1,12 @@
-import { Interaction } from '../../../../deps.ts';
+import {
+	ApplicationCommandOptionTypes,
+	Interaction,
+} from '../../../../deps.ts';
 import { Client } from '../../../client.ts';
-import { CommandBuilder } from '../../../commands/command.ts';
+import { OptionBuilder } from '../../../commands/command.ts';
 import { index } from '../parameters.ts';
 
-const command: CommandBuilder = {
+const command: OptionBuilder = {
 	name: 'remove',
 	nameLocalizations: {
 		pl: 'usuń',
@@ -14,7 +17,7 @@ const command: CommandBuilder = {
 		pl: 'Usuwa wpis z kolejki muzycznej.',
 		ro: 'Șterge o înregistrare din coadă.',
 	},
-	defaultMemberPermissions: ['VIEW_CHANNEL'],
+	type: ApplicationCommandOptionTypes.SubCommand,
 	handle: removeSongListing,
 	options: [index],
 };

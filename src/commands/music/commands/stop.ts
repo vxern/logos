@@ -1,13 +1,14 @@
 import {
 	ApplicationCommandFlags,
+	ApplicationCommandOptionTypes,
 	InteractionResponseTypes,
 } from '../../../../deps.ts';
 import { Interaction, sendInteractionResponse } from '../../../../deps.ts';
 import { Client } from '../../../client.ts';
-import { CommandBuilder } from '../../../commands/command.ts';
+import { OptionBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
 
-const command: CommandBuilder = {
+const command: OptionBuilder = {
 	name: 'stop',
 	nameLocalizations: {
 		pl: 'przerwij',
@@ -19,7 +20,7 @@ const command: CommandBuilder = {
 		pl: 'Przerywa obecną sesję słuchania muzyki.',
 		ro: 'Oprește sesiunea actuală de ascultare.',
 	},
-	defaultMemberPermissions: ['VIEW_CHANNEL'],
+	type: ApplicationCommandOptionTypes.SubCommand,
 	handle: stopSession,
 };
 

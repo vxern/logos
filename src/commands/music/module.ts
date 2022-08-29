@@ -3,6 +3,7 @@ import { Client } from '../../client.ts';
 import configuration from '../../configuration.ts';
 import { list } from '../../formatting.ts';
 import { chunk, paginate } from '../../utils.ts';
+import { CommandBuilder } from '../command.ts';
 import history from './commands/history.ts';
 import now from './commands/now.ts';
 import pause from './commands/pause.ts';
@@ -16,19 +17,36 @@ import unskip from './commands/unskip.ts';
 import volume from './commands/volume.ts';
 import { SongListing } from './data/song-listing.ts';
 
-const commands = [
-	history,
-	now,
-	pause,
-	play,
-	queue,
-	replay,
-	skip,
-	stop,
-	unpause,
-	unskip,
-	volume,
-];
+const music: CommandBuilder = {
+	name: 'music',
+	nameLocalizations: {
+		pl: 'muzyka',
+		ro: 'muzică',
+	},
+	description: 'Allows the user to manage music playback in a voice channel.',
+	descriptionLocalizations: {
+		pl:
+			'Pozwala użytkownikowi na zarządanie odtwarzaniem muzyki w kanale głosowym.',
+		ro:
+			'Permite utilizatorului gestionarea redării muzicii într-un canal de voce.',
+	},
+	defaultMemberPermissions: ['VIEW_CHANNEL'],
+	options: [
+		history,
+		now,
+		pause,
+		play,
+		queue,
+		replay,
+		skip,
+		stop,
+		unpause,
+		unskip,
+		volume,
+	],
+};
+
+const commands = [music];
 
 function displayListings(
 	client: Client,

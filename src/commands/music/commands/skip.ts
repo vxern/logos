@@ -6,11 +6,11 @@ import {
 	sendInteractionResponse,
 } from '../../../../deps.ts';
 import { Client } from '../../../client.ts';
-import { CommandBuilder } from '../../../commands/command.ts';
+import { OptionBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
 import { SongListingContentTypes } from '../data/song-listing.ts';
 
-const command: CommandBuilder = {
+const command: OptionBuilder = {
 	name: 'skip',
 	nameLocalizations: {
 		pl: 'przewiń',
@@ -21,7 +21,7 @@ const command: CommandBuilder = {
 		pl: 'Przewija obecnie grający utwór.',
 		ro: 'Sare peste melodia în curs de redare.',
 	},
-	defaultMemberPermissions: ['VIEW_CHANNEL'],
+	type: ApplicationCommandOptionTypes.SubCommand,
 	handle: skipSong,
 	options: [{
 		name: 'collection',

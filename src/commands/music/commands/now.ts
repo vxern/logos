@@ -6,7 +6,7 @@ import {
 	sendInteractionResponse,
 } from '../../../../deps.ts';
 import { Client } from '../../../client.ts';
-import { CommandBuilder } from '../../../commands/command.ts';
+import { OptionBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
 import { mention, MentionTypes } from '../../../formatting.ts';
 import { chunk, paginate, trim } from '../../../utils.ts';
@@ -14,7 +14,7 @@ import { Song } from '../data/song.ts';
 import { SongStream } from '../data/song-stream.ts';
 import { SongListingContentTypes } from '../data/song-listing.ts';
 
-const command: CommandBuilder = {
+const command: OptionBuilder = {
 	name: 'now',
 	nameLocalizations: {
 		pl: 'teraz',
@@ -25,7 +25,7 @@ const command: CommandBuilder = {
 		pl: 'Wyświetla obecnie odtwarzany utwór lub zbiór utworów.',
 		ro: 'Afișează melodia sau setul de melodii în curs de redare.',
 	},
-	defaultMemberPermissions: ['VIEW_CHANNEL'],
+	type: ApplicationCommandOptionTypes.SubCommand,
 	handle: displayNowPlaying,
 	options: [{
 		name: 'collection',
