@@ -113,10 +113,12 @@ async function setTimeout(
 
 	const until = Date.now() + duration;
 
-	await editMember(client.bot, interaction.guildId!, member.id, {
-		// TODO: Verify works.
-		communicationDisabledUntil: until,
-	});
+	await editMember(
+		client.bot,
+		interaction.guildId!,
+		member.id,
+		{ communicationDisabledUntil: until },
+	);
 
 	client.logging.get(interaction.guildId!)?.log(
 		'memberTimeoutAdd',
