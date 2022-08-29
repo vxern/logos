@@ -12,7 +12,7 @@ import queue from './commands/queue.ts';
 import replay from './commands/replay.ts';
 import skip from './commands/skip.ts';
 import stop from './commands/stop.ts';
-import unpause from './commands/unpause.ts';
+import resume from './commands/resume.ts';
 import unskip from './commands/unskip.ts';
 import volume from './commands/volume.ts';
 import { SongListing } from './data/song-listing.ts';
@@ -40,7 +40,7 @@ const music: CommandBuilder = {
 		replay,
 		skip,
 		stop,
-		unpause,
+		resume,
 		unskip,
 		volume,
 	],
