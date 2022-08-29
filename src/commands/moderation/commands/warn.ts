@@ -40,8 +40,8 @@ async function warnUser(
 	if (!data) return;
 
 	const userIdentifier = <string | undefined> data.options?.at(0)?.value;
-	const reason = <string | undefined> data.options?.at(0)?.value;
-	if (userIdentifier === undefined || !reason) return;
+	const reason = <string | undefined> data.options?.at(1)?.value;
+	if (userIdentifier === undefined || reason === undefined) return;
 
 	const member = resolveInteractionToMember(
 		client,
@@ -60,9 +60,8 @@ async function warnUser(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						title: 'Invalid user',
-						description: 'You cannot time yourself out!',
-						color: configuration.interactions.responses.colors.red,
+						description: 'You cannot warn yourself!',
+						color: configuration.interactions.responses.colors.yellow,
 					}],
 				},
 			},
@@ -72,13 +71,13 @@ async function warnUser(
 	const guild = client.guilds.get(interaction.guildId!);
 	if (!guild) return;
 
-	const enforcerRoleId = guild.roles.find((role) =>
+	const moderatorRoleId = guild.roles.find((role) =>
 		role.name === configuration.guilds.moderation.moderator
 	)?.id;
-	if (!enforcerRoleId) return;
+	if (!moderatorRoleId) return;
 
-	const isGuide = member.roles.includes(enforcerRoleId);
-	if (isGuide) {
+	const isModerator = member.roles.includes(moderatorRoleId);
+	if (isModerator) {
 		return void sendInteractionResponse(
 			client.bot,
 			interaction.id,
@@ -88,9 +87,8 @@ async function warnUser(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						title: 'Invalid user',
 						description:
-							`Bots and server ${configuration.guilds.moderation.moderator.toLowerCase()}s cannot be warned.`,
+							`Server ${configuration.guilds.moderation.moderator.toLowerCase()}s cannot be warned.`,
 						color: configuration.interactions.responses.colors.yellow,
 					}],
 				},
@@ -165,13 +163,16 @@ async function warnUser(
 	const passedMaximum =
 		relevantWarnings.length > configuration.guilds.moderation.warnings.maximum;
 
-	const dmChannel = await getDmChannel(client.bot, interaction.user.id);
+	const dmChannel = await getDmChannel(client.bot, member.id);
 	if (dmChannel) {
 		sendMessage(client.bot, dmChannel.id, {
 			embeds: [
 				{
 					thumbnail: (() => {
-						const iconURL = getGuildIconURL(client.bot, guild.id, guild.icon);
+						const iconURL = getGuildIconURL(client.bot, guild.id, guild.icon, {
+							size: 4096,
+							format: 'webp',
+						});
 						if (!iconURL) return;
 
 						return { url: iconURL };
