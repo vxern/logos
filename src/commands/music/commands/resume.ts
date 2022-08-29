@@ -10,7 +10,7 @@ import { OptionBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
 
 const command: OptionBuilder = {
-	name: 'unpause',
+	name: 'resume',
 	nameLocalizations: {
 		pl: 'wznów',
 		ro: 'continuă',
@@ -23,10 +23,10 @@ const command: OptionBuilder = {
 			'Anulează întreruperea redării melodiei actuale dacă aceasta este în pauză.',
 	},
 	type: ApplicationCommandOptionTypes.SubCommand,
-	handle: unpause,
+	handle: resumeSong,
 };
 
-function unpause(
+function resumeSong(
 	client: Client,
 	interaction: Interaction,
 ): void {
@@ -74,7 +74,7 @@ function unpause(
 		);
 	}
 
-	musicController.unpause();
+	musicController.resume();
 
 	return void sendInteractionResponse(
 		client.bot,
@@ -94,4 +94,4 @@ function unpause(
 }
 
 export default command;
-export { unpause };
+export { resumeSong };

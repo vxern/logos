@@ -481,7 +481,7 @@ class MusicController extends Controller {
 		this.player.pause(true);
 	}
 
-	unpause(): void {
+	resume(): void {
 		this.player.pause(false);
 	}
 

@@ -8,7 +8,7 @@ import {
 import { Client } from '../../../client.ts';
 import { OptionBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
-import { unpause } from './unpause.ts';
+import { resumeSong } from './resume.ts';
 
 const command: OptionBuilder = {
 	name: 'pause',
@@ -54,7 +54,7 @@ function pauseSong(client: Client, interaction: Interaction): void {
 	}
 
 	if (musicController.isPaused) {
-		return unpause(client, interaction);
+		return resumeSong(client, interaction);
 	}
 
 	musicController.pause();
