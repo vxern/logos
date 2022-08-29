@@ -17,7 +17,7 @@ async function clearTimeout(
 		?.options?.at(
 			0,
 		)?.value;
-	if (!userIdentifier) return;
+	if (userIdentifier === undefined) return;
 
 	const member = resolveInteractionToMember(
 		client,
@@ -45,11 +45,12 @@ async function clearTimeout(
 		);
 	}
 
-	await editMember(client.bot, interaction.guildId!, member.id, {
-		// TODO: Remove once the type is made nullable.
-		// @ts-ignore: Library issue.
-		communicationDisabledUntil: null,
-	});
+	await editMember(
+		client.bot,
+		interaction.guildId!,
+		member.id,
+		{ communicationDisabledUntil: undefined },
+	);
 
 	client.logging.get(interaction.guildId!)?.log(
 		'memberTimeoutRemove',
