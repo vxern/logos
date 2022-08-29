@@ -24,6 +24,7 @@ const command: CommandBuilder = {
 		ro: 'Citează una dintre regulile serverului.',
 	},
 	defaultMemberPermissions: ['VIEW_CHANNEL'],
+	handle: citeRule,
 	options: [{
 		name: 'rule',
 		nameLocalizations: {
@@ -39,7 +40,6 @@ const command: CommandBuilder = {
 		required: true,
 		autocomplete: true,
 	}],
-	handle: citeRule,
 };
 
 function citeRule(
