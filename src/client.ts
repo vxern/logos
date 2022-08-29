@@ -18,7 +18,6 @@ import {
 	sendShardMessage,
 	snowflakeToBigint,
 	startBot,
-	upsertApplicationCommands,
 	User,
 } from '../deps.ts';
 import services from './services/service.ts';
@@ -367,7 +366,7 @@ function registerCommands(
 		}
 	}
 
-	upsertApplicationCommands(client.bot, commands, guildId);
+	// upsertApplicationCommands(client.bot, commands, guildId);
 }
 
 function addCollector<T extends keyof EventHandlers>(
@@ -452,12 +451,21 @@ function getLanguage(client: Client, guildId: bigint): Language {
 const userMentionExpression = new RegExp(/^<@!?([0-9]{18})>$/);
 const userIDExpression = new RegExp(/^[0-9]{18}$/);
 
+/**
+ * @param client - The client instance to use.
+ * @param guildId - The id of the guild whose members to resolve to.
+ * @param identifier - The user identifier to match to members.
+ * @param options - Additional options to use when resolving to members.
+ *
+ * @returns A tuple containing the members matched to the identifier and a
+ * boolean value indicating whether the identifier is a user ID.
+ */
 function resolveIdentifierToMembers(
 	client: Client,
 	guildId: bigint,
 	identifier: string,
 	options: { includeBots: boolean } = { includeBots: false },
-): Member[] | undefined {
+): [Member[], boolean] | undefined {
 	let id: string | undefined = undefined;
 	id ??= userMentionExpression.exec(identifier)?.at(1);
 	id ??= userIDExpression.exec(identifier)?.at(0);
@@ -468,16 +476,19 @@ function resolveIdentifierToMembers(
 		);
 
 		const identifierLowercase = identifier.toLowerCase();
-		return members.filter((member) => {
-			if (!options.includeBots && member.user?.toggles.bot) return false;
-			if (member.user?.username.toLowerCase().includes(identifierLowercase)) {
-				return true;
-			}
-			if (member.nick?.toLowerCase().includes(identifierLowercase)) {
-				return true;
-			}
-			return false;
-		});
+		return [
+			members.filter((member) => {
+				if (!options.includeBots && member.user?.toggles.bot) return false;
+				if (member.user?.username.toLowerCase().includes(identifierLowercase)) {
+					return true;
+				}
+				if (member.nick?.toLowerCase().includes(identifierLowercase)) {
+					return true;
+				}
+				return false;
+			}),
+			false,
+		];
 	}
 
 	const guild = client.guilds.get(guildId);
@@ -486,7 +497,7 @@ function resolveIdentifierToMembers(
 	const member = client.members.get(snowflakeToBigint(`${id}${guild.id}`));
 	if (!member) return;
 
-	return [member];
+	return [[member], true];
 }
 
 function resolveInteractionToMember(
@@ -494,12 +505,15 @@ function resolveInteractionToMember(
 	interaction: Interaction,
 	identifier: string,
 ): Member | undefined {
-	const matchingMembers = resolveIdentifierToMembers(
+	const result = resolveIdentifierToMembers(
 		client,
 		interaction.guildId!,
 		identifier,
 	);
-	if (!matchingMembers) return;
+	if (!result) return;
+
+	const [matchedMembers, isId] = result;
+	if (isId) return matchedMembers.at(0);
 
 	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete) {
 		return void sendInteractionResponse(
@@ -509,7 +523,7 @@ function resolveInteractionToMember(
 			{
 				type: InteractionResponseTypes.ApplicationCommandAutocompleteResult,
 				data: {
-					choices: matchingMembers.slice(0, 20).map((member) => ({
+					choices: matchedMembers.slice(0, 20).map((member) => ({
 						name: mentionUser(member.user!, true),
 						value: member.id.toString(),
 					})),
@@ -518,7 +532,7 @@ function resolveInteractionToMember(
 		);
 	}
 
-	if (matchingMembers.length === 0) {
+	if (matchedMembers.length === 0) {
 		return void sendInteractionResponse(
 			client.bot,
 			interaction.id,
@@ -535,7 +549,7 @@ function resolveInteractionToMember(
 		);
 	}
 
-	return matchingMembers.at(0)!;
+	return matchedMembers.at(0);
 }
 
 export {
