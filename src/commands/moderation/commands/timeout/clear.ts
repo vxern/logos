@@ -36,7 +36,6 @@ async function clearTimeout(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						title: 'User not timed out',
 						description: 'The provided user is not currently timed out.',
 						color: configuration.interactions.responses.colors.yellow,
 					}],
