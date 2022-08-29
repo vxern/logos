@@ -16,6 +16,7 @@ import {
 	Message,
 	sendInteractionResponse,
 	sendShardMessage,
+	snowflakeToBigint,
 	startBot,
 	upsertApplicationCommands,
 	User,
@@ -482,7 +483,7 @@ function resolveIdentifierToMembers(
 	const guild = client.guilds.get(guildId);
 	if (!guild) return;
 
-	const member = client.members.get(BigInt(id));
+	const member = client.members.get(snowflakeToBigint(`${id}${guild.id}`));
 	if (!member) return;
 
 	return [member];
