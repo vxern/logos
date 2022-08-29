@@ -1,4 +1,4 @@
-import { CommandBuilder, OptionBuilder } from '../../../commands/command.ts';
+import { OptionBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
 import { ListingResolver, sources } from '../data/sources/sources.ts';
 import { titleOrUrl } from '../parameters.ts';
@@ -12,7 +12,7 @@ import {
 } from '../../../../deps.ts';
 import { SongListingContentTypes } from '../data/song-listing.ts';
 
-const command: CommandBuilder = {
+const command: OptionBuilder = {
 	name: 'play',
 	nameLocalizations: {
 		pl: 'odtwórz',
@@ -23,7 +23,7 @@ const command: CommandBuilder = {
 		pl: 'Pozwala użytkownikowi na odtwarzanie muzyki w kanale głosowym.',
 		ro: 'Permite utilizatorului să redea muzică într-un canal de voce.',
 	},
-	defaultMemberPermissions: ['VIEW_CHANNEL'],
+	type: ApplicationCommandOptionTypes.SubCommandGroup,
 	options: [
 		{
 			name: 'stream',

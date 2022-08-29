@@ -6,10 +6,10 @@ import {
 	sendInteractionResponse,
 } from '../../../../deps.ts';
 import { Client } from '../../../client.ts';
-import { CommandBuilder } from '../../../commands/command.ts';
+import { OptionBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
 
-const command: CommandBuilder = {
+const command: OptionBuilder = {
 	name: 'volume',
 	nameLocalizations: {
 		pl: 'głośność',
@@ -20,7 +20,7 @@ const command: CommandBuilder = {
 		pl: 'Pozwala użytkownikowi na zarządzanie głośnością odtwarzania muzyki.',
 		ro: 'Permite utilizatorului gestionarea volumului redării muzicii.',
 	},
-	defaultMemberPermissions: ['VIEW_CHANNEL'],
+	type: ApplicationCommandOptionTypes.SubCommandGroup,
 	options: [{
 		name: 'display',
 		nameLocalizations: {

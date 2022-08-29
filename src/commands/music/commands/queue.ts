@@ -3,10 +3,10 @@ import {
 	Interaction,
 } from '../../../../deps.ts';
 import { Client } from '../../../client.ts';
-import { CommandBuilder } from '../../../commands/command.ts';
+import { OptionBuilder } from '../../../commands/command.ts';
 import { displayListings } from '../module.ts';
 
-const command: CommandBuilder = {
+const command: OptionBuilder = {
 	name: 'queue',
 	nameLocalizations: {
 		pl: 'kolejka',
@@ -17,7 +17,7 @@ const command: CommandBuilder = {
 		pl: 'Wyświetla listę utworów oraz zbiorów utworów w kolejce.',
 		ro: 'Afișează lista cu melodii și seturi de melodii în coadă.',
 	},
-	defaultMemberPermissions: ['VIEW_CHANNEL'],
+	type: ApplicationCommandOptionTypes.SubCommand,
 	handle: displaySongQueue,
 	options: [{
 		name: 'show',

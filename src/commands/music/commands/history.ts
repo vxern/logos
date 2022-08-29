@@ -4,10 +4,10 @@ import {
 	Interaction,
 } from '../../../../deps.ts';
 import { Client } from '../../../client.ts';
-import { CommandBuilder } from '../../../commands/command.ts';
+import { OptionBuilder } from '../../command.ts';
 import { displayListings } from '../module.ts';
 
-const command: CommandBuilder = {
+const command: OptionBuilder = {
 	name: 'history',
 	nameLocalizations: {
 		pl: 'historia',
@@ -18,7 +18,7 @@ const command: CommandBuilder = {
 		pl: 'Wyświetla listę zagranych piosenek.',
 		ro: 'Afișează lista tututor melodiilor redate.',
 	},
-	defaultMemberPermissions: ['VIEW_CHANNEL'],
+	type: ApplicationCommandOptionTypes.SubCommand,
 	handle: displaySongHistory,
 	options: [{
 		name: 'show',

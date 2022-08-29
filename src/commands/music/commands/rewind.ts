@@ -1,9 +1,12 @@
-import { Interaction } from '../../../../deps.ts';
+import {
+	ApplicationCommandOptionTypes,
+	Interaction,
+} from '../../../../deps.ts';
 import { Client } from '../../../client.ts';
-import { CommandBuilder } from '../../../commands/command.ts';
+import { OptionBuilder } from '../../../commands/command.ts';
 import { by, to } from '../parameters.ts';
 
-const command: CommandBuilder = {
+const command: OptionBuilder = {
 	name: 'rewind',
 	nameLocalizations: {
 		pl: 'przewiń-do-tyłu',
@@ -14,9 +17,9 @@ const command: CommandBuilder = {
 		pl: 'Przewija obecnie grający utwór do tyłu.',
 		ro: 'Derulează melodia în curs de redare înapoi.',
 	},
-	defaultMemberPermissions: ['VIEW_CHANNEL'],
-	options: [by, to],
+	type: ApplicationCommandOptionTypes.SubCommand,
 	handle: rewindSong,
+	options: [by, to],
 };
 
 function rewindSong(

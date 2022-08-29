@@ -1,14 +1,15 @@
 import {
 	ApplicationCommandFlags,
+	ApplicationCommandOptionTypes,
 	Interaction,
 	InteractionResponseTypes,
 	sendInteractionResponse,
 } from '../../../../deps.ts';
 import { Client } from '../../../client.ts';
-import { CommandBuilder } from '../../../commands/command.ts';
+import { OptionBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
 
-const command: CommandBuilder = {
+const command: OptionBuilder = {
 	name: 'unpause',
 	nameLocalizations: {
 		pl: 'wznów',
@@ -21,7 +22,7 @@ const command: CommandBuilder = {
 		ro:
 			'Anulează întreruperea redării melodiei actuale dacă aceasta este în pauză.',
 	},
-	defaultMemberPermissions: ['VIEW_CHANNEL'],
+	type: ApplicationCommandOptionTypes.SubCommand,
 	handle: unpause,
 };
 

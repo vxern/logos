@@ -1,15 +1,16 @@
 import {
 	ApplicationCommandFlags,
+	ApplicationCommandOptionTypes,
 	Interaction,
 	InteractionResponseTypes,
 	sendInteractionResponse,
 } from '../../../../deps.ts';
 import { Client } from '../../../client.ts';
-import { CommandBuilder } from '../../../commands/command.ts';
+import { OptionBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
 import { unpause } from './unpause.ts';
 
-const command: CommandBuilder = {
+const command: OptionBuilder = {
 	name: 'pause',
 	nameLocalizations: {
 		pl: 'zapauzuj',
@@ -20,7 +21,7 @@ const command: CommandBuilder = {
 		pl: 'Zapauzuj obecną piosenkę lub zbiór piosenek.',
 		ro: 'Pauzează melodia sau setul de melodii în curs de redare.',
 	},
-	defaultMemberPermissions: ['VIEW_CHANNEL'],
+	type: ApplicationCommandOptionTypes.SubCommand,
 	handle: pauseSong,
 };
 

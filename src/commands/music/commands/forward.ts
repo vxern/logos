@@ -1,9 +1,9 @@
-import { Interaction } from '../../../../deps.ts';
+import { ApplicationCommandOptionTypes, Interaction } from '../../../../deps.ts';
 import { Client } from '../../../client.ts';
-import { CommandBuilder } from '../../../commands/command.ts';
+import { OptionBuilder } from '../../../commands/command.ts';
 import { by, to } from '../parameters.ts';
 
-const command: CommandBuilder = {
+const command: OptionBuilder = {
 	name: 'forward',
 	nameLocalizations: {
 		pl: 'przewiń-do-przodu',
@@ -14,7 +14,7 @@ const command: CommandBuilder = {
 		pl: 'Przewija obecnie grający utwór do przodu.',
 		ro: 'Derulează melodia în curs de redare înainte.',
 	},
-	defaultMemberPermissions: ['VIEW_CHANNEL'],
+  type: ApplicationCommandOptionTypes.SubCommand,
 	handle: fastForwardSong,
 	options: [by, to],
 };

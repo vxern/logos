@@ -6,11 +6,11 @@ import {
 	sendInteractionResponse,
 } from '../../../../deps.ts';
 import { Client } from '../../../client.ts';
-import { CommandBuilder } from '../../../commands/command.ts';
+import { OptionBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
 import { SongListingContentTypes } from '../data/song-listing.ts';
 
-const command: CommandBuilder = {
+const command: OptionBuilder = {
 	name: 'replay',
 	nameLocalizations: {
 		pl: 'odtwórz-ponownie',
@@ -21,7 +21,7 @@ const command: CommandBuilder = {
 		pl: 'Odtwarza obecnie grający utwór od początku.',
 		ro: 'Redă melodia în curs de redare din nou.',
 	},
-	defaultMemberPermissions: ['VIEW_CHANNEL'],
+	type: ApplicationCommandOptionTypes.SubCommand,
 	handle: replaySong,
 	options: [{
 		name: 'collection',

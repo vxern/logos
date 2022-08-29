@@ -6,11 +6,11 @@ import {
 	sendInteractionResponse,
 } from '../../../../deps.ts';
 import { Client } from '../../../client.ts';
-import { CommandBuilder } from '../../../commands/command.ts';
+import { OptionBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
 import { SongListingContentTypes } from '../data/song-listing.ts';
 
-const command: CommandBuilder = {
+const command: OptionBuilder = {
 	name: 'unskip',
 	nameLocalizations: {
 		pl: 'przywróć',
@@ -21,7 +21,7 @@ const command: CommandBuilder = {
 		pl: 'Przywraca ostatnio zagrany utwór lub zbiór utworów.',
 		ro: 'Înapoiază ultima melodie sau ultimul set de melodii redat.',
 	},
-	defaultMemberPermissions: ['VIEW_CHANNEL'],
+	type: ApplicationCommandOptionTypes.SubCommand,
 	handle: unskip,
 	options: [{
 		name: 'collection',
