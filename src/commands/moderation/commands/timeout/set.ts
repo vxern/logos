@@ -166,7 +166,10 @@ async function setTimeout(
 		embeds: [
 			{
 				thumbnail: (() => {
-					const iconURL = getGuildIconURL(client.bot, guild.id, guild.icon);
+					const iconURL = getGuildIconURL(client.bot, guild.id, guild.icon, {
+						size: 4096,
+						format: 'webp',
+					});
 					if (!iconURL) return;
 
 					return { url: iconURL };
