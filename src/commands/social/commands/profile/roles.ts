@@ -1,5 +1,6 @@
 import {
 	ApplicationCommandFlags,
+	ApplicationCommandOptionTypes,
 	editInteractionResponse,
 	Interaction,
 	InteractionResponse,
@@ -26,6 +27,22 @@ import {
 } from '../../data/structures/role-collection.ts';
 import { Role, tryAssignRole } from '../../data/structures/role.ts';
 import { roles } from '../../module.ts';
+import { OptionBuilder } from '../../../command.ts';
+
+const command: OptionBuilder = {
+	name: 'roles',
+	nameLocalizations: {
+		pl: 'role',
+		ro: 'roluri',
+	},
+	description: 'Opens the role selection menu.',
+	descriptionLocalizations: {
+		pl: 'Otwiera menu wybierania ról.',
+		ro: 'Deschide meniul selectării rolurilor.',
+	},
+	type: ApplicationCommandOptionTypes.SubCommand,
+	handle: selectRoles,
+};
 
 /**
  * Displays a role selection menu to the user and allows them to assign or unassign roles
@@ -292,4 +309,4 @@ function displaySelectMenu(
 	};
 }
 
-export { selectRoles };
+export default command;

@@ -1,5 +1,6 @@
 import {
 	ApplicationCommandFlags,
+	ApplicationCommandOptionTypes,
 	dayjs,
 	getAvatarURL,
 	Interaction,
@@ -10,6 +11,24 @@ import { Client, resolveInteractionToMember } from '../../../../client.ts';
 import configuration from '../../../../configuration.ts';
 import { mention, MentionTypes } from '../../../../formatting.ts';
 import { snowflakeToTimestamp } from '../../../../utils.ts';
+import { OptionBuilder } from '../../../command.ts';
+import { user } from '../../../parameters.ts';
+
+const command: OptionBuilder = {
+	name: 'view',
+	nameLocalizations: {
+		pl: 'wyświetl',
+		ro: 'afișează',
+	},
+	description: 'Displays a user\'s profile.',
+	descriptionLocalizations: {
+		pl: 'Wyświetla profil użytkownika.',
+		ro: 'Afișează profilul unui utilizator.',
+	},
+	type: ApplicationCommandOptionTypes.SubCommand,
+	options: [user],
+	handle: viewProfile,
+};
 
 async function viewProfile(
 	client: Client,
@@ -111,4 +130,4 @@ async function viewProfile(
 	});
 }
 
-export { viewProfile };
+export default command;
