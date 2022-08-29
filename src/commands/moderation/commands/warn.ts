@@ -41,7 +41,7 @@ async function warnUser(
 
 	const userIdentifier = <string | undefined> data.options?.at(0)?.value;
 	const reason = <string | undefined> data.options?.at(0)?.value;
-	if (!userIdentifier || !reason) return;
+	if (userIdentifier === undefined || !reason) return;
 
 	const member = resolveInteractionToMember(
 		client,
