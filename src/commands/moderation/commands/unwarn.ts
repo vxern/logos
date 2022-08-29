@@ -2,7 +2,6 @@ import {
 	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
 	dayjs,
-	fetchMembers,
 	getDmChannel,
 	getGuildIconURL,
 	Interaction,
@@ -11,10 +10,9 @@ import {
 	sendInteractionResponse,
 	sendMessage,
 } from '../../../../deps.ts';
-import { Client } from '../../../client.ts';
+import { Client, resolveInteractionToMember } from '../../../client.ts';
 import { CommandBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
-import { mentionUser, resolveUserIdentifier } from '../../../utils.ts';
 import { user } from '../../parameters.ts';
 import { getRelevantWarnings } from '../module.ts';
 
@@ -65,41 +63,26 @@ async function unwarnUser(
 	const userIdentifier = <string | undefined> userIdentifierOption.value;
 	if (!userIdentifier) return;
 
-	await fetchMembers(client.bot, interaction.guildId!, { limit: 0, query: '' });
-
-	const members = Array.from(client.members.values()).filter((member) =>
-		member.guildId === interaction.guildId!
-	);
-
-	const matchingUsers = resolveUserIdentifier(
+	const member = resolveInteractionToMember(
 		client,
-		interaction.guildId!,
-		members,
+		interaction,
 		userIdentifier,
 	);
-	if (!matchingUsers) return;
+	if (!member) return;
 
-	if (
-		interaction.type === InteractionTypes.ApplicationCommandAutocomplete &&
-		userIdentifierOption.focused
-	) {
-		return void sendInteractionResponse(
-			client.bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ApplicationCommandAutocompleteResult,
-				data: {
-					choices: matchingUsers.slice(0, 20).map((user) => ({
-						name: mentionUser(user, true),
-						value: user.id.toString(),
-					})),
+	const displayErrorOrEmptyChoices = (): void => {
+		if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete) {
+			return void sendInteractionResponse(
+				client.bot,
+				interaction.id,
+				interaction.token,
+				{
+					type: InteractionResponseTypes.ApplicationCommandAutocompleteResult,
+					data: { choices: [] },
 				},
-			},
-		);
-	}
+			);
+		}
 
-	function showUnwarnFailure(): unknown {
 		return void sendInteractionResponse(
 			client.bot,
 			interaction.id,
@@ -116,42 +99,16 @@ async function unwarnUser(
 				},
 			},
 		);
-	}
-
-	if (matchingUsers.length === 0) return void showUnwarnFailure();
-
-	function displayEmptyChoices(): unknown {
-		return sendInteractionResponse(
-			client.bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ApplicationCommandAutocompleteResult,
-				data: { choices: [] },
-			},
-		);
-	}
-
-	const user = matchingUsers[0]!;
+	};
 
 	const subject = await client.database.getOrCreateUser(
 		'id',
-		user.id.toString(),
+		member.id.toString(),
 	);
-	if (!subject) {
-		return void (interaction.type ===
-				InteractionTypes.ApplicationCommandAutocomplete
-			? displayEmptyChoices()
-			: showUnwarnFailure());
-	}
+	if (!subject) return displayErrorOrEmptyChoices();
 
 	const warnings = await client.database.getWarnings(subject.ref);
-	if (!warnings) {
-		return void (interaction.type ===
-				InteractionTypes.ApplicationCommandAutocomplete
-			? displayEmptyChoices()
-			: showUnwarnFailure());
-	}
+	if (!warnings) return displayErrorOrEmptyChoices();
 
 	const relevantWarnings = getRelevantWarnings(warnings);
 	relevantWarnings.reverse();
@@ -173,51 +130,43 @@ async function unwarnUser(
 		);
 	}
 
+	const displayUnwarnError = (title: string, description: string): void => {
+		return void sendInteractionResponse(
+			client.bot,
+			interaction.id,
+			interaction.token,
+			{
+				type: InteractionResponseTypes.ChannelMessageWithSource,
+				data: {
+					flags: ApplicationCommandFlags.Ephemeral,
+					embeds: [{
+						title: title,
+						description: description,
+						color: configuration.interactions.responses.colors.red,
+					}],
+				},
+			},
+		);
+	};
+
 	const warningReferenceID = <string> warningOption.value!;
 	const warningToRemove = relevantWarnings.find((warning) =>
 		warning.ref.value.id === warningReferenceID
 	);
 	if (!warningToRemove) {
-		return void sendInteractionResponse(
-			client.bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						title: 'Warning already removed',
-						description: `The selected warning has already been removed.`,
-						color: configuration.interactions.responses.colors.red,
-					}],
-				},
-			},
+		return displayUnwarnError(
+			'Warning already removed',
+			'The selected warning has already been removed.',
 		);
 	}
 
 	const warning = await client.database.deleteWarning(warningToRemove);
 	if (!warning) {
-		return void sendInteractionResponse(
-			client.bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						title: 'Failed to remove warning',
-						description: `The selected warning failed to be removed.`,
-						color: configuration.interactions.responses.colors.red,
-					}],
-				},
-			},
+		return displayUnwarnError(
+			'Failed to remove warning',
+			'The selected warning failed to be removed.',
 		);
 	}
-
-	const member = client.members.get(user.id);
-	if (!member) return;
 
 	client.logging.get(interaction.guildId!)?.log(
 		'memberWarnRemove',
@@ -255,11 +204,9 @@ async function unwarnUser(
 			{
 				thumbnail: (() => {
 					const iconURL = getGuildIconURL(client.bot, guild.id, guild.icon);
-					if (!iconURL) return undefined;
+					if (!iconURL) return;
 
-					return {
-						url: iconURL,
-					};
+					return { url: iconURL };
 				})(),
 				title: 'You have been pardoned',
 				description: `The warning for '${warning.data.reason}' given to you ${

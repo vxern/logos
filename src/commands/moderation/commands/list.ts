@@ -4,22 +4,15 @@ import {
 	dayjs,
 	Interaction,
 	InteractionResponseTypes,
-	InteractionTypes,
 	sendInteractionResponse,
 } from '../../../../deps.ts';
-import { Client } from '../../../client.ts';
+import { Client, resolveInteractionToMember } from '../../../client.ts';
 import { CommandBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
 import { Document } from '../../../database/structs/document.ts';
 import { Warning } from '../../../database/structs/users/warning.ts';
 import { list } from '../../../formatting.ts';
-import {
-	chunk,
-	mentionUser,
-	paginate,
-	resolveUserIdentifier,
-	trim,
-} from '../../../utils.ts';
+import { chunk, paginate, trim } from '../../../utils.ts';
 import { user } from '../../parameters.ts';
 
 const command: CommandBuilder = {
@@ -61,38 +54,14 @@ async function listWarnings(
 		)?.value;
 	if (userIdentifier === undefined) return;
 
-	const members = Array.from(client.members.values()).filter((member) =>
-		member.guildId === interaction.guildId!
-	);
-
-	const matchingUsers = resolveUserIdentifier(
+	const member = resolveInteractionToMember(
 		client,
-		interaction.guildId!,
-		members,
+		interaction,
 		userIdentifier,
 	);
-	if (!matchingUsers) return;
+	if (!member) return;
 
-	if (
-		interaction.type === InteractionTypes.ApplicationCommandAutocomplete
-	) {
-		return void sendInteractionResponse(
-			client.bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ApplicationCommandAutocompleteResult,
-				data: {
-					choices: matchingUsers.slice(0, 20).map((user) => ({
-						name: mentionUser(user, true),
-						value: user.id.toString(),
-					})),
-				},
-			},
-		);
-	}
-
-	const displayWarningDisplayError = (): void => {
+	const displayError = (): void => {
 		return void sendInteractionResponse(
 			client.bot,
 			interaction.id,
@@ -110,18 +79,14 @@ async function listWarnings(
 		);
 	};
 
-	if (matchingUsers.length === 0) return displayWarningDisplayError();
-
-	const user = matchingUsers[0]!;
-
 	const subject = await client.database.getOrCreateUser(
 		'id',
-		user.id.toString(),
+		member.id.toString(),
 	);
-	if (!subject) return displayWarningDisplayError();
+	if (!subject) return displayError();
 
 	const warnings = await client.database.getWarnings(subject.ref);
-	if (!warnings) return displayWarningDisplayError();
+	if (!warnings) return displayError();
 
 	const pages = chunk(
 		warnings,
@@ -147,10 +112,7 @@ async function listWarnings(
 	return paginate(client, interaction, {
 		elements: pages,
 		embed: { color: configuration.interactions.responses.colors.blue },
-		view: {
-			title: 'Warnings',
-			generate: generateWarningsPage,
-		},
+		view: { title: 'Warnings', generate: generateWarningsPage },
 		show: false,
 	});
 }

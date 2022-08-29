@@ -10,14 +10,14 @@ import {
 	sendInteractionResponse,
 	sendMessage,
 } from '../../../../../deps.ts';
-import { Client } from '../../../../client.ts';
+import { Client, resolveInteractionToMember } from '../../../../client.ts';
 import configuration, {
 	minute,
 	timeDescriptors,
 	week,
 } from '../../../../configuration.ts';
 import { mention, MentionTypes } from '../../../../formatting.ts';
-import { mentionUser, resolveUserIdentifier } from '../../../../utils.ts';
+import { mentionUser } from '../../../../utils.ts';
 
 async function setTimeout(
 	client: Client,
@@ -40,36 +40,10 @@ async function setTimeout(
 
 	const userIdentifier = <string> userIdentifierOption.value;
 
-	const members = Array.from(client.members.values()).filter((member) =>
-		member.guildId === interaction.guildId!
-	);
-
-	const matchingUsers = resolveUserIdentifier(
-		client,
-		interaction.guildId!,
-		members,
-		userIdentifier,
-	);
-	if (!matchingUsers) return undefined;
-
-	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete) {
-		if (userIdentifierOption.focused) {
-			return void sendInteractionResponse(
-				client.bot,
-				interaction.id,
-				interaction.token,
-				{
-					type: InteractionResponseTypes.ApplicationCommandAutocompleteResult,
-					data: {
-						choices: matchingUsers.slice(0, 20).map((user) => ({
-							name: mentionUser(user, true),
-							value: user.id.toString(),
-						})),
-					},
-				},
-			);
-		}
-
+	if (
+		interaction.type === InteractionTypes.ApplicationCommandAutocomplete &&
+		!userIdentifierOption.focused
+	) {
 		const timestamp = getTimestampFromExpression(durationIdentifier);
 
 		return void sendInteractionResponse(
@@ -87,7 +61,14 @@ async function setTimeout(
 		);
 	}
 
-	if (matchingUsers.length === 0) {
+	const member = resolveInteractionToMember(
+		client,
+		interaction,
+		userIdentifier,
+	);
+	if (!member) return;
+
+	const displayError = (error: string): void => {
 		return void sendInteractionResponse(
 			client.bot,
 			interaction.id,
@@ -97,99 +78,35 @@ async function setTimeout(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						title: 'Invalid user',
-						description:
-							'The provided user identifier is invalid, and does not match to a guild member.',
+						description: error,
 						color: configuration.interactions.responses.colors.yellow,
 					}],
 				},
 			},
 		);
-	}
+	};
 
-	const user = matchingUsers[0]!;
-
-	if (user.id === interaction.member?.id) {
-		return void sendInteractionResponse(
-			client.bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						title: 'Invalid user',
-						description: 'You cannot time yourself out!',
-						color: configuration.interactions.responses.colors.red,
-					}],
-				},
-			},
-		);
+	if (member.id === interaction.member?.id) {
+		return displayError('You cannot time yourself out!');
 	}
 
 	const duration = Number(durationIdentifier);
 
 	if (Number.isNaN(duration)) {
-		return void sendInteractionResponse(
-			client.bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						title: 'Invalid timestamp',
-						description: 'The provided duration is invalid.',
-						color: configuration.interactions.responses.colors.yellow,
-					}],
-				},
-			},
-		);
+		return displayError('The provided duration is invalid.');
 	}
 
 	if (duration < minute) {
-		return void sendInteractionResponse(
-			client.bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						title: 'Invalid timestamp',
-						description: 'The duration must be longer than a minute.',
-						color: configuration.interactions.responses.colors.yellow,
-					}],
-				},
-			},
-		);
+		return displayError('The duration must be longer than a minute.');
 	}
 
 	if (duration > week) {
-		return void sendInteractionResponse(
-			client.bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						title: 'Invalid timestamp',
-						description: 'The duration must not be longer than a week.',
-						color: configuration.interactions.responses.colors.yellow,
-					}],
-				},
-			},
-		);
+		return displayError('The duration must not be longer than a week.');
 	}
 
 	const until = new Date(Date.now() + duration);
 
-	const member = await editMember(client.bot, interaction.guildId!, user.id, {
+	await editMember(client.bot, interaction.guildId!, member.id, {
 		// TODO: Verify works.
 		communicationDisabledUntil: until.getUTCMilliseconds(),
 	});
@@ -207,7 +124,6 @@ async function setTimeout(
 		data: {
 			flags: ApplicationCommandFlags.Ephemeral,
 			embeds: [{
-				title: 'Member timed out',
 				description: `Member ${
 					mention(member.id, MentionTypes.User)
 				} has been timed out for a duration of ${dayjs(until).fromNow(true)}.`,
@@ -220,6 +136,9 @@ async function setTimeout(
 	if (!dmChannel) {
 		const textChannel = client.channels.get(interaction.channelId!);
 		if (!textChannel) return;
+
+		const user = member.user;
+		if (!user) return;
 
 		return void sendMessage(client.bot, textChannel.id, {
 			embeds: [{
@@ -241,11 +160,9 @@ async function setTimeout(
 			{
 				thumbnail: (() => {
 					const iconURL = getGuildIconURL(client.bot, guild.id, guild.icon);
-					if (!iconURL) return undefined;
+					if (!iconURL) return;
 
-					return {
-						url: iconURL,
-					};
+					return { url: iconURL };
 				})(),
 				title: 'You have been timed out',
 				description: `You have been timed out for a duration of ${

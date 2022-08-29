@@ -3,12 +3,11 @@ import {
 	editMember,
 	Interaction,
 	InteractionResponseTypes,
-	InteractionTypes,
 	sendInteractionResponse,
 } from '../../../../../deps.ts';
-import { Client } from '../../../../client.ts';
+import { Client, resolveInteractionToMember } from '../../../../client.ts';
 import configuration from '../../../../configuration.ts';
-import { mentionUser, resolveUserIdentifier } from '../../../../utils.ts';
+import { mentionUser } from '../../../../utils.ts';
 
 async function clearTimeout(
 	client: Client,
@@ -20,58 +19,11 @@ async function clearTimeout(
 		)?.value;
 	if (!userIdentifier) return;
 
-	const members = Array.from(client.members.values()).filter((member) =>
-		member.guildId === interaction.guildId!
-	);
-
-	const matchingUsers = resolveUserIdentifier(
+	const member = resolveInteractionToMember(
 		client,
-		interaction.guildId!,
-		members,
+		interaction,
 		userIdentifier,
 	);
-	if (!matchingUsers) return undefined;
-
-	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete) {
-		return void sendInteractionResponse(
-			client.bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ApplicationCommandAutocompleteResult,
-				data: {
-					choices: matchingUsers.slice(0, 20).map((user) => ({
-						name: mentionUser(user, true),
-						value: user.id.toString(),
-					})),
-				},
-			},
-		);
-	}
-
-	if (matchingUsers.length === 0) {
-		return void sendInteractionResponse(
-			client.bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						title: 'Invalid user',
-						description:
-							'The provided user identifier is invalid, and does not match to a guild member.',
-						color: configuration.interactions.responses.colors.yellow,
-					}],
-				},
-			},
-		);
-	}
-
-	const user = matchingUsers[0]!;
-
-	const member = client.members.get(user.id);
 	if (!member) return;
 
 	if (!member.communicationDisabledUntil) {
@@ -114,9 +66,8 @@ async function clearTimeout(
 			data: {
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
-					title: 'Cleared user timeout',
 					description: `The timeout of member ${
-						mentionUser(user)
+						member.user ? mentionUser(member.user) : undefined
 					} has been cleared.`,
 					color: configuration.interactions.responses.colors.blue,
 				}],

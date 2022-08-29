@@ -1,21 +1,18 @@
 import {
 	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
-	fetchMembers,
 	getDmChannel,
 	getGuildIconURL,
 	Interaction,
 	InteractionResponseTypes,
-	InteractionTypes,
 	sendInteractionResponse,
 	sendMessage,
 } from '../../../../deps.ts';
-import { Client } from '../../../client.ts';
+import { Client, resolveInteractionToMember } from '../../../client.ts';
 import { CommandBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
 import { Praise } from '../../../database/structs/users/praise.ts';
 import { mention, MentionTypes } from '../../../formatting.ts';
-import { mentionUser, resolveUserIdentifier } from '../../../utils.ts';
 import { user } from '../../parameters.ts';
 
 const command: CommandBuilder = {
@@ -54,64 +51,18 @@ async function praise(
 	if (!data) return;
 
 	const userIdentifier = <string | undefined> data.options?.at(0)?.value;
-	if (!userIdentifier) return;
+	if (userIdentifier === undefined) return;
+
+	const member = resolveInteractionToMember(
+		client,
+		interaction,
+		userIdentifier,
+	);
+	if (!member) return;
 
 	const comment = <string | undefined> data.options?.at(1)?.value;
 
-	await fetchMembers(client.bot, interaction.guildId!, { limit: 0, query: '' });
-
-	const members = Array.from(client.members.values()).filter((member) =>
-		member.guildId === interaction.guildId!
-	);
-
-	const matchingUsers = resolveUserIdentifier(
-		client,
-		interaction.guildId!,
-		members,
-		userIdentifier,
-	);
-	if (!matchingUsers) return;
-
-	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete) {
-		return void sendInteractionResponse(
-			client.bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ApplicationCommandAutocompleteResult,
-				data: {
-					choices: matchingUsers.slice(0, 20).map((user) => ({
-						name: mentionUser(user, true),
-						value: user.id.toString(),
-					})),
-				},
-			},
-		);
-	}
-
-	if (matchingUsers.length === 0) {
-		return void sendInteractionResponse(
-			client.bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						title: 'Invalid user',
-						description:
-							'The provided user identifier is invalid, and does not match to a guild member.',
-						color: configuration.interactions.responses.colors.yellow,
-					}],
-				},
-			},
-		);
-	}
-
-	const user = matchingUsers[0]!;
-
-	if (user.id === interaction.member?.id) {
+	if (member.id === interaction.member?.id) {
 		return void sendInteractionResponse(
 			client.bot,
 			interaction.id,
@@ -196,7 +147,7 @@ async function praise(
 
 	const subject = await client.database.getOrCreateUser(
 		'id',
-		user.id.toString(),
+		member.id.toString(),
 	);
 	if (!subject) return showPraiseFailure();
 

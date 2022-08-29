@@ -1,21 +1,15 @@
 import {
 	ApplicationCommandFlags,
 	dayjs,
-	fetchMembers,
 	getAvatarURL,
 	Interaction,
 	InteractionResponseTypes,
-	InteractionTypes,
 	sendInteractionResponse,
 } from '../../../../../deps.ts';
-import { Client } from '../../../../client.ts';
+import { Client, resolveInteractionToMember } from '../../../../client.ts';
 import configuration from '../../../../configuration.ts';
 import { mention, MentionTypes } from '../../../../formatting.ts';
-import {
-	mentionUser,
-	resolveUserIdentifier,
-	snowflakeToTimestamp,
-} from '../../../../utils.ts';
+import { snowflakeToTimestamp } from '../../../../utils.ts';
 
 async function viewProfile(
 	client: Client,
@@ -23,58 +17,17 @@ async function viewProfile(
 ): Promise<void> {
 	const userIdentifier = <string | undefined> interaction.data?.options?.at(0)
 		?.options?.at(0)?.value;
-	if (!userIdentifier) return;
+	if (userIdentifier === undefined) return;
 
-	await fetchMembers(client.bot, interaction.guildId!, { limit: 0, query: '' });
-
-	const members = Array.from(client.members.values()).filter((member) =>
-		member.guildId === interaction.guildId!
-	);
-
-	const matchingUsers = resolveUserIdentifier(
+	const member = resolveInteractionToMember(
 		client,
-		interaction.guildId!,
-		members,
+		interaction,
 		userIdentifier,
 	);
-	if (!matchingUsers) return;
+	if (!member) return;
 
-	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete) {
-		return void sendInteractionResponse(
-			client.bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ApplicationCommandAutocompleteResult,
-				data: {
-					choices: matchingUsers.slice(0, 20).map((user) => ({
-						name: mentionUser(user, true),
-						value: user.id.toString(),
-					})),
-				},
-			},
-		);
-	}
-
-	if (matchingUsers.length === 0) {
-		return void sendInteractionResponse(
-			client.bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						title: 'Invalid user',
-						description:
-							'The provided user identifier is invalid, and does not match to a guild member.',
-						color: configuration.interactions.responses.colors.yellow,
-					}],
-				},
-			},
-		);
-	}
+	const user = member.user;
+	if (!user) return;
 
 	function showProfileViewFailure(): void {
 		return void sendInteractionResponse(
@@ -95,14 +48,9 @@ async function viewProfile(
 		);
 	}
 
-	const user = matchingUsers[0]!;
-
-	const member = client.members.get(user.id);
-	if (!member) return;
-
 	// TODO: Remove @everyone role.
 
-	const createdAt = dayjs(snowflakeToTimestamp(user.id));
+	const createdAt = dayjs(snowflakeToTimestamp(member.id));
 	const joinedAt = dayjs(member.joinedAt);
 
 	const subject = await client.database.getOrCreateUser(
@@ -130,11 +78,9 @@ async function viewProfile(
 				title: `Information for ${user.username}`,
 				thumbnail: (() => {
 					const iconURL = getAvatarURL(client.bot, user.id, user.discriminator);
-					if (!iconURL) return undefined;
+					if (!iconURL) return;
 
-					return {
-						url: iconURL,
-					};
+					return { url: iconURL };
 				})(),
 				fields: [{
 					name: '💼 Roles',
