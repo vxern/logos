@@ -10,6 +10,7 @@ import {
 	Role as DiscordRole,
 	sendInteractionResponse,
 	sendMessage,
+	snowflakeToBigint,
 } from '../../../../../deps.ts';
 import { Client } from '../../../../client.ts';
 import configuration from '../../../../configuration.ts';
@@ -77,7 +78,9 @@ async function tryAssignRole(
 	category: RoleCategory & { type: RoleCategoryTypes.Category },
 	role: Role,
 ): Promise<void> {
-	const member = client.members.get(interaction.user.id);
+	const member = client.members.get(
+		snowflakeToBigint(`${interaction.user.id}${interaction.guildId!}`),
+	);
 	if (!member) return;
 
 	const guild = client.guilds.get(interaction.guildId!);
