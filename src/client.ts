@@ -173,12 +173,6 @@ class Client {
 
 			this.members.set(memberSnowflake, result);
 
-			if (payload.user) {
-				const user = bot.transformers.user(bot, payload.user);
-
-				this.users.set(user.id, user);
-			}
-
 			return result;
 		};
 
