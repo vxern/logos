@@ -8,9 +8,13 @@ import {
 	fetchMembers,
 	Guild,
 	Intents,
+	Interaction,
+	InteractionResponseTypes,
+	InteractionTypes,
 	lavadeno,
 	Member,
 	Message,
+	sendInteractionResponse,
 	sendShardMessage,
 	startBot,
 	upsertApplicationCommands,
@@ -29,6 +33,7 @@ import {
 } from './commands/command.ts';
 import { defaultLanguage, Language, supportedLanguages } from './types.ts';
 import { commandBuilders } from './commands/modules.ts';
+import { mentionUser } from './utils.ts';
 
 interface Collector<
 	E extends keyof EventHandlers,
@@ -127,7 +132,7 @@ class Client {
 			this.setupControllers(result);
 
 			console.info(
-				`Fetching ~ ${result.memberCount} members for guild ${
+				`Fetching ~${result.memberCount} members for guild ${
 					colors.bold(result.name)
 				}...`,
 			);
@@ -438,5 +443,100 @@ function getLanguage(client: Client, guildId: bigint): Language {
 	return client.languages.get(guildId) ?? defaultLanguage;
 }
 
-export { addCollector, Client, getLanguage, isManagedGuild };
+const userMentionExpression = new RegExp(/^<@!?([0-9]{18})>$/);
+const userIDExpression = new RegExp(/^[0-9]{18}$/);
+
+function resolveIdentifierToMembers(
+	client: Client,
+	guildId: bigint,
+	identifier: string,
+	options: { includeBots: boolean } = { includeBots: false },
+): Member[] | undefined {
+	let id: string | undefined = undefined;
+	id ??= userMentionExpression.exec(identifier)?.at(1);
+	id ??= userIDExpression.exec(identifier)?.at(0);
+
+	if (!id) {
+		const members = Array.from(client.members.values()).filter((member) =>
+			member.guildId === guildId
+		);
+
+		const identifierLowercase = identifier.toLowerCase();
+		return members.filter((member) => {
+			if (!options.includeBots && member.user?.toggles.bot) return false;
+			if (member.user?.username.toLowerCase().includes(identifierLowercase)) {
+				return true;
+			}
+			if (member.nick?.toLowerCase().includes(identifierLowercase)) {
+				return true;
+			}
+			return false;
+		});
+	}
+
+	const guild = client.guilds.get(guildId);
+	if (!guild) return;
+
+	const member = client.members.get(BigInt(id));
+	if (!member) return;
+
+	return [member];
+}
+
+function resolveInteractionToMember(
+	client: Client,
+	interaction: Interaction,
+	identifier: string,
+): Member | undefined {
+	const matchingMembers = resolveIdentifierToMembers(
+		client,
+		interaction.guildId!,
+		identifier,
+	);
+	if (!matchingMembers) return;
+
+	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete) {
+		return void sendInteractionResponse(
+			client.bot,
+			interaction.id,
+			interaction.token,
+			{
+				type: InteractionResponseTypes.ApplicationCommandAutocompleteResult,
+				data: {
+					choices: matchingMembers.slice(0, 20).map((member) => ({
+						name: mentionUser(member.user!, true),
+						value: member.id.toString(),
+					})),
+				},
+			},
+		);
+	}
+
+	if (matchingMembers.length === 0) {
+		return void sendInteractionResponse(
+			client.bot,
+			interaction.id,
+			interaction.token,
+			{
+				type: InteractionResponseTypes.ChannelMessageWithSource,
+				data: {
+					embeds: [{
+						description: 'Invalid member.',
+						color: configuration.interactions.responses.colors.red,
+					}],
+				},
+			},
+		);
+	}
+
+	return matchingMembers.at(0)!;
+}
+
+export {
+	addCollector,
+	Client,
+	getLanguage,
+	isManagedGuild,
+	resolveInteractionToMember,
+};
 export type { Collector };

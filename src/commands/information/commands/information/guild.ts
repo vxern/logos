@@ -49,11 +49,9 @@ async function displayGuildInformation(
 							size: 4096,
 							format: 'png',
 						});
-						if (!iconURL) return undefined;
+						if (!iconURL) return;
 
-						return {
-							url: iconURL,
-						};
+						return { url: iconURL };
 					})(),
 					color: configuration.interactions.responses.colors.invisible,
 					fields: [

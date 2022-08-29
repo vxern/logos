@@ -460,51 +460,6 @@ function random(max: number): number {
 	return Math.floor(Math.random() * max);
 }
 
-const userMentionExpression = new RegExp(/^<@!?([0-9]{18})>$/);
-const userIDExpression = new RegExp(/^[0-9]{18}$/);
-
-function resolveUserIdentifier(
-	client: Client,
-	guildId: bigint,
-	members: Member[],
-	identifier: string,
-	options: { includeBots: boolean } = { includeBots: false },
-): User[] | undefined {
-	let id: string | undefined = undefined;
-	id ??= userMentionExpression.exec(identifier)?.at(1);
-	id ??= userIDExpression.exec(identifier)?.at(0);
-
-	if (!id) {
-		const users: User[] = [];
-		for (const member of members) {
-			const user = client.users.get(member.id);
-			if (!user) continue;
-
-			users.push(user);
-		}
-
-		const identifierLowercase = identifier.toLowerCase();
-		return users.filter((user, index) => {
-			if (!options.includeBots && user.toggles.bot) return false;
-			if (user.username.toLowerCase().includes(identifierLowercase)) {
-				return true;
-			}
-			if (members[index]!.nick?.toLowerCase().includes(identifierLowercase)) {
-				return true;
-			}
-			return false;
-		});
-	}
-
-	const guild = client.guilds.get(guildId);
-	if (!guild) return;
-
-	const user = client.users.get(BigInt(id));
-	if (!user) return;
-
-	return [user];
-}
-
 const beginningOfDiscordEpoch = 1420070400000n;
 const snowflakeBitsToDiscard = 22n;
 
@@ -523,7 +478,6 @@ export {
 	mentionUser,
 	paginate,
 	random,
-	resolveUserIdentifier,
 	snowflakeToTimestamp,
 	toModal,
 	trim,

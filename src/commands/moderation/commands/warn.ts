@@ -1,20 +1,17 @@
 import {
 	ApplicationCommandFlags,
-	fetchMembers,
 	getDmChannel,
 	getGuildIconURL,
 	Interaction,
 	InteractionResponseTypes,
-	InteractionTypes,
 	kickMember,
 	sendInteractionResponse,
 	sendMessage,
 } from '../../../../deps.ts';
-import { Client } from '../../../client.ts';
+import { Client, resolveInteractionToMember } from '../../../client.ts';
 import { CommandBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
 import { mention, MentionTypes } from '../../../formatting.ts';
-import { mentionUser, resolveUserIdentifier } from '../../../utils.ts';
 import { user } from '../../parameters.ts';
 import { getRelevantWarnings } from '../module.ts';
 import { reason } from '../parameters.ts';
@@ -46,60 +43,14 @@ async function warnUser(
 	const reason = <string | undefined> data.options?.at(0)?.value;
 	if (!userIdentifier || !reason) return;
 
-	await fetchMembers(client.bot, interaction.guildId!, { limit: 0, query: '' });
-
-	const members = Array.from(client.members.values()).filter((member) =>
-		member.guildId === interaction.guildId!
-	);
-
-	const matchingUsers = resolveUserIdentifier(
+	const member = resolveInteractionToMember(
 		client,
-		interaction.guildId!,
-		members,
+		interaction,
 		userIdentifier,
 	);
-	if (!matchingUsers) return;
+	if (!member) return;
 
-	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete) {
-		return void sendInteractionResponse(
-			client.bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ApplicationCommandAutocompleteResult,
-				data: {
-					choices: matchingUsers.slice(0, 20).map((user) => ({
-						name: mentionUser(user, true),
-						value: user.id.toString(),
-					})),
-				},
-			},
-		);
-	}
-
-	if (matchingUsers.length === 0) {
-		return void sendInteractionResponse(
-			client.bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						title: 'Invalid user',
-						description:
-							'The provided user identifier is invalid, and does not match to a guild member.',
-						color: configuration.interactions.responses.colors.yellow,
-					}],
-				},
-			},
-		);
-	}
-
-	const user = matchingUsers[0]!;
-
-	if (user.id === interaction.member?.id) {
+	if (member.id === interaction.member?.id) {
 		return void sendInteractionResponse(
 			client.bot,
 			interaction.id,
@@ -126,9 +77,6 @@ async function warnUser(
 	)?.id;
 	if (!enforcerRoleId) return;
 
-	const member = client.members.get(user.id);
-	if (!member) return;
-
 	const isGuide = member.roles.includes(enforcerRoleId);
 	if (isGuide) {
 		return void sendInteractionResponse(
@@ -150,7 +98,7 @@ async function warnUser(
 		);
 	}
 
-	function showWarnFailure(interaction: Interaction): unknown {
+	const displayWarnError = (): void => {
 		return void sendInteractionResponse(
 			client.bot,
 			interaction.id,
@@ -167,29 +115,29 @@ async function warnUser(
 				},
 			},
 		);
-	}
+	};
 
 	const subject = await client.database.getOrCreateUser(
 		'id',
 		member.id.toString(),
 	);
-	if (!subject) return void showWarnFailure(interaction);
+	if (!subject) return displayWarnError();
 
 	const author = await client.database.getOrCreateUser(
 		'id',
 		interaction.user.id.toString(),
 	);
-	if (!author) return void showWarnFailure(interaction);
+	if (!author) return displayWarnError();
 
 	const warnings = await client.database.getWarnings(subject.ref);
-	if (!warnings) return void showWarnFailure(interaction);
+	if (!warnings) return displayWarnError();
 
 	const document = await client.database.createWarning({
 		author: author.ref,
 		subject: subject.ref,
 		reason: reason,
 	});
-	if (!document) return void showWarnFailure(interaction);
+	if (!document) return displayWarnError();
 
 	client.logging.get(interaction.guildId!)?.log(
 		'memberWarnAdd',
@@ -224,11 +172,9 @@ async function warnUser(
 				{
 					thumbnail: (() => {
 						const iconURL = getGuildIconURL(client.bot, guild.id, guild.icon);
-						if (!iconURL) return undefined;
+						if (!iconURL) return;
 
-						return {
-							url: iconURL,
-						};
+						return { url: iconURL };
 					})(),
 					...(passedMaximum
 						? {
@@ -252,7 +198,7 @@ async function warnUser(
 		return kickMember(
 			client.bot,
 			interaction.guildId!,
-			user.id,
+			member.id,
 			'Kicked due to having received too many warnings.',
 		);
 	}
