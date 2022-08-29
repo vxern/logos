@@ -164,13 +164,16 @@ class Client {
 			return result;
 		};
 
-		bot.transformers.member = (...args) => {
-			const result = member(...args);
+		bot.transformers.member = (bot, payload, ...args) => {
+			const result = member(bot, payload, ...args);
 
-			const memberId = `${result.id}${result.guildId}`;
-			const memberSnowflake = bot.transformers.snowflake(memberId);
+			this.members.set(result.id, result);
 
-			this.members.set(memberSnowflake, result);
+			if (payload.user) {
+				const user = bot.transformers.user(bot, payload.user);
+
+				this.users.set(user.id, user);
+			}
 
 			return result;
 		};
