@@ -56,11 +56,15 @@ async function unwarnUser(
 	const data = interaction.data;
 	if (!data) return;
 
-	const userIdentifierOption = data.options?.at(0);
-	const warningOption = data.options?.at(1);
-	if (!userIdentifierOption || !warningOption) return;
+	const userIdentifierOption = data.options?.find((option) =>
+		option.name === 'user'
+	);
+	const warningOption = data.options?.find((option) =>
+		option.name === 'warning'
+	);
+	if (!userIdentifierOption && !warningOption) return;
 
-	const userIdentifier = <string | undefined> userIdentifierOption.value;
+	const userIdentifier = <string | undefined> userIdentifierOption?.value;
 	if (userIdentifier === undefined) return;
 
 	const member = resolveInteractionToMember(
@@ -92,7 +96,6 @@ async function unwarnUser(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						title: 'Failed to pardon user',
 						description: `The member may have already left the server.`,
 						color: configuration.interactions.responses.colors.red,
 					}],
@@ -149,7 +152,7 @@ async function unwarnUser(
 		);
 	};
 
-	const warningReferenceID = <string> warningOption.value!;
+	const warningReferenceID = <string> warningOption!.value!;
 	const warningToRemove = relevantWarnings.find((warning) =>
 		warning.ref.value.id === warningReferenceID
 	);
@@ -193,7 +196,7 @@ async function unwarnUser(
 		},
 	);
 
-	const dmChannel = await getDmChannel(client.bot, interaction.user.id);
+	const dmChannel = await getDmChannel(client.bot, member.id);
 	if (!dmChannel) return;
 
 	const guild = client.guilds.get(interaction.guildId!);
@@ -203,7 +206,10 @@ async function unwarnUser(
 		embeds: [
 			{
 				thumbnail: (() => {
-					const iconURL = getGuildIconURL(client.bot, guild.id, guild.icon);
+					const iconURL = getGuildIconURL(client.bot, guild.id, guild.icon, {
+						size: 4096,
+						format: 'webp',
+					});
 					if (!iconURL) return;
 
 					return { url: iconURL };
