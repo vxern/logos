@@ -1,5 +1,4 @@
 import {
-	fetchMembers,
 	getGuildIconURL,
 	Guild,
 	Interaction,
@@ -18,10 +17,10 @@ import { snowflakeToTimestamp } from '../../../../utils.ts';
 import { getProficiencyCategory } from '../../../social/module.ts';
 
 /** Displays information about the guild that this command was executed in. */
-async function displayGuildInformation(
+function displayGuildInformation(
 	client: Client,
 	interaction: Interaction,
-): Promise<void> {
+): void {
 	const guild = client.guilds.get(interaction.guildId!);
 	if (!guild) return;
 
@@ -30,7 +29,7 @@ async function displayGuildInformation(
 
 	const hasDistinctOwner = owner && owner.username !== guild.name!;
 
-	const proficiencyRoleFrequencies = await getProficiencyRoleFrequencies(
+	const proficiencyRoleFrequencies = getProficiencyRoleFrequencies(
 		client,
 		guild,
 	);
@@ -104,12 +103,10 @@ async function displayGuildInformation(
  * @returns A map where the keys represent the proficiency role ID, and the values
  * represent the frequency of members that have that role.
  */
-async function getProficiencyRoleFrequencies(
+function getProficiencyRoleFrequencies(
 	client: Client,
 	guild: Guild,
-): Promise<Map<bigint, number>> {
-	await fetchMembers(client.bot, guild.id, { limit: 0, query: '' });
-
+): Map<bigint, number> {
 	const proficiencyCategory = getProficiencyCategory();
 	const proficiencies = proficiencyCategory.collection!.list!;
 	const proficiencyNames = proficiencies.map((proficiency) => proficiency.name);
