@@ -167,7 +167,11 @@ class Client {
 		bot.transformers.member = (bot, payload, ...args) => {
 			const result = member(bot, payload, ...args);
 
-			this.members.set(result.id, result);
+			const memberSnowflake = bot.transformers.snowflake(
+				`${result.id}${result.guildId}`,
+			);
+
+			this.members.set(memberSnowflake, result);
 
 			if (payload.user) {
 				const user = bot.transformers.user(bot, payload.user);
@@ -205,7 +209,11 @@ class Client {
 					user.id,
 				);
 
-				this.members.set(member.id, member);
+				const memberSnowflake = bot.transformers.snowflake(
+					`${member.id}${member.guildId}`,
+				);
+
+				this.members.set(memberSnowflake, member);
 			}
 
 			return result;
