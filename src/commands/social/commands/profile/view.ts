@@ -96,7 +96,12 @@ async function viewProfile(
 			embeds: [{
 				title: `Information for ${user.username}`,
 				thumbnail: (() => {
-					const iconURL = getAvatarURL(client.bot, user.id, user.discriminator);
+					const iconURL = getAvatarURL(
+						client.bot,
+						user.id,
+						user.discriminator,
+						{ avatar: user.avatar, size: 4096, format: 'webp' },
+					);
 					if (!iconURL) return;
 
 					return { url: iconURL };
