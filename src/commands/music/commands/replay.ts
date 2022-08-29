@@ -13,8 +13,8 @@ import { SongListingContentTypes } from '../data/song-listing.ts';
 const command: OptionBuilder = {
 	name: 'replay',
 	nameLocalizations: {
-		pl: 'odtwórz-ponownie',
-		ro: 'redă-din-nou',
+		pl: 'powtórz',
+		ro: 'reia',
 	},
 	description: 'Begins playing the currently playing song from the start.',
 	descriptionLocalizations: {
