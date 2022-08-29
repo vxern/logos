@@ -61,7 +61,7 @@ async function unwarnUser(
 	if (!userIdentifierOption || !warningOption) return;
 
 	const userIdentifier = <string | undefined> userIdentifierOption.value;
-	if (!userIdentifier) return;
+	if (userIdentifier === undefined) return;
 
 	const member = resolveInteractionToMember(
 		client,
