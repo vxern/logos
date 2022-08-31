@@ -1,6 +1,5 @@
 /.vscode
 .env
-secrets.ts
 
 lavalink/logs/
 lavalink/application.yml

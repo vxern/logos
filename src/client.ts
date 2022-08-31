@@ -24,7 +24,6 @@ import {
 import services from './services/service.ts';
 import { LoggingController } from './controllers/logging.ts';
 import { MusicController } from './controllers/music.ts';
-import secrets from '../secrets.ts';
 import { Database } from './database/database.ts';
 import configuration from './configuration.ts';
 import {
@@ -100,7 +99,7 @@ class Client {
 		console.log('Creating bot...');
 
 		this.bot = createBot({
-			token: secrets.core.discord.secret,
+			token: Deno.env.get('DISCORD_SECRET')!,
 			intents: Intents.Guilds | Intents.GuildMembers | Intents.GuildVoiceStates,
 			events: { ready: (bot) => this.setupBot(bot) },
 		});
@@ -274,7 +273,11 @@ class Client {
 		};
 
 		this.node = new lavadeno.Node({
-			connection: secrets.modules.music.lavalink,
+			connection: {
+				host: Deno.env.get('LAVALINK_HOST')!,
+				port: Number(Deno.env.get('LAVALINK_PORT')!),
+				password: Deno.env.get('LAVALINK_PASSWORD')!,
+			},
 			sendGatewayPayload: (id, payload) => {
 				const shardId = this.guilds.get(id)?.shardId;
 				if (shardId === undefined) return;
