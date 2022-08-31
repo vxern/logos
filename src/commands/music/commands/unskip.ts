@@ -41,16 +41,16 @@ function unskip(
 	if (!data) return;
 
 	const unskipCollection =
-		(<boolean | undefined> data.options?.find((option) =>
-			option.name === 'collection'
-		)?.value) ?? false;
+		(<boolean | undefined> data.options?.at(0)?.options?.find((
+			option,
+		) => option.name === 'collection')?.value) ?? false;
 
-	const byString = <string | undefined> data.options?.find((option) =>
-		option.name === 'by'
-	)?.value;
-	const toString = <string | undefined> data.options?.find((option) =>
-		option.name === 'to'
-	)?.value;
+	const byString = <string | undefined> data.options?.at(0)?.options?.find((
+		option,
+	) => option.name === 'by')?.value;
+	const toString = <string | undefined> data.options?.at(0)?.options?.find((
+		option,
+	) => option.name === 'to')?.value;
 
 	const by = byString ? Number(byString) : undefined;
 	if (by && isNaN(by)) return;
@@ -76,7 +76,7 @@ function unskip(
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						title: 'Nothing to unskip',
-						description: 'There is nothing to unskip.',
+						description: 'There is nothing to unskip to.',
 						color: configuration.interactions.responses.colors.yellow,
 					}],
 				},
@@ -155,7 +155,7 @@ function unskip(
 	} else {
 		if (by) {
 			if (
-				songListing?.content.type === SongListingContentTypes.Collection &&
+				songListing.content.type === SongListingContentTypes.Collection &&
 				!unskipCollection
 			) {
 				const listingToUnskip = Math.min(by, songListing.content.position);
@@ -174,7 +174,7 @@ function unskip(
 			}
 		} else if (to) {
 			if (
-				songListing?.content.type === SongListingContentTypes.Collection &&
+				songListing.content.type === SongListingContentTypes.Collection &&
 				!unskipCollection
 			) {
 				const listingToSkipTo = Math.max(to, 1);
@@ -191,6 +191,11 @@ function unskip(
 					to: listingToSkipTo,
 				});
 			}
+		} else {
+			musicController.unskip(unskipCollection, {
+				by: undefined,
+				to: undefined,
+			});
 		}
 	}
 
