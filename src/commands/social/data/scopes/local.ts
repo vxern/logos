@@ -15,13 +15,13 @@ const categories: RoleCategory[] = [
 		type: RoleCategoryTypes.Category,
 		color: fromHex('#68d8d6'),
 		emoji: '🗾',
-		isSingle: false,
+		restrictToOneRole: false,
 		limit: 2,
 		collection: {
 			type: RoleCollectionTypes.CollectionLocalised,
 			onAssignMessage: (name) => `Your ethnicity is now ${name}.`,
 			onUnassignMessage: (name) => `Your ethnicity is no longer ${name}.`,
-			description: (name) => `I am of ${name} heritage.`,
+			generateDescription: (name) => `I am of ${name} heritage.`,
 			lists: {
 				'Armenian': fromNames([
 					'Armeno-Tat',
@@ -44,12 +44,12 @@ const categories: RoleCategory[] = [
 		type: RoleCategoryTypes.Category,
 		color: fromHex('#00cc66'),
 		emoji: '🏷️',
-		isSingle: false,
+		restrictToOneRole: false,
 		collection: {
 			type: RoleCollectionTypes.CollectionLocalised,
 			onAssignMessage: (name) => `You are now learning ${name}.`,
 			onUnassignMessage: (name) => `You are no longer learning ${name}.`,
-			description: (name) => `I am learning ${name}.`,
+			generateDescription: (name) => `I am learning ${name}.`,
 			lists: {
 				'Armenian': fromNames(
 					configuration.guilds.languages['Armenian'].dialects,
@@ -63,13 +63,13 @@ const categories: RoleCategory[] = [
 		type: RoleCategoryTypes.Category,
 		color: fromHex('#c5e0d8'),
 		emoji: '🤷‍♂️',
-		isSingle: false,
+		restrictToOneRole: false,
 		limit: 2,
 		collection: {
 			type: RoleCollectionTypes.CollectionLocalised,
 			onAssignMessage: (name) => `You are now from ${name}.`,
 			onUnassignMessage: (name) => `You are no longer from ${name}.`,
-			description: (name) => `I am from ${name}.`,
+			generateDescription: (name) => `I am from ${name}.`,
 			lists: {
 				'Armenian': fromNames([
 					'Aragats\'otn / Արագածոտն',

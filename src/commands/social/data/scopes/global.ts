@@ -13,7 +13,7 @@ const categories: RoleCategory[] = [
 		type: RoleCategoryTypes.Category,
 		color: fromHex('#1c1c1c'),
 		emoji: '🎓',
-		isSingle: true,
+		restrictToOneRole: true,
 		collection: {
 			type: RoleCollectionTypes.Collection,
 			onAssignMessage: (name) =>
@@ -54,10 +54,10 @@ const categories: RoleCategory[] = [
 				type: RoleCategoryTypes.Category,
 				color: fromHex('#ff4b3e'),
 				emoji: '⚧',
-				isSingle: true,
+				restrictToOneRole: true,
 				collection: {
 					type: RoleCollectionTypes.Collection,
-					description: (name) =>
+					generateDescription: (name) =>
 						`I am of the ${name.toLowerCase()} persuasion.`,
 					onAssignMessage: (name) =>
 						`You now identify as a ${name.toLowerCase()}.`,
@@ -82,7 +82,7 @@ const categories: RoleCategory[] = [
 				type: RoleCategoryTypes.Category,
 				color: fromHex('#d6e3f8'),
 				emoji: '🌎',
-				isSingle: false,
+				restrictToOneRole: false,
 				collection: {
 					type: RoleCollectionTypes.Collection,
 					onAssignMessage: (name) => `You are now a ${name}.`,
@@ -103,7 +103,7 @@ const categories: RoleCategory[] = [
 		type: RoleCategoryTypes.Category,
 		color: fromHex('#daddd8'),
 		emoji: '📖',
-		isSingle: false,
+		restrictToOneRole: false,
 		collection: {
 			type: RoleCollectionTypes.Collection,
 			list: [{

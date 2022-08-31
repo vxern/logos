@@ -1,4 +1,5 @@
 import {
+	addRole,
 	ButtonStyles,
 	Guild,
 	Interaction,
@@ -20,7 +21,6 @@ import {
 	mentionUser,
 	toModal,
 } from '../../utils.ts';
-import { tryAssignRole } from '../../commands/social/data/structures/role.ts';
 
 const proficiencyCategory = getProficiencyCategory();
 const proficiencies = proficiencyCategory.collection.list;
@@ -31,7 +31,9 @@ async function onSelectLanguageProficiency(
 	parameter: string,
 ): Promise<void> {
 	const language = getLanguage(client, interaction.guildId!);
-	if (!language) return;
+
+	const guild = client.guilds.get(interaction.guildId!);
+	if (!guild) return;
 
 	const languageConfigurationTuples = <[
 		Language,
@@ -123,11 +125,17 @@ async function onSelectLanguageProficiency(
 
 	const proficiency = proficiencies[parseInt(parameter)]!;
 
-	return tryAssignRole(
-		client,
-		interaction,
-		proficiencyCategory,
-		proficiency,
+	const roleResolved = guild.roles.array().find((role) =>
+		role.name === proficiency.name
+	);
+	if (!roleResolved) return;
+
+	return void addRole(
+		client.bot,
+		guild.id,
+		interaction.user.id,
+		roleResolved.id,
+		'User-requested role addition.',
 	);
 }
 
