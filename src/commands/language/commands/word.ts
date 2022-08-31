@@ -11,6 +11,7 @@ import { CommandBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
 import { capitalise } from '../../../formatting.ts';
 import { fromHex } from '../../../utils.ts';
+import { show } from '../../parameters.ts';
 import { DictionaryEntry, toFields } from '../data/dictionary.ts';
 import { dictionaryAdaptersByLanguage } from '../module.ts';
 
@@ -54,20 +55,7 @@ const command: CommandBuilder = {
 			ro: 'Dacă da, mai multe (posibil inutile) informații vor fi afișate.',
 		},
 		type: ApplicationCommandOptionTypes.Boolean,
-	}, {
-		name: 'show',
-		nameLocalizations: {
-			pl: 'wyświetl',
-			ro: 'afișează',
-		},
-		description:
-			'If set to true, the dictionary entry will be shown to other users.',
-		descriptionLocalizations: {
-			pl: 'Jeśli tak, artykuł będzie wyświetlony innym użytkownikom.',
-			ro: 'Dacă da, articolul va fi afișat altor utilizatori.',
-		},
-		type: ApplicationCommandOptionTypes.Boolean,
-	}],
+	}, show],
 };
 
 /** Allows the user to look up a word and get information about it. */

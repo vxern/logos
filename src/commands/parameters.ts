@@ -47,4 +47,18 @@ const user: OptionBuilder = {
 	autocomplete: true,
 };
 
-export { elements, index, user };
+const show: OptionBuilder = {
+	name: 'show',
+	nameLocalizations: {
+		pl: 'wyświetl',
+		ro: 'afișează',
+	},
+	description: 'If set to true, the result will be shown to others.',
+	descriptionLocalizations: {
+		pl: 'Jeśli tak, rezultat będzie wyświetlony innym użytkownikom.',
+		ro: 'Dacă da, rezultatul va fi afișat altor utilizatori.',
+	},
+	type: ApplicationCommandOptionTypes.Boolean,
+};
+
+export { elements, index, show, user };

@@ -53,7 +53,6 @@ const command: OptionBuilder = {
 				required: false,
 			}],
 		},
-
 		...Object.entries(sources).map<OptionBuilder>(([name, resolve]) => ({
 			name: name.toLowerCase(),
 			nameLocalizations: {},

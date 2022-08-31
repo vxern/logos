@@ -18,7 +18,7 @@ const command: OptionBuilder = {
 	},
 	description: 'Pauses the currently playing song or song collection.',
 	descriptionLocalizations: {
-		pl: 'Zapauzuj obecną piosenkę lub zbiór piosenek.',
+		pl: 'Zapauzuj obecny utwór lub zbiór utworów.',
 		ro: 'Pauzează melodia sau setul de melodii în curs de redare.',
 	},
 	type: ApplicationCommandOptionTypes.SubCommand,

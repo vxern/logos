@@ -9,6 +9,7 @@ import { Client } from '../../../client.ts';
 import { OptionBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
 import { SongListingContentTypes } from '../data/song-listing.ts';
+import { by, collection, to } from '../parameters.ts';
 
 const command: OptionBuilder = {
 	name: 'unskip',
@@ -23,46 +24,7 @@ const command: OptionBuilder = {
 	},
 	type: ApplicationCommandOptionTypes.SubCommand,
 	handle: unskip,
-	options: [{
-		name: 'collection',
-		nameLocalizations: {
-			pl: 'zbiór',
-			ro: 'set',
-		},
-		description:
-			'If set to true, the last played song outside of the current song collection will be played.',
-		descriptionLocalizations: {
-			pl:
-				'Jeśli tak, ostatni zagrany utwór z poza obecnego zbioru utworów będzie odtworzony.',
-			ro:
-				'Dacă da, ultima melodie redată din afară de setul de melodii în curs de redare va fi redată.',
-		},
-		type: ApplicationCommandOptionTypes.Boolean,
-	}, {
-		name: 'by',
-		nameLocalizations: {
-			pl: 'o',
-			ro: 'cu',
-		},
-		description: 'The number of songs or song listings to unskip by.',
-		descriptionLocalizations: {
-			pl: 'Liczba utworów lub wpisów, które mają być przywrócone.',
-			ro: 'Numărul de melodii sau de înregistrări care să fie înapoiate.',
-		},
-		type: ApplicationCommandOptionTypes.Integer,
-	}, {
-		name: 'to',
-		nameLocalizations: {
-			pl: 'do',
-			ro: 'până-la',
-		},
-		description: 'The index of the track to unskip to.',
-		descriptionLocalizations: {
-			pl: 'Indeks utworu lub wpisu który przywrócić.',
-			ro: 'Indexul melodiei sau al înregistrării care să fie înapoiat.',
-		},
-		type: ApplicationCommandOptionTypes.Integer,
-	}],
+	options: [collection, by, to],
 };
 
 function unskip(

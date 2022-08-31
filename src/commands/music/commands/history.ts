@@ -6,6 +6,7 @@ import {
 import { Client } from '../../../client.ts';
 import { OptionBuilder } from '../../command.ts';
 import { displayListings } from '../module.ts';
+import { show } from '../../parameters.ts';
 
 const command: OptionBuilder = {
 	name: 'history',
@@ -20,19 +21,7 @@ const command: OptionBuilder = {
 	},
 	type: ApplicationCommandOptionTypes.SubCommand,
 	handle: displaySongHistory,
-	options: [{
-		name: 'show',
-		nameLocalizations: {
-			pl: 'wyświetl-innym',
-			ro: 'arată-le-celorlalți',
-		},
-		description: 'If set to true, the list will be shown to others.',
-		descriptionLocalizations: {
-			pl: 'Jeśli tak, lista będzie wyświetlona innym użytkownikom.',
-			ro: 'Dacă da, lista va fi afișată altor utilizatori.',
-		},
-		type: ApplicationCommandOptionTypes.Boolean,
-	}],
+	options: [show],
 };
 
 function displaySongHistory(client: Client, interaction: Interaction): void {
@@ -40,9 +29,9 @@ function displaySongHistory(client: Client, interaction: Interaction): void {
 	if (!musicController) return;
 
 	const show =
-		(<boolean | undefined> interaction.data?.options?.find((option) =>
-			option.name === 'show'
-		)?.value) ?? false;
+		(<boolean | undefined> interaction.data?.options?.at(0)?.options?.find((
+			option,
+		) => option.name === 'show')?.value) ?? false;
 
 	const listingHistory = _.cloneDeep(musicController.history);
 

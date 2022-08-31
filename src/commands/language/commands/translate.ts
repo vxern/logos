@@ -13,6 +13,7 @@ import { Client } from '../../../client.ts';
 import { CommandBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
 import { deepLApiEndpoints } from '../../../constants.ts';
+import { show } from '../../parameters.ts';
 
 const command: CommandBuilder = {
 	name: 'translate',
@@ -69,20 +70,7 @@ const command: CommandBuilder = {
 		},
 		type: ApplicationCommandOptionTypes.String,
 		required: true,
-	}, {
-		name: 'show',
-		nameLocalizations: {
-			pl: 'wyświetl',
-			ro: 'afișează',
-		},
-		description:
-			'If set to true, the translation will be shown to other users.',
-		descriptionLocalizations: {
-			pl: 'Jeśli tak, tłumaczenie będzie wyświetlone innym użytkownikom.',
-			ro: 'Dacă da, traducerea va fi afișată altor utilizatori.',
-		},
-		type: ApplicationCommandOptionTypes.Boolean,
-	}],
+	}, show],
 };
 
 interface DeepLSupportedLanguage {
