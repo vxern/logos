@@ -30,6 +30,13 @@ async function onSelectLanguageProficiency(
 	interaction: Interaction & { type: InteractionTypes.MessageComponent },
 	parameter: string,
 ): Promise<void> {
+	sendInteractionResponse(
+		client.bot,
+		interaction.id,
+		interaction.token,
+		{ type: InteractionResponseTypes.DeferredUpdateMessage },
+	);
+
 	const language = getLanguage(client, interaction.guildId!);
 
 	const guild = client.guilds.get(interaction.guildId!);
