@@ -1,4 +1,5 @@
 import {
+	ApplicationCommandFlags,
 	getGuildIconURL,
 	Guild,
 	Interaction,
@@ -41,6 +42,7 @@ function displayGuildInformation(
 		{
 			type: InteractionResponseTypes.ChannelMessageWithSource,
 			data: {
+				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
 					title: `Information about **${guild.name!}**`,
 					thumbnail: (() => {
