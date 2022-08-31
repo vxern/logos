@@ -1,7 +1,7 @@
 import { OptionBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
 import { ListingResolver, sources } from '../data/sources/sources.ts';
-import { titleOrUrl } from '../parameters.ts';
+import { query } from '../parameters.ts';
 import { Client } from '../../../client.ts';
 import {
 	ApplicationCommandFlags,
@@ -64,7 +64,7 @@ const command: OptionBuilder = {
 			type: ApplicationCommandOptionTypes.SubCommand,
 			handle: (client, interaction) =>
 				playSongListing(client, interaction, resolve),
-			options: [titleOrUrl],
+			options: [query],
 		})),
 	],
 };
@@ -99,7 +99,7 @@ async function playSongListing(
 	if (!musicController) return;
 
 	const titleOrUrl = <string | undefined> interaction.data?.options?.at(0)
-		?.options?.at(0)?.value;
+		?.options?.at(0)?.options?.at(0)?.value;
 	if (!titleOrUrl) return;
 
 	const [canPlay, voiceState] = musicController.verifyCanPlay(interaction);
@@ -136,10 +136,6 @@ async function playSongListing(
 
 	const voiceChannel = client.channels.get(voiceState.channelId!);
 	if (!voiceChannel) return;
-
-	await sendInteractionResponse(client.bot, interaction.id, interaction.token, {
-		type: InteractionResponseTypes.DeferredChannelMessageWithSource,
-	});
 
 	return void musicController.play(client, {
 		interaction: interaction,
