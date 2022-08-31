@@ -101,10 +101,8 @@ class Client {
 
 		this.bot = createBot({
 			token: secrets.core.discord.secret,
-			intents: Intents.Guilds | Intents.GuildMembers,
-			events: {
-				ready: (bot) => this.setupBot(bot),
-			},
+			intents: Intents.Guilds | Intents.GuildMembers | Intents.GuildVoiceStates,
+			events: { ready: (bot) => this.setupBot(bot) },
 		});
 
 		console.log('Setting up cache...');
@@ -233,8 +231,8 @@ class Client {
 	protected async setupBot(bot: Bot): Promise<void> {
 		console.time('SETUP');
 
-		const onInteractionCreate = bot.events['interactionCreate'];
-		bot.events['interactionCreate'] = (bot, interaction) => {
+		const onInteractionCreate = bot.events.interactionCreate;
+		bot.events.interactionCreate = (bot, interaction) => {
 			onInteractionCreate(bot, interaction);
 
 			const commandName = interaction.data?.name;
@@ -249,7 +247,7 @@ class Client {
 				const subCommandGroupName = subCommandGroupOption.name;
 				const subCommandName = subCommandGroupOption.options?.find((option) =>
 					option.type === ApplicationCommandOptionTypes.SubCommand
-				);
+				)?.name;
 				if (!subCommandName) return;
 
 				commandNameFull =
@@ -279,7 +277,7 @@ class Client {
 			connection: secrets.modules.music.lavalink,
 			sendGatewayPayload: (id, payload) => {
 				const shardId = this.guilds.get(id)?.shardId;
-				if (!shardId) return;
+				if (shardId === undefined) return;
 
 				const shard = bot.gateway.manager.shards.find((shard) =>
 					shard.id === shardId
@@ -289,7 +287,6 @@ class Client {
 				sendShardMessage(shard, payload, true);
 			},
 		});
-		await this.node.connect(bot.id);
 
 		bot.events.voiceStateUpdate = (_bot, payload) =>
 			this.node.handleVoiceUpdate({
@@ -304,6 +301,8 @@ class Client {
 				endpoint: payload.endpoint!,
 				guild_id: `${payload.guildId}`,
 			});
+
+		await this.node.connect(bot.id);
 
 		this.setupServices();
 
