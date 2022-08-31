@@ -40,9 +40,9 @@ function replaySong(
 	if (!canAct) return;
 
 	const replayCollection =
-		(<boolean | undefined> interaction.data?.options?.find((option) =>
-			option.name === 'collection'
-		)?.value) ?? false;
+		(<boolean | undefined> interaction.data?.options?.at(0)?.options?.find((
+			option,
+		) => option.name === 'collection')?.value) ?? false;
 
 	const currentListing = musicController.current;
 
