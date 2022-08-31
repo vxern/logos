@@ -8,6 +8,7 @@ import {
 import { Client } from '../../../client.ts';
 import { OptionBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
+import { show } from '../../parameters.ts';
 
 const command: OptionBuilder = {
 	name: 'volume',
@@ -34,19 +35,7 @@ const command: OptionBuilder = {
 		},
 		type: ApplicationCommandOptionTypes.SubCommand,
 		handle: displayVolume,
-		options: [{
-			name: 'show',
-			nameLocalizations: {
-				pl: 'wyświetl-innym',
-				ro: 'arată-le-celorlalți',
-			},
-			description: 'If set to true, the volume will be shown to others.',
-			descriptionLocalizations: {
-				pl: 'Jeśli tak, głośność będzie wyświetlona innym użytkownikom.',
-				ro: 'Dacă da, volumul va fi afișat altor utilizatori.',
-			},
-			type: ApplicationCommandOptionTypes.Boolean,
-		}],
+		options: [show],
 	}, {
 		name: 'set',
 		nameLocalizations: {

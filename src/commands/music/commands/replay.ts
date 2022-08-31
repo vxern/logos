@@ -9,6 +9,7 @@ import { Client } from '../../../client.ts';
 import { OptionBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
 import { SongListingContentTypes } from '../data/song-listing.ts';
+import { collection } from '../parameters.ts';
 
 const command: OptionBuilder = {
 	name: 'replay',
@@ -23,21 +24,7 @@ const command: OptionBuilder = {
 	},
 	type: ApplicationCommandOptionTypes.SubCommand,
 	handle: replaySong,
-	options: [{
-		name: 'collection',
-		nameLocalizations: {
-			pl: 'zbiór',
-			ro: 'set',
-		},
-		description:
-			'If set to true, the currently playing song collection will be replayed.',
-		descriptionLocalizations: {
-			pl: 'Jeśli tak, obecnie grający zbiór utworów zostanie odtworzony.',
-			ro:
-				'Dacă da, se va reda setul de melodii care este actual în curs de redare.',
-		},
-		type: ApplicationCommandOptionTypes.Boolean,
-	}],
+	options: [collection],
 };
 
 function replaySong(

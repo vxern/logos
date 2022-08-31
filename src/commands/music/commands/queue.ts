@@ -5,6 +5,7 @@ import {
 import { Client } from '../../../client.ts';
 import { OptionBuilder } from '../../../commands/command.ts';
 import { displayListings } from '../module.ts';
+import { show } from '../../parameters.ts';
 
 const command: OptionBuilder = {
 	name: 'queue',
@@ -19,19 +20,7 @@ const command: OptionBuilder = {
 	},
 	type: ApplicationCommandOptionTypes.SubCommand,
 	handle: displaySongQueue,
-	options: [{
-		name: 'show',
-		nameLocalizations: {
-			pl: 'wyświetl-innym',
-			ro: 'arată-le-celorlalți',
-		},
-		description: 'If set to true, the queue view will be shown to others.',
-		descriptionLocalizations: {
-			pl: 'Jeśli tak, kolejka będzie wyświetlona innym użytkownikom.',
-			ro: 'Dacă da, se va afișa coada altor utilizatori.',
-		},
-		type: ApplicationCommandOptionTypes.Boolean,
-	}],
+	options: [show],
 };
 
 function displaySongQueue(

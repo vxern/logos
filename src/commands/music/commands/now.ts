@@ -13,6 +13,8 @@ import { chunk, paginate, trim } from '../../../utils.ts';
 import { Song } from '../data/song.ts';
 import { SongStream } from '../data/song-stream.ts';
 import { SongListingContentTypes } from '../data/song-listing.ts';
+import { show } from '../../parameters.ts';
+import { collection } from "../parameters.ts";
 
 const command: OptionBuilder = {
 	name: 'now',
@@ -27,34 +29,7 @@ const command: OptionBuilder = {
 	},
 	type: ApplicationCommandOptionTypes.SubCommand,
 	handle: displayNowPlaying,
-	options: [{
-		name: 'collection',
-		nameLocalizations: {
-			pl: 'zbiór',
-			ro: 'set',
-		},
-		description:
-			'If set to true, information about the current collection will be shown instead.',
-		descriptionLocalizations: {
-			pl:
-				'Jeśli tak, w zamian informacje o obecnym zbiorze utworów będą wyświetlone.',
-			ro: 'Dacă da, se vor afișa în schimb informații despre setul actual.',
-		},
-		type: ApplicationCommandOptionTypes.Boolean,
-	}, {
-		name: 'show',
-		nameLocalizations: {
-			pl: 'wyświetl-innym',
-			ro: 'arată-le-celorlalți',
-		},
-		description:
-			'If set to true, the information will be shown to others in chat.',
-		descriptionLocalizations: {
-			pl: 'Jeśli tak, informacje zostaną wyświetlone innym użytkownikom.',
-			ro: 'Dacă da, informațiile vor fi afișate altor utilizatori.',
-		},
-		type: ApplicationCommandOptionTypes.Boolean,
-	}],
+	options: [collection, show],
 };
 
 function displayNowPlaying(client: Client, interaction: Interaction): void {

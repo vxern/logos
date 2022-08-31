@@ -31,7 +31,7 @@ const titleOrUrl: OptionBuilder = {
 	required: false,
 };
 
-const by: OptionBuilder = {
+const byTimestamp: OptionBuilder = {
 	name: 'by',
 	nameLocalizations: {
 		pl: 'o',
@@ -46,7 +46,7 @@ const by: OptionBuilder = {
 	required: false,
 };
 
-const to: OptionBuilder = {
+const toTimestamp: OptionBuilder = {
 	name: 'to',
 	nameLocalizations: {
 		pl: 'do',
@@ -61,4 +61,48 @@ const to: OptionBuilder = {
 	required: false,
 };
 
-export { by, index, titleOrUrl, to };
+const collection: OptionBuilder = {
+	name: 'collection',
+	nameLocalizations: {
+		pl: 'zbiór',
+		ro: 'set',
+	},
+	description:
+		'If set to true, the action will be taken on the song collection instead.',
+	descriptionLocalizations: {
+		pl: 'Jeśli tak, działanie zostanie wykonane na zbiorze utworów.',
+		ro: 'Dacă da, acțiunea va fi efectuată pe set de melodii.',
+	},
+	type: ApplicationCommandOptionTypes.Boolean,
+};
+
+const by: OptionBuilder = {
+	name: 'by',
+	nameLocalizations: {
+		pl: 'o',
+		ro: 'cu',
+	},
+	description: 'The number of songs or song listings to skip by.',
+	descriptionLocalizations: {
+		pl: 'Liczba utworów lub wpisów, które mają być przewinięte.',
+		ro: 'Numărul de melodii sau de înregistrări care să fie sărite peste.',
+	},
+	type: ApplicationCommandOptionTypes.Integer,
+};
+
+const to: OptionBuilder = {
+	name: 'to',
+	nameLocalizations: {
+		pl: 'do',
+		ro: 'până-la',
+	},
+	description: 'The index of the track to skip to.',
+	descriptionLocalizations: {
+		pl: 'Indeks utworu lub wpisu do którego przewinąć.',
+		ro:
+			'Indexul melodiei sau al înregistrării până la care să fie sărit peste.',
+	},
+	type: ApplicationCommandOptionTypes.Integer,
+};
+
+export { by, byTimestamp, collection, index, titleOrUrl, to, toTimestamp };

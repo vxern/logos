@@ -9,6 +9,7 @@ import { Client } from '../../../client.ts';
 import { OptionBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
 import { SongListingContentTypes } from '../data/song-listing.ts';
+import { by, collection, to } from '../parameters.ts';
 
 const command: OptionBuilder = {
 	name: 'skip',
@@ -23,44 +24,7 @@ const command: OptionBuilder = {
 	},
 	type: ApplicationCommandOptionTypes.SubCommand,
 	handle: skipSong,
-	options: [{
-		name: 'collection',
-		nameLocalizations: {
-			pl: 'zbiór',
-			ro: 'set',
-		},
-		description: 'If set to true, skips the song collection instead.',
-		descriptionLocalizations: {
-			pl: 'Jeśli tak, w zamian przewija zbiór piosenek.',
-			ro: 'Dacă da, în schimb se va sări setul de melodii peste.',
-		},
-		type: ApplicationCommandOptionTypes.Boolean,
-	}, {
-		name: 'by',
-		nameLocalizations: {
-			pl: 'o',
-			ro: 'cu',
-		},
-		description: 'The number of songs or song listings to skip by.',
-		descriptionLocalizations: {
-			pl: 'Liczba utworów lub wpisów, które mają być przewinięte.',
-			ro: 'Numărul de melodii sau de înregistrări care să fie sărite peste.',
-		},
-		type: ApplicationCommandOptionTypes.Integer,
-	}, {
-		name: 'to',
-		nameLocalizations: {
-			pl: 'do',
-			ro: 'până-la',
-		},
-		description: 'The index of the track to skip to.',
-		descriptionLocalizations: {
-			pl: 'Indeks utworu lub wpisu do którego przewinąć.',
-			ro:
-				'Indexul melodiei sau al înregistrării până la care să fie sărit peste.',
-		},
-		type: ApplicationCommandOptionTypes.Integer,
-	}],
+	options: [collection, by, to],
 };
 
 function skipSong(client: Client, interaction: Interaction): void {
