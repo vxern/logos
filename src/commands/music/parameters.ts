@@ -16,19 +16,19 @@ const index: OptionBuilder = {
 	required: false,
 };
 
-const titleOrUrl: OptionBuilder = {
-	name: 'title-or-url',
+const query: OptionBuilder = {
+	name: 'query',
 	nameLocalizations: {
-		pl: 'tytuł-lub-url',
-		ro: 'titlu-sau-url',
+		pl: 'zapytanie',
+		ro: 'interogare',
 	},
-	description: 'The title of or the link to the song or song collection.',
+	description: 'The title or a link to the song or song collection.',
 	descriptionLocalizations: {
 		pl: 'Tytuł lub link do utworu lub zbioru utworów.',
 		ro: 'Titlul sau link-ul către melodie sau către unui set de melodii.',
 	},
 	type: ApplicationCommandOptionTypes.String,
-	required: false,
+	required: true,
 };
 
 const byTimestamp: OptionBuilder = {
@@ -105,4 +105,4 @@ const to: OptionBuilder = {
 	type: ApplicationCommandOptionTypes.Integer,
 };
 
-export { by, byTimestamp, collection, index, titleOrUrl, to, toTimestamp };
+export { by, byTimestamp, collection, index, query, to, toTimestamp };
