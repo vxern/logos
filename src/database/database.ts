@@ -1,5 +1,4 @@
 import { faunadb } from '../../deps.ts';
-import secrets from '../../secrets.ts';
 import {
 	Article,
 	getMostRecentArticleContent,
@@ -148,7 +147,7 @@ class Database {
 	/** Constructs a database. */
 	constructor() {
 		this.client = new faunadb.Client({
-			secret: secrets.core.database.secret,
+			secret: Deno.env.get('FAUNA_SECRET')!,
 			domain: 'db.us.fauna.com',
 			scheme: 'https',
 			port: 443,

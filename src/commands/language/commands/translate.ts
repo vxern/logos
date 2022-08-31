@@ -8,7 +8,6 @@ import {
 	InteractionTypes,
 	sendInteractionResponse,
 } from '../../../../deps.ts';
-import secrets from '../../../../secrets.ts';
 import { Client } from '../../../client.ts';
 import { CommandBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
@@ -91,6 +90,8 @@ interface SupportedLanguage {
 	supportsFormality: boolean;
 }
 
+const deepLSecret = Deno.env.get('DEEPL_SECRET')!;
+
 const supportedLanguages = await getSupportedLanguages();
 const supportedLanguagesChoices = supportedLanguages.map<
 	ApplicationCommandOptionChoice
@@ -102,7 +103,7 @@ const supportedLanguagesChoices = supportedLanguages.map<
 async function getSupportedLanguages(): Promise<SupportedLanguage[]> {
 	const response = await fetch(
 		addParametersToURL(deepLApiEndpoints.languages, {
-			'auth_key': secrets.modules.language.deepL.secret,
+			'auth_key': deepLSecret,
 			'type': 'target',
 		}),
 	);
@@ -142,7 +143,7 @@ async function getTranslation(
 
 	const response = await fetch(
 		addParametersToURL(deepLApiEndpoints.translate, {
-			'auth_key': secrets.modules.language.deepL.secret,
+			'auth_key': deepLSecret,
 			'text': text,
 			'source_lang': sourceLanguageCodeBase,
 			'target_lang': targetLanguageCode,
