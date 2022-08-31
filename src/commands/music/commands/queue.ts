@@ -31,9 +31,9 @@ function displaySongQueue(
 	if (!musicController) return;
 
 	const show =
-		(<boolean | undefined> interaction.data?.options?.find((option) =>
-			option.name === 'show'
-		)?.value) ?? false;
+		(<boolean | undefined> interaction.data?.options?.at(0)?.options?.find((
+			option,
+		) => option.name === 'show')?.value) ?? false;
 
 	return displayListings(client, interaction, {
 		title: '📋 Queue',
