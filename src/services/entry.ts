@@ -32,10 +32,7 @@ const service: ServiceStarter = (client) => {
 				const selectionCustomId = interaction.data?.customId;
 				if (!selectionCustomId) return;
 
-				const stepAndParameter = selectionCustomId.split('|');
-				if (stepAndParameter.length !== 2) return;
-
-				const [step, parameter] = <[Step, string]> stepAndParameter;
+				const [step, parameter] = <[Step, string]> selectionCustomId.split('|');
 
 				interactionHandlers[step](
 					client,

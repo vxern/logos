@@ -28,10 +28,10 @@ const proficiencyButtonActionRow: ActionRow = {
 	]> proficiencies.map<ButtonComponent>(
 		(proficiency, index) => ({
 			type: MessageComponentTypes.Button,
-			style: ButtonStyles.Secondary,
 			label: proficiency.name,
+			customId: `SELECTED_LANGUAGE_PROFICIENCY|${index}`,
+			style: ButtonStyles.Secondary,
 			emoji: { name: proficiency.emoji },
-			customID: `SELECTED_LANGUAGE_PROFICIENCY|${index}`,
 		}),
 	),
 };
@@ -75,9 +75,11 @@ function onAcceptRules(
 					title: 'Language Proficiency',
 					description: `Select the role that most accurately describes your ${
 						capitalise(language)
-					} language proficiency.\n\n__You can always change this later using the ${
+					} language proficiency.
+
+          ℹ️ **You can always change this later using the ${
 						code('/profile roles')
-					} command.__`,
+					} command.** ℹ️`,
 				}],
 				components: [proficiencyButtonActionRow],
 			},
