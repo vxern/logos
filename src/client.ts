@@ -18,6 +18,7 @@ import {
 	sendShardMessage,
 	snowflakeToBigint,
 	startBot,
+	upsertApplicationCommands,
 	User,
 } from '../deps.ts';
 import services from './services/service.ts';
@@ -311,7 +312,7 @@ class Client {
 
 	setupControllers(guild: Guild): void {
 		this.logging.set(guild.id, new LoggingController(this, guild));
-		//this.music.set(guild.id, new MusicController(this, guild));
+		this.music.set(guild.id, new MusicController(this, guild));
 	}
 
 	setupServices(): void {
@@ -366,7 +367,7 @@ function registerCommands(
 		}
 	}
 
-	// upsertApplicationCommands(client.bot, commands, guildId);
+	upsertApplicationCommands(client.bot, commands, guildId);
 }
 
 function addCollector<T extends keyof EventHandlers>(
