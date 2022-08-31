@@ -61,7 +61,7 @@ function supplyMissingProperties(
 
 		for (const roleList of roleLists) {
 			for (const role of roleList) {
-				role.description ??= collection.description!(role.name);
+				role.description ??= collection.generateDescription!(role.name);
 				role.onAssignMessage ??= collection.onAssignMessage;
 				if ('onUnassignMessage' in collection) {
 					role.onUnassignMessage = collection.onUnassignMessage;

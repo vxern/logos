@@ -1,4 +1,5 @@
 import {
+	addRole,
 	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
 	editInteractionResponse,
@@ -6,28 +7,30 @@ import {
 	InteractionResponse,
 	InteractionResponseTypes,
 	InteractionTypes,
-	Member,
 	MessageComponentTypes,
+	removeRole,
+	Role as DiscordRole,
 	SelectOption,
 	sendInteractionResponse,
+	snowflakeToBigint,
 } from '../../../../../deps.ts';
 import { Client, getLanguage, isManagedGuild } from '../../../../client.ts';
 import { Language } from '../../../../types.ts';
 import { createInteractionCollector } from '../../../../utils.ts';
 import configuration from '../../../../configuration.ts';
 import {
-	createSelectionsFromCategories,
-	getCategorySelections,
+	createSelectOptionsFromCategories,
+	getRelevantCategories,
 	RoleCategory,
 	RoleCategoryTypes,
 } from '../../data/structures/role-category.ts';
 import {
-	createSelectionsFromCollection,
+	createSelectOptionsFromCollection,
 	resolveRoles,
 } from '../../data/structures/role-collection.ts';
-import { Role, tryAssignRole } from '../../data/structures/role.ts';
 import { roles } from '../../module.ts';
 import { OptionBuilder } from '../../../command.ts';
+import { Role } from '../../data/structures/role.ts';
 
 const command: OptionBuilder = {
 	name: 'roles',
@@ -53,45 +56,33 @@ function selectRoles(
 	interaction: Interaction,
 ): void {
 	const language = getLanguage(client, interaction.guildId!);
-	if (!language) return;
-
 	const isManaged = isManagedGuild(client, interaction.guildId!);
 
-	let availableRoleCategories = [];
+	const topLevelRoleCategories = roles.scopes.global;
 	if (isManaged) {
-		availableRoleCategories = [
-			...roles.scopes.global,
-			...getCategorySelections(roles.scopes.local, language).filter((
-				[_category, shouldDisplay],
-			) => shouldDisplay).map(([category, _shouldDisplay]) => category),
-		];
-	} else {
-		availableRoleCategories = roles.scopes.global;
+		const selections = getRelevantCategories(roles.scopes.local, language);
+
+		topLevelRoleCategories.push(...selections);
 	}
 
-	const navigation: NavigationData = {
-		root: {
-			type: RoleCategoryTypes.CategoryGroup,
-			name: 'No Category Selected',
-			description:
-				'Please select a role category to obtain a list of available roles within it.',
-			color: configuration.interactions.responses.colors.invisible,
-			emoji: '💭',
-			categories: availableRoleCategories,
-		},
-		indexes: [],
-		index: 0,
-	};
-
-	return browse(
+	return createRoleSelectionMenu(
 		client,
+		interaction,
 		{
-			client: client,
-			interaction: interaction,
-			navigation: navigation,
+			navigationData: {
+				root: {
+					type: RoleCategoryTypes.CategoryGroup,
+					name: 'No Category Selected',
+					description:
+						'Please select a role category to obtain a list of available roles within it.',
+					color: configuration.interactions.responses.colors.invisible,
+					emoji: '💭',
+					categories: topLevelRoleCategories,
+				},
+				indexesAccessed: [],
+			},
 			language: language,
 		},
-		(role, category) => tryAssignRole(client, interaction, category, role),
 	);
 }
 
@@ -100,17 +91,11 @@ function selectRoles(
  * managing the interaction that requested it.
  */
 interface BrowsingData {
-	/** The client associated with this interaction. */
-	client: Client;
-
-	/** The interaction that requested this menu. */
-	interaction: Interaction;
-
 	/**
 	 * The navigation data associated with this menu required for the
 	 * ability to browse through it.
 	 */
-	navigation: NavigationData;
+	navigationData: NavigationData;
 
 	/** The language of the guild where the interaction was made. */
 	language?: Language;
@@ -128,13 +113,10 @@ interface NavigationData {
 	root: RoleCategory;
 
 	/**
-	 * Array of indexes to be accessed successively to arrive at the current
-	 * view within the selection menu.
+	 * A stack containing the indexes accessed in succession to arrive at the
+	 * current position in the role selection menu.
 	 */
-	indexes: number[];
-
-	/** The index being followed during traversal. */
-	index: number;
+	indexesAccessed: number[];
 }
 
 /**
@@ -144,11 +126,9 @@ interface NavigationData {
  * @param data - Navigation data for the selection menu.
  * @returns The category the user is now viewing.
  */
-function traverse(
-	data: NavigationData,
-): RoleCategory {
+function traverseRoleSelectionTree(data: NavigationData): RoleCategory {
 	let category = data.root;
-	for (const index of data.indexes) {
+	for (const index of data.indexesAccessed) {
 		category =
 			(<RoleCategory & { type: RoleCategoryTypes.CategoryGroup }> category)
 				.categories![index]!;
@@ -159,23 +139,58 @@ function traverse(
 /**
  * Creates a browsing menu for selecting roles.
  */
-function browse(
+function createRoleSelectionMenu(
 	client: Client,
+	interaction: Interaction,
 	data: BrowsingData,
-	onSelectRole: (
-		role: Role,
-		category: RoleCategory & { type: RoleCategoryTypes.Category },
-	) => void,
 ): void {
-	let roleCategory: RoleCategory;
+	const guild = client.guilds.get(interaction.guildId!);
+	if (!guild) return;
 
-	function traverseAndDisplay(
+	const member = client.members.get(
+		snowflakeToBigint(`${interaction.user.id}${guild.id}`),
+	);
+	if (!member) return;
+
+	const memberRoleIds = [...member.roles];
+	const rolesByName = new Map(
+		guild.roles.array().map((role) => [role.name, role]),
+	);
+
+	let category: RoleCategory;
+	let menuRoles: Role[];
+	let menuRolesResolved: DiscordRole[];
+	let memberRolesIncludedInMenu: bigint[];
+
+	const traverseRoleTreeAndDisplay = (
 		interaction: Interaction,
 		editResponse = true,
-	): void {
-		roleCategory = traverse(data.navigation);
+	): void => {
+		category = traverseRoleSelectionTree(data.navigationData);
 
-		const menu = displaySelectMenu(client, data, customId, roleCategory);
+		if (category.type === RoleCategoryTypes.Category) {
+			menuRoles = resolveRoles(category.collection, data.language);
+			menuRolesResolved = menuRoles.map((role) => rolesByName.get(role.name)!);
+			memberRolesIncludedInMenu = memberRoleIds.filter((roleId) =>
+				menuRolesResolved.some((role) => role.id === roleId)
+			);
+		}
+
+		let selectOptions: SelectOption[];
+		if (category.type === RoleCategoryTypes.CategoryGroup) {
+			selectOptions = createSelectOptionsFromCategories(
+				category.categories!,
+				data.language,
+			);
+		} else {
+			selectOptions = createSelectOptionsFromCollection(
+				menuRoles,
+				menuRolesResolved,
+				memberRolesIncludedInMenu,
+			);
+		}
+
+		const menu = displaySelectMenu(selectOptions, data, customId, category);
 
 		if (editResponse) {
 			return void editInteractionResponse(
@@ -191,97 +206,133 @@ function browse(
 			interaction.token,
 			menu,
 		);
-	}
-
-	traverseAndDisplay(data.interaction, false);
+	};
 
 	const customId = createInteractionCollector(
-		data.client,
+		client,
 		{
 			type: InteractionTypes.MessageComponent,
-			userId: data.interaction.user.id,
-			onCollect: (bot, interaction) => {
-				sendInteractionResponse(bot, interaction.id, interaction.token, {
+			userId: interaction.user.id,
+			onCollect: (bot, selection) => {
+				sendInteractionResponse(bot, selection.id, selection.token, {
 					type: InteractionResponseTypes.DeferredUpdateMessage,
 				});
 
-				const indexString = interaction.data?.values?.at(0);
+				const indexString = selection.data?.values?.at(0);
 				if (!indexString) return;
 
 				const index = Number(indexString);
 				if (isNaN(index)) return;
 
-				traverseAndDisplay(interaction);
-
 				if (index === -1) {
-					data.navigation.indexes.pop();
-					return;
+					data.navigationData.indexesAccessed.pop();
+					return traverseRoleTreeAndDisplay(selection);
 				}
 
-				if (roleCategory.type === RoleCategoryTypes.CategoryGroup) {
-					data.navigation.indexes.push(index);
-					return;
+				if (category.type === RoleCategoryTypes.CategoryGroup) {
+					data.navigationData.indexesAccessed.push(index);
+					return traverseRoleTreeAndDisplay(selection);
 				}
 
-				const roles = resolveRoles(roleCategory.collection, data.language);
-				const role = roles[index]!;
-				onSelectRole(role, roleCategory);
+				const role = menuRolesResolved.at(index)!;
+
+				const alreadyHasRole = memberRolesIncludedInMenu.includes(role.id);
+
+				if (alreadyHasRole) {
+					removeRole(
+						bot,
+						guild.id,
+						member.id,
+						role.id,
+						'User-requested role removal.',
+					);
+					memberRoleIds.splice(
+						memberRoleIds.findIndex((roleId) => roleId === role.id)!,
+						1,
+					);
+					memberRolesIncludedInMenu.splice(
+						memberRolesIncludedInMenu.findIndex((roleId) =>
+							roleId === role.id
+						)!,
+						1,
+					);
+				} else {
+					if (category.restrictToOneRole) {
+						for (const memberRoleId of memberRolesIncludedInMenu) {
+							removeRole(bot, guild.id, member.id, memberRoleId);
+							memberRoleIds.splice(
+								memberRoleIds.findIndex((roleId) => roleId === memberRoleId)!,
+								1,
+							);
+						}
+						memberRolesIncludedInMenu = [];
+					} else if (
+						category.limit &&
+						memberRolesIncludedInMenu.length >= category.limit
+					) {
+						sendInteractionResponse(
+							client.bot,
+							interaction.id,
+							interaction.token,
+							{
+								type: InteractionResponseTypes.ChannelMessageWithSource,
+								data: {
+									flags: ApplicationCommandFlags.Ephemeral,
+									embeds: [{
+										title:
+											`Reached role limit in the '${category.name}' category.`,
+										description:
+											`You have reached the limit of roles you can assign from within the '${category.name}' category.
+
+To choose a new role, unassign one of your existing roles.`,
+									}],
+								},
+							},
+						);
+
+						return traverseRoleTreeAndDisplay(interaction, true);
+					}
+
+					addRole(
+						bot,
+						guild.id,
+						member.id,
+						role.id,
+						'User-requested role addition.',
+					);
+					memberRoleIds.push(role.id);
+					memberRolesIncludedInMenu.push(role.id);
+				}
+
+				traverseRoleTreeAndDisplay(interaction, true);
 			},
 		},
 	);
-}
 
-/**
- * Taking a member, language and category, gets a list of selections for the select menu.
- *
- * @param member - The member to get the selections for.
- * @param language - The language of the menu.
- * @param category - The role category to display.
- * @returns An array of selections.
- */
-function getSelections(
-	client: Client,
-	member: Member,
-	language: Language | undefined,
-	category: RoleCategory,
-): SelectOption[] {
-	if (category.type === RoleCategoryTypes.CategoryGroup) {
-		return createSelectionsFromCategories(category.categories!, language);
-	}
-
-	return createSelectionsFromCollection(
-		client,
-		member,
-		language,
-		category.collection!,
-	)!;
+	traverseRoleTreeAndDisplay(interaction, false);
 }
 
 /**
  * Creates a selection menu and returns its object.
  *
- * @param client - The client instance to use.
- * @param data - The data used for dispalying the selection menu.
+ * @param selectOptions - The options to display in the selection menu.
+ * @param data - The data used for displaying the selection menu.
  * @param customId - The ID of the selection menu.
  * @param category - The role category shown.
  * @returns A promise resolving to an interaction response.
  */
 function displaySelectMenu(
-	client: Client,
+	selectOptions: SelectOption[],
 	data: BrowsingData,
 	customId: string,
 	category: RoleCategory,
 ): InteractionResponse {
-	const selections = getSelections(
-		client,
-		data.interaction.member!,
-		data.language,
-		category,
-	);
-	if (data.navigation.indexes.length !== 0) {
-		selections.push({
+	const isInRootCategory = data.navigationData.indexesAccessed.length === 0;
+
+	if (!isInRootCategory) {
+		selectOptions.push({
 			label: 'Back',
-			value: (-1).toString(),
+			value: `${-1}`,
 		});
 	}
 
@@ -299,7 +350,7 @@ function displaySelectMenu(
 				components: [{
 					type: MessageComponentTypes.SelectMenu,
 					customId: customId,
-					options: selections,
+					options: selectOptions,
 					placeholder: category.type === RoleCategoryTypes.CategoryGroup
 						? 'Choose a role category.'
 						: 'Choose a role.',

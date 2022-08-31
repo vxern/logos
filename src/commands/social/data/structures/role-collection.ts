@@ -1,66 +1,69 @@
-import { Member, SelectOption } from '../../../../../deps.ts';
-import { Client } from '../../../../client.ts';
+import { Role as DiscordRole, SelectOption } from '../../../../../deps.ts';
 import { Language } from '../../../../types.ts';
 import { Assignable, DescriptionGenerator, Role } from './role.ts';
 
-/** Defines the type of a role collection. */
+/** The type of role collection. */
 enum RoleCollectionTypes {
+	/** A collection of roles. */
 	Collection,
+
+	/** A group of role collections that differ depending on the language. */
 	CollectionLocalised,
 }
 
+/**
+ * The base of a role collection.
+ *
+ * This type defines the core properties that all role collections must define.
+ */
+type RoleCollectionBase = {
+	/** The type of this collection. */
+	type: RoleCollectionTypes;
+
+	/** A default description for roles contained within this collection.. */
+	generateDescription?: DescriptionGenerator;
+};
+
+/** The base of a role collection with a standalone group of roles. */
+type RoleCollectionStandalone = {
+	type: RoleCollectionTypes.Collection;
+
+	/** The roles in this role collection. */
+	list: Role[];
+};
+
+/** The base of a role collection with localised groups of roles. */
+type RoleCollectionLocalised = {
+	type: RoleCollectionTypes.CollectionLocalised;
+
+	/** Groups of roles defined by language in this role collection. */
+	lists: Partial<Record<Language, Role[]>>;
+};
+
+/** Represents a grouping of roles. */
 type RoleCollection<T = Assignable> =
+	& RoleCollectionBase
 	& T
-	& {
-		/** The type of this collection. */
-		type: RoleCollectionTypes;
+	& (RoleCollectionStandalone | RoleCollectionLocalised);
 
-		/** Description applied to roles in this collection without a description. */
-		description?: DescriptionGenerator;
-	}
-	& ({
-		type: RoleCollectionTypes.Collection;
+function createSelectOptionsFromCollection(
+	menuRoles: Role[],
+	menuRolesResolved: DiscordRole[],
+	memberRolesIncludedInMenu: bigint[],
+): SelectOption[] {
+	const selectOptions: SelectOption[] = [];
 
-		/** List of roles within this collection. */
-		list: Role[];
-	} | {
-		type: RoleCollectionTypes.CollectionLocalised;
+	for (let index = 0; index < menuRoles.length; index++) {
+		const [role, roleResolved] = [menuRoles[index]!, menuRolesResolved[index]!];
+		const memberHasRole = memberRolesIncludedInMenu.includes(roleResolved.id);
 
-		/** Lists of roles with languages as keys. */
-		lists: Partial<Record<Language, Role[]>>;
-	});
-
-function createSelectionsFromCollection(
-	client: Client,
-	member: Member,
-	language: Language | undefined,
-	collection: RoleCollection,
-): SelectOption[] | undefined {
-	const guild = client.guilds.get(member.guildId!);
-	if (!guild) return undefined;
-
-	const memberRoleNames: string[] = [];
-	for (const roleId of member.roles) {
-		const role = guild.roles.get(roleId);
-		if (!role) return undefined;
-
-		memberRoleNames.push(role.name);
-	}
-
-	const roles = resolveRoles(collection, language);
-
-	const selectOptions = roles.map<SelectOption>((role, index) => {
-		const memberHasRole = memberRoleNames.some((memberRoleName) =>
-			memberRoleName === role.name
-		);
-
-		return {
+		selectOptions.push({
 			label: memberHasRole ? `[Assigned] ${role.name}` : role.name,
 			value: index.toString(),
 			description: role.description,
 			emoji: { name: role.emoji },
-		};
-	});
+		});
+	}
 
 	return selectOptions;
 }
@@ -85,5 +88,5 @@ function resolveRoles(
 	return collection.list;
 }
 
-export { createSelectionsFromCollection, resolveRoles, RoleCollectionTypes };
+export { createSelectOptionsFromCollection, resolveRoles, RoleCollectionTypes };
 export type { RoleCollection };
