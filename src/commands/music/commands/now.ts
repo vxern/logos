@@ -14,7 +14,7 @@ import { Song } from '../data/song.ts';
 import { SongStream } from '../data/song-stream.ts';
 import { SongListingContentTypes } from '../data/song-listing.ts';
 import { show } from '../../parameters.ts';
-import { collection } from "../parameters.ts";
+import { collection } from '../parameters.ts';
 
 const command: OptionBuilder = {
 	name: 'now',
@@ -60,14 +60,15 @@ function displayNowPlaying(client: Client, interaction: Interaction): void {
 	const data = interaction.data;
 	if (!data) return;
 
+	const options = data.options?.at(0)?.options;
+
 	const showCollection =
-		(<boolean | undefined> data.options?.find((option) =>
+		(<boolean | undefined> options?.find((option) =>
 			option.name === 'collection'
 		)?.value) ?? false;
 	const show =
-		(<boolean | undefined> data.options?.find((option) =>
-			option.name === 'show'
-		)?.value) ?? false;
+		(<boolean | undefined> options?.find((option) => option.name === 'show')
+			?.value) ?? false;
 
 	if (showCollection) {
 		if (currentListing?.content.type !== SongListingContentTypes.Collection) {
