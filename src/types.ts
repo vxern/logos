@@ -1,4 +1,9 @@
-const supportedLanguages = ['Armenian', 'Belarusian', 'Romanian'] as const;
+const supportedLanguages = [
+	'Armenian',
+	'English',
+	'Belarusian',
+	'Romanian',
+] as const;
 const defaultLanguage = 'English';
 type Language = typeof defaultLanguage | typeof supportedLanguages[number];
 
