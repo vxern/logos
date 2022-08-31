@@ -40,16 +40,16 @@ function skipSong(client: Client, interaction: Interaction): void {
 	if (!data) return;
 
 	const skipCollection =
-		(<boolean | undefined> data.options?.find((option) =>
+		(<boolean | undefined> data.options?.at(0)?.options?.find((option) =>
 			option.name === 'collection'
 		)?.value) ?? false;
 
-	const byString = <string | undefined> data.options?.find((option) =>
-		option.name === 'by'
-	)?.value;
-	const toString = <string | undefined> data.options?.find((option) =>
-		option.name === 'to'
-	)?.value;
+	const byString = <string | undefined> data.options?.at(0)?.options?.find((
+		option,
+	) => option.name === 'by')?.value;
+	const toString = <string | undefined> data.options?.at(0)?.options?.find((
+		option,
+	) => option.name === 'to')?.value;
 
 	const by = byString ? Number(byString) : undefined;
 	if (by && isNaN(by)) return;
@@ -183,6 +183,11 @@ function skipSong(client: Client, interaction: Interaction): void {
 				to: listingToSkipTo,
 			});
 		}
+	} else {
+		musicController.skip(skipCollection, {
+			by: undefined,
+			to: undefined,
+		});
 	}
 
 	return void sendInteractionResponse(
