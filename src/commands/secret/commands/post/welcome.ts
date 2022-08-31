@@ -1,10 +1,14 @@
 import {
+	ApplicationCommandFlags,
 	ButtonStyles,
 	Interaction,
+	InteractionResponseTypes,
 	MessageComponentTypes,
+	sendInteractionResponse,
 	sendMessage,
 } from '../../../../../deps.ts';
 import { Client } from '../../../../client.ts';
+import configuration from '../../../../configuration.ts';
 import { fromHex } from '../../../../utils.ts';
 import { getChannelMention } from '../../data/information/information-sections.ts';
 
@@ -14,6 +18,22 @@ function postWelcome(
 ): void {
 	const guild = client.guilds.get(interaction.guildId!);
 	if (!guild) return;
+
+	sendInteractionResponse(
+		client.bot,
+		interaction.id,
+		interaction.token,
+		{
+			type: InteractionResponseTypes.ChannelMessageWithSource,
+			data: {
+				flags: ApplicationCommandFlags.Ephemeral,
+				embeds: [{
+					description: 'Welcome posted.',
+					color: configuration.interactions.responses.colors.blue,
+				}],
+			},
+		},
+	);
 
 	return void sendMessage(client.bot, interaction.channelId!, {
 		embeds: [{
