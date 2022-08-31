@@ -86,7 +86,7 @@ class MusicController extends Controller {
 	verifyMemberVoiceState(
 		interaction: Interaction,
 	): [boolean, VoiceState | undefined] {
-		const voiceState = this.guild.voiceStates.get(interaction.member!.id);
+		const voiceState = this.guild.voiceStates.get(interaction.user.id);
 
 		// The user is not in a voice channel.
 		if (!voiceState || !voiceState.channelId) {
