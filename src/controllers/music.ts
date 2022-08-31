@@ -210,7 +210,7 @@ class MusicController extends Controller {
 		// If the player is not connected to a voice channel, or if it is connected
 		// to a different voice channel, connect to the new voice channel.
 		if (!this.player.connected) {
-			this.player.connect(BigInt(channels.voice.id), { deafen: true });
+			this.player.connect(channels.voice.id, { deafen: true });
 
 			this.voiceChannel = channels.voice;
 			this.textChannel = channels.text;
