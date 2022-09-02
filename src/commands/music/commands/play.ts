@@ -50,7 +50,7 @@ const command: OptionBuilder = {
 					ro: 'Link-ul către muzică în forma unui flux de date.',
 				},
 				type: ApplicationCommandOptionTypes.String,
-				required: false,
+				required: true,
 			}],
 		},
 		...Object.entries(sources).map<OptionBuilder>(([name, resolve]) => ({
