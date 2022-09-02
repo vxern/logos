@@ -9,6 +9,7 @@ import {
 	InteractionResponseTypes,
 	InteractionTypes,
 	MessageComponentTypes,
+	SelectOption,
 	sendInteractionResponse,
 } from '../../../../../deps.ts';
 import { Client } from '../../../../client.ts';
@@ -104,11 +105,12 @@ async function search(
 						customId: customId,
 						minValues: 1,
 						maxValues: 1,
-						options: results.map((result, index) => ({
+						options: results.map<SelectOption>((result, index) => ({
 							emoji: {
 								name: result.type === 'video'
-									? configuration.music.symbols.song
-									: configuration.music.symbols.collection,
+									? configuration.music.symbols[SongListingContentTypes.Song]
+									: configuration.music
+										.symbols[SongListingContentTypes.Collection],
 							},
 							label: trim(result.title!, 100),
 							value: index.toString(),
