@@ -114,7 +114,8 @@ class Client {
 	}
 
 	protected setupCache(bot: Bot): void {
-		const { guild, user, member, channel, message, role } = bot.transformers;
+		const { guild, user, member, channel, message, role, voiceState } =
+			bot.transformers;
 
 		bot.transformers.guild = (bot, payload) => {
 			const result = guild(bot, payload);
@@ -215,6 +216,14 @@ class Client {
 			const result = role(bot, payload);
 
 			this.guilds.get(result.guildId)?.roles.set(result.id, result);
+
+			return result;
+		};
+
+		bot.transformers.voiceState = (bot, payload) => {
+			const result = voiceState(bot, payload);
+
+			this.guilds.get(result.guildId)?.voiceStates.set(result.userId, result);
 
 			return result;
 		};
