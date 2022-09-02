@@ -144,7 +144,7 @@ class Client {
 				configuration.guilds.nameExpression.exec(result.name) || undefined;
 			if (!guildNameMatch) return result;
 
-			const languageString = guildNameMatch[1]!.toLowerCase();
+			const languageString = guildNameMatch.at(1)!;
 			const language = supportedLanguages.find((language) =>
 				languageString === language
 			);
