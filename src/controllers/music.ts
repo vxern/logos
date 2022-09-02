@@ -228,7 +228,15 @@ class MusicController extends Controller {
 				return sendMessage(client.bot, this.textChannel.id, { embeds });
 			}
 
-			return editInteractionResponse(client.bot, interaction.token, { embeds });
+			return sendInteractionResponse(
+				client.bot,
+				interaction.id,
+				interaction.token,
+				{
+					type: InteractionResponseTypes.ChannelMessageWithSource,
+					data: { embeds },
+				},
+			);
 		}
 
 		return this.advanceQueueAndPlay(interaction);
