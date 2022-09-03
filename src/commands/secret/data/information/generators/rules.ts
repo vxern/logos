@@ -37,7 +37,7 @@ const ruleGenerators: Record<string, (guild: Guild) => Rule> = {
 	exclusivity: (_) => ({
 		summary: 'Do not advertise.',
 		content:
-			'It is expected of members to not advertise other Discord servers, and active attempts at advertising (including unsolicited DMs) are prohibited.',
+			'It is expected of members to not use this space for advertising, and active attempts at it (including unsolicited DMs) are prohibited.',
 	}),
 };
 
