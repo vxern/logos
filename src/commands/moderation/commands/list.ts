@@ -19,7 +19,7 @@ const command: CommandBuilder = {
 	name: 'list',
 	nameLocalizations: {
 		pl: 'spisz',
-		ro: 'enumerează',
+		ro: 'enumerare',
 	},
 	description: 'Allows the viewing of various information about users.',
 	descriptionLocalizations: {

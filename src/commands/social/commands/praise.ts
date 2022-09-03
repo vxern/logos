@@ -19,7 +19,7 @@ const command: CommandBuilder = {
 	name: 'praise',
 	nameLocalizations: {
 		pl: 'pochwal',
-		ro: 'laudă',
+		ro: 'lăudare',
 	},
 	description: 'Praises a user for their contribution.',
 	descriptionLocalizations: {
@@ -32,12 +32,12 @@ const command: CommandBuilder = {
 		name: 'comment',
 		nameLocalizations: {
 			pl: 'komentarz',
-			ro: 'comentar',
+			ro: 'comentariu',
 		},
 		description: 'A comment to attach to the praise.',
 		descriptionLocalizations: {
 			pl: 'Komentarz, który ma zostać załączony do pochwały.',
-			ro: 'Comentarul care să fie atașat la laudă.',
+			ro: 'Comentariul care să fie atașat la laudă.',
 		},
 		type: ApplicationCommandOptionTypes.String,
 	}],

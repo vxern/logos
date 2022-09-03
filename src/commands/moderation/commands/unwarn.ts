@@ -17,10 +17,10 @@ import { user } from '../../parameters.ts';
 import { getRelevantWarnings } from '../module.ts';
 
 const command: CommandBuilder = {
-	name: 'unwarn',
+	name: 'pardon',
 	nameLocalizations: {
-		pl: 'usuń-ostrzeżenie',
-		ro: 'șterge-un-avertisment',
+		pl: 'ułaskawienie',
+		ro: 'grațiere',
 	},
 	description: 'Removes the last given warning to a user.',
 	descriptionLocalizations: {

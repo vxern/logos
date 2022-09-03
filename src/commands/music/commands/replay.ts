@@ -15,7 +15,7 @@ const command: OptionBuilder = {
 	name: 'replay',
 	nameLocalizations: {
 		pl: 'powtórz',
-		ro: 'reia',
+		ro: 'reluare',
 	},
 	description: 'Begins playing the currently playing song from the start.',
 	descriptionLocalizations: {

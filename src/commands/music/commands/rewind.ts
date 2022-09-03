@@ -10,7 +10,7 @@ const command: OptionBuilder = {
 	name: 'rewind',
 	nameLocalizations: {
 		pl: 'przewiń-do-tyłu',
-		ro: 'derulează-înapoi',
+		ro: 'derulare-înapoi',
 	},
 	description: 'Rewinds the currently playing song.',
 	descriptionLocalizations: {

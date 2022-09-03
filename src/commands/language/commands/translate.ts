@@ -18,7 +18,7 @@ const command: CommandBuilder = {
 	name: 'translate',
 	nameLocalizations: {
 		pl: 'przetłumacz',
-		ro: 'traduce',
+		ro: 'traducere',
 	},
 	description:
 		'Translates a text from the source language to the target language.',

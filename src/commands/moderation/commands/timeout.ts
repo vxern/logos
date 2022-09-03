@@ -21,7 +21,7 @@ const command: CommandBuilder = {
 		name: 'set',
 		nameLocalizations: {
 			pl: 'ustaw',
-			ro: 'setează',
+			ro: 'setare',
 		},
 		description:
 			'Times out a user, making them unable to interact on the server.',
@@ -37,7 +37,7 @@ const command: CommandBuilder = {
 		name: 'clear',
 		nameLocalizations: {
 			pl: 'usuń',
-			ro: 'șterge',
+			ro: 'ștergere',
 		},
 		description: 'Clears a user\'s timeout.',
 		descriptionLocalizations: {

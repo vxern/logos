@@ -18,7 +18,7 @@ const command: OptionBuilder = {
 	name: 'view',
 	nameLocalizations: {
 		pl: 'wyświetl',
-		ro: 'afișează',
+		ro: 'afișare',
 	},
 	description: 'Displays a user\'s profile.',
 	descriptionLocalizations: {
@@ -66,8 +66,6 @@ async function viewProfile(
 			},
 		);
 	}
-
-	// TODO: Remove @everyone role.
 
 	const createdAt = dayjs(snowflakeToTimestamp(member.id));
 	const joinedAt = dayjs(member.joinedAt);

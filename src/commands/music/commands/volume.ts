@@ -26,7 +26,7 @@ const command: OptionBuilder = {
 		name: 'display',
 		nameLocalizations: {
 			pl: 'wyświetl',
-			ro: 'afișează',
+			ro: 'afișare',
 		},
 		description: 'Displays the volume of playback.',
 		descriptionLocalizations: {
@@ -40,7 +40,7 @@ const command: OptionBuilder = {
 		name: 'set',
 		nameLocalizations: {
 			pl: 'ustaw',
-			ro: 'setează',
+			ro: 'setare',
 		},
 		description: 'Sets the volume of playback.',
 		descriptionLocalizations: {

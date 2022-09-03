@@ -13,7 +13,7 @@ const command: OptionBuilder = {
 	name: 'resume',
 	nameLocalizations: {
 		pl: 'wznów',
-		ro: 'continuă',
+		ro: 'continuare',
 	},
 	description: 'Unpauses the currently playing song if it is paused.',
 	descriptionLocalizations: {

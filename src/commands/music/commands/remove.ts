@@ -10,7 +10,7 @@ const command: OptionBuilder = {
 	name: 'remove',
 	nameLocalizations: {
 		pl: 'usuń',
-		ro: 'șterge',
+		ro: 'ștergere',
 	},
 	description: 'Removes a song listing from the queue.',
 	descriptionLocalizations: {
