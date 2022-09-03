@@ -136,7 +136,7 @@ class Client {
 				}...`,
 			);
 			console.time(`MEMBERS (${result.name})`);
-			fetchMembers(bot, result.id!, { limit: 0, query: '' }).then(
+			fetchMembers(bot, result.id, { limit: 0, query: '' }).then(
 				() => console.timeEnd(`MEMBERS (${result.name})`),
 			);
 
