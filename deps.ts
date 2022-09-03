@@ -1,7 +1,7 @@
 /** Discord API library. */
-export * from 'https://raw.githubusercontent.com/vxern/discordeno/main/mod.ts';
-export { send as sendShardMessage } from 'https://raw.githubusercontent.com/vxern/discordeno/main/mod.ts';
-export { routes } from 'https://raw.githubusercontent.com/vxern/discordeno/main/util/routes.ts';
+export * from 'https://raw.githubusercontent.com/discordeno/discordeno/main/mod.ts';
+export { send as sendShardMessage } from 'https://raw.githubusercontent.com/discordeno/discordeno/main/mod.ts';
+export { routes } from 'https://raw.githubusercontent.com/discordeno/discordeno/main/util/routes.ts';
 
 /** Database connection. */
 export * as faunadb from 'https://deno.land/x/fauna@5.0.0-deno-alpha9/mod.ts';
@@ -19,9 +19,9 @@ export * as colors from 'https://deno.land/x/nanocolors@0.1.12/mod.ts';
 export * as _ from 'https://deno.land/x/lodash@4.17.15-es/lodash.js';
 
 /** Date/time library for dealing with time. */
-import dayjs from 'https://cdn.skypack.dev/dayjs';
-import relativeTime from 'https://cdn.skypack.dev/dayjs/plugin/relativeTime';
-import advancedFormat from 'https://cdn.skypack.dev/dayjs/plugin/advancedFormat';
+import dayjs from 'https://cdn.skypack.dev/dayjs@v1.11.5';
+import relativeTime from 'https://cdn.skypack.dev/dayjs@v1.11.5/plugin/relativeTime';
+import advancedFormat from 'https://cdn.skypack.dev/dayjs@v1.11.5/plugin/advancedFormat';
 dayjs.extend(relativeTime);
 dayjs.extend(advancedFormat);
 

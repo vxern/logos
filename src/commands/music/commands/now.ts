@@ -1,6 +1,7 @@
 import {
 	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
+	dayjs,
 	Interaction,
 	InteractionResponseTypes,
 	sendInteractionResponse,
@@ -128,6 +129,9 @@ function displayNowPlaying(client: Client, interaction: Interaction): void {
 
 	const song = <Song | SongStream> currentListing.content;
 
+	const runningTime = dayjs(musicController.runningTime!);
+	const hoursExpression = ((<number> runningTime.hour()) - 1).toString();
+
 	return void sendInteractionResponse(
 		client.bot,
 		interaction.id,
@@ -154,11 +158,19 @@ function displayNowPlaying(client: Client, interaction: Interaction): void {
 						{
 							name: 'Title',
 							value: `[${song.title}](${song.url})`,
-							inline: true,
+							inline: false,
 						},
 						{
 							name: 'Requested By',
 							value: mention(currentListing.requestedBy, MentionTypes.User),
+							inline: false,
+						},
+						{
+							name: 'Running Time',
+							value: `${
+								(hoursExpression.length === 1 ? '0' : '') + hoursExpression
+							}:${runningTime.format('mm:ss')}`,
+							inline: false,
 						},
 					],
 					footer: {
