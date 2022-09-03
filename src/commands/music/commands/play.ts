@@ -4,7 +4,6 @@ import { ListingResolver, sources } from '../data/sources/sources.ts';
 import { query } from '../parameters.ts';
 import { Client } from '../../../client.ts';
 import {
-	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
 	Interaction,
 	InteractionResponseTypes,
@@ -119,7 +118,6 @@ async function playSongListing(
 			{
 				type: InteractionResponseTypes.ChannelMessageWithSource,
 				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						title: 'Couldn\'t find the requested song.',
 						description:
