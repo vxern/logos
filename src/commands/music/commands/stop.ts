@@ -12,7 +12,7 @@ const command: OptionBuilder = {
 	name: 'stop',
 	nameLocalizations: {
 		pl: 'przerwij',
-		ro: 'oprește',
+		ro: 'oprire',
 	},
 	description:
 		'Stops the current listening session, clearing the queue and song history.',

@@ -20,7 +20,7 @@ const command: CommandBuilder = {
 	name: 'warn',
 	nameLocalizations: {
 		pl: 'ostrzeż',
-		ro: 'avertizează',
+		ro: 'avertizare',
 	},
 	description: 'Warns a user.',
 	descriptionLocalizations: {

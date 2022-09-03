@@ -16,7 +16,7 @@ const command: OptionBuilder = {
 	name: 'play',
 	nameLocalizations: {
 		pl: 'odtwórz',
-		ro: 'redă',
+		ro: 'redare',
 	},
 	description: 'Allows the user to play music in a voice channel.',
 	descriptionLocalizations: {
@@ -26,15 +26,15 @@ const command: OptionBuilder = {
 	type: ApplicationCommandOptionTypes.SubCommandGroup,
 	options: [
 		{
-			name: 'stream',
+			name: 'file',
 			nameLocalizations: {
-				pl: 'strumień',
-				ro: 'flux',
+				pl: 'plik',
+				ro: 'fișier',
 			},
-			description: 'Plays an audio stream.',
+			description: 'Plays an external audio file.',
 			descriptionLocalizations: {
-				pl: 'Odtwarza muzykę w kształcie strumienia danych.',
-				ro: 'Redă muzică în forma unui flux de date.',
+				pl: 'Odtwarza muzykę w kształcie zewnętrznego pliku audio.',
+				ro: 'Redă muzică în forma unui fișier audio extern.',
 			},
 			type: ApplicationCommandOptionTypes.SubCommand,
 			handle: playStream,
@@ -44,10 +44,10 @@ const command: OptionBuilder = {
 					pl: 'url',
 					ro: 'url',
 				},
-				description: 'The link to the stream.',
+				description: 'Link to the audio file.',
 				descriptionLocalizations: {
-					pl: 'Link do muzyki w kształcie strumienia danych.',
-					ro: 'Link-ul către muzică în forma unui flux de date.',
+					pl: 'Link do pliku audio.',
+					ro: 'Linkul către fișier audio.',
 				},
 				type: ApplicationCommandOptionTypes.String,
 				required: true,
@@ -81,8 +81,8 @@ function playStream(
 				resolve({
 					requestedBy: interaction.user.id,
 					content: {
-						type: SongListingContentTypes.Stream,
-						title: 'Song stream',
+						type: SongListingContentTypes.External,
+						title: 'External file',
 						url: query,
 					},
 				})

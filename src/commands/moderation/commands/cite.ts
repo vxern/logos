@@ -16,7 +16,7 @@ const command: CommandBuilder = {
 	name: 'cite',
 	nameLocalizations: {
 		pl: 'zacytuj',
-		ro: 'citează',
+		ro: 'citare',
 	},
 	description: 'Cites a server rule.',
 	descriptionLocalizations: {

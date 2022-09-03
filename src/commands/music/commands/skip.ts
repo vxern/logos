@@ -15,7 +15,7 @@ const command: OptionBuilder = {
 	name: 'skip',
 	nameLocalizations: {
 		pl: 'przewiń',
-		ro: 'sari-peste',
+		ro: 'sărire-peste',
 	},
 	description: 'Skips the currently playing song.',
 	descriptionLocalizations: {

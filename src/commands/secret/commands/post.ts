@@ -7,7 +7,7 @@ const command: CommandBuilder = {
 	name: 'post',
 	nameLocalizations: {
 		pl: 'wstaw',
-		ro: 'postează',
+		ro: 'postare',
 	},
 	description:
 		'Allows the user to post various core server messages, such as the server rules.',

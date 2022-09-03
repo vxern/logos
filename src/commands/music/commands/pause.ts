@@ -14,7 +14,7 @@ const command: OptionBuilder = {
 	name: 'pause',
 	nameLocalizations: {
 		pl: 'zapauzuj',
-		ro: 'pauzează',
+		ro: 'pauzare',
 	},
 	description: 'Pauses the currently playing song or song collection.',
 	descriptionLocalizations: {

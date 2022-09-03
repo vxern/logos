@@ -7,7 +7,7 @@ const command: OptionBuilder = {
 	name: 'forward',
 	nameLocalizations: {
 		pl: 'przewiń-do-przodu',
-		ro: 'derulează-înainte',
+		ro: 'derulare-înainte',
 	},
 	description: 'Fast-forwards the currently playing song.',
 	descriptionLocalizations: {

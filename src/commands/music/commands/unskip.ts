@@ -15,7 +15,7 @@ const command: OptionBuilder = {
 	name: 'unskip',
 	nameLocalizations: {
 		pl: 'przywróć',
-		ro: 'înapoiază',
+		ro: 'înapoiare',
 	},
 	description: 'Brings back the last played song.',
 	descriptionLocalizations: {

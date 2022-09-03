@@ -51,7 +51,7 @@ const show: OptionBuilder = {
 	name: 'show',
 	nameLocalizations: {
 		pl: 'wyświetl',
-		ro: 'afișează',
+		ro: 'afișare',
 	},
 	description: 'If set to true, the result will be shown to others.',
 	descriptionLocalizations: {
