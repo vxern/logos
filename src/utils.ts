@@ -197,7 +197,7 @@ function paginate<T>(
 		show,
 	}: {
 		elements: T[];
-		embed: Omit<Embed, 'fields' | 'footer'>;
+		embed: Omit<Embed, 'footer'>;
 		view: {
 			title: string;
 			generate: (element: T, index: number) => string;
@@ -210,6 +210,11 @@ function paginate<T>(
 	const isFirst = () => index === 0;
 	const isLast = () => index === elements.length - 1;
 
+	const existingFields = embed.fields ?? [];
+	if ('fields' in embed) {
+		delete embed.fields;
+	}
+
 	const generateEmbed: () => Embed[] = () => [{
 		...embed,
 		fields: [{
@@ -217,11 +222,11 @@ function paginate<T>(
 				? view.title
 				: `${view.title} ~ Page ${index + 1}/${elements.length}`,
 			value: view.generate(elements[index]!, index),
-		}],
+		}, ...existingFields],
 		footer: isLast() ? undefined : { text: 'Continued on the next page...' },
 	}];
 
-	function generateButtons(): MessageComponents {
+	const generateButtons = (): MessageComponents => {
 		const buttons: ButtonComponent[] = [];
 
 		if (!isFirst()) {
@@ -248,14 +253,14 @@ function paginate<T>(
 				ButtonComponent | ButtonComponent,
 			]> buttons,
 		}];
-	}
+	};
 
 	const customId = createInteractionCollector(client, {
 		type: InteractionTypes.MessageComponent,
 		doesNotExpire: true,
-		limit: 1,
 		onCollect: (bot, selection) => {
 			if (!selection.data) return;
+
 			const action = selection.data.customId!.split('|')[1]!;
 
 			switch (action) {
@@ -287,6 +292,7 @@ function paginate<T>(
 			data: {
 				flags: !show ? ApplicationCommandFlags.Ephemeral : undefined,
 				embeds: generateEmbed(),
+				components: generateButtons(),
 			},
 		},
 	);
