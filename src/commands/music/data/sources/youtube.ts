@@ -23,33 +23,15 @@ const urlExpression = new RegExp(
 );
 
 const resolver: ListingResolver = async (client, interaction, query) => {
-	const deferTimeoutId = setTimeout(() => {
-		sendInteractionResponse(
-			client.bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.DeferredChannelMessageWithSource,
-				data: { flags: ApplicationCommandFlags.Ephemeral },
-			},
-		);
-	}, 2000);
-
 	const urlExpressionExecuted = urlExpression.exec(query);
 	if (!urlExpressionExecuted) {
-		const listing = await search(client, interaction, query);
-
-		clearTimeout(deferTimeoutId);
-
-		return listing;
+		return search(client, interaction, query);
 	}
 
 	const url = urlExpressionExecuted[0]!;
 
 	if (url.includes('&list=')) {
 		const playlist = await YouTube.getPlaylist(query);
-
-		clearTimeout(deferTimeoutId);
 
 		return fromYouTubePlaylist(playlist, interaction.user.id);
 	}
