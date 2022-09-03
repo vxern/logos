@@ -82,6 +82,13 @@ class MusicController extends Controller {
 		return this.player.paused;
 	}
 
+	/** Returns, in milliseconds, how long the current song has been playing for. */
+	get runningTime(): number | undefined {
+		if (!this.player.playingSince) return undefined;
+
+		return Date.now() - this.player.playingSince;
+	}
+
 	/** Checks the user's voice state, ensuring it is valid for playing music. */
 	verifyMemberVoiceState(
 		interaction: Interaction,
