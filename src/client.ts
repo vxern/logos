@@ -120,6 +120,8 @@ class Client {
 		bot.transformers.guild = (bot, payload) => {
 			const result = guild(bot, payload);
 
+			if (this.guilds.has(result.id)) return result;
+
 			this.guilds.set(result.id, result);
 
 			payload.guild.channels?.forEach((channel) => {
