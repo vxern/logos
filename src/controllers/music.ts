@@ -341,7 +341,7 @@ class MusicController extends Controller {
 
 		const track = tracksResponse.tracks[0]!;
 
-		if (this.current?.content.type === SongListingContentTypes.Stream) {
+		if (this.current?.content.type === SongListingContentTypes.External) {
 			this.current.content.title = track.info.title;
 		}
 

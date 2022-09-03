@@ -4,7 +4,7 @@ import { Song } from './song.ts';
 
 enum SongListingContentTypes {
 	Song,
-	Stream,
+	External,
 	Collection,
 }
 

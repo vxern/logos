@@ -135,7 +135,7 @@ const settings = {
 	music: {
 		symbols: <Record<string, string>> {
 			[SongListingContentTypes.Song]: '🎵',
-			[SongListingContentTypes.Stream]: '🌊',
+			[SongListingContentTypes.External]: '📁',
 			[SongListingContentTypes.Collection]: '🎶',
 		},
 		disconnectTimeout: 10 * minute,
