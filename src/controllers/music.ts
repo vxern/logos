@@ -50,6 +50,8 @@ class MusicController extends Controller {
 
 	private breakPreviousLoop = false;
 
+	readonly onQueueChange: Map<string, () => void> = new Map();
+
 	/** Constructs a {@link MusicController}. */
 	constructor(client: Client, guild: Guild) {
 		super(client, guild);

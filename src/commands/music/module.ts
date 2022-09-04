@@ -9,6 +9,7 @@ import now from './commands/now.ts';
 import pause from './commands/pause.ts';
 import play from './commands/play.ts';
 import queue from './commands/queue.ts';
+import remove from './commands/remove.ts';
 import replay from './commands/replay.ts';
 import skip from './commands/skip.ts';
 import stop from './commands/stop.ts';
@@ -37,6 +38,7 @@ const music: CommandBuilder = {
 		pause,
 		play,
 		queue,
+		remove,
 		replay,
 		skip,
 		stop,

@@ -205,10 +205,10 @@ function paginate<T>(
 		show: boolean;
 	},
 ): void {
-	let index = 0;
+	let pageIndex = 0;
 
-	const isFirst = () => index === 0;
-	const isLast = () => index === elements.length - 1;
+	const isFirst = () => pageIndex === 0;
+	const isLast = () => pageIndex === elements.length - 1;
 
 	const existingFields = embed.fields ?? [];
 	if ('fields' in embed) {
@@ -220,8 +220,8 @@ function paginate<T>(
 		fields: [{
 			name: elements.length === 1
 				? view.title
-				: `${view.title} ~ Page ${index + 1}/${elements.length}`,
-			value: view.generate(elements[index]!, index),
+				: `${view.title} ~ Page ${pageIndex + 1}/${elements.length}`,
+			value: view.generate(elements[pageIndex]!, pageIndex),
 		}, ...existingFields],
 		footer: isLast() ? undefined : { text: 'Continued on the next page...' },
 	}];
@@ -265,10 +265,10 @@ function paginate<T>(
 
 			switch (action) {
 				case 'PREVIOUS':
-					if (!isFirst()) index--;
+					if (!isFirst()) pageIndex--;
 					break;
 				case 'NEXT':
-					if (!isLast()) index++;
+					if (!isLast()) pageIndex++;
 					break;
 			}
 
