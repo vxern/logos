@@ -3,7 +3,6 @@ import game from './commands/game.ts';
 import resources from './commands/resources.ts';
 import word from './commands/word.ts';
 import translate from './commands/translate.ts';
-//import article from './commands/article.ts';
 import { DictionaryAdapter, DictionaryScopes } from './data/dictionary.ts';
 import dexonline from './data/dictionaries/dexonline.ts';
 import dictionarDeSinonime from './data/dictionaries/dictionar-de-antonime.ts';
@@ -12,7 +11,7 @@ import { SentencePair } from './data/sentence.ts';
 import { Language, supportedLanguages } from '../../types.ts';
 import { capitalise } from '../../formatting.ts';
 
-const commands = [/*article,*/ game, resources, translate, word];
+const commands = [game, resources, translate, word];
 
 const dictionaryAdapters = [
 	dexonline,
