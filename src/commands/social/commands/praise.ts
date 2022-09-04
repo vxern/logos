@@ -72,7 +72,6 @@ async function praise(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						title: 'Invalid user',
 						description: 'You cannot praise yourself!',
 						color: configuration.interactions.responses.colors.red,
 					}],
@@ -81,7 +80,7 @@ async function praise(
 		);
 	}
 
-	function showPraiseFailure(): void {
+	const showPraiseFailure = (): void => {
 		return void sendInteractionResponse(
 			client.bot,
 			interaction.id,
@@ -98,7 +97,7 @@ async function praise(
 				},
 			},
 		);
-	}
+	};
 
 	const author = await client.database.getOrCreateUser(
 		'id',
