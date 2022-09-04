@@ -288,7 +288,11 @@ class MusicController extends Controller {
 					this.current.content.position = 0;
 				} else {
 					this.moveToHistory(this.current);
-					this.current = undefined;
+					if (this.queue.length !== 0) {
+						this.current = this.queue.shift()!;
+					} else {
+						this.current = undefined;
+					}
 				}
 			}
 		}
@@ -464,18 +468,18 @@ class MusicController extends Controller {
 					this.current.content.position -= 2;
 				}
 			}
-		}
+		} else {
+			const songsToMoveToQueue = Math.min(by ?? to ?? 1, this.history.length);
 
-		const songsToMoveToQueue = Math.min(by ?? to ?? 1, this.history.length);
+			if (this.current) {
+				this.queue.unshift(this.current);
 
-		if (this.current) {
-			this.queue.unshift(this.current);
+				this.current = undefined;
+			}
 
-			this.current = undefined;
-		}
-
-		for (let i = 0; i < songsToMoveToQueue; i++) {
-			this.queue.unshift(this.history.pop()!);
+			for (let i = 0; i < songsToMoveToQueue; i++) {
+				this.queue.unshift(this.history.pop()!);
+			}
 		}
 
 		if (this.player.track) {
@@ -527,8 +531,10 @@ class MusicController extends Controller {
 		this.queue = [];
 
 		this.isLoop = false;
+		this.isPaused;
 
 		this.player.stop();
+		this.player.pause(false);
 		this.player.disconnect();
 
 		this.setVolume(configuration.music.maxima.volume);
