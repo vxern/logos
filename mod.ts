@@ -6,9 +6,6 @@ const requiredKeys = [
 	'DISCORD_SECRET',
 	'FAUNA_SECRET',
 	'DEEPL_SECRET',
-	'LAVALINK_HOST',
-	'LAVALINK_PORT',
-	'LAVALINK_PASSWORD',
 ] as const;
 // Array of booleans indicating which environment variables are present at launch.
 const presentKeys = requiredKeys.map((key) => !!Deno.env.get(key));
