@@ -11,11 +11,11 @@ import {
 	Interaction,
 	InteractionResponseTypes,
 	InteractionTypes,
-	lavadeno,
+	// lavadeno,
 	Member,
 	Message,
 	sendInteractionResponse,
-	sendShardMessage,
+	// sendShardMessage,
 	snowflakeToBigint,
 	startBot,
 	upsertApplicationCommands,
@@ -92,7 +92,7 @@ class Client {
 	//readonly music: Map<bigint, MusicController> = new Map();
 
 	/** The Lavalink node serving this client. */
-	node!: lavadeno.Node;
+	// node!: lavadeno.Node;
 
 	/** Constructs an instance of {@link Client}. */
 	constructor() {
@@ -238,7 +238,7 @@ class Client {
 	 * @remarks
 	 * This function should __not__ be called externally.
 	 */
-	protected async setupBot(bot: Bot): Promise<void> {
+	protected setupBot(bot: Bot): void {
 		console.time('SETUP');
 
 		const onInteractionCreate = bot.events.interactionCreate;
@@ -283,6 +283,7 @@ class Client {
 			}
 		};
 
+		/*
 		this.node = new lavadeno.Node({
 			connection: {
 				host: Deno.env.get('LAVALINK_HOST')!,
@@ -317,6 +318,7 @@ class Client {
 			});
 
 		await this.node.connect(bot.id);
+    */
 
 		this.setupServices();
 
