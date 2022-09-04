@@ -23,7 +23,7 @@ import {
 } from '../deps.ts';
 import services from './services/service.ts';
 import { LoggingController } from './controllers/logging.ts';
-import { MusicController } from './controllers/music.ts';
+//import { MusicController } from './controllers/music.ts';
 import { Database } from './database/database.ts';
 import configuration from './configuration.ts';
 import {
@@ -89,7 +89,7 @@ class Client {
 	 *
 	 * The keys are guild IDs, and the values are their respective music controller.
 	 */
-	readonly music: Map<bigint, MusicController> = new Map();
+	//readonly music: Map<bigint, MusicController> = new Map();
 
 	/** The Lavalink node serving this client. */
 	node!: lavadeno.Node;
@@ -325,7 +325,7 @@ class Client {
 
 	setupControllers(guild: Guild): void {
 		this.logging.set(guild.id, new LoggingController(this, guild));
-		this.music.set(guild.id, new MusicController(this, guild));
+		//this.music.set(guild.id, new MusicController(this, guild));
 	}
 
 	setupServices(): void {
