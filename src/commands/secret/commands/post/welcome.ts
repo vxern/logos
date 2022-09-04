@@ -19,23 +19,7 @@ function postWelcome(
 	const guild = client.guilds.get(interaction.guildId!);
 	if (!guild) return;
 
-	sendInteractionResponse(
-		client.bot,
-		interaction.id,
-		interaction.token,
-		{
-			type: InteractionResponseTypes.ChannelMessageWithSource,
-			data: {
-				flags: ApplicationCommandFlags.Ephemeral,
-				embeds: [{
-					description: 'Welcome posted.',
-					color: configuration.interactions.responses.colors.blue,
-				}],
-			},
-		},
-	);
-
-	return void sendMessage(client.bot, interaction.channelId!, {
+	sendMessage(client.bot, interaction.channelId!, {
 		embeds: [{
 			title: `Welcome to **${guild.name}**`,
 			description:
@@ -56,6 +40,22 @@ function postWelcome(
 			}],
 		}],
 	});
+
+  return void sendInteractionResponse(
+		client.bot,
+		interaction.id,
+		interaction.token,
+		{
+			type: InteractionResponseTypes.ChannelMessageWithSource,
+			data: {
+				flags: ApplicationCommandFlags.Ephemeral,
+				embeds: [{
+					description: 'Welcome posted.',
+					color: configuration.interactions.responses.colors.blue,
+				}],
+			},
+		},
+	);
 }
 
 export { postWelcome };
