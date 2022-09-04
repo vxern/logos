@@ -1,6 +1,5 @@
-import { BitwisePermissionFlags, Embed, Guild } from '../../../../../deps.ts';
+import { Embed, Guild } from '../../../../../deps.ts';
 import { Client } from '../../../../client.ts';
-import configuration from '../../../../configuration.ts';
 import { mention, MentionTypes } from '../../../../formatting.ts';
 import { fromHex, getTextChannel } from '../../../../utils.ts';
 import ruleGenerators from './generators/rules.ts';
@@ -33,25 +32,10 @@ const informationSections: Record<string, InformationSection> = {
 				});
 			}
 
-			const manageMembersRoles = guild.roles.array().filter((role) =>
-				role.permissions & BigInt(BitwisePermissionFlags['VIEW_CHANNEL']!)
-			);
-
-			const moderatorRole =
-				manageMembersRoles.find((role) =>
-					role.name === configuration.guilds.moderation.moderator
-				) ?? manageMembersRoles.reduce((previous, current) =>
-					current.position < previous.position ? current : previous
-				);
-
-			const moderatorRoleMention = !moderatorRole
-				? configuration.guilds.moderation.moderator.toLowerCase()
-				: mention(moderatorRole.id, MentionTypes.Role);
-
 			fields.push({
 				name: 'ℹ️  MODERATION POLICY',
 				value:
-					`The server abides by a 3-warn moderation policy, enforced by the server's ${moderatorRoleMention}s. The above rules apply to the entirety of the server, and a breach thereof will cause a warning to be issued.\n\nDepending on the circumstances, a timeout may be issued to the member for the duration of 5, 15, or 60 minutes respectively.\n\nIf a member received three warnings, and a situation occurs where a fourth warning would be issued, the member will be kicked instead.\n\nFor members who show no regard for the server rules, and are not interested in making useful contributions, a permanent ban may be issued.`,
+					`The server abides by a 3-warn moderation policy, enforced by the server's guides. The above rules apply to the entirety of the server, and a breach thereof will cause a warning to be issued.\n\nDepending on the circumstances, a timeout may be issued to the member for the duration of 5, 15, or 60 minutes respectively.\n\nIf a member received three warnings, and a situation occurs where a fourth warning would be issued, the member will be kicked instead.\n\nFor members who show no regard for the server rules, and are not interested in making useful contributions, a permanent ban may be issued.`,
 				inline: false,
 			});
 
