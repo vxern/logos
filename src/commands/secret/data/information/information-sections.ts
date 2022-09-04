@@ -41,7 +41,7 @@ const informationSections: Record<string, InformationSection> = {
 				manageMembersRoles.find((role) =>
 					role.name === configuration.guilds.moderation.moderator
 				) ?? manageMembersRoles.reduce((previous, current) =>
-					current.position > previous.position ? current : previous
+					current.position < previous.position ? current : previous
 				);
 
 			const moderatorRoleMention = !moderatorRole
@@ -56,7 +56,7 @@ const informationSections: Record<string, InformationSection> = {
 			});
 
 			return {
-				description: '*Last updated: 9th July 2022*',
+				description: '*Last updated: 25th August 2022*',
 				fields: fields,
 			};
 		},
