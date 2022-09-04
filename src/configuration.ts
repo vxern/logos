@@ -58,7 +58,7 @@ const settings = {
 			{ requiresVerification: boolean; dialects: string[] }
 		>> {
 			'Armenian': {
-				requiresVerification: true,
+				requiresVerification: false,
 				dialects: ['Western Armenian', 'Eastern Armenian', 'Karabakh Dialect'],
 			},
 			'Belarusian': {
