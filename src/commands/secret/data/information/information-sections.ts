@@ -1,4 +1,11 @@
-import { Embed, Guild } from '../../../../../deps.ts';
+import {
+	BaseInvite,
+	createInvite,
+	Embed,
+	getInvites,
+	Guild,
+	InviteMetadata,
+} from '../../../../../deps.ts';
 import { Client } from '../../../../client.ts';
 import { mention, MentionTypes } from '../../../../formatting.ts';
 import { fromHex, getTextChannel } from '../../../../utils.ts';
@@ -9,18 +16,17 @@ interface InformationSection {
 	/** The image associated with the section. */
 	image: string;
 
-	/** The embed ribbon colour for the section. */
-	color: number;
-
 	/** The method to generate the embed. */
-	generateEmbed: (client: Client, guild: Guild) => Embed | undefined;
+	generateEmbed: (
+		client: Client,
+		guild: Guild,
+	) => Promise<Embed | undefined> | (Embed | undefined);
 }
 
 /** The defined sections of information for guilds. */
 const informationSections: Record<string, InformationSection> = {
 	rules: {
 		image: 'https://i.imgur.com/wRBpXcY.png',
-		color: fromHex('#ff9a76'),
 		generateEmbed: (_client, guild) => {
 			const fields = [];
 			for (const [title, generateRule] of Object.entries(ruleGenerators)) {
@@ -41,60 +47,51 @@ const informationSections: Record<string, InformationSection> = {
 
 			return {
 				description: '*Last updated: 25th August 2022*',
+				color: fromHex('#ff9a76'),
 				fields: fields,
 			};
 		},
 	},
-	// TODO: Reimplement invite category once invite helpers and types are fixed in discordeno.
-	/*
 	invite: {
 		image: 'https://i.imgur.com/snJaKYm.png',
-		color: fromHex('#637373'),
-		generateEmbed: async (_client, guild) => {
-			const invite = await getInvite(guild);
-			if (!invite) return undefined;
+		generateEmbed: async (client, guild) => {
+			const invite = await getInvite(client, guild);
+			if (!invite) return;
 
 			return {
+				color: fromHex('#637373'),
 				fields: [{
 					name: '🔗  PERMANENT INVITE LINK',
-					value: `**${invite.link}**`,
+					value: `**https://discord.gg/${invite.code}**`,
 				}],
 			};
 		},
 	},
-  */
 };
 
-// TODO: Reimplement `getInvite()` once invite helpers and types are fixed in discordeno.
-/*
 async function getInvite(
 	client: Client,
 	guild: Guild,
-): Promise<Invite | undefined> {
-	// @ts-ignore
-	const invites = (await getInvites(client.bot, guildId)).array();
-
-	// Invites that do not expire.
+): Promise<InviteMetadata | BaseInvite | undefined> {
+	const invites = (await getInvites(client.bot, guild.id)).array();
 	const viableInvites = invites.filter((invite) => invite.maxAge === 0);
-
-	const invite = viableInvites.find((invite) =>
+	const mostViableInvite = viableInvites.find((invite) =>
 		invite.maxAge === 0 && invite.inviter?.id === guild.ownerId
 	);
-  if (invite) return invite;
+	if (mostViableInvite) return mostViableInvite;
 
-  const inviteLinkChannel = getTextChannel(guild, 'welcome');
-  if (!inviteLinkChannel) return undefined;
+	const inviteLinkChannel = getTextChannel(guild, 'welcome');
+	if (!inviteLinkChannel) return undefined;
 
-  const newInvite: Invite = await createInvite(client.bot, inviteLinkChannel.id, {
-    maxAge: 0,
-    maxUses: 0,
-    temporary: false,
-    unique: false,
-  });
+	const newInvite = await createInvite(client.bot, inviteLinkChannel.id, {
+		maxAge: 0,
+		maxUses: 0,
+		temporary: false,
+		unique: false,
+	});
 
 	return newInvite;
 }
-*/
 
 function getChannelMention(guild: Guild, name: string): string {
 	const channel = getTextChannel(guild, name);
