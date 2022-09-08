@@ -1,5 +1,6 @@
 import {
 	ApplicationCommandFlags,
+	ChannelTypes,
 	getGuildIconURL,
 	Guild,
 	Interaction,
@@ -45,14 +46,19 @@ function displayGuildInformation(
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
 					title: `Information about **${guild.name!}**`,
-					thumbnail: (() => {
+					...(() => {
 						const iconURL = getGuildIconURL(client.bot, guild.id, guild.icon, {
 							size: 4096,
 							format: 'png',
 						});
-						if (!iconURL) return;
+						if (!iconURL) return {};
 
-						return { url: iconURL };
+						const icon = { url: iconURL };
+
+						return {
+							author: { ...icon, name: '' },
+							thumbnail: icon,
+						};
 					})(),
 					color: configuration.interactions.responses.colors.invisible,
 					fields: [
@@ -63,7 +69,7 @@ function displayGuildInformation(
 						},
 						{
 							name: '🧑 Members',
-							value: guild.memberCount!.toString(),
+							value: guild.memberCount.toString(),
 							inline: true,
 						},
 						{
@@ -72,11 +78,25 @@ function displayGuildInformation(
 							inline: true,
 						},
 						{
-							name: '🎓 Proficiency Distribution',
-							value: displayProficiencyRoleDistribution(
-								proficiencyRoleFrequencies,
-							),
-							inline: false,
+							name: '🗯️ Channels',
+							value: (() => {
+								const channels = guild.channels.array();
+
+								const getCountByType = (type: ChannelTypes): number => {
+									return channels.filter((channel) => channel.type === type)
+										.length;
+								};
+
+								const textChannelsCount = getCountByType(
+									ChannelTypes.GuildText,
+								);
+								const voiceChannelsCount = getCountByType(
+									ChannelTypes.GuildVoice,
+								);
+
+								return `📜 ${textChannelsCount} Text | 🔊 ${voiceChannelsCount} Voice`;
+							})(),
+							inline: true,
 						},
 						hasDistinctOwner
 							? {
@@ -88,8 +108,15 @@ function displayGuildInformation(
 								name: `⚖️ ${capitalise(enforcerRoleName)}s`,
 								value:
 									`This server is overseen by a collective of ${enforcerRoleName}s, rather than a single owner.`,
-								inline: true,
+								inline: false,
 							}))(configuration.guilds.moderation.moderator.toLowerCase()),
+						{
+							name: '🎓 Proficiency Distribution',
+							value: displayProficiencyRoleDistribution(
+								proficiencyRoleFrequencies,
+							),
+							inline: false,
+						},
 					],
 				}],
 			},
