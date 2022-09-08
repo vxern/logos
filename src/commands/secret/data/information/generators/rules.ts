@@ -39,6 +39,11 @@ const ruleGenerators: Record<string, (guild: Guild) => Rule> = {
 		content:
 			'It is expected of members to not use this space for advertising, and active attempts at it (including unsolicited DMs) are prohibited.',
 	}),
+	adherence: (_) => ({
+		summary: 'Respect the rules.',
+		content:
+			'For members who show no regard for the server rules, and are not interested in making useful contributions, a permanent ban may be issued.',
+	}),
 };
 
 export default ruleGenerators;
