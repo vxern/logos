@@ -27,7 +27,7 @@ interface Role extends Assignable {
 	/** Description of this role's purpose. */
 	description?: string;
 
-	/** Emoji to be displayed next to its selection. */
+	/** Emoji to be displayed next to the role name. */
 	emoji?: string;
 }
 
