@@ -7,6 +7,7 @@ import {
 	InviteMetadata,
 } from '../../../../../deps.ts';
 import { Client } from '../../../../client.ts';
+import configuration from '../../../../configuration.ts';
 import { mention, MentionTypes } from '../../../../formatting.ts';
 import { fromHex, getTextChannel } from '../../../../utils.ts';
 import ruleGenerators from './generators/rules.ts';
@@ -38,10 +39,17 @@ const informationSections: Record<string, InformationSection> = {
 				});
 			}
 
+			const moderatorRoleId = guild.roles.array().find((role) =>
+				role.name === configuration.guilds.moderation.moderator
+			)?.id;
+			const moderatorRoleMention = moderatorRoleId
+				? mention(moderatorRoleId, MentionTypes.Role)
+				: configuration.guilds.moderation.moderator.toLowerCase();
+
 			fields.push({
 				name: 'ℹ️  MODERATION POLICY',
 				value:
-					`The server abides by a 3-warn moderation policy, enforced by the server's guides. The above rules apply to the entirety of the server, and a breach thereof will cause a warning to be issued.\n\nDepending on the circumstances, a timeout may be issued to the member for the duration of 5, 15, or 60 minutes respectively.\n\nIf a member received three warnings, and a situation occurs where a fourth warning would be issued, the member will be kicked instead.`,
+					`The server abides by a 3-warn moderation policy, enforced by the server's ${moderatorRoleMention}s. The above rules apply to the entirety of the server, and a breach thereof will cause a warning to be issued.\n\nDepending on the circumstances, a timeout may be issued to the member for the duration of 5, 15, or 60 minutes respectively.\n\nIf a member received three warnings, and a situation occurs where a fourth warning would be issued, the member will be kicked instead.`,
 				inline: false,
 			});
 
