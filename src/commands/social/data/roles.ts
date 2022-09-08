@@ -49,6 +49,24 @@ const categories: RoleCategory[] = [
 		type: RoleCategoryTypes.CategoryGroup,
 		categories: [
 			{
+				name: 'Orthography',
+				description: 'Roles related to various orthographies.',
+				type: RoleCategoryTypes.Category,
+				color: fromHex('#d6e3f8'),
+				emoji: '🖋️',
+				restrictToOneRole: true,
+				collection: {
+					type: RoleCollectionTypes.CollectionLocalised,
+					onAssignMessage: (name) => `You are now a ${name}.`,
+					lists: {
+						'Romanian': [{
+							name: 'Îdinist',
+							description: 'I am a proponent of Îdinism.',
+						}],
+					},
+				},
+			},
+			{
 				name: 'Gender',
 				description: 'Roles defining one\'s gender.',
 				type: RoleCategoryTypes.Category,
