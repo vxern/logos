@@ -164,7 +164,7 @@ async function praise(
 	const guild = client.guilds.get(interaction.guildId!);
 	if (!guild) return;
 
-	const dmChannel = await getDmChannel(client.bot, interaction.user.id);
+	const dmChannel = await getDmChannel(client.bot, member.id);
 	if (dmChannel) {
 		sendMessage(client.bot, dmChannel.id, {
 			embeds: [
@@ -198,7 +198,7 @@ async function praise(
 				embeds: [{
 					title: 'User praised',
 					description:
-						`The user has been praised, and they have been notified (if they have their DMs open).`,
+						`The user has been praised and notified (if they have their DMs open).`,
 					color: configuration.interactions.responses.colors.green,
 				}],
 			},
