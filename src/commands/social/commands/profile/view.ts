@@ -12,7 +12,7 @@ import configuration from '../../../../configuration.ts';
 import { mention, MentionTypes } from '../../../../formatting.ts';
 import { snowflakeToTimestamp } from '../../../../utils.ts';
 import { OptionBuilder } from '../../../command.ts';
-import { user } from '../../../parameters.ts';
+import { show, user } from '../../../parameters.ts';
 
 const command: OptionBuilder = {
 	name: 'view',
@@ -26,7 +26,7 @@ const command: OptionBuilder = {
 		ro: 'Afișează profilul unui utilizator.',
 	},
 	type: ApplicationCommandOptionTypes.SubCommand,
-	options: [user],
+	options: [user, show],
 	handle: viewProfile,
 };
 
@@ -37,6 +37,12 @@ async function viewProfile(
 	const userIdentifier = <string | undefined> interaction.data?.options?.at(0)
 		?.options?.at(0)?.value;
 	if (userIdentifier === undefined) return;
+
+	const show =
+		(<boolean | undefined> interaction.data?.options?.at(0)?.options?.find((
+			option,
+		) => option.name === 'show')
+			?.value) ?? false;
 
 	const member = resolveInteractionToMember(
 		client,
@@ -88,49 +94,55 @@ async function viewProfile(
 	const warnings = await client.database.getWarnings(subject.ref);
 	if (!warnings) return showProfileViewFailure();
 
-	sendInteractionResponse(client.bot, interaction.id, interaction.token, {
-		type: InteractionResponseTypes.ChannelMessageWithSource,
-		data: {
-			embeds: [{
-				title: `Information for ${user.username}`,
-				thumbnail: (() => {
-					const iconURL = getAvatarURL(
-						client.bot,
-						user.id,
-						user.discriminator,
-						{ avatar: user.avatar, size: 4096, format: 'webp' },
-					);
-					if (!iconURL) return;
+	return void sendInteractionResponse(
+		client.bot,
+		interaction.id,
+		interaction.token,
+		{
+			type: InteractionResponseTypes.ChannelMessageWithSource,
+			data: {
+				flags: !show ? ApplicationCommandFlags.Ephemeral : undefined,
+				embeds: [{
+					title: `Information for ${user.username}`,
+					thumbnail: (() => {
+						const iconURL = getAvatarURL(
+							client.bot,
+							user.id,
+							user.discriminator,
+							{ avatar: user.avatar, size: 4096, format: 'webp' },
+						);
+						if (!iconURL) return;
 
-					return { url: iconURL };
-				})(),
-				fields: [{
-					name: '💼 Roles',
-					value: member.roles.map((roleId) =>
-						mention(roleId, MentionTypes.Role)
-					).join(' '),
-					inline: false,
-				}, {
-					name: '📅 Dates',
-					value: `Joined server: ${
-						joinedAt.format('Do [of] MMMM YYYY')
-					} (${joinedAt.fromNow()})\nCreated account: ${
-						createdAt.format('Do [of] MMMM YYYY')
-					} (${createdAt.fromNow()})`,
-					inline: false,
-				}, {
-					name: '🙏 Praises',
-					value:
-						`Received: ${praisesReceived.length}\nGiven: ${praisesGiven.length}`,
-					inline: true,
-				}, {
-					name: `😖 Warnings`,
-					value: `Received: ${warnings.length}`,
-					inline: true,
+						return { url: iconURL };
+					})(),
+					fields: [{
+						name: '💼 Roles',
+						value: member.roles.map((roleId) =>
+							mention(roleId, MentionTypes.Role)
+						).join(' '),
+						inline: false,
+					}, {
+						name: '📅 Dates',
+						value: `Joined server: ${
+							joinedAt.format('Do [of] MMMM YYYY')
+						} (${joinedAt.fromNow()})\nCreated account: ${
+							createdAt.format('Do [of] MMMM YYYY')
+						} (${createdAt.fromNow()})`,
+						inline: false,
+					}, {
+						name: '🙏 Praises',
+						value:
+							`Received: ${praisesReceived.length}\nGiven: ${praisesGiven.length}`,
+						inline: true,
+					}, {
+						name: `😖 Warnings`,
+						value: `Received: ${warnings.length}`,
+						inline: true,
+					}],
 				}],
-			}],
+			},
 		},
-	});
+	);
 }
 
 export default command;
