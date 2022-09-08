@@ -104,10 +104,10 @@ function displayGuildInformation(
 								value: mention(owner.id, MentionTypes.User),
 								inline: true,
 							}
-							: ((enforcerRoleName) => ({
-								name: `⚖️ ${capitalise(enforcerRoleName)}s`,
+							: ((moderatorRoleName) => ({
+								name: `⚖️ ${capitalise(moderatorRoleName)}s`,
 								value:
-									`This server is overseen by a collective of ${enforcerRoleName}s, rather than a single owner.`,
+									`This server is overseen by a collective of ${moderatorRoleName}s, rather than a single owner.`,
 								inline: false,
 							}))(configuration.guilds.moderation.moderator.toLowerCase()),
 						{
