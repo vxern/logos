@@ -80,13 +80,17 @@ async function praise(
 		);
 	}
 
+	sendInteractionResponse(client.bot, interaction.id, interaction.token, {
+		type: InteractionResponseTypes.DeferredChannelMessageWithSource,
+	});
+
 	const showPraiseFailure = (): void => {
 		return void sendInteractionResponse(
 			client.bot,
 			interaction.id,
 			interaction.token,
 			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
+				type: InteractionResponseTypes.UpdateMessage,
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
@@ -130,7 +134,7 @@ async function praise(
 			interaction.id,
 			interaction.token,
 			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
+				type: InteractionResponseTypes.UpdateMessage,
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
@@ -192,7 +196,7 @@ async function praise(
 		interaction.id,
 		interaction.token,
 		{
-			type: InteractionResponseTypes.ChannelMessageWithSource,
+			type: InteractionResponseTypes.UpdateMessage,
 			data: {
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{

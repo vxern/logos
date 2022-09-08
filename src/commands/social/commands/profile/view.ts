@@ -9,7 +9,7 @@ import {
 } from '../../../../../deps.ts';
 import { Client, resolveInteractionToMember } from '../../../../client.ts';
 import configuration from '../../../../configuration.ts';
-import { mention, MentionTypes } from '../../../../formatting.ts';
+import { displayTime, mention, MentionTypes } from '../../../../formatting.ts';
 import { snowflakeToTimestamp } from '../../../../utils.ts';
 import { OptionBuilder } from '../../../command.ts';
 import { show, user } from '../../../parameters.ts';
@@ -26,7 +26,7 @@ const command: OptionBuilder = {
 		ro: 'Afișează profilul unui utilizator.',
 	},
 	type: ApplicationCommandOptionTypes.SubCommand,
-	options: [user, show],
+	options: [{ ...user, required: false }, show],
 	handle: viewProfile,
 };
 
@@ -36,7 +36,6 @@ async function viewProfile(
 ): Promise<void> {
 	const userIdentifier = <string | undefined> interaction.data?.options?.at(0)
 		?.options?.at(0)?.value;
-	if (userIdentifier === undefined) return;
 
 	const show =
 		(<boolean | undefined> interaction.data?.options?.at(0)?.options?.find((
@@ -47,7 +46,7 @@ async function viewProfile(
 	const member = resolveInteractionToMember(
 		client,
 		interaction,
-		userIdentifier,
+		userIdentifier ?? interaction.user.id.toString(),
 	);
 	if (!member) return;
 
@@ -91,8 +90,8 @@ async function viewProfile(
 	const praisesGiven = await client.database.getPraises('author', subject.ref);
 	if (!praisesGiven) return showProfileViewFailure();
 
-	const warnings = await client.database.getWarnings(subject.ref);
-	if (!warnings) return showProfileViewFailure();
+	const warningsReceived = await client.database.getWarnings(subject.ref);
+	if (!warningsReceived) return showProfileViewFailure();
 
 	return void sendInteractionResponse(
 		client.bot,
@@ -123,21 +122,15 @@ async function viewProfile(
 						inline: false,
 					}, {
 						name: '📅 Dates',
-						value: `Joined server: ${
-							joinedAt.format('Do [of] MMMM YYYY')
-						} (${joinedAt.fromNow()})\nCreated account: ${
-							createdAt.format('Do [of] MMMM YYYY')
-						} (${createdAt.fromNow()})`,
+						value: `Joined server: ${displayTime(joinedAt)}
+Created account: ${displayTime(createdAt)}`,
 						inline: false,
 					}, {
-						name: '🙏 Praises',
+						name: '🧮 Statistics',
 						value:
-							`Received: ${praisesReceived.length}\nGiven: ${praisesGiven.length}`,
-						inline: true,
-					}, {
-						name: `😖 Warnings`,
-						value: `Received: ${warnings.length}`,
-						inline: true,
+							`🙏 Praises - ${praisesReceived.length} Received | ${praisesGiven.length} Given
+😖 Warnings - ${warningsReceived.length} Received`,
+						inline: false,
 					}],
 				}],
 			},
