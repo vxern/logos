@@ -1,5 +1,3 @@
-import { dayjs } from '../deps.ts';
-
 /**
  * Capitalises the first letter of the given text.
  *
@@ -48,10 +46,8 @@ function list(items: string[]): string {
  * @param timestamp - Unix timestamp.
  * @returns The formatted, human-readable time expression.
  */
-function displayTime(timestamp: number | bigint): string {
-	const dateTime = dayjs(timestamp);
-
-	return `${dateTime.format('D MMMM YYYY')} (${dateTime.fromNow()})`;
+function displayTime(timestamp: number): string {
+	return `<t:${Math.floor(timestamp / 1000)}:R>`;
 }
 
 /** Defines the type of Discord mention. */
