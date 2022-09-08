@@ -141,6 +141,10 @@ function createRoleSelectionMenu(
 	const guild = client.guilds.get(interaction.guildId!);
 	if (!guild) return;
 
+	const emojiIdsByName = new Map(
+		guild.emojis.map((emoji) => [emoji.name!, emoji.id!]),
+	);
+
 	const member = client.members.get(
 		snowflakeToBigint(`${interaction.user.id}${guild.id}`),
 	);
@@ -181,6 +185,7 @@ function createRoleSelectionMenu(
 				menuRoles,
 				menuRolesResolved,
 				memberRolesIncludedInMenu,
+				emojiIdsByName,
 			);
 		}
 
@@ -303,7 +308,7 @@ To choose a new role, unassign one of your existing roles.`,
 		},
 	);
 
-	traverseRoleTreeAndDisplay(interaction, false);
+	return traverseRoleTreeAndDisplay(interaction, false);
 }
 
 /**

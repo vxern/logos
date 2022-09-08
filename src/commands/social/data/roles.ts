@@ -62,6 +62,7 @@ const categories: RoleCategory[] = [
 						'Romanian': [{
 							name: 'Îdinist',
 							description: 'I am a proponent of Îdinism.',
+							emoji: 'Idini',
 						}],
 					},
 				},

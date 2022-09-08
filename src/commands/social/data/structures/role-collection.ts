@@ -46,10 +46,13 @@ type RoleCollection<T = Assignable> =
 	& T
 	& (RoleCollectionStandalone | RoleCollectionLocalised);
 
+const emojiExpression = /\p{Extended_Pictographic}/u;
+
 function createSelectOptionsFromCollection(
 	menuRoles: Role[],
 	menuRolesResolved: DiscordRole[],
 	memberRolesIncludedInMenu: bigint[],
+	emojiIdsByName: Map<string, bigint>,
 ): SelectOption[] {
 	const selectOptions: SelectOption[] = [];
 
@@ -61,7 +64,15 @@ function createSelectOptionsFromCollection(
 			label: memberHasRole ? `[Assigned] ${role.name}` : role.name,
 			value: index.toString(),
 			description: role.description,
-			emoji: { name: role.emoji },
+			emoji: (() => {
+				if (!role.emoji) return;
+				if (emojiExpression.test(role.emoji)) return { name: role.emoji };
+
+				const id = emojiIdsByName.get(role.emoji);
+				if (!id) return { name: '❓' };
+
+				return { name: role.emoji, id };
+			})(),
 		});
 	}
 
