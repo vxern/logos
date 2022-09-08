@@ -48,7 +48,9 @@ function citeRule(
 ): void {
 	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete) {
 		const choices = Object.keys(ruleGenerators).map((name, index) => ({
-			name: capitalise(name.toLowerCase()),
+			name: `#${index + 1}: ${
+				name.toLowerCase().split(' ').map(capitalise).join(' ')
+			}`,
 			value: index.toString(),
 		}));
 
