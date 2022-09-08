@@ -35,7 +35,7 @@ async function displayBotInformation(
 							client.bot,
 							client.bot.id,
 							botUser.discriminator,
-							{ avatar: botUser.avatar },
+							{ avatar: botUser.avatar, size: 4096, format: 'png' },
 						),
 					},
 					color: configuration.interactions.responses.colors.invisible,
