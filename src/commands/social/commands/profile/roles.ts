@@ -14,7 +14,7 @@ import {
 	sendInteractionResponse,
 	snowflakeToBigint,
 } from '../../../../../deps.ts';
-import { Client, getLanguage, isManagedGuild } from '../../../../client.ts';
+import { Client, getLanguage } from '../../../../client.ts';
 import { Language } from '../../../../types.ts';
 import { createInteractionCollector } from '../../../../utils.ts';
 import configuration from '../../../../configuration.ts';
@@ -28,9 +28,9 @@ import {
 	createSelectOptionsFromCollection,
 	resolveRoles,
 } from '../../data/structures/role-collection.ts';
-import { roles } from '../../module.ts';
 import { OptionBuilder } from '../../../command.ts';
 import { Role } from '../../data/structures/role.ts';
+import roles from '../../data/roles.ts';
 
 const command: OptionBuilder = {
 	name: 'roles',
@@ -56,14 +56,8 @@ function selectRoles(
 	interaction: Interaction,
 ): void {
 	const language = getLanguage(client, interaction.guildId!);
-	const isManaged = isManagedGuild(client, interaction.guildId!);
 
-	const topLevelRoleCategories = roles.scopes.global;
-	if (isManaged) {
-		const selections = getRelevantCategories(roles.scopes.local, language);
-
-		topLevelRoleCategories.push(...selections);
-	}
+	const rootCategories = getRelevantCategories(roles, language);
 
 	return createRoleSelectionMenu(
 		client,
@@ -77,7 +71,7 @@ function selectRoles(
 						'Please select a role category to obtain a list of available roles within it.',
 					color: configuration.interactions.responses.colors.invisible,
 					emoji: '💭',
-					categories: topLevelRoleCategories,
+					categories: rootCategories,
 				},
 				indexesAccessed: [],
 			},
