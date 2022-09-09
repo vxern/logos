@@ -1,4 +1,7 @@
-import { ApplicationCommandOptionTypes, Interaction } from '../../../../deps.ts';
+import {
+	ApplicationCommandOptionTypes,
+	Interaction,
+} from '../../../../deps.ts';
 import { Client } from '../../../client.ts';
 import { OptionBuilder } from '../../../commands/command.ts';
 import { by, to } from '../parameters.ts';
@@ -14,7 +17,7 @@ const command: OptionBuilder = {
 		pl: 'Przewija obecnie grający utwór do przodu.',
 		ro: 'Derulează melodia în curs de redare înainte.',
 	},
-  type: ApplicationCommandOptionTypes.SubCommand,
+	type: ApplicationCommandOptionTypes.SubCommand,
 	handle: fastForwardSong,
 	options: [by, to],
 };
