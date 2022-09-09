@@ -3,7 +3,7 @@ import { LoadType } from 'https://deno.land/x/lavalink_types@2.0.6/mod.ts';
 import {
 	ApplicationCommandFlags,
 	Channel,
-	editInteractionResponse,
+	editOriginalInteractionResponse,
 	Guild,
 	Interaction,
 	InteractionResponseTypes,
@@ -336,9 +336,13 @@ class MusicController extends Controller {
 			}
 
 			if (isDeferred) {
-				return editInteractionResponse(this.client.bot, interaction.token, {
-					embeds,
-				});
+				return editOriginalInteractionResponse(
+					this.client.bot,
+					interaction.token,
+					{
+						embeds,
+					},
+				);
 			}
 
 			return sendInteractionResponse(
@@ -393,9 +397,13 @@ class MusicController extends Controller {
 		}
 
 		if (isDeferred) {
-			return editInteractionResponse(this.client.bot, interaction.token, {
-				embeds,
-			});
+			return editOriginalInteractionResponse(
+				this.client.bot,
+				interaction.token,
+				{
+					embeds,
+				},
+			);
 		}
 
 		return sendInteractionResponse(

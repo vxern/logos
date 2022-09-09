@@ -2,7 +2,7 @@ import {
 	addRole,
 	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
-	editInteractionResponse,
+	editOriginalInteractionResponse,
 	Interaction,
 	InteractionResponse,
 	InteractionResponseTypes,
@@ -192,7 +192,7 @@ function createRoleSelectionMenu(
 		const menu = displaySelectMenu(selectOptions, data, customId, category);
 
 		if (editResponse) {
-			return void editInteractionResponse(
+			return void editOriginalInteractionResponse(
 				client.bot,
 				interaction.token,
 				menu.data!,

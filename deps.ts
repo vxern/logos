@@ -1,13 +1,12 @@
 /** Discord API library. */
-export * from 'https://raw.githubusercontent.com/discordeno/discordeno/main/mod.ts';
-export { send as sendShardMessage } from 'https://raw.githubusercontent.com/discordeno/discordeno/main/mod.ts';
-export { routes } from 'https://raw.githubusercontent.com/discordeno/discordeno/main/util/routes.ts';
+export * from 'https://raw.githubusercontent.com/vxern/discordeno/main/mod.ts';
+export { send as sendShardMessage } from 'https://raw.githubusercontent.com/vxern/discordeno/main/mod.ts';
 
 /** Database connection. */
 export * as faunadb from 'https://deno.land/x/fauna@5.0.0-deno-alpha9/mod.ts';
 
 /** Music playback. */
-export * as lavadeno from 'https://deno.land/x/lavadeno@3.2.2/mod.ts';
+export * as lavadeno from 'https://deno.land/x/lavadeno@3.2.3/mod.ts';
 
 /** Extracting data from webpages. */
 export * from 'https://deno.land/x/cheerio@1.0.6/mod.ts';

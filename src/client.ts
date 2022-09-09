@@ -18,7 +18,7 @@ import {
 	// sendShardMessage,
 	snowflakeToBigint,
 	startBot,
-	upsertApplicationCommands,
+	upsertGuildApplicationCommands,
 	User,
 } from '../deps.ts';
 import services from './services/service.ts';
@@ -382,7 +382,7 @@ function registerCommands(
 		}
 	}
 
-	upsertApplicationCommands(client.bot, commands, guildId);
+	return void upsertGuildApplicationCommands(client.bot, guildId, commands);
 }
 
 function addCollector<T extends keyof EventHandlers>(
