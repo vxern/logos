@@ -89,7 +89,7 @@ function createSelectOptionsFromCategories(
 
 	const selections: SelectOption[] = [];
 	for (let index = 0; index < categorySelections.length; index++) {
-		const category = categorySelections[index]!;
+		const category = categorySelections.at(index)!;
 
 		selections.push({
 			label: category.name,

@@ -221,7 +221,7 @@ function paginate<T>(
 			name: elements.length === 1
 				? view.title
 				: `${view.title} ~ Page ${pageIndex + 1}/${elements.length}`,
-			value: view.generate(elements[pageIndex]!, pageIndex),
+			value: view.generate(elements.at(pageIndex)!, pageIndex),
 		}, ...existingFields],
 		footer: isLast() ? undefined : { text: 'Continued on the next page...' },
 	}];

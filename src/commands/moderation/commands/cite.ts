@@ -89,7 +89,7 @@ function citeRule(
 	const index = Number(indexString);
 	if (isNaN(index)) return displayInvalidRuleError();
 
-	const titleRuleTuples = Object.entries(ruleGenerators)[index];
+	const titleRuleTuples = Object.entries(ruleGenerators).at(index);
 	if (!titleRuleTuples) return displayInvalidRuleError();
 
 	const [title, generateRule] = titleRuleTuples;

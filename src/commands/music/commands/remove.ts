@@ -79,7 +79,7 @@ function removeSongListing(
 	const isLast = () => pageIndex === queueChunks.length - 1;
 
 	const generateSelectMenu = (): ActionRow => {
-		page = queueChunks[pageIndex]!;
+		page = queueChunks.at(pageIndex)!;
 
 		return {
 			type: MessageComponentTypes.ActionRow,
