@@ -1,6 +1,7 @@
 import {
 	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
+	editOriginalInteractionResponse,
 	getDmChannel,
 	getGuildIconURL,
 	Interaction,
@@ -129,21 +130,17 @@ async function praise(
 				configuration.guilds.praises.interval
 		);
 	if (!canPraise) {
-		return void sendInteractionResponse(
+		return void editOriginalInteractionResponse(
 			client.bot,
-			interaction.id,
 			interaction.token,
 			{
-				type: InteractionResponseTypes.UpdateMessage,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						title: 'Wait before praising again',
-						description:
-							`You have already praised a user recently. You must wait before praising somebody again.`,
-						color: configuration.interactions.responses.colors.yellow,
-					}],
-				},
+				flags: ApplicationCommandFlags.Ephemeral,
+				embeds: [{
+					title: 'Wait before praising again',
+					description:
+						`You have already praised a user recently. You must wait before praising somebody again.`,
+					color: configuration.interactions.responses.colors.yellow,
+				}],
 			},
 		);
 	}
@@ -191,21 +188,17 @@ async function praise(
 		});
 	}
 
-	return void sendInteractionResponse(
+	return void editOriginalInteractionResponse(
 		client.bot,
-		interaction.id,
 		interaction.token,
 		{
-			type: InteractionResponseTypes.UpdateMessage,
-			data: {
-				flags: ApplicationCommandFlags.Ephemeral,
-				embeds: [{
-					title: 'User praised',
-					description:
-						`The user has been praised and notified (if they have their DMs open).`,
-					color: configuration.interactions.responses.colors.green,
-				}],
-			},
+			flags: ApplicationCommandFlags.Ephemeral,
+			embeds: [{
+				title: 'User praised',
+				description:
+					`The user has been praised and notified (if they have their DMs open).`,
+				color: configuration.interactions.responses.colors.green,
+			}],
 		},
 	);
 }

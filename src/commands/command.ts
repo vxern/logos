@@ -1,6 +1,6 @@
 import {
 	ApplicationCommandOption,
-	CreateApplicationCommand,
+	CreateSlashApplicationCommand,
 	Interaction,
 } from '../../deps.ts';
 import { Client } from '../client.ts';
@@ -28,7 +28,7 @@ type InteractionHandler = (
 ) => void | Promise<void>;
 
 type CommandLocalised = WithRequired<
-	CreateApplicationCommand,
+	CreateSlashApplicationCommand,
 	LocalisationFields
 >;
 

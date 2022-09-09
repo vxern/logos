@@ -1,7 +1,7 @@
 import {
 	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
-	editInteractionResponse,
+	editOriginalInteractionResponse,
 	Interaction,
 	InteractionResponseTypes,
 	sendInteractionResponse,
@@ -105,9 +105,7 @@ async function word(
 		interaction.token,
 		{
 			type: InteractionResponseTypes.DeferredChannelMessageWithSource,
-			data: {
-				flags: !show ? ApplicationCommandFlags.Ephemeral : undefined,
-			},
+			data: { flags: !show ? ApplicationCommandFlags.Ephemeral : undefined },
 		},
 	);
 
@@ -127,7 +125,7 @@ async function word(
 			const hasEntry = fields.length > 0;
 			if (!hasEntry) return;
 
-			editInteractionResponse(client.bot, interaction.token, {
+			editOriginalInteractionResponse(client.bot, interaction.token, {
 				embeds: [{
 					title: entry.headword,
 					fields: fields,
@@ -144,18 +142,14 @@ async function word(
 	const responded = toFields(entry, { verbose: verbose }).length > 0;
 	if (responded) return;
 
-	return void sendInteractionResponse(
+	return void editOriginalInteractionResponse(
 		client.bot,
-		interaction.id,
 		interaction.token,
 		{
-			type: InteractionResponseTypes.ChannelMessageWithSource,
-			data: {
-				embeds: [{
-					description: `No results found.`,
-					color: configuration.interactions.responses.colors.red,
-				}],
-			},
+			embeds: [{
+				description: `No results found.`,
+				color: configuration.interactions.responses.colors.yellow,
+			}],
 		},
 	);
 }

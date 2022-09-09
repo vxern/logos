@@ -8,12 +8,12 @@ import {
 	ChannelTypes,
 	deleteMessage,
 	DiscordEmbedField,
-	editInteractionResponse,
+	editOriginalInteractionResponse,
 	Embed,
 	EventHandlers,
 	Guild,
 	Interaction,
-	InteractionApplicationCommandCallbackData,
+	InteractionCallbackData,
 	InteractionResponseTypes,
 	InteractionTypes,
 	Member,
@@ -141,7 +141,7 @@ function toModal(
 	form: Form,
 	customId: string,
 	language?: Language,
-): InteractionApplicationCommandCallbackData {
+): InteractionCallbackData {
 	const components = Object.entries(form.fields).map<ActionRow>(
 		([name, field]) => {
 			const idWithFieldName = `${customId}|${name}`;
@@ -276,7 +276,7 @@ function paginate<T>(
 				type: InteractionResponseTypes.DeferredUpdateMessage,
 			});
 
-			editInteractionResponse(bot, interaction.token, {
+			editOriginalInteractionResponse(bot, interaction.token, {
 				embeds: generateEmbed(),
 				components: generateButtons(),
 			});

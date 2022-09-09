@@ -2,9 +2,9 @@ import {
 	ApplicationCommandFlags,
 	ButtonComponent,
 	ButtonStyles,
-	editInteractionResponse,
+	editOriginalInteractionResponse,
 	Interaction,
-	InteractionApplicationCommandCallbackData,
+	InteractionCallbackData,
 	InteractionResponseTypes,
 	InteractionTypes,
 	MessageComponentTypes,
@@ -39,7 +39,7 @@ async function startGame(
 ): Promise<void> {
 	const language = getLanguage(client, interaction.guildId!);
 	const sentencePairs = sentencePairsByLanguage.get(language);
-	if (!sentencePairs) {
+	if (!sentencePairs || sentencePairs.length === 0) {
 		return void sendInteractionResponse(
 			client.bot,
 			interaction.id,
@@ -70,7 +70,7 @@ async function startGame(
 
 	let sentenceSelection: SentenceSelection;
 
-	const createGameView = (): InteractionApplicationCommandCallbackData => {
+	const createGameView = (): InteractionCallbackData => {
 		sentenceSelection = createSentenceSelection(sentencePairs);
 
 		return {
@@ -131,7 +131,7 @@ async function startGame(
 				? configuration.interactions.responses.colors.green
 				: configuration.interactions.responses.colors.red;
 
-			return void editInteractionResponse(
+			return void editOriginalInteractionResponse(
 				client.bot,
 				interaction.token,
 				createGameView(),
@@ -139,14 +139,10 @@ async function startGame(
 		},
 	});
 
-	return void sendInteractionResponse(
+	return void editOriginalInteractionResponse(
 		client.bot,
-		interaction.id,
 		interaction.token,
-		{
-			type: InteractionResponseTypes.ChannelMessageWithSource,
-			data: createGameView(),
-		},
+		createGameView(),
 	);
 }
 
@@ -189,7 +185,7 @@ function createSentenceSelection(
 ): SentenceSelection {
 	const indexes = Array.from({ length: 4 }, () => random(sentencePairs.length));
 
-	const pair = sentencePairs.at(indexes[0]!)!;
+	const pair = sentencePairs.at(indexes.at(0)!)!;
 	const words = pair.sentence.split(' ');
 	const wordIndex = random(words.length);
 	const word = words.at(wordIndex)!;

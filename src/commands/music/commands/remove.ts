@@ -4,9 +4,9 @@ import {
 	ApplicationCommandOptionTypes,
 	ButtonComponent,
 	ButtonStyles,
-	editInteractionResponse,
-	EditWebhookMessage,
+	editOriginalInteractionResponse,
 	Interaction,
+	InteractionCallbackData,
 	InteractionResponseTypes,
 	InteractionTypes,
 	MessageComponents,
@@ -132,7 +132,7 @@ function removeSongListing(
 		}];
 	};
 
-	const generateEmbed: () => EditWebhookMessage = () => ({
+	const generateEmbed: () => InteractionCallbackData = () => ({
 		embeds: [{
 			title: 'Select a song / song collection to remove',
 			description: 'Select a song or song collection from the choices below.',
@@ -163,7 +163,7 @@ function removeSongListing(
 				type: InteractionResponseTypes.DeferredUpdateMessage,
 			});
 
-			editInteractionResponse(bot, interaction.token, generateEmbed());
+			editOriginalInteractionResponse(bot, interaction.token, generateEmbed());
 		},
 	});
 

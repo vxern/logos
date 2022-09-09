@@ -1,8 +1,10 @@
 // deno-lint-ignore-file camelcase
+import 'https://deno.land/x/dotenv@v3.2.0/load.ts';
 import {
 	ApplicationCommandFlags,
 	ApplicationCommandOptionChoice,
 	ApplicationCommandOptionTypes,
+	editOriginalInteractionResponse,
 	Interaction,
 	InteractionResponseTypes,
 	InteractionTypes,
@@ -296,18 +298,14 @@ async function translate(
 		text,
 	);
 	if (!translation) {
-		return void sendInteractionResponse(
+		return void editOriginalInteractionResponse(
 			client.bot,
-			interaction.id,
 			interaction.token,
 			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					embeds: [{
-						description: 'Failed to translate text.',
-						color: configuration.interactions.responses.colors.red,
-					}],
-				},
+				embeds: [{
+					description: 'Failed to translate text.',
+					color: configuration.interactions.responses.colors.red,
+				}],
 			},
 		);
 	}
@@ -317,27 +315,23 @@ async function translate(
 		? translation.text
 		: '⠀';
 
-	return void sendInteractionResponse(
+	return void editOriginalInteractionResponse(
 		client.bot,
-		interaction.id,
 		interaction.token,
 		{
-			type: InteractionResponseTypes.ChannelMessageWithSource,
-			data: {
-				embeds: [{
-					title: `${sourceLanguage.name} → ${targetLanguage.name}`,
-					color: configuration.interactions.responses.colors.blue,
-					fields: [{
-						name: sourceLanguage.name,
-						value: text,
-						inline: false,
-					}, {
-						name: targetLanguage.name,
-						value: translatedText,
-						inline: false,
-					}],
+			embeds: [{
+				title: `${sourceLanguage.name} → ${targetLanguage.name}`,
+				color: configuration.interactions.responses.colors.blue,
+				fields: [{
+					name: sourceLanguage.name,
+					value: text,
+					inline: false,
+				}, {
+					name: targetLanguage.name,
+					value: translatedText,
+					inline: false,
 				}],
-			},
+			}],
 		},
 	);
 }
