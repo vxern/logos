@@ -29,7 +29,7 @@ function displayGuildInformation(
 	const owner = client.users.get(guild.ownerId);
 	if (!owner) return;
 
-	const hasDistinctOwner = owner && owner.username !== guild.name!;
+	const hasDistinctOwner = owner && owner.username !== guild.name;
 
 	const proficiencyRoleFrequencies = getProficiencyRoleFrequencies(
 		client,
@@ -45,7 +45,7 @@ function displayGuildInformation(
 			data: {
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
-					title: `Information about **${guild.name!}**`,
+					title: `Information about **${guild.name}**`,
 					...(() => {
 						const iconURL = getGuildIconURL(client.bot, guild.id, guild.icon, {
 							size: 4096,

@@ -450,7 +450,7 @@ function isManagedGuild(client: Client, guildId: bigint): boolean {
 	const guild = client.guilds.get(guildId);
 	if (!guild) return false;
 
-	return configuration.guilds.nameExpression.test(guild.name!);
+	return configuration.guilds.nameExpression.test(guild.name);
 }
 
 /**

@@ -34,8 +34,7 @@ class LoggingController extends Controller {
 
 		if (!this.channel) {
 			console.error(
-				`Failed to set up log service for guild '${guild
-					.name!}': No journal channel found.`,
+				`Failed to set up log service for guild '${guild.name}': No journal channel found.`,
 			);
 			return;
 		}
@@ -51,7 +50,7 @@ class LoggingController extends Controller {
 			this.client.bot.events[eventName]! = (
 				...args: ClientEvents[keyof ClientEvents]
 			) => {
-				// @ts-ignore
+				// @ts-ignore: Improve typing to prevent rest parameter/tuple error.
 				eventHandler(...args);
 				this.log(eventName, ...args);
 			};

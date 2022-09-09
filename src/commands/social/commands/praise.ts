@@ -80,7 +80,7 @@ async function praise(
 		);
 	}
 
-	sendInteractionResponse(client.bot, interaction.id, interaction.token, {
+	await sendInteractionResponse(client.bot, interaction.id, interaction.token, {
 		type: InteractionResponseTypes.DeferredChannelMessageWithSource,
 	});
 
