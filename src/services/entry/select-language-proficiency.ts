@@ -89,8 +89,8 @@ async function onSelectLanguageProficiency(
 								configuration.interactions.forms.verification.fields,
 							);
 
-							const label = fields.find(([name]) =>
-								name === field.customId!.split('|')[1]!
+							const label = fields.find(
+								([name]) => name === field.customId!.split('|').at(1)!,
 							)![1].label;
 
 							const question = typeof label === 'function'
@@ -111,9 +111,7 @@ async function onSelectLanguageProficiency(
 						guild,
 						submission.user,
 						answers,
-					).then((verificationResult) =>
-						resolve(verificationResult)
-					);
+					).then((verificationResult) => resolve(verificationResult));
 				},
 			});
 

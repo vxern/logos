@@ -77,7 +77,7 @@ async function search(
 					const index = Number(indexString);
 					if (isNaN(index)) return resolve(undefined);
 
-					const result = results[index]!;
+					const result = results.at(index)!;
 					if (result.type === 'video') {
 						return resolve(fromYouTubeVideo(result, interaction.user.id));
 					}

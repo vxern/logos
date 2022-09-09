@@ -57,7 +57,10 @@ function createSelectOptionsFromCollection(
 	const selectOptions: SelectOption[] = [];
 
 	for (let index = 0; index < menuRoles.length; index++) {
-		const [role, roleResolved] = [menuRoles[index]!, menuRolesResolved[index]!];
+		const [role, roleResolved] = [
+			menuRoles.at(index)!,
+			menuRolesResolved.at(index)!,
+		];
 		const memberHasRole = memberRolesIncludedInMenu.includes(roleResolved.id);
 
 		selectOptions.push({

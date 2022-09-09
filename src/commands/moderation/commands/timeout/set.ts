@@ -257,8 +257,8 @@ function getTimestampFromExpression(
 			) => descriptors.includes(key))!;
 
 			return [descriptors[descriptors.length - 1]!, [
-				values[index]!,
-				values[index]! * milliseconds,
+				values.at(index)!,
+				values.at(index)! * milliseconds,
 			]];
 		},
 	);

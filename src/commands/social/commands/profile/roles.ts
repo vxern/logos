@@ -125,7 +125,7 @@ function traverseRoleSelectionTree(data: NavigationData): RoleCategory {
 	for (const index of data.indexesAccessed) {
 		category =
 			(<RoleCategory & { type: RoleCategoryTypes.CategoryGroup }> category)
-				.categories![index]!;
+				.categories.at(index)!;
 	}
 	return category;
 }
