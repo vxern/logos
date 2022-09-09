@@ -41,7 +41,7 @@ function postWelcome(
 		}],
 	});
 
-  return void sendInteractionResponse(
+	return void sendInteractionResponse(
 		client.bot,
 		interaction.id,
 		interaction.token,
