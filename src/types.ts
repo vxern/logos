@@ -4,11 +4,8 @@ const supportedLanguages = [
 	'Belarusian',
 	'Romanian',
 ] as const;
-
-type SupportedLanguage = (typeof supportedLanguages[number])[number];
 type Language = typeof supportedLanguages[number];
-
-const defaultLanguage: SupportedLanguage = 'English';
+const defaultLanguage: Language = 'English';
 
 export { defaultLanguage, supportedLanguages };
 export type { Language };

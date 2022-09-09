@@ -29,11 +29,11 @@ const command: CommandBuilder = {
 		ro: 'Alege cuvântul care se potrivește cu spațiul gol în propoziție.',
 	},
 	defaultMemberPermissions: ['VIEW_CHANNEL'],
-	handle: initialiseGame,
+	handle: startGame,
 };
 
 /** Starts a simple game of 'choose the correct word to fit in the blank'. */
-async function initialiseGame(
+async function startGame(
 	client: Client,
 	interaction: Interaction,
 ): Promise<void> {
@@ -124,7 +124,7 @@ async function initialiseGame(
 
 			if (index < 0 || index > sentenceSelection.choices.length - 1) return;
 
-			const choice = sentenceSelection.choices[index];
+			const choice = sentenceSelection.choices.at(index);
 			const isCorrect = choice === sentenceSelection.word;
 
 			ribbonColor = isCorrect
@@ -176,8 +176,8 @@ function shuffle<T>(array: T[]): T[] {
 
 	for (let index = 0; index < array.length - 1; index++) {
 		const random = Math.floor(Math.random() * (index + 1));
-		const temporary = shuffled[index]!;
-		shuffled[index] = shuffled[random]!;
+		const temporary = shuffled.at(index)!;
+		shuffled[index] = shuffled.at(random)!;
 		shuffled[random] = temporary!;
 	}
 
@@ -189,10 +189,10 @@ function createSentenceSelection(
 ): SentenceSelection {
 	const indexes = Array.from({ length: 4 }, () => random(sentencePairs.length));
 
-	const pair = sentencePairs[indexes[0]!]!;
+	const pair = sentencePairs.at(indexes[0]!)!;
 	const words = pair.sentence.split(' ');
 	const wordIndex = random(words.length);
-	const word = words[wordIndex]!;
+	const word = words.at(wordIndex)!;
 	words[wordIndex] = '\\_'.repeat(word.split('').length);
 	pair.sentence = words.join(' ');
 
@@ -200,8 +200,8 @@ function createSentenceSelection(
 
 	const choices: string[] = [word];
 	for (const index of indexes) {
-		const words = sentencePairs[index]!.sentence.split(' ');
-		choices.push(words[random(words.length)]!);
+		const words = sentencePairs.at(index)!.sentence.split(' ');
+		choices.push(words.at(random(words.length))!);
 	}
 
 	const shuffled = shuffle(choices);
