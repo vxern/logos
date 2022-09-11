@@ -1,6 +1,7 @@
 import {
 	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
+	Bot,
 	dayjs,
 	getAvatarURL,
 	Interaction,
@@ -9,6 +10,9 @@ import {
 } from '../../../../../deps.ts';
 import { Client, resolveInteractionToMember } from '../../../../client.ts';
 import configuration from '../../../../configuration.ts';
+import { getPraises } from '../../../../database/functions/praises.ts';
+import { getOrCreateUser } from '../../../../database/functions/users.ts';
+import { getWarnings } from '../../../../database/functions/warnings.ts';
 import { displayTime, mention, MentionTypes } from '../../../../formatting.ts';
 import { snowflakeToTimestamp } from '../../../../utils.ts';
 import { OptionBuilder } from '../../../command.ts';
@@ -31,7 +35,7 @@ const command: OptionBuilder = {
 };
 
 async function viewProfile(
-	client: Client,
+	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {
 	const userIdentifier = <string | undefined> interaction.data?.options?.at(0)
@@ -44,7 +48,7 @@ async function viewProfile(
 			?.value) ?? false;
 
 	const member = resolveInteractionToMember(
-		client,
+		[client, bot],
 		interaction,
 		userIdentifier ?? interaction.user.id.toString(),
 	);
@@ -55,7 +59,7 @@ async function viewProfile(
 
 	function showProfileViewFailure(): void {
 		return void sendInteractionResponse(
-			client.bot,
+			bot,
 			interaction.id,
 			interaction.token,
 			{
@@ -75,26 +79,28 @@ async function viewProfile(
 	const createdAt = dayjs(snowflakeToTimestamp(member.id));
 	const joinedAt = dayjs(member.joinedAt);
 
-	const subject = await client.database.getOrCreateUser(
+	const subject = await getOrCreateUser(
+		client.database,
 		'id',
 		member.id.toString(),
 	);
 	if (!subject) return showProfileViewFailure();
 
-	const praisesReceived = await client.database.getPraises(
+	const praisesReceived = await getPraises(
+		client.database,
 		'subject',
 		subject.ref,
 	);
 	if (!praisesReceived) return showProfileViewFailure();
 
-	const praisesGiven = await client.database.getPraises('author', subject.ref);
+	const praisesGiven = await getPraises(client.database, 'author', subject.ref);
 	if (!praisesGiven) return showProfileViewFailure();
 
-	const warningsReceived = await client.database.getWarnings(subject.ref);
+	const warningsReceived = await getWarnings(client.database, subject.ref);
 	if (!warningsReceived) return showProfileViewFailure();
 
 	return void sendInteractionResponse(
-		client.bot,
+		bot,
 		interaction.id,
 		interaction.token,
 		{
@@ -105,7 +111,7 @@ async function viewProfile(
 					title: `Information for ${user.username}`,
 					thumbnail: (() => {
 						const iconURL = getAvatarURL(
-							client.bot,
+							bot,
 							user.id,
 							user.discriminator,
 							{ avatar: user.avatar, size: 4096, format: 'webp' },

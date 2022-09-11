@@ -73,7 +73,7 @@ const generators: Required<MessageGenerators<GuildEvents>> = {
 	verificationRequestAccept: {
 		title: '✔️ Verification request accepted',
 		message: (client, user, by) => {
-			const byUser = client.users.get(by.id);
+			const byUser = client.cache.users.get(by.id);
 			if (!byUser) return;
 
 			return `${
@@ -86,7 +86,7 @@ const generators: Required<MessageGenerators<GuildEvents>> = {
 	verificationRequestReject: {
 		title: '❌ Verification request rejected',
 		message: (client, user, by) => {
-			const byUser = client.users.get(by.id);
+			const byUser = client.cache.users.get(by.id);
 			if (!byUser) return;
 
 			return `${
@@ -99,7 +99,7 @@ const generators: Required<MessageGenerators<GuildEvents>> = {
 	entryRequestAccept: {
 		title: '✔️ Entry granted',
 		message: (client, member) => {
-			const user = client.users.get(member.id);
+			const user = client.cache.users.get(member.id);
 			if (!user) return;
 
 			return `Entry has been granted to ${mentionUser(user)}.`;
@@ -111,7 +111,7 @@ const generators: Required<MessageGenerators<GuildEvents>> = {
 	entryRequestReject: {
 		title: '❌ Entry refused',
 		message: (client, member, reason) => {
-			const user = client.users.get(member.id);
+			const user = client.cache.users.get(member.id);
 			if (!user) return;
 
 			return `Entry has been refused to ${mentionUser(user)}.
@@ -126,7 +126,7 @@ ${codeMultiline(reason)}`;
 	articleCreate: {
 		title: '📜 Article created',
 		message: (client, article, by) => {
-			const user = client.users.get(by.id);
+			const user = client.cache.users.get(by.id);
 			if (!user) return;
 
 			return `An article has been created by ${mentionUser(user)}:
@@ -142,7 +142,7 @@ ${trim(article.content.body, 300)}`;
 	articleCreateAccept: {
 		title: '✔️ Article verified',
 		message: (client, article, by) => {
-			const user = client.users.get(by.id);
+			const user = client.cache.users.get(by.id);
 			if (!user) return;
 
 			return `An article submission has been verified by ${mentionUser(user)}:
@@ -158,7 +158,7 @@ ${trim(article.content.body, 300)}`;
 	articleCreateReject: {
 		title: '❌ Article rejected',
 		message: (client, article, by) => {
-			const user = client.users.get(by.id);
+			const user = client.cache.users.get(by.id);
 			if (!user) return;
 
 			return `An article submission has been rejected by ${mentionUser(user)}:
@@ -174,7 +174,7 @@ ${trim(article.content.body, 300)}`;
 	articleEdit: {
 		title: '✍️ Article edited',
 		message: (client, article, change, by) => {
-			const user = client.users.get(by.id);
+			const user = client.cache.users.get(by.id);
 			if (!user) return;
 
 			return `The article ${code(article.content.title)} has been edited by ${
@@ -192,7 +192,7 @@ ${trim(change.content.body, 300)}`;
 	articleEditAccept: {
 		title: '✔️ Article edit accepted',
 		message: (client, _article, change, by) => {
-			const user = client.users.get(by.id);
+			const user = client.cache.users.get(by.id);
 			if (!user) return;
 
 			return `An article edit has been verified by ${mentionUser(user)}:
@@ -208,7 +208,7 @@ ${trim(change.content.body, 300)}`;
 	articleEditReject: {
 		title: '❌ Article edit rejected',
 		message: (client, _article, change, by) => {
-			const user = client.users.get(by.id);
+			const user = client.cache.users.get(by.id);
 			if (!user) return;
 
 			return `An article edit has been rejected by ${mentionUser(user)}:
@@ -224,7 +224,7 @@ ${trim(change.content.body, 300)}`;
 	articleLock: {
 		title: '🔐 Article locked',
 		message: (client, article, by) => {
-			const user = client.users.get(by.id);
+			const user = client.cache.users.get(by.id);
 			if (!user) return;
 
 			return `The article ${code(article.content.title)} has been locked by ${
@@ -238,7 +238,7 @@ ${trim(change.content.body, 300)}`;
 	moderatorInquestLaunch: {
 		title: '❗ Inquest launched',
 		message: (client, member, by) => {
-			const memberUser = client.users.get(member.id);
+			const memberUser = client.cache.users.get(member.id);
 			if (!memberUser) return;
 
 			return `An inquest has been launched into ${mentionUser(memberUser)} by ${
@@ -252,7 +252,7 @@ ${trim(change.content.body, 300)}`;
 	moderatorInquestPass: {
 		title: '✔️ Inquest resulted in acquittance',
 		message: (client, member, by) => {
-			const memberUser = client.users.get(member.id);
+			const memberUser = client.cache.users.get(member.id);
 			if (!memberUser) return;
 
 			return `An inquest into ${mentionUser(memberUser)} has been reviewed by ${
@@ -266,7 +266,7 @@ ${trim(change.content.body, 300)}`;
 	moderatorInquestFail: {
 		title: '❌ Inquest resulted in failure',
 		message: (client, member, by) => {
-			const memberUser = client.users.get(member.id);
+			const memberUser = client.cache.users.get(member.id);
 			if (!memberUser) return;
 
 			return `An inquest into ${mentionUser(memberUser)} has been reviewed by ${
@@ -280,7 +280,7 @@ ${trim(change.content.body, 300)}`;
 	memberWarnAdd: {
 		title: '⚠️ Member warned',
 		message: (client, member, warning, by) => {
-			const memberUser = client.users.get(member.id);
+			const memberUser = client.cache.users.get(member.id);
 			if (!memberUser) return;
 
 			return `${mentionUser(memberUser)} has been warned by ${
@@ -294,7 +294,7 @@ ${trim(change.content.body, 300)}`;
 	memberWarnRemove: {
 		title: '😇 Member pardoned',
 		message: (client, member, warning, by) => {
-			const memberUser = client.users.get(member.id);
+			const memberUser = client.cache.users.get(member.id);
 			if (!memberUser) return;
 
 			return `${mentionUser(memberUser)} has been pardoned by ${
@@ -308,7 +308,7 @@ ${trim(change.content.body, 300)}`;
 	memberTimeoutAdd: {
 		title: '⏳ Member timed out',
 		message: (client, member, until, reason, by) => {
-			const memberUser = client.users.get(member.id);
+			const memberUser = client.cache.users.get(member.id);
 			if (!memberUser) return;
 
 			return `${mentionUser(memberUser)} has been timed out by ${
@@ -322,7 +322,7 @@ ${trim(change.content.body, 300)}`;
 	memberTimeoutRemove: {
 		title: `😇 Member's timeout cleared`,
 		message: (client, member, by) => {
-			const memberUser = client.users.get(member.id);
+			const memberUser = client.cache.users.get(member.id);
 			if (!memberUser) return;
 
 			return `The timeout of ${mentionUser(memberUser)} has been cleared by: ${
@@ -336,7 +336,7 @@ ${trim(change.content.body, 300)}`;
 	praiseAdd: {
 		title: `🙏 Member praised`,
 		message: (client, member, praise, by) => {
-			const memberUser = client.users.get(member.id);
+			const memberUser = client.cache.users.get(member.id);
 			if (!memberUser) return;
 
 			return `${mentionUser(memberUser)} has been praised by ${by}. Comment: ${

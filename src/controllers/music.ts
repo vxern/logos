@@ -13,7 +13,6 @@ import {
 } from '../../deps.ts';
 import { Client } from '../client.ts';
 import configuration from '../configuration.ts';
-import { Controller } from './controller.ts';
 import { Song } from '../commands/music/data/song.ts';
 import {
 	SongListing,
@@ -22,7 +21,10 @@ import {
 import { SongStream } from '../commands/music/data/song-stream.ts';
 import { mention, MentionTypes } from '../formatting.ts';
 
-class MusicController extends Controller {
+class MusicController {
+  private client: Client;
+  private guild: Guild;
+
 	/** The audio player associated with this controller. */
 	private player: Player;
 
@@ -54,8 +56,8 @@ class MusicController extends Controller {
 
 	/** Constructs a {@link MusicController}. */
 	constructor(client: Client, guild: Guild) {
-		super(client, guild);
-
+    this.client = client;
+    this.guild = guild;
 		this.player = this.client.node.createPlayer(BigInt(this.guild.id));
 	}
 

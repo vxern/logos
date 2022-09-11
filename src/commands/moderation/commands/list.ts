@@ -1,6 +1,7 @@
 import {
 	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
+	Bot,
 	dayjs,
 	Interaction,
 	InteractionResponseTypes,
@@ -9,6 +10,8 @@ import {
 import { Client, resolveInteractionToMember } from '../../../client.ts';
 import { CommandBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
+import { getOrCreateUser } from '../../../database/functions/users.ts';
+import { getWarnings } from '../../../database/functions/warnings.ts';
 import { Document } from '../../../database/structs/document.ts';
 import { Warning } from '../../../database/structs/users/warning.ts';
 import { list } from '../../../formatting.ts';
@@ -45,7 +48,7 @@ const command: CommandBuilder = {
 };
 
 async function listWarnings(
-	client: Client,
+	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {
 	const userIdentifier = <string | undefined> interaction.data?.options?.at(0)
@@ -55,7 +58,7 @@ async function listWarnings(
 	if (userIdentifier === undefined) return;
 
 	const member = resolveInteractionToMember(
-		client,
+		[client, bot],
 		interaction,
 		userIdentifier,
 	);
@@ -63,7 +66,7 @@ async function listWarnings(
 
 	const displayError = (): void => {
 		return void sendInteractionResponse(
-			client.bot,
+			bot,
 			interaction.id,
 			interaction.token,
 			{
@@ -79,13 +82,14 @@ async function listWarnings(
 		);
 	};
 
-	const subject = await client.database.getOrCreateUser(
+	const subject = await getOrCreateUser(
+		client.database,
 		'id',
 		member.id.toString(),
 	);
 	if (!subject) return displayError();
 
-	const warnings = await client.database.getWarnings(subject.ref);
+	const warnings = await getWarnings(client.database, subject.ref);
 	if (!warnings) return displayError();
 
 	const pages = chunk(
@@ -109,7 +113,7 @@ async function listWarnings(
 		);
 	};
 
-	return paginate(client, interaction, {
+	return paginate([client, bot], interaction, {
 		elements: pages,
 		embed: { color: configuration.interactions.responses.colors.blue },
 		view: { title: 'Warnings', generate: generateWarningsPage },

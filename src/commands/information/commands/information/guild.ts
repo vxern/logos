@@ -1,5 +1,6 @@
 import {
 	ApplicationCommandFlags,
+	Bot,
 	ChannelTypes,
 	getGuildIconURL,
 	Guild,
@@ -20,13 +21,13 @@ import { getProficiencyCategory } from '../../../social/module.ts';
 
 /** Displays information about the guild that this command was executed in. */
 function displayGuildInformation(
-	client: Client,
+	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): void {
-	const guild = client.guilds.get(interaction.guildId!);
+	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (!guild) return;
 
-	const owner = client.users.get(guild.ownerId);
+	const owner = client.cache.users.get(guild.ownerId);
 	if (!owner) return;
 
 	const hasDistinctOwner = owner && owner.username !== guild.name;
@@ -37,7 +38,7 @@ function displayGuildInformation(
 	);
 
 	return void sendInteractionResponse(
-		client.bot,
+		bot,
 		interaction.id,
 		interaction.token,
 		{
@@ -47,7 +48,7 @@ function displayGuildInformation(
 				embeds: [{
 					title: `Information about **${guild.name}**`,
 					...(() => {
-						const iconURL = getGuildIconURL(client.bot, guild.id, guild.icon, {
+						const iconURL = getGuildIconURL(bot, guild.id, guild.icon, {
 							size: 4096,
 							format: 'png',
 						});
@@ -143,9 +144,10 @@ function getProficiencyRoleFrequencies(
 		proficiencyNames.includes(role.name)
 	).map((role) => role.id);
 
-	const membersIndiscriminate = Array.from(client.members.values());
+	const membersIndiscriminate = Array.from(client.cache.members.values());
 	const members = membersIndiscriminate.filter((member) =>
-		!client.users.get(member.id)?.toggles.bot && member.guildId === guild.id
+		!client.cache.users.get(member.id)?.toggles.bot &&
+		member.guildId === guild.id
 	);
 
 	const roleFrequencies = new Map<bigint, number>();

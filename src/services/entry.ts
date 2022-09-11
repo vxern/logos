@@ -1,9 +1,9 @@
-import { Interaction, InteractionTypes } from '../../deps.ts';
-import { Client } from '../client.ts';
+import { Bot, Interaction, InteractionTypes } from '../../deps.ts';
 import { ServiceStarter } from './service.ts';
 import { createInteractionCollector } from '../utils.ts';
 import { onAcceptRules } from './entry/accept-rules.ts';
 import { onSelectLanguageProficiency } from './entry/select-language-proficiency.ts';
+import { Client } from '../client.ts';
 
 const entrySteps = [
 	'ACCEPTED_RULES',
@@ -12,7 +12,7 @@ const entrySteps = [
 type Step = (typeof entrySteps)[number];
 
 type EntryInteractionHandler = (
-	client: Client,
+	[client, bot]: [Client, Bot],
 	interaction: Interaction & { type: InteractionTypes.MessageComponent },
 	parameter: string,
 ) => Promise<void> | void;
@@ -22,9 +22,9 @@ const interactionHandlers: { [key in Step]: EntryInteractionHandler } = {
 	'SELECTED_LANGUAGE_PROFICIENCY': onSelectLanguageProficiency,
 };
 
-const service: ServiceStarter = (client) => {
+const service: ServiceStarter = (clientWithBot) => {
 	for (const entryStep of entrySteps) {
-		createInteractionCollector(client, {
+		createInteractionCollector(clientWithBot, {
 			type: InteractionTypes.MessageComponent,
 			customId: entryStep,
 			doesNotExpire: true,
@@ -34,8 +34,10 @@ const service: ServiceStarter = (client) => {
 
 				const [step, parameter] = <[Step, string]> selectionCustomId.split('|');
 
-				interactionHandlers[step](
-					client,
+				const handleInteraction = interactionHandlers[step];
+
+				return void handleInteraction(
+					clientWithBot,
 					<Interaction & {
 						type: InteractionTypes.MessageComponent;
 					}> interaction,

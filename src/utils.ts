@@ -2,6 +2,7 @@ import {
 	_,
 	ActionRow,
 	ApplicationCommandFlags,
+	Bot,
 	ButtonComponent,
 	ButtonStyles,
 	Channel,
@@ -188,7 +189,7 @@ function toModal(
  * in an embed view.
  */
 function paginate<T>(
-	client: Client,
+	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 	{
 		elements,
@@ -255,7 +256,7 @@ function paginate<T>(
 		}];
 	};
 
-	const customId = createInteractionCollector(client, {
+	const customId = createInteractionCollector([client, bot], {
 		type: InteractionTypes.MessageComponent,
 		doesNotExpire: true,
 		onCollect: (bot, selection) => {
@@ -284,7 +285,7 @@ function paginate<T>(
 	});
 
 	return void sendInteractionResponse(
-		client.bot,
+		bot,
 		interaction.id,
 		interaction.token,
 		{
@@ -327,7 +328,7 @@ interface InteractionCollectorSettings {
  * interaction collector.
  */
 function createInteractionCollector(
-	client: Client,
+	clientWithBot: [Client, Bot],
 	settings: InteractionCollectorSettings,
 ): string {
 	const customId = settings.customId ?? Snowflake.generate();
@@ -345,7 +346,7 @@ function createInteractionCollector(
 		!settings.userId ? true : interaction.user.id === settings.userId,
 	];
 
-	addCollector(client, 'interactionCreate', {
+	addCollector(clientWithBot, 'interactionCreate', {
 		filter: (_bot, interaction) =>
 			conditions(interaction).every((condition) => condition),
 		limit: settings.limit,
@@ -361,11 +362,11 @@ function createInteractionCollector(
 
 /** Creates a verification prompt in the verifications channel. */
 function createVerificationPrompt(
-	client: Client,
+	[client, bot]: [Client, Bot],
 	guildId: bigint,
 	settings: { title: string; fields: DiscordEmbedField[] },
 ): Promise<[boolean, Member] | undefined> {
-	const guild = client.guilds.get(guildId);
+	const guild = client.cache.guilds.get(guildId);
 	if (!guild) return new Promise(() => undefined);
 
 	const verificationChannel = guild.channels.array().find((channel) =>
@@ -377,7 +378,7 @@ function createVerificationPrompt(
 	if (!verificationChannel) return new Promise(() => undefined);
 
 	return new Promise((resolve) => {
-		const customId = createInteractionCollector(client, {
+		const customId = createInteractionCollector([client, bot], {
 			type: InteractionTypes.MessageComponent,
 			doesNotExpire: true,
 			limit: 1,
@@ -400,7 +401,7 @@ function createVerificationPrompt(
 		});
 
 		const verificationMessagePromise = sendMessage(
-			client.bot,
+			bot,
 			verificationChannel.id,
 			{
 				embeds: [{

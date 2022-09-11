@@ -49,7 +49,7 @@ const client: MessageGenerators<ClientEvents> = {
 	messageUpdate: {
 		title: '⬆️ Message updated',
 		message: (client, _bot, message, oldMessage) => {
-			const author = client.users.get(message.authorId);
+			const author = client.cache.users.get(message.authorId);
 			if (!author) return;
 
 			return `${mentionUser(author)} updated their message in ${
@@ -62,7 +62,7 @@ ${oldMessage ? codeMultiline(oldMessage.content) : '*No message*'}
 ${codeMultiline(message.content)}`;
 		},
 		filter: (client, originGuildId, _bot, message, oldMessage) => {
-			const author = client.users.get(message.authorId);
+			const author = client.cache.users.get(message.authorId);
 			if (!author) return false;
 
 			return originGuildId === message.guildId && !author.toggles.bot &&
@@ -75,7 +75,7 @@ ${codeMultiline(message.content)}`;
 		message: (client, _bot, _payload, message) => {
 			if (!message) return;
 
-			const author = client.users.get(message.authorId);
+			const author = client.cache.users.get(message.authorId);
 			if (!author) return;
 
 			return `${mentionUser(author)} deleted their message in ${
@@ -88,7 +88,7 @@ ${codeMultiline(message.content)}`;
 		filter: (client, originGuildId, _bot, payload, message) => {
 			if (!message) return false;
 
-			const author = client.users.get(message.authorId);
+			const author = client.cache.users.get(message.authorId);
 			if (!author) return false;
 
 			return (message

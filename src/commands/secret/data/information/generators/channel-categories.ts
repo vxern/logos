@@ -1,11 +1,11 @@
 import { Guild } from '../../../../../../deps.ts';
-import { Client, getLanguage } from '../../../../../client.ts';
+import { Client, WithLanguage } from '../../../../../client.ts';
 import { getChannelMention } from './../information-sections.ts';
 
 /** The information for channel categories for the guilds. */
 const channelCategoryGenerators: Record<
 	string,
-	(client: Client, guild: Guild) => string
+	(client: Client, guild: WithLanguage<Guild>) => string
 > = {
 	information: (_client, guild) => {
 		const mentions = getChannelMentions(guild, [
@@ -16,12 +16,10 @@ const channelCategoryGenerators: Record<
 
 		return `Meta channels that provide information about the server itself, as well as its members. The server's ${mentions.shift()}, ${mentions.shift()} and member ${mentions.shift()} are found here.`;
 	},
-	discussion: (client, guild) => {
-		const language = getLanguage(client, guild.id);
-
+	discussion: (_client, guild) => {
 		const mentions = getChannelMentions(guild, [
 			'discussion',
-			language,
+			guild.language,
 			'other languages',
 		]);
 

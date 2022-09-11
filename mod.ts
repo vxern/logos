@@ -1,5 +1,5 @@
 import 'https://deno.land/x/dotenv@v3.2.0/load.ts';
-import { Client } from './src/client.ts';
+import { initialiseClient } from './src/client.ts';
 
 // Array of environment variables required to run the program.
 const requiredKeys = [
@@ -23,5 +23,4 @@ if (presentKeys.includes(false)) {
 	Deno.exit(1);
 }
 
-const client = new Client();
-client.start();
+initialiseClient();

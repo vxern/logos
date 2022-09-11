@@ -1,5 +1,6 @@
 import {
 	ApplicationCommandFlags,
+	Bot,
 	getAvatarURL,
 	getUser,
 	Interaction,
@@ -13,15 +14,14 @@ import { list } from '../../../../formatting.ts';
 
 /** Displays information about the bot (application). */
 async function displayBotInformation(
-	client: Client,
+	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {
-	const botUser = client.users.get(client.bot.id) ??
-		await getUser(client.bot, client.bot.id);
+	const botUser = client.cache.users.get(bot.id) ?? await getUser(bot, bot.id);
 	if (!botUser) return;
 
 	return void sendInteractionResponse(
-		client.bot,
+		bot,
 		interaction.id,
 		interaction.token,
 		{
@@ -32,8 +32,8 @@ async function displayBotInformation(
 					title: botUser.username,
 					thumbnail: {
 						url: getAvatarURL(
-							client.bot,
-							client.bot.id,
+							bot,
+							bot.id,
 							botUser.discriminator,
 							{ avatar: botUser.avatar, size: 4096, format: 'png' },
 						),

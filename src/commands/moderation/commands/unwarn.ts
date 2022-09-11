@@ -1,6 +1,7 @@
 import {
 	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
+	Bot,
 	dayjs,
 	getDmChannel,
 	getGuildIconURL,
@@ -13,8 +14,14 @@ import {
 import { Client, resolveInteractionToMember } from '../../../client.ts';
 import { CommandBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
+import { getOrCreateUser } from '../../../database/functions/users.ts';
+import {
+	deleteWarning,
+	getWarnings,
+} from '../../../database/functions/warnings.ts';
 import { user } from '../../parameters.ts';
 import { getRelevantWarnings } from '../module.ts';
+import { log } from '../../../controllers/logging.ts';
 
 const command: CommandBuilder = {
 	name: 'pardon',
@@ -50,7 +57,7 @@ const command: CommandBuilder = {
 };
 
 async function unwarnUser(
-	client: Client,
+	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {
 	const data = interaction.data;
@@ -68,7 +75,7 @@ async function unwarnUser(
 	if (userIdentifier === undefined) return;
 
 	const member = resolveInteractionToMember(
-		client,
+		[client, bot],
 		interaction,
 		userIdentifier,
 	);
@@ -77,7 +84,7 @@ async function unwarnUser(
 	const displayErrorOrEmptyChoices = (): void => {
 		if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete) {
 			return void sendInteractionResponse(
-				client.bot,
+				bot,
 				interaction.id,
 				interaction.token,
 				{
@@ -88,7 +95,7 @@ async function unwarnUser(
 		}
 
 		return void sendInteractionResponse(
-			client.bot,
+			bot,
 			interaction.id,
 			interaction.token,
 			{
@@ -104,13 +111,14 @@ async function unwarnUser(
 		);
 	};
 
-	const subject = await client.database.getOrCreateUser(
+	const subject = await getOrCreateUser(
+		client.database,
 		'id',
 		member.id.toString(),
 	);
 	if (!subject) return displayErrorOrEmptyChoices();
 
-	const warnings = await client.database.getWarnings(subject.ref);
+	const warnings = await getWarnings(client.database, subject.ref);
 	if (!warnings) return displayErrorOrEmptyChoices();
 
 	const relevantWarnings = getRelevantWarnings(warnings);
@@ -118,7 +126,7 @@ async function unwarnUser(
 
 	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete) {
 		return void sendInteractionResponse(
-			client.bot,
+			bot,
 			interaction.id,
 			interaction.token,
 			{
@@ -135,7 +143,7 @@ async function unwarnUser(
 
 	const displayUnwarnError = (title: string, description: string): void => {
 		return void sendInteractionResponse(
-			client.bot,
+			bot,
 			interaction.id,
 			interaction.token,
 			{
@@ -163,7 +171,7 @@ async function unwarnUser(
 		);
 	}
 
-	const warning = await client.database.deleteWarning(warningToRemove);
+	const warning = await deleteWarning(client.database, warningToRemove);
 	if (!warning) {
 		return displayUnwarnError(
 			'Failed to remove warning',
@@ -171,7 +179,12 @@ async function unwarnUser(
 		);
 	}
 
-	client.logging.get(interaction.guildId!)?.log(
+	const guild = client.cache.guilds.get(interaction.guildId!);
+	if (!guild) return;
+
+	log(
+		[client, bot],
+		guild,
 		'memberWarnRemove',
 		member,
 		warning.data,
@@ -179,7 +192,7 @@ async function unwarnUser(
 	);
 
 	sendInteractionResponse(
-		client.bot,
+		bot,
 		interaction.id,
 		interaction.token,
 		{
@@ -196,17 +209,14 @@ async function unwarnUser(
 		},
 	);
 
-	const dmChannel = await getDmChannel(client.bot, member.id);
+	const dmChannel = await getDmChannel(bot, member.id);
 	if (!dmChannel) return;
 
-	const guild = client.guilds.get(interaction.guildId!);
-	if (!guild) return;
-
-	return void sendMessage(client.bot, dmChannel.id, {
+	return void sendMessage(bot, dmChannel.id, {
 		embeds: [
 			{
 				thumbnail: (() => {
-					const iconURL = getGuildIconURL(client.bot, guild.id, guild.icon, {
+					const iconURL = getGuildIconURL(bot, guild.id, guild.icon, {
 						size: 4096,
 						format: 'webp',
 					});
