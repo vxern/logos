@@ -90,23 +90,19 @@ async function praise(
 
 	await sendInteractionResponse(bot, interaction.id, interaction.token, {
 		type: InteractionResponseTypes.DeferredChannelMessageWithSource,
+		data: { flags: ApplicationCommandFlags.Ephemeral },
 	});
 
 	const showPraiseFailure = (): void => {
-		return void sendInteractionResponse(
+		return void editOriginalInteractionResponse(
 			bot,
-			interaction.id,
 			interaction.token,
 			{
-				type: InteractionResponseTypes.UpdateMessage,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						title: 'Failed to praise user',
-						description: `Your praise failed to be submitted.`,
-						color: configuration.interactions.responses.colors.red,
-					}],
-				},
+				embeds: [{
+					title: 'Failed to praise user',
+					description: `Your praise failed to be submitted.`,
+					color: configuration.interactions.responses.colors.red,
+				}],
 			},
 		);
 	};
@@ -143,7 +139,6 @@ async function praise(
 			bot,
 			interaction.token,
 			{
-				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
 					title: 'Wait before praising again',
 					description:
@@ -205,7 +200,6 @@ async function praise(
 		bot,
 		interaction.token,
 		{
-			flags: ApplicationCommandFlags.Ephemeral,
 			embeds: [{
 				title: 'User praised',
 				description:
