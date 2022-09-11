@@ -4,6 +4,7 @@ import {
 	ApplicationCommandFlags,
 	ApplicationCommandOptionChoice,
 	ApplicationCommandOptionTypes,
+	Bot,
 	editOriginalInteractionResponse,
 	Interaction,
 	InteractionResponseTypes,
@@ -176,9 +177,12 @@ function resolveToSupportedLanguage(
 
 /** Allows the user to translate text from one language to another through the DeepL API. */
 async function translate(
-	client: Client,
+	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {
+	const guild = client.cache.guilds.get(interaction.guildId!);
+	if (!guild) return;
+
 	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete) {
 		const input = <string | undefined> interaction.data?.options?.find((
 			option,
@@ -196,7 +200,7 @@ async function translate(
 		}
 
 		return void sendInteractionResponse(
-			client.bot,
+			bot,
 			interaction.id,
 			interaction.token,
 			{
@@ -216,7 +220,7 @@ async function translate(
 
 	if (sourceLanguageOrCode === targetLanguageOrCode) {
 		return void sendInteractionResponse(
-			client.bot,
+			bot,
 			interaction.id,
 			interaction.token,
 			{
@@ -236,7 +240,7 @@ async function translate(
 	const isSourceTextEmpty = text.trim().length === 0;
 	if (isSourceTextEmpty) {
 		return void sendInteractionResponse(
-			client.bot,
+			bot,
 			interaction.id,
 			interaction.token,
 			{
@@ -256,7 +260,7 @@ async function translate(
 	const targetLanguage = resolveToSupportedLanguage(targetLanguageOrCode);
 	if (!sourceLanguage || !targetLanguage) {
 		return void sendInteractionResponse(
-			client.bot,
+			bot,
 			interaction.id,
 			interaction.token,
 			{
@@ -283,7 +287,7 @@ async function translate(
 			false;
 
 	await sendInteractionResponse(
-		client.bot,
+		bot,
 		interaction.id,
 		interaction.token,
 		{
@@ -299,7 +303,7 @@ async function translate(
 	);
 	if (!translation) {
 		return void editOriginalInteractionResponse(
-			client.bot,
+			bot,
 			interaction.token,
 			{
 				embeds: [{
@@ -316,7 +320,7 @@ async function translate(
 		: '⠀';
 
 	return void editOriginalInteractionResponse(
-		client.bot,
+		bot,
 		interaction.token,
 		{
 			embeds: [{

@@ -1,6 +1,7 @@
 import {
 	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
+	Bot,
 	editOriginalInteractionResponse,
 	getDmChannel,
 	getGuildIconURL,
@@ -15,6 +16,12 @@ import configuration from '../../../configuration.ts';
 import { Praise } from '../../../database/structs/users/praise.ts';
 import { mention, MentionTypes } from '../../../formatting.ts';
 import { user } from '../../parameters.ts';
+import {
+	createPraise,
+	getPraises,
+} from '../../../database/functions/praises.ts';
+import { getOrCreateUser } from '../../../database/functions/users.ts';
+import { log } from '../../../controllers/logging.ts';
 
 const command: CommandBuilder = {
 	name: 'praise',
@@ -45,7 +52,7 @@ const command: CommandBuilder = {
 };
 
 async function praise(
-	client: Client,
+	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {
 	const data = interaction.data;
@@ -55,7 +62,7 @@ async function praise(
 	if (userIdentifier === undefined) return;
 
 	const member = resolveInteractionToMember(
-		client,
+		[client, bot],
 		interaction,
 		userIdentifier,
 	);
@@ -65,7 +72,7 @@ async function praise(
 
 	if (member.id === interaction.member?.id) {
 		return void sendInteractionResponse(
-			client.bot,
+			bot,
 			interaction.id,
 			interaction.token,
 			{
@@ -81,13 +88,13 @@ async function praise(
 		);
 	}
 
-	await sendInteractionResponse(client.bot, interaction.id, interaction.token, {
+	await sendInteractionResponse(bot, interaction.id, interaction.token, {
 		type: InteractionResponseTypes.DeferredChannelMessageWithSource,
 	});
 
 	const showPraiseFailure = (): void => {
 		return void sendInteractionResponse(
-			client.bot,
+			bot,
 			interaction.id,
 			interaction.token,
 			{
@@ -104,13 +111,15 @@ async function praise(
 		);
 	};
 
-	const author = await client.database.getOrCreateUser(
+	const author = await getOrCreateUser(
+		client.database,
 		'id',
 		interaction.user.id.toString(),
 	);
 	if (!author) return showPraiseFailure();
 
-	const praisesByAuthor = await client.database.getPraises(
+	const praisesByAuthor = await getPraises(
+		client.database,
 		'author',
 		author.ref,
 	);
@@ -131,7 +140,7 @@ async function praise(
 		);
 	if (!canPraise) {
 		return void editOriginalInteractionResponse(
-			client.bot,
+			bot,
 			interaction.token,
 			{
 				flags: ApplicationCommandFlags.Ephemeral,
@@ -145,7 +154,8 @@ async function praise(
 		);
 	}
 
-	const subject = await client.database.getOrCreateUser(
+	const subject = await getOrCreateUser(
+		client.database,
 		'id',
 		member.id.toString(),
 	);
@@ -157,21 +167,24 @@ async function praise(
 		comment: comment,
 	};
 
-	const document = await client.database.createPraise(praise);
+	const document = await createPraise(client.database, praise);
 	if (!document) return showPraiseFailure();
 
-	// Log change.
-
-	const guild = client.guilds.get(interaction.guildId!);
+	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (!guild) return;
 
-	const dmChannel = await getDmChannel(client.bot, member.id);
+	log([client, bot], guild, 'praiseAdd', member, praise, interaction.user);
+
+	const dmChannel = await getDmChannel(bot, member.id);
 	if (dmChannel) {
-		sendMessage(client.bot, dmChannel.id, {
+		sendMessage(bot, dmChannel.id, {
 			embeds: [
 				{
 					thumbnail: (() => {
-						const iconURL = getGuildIconURL(client.bot, guild.id, guild.icon);
+						const iconURL = getGuildIconURL(bot, guild.id, guild.icon, {
+							size: 4096,
+							format: 'png',
+						});
 						if (!iconURL) return undefined;
 
 						return {
@@ -189,7 +202,7 @@ async function praise(
 	}
 
 	return void editOriginalInteractionResponse(
-		client.bot,
+		bot,
 		interaction.token,
 		{
 			flags: ApplicationCommandFlags.Ephemeral,

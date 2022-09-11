@@ -1,5 +1,6 @@
 import {
 	ApplicationCommandFlags,
+	Bot,
 	dayjs,
 	editMember,
 	getDmChannel,
@@ -18,9 +19,10 @@ import configuration, {
 } from '../../../../configuration.ts';
 import { mention, MentionTypes } from '../../../../formatting.ts';
 import { mentionUser } from '../../../../utils.ts';
+import { log } from '../../../../controllers/logging.ts';
 
 async function setTimeout(
-	client: Client,
+	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {
 	const data = interaction.data;
@@ -54,7 +56,7 @@ async function setTimeout(
 		const timestamp = getTimestampFromExpression(durationIdentifier!);
 
 		return void sendInteractionResponse(
-			client.bot,
+			bot,
 			interaction.id,
 			interaction.token,
 			{
@@ -69,7 +71,7 @@ async function setTimeout(
 	}
 
 	const member = resolveInteractionToMember(
-		client,
+		[client, bot],
 		interaction,
 		userIdentifier!,
 	);
@@ -77,7 +79,7 @@ async function setTimeout(
 
 	const displayError = (error: string): void => {
 		return void sendInteractionResponse(
-			client.bot,
+			bot,
 			interaction.id,
 			interaction.token,
 			{
@@ -114,13 +116,18 @@ async function setTimeout(
 	const until = Date.now() + duration;
 
 	await editMember(
-		client.bot,
+		bot,
 		interaction.guildId!,
 		member.id,
 		{ communicationDisabledUntil: until },
 	);
 
-	client.logging.get(interaction.guildId!)?.log(
+	const guild = client.cache.guilds.get(interaction.guildId!);
+	if (!guild) return;
+
+	log(
+		[client, bot],
+		guild,
 		'memberTimeoutAdd',
 		member,
 		new Date(until),
@@ -128,7 +135,7 @@ async function setTimeout(
 		interaction.user,
 	);
 
-	sendInteractionResponse(client.bot, interaction.id, interaction.token, {
+	sendInteractionResponse(bot, interaction.id, interaction.token, {
 		type: InteractionResponseTypes.ChannelMessageWithSource,
 		data: {
 			flags: ApplicationCommandFlags.Ephemeral,
@@ -141,15 +148,15 @@ async function setTimeout(
 		},
 	});
 
-	const dmChannel = await getDmChannel(client.bot, member.id);
+	const dmChannel = await getDmChannel(bot, member.id);
 	if (!dmChannel) {
-		const textChannel = client.channels.get(interaction.channelId!);
+		const textChannel = client.cache.channels.get(interaction.channelId!);
 		if (!textChannel) return;
 
 		const user = member.user;
 		if (!user) return;
 
-		return void sendMessage(client.bot, textChannel.id, {
+		return void sendMessage(bot, textChannel.id, {
 			embeds: [{
 				description: `${
 					mentionUser(user)
@@ -161,14 +168,11 @@ async function setTimeout(
 		});
 	}
 
-	const guild = client.guilds.get(interaction.guildId!);
-	if (!guild) return;
-
-	return void sendMessage(client.bot, dmChannel.id, {
+	return void sendMessage(bot, dmChannel.id, {
 		embeds: [
 			{
 				thumbnail: (() => {
-					const iconURL = getGuildIconURL(client.bot, guild.id, guild.icon, {
+					const iconURL = getGuildIconURL(bot, guild.id, guild.icon, {
 						size: 4096,
 						format: 'webp',
 					});

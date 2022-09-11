@@ -30,9 +30,7 @@ function fromNames(names: string[]): Role[] {
 
 type ProficiencyCategory = RoleCategory & {
 	type: RoleCategoryTypes.Category;
-	collection: RoleCollection & {
-		type: RoleCollectionTypes.Collection;
-	};
+	collection: RoleCollection & { type: RoleCollectionTypes.Collection };
 };
 
 /**

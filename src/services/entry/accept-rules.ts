@@ -1,6 +1,7 @@
 import {
 	ActionRow,
 	ApplicationCommandFlags,
+	Bot,
 	ButtonComponent,
 	ButtonStyles,
 	Interaction,
@@ -10,11 +11,11 @@ import {
 	sendInteractionResponse,
 	User,
 } from '../../../deps.ts';
-import { Client, getLanguage } from '../../client.ts';
 import { capitalise, code } from '../../formatting.ts';
 import configuration from '../../configuration.ts';
 import { getProficiencyCategory } from '../../commands/social/module.ts';
 import { snowflakeToTimestamp } from '../../utils.ts';
+import { Client } from '../../client.ts';
 
 const proficiencyCategory = getProficiencyCategory();
 const proficiencies = proficiencyCategory.collection.list;
@@ -37,7 +38,7 @@ const proficiencyButtonActionRow: ActionRow = {
 };
 
 function onAcceptRules(
-	client: Client,
+	[client, bot]: [Client, Bot],
 	interaction: Interaction & { type: InteractionTypes.MessageComponent },
 	_parameter: string,
 ): void {
@@ -45,7 +46,7 @@ function onAcceptRules(
 
 	if (!screening.canEnter) {
 		return void sendInteractionResponse(
-			client.bot,
+			bot,
 			interaction.id,
 			interaction.token,
 			{
@@ -61,10 +62,11 @@ function onAcceptRules(
 		);
 	}
 
-	const language = getLanguage(client, interaction.guildId!);
+	const guild = client.cache.guilds.get(interaction.guildId!);
+	if (!guild) return;
 
 	return void sendInteractionResponse(
-		client.bot,
+		bot,
 		interaction.id,
 		interaction.token,
 		{
@@ -74,7 +76,7 @@ function onAcceptRules(
 				embeds: [{
 					title: 'Language Proficiency',
 					description: `Select the role that most accurately describes your ${
-						capitalise(language)
+						capitalise(guild.language)
 					} language proficiency.
 
           ℹ️ **You can always change this later using the ${

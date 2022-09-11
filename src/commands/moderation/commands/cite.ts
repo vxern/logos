@@ -1,6 +1,7 @@
 import {
 	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
+	Bot,
 	Interaction,
 	InteractionResponseTypes,
 	InteractionTypes,
@@ -43,7 +44,7 @@ const command: CommandBuilder = {
 };
 
 function citeRule(
-	client: Client,
+	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): void {
 	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete) {
@@ -55,7 +56,7 @@ function citeRule(
 		}));
 
 		return void sendInteractionResponse(
-			client.bot,
+			bot,
 			interaction.id,
 			interaction.token,
 			{
@@ -67,7 +68,7 @@ function citeRule(
 
 	const displayInvalidRuleError = (): void => {
 		return void sendInteractionResponse(
-			client.bot,
+			bot,
 			interaction.id,
 			interaction.token,
 			{
@@ -94,12 +95,12 @@ function citeRule(
 
 	const [title, generateRule] = titleRuleTuples;
 
-	const guild = client.guilds.get(interaction.guildId!);
+	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (!guild) return;
 
 	const rule = generateRule(guild);
 	return void sendInteractionResponse(
-		client.bot,
+		bot,
 		interaction.id,
 		interaction.token,
 		{

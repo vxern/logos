@@ -1,5 +1,6 @@
 import {
 	ApplicationCommandFlags,
+	Bot,
 	getDmChannel,
 	getGuildIconURL,
 	Interaction,
@@ -11,6 +12,12 @@ import {
 import { Client, resolveInteractionToMember } from '../../../client.ts';
 import { CommandBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
+import { log } from '../../../controllers/logging.ts';
+import { getOrCreateUser } from '../../../database/functions/users.ts';
+import {
+	createWarning,
+	getWarnings,
+} from '../../../database/functions/warnings.ts';
 import { mention, MentionTypes } from '../../../formatting.ts';
 import { user } from '../../parameters.ts';
 import { getRelevantWarnings } from '../module.ts';
@@ -33,7 +40,7 @@ const command: CommandBuilder = {
 };
 
 async function warnUser(
-	client: Client,
+	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {
 	const data = interaction.data;
@@ -44,7 +51,7 @@ async function warnUser(
 	if (userIdentifier === undefined || reason === undefined) return;
 
 	const member = resolveInteractionToMember(
-		client,
+		[client, bot],
 		interaction,
 		userIdentifier,
 	);
@@ -52,7 +59,7 @@ async function warnUser(
 
 	if (member.id === interaction.member?.id) {
 		return void sendInteractionResponse(
-			client.bot,
+			bot,
 			interaction.id,
 			interaction.token,
 			{
@@ -68,7 +75,7 @@ async function warnUser(
 		);
 	}
 
-	const guild = client.guilds.get(interaction.guildId!);
+	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (!guild) return;
 
 	const moderatorRoleId = guild.roles.find((role) =>
@@ -79,7 +86,7 @@ async function warnUser(
 	const isModerator = member.roles.includes(moderatorRoleId);
 	if (isModerator) {
 		return void sendInteractionResponse(
-			client.bot,
+			bot,
 			interaction.id,
 			interaction.token,
 			{
@@ -98,7 +105,7 @@ async function warnUser(
 
 	const displayWarnError = (): void => {
 		return void sendInteractionResponse(
-			client.bot,
+			bot,
 			interaction.id,
 			interaction.token,
 			{
@@ -115,38 +122,48 @@ async function warnUser(
 		);
 	};
 
-	const subject = await client.database.getOrCreateUser(
+	const subject = await getOrCreateUser(
+		client.database,
 		'id',
 		member.id.toString(),
 	);
 	if (!subject) return displayWarnError();
 
-	const author = await client.database.getOrCreateUser(
+	const author = await getOrCreateUser(
+		client.database,
 		'id',
 		interaction.user.id.toString(),
 	);
 	if (!author) return displayWarnError();
 
-	const warnings = await client.database.getWarnings(subject.ref);
+	const warnings = await getWarnings(
+		client.database,
+		subject.ref,
+	);
 	if (!warnings) return displayWarnError();
 
-	const document = await client.database.createWarning({
-		author: author.ref,
-		subject: subject.ref,
-		reason: reason,
-	});
+	const document = await createWarning(
+		client.database,
+		{
+			author: author.ref,
+			subject: subject.ref,
+			reason: reason,
+		},
+	);
 	if (!document) return displayWarnError();
 
-	client.logging.get(interaction.guildId!)?.log(
+	log(
+		[client, bot],
+		guild,
 		'memberWarnAdd',
-		member!,
+		member,
 		document.data,
 		interaction.user,
 	);
 
 	const relevantWarnings = getRelevantWarnings(warnings);
 
-	sendInteractionResponse(client.bot, interaction.id, interaction.token, {
+	sendInteractionResponse(bot, interaction.id, interaction.token, {
 		type: InteractionResponseTypes.ChannelMessageWithSource,
 		data: {
 			flags: ApplicationCommandFlags.Ephemeral,
@@ -163,13 +180,13 @@ async function warnUser(
 	const passedMaximum =
 		relevantWarnings.length > configuration.guilds.moderation.warnings.maximum;
 
-	const dmChannel = await getDmChannel(client.bot, member.id);
+	const dmChannel = await getDmChannel(bot, member.id);
 	if (dmChannel) {
-		sendMessage(client.bot, dmChannel.id, {
+		sendMessage(bot, dmChannel.id, {
 			embeds: [
 				{
 					thumbnail: (() => {
-						const iconURL = getGuildIconURL(client.bot, guild.id, guild.icon, {
+						const iconURL = getGuildIconURL(bot, guild.id, guild.icon, {
 							size: 4096,
 							format: 'webp',
 						});
@@ -197,7 +214,7 @@ async function warnUser(
 
 	if (passedMaximum) {
 		return kickMember(
-			client.bot,
+			bot,
 			interaction.guildId!,
 			member.id,
 			'Kicked due to having received too many warnings.',

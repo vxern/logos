@@ -1,5 +1,6 @@
 import {
 	ApplicationCommandOption,
+	Bot,
 	CreateSlashApplicationCommand,
 	Interaction,
 } from '../../deps.ts';
@@ -9,7 +10,6 @@ import {
 	InteractionResponseTypes,
 	sendInteractionResponse,
 } from '../../deps.ts';
-import { Language } from '../types.ts';
 
 type WithRequired<T, K extends keyof T> =
 	& Pick<T, Exclude<keyof T, K>>
@@ -23,7 +23,7 @@ type LocalisationFields = 'nameLocalizations' | 'descriptionLocalizations';
 
 /** Describes the handler of an interaction. */
 type InteractionHandler = (
-	client: Client,
+	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ) => void | Promise<void>;
 
@@ -49,9 +49,7 @@ type Option = Omit<OptionLocalised, 'options'> & {
 	options?: Option[];
 };
 
-type CommandLocaliser = (language: Language) => Command;
-
-type CommandBuilder = Command | CommandLocaliser;
+type CommandBuilder = Command;
 
 type OptionBuilder = Option;
 
@@ -61,11 +59,11 @@ type OptionBuilder = Option;
  * @param interaction - The interaction to be handled.
  */
 function displayUnimplemented(
-	client: Client,
+	[_client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): Promise<unknown> {
 	return sendInteractionResponse(
-		client.bot,
+		bot,
 		interaction.id,
 		interaction.token,
 		{

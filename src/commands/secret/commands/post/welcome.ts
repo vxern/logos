@@ -1,5 +1,6 @@
 import {
 	ApplicationCommandFlags,
+	Bot,
 	ButtonStyles,
 	Interaction,
 	InteractionResponseTypes,
@@ -13,13 +14,13 @@ import { fromHex } from '../../../../utils.ts';
 import { getChannelMention } from '../../data/information/information-sections.ts';
 
 function postWelcome(
-	client: Client,
+	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): void {
-	const guild = client.guilds.get(interaction.guildId!);
+	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (!guild) return;
 
-	sendMessage(client.bot, interaction.channelId!, {
+	sendMessage(bot, interaction.channelId!, {
 		embeds: [{
 			title: `Welcome to **${guild.name}**`,
 			description:
@@ -42,7 +43,7 @@ function postWelcome(
 	});
 
 	return void sendInteractionResponse(
-		client.bot,
+		bot,
 		interaction.id,
 		interaction.token,
 		{

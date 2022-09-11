@@ -1,5 +1,6 @@
 import {
 	addRole,
+	Bot,
 	ButtonStyles,
 	Guild,
 	Interaction,
@@ -10,9 +11,10 @@ import {
 	sendMessage,
 	User,
 } from '../../../deps.ts';
-import { Client, getLanguage } from '../../client.ts';
+import { Client } from '../../client.ts';
 import { getProficiencyCategory } from '../../commands/social/module.ts';
 import configuration from '../../configuration.ts';
+import { log } from '../../controllers/logging.ts';
 import { Language } from '../../types.ts';
 import {
 	createInteractionCollector,
@@ -26,20 +28,18 @@ const proficiencyCategory = getProficiencyCategory();
 const proficiencies = proficiencyCategory.collection.list;
 
 async function onSelectLanguageProficiency(
-	client: Client,
+	[client, bot]: [Client, Bot],
 	interaction: Interaction & { type: InteractionTypes.MessageComponent },
 	parameter: string,
 ): Promise<void> {
 	sendInteractionResponse(
-		client.bot,
+		bot,
 		interaction.id,
 		interaction.token,
 		{ type: InteractionResponseTypes.DeferredUpdateMessage },
 	);
 
-	const language = getLanguage(client, interaction.guildId!);
-
-	const guild = client.guilds.get(interaction.guildId!);
+	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (!guild) return;
 
 	const languageConfigurationTuples = <[
@@ -49,12 +49,12 @@ async function onSelectLanguageProficiency(
 
 	const requiresVerification =
 		languageConfigurationTuples.find(([key, _configuration]) =>
-			key === language
+			key === guild.language
 		)![1].requiresVerification;
 
 	if (requiresVerification) {
 		const verificationResult = new Promise<boolean>((resolve) => {
-			const customId = createInteractionCollector(client, {
+			const customId = createInteractionCollector([client, bot], {
 				type: InteractionTypes.ModalSubmit,
 				userId: interaction.user.id,
 				limit: 1,
@@ -94,20 +94,15 @@ async function onSelectLanguageProficiency(
 							)![1].label;
 
 							const question = typeof label === 'function'
-								? label(language)
+								? label(guild.language)
 								: label;
 
 							return [question, field.value!];
 						},
 					);
 
-					const guild = client.guilds.get(submission.guildId!);
-					if (!guild) {
-						return;
-					}
-
 					verifyUser(
-						client,
+						[client, bot],
 						guild,
 						submission.user,
 						answers,
@@ -115,12 +110,12 @@ async function onSelectLanguageProficiency(
 				},
 			});
 
-			sendInteractionResponse(client.bot, interaction.id, interaction.token, {
+			sendInteractionResponse(bot, interaction.id, interaction.token, {
 				type: InteractionResponseTypes.Modal,
 				data: toModal(
 					<Form> configuration.interactions.forms.verification,
 					customId,
-					language,
+					guild.language,
 				),
 			});
 		});
@@ -136,7 +131,7 @@ async function onSelectLanguageProficiency(
 	if (!roleResolved) return;
 
 	return void addRole(
-		client.bot,
+		bot,
 		guild.id,
 		interaction.user.id,
 		roleResolved.id,
@@ -152,7 +147,7 @@ async function onSelectLanguageProficiency(
  * @returns A decision in regards to the user being able to join.
  */
 function verifyUser(
-	client: Client,
+	[client, bot]: [Client, Bot],
 	guild: Guild,
 	user: User,
 	answers: Array<[string, string]>,
@@ -163,7 +158,7 @@ function verifyUser(
 	)!;
 
 	return new Promise<boolean>((resolve) => {
-		const customId = createInteractionCollector(client, {
+		const customId = createInteractionCollector([client, bot], {
 			type: InteractionTypes.MessageComponent,
 			doesNotExpire: true,
 			limit: 1,
@@ -177,7 +172,9 @@ function verifyUser(
 				const [_customId, isAcceptedString] = customIdParts;
 				const isAccepted = isAcceptedString === 'true';
 
-				client.logging.get(guild.id)?.log(
+				log(
+					[client, bot],
+					guild,
 					isAccepted
 						? 'verificationRequestAccept'
 						: 'verificationRequestReject',
@@ -189,7 +186,7 @@ function verifyUser(
 			},
 		});
 
-		sendMessage(client.bot, verificationChannel.id, {
+		sendMessage(bot, verificationChannel.id, {
 			embeds: [{
 				title: mentionUser(user),
 				fields: answers.map(([question, answer]) => ({

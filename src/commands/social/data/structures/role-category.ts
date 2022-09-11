@@ -88,9 +88,7 @@ function createSelectOptionsFromCategories(
 	const categorySelections = getRelevantCategories(categories, language);
 
 	const selections: SelectOption[] = [];
-	for (let index = 0; index < categorySelections.length; index++) {
-		const category = categorySelections.at(index)!;
-
+	for (const [category, index] of categorySelections) {
 		selections.push({
 			label: category.name,
 			value: index.toString(),
@@ -105,12 +103,14 @@ function createSelectOptionsFromCategories(
 function getRelevantCategories(
 	categories: RoleCategory[],
 	language: Language | undefined,
-): RoleCategory[] {
-	const selectedRoleCategories: RoleCategory[] = [];
+): [RoleCategory, number][] {
+	const selectedRoleCategories: [RoleCategory, number][] = [];
 
-	for (const category of categories) {
+	for (let index = 0; index < categories.length; index++) {
+		const category = categories.at(index)!;
+
 		if (category.type === RoleCategoryTypes.CategoryGroup) {
-			selectedRoleCategories.push(category);
+			selectedRoleCategories.push([category, index]);
 			continue;
 		}
 
@@ -119,7 +119,7 @@ function getRelevantCategories(
 			if (!(language in category.collection.lists)) continue;
 		}
 
-		selectedRoleCategories.push(category);
+		selectedRoleCategories.push([category, index]);
 	}
 
 	return selectedRoleCategories;

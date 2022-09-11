@@ -1,12 +1,13 @@
 import {
 	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
+	Bot,
 	editOriginalInteractionResponse,
 	Interaction,
 	InteractionResponseTypes,
 	sendInteractionResponse,
 } from '../../../../deps.ts';
-import { Client, getLanguage } from '../../../client.ts';
+import { Client } from '../../../client.ts';
 import { CommandBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
 import { capitalise } from '../../../formatting.ts';
@@ -60,7 +61,7 @@ const command: CommandBuilder = {
 
 /** Allows the user to look up a word and get information about it. */
 async function word(
-	client: Client,
+	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {
 	const data = interaction.data;
@@ -77,11 +78,13 @@ async function word(
 		<boolean> data.options?.find((option) => option.name === 'show')?.value ??
 			false;
 
-	const language = getLanguage(client, interaction.guildId!);
-	const dictionaries = dictionaryAdaptersByLanguage.get(language);
+	const guild = client.cache.guilds.get(interaction.guildId!);
+	if (!guild) return;
+
+	const dictionaries = dictionaryAdaptersByLanguage.get(guild.language);
 	if (!dictionaries) {
 		return void sendInteractionResponse(
-			client.bot,
+			bot,
 			interaction.id,
 			interaction.token,
 			{
@@ -90,7 +93,7 @@ async function word(
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: `There are no dictionary adapters installed for the ${
-							capitalise(language)
+							capitalise(guild.language)
 						} language.`,
 						color: configuration.interactions.responses.colors.yellow,
 					}],
@@ -100,7 +103,7 @@ async function word(
 	}
 
 	await sendInteractionResponse(
-		client.bot,
+		bot,
 		interaction.id,
 		interaction.token,
 		{
@@ -114,7 +117,7 @@ async function word(
 	const promises = [];
 	for (const dictionary of dictionaries) {
 		const promise = dictionary.lookup(
-			{ word, native: language },
+			{ word, native: guild.language },
 			dictionary.queryBuilder,
 		).catch();
 
@@ -125,7 +128,7 @@ async function word(
 			const hasEntry = fields.length > 0;
 			if (!hasEntry) return;
 
-			editOriginalInteractionResponse(client.bot, interaction.token, {
+			editOriginalInteractionResponse(bot, interaction.token, {
 				embeds: [{
 					title: entry.headword,
 					fields: fields,
@@ -143,7 +146,7 @@ async function word(
 	if (responded) return;
 
 	return void editOriginalInteractionResponse(
-		client.bot,
+		bot,
 		interaction.token,
 		{
 			embeds: [{

@@ -1,5 +1,6 @@
 import {
 	ApplicationCommandFlags,
+	Bot,
 	Embed,
 	Interaction,
 	InteractionResponseTypes,
@@ -11,25 +12,25 @@ import configuration from '../../../../configuration.ts';
 import informationSections from '../../data/information/information-sections.ts';
 
 async function postRules(
-	client: Client,
+	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {
-	const guild = client.guilds.get(interaction.guildId!);
+	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (!guild) return;
 
 	const sections = Object.values(informationSections);
 	const embeds = <Embed[]> (await Promise.all(
-		sections.map((section) => section.generateEmbed(client, guild)),
+		sections.map((section) => section.generateEmbed([client, bot], guild)),
 	)).filter((embed) => embed);
 
 	sendMessage(
-		client.bot,
+		bot,
 		interaction.channelId!,
 		{ embeds },
 	);
 
 	return void sendInteractionResponse(
-		client.bot,
+		bot,
 		interaction.id,
 		interaction.token,
 		{

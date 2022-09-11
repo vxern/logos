@@ -1,5 +1,6 @@
 import {
 	ApplicationCommandFlags,
+	Bot,
 	editMember,
 	Interaction,
 	InteractionResponseTypes,
@@ -8,9 +9,10 @@ import {
 import { Client, resolveInteractionToMember } from '../../../../client.ts';
 import configuration from '../../../../configuration.ts';
 import { mentionUser } from '../../../../utils.ts';
+import { log } from '../../../../controllers/logging.ts';
 
 async function clearTimeout(
-	client: Client,
+	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {
 	const userIdentifier = <string | undefined> interaction.data?.options?.at(0)
@@ -20,7 +22,7 @@ async function clearTimeout(
 	if (userIdentifier === undefined) return;
 
 	const member = resolveInteractionToMember(
-		client,
+		[client, bot],
 		interaction,
 		userIdentifier,
 	);
@@ -28,7 +30,7 @@ async function clearTimeout(
 
 	if (!member.communicationDisabledUntil) {
 		return void sendInteractionResponse(
-			client.bot,
+			bot,
 			interaction.id,
 			interaction.token,
 			{
@@ -45,20 +47,19 @@ async function clearTimeout(
 	}
 
 	await editMember(
-		client.bot,
+		bot,
 		interaction.guildId!,
 		member.id,
 		{ communicationDisabledUntil: undefined },
 	);
 
-	client.logging.get(interaction.guildId!)?.log(
-		'memberTimeoutRemove',
-		member,
-		interaction.user,
-	);
+	const guild = client.cache.guilds.get(interaction.guildId!);
+	if (!guild) return;
+
+	log([client, bot], guild, 'memberTimeoutRemove', member, interaction.user);
 
 	return void sendInteractionResponse(
-		client.bot,
+		bot,
 		interaction.id,
 		interaction.token,
 		{

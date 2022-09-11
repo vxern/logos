@@ -1,5 +1,6 @@
 import {
 	ApplicationCommandFlags,
+	Bot,
 	ButtonComponent,
 	ButtonStyles,
 	editOriginalInteractionResponse,
@@ -10,7 +11,7 @@ import {
 	MessageComponentTypes,
 	sendInteractionResponse,
 } from '../../../../deps.ts';
-import { Client, getLanguage } from '../../../client.ts';
+import { Client } from '../../../client.ts';
 import { CommandBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
 import { createInteractionCollector, random } from '../../../utils.ts';
@@ -34,14 +35,16 @@ const command: CommandBuilder = {
 
 /** Starts a simple game of 'choose the correct word to fit in the blank'. */
 async function startGame(
-	client: Client,
+	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {
-	const language = getLanguage(client, interaction.guildId!);
-	const sentencePairs = sentencePairsByLanguage.get(language);
+	const guild = client.cache.guilds.get(interaction.guildId!);
+	if (!guild) return;
+
+	const sentencePairs = sentencePairsByLanguage.get(guild.language);
 	if (!sentencePairs || sentencePairs.length === 0) {
 		return void sendInteractionResponse(
-			client.bot,
+			bot,
 			interaction.id,
 			interaction.token,
 			{
@@ -50,7 +53,7 @@ async function startGame(
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description:
-							`There are no sentences available in ${language} to learn from.`,
+							`There are no sentences available in ${guild.language} to learn from.`,
 						color: configuration.interactions.responses.colors.yellow,
 					}],
 				},
@@ -59,7 +62,7 @@ async function startGame(
 	}
 
 	await sendInteractionResponse(
-		client.bot,
+		bot,
 		interaction.id,
 		interaction.token,
 		{
@@ -105,7 +108,7 @@ async function startGame(
 
 	let ribbonColor = configuration.interactions.responses.colors.blue;
 
-	const customId = createInteractionCollector(client, {
+	const customId = createInteractionCollector([client, bot], {
 		type: InteractionTypes.MessageComponent,
 		userId: interaction.user.id,
 		onCollect: (bot, selection) => {
@@ -132,7 +135,7 @@ async function startGame(
 				: configuration.interactions.responses.colors.red;
 
 			return void editOriginalInteractionResponse(
-				client.bot,
+				bot,
 				interaction.token,
 				createGameView(),
 			);
@@ -140,7 +143,7 @@ async function startGame(
 	});
 
 	return void editOriginalInteractionResponse(
-		client.bot,
+		bot,
 		interaction.token,
 		createGameView(),
 	);

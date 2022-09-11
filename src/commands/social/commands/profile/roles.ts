@@ -2,6 +2,7 @@ import {
 	addRole,
 	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
+	Bot,
 	editOriginalInteractionResponse,
 	Interaction,
 	InteractionResponse,
@@ -14,7 +15,7 @@ import {
 	sendInteractionResponse,
 	snowflakeToBigint,
 } from '../../../../../deps.ts';
-import { Client, getLanguage } from '../../../../client.ts';
+import { Client } from '../../../../client.ts';
 import { Language } from '../../../../types.ts';
 import { createInteractionCollector } from '../../../../utils.ts';
 import configuration from '../../../../configuration.ts';
@@ -52,15 +53,18 @@ const command: OptionBuilder = {
  * from within it.
  */
 function selectRoles(
-	client: Client,
+	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): void {
-	const language = getLanguage(client, interaction.guildId!);
+	const guild = client.cache.guilds.get(interaction.guildId!);
+	if (!guild) return;
 
-	const rootCategories = getRelevantCategories(roles, language);
+	const rootCategories = getRelevantCategories(roles, guild.language).map((
+		[category, _index],
+	) => category);
 
 	return createRoleSelectionMenu(
-		client,
+		[client, bot],
 		interaction,
 		{
 			navigationData: {
@@ -75,7 +79,7 @@ function selectRoles(
 				},
 				indexesAccessed: [],
 			},
-			language: language,
+			language: guild.language,
 		},
 	);
 }
@@ -95,6 +99,10 @@ interface BrowsingData {
 	language?: Language;
 }
 
+type CategoryGroupRoleCategory = RoleCategory & {
+	type: RoleCategoryTypes.CategoryGroup;
+};
+
 /**
  * Represents a template for data used in navigation between sections of the
  * role selection menu.
@@ -104,7 +112,7 @@ interface NavigationData {
 	 * The root category, which is not part of another category's list of
 	 * categories.
 	 */
-	root: RoleCategory;
+	root: CategoryGroupRoleCategory;
 
 	/**
 	 * A stack containing the indexes accessed in succession to arrive at the
@@ -120,32 +128,32 @@ interface NavigationData {
  * @param data - Navigation data for the selection menu.
  * @returns The category the user is now viewing.
  */
-function traverseRoleSelectionTree(data: NavigationData): RoleCategory {
-	let category = data.root;
-	for (const index of data.indexesAccessed) {
-		category =
-			(<RoleCategory & { type: RoleCategoryTypes.CategoryGroup }> category)
-				.categories.at(index)!;
-	}
-	return category;
+function traverseRoleSelectionTree(
+	data: NavigationData,
+): CategoryGroupRoleCategory {
+	return data.indexesAccessed.reduce(
+		(category, next) =>
+			<CategoryGroupRoleCategory> category.categories.at(next)!,
+		data.root,
+	);
 }
 
 /**
  * Creates a browsing menu for selecting roles.
  */
 function createRoleSelectionMenu(
-	client: Client,
+	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 	data: BrowsingData,
 ): void {
-	const guild = client.guilds.get(interaction.guildId!);
+	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (!guild) return;
 
 	const emojiIdsByName = new Map(
 		guild.emojis.map((emoji) => [emoji.name!, emoji.id!]),
 	);
 
-	const member = client.members.get(
+	const member = client.cache.members.get(
 		snowflakeToBigint(`${interaction.user.id}${guild.id}`),
 	);
 	if (!member) return;
@@ -193,14 +201,14 @@ function createRoleSelectionMenu(
 
 		if (editResponse) {
 			return void editOriginalInteractionResponse(
-				client.bot,
+				bot,
 				interaction.token,
 				menu.data!,
 			);
 		}
 
 		return void sendInteractionResponse(
-			client.bot,
+			bot,
 			interaction.id,
 			interaction.token,
 			menu,
@@ -208,7 +216,7 @@ function createRoleSelectionMenu(
 	};
 
 	const customId = createInteractionCollector(
-		client,
+		[client, bot],
 		{
 			type: InteractionTypes.MessageComponent,
 			userId: interaction.user.id,
@@ -270,7 +278,7 @@ function createRoleSelectionMenu(
 						memberRolesIncludedInMenu.length >= category.limit
 					) {
 						sendInteractionResponse(
-							client.bot,
+							bot,
 							interaction.id,
 							interaction.token,
 							{

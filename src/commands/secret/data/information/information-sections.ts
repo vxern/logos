@@ -1,5 +1,6 @@
 import {
 	BaseInvite,
+	Bot,
 	createInvite,
 	Embed,
 	getInvites,
@@ -19,7 +20,7 @@ interface InformationSection {
 
 	/** The method to generate the embed. */
 	generateEmbed: (
-		client: Client,
+		[client, bot]: [Client, Bot],
 		guild: Guild,
 	) => Promise<Embed | undefined> | (Embed | undefined);
 }
@@ -28,7 +29,7 @@ interface InformationSection {
 const informationSections: Record<string, InformationSection> = {
 	rules: {
 		image: 'https://i.imgur.com/wRBpXcY.png',
-		generateEmbed: (_client, guild) => {
+		generateEmbed: (_clientWithBot, guild) => {
 			const fields = [];
 			for (const [title, generateRule] of Object.entries(ruleGenerators)) {
 				const rule = generateRule(guild);
@@ -62,8 +63,8 @@ const informationSections: Record<string, InformationSection> = {
 	},
 	invite: {
 		image: 'https://i.imgur.com/snJaKYm.png',
-		generateEmbed: async (client, guild) => {
-			const invite = await getInvite(client, guild);
+		generateEmbed: async ([_client, bot], guild) => {
+			const invite = await getInvite(bot, guild);
 			if (!invite) return;
 
 			return {
@@ -78,10 +79,10 @@ const informationSections: Record<string, InformationSection> = {
 };
 
 async function getInvite(
-	client: Client,
+	bot: Bot,
 	guild: Guild,
 ): Promise<InviteMetadata | BaseInvite | undefined> {
-	const invites = (await getInvites(client.bot, guild.id)).array();
+	const invites = (await getInvites(bot, guild.id)).array();
 	const viableInvites = invites.filter((invite) => invite.maxAge === 0);
 	const mostViableInvite = viableInvites.find((invite) =>
 		invite.maxAge === 0 && invite.inviter?.id === guild.ownerId
@@ -91,7 +92,7 @@ async function getInvite(
 	const inviteLinkChannel = getTextChannel(guild, 'welcome');
 	if (!inviteLinkChannel) return undefined;
 
-	const newInvite = await createInvite(client.bot, inviteLinkChannel.id, {
+	const newInvite = await createInvite(bot, inviteLinkChannel.id, {
 		maxAge: 0,
 		maxUses: 0,
 		temporary: false,
