@@ -1,4 +1,4 @@
-import 'https://deno.land/x/dotenv@v3.2.0/load.ts';
+import 'dotenv_load';
 import { initialiseClient } from './src/client.ts';
 
 // Array of environment variables required to run the program.

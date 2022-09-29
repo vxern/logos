@@ -1,5 +1,5 @@
-import { Player } from 'https://deno.land/x/lavadeno@3.2.2/mod.ts';
-import { LoadType } from 'https://deno.land/x/lavalink_types@2.0.6/mod.ts';
+import { Player } from 'lavadeno';
+import { LoadType } from 'lavalink_types';
 import {
 	ApplicationCommandFlags,
 	Channel,
@@ -22,8 +22,8 @@ import { SongStream } from '../commands/music/data/song-stream.ts';
 import { mention, MentionTypes } from '../formatting.ts';
 
 class MusicController {
-  private client: Client;
-  private guild: Guild;
+	private client: Client;
+	private guild: Guild;
 
 	/** The audio player associated with this controller. */
 	private player: Player;
@@ -56,8 +56,8 @@ class MusicController {
 
 	/** Constructs a {@link MusicController}. */
 	constructor(client: Client, guild: Guild) {
-    this.client = client;
-    this.guild = guild;
+		this.client = client;
+		this.guild = guild;
 		this.player = this.client.node.createPlayer(BigInt(this.guild.id));
 	}
 

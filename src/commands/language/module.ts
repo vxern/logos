@@ -1,4 +1,4 @@
-import { parse as parseCSV } from 'https://deno.land/std@0.127.0/encoding/csv.ts';
+import { parse as parseCSV } from 'std/encoding/csv.ts';
 import game from './commands/game.ts';
 import resources from './commands/resources.ts';
 import word from './commands/word.ts';

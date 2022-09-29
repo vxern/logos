@@ -1,8 +1,4 @@
-import {
-	Playlist,
-	Video,
-	YouTube,
-} from 'https://deno.land/x/youtube_sr@v4.1.17/mod.ts';
+import { Playlist, Video, YouTube } from 'youtube_sr';
 import {
 	ApplicationCommandFlags,
 	Interaction,
