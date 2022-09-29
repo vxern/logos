@@ -2,7 +2,6 @@ import {
 	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
 	Bot,
-	dayjs,
 	getAvatarURL,
 	Interaction,
 	InteractionResponseTypes,
@@ -76,8 +75,8 @@ async function viewProfile(
 		);
 	}
 
-	const createdAt = dayjs(snowflakeToTimestamp(member.id));
-	const joinedAt = dayjs(member.joinedAt);
+	const createdAt = snowflakeToTimestamp(member.id);
+	const joinedAt = member.joinedAt;
 
 	const subject = await getOrCreateUser(
 		client.database,

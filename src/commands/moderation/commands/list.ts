@@ -2,7 +2,6 @@ import {
 	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
 	Bot,
-	dayjs,
 	Interaction,
 	InteractionResponseTypes,
 	sendInteractionResponse,
@@ -14,7 +13,7 @@ import { getOrCreateUser } from '../../../database/functions/users.ts';
 import { getWarnings } from '../../../database/functions/warnings.ts';
 import { Document } from '../../../database/structs/document.ts';
 import { Warning } from '../../../database/structs/users/warning.ts';
-import { list } from '../../../formatting.ts';
+import { displayTime, list } from '../../../formatting.ts';
 import { chunk, paginate, trim } from '../../../utils.ts';
 import { user } from '../../parameters.ts';
 
@@ -108,7 +107,7 @@ async function listWarnings(
 		return list(
 			warnings.map(
 				(warning) =>
-					`${trim(warning.data.reason, 50)} (${dayjs(warning.ts).fromNow()})`,
+					`${trim(warning.data.reason, 50)} (${displayTime(warning.ts)})`,
 			),
 		);
 	};

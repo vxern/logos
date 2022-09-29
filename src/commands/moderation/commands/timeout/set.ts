@@ -1,7 +1,6 @@
 import {
 	ApplicationCommandFlags,
 	Bot,
-	dayjs,
 	editMember,
 	getDmChannel,
 	getGuildIconURL,
@@ -17,7 +16,7 @@ import configuration, {
 	timeDescriptors,
 	week,
 } from '../../../../configuration.ts';
-import { mention, MentionTypes } from '../../../../formatting.ts';
+import { displayTime, mention, MentionTypes } from '../../../../formatting.ts';
 import { mentionUser } from '../../../../utils.ts';
 import { log } from '../../../../controllers/logging.ts';
 
@@ -130,7 +129,7 @@ async function setTimeout(
 		guild,
 		'memberTimeoutAdd',
 		member,
-		new Date(until),
+		until,
 		reason,
 		interaction.user,
 	);
@@ -142,7 +141,7 @@ async function setTimeout(
 			embeds: [{
 				description: `Member ${
 					mention(member.id, MentionTypes.User)
-				} has been timed out for a duration of ${dayjs(until).fromNow(true)}.`,
+				} has been timed out until ${displayTime(until)}.`,
 				color: configuration.interactions.responses.colors.blue,
 			}],
 		},
@@ -158,10 +157,8 @@ async function setTimeout(
 
 		return void sendMessage(bot, textChannel.id, {
 			embeds: [{
-				description: `${
-					mentionUser(user)
-				} has been timed out for a duration of ${
-					dayjs(until).fromNow(true)
+				description: `${mentionUser(user)} has been timed out until ${
+					displayTime(until)
 				} for: ${reason}`,
 				color: configuration.interactions.responses.colors.yellow,
 			}],
@@ -181,8 +178,8 @@ async function setTimeout(
 					return { url: iconURL };
 				})(),
 				title: 'You have been timed out',
-				description: `You have been timed out for a duration of ${
-					dayjs(until).fromNow(true)
+				description: `You have been timed out until ${
+					displayTime(until)
 				} for: ${reason}`,
 				color: configuration.interactions.responses.colors.yellow,
 			},

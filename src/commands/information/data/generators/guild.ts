@@ -1,10 +1,10 @@
-import { dayjs, Member, User } from '../../../../../deps.ts';
+import { Member, User } from '../../../../../deps.ts';
 import configuration from '../../../../configuration.ts';
 import { ArticleChange } from '../../../../database/structs/articles/article-change.ts';
 import { Article } from '../../../../database/structs/articles/article.ts';
 import { Praise } from '../../../../database/structs/users/praise.ts';
 import { Warning } from '../../../../database/structs/users/warning.ts';
-import { code, codeMultiline } from '../../../../formatting.ts';
+import { code, codeMultiline, displayTime } from '../../../../formatting.ts';
 import { mentionUser, trim } from '../../../../utils.ts';
 import { MessageGenerators } from './generators.ts';
 
@@ -59,7 +59,7 @@ type GuildEvents = {
 	memberWarnRemove: [member: Member, warning: Warning, by: User];
 
 	/** A member has been timed out. */
-	memberTimeoutAdd: [member: Member, until: Date, reason: string, by: User];
+	memberTimeoutAdd: [member: Member, until: number, reason: string, by: User];
 
 	/** A member's timeout has been cleared. */
 	memberTimeoutRemove: [member: Member, by: User];
@@ -313,7 +313,7 @@ ${trim(change.content.body, 300)}`;
 
 			return `${mentionUser(memberUser)} has been timed out by ${
 				mentionUser(by)
-			} for a duration of ${dayjs(until).fromNow(true)} for: ${reason}`;
+			} until ${displayTime(until)} for: ${reason}`;
 		},
 		filter: (_client, originGuildId, member, _until, _reason, _by) =>
 			originGuildId === member.guildId,

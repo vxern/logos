@@ -2,7 +2,6 @@ import {
 	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
 	Bot,
-	dayjs,
 	getDmChannel,
 	getGuildIconURL,
 	Interaction,
@@ -22,6 +21,7 @@ import {
 import { user } from '../../parameters.ts';
 import { getRelevantWarnings } from '../module.ts';
 import { log } from '../../../controllers/logging.ts';
+import { displayTime } from '../../../formatting.ts';
 
 const command: CommandBuilder = {
 	name: 'pardon',
@@ -133,7 +133,7 @@ async function unwarnUser(
 				type: InteractionResponseTypes.ApplicationCommandAutocompleteResult,
 				data: {
 					choices: relevantWarnings.map((warning) => ({
-						name: `${warning.data.reason} (${dayjs(warning.ts).fromNow()})`,
+						name: `${warning.data.reason} (${displayTime(warning.ts)})`,
 						value: warning.ref.value.id,
 					})),
 				},
@@ -226,7 +226,7 @@ async function unwarnUser(
 				})(),
 				title: 'You have been pardoned',
 				description: `The warning for '${warning.data.reason}' given to you ${
-					dayjs(warning.ts).fromNow()
+					displayTime(warning.ts)
 				} has been dispelled.`,
 				color: configuration.interactions.responses.colors.green,
 			},
