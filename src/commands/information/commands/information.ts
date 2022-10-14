@@ -1,44 +1,19 @@
+import { Commands } from '../../../../assets/localisations/commands.ts';
+import { createLocalisations } from '../../../../assets/localisations/types.ts';
 import { ApplicationCommandOptionTypes } from '../../../../deps.ts';
 import { CommandBuilder } from '../../command.ts';
 import { displayBotInformation } from './information/bot.ts';
 import { displayGuildInformation } from './information/guild.ts';
 
 const command: CommandBuilder = {
-	name: 'information',
-	nameLocalizations: {
-		pl: 'informacje',
-		ro: 'informații',
-	},
-	description: 'Used to display various information.',
-	descriptionLocalizations: {
-		pl: 'Komenda używania do wyświetlania różnych informacji.',
-		ro: 'Comandă utilizată pentru afișarea diverselor informații.',
-	},
+	...createLocalisations(Commands.information),
 	defaultMemberPermissions: ['VIEW_CHANNEL'],
 	options: [{
-		name: 'bot',
-		nameLocalizations: {
-			pl: 'bot',
-			ro: 'bot',
-		},
-		description: 'Displays information about the bot.',
-		descriptionLocalizations: {
-			pl: 'Wyświetla informacje o bocie.',
-			ro: 'Afișează informații despre bot.',
-		},
+		...createLocalisations(Commands.information.options.bot),
 		type: ApplicationCommandOptionTypes.SubCommand,
 		handle: displayBotInformation,
 	}, {
-		name: 'server',
-		nameLocalizations: {
-			pl: 'serwer',
-			ro: 'server',
-		},
-		description: 'Displays information about the server.',
-		descriptionLocalizations: {
-			pl: 'Wyświetla informacje o serwerze.',
-			ro: 'Afișează informații despre server.',
-		},
+		...createLocalisations(Commands.information.options.guild),
 		type: ApplicationCommandOptionTypes.SubCommand,
 		handle: displayGuildInformation,
 	}],
