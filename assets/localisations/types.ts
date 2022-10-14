@@ -2,13 +2,13 @@ import { Locales, Localization as DiscordLocalisation } from '../../deps.ts';
 import { Language } from '../../src/types.ts';
 
 type Expression<T> = (argument: T) => string;
-type Localisations<T> = Partial<Record<Language, T>>;
+type Localisations<T> = Partial<Record<Language, T>> & { 'English': T };
 type DiscordLocalisations = Record<
 	'name' | 'description',
-	Localisations<string> & { 'English': string }
+	Localisations<string>
 >;
 
-const languagesByLocale: Partial<Record<Locales, Language>> = {
+const languageByLocale: Partial<Record<Locales, Language>> = {
 	'en-GB': 'English',
 	'en-US': 'English',
 	'pl': 'Polish',
@@ -16,7 +16,7 @@ const languagesByLocale: Partial<Record<Locales, Language>> = {
 };
 
 function getLanguageByLocale(locale: Locales): Language | undefined {
-	return languagesByLocale[locale];
+	return languageByLocale[locale];
 }
 
 function createDiscordLocalisations(
@@ -49,5 +49,16 @@ function createLocalisations(
 	};
 }
 
+function localise<T>(
+	localisations: Localisations<T>,
+	locale: string | undefined,
+): T {
+	if (!locale || !(locale in languageByLocale)) {
+		return localisations['English'];
+	}
+
+	return localisations[getLanguageByLocale(<Locales> locale)!]!;
+}
+
 export type { DiscordLocalisations, Expression, Localisations };
-export { createLocalisations, getLanguageByLocale };
+export { createLocalisations, getLanguageByLocale, localise };

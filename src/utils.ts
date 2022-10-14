@@ -31,6 +31,8 @@ import { code } from './formatting.ts';
 import { addCollector, Client } from './client.ts';
 import configuration from './configuration.ts';
 import { Language } from './types.ts';
+import { Utils } from '../assets/localisations/utils.ts';
+import { localise } from '../assets/localisations/types.ts';
 
 /**
  * Parses a 6-digit hex value prefixed with a hashtag to a number.
@@ -216,6 +218,8 @@ function paginate<T>(
 		delete embed.fields;
 	}
 
+  const footerText = localise(Utils.continuedOnNextPage, interaction.locale);
+
 	const generateEmbed: () => Embed[] = () => [{
 		...embed,
 		fields: [{
@@ -224,7 +228,7 @@ function paginate<T>(
 				: `${view.title} ~ Page ${pageIndex + 1}/${elements.length}`,
 			value: view.generate(elements.at(pageIndex)!, pageIndex),
 		}, ...existingFields],
-		footer: isLast() ? undefined : { text: 'Continued on the next page...' },
+		footer: isLast() ? undefined : { text: footerText },
 	}];
 
 	const generateButtons = (): MessageComponents => {
