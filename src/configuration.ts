@@ -1,4 +1,3 @@
-import { TextStyles } from '../deps.ts';
 import { SongListingContentTypes } from './commands/music/data/song-listing.ts';
 import { Language } from './types.ts';
 import { fromHex } from './utils.ts';
@@ -66,6 +65,10 @@ const settings = {
 				dialects: [],
 			},
 			'English': {
+				requiresVerification: false,
+				dialects: [],
+			},
+			'Polish': {
 				requiresVerification: false,
 				dialects: [],
 			},
@@ -164,68 +167,6 @@ const settings = {
 				// making it seem like there is no colour stripe.
 				invisible: fromHex('#36393f'),
 				darkRed: fromHex('#820000'),
-			},
-		},
-		// Configuration settings pertaining to user forms.
-		forms: {
-			// Configuration settings pertaining to the article editor.
-			article: {
-				title: 'Article Editor',
-				// Definitions of fields in the article editor form.
-				fields: {
-					title: {
-						type: 'TEXT_INPUT',
-						label: 'Title of your article',
-						style: TextStyles.Short,
-						minimum: 10,
-						maximum: 50,
-					},
-					body: {
-						type: 'TEXT_INPUT',
-						label: 'Body of your article',
-						style: TextStyles.Paragraph,
-						minimum: 30,
-						maximum: 3000,
-					},
-					footer: {
-						type: 'TEXT_INPUT',
-						label: 'Additional information / notes',
-						style: TextStyles.Paragraph,
-						required: false,
-						minimum: 10,
-						maximum: 500,
-					},
-				},
-			},
-			// Configuration settings pertaining to user verification.
-			verification: {
-				title: 'Verification Questions',
-				// Definitions of fields in the verification form.
-				fields: {
-					reason: {
-						type: 'TEXT_INPUT',
-						label: (language: string) =>
-							`What is your reason for learning ${language}?`,
-						style: TextStyles.Paragraph,
-						minimum: 20,
-						maximum: 300,
-					},
-					aim: {
-						type: 'TEXT_INPUT',
-						label: 'How will you benefit from being a member?',
-						style: TextStyles.Paragraph,
-						minimum: 20,
-						maximum: 300,
-					},
-					whereFound: {
-						type: 'TEXT_INPUT',
-						label: (language: string) =>
-							`How did you find out about Learn ${language}?`,
-						style: TextStyles.Short,
-						minimum: 5,
-						maximum: 50,
-					},
-				},
 			},
 		},
 		// Configuration settings pertaining to articles.
