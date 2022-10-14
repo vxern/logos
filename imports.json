@@ -1,7 +1,5 @@
 {
   "imports": {
-    "/": "./",
-    "./": "./",
     "std/": "https://deno.land/std@0.158.0/",
     "cheerio": "https://deno.land/x/cheerio@1.0.6/mod.ts",
     "discordeno": "https://deno.land/x/discordeno@16.0.0/mod.ts",
