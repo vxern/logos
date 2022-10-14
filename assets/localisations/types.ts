@@ -7,6 +7,9 @@ type DiscordLocalisations = Record<
 	'name' | 'description',
 	Localisations<string>
 >;
+type CommandLocalisations<T extends string> = DiscordLocalisations & {
+	options: Record<T, DiscordLocalisations>;
+};
 
 const languageByLocale: Partial<Record<Locales, Language>> = {
 	'en-GB': 'English',
@@ -60,5 +63,10 @@ function localise<T>(
 	return localisations[getLanguageByLocale(<Locales> locale)!]!;
 }
 
-export type { DiscordLocalisations, Expression, Localisations };
+export type {
+	CommandLocalisations,
+	DiscordLocalisations,
+	Expression,
+	Localisations,
+};
 export { createLocalisations, getLanguageByLocale, localise };
