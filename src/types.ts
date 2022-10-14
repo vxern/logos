@@ -2,6 +2,7 @@ const supportedLanguages = [
 	'Armenian',
 	'English',
 	'Belarusian',
+  'Polish',
 	'Romanian',
 ] as const;
 type Language = typeof supportedLanguages[number];
