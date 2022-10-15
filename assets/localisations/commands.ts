@@ -322,6 +322,26 @@ class Commands {
 			},
 		},
 	});
+
+	static readonly resources = typedLocalisations({
+		name: {
+			'English': 'resources',
+			'Polish': 'zasoby',
+			'Romanian': 'resurse',
+		},
+		description: {
+			'English': 'Displays a list of resources to learn the language.',
+			'Polish': 'Wyświetla listę zasób do nauki języka.',
+			'Romanian': 'Afișează o listă cu resurse pentru învățarea limbii.',
+		},
+		strings: {
+			clickForResources: {
+				'English': 'Click here for resources',
+				'Polish': 'Kliknij tutaj dla zasobów',
+				'Romanian': 'Dă clic aici pentru resurse',
+			},
+		},
+	});
 }
 
 export { Commands, GlobalParameters };
