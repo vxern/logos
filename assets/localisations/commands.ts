@@ -1,6 +1,6 @@
 import { User } from '../../deps.ts';
 import { links } from '../../src/constants.ts';
-import { list } from '../../src/formatting.ts';
+import { capitalise, list } from '../../src/formatting.ts';
 import { CommandLocalisations, DiscordLocalisations } from './types.ts';
 
 class GlobalParameters {
@@ -182,7 +182,6 @@ class Commands {
 								`Nu, din păcate. Deși, codul-sursă al predecesorului meu, lui Talon, *este* public. Îl puteți vedea [aici](${links.talonRepositoryLink}).`,
 						},
 					},
-          
 				},
 			},
 			guild: {
@@ -195,6 +194,86 @@ class Commands {
 					'English': 'Displays information about the server.',
 					'Polish': 'Wyświetla informacje o serwerze.',
 					'Romanian': 'Afișează informații despre server.',
+				},
+				strings: {
+					informationAbout: {
+						'English': (guildName: string) =>
+							`Information about **${guildName}**`,
+						'Polish': (guildName: string) => `Informacje o **${guildName}**`,
+						'Romanian': (guildName: string) =>
+							`Informații despre **${guildName}**`,
+					},
+					noDescription: {
+						'English': 'No description provided.',
+						'Polish': 'Bez opisu.',
+						'Romanian': 'Fără descriere.',
+					},
+					overseenByModerators: {
+						'English': (moderatorRoleName: string) =>
+							`This server is overseen by a collective of ${moderatorRoleName}s.`,
+						'Polish': (moderatorRoleName: string) =>
+							`Ten serwer jest nadzorowany poprzez grupę osób z rolą **${
+								capitalise(moderatorRoleName)
+							}**.`,
+						'Romanian': (moderatorRoleName: string) =>
+							`Acest server este supravegheat de cătr-un grup de oameni cu rolul **${
+								capitalise(moderatorRoleName)
+							}**.`,
+					},
+					withoutProficiencyRole: {
+						'English': 'without a proficiency role.',
+						'Polish': 'bez roli biegłości',
+						'Romanian': 'fără un rol de proficiență.',
+					},
+					fields: {
+						description: {
+							'English': 'Description',
+							'Polish': 'Opis',
+							'Romanian': 'Descriere',
+						},
+						members: {
+							'English': 'Members',
+							'Polish': 'Członkowie',
+							'Romanian': 'Membri',
+						},
+						created: {
+							'English': 'Created',
+							'Polish': 'Stworzony',
+							'Romanian': 'Creat',
+						},
+						channels: {
+							'English': 'Channels',
+							'Polish': 'Kanały',
+							'Romanian': 'Canale',
+						},
+						owner: {
+							'English': 'Owner',
+							'Polish': 'Właściciel',
+							'Romanian': 'Properietarul',
+						},
+						moderators: {
+							'English': 'Moderators',
+							'Polish': 'Moderatorzy',
+							'Romanian': 'Moderatori',
+						},
+						proficiencyDistribution: {
+							'English': 'Proficiency Distribution',
+							'Polish': 'Dystrybucja Biegłości',
+							'Romanian': 'Distribuție de Proficiență',
+						},
+					},
+					channelTypes: {
+						text: {
+							'English': 'Text',
+							'Polish': 'Tekstowe',
+							'Romanian': 'de Text',
+						},
+						voice: {
+							'English': 'Voice',
+							'Polish': 'Głosowe',
+							'Romanian': 'de Voce',
+						},
+					},
 				},
 			},
 		},
