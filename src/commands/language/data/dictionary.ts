@@ -1,3 +1,5 @@
+import { Commands } from '../../../../assets/localisations/commands.ts';
+import { localise } from '../../../../assets/localisations/types.ts';
 import { DiscordEmbedField } from '../../../../deps.ts';
 import { Language } from '../../../types.ts';
 
@@ -81,27 +83,28 @@ type DictionaryEntry = DictionaryEntryContent & {
  */
 function toFields(
 	entry: DictionaryEntry,
+	locale: string,
 	{ verbose }: { verbose: boolean },
 ): DiscordEmbedField[] {
 	const fields: Partial<DiscordEmbedField>[] = [{
-		name: 'Translation',
+		name: localise(Commands.word.strings.fields.translation, locale),
 		value: entry.translations?.join(', '),
 	}, {
-		name: 'Pronunciation',
+		name: localise(Commands.word.strings.fields.pronunciation, locale),
 		value: entry.pronunciation,
 	}, {
-		name: 'Definition',
+		name: localise(Commands.word.strings.fields.definition, locale),
 		value: entry.definition,
 	}, {
-		name: 'Etymology',
+		name: localise(Commands.word.strings.fields.etymology, locale),
 		value: entry.etymology,
 	}, {
-		name: 'Synonyms',
+		name: localise(Commands.word.strings.fields.synonyms, locale),
 		value: (verbose ? entry.synonyms : entry.synonyms?.slice(0, 10))?.join(
 			', ',
 		),
 	}, {
-		name: 'Antonyms',
+		name: localise(Commands.word.strings.fields.antonyms, locale),
 		value: (verbose ? entry.antonyms : entry.antonyms?.slice(0, 10))?.join(
 			', ',
 		),
