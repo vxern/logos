@@ -316,9 +316,9 @@ class Commands {
 			},
 			noSentencesAvailable: {
 				'English':
-					'There are no available sentences in the requested language.',
-				'Polish': 'Nie ma zdań dostępnych dla tego języka.',
-				'Romanian': 'Nu sunt propoziții disponibile pentru această limbă.',
+					'There are no sentences available in the requested language.',
+				'Polish': 'Nie ma zdań dostępnych w tym języku.',
+				'Romanian': 'Nu sunt propoziții disponibile în această limbă.',
 			},
 		},
 	});
@@ -426,6 +426,61 @@ class Commands {
 					'Polish': 'Oba języki źródłowy oraz docelowy są nieprawidłowe.',
 					'Romanian': 'Atât limba-sursă, cât și limba-țintă sunt nevalide.',
 				},
+			},
+		},
+	});
+
+	static readonly word = typedLocalisations({
+		name: {
+			'English': 'word',
+			'Polish': 'słowo',
+			'Romanian': 'cuvânt',
+		},
+		description: {
+			'English': 'Displays information about a given word.',
+			'Polish': 'Wyświetla informacje o danym słowie.',
+			'Romanian': 'Afișează informații despre un cuvânt dat.',
+		},
+		options: {
+			word: {
+				name: {
+					'English': 'word',
+					'Polish': 'słowo',
+					'Romanian': 'cuvânt',
+				},
+				description: {
+					'English': 'The word to display information about.',
+					'Polish': 'Słowo, o którym mają być wyświetlone informacje.',
+					'Romanian': 'Cuvântul despre care să fie afișate informații.',
+				},
+			},
+			verbose: {
+				name: {
+					'English': 'verbose',
+					'Polish': 'tryb-rozwlekły',
+					'Romanian': 'mod-prolix',
+				},
+				description: {
+					'English':
+						'If set to true, more (perhaps unnecessary) information will be shown.',
+					'Polish':
+						'Jeśli tak, więcej (możliwie niepotrzebnych) informacji będzie pokazanych.',
+					'Romanian':
+						'Dacă da, mai multe (posibil inutile) informații vor fi afișate.',
+				},
+			},
+		},
+		strings: {
+			noDictionaryAdapters: {
+				'English':
+					'There are no dictionaries available in the requested language.',
+				'Polish': 'Nie ma słowników dostępnych w tym języku.',
+				'Romanian': 'Nu sunt dicționare disponibile în această limbă.',
+			},
+			noResults: {
+				'English': 'No results.',
+				'Polish': 'Brak wyników.',
+				'Romanian': 'Fără rezultate.',
 			},
 		},
 	});
