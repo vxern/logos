@@ -3,9 +3,11 @@ import { Language } from '../../src/types.ts';
 
 type Expression<T> = (argument: T) => string;
 type Localisations<T> = Partial<Record<Language, T>> & { 'English': T };
-type DiscordLocalisations = Record<
-	'name' | 'description',
-	Localisations<string>
+type DiscordLocalisations = Required<
+	Record<
+		'name' | 'description',
+		Localisations<string>
+	>
 >;
 type CommandLocalisations<
 	OptionKeys extends string,
