@@ -342,6 +342,93 @@ class Commands {
 			},
 		},
 	});
+
+	static readonly translate = typedLocalisations({
+		name: {
+			'English': 'translate',
+			'Polish': 'przetłumacz',
+			'Romanian': 'traducere',
+		},
+		description: {
+			'English':
+				'Translates a text from the source language to the target language.',
+			'Polish': 'Tłumaczy dany tekst z języka źródłowego na język docelowy.',
+			'Romanian': 'Traduce un text dat din limbă-sursă în limbă-țintă.',
+		},
+		options: {
+			from: {
+				name: {
+					'English': 'from',
+					'Polish': 'z',
+					'Romanian': 'din',
+				},
+				description: {
+					'English': 'The source language.',
+					'Polish': 'Język źródłowy.',
+					'Romanian': 'Limbă-sursă.',
+				},
+			},
+			to: {
+				name: {
+					'English': 'to',
+					'Polish': 'na',
+					'Romanian': 'în',
+				},
+				description: {
+					'English': 'The target language.',
+					'Polish': 'Język docelowy.',
+					'Romanian': 'Limbă-țintă.',
+				},
+			},
+			text: {
+				name: {
+					'English': 'text',
+					'Polish': 'tekst',
+					'Romanian': 'text',
+				},
+				description: {
+					'English': 'The text to translate.',
+					'Polish': 'Tekst do przetłumaczenia.',
+					'Romanian': 'Text de tradus.',
+				},
+			},
+		},
+		strings: {
+			targetLanguageMustBeDifferentFromSource: {
+				'English':
+					'The target language may not be the same as the source language.',
+				'Polish': 'Język docelowy nie może być taki sam jak język źródłowy.',
+				'Romanian': 'Limba-țintă nu poate fi aceeași cu limba-sursă.',
+			},
+			textCannotBeEmpty: {
+				'English': 'The source text may not be empty.',
+				'Polish': 'Tekst źródłowy nie może być pusty.',
+				'Romanian': 'Câmpul pentru text-sursă nu poate fi gol.',
+			},
+			failed: {
+				'English': 'Failed to translate the given text.',
+				'Polish': 'Tłumaczenie danego tekstu nie powiodło się.',
+				'Romanian': 'Traducerea textului dat nu a reușit.',
+			},
+			invalid: {
+				source: {
+					'English': 'The source language is invalid.',
+					'Polish': 'Język źródłowy jest nieprawidłowy.',
+					'Romanian': 'Limba-sursă este nevalidă.',
+				},
+				target: {
+					'English': 'The target language is invalid.',
+					'Polish': 'Język docelowy jest nieprawidłowy.',
+					'Romanian': 'Limba-țintă este nevalidă.',
+				},
+				both: {
+					'English': 'Both the source and target languages are invalid.',
+					'Polish': 'Oba języki źródłowy oraz docelowy są nieprawidłowe.',
+					'Romanian': 'Atât limba-sursă, cât și limba-țintă sunt nevalide.',
+				},
+			},
+		},
+	});
 }
 
 export { Commands, GlobalParameters };
