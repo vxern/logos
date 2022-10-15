@@ -7,9 +7,24 @@ type DiscordLocalisations = Record<
 	'name' | 'description',
 	Localisations<string>
 >;
-type CommandLocalisations<T extends string> = DiscordLocalisations & {
-	options: Record<T, DiscordLocalisations>;
-};
+type CommandLocalisations<
+	OptionKeys extends string,
+	StringKeys extends string,
+	Expression,
+	StringsType extends Record<StringKeys, Expression> | undefined = undefined,
+> =
+	& DiscordLocalisations
+	& {
+		options: Record<OptionKeys, DiscordLocalisations>;
+	}
+	& (
+		StringsType extends undefined ? {
+				strings?: StringsType;
+			}
+			: {
+				strings: StringsType;
+			}
+	);
 
 const languageByLocale: Partial<Record<Locales, Language>> = {
 	'en-GB': 'English',
