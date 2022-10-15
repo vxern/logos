@@ -100,7 +100,7 @@ async function word(
 		promise.then((result) => {
 			entry = { ...result, ...entry };
 
-			const fields = toFields(entry, { verbose: verbose });
+			const fields = toFields(entry, interaction.locale, { verbose: verbose });
 			const hasEntry = fields.length > 0;
 			if (!hasEntry) return;
 
@@ -118,7 +118,7 @@ async function word(
 
 	await Promise.all(promises).catch();
 
-	const responded = toFields(entry, { verbose: verbose }).length > 0;
+	const responded = toFields(entry, interaction.locale, { verbose: verbose }).length > 0;
 	if (responded) return;
 
 	return void editOriginalInteractionResponse(
