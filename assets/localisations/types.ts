@@ -10,13 +10,18 @@ type DiscordLocalisations = Record<
 type CommandLocalisations<
 	OptionKeys extends string,
 	StringKeys extends string,
-	Expression,
-	StringsType extends Record<StringKeys, Expression> | undefined = undefined,
+	OptionsType extends Record<OptionKeys, any> | undefined = undefined,
+	StringsType extends Record<StringKeys, any> | undefined = undefined,
 > =
 	& DiscordLocalisations
-	& {
-		options: Record<OptionKeys, DiscordLocalisations>;
-	}
+	& (
+		OptionsType extends undefined ? {
+				options?: OptionsType;
+			}
+			: {
+				options: OptionsType;
+			}
+	)
 	& (
 		StringsType extends undefined ? {
 				strings?: StringsType;

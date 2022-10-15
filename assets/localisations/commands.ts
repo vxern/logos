@@ -61,9 +61,21 @@ class GlobalParameters {
 function typedLocalisations<
 	OptionKeys extends string,
 	StringKeys extends string,
-	Expression,
-	T = CommandLocalisations<OptionKeys, StringKeys, Expression>,
->(localisations: T): T {
+	OptionsType extends Record<OptionKeys, any> | undefined,
+	StringsType extends Record<StringKeys, any> | undefined,
+>(
+	localisations: CommandLocalisations<
+		OptionKeys,
+		StringKeys,
+		OptionsType,
+		StringsType
+	>,
+): CommandLocalisations<
+	OptionKeys,
+	StringKeys,
+	OptionsType,
+	StringsType
+> {
 	return localisations;
 }
 
