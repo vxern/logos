@@ -1,3 +1,5 @@
+import { Commands } from '../../../../../assets/localisations/commands.ts';
+import { localise } from '../../../../../assets/localisations/types.ts';
 import {
 	ApplicationCommandFlags,
 	Bot,
@@ -9,8 +11,6 @@ import {
 } from '../../../../../deps.ts';
 import { Client } from '../../../../client.ts';
 import configuration from '../../../../configuration.ts';
-import { links } from '../../../../constants.ts';
-import { list } from '../../../../formatting.ts';
 
 /** Displays information about the bot (application). */
 async function displayBotInformation(
@@ -40,31 +40,41 @@ async function displayBotInformation(
 					},
 					color: configuration.interactions.responses.colors.invisible,
 					fields: [{
-						name: 'What am I?',
-						value:
-							`I am **${botUser.username}**, an application created to provide language-learning Discord communities with the highest quality features, such as:
-  ${
-								list([
-									'Rich social interactions',
-									'Intuitive role management',
-									'Translation and morphology look-ups',
-									'Music playback',
-									'Article creation',
-									'Server structure synchronisation',
-								])
-							}`,
+						name: localise(
+							Commands.information.options.bot.strings.whatAmI.header,
+							interaction.locale,
+						),
+						value: localise(
+							Commands.information.options.bot.strings.whatAmI.body,
+							interaction.locale,
+						)(botUser),
 					}, {
-						name: 'How was I made?',
-						value:
-							`I am powered by [TypeScript](${links.typescriptWebsite}) running within [Deno](${links.denoWebsite}). I interact with [Discord\'s API](${links.discordApiWebsite}) with the help of [discordeno](${links.discordenoRepository}).`,
+						name: localise(
+							Commands.information.options.bot.strings.howWasIMade.header,
+							interaction.locale,
+						),
+						value: localise(
+							Commands.information.options.bot.strings.howWasIMade.body,
+							interaction.locale,
+						),
 					}, {
-						name: 'How can you add me to your server?',
-						value:
-							`You cannot just yet. I was made for the purpose of managing a select few language-learning communities, such as [Learn Armenian](${links.learnArmenianListingWebsite}) and [Learn Romanian](${links.learnRomanianListingWebsite}).`,
+						name: localise(
+							Commands.information.options.bot.strings.howToAddToServer.header,
+							interaction.locale,
+						),
+						value: localise(
+							Commands.information.options.bot.strings.howToAddToServer.body,
+							interaction.locale,
+						),
 					}, {
-						name: 'Am I open-source?',
-						value:
-							`Unfortunately, no. However, my predecessor, Talon, *is*. You can view his source code [here](${links.talonRepositoryLink}).`,
+						name: localise(
+							Commands.information.options.bot.strings.amIOpenSource.header,
+							interaction.locale,
+						),
+						value: localise(
+							Commands.information.options.bot.strings.amIOpenSource.body,
+							interaction.locale,
+						),
 					}],
 				}],
 			},
