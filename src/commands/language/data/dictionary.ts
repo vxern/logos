@@ -83,7 +83,7 @@ type DictionaryEntry = DictionaryEntryContent & {
  */
 function toFields(
 	entry: DictionaryEntry,
-	locale: string,
+	locale: string | undefined,
 	{ verbose }: { verbose: boolean },
 ): DiscordEmbedField[] {
 	const fields: Partial<DiscordEmbedField>[] = [{
