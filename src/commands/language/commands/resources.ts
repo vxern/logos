@@ -1,3 +1,5 @@
+import { Commands } from '../../../../assets/localisations/commands.ts';
+import { createLocalisations } from '../../../../assets/localisations/types.ts';
 import {
 	ApplicationCommandFlags,
 	Bot,
@@ -12,16 +14,7 @@ import { CommandBuilder } from '../../../commands/command.ts';
 import { links } from '../../../constants.ts';
 
 const command: CommandBuilder = {
-	name: 'resources',
-	nameLocalizations: {
-		pl: 'zasoby',
-		ro: 'resurse',
-	},
-	description: 'Displays a list of resources to learn the language.',
-	descriptionLocalizations: {
-		pl: 'Wyświetla listę zasób do nauki języka.',
-		ro: 'Afișează o listă cu resurse pentru învățarea limbii.',
-	},
+	...createLocalisations(Commands.resources),
 	defaultMemberPermissions: ['VIEW_CHANNEL'],
 	handle: resources,
 };
@@ -48,7 +41,7 @@ function resources(
 					type: MessageComponentTypes.ActionRow,
 					components: [{
 						type: MessageComponentTypes.Button,
-						label: 'Click here for resources',
+						label: Commands.resources.strings.clickForResources['English'],
 						style: ButtonStyles.Link,
 						url: repositoryLink,
 					}],
