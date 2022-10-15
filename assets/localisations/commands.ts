@@ -55,8 +55,17 @@ class GlobalParameters {
 	};
 }
 
+function typedLocalisations<
+	OptionKeys extends string,
+	StringKeys extends string,
+	Expression,
+	T = CommandLocalisations<OptionKeys, StringKeys, Expression>,
+>(localisations: T): T {
+	return localisations;
+}
+
 class Commands {
-	static readonly information: CommandLocalisations<'bot' | 'guild'> = {
+	static readonly information = typedLocalisations({
 		name: {
 			'English': 'information',
 			'Polish': 'informacje',
@@ -93,7 +102,7 @@ class Commands {
 				},
 			},
 		},
-	};
+	});
 }
 
 export { Commands, GlobalParameters };
