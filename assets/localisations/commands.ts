@@ -278,6 +278,38 @@ class Commands {
 			},
 		},
 	});
+
+	static readonly game = typedLocalisations({
+		name: {
+			'English': 'game',
+			'Polish': 'gra',
+			'Romanian': 'joc',
+		},
+		description: {
+			'English': 'Pick the correct word out of four to fit in the blank.',
+			'Polish': 'Wybierz słowo, które pasuje do luki w zdaniu.',
+			'Romanian':
+				'Alege cuvântul care se potrivește cu spațiul gol în propoziție.',
+		},
+		strings: {
+			sentence: {
+				'English': 'Sentence',
+				'Polish': 'Zdanie',
+				'Romanian': 'Propoziție',
+			},
+			translation: {
+				'English': 'Translation',
+				'Polish': 'Tłumaczenie',
+				'Romanian': 'Traducere',
+			},
+			noSentencesAvailable: {
+				'English':
+					'There are no available sentences in the requested language.',
+				'Polish': 'Nie ma zdań dostępnych dla tego języka.',
+				'Romanian': 'Nu sunt propoziții disponibile pentru această limbă.',
+			},
+		},
+	});
 }
 
 export { Commands, GlobalParameters };

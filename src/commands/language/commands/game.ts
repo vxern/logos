@@ -1,3 +1,8 @@
+import { Commands } from '../../../../assets/localisations/commands.ts';
+import {
+	createLocalisations,
+	localise,
+} from '../../../../assets/localisations/types.ts';
 import {
 	ApplicationCommandFlags,
 	Bot,
@@ -19,16 +24,7 @@ import { SentencePair } from '../data/sentence.ts';
 import { sentencePairsByLanguage } from '../module.ts';
 
 const command: CommandBuilder = {
-	name: 'game',
-	nameLocalizations: {
-		pl: 'gra',
-		ro: 'joc',
-	},
-	description: 'Pick the correct word out of four to fit in the blank.',
-	descriptionLocalizations: {
-		pl: 'Wybierz słowo, które pasuje do luki w zdaniu.',
-		ro: 'Alege cuvântul care se potrivește cu spațiul gol în propoziție.',
-	},
+	...createLocalisations(Commands.game),
 	defaultMemberPermissions: ['VIEW_CHANNEL'],
 	handle: startGame,
 };
@@ -52,8 +48,10 @@ async function startGame(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description:
-							`There are no sentences available in ${guild.language} to learn from.`,
+						description: localise(
+							Commands.game.strings.noSentencesAvailable,
+							interaction.locale,
+						),
 						color: configuration.interactions.responses.colors.yellow,
 					}],
 				},
@@ -80,10 +78,10 @@ async function startGame(
 			embeds: [{
 				color: ribbonColor,
 				fields: [{
-					name: 'Sentence',
+					name: localise(Commands.game.strings.sentence, interaction.locale),
 					value: sentenceSelection.pair.sentence,
 				}, {
-					name: 'Translation',
+					name: localise(Commands.game.strings.translation, interaction.locale),
 					value: sentenceSelection.pair.translation,
 				}],
 			}],
