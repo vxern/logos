@@ -1,5 +1,10 @@
 // deno-lint-ignore-file camelcase
 import 'dotenv_load';
+import { Commands } from '../../../../assets/localisations/commands.ts';
+import {
+	createLocalisations,
+	localise,
+} from '../../../../assets/localisations/types.ts';
 import {
 	ApplicationCommandFlags,
 	ApplicationCommandOptionChoice,
@@ -18,58 +23,21 @@ import { deepLApiEndpoints } from '../../../constants.ts';
 import { show } from '../../parameters.ts';
 
 const command: CommandBuilder = {
-	name: 'translate',
-	nameLocalizations: {
-		pl: 'przetłumacz',
-		ro: 'traducere',
-	},
-	description:
-		'Translates a text from the source language to the target language.',
-	descriptionLocalizations: {
-		pl: 'Tłumaczy dany tekst z języka źródłowego na język docelowy.',
-		ro: 'Traduce un text dat din limba-sursă în limba-țintă.',
-	},
+	...createLocalisations(Commands.translate),
 	defaultMemberPermissions: ['VIEW_CHANNEL'],
 	handle: translate,
 	options: [{
-		name: 'from',
-		nameLocalizations: {
-			pl: 'z',
-			ro: 'din',
-		},
-		description: 'The source language.',
-		descriptionLocalizations: {
-			pl: 'Język źródłowy.',
-			ro: 'Limbă-sursă.',
-		},
+		...createLocalisations(Commands.translate.options.from),
 		type: ApplicationCommandOptionTypes.String,
 		required: true,
 		autocomplete: true,
 	}, {
-		name: 'to',
-		nameLocalizations: {
-			pl: 'na',
-			ro: 'în',
-		},
-		description: 'The target language.',
-		descriptionLocalizations: {
-			pl: 'Język docelowy.',
-			ro: 'Limbă-țintă.',
-		},
+		...createLocalisations(Commands.translate.options.to),
 		type: ApplicationCommandOptionTypes.String,
 		required: true,
 		autocomplete: true,
 	}, {
-		name: 'text',
-		nameLocalizations: {
-			pl: 'tekst',
-			ro: 'text',
-		},
-		description: 'The text to translate.',
-		descriptionLocalizations: {
-			pl: 'Tekst do przetłumaczenia.',
-			ro: 'Text de tradus.',
-		},
+		...createLocalisations(Commands.translate.options.text),
 		type: ApplicationCommandOptionTypes.String,
 		required: true,
 	}, show],
@@ -228,8 +196,11 @@ async function translate(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description:
-							'The target language may not be the same as the source language.',
+						description: localise(
+							Commands.translate.strings
+								.targetLanguageMustBeDifferentFromSource,
+							interaction.locale,
+						),
 						color: configuration.interactions.responses.colors.yellow,
 					}],
 				},
@@ -248,7 +219,10 @@ async function translate(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: 'The source text may not be empty.',
+						description: localise(
+							Commands.translate.strings.textCannotBeEmpty,
+							interaction.locale,
+						),
 						color: configuration.interactions.responses.colors.yellow,
 					}],
 				},
@@ -271,10 +245,19 @@ async function translate(
 						description: !sourceLanguage
 							? (
 								!targetLanguage
-									? 'Both the source language and the target language are invalid.'
-									: 'The source language is invalid.'
+									? localise(
+										Commands.translate.strings.invalid.both,
+										interaction.locale,
+									)
+									: localise(
+										Commands.translate.strings.invalid.source,
+										interaction.locale,
+									)
 							)
-							: 'The target language is invalid.',
+							: localise(
+								Commands.translate.strings.invalid.target,
+								interaction.locale,
+							),
 						color: configuration.interactions.responses.colors.red,
 					}],
 				},
@@ -307,7 +290,10 @@ async function translate(
 			interaction.token,
 			{
 				embeds: [{
-					description: 'Failed to translate text.',
+					description: localise(
+						Commands.translate.strings.failed,
+						interaction.locale,
+					),
 					color: configuration.interactions.responses.colors.red,
 				}],
 			},
