@@ -1,3 +1,8 @@
+import { Commands } from '../../../../assets/localisations/commands.ts';
+import {
+	createLocalisations,
+	localise,
+} from '../../../../assets/localisations/types.ts';
 import {
 	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
@@ -10,51 +15,21 @@ import {
 import { Client } from '../../../client.ts';
 import { CommandBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
-import { capitalise } from '../../../formatting.ts';
 import { fromHex } from '../../../utils.ts';
 import { show } from '../../parameters.ts';
 import { DictionaryEntry, toFields } from '../data/dictionary.ts';
 import { dictionaryAdaptersByLanguage } from '../module.ts';
 
 const command: CommandBuilder = {
-	name: 'word',
-	nameLocalizations: {
-		pl: 'słowo',
-		ro: 'cuvânt',
-	},
-	description: 'Displays information about a given word.',
-	descriptionLocalizations: {
-		pl: 'Wyświetla informacje o danym słowie.',
-		ro: 'Afișează informații despre un cuvânt dat.',
-	},
+	...createLocalisations(Commands.word),
 	defaultMemberPermissions: ['VIEW_CHANNEL'],
 	handle: word,
 	options: [{
-		name: 'word',
-		nameLocalizations: {
-			pl: 'słowo',
-			ro: 'cuvânt',
-		},
-		description: 'The word to display information about.',
-		descriptionLocalizations: {
-			pl: 'Słowo, o którym mają być wyświetlone informacje.',
-			ro: 'Cuvântul despre care să fie afișate informații.',
-		},
+		...createLocalisations(Commands.word.options.word),
 		type: ApplicationCommandOptionTypes.String,
 		required: true,
 	}, {
-		name: 'verbose',
-		nameLocalizations: {
-			pl: 'tryb-rozwlekły',
-			ro: 'mod-prolix',
-		},
-		description:
-			'If set to true, more (perhaps unnecessary) information will be shown.',
-		descriptionLocalizations: {
-			pl:
-				'Jeśli tak, więcej (możliwie niepotrzebnych) informacji będzie pokazanych.',
-			ro: 'Dacă da, mai multe (posibil inutile) informații vor fi afișate.',
-		},
+		...createLocalisations(Commands.word.options.verbose),
 		type: ApplicationCommandOptionTypes.Boolean,
 	}, show],
 };
@@ -92,9 +67,10 @@ async function word(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: `There are no dictionary adapters installed for the ${
-							capitalise(guild.language)
-						} language.`,
+						description: localise(
+							Commands.word.strings.noDictionaryAdapters,
+							interaction.locale,
+						),
 						color: configuration.interactions.responses.colors.yellow,
 					}],
 				},
@@ -150,7 +126,10 @@ async function word(
 		interaction.token,
 		{
 			embeds: [{
-				description: `No results found.`,
+				description: localise(
+					Commands.word.strings.noResults,
+					interaction.locale,
+				),
 				color: configuration.interactions.responses.colors.yellow,
 			}],
 		},
