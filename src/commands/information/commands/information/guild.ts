@@ -1,3 +1,5 @@
+import { Commands } from '../../../../../assets/localisations/commands.ts';
+import { localise } from '../../../../../assets/localisations/types.ts';
 import {
 	ApplicationCommandFlags,
 	Bot,
@@ -10,12 +12,7 @@ import {
 } from '../../../../../deps.ts';
 import { Client } from '../../../../client.ts';
 import configuration from '../../../../configuration.ts';
-import {
-	capitalise,
-	displayTime,
-	mention,
-	MentionTypes,
-} from '../../../../formatting.ts';
+import { displayTime, mention, MentionTypes } from '../../../../formatting.ts';
 import { snowflakeToTimestamp } from '../../../../utils.ts';
 import { getProficiencyCategory } from '../../../social/module.ts';
 
@@ -46,7 +43,10 @@ function displayGuildInformation(
 			data: {
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
-					title: `Information about **${guild.name}**`,
+					title: localise(
+						Commands.information.options.guild.strings.informationAbout,
+						interaction.locale,
+					)(guild.name),
 					...(() => {
 						const iconURL = getGuildIconURL(bot, guild.id, guild.icon, {
 							size: 4096,
@@ -64,22 +64,46 @@ function displayGuildInformation(
 					color: configuration.interactions.responses.colors.invisible,
 					fields: [
 						{
-							name: '🖋️ Description',
-							value: guild.description ?? 'No description provided.',
+							name: `🖋️ ${
+								localise(
+									Commands.information.options.guild.strings.fields.description,
+									interaction.locale,
+								)
+							}`,
+							value: guild.description ??
+								localise(
+									Commands.information.options.guild.strings.noDescription,
+									interaction.locale,
+								),
 							inline: true,
 						},
 						{
-							name: '🧑 Members',
+							name: `🧑 ${
+								localise(
+									Commands.information.options.guild.strings.fields.members,
+									interaction.locale,
+								)
+							}`,
 							value: guild.memberCount.toString(),
 							inline: true,
 						},
 						{
-							name: '⏱️ Created',
+							name: `⏱️ ${
+								localise(
+									Commands.information.options.guild.strings.fields.created,
+									interaction.locale,
+								)
+							}`,
 							value: displayTime(snowflakeToTimestamp(guild.id)),
 							inline: true,
 						},
 						{
-							name: '🗯️ Channels',
+							name: `🗯️ ${
+								localise(
+									Commands.information.options.guild.strings.fields.channels,
+									interaction.locale,
+								)
+							}`,
 							value: (() => {
 								const channels = guild.channels.array();
 
@@ -95,26 +119,59 @@ function displayGuildInformation(
 									ChannelTypes.GuildVoice,
 								);
 
-								return `📜 ${textChannelsCount} Text | 🔊 ${voiceChannelsCount} Voice`;
+								return `📜 ${textChannelsCount} ${
+									localise(
+										Commands.information.options.guild.strings.channelTypes
+											.text,
+										interaction.locale,
+									)
+								} | 🔊 ${voiceChannelsCount} ${
+									localise(
+										Commands.information.options.guild.strings.channelTypes
+											.voice,
+										interaction.locale,
+									)
+								}`;
 							})(),
 							inline: true,
 						},
 						hasDistinctOwner
 							? {
-								name: '👑 Owner',
+								name: `👑 ${
+									localise(
+										Commands.information.options.guild.strings.fields.owner,
+										interaction.locale,
+									)
+								}`,
 								value: mention(owner.id, MentionTypes.User),
 								inline: true,
 							}
 							: ((moderatorRoleName) => ({
-								name: `⚖️ ${capitalise(moderatorRoleName)}s`,
-								value:
-									`This server is overseen by a collective of ${moderatorRoleName}s, rather than a single owner.`,
+								name: `⚖️ ${
+									localise(
+										Commands.information.options.guild.strings.fields
+											.moderators,
+										interaction.locale,
+									)
+								}`,
+								value: localise(
+									Commands.information.options.guild.strings
+										.overseenByModerators,
+									interaction.locale,
+								)(moderatorRoleName),
 								inline: false,
 							}))(configuration.guilds.moderation.moderator.toLowerCase()),
 						{
-							name: '🎓 Proficiency Distribution',
+							name: `🎓 ${
+								localise(
+									Commands.information.options.guild.strings.fields
+										.proficiencyDistribution,
+									interaction.locale,
+								)
+							}`,
 							value: displayProficiencyRoleDistribution(
 								proficiencyRoleFrequencies,
+								interaction.locale,
 							),
 							inline: false,
 						},
@@ -180,6 +237,7 @@ function getProficiencyRoleFrequencies(
  */
 function displayProficiencyRoleDistribution(
 	proficiencyRoleFrequencies: Map<bigint, number>,
+	locale: string | undefined,
 ): string {
 	const total = Array.from(proficiencyRoleFrequencies.values()).reduce((a, b) =>
 		a + b
@@ -193,7 +251,10 @@ function displayProficiencyRoleDistribution(
 	) {
 		const percentageComposition = getPercentageComposition(frequency, total);
 		const roleMention = roleId === -1n
-			? 'without a proficiency role.'
+			? localise(
+				Commands.information.options.guild.strings.withoutProficiencyRole,
+				locale,
+			)
 			: mention(roleId, MentionTypes.Role);
 
 		strings.push(`${frequency} (${percentageComposition}%) ${roleMention}`);
