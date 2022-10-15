@@ -482,6 +482,38 @@ class Commands {
 				'Polish': 'Brak wyników.',
 				'Romanian': 'Fără rezultate.',
 			},
+      fields: {
+        translation: {
+          'English': 'Translation',
+          'Polish': 'Tłumaczenie',
+          'Romanian': 'Traducere',
+        },
+        pronunciation: {
+          'English': 'Pronunciation',
+          'Polish': 'Wymowa',
+          'Romanian': 'Pronunțare',
+        },
+        definition: {
+          'English': 'Definition',
+          'Polish': 'Znaczenie',
+          'Romanian': 'Definiție',
+        },
+        etymology: {
+          'English': 'Etymology',
+          'Polish': 'Etymologia',
+          'Romanian': 'Etimologie',
+        },
+        synonyms: {
+          'English': 'Synonyms',
+          'Polish': 'Synonimy',
+          'Romanian': 'Sinonime',
+        },
+        antonyms: {
+          'English': 'Antonyms',
+          'Polish': 'Antonimy',
+          'Romanian': 'Antonime',
+        },
+      },
 		},
 	});
 }
