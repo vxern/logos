@@ -155,7 +155,7 @@ async function setTimeout(
 			flags: ApplicationCommandFlags.Ephemeral,
 			embeds: [{
 				description: localise(
-					Commands.timeout.strings.timedOutUntil,
+					Commands.timeout.strings.timedOut,
 					interaction.locale,
 				)(mention(member.id, MentionTypes.User), displayTime(until)),
 				color: configuration.interactions.responses.colors.blue,
@@ -174,7 +174,7 @@ async function setTimeout(
 		return void sendMessage(bot, textChannel.id, {
 			embeds: [{
 				description: localise(
-					Commands.timeout.strings.timedOutUntilWithReason,
+					Commands.timeout.strings.timedOutWithReason,
 					interaction.locale,
 				)(mention(member.id, MentionTypes.User), displayTime(until), reason),
 				color: configuration.interactions.responses.colors.yellow,
@@ -195,11 +195,11 @@ async function setTimeout(
 					return { url: iconURL };
 				})(),
 				title: localise(
-					Commands.timeout.strings.youHaveBeenTimedOut.header,
+					Commands.timeout.strings.timedOutDirect.header,
 					interaction.locale,
 				),
 				description: localise(
-					Commands.timeout.strings.youHaveBeenTimedOut.body,
+					Commands.timeout.strings.timedOutDirect.body,
 					interaction.locale,
 				)(displayTime(until), reason),
 				color: configuration.interactions.responses.colors.yellow,

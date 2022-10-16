@@ -21,34 +21,21 @@ import {
 import { user } from '../../parameters.ts';
 import { getRelevantWarnings } from '../module.ts';
 import { log } from '../../../controllers/logging.ts';
-import { displayTime } from '../../../formatting.ts';
+import { displayTime, mention, MentionTypes } from '../../../formatting.ts';
+import {
+	createLocalisations,
+	localise,
+} from '../../../../assets/localisations/types.ts';
+import { Commands } from '../../../../assets/localisations/commands.ts';
 
 const command: CommandBuilder = {
-	name: 'pardon',
-	nameLocalizations: {
-		pl: 'ułaskawienie',
-		ro: 'grațiere',
-	},
-	description: 'Removes the last given warning to a user.',
-	descriptionLocalizations: {
-		pl: 'Usuwa ostatnie ostrzeżenie dane użytkownikowi.',
-		ro: 'Șterge ultimul avertisment dat unui utilizator.',
-	},
+	...createLocalisations(Commands.unwarn),
 	defaultMemberPermissions: ['MODERATE_MEMBERS'],
 	handle: unwarnUser,
 	options: [
 		user,
 		{
-			name: 'warning',
-			nameLocalizations: {
-				pl: 'ostrzeżenie',
-				ro: 'avertisment',
-			},
-			description: 'The warning to remove.',
-			descriptionLocalizations: {
-				pl: 'Ostrzeżenie, które ma zostać usunięte.',
-				ro: 'Avertismentul care să fie șters.',
-			},
+			...createLocalisations(Commands.unwarn.options.warning),
 			type: ApplicationCommandOptionTypes.String,
 			required: true,
 			autocomplete: true,
@@ -103,7 +90,10 @@ async function unwarnUser(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: `The member may have already left the server.`,
+						description: localise(
+							Commands.unwarn.strings.failed,
+							interaction.locale,
+						),
 						color: configuration.interactions.responses.colors.red,
 					}],
 				},
@@ -141,7 +131,7 @@ async function unwarnUser(
 		);
 	}
 
-	const displayUnwarnError = (title: string, description: string): void => {
+	const displayUnwarnError = (description: string): void => {
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -151,7 +141,6 @@ async function unwarnUser(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						title: title,
 						description: description,
 						color: configuration.interactions.responses.colors.red,
 					}],
@@ -166,16 +155,14 @@ async function unwarnUser(
 	);
 	if (!warningToRemove) {
 		return displayUnwarnError(
-			'Warning already removed',
-			'The selected warning has already been removed.',
+			localise(Commands.unwarn.strings.alreadyRemoved, interaction.locale),
 		);
 	}
 
 	const warning = await deleteWarning(client.database, warningToRemove);
 	if (!warning) {
 		return displayUnwarnError(
-			'Failed to remove warning',
-			'The selected warning failed to be removed.',
+			localise(Commands.unwarn.strings.failed, interaction.locale),
 		);
 	}
 
@@ -200,9 +187,10 @@ async function unwarnUser(
 			data: {
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
-					title: 'User pardoned',
-					description:
-						`The user has been pardoned from their warning for: ${warning.data.reason}`,
+					description: localise(
+						Commands.unwarn.strings.pardoned,
+						interaction.locale,
+					)(mention(member.id, MentionTypes.User), warning.data.reason),
 					color: configuration.interactions.responses.colors.green,
 				}],
 			},
@@ -224,10 +212,10 @@ async function unwarnUser(
 
 					return { url: iconURL };
 				})(),
-				title: 'You have been pardoned',
-				description: `The warning for '${warning.data.reason}' given to you ${
-					displayTime(warning.ts)
-				} has been dispelled.`,
+				description: localise(
+					Commands.unwarn.strings.pardonedDirect,
+					interaction.locale,
+				)(warning.data.reason, displayTime(warning.ts)),
 				color: configuration.interactions.responses.colors.green,
 			},
 		],
