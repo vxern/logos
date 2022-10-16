@@ -767,6 +767,33 @@ class Commands {
 			},
 		},
 	});
+
+	static readonly music = typedLocalisations({
+		name: {
+			'English': 'music',
+			'Polish': 'muzyka',
+			'Romanian': 'muzică',
+		},
+		description: {
+			'English': 'Allows the user to manage music playback in a voice channel.',
+			'Polish':
+				'Pozwala użytkownikowi na zarządanie odtwarzaniem muzyki w kanale głosowym.',
+			'Romanian':
+				'Permite utilizatorului gestionarea redării muzicii într-un canal de voce.',
+		},
+		strings: {
+			listings: {
+				'English': 'Listings',
+				'Polish': 'Wpisy',
+				'Romanian': 'Înregistrări',
+			},
+			listEmpty: {
+				'English': 'This list is empty.',
+				'Polish': 'Ta lista jest pusta.',
+				'Romanian': 'Această listă este goală.',
+			},
+		},
+	});
 }
 
 export { Commands };
