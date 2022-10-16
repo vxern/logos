@@ -17,8 +17,9 @@ import configuration, {
 	week,
 } from '../../../../configuration.ts';
 import { displayTime, mention, MentionTypes } from '../../../../formatting.ts';
-import { mentionUser } from '../../../../utils.ts';
 import { log } from '../../../../controllers/logging.ts';
+import { localise } from '../../../../../assets/localisations/types.ts';
+import { Commands } from '../../../../../assets/localisations/commands.ts';
 
 async function setTimeout(
 	[client, bot]: [Client, Bot],
@@ -95,21 +96,35 @@ async function setTimeout(
 	};
 
 	if (member.id === interaction.member?.id) {
-		return displayError('You cannot time yourself out!');
+		return displayError(
+			localise(Commands.timeout.strings.cannotTimeoutSelf, interaction.locale),
+		);
 	}
 
 	const duration = Number(durationIdentifier);
 
 	if (Number.isNaN(duration)) {
-		return displayError('The provided duration is invalid.');
+		return displayError(
+			localise(Commands.timeout.strings.invalidDuration, interaction.locale),
+		);
 	}
 
 	if (duration < minute) {
-		return displayError('The duration must be longer than a minute.');
+		return displayError(
+			localise(
+				Commands.timeout.strings.durationMustBeLongerThanMinute,
+				interaction.locale,
+			),
+		);
 	}
 
 	if (duration > week) {
-		return displayError('The duration must not be longer than a week.');
+		return displayError(
+			localise(
+				Commands.timeout.strings.durationMustBeShorterThanWeek,
+				interaction.locale,
+			),
+		);
 	}
 
 	const until = Date.now() + duration;
@@ -139,9 +154,10 @@ async function setTimeout(
 		data: {
 			flags: ApplicationCommandFlags.Ephemeral,
 			embeds: [{
-				description: `Member ${
-					mention(member.id, MentionTypes.User)
-				} has been timed out until ${displayTime(until)}.`,
+				description: localise(
+					Commands.timeout.strings.timedOutUntil,
+					interaction.locale,
+				)(mention(member.id, MentionTypes.User), displayTime(until)),
 				color: configuration.interactions.responses.colors.blue,
 			}],
 		},
@@ -157,9 +173,10 @@ async function setTimeout(
 
 		return void sendMessage(bot, textChannel.id, {
 			embeds: [{
-				description: `${mentionUser(user)} has been timed out until ${
-					displayTime(until)
-				} for: ${reason}`,
+				description: localise(
+					Commands.timeout.strings.timedOutUntilWithReason,
+					interaction.locale,
+				)(mention(member.id, MentionTypes.User), displayTime(until), reason),
 				color: configuration.interactions.responses.colors.yellow,
 			}],
 		});
@@ -177,10 +194,14 @@ async function setTimeout(
 
 					return { url: iconURL };
 				})(),
-				title: 'You have been timed out',
-				description: `You have been timed out until ${
-					displayTime(until)
-				} for: ${reason}`,
+				title: localise(
+					Commands.timeout.strings.youHaveBeenTimedOut.header,
+					interaction.locale,
+				),
+				description: localise(
+					Commands.timeout.strings.youHaveBeenTimedOut.body,
+					interaction.locale,
+				)(displayTime(until), reason),
 				color: configuration.interactions.responses.colors.yellow,
 			},
 		],
