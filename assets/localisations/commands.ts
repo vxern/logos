@@ -691,6 +691,19 @@ class Commands {
 						`Ai primit un timeout care va dura până la ${until} pentru: ${reason}`,
 				},
 			},
+			notTimedOut: {
+				'English': 'The provided user is not currently timed out.',
+				'Polish': 'Ten użytkownik nie jest wyciszony.',
+				'Romanian': 'Acest utilizator nu a avut o pauză impusă pe el.',
+			},
+			timeoutCleared: {
+				'English': (memberMention: string) =>
+					`Member ${memberMention} is no longer timed out.`,
+				'Polish': (memberMention: string) =>
+					`Użytkownik ${memberMention} już nie jest wyciszony.`,
+				'Romanian': (memberMention: string) =>
+					`Utilizatorul ${memberMention} nu mai are o pauză.`,
+			},
 		},
 	});
 }
