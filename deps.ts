@@ -15,7 +15,8 @@ export * from 'cheerio';
 export * as colors from 'nanocolors';
 
 /** Utility features. */
-export * as _ from 'lodash';
+import { lodash } from 'lodash';
+export { lodash as _ };
 
 /** Generating unique IDs. */
 export * as Snowflake from 'snowflake_deno';
