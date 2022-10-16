@@ -1,35 +1,17 @@
+import { Parameters } from '../../../assets/localisations/parameters.ts';
+import { createLocalisations } from '../../../assets/localisations/types.ts';
 import { ApplicationCommandOptionTypes } from '../../../deps.ts';
 import { OptionBuilder } from '../../commands/command.ts';
 
 const duration: OptionBuilder = {
-	name: 'duration',
-	nameLocalizations: {
-		pl: 'okres',
-		ro: 'durată',
-	},
-	description: 'The duration of the sanction.',
-	descriptionLocalizations: {
-		pl: 'Jak długo sankcja ma trwać.',
-		ro: 'Durata sancțiunii.',
-	},
+	...createLocalisations(Parameters.moderation.duration),
 	type: ApplicationCommandOptionTypes.String,
 	required: true,
 	autocomplete: true,
 };
 
 const reason: OptionBuilder = {
-	name: 'reason',
-	nameLocalizations: {
-		pl: 'powód',
-		ro: 'motiv',
-	},
-	description:
-		'The reason for the sanction or its repeal. It should be descriptive.',
-	descriptionLocalizations: {
-		pl: 'Powód sankcji lub jej uchylenia. Powinien być szczegółowy.',
-		ro:
-			'Motivul pentru sancțiune sau anularea acesteia. Ar trebui să fie detaliat.',
-	},
+	...createLocalisations(Parameters.moderation.reason),
 	type: ApplicationCommandOptionTypes.String,
 	required: true,
 };
