@@ -1,3 +1,8 @@
+import { Commands } from '../../../../assets/localisations/commands.ts';
+import {
+	createLocalisations,
+	localise,
+} from '../../../../assets/localisations/types.ts';
 import {
 	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
@@ -14,29 +19,11 @@ import { capitalise } from '../../../formatting.ts';
 import ruleGenerators from '../../secret/data/information/generators/rules.ts';
 
 const command: CommandBuilder = {
-	name: 'cite',
-	nameLocalizations: {
-		pl: 'zacytuj',
-		ro: 'citare',
-	},
-	description: 'Cites a server rule.',
-	descriptionLocalizations: {
-		pl: 'Cytuje jedną z reguł serwera.',
-		ro: 'Citează una dintre regulile serverului.',
-	},
+	...createLocalisations(Commands.cite),
 	defaultMemberPermissions: ['VIEW_CHANNEL'],
 	handle: citeRule,
 	options: [{
-		name: 'rule',
-		nameLocalizations: {
-			pl: 'reguła',
-			ro: 'regulă',
-		},
-		description: 'The rule to cite.',
-		descriptionLocalizations: {
-			pl: 'Reguła, która ma być zacytowana.',
-			ro: 'Regula care să fie citată.',
-		},
+		...createLocalisations(Commands.cite.options.rule),
 		type: ApplicationCommandOptionTypes.String,
 		required: true,
 		autocomplete: true,
@@ -76,7 +63,10 @@ function citeRule(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: 'Invalid rule.',
+						description: localise(
+							Commands.cite.strings.invalidRule,
+							interaction.locale,
+						),
 						color: configuration.interactions.responses.colors.red,
 					}],
 				},
