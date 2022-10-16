@@ -1,30 +1,27 @@
 import {
 	_,
 	ApplicationCommandOptionTypes,
+	Bot,
 	Interaction,
 } from '../../../../deps.ts';
 import { Client } from '../../../client.ts';
 import { OptionBuilder } from '../../command.ts';
 import { displayListings } from '../module.ts';
 import { show } from '../../parameters.ts';
+import { createLocalisations } from '../../../../assets/localisations/types.ts';
+import { Commands } from '../../../../assets/localisations/commands.ts';
 
 const command: OptionBuilder = {
-	name: 'history',
-	nameLocalizations: {
-		pl: 'historia',
-		ro: 'istorie',
-	},
-	description: 'Displays a list of previously played songs.',
-	descriptionLocalizations: {
-		pl: 'Wyświetla listę zagranych piosenek.',
-		ro: 'Afișează lista tututor melodiilor redate.',
-	},
+	...createLocalisations(Commands.music.options.history),
 	type: ApplicationCommandOptionTypes.SubCommand,
 	handle: displaySongHistory,
 	options: [show],
 };
 
-function displaySongHistory(client: Client, interaction: Interaction): void {
+function displaySongHistory(
+	[client, bot]: [Client, Bot],
+	interaction: Interaction,
+): void {
 	const musicController = client.music.get(interaction.guildId!);
 	if (!musicController) return;
 
@@ -37,7 +34,7 @@ function displaySongHistory(client: Client, interaction: Interaction): void {
 
 	listingHistory.reverse();
 
-	return displayListings(client, interaction, {
+	return displayListings([client, bot], interaction, {
 		title: '📋 Playback History',
 		songListings: listingHistory,
 		show: show,
