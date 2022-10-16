@@ -194,12 +194,8 @@ async function setTimeout(
 
 					return { url: iconURL };
 				})(),
-				title: localise(
-					Commands.timeout.strings.timedOutDirect.header,
-					interaction.locale,
-				),
 				description: localise(
-					Commands.timeout.strings.timedOutDirect.body,
+					Commands.timeout.strings.timedOutDirect,
 					interaction.locale,
 				)(displayTime(until), reason),
 				color: configuration.interactions.responses.colors.yellow,

@@ -1,3 +1,8 @@
+import { Commands } from '../../../../assets/localisations/commands.ts';
+import {
+	createLocalisations,
+	localise,
+} from '../../../../assets/localisations/types.ts';
 import {
 	ApplicationCommandFlags,
 	Bot,
@@ -24,16 +29,7 @@ import { getRelevantWarnings } from '../module.ts';
 import { reason } from '../parameters.ts';
 
 const command: CommandBuilder = {
-	name: 'warn',
-	nameLocalizations: {
-		pl: 'ostrzeż',
-		ro: 'avertizare',
-	},
-	description: 'Warns a user.',
-	descriptionLocalizations: {
-		pl: 'Ostrzega użytkownika.',
-		ro: 'Avertizează un utilizator.',
-	},
+	...createLocalisations(Commands.warn),
 	defaultMemberPermissions: ['MODERATE_MEMBERS'],
 	handle: warnUser,
 	options: [user, reason],
@@ -67,7 +63,10 @@ async function warnUser(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: 'You cannot warn yourself!',
+						description: localise(
+							Commands.warn.strings.cannotWarnSelf,
+							interaction.locale,
+						),
 						color: configuration.interactions.responses.colors.yellow,
 					}],
 				},
@@ -94,8 +93,10 @@ async function warnUser(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description:
-							`Server ${configuration.guilds.moderation.moderator.toLowerCase()}s cannot be warned.`,
+						description: localise(
+							Commands.warn.strings.cannotWarnCertainUsers,
+							interaction.locale,
+						),
 						color: configuration.interactions.responses.colors.yellow,
 					}],
 				},
@@ -113,8 +114,10 @@ async function warnUser(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						title: 'Failed to warn user',
-						description: `Your warning failed to be submitted.`,
+						description: localise(
+							Commands.warn.strings.failed,
+							interaction.locale,
+						),
 						color: configuration.interactions.responses.colors.red,
 					}],
 				},
@@ -168,10 +171,10 @@ async function warnUser(
 		data: {
 			flags: ApplicationCommandFlags.Ephemeral,
 			embeds: [{
-				title: 'Member warned',
-				description: `Member ${
-					mention(member!.id, MentionTypes.User)
-				} has been warned. They now have ${relevantWarnings.length} warnings.`,
+				description: localise(Commands.warn.strings.warned, interaction.locale)(
+					mention(member!.id, MentionTypes.User),
+					relevantWarnings.length,
+				),
 				color: configuration.interactions.responses.colors.blue,
 			}],
 		},
@@ -196,15 +199,21 @@ async function warnUser(
 					})(),
 					...(passedMaximum
 						? {
-							title: 'You have been kicked',
-							description:
-								`You have received a warning for: ${reason}\n\nYou have surpassed the maximum number of warnings, and have subsequently been kicked.`,
+							description: localise(
+								Commands.warn.strings.passedWarningLimitDirect,
+								interaction.locale,
+							)(reason),
 							color: configuration.interactions.responses.colors.red,
 						}
 						: {
-							title: 'You have been warned',
-							description:
-								`You have received a warning for: ${reason}\n\nThis is warning ${relevantWarnings.length}/${configuration.guilds.moderation.warnings.maximum}.`,
+							description: localise(
+								Commands.warn.strings.warnedDirect,
+								interaction.locale,
+							)(
+								reason,
+								relevantWarnings.length,
+								configuration.guilds.moderation.warnings.maximum,
+							),
 							color: configuration.interactions.responses.colors.yellow,
 						}),
 				},
