@@ -604,7 +604,7 @@ class Commands {
 		},
 		description: {
 			'English': 'Used to manage user timeouts.',
-			'Polish': 'Komenda używana do zarządzania pauzami użytkowników.',
+			'Polish': 'Komenda używana do zarządzania wyciszaniem użytkowników.',
 			'Romanian':
 				'Comandă utilizată pentru gestionarea pauzelor utilizatorilor.',
 		},
@@ -619,7 +619,7 @@ class Commands {
 					'English':
 						'Times out a user, making them unable to interact on the server.',
 					'Polish':
-						'Uniemożliwia użytkownikowi interakcjonowanie z serwerem (pisanie, mówienie w VC, itp.).',
+						'Wycisza użytkownika, uniemożliwiając mu interakcję z serwerem (pisanie, mówienie w VC, itp.).',
 					'Romanian':
 						'Face ca un utilizator să nu mai poată interacționa în server.',
 				},
@@ -633,9 +633,62 @@ class Commands {
 				description: {
 					'English': 'Clears a user\'s timeout.',
 					'Polish':
-						'Pozwala użytkownikowi, który dostał timeout, ponownie interakcjonować z serwerem.',
+						'Umożliwia użytkownikowi, który został wyciszony, ponowną interakcję z serwerem.',
 					'Romanian':
 						'Permite utilizatorului care a primit un timeout să interacționeze cu serverul.',
+				},
+			},
+		},
+		strings: {
+			cannotTimeoutSelf: {
+				'English': 'You cannot time yourself out.',
+				'Polish': 'Nie można wyciszyć siebie samego.',
+				'Romanian': 'Nu îți poți seta însuți o pauză.',
+			},
+			invalidDuration: {
+				'English': 'The provided duration is invalid.',
+				'Polish': 'Określony okres czasu nie jest prawidłowy.',
+				'Romanian': 'Durata precizată nu este validă.',
+			},
+			durationMustBeLongerThanMinute: {
+				'English': 'The duration must be longer than a minute.',
+				'Polish': 'Wyciszenie musi trwać przynajmniej minutę.',
+				'Romanian': 'Pauza trebuie să dureze mai mult decât un minut.',
+			},
+			durationMustBeShorterThanWeek: {
+				'English': 'The duration must not be longer than a week.',
+				'Polish': 'Wyciszenie nie może trwać dłużej niż tydzień.',
+				'Romanian': 'Pauza nu poate să dureze mai mult decât o săptămână.',
+			},
+			timedOutUntil: {
+				'English': (memberMention: string, until: string) =>
+					`Member ${memberMention} has been timed out until ${until}.`,
+				'Polish': (memberMention: string, until: string) =>
+					`Użytkownik ${memberMention} został wyciszony do ${until}.`,
+				'Romanian': (memberMention: string, until: string) =>
+					`Utilizatorul ${memberMention} a primit un timeout care va dura până la ${until}.`,
+			},
+			timedOutUntilWithReason: {
+				'English': (memberMention: string, until: string, reason: string) =>
+					`Member ${memberMention} has been timed out until ${until} for: ${reason}`,
+				'Polish': (memberMention: string, until: string, reason: string) =>
+					`Użytkownik ${memberMention} został wyciszony do ${until} za: ${reason}`,
+				'Romanian': (memberMention: string, until: string, reason: string) =>
+					`Utilizatorul ${memberMention} a primit un timeout care va dura până la ${until} pentru: ${reason}`,
+			},
+			youHaveBeenTimedOut: {
+				header: {
+					'English': 'You have been timed out',
+					'Polish': 'Zostałeś/aś wyciszony/a',
+					'Romanian': 'Ai primit un timeout',
+				},
+				body: {
+					'English': (until: string, reason: string) =>
+						`You have been timed out until ${until} for: ${reason}`,
+					'Polish': (until: string, reason: string) =>
+						`Zostałeś/aś wyciszony/a do ${until} za: ${reason}`,
+					'Romanian': (until: string, reason: string) =>
+						`Ai primit un timeout care va dura până la ${until} pentru: ${reason}`,
 				},
 			},
 		},
