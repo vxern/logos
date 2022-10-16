@@ -781,6 +781,20 @@ class Commands {
 			'Romanian':
 				'Permite utilizatorului gestionarea redării muzicii într-un canal de voce.',
 		},
+		options: {
+			forward: {
+				name: {
+					'English': 'forward',
+					'Polish': 'przewiń-do-przodu',
+					'Romanian': 'derulare-înainte',
+				},
+				description: {
+					'English': 'Fast-forwards the currently playing song.',
+					'Polish': 'Przewija obecnie grający utwór do przodu.',
+					'Romanian': 'Derulează melodia în curs de redare înainte.',
+				},
+			},
+		},
 		strings: {
 			listings: {
 				'English': 'Listings',
