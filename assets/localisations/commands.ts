@@ -595,6 +595,51 @@ class Commands {
 			},
 		},
 	});
+
+	static readonly timeout = typedLocalisations({
+		name: {
+			'English': 'timeout',
+			'Polish': 'timeout',
+			'Romanian': 'timeout',
+		},
+		description: {
+			'English': 'Used to manage user timeouts.',
+			'Polish': 'Komenda używana do zarządzania pauzami użytkowników.',
+			'Romanian':
+				'Comandă utilizată pentru gestionarea pauzelor utilizatorilor.',
+		},
+		options: {
+			set: {
+				name: {
+					'English': 'set',
+					'Polish': 'ustaw',
+					'Romanian': 'setare',
+				},
+				description: {
+					'English':
+						'Times out a user, making them unable to interact on the server.',
+					'Polish':
+						'Uniemożliwia użytkownikowi interakcjonowanie z serwerem (pisanie, mówienie w VC, itp.).',
+					'Romanian':
+						'Face ca un utilizator să nu mai poată interacționa în server.',
+				},
+			},
+			clear: {
+				name: {
+					'English': 'clear',
+					'Polish': 'usuń',
+					'Romanian': 'ștergere',
+				},
+				description: {
+					'English': 'Clears a user\'s timeout.',
+					'Polish':
+						'Pozwala użytkownikowi, który dostał timeout, ponownie interakcjonować z serwerem.',
+					'Romanian':
+						'Permite utilizatorului care a primit un timeout să interacționeze cu serverul.',
+				},
+			},
+		},
+	});
 }
 
 export { Commands, GlobalParameters };
