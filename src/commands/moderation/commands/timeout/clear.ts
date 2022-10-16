@@ -10,6 +10,8 @@ import { Client, resolveInteractionToMember } from '../../../../client.ts';
 import configuration from '../../../../configuration.ts';
 import { mentionUser } from '../../../../utils.ts';
 import { log } from '../../../../controllers/logging.ts';
+import { localise } from '../../../../../assets/localisations/types.ts';
+import { Commands } from '../../../../../assets/localisations/commands.ts';
 
 async function clearTimeout(
 	[client, bot]: [Client, Bot],
@@ -38,7 +40,10 @@ async function clearTimeout(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: 'The provided user is not currently timed out.',
+						description: localise(
+							Commands.timeout.strings.notTimedOut,
+							interaction.locale,
+						),
 						color: configuration.interactions.responses.colors.yellow,
 					}],
 				},
@@ -67,9 +72,10 @@ async function clearTimeout(
 			data: {
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
-					description: `The timeout of member ${
-						member.user ? mentionUser(member.user) : undefined
-					} has been cleared.`,
+					description: localise(
+						Commands.timeout.strings.timeoutCleared,
+						interaction.locale,
+					)(mentionUser(member.user!)),
 					color: configuration.interactions.responses.colors.blue,
 				}],
 			},
