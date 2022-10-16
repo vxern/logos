@@ -662,35 +662,28 @@ class Commands {
 				'Romanian': 'Pauza nu poate să dureze mai mult decât o săptămână.',
 			},
 			timedOut: {
-				'English': (memberMention: string, until: string) =>
-					`User ${memberMention} has been timed out until ${until}.`,
-				'Polish': (memberMention: string, until: string) =>
-					`Użytkownik ${memberMention} został wyciszony do ${until}.`,
-				'Romanian': (memberMention: string, until: string) =>
-					`Utilizatorul ${memberMention} a primit un timeout care va dura până la ${until}.`,
+				'English': (userMention: string, until: string) =>
+					`User ${userMention} has been timed out until ${until}.`,
+				'Polish': (userMention: string, until: string) =>
+					`Użytkownik ${userMention} został wyciszony do ${until}.`,
+				'Romanian': (userMention: string, until: string) =>
+					`Utilizatorul ${userMention} a primit un timeout care va dura până la ${until}.`,
 			},
 			timedOutWithReason: {
-				'English': (memberMention: string, until: string, reason: string) =>
-					`User ${memberMention} has been timed out until ${until} for: ${reason}`,
-				'Polish': (memberMention: string, until: string, reason: string) =>
-					`Użytkownik ${memberMention} został wyciszony do ${until} za: ${reason}`,
-				'Romanian': (memberMention: string, until: string, reason: string) =>
-					`Utilizatorul ${memberMention} a primit un timeout care va dura până la ${until} pentru: ${reason}`,
+				'English': (userMention: string, until: string, reason: string) =>
+					`User ${userMention} has been timed out until ${until} for: ${reason}`,
+				'Polish': (userMention: string, until: string, reason: string) =>
+					`Użytkownik ${userMention} został wyciszony do ${until} za: ${reason}`,
+				'Romanian': (userMention: string, until: string, reason: string) =>
+					`Utilizatorul ${userMention} a primit un timeout care va dura până la ${until} pentru: ${reason}`,
 			},
 			timedOutDirect: {
-				header: {
-					'English': 'You have been timed out',
-					'Polish': 'Zostałeś/aś wyciszony/a',
-					'Romanian': 'Ai primit un timeout',
-				},
-				body: {
-					'English': (until: string, reason: string) =>
-						`You have been timed out until ${until} for: ${reason}`,
-					'Polish': (until: string, reason: string) =>
-						`Zostałeś/aś wyciszony/a do ${until} za: ${reason}`,
-					'Romanian': (until: string, reason: string) =>
-						`Ai primit un timeout care va dura până la ${until} pentru: ${reason}`,
-				},
+				'English': (until: string, reason: string) =>
+					`You have been timed out until ${until} for: ${reason}`,
+				'Polish': (until: string, reason: string) =>
+					`Zostałeś/aś wyciszony/a do ${until} za: ${reason}`,
+				'Romanian': (until: string, reason: string) =>
+					`Ai primit un timeout care va dura până la ${until} pentru: ${reason}`,
 			},
 			notTimedOut: {
 				'English': 'The provided user is not currently timed out.',
@@ -698,12 +691,12 @@ class Commands {
 				'Romanian': 'Acest utilizator nu a avut o pauză impusă pe el.',
 			},
 			timeoutCleared: {
-				'English': (memberMention: string) =>
-					`User ${memberMention} is no longer timed out.`,
-				'Polish': (memberMention: string) =>
-					`Użytkownik ${memberMention} już nie jest wyciszony.`,
-				'Romanian': (memberMention: string) =>
-					`Utilizatorul ${memberMention} nu mai are o pauză.`,
+				'English': (userMention: string) =>
+					`User ${userMention} is no longer timed out.`,
+				'Polish': (userMention: string) =>
+					`Użytkownik ${userMention} już nie jest wyciszony.`,
+				'Romanian': (userMention: string) =>
+					`Utilizatorul ${userMention} nu mai are o pauză.`,
 			},
 		},
 	});
@@ -745,12 +738,12 @@ class Commands {
 				'Romanian': 'Avertizarea selectată a fost deja eliminată.',
 			},
 			pardoned: {
-				'English': (memberMention: string, reason: string) =>
-					`User ${memberMention} has been pardoned from their warning for: ${reason}`,
-				'Polish': (memberMention: string, reason: string) =>
-					`Użytkownik ${memberMention} został ułaskawiony z jego ostrzeżenia za: ${reason}`,
-				'Romanian': (memberMention: string, reason: string) =>
-					`Utilizatorul ${memberMention} a fost grațiat de avertizarea sa pentru: ${reason}`,
+				'English': (userMention: string, reason: string) =>
+					`User ${userMention} has been pardoned from their warning for: ${reason}`,
+				'Polish': (userMention: string, reason: string) =>
+					`Użytkownik ${userMention} został ułaskawiony z jego ostrzeżenia za: ${reason}`,
+				'Romanian': (userMention: string, reason: string) =>
+					`Utilizatorul ${userMention} a fost grațiat de avertizarea sa pentru: ${reason}`,
 			},
 			pardonedDirect: {
 				'English': (reason: string, relativeTime: string) =>
@@ -759,6 +752,73 @@ class Commands {
 					`Ostrzeżenie za '${reason}' dane Tobie ${relativeTime} zostało wycofane.`,
 				'Romanian': (reason: string, relativeTime: string) =>
 					`Avertizarea pentru '${reason}' care a fost dată ție ${relativeTime} a fost anulată.`,
+			},
+		},
+	});
+
+	static readonly warn = typedLocalisations({
+		name: {
+			'English': 'warn',
+			'Polish': 'ostrzeż',
+			'Romanian': 'avertizare',
+		},
+		description: {
+			'English': 'Warns a user.',
+			'Polish': 'Ostrzega użytkownika.',
+			'Romanian': 'Avertizează un utilizator.',
+		},
+		strings: {
+			cannotWarnSelf: {
+				'English': 'You cannot warn yourself.',
+				'Polish': 'Nie można ostrzec siebie samego.',
+				'Romanian': 'Nu te poți avertiza pe tine însuți.',
+			},
+			cannotWarnCertainUsers: {
+				'English': 'Neither bots nor server moderators can be warned.',
+				'Polish': 'Nie można ostrzegać ani botów, ani moderatorów serwera.',
+				'Romanian':
+					'Nu se pot avertiza nici boții, nici moderatorii de server.',
+			},
+			failed: {
+				'English': 'Failed to warn user.',
+				'Polish': 'Nie udało się ostrzec użytkownika.',
+				'Romanian': 'Nu s-a putut avertiza utilizatorul.',
+			},
+			warned: {
+				'English': (userMention: string, warningCount: number) =>
+					`User ${userMention} has been warned. They now have ${warningCount} warnings.`,
+				'Polish': (userMention: string, warningCount: number) =>
+					`Użytkownik ${userMention} został ostrzeżony. Razem ostrzeżeń: ${warningCount}.`,
+				'Romanian': (userMention: string, warningCount: number) =>
+					`Utilizatorul ${userMention} a fost avertizat. Avertizări în total: ${warningCount}.`,
+			},
+			passedWarningLimitDirect: {
+				'English': (reason: string) =>
+					`You have been warned for: ${reason}\n\nYou have surpassed the maximum number of warnings, and have subsequently been kicked from the server.`,
+				'Polish': (reason: string) =>
+					`Zostałeś/aś ostrzeżony/a za: ${reason}\n\nPrzekroczyłeś/aś maksymalną liczbę ostrzeżeń, więc zostałeś/aś wyrzucony/a z serwera.`,
+				'Romanian': (reason: string) =>
+					`Ai fost avertizat/ă pentru: ${reason}\n\nAi depășit limita de avertizări, așa că ai fost dat/ă afară de pe server.`,
+			},
+			warnedDirect: {
+				'English': (
+					reason: string,
+					warningCount: number,
+					warningLimit: number,
+				) =>
+					`You have been warned for: ${reason}\n\nThis was warning #${warningCount} of ${warningLimit}.`,
+				'Polish': (
+					reason: string,
+					warningCount: number,
+					warningLimit: number,
+				) =>
+					`Zostałeś/aś ostrzeżony/a za: ${reason}\n\nTo było ostrzeżenie #${warningCount} z ${warningLimit}.`,
+				'Romanian': (
+					reason: string,
+					warningCount: number,
+					warningLimit: number,
+				) =>
+					`Ai fost avertizat/ă pentru: ${reason}\n\nAsta a fost avertizarea #${warningCount} din ${warningLimit}.`,
 			},
 		},
 	});
