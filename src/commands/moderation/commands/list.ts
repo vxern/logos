@@ -1,3 +1,8 @@
+import { Commands } from '../../../../assets/localisations/commands.ts';
+import {
+	createLocalisations,
+	localise,
+} from '../../../../assets/localisations/types.ts';
 import {
 	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
@@ -18,28 +23,10 @@ import { chunk, paginate, trim } from '../../../utils.ts';
 import { user } from '../../parameters.ts';
 
 const command: CommandBuilder = {
-	name: 'list',
-	nameLocalizations: {
-		pl: 'spisz',
-		ro: 'enumerare',
-	},
-	description: 'Allows the viewing of various information about users.',
-	descriptionLocalizations: {
-		pl: 'Pozwala na wyświetlanie różnych informacji o użytkownikach.',
-		ro: 'Permite afișarea diverselor informații despre utilizatori.',
-	},
+	...createLocalisations(Commands.list),
 	defaultMemberPermissions: ['MODERATE_MEMBERS'],
 	options: [{
-		name: 'warnings',
-		nameLocalizations: {
-			pl: 'ostrzeżenia',
-			ro: 'avertismente',
-		},
-		description: 'Lists the warnings issued to a user.',
-		descriptionLocalizations: {
-			pl: 'Wyświetla ostrzeżenia dane użytkownikowi.',
-			ro: 'Afișează avertismentele date unui utilizator.',
-		},
+		...createLocalisations(Commands.list.options.warnings),
 		type: ApplicationCommandOptionTypes.SubCommand,
 		handle: listWarnings,
 		options: [user],
@@ -73,7 +60,10 @@ async function listWarnings(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: 'The warnings for the given user could not be shown.',
+						description: localise(
+							Commands.list.strings.warningsUnableToBeShown,
+							interaction.locale,
+						),
 						color: configuration.interactions.responses.colors.red,
 					}],
 				},
@@ -101,7 +91,10 @@ async function listWarnings(
 		_index: number,
 	): string => {
 		if (warnings.length === 0) {
-			return 'This user has not received any warnings.';
+			return localise(
+				Commands.list.strings.userDoesNotHaveWarnings,
+				interaction.locale,
+			);
 		}
 
 		return list(
@@ -115,7 +108,10 @@ async function listWarnings(
 	return paginate([client, bot], interaction, {
 		elements: pages,
 		embed: { color: configuration.interactions.responses.colors.blue },
-		view: { title: 'Warnings', generate: generateWarningsPage },
+		view: {
+			title: localise(Commands.list.strings.warnings, interaction.locale),
+			generate: generateWarningsPage,
+		},
 		show: false,
 	});
 }

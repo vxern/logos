@@ -550,6 +550,51 @@ class Commands {
 			},
 		},
 	});
+
+	static readonly list = typedLocalisations({
+		name: {
+			'English': 'list',
+			'Polish': 'spisz',
+			'Romanian': 'enumerare',
+		},
+		description: {
+			'English': 'Allows the viewing of various information about users.',
+			'Polish': 'Pozwala na wyświetlanie różnych informacji o użytkownikach.',
+			'Romanian': 'Permite afișarea diverselor informații despre utilizatori.',
+		},
+		options: {
+			warnings: {
+				name: {
+					'English': 'warnings',
+					'Polish': 'ostrzeżenia',
+					'Romanian': 'avertismente',
+				},
+				description: {
+					'English': 'Lists the warnings issued to a user.',
+					'Polish': 'Wyświetla ostrzeżenia dane użytkownikowi.',
+					'Romanian': 'Afișează avertismentele date unui utilizator.',
+				},
+			},
+		},
+		strings: {
+			warningsUnableToBeShown: {
+				'English': 'The warnings for the given user could not be shown.',
+				'Polish': 'Nie udało się wyświetlić ostrzeżeń dla danego użytkownika.',
+				'Romanian':
+					'Avertizările pentru utilizatorul dat nu au putut fi afișate.',
+			},
+			userDoesNotHaveWarnings: {
+				'English': 'This user has not received any warnings.',
+				'Polish': 'Ten użytkownik nigdy nie dostał ostrzeżenia.',
+				'Romanian': 'Acest utilizator niciodată nu a primit o avertizare.',
+			},
+			warnings: {
+				'English': 'Warnings',
+				'Polish': 'Ostrzeżenia',
+				'Romanian': 'Avertizări',
+			},
+		},
+	});
 }
 
 export { Commands, GlobalParameters };
