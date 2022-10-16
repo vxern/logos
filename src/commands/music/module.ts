@@ -1,4 +1,4 @@
-import { Interaction } from '../../../deps.ts';
+import { Bot, Interaction } from '../../../deps.ts';
 import { Client } from '../../client.ts';
 import configuration from '../../configuration.ts';
 import { list } from '../../formatting.ts';
@@ -17,20 +17,14 @@ import resume from './commands/resume.ts';
 import unskip from './commands/unskip.ts';
 import volume from './commands/volume.ts';
 import { SongListing } from './data/song-listing.ts';
+import {
+	createLocalisations,
+	localise,
+} from '../../../assets/localisations/types.ts';
+import { Commands } from '../../../assets/localisations/commands.ts';
 
 const music: CommandBuilder = {
-	name: 'music',
-	nameLocalizations: {
-		pl: 'muzyka',
-		ro: 'muzică',
-	},
-	description: 'Allows the user to manage music playback in a voice channel.',
-	descriptionLocalizations: {
-		pl:
-			'Pozwala użytkownikowi na zarządanie odtwarzaniem muzyki w kanale głosowym.',
-		ro:
-			'Permite utilizatorului gestionarea redării muzicii într-un canal de voce.',
-	},
+	...createLocalisations(Commands.music),
 	defaultMemberPermissions: ['VIEW_CHANNEL'],
 	options: [
 		history,
@@ -51,7 +45,7 @@ const music: CommandBuilder = {
 const commands = [music];
 
 function displayListings(
-	client: Client,
+	clientWithBot: [Client, Bot],
 	interaction: Interaction,
 	{ title, songListings, show }: {
 		title: string;
@@ -61,22 +55,24 @@ function displayListings(
 ): void {
 	const pages = chunk(songListings, configuration.music.maxima.songs.page);
 
-	paginate(client, interaction, {
+	return paginate(clientWithBot, interaction, {
 		elements: pages,
 		embed: {
 			title: title,
 			color: configuration.interactions.responses.colors.blue,
 		},
 		view: {
-			title: 'Listings',
+			title: localise(Commands.music.strings.listings, interaction.locale),
 			generate: (page, pageIndex) =>
-				page.length === 0 ? 'This list is empty.' : list(
-					page.map((listing, index) =>
-						`${pageIndex * 10 + (index + 1)}. ${
-							(configuration.music.symbols)[listing.content.type]
-						} ~ ${listing.content.title}`
+				page.length === 0
+					? localise(Commands.music.strings.listEmpty, interaction.locale)
+					: list(
+						page.map((listing, index) =>
+							`${pageIndex * 10 + (index + 1)}. ${
+								(configuration.music.symbols)[listing.content.type]
+							} ~ ${listing.content.title}`
+						),
 					),
-				),
 		},
 		show: show,
 	});
