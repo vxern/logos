@@ -482,38 +482,72 @@ class Commands {
 				'Polish': 'Brak wyników.',
 				'Romanian': 'Fără rezultate.',
 			},
-      fields: {
-        translation: {
-          'English': 'Translation',
-          'Polish': 'Tłumaczenie',
-          'Romanian': 'Traducere',
-        },
-        pronunciation: {
-          'English': 'Pronunciation',
-          'Polish': 'Wymowa',
-          'Romanian': 'Pronunțare',
-        },
-        definition: {
-          'English': 'Definition',
-          'Polish': 'Znaczenie',
-          'Romanian': 'Definiție',
-        },
-        etymology: {
-          'English': 'Etymology',
-          'Polish': 'Etymologia',
-          'Romanian': 'Etimologie',
-        },
-        synonyms: {
-          'English': 'Synonyms',
-          'Polish': 'Synonimy',
-          'Romanian': 'Sinonime',
-        },
-        antonyms: {
-          'English': 'Antonyms',
-          'Polish': 'Antonimy',
-          'Romanian': 'Antonime',
-        },
-      },
+			fields: {
+				translation: {
+					'English': 'Translation',
+					'Polish': 'Tłumaczenie',
+					'Romanian': 'Traducere',
+				},
+				pronunciation: {
+					'English': 'Pronunciation',
+					'Polish': 'Wymowa',
+					'Romanian': 'Pronunțare',
+				},
+				definition: {
+					'English': 'Definition',
+					'Polish': 'Znaczenie',
+					'Romanian': 'Definiție',
+				},
+				etymology: {
+					'English': 'Etymology',
+					'Polish': 'Etymologia',
+					'Romanian': 'Etimologie',
+				},
+				synonyms: {
+					'English': 'Synonyms',
+					'Polish': 'Synonimy',
+					'Romanian': 'Sinonime',
+				},
+				antonyms: {
+					'English': 'Antonyms',
+					'Polish': 'Antonimy',
+					'Romanian': 'Antonime',
+				},
+			},
+		},
+	});
+
+	static readonly cite = typedLocalisations({
+		name: {
+			'English': 'cite',
+			'Polish': 'zacytuj',
+			'Romanian': 'citare',
+		},
+		description: {
+			'English': 'Cites a server rule.',
+			'Polish': 'Cytuje jedną z reguł serwera.',
+			'Romanian': 'Citează una dintre regulile serverului.',
+		},
+		options: {
+			rule: {
+				name: {
+					'English': 'rule',
+					'Polish': 'reguła',
+					'Romanian': 'regulă',
+				},
+				description: {
+					'English': 'The rule to cite.',
+					'Polish': 'Reguła, która ma być zacytowana.',
+					'Romanian': 'Regula care să fie citată.',
+				},
+			},
+		},
+		strings: {
+			invalidRule: {
+				'English': 'Invalid rule.',
+				'Polish': 'Nieprawidłowa reguła.',
+				'Romanian': 'Regulă invalidă.',
+			},
 		},
 	});
 }
