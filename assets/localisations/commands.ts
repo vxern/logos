@@ -794,6 +794,18 @@ class Commands {
 					'Romanian': 'Derulează melodia în curs de redare înainte.',
 				},
 			},
+			history: {
+				name: {
+					'English': 'history',
+					'Polish': 'historia',
+					'Romanian': 'istorie',
+				},
+				description: {
+					'English': 'Displays a list of previously played songs.',
+					'Polish': 'Wyświetla listę zagranych piosenek.',
+					'Romanian': 'Afișează lista tututor melodiilor redate.',
+				},
+			},
 		},
 		strings: {
 			listings: {
