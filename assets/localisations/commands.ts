@@ -832,6 +832,56 @@ class Commands {
 						'Pauzează melodia sau setul de melodii în curs de redare.',
 				},
 			},
+			play: {
+				name: {
+					'English': 'play',
+					'Polish': 'odtwórz',
+					'Romanian': 'redare',
+				},
+				description: {
+					'English': 'Allows the user to play music in a voice channel.',
+					'Polish':
+						'Pozwala użytkownikowi na odtwarzanie muzyki w kanale głosowym.',
+					'Romanian':
+						'Permite utilizatorului să redea muzică într-un canal de voce.',
+				},
+				options: {
+					file: {
+						name: {
+							'English': 'file',
+							'Polish': 'plik',
+							'Romanian': 'fișier',
+						},
+						description: {
+							'English': 'Plays an external audio file.',
+							'Polish': 'Odtwarza muzykę w kształcie zewnętrznego pliku audio.',
+							'Romanian': 'Redă muzică în forma unui fișier audio extern.',
+						},
+						options: {
+							url: {
+								name: {
+									'English': 'url',
+									'Polish': 'url',
+									'Romanian': 'url',
+								},
+								description: {
+									'English': 'Link to the audio file.',
+									'Polish': 'Link do pliku audio.',
+									'Romanian': 'Linkul către fișier audio.',
+								},
+							},
+						},
+					},
+					source: (name: string) => ({
+						name: { 'English': name.toLowerCase() },
+						description: {
+							'English': `Plays a song from ${name}.`,
+							'Polish': `Odtwarza utwór dostępny na ${name}.`,
+							'Romanian': `Redă o melodie disponibilă pe ${name}.`,
+						},
+					}),
+				},
+			},
 		},
 		strings: {
 			listings: {
@@ -927,6 +977,19 @@ class Commands {
 					'Polish': 'Zapauzowano odtwarzanie utworu.',
 					'Romanian': 'A fost oprită redarea melodiei.',
 				},
+			},
+			externalFile: {
+				'English': 'External file',
+				'Polish': 'Zewnętrzny plik',
+				'Romanian': 'Fișier extern',
+			},
+			songNotFound: {
+				'English': 'Couldn\'t find the requested song.\n\n' +
+					'You could try an alternative search, or request a different song.',
+				'Polish': 'Nie udało się znaleźć utworu.\n\n' +
+					'Spróbuj wyszukać utworu w inny sposób, lub odtworzyć inny otwór.',
+				'Romanian': 'Nu s-a putut găsi melodia.\n\n' +
+					'Încearcă să cauți melodia într-un mod diferit, sau să redai o altă melodie.',
 			},
 		},
 	});
