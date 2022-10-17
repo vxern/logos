@@ -958,6 +958,19 @@ class Commands {
 					'Romanian': 'Sare peste melodia în curs de redare.',
 				},
 			},
+			stop: {
+				name: {
+					'English': 'stop',
+					'Polish': 'przerwij',
+					'Romanian': 'oprire',
+				},
+				description: {
+					'English':
+						'Stops the current listening session, clearing the queue and song history.',
+					'Polish': 'Przerywa obecną sesję słuchania muzyki.',
+					'Romanian': 'Oprește sesiunea actuală de ascultare.',
+				},
+			},
 		},
 		strings: {
 			listings: {
@@ -1157,6 +1170,19 @@ class Commands {
 						`The ${
 							!skipCollection ? 'song' : 'song collection'
 						} has been skipped.`,
+				},
+			},
+			notPlayingMusic: {
+				'English': 'The bot is currently not playing music.',
+				'Polish': 'Bot obecnie nie odtwarza muzyki.',
+				'Romanian': 'Nu se redă muzică.',
+			},
+			// Do not localise; this is a public feedback message.
+			stopped: {
+				header: { 'English': 'Stopped' },
+				body: {
+					'English':
+						'The listening session has been stopped, and the song queue and history have been cleared.',
 				},
 			},
 		},
