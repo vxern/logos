@@ -1,6 +1,12 @@
+import { Commands } from '../../../../assets/localisations/commands.ts';
+import {
+	createLocalisations,
+	localise,
+} from '../../../../assets/localisations/types.ts';
 import {
 	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
+	Bot,
 	Interaction,
 	InteractionResponseTypes,
 	sendInteractionResponse,
@@ -8,59 +14,27 @@ import {
 import { Client } from '../../../client.ts';
 import { OptionBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
+import { defaultLanguage } from '../../../types.ts';
 import { show } from '../../parameters.ts';
 
 const command: OptionBuilder = {
-	name: 'volume',
-	nameLocalizations: {
-		pl: 'głośność',
-		ro: 'volum',
-	},
-	description: 'Allows the user to manage the volume of music playback.',
-	descriptionLocalizations: {
-		pl: 'Pozwala użytkownikowi na zarządzanie głośnością odtwarzania muzyki.',
-		ro: 'Permite utilizatorului gestionarea volumului redării muzicii.',
-	},
+	...createLocalisations(Commands.music.options.volume),
 	type: ApplicationCommandOptionTypes.SubCommandGroup,
 	options: [{
-		name: 'display',
-		nameLocalizations: {
-			pl: 'wyświetl',
-			ro: 'afișare',
-		},
-		description: 'Displays the volume of playback.',
-		descriptionLocalizations: {
-			pl: 'Wyświetla głośność odtwarzania.',
-			ro: 'Afișează volumul redării.',
-		},
+		...createLocalisations(Commands.music.options.volume.options.display),
 		type: ApplicationCommandOptionTypes.SubCommand,
 		handle: displayVolume,
 		options: [show],
 	}, {
-		name: 'set',
-		nameLocalizations: {
-			pl: 'ustaw',
-			ro: 'setare',
-		},
-		description: 'Sets the volume of playback.',
-		descriptionLocalizations: {
-			pl: 'Ustawia głośność odtwarzania.',
-			ro: 'Setează volumul redării.',
-		},
+		...createLocalisations(Commands.music.options.volume.options.set),
 		type: ApplicationCommandOptionTypes.SubCommand,
 		handle: setVolume,
 		options: [{
-			name: 'volume',
-			nameLocalizations: {
-				pl: 'głośność',
-				ro: 'volum',
-			},
-			description:
-				`A value between 0 and ${configuration.music.maxima.volume}.`,
-			descriptionLocalizations: {
-				pl: `Wartość 0–${configuration.music.maxima.volume}.`,
-				ro: `O valoare 0–${configuration.music.maxima.volume}.`,
-			},
+			...createLocalisations(
+				Commands.music.options.volume.options.set.options.volume(
+					configuration.music.maxima.volume,
+				),
+			),
 			type: ApplicationCommandOptionTypes.Integer,
 			required: true,
 		}],
@@ -68,7 +42,7 @@ const command: OptionBuilder = {
 };
 
 function displayVolume(
-	client: Client,
+	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): void {
 	const musicController = client.music.get(interaction.guildId!);
@@ -79,7 +53,7 @@ function displayVolume(
 			?.value) ?? false;
 
 	return void sendInteractionResponse(
-		client.bot,
+		bot,
 		interaction.id,
 		interaction.token,
 		{
@@ -87,8 +61,13 @@ function displayVolume(
 			data: {
 				flags: !show ? ApplicationCommandFlags.Ephemeral : undefined,
 				embeds: [{
-					title: '🔊 Volume',
-					description: `The current volume is ${musicController.volume}%.`,
+					title: `🔊 ${
+						localise(Commands.music.strings.volume.header, defaultLanguage)
+					}`,
+					description: localise(
+						Commands.music.strings.volume.body,
+						defaultLanguage,
+					)(musicController.volume),
 					color: configuration.interactions.responses.colors.invisible,
 				}],
 			},
@@ -97,7 +76,7 @@ function displayVolume(
 }
 
 function setVolume(
-	client: Client,
+	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): void {
 	const musicController = client.music.get(interaction.guildId!);
@@ -114,16 +93,17 @@ function setVolume(
 
 	if (volume < 0 || volume > configuration.music.maxima.volume) {
 		return void sendInteractionResponse(
-			client.bot,
+			bot,
 			interaction.id,
 			interaction.token,
 			{
 				type: InteractionResponseTypes.ChannelMessageWithSource,
 				data: {
 					embeds: [{
-						title: 'Invalid volume',
-						description:
-							`Song volume may not be negative, and it may not be bigger than ${configuration.music.maxima.volume}%.`,
+						description: localise(
+							Commands.music.strings.invalidVolume,
+							interaction.locale,
+						)(configuration.music.maxima.volume),
 						color: configuration.interactions.responses.colors.red,
 					}],
 				},
@@ -134,15 +114,23 @@ function setVolume(
 	musicController.setVolume(volume);
 
 	return void sendInteractionResponse(
-		client.bot,
+		bot,
 		interaction.id,
 		interaction.token,
 		{
 			type: InteractionResponseTypes.ChannelMessageWithSource,
 			data: {
 				embeds: [{
-					title: '🔊 Volume set',
-					description: `The volume has been set to ${volume}%.`,
+					title: `🔊 ${
+						localise(
+							Commands.music.strings.volumeSet.header,
+							interaction.locale,
+						)
+					}`,
+					description: localise(
+						Commands.music.strings.volumeSet.body,
+						interaction.locale,
+					)(volume),
 					color: configuration.interactions.responses.colors.invisible,
 				}],
 			},
