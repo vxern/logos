@@ -1050,6 +1050,11 @@ class Commands {
 				'Polish': 'Ta lista jest pusta.',
 				'Romanian': 'Această listă este goală.',
 			},
+			playbackHistory: {
+				'English': 'Playback history',
+				'Polish': 'Historia odtwarzania',
+				'Romanian': 'Istoricul redării',
+			},
 			noSongPlaying: {
 				'English': 'There is no song to display the details of.',
 				'Polish':

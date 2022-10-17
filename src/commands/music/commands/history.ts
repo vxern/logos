@@ -8,7 +8,7 @@ import { Client } from '../../../client.ts';
 import { OptionBuilder } from '../../command.ts';
 import { displayListings } from '../module.ts';
 import { show } from '../../parameters.ts';
-import { createLocalisations } from '../../../../assets/localisations/types.ts';
+import { createLocalisations, localise } from '../../../../assets/localisations/types.ts';
 import { Commands } from '../../../../assets/localisations/commands.ts';
 
 const command: OptionBuilder = {
@@ -35,7 +35,7 @@ function displaySongHistory(
 	listingHistory.reverse();
 
 	return displayListings([client, bot], interaction, {
-		title: '📋 Playback History',
+		title: `📋 ${localise(Commands.music.strings.playbackHistory, interaction.locale)}`,
 		songListings: listingHistory,
 		show: show,
 	});
