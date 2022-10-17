@@ -1,7 +1,13 @@
+import { Commands } from '../../../../assets/localisations/commands.ts';
+import {
+	createLocalisations,
+	localise,
+} from '../../../../assets/localisations/types.ts';
 import {
 	ActionRow,
 	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
+	Bot,
 	ButtonComponent,
 	ButtonStyles,
 	editOriginalInteractionResponse,
@@ -18,26 +24,18 @@ import { Client } from '../../../client.ts';
 import { OptionBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
 import { mention, MentionTypes } from '../../../formatting.ts';
+import { defaultLanguage } from '../../../types.ts';
 import { chunk, createInteractionCollector, trim } from '../../../utils.ts';
 import { SongListing } from '../data/song-listing.ts';
 
 const command: OptionBuilder = {
-	name: 'remove',
-	nameLocalizations: {
-		pl: 'usuń',
-		ro: 'ștergere',
-	},
-	description: 'Removes a song listing from the queue.',
-	descriptionLocalizations: {
-		pl: 'Usuwa wpis z kolejki muzycznej.',
-		ro: 'Șterge o înregistrare din coadă.',
-	},
+	...createLocalisations(Commands.music.options.remove),
 	type: ApplicationCommandOptionTypes.SubCommand,
 	handle: removeSongListing,
 };
 
 function removeSongListing(
-	client: Client,
+	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): void {
 	const musicController = client.music.get(interaction.guildId!);
@@ -50,7 +48,7 @@ function removeSongListing(
 
 	if (musicController.queue.length === 0) {
 		return void sendInteractionResponse(
-			client.bot,
+			bot,
 			interaction.id,
 			interaction.token,
 			{
@@ -58,8 +56,10 @@ function removeSongListing(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						title: 'Nothing to remove',
-						description: 'There are no songs in the queue.',
+						description: localise(
+							Commands.music.strings.nothingToRemove,
+							interaction.locale,
+						),
 						color: configuration.interactions.responses.colors.yellow,
 					}],
 				},
@@ -134,15 +134,22 @@ function removeSongListing(
 
 	const generateEmbed: () => InteractionCallbackData = () => ({
 		embeds: [{
-			title: 'Select a song / song collection to remove',
-			description: 'Select a song or song collection from the choices below.',
+			description: localise(
+				Commands.music.strings.selectSongToRemove,
+				interaction.locale,
+			),
 			color: configuration.interactions.responses.colors.blue,
-			footer: isLast() ? undefined : { text: 'Continued on the next page...' },
+			footer: isLast() ? undefined : {
+				text: localise(
+					Commands.music.strings.continuedOnTheNextPage,
+					interaction.locale,
+				),
+			},
 		}],
 		components: [generateSelectMenu(), ...generateButtons()],
 	});
 
-	const buttonsCustomId = createInteractionCollector(client, {
+	const buttonsCustomId = createInteractionCollector([client, bot], {
 		type: InteractionTypes.MessageComponent,
 		userId: interaction.user.id,
 		onCollect: (bot, selection) => {
@@ -168,7 +175,7 @@ function removeSongListing(
 	});
 
 	const selectMenuCustomId = createInteractionCollector(
-		client,
+		[client, bot],
 		{
 			type: InteractionTypes.MessageComponent,
 			userId: interaction.user.id,
@@ -192,11 +199,10 @@ function removeSongListing(
 							type: InteractionResponseTypes.ChannelMessageWithSource,
 							data: {
 								embeds: [{
-									title: 'Failed to remove song',
-									description:
-										`The song you attempted to remove no longer exists.
-
-This may be due to another user removing the song, or the queue having advanced.`,
+									description: localise(
+										Commands.music.strings.failedToRemoveSong,
+										interaction.locale,
+									),
 									color: configuration.interactions.responses.colors.yellow,
 								}],
 							},
@@ -212,11 +218,14 @@ This may be due to another user removing the song, or the queue having advanced.
 						type: InteractionResponseTypes.ChannelMessageWithSource,
 						data: {
 							embeds: [{
-								title: '❌ Removed',
-								description:
-									`The song **${songListing.content.title}** has been removed by ${
-										mention(selection.user.id, MentionTypes.User)
-									}.`,
+								title: `❌ ${
+									Commands.music.strings.removed.header[defaultLanguage]
+								}`,
+								description: Commands.music.strings.removed.body
+									[defaultLanguage](
+										songListing.content.title,
+										mention(selection.user.id, MentionTypes.User),
+									),
 								color: configuration.interactions.responses.colors.invisible,
 							}],
 						},
@@ -227,7 +236,7 @@ This may be due to another user removing the song, or the queue having advanced.
 	);
 
 	return void sendInteractionResponse(
-		client.bot,
+		bot,
 		interaction.id,
 		interaction.token,
 		{

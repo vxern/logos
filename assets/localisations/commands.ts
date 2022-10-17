@@ -895,6 +895,18 @@ class Commands {
 						'Afișează lista cu melodii și seturi de melodii în coadă.',
 				},
 			},
+			remove: {
+				name: {
+					'English': 'remove',
+					'Polish': 'usuń',
+					'Romanian': 'ștergere',
+				},
+				description: {
+					'English': 'Removes a song listing from the queue.',
+					'Polish': 'Usuwa wpis z kolejki muzycznej.',
+					'Romanian': 'Șterge o înregistrare din coadă.',
+				},
+			},
 		},
 		strings: {
 			listings: {
@@ -980,16 +992,8 @@ class Commands {
 				'Romanian': 'Nu este o melodie pentru a o pauza.',
 			},
 			paused: {
-				header: {
-					'English': 'Paused',
-					'Polish': 'Zapauzowane',
-					'Romanian': 'În pauză',
-				},
-				body: {
-					'English': 'The current song has been paused.',
-					'Polish': 'Zapauzowano odtwarzanie utworu.',
-					'Romanian': 'A fost oprită redarea melodiei.',
-				},
+				header: { 'English': 'Paused' },
+				body: { 'English': 'Paused the playback of music.' },
 			},
 			externalFile: {
 				'English': 'External file',
@@ -1004,11 +1008,40 @@ class Commands {
 				'Romanian': 'Nu s-a putut găsi melodia.\n\n' +
 					'Încearcă să cauți melodia într-un mod diferit, sau să redai o altă melodie.',
 			},
-      queue: {
-        'English': 'Queue',
-        'Polish': 'Kolejka',
-        'Romanian': 'Coadă',
-      }
+			queue: {
+				'English': 'Queue',
+				'Polish': 'Kolejka',
+				'Romanian': 'Coadă',
+			},
+			nothingToRemove: {
+				'English': 'There are no songs in the queue.',
+				'Polish': 'Nie ma utworów w kolejce.',
+				'Romanian': 'Nu sunt melodii în coadă.',
+			},
+			selectSongToRemove: {
+				'English':
+					'Select a song or song collection to remove from the choices below.',
+				'Polish': 'Wybierz utwór lub zbiór utworów do usunięcia poniżej.',
+				'Romanian': 'Alege o melodie sau un set de melodii de șters mai jos.',
+			},
+			// Use ellipsis if appropriate.
+			continuedOnTheNextPage: {
+				'English': 'Continued on the next page...',
+				'Polish': 'Kontynuacja na następnej stronie...',
+				'Romanian': 'Continuare pe următoarea pagină...',
+			},
+			failedToRemoveSong: {
+				'English': 'Failed to remove the selected song.',
+				'Polish': 'Nie udało się usunąć zaznaczonego utworu.',
+				'Romanian': 'Nu s-a putut elimina melodia selectată.',
+			},
+			removed: {
+				header: { 'English': 'Removed' },
+				body: {
+					'English': (songTitle: string, userMention: string) =>
+						`The song **${songTitle}** has been removed by ${userMention}.`,
+				},
+			},
 		},
 	});
 }
