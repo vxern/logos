@@ -984,6 +984,60 @@ class Commands {
 						'Înapoiază ultima melodie sau ultimul set de melodii redat.',
 				},
 			},
+			volume: {
+				name: {
+					'English': 'volume',
+					'Polish': 'głośność',
+					'Romanian': 'volum',
+				},
+				description: {
+					'English': 'Allows the user to manage the volume of music playback.',
+					'Polish':
+						'Pozwala użytkownikowi na zarządzanie głośnością odtwarzania muzyki.',
+					'Romanian':
+						'Permite utilizatorului gestionarea volumului redării muzicii.',
+				},
+				options: {
+					display: {
+						name: {
+							'English': 'display',
+							'Polish': 'wyświetl',
+							'Romanian': 'afișare',
+						},
+						description: {
+							'English': 'Displays the volume of playback.',
+							'Polish': 'Wyświetla głośność odtwarzania.',
+							'Romanian': 'Afișează volumul redării.',
+						},
+					},
+					set: {
+						name: {
+							'English': 'set',
+							'Polish': 'ustaw',
+							'Romanian': 'setare',
+						},
+						description: {
+							'English': 'Sets the volume of playback.',
+							'Polish': 'Ustawia głośność odtwarzania.',
+							'Romanian': 'Setează volumul redării.',
+						},
+						options: {
+							volume: (maxVolume: number) => ({
+								name: {
+									'English': 'volume',
+									'Polish': 'głośność',
+									'Romanian': 'volum',
+								},
+								description: {
+									'English': `A number between 0 and ${maxVolume}.`,
+									'Polish': `Liczba między 0 i ${maxVolume}.`,
+									'Romanian': `Un număr între 0 și ${maxVolume}.`,
+								},
+							}),
+						},
+					},
+				},
+			},
 		},
 		strings: {
 			listings: {
@@ -1173,7 +1227,7 @@ class Commands {
 			mustBeGreaterThanZero: {
 				'English': 'The skip argument must be greater than zero.',
 				'Polish': 'Argument przewinięcia musi być większy niż zero.',
-				'Romanian': 'Argumentul trebuie să fie mai marea decât zero.',
+				'Romanian': 'Argumentul trebuie să fie mai mare decât zero.',
 			},
 			// Do not localise; this is a public feedback message.
 			skipped: {
@@ -1224,6 +1278,34 @@ class Commands {
 				header: { 'English': 'Unskipped' },
 				body: {
 					'English': 'The last played song listing has been brought back.',
+				},
+			},
+			volume: {
+				header: {
+					'English': 'Volume',
+					'Polish': 'Głośność',
+					'Romanian': 'Volum',
+				},
+				body: {
+					'English': (volume: number) => `The current volume is ${volume}%.`,
+					'Polish': (volume: number) => `Obecna głośność to ${volume}%.`,
+					'Romanian': (volume: number) => `Volumul actual este ${volume}%.`,
+				},
+			},
+			invalidVolume: {
+				'English': (maxVolume: number) =>
+					`Song volume may not be negative, and it may not be higher than ${maxVolume}%.`,
+				'Polish': (maxVolume: number) =>
+					`Głośność musi być większa niż zero, oraz nie większa niż ${maxVolume}%.`,
+				'Romanian': (maxVolume: number) =>
+					`Volumul trebuie să fie mai mare decât zero, dar și nu mai mare decât ${maxVolume}%.`,
+			},
+			// Do not localise; this is a public feedback message.
+			volumeSet: {
+				header: { 'English': 'Volume set' },
+				body: {
+					'English': (volume: number) =>
+						`The volume has been set to ${volume}%.`,
 				},
 			},
 		},
