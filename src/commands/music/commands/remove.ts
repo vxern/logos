@@ -57,7 +57,7 @@ function removeSongListing(
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(
-							Commands.music.strings.nothingToRemove,
+							Commands.music.strings.noListingToRemove,
 							interaction.locale,
 						),
 						color: configuration.interactions.responses.colors.yellow,
