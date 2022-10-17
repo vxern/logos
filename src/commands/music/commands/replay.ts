@@ -1,6 +1,12 @@
+import { Commands } from '../../../../assets/localisations/commands.ts';
+import {
+	createLocalisations,
+	localise,
+} from '../../../../assets/localisations/types.ts';
 import {
 	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
+	Bot,
 	Interaction,
 	InteractionResponseTypes,
 	sendInteractionResponse,
@@ -12,23 +18,14 @@ import { SongListingContentTypes } from '../data/song-listing.ts';
 import { collection } from '../parameters.ts';
 
 const command: OptionBuilder = {
-	name: 'replay',
-	nameLocalizations: {
-		pl: 'powtórz',
-		ro: 'reluare',
-	},
-	description: 'Begins playing the currently playing song from the start.',
-	descriptionLocalizations: {
-		pl: 'Odtwarza obecnie grający utwór od początku.',
-		ro: 'Redă melodia în curs de redare din nou.',
-	},
+	...createLocalisations(Commands.music.options.replay),
 	type: ApplicationCommandOptionTypes.SubCommand,
 	handle: replaySong,
 	options: [collection],
 };
 
 function replaySong(
-	client: Client,
+	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): void {
 	const musicController = client.music.get(interaction.guildId!);
@@ -48,7 +45,7 @@ function replaySong(
 
 	if (!musicController.isOccupied || !currentListing) {
 		return void sendInteractionResponse(
-			client.bot,
+			bot,
 			interaction.id,
 			interaction.token,
 			{
@@ -56,8 +53,10 @@ function replaySong(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						title: 'Nothing to replay',
-						description: 'There is no song to replay.',
+						description: localise(
+							Commands.music.strings.noSongToReplay,
+							interaction.locale,
+						),
 						color: configuration.interactions.responses.colors.yellow,
 					}],
 				},
@@ -70,7 +69,7 @@ function replaySong(
 		currentListing.content.type !== SongListingContentTypes.Collection
 	) {
 		return void sendInteractionResponse(
-			client.bot,
+			bot,
 			interaction.id,
 			interaction.token,
 			{
@@ -78,9 +77,10 @@ function replaySong(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						title: 'Not playing a collection',
-						description:
-							'There is no song collection to replay. Try replaying the current song instead.',
+						description: localise(
+							Commands.music.strings.noSongCollectionToReplay,
+							interaction.locale,
+						),
 						color: configuration.interactions.responses.colors.yellow,
 					}],
 				},
