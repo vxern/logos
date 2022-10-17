@@ -819,6 +819,19 @@ class Commands {
 						'Afișează melodia sau setul de melodii în curs de redare.',
 				},
 			},
+			pause: {
+				name: {
+					'English': 'pause',
+					'Polish': 'zapauzuj',
+					'Romanian': 'pauzare',
+				},
+				description: {
+					'English': 'Pauses the currently playing song or song collection.',
+					'Polish': 'Zapauzuj obecny utwór lub zbiór utworów.',
+					'Romanian':
+						'Pauzează melodia sau setul de melodii în curs de redare.',
+				},
+			},
 		},
 		strings: {
 			listings: {
@@ -845,7 +858,7 @@ class Commands {
 					'Nie można wyświetlić informacji o zbiorze utworów, ponieważ żaden zbiór utworów obecnie nie jest odtwarzany.\n\n' +
 					'Spróbuj wysłać prośbę o wyświetlenie informacji o samym utworze.',
 				'Romanian':
-					'Nu s-au putut afișa informații despre melodie fiindcă în prezent nu se redă niciun grup de melodii.\n\n' +
+					'Nu s-au putut afișa informații despre melodie fiindcă în prezent nu se redă niciun set de melodii.\n\n' +
 					'Încearcă să trimiți o cerere de informații despre melodia actuală.',
 			},
 			nowPlaying: {
@@ -861,7 +874,7 @@ class Commands {
 			collection: {
 				'English': 'Collection',
 				'Polish': 'Zbiór',
-				'Romanian': 'Grup',
+				'Romanian': 'Set',
 			},
 			track: {
 				'English': 'Track',
@@ -897,6 +910,23 @@ class Commands {
 					`Această înregistrare a fost furnizată de pe ${
 						origin ?? 'internet'
 					}.`,
+			},
+			noSongToPause: {
+				'English': 'There is no song to pause.',
+				'Polish': 'Nie ma utworu do zapauzowania.',
+				'Romanian': 'Nu este o melodie pentru a o pauza.',
+			},
+			paused: {
+				header: {
+					'English': 'Paused',
+					'Polish': 'Zapauzowane',
+					'Romanian': 'În pauză',
+				},
+				body: {
+					'English': 'The current song has been paused.',
+					'Polish': 'Zapauzowano odtwarzanie utworu.',
+					'Romanian': 'A fost oprită redarea melodiei.',
+				},
 			},
 		},
 	});
