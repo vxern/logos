@@ -1,8 +1,8 @@
 import { Locales, Localization as DiscordLocalisation } from '../../deps.ts';
-import { Language } from '../../src/types.ts';
+import { defaultLanguage, Language } from '../../src/types.ts';
 
 type Expression<T> = (argument: T) => string;
-type Localisations<T> = Partial<Record<Language, T>> & { 'English': T };
+type Localisations<T> = Partial<Record<Language, T>> & { [defaultLanguage]: T };
 type DiscordLocalisations = Required<
 	Record<
 		'name' | 'description',
@@ -49,7 +49,7 @@ function createDiscordLocalisations(
 ): DiscordLocalisation {
 	return Object.fromEntries(
 		(<[Language, string][]> Object.entries(localisations))
-			.filter(([key, _value]) => key !== 'English')
+			.filter(([key, _value]) => key !== defaultLanguage)
 			.map(([key, value]) => [Locales[<keyof typeof Locales> key], value]),
 	);
 }
@@ -65,9 +65,9 @@ function createLocalisations(
 	commandLocalisations: DiscordLocalisations,
 ): DiscordLocalisationFields {
 	return {
-		name: commandLocalisations.name['English'],
+		name: commandLocalisations.name[defaultLanguage],
 		nameLocalizations: createDiscordLocalisations(commandLocalisations.name),
-		description: commandLocalisations.description['English'],
+		description: commandLocalisations.description[defaultLanguage],
 		descriptionLocalizations: createDiscordLocalisations(
 			commandLocalisations.description,
 		),
@@ -79,7 +79,7 @@ function localise<T>(
 	locale: string | undefined,
 ): T {
 	if (!locale || !(locale in languageByLocale)) {
-		return localisations['English'];
+		return localisations[defaultLanguage];
 	}
 
 	return localisations[getLanguageByLocale(<Locales> locale)!]!;
