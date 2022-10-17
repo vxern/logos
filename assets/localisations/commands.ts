@@ -882,6 +882,19 @@ class Commands {
 					}),
 				},
 			},
+			queue: {
+				name: {
+					'English': 'queue',
+					'Polish': 'kolejka',
+					'Romanian': 'coadă',
+				},
+				description: {
+					'English': 'Displays a list of queued song listings.',
+					'Polish': 'Wyświetla listę utworów oraz zbiorów utworów w kolejce.',
+					'Romanian':
+						'Afișează lista cu melodii și seturi de melodii în coadă.',
+				},
+			},
 		},
 		strings: {
 			listings: {
@@ -991,6 +1004,11 @@ class Commands {
 				'Romanian': 'Nu s-a putut găsi melodia.\n\n' +
 					'Încearcă să cauți melodia într-un mod diferit, sau să redai o altă melodie.',
 			},
+      queue: {
+        'English': 'Queue',
+        'Polish': 'Kolejka',
+        'Romanian': 'Coadă',
+      }
 		},
 	});
 }
