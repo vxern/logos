@@ -1,6 +1,12 @@
+import { Commands } from '../../../../assets/localisations/commands.ts';
+import {
+	createLocalisations,
+	localise,
+} from '../../../../assets/localisations/types.ts';
 import {
 	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
+	Bot,
 	Interaction,
 	InteractionResponseTypes,
 	sendInteractionResponse,
@@ -8,27 +14,19 @@ import {
 import { Client } from '../../../client.ts';
 import { OptionBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
+import { defaultLanguage } from '../../../types.ts';
 import { SongListingContentTypes } from '../data/song-listing.ts';
 import { by, collection, to } from '../parameters.ts';
 
 const command: OptionBuilder = {
-	name: 'unskip',
-	nameLocalizations: {
-		pl: 'przywróć',
-		ro: 'înapoiare',
-	},
-	description: 'Brings back the last played song.',
-	descriptionLocalizations: {
-		pl: 'Przywraca ostatnio zagrany utwór lub zbiór utworów.',
-		ro: 'Înapoiază ultima melodie sau ultimul set de melodii redat.',
-	},
+	...createLocalisations(Commands.music.options.unskip),
 	type: ApplicationCommandOptionTypes.SubCommand,
 	handle: unskip,
 	options: [collection, by, to],
 };
 
 function unskip(
-	client: Client,
+	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): void {
 	const musicController = client.music.get(interaction.guildId!);
@@ -67,7 +65,7 @@ function unskip(
 
 	if (isUnskippingListing && musicController.history.length === 0) {
 		return void sendInteractionResponse(
-			client.bot,
+			bot,
 			interaction.id,
 			interaction.token,
 			{
@@ -75,8 +73,10 @@ function unskip(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						title: 'Nothing to unskip',
-						description: 'There is nothing to unskip to.',
+						description: localise(
+							Commands.music.strings.nowhereToUnskipTo,
+							interaction.locale,
+						),
 						color: configuration.interactions.responses.colors.yellow,
 					}],
 				},
@@ -89,7 +89,7 @@ function unskip(
 		songListing?.content.type !== SongListingContentTypes.Collection
 	) {
 		return void sendInteractionResponse(
-			client.bot,
+			bot,
 			interaction.id,
 			interaction.token,
 			{
@@ -97,9 +97,10 @@ function unskip(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						title: 'Not playing a collection',
-						description:
-							`There is no song collection to unskip. Try unskipping the current song instead.`,
+						description: localise(
+							Commands.music.strings.noSongCollectionToUnskip,
+							interaction.locale,
+						),
 						color: configuration.interactions.responses.colors.yellow,
 					}],
 				},
@@ -109,7 +110,7 @@ function unskip(
 
 	if (musicController.isOccupied && !musicController.canPushToQueue) {
 		return void sendInteractionResponse(
-			client.bot,
+			bot,
 			interaction.id,
 			interaction.token,
 			{
@@ -117,9 +118,10 @@ function unskip(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						title: 'The queue is full',
-						description:
-							'The last played song listing cannot be unskipped because the song queue is already full.',
+						description: localise(
+							Commands.music.strings.cannotUnskipDueToFullQueue,
+							interaction.locale,
+						),
 						color: configuration.interactions.responses.colors.red,
 					}],
 				},
@@ -129,7 +131,7 @@ function unskip(
 
 	if (by && to) {
 		return void sendInteractionResponse(
-			client.bot,
+			bot,
 			interaction.id,
 			interaction.token,
 			{
@@ -137,9 +139,10 @@ function unskip(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						title: 'Too many skip operations',
-						description:
-							`You may not unskip by a number of songs __and__ unskip to a certain song in the same query.`,
+						description: localise(
+							Commands.music.strings.tooManySkipArguments,
+							interaction.locale,
+						),
 						color: configuration.interactions.responses.colors.red,
 					}],
 				},
@@ -200,15 +203,20 @@ function unskip(
 	}
 
 	return void sendInteractionResponse(
-		client.bot,
+		bot,
 		interaction.id,
 		interaction.token,
 		{
 			type: InteractionResponseTypes.ChannelMessageWithSource,
 			data: {
 				embeds: [{
-					title: '⏮️ Unskipped',
-					description: 'The last played song listing has been brought back.',
+					title: `⏮️ ${
+						localise(Commands.music.strings.unskipped.header, defaultLanguage)
+					}`,
+					description: localise(
+						Commands.music.strings.unskipped.body,
+						defaultLanguage,
+					),
 					color: configuration.interactions.responses.colors.invisible,
 				}],
 			},
