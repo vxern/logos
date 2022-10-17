@@ -1,5 +1,8 @@
+import { Commands } from '../../../../assets/localisations/commands.ts';
+import { createLocalisations } from '../../../../assets/localisations/types.ts';
 import {
 	ApplicationCommandOptionTypes,
+	Bot,
 	Interaction,
 } from '../../../../deps.ts';
 import { Client } from '../../../client.ts';
@@ -7,23 +10,14 @@ import { OptionBuilder } from '../../../commands/command.ts';
 import { by, to } from '../parameters.ts';
 
 const command: OptionBuilder = {
-	name: 'rewind',
-	nameLocalizations: {
-		pl: 'przewiń-do-tyłu',
-		ro: 'derulare-înapoi',
-	},
-	description: 'Rewinds the currently playing song.',
-	descriptionLocalizations: {
-		pl: 'Przewija obecnie grający utwór do tyłu.',
-		ro: 'Derulează melodia în curs de redare înapoi.',
-	},
+	...createLocalisations(Commands.music.options.rewind),
 	type: ApplicationCommandOptionTypes.SubCommand,
 	handle: rewindSong,
 	options: [by, to],
 };
 
 function rewindSong(
-	_client: Client,
+	[_client, _bot]: [Client, Bot],
 	_interaction: Interaction,
 ): void {
 	/// TODO(vxern):
