@@ -5,75 +5,50 @@ import { query } from '../parameters.ts';
 import { Client } from '../../../client.ts';
 import {
 	ApplicationCommandOptionTypes,
+	Bot,
 	Interaction,
 	InteractionResponseTypes,
 	sendInteractionResponse,
 } from '../../../../deps.ts';
 import { SongListingContentTypes } from '../data/song-listing.ts';
+import {
+	createLocalisations,
+	localise,
+} from '../../../../assets/localisations/types.ts';
+import { Commands } from '../../../../assets/localisations/commands.ts';
 
 const command: OptionBuilder = {
-	name: 'play',
-	nameLocalizations: {
-		pl: 'odtwórz',
-		ro: 'redare',
-	},
-	description: 'Allows the user to play music in a voice channel.',
-	descriptionLocalizations: {
-		pl: 'Pozwala użytkownikowi na odtwarzanie muzyki w kanale głosowym.',
-		ro: 'Permite utilizatorului să redea muzică într-un canal de voce.',
-	},
+	...createLocalisations(Commands.music.options.play),
 	type: ApplicationCommandOptionTypes.SubCommandGroup,
 	options: [
 		{
-			name: 'file',
-			nameLocalizations: {
-				pl: 'plik',
-				ro: 'fișier',
-			},
-			description: 'Plays an external audio file.',
-			descriptionLocalizations: {
-				pl: 'Odtwarza muzykę w kształcie zewnętrznego pliku audio.',
-				ro: 'Redă muzică în forma unui fișier audio extern.',
-			},
+			...createLocalisations(Commands.music.options.play.options.file),
 			type: ApplicationCommandOptionTypes.SubCommand,
 			handle: playStream,
 			options: [{
-				name: 'url',
-				nameLocalizations: {
-					pl: 'url',
-					ro: 'url',
-				},
-				description: 'Link to the audio file.',
-				descriptionLocalizations: {
-					pl: 'Link do pliku audio.',
-					ro: 'Linkul către fișier audio.',
-				},
+				...createLocalisations(
+					Commands.music.options.play.options.file.options.url,
+				),
 				type: ApplicationCommandOptionTypes.String,
 				required: true,
 			}],
 		},
 		...Object.entries(sources).map<OptionBuilder>(([name, resolve]) => ({
-			name: name.toLowerCase(),
-			nameLocalizations: {},
-			description: `Plays a song from ${name}.`,
-			descriptionLocalizations: {
-				pl: `Odtwarza muzykę dostępną na ${name}.`,
-				ro: `Redă muzică disponibilă pe ${name}.`,
-			},
+			...createLocalisations(Commands.music.options.play.options.source(name)),
 			type: ApplicationCommandOptionTypes.SubCommand,
-			handle: (client, interaction) =>
-				playSongListing(client, interaction, resolve),
+			handle: ([client, bot], interaction) =>
+				playSongListing([client, bot], interaction, resolve),
 			options: [query],
 		})),
 	],
 };
 
 function playStream(
-	client: Client,
+	clientWithBot: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {
 	return playSongListing(
-		client,
+		clientWithBot,
 		interaction,
 		(_client, interaction, query) =>
 			new Promise((resolve) =>
@@ -81,7 +56,10 @@ function playStream(
 					requestedBy: interaction.user.id,
 					content: {
 						type: SongListingContentTypes.External,
-						title: 'External file',
+						title: localise(
+							Commands.music.strings.externalFile,
+							interaction.locale,
+						),
 						url: query,
 					},
 				})
@@ -90,7 +68,7 @@ function playStream(
 }
 
 async function playSongListing(
-	client: Client,
+	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 	resolveToSongListing: ListingResolver,
 ): Promise<void> {
@@ -112,16 +90,17 @@ async function playSongListing(
 
 	if (!songListing) {
 		return void sendInteractionResponse(
-			client.bot,
+			bot,
 			interaction.id,
 			interaction.token,
 			{
 				type: InteractionResponseTypes.ChannelMessageWithSource,
 				data: {
 					embeds: [{
-						title: 'Couldn\'t find the requested song.',
-						description:
-							'You could try an alternative search, or request a different song.',
+						description: localise(
+							Commands.music.strings.songNotFound,
+							interaction.locale,
+						),
 						color: configuration.interactions.responses.colors.red,
 					}],
 				},
