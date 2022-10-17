@@ -219,13 +219,18 @@ function removeSongListing(
 						data: {
 							embeds: [{
 								title: `❌ ${
-									Commands.music.strings.removed.header[defaultLanguage]
+									localise(
+										Commands.music.strings.removed.header,
+										defaultLanguage,
+									)
 								}`,
-								description: Commands.music.strings.removed.body
-									[defaultLanguage](
-										songListing.content.title,
-										mention(selection.user.id, MentionTypes.User),
-									),
+								description: localise(
+									Commands.music.strings.removed.body,
+									defaultLanguage,
+								)(
+									songListing.content.title,
+									mention(selection.user.id, MentionTypes.User),
+								),
 								color: configuration.interactions.responses.colors.invisible,
 							}],
 						},

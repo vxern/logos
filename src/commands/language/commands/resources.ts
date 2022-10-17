@@ -1,5 +1,5 @@
 import { Commands } from '../../../../assets/localisations/commands.ts';
-import { createLocalisations } from '../../../../assets/localisations/types.ts';
+import { createLocalisations, localise } from '../../../../assets/localisations/types.ts';
 import {
 	ApplicationCommandFlags,
 	Bot,
@@ -42,7 +42,7 @@ function resources(
 					type: MessageComponentTypes.ActionRow,
 					components: [{
 						type: MessageComponentTypes.Button,
-						label: Commands.resources.strings.clickForResources[defaultLanguage],
+						label: localise(Commands.resources.strings.clickForResources, defaultLanguage),
 						style: ButtonStyles.Link,
 						url: repositoryLink,
 					}],
