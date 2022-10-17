@@ -70,8 +70,8 @@ function pauseSong(
 			type: InteractionResponseTypes.ChannelMessageWithSource,
 			data: {
 				embeds: [{
-					title: `⏸️ ${Commands.music.strings.paused.header[defaultLanguage], interaction.locale}`,
-					description: Commands.music.strings.paused.body[defaultLanguage],
+					title: `⏸️ ${localise(Commands.music.strings.paused.header, defaultLanguage)}`,
+					description: localise(Commands.music.strings.paused.body, defaultLanguage),
 					color: configuration.interactions.responses.colors.invisible,
 				}],
 			},
