@@ -1,6 +1,12 @@
+import { Commands } from '../../../../assets/localisations/commands.ts';
+import {
+	createLocalisations,
+	localise,
+} from '../../../../assets/localisations/types.ts';
 import {
 	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
+	Bot,
 	Interaction,
 	InteractionResponseTypes,
 	sendInteractionResponse,
@@ -8,26 +14,16 @@ import {
 import { Client } from '../../../client.ts';
 import { OptionBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
+import { defaultLanguage } from '../../../types.ts';
 
 const command: OptionBuilder = {
-	name: 'resume',
-	nameLocalizations: {
-		pl: 'wznów',
-		ro: 'continuare',
-	},
-	description: 'Unpauses the currently playing song if it is paused.',
-	descriptionLocalizations: {
-		pl:
-			'Wznawia odtwarzanie obecnie grającego utworu, jeśli ten jest zapauzowany.',
-		ro:
-			'Anulează întreruperea redării melodiei actuale dacă aceasta este în pauză.',
-	},
+	...createLocalisations(Commands.music.options.resume),
 	type: ApplicationCommandOptionTypes.SubCommand,
 	handle: resumeSong,
 };
 
 function resumeSong(
-	client: Client,
+	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): void {
 	const musicController = client.music.get(interaction.guildId!);
@@ -38,7 +34,7 @@ function resumeSong(
 
 	if (!musicController.isOccupied) {
 		return void sendInteractionResponse(
-			client.bot,
+			bot,
 			interaction.id,
 			interaction.token,
 			{
@@ -46,8 +42,10 @@ function resumeSong(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						title: 'Nothing to unpause',
-						description: 'There is no song to unpause.',
+						description: localise(
+							Commands.music.strings.noSongToResume,
+							interaction.locale,
+						),
 						color: configuration.interactions.responses.colors.yellow,
 					}],
 				},
@@ -57,7 +55,7 @@ function resumeSong(
 
 	if (!musicController.isPaused) {
 		return void sendInteractionResponse(
-			client.bot,
+			bot,
 			interaction.id,
 			interaction.token,
 			{
@@ -65,8 +63,10 @@ function resumeSong(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						title: 'Not paused',
-						description: 'The current song is not paused.',
+						description: localise(
+							Commands.music.strings.notCurrentlyPaused,
+							interaction.locale,
+						),
 						color: configuration.interactions.responses.colors.yellow,
 					}],
 				},
@@ -77,15 +77,20 @@ function resumeSong(
 	musicController.resume();
 
 	return void sendInteractionResponse(
-		client.bot,
+		bot,
 		interaction.id,
 		interaction.token,
 		{
 			type: InteractionResponseTypes.ChannelMessageWithSource,
 			data: {
 				embeds: [{
-					title: '▶️ Unpaused',
-					description: 'The current song has been unpaused.',
+					title: `▶️ ${
+						localise(Commands.music.strings.resumed.header, defaultLanguage)
+					}`,
+					description: localise(
+						Commands.music.strings.resumed.body,
+						defaultLanguage,
+					),
 					color: configuration.interactions.responses.colors.invisible,
 				}],
 			},
