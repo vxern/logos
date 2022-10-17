@@ -934,6 +934,18 @@ class Commands {
 						'Anulează întreruperea redării melodiei actuale dacă aceasta este în pauză.',
 				},
 			},
+			rewind: {
+				name: {
+					'English': 'rewind',
+					'Polish': 'przewiń-do-tyłu',
+					'Romanian': 'derulare-înapoi',
+				},
+				description: {
+					'English': 'Rewinds the currently playing song.',
+					'Polish': 'Przewija obecnie grający utwór do tyłu.',
+					'Romanian': 'Derulează melodia în curs de redare înapoi.',
+				},
+			},
 		},
 		strings: {
 			listings: {
@@ -1018,7 +1030,7 @@ class Commands {
 				'Polish': 'Nie ma utworu do zapauzowania.',
 				'Romanian': 'Nu este o melodie pentru a o pauza.',
 			},
-      // Do not localise; this is a public feedback message.
+			// Do not localise; this is a public feedback message.
 			paused: {
 				header: { 'English': 'Paused' },
 				body: { 'English': 'Paused the playback of music.' },
@@ -1063,7 +1075,7 @@ class Commands {
 				'Polish': 'Nie udało się usunąć zaznaczonego utworu.',
 				'Romanian': 'Nu s-a putut elimina melodia selectată.',
 			},
-      // Do not localise; this is a public feedback message.
+			// Do not localise; this is a public feedback message.
 			removed: {
 				header: { 'English': 'Removed' },
 				body: {
@@ -1089,16 +1101,16 @@ class Commands {
 				'Polish': 'Nie ma piosenki do wznowienia odtwarzania.',
 				'Romanian': 'Nu este o melodie pentru a-i relua redarea.',
 			},
-      notCurrentlyPaused: {
-        'English': 'The current song is not paused.',
-        'Polish': 'Obecny utwór nie jest zatrzymany.',
-        'Romanian': 'Melodia actuală nu este oprită.',
-      },
-      // Do not localise; this is a public feedback message.
-      resumed: {
-        header: { 'English': 'Resumed' },
-        body: { 'English': 'Music playback has been resumed.' },
-      },
+			notCurrentlyPaused: {
+				'English': 'The current song is not paused.',
+				'Polish': 'Obecny utwór nie jest zatrzymany.',
+				'Romanian': 'Melodia actuală nu este oprită.',
+			},
+			// Do not localise; this is a public feedback message.
+			resumed: {
+				header: { 'English': 'Resumed' },
+				body: { 'English': 'Music playback has been resumed.' },
+			},
 		},
 	});
 }
