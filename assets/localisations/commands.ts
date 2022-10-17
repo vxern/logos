@@ -907,6 +907,19 @@ class Commands {
 					'Romanian': 'Șterge o înregistrare din coadă.',
 				},
 			},
+			replay: {
+				name: {
+					'English': 'replay',
+					'Polish': 'powtórz',
+					'Romanian': 'reluare',
+				},
+				description: {
+					'English':
+						'Begins playing the currently playing song from the start.',
+					'Polish': 'Odtwarza obecnie grający utwór od początku.',
+					'Romanian': 'Redă melodia în curs de redare din nou.',
+				},
+			},
 		},
 		strings: {
 			listings: {
@@ -1013,7 +1026,7 @@ class Commands {
 				'Polish': 'Kolejka',
 				'Romanian': 'Coadă',
 			},
-			nothingToRemove: {
+			noListingToRemove: {
 				'English': 'There are no songs in the queue.',
 				'Polish': 'Nie ma utworów w kolejce.',
 				'Romanian': 'Nu sunt melodii în coadă.',
@@ -1041,6 +1054,19 @@ class Commands {
 					'English': (songTitle: string, userMention: string) =>
 						`The song **${songTitle}** has been removed by ${userMention}.`,
 				},
+			},
+			noSongToReplay: {
+				'English': 'There is no song to replay.',
+				'Polish': 'Nie ma utworu do ponownego odtworzenia.',
+				'Romanian': 'Nu este o melodie de redat din nou.',
+			},
+			noSongCollectionToReplay: {
+				'English': 'There is no song collection to replay.\n\n' +
+					'Try replaying the current song instead.',
+				'Polish': 'Nie ma zbioru utworów do ponownego odtworzenia.\n\n' +
+					'Spróbuj odtworzyć ponownie sam utwór.',
+				'Romanian': 'Nu este un set de melodii de redat din nou.\n\n' +
+					'Încearcă să redai din nou melodia actuală.',
 			},
 		},
 	});
