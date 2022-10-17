@@ -1,6 +1,12 @@
+import { Commands } from '../../../../assets/localisations/commands.ts';
+import {
+	createLocalisations,
+	localise,
+} from '../../../../assets/localisations/types.ts';
 import {
 	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
+	Bot,
 	Interaction,
 	InteractionResponseTypes,
 	sendInteractionResponse,
@@ -8,26 +14,21 @@ import {
 import { Client } from '../../../client.ts';
 import { OptionBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
+import { defaultLanguage } from '../../../types.ts';
 import { SongListingContentTypes } from '../data/song-listing.ts';
 import { by, collection, to } from '../parameters.ts';
 
 const command: OptionBuilder = {
-	name: 'skip',
-	nameLocalizations: {
-		pl: 'przewiń',
-		ro: 'sărire-peste',
-	},
-	description: 'Skips the currently playing song.',
-	descriptionLocalizations: {
-		pl: 'Przewija obecnie grający utwór.',
-		ro: 'Sare peste melodia în curs de redare.',
-	},
+	...createLocalisations(Commands.music.options.skip),
 	type: ApplicationCommandOptionTypes.SubCommand,
 	handle: skipSong,
 	options: [collection, by, to],
 };
 
-function skipSong(client: Client, interaction: Interaction): void {
+function skipSong(
+	[client, bot]: [Client, Bot],
+	interaction: Interaction,
+): void {
 	const musicController = client.music.get(interaction.guildId!);
 	if (!musicController) return;
 
@@ -61,7 +62,7 @@ function skipSong(client: Client, interaction: Interaction): void {
 
 	if (!musicController.isOccupied || !songListing) {
 		return void sendInteractionResponse(
-			client.bot,
+			bot,
 			interaction.id,
 			interaction.token,
 			{
@@ -69,8 +70,10 @@ function skipSong(client: Client, interaction: Interaction): void {
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						title: 'Nothing to skip',
-						description: 'There is no song to skip.',
+						description: localise(
+							Commands.music.strings.noSongToSkip,
+							interaction.locale,
+						),
 						color: configuration.interactions.responses.colors.yellow,
 					}],
 				},
@@ -83,7 +86,7 @@ function skipSong(client: Client, interaction: Interaction): void {
 		songListing.content.type !== SongListingContentTypes.Collection
 	) {
 		return void sendInteractionResponse(
-			client.bot,
+			bot,
 			interaction.id,
 			interaction.token,
 			{
@@ -91,9 +94,10 @@ function skipSong(client: Client, interaction: Interaction): void {
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						title: 'Not playing a collection',
-						description:
-							`There is no song collection to skip. Try skipping the current song instead.`,
+						description: localise(
+							Commands.music.strings.noSongCollectionToSkip,
+							interaction.locale,
+						),
 						color: configuration.interactions.responses.colors.yellow,
 					}],
 				},
@@ -103,7 +107,7 @@ function skipSong(client: Client, interaction: Interaction): void {
 
 	if (by && to) {
 		return void sendInteractionResponse(
-			client.bot,
+			bot,
 			interaction.id,
 			interaction.token,
 			{
@@ -111,9 +115,10 @@ function skipSong(client: Client, interaction: Interaction): void {
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						title: 'Too many skip operations',
-						description:
-							`You may not skip by a number of songs __and__ skip to a certain song in the same query.`,
+						description: localise(
+							Commands.music.strings.tooManySkipArguments,
+							interaction.locale,
+						),
 						color: configuration.interactions.responses.colors.red,
 					}],
 				},
@@ -123,7 +128,7 @@ function skipSong(client: Client, interaction: Interaction): void {
 
 	if ((by && by <= 0) || (to && to <= 0)) {
 		return void sendInteractionResponse(
-			client.bot,
+			bot,
 			interaction.id,
 			interaction.token,
 			{
@@ -131,9 +136,10 @@ function skipSong(client: Client, interaction: Interaction): void {
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						title: 'No negative integers or 0',
-						description:
-							'The skip operation may not be defined by negative integers or 0.',
+						description: localise(
+							Commands.music.strings.mustBeGreaterThanZero,
+							interaction.locale,
+						),
 						color: configuration.interactions.responses.colors.red,
 					}],
 				},
@@ -191,17 +197,20 @@ function skipSong(client: Client, interaction: Interaction): void {
 	}
 
 	return void sendInteractionResponse(
-		client.bot,
+		bot,
 		interaction.id,
 		interaction.token,
 		{
 			type: InteractionResponseTypes.ChannelMessageWithSource,
 			data: {
 				embeds: [{
-					title: '⏭️ Skipped',
-					description: `The ${
-						!skipCollection ? 'song' : 'song collection'
-					} has been skipped.`,
+					title: `⏭️ ${
+						localise(Commands.music.strings.skipped.header, defaultLanguage)
+					}`,
+					description: localise(
+						Commands.music.strings.skipped.body,
+						defaultLanguage,
+					)(skipCollection),
 					color: configuration.interactions.responses.colors.invisible,
 				}],
 			},
