@@ -1,6 +1,12 @@
+import { Commands } from '../../../../assets/localisations/commands.ts';
+import {
+	createLocalisations,
+	localise,
+} from '../../../../assets/localisations/types.ts';
 import {
 	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
+	Bot,
 	Interaction,
 	InteractionResponseTypes,
 	sendInteractionResponse,
@@ -11,21 +17,15 @@ import configuration from '../../../configuration.ts';
 import { resumeSong } from './resume.ts';
 
 const command: OptionBuilder = {
-	name: 'pause',
-	nameLocalizations: {
-		pl: 'zapauzuj',
-		ro: 'pauzare',
-	},
-	description: 'Pauses the currently playing song or song collection.',
-	descriptionLocalizations: {
-		pl: 'Zapauzuj obecny utwór lub zbiór utworów.',
-		ro: 'Pauzează melodia sau setul de melodii în curs de redare.',
-	},
+	...createLocalisations(Commands.music.options.pause),
 	type: ApplicationCommandOptionTypes.SubCommand,
 	handle: pauseSong,
 };
 
-function pauseSong(client: Client, interaction: Interaction): void {
+function pauseSong(
+	[client, bot]: [Client, Bot],
+	interaction: Interaction,
+): void {
 	const musicController = client.music.get(interaction.guildId!);
 	if (!musicController) return;
 
@@ -36,7 +36,7 @@ function pauseSong(client: Client, interaction: Interaction): void {
 
 	if (!musicController.isOccupied) {
 		return void sendInteractionResponse(
-			client.bot,
+			bot,
 			interaction.id,
 			interaction.token,
 			{
@@ -44,8 +44,10 @@ function pauseSong(client: Client, interaction: Interaction): void {
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						title: 'Nothing to pause',
-						description: 'There is no song to pause.',
+						description: localise(
+							Commands.music.strings.noSongToPause,
+							interaction.locale,
+						),
 						color: configuration.interactions.responses.colors.yellow,
 					}],
 				},
@@ -60,15 +62,20 @@ function pauseSong(client: Client, interaction: Interaction): void {
 	musicController.pause();
 
 	return void sendInteractionResponse(
-		client.bot,
+		bot,
 		interaction.id,
 		interaction.token,
 		{
 			type: InteractionResponseTypes.ChannelMessageWithSource,
 			data: {
 				embeds: [{
-					title: '⏸️ Paused',
-					description: 'The current song has been paused.',
+					title: `⏸️ ${
+						localise(Commands.music.strings.paused.header, interaction.locale)
+					}`,
+					description: localise(
+						Commands.music.strings.paused.body,
+						interaction.locale,
+					),
 					color: configuration.interactions.responses.colors.invisible,
 				}],
 			},
