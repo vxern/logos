@@ -1,7 +1,7 @@
 import {
 	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
-	dayjs,
+	Bot,
 	Interaction,
 	InteractionResponseTypes,
 	sendInteractionResponse,
@@ -9,31 +9,30 @@ import {
 import { Client } from '../../../client.ts';
 import { OptionBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
-import { mention, MentionTypes } from '../../../formatting.ts';
+import { displayTime, mention, MentionTypes } from '../../../formatting.ts';
 import { chunk, paginate, trim } from '../../../utils.ts';
 import { Song } from '../data/song.ts';
 import { SongStream } from '../data/song-stream.ts';
 import { SongListingContentTypes } from '../data/song-listing.ts';
 import { show } from '../../parameters.ts';
 import { collection } from '../parameters.ts';
+import {
+	createLocalisations,
+	localise,
+} from '../../../../assets/localisations/types.ts';
+import { Commands } from '../../../../assets/localisations/commands.ts';
 
 const command: OptionBuilder = {
-	name: 'now',
-	nameLocalizations: {
-		pl: 'teraz',
-		ro: 'acum',
-	},
-	description: 'Displays the currently playing song.',
-	descriptionLocalizations: {
-		pl: 'Wyświetla obecnie odtwarzany utwór lub zbiór utworów.',
-		ro: 'Afișează melodia sau setul de melodii în curs de redare.',
-	},
+	...createLocalisations(Commands.music.options.now),
 	type: ApplicationCommandOptionTypes.SubCommand,
 	handle: displayNowPlaying,
 	options: [collection, show],
 };
 
-function displayNowPlaying(client: Client, interaction: Interaction): void {
+function displayNowPlaying(
+	[client, bot]: [Client, Bot],
+	interaction: Interaction,
+): void {
 	const musicController = client.music.get(interaction.guildId!);
 	if (!musicController) return;
 
@@ -41,7 +40,7 @@ function displayNowPlaying(client: Client, interaction: Interaction): void {
 
 	if (!musicController.isOccupied || !currentListing) {
 		return void sendInteractionResponse(
-			client.bot,
+			bot,
 			interaction.id,
 			interaction.token,
 			{
@@ -49,8 +48,10 @@ function displayNowPlaying(client: Client, interaction: Interaction): void {
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						title: 'No song playing',
-						description: 'There is no song to display the details of.',
+						description: localise(
+							Commands.music.strings.noSongPlaying,
+							interaction.locale,
+						),
 						color: configuration.interactions.responses.colors.yellow,
 					}],
 				},
@@ -74,7 +75,7 @@ function displayNowPlaying(client: Client, interaction: Interaction): void {
 	if (showCollection) {
 		if (currentListing?.content.type !== SongListingContentTypes.Collection) {
 			return void sendInteractionResponse(
-				client.bot,
+				bot,
 				interaction.id,
 				interaction.token,
 				{
@@ -82,9 +83,10 @@ function displayNowPlaying(client: Client, interaction: Interaction): void {
 					data: {
 						flags: ApplicationCommandFlags.Ephemeral,
 						embeds: [{
-							title: 'Not playing a collection',
-							description:
-								'There is no song collection to show the details of. Try requesting information about the current song instead.',
+							description: localise(
+								Commands.music.strings.noCollectionPlaying,
+								interaction.locale,
+							),
 							color: configuration.interactions.responses.colors.yellow,
 						}],
 					},
@@ -94,14 +96,16 @@ function displayNowPlaying(client: Client, interaction: Interaction): void {
 
 		const collection = currentListing.content;
 
-		return void paginate(client, interaction, {
+		return void paginate([client, bot], interaction, {
 			elements: chunk(collection.songs, configuration.music.maxima.songs.page),
 			embed: {
-				title: '⬇️ Now playing',
+				title: `⬇️ ${
+					localise(Commands.music.strings.nowPlaying, interaction.locale)
+				}`,
 				color: configuration.interactions.responses.colors.blue,
 			},
 			view: {
-				title: 'Songs',
+				title: localise(Commands.music.strings.songs, interaction.locale),
 				generate: (songs, pageIndex) =>
 					songs.length !== 0
 						? songs.map((song, index) => {
@@ -121,7 +125,7 @@ function displayNowPlaying(client: Client, interaction: Interaction): void {
 								isCurrent ? `**${songString}**` : songString
 							}`;
 						}).join('\n')
-						: 'This list is empty.',
+						: localise(Commands.music.strings.listEmpty, interaction.locale),
 			},
 			show: show,
 		});
@@ -129,11 +133,8 @@ function displayNowPlaying(client: Client, interaction: Interaction): void {
 
 	const song = <Song | SongStream> currentListing.content;
 
-	const runningTime = dayjs(musicController.runningTime!);
-	const hoursExpression = ((<number> runningTime.hour()) - 1).toString();
-
 	return void sendInteractionResponse(
-		client.bot,
+		bot,
 		interaction.id,
 		interaction.token,
 		{
@@ -141,42 +142,58 @@ function displayNowPlaying(client: Client, interaction: Interaction): void {
 			data: {
 				flags: !show ? ApplicationCommandFlags.Ephemeral : undefined,
 				embeds: [{
-					title: '⬇️ Now playing',
+					title: `⬇️ ${
+						localise(Commands.music.strings.nowPlaying, interaction.locale)
+					}`,
 					fields: [
 						...currentListing.content.type ===
 								SongListingContentTypes.Collection
 							? [{
-								name: 'Collection',
+								name: localise(
+									Commands.music.strings.collection,
+									interaction.locale,
+								),
 								value: currentListing.content.title,
 							}, {
-								name: 'Track',
+								name: localise(
+									Commands.music.strings.track,
+									interaction.locale,
+								),
 								value: `${
 									currentListing.content.position + 1
 								}/${currentListing.content.songs.length}`,
 							}]
 							: [],
 						{
-							name: 'Title',
+							name: localise(Commands.music.strings.title, interaction.locale),
 							value: `[${song.title}](${song.url})`,
 							inline: false,
 						},
 						{
-							name: 'Requested By',
+							name: localise(
+								Commands.music.strings.requestedBy,
+								interaction.locale,
+							),
 							value: mention(currentListing.requestedBy, MentionTypes.User),
 							inline: false,
 						},
 						{
-							name: 'Running Time',
-							value: `${
-								(hoursExpression.length === 1 ? '0' : '') + hoursExpression
-							}:${runningTime.format('mm:ss')}`,
+							name: localise(
+								Commands.music.strings.runningTime,
+								interaction.locale,
+							),
+							value: localise(
+								Commands.music.strings.playingSince,
+								interaction.locale,
+							)(displayTime(musicController.runningTime!)),
 							inline: false,
 						},
 					],
 					footer: {
-						text: `This listing was sourced from ${
-							currentListing.source ?? 'the internet'
-						}.`,
+						text: localise(
+							Commands.music.strings.sourcedFrom,
+							interaction.locale,
+						)(currentListing.source),
 					},
 				}],
 			},

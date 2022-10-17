@@ -806,6 +806,19 @@ class Commands {
 					'Romanian': 'Afișează lista tututor melodiilor redate.',
 				},
 			},
+			now: {
+				name: {
+					'English': 'now',
+					'Polish': 'teraz',
+					'Romanian': 'acum',
+				},
+				description: {
+					'English': 'Displays the currently playing song.',
+					'Polish': 'Wyświetla obecnie odtwarzany utwór lub zbiór utworów.',
+					'Romanian':
+						'Afișează melodia sau setul de melodii în curs de redare.',
+				},
+			},
 		},
 		strings: {
 			listings: {
@@ -817,6 +830,73 @@ class Commands {
 				'English': 'This list is empty.',
 				'Polish': 'Ta lista jest pusta.',
 				'Romanian': 'Această listă este goală.',
+			},
+			noSongPlaying: {
+				'English': 'There is no song to display the details of.',
+				'Polish':
+					'Nie można wyświetlić informacji o utworze, ponieważ żaden utwór obecnie nie jest odtwarzany.',
+				'Romanian':
+					'Nu s-au putut afișa informații despre melodie fiindcă în prezent nu se redă nicio melodie.',
+			},
+			noCollectionPlaying: {
+				'English': 'There is no song collection to show the details of.\n\n' +
+					'Try requesting information about the current song instead.',
+				'Polish':
+					'Nie można wyświetlić informacji o zbiorze utworów, ponieważ żaden zbiór utworów obecnie nie jest odtwarzany.\n\n' +
+					'Spróbuj wysłać prośbę o wyświetlenie informacji o samym utworze.',
+				'Romanian':
+					'Nu s-au putut afișa informații despre melodie fiindcă în prezent nu se redă niciun grup de melodii.\n\n' +
+					'Încearcă să trimiți o cerere de informații despre melodia actuală.',
+			},
+			nowPlaying: {
+				'English': 'Now playing',
+				'Polish': 'Teraz odtwarzane',
+				'Romanian': 'În curs de redare',
+			},
+			songs: {
+				'English': 'Songs',
+				'Polish': 'Utwory',
+				'Romanian': 'Melodii',
+			},
+			collection: {
+				'English': 'Collection',
+				'Polish': 'Zbiór',
+				'Romanian': 'Grup',
+			},
+			track: {
+				'English': 'Track',
+				'Polish': 'Track',
+				'Romanian': 'Track',
+			},
+			title: {
+				'English': 'Title',
+				'Polish': 'Tytuł',
+				'Romanian': 'Titlu',
+			},
+			requestedBy: {
+				'English': 'Requested by',
+				'Polish': 'Na prośbę',
+				'Romanian': 'Conform cererii',
+			},
+			runningTime: {
+				'English': 'Running time',
+				'Polish': 'Czas odtwarzania',
+				'Romanian': 'Perioadă de redare',
+			},
+			playingSince: {
+				'English': (timestamp: string) => `Since ${timestamp}.`,
+				'Polish': (timestamp: string) => `Od ${timestamp}.`,
+				'Romanian': (timestamp: string) => `De la ${timestamp}.`,
+			},
+			sourcedFrom: {
+				'English': (origin: string | undefined) =>
+					`This listing was sourced from ${origin ?? 'the internet'}.`,
+				'Polish': (origin: string | undefined) =>
+					`Ten wpis został pobrany z ${origin ?? 'internetu'}.`,
+				'Romanian': (origin: string | undefined) =>
+					`Această înregistrare a fost furnizată de pe ${
+						origin ?? 'internet'
+					}.`,
 			},
 		},
 	});
