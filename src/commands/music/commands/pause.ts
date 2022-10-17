@@ -14,6 +14,7 @@ import {
 import { Client } from '../../../client.ts';
 import { OptionBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
+import { defaultLanguage } from "../../../types.ts";
 import { resumeSong } from './resume.ts';
 
 const command: OptionBuilder = {
@@ -69,13 +70,8 @@ function pauseSong(
 			type: InteractionResponseTypes.ChannelMessageWithSource,
 			data: {
 				embeds: [{
-					title: `⏸️ ${
-						localise(Commands.music.strings.paused.header, interaction.locale)
-					}`,
-					description: localise(
-						Commands.music.strings.paused.body,
-						interaction.locale,
-					),
+					title: `⏸️ ${Commands.music.strings.paused.header[defaultLanguage], interaction.locale}`,
+					description: Commands.music.strings.paused.body[defaultLanguage],
 					color: configuration.interactions.responses.colors.invisible,
 				}],
 			},
