@@ -1,30 +1,27 @@
 import {
 	ApplicationCommandOptionTypes,
+	Bot,
 	Interaction,
 } from '../../../../deps.ts';
 import { Client } from '../../../client.ts';
 import { OptionBuilder } from '../../../commands/command.ts';
 import { displayListings } from '../module.ts';
 import { show } from '../../parameters.ts';
+import {
+	createLocalisations,
+	localise,
+} from '../../../../assets/localisations/types.ts';
+import { Commands } from '../../../../assets/localisations/commands.ts';
 
 const command: OptionBuilder = {
-	name: 'queue',
-	nameLocalizations: {
-		pl: 'kolejka',
-		ro: 'coadă',
-	},
-	description: 'Displays a list of queued song listings.',
-	descriptionLocalizations: {
-		pl: 'Wyświetla listę utworów oraz zbiorów utworów w kolejce.',
-		ro: 'Afișează lista cu melodii și seturi de melodii în coadă.',
-	},
+	...createLocalisations(Commands.music.options.queue),
 	type: ApplicationCommandOptionTypes.SubCommand,
 	handle: displaySongQueue,
 	options: [show],
 };
 
 function displaySongQueue(
-	client: Client,
+	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): void {
 	const musicController = client.music.get(interaction.guildId!);
@@ -35,8 +32,8 @@ function displaySongQueue(
 			option,
 		) => option.name === 'show')?.value) ?? false;
 
-	return displayListings(client, interaction, {
-		title: '📋 Queue',
+	return displayListings([client, bot], interaction, {
+		title: `📋 ${localise(Commands.music.strings.queue, interaction.locale)}`,
 		songListings: musicController.queue,
 		show: show,
 	});
