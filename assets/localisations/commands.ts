@@ -971,6 +971,19 @@ class Commands {
 					'Romanian': 'Oprește sesiunea actuală de ascultare.',
 				},
 			},
+			unskip: {
+				name: {
+					'English': 'unskip',
+					'Polish': 'przywróć',
+					'Romanian': 'înapoiare',
+				},
+				description: {
+					'English': 'Brings back the last played song.',
+					'Polish': 'Przywraca ostatnio zagrany utwór lub zbiór utworów.',
+					'Romanian':
+						'Înapoiază ultima melodie sau ultimul set de melodii redat.',
+				},
+			},
 		},
 		strings: {
 			listings: {
@@ -1183,6 +1196,34 @@ class Commands {
 				body: {
 					'English':
 						'The listening session has been stopped, and the song queue and history have been cleared.',
+				},
+			},
+			nowhereToUnskipTo: {
+				'English': 'There is nowhere to unskip to.',
+				'Polish': 'Nie ma dokąd przewinąć spowrotem.',
+				'Romanian': 'Nu este încotro a sări peste.',
+			},
+			noSongCollectionToUnskip: {
+				'English': 'There is no song collection to unskip.\n\n' +
+					'Try unskipping the current song instead.',
+				'Polish': 'Nie ma zbioru utworów do przewinięcia.\n\n' +
+					'Spróbuj przewinąć sam utwór.',
+				'Romanian': 'Nu este un set de melodii de sărit peste.\n\n' +
+					'Încearcă să sari peste melodia actuală.',
+			},
+			cannotUnskipDueToFullQueue: {
+				'English':
+					'The last played song listing cannot be unskipped because the song queue is already full.',
+				'Polish':
+					'Ostatnio odtworzony wpis nie może zostać przywrócony, ponieważ kolejka jest pełna.',
+				'Romanian':
+					'Ultima înregistrare nu poate fi înapoiată fiindcă coada deja este plină.',
+			},
+			// Do not localise; this is a public feedback message.
+			unskipped: {
+				header: { 'English': 'Unskipped' },
+				body: {
+					'English': 'The last played song listing has been brought back.',
 				},
 			},
 		},
