@@ -12,6 +12,7 @@ import {
 import { Client } from '../../../client.ts';
 import { CommandBuilder } from '../../../commands/command.ts';
 import { links } from '../../../constants.ts';
+import { defaultLanguage } from "../../../types.ts";
 
 const command: CommandBuilder = {
 	...createLocalisations(Commands.resources),
@@ -41,7 +42,7 @@ function resources(
 					type: MessageComponentTypes.ActionRow,
 					components: [{
 						type: MessageComponentTypes.Button,
-						label: Commands.resources.strings.clickForResources['English'],
+						label: Commands.resources.strings.clickForResources[defaultLanguage],
 						style: ButtonStyles.Link,
 						url: repositoryLink,
 					}],
