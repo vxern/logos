@@ -946,6 +946,18 @@ class Commands {
 					'Romanian': 'Derulează melodia în curs de redare înapoi.',
 				},
 			},
+			skip: {
+				name: {
+					'English': 'skip',
+					'Polish': 'przewiń',
+					'Romanian': 'sărire-peste',
+				},
+				description: {
+					'English': 'Skips the currently playing song.',
+					'Polish': 'Przewija obecnie grający utwór.',
+					'Romanian': 'Sare peste melodia în curs de redare.',
+				},
+			},
 		},
 		strings: {
 			listings: {
@@ -1110,6 +1122,42 @@ class Commands {
 			resumed: {
 				header: { 'English': 'Resumed' },
 				body: { 'English': 'Music playback has been resumed.' },
+			},
+			noSongToSkip: {
+				'English': 'There is no song to skip.',
+				'Polish': 'Nie ma utworu do przewinięcia.',
+				'Romanian': 'Nu este o melodie de sărit peste.',
+			},
+			noSongCollectionToSkip: {
+				'English': 'There is no song collection to skip.\n\n' +
+					'Try skipping the current song instead.',
+				'Polish': 'Nie ma zbioru utworów do przewinięcia.\n\n' +
+					'Spróbuj przewinąć sam utwór.',
+				'Romanian': 'Nu este un set de melodii de sărit peste.\n\n' +
+					'Încearcă să sari peste melodia actuală.',
+			},
+			tooManySkipArguments: {
+				'English':
+					'You may not skip __by__ a number of songs and skip __to__ a certain song in the same query.',
+				'Polish':
+					'Nie można przewijać zarazem __o__ liczbę utworów i __do__ danego utworu w tym samym czasie.',
+				'Romanian':
+					'Nu se poate sări __peste__ un anumit număr de melodii și __către__ o anumită melodie în același timp.',
+			},
+			mustBeGreaterThanZero: {
+				'English': 'The skip argument must be greater than zero.',
+				'Polish': 'Argument przewinięcia musi być większy niż zero.',
+				'Romanian': 'Argumentul trebuie să fie mai marea decât zero.',
+			},
+			// Do not localise; this is a public feedback message.
+			skipped: {
+				header: { 'English': 'Skipped' },
+				body: {
+					'English': (skipCollection: boolean) =>
+						`The ${
+							!skipCollection ? 'song' : 'song collection'
+						} has been skipped.`,
+				},
 			},
 		},
 	});
