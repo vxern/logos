@@ -920,6 +920,20 @@ class Commands {
 					'Romanian': 'Redă melodia în curs de redare din nou.',
 				},
 			},
+			resume: {
+				name: {
+					'English': 'resume',
+					'Polish': 'wznów',
+					'Romanian': 'continuare',
+				},
+				description: {
+					'English': 'Unpauses the currently playing song if it is paused.',
+					'Polish':
+						'Wznawia odtwarzanie obecnie grającego utworu, jeśli ten jest zapauzowany.',
+					'Romanian':
+						'Anulează întreruperea redării melodiei actuale dacă aceasta este în pauză.',
+				},
+			},
 		},
 		strings: {
 			listings: {
@@ -1004,6 +1018,7 @@ class Commands {
 				'Polish': 'Nie ma utworu do zapauzowania.',
 				'Romanian': 'Nu este o melodie pentru a o pauza.',
 			},
+      // Do not localise; this is a public feedback message.
 			paused: {
 				header: { 'English': 'Paused' },
 				body: { 'English': 'Paused the playback of music.' },
@@ -1048,6 +1063,7 @@ class Commands {
 				'Polish': 'Nie udało się usunąć zaznaczonego utworu.',
 				'Romanian': 'Nu s-a putut elimina melodia selectată.',
 			},
+      // Do not localise; this is a public feedback message.
 			removed: {
 				header: { 'English': 'Removed' },
 				body: {
@@ -1068,6 +1084,21 @@ class Commands {
 				'Romanian': 'Nu este un set de melodii de redat din nou.\n\n' +
 					'Încearcă să redai din nou melodia actuală.',
 			},
+			noSongToResume: {
+				'English': 'There is no song to resume the playing of.',
+				'Polish': 'Nie ma piosenki do wznowienia odtwarzania.',
+				'Romanian': 'Nu este o melodie pentru a-i relua redarea.',
+			},
+      notCurrentlyPaused: {
+        'English': 'The current song is not paused.',
+        'Polish': 'Obecny utwór nie jest zatrzymany.',
+        'Romanian': 'Melodia actuală nu este oprită.',
+      },
+      // Do not localise; this is a public feedback message.
+      resumed: {
+        header: { 'English': 'Resumed' },
+        body: { 'English': 'Music playback has been resumed.' },
+      },
 		},
 	});
 }
