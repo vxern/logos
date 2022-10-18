@@ -1,4 +1,5 @@
-import { User } from '../../deps.ts';
+import { Guild, User } from '../../deps.ts';
+import { getChannelMention } from '../../src/commands/secret/data/information/information-sections.ts';
 import { links } from '../../src/constants.ts';
 import { capitalise, list } from '../../src/formatting.ts';
 import { CommandLocalisations } from './types.ts';
@@ -1373,13 +1374,13 @@ class Commands {
 					'Polish': 'Wstawia wiadomość zawierającą regulamin.',
 					'Romanian': 'Postează un mesaj care conține regulamentul.',
 				},
-        strings: {
-          posted: {
-            'English': 'Rules posted.',
-            'Polish': 'Reguły opublikowane.',
-            'Romanian': 'Reguli publicate.',
-          },
-        }
+				strings: {
+					posted: {
+						'English': 'Rules posted.',
+						'Polish': 'Reguły opublikowane.',
+						'Romanian': 'Reguli publicate.',
+					},
+				},
 			},
 			welcome: {
 				name: {
@@ -1393,6 +1394,28 @@ class Commands {
 						'Wstawia wiadomość zawierającą powitanie dla nowych członków serwera.',
 					'Romanian':
 						'Postează un mesaj care conține un bun-venit pentru membri noi ai serverului.',
+				},
+				strings: {
+					// Do not localise; this is a public feedback message.
+					welcome: {
+						header: {
+							'English': (guildName: string) => `Welcome to **${guildName}**`,
+						},
+						body: {
+							'English': (channelMention: string) =>
+								`To enter the server and become its official member, read the information in the ${channelMention} channel to get yourself familiarised with the server guidelines, and then press the button below.`,
+						},
+					},
+					// Do not localise; this is a public feedback message.
+					// No full stop here.
+					acceptedRules: {
+						'English': 'I have read the rules, and agree to abide by them',
+					},
+					posted: {
+						'English': 'Welcome posted.',
+						'Polish': 'Powitanie opublikowane.',
+						'Romanian': 'Bun-venit publicat.',
+					},
 				},
 			},
 		},
