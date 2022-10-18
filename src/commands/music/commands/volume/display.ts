@@ -32,10 +32,14 @@ function displayVolume(
 				flags: !show ? ApplicationCommandFlags.Ephemeral : undefined,
 				embeds: [{
 					title: `🔊 ${
-						localise(Commands.music.strings.volume.header, defaultLanguage)
+						localise(
+							Commands.music.options.volume.options.display.strings.volume
+								.header,
+							defaultLanguage,
+						)
 					}`,
 					description: localise(
-						Commands.music.strings.volume.body,
+						Commands.music.options.volume.options.display.strings.volume.body,
 						defaultLanguage,
 					)(musicController.volume),
 					color: configuration.interactions.responses.colors.invisible,

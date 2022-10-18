@@ -74,7 +74,7 @@ function unskip(
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(
-							Commands.music.strings.nowhereToUnskipTo,
+							Commands.music.options.unskip.strings.nowhereToUnskipTo,
 							interaction.locale,
 						),
 						color: configuration.interactions.responses.colors.yellow,
@@ -98,7 +98,7 @@ function unskip(
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(
-							Commands.music.strings.noSongCollectionToUnskip,
+							Commands.music.options.unskip.strings.noSongCollectionToUnskip,
 							interaction.locale,
 						),
 						color: configuration.interactions.responses.colors.yellow,
@@ -119,7 +119,7 @@ function unskip(
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(
-							Commands.music.strings.cannotUnskipDueToFullQueue,
+							Commands.music.options.unskip.strings.cannotUnskipDueToFullQueue,
 							interaction.locale,
 						),
 						color: configuration.interactions.responses.colors.red,
@@ -141,6 +141,27 @@ function unskip(
 					embeds: [{
 						description: localise(
 							Commands.music.strings.tooManySkipArguments,
+							interaction.locale,
+						),
+						color: configuration.interactions.responses.colors.red,
+					}],
+				},
+			},
+		);
+	}
+
+	if ((by && by <= 0) || (to && to <= 0)) {
+		return void sendInteractionResponse(
+			bot,
+			interaction.id,
+			interaction.token,
+			{
+				type: InteractionResponseTypes.ChannelMessageWithSource,
+				data: {
+					flags: ApplicationCommandFlags.Ephemeral,
+					embeds: [{
+						description: localise(
+							Commands.music.strings.mustBeGreaterThanZero,
 							interaction.locale,
 						),
 						color: configuration.interactions.responses.colors.red,
@@ -211,10 +232,13 @@ function unskip(
 			data: {
 				embeds: [{
 					title: `⏮️ ${
-						localise(Commands.music.strings.unskipped.header, defaultLanguage)
+						localise(
+							Commands.music.options.unskip.strings.unskipped.header,
+							defaultLanguage,
+						)
 					}`,
 					description: localise(
-						Commands.music.strings.unskipped.body,
+						Commands.music.options.unskip.strings.unskipped.body,
 						defaultLanguage,
 					),
 					color: configuration.interactions.responses.colors.invisible,

@@ -35,7 +35,7 @@ function setVolume(
 				data: {
 					embeds: [{
 						description: localise(
-							Commands.music.strings.invalidVolume,
+							Commands.music.options.volume.options.set.strings.invalidVolume,
 							interaction.locale,
 						)(configuration.music.maxima.volume),
 						color: configuration.interactions.responses.colors.red,
@@ -57,12 +57,13 @@ function setVolume(
 				embeds: [{
 					title: `🔊 ${
 						localise(
-							Commands.music.strings.volumeSet.header,
+							Commands.music.options.volume.options.set.strings.volumeSet
+								.header,
 							interaction.locale,
 						)
 					}`,
 					description: localise(
-						Commands.music.strings.volumeSet.body,
+						Commands.music.options.volume.options.set.strings.volumeSet.body,
 						interaction.locale,
 					)(volume),
 					color: configuration.interactions.responses.colors.invisible,
