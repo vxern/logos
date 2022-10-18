@@ -14,7 +14,7 @@ import {
 import { Client } from '../../../client.ts';
 import { OptionBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
-import { defaultLanguage } from "../../../types.ts";
+import { defaultLanguage } from '../../../types.ts';
 import { resumeSong } from './resume.ts';
 
 const command: OptionBuilder = {
@@ -46,7 +46,7 @@ function pauseSong(
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(
-							Commands.music.strings.noSongToPause,
+							Commands.music.options.pause.strings.noSongToPause,
 							interaction.locale,
 						),
 						color: configuration.interactions.responses.colors.yellow,
@@ -57,7 +57,7 @@ function pauseSong(
 	}
 
 	if (musicController.isPaused) {
-		return resumeSong(client, interaction);
+		return resumeSong([client, bot], interaction);
 	}
 
 	musicController.pause();
@@ -70,8 +70,16 @@ function pauseSong(
 			type: InteractionResponseTypes.ChannelMessageWithSource,
 			data: {
 				embeds: [{
-					title: `⏸️ ${localise(Commands.music.strings.paused.header, defaultLanguage)}`,
-					description: localise(Commands.music.strings.paused.body, defaultLanguage),
+					title: `⏸️ ${
+						localise(
+							Commands.music.options.pause.strings.paused.header,
+							defaultLanguage,
+						)
+					}`,
+					description: localise(
+						Commands.music.options.pause.strings.paused.body,
+						defaultLanguage,
+					),
 					color: configuration.interactions.responses.colors.invisible,
 				}],
 			},

@@ -805,6 +805,13 @@ class Commands {
 					'Polish': 'Wyświetla listę zagranych piosenek.',
 					'Romanian': 'Afișează lista tututor melodiilor redate.',
 				},
+				strings: {
+					playbackHistory: {
+						'English': 'Playback history',
+						'Polish': 'Historia odtwarzania',
+						'Romanian': 'Istoricul redării',
+					},
+				},
 			},
 			now: {
 				name: {
@@ -818,6 +825,76 @@ class Commands {
 					'Romanian':
 						'Afișează melodia sau setul de melodii în curs de redare.',
 				},
+				strings: {
+					noSongPlaying: {
+						'English': 'There is no song to display the details of.',
+						'Polish':
+							'Nie można wyświetlić informacji o utworze, ponieważ żaden utwór obecnie nie jest odtwarzany.',
+						'Romanian':
+							'Nu s-au putut afișa informații despre melodie fiindcă în prezent nu se redă nicio melodie.',
+					},
+					noCollectionPlaying: {
+						'English':
+							'There is no song collection to show the details of.\n\n' +
+							'Try requesting information about the current song instead.',
+						'Polish':
+							'Nie można wyświetlić informacji o zbiorze utworów, ponieważ żaden zbiór utworów obecnie nie jest odtwarzany.\n\n' +
+							'Spróbuj wysłać prośbę o wyświetlenie informacji o samym utworze.',
+						'Romanian':
+							'Nu s-au putut afișa informații despre melodie fiindcă în prezent nu se redă niciun set de melodii.\n\n' +
+							'Încearcă să trimiți o cerere de informații despre melodia actuală.',
+					},
+					nowPlaying: {
+						'English': 'Now playing',
+						'Polish': 'Teraz odtwarzane',
+						'Romanian': 'În curs de redare',
+					},
+					songs: {
+						'English': 'Songs',
+						'Polish': 'Utwory',
+						'Romanian': 'Melodii',
+					},
+					collection: {
+						'English': 'Collection',
+						'Polish': 'Zbiór',
+						'Romanian': 'Set',
+					},
+					track: {
+						'English': 'Track',
+						'Polish': 'Track',
+						'Romanian': 'Track',
+					},
+					title: {
+						'English': 'Title',
+						'Polish': 'Tytuł',
+						'Romanian': 'Titlu',
+					},
+					requestedBy: {
+						'English': 'Requested by',
+						'Polish': 'Na prośbę',
+						'Romanian': 'Conform cererii',
+					},
+					runningTime: {
+						'English': 'Running time',
+						'Polish': 'Czas odtwarzania',
+						'Romanian': 'Perioadă de redare',
+					},
+					playingSince: {
+						'English': (timestamp: string) => `Since ${timestamp}.`,
+						'Polish': (timestamp: string) => `Od ${timestamp}.`,
+						'Romanian': (timestamp: string) => `De la ${timestamp}.`,
+					},
+					sourcedFrom: {
+						'English': (origin: string | undefined) =>
+							`This listing was sourced from ${origin ?? 'the internet'}.`,
+						'Polish': (origin: string | undefined) =>
+							`Ten wpis został pobrany z ${origin ?? 'internetu'}.`,
+						'Romanian': (origin: string | undefined) =>
+							`Această înregistrare a fost furnizată de pe ${
+								origin ?? 'internet'
+							}.`,
+					},
+				},
 			},
 			pause: {
 				name: {
@@ -830,6 +907,18 @@ class Commands {
 					'Polish': 'Zapauzuj obecny utwór lub zbiór utworów.',
 					'Romanian':
 						'Pauzează melodia sau setul de melodii în curs de redare.',
+				},
+				strings: {
+					noSongToPause: {
+						'English': 'There is no song to pause.',
+						'Polish': 'Nie ma utworu do zapauzowania.',
+						'Romanian': 'Nu este o melodie pentru a o pauza.',
+					},
+					// Do not localise; this is a public feedback message.
+					paused: {
+						header: { 'English': 'Paused' },
+						body: { 'English': 'Paused the playback of music.' },
+					},
 				},
 			},
 			play: {
@@ -881,6 +970,21 @@ class Commands {
 						},
 					}),
 				},
+				strings: {
+					externalFile: {
+						'English': 'External file',
+						'Polish': 'Zewnętrzny plik',
+						'Romanian': 'Fișier extern',
+					},
+					songNotFound: {
+						'English': 'Couldn\'t find the requested song.\n\n' +
+							'You could try an alternative search, or request a different song.',
+						'Polish': 'Nie udało się znaleźć utworu.\n\n' +
+							'Spróbuj wyszukać utworu w inny sposób, lub odtworzyć inny otwór.',
+						'Romanian': 'Nu s-a putut găsi melodia.\n\n' +
+							'Încearcă să cauți melodia într-un mod diferit, sau să redai o altă melodie.',
+					},
+				},
 			},
 			queue: {
 				name: {
@@ -894,6 +998,13 @@ class Commands {
 					'Romanian':
 						'Afișează lista cu melodii și seturi de melodii în coadă.',
 				},
+				strings: {
+					queue: {
+						'English': 'Queue',
+						'Polish': 'Kolejka',
+						'Romanian': 'Coadă',
+					},
+				},
 			},
 			remove: {
 				name: {
@@ -905,6 +1016,39 @@ class Commands {
 					'English': 'Removes a song listing from the queue.',
 					'Polish': 'Usuwa wpis z kolejki muzycznej.',
 					'Romanian': 'Șterge o înregistrare din coadă.',
+				},
+				strings: {
+					noListingToRemove: {
+						'English': 'There are no songs in the queue.',
+						'Polish': 'Nie ma utworów w kolejce.',
+						'Romanian': 'Nu sunt melodii în coadă.',
+					},
+					selectSongToRemove: {
+						'English':
+							'Select a song or song collection to remove from the choices below.',
+						'Polish': 'Wybierz utwór lub zbiór utworów do usunięcia poniżej.',
+						'Romanian':
+							'Alege o melodie sau un set de melodii de șters mai jos.',
+					},
+					// Use ellipsis if appropriate.
+					continuedOnTheNextPage: {
+						'English': 'Continued on the next page...',
+						'Polish': 'Kontynuacja na następnej stronie...',
+						'Romanian': 'Continuare pe următoarea pagină...',
+					},
+					failedToRemoveSong: {
+						'English': 'Failed to remove the selected song.',
+						'Polish': 'Nie udało się usunąć zaznaczonego utworu.',
+						'Romanian': 'Nu s-a putut elimina melodia selectată.',
+					},
+					// Do not localise; this is a public feedback message.
+					removed: {
+						header: { 'English': 'Removed' },
+						body: {
+							'English': (songTitle: string, userMention: string) =>
+								`The song **${songTitle}** has been removed by ${userMention}.`,
+						},
+					},
 				},
 			},
 			replay: {
@@ -919,6 +1063,21 @@ class Commands {
 					'Polish': 'Odtwarza obecnie grający utwór od początku.',
 					'Romanian': 'Redă melodia în curs de redare din nou.',
 				},
+				strings: {
+					noSongToReplay: {
+						'English': 'There is no song to replay.',
+						'Polish': 'Nie ma utworu do ponownego odtworzenia.',
+						'Romanian': 'Nu este o melodie de redat din nou.',
+					},
+					noSongCollectionToReplay: {
+						'English': 'There is no song collection to replay.\n\n' +
+							'Try replaying the current song instead.',
+						'Polish': 'Nie ma zbioru utworów do ponownego odtworzenia.\n\n' +
+							'Spróbuj odtworzyć ponownie sam utwór.',
+						'Romanian': 'Nu este un set de melodii de redat din nou.\n\n' +
+							'Încearcă să redai din nou melodia actuală.',
+					},
+				},
 			},
 			resume: {
 				name: {
@@ -932,6 +1091,23 @@ class Commands {
 						'Wznawia odtwarzanie obecnie grającego utworu, jeśli ten jest zapauzowany.',
 					'Romanian':
 						'Anulează întreruperea redării melodiei actuale dacă aceasta este în pauză.',
+				},
+				strings: {
+					noSongToResume: {
+						'English': 'There is no song to resume the playing of.',
+						'Polish': 'Nie ma piosenki do wznowienia odtwarzania.',
+						'Romanian': 'Nu este o melodie pentru a-i relua redarea.',
+					},
+					notCurrentlyPaused: {
+						'English': 'The current song is not paused.',
+						'Polish': 'Obecny utwór nie jest zatrzymany.',
+						'Romanian': 'Melodia actuală nu este oprită.',
+					},
+					// Do not localise; this is a public feedback message.
+					resumed: {
+						header: { 'English': 'Resumed' },
+						body: { 'English': 'Music playback has been resumed.' },
+					},
 				},
 			},
 			rewind: {
@@ -957,6 +1133,31 @@ class Commands {
 					'Polish': 'Przewija obecnie grający utwór.',
 					'Romanian': 'Sare peste melodia în curs de redare.',
 				},
+				strings: {
+					noSongToSkip: {
+						'English': 'There is no song to skip.',
+						'Polish': 'Nie ma utworu do przewinięcia.',
+						'Romanian': 'Nu este o melodie de sărit peste.',
+					},
+					noSongCollectionToSkip: {
+						'English': 'There is no song collection to skip.\n\n' +
+							'Try skipping the current song instead.',
+						'Polish': 'Nie ma zbioru utworów do przewinięcia.\n\n' +
+							'Spróbuj przewinąć sam utwór.',
+						'Romanian': 'Nu este un set de melodii de sărit peste.\n\n' +
+							'Încearcă să sari peste melodia actuală.',
+					},
+					// Do not localise; this is a public feedback message.
+					skipped: {
+						header: { 'English': 'Skipped' },
+						body: {
+							'English': (skipCollection: boolean) =>
+								`The ${
+									!skipCollection ? 'song' : 'song collection'
+								} has been skipped.`,
+						},
+					},
+				},
 			},
 			stop: {
 				name: {
@@ -970,6 +1171,21 @@ class Commands {
 					'Polish': 'Przerywa obecną sesję słuchania muzyki.',
 					'Romanian': 'Oprește sesiunea actuală de ascultare.',
 				},
+				strings: {
+					notPlayingMusic: {
+						'English': 'The bot is currently not playing music.',
+						'Polish': 'Bot obecnie nie odtwarza muzyki.',
+						'Romanian': 'Nu se redă muzică.',
+					},
+					// Do not localise; this is a public feedback message.
+					stopped: {
+						header: { 'English': 'Stopped' },
+						body: {
+							'English':
+								'The listening session has been stopped, and the song queue and history have been cleared.',
+						},
+					},
+				},
 			},
 			unskip: {
 				name: {
@@ -982,6 +1198,36 @@ class Commands {
 					'Polish': 'Przywraca ostatnio zagrany utwór lub zbiór utworów.',
 					'Romanian':
 						'Înapoiază ultima melodie sau ultimul set de melodii redat.',
+				},
+				strings: {
+					nowhereToUnskipTo: {
+						'English': 'There is nowhere to unskip to.',
+						'Polish': 'Nie ma dokąd przewinąć spowrotem.',
+						'Romanian': 'Nu este încotro a sări peste.',
+					},
+					noSongCollectionToUnskip: {
+						'English': 'There is no song collection to unskip.\n\n' +
+							'Try unskipping the current song instead.',
+						'Polish': 'Nie ma zbioru utworów do przewinięcia.\n\n' +
+							'Spróbuj przewinąć sam utwór.',
+						'Romanian': 'Nu este un set de melodii de sărit peste.\n\n' +
+							'Încearcă să sari peste melodia actuală.',
+					},
+					cannotUnskipDueToFullQueue: {
+						'English':
+							'The last played song listing cannot be unskipped because the song queue is already full.',
+						'Polish':
+							'Ostatnio odtworzony wpis nie może zostać przywrócony, ponieważ kolejka jest pełna.',
+						'Romanian':
+							'Ultima înregistrare nu poate fi înapoiată fiindcă coada deja este plină.',
+					},
+					// Do not localise; this is a public feedback message.
+					unskipped: {
+						header: { 'English': 'Unskipped' },
+						body: {
+							'English': 'The last played song listing has been brought back.',
+						},
+					},
 				},
 			},
 			volume: {
@@ -1009,6 +1255,23 @@ class Commands {
 							'Polish': 'Wyświetla głośność odtwarzania.',
 							'Romanian': 'Afișează volumul redării.',
 						},
+						strings: {
+							volume: {
+								header: {
+									'English': 'Volume',
+									'Polish': 'Głośność',
+									'Romanian': 'Volum',
+								},
+								body: {
+									'English': (volume: number) =>
+										`The current volume is ${volume}%.`,
+									'Polish': (volume: number) =>
+										`Obecna głośność to ${volume}%.`,
+									'Romanian': (volume: number) =>
+										`Volumul actual este ${volume}%.`,
+								},
+							},
+						},
 					},
 					set: {
 						name: {
@@ -1035,6 +1298,24 @@ class Commands {
 								},
 							}),
 						},
+						strings: {
+							invalidVolume: {
+								'English': (maxVolume: number) =>
+									`Song volume may not be negative, and it may not be higher than ${maxVolume}%.`,
+								'Polish': (maxVolume: number) =>
+									`Głośność musi być większa niż zero, oraz nie większa niż ${maxVolume}%.`,
+								'Romanian': (maxVolume: number) =>
+									`Volumul trebuie să fie mai mare decât zero, dar și nu mai mare decât ${maxVolume}%.`,
+							},
+							// Do not localise; this is a public feedback message.
+							volumeSet: {
+								header: { 'English': 'Volume set' },
+								body: {
+									'English': (volume: number) =>
+										`The volume has been set to ${volume}%.`,
+								},
+							},
+						},
 					},
 				},
 			},
@@ -1050,177 +1331,6 @@ class Commands {
 				'Polish': 'Ta lista jest pusta.',
 				'Romanian': 'Această listă este goală.',
 			},
-			playbackHistory: {
-				'English': 'Playback history',
-				'Polish': 'Historia odtwarzania',
-				'Romanian': 'Istoricul redării',
-			},
-			noSongPlaying: {
-				'English': 'There is no song to display the details of.',
-				'Polish':
-					'Nie można wyświetlić informacji o utworze, ponieważ żaden utwór obecnie nie jest odtwarzany.',
-				'Romanian':
-					'Nu s-au putut afișa informații despre melodie fiindcă în prezent nu se redă nicio melodie.',
-			},
-			noCollectionPlaying: {
-				'English': 'There is no song collection to show the details of.\n\n' +
-					'Try requesting information about the current song instead.',
-				'Polish':
-					'Nie można wyświetlić informacji o zbiorze utworów, ponieważ żaden zbiór utworów obecnie nie jest odtwarzany.\n\n' +
-					'Spróbuj wysłać prośbę o wyświetlenie informacji o samym utworze.',
-				'Romanian':
-					'Nu s-au putut afișa informații despre melodie fiindcă în prezent nu se redă niciun set de melodii.\n\n' +
-					'Încearcă să trimiți o cerere de informații despre melodia actuală.',
-			},
-			nowPlaying: {
-				'English': 'Now playing',
-				'Polish': 'Teraz odtwarzane',
-				'Romanian': 'În curs de redare',
-			},
-			songs: {
-				'English': 'Songs',
-				'Polish': 'Utwory',
-				'Romanian': 'Melodii',
-			},
-			collection: {
-				'English': 'Collection',
-				'Polish': 'Zbiór',
-				'Romanian': 'Set',
-			},
-			track: {
-				'English': 'Track',
-				'Polish': 'Track',
-				'Romanian': 'Track',
-			},
-			title: {
-				'English': 'Title',
-				'Polish': 'Tytuł',
-				'Romanian': 'Titlu',
-			},
-			requestedBy: {
-				'English': 'Requested by',
-				'Polish': 'Na prośbę',
-				'Romanian': 'Conform cererii',
-			},
-			runningTime: {
-				'English': 'Running time',
-				'Polish': 'Czas odtwarzania',
-				'Romanian': 'Perioadă de redare',
-			},
-			playingSince: {
-				'English': (timestamp: string) => `Since ${timestamp}.`,
-				'Polish': (timestamp: string) => `Od ${timestamp}.`,
-				'Romanian': (timestamp: string) => `De la ${timestamp}.`,
-			},
-			sourcedFrom: {
-				'English': (origin: string | undefined) =>
-					`This listing was sourced from ${origin ?? 'the internet'}.`,
-				'Polish': (origin: string | undefined) =>
-					`Ten wpis został pobrany z ${origin ?? 'internetu'}.`,
-				'Romanian': (origin: string | undefined) =>
-					`Această înregistrare a fost furnizată de pe ${
-						origin ?? 'internet'
-					}.`,
-			},
-			noSongToPause: {
-				'English': 'There is no song to pause.',
-				'Polish': 'Nie ma utworu do zapauzowania.',
-				'Romanian': 'Nu este o melodie pentru a o pauza.',
-			},
-			// Do not localise; this is a public feedback message.
-			paused: {
-				header: { 'English': 'Paused' },
-				body: { 'English': 'Paused the playback of music.' },
-			},
-			externalFile: {
-				'English': 'External file',
-				'Polish': 'Zewnętrzny plik',
-				'Romanian': 'Fișier extern',
-			},
-			songNotFound: {
-				'English': 'Couldn\'t find the requested song.\n\n' +
-					'You could try an alternative search, or request a different song.',
-				'Polish': 'Nie udało się znaleźć utworu.\n\n' +
-					'Spróbuj wyszukać utworu w inny sposób, lub odtworzyć inny otwór.',
-				'Romanian': 'Nu s-a putut găsi melodia.\n\n' +
-					'Încearcă să cauți melodia într-un mod diferit, sau să redai o altă melodie.',
-			},
-			queue: {
-				'English': 'Queue',
-				'Polish': 'Kolejka',
-				'Romanian': 'Coadă',
-			},
-			noListingToRemove: {
-				'English': 'There are no songs in the queue.',
-				'Polish': 'Nie ma utworów w kolejce.',
-				'Romanian': 'Nu sunt melodii în coadă.',
-			},
-			selectSongToRemove: {
-				'English':
-					'Select a song or song collection to remove from the choices below.',
-				'Polish': 'Wybierz utwór lub zbiór utworów do usunięcia poniżej.',
-				'Romanian': 'Alege o melodie sau un set de melodii de șters mai jos.',
-			},
-			// Use ellipsis if appropriate.
-			continuedOnTheNextPage: {
-				'English': 'Continued on the next page...',
-				'Polish': 'Kontynuacja na następnej stronie...',
-				'Romanian': 'Continuare pe următoarea pagină...',
-			},
-			failedToRemoveSong: {
-				'English': 'Failed to remove the selected song.',
-				'Polish': 'Nie udało się usunąć zaznaczonego utworu.',
-				'Romanian': 'Nu s-a putut elimina melodia selectată.',
-			},
-			// Do not localise; this is a public feedback message.
-			removed: {
-				header: { 'English': 'Removed' },
-				body: {
-					'English': (songTitle: string, userMention: string) =>
-						`The song **${songTitle}** has been removed by ${userMention}.`,
-				},
-			},
-			noSongToReplay: {
-				'English': 'There is no song to replay.',
-				'Polish': 'Nie ma utworu do ponownego odtworzenia.',
-				'Romanian': 'Nu este o melodie de redat din nou.',
-			},
-			noSongCollectionToReplay: {
-				'English': 'There is no song collection to replay.\n\n' +
-					'Try replaying the current song instead.',
-				'Polish': 'Nie ma zbioru utworów do ponownego odtworzenia.\n\n' +
-					'Spróbuj odtworzyć ponownie sam utwór.',
-				'Romanian': 'Nu este un set de melodii de redat din nou.\n\n' +
-					'Încearcă să redai din nou melodia actuală.',
-			},
-			noSongToResume: {
-				'English': 'There is no song to resume the playing of.',
-				'Polish': 'Nie ma piosenki do wznowienia odtwarzania.',
-				'Romanian': 'Nu este o melodie pentru a-i relua redarea.',
-			},
-			notCurrentlyPaused: {
-				'English': 'The current song is not paused.',
-				'Polish': 'Obecny utwór nie jest zatrzymany.',
-				'Romanian': 'Melodia actuală nu este oprită.',
-			},
-			// Do not localise; this is a public feedback message.
-			resumed: {
-				header: { 'English': 'Resumed' },
-				body: { 'English': 'Music playback has been resumed.' },
-			},
-			noSongToSkip: {
-				'English': 'There is no song to skip.',
-				'Polish': 'Nie ma utworu do przewinięcia.',
-				'Romanian': 'Nu este o melodie de sărit peste.',
-			},
-			noSongCollectionToSkip: {
-				'English': 'There is no song collection to skip.\n\n' +
-					'Try skipping the current song instead.',
-				'Polish': 'Nie ma zbioru utworów do przewinięcia.\n\n' +
-					'Spróbuj przewinąć sam utwór.',
-				'Romanian': 'Nu este un set de melodii de sărit peste.\n\n' +
-					'Încearcă să sari peste melodia actuală.',
-			},
 			tooManySkipArguments: {
 				'English':
 					'You may not skip __by__ a number of songs and skip __to__ a certain song in the same query.',
@@ -1233,85 +1343,6 @@ class Commands {
 				'English': 'The skip argument must be greater than zero.',
 				'Polish': 'Argument przewinięcia musi być większy niż zero.',
 				'Romanian': 'Argumentul trebuie să fie mai mare decât zero.',
-			},
-			// Do not localise; this is a public feedback message.
-			skipped: {
-				header: { 'English': 'Skipped' },
-				body: {
-					'English': (skipCollection: boolean) =>
-						`The ${
-							!skipCollection ? 'song' : 'song collection'
-						} has been skipped.`,
-				},
-			},
-			notPlayingMusic: {
-				'English': 'The bot is currently not playing music.',
-				'Polish': 'Bot obecnie nie odtwarza muzyki.',
-				'Romanian': 'Nu se redă muzică.',
-			},
-			// Do not localise; this is a public feedback message.
-			stopped: {
-				header: { 'English': 'Stopped' },
-				body: {
-					'English':
-						'The listening session has been stopped, and the song queue and history have been cleared.',
-				},
-			},
-			nowhereToUnskipTo: {
-				'English': 'There is nowhere to unskip to.',
-				'Polish': 'Nie ma dokąd przewinąć spowrotem.',
-				'Romanian': 'Nu este încotro a sări peste.',
-			},
-			noSongCollectionToUnskip: {
-				'English': 'There is no song collection to unskip.\n\n' +
-					'Try unskipping the current song instead.',
-				'Polish': 'Nie ma zbioru utworów do przewinięcia.\n\n' +
-					'Spróbuj przewinąć sam utwór.',
-				'Romanian': 'Nu este un set de melodii de sărit peste.\n\n' +
-					'Încearcă să sari peste melodia actuală.',
-			},
-			cannotUnskipDueToFullQueue: {
-				'English':
-					'The last played song listing cannot be unskipped because the song queue is already full.',
-				'Polish':
-					'Ostatnio odtworzony wpis nie może zostać przywrócony, ponieważ kolejka jest pełna.',
-				'Romanian':
-					'Ultima înregistrare nu poate fi înapoiată fiindcă coada deja este plină.',
-			},
-			// Do not localise; this is a public feedback message.
-			unskipped: {
-				header: { 'English': 'Unskipped' },
-				body: {
-					'English': 'The last played song listing has been brought back.',
-				},
-			},
-			volume: {
-				header: {
-					'English': 'Volume',
-					'Polish': 'Głośność',
-					'Romanian': 'Volum',
-				},
-				body: {
-					'English': (volume: number) => `The current volume is ${volume}%.`,
-					'Polish': (volume: number) => `Obecna głośność to ${volume}%.`,
-					'Romanian': (volume: number) => `Volumul actual este ${volume}%.`,
-				},
-			},
-			invalidVolume: {
-				'English': (maxVolume: number) =>
-					`Song volume may not be negative, and it may not be higher than ${maxVolume}%.`,
-				'Polish': (maxVolume: number) =>
-					`Głośność musi być większa niż zero, oraz nie większa niż ${maxVolume}%.`,
-				'Romanian': (maxVolume: number) =>
-					`Volumul trebuie să fie mai mare decât zero, dar și nu mai mare decât ${maxVolume}%.`,
-			},
-			// Do not localise; this is a public feedback message.
-			volumeSet: {
-				header: { 'English': 'Volume set' },
-				body: {
-					'English': (volume: number) =>
-						`The volume has been set to ${volume}%.`,
-				},
 			},
 		},
 	});

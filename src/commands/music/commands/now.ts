@@ -49,7 +49,7 @@ function displayNowPlaying(
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(
-							Commands.music.strings.noSongPlaying,
+							Commands.music.options.now.strings.noSongPlaying,
 							interaction.locale,
 						),
 						color: configuration.interactions.responses.colors.yellow,
@@ -84,7 +84,7 @@ function displayNowPlaying(
 						flags: ApplicationCommandFlags.Ephemeral,
 						embeds: [{
 							description: localise(
-								Commands.music.strings.noCollectionPlaying,
+								Commands.music.options.now.strings.noCollectionPlaying,
 								interaction.locale,
 							),
 							color: configuration.interactions.responses.colors.yellow,
@@ -100,12 +100,18 @@ function displayNowPlaying(
 			elements: chunk(collection.songs, configuration.music.maxima.songs.page),
 			embed: {
 				title: `⬇️ ${
-					localise(Commands.music.strings.nowPlaying, interaction.locale)
+					localise(
+						Commands.music.options.now.strings.nowPlaying,
+						interaction.locale,
+					)
 				}`,
 				color: configuration.interactions.responses.colors.blue,
 			},
 			view: {
-				title: localise(Commands.music.strings.songs, interaction.locale),
+				title: localise(
+					Commands.music.options.now.strings.songs,
+					interaction.locale,
+				),
 				generate: (songs, pageIndex) =>
 					songs.length !== 0
 						? songs.map((song, index) => {
@@ -143,20 +149,23 @@ function displayNowPlaying(
 				flags: !show ? ApplicationCommandFlags.Ephemeral : undefined,
 				embeds: [{
 					title: `⬇️ ${
-						localise(Commands.music.strings.nowPlaying, interaction.locale)
+						localise(
+							Commands.music.options.now.strings.nowPlaying,
+							interaction.locale,
+						)
 					}`,
 					fields: [
 						...currentListing.content.type ===
 								SongListingContentTypes.Collection
 							? [{
 								name: localise(
-									Commands.music.strings.collection,
+									Commands.music.options.now.strings.collection,
 									interaction.locale,
 								),
 								value: currentListing.content.title,
 							}, {
 								name: localise(
-									Commands.music.strings.track,
+									Commands.music.options.now.strings.track,
 									interaction.locale,
 								),
 								value: `${
@@ -165,13 +174,16 @@ function displayNowPlaying(
 							}]
 							: [],
 						{
-							name: localise(Commands.music.strings.title, interaction.locale),
+							name: localise(
+								Commands.music.options.now.strings.title,
+								interaction.locale,
+							),
 							value: `[${song.title}](${song.url})`,
 							inline: false,
 						},
 						{
 							name: localise(
-								Commands.music.strings.requestedBy,
+								Commands.music.options.now.strings.requestedBy,
 								interaction.locale,
 							),
 							value: mention(currentListing.requestedBy, MentionTypes.User),
@@ -179,11 +191,11 @@ function displayNowPlaying(
 						},
 						{
 							name: localise(
-								Commands.music.strings.runningTime,
+								Commands.music.options.now.strings.runningTime,
 								interaction.locale,
 							),
 							value: localise(
-								Commands.music.strings.playingSince,
+								Commands.music.options.now.strings.playingSince,
 								interaction.locale,
 							)(displayTime(musicController.runningTime!)),
 							inline: false,
@@ -191,7 +203,7 @@ function displayNowPlaying(
 					],
 					footer: {
 						text: localise(
-							Commands.music.strings.sourcedFrom,
+							Commands.music.options.now.strings.sourcedFrom,
 							interaction.locale,
 						)(currentListing.source),
 					},

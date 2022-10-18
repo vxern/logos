@@ -42,7 +42,7 @@ function stopSession(
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(
-							Commands.music.strings.notPlayingMusic,
+							Commands.music.options.stop.strings.notPlayingMusic,
 							interaction.locale,
 						),
 						color: configuration.interactions.responses.colors.yellow,
@@ -63,10 +63,13 @@ function stopSession(
 			data: {
 				embeds: [{
 					title: `⏹️ ${
-						localise(Commands.music.strings.stopped.header, defaultLanguage)
+						localise(
+							Commands.music.options.stop.strings.stopped.header,
+							defaultLanguage,
+						)
 					}`,
 					description: localise(
-						Commands.music.strings.stopped.body,
+						Commands.music.options.stop.strings.stopped.body,
 						defaultLanguage,
 					),
 					color: configuration.interactions.responses.colors.blue,
