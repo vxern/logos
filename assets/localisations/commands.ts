@@ -1362,7 +1362,7 @@ class Commands {
 				'Permite utilizatorului postarea diverselor mesaje de server, precum regulamentul.',
 		},
 		options: {
-			rules: {
+			information: {
 				name: {
 					'English': 'rules',
 					'Polish': 'regulamin',
