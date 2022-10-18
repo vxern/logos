@@ -1,3 +1,5 @@
+import { Commands } from '../../../../../assets/localisations/commands.ts';
+import { localise } from '../../../../../assets/localisations/types.ts';
 import {
 	ApplicationCommandFlags,
 	Bot,
@@ -10,6 +12,7 @@ import {
 } from '../../../../../deps.ts';
 import { Client } from '../../../../client.ts';
 import configuration from '../../../../configuration.ts';
+import { defaultLanguage } from '../../../../types.ts';
 import { fromHex } from '../../../../utils.ts';
 import { getChannelMention } from '../../data/information/information-sections.ts';
 
@@ -22,12 +25,14 @@ function postWelcome(
 
 	sendMessage(bot, interaction.channelId!, {
 		embeds: [{
-			title: `Welcome to **${guild.name}**`,
-			description:
-				`To enter the server and become its official member, read the information in the ${(getChannelMention(
-					guild,
-					'rules',
-				))} channel to get yourself familiarised with the server guidelines, and then press the button below.`,
+			title: localise(
+				Commands.post.options.welcome.strings.welcome.header,
+				defaultLanguage,
+			)(guild.name),
+			description: localise(
+				Commands.post.options.welcome.strings.welcome.body,
+				defaultLanguage,
+			)(getChannelMention(guild, 'rules')),
 			color: fromHex('#f28123'),
 		}],
 		components: [{
@@ -35,7 +40,10 @@ function postWelcome(
 			components: [{
 				type: MessageComponentTypes.Button,
 				style: ButtonStyles.Secondary,
-				label: 'I have read the rules, and agree to abide by them',
+				label: localise(
+					Commands.post.options.welcome.strings.acceptedRules,
+					defaultLanguage,
+				),
 				customId: 'ACCEPTED_RULES',
 				emoji: { name: '✅' },
 			}],
@@ -51,7 +59,10 @@ function postWelcome(
 			data: {
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
-					description: 'Welcome posted.',
+					description: localise(
+						Commands.post.options.welcome.strings.posted,
+						defaultLanguage,
+					),
 					color: configuration.interactions.responses.colors.blue,
 				}],
 			},
