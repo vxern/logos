@@ -1,3 +1,5 @@
+import { Commands } from "../../../../../assets/localisations/commands.ts";
+import { localise } from "../../../../../assets/localisations/types.ts";
 import {
 	ApplicationCommandFlags,
 	Bot,
@@ -38,7 +40,7 @@ async function postRules(
 			data: {
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
-					description: 'Rules posted.',
+					description: localise(Commands.post.options.rules.strings.posted, interaction.locale),
 					color: configuration.interactions.responses.colors.blue,
 				}],
 			},

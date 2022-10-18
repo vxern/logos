@@ -1373,6 +1373,13 @@ class Commands {
 					'Polish': 'Wstawia wiadomość zawierającą regulamin.',
 					'Romanian': 'Postează un mesaj care conține regulamentul.',
 				},
+        strings: {
+          posted: {
+            'English': 'Rules posted.',
+            'Polish': 'Reguły opublikowane.',
+            'Romanian': 'Reguli publicate.',
+          },
+        }
 			},
 			welcome: {
 				name: {
