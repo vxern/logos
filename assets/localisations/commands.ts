@@ -1,5 +1,4 @@
-import { Guild, User } from '../../deps.ts';
-import { getChannelMention } from '../../src/commands/secret/data/information/information-sections.ts';
+import { User } from '../../deps.ts';
 import { links } from '../../src/constants.ts';
 import { capitalise, list } from '../../src/formatting.ts';
 import { CommandLocalisations } from './types.ts';
@@ -472,7 +471,7 @@ class Commands {
 		description: {
 			'English': 'Cites a server rule.',
 			'Polish': 'Cytuje jedną z reguł serwera.',
-			'Romanian': 'Citează una dintre regulile serverului.',
+			'Romanian': 'Citează o regulă din regulament.',
 		},
 		options: {
 			rule: {

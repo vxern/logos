@@ -1,3 +1,5 @@
+import { Information } from '../../../../../assets/localisations/information.ts';
+import { localise } from '../../../../../assets/localisations/types.ts';
 import {
 	BaseInvite,
 	Bot,
@@ -9,9 +11,10 @@ import {
 } from '../../../../../deps.ts';
 import { Client } from '../../../../client.ts';
 import configuration from '../../../../configuration.ts';
+import { links } from '../../../../constants.ts';
 import { mention, MentionTypes } from '../../../../formatting.ts';
+import { defaultLanguage } from '../../../../types.ts';
 import { fromHex, getTextChannel } from '../../../../utils.ts';
-import ruleGenerators from './generators/rules.ts';
 
 /** Represents a section of guild information. */
 interface InformationSection {
@@ -31,11 +34,14 @@ const informationSections: Record<string, InformationSection> = {
 		image: 'https://i.imgur.com/wRBpXcY.png',
 		generateEmbed: (_clientWithBot, guild) => {
 			const fields = [];
-			for (const [title, generateRule] of Object.entries(ruleGenerators)) {
-				const rule = generateRule(guild);
+			for (const rule of Object.values(Information.rules.rules)) {
 				fields.push({
-					name: `💠  **${title.toUpperCase()}**  ~  TLDR: *${rule.summary}*`,
-					value: rule.content,
+					name: `💠  **${
+						localise(rule.title, defaultLanguage).toUpperCase()
+					}**  ~  ${localise(Information.rules.tldr, defaultLanguage)}: *${
+						localise(rule.summary, defaultLanguage)
+					}*`,
+					value: localise(rule.content, defaultLanguage)(guild),
 					inline: false,
 				});
 			}
@@ -48,14 +54,20 @@ const informationSections: Record<string, InformationSection> = {
 				: configuration.guilds.moderation.moderator.toLowerCase();
 
 			fields.push({
-				name: 'ℹ️  MODERATION POLICY',
-				value:
-					`The server abides by a 3-warn moderation policy, enforced by the server's ${moderatorRoleMention}s. The above rules apply to the entirety of the server, and a breach thereof will cause a warning to be issued.\n\nDepending on the circumstances, a timeout may be issued to the member for the duration of 5, 15, or 60 minutes respectively.\n\nIf a member received three warnings, and a situation occurs where a fourth warning would be issued, the member will be kicked instead.`,
+				name: `ℹ️  ${
+					localise(Information.rules.moderationPolicy.header, defaultLanguage)
+				}`,
+				value: localise(
+					Information.rules.moderationPolicy.body,
+					defaultLanguage,
+				)(
+					moderatorRoleMention,
+				),
 				inline: false,
 			});
 
 			return {
-				description: '*Last updated: 8th September 2022*',
+				description: localise(Information.rules.lastUpdated, defaultLanguage),
 				color: fromHex('#ff9a76'),
 				fields: fields,
 			};
@@ -70,8 +82,8 @@ const informationSections: Record<string, InformationSection> = {
 			return {
 				color: fromHex('#637373'),
 				fields: [{
-					name: '🔗  PERMANENT INVITE LINK',
-					value: `**https://discord.gg/${invite.code}**`,
+					name: `🔗  ${localise(Information.invite, defaultLanguage)}`,
+					value: `**${links.generateDiscordInviteLink(invite.code)}**`,
 				}],
 			};
 		},
