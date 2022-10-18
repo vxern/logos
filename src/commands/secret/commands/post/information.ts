@@ -1,5 +1,5 @@
-import { Commands } from "../../../../../assets/localisations/commands.ts";
-import { localise } from "../../../../../assets/localisations/types.ts";
+import { Commands } from '../../../../../assets/localisations/commands.ts';
+import { localise } from '../../../../../assets/localisations/types.ts';
 import {
 	ApplicationCommandFlags,
 	Bot,
@@ -13,7 +13,7 @@ import { Client } from '../../../../client.ts';
 import configuration from '../../../../configuration.ts';
 import informationSections from '../../data/information/information-sections.ts';
 
-async function postRules(
+async function postInformation(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {
@@ -40,7 +40,10 @@ async function postRules(
 			data: {
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
-					description: localise(Commands.post.options.rules.strings.posted, interaction.locale),
+					description: localise(
+						Commands.post.options.information.strings.posted,
+						interaction.locale,
+					),
 					color: configuration.interactions.responses.colors.blue,
 				}],
 			},
@@ -48,4 +51,4 @@ async function postRules(
 	);
 }
 
-export { postRules };
+export { postInformation };
