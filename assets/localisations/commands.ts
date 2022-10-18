@@ -1346,6 +1346,50 @@ class Commands {
 			},
 		},
 	});
+
+	static readonly post = typedLocalisations({
+		name: {
+			'English': 'post',
+			'Polish': 'wstaw',
+			'Romanian': 'postare',
+		},
+		description: {
+			'English':
+				'Allows the user to post various core server messages, such as the server rules.',
+			'Polish':
+				'Pozwala użytkownikowi na wstawianie różnych wiadomości serwerowych, takich jak regulamin.',
+			'Romanian':
+				'Permite utilizatorului postarea diverselor mesaje de server, precum regulamentul.',
+		},
+		options: {
+			rules: {
+				name: {
+					'English': 'rules',
+					'Polish': 'regulamin',
+					'Romanian': 'regulament',
+				},
+				description: {
+					'English': 'Posts a message containing the server rules.',
+					'Polish': 'Wstawia wiadomość zawierającą regulamin.',
+					'Romanian': 'Postează un mesaj care conține regulamentul.',
+				},
+			},
+			welcome: {
+				name: {
+					'English': 'welcome',
+					'Polish': 'powitanie',
+					'Romanian': 'bun-venit',
+				},
+				description: {
+					'English': 'Posts a message containing the welcome message.',
+					'Polish':
+						'Wstawia wiadomość zawierającą powitanie dla nowych członków serwera.',
+					'Romanian':
+						'Postează un mesaj care conține un bun-venit pentru membri noi ai serverului.',
+				},
+			},
+		},
+	});
 }
 
 export { Commands };
