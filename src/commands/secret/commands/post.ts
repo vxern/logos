@@ -1,49 +1,19 @@
+import { Commands } from '../../../../assets/localisations/commands.ts';
+import { createLocalisations } from '../../../../assets/localisations/types.ts';
 import { ApplicationCommandOptionTypes } from '../../../../deps.ts';
 import { CommandBuilder } from '../../command.ts';
 import { postRules } from './post/rules.ts';
 import { postWelcome } from './post/welcome.ts';
 
 const command: CommandBuilder = {
-	name: 'post',
-	nameLocalizations: {
-		pl: 'wstaw',
-		ro: 'postare',
-	},
-	description:
-		'Allows the user to post various core server messages, such as the server rules.',
-	descriptionLocalizations: {
-		pl:
-			'Pozwala użytkownikowi na wstawianie różnych wiadomości serwerowych, takich jak regulamin.',
-		ro:
-			'Permite utilizatorului postarea diverselor mesaje de server, precum regulamentul.',
-	},
+	...createLocalisations(Commands.post),
 	defaultMemberPermissions: ['ADMINISTRATOR'],
 	options: [{
-		name: 'rules',
-		nameLocalizations: {
-			pl: 'regulamin',
-			ro: 'regulament',
-		},
-		description: 'Posts a message containing the server rules.',
-		descriptionLocalizations: {
-			pl: 'Wstawia wiadomość zawierającą regulamin.',
-			ro: 'Postează un mesaj care conține regulamentul.',
-		},
+		...createLocalisations(Commands.post.options.rules),
 		type: ApplicationCommandOptionTypes.SubCommand,
 		handle: postRules,
 	}, {
-		name: 'welcome',
-		nameLocalizations: {
-			pl: 'powitanie',
-			ro: 'bun-venit',
-		},
-		description: 'Posts a message containing the welcome message.',
-		descriptionLocalizations: {
-			pl:
-				'Wstawia wiadomość zawierającą powitanie dla nowych członków serwera.',
-			ro:
-				'Postează un mesaj care conține un bun-venit pentru membri noi ai serverului.',
-		},
+		...createLocalisations(Commands.post.options.welcome),
 		type: ApplicationCommandOptionTypes.SubCommand,
 		handle: postWelcome,
 	}],
