@@ -1419,6 +1419,22 @@ class Commands {
 			},
 		},
 	});
+
+	static readonly profile = typedLocalisations({
+		name: {
+			'English': 'profile',
+			'Polish': 'profil',
+			'Romanian': 'profil',
+		},
+		description: {
+			'English':
+				'Allows the user to view information about themselves or another user.',
+			'Polish':
+				'Pozwala użytkownikowi na wyświetlanie informacji o sobie lub o innych użytkownikach.',
+			'Romanian':
+				'Permite utilizatorului afișarea informațiilor despre sine sau despre alți utilizatori.',
+		},
+	});
 }
 
 export { Commands };
