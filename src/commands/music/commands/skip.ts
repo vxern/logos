@@ -71,7 +71,7 @@ function skipSong(
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(
-							Commands.music.strings.noSongToSkip,
+							Commands.music.options.skip.strings.noSongToSkip,
 							interaction.locale,
 						),
 						color: configuration.interactions.responses.colors.yellow,
@@ -95,7 +95,7 @@ function skipSong(
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(
-							Commands.music.strings.noSongCollectionToSkip,
+							Commands.music.options.skip.strings.noSongCollectionToSkip,
 							interaction.locale,
 						),
 						color: configuration.interactions.responses.colors.yellow,
@@ -205,10 +205,13 @@ function skipSong(
 			data: {
 				embeds: [{
 					title: `⏭️ ${
-						localise(Commands.music.strings.skipped.header, defaultLanguage)
+						localise(
+							Commands.music.options.skip.strings.skipped.header,
+							defaultLanguage,
+						)
 					}`,
 					description: localise(
-						Commands.music.strings.skipped.body,
+						Commands.music.options.skip.strings.skipped.body,
 						defaultLanguage,
 					)(skipCollection),
 					color: configuration.interactions.responses.colors.invisible,

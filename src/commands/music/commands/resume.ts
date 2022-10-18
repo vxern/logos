@@ -43,7 +43,7 @@ function resumeSong(
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(
-							Commands.music.strings.noSongToResume,
+							Commands.music.options.resume.strings.noSongToResume,
 							interaction.locale,
 						),
 						color: configuration.interactions.responses.colors.yellow,
@@ -64,7 +64,7 @@ function resumeSong(
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(
-							Commands.music.strings.notCurrentlyPaused,
+							Commands.music.options.resume.strings.notCurrentlyPaused,
 							interaction.locale,
 						),
 						color: configuration.interactions.responses.colors.yellow,
@@ -85,10 +85,13 @@ function resumeSong(
 			data: {
 				embeds: [{
 					title: `▶️ ${
-						localise(Commands.music.strings.resumed.header, defaultLanguage)
+						localise(
+							Commands.music.options.resume.strings.resumed.header,
+							defaultLanguage,
+						)
 					}`,
 					description: localise(
-						Commands.music.strings.resumed.body,
+						Commands.music.options.resume.strings.resumed.body,
 						defaultLanguage,
 					),
 					color: configuration.interactions.responses.colors.invisible,

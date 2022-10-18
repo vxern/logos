@@ -57,7 +57,7 @@ function playStream(
 					content: {
 						type: SongListingContentTypes.External,
 						title: localise(
-							Commands.music.strings.externalFile,
+							Commands.music.options.play.strings.externalFile,
 							interaction.locale,
 						),
 						url: query,
@@ -98,7 +98,7 @@ async function playSongListing(
 				data: {
 					embeds: [{
 						description: localise(
-							Commands.music.strings.songNotFound,
+							Commands.music.options.play.strings.songNotFound,
 							interaction.locale,
 						),
 						color: configuration.interactions.responses.colors.red,
@@ -108,10 +108,10 @@ async function playSongListing(
 		);
 	}
 
-	const textChannel = client.channels.get(interaction.channelId!);
+	const textChannel = client.cache.channels.get(interaction.channelId!);
 	if (!textChannel) return;
 
-	const voiceChannel = client.channels.get(voiceState.channelId!);
+	const voiceChannel = client.cache.channels.get(voiceState.channelId!);
 	if (!voiceChannel) return;
 
 	return void musicController.play(client, {

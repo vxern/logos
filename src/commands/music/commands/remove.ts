@@ -57,7 +57,7 @@ function removeSongListing(
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(
-							Commands.music.strings.noListingToRemove,
+							Commands.music.options.remove.strings.noListingToRemove,
 							interaction.locale,
 						),
 						color: configuration.interactions.responses.colors.yellow,
@@ -135,13 +135,13 @@ function removeSongListing(
 	const generateEmbed: () => InteractionCallbackData = () => ({
 		embeds: [{
 			description: localise(
-				Commands.music.strings.selectSongToRemove,
+				Commands.music.options.remove.strings.selectSongToRemove,
 				interaction.locale,
 			),
 			color: configuration.interactions.responses.colors.blue,
 			footer: isLast() ? undefined : {
 				text: localise(
-					Commands.music.strings.continuedOnTheNextPage,
+					Commands.music.options.remove.strings.continuedOnTheNextPage,
 					interaction.locale,
 				),
 			},
@@ -200,7 +200,7 @@ function removeSongListing(
 							data: {
 								embeds: [{
 									description: localise(
-										Commands.music.strings.failedToRemoveSong,
+										Commands.music.options.remove.strings.failedToRemoveSong,
 										interaction.locale,
 									),
 									color: configuration.interactions.responses.colors.yellow,
@@ -220,12 +220,12 @@ function removeSongListing(
 							embeds: [{
 								title: `❌ ${
 									localise(
-										Commands.music.strings.removed.header,
+										Commands.music.options.remove.strings.removed.header,
 										defaultLanguage,
 									)
 								}`,
 								description: localise(
-									Commands.music.strings.removed.body,
+									Commands.music.options.remove.strings.removed.body,
 									defaultLanguage,
 								)(
 									songListing.content.title,

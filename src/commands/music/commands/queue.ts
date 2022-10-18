@@ -33,7 +33,9 @@ function displaySongQueue(
 		) => option.name === 'show')?.value) ?? false;
 
 	return displayListings([client, bot], interaction, {
-		title: `📋 ${localise(Commands.music.strings.queue, interaction.locale)}`,
+		title: `📋 ${
+			localise(Commands.music.options.queue.strings.queue, interaction.locale)
+		}`,
 		songListings: musicController.queue,
 		show: show,
 	});
