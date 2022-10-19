@@ -1,6 +1,7 @@
+import { localise } from '../../../../../assets/localisations/types.ts';
 import { Role as DiscordRole, SelectOption } from '../../../../../deps.ts';
 import { Language } from '../../../../types.ts';
-import { Assignable, DescriptionGenerator, Role } from './role.ts';
+import { Role } from './role.ts';
 
 /** The type of role collection. */
 enum RoleCollectionTypes {
@@ -19,9 +20,6 @@ enum RoleCollectionTypes {
 type RoleCollectionBase = {
 	/** The type of this collection. */
 	type: RoleCollectionTypes;
-
-	/** A default description for roles contained within this collection.. */
-	generateDescription?: DescriptionGenerator;
 };
 
 /** The base of a role collection with a standalone group of roles. */
@@ -41,9 +39,8 @@ type RoleCollectionLocalised = {
 };
 
 /** Represents a grouping of roles. */
-type RoleCollection<T = Assignable> =
+type RoleCollection =
 	& RoleCollectionBase
-	& T
 	& (RoleCollectionStandalone | RoleCollectionLocalised);
 
 const emojiExpression = /\p{Extended_Pictographic}/u;
@@ -53,6 +50,7 @@ function createSelectOptionsFromCollection(
 	menuRolesResolved: DiscordRole[],
 	memberRolesIncludedInMenu: bigint[],
 	emojiIdsByName: Map<string, bigint>,
+	locale: string | undefined,
 ): SelectOption[] {
 	const selectOptions: SelectOption[] = [];
 
@@ -63,10 +61,14 @@ function createSelectOptionsFromCollection(
 		];
 		const memberHasRole = memberRolesIncludedInMenu.includes(roleResolved.id);
 
+		const localisedName = localise(role.name, locale);
+
 		selectOptions.push({
-			label: memberHasRole ? `[Assigned] ${role.name}` : role.name,
+			label: memberHasRole ? `[Assigned] ${localisedName}` : localisedName,
 			value: index.toString(),
-			description: role.description,
+			description: role.description
+				? localise(role.description, locale)
+				: undefined,
 			emoji: (() => {
 				if (!role.emoji) return;
 				if (emojiExpression.test(role.emoji)) return { name: role.emoji };
