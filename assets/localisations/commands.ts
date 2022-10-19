@@ -1490,6 +1490,65 @@ class Commands {
 					},
 				},
 			},
+			view: {
+				name: {
+					'English': 'view',
+					'Polish': 'wyświetl',
+					'Romanian': 'afișare',
+				},
+				description: {
+					'English': 'Displays a user\'s profile.',
+					'Polish': 'Wyświetla profil użytkownika.',
+					'Romanian': 'Afișează profilul unui utilizator.',
+				},
+				strings: {
+					failed: {
+						'English': 'Failed to show information about the chosen member.',
+						'Polish': 'Nie udało się wyświetlić informacji o danym członku.',
+						'Romanian': 'Nu s-au putut afișa informații despre un membru dat.',
+					},
+					informationForUser: {
+						'English': (username: string) => `Information for ${username}`,
+						'Polish': (username: string) => `Informacje dla ${username}`,
+						'Romanian': (username: string) => `Informații pentru ${username}`,
+					},
+					roles: {
+						'English': 'Roles',
+						'Polish': 'Role',
+						'Romanian': 'Roluri',
+					},
+					dates: {
+						'English': 'Dates',
+						'Polish': 'Dat',
+						'Romanian': 'Date',
+					},
+					statistics: {
+						'English': 'Statistics',
+						'Polish': 'Statystyki',
+						'Romanian': 'Statistici',
+					},
+					received: {
+						'English': 'Received',
+						'Polish': 'Otrzymane',
+						'Romanian': 'Primite',
+					},
+					given: {
+						'English': 'Given',
+						'Polish': 'Dane',
+						'Romanian': 'Date',
+					},
+					praises: {
+						'English': 'Praises',
+						'Polish': 'Pochwały',
+						'Romanian': 'Lăudări',
+					},
+					warnings: {
+						'English': 'Warnings',
+						'Polish': 'Ostrzeżenia',
+						'Romanian': 'Avertizări',
+					},
+				},
+			},
 		},
 	});
 }

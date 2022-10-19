@@ -1,3 +1,8 @@
+import { Commands } from '../../../../../assets/localisations/commands.ts';
+import {
+	createLocalisations,
+	localise,
+} from '../../../../../assets/localisations/types.ts';
 import {
 	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
@@ -12,22 +17,13 @@ import configuration from '../../../../configuration.ts';
 import { getPraises } from '../../../../database/functions/praises.ts';
 import { getOrCreateUser } from '../../../../database/functions/users.ts';
 import { getWarnings } from '../../../../database/functions/warnings.ts';
-import { displayTime, mention, MentionTypes } from '../../../../formatting.ts';
-import { snowflakeToTimestamp } from '../../../../utils.ts';
+import { mention, MentionTypes } from '../../../../formatting.ts';
+import { defaultLanguage } from '../../../../types.ts';
 import { OptionBuilder } from '../../../command.ts';
 import { show, user } from '../../../parameters.ts';
 
 const command: OptionBuilder = {
-	name: 'view',
-	nameLocalizations: {
-		pl: 'wyświetl',
-		ro: 'afișare',
-	},
-	description: 'Displays a user\'s profile.',
-	descriptionLocalizations: {
-		pl: 'Wyświetla profil użytkownika.',
-		ro: 'Afișează profilul unui utilizator.',
-	},
+	...createLocalisations(Commands.profile.options.view),
 	type: ApplicationCommandOptionTypes.SubCommand,
 	options: [{ ...user, required: false }, show],
 	handle: viewProfile,
@@ -66,17 +62,16 @@ async function viewProfile(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						title: 'Failed to show profile',
-						description: 'Failed to show information about the chosen member.',
+						description: localise(
+							Commands.profile.options.view.strings.failed,
+							interaction.locale,
+						),
 						color: configuration.interactions.responses.colors.red,
 					}],
 				},
 			},
 		);
 	}
-
-	const createdAt = snowflakeToTimestamp(member.id);
-	const joinedAt = member.joinedAt;
 
 	const subject = await getOrCreateUser(
 		client.database,
@@ -98,6 +93,8 @@ async function viewProfile(
 	const warningsReceived = await getWarnings(client.database, subject.ref);
 	if (!warningsReceived) return showProfileViewFailure();
 
+  const locale = !show ? interaction.locale : defaultLanguage;
+
 	return void sendInteractionResponse(
 		bot,
 		interaction.id,
@@ -107,7 +104,10 @@ async function viewProfile(
 			data: {
 				flags: !show ? ApplicationCommandFlags.Ephemeral : undefined,
 				embeds: [{
-					title: `Information for ${user.username}`,
+					title: localise(
+						Commands.profile.options.view.strings.informationForUser,
+						locale,
+					)(user.username),
 					thumbnail: (() => {
 						const iconURL = getAvatarURL(
 							bot,
@@ -120,21 +120,50 @@ async function viewProfile(
 						return { url: iconURL };
 					})(),
 					fields: [{
-						name: '💼 Roles',
+						name: `💼 ${
+							localise(
+								Commands.profile.options.view.strings.roles,
+								locale,
+							)
+						}`,
 						value: member.roles.map((roleId) =>
 							mention(roleId, MentionTypes.Role)
 						).join(' '),
 						inline: false,
 					}, {
-						name: '📅 Dates',
-						value: `Joined server: ${displayTime(joinedAt)}
-Created account: ${displayTime(createdAt)}`,
-						inline: false,
-					}, {
-						name: '🧮 Statistics',
-						value:
-							`🙏 Praises - ${praisesReceived.length} Received | ${praisesGiven.length} Given
-😖 Warnings - ${warningsReceived.length} Received`,
+						name: `🧮 ${
+							localise(
+								Commands.profile.options.view.strings.statistics,
+								locale,
+							)
+						}`,
+						value: `🙏 ${
+							localise(
+								Commands.profile.options.view.strings.praises,
+								locale,
+							)
+						} - ${praisesReceived.length} ${
+							localise(
+								Commands.profile.options.view.strings.received,
+								locale,
+							)
+						} | ${praisesGiven.length} ${
+							localise(
+								Commands.profile.options.view.strings.given,
+								locale,
+							)
+						}
+😖 ${
+							localise(
+								Commands.profile.options.view.strings.warnings,
+								locale,
+							)
+						} - ${warningsReceived.length} ${
+							localise(
+								Commands.profile.options.view.strings.received,
+								locale,
+							)
+						}`,
 						inline: false,
 					}],
 				}],
