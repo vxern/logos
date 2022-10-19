@@ -5,11 +5,6 @@ import {
 	Interaction,
 } from '../../deps.ts';
 import { Client } from '../client.ts';
-import {
-	ApplicationCommandFlags,
-	InteractionResponseTypes,
-	sendInteractionResponse,
-} from '../../deps.ts';
 
 type WithRequired<T, K extends keyof T> =
 	& Pick<T, Exclude<keyof T, K>>
@@ -53,36 +48,4 @@ type CommandBuilder = Command;
 
 type OptionBuilder = Option;
 
-/**
- * A handler for interactions that are missing a handler.
- *
- * @param interaction - The interaction to be handled.
- */
-function displayUnimplemented(
-	[_client, bot]: [Client, Bot],
-	interaction: Interaction,
-): Promise<unknown> {
-	return sendInteractionResponse(
-		bot,
-		interaction.id,
-		interaction.token,
-		{
-			type: InteractionResponseTypes.ChannelMessageWithSource,
-			data: {
-				flags: ApplicationCommandFlags.Ephemeral,
-				embeds: [{
-					title: 'Unimplemented',
-					description: 'This command is missing a handler.',
-				}],
-			},
-		},
-	);
-}
-
-export type {
-	Command,
-	CommandBuilder,
-	displayUnimplemented,
-	InteractionHandler,
-	OptionBuilder,
-};
+export type { Command, CommandBuilder, InteractionHandler, OptionBuilder };
