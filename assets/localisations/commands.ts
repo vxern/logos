@@ -180,7 +180,7 @@ class Commands {
 					withoutProficiencyRole: {
 						'English': 'without a proficiency role.',
 						'Polish': 'bez roli biegłości',
-						'Romanian': 'fără un rol de proficiență.',
+						'Romanian': 'fără un rol de competență.',
 					},
 					fields: {
 						description: {
@@ -216,7 +216,7 @@ class Commands {
 						proficiencyDistribution: {
 							'English': 'Proficiency Distribution',
 							'Polish': 'Dystrybucja Biegłości',
-							'Romanian': 'Distribuție de Proficiență',
+							'Romanian': 'Distribuție de Competență',
 						},
 					},
 					channelTypes: {
@@ -1433,6 +1433,63 @@ class Commands {
 				'Pozwala użytkownikowi na wyświetlanie informacji o sobie lub o innych użytkownikach.',
 			'Romanian':
 				'Permite utilizatorului afișarea informațiilor despre sine sau despre alți utilizatori.',
+		},
+		options: {
+			roles: {
+				name: {
+					'English': 'roles',
+					'Polish': 'role',
+					'Romanian': 'roluri',
+				},
+				description: {
+					'English': 'Opens the role selection menu.',
+					'Polish': 'Otwiera menu wybierania ról.',
+					'Romanian': 'Deschide meniul selectării rolurilor.',
+				},
+				strings: {
+					selectCategory: {
+						header: {
+							'English': 'No category selected',
+							'Polish': 'Nie wybrano kategorii',
+							'Romanian': 'Nicio categorie selectată',
+						},
+						body: {
+							'English':
+								'Please select a category to obtain a list of available roles within it.',
+							'Polish':
+								'Prosimy wybrać kategorię, aby otrzymać listę dostępnych w niej ról.',
+							'Romanian':
+								'Te rugăm să selectezi o categorie pentru a primi o listă cu rolurile disponibile.',
+						},
+					},
+					reachedLimit: {
+						'English': (categoryName: string) =>
+							`You have reached the limit of roles you can assign from within the '${categoryName}' category.` +
+							'To choose a new role, unassign one of your existing roles.',
+						'Polish': (categoryName: string) =>
+							`Dosięgnąłeś/as limitu ról które mogłeś uzyskać z kategorii '${categoryName}'.` +
+							'Aby wybrać rolę inną od tych, które już masz, usuń jedną z istniejących ról.',
+						'Romanian': (categoryName: string) =>
+							`Ai atins limita rolurilor pe care le poți obține din cadrul categoriei '${categoryName}'.` +
+							'Pentru a alege un rol nou, dezasociază unul dintre rolurile existente.',
+					},
+					chooseCategory: {
+						'English': 'Choose a category.',
+						'Polish': 'Wybierz kategorię.',
+						'Romanian': 'Alege o categorie.',
+					},
+					chooseRole: {
+						'English': 'Choose a role.',
+						'Polish': 'Wybierz rolę.',
+						'Romanian': 'Alege un rol.',
+					},
+					back: {
+						'English': 'Back',
+						'Polish': 'Wstecz',
+						'Romanian': 'Înapoi',
+					},
+				},
+			},
 		},
 	});
 }
