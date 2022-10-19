@@ -1,8 +1,11 @@
 import { SelectOption } from '../../../../../deps.ts';
 import { Language } from '../../../../types.ts';
 import { trim } from '../../../../utils.ts';
-import { Assignable } from './role.ts';
 import { RoleCollection, RoleCollectionTypes } from './role-collection.ts';
+import {
+	Localisations,
+	localise,
+} from '../../../../../assets/localisations/types.ts';
 
 /** The type of role category. */
 enum RoleCategoryTypes {
@@ -23,10 +26,10 @@ type RoleCategoryBase = {
 	type: RoleCategoryTypes;
 
 	/** The display name of this category. */
-	name: string;
+	name: Localisations<string>;
 
 	/** A description for what roles or role categories this role category contains. */
-	description: string;
+	description: Localisations<string>;
 
 	/** The colour to be displayed in the embed message when this category is selected. */
 	color: number;
@@ -58,7 +61,7 @@ type SingleAssignableRoleCategory = {
 	// Because only one role can be selected at any one time from this category, and
 	// once a role has been selected, it cannot be unselected again, the message to be
 	// shown when a role is unassigned will never be shown to the user.
-	collection: RoleCollection<Omit<Assignable, 'onUnassignMessage'>>;
+	collection: RoleCollection;
 
 	restrictToOneRole: true;
 };
@@ -84,15 +87,16 @@ type RoleCategory =
 function createSelectOptionsFromCategories(
 	categories: RoleCategory[],
 	language: Language | undefined,
+	locale: string | undefined,
 ): SelectOption[] {
 	const categorySelections = getRelevantCategories(categories, language);
 
 	const selections: SelectOption[] = [];
 	for (const [category, index] of categorySelections) {
 		selections.push({
-			label: category.name,
+			label: localise(category.name, locale),
 			value: index.toString(),
-			description: trim(category.description, 100),
+			description: trim(localise(category.description, locale), 100),
 			emoji: { name: category.emoji },
 		});
 	}

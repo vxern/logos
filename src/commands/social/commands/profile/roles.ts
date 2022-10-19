@@ -16,7 +16,7 @@ import {
 	snowflakeToBigint,
 } from '../../../../../deps.ts';
 import { Client } from '../../../../client.ts';
-import { Language } from '../../../../types.ts';
+import { defaultLanguage, Language } from '../../../../types.ts';
 import { createInteractionCollector } from '../../../../utils.ts';
 import configuration from '../../../../configuration.ts';
 import {
@@ -32,18 +32,14 @@ import {
 import { OptionBuilder } from '../../../command.ts';
 import { Role } from '../../data/structures/role.ts';
 import roles from '../../data/roles.ts';
+import { Commands } from '../../../../../assets/localisations/commands.ts';
+import {
+	createLocalisations,
+	localise,
+} from '../../../../../assets/localisations/types.ts';
 
 const command: OptionBuilder = {
-	name: 'roles',
-	nameLocalizations: {
-		pl: 'role',
-		ro: 'roluri',
-	},
-	description: 'Opens the role selection menu.',
-	descriptionLocalizations: {
-		pl: 'Otwiera menu wybierania ról.',
-		ro: 'Deschide meniul selectării rolurilor.',
-	},
+	...createLocalisations(Commands.profile.options.roles),
 	type: ApplicationCommandOptionTypes.SubCommand,
 	handle: selectRoles,
 };
@@ -70,9 +66,9 @@ function selectRoles(
 			navigationData: {
 				root: {
 					type: RoleCategoryTypes.CategoryGroup,
-					name: 'No Category Selected',
+					name: Commands.profile.options.roles.strings.selectCategory.header,
 					description:
-						'Please select a role category to obtain a list of available roles within it.',
+						Commands.profile.options.roles.strings.selectCategory.body,
 					color: configuration.interactions.responses.colors.invisible,
 					emoji: '💭',
 					categories: rootCategories,
@@ -176,7 +172,9 @@ function createRoleSelectionMenu(
 
 		if (category.type === RoleCategoryTypes.Category) {
 			menuRoles = resolveRoles(category.collection, data.language);
-			menuRolesResolved = menuRoles.map((role) => rolesByName.get(role.name)!);
+			menuRolesResolved = menuRoles.map((role) =>
+				rolesByName.get(localise(role.name, defaultLanguage))!
+			);
 			memberRolesIncludedInMenu = memberRoleIds.filter((roleId) =>
 				menuRolesResolved.some((role) => role.id === roleId)
 			);
@@ -187,6 +185,7 @@ function createRoleSelectionMenu(
 			selectOptions = createSelectOptionsFromCategories(
 				category.categories!,
 				data.language,
+				interaction.locale,
 			);
 		} else {
 			selectOptions = createSelectOptionsFromCollection(
@@ -194,10 +193,17 @@ function createRoleSelectionMenu(
 				menuRolesResolved,
 				memberRolesIncludedInMenu,
 				emojiIdsByName,
+				interaction.locale,
 			);
 		}
 
-		const menu = displaySelectMenu(selectOptions, data, customId, category);
+		const menu = displaySelectMenu(
+			selectOptions,
+			data,
+			customId,
+			category,
+			interaction.locale,
+		);
 
 		if (editResponse) {
 			return void editOriginalInteractionResponse(
@@ -286,12 +292,10 @@ function createRoleSelectionMenu(
 								data: {
 									flags: ApplicationCommandFlags.Ephemeral,
 									embeds: [{
-										title:
-											`Reached role limit in the '${category.name}' category.`,
-										description:
-											`You have reached the limit of roles you can assign from within the '${category.name}' category.
-
-To choose a new role, unassign one of your existing roles.`,
+										description: localise(
+											Commands.profile.options.roles.strings.reachedLimit,
+											interaction.locale,
+										)(localise(category.name, interaction.locale)),
 									}],
 								},
 							},
@@ -333,12 +337,13 @@ function displaySelectMenu(
 	data: BrowsingData,
 	customId: string,
 	category: RoleCategory,
+	locale: string | undefined,
 ): InteractionResponse {
 	const isInRootCategory = data.navigationData.indexesAccessed.length === 0;
 
 	if (!isInRootCategory) {
 		selectOptions.push({
-			label: 'Back',
+			label: localise(Commands.profile.options.roles.strings.back, locale),
 			value: `${-1}`,
 		});
 	}
@@ -348,8 +353,8 @@ function displaySelectMenu(
 		data: {
 			flags: ApplicationCommandFlags.Ephemeral,
 			embeds: [{
-				title: `${category.emoji}  ${category.name}`,
-				description: category.description,
+				title: `${category.emoji}  ${localise(category.name, locale)}`,
+				description: localise(category.description, locale),
 				color: category.color,
 			}],
 			components: [{
@@ -359,8 +364,14 @@ function displaySelectMenu(
 					customId: customId,
 					options: selectOptions,
 					placeholder: category.type === RoleCategoryTypes.CategoryGroup
-						? 'Choose a role category.'
-						: 'Choose a role.',
+						? localise(
+							Commands.profile.options.roles.strings.chooseCategory,
+							locale,
+						)
+						: localise(
+							Commands.profile.options.roles.strings.chooseRole,
+							locale,
+						),
 				}],
 			}],
 		},

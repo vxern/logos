@@ -1,115 +1,87 @@
-import configuration from '../../../configuration.ts';
 import { fromHex } from '../../../utils.ts';
-import { fromNames } from '../module.ts';
-import { Role } from './structures/role.ts';
 import { RoleCategory, RoleCategoryTypes } from './structures/role-category.ts';
 import { RoleCollectionTypes } from './structures/role-collection.ts';
+import { Roles } from '../../../../assets/localisations/roles.ts';
 
 const categories: RoleCategory[] = [
 	{
-		name: 'Proficiency',
-		description:
-			'Roles representing the user\'s language proficiency and knowledge of the language.',
+		...Roles.proficiency,
 		type: RoleCategoryTypes.Category,
 		color: fromHex('#1c1c1c'),
 		emoji: '🎓',
 		restrictToOneRole: true,
 		collection: {
 			type: RoleCollectionTypes.Collection,
-			onAssignMessage: (name) =>
-				`Your language proficiency is now ${name.toLowerCase()}.`,
 			list: [{
-				name: 'Beginner',
-				description:
-					'I am just beginning to learn; I have limited understanding and I know a couple basic phrases.',
+				...Roles.proficiency.roles.beginner,
 				emoji: '🟩',
 			}, {
-				name: 'Intermediate',
-				description:
-					'I have been learning for a while; I have decent understanding and I can sustain a conversation.',
+				...Roles.proficiency.roles.intermediate,
 				emoji: '🟦',
 			}, {
-				name: 'Advanced',
-				description:
-					'I have been learning for a long time; I have firm understanding and I can speak without much effort.',
+				...Roles.proficiency.roles.advanced,
 				emoji: '🟥',
 			}, {
-				name: 'Native',
-				description:
-					'I was brought up speaking the language; I understand and I can speak about everything with ease.',
+				...Roles.proficiency.roles.native,
 				emoji: '🟨',
 			}],
 		},
 	},
 	{
-		name: 'Personalisation',
-		description: 'Roles used to personalise one\'s server profile.',
+		...Roles.personalisation,
 		color: fromHex('#ffe548'),
 		emoji: '🌈',
 		type: RoleCategoryTypes.CategoryGroup,
 		categories: [
 			{
-				name: 'Orthography',
-				description: 'Roles related to various orthographies.',
+				...Roles.personalisation.categories.orthography,
 				type: RoleCategoryTypes.Category,
 				color: fromHex('#d6e3f8'),
 				emoji: '🖋️',
 				restrictToOneRole: true,
 				collection: {
 					type: RoleCollectionTypes.CollectionLocalised,
-					onAssignMessage: (name) => `You are now a ${name}.`,
 					lists: {
 						'Romanian': [{
-							name: 'Îdinist',
-							description: 'I am a proponent of Îdinism.',
+							...Roles.personalisation.categories.orthography.roles.idinist,
 							emoji: 'Idini',
 						}],
 					},
 				},
 			},
 			{
-				name: 'Gender',
-				description: 'Roles defining one\'s gender.',
+				...Roles.personalisation.categories.gender,
 				type: RoleCategoryTypes.Category,
 				color: fromHex('#ff4b3e'),
 				emoji: '⚧',
 				restrictToOneRole: true,
 				collection: {
 					type: RoleCollectionTypes.Collection,
-					generateDescription: (name) =>
-						`I am of the ${name.toLowerCase()} persuasion.`,
-					onAssignMessage: (name) =>
-						`You now identify as a ${name.toLowerCase()}.`,
 					list: [{
-						name: 'Male',
+						...Roles.personalisation.categories.gender.roles.male,
 						emoji: '♂️',
 					}, {
-						name: 'Female',
+						...Roles.personalisation.categories.gender.roles.female,
 						emoji: '♀️',
 					}, {
-						name: 'Transgender',
+						...Roles.personalisation.categories.gender.roles.transgender,
 						emoji: '⚧',
 					}, {
-						name: 'Non-binary',
+						...Roles.personalisation.categories.gender.roles.nonBinary,
 						emoji: '❔',
 					}],
 				},
 			},
 			{
-				name: 'Abroad',
-				description: 'Roles related to the abroad.',
+				...Roles.personalisation.categories.abroad,
 				type: RoleCategoryTypes.Category,
 				color: fromHex('#d6e3f8'),
 				emoji: '🌎',
 				restrictToOneRole: false,
 				collection: {
 					type: RoleCollectionTypes.Collection,
-					onAssignMessage: (name) => `You are now a ${name}.`,
-					onUnassignMessage: (name) => `You are no longer a ${name}.`,
 					list: [{
-						name: 'Diasporan',
-						description:
-							'I am a native, or a child of natives, who has been brought up abroad.',
+						...Roles.personalisation.categories.abroad.roles.diasporan,
 						emoji: '🌎',
 					}],
 				},
@@ -117,8 +89,7 @@ const categories: RoleCategory[] = [
 		],
 	},
 	{
-		name: 'Learning',
-		description: 'Roles applied in teaching and learning the language.',
+		...Roles.learning,
 		type: RoleCategoryTypes.Category,
 		color: fromHex('#daddd8'),
 		emoji: '📖',
@@ -126,45 +97,22 @@ const categories: RoleCategory[] = [
 		collection: {
 			type: RoleCollectionTypes.Collection,
 			list: [{
-				name: 'Classroom Attendee',
-				description:
-					'I attend sessions in the classroom channel and would like to be notified when a session takes place.',
-				onAssignMessage: (_) =>
-					`You will now be notified of each lesson before it begins.`,
-				onUnassignMessage: (_) =>
-					`You will no longer be notified before each lesson.`,
+				...Roles.learning.roles.classroomAttendee,
 				emoji: '📖',
 			}, {
-				name: 'Correct Me',
-				description:
-					`"I think, therefore I make mistakes." - Please do correct me.`,
-				onAssignMessage: (_) =>
-					`Other users will now be able to see that you demand additional corrections.`,
-				onUnassignMessage: (_) =>
-					`Other users will no longer be able to see that you demand additional corrections.`,
+				...Roles.learning.roles.correctMe,
 				emoji: '✍️',
 			}, {
-				name: 'Daily Phrase',
-				description: 'I want to be notified when a new daily phrase is posted.',
-				onAssignMessage: (_) =>
-					`You will now be notified when a daily phrase is posted.`,
-				onUnassignMessage: (_) =>
-					'You will no longer be notified of new daily phrases.',
+				...Roles.learning.roles.dailyPhrase,
 				emoji: '🌞',
 			}, {
-				name: 'Voicechatter',
-				description:
-					'I enjoy attending (un)announced VC sessions and speaking with other people.',
-				onAssignMessage: (_) => `You can now be notified of a VC session.`,
-				onUnassignMessage: (_) =>
-					'You will no longer be notified of VC sessions.',
+				...Roles.learning.roles.voicechatter,
 				emoji: '🗣️',
 			}],
 		},
 	},
 	{
-		name: 'Ethnicities',
-		description: 'Roles identifying one\'s ethnicity.',
+		...Roles.ethnicity,
 		type: RoleCategoryTypes.Category,
 		color: fromHex('#68d8d6'),
 		emoji: '🗾',
@@ -172,47 +120,27 @@ const categories: RoleCategory[] = [
 		limit: 2,
 		collection: {
 			type: RoleCollectionTypes.CollectionLocalised,
-			onAssignMessage: (name) => `Your ethnicity is now ${name}.`,
-			onUnassignMessage: (name) => `Your ethnicity is no longer ${name}.`,
-			generateDescription: (name) => `I am of ${name} heritage.`,
 			lists: {
-				'Armenian': fromNames([
-					'Armeno-Tat',
-					'Circassian',
-					'Hemshen',
-					'Hidden',
-				]),
-				'Romanian': fromNames([
-					'Aromanian',
-					'Istro-Romanian',
-					'Megleno-Romanian',
-				]),
+				'Armenian': Roles.ethnicity.languages['Armenian'],
+				'Romanian': Roles.ethnicity.languages['Romanian'],
 			},
 		},
 	},
 	{
-		name: 'Dialects',
-		description:
-			'Roles specifying which dialect of the language one is learning.',
+		...Roles.dialects,
 		type: RoleCategoryTypes.Category,
 		color: fromHex('#00cc66'),
 		emoji: '🏷️',
 		restrictToOneRole: false,
 		collection: {
 			type: RoleCollectionTypes.CollectionLocalised,
-			onAssignMessage: (name) => `You are now learning ${name}.`,
-			onUnassignMessage: (name) => `You are no longer learning ${name}.`,
-			generateDescription: (name) => `I am learning ${name}.`,
 			lists: {
-				'Armenian': fromNames(
-					configuration.guilds.languages['Armenian'].dialects,
-				),
+				'Armenian': Roles.dialects.languages['Armenian'],
 			},
 		},
 	},
 	{
-		name: 'Regions',
-		description: 'Roles specifying which area of the country one is from.',
+		...Roles.regions,
 		type: RoleCategoryTypes.Category,
 		color: fromHex('#c5e0d8'),
 		emoji: '🤷‍♂️',
@@ -220,85 +148,13 @@ const categories: RoleCategory[] = [
 		limit: 2,
 		collection: {
 			type: RoleCollectionTypes.CollectionLocalised,
-			onAssignMessage: (name) => `You are now from ${name}.`,
-			onUnassignMessage: (name) => `You are no longer from ${name}.`,
-			generateDescription: (name) => `I am from ${name}.`,
 			lists: {
-				'Armenian': fromNames([
-					'Aragats\'otn / Արագածոտն',
-					'Ararat / Արարատ',
-					'Armavir / Արմավիր',
-					'Geghark\'unik\' / Գեղարքունիք',
-					'Kotayk\' / Կոտայք',
-					'Lorri / Լոռի',
-					'Shirak / Շիրակ',
-					'Syunik\' / Սյունիք',
-					'Tavush / Տավուշ',
-					'Vayots\' Dzor / Վայոց Ձոր',
-					'Yerevan / Երևան',
-				]),
-				'Belarusian': fromNames([
-					'Brest / Брэсцкая',
-					'Hrodna / Гродзенская',
-					'Homel / Гомельская',
-					'Mahilyow / Магілёўская',
-					'Minsk / Мінская',
-					'Vitsebsk / Вiцебская',
-				]),
-				'Romanian': fromNames([
-					'Banat',
-					'Basarabia',
-					'Bucovina',
-					'Crișana',
-					'Dobrogea',
-					'Maramureș',
-					'Moldova',
-					'Muntenia',
-					'Oltenia',
-					'Transilvania',
-				]),
+				'Armenian': Roles.regions.languages['Armenian'],
+				'Belarusian': Roles.regions.languages['Belarusian'],
+				'Romanian': Roles.regions.languages['Romanian'],
 			},
 		},
 	},
 ];
 
-/**
- * Taking an array of categories with partial information filled in, completes
- * the necessary information, and returns the complete role categories.
- *
- * @param roleCategories - The incomplete role categories.
- * @returns The completed categories.
- */
-function supplyMissingProperties(
-	roleCategories: RoleCategory[],
-): RoleCategory[] {
-	for (const category of roleCategories) {
-		if (category.type === RoleCategoryTypes.CategoryGroup) {
-			supplyMissingProperties(category.categories);
-			continue;
-		}
-
-		const collection = category.collection;
-
-		const roleLists =
-			collection.type === RoleCollectionTypes.CollectionLocalised
-				? Object.values<Role[]>(collection.lists)
-				: [collection.list];
-
-		for (const roleList of roleLists) {
-			for (const role of roleList) {
-				role.description ??= collection.generateDescription!(role.name);
-				role.onAssignMessage ??= collection.onAssignMessage;
-				if ('onUnassignMessage' in collection) {
-					role.onUnassignMessage = collection.onUnassignMessage;
-				}
-			}
-		}
-	}
-
-	return roleCategories;
-}
-
-const categoriesComplete = supplyMissingProperties(categories);
-
-export default categoriesComplete;
+export default categories;
