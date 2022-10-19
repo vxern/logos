@@ -181,6 +181,21 @@ class Parameters {
 			},
 		},
 	});
+
+	static readonly social = typedLocalisations({
+		roles: {
+			name: {
+				'English': 'role',
+				'Polish': 'rola',
+				'Romanian': 'rol',
+			},
+			description: {
+				'English': 'The name of the role.',
+				'Polish': 'Nazwa roli.',
+				'Romanian': 'Numele rolului.',
+			},
+		},
+	});
 }
 
 export { Parameters };

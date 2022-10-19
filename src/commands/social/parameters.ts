@@ -1,17 +1,10 @@
+import { Parameters } from '../../../assets/localisations/parameters.ts';
+import { createLocalisations } from '../../../assets/localisations/types.ts';
 import { ApplicationCommandOptionTypes } from '../../../deps.ts';
 import { OptionBuilder } from '../../commands/command.ts';
 
 const role: OptionBuilder = {
-	name: 'role',
-	nameLocalizations: {
-		pl: 'rola',
-		ro: 'rol',
-	},
-	description: 'The name of the role.',
-	descriptionLocalizations: {
-		pl: 'Nazwa roli.',
-		ro: 'Numele rolului.',
-	},
+  ...createLocalisations(Parameters.social.roles),
 	type: ApplicationCommandOptionTypes.Role,
 	required: true,
 };
