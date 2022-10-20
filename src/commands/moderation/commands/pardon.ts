@@ -29,13 +29,13 @@ import {
 import { Commands } from '../../../../assets/localisations/commands.ts';
 
 const command: CommandBuilder = {
-	...createLocalisations(Commands.unwarn),
+	...createLocalisations(Commands.pardon),
 	defaultMemberPermissions: ['MODERATE_MEMBERS'],
 	handle: unwarnUser,
 	options: [
 		user,
 		{
-			...createLocalisations(Commands.unwarn.options.warning),
+			...createLocalisations(Commands.pardon.options.warning),
 			type: ApplicationCommandOptionTypes.String,
 			required: true,
 			autocomplete: true,
@@ -91,7 +91,7 @@ async function unwarnUser(
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(
-							Commands.unwarn.strings.failed,
+							Commands.pardon.strings.failed,
 							interaction.locale,
 						),
 						color: configuration.interactions.responses.colors.red,
@@ -155,14 +155,14 @@ async function unwarnUser(
 	);
 	if (!warningToRemove) {
 		return displayUnwarnError(
-			localise(Commands.unwarn.strings.alreadyRemoved, interaction.locale),
+			localise(Commands.pardon.strings.alreadyRemoved, interaction.locale),
 		);
 	}
 
 	const warning = await deleteWarning(client.database, warningToRemove);
 	if (!warning) {
 		return displayUnwarnError(
-			localise(Commands.unwarn.strings.failed, interaction.locale),
+			localise(Commands.pardon.strings.failed, interaction.locale),
 		);
 	}
 
@@ -188,7 +188,7 @@ async function unwarnUser(
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
 					description: localise(
-						Commands.unwarn.strings.pardoned,
+						Commands.pardon.strings.pardoned,
 						interaction.locale,
 					)(mention(member.id, MentionTypes.User), warning.data.reason),
 					color: configuration.interactions.responses.colors.green,
@@ -213,7 +213,7 @@ async function unwarnUser(
 					return { url: iconURL };
 				})(),
 				description: localise(
-					Commands.unwarn.strings.pardonedDirect,
+					Commands.pardon.strings.pardonedDirect,
 					interaction.locale,
 				)(warning.data.reason, displayTime(warning.ts)),
 				color: configuration.interactions.responses.colors.green,
