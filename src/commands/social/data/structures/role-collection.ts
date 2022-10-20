@@ -1,3 +1,4 @@
+import { Commands } from '../../../../../assets/localisations/commands.ts';
 import { localise } from '../../../../../assets/localisations/types.ts';
 import { Role as DiscordRole, SelectOption } from '../../../../../deps.ts';
 import { Language } from '../../../../types.ts';
@@ -64,7 +65,11 @@ function createSelectOptionsFromCollection(
 		const localisedName = localise(role.name, locale);
 
 		selectOptions.push({
-			label: memberHasRole ? `[Assigned] ${localisedName}` : localisedName,
+			label: memberHasRole
+				? `[${
+					localise(Commands.profile.options.roles.strings.assigned, locale)
+				}] ${localisedName}`
+				: localisedName,
 			value: index.toString(),
 			description: role.description
 				? localise(role.description, locale)
