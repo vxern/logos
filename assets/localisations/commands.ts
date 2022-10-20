@@ -984,6 +984,26 @@ class Commands {
 						'Romanian': 'Nu s-a putut găsi melodia.\n\n' +
 							'Încearcă să cauți melodia într-un mod diferit, sau să redai o altă melodie.',
 					},
+					mustBeInVoiceChannel: {
+						'English': 'To manipulate music, you must be in a voice channel.',
+					},
+					alreadyPlayingInAnotherVoiceChannel: {
+						'English': 'The bot is playing music in another voice channel.',
+					},
+					queueIsFull: {
+						'English':
+							'The queue is full; Try removing a song from the song queue, skip the current song to advance the queue immediately, or wait until the current song stops playing.',
+					},
+					// Do not localise; this is a public feedback message.
+					queued: {
+						header: {
+							'English': 'Listing queued',
+						},
+						body: {
+							'English': (listingTitle: string) =>
+								`Your listing, **${listingTitle}**, has been added to the queue.`,
+						},
+					},
 				},
 			},
 			queue: {
@@ -1343,6 +1363,49 @@ class Commands {
 				'English': 'The skip argument must be greater than zero.',
 				'Polish': 'Argument przewinięcia musi być większy niż zero.',
 				'Romanian': 'Argumentul trebuie să fie mai mare decât zero.',
+			},
+			// Do not localise; this is a public feedback message.
+			allDone: {
+				header: {
+					'English': 'All done!',
+				},
+				body: {
+					'English': 'Can I go home for today?',
+				},
+			},
+			// Do not localise; this is a public feedback message.
+			couldNotLoadTrack: {
+				header: {
+					'English': 'Couldn\'t load track',
+				},
+				body: {
+					'English': (songTitle: string) =>
+						`The track, **${songTitle}**, could not be loaded.`,
+				},
+			},
+			// Do not localise (not even 'parts'); this is a public feedback message.
+			playing: {
+				header: {
+					'English': 'Now playing',
+				},
+				body: {
+					'English': (
+						displayTrack: string,
+						songTitle: string,
+						songUrl: string,
+						userMention: string,
+					) =>
+						`Now playing ${displayTrack} [**${songTitle}**](${songUrl}) as requested by ${userMention}.`,
+				},
+				parts: {
+					displayTrack: {
+						'English': (
+							position: number,
+							songCount: number,
+							listingTitle: string,
+						) => `track **${position}/${songCount}** of **${listingTitle}**: `,
+					},
+				},
 			},
 		},
 	});
