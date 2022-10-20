@@ -12,10 +12,10 @@ const commands = [cite, list, pardon, timeout, warn];
 function getRelevantWarnings(
 	warnings: Document<Warning>[],
 ): Document<Warning>[] {
-	return warnings.filter((warning) =>
-		(Date.now() - warning.ts) * 1000 <
-			configuration.guilds.moderation.warnings.interval
-	);
+	return warnings.filter((warning) => {
+		return (Date.now() - warning.ts) <
+			configuration.guilds.moderation.warnings.interval;
+	});
 }
 
 export default commands;
