@@ -1,7 +1,9 @@
 // deno-lint-ignore-file camelcase
 import 'dotenv_load';
 import { Commands } from '../../../../assets/localisations/commands.ts';
-import { localisationsByLanguage } from '../../../../assets/localisations/languages.ts';
+import {
+	getLocalisations,
+} from '../../../../assets/localisations/languages.ts';
 import {
 	createLocalisations,
 	localise,
@@ -20,7 +22,6 @@ import { Client } from '../../../client.ts';
 import { CommandBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
 import { deepLApiEndpoints } from '../../../constants.ts';
-import { defaultLanguage } from '../../../types.ts';
 import { show } from '../../parameters.ts';
 
 const command: CommandBuilder = {
@@ -66,8 +67,7 @@ const deepLSecret = Deno.env.get('DEEPL_SECRET')!;
 
 const supportedLanguages = await getSupportedLanguages();
 const supportedLanguagesChoices = supportedLanguages.map((language) => ({
-	name: localisationsByLanguage[language.name] ??
-		{ [defaultLanguage]: language.name },
+	name: getLocalisations(language.name),
 	value: language.code,
 }));
 
@@ -312,21 +312,28 @@ async function translate(
 		? translation.text
 		: '⠀';
 
+	const sourceLanguageName = localise(
+		getLocalisations(sourceLanguage.name),
+		interaction.locale,
+	);
+	const targetLanguageName = localise(
+		getLocalisations(targetLanguage.name),
+		interaction.locale,
+	);
+
 	return void editOriginalInteractionResponse(
 		bot,
 		interaction.token,
 		{
 			embeds: [{
-				title: `${localisationsByLanguage[sourceLanguage.name]} → ${
-					localisationsByLanguage[targetLanguage.name]
-				}`,
+				title: `${sourceLanguageName} → ${targetLanguageName}`,
 				color: configuration.interactions.responses.colors.blue,
 				fields: [{
-					name: sourceLanguage.name,
+					name: sourceLanguageName,
 					value: text,
 					inline: false,
 				}, {
-					name: targetLanguage.name,
+					name: targetLanguageName,
 					value: translatedText,
 					inline: false,
 				}],
