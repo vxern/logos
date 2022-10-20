@@ -1,8 +1,22 @@
+import { Language } from '../../src/types.ts';
 import { Localisations } from './types.ts';
 
+type LocalisationsByLanguage =
+	& Required<Record<Language, Localisations<string>>>
+	& Record<string, Localisations<string>>;
+
 // https://www.deepl.com/docs-api/translate-text/translate-text
-// Do not change keys.
-const languagesWithLocalisations: Record<string, Localisations<string>> = {
+const localisationsByLanguage: LocalisationsByLanguage = {
+	'Armenian': {
+		'English': 'Armenian',
+		'Polish': 'Ormiański',
+		'Romanian': 'Armeană',
+	},
+	'Belarusian': {
+		'English': 'Belarusian',
+		'Polish': 'Białoruski',
+		'Romanian': 'Belarusă',
+	},
 	'Bulgarian': {
 		'English': 'Bulgarian',
 		'Polish': 'Bułgarski',
@@ -144,4 +158,4 @@ const languagesWithLocalisations: Record<string, Localisations<string>> = {
 	},
 };
 
-export { languagesWithLocalisations };
+export { localisationsByLanguage };

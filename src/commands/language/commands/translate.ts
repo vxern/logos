@@ -1,7 +1,7 @@
 // deno-lint-ignore-file camelcase
 import 'dotenv_load';
 import { Commands } from '../../../../assets/localisations/commands.ts';
-import { languagesWithLocalisations } from '../../../../assets/localisations/languages.ts';
+import { localisationsByLanguage } from '../../../../assets/localisations/languages.ts';
 import {
 	createLocalisations,
 	localise,
@@ -66,7 +66,7 @@ const deepLSecret = Deno.env.get('DEEPL_SECRET')!;
 
 const supportedLanguages = await getSupportedLanguages();
 const supportedLanguagesChoices = supportedLanguages.map((language) => ({
-	name: languagesWithLocalisations[language.name] ??
+	name: localisationsByLanguage[language.name] ??
 		{ [defaultLanguage]: language.name },
 	value: language.code,
 }));
@@ -317,7 +317,9 @@ async function translate(
 		interaction.token,
 		{
 			embeds: [{
-				title: `${languagesWithLocalisations[sourceLanguage.name]} → ${languagesWithLocalisations[targetLanguage.name]}`,
+				title: `${localisationsByLanguage[sourceLanguage.name]} → ${
+					localisationsByLanguage[targetLanguage.name]
+				}`,
 				color: configuration.interactions.responses.colors.blue,
 				fields: [{
 					name: sourceLanguage.name,
