@@ -15,6 +15,11 @@ class Information {
 			'Polish': 'Strzeszczenie',
 			'Romanian': 'Pe scurt',
 		},
+		rule: {
+			'English': 'Rule',
+			'Polish': 'Reguła',
+			'Romanian': 'Regulă',
+		},
 		rules: {
 			behaviour: {
 				title: {
@@ -145,7 +150,7 @@ class Information {
 				},
 			},
 		},
-    // Do not localise; this is a public feedback message.
+		// Do not localise; this is a public feedback message.
 		moderationPolicy: {
 			header: {
 				'English': 'Moderation policy',
@@ -160,10 +165,10 @@ class Information {
 		},
 	};
 
-  // Do not localise; this is a public feedback message.
-  static readonly invite = {
-    'English': 'Permanent invite link',
-  }
+	// Do not localise; this is a public feedback message.
+	static readonly invite = {
+		'English': 'Permanent invite link',
+	};
 }
 
 export { Information };
