@@ -20,6 +20,9 @@ import {
 } from '../commands/music/data/song-listing.ts';
 import { SongStream } from '../commands/music/data/song-stream.ts';
 import { mention, MentionTypes } from '../formatting.ts';
+import { Commands } from '../../assets/localisations/commands.ts';
+import { localise } from '../../assets/localisations/types.ts';
+import { defaultLanguage } from '../types.ts';
 
 class MusicController {
 	private client: Client;
@@ -111,9 +114,10 @@ class MusicController {
 						flags: ApplicationCommandFlags.Ephemeral,
 						embeds: [
 							{
-								title: 'You are not in a voice channel',
-								description:
-									'To manipulate music, you must be in a voice channel.',
+								description: localise(
+									Commands.music.options.play.strings.mustBeInVoiceChannel,
+									interaction.locale,
+								),
 								color: configuration.interactions.responses.colors.yellow,
 							},
 						],
@@ -133,9 +137,11 @@ class MusicController {
 					data: {
 						flags: ApplicationCommandFlags.Ephemeral,
 						embeds: [{
-							title: 'The bot is playing music in another voice channel',
-							description:
-								'Join the channel the bot is already playing music in, or wait for the bot to free up.',
+							description: localise(
+								Commands.music.options.play.strings
+									.alreadyPlayingInAnotherVoiceChannel,
+								interaction.locale,
+							),
 							color: configuration.interactions.responses.colors.yellow,
 						}],
 					},
@@ -176,9 +182,10 @@ class MusicController {
 					data: {
 						flags: ApplicationCommandFlags.Ephemeral,
 						embeds: [{
-							title: 'The queue is full',
-							description:
-								'Try removing a song from the song queue, skip the current song to advance the queue immediately, or wait until the current song stops playing.',
+							description: localise(
+								Commands.music.options.play.strings.queueIsFull,
+								interaction.locale,
+							),
 							color: configuration.interactions.responses.colors.yellow,
 						}],
 					},
@@ -228,9 +235,16 @@ class MusicController {
 		}
 
 		const embeds = [{
-			title: '👍 Listing queued.',
-			description:
-				`Your listing, **${songListing.content.title}**, has been added to the queue.`,
+			title: `👍 ${
+				localise(
+					Commands.music.options.play.strings.queued.header,
+					defaultLanguage,
+				)
+			}`,
+			description: localise(
+				Commands.music.options.play.strings.queued.body,
+				defaultLanguage,
+			)(songListing.content.title),
 			color: configuration.interactions.responses.colors.green,
 		}];
 
@@ -309,8 +323,13 @@ class MusicController {
 
 			return sendMessage(this.client.bot, this.textChannel.id, {
 				embeds: [{
-					title: '👏 All done!',
-					description: 'Can I go home for today?',
+					title: `👏 ${
+						localise(Commands.music.strings.allDone.header, defaultLanguage)
+					}`,
+					description: localise(
+						Commands.music.strings.allDone.body,
+						defaultLanguage,
+					),
 					color: configuration.interactions.responses.colors.blue,
 				}],
 			});
@@ -327,9 +346,14 @@ class MusicController {
 			tracksResponse.loadType === LoadType.NoMatches
 		) {
 			const embeds = [{
-				title: 'Couldn\'t load track',
-				description:
-					`The track, **${currentSong.title}**, could not be loaded.`,
+				title: localise(
+					Commands.music.strings.couldNotLoadTrack.header,
+					defaultLanguage,
+				),
+				description: localise(
+					Commands.music.strings.couldNotLoadTrack.body,
+					defaultLanguage,
+				)(currentSong.title),
 				color: configuration.interactions.responses.colors.red,
 			}];
 
@@ -380,17 +404,29 @@ class MusicController {
 
 		const embeds = [{
 			title: `${configuration.music.symbols[this.current.content.type]} ${
-				!wasLooped ? 'Playing' : 'Replaying'
+				localise(
+					Commands.music.strings.playing.header,
+					defaultLanguage,
+				)
 			} ${SongListingContentTypes[this.current.content.type]!.toLowerCase()}`,
-			description: `${!wasLooped ? 'Now playing' : 'Replaying'} ${
-				this.current.content.type !== SongListingContentTypes.Collection
-					? ''
-					: `track **${
-						this.current.content.position + 1
-					}/${this.current.content.songs.length}** of **${this.current.content.title}**: `
-			} [**${currentSong.title}**](${currentSong.url}) as requested by ${
-				mention(this.current.requestedBy, MentionTypes.User)
-			}.`,
+			description: localise(
+				Commands.music.strings.playing.body,
+				defaultLanguage,
+			)(
+				this.current.content.type === SongListingContentTypes.Collection
+					? localise(
+						Commands.music.strings.playing.parts.displayTrack,
+						defaultLanguage,
+					)(
+						this.current.content.position + 1,
+						this.current.content.songs.length,
+						this.current.content.title,
+					)
+					: '',
+				currentSong.title,
+				currentSong.url,
+				mention(this.current.requestedBy, MentionTypes.User),
+			),
 			color: configuration.interactions.responses.colors.invisible,
 		}];
 
