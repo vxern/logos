@@ -105,12 +105,9 @@ async function deleteWarning(
 		warning.data.subject.value.id,
 	)!.findIndex((warning) => warning.ref.value.id === document.ref.value.id)!;
 
-	database.warningsBySubject.set(
-		warning.data.subject.value.id,
-		database.warningsBySubject.get(warning.data.subject.value.id)!.splice(
-			indexOfWarningToRemove,
-			indexOfWarningToRemove,
-		),
+	database.warningsBySubject.get(warning.data.subject.value.id)!.splice(
+		indexOfWarningToRemove,
+		1,
 	);
 
 	console.log(`Deleted warning ${document.ref}.`);
