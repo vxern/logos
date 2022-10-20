@@ -1,4 +1,5 @@
 import { Commands } from '../../../../assets/localisations/commands.ts';
+import { Information } from '../../../../assets/localisations/information.ts';
 import {
 	createLocalisations,
 	localise,
@@ -16,7 +17,7 @@ import { Client } from '../../../client.ts';
 import { CommandBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
 import { capitalise } from '../../../formatting.ts';
-import ruleGenerators from '../../secret/data/information/generators/rules.ts';
+import { defaultLanguage } from '../../../types.ts';
 
 const command: CommandBuilder = {
 	...createLocalisations(Commands.cite),
@@ -35,9 +36,14 @@ function citeRule(
 	interaction: Interaction,
 ): void {
 	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete) {
-		const choices = Object.keys(ruleGenerators).map((name, index) => ({
+		const choices = Object.values(Information.rules.rules).map((
+			rule,
+			index,
+		) => ({
 			name: `#${index + 1}: ${
-				name.toLowerCase().split(' ').map(capitalise).join(' ')
+				localise(rule.title, interaction.locale).toLowerCase().split(' ').map(
+					capitalise,
+				).join(' ')
 			}`,
 			value: index.toString(),
 		}));
@@ -80,15 +86,12 @@ function citeRule(
 	const index = Number(indexString);
 	if (isNaN(index)) return displayInvalidRuleError();
 
-	const titleRuleTuples = Object.entries(ruleGenerators).at(index);
-	if (!titleRuleTuples) return displayInvalidRuleError();
-
-	const [title, generateRule] = titleRuleTuples;
+	const rule = Object.values(Information.rules.rules).at(index);
+	if (!rule) return displayInvalidRuleError();
 
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (!guild) return;
 
-	const rule = generateRule(guild);
 	return void sendInteractionResponse(
 		bot,
 		interaction.id,
@@ -97,8 +100,12 @@ function citeRule(
 			type: InteractionResponseTypes.ChannelMessageWithSource,
 			data: {
 				embeds: [{
-					title: `${title.toUpperCase()} ~ TLDR: *${rule.summary}*`,
-					description: rule.content,
+					title: `${localise(Information.rules.rule, defaultLanguage)} #${
+						index + 1
+					}: ${localise(rule.title, defaultLanguage)} ~ ${
+						localise(Information.rules.tldr, defaultLanguage)
+					}: *${localise(rule.summary, defaultLanguage)}*`,
+					description: localise(rule.content, defaultLanguage)(guild),
 					color: configuration.interactions.responses.colors.blue,
 				}],
 			},
