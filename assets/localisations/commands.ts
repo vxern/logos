@@ -1557,6 +1557,11 @@ class Commands {
 						'Polish': 'Wstecz',
 						'Romanian': 'Înapoi',
 					},
+					assigned: {
+						'English': 'Assigned',
+						'Polish': 'Przydzielono',
+						'Romanian': 'Atribuit',
+					},
 				},
 			},
 			view: {
