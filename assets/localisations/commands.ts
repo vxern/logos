@@ -49,11 +49,11 @@ class Commands {
 					'Romanian': 'Afișează informații despre bot.',
 				},
 				strings: {
-					whatAmI: {
+					whoAmI: {
 						header: {
-							'English': 'What am I?',
-							'Polish': 'Czym jestem?',
-							'Romanian': 'Ce sunt?',
+							'English': 'Who am I?',
+							'Polish': 'Kim jestem?',
+							'Romanian': 'Cine sunt?',
 						},
 						body: {
 							'English': (botUser: User) =>
@@ -69,7 +69,7 @@ class Commands {
 									])
 								}`,
 							'Polish': (botUser: User) =>
-								`Jestem **${botUser.username}**, aplikacją stworzoną dla zaoferowania społecznościom Discord do nauki języków obcych najwyższej jakości funkcje, takie jak:
+								`Nazywam się **${botUser.username}**. Jestem aplikacją stworzoną do zaoferowania społecznościom języcznym na Discordzie najwyższej jakości funkcji, takich jak:
               ${
 									list([
 										'Bogate interakcje socjalne',
@@ -81,7 +81,7 @@ class Commands {
 									])
 								}`,
 							'Romanian': (botUser: User) =>
-								`Sunt **${botUser.username}**, o aplicație creată pentru a oferi comunităților Discord de învățat limbile străine funcții de cea mai înaltă calitate, cum ar fi:
+								`Sunt **${botUser.username}**. Sunt o aplicație creată pentru a oferi comunităților lingvistice Discord funcții de cea mai înaltă calitate, cum ar fi:
               ${
 									list([
 										'Interacțiuni sociale bogate',
@@ -97,7 +97,7 @@ class Commands {
 					howWasIMade: {
 						header: {
 							'English': 'How was I made?',
-							'Polish': 'Jak zostałem stworzony?',
+							'Polish': 'Jak mnie stworzono?',
 							'Romanian': 'Cum am fost creat?',
 						},
 						body: {
@@ -112,8 +112,8 @@ class Commands {
 					howToAddToServer: {
 						header: {
 							'English': 'How can you add me to your server?',
-							'Polish': 'Jak można dodać mnie na swój serwer?',
-							'Romanian': 'Cum pot fi adăugat pe server?',
+							'Polish': 'Jak można dodać mnie na własny serwer?',
+							'Romanian': 'Cum poți să mă adaugi pe serverul tău?',
 						},
 						body: {
 							'English':
@@ -134,9 +134,9 @@ class Commands {
 							'English':
 								`Unfortunately, no. However, my predecessor, Talon, *is*. You can view his source code [here](${links.talonRepositoryLink}).`,
 							'Polish':
-								`Niestety nie. Jednakże, kod źródłowy mojego poprzednika, Talona, *jest* publiczny. Można zajrzeć w jego kod źródłowy [tutaj](${links.talonRepositoryLink}).`,
+								`Niestety nie. Jednakże, kod źródłowy mojego poprzednika, Talona, jest publiczny. Można zajrzeć w jego kod źródłowy [tutaj](${links.talonRepositoryLink}).`,
 							'Romanian':
-								`Nu, din păcate. Deși, codul-sursă al predecesorului meu, lui Talon, *este* public. Îl puteți vedea [aici](${links.talonRepositoryLink}).`,
+								`Nu, din păcate. Deși, codul-sursă al predecesorului meu, al lui Talon, este public. Îl puteți vedea [aici](${links.talonRepositoryLink}).`,
 						},
 					},
 				},
@@ -589,7 +589,7 @@ class Commands {
 			cannotTimeoutSelf: {
 				'English': 'You cannot time yourself out.',
 				'Polish': 'Nie można wyciszyć siebie samego.',
-				'Romanian': 'Nu îți poți seta însuți o pauză.',
+				'Romanian': 'Nu îți poți seta însuți un timeout.',
 			},
 			invalidDuration: {
 				'English': 'The provided duration is invalid.',
@@ -608,32 +608,38 @@ class Commands {
 			},
 			timedOut: {
 				'English': (userMention: string, until: string) =>
-					`User ${userMention} has been timed out until ${until}.`,
+					`User ${userMention} has been timed out. The timeout will expire ${until}.`,
 				'Polish': (userMention: string, until: string) =>
-					`Użytkownik ${userMention} został wyciszony do ${until}.`,
+					`Użytkownik ${userMention} został wyciszony. Wyciszenie wygaśnie ${until}.`,
 				'Romanian': (userMention: string, until: string) =>
-					`Utilizatorul ${userMention} a primit un timeout care va dura până la ${until}.`,
+					`Utilizatorul ${userMention} a primit un timeout. Timeout-ul va expira ${until}.`,
 			},
 			timedOutWithReason: {
 				'English': (userMention: string, until: string, reason: string) =>
-					`User ${userMention} has been timed out until ${until} for: ${reason}`,
+					`User ${userMention} has been timed out for: ${reason}\n\n` +
+					`The timeout will expire ${until}`,
 				'Polish': (userMention: string, until: string, reason: string) =>
-					`Użytkownik ${userMention} został wyciszony do ${until} za: ${reason}`,
+					`Użytkownik ${userMention} został wyciszony za: ${reason}\n\n` +
+					`Wyciszenie wygaśnie ${until}.`,
 				'Romanian': (userMention: string, until: string, reason: string) =>
-					`Utilizatorul ${userMention} a primit un timeout care va dura până la ${until} pentru: ${reason}`,
+					`Utilizatorul ${userMention} a primit un timeout pentru: ${reason}\n\n` +
+					`Timeout-ul va expira ${until}.`,
 			},
 			timedOutDirect: {
 				'English': (until: string, reason: string) =>
-					`You have been timed out until ${until} for: ${reason}`,
+					`You have been timed out for: ${reason}\n\n` +
+					`The timeout will expire ${until}.`,
 				'Polish': (until: string, reason: string) =>
-					`Zostałeś/aś wyciszony/a do ${until} za: ${reason}`,
+					`Zostałeś/aś wyciszony/a za: ${reason}\n\n` +
+					`The timeout will expire ${until}.`,
 				'Romanian': (until: string, reason: string) =>
-					`Ai primit un timeout care va dura până la ${until} pentru: ${reason}`,
+					`Ai primit un timeout pentru: ${reason}\n\n` +
+					`Timeout-ul va expira ${until}.`,
 			},
 			notTimedOut: {
 				'English': 'The provided user is not currently timed out.',
 				'Polish': 'Ten użytkownik nie jest wyciszony.',
-				'Romanian': 'Acest utilizator nu a avut o pauză impusă pe el.',
+				'Romanian': 'Acest utilizator nu a avut un timeout impus pe el.',
 			},
 			timeoutCleared: {
 				'English': (userMention: string) =>
@@ -641,15 +647,15 @@ class Commands {
 				'Polish': (userMention: string) =>
 					`Użytkownik ${userMention} już nie jest wyciszony.`,
 				'Romanian': (userMention: string) =>
-					`Utilizatorul ${userMention} nu mai are o pauză.`,
+					`Utilizatorul ${userMention} nu mai are un timeout.`,
 			},
 		},
 	});
 
-	static readonly unwarn = typedLocalisations({
+	static readonly pardon = typedLocalisations({
 		name: {
 			'English': 'pardon',
-			'Polish': 'ułaskawienie',
+			'Polish': 'ułaskaw',
 			'Romanian': 'grațiere',
 		},
 		description: {
