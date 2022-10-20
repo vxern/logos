@@ -30,7 +30,10 @@ async function clearTimeout(
 	);
 	if (!member) return;
 
-	if (!member.communicationDisabledUntil) {
+	const notTimedOut = !member.communicationDisabledUntil ||
+		member.communicationDisabledUntil < Date.now();
+
+	if (notTimedOut) {
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
