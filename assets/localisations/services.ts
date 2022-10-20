@@ -50,6 +50,28 @@ class Services {
 				},
 			},
 		},
+		verification: {
+			answersSubmitted: {
+				// Use exclamation if possible.
+				header: {
+					'English': 'Answers submitted!',
+					'Polish': 'Odpowiedzi wysłane!',
+					'Romanian': 'Răspunsuri transmise!',
+				},
+				body: {
+					'English':
+						'Your answers to the verification questions have been submitted.\n\n' +
+						'Your request to join the server will be reviewed by a staff member, and you will be notified via DMs when your entry request is accepted.',
+					'Polish': 'Wysłano Twoje odpowiedzi na pytania weryfikacyjne.\n\n' +
+						'Twoja prośba o dołączenie do serwera będzie przejrzana przez jednego z moderatorów.' +
+						'Gdy to się wydarzy, zostaniesz powiadomiony/a poprzez DM.',
+					'Romanian':
+						'Răspunsurile tale la întrebările de verificate au fost transmitate.\n\n' +
+						'Cererea ta de a te alătura serverului va fi examinată de către un moderator.' +
+						'Când aceasta se va întâmpla, vei fi notificat/ă în DM-uri.',
+				},
+			},
+		},
 	};
 }
 
