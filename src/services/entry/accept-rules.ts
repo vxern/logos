@@ -1,5 +1,4 @@
 import {
-	ActionRow,
 	ApplicationCommandFlags,
 	Bot,
 	ButtonComponent,
@@ -11,31 +10,18 @@ import {
 	sendInteractionResponse,
 	User,
 } from '../../../deps.ts';
-import { capitalise, code } from '../../formatting.ts';
 import configuration from '../../configuration.ts';
 import { getProficiencyCategory } from '../../commands/social/module.ts';
 import { snowflakeToTimestamp } from '../../utils.ts';
 import { Client } from '../../client.ts';
+import {
+	Localisations,
+	localise,
+} from '../../../assets/localisations/types.ts';
+import { Services } from '../../../assets/localisations/services.ts';
 
 const proficiencyCategory = getProficiencyCategory();
 const proficiencies = proficiencyCategory.collection.list;
-const proficiencyButtonActionRow: ActionRow = {
-	type: MessageComponentTypes.ActionRow,
-	components: <[
-		ButtonComponent,
-		ButtonComponent,
-		ButtonComponent,
-		ButtonComponent,
-	]> proficiencies.map<ButtonComponent>(
-		(proficiency, index) => ({
-			type: MessageComponentTypes.Button,
-			label: proficiency.name,
-			customId: `SELECTED_LANGUAGE_PROFICIENCY|${index}`,
-			style: ButtonStyles.Secondary,
-			emoji: { name: proficiency.emoji },
-		}),
-	),
-};
 
 function onAcceptRules(
 	[client, bot]: [Client, Bot],
@@ -54,8 +40,11 @@ function onAcceptRules(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						title: 'Entry denied.',
-						description: screening.reason!,
+						title: localise(
+							Services.entry.rejected.entryDenied,
+							interaction.locale,
+						),
+						description: localise(screening.reason!, interaction.locale),
 					}],
 				},
 			},
@@ -74,16 +63,32 @@ function onAcceptRules(
 			data: {
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
-					title: 'Language Proficiency',
-					description: `Select the role that most accurately describes your ${
-						capitalise(guild.language)
-					} language proficiency.
-
-          ℹ️ **You can always change this later using the ${
-						code('/profile roles')
-					} command.** ℹ️`,
+					title: localise(
+						Services.entry.selectProficiency.header,
+						interaction.locale,
+					),
+					description: localise(
+						Services.entry.selectProficiency.body,
+						interaction.locale,
+					)(guild.language),
 				}],
-				components: [proficiencyButtonActionRow],
+				components: [{
+					type: MessageComponentTypes.ActionRow,
+					components: <[
+						ButtonComponent,
+						ButtonComponent,
+						ButtonComponent,
+						ButtonComponent,
+					]> proficiencies.map<ButtonComponent>(
+						(proficiency, index) => ({
+							type: MessageComponentTypes.Button,
+							label: localise(proficiency.name, interaction.locale),
+							customId: `SELECTED_LANGUAGE_PROFICIENCY|${index}`,
+							style: ButtonStyles.Secondary,
+							emoji: { name: proficiency.emoji },
+						}),
+					),
+				}],
 			},
 		},
 	);
@@ -95,7 +100,7 @@ interface EntryDecision {
 	canEnter: boolean;
 
 	/** If the user may not enter, the reason for their rejection. */
-	reason?: string;
+	reason?: Localisations<string>;
 }
 
 /**
@@ -114,8 +119,7 @@ function screenUser(user: User): EntryDecision {
 	) {
 		return {
 			canEnter: false,
-			reason:
-				'Due to security concerns, accounts that are too new may not enter the server.',
+			reason: Services.entry.rejected.reasons.accountTooNew,
 		};
 	}
 
