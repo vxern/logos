@@ -407,7 +407,7 @@ class Commands {
 				},
 				description: {
 					'English':
-						'If set to true, more (perhaps unnecessary) information will be shown.',
+						'If set to true, more (possibly unnecessary) information will be shown.',
 					'Polish':
 						'Jeśli tak, więcej (możliwie niepotrzebnych) informacji będzie pokazanych.',
 					'Romanian':
