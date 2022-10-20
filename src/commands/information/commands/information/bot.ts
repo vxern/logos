@@ -41,11 +41,11 @@ async function displayBotInformation(
 					color: configuration.interactions.responses.colors.invisible,
 					fields: [{
 						name: localise(
-							Commands.information.options.bot.strings.whatAmI.header,
+							Commands.information.options.bot.strings.whoAmI.header,
 							interaction.locale,
 						),
 						value: localise(
-							Commands.information.options.bot.strings.whatAmI.body,
+							Commands.information.options.bot.strings.whoAmI.body,
 							interaction.locale,
 						)(botUser),
 					}, {
