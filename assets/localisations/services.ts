@@ -1,7 +1,8 @@
 import { code } from '../../src/formatting.ts';
 import { Language } from '../../src/types.ts';
 import { Expressions } from './expressions.ts';
-import { localisationsByLanguage } from './languages.ts';
+import { getLocalisations } from './languages.ts';
+import { localise } from './types.ts';
 
 class Services {
 	static readonly entry = {
@@ -13,7 +14,9 @@ class Services {
 			},
 			body: {
 				'English': (guildLanguage: Language) =>
-					`Select the role that most accurately describes your ${guildLanguage} language proficiency.\n\n` +
+					`Select the role that most accurately describes your ${
+						localise(getLocalisations(guildLanguage), 'English')
+					} language proficiency.\n\n` +
 					`ℹ️ **You can always change this later using the ${
 						code('/profile roles')
 					} command.** ℹ️`,
@@ -26,7 +29,7 @@ class Services {
 					}.** ℹ️`,
 				'Romanian': (guildLanguage: Language) =>
 					`Alege rolul care îți reprezintă competența cel mai bine în limba ${
-						localisationsByLanguage[guildLanguage]
+						localise(getLocalisations(guildLanguage), 'Romanian')
 					}.\n\n` +
 					`ℹ️ **Ține minte că o poți schimba mai apoi folosind comanda ${
 						code('/profile roles')

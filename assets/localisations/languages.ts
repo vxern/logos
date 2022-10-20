@@ -1,4 +1,4 @@
-import { Language } from '../../src/types.ts';
+import { defaultLanguage, Language } from '../../src/types.ts';
 import { Localisations } from './types.ts';
 
 type LocalisationsByLanguage =
@@ -158,4 +158,8 @@ const localisationsByLanguage: LocalisationsByLanguage = {
 	},
 };
 
-export { localisationsByLanguage };
+function getLocalisations(language: string): Localisations<string> {
+	return localisationsByLanguage[language] ?? { [defaultLanguage]: language };
+}
+
+export { getLocalisations, localisationsByLanguage };
