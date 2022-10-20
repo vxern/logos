@@ -82,7 +82,12 @@ function localise<T>(
 		return localisations[defaultLanguage];
 	}
 
-	return localisations[getLanguageByLocale(<Locales> locale)!]!;
+	const language = getLanguageByLocale(<Locales> locale)!;
+	if (!(language in localisations)) {
+		return localisations[defaultLanguage];
+	}
+
+	return localisations[language]!;
 }
 
 export type {
