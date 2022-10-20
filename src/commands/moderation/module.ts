@@ -3,11 +3,11 @@ import { Document } from '../../database/structs/document.ts';
 import { Warning } from '../../database/structs/users/warning.ts';
 import cite from './commands/cite.ts';
 import list from './commands/list.ts';
+import pardon from './commands/pardon.ts';
 import timeout from './commands/timeout.ts';
-import unwarn from './commands/unwarn.ts';
 import warn from './commands/warn.ts';
 
-const commands = [cite, list, timeout, unwarn, warn];
+const commands = [cite, list, pardon, timeout, warn];
 
 function getRelevantWarnings(
 	warnings: Document<Warning>[],
