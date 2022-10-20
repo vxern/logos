@@ -61,7 +61,7 @@ function postWelcome(
 				embeds: [{
 					description: localise(
 						Commands.post.options.welcome.strings.posted,
-						defaultLanguage,
+						interaction.locale,
 					),
 					color: configuration.interactions.responses.colors.blue,
 				}],
