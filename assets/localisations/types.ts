@@ -1,5 +1,6 @@
 import { Locales, Localization as DiscordLocalisation } from '../../deps.ts';
 import { defaultLanguage, Language } from '../../src/types.ts';
+import { getLocale } from './languages.ts';
 
 type Expression<T> = (argument: T) => string;
 type Localisations<T> = Partial<Record<Language, T>> & { [defaultLanguage]: T };
@@ -50,7 +51,7 @@ function createDiscordLocalisations(
 	return Object.fromEntries(
 		(<[Language, string][]> Object.entries(localisations))
 			.filter(([key, _value]) => key !== defaultLanguage)
-			.map(([key, value]) => [Locales[<keyof typeof Locales> key], value]),
+			.map(([key, value]) => [getLocale(key), value]),
 	);
 }
 
