@@ -1,3 +1,4 @@
+import { Locales } from '../../deps.ts';
 import { defaultLanguage, Language } from '../../src/types.ts';
 import { Localisations } from './types.ts';
 
@@ -158,8 +159,20 @@ const localisationsByLanguage: LocalisationsByLanguage = {
 	},
 };
 
+const localeByLanguage: Partial<Record<Language, `${Locales}`>> = {
+	'English': 'en-GB',
+	'Polish': 'pl',
+	'Romanian': 'ro',
+};
+
 function getLocalisations(language: string): Localisations<string> {
 	return localisationsByLanguage[language] ?? { [defaultLanguage]: language };
 }
 
-export { getLocalisations, localisationsByLanguage };
+function getLocale(
+	language: Language,
+): typeof localeByLanguage[keyof typeof localeByLanguage] {
+	return localeByLanguage[language] ?? 'en-GB';
+}
+
+export { getLocale, getLocalisations };
