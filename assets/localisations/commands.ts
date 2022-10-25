@@ -134,9 +134,9 @@ class Commands {
 							'English':
 								`Unfortunately, no. However, my predecessor, Talon, *is*. You can view his source code [here](${links.talonRepositoryLink}).`,
 							'Polish':
-								`Niestety nie. Jednakże, kod źródłowy mojego poprzednika, Talona, jest publiczny. Można zajrzeć w jego kod źródłowy [tutaj](${links.talonRepositoryLink}).`,
+								`Niestety nie, chociaż kod źródłowy mojego poprzednika, Talona, jest publiczny. Można zajrzeć w jego kod źródłowy [o tu](${links.talonRepositoryLink}).`,
 							'Romanian':
-								`Nu, din păcate. Deși, codul-sursă al predecesorului meu, al lui Talon, este public. Îl puteți vedea [aici](${links.talonRepositoryLink}).`,
+								`Nu, din păcate. Deși, codul-sursă al predecesorului meu, al lui Talon, este public. Îl puteți vedea [chiar aici](${links.talonRepositoryLink}).`,
 						},
 					},
 				},
@@ -162,7 +162,7 @@ class Commands {
 					},
 					noDescription: {
 						'English': 'No description provided.',
-						'Polish': 'Bez opisu.',
+						'Polish': 'Brak opisu.',
 						'Romanian': 'Fără descriere.',
 					},
 					overseenByModerators: {
@@ -178,9 +178,9 @@ class Commands {
 							}**.`,
 					},
 					withoutProficiencyRole: {
-						'English': 'without a proficiency role.',
-						'Polish': 'bez roli biegłości',
-						'Romanian': 'fără un rol de competență.',
+						'English': 'without a specified proficiency.',
+						'Polish': 'bez określonej biegłości.',
+						'Romanian': 'fără o competență specifizată.',
 					},
 					fields: {
 						description: {
@@ -531,8 +531,8 @@ class Commands {
 			},
 			userDoesNotHaveWarnings: {
 				'English': 'This user has not received any warnings.',
-				'Polish': 'Ten użytkownik nigdy nie dostał ostrzeżenia.',
-				'Romanian': 'Acest utilizator niciodată nu a primit o avertizare.',
+				'Polish': 'Ten użytkownik jeszcze nie dostał ostrzeżenia.',
+				'Romanian': 'Acest utilizator nu a primit încă o avertizare.',
 			},
 			warnings: {
 				'English': 'Warnings',

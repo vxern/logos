@@ -19,21 +19,21 @@ class Services {
 					} language proficiency.\n\n` +
 					`ℹ️ **You can always change this later using the ${
 						code('/profile roles')
-					} command.** ℹ️`,
+					} command.**`,
 				'Polish': (guildLanguage: Language) =>
-					`Wybierz rolę, która przedstawia najlepiej Twoją biegłość w języku ${
+					`Wybierz rolę, która najlepiej przedstawia Twoją biegłość w języku ${
 						Expressions.polish.cases.instrumental.languages[guildLanguage]
 					}.\n\n` +
 					`ℹ️ **Pamiętaj, że możesz ją później zmienić używając komendy ${
 						code('/profile roles')
-					}.** ℹ️`,
+					}.**`,
 				'Romanian': (guildLanguage: Language) =>
-					`Alege rolul care îți reprezintă competența cel mai bine în limba ${
+					`Alege rolul care îți reprezintă cel mai bine competența în limba ${
 						localise(getLocalisations(guildLanguage), 'Romanian')
 					}.\n\n` +
 					`ℹ️ **Ține minte că o poți schimba mai apoi folosind comanda ${
 						code('/profile roles')
-					}.** ℹ️`,
+					}.**`,
 			},
 		},
 		rejected: {
