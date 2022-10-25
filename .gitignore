@@ -1,5 +1,5 @@
-/.vscode
-.env
+.terraform/
+.terraform.lock.hcl
+terraform.tfstate
 
-lavalink/logs/
-lavalink/application.yml
+.env
