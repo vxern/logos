@@ -17,6 +17,7 @@ import {
 	snowflakeToBigint,
 	startBot,
 	Transformers,
+	upsertGuildApplicationCommands,
 	User,
 } from '../deps.ts';
 import services from './services/service.ts';
@@ -102,6 +103,8 @@ function createEventHandlers(client: Client): Partial<EventHandlers> {
 	return {
 		guildCreate: (bot, guild) => {
 			fetchMembers(bot, guild.id, { limit: 0, query: '' });
+
+			upsertGuildApplicationCommands(bot, guild.id, commandBuilders);
 
 			registerGuild(client, guild);
 			setupLogging([client, bot], guild);
