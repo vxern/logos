@@ -1,0 +1,8 @@
+[phases.setup]
+nixPkgs = ['...', 'terraform']
+
+[phases.build]
+build = 'terraform apply -auto-approve'
+
+[start]
+cmd = 'deno run --allow-env --allow-net --allow-read mod.ts'
