@@ -182,7 +182,7 @@ class Roles {
 			abroad: {
 				name: {
 					'English': 'Abroad',
-					'Polish': 'Za granicą',
+					'Polish': 'Zagranicą',
 					'Romanian': 'În străinătate',
 				},
 				description: {
