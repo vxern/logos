@@ -9,6 +9,19 @@ type TranslationLanguageMappings = Required<
 type LanguageMappings = Required<Record<Language, string>>;
 
 class Expressions {
+	static readonly english = {
+		methods: {
+			pluralise: (
+				number: string,
+				singular: string,
+				plural: string,
+			) => {
+				if (number == '1') return `${number} ${singular}`;
+				return `${number} ${plural}`;
+			},
+		},
+	};
+
 	static readonly polish = {
 		cases: {
 			// Do not change key names.
@@ -60,6 +73,22 @@ class Expressions {
 				},
 			},
 		},
+		methods: {
+			pluralise: (
+				number: string,
+				singular: string,
+				plural: string,
+				genitive: string,
+			) => {
+				if (['1', '12', '13', '14'].some((digits) => number == digits)) {
+					return `${number} ${singular}`;
+				}
+				if (['2', '3', '4'].some((digit) => number.endsWith(digit))) {
+					return `${number} ${plural}`;
+				}
+				return `${number} ${genitive}`;
+			},
+		},
 	};
 
 	static readonly romanian = {
@@ -74,6 +103,19 @@ class Expressions {
 						'Romanian': 'române',
 					}),
 				},
+			},
+		},
+		methods: {
+			pluralise: (
+				number: string,
+				singular: string,
+				plural: string,
+			) => {
+				if (number === '1') return `${number} ${singular}`;
+				if (
+					number.length === 1 || (number.length == 2 && number.at(0) == '1')
+				) return `${number} ${plural}`;
+				return `${number} de ${plural}`;
 			},
 		},
 	};
