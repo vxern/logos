@@ -6,9 +6,10 @@ import { CommandLocalisations, localise } from './types.ts';
 import {
 	getLocale,
 	getLocalisations,
-	TranslationLanguages,
+	TranslationLanguage,
 } from './languages.ts';
 import { Expressions } from './expressions.ts';
+import { Language } from '../../src/types.ts';
 
 function typedLocalisations<
 	OptionKeys extends string,
@@ -287,10 +288,19 @@ class Commands {
 			'Romanian': 'Afișează o listă cu resurse pentru învățarea limbii.',
 		},
 		strings: {
-			clickForResources: {
-				'English': 'Click here for resources',
-				'Polish': 'Kliknij tutaj dla zasobów',
-				'Romanian': 'Dă clic aici pentru resurse',
+			resourcesStoredHere: {
+				'English': (language: Language) =>
+					`Resources for learning ${
+						localise(getLocalisations(language), 'English')
+					} are stored here`,
+				'Polish': (language: Language) =>
+					`Zasoby do nauki ${
+						Expressions.polish.cases.genitive.languages[language].toLowerCase()
+					} są przechowywane tutaj`,
+				'Romanian': (language: Language) =>
+					`Resursele pentru învățatul limbii ${
+						Expressions.romanian.cases.genitive.indefinite.languages[language]
+					} sunt stocate aici`,
 			},
 		},
 	});
@@ -380,19 +390,19 @@ class Commands {
 				},
 			},
 			source: {
-				'English': (languageName: TranslationLanguages) =>
+				'English': (languageName: TranslationLanguage) =>
 					localise(getLocalisations(languageName), getLocale('English')),
-				'Polish': (languageName: TranslationLanguages) =>
+				'Polish': (languageName: TranslationLanguage) =>
 					Expressions.polish.cases.genitive.languages[languageName],
-				'Romanian': (languageName: TranslationLanguages) =>
+				'Romanian': (languageName: TranslationLanguage) =>
 					localise(getLocalisations(languageName), getLocale('Romanian')),
 			},
 			target: {
-				'English': (languageName: TranslationLanguages) =>
+				'English': (languageName: TranslationLanguage) =>
 					localise(getLocalisations(languageName), getLocale('English')),
-				'Polish': (languageName: TranslationLanguages) =>
+				'Polish': (languageName: TranslationLanguage) =>
 					localise(getLocalisations(languageName), getLocale('Polish')),
-				'Romanian': (languageName: TranslationLanguages) =>
+				'Romanian': (languageName: TranslationLanguage) =>
 					localise(getLocalisations(languageName), getLocale('Romanian')),
 			},
 			text: {

@@ -16,11 +16,13 @@ import { Client } from '../../../client.ts';
 import { CommandBuilder } from '../../../commands/command.ts';
 import { links } from '../../../constants.ts';
 import { defaultLanguage } from '../../../types.ts';
+import { show } from '../../parameters.ts';
 
 const command: CommandBuilder = {
 	...createLocalisations(Commands.resources),
 	defaultMemberPermissions: ['VIEW_CHANNEL'],
 	handle: resources,
+	options: [show],
 };
 
 /** Displays a message with information on where to find the resources for a given language. */
@@ -33,6 +35,12 @@ function resources(
 
 	const repositoryLink = links.generateLanguageRepositoryLink(guild.language);
 
+	const show =
+		<boolean> interaction.data?.options?.find((option) =>
+			option.name === 'show'
+		)?.value ??
+			false;
+
 	return void sendInteractionResponse(
 		bot,
 		interaction.id,
@@ -40,15 +48,15 @@ function resources(
 		{
 			type: InteractionResponseTypes.ChannelMessageWithSource,
 			data: {
-				flags: ApplicationCommandFlags.Ephemeral,
+				flags: !show ? ApplicationCommandFlags.Ephemeral : undefined,
 				components: [{
 					type: MessageComponentTypes.ActionRow,
 					components: [{
 						type: MessageComponentTypes.Button,
 						label: localise(
-							Commands.resources.strings.clickForResources,
-							defaultLanguage,
-						),
+							Commands.resources.strings.resourcesStoredHere,
+							show ? defaultLanguage : interaction.locale,
+						)(guild.language),
 						style: ButtonStyles.Link,
 						url: repositoryLink,
 					}],
