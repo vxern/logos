@@ -1,9 +1,11 @@
 import {
+	ActivityTypes,
 	ApplicationCommandOptionTypes,
 	Bot,
 	Channel,
 	createBot,
 	createTransformers,
+	editShardStatus,
 	EventHandlers,
 	fetchMembers,
 	Guild,
@@ -99,8 +101,27 @@ function initialiseClient(): void {
 	return void startBot(bot);
 }
 
+const version = new TextDecoder().decode(
+	await Deno.run({
+		cmd: ['git', 'tag', '--sort=-committerdate', '--list', 'v*'],
+		stdout: 'piped',
+	}).output(),
+).split('\n').at(0);
+
 function createEventHandlers(client: Client): Partial<EventHandlers> {
 	return {
+		ready: (bot, payload) => {
+			if (!version) return;
+
+			editShardStatus(bot, payload.shardId, {
+				activities: [{
+					name: version,
+					type: ActivityTypes.Streaming,
+					createdAt: Date.now(),
+				}],
+				status: 'online',
+			});
+		},
 		guildCreate: (bot, guild) => {
 			fetchMembers(bot, guild.id, { limit: 0, query: '' });
 
