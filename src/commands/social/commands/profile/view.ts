@@ -87,13 +87,13 @@ async function viewProfile(
 	);
 	if (!praisesReceived) return showProfileViewFailure();
 
-	const praisesGiven = await getPraises(client.database, 'author', subject.ref);
-	if (!praisesGiven) return showProfileViewFailure();
+	const praisesSent = await getPraises(client.database, 'author', subject.ref);
+	if (!praisesSent) return showProfileViewFailure();
 
 	const warningsReceived = await getWarnings(client.database, subject.ref);
 	if (!warningsReceived) return showProfileViewFailure();
 
-  const locale = !show ? interaction.locale : defaultLanguage;
+	const locale = !show ? interaction.locale : defaultLanguage;
 
 	return void sendInteractionResponse(
 		bot,
@@ -142,28 +142,28 @@ async function viewProfile(
 								Commands.profile.options.view.strings.praises,
 								locale,
 							)
-						} - ${praisesReceived.length} ${
+						} — ${
 							localise(
 								Commands.profile.options.view.strings.received,
 								locale,
 							)
-						} | ${praisesGiven.length} ${
+						} ${praisesReceived.length} • ${
 							localise(
-								Commands.profile.options.view.strings.given,
+								Commands.profile.options.view.strings.sent,
 								locale,
 							)
-						}
+						} ${praisesSent.length}
 😖 ${
 							localise(
 								Commands.profile.options.view.strings.warnings,
 								locale,
 							)
-						} - ${warningsReceived.length} ${
+						} — ${
 							localise(
 								Commands.profile.options.view.strings.received,
 								locale,
 							)
-						}`,
+						} ${warningsReceived.length}`,
 						inline: false,
 					}],
 				}],

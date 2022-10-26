@@ -37,7 +37,7 @@ function codeMultiline(target: string): string {
  * @returns The formatted string of text.
  */
 function list(items: string[]): string {
-	return items.map((item) => `• ${item}`).join('\n');
+	return items.map((item) => `➜ ${item}`).join('\n');
 }
 
 /**
