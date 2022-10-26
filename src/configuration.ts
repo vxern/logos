@@ -168,6 +168,12 @@ const settings = {
 				invisible: fromHex('#36393f'),
 				darkRed: fromHex('#820000'),
 			},
+			// The standardised, available set of custom emojis the bot can utilise for its embed messages.
+			emojis: {
+				typescript: '<:TypeScript:1034795288185024592>',
+				deno: '<:Deno:1034795684852932729>',
+				discordeno: '<:Discordeno:1034795720315777086>',
+			},
 		},
 		// Configuration settings pertaining to articles.
 		articles: {
