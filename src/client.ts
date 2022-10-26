@@ -1,5 +1,6 @@
 import {
 	ActivityTypes,
+	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
 	Bot,
 	Channel,
@@ -31,6 +32,8 @@ import { defaultLanguage, Language, supportedLanguages } from './types.ts';
 import { commandBuilders } from './commands/modules.ts';
 import { mentionUser } from './utils.ts';
 import { setupLogging } from './controllers/logging.ts';
+import { localise } from '../assets/localisations/types.ts';
+import { Misc } from '../assets/localisations/misc.ts';
 
 interface Collector<
 	E extends keyof EventHandlers,
@@ -471,8 +474,12 @@ function resolveInteractionToMember(
 			{
 				type: InteractionResponseTypes.ChannelMessageWithSource,
 				data: {
+					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: 'Invalid member.',
+						description: localise(
+							Misc.client.invalidUser,
+							interaction.locale,
+						),
 						color: configuration.interactions.responses.colors.red,
 					}],
 				},
