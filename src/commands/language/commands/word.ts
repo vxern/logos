@@ -118,7 +118,8 @@ async function word(
 
 	await Promise.all(promises).catch();
 
-	const responded = toFields(entry, interaction.locale, { verbose: verbose }).length > 0;
+	const responded =
+		toFields(entry, interaction.locale, { verbose: verbose }).length > 0;
 	if (responded) return;
 
 	return void editOriginalInteractionResponse(
