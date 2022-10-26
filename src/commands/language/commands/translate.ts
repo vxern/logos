@@ -3,7 +3,7 @@ import 'dotenv_load';
 import { Commands } from '../../../../assets/localisations/commands.ts';
 import {
 	getLocalisations,
-	TranslationLanguages,
+	TranslationLanguage,
 } from '../../../../assets/localisations/languages.ts';
 import {
 	createLocalisations,
@@ -48,14 +48,14 @@ const command: CommandBuilder = {
 
 interface DeepLSupportedLanguage {
 	language: string;
-	name: TranslationLanguages;
+	name: TranslationLanguage;
 	supports_formality: boolean;
 }
 
 /** Represents a supported language object sent by DeepL. */
 interface SupportedLanguage {
 	/** The language name */
-	name: TranslationLanguages;
+	name: TranslationLanguage;
 
 	/** The language code. */
 	code: string;

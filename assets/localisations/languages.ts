@@ -12,7 +12,7 @@ function inferLanguages<L extends string>(
 	return localisations;
 }
 
-type TranslationLanguages = keyof typeof localisationsByLanguage;
+type TranslationLanguage = keyof typeof localisationsByLanguage;
 
 // https://www.deepl.com/docs-api/translate-text/translate-text
 // Do not change key names.
@@ -180,7 +180,7 @@ const localeByLanguage: Partial<Record<Language, `${Locales}`>> = {
 };
 
 function getLocalisations(
-	language: TranslationLanguages,
+	language: TranslationLanguage,
 ): Localisations<string> {
 	if (!(language in localisationsByLanguage)) {
 		return { [defaultLanguage]: language };
@@ -195,4 +195,4 @@ function getLocale(
 }
 
 export { getLocale, getLocalisations };
-export type { TranslationLanguages };
+export type { TranslationLanguage };

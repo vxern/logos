@@ -1,9 +1,12 @@
-import { TranslationLanguages } from './languages.ts';
+import { Language } from '../../src/types.ts';
+import { TranslationLanguage } from './languages.ts';
 import { ensureType } from './types.ts';
 
 type TranslationLanguageMappings = Required<
-	Record<TranslationLanguages, string>
+	Record<TranslationLanguage, string>
 >;
+
+type LanguageMappings = Required<Record<Language, string>>;
 
 class Expressions {
 	static readonly polish = {
@@ -54,6 +57,22 @@ class Expressions {
 					'English': 'angielskim',
 					'Polish': 'polskim',
 					'Romanian': 'rumuńskim',
+				},
+			},
+		},
+	};
+
+	static readonly romanian = {
+		cases: {
+			genitive: {
+				indefinite: {
+					languages: ensureType<LanguageMappings>({
+						'Armenian': 'armene',
+						'Belarusian': 'belaruse',
+						'English': 'engleze',
+						'Polish': 'poloneze',
+						'Romanian': 'române',
+					}),
 				},
 			},
 		},
