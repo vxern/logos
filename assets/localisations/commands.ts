@@ -1584,7 +1584,8 @@ class Commands {
 					},
 					informationForUser: {
 						'English': (username: string) => `Information about ${username}`,
-						'Polish': (username: string) => `Informacje o ${username}`,
+						'Polish': (username: string) =>
+							`Informacje o użytkowniku ${username}`,
 						'Romanian': (username: string) => `Informații despre ${username}`,
 					},
 					roles: {
