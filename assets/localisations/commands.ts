@@ -2,7 +2,13 @@ import { User } from '../../deps.ts';
 import { links } from '../../src/constants.ts';
 import configuration from '../../src/configuration.ts';
 import { capitalise, list } from '../../src/formatting.ts';
-import { CommandLocalisations } from './types.ts';
+import { CommandLocalisations, localise } from './types.ts';
+import {
+	getLocale,
+	getLocalisations,
+	TranslationLanguages,
+} from './languages.ts';
+import { Expressions } from './expressions.ts';
 
 function typedLocalisations<
 	OptionKeys extends string,
@@ -372,6 +378,32 @@ class Commands {
 					'Polish': 'Oba języki źródłowy oraz docelowy są nieprawidłowe.',
 					'Romanian': 'Atât limba-sursă, cât și limba-țintă sunt nevalide.',
 				},
+			},
+			source: {
+				'English': (languageName: TranslationLanguages) =>
+					localise(getLocalisations(languageName), getLocale('English')),
+				'Polish': (languageName: TranslationLanguages) =>
+					Expressions.polish.cases.genitive.languages[languageName],
+				'Romanian': (languageName: TranslationLanguages) =>
+					localise(getLocalisations(languageName), getLocale('Romanian')),
+			},
+			target: {
+				'English': (languageName: TranslationLanguages) =>
+					localise(getLocalisations(languageName), getLocale('English')),
+				'Polish': (languageName: TranslationLanguages) =>
+					localise(getLocalisations(languageName), getLocale('Polish')),
+				'Romanian': (languageName: TranslationLanguages) =>
+					localise(getLocalisations(languageName), getLocale('Romanian')),
+			},
+			text: {
+				'English': 'Text',
+				'Polish': 'Tekst',
+				'Romanian': 'Text',
+			},
+			translation: {
+				'English': 'Translation',
+				'Polish': 'Tłumaczenie',
+				'Romanian': 'Traducere',
 			},
 		},
 	});

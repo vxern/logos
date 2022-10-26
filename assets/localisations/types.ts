@@ -91,10 +91,14 @@ function localise<T>(
 	return localisations[language]!;
 }
 
+function ensureType<T>(object: T): T {
+	return object;
+}
+
 export type {
 	CommandLocalisations,
 	DiscordLocalisations,
 	Expression,
 	Localisations,
 };
-export { createLocalisations, getLanguageByLocale, localise };
+export { createLocalisations, ensureType, getLanguageByLocale, localise };
