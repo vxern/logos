@@ -1,5 +1,8 @@
 import { Commands } from '../../../../assets/localisations/commands.ts';
-import { createLocalisations, localise } from '../../../../assets/localisations/types.ts';
+import {
+	createLocalisations,
+	localise,
+} from '../../../../assets/localisations/types.ts';
 import {
 	ApplicationCommandFlags,
 	Bot,
@@ -12,7 +15,7 @@ import {
 import { Client } from '../../../client.ts';
 import { CommandBuilder } from '../../../commands/command.ts';
 import { links } from '../../../constants.ts';
-import { defaultLanguage } from "../../../types.ts";
+import { defaultLanguage } from '../../../types.ts';
 
 const command: CommandBuilder = {
 	...createLocalisations(Commands.resources),
@@ -42,7 +45,10 @@ function resources(
 					type: MessageComponentTypes.ActionRow,
 					components: [{
 						type: MessageComponentTypes.Button,
-						label: localise(Commands.resources.strings.clickForResources, defaultLanguage),
+						label: localise(
+							Commands.resources.strings.clickForResources,
+							defaultLanguage,
+						),
 						style: ButtonStyles.Link,
 						url: repositoryLink,
 					}],

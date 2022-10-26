@@ -4,7 +4,7 @@ import { ApplicationCommandOptionTypes } from '../../../deps.ts';
 import { OptionBuilder } from '../../commands/command.ts';
 
 const role: OptionBuilder = {
-  ...createLocalisations(Parameters.social.roles),
+	...createLocalisations(Parameters.social.roles),
 	type: ApplicationCommandOptionTypes.Role,
 	required: true,
 };
