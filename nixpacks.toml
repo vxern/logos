@@ -5,4 +5,4 @@ nixPkgs = ['...', 'terraform']
 build = 'terraform apply -auto-approve'
 
 [start]
-cmd = 'deno run --allow-env --allow-net --allow-read mod.ts'
+cmd = 'deno run --allow-env --allow-net --allow-read --allow-run mod.ts'
