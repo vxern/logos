@@ -1,6 +1,14 @@
 import { Expressions } from './expressions.ts';
 
 class Misc {
+	static readonly client = {
+		invalidUser: {
+			'English': 'Invalid user.',
+			'Polish': 'Nieprawidłowy użytkownik.',
+			'Romanian': 'Utilizator nevalid.',
+		},
+	};
+
 	static readonly time = {
 		periods: {
 			second: {
