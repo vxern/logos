@@ -19,6 +19,7 @@ import { displayTime, mention, MentionTypes } from '../../../../formatting.ts';
 import { log } from '../../../../controllers/logging.ts';
 import { localise } from '../../../../../assets/localisations/types.ts';
 import { Commands } from '../../../../../assets/localisations/commands.ts';
+import { defaultLanguage } from '../../../../types.ts';
 
 async function setTimeout(
 	[client, bot]: [Client, Bot],
@@ -189,7 +190,7 @@ async function setTimeout(
 			{
 				thumbnail: (() => {
 					const iconURL = getGuildIconURL(bot, guild.id, guild.icon, {
-						size: 4096,
+						size: 64,
 						format: 'webp',
 					});
 					if (!iconURL) return;
@@ -198,7 +199,7 @@ async function setTimeout(
 				})(),
 				description: localise(
 					Commands.timeout.strings.timedOutDirect,
-					interaction.locale,
+					defaultLanguage,
 				)(displayTime(until), reason),
 				color: configuration.interactions.responses.colors.yellow,
 			},

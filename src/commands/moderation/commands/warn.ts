@@ -5,6 +5,7 @@ import {
 } from '../../../../assets/localisations/types.ts';
 import {
 	ApplicationCommandFlags,
+	banMember,
 	Bot,
 	getDmChannel,
 	getGuildIconURL,
@@ -24,6 +25,7 @@ import {
 	getWarnings,
 } from '../../../database/functions/warnings.ts';
 import { mention, MentionTypes } from '../../../formatting.ts';
+import { defaultLanguage } from '../../../types.ts';
 import { user } from '../../parameters.ts';
 import { getRelevantWarnings } from '../module.ts';
 import { reason } from '../parameters.ts';
@@ -180,8 +182,10 @@ async function warnUser(
 		},
 	});
 
-	const passedMaximum =
-		relevantWarnings.length > configuration.guilds.moderation.warnings.maximum;
+	const reachedKickStage = relevantWarnings.length >=
+		configuration.guilds.moderation.warnings.maximum + 1;
+	const reachedBanStage = relevantWarnings.length >=
+		configuration.guilds.moderation.warnings.maximum + 2;
 
 	const dmChannel = await getDmChannel(bot, member.id);
 	if (dmChannel) {
@@ -190,43 +194,67 @@ async function warnUser(
 				{
 					thumbnail: (() => {
 						const iconURL = getGuildIconURL(bot, guild.id, guild.icon, {
-							size: 4096,
+							size: 64,
 							format: 'webp',
 						});
 						if (!iconURL) return;
 
 						return { url: iconURL };
 					})(),
-					...(passedMaximum
-						? {
-							description: localise(
-								Commands.warn.strings.passedWarningLimitDirect,
-								interaction.locale,
-							)(reason),
-							color: configuration.interactions.responses.colors.red,
-						}
-						: {
-							description: localise(
-								Commands.warn.strings.warnedDirect,
-								interaction.locale,
-							)(
-								reason,
-								relevantWarnings.length,
-								configuration.guilds.moderation.warnings.maximum,
-							),
-							color: configuration.interactions.responses.colors.yellow,
-						}),
+					...(
+						reachedKickStage
+							? (
+								reachedBanStage
+									? {
+										description: localise(
+											Commands.warn.strings.reachedBanStage,
+											defaultLanguage,
+										)(reason),
+										color: configuration.interactions.responses.colors.darkRed,
+									}
+									: {
+										description: localise(
+											Commands.warn.strings.reachedKickStage,
+											defaultLanguage,
+										)(reason),
+										color: configuration.interactions.responses.colors.red,
+									}
+							)
+							: {
+								description: localise(
+									Commands.warn.strings.warnedDirect,
+									defaultLanguage,
+								)(
+									reason,
+									relevantWarnings.length,
+									configuration.guilds.moderation.warnings.maximum,
+								),
+								color: configuration.interactions.responses.colors.yellow,
+							}
+					),
 				},
 			],
 		});
 	}
 
-	if (passedMaximum) {
+	if (reachedBanStage) {
+		return banMember(
+			bot,
+			interaction.guildId!,
+			member.id,
+			{
+				reason:
+					`Banned due to having received too many warnings (${relevantWarnings.length}).`,
+			},
+		);
+	}
+
+	if (reachedKickStage) {
 		return kickMember(
 			bot,
 			interaction.guildId!,
 			member.id,
-			'Kicked due to having received too many warnings.',
+			`Kicked due to having received too many warnings (${relevantWarnings.length}).`,
 		);
 	}
 }

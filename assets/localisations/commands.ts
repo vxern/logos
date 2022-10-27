@@ -668,16 +668,11 @@ class Commands {
 					`Utilizatorul ${userMention} a primit un timeout pentru: ${reason}\n\n` +
 					`Timeout-ul va expira ${until}.`,
 			},
+			// Do not localise; This is a public feedback message.
 			timedOutDirect: {
 				'English': (until: string, reason: string) =>
 					`You have been timed out for: ${reason}\n\n` +
 					`The timeout will expire ${until}.`,
-				'Polish': (until: string, reason: string) =>
-					`Zostałeś/aś wyciszony/a za: ${reason}\n\n` +
-					`The timeout will expire ${until}.`,
-				'Romanian': (until: string, reason: string) =>
-					`Ai primit un timeout pentru: ${reason}\n\n` +
-					`Timeout-ul va expira ${until}.`,
 			},
 			notTimedOut: {
 				'English': 'The provided user is not currently timed out.',
@@ -691,6 +686,10 @@ class Commands {
 					`Użytkownik ${userMention} już nie jest wyciszony.`,
 				'Romanian': (userMention: string) =>
 					`Utilizatorul ${userMention} nu mai are un timeout.`,
+			},
+			// Do not localise; This is a public feedback message.
+			timeoutClearedDirect: {
+				'English': 'Your timeout has been cleared.',
 			},
 		},
 	});
@@ -739,13 +738,11 @@ class Commands {
 				'Romanian': (userMention: string, reason: string) =>
 					`Utilizatorul ${userMention} a fost grațiat de avertizarea sa pentru: ${reason}`,
 			},
+			// Do not localise; This is a public feedback message.
 			pardonedDirect: {
 				'English': (reason: string, relativeTime: string) =>
-					`You have been pardoned from the warning for '${reason}' given to you ${relativeTime}.`,
-				'Polish': (reason: string, relativeTime: string) =>
-					`Ostrzeżenie za '${reason}' dane Tobie ${relativeTime} zostało wycofane.`,
-				'Romanian': (reason: string, relativeTime: string) =>
-					`Avertizarea pentru '${reason}' care a fost dată ție ${relativeTime} a fost anulată.`,
+					`You have been pardoned from the warning given to you ${relativeTime}.\n\n` +
+					`This warning was given to you for: ${reason}`,
 			},
 		},
 	});
@@ -786,33 +783,27 @@ class Commands {
 				'Romanian': (userMention: string, warningCount: number) =>
 					`Utilizatorul ${userMention} a fost avertizat. Avertizări în total: ${warningCount}.`,
 			},
-			passedWarningLimitDirect: {
+			// Do not localise; This is a public feedback message.
+			reachedKickStage: {
 				'English': (reason: string) =>
-					`You have been warned for: ${reason}\n\nYou have surpassed the maximum number of warnings, and have subsequently been kicked from the server.`,
-				'Polish': (reason: string) =>
-					`Zostałeś/aś ostrzeżony/a za: ${reason}\n\nPrzekroczyłeś/aś maksymalną liczbę ostrzeżeń, więc zostałeś/aś wyrzucony/a z serwera.`,
-				'Romanian': (reason: string) =>
-					`Ai fost avertizat/ă pentru: ${reason}\n\nAi depășit limita de avertizări, așa că ai fost dat/ă afară de pe server.`,
+					`You have been warned for: ${reason}\n\n` +
+					'You have surpassed the maximum number of warnings, and have subsequently been kicked from the server.',
 			},
+			// Do not localise; This is a public feedback message.
+			reachedBanStage: {
+				'English': (reason: string) =>
+					`You have been warned for: ${reason}\n\n` +
+					'You have surpassed the maximum number of warnings twice, and have subsequently been permanently banned from the server.',
+			},
+			// Do not localise; This is a public feedback message.
 			warnedDirect: {
 				'English': (
 					reason: string,
 					warningCount: number,
 					warningLimit: number,
 				) =>
-					`You have been warned for: ${reason}\n\nThis was warning #${warningCount} of ${warningLimit}.`,
-				'Polish': (
-					reason: string,
-					warningCount: number,
-					warningLimit: number,
-				) =>
-					`Zostałeś/aś ostrzeżony/a za: ${reason}\n\nTo było ostrzeżenie #${warningCount} z ${warningLimit}.`,
-				'Romanian': (
-					reason: string,
-					warningCount: number,
-					warningLimit: number,
-				) =>
-					`Ai fost avertizat/ă pentru: ${reason}\n\nAsta a fost avertizarea #${warningCount} din ${warningLimit}.`,
+					`You have been warned for: ${reason}\n\n` +
+					`This is warning no. ${warningCount} of ${warningLimit}.`,
 			},
 		},
 	});
