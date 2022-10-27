@@ -21,9 +21,11 @@ async function postInformation(
 	if (!guild) return;
 
 	const sections = Object.values(informationSections);
-	const embeds = <Embed[]> (await Promise.all(
-		sections.map((section) => section.generateEmbed([client, bot], guild)),
-	)).filter((embed) => embed);
+	const embeds = <Embed[]> (
+		await Promise.all(
+			sections.map((section) => section.generateEmbed([client, bot], guild)),
+		)
+	).filter((embed) => embed);
 
 	sendMessage(
 		bot,
