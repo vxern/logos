@@ -24,6 +24,7 @@ import {
 	getWarnings,
 } from '../../../database/functions/warnings.ts';
 import { mention, MentionTypes } from '../../../formatting.ts';
+import { defaultLanguage } from '../../../types.ts';
 import { user } from '../../parameters.ts';
 import { getRelevantWarnings } from '../module.ts';
 import { reason } from '../parameters.ts';
@@ -190,7 +191,7 @@ async function warnUser(
 				{
 					thumbnail: (() => {
 						const iconURL = getGuildIconURL(bot, guild.id, guild.icon, {
-							size: 4096,
+							size: 64,
 							format: 'webp',
 						});
 						if (!iconURL) return;
@@ -201,14 +202,14 @@ async function warnUser(
 						? {
 							description: localise(
 								Commands.warn.strings.passedWarningLimitDirect,
-								interaction.locale,
+								defaultLanguage,
 							)(reason),
 							color: configuration.interactions.responses.colors.red,
 						}
 						: {
 							description: localise(
 								Commands.warn.strings.warnedDirect,
-								interaction.locale,
+								defaultLanguage,
 							)(
 								reason,
 								relevantWarnings.length,

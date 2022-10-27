@@ -27,6 +27,7 @@ import {
 	localise,
 } from '../../../../assets/localisations/types.ts';
 import { Commands } from '../../../../assets/localisations/commands.ts';
+import { defaultLanguage } from '../../../types.ts';
 
 const command: CommandBuilder = {
 	...createLocalisations(Commands.pardon),
@@ -205,7 +206,7 @@ async function unwarnUser(
 			{
 				thumbnail: (() => {
 					const iconURL = getGuildIconURL(bot, guild.id, guild.icon, {
-						size: 4096,
+						size: 64,
 						format: 'webp',
 					});
 					if (!iconURL) return;
@@ -214,7 +215,7 @@ async function unwarnUser(
 				})(),
 				description: localise(
 					Commands.pardon.strings.pardonedDirect,
-					interaction.locale,
+					defaultLanguage,
 				)(warning.data.reason, displayTime(warning.ts)),
 				color: configuration.interactions.responses.colors.green,
 			},
