@@ -58,7 +58,7 @@ async function clearTimeout(
 		bot,
 		interaction.guildId!,
 		member.id,
-		{ communicationDisabledUntil: undefined },
+		{ communicationDisabledUntil: null },
 	);
 
 	const guild = client.cache.guilds.get(interaction.guildId!);
