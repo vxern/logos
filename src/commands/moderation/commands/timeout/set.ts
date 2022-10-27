@@ -12,14 +12,14 @@ import {
 } from '../../../../../deps.ts';
 import { Client, resolveInteractionToMember } from '../../../../client.ts';
 import configuration, {
-	minute,
+	Periods,
 	timeDescriptors,
-	week,
 } from '../../../../configuration.ts';
 import { displayTime, mention, MentionTypes } from '../../../../formatting.ts';
 import { log } from '../../../../controllers/logging.ts';
 import { localise } from '../../../../../assets/localisations/types.ts';
 import { Commands } from '../../../../../assets/localisations/commands.ts';
+import { defaultLanguage } from '../../../../types.ts';
 
 async function setTimeout(
 	[client, bot]: [Client, Bot],
@@ -53,7 +53,10 @@ async function setTimeout(
 		interaction.type === InteractionTypes.ApplicationCommandAutocomplete &&
 		!userIdentifierOption?.focused
 	) {
-		const timestamp = getTimestampFromExpression(durationIdentifier!);
+		const timestamp = getTimestampFromExpression(
+			durationIdentifier!,
+			interaction.locale,
+		);
 
 		return void sendInteractionResponse(
 			bot,
@@ -109,7 +112,7 @@ async function setTimeout(
 		);
 	}
 
-	if (duration < minute) {
+	if (duration < Periods.minute) {
 		return displayError(
 			localise(
 				Commands.timeout.strings.durationMustBeLongerThanMinute,
@@ -118,7 +121,7 @@ async function setTimeout(
 		);
 	}
 
-	if (duration > week) {
+	if (duration > Periods.week) {
 		return displayError(
 			localise(
 				Commands.timeout.strings.durationMustBeShorterThanWeek,
@@ -187,7 +190,7 @@ async function setTimeout(
 			{
 				thumbnail: (() => {
 					const iconURL = getGuildIconURL(bot, guild.id, guild.icon, {
-						size: 4096,
+						size: 64,
 						format: 'webp',
 					});
 					if (!iconURL) return;
@@ -196,7 +199,7 @@ async function setTimeout(
 				})(),
 				description: localise(
 					Commands.timeout.strings.timedOutDirect,
-					interaction.locale,
+					defaultLanguage,
 				)(displayTime(until), reason),
 				color: configuration.interactions.responses.colors.yellow,
 			},
@@ -217,78 +220,85 @@ function extractStrings(expression: string): string[] {
 	return expression.match(stringsExpression) ?? [];
 }
 
-const timeDescriptorUnits = timeDescriptors.map(([descriptors, _value]) =>
-	descriptors
-);
-const allValidTimeDescriptors = timeDescriptors.reduce<string[]>(
-	(timeDescriptors, [next, _value]) => {
-		timeDescriptors.push(...next);
-		return timeDescriptors;
-	},
-	[],
-);
-
 function getTimestampFromExpression(
 	expression: string,
+	locale: string | undefined,
 ): [string, number] | undefined {
 	// Extract the digits present in the expression.
-	const values = extractNumbers(expression).map((string) => Number(string));
+	const quantifiers = extractNumbers(expression).map((string) =>
+		Number(string)
+	);
 	// Extract the strings present in the expression.
-	const keys = extractStrings(expression);
+	const periodNames = extractStrings(expression);
 
 	// No parameters have been provided for both keys and values.
-	if (keys.length === 0 || values.length === 0) return undefined;
+	if (periodNames.length === 0 || quantifiers.length === 0) return undefined;
 
 	// The number of values does not match the number of keys.
-	if (values.length !== keys.length) return undefined;
+	if (quantifiers.length !== periodNames.length) return undefined;
 
 	// One of the values is equal to 0.
-	if (values.includes(0)) return undefined;
+	if (quantifiers.includes(0)) return undefined;
+
+	const validTimeDescriptors = timeDescriptors.reduce<string[]>(
+		(validTimeDescriptors, [descriptors, _period]) => {
+			validTimeDescriptors.push(...localise(descriptors.descriptors, locale));
+			return validTimeDescriptors;
+		},
+		[],
+	);
 
 	// If one of the keys is invalid.
-	if (keys.some((key) => !allValidTimeDescriptors.includes(key))) {
+	if (periodNames.some((key) => !validTimeDescriptors.includes(key))) {
 		return undefined;
 	}
 
-	const distributionOfKeysInTimeDescriptorUnits = keys.reduce(
-		(distribution, key) => {
-			const index = timeDescriptorUnits.findIndex((distribution) =>
-				distribution.includes(key)
+	const quantifierFrequencies = periodNames.reduce(
+		(frequencies, quantifier) => {
+			const index = timeDescriptors.findIndex(([descriptors, _period]) =>
+				localise(descriptors.descriptors, locale).includes(quantifier)
 			);
 
-			distribution[index]++;
+			frequencies[index]++;
 
-			return distribution;
+			return frequencies;
 		},
 		Array.from({ length: timeDescriptors.length }, () => 0),
 	);
 
 	// If one of the keys is duplicate.
-	if (distributionOfKeysInTimeDescriptorUnits.some((count) => count > 1)) {
+	if (quantifierFrequencies.some((count) => count > 1)) {
 		return undefined;
 	}
 
-	const keysWithValues: [string, [number, number]][] = keys.map(
-		(key, index) => {
-			const [descriptors, milliseconds] = timeDescriptors.find((
-				[descriptors, _value],
-			) => descriptors.includes(key))!;
+	const keysWithValues: [
+		(number: number) => string,
+		[number, number],
+		number,
+	][] = periodNames
+		.map(
+			(key, index) => {
+				const [descriptors, milliseconds] = timeDescriptors.find((
+					[descriptors, _value],
+				) => localise(descriptors.descriptors, locale).includes(key))!;
 
-			return [descriptors[descriptors.length - 1]!, [
-				values.at(index)!,
-				values.at(index)! * milliseconds,
-			]];
-		},
-	);
+				return [localise(descriptors.display, locale), [
+					quantifiers.at(index)!,
+					quantifiers.at(index)! * milliseconds,
+				], index];
+			},
+		);
+
+	keysWithValues.sort((previous, next) => next[2] - previous[2]);
 
 	const timeExpressions = [];
 	let total = 0;
-	for (const [key, [nominal, milliseconds]] of keysWithValues) {
-		timeExpressions.push(`${nominal} ${key}`);
+	for (const [display, [quantifier, milliseconds]] of keysWithValues) {
+		timeExpressions.push(display(quantifier));
 		total += milliseconds;
 	}
 
-	const timeExpression = timeExpressions.join(' ');
+	const timeExpression = timeExpressions.join(', ');
 
 	return [timeExpression, total];
 }

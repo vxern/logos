@@ -1,15 +1,11 @@
 import { Commands } from '../../../../assets/localisations/commands.ts';
-import {
-	createLocalisations,
-} from '../../../../assets/localisations/types.ts';
-import {
-	ApplicationCommandOptionTypes,
-} from '../../../../deps.ts';
+import { createLocalisations } from '../../../../assets/localisations/types.ts';
+import { ApplicationCommandOptionTypes } from '../../../../deps.ts';
 import { OptionBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
 import { show } from '../../parameters.ts';
 import { displayVolume } from './volume/display.ts';
-import { setVolume } from "./volume/set.ts";
+import { setVolume } from './volume/set.ts';
 
 const command: OptionBuilder = {
 	...createLocalisations(Commands.music.options.volume),

@@ -1,7 +1,15 @@
 import { User } from '../../deps.ts';
 import { links } from '../../src/constants.ts';
+import configuration from '../../src/configuration.ts';
 import { capitalise, list } from '../../src/formatting.ts';
-import { CommandLocalisations } from './types.ts';
+import { CommandLocalisations, localise } from './types.ts';
+import {
+	getLocale,
+	getLocalisations,
+	TranslationLanguage,
+} from './languages.ts';
+import { Expressions } from './expressions.ts';
+import { Language } from '../../src/types.ts';
 
 function typedLocalisations<
 	OptionKeys extends string,
@@ -60,36 +68,36 @@ class Commands {
 								`I am **${botUser.username}**, an application created to offer language-learning Discord communities with the highest quality features, such as:
               ${
 									list([
-										'Rich social interactions',
-										'Intuitive role management',
-										'Translation and morphology look-ups',
-										'Music playback',
-										'Article creation',
-										'Server structure synchronisation',
+										'🫂 Rich social interactions',
+										'💼 Intuitive role management',
+										'📚 Translation and morphology look-ups',
+										'🎶 Music playback',
+										'📜 Article creation',
+										'🔁 Server structure synchronisation',
 									])
 								}`,
 							'Polish': (botUser: User) =>
 								`Nazywam się **${botUser.username}**. Jestem aplikacją stworzoną do zaoferowania społecznościom języcznym na Discordzie najwyższej jakości funkcji, takich jak:
               ${
 									list([
-										'Bogate interakcje socjalne',
-										'Intuitywne wybieranie ról',
-										'Tłumaczenia, wyszukiwanie znaczeń oraz innych informacji o słowach',
-										'Odtwarzanie muzyki',
-										'Tworzenie oraz czytanie artykułów lingwistycznych',
-										'Synchronizacja struktury serwera',
+										'🫂 Bogate interakcje socjalne',
+										'💼 Intuitywne wybieranie ról',
+										'📚 Tłumaczenia, wyszukiwanie znaczeń oraz innych informacji o słowach',
+										'🎶 Odtwarzanie muzyki',
+										'📜 Tworzenie oraz czytanie artykułów lingwistycznych',
+										'🔁 Synchronizacja struktury serwera',
 									])
 								}`,
 							'Romanian': (botUser: User) =>
-								`Sunt **${botUser.username}**. Sunt o aplicație creată pentru a oferi comunităților lingvistice Discord funcții de cea mai înaltă calitate, cum ar fi:
+								`Mă numesc **${botUser.username}**. Sunt o aplicație creată pentru a oferi comunităților lingvistice Discord funcții de cea mai înaltă calitate, cum ar fi:
               ${
 									list([
-										'Interacțiuni sociale bogate',
-										'Gestionarea intuitivă a rolurilor',
-										'Traduceri și căutarea cuvintelor',
-										'Redarea muzicii',
-										'Crearea și citirea articolelor lingvistice',
-										'Sincronizarea structurii serverului',
+										'🫂 Interacțiuni sociale bogate',
+										'💼 Gestionarea intuitivă a rolurilor',
+										'📚 Traduceri și căutarea cuvintelor',
+										'🎶 Redarea muzicii',
+										'📜 Crearea și citirea articolelor lingvistice',
+										'🔁 Sincronizarea structurii serverului',
 									])
 								}`,
 						},
@@ -102,11 +110,11 @@ class Commands {
 						},
 						body: {
 							'English':
-								`I am powered by [TypeScript](${links.typescriptWebsite}) running within [Deno](${links.denoWebsite}). I interact with [Discord\'s API](${links.discordApiWebsite}) with the help of the [discordeno](${links.discordenoRepository}) library.`,
+								`I am powered by [${configuration.interactions.responses.emojis.typescript} TypeScript](${links.typescriptWebsite}) running within [${configuration.interactions.responses.emojis.deno} Deno](${links.denoWebsite}). I interact with [Discord\'s API](${links.discordApiWebsite}) with the help of the [${configuration.interactions.responses.emojis.discordeno} discordeno](${links.discordenoRepository}) library.`,
 							'Polish':
-								`Jestem zasilany przez [TypeScript](${links.typescriptWebsite}), działający w ramach [Deno](${links.denoWebsite}). Współdziałam z [API Discorda](${links.discordApiWebsite}) za pomocą biblioteki [discordeno](${links.discordenoRepository}).`,
+								`Jestem zasilany przez [${configuration.interactions.responses.emojis.typescript} TypeScript](${links.typescriptWebsite}), działający w ramach [${configuration.interactions.responses.emojis.deno} Deno](${links.denoWebsite}). Współdziałam z [API Discorda](${links.discordApiWebsite}) za pomocą biblioteki [${configuration.interactions.responses.emojis.discordeno} discordeno](${links.discordenoRepository}).`,
 							'Romanian':
-								`Sunt alimentat de către [TypeScript](${links.typescriptWebsite}), care rulează în cadrul [Deno](${links.denoWebsite}). Interacționez cu [API-ul Discord-ului](${links.discordApiWebsite}) cu ajutorul bibliotecii [discordeno](${links.discordenoRepository}).`,
+								`Sunt alimentat de către [${configuration.interactions.responses.emojis.typescript} TypeScript](${links.typescriptWebsite}), care se execută în cadrul [${configuration.interactions.responses.emojis.deno} Deno](${links.denoWebsite}). Interacționez cu [API-ul Discord-ului](${links.discordApiWebsite}) cu ajutorul bibliotecii [${configuration.interactions.responses.emojis.discordeno} discordeno](${links.discordenoRepository}).`,
 						},
 					},
 					howToAddToServer: {
@@ -117,11 +125,11 @@ class Commands {
 						},
 						body: {
 							'English':
-								`You cannot just yet. I was made for the purpose of managing a select few language-learning communities, such as [Learn Armenian](${links.learnArmenianListingWebsite}) and [Learn Romanian](${links.learnRomanianListingWebsite}).`,
+								`It is not possible at this point in time. I was made for the purpose of managing a select few language-learning communities, such as [🇦🇲 Learn Armenian](${links.learnArmenianListingWebsite}) and [🇷🇴 Learn Romanian](${links.learnRomanianListingWebsite}).`,
 							'Polish':
-								`Jeszcze nie można. Zostałem stworzony w celu zarządzania kilkoma wybranymi społecznościami językowymi, takimi jak [Learn Armenian](${links.learnArmenianListingWebsite}) lub [Learn Romanian](${links.learnRomanianListingWebsite}).`,
+								`Na chwilę obecną nie można tego zrobić. Zostałem stworzony w celu zarządzania kilkoma wybranymi społecznościami językowymi, takimi jak [🇦🇲 Learn Armenian](${links.learnArmenianListingWebsite}) oraz [🇷🇴 Learn Romanian](${links.learnRomanianListingWebsite}).`,
 							'Romanian':
-								`Nu se poate încă. Am fost creat cu scopul de a gestiona câteva comunități selecte de învățare a limbilor străine, cum ar fi [Learn Armenian](${links.learnArmenianListingWebsite}) sau [Learn Romanian](${links.learnRomanianListingWebsite}).`,
+								`La acest moment asta nu este posibil. Am fost creat cu scopul de a nu gestiona decât câteva comunități lingvistice selecte, cum ar fi [🇦🇲 Learn Armenian](${links.learnArmenianListingWebsite}) și [🇷🇴 Learn Romanian](${links.learnRomanianListingWebsite}).`,
 						},
 					},
 					amIOpenSource: {
@@ -203,10 +211,10 @@ class Commands {
 							'Polish': 'Kanały',
 							'Romanian': 'Canale',
 						},
-						owner: {
-							'English': 'Owner',
-							'Polish': 'Właściciel',
-							'Romanian': 'Properietarul',
+						serverOwner: {
+							'English': 'Server Owner',
+							'Polish': 'Właściciel Serwera',
+							'Romanian': 'Properietarul Serverului',
 						},
 						moderators: {
 							'English': 'Moderators',
@@ -280,10 +288,19 @@ class Commands {
 			'Romanian': 'Afișează o listă cu resurse pentru învățarea limbii.',
 		},
 		strings: {
-			clickForResources: {
-				'English': 'Click here for resources',
-				'Polish': 'Kliknij tutaj dla zasobów',
-				'Romanian': 'Dă clic aici pentru resurse',
+			resourcesStoredHere: {
+				'English': (language: Language) =>
+					`Resources for learning ${
+						localise(getLocalisations(language), 'English')
+					} are stored here`,
+				'Polish': (language: Language) =>
+					`Zasoby do nauki ${
+						Expressions.polish.cases.genitive.languages[language].toLowerCase()
+					} są przechowywane tutaj`,
+				'Romanian': (language: Language) =>
+					`Resursele pentru învățatul limbii ${
+						Expressions.romanian.cases.genitive.indefinite.languages[language]
+					} sunt stocate aici`,
 			},
 		},
 	});
@@ -371,6 +388,32 @@ class Commands {
 					'Polish': 'Oba języki źródłowy oraz docelowy są nieprawidłowe.',
 					'Romanian': 'Atât limba-sursă, cât și limba-țintă sunt nevalide.',
 				},
+			},
+			source: {
+				'English': (languageName: TranslationLanguage) =>
+					localise(getLocalisations(languageName), getLocale('English')),
+				'Polish': (languageName: TranslationLanguage) =>
+					Expressions.polish.cases.genitive.languages[languageName],
+				'Romanian': (languageName: TranslationLanguage) =>
+					localise(getLocalisations(languageName), getLocale('Romanian')),
+			},
+			target: {
+				'English': (languageName: TranslationLanguage) =>
+					localise(getLocalisations(languageName), getLocale('English')),
+				'Polish': (languageName: TranslationLanguage) =>
+					localise(getLocalisations(languageName), getLocale('Polish')),
+				'Romanian': (languageName: TranslationLanguage) =>
+					localise(getLocalisations(languageName), getLocale('Romanian')),
+			},
+			text: {
+				'English': 'Text',
+				'Polish': 'Tekst',
+				'Romanian': 'Text',
+			},
+			translation: {
+				'English': 'Translation',
+				'Polish': 'Tłumaczenie',
+				'Romanian': 'Traducere',
 			},
 		},
 	});
@@ -625,16 +668,11 @@ class Commands {
 					`Utilizatorul ${userMention} a primit un timeout pentru: ${reason}\n\n` +
 					`Timeout-ul va expira ${until}.`,
 			},
+			// Do not localise; This is a public feedback message.
 			timedOutDirect: {
 				'English': (until: string, reason: string) =>
 					`You have been timed out for: ${reason}\n\n` +
 					`The timeout will expire ${until}.`,
-				'Polish': (until: string, reason: string) =>
-					`Zostałeś/aś wyciszony/a za: ${reason}\n\n` +
-					`The timeout will expire ${until}.`,
-				'Romanian': (until: string, reason: string) =>
-					`Ai primit un timeout pentru: ${reason}\n\n` +
-					`Timeout-ul va expira ${until}.`,
 			},
 			notTimedOut: {
 				'English': 'The provided user is not currently timed out.',
@@ -648,6 +686,10 @@ class Commands {
 					`Użytkownik ${userMention} już nie jest wyciszony.`,
 				'Romanian': (userMention: string) =>
 					`Utilizatorul ${userMention} nu mai are un timeout.`,
+			},
+			// Do not localise; This is a public feedback message.
+			timeoutClearedDirect: {
+				'English': 'Your timeout has been cleared.',
 			},
 		},
 	});
@@ -696,13 +738,11 @@ class Commands {
 				'Romanian': (userMention: string, reason: string) =>
 					`Utilizatorul ${userMention} a fost grațiat de avertizarea sa pentru: ${reason}`,
 			},
+			// Do not localise; This is a public feedback message.
 			pardonedDirect: {
 				'English': (reason: string, relativeTime: string) =>
-					`You have been pardoned from the warning for '${reason}' given to you ${relativeTime}.`,
-				'Polish': (reason: string, relativeTime: string) =>
-					`Ostrzeżenie za '${reason}' dane Tobie ${relativeTime} zostało wycofane.`,
-				'Romanian': (reason: string, relativeTime: string) =>
-					`Avertizarea pentru '${reason}' care a fost dată ție ${relativeTime} a fost anulată.`,
+					`You have been pardoned from the warning given to you ${relativeTime}.\n\n` +
+					`This warning was given to you for: ${reason}`,
 			},
 		},
 	});
@@ -743,33 +783,27 @@ class Commands {
 				'Romanian': (userMention: string, warningCount: number) =>
 					`Utilizatorul ${userMention} a fost avertizat. Avertizări în total: ${warningCount}.`,
 			},
-			passedWarningLimitDirect: {
+			// Do not localise; This is a public feedback message.
+			reachedKickStage: {
 				'English': (reason: string) =>
-					`You have been warned for: ${reason}\n\nYou have surpassed the maximum number of warnings, and have subsequently been kicked from the server.`,
-				'Polish': (reason: string) =>
-					`Zostałeś/aś ostrzeżony/a za: ${reason}\n\nPrzekroczyłeś/aś maksymalną liczbę ostrzeżeń, więc zostałeś/aś wyrzucony/a z serwera.`,
-				'Romanian': (reason: string) =>
-					`Ai fost avertizat/ă pentru: ${reason}\n\nAi depășit limita de avertizări, așa că ai fost dat/ă afară de pe server.`,
+					`You have been warned for: ${reason}\n\n` +
+					'You have surpassed the maximum number of warnings, and have subsequently been kicked from the server.',
 			},
+			// Do not localise; This is a public feedback message.
+			reachedBanStage: {
+				'English': (reason: string) =>
+					`You have been warned for: ${reason}\n\n` +
+					'You have surpassed the maximum number of warnings twice, and have subsequently been permanently banned from the server.',
+			},
+			// Do not localise; This is a public feedback message.
 			warnedDirect: {
 				'English': (
 					reason: string,
 					warningCount: number,
 					warningLimit: number,
 				) =>
-					`You have been warned for: ${reason}\n\nThis was warning #${warningCount} of ${warningLimit}.`,
-				'Polish': (
-					reason: string,
-					warningCount: number,
-					warningLimit: number,
-				) =>
-					`Zostałeś/aś ostrzeżony/a za: ${reason}\n\nTo było ostrzeżenie #${warningCount} z ${warningLimit}.`,
-				'Romanian': (
-					reason: string,
-					warningCount: number,
-					warningLimit: number,
-				) =>
-					`Ai fost avertizat/ă pentru: ${reason}\n\nAsta a fost avertizarea #${warningCount} din ${warningLimit}.`,
+					`You have been warned for: ${reason}\n\n` +
+					`This is warning no. ${warningCount} of ${warningLimit}.`,
 			},
 		},
 	});
@@ -1524,11 +1558,11 @@ class Commands {
 						},
 						body: {
 							'English':
-								'Please select a category to obtain a list of available roles within it.',
+								'Select a category to obtain the list of available roles for it.',
 							'Polish':
-								'Prosimy wybrać kategorię, aby otrzymać listę dostępnych w niej ról.',
+								'Wybierz kategorię, aby otrzymać listę dostępnych dla niej ról.',
 							'Romanian':
-								'Te rugăm să selectezi o categorie pentru a primi o listă cu rolurile disponibile.',
+								'Selectează o categorie pentru a primi lista cu rolurile disponibile pentru aceasta.',
 						},
 					},
 					reachedLimit: {
@@ -1582,9 +1616,10 @@ class Commands {
 						'Romanian': 'Nu s-au putut afișa informații despre un membru dat.',
 					},
 					informationForUser: {
-						'English': (username: string) => `Information for ${username}`,
-						'Polish': (username: string) => `Informacje dla ${username}`,
-						'Romanian': (username: string) => `Informații pentru ${username}`,
+						'English': (username: string) => `Information about ${username}`,
+						'Polish': (username: string) =>
+							`Informacje o użytkowniku ${username}`,
+						'Romanian': (username: string) => `Informații despre ${username}`,
 					},
 					roles: {
 						'English': 'Roles',
@@ -1603,13 +1638,13 @@ class Commands {
 					},
 					received: {
 						'English': 'Received',
-						'Polish': 'Otrzymane',
+						'Polish': 'Otrzymano',
 						'Romanian': 'Primite',
 					},
-					given: {
-						'English': 'Given',
-						'Polish': 'Dane',
-						'Romanian': 'Date',
+					sent: {
+						'English': 'Sent',
+						'Polish': 'Wysłano',
+						'Romanian': 'Trimise',
 					},
 					praises: {
 						'English': 'Praises',

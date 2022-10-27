@@ -289,7 +289,7 @@ ${trim(change.content.body, 300)}`;
 		},
 		filter: (_client, originGuildId, member, _warning, _by) =>
 			originGuildId === member.guildId,
-		color: configuration.interactions.responses.colors.red,
+		color: configuration.interactions.responses.colors.yellow,
 	},
 	memberWarnRemove: {
 		title: '😇 Member pardoned',

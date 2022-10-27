@@ -218,7 +218,7 @@ function paginate<T>(
 		delete embed.fields;
 	}
 
-  const footerText = localise(Utils.continuedOnNextPage, interaction.locale);
+	const footerText = localise(Utils.continuedOnNextPage, interaction.locale);
 
 	const generateEmbed: () => Embed[] = () => [{
 		...embed,

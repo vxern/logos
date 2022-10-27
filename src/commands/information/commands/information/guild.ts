@@ -13,6 +13,7 @@ import {
 import { Client } from '../../../../client.ts';
 import configuration from '../../../../configuration.ts';
 import { displayTime, mention, MentionTypes } from '../../../../formatting.ts';
+import { defaultLanguage } from '../../../../types.ts';
 import { snowflakeToTimestamp } from '../../../../utils.ts';
 import { getProficiencyCategory } from '../../../social/module.ts';
 
@@ -139,7 +140,8 @@ function displayGuildInformation(
 							? {
 								name: `👑 ${
 									localise(
-										Commands.information.options.guild.strings.fields.owner,
+										Commands.information.options.guild.strings.fields
+											.serverOwner,
 										interaction.locale,
 									)
 								}`,
@@ -196,7 +198,9 @@ function getProficiencyRoleFrequencies(
 ): Map<bigint, number> {
 	const proficiencyCategory = getProficiencyCategory();
 	const proficiencies = proficiencyCategory.collection!.list!;
-	const proficiencyNames = proficiencies.map((proficiency) => proficiency.name);
+	const proficiencyNames = proficiencies.map((proficiency) =>
+		proficiency.name[defaultLanguage]
+	);
 	const proficiencyRoleIds = guild.roles.array().filter((role) =>
 		proficiencyNames.includes(role.name)
 	).map((role) => role.id);

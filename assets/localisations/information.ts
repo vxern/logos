@@ -1,5 +1,6 @@
 import { Guild } from '../../deps.ts';
 import { getChannelMention } from '../../src/commands/secret/data/information/information-sections.ts';
+import { list } from '../../src/formatting.ts';
 
 const memesChannel = 'memes';
 
@@ -157,10 +158,14 @@ class Information {
 			},
 			body: {
 				'English': (moderatorRoleMention: string) =>
-					`The server abides by a 3-warn moderation policy, enforced by the server's ${moderatorRoleMention}s.` +
-					'The above rules apply to the entirety of the server, and a breach thereof will cause a warning to be issued.\n\n' +
-					'Depending on the circumstances, a timeout may be issued to the member for the duration of 5, 15, or 60 minutes respectively.\n\n' +
-					'If a member received three warnings, and a situation occurs where a fourth warning would be issued, the member will be kicked instead.`',
+					list(
+						[
+							`The server abides by a 3-warn moderation policy, enforced by the server's ${moderatorRoleMention}s.`,
+							'The above rules apply to the entirety of the server, and a breach thereof will cause a warning to be issued. Warnings expire after a period of two months.',
+							'Depending on the circumstances, a timeout may be issued to the member for the duration of 5, 15, or 60 minutes respectively.',
+							'If a member has already received three warnings, the fourth warning will warrant a kick from the server. If they rejoin, and are warned again, they will be banned permanently.',
+						],
+					),
 			},
 		},
 	};

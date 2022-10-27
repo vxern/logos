@@ -1,15 +1,15 @@
 {
-  "imports": {
-    "std/": "https://deno.land/std@0.158.0/",
-    "cheerio": "https://deno.land/x/cheerio@1.0.6/mod.ts",
-    "discordeno": "https://deno.land/x/discordeno@16.0.0/mod.ts",
-    "dotenv_load": "https://deno.land/x/dotenv@v3.2.0/load.ts",
-    "faunadb": "https://deno.land/x/fauna@5.0.0-deno-alpha9/mod.ts",
-    "lavadeno": "https://deno.land/x/lavadeno@3.2.3/mod.ts",
-    "lavalink_types": "https://deno.land/x/lavalink_types@2.0.6/mod.ts",
-    "lodash": "https://deno.land/x/deno_ts_lodash@0.0.1/mod.ts",
-    "nanocolors": "https://deno.land/x/nanocolors@0.1.12/mod.ts",
-    "snowflake_deno": "https://deno.land/x/deno_snowflake@v1.0.1/snowflake.ts",
-    "youtube_sr": "https://deno.land/x/youtube_sr@v4.3.4/mod.ts"
-  }
+	"imports": {
+		"std/": "https://deno.land/std@0.161.0/",
+		"cheerio": "https://deno.land/x/cheerio@1.0.7/mod.ts",
+		"discordeno": "https://raw.githubusercontent.com/vxern/discordeno/main/mod.ts",
+		"dotenv_load": "https://deno.land/x/dotenv@v3.2.0/load.ts",
+		"faunadb": "https://deno.land/x/fauna@5.0.0-deno-alpha9/mod.ts",
+		"lavadeno": "https://deno.land/x/lavadeno@3.2.3/mod.ts",
+		"lavalink_types": "https://deno.land/x/lavalink_types@2.0.6/mod.ts",
+		"lodash": "https://deno.land/x/deno_ts_lodash@0.0.1/mod.ts",
+		"nanocolors": "https://deno.land/x/nanocolors@0.1.12/mod.ts",
+		"snowflake_deno": "https://deno.land/x/deno_snowflake@v1.0.1/snowflake.ts",
+		"youtube_sr": "https://deno.land/x/youtube_sr@v4.3.4/mod.ts"
+	}
 }

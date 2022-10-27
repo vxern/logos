@@ -2,12 +2,21 @@ import { Locales } from '../../deps.ts';
 import { defaultLanguage, Language } from '../../src/types.ts';
 import { Localisations } from './types.ts';
 
-type LocalisationsByLanguage =
+type LocalisationsByLanguage<L extends string> =
 	& Required<Record<Language, Localisations<string>>>
-	& Record<string, Localisations<string>>;
+	& Record<L, Localisations<string>>;
+
+function inferLanguages<L extends string>(
+	localisations: LocalisationsByLanguage<L>,
+): LocalisationsByLanguage<L> {
+	return localisations;
+}
+
+type TranslationLanguage = keyof typeof localisationsByLanguage;
 
 // https://www.deepl.com/docs-api/translate-text/translate-text
-const localisationsByLanguage: LocalisationsByLanguage = {
+// Do not change key names.
+const localisationsByLanguage = inferLanguages({
 	'Armenian': {
 		'English': 'Armenian',
 		'Polish': 'Ormiański',
@@ -55,13 +64,13 @@ const localisationsByLanguage: LocalisationsByLanguage = {
 	},
 	'English (American)': {
 		'English': 'English (American)',
-		'Polish': 'Angielski (Ameryka)',
-		'Romanian': 'Engleză (America)',
+		'Polish': 'Angielski (Amerykański)',
+		'Romanian': 'Engleză (Americană)',
 	},
 	'English (British)': {
 		'English': 'English (British)',
-		'Polish': 'Angielski (Wielka Brytania)',
-		'Romanian': 'Engleză (Marea Britanie)',
+		'Polish': 'Angielski (Brytyjski)',
+		'Romanian': 'Engleză (Britanică)',
 	},
 	'Estonian': {
 		'English': 'Estonian',
@@ -83,7 +92,7 @@ const localisationsByLanguage: LocalisationsByLanguage = {
 		'Polish': 'Niemiecki',
 		'Romanian': 'Germană',
 	},
-	'Greek': { 'English': 'Greek', 'Polish': 'Grecki', 'Romanian': 'Grecă' },
+	'Greek': { 'English': 'Greek', 'Polish': 'Grecki', 'Romanian': 'Greacă' },
 	'Hungarian': {
 		'English': 'Hungarian',
 		'Polish': 'Węgierski',
@@ -122,8 +131,13 @@ const localisationsByLanguage: LocalisationsByLanguage = {
 	},
 	'Portuguese (Brazilian)': {
 		'English': 'Portuguese (Brazilian)',
-		'Polish': 'Portugalski (Brazylia)',
-		'Romanian': 'Portugheză (Brazilia)',
+		'Polish': 'Portugalski (Brazylijski)',
+		'Romanian': 'Portugheză (Braziliană)',
+	},
+	'Portuguese (European)': {
+		'English': 'Portuguese (European)',
+		'Polish': 'Portugalski (Europejski)',
+		'Romanian': 'Portugheză (Europeană)',
 	},
 	'Romanian': {
 		'English': 'Romanian',
@@ -157,7 +171,7 @@ const localisationsByLanguage: LocalisationsByLanguage = {
 		'Polish': 'Ukraiński',
 		'Romanian': 'Ucraineană',
 	},
-};
+});
 
 const localeByLanguage: Partial<Record<Language, `${Locales}`>> = {
 	'English': 'en-GB',
@@ -165,8 +179,13 @@ const localeByLanguage: Partial<Record<Language, `${Locales}`>> = {
 	'Romanian': 'ro',
 };
 
-function getLocalisations(language: string): Localisations<string> {
-	return localisationsByLanguage[language] ?? { [defaultLanguage]: language };
+function getLocalisations(
+	language: TranslationLanguage,
+): Localisations<string> {
+	if (!(language in localisationsByLanguage)) {
+		return { [defaultLanguage]: language };
+	}
+	return localisationsByLanguage[language];
 }
 
 function getLocale(
@@ -176,3 +195,4 @@ function getLocale(
 }
 
 export { getLocale, getLocalisations };
+export type { TranslationLanguage };

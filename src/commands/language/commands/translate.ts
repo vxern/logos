@@ -3,6 +3,7 @@ import 'dotenv_load';
 import { Commands } from '../../../../assets/localisations/commands.ts';
 import {
 	getLocalisations,
+	TranslationLanguage,
 } from '../../../../assets/localisations/languages.ts';
 import {
 	createLocalisations,
@@ -47,14 +48,14 @@ const command: CommandBuilder = {
 
 interface DeepLSupportedLanguage {
 	language: string;
-	name: string;
+	name: TranslationLanguage;
 	supports_formality: boolean;
 }
 
 /** Represents a supported language object sent by DeepL. */
 interface SupportedLanguage {
 	/** The language name */
-	name: string;
+	name: TranslationLanguage;
 
 	/** The language code. */
 	code: string;
@@ -66,10 +67,6 @@ interface SupportedLanguage {
 const deepLSecret = Deno.env.get('DEEPL_SECRET')!;
 
 const supportedLanguages = await getSupportedLanguages();
-const supportedLanguagesChoices = supportedLanguages.map((language) => ({
-	name: getLocalisations(language.name),
-	value: language.code,
-}));
 
 async function getSupportedLanguages(): Promise<SupportedLanguage[]> {
 	const response = await fetch(
@@ -152,22 +149,30 @@ async function translate(
 	if (!guild) return;
 
 	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete) {
-		const input = <string | undefined> interaction.data?.options?.find((
+		const inputOption = interaction.data?.options?.find((
 			option,
-		) => option.focused)?.value;
-		if (input === undefined) return;
+		) => option.focused);
+		if (inputOption === undefined || inputOption.value === undefined) return;
 
-		let languages;
-		if (input.length === 0) {
-			languages = supportedLanguagesChoices.slice(0, 25);
-		} else {
-			const inputLowercase = input.toLowerCase();
-			languages = supportedLanguagesChoices.filter((language) =>
-				localise(language.name, interaction.locale).toLowerCase().includes(
-					inputLowercase,
-				)
-			);
-		}
+		const isInputtingSourceLanguage = inputOption.name === 'from';
+		const localisations = isInputtingSourceLanguage
+			? Commands.translate.strings.source
+			: Commands.translate.strings.target;
+
+		const inputLowercase = (<string> inputOption.value).toLowerCase();
+		const choices = supportedLanguages
+			.map((language) => {
+				return {
+					name: localise(localisations, interaction.locale)(language.name),
+					value: language.code,
+				};
+			})
+			.filter((choice) =>
+				choice.name && choice.name.toLowerCase().includes(inputLowercase)
+			)
+			.slice(0, 25);
+
+		choices.sort((previous, next) => previous.name.localeCompare(next.name));
 
 		return void sendInteractionResponse(
 			bot,
@@ -175,12 +180,7 @@ async function translate(
 			interaction.token,
 			{
 				type: InteractionResponseTypes.ApplicationCommandAutocompleteResult,
-				data: {
-					choices: languages.map((language) => ({
-						name: localise(language.name, interaction.locale),
-						value: language.value,
-					})),
-				},
+				data: { choices },
 			},
 		);
 	}
@@ -326,17 +326,22 @@ async function translate(
 		interaction.token,
 		{
 			embeds: [{
-				title: `${sourceLanguageName} → ${targetLanguageName}`,
 				color: configuration.interactions.responses.colors.blue,
 				fields: [{
-					name: sourceLanguageName,
+					name: localise(Commands.translate.strings.text, interaction.locale),
 					value: text,
 					inline: false,
 				}, {
-					name: targetLanguageName,
+					name: localise(
+						Commands.translate.strings.translation,
+						interaction.locale,
+					),
 					value: translatedText,
 					inline: false,
 				}],
+				footer: {
+					text: `${sourceLanguageName} ➜ ${targetLanguageName}`,
+				},
 			}],
 		},
 	);

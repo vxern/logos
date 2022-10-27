@@ -1,9 +1,12 @@
 import {
+	ActivityTypes,
+	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
 	Bot,
 	Channel,
 	createBot,
 	createTransformers,
+	editShardStatus,
 	EventHandlers,
 	fetchMembers,
 	Guild,
@@ -29,6 +32,8 @@ import { defaultLanguage, Language, supportedLanguages } from './types.ts';
 import { commandBuilders } from './commands/modules.ts';
 import { mentionUser } from './utils.ts';
 import { setupLogging } from './controllers/logging.ts';
+import { localise } from '../assets/localisations/types.ts';
+import { Misc } from '../assets/localisations/misc.ts';
 
 interface Collector<
 	E extends keyof EventHandlers,
@@ -99,8 +104,27 @@ function initialiseClient(): void {
 	return void startBot(bot);
 }
 
+const version = new TextDecoder().decode(
+	await Deno.run({
+		cmd: ['git', 'tag', '--sort=-committerdate', '--list', 'v*'],
+		stdout: 'piped',
+	}).output(),
+).split('\n').at(0);
+
 function createEventHandlers(client: Client): Partial<EventHandlers> {
 	return {
+		ready: (bot, payload) => {
+			if (!version) return;
+
+			editShardStatus(bot, payload.shardId, {
+				activities: [{
+					name: version,
+					type: ActivityTypes.Streaming,
+					createdAt: Date.now(),
+				}],
+				status: 'online',
+			});
+		},
 		guildCreate: (bot, guild) => {
 			fetchMembers(bot, guild.id, { limit: 0, query: '' });
 
@@ -450,8 +474,12 @@ function resolveInteractionToMember(
 			{
 				type: InteractionResponseTypes.ChannelMessageWithSource,
 				data: {
+					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: 'Invalid member.',
+						description: localise(
+							Misc.client.invalidUser,
+							interaction.locale,
+						),
 						color: configuration.interactions.responses.colors.red,
 					}],
 				},

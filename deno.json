@@ -1,5 +1,5 @@
 {
-  "importMap": "imports.json",
+	"importMap": "imports.json",
 	"compilerOptions": {
 		"allowJs": false,
 		"allowUnreachableCode": false,
@@ -23,10 +23,10 @@
 		"suppressImplicitAnyIndexErrors": false
 	},
 	"lint": {
-    "files": {
-      "include": ["src/"],
-      "exclude": ["./"]
-    },
+		"files": {
+			"include": ["src/"],
+			"exclude": ["./"]
+		},
 		"rules": {
 			"include": [
 				"adjacent-overload-signatures",

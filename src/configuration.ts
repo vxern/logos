@@ -1,23 +1,26 @@
+import { Misc } from '../assets/localisations/misc.ts';
 import { SongListingContentTypes } from './commands/music/data/song-listing.ts';
 import { Language } from './types.ts';
 import { fromHex } from './utils.ts';
 
-const second = 1000;
-const minute = 60 * second;
-const hour = 60 * minute;
-const day = 24 * hour;
-const week = 7 * day;
-const month = 30 * day;
-const year = 365 * day;
+class Periods {
+	static readonly second = 1000;
+	static readonly minute = 60 * Periods.second;
+	static readonly hour = 60 * Periods.minute;
+	static readonly day = 24 * Periods.hour;
+	static readonly week = 7 * Periods.day;
+	static readonly month = 30 * Periods.day;
+	static readonly year = 365 * Periods.day;
+}
 
-const timeDescriptors: [string[], number][] = [
-	[['s', 'sec', 'second', 'seconds'], second],
-	[['m', 'min', 'minute', 'minutes'], minute],
-	[['h', 'hr', 'hour', 'hours'], hour],
-	[['d', 'day', 'days'], day],
-	[['w', 'wk', 'week', 'weeks'], week],
-	[['M', 'month', 'months'], month],
-	[['y', 'year', 'years'], year],
+const timeDescriptors: [typeof Misc.time.periods.second, number][] = [
+	[Misc.time.periods.second, Periods.second],
+	[Misc.time.periods.minute, Periods.minute],
+	[Misc.time.periods.hour, Periods.hour],
+	[Misc.time.periods.day, Periods.day],
+	[Misc.time.periods.week, Periods.week],
+	[Misc.time.periods.month, Periods.month],
+	[Misc.time.periods.year, Periods.year],
 ];
 
 const settings = {
@@ -27,7 +30,7 @@ const settings = {
 		collectors: {
 			maxima: {
 				// How long it should take before a collector is automatically deinitialised.
-				timeout: 6 * hour,
+				timeout: 6 * Periods.hour,
 			},
 		},
 		// Configuration settings pertaining to the database.
@@ -50,7 +53,6 @@ const settings = {
 			logging: 'journal',
 			verification: 'verifications',
 		},
-		defaultLanguage: 'english',
 		// Configuration settings pertaining to the topic languages of managed guilds.
 		languages: <Record<
 			Language,
@@ -78,7 +80,7 @@ const settings = {
 			},
 		},
 		praises: {
-			interval: hour,
+			interval: Periods.hour,
 			maximum: 1,
 		},
 		// Configuration settings pertaining to the de facto owner of the managed guilds.
@@ -90,7 +92,7 @@ const settings = {
 			// The role responsible for taking moderation action.
 			moderator: 'Guide',
 			warnings: {
-				interval: 2 * month,
+				interval: 2 * Periods.month,
 				maximum: 3,
 			},
 			// Configuration settings pertaining to moderation abuse prevention.
@@ -100,30 +102,30 @@ const settings = {
 				// the anti-abuse system to trigger.
 				allowance: 0.1,
 				// The interval within which the enforcements must have taken place.
-				interval: day,
+				interval: Periods.day,
 				// The thresholds at which the anti-abuse system operates.
 				thresholds: [{
 					age: 0,
 					string: 'less than a day',
 					maximum: 8,
 				}, {
-					age: day,
+					age: Periods.day,
 					string: 'a day',
 					maximum: 6,
 				}, {
-					age: week,
+					age: Periods.week,
 					string: 'a week',
 					maximum: 4,
 				}, {
-					age: month,
+					age: Periods.month,
 					string: 'a month',
 					maximum: 3,
 				}, {
-					age: 6 * month,
+					age: 6 * Periods.month,
 					string: 'six months',
 					maximum: 2,
 				}, {
-					age: year,
+					age: Periods.year,
 					string: 'a year',
 					maximum: 1,
 				}],
@@ -131,7 +133,7 @@ const settings = {
 		},
 		// Configuration settings pertaining to entry to the guild.
 		entry: {
-			minimumRequiredAge: 2 * day,
+			minimumRequiredAge: 2 * Periods.day,
 		},
 	},
 	// Configuration settings pertaining to music.
@@ -141,7 +143,7 @@ const settings = {
 			[SongListingContentTypes.External]: '📁',
 			[SongListingContentTypes.Collection]: '🎶',
 		},
-		disconnectTimeout: 10 * minute,
+		disconnectTimeout: 10 * Periods.minute,
 		maxima: {
 			// The maximum volume
 			volume: 100,
@@ -168,6 +170,12 @@ const settings = {
 				invisible: fromHex('#36393f'),
 				darkRed: fromHex('#820000'),
 			},
+			// The standardised, available set of custom emojis the bot can utilise for its embed messages.
+			emojis: {
+				typescript: '<:TypeScript:1034795288185024592>',
+				deno: '<:Deno:1034795684852932729>',
+				discordeno: '<:Discordeno:1034795720315777086>',
+			},
 		},
 		// Configuration settings pertaining to articles.
 		articles: {
@@ -187,7 +195,7 @@ const settings = {
 					members: 3,
 				},
 				// ... in the interval:
-				interval: day,
+				interval: Periods.day,
 			},
 			edit: {
 				// The maximum number of edits that can be made...
@@ -196,11 +204,11 @@ const settings = {
 					members: 5,
 				},
 				// ... in the interval:
-				interval: day / 2,
+				interval: Periods.day / 2,
 			},
 		},
 	},
 };
 
 export default settings;
-export { day, hour, minute, month, second, timeDescriptors, week, year };
+export { Periods, timeDescriptors };

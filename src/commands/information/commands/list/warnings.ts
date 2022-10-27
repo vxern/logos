@@ -1,37 +1,20 @@
-import { Commands } from '../../../../assets/localisations/commands.ts';
-import {
-	createLocalisations,
-	localise,
-} from '../../../../assets/localisations/types.ts';
+import { Commands } from '../../../../../assets/localisations/commands.ts';
+import { localise } from '../../../../../assets/localisations/types.ts';
 import {
 	ApplicationCommandFlags,
-	ApplicationCommandOptionTypes,
 	Bot,
 	Interaction,
 	InteractionResponseTypes,
 	sendInteractionResponse,
-} from '../../../../deps.ts';
-import { Client, resolveInteractionToMember } from '../../../client.ts';
-import { CommandBuilder } from '../../../commands/command.ts';
-import configuration from '../../../configuration.ts';
-import { getOrCreateUser } from '../../../database/functions/users.ts';
-import { getWarnings } from '../../../database/functions/warnings.ts';
-import { Document } from '../../../database/structs/document.ts';
-import { Warning } from '../../../database/structs/users/warning.ts';
-import { displayTime, list } from '../../../formatting.ts';
-import { chunk, paginate, trim } from '../../../utils.ts';
-import { user } from '../../parameters.ts';
-
-const command: CommandBuilder = {
-	...createLocalisations(Commands.list),
-	defaultMemberPermissions: ['MODERATE_MEMBERS'],
-	options: [{
-		...createLocalisations(Commands.list.options.warnings),
-		type: ApplicationCommandOptionTypes.SubCommand,
-		handle: listWarnings,
-		options: [user],
-	}],
-};
+} from '../../../../../deps.ts';
+import { Client, resolveInteractionToMember } from '../../../../client.ts';
+import configuration from '../../../../configuration.ts';
+import { getOrCreateUser } from '../../../../database/functions/users.ts';
+import { getWarnings } from '../../../../database/functions/warnings.ts';
+import { Document } from '../../../../database/structs/document.ts';
+import { Warning } from '../../../../database/structs/users/warning.ts';
+import { displayTime, list } from '../../../../formatting.ts';
+import { chunk, paginate, trim } from '../../../../utils.ts';
 
 async function listWarnings(
 	[client, bot]: [Client, Bot],
@@ -116,4 +99,4 @@ async function listWarnings(
 	});
 }
 
-export default command;
+export { listWarnings };
