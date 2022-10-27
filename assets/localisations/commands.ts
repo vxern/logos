@@ -784,10 +784,16 @@ class Commands {
 					`Utilizatorul ${userMention} a fost avertizat. Avertizări în total: ${warningCount}.`,
 			},
 			// Do not localise; This is a public feedback message.
-			passedWarningLimitDirect: {
+			reachedKickStage: {
 				'English': (reason: string) =>
 					`You have been warned for: ${reason}\n\n` +
 					'You have surpassed the maximum number of warnings, and have subsequently been kicked from the server.',
+			},
+			// Do not localise; This is a public feedback message.
+			reachedBanStage: {
+				'English': (reason: string) =>
+					`You have been warned for: ${reason}\n\n` +
+					'You have surpassed the maximum number of warnings twice, and have subsequently been permanently banned from the server.',
 			},
 			// Do not localise; This is a public feedback message.
 			warnedDirect: {
