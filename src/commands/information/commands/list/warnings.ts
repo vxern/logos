@@ -14,22 +14,22 @@ import { getWarnings } from '../../../../database/functions/warnings.ts';
 import { Document } from '../../../../database/structs/document.ts';
 import { Warning } from '../../../../database/structs/users/warning.ts';
 import { displayTime, list } from '../../../../formatting.ts';
-import { chunk, paginate, trim } from '../../../../utils.ts';
+import { chunk, paginate, parseArguments, trim } from '../../../../utils.ts';
 
 async function listWarnings(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {
-	const userIdentifier = <string | undefined> interaction.data?.options?.at(0)
-		?.options?.at(
-			0,
-		)?.value;
-	if (userIdentifier === undefined) return;
+	const [{ user }] = parseArguments(
+		interaction.data!.options!,
+		{ show: 'boolean' },
+	);
+	if (user === undefined) return;
 
 	const member = resolveInteractionToMember(
 		[client, bot],
 		interaction,
-		userIdentifier,
+		user,
 	);
 	if (!member) return;
 
