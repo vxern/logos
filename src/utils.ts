@@ -551,11 +551,11 @@ function parseArguments<
 		switch (customTypes[option.name]) {
 			case 'boolean': {
 				args[option.name] = <boolean> option.value;
-				break;
+				continue;
 			}
 			case 'number': {
-				args[option.name] = Number(<string> option.value);
-				break;
+				args[option.name] = parseInt(<string> option.value);
+				continue;
 			}
 		}
 
