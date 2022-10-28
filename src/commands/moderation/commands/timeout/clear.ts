@@ -10,7 +10,7 @@ import {
 } from '../../../../../deps.ts';
 import { Client, resolveInteractionToMember } from '../../../../client.ts';
 import configuration from '../../../../configuration.ts';
-import { guildAsAuthor, mentionUser } from '../../../../utils.ts';
+import { diagnosticMentionUser, guildAsAuthor } from '../../../../utils.ts';
 import { log } from '../../../../controllers/logging.ts';
 import { localise } from '../../../../../assets/localisations/types.ts';
 import { Commands } from '../../../../../assets/localisations/commands.ts';
@@ -83,7 +83,7 @@ async function clearTimeout(
 					description: localise(
 						Commands.timeout.strings.timeoutCleared,
 						interaction.locale,
-					)(mentionUser(member.user!)),
+					)(diagnosticMentionUser(member.user!)),
 					color: configuration.interactions.responses.colors.green,
 				}],
 			},

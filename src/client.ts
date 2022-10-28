@@ -30,7 +30,7 @@ import configuration from './configuration.ts';
 import { Command, InteractionHandler } from './commands/command.ts';
 import { defaultLanguage, Language, supportedLanguages } from './types.ts';
 import { commandBuilders } from './commands/modules.ts';
-import { mentionUser } from './utils.ts';
+import { diagnosticMentionUser } from './utils.ts';
 import { setupLogging } from './controllers/logging.ts';
 import { localise } from '../assets/localisations/types.ts';
 import { Misc } from '../assets/localisations/misc.ts';
@@ -458,7 +458,7 @@ function resolveInteractionToMember(
 				type: InteractionResponseTypes.ApplicationCommandAutocompleteResult,
 				data: {
 					choices: matchedMembers.slice(0, 20).map((member) => ({
-						name: mentionUser(member.user!, true),
+						name: diagnosticMentionUser(member.user!, true),
 						value: member.id.toString(),
 					})),
 				},

@@ -5,7 +5,7 @@ import {
 	mention,
 	MentionTypes,
 } from '../../../../formatting.ts';
-import { mentionUser } from '../../../../utils.ts';
+import { diagnosticMentionUser } from '../../../../utils.ts';
 import { MessageGenerators } from './generators.ts';
 
 type ClientEvents = {
@@ -17,7 +17,7 @@ const client: MessageGenerators<ClientEvents> = {
 	guildBanAdd: {
 		title: '⚔️ User banned',
 		message: (_client, _bot, user, _guildId) =>
-			`${mentionUser(user)} has been banned.`,
+			`${diagnosticMentionUser(user)} has been banned.`,
 		filter: (_client, originGuildId, _bot, user, guildId) =>
 			originGuildId === guildId && !user.toggles.bot,
 		color: configuration.interactions.responses.colors.red,
@@ -25,7 +25,7 @@ const client: MessageGenerators<ClientEvents> = {
 	guildBanRemove: {
 		title: '😇 User unbanned',
 		message: (_client, _bot, user, _guildId) =>
-			`${mentionUser(user)} has been unbanned.`,
+			`${diagnosticMentionUser(user)} has been unbanned.`,
 		filter: (_client, originGuildId, _bot, user, guildId) =>
 			originGuildId === guildId && !user.toggles.bot,
 		color: configuration.interactions.responses.colors.yellow,
@@ -33,7 +33,7 @@ const client: MessageGenerators<ClientEvents> = {
 	guildMemberAdd: {
 		title: '😁 User joined',
 		message: (_client, _bot, _member, user) =>
-			`${mentionUser(user)} has joined the server.`,
+			`${diagnosticMentionUser(user)} has joined the server.`,
 		filter: (_client, originGuildId, _bot, member, user) =>
 			originGuildId === member.guildId && !user.toggles.bot,
 		color: configuration.interactions.responses.colors.green,
@@ -41,7 +41,9 @@ const client: MessageGenerators<ClientEvents> = {
 	guildMemberRemove: {
 		title: '😔 User kicked or left',
 		message: (_client, _bot, user, _guildId) =>
-			`${mentionUser(user)} has left the server, or they have been kicked.`,
+			`${
+				diagnosticMentionUser(user)
+			} has left the server, or they have been kicked.`,
 		filter: (_client, originGuildId, _bot, user, guildId) =>
 			originGuildId === guildId && !user.toggles.bot,
 		color: configuration.interactions.responses.colors.yellow,
@@ -52,7 +54,7 @@ const client: MessageGenerators<ClientEvents> = {
 			const author = client.cache.users.get(message.authorId);
 			if (!author) return;
 
-			return `${mentionUser(author)} updated their message in ${
+			return `${diagnosticMentionUser(author)} updated their message in ${
 				mention(message.channelId, MentionTypes.Channel)
 			}.
 
@@ -78,7 +80,7 @@ ${codeMultiline(message.content)}`;
 			const author = client.cache.users.get(message.authorId);
 			if (!author) return;
 
-			return `${mentionUser(author)} deleted their message in ${
+			return `${diagnosticMentionUser(author)} deleted their message in ${
 				mention(message.channelId, MentionTypes.Channel)
 			}.
 

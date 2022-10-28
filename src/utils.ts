@@ -75,7 +75,7 @@ function getTextChannel(
  * @param user - The user object.
  * @returns The mention.
  */
-function mentionUser(user: User, plain?: boolean): string {
+function diagnosticMentionUser(user: User, plain?: boolean): string {
 	const tag = `${user.username}#${user.discriminator}`;
 
 	if (plain) return `${tag} (${user.id})`;
@@ -515,12 +515,12 @@ export {
 	chunk,
 	createInteractionCollector,
 	createVerificationPrompt,
+	diagnosticMentionUser,
 	fromHex,
 	getGuildIconURLFormatted,
 	getTextChannel,
 	guildAsAuthor,
 	guildAsThumbnail,
-	mentionUser,
 	paginate,
 	random,
 	snowflakeToTimestamp,
