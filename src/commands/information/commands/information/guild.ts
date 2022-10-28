@@ -91,35 +91,7 @@ function displayGuildInformation(
 									interaction.locale,
 								)
 							}`,
-							value: (() => {
-								const channels = guild.channels.array();
-
-								const getCountByType = (type: ChannelTypes): number => {
-									return channels.filter((channel) => channel.type === type)
-										.length;
-								};
-
-								const textChannelsCount = getCountByType(
-									ChannelTypes.GuildText,
-								);
-								const voiceChannelsCount = getCountByType(
-									ChannelTypes.GuildVoice,
-								);
-
-								return `📜 ${textChannelsCount} ${
-									localise(
-										Commands.information.options.guild.strings.channelTypes
-											.text,
-										interaction.locale,
-									)
-								} | 🔊 ${voiceChannelsCount} ${
-									localise(
-										Commands.information.options.guild.strings.channelTypes
-											.voice,
-										interaction.locale,
-									)
-								}`;
-							})(),
+							value: displayInformationAboutChannels(guild, interaction.locale),
 							inline: true,
 						},
 						hasDistinctOwner
@@ -170,8 +142,33 @@ function displayGuildInformation(
 	);
 }
 
+function displayInformationAboutChannels(guild: Guild, locale: string | undefined): string {
+	const channels = guild.channels.array();
+
+	const getCountByType = (type: ChannelTypes): number => {
+		return channels.filter((channel) => channel.type === type).length;
+	};
+
+	const textChannelsCount = getCountByType(ChannelTypes.GuildText);
+	const voiceChannelsCount = getCountByType(ChannelTypes.GuildVoice);
+
+	return `📜 ${textChannelsCount} ${
+		localise(
+			Commands.information.options.guild.strings.channelTypes
+				.text,
+			locale,
+		)
+	} | 🔊 ${voiceChannelsCount} ${
+		localise(
+			Commands.information.options.guild.strings.channelTypes
+				.voice,
+			locale,
+		)
+	}`;
+}
+
 /**
- * Taking a guild object, gets a distribution of proficiency roles of its members.
+ * Taking a guild object, gets the distribution of proficiency roles of its members.
  *
  * @param client - The client instance to use.
  * @param guild - The guild of which the role frequencies to get.
