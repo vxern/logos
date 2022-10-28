@@ -380,8 +380,8 @@ function addCollector<T extends keyof EventHandlers>(
 	collectors.add(collector);
 }
 
-const userMentionExpression = new RegExp(/^<@!?([0-9]{18})>$/);
-const userIDExpression = new RegExp(/^[0-9]{18}$/);
+const userMentionExpression = new RegExp(/^<@!?([0-9]{18,19})>$/);
+const userIDExpression = new RegExp(/^[0-9]{18,19}$/);
 
 /**
  * @param client - The client instance to use.
