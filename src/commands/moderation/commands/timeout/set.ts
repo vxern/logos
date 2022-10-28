@@ -15,7 +15,7 @@ import configuration, {
 	timeDescriptors,
 } from '../../../../configuration.ts';
 import { displayTime, mention, MentionTypes } from '../../../../formatting.ts';
-import { log } from '../../../../controllers/logging.ts';
+import { log } from '../../../../controllers/logging/logging.ts';
 import { localise } from '../../../../../assets/localisations/types.ts';
 import { Commands } from '../../../../../assets/localisations/commands.ts';
 import { defaultLanguage } from '../../../../types.ts';

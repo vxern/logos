@@ -31,7 +31,7 @@ import { Command, InteractionHandler } from './commands/command.ts';
 import { defaultLanguage, Language, supportedLanguages } from './types.ts';
 import { commandBuilders } from './commands/modules.ts';
 import { diagnosticMentionUser } from './utils.ts';
-import { setupLogging } from './controllers/logging.ts';
+import { setupLogging } from './controllers/logging/logging.ts';
 import { localise } from '../assets/localisations/types.ts';
 import { Misc } from '../assets/localisations/misc.ts';
 

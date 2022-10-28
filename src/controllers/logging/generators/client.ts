@@ -1,11 +1,7 @@
-import { EventHandlers } from '../../../../../deps.ts';
-import configuration from '../../../../configuration.ts';
-import {
-	codeMultiline,
-	mention,
-	MentionTypes,
-} from '../../../../formatting.ts';
-import { diagnosticMentionUser } from '../../../../utils.ts';
+import { EventHandlers } from '../../../../deps.ts';
+import configuration from '../../../configuration.ts';
+import { codeMultiline, mention, MentionTypes } from '../../../formatting.ts';
+import { diagnosticMentionUser } from '../../../utils.ts';
 import { MessageGenerators } from './generators.ts';
 
 type ClientEvents = {

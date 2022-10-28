@@ -19,7 +19,7 @@ import {
 	getPraises,
 } from '../../../database/functions/praises.ts';
 import { getOrCreateUser } from '../../../database/functions/users.ts';
-import { log } from '../../../controllers/logging.ts';
+import { log } from '../../../controllers/logging/logging.ts';
 import { guildAsAuthor } from '../../../utils.ts';
 import {
 	createLocalisations,

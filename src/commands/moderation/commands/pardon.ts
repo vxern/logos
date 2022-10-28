@@ -19,7 +19,7 @@ import {
 } from '../../../database/functions/warnings.ts';
 import { user } from '../../parameters.ts';
 import { getRelevantWarnings } from '../module.ts';
-import { log } from '../../../controllers/logging.ts';
+import { log } from '../../../controllers/logging/logging.ts';
 import { displayTime, mention, MentionTypes } from '../../../formatting.ts';
 import {
 	createLocalisations,

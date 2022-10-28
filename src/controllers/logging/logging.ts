@@ -1,11 +1,9 @@
-import { Bot, Channel, Guild, sendMessage } from '../../deps.ts';
-import configuration from '../configuration.ts';
-import { getTextChannel } from '../utils.ts';
-import generators, {
-	Events,
-} from '../commands/information/data/generators/generators.ts';
-import { ClientEvents } from '../commands/information/data/generators/client.ts';
-import { Client } from '../client.ts';
+import { Bot, Channel, Guild, sendMessage } from '../../../deps.ts';
+import configuration from '../../configuration.ts';
+import { getTextChannel } from '../../utils.ts';
+import { Client } from '../../client.ts';
+import generators, { Events } from './generators/generators.ts';
+import { ClientEvents } from './generators/client.ts';
 
 const clientEventNames = <(keyof ClientEvents)[]> Object.keys(
 	generators.client,

@@ -17,7 +17,7 @@ import {
 import { Client, resolveInteractionToMember } from '../../../client.ts';
 import { CommandBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
-import { log } from '../../../controllers/logging.ts';
+import { log } from '../../../controllers/logging/logging.ts';
 import { getOrCreateUser } from '../../../database/functions/users.ts';
 import {
 	createWarning,

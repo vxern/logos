@@ -11,7 +11,7 @@ import {
 import { Client, resolveInteractionToMember } from '../../../../client.ts';
 import configuration from '../../../../configuration.ts';
 import { diagnosticMentionUser, guildAsAuthor } from '../../../../utils.ts';
-import { log } from '../../../../controllers/logging.ts';
+import { log } from '../../../../controllers/logging/logging.ts';
 import { localise } from '../../../../../assets/localisations/types.ts';
 import { Commands } from '../../../../../assets/localisations/commands.ts';
 import { defaultLanguage } from '../../../../types.ts';
