@@ -8,7 +8,6 @@ import {
 	banMember,
 	Bot,
 	getDmChannel,
-	getGuildIconURL,
 	Interaction,
 	InteractionResponseTypes,
 	kickMember,
@@ -26,6 +25,7 @@ import {
 } from '../../../database/functions/warnings.ts';
 import { mention, MentionTypes } from '../../../formatting.ts';
 import { defaultLanguage } from '../../../types.ts';
+import { guildAsAuthor } from '../../../utils.ts';
 import { user } from '../../parameters.ts';
 import { getRelevantWarnings } from '../module.ts';
 import { reason } from '../parameters.ts';
@@ -192,15 +192,7 @@ async function warnUser(
 		sendMessage(bot, dmChannel.id, {
 			embeds: [
 				{
-					thumbnail: (() => {
-						const iconURL = getGuildIconURL(bot, guild.id, guild.icon, {
-							size: 64,
-							format: 'webp',
-						});
-						if (!iconURL) return;
-
-						return { url: iconURL };
-					})(),
+					author: guildAsAuthor(bot, guild),
 					...(
 						reachedKickStage
 							? (

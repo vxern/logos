@@ -12,6 +12,7 @@ import {
 	editOriginalInteractionResponse,
 	Embed,
 	EventHandlers,
+	getGuildIconURL,
 	Guild,
 	Interaction,
 	InteractionCallbackData,
@@ -480,12 +481,45 @@ function snowflakeToTimestamp(snowflake: bigint): number {
 	);
 }
 
+function getGuildIconURLFormatted(bot: Bot, guild: Guild): string | undefined {
+	const iconURL = getGuildIconURL(bot, guild.id, guild.icon, {
+		size: 4096,
+		format: 'png',
+	});
+
+	return iconURL;
+}
+
+type Author = NonNullable<Embed['author']>;
+
+function guildAsAuthor(bot: Bot, guild: Guild): Author | undefined {
+	const iconURL = getGuildIconURLFormatted(bot, guild);
+	if (!iconURL) return undefined;
+
+	return {
+		name: guild.name,
+		iconUrl: iconURL,
+	};
+}
+
+type Thumbnail = NonNullable<Embed['thumbnail']>;
+
+function guildAsThumbnail(bot: Bot, guild: Guild): Thumbnail | undefined {
+	const iconURL = getGuildIconURLFormatted(bot, guild);
+	if (!iconURL) return undefined;
+
+	return { url: iconURL };
+}
+
 export {
 	chunk,
 	createInteractionCollector,
 	createVerificationPrompt,
 	fromHex,
+	getGuildIconURLFormatted,
 	getTextChannel,
+	guildAsAuthor,
+	guildAsThumbnail,
 	mentionUser,
 	paginate,
 	random,

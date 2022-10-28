@@ -4,7 +4,6 @@ import {
 	Bot,
 	editOriginalInteractionResponse,
 	getDmChannel,
-	getGuildIconURL,
 	Interaction,
 	InteractionResponseTypes,
 	sendInteractionResponse,
@@ -22,6 +21,7 @@ import {
 } from '../../../database/functions/praises.ts';
 import { getOrCreateUser } from '../../../database/functions/users.ts';
 import { log } from '../../../controllers/logging.ts';
+import { guildAsAuthor } from '../../../utils.ts';
 
 const command: CommandBuilder = {
 	name: 'praise',
@@ -175,17 +175,7 @@ async function praise(
 		sendMessage(bot, dmChannel.id, {
 			embeds: [
 				{
-					thumbnail: (() => {
-						const iconURL = getGuildIconURL(bot, guild.id, guild.icon, {
-							size: 4096,
-							format: 'png',
-						});
-						if (!iconURL) return undefined;
-
-						return {
-							url: iconURL,
-						};
-					})(),
+					author: guildAsAuthor(bot, guild),
 					title: 'You have been praised!',
 					description: `The user ${
 						mention(interaction.user.id, MentionTypes.User)

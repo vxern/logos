@@ -3,7 +3,6 @@ import {
 	Bot,
 	editMember,
 	getDmChannel,
-	getGuildIconURL,
 	Interaction,
 	InteractionResponseTypes,
 	InteractionTypes,
@@ -20,6 +19,7 @@ import { log } from '../../../../controllers/logging.ts';
 import { localise } from '../../../../../assets/localisations/types.ts';
 import { Commands } from '../../../../../assets/localisations/commands.ts';
 import { defaultLanguage } from '../../../../types.ts';
+import { guildAsAuthor } from '../../../../utils.ts';
 
 async function setTimeout(
 	[client, bot]: [Client, Bot],
@@ -188,15 +188,7 @@ async function setTimeout(
 	return void sendMessage(bot, dmChannel.id, {
 		embeds: [
 			{
-				thumbnail: (() => {
-					const iconURL = getGuildIconURL(bot, guild.id, guild.icon, {
-						size: 64,
-						format: 'webp',
-					});
-					if (!iconURL) return;
-
-					return { url: iconURL };
-				})(),
+				author: guildAsAuthor(bot, guild),
 				description: localise(
 					Commands.timeout.strings.timedOutDirect,
 					defaultLanguage,

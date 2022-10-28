@@ -4,7 +4,6 @@ import {
 	ApplicationCommandFlags,
 	Bot,
 	ChannelTypes,
-	getGuildIconURL,
 	Guild,
 	Interaction,
 	InteractionResponseTypes,
@@ -14,7 +13,7 @@ import { Client } from '../../../../client.ts';
 import configuration from '../../../../configuration.ts';
 import { displayTime, mention, MentionTypes } from '../../../../formatting.ts';
 import { defaultLanguage } from '../../../../types.ts';
-import { snowflakeToTimestamp } from '../../../../utils.ts';
+import { guildAsThumbnail, snowflakeToTimestamp } from '../../../../utils.ts';
 import { getProficiencyCategory } from '../../../social/module.ts';
 
 /** Displays information about the guild that this command was executed in. */
@@ -44,24 +43,11 @@ function displayGuildInformation(
 			data: {
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
+					thumbnail: guildAsThumbnail(bot, guild),
 					title: localise(
 						Commands.information.options.guild.strings.informationAbout,
 						interaction.locale,
 					)(guild.name),
-					...(() => {
-						const iconURL = getGuildIconURL(bot, guild.id, guild.icon, {
-							size: 4096,
-							format: 'png',
-						});
-						if (!iconURL) return {};
-
-						const icon = { url: iconURL };
-
-						return {
-							author: { ...icon, name: '' },
-							thumbnail: icon,
-						};
-					})(),
 					color: configuration.interactions.responses.colors.invisible,
 					fields: [
 						{

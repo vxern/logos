@@ -3,7 +3,6 @@ import {
 	Bot,
 	editMember,
 	getDmChannel,
-	getGuildIconURL,
 	Interaction,
 	InteractionResponseTypes,
 	sendInteractionResponse,
@@ -11,7 +10,7 @@ import {
 } from '../../../../../deps.ts';
 import { Client, resolveInteractionToMember } from '../../../../client.ts';
 import configuration from '../../../../configuration.ts';
-import { mentionUser } from '../../../../utils.ts';
+import { guildAsAuthor, mentionUser } from '../../../../utils.ts';
 import { log } from '../../../../controllers/logging.ts';
 import { localise } from '../../../../../assets/localisations/types.ts';
 import { Commands } from '../../../../../assets/localisations/commands.ts';
@@ -97,15 +96,7 @@ async function clearTimeout(
 	return void sendMessage(bot, dmChannel.id, {
 		embeds: [
 			{
-				thumbnail: (() => {
-					const iconURL = getGuildIconURL(bot, guild.id, guild.icon, {
-						size: 64,
-						format: 'webp',
-					});
-					if (!iconURL) return;
-
-					return { url: iconURL };
-				})(),
+				author: guildAsAuthor(bot, guild),
 				description: localise(
 					Commands.timeout.strings.timeoutClearedDirect,
 					defaultLanguage,
