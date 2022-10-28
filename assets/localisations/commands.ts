@@ -1,4 +1,4 @@
-import { User } from '../../deps.ts';
+import { ApplicationCommandOptionTypes, User } from '../../deps.ts';
 import { links } from '../../src/constants.ts';
 import configuration from '../../src/configuration.ts';
 import { capitalise, list } from '../../src/formatting.ts';
@@ -315,7 +315,7 @@ class Commands {
 			'English':
 				'Translates a text from the source language to the target language.',
 			'Polish': 'Tłumaczy dany tekst z języka źródłowego na język docelowy.',
-			'Romanian': 'Traduce un text dat din limbă-sursă în limbă-țintă.',
+			'Romanian': 'Traduce textul dat din limbă-sursă în limbă-țintă.',
 		},
 		options: {
 			from: {
@@ -427,7 +427,7 @@ class Commands {
 		description: {
 			'English': 'Displays information about a given word.',
 			'Polish': 'Wyświetla informacje o danym słowie.',
-			'Romanian': 'Afișează informații despre un cuvânt dat.',
+			'Romanian': 'Afișează informații despre un anumit cuvânt.',
 		},
 		options: {
 			word: {
@@ -703,7 +703,7 @@ class Commands {
 		description: {
 			'English': 'Removes the last given warning to a user.',
 			'Polish': 'Usuwa ostatnie ostrzeżenie dane użytkownikowi.',
-			'Romanian': 'Șterge ultima avertizare dat unui utilizator.',
+			'Romanian': 'Șterge ultima avertizare dată unui utilizator.',
 		},
 		options: {
 			warning: {
@@ -1523,6 +1523,70 @@ class Commands {
 		},
 	});
 
+	static readonly praise = typedLocalisations({
+		name: {
+			'English': 'praise',
+			'Polish': 'pochwal',
+			'Romanian': 'lăudare',
+		},
+		description: {
+			'English': 'Praises a user for their contribution.',
+			'Polish': 'Chwali użytkownika za jego wkład.',
+			'Romanian': 'Laudă un utilizator pentru contribuțiile sale.',
+		},
+		options: {
+			comment: {
+				name: {
+					'English': 'comment',
+					'Polish': 'komentarz',
+					'Romanian': 'comentariu',
+				},
+				description: {
+					'English': 'A comment to attach to the praise.',
+					'Polish': 'Komentarz, który ma zostać załączony do pochwały.',
+					'Romanian': 'Comentariul care să fie atașat la laudă.',
+				},
+				type: ApplicationCommandOptionTypes.String,
+			},
+		},
+		strings: {
+			cannotPraiseSelf: {
+				'English': 'You cannot praise yourself.',
+				'Polish': 'Nie możesz pochwalić samego siebie.',
+				'Romanian': 'Nu te poți lăuda pe tine însuți/însăți.',
+			},
+			failed: {
+				'English': 'Failed to praise user.',
+				'Polish': 'Nie udało się pochwalić użytkownika.',
+				'Romanian': 'Nu s-a putut lăuda utilizatorul.',
+			},
+			waitBeforePraising: {
+				'English':
+					'You have already praised a user recently. You must wait before praising somebody again.',
+				'Polish':
+					'Zanim ponownie spróbujesz pochwalić użytkownika, powinieneś troszeczkę poczekać.',
+				'Romanian':
+					'Înainte să încerci să lauzi un utilizator din nou, ar trebui să aștepți puțin.',
+			},
+			praised: {
+				'English': (userMention: string) =>
+					`Unless ${userMention} has their DMs closed, they have just been notified that you have praised them.`,
+				'Polish': (userMention: string) =>
+					`Jeśli ${userMention} nie zablokował swoich DM-ów, właśnie został/a powiadomiony/a o pochwale.`,
+				'Romanian': (userMention: string) =>
+					`Cu excepția că ${userMention} și-a blocat DM-urile sale, tocmai ce a fost notificat despre laudă.`,
+			},
+			praisedDirect: {
+				'English': (userMention: string) =>
+					`You have just been praised by ${userMention}!`,
+				'Polish': (userMention: string) =>
+					`Użytkownik ${userMention} właśnie Cię pochwalił!`,
+				'Romanian': (userMention: string) =>
+					`Abia ce ai primit o laudă de la ${userMention}!`,
+			},
+		},
+	});
+
 	static readonly profile = typedLocalisations({
 		name: {
 			'English': 'profile',
@@ -1613,7 +1677,7 @@ class Commands {
 					failed: {
 						'English': 'Failed to show information about the chosen member.',
 						'Polish': 'Nie udało się wyświetlić informacji o danym członku.',
-						'Romanian': 'Nu s-au putut afișa informații despre un membru dat.',
+						'Romanian': 'Nu s-au putut afișa informații despre membrul dat.',
 					},
 					informationForUser: {
 						'English': (username: string) => `Information about ${username}`,
