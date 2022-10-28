@@ -2,7 +2,7 @@
 nixPkgs = ['...', 'terraform']
 
 [phases.build]
-build = 'terraform apply -auto-approve'
+cmds = ['terraform init']
 
 [start]
-cmd = 'deno run --allow-env --allow-net --allow-read --allow-run mod.ts'
+cmd = 'echo -e "FAUNA_SECRET=$FAUNA_SECRET\r" > .env && terraform apply -auto-approve && deno run --allow-env --allow-net --allow-read --allow-run mod.ts'
