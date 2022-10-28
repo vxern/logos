@@ -12,6 +12,7 @@ import {
 	editOriginalInteractionResponse,
 	Embed,
 	EventHandlers,
+	getGuildIconURL,
 	Guild,
 	Interaction,
 	InteractionCallbackData,
@@ -74,7 +75,7 @@ function getTextChannel(
  * @param user - The user object.
  * @returns The mention.
  */
-function mentionUser(user: User, plain?: boolean): string {
+function diagnosticMentionUser(user: User, plain?: boolean): string {
 	const tag = `${user.username}#${user.discriminator}`;
 
 	if (plain) return `${tag} (${user.id})`;
@@ -480,13 +481,46 @@ function snowflakeToTimestamp(snowflake: bigint): number {
 	);
 }
 
+function getGuildIconURLFormatted(bot: Bot, guild: Guild): string | undefined {
+	const iconURL = getGuildIconURL(bot, guild.id, guild.icon, {
+		size: 4096,
+		format: 'png',
+	});
+
+	return iconURL;
+}
+
+type Author = NonNullable<Embed['author']>;
+
+function guildAsAuthor(bot: Bot, guild: Guild): Author | undefined {
+	const iconURL = getGuildIconURLFormatted(bot, guild);
+	if (!iconURL) return undefined;
+
+	return {
+		name: guild.name,
+		iconUrl: iconURL,
+	};
+}
+
+type Thumbnail = NonNullable<Embed['thumbnail']>;
+
+function guildAsThumbnail(bot: Bot, guild: Guild): Thumbnail | undefined {
+	const iconURL = getGuildIconURLFormatted(bot, guild);
+	if (!iconURL) return undefined;
+
+	return { url: iconURL };
+}
+
 export {
 	chunk,
 	createInteractionCollector,
 	createVerificationPrompt,
+	diagnosticMentionUser,
 	fromHex,
+	getGuildIconURLFormatted,
 	getTextChannel,
-	mentionUser,
+	guildAsAuthor,
+	guildAsThumbnail,
 	paginate,
 	random,
 	snowflakeToTimestamp,

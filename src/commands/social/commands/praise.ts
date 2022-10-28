@@ -4,7 +4,6 @@ import {
 	Bot,
 	editOriginalInteractionResponse,
 	getDmChannel,
-	getGuildIconURL,
 	Interaction,
 	InteractionResponseTypes,
 	sendInteractionResponse,
@@ -14,39 +13,27 @@ import { Client, resolveInteractionToMember } from '../../../client.ts';
 import { CommandBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
 import { Praise } from '../../../database/structs/users/praise.ts';
-import { mention, MentionTypes } from '../../../formatting.ts';
 import { user } from '../../parameters.ts';
 import {
 	createPraise,
 	getPraises,
 } from '../../../database/functions/praises.ts';
 import { getOrCreateUser } from '../../../database/functions/users.ts';
-import { log } from '../../../controllers/logging.ts';
+import { log } from '../../../controllers/logging/logging.ts';
+import { guildAsAuthor } from '../../../utils.ts';
+import {
+	createLocalisations,
+	localise,
+} from '../../../../assets/localisations/types.ts';
+import { Commands } from '../../../../assets/localisations/commands.ts';
+import { mention, MentionTypes } from '../../../formatting.ts';
 
 const command: CommandBuilder = {
-	name: 'praise',
-	nameLocalizations: {
-		pl: 'pochwal',
-		ro: 'lăudare',
-	},
-	description: 'Praises a user for their contribution.',
-	descriptionLocalizations: {
-		pl: 'Chwali użytkownika za jego wkład.',
-		ro: 'Laudă un utilizator pentru contribuțiile sale.',
-	},
+	...createLocalisations(Commands.praise),
 	defaultMemberPermissions: ['VIEW_CHANNEL'],
 	handle: praise,
 	options: [user, {
-		name: 'comment',
-		nameLocalizations: {
-			pl: 'komentarz',
-			ro: 'comentariu',
-		},
-		description: 'A comment to attach to the praise.',
-		descriptionLocalizations: {
-			pl: 'Komentarz, który ma zostać załączony do pochwały.',
-			ro: 'Comentariul care să fie atașat la laudă.',
-		},
+		...createLocalisations(Commands.praise.options.comment),
 		type: ApplicationCommandOptionTypes.String,
 	}],
 };
@@ -80,8 +67,11 @@ async function praise(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: 'You cannot praise yourself!',
-						color: configuration.interactions.responses.colors.red,
+						description: localise(
+							Commands.praise.strings.cannotPraiseSelf,
+							interaction.locale,
+						),
+						color: configuration.interactions.responses.colors.yellow,
 					}],
 				},
 			},
@@ -99,8 +89,10 @@ async function praise(
 			interaction.token,
 			{
 				embeds: [{
-					title: 'Failed to praise user',
-					description: `Your praise failed to be submitted.`,
+					description: localise(
+						Commands.praise.strings.failed,
+						interaction.locale,
+					),
 					color: configuration.interactions.responses.colors.red,
 				}],
 			},
@@ -140,9 +132,10 @@ async function praise(
 			interaction.token,
 			{
 				embeds: [{
-					title: 'Wait before praising again',
-					description:
-						`You have already praised a user recently. You must wait before praising somebody again.`,
+					description: localise(
+						Commands.praise.strings.waitBeforePraising,
+						interaction.locale,
+					),
 					color: configuration.interactions.responses.colors.yellow,
 				}],
 			},
@@ -175,21 +168,12 @@ async function praise(
 		sendMessage(bot, dmChannel.id, {
 			embeds: [
 				{
-					thumbnail: (() => {
-						const iconURL = getGuildIconURL(bot, guild.id, guild.icon, {
-							size: 4096,
-							format: 'png',
-						});
-						if (!iconURL) return undefined;
-
-						return {
-							url: iconURL,
-						};
-					})(),
-					title: 'You have been praised!',
-					description: `The user ${
-						mention(interaction.user.id, MentionTypes.User)
-					} has praised you for your contributions.`,
+					author: guildAsAuthor(bot, guild),
+					description: `${
+						localise(Commands.praise.strings.praisedDirect, interaction.locale)(
+							mention(interaction.user.id, MentionTypes.User),
+						)
+					} 🥳`,
 					color: configuration.interactions.responses.colors.green,
 				},
 			],
@@ -201,9 +185,10 @@ async function praise(
 		interaction.token,
 		{
 			embeds: [{
-				title: 'User praised',
-				description:
-					`The user has been praised and notified (if they have their DMs open).`,
+				description: localise(
+					Commands.praise.strings.praised,
+					interaction.locale,
+				)(mention(member.id, MentionTypes.User)),
 				color: configuration.interactions.responses.colors.green,
 			}],
 		},

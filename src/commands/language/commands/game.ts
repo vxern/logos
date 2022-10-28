@@ -6,7 +6,6 @@ import {
 import {
 	ApplicationCommandFlags,
 	Bot,
-	ButtonComponent,
 	ButtonStyles,
 	editOriginalInteractionResponse,
 	Interaction,
@@ -87,19 +86,15 @@ async function startGame(
 			}],
 			components: [{
 				type: MessageComponentTypes.ActionRow,
-				components: <[
-					ButtonComponent,
-					ButtonComponent,
-					ButtonComponent,
-					ButtonComponent,
-				]> (<unknown> sentenceSelection.choices.map(
+				// @ts-ignore: There are always 4 buttons for the 4 sentences selected.
+				components: sentenceSelection.choices.map(
 					(choice, index) => ({
 						type: MessageComponentTypes.Button,
 						style: ButtonStyles.Success,
 						label: choice,
 						customId: `${customId}|${index}`,
 					}),
-				)),
+				),
 			}],
 		};
 	};

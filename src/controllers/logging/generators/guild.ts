@@ -1,11 +1,11 @@
-import { Member, User } from '../../../../../deps.ts';
-import configuration from '../../../../configuration.ts';
-import { ArticleChange } from '../../../../database/structs/articles/article-change.ts';
-import { Article } from '../../../../database/structs/articles/article.ts';
-import { Praise } from '../../../../database/structs/users/praise.ts';
-import { Warning } from '../../../../database/structs/users/warning.ts';
-import { code, codeMultiline, displayTime } from '../../../../formatting.ts';
-import { mentionUser, trim } from '../../../../utils.ts';
+import { Member, User } from '../../../../deps.ts';
+import configuration from '../../../configuration.ts';
+import { ArticleChange } from '../../../database/structs/articles/article-change.ts';
+import { Article } from '../../../database/structs/articles/article.ts';
+import { Praise } from '../../../database/structs/users/praise.ts';
+import { Warning } from '../../../database/structs/users/warning.ts';
+import { code, codeMultiline, displayTime } from '../../../formatting.ts';
+import { diagnosticMentionUser, trim } from '../../../utils.ts';
 import { MessageGenerators } from './generators.ts';
 
 /** Type representing events that occur within a guild. */
@@ -77,8 +77,10 @@ const generators: Required<MessageGenerators<GuildEvents>> = {
 			if (!byUser) return;
 
 			return `${
-				mentionUser(user)
-			}'s verification request has been accepted by ${mentionUser(byUser)}`;
+				diagnosticMentionUser(user)
+			}'s verification request has been accepted by ${
+				diagnosticMentionUser(byUser)
+			}`;
 		},
 		filter: (_client, originGuildId, _user, by) => originGuildId === by.guildId,
 		color: configuration.interactions.responses.colors.green,
@@ -90,8 +92,10 @@ const generators: Required<MessageGenerators<GuildEvents>> = {
 			if (!byUser) return;
 
 			return `${
-				mentionUser(user)
-			}'s verification request has been rejected by ${mentionUser(byUser)}`;
+				diagnosticMentionUser(user)
+			}'s verification request has been rejected by ${
+				diagnosticMentionUser(byUser)
+			}`;
 		},
 		filter: (_client, originGuildId, _user, by) => originGuildId === by.guildId,
 		color: configuration.interactions.responses.colors.red,
@@ -102,7 +106,7 @@ const generators: Required<MessageGenerators<GuildEvents>> = {
 			const user = client.cache.users.get(member.id);
 			if (!user) return;
 
-			return `Entry has been granted to ${mentionUser(user)}.`;
+			return `Entry has been granted to ${diagnosticMentionUser(user)}.`;
 		},
 		filter: (_client, originGuildId, member) =>
 			originGuildId === member.guildId,
@@ -114,7 +118,7 @@ const generators: Required<MessageGenerators<GuildEvents>> = {
 			const user = client.cache.users.get(member.id);
 			if (!user) return;
 
-			return `Entry has been refused to ${mentionUser(user)}.
+			return `Entry has been refused to ${diagnosticMentionUser(user)}.
 
 **REASON**
 ${codeMultiline(reason)}`;
@@ -129,7 +133,7 @@ ${codeMultiline(reason)}`;
 			const user = client.cache.users.get(by.id);
 			if (!user) return;
 
-			return `An article has been created by ${mentionUser(user)}:
+			return `An article has been created by ${diagnosticMentionUser(user)}:
 
 **${article.content.title}**
         
@@ -145,7 +149,9 @@ ${trim(article.content.body, 300)}`;
 			const user = client.cache.users.get(by.id);
 			if (!user) return;
 
-			return `An article submission has been verified by ${mentionUser(user)}:
+			return `An article submission has been verified by ${
+				diagnosticMentionUser(user)
+			}:
 
 **${article.content.title}**
 
@@ -161,7 +167,9 @@ ${trim(article.content.body, 300)}`;
 			const user = client.cache.users.get(by.id);
 			if (!user) return;
 
-			return `An article submission has been rejected by ${mentionUser(user)}:
+			return `An article submission has been rejected by ${
+				diagnosticMentionUser(user)
+			}:
 
 **${article.content.title}**
         
@@ -178,7 +186,7 @@ ${trim(article.content.body, 300)}`;
 			if (!user) return;
 
 			return `The article ${code(article.content.title)} has been edited by ${
-				mentionUser(user)
+				diagnosticMentionUser(user)
 			}:
   
 **${change.content.title}**
@@ -195,7 +203,9 @@ ${trim(change.content.body, 300)}`;
 			const user = client.cache.users.get(by.id);
 			if (!user) return;
 
-			return `An article edit has been verified by ${mentionUser(user)}:
+			return `An article edit has been verified by ${
+				diagnosticMentionUser(user)
+			}:
 
 **${change.content.title}**
 
@@ -211,7 +221,9 @@ ${trim(change.content.body, 300)}`;
 			const user = client.cache.users.get(by.id);
 			if (!user) return;
 
-			return `An article edit has been rejected by ${mentionUser(user)}:
+			return `An article edit has been rejected by ${
+				diagnosticMentionUser(user)
+			}:
 
 **${change.content.title}**
 
@@ -228,7 +240,7 @@ ${trim(change.content.body, 300)}`;
 			if (!user) return;
 
 			return `The article ${code(article.content.title)} has been locked by ${
-				mentionUser(user)
+				diagnosticMentionUser(user)
 			}.`;
 		},
 		filter: (_client, originGuildId, _article, by) =>
@@ -241,9 +253,9 @@ ${trim(change.content.body, 300)}`;
 			const memberUser = client.cache.users.get(member.id);
 			if (!memberUser) return;
 
-			return `An inquest has been launched into ${mentionUser(memberUser)} by ${
-				mentionUser(by)
-			}.`;
+			return `An inquest has been launched into ${
+				diagnosticMentionUser(memberUser)
+			} by ${diagnosticMentionUser(by)}.`;
 		},
 		filter: (_client, originGuildId, member, _by) =>
 			originGuildId === member.guildId,
@@ -255,8 +267,10 @@ ${trim(change.content.body, 300)}`;
 			const memberUser = client.cache.users.get(member.id);
 			if (!memberUser) return;
 
-			return `An inquest into ${mentionUser(memberUser)} has been reviewed by ${
-				mentionUser(by)
+			return `An inquest into ${
+				diagnosticMentionUser(memberUser)
+			} has been reviewed by ${
+				diagnosticMentionUser(by)
 			}, and resulted in a pass.`;
 		},
 		filter: (_client, originGuildId, member, _by) =>
@@ -269,8 +283,10 @@ ${trim(change.content.body, 300)}`;
 			const memberUser = client.cache.users.get(member.id);
 			if (!memberUser) return;
 
-			return `An inquest into ${mentionUser(memberUser)} has been reviewed by ${
-				mentionUser(by)
+			return `An inquest into ${
+				diagnosticMentionUser(memberUser)
+			} has been reviewed by ${
+				diagnosticMentionUser(by)
 			}, and resulted in a failure.`;
 		},
 		filter: (_client, originGuildId, member, _by) =>
@@ -283,8 +299,8 @@ ${trim(change.content.body, 300)}`;
 			const memberUser = client.cache.users.get(member.id);
 			if (!memberUser) return;
 
-			return `${mentionUser(memberUser)} has been warned by ${
-				mentionUser(by)
+			return `${diagnosticMentionUser(memberUser)} has been warned by ${
+				diagnosticMentionUser(by)
 			} for: ${warning.reason}`;
 		},
 		filter: (_client, originGuildId, member, _warning, _by) =>
@@ -297,8 +313,8 @@ ${trim(change.content.body, 300)}`;
 			const memberUser = client.cache.users.get(member.id);
 			if (!memberUser) return;
 
-			return `${mentionUser(memberUser)} has been pardoned by ${
-				mentionUser(by)
+			return `${diagnosticMentionUser(memberUser)} has been pardoned by ${
+				diagnosticMentionUser(by)
 			} regarding their warning for: ${warning.reason}`;
 		},
 		filter: (_client, originGuildId, member, _warning, _by) =>
@@ -311,8 +327,8 @@ ${trim(change.content.body, 300)}`;
 			const memberUser = client.cache.users.get(member.id);
 			if (!memberUser) return;
 
-			return `${mentionUser(memberUser)} has been timed out by ${
-				mentionUser(by)
+			return `${diagnosticMentionUser(memberUser)} has been timed out by ${
+				diagnosticMentionUser(by)
 			} until ${displayTime(until)} for: ${reason}`;
 		},
 		filter: (_client, originGuildId, member, _until, _reason, _by) =>
@@ -325,9 +341,9 @@ ${trim(change.content.body, 300)}`;
 			const memberUser = client.cache.users.get(member.id);
 			if (!memberUser) return;
 
-			return `The timeout of ${mentionUser(memberUser)} has been cleared by: ${
-				mentionUser(by)
-			}`;
+			return `The timeout of ${
+				diagnosticMentionUser(memberUser)
+			} has been cleared by: ${diagnosticMentionUser(by)}`;
 		},
 		filter: (_client, originGuildId, member, _by) =>
 			originGuildId === member.guildId,
@@ -339,9 +355,9 @@ ${trim(change.content.body, 300)}`;
 			const memberUser = client.cache.users.get(member.id);
 			if (!memberUser) return;
 
-			return `${mentionUser(memberUser)} has been praised by ${by}. Comment: ${
-				praise.comment ?? 'None.'
-			}`;
+			return `${
+				diagnosticMentionUser(memberUser)
+			} has been praised by ${by}. Comment: ${praise.comment ?? 'None.'}`;
 		},
 		filter: (_client, originGuildId, member, _praise, _by) =>
 			originGuildId === member.guildId,

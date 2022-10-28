@@ -3,7 +3,6 @@ import {
 	ApplicationCommandOptionTypes,
 	Bot,
 	getDmChannel,
-	getGuildIconURL,
 	Interaction,
 	InteractionResponseTypes,
 	InteractionTypes,
@@ -20,7 +19,7 @@ import {
 } from '../../../database/functions/warnings.ts';
 import { user } from '../../parameters.ts';
 import { getRelevantWarnings } from '../module.ts';
-import { log } from '../../../controllers/logging.ts';
+import { log } from '../../../controllers/logging/logging.ts';
 import { displayTime, mention, MentionTypes } from '../../../formatting.ts';
 import {
 	createLocalisations,
@@ -28,6 +27,7 @@ import {
 } from '../../../../assets/localisations/types.ts';
 import { Commands } from '../../../../assets/localisations/commands.ts';
 import { defaultLanguage } from '../../../types.ts';
+import { guildAsAuthor } from '../../../utils.ts';
 
 const command: CommandBuilder = {
 	...createLocalisations(Commands.pardon),
@@ -204,15 +204,7 @@ async function unwarnUser(
 	return void sendMessage(bot, dmChannel.id, {
 		embeds: [
 			{
-				thumbnail: (() => {
-					const iconURL = getGuildIconURL(bot, guild.id, guild.icon, {
-						size: 64,
-						format: 'webp',
-					});
-					if (!iconURL) return;
-
-					return { url: iconURL };
-				})(),
+				author: guildAsAuthor(bot, guild),
 				description: localise(
 					Commands.pardon.strings.pardonedDirect,
 					defaultLanguage,
