@@ -15,7 +15,7 @@ import {
 import { Client } from '../../../client.ts';
 import { CommandBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
-import { fromHex } from '../../../utils.ts';
+import { fromHex, parseArguments } from '../../../utils.ts';
 import { show } from '../../parameters.ts';
 import { DictionaryEntry, toFields } from '../data/dictionary.ts';
 import { dictionaryAdaptersByLanguage } from '../module.ts';
@@ -39,19 +39,11 @@ async function word(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {
-	const data = interaction.data;
-	if (!data) return;
-
-	const word = <string | undefined> data.options?.at(0)?.value;
+	const [{ word, verbose, show }] = parseArguments(
+		interaction.data!.options!,
+		{ verbose: 'boolean', show: 'boolean' },
+	);
 	if (!word) return;
-
-	const verbose =
-		<boolean> data.options?.find((option) => option.name === 'verbose')
-			?.value ??
-			false;
-	const show =
-		<boolean> data.options?.find((option) => option.name === 'show')?.value ??
-			false;
 
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (!guild) return;
@@ -100,7 +92,7 @@ async function word(
 		promise.then((result) => {
 			entry = { ...result, ...entry };
 
-			const fields = toFields(entry, interaction.locale, { verbose: verbose });
+			const fields = toFields(entry, interaction.locale, { verbose });
 			const hasEntry = fields.length > 0;
 			if (!hasEntry) return;
 
@@ -118,8 +110,8 @@ async function word(
 
 	await Promise.all(promises).catch();
 
-	const responded =
-		toFields(entry, interaction.locale, { verbose: verbose }).length > 0;
+	const responded = toFields(entry, interaction.locale, { verbose }).length >
+		0;
 	if (responded) return;
 
 	return void editOriginalInteractionResponse(

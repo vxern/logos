@@ -23,6 +23,7 @@ import { Client } from '../../../client.ts';
 import { CommandBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
 import { deepLApiEndpoints } from '../../../constants.ts';
+import { parseArguments } from '../../../utils.ts';
 import { show } from '../../parameters.ts';
 
 const command: CommandBuilder = {
@@ -148,18 +149,20 @@ async function translate(
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (!guild) return;
 
-	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete) {
-		const inputOption = interaction.data?.options?.find((
-			option,
-		) => option.focused);
-		if (inputOption === undefined || inputOption.value === undefined) return;
+	const [{ from, to, text, show }, focused] = parseArguments(
+		interaction.data!.options!,
+		{ show: 'boolean' },
+	);
 
-		const isInputtingSourceLanguage = inputOption.name === 'from';
+	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete) {
+		if (!focused || focused.value === undefined) return;
+
+		const isInputtingSourceLanguage = focused.name === 'from';
 		const localisations = isInputtingSourceLanguage
 			? Commands.translate.strings.source
 			: Commands.translate.strings.target;
 
-		const inputLowercase = (<string> inputOption.value).toLowerCase();
+		const inputLowercase = (<string> focused.value).toLowerCase();
 		const choices = supportedLanguages
 			.map((language) => {
 				return {
@@ -185,15 +188,9 @@ async function translate(
 		);
 	}
 
-	const data = interaction.data;
-	if (!data) return;
+	if (!from || !to || !text) return;
 
-	const sourceLanguageOrCode = <string | undefined> data.options?.at(0)?.value;
-	const targetLanguageOrCode = <string | undefined> data.options?.at(1)?.value;
-	const text = <string | undefined> data.options?.at(2)?.value;
-	if (!(sourceLanguageOrCode && targetLanguageOrCode && text)) return;
-
-	if (sourceLanguageOrCode === targetLanguageOrCode) {
+	if (from === to) {
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -237,8 +234,8 @@ async function translate(
 		);
 	}
 
-	const sourceLanguage = resolveToSupportedLanguage(sourceLanguageOrCode);
-	const targetLanguage = resolveToSupportedLanguage(targetLanguageOrCode);
+	const sourceLanguage = resolveToSupportedLanguage(from);
+	const targetLanguage = resolveToSupportedLanguage(to);
 	if (!sourceLanguage || !targetLanguage) {
 		return void sendInteractionResponse(
 			bot,
@@ -271,10 +268,6 @@ async function translate(
 			},
 		);
 	}
-
-	const show =
-		<boolean> data.options?.find((option) => option.name === 'show')?.value ??
-			false;
 
 	await sendInteractionResponse(
 		bot,

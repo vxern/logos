@@ -16,6 +16,7 @@ import { Client } from '../../../client.ts';
 import { CommandBuilder } from '../../../commands/command.ts';
 import { links } from '../../../constants.ts';
 import { defaultLanguage } from '../../../types.ts';
+import { parseArguments } from '../../../utils.ts';
 import { show } from '../../parameters.ts';
 
 const command: CommandBuilder = {
@@ -35,11 +36,10 @@ function resources(
 
 	const repositoryLink = links.generateLanguageRepositoryLink(guild.language);
 
-	const show =
-		<boolean> interaction.data?.options?.find((option) =>
-			option.name === 'show'
-		)?.value ??
-			false;
+	const [{ show }] = parseArguments(
+		interaction.data!.options,
+		{ show: 'boolean' },
+	);
 
 	return void sendInteractionResponse(
 		bot,
