@@ -1,8 +1,2 @@
-[phases.setup]
-nixPkgs = ['...', 'terraform']
-
-[phases.build]
-cmds = ['terraform init']
-
 [start]
-cmd = 'echo -e "FAUNA_SECRET=$FAUNA_SECRET\r" > .env && terraform apply -auto-approve && deno run --allow-env --allow-net --allow-read --allow-run mod.ts'
+cmd = 'deno run --allow-env --allow-net --allow-read --allow-run mod.ts'
