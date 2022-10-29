@@ -150,7 +150,7 @@ async function translate(
 	if (!guild) return;
 
 	const [{ from, to, text, show }, focused] = parseArguments(
-		interaction.data!.options!,
+		interaction.data!.options,
 		{ show: 'boolean' },
 	);
 

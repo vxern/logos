@@ -40,7 +40,7 @@ async function word(
 	interaction: Interaction,
 ): Promise<void> {
 	const [{ word, verbose, show }] = parseArguments(
-		interaction.data!.options!,
+		interaction.data!.options,
 		{ verbose: 'boolean', show: 'boolean' },
 	);
 	if (!word) return;

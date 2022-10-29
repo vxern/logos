@@ -21,7 +21,7 @@ async function listWarnings(
 	interaction: Interaction,
 ): Promise<void> {
 	const [{ user }] = parseArguments(
-		interaction.data!.options!,
+		interaction.data!.options,
 		{ show: 'boolean' },
 	);
 	if (user === undefined) return;
