@@ -1,6 +1,6 @@
 import { Bot } from '../../deps.ts';
 import { Client } from '../client.ts';
-import entry from './entry.ts';
+import entry from './entry/entry.ts';
 
 type ServiceStarter = ([client, bot]: [Client, Bot]) => void;
 

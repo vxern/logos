@@ -9,16 +9,16 @@ import {
 	MessageComponentTypes,
 	sendInteractionResponse,
 	User,
-} from '../../../deps.ts';
-import configuration from '../../configuration.ts';
-import { getProficiencyCategory } from '../../commands/social/module.ts';
-import { snowflakeToTimestamp } from '../../utils.ts';
-import { Client } from '../../client.ts';
+} from '../../../../deps.ts';
+import configuration from '../../../configuration.ts';
+import { getProficiencyCategory } from '../../../commands/social/module.ts';
+import { snowflakeToTimestamp } from '../../../utils.ts';
+import { Client } from '../../../client.ts';
 import {
 	Localisations,
 	localise,
-} from '../../../assets/localisations/types.ts';
-import { Services } from '../../../assets/localisations/services.ts';
+} from '../../../../assets/localisations/types.ts';
+import { Services } from '../../../../assets/localisations/services.ts';
 
 const proficiencyCategory = getProficiencyCategory();
 const proficiencies = proficiencyCategory.collection.list;
@@ -74,12 +74,8 @@ function onAcceptRules(
 				}],
 				components: [{
 					type: MessageComponentTypes.ActionRow,
-					components: <[
-						ButtonComponent,
-						ButtonComponent,
-						ButtonComponent,
-						ButtonComponent,
-					]> proficiencies.map<ButtonComponent>(
+					// @ts-ignore: There are only 4 proficiency roles, therefore only 4 buttons. (max is 5)
+					components: proficiencies.map<ButtonComponent>(
 						(proficiency, index) => ({
 							type: MessageComponentTypes.Button,
 							label: localise(proficiency.name, interaction.locale),

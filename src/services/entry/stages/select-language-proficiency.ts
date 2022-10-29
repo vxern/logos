@@ -1,4 +1,3 @@
-import { localise } from '../../../assets/localisations/types.ts';
 import {
 	addRole,
 	Bot,
@@ -6,10 +5,11 @@ import {
 	InteractionResponseTypes,
 	InteractionTypes,
 	sendInteractionResponse,
-} from '../../../deps.ts';
-import { Client } from '../../client.ts';
-import { getProficiencyCategory } from '../../commands/social/module.ts';
-import { defaultLanguage } from '../../types.ts';
+} from '../../../../deps.ts';
+import { localise } from '../../../../assets/localisations/types.ts';
+import { Client } from '../../../client.ts';
+import { getProficiencyCategory } from '../../../commands/social/module.ts';
+import { defaultLanguage } from '../../../types.ts';
 
 const proficiencyCategory = getProficiencyCategory();
 const proficiencies = proficiencyCategory.collection.list;
