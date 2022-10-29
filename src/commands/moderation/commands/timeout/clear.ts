@@ -10,7 +10,11 @@ import {
 } from '../../../../../deps.ts';
 import { Client, resolveInteractionToMember } from '../../../../client.ts';
 import configuration from '../../../../configuration.ts';
-import { diagnosticMentionUser, guildAsAuthor } from '../../../../utils.ts';
+import {
+	diagnosticMentionUser,
+	guildAsAuthor,
+	parseArguments,
+} from '../../../../utils.ts';
 import { log } from '../../../../controllers/logging/logging.ts';
 import { localise } from '../../../../../assets/localisations/types.ts';
 import { Commands } from '../../../../../assets/localisations/commands.ts';
@@ -20,16 +24,13 @@ async function clearTimeout(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {
-	const userIdentifier = <string | undefined> interaction.data?.options?.at(0)
-		?.options?.at(
-			0,
-		)?.value;
-	if (userIdentifier === undefined) return;
+	const [{ user }] = parseArguments(interaction.data!.options, {});
+	if (user === undefined) return;
 
 	const member = resolveInteractionToMember(
 		[client, bot],
 		interaction,
-		userIdentifier,
+		user,
 	);
 	if (!member) return;
 
