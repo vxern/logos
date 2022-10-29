@@ -46,7 +46,7 @@ resource "fauna_index" "get_article_changes_by_article_reference" {
 }
 
 resource "fauna_index" "get_article_changes_by_author" {
-  depends_on = [fauna_collection.article_changes]
+  depends_on = [fauna_collection.article_changes, fauna_index.get_article_changes_by_article_reference]
 
   name   = "GetArticleChangesByAuthor"
   source = "ArticleChanges"
@@ -62,7 +62,7 @@ resource "fauna_index" "get_articles_by_author" {
 }
 
 resource "fauna_index" "get_articles_by_language" {
-  depends_on = [fauna_collection.articles]
+  depends_on = [fauna_collection.articles, fauna_index.get_articles_by_author]
 
   name   = "GetArticlesByLanguage"
   source = "Articles"
@@ -70,7 +70,7 @@ resource "fauna_index" "get_articles_by_language" {
 }
 
 resource "fauna_index" "get_articles_by_language_and_dialect" {
-  depends_on = [fauna_collection.articles]
+  depends_on = [fauna_collection.articles, fauna_index.get_articles_by_language]
 
   name   = "GetArticlesByLanguageAndDialect"
   source = "Articles"
@@ -87,7 +87,7 @@ resource "fauna_index" "get_praises_by_author" {
 }
 
 resource "fauna_index" "get_praises_by_subject" {
-  depends_on = [fauna_collection.praises]
+  depends_on = [fauna_collection.praises, fauna_index.get_praises_by_author]
 
   name   = "GetPraisesBySubject"
   source = "Praises"
