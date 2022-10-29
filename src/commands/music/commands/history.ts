@@ -13,6 +13,7 @@ import {
 	localise,
 } from '../../../../assets/localisations/types.ts';
 import { Commands } from '../../../../assets/localisations/commands.ts';
+import { parseArguments } from '../../../utils.ts';
 
 const command: OptionBuilder = {
 	...createLocalisations(Commands.music.options.history),
@@ -28,10 +29,9 @@ function displaySongHistory(
 	const musicController = client.music.get(interaction.guildId!);
 	if (!musicController) return;
 
-	const show =
-		(<boolean | undefined> interaction.data?.options?.at(0)?.options?.find((
-			option,
-		) => option.name === 'show')?.value) ?? false;
+	const [{ show }] = parseArguments(interaction.data!.options, {
+		show: 'boolean',
+	});
 
 	const listingHistory = _.cloneDeep(musicController.history);
 
@@ -45,7 +45,7 @@ function displaySongHistory(
 			)
 		}`,
 		songListings: listingHistory,
-		show: show,
+		show: show ?? false,
 	});
 }
 

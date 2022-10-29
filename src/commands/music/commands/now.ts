@@ -10,7 +10,7 @@ import { Client } from '../../../client.ts';
 import { OptionBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
 import { displayTime, mention, MentionTypes } from '../../../formatting.ts';
-import { chunk, paginate, trim } from '../../../utils.ts';
+import { chunk, paginate, parseArguments, trim } from '../../../utils.ts';
 import { Song } from '../data/song.ts';
 import { SongStream } from '../data/song-stream.ts';
 import { SongListingContentTypes } from '../data/song-listing.ts';
@@ -59,20 +59,15 @@ function displayNowPlaying(
 		);
 	}
 
-	const data = interaction.data;
-	if (!data) return;
+	const [{ collection, show }] = parseArguments(
+		interaction.data!.options,
+		{
+			collection: 'boolean',
+			show: 'boolean',
+		},
+	);
 
-	const options = data.options?.at(0)?.options;
-
-	const showCollection =
-		(<boolean | undefined> options?.find((option) =>
-			option.name === 'collection'
-		)?.value) ?? false;
-	const show =
-		(<boolean | undefined> options?.find((option) => option.name === 'show')
-			?.value) ?? false;
-
-	if (showCollection) {
+	if (collection) {
 		if (currentListing?.content.type !== SongListingContentTypes.Collection) {
 			return void sendInteractionResponse(
 				bot,
@@ -133,7 +128,7 @@ function displayNowPlaying(
 						}).join('\n')
 						: localise(Commands.music.strings.listEmpty, interaction.locale),
 			},
-			show: show,
+			show: show ?? false,
 		});
 	}
 

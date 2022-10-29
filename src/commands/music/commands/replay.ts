@@ -14,6 +14,7 @@ import {
 import { Client } from '../../../client.ts';
 import { OptionBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
+import { parseArguments } from '../../../utils.ts';
 import { SongListingContentTypes } from '../data/song-listing.ts';
 import { collection } from '../parameters.ts';
 
@@ -36,10 +37,9 @@ function replaySong(
 	);
 	if (!canAct) return;
 
-	const replayCollection =
-		(<boolean | undefined> interaction.data?.options?.at(0)?.options?.find((
-			option,
-		) => option.name === 'collection')?.value) ?? false;
+	const [{ collection }] = parseArguments(interaction.data!.options, {
+		collection: 'boolean',
+	});
 
 	const currentListing = musicController.current;
 
@@ -65,7 +65,7 @@ function replaySong(
 	}
 
 	if (
-		replayCollection &&
+		collection &&
 		currentListing.content.type !== SongListingContentTypes.Collection
 	) {
 		return void sendInteractionResponse(
@@ -88,7 +88,7 @@ function replaySong(
 		);
 	}
 
-	return musicController.replay(interaction, replayCollection);
+	return musicController.replay(interaction, collection);
 }
 
 export default command;

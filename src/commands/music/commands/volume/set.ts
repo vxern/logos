@@ -8,6 +8,7 @@ import {
 } from '../../../../../deps.ts';
 import { Client } from '../../../../client.ts';
 import configuration from '../../../../configuration.ts';
+import { parseArguments } from '../../../../utils.ts';
 
 function setVolume(
 	[client, bot]: [Client, Bot],
@@ -19,11 +20,11 @@ function setVolume(
 	const [canAct, _] = musicController.verifyMemberVoiceState(interaction);
 	if (!canAct) return;
 
-	const volumeString = interaction.data?.options?.at(0)?.options?.at(0)?.value;
-	if (!volumeString) return;
+	const [{ volume }] = parseArguments(interaction.data!.options, {
+		volume: 'number',
+	});
 
-	const volume = Number(volumeString);
-	if (isNaN(volume)) return;
+	if (!volume || isNaN(volume)) return;
 
 	if (volume < 0 || volume > configuration.music.maxima.volume) {
 		return void sendInteractionResponse(

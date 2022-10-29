@@ -16,6 +16,7 @@ import {
 	localise,
 } from '../../../../assets/localisations/types.ts';
 import { Commands } from '../../../../assets/localisations/commands.ts';
+import { parseArguments } from '../../../utils.ts';
 
 const command: OptionBuilder = {
 	...createLocalisations(Commands.music.options.play),
@@ -24,7 +25,7 @@ const command: OptionBuilder = {
 		{
 			...createLocalisations(Commands.music.options.play.options.file),
 			type: ApplicationCommandOptionTypes.SubCommand,
-			handle: playStream,
+			handle: playExternal,
 			options: [{
 				...createLocalisations(
 					Commands.music.options.play.options.file.options.url,
@@ -43,7 +44,7 @@ const command: OptionBuilder = {
 	],
 };
 
-function playStream(
+function playExternal(
 	clientWithBot: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {
@@ -75,9 +76,8 @@ async function playSongListing(
 	const musicController = client.music.get(interaction.guildId!);
 	if (!musicController) return;
 
-	const titleOrUrl = <string | undefined> interaction.data?.options?.at(0)
-		?.options?.at(0)?.options?.at(0)?.value;
-	if (!titleOrUrl) return;
+	const [{ query }] = parseArguments(interaction.data!.options, {});
+	if (!query) return;
 
 	const [canPlay, voiceState] = musicController.verifyCanPlay(interaction);
 	if (!canPlay || !voiceState) return;
@@ -85,7 +85,7 @@ async function playSongListing(
 	const songListing = await resolveToSongListing(
 		client,
 		interaction,
-		titleOrUrl,
+		query,
 	);
 
 	if (!songListing) {
