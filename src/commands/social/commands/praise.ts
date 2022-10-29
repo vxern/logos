@@ -42,7 +42,7 @@ async function praise(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {
-	const [{ user, comment }] = parseArguments(interaction.data!.options, {});
+	const [{ user, comment }] = parseArguments(interaction.data?.options, {});
 	if (user === undefined) return;
 
 	const member = resolveInteractionToMember(

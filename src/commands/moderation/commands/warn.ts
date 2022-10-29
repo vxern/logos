@@ -41,7 +41,7 @@ async function warnUser(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {
-	const [{ user, reason }] = parseArguments(interaction.data!.options, {});
+	const [{ user, reason }] = parseArguments(interaction.data?.options, {});
 	if (user === undefined) return;
 
 	const member = resolveInteractionToMember(

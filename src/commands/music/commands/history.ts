@@ -29,7 +29,7 @@ function displaySongHistory(
 	const musicController = client.music.get(interaction.guildId!);
 	if (!musicController) return;
 
-	const [{ show }] = parseArguments(interaction.data!.options, {
+	const [{ show }] = parseArguments(interaction.data?.options, {
 		show: 'boolean',
 	});
 

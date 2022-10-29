@@ -60,7 +60,7 @@ function displayNowPlaying(
 	}
 
 	const [{ collection, show }] = parseArguments(
-		interaction.data!.options,
+		interaction.data?.options,
 		{
 			collection: 'boolean',
 			show: 'boolean',

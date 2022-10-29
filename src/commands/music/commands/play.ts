@@ -76,7 +76,7 @@ async function playSongListing(
 	const musicController = client.music.get(interaction.guildId!);
 	if (!musicController) return;
 
-	const [{ query }] = parseArguments(interaction.data!.options, {});
+	const [{ query }] = parseArguments(interaction.data?.options, {});
 	if (!query) return;
 
 	const [canPlay, voiceState] = musicController.verifyCanPlay(interaction);

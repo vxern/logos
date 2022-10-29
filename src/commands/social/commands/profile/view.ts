@@ -34,7 +34,7 @@ async function viewProfile(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {
-	const [{ user, show }] = parseArguments(interaction.data!.options, {
+	const [{ user, show }] = parseArguments(interaction.data?.options, {
 		show: 'boolean',
 	});
 

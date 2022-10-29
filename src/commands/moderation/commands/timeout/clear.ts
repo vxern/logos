@@ -24,7 +24,7 @@ async function clearTimeout(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {
-	const [{ user }] = parseArguments(interaction.data!.options, {});
+	const [{ user }] = parseArguments(interaction.data?.options, {});
 	if (user === undefined) return;
 
 	const member = resolveInteractionToMember(

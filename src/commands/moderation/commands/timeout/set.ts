@@ -26,7 +26,7 @@ async function setTimeout(
 	interaction: Interaction,
 ): Promise<void> {
 	const [{ user, duration, reason }, focused] = parseArguments(
-		interaction.data!.options,
+		interaction.data?.options,
 		{},
 	);
 

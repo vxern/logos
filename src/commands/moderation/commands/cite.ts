@@ -82,7 +82,7 @@ function citeRule(
 	};
 
 	const [{ rule }] = parseArguments(
-		interaction.data!.options,
+		interaction.data?.options,
 		{ rule: 'number' },
 	);
 	if (!rule) return displayInvalidRuleError();

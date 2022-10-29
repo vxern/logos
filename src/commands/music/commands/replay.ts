@@ -37,7 +37,7 @@ function replaySong(
 	);
 	if (!canAct) return;
 
-	const [{ collection }] = parseArguments(interaction.data!.options, {
+	const [{ collection }] = parseArguments(interaction.data?.options, {
 		collection: 'boolean',
 	});
 

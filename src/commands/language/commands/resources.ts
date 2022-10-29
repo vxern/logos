@@ -37,7 +37,7 @@ function resources(
 	const repositoryLink = links.generateLanguageRepositoryLink(guild.language);
 
 	const [{ show }] = parseArguments(
-		interaction.data!.options,
+		interaction.data?.options,
 		{ show: 'boolean' },
 	);
 

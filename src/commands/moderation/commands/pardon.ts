@@ -48,7 +48,7 @@ async function pardonUser(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {
-	const [{ user, warning }] = parseArguments(interaction.data!.options, {});
+	const [{ user, warning }] = parseArguments(interaction.data?.options, {});
 	if (user === undefined) return;
 
 	const member = resolveInteractionToMember(

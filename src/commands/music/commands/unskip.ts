@@ -39,7 +39,7 @@ function unskip(
 	const data = interaction.data;
 	if (!data) return;
 
-	const [{ collection, by, to }] = parseArguments(interaction.data!.options, {
+	const [{ collection, by, to }] = parseArguments(interaction.data?.options, {
 		collection: 'boolean',
 		by: 'number',
 		to: 'number',

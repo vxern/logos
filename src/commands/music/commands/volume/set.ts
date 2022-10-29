@@ -20,7 +20,7 @@ function setVolume(
 	const [canAct, _] = musicController.verifyMemberVoiceState(interaction);
 	if (!canAct) return;
 
-	const [{ volume }] = parseArguments(interaction.data!.options, {
+	const [{ volume }] = parseArguments(interaction.data?.options, {
 		volume: 'number',
 	});
 
