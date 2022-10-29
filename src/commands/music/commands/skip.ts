@@ -15,6 +15,7 @@ import { Client } from '../../../client.ts';
 import { OptionBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
 import { defaultLanguage } from '../../../types.ts';
+import { parseArguments } from '../../../utils.ts';
 import { SongListingContentTypes } from '../data/song-listing.ts';
 import { by, collection, to } from '../parameters.ts';
 
@@ -40,22 +41,13 @@ function skipSong(
 	const data = interaction.data;
 	if (!data) return;
 
-	const skipCollection =
-		(<boolean | undefined> data.options?.at(0)?.options?.find((option) =>
-			option.name === 'collection'
-		)?.value) ?? false;
+	const [{ collection, by, to }] = parseArguments(interaction.data?.options, {
+		collection: 'boolean',
+		by: 'number',
+		to: 'number',
+	});
 
-	const byString = <string | undefined> data.options?.at(0)?.options?.find((
-		option,
-	) => option.name === 'by')?.value;
-	const toString = <string | undefined> data.options?.at(0)?.options?.find((
-		option,
-	) => option.name === 'to')?.value;
-
-	const by = byString ? Number(byString) : undefined;
 	if (by && isNaN(by)) return;
-
-	const to = toString ? Number(toString) : undefined;
 	if (to && isNaN(to)) return;
 
 	const songListing = musicController.current;
@@ -82,7 +74,7 @@ function skipSong(
 	}
 
 	if (
-		skipCollection &&
+		collection &&
 		songListing.content.type !== SongListingContentTypes.Collection
 	) {
 		return void sendInteractionResponse(
@@ -150,7 +142,7 @@ function skipSong(
 	if (by) {
 		if (
 			songListing.content.type === SongListingContentTypes.Collection &&
-			!skipCollection
+			!collection
 		) {
 			const listingsToSkip = Math.min(
 				by,
@@ -158,14 +150,14 @@ function skipSong(
 					(songListing.content.position + 1),
 			);
 
-			musicController.skip(skipCollection, {
+			musicController.skip(collection, {
 				by: listingsToSkip,
 				to: undefined,
 			});
 		} else {
 			const listingsToSkip = Math.min(by, musicController.queue.length);
 
-			musicController.skip(skipCollection, {
+			musicController.skip(collection, {
 				by: listingsToSkip,
 				to: undefined,
 			});
@@ -173,24 +165,24 @@ function skipSong(
 	} else if (to) {
 		if (
 			songListing.content.type === SongListingContentTypes.Collection &&
-			!skipCollection
+			!collection
 		) {
 			const listingToSkipTo = Math.min(to, songListing.content.songs.length);
 
-			musicController.skip(skipCollection, {
+			musicController.skip(collection, {
 				by: undefined,
 				to: listingToSkipTo,
 			});
 		} else {
 			const listingToSkipTo = Math.min(to, musicController.queue.length);
 
-			musicController.skip(skipCollection, {
+			musicController.skip(collection, {
 				by: undefined,
 				to: listingToSkipTo,
 			});
 		}
 	} else {
-		musicController.skip(skipCollection, {
+		musicController.skip(collection, {
 			by: undefined,
 			to: undefined,
 		});
@@ -213,7 +205,7 @@ function skipSong(
 					description: localise(
 						Commands.music.options.skip.strings.skipped.body,
 						defaultLanguage,
-					)(skipCollection),
+					)(collection ?? false),
 					color: configuration.interactions.responses.colors.invisible,
 				}],
 			},

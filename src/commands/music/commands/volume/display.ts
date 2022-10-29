@@ -10,6 +10,7 @@ import {
 import { Client } from '../../../../client.ts';
 import configuration from '../../../../configuration.ts';
 import { defaultLanguage } from '../../../../types.ts';
+import { parseArguments } from '../../../../utils.ts';
 
 function displayVolume(
 	[client, bot]: [Client, Bot],
@@ -18,9 +19,9 @@ function displayVolume(
 	const musicController = client.music.get(interaction.guildId!);
 	if (!musicController) return;
 
-	const show =
-		(<boolean | undefined> interaction.data?.options?.at(0)?.options?.at(0)
-			?.value) ?? false;
+	const [{ show }] = parseArguments(interaction.data?.options, {
+		show: 'boolean',
+	});
 
 	return void sendInteractionResponse(
 		bot,

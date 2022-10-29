@@ -19,42 +19,30 @@ import { log } from '../../../../controllers/logging/logging.ts';
 import { localise } from '../../../../../assets/localisations/types.ts';
 import { Commands } from '../../../../../assets/localisations/commands.ts';
 import { defaultLanguage } from '../../../../types.ts';
-import { guildAsAuthor } from '../../../../utils.ts';
+import { guildAsAuthor, parseArguments } from '../../../../utils.ts';
 
 async function setTimeout(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {
-	const data = interaction.data;
-	if (!data) return;
-
-	const options = data.options?.at(0)?.options;
-	if (!options) return;
-
-	const userIdentifierOption = options.find((option) => option.name === 'user');
-	const durationIdentifier = <string | undefined> options.find((option) =>
-		option.name === 'duration'
-	)?.value;
-	const reason = <string | undefined> options.find((option) =>
-		option.name === 'reason'
-	)?.value;
-	if (reason === undefined) return;
+	const [{ user, duration, reason }, focused] = parseArguments(
+		interaction.data?.options,
+		{},
+	);
 
 	if (
 		interaction.type !== InteractionTypes.ApplicationCommandAutocomplete &&
-		userIdentifierOption === undefined && durationIdentifier === undefined
+		user === undefined && duration === undefined
 	) {
 		return;
 	}
 
-	const userIdentifier = <string | undefined> userIdentifierOption?.value;
-
 	if (
 		interaction.type === InteractionTypes.ApplicationCommandAutocomplete &&
-		!userIdentifierOption?.focused
+		focused?.name === 'duration'
 	) {
 		const timestamp = getTimestampFromExpression(
-			durationIdentifier!,
+			duration!,
 			interaction.locale,
 		);
 
@@ -76,9 +64,11 @@ async function setTimeout(
 	const member = resolveInteractionToMember(
 		[client, bot],
 		interaction,
-		userIdentifier!,
+		user!,
 	);
 	if (!member) return;
+
+	if (!reason) return;
 
 	const displayError = (error: string): void => {
 		return void sendInteractionResponse(
@@ -104,7 +94,7 @@ async function setTimeout(
 		);
 	}
 
-	const duration = Number(durationIdentifier);
+	const durationParsed = Number(duration);
 
 	if (Number.isNaN(duration)) {
 		return displayError(
@@ -112,7 +102,7 @@ async function setTimeout(
 		);
 	}
 
-	if (duration < Periods.minute) {
+	if (durationParsed < Periods.minute) {
 		return displayError(
 			localise(
 				Commands.timeout.strings.durationMustBeLongerThanMinute,
@@ -121,7 +111,7 @@ async function setTimeout(
 		);
 	}
 
-	if (duration > Periods.week) {
+	if (durationParsed > Periods.week) {
 		return displayError(
 			localise(
 				Commands.timeout.strings.durationMustBeShorterThanWeek,
@@ -130,7 +120,7 @@ async function setTimeout(
 		);
 	}
 
-	const until = Date.now() + duration;
+	const until = Date.now() + durationParsed;
 
 	await editMember(
 		bot,

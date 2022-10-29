@@ -12,6 +12,7 @@ import {
 	localise,
 } from '../../../../assets/localisations/types.ts';
 import { Commands } from '../../../../assets/localisations/commands.ts';
+import { parseArguments } from '../../../utils.ts';
 
 const command: OptionBuilder = {
 	...createLocalisations(Commands.music.options.queue),
@@ -27,17 +28,16 @@ function displaySongQueue(
 	const musicController = client.music.get(interaction.guildId!);
 	if (!musicController) return;
 
-	const show =
-		(<boolean | undefined> interaction.data?.options?.at(0)?.options?.find((
-			option,
-		) => option.name === 'show')?.value) ?? false;
+	const [{ show }] = parseArguments(interaction.data?.options, {
+		show: 'boolean',
+	});
 
 	return displayListings([client, bot], interaction, {
 		title: `📋 ${
 			localise(Commands.music.options.queue.strings.queue, interaction.locale)
 		}`,
 		songListings: musicController.queue,
-		show: show,
+		show: show ?? false,
 	});
 }
 

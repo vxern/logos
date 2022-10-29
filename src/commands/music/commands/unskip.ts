@@ -15,6 +15,7 @@ import { Client } from '../../../client.ts';
 import { OptionBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
 import { defaultLanguage } from '../../../types.ts';
+import { parseArguments } from '../../../utils.ts';
 import { SongListingContentTypes } from '../data/song-listing.ts';
 import { by, collection, to } from '../parameters.ts';
 
@@ -38,22 +39,13 @@ function unskip(
 	const data = interaction.data;
 	if (!data) return;
 
-	const unskipCollection =
-		(<boolean | undefined> data.options?.at(0)?.options?.find((
-			option,
-		) => option.name === 'collection')?.value) ?? false;
+	const [{ collection, by, to }] = parseArguments(interaction.data?.options, {
+		collection: 'boolean',
+		by: 'number',
+		to: 'number',
+	});
 
-	const byString = <string | undefined> data.options?.at(0)?.options?.find((
-		option,
-	) => option.name === 'by')?.value;
-	const toString = <string | undefined> data.options?.at(0)?.options?.find((
-		option,
-	) => option.name === 'to')?.value;
-
-	const by = byString ? Number(byString) : undefined;
 	if (by && isNaN(by)) return;
-
-	const to = toString ? Number(toString) : undefined;
 	if (to && isNaN(to)) return;
 
 	const songListing = musicController.current;
@@ -61,7 +53,7 @@ function unskip(
 	const isUnskippingListing = !songListing ||
 		songListing.content.type !== SongListingContentTypes.Collection ||
 		(songListing.content.type === SongListingContentTypes.Collection &&
-			(unskipCollection || songListing.content.position === 0));
+			(collection || songListing.content.position === 0));
 
 	if (isUnskippingListing && musicController.history.length === 0) {
 		return void sendInteractionResponse(
@@ -85,7 +77,7 @@ function unskip(
 	}
 
 	if (
-		unskipCollection &&
+		collection &&
 		songListing?.content.type !== SongListingContentTypes.Collection
 	) {
 		return void sendInteractionResponse(
@@ -172,7 +164,7 @@ function unskip(
 	}
 
 	if (isUnskippingListing) {
-		musicController.unskip(unskipCollection, {
+		musicController.unskip(collection, {
 			by: by,
 			to: to,
 		});
@@ -180,18 +172,18 @@ function unskip(
 		if (by) {
 			if (
 				songListing.content.type === SongListingContentTypes.Collection &&
-				!unskipCollection
+				!collection
 			) {
 				const listingToUnskip = Math.min(by, songListing.content.position);
 
-				musicController.unskip(unskipCollection, {
+				musicController.unskip(collection, {
 					by: listingToUnskip,
 					to: undefined,
 				});
 			} else {
 				const listingsToUnskip = Math.min(by, musicController.history.length);
 
-				musicController.unskip(unskipCollection, {
+				musicController.unskip(collection, {
 					by: listingsToUnskip,
 					to: undefined,
 				});
@@ -199,24 +191,24 @@ function unskip(
 		} else if (to) {
 			if (
 				songListing.content.type === SongListingContentTypes.Collection &&
-				!unskipCollection
+				!collection
 			) {
 				const listingToSkipTo = Math.max(to, 1);
 
-				musicController.unskip(unskipCollection, {
+				musicController.unskip(collection, {
 					by: undefined,
 					to: listingToSkipTo,
 				});
 			} else {
 				const listingToSkipTo = Math.min(to, musicController.history.length);
 
-				musicController.unskip(unskipCollection, {
+				musicController.unskip(collection, {
 					by: undefined,
 					to: listingToSkipTo,
 				});
 			}
 		} else {
-			musicController.unskip(unskipCollection, {
+			musicController.unskip(collection, {
 				by: undefined,
 				to: undefined,
 			});

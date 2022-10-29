@@ -27,12 +27,12 @@ import {
 } from '../../../../assets/localisations/types.ts';
 import { Commands } from '../../../../assets/localisations/commands.ts';
 import { defaultLanguage } from '../../../types.ts';
-import { guildAsAuthor } from '../../../utils.ts';
+import { guildAsAuthor, parseArguments } from '../../../utils.ts';
 
 const command: CommandBuilder = {
 	...createLocalisations(Commands.pardon),
 	defaultMemberPermissions: ['MODERATE_MEMBERS'],
-	handle: unwarnUser,
+	handle: pardonUser,
 	options: [
 		user,
 		{
@@ -44,28 +44,17 @@ const command: CommandBuilder = {
 	],
 };
 
-async function unwarnUser(
+async function pardonUser(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {
-	const data = interaction.data;
-	if (!data) return;
-
-	const userIdentifierOption = data.options?.find((option) =>
-		option.name === 'user'
-	);
-	const warningOption = data.options?.find((option) =>
-		option.name === 'warning'
-	);
-	if (!userIdentifierOption && !warningOption) return;
-
-	const userIdentifier = <string | undefined> userIdentifierOption?.value;
-	if (userIdentifier === undefined) return;
+	const [{ user, warning }] = parseArguments(interaction.data?.options, {});
+	if (user === undefined) return;
 
 	const member = resolveInteractionToMember(
 		[client, bot],
 		interaction,
-		userIdentifier,
+		user,
 	);
 	if (!member) return;
 
@@ -150,9 +139,8 @@ async function unwarnUser(
 		);
 	};
 
-	const warningReferenceID = <string> warningOption!.value!;
-	const warningToRemove = relevantWarnings.find((warning) =>
-		warning.ref.value.id === warningReferenceID
+	const warningToRemove = relevantWarnings.find((relevantWarning) =>
+		relevantWarning.ref.value.id === warning
 	);
 	if (!warningToRemove) {
 		return displayUnwarnError(
@@ -160,8 +148,8 @@ async function unwarnUser(
 		);
 	}
 
-	const warning = await deleteWarning(client.database, warningToRemove);
-	if (!warning) {
+	const deletedWarning = await deleteWarning(client.database, warningToRemove);
+	if (!deletedWarning) {
 		return displayUnwarnError(
 			localise(Commands.pardon.strings.failed, interaction.locale),
 		);
@@ -175,7 +163,7 @@ async function unwarnUser(
 		guild,
 		'memberWarnRemove',
 		member,
-		warning.data,
+		deletedWarning.data,
 		interaction.user,
 	);
 
@@ -191,7 +179,7 @@ async function unwarnUser(
 					description: localise(
 						Commands.pardon.strings.pardoned,
 						interaction.locale,
-					)(mention(member.id, MentionTypes.User), warning.data.reason),
+					)(mention(member.id, MentionTypes.User), deletedWarning.data.reason),
 					color: configuration.interactions.responses.colors.green,
 				}],
 			},
@@ -208,7 +196,7 @@ async function unwarnUser(
 				description: localise(
 					Commands.pardon.strings.pardonedDirect,
 					defaultLanguage,
-				)(warning.data.reason, displayTime(warning.ts)),
+				)(deletedWarning.data.reason, displayTime(deletedWarning.ts)),
 				color: configuration.interactions.responses.colors.green,
 			},
 		],

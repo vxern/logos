@@ -20,7 +20,7 @@ import {
 } from '../../../database/functions/praises.ts';
 import { getOrCreateUser } from '../../../database/functions/users.ts';
 import { log } from '../../../controllers/logging/logging.ts';
-import { guildAsAuthor } from '../../../utils.ts';
+import { guildAsAuthor, parseArguments } from '../../../utils.ts';
 import {
 	createLocalisations,
 	localise,
@@ -42,20 +42,15 @@ async function praise(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {
-	const data = interaction.data;
-	if (!data) return;
-
-	const userIdentifier = <string | undefined> data.options?.at(0)?.value;
-	if (userIdentifier === undefined) return;
+	const [{ user, comment }] = parseArguments(interaction.data?.options, {});
+	if (user === undefined) return;
 
 	const member = resolveInteractionToMember(
 		[client, bot],
 		interaction,
-		userIdentifier,
+		user,
 	);
 	if (!member) return;
-
-	const comment = <string | undefined> data.options?.at(1)?.value;
 
 	if (member.id === interaction.member?.id) {
 		return void sendInteractionResponse(

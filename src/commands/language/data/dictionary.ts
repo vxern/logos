@@ -84,7 +84,7 @@ type DictionaryEntry = DictionaryEntryContent & {
 function toFields(
 	entry: DictionaryEntry,
 	locale: string | undefined,
-	{ verbose }: { verbose: boolean },
+	{ verbose }: { verbose: boolean | undefined },
 ): DiscordEmbedField[] {
 	const fields: Partial<DiscordEmbedField>[] = [{
 		name: localise(Commands.word.strings.fields.translation, locale),

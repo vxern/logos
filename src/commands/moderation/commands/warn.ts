@@ -25,7 +25,7 @@ import {
 } from '../../../database/functions/warnings.ts';
 import { mention, MentionTypes } from '../../../formatting.ts';
 import { defaultLanguage } from '../../../types.ts';
-import { guildAsAuthor } from '../../../utils.ts';
+import { guildAsAuthor, parseArguments } from '../../../utils.ts';
 import { user } from '../../parameters.ts';
 import { getRelevantWarnings } from '../module.ts';
 import { reason } from '../parameters.ts';
@@ -41,17 +41,13 @@ async function warnUser(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {
-	const data = interaction.data;
-	if (!data) return;
-
-	const userIdentifier = <string | undefined> data.options?.at(0)?.value;
-	const reason = <string | undefined> data.options?.at(1)?.value;
-	if (userIdentifier === undefined || reason === undefined) return;
+	const [{ user, reason }] = parseArguments(interaction.data?.options, {});
+	if (user === undefined) return;
 
 	const member = resolveInteractionToMember(
 		[client, bot],
 		interaction,
-		userIdentifier,
+		user,
 	);
 	if (!member) return;
 
@@ -126,6 +122,8 @@ async function warnUser(
 			},
 		);
 	};
+
+	if (!user || !reason) return displayWarnError();
 
 	const subject = await getOrCreateUser(
 		client.database,

@@ -18,6 +18,7 @@ import { CommandBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
 import { capitalise } from '../../../formatting.ts';
 import { defaultLanguage } from '../../../types.ts';
+import { parseArguments } from '../../../utils.ts';
 
 const command: CommandBuilder = {
 	...createLocalisations(Commands.cite),
@@ -80,14 +81,14 @@ function citeRule(
 		);
 	};
 
-	const indexString = interaction.data?.options?.at(0)?.value;
-	if (!indexString) return displayInvalidRuleError();
-
-	const index = Number(indexString);
-	if (isNaN(index)) return displayInvalidRuleError();
-
-	const rule = Object.values(Information.rules.rules).at(index);
+	const [{ rule }] = parseArguments(
+		interaction.data?.options,
+		{ rule: 'number' },
+	);
 	if (!rule) return displayInvalidRuleError();
+
+	const ruleParsed = Object.values(Information.rules.rules).at(rule);
+	if (!ruleParsed) return displayInvalidRuleError();
 
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (!guild) return;
@@ -101,11 +102,11 @@ function citeRule(
 			data: {
 				embeds: [{
 					title: `${localise(Information.rules.rule, defaultLanguage)} #${
-						index + 1
-					}: ${localise(rule.title, defaultLanguage)} ~ ${
+						rule + 1
+					}: ${localise(ruleParsed.title, defaultLanguage)} ~ ${
 						localise(Information.rules.tldr, defaultLanguage)
-					}: *${localise(rule.summary, defaultLanguage)}*`,
-					description: localise(rule.content, defaultLanguage)(guild),
+					}: *${localise(ruleParsed.summary, defaultLanguage)}*`,
+					description: localise(ruleParsed.content, defaultLanguage)(guild),
 					color: configuration.interactions.responses.colors.blue,
 				}],
 			},
