@@ -19,6 +19,7 @@ import { getOrCreateUser } from '../../../../database/functions/users.ts';
 import { getWarnings } from '../../../../database/functions/warnings.ts';
 import { mention, MentionTypes } from '../../../../formatting.ts';
 import { defaultLanguage } from '../../../../types.ts';
+import { parseArguments } from '../../../../utils.ts';
 import { OptionBuilder } from '../../../command.ts';
 import { show, user } from '../../../parameters.ts';
 
@@ -33,24 +34,19 @@ async function viewProfile(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {
-	const userIdentifier = <string | undefined> interaction.data?.options?.at(0)
-		?.options?.at(0)?.value;
-
-	const show =
-		(<boolean | undefined> interaction.data?.options?.at(0)?.options?.find((
-			option,
-		) => option.name === 'show')
-			?.value) ?? false;
+	const [{ user, show }] = parseArguments(interaction.data!.options, {
+		show: 'boolean',
+	});
 
 	const member = resolveInteractionToMember(
 		[client, bot],
 		interaction,
-		userIdentifier ?? interaction.user.id.toString(),
+		user ?? interaction.user.id.toString(),
 	);
 	if (!member) return;
 
-	const user = member.user;
-	if (!user) return;
+	const target = member.user;
+	if (!target) return;
 
 	function showProfileViewFailure(): void {
 		return void sendInteractionResponse(
@@ -107,13 +103,13 @@ async function viewProfile(
 					title: localise(
 						Commands.profile.options.view.strings.informationForUser,
 						locale,
-					)(user.username),
+					)(target.username),
 					thumbnail: (() => {
 						const iconURL = getAvatarURL(
 							bot,
-							user.id,
-							user.discriminator,
-							{ avatar: user.avatar, size: 4096, format: 'webp' },
+							target.id,
+							target.discriminator,
+							{ avatar: target.avatar, size: 4096, format: 'webp' },
 						);
 						if (!iconURL) return;
 
