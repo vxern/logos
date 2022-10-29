@@ -20,10 +20,7 @@ async function listWarnings(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {
-	const [{ user }] = parseArguments(
-		interaction.data?.options,
-		{ show: 'boolean' },
-	);
+	const [{ user }] = parseArguments(interaction.data?.options, {});
 	if (user === undefined) return;
 
 	const member = resolveInteractionToMember(
