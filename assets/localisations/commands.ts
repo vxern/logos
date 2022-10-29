@@ -1564,9 +1564,9 @@ class Commands {
 				'English':
 					'You have already praised a user recently. You must wait before praising somebody again.',
 				'Polish':
-					'Zanim ponownie spróbujesz pochwalić użytkownika, powinieneś troszeczkę poczekać.',
+					'Zanim ponownie spróbujesz pochwalić użytkownika, powinieneś/powinnaś troszeczkę poczekać.',
 				'Romanian':
-					'Înainte să încerci să lauzi un utilizator din nou, ar trebui să aștepți puțin.',
+					'Ar trebui să-ți iei puțin timp înainte de a încerca să lauzi din nou un utilizator.',
 			},
 			praised: {
 				'English': (userMention: string) =>
@@ -1574,7 +1574,7 @@ class Commands {
 				'Polish': (userMention: string) =>
 					`Jeśli ${userMention} nie zablokował swoich DM-ów, właśnie został/a powiadomiony/a o pochwale.`,
 				'Romanian': (userMention: string) =>
-					`Cu excepția că ${userMention} și-a blocat DM-urile sale, tocmai ce a fost notificat despre laudă.`,
+					`Cu excepția că ${userMention} și-a blocat DM-urile sale, tocmai ce a fost notificat că l-ai lăudat.`,
 			},
 			praisedDirect: {
 				'English': (userMention: string) =>
