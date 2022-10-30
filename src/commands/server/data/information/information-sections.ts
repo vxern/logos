@@ -114,13 +114,5 @@ async function getInvite(
 	return newInvite;
 }
 
-function getChannelMention(guild: Guild, name: string): string {
-	const channel = getTextChannel(guild, name);
-	if (!channel) return name;
-
-	return mention(channel.id, MentionTypes.Channel);
-}
-
-export { getChannelMention };
 export type { InformationSection };
 export default informationSections;
