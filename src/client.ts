@@ -153,8 +153,7 @@ function createEventHandlers(client: Client): Partial<EventHandlers> {
 				)?.name;
 				if (!subCommandName) return;
 
-				commandNameFull =
-					`${commandName} ${subCommandGroupName} ${subCommandName}`;
+				commandNameFull = `${commandName} ${subCommandGroupName} ${subCommandName}`;
 			} else {
 				const subCommandName = interaction.data?.options?.find((option) =>
 					option.type === ApplicationCommandOptionTypes.SubCommand
@@ -182,8 +181,7 @@ function createCacheHandlers(
 	client: Client,
 	transformers: Transformers,
 ): Transformers {
-	const { guild, user, member, channel, message, role, voiceState } =
-		transformers;
+	const { guild, user, member, channel, message, role, voiceState } = transformers;
 
 	transformers.guild = (bot, payload) => {
 		const result = guild(bot, payload);
@@ -366,20 +364,19 @@ function addCollector<T extends keyof EventHandlers>(
 
 		const eventHandler = <(...args: Parameters<EventHandlers[T]>) => void> bot
 			.events[event];
-		bot.events[event] =
-			<EventHandlers[T]> ((...args: Parameters<typeof eventHandler>) => {
-				const collectors = <Set<Collector<T>>> client.collectors.get(event)!;
+		bot.events[event] = <EventHandlers[T]> ((...args: Parameters<typeof eventHandler>) => {
+			const collectors = <Set<Collector<T>>> client.collectors.get(event)!;
 
-				for (const collector of collectors) {
-					if (!collector.filter(...args)) {
-						continue;
-					}
-
-					collector.onCollect(...args);
+			for (const collector of collectors) {
+				if (!collector.filter(...args)) {
+					continue;
 				}
 
-				eventHandler(...args);
-			});
+				collector.onCollect(...args);
+			}
+
+			eventHandler(...args);
+		});
 	}
 
 	const collectors = <Set<Collector<T>>> client.collectors.get(event)!;
@@ -409,9 +406,7 @@ function resolveIdentifierToMembers(
 	id ??= userIDExpression.exec(identifier)?.at(0);
 
 	if (!id) {
-		const members = Array.from(client.cache.members.values()).filter((member) =>
-			member.guildId === guildId
-		);
+		const members = Array.from(client.cache.members.values()).filter((member) => member.guildId === guildId);
 
 		const identifierLowercase = identifier.toLowerCase();
 		return [

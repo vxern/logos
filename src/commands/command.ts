@@ -1,9 +1,4 @@
-import {
-	ApplicationCommandOption,
-	Bot,
-	CreateSlashApplicationCommand,
-	Interaction,
-} from '../../deps.ts';
+import { ApplicationCommandOption, Bot, CreateSlashApplicationCommand, Interaction } from '../../deps.ts';
 import { Client } from '../client.ts';
 
 type WithRequired<T, K extends keyof T> =

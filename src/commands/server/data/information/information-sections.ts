@@ -1,14 +1,6 @@
 import { Information } from '../../../../../assets/localisations/information.ts';
 import { localise } from '../../../../../assets/localisations/types.ts';
-import {
-	BaseInvite,
-	Bot,
-	createInvite,
-	Embed,
-	getInvites,
-	Guild,
-	InviteMetadata,
-} from '../../../../../deps.ts';
+import { BaseInvite, Bot, createInvite, Embed, getInvites, Guild, InviteMetadata } from '../../../../../deps.ts';
 import { Client } from '../../../../client.ts';
 import configuration from '../../../../configuration.ts';
 import { links } from '../../../../constants.ts';
@@ -36,11 +28,9 @@ const informationSections: Record<string, InformationSection> = {
 			const fields = [];
 			for (const rule of Object.values(Information.rules.rules)) {
 				fields.push({
-					name: `💠  **${
-						localise(rule.title, defaultLanguage).toUpperCase()
-					}**  ~  ${localise(Information.rules.tldr, defaultLanguage)}: *${
-						localise(rule.summary, defaultLanguage)
-					}*`,
+					name: `💠  **${localise(rule.title, defaultLanguage).toUpperCase()}**  ~  ${
+						localise(Information.rules.tldr, defaultLanguage)
+					}: *${localise(rule.summary, defaultLanguage)}*`,
 					value: localise(rule.content, defaultLanguage)(guild),
 					inline: false,
 				});
@@ -54,9 +44,7 @@ const informationSections: Record<string, InformationSection> = {
 				: configuration.guilds.moderation.moderator.toLowerCase();
 
 			fields.push({
-				name: `ℹ️  ${
-					localise(Information.rules.moderationPolicy.header, defaultLanguage)
-				}`,
+				name: `ℹ️  ${localise(Information.rules.moderationPolicy.header, defaultLanguage)}`,
 				value: localise(
 					Information.rules.moderationPolicy.body,
 					defaultLanguage,
@@ -96,9 +84,7 @@ async function getInvite(
 ): Promise<InviteMetadata | BaseInvite | undefined> {
 	const invites = (await getInvites(bot, guild.id)).array();
 	const viableInvites = invites.filter((invite) => invite.maxAge === 0);
-	const mostViableInvite = viableInvites.find((invite) =>
-		invite.maxAge === 0 && invite.inviter?.id === guild.ownerId
-	);
+	const mostViableInvite = viableInvites.find((invite) => invite.maxAge === 0 && invite.inviter?.id === guild.ownerId);
 	if (mostViableInvite) return mostViableInvite;
 
 	const inviteLinkChannel = getTextChannel(guild, 'welcome');

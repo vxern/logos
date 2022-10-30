@@ -181,12 +181,10 @@ function getProficiencyRoleFrequencies(
 ): Map<bigint, number> {
 	const proficiencyCategory = getProficiencyCategory();
 	const proficiencies = proficiencyCategory.collection!.list!;
-	const proficiencyNames = proficiencies.map((proficiency) =>
-		proficiency.name[defaultLanguage]
+	const proficiencyNames = proficiencies.map((proficiency) => proficiency.name[defaultLanguage]);
+	const proficiencyRoleIds = guild.roles.array().filter((role) => proficiencyNames.includes(role.name)).map((role) =>
+		role.id
 	);
-	const proficiencyRoleIds = guild.roles.array().filter((role) =>
-		proficiencyNames.includes(role.name)
-	).map((role) => role.id);
 
 	const membersIndiscriminate = Array.from(client.cache.members.values());
 	const members = membersIndiscriminate.filter((member) =>
@@ -201,9 +199,7 @@ function getProficiencyRoleFrequencies(
 	}
 
 	for (const member of members) {
-		const relevantRoleIds = member.roles.filter((roleId) =>
-			proficiencyRoleIds.includes(roleId)
-		);
+		const relevantRoleIds = member.roles.filter((roleId) => proficiencyRoleIds.includes(roleId));
 
 		if (relevantRoleIds.length === 0) {
 			relevantRoleIds.push(-1n);
@@ -226,9 +222,7 @@ function displayProficiencyRoleDistribution(
 	proficiencyRoleFrequencies: Map<bigint, number>,
 	locale: string | undefined,
 ): string {
-	const total = Array.from(proficiencyRoleFrequencies.values()).reduce((a, b) =>
-		a + b
-	);
+	const total = Array.from(proficiencyRoleFrequencies.values()).reduce((a, b) => a + b);
 
 	const strings: string[] = [];
 	for (

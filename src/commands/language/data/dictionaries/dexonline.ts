@@ -1,8 +1,4 @@
-import {
-	DictionaryAdapter,
-	DictionaryScopes,
-	DictionaryTypes,
-} from '../dictionary.ts';
+import { DictionaryAdapter, DictionaryScopes, DictionaryTypes } from '../dictionary.ts';
 
 /** Maps numbers to their superscript variants. */
 const superscript: Record<string, string> = {
@@ -82,10 +78,7 @@ const adapter: DictionaryAdapter = {
 			) // Spread letters out
 			.replaceAll(
 				/\^[0-9]+/g,
-				(match) =>
-					match.substring(1, match.length).split('').map((number) =>
-						superscript[number]!
-					).join(''),
+				(match) => match.substring(1, match.length).split('').map((number) => superscript[number]!).join(''),
 			) // Spread letters out
 			.replaceAll('&quot;', '"') // Remove XHTML relics.
 			.replaceAll('#', '__') // Underline

@@ -79,8 +79,7 @@ async function listWarnings(
 
 		return list(
 			warnings.map(
-				(warning) =>
-					`${trim(warning.data.reason, 50)} (${displayTime(warning.ts)})`,
+				(warning) => `${trim(warning.data.reason, 50)} (${displayTime(warning.ts)})`,
 			),
 		);
 	};

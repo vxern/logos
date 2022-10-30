@@ -1,8 +1,5 @@
 import { Commands } from '../../../../../assets/localisations/commands.ts';
-import {
-	createLocalisations,
-	localise,
-} from '../../../../../assets/localisations/types.ts';
+import { createLocalisations, localise } from '../../../../../assets/localisations/types.ts';
 import {
 	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
@@ -122,9 +119,7 @@ async function viewProfile(
 								locale,
 							)
 						}`,
-						value: member.roles.map((roleId) =>
-							mention(roleId, MentionTypes.Role)
-						).join(' '),
+						value: member.roles.map((roleId) => mention(roleId, MentionTypes.Role)).join(' '),
 						inline: false,
 					}, {
 						name: `🧮 ${

@@ -25,18 +25,12 @@ import {
 	RoleCategory,
 	RoleCategoryTypes,
 } from '../../data/structures/role-category.ts';
-import {
-	createSelectOptionsFromCollection,
-	resolveRoles,
-} from '../../data/structures/role-collection.ts';
+import { createSelectOptionsFromCollection, resolveRoles } from '../../data/structures/role-collection.ts';
 import { OptionBuilder } from '../../../command.ts';
 import { Role } from '../../data/structures/role.ts';
 import roles from '../../data/roles.ts';
 import { Commands } from '../../../../../assets/localisations/commands.ts';
-import {
-	createLocalisations,
-	localise,
-} from '../../../../../assets/localisations/types.ts';
+import { createLocalisations, localise } from '../../../../../assets/localisations/types.ts';
 
 const command: OptionBuilder = {
 	...createLocalisations(Commands.profile.options.roles),
@@ -67,8 +61,7 @@ function selectRoles(
 				root: {
 					type: RoleCategoryTypes.CategoryGroup,
 					name: Commands.profile.options.roles.strings.selectCategory.header,
-					description:
-						Commands.profile.options.roles.strings.selectCategory.body,
+					description: Commands.profile.options.roles.strings.selectCategory.body,
 					color: configuration.interactions.responses.colors.invisible,
 					emoji: '💭',
 					categories: rootCategories,
@@ -128,8 +121,7 @@ function traverseRoleSelectionTree(
 	data: NavigationData,
 ): CategoryGroupRoleCategory {
 	return data.indexesAccessed.reduce(
-		(category, next) =>
-			<CategoryGroupRoleCategory> category.categories.at(next)!,
+		(category, next) => <CategoryGroupRoleCategory> category.categories.at(next)!,
 		data.root,
 	);
 }
@@ -172,9 +164,7 @@ function createRoleSelectionMenu(
 
 		if (category.type === RoleCategoryTypes.Category) {
 			menuRoles = resolveRoles(category.collection, data.language);
-			menuRolesResolved = menuRoles.map((role) =>
-				rolesByName.get(localise(role.name, defaultLanguage))!
-			);
+			menuRolesResolved = menuRoles.map((role) => rolesByName.get(localise(role.name, defaultLanguage))!);
 			memberRolesIncludedInMenu = memberRoleIds.filter((roleId) =>
 				menuRolesResolved.some((role) => role.id === roleId)
 			);
@@ -264,9 +254,7 @@ function createRoleSelectionMenu(
 						1,
 					);
 					memberRolesIncludedInMenu.splice(
-						memberRolesIncludedInMenu.findIndex((roleId) =>
-							roleId === role.id
-						)!,
+						memberRolesIncludedInMenu.findIndex((roleId) => roleId === role.id)!,
 						1,
 					);
 				} else {

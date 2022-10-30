@@ -3,10 +3,7 @@ import { capitalise } from '../../formatting.ts';
 import { Language } from '../../types.ts';
 import { Database, dispatchQuery } from '../database.ts';
 import { ArticleChange } from '../structs/articles/article-change.ts';
-import {
-	Article,
-	getMostRecentArticleContent,
-} from '../structs/articles/article.ts';
+import { Article, getMostRecentArticleContent } from '../structs/articles/article.ts';
 import { Document, Reference } from '../structs/document.ts';
 
 const $ = faunadb.query;
@@ -64,12 +61,9 @@ async function fetchArticles<
 		return undefined;
 	}
 
-	const argument =
-		<string> (typeof value === 'object' ? (<Reference> value).value.id : value);
+	const argument = <string> (typeof value === 'object' ? (<Reference> value).value.id : value);
 
-	const cache = parameter === 'language'
-		? database.articlesByLanguage
-		: database.articlesByAuthor;
+	const cache = parameter === 'language' ? database.articlesByLanguage : database.articlesByAuthor;
 
 	if (!cache.has(argument)) {
 		cache.set(argument, new Map());
@@ -113,16 +107,11 @@ async function getArticles<
 		return await fetchArticles(database, parameter, value);
 	}
 
-	const argument =
-		<string> (typeof value === 'object' ? (<Reference> value).value.id : value);
+	const argument = <string> (typeof value === 'object' ? (<Reference> value).value.id : value);
 
-	const cache = parameter === 'language'
-		? database.articlesByLanguage
-		: database.articlesByAuthor;
+	const cache = parameter === 'language' ? database.articlesByLanguage : database.articlesByAuthor;
 
-	return (!cache.has(argument)
-		? undefined
-		: Array.from(cache.get(argument)!.values())) ??
+	return (!cache.has(argument) ? undefined : Array.from(cache.get(argument)!.values())) ??
 		await fetchArticles(database, parameter, value);
 }
 
@@ -282,8 +271,7 @@ async function getArticleChanges<
 	parameter: K,
 	value: V,
 ): Promise<Document<ArticleChange>[] | undefined> {
-	const argument =
-		<string> (typeof value === 'object' ? (<Reference> value).value.id : value);
+	const argument = <string> (typeof value === 'object' ? (<Reference> value).value.id : value);
 
 	const cache = parameter === 'articleReference'
 		? database.articleChangesByArticleReference
@@ -332,10 +320,4 @@ async function processArticles(
 	});
 }
 
-export {
-	changeArticle,
-	createArticle,
-	getArticleChanges,
-	getArticles,
-	processArticles,
-};
+export { changeArticle, createArticle, getArticleChanges, getArticles, processArticles };

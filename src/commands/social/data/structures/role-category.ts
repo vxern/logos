@@ -2,10 +2,7 @@ import { SelectOption } from '../../../../../deps.ts';
 import { Language } from '../../../../types.ts';
 import { trim } from '../../../../utils.ts';
 import { RoleCollection, RoleCollectionTypes } from './role-collection.ts';
-import {
-	Localisations,
-	localise,
-} from '../../../../../assets/localisations/types.ts';
+import { Localisations, localise } from '../../../../../assets/localisations/types.ts';
 
 /** The type of role category. */
 enum RoleCategoryTypes {
@@ -129,9 +126,5 @@ function getRelevantCategories(
 	return selectedRoleCategories;
 }
 
-export {
-	createSelectOptionsFromCategories,
-	getRelevantCategories,
-	RoleCategoryTypes,
-};
+export { createSelectOptionsFromCategories, getRelevantCategories, RoleCategoryTypes };
 export type { RoleCategory, RoleCategoryBase, RoleCategoryStandalone };

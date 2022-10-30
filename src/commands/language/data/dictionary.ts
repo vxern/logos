@@ -169,9 +169,4 @@ type DictionaryAdapter = Readonly<
 >;
 
 export { DictionaryScopes, DictionaryTypes, toFields };
-export type {
-	DictionaryAdapter,
-	DictionaryEntry,
-	DictionaryEntryContent,
-	SearchQuery,
-};
+export type { DictionaryAdapter, DictionaryEntry, DictionaryEntryContent, SearchQuery };

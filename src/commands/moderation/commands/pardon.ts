@@ -13,18 +13,12 @@ import { Client, resolveInteractionToMember } from '../../../client.ts';
 import { CommandBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
 import { getOrCreateUser } from '../../../database/functions/users.ts';
-import {
-	deleteWarning,
-	getWarnings,
-} from '../../../database/functions/warnings.ts';
+import { deleteWarning, getWarnings } from '../../../database/functions/warnings.ts';
 import { user } from '../../parameters.ts';
 import { getRelevantWarnings } from '../module.ts';
 import { log } from '../../../controllers/logging/logging.ts';
 import { displayTime, mention, MentionTypes } from '../../../formatting.ts';
-import {
-	createLocalisations,
-	localise,
-} from '../../../../assets/localisations/types.ts';
+import { createLocalisations, localise } from '../../../../assets/localisations/types.ts';
 import { Commands } from '../../../../assets/localisations/commands.ts';
 import { defaultLanguage } from '../../../types.ts';
 import { guildAsAuthor, parseArguments } from '../../../utils.ts';
@@ -139,9 +133,7 @@ async function pardonUser(
 		);
 	};
 
-	const warningToRemove = relevantWarnings.find((relevantWarning) =>
-		relevantWarning.ref.value.id === warning
-	);
+	const warningToRemove = relevantWarnings.find((relevantWarning) => relevantWarning.ref.value.id === warning);
 	if (!warningToRemove) {
 		return displayUnwarnError(
 			localise(Commands.pardon.strings.alreadyRemoved, interaction.locale),

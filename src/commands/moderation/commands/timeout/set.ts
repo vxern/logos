@@ -10,10 +10,7 @@ import {
 	sendMessage,
 } from '../../../../../deps.ts';
 import { Client, resolveInteractionToMember } from '../../../../client.ts';
-import configuration, {
-	Periods,
-	timeDescriptors,
-} from '../../../../configuration.ts';
+import configuration, { Periods, timeDescriptors } from '../../../../configuration.ts';
 import { displayTime, mention, MentionTypes } from '../../../../formatting.ts';
 import { log } from '../../../../controllers/logging/logging.ts';
 import { localise } from '../../../../../assets/localisations/types.ts';
@@ -53,9 +50,7 @@ async function setTimeout(
 			{
 				type: InteractionResponseTypes.ApplicationCommandAutocompleteResult,
 				data: {
-					choices: !timestamp
-						? []
-						: [{ name: timestamp[0], value: timestamp[1].toString() }],
+					choices: !timestamp ? [] : [{ name: timestamp[0], value: timestamp[1].toString() }],
 				},
 			},
 		);
@@ -193,9 +188,7 @@ const digitsExpression = new RegExp(/\d+/g);
 const stringsExpression = new RegExp(/[a-zA-Z]+/g);
 
 function extractNumbers(expression: string): number[] {
-	return (expression.match(digitsExpression) ?? []).map((digits) =>
-		Number(digits)
-	);
+	return (expression.match(digitsExpression) ?? []).map((digits) => Number(digits));
 }
 
 function extractStrings(expression: string): string[] {
@@ -207,9 +200,7 @@ function getTimestampFromExpression(
 	locale: string | undefined,
 ): [string, number] | undefined {
 	// Extract the digits present in the expression.
-	const quantifiers = extractNumbers(expression).map((string) =>
-		Number(string)
-	);
+	const quantifiers = extractNumbers(expression).map((string) => Number(string));
 	// Extract the strings present in the expression.
 	const periodNames = extractStrings(expression);
 

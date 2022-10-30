@@ -61,13 +61,9 @@ function getTextChannel(
 ): Channel | undefined {
 	const nameAsLowercase = name.toLowerCase();
 
-	const textChannels = guild.channels.array().filter((channel) =>
-		channel.type === ChannelTypes.GuildText
-	);
+	const textChannels = guild.channels.array().filter((channel) => channel.type === ChannelTypes.GuildText);
 
-	return textChannels.find((channel) =>
-		channel.name!.toLowerCase().includes(nameAsLowercase)
-	);
+	return textChannels.find((channel) => channel.name!.toLowerCase().includes(nameAsLowercase));
 }
 
 /**
@@ -150,9 +146,7 @@ function toModal(
 	const components = Object.entries(form.fields).map<ActionRow>(
 		([name, field]) => {
 			const idWithFieldName = `${customId}|${name}`;
-			const label = typeof field.label === 'function'
-				? field.label(language!)
-				: field.label;
+			const label = typeof field.label === 'function' ? field.label(language!) : field.label;
 
 			return {
 				type: MessageComponentTypes.ActionRow,
@@ -225,9 +219,7 @@ function paginate<T>(
 	const generateEmbed: () => Embed[] = () => [{
 		...embed,
 		fields: [{
-			name: elements.length === 1
-				? view.title
-				: `${view.title} ~ Page ${pageIndex + 1}/${elements.length}`,
+			name: elements.length === 1 ? view.title : `${view.title} ~ Page ${pageIndex + 1}/${elements.length}`,
 			value: view.generate(elements.at(pageIndex)!, pageIndex),
 		}, ...existingFields],
 		footer: isLast() ? undefined : { text: footerText },
@@ -343,9 +335,7 @@ function createInteractionCollector(
 		interaction.type === settings.type,
 		!!interaction.data && !!interaction.data.customId &&
 		(
-				!interaction.data.customId.includes('|')
-					? interaction.data.customId
-					: interaction.data.customId.split('|')[0]!
+				!interaction.data.customId.includes('|') ? interaction.data.customId : interaction.data.customId.split('|')[0]!
 			) === (
 				!customId.includes('|') ? customId : customId.split('|')[0]!
 			),
@@ -353,12 +343,9 @@ function createInteractionCollector(
 	];
 
 	addCollector(clientWithBot, 'interactionCreate', {
-		filter: (_bot, interaction) =>
-			conditions(interaction).every((condition) => condition),
+		filter: (_bot, interaction) => conditions(interaction).every((condition) => condition),
 		limit: settings.limit,
-		removeAfter: settings.doesNotExpire
-			? undefined
-			: configuration.core.collectors.maxima.timeout,
+		removeAfter: settings.doesNotExpire ? undefined : configuration.core.collectors.maxima.timeout,
 		onCollect: settings.onCollect ?? (() => {}),
 		onEnd: settings.onEnd ?? (() => {}),
 	});
@@ -458,9 +445,7 @@ function chunk<T>(array: T[], size: number): T[][] {
  * @returns The trimmed string.
  */
 function trim(string: string, length: number): string {
-	return string.length <= length
-		? string
-		: `${string.slice(0, Math.max(length - 3, 0))}...`;
+	return string.length <= length ? string : `${string.slice(0, Math.max(length - 3, 0))}...`;
 }
 
 /**

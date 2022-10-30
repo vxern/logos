@@ -66,14 +66,10 @@ function createSelectOptionsFromCollection(
 
 		selectOptions.push({
 			label: memberHasRole
-				? `[${
-					localise(Commands.profile.options.roles.strings.assigned, locale)
-				}] ${localisedName}`
+				? `[${localise(Commands.profile.options.roles.strings.assigned, locale)}] ${localisedName}`
 				: localisedName,
 			value: index.toString(),
-			description: role.description
-				? localise(role.description, locale)
-				: undefined,
+			description: role.description ? localise(role.description, locale) : undefined,
 			emoji: (() => {
 				if (!role.emoji) return;
 				if (emojiExpression.test(role.emoji)) return { name: role.emoji };

@@ -14,10 +14,7 @@ import {
 import { Client } from '../client.ts';
 import configuration from '../configuration.ts';
 import { Song } from '../commands/music/data/song.ts';
-import {
-	SongListing,
-	SongListingContentTypes,
-} from '../commands/music/data/song-listing.ts';
+import { SongListing, SongListingContentTypes } from '../commands/music/data/song-listing.ts';
 import { SongStream } from '../commands/music/data/song-stream.ts';
 import { mention, MentionTypes } from '../formatting.ts';
 import { Commands } from '../../assets/localisations/commands.ts';
@@ -323,9 +320,7 @@ class MusicController {
 
 			return sendMessage(this.client.bot, this.textChannel.id, {
 				embeds: [{
-					title: `👏 ${
-						localise(Commands.music.strings.allDone.header, defaultLanguage)
-					}`,
+					title: `👏 ${localise(Commands.music.strings.allDone.header, defaultLanguage)}`,
 					description: localise(
 						Commands.music.strings.allDone.body,
 						defaultLanguage,

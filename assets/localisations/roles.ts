@@ -6,12 +6,9 @@ class Roles {
 			'Romanian': 'Competență',
 		},
 		description: {
-			'English':
-				'Roles representing the user\'s language proficiency and knowledge of the language.',
-			'Polish':
-				'Role odzwierciedlające biegłość oraz znajomość języka użytkownika.',
-			'Romanian':
-				'Roluri care simbolizează competența lingvistică a utilizatorului și cunoașterea limbii.',
+			'English': 'Roles representing the user\'s language proficiency and knowledge of the language.',
+			'Polish': 'Role odzwierciedlające biegłość oraz znajomość języka użytkownika.',
+			'Romanian': 'Roluri care simbolizează competența lingvistică a utilizatorului și cunoașterea limbii.',
 		},
 		roles: {
 			beginner: {
@@ -22,12 +19,10 @@ class Roles {
 				},
 				// Keep descriptions under 100 characters. (The Polish string is exactly 100 characters long.)
 				description: {
-					'English':
-						'I am just beginning to learn; I have limited understanding and I know a couple basic phrases.',
+					'English': 'I am just beginning to learn; I have limited understanding and I know a couple basic phrases.',
 					'Polish':
 						'Właśnie co zaczynam się uczyć; mam ograniczone zrozumienie, i znam tylko kilka podstawowych zwrotów.',
-					'Romanian':
-						'Abia ce încep să învăț; am o înțelegere limitată, și cunosc doar câteva fraze de bază.',
+					'Romanian': 'Abia ce încep să învăț; am o înțelegere limitată, și cunosc doar câteva fraze de bază.',
 				},
 			},
 			intermediate: {
@@ -37,12 +32,9 @@ class Roles {
 					'Romanian': 'Mediu',
 				},
 				description: {
-					'English':
-						'I have been learning for a while; I have decent understanding and I can sustain a conversation.',
-					'Polish':
-						'Uczę się od jakiegoś czasu; mam niezłe zrozumienie, oraz potrafię utrzymywać się w rozmowie.',
-					'Romanian':
-						'Învăț de ceva timp; am o înțelegere adecvată, și pot întreține o conversație.',
+					'English': 'I have been learning for a while; I have decent understanding and I can sustain a conversation.',
+					'Polish': 'Uczę się od jakiegoś czasu; mam niezłe zrozumienie, oraz potrafię utrzymywać się w rozmowie.',
+					'Romanian': 'Învăț de ceva timp; am o înțelegere adecvată, și pot întreține o conversație.',
 				},
 			},
 			advanced: {
@@ -54,10 +46,8 @@ class Roles {
 				description: {
 					'English':
 						'I have been learning for a long time; I have firm understanding and I can speak without much effort.',
-					'Polish':
-						'Uczę się od długiego czasu; mam solidne zrozumienie, oraz potrafię mówić bez większego wysiłku.',
-					'Romanian':
-						'Învăț de mai mult timp; am o înțelegere firmă, și pot vorbi fără un efort mai mare.',
+					'Polish': 'Uczę się od długiego czasu; mam solidne zrozumienie, oraz potrafię mówić bez większego wysiłku.',
+					'Romanian': 'Învăț de mai mult timp; am o înțelegere firmă, și pot vorbi fără un efort mai mare.',
 				},
 			},
 			native: {
@@ -67,10 +57,8 @@ class Roles {
 					'Romanian': 'Nativ',
 				},
 				description: {
-					'English':
-						'I was brought up speaking the language; I understand and I can speak about everything with ease.',
-					'Polish':
-						'Dorastałem z językiem; wszystko rozumiem i z łatwością prowadzę rozmowę o czymkolwiek.',
+					'English': 'I was brought up speaking the language; I understand and I can speak about everything with ease.',
+					'Polish': 'Dorastałem z językiem; wszystko rozumiem i z łatwością prowadzę rozmowę o czymkolwiek.',
 					'Romanian':
 						'Am fost crescut cu limba; înțeleg totul și pot avea o conversație despre orice subiect cu ușurință.',
 				},
@@ -87,8 +75,7 @@ class Roles {
 		description: {
 			'English': 'Roles used to personalise one\'s server profile.',
 			'Polish': 'Role do personalizacji swojego profilu na serwerze.',
-			'Romanian':
-				'Roluri utilizate pentru a-și personaliza profilul de server.',
+			'Romanian': 'Roluri utilizate pentru a-și personaliza profilul de server.',
 		},
 		categories: {
 			orthography: {
@@ -199,12 +186,9 @@ class Roles {
 						},
 						// Keep under 100 characters.
 						description: {
-							'English':
-								'I am a native, or a child of natives, but I have been brought up abroad.',
-							'Polish':
-								'Jestem tubylcem, lub dzieckiem tubylców, ale dorastałem za granicą.',
-							'Romanian':
-								'Sunt nativ sau părinții mei sunt nativi, dar am crescut în străinatate.',
+							'English': 'I am a native, or a child of natives, but I have been brought up abroad.',
+							'Polish': 'Jestem tubylcem, lub dzieckiem tubylców, ale dorastałem za granicą.',
+							'Romanian': 'Sunt nativ sau părinții mei sunt nativi, dar am crescut în străinatate.',
 						},
 					},
 				},
@@ -236,8 +220,7 @@ class Roles {
 						'I attend sessions in the classroom channel and would like to be notified when a session takes place.',
 					'Polish':
 						'Chciał(a)bym uczęszczać na zajęcia, i chciał(a)bym być powiadamiany/a gdy takie zajęcie ma miejsce.',
-					'Romanian':
-						'Particip la sesiuni și aș dori să fiu notificat/ă atunci când are loc o astfel de sesiune.',
+					'Romanian': 'Particip la sesiuni și aș dori să fiu notificat/ă atunci când are loc o astfel de sesiune.',
 				},
 			},
 			correctMe: {
@@ -247,10 +230,8 @@ class Roles {
 					'Romanian': 'Corectează-mă',
 				},
 				description: {
-					'English':
-						'"I think, therefore I make mistakes." - Please do correct me.',
-					'Polish':
-						'"Myślę, więc popełniam błędy." - Proszę, popraw mnie, jeśli popełnię błąd.',
+					'English': '"I think, therefore I make mistakes." - Please do correct me.',
+					'Polish': '"Myślę, więc popełniam błędy." - Proszę, popraw mnie, jeśli popełnię błąd.',
 					'Romanian': '"Cuget, deci fac greșeli." - Vă rog, corectați-mă.',
 				},
 			},
@@ -262,10 +243,8 @@ class Roles {
 				},
 				description: {
 					'English': 'I want to be notified when a new daily phrase is posted.',
-					'Polish':
-						'Chcę zostać powiadomiony/a, gdy będzie opublikowana nowe wyrażenie dnia.',
-					'Romanian':
-						'Vreau să fiu anunțat/ă atunci când este postată o nouă expresie a zilei.',
+					'Polish': 'Chcę zostać powiadomiony/a, gdy będzie opublikowana nowe wyrażenie dnia.',
+					'Romanian': 'Vreau să fiu anunțat/ă atunci când este postată o nouă expresie a zilei.',
 				},
 			},
 			voicechatter: {
@@ -275,12 +254,9 @@ class Roles {
 					'Romanian': 'Voicechatter',
 				},
 				description: {
-					'English':
-						'I enjoy attending (un)announced VC sessions and speaking with other people.',
-					'Polish':
-						'Lubię uczestniczyć w (nie)zapowiedzianych sesjach VC oraz rozmawiać z innymi ludźmi.',
-					'Romanian':
-						'Îmi place să particip la sesii VC (ne)anunțate și să vorbesc cu alte persoane.',
+					'English': 'I enjoy attending (un)announced VC sessions and speaking with other people.',
+					'Polish': 'Lubię uczestniczyć w (nie)zapowiedzianych sesjach VC oraz rozmawiać z innymi ludźmi.',
+					'Romanian': 'Îmi place să particip la sesii VC (ne)anunțate și să vorbesc cu alte persoane.',
 				},
 			},
 		},
@@ -401,8 +377,7 @@ class Roles {
 			'Romanian': 'Dialecte',
 		},
 		description: {
-			'English':
-				'Roles specifying which dialect of the language one is learning.',
+			'English': 'Roles specifying which dialect of the language one is learning.',
 			'Polish': 'Role określające, jakiego dialektu języka się uczy.',
 			'Romanian': 'Roluri care specifică ce dialect al limbii se învață.',
 		},
@@ -455,8 +430,7 @@ class Roles {
 			'Romanian': 'Regiuni',
 		},
 		description: {
-			'English':
-				'Roles specifying which area of the country one originates from.',
+			'English': 'Roles specifying which area of the country one originates from.',
 			'Polish': 'Role określające, z jakiego obszaru kraju się pochodzi.',
 			'Romanian': 'Roluri care specifică din care regiune se vine.',
 		},

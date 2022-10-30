@@ -1,14 +1,8 @@
 // deno-lint-ignore-file camelcase
 import 'dotenv_load';
 import { Commands } from '../../../../assets/localisations/commands.ts';
-import {
-	getLocalisations,
-	TranslationLanguage,
-} from '../../../../assets/localisations/languages.ts';
-import {
-	createLocalisations,
-	localise,
-} from '../../../../assets/localisations/types.ts';
+import { getLocalisations, TranslationLanguage } from '../../../../assets/localisations/languages.ts';
+import { createLocalisations, localise } from '../../../../assets/localisations/types.ts';
 import {
 	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
@@ -120,8 +114,7 @@ async function getTranslation(
 	);
 	if (!response.ok) return;
 
-	const results =
-		(<{ translations: DeepLTranslation[] }> await response.json()).translations;
+	const results = (<{ translations: DeepLTranslation[] }> await response.json()).translations;
 	if (results.length !== 1) return;
 
 	const result = results.at(0)!;
@@ -170,9 +163,7 @@ async function translate(
 					value: language.code,
 				};
 			})
-			.filter((choice) =>
-				choice.name && choice.name.toLowerCase().includes(inputLowercase)
-			)
+			.filter((choice) => choice.name && choice.name.toLowerCase().includes(inputLowercase))
 			.slice(0, 25);
 
 		choices.sort((previous, next) => previous.name.localeCompare(next.name));
@@ -301,9 +292,7 @@ async function translate(
 	}
 
 	// Ensures that an empty translation string doesn't result in embed failure.
-	const translatedText = translation.text.trim().length !== 0
-		? translation.text
-		: '⠀';
+	const translatedText = translation.text.trim().length !== 0 ? translation.text : '⠀';
 
 	const sourceLanguageName = localise(
 		getLocalisations(sourceLanguage.name),
