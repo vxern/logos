@@ -66,6 +66,9 @@ type GuildEvents = {
 
 	/** A member has been praised. */
 	praiseAdd: [member: Member, praise: Praise, by: User];
+
+	/** A suggestion has been made. */
+	suggestionSend: [member: Member, suggestion: string];
 };
 
 /** Contains the message generators for (custom) guild events. */
@@ -362,6 +365,19 @@ ${trim(change.content.body, 300)}`;
 		filter: (_client, originGuildId, member, _praise, _by) =>
 			originGuildId === member.guildId,
 		color: configuration.interactions.responses.colors.green,
+	},
+	suggestionSend: {
+		title: `🌿 Suggestion made`,
+		message: (client, member, suggestion) => {
+			const memberUser = client.cache.users.get(member.id);
+			if (!memberUser) return;
+
+			return `${diagnosticMentionUser(memberUser)} has made a suggestion.\n\n` +
+				`Suggestion: **${suggestion}**`;
+		},
+		filter: (_client, originGuildId, member, _suggestion) =>
+			originGuildId === member.guildId,
+		color: configuration.interactions.responses.colors.darkGreen,
 	},
 };
 

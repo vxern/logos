@@ -3,7 +3,7 @@ import information from './information/module.ts';
 import language from './language/module.ts';
 import moderation from './moderation/module.ts';
 //import music from './music/module.ts';
-import secret from './secret/module.ts';
+import server from './server/module.ts';
 import social from './social/module.ts';
 
 const modules = [
@@ -11,7 +11,7 @@ const modules = [
 	language,
 	moderation,
 	//music,
-	secret,
+	server,
 	social,
 ];
 

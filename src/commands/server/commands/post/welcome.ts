@@ -13,8 +13,7 @@ import {
 import { Client } from '../../../../client.ts';
 import configuration from '../../../../configuration.ts';
 import { defaultLanguage } from '../../../../types.ts';
-import { fromHex } from '../../../../utils.ts';
-import { getChannelMention } from '../../data/information/information-sections.ts';
+import { fromHex, getChannelMention } from '../../../../utils.ts';
 
 function postWelcome(
 	[client, bot]: [Client, Bot],

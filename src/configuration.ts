@@ -51,6 +51,7 @@ const settings = {
 		// Configuration settings pertaining to the guild channels.
 		channels: {
 			logging: 'journal',
+			conference: 'conference',
 			verification: 'verifications',
 			voiceChat: 'Voice Chat',
 		},
@@ -166,13 +167,14 @@ const settings = {
 			// The standardised, available set of colours the bot can utilise for its embed messages.
 			colors: {
 				red: fromHex('#b42f2f'),
+				darkRed: fromHex('#820000'),
 				green: fromHex('#89ef59'),
+				darkGreen: fromHex('#479621'),
 				blue: fromHex('#6269ed'),
 				yellow: fromHex('#f2f277'),
 				// This colour matches the colour of an embed message,
 				// making it seem like there is no colour stripe.
 				invisible: fromHex('#36393f'),
-				darkRed: fromHex('#820000'),
 			},
 			// The standardised, available set of custom emojis the bot can utilise for its embed messages.
 			emojis: {

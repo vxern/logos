@@ -29,7 +29,7 @@ import {
 	TextStyles,
 	User,
 } from '../deps.ts';
-import { code } from './formatting.ts';
+import { code, mention, MentionTypes } from './formatting.ts';
 import { addCollector, Client } from './client.ts';
 import configuration from './configuration.ts';
 import { Language } from './types.ts';
@@ -565,12 +565,20 @@ function parseArguments<
 	return [args as R, focused];
 }
 
+function getChannelMention(guild: Guild, name: string): string {
+	const channel = getTextChannel(guild, name);
+	if (!channel) return name;
+
+	return mention(channel.id, MentionTypes.Channel);
+}
+
 export {
 	chunk,
 	createInteractionCollector,
 	createVerificationPrompt,
 	diagnosticMentionUser,
 	fromHex,
+	getChannelMention,
 	getGuildIconURLFormatted,
 	getTextChannel,
 	guildAsAuthor,

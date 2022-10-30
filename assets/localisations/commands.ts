@@ -668,7 +668,7 @@ class Commands {
 					`Utilizatorul ${userMention} a primit un timeout pentru: ${reason}\n\n` +
 					`Timeout-ul va expira ${until}.`,
 			},
-			// Do not localise; This is a public feedback message.
+			// Do not localise; this is a public feedback message.
 			timedOutDirect: {
 				'English': (until: string, reason: string) =>
 					`You have been timed out for: ${reason}\n\n` +
@@ -687,7 +687,7 @@ class Commands {
 				'Romanian': (userMention: string) =>
 					`Utilizatorul ${userMention} nu mai are un timeout.`,
 			},
-			// Do not localise; This is a public feedback message.
+			// Do not localise; this is a public feedback message.
 			timeoutClearedDirect: {
 				'English': 'Your timeout has been cleared.',
 			},
@@ -738,7 +738,7 @@ class Commands {
 				'Romanian': (userMention: string, reason: string) =>
 					`Utilizatorul ${userMention} a fost grațiat de avertizarea sa pentru: ${reason}`,
 			},
-			// Do not localise; This is a public feedback message.
+			// Do not localise; this is a public feedback message.
 			pardonedDirect: {
 				'English': (reason: string, relativeTime: string) =>
 					`You have been pardoned from the warning given to you ${relativeTime}.\n\n` +
@@ -783,19 +783,19 @@ class Commands {
 				'Romanian': (userMention: string, warningCount: number) =>
 					`Utilizatorul ${userMention} a fost avertizat. Avertizări în total: ${warningCount}.`,
 			},
-			// Do not localise; This is a public feedback message.
+			// Do not localise; this is a public feedback message.
 			reachedKickStage: {
 				'English': (reason: string) =>
 					`You have been warned for: ${reason}\n\n` +
 					'You have surpassed the maximum number of warnings, and have subsequently been kicked from the server.',
 			},
-			// Do not localise; This is a public feedback message.
+			// Do not localise; this is a public feedback message.
 			reachedBanStage: {
 				'English': (reason: string) =>
 					`You have been warned for: ${reason}\n\n` +
 					'You have surpassed the maximum number of warnings twice, and have subsequently been permanently banned from the server.',
 			},
-			// Do not localise; This is a public feedback message.
+			// Do not localise; this is a public feedback message.
 			warnedDirect: {
 				'English': (
 					reason: string,
@@ -1519,6 +1519,55 @@ class Commands {
 						'Romanian': 'Bun-venit publicat.',
 					},
 				},
+			},
+		},
+	});
+
+	static readonly suggest = typedLocalisations({
+		name: {
+			'English': 'suggest',
+			'Polish': 'zasugeruj',
+			'Romanian': 'sugerează',
+		},
+		description: {
+			'English': 'Passes a suggestion over to the server staff.',
+			'Polish': 'Przekazuje sugestię moderacji serwera.',
+			'Romanian': 'Transmite o sugestie personalului serverului.',
+		},
+		options: {
+			suggestion: {
+				name: {
+					'English': 'suggestion',
+					'Polish': 'sugestia',
+					'Romanian': 'sugestie',
+				},
+				description: {
+					'English': 'The suggestion to pass over to the server staff.',
+					'Polish': 'Sugestia, która ma zostać przekazana moderacji serwera.',
+					'Romanian': 'Sugestia care să fie transmisă personalului serverului.',
+				},
+			},
+		},
+		strings: {
+			// Do not localise; this is a public feedback message.
+			suggestionReceived: {
+				header: {
+					'English': 'Suggestion!',
+				},
+				body: {
+					'English': (userMention: string, suggestion: string) =>
+						`${userMention} has made a suggestion:\n\n` + `*${suggestion}*`,
+				},
+			},
+			suggestionMade: {
+				'English':
+					'Your suggestion has been passed over to the server staff.\n\n' +
+					'We will keep you posted for developments regarding it.',
+				'Polish': 'Twoja sugestia została przekazana moderacji serwera.\n\n' +
+					'Będziemy na bieżąco informować Cię o zmianach w jej zakresie.',
+				'Romanian':
+					'Sugestia ta a fost transmisă personalului serverului.\n\n' +
+					'Te vom ține la curent cu evoluțiile din cadrul acesteia.',
 			},
 		},
 	});
