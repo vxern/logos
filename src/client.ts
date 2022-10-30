@@ -133,6 +133,10 @@ function createEventHandlers(client: Client): Partial<EventHandlers> {
 			registerGuild(client, guild);
 			setupLogging([client, bot], guild);
 		},
+		channelDelete: (_bot, channel) => {
+			client.cache.channels.delete(channel.id);
+			client.cache.guilds.get(channel.guildId)?.channels.delete(channel.id);
+		},
 		interactionCreate: (bot, interaction) => {
 			const commandName = interaction.data?.name;
 			if (!commandName) return;
@@ -215,6 +219,8 @@ function createCacheHandlers(
 		const result = channel(...args);
 
 		client.cache.channels.set(result.id, result);
+
+		client.cache.guilds.get(result.guildId)?.channels.set(result.id, result);
 
 		return result;
 	};

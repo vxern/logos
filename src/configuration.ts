@@ -52,6 +52,7 @@ const settings = {
 		channels: {
 			logging: 'journal',
 			verification: 'verifications',
+			voiceChat: 'Voice Chat',
 		},
 		// Configuration settings pertaining to the topic languages of managed guilds.
 		languages: <Record<
@@ -134,6 +135,9 @@ const settings = {
 		// Configuration settings pertaining to entry to the guild.
 		entry: {
 			minimumRequiredAge: 2 * Periods.day,
+		},
+		dynamicVoiceChannels: {
+			maximum: 5,
 		},
 	},
 	// Configuration settings pertaining to music.
