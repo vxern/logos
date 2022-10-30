@@ -1523,6 +1523,55 @@ class Commands {
 		},
 	});
 
+	static readonly suggest = typedLocalisations({
+		name: {
+			'English': 'suggest',
+			'Polish': 'zasugeruj',
+			'Romanian': 'sugerează',
+		},
+		description: {
+			'English': 'Passes a suggestion over to the server staff.',
+			'Polish': 'Przekazuje sugestię moderacji serwera.',
+			'Romanian': 'Transmite o sugestie personalului serverului.',
+		},
+		options: {
+			suggestion: {
+				name: {
+					'English': 'suggestion',
+					'Polish': 'sugestia',
+					'Romanian': 'sugestie',
+				},
+				description: {
+					'English': 'The suggestion to pass over to the server staff.',
+					'Polish': 'Sugestia, która ma zostać przekazana moderacji serwera.',
+					'Romanian': 'Sugestia care să fie transmisă personalului serverului.',
+				},
+			},
+		},
+		strings: {
+			// Do not localise; this is a public feedback message.
+			suggestionReceived: {
+				header: {
+					'English': 'Suggestion!',
+				},
+				body: {
+					'English': (userMention: string, suggestion: string) =>
+						`${userMention} has made a suggestion:\n\n` + `*${suggestion}*`,
+				},
+			},
+			suggestionMade: {
+				'English':
+					'Your suggestion has been passed over to the server staff.\n\n' +
+					'We will keep you posted for developments regarding it.',
+				'Polish': 'Twoja sugestia została przekazana moderacji serwera.\n\n' +
+					'Będziemy na bieżąco informować Cię o zmianach w jej zakresie.',
+				'Romanian':
+					'Sugestia ta a fost transmisă personalului serverului.\n\n' +
+					'Te vom ține la curent cu evoluțiile din cadrul acesteia.',
+			},
+		},
+	});
+
 	static readonly praise = typedLocalisations({
 		name: {
 			'English': 'praise',
