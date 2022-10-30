@@ -1,9 +1,9 @@
-import { Bot, Interaction, InteractionTypes } from '../../deps.ts';
-import { ServiceStarter } from './service.ts';
-import { createInteractionCollector } from '../utils.ts';
-import { onAcceptRules } from './entry/accept-rules.ts';
-import { onSelectLanguageProficiency } from './entry/select-language-proficiency.ts';
-import { Client } from '../client.ts';
+import { Bot, Interaction, InteractionTypes } from '../../../deps.ts';
+import { ServiceStarter } from '../service.ts';
+import { createInteractionCollector } from '../../utils.ts';
+import { onAcceptRules } from './stages/accept-rules.ts';
+import { onSelectLanguageProficiency } from './stages/select-language-proficiency.ts';
+import { Client } from '../../client.ts';
 
 const entrySteps = [
 	'ACCEPTED_RULES',
