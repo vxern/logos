@@ -14,6 +14,7 @@ import {
 } from '../../../../deps.ts';
 import { Client } from '../../../client.ts';
 import configuration from '../../../configuration.ts';
+import { log } from '../../../controllers/logging/logging.ts';
 import { mention, MentionTypes } from '../../../formatting.ts';
 import { defaultLanguage } from '../../../types.ts';
 import { getTextChannel, parseArguments } from '../../../utils.ts';
@@ -62,7 +63,7 @@ async function makeSuggestion(
 		}],
 	});
 
-	return void sendInteractionResponse(
+	sendInteractionResponse(
 		bot,
 		interaction.id,
 		interaction.token,
@@ -79,6 +80,14 @@ async function makeSuggestion(
 				}],
 			},
 		},
+	);
+
+	return log(
+		[client, bot],
+		guild,
+		'suggestionSend',
+		interaction.member!,
+		suggestion,
 	);
 }
 
