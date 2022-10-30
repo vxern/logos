@@ -1,5 +1,5 @@
 import { Guild } from '../../deps.ts';
-import { getChannelMention } from '../../src/commands/secret/data/information/information-sections.ts';
+import { getChannelMention } from '../../src/commands/server/data/information/information-sections.ts';
 import { list } from '../../src/formatting.ts';
 
 const memesChannel = 'memes';
