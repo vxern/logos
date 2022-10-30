@@ -3,11 +3,7 @@ import { links } from '../../src/constants.ts';
 import configuration from '../../src/configuration.ts';
 import { capitalise, list } from '../../src/formatting.ts';
 import { CommandLocalisations, localise } from './types.ts';
-import {
-	getLocale,
-	getLocalisations,
-	TranslationLanguage,
-} from './languages.ts';
+import { getLocale, getLocalisations, TranslationLanguage } from './languages.ts';
 import { Expressions } from './expressions.ts';
 import { Language } from '../../src/types.ts';
 
@@ -162,11 +158,9 @@ class Commands {
 				},
 				strings: {
 					informationAbout: {
-						'English': (guildName: string) =>
-							`Information about **${guildName}**`,
+						'English': (guildName: string) => `Information about **${guildName}**`,
 						'Polish': (guildName: string) => `Informacje o **${guildName}**`,
-						'Romanian': (guildName: string) =>
-							`Informații despre **${guildName}**`,
+						'Romanian': (guildName: string) => `Informații despre **${guildName}**`,
 					},
 					noDescription: {
 						'English': 'No description provided.',
@@ -177,13 +171,9 @@ class Commands {
 						'English': (moderatorRoleName: string) =>
 							`This server is overseen by a collective of ${moderatorRoleName}s.`,
 						'Polish': (moderatorRoleName: string) =>
-							`Ten serwer jest nadzorowany poprzez grupę osób z rolą **${
-								capitalise(moderatorRoleName)
-							}**.`,
+							`Ten serwer jest nadzorowany poprzez grupę osób z rolą **${capitalise(moderatorRoleName)}**.`,
 						'Romanian': (moderatorRoleName: string) =>
-							`Acest server este supravegheat de cătr-un grup de oameni cu rolul **${
-								capitalise(moderatorRoleName)
-							}**.`,
+							`Acest server este supravegheat de cătr-un grup de oameni cu rolul **${capitalise(moderatorRoleName)}**.`,
 					},
 					withoutProficiencyRole: {
 						'English': 'without a specified proficiency.',
@@ -253,8 +243,7 @@ class Commands {
 		description: {
 			'English': 'Pick the correct word out of four to fit in the blank.',
 			'Polish': 'Wybierz słowo, które pasuje do luki w zdaniu.',
-			'Romanian':
-				'Alege cuvântul care se potrivește cu spațiul gol în propoziție.',
+			'Romanian': 'Alege cuvântul care se potrivește cu spațiul gol în propoziție.',
 		},
 		strings: {
 			sentence: {
@@ -268,8 +257,7 @@ class Commands {
 				'Romanian': 'Traducere',
 			},
 			noSentencesAvailable: {
-				'English':
-					'There are no sentences available in the requested language.',
+				'English': 'There are no sentences available in the requested language.',
 				'Polish': 'Nie ma zdań dostępnych w tym języku.',
 				'Romanian': 'Nu sunt propoziții disponibile în această limbă.',
 			},
@@ -290,9 +278,7 @@ class Commands {
 		strings: {
 			resourcesStoredHere: {
 				'English': (language: Language) =>
-					`Resources for learning ${
-						localise(getLocalisations(language), 'English')
-					} are stored here`,
+					`Resources for learning ${localise(getLocalisations(language), 'English')} are stored here`,
 				'Polish': (language: Language) =>
 					`Zasoby do nauki ${
 						Expressions.polish.cases.genitive.languages[language].toLowerCase()
@@ -312,8 +298,7 @@ class Commands {
 			'Romanian': 'traducere',
 		},
 		description: {
-			'English':
-				'Translates a text from the source language to the target language.',
+			'English': 'Translates a text from the source language to the target language.',
 			'Polish': 'Tłumaczy dany tekst z języka źródłowego na język docelowy.',
 			'Romanian': 'Traduce textul dat din limbă-sursă în limbă-țintă.',
 		},
@@ -357,8 +342,7 @@ class Commands {
 		},
 		strings: {
 			targetLanguageMustBeDifferentFromSource: {
-				'English':
-					'The target language may not be the same as the source language.',
+				'English': 'The target language may not be the same as the source language.',
 				'Polish': 'Język docelowy nie może być taki sam jak język źródłowy.',
 				'Romanian': 'Limba-țintă nu poate fi aceeași cu limba-sursă.',
 			},
@@ -392,16 +376,14 @@ class Commands {
 			source: {
 				'English': (languageName: TranslationLanguage) =>
 					localise(getLocalisations(languageName), getLocale('English')),
-				'Polish': (languageName: TranslationLanguage) =>
-					Expressions.polish.cases.genitive.languages[languageName],
+				'Polish': (languageName: TranslationLanguage) => Expressions.polish.cases.genitive.languages[languageName],
 				'Romanian': (languageName: TranslationLanguage) =>
 					localise(getLocalisations(languageName), getLocale('Romanian')),
 			},
 			target: {
 				'English': (languageName: TranslationLanguage) =>
 					localise(getLocalisations(languageName), getLocale('English')),
-				'Polish': (languageName: TranslationLanguage) =>
-					localise(getLocalisations(languageName), getLocale('Polish')),
+				'Polish': (languageName: TranslationLanguage) => localise(getLocalisations(languageName), getLocale('Polish')),
 				'Romanian': (languageName: TranslationLanguage) =>
 					localise(getLocalisations(languageName), getLocale('Romanian')),
 			},
@@ -449,19 +431,15 @@ class Commands {
 					'Romanian': 'mod-prolix',
 				},
 				description: {
-					'English':
-						'If set to true, more (possibly unnecessary) information will be shown.',
-					'Polish':
-						'Jeśli tak, więcej (możliwie niepotrzebnych) informacji będzie pokazanych.',
-					'Romanian':
-						'Dacă da, mai multe (posibil inutile) informații vor fi afișate.',
+					'English': 'If set to true, more (possibly unnecessary) information will be shown.',
+					'Polish': 'Jeśli tak, więcej (możliwie niepotrzebnych) informacji będzie pokazanych.',
+					'Romanian': 'Dacă da, mai multe (posibil inutile) informații vor fi afișate.',
 				},
 			},
 		},
 		strings: {
 			noDictionaryAdapters: {
-				'English':
-					'There are no dictionaries available in the requested language.',
+				'English': 'There are no dictionaries available in the requested language.',
 				'Polish': 'Nie ma słowników dostępnych w tym języku.',
 				'Romanian': 'Nu sunt dicționare disponibile în această limbă.',
 			},
@@ -560,8 +538,7 @@ class Commands {
 				description: {
 					'English': 'Lists the warnings issued to a user.',
 					'Polish': 'Wyświetla ostrzeżenia dane użytkownikowi.',
-					'Romanian':
-						'Afișează avertizările care au fost date unui utilizator.',
+					'Romanian': 'Afișează avertizările care au fost date unui utilizator.',
 				},
 			},
 		},
@@ -569,8 +546,7 @@ class Commands {
 			warningsUnableToBeShown: {
 				'English': 'The warnings for the given user could not be shown.',
 				'Polish': 'Nie udało się wyświetlić ostrzeżeń dla danego użytkownika.',
-				'Romanian':
-					'Avertizările pentru utilizatorul dat nu au putut fi afișate.',
+				'Romanian': 'Avertizările pentru utilizatorul dat nu au putut fi afișate.',
 			},
 			userDoesNotHaveWarnings: {
 				'English': 'This user has not received any warnings.',
@@ -594,8 +570,7 @@ class Commands {
 		description: {
 			'English': 'Used to manage user timeouts.',
 			'Polish': 'Komenda używana do zarządzania wyciszaniem użytkowników.',
-			'Romanian':
-				'Comandă utilizată pentru gestionarea pauzelor utilizatorilor.',
+			'Romanian': 'Comandă utilizată pentru gestionarea pauzelor utilizatorilor.',
 		},
 		options: {
 			set: {
@@ -605,12 +580,9 @@ class Commands {
 					'Romanian': 'setare',
 				},
 				description: {
-					'English':
-						'Times out a user, making them unable to interact on the server.',
-					'Polish':
-						'Wycisza użytkownika, uniemożliwiając mu interakcję z serwerem (pisanie, mówienie w VC, itp.).',
-					'Romanian':
-						'Face ca un utilizator să nu mai poată interacționa în server.',
+					'English': 'Times out a user, making them unable to interact on the server.',
+					'Polish': 'Wycisza użytkownika, uniemożliwiając mu interakcję z serwerem (pisanie, mówienie w VC, itp.).',
+					'Romanian': 'Face ca un utilizator să nu mai poată interacționa în server.',
 				},
 			},
 			clear: {
@@ -621,10 +593,8 @@ class Commands {
 				},
 				description: {
 					'English': 'Clears a user\'s timeout.',
-					'Polish':
-						'Umożliwia użytkownikowi, który został wyciszony, ponowną interakcję z serwerem.',
-					'Romanian':
-						'Permite utilizatorului care a primit un timeout să interacționeze cu serverul.',
+					'Polish': 'Umożliwia użytkownikowi, który został wyciszony, ponowną interakcję z serwerem.',
+					'Romanian': 'Permite utilizatorului care a primit un timeout să interacționeze cu serverul.',
 				},
 			},
 		},
@@ -680,12 +650,9 @@ class Commands {
 				'Romanian': 'Acest utilizator nu a avut un timeout impus pe el.',
 			},
 			timeoutCleared: {
-				'English': (userMention: string) =>
-					`User ${userMention} is no longer timed out.`,
-				'Polish': (userMention: string) =>
-					`Użytkownik ${userMention} już nie jest wyciszony.`,
-				'Romanian': (userMention: string) =>
-					`Utilizatorul ${userMention} nu mai are un timeout.`,
+				'English': (userMention: string) => `User ${userMention} is no longer timed out.`,
+				'Polish': (userMention: string) => `Użytkownik ${userMention} już nie jest wyciszony.`,
+				'Romanian': (userMention: string) => `Utilizatorul ${userMention} nu mai are un timeout.`,
 			},
 			// Do not localise; this is a public feedback message.
 			timeoutClearedDirect: {
@@ -767,8 +734,7 @@ class Commands {
 			cannotWarnCertainUsers: {
 				'English': 'Neither bots nor server moderators can be warned.',
 				'Polish': 'Nie można ostrzegać ani botów, ani moderatorów serwera.',
-				'Romanian':
-					'Nu se pot avertiza nici boții, nici moderatorii de server.',
+				'Romanian': 'Nu se pot avertiza nici boții, nici moderatorii de server.',
 			},
 			failed: {
 				'English': 'Failed to warn user.',
@@ -816,10 +782,8 @@ class Commands {
 		},
 		description: {
 			'English': 'Allows the user to manage music playback in a voice channel.',
-			'Polish':
-				'Pozwala użytkownikowi na zarządanie odtwarzaniem muzyki w kanale głosowym.',
-			'Romanian':
-				'Permite utilizatorului gestionarea redării muzicii într-un canal de voce.',
+			'Polish': 'Pozwala użytkownikowi na zarządanie odtwarzaniem muzyki w kanale głosowym.',
+			'Romanian': 'Permite utilizatorului gestionarea redării muzicii într-un canal de voce.',
 		},
 		options: {
 			forward: {
@@ -862,20 +826,16 @@ class Commands {
 				description: {
 					'English': 'Displays the currently playing song.',
 					'Polish': 'Wyświetla obecnie odtwarzany utwór lub zbiór utworów.',
-					'Romanian':
-						'Afișează melodia sau setul de melodii în curs de redare.',
+					'Romanian': 'Afișează melodia sau setul de melodii în curs de redare.',
 				},
 				strings: {
 					noSongPlaying: {
 						'English': 'There is no song to display the details of.',
-						'Polish':
-							'Nie można wyświetlić informacji o utworze, ponieważ żaden utwór obecnie nie jest odtwarzany.',
-						'Romanian':
-							'Nu s-au putut afișa informații despre melodie fiindcă în prezent nu se redă nicio melodie.',
+						'Polish': 'Nie można wyświetlić informacji o utworze, ponieważ żaden utwór obecnie nie jest odtwarzany.',
+						'Romanian': 'Nu s-au putut afișa informații despre melodie fiindcă în prezent nu se redă nicio melodie.',
 					},
 					noCollectionPlaying: {
-						'English':
-							'There is no song collection to show the details of.\n\n' +
+						'English': 'There is no song collection to show the details of.\n\n' +
 							'Try requesting information about the current song instead.',
 						'Polish':
 							'Nie można wyświetlić informacji o zbiorze utworów, ponieważ żaden zbiór utworów obecnie nie jest odtwarzany.\n\n' +
@@ -925,14 +885,10 @@ class Commands {
 						'Romanian': (timestamp: string) => `De la ${timestamp}.`,
 					},
 					sourcedFrom: {
-						'English': (origin: string | undefined) =>
-							`This listing was sourced from ${origin ?? 'the internet'}.`,
-						'Polish': (origin: string | undefined) =>
-							`Ten wpis został pobrany z ${origin ?? 'internetu'}.`,
+						'English': (origin: string | undefined) => `This listing was sourced from ${origin ?? 'the internet'}.`,
+						'Polish': (origin: string | undefined) => `Ten wpis został pobrany z ${origin ?? 'internetu'}.`,
 						'Romanian': (origin: string | undefined) =>
-							`Această înregistrare a fost furnizată de pe ${
-								origin ?? 'internet'
-							}.`,
+							`Această înregistrare a fost furnizată de pe ${origin ?? 'internet'}.`,
 					},
 				},
 			},
@@ -945,8 +901,7 @@ class Commands {
 				description: {
 					'English': 'Pauses the currently playing song or song collection.',
 					'Polish': 'Zapauzuj obecny utwór lub zbiór utworów.',
-					'Romanian':
-						'Pauzează melodia sau setul de melodii în curs de redare.',
+					'Romanian': 'Pauzează melodia sau setul de melodii în curs de redare.',
 				},
 				strings: {
 					noSongToPause: {
@@ -969,10 +924,8 @@ class Commands {
 				},
 				description: {
 					'English': 'Allows the user to play music in a voice channel.',
-					'Polish':
-						'Pozwala użytkownikowi na odtwarzanie muzyki w kanale głosowym.',
-					'Romanian':
-						'Permite utilizatorului să redea muzică într-un canal de voce.',
+					'Polish': 'Pozwala użytkownikowi na odtwarzanie muzyki w kanale głosowym.',
+					'Romanian': 'Permite utilizatorului să redea muzică într-un canal de voce.',
 				},
 				options: {
 					file: {
@@ -1040,8 +993,7 @@ class Commands {
 							'English': 'Listing queued',
 						},
 						body: {
-							'English': (listingTitle: string) =>
-								`Your listing, **${listingTitle}**, has been added to the queue.`,
+							'English': (listingTitle: string) => `Your listing, **${listingTitle}**, has been added to the queue.`,
 						},
 					},
 				},
@@ -1055,8 +1007,7 @@ class Commands {
 				description: {
 					'English': 'Displays a list of queued song listings.',
 					'Polish': 'Wyświetla listę utworów oraz zbiorów utworów w kolejce.',
-					'Romanian':
-						'Afișează lista cu melodii și seturi de melodii în coadă.',
+					'Romanian': 'Afișează lista cu melodii și seturi de melodii în coadă.',
 				},
 				strings: {
 					queue: {
@@ -1084,11 +1035,9 @@ class Commands {
 						'Romanian': 'Nu sunt melodii în coadă.',
 					},
 					selectSongToRemove: {
-						'English':
-							'Select a song or song collection to remove from the choices below.',
+						'English': 'Select a song or song collection to remove from the choices below.',
 						'Polish': 'Wybierz utwór lub zbiór utworów do usunięcia poniżej.',
-						'Romanian':
-							'Alege o melodie sau un set de melodii de șters mai jos.',
+						'Romanian': 'Alege o melodie sau un set de melodii de șters mai jos.',
 					},
 					// Use ellipsis if appropriate.
 					continuedOnTheNextPage: {
@@ -1118,8 +1067,7 @@ class Commands {
 					'Romanian': 'reluare',
 				},
 				description: {
-					'English':
-						'Begins playing the currently playing song from the start.',
+					'English': 'Begins playing the currently playing song from the start.',
 					'Polish': 'Odtwarza obecnie grający utwór od początku.',
 					'Romanian': 'Redă melodia în curs de redare din nou.',
 				},
@@ -1147,10 +1095,8 @@ class Commands {
 				},
 				description: {
 					'English': 'Unpauses the currently playing song if it is paused.',
-					'Polish':
-						'Wznawia odtwarzanie obecnie grającego utworu, jeśli ten jest zapauzowany.',
-					'Romanian':
-						'Anulează întreruperea redării melodiei actuale dacă aceasta este în pauză.',
+					'Polish': 'Wznawia odtwarzanie obecnie grającego utworu, jeśli ten jest zapauzowany.',
+					'Romanian': 'Anulează întreruperea redării melodiei actuale dacă aceasta este în pauză.',
 				},
 				strings: {
 					noSongToResume: {
@@ -1212,9 +1158,7 @@ class Commands {
 						header: { 'English': 'Skipped' },
 						body: {
 							'English': (skipCollection: boolean) =>
-								`The ${
-									!skipCollection ? 'song' : 'song collection'
-								} has been skipped.`,
+								`The ${!skipCollection ? 'song' : 'song collection'} has been skipped.`,
 						},
 					},
 				},
@@ -1226,8 +1170,7 @@ class Commands {
 					'Romanian': 'oprire',
 				},
 				description: {
-					'English':
-						'Stops the current listening session, clearing the queue and song history.',
+					'English': 'Stops the current listening session, clearing the queue and song history.',
 					'Polish': 'Przerywa obecną sesję słuchania muzyki.',
 					'Romanian': 'Oprește sesiunea actuală de ascultare.',
 				},
@@ -1241,8 +1184,7 @@ class Commands {
 					stopped: {
 						header: { 'English': 'Stopped' },
 						body: {
-							'English':
-								'The listening session has been stopped, and the song queue and history have been cleared.',
+							'English': 'The listening session has been stopped, and the song queue and history have been cleared.',
 						},
 					},
 				},
@@ -1256,8 +1198,7 @@ class Commands {
 				description: {
 					'English': 'Brings back the last played song.',
 					'Polish': 'Przywraca ostatnio zagrany utwór lub zbiór utworów.',
-					'Romanian':
-						'Înapoiază ultima melodie sau ultimul set de melodii redat.',
+					'Romanian': 'Înapoiază ultima melodie sau ultimul set de melodii redat.',
 				},
 				strings: {
 					nowhereToUnskipTo: {
@@ -1274,12 +1215,9 @@ class Commands {
 							'Încearcă să sari peste melodia actuală.',
 					},
 					cannotUnskipDueToFullQueue: {
-						'English':
-							'The last played song listing cannot be unskipped because the song queue is already full.',
-						'Polish':
-							'Ostatnio odtworzony wpis nie może zostać przywrócony, ponieważ kolejka jest pełna.',
-						'Romanian':
-							'Ultima înregistrare nu poate fi înapoiată fiindcă coada deja este plină.',
+						'English': 'The last played song listing cannot be unskipped because the song queue is already full.',
+						'Polish': 'Ostatnio odtworzony wpis nie może zostać przywrócony, ponieważ kolejka jest pełna.',
+						'Romanian': 'Ultima înregistrare nu poate fi înapoiată fiindcă coada deja este plină.',
 					},
 					// Do not localise; this is a public feedback message.
 					unskipped: {
@@ -1298,10 +1236,8 @@ class Commands {
 				},
 				description: {
 					'English': 'Allows the user to manage the volume of music playback.',
-					'Polish':
-						'Pozwala użytkownikowi na zarządzanie głośnością odtwarzania muzyki.',
-					'Romanian':
-						'Permite utilizatorului gestionarea volumului redării muzicii.',
+					'Polish': 'Pozwala użytkownikowi na zarządzanie głośnością odtwarzania muzyki.',
+					'Romanian': 'Permite utilizatorului gestionarea volumului redării muzicii.',
 				},
 				options: {
 					display: {
@@ -1323,12 +1259,9 @@ class Commands {
 									'Romanian': 'Volum',
 								},
 								body: {
-									'English': (volume: number) =>
-										`The current volume is ${volume}%.`,
-									'Polish': (volume: number) =>
-										`Obecna głośność to ${volume}%.`,
-									'Romanian': (volume: number) =>
-										`Volumul actual este ${volume}%.`,
+									'English': (volume: number) => `The current volume is ${volume}%.`,
+									'Polish': (volume: number) => `Obecna głośność to ${volume}%.`,
+									'Romanian': (volume: number) => `Volumul actual este ${volume}%.`,
 								},
 							},
 						},
@@ -1371,8 +1304,7 @@ class Commands {
 							volumeSet: {
 								header: { 'English': 'Volume set' },
 								body: {
-									'English': (volume: number) =>
-										`The volume has been set to ${volume}%.`,
+									'English': (volume: number) => `The volume has been set to ${volume}%.`,
 								},
 							},
 						},
@@ -1392,10 +1324,8 @@ class Commands {
 				'Romanian': 'Această listă este goală.',
 			},
 			tooManySkipArguments: {
-				'English':
-					'You may not skip __by__ a number of songs and skip __to__ a certain song in the same query.',
-				'Polish':
-					'Nie można przewijać zarazem __o__ liczbę utworów i __do__ danego utworu w tym samym czasie.',
+				'English': 'You may not skip __by__ a number of songs and skip __to__ a certain song in the same query.',
+				'Polish': 'Nie można przewijać zarazem __o__ liczbę utworów i __do__ danego utworu w tym samym czasie.',
 				'Romanian':
 					'Nu se poate sări __peste__ un anumit număr de melodii și __către__ o anumită melodie în același timp.',
 			},
@@ -1419,8 +1349,7 @@ class Commands {
 					'English': 'Couldn\'t load track',
 				},
 				body: {
-					'English': (songTitle: string) =>
-						`The track, **${songTitle}**, could not be loaded.`,
+					'English': (songTitle: string) => `The track, **${songTitle}**, could not be loaded.`,
 				},
 			},
 			// Do not localise (not even 'parts'); this is a public feedback message.
@@ -1434,8 +1363,7 @@ class Commands {
 						songTitle: string,
 						songUrl: string,
 						userMention: string,
-					) =>
-						`Now playing ${displayTrack} [**${songTitle}**](${songUrl}) as requested by ${userMention}.`,
+					) => `Now playing ${displayTrack} [**${songTitle}**](${songUrl}) as requested by ${userMention}.`,
 				},
 				parts: {
 					displayTrack: {
@@ -1457,12 +1385,9 @@ class Commands {
 			'Romanian': 'postare',
 		},
 		description: {
-			'English':
-				'Allows the user to post various core server messages, such as the server rules.',
-			'Polish':
-				'Pozwala użytkownikowi na wstawianie różnych wiadomości serwerowych, takich jak regulamin.',
-			'Romanian':
-				'Permite utilizatorului postarea diverselor mesaje de server, precum regulamentul.',
+			'English': 'Allows the user to post various core server messages, such as the server rules.',
+			'Polish': 'Pozwala użytkownikowi na wstawianie różnych wiadomości serwerowych, takich jak regulamin.',
+			'Romanian': 'Permite utilizatorului postarea diverselor mesaje de server, precum regulamentul.',
 		},
 		options: {
 			information: {
@@ -1492,10 +1417,8 @@ class Commands {
 				},
 				description: {
 					'English': 'Posts a message containing the welcome message.',
-					'Polish':
-						'Wstawia wiadomość zawierającą powitanie dla nowych członków serwera.',
-					'Romanian':
-						'Postează un mesaj care conține un bun-venit pentru membri noi ai serverului.',
+					'Polish': 'Wstawia wiadomość zawierającą powitanie dla nowych członków serwera.',
+					'Romanian': 'Postează un mesaj care conține un bun-venit pentru membri noi ai serverului.',
 				},
 				strings: {
 					// Do not localise; this is a public feedback message.
@@ -1556,17 +1479,15 @@ class Commands {
 				},
 				body: {
 					'English': (userMention: string, suggestion: string) =>
-						`${userMention} has made a suggestion:\n\n` + `*${suggestion}*`,
+						`${userMention} has made a suggestion.\n\n` + `Suggestion: *${suggestion}*`,
 				},
 			},
 			suggestionMade: {
-				'English':
-					'Your suggestion has been passed over to the server staff.\n\n' +
+				'English': 'Your suggestion has been passed over to the server staff.\n\n' +
 					'We will keep you posted for developments regarding it.',
 				'Polish': 'Twoja sugestia została przekazana moderacji serwera.\n\n' +
 					'Będziemy na bieżąco informować Cię o zmianach w jej zakresie.',
-				'Romanian':
-					'Sugestia ta a fost transmisă personalului serverului.\n\n' +
+				'Romanian': 'Sugestia ta a fost transmisă personalului serverului.\n\n' +
 					'Te vom ține la curent cu evoluțiile din cadrul acesteia.',
 			},
 		},
@@ -1610,12 +1531,9 @@ class Commands {
 				'Romanian': 'Nu s-a putut lăuda utilizatorul.',
 			},
 			waitBeforePraising: {
-				'English':
-					'You have already praised a user recently. You must wait before praising somebody again.',
-				'Polish':
-					'Zanim ponownie spróbujesz pochwalić użytkownika, powinieneś/powinnaś troszeczkę poczekać.',
-				'Romanian':
-					'Ar trebui să-ți iei puțin timp înainte de a încerca să lauzi din nou un utilizator.',
+				'English': 'You have already praised a user recently. You must wait before praising somebody again.',
+				'Polish': 'Zanim ponownie spróbujesz pochwalić użytkownika, powinieneś/powinnaś troszeczkę poczekać.',
+				'Romanian': 'Ar trebui să-ți iei puțin timp înainte de a încerca să lauzi din nou un utilizator.',
 			},
 			praised: {
 				'English': (userMention: string) =>
@@ -1626,12 +1544,9 @@ class Commands {
 					`Cu excepția că ${userMention} și-a blocat DM-urile sale, tocmai ce a fost notificat că l-ai lăudat.`,
 			},
 			praisedDirect: {
-				'English': (userMention: string) =>
-					`You have just been praised by ${userMention}!`,
-				'Polish': (userMention: string) =>
-					`Użytkownik ${userMention} właśnie Cię pochwalił!`,
-				'Romanian': (userMention: string) =>
-					`Abia ce ai primit o laudă de la ${userMention}!`,
+				'English': (userMention: string) => `You have just been praised by ${userMention}!`,
+				'Polish': (userMention: string) => `Użytkownik ${userMention} właśnie Cię pochwalił!`,
+				'Romanian': (userMention: string) => `Abia ce ai primit o laudă de la ${userMention}!`,
 			},
 		},
 	});
@@ -1643,12 +1558,9 @@ class Commands {
 			'Romanian': 'profil',
 		},
 		description: {
-			'English':
-				'Allows the user to view information about themselves or another user.',
-			'Polish':
-				'Pozwala użytkownikowi na wyświetlanie informacji o sobie lub o innych użytkownikach.',
-			'Romanian':
-				'Permite utilizatorului afișarea informațiilor despre sine sau despre alți utilizatori.',
+			'English': 'Allows the user to view information about themselves or another user.',
+			'Polish': 'Pozwala użytkownikowi na wyświetlanie informacji o sobie lub o innych użytkownikach.',
+			'Romanian': 'Permite utilizatorului afișarea informațiilor despre sine sau despre alți utilizatori.',
 		},
 		options: {
 			roles: {
@@ -1670,12 +1582,9 @@ class Commands {
 							'Romanian': 'Nicio categorie selectată',
 						},
 						body: {
-							'English':
-								'Select a category to obtain the list of available roles for it.',
-							'Polish':
-								'Wybierz kategorię, aby otrzymać listę dostępnych dla niej ról.',
-							'Romanian':
-								'Selectează o categorie pentru a primi lista cu rolurile disponibile pentru aceasta.',
+							'English': 'Select a category to obtain the list of available roles for it.',
+							'Polish': 'Wybierz kategorię, aby otrzymać listę dostępnych dla niej ról.',
+							'Romanian': 'Selectează o categorie pentru a primi lista cu rolurile disponibile pentru aceasta.',
 						},
 					},
 					reachedLimit: {
@@ -1730,8 +1639,7 @@ class Commands {
 					},
 					informationForUser: {
 						'English': (username: string) => `Information about ${username}`,
-						'Polish': (username: string) =>
-							`Informacje o użytkowniku ${username}`,
+						'Polish': (username: string) => `Informacje o użytkowniku ${username}`,
 						'Romanian': (username: string) => `Informații despre ${username}`,
 					},
 					roles: {

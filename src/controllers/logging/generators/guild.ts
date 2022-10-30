@@ -79,9 +79,7 @@ const generators: Required<MessageGenerators<GuildEvents>> = {
 			const byUser = client.cache.users.get(by.id);
 			if (!byUser) return;
 
-			return `${
-				diagnosticMentionUser(user)
-			}'s verification request has been accepted by ${
+			return `${diagnosticMentionUser(user)}'s verification request has been accepted by ${
 				diagnosticMentionUser(byUser)
 			}`;
 		},
@@ -94,9 +92,7 @@ const generators: Required<MessageGenerators<GuildEvents>> = {
 			const byUser = client.cache.users.get(by.id);
 			if (!byUser) return;
 
-			return `${
-				diagnosticMentionUser(user)
-			}'s verification request has been rejected by ${
+			return `${diagnosticMentionUser(user)}'s verification request has been rejected by ${
 				diagnosticMentionUser(byUser)
 			}`;
 		},
@@ -111,8 +107,7 @@ const generators: Required<MessageGenerators<GuildEvents>> = {
 
 			return `Entry has been granted to ${diagnosticMentionUser(user)}.`;
 		},
-		filter: (_client, originGuildId, member) =>
-			originGuildId === member.guildId,
+		filter: (_client, originGuildId, member) => originGuildId === member.guildId,
 		color: configuration.interactions.responses.colors.green,
 	},
 	entryRequestReject: {
@@ -126,8 +121,7 @@ const generators: Required<MessageGenerators<GuildEvents>> = {
 **REASON**
 ${codeMultiline(reason)}`;
 		},
-		filter: (_client, originGuildId, member, _reason) =>
-			originGuildId === member.guildId,
+		filter: (_client, originGuildId, member, _reason) => originGuildId === member.guildId,
 		color: configuration.interactions.responses.colors.green,
 	},
 	articleCreate: {
@@ -142,8 +136,7 @@ ${codeMultiline(reason)}`;
         
 ${trim(article.content.body, 300)}`;
 		},
-		filter: (_client, originGuildId, _article, by) =>
-			originGuildId === by.guildId,
+		filter: (_client, originGuildId, _article, by) => originGuildId === by.guildId,
 		color: configuration.interactions.responses.colors.green,
 	},
 	articleCreateAccept: {
@@ -152,16 +145,13 @@ ${trim(article.content.body, 300)}`;
 			const user = client.cache.users.get(by.id);
 			if (!user) return;
 
-			return `An article submission has been verified by ${
-				diagnosticMentionUser(user)
-			}:
+			return `An article submission has been verified by ${diagnosticMentionUser(user)}:
 
 **${article.content.title}**
 
 ${trim(article.content.body, 300)}`;
 		},
-		filter: (_client, originGuildId, _article, by) =>
-			originGuildId === by.guildId,
+		filter: (_client, originGuildId, _article, by) => originGuildId === by.guildId,
 		color: configuration.interactions.responses.colors.green,
 	},
 	articleCreateReject: {
@@ -170,16 +160,13 @@ ${trim(article.content.body, 300)}`;
 			const user = client.cache.users.get(by.id);
 			if (!user) return;
 
-			return `An article submission has been rejected by ${
-				diagnosticMentionUser(user)
-			}:
+			return `An article submission has been rejected by ${diagnosticMentionUser(user)}:
 
 **${article.content.title}**
         
 ${trim(article.content.body, 300)}`;
 		},
-		filter: (_client, originGuildId, _article, by) =>
-			originGuildId === by.guildId,
+		filter: (_client, originGuildId, _article, by) => originGuildId === by.guildId,
 		color: configuration.interactions.responses.colors.red,
 	},
 	articleEdit: {
@@ -188,16 +175,13 @@ ${trim(article.content.body, 300)}`;
 			const user = client.cache.users.get(by.id);
 			if (!user) return;
 
-			return `The article ${code(article.content.title)} has been edited by ${
-				diagnosticMentionUser(user)
-			}:
+			return `The article ${code(article.content.title)} has been edited by ${diagnosticMentionUser(user)}:
   
 **${change.content.title}**
   
 ${trim(change.content.body, 300)}`;
 		},
-		filter: (_client, originGuildId, _article, _change, by) =>
-			originGuildId === by.guildId,
+		filter: (_client, originGuildId, _article, _change, by) => originGuildId === by.guildId,
 		color: configuration.interactions.responses.colors.blue,
 	},
 	articleEditAccept: {
@@ -206,16 +190,13 @@ ${trim(change.content.body, 300)}`;
 			const user = client.cache.users.get(by.id);
 			if (!user) return;
 
-			return `An article edit has been verified by ${
-				diagnosticMentionUser(user)
-			}:
+			return `An article edit has been verified by ${diagnosticMentionUser(user)}:
 
 **${change.content.title}**
 
 ${trim(change.content.body, 300)}`;
 		},
-		filter: (_client, originGuildId, _article, _change, by) =>
-			originGuildId === by.guildId,
+		filter: (_client, originGuildId, _article, _change, by) => originGuildId === by.guildId,
 		color: configuration.interactions.responses.colors.green,
 	},
 	articleEditReject: {
@@ -224,16 +205,13 @@ ${trim(change.content.body, 300)}`;
 			const user = client.cache.users.get(by.id);
 			if (!user) return;
 
-			return `An article edit has been rejected by ${
-				diagnosticMentionUser(user)
-			}:
+			return `An article edit has been rejected by ${diagnosticMentionUser(user)}:
 
 **${change.content.title}**
 
 ${trim(change.content.body, 300)}`;
 		},
-		filter: (_client, originGuildId, _article, _change, by) =>
-			originGuildId === by.guildId,
+		filter: (_client, originGuildId, _article, _change, by) => originGuildId === by.guildId,
 		color: configuration.interactions.responses.colors.red,
 	},
 	articleLock: {
@@ -242,12 +220,9 @@ ${trim(change.content.body, 300)}`;
 			const user = client.cache.users.get(by.id);
 			if (!user) return;
 
-			return `The article ${code(article.content.title)} has been locked by ${
-				diagnosticMentionUser(user)
-			}.`;
+			return `The article ${code(article.content.title)} has been locked by ${diagnosticMentionUser(user)}.`;
 		},
-		filter: (_client, originGuildId, _article, by) =>
-			originGuildId === by.guildId,
+		filter: (_client, originGuildId, _article, by) => originGuildId === by.guildId,
 		color: configuration.interactions.responses.colors.yellow,
 	},
 	moderatorInquestLaunch: {
@@ -256,12 +231,9 @@ ${trim(change.content.body, 300)}`;
 			const memberUser = client.cache.users.get(member.id);
 			if (!memberUser) return;
 
-			return `An inquest has been launched into ${
-				diagnosticMentionUser(memberUser)
-			} by ${diagnosticMentionUser(by)}.`;
+			return `An inquest has been launched into ${diagnosticMentionUser(memberUser)} by ${diagnosticMentionUser(by)}.`;
 		},
-		filter: (_client, originGuildId, member, _by) =>
-			originGuildId === member.guildId,
+		filter: (_client, originGuildId, member, _by) => originGuildId === member.guildId,
 		color: configuration.interactions.responses.colors.darkRed,
 	},
 	moderatorInquestPass: {
@@ -270,14 +242,11 @@ ${trim(change.content.body, 300)}`;
 			const memberUser = client.cache.users.get(member.id);
 			if (!memberUser) return;
 
-			return `An inquest into ${
-				diagnosticMentionUser(memberUser)
-			} has been reviewed by ${
+			return `An inquest into ${diagnosticMentionUser(memberUser)} has been reviewed by ${
 				diagnosticMentionUser(by)
 			}, and resulted in a pass.`;
 		},
-		filter: (_client, originGuildId, member, _by) =>
-			originGuildId === member.guildId,
+		filter: (_client, originGuildId, member, _by) => originGuildId === member.guildId,
 		color: configuration.interactions.responses.colors.green,
 	},
 	moderatorInquestFail: {
@@ -286,14 +255,11 @@ ${trim(change.content.body, 300)}`;
 			const memberUser = client.cache.users.get(member.id);
 			if (!memberUser) return;
 
-			return `An inquest into ${
-				diagnosticMentionUser(memberUser)
-			} has been reviewed by ${
+			return `An inquest into ${diagnosticMentionUser(memberUser)} has been reviewed by ${
 				diagnosticMentionUser(by)
 			}, and resulted in a failure.`;
 		},
-		filter: (_client, originGuildId, member, _by) =>
-			originGuildId === member.guildId,
+		filter: (_client, originGuildId, member, _by) => originGuildId === member.guildId,
 		color: configuration.interactions.responses.colors.red,
 	},
 	memberWarnAdd: {
@@ -306,8 +272,7 @@ ${trim(change.content.body, 300)}`;
 				diagnosticMentionUser(by)
 			} for: ${warning.reason}`;
 		},
-		filter: (_client, originGuildId, member, _warning, _by) =>
-			originGuildId === member.guildId,
+		filter: (_client, originGuildId, member, _warning, _by) => originGuildId === member.guildId,
 		color: configuration.interactions.responses.colors.yellow,
 	},
 	memberWarnRemove: {
@@ -320,8 +285,7 @@ ${trim(change.content.body, 300)}`;
 				diagnosticMentionUser(by)
 			} regarding their warning for: ${warning.reason}`;
 		},
-		filter: (_client, originGuildId, member, _warning, _by) =>
-			originGuildId === member.guildId,
+		filter: (_client, originGuildId, member, _warning, _by) => originGuildId === member.guildId,
 		color: configuration.interactions.responses.colors.blue,
 	},
 	memberTimeoutAdd: {
@@ -330,12 +294,11 @@ ${trim(change.content.body, 300)}`;
 			const memberUser = client.cache.users.get(member.id);
 			if (!memberUser) return;
 
-			return `${diagnosticMentionUser(memberUser)} has been timed out by ${
-				diagnosticMentionUser(by)
-			} until ${displayTime(until)} for: ${reason}`;
+			return `${diagnosticMentionUser(memberUser)} has been timed out by ${diagnosticMentionUser(by)} until ${
+				displayTime(until)
+			} for: ${reason}`;
 		},
-		filter: (_client, originGuildId, member, _until, _reason, _by) =>
-			originGuildId === member.guildId,
+		filter: (_client, originGuildId, member, _until, _reason, _by) => originGuildId === member.guildId,
 		color: configuration.interactions.responses.colors.yellow,
 	},
 	memberTimeoutRemove: {
@@ -344,12 +307,9 @@ ${trim(change.content.body, 300)}`;
 			const memberUser = client.cache.users.get(member.id);
 			if (!memberUser) return;
 
-			return `The timeout of ${
-				diagnosticMentionUser(memberUser)
-			} has been cleared by: ${diagnosticMentionUser(by)}`;
+			return `The timeout of ${diagnosticMentionUser(memberUser)} has been cleared by: ${diagnosticMentionUser(by)}`;
 		},
-		filter: (_client, originGuildId, member, _by) =>
-			originGuildId === member.guildId,
+		filter: (_client, originGuildId, member, _by) => originGuildId === member.guildId,
 		color: configuration.interactions.responses.colors.blue,
 	},
 	praiseAdd: {
@@ -358,12 +318,11 @@ ${trim(change.content.body, 300)}`;
 			const memberUser = client.cache.users.get(member.id);
 			if (!memberUser) return;
 
-			return `${
-				diagnosticMentionUser(memberUser)
-			} has been praised by ${by}. Comment: ${praise.comment ?? 'None.'}`;
+			return `${diagnosticMentionUser(memberUser)} has been praised by ${diagnosticMentionUser(by)}. Comment: ${
+				praise.comment ?? 'None.'
+			}`;
 		},
-		filter: (_client, originGuildId, member, _praise, _by) =>
-			originGuildId === member.guildId,
+		filter: (_client, originGuildId, member, _praise, _by) => originGuildId === member.guildId,
 		color: configuration.interactions.responses.colors.green,
 	},
 	suggestionSend: {
@@ -373,10 +332,9 @@ ${trim(change.content.body, 300)}`;
 			if (!memberUser) return;
 
 			return `${diagnosticMentionUser(memberUser)} has made a suggestion.\n\n` +
-				`Suggestion: **${suggestion}**`;
+				`Suggestion: *${suggestion}*`;
 		},
-		filter: (_client, originGuildId, member, _suggestion) =>
-			originGuildId === member.guildId,
+		filter: (_client, originGuildId, member, _suggestion) => originGuildId === member.guildId,
 		color: configuration.interactions.responses.colors.darkGreen,
 	},
 };
