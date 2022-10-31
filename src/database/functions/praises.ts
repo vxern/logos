@@ -49,9 +49,7 @@ async function fetchPraises<
 		return undefined;
 	}
 
-	const cache = parameter === 'author'
-		? database.praisesByAuthor
-		: database.praisesBySubject;
+	const cache = parameter === 'author' ? database.praisesByAuthor : database.praisesBySubject;
 
 	cache.set(
 		value.value.id,
@@ -77,9 +75,7 @@ async function getPraises<
 	parameter: K,
 	value: V,
 ): Promise<Document<Praise>[] | undefined> {
-	const cache = parameter === 'author'
-		? database.praisesByAuthor
-		: database.praisesBySubject;
+	const cache = parameter === 'author' ? database.praisesByAuthor : database.praisesBySubject;
 
 	return cache.get(value.value.id) ??
 		await fetchPraises(database, parameter, value);

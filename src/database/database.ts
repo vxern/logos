@@ -1,4 +1,4 @@
-import { faunadb } from '../../deps.ts';
+import { faunadb, Sentry } from '../../deps.ts';
 import { Article } from './structs/articles/article.ts';
 import { ArticleChange } from './structs/articles/article-change.ts';
 import { User } from './structs/users/user.ts';
@@ -123,28 +123,33 @@ async function dispatchQuery<
 	database: Database,
 	expression: faunadb.Expr,
 ): Promise<R | undefined> {
+	let result;
 	try {
-		const queryResult = <Record<
-			string,
-			unknown
-		>> (await database.client.query(expression));
+		result = await database.client.query<Record<string, unknown>>(expression);
+	} catch (exception) {
+		if (exception.code === 'NotFound') return undefined;
 
-		if (!Array.isArray(queryResult.data)) {
-			queryResult.ts = <number> queryResult.ts / 1000;
+		Sentry.captureException(exception);
+		console.error(`${exception.message} ~ ${exception.description}`);
 
-			return <R> queryResult;
-		}
-
-		for (const element of queryResult.data) {
-			element.ts = <number> element.ts / 1000;
-		}
-
-		return <R> (<unknown> queryResult.data);
-	} catch (error) {
-		console.error(`${error.message} ~ ${error.description}`);
+		return undefined;
 	}
 
-	return undefined;
+	if (!Array.isArray(result.data)) {
+		result.ts = convertToMilliseconds(<number> result.ts);
+
+		return <R> (<unknown> result);
+	}
+
+	for (const element of result.data) {
+		element.ts = convertToMilliseconds(<number> element.ts);
+	}
+
+	return <R> (<unknown> result.data);
+}
+
+function convertToMilliseconds(number: number): number {
+	return number / 1000;
 }
 
 export type { Database };

@@ -16,10 +16,7 @@ import { SongStream } from '../data/song-stream.ts';
 import { SongListingContentTypes } from '../data/song-listing.ts';
 import { show } from '../../parameters.ts';
 import { collection } from '../parameters.ts';
-import {
-	createLocalisations,
-	localise,
-} from '../../../../assets/localisations/types.ts';
+import { createLocalisations, localise } from '../../../../assets/localisations/types.ts';
 import { Commands } from '../../../../assets/localisations/commands.ts';
 
 const command: OptionBuilder = {
@@ -122,9 +119,7 @@ function displayNowPlaying(
 								)
 							}](${song.url})`;
 
-							return `${pageIndex * 10 + (index + 1)}. ${
-								isCurrent ? `**${songString}**` : songString
-							}`;
+							return `${pageIndex * 10 + (index + 1)}. ${isCurrent ? `**${songString}**` : songString}`;
 						}).join('\n')
 						: localise(Commands.music.strings.listEmpty, interaction.locale),
 			},
@@ -163,9 +158,7 @@ function displayNowPlaying(
 									Commands.music.options.now.strings.track,
 									interaction.locale,
 								),
-								value: `${
-									currentListing.content.position + 1
-								}/${currentListing.content.songs.length}`,
+								value: `${currentListing.content.position + 1}/${currentListing.content.songs.length}`,
 							}]
 							: [],
 						{

@@ -75,12 +75,4 @@ function mention(id: bigint, type: MentionTypes): string {
 	return `<${prefixes[type]}${id}>`;
 }
 
-export {
-	capitalise,
-	code,
-	codeMultiline,
-	displayTime,
-	list,
-	mention,
-	MentionTypes,
-};
+export { capitalise, code, codeMultiline, displayTime, list, mention, MentionTypes };

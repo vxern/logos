@@ -17,10 +17,7 @@ import resume from './commands/resume.ts';
 import unskip from './commands/unskip.ts';
 import volume from './commands/volume.ts';
 import { SongListing } from './data/song-listing.ts';
-import {
-	createLocalisations,
-	localise,
-} from '../../../assets/localisations/types.ts';
+import { createLocalisations, localise } from '../../../assets/localisations/types.ts';
 import { Commands } from '../../../assets/localisations/commands.ts';
 
 const music: CommandBuilder = {
@@ -64,15 +61,13 @@ function displayListings(
 		view: {
 			title: localise(Commands.music.strings.listings, interaction.locale),
 			generate: (page, pageIndex) =>
-				page.length === 0
-					? localise(Commands.music.strings.listEmpty, interaction.locale)
-					: list(
-						page.map((listing, index) =>
-							`${pageIndex * 10 + (index + 1)}. ${
-								(configuration.music.symbols)[listing.content.type]
-							} ~ ${listing.content.title}`
-						),
+				page.length === 0 ? localise(Commands.music.strings.listEmpty, interaction.locale) : list(
+					page.map((listing, index) =>
+						`${pageIndex * 10 + (index + 1)}. ${
+							(configuration.music.symbols)[listing.content.type]
+						} ~ ${listing.content.title}`
 					),
+				),
 		},
 		show: show,
 	});

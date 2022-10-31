@@ -17,6 +17,7 @@ import {
 	Member,
 	Message,
 	sendInteractionResponse,
+	Sentry,
 	snowflakeToBigint,
 	startBot,
 	Transformers,
@@ -71,14 +72,16 @@ function createCache(): Cache {
 }
 
 type Client = Readonly<{
+	version: string;
 	database: Database;
 	cache: Cache;
 	collectors: Map<Event, Set<Collector<Event>>>;
 	handlers: Map<string, InteractionHandler>;
 }>;
 
-function createClient(): Client {
+function createClient(version: string): Client {
 	return {
+		version,
 		database: createDatabase(),
 		cache: createCache(),
 		collectors: new Map(),
@@ -86,17 +89,14 @@ function createClient(): Client {
 	};
 }
 
-function initialiseClient(): void {
-	const client = createClient();
-
-	const eventHandlers = createEventHandlers(client);
-	const cacheHandlers = createCacheHandlers(client, createTransformers({}));
+function initialiseClient(version: string): void {
+	const client = createClient(version);
 
 	const bot = createBot({
 		token: Deno.env.get('DISCORD_SECRET')!,
 		intents: Intents.Guilds | Intents.GuildMembers | Intents.GuildVoiceStates,
-		events: eventHandlers,
-		transformers: cacheHandlers,
+		events: createEventHandlers(client),
+		transformers: withCaching(client, createTransformers({})),
 	});
 
 	startServices([client, bot]);
@@ -104,27 +104,17 @@ function initialiseClient(): void {
 	return void startBot(bot);
 }
 
-const version = new TextDecoder().decode(
-	await Deno.run({
-		cmd: ['git', 'tag', '--sort=-committerdate', '--list', 'v*'],
-		stdout: 'piped',
-	}).output(),
-).split('\n').at(0);
-
 function createEventHandlers(client: Client): Partial<EventHandlers> {
 	return {
-		ready: (bot, payload) => {
-			if (!version) return;
-
+		ready: (bot, payload) =>
 			editShardStatus(bot, payload.shardId, {
 				activities: [{
-					name: version,
+					name: client.version,
 					type: ActivityTypes.Streaming,
 					createdAt: Date.now(),
 				}],
 				status: 'online',
-			});
-		},
+			}),
 		guildCreate: (bot, guild) => {
 			fetchMembers(bot, guild.id, { limit: 0, query: '' });
 
@@ -153,8 +143,7 @@ function createEventHandlers(client: Client): Partial<EventHandlers> {
 				)?.name;
 				if (!subCommandName) return;
 
-				commandNameFull =
-					`${commandName} ${subCommandGroupName} ${subCommandName}`;
+				commandNameFull = `${commandName} ${subCommandGroupName} ${subCommandName}`;
 			} else {
 				const subCommandName = interaction.data?.options?.find((option) =>
 					option.type === ApplicationCommandOptionTypes.SubCommand
@@ -166,24 +155,22 @@ function createEventHandlers(client: Client): Partial<EventHandlers> {
 				}
 			}
 
-			const handler = client.handlers.get(commandNameFull);
-			if (!handler) return;
+			const handle = client.handlers.get(commandNameFull);
+			if (!handle) return;
 
-			try {
-				handler([client, bot], interaction);
-			} catch (exception) {
+			Promise.resolve(handle([client, bot], interaction)).catch((exception) => {
+				Sentry.captureException(exception);
 				console.error(exception);
-			}
+			});
 		},
 	};
 }
 
-function createCacheHandlers(
+function withCaching(
 	client: Client,
 	transformers: Transformers,
 ): Transformers {
-	const { guild, user, member, channel, message, role, voiceState } =
-		transformers;
+	const { guild, user, member, channel, message, role, voiceState } = transformers;
 
 	transformers.guild = (bot, payload) => {
 		const result = guild(bot, payload);
@@ -366,20 +353,19 @@ function addCollector<T extends keyof EventHandlers>(
 
 		const eventHandler = <(...args: Parameters<EventHandlers[T]>) => void> bot
 			.events[event];
-		bot.events[event] =
-			<EventHandlers[T]> ((...args: Parameters<typeof eventHandler>) => {
-				const collectors = <Set<Collector<T>>> client.collectors.get(event)!;
+		bot.events[event] = <EventHandlers[T]> ((...args: Parameters<typeof eventHandler>) => {
+			const collectors = <Set<Collector<T>>> client.collectors.get(event)!;
 
-				for (const collector of collectors) {
-					if (!collector.filter(...args)) {
-						continue;
-					}
-
-					collector.onCollect(...args);
+			for (const collector of collectors) {
+				if (!collector.filter(...args)) {
+					continue;
 				}
 
-				eventHandler(...args);
-			});
+				collector.onCollect(...args);
+			}
+
+			eventHandler(...args);
+		});
 	}
 
 	const collectors = <Set<Collector<T>>> client.collectors.get(event)!;
@@ -409,9 +395,7 @@ function resolveIdentifierToMembers(
 	id ??= userIDExpression.exec(identifier)?.at(0);
 
 	if (!id) {
-		const members = Array.from(client.cache.members.values()).filter((member) =>
-			member.guildId === guildId
-		);
+		const members = Array.from(client.cache.members.values()).filter((member) => member.guildId === guildId);
 
 		const identifierLowercase = identifier.toLowerCase();
 		return [

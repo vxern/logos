@@ -14,10 +14,7 @@ import configuration from '../../../configuration.ts';
 import { getProficiencyCategory } from '../../../commands/social/module.ts';
 import { snowflakeToTimestamp } from '../../../utils.ts';
 import { Client } from '../../../client.ts';
-import {
-	Localisations,
-	localise,
-} from '../../../../assets/localisations/types.ts';
+import { Localisations, localise } from '../../../../assets/localisations/types.ts';
 import { Services } from '../../../../assets/localisations/services.ts';
 
 const proficiencyCategory = getProficiencyCategory();

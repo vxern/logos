@@ -24,16 +24,14 @@ class Articles {
 	> = {
 		reason: {
 			'English': (language) => `What is your reason for learning ${language}?`,
-			'Polish': (language) =>
-				`Jaki jest powód dla którego uczysz się ${language}?`,
+			'Polish': (language) => `Jaki jest powód dla którego uczysz się ${language}?`,
 		},
 		aim: {
 			'English': (_language) => 'How will you benefit from becoming a member?',
 			'Polish': (_language) => 'Jaką korzyść przyniesie Tobie członkostwo?',
 		},
 		whereFound: {
-			'English': (language) =>
-				`Where did you find out about Learn ${language}?`,
+			'English': (language) => `Where did you find out about Learn ${language}?`,
 			'Polish': (language) => `Gdzie dowiedziałeś/aś się o Learn ${language}?`,
 		},
 	};

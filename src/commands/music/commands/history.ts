@@ -1,17 +1,9 @@
-import {
-	_,
-	ApplicationCommandOptionTypes,
-	Bot,
-	Interaction,
-} from '../../../../deps.ts';
+import { _, ApplicationCommandOptionTypes, Bot, Interaction } from '../../../../deps.ts';
 import { Client } from '../../../client.ts';
 import { OptionBuilder } from '../../command.ts';
 import { displayListings } from '../module.ts';
 import { show } from '../../parameters.ts';
-import {
-	createLocalisations,
-	localise,
-} from '../../../../assets/localisations/types.ts';
+import { createLocalisations, localise } from '../../../../assets/localisations/types.ts';
 import { Commands } from '../../../../assets/localisations/commands.ts';
 import { parseArguments } from '../../../utils.ts';
 

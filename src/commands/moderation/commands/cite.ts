@@ -1,9 +1,6 @@
 import { Commands } from '../../../../assets/localisations/commands.ts';
 import { Information } from '../../../../assets/localisations/information.ts';
-import {
-	createLocalisations,
-	localise,
-} from '../../../../assets/localisations/types.ts';
+import { createLocalisations, localise } from '../../../../assets/localisations/types.ts';
 import {
 	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
@@ -101,11 +98,9 @@ function citeRule(
 			type: InteractionResponseTypes.ChannelMessageWithSource,
 			data: {
 				embeds: [{
-					title: `${localise(Information.rules.rule, defaultLanguage)} #${
-						rule + 1
-					}: ${localise(ruleParsed.title, defaultLanguage)} ~ ${
-						localise(Information.rules.tldr, defaultLanguage)
-					}: *${localise(ruleParsed.summary, defaultLanguage)}*`,
+					title: `${localise(Information.rules.rule, defaultLanguage)} #${rule + 1}: ${
+						localise(ruleParsed.title, defaultLanguage)
+					} ~ ${localise(Information.rules.tldr, defaultLanguage)}: *${localise(ruleParsed.summary, defaultLanguage)}*`,
 					description: localise(ruleParsed.content, defaultLanguage)(guild),
 					color: configuration.interactions.responses.colors.blue,
 				}],

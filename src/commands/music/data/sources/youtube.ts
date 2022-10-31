@@ -46,11 +46,7 @@ async function search(
 		limit: 20,
 		type: 'all',
 		safeSearch: false,
-	}).then((result) =>
-		result.filter((element) =>
-			element.type === 'video' || element.type === 'playlist'
-		)
-	);
+	}).then((result) => result.filter((element) => element.type === 'video' || element.type === 'playlist'));
 	if (results.length === 0) return undefined;
 
 	return new Promise<SongListing | undefined>((resolve) => {
@@ -90,8 +86,7 @@ async function search(
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
 					title: 'Select a song / song collection',
-					description:
-						'Select a song or song collection from the choices below.',
+					description: 'Select a song or song collection from the choices below.',
 					color: configuration.interactions.responses.colors.blue,
 				}],
 				components: [{

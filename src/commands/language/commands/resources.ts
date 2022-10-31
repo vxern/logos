@@ -1,8 +1,5 @@
 import { Commands } from '../../../../assets/localisations/commands.ts';
-import {
-	createLocalisations,
-	localise,
-} from '../../../../assets/localisations/types.ts';
+import { createLocalisations, localise } from '../../../../assets/localisations/types.ts';
 import {
 	ApplicationCommandFlags,
 	Bot,

@@ -11,10 +11,7 @@ import {
 	sendInteractionResponse,
 } from '../../../../deps.ts';
 import { SongListingContentTypes } from '../data/song-listing.ts';
-import {
-	createLocalisations,
-	localise,
-} from '../../../../assets/localisations/types.ts';
+import { createLocalisations, localise } from '../../../../assets/localisations/types.ts';
 import { Commands } from '../../../../assets/localisations/commands.ts';
 import { parseArguments } from '../../../utils.ts';
 
@@ -37,8 +34,7 @@ const command: OptionBuilder = {
 		...Object.entries(sources).map<OptionBuilder>(([name, resolve]) => ({
 			...createLocalisations(Commands.music.options.play.options.source(name)),
 			type: ApplicationCommandOptionTypes.SubCommand,
-			handle: ([client, bot], interaction) =>
-				playSongListing([client, bot], interaction, resolve),
+			handle: ([client, bot], interaction) => playSongListing([client, bot], interaction, resolve),
 			options: [query],
 		})),
 	],

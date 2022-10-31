@@ -5,6 +5,9 @@ export { send as sendShardMessage } from 'discordeno';
 /** Database connection. */
 export * as faunadb from 'faunadb';
 
+/** Monitoring and error tracking. */
+export * as Sentry from 'sentry';
+
 /** Music playback. */
 export * as lavadeno from 'lavadeno';
 

@@ -1,16 +1,9 @@
-import {
-	ApplicationCommandOptionTypes,
-	Bot,
-	Interaction,
-} from '../../../../deps.ts';
+import { ApplicationCommandOptionTypes, Bot, Interaction } from '../../../../deps.ts';
 import { Client } from '../../../client.ts';
 import { OptionBuilder } from '../../../commands/command.ts';
 import { displayListings } from '../module.ts';
 import { show } from '../../parameters.ts';
-import {
-	createLocalisations,
-	localise,
-} from '../../../../assets/localisations/types.ts';
+import { createLocalisations, localise } from '../../../../assets/localisations/types.ts';
 import { Commands } from '../../../../assets/localisations/commands.ts';
 import { parseArguments } from '../../../utils.ts';
 
@@ -33,9 +26,7 @@ function displaySongQueue(
 	});
 
 	return displayListings([client, bot], interaction, {
-		title: `📋 ${
-			localise(Commands.music.options.queue.strings.queue, interaction.locale)
-		}`,
+		title: `📋 ${localise(Commands.music.options.queue.strings.queue, interaction.locale)}`,
 		songListings: musicController.queue,
 		show: show ?? false,
 	});

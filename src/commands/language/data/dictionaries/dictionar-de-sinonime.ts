@@ -1,18 +1,12 @@
 import { cheerio } from '../../../../../deps.ts';
-import {
-	DictionaryAdapter,
-	DictionaryScopes,
-	DictionaryTypes,
-	SearchQuery,
-} from '../dictionary.ts';
+import { DictionaryAdapter, DictionaryScopes, DictionaryTypes, SearchQuery } from '../dictionary.ts';
 
 const adapter: DictionaryAdapter = {
 	scope: DictionaryScopes.Monolingual,
 	types: [DictionaryTypes.Defining, DictionaryTypes.Synonym],
 	languages: ['Romanian'],
 
-	queryBuilder: (query: SearchQuery) =>
-		`https://www.dictionardesinonime.ro/?c=${query.word}`,
+	queryBuilder: (query: SearchQuery) => `https://www.dictionardesinonime.ro/?c=${query.word}`,
 
 	lookup: async (query, builder) => {
 		const response = await fetch(builder(query));
@@ -30,9 +24,7 @@ const adapter: DictionaryAdapter = {
 
 			const uniformised = uniformise(content);
 			const synonyms = uniformised.split(/\d+\./)
-				.map((synonym) =>
-					/ v\. ([a-zA-Z0-9_-ăâșțîĂÂȘȚÎ,]+)\./.exec(synonym)?.[1] ?? ''
-				)
+				.map((synonym) => / v\. ([a-zA-Z0-9_-ăâșțîĂÂȘȚÎ,]+)\./.exec(synonym)?.[1] ?? '')
 				.filter((synonym) => synonym.length > 0);
 			synonyms.shift(); // Remove the headword.
 

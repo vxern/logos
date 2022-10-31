@@ -1,8 +1,5 @@
 import { Commands } from '../../../../assets/localisations/commands.ts';
-import {
-	createLocalisations,
-	localise,
-} from '../../../../assets/localisations/types.ts';
+import { createLocalisations, localise } from '../../../../assets/localisations/types.ts';
 import {
 	ApplicationCommandFlags,
 	banMember,
@@ -19,10 +16,7 @@ import { CommandBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
 import { log } from '../../../controllers/logging/logging.ts';
 import { getOrCreateUser } from '../../../database/functions/users.ts';
-import {
-	createWarning,
-	getWarnings,
-} from '../../../database/functions/warnings.ts';
+import { createWarning, getWarnings } from '../../../database/functions/warnings.ts';
 import { mention, MentionTypes } from '../../../formatting.ts';
 import { defaultLanguage } from '../../../types.ts';
 import { guildAsAuthor, parseArguments } from '../../../utils.ts';
@@ -75,9 +69,7 @@ async function warnUser(
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (!guild) return;
 
-	const moderatorRoleId = guild.roles.find((role) =>
-		role.name === configuration.guilds.moderation.moderator
-	)?.id;
+	const moderatorRoleId = guild.roles.find((role) => role.name === configuration.guilds.moderation.moderator)?.id;
 	if (!moderatorRoleId) return;
 
 	const isModerator = member.roles.includes(moderatorRoleId);
@@ -233,8 +225,7 @@ async function warnUser(
 			interaction.guildId!,
 			member.id,
 			{
-				reason:
-					`Banned due to having received too many warnings (${relevantWarnings.length}).`,
+				reason: `Banned due to having received too many warnings (${relevantWarnings.length}).`,
 			},
 		);
 	}

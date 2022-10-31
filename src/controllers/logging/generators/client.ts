@@ -12,36 +12,27 @@ type ClientEvents = {
 const client: MessageGenerators<ClientEvents> = {
 	guildBanAdd: {
 		title: '⚔️ User banned',
-		message: (_client, _bot, user, _guildId) =>
-			`${diagnosticMentionUser(user)} has been banned.`,
-		filter: (_client, originGuildId, _bot, user, guildId) =>
-			originGuildId === guildId && !user.toggles.bot,
+		message: (_client, _bot, user, _guildId) => `${diagnosticMentionUser(user)} has been banned.`,
+		filter: (_client, originGuildId, _bot, user, guildId) => originGuildId === guildId && !user.toggles.bot,
 		color: configuration.interactions.responses.colors.red,
 	},
 	guildBanRemove: {
 		title: '😇 User unbanned',
-		message: (_client, _bot, user, _guildId) =>
-			`${diagnosticMentionUser(user)} has been unbanned.`,
-		filter: (_client, originGuildId, _bot, user, guildId) =>
-			originGuildId === guildId && !user.toggles.bot,
+		message: (_client, _bot, user, _guildId) => `${diagnosticMentionUser(user)} has been unbanned.`,
+		filter: (_client, originGuildId, _bot, user, guildId) => originGuildId === guildId && !user.toggles.bot,
 		color: configuration.interactions.responses.colors.yellow,
 	},
 	guildMemberAdd: {
 		title: '😁 User joined',
-		message: (_client, _bot, _member, user) =>
-			`${diagnosticMentionUser(user)} has joined the server.`,
-		filter: (_client, originGuildId, _bot, member, user) =>
-			originGuildId === member.guildId && !user.toggles.bot,
+		message: (_client, _bot, _member, user) => `${diagnosticMentionUser(user)} has joined the server.`,
+		filter: (_client, originGuildId, _bot, member, user) => originGuildId === member.guildId && !user.toggles.bot,
 		color: configuration.interactions.responses.colors.green,
 	},
 	guildMemberRemove: {
 		title: '😔 User kicked or left',
 		message: (_client, _bot, user, _guildId) =>
-			`${
-				diagnosticMentionUser(user)
-			} has left the server, or they have been kicked.`,
-		filter: (_client, originGuildId, _bot, user, guildId) =>
-			originGuildId === guildId && !user.toggles.bot,
+			`${diagnosticMentionUser(user)} has left the server, or they have been kicked.`,
+		filter: (_client, originGuildId, _bot, user, guildId) => originGuildId === guildId && !user.toggles.bot,
 		color: configuration.interactions.responses.colors.yellow,
 	},
 	messageUpdate: {
@@ -89,9 +80,7 @@ ${codeMultiline(message.content)}`;
 			const author = client.cache.users.get(message.authorId);
 			if (!author) return false;
 
-			return (message
-				? originGuildId === message.guildId
-				: originGuildId === payload.guildId) && !author.toggles.bot;
+			return (message ? originGuildId === message.guildId : originGuildId === payload.guildId) && !author.toggles.bot;
 		},
 		color: configuration.interactions.responses.colors.red,
 	},

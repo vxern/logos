@@ -10,11 +10,9 @@ const links = {
 	learnRomanianListingWebsite: 'https://discord.me/learnromanian',
 
 	talonRepositoryLink: 'https://github.com/linguition/talon',
-	generateLanguageRepositoryLink: (language: Language) =>
-		`https://github.com/linguition/${language.toLowerCase()}`,
+	generateLanguageRepositoryLink: (language: Language) => `https://github.com/linguition/${language.toLowerCase()}`,
 
-	generateDiscordInviteLink: (inviteCode: string) =>
-		`https://discord.gg/${inviteCode}`,
+	generateDiscordInviteLink: (inviteCode: string) => `https://discord.gg/${inviteCode}`,
 };
 
 const deepLApiBaseLink = 'https://api-free.deepl.com/v2';

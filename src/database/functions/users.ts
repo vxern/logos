@@ -32,9 +32,7 @@ async function fetchUser<
 	const document = await dispatchQuery<User>(
 		database,
 		$.Get(
-			parameter === 'reference'
-				? value
-				: $.Match($.FaunaIndex('GetUserByID'), value),
+			parameter === 'reference' ? value : $.Match($.FaunaIndex('GetUserByID'), value),
 		),
 	);
 
@@ -96,9 +94,7 @@ async function getOrCreateUser<
 ): Promise<Document<User> | undefined> {
 	const cacheValue = parameter === 'reference'
 		? database.users.get((<Reference> value).value.id)
-		: Array.from(database.users.values()).find((document) =>
-			document.data.account.id === value
-		);
+		: Array.from(database.users.values()).find((document) => document.data.account.id === value);
 
 	const cacheOrFetch = cacheValue ??
 		await fetchUser(database, parameter, value);
