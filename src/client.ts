@@ -35,6 +35,7 @@ import { diagnosticMentionUser } from './utils.ts';
 import { setupLogging } from './controllers/logging/logging.ts';
 import { localise } from '../assets/localisations/types.ts';
 import { Misc } from '../assets/localisations/misc.ts';
+import { SupportedLanguage } from './commands/language/module.ts';
 
 interface Collector<
 	E extends keyof EventHandlers,
@@ -72,16 +73,19 @@ function createCache(): Cache {
 }
 
 type Client = Readonly<{
-	version: string;
+	metadata: {
+		version: string;
+		supportedTranslationLanguages: SupportedLanguage[];
+	};
 	database: Database;
 	cache: Cache;
 	collectors: Map<Event, Set<Collector<Event>>>;
 	handlers: Map<string, InteractionHandler>;
 }>;
 
-function createClient(version: string): Client {
+function createClient(metadata: Client['metadata']): Client {
 	return {
-		version,
+		metadata,
 		database: createDatabase(),
 		cache: createCache(),
 		collectors: new Map(),
@@ -89,8 +93,8 @@ function createClient(version: string): Client {
 	};
 }
 
-function initialiseClient(version: string): void {
-	const client = createClient(version);
+function initialiseClient(metadata: Client['metadata']): void {
+	const client = createClient(metadata);
 
 	const bot = createBot({
 		token: Deno.env.get('DISCORD_SECRET')!,
@@ -109,7 +113,7 @@ function createEventHandlers(client: Client): Partial<EventHandlers> {
 		ready: (bot, payload) =>
 			editShardStatus(bot, payload.shardId, {
 				activities: [{
-					name: client.version,
+					name: client.metadata.version,
 					type: ActivityTypes.Streaming,
 					createdAt: Date.now(),
 				}],
