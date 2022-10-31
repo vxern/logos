@@ -17,6 +17,7 @@ import {
 	Member,
 	Message,
 	sendInteractionResponse,
+	Sentry,
 	snowflakeToBigint,
 	startBot,
 	Transformers,
@@ -154,14 +155,13 @@ function createEventHandlers(client: Client): Partial<EventHandlers> {
 				}
 			}
 
-			const handler = client.handlers.get(commandNameFull);
-			if (!handler) return;
+			const handle = client.handlers.get(commandNameFull);
+			if (!handle) return;
 
-			try {
-				handler([client, bot], interaction);
-			} catch (exception) {
+			Promise.resolve(handle([client, bot], interaction)).catch((exception) => {
+				Sentry.captureException(exception);
 				console.error(exception);
-			}
+			});
 		},
 	};
 }
