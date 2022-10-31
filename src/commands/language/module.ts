@@ -1,4 +1,4 @@
-import { parse as parseCSV } from 'std/encoding/csv.ts';
+import * as csv from 'std/encoding/csv.ts';
 import game from './commands/game.ts';
 import resources from './commands/resources.ts';
 import word from './commands/word.ts';
@@ -102,7 +102,7 @@ async function loadSentencePairs(): Promise<Map<Language, SentencePair[]>> {
 			const language = <Language> languageName;
 
 			Deno.readTextFile(`${directory}/${file.name}`).then(async (contents) => {
-				const records = <[string, string, string, string][]> await parseCSV(
+				const records = <[string, string, string, string][]> csv.parse(
 					contents,
 					{
 						lazyQuotes: true,
@@ -192,6 +192,6 @@ function resolveToSupportedLanguage(
 	);
 }
 
-export { dictionaryAdaptersByLanguage, getSupportedLanguages, sentencePairsByLanguage, resolveToSupportedLanguage };
+export { dictionaryAdaptersByLanguage, getSupportedLanguages, resolveToSupportedLanguage, sentencePairsByLanguage };
 export type { SupportedLanguage };
 export default commands;
