@@ -1,7 +1,7 @@
 // deno-lint-ignore-file camelcase
 import 'dotenv_load';
 import { Commands } from '../../../../assets/localisations/commands.ts';
-import { getLocalisations, TranslationLanguage } from '../../../../assets/localisations/languages.ts';
+import { getLocalisations } from '../../../../assets/localisations/languages.ts';
 import { createLocalisations, localise } from '../../../../assets/localisations/types.ts';
 import {
 	ApplicationCommandFlags,
@@ -19,6 +19,7 @@ import configuration from '../../../configuration.ts';
 import { deepLApiEndpoints } from '../../../constants.ts';
 import { addParametersToURL, parseArguments } from '../../../utils.ts';
 import { show } from '../../parameters.ts';
+import { resolveToSupportedLanguage } from '../module.ts';
 
 const command: CommandBuilder = {
 	...createLocalisations(Commands.translate),
@@ -40,48 +41,6 @@ const command: CommandBuilder = {
 		required: true,
 	}, show],
 };
-
-interface DeepLSupportedLanguage {
-	language: string;
-	name: TranslationLanguage;
-	supports_formality: boolean;
-}
-
-/** Represents a supported language object sent by DeepL. */
-interface SupportedLanguage {
-	/** The language name */
-	name: TranslationLanguage;
-
-	/** The language code. */
-	code: string;
-
-	/** Whether the formality option is supported for this language. */
-	supportsFormality: boolean;
-}
-
-const deepLSecret = Deno.env.get('DEEPL_SECRET')!;
-
-const supportedLanguages = await getSupportedLanguages();
-
-async function getSupportedLanguages(): Promise<SupportedLanguage[]> {
-	const response = await fetch(
-		addParametersToURL(deepLApiEndpoints.languages, {
-			'auth_key': deepLSecret,
-			'type': 'target',
-		}),
-	);
-	if (!response.ok) return [];
-
-	const results = <DeepLSupportedLanguage[]> await response.json().catch(
-		() => [],
-	);
-
-	return results.map((result) => ({
-		name: result.name,
-		code: result.language,
-		supportsFormality: result.supports_formality,
-	}));
-}
 
 interface DeepLTranslation {
 	detected_source_language: string;
@@ -106,7 +65,7 @@ async function getTranslation(
 
 	const response = await fetch(
 		addParametersToURL(deepLApiEndpoints.translate, {
-			'auth_key': deepLSecret,
+			'auth_key': Deno.env.get('DEEPL_SECRET')!,
 			'text': text,
 			'source_lang': sourceLanguageCodeBase,
 			'target_lang': targetLanguageCode,
@@ -122,16 +81,6 @@ async function getTranslation(
 		detectedSourceLanguage: result.detected_source_language,
 		text: result.text,
 	};
-}
-
-function resolveToSupportedLanguage(
-	languageOrCode: string,
-): SupportedLanguage | undefined {
-	const languageOrCodeLowercase = languageOrCode.toLowerCase();
-	return supportedLanguages.find((language) =>
-		language.code.toLowerCase() === languageOrCodeLowercase ||
-		language.name.toLowerCase() === languageOrCode
-	);
 }
 
 /** Allows the user to translate text from one language to another through the DeepL API. */
@@ -156,7 +105,7 @@ async function translate(
 			: Commands.translate.strings.target;
 
 		const inputLowercase = (<string> focused.value).toLowerCase();
-		const choices = supportedLanguages
+		const choices = client.metadata.supportedTranslationLanguages
 			.map((language) => {
 				return {
 					name: localise(localisations, interaction.locale)(language.name),
@@ -225,8 +174,8 @@ async function translate(
 		);
 	}
 
-	const sourceLanguage = resolveToSupportedLanguage(from);
-	const targetLanguage = resolveToSupportedLanguage(to);
+	const sourceLanguage = resolveToSupportedLanguage(client, from);
+	const targetLanguage = resolveToSupportedLanguage(client, to);
 	if (!sourceLanguage || !targetLanguage) {
 		return void sendInteractionResponse(
 			bot,

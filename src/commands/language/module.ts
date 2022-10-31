@@ -10,6 +10,10 @@ import dictionarDeAntonime from './data/dictionaries/dictionar-de-sinonime.ts';
 import { SentencePair } from './data/sentence.ts';
 import { Language, supportedLanguages } from '../../types.ts';
 import { capitalise } from '../../formatting.ts';
+import { TranslationLanguage } from '../../../assets/localisations/languages.ts';
+import { addParametersToURL } from '../../utils.ts';
+import { deepLApiEndpoints } from '../../constants.ts';
+import { Client } from '../../client.ts';
 
 const commands = [game, resources, translate, word];
 
@@ -139,5 +143,55 @@ async function loadSentencePairs(): Promise<Map<Language, SentencePair[]>> {
 	return result;
 }
 
-export { dictionaryAdaptersByLanguage, sentencePairsByLanguage };
+interface DeepLSupportedLanguage {
+	language: string;
+	name: TranslationLanguage;
+	supports_formality: boolean;
+}
+
+/** Represents a supported language object sent by DeepL. */
+interface SupportedLanguage {
+	/** The language name */
+	name: TranslationLanguage;
+
+	/** The language code. */
+	code: string;
+
+	/** Whether the formality option is supported for this language. */
+	supportsFormality: boolean;
+}
+
+async function getSupportedLanguages(): Promise<SupportedLanguage[]> {
+	const response = await fetch(
+		addParametersToURL(deepLApiEndpoints.languages, {
+			'auth_key': Deno.env.get('DEEPL_SECRET')!,
+			'type': 'target',
+		}),
+	);
+	if (!response.ok) return [];
+
+	const results = <DeepLSupportedLanguage[]> await response.json().catch(
+		() => [],
+	);
+
+	return results.map((result) => ({
+		name: result.name,
+		code: result.language,
+		supportsFormality: result.supports_formality,
+	}));
+}
+
+function resolveToSupportedLanguage(
+	client: Client,
+	languageOrCode: string,
+): SupportedLanguage | undefined {
+	const languageOrCodeLowercase = languageOrCode.toLowerCase();
+	return client.metadata.supportedTranslationLanguages.find((language) =>
+		language.code.toLowerCase() === languageOrCodeLowercase ||
+		language.name.toLowerCase() === languageOrCode
+	);
+}
+
+export { dictionaryAdaptersByLanguage, getSupportedLanguages, sentencePairsByLanguage, resolveToSupportedLanguage };
+export type { SupportedLanguage };
 export default commands;
