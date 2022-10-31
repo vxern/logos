@@ -24,4 +24,11 @@ if (presentKeys.includes(false)) {
 
 Sentry.init({ dsn: Deno.env.get('SENTRY_SECRET'), environment: Deno.env.get('ENVIRONMENT') });
 
-initialiseClient();
+const version = new TextDecoder().decode(
+	await Deno.run({
+		cmd: ['git', 'tag', '--sort=-committerdate', '--list', 'v*'],
+		stdout: 'piped',
+	}).output(),
+).split('\n').at(0);
+
+initialiseClient(version ?? 'Deno');

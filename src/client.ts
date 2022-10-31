@@ -71,14 +71,16 @@ function createCache(): Cache {
 }
 
 type Client = Readonly<{
+	version: string;
 	database: Database;
 	cache: Cache;
 	collectors: Map<Event, Set<Collector<Event>>>;
 	handlers: Map<string, InteractionHandler>;
 }>;
 
-function createClient(): Client {
+function createClient(version: string): Client {
 	return {
+		version,
 		database: createDatabase(),
 		cache: createCache(),
 		collectors: new Map(),
@@ -86,17 +88,14 @@ function createClient(): Client {
 	};
 }
 
-function initialiseClient(): void {
-	const client = createClient();
-
-	const eventHandlers = createEventHandlers(client);
-	const cacheHandlers = createCacheHandlers(client, createTransformers({}));
+function initialiseClient(version: string): void {
+	const client = createClient(version);
 
 	const bot = createBot({
 		token: Deno.env.get('DISCORD_SECRET')!,
 		intents: Intents.Guilds | Intents.GuildMembers | Intents.GuildVoiceStates,
-		events: eventHandlers,
-		transformers: cacheHandlers,
+		events: createEventHandlers(client),
+		transformers: withCaching(client, createTransformers({})),
 	});
 
 	startServices([client, bot]);
@@ -104,27 +103,17 @@ function initialiseClient(): void {
 	return void startBot(bot);
 }
 
-const version = new TextDecoder().decode(
-	await Deno.run({
-		cmd: ['git', 'tag', '--sort=-committerdate', '--list', 'v*'],
-		stdout: 'piped',
-	}).output(),
-).split('\n').at(0);
-
 function createEventHandlers(client: Client): Partial<EventHandlers> {
 	return {
-		ready: (bot, payload) => {
-			if (!version) return;
-
+		ready: (bot, payload) =>
 			editShardStatus(bot, payload.shardId, {
 				activities: [{
-					name: version,
+					name: client.version,
 					type: ActivityTypes.Streaming,
 					createdAt: Date.now(),
 				}],
 				status: 'online',
-			});
-		},
+			}),
 		guildCreate: (bot, guild) => {
 			fetchMembers(bot, guild.id, { limit: 0, query: '' });
 
@@ -177,7 +166,7 @@ function createEventHandlers(client: Client): Partial<EventHandlers> {
 	};
 }
 
-function createCacheHandlers(
+function withCaching(
 	client: Client,
 	transformers: Transformers,
 ): Transformers {
