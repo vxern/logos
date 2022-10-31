@@ -1,5 +1,4 @@
 // deno-lint-ignore-file camelcase
-import 'dotenv_load';
 import { Commands } from '../../../../assets/localisations/commands.ts';
 import { getLocalisations } from '../../../../assets/localisations/languages.ts';
 import { createLocalisations, localise } from '../../../../assets/localisations/types.ts';
