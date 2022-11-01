@@ -1,12 +1,13 @@
-import { faunadb, Sentry } from '../../deps.ts';
+import { faunadb, Sentry, User as DiscordUser } from '../../deps.ts';
 import { Article } from './structs/articles/article.ts';
 import { ArticleChange } from './structs/articles/article-change.ts';
 import { User } from './structs/users/user.ts';
-import { Document } from './structs/document.ts';
+import { Document, Reference } from './structs/document.ts';
 import { Praise } from './structs/users/praise.ts';
 import { Warning } from './structs/users/warning.ts';
 import { Language } from '../types.ts';
 import { Client } from '../client.ts';
+import { diagnosticMentionUser } from '../utils.ts';
 
 /**
  * 'Unpacks' a nested type from an array, function or promise.
@@ -153,5 +154,17 @@ function convertToMilliseconds(number: number): number {
 	return number / 1000;
 }
 
+function mentionUser(user: DiscordUser | undefined, id: bigint): string {
+	return !user ? `an unknown user (ID ${id})` : diagnosticMentionUser(user, true);
+}
+
+function getUserMentionByReference(client: Client, reference: Reference): string {
+	const userDocument = client.database.users.get(reference.value.id);
+	if (!userDocument) return `an unknown, uncached user`;
+	const id = BigInt(userDocument.data.account.id);
+	const user = client.cache.users.get(id);
+	return mentionUser(user, id);
+}
+
 export type { Database };
-export { createDatabase, dispatchQuery };
+export { createDatabase, dispatchQuery, getUserMentionByReference, mentionUser };
