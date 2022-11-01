@@ -2,6 +2,8 @@
 export * from 'discordeno';
 export { send as sendShardMessage } from 'discordeno';
 
+export { Log as Logger } from 'tl_log';
+
 /** Database connection. */
 export * as faunadb from 'faunadb';
 

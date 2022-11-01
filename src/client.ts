@@ -14,6 +14,7 @@ import {
 	Interaction,
 	InteractionResponseTypes,
 	InteractionTypes,
+	Logger,
 	Member,
 	Message,
 	sendInteractionResponse,
@@ -77,6 +78,7 @@ type Client = Readonly<{
 		version: string;
 		supportedTranslationLanguages: SupportedLanguage[];
 	};
+	log: Logger;
 	database: Database;
 	cache: Cache;
 	collectors: Map<Event, Set<Collector<Event>>>;
@@ -86,6 +88,7 @@ type Client = Readonly<{
 function createClient(metadata: Client['metadata']): Client {
 	return {
 		metadata,
+		log: createLogger(),
 		database: createDatabase(),
 		cache: createCache(),
 		collectors: new Map(),
@@ -106,6 +109,13 @@ function initialiseClient(metadata: Client['metadata']): void {
 	startServices([client, bot]);
 
 	return void startBot(bot);
+}
+
+function createLogger(): Logger {
+	return new Logger({
+		minLogLevel: Deno.env.get('ENVIRONMENT') === 'development' ? 'debug' : 'info',
+		levelIndicator: 'full',
+	});
 }
 
 function createEventHandlers(client: Client): Partial<EventHandlers> {
@@ -164,7 +174,7 @@ function createEventHandlers(client: Client): Partial<EventHandlers> {
 
 			Promise.resolve(handle([client, bot], interaction)).catch((exception) => {
 				Sentry.captureException(exception);
-				console.error(exception);
+				client.log.error(exception);
 			});
 		},
 	};
