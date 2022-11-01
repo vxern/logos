@@ -6,7 +6,7 @@ import { getSupportedLanguages } from './src/commands/language/module.ts';
 const envFileName = '.env';
 const envTemplateFileName = `${envFileName}.example`;
 
-async function parseDotEnvFile(fileName: string, template = false): Promise<dotenv.DotenvConfig> {
+async function readDotEnvFile(fileName: string, template = false): Promise<dotenv.DotenvConfig | undefined> {
 	const kind = template ? 'environment template' : 'environment';
 
 	let contents: string;
@@ -15,9 +15,12 @@ async function parseDotEnvFile(fileName: string, template = false): Promise<dote
 	} catch (error) {
 		if (error instanceof Deno.errors.NotFound) {
 			console.error(`Missing ${kind} file.`);
-		} else {
-			console.error(`Unknown error while reading ${kind} file: ${error}`);
+			if (!template) {
+				return undefined;
+			}
 		}
+
+		console.error(`Unknown error while reading ${kind} file: ${error}`);
 
 		Deno.exit(1);
 	}
@@ -30,11 +33,11 @@ async function parseDotEnvFile(fileName: string, template = false): Promise<dote
 	}
 }
 
-async function readDotEnvFile(): Promise<void> {
-	const env = await parseDotEnvFile(envFileName);
+async function readEnvironment(): Promise<void> {
+	const requiredKeys = Object.keys((await readDotEnvFile(envTemplateFileName, true))!);
 
-	const requiredKeys = Object.keys(await parseDotEnvFile(envTemplateFileName));
-	const presentKeys = Object.keys(env);
+	const env = await readDotEnvFile(envFileName);
+	const presentKeys = Object.keys(env ? env : Deno.env.toObject());
 
 	const missingKeys = requiredKeys.filter((requiredKey) => !presentKeys.includes(requiredKey));
 	if (missingKeys.length !== 0) {
@@ -42,12 +45,14 @@ async function readDotEnvFile(): Promise<void> {
 		Deno.exit(1);
 	}
 
+	if (!env) return;
+
 	for (const [key, value] of <[string, string][]> Object.entries(env)) {
 		Deno.env.set(key, value);
 	}
 }
 
-await readDotEnvFile();
+await readEnvironment();
 
 async function readVersion(): Promise<string> {
 	const version = new TextDecoder().decode(
