@@ -1,6 +1,6 @@
 import { faunadb } from '../../../deps.ts';
 import { Client } from '../../client.ts';
-import { dispatchQuery } from '../database.ts';
+import { dispatchQuery, getUserMentionByReference } from '../database.ts';
 import { Document, Reference } from '../structs/document.ts';
 import { Warning } from '../structs/users/warning.ts';
 
@@ -9,43 +9,47 @@ const $ = faunadb.query;
 /**
  * Fetches warnings from the database.
  *
- * @param user - The user to use for indexing the database.
- * @returns An array of article change documents or undefined.
+ * @param reference - Reference to the user for whom to get the warnings.
+ * @returns An array of warning documents or undefined if not able to fetch.
  */
 async function fetchWarnings(
 	client: Client,
-	user: Reference,
+	reference: Reference,
 ): Promise<Document<Warning>[] | undefined> {
 	const documents = await dispatchQuery<Warning[]>(
 		client,
 		$.Map(
-			$.Paginate($.Match($.FaunaIndex('GetWarningsBySubject'), user)),
+			$.Paginate($.Match($.FaunaIndex('GetWarningsBySubject'), reference)),
 			$.Lambda('warning', $.Get($.Var('warning'))),
 		),
 	);
 
+	const userMention = getUserMentionByReference(client, reference);
+
 	if (!documents) {
-		client.log.error(`Failed to fetch warnings by user.`);
+		client.log.error(`Failed to fetch warnings for ${userMention}. Reference: ${reference}`);
 		return undefined;
 	}
 
-	client.database.warningsBySubject.set(user.value.id, documents);
+	client.database.warningsBySubject.set(reference.value.id, documents);
+
+	client.log.debug(`Fetched ${documents.length} warning(s) for ${userMention}.`);
 
 	return documents;
 }
 
 /**
  * Attempts to get user warnings from cache, and if the warnings do not exist,
- * attempts to fetch them from the database.
+ * attempts to fetch them from the database directly.
  *
- * @param user - The reference to the user for indexing the database.
+ * @param reference - The reference to the user for indexing the database.
  * @returns The warnings.
  */
 async function getWarnings(
 	client: Client,
-	user: Reference,
+	reference: Reference,
 ): Promise<Document<Warning>[] | undefined> {
-	return client.database.warningsBySubject.get(user.value.id) ?? await fetchWarnings(client, user);
+	return client.database.warningsBySubject.get(reference.value.id) ?? await fetchWarnings(client, reference);
 }
 
 /**
@@ -63,8 +67,10 @@ async function createWarning(
 		$.Create($.Collection('Warnings'), { data: warning }),
 	);
 
+	const userMention = getUserMentionByReference(client, warning.subject);
+
 	if (!document) {
-		client.log.error(`Failed to create warning for user ${warning.subject}.`);
+		client.log.error(`Failed to create warning for ${userMention}. Warning:\n${warning}`);
 		return undefined;
 	}
 
@@ -74,7 +80,7 @@ async function createWarning(
 
 	client.database.warningsBySubject.get(warning.subject.value.id)!.push(document);
 
-	client.log.info(`Created warning ${document.ref}.`);
+	client.log.debug(`Created warning for ${userMention}. Warning:\n${document}`);
 
 	return document;
 }
@@ -94,8 +100,10 @@ async function deleteWarning(
 		$.Delete(warning.ref),
 	);
 
+	const userMention = getUserMentionByReference(client, warning.data.subject);
+
 	if (!document) {
-		client.log.error(`Failed to delete warning given to user ${warning.data.subject}.`);
+		client.log.error(`Failed to delete warning for ${userMention}. Warning:\n${warning}`);
 		return undefined;
 	}
 
@@ -108,7 +116,7 @@ async function deleteWarning(
 		1,
 	);
 
-	client.log.info(`Deleted warning ${document.ref}.`);
+	client.log.debug(`Deleted warning for ${userMention}. Warning document:\n${document}`);
 
 	return document;
 }
