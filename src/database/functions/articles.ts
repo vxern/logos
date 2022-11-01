@@ -58,7 +58,7 @@ async function fetchArticles<
 	);
 
 	if (!documents) {
-		client.log.error(`Failed to fetch articles for ${parameter} ${value}.`);
+		client.log.error(`Failed to fetch articles whose ${parameter} matches the query '${value}'.`);
 		return undefined;
 	}
 
@@ -81,7 +81,7 @@ async function fetchArticles<
 
 	client.database.articlesFetched = true;
 
-	client.log.info(`Fetched ${documents.length} articles for ${parameter} ${value}.`);
+	client.log.debug(`Fetched ${documents.length} article(s) whose ${parameter} matches the query '${value}'.`);
 
 	return documents;
 }
@@ -130,14 +130,13 @@ async function createArticle(
 	);
 
 	if (!document) {
-		client.log.error(`Failed to create article ${article.content.title}.`);
+		client.log.error(`Failed to create article '${article.content.title}'.`);
 		return undefined;
 	}
 
 	if (!client.database.articlesByLanguage.has(article.language)) {
 		await fetchArticles(client, 'language', article.language);
 	}
-
 	client.database.articlesByLanguage.get(article.language)!.set(
 		document.ref.value.id,
 		document,
@@ -146,13 +145,12 @@ async function createArticle(
 	if (!client.database.articlesByAuthor.has(article.author.value.id)) {
 		await fetchArticles(client, 'author', article.author);
 	}
-
 	client.database.articlesByAuthor.get(article.author.value.id)!.set(
 		document.ref.value.id,
 		document,
 	);
 
-	client.log.info(`Created article ${article.content.title}.`);
+	client.log.debug(`Created article '${article.content.title}'.`);
 
 	return document;
 }
@@ -173,7 +171,7 @@ async function changeArticle(
 	);
 
 	if (!document) {
-		client.log.error(`Failed to create article change.`);
+		client.log.error(`Failed to create article change. Article change:\n${change}`);
 		return undefined;
 	}
 
@@ -193,7 +191,6 @@ async function changeArticle(
 		.push(
 			document,
 		);
-
 	if (!client.database.articleChangesByAuthor.has(document.data.author.value.id)) {
 		await fetchArticleChanges(
 			client,
@@ -201,10 +198,11 @@ async function changeArticle(
 			document.data.author,
 		);
 	}
-
 	client.database.articleChangesByAuthor.get(document.data.author.value.id)!.push(
 		document,
 	);
+
+	client.log.debug(`Created article change to article '${change.content.title}'.`);
 
 	return document;
 }
@@ -235,8 +233,12 @@ async function fetchArticleChanges<
 		),
 	);
 
+	const parameterPrinted = parameter === 'articleReference' ? 'article reference' : parameter;
+
 	if (!documents) {
-		client.log.error(`Failed to fetch article changes by ${parameterCapitalised}.`);
+		client.log.error(
+			`Failed to fetch article changes whose ${parameterPrinted} matches the query '${value}'.`,
+		);
 		return undefined;
 	}
 
@@ -247,6 +249,10 @@ async function fetchArticleChanges<
 	cache.set(
 		typeof value === 'object' ? (<Reference> value).value.id : value,
 		documents,
+	);
+
+	client.log.debug(
+		`Fetched ${documents.length} article change(s) whose ${parameterPrinted} matches the query '${value}'.`,
 	);
 
 	return documents;
