@@ -129,7 +129,7 @@ async function dispatchQuery<
 	try {
 		result = await client.database.client.query<Record<string, unknown>>(expression);
 	} catch (exception) {
-		if (exception.code === 'NotFound') return undefined;
+		if (exception.name === 'NotFound') return undefined;
 
 		Sentry.captureException(exception);
 		client.log.error(`${exception.message} ~ ${exception.description}`);
