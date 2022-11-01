@@ -12,7 +12,7 @@ import {
 import { Client } from '../../../client.ts';
 import { CommandBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
-import { fromHex, parseArguments } from '../../../utils.ts';
+import { diagnosticMentionUser, fromHex, parseArguments } from '../../../utils.ts';
 import { show } from '../../parameters.ts';
 import { DictionaryEntry, toFields } from '../data/dictionary.ts';
 import { dictionaryAdaptersByLanguage } from '../module.ts';
@@ -78,6 +78,11 @@ async function word(
 	);
 
 	let entry: DictionaryEntry = { headword: word };
+
+	client.log.info(
+		`Looking up the word '${word}' from ${dictionaries.length} dictionaries ` +
+			`as requested by ${diagnosticMentionUser(interaction.user, true)} on ${guild.name}...`,
+	);
 
 	const promises = [];
 	for (const dictionary of dictionaries) {

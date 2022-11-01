@@ -16,7 +16,7 @@ import { Client } from '../../../client.ts';
 import { CommandBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
 import { deepLApiEndpoints } from '../../../constants.ts';
-import { addParametersToURL, parseArguments } from '../../../utils.ts';
+import { addParametersToURL, diagnosticMentionUser, parseArguments } from '../../../utils.ts';
 import { show } from '../../parameters.ts';
 import { resolveToSupportedLanguage } from '../module.ts';
 
@@ -218,11 +218,12 @@ async function translate(
 		},
 	);
 
-	const translation = await getTranslation(
-		sourceLanguage.code,
-		targetLanguage.code,
-		text,
+	client.log.info(
+		`Translating a text of length ${text.length} from ${sourceLanguage.name} to ${targetLanguage.name} ` +
+			`as requested by ${diagnosticMentionUser(interaction.user, true)} on ${guild.name}...`,
 	);
+
+	const translation = await getTranslation(sourceLanguage.code, targetLanguage.code, text);
 	if (!translation) {
 		return void editOriginalInteractionResponse(
 			bot,
@@ -239,17 +240,11 @@ async function translate(
 		);
 	}
 
-	// Ensures that an empty translation string doesn't result in embed failure.
+	// Ensures that an empty translation string does not result in embed failure.
 	const translatedText = translation.text.trim().length !== 0 ? translation.text : '⠀';
 
-	const sourceLanguageName = localise(
-		getLocalisations(sourceLanguage.name),
-		interaction.locale,
-	);
-	const targetLanguageName = localise(
-		getLocalisations(targetLanguage.name),
-		interaction.locale,
-	);
+	const sourceLanguageName = localise(getLocalisations(sourceLanguage.name), interaction.locale);
+	const targetLanguageName = localise(getLocalisations(targetLanguage.name), interaction.locale);
 
 	return void editOriginalInteractionResponse(
 		bot,
