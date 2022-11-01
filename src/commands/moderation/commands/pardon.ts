@@ -85,14 +85,10 @@ async function pardonUser(
 		);
 	};
 
-	const subject = await getOrCreateUser(
-		client.database,
-		'id',
-		member.id.toString(),
-	);
+	const subject = await getOrCreateUser(client, 'id', member.id.toString());
 	if (!subject) return displayErrorOrEmptyChoices();
 
-	const warnings = await getWarnings(client.database, subject.ref);
+	const warnings = await getWarnings(client, subject.ref);
 	if (!warnings) return displayErrorOrEmptyChoices();
 
 	const relevantWarnings = getRelevantWarnings(warnings);
@@ -140,7 +136,7 @@ async function pardonUser(
 		);
 	}
 
-	const deletedWarning = await deleteWarning(client.database, warningToRemove);
+	const deletedWarning = await deleteWarning(client, warningToRemove);
 	if (!deletedWarning) {
 		return displayUnwarnError(
 			localise(Commands.pardon.strings.failed, interaction.locale),
@@ -150,14 +146,7 @@ async function pardonUser(
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (!guild) return;
 
-	log(
-		[client, bot],
-		guild,
-		'memberWarnRemove',
-		member,
-		deletedWarning.data,
-		interaction.user,
-	);
+	log([client, bot], guild, 'memberWarnRemove', member, deletedWarning.data, interaction.user);
 
 	sendInteractionResponse(
 		bot,

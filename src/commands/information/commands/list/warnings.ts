@@ -51,14 +51,10 @@ async function listWarnings(
 		);
 	};
 
-	const subject = await getOrCreateUser(
-		client.database,
-		'id',
-		member.id.toString(),
-	);
+	const subject = await getOrCreateUser(client, 'id', member.id.toString());
 	if (!subject) return displayError();
 
-	const warnings = await getWarnings(client.database, subject.ref);
+	const warnings = await getWarnings(client, subject.ref);
 	if (!warnings) return displayError();
 
 	const pages = chunk(

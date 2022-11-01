@@ -1,6 +1,7 @@
 import { faunadb } from '../../../deps.ts';
+import { Client } from '../../client.ts';
 import { capitalise } from '../../formatting.ts';
-import { Database, dispatchQuery } from '../database.ts';
+import { dispatchQuery } from '../database.ts';
 import { Document, Reference } from '../structs/document.ts';
 import { Praise } from '../structs/users/praise.ts';
 import { Warning } from '../structs/users/warning.ts';
@@ -27,7 +28,7 @@ async function fetchPraises<
 	K extends keyof PraiseIndexParameters,
 	V extends PraiseIndexParameters[K],
 >(
-	database: Database,
+	client: Client,
 	parameter: K,
 	value: V,
 ): Promise<Document<Praise>[] | undefined> {
@@ -35,7 +36,7 @@ async function fetchPraises<
 	const index = `GetPraisesBy${parameterCapitalised}`;
 
 	const documents = await dispatchQuery<Praise[]>(
-		database,
+		client,
 		$.Map(
 			$.Paginate($.Match($.FaunaIndex(index), value)),
 			$.Lambda('praise', $.Get($.Var('praise'))),
@@ -43,18 +44,13 @@ async function fetchPraises<
 	);
 
 	if (!documents) {
-		console.error(
-			`Failed to fetch praises by ${parameterCapitalised}.`,
-		);
+		client.log.error(`Failed to fetch praises by ${parameterCapitalised}.`);
 		return undefined;
 	}
 
-	const cache = parameter === 'author' ? database.praisesByAuthor : database.praisesBySubject;
+	const cache = parameter === 'author' ? client.database.praisesByAuthor : client.database.praisesBySubject;
 
-	cache.set(
-		value.value.id,
-		documents,
-	);
+	cache.set(value.value.id, documents);
 
 	return documents;
 }
@@ -71,14 +67,13 @@ async function getPraises<
 	K extends keyof PraiseIndexParameters,
 	V extends PraiseIndexParameters[K],
 >(
-	database: Database,
+	client: Client,
 	parameter: K,
 	value: V,
 ): Promise<Document<Praise>[] | undefined> {
-	const cache = parameter === 'author' ? database.praisesByAuthor : database.praisesBySubject;
+	const cache = parameter === 'author' ? client.database.praisesByAuthor : client.database.praisesBySubject;
 
-	return cache.get(value.value.id) ??
-		await fetchPraises(database, parameter, value);
+	return cache.get(value.value.id) ?? await fetchPraises(client, parameter, value);
 }
 
 /**
@@ -88,32 +83,32 @@ async function getPraises<
  * @returns The created praise document.
  */
 async function createPraise(
-	database: Database,
+	client: Client,
 	praise: Praise,
 ): Promise<Document<Praise> | undefined> {
 	const document = await dispatchQuery<Warning>(
-		database,
+		client,
 		$.Create($.Collection('Praises'), { data: praise }),
 	);
 
 	if (!document) {
-		console.error(`Failed to create praises for user ${praise.subject}.`);
+		client.log.error(`Failed to create praises for user ${praise.subject}.`);
 		return undefined;
 	}
 
-	if (!database.praisesByAuthor.has(praise.author.value.id)) {
-		await fetchPraises(database, 'author', praise.author);
+	if (!client.database.praisesByAuthor.has(praise.author.value.id)) {
+		await fetchPraises(client, 'author', praise.author);
 	}
 
-	database.praisesByAuthor.get(praise.author.value.id)!.push(document);
+	client.database.praisesByAuthor.get(praise.author.value.id)!.push(document);
 
-	if (!database.praisesBySubject.has(praise.subject.value.id)) {
-		await fetchPraises(database, 'subject', praise.subject);
+	if (!client.database.praisesBySubject.has(praise.subject.value.id)) {
+		await fetchPraises(client, 'subject', praise.subject);
 	}
 
-	database.praisesBySubject.get(praise.subject.value.id)!.push(document);
+	client.database.praisesBySubject.get(praise.subject.value.id)!.push(document);
 
-	console.log(`Created praise ${document.ref}.`);
+	client.log.info(`Created praise ${document.ref}.`);
 
 	return document;
 }

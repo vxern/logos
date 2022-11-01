@@ -6,6 +6,7 @@ import { Document } from './structs/document.ts';
 import { Praise } from './structs/users/praise.ts';
 import { Warning } from './structs/users/warning.ts';
 import { Language } from '../types.ts';
+import { Client } from '../client.ts';
 
 /**
  * 'Unpacks' a nested type from an array, function or promise.
@@ -120,17 +121,17 @@ async function dispatchQuery<
 	B = Unpacked<T>,
 	R = T extends Array<B> ? Document<B>[] : Document<T>,
 >(
-	database: Database,
+	client: Client,
 	expression: faunadb.Expr,
 ): Promise<R | undefined> {
 	let result;
 	try {
-		result = await database.client.query<Record<string, unknown>>(expression);
+		result = await client.database.client.query<Record<string, unknown>>(expression);
 	} catch (exception) {
 		if (exception.code === 'NotFound') return undefined;
 
 		Sentry.captureException(exception);
-		console.error(`${exception.message} ~ ${exception.description}`);
+		client.log.error(`${exception.message} ~ ${exception.description}`);
 
 		return undefined;
 	}

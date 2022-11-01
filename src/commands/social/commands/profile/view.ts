@@ -66,24 +66,16 @@ async function viewProfile(
 		);
 	}
 
-	const subject = await getOrCreateUser(
-		client.database,
-		'id',
-		member.id.toString(),
-	);
+	const subject = await getOrCreateUser(client, 'id', member.id.toString());
 	if (!subject) return showProfileViewFailure();
 
-	const praisesReceived = await getPraises(
-		client.database,
-		'subject',
-		subject.ref,
-	);
+	const praisesReceived = await getPraises(client, 'subject', subject.ref);
 	if (!praisesReceived) return showProfileViewFailure();
 
-	const praisesSent = await getPraises(client.database, 'author', subject.ref);
+	const praisesSent = await getPraises(client, 'author', subject.ref);
 	if (!praisesSent) return showProfileViewFailure();
 
-	const warningsReceived = await getWarnings(client.database, subject.ref);
+	const warningsReceived = await getWarnings(client, subject.ref);
 	if (!warningsReceived) return showProfileViewFailure();
 
 	const locale = !show ? interaction.locale : defaultLanguage;
