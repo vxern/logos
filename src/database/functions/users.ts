@@ -1,6 +1,6 @@
 import { faunadb } from '../../../deps.ts';
 import { Client } from '../../client.ts';
-import { dispatchQuery } from '../database.ts';
+import { dispatchQuery, getUserMentionByReference, mentionUser } from '../database.ts';
 import { Document, Reference } from '../structs/document.ts';
 import { User } from '../structs/users/user.ts';
 
@@ -38,11 +38,15 @@ async function fetchUser<
 	);
 
 	if (!document) {
-		client.log.error(`Failed to fetch user with ${`${parameter} ${value}`} from the database.`);
+		const parameterPrinted = parameter === 'id' ? 'ID' : 'document reference';
+		client.log.debug(`Couldn't find a user in the database whose ${parameterPrinted} matches '${value}'.`);
 		return undefined;
 	}
 
 	client.database.users.set(document.ref.value.id, document);
+
+	const userMention = getUserMentionByReference(client, document.ref);
+	client.log.debug(`Fetched document of ${userMention}.`);
 
 	return document;
 }
@@ -62,12 +66,18 @@ async function createUser(
 		$.Create($.Collection('Users'), { data: user }),
 	);
 
+	const id = BigInt(user.account.id);
+	const user_ = client.cache.users.get(id);
+	const userMention = mentionUser(user_, id);
+
 	if (!document) {
-		client.log.error(`Failed to create a document for user ${user.account.id} in the database.`);
+		client.log.error(`Failed to create a user document in the database for ${userMention}.`);
 		return undefined;
 	}
 
 	client.database.users.set(document.ref.value.id, document);
+
+	client.log.debug(`Created document for ${userMention}.`);
 
 	return document;
 }
