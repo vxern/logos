@@ -1,7 +1,7 @@
 import { faunadb } from '../../../deps.ts';
 import { Client } from '../../client.ts';
 import { capitalise } from '../../formatting.ts';
-import { dispatchQuery } from '../database.ts';
+import { dispatchQuery, getUserMentionByReference } from '../database.ts';
 import { Document, Reference } from '../structs/document.ts';
 import { Praise } from '../structs/users/praise.ts';
 import { Warning } from '../structs/users/warning.ts';
@@ -43,14 +43,20 @@ async function fetchPraises<
 		),
 	);
 
+	const userMention = getUserMentionByReference(client, value);
+
+	const action = parameter === 'author' ? 'given' : 'received';
+
 	if (!documents) {
-		client.log.error(`Failed to fetch praises by ${parameterCapitalised}.`);
+		client.log.error(`Failed to fetch praises ${action} by ${userMention}.`);
 		return undefined;
 	}
 
 	const cache = parameter === 'author' ? client.database.praisesByAuthor : client.database.praisesBySubject;
 
 	cache.set(value.value.id, documents);
+
+	client.log.debug(`Fetched ${documents.length} praise(s) ${action} by ${userMention}.`);
 
 	return documents;
 }
@@ -91,24 +97,25 @@ async function createPraise(
 		$.Create($.Collection('Praises'), { data: praise }),
 	);
 
+	const authorMention = getUserMentionByReference(client, praise.author);
+	const subjectMention = getUserMentionByReference(client, praise.subject);
+
 	if (!document) {
-		client.log.error(`Failed to create praises for user ${praise.subject}.`);
+		client.log.error(`Failed to create praise given by ${authorMention} to ${subjectMention}.`);
 		return undefined;
 	}
 
 	if (!client.database.praisesByAuthor.has(praise.author.value.id)) {
 		await fetchPraises(client, 'author', praise.author);
 	}
-
 	client.database.praisesByAuthor.get(praise.author.value.id)!.push(document);
 
 	if (!client.database.praisesBySubject.has(praise.subject.value.id)) {
 		await fetchPraises(client, 'subject', praise.subject);
 	}
-
 	client.database.praisesBySubject.get(praise.subject.value.id)!.push(document);
 
-	client.log.info(`Created praise ${document.ref}.`);
+	client.log.debug(`Created praise document given by ${authorMention} to ${subjectMention}.`);
 
 	return document;
 }
