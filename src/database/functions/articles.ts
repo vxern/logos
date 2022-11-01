@@ -1,7 +1,8 @@
 import { faunadb } from '../../../deps.ts';
+import { Client } from '../../client.ts';
 import { capitalise } from '../../formatting.ts';
 import { Language } from '../../types.ts';
-import { Database, dispatchQuery } from '../database.ts';
+import { dispatchQuery } from '../database.ts';
 import { ArticleChange } from '../structs/articles/article-change.ts';
 import { Article, getMostRecentArticleContent } from '../structs/articles/article.ts';
 import { Document, Reference } from '../structs/document.ts';
@@ -41,7 +42,7 @@ async function fetchArticles<
 	K extends keyof ArticleIndexParameters,
 	V extends ArticleIndexParameters[K],
 >(
-	database: Database,
+	client: Client,
 	parameter: K,
 	value: V,
 ): Promise<Document<Article>[] | undefined> {
@@ -49,7 +50,7 @@ async function fetchArticles<
 	const index = `GetArticlesBy${parameterCapitalised}`;
 
 	const documents = await dispatchQuery<Article[]>(
-		database,
+		client,
 		$.Map(
 			$.Paginate($.Match($.FaunaIndex(index), value)),
 			$.Lambda('article', $.Get($.Var('article'))),
@@ -57,13 +58,13 @@ async function fetchArticles<
 	);
 
 	if (!documents) {
-		console.error(`Failed to fetch articles for ${parameter} ${value}.`);
+		client.log.error(`Failed to fetch articles whose ${parameter} matches the query '${value}'.`);
 		return undefined;
 	}
 
 	const argument = <string> (typeof value === 'object' ? (<Reference> value).value.id : value);
 
-	const cache = parameter === 'language' ? database.articlesByLanguage : database.articlesByAuthor;
+	const cache = parameter === 'language' ? client.database.articlesByLanguage : client.database.articlesByAuthor;
 
 	if (!cache.has(argument)) {
 		cache.set(argument, new Map());
@@ -78,11 +79,9 @@ async function fetchArticles<
 		);
 	}
 
-	database.articlesFetched = true;
+	client.database.articlesFetched = true;
 
-	console.log(
-		`Fetched ${documents.length} articles for ${parameter} ${value}.`,
-	);
+	client.log.debug(`Fetched ${documents.length} article(s) whose ${parameter} matches the query '${value}'.`);
 
 	return documents;
 }
@@ -99,20 +98,20 @@ async function getArticles<
 	K extends keyof ArticleIndexParameters,
 	V extends ArticleIndexParameters[K],
 >(
-	database: Database,
+	client: Client,
 	parameter: K,
 	value: V,
 ): Promise<Document<Article>[] | undefined> {
-	if (parameter === 'language' && !database.articlesFetched) {
-		return await fetchArticles(database, parameter, value);
+	if (parameter === 'language' && !client.database.articlesFetched) {
+		return await fetchArticles(client, parameter, value);
 	}
 
 	const argument = <string> (typeof value === 'object' ? (<Reference> value).value.id : value);
 
-	const cache = parameter === 'language' ? database.articlesByLanguage : database.articlesByAuthor;
+	const cache = parameter === 'language' ? client.database.articlesByLanguage : client.database.articlesByAuthor;
 
 	return (!cache.has(argument) ? undefined : Array.from(cache.get(argument)!.values())) ??
-		await fetchArticles(database, parameter, value);
+		await fetchArticles(client, parameter, value);
 }
 
 /**
@@ -122,38 +121,36 @@ async function getArticles<
  * @returns The created article document.
  */
 async function createArticle(
-	database: Database,
+	client: Client,
 	article: Article,
 ): Promise<Document<Article> | undefined> {
 	const document = await dispatchQuery<Article>(
-		database,
+		client,
 		$.Create($.Collection('Articles'), { data: article }),
 	);
 
 	if (!document) {
-		console.error(`Failed to create article ${article.content.title}.`);
+		client.log.error(`Failed to create article '${article.content.title}'.`);
 		return undefined;
 	}
 
-	if (!database.articlesByLanguage.has(article.language)) {
-		await fetchArticles(database, 'language', article.language);
+	if (!client.database.articlesByLanguage.has(article.language)) {
+		await fetchArticles(client, 'language', article.language);
 	}
-
-	database.articlesByLanguage.get(article.language)!.set(
+	client.database.articlesByLanguage.get(article.language)!.set(
 		document.ref.value.id,
 		document,
 	);
 
-	if (!database.articlesByAuthor.has(article.author.value.id)) {
-		await fetchArticles(database, 'author', article.author);
+	if (!client.database.articlesByAuthor.has(article.author.value.id)) {
+		await fetchArticles(client, 'author', article.author);
 	}
-
-	database.articlesByAuthor.get(article.author.value.id)!.set(
+	client.database.articlesByAuthor.get(article.author.value.id)!.set(
 		document.ref.value.id,
 		document,
 	);
 
-	console.log(`Created article ${article.content.title}.`);
+	client.log.debug(`Created article '${article.content.title}'.`);
 
 	return document;
 }
@@ -165,47 +162,47 @@ async function createArticle(
  * @returns The change made to the article or undefined.
  */
 async function changeArticle(
-	database: Database,
+	client: Client,
 	change: ArticleChange,
 ): Promise<Document<ArticleChange> | undefined> {
 	const document = await dispatchQuery<ArticleChange>(
-		database,
+		client,
 		$.Create($.Collection('ArticleChanges'), { data: change }),
 	);
 
 	if (!document) {
-		console.error(`Failed to create article change.`);
+		client.log.error('Failed to create article change.');
 		return undefined;
 	}
 
 	if (
-		!database.articleChangesByArticleReference.has(
+		!client.database.articleChangesByArticleReference.has(
 			document.data.article.value.id,
 		)
 	) {
 		await fetchArticleChanges(
-			database,
+			client,
 			'articleReference',
 			document.data.article,
 		);
 	}
 
-	database.articleChangesByArticleReference.get(document.data.article.value.id)!
+	client.database.articleChangesByArticleReference.get(document.data.article.value.id)!
 		.push(
 			document,
 		);
-
-	if (!database.articleChangesByAuthor.has(document.data.author.value.id)) {
+	if (!client.database.articleChangesByAuthor.has(document.data.author.value.id)) {
 		await fetchArticleChanges(
-			database,
+			client,
 			'author',
 			document.data.author,
 		);
 	}
-
-	database.articleChangesByAuthor.get(document.data.author.value.id)!.push(
+	client.database.articleChangesByAuthor.get(document.data.author.value.id)!.push(
 		document,
 	);
+
+	client.log.debug(`Created article change to article '${change.content.title}'.`);
 
 	return document;
 }
@@ -221,7 +218,7 @@ async function fetchArticleChanges<
 	K extends keyof ArticleChangeIndexParameters,
 	V extends ArticleChangeIndexParameters[K],
 >(
-	database: Database,
+	client: Client,
 	parameter: K,
 	value: V,
 ): Promise<Document<ArticleChange>[] | undefined> {
@@ -229,27 +226,33 @@ async function fetchArticleChanges<
 	const index = `GetArticleChangesBy${parameterCapitalised}`;
 
 	const documents = await dispatchQuery<ArticleChange[]>(
-		database,
+		client,
 		$.Map(
 			$.Paginate($.Match($.FaunaIndex(index), value)),
 			$.Lambda('articleChange', $.Get($.Var('articleChange'))),
 		),
 	);
 
+	const parameterPrinted = parameter === 'articleReference' ? 'article reference' : parameter;
+
 	if (!documents) {
-		console.error(
-			`Failed to fetch article changes by ${parameterCapitalised}.`,
+		client.log.error(
+			`Failed to fetch article changes whose ${parameterPrinted} matches the query '${value}'.`,
 		);
 		return undefined;
 	}
 
 	const cache = parameter === 'articleReference'
-		? database.articleChangesByArticleReference
-		: database.articleChangesByAuthor;
+		? client.database.articleChangesByArticleReference
+		: client.database.articleChangesByAuthor;
 
 	cache.set(
 		typeof value === 'object' ? (<Reference> value).value.id : value,
 		documents,
+	);
+
+	client.log.debug(
+		`Fetched ${documents.length} article change(s) whose ${parameterPrinted} matches the query '${value}'.`,
 	);
 
 	return documents;
@@ -267,46 +270,35 @@ async function getArticleChanges<
 	K extends keyof ArticleChangeIndexParameters,
 	V extends ArticleChangeIndexParameters[K],
 >(
-	database: Database,
+	client: Client,
 	parameter: K,
 	value: V,
 ): Promise<Document<ArticleChange>[] | undefined> {
 	const argument = <string> (typeof value === 'object' ? (<Reference> value).value.id : value);
 
 	const cache = parameter === 'articleReference'
-		? database.articleChangesByArticleReference
-		: database.articleChangesByAuthor;
+		? client.database.articleChangesByArticleReference
+		: client.database.articleChangesByAuthor;
 
-	return cache.get(argument) ??
-		await fetchArticleChanges(database, parameter, value);
+	return cache.get(argument) ?? await fetchArticleChanges(client, parameter, value);
 }
 
 /** Taking an array of articles, gets their most up-to-date state. */
 async function processArticles(
-	database: Database,
+	client: Client,
 	documents: Document<Article>[],
 ): Promise<Document<Article>[] | undefined> {
 	const documentsChanges = await Promise.all(
 		documents.map((document) =>
 			new Promise<[Document<Article>, Document<ArticleChange>[] | undefined]>(
-				(
-					resolve,
-				) =>
-					getArticleChanges(
-						database,
-						'articleReference',
-						document.ref,
-					)
-						.then((changes) => {
-							resolve([document, changes]);
-						}),
+				(resolve) =>
+					getArticleChanges(client, 'articleReference', document.ref)
+						.then((changes) => resolve([document, changes])),
 			)
 		),
 	);
 
-	if (
-		documentsChanges.map(([_document, change]) => change).includes(undefined)
-	) {
+	if (documentsChanges.map(([_document, change]) => change).includes(undefined)) {
 		return;
 	}
 

@@ -1,5 +1,6 @@
 import { faunadb } from '../../../deps.ts';
-import { Database, dispatchQuery } from '../database.ts';
+import { Client } from '../../client.ts';
+import { dispatchQuery, getUserMentionByReference, mentionUser } from '../database.ts';
 import { Document, Reference } from '../structs/document.ts';
 import { User } from '../structs/users/user.ts';
 
@@ -25,25 +26,27 @@ async function fetchUser<
 	K extends keyof UserIndexParameters,
 	V extends UserIndexParameters[K],
 >(
-	database: Database,
+	client: Client,
 	parameter: K,
 	value: V,
 ): Promise<Document<User> | undefined> {
 	const document = await dispatchQuery<User>(
-		database,
+		client,
 		$.Get(
 			parameter === 'reference' ? value : $.Match($.FaunaIndex('GetUserByID'), value),
 		),
 	);
 
 	if (!document) {
-		console.error(
-			`Failed to fetch user with ${`${parameter} ${value}`} from the database.`,
-		);
+		const parameterPrinted = parameter === 'id' ? 'ID' : 'document reference';
+		client.log.debug(`Couldn't find a user in the database whose ${parameterPrinted} matches '${value}'.`);
 		return undefined;
 	}
 
-	database.users.set(document.ref.value.id, document);
+	client.database.users.set(document.ref.value.id, document);
+
+	const userMention = getUserMentionByReference(client, document.ref);
+	client.log.debug(`Fetched user document for ${userMention}.`);
 
 	return document;
 }
@@ -55,22 +58,26 @@ async function fetchUser<
  * @returns The created user document.
  */
 async function createUser(
-	database: Database,
+	client: Client,
 	user: User,
 ): Promise<Document<User> | undefined> {
 	const document = await dispatchQuery<User>(
-		database,
+		client,
 		$.Create($.Collection('Users'), { data: user }),
 	);
 
+	const id = BigInt(user.account.id);
+	const user_ = client.cache.users.get(id);
+	const userMention = mentionUser(user_, id);
+
 	if (!document) {
-		console.error(
-			`Failed to create a document for user ${user.account.id} in the database.`,
-		);
+		client.log.error(`Failed to create a user document in the database for ${userMention}.`);
 		return undefined;
 	}
 
-	database.users.set(document.ref.value.id, document);
+	client.database.users.set(document.ref.value.id, document);
+
+	client.log.debug(`Created user document for ${userMention}.`);
 
 	return document;
 }
@@ -88,20 +95,19 @@ async function getOrCreateUser<
 	K extends keyof UserIndexParameters,
 	V extends UserIndexParameters[K],
 >(
-	database: Database,
+	client: Client,
 	parameter: K,
 	value: V,
 ): Promise<Document<User> | undefined> {
 	const cacheValue = parameter === 'reference'
-		? database.users.get((<Reference> value).value.id)
-		: Array.from(database.users.values()).find((document) => document.data.account.id === value);
+		? client.database.users.get((<Reference> value).value.id)
+		: Array.from(client.database.users.values()).find((document) => document.data.account.id === value);
 
-	const cacheOrFetch = cacheValue ??
-		await fetchUser(database, parameter, value);
+	const cacheOrFetch = cacheValue ?? await fetchUser(client, parameter, value);
 	if (cacheOrFetch) return cacheOrFetch;
 
 	if (parameter === 'id') {
-		return await createUser(database, { account: { id: <string> value } });
+		return await createUser(client, { account: { id: <string> value } });
 	}
 
 	return undefined;

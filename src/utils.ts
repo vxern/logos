@@ -557,7 +557,27 @@ function getChannelMention(guild: Guild, name: string): string {
 	return mention(channel.id, MentionTypes.Channel);
 }
 
+/**
+ * Taking a URL and a list of parameters, returns the URL with the parameters appended
+ * to it.
+ *
+ * @param url - The URL to format.
+ * @param parameters - The parameters to append to the URL.
+ * @returns The formatted URL.
+ */
+function addParametersToURL(
+	url: string,
+	parameters: Record<string, string>,
+): string {
+	const query = Object.entries(parameters)
+		.map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+		.join('&');
+
+	return `${url}?${query}`;
+}
+
 export {
+	addParametersToURL,
 	chunk,
 	createInteractionCollector,
 	createVerificationPrompt,

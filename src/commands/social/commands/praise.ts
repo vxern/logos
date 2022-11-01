@@ -88,33 +88,18 @@ async function praise(
 		);
 	};
 
-	const author = await getOrCreateUser(
-		client.database,
-		'id',
-		interaction.user.id.toString(),
-	);
+	const author = await getOrCreateUser(client, 'id', interaction.user.id.toString());
 	if (!author) return showPraiseFailure();
 
-	const praisesByAuthor = await getPraises(
-		client.database,
-		'author',
-		author.ref,
-	);
+	const praisesByAuthor = await getPraises(client, 'author', author.ref);
 	if (!praisesByAuthor) return showPraiseFailure();
 
 	const praiseTimestamps = praisesByAuthor
 		.map((document) => document.ts)
 		.sort((a, b) => b - a); // From most recent to least recent.
-	const timestampSlice = praiseTimestamps.slice(
-		0,
-		configuration.guilds.praises.maximum,
-	);
-	const canPraise = timestampSlice.length <
-			configuration.guilds.praises.maximum ||
-		timestampSlice.some((timestamp) =>
-			(Date.now() - timestamp) >=
-				configuration.guilds.praises.interval
-		);
+	const timestampSlice = praiseTimestamps.slice(0, configuration.guilds.praises.maximum);
+	const canPraise = timestampSlice.length < configuration.guilds.praises.maximum ||
+		timestampSlice.some((timestamp) => (Date.now() - timestamp) >= configuration.guilds.praises.interval);
 	if (!canPraise) {
 		return void editOriginalInteractionResponse(
 			bot,
@@ -131,11 +116,7 @@ async function praise(
 		);
 	}
 
-	const subject = await getOrCreateUser(
-		client.database,
-		'id',
-		member.id.toString(),
-	);
+	const subject = await getOrCreateUser(client, 'id', member.id.toString());
 	if (!subject) return showPraiseFailure();
 
 	const praise: Praise = {
@@ -144,7 +125,7 @@ async function praise(
 		comment: comment,
 	};
 
-	const document = await createPraise(client.database, praise);
+	const document = await createPraise(client, praise);
 	if (!document) return showPraiseFailure();
 
 	const guild = client.cache.guilds.get(interaction.guildId!);

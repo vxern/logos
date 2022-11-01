@@ -117,44 +117,22 @@ async function warnUser(
 
 	if (!user || !reason) return displayWarnError();
 
-	const subject = await getOrCreateUser(
-		client.database,
-		'id',
-		member.id.toString(),
-	);
+	const subject = await getOrCreateUser(client, 'id', member.id.toString());
 	if (!subject) return displayWarnError();
 
-	const author = await getOrCreateUser(
-		client.database,
-		'id',
-		interaction.user.id.toString(),
-	);
+	const author = await getOrCreateUser(client, 'id', interaction.user.id.toString());
 	if (!author) return displayWarnError();
 
-	const warnings = await getWarnings(
-		client.database,
-		subject.ref,
-	);
+	const warnings = await getWarnings(client, subject.ref);
 	if (!warnings) return displayWarnError();
 
 	const document = await createWarning(
-		client.database,
-		{
-			author: author.ref,
-			subject: subject.ref,
-			reason: reason,
-		},
+		client,
+		{ author: author.ref, subject: subject.ref, reason },
 	);
 	if (!document) return displayWarnError();
 
-	log(
-		[client, bot],
-		guild,
-		'memberWarnAdd',
-		member,
-		document.data,
-		interaction.user,
-	);
+	log([client, bot], guild, 'memberWarnAdd', member, document.data, interaction.user);
 
 	const relevantWarnings = getRelevantWarnings(warnings);
 
@@ -172,10 +150,8 @@ async function warnUser(
 		},
 	});
 
-	const reachedKickStage = relevantWarnings.length >=
-		configuration.guilds.moderation.warnings.maximum + 1;
-	const reachedBanStage = relevantWarnings.length >=
-		configuration.guilds.moderation.warnings.maximum + 2;
+	const reachedKickStage = relevantWarnings.length >= configuration.guilds.moderation.warnings.maximum + 1;
+	const reachedBanStage = relevantWarnings.length >= configuration.guilds.moderation.warnings.maximum + 2;
 
 	const dmChannel = await getDmChannel(bot, member.id);
 	if (dmChannel) {
