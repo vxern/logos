@@ -171,7 +171,7 @@ async function changeArticle(
 	);
 
 	if (!document) {
-		client.log.error(`Failed to create article change. Article change:\n${change}`);
+		client.log.error('Failed to create article change.');
 		return undefined;
 	}
 

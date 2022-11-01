@@ -46,7 +46,7 @@ async function fetchUser<
 	client.database.users.set(document.ref.value.id, document);
 
 	const userMention = getUserMentionByReference(client, document.ref);
-	client.log.debug(`Fetched document of ${userMention}.`);
+	client.log.debug(`Fetched user document for ${userMention}.`);
 
 	return document;
 }
@@ -77,7 +77,7 @@ async function createUser(
 
 	client.database.users.set(document.ref.value.id, document);
 
-	client.log.debug(`Created document for ${userMention}.`);
+	client.log.debug(`Created user document for ${userMention}.`);
 
 	return document;
 }

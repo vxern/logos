@@ -70,7 +70,7 @@ async function createWarning(
 	const userMention = getUserMentionByReference(client, warning.subject);
 
 	if (!document) {
-		client.log.error(`Failed to create warning for ${userMention}. Warning:\n${warning}`);
+		client.log.error(`Failed to create warning for ${userMention}.`);
 		return undefined;
 	}
 
@@ -80,7 +80,7 @@ async function createWarning(
 
 	client.database.warningsBySubject.get(warning.subject.value.id)!.push(document);
 
-	client.log.debug(`Created warning for ${userMention}. Warning:\n${document}`);
+	client.log.debug(`Created warning for ${userMention}.`);
 
 	return document;
 }
@@ -103,7 +103,7 @@ async function deleteWarning(
 	const userMention = getUserMentionByReference(client, warning.data.subject);
 
 	if (!document) {
-		client.log.error(`Failed to delete warning for ${userMention}. Warning:\n${warning}`);
+		client.log.error(`Failed to delete warning for ${userMention}.`);
 		return undefined;
 	}
 
@@ -116,7 +116,7 @@ async function deleteWarning(
 		1,
 	);
 
-	client.log.debug(`Deleted warning for ${userMention}. Warning document:\n${document}`);
+	client.log.debug(`Deleted warning for ${userMention}.`);
 
 	return document;
 }
