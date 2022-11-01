@@ -180,11 +180,11 @@ function getProficiencyRoleFrequencies(
 	guild: Guild,
 ): Map<bigint, number> {
 	const proficiencyCategory = getProficiencyCategory();
-	const proficiencies = proficiencyCategory.collection!.list!;
-	const proficiencyNames = proficiencies.map((proficiency) => proficiency.name[defaultLanguage]);
-	const proficiencyRoleIds = guild.roles.array().filter((role) => proficiencyNames.includes(role.name)).map((role) =>
-		role.id
-	);
+	const proficiencies = proficiencyCategory.collection.list;
+	const proficiencyRoleNames = proficiencies.map((proficiency) => proficiency.name[defaultLanguage]);
+	const proficiencyRoles = guild.roles.array().filter((role) => proficiencyRoleNames.includes(role.name));
+	proficiencyRoles.sort((a, b) => a.position - b.position);
+	const proficiencyRoleIds = proficiencyRoles.map((role) => role.id);
 
 	const membersIndiscriminate = Array.from(client.cache.members.values());
 	const members = membersIndiscriminate.filter((member) =>
