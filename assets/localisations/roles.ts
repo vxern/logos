@@ -175,7 +175,7 @@ class Roles {
 				description: {
 					'English': 'Roles related to the abroad.',
 					'Polish': 'Role związane z zagranicą.',
-					'Romanian': 'Roluri asociate cu trăire în străinătate.',
+					'Romanian': 'Roluri asociate cu viața în străinătate.',
 				},
 				roles: {
 					diasporan: {
