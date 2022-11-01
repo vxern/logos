@@ -7,6 +7,7 @@ import {
 	ApplicationCommandOptionTypes,
 	Bot,
 	editOriginalInteractionResponse,
+	Embed,
 	Interaction,
 	InteractionResponseTypes,
 	InteractionTypes,
@@ -100,8 +101,8 @@ async function translate(
 
 		const isInputtingSourceLanguage = focused.name === 'from';
 		const localisations = isInputtingSourceLanguage
-			? Commands.translate.strings.source
-			: Commands.translate.strings.target;
+			? Commands.translate.strings.sourceLanguage
+			: Commands.translate.strings.targetLanguage;
 
 		const inputLowercase = (<string> focused.value).toLowerCase();
 		const choices = client.metadata.supportedTranslationLanguages
@@ -246,29 +247,47 @@ async function translate(
 	const sourceLanguageName = localise(getLocalisations(sourceLanguage.name), interaction.locale);
 	const targetLanguageName = localise(getLocalisations(targetLanguage.name), interaction.locale);
 
+	const isLong = text.length > 950;
+
+	let embeds: Embed[] = [];
+	if (!isLong) {
+		embeds = [{
+			color: configuration.interactions.responses.colors.blue,
+			fields: [{
+				name: localise(Commands.translate.strings.sourceText, interaction.locale),
+				value: text,
+				inline: false,
+			}, {
+				name: localise(
+					Commands.translate.strings.translation,
+					interaction.locale,
+				),
+				value: translatedText,
+				inline: false,
+			}],
+			footer: {
+				text: `${sourceLanguageName} ➜ ${targetLanguageName}`,
+			},
+		}];
+	} else {
+		embeds = [{
+			color: configuration.interactions.responses.colors.blue,
+			title: localise(Commands.translate.strings.sourceText, interaction.locale),
+			description: text,
+		}, {
+			color: configuration.interactions.responses.colors.blue,
+			title: localise(Commands.translate.strings.translation, interaction.locale),
+			description: translatedText,
+			footer: {
+				text: `${sourceLanguageName} ➜ ${targetLanguageName}`,
+			},
+		}];
+	}
+
 	return void editOriginalInteractionResponse(
 		bot,
 		interaction.token,
-		{
-			embeds: [{
-				color: configuration.interactions.responses.colors.blue,
-				fields: [{
-					name: localise(Commands.translate.strings.text, interaction.locale),
-					value: text,
-					inline: false,
-				}, {
-					name: localise(
-						Commands.translate.strings.translation,
-						interaction.locale,
-					),
-					value: translatedText,
-					inline: false,
-				}],
-				footer: {
-					text: `${sourceLanguageName} ➜ ${targetLanguageName}`,
-				},
-			}],
-		},
+		{ embeds },
 	);
 }
 

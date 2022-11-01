@@ -373,29 +373,29 @@ class Commands {
 					'Romanian': 'Atât limba-sursă, cât și limba-țintă sunt nevalide.',
 				},
 			},
-			source: {
+			sourceLanguage: {
 				'English': (languageName: TranslationLanguage) =>
 					localise(getLocalisations(languageName), getLocale('English')),
 				'Polish': (languageName: TranslationLanguage) => Expressions.polish.cases.genitive.languages[languageName],
 				'Romanian': (languageName: TranslationLanguage) =>
 					localise(getLocalisations(languageName), getLocale('Romanian')),
 			},
-			target: {
+			targetLanguage: {
 				'English': (languageName: TranslationLanguage) =>
 					localise(getLocalisations(languageName), getLocale('English')),
 				'Polish': (languageName: TranslationLanguage) => localise(getLocalisations(languageName), getLocale('Polish')),
 				'Romanian': (languageName: TranslationLanguage) =>
 					localise(getLocalisations(languageName), getLocale('Romanian')),
 			},
-			text: {
-				'English': 'Text',
-				'Polish': 'Tekst',
-				'Romanian': 'Text',
+			sourceText: {
+				'English': 'Source Text',
+				'Polish': 'Tekst Źródłowy',
+				'Romanian': 'Textul-sursă',
 			},
 			translation: {
 				'English': 'Translation',
 				'Polish': 'Tłumaczenie',
-				'Romanian': 'Traducere',
+				'Romanian': 'Traducerea',
 			},
 		},
 	});
