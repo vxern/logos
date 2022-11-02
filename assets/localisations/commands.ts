@@ -390,12 +390,12 @@ class Commands {
 			sourceText: {
 				'English': 'Source Text',
 				'Polish': 'Tekst Źródłowy',
-				'Romanian': 'Textul-sursă',
+				'Romanian': 'Text-sursă',
 			},
 			translation: {
 				'English': 'Translation',
 				'Polish': 'Tłumaczenie',
-				'Romanian': 'Traducerea',
+				'Romanian': 'Traducere',
 			},
 		},
 	});
