@@ -5,8 +5,6 @@ import word from './commands/word.ts';
 import translate from './commands/translate.ts';
 import { DictionaryAdapter, DictionaryScopes } from './data/dictionary.ts';
 import dexonline from './data/dictionaries/dexonline.ts';
-import dictionarDeSinonime from './data/dictionaries/dictionar-de-antonime.ts';
-import dictionarDeAntonime from './data/dictionaries/dictionar-de-sinonime.ts';
 import { SentencePair } from './data/sentence.ts';
 import { Language, supportedLanguages } from '../../types.ts';
 import { TranslationLanguage } from '../../../assets/localisations/languages.ts';
@@ -18,8 +16,6 @@ const commands = [game, resources, translate, word];
 
 const dictionaryAdapters = [
 	dexonline,
-	dictionarDeAntonime,
-	dictionarDeSinonime,
 ];
 
 function loadDictionaryAdapters(): Map<Language, DictionaryAdapter[]> {
