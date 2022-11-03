@@ -1,17 +1,16 @@
 import * as dotenv from 'std/dotenv/mod.ts';
 import { Sentry } from './deps.ts';
 import { initialiseClient } from './src/client.ts';
-import { getSupportedLanguages } from './src/commands/language/module.ts';
+import { getSupportedLanguages, loadDictionaryAdapters, loadSentencePairs } from './src/commands/language/module.ts';
+import { capitalise } from './src/formatting.ts';
+import { Language, supportedLanguages } from './src/types.ts';
 
-const envFileName = '.env';
-const envTemplateFileName = `${envFileName}.example`;
-
-async function readDotEnvFile(fileName: string, template = false): Promise<dotenv.DotenvConfig | undefined> {
+async function readDotEnvFile(fileUri: string, template = false): Promise<dotenv.DotenvConfig | undefined> {
 	const kind = template ? 'environment template' : 'environment';
 
 	let contents: string;
 	try {
-		contents = await Deno.readTextFile(fileName);
+		contents = await Deno.readTextFile(fileUri);
 	} catch (error) {
 		if (error instanceof Deno.errors.NotFound) {
 			console.error(`Missing ${kind} file.`);
@@ -33,11 +32,16 @@ async function readDotEnvFile(fileName: string, template = false): Promise<doten
 	}
 }
 
-async function readEnvironment(): Promise<void> {
-	const requiredKeys = Object.keys((await readDotEnvFile(envTemplateFileName, true))!);
+async function readEnvironment({
+	envConfiguration,
+	templateEnvConfiguration,
+}: {
+	envConfiguration: dotenv.DotenvConfig | undefined;
+	templateEnvConfiguration: dotenv.DotenvConfig;
+}): Promise<void> {
+	const requiredKeys = Object.keys(templateEnvConfiguration);
 
-	const env = await readDotEnvFile(envFileName);
-	const presentKeys = Object.keys(env ? env : Deno.env.toObject());
+	const presentKeys = Object.keys(envConfiguration ? envConfiguration : Deno.env.toObject());
 
 	const missingKeys = requiredKeys.filter((requiredKey) => !presentKeys.includes(requiredKey));
 	if (missingKeys.length !== 0) {
@@ -45,14 +49,17 @@ async function readEnvironment(): Promise<void> {
 		Deno.exit(1);
 	}
 
-	if (!env) return;
+	if (!envConfiguration) return;
 
-	for (const [key, value] of <[string, string][]> Object.entries(env)) {
+	for (const [key, value] of <[string, string][]> Object.entries(envConfiguration)) {
 		Deno.env.set(key, value);
 	}
 }
 
-await readEnvironment();
+await readEnvironment({
+	envConfiguration: await readDotEnvFile('.env'),
+	templateEnvConfiguration: (await readDotEnvFile('.env.example', true))!,
+});
 
 async function readVersion(): Promise<string> {
 	const version = new TextDecoder().decode(
@@ -67,10 +74,40 @@ async function readVersion(): Promise<string> {
 
 Sentry.init({ dsn: Deno.env.get('SENTRY_SECRET'), environment: Deno.env.get('ENVIRONMENT') });
 
-const version = await readVersion() ?? 'Deno';
-const supportedTranslationLanguages = await getSupportedLanguages();
+/**
+ * @returns An array of tuples where the first element is a language and the second
+ * element is the contents of its sentence file.
+ */
+async function readSentenceFiles(directoryUri: string): Promise<[Language, string][]> {
+	const files: Deno.DirEntry[] = [];
+	for await (const entry of Deno.readDir(directoryUri)) {
+		if (!entry.isFile) continue;
+
+		files.push(entry);
+	}
+
+	const results: Promise<[Language, string]>[] = [];
+	for (const file of files) {
+		const languageName = capitalise(file.name.split('.').at(0)!);
+
+		if (!(Array.from<string>(supportedLanguages).includes(languageName))) {
+			console.warn(
+				`File '${file.name}' contains sentences for a language '${languageName}' not supported by the application. Skipping...`,
+			);
+			continue;
+		}
+
+		const language = <Language> languageName;
+		results.push(Deno.readTextFile(`${directoryUri}/${file.name}`).then((contents) => [language, contents]));
+	}
+
+	return Promise.all(results);
+}
 
 initialiseClient({
-	version,
-	supportedTranslationLanguages,
+	version: await readVersion() ?? 'Deno',
+	supportedTranslationLanguages: await getSupportedLanguages(),
+}, {
+	dictionaryAdapters: loadDictionaryAdapters(),
+	sentencePairs: loadSentencePairs(await readSentenceFiles('./assets/sentences')),
 });
