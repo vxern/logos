@@ -480,6 +480,42 @@ class Commands {
 					'Romanian': 'Antonime',
 				},
 			},
+			skippedResults: {
+				'English': (results: number) => {
+					const numberExpression = Expressions.english.methods.pluralise(
+						results.toString(),
+						'result',
+						'results',
+					);
+					return `Skipped ${numberExpression}. ` +
+						`To display more results, enable the '${
+							localise(this.word.options.verbose.name, getLocale('English'))
+						}' flag.`;
+				},
+				'Polish': (results: number) => {
+					const numberExpression = Expressions.polish.methods.pluralise(
+						results.toString(),
+						'rezultat',
+						'rezultaty',
+						'rezultatów',
+					);
+					return `Ominięto ${numberExpression}. ` +
+						`Aby wyświetlić więcej rezultatów, użyj flagi '${
+							localise(this.word.options.verbose.name, getLocale('Polish'))
+						}'.`;
+				},
+				'Romanian': (results: number) => {
+					const numberExpression = Expressions.romanian.methods.pluralise(
+						results.toString(),
+						'rezultat',
+						'rezultate',
+					);
+					return `${numberExpression} au fost omise. ` +
+						`Pentru a afișa mai multe rezultate, activează fanionul '${
+							localise(this.word.options.verbose.name, getLocale('Romanian'))
+						}'.`;
+				},
+			},
 		},
 	});
 
