@@ -26,15 +26,20 @@ enum DictionaryProvisions {
 	Etymology,
 }
 
+interface WithTags<T> {
+	tags?: string[];
+	value: T;
+}
+
 interface DictionaryEntry {
 	/** The topic word of an entry. */
 	word: string;
 
-	/** The definitions for a word entry. */
-	definitions?: string[];
+	/** The definitions of a word entry. */
+	definitions?: WithTags<string>[];
 
-	/** The etymology of a word entry. */
-	etymology?: string;
+	/** The etymologies of a word entry. */
+	etymologies?: WithTags<string | undefined>[];
 }
 
 abstract class DictionaryAdapter<T = string> {
@@ -57,21 +62,67 @@ function getEmbedFields(
 	locale: string | undefined,
 	{ verbose }: { verbose: boolean | undefined },
 ): DiscordEmbedField[] {
-	const fields: Partial<DiscordEmbedField>[] = [{
-		name: localise(Commands.word.strings.fields.definition, locale),
-		value: !entry.definitions ? undefined : list(entry.definitions),
-	}, {
-		name: localise(Commands.word.strings.fields.etymology, locale),
-		value: entry.etymology,
-	}];
+	const fields: DiscordEmbedField[] = [];
 
-	const nonEmptyFields = <DiscordEmbedField[]> fields.filter((field) => field.value);
-	const truncatedFields = nonEmptyFields.map((field) => {
-		return { ...field, value: field.value.slice(0, verbose ? 950 : 512) };
-	});
+	if (entry.definitions) {
+		const skippedEntriesString = localise(Commands.word.strings.skippedResults, locale)(entry.definitions.length);
 
-	return truncatedFields;
+		const definitions = entry.definitions.map((definition) => {
+			if (!definition.tags) {
+				return definition.value;
+			}
+
+			return `${tagsToString(definition.tags)} ${definition.value}`;
+		});
+		const definitionsListed = list(definitions, 'diamond');
+		const definitionsDelisted = definitionsListed.split('\n');
+
+		const maxCharacterCount = verbose ? 4096 : 1024;
+		let characterCount = verbose ? 0 : skippedEntriesString.length + 20;
+		const definitionsToDisplay: string[] = [];
+		for (const definition of definitionsDelisted) {
+			characterCount += definition.length;
+
+			if (characterCount >= maxCharacterCount) break;
+			definitionsToDisplay.push(definition);
+		}
+
+		const definitionsOmitted = definitionsDelisted.length - definitionsToDisplay.length;
+
+		let displayString = definitionsToDisplay.join('\n');
+		if (definitionsOmitted !== 0) {
+			displayString += '\n...' + `\n*${localise(Commands.word.strings.skippedResults, locale)(definitionsOmitted)}*`;
+		}
+
+		fields.push({
+			name: localise(Commands.word.strings.fields.definitions, locale),
+			value: displayString,
+		});
+	}
+
+	if (entry.etymologies) {
+		fields.push({
+			name: localise(Commands.word.strings.fields.etymology, locale),
+			value: entry.etymologies.map((etymology) => {
+				if (!etymology.tags) {
+					return `**${etymology.value}**`;
+				}
+
+				if (!etymology.value) {
+					return tagsToString(etymology.tags);
+				}
+
+				return `${tagsToString(etymology.tags)} **${etymology.value}**`;
+			}).join('\n'),
+		});
+	}
+
+	return fields;
+}
+
+function tagsToString(tags: string[]): string {
+	return tags.map((tag) => `\`${tag}\``).join(' ');
 }
 
 export { DictionaryAdapter, DictionaryProvisions, DictionaryScopes, getEmbedFields };
-export type { DictionaryEntry };
+export type { DictionaryEntry, WithTags };
