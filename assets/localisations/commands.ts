@@ -449,20 +449,20 @@ class Commands {
 				'Romanian': 'Fără rezultate.',
 			},
 			fields: {
-				translation: {
-					'English': 'Translation',
-					'Polish': 'Tłumaczenie',
-					'Romanian': 'Traducere',
+				translations: {
+					'English': 'Translations',
+					'Polish': 'Tłumaczenia',
+					'Romanian': 'Traduceri',
 				},
 				pronunciation: {
 					'English': 'Pronunciation',
 					'Polish': 'Wymowa',
 					'Romanian': 'Pronunțare',
 				},
-				definition: {
-					'English': 'Definition',
-					'Polish': 'Znaczenie',
-					'Romanian': 'Definiție',
+				definitions: {
+					'English': 'Definitions',
+					'Polish': 'Znaczenia',
+					'Romanian': 'Definiții',
 				},
 				etymology: {
 					'English': 'Etymology',
