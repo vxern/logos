@@ -92,23 +92,21 @@ async function word(
 		entries.push(...entries_);
 	}
 
-	const entry = entries.at(0)!;
+	if (entries.length !== 0) {
+		const entry = entries.at(0)!;
 
-	const fields = getEmbedFields(entry, interaction.locale, { verbose });
-	const hasEntry = fields.length > 0;
-	if (!hasEntry) return;
+		const fields = getEmbedFields(entry, interaction.locale, { verbose });
+		const hasEntry = fields.length > 0;
+		if (!hasEntry) return;
 
-	editOriginalInteractionResponse(bot, interaction.token, {
-		embeds: [{
-			title: entry.word,
-			fields: fields,
-			color: fromHex('#d6e3f8'),
-		}],
-	});
-
-	const responded = getEmbedFields(entry, interaction.locale, { verbose }).length >
-		0;
-	if (responded) return;
+		return void editOriginalInteractionResponse(bot, interaction.token, {
+			embeds: [{
+				title: entry.word,
+				fields: fields,
+				color: fromHex('#d6e3f8'),
+			}],
+		});
+	}
 
 	return void editOriginalInteractionResponse(
 		bot,
