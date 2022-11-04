@@ -3,7 +3,7 @@ import game from './commands/game.ts';
 import resources from './commands/resources.ts';
 import word from './commands/word.ts';
 import translate from './commands/translate.ts';
-import { DictionaryAdapter, DictionaryScopes } from './data/dictionary.ts';
+import { DictionaryAdapter } from './data/dictionary.ts';
 import dexonline from './data/dictionaries/dexonline.ts';
 import { SentencePair } from './data/sentence.ts';
 import { Language, supportedLanguages } from '../../types.ts';
@@ -26,16 +26,14 @@ function loadDictionaryAdapters(): Map<Language, DictionaryAdapter[]> {
 	}
 
 	for (const adapter of dictionaryAdapters) {
-		if (adapter.scope === DictionaryScopes.Omnilingual) {
-			for (const adapters of Array.from(result.values())) {
-				adapters.push(adapter);
-			}
-			continue;
-		}
-
-		for (const language of adapter.languages) {
+		for (const language of adapter.supports) {
 			result.get(language)!.push(adapter);
 		}
+	}
+
+	for (const adapters of result.values()) {
+		// Sorts adapters in descending order by how much information they provide.
+		adapters.sort((a, b) => b.provides.length - a.provides.length);
 	}
 
 	return result;
