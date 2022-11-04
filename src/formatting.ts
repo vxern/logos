@@ -30,14 +30,21 @@ function codeMultiline(target: string): string {
 	return '```' + target + '```';
 }
 
+type BulletStyle = 'arrow' | 'diamond';
+const bulletStyles: Required<Record<BulletStyle, string>> = {
+	'arrow': '➜',
+	'diamond': '♦️',
+};
+
 /**
  * Taking a list of items, puts them in a list format.
  *
  * @param items - Items in the list.
  * @returns The formatted string of text.
  */
-function list(items: string[]): string {
-	return items.map((item) => `➜ ${item}`).join('\n');
+function list(items: string[], bulletStyle: BulletStyle = 'arrow'): string {
+	const bullet = bulletStyles[bulletStyle];
+	return items.map((item) => `${bullet} ${item}`).join('\n');
 }
 
 /**
