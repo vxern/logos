@@ -32,7 +32,7 @@ async function startGame(
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (!guild) return;
 
-	const sentencePairs = client.metadata.sentencePairs.get(guild.language);
+	const sentencePairs = client.features.sentencePairs.get(guild.language);
 	if (!sentencePairs || sentencePairs.length === 0) {
 		return void sendInteractionResponse(
 			bot,
