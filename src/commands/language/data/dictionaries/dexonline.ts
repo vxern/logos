@@ -1,92 +1,109 @@
-import { DictionaryAdapter, DictionaryScopes, DictionaryTypes } from '../dictionary.ts';
+import { cheerio } from 'cheerio';
+import { Language } from '../../../../types.ts';
+import { DictionaryAdapter, DictionaryEntry, DictionaryProvisions } from '../dictionary.ts';
 
-/** Maps numbers to their superscript variants. */
-const superscript: Record<string, string> = {
-	'0': '⁰',
-	'1': '¹',
-	'2': '²',
-	'3': '³',
-	'4': '⁴',
-	'5': '⁵',
-	'6': '⁶',
-	'7': '⁷',
-	'8': '⁸',
-	'9': '⁹',
-};
+const tabContentSelector = (tab: ContentTab) => `#tab_${tab}`;
 
-/** Represents a Dexonline definition entry. */
-interface Definition {
-	/** The type of this definition. */
-	type: string;
-
-	/** The internal ID of this definition. */
-	id: string;
-
-	/** The internal representation of the content of this definition. */
-	internalRep: string;
-
-	/** The HTML representation of the content of this definition. */
-	htmlRep: string;
-
-	/** The username of the user who submitted this definition. */
-	userNick: string;
-
-	/** The name of the source from which this definition was taken. */
-	sourceName: string;
-
-	/** The creation time of this definition. */
-	createDate: string;
-
-	/** The time this definition was last edited at. */
-	modDate: string;
+enum ContentTab {
+	Definitions = 0,
+	Inflections,
+	Synthesis,
+	Articles,
 }
 
-/** Represents a Dexonline search results object. */
-interface SearchResults {
-	/** The type of this query. */
-	type: string;
+type Element = cheerio.Cheerio<cheerio.Element>;
 
-	/** The word in question in this query. */
-	word: string;
+class Dexonline implements DictionaryAdapter {
+	readonly supports: Language[] = ['Romanian'];
+	readonly provides = [DictionaryProvisions.Definitions, DictionaryProvisions.Etymology];
 
-	/** The definitions matched by this query. */
-	definitions: Definition[];
+	async query(word: string) {
+		return fetch(`https://dexonline.ro/definitie/${word}`).then((response) => {
+			if (!response.ok) return undefined;
+			return response.text();
+		});
+	}
+
+	parse(contents: string) {
+		const $ = cheerio.load(contents);
+
+		const wordEntries = this.getWordEntries($);
+
+		const entries: DictionaryEntry[] = [];
+		for (const [heading, body] of wordEntries) {
+			const { word } = this.parseHeading(heading);
+			const { etymologies, definitions } = this.parseBody($, body);
+
+			entries.push({ word, etymologies, definitions });
+		}
+
+		return entries.length === 0 ? undefined : entries;
+	}
+
+	/**
+	 * @returns A tuple where the first element is the heading and the second element is the body of the entry.
+	 */
+	private getWordEntries($: cheerio.CheerioAPI): [Element, Element][] {
+		const synthesis = $(tabContentSelector(ContentTab.Synthesis));
+
+		const entryHeadings = synthesis.find('h3[class=tree-heading] > div').toArray();
+		const entryBodies = synthesis.find('div[class=tree-body]').toArray();
+
+		return entryHeadings.map(
+			(heading, index) => [$(heading), $(entryBodies.at(index)!)],
+		);
+	}
+
+	private parseHeading(heading: Element): Required<{ type: string; word: string }> {
+		const type = heading.find('span[class=tree-pos-info]').remove().text();
+		const word = heading.text().trim();
+		return { type, word };
+	}
+
+	private parseBody(
+		$: cheerio.CheerioAPI,
+		body: Element,
+	): Required<{ etymologies: DictionaryEntry['etymologies']; definitions: DictionaryEntry['definitions'] }> {
+		const etymologies = this.getEtymologies($, body);
+		const definitions = this.getDefinitions($, body);
+
+		return { etymologies, definitions };
+	}
+
+	private getEtymologies($: cheerio.CheerioAPI, body: Element): DictionaryEntry['etymologies'] {
+		const etymologyRows = body.find(
+			'div[class=etymology] > ul[class=meaningTree] > li[class="type-etymology depth-1"] > div[class=meaningContainer] > div[class=meaning-row]',
+		).toArray().map((etymology) => $(etymology));
+
+		const etymologies: DictionaryEntry['etymologies'] = [];
+		for (const etymologyRow of etymologyRows) {
+			const tags = etymologyRow.find('span[class="tag-group meaning-tags"]').children().toArray().map((element) =>
+				$(element).text()
+			);
+			const term = etymologyRow.find('span[class="def html"]').text().trim();
+			etymologies.push({ tags, value: term.length !== 0 ? term : undefined });
+		}
+		return etymologies;
+	}
+
+	private getDefinitions($: cheerio.CheerioAPI, body: Element): DictionaryEntry['definitions'] {
+		const definitionRows = body.find(
+			'ul[class=meaningTree] > li[class="type-meaning depth-0"] > div[class=meaningContainer]',
+		).toArray().map((definition) => $(definition));
+
+		const definitions: DictionaryEntry['definitions'] = [];
+		for (const definitionRow of definitionRows) {
+			const row = definitionRow.find('div[class=meaning-row]');
+			const tags = row.find('span[class="tag-group meaning-tags"] > span[class="tag "]').toArray().map((element) =>
+				$(element).text()
+			);
+			const definition = row.find('span[class="def html"]').text().trim();
+			definitions.push({ tags, value: definition });
+		}
+		return definitions;
+	}
 }
 
-const adapter: DictionaryAdapter = {
-	scope: DictionaryScopes.Monolingual,
-	types: [DictionaryTypes.Defining, DictionaryTypes.Etymological],
-	languages: ['Romanian'],
-
-	queryBuilder: (query) => `https://dexonline.ro/definitie/${query.word}/json`,
-
-	lookup: async (query, builder) => {
-		const response = await fetch(builder(query));
-		if (!response.ok) return undefined;
-
-		const content = await response.text();
-
-		const data = <SearchResults> JSON.parse(content);
-		if (data.definitions.length === 0) return undefined;
-
-		const definition = data.definitions[0]!.internalRep
-			.replaceAll(' ** ', ' ⬥ ') // Filled diamond
-			.replaceAll(' * ', ' ⬦ ') // Diamond outline
-			.replaceAll(
-				/%.+?%/g,
-				(match) => match.substring(1, match.length - 1).split('').join(' '),
-			) // Spread letters out
-			.replaceAll(
-				/\^[0-9]+/g,
-				(match) => match.substring(1, match.length).split('').map((number) => superscript[number]!).join(''),
-			) // Spread letters out
-			.replaceAll('&quot;', '"') // Remove XHTML relics.
-			.replaceAll('#', '__') // Underline
-			.replaceAll('@', '**') // Bolden
-			.replaceAll('$', '*'); // Italicise
-
-		return { definition: definition };
-	},
-};
+const adapter = new Dexonline();
 
 export default adapter;
