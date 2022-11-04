@@ -14,8 +14,7 @@ import { CommandBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
 import { diagnosticMentionUser, fromHex, parseArguments } from '../../../utils.ts';
 import { show } from '../../parameters.ts';
-import { DictionaryEntry, toFields } from '../data/dictionary.ts';
-import { dictionaryAdaptersByLanguage } from '../module.ts';
+import { DictionaryEntry, getEmbedFields } from '../data/dictionary.ts';
 
 const command: CommandBuilder = {
 	...createLocalisations(Commands.word),
@@ -45,7 +44,7 @@ async function word(
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (!guild) return;
 
-	const dictionaries = dictionaryAdaptersByLanguage.get(guild.language);
+	const dictionaries = client.features.dictionaryAdapters.get('Romanian');
 	if (!dictionaries) {
 		return void sendInteractionResponse(
 			bot,
@@ -77,42 +76,37 @@ async function word(
 		},
 	);
 
-	let entry: DictionaryEntry = { headword: word };
-
 	client.log.info(
 		`Looking up the word '${word}' from ${dictionaries.length} dictionaries ` +
 			`as requested by ${diagnosticMentionUser(interaction.user, true)} on ${guild.name}...`,
 	);
 
-	const promises = [];
+	const entries: DictionaryEntry[] = [];
 	for (const dictionary of dictionaries) {
-		const promise = dictionary.lookup(
-			{ word, native: guild.language },
-			dictionary.queryBuilder,
-		).catch();
+		const data = await dictionary.query(word, guild.language);
+		if (!data) continue;
 
-		promise.then((result) => {
-			entry = { ...result, ...entry };
+		const entries_ = dictionary.parse(data);
+		if (!entries_) continue;
 
-			const fields = toFields(entry, interaction.locale, { verbose });
-			const hasEntry = fields.length > 0;
-			if (!hasEntry) return;
-
-			editOriginalInteractionResponse(bot, interaction.token, {
-				embeds: [{
-					title: entry.headword,
-					fields: fields,
-					color: fromHex('#d6e3f8'),
-				}],
-			});
-		});
-
-		promises.push(promise);
+		entries.push(...entries_);
 	}
 
-	await Promise.all(promises).catch();
+	const entry = entries.at(0)!;
 
-	const responded = toFields(entry, interaction.locale, { verbose }).length >
+	const fields = getEmbedFields(entry, interaction.locale, { verbose });
+	const hasEntry = fields.length > 0;
+	if (!hasEntry) return;
+
+	editOriginalInteractionResponse(bot, interaction.token, {
+		embeds: [{
+			title: entry.word,
+			fields: fields,
+			color: fromHex('#d6e3f8'),
+		}],
+	});
+
+	const responded = getEmbedFields(entry, interaction.locale, { verbose }).length >
 		0;
 	if (responded) return;
 
