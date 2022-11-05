@@ -12,6 +12,8 @@ enum ContentTab {
 }
 
 type Element = cheerio.Cheerio<cheerio.Element>;
+type Definitions = NonNullable<DictionaryEntry['definitions']>;
+type Etymologies = NonNullable<DictionaryEntry['etymologies']>;
 
 class Dexonline implements DictionaryAdapter {
 	readonly supports: Language[] = ['Romanian'];
@@ -34,6 +36,8 @@ class Dexonline implements DictionaryAdapter {
 			const { word } = this.parseHeading(heading);
 			const { etymologies, definitions } = this.parseBody($, body);
 
+			if (definitions.length === 0) continue;
+
 			entries.push({ word, etymologies, definitions });
 		}
 
@@ -54,7 +58,7 @@ class Dexonline implements DictionaryAdapter {
 		);
 	}
 
-	private parseHeading(heading: Element): Required<{ type: string; word: string }> {
+	private parseHeading(heading: Element): { type: string; word: string } {
 		const type = heading.find('span[class=tree-pos-info]').remove().text();
 		const word = heading.text().trim();
 		return { type, word };
@@ -63,19 +67,19 @@ class Dexonline implements DictionaryAdapter {
 	private parseBody(
 		$: cheerio.CheerioAPI,
 		body: Element,
-	): Required<{ etymologies: DictionaryEntry['etymologies']; definitions: DictionaryEntry['definitions'] }> {
+	): { etymologies: Etymologies; definitions: Definitions } {
 		const etymologies = this.getEtymologies($, body);
 		const definitions = this.getDefinitions($, body);
 
 		return { etymologies, definitions };
 	}
 
-	private getEtymologies($: cheerio.CheerioAPI, body: Element): DictionaryEntry['etymologies'] {
+	private getEtymologies($: cheerio.CheerioAPI, body: Element): Etymologies {
 		const etymologyRows = body.find(
 			'div[class=etymology] > ul[class=meaningTree] > li[class="type-etymology depth-1"] > div[class=meaningContainer] > div[class=meaning-row]',
 		).toArray().map((etymology) => $(etymology));
 
-		const etymologies: DictionaryEntry['etymologies'] = [];
+		const etymologies: Etymologies = [];
 		for (const etymologyRow of etymologyRows) {
 			const tags = etymologyRow.find('span[class="tag-group meaning-tags"]').children().toArray().map((element) =>
 				$(element).text()
@@ -86,18 +90,19 @@ class Dexonline implements DictionaryAdapter {
 		return etymologies;
 	}
 
-	private getDefinitions($: cheerio.CheerioAPI, body: Element): DictionaryEntry['definitions'] {
+	private getDefinitions($: cheerio.CheerioAPI, body: Element): Definitions {
 		const definitionRows = body.find(
 			'ul[class=meaningTree] > li[class="type-meaning depth-0"] > div[class=meaningContainer]',
 		).toArray().map((definition) => $(definition));
 
-		const definitions: DictionaryEntry['definitions'] = [];
+		const definitions: Definitions = [];
 		for (const definitionRow of definitionRows) {
 			const row = definitionRow.find('div[class=meaning-row]');
 			const tags = row.find('span[class="tag-group meaning-tags"] > span[class="tag "]').toArray().map((element) =>
 				$(element).text()
 			);
 			const definition = row.find('span[class="def html"]').text().trim();
+			console.log(definition);
 			definitions.push({ tags, value: definition });
 		}
 		return definitions;
