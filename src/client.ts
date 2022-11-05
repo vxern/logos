@@ -149,6 +149,12 @@ function createEventHandlers(client: Client): Partial<EventHandlers> {
 			client.cache.guilds.get(channel.guildId)?.channels.delete(channel.id);
 		},
 		interactionCreate: (bot, interaction) => {
+			if (interaction.data?.customId === 'none') {
+				return <unknown> sendInteractionResponse(bot, interaction.id, interaction.token, {
+					type: InteractionResponseTypes.DeferredUpdateMessage,
+				});
+			}
+
 			const commandName = interaction.data?.name;
 			if (!commandName) return;
 
