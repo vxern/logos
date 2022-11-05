@@ -4,15 +4,20 @@ import {
 	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
 	Bot,
+	ButtonStyles,
 	editOriginalInteractionResponse,
+	Embed,
 	Interaction,
 	InteractionResponseTypes,
+	InteractionTypes,
+	MessageComponents,
+	MessageComponentTypes,
 	sendInteractionResponse,
 } from '../../../../deps.ts';
 import { Client } from '../../../client.ts';
 import { CommandBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
-import { diagnosticMentionUser, fromHex, parseArguments } from '../../../utils.ts';
+import { createInteractionCollector, diagnosticMentionUser, fromHex, parseArguments } from '../../../utils.ts';
 import { show } from '../../parameters.ts';
 import { DictionaryEntry, getEmbedFields } from '../data/dictionary.ts';
 
@@ -108,19 +113,80 @@ async function word(
 		);
 	}
 
-	const entry = entries.at(0)!;
+	let pageIndex = 0;
+	const isFirst = () => pageIndex === 0;
+	const isLast = () => pageIndex === entries.length - 1;
 
-	const fields = getEmbedFields(entry, interaction.locale, { verbose });
-	const hasEntry = fields.length > 0;
-	if (!hasEntry) return;
+	const generateView = (selection?: Interaction): void => {
+		if (selection) {
+			sendInteractionResponse(bot, selection.id, selection.token, {
+				type: InteractionResponseTypes.DeferredUpdateMessage,
+			});
+		}
 
-	return void editOriginalInteractionResponse(bot, interaction.token, {
-		embeds: [{
+		editOriginalInteractionResponse(bot, interaction.token, {
+			embeds: [generateEmbed()],
+			components: generateButtons(),
+		});
+	};
+
+	const previousPageButtonId = createInteractionCollector([client, bot], {
+		type: InteractionTypes.MessageComponent,
+		doesNotExpire: true,
+		onCollect: (_bot, selection) => {
+			if (!isFirst()) pageIndex--;
+			return void generateView(selection);
+		},
+	});
+
+	const nextPageButtonId = createInteractionCollector([client, bot], {
+		type: InteractionTypes.MessageComponent,
+		doesNotExpire: true,
+		onCollect: (_bot, selection) => {
+			if (!isLast()) pageIndex++;
+			return void generateView(selection);
+		},
+	});
+
+	const generateEmbed: () => Embed = () => {
+		const entry = entries.at(pageIndex)!;
+
+		const fields = getEmbedFields(entry, interaction.locale, { verbose });
+
+		return {
 			title: entry.word,
 			fields: fields,
 			color: fromHex('#d6e3f8'),
-		}],
-	});
+		};
+	};
+
+	const generateButtons = (): MessageComponents => {
+		if (isFirst() && isLast()) return [];
+
+		return [{
+			type: MessageComponentTypes.ActionRow,
+			components: [{
+				type: MessageComponentTypes.Button,
+				label: '«',
+				customId: previousPageButtonId,
+				style: ButtonStyles.Secondary,
+				disabled: isFirst(),
+			}, {
+				type: MessageComponentTypes.Button,
+				label: `${localise(Commands.word.strings.page, interaction.locale)} ${pageIndex + 1}/${entries.length}`,
+				style: ButtonStyles.Secondary,
+				customId: 'none',
+			}, {
+				type: MessageComponentTypes.Button,
+				label: '»',
+				customId: nextPageButtonId,
+				style: ButtonStyles.Secondary,
+				disabled: isLast(),
+			}],
+		}];
+	};
+
+	return void generateView();
 }
 
 export default command;
