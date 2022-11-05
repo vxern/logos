@@ -65,7 +65,7 @@ function getEmbedFields(
 	const fields: DiscordEmbedField[] = [];
 
 	if (entry.definitions) {
-		const skippedEntriesString = localise(Commands.word.strings.skippedResults, locale)(entry.definitions.length);
+		const skippedEntriesString = localise(Commands.word.strings.definitionsOmitted, locale)(entry.definitions.length);
 
 		const definitions = entry.definitions.map((definition) => {
 			if (!definition.tags) {
@@ -91,7 +91,7 @@ function getEmbedFields(
 
 		let displayString = definitionsToDisplay.join('\n');
 		if (definitionsOmitted !== 0) {
-			displayString += `\n*${localise(Commands.word.strings.skippedResults, locale)(definitionsOmitted)}*`;
+			displayString += `\n*${localise(Commands.word.strings.definitionsOmitted, locale)(definitionsOmitted)}*`;
 		}
 
 		fields.push({

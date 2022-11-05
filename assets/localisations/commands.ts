@@ -480,14 +480,14 @@ class Commands {
 					'Romanian': 'Antonime',
 				},
 			},
-			skippedResults: {
+			definitionsOmitted: {
 				'English': (results: number) => {
 					const numberExpression = Expressions.english.methods.pluralise(
 						results.toString(),
-						'result',
-						'results',
+						'definition',
+						'definitions',
 					);
-					return `Skipped ${numberExpression}. ` +
+					return `Omitted ${numberExpression}. ` +
 						`To display more results, enable the '${
 							localise(this.word.options.verbose.name, getLocale('English'))
 						}' flag.`;
@@ -495,9 +495,9 @@ class Commands {
 				'Polish': (results: number) => {
 					const numberExpression = Expressions.polish.methods.pluralise(
 						results.toString(),
-						'rezultat',
-						'rezultaty',
-						'rezultatów',
+						'znaczenie',
+						'znaczenia',
+						'znaczeń',
 					);
 					return `Ominięto ${numberExpression}. ` +
 						`Aby wyświetlić więcej rezultatów, użyj flagi '${
@@ -507,14 +507,19 @@ class Commands {
 				'Romanian': (results: number) => {
 					const numberExpression = Expressions.romanian.methods.pluralise(
 						results.toString(),
-						'rezultat',
-						'rezultate',
+						'definiție',
+						'definiții',
 					);
 					return `${numberExpression} au fost omise. ` +
 						`Pentru a afișa mai multe rezultate, activează fanionul '${
 							localise(this.word.options.verbose.name, getLocale('Romanian'))
 						}'.`;
 				},
+			},
+			page: {
+				'English': 'Page',
+				'Polish': 'Strona',
+				'Romanian': 'Pagina',
 			},
 		},
 	});
