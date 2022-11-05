@@ -479,6 +479,11 @@ class Commands {
 					'Polish': 'Antonimy',
 					'Romanian': 'Antonime',
 				},
+				expressions: {
+					'English': 'Expressions',
+					'Polish': 'Zwroty',
+					'Romanian': 'Exprimări',
+				},
 			},
 			definitionsOmitted: {
 				'English': (results: number) => {

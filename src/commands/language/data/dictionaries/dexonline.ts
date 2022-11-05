@@ -1,6 +1,6 @@
 import { cheerio } from 'cheerio';
 import { Language } from '../../../../types.ts';
-import { DictionaryAdapter, DictionaryEntry, DictionaryProvisions } from '../dictionary.ts';
+import { DictionaryAdapter, DictionaryEntry, DictionaryProvisions, TaggedValue } from '../dictionary.ts';
 
 const tabContentSelector = (tab: ContentTab) => `#tab_${tab}`;
 
@@ -14,6 +14,7 @@ enum ContentTab {
 type Element = cheerio.Cheerio<cheerio.Element>;
 type Definitions = NonNullable<DictionaryEntry['definitions']>;
 type Etymologies = NonNullable<DictionaryEntry['etymologies']>;
+type Expressions = NonNullable<DictionaryEntry['expressions']>;
 
 class Dexonline implements DictionaryAdapter {
 	readonly supports: Language[] = ['Romanian'];
@@ -34,11 +35,16 @@ class Dexonline implements DictionaryAdapter {
 		const entries: DictionaryEntry[] = [];
 		for (const [heading, body] of wordEntries) {
 			const { word } = this.parseHeading(heading);
-			const { etymologies, definitions } = this.parseBody($, body);
+			const { etymologies, definitions, expressions } = this.parseBody($, body);
 
-			if (definitions.length === 0) continue;
+			if (definitions.length === 0 && expressions.length === 0) continue;
 
-			entries.push({ word, etymologies, definitions });
+			entries.push({
+				word,
+				etymologies,
+				definitions: definitions.length > 0 ? definitions : undefined,
+				expressions: expressions.length > 0 ? expressions : undefined,
+			});
 		}
 
 		return entries.length === 0 ? undefined : entries;
@@ -67,11 +73,12 @@ class Dexonline implements DictionaryAdapter {
 	private parseBody(
 		$: cheerio.CheerioAPI,
 		body: Element,
-	): { etymologies: Etymologies; definitions: Definitions } {
+	): { etymologies: Etymologies; definitions: Definitions; expressions: Expressions } {
 		const etymologies = this.getEtymologies($, body);
-		const definitions = this.getDefinitions($, body);
+		const definitions = this.getEntries($, body, 'definitions');
+		const expressions = this.getEntries($, body, 'expressions');
 
-		return { etymologies, definitions };
+		return { etymologies, definitions, expressions };
 	}
 
 	private getEtymologies($: cheerio.CheerioAPI, body: Element): Etymologies {
@@ -90,22 +97,27 @@ class Dexonline implements DictionaryAdapter {
 		return etymologies;
 	}
 
-	private getDefinitions($: cheerio.CheerioAPI, body: Element): Definitions {
-		const definitionRows = body.find(
-			'ul[class=meaningTree] > li[class="type-meaning depth-0"] > div[class=meaningContainer]',
+	private getEntries<T extends 'definitions' | 'expressions'>(
+		$: cheerio.CheerioAPI,
+		body: Element,
+		type: T,
+	): TaggedValue<string>[] {
+		const rows = body.find(
+			`ul[class=meaningTree] > li[class="type-${
+				type === 'definitions' ? 'meaning' : 'expression'
+			} depth-0"] > div[class=meaningContainer]`,
 		).toArray().map((definition) => $(definition));
 
-		const definitions: Definitions = [];
-		for (const definitionRow of definitionRows) {
-			const row = definitionRow.find('div[class=meaning-row]');
-			const tags = row.find('span[class="tag-group meaning-tags"] > span[class="tag "]').toArray().map((element) =>
-				$(element).text()
-			);
-			const definition = row.find('span[class="def html"]').text().trim();
-			console.log(definition);
-			definitions.push({ tags, value: definition });
+		const entries: TaggedValue<string>[] = [];
+		for (const row of rows) {
+			const meaningRow = row.find('div[class=meaning-row]');
+			const tags = meaningRow.find('span[class="tag-group meaning-tags"] > span[class="tag "]').toArray().map((
+				element,
+			) => $(element).text());
+			const value = meaningRow.find('span[class="def html"]').text().trim();
+			entries.push({ tags, value });
 		}
-		return definitions;
+		return entries;
 	}
 }
 

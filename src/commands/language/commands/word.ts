@@ -151,7 +151,7 @@ async function word(
 	const generateEmbed: () => Embed = () => {
 		const entry = entries.at(pageIndex)!;
 
-		const fields = getEmbedFields(entry, interaction.locale, { verbose });
+		const fields = getEmbedFields(entry, interaction.locale, { verbose: verbose ?? false });
 
 		return {
 			title: entry.word,

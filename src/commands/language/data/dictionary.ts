@@ -1,7 +1,7 @@
 import { Commands } from '../../../../assets/localisations/commands.ts';
 import { localise } from '../../../../assets/localisations/types.ts';
 import { DiscordEmbedField } from '../../../../deps.ts';
-import { list } from '../../../formatting.ts';
+import { BulletStyles, list } from '../../../formatting.ts';
 import { Language } from '../../../types.ts';
 
 enum DictionaryScopes {
@@ -26,20 +26,31 @@ enum DictionaryProvisions {
 	Etymology,
 }
 
-interface WithTags<T> {
+interface TaggedValue<T> {
 	tags?: string[];
 	value: T;
 }
+
+interface Expression extends TaggedValue<string> {}
+
+interface Definition extends TaggedValue<string> {
+	expressions?: Expression[];
+}
+
+interface Etymology extends TaggedValue<string | undefined> {}
 
 interface DictionaryEntry {
 	/** The topic word of an entry. */
 	word: string;
 
 	/** The definitions of a word entry. */
-	definitions?: WithTags<string>[];
+	definitions?: Definition[];
+
+	/** The expressions of a word entry. */
+	expressions?: Expression[];
 
 	/** The etymologies of a word entry. */
-	etymologies?: WithTags<string | undefined>[];
+	etymologies?: Etymology[];
 }
 
 abstract class DictionaryAdapter<T = string> {
@@ -60,43 +71,27 @@ abstract class DictionaryAdapter<T = string> {
 function getEmbedFields(
 	entry: DictionaryEntry,
 	locale: string | undefined,
-	{ verbose }: { verbose: boolean | undefined },
+	{ verbose }: { verbose: boolean },
 ): DiscordEmbedField[] {
 	const fields: DiscordEmbedField[] = [];
 
 	if (entry.definitions) {
-		const skippedEntriesString = localise(Commands.word.strings.definitionsOmitted, locale)(entry.definitions.length);
-
-		const definitions = entry.definitions.map((definition) => {
-			if (!definition.tags) {
-				return definition.value;
-			}
-
-			return `${tagsToString(definition.tags)} ${definition.value}`;
-		});
-		const definitionsListed = list(definitions, 'diamond');
-		const definitionsDelisted = definitionsListed.split('\n');
-
-		const maxCharacterCount = verbose ? 4096 : 1024;
-		let characterCount = verbose ? 0 : skippedEntriesString.length + 20;
-		const definitionsToDisplay: string[] = [];
-		for (const definition of definitionsDelisted) {
-			characterCount += definition.length;
-
-			if (characterCount >= maxCharacterCount) break;
-			definitionsToDisplay.push(definition);
-		}
-
-		const definitionsOmitted = definitionsDelisted.length - definitionsToDisplay.length;
-
-		let displayString = definitionsToDisplay.join('\n');
-		if (definitionsOmitted !== 0) {
-			displayString += `\n*${localise(Commands.word.strings.definitionsOmitted, locale)(definitionsOmitted)}*`;
-		}
+		const definitionsStringified = stringifyEntries(entry.definitions, BulletStyles.Diamond);
+		const definitionsFitted = fitStringsToFieldSize(definitionsStringified, locale, verbose);
 
 		fields.push({
 			name: localise(Commands.word.strings.fields.definitions, locale),
-			value: displayString,
+			value: definitionsFitted,
+		});
+	}
+
+	if (entry.expressions) {
+		const expressionsStringified = stringifyEntries(entry.expressions, BulletStyles.Arrow);
+		const expressionsFitted = fitStringsToFieldSize(expressionsStringified, locale, verbose);
+
+		fields.push({
+			name: localise(Commands.word.strings.fields.expressions, locale),
+			value: expressionsFitted,
 		});
 	}
 
@@ -124,5 +119,49 @@ function tagsToString(tags: string[]): string {
 	return tags.map((tag) => `\`${tag}\``).join(' ');
 }
 
+function stringifyEntries(entries: TaggedValue<string>[], bulletStyle: BulletStyles): string[] {
+	const entriesStringified = entries.map((entry) => {
+		if (!entry.tags) {
+			return entry.value;
+		}
+
+		return `${tagsToString(entry.tags)} ${entry.value}`;
+	});
+	const entriesEnlisted = list(entriesStringified, bulletStyle);
+	const entriesDelisted = entriesEnlisted.split('\n');
+
+	return entriesDelisted;
+}
+
+function fitStringsToFieldSize(
+	strings: string[],
+	locale: string | undefined,
+	verbose: boolean,
+): string {
+	const overheadString = localise(Commands.word.strings.definitionsOmitted, locale)(strings.length);
+	const characterOverhead = overheadString.length + 20;
+
+	const maxCharacterCount = verbose ? 4096 : 1024;
+
+	let characterCount = 0;
+	const stringsToDisplay: string[] = [];
+	for (const [string, index] of strings.map<[string, number]>((s, i) => [s, i])) {
+		characterCount += string.length;
+
+		if (characterCount + (index + 1 === strings.length ? 0 : characterOverhead) >= maxCharacterCount) break;
+
+		stringsToDisplay.push(string);
+	}
+
+	const stringsOmitted = strings.length - stringsToDisplay.length;
+
+	let fittedString = stringsToDisplay.join('\n');
+	if (stringsOmitted !== 0) {
+		fittedString += `\n*${localise(Commands.word.strings.definitionsOmitted, locale)(stringsOmitted)}*`;
+	}
+
+	return fittedString;
+}
+
 export { DictionaryAdapter, DictionaryProvisions, DictionaryScopes, getEmbedFields };
-export type { DictionaryEntry, WithTags };
+export type { DictionaryEntry, TaggedValue };
