@@ -91,7 +91,7 @@ function getEmbedFields(
 
 		let displayString = definitionsToDisplay.join('\n');
 		if (definitionsOmitted !== 0) {
-			displayString += '\n...' + `\n*${localise(Commands.word.strings.skippedResults, locale)(definitionsOmitted)}*`;
+			displayString += `\n*${localise(Commands.word.strings.skippedResults, locale)(definitionsOmitted)}*`;
 		}
 
 		fields.push({
