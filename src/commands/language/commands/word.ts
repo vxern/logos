@@ -92,35 +92,35 @@ async function word(
 		entries.push(...entries_);
 	}
 
-	if (entries.length !== 0) {
-		const entry = entries.at(0)!;
-
-		const fields = getEmbedFields(entry, interaction.locale, { verbose });
-		const hasEntry = fields.length > 0;
-		if (!hasEntry) return;
-
-		return void editOriginalInteractionResponse(bot, interaction.token, {
-			embeds: [{
-				title: entry.word,
-				fields: fields,
-				color: fromHex('#d6e3f8'),
-			}],
-		});
+	if (entries.length === 0) {
+		return void editOriginalInteractionResponse(
+			bot,
+			interaction.token,
+			{
+				embeds: [{
+					description: localise(
+						Commands.word.strings.noResults,
+						interaction.locale,
+					),
+					color: configuration.interactions.responses.colors.yellow,
+				}],
+			},
+		);
 	}
 
-	return void editOriginalInteractionResponse(
-		bot,
-		interaction.token,
-		{
-			embeds: [{
-				description: localise(
-					Commands.word.strings.noResults,
-					interaction.locale,
-				),
-				color: configuration.interactions.responses.colors.yellow,
-			}],
-		},
-	);
+	const entry = entries.at(0)!;
+
+	const fields = getEmbedFields(entry, interaction.locale, { verbose });
+	const hasEntry = fields.length > 0;
+	if (!hasEntry) return;
+
+	return void editOriginalInteractionResponse(bot, interaction.token, {
+		embeds: [{
+			title: entry.word,
+			fields: fields,
+			color: fromHex('#d6e3f8'),
+		}],
+	});
 }
 
 export default command;
