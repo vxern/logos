@@ -37,6 +37,8 @@ import { setupLogging } from './controllers/logging/logging.ts';
 import { localise } from '../assets/localisations/types.ts';
 import { Misc } from '../assets/localisations/misc.ts';
 import { SupportedLanguage } from './commands/language/module.ts';
+import { DictionaryAdapter } from './commands/language/data/dictionary.ts';
+import { SentencePair } from './commands/language/data/sentence.ts';
 
 interface Collector<
 	E extends keyof EventHandlers,
@@ -83,9 +85,13 @@ type Client = Readonly<{
 	cache: Cache;
 	collectors: Map<Event, Set<Collector<Event>>>;
 	handlers: Map<string, InteractionHandler>;
+	features: {
+		dictionaryAdapters: Map<Language, DictionaryAdapter[]>;
+		sentencePairs: Map<Language, SentencePair[]>;
+	};
 }>;
 
-function createClient(metadata: Client['metadata']): Client {
+function createClient(metadata: Client['metadata'], features: Client['features']): Client {
 	return {
 		metadata,
 		log: createLogger(),
@@ -93,11 +99,12 @@ function createClient(metadata: Client['metadata']): Client {
 		cache: createCache(),
 		collectors: new Map(),
 		handlers: createCommandHandlers(commandBuilders),
+		features,
 	};
 }
 
-function initialiseClient(metadata: Client['metadata']): void {
-	const client = createClient(metadata);
+function initialiseClient(metadata: Client['metadata'], features: Client['features']): void {
+	const client = createClient(metadata, features);
 
 	const bot = createBot({
 		token: Deno.env.get('DISCORD_SECRET')!,
@@ -142,6 +149,12 @@ function createEventHandlers(client: Client): Partial<EventHandlers> {
 			client.cache.guilds.get(channel.guildId)?.channels.delete(channel.id);
 		},
 		interactionCreate: (bot, interaction) => {
+			if (interaction.data?.customId === 'none') {
+				return <unknown> sendInteractionResponse(bot, interaction.id, interaction.token, {
+					type: InteractionResponseTypes.DeferredUpdateMessage,
+				});
+			}
+
 			const commandName = interaction.data?.name;
 			if (!commandName) return;
 

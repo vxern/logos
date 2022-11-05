@@ -17,7 +17,6 @@ import { CommandBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
 import { createInteractionCollector, random } from '../../../utils.ts';
 import { SentencePair } from '../data/sentence.ts';
-import { sentencePairsByLanguage } from '../module.ts';
 
 const command: CommandBuilder = {
 	...createLocalisations(Commands.game),
@@ -33,7 +32,7 @@ async function startGame(
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (!guild) return;
 
-	const sentencePairs = sentencePairsByLanguage.get(guild.language);
+	const sentencePairs = client.features.sentencePairs.get(guild.language);
 	if (!sentencePairs || sentencePairs.length === 0) {
 		return void sendInteractionResponse(
 			bot,

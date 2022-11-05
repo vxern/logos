@@ -30,14 +30,24 @@ function codeMultiline(target: string): string {
 	return '```' + target + '```';
 }
 
+enum BulletStyles {
+	Arrow,
+	Diamond,
+}
+const bulletStyles: Required<Record<`${BulletStyles}`, string>> = {
+	[BulletStyles.Arrow]: '➜',
+	[BulletStyles.Diamond]: '♦️',
+};
+
 /**
  * Taking a list of items, puts them in a list format.
  *
  * @param items - Items in the list.
  * @returns The formatted string of text.
  */
-function list(items: string[]): string {
-	return items.map((item) => `➜ ${item}`).join('\n');
+function list(items: string[], bulletStyle: BulletStyles = BulletStyles.Arrow): string {
+	const bullet = bulletStyles[bulletStyle];
+	return items.map((item) => `${bullet} ${item}`).join('\n');
 }
 
 /**
@@ -75,4 +85,4 @@ function mention(id: bigint, type: MentionTypes): string {
 	return `<${prefixes[type]}${id}>`;
 }
 
-export { capitalise, code, codeMultiline, displayTime, list, mention, MentionTypes };
+export { BulletStyles, capitalise, code, codeMultiline, displayTime, list, mention, MentionTypes };

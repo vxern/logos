@@ -4,18 +4,22 @@ import {
 	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
 	Bot,
+	ButtonStyles,
 	editOriginalInteractionResponse,
+	Embed,
 	Interaction,
 	InteractionResponseTypes,
+	InteractionTypes,
+	MessageComponents,
+	MessageComponentTypes,
 	sendInteractionResponse,
 } from '../../../../deps.ts';
 import { Client } from '../../../client.ts';
 import { CommandBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
-import { diagnosticMentionUser, fromHex, parseArguments } from '../../../utils.ts';
+import { createInteractionCollector, diagnosticMentionUser, fromHex, parseArguments } from '../../../utils.ts';
 import { show } from '../../parameters.ts';
-import { DictionaryEntry, toFields } from '../data/dictionary.ts';
-import { dictionaryAdaptersByLanguage } from '../module.ts';
+import { DictionaryEntry, getEmbedFields } from '../data/dictionary.ts';
 
 const command: CommandBuilder = {
 	...createLocalisations(Commands.word),
@@ -45,7 +49,7 @@ async function word(
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (!guild) return;
 
-	const dictionaries = dictionaryAdaptersByLanguage.get(guild.language);
+	const dictionaries = client.features.dictionaryAdapters.get('Romanian');
 	if (!dictionaries) {
 		return void sendInteractionResponse(
 			bot,
@@ -77,58 +81,112 @@ async function word(
 		},
 	);
 
-	let entry: DictionaryEntry = { headword: word };
-
 	client.log.info(
 		`Looking up the word '${word}' from ${dictionaries.length} dictionaries ` +
 			`as requested by ${diagnosticMentionUser(interaction.user, true)} on ${guild.name}...`,
 	);
 
-	const promises = [];
+	const entries: DictionaryEntry[] = [];
 	for (const dictionary of dictionaries) {
-		const promise = dictionary.lookup(
-			{ word, native: guild.language },
-			dictionary.queryBuilder,
-		).catch();
+		const data = await dictionary.query(word, guild.language);
+		if (!data) continue;
 
-		promise.then((result) => {
-			entry = { ...result, ...entry };
+		const entries_ = dictionary.parse(data);
+		if (!entries_) continue;
 
-			const fields = toFields(entry, interaction.locale, { verbose });
-			const hasEntry = fields.length > 0;
-			if (!hasEntry) return;
-
-			editOriginalInteractionResponse(bot, interaction.token, {
-				embeds: [{
-					title: entry.headword,
-					fields: fields,
-					color: fromHex('#d6e3f8'),
-				}],
-			});
-		});
-
-		promises.push(promise);
+		entries.push(...entries_);
 	}
 
-	await Promise.all(promises).catch();
+	if (entries.length === 0) {
+		return void editOriginalInteractionResponse(
+			bot,
+			interaction.token,
+			{
+				embeds: [{
+					description: localise(
+						Commands.word.strings.noResults,
+						interaction.locale,
+					),
+					color: configuration.interactions.responses.colors.yellow,
+				}],
+			},
+		);
+	}
 
-	const responded = toFields(entry, interaction.locale, { verbose }).length >
-		0;
-	if (responded) return;
+	let pageIndex = 0;
+	const isFirst = () => pageIndex === 0;
+	const isLast = () => pageIndex === entries.length - 1;
 
-	return void editOriginalInteractionResponse(
-		bot,
-		interaction.token,
-		{
-			embeds: [{
-				description: localise(
-					Commands.word.strings.noResults,
-					interaction.locale,
-				),
-				color: configuration.interactions.responses.colors.yellow,
-			}],
+	const generateView = (selection?: Interaction): void => {
+		if (selection) {
+			sendInteractionResponse(bot, selection.id, selection.token, {
+				type: InteractionResponseTypes.DeferredUpdateMessage,
+			});
+		}
+
+		editOriginalInteractionResponse(bot, interaction.token, {
+			embeds: [generateEmbed()],
+			components: generateButtons(),
+		});
+	};
+
+	const previousPageButtonId = createInteractionCollector([client, bot], {
+		type: InteractionTypes.MessageComponent,
+		doesNotExpire: true,
+		onCollect: (_bot, selection) => {
+			if (!isFirst()) pageIndex--;
+			return void generateView(selection);
 		},
-	);
+	});
+
+	const nextPageButtonId = createInteractionCollector([client, bot], {
+		type: InteractionTypes.MessageComponent,
+		doesNotExpire: true,
+		onCollect: (_bot, selection) => {
+			if (!isLast()) pageIndex++;
+			return void generateView(selection);
+		},
+	});
+
+	const generateEmbed: () => Embed = () => {
+		const entry = entries.at(pageIndex)!;
+
+		const fields = getEmbedFields(entry, interaction.locale, { verbose: verbose ?? false });
+
+		return {
+			title: entry.word,
+			fields: fields,
+			color: fromHex('#d6e3f8'),
+		};
+	};
+
+	const generateButtons = (): MessageComponents => {
+		if (isFirst() && isLast()) return [];
+
+		return [{
+			type: MessageComponentTypes.ActionRow,
+			components: [{
+				type: MessageComponentTypes.Button,
+				label: '«',
+				customId: previousPageButtonId,
+				style: ButtonStyles.Secondary,
+				disabled: isFirst(),
+			}, {
+				type: MessageComponentTypes.Button,
+				label: `${localise(Commands.word.strings.page, interaction.locale)} ${pageIndex + 1}/${entries.length}`,
+				style: ButtonStyles.Secondary,
+				customId: 'none',
+			}, {
+				type: MessageComponentTypes.Button,
+				label: '»',
+				customId: nextPageButtonId,
+				style: ButtonStyles.Secondary,
+				disabled: isLast(),
+			}],
+		}];
+	};
+
+	return void generateView();
 }
 
 export default command;

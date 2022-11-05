@@ -449,20 +449,20 @@ class Commands {
 				'Romanian': 'Fără rezultate.',
 			},
 			fields: {
-				translation: {
-					'English': 'Translation',
-					'Polish': 'Tłumaczenie',
-					'Romanian': 'Traducere',
+				translations: {
+					'English': 'Translations',
+					'Polish': 'Tłumaczenia',
+					'Romanian': 'Traduceri',
 				},
 				pronunciation: {
 					'English': 'Pronunciation',
 					'Polish': 'Wymowa',
 					'Romanian': 'Pronunțare',
 				},
-				definition: {
-					'English': 'Definition',
-					'Polish': 'Znaczenie',
-					'Romanian': 'Definiție',
+				definitions: {
+					'English': 'Definitions',
+					'Polish': 'Znaczenia',
+					'Romanian': 'Definiții',
 				},
 				etymology: {
 					'English': 'Etymology',
@@ -479,6 +479,52 @@ class Commands {
 					'Polish': 'Antonimy',
 					'Romanian': 'Antonime',
 				},
+				expressions: {
+					'English': 'Expressions',
+					'Polish': 'Zwroty',
+					'Romanian': 'Exprimări',
+				},
+			},
+			definitionsOmitted: {
+				'English': (results: number) => {
+					const numberExpression = Expressions.english.methods.pluralise(
+						results.toString(),
+						'definition',
+						'definitions',
+					);
+					return `Omitted ${numberExpression}. ` +
+						`To display more results, enable the '${
+							localise(this.word.options.verbose.name, getLocale('English'))
+						}' flag.`;
+				},
+				'Polish': (results: number) => {
+					const numberExpression = Expressions.polish.methods.pluralise(
+						results.toString(),
+						'znaczenie',
+						'znaczenia',
+						'znaczeń',
+					);
+					return `Ominięto ${numberExpression}. ` +
+						`Aby wyświetlić więcej rezultatów, użyj flagi '${
+							localise(this.word.options.verbose.name, getLocale('Polish'))
+						}'.`;
+				},
+				'Romanian': (results: number) => {
+					const numberExpression = Expressions.romanian.methods.pluralise(
+						results.toString(),
+						'definiție',
+						'definiții',
+					);
+					return `${numberExpression} au fost omise. ` +
+						`Pentru a afișa mai multe rezultate, activează fanionul '${
+							localise(this.word.options.verbose.name, getLocale('Romanian'))
+						}'.`;
+				},
+			},
+			page: {
+				'English': 'Page',
+				'Polish': 'Strona',
+				'Romanian': 'Pagina',
 			},
 		},
 	});
