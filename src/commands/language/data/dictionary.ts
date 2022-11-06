@@ -35,9 +35,26 @@ interface Definition extends TaggedValue<string> {
 
 interface Etymology extends TaggedValue<string | undefined> {}
 
+enum WordTypes {
+	Noun,
+	Verb,
+	Adjective,
+	Adverb,
+	Adposition,
+	Affix,
+	Pronoun,
+	Determiner,
+	Conjunction,
+	Interjection,
+	Unknown,
+}
+
 interface DictionaryEntry {
 	/** The topic word of an entry. */
 	word: string;
+
+	/** The type of a word. */
+	type?: [WordTypes, string];
 
 	/** The definitions of a word entry. */
 	definitions?: Definition[];
@@ -57,5 +74,5 @@ abstract class DictionaryAdapter<T = string> {
 	abstract readonly parse: (contents: T) => DictionaryEntry[] | undefined;
 }
 
-export { DictionaryAdapter, DictionaryProvisions, DictionaryScopes };
+export { DictionaryAdapter, DictionaryProvisions, DictionaryScopes, WordTypes };
 export type { DictionaryEntry, TaggedValue };

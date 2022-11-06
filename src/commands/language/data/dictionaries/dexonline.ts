@@ -1,4 +1,5 @@
 import { cheerio } from 'cheerio';
+import { getWordType } from '../../../../../assets/localisations/words.ts';
 import { Language } from '../../../../types.ts';
 import { DictionaryAdapter, DictionaryEntry, DictionaryProvisions, TaggedValue } from '../dictionary.ts';
 
@@ -12,6 +13,8 @@ enum ContentTab {
 }
 
 type Element = cheerio.Cheerio<cheerio.Element>;
+type Word = DictionaryEntry['word'];
+type WordType = DictionaryEntry['type'];
 type Definitions = NonNullable<DictionaryEntry['definitions']>;
 type Etymologies = NonNullable<DictionaryEntry['etymologies']>;
 type Expressions = NonNullable<DictionaryEntry['expressions']>;
@@ -34,13 +37,14 @@ class Dexonline implements DictionaryAdapter {
 
 		const entries: DictionaryEntry[] = [];
 		for (const [heading, body] of wordEntries) {
-			const { word } = this.parseHeading(heading);
+			const { word, type } = this.parseHeading(heading);
 			const { etymologies, definitions, expressions } = this.parseBody($, body);
 
 			if (definitions.length === 0 && expressions.length === 0) continue;
 
 			entries.push({
 				word,
+				type,
 				etymologies,
 				definitions: definitions.length > 0 ? definitions : undefined,
 				expressions: expressions.length > 0 ? expressions : undefined,
@@ -64,10 +68,14 @@ class Dexonline implements DictionaryAdapter {
 		);
 	}
 
-	private parseHeading(heading: Element): { type: string; word: string } {
-		const type = heading.find('span[class=tree-pos-info]').remove().text();
+	private parseHeading(heading: Element): { word: Word; type: WordType } {
+		const typeString = heading.find('span[class=tree-pos-info]').remove().text().trim().toLowerCase();
 		const word = heading.text().trim();
-		return { type, word };
+
+		const primaryType = typeString.split(' ').at(0)!;
+		const type = getWordType(primaryType, 'Romanian');
+
+		return { type: [type, typeString], word };
 	}
 
 	private parseBody(

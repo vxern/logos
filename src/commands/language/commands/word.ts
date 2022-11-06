@@ -1,4 +1,5 @@
 import { Commands } from '../../../../assets/localisations/commands.ts';
+import { Words } from '../../../../assets/localisations/words.ts';
 import { createLocalisations, localise } from '../../../../assets/localisations/types.ts';
 import {
 	ApplicationCommandFlags,
@@ -21,7 +22,7 @@ import configuration from '../../../configuration.ts';
 import { BulletStyles, list } from '../../../formatting.ts';
 import { createInteractionCollector, diagnosticMentionUser, fromHex, parseArguments } from '../../../utils.ts';
 import { show } from '../../parameters.ts';
-import { DictionaryEntry, TaggedValue } from '../data/dictionary.ts';
+import { DictionaryEntry, TaggedValue, WordTypes } from '../data/dictionary.ts';
 
 const command: CommandBuilder = {
 	...createLocalisations(Commands.word),
@@ -229,8 +230,20 @@ function getEmbed(
 		});
 	}
 
+	let description: string;
+	if (!entry.type) {
+		description = localise(Words.types[WordTypes.Unknown], locale);
+	} else {
+		const [type, typeString] = entry.type;
+		description = localise(Words.types[type], locale);
+		if (type === WordTypes.Unknown) {
+			description += ` — '${typeString}'`;
+		}
+	}
+
 	return {
 		title: entry.word,
+		description: `***${description}***`,
 		fields,
 		color: fromHex('#d6e3f8'),
 	};
