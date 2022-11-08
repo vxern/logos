@@ -1,3 +1,4 @@
+import { DiscordEmbedField } from '../../../../deps.ts';
 import { Language } from '../../../types.ts';
 
 enum DictionaryScopes {
@@ -49,6 +50,8 @@ enum WordTypes {
 	Unknown,
 }
 
+type InflectionTable = { title: string; fields: DiscordEmbedField[] }[];
+
 interface DictionaryEntry {
 	/** The topic word of an entry. */
 	word: string;
@@ -64,6 +67,9 @@ interface DictionaryEntry {
 
 	/** The etymologies of a word entry. */
 	etymologies?: Etymology[];
+
+	/** The inflection of a word entry. */
+	inflectionTable?: InflectionTable;
 }
 
 abstract class DictionaryAdapter<T = string> {
@@ -71,7 +77,7 @@ abstract class DictionaryAdapter<T = string> {
 	abstract readonly provides: DictionaryProvisions[];
 
 	abstract readonly query: (word: string, language: Language) => Promise<T | undefined>;
-	abstract readonly parse: (contents: T) => DictionaryEntry[] | undefined;
+	abstract readonly parse: (contents: T, locale: string | undefined) => DictionaryEntry[] | undefined;
 }
 
 export { DictionaryAdapter, DictionaryProvisions, DictionaryScopes, WordTypes };

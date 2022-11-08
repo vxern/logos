@@ -526,6 +526,16 @@ class Commands {
 				'Polish': 'Strona',
 				'Romanian': 'Pagina',
 			},
+			definitions: {
+				'English': 'Definitions',
+				'Polish': 'Znaczenia',
+				'Romanian': 'Definiții',
+			},
+			inflection: {
+				'English': 'Inflection',
+				'Polish': 'Odmiana',
+				'Romanian': 'Flexiune',
+			},
 		},
 	});
 

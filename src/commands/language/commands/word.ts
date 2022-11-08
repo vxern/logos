@@ -5,6 +5,7 @@ import {
 	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
 	Bot,
+	ButtonComponent,
 	ButtonStyles,
 	DiscordEmbedField,
 	editOriginalInteractionResponse,
@@ -20,7 +21,7 @@ import { Client } from '../../../client.ts';
 import { CommandBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
 import { BulletStyles, list } from '../../../formatting.ts';
-import { createInteractionCollector, diagnosticMentionUser, fromHex, parseArguments } from '../../../utils.ts';
+import { chunk, createInteractionCollector, diagnosticMentionUser, fromHex, parseArguments } from '../../../utils.ts';
 import { show } from '../../parameters.ts';
 import { DictionaryEntry, TaggedValue, WordTypes } from '../data/dictionary.ts';
 
@@ -37,6 +38,11 @@ const command: CommandBuilder = {
 		type: ApplicationCommandOptionTypes.Boolean,
 	}, show],
 };
+
+enum Views {
+	Definitions = 0,
+	Inflection,
+}
 
 /** Allows the user to look up a word and get information about it. */
 async function word(
@@ -94,7 +100,7 @@ async function word(
 		const data = await dictionary.query(word, guild.language);
 		if (!data) continue;
 
-		const entries_ = dictionary.parse(data);
+		const entries_ = dictionary.parse(data, interaction.locale);
 		if (!entries_) continue;
 
 		entries.push(...entries_);
@@ -116,74 +122,178 @@ async function word(
 		);
 	}
 
-	let pageIndex = 0;
-	const isFirst = () => pageIndex === 0;
-	const isLast = () => pageIndex === entries.length - 1;
+	let currentView = Views.Definitions;
+	let definitionEntryIndex = 0;
+	let inflectionTableIndex = 0;
 
-	const generateView = (selection?: Interaction): void => {
+	const isFirst = () => definitionEntryIndex === 0;
+	const isLast = () => definitionEntryIndex === entries.length - 1;
+	const getEntry = () => entries.at(definitionEntryIndex)!;
+
+	const displayMenu = (selection?: Interaction): void => {
 		if (selection) {
 			sendInteractionResponse(bot, selection.id, selection.token, {
 				type: InteractionResponseTypes.DeferredUpdateMessage,
 			});
 		}
 
+		const entry = getEntry();
+
 		editOriginalInteractionResponse(bot, interaction.token, {
-			embeds: [generateEmbed()],
-			components: generateButtons(),
+			embeds: [generateEmbed(entry)],
+			components: generateButtons(entry),
 		});
 	};
 
-	const previousPageButtonId = createInteractionCollector([client, bot], {
-		type: InteractionTypes.MessageComponent,
-		doesNotExpire: true,
-		onCollect: (_bot, selection) => {
-			if (!isFirst()) pageIndex--;
-			return void generateView(selection);
-		},
-	});
-
-	const nextPageButtonId = createInteractionCollector([client, bot], {
-		type: InteractionTypes.MessageComponent,
-		doesNotExpire: true,
-		onCollect: (_bot, selection) => {
-			if (!isLast()) pageIndex++;
-			return void generateView(selection);
-		},
-	});
-
-	const generateEmbed: () => Embed = () => {
-		const entry = entries.at(pageIndex)!;
-
-		return getEmbed(entry, interaction.locale, verbose ?? false);
+	const generateEmbed = (entry: DictionaryEntry): Embed => {
+		switch (currentView) {
+			case Views.Definitions: {
+				return getEmbed(entry, interaction.locale, verbose ?? false);
+			}
+			case Views.Inflection: {
+				return entry.inflectionTable!.at(inflectionTableIndex)!;
+			}
+		}
 	};
 
-	const generateButtons = (): MessageComponents => {
-		if (isFirst() && isLast()) return [];
+	const generateButtons = (entry: DictionaryEntry): MessageComponents => {
+		const paginationControls: ButtonComponent[][] = [];
 
-		return [{
+		switch (currentView) {
+			case Views.Definitions: {
+				if (isFirst() && isLast()) return [];
+
+				const previousPageButtonId = createInteractionCollector([client, bot], {
+					type: InteractionTypes.MessageComponent,
+					onCollect: (_bot, selection) => {
+						if (!isFirst()) definitionEntryIndex--;
+						return void displayMenu(selection);
+					},
+				});
+
+				const nextPageButtonId = createInteractionCollector([client, bot], {
+					type: InteractionTypes.MessageComponent,
+					onCollect: (_bot, selection) => {
+						if (!isLast()) definitionEntryIndex++;
+						return void displayMenu(selection);
+					},
+				});
+
+				paginationControls.push([{
+					type: MessageComponentTypes.Button,
+					label: '«',
+					customId: previousPageButtonId,
+					style: ButtonStyles.Secondary,
+					disabled: isFirst(),
+				}, {
+					type: MessageComponentTypes.Button,
+					label: `${localise(Commands.word.strings.page, interaction.locale)} ${
+						definitionEntryIndex + 1
+					}/${entries.length}`,
+					style: ButtonStyles.Secondary,
+					customId: 'none',
+				}, {
+					type: MessageComponentTypes.Button,
+					label: '»',
+					customId: nextPageButtonId,
+					style: ButtonStyles.Secondary,
+					disabled: isLast(),
+				}]);
+
+				break;
+			}
+			case Views.Inflection: {
+				if (!entry.inflectionTable) return [];
+
+				const rows = chunk(entry.inflectionTable, 5);
+				rows.reverse();
+
+				const buttonId = createInteractionCollector([client, bot], {
+					type: InteractionTypes.MessageComponent,
+					onCollect: (_bot, selection) => {
+						if (!entry.inflectionTable || !selection.data) return void displayMenu(selection);
+
+						const [_buttonId, indexString] = selection.data.customId!.split('|');
+						const index = Number(indexString);
+
+						if (index >= 0 && index <= entry.inflectionTable?.length) {
+							inflectionTableIndex = index;
+						}
+
+						return void displayMenu(selection);
+					},
+				});
+
+				for (const [row, rowIndex] of rows.map<[typeof entry.inflectionTable, number]>((r, i) => [r, i])) {
+					paginationControls.unshift(
+						row.map((table, index) => {
+							const index_ = rowIndex * 5 + index;
+
+							return {
+								type: MessageComponentTypes.Button,
+								label: table.title,
+								customId: `${buttonId}|${index_}`,
+								disabled: inflectionTableIndex === index_,
+								style: ButtonStyles.Secondary,
+							};
+						}),
+					);
+				}
+			}
+		}
+
+		if (paginationControls.length !== 0) {
+			const row: ButtonComponent[] = [];
+
+			const definitionsMenuButtonId = createInteractionCollector([client, bot], {
+				type: InteractionTypes.MessageComponent,
+				onCollect: (_bot, selection) => {
+					currentView = Views.Definitions;
+					return void displayMenu(selection);
+				},
+			});
+
+			const inflectionMenuButtonId = createInteractionCollector([client, bot], {
+				type: InteractionTypes.MessageComponent,
+				onCollect: (_bot, selection) => {
+					currentView = Views.Inflection;
+					return void displayMenu(selection);
+				},
+			});
+
+			if (entry.definitions) {
+				row.push({
+					type: MessageComponentTypes.Button,
+					label: localise(Commands.word.strings.definitions, interaction.locale),
+					disabled: currentView === Views.Definitions,
+					customId: definitionsMenuButtonId,
+					style: ButtonStyles.Primary,
+				});
+			}
+
+			if (entry.inflectionTable) {
+				row.push({
+					type: MessageComponentTypes.Button,
+					label: localise(Commands.word.strings.inflection, interaction.locale),
+					disabled: currentView === Views.Inflection,
+					customId: inflectionMenuButtonId,
+					style: ButtonStyles.Primary,
+				});
+			}
+
+			if (row.length > 1) {
+				paginationControls.push(row);
+			}
+		}
+
+		// @ts-ignore
+		return paginationControls.map((row) => ({
 			type: MessageComponentTypes.ActionRow,
-			components: [{
-				type: MessageComponentTypes.Button,
-				label: '«',
-				customId: previousPageButtonId,
-				style: ButtonStyles.Secondary,
-				disabled: isFirst(),
-			}, {
-				type: MessageComponentTypes.Button,
-				label: `${localise(Commands.word.strings.page, interaction.locale)} ${pageIndex + 1}/${entries.length}`,
-				style: ButtonStyles.Secondary,
-				customId: 'none',
-			}, {
-				type: MessageComponentTypes.Button,
-				label: '»',
-				customId: nextPageButtonId,
-				style: ButtonStyles.Secondary,
-				disabled: isLast(),
-			}],
-		}];
+			components: row,
+		}));
 	};
 
-	return void generateView();
+	return void displayMenu();
 }
 
 function getEmbed(
