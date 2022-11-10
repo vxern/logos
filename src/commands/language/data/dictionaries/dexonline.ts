@@ -411,7 +411,7 @@ class Dexonline implements DictionaryAdapter {
 				(
 					columns,
 				) => columns.slice(2).map((terms) => terms.split(' ').filter((term) => !term.endsWith('‑')).join(' ')),
-			).filter((row) => row.every((term) => term !== '—')),
+			),
 			2,
 		);
 
