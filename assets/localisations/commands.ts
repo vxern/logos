@@ -684,6 +684,40 @@ class Commands {
 					},
 				},
 			},
+			nouns: {
+				cases: {
+					cases: {
+						'English': 'Cases',
+						'Polish': 'Przypadki',
+						'Romanian': 'Cazuri',
+					},
+					nominativeAccusative: {
+						'English': 'Nominative-accusative',
+						'Polish': 'Mianownik-biernik',
+						'Romanian': 'Nominativ-acuzativ',
+					},
+					genitiveDative: {
+						'English': 'Genitive-dative',
+						'Polish': 'Dopełniacz-celownik',
+						'Romanian': 'Genitiv-dativ',
+					},
+					vocative: {
+						'English': 'Vocative',
+						'Polish': 'Wołacz',
+						'Romanian': 'Vocativ',
+					},
+				},
+				singular: {
+					'English': 'Singular',
+					'Polish': 'Liczba pojedyncza',
+					'Romanian': 'Singular',
+				},
+				plural: {
+					'English': 'Plural',
+					'Polish': 'Liczba mnoga',
+					'Romanian': 'Plural',
+				},
+			},
 		},
 	});
 
