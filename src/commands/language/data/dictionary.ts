@@ -56,6 +56,9 @@ interface DictionaryEntry {
 	/** The topic word of an entry. */
 	word: string;
 
+	/** The string to display as the title of this entry. */
+	title?: string;
+
 	/** The type of a word. */
 	type?: [WordTypes, string];
 
