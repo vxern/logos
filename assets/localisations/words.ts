@@ -69,6 +69,7 @@ class Words {
 			'substantiv': WordTypes.Noun,
 			'verb': WordTypes.Verb,
 			'adjectiv': WordTypes.Adjective,
+			'adjectiv pronominal': WordTypes.Determiner,
 			'adverb': WordTypes.Adverb,
 			'prepoziție': WordTypes.Adposition,
 			'postpoziție': WordTypes.Adposition,

@@ -225,19 +225,21 @@ async function word(
 				});
 
 				for (const [row, rowIndex] of rows.map<[typeof entry.inflectionTable, number]>((r, i) => [r, i])) {
-					paginationControls.unshift(
-						row.map((table, index) => {
-							const index_ = rowIndex * 5 + index;
+					const buttons = row.map<ButtonComponent>((table, index) => {
+						const index_ = rowIndex * 5 + index;
 
-							return {
-								type: MessageComponentTypes.Button,
-								label: table.title,
-								customId: `${buttonId}|${index_}`,
-								disabled: inflectionTableIndex === index_,
-								style: ButtonStyles.Secondary,
-							};
-						}),
-					);
+						return {
+							type: MessageComponentTypes.Button,
+							label: table.title,
+							customId: `${buttonId}|${index_}`,
+							disabled: inflectionTableIndex === index_,
+							style: ButtonStyles.Secondary,
+						};
+					});
+
+					if (buttons.length > 1) {
+						paginationControls.unshift(buttons);
+					}
 				}
 			}
 		}

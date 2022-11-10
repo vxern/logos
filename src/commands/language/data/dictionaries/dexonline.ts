@@ -25,7 +25,7 @@ type Etymologies = NonNullable<DictionaryEntry['etymologies']>;
 type Expressions = NonNullable<DictionaryEntry['expressions']>;
 type InflectionTable = NonNullable<DictionaryEntry['inflectionTable']>;
 
-const supportedTypesForInflection = [WordTypes.Noun, WordTypes.Verb, WordTypes.Adjective];
+const supportedTypesForInflection = [WordTypes.Noun, WordTypes.Verb, WordTypes.Adjective, WordTypes.Determiner];
 
 const entryNameExpression = /((?:[a-zA-ZăĂâÂîÎșȘțȚ-]+))(<sup>(\d+)<\/sup>)?/;
 
@@ -131,8 +131,7 @@ class Dexonline implements DictionaryAdapter {
 		const wordDisplayed = heading.text().trim();
 		const word = wordDisplayed.split(', ').at(0)!;
 
-		const primaryType = typeString.split(' ').at(0)!;
-		const type = getWordType(primaryType, 'Romanian');
+		const type = getWordType(typeString, 'Romanian');
 
 		return { word, title: wordDisplayed, type: [type, typeString] };
 	}
@@ -201,9 +200,65 @@ class Dexonline implements DictionaryAdapter {
 			case WordTypes.Verb: {
 				return this.verbTableRowsToTable(rows, locale);
 			}
+			case WordTypes.Adjective: {
+				return this.adjectiveTableRowsToTable(rows, locale);
+			}
+			case WordTypes.Determiner: {
+				return this.determinerTableRowsToTable(rows, locale);
+			}
 		}
 
 		return [];
+	}
+
+	private nounTableRowsToTable(rows: string[][], locale: string | undefined): InflectionTable {
+		const [nominativeAccusative, genitiveDative, vocative] = chunk(
+			rows.slice(1).map(
+				(
+					columns,
+				) => columns.slice(2).map((terms) => terms.split(' ').filter((term) => !term.endsWith('‑')).join(' ')),
+			),
+			2,
+		);
+
+		for (const row of vocative!) {
+			row.pop();
+		}
+		vocative![0] = vocative!.at(0)!.at(0)!.split(' ');
+
+		const numberColumn = {
+			name: '⠀',
+			value: `**${localise(Commands.word.strings.nouns.singular, locale)}**\n` +
+				`**${localise(Commands.word.strings.nouns.plural, locale)}**`,
+			inline: true,
+		};
+
+		return [{
+			title: localise(Commands.word.strings.nouns.cases.cases, locale),
+			fields: [
+				numberColumn,
+				{
+					name: localise(Commands.word.strings.nouns.cases.nominativeAccusative, locale),
+					value: nominativeAccusative!.map((terms) => terms.join(', ')).join('\n'),
+					inline: true,
+				},
+				{
+					name: localise(Commands.word.strings.nouns.cases.genitiveDative, locale),
+					value: genitiveDative!.map((terms) => terms.join(', ')).join('\n'),
+					inline: true,
+				},
+				...(vocative
+					? [
+						numberColumn,
+						{
+							name: localise(Commands.word.strings.nouns.cases.vocative, locale),
+							value: vocative!.map((terms) => terms.join(', ')).join('\n'),
+							inline: true,
+						},
+					]
+					: []),
+			],
+		}];
 	}
 
 	private verbTableRowsToTable(rows: string[][], locale: string | undefined): InflectionTable {
@@ -405,22 +460,15 @@ class Dexonline implements DictionaryAdapter {
 		];
 	}
 
-	private nounTableRowsToTable(rows: string[][], locale: string | undefined): InflectionTable {
-		const [nominativeAccusative, genitiveDative, vocative] = chunk(
-			rows.slice(1).map(
+	private adjectiveTableRowsToTable(rows: string[][], locale: string | undefined): InflectionTable {
+		const [nominativeAccusative, genitiveDative] = chunk(
+			rows.slice(2).map(
 				(
 					columns,
-				) => columns.slice(2).map((terms) => terms.split(' ').filter((term) => !term.endsWith('‑')).join(' ')),
+				) => columns.slice(2, 8).map((terms) => terms.split(' ').filter((term) => !term.endsWith('‑')).join(' ')),
 			),
 			2,
 		);
-
-		if (vocative) {
-			for (const row of vocative) {
-				row.pop();
-			}
-			vocative[0] = vocative.at(0)!.at(0)!.split(' ');
-		}
 
 		const numberColumn = {
 			name: '⠀',
@@ -443,16 +491,41 @@ class Dexonline implements DictionaryAdapter {
 					value: genitiveDative!.map((terms) => terms.join(', ')).join('\n'),
 					inline: true,
 				},
-				...(vocative
-					? [
-						numberColumn,
-						{
-							name: localise(Commands.word.strings.nouns.cases.vocative, locale),
-							value: vocative!.map((terms) => terms.join(', ')).join('\n'),
-							inline: true,
-						},
-					]
-					: []),
+			],
+		}];
+	}
+
+	private determinerTableRowsToTable(rows: string[][], locale: string | undefined): InflectionTable {
+		const [nominativeAccusative, genitiveDative] = chunk(
+			rows.slice(2).map(
+				(
+					columns,
+				) => columns.slice(2, 8).map((terms) => terms.split(' ').filter((term) => !term.endsWith('‑')).join(' ')),
+			),
+			2,
+		);
+
+		const numberColumn = {
+			name: '⠀',
+			value: `**${localise(Commands.word.strings.nouns.singular, locale)}**\n` +
+				`**${localise(Commands.word.strings.nouns.plural, locale)}**`,
+			inline: true,
+		};
+
+		return [{
+			title: localise(Commands.word.strings.nouns.cases.cases, locale),
+			fields: [
+				numberColumn,
+				{
+					name: localise(Commands.word.strings.nouns.cases.nominativeAccusative, locale),
+					value: nominativeAccusative!.map((terms) => terms.join(', ')).join('\n'),
+					inline: true,
+				},
+				{
+					name: localise(Commands.word.strings.nouns.cases.genitiveDative, locale),
+					value: genitiveDative!.map((terms) => terms.join(', ')).join('\n'),
+					inline: true,
+				},
 			],
 		}];
 	}
