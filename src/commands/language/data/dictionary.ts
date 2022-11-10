@@ -1,7 +1,4 @@
-import { Commands } from '../../../../assets/localisations/commands.ts';
-import { localise } from '../../../../assets/localisations/types.ts';
 import { DiscordEmbedField } from '../../../../deps.ts';
-import { BulletStyles, list } from '../../../formatting.ts';
 import { Language } from '../../../types.ts';
 
 enum DictionaryScopes {
@@ -39,9 +36,31 @@ interface Definition extends TaggedValue<string> {
 
 interface Etymology extends TaggedValue<string | undefined> {}
 
+enum WordTypes {
+	Noun,
+	Verb,
+	Adjective,
+	Adverb,
+	Adposition,
+	Affix,
+	Pronoun,
+	Determiner,
+	Conjunction,
+	Interjection,
+	Unknown,
+}
+
+type InflectionTable = { title: string; fields: DiscordEmbedField[] }[];
+
 interface DictionaryEntry {
 	/** The topic word of an entry. */
 	word: string;
+
+	/** The string to display as the title of this entry. */
+	title?: string;
+
+	/** The type of a word. */
+	type?: [WordTypes, string];
 
 	/** The definitions of a word entry. */
 	definitions?: Definition[];
@@ -51,6 +70,9 @@ interface DictionaryEntry {
 
 	/** The etymologies of a word entry. */
 	etymologies?: Etymology[];
+
+	/** The inflection of a word entry. */
+	inflectionTable?: InflectionTable;
 }
 
 abstract class DictionaryAdapter<T = string> {
@@ -58,110 +80,8 @@ abstract class DictionaryAdapter<T = string> {
 	abstract readonly provides: DictionaryProvisions[];
 
 	abstract readonly query: (word: string, language: Language) => Promise<T | undefined>;
-	abstract readonly parse: (contents: T) => DictionaryEntry[] | undefined;
+	abstract readonly parse: (contents: T, locale: string | undefined) => DictionaryEntry[] | undefined;
 }
 
-/**
- * Builds embed fields from a {@link DictionaryEntry} corresponding to the
- * different pieces of data.
- *
- * @param entry - The entry to build fields from.
- * @returns The fields.
- */
-function getEmbedFields(
-	entry: DictionaryEntry,
-	locale: string | undefined,
-	{ verbose }: { verbose: boolean },
-): DiscordEmbedField[] {
-	const fields: DiscordEmbedField[] = [];
-
-	if (entry.definitions) {
-		const definitionsStringified = stringifyEntries(entry.definitions, BulletStyles.Diamond);
-		const definitionsFitted = fitStringsToFieldSize(definitionsStringified, locale, verbose);
-
-		fields.push({
-			name: localise(Commands.word.strings.fields.definitions, locale),
-			value: definitionsFitted,
-		});
-	}
-
-	if (entry.expressions) {
-		const expressionsStringified = stringifyEntries(entry.expressions, BulletStyles.Arrow);
-		const expressionsFitted = fitStringsToFieldSize(expressionsStringified, locale, verbose);
-
-		fields.push({
-			name: localise(Commands.word.strings.fields.expressions, locale),
-			value: expressionsFitted,
-		});
-	}
-
-	if (entry.etymologies) {
-		fields.push({
-			name: localise(Commands.word.strings.fields.etymology, locale),
-			value: entry.etymologies.map((etymology) => {
-				if (!etymology.tags) {
-					return `**${etymology.value}**`;
-				}
-
-				if (!etymology.value) {
-					return tagsToString(etymology.tags);
-				}
-
-				return `${tagsToString(etymology.tags)} **${etymology.value}**`;
-			}).join('\n'),
-		});
-	}
-
-	return fields;
-}
-
-function tagsToString(tags: string[]): string {
-	return tags.map((tag) => `\`${tag}\``).join(' ');
-}
-
-function stringifyEntries(entries: TaggedValue<string>[], bulletStyle: BulletStyles): string[] {
-	const entriesStringified = entries.map((entry) => {
-		if (!entry.tags) {
-			return entry.value;
-		}
-
-		return `${tagsToString(entry.tags)} ${entry.value}`;
-	});
-	const entriesEnlisted = list(entriesStringified, bulletStyle);
-	const entriesDelisted = entriesEnlisted.split('\n');
-
-	return entriesDelisted;
-}
-
-function fitStringsToFieldSize(
-	strings: string[],
-	locale: string | undefined,
-	verbose: boolean,
-): string {
-	const overheadString = localise(Commands.word.strings.definitionsOmitted, locale)(strings.length);
-	const characterOverhead = overheadString.length + 20;
-
-	const maxCharacterCount = verbose ? 4096 : 1024;
-
-	let characterCount = 0;
-	const stringsToDisplay: string[] = [];
-	for (const [string, index] of strings.map<[string, number]>((s, i) => [s, i])) {
-		characterCount += string.length;
-
-		if (characterCount + (index + 1 === strings.length ? 0 : characterOverhead) >= maxCharacterCount) break;
-
-		stringsToDisplay.push(string);
-	}
-
-	const stringsOmitted = strings.length - stringsToDisplay.length;
-
-	let fittedString = stringsToDisplay.join('\n');
-	if (stringsOmitted !== 0) {
-		fittedString += `\n*${localise(Commands.word.strings.definitionsOmitted, locale)(stringsOmitted)}*`;
-	}
-
-	return fittedString;
-}
-
-export { DictionaryAdapter, DictionaryProvisions, DictionaryScopes, getEmbedFields };
+export { DictionaryAdapter, DictionaryProvisions, DictionaryScopes, WordTypes };
 export type { DictionaryEntry, TaggedValue };

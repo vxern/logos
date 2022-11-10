@@ -526,6 +526,198 @@ class Commands {
 				'Polish': 'Strona',
 				'Romanian': 'Pagina',
 			},
+			definitions: {
+				'English': 'Definitions',
+				'Polish': 'Znaczenia',
+				'Romanian': 'Definiții',
+			},
+			inflection: {
+				'English': 'Inflection',
+				'Polish': 'Odmiana',
+				'Romanian': 'Flexiune',
+			},
+			verbs: {
+				moodsAndParticiples: {
+					'English': 'Moods and participles',
+					'Polish': 'Tryby oraz imiesłowy',
+					'Romanian': 'Moduri și participii',
+				},
+				moods: {
+					conditional: {
+						'English': 'Conditional',
+						'Polish': 'Warunkowy',
+						'Romanian': 'Condițional',
+					},
+					imperative: {
+						'English': 'Imperative',
+						'Polish': 'Rozkazujący',
+						'Romanian': 'Imperativ',
+					},
+					indicative: {
+						'English': 'Indicative',
+						'Polish': 'Oznajmujący',
+						'Romanian': 'Indicativ',
+					},
+					infinitive: {
+						'English': 'Infinitive',
+						'Polish': 'Bezokolicznik',
+						'Romanian': 'Infinitiv',
+					},
+					longInfinitive: {
+						'English': 'Long infinitive',
+						'Polish': 'Bezokolicznik długi',
+						'Romanian': 'Infinitiv lung',
+					},
+					optative: {
+						'English': 'Optative',
+						'Polish': 'Życzący',
+						'Romanian': 'Optativ',
+					},
+					presumptive: {
+						'English': 'Presumptive',
+						'Polish': 'Przypuszczający',
+						'Romanian': 'Prezumtiv',
+					},
+					subjunctive: {
+						'English': 'Subjunctive',
+						'Polish': 'Łączący',
+						'Romanian': 'Conjunctiv',
+					},
+					supine: {
+						'English': 'Supine',
+						'Polish': 'Celujący',
+						'Romanian': 'Supin',
+					},
+				},
+				participles: {
+					present: {
+						'English': 'Present participle',
+						'Polish': 'Imiesłów przysłówkowy współczesny',
+						'Romanian': 'Participiu prezent',
+					},
+					past: {
+						'English': 'Past participle',
+						'Polish': 'Imiesłów przymiotnikowy bierny',
+						'Romanian': 'Participiu trecut',
+					},
+				},
+				popular: {
+					'English': 'popular',
+					'Polish': 'popularny',
+					'Romanian': 'popular',
+				},
+				tenses: {
+					tenses: {
+						'English': 'Tenses',
+						'Polish': 'Czasy',
+						'Romanian': 'Timpuri',
+					},
+					present: {
+						'English': 'Present',
+						'Polish': 'Teraźniejszy',
+						'Romanian': 'Prezent',
+					},
+					presentContinuous: {
+						'English': 'Present continuous',
+						'Polish': 'Teraźniejszy ciągły',
+						'Romanian': 'Prezent continuu',
+					},
+					imperfect: {
+						'English': 'Imperfect',
+						'Polish': 'Przeszły niedokonany',
+						'Romanian': 'Imperfect',
+					},
+					preterite: {
+						'English': 'Preterite',
+						'Polish': 'Przeszły',
+						'Romanian': 'Perfect simplu',
+					},
+					pluperfect: {
+						'English': 'Pluperfect',
+						'Polish': 'Zaprzeszły',
+						'Romanian': 'Mai mult ca perfect',
+					},
+					perfect: {
+						'English': 'Perfect',
+						'Polish': 'Dokonany',
+						'Romanian': 'Perfect',
+					},
+					compoundPerfect: {
+						'English': 'Compound perfect',
+						'Polish': 'Dokonany złożony',
+						'Romanian': 'Perfect compus',
+					},
+					future: {
+						'English': 'Future',
+						'Polish': 'Przyszły',
+						'Romanian': 'Viitor',
+					},
+					futureCertain: {
+						'English': 'Certain future',
+						'Polish': 'Przyszły pewny',
+						'Romanian': 'Viitor cert',
+					},
+					futurePlanned: {
+						'English': 'Planned future',
+						'Polish': 'Przyszły zaplanowany',
+						'Romanian': 'Viitor planificat',
+					},
+					futureDecided: {
+						'English': 'Decided future',
+						'Polish': 'Przyszły zdecydowany',
+						'Romanian': 'Viitor decis',
+					},
+					futureIntended: {
+						'English': 'Intended future',
+						'Polish': 'Przyszły zamierzony',
+						'Romanian': 'Viitor intenționat',
+					},
+					futureInThePast: {
+						'English': 'Future-in-the-past',
+						'Polish': 'Przyszłość w przeszłości',
+						'Romanian': 'Viitor în trecut',
+					},
+					futurePerfect: {
+						'English': 'Future perfect',
+						'Polish': 'Przyszły dokonany',
+						'Romanian': 'Viitor anterior',
+					},
+				},
+			},
+			nouns: {
+				cases: {
+					cases: {
+						'English': 'Cases',
+						'Polish': 'Przypadki',
+						'Romanian': 'Cazuri',
+					},
+					nominativeAccusative: {
+						'English': 'Nominative-accusative',
+						'Polish': 'Mianownik-biernik',
+						'Romanian': 'Nominativ-acuzativ',
+					},
+					genitiveDative: {
+						'English': 'Genitive-dative',
+						'Polish': 'Dopełniacz-celownik',
+						'Romanian': 'Genitiv-dativ',
+					},
+					vocative: {
+						'English': 'Vocative',
+						'Polish': 'Wołacz',
+						'Romanian': 'Vocativ',
+					},
+				},
+				singular: {
+					'English': 'Singular',
+					'Polish': 'Liczba pojedyncza',
+					'Romanian': 'Singular',
+				},
+				plural: {
+					'English': 'Plural',
+					'Polish': 'Liczba mnoga',
+					'Romanian': 'Plural',
+				},
+			},
 		},
 	});
 

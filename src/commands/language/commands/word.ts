@@ -1,10 +1,13 @@
 import { Commands } from '../../../../assets/localisations/commands.ts';
+import { Words } from '../../../../assets/localisations/words.ts';
 import { createLocalisations, localise } from '../../../../assets/localisations/types.ts';
 import {
 	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
 	Bot,
+	ButtonComponent,
 	ButtonStyles,
+	DiscordEmbedField,
 	editOriginalInteractionResponse,
 	Embed,
 	Interaction,
@@ -17,9 +20,10 @@ import {
 import { Client } from '../../../client.ts';
 import { CommandBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
-import { createInteractionCollector, diagnosticMentionUser, fromHex, parseArguments } from '../../../utils.ts';
+import { BulletStyles, list } from '../../../formatting.ts';
+import { chunk, createInteractionCollector, diagnosticMentionUser, fromHex, parseArguments } from '../../../utils.ts';
 import { show } from '../../parameters.ts';
-import { DictionaryEntry, getEmbedFields } from '../data/dictionary.ts';
+import { DictionaryEntry, TaggedValue, WordTypes } from '../data/dictionary.ts';
 
 const command: CommandBuilder = {
 	...createLocalisations(Commands.word),
@@ -34,6 +38,11 @@ const command: CommandBuilder = {
 		type: ApplicationCommandOptionTypes.Boolean,
 	}, show],
 };
+
+enum Views {
+	Definitions = 0,
+	Inflection,
+}
 
 /** Allows the user to look up a word and get information about it. */
 async function word(
@@ -91,7 +100,7 @@ async function word(
 		const data = await dictionary.query(word, guild.language);
 		if (!data) continue;
 
-		const entries_ = dictionary.parse(data);
+		const entries_ = dictionary.parse(data, interaction.locale);
 		if (!entries_) continue;
 
 		entries.push(...entries_);
@@ -113,80 +122,290 @@ async function word(
 		);
 	}
 
-	let pageIndex = 0;
-	const isFirst = () => pageIndex === 0;
-	const isLast = () => pageIndex === entries.length - 1;
+	let currentView = Views.Definitions;
+	let dictionaryEntryIndex = 0;
+	let inflectionTableIndex = 0;
 
-	const generateView = (selection?: Interaction): void => {
+	const isFirst = () => dictionaryEntryIndex === 0;
+	const isLast = () => dictionaryEntryIndex === entries.length - 1;
+	const getEntry = () => entries.at(dictionaryEntryIndex)!;
+
+	const displayMenu = (selection?: Interaction): void => {
 		if (selection) {
 			sendInteractionResponse(bot, selection.id, selection.token, {
 				type: InteractionResponseTypes.DeferredUpdateMessage,
 			});
 		}
 
+		const entry = getEntry();
+
 		editOriginalInteractionResponse(bot, interaction.token, {
-			embeds: [generateEmbed()],
-			components: generateButtons(),
+			embeds: [generateEmbed(entry)],
+			components: generateButtons(entry),
 		});
 	};
 
-	const previousPageButtonId = createInteractionCollector([client, bot], {
-		type: InteractionTypes.MessageComponent,
-		doesNotExpire: true,
-		onCollect: (_bot, selection) => {
-			if (!isFirst()) pageIndex--;
-			return void generateView(selection);
-		},
-	});
-
-	const nextPageButtonId = createInteractionCollector([client, bot], {
-		type: InteractionTypes.MessageComponent,
-		doesNotExpire: true,
-		onCollect: (_bot, selection) => {
-			if (!isLast()) pageIndex++;
-			return void generateView(selection);
-		},
-	});
-
-	const generateEmbed: () => Embed = () => {
-		const entry = entries.at(pageIndex)!;
-
-		const fields = getEmbedFields(entry, interaction.locale, { verbose: verbose ?? false });
-
-		return {
-			title: entry.word,
-			fields: fields,
-			color: fromHex('#d6e3f8'),
-		};
+	const generateEmbed = (entry: DictionaryEntry): Embed => {
+		switch (currentView) {
+			case Views.Definitions: {
+				return getEmbed(entry, interaction.locale, verbose ?? false);
+			}
+			case Views.Inflection: {
+				return entry.inflectionTable!.at(inflectionTableIndex)!;
+			}
+		}
 	};
 
-	const generateButtons = (): MessageComponents => {
-		if (isFirst() && isLast()) return [];
+	const generateButtons = (entry: DictionaryEntry): MessageComponents => {
+		const paginationControls: ButtonComponent[][] = [];
 
-		return [{
+		switch (currentView) {
+			case Views.Definitions: {
+				if (isFirst() && isLast()) break;
+
+				const previousPageButtonId = createInteractionCollector([client, bot], {
+					type: InteractionTypes.MessageComponent,
+					onCollect: (_bot, selection) => {
+						if (!isFirst()) dictionaryEntryIndex--;
+						return void displayMenu(selection);
+					},
+				});
+
+				const nextPageButtonId = createInteractionCollector([client, bot], {
+					type: InteractionTypes.MessageComponent,
+					onCollect: (_bot, selection) => {
+						if (!isLast()) dictionaryEntryIndex++;
+						return void displayMenu(selection);
+					},
+				});
+
+				paginationControls.push([{
+					type: MessageComponentTypes.Button,
+					label: '«',
+					customId: previousPageButtonId,
+					style: ButtonStyles.Secondary,
+					disabled: isFirst(),
+				}, {
+					type: MessageComponentTypes.Button,
+					label: `${localise(Commands.word.strings.page, interaction.locale)} ${
+						dictionaryEntryIndex + 1
+					}/${entries.length}`,
+					style: ButtonStyles.Secondary,
+					customId: 'none',
+				}, {
+					type: MessageComponentTypes.Button,
+					label: '»',
+					customId: nextPageButtonId,
+					style: ButtonStyles.Secondary,
+					disabled: isLast(),
+				}]);
+
+				break;
+			}
+			case Views.Inflection: {
+				if (!entry.inflectionTable) return [];
+
+				const rows = chunk(entry.inflectionTable, 5);
+				rows.reverse();
+
+				const buttonId = createInteractionCollector([client, bot], {
+					type: InteractionTypes.MessageComponent,
+					onCollect: (_bot, selection) => {
+						if (!entry.inflectionTable || !selection.data) return void displayMenu(selection);
+
+						const [_buttonId, indexString] = selection.data.customId!.split('|');
+						const index = Number(indexString);
+
+						if (index >= 0 && index <= entry.inflectionTable?.length) {
+							inflectionTableIndex = index;
+						}
+
+						return void displayMenu(selection);
+					},
+				});
+
+				for (const [row, rowIndex] of rows.map<[typeof entry.inflectionTable, number]>((r, i) => [r, i])) {
+					const buttons = row.map<ButtonComponent>((table, index) => {
+						const index_ = rowIndex * 5 + index;
+
+						return {
+							type: MessageComponentTypes.Button,
+							label: table.title,
+							customId: `${buttonId}|${index_}`,
+							disabled: inflectionTableIndex === index_,
+							style: ButtonStyles.Secondary,
+						};
+					});
+
+					if (buttons.length > 1) {
+						paginationControls.unshift(buttons);
+					}
+				}
+			}
+		}
+
+		const row: ButtonComponent[] = [];
+
+		const definitionsMenuButtonId = createInteractionCollector([client, bot], {
+			type: InteractionTypes.MessageComponent,
+			onCollect: (_bot, selection) => {
+				inflectionTableIndex = 0;
+				currentView = Views.Definitions;
+				return void displayMenu(selection);
+			},
+		});
+
+		const inflectionMenuButtonId = createInteractionCollector([client, bot], {
+			type: InteractionTypes.MessageComponent,
+			onCollect: (_bot, selection) => {
+				currentView = Views.Inflection;
+				return void displayMenu(selection);
+			},
+		});
+
+		if (entry.definitions) {
+			row.push({
+				type: MessageComponentTypes.Button,
+				label: localise(Commands.word.strings.definitions, interaction.locale),
+				disabled: currentView === Views.Definitions,
+				customId: definitionsMenuButtonId,
+				style: ButtonStyles.Primary,
+			});
+		}
+
+		if (entry.inflectionTable) {
+			row.push({
+				type: MessageComponentTypes.Button,
+				label: localise(Commands.word.strings.inflection, interaction.locale),
+				disabled: currentView === Views.Inflection,
+				customId: inflectionMenuButtonId,
+				style: ButtonStyles.Primary,
+			});
+		}
+
+		if (row.length > 1) {
+			paginationControls.push(row);
+		}
+
+		// @ts-ignore
+		return paginationControls.map((row) => ({
 			type: MessageComponentTypes.ActionRow,
-			components: [{
-				type: MessageComponentTypes.Button,
-				label: '«',
-				customId: previousPageButtonId,
-				style: ButtonStyles.Secondary,
-				disabled: isFirst(),
-			}, {
-				type: MessageComponentTypes.Button,
-				label: `${localise(Commands.word.strings.page, interaction.locale)} ${pageIndex + 1}/${entries.length}`,
-				style: ButtonStyles.Secondary,
-				customId: 'none',
-			}, {
-				type: MessageComponentTypes.Button,
-				label: '»',
-				customId: nextPageButtonId,
-				style: ButtonStyles.Secondary,
-				disabled: isLast(),
-			}],
-		}];
+			components: row,
+		}));
 	};
 
-	return void generateView();
+	return void displayMenu();
+}
+
+function getEmbed(
+	entry: DictionaryEntry,
+	locale: string | undefined,
+	verbose: boolean,
+): Embed {
+	const fields: DiscordEmbedField[] = [];
+
+	if (entry.definitions && entry.definitions.length !== 0) {
+		const definitionsStringified = stringifyEntries(entry.definitions, BulletStyles.Diamond);
+		const definitionsFitted = fitStringsToFieldSize(definitionsStringified, locale, verbose);
+
+		fields.push({
+			name: localise(Commands.word.strings.fields.definitions, locale),
+			value: definitionsFitted,
+		});
+	}
+
+	if (entry.expressions && entry.expressions.length !== 0) {
+		const expressionsStringified = stringifyEntries(entry.expressions, BulletStyles.Arrow);
+		const expressionsFitted = fitStringsToFieldSize(expressionsStringified, locale, verbose);
+
+		fields.push({
+			name: localise(Commands.word.strings.fields.expressions, locale),
+			value: expressionsFitted,
+		});
+	}
+
+	if (entry.etymologies && entry.etymologies.length !== 0) {
+		fields.push({
+			name: localise(Commands.word.strings.fields.etymology, locale),
+			value: entry.etymologies.map((etymology) => {
+				if (!etymology.tags) {
+					return `**${etymology.value}**`;
+				}
+
+				if (!etymology.value) {
+					return tagsToString(etymology.tags);
+				}
+
+				return `${tagsToString(etymology.tags)} **${etymology.value}**`;
+			}).join('\n'),
+		});
+	}
+
+	let description: string;
+	if (!entry.type) {
+		description = localise(Words.types[WordTypes.Unknown], locale);
+	} else {
+		const [type, typeString] = entry.type;
+		description = localise(Words.types[type], locale);
+		if (type === WordTypes.Unknown) {
+			description += ` — '${typeString}'`;
+		}
+	}
+
+	return {
+		title: entry.title ?? entry.word,
+		description: `***${description}***`,
+		fields,
+		color: fromHex('#d6e3f8'),
+	};
+}
+
+function tagsToString(tags: string[]): string {
+	return tags.map((tag) => `\`${tag}\``).join(' ');
+}
+
+function stringifyEntries(entries: TaggedValue<string>[], bulletStyle: BulletStyles): string[] {
+	const entriesStringified = entries.map((entry) => {
+		if (!entry.tags) {
+			return entry.value;
+		}
+
+		return `${tagsToString(entry.tags)} ${entry.value}`;
+	});
+	const entriesEnlisted = list(entriesStringified, bulletStyle);
+	const entriesDelisted = entriesEnlisted.split('\n');
+
+	return entriesDelisted;
+}
+
+function fitStringsToFieldSize(
+	strings: string[],
+	locale: string | undefined,
+	verbose: boolean,
+): string {
+	const overheadString = localise(Commands.word.strings.definitionsOmitted, locale)(strings.length);
+	const characterOverhead = overheadString.length + 20;
+
+	const maxCharacterCount = verbose ? 4096 : 1024;
+
+	let characterCount = 0;
+	const stringsToDisplay: string[] = [];
+	for (const [string, index] of strings.map<[string, number]>((s, i) => [s, i])) {
+		characterCount += string.length;
+
+		if (characterCount + (index + 1 === strings.length ? 0 : characterOverhead) >= maxCharacterCount) break;
+
+		stringsToDisplay.push(string);
+	}
+
+	const stringsOmitted = strings.length - stringsToDisplay.length;
+
+	let fittedString = stringsToDisplay.join('\n');
+	if (stringsOmitted !== 0) {
+		fittedString += `\n*${localise(Commands.word.strings.definitionsOmitted, locale)(stringsOmitted)}*`;
+	}
+
+	return fittedString;
 }
 
 export default command;
