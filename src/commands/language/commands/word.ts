@@ -123,12 +123,12 @@ async function word(
 	}
 
 	let currentView = Views.Definitions;
-	let definitionEntryIndex = 0;
+	let dictionaryEntryIndex = 0;
 	let inflectionTableIndex = 0;
 
-	const isFirst = () => definitionEntryIndex === 0;
-	const isLast = () => definitionEntryIndex === entries.length - 1;
-	const getEntry = () => entries.at(definitionEntryIndex)!;
+	const isFirst = () => dictionaryEntryIndex === 0;
+	const isLast = () => dictionaryEntryIndex === entries.length - 1;
+	const getEntry = () => entries.at(dictionaryEntryIndex)!;
 
 	const displayMenu = (selection?: Interaction): void => {
 		if (selection) {
@@ -161,12 +161,12 @@ async function word(
 
 		switch (currentView) {
 			case Views.Definitions: {
-				if (isFirst() && isLast()) return [];
+				if (isFirst() && isLast()) break;
 
 				const previousPageButtonId = createInteractionCollector([client, bot], {
 					type: InteractionTypes.MessageComponent,
 					onCollect: (_bot, selection) => {
-						if (!isFirst()) definitionEntryIndex--;
+						if (!isFirst()) dictionaryEntryIndex--;
 						return void displayMenu(selection);
 					},
 				});
@@ -174,7 +174,7 @@ async function word(
 				const nextPageButtonId = createInteractionCollector([client, bot], {
 					type: InteractionTypes.MessageComponent,
 					onCollect: (_bot, selection) => {
-						if (!isLast()) definitionEntryIndex++;
+						if (!isLast()) dictionaryEntryIndex++;
 						return void displayMenu(selection);
 					},
 				});
@@ -188,7 +188,7 @@ async function word(
 				}, {
 					type: MessageComponentTypes.Button,
 					label: `${localise(Commands.word.strings.page, interaction.locale)} ${
-						definitionEntryIndex + 1
+						dictionaryEntryIndex + 1
 					}/${entries.length}`,
 					style: ButtonStyles.Secondary,
 					customId: 'none',
@@ -242,48 +242,47 @@ async function word(
 			}
 		}
 
-		if (paginationControls.length !== 0) {
-			const row: ButtonComponent[] = [];
+		const row: ButtonComponent[] = [];
 
-			const definitionsMenuButtonId = createInteractionCollector([client, bot], {
-				type: InteractionTypes.MessageComponent,
-				onCollect: (_bot, selection) => {
-					currentView = Views.Definitions;
-					return void displayMenu(selection);
-				},
+		const definitionsMenuButtonId = createInteractionCollector([client, bot], {
+			type: InteractionTypes.MessageComponent,
+			onCollect: (_bot, selection) => {
+				inflectionTableIndex = 0;
+				currentView = Views.Definitions;
+				return void displayMenu(selection);
+			},
+		});
+
+		const inflectionMenuButtonId = createInteractionCollector([client, bot], {
+			type: InteractionTypes.MessageComponent,
+			onCollect: (_bot, selection) => {
+				currentView = Views.Inflection;
+				return void displayMenu(selection);
+			},
+		});
+
+		if (entry.definitions) {
+			row.push({
+				type: MessageComponentTypes.Button,
+				label: localise(Commands.word.strings.definitions, interaction.locale),
+				disabled: currentView === Views.Definitions,
+				customId: definitionsMenuButtonId,
+				style: ButtonStyles.Primary,
 			});
+		}
 
-			const inflectionMenuButtonId = createInteractionCollector([client, bot], {
-				type: InteractionTypes.MessageComponent,
-				onCollect: (_bot, selection) => {
-					currentView = Views.Inflection;
-					return void displayMenu(selection);
-				},
+		if (entry.inflectionTable) {
+			row.push({
+				type: MessageComponentTypes.Button,
+				label: localise(Commands.word.strings.inflection, interaction.locale),
+				disabled: currentView === Views.Inflection,
+				customId: inflectionMenuButtonId,
+				style: ButtonStyles.Primary,
 			});
+		}
 
-			if (entry.definitions) {
-				row.push({
-					type: MessageComponentTypes.Button,
-					label: localise(Commands.word.strings.definitions, interaction.locale),
-					disabled: currentView === Views.Definitions,
-					customId: definitionsMenuButtonId,
-					style: ButtonStyles.Primary,
-				});
-			}
-
-			if (entry.inflectionTable) {
-				row.push({
-					type: MessageComponentTypes.Button,
-					label: localise(Commands.word.strings.inflection, interaction.locale),
-					disabled: currentView === Views.Inflection,
-					customId: inflectionMenuButtonId,
-					style: ButtonStyles.Primary,
-				});
-			}
-
-			if (row.length > 1) {
-				paginationControls.push(row);
-			}
+		if (row.length > 1) {
+			paginationControls.push(row);
 		}
 
 		// @ts-ignore
@@ -303,7 +302,7 @@ function getEmbed(
 ): Embed {
 	const fields: DiscordEmbedField[] = [];
 
-	if (entry.definitions) {
+	if (entry.definitions && entry.definitions.length !== 0) {
 		const definitionsStringified = stringifyEntries(entry.definitions, BulletStyles.Diamond);
 		const definitionsFitted = fitStringsToFieldSize(definitionsStringified, locale, verbose);
 
@@ -313,7 +312,7 @@ function getEmbed(
 		});
 	}
 
-	if (entry.expressions) {
+	if (entry.expressions && entry.expressions.length !== 0) {
 		const expressionsStringified = stringifyEntries(entry.expressions, BulletStyles.Arrow);
 		const expressionsFitted = fitStringsToFieldSize(expressionsStringified, locale, verbose);
 
@@ -323,7 +322,7 @@ function getEmbed(
 		});
 	}
 
-	if (entry.etymologies) {
+	if (entry.etymologies && entry.etymologies.length !== 0) {
 		fields.push({
 			name: localise(Commands.word.strings.fields.etymology, locale),
 			value: entry.etymologies.map((etymology) => {
@@ -352,7 +351,7 @@ function getEmbed(
 	}
 
 	return {
-		title: entry.word,
+		title: entry.title ?? entry.word,
 		description: `***${description}***`,
 		fields,
 		color: fromHex('#d6e3f8'),
