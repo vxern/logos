@@ -100,7 +100,7 @@ class Roles {
 				description: {
 					'English': 'Roles related to various orthographies.',
 					'Polish': 'Role reprezentujące różne ortografie.',
-					'Romanian': 'Roluri care reprezintă diferite ortografii.',
+					'Romanian': 'Roluri care reprezintă ortografiile.',
 				},
 				roles: {
 					idinist: {
@@ -295,7 +295,7 @@ class Roles {
 		description: {
 			'English': 'Roles identifying one\'s ethnicity.',
 			'Polish': 'Role reprezentujące pochodzenie etniczne.',
-			'Romanian': 'Roluri care reprezintă etnie.',
+			'Romanian': 'Roluri care reprezintă etnia.',
 		},
 		languages: {
 			'Armenian': [
