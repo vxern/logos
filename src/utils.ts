@@ -510,7 +510,7 @@ function parseArguments<
 	options: InteractionDataOption[] | undefined,
 	customTypes: C,
 ): [R, InteractionDataOption | undefined] {
-	let args: Record<string, any> = {};
+	let args: Record<string, unknown> = {};
 
 	let focused: InteractionDataOption | undefined = undefined;
 	for (const option of options ?? []) {

@@ -28,10 +28,10 @@ const command: CommandBuilder = {
 	}],
 };
 
-async function makeSuggestion(
+function makeSuggestion(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
-): Promise<void> {
+): void {
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (!guild) return;
 

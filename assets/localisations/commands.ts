@@ -10,8 +10,8 @@ import { Language } from '../../src/types.ts';
 function typedLocalisations<
 	OptionKeys extends string,
 	StringKeys extends string,
-	OptionsType extends Record<OptionKeys, any> | undefined,
-	StringsType extends Record<StringKeys, any> | undefined,
+	OptionsType extends Record<OptionKeys, unknown> | undefined,
+	StringsType extends Record<StringKeys, unknown> | undefined,
 >(
 	localisations: CommandLocalisations<
 		OptionKeys,

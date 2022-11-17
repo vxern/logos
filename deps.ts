@@ -23,6 +23,7 @@ export * as colors from 'nanocolors';
 import { lodash } from 'lodash';
 export { lodash as _ };
 
+// deno-lint-ignore camelcase
 import table_to_csv_headless from 'table_to_csv';
 export { table_to_csv_headless as convertTableToCSV };
 

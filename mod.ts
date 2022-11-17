@@ -27,18 +27,18 @@ async function readDotEnvFile(fileUri: string, template = false): Promise<dotenv
 	try {
 		return dotenv.parse(contents);
 	} catch (error) {
-		console.error(`Unknown error while parsing ${kind} file.`);
+		console.error(`Unknown error while parsing ${kind} file: ${error}`);
 		Deno.exit(1);
 	}
 }
 
-async function readEnvironment({
+function readEnvironment({
 	envConfiguration,
 	templateEnvConfiguration,
 }: {
 	envConfiguration: dotenv.DotenvConfig | undefined;
 	templateEnvConfiguration: dotenv.DotenvConfig;
-}): Promise<void> {
+}): void {
 	const requiredKeys = Object.keys(templateEnvConfiguration);
 
 	const presentKeys = Object.keys(envConfiguration ? envConfiguration : Deno.env.toObject());
@@ -56,7 +56,7 @@ async function readEnvironment({
 	}
 }
 
-await readEnvironment({
+readEnvironment({
 	envConfiguration: await readDotEnvFile('.env'),
 	templateEnvConfiguration: (await readDotEnvFile('.env.example', true))!,
 });

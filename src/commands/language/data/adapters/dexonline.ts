@@ -33,14 +33,14 @@ class Dexonline implements DictionaryAdapter {
 	readonly supports: Language[] = ['Romanian'];
 	readonly provides = [DictionaryProvisions.Definitions, DictionaryProvisions.Etymology];
 
-	async query(word: string) {
+	query(word: string): Promise<string | undefined> {
 		return fetch(`https://dexonline.ro/definitie/${word}`).then((response) => {
 			if (!response.ok) return undefined;
 			return response.text();
 		});
 	}
 
-	parse(contents: string, locale: string | undefined) {
+	parse(contents: string, locale: string | undefined): DictionaryEntry[] | undefined {
 		const $ = cheerio.load(contents);
 
 		const wordEntries = this.getWordEntries($);

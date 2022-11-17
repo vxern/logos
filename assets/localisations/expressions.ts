@@ -16,7 +16,7 @@ class Expressions {
 				singular: string,
 				plural: string,
 			) => {
-				if (number == '1') return `${number} ${singular}`;
+				if (number === '1') return `${number} ${singular}`;
 				return `${number} ${plural}`;
 			},
 		},
@@ -80,7 +80,7 @@ class Expressions {
 				plural: string,
 				genitive: string,
 			) => {
-				if (['1', '12', '13', '14'].some((digits) => number == digits)) {
+				if (['1', '12', '13', '14'].some((digits) => number === digits)) {
 					return `${number} ${singular}`;
 				}
 				if (['2', '3', '4'].some((digit) => number.endsWith(digit))) {
@@ -113,7 +113,7 @@ class Expressions {
 			) => {
 				if (number === '1') return `${number} ${singular}`;
 				if (
-					number.length === 1 || (number.length == 2 && number.at(0) == '1')
+					number.length === 1 || (number.length === 2 && number.at(0) === '1')
 				) return `${number} ${plural}`;
 				return `${number} de ${plural}`;
 			},
