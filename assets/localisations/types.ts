@@ -13,8 +13,8 @@ type DiscordLocalisations = Required<
 type CommandLocalisations<
 	OptionKeys extends string,
 	StringKeys extends string,
-	OptionsType extends Record<OptionKeys, any> | undefined = undefined,
-	StringsType extends Record<StringKeys, any> | undefined = undefined,
+	OptionsType extends Record<OptionKeys, unknown> | undefined = undefined,
+	StringsType extends Record<StringKeys, unknown> | undefined = undefined,
 > =
 	& DiscordLocalisations
 	& (

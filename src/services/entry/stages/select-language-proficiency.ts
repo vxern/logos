@@ -14,11 +14,11 @@ import { defaultLanguage } from '../../../types.ts';
 const proficiencyCategory = getProficiencyCategory();
 const proficiencies = proficiencyCategory.collection.list;
 
-async function onSelectLanguageProficiency(
+function onSelectLanguageProficiency(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction & { type: InteractionTypes.MessageComponent },
 	parameter: string,
-): Promise<void> {
+): void {
 	sendInteractionResponse(
 		bot,
 		interaction.id,

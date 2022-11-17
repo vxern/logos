@@ -4,7 +4,7 @@ import resources from './commands/resources.ts';
 import word from './commands/word.ts';
 import translate from './commands/translate.ts';
 import { DictionaryAdapter } from './data/dictionary.ts';
-import dexonline from './data/dictionaries/dexonline.ts';
+import dexonline from './data/adapters/dexonline.ts';
 import { SentencePair } from './data/sentence.ts';
 import { Language, supportedLanguages } from '../../types.ts';
 import { TranslationLanguage } from '../../../assets/localisations/languages.ts';
@@ -72,7 +72,7 @@ function loadSentencePairs(languageFileContents: [Language, string][]): Map<Lang
 interface DeepLSupportedLanguage {
 	language: string;
 	name: TranslationLanguage;
-	supports_formality: boolean;
+	'supports_formality': boolean;
 }
 
 /** Represents a supported language object sent by DeepL. */
