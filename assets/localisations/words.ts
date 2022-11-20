@@ -67,6 +67,10 @@ class Words {
 		'Polish': {},
 		'Romanian': {
 			'substantiv': WordTypes.Noun,
+			'substantiv masculin': WordTypes.Noun,
+			'substantiv feminin': WordTypes.Noun,
+			'substantiv neutru': WordTypes.Noun,
+			'substantiv propriu': WordTypes.Noun,
 			'verb': WordTypes.Verb,
 			'adjectiv': WordTypes.Adjective,
 			'adjectiv pronominal': WordTypes.Determiner,
