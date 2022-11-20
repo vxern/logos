@@ -28,12 +28,14 @@ interface TaggedValue<T> {
 	value: T;
 }
 
+// deno-lint-ignore no-empty-interface
 interface Expression extends TaggedValue<string> {}
 
 interface Definition extends TaggedValue<string> {
 	expressions?: Expression[];
 }
 
+// deno-lint-ignore no-empty-interface
 interface Etymology extends TaggedValue<string | undefined> {}
 
 enum WordTypes {
@@ -75,7 +77,7 @@ interface DictionaryEntry {
 	inflectionTable?: InflectionTable;
 }
 
-abstract class DictionaryAdapter<T = string> {
+abstract class DictionaryAdapter<T> {
 	abstract readonly supports: Language[];
 	abstract readonly provides: DictionaryProvisions[];
 
