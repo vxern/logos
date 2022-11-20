@@ -34,9 +34,18 @@ const informationSections: Record<string, InformationSection> = {
 		image: 'https://i.imgur.com/wRBpXcY.png',
 		generateEmbed: (_clientWithBot, guild) => {
 			const fields = [];
-			for (const rule of Object.values(Information.rules.rules)) {
+			for (
+				const [rule, index] of Object.values(Information.rules.rules).map<
+					[
+						typeof Information.rules.rules[
+							keyof typeof Information.rules.rules
+						],
+						number,
+					]
+				>((rule, index) => [rule, index])
+			) {
 				fields.push({
-					name: `💠  **${
+					name: `💠  #${index + 1} ~ **${
 						localise(rule.title, defaultLanguage).toUpperCase()
 					}**  ~  ${localise(Information.rules.tldr, defaultLanguage)}: *${
 						localise(rule.summary, defaultLanguage)
