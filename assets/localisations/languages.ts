@@ -1,4 +1,4 @@
-import { Locales } from '../../deps.ts';
+import { Locales } from 'discordeno';
 import { defaultLanguage, Language } from '../../src/types.ts';
 import { Localisations } from './types.ts';
 

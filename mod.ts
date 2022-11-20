@@ -1,5 +1,5 @@
 import * as dotenv from 'std/dotenv/mod.ts';
-import { Sentry } from './deps.ts';
+import * as Sentry from 'sentry';
 import { initialiseClient } from './src/client.ts';
 import { getSupportedLanguages, loadDictionaryAdapters, loadSentencePairs } from './src/commands/language/module.ts';
 import { capitalise } from './src/formatting.ts';

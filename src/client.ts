@@ -14,17 +14,17 @@ import {
 	Interaction,
 	InteractionResponseTypes,
 	InteractionTypes,
-	Logger,
 	Member,
 	Message,
 	sendInteractionResponse,
-	Sentry,
 	snowflakeToBigint,
 	startBot,
 	Transformers,
 	upsertGuildApplicationCommands,
 	User,
-} from '../deps.ts';
+} from 'discordeno';
+import * as Sentry from 'sentry';
+import { Log as Logger } from 'tl_log';
 import services from './services/service.ts';
 //import { MusicController } from './controllers/music.ts';
 import { createDatabase, Database } from './database/database.ts';
@@ -86,7 +86,7 @@ type Client = Readonly<{
 	collectors: Map<Event, Set<Collector<Event>>>;
 	handlers: Map<string, InteractionHandler>;
 	features: {
-		dictionaryAdapters: Map<Language, DictionaryAdapter[]>;
+		dictionaryAdapters: Map<Language, DictionaryAdapter<unknown>[]>;
 		sentencePairs: Map<Language, SentencePair[]>;
 	};
 }>;

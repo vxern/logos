@@ -1,5 +1,3 @@
-import { Commands } from '../../../../assets/localisations/commands.ts';
-import { createLocalisations, localise } from '../../../../assets/localisations/types.ts';
 import {
 	ActionRow,
 	ApplicationCommandFlags,
@@ -16,7 +14,9 @@ import {
 	MessageComponentTypes,
 	SelectOption,
 	sendInteractionResponse,
-} from '../../../../deps.ts';
+} from 'discordeno';
+import { Commands } from '../../../../assets/localisations/commands.ts';
+import { createLocalisations, localise } from '../../../../assets/localisations/types.ts';
 import { Client } from '../../../client.ts';
 import { OptionBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';

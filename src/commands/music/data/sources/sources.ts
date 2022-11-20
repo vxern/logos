@@ -1,4 +1,4 @@
-import { Interaction } from '../../../../../deps.ts';
+import { Interaction } from 'discordeno';
 import { Client } from '../../../../client.ts';
 import { SongListing } from '../song-listing.ts';
 import youtube from './youtube.ts';

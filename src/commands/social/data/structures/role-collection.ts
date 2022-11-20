@@ -1,6 +1,6 @@
+import { Role as DiscordRole, SelectOption } from 'discordeno';
 import { Commands } from '../../../../../assets/localisations/commands.ts';
 import { localise } from '../../../../../assets/localisations/types.ts';
-import { Role as DiscordRole, SelectOption } from '../../../../../deps.ts';
 import { Language } from '../../../../types.ts';
 import { Role } from './role.ts';
 

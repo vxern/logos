@@ -1,5 +1,3 @@
-import { Commands } from '../../../../../assets/localisations/commands.ts';
-import { createLocalisations, localise } from '../../../../../assets/localisations/types.ts';
 import {
 	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
@@ -8,7 +6,9 @@ import {
 	Interaction,
 	InteractionResponseTypes,
 	sendInteractionResponse,
-} from '../../../../../deps.ts';
+} from 'discordeno';
+import { Commands } from '../../../../../assets/localisations/commands.ts';
+import { createLocalisations, localise } from '../../../../../assets/localisations/types.ts';
 import { Client, resolveInteractionToMember } from '../../../../client.ts';
 import configuration from '../../../../configuration.ts';
 import { getPraises } from '../../../../database/functions/praises.ts';

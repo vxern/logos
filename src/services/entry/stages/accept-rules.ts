@@ -9,7 +9,7 @@ import {
 	MessageComponentTypes,
 	sendInteractionResponse,
 	User,
-} from '../../../../deps.ts';
+} from 'discordeno';
 import configuration from '../../../configuration.ts';
 import { getProficiencyCategory } from '../../../commands/social/module.ts';
 import { snowflakeToTimestamp } from '../../../utils.ts';

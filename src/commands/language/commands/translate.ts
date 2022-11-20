@@ -1,7 +1,3 @@
-// deno-lint-ignore-file camelcase
-import { Commands } from '../../../../assets/localisations/commands.ts';
-import { getLocalisations } from '../../../../assets/localisations/languages.ts';
-import { createLocalisations, localise } from '../../../../assets/localisations/types.ts';
 import {
 	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
@@ -12,7 +8,10 @@ import {
 	InteractionResponseTypes,
 	InteractionTypes,
 	sendInteractionResponse,
-} from '../../../../deps.ts';
+} from 'discordeno';
+import { Commands } from '../../../../assets/localisations/commands.ts';
+import { getLocalisations } from '../../../../assets/localisations/languages.ts';
+import { createLocalisations, localise } from '../../../../assets/localisations/types.ts';
 import { Client } from '../../../client.ts';
 import { CommandBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
@@ -43,7 +42,7 @@ const command: CommandBuilder = {
 };
 
 interface DeepLTranslation {
-	detected_source_language: string;
+	'detected_source_language': string;
 	text: string;
 }
 

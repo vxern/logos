@@ -1,10 +1,10 @@
+import { Dexonline } from 'dexonline';
 import { getWordType } from '../../../../../assets/localisations/words.ts';
 import { Language } from '../../../../types.ts';
 import { DictionaryAdapter, DictionaryEntry, DictionaryProvisions, WordTypes } from '../dictionary.ts';
 import { localise } from '../../../../../assets/localisations/types.ts';
 import { chunk } from '../../../../utils.ts';
 import { Commands } from '../../../../../assets/localisations/commands.ts';
-import { Dexonline } from '../../../../../deps.ts';
 
 const supportedTypesForInflection = [WordTypes.Noun, WordTypes.Verb, WordTypes.Adjective, WordTypes.Determiner];
 

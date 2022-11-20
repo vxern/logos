@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionTypes, User } from '../../deps.ts';
+import { ApplicationCommandOptionTypes, User } from 'discordeno';
 import { links } from '../../src/constants.ts';
 import configuration from '../../src/configuration.ts';
 import { capitalise, list } from '../../src/formatting.ts';

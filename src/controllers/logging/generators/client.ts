@@ -1,4 +1,4 @@
-import { EventHandlers } from '../../../../deps.ts';
+import { EventHandlers } from 'discordeno';
 import configuration from '../../../configuration.ts';
 import { codeMultiline, mention, MentionTypes } from '../../../formatting.ts';
 import { diagnosticMentionUser } from '../../../utils.ts';

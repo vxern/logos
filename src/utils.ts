@@ -1,5 +1,4 @@
 import {
-	_,
 	ActionRow,
 	ApplicationCommandFlags,
 	Bot,
@@ -25,10 +24,10 @@ import {
 	SelectOption,
 	sendInteractionResponse,
 	sendMessage,
-	Snowflake,
 	TextStyles,
 	User,
-} from '../deps.ts';
+} from 'discordeno';
+import * as Snowflake from 'snowflake';
 import { code, mention, MentionTypes } from './formatting.ts';
 import { addCollector, Client } from './client.ts';
 import configuration from './configuration.ts';

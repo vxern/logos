@@ -5,7 +5,7 @@ import {
 	InteractionResponseTypes,
 	InteractionTypes,
 	sendInteractionResponse,
-} from '../../../../deps.ts';
+} from 'discordeno';
 import { localise } from '../../../../assets/localisations/types.ts';
 import { Client } from '../../../client.ts';
 import { getProficiencyCategory } from '../../../commands/social/module.ts';

@@ -8,7 +8,7 @@ import {
 	InteractionTypes,
 	sendInteractionResponse,
 	sendMessage,
-} from '../../../../deps.ts';
+} from 'discordeno';
 import { Client, resolveInteractionToMember } from '../../../client.ts';
 import { CommandBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';

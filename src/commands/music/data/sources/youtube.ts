@@ -1,4 +1,3 @@
-import { Playlist, Video, YouTube } from 'youtube_sr';
 import {
 	ApplicationCommandFlags,
 	Interaction,
@@ -7,7 +6,8 @@ import {
 	MessageComponentTypes,
 	SelectOption,
 	sendInteractionResponse,
-} from '../../../../../deps.ts';
+} from 'discordeno';
+import { Playlist, Video, YouTube } from 'youtube_sr';
 import { Client } from '../../../../client.ts';
 import configuration from '../../../../configuration.ts';
 import { createInteractionCollector, trim } from '../../../../utils.ts';

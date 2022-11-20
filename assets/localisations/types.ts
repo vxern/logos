@@ -1,4 +1,4 @@
-import { Locales, Localization as DiscordLocalisation } from '../../deps.ts';
+import { Locales, Localization as DiscordLocalisation } from 'discordeno';
 import { defaultLanguage, Language } from '../../src/types.ts';
 import { getLocale } from './languages.ts';
 

@@ -1,4 +1,4 @@
-import { Bot, Interaction } from '../../../deps.ts';
+import { Bot, Interaction } from 'discordeno';
 import { Client } from '../../client.ts';
 import configuration from '../../configuration.ts';
 import { list } from '../../formatting.ts';

@@ -8,7 +8,7 @@ import {
 	InteractionTypes,
 	sendInteractionResponse,
 	sendMessage,
-} from '../../../../../deps.ts';
+} from 'discordeno';
 import { Client, resolveInteractionToMember } from '../../../../client.ts';
 import configuration, { Periods, timeDescriptors } from '../../../../configuration.ts';
 import { displayTime, mention, MentionTypes } from '../../../../formatting.ts';

@@ -1,6 +1,6 @@
+import { ApplicationCommandOptionTypes } from 'discordeno';
 import { Commands } from '../../../../assets/localisations/commands.ts';
 import { createLocalisations } from '../../../../assets/localisations/types.ts';
-import { ApplicationCommandOptionTypes } from '../../../../deps.ts';
 import { CommandBuilder } from '../../command.ts';
 import { postInformation } from './post/information.ts';
 import { postWelcome } from './post/welcome.ts';

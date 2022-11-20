@@ -1,5 +1,3 @@
-import { Commands } from '../../../../../assets/localisations/commands.ts';
-import { localise } from '../../../../../assets/localisations/types.ts';
 import {
 	ApplicationCommandFlags,
 	Bot,
@@ -9,7 +7,9 @@ import {
 	MessageComponentTypes,
 	sendInteractionResponse,
 	sendMessage,
-} from '../../../../../deps.ts';
+} from 'discordeno';
+import { Commands } from '../../../../../assets/localisations/commands.ts';
+import { localise } from '../../../../../assets/localisations/types.ts';
 import { Client } from '../../../../client.ts';
 import configuration from '../../../../configuration.ts';
 import { defaultLanguage } from '../../../../types.ts';

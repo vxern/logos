@@ -7,7 +7,7 @@ import {
 	InteractionResponseTypes,
 	sendInteractionResponse,
 	sendMessage,
-} from '../../../../../deps.ts';
+} from 'discordeno';
 import { Client, resolveInteractionToMember } from '../../../../client.ts';
 import configuration from '../../../../configuration.ts';
 import { diagnosticMentionUser, guildAsAuthor, parseArguments } from '../../../../utils.ts';

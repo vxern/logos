@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionTypes, Bot, Interaction } from '../../../../deps.ts';
+import { ApplicationCommandOptionTypes, Bot, Interaction } from 'discordeno';
 import { Client } from '../../../client.ts';
 import { OptionBuilder } from '../../../commands/command.ts';
 import { displayListings } from '../module.ts';

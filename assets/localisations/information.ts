@@ -1,4 +1,4 @@
-import { Guild } from '../../deps.ts';
+import { Guild } from 'discordeno';
 import { list } from '../../src/formatting.ts';
 import { getChannelMention } from '../../src/utils.ts';
 
