@@ -1,7 +1,6 @@
 import { Bot } from 'discordeno';
-import { Client } from '../client.ts';
-import dynamicVoiceChannels from './dynamic-voice-channels/dynamic-voice-channels.ts';
-import entry from './entry/entry.ts';
+import { dynamicVoiceChannels, entry } from './services/mod.ts';
+import { Client } from './client.ts';
 
 type ServiceStarter = ([client, bot]: [Client, Bot]) => void;
 

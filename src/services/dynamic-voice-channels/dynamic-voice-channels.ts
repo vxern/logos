@@ -1,7 +1,7 @@
 import { Bot, Channel, ChannelTypes, Collection, createChannel, deleteChannel, Guild, VoiceState } from 'discordeno';
 import { Client } from '../../client.ts';
 import configuration from '../../configuration.ts';
-import { ServiceStarter } from '../service.ts';
+import { ServiceStarter } from '../../service.ts';
 
 const previousVoiceStateByUserId = new Map<bigint, VoiceState>();
 

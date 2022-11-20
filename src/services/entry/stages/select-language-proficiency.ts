@@ -7,8 +7,8 @@ import {
 	sendInteractionResponse,
 } from 'discordeno';
 import { localise } from '../../../../assets/localisations/mod.ts';
+import { getProficiencyCategory } from '../../../commands/social/mod.ts';
 import { Client } from '../../../client.ts';
-import { getProficiencyCategory } from '../../../commands/social/module.ts';
 import { defaultLanguage } from '../../../types.ts';
 
 const proficiencyCategory = getProficiencyCategory();
