@@ -2,7 +2,7 @@ import information from './information/mod.ts';
 import language from './language/mod.ts';
 import moderation from './moderation/mod.ts';
 //import music from './music/mod.ts';
-import server from './server/module.ts';
+import server from './server/mod.ts';
 import social from './social/module.ts';
 
 const commands = [
