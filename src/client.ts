@@ -32,7 +32,7 @@ import { createDatabase, Database } from './database/database.ts';
 import configuration from './configuration.ts';
 import { Command, InteractionHandler } from './commands/command.ts';
 import { defaultLanguage, Language, supportedLanguages } from './types.ts';
-import { commandBuilders } from './commands/modules.ts';
+import { commands } from './commands/modules.ts';
 import { diagnosticMentionUser } from './utils.ts';
 import { setupLogging } from './controllers/logging/logging.ts';
 import { SupportedLanguage } from './commands/language/module.ts';
@@ -97,7 +97,7 @@ function createClient(metadata: Client['metadata'], features: Client['features']
 		database: createDatabase(),
 		cache: createCache(),
 		collectors: new Map(),
-		handlers: createCommandHandlers(commandBuilders),
+		handlers: createCommandHandlers(commands),
 		features,
 	};
 }
@@ -138,7 +138,7 @@ function createEventHandlers(client: Client): Partial<EventHandlers> {
 		guildCreate: (bot, guild) => {
 			fetchMembers(bot, guild.id, { limit: 0, query: '' });
 
-			upsertGuildApplicationCommands(bot, guild.id, commandBuilders);
+			upsertGuildApplicationCommands(bot, guild.id, commands);
 
 			registerGuild(client, guild);
 			setupLogging([client, bot], guild);
