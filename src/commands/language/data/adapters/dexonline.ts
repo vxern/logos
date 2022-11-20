@@ -1,101 +1,47 @@
-import * as csv from 'std/encoding/csv.ts';
-import { cheerio, convertTableToCSV } from '../../../../../deps.ts';
 import { getWordType } from '../../../../../assets/localisations/words.ts';
 import { Language } from '../../../../types.ts';
-import { DictionaryAdapter, DictionaryEntry, DictionaryProvisions, TaggedValue, WordTypes } from '../dictionary.ts';
+import { DictionaryAdapter, DictionaryEntry, DictionaryProvisions, WordTypes } from '../dictionary.ts';
 import { localise } from '../../../../../assets/localisations/types.ts';
 import { chunk } from '../../../../utils.ts';
 import { Commands } from '../../../../../assets/localisations/commands.ts';
-
-const tabContentSelector = (tab: ContentTab) => `#tab_${tab}`;
-
-enum ContentTab {
-	Definitions = 0,
-	Inflections,
-	Synthesis,
-	Articles,
-}
-
-type Element = cheerio.Cheerio<cheerio.Element>;
-type Word = NonNullable<DictionaryEntry['word']>;
-type Title = NonNullable<DictionaryEntry['title']>;
-type WordType = NonNullable<DictionaryEntry['type']>;
-type Definitions = NonNullable<DictionaryEntry['definitions']>;
-type Etymologies = NonNullable<DictionaryEntry['etymologies']>;
-type Expressions = NonNullable<DictionaryEntry['expressions']>;
-type InflectionTable = NonNullable<DictionaryEntry['inflectionTable']>;
+import { Dexonline } from '../../../../../deps.ts';
 
 const supportedTypesForInflection = [WordTypes.Noun, WordTypes.Verb, WordTypes.Adjective, WordTypes.Determiner];
 
-const entryNameExpression = /((?:[a-zA-ZăĂâÂîÎșȘțȚ-]+))(<sup>(\d+)<\/sup>)?/;
+type InflectionTable = NonNullable<DictionaryEntry['inflectionTable']>;
 
-class Dexonline implements DictionaryAdapter {
+class DexonlineAdapter implements DictionaryAdapter<Dexonline.Results> {
 	readonly supports: Language[] = ['Romanian'];
 	readonly provides = [DictionaryProvisions.Definitions, DictionaryProvisions.Etymology];
 
-	query(word: string): Promise<string | undefined> {
-		return fetch(`https://dexonline.ro/definitie/${word}`).then((response) => {
-			if (!response.ok) return undefined;
-			return response.text();
-		});
+	query(word: string): Promise<Dexonline.Results | undefined> {
+		return Dexonline.get(word);
 	}
 
-	parse(contents: string, locale: string | undefined): DictionaryEntry[] | undefined {
-		const $ = cheerio.load(contents);
+	parse(results: Dexonline.Results, locale: string | undefined): DictionaryEntry[] | undefined {
+		const entries = results.synthesis.map<DictionaryEntry>((result) => ({
+			word: result.lemma,
+			title: result.lemma,
+			type: [getWordType(result.type, 'Romanian'), result.type],
+			definitions: result.definitions,
+			etymologies: result.etymology,
+			expressions: result.expressions,
+			inflectionTable: undefined,
+		}));
 
-		const wordEntries = this.getWordEntries($);
-
-		const entries: DictionaryEntry[] = [];
-		for (const [heading, body] of wordEntries) {
-			const { word, title, type } = this.parseHeading(heading);
-			const { etymologies, definitions, expressions } = this.parseBody($, body);
-
-			if (definitions.length === 0 && expressions.length === 0) continue;
-
-			entries.push({
-				word,
-				title,
-				type,
-				etymologies,
-				definitions: definitions.length > 0 ? definitions : undefined,
-				expressions: expressions.length > 0 ? expressions : undefined,
-			});
-		}
-
-		const inflectionTableElements = this.getInflectionTableEntries($);
-
-		type InflectionTableWithMetadata = [tableElement: Element, word: string, entryIndex: number | undefined];
-
-		const inflectionTablesWithMetadata = <InflectionTableWithMetadata[]> inflectionTableElements
-			.map<InflectionTableWithMetadata | undefined>((tableElement) => {
-				const entryName = tableElement.find('div[class=paraLexeme] > div > span[class=lexemeName]').html();
-				if (!entryName) return undefined;
-
-				const match = entryNameExpression.exec(entryName);
-				if (!match) return undefined;
-
-				match.shift();
-
-				const [word, _, indexString] = match;
-				if (!entries.some((entry) => entry.word === word!)) return undefined;
-
-				const index = Number(indexString);
-				return [tableElement, word!, !isNaN(index) ? (index - 1) : undefined];
-			}).filter((elementOrUndefined) => !!elementOrUndefined);
-
-		for (const [tableElement, word, entryIndex] of inflectionTablesWithMetadata) {
-			const entriesByWord = entries.filter((entry) => entry.word === word);
+		for (const { index, lemma, table } of results.inflection) {
+			const entriesByWord = entries.filter((entry) => entry.word === lemma);
 			if (entriesByWord.length === 0) continue;
 
 			let entry: DictionaryEntry;
 			// If the inflection table entry is not indexed, rely on the entries being ordered.
-			if (!entryIndex) {
+			if (index === 0) {
 				entry = entriesByWord.find((entry) => !entry.inflectionTable)!;
 			} // Otherwise, use the index directly.
 			else {
-				if (entryIndex >= entriesByWord.length) continue;
+				if (index >= entriesByWord.length) continue;
 
-				entry = entriesByWord.at(entryIndex)!;
+				entry = entriesByWord.at(index)!;
 			}
 
 			if (!entry.type) continue;
@@ -103,93 +49,12 @@ class Dexonline implements DictionaryAdapter {
 			const type = entry.type[0]!;
 			if (!supportedTypesForInflection.includes(type)) continue;
 
-			const tableRows = csv.parse(convertTableToCSV(tableElement.html()));
-			const table = this.tableRowsToFields(type, tableRows, locale);
+			const inflectionTable = this.tableRowsToFields(type, table, locale);
 
-			entry.inflectionTable = table;
+			entry.inflectionTable = inflectionTable;
 		}
 
 		return entries.length === 0 ? undefined : entries;
-	}
-
-	/**
-	 * @returns A tuple where the first element is the heading and the second element is the body of the entry.
-	 */
-	private getWordEntries($: cheerio.CheerioAPI): [Element, Element][] {
-		const synthesis = $(tabContentSelector(ContentTab.Synthesis));
-
-		const entryHeadings = synthesis.find('h3[class=tree-heading] > div').toArray();
-		const entryBodies = synthesis.find('div[class=tree-body]').toArray();
-
-		return entryHeadings.map(
-			(heading, index) => [$(heading), $(entryBodies.at(index)!)],
-		);
-	}
-
-	private parseHeading(heading: Element): { word: Word; title: Title; type: WordType } {
-		const typeString = heading.find('span[class=tree-pos-info]').remove().text().trim().toLowerCase();
-		const wordDisplayed = heading.text().trim();
-		const word = wordDisplayed.split(', ').at(0)!;
-
-		const type = getWordType(typeString, 'Romanian');
-
-		return { word, title: wordDisplayed, type: [type, typeString] };
-	}
-
-	private parseBody(
-		$: cheerio.CheerioAPI,
-		body: Element,
-	): { etymologies: Etymologies; definitions: Definitions; expressions: Expressions } {
-		const etymologies = this.getEtymologies($, body);
-		const definitions = this.getEntries($, body, 'definitions');
-		const expressions = this.getEntries($, body, 'expressions');
-
-		return { etymologies, definitions, expressions };
-	}
-
-	private getEtymologies($: cheerio.CheerioAPI, body: Element): Etymologies {
-		const etymologyRows = body.find(
-			'div[class=etymology] > ul[class=meaningTree] > li[class="type-etymology depth-1"] > div[class=meaningContainer] > div[class=meaning-row]',
-		).toArray().map((etymology) => $(etymology));
-
-		const etymologies: Etymologies = [];
-		for (const etymologyRow of etymologyRows) {
-			const tags = etymologyRow.find('span[class="tag-group meaning-tags"]').children().toArray().map((element) =>
-				$(element).text()
-			);
-			const term = etymologyRow.find('span[class="def html"]').text().trim();
-			etymologies.push({ tags, value: term.length !== 0 ? term : undefined });
-		}
-		return etymologies;
-	}
-
-	private getEntries<T extends 'definitions' | 'expressions'>(
-		$: cheerio.CheerioAPI,
-		body: Element,
-		type: T,
-	): TaggedValue<string>[] {
-		const rows = body.find(
-			`ul[class=meaningTree] > li[class="type-${
-				type === 'definitions' ? 'meaning' : 'expression'
-			} depth-0"] > div[class=meaningContainer]`,
-		).toArray().map((definition) => $(definition));
-
-		const entries: TaggedValue<string>[] = [];
-		for (const row of rows) {
-			const meaningRow = row.find('div[class=meaning-row]');
-			const tags = meaningRow.find('span[class="tag-group meaning-tags"] > span[class="tag "]').toArray().map((
-				element,
-			) => $(element).text());
-			const value = meaningRow.find('span[class="def html"]').text().trim();
-			entries.push({ tags, value });
-		}
-		return entries;
-	}
-
-	private getInflectionTableEntries($: cheerio.CheerioAPI): Element[] {
-		const inflections = $(tabContentSelector(ContentTab.Inflections));
-		const entryBodies = inflections.find('div[class="card mb-3 paradigmDiv"] > div[class=card-body]').toArray();
-		return entryBodies.map((body) => $(body));
 	}
 
 	private tableRowsToFields(wordType: WordTypes, rows: string[][], locale: string | undefined): InflectionTable {
@@ -531,6 +396,6 @@ class Dexonline implements DictionaryAdapter {
 	}
 }
 
-const adapter = new Dexonline();
+const adapter = new DexonlineAdapter();
 
 export default adapter;
