@@ -5,14 +5,13 @@ import {
 	InteractionResponseTypes,
 	sendInteractionResponse,
 } from 'discordeno';
+import { Commands, createLocalisations, localise } from '../../../../assets/localisations/mod.ts';
 import { OptionBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
 import { ListingResolver, sources } from '../data/sources/sources.ts';
 import { query } from '../parameters.ts';
 import { Client } from '../../../client.ts';
 import { SongListingContentTypes } from '../data/song-listing.ts';
-import { createLocalisations, localise } from '../../../../assets/localisations/types.ts';
-import { Commands } from '../../../../assets/localisations/commands.ts';
 import { parseArguments } from '../../../utils.ts';
 
 const command: OptionBuilder = {

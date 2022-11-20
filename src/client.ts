@@ -25,6 +25,7 @@ import {
 } from 'discordeno';
 import * as Sentry from 'sentry';
 import { Log as Logger } from 'tl_log';
+import { localise, Misc } from '../assets/localisations/mod.ts';
 import services from './services/service.ts';
 //import { MusicController } from './controllers/music.ts';
 import { createDatabase, Database } from './database/database.ts';
@@ -34,8 +35,6 @@ import { defaultLanguage, Language, supportedLanguages } from './types.ts';
 import { commandBuilders } from './commands/modules.ts';
 import { diagnosticMentionUser } from './utils.ts';
 import { setupLogging } from './controllers/logging/logging.ts';
-import { localise } from '../assets/localisations/types.ts';
-import { Misc } from '../assets/localisations/misc.ts';
 import { SupportedLanguage } from './commands/language/module.ts';
 import { DictionaryAdapter } from './commands/language/data/dictionary.ts';
 import { SentencePair } from './commands/language/data/sentence.ts';

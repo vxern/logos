@@ -9,6 +9,7 @@ import {
 	sendInteractionResponse,
 	sendMessage,
 } from 'discordeno';
+import { Commands, createLocalisations, localise } from '../../../../assets/localisations/mod.ts';
 import { Client, resolveInteractionToMember } from '../../../client.ts';
 import { CommandBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';
@@ -18,8 +19,6 @@ import { createPraise, getPraises } from '../../../database/functions/praises.ts
 import { getOrCreateUser } from '../../../database/functions/users.ts';
 import { log } from '../../../controllers/logging/logging.ts';
 import { guildAsAuthor, parseArguments } from '../../../utils.ts';
-import { createLocalisations, localise } from '../../../../assets/localisations/types.ts';
-import { Commands } from '../../../../assets/localisations/commands.ts';
 import { mention, MentionTypes } from '../../../formatting.ts';
 
 const command: CommandBuilder = {

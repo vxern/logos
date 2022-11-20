@@ -1,8 +1,8 @@
 import { SelectOption } from 'discordeno';
+import { Localisations, localise } from '../../../../../assets/localisations/mod.ts';
 import { Language } from '../../../../types.ts';
 import { trim } from '../../../../utils.ts';
 import { RoleCollection, RoleCollectionTypes } from './role-collection.ts';
-import { Localisations, localise } from '../../../../../assets/localisations/types.ts';
 
 /** The type of role category. */
 enum RoleCategoryTypes {

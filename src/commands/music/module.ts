@@ -1,4 +1,5 @@
 import { Bot, Interaction } from 'discordeno';
+import { Commands, createLocalisations, localise } from '../../../assets/localisations/mod.ts';
 import { Client } from '../../client.ts';
 import configuration from '../../configuration.ts';
 import { list } from '../../formatting.ts';
@@ -17,8 +18,6 @@ import resume from './commands/resume.ts';
 import unskip from './commands/unskip.ts';
 import volume from './commands/volume.ts';
 import { SongListing } from './data/song-listing.ts';
-import { createLocalisations, localise } from '../../../assets/localisations/types.ts';
-import { Commands } from '../../../assets/localisations/commands.ts';
 
 const music: CommandBuilder = {
 	...createLocalisations(Commands.music),

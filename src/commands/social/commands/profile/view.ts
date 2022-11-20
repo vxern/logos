@@ -7,8 +7,7 @@ import {
 	InteractionResponseTypes,
 	sendInteractionResponse,
 } from 'discordeno';
-import { Commands } from '../../../../../assets/localisations/commands.ts';
-import { createLocalisations, localise } from '../../../../../assets/localisations/types.ts';
+import { Commands, createLocalisations, localise } from '../../../../../assets/localisations/mod.ts';
 import { Client, resolveInteractionToMember } from '../../../../client.ts';
 import configuration from '../../../../configuration.ts';
 import { getPraises } from '../../../../database/functions/praises.ts';

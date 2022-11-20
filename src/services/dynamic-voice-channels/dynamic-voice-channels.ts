@@ -1,13 +1,4 @@
-import {
-	Bot,
-	Channel,
-	ChannelTypes,
-	Collection,
-	createChannel,
-	deleteChannel,
-	Guild,
-	VoiceState,
-} from 'discordeno';
+import { Bot, Channel, ChannelTypes, Collection, createChannel, deleteChannel, Guild, VoiceState } from 'discordeno';
 import { Client } from '../../client.ts';
 import configuration from '../../configuration.ts';
 import { ServiceStarter } from '../service.ts';

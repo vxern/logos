@@ -1,10 +1,10 @@
-import { _, ApplicationCommandOptionTypes, Bot, Interaction } from 'discordeno';
+import { ApplicationCommandOptionTypes, Bot, Interaction } from 'discordeno';
+import { lodash } from 'lodash';
+import { Commands, createLocalisations, localise } from '../../../../assets/localisations/mod.ts';
 import { Client } from '../../../client.ts';
 import { OptionBuilder } from '../../command.ts';
 import { displayListings } from '../module.ts';
 import { show } from '../../parameters.ts';
-import { createLocalisations, localise } from '../../../../assets/localisations/types.ts';
-import { Commands } from '../../../../assets/localisations/commands.ts';
 import { parseArguments } from '../../../utils.ts';
 
 const command: OptionBuilder = {
@@ -25,7 +25,7 @@ function displaySongHistory(
 		show: 'boolean',
 	});
 
-	const listingHistory = _.cloneDeep(musicController.history);
+	const listingHistory = lodash.cloneDeep(musicController.history);
 
 	listingHistory.reverse();
 

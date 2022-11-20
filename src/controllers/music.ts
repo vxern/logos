@@ -11,14 +11,13 @@ import {
 } from 'discordeno';
 import { Player } from 'lavadeno';
 import { LoadType } from 'lavalink_types';
+import { Commands, localise } from '../../assets/localisations/mod.ts';
 import { Client } from '../client.ts';
 import configuration from '../configuration.ts';
 import { Song } from '../commands/music/data/song.ts';
 import { SongListing, SongListingContentTypes } from '../commands/music/data/song-listing.ts';
 import { SongStream } from '../commands/music/data/song-stream.ts';
 import { mention, MentionTypes } from '../formatting.ts';
-import { Commands } from '../../assets/localisations/commands.ts';
-import { localise } from '../../assets/localisations/types.ts';
 import { defaultLanguage } from '../types.ts';
 
 class MusicController {

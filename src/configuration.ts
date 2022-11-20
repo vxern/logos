@@ -1,4 +1,4 @@
-import { Misc } from '../assets/localisations/misc.ts';
+import { Misc } from '../assets/localisations/mod.ts';
 import { SongListingContentTypes } from './commands/music/data/song-listing.ts';
 import { Language } from './types.ts';
 import { fromHex } from './utils.ts';

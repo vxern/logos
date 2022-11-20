@@ -1,4 +1,4 @@
-import { localise } from '../../../assets/localisations/types.ts';
+import { localise } from '../../../assets/localisations/mod.ts';
 import { defaultLanguage } from '../../types.ts';
 import praise from './commands/praise.ts';
 import profile from './commands/profile.ts';

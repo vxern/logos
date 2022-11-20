@@ -1,4 +1,5 @@
 import * as csv from 'std/encoding/csv.ts';
+import { TranslationLanguage } from '../../../assets/localisations/mod.ts';
 import game from './commands/game.ts';
 import resources from './commands/resources.ts';
 import word from './commands/word.ts';
@@ -7,7 +8,6 @@ import { DictionaryAdapter } from './data/dictionary.ts';
 import dexonline from './data/adapters/dexonline.ts';
 import { SentencePair } from './data/sentence.ts';
 import { Language, supportedLanguages } from '../../types.ts';
-import { TranslationLanguage } from '../../../assets/localisations/languages.ts';
 import { addParametersToURL } from '../../utils.ts';
 import { deepLApiEndpoints } from '../../constants.ts';
 import { Client } from '../../client.ts';

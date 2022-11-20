@@ -9,9 +9,7 @@ import {
 	InteractionTypes,
 	sendInteractionResponse,
 } from 'discordeno';
-import { Commands } from '../../../../assets/localisations/commands.ts';
-import { getLocalisations } from '../../../../assets/localisations/languages.ts';
-import { createLocalisations, localise } from '../../../../assets/localisations/types.ts';
+import { Commands, createLocalisations, getLocalisations, localise } from '../../../../assets/localisations/mod.ts';
 import { Client } from '../../../client.ts';
 import { CommandBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';

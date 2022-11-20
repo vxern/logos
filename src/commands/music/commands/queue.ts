@@ -1,10 +1,9 @@
 import { ApplicationCommandOptionTypes, Bot, Interaction } from 'discordeno';
+import { Commands, createLocalisations, localise } from '../../../../assets/localisations/mod.ts';
 import { Client } from '../../../client.ts';
 import { OptionBuilder } from '../../../commands/command.ts';
 import { displayListings } from '../module.ts';
 import { show } from '../../parameters.ts';
-import { createLocalisations, localise } from '../../../../assets/localisations/types.ts';
-import { Commands } from '../../../../assets/localisations/commands.ts';
 import { parseArguments } from '../../../utils.ts';
 
 const command: OptionBuilder = {
