@@ -14,9 +14,7 @@ import { LoadType } from 'lavalink_types';
 import { Commands, localise } from '../../assets/localisations/mod.ts';
 import { Client } from '../client.ts';
 import configuration from '../configuration.ts';
-import { Song } from '../commands/music/data/song.ts';
-import { SongListing, SongListingContentTypes } from '../commands/music/data/song-listing.ts';
-import { SongStream } from '../commands/music/data/song-stream.ts';
+import { Song, SongListing, SongListingContentTypes, SongStream } from '../commands/music/data/mod.ts';
 import { mention, MentionTypes } from '../formatting.ts';
 import { defaultLanguage } from '../types.ts';
 
