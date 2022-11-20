@@ -5,19 +5,21 @@ import configuration from '../../configuration.ts';
 import { list } from '../../formatting.ts';
 import { chunk, paginate } from '../../utils.ts';
 import { CommandBuilder } from '../command.ts';
-import history from './commands/history.ts';
-import now from './commands/now.ts';
-import pause from './commands/pause.ts';
-import play from './commands/play.ts';
-import queue from './commands/queue.ts';
-import remove from './commands/remove.ts';
-import replay from './commands/replay.ts';
-import skip from './commands/skip.ts';
-import stop from './commands/stop.ts';
-import resume from './commands/resume.ts';
-import unskip from './commands/unskip.ts';
-import volume from './commands/volume.ts';
-import { SongListing } from './data/song-listing.ts';
+import {
+	history,
+	now,
+	pause,
+	play,
+	queue,
+	remove,
+	replay,
+	resume,
+	skip,
+	stop,
+	unskip,
+	volume,
+} from './commands/mod.ts';
+import { SongListing } from './data/mod.ts';
 
 const music: CommandBuilder = {
 	...createLocalisations(Commands.music),
