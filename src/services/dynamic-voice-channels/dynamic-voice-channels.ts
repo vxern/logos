@@ -7,7 +7,7 @@ import {
 	deleteChannel,
 	Guild,
 	VoiceState,
-} from '../../../deps.ts';
+} from 'discordeno';
 import { Client } from '../../client.ts';
 import configuration from '../../configuration.ts';
 import { ServiceStarter } from '../service.ts';

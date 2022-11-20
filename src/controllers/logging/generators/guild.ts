@@ -1,4 +1,4 @@
-import { Member, User } from '../../../../deps.ts';
+import { Member, User } from 'discordeno';
 import configuration from '../../../configuration.ts';
 import { ArticleChange } from '../../../database/structs/articles/article-change.ts';
 import { Article } from '../../../database/structs/articles/article.ts';

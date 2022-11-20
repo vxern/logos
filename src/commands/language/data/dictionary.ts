@@ -1,4 +1,4 @@
-import { DiscordEmbedField } from '../../../../deps.ts';
+import { DiscordEmbedField } from 'discordeno';
 import { Language } from '../../../types.ts';
 
 enum DictionaryScopes {

@@ -1,4 +1,4 @@
-import { Bot, Interaction, InteractionTypes } from '../../../deps.ts';
+import { Bot, Interaction, InteractionTypes } from 'discordeno';
 import { ServiceStarter } from '../service.ts';
 import { createInteractionCollector } from '../../utils.ts';
 import { onAcceptRules } from './stages/accept-rules.ts';

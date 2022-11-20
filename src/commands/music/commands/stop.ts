@@ -1,12 +1,10 @@
-import { Commands } from '../../../../assets/localisations/commands.ts';
-import { createLocalisations, localise } from '../../../../assets/localisations/types.ts';
 import {
 	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
 	Bot,
-	InteractionResponseTypes,
-} from '../../../../deps.ts';
-import { Interaction, sendInteractionResponse } from '../../../../deps.ts';
+	InteractionResponseTypes, Interaction, sendInteractionResponse } from 'discordeno';
+import { Commands } from '../../../../assets/localisations/commands.ts';
+import { createLocalisations, localise } from '../../../../assets/localisations/types.ts';
 import { Client } from '../../../client.ts';
 import { OptionBuilder } from '../../../commands/command.ts';
 import configuration from '../../../configuration.ts';

@@ -14,7 +14,7 @@ import {
 	SelectOption,
 	sendInteractionResponse,
 	snowflakeToBigint,
-} from '../../../../../deps.ts';
+} from 'discordeno';
 import { Client } from '../../../../client.ts';
 import { defaultLanguage, Language } from '../../../../types.ts';
 import { createInteractionCollector } from '../../../../utils.ts';

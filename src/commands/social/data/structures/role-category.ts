@@ -1,4 +1,4 @@
-import { SelectOption } from '../../../../../deps.ts';
+import { SelectOption } from 'discordeno';
 import { Language } from '../../../../types.ts';
 import { trim } from '../../../../utils.ts';
 import { RoleCollection, RoleCollectionTypes } from './role-collection.ts';

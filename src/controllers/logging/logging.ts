@@ -1,4 +1,4 @@
-import { Bot, Channel, Guild, sendMessage } from '../../../deps.ts';
+import { Bot, Channel, Guild, sendMessage } from 'discordeno';
 import configuration from '../../configuration.ts';
 import { getTextChannel } from '../../utils.ts';
 import { Client } from '../../client.ts';

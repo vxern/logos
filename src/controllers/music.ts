@@ -1,5 +1,3 @@
-import { Player } from 'lavadeno';
-import { LoadType } from 'lavalink_types';
 import {
 	ApplicationCommandFlags,
 	Channel,
@@ -10,7 +8,9 @@ import {
 	sendInteractionResponse,
 	sendMessage,
 	VoiceState,
-} from '../../deps.ts';
+} from 'discordeno';
+import { Player } from 'lavadeno';
+import { LoadType } from 'lavalink_types';
 import { Client } from '../client.ts';
 import configuration from '../configuration.ts';
 import { Song } from '../commands/music/data/song.ts';

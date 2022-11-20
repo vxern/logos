@@ -1,15 +1,15 @@
-import { OptionBuilder } from '../../../commands/command.ts';
-import configuration from '../../../configuration.ts';
-import { ListingResolver, sources } from '../data/sources/sources.ts';
-import { query } from '../parameters.ts';
-import { Client } from '../../../client.ts';
 import {
 	ApplicationCommandOptionTypes,
 	Bot,
 	Interaction,
 	InteractionResponseTypes,
 	sendInteractionResponse,
-} from '../../../../deps.ts';
+} from 'discordeno';
+import { OptionBuilder } from '../../../commands/command.ts';
+import configuration from '../../../configuration.ts';
+import { ListingResolver, sources } from '../data/sources/sources.ts';
+import { query } from '../parameters.ts';
+import { Client } from '../../../client.ts';
 import { SongListingContentTypes } from '../data/song-listing.ts';
 import { createLocalisations, localise } from '../../../../assets/localisations/types.ts';
 import { Commands } from '../../../../assets/localisations/commands.ts';

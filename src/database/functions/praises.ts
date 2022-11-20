@@ -1,4 +1,4 @@
-import { faunadb } from '../../../deps.ts';
+import * as Fauna from 'fauna';
 import { Client } from '../../client.ts';
 import { capitalise } from '../../formatting.ts';
 import { dispatchQuery, getUserMentionByReference } from '../database.ts';
@@ -6,7 +6,7 @@ import { Document, Reference } from '../structs/document.ts';
 import { Praise } from '../structs/users/praise.ts';
 import { Warning } from '../structs/users/warning.ts';
 
-const $ = faunadb.query;
+const $ = Fauna.query;
 
 /** Defines parameters used in indexing praises. */
 interface PraiseIndexParameters {

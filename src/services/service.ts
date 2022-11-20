@@ -1,4 +1,4 @@
-import { Bot } from '../../deps.ts';
+import { Bot } from 'discordeno';
 import { Client } from '../client.ts';
 import dynamicVoiceChannels from './dynamic-voice-channels/dynamic-voice-channels.ts';
 import entry from './entry/entry.ts';

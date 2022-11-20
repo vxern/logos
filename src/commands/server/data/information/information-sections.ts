@@ -1,6 +1,6 @@
+import { BaseInvite, Bot, createInvite, Embed, getInvites, Guild, InviteMetadata } from 'discordeno';
 import { Information } from '../../../../../assets/localisations/information.ts';
 import { localise } from '../../../../../assets/localisations/types.ts';
-import { BaseInvite, Bot, createInvite, Embed, getInvites, Guild, InviteMetadata } from '../../../../../deps.ts';
 import { Client } from '../../../../client.ts';
 import configuration from '../../../../configuration.ts';
 import { links } from '../../../../constants.ts';
