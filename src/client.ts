@@ -26,18 +26,21 @@ import {
 import * as Sentry from 'sentry';
 import { Log as Logger } from 'tl_log';
 import { localise, Misc } from '../assets/localisations/mod.ts';
-import services from './services/service.ts';
 //import { MusicController } from './controllers/music.ts';
-import { createDatabase, Database } from './database/database.ts';
-import configuration from './configuration.ts';
-import { Command, InteractionHandler } from './commands/command.ts';
-import { defaultLanguage, Language, supportedLanguages } from './types.ts';
-import { commands } from './commands/modules.ts';
-import { diagnosticMentionUser } from './utils.ts';
-import { setupLogging } from './controllers/logging/logging.ts';
-import { SupportedLanguage } from './commands/language/module.ts';
-import { DictionaryAdapter } from './commands/language/data/dictionary.ts';
-import { SentencePair } from './commands/language/data/sentence.ts';
+import { DictionaryAdapter, SentencePair } from './commands/language/data/mod.ts';
+import { SupportedLanguage } from './commands/language/mod.ts';
+import { Command, InteractionHandler } from './commands/mod.ts';
+import { setupLogging } from './controllers/logging/mod.ts';
+import { createDatabase, Database } from './database/mod.ts';
+import { commands } from './commands/mod.ts';
+import {
+	configuration,
+	defaultLanguage,
+	diagnosticMentionUser,
+	Language,
+	services,
+	supportedLanguages,
+} from './mod.ts';
 
 interface Collector<
 	E extends keyof EventHandlers,
