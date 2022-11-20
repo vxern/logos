@@ -1,6 +1,6 @@
 import { ApplicationCommandOptionTypes } from 'discordeno';
 import { createLocalisations, Parameters } from '../../assets/localisations/mod.ts';
-import { OptionBuilder } from './command.ts';
+import { OptionBuilder } from './mod.ts';
 
 const elements: OptionBuilder = {
 	...createLocalisations(Parameters.global.elements),

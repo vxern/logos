@@ -2,10 +2,9 @@ import * as Fauna from 'fauna';
 import { Client } from '../../client.ts';
 import { capitalise } from '../../formatting.ts';
 import { Language } from '../../types.ts';
-import { dispatchQuery } from '../database.ts';
-import { ArticleChange } from '../structs/articles/article-change.ts';
-import { Article, getMostRecentArticleContent } from '../structs/articles/article.ts';
-import { Document, Reference } from '../structs/document.ts';
+import { Article, ArticleChange, getMostRecentArticleContent } from '../structs/articles/mod.ts';
+import { Document, Reference } from '../structs/mod.ts';
+import { dispatchQuery } from '../mod.ts';
 
 const $ = Fauna.query;
 

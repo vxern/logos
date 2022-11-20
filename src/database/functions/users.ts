@@ -1,8 +1,8 @@
 import * as Fauna from 'fauna';
 import { Client } from '../../client.ts';
-import { dispatchQuery, getUserMentionByReference, mentionUser } from '../database.ts';
-import { Document, Reference } from '../structs/document.ts';
-import { User } from '../structs/users/user.ts';
+import { User } from '../structs/users/mod.ts';
+import { Document, Reference } from '../structs/mod.ts';
+import { dispatchQuery, getUserMentionByReference, mentionUser } from '../mod.ts';
 
 const $ = Fauna.query;
 

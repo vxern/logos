@@ -1,4 +1,4 @@
-import { Reference } from '../document.ts';
+import { Reference } from '../mod.ts';
 
 /** Represents a warning given to a user. */
 interface Warning {
