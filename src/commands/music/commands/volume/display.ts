@@ -5,12 +5,8 @@ import {
 	InteractionResponseTypes,
 	sendInteractionResponse,
 } from 'discordeno';
-import { Commands } from '../../../../../assets/localisations/commands.ts';
-import { localise } from '../../../../../assets/localisations/types.ts';
-import { Client } from '../../../../client.ts';
-import configuration from '../../../../configuration.ts';
-import { defaultLanguage } from '../../../../types.ts';
-import { parseArguments } from '../../../../utils.ts';
+import { Commands, localise } from '../../../../../assets/localisations/mod.ts';
+import { Client, configuration, defaultLanguage, parseArguments } from '../../../../mod.ts';
 
 function displayVolume(
 	[client, bot]: [Client, Bot],

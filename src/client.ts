@@ -25,20 +25,22 @@ import {
 } from 'discordeno';
 import * as Sentry from 'sentry';
 import { Log as Logger } from 'tl_log';
-import services from './services/service.ts';
-//import { MusicController } from './controllers/music.ts';
-import { createDatabase, Database } from './database/database.ts';
-import configuration from './configuration.ts';
-import { Command, InteractionHandler } from './commands/command.ts';
-import { defaultLanguage, Language, supportedLanguages } from './types.ts';
-import { commandBuilders } from './commands/modules.ts';
-import { diagnosticMentionUser } from './utils.ts';
-import { setupLogging } from './controllers/logging/logging.ts';
-import { localise } from '../assets/localisations/types.ts';
-import { Misc } from '../assets/localisations/misc.ts';
-import { SupportedLanguage } from './commands/language/module.ts';
-import { DictionaryAdapter } from './commands/language/data/dictionary.ts';
-import { SentencePair } from './commands/language/data/sentence.ts';
+import { localise, Misc } from '../assets/localisations/mod.ts';
+//import { MusicController } from './controllers/mod.ts';
+import { DictionaryAdapter, SentencePair } from './commands/language/data/mod.ts';
+import { SupportedLanguage } from './commands/language/mod.ts';
+import { Command, InteractionHandler } from './commands/mod.ts';
+import { setupLogging } from './controllers/logging/mod.ts';
+import { createDatabase, Database } from './database/mod.ts';
+import { commands } from './commands/mod.ts';
+import {
+	configuration,
+	defaultLanguage,
+	diagnosticMentionUser,
+	Language,
+	services,
+	supportedLanguages,
+} from './mod.ts';
 
 interface Collector<
 	E extends keyof EventHandlers,
@@ -98,7 +100,7 @@ function createClient(metadata: Client['metadata'], features: Client['features']
 		database: createDatabase(),
 		cache: createCache(),
 		collectors: new Map(),
-		handlers: createCommandHandlers(commandBuilders),
+		handlers: createCommandHandlers(commands),
 		features,
 	};
 }
@@ -139,7 +141,7 @@ function createEventHandlers(client: Client): Partial<EventHandlers> {
 		guildCreate: (bot, guild) => {
 			fetchMembers(bot, guild.id, { limit: 0, query: '' });
 
-			upsertGuildApplicationCommands(bot, guild.id, commandBuilders);
+			upsertGuildApplicationCommands(bot, guild.id, commands);
 
 			registerGuild(client, guild);
 			setupLogging([client, bot], guild);

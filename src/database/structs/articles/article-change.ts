@@ -1,5 +1,5 @@
-import { Reference } from '../document.ts';
-import { ArticleTextContent } from './article.ts';
+import { Reference } from '../mod.ts';
+import { ArticleTextContent } from './mod.ts';
 
 /** Represents a change made to an article. */
 interface ArticleChange {

@@ -1,5 +1,4 @@
-import { SongListingContentTypes } from './song-listing.ts';
-import { Song } from './song.ts';
+import { SongListingContentTypes, Song } from './mod.ts';
 
 /**
  * Represents a collection of songs that occupies a single position in music

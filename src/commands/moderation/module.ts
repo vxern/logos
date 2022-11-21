@@ -1,10 +1,7 @@
-import configuration from '../../configuration.ts';
-import { Document } from '../../database/structs/document.ts';
-import { Warning } from '../../database/structs/users/warning.ts';
-import cite from './commands/cite.ts';
-import pardon from './commands/pardon.ts';
-import timeout from './commands/timeout.ts';
-import warn from './commands/warn.ts';
+import { Warning } from '../../database/structs/users/mod.ts';
+import { Document } from '../../database/structs/mod.ts';
+import { configuration } from '../../mod.ts';
+import { cite, pardon, timeout, warn } from './commands/mod.ts';
 
 const commands = [cite, pardon, timeout, warn];
 
@@ -17,5 +14,5 @@ function getRelevantWarnings(
 	});
 }
 
-export default commands;
 export { getRelevantWarnings };
+export default commands;

@@ -3,7 +3,7 @@
 		"std/": "https://deno.land/std@0.161.0/",
 		"cheerio": "https://deno.land/x/cheerio@1.0.7/mod.ts",
 		"dexonline": "https://deno.land/x/dexonline@v3.2.2/mod.ts",
-		"discordeno": "https://deno.land/x/discordeno@17.0.1/mod.ts",
+		"discordeno": "https://raw.githubusercontent.com/discordeno/discordeno/main/mod.ts",
 		"fauna": "https://deno.land/x/fauna@5.0.0-deno-alpha9/mod.ts",
 		"lavadeno": "https://deno.land/x/lavadeno@3.2.3/mod.ts",
 		"lavalink_types": "https://deno.land/x/lavalink_types@2.0.6/mod.ts",

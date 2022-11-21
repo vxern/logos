@@ -1,6 +1,6 @@
-import { Language } from '../../../types.ts';
-import { Document, Reference } from '../document.ts';
-import { ArticleChange } from './article-change.ts';
+import { Language } from '../../../mod.ts';
+import { Document, Reference } from '../mod.ts';
+import { ArticleChange } from './mod.ts';
 
 /** Represents the text content of an article. */
 interface ArticleTextContent {

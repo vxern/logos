@@ -1,9 +1,7 @@
 import { ApplicationCommandOptionTypes } from 'discordeno';
-import { Commands } from '../../../../assets/localisations/commands.ts';
-import { createLocalisations } from '../../../../assets/localisations/types.ts';
-import { CommandBuilder } from '../../command.ts';
-import { displayBotInformation } from './information/bot.ts';
-import { displayGuildInformation } from './information/guild.ts';
+import { Commands, createLocalisations } from '../../../../assets/localisations/mod.ts';
+import { CommandBuilder } from '../../mod.ts';
+import { displayBotInformation, displayGuildInformation } from './information/mod.ts';
 
 const command: CommandBuilder = {
 	...createLocalisations(Commands.information),

@@ -1,7 +1,6 @@
 import { ApplicationCommandOptionTypes } from 'discordeno';
-import { Parameters } from '../../../assets/localisations/parameters.ts';
-import { createLocalisations } from '../../../assets/localisations/types.ts';
-import { OptionBuilder } from '../../commands/command.ts';
+import { createLocalisations, Parameters } from '../../../assets/localisations/mod.ts';
+import { OptionBuilder } from '../../commands/mod.ts';
 
 const duration: OptionBuilder = {
 	...createLocalisations(Parameters.moderation.duration),

@@ -1,4 +1,4 @@
-import { Reference } from '../document.ts';
+import { Reference } from '../mod.ts';
 
 /** Represents a praise given by a user to another user. */
 interface Praise {

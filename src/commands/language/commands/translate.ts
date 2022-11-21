@@ -9,16 +9,17 @@ import {
 	InteractionTypes,
 	sendInteractionResponse,
 } from 'discordeno';
-import { Commands } from '../../../../assets/localisations/commands.ts';
-import { getLocalisations } from '../../../../assets/localisations/languages.ts';
-import { createLocalisations, localise } from '../../../../assets/localisations/types.ts';
-import { Client } from '../../../client.ts';
-import { CommandBuilder } from '../../../commands/command.ts';
-import configuration from '../../../configuration.ts';
-import { deepLApiEndpoints } from '../../../constants.ts';
-import { addParametersToURL, diagnosticMentionUser, parseArguments } from '../../../utils.ts';
-import { show } from '../../parameters.ts';
-import { resolveToSupportedLanguage } from '../module.ts';
+import { Commands, createLocalisations, getLocalisations, localise } from '../../../../assets/localisations/mod.ts';
+import {
+	addParametersToURL,
+	Client,
+	configuration,
+	deepLApiEndpoints,
+	diagnosticMentionUser,
+	parseArguments,
+} from '../../../mod.ts';
+import { CommandBuilder, show } from '../../mod.ts';
+import { resolveToSupportedLanguage } from '../mod.ts';
 
 const command: CommandBuilder = {
 	...createLocalisations(Commands.translate),

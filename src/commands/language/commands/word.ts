@@ -14,15 +14,19 @@ import {
 	MessageComponentTypes,
 	sendInteractionResponse,
 } from 'discordeno';
-import { Commands } from '../../../../assets/localisations/commands.ts';
-import { Words } from '../../../../assets/localisations/words.ts';
-import { createLocalisations, localise } from '../../../../assets/localisations/types.ts';
-import { Client } from '../../../client.ts';
-import { CommandBuilder } from '../../../commands/command.ts';
-import configuration from '../../../configuration.ts';
-import { BulletStyles, list } from '../../../formatting.ts';
-import { chunk, createInteractionCollector, diagnosticMentionUser, fromHex, parseArguments } from '../../../utils.ts';
-import { show } from '../../parameters.ts';
+import { Commands, createLocalisations, localise, Words } from '../../../../assets/localisations/mod.ts';
+import {
+	BulletStyles,
+	chunk,
+	Client,
+	configuration,
+	createInteractionCollector,
+	diagnosticMentionUser,
+	fromHex,
+	list,
+	parseArguments,
+} from '../../../mod.ts';
+import { CommandBuilder, show } from '../../mod.ts';
 import { DictionaryEntry, TaggedValue, WordTypes } from '../data/dictionary.ts';
 
 const command: CommandBuilder = {

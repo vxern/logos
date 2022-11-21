@@ -7,15 +7,18 @@ import {
 	sendInteractionResponse,
 	sendMessage,
 } from 'discordeno';
-import { Commands } from '../../../../assets/localisations/commands.ts';
-import { createLocalisations, localise } from '../../../../assets/localisations/types.ts';
-import { Client } from '../../../client.ts';
-import configuration from '../../../configuration.ts';
-import { log } from '../../../controllers/logging/logging.ts';
-import { mention, MentionTypes } from '../../../formatting.ts';
-import { defaultLanguage } from '../../../types.ts';
-import { getTextChannel, parseArguments } from '../../../utils.ts';
-import { CommandBuilder } from '../../command.ts';
+import { Commands, createLocalisations, localise } from '../../../../assets/localisations/mod.ts';
+import { log } from '../../../controllers/logging/mod.ts';
+import {
+	Client,
+	configuration,
+	defaultLanguage,
+	getTextChannel,
+	mention,
+	MentionTypes,
+	parseArguments,
+} from '../../../mod.ts';
+import { CommandBuilder } from '../../mod.ts';
 
 const command: CommandBuilder = {
 	...createLocalisations(Commands.suggest),

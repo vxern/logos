@@ -1,25 +1,18 @@
 import * as csv from 'std/encoding/csv.ts';
-import game from './commands/game.ts';
-import resources from './commands/resources.ts';
-import word from './commands/word.ts';
-import translate from './commands/translate.ts';
-import { DictionaryAdapter } from './data/dictionary.ts';
-import dexonline from './data/adapters/dexonline.ts';
-import { SentencePair } from './data/sentence.ts';
-import { Language, supportedLanguages } from '../../types.ts';
-import { TranslationLanguage } from '../../../assets/localisations/languages.ts';
-import { addParametersToURL } from '../../utils.ts';
-import { deepLApiEndpoints } from '../../constants.ts';
-import { Client } from '../../client.ts';
+import { TranslationLanguage } from '../../../assets/localisations/mod.ts';
+import { addParametersToURL, Client, deepLApiEndpoints, Language, supportedLanguages } from '../../mod.ts';
+import { game, resources, translate, word } from './commands/mod.ts';
+import { dexonline } from './data/adapters/mod.ts';
+import { DictionaryAdapter, SentencePair } from './data/mod.ts';
 
 const commands = [game, resources, translate, word];
 
-const dictionaryAdapters = [
+const dictionaryAdapters: DictionaryAdapter<any>[] = [
 	dexonline,
 ];
 
-function loadDictionaryAdapters(): Map<Language, DictionaryAdapter[]> {
-	const result = new Map<Language, DictionaryAdapter[]>();
+function loadDictionaryAdapters(): Map<Language, DictionaryAdapter<any>[]> {
+	const result = new Map<Language, DictionaryAdapter<any>[]>();
 
 	for (const language of supportedLanguages) {
 		result.set(language, []);

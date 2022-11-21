@@ -1,8 +1,7 @@
 import { Role as DiscordRole, SelectOption } from 'discordeno';
-import { Commands } from '../../../../../assets/localisations/commands.ts';
-import { localise } from '../../../../../assets/localisations/types.ts';
-import { Language } from '../../../../types.ts';
-import { Role } from './role.ts';
+import { Commands, localise } from '../../../../../assets/localisations/mod.ts';
+import { Language } from '../../../../mod.ts';
+import { Role } from './mod.ts';
 
 /** The type of role collection. */
 enum RoleCollectionTypes {

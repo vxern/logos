@@ -6,13 +6,10 @@ import {
 	InteractionResponseTypes,
 	sendInteractionResponse,
 } from 'discordeno';
-import { Commands } from '../../../../assets/localisations/commands.ts';
-import { createLocalisations, localise } from '../../../../assets/localisations/types.ts';
-import { Client } from '../../../client.ts';
-import { OptionBuilder } from '../../../commands/command.ts';
-import configuration from '../../../configuration.ts';
-import { defaultLanguage } from '../../../types.ts';
-import { resumeSong } from './resume.ts';
+import { Commands, createLocalisations, localise } from '../../../../assets/localisations/mod.ts';
+import { OptionBuilder } from '../../../commands/mod.ts';
+import { Client, configuration, defaultLanguage } from '../../../mod.ts';
+import { resumeSong } from './mod.ts';
 
 const command: OptionBuilder = {
 	...createLocalisations(Commands.music.options.pause),

@@ -10,12 +10,9 @@ import {
 	sendInteractionResponse,
 	User,
 } from 'discordeno';
-import configuration from '../../../configuration.ts';
-import { getProficiencyCategory } from '../../../commands/social/module.ts';
-import { snowflakeToTimestamp } from '../../../utils.ts';
-import { Client } from '../../../client.ts';
-import { Localisations, localise } from '../../../../assets/localisations/types.ts';
-import { Services } from '../../../../assets/localisations/services.ts';
+import { Localisations, localise, Services } from '../../../../assets/localisations/mod.ts';
+import { getProficiencyCategory } from '../../../commands/social/mod.ts';
+import { Client, configuration, snowflakeToTimestamp } from '../../../mod.ts';
 
 const proficiencyCategory = getProficiencyCategory();
 const proficiencies = proficiencyCategory.collection.list;

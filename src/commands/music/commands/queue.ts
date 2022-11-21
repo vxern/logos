@@ -1,11 +1,9 @@
 import { ApplicationCommandOptionTypes, Bot, Interaction } from 'discordeno';
-import { Client } from '../../../client.ts';
+import { Commands, createLocalisations, localise } from '../../../../assets/localisations/mod.ts';
 import { OptionBuilder } from '../../../commands/command.ts';
-import { displayListings } from '../module.ts';
-import { show } from '../../parameters.ts';
-import { createLocalisations, localise } from '../../../../assets/localisations/types.ts';
-import { Commands } from '../../../../assets/localisations/commands.ts';
-import { parseArguments } from '../../../utils.ts';
+import { Client, parseArguments } from '../../../mod.ts';
+import { show } from '../../mod.ts';
+import { displayListings } from '../mod.ts';
 
 const command: OptionBuilder = {
 	...createLocalisations(Commands.music.options.queue),

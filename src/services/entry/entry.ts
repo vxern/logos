@@ -1,9 +1,6 @@
 import { Bot, Interaction, InteractionTypes } from 'discordeno';
-import { ServiceStarter } from '../service.ts';
-import { createInteractionCollector } from '../../utils.ts';
-import { onAcceptRules } from './stages/accept-rules.ts';
-import { onSelectLanguageProficiency } from './stages/select-language-proficiency.ts';
-import { Client } from '../../client.ts';
+import { Client, createInteractionCollector, ServiceStarter } from '../../mod.ts';
+import { onAcceptRules, onSelectLanguageProficiency } from './stages/mod.ts';
 
 const entrySteps = [
 	'ACCEPTED_RULES',
