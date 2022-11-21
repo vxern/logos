@@ -5,19 +5,23 @@ import {
 	Interaction,
 	InteractionResponseTypes,
 	sendInteractionResponse,
-} from '../../../../deps.ts';
-import { Client } from '../../../client.ts';
-import { OptionBuilder } from '../../../commands/command.ts';
-import configuration from '../../../configuration.ts';
-import { displayTime, mention, MentionTypes } from '../../../formatting.ts';
-import { chunk, paginate, parseArguments, trim } from '../../../utils.ts';
-import { Song } from '../data/song.ts';
-import { SongStream } from '../data/song-stream.ts';
-import { SongListingContentTypes } from '../data/song-listing.ts';
-import { show } from '../../parameters.ts';
-import { collection } from '../parameters.ts';
-import { createLocalisations, localise } from '../../../../assets/localisations/types.ts';
-import { Commands } from '../../../../assets/localisations/commands.ts';
+} from 'discordeno';
+import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
+import { OptionBuilder } from 'logos/src/commands/mod.ts';
+import {
+	chunk,
+	Client,
+	configuration,
+	displayTime,
+	mention,
+	MentionTypes,
+	paginate,
+	parseArguments,
+	trim,
+} from 'logos/src/mod.ts';
+import { Song, SongListingContentTypes, SongStream } from 'logos/src/commands/music/data/mod.ts';
+import { show } from 'logos/src/commands/mod.ts';
+import { collection } from 'logos/src/commands/music/mod.ts';
 
 const command: OptionBuilder = {
 	...createLocalisations(Commands.music.options.now),

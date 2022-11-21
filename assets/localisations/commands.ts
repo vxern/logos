@@ -1,11 +1,13 @@
-import { ApplicationCommandOptionTypes, User } from '../../deps.ts';
-import { links } from '../../src/constants.ts';
-import configuration from '../../src/configuration.ts';
-import { capitalise, list } from '../../src/formatting.ts';
-import { CommandLocalisations, localise } from './types.ts';
-import { getLocale, getLocalisations, TranslationLanguage } from './languages.ts';
-import { Expressions } from './expressions.ts';
-import { Language } from '../../src/types.ts';
+import { ApplicationCommandOptionTypes, User } from 'discordeno';
+import { capitalise, configuration, Language, links, list } from 'logos/src/mod.ts';
+import {
+	CommandLocalisations,
+	Expressions,
+	getLocale,
+	getLocalisations,
+	localise,
+	TranslationLanguage,
+} from 'logos/assets/localisations/mod.ts';
 
 function typedLocalisations<
 	OptionKeys extends string,

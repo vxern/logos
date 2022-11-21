@@ -1,5 +1,3 @@
-import { Commands } from '../../../../../assets/localisations/commands.ts';
-import { localise } from '../../../../../assets/localisations/types.ts';
 import {
 	ApplicationCommandFlags,
 	Bot,
@@ -8,9 +6,9 @@ import {
 	Interaction,
 	InteractionResponseTypes,
 	sendInteractionResponse,
-} from '../../../../../deps.ts';
-import { Client } from '../../../../client.ts';
-import configuration from '../../../../configuration.ts';
+} from 'discordeno';
+import { Commands, localise } from 'logos/assets/localisations/mod.ts';
+import { Client, configuration } from 'logos/src/mod.ts';
 
 /** Displays information about the bot (application). */
 async function displayBotInformation(

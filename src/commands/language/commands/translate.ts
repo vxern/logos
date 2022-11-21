@@ -1,7 +1,3 @@
-// deno-lint-ignore-file camelcase
-import { Commands } from '../../../../assets/localisations/commands.ts';
-import { getLocalisations } from '../../../../assets/localisations/languages.ts';
-import { createLocalisations, localise } from '../../../../assets/localisations/types.ts';
 import {
 	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
@@ -12,14 +8,18 @@ import {
 	InteractionResponseTypes,
 	InteractionTypes,
 	sendInteractionResponse,
-} from '../../../../deps.ts';
-import { Client } from '../../../client.ts';
-import { CommandBuilder } from '../../../commands/command.ts';
-import configuration from '../../../configuration.ts';
-import { deepLApiEndpoints } from '../../../constants.ts';
-import { addParametersToURL, diagnosticMentionUser, parseArguments } from '../../../utils.ts';
-import { show } from '../../parameters.ts';
-import { resolveToSupportedLanguage } from '../module.ts';
+} from 'discordeno';
+import { Commands, createLocalisations, getLocalisations, localise } from 'logos/assets/localisations/mod.ts';
+import {
+	addParametersToURL,
+	Client,
+	configuration,
+	deepLApiEndpoints,
+	diagnosticMentionUser,
+	parseArguments,
+} from 'logos/src/mod.ts';
+import { CommandBuilder, show } from 'logos/src/commands/mod.ts';
+import { resolveToSupportedLanguage } from 'logos/src/commands/language/mod.ts';
 
 const command: CommandBuilder = {
 	...createLocalisations(Commands.translate),
@@ -43,7 +43,7 @@ const command: CommandBuilder = {
 };
 
 interface DeepLTranslation {
-	detected_source_language: string;
+	'detected_source_language': string;
 	text: string;
 }
 

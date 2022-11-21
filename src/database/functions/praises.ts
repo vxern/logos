@@ -1,12 +1,10 @@
-import { faunadb } from '../../../deps.ts';
-import { Client } from '../../client.ts';
-import { capitalise } from '../../formatting.ts';
-import { dispatchQuery, getUserMentionByReference } from '../database.ts';
-import { Document, Reference } from '../structs/document.ts';
-import { Praise } from '../structs/users/praise.ts';
-import { Warning } from '../structs/users/warning.ts';
+import * as Fauna from 'fauna';
+import { capitalise, Client } from 'logos/src/mod.ts';
+import { Praise, Warning } from 'logos/src/database/structs/users/mod.ts';
+import { Document, Reference } from 'logos/src/database/structs/mod.ts';
+import { dispatchQuery, getUserMentionByReference } from 'logos/src/database/mod.ts';
 
-const $ = faunadb.query;
+const $ = Fauna.query;
 
 /** Defines parameters used in indexing praises. */
 interface PraiseIndexParameters {

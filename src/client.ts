@@ -14,31 +14,32 @@ import {
 	Interaction,
 	InteractionResponseTypes,
 	InteractionTypes,
-	Logger,
 	Member,
 	Message,
 	sendInteractionResponse,
-	Sentry,
 	snowflakeToBigint,
 	startBot,
 	Transformers,
 	upsertGuildApplicationCommands,
 	User,
-} from '../deps.ts';
-import services from './services/service.ts';
-//import { MusicController } from './controllers/music.ts';
-import { createDatabase, Database } from './database/database.ts';
-import configuration from './configuration.ts';
-import { Command, InteractionHandler } from './commands/command.ts';
-import { defaultLanguage, Language, supportedLanguages } from './types.ts';
-import { commandBuilders } from './commands/modules.ts';
-import { diagnosticMentionUser } from './utils.ts';
-import { setupLogging } from './controllers/logging/logging.ts';
-import { localise } from '../assets/localisations/types.ts';
-import { Misc } from '../assets/localisations/misc.ts';
-import { SupportedLanguage } from './commands/language/module.ts';
-import { DictionaryAdapter } from './commands/language/data/dictionary.ts';
-import { SentencePair } from './commands/language/data/sentence.ts';
+} from 'discordeno';
+import * as Sentry from 'sentry';
+import { Log as Logger } from 'tl_log';
+import { localise, Misc } from 'logos/assets/localisations/mod.ts';
+import { DictionaryAdapter, SentencePair } from 'logos/src/commands/language/data/mod.ts';
+import { SupportedLanguage } from 'logos/src/commands/language/mod.ts';
+import { Command, InteractionHandler } from 'logos/src/commands/mod.ts';
+import { setupLogging } from 'logos/src/controllers/logging/mod.ts';
+import { commands } from 'logos/src/commands/mod.ts';
+import { createDatabase, Database } from 'logos/src/database/mod.ts';
+import {
+	configuration,
+	defaultLanguage,
+	diagnosticMentionUser,
+	Language,
+	services,
+	supportedLanguages,
+} from 'logos/src/mod.ts';
 
 interface Collector<
 	E extends keyof EventHandlers,
@@ -86,7 +87,7 @@ type Client = Readonly<{
 	collectors: Map<Event, Set<Collector<Event>>>;
 	handlers: Map<string, InteractionHandler>;
 	features: {
-		dictionaryAdapters: Map<Language, DictionaryAdapter[]>;
+		dictionaryAdapters: Map<Language, DictionaryAdapter<unknown>[]>;
 		sentencePairs: Map<Language, SentencePair[]>;
 	};
 }>;
@@ -98,7 +99,7 @@ function createClient(metadata: Client['metadata'], features: Client['features']
 		database: createDatabase(),
 		cache: createCache(),
 		collectors: new Map(),
-		handlers: createCommandHandlers(commandBuilders),
+		handlers: createCommandHandlers(commands),
 		features,
 	};
 }
@@ -139,7 +140,7 @@ function createEventHandlers(client: Client): Partial<EventHandlers> {
 		guildCreate: (bot, guild) => {
 			fetchMembers(bot, guild.id, { limit: 0, query: '' });
 
-			upsertGuildApplicationCommands(bot, guild.id, commandBuilders);
+			upsertGuildApplicationCommands(bot, guild.id, commands);
 
 			registerGuild(client, guild);
 			setupLogging([client, bot], guild);

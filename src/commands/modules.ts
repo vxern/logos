@@ -1,26 +1,17 @@
-import { CommandBuilder } from '../commands/command.ts';
-import information from './information/module.ts';
-import language from './language/module.ts';
-import moderation from './moderation/module.ts';
-//import music from './music/module.ts';
-import server from './server/module.ts';
-import social from './social/module.ts';
+import { information } from 'logos/src/commands/information/mod.ts';
+import { language } from 'logos/src/commands/language/mod.ts';
+import { moderation } from 'logos/src/commands/moderation/mod.ts';
+//import { music } from 'logos/src/commands/music/mod.ts';
+import { server } from 'logos/src/commands/server/mod.ts';
+import { social } from 'logos/src/commands/social/mod.ts';
 
-const modules = [
-	information,
-	language,
-	moderation,
-	//music,
-	server,
-	social,
+const commands = [
+	...information,
+	...language,
+	...moderation,
+	//...music,
+	...server,
+	...social,
 ];
 
-const commandBuilders = modules.reduce<CommandBuilder[]>(
-	(commandBuilders, module) => {
-		commandBuilders.push(...module);
-		return commandBuilders;
-	},
-	[],
-);
-
-export { commandBuilders };
+export { commands };

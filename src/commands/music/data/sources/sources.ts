@@ -1,7 +1,7 @@
-import { Interaction } from '../../../../../deps.ts';
-import { Client } from '../../../../client.ts';
-import { SongListing } from '../song-listing.ts';
-import youtube from './youtube.ts';
+import { Interaction } from 'discordeno';
+import { Client } from 'logos/src/mod.ts';
+import { SongListing } from 'logos/src/commands/music/data/mod.ts';
+import { youtube } from 'logos/src/commands/music/data/sources/mod.ts';
 
 /** Obtains a song listing from a source. */
 type ListingResolver = (

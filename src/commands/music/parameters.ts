@@ -1,7 +1,6 @@
-import { Parameters } from '../../../assets/localisations/parameters.ts';
-import { createLocalisations } from '../../../assets/localisations/types.ts';
-import { ApplicationCommandOptionTypes } from '../../../deps.ts';
-import { OptionBuilder } from '../../commands/command.ts';
+import { ApplicationCommandOptionTypes } from 'discordeno';
+import { createLocalisations, Parameters } from 'logos/assets/localisations/mod.ts';
+import { OptionBuilder } from 'logos/src/commands/mod.ts';
 
 const index: OptionBuilder = {
 	...createLocalisations(Parameters.music.index),

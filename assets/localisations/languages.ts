@@ -1,6 +1,6 @@
-import { Locales } from '../../deps.ts';
-import { defaultLanguage, Language } from '../../src/types.ts';
-import { Localisations } from './types.ts';
+import { Locales } from 'discordeno';
+import { defaultLanguage, Language } from 'logos/src/mod.ts';
+import { Localisations } from 'logos/assets/localisations/mod.ts';
 
 type LocalisationsByLanguage<L extends string> =
 	& Required<Record<Language, Localisations<string>>>

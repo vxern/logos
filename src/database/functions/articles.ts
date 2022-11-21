@@ -1,13 +1,10 @@
-import { faunadb } from '../../../deps.ts';
-import { Client } from '../../client.ts';
-import { capitalise } from '../../formatting.ts';
-import { Language } from '../../types.ts';
-import { dispatchQuery } from '../database.ts';
-import { ArticleChange } from '../structs/articles/article-change.ts';
-import { Article, getMostRecentArticleContent } from '../structs/articles/article.ts';
-import { Document, Reference } from '../structs/document.ts';
+import * as Fauna from 'fauna';
+import { capitalise, Client, Language } from 'logos/src/mod.ts';
+import { Article, ArticleChange, getMostRecentArticleContent } from 'logos/src/database/structs/articles/mod.ts';
+import { Document, Reference } from 'logos/src/database/structs/mod.ts';
+import { dispatchQuery } from 'logos/src/database/mod.ts';
 
-const $ = faunadb.query;
+const $ = Fauna.query;
 
 /** Defines parameters used in indexing articles. */
 interface ArticleIndexParameters {

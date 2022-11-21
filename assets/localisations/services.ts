@@ -1,8 +1,5 @@
-import { code } from '../../src/formatting.ts';
-import { Language } from '../../src/types.ts';
-import { Expressions } from './expressions.ts';
-import { getLocalisations } from './languages.ts';
-import { localise } from './types.ts';
+import { code, Language } from 'logos/src/mod.ts';
+import { Expressions, getLocalisations, localise } from 'logos/assets/localisations/mod.ts';
 
 class Services {
 	static readonly entry = {

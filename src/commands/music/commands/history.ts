@@ -1,11 +1,9 @@
-import { _, ApplicationCommandOptionTypes, Bot, Interaction } from '../../../../deps.ts';
-import { Client } from '../../../client.ts';
-import { OptionBuilder } from '../../command.ts';
-import { displayListings } from '../module.ts';
-import { show } from '../../parameters.ts';
-import { createLocalisations, localise } from '../../../../assets/localisations/types.ts';
-import { Commands } from '../../../../assets/localisations/commands.ts';
-import { parseArguments } from '../../../utils.ts';
+import { ApplicationCommandOptionTypes, Bot, Interaction } from 'discordeno';
+import { lodash } from 'lodash';
+import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
+import { Client, parseArguments } from 'logos/src/mod.ts';
+import { OptionBuilder, show } from 'logos/src/commands/mod.ts';
+import { displayListings } from 'logos/src/commands/music/mod.ts';
 
 const command: OptionBuilder = {
 	...createLocalisations(Commands.music.options.history),
@@ -25,7 +23,7 @@ function displaySongHistory(
 		show: 'boolean',
 	});
 
-	const listingHistory = _.cloneDeep(musicController.history);
+	const listingHistory = lodash.cloneDeep(musicController.history);
 
 	listingHistory.reverse();
 

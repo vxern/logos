@@ -1,5 +1,3 @@
-import { Commands } from '../../../../assets/localisations/commands.ts';
-import { createLocalisations, localise } from '../../../../assets/localisations/types.ts';
 import {
 	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
@@ -7,14 +5,12 @@ import {
 	Interaction,
 	InteractionResponseTypes,
 	sendInteractionResponse,
-} from '../../../../deps.ts';
-import { Client } from '../../../client.ts';
-import { OptionBuilder } from '../../../commands/command.ts';
-import configuration from '../../../configuration.ts';
-import { defaultLanguage } from '../../../types.ts';
-import { parseArguments } from '../../../utils.ts';
-import { SongListingContentTypes } from '../data/song-listing.ts';
-import { by, collection, to } from '../parameters.ts';
+} from 'discordeno';
+import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
+import { OptionBuilder } from 'logos/src/commands/mod.ts';
+import { Client, configuration, defaultLanguage, parseArguments } from 'logos/src/mod.ts';
+import { SongListingContentTypes } from 'logos/src/commands/music/data/mod.ts';
+import { by, collection, to } from 'logos/src/commands/music/mod.ts';
 
 const command: OptionBuilder = {
 	...createLocalisations(Commands.music.options.unskip),

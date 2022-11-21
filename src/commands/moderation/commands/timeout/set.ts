@@ -8,15 +8,22 @@ import {
 	InteractionTypes,
 	sendInteractionResponse,
 	sendMessage,
-} from '../../../../../deps.ts';
-import { Client, resolveInteractionToMember } from '../../../../client.ts';
-import configuration, { Periods, timeDescriptors } from '../../../../configuration.ts';
-import { displayTime, mention, MentionTypes } from '../../../../formatting.ts';
-import { log } from '../../../../controllers/logging/logging.ts';
-import { localise } from '../../../../../assets/localisations/types.ts';
-import { Commands } from '../../../../../assets/localisations/commands.ts';
-import { defaultLanguage } from '../../../../types.ts';
-import { guildAsAuthor, parseArguments } from '../../../../utils.ts';
+} from 'discordeno';
+import { Commands, localise } from 'logos/assets/localisations/mod.ts';
+import { log } from 'logos/src/controllers/logging/mod.ts';
+import {
+	Client,
+	configuration,
+	defaultLanguage,
+	displayTime,
+	guildAsAuthor,
+	mention,
+	MentionTypes,
+	parseArguments,
+	Periods,
+	resolveInteractionToMember,
+	timeDescriptors,
+} from 'logos/src/mod.ts';
 
 async function setTimeout(
 	[client, bot]: [Client, Bot],

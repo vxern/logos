@@ -1,5 +1,3 @@
-import { Commands } from '../../../../../assets/localisations/commands.ts';
-import { localise } from '../../../../../assets/localisations/types.ts';
 import {
 	ApplicationCommandFlags,
 	Bot,
@@ -8,10 +6,10 @@ import {
 	InteractionResponseTypes,
 	sendInteractionResponse,
 	sendMessage,
-} from '../../../../../deps.ts';
-import { Client } from '../../../../client.ts';
-import configuration from '../../../../configuration.ts';
-import informationSections from '../../data/information/information-sections.ts';
+} from 'discordeno';
+import { Commands, localise } from 'logos/assets/localisations/mod.ts';
+import { Client, configuration } from 'logos/src/mod.ts';
+import { informationSections } from 'logos/src/commands/server/data/information/mod.ts';
 
 async function postInformation(
 	[client, bot]: [Client, Bot],

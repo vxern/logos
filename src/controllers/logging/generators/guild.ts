@@ -1,12 +1,8 @@
-import { Member, User } from '../../../../deps.ts';
-import configuration from '../../../configuration.ts';
-import { ArticleChange } from '../../../database/structs/articles/article-change.ts';
-import { Article } from '../../../database/structs/articles/article.ts';
-import { Praise } from '../../../database/structs/users/praise.ts';
-import { Warning } from '../../../database/structs/users/warning.ts';
-import { code, codeMultiline, displayTime } from '../../../formatting.ts';
-import { diagnosticMentionUser, trim } from '../../../utils.ts';
-import { MessageGenerators } from './generators.ts';
+import { Member, User } from 'discordeno';
+import { Article, ArticleChange } from 'logos/src/database/structs/articles/mod.ts';
+import { Praise, Warning } from 'logos/src/database/structs/users/mod.ts';
+import { code, codeMultiline, configuration, diagnosticMentionUser, displayTime, trim } from 'logos/src/mod.ts';
+import { MessageGenerators } from 'logos/src/controllers/logging/generators/mod.ts';
 
 /** Type representing events that occur within a guild. */
 type GuildEvents = {

@@ -1,5 +1,3 @@
-import { Commands } from '../../../../../assets/localisations/commands.ts';
-import { localise } from '../../../../../assets/localisations/types.ts';
 import {
 	ApplicationCommandFlags,
 	Bot,
@@ -8,13 +6,19 @@ import {
 	Interaction,
 	InteractionResponseTypes,
 	sendInteractionResponse,
-} from '../../../../../deps.ts';
-import { Client } from '../../../../client.ts';
-import configuration from '../../../../configuration.ts';
-import { displayTime, mention, MentionTypes } from '../../../../formatting.ts';
-import { defaultLanguage } from '../../../../types.ts';
-import { guildAsThumbnail, snowflakeToTimestamp } from '../../../../utils.ts';
-import { getProficiencyCategory } from '../../../social/module.ts';
+} from 'discordeno';
+import { Commands, localise } from 'logos/assets/localisations/mod.ts';
+import {
+	Client,
+	configuration,
+	defaultLanguage,
+	displayTime,
+	guildAsThumbnail,
+	mention,
+	MentionTypes,
+	snowflakeToTimestamp,
+} from 'logos/src/mod.ts';
+import { getProficiencyCategory } from 'logos/src/commands/social/mod.ts';
 
 /** Displays information about the guild that this command was executed in. */
 function displayGuildInformation(
