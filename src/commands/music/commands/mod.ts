@@ -6,6 +6,7 @@ export { default as queue } from './queue.ts';
 export { default as remove } from './remove.ts';
 export { default as replay } from './replay.ts';
 export { default as resume } from './resume.ts';
+export * from './resume.ts';
 export { default as skip } from './skip.ts';
 export { default as stop } from './stop.ts';
 export { default as unskip } from './unskip.ts';

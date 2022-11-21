@@ -1,5 +1,5 @@
 import { Interaction } from 'discordeno';
-import { Client } from '../../../../client.ts';
+import { Client } from '../../../../mod.ts';
 import { SongListing } from '../mod.ts';
 import { youtube } from './mod.ts';
 

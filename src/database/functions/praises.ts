@@ -1,6 +1,5 @@
 import * as Fauna from 'fauna';
-import { Client } from '../../client.ts';
-import { capitalise } from '../../formatting.ts';
+import { capitalise, Client } from '../../mod.ts';
 import { Praise, Warning } from '../structs/users/mod.ts';
 import { Document, Reference } from '../structs/mod.ts';
 import { dispatchQuery, getUserMentionByReference } from '../mod.ts';

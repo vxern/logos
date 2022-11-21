@@ -1,4 +1,4 @@
-import { Language } from '../../../types.ts';
+import { Language } from '../../../mod.ts';
 import { Document, Reference } from '../mod.ts';
 import { ArticleChange } from './mod.ts';
 

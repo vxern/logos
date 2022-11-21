@@ -8,12 +8,8 @@ import {
 	sendInteractionResponse,
 } from 'discordeno';
 import { Commands, createLocalisations, Information, localise } from '../../../../assets/localisations/mod.ts';
-import { Client } from '../../../client.ts';
-import { CommandBuilder } from '../../../commands/command.ts';
-import configuration from '../../../configuration.ts';
-import { capitalise } from '../../../formatting.ts';
-import { defaultLanguage } from '../../../types.ts';
-import { parseArguments } from '../../../utils.ts';
+import { CommandBuilder } from '../../../commands/mod.ts';
+import { capitalise, Client, configuration, defaultLanguage, parseArguments } from '../../../mod.ts';
 
 const command: CommandBuilder = {
 	...createLocalisations(Commands.cite),

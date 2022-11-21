@@ -1,8 +1,6 @@
 import { Bot, Interaction, InteractionResponseTypes, sendInteractionResponse } from 'discordeno';
 import { Commands, localise } from '../../../../../assets/localisations/mod.ts';
-import { Client } from '../../../../client.ts';
-import configuration from '../../../../configuration.ts';
-import { parseArguments } from '../../../../utils.ts';
+import { Client, configuration, parseArguments } from '../../../../mod.ts';
 
 function setVolume(
 	[client, bot]: [Client, Bot],

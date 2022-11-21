@@ -16,13 +16,18 @@ import {
 	sendInteractionResponse,
 } from 'discordeno';
 import { Commands, createLocalisations, localise } from '../../../../assets/localisations/mod.ts';
-import { Client } from '../../../client.ts';
-import { OptionBuilder } from '../../../commands/command.ts';
-import configuration from '../../../configuration.ts';
-import { mention, MentionTypes } from '../../../formatting.ts';
-import { defaultLanguage } from '../../../types.ts';
-import { chunk, createInteractionCollector, trim } from '../../../utils.ts';
-import { SongListing } from '../data/song-listing.ts';
+import { OptionBuilder } from '../../../commands/mod.ts';
+import {
+	chunk,
+	Client,
+	configuration,
+	createInteractionCollector,
+	defaultLanguage,
+	mention,
+	MentionTypes,
+	trim,
+} from '../../../mod.ts';
+import { SongListing } from '../data/mod.ts';
 
 const command: OptionBuilder = {
 	...createLocalisations(Commands.music.options.remove),

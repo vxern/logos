@@ -9,10 +9,7 @@ import {
 	sendMessage,
 } from 'discordeno';
 import { Commands, localise } from '../../../../../assets/localisations/mod.ts';
-import { Client } from '../../../../client.ts';
-import configuration from '../../../../configuration.ts';
-import { defaultLanguage } from '../../../../types.ts';
-import { fromHex, getChannelMention } from '../../../../utils.ts';
+import { Client, configuration, defaultLanguage, fromHex, getChannelMention } from '../../../../mod.ts';
 
 function postWelcome(
 	[client, bot]: [Client, Bot],

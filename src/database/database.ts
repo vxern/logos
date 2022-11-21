@@ -1,12 +1,10 @@
 import { User as DiscordUser } from 'discordeno';
 import * as Sentry from 'sentry';
 import * as Fauna from 'fauna';
+import { Client, diagnosticMentionUser, Language } from '../mod.ts';
 import { Article, ArticleChange } from './structs/articles/mod.ts';
 import { Praise, User, Warning } from './structs/users/mod.ts';
 import { Document, Reference } from './structs/mod.ts';
-import { Language } from '../types.ts';
-import { Client } from '../client.ts';
-import { diagnosticMentionUser } from '../utils.ts';
 
 /**
  * 'Unpacks' a nested type from an array, function or promise.

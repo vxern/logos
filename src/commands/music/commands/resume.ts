@@ -7,10 +7,8 @@ import {
 	sendInteractionResponse,
 } from 'discordeno';
 import { Commands, createLocalisations, localise } from '../../../../assets/localisations/mod.ts';
-import { Client } from '../../../client.ts';
-import { OptionBuilder } from '../../../commands/command.ts';
-import configuration from '../../../configuration.ts';
-import { defaultLanguage } from '../../../types.ts';
+import { OptionBuilder } from '../../../commands/mod.ts';
+import { Client, configuration, defaultLanguage } from '../../../mod.ts';
 
 const command: OptionBuilder = {
 	...createLocalisations(Commands.music.options.resume),

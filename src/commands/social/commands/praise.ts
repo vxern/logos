@@ -10,16 +10,19 @@ import {
 	sendMessage,
 } from 'discordeno';
 import { Commands, createLocalisations, localise } from '../../../../assets/localisations/mod.ts';
-import { Client, resolveInteractionToMember } from '../../../client.ts';
-import { CommandBuilder } from '../../../commands/command.ts';
-import configuration from '../../../configuration.ts';
-import { Praise } from '../../../database/structs/users/praise.ts';
-import { user } from '../../parameters.ts';
-import { createPraise, getPraises } from '../../../database/functions/praises.ts';
-import { getOrCreateUser } from '../../../database/functions/users.ts';
-import { log } from '../../../controllers/logging/logging.ts';
-import { guildAsAuthor, parseArguments } from '../../../utils.ts';
-import { mention, MentionTypes } from '../../../formatting.ts';
+import { Praise } from '../../../database/structs/users/mod.ts';
+import { createPraise, getOrCreateUser, getPraises } from '../../../database/functions/mod.ts';
+import { log } from '../../../controllers/logging/mod.ts';
+import {
+	Client,
+	configuration,
+	guildAsAuthor,
+	mention,
+	MentionTypes,
+	parseArguments,
+	resolveInteractionToMember,
+} from '../../../mod.ts';
+import { CommandBuilder, user } from '../../mod.ts';
 
 const command: CommandBuilder = {
 	...createLocalisations(Commands.praise),

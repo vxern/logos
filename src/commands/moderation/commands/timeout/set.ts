@@ -10,12 +10,20 @@ import {
 	sendMessage,
 } from 'discordeno';
 import { Commands, localise } from '../../../../../assets/localisations/mod.ts';
-import { Client, resolveInteractionToMember } from '../../../../client.ts';
-import configuration, { Periods, timeDescriptors } from '../../../../configuration.ts';
-import { displayTime, mention, MentionTypes } from '../../../../formatting.ts';
-import { log } from '../../../../controllers/logging/logging.ts';
-import { defaultLanguage } from '../../../../types.ts';
-import { guildAsAuthor, parseArguments } from '../../../../utils.ts';
+import { log } from '../../../../controllers/logging/mod.ts';
+import {
+	Client,
+	configuration,
+	defaultLanguage,
+	displayTime,
+	guildAsAuthor,
+	mention,
+	MentionTypes,
+	parseArguments,
+	Periods,
+	resolveInteractionToMember,
+	timeDescriptors,
+} from '../../../../mod.ts';
 
 async function setTimeout(
 	[client, bot]: [Client, Bot],

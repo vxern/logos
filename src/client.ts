@@ -26,7 +26,7 @@ import {
 import * as Sentry from 'sentry';
 import { Log as Logger } from 'tl_log';
 import { localise, Misc } from '../assets/localisations/mod.ts';
-//import { MusicController } from './controllers/music.ts';
+//import { MusicController } from './controllers/mod.ts';
 import { DictionaryAdapter, SentencePair } from './commands/language/data/mod.ts';
 import { SupportedLanguage } from './commands/language/mod.ts';
 import { Command, InteractionHandler } from './commands/mod.ts';

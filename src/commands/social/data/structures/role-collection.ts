@@ -1,6 +1,6 @@
 import { Role as DiscordRole, SelectOption } from 'discordeno';
 import { Commands, localise } from '../../../../../assets/localisations/mod.ts';
-import { Language } from '../../../../types.ts';
+import { Language } from '../../../../mod.ts';
 import { Role } from './mod.ts';
 
 /** The type of role collection. */

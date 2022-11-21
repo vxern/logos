@@ -9,11 +9,16 @@ import {
 	sendMessage,
 } from 'discordeno';
 import { Commands, localise } from '../../../../../assets/localisations/mod.ts';
-import { Client, resolveInteractionToMember } from '../../../../client.ts';
-import configuration from '../../../../configuration.ts';
-import { diagnosticMentionUser, guildAsAuthor, parseArguments } from '../../../../utils.ts';
-import { log } from '../../../../controllers/logging/logging.ts';
-import { defaultLanguage } from '../../../../types.ts';
+import { log } from '../../../../controllers/logging/mod.ts';
+import {
+	Client,
+	configuration,
+	defaultLanguage,
+	diagnosticMentionUser,
+	guildAsAuthor,
+	parseArguments,
+	resolveInteractionToMember,
+} from '../../../../mod.ts';
 
 async function clearTimeout(
 	[client, bot]: [Client, Bot],

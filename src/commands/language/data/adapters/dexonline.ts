@@ -1,8 +1,7 @@
 import { Dexonline } from 'dexonline';
 import { Commands, getWordType, localise } from '../../../../../assets/localisations/mod.ts';
-import { Language } from '../../../../types.ts';
-import { DictionaryAdapter, DictionaryEntry, DictionaryProvisions, WordTypes } from '../dictionary.ts';
-import { chunk } from '../../../../utils.ts';
+import { chunk, Language } from '../../../../mod.ts';
+import { DictionaryAdapter, DictionaryEntry, DictionaryProvisions, WordTypes } from '../mod.ts';
 
 const supportedTypesForInflection = [WordTypes.Noun, WordTypes.Verb, WordTypes.Adjective, WordTypes.Determiner];
 

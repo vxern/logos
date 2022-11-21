@@ -8,16 +8,17 @@ import {
 	sendInteractionResponse,
 } from 'discordeno';
 import { Commands, createLocalisations, localise } from '../../../../../assets/localisations/mod.ts';
-import { Client, resolveInteractionToMember } from '../../../../client.ts';
-import configuration from '../../../../configuration.ts';
-import { getPraises } from '../../../../database/functions/praises.ts';
-import { getOrCreateUser } from '../../../../database/functions/users.ts';
-import { getWarnings } from '../../../../database/functions/warnings.ts';
-import { mention, MentionTypes } from '../../../../formatting.ts';
-import { defaultLanguage } from '../../../../types.ts';
-import { parseArguments } from '../../../../utils.ts';
-import { OptionBuilder } from '../../../command.ts';
-import { show, user } from '../../../parameters.ts';
+import { getOrCreateUser, getPraises, getWarnings } from '../../../../database/functions/mod.ts';
+import {
+	Client,
+	configuration,
+	defaultLanguage,
+	mention,
+	MentionTypes,
+	parseArguments,
+	resolveInteractionToMember,
+} from '../../../../mod.ts';
+import { OptionBuilder, show, user } from '../../../mod.ts';
 
 const command: OptionBuilder = {
 	...createLocalisations(Commands.profile.options.view),

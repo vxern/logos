@@ -1,11 +1,15 @@
 import { BaseInvite, Bot, createInvite, Embed, getInvites, Guild, InviteMetadata } from 'discordeno';
 import { Information, localise } from '../../../../../assets/localisations/mod.ts';
-import { Client } from '../../../../client.ts';
-import configuration from '../../../../configuration.ts';
-import { links } from '../../../../constants.ts';
-import { mention, MentionTypes } from '../../../../formatting.ts';
-import { defaultLanguage } from '../../../../types.ts';
-import { fromHex, getTextChannel } from '../../../../utils.ts';
+import {
+	Client,
+	configuration,
+	defaultLanguage,
+	fromHex,
+	getTextChannel,
+	links,
+	mention,
+	MentionTypes,
+} from '../../../../mod.ts';
 
 /** Represents a section of guild information. */
 interface InformationSection {

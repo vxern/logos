@@ -1,4 +1,4 @@
-import { SongListingContentTypes } from './song-listing.ts';
+import { SongListingContentTypes } from './mod.ts';
 
 /** Represents a musical piece, playable singly by the music controller. */
 interface Song {

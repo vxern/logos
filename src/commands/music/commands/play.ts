@@ -6,13 +6,11 @@ import {
 	sendInteractionResponse,
 } from 'discordeno';
 import { Commands, createLocalisations, localise } from '../../../../assets/localisations/mod.ts';
-import { OptionBuilder } from '../../../commands/command.ts';
-import configuration from '../../../configuration.ts';
-import { ListingResolver, sources } from '../data/sources/sources.ts';
-import { query } from '../parameters.ts';
-import { Client } from '../../../client.ts';
-import { SongListingContentTypes } from '../data/song-listing.ts';
-import { parseArguments } from '../../../utils.ts';
+import { OptionBuilder } from '../../../commands/mod.ts';
+import { Client, configuration, parseArguments } from '../../../mod.ts';
+import { ListingResolver, sources } from '../data/sources/mod.ts';
+import { SongListingContentTypes } from '../data/mod.ts';
+import { query } from '../mod.ts';
 
 const command: OptionBuilder = {
 	...createLocalisations(Commands.music.options.play),

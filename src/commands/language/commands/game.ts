@@ -11,11 +11,9 @@ import {
 	sendInteractionResponse,
 } from 'discordeno';
 import { Commands, createLocalisations, localise } from '../../../../assets/localisations/mod.ts';
-import { Client } from '../../../client.ts';
-import { CommandBuilder } from '../../../commands/command.ts';
-import configuration from '../../../configuration.ts';
-import { createInteractionCollector, random } from '../../../utils.ts';
-import { SentencePair } from '../data/sentence.ts';
+import { CommandBuilder } from '../../../commands/mod.ts';
+import { Client, configuration, createInteractionCollector, random } from '../../../mod.ts';
+import { SentencePair } from '../data/mod.ts';
 
 const command: CommandBuilder = {
 	...createLocalisations(Commands.game),

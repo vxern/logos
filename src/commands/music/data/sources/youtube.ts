@@ -8,9 +8,7 @@ import {
 	sendInteractionResponse,
 } from 'discordeno';
 import { Playlist, Video, YouTube } from 'youtube_sr';
-import { Client } from '../../../../client.ts';
-import configuration from '../../../../configuration.ts';
-import { createInteractionCollector, trim } from '../../../../utils.ts';
+import { Client, configuration, createInteractionCollector, trim } from '../../../../mod.ts';
 import { SongListing, SongListingContentTypes } from '../mod.ts';
 import { ListingResolver } from './mod.ts';
 

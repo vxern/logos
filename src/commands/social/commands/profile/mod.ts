@@ -1,2 +1,2 @@
-export * from './roles.ts';
-export * from './view.ts';
+export { default as roles } from './roles.ts';
+export { default as view } from './view.ts';
