@@ -1,9 +1,9 @@
 import { ApplicationCommandOptionTypes } from 'discordeno';
-import { Commands, createLocalisations } from '../../../../assets/localisations/mod.ts';
-import { OptionBuilder } from '../../../commands/mod.ts';
-import { configuration } from '../../../mod.ts';
-import { show } from '../../mod.ts';
-import { displayVolume, setVolume } from './volume/mod.ts';
+import { Commands, createLocalisations } from 'logos/assets/localisations/mod.ts';
+import { OptionBuilder } from 'logos/src/commands/mod.ts';
+import { configuration } from 'logos/src/mod.ts';
+import { show } from 'logos/src/commands/mod.ts';
+import { displayVolume, setVolume } from 'logos/src/commands/music/commands/volume/mod.ts';
 
 const command: OptionBuilder = {
 	...createLocalisations(Commands.music.options.volume),

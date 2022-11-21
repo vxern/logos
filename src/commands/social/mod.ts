@@ -1,2 +1,2 @@
-export { default as social } from './module.ts';
-export * from './module.ts';
+export { default as social } from 'logos/src/commands/social/module.ts';
+export * from 'logos/src/commands/social/module.ts';

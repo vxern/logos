@@ -25,14 +25,13 @@ import {
 } from 'discordeno';
 import * as Sentry from 'sentry';
 import { Log as Logger } from 'tl_log';
-import { localise, Misc } from '../assets/localisations/mod.ts';
-//import { MusicController } from './controllers/mod.ts';
-import { DictionaryAdapter, SentencePair } from './commands/language/data/mod.ts';
-import { SupportedLanguage } from './commands/language/mod.ts';
-import { Command, InteractionHandler } from './commands/mod.ts';
-import { setupLogging } from './controllers/logging/mod.ts';
-import { createDatabase, Database } from './database/mod.ts';
-import { commands } from './commands/mod.ts';
+import { localise, Misc } from 'logos/assets/localisations/mod.ts';
+import { DictionaryAdapter, SentencePair } from 'logos/src/commands/language/data/mod.ts';
+import { SupportedLanguage } from 'logos/src/commands/language/mod.ts';
+import { Command, InteractionHandler } from 'logos/src/commands/mod.ts';
+import { setupLogging } from 'logos/src/controllers/logging/mod.ts';
+import { commands } from 'logos/src/commands/mod.ts';
+import { createDatabase, Database } from 'logos/src/database/mod.ts';
 import {
 	configuration,
 	defaultLanguage,
@@ -40,7 +39,7 @@ import {
 	Language,
 	services,
 	supportedLanguages,
-} from './mod.ts';
+} from 'logos/src/mod.ts';
 
 interface Collector<
 	E extends keyof EventHandlers,

@@ -1,6 +1,5 @@
-import { Language } from '../../src/types.ts';
-import { Expression } from './types.ts';
-import { Localisations } from './types.ts';
+import { Language } from 'logos/src/mod.ts';
+import { Expression, Localisations } from 'logos/assets/localisations/mod.ts';
 
 class Articles {
 	static readonly article: Record<string, Localisations<string>> = {

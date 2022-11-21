@@ -14,7 +14,7 @@ import {
 	MessageComponentTypes,
 	sendInteractionResponse,
 } from 'discordeno';
-import { Commands, createLocalisations, localise, Words } from '../../../../assets/localisations/mod.ts';
+import { Commands, createLocalisations, localise, Words } from 'logos/assets/localisations/mod.ts';
 import {
 	BulletStyles,
 	chunk,
@@ -25,9 +25,9 @@ import {
 	fromHex,
 	list,
 	parseArguments,
-} from '../../../mod.ts';
-import { CommandBuilder, show } from '../../mod.ts';
-import { DictionaryEntry, TaggedValue, WordTypes } from '../data/dictionary.ts';
+} from 'logos/src/mod.ts';
+import { CommandBuilder, show } from 'logos/src/commands/mod.ts';
+import { DictionaryEntry, TaggedValue, WordTypes } from 'logos/src/commands/language/data/dictionary.ts';
 
 const command: CommandBuilder = {
 	...createLocalisations(Commands.word),

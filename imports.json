@@ -1,6 +1,7 @@
 {
 	"imports": {
-		"std/": "https://deno.land/std@0.161.0/",
+		"logos/": "./",
+		"std/": "https://deno.land/std@0.165.0/",
 		"cheerio": "https://deno.land/x/cheerio@1.0.7/mod.ts",
 		"dexonline": "https://deno.land/x/dexonline@v3.2.2/mod.ts",
 		"discordeno": "https://raw.githubusercontent.com/discordeno/discordeno/main/mod.ts",

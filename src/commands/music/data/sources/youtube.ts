@@ -8,9 +8,9 @@ import {
 	sendInteractionResponse,
 } from 'discordeno';
 import { Playlist, Video, YouTube } from 'youtube_sr';
-import { Client, configuration, createInteractionCollector, trim } from '../../../../mod.ts';
-import { SongListing, SongListingContentTypes } from '../mod.ts';
-import { ListingResolver } from './mod.ts';
+import { Client, configuration, createInteractionCollector, trim } from 'logos/src/mod.ts';
+import { SongListing, SongListingContentTypes } from 'logos/src/commands/music/data/mod.ts';
+import { ListingResolver } from 'logos/src/commands/music/data/sources/mod.ts';
 
 const urlExpression = new RegExp(
 	/^(?:https?:)?(?:\/\/)?(?:youtu\.be\/|(?:www\.|m\.)?youtube\.com\/(?:watch|v|embed)(?:\.php)?(?:\?.*v=|\/))([a-zA-Z0-9\_-]{7,15})(?:[\?&][a-zA-Z0-9\_-]+=[a-zA-Z0-9\_-]+)*$/,

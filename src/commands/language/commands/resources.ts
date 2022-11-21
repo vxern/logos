@@ -7,10 +7,10 @@ import {
 	MessageComponentTypes,
 	sendInteractionResponse,
 } from 'discordeno';
-import { Commands, createLocalisations, localise } from '../../../../assets/localisations/mod.ts';
-import { CommandBuilder } from '../../../commands/mod.ts';
-import { Client, defaultLanguage, links, parseArguments } from '../../../mod.ts';
-import { show } from '../../mod.ts';
+import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
+import { CommandBuilder } from 'logos/src/commands/mod.ts';
+import { Client, defaultLanguage, links, parseArguments } from 'logos/src/mod.ts';
+import { show } from 'logos/src/commands/mod.ts';
 
 const command: CommandBuilder = {
 	...createLocalisations(Commands.resources),

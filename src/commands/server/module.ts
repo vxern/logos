@@ -1,4 +1,4 @@
-import { post, suggest } from './commands/mod.ts';
+import { post, suggest } from 'logos/src/commands/server/commands/mod.ts';
 
 const commands = [post, suggest];
 

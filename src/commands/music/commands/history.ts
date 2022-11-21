@@ -1,9 +1,9 @@
 import { ApplicationCommandOptionTypes, Bot, Interaction } from 'discordeno';
 import { lodash } from 'lodash';
-import { Commands, createLocalisations, localise } from '../../../../assets/localisations/mod.ts';
-import { Client, parseArguments } from '../../../mod.ts';
-import { OptionBuilder, show } from '../../mod.ts';
-import { displayListings } from '../mod.ts';
+import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
+import { Client, parseArguments } from 'logos/src/mod.ts';
+import { OptionBuilder, show } from 'logos/src/commands/mod.ts';
+import { displayListings } from 'logos/src/commands/music/mod.ts';
 
 const command: OptionBuilder = {
 	...createLocalisations(Commands.music.options.history),

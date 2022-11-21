@@ -1,1 +1,1 @@
-export { default as roles } from './roles.ts';
+export { default as roles } from 'logos/src/commands/social/data/roles.ts';

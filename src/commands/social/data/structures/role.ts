@@ -1,4 +1,4 @@
-import { Localisations } from '../../../../../assets/localisations/mod.ts';
+import { Localisations } from 'logos/assets/localisations/mod.ts';
 
 /** Represents a selectable role within a role selection menu.  */
 interface Role {

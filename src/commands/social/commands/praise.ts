@@ -9,10 +9,10 @@ import {
 	sendInteractionResponse,
 	sendMessage,
 } from 'discordeno';
-import { Commands, createLocalisations, localise } from '../../../../assets/localisations/mod.ts';
-import { Praise } from '../../../database/structs/users/mod.ts';
-import { createPraise, getOrCreateUser, getPraises } from '../../../database/functions/mod.ts';
-import { log } from '../../../controllers/logging/mod.ts';
+import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
+import { Praise } from 'logos/src/database/structs/users/mod.ts';
+import { createPraise, getOrCreateUser, getPraises } from 'logos/src/database/functions/mod.ts';
+import { log } from 'logos/src/controllers/logging/mod.ts';
 import {
 	Client,
 	configuration,
@@ -21,8 +21,8 @@ import {
 	MentionTypes,
 	parseArguments,
 	resolveInteractionToMember,
-} from '../../../mod.ts';
-import { CommandBuilder, user } from '../../mod.ts';
+} from 'logos/src/mod.ts';
+import { CommandBuilder, user } from 'logos/src/commands/mod.ts';
 
 const command: CommandBuilder = {
 	...createLocalisations(Commands.praise),

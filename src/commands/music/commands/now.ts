@@ -6,8 +6,8 @@ import {
 	InteractionResponseTypes,
 	sendInteractionResponse,
 } from 'discordeno';
-import { Commands, createLocalisations, localise } from '../../../../assets/localisations/mod.ts';
-import { OptionBuilder } from '../../../commands/mod.ts';
+import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
+import { OptionBuilder } from 'logos/src/commands/mod.ts';
 import {
 	chunk,
 	Client,
@@ -18,10 +18,10 @@ import {
 	paginate,
 	parseArguments,
 	trim,
-} from '../../../mod.ts';
-import { Song, SongListingContentTypes, SongStream } from '../data/mod.ts';
-import { show } from '../../mod.ts';
-import { collection } from '../mod.ts';
+} from 'logos/src/mod.ts';
+import { Song, SongListingContentTypes, SongStream } from 'logos/src/commands/music/data/mod.ts';
+import { show } from 'logos/src/commands/mod.ts';
+import { collection } from 'logos/src/commands/music/mod.ts';
 
 const command: OptionBuilder = {
 	...createLocalisations(Commands.music.options.now),

@@ -1,7 +1,6 @@
-import { WordTypes } from '../../src/commands/language/data/dictionary.ts';
-import { Language } from '../../src/types.ts';
-import { getLocale } from './languages.ts';
-import { Localisations, localise } from './types.ts';
+import { WordTypes } from 'logos/src/commands/language/data/mod.ts';
+import { Language } from 'logos/src/mod.ts';
+import { getLocale, Localisations, localise } from 'logos/assets/localisations/mod.ts';
 
 class Words {
 	static readonly types: Record<`${WordTypes}`, Localisations<string>> = {

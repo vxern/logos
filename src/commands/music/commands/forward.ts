@@ -1,8 +1,8 @@
 import { ApplicationCommandOptionTypes, Bot, Interaction } from 'discordeno';
-import { Commands, createLocalisations } from '../../../../assets/localisations/mod.ts';
-import { OptionBuilder } from '../../../commands/mod.ts';
-import { Client } from '../../../mod.ts';
-import { by, to } from '../mod.ts';
+import { Commands, createLocalisations } from 'logos/assets/localisations/mod.ts';
+import { OptionBuilder } from 'logos/src/commands/mod.ts';
+import { Client } from 'logos/src/mod.ts';
+import { by, to } from 'logos/src/commands/music/mod.ts';
 
 const command: OptionBuilder = {
 	...createLocalisations(Commands.music.options.forward),

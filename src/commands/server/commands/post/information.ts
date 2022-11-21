@@ -7,9 +7,9 @@ import {
 	sendInteractionResponse,
 	sendMessage,
 } from 'discordeno';
-import { Commands, localise } from '../../../../../assets/localisations/mod.ts';
-import { Client, configuration } from '../../../../mod.ts';
-import { informationSections } from '../../data/information/mod.ts';
+import { Commands, localise } from 'logos/assets/localisations/mod.ts';
+import { Client, configuration } from 'logos/src/mod.ts';
+import { informationSections } from 'logos/src/commands/server/data/information/mod.ts';
 
 async function postInformation(
 	[client, bot]: [Client, Bot],

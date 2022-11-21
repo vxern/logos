@@ -28,8 +28,8 @@ import {
 	User,
 } from 'discordeno';
 import * as Snowflake from 'snowflake';
-import { localise, Utils } from '../assets/localisations/mod.ts';
-import { addCollector, Client, code, configuration, Language, mention, MentionTypes } from './mod.ts';
+import { localise, Utils } from 'logos/assets/localisations/mod.ts';
+import { addCollector, Client, code, configuration, Language, mention, MentionTypes } from 'logos/src/mod.ts';
 
 /**
  * Parses a 6-digit hex value prefixed with a hashtag to a number.

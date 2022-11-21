@@ -1,5 +1,5 @@
 import { BaseInvite, Bot, createInvite, Embed, getInvites, Guild, InviteMetadata } from 'discordeno';
-import { Information, localise } from '../../../../../assets/localisations/mod.ts';
+import { Information, localise } from 'logos/assets/localisations/mod.ts';
 import {
 	Client,
 	configuration,
@@ -9,7 +9,7 @@ import {
 	links,
 	mention,
 	MentionTypes,
-} from '../../../../mod.ts';
+} from 'logos/src/mod.ts';
 
 /** Represents a section of guild information. */
 interface InformationSection {

@@ -1,4 +1,4 @@
-import { DiscordLocalisations } from './types.ts';
+import { DiscordLocalisations } from 'logos/assets/localisations/mod.ts';
 
 function typedLocalisations<OptionKeys extends string>(
 	localisations: Record<OptionKeys, DiscordLocalisations>,

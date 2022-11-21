@@ -1,9 +1,9 @@
 import * as csv from 'std/encoding/csv.ts';
-import { TranslationLanguage } from '../../../assets/localisations/mod.ts';
-import { addParametersToURL, Client, deepLApiEndpoints, Language, supportedLanguages } from '../../mod.ts';
-import { game, resources, translate, word } from './commands/mod.ts';
-import { dexonline } from './data/adapters/mod.ts';
-import { DictionaryAdapter, SentencePair } from './data/mod.ts';
+import { TranslationLanguage } from 'logos/assets/localisations/mod.ts';
+import { addParametersToURL, Client, deepLApiEndpoints, Language, supportedLanguages } from 'logos/src/mod.ts';
+import { game, resources, translate, word } from 'logos/src/commands/language/commands/mod.ts';
+import { dexonline } from 'logos/src/commands/language/data/adapters/mod.ts';
+import { DictionaryAdapter, SentencePair } from 'logos/src/commands/language/data/mod.ts';
 
 const commands = [game, resources, translate, word];
 

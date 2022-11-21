@@ -10,10 +10,10 @@ import {
 	MessageComponentTypes,
 	sendInteractionResponse,
 } from 'discordeno';
-import { Commands, createLocalisations, localise } from '../../../../assets/localisations/mod.ts';
-import { CommandBuilder } from '../../../commands/mod.ts';
-import { Client, configuration, createInteractionCollector, random } from '../../../mod.ts';
-import { SentencePair } from '../data/mod.ts';
+import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
+import { CommandBuilder } from 'logos/src/commands/mod.ts';
+import { Client, configuration, createInteractionCollector, random } from 'logos/src/mod.ts';
+import { SentencePair } from 'logos/src/commands/language/data/mod.ts';
 
 const command: CommandBuilder = {
 	...createLocalisations(Commands.game),

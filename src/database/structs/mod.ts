@@ -1,1 +1,1 @@
-export * from './document.ts';
+export * from 'logos/src/database/structs/document.ts';

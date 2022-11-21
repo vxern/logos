@@ -1,6 +1,5 @@
 import { Guild } from 'discordeno';
-import { list } from '../../src/formatting.ts';
-import { getChannelMention } from '../../src/utils.ts';
+import { list, getChannelMention } from "logos/src/mod.ts";
 
 const memesChannel = 'memes';
 

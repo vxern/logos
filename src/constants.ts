@@ -1,4 +1,4 @@
-import { Language } from './mod.ts';
+import { Language } from 'logos/src/mod.ts';
 
 const links = {
 	typescriptWebsite: 'https://www.typescriptlang.org/',
