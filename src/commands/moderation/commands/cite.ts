@@ -1,6 +1,3 @@
-import { Commands } from '../../../../assets/localisations/commands.ts';
-import { Information } from '../../../../assets/localisations/information.ts';
-import { createLocalisations, localise } from '../../../../assets/localisations/types.ts';
 import {
 	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
@@ -9,13 +6,10 @@ import {
 	InteractionResponseTypes,
 	InteractionTypes,
 	sendInteractionResponse,
-} from '../../../../deps.ts';
-import { Client } from '../../../client.ts';
-import { CommandBuilder } from '../../../commands/command.ts';
-import configuration from '../../../configuration.ts';
-import { capitalise } from '../../../formatting.ts';
-import { defaultLanguage } from '../../../types.ts';
-import { parseArguments } from '../../../utils.ts';
+} from 'discordeno';
+import { Commands, createLocalisations, Information, localise } from 'logos/assets/localisations/mod.ts';
+import { CommandBuilder } from 'logos/src/commands/mod.ts';
+import { capitalise, Client, configuration, defaultLanguage, parseArguments } from 'logos/src/mod.ts';
 
 const command: CommandBuilder = {
 	...createLocalisations(Commands.cite),

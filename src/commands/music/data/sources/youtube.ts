@@ -1,4 +1,3 @@
-import { Playlist, Video, YouTube } from 'youtube_sr';
 import {
 	ApplicationCommandFlags,
 	Interaction,
@@ -7,12 +6,11 @@ import {
 	MessageComponentTypes,
 	SelectOption,
 	sendInteractionResponse,
-} from '../../../../../deps.ts';
-import { Client } from '../../../../client.ts';
-import configuration from '../../../../configuration.ts';
-import { createInteractionCollector, trim } from '../../../../utils.ts';
-import { SongListing, SongListingContentTypes } from '../song-listing.ts';
-import { ListingResolver } from './sources.ts';
+} from 'discordeno';
+import { Playlist, Video, YouTube } from 'youtube_sr';
+import { Client, configuration, createInteractionCollector, trim } from 'logos/src/mod.ts';
+import { SongListing, SongListingContentTypes } from 'logos/src/commands/music/data/mod.ts';
+import { ListingResolver } from 'logos/src/commands/music/data/sources/mod.ts';
 
 const urlExpression = new RegExp(
 	/^(?:https?:)?(?:\/\/)?(?:youtu\.be\/|(?:www\.|m\.)?youtube\.com\/(?:watch|v|embed)(?:\.php)?(?:\?.*v=|\/))([a-zA-Z0-9\_-]{7,15})(?:[\?&][a-zA-Z0-9\_-]+=[a-zA-Z0-9\_-]+)*$/,

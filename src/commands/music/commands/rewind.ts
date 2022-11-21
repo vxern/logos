@@ -1,9 +1,8 @@
-import { Commands } from '../../../../assets/localisations/commands.ts';
-import { createLocalisations } from '../../../../assets/localisations/types.ts';
-import { ApplicationCommandOptionTypes, Bot, Interaction } from '../../../../deps.ts';
-import { Client } from '../../../client.ts';
-import { OptionBuilder } from '../../../commands/command.ts';
-import { by, to } from '../parameters.ts';
+import { ApplicationCommandOptionTypes, Bot, Interaction } from 'discordeno';
+import { Commands, createLocalisations } from 'logos/assets/localisations/mod.ts';
+import { OptionBuilder } from 'logos/src/commands/mod.ts';
+import { Client } from 'logos/src/mod.ts';
+import { by, to } from 'logos/src/commands/music/mod.ts';
 
 const command: OptionBuilder = {
 	...createLocalisations(Commands.music.options.rewind),

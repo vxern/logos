@@ -1,10 +1,13 @@
-import { localise } from '../../../assets/localisations/types.ts';
-import { defaultLanguage } from '../../types.ts';
-import praise from './commands/praise.ts';
-import profile from './commands/profile.ts';
-import roles from './data/roles.ts';
-import { RoleCategory, RoleCategoryTypes } from './data/structures/role-category.ts';
-import { RoleCollection, RoleCollectionTypes } from './data/structures/role-collection.ts';
+import { localise } from 'logos/assets/localisations/mod.ts';
+import { defaultLanguage } from 'logos/src/mod.ts';
+import { praise, profile } from 'logos/src/commands/social/commands/mod.ts';
+import {
+	RoleCategory,
+	RoleCategoryTypes,
+	RoleCollection,
+	RoleCollectionTypes,
+} from 'logos/src/commands/social/data/structures/mod.ts';
+import { roles } from 'logos/src/commands/social/data/mod.ts';
 
 const commands = [
 	praise,

@@ -1,10 +1,10 @@
-import { faunadb } from '../../../deps.ts';
-import { Client } from '../../client.ts';
-import { dispatchQuery, getUserMentionByReference, mentionUser } from '../database.ts';
-import { Document, Reference } from '../structs/document.ts';
-import { User } from '../structs/users/user.ts';
+import * as Fauna from 'fauna';
+import { Client } from 'logos/src/mod.ts';
+import { User } from 'logos/src/database/structs/users/mod.ts';
+import { Document, Reference } from 'logos/src/database/structs/mod.ts';
+import { dispatchQuery, getUserMentionByReference, mentionUser } from 'logos/src/database/mod.ts';
 
-const $ = faunadb.query;
+const $ = Fauna.query;
 
 /** Defines parameters used in indexing users. */
 interface UserIndexParameters {

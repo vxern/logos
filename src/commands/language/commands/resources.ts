@@ -1,5 +1,3 @@
-import { Commands } from '../../../../assets/localisations/commands.ts';
-import { createLocalisations, localise } from '../../../../assets/localisations/types.ts';
 import {
 	ApplicationCommandFlags,
 	Bot,
@@ -8,13 +6,11 @@ import {
 	InteractionResponseTypes,
 	MessageComponentTypes,
 	sendInteractionResponse,
-} from '../../../../deps.ts';
-import { Client } from '../../../client.ts';
-import { CommandBuilder } from '../../../commands/command.ts';
-import { links } from '../../../constants.ts';
-import { defaultLanguage } from '../../../types.ts';
-import { parseArguments } from '../../../utils.ts';
-import { show } from '../../parameters.ts';
+} from 'discordeno';
+import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
+import { CommandBuilder } from 'logos/src/commands/mod.ts';
+import { Client, defaultLanguage, links, parseArguments } from 'logos/src/mod.ts';
+import { show } from 'logos/src/commands/mod.ts';
 
 const command: CommandBuilder = {
 	...createLocalisations(Commands.resources),

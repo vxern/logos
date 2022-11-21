@@ -5,11 +5,10 @@ import {
 	InteractionResponseTypes,
 	InteractionTypes,
 	sendInteractionResponse,
-} from '../../../../deps.ts';
-import { localise } from '../../../../assets/localisations/types.ts';
-import { Client } from '../../../client.ts';
-import { getProficiencyCategory } from '../../../commands/social/module.ts';
-import { defaultLanguage } from '../../../types.ts';
+} from 'discordeno';
+import { localise } from 'logos/assets/localisations/mod.ts';
+import { getProficiencyCategory } from 'logos/src/commands/social/mod.ts';
+import { Client, defaultLanguage } from 'logos/src/mod.ts';
 
 const proficiencyCategory = getProficiencyCategory();
 const proficiencies = proficiencyCategory.collection.list;

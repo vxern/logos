@@ -8,20 +8,24 @@ import {
 	InteractionTypes,
 	sendInteractionResponse,
 	sendMessage,
-} from '../../../../deps.ts';
-import { Client, resolveInteractionToMember } from '../../../client.ts';
-import { CommandBuilder } from '../../../commands/command.ts';
-import configuration from '../../../configuration.ts';
-import { getOrCreateUser } from '../../../database/functions/users.ts';
-import { deleteWarning, getWarnings } from '../../../database/functions/warnings.ts';
-import { user } from '../../parameters.ts';
-import { getRelevantWarnings } from '../module.ts';
-import { log } from '../../../controllers/logging/logging.ts';
-import { displayTime, mention, MentionTypes } from '../../../formatting.ts';
-import { createLocalisations, localise } from '../../../../assets/localisations/types.ts';
-import { Commands } from '../../../../assets/localisations/commands.ts';
-import { defaultLanguage } from '../../../types.ts';
-import { guildAsAuthor, parseArguments } from '../../../utils.ts';
+} from 'discordeno';
+import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
+import { CommandBuilder } from 'logos/src/commands/mod.ts';
+import {
+	Client,
+	configuration,
+	defaultLanguage,
+	displayTime,
+	guildAsAuthor,
+	mention,
+	MentionTypes,
+	parseArguments,
+	resolveInteractionToMember,
+} from 'logos/src/mod.ts';
+import { log } from 'logos/src/controllers/logging/mod.ts';
+import { deleteWarning, getOrCreateUser, getWarnings } from 'logos/src/database/functions/mod.ts';
+import { user } from 'logos/src/commands/mod.ts';
+import { getRelevantWarnings } from 'logos/src/commands/moderation/mod.ts';
 
 const command: CommandBuilder = {
 	...createLocalisations(Commands.pardon),

@@ -7,14 +7,18 @@ import {
 	InteractionResponseTypes,
 	sendInteractionResponse,
 	sendMessage,
-} from '../../../../../deps.ts';
-import { Client, resolveInteractionToMember } from '../../../../client.ts';
-import configuration from '../../../../configuration.ts';
-import { diagnosticMentionUser, guildAsAuthor, parseArguments } from '../../../../utils.ts';
-import { log } from '../../../../controllers/logging/logging.ts';
-import { localise } from '../../../../../assets/localisations/types.ts';
-import { Commands } from '../../../../../assets/localisations/commands.ts';
-import { defaultLanguage } from '../../../../types.ts';
+} from 'discordeno';
+import { Commands, localise } from 'logos/assets/localisations/mod.ts';
+import { log } from 'logos/src/controllers/logging/mod.ts';
+import {
+	Client,
+	configuration,
+	defaultLanguage,
+	diagnosticMentionUser,
+	guildAsAuthor,
+	parseArguments,
+	resolveInteractionToMember,
+} from 'logos/src/mod.ts';
 
 async function clearTimeout(
 	[client, bot]: [Client, Bot],

@@ -1,5 +1,3 @@
-import { Player } from 'lavadeno';
-import { LoadType } from 'lavalink_types';
 import {
 	ApplicationCommandFlags,
 	Channel,
@@ -10,16 +8,12 @@ import {
 	sendInteractionResponse,
 	sendMessage,
 	VoiceState,
-} from '../../deps.ts';
-import { Client } from '../client.ts';
-import configuration from '../configuration.ts';
-import { Song } from '../commands/music/data/song.ts';
-import { SongListing, SongListingContentTypes } from '../commands/music/data/song-listing.ts';
-import { SongStream } from '../commands/music/data/song-stream.ts';
-import { mention, MentionTypes } from '../formatting.ts';
-import { Commands } from '../../assets/localisations/commands.ts';
-import { localise } from '../../assets/localisations/types.ts';
-import { defaultLanguage } from '../types.ts';
+} from 'discordeno';
+import { Player } from 'lavadeno';
+import { LoadType } from 'lavalink_types';
+import { Commands, localise } from 'logos/assets/localisations/mod.ts';
+import { Song, SongListing, SongListingContentTypes, SongStream } from 'logos/src/commands/music/data/mod.ts';
+import { Client, configuration, defaultLanguage, mention, MentionTypes } from 'logos/src/mod.ts';
 
 class MusicController {
 	private client: Client;

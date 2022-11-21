@@ -1,5 +1,3 @@
-import { Commands } from '../../../../../assets/localisations/commands.ts';
-import { localise } from '../../../../../assets/localisations/types.ts';
 import {
 	ApplicationCommandFlags,
 	Bot,
@@ -9,11 +7,9 @@ import {
 	MessageComponentTypes,
 	sendInteractionResponse,
 	sendMessage,
-} from '../../../../../deps.ts';
-import { Client } from '../../../../client.ts';
-import configuration from '../../../../configuration.ts';
-import { defaultLanguage } from '../../../../types.ts';
-import { fromHex, getChannelMention } from '../../../../utils.ts';
+} from 'discordeno';
+import { Commands, localise } from "logos/assets/localisations/mod.ts";
+import { Client, configuration, defaultLanguage, fromHex, getChannelMention } from "logos/src/mod.ts";
 
 function postWelcome(
 	[client, bot]: [Client, Bot],

@@ -1,8 +1,7 @@
-import { Commands } from '../../../../../assets/localisations/commands.ts';
-import { localise } from '../../../../../assets/localisations/types.ts';
-import { Role as DiscordRole, SelectOption } from '../../../../../deps.ts';
-import { Language } from '../../../../types.ts';
-import { Role } from './role.ts';
+import { Role as DiscordRole, SelectOption } from 'discordeno';
+import { Commands, localise } from 'logos/assets/localisations/mod.ts';
+import { Language } from 'logos/src/mod.ts';
+import { Role } from 'logos/src/commands/social/data/structures/mod.ts';
 
 /** The type of role collection. */
 enum RoleCollectionTypes {

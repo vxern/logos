@@ -1,5 +1,3 @@
-import { Commands } from '../../../../../assets/localisations/commands.ts';
-import { createLocalisations, localise } from '../../../../../assets/localisations/types.ts';
 import {
 	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
@@ -8,17 +6,19 @@ import {
 	Interaction,
 	InteractionResponseTypes,
 	sendInteractionResponse,
-} from '../../../../../deps.ts';
-import { Client, resolveInteractionToMember } from '../../../../client.ts';
-import configuration from '../../../../configuration.ts';
-import { getPraises } from '../../../../database/functions/praises.ts';
-import { getOrCreateUser } from '../../../../database/functions/users.ts';
-import { getWarnings } from '../../../../database/functions/warnings.ts';
-import { mention, MentionTypes } from '../../../../formatting.ts';
-import { defaultLanguage } from '../../../../types.ts';
-import { parseArguments } from '../../../../utils.ts';
-import { OptionBuilder } from '../../../command.ts';
-import { show, user } from '../../../parameters.ts';
+} from 'discordeno';
+import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
+import { getOrCreateUser, getPraises, getWarnings } from 'logos/src/database/functions/mod.ts';
+import {
+	Client,
+	configuration,
+	defaultLanguage,
+	mention,
+	MentionTypes,
+	parseArguments,
+	resolveInteractionToMember,
+} from 'logos/src/mod.ts';
+import { OptionBuilder, show, user } from 'logos/src/commands/mod.ts';
 
 const command: OptionBuilder = {
 	...createLocalisations(Commands.profile.options.view),

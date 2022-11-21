@@ -1,8 +1,6 @@
-import { EventHandlers } from '../../../../deps.ts';
-import configuration from '../../../configuration.ts';
-import { codeMultiline, mention, MentionTypes } from '../../../formatting.ts';
-import { diagnosticMentionUser } from '../../../utils.ts';
-import { MessageGenerators } from './generators.ts';
+import { EventHandlers } from 'discordeno';
+import { codeMultiline, configuration, diagnosticMentionUser, mention, MentionTypes } from 'logos/src/mod.ts';
+import { MessageGenerators } from 'logos/src/controllers/logging/generators/mod.ts';
 
 type ClientEvents = {
 	[T in keyof EventHandlers]: Parameters<EventHandlers[T]>;

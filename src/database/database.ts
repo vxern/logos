@@ -1,13 +1,10 @@
-import { faunadb, Sentry, User as DiscordUser } from '../../deps.ts';
-import { Article } from './structs/articles/article.ts';
-import { ArticleChange } from './structs/articles/article-change.ts';
-import { User } from './structs/users/user.ts';
-import { Document, Reference } from './structs/document.ts';
-import { Praise } from './structs/users/praise.ts';
-import { Warning } from './structs/users/warning.ts';
-import { Language } from '../types.ts';
-import { Client } from '../client.ts';
-import { diagnosticMentionUser } from '../utils.ts';
+import { User as DiscordUser } from 'discordeno';
+import * as Sentry from 'sentry';
+import * as Fauna from 'fauna';
+import { Client, diagnosticMentionUser, Language } from 'logos/src/mod.ts';
+import { Article, ArticleChange } from 'logos/src/database/structs/articles/mod.ts';
+import { Praise, User, Warning } from 'logos/src/database/structs/users/mod.ts';
+import { Document, Reference } from 'logos/src/database/structs/mod.ts';
 
 /**
  * 'Unpacks' a nested type from an array, function or promise.
@@ -26,7 +23,7 @@ type Unpacked<T> = T extends (infer U)[] ? U
 type Database =
 	& Readonly<{
 		/** Client used to interface with the Fauna database. */
-		client: faunadb.Client;
+		client: Fauna.Client;
 
 		/**
 		 * Cached users.
@@ -92,7 +89,7 @@ type Database =
 
 function createDatabase(): Database {
 	return {
-		client: new faunadb.Client({
+		client: new Fauna.Client({
 			secret: Deno.env.get('FAUNA_SECRET')!,
 			domain: 'db.us.fauna.com',
 			scheme: 'https',
@@ -123,7 +120,7 @@ async function dispatchQuery<
 	R = T extends Array<B> ? Document<B>[] : Document<T>,
 >(
 	client: Client,
-	expression: faunadb.Expr,
+	expression: Fauna.Expr,
 ): Promise<R | undefined> {
 	let result;
 	try {

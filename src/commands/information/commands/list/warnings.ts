@@ -1,20 +1,25 @@
-import { Commands } from '../../../../../assets/localisations/commands.ts';
-import { localise } from '../../../../../assets/localisations/types.ts';
 import {
 	ApplicationCommandFlags,
 	Bot,
 	Interaction,
 	InteractionResponseTypes,
 	sendInteractionResponse,
-} from '../../../../../deps.ts';
-import { Client, resolveInteractionToMember } from '../../../../client.ts';
-import configuration from '../../../../configuration.ts';
-import { getOrCreateUser } from '../../../../database/functions/users.ts';
-import { getWarnings } from '../../../../database/functions/warnings.ts';
-import { Document } from '../../../../database/structs/document.ts';
-import { Warning } from '../../../../database/structs/users/warning.ts';
-import { displayTime, list } from '../../../../formatting.ts';
-import { chunk, paginate, parseArguments, trim } from '../../../../utils.ts';
+} from 'discordeno';
+import { Commands, localise } from 'logos/assets/localisations/mod.ts';
+import { getOrCreateUser, getWarnings } from 'logos/src/database/functions/mod.ts';
+import { Warning } from 'logos/src/database/structs/users/mod.ts';
+import { Document } from 'logos/src/database/structs/mod.ts';
+import {
+	chunk,
+	Client,
+	configuration,
+	displayTime,
+	list,
+	paginate,
+	parseArguments,
+	resolveInteractionToMember,
+	trim,
+} from 'logos/src/mod.ts';
 
 async function listWarnings(
 	[client, bot]: [Client, Bot],

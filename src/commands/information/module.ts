@@ -1,5 +1,4 @@
-import information from './commands/information.ts';
-import list from './commands/list.ts';
+import { information, list } from 'logos/src/commands/information/commands/mod.ts';
 
 const commands = [information, list];
 

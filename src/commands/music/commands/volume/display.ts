@@ -1,16 +1,12 @@
-import { Commands } from '../../../../../assets/localisations/commands.ts';
-import { localise } from '../../../../../assets/localisations/types.ts';
 import {
 	ApplicationCommandFlags,
 	Bot,
 	Interaction,
 	InteractionResponseTypes,
 	sendInteractionResponse,
-} from '../../../../../deps.ts';
-import { Client } from '../../../../client.ts';
-import configuration from '../../../../configuration.ts';
-import { defaultLanguage } from '../../../../types.ts';
-import { parseArguments } from '../../../../utils.ts';
+} from 'discordeno';
+import { Commands, localise } from 'logos/assets/localisations/mod.ts';
+import { Client, configuration, defaultLanguage, parseArguments } from 'logos/src/mod.ts';
 
 function displayVolume(
 	[client, bot]: [Client, Bot],

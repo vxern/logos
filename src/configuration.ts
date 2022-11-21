@@ -1,7 +1,6 @@
-import { Misc } from '../assets/localisations/misc.ts';
-import { SongListingContentTypes } from './commands/music/data/song-listing.ts';
-import { Language } from './types.ts';
-import { fromHex } from './utils.ts';
+import { Misc } from 'logos/assets/localisations/mod.ts';
+import { SongListingContentTypes } from 'logos/src/commands/music/data/mod.ts';
+import { fromHex, Language } from 'logos/src/mod.ts';
 
 class Periods {
 	static readonly second = 1000;

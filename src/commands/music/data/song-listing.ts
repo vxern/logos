@@ -1,6 +1,4 @@
-import { SongCollection } from './song-collection.ts';
-import { SongStream } from './song-stream.ts';
-import { Song } from './song.ts';
+import { Song, SongCollection, SongStream } from 'logos/src/commands/music/data/mod.ts';
 
 enum SongListingContentTypes {
 	Song,

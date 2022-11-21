@@ -1,6 +1,5 @@
-import { LogEntry } from '../log-entry.ts';
-import client, { ClientEvents } from './client.ts';
-import guild, { GuildEvents } from './guild.ts';
+import { LogEntry } from 'logos/src/controllers/logging/mod.ts';
+import { client, ClientEvents, guild, GuildEvents } from 'logos/src/controllers/logging/generators/mod.ts';
 
 type Events = ClientEvents & GuildEvents;
 
