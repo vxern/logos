@@ -1,1 +1,1 @@
-export { default as entry } from './entry.ts';
+export { default as entry } from 'logos/src/services/entry/entry.ts';

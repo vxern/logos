@@ -1,8 +1,8 @@
 import * as Fauna from 'fauna';
-import { capitalise, Client, Language } from '../../mod.ts';
-import { Article, ArticleChange, getMostRecentArticleContent } from '../structs/articles/mod.ts';
-import { Document, Reference } from '../structs/mod.ts';
-import { dispatchQuery } from '../mod.ts';
+import { capitalise, Client, Language } from 'logos/src/mod.ts';
+import { Article, ArticleChange, getMostRecentArticleContent } from 'logos/src/database/structs/articles/mod.ts';
+import { Document, Reference } from 'logos/src/database/structs/mod.ts';
+import { dispatchQuery } from 'logos/src/database/mod.ts';
 
 const $ = Fauna.query;
 

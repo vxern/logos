@@ -1,3 +1,3 @@
-export { default as music } from './module.ts';
-export * from './module.ts';
-export * from './parameters.ts';
+export { default as music } from 'logos/src/commands/music/module.ts';
+export * from 'logos/src/commands/music/module.ts';
+export * from 'logos/src/commands/music/parameters.ts';

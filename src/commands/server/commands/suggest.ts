@@ -7,8 +7,8 @@ import {
 	sendInteractionResponse,
 	sendMessage,
 } from 'discordeno';
-import { Commands, createLocalisations, localise } from '../../../../assets/localisations/mod.ts';
-import { log } from '../../../controllers/logging/mod.ts';
+import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
+import { log } from 'logos/src/controllers/logging/mod.ts';
 import {
 	Client,
 	configuration,
@@ -17,8 +17,8 @@ import {
 	mention,
 	MentionTypes,
 	parseArguments,
-} from '../../../mod.ts';
-import { CommandBuilder } from '../../mod.ts';
+} from 'logos/src/mod.ts';
+import { CommandBuilder } from 'logos/src/commands/mod.ts';
 
 const command: CommandBuilder = {
 	...createLocalisations(Commands.suggest),

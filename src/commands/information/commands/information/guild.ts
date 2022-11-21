@@ -7,7 +7,7 @@ import {
 	InteractionResponseTypes,
 	sendInteractionResponse,
 } from 'discordeno';
-import { Commands, localise } from '../../../../../assets/localisations/mod.ts';
+import { Commands, localise } from 'logos/assets/localisations/mod.ts';
 import {
 	Client,
 	configuration,
@@ -17,8 +17,8 @@ import {
 	mention,
 	MentionTypes,
 	snowflakeToTimestamp,
-} from '../../../../mod.ts';
-import { getProficiencyCategory } from '../../../social/mod.ts';
+} from 'logos/src/mod.ts';
+import { getProficiencyCategory } from 'logos/src/commands/social/mod.ts';
 
 /** Displays information about the guild that this command was executed in. */
 function displayGuildInformation(

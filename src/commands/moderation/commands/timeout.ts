@@ -1,9 +1,9 @@
 import { ApplicationCommandOptionTypes } from 'discordeno';
-import { Commands, createLocalisations } from '../../../../assets/localisations/mod.ts';
-import { CommandBuilder } from '../../../commands/mod.ts';
-import { user } from '../../mod.ts';
-import { duration, reason } from '../mod.ts';
-import { clearTimeout, setTimeout } from './timeout/mod.ts';
+import { Commands, createLocalisations } from 'logos/assets/localisations/mod.ts';
+import { CommandBuilder } from 'logos/src/commands/mod.ts';
+import { user } from 'logos/src/commands/mod.ts';
+import { duration, reason } from 'logos/src/commands/moderation/mod.ts';
+import { clearTimeout, setTimeout } from 'logos/src/commands/moderation/commands/timeout/mod.ts';
 
 const command: CommandBuilder = {
 	...createLocalisations(Commands.timeout),

@@ -1,4 +1,4 @@
-import { SongListingContentTypes } from './mod.ts';
+import { SongListingContentTypes } from 'logos/src/commands/music/data/mod.ts';
 
 /** Represents a musical piece in stream format. */
 interface SongStream {

@@ -1,2 +1,2 @@
-export * from './log-entry.ts';
-export * from './logging.ts';
+export * from 'logos/src/controllers/logging/log-entry.ts';
+export * from 'logos/src/controllers/logging/logging.ts';

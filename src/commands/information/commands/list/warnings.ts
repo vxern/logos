@@ -5,10 +5,10 @@ import {
 	InteractionResponseTypes,
 	sendInteractionResponse,
 } from 'discordeno';
-import { Commands, localise } from '../../../../../assets/localisations/mod.ts';
-import { getOrCreateUser, getWarnings } from '../../../../database/functions/mod.ts';
-import { Warning } from '../../../../database/structs/users/mod.ts';
-import { Document } from '../../../../database/structs/mod.ts';
+import { Commands, localise } from 'logos/assets/localisations/mod.ts';
+import { getOrCreateUser, getWarnings } from 'logos/src/database/functions/mod.ts';
+import { Warning } from 'logos/src/database/structs/users/mod.ts';
+import { Document } from 'logos/src/database/structs/mod.ts';
 import {
 	chunk,
 	Client,
@@ -19,7 +19,7 @@ import {
 	parseArguments,
 	resolveInteractionToMember,
 	trim,
-} from '../../../../mod.ts';
+} from 'logos/src/mod.ts';
 
 async function listWarnings(
 	[client, bot]: [Client, Bot],

@@ -5,8 +5,8 @@ import {
 	InteractionResponseTypes,
 	sendInteractionResponse,
 } from 'discordeno';
-import { Commands, localise } from '../../../../../assets/localisations/mod.ts';
-import { Client, configuration, defaultLanguage, parseArguments } from '../../../../mod.ts';
+import { Commands, localise } from 'logos/assets/localisations/mod.ts';
+import { Client, configuration, defaultLanguage, parseArguments } from 'logos/src/mod.ts';
 
 function displayVolume(
 	[client, bot]: [Client, Bot],

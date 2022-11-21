@@ -1,4 +1,4 @@
-import { Client } from '../../mod.ts';
+import { Client } from 'logos/src/mod.ts';
 
 /** Represents an entry in the log channel. */
 interface LogEntry<E extends Record<string, unknown[]>, K extends keyof E> {

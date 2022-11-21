@@ -7,8 +7,8 @@ import {
 	InteractionResponseTypes,
 	sendInteractionResponse,
 } from 'discordeno';
-import { Commands, createLocalisations, localise } from '../../../../../assets/localisations/mod.ts';
-import { getOrCreateUser, getPraises, getWarnings } from '../../../../database/functions/mod.ts';
+import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
+import { getOrCreateUser, getPraises, getWarnings } from 'logos/src/database/functions/mod.ts';
 import {
 	Client,
 	configuration,
@@ -17,8 +17,8 @@ import {
 	MentionTypes,
 	parseArguments,
 	resolveInteractionToMember,
-} from '../../../../mod.ts';
-import { OptionBuilder, show, user } from '../../../mod.ts';
+} from 'logos/src/mod.ts';
+import { OptionBuilder, show, user } from 'logos/src/commands/mod.ts';
 
 const command: OptionBuilder = {
 	...createLocalisations(Commands.profile.options.view),

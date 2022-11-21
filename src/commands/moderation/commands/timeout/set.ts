@@ -9,8 +9,8 @@ import {
 	sendInteractionResponse,
 	sendMessage,
 } from 'discordeno';
-import { Commands, localise } from '../../../../../assets/localisations/mod.ts';
-import { log } from '../../../../controllers/logging/mod.ts';
+import { Commands, localise } from 'logos/assets/localisations/mod.ts';
+import { log } from 'logos/src/controllers/logging/mod.ts';
 import {
 	Client,
 	configuration,
@@ -23,7 +23,7 @@ import {
 	Periods,
 	resolveInteractionToMember,
 	timeDescriptors,
-} from '../../../../mod.ts';
+} from 'logos/src/mod.ts';
 
 async function setTimeout(
 	[client, bot]: [Client, Bot],

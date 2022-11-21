@@ -1,3 +1,3 @@
-export * from './command.ts';
-export * from './modules.ts';
-export * from './parameters.ts';
+export * from 'logos/src/commands/command.ts';
+export * from 'logos/src/commands/modules.ts';
+export * from 'logos/src/commands/parameters.ts';

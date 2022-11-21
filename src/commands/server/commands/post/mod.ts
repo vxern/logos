@@ -1,2 +1,2 @@
-export * from './information.ts';
-export * from './welcome.ts';
+export * from 'logos/src/commands/server/commands/post/information.ts';
+export * from 'logos/src/commands/server/commands/post/welcome.ts';

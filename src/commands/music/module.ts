@@ -1,7 +1,7 @@
 import { Bot, Interaction } from 'discordeno';
-import { Commands, createLocalisations, localise } from '../../../assets/localisations/mod.ts';
-import { chunk, Client, configuration, list, paginate } from '../../mod.ts';
-import { CommandBuilder } from '../mod.ts';
+import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
+import { chunk, Client, configuration, list, paginate } from 'logos/src/mod.ts';
+import { CommandBuilder } from 'logos/src/commands/mod.ts';
 import {
 	history,
 	now,
@@ -15,8 +15,8 @@ import {
 	stop,
 	unskip,
 	volume,
-} from './commands/mod.ts';
-import { SongListing } from './data/mod.ts';
+} from 'logos/src/commands/music/commands/mod.ts';
+import { SongListing } from 'logos/src/commands/music/data/mod.ts';
 
 const music: CommandBuilder = {
 	...createLocalisations(Commands.music),

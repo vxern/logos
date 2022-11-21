@@ -1,1 +1,1 @@
-export { default as dexonline } from './dexonline.ts';
+export { default as dexonline } from 'logos/src/commands/language/data/adapters/dexonline.ts';

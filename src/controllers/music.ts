@@ -11,9 +11,9 @@ import {
 } from 'discordeno';
 import { Player } from 'lavadeno';
 import { LoadType } from 'lavalink_types';
-import { Commands, localise } from '../../assets/localisations/mod.ts';
-import { Song, SongListing, SongListingContentTypes, SongStream } from '../commands/music/data/mod.ts';
-import { Client, configuration, defaultLanguage, mention, MentionTypes } from '../mod.ts';
+import { Commands, localise } from 'logos/assets/localisations/mod.ts';
+import { Song, SongListing, SongListingContentTypes, SongStream } from 'logos/src/commands/music/data/mod.ts';
+import { Client, configuration, defaultLanguage, mention, MentionTypes } from 'logos/src/mod.ts';
 
 class MusicController {
 	private client: Client;

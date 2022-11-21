@@ -1,6 +1,6 @@
-import { Roles } from '../../../../assets/localisations/mod.ts';
-import { fromHex } from '../../../mod.ts';
-import { RoleCategory, RoleCategoryTypes, RoleCollectionTypes } from './structures/mod.ts';
+import { Roles } from 'logos/assets/localisations/mod.ts';
+import { fromHex } from 'logos/src/mod.ts';
+import { RoleCategory, RoleCategoryTypes, RoleCollectionTypes } from 'logos/src/commands/social/data/structures/mod.ts';
 
 const categories: RoleCategory[] = [
 	{
