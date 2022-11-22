@@ -447,8 +447,6 @@ function resolveInteractionToMember(
 	if (!result) return;
 
 	const [matchedMembers, isId] = result;
-	if (isId) return matchedMembers.at(0);
-
 	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete) {
 		return void sendInteractionResponse(
 			bot,
@@ -457,10 +455,14 @@ function resolveInteractionToMember(
 			{
 				type: InteractionResponseTypes.ApplicationCommandAutocompleteResult,
 				data: {
-					choices: matchedMembers.slice(0, 20).map((member) => ({
-						name: mentionUser(member.user!, true),
-						value: member.id.toString(),
-					})),
+					choices:
+						(isId ? [matchedMembers.at(0)!] : matchedMembers.slice(0, 20))
+							.map(
+								(member) => ({
+									name: mentionUser(member.user!, true),
+									value: member.id.toString(),
+								}),
+							),
 				},
 			},
 		);
