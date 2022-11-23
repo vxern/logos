@@ -9,9 +9,9 @@ const links = {
 	learnArmenianListingWebsite: 'https://discord.me/learnarmenian',
 	learnRomanianListingWebsite: 'https://discord.me/learnromanian',
 
-	talonRepositoryLink: 'https://github.com/linguition/talon',
+	talonRepositoryLink: 'https://github.com/wordcollector/talon',
 	generateLanguageRepositoryLink: (language: Language) =>
-		`https://github.com/linguition/${language.toLowerCase()}`,
+		`https://github.com/wordcollector/${language.toLowerCase()}`,
 
 	generateDiscordInviteLink: (inviteCode: string) =>
 		`https://discord.gg/${inviteCode}`,
