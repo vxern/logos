@@ -1,7 +1,9 @@
 import * as dotenv from 'std/dotenv/mod.ts';
 import * as Sentry from 'sentry';
-import { getSupportedLanguages, loadDictionaryAdapters, loadSentencePairs } from './src/commands/language/mod.ts';
-import { capitalise, initialiseClient, Language, supportedLanguages } from './src/mod.ts';
+import { getSupportedLanguages, loadDictionaryAdapters, loadSentencePairs } from 'logos/src/commands/language/mod.ts';
+import { initialiseClient } from 'logos/src/mod.ts';
+import { capitalise } from 'logos/formatting.ts';
+import { Language, supportedLanguages } from 'logos/types.ts';
 
 async function readDotEnvFile(fileUri: string, template = false): Promise<dotenv.DotenvConfig | undefined> {
 	const kind = template ? 'environment template' : 'environment';

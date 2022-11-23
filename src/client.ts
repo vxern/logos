@@ -32,14 +32,8 @@ import { Command, InteractionHandler } from 'logos/src/commands/mod.ts';
 import { setupLogging } from 'logos/src/controllers/logging/mod.ts';
 import { commands } from 'logos/src/commands/mod.ts';
 import { createDatabase, Database } from 'logos/src/database/mod.ts';
-import {
-	configuration,
-	defaultLanguage,
-	diagnosticMentionUser,
-	Language,
-	services,
-	supportedLanguages,
-} from 'logos/src/mod.ts';
+import { configuration, diagnosticMentionUser, services } from 'logos/src/mod.ts';
+import { defaultLanguage, Language, supportedLanguages } from 'logos/types.ts';
 
 interface Collector<
 	E extends keyof EventHandlers,

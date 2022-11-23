@@ -8,17 +8,10 @@ import {
 	sendInteractionResponse,
 } from 'discordeno';
 import { Commands, localise } from 'logos/assets/localisations/mod.ts';
-import {
-	Client,
-	configuration,
-	defaultLanguage,
-	displayTime,
-	guildAsThumbnail,
-	mention,
-	MentionTypes,
-	snowflakeToTimestamp,
-} from 'logos/src/mod.ts';
+import { Client, configuration, guildAsThumbnail, snowflakeToTimestamp } from 'logos/src/mod.ts';
 import { getProficiencyCategory } from 'logos/src/commands/social/mod.ts';
+import { displayTime, mention, MentionTypes } from 'logos/formatting.ts';
+import { defaultLanguage } from 'logos/types.ts';
 
 /** Displays information about the guild that this command was executed in. */
 function displayGuildInformation(

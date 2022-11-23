@@ -1,4 +1,4 @@
-import { Language } from 'logos/src/mod.ts';
+import { Language } from 'logos/types.ts';
 import { Document, Reference } from 'logos/src/database/structs/mod.ts';
 import { ArticleChange } from 'logos/src/database/structs/articles/mod.ts';
 

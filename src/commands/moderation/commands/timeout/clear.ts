@@ -13,12 +13,12 @@ import { log } from 'logos/src/controllers/logging/mod.ts';
 import {
 	Client,
 	configuration,
-	defaultLanguage,
 	diagnosticMentionUser,
 	guildAsAuthor,
 	parseArguments,
 	resolveInteractionToMember,
 } from 'logos/src/mod.ts';
+import { defaultLanguage } from 'logos/types.ts';
 
 async function clearTimeout(
 	[client, bot]: [Client, Bot],

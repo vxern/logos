@@ -8,7 +8,8 @@ import {
 } from 'discordeno';
 import { localise } from 'logos/assets/localisations/mod.ts';
 import { getProficiencyCategory } from 'logos/src/commands/social/mod.ts';
-import { Client, defaultLanguage } from 'logos/src/mod.ts';
+import { Client } from 'logos/src/mod.ts';
+import { defaultLanguage } from 'logos/types.ts';
 
 const proficiencyCategory = getProficiencyCategory();
 const proficiencies = proficiencyCategory.collection.list;

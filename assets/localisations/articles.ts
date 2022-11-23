@@ -1,4 +1,4 @@
-import { Language } from 'logos/src/mod.ts';
+import { Language } from 'logos/types.ts';
 import { Expression, Localisations } from 'logos/assets/localisations/mod.ts';
 
 class Articles {

@@ -13,13 +13,12 @@ import {
 	chunk,
 	Client,
 	configuration,
-	displayTime,
-	list,
 	paginate,
 	parseArguments,
 	resolveInteractionToMember,
 	trim,
 } from 'logos/src/mod.ts';
+import { displayTime, list } from 'logos/formatting.ts';
 
 async function listWarnings(
 	[client, bot]: [Client, Bot],

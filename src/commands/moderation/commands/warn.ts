@@ -13,18 +13,11 @@ import { Commands, createLocalisations, localise } from 'logos/assets/localisati
 import { CommandBuilder } from 'logos/src/commands/mod.ts';
 import { log } from 'logos/src/controllers/logging/mod.ts';
 import { createWarning, getOrCreateUser, getWarnings } from 'logos/src/database/functions/mod.ts';
-import {
-	Client,
-	configuration,
-	defaultLanguage,
-	guildAsAuthor,
-	mention,
-	MentionTypes,
-	parseArguments,
-	resolveInteractionToMember,
-} from 'logos/src/mod.ts';
-import { user } from 'logos/src/commands/mod.ts';
 import { getRelevantWarnings, reason } from 'logos/src/commands/moderation/mod.ts';
+import { user } from 'logos/src/commands/mod.ts';
+import { Client, configuration, guildAsAuthor, parseArguments, resolveInteractionToMember } from 'logos/src/mod.ts';
+import { mention, MentionTypes } from 'logos/formatting.ts';
+import { defaultLanguage } from 'logos/types.ts';
 
 const command: CommandBuilder = {
 	...createLocalisations(Commands.warn),

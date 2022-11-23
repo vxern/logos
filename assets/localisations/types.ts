@@ -1,6 +1,6 @@
 import { Locales, Localization as DiscordLocalisation } from 'discordeno';
-import { defaultLanguage, Language } from 'logos/src/mod.ts';
 import { getLocale } from 'logos/assets/localisations/mod.ts';
+import { defaultLanguage, Language } from 'logos/types.ts';
 
 type Expression<T> = (argument: T) => string;
 type Localisations<T> = Partial<Record<Language, T>> & { [defaultLanguage]: T };

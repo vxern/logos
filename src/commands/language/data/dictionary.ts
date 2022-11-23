@@ -1,5 +1,5 @@
 import { DiscordEmbedField } from 'discordeno';
-import { Language } from 'logos/src/mod.ts';
+import { Language } from 'logos/types.ts';
 
 enum DictionaryScopes {
 	/** Provides definitions in the same language as the headword. */

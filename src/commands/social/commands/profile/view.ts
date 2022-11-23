@@ -9,16 +9,10 @@ import {
 } from 'discordeno';
 import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
 import { getOrCreateUser, getPraises, getWarnings } from 'logos/src/database/functions/mod.ts';
-import {
-	Client,
-	configuration,
-	defaultLanguage,
-	mention,
-	MentionTypes,
-	parseArguments,
-	resolveInteractionToMember,
-} from 'logos/src/mod.ts';
 import { OptionBuilder, show, user } from 'logos/src/commands/mod.ts';
+import { Client, configuration, parseArguments, resolveInteractionToMember } from 'logos/src/mod.ts';
+import { mention, MentionTypes } from 'logos/formatting.ts';
+import { defaultLanguage } from 'logos/types.ts';
 
 const command: OptionBuilder = {
 	...createLocalisations(Commands.profile.options.view),

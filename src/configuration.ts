@@ -1,6 +1,7 @@
 import { Misc } from 'logos/assets/localisations/mod.ts';
 import { SongListingContentTypes } from 'logos/src/commands/music/data/mod.ts';
-import { fromHex, Language } from 'logos/src/mod.ts';
+import { fromHex } from 'logos/src/utils.ts';
+import { Language } from 'logos/types.ts';
 
 class Periods {
 	static readonly second = 1000;
@@ -174,12 +175,6 @@ const settings = {
 				// This colour matches the colour of an embed message,
 				// making it seem like there is no colour stripe.
 				invisible: fromHex('#36393f'),
-			},
-			// The standardised, available set of custom emojis the bot can utilise for its embed messages.
-			emojis: {
-				typescript: '<:TypeScript:1034795288185024592>',
-				deno: '<:Deno:1034795684852932729>',
-				discordeno: '<:Discordeno:1034795720315777086>',
 			},
 		},
 		// Configuration settings pertaining to articles.

@@ -1,5 +1,4 @@
 import { localise } from 'logos/assets/localisations/mod.ts';
-import { defaultLanguage } from 'logos/src/mod.ts';
 import { praise, profile } from 'logos/src/commands/social/commands/mod.ts';
 import {
 	RoleCategory,
@@ -8,6 +7,7 @@ import {
 	RoleCollectionTypes,
 } from 'logos/src/commands/social/data/structures/mod.ts';
 import { roles } from 'logos/src/commands/social/data/mod.ts';
+import { defaultLanguage } from 'logos/types.ts';
 
 const commands = [
 	praise,

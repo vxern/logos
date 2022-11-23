@@ -10,16 +10,10 @@ import {
 	sendInteractionResponse,
 } from 'discordeno';
 import { Commands, createLocalisations, getLocalisations, localise } from 'logos/assets/localisations/mod.ts';
-import {
-	addParametersToURL,
-	Client,
-	configuration,
-	deepLApiEndpoints,
-	diagnosticMentionUser,
-	parseArguments,
-} from 'logos/src/mod.ts';
-import { CommandBuilder, show } from 'logos/src/commands/mod.ts';
 import { resolveToSupportedLanguage } from 'logos/src/commands/language/mod.ts';
+import { CommandBuilder, show } from 'logos/src/commands/mod.ts';
+import { addParametersToURL, Client, configuration, diagnosticMentionUser, parseArguments } from 'logos/src/mod.ts';
+import { deepLApiEndpoints } from 'logos/constants.ts';
 
 const command: CommandBuilder = {
 	...createLocalisations(Commands.translate),

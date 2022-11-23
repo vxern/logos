@@ -9,7 +9,9 @@ import {
 } from 'discordeno';
 import { Commands, createLocalisations, Information, localise } from 'logos/assets/localisations/mod.ts';
 import { CommandBuilder } from 'logos/src/commands/mod.ts';
-import { capitalise, Client, configuration, defaultLanguage, parseArguments } from 'logos/src/mod.ts';
+import { Client, configuration, parseArguments } from 'logos/src/mod.ts';
+import { capitalise } from 'logos/formatting.ts';
+import { defaultLanguage } from 'logos/types.ts';
 
 const command: CommandBuilder = {
 	...createLocalisations(Commands.cite),
@@ -95,7 +97,7 @@ function citeRule(
 					title: `${localise(Information.rules.rule, defaultLanguage)} #${rule + 1}: ${
 						localise(ruleParsed.title, defaultLanguage)
 					} ~ ${localise(Information.rules.tldr, defaultLanguage)}: *${localise(ruleParsed.summary, defaultLanguage)}*`,
-					description: localise(ruleParsed.content, defaultLanguage)(guild),
+					description: localise(ruleParsed.content, defaultLanguage),
 					color: configuration.interactions.responses.colors.blue,
 				}],
 			},

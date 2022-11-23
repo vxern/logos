@@ -14,16 +14,14 @@ import { log } from 'logos/src/controllers/logging/mod.ts';
 import {
 	Client,
 	configuration,
-	defaultLanguage,
-	displayTime,
 	guildAsAuthor,
-	mention,
-	MentionTypes,
 	parseArguments,
 	Periods,
 	resolveInteractionToMember,
 	timeDescriptors,
 } from 'logos/src/mod.ts';
+import { displayTime, mention, MentionTypes } from 'logos/formatting.ts';
+import { defaultLanguage } from 'logos/types.ts';
 
 async function setTimeout(
 	[client, bot]: [Client, Bot],
