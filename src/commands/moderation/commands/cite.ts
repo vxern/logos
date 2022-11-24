@@ -9,7 +9,8 @@ import {
 } from 'discordeno';
 import { Commands, createLocalisations, Information, localise } from 'logos/assets/localisations/mod.ts';
 import { CommandBuilder } from 'logos/src/commands/mod.ts';
-import { Client, configuration, parseArguments } from 'logos/src/mod.ts';
+import { Client, parseArguments } from 'logos/src/mod.ts';
+import configuration from 'logos/configuration.ts';
 import { capitalise } from 'logos/formatting.ts';
 import { defaultLanguage } from 'logos/types.ts';
 

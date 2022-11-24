@@ -2,7 +2,8 @@ import { Member, User } from 'discordeno';
 import { Article, ArticleChange } from 'logos/src/database/structs/articles/mod.ts';
 import { Praise, Warning } from 'logos/src/database/structs/users/mod.ts';
 import { MessageGenerators } from 'logos/src/controllers/logging/generators/mod.ts';
-import { configuration, diagnosticMentionUser, trim } from 'logos/src/mod.ts';
+import { diagnosticMentionUser, trim } from 'logos/src/mod.ts';
+import configuration from 'logos/configuration.ts';
 import { code, codeMultiline, displayTime } from 'logos/formatting.ts';
 
 /** Type representing events that occur within a guild. */

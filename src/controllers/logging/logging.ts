@@ -1,6 +1,7 @@
 import { Bot, Channel, Guild, sendMessage } from 'discordeno';
-import { Client, configuration, getTextChannel } from 'logos/src/mod.ts';
 import { ClientEvents, Events, generators } from 'logos/src/controllers/logging/generators/mod.ts';
+import { Client, getTextChannel } from 'logos/src/mod.ts';
+import configuration from 'logos/configuration.ts';
 
 const clientEventNames = <(keyof ClientEvents)[]> Object.keys(
 	generators.client,

@@ -20,12 +20,12 @@ import { CommandBuilder, show } from 'logos/src/commands/mod.ts';
 import {
 	chunk,
 	Client,
-	configuration,
 	createInteractionCollector,
 	diagnosticMentionUser,
 	fromHex,
 	parseArguments,
 } from 'logos/src/mod.ts';
+import configuration from 'logos/configuration.ts';
 import { BulletStyles, list } from 'logos/formatting.ts';
 
 const command: CommandBuilder = {

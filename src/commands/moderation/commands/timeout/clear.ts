@@ -12,12 +12,12 @@ import { Commands, localise } from 'logos/assets/localisations/mod.ts';
 import { log } from 'logos/src/controllers/logging/mod.ts';
 import {
 	Client,
-	configuration,
 	diagnosticMentionUser,
 	guildAsAuthor,
 	parseArguments,
 	resolveInteractionToMember,
 } from 'logos/src/mod.ts';
+import configuration from 'logos/configuration.ts';
 import { defaultLanguage } from 'logos/types.ts';
 
 async function clearTimeout(

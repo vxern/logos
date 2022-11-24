@@ -10,7 +10,8 @@ import {
 import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
 import { getOrCreateUser, getPraises, getWarnings } from 'logos/src/database/functions/mod.ts';
 import { OptionBuilder, show, user } from 'logos/src/commands/mod.ts';
-import { Client, configuration, parseArguments, resolveInteractionToMember } from 'logos/src/mod.ts';
+import { Client, parseArguments, resolveInteractionToMember } from 'logos/src/mod.ts';
+import configuration from 'logos/configuration.ts';
 import { mention, MentionTypes } from 'logos/formatting.ts';
 import { defaultLanguage } from 'logos/types.ts';
 

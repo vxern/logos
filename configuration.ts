@@ -1,29 +1,9 @@
-import { Misc } from 'logos/assets/localisations/mod.ts';
 import { SongListingContentTypes } from 'logos/src/commands/music/data/mod.ts';
-import { fromHex } from 'logos/src/utils.ts';
+import { fromHex } from 'logos/src/mod.ts';
 import { Language } from 'logos/types.ts';
+import { Periods } from 'logos/constants.ts';
 
-class Periods {
-	static readonly second = 1000;
-	static readonly minute = 60 * Periods.second;
-	static readonly hour = 60 * Periods.minute;
-	static readonly day = 24 * Periods.hour;
-	static readonly week = 7 * Periods.day;
-	static readonly month = 30 * Periods.day;
-	static readonly year = 365 * Periods.day;
-}
-
-const timeDescriptors: [typeof Misc.time.periods.second, number][] = [
-	[Misc.time.periods.second, Periods.second],
-	[Misc.time.periods.minute, Periods.minute],
-	[Misc.time.periods.hour, Periods.hour],
-	[Misc.time.periods.day, Periods.day],
-	[Misc.time.periods.week, Periods.week],
-	[Misc.time.periods.month, Periods.month],
-	[Misc.time.periods.year, Periods.year],
-];
-
-const settings = {
+const configuration = {
 	// Configuration settings pertaining to core functions of the application.
 	core: {
 		// Configuration settings pertaining to event collectors.
@@ -210,5 +190,4 @@ const settings = {
 	},
 };
 
-export default settings;
-export { Periods, timeDescriptors };
+export default configuration;

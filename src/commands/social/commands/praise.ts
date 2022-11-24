@@ -14,7 +14,8 @@ import { Praise } from 'logos/src/database/structs/users/mod.ts';
 import { createPraise, getOrCreateUser, getPraises } from 'logos/src/database/functions/mod.ts';
 import { log } from 'logos/src/controllers/logging/mod.ts';
 import { CommandBuilder, user } from 'logos/src/commands/mod.ts';
-import { Client, configuration, guildAsAuthor, parseArguments, resolveInteractionToMember } from 'logos/src/mod.ts';
+import { Client, guildAsAuthor, parseArguments, resolveInteractionToMember } from 'logos/src/mod.ts';
+import configuration from 'logos/configuration.ts';
 import { mention, MentionTypes } from 'logos/formatting.ts';
 
 const command: CommandBuilder = {

@@ -9,17 +9,11 @@ import {
 	sendInteractionResponse,
 	sendMessage,
 } from 'discordeno';
-import { Commands, localise } from 'logos/assets/localisations/mod.ts';
+import { Commands, localise, Misc } from 'logos/assets/localisations/mod.ts';
 import { log } from 'logos/src/controllers/logging/mod.ts';
-import {
-	Client,
-	configuration,
-	guildAsAuthor,
-	parseArguments,
-	Periods,
-	resolveInteractionToMember,
-	timeDescriptors,
-} from 'logos/src/mod.ts';
+import { Client, guildAsAuthor, parseArguments, resolveInteractionToMember } from 'logos/src/mod.ts';
+import configuration from 'logos/configuration.ts';
+import { Periods, timeDescriptors } from 'logos/constants.ts';
 import { displayTime, mention, MentionTypes } from 'logos/formatting.ts';
 import { defaultLanguage } from 'logos/types.ts';
 
@@ -218,7 +212,16 @@ function getTimestampFromExpression(
 	// One of the values is equal to 0.
 	if (quantifiers.includes(0)) return undefined;
 
-	const validTimeDescriptors = timeDescriptors.reduce<string[]>(
+	const timeDescriptorsWithLocalisations = timeDescriptors.map<
+		[typeof Misc.time.periods[keyof typeof Misc.time.periods], number]
+	>(
+		([descriptor, period]) => {
+			const descriptorLocalised = Misc.time.periods[descriptor as keyof typeof Misc.time.periods];
+			return [descriptorLocalised, period];
+		},
+	);
+
+	const validTimeDescriptors = timeDescriptorsWithLocalisations.reduce<string[]>(
 		(validTimeDescriptors, [descriptors, _period]) => {
 			validTimeDescriptors.push(...localise(descriptors.descriptors, locale));
 			return validTimeDescriptors;
@@ -233,7 +236,7 @@ function getTimestampFromExpression(
 
 	const quantifierFrequencies = periodNames.reduce(
 		(frequencies, quantifier) => {
-			const index = timeDescriptors.findIndex(([descriptors, _period]) =>
+			const index = timeDescriptorsWithLocalisations.findIndex(([descriptors, _period]) =>
 				localise(descriptors.descriptors, locale).includes(quantifier)
 			);
 
@@ -256,9 +259,9 @@ function getTimestampFromExpression(
 	][] = periodNames
 		.map(
 			(key, index) => {
-				const [descriptors, milliseconds] = timeDescriptors.find((
-					[descriptors, _value],
-				) => localise(descriptors.descriptors, locale).includes(key))!;
+				const [descriptors, milliseconds] = timeDescriptorsWithLocalisations.find(
+					([descriptors, _value]) => localise(descriptors.descriptors, locale).includes(key),
+				)!;
 
 				return [localise(descriptors.display, locale), [
 					quantifiers.at(index)!,

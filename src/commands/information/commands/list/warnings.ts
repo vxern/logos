@@ -9,15 +9,8 @@ import { Commands, localise } from 'logos/assets/localisations/mod.ts';
 import { getOrCreateUser, getWarnings } from 'logos/src/database/functions/mod.ts';
 import { Warning } from 'logos/src/database/structs/users/mod.ts';
 import { Document } from 'logos/src/database/structs/mod.ts';
-import {
-	chunk,
-	Client,
-	configuration,
-	paginate,
-	parseArguments,
-	resolveInteractionToMember,
-	trim,
-} from 'logos/src/mod.ts';
+import { chunk, Client, paginate, parseArguments, resolveInteractionToMember, trim } from 'logos/src/mod.ts';
+import configuration from 'logos/configuration.ts';
 import { displayTime, list } from 'logos/formatting.ts';
 
 async function listWarnings(

@@ -8,8 +8,9 @@ import {
 	sendInteractionResponse,
 } from 'discordeno';
 import { Commands, localise } from 'logos/assets/localisations/mod.ts';
-import { Client, configuration, guildAsThumbnail, snowflakeToTimestamp } from 'logos/src/mod.ts';
 import { getProficiencyCategory } from 'logos/src/commands/social/mod.ts';
+import { Client, guildAsThumbnail, snowflakeToTimestamp } from 'logos/src/mod.ts';
+import configuration from 'logos/configuration.ts';
 import { displayTime, mention, MentionTypes } from 'logos/formatting.ts';
 import { defaultLanguage } from 'logos/types.ts';
 

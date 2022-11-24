@@ -10,7 +10,8 @@ import {
 import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
 import { log } from 'logos/src/controllers/logging/mod.ts';
 import { CommandBuilder } from 'logos/src/commands/mod.ts';
-import { Client, configuration, getTextChannel, parseArguments } from 'logos/src/mod.ts';
+import { Client, getTextChannel, parseArguments } from 'logos/src/mod.ts';
+import configuration from 'logos/configuration.ts';
 import { mention, MentionTypes } from 'logos/formatting.ts';
 import { defaultLanguage } from 'logos/types.ts';
 

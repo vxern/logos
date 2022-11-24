@@ -15,7 +15,8 @@ import { log } from 'logos/src/controllers/logging/mod.ts';
 import { createWarning, getOrCreateUser, getWarnings } from 'logos/src/database/functions/mod.ts';
 import { getRelevantWarnings, reason } from 'logos/src/commands/moderation/mod.ts';
 import { user } from 'logos/src/commands/mod.ts';
-import { Client, configuration, guildAsAuthor, parseArguments, resolveInteractionToMember } from 'logos/src/mod.ts';
+import { Client, guildAsAuthor, parseArguments, resolveInteractionToMember } from 'logos/src/mod.ts';
+import configuration from 'logos/configuration.ts';
 import { mention, MentionTypes } from 'logos/formatting.ts';
 import { defaultLanguage } from 'logos/types.ts';
 

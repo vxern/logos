@@ -10,12 +10,12 @@ import {
 	sendMessage,
 } from 'discordeno';
 import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
-import { CommandBuilder } from 'logos/src/commands/mod.ts';
-import { Client, configuration, guildAsAuthor, parseArguments, resolveInteractionToMember } from 'logos/src/mod.ts';
 import { log } from 'logos/src/controllers/logging/mod.ts';
 import { deleteWarning, getOrCreateUser, getWarnings } from 'logos/src/database/functions/mod.ts';
-import { user } from 'logos/src/commands/mod.ts';
 import { getRelevantWarnings } from 'logos/src/commands/moderation/mod.ts';
+import { CommandBuilder, user } from 'logos/src/commands/mod.ts';
+import { Client, guildAsAuthor, parseArguments, resolveInteractionToMember } from 'logos/src/mod.ts';
+import configuration from 'logos/configuration.ts';
 import { displayTime, mention, MentionTypes } from 'logos/formatting.ts';
 import { defaultLanguage } from 'logos/types.ts';
 
