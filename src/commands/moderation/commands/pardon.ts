@@ -10,22 +10,17 @@ import {
 	sendMessage,
 } from 'discordeno';
 import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
-import { CommandBuilder } from 'logos/src/commands/mod.ts';
-import {
-	Client,
-	configuration,
-	defaultLanguage,
-	displayTime,
-	guildAsAuthor,
-	mention,
-	MentionTypes,
-	parseArguments,
-	resolveInteractionToMember,
-} from 'logos/src/mod.ts';
-import { log } from 'logos/src/controllers/logging/mod.ts';
-import { deleteWarning, getOrCreateUser, getWarnings } from 'logos/src/database/functions/mod.ts';
-import { user } from 'logos/src/commands/mod.ts';
-import { getRelevantWarnings } from 'logos/src/commands/moderation/mod.ts';
+import { getOrCreateUser } from 'logos/src/database/functions/users.ts';
+import { deleteWarning, getWarnings } from 'logos/src/database/functions/warnings.ts';
+import { getRelevantWarnings } from 'logos/src/commands/moderation/module.ts';
+import { CommandBuilder } from 'logos/src/commands/command.ts';
+import { user } from 'logos/src/commands/parameters.ts';
+import { log } from 'logos/src/controllers/logging/logging.ts';
+import { Client, resolveInteractionToMember } from 'logos/src/client.ts';
+import { guildAsAuthor, parseArguments } from 'logos/src/utils.ts';
+import configuration from 'logos/configuration.ts';
+import { displayTime, mention, MentionTypes } from 'logos/formatting.ts';
+import { defaultLanguage } from 'logos/types.ts';
 
 const command: CommandBuilder = {
 	...createLocalisations(Commands.pardon),

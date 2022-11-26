@@ -1,4 +1,4 @@
-import { Localisations } from 'logos/assets/localisations/mod.ts';
+import { Localisations } from 'logos/assets/localisations/types.ts';
 
 class Utils {
 	static readonly continuedOnNextPage: Localisations<string> = {

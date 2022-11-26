@@ -1,5 +1,5 @@
 import { ApplicationCommandOption, Bot, CreateSlashApplicationCommand, Interaction } from 'discordeno';
-import { Client } from 'logos/src/mod.ts';
+import { Client } from 'logos/src/client.ts';
 
 type WithRequired<T, K extends keyof T> =
 	& Pick<T, Exclude<keyof T, K>>

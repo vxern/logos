@@ -1,13 +1,10 @@
 import { ApplicationCommandOptionTypes, User } from 'discordeno';
-import { capitalise, configuration, Language, links, list } from 'logos/src/mod.ts';
-import {
-	CommandLocalisations,
-	Expressions,
-	getLocale,
-	getLocalisations,
-	localise,
-	TranslationLanguage,
-} from 'logos/assets/localisations/mod.ts';
+import { Expressions } from 'logos/assets/localisations/expressions.ts';
+import { getLocale, getLocalisations, TranslationLanguage } from 'logos/assets/localisations/languages.ts';
+import { CommandLocalisations, localise } from 'logos/assets/localisations/types.ts';
+import { emojis, links } from 'logos/constants.ts';
+import { capitalise, list } from 'logos/formatting.ts';
+import { Language } from 'logos/types.ts';
 
 function typedLocalisations<
 	OptionKeys extends string,
@@ -108,11 +105,11 @@ class Commands {
 						},
 						body: {
 							'English':
-								`I am powered by [${configuration.interactions.responses.emojis.typescript} TypeScript](${links.typescriptWebsite}) running within [${configuration.interactions.responses.emojis.deno} Deno](${links.denoWebsite}). I interact with [Discord\'s API](${links.discordApiWebsite}) with the help of the [${configuration.interactions.responses.emojis.discordeno} discordeno](${links.discordenoRepository}) library.`,
+								`I am powered by [${emojis.typescript} TypeScript](${links.typescriptWebsite}) running within [${emojis.deno} Deno](${links.denoWebsite}). I interact with [Discord\'s API](${links.discordApiWebsite}) with the help of the [${emojis.discordeno} discordeno](${links.discordenoRepository}) library.`,
 							'Polish':
-								`Jestem zasilany przez [${configuration.interactions.responses.emojis.typescript} TypeScript](${links.typescriptWebsite}), działający w ramach [${configuration.interactions.responses.emojis.deno} Deno](${links.denoWebsite}). Współdziałam z [API Discorda](${links.discordApiWebsite}) za pomocą biblioteki [${configuration.interactions.responses.emojis.discordeno} discordeno](${links.discordenoRepository}).`,
+								`Jestem zasilany przez [${emojis.typescript} TypeScript](${links.typescriptWebsite}), działający w ramach [${emojis.deno} Deno](${links.denoWebsite}). Współdziałam z [API Discorda](${links.discordApiWebsite}) za pomocą biblioteki [${emojis.discordeno} discordeno](${links.discordenoRepository}).`,
 							'Romanian':
-								`Sunt alimentat de către [${configuration.interactions.responses.emojis.typescript} TypeScript](${links.typescriptWebsite}), care se execută în cadrul [${configuration.interactions.responses.emojis.deno} Deno](${links.denoWebsite}). Interacționez cu [API-ul Discord-ului](${links.discordApiWebsite}) cu ajutorul bibliotecii [${configuration.interactions.responses.emojis.discordeno} discordeno](${links.discordenoRepository}).`,
+								`Sunt alimentat de către [${emojis.typescript} TypeScript](${links.typescriptWebsite}), care se execută în cadrul [${emojis.deno} Deno](${links.denoWebsite}). Interacționez cu [API-ul Discord-ului](${links.discordApiWebsite}) cu ajutorul bibliotecii [${emojis.discordeno} discordeno](${links.discordenoRepository}).`,
 						},
 					},
 					howToAddToServer: {

@@ -16,18 +16,23 @@ import {
 	snowflakeToBigint,
 } from 'discordeno';
 import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
-import { Client, configuration, createInteractionCollector, defaultLanguage, Language } from 'logos/src/mod.ts';
-import { OptionBuilder } from 'logos/src/commands/mod.ts';
+import { OptionBuilder } from 'logos/src/commands/command.ts';
 import {
 	createSelectOptionsFromCategories,
-	createSelectOptionsFromCollection,
 	getRelevantCategories,
-	resolveRoles,
-	Role,
 	RoleCategory,
 	RoleCategoryTypes,
-} from 'logos/src/commands/social/data/structures/mod.ts';
-import { roles } from 'logos/src/commands/social/data/mod.ts';
+} from 'logos/src/commands/social/data/structures/role-category.ts';
+import {
+	createSelectOptionsFromCollection,
+	resolveRoles,
+} from 'logos/src/commands/social/data/structures/role-collection.ts';
+import { Role } from 'logos/src/commands/social/data/structures/role.ts';
+import roles from 'logos/src/commands/social/data/roles.ts';
+import { Client } from 'logos/src/client.ts';
+import { createInteractionCollector } from 'logos/src/utils.ts';
+import configuration from 'logos/configuration.ts';
+import { defaultLanguage, Language } from 'logos/types.ts';
 
 const command: OptionBuilder = {
 	...createLocalisations(Commands.profile.options.roles),

@@ -1,6 +1,5 @@
-import { WordTypes } from 'logos/src/commands/language/data/mod.ts';
-import { Language } from 'logos/src/mod.ts';
-import { getLocale, Localisations, localise } from 'logos/assets/localisations/mod.ts';
+import { Localisations } from 'logos/assets/localisations/types.ts';
+import { WordTypes } from 'logos/types.ts';
 
 class Words {
 	static readonly types: Record<`${WordTypes}`, Localisations<string>> = {
@@ -86,8 +85,4 @@ class Words {
 	};
 }
 
-function getWordType(typeString: string, language: Language): WordTypes {
-	return localise(Words.typeNameToType, getLocale(language))[typeString] ?? WordTypes.Unknown;
-}
-
-export { getWordType, Words };
+export { Words };

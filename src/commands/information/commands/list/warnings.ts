@@ -6,20 +6,14 @@ import {
 	sendInteractionResponse,
 } from 'discordeno';
 import { Commands, localise } from 'logos/assets/localisations/mod.ts';
-import { getOrCreateUser, getWarnings } from 'logos/src/database/functions/mod.ts';
-import { Warning } from 'logos/src/database/structs/users/mod.ts';
-import { Document } from 'logos/src/database/structs/mod.ts';
-import {
-	chunk,
-	Client,
-	configuration,
-	displayTime,
-	list,
-	paginate,
-	parseArguments,
-	resolveInteractionToMember,
-	trim,
-} from 'logos/src/mod.ts';
+import { getOrCreateUser } from 'logos/src/database/functions/users.ts';
+import { getWarnings } from 'logos/src/database/functions/warnings.ts';
+import { Warning } from 'logos/src/database/structs/users/warning.ts';
+import { Document } from 'logos/src/database/structs/document.ts';
+import { Client, resolveInteractionToMember } from 'logos/src/client.ts';
+import { chunk, paginate, parseArguments, trim } from 'logos/src/utils.ts';
+import configuration from 'logos/configuration.ts';
+import { displayTime, list } from 'logos/formatting.ts';
 
 async function listWarnings(
 	[client, bot]: [Client, Bot],

@@ -1,4 +1,4 @@
-import { Reference } from 'logos/src/database/structs/mod.ts';
+import { Reference } from 'logos/src/database/structs/document.ts';
 
 /** Represents a warning given to a user. */
 interface Warning {

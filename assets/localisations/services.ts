@@ -1,5 +1,8 @@
-import { code, Language } from 'logos/src/mod.ts';
-import { Expressions, getLocalisations, localise } from 'logos/assets/localisations/mod.ts';
+import { Expressions } from 'logos/assets/localisations/expressions.ts';
+import { getLocalisations } from 'logos/assets/localisations/languages.ts';
+import { localise } from 'logos/assets/localisations/types.ts';
+import { code } from 'logos/formatting.ts';
+import { Language } from 'logos/types.ts';
 
 class Services {
 	static readonly entry = {
@@ -7,7 +10,7 @@ class Services {
 			header: {
 				'English': 'Language Proficiency',
 				'Polish': 'Biegłość Języczna',
-				'Romanian': 'Competența Lingvistică',
+				'Romanian': 'Competență Lingvistică',
 			},
 			body: {
 				'English': (guildLanguage: Language) =>
