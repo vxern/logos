@@ -4,12 +4,7 @@ import { defaultLanguage, Language } from 'logos/types.ts';
 
 type Expression<T> = (argument: T) => string;
 type Localisations<T> = Partial<Record<Language, T>> & { [defaultLanguage]: T };
-type DiscordLocalisations = Required<
-	Record<
-		'name' | 'description',
-		Localisations<string>
-	>
->;
+type DiscordLocalisations = Required<Record<'name' | 'description', Localisations<string>>>;
 type CommandLocalisations<
 	OptionKeys extends string,
 	StringKeys extends string,
