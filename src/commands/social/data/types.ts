@@ -1,8 +1,17 @@
-import { SelectOption } from 'discordeno';
-import { Localisations, localise } from 'logos/assets/localisations/mod.ts';
-import { RoleCollection, RoleCollectionTypes } from 'logos/src/commands/social/data/structures/role-collection.ts';
-import { trim } from 'logos/src/utils.ts';
+import { Localisations } from 'logos/assets/localisations/mod.ts';
 import { Language } from 'logos/types.ts';
+
+/** Represents a selectable role within a role selection menu.  */
+interface Role {
+	/** Role name corresponding to the guild role name. */
+	name: Localisations<string>;
+
+	/** Description of this role's purpose. */
+	description?: Localisations<string>;
+
+	/** Emoji to be displayed next to the role name. */
+	emoji?: string;
+}
 
 /** The type of role category. */
 enum RoleCategoryTypes {
@@ -81,50 +90,45 @@ type RoleCategory =
 		| RoleCategoryStandalone
 	);
 
-function createSelectOptionsFromCategories(
-	categories: RoleCategory[],
-	language: Language | undefined,
-	locale: string | undefined,
-): SelectOption[] {
-	const categorySelections = getRelevantCategories(categories, language);
+/** The type of role collection. */
+enum RoleCollectionTypes {
+	/** A collection of roles. */
+	Collection,
 
-	const selections: SelectOption[] = [];
-	for (const [category, index] of categorySelections) {
-		selections.push({
-			label: localise(category.name, locale),
-			value: index.toString(),
-			description: trim(localise(category.description, locale), 100),
-			emoji: { name: category.emoji },
-		});
-	}
-
-	return selections;
+	/** A group of role collections that differ depending on the language. */
+	CollectionLocalised,
 }
 
-function getRelevantCategories(
-	categories: RoleCategory[],
-	language: Language | undefined,
-): [RoleCategory, number][] {
-	const selectedRoleCategories: [RoleCategory, number][] = [];
+/**
+ * The base of a role collection.
+ *
+ * This type defines the core properties that all role collections must define.
+ */
+type RoleCollectionBase = {
+	/** The type of this collection. */
+	type: RoleCollectionTypes;
+};
 
-	for (let index = 0; index < categories.length; index++) {
-		const category = categories.at(index)!;
+/** The base of a role collection with a standalone group of roles. */
+type RoleCollectionStandalone = {
+	type: RoleCollectionTypes.Collection;
 
-		if (category.type === RoleCategoryTypes.CategoryGroup) {
-			selectedRoleCategories.push([category, index]);
-			continue;
-		}
+	/** The roles in this role collection. */
+	list: Role[];
+};
 
-		if (category.collection.type === RoleCollectionTypes.CollectionLocalised) {
-			if (!language) continue;
-			if (!(language in category.collection.lists)) continue;
-		}
+/** The base of a role collection with localised groups of roles. */
+type RoleCollectionLocalised = {
+	type: RoleCollectionTypes.CollectionLocalised;
 
-		selectedRoleCategories.push([category, index]);
-	}
+	/** Groups of roles defined by language in this role collection. */
+	lists: Partial<Record<Language, Role[]>>;
+};
 
-	return selectedRoleCategories;
-}
+/** Represents a grouping of roles. */
+type RoleCollection =
+	& RoleCollectionBase
+	& (RoleCollectionStandalone | RoleCollectionLocalised);
 
-export { createSelectOptionsFromCategories, getRelevantCategories, RoleCategoryTypes };
-export type { RoleCategory, RoleCategoryBase, RoleCategoryStandalone };
+export { RoleCategoryTypes, RoleCollectionTypes };
+export type { Role, RoleCategory, RoleCategoryBase, RoleCategoryStandalone, RoleCollection };

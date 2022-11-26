@@ -17,18 +17,14 @@ import {
 } from 'discordeno';
 import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
 import { OptionBuilder } from 'logos/src/commands/command.ts';
+import roles from 'logos/src/commands/social/data/roles.ts';
+import { Role, RoleCategory, RoleCategoryTypes } from 'logos/src/commands/social/data/types.ts';
 import {
 	createSelectOptionsFromCategories,
-	getRelevantCategories,
-	RoleCategory,
-	RoleCategoryTypes,
-} from 'logos/src/commands/social/data/structures/role-category.ts';
-import {
 	createSelectOptionsFromCollection,
+	getRelevantCategories,
 	resolveRoles,
-} from 'logos/src/commands/social/data/structures/role-collection.ts';
-import { Role } from 'logos/src/commands/social/data/structures/role.ts';
-import roles from 'logos/src/commands/social/data/roles.ts';
+} from 'logos/src/commands/social/module.ts';
 import { Client } from 'logos/src/client.ts';
 import { createInteractionCollector } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
