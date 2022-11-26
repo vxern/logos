@@ -8,7 +8,7 @@ import {
 	sendInteractionResponse,
 } from 'discordeno';
 import { Commands, localise } from 'logos/assets/localisations/mod.ts';
-import { Client } from 'logos/src/mod.ts';
+import { Client } from 'logos/src/client.ts';
 import configuration from 'logos/configuration.ts';
 
 /** Displays information about the bot (application). */

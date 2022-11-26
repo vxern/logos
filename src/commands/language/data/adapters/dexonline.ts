@@ -1,12 +1,13 @@
 import { Dexonline } from 'dexonline';
-import { Commands, getWordType, localise } from 'logos/assets/localisations/mod.ts';
+import { Commands, localise } from 'logos/assets/localisations/mod.ts';
 import {
 	DictionaryAdapter,
 	DictionaryEntry,
 	DictionaryProvisions,
 	WordTypes,
-} from 'logos/src/commands/language/data/mod.ts';
-import { chunk } from 'logos/src/mod.ts';
+} from 'logos/src/commands/language/data/types.ts';
+import { getWordType } from 'logos/src/commands/language/module.ts';
+import { chunk } from 'logos/src/utils.ts';
 import { Language } from 'logos/types.ts';
 
 const supportedTypesForInflection = [WordTypes.Noun, WordTypes.Verb, WordTypes.Adjective, WordTypes.Determiner];

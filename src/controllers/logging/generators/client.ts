@@ -1,6 +1,6 @@
 import { EventHandlers } from 'discordeno';
-import { MessageGenerators } from 'logos/src/controllers/logging/generators/mod.ts';
-import { diagnosticMentionUser } from 'logos/src/mod.ts';
+import { MessageGenerators } from 'logos/src/controllers/logging/generators/generators.ts';
+import { diagnosticMentionUser } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import { codeMultiline, mention, MentionTypes } from 'logos/formatting.ts';
 

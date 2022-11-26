@@ -8,8 +8,9 @@ import {
 	sendInteractionResponse,
 } from 'discordeno';
 import { Commands, createLocalisations, Information, localise } from 'logos/assets/localisations/mod.ts';
-import { CommandBuilder } from 'logos/src/commands/mod.ts';
-import { Client, parseArguments } from 'logos/src/mod.ts';
+import { CommandBuilder } from 'logos/src/commands/command.ts';
+import { Client } from 'logos/src/client.ts';
+import { parseArguments } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import { capitalise } from 'logos/formatting.ts';
 import { defaultLanguage } from 'logos/types.ts';

@@ -1,9 +1,6 @@
-import { Warning } from 'logos/src/database/structs/users/mod.ts';
-import { Document } from 'logos/src/database/structs/mod.ts';
-import { cite, pardon, timeout, warn } from 'logos/src/commands/moderation/commands/mod.ts';
+import { Warning } from 'logos/src/database/structs/users/warning.ts';
+import { Document } from 'logos/src/database/structs/document.ts';
 import configuration from 'logos/configuration.ts';
-
-const commands = [cite, pardon, timeout, warn];
 
 function getRelevantWarnings(
 	warnings: Document<Warning>[],
@@ -15,4 +12,3 @@ function getRelevantWarnings(
 }
 
 export { getRelevantWarnings };
-export default commands;

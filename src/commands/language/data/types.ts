@@ -85,5 +85,14 @@ abstract class DictionaryAdapter<T> {
 	abstract readonly parse: (contents: T, locale: string | undefined) => DictionaryEntry[] | undefined;
 }
 
+/** Represents a pair of a sentence and its translation. */
+interface SentencePair {
+	/** The source sentence. */
+	sentence: string;
+
+	/** The translation of the sentence. */
+	translation: string;
+}
+
 export { DictionaryAdapter, DictionaryProvisions, DictionaryScopes, WordTypes };
-export type { DictionaryEntry, TaggedValue };
+export type { DictionaryEntry, SentencePair, TaggedValue };

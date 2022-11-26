@@ -9,14 +9,9 @@ import {
 	sendMessage,
 } from 'discordeno';
 import { Commands, localise } from 'logos/assets/localisations/mod.ts';
-import { log } from 'logos/src/controllers/logging/mod.ts';
-import {
-	Client,
-	diagnosticMentionUser,
-	guildAsAuthor,
-	parseArguments,
-	resolveInteractionToMember,
-} from 'logos/src/mod.ts';
+import { log } from 'logos/src/controllers/logging/logging.ts';
+import { Client, resolveInteractionToMember } from 'logos/src/client.ts';
+import { diagnosticMentionUser, guildAsAuthor, parseArguments } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import { defaultLanguage } from 'logos/types.ts';
 

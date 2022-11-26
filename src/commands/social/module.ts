@@ -1,18 +1,8 @@
 import { localise } from 'logos/assets/localisations/mod.ts';
-import { praise, profile } from 'logos/src/commands/social/commands/mod.ts';
-import {
-	RoleCategory,
-	RoleCategoryTypes,
-	RoleCollection,
-	RoleCollectionTypes,
-} from 'logos/src/commands/social/data/structures/mod.ts';
-import { roles } from 'logos/src/commands/social/data/mod.ts';
+import { RoleCategory, RoleCategoryTypes } from 'logos/src/commands/social/data/structures/role-category.ts';
+import { RoleCollection, RoleCollectionTypes } from 'logos/src/commands/social/data/structures/role-collection.ts';
+import roles from 'logos/src/commands/social/data/roles.ts';
 import { defaultLanguage } from 'logos/types.ts';
-
-const commands = [
-	praise,
-	profile,
-];
 
 type ProficiencyCategory = RoleCategory & {
 	type: RoleCategoryTypes.Category;
@@ -29,4 +19,3 @@ function getProficiencyCategory(): ProficiencyCategory {
 }
 
 export { getProficiencyCategory };
-export default commands;

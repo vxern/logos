@@ -12,8 +12,11 @@ import {
 import { Player } from 'lavadeno';
 import { LoadType } from 'lavalink_types';
 import { Commands, localise } from 'logos/assets/localisations/mod.ts';
-import { Song, SongListing, SongListingContentTypes, SongStream } from 'logos/src/commands/music/data/mod.ts';
-import { Client, configuration, defaultLanguage, mention, MentionTypes } from 'logos/src/mod.ts';
+import { Song, SongListing, SongListingContentTypes, SongStream } from 'logos/src/commands/music/data/types.ts';
+import { Client } from 'logos/src/client.ts';
+import configuration from 'logos/configuration.ts';
+import { mention, MentionTypes } from 'logos/formatting.ts';
+import { defaultLanguage } from 'logos/types.ts';
 
 class MusicController {
 	private client: Client;

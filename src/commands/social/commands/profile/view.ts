@@ -8,9 +8,13 @@ import {
 	sendInteractionResponse,
 } from 'discordeno';
 import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
-import { getOrCreateUser, getPraises, getWarnings } from 'logos/src/database/functions/mod.ts';
-import { OptionBuilder, show, user } from 'logos/src/commands/mod.ts';
-import { Client, parseArguments, resolveInteractionToMember } from 'logos/src/mod.ts';
+import { OptionBuilder } from 'logos/src/commands/command.ts';
+import { show, user } from 'logos/src/commands/parameters.ts';
+import { getPraises } from 'logos/src/database/functions/praises.ts';
+import { getOrCreateUser } from 'logos/src/database/functions/users.ts';
+import { getWarnings } from 'logos/src/database/functions/warnings.ts';
+import { Client, resolveInteractionToMember } from 'logos/src/client.ts';
+import { parseArguments } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import { mention, MentionTypes } from 'logos/formatting.ts';
 import { defaultLanguage } from 'logos/types.ts';

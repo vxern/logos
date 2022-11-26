@@ -11,8 +11,9 @@ import {
 	User,
 } from 'discordeno';
 import { Localisations, localise, Services } from 'logos/assets/localisations/mod.ts';
-import { getProficiencyCategory } from 'logos/src/commands/social/mod.ts';
-import { Client, snowflakeToTimestamp } from 'logos/src/mod.ts';
+import { getProficiencyCategory } from 'logos/src/commands/social/module.ts';
+import { Client } from 'logos/src/client.ts';
+import { snowflakeToTimestamp } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 
 const proficiencyCategory = getProficiencyCategory();

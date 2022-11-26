@@ -1,5 +1,5 @@
 import { Locales } from 'discordeno';
-import { Localisations } from 'logos/assets/localisations/mod.ts';
+import { Localisations } from 'logos/assets/localisations/types.ts';
 import { defaultLanguage, Language } from 'logos/types.ts';
 
 type LocalisationsByLanguage<L extends string> =

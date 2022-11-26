@@ -1,43 +1,10 @@
 import { Bot, Interaction } from 'discordeno';
-import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
-import { chunk, Client, configuration, list, paginate } from 'logos/src/mod.ts';
-import { CommandBuilder } from 'logos/src/commands/mod.ts';
-import {
-	history,
-	now,
-	pause,
-	play,
-	queue,
-	remove,
-	replay,
-	resume,
-	skip,
-	stop,
-	unskip,
-	volume,
-} from 'logos/src/commands/music/commands/mod.ts';
-import { SongListing } from 'logos/src/commands/music/data/mod.ts';
-
-const music: CommandBuilder = {
-	...createLocalisations(Commands.music),
-	defaultMemberPermissions: ['VIEW_CHANNEL'],
-	options: [
-		history,
-		now,
-		pause,
-		play,
-		queue,
-		remove,
-		replay,
-		skip,
-		stop,
-		resume,
-		unskip,
-		volume,
-	],
-};
-
-const commands = [music];
+import { Commands, localise } from 'logos/assets/localisations/mod.ts';
+import { SongListing } from 'logos/src/commands/music/data/types.ts';
+import { Client } from 'logos/src/client.ts';
+import { chunk, paginate } from 'logos/src/utils.ts';
+import configuration from 'logos/configuration.ts';
+import { list } from 'logos/formatting.ts';
 
 function displayListings(
 	clientWithBot: [Client, Bot],
@@ -71,5 +38,4 @@ function displayListings(
 	});
 }
 
-export default commands;
 export { displayListings };

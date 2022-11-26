@@ -1,5 +1,5 @@
-import { SongListingContentTypes } from 'logos/src/commands/music/data/mod.ts';
-import { fromHex } from 'logos/src/mod.ts';
+import { SongListingContentTypes } from 'logos/src/commands/music/data/types.ts';
+import { fromHex } from 'logos/src/utils.ts';
 import { Language } from 'logos/types.ts';
 import { Periods } from 'logos/constants.ts';
 

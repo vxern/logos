@@ -1,6 +1,7 @@
 import { BaseInvite, Bot, createInvite, Embed, getInvites, Guild, InviteMetadata } from 'discordeno';
 import { Information, localise } from 'logos/assets/localisations/mod.ts';
-import { Client, fromHex, getTextChannel } from 'logos/src/mod.ts';
+import { Client } from 'logos/src/client.ts';
+import { fromHex, getTextChannel } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import { links } from 'logos/constants.ts';
 import { mention, MentionTypes } from 'logos/formatting.ts';

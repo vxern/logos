@@ -29,7 +29,7 @@ import {
 } from 'discordeno';
 import * as Snowflake from 'snowflake';
 import { localise, Utils } from 'logos/assets/localisations/mod.ts';
-import { addCollector, Client } from 'logos/src/mod.ts';
+import { addCollector, Client } from 'logos/src/client.ts';
 import configuration from 'logos/configuration.ts';
 import { code, mention, MentionTypes } from 'logos/formatting.ts';
 import { Language } from 'logos/types.ts';

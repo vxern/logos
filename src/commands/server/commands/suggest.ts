@@ -8,9 +8,10 @@ import {
 	sendMessage,
 } from 'discordeno';
 import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
-import { log } from 'logos/src/controllers/logging/mod.ts';
-import { CommandBuilder } from 'logos/src/commands/mod.ts';
-import { Client, getTextChannel, parseArguments } from 'logos/src/mod.ts';
+import { CommandBuilder } from 'logos/src/commands/command.ts';
+import { log } from 'logos/src/controllers/logging/logging.ts';
+import { Client } from 'logos/src/client.ts';
+import { getTextChannel, parseArguments } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import { mention, MentionTypes } from 'logos/formatting.ts';
 import { defaultLanguage } from 'logos/types.ts';

@@ -10,8 +10,9 @@ import {
 	sendMessage,
 } from 'discordeno';
 import { Commands, localise, Misc } from 'logos/assets/localisations/mod.ts';
-import { log } from 'logos/src/controllers/logging/mod.ts';
-import { Client, guildAsAuthor, parseArguments, resolveInteractionToMember } from 'logos/src/mod.ts';
+import { log } from 'logos/src/controllers/logging/logging.ts';
+import { Client, resolveInteractionToMember } from 'logos/src/client.ts';
+import { guildAsAuthor, parseArguments } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import { Periods, timeDescriptors } from 'logos/constants.ts';
 import { displayTime, mention, MentionTypes } from 'logos/formatting.ts';

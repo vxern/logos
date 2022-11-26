@@ -1,5 +1,6 @@
-import { ensureType, TranslationLanguage } from 'logos/assets/localisations/mod.ts';
 import { Language } from 'logos/types.ts';
+import { TranslationLanguage } from 'logos/assets/localisations/languages.ts';
+import { ensureType } from 'logos/assets/localisations/types.ts';
 
 type TranslationLanguageMappings = Required<
 	Record<TranslationLanguage, string>

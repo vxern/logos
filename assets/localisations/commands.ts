@@ -1,12 +1,7 @@
 import { ApplicationCommandOptionTypes, User } from 'discordeno';
-import {
-	CommandLocalisations,
-	Expressions,
-	getLocale,
-	getLocalisations,
-	localise,
-	TranslationLanguage,
-} from 'logos/assets/localisations/mod.ts';
+import { Expressions } from 'logos/assets/localisations/expressions.ts';
+import { getLocale, getLocalisations, TranslationLanguage } from 'logos/assets/localisations/languages.ts';
+import { CommandLocalisations, localise } from 'logos/assets/localisations/types.ts';
 import { emojis, links } from 'logos/constants.ts';
 import { capitalise, list } from 'logos/formatting.ts';
 import { Language } from 'logos/types.ts';

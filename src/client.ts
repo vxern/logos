@@ -26,13 +26,14 @@ import {
 import * as Sentry from 'sentry';
 import { Log as Logger } from 'tl_log';
 import { localise, Misc } from 'logos/assets/localisations/mod.ts';
-import { DictionaryAdapter, SentencePair } from 'logos/src/commands/language/data/mod.ts';
-import { SupportedLanguage } from 'logos/src/commands/language/mod.ts';
-import { Command, InteractionHandler } from 'logos/src/commands/mod.ts';
-import { setupLogging } from 'logos/src/controllers/logging/mod.ts';
-import { commands } from 'logos/src/commands/mod.ts';
-import { createDatabase, Database } from 'logos/src/database/mod.ts';
-import { diagnosticMentionUser, services } from 'logos/src/mod.ts';
+import { DictionaryAdapter, SentencePair } from 'logos/src/commands/language/data/types.ts';
+import { SupportedLanguage } from 'logos/src/commands/language/module.ts';
+import { Command, InteractionHandler } from 'logos/src/commands/command.ts';
+import { setupLogging } from 'logos/src/controllers/logging/logging.ts';
+import commands from 'logos/src/commands/commands.ts';
+import { createDatabase, Database } from 'logos/src/database/database.ts';
+import services from 'logos/src/services/services.ts';
+import { diagnosticMentionUser } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import { defaultLanguage, Language, supportedLanguages } from 'logos/types.ts';
 

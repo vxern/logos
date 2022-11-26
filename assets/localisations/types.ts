@@ -1,5 +1,5 @@
 import { Locales, Localization as DiscordLocalisation } from 'discordeno';
-import { getLocale } from 'logos/assets/localisations/mod.ts';
+import { getLocale } from 'logos/assets/localisations/languages.ts';
 import { defaultLanguage, Language } from 'logos/types.ts';
 
 type Expression<T> = (argument: T) => string;

@@ -10,12 +10,15 @@ import {
 	sendMessage,
 } from 'discordeno';
 import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
-import { CommandBuilder } from 'logos/src/commands/mod.ts';
-import { log } from 'logos/src/controllers/logging/mod.ts';
-import { createWarning, getOrCreateUser, getWarnings } from 'logos/src/database/functions/mod.ts';
-import { getRelevantWarnings, reason } from 'logos/src/commands/moderation/mod.ts';
-import { user } from 'logos/src/commands/mod.ts';
-import { Client, guildAsAuthor, parseArguments, resolveInteractionToMember } from 'logos/src/mod.ts';
+import { reason } from 'logos/src/commands/moderation/parameters.ts';
+import { CommandBuilder } from 'logos/src/commands/command.ts';
+import { user } from 'logos/src/commands/parameters.ts';
+import { getRelevantWarnings } from 'logos/src/commands/moderation/module.ts';
+import { log } from 'logos/src/controllers/logging/logging.ts';
+import { getOrCreateUser } from 'logos/src/database/functions/users.ts';
+import { createWarning, getWarnings } from 'logos/src/database/functions/warnings.ts';
+import { Client, resolveInteractionToMember } from 'logos/src/client.ts';
+import { guildAsAuthor, parseArguments } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import { mention, MentionTypes } from 'logos/formatting.ts';
 import { defaultLanguage } from 'logos/types.ts';

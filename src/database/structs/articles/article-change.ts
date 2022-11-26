@@ -1,5 +1,5 @@
-import { Reference } from 'logos/src/database/structs/mod.ts';
-import { ArticleTextContent } from 'logos/src/database/structs/articles/mod.ts';
+import { ArticleTextContent } from 'logos/src/database/structs/articles/article.ts';
+import { Reference } from 'logos/src/database/structs/document.ts';
 
 /** Represents a change made to an article. */
 interface ArticleChange {

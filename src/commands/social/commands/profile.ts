@@ -1,6 +1,7 @@
 import { Commands, createLocalisations } from 'logos/assets/localisations/mod.ts';
-import { CommandBuilder } from 'logos/src/commands/mod.ts';
-import { roles, view } from 'logos/src/commands/social/commands/profile/mod.ts';
+import roles from 'logos/src/commands/social/commands/profile/roles.ts';
+import view from 'logos/src/commands/social/commands/profile/view.ts';
+import { CommandBuilder } from 'logos/src/commands/command.ts';
 
 const command: CommandBuilder = {
 	...createLocalisations(Commands.profile),

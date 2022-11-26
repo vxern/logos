@@ -1,7 +1,11 @@
 import * as dotenv from 'std/dotenv/mod.ts';
 import * as Sentry from 'sentry';
-import { getSupportedLanguages, loadDictionaryAdapters, loadSentencePairs } from 'logos/src/commands/language/mod.ts';
-import { initialiseClient } from 'logos/src/mod.ts';
+import {
+	getSupportedLanguages,
+	loadDictionaryAdapters,
+	loadSentencePairs,
+} from 'logos/src/commands/language/module.ts';
+import { initialiseClient } from 'logos/src/client.ts';
 import { capitalise } from 'logos/formatting.ts';
 import { Language, supportedLanguages } from 'logos/types.ts';
 
