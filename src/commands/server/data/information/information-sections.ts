@@ -1,15 +1,11 @@
 import { BaseInvite, Bot, createInvite, Embed, getInvites, Guild, InviteMetadata } from 'discordeno';
 import { Information, localise } from 'logos/assets/localisations/mod.ts';
-import {
-	Client,
-	configuration,
-	defaultLanguage,
-	fromHex,
-	getTextChannel,
-	links,
-	mention,
-	MentionTypes,
-} from 'logos/src/mod.ts';
+import { Client } from 'logos/src/client.ts';
+import { fromHex, getTextChannel } from 'logos/src/utils.ts';
+import configuration from 'logos/configuration.ts';
+import { links } from 'logos/constants.ts';
+import { mention, MentionTypes } from 'logos/formatting.ts';
+import { defaultLanguage } from 'logos/types.ts';
 
 /** Represents a section of guild information. */
 interface InformationSection {
@@ -34,7 +30,7 @@ const informationSections: Record<string, InformationSection> = {
 					name: `💠  **${localise(rule.title, defaultLanguage).toUpperCase()}**  ~  ${
 						localise(Information.rules.tldr, defaultLanguage)
 					}: *${localise(rule.summary, defaultLanguage)}*`,
-					value: localise(rule.content, defaultLanguage)(guild),
+					value: localise(rule.content, defaultLanguage),
 					inline: false,
 				});
 			}

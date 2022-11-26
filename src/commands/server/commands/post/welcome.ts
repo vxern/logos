@@ -8,8 +8,11 @@ import {
 	sendInteractionResponse,
 	sendMessage,
 } from 'discordeno';
-import { Commands, localise } from "logos/assets/localisations/mod.ts";
-import { Client, configuration, defaultLanguage, fromHex, getChannelMention } from "logos/src/mod.ts";
+import { Commands, localise } from 'logos/assets/localisations/mod.ts';
+import { Client } from 'logos/src/client.ts';
+import { fromHex, getChannelMention } from 'logos/src/utils.ts';
+import configuration from 'logos/configuration.ts';
+import { defaultLanguage } from 'logos/types.ts';
 
 function postWelcome(
 	[client, bot]: [Client, Bot],

@@ -1,4 +1,4 @@
-import { Reference } from 'logos/src/database/structs/mod.ts';
+import { Reference } from 'logos/src/database/structs/document.ts';
 
 /** Represents a praise given by a user to another user. */
 interface Praise {

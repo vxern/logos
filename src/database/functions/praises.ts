@@ -1,8 +1,10 @@
 import * as Fauna from 'fauna';
-import { capitalise, Client } from 'logos/src/mod.ts';
-import { Praise, Warning } from 'logos/src/database/structs/users/mod.ts';
-import { Document, Reference } from 'logos/src/database/structs/mod.ts';
-import { dispatchQuery, getUserMentionByReference } from 'logos/src/database/mod.ts';
+import { Praise } from 'logos/src/database/structs/users/praise.ts';
+import { Warning } from 'logos/src/database/structs/users/warning.ts';
+import { Document, Reference } from 'logos/src/database/structs/document.ts';
+import { dispatchQuery, getUserMentionByReference } from 'logos/src/database/database.ts';
+import { Client } from 'logos/src/client.ts';
+import { capitalise } from 'logos/formatting.ts';
 
 const $ = Fauna.query;
 

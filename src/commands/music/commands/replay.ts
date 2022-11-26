@@ -7,10 +7,12 @@ import {
 	sendInteractionResponse,
 } from 'discordeno';
 import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
-import { OptionBuilder } from 'logos/src/commands/mod.ts';
-import { Client, configuration, parseArguments } from 'logos/src/mod.ts';
-import { SongListingContentTypes } from 'logos/src/commands/music/data/mod.ts';
-import { collection } from 'logos/src/commands/music/mod.ts';
+import { SongListingContentTypes } from 'logos/src/commands/music/data/types.ts';
+import { collection } from 'logos/src/commands/music/parameters.ts';
+import { OptionBuilder } from 'logos/src/commands/command.ts';
+import { Client } from 'logos/src/client.ts';
+import { parseArguments } from 'logos/src/utils.ts';
+import configuration from 'logos/configuration.ts';
 
 const command: OptionBuilder = {
 	...createLocalisations(Commands.music.options.replay),

@@ -1,4 +1,4 @@
-import { Expressions } from 'logos/assets/localisations/mod.ts';
+import { Expressions } from 'logos/assets/localisations/expressions.ts';
 
 class Misc {
 	static readonly client = {

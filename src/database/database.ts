@@ -1,10 +1,15 @@
 import { User as DiscordUser } from 'discordeno';
 import * as Sentry from 'sentry';
 import * as Fauna from 'fauna';
-import { Client, diagnosticMentionUser, Language } from 'logos/src/mod.ts';
-import { Article, ArticleChange } from 'logos/src/database/structs/articles/mod.ts';
-import { Praise, User, Warning } from 'logos/src/database/structs/users/mod.ts';
-import { Document, Reference } from 'logos/src/database/structs/mod.ts';
+import { ArticleChange } from 'logos/src/database/structs/articles/article-change.ts';
+import { Article } from 'logos/src/database/structs/articles/article.ts';
+import { Praise } from 'logos/src/database/structs/users/praise.ts';
+import { User } from 'logos/src/database/structs/users/user.ts';
+import { Warning } from 'logos/src/database/structs/users/warning.ts';
+import { Document, Reference } from 'logos/src/database/structs/document.ts';
+import { Client } from 'logos/src/client.ts';
+import { diagnosticMentionUser } from 'logos/src/utils.ts';
+import { Language } from 'logos/types.ts';
 
 /**
  * 'Unpacks' a nested type from an array, function or promise.

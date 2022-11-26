@@ -1,7 +1,4 @@
-import { Guild } from 'discordeno';
-import { list, getChannelMention } from "logos/src/mod.ts";
-
-const memesChannel = 'memes';
+import { list } from 'logos/formatting.ts';
 
 class Information {
 	static readonly rules = {
@@ -33,12 +30,12 @@ class Information {
 					'Romanian': 'Încearcă să fii drăguț/ă.',
 				},
 				content: {
-					'English': (_guild: Guild) =>
-						'It is expected of members to treat each other with respect, consideration and understanding. Malicious behaviour in the form of verbal abuse, discrimination, harassment and other forms of hurtful or toxic behaviour will not be tolerated.',
-					'Polish': (_guild: Guild) =>
-						'Od członków oczekuje się traktowania siebie nawzajem z szacunkiem, rozwagą, oraz zrozumieniem. Złośliwe zachowanie w postaci obelg słownych, dyskryminacji, nękania lub innych wcieleń krzywdzących lub toksycznych zachowań nie będzie tolerowane.',
-					'Romanian': (_guild: Guild) =>
-						'Se așteaptă de la membri să se trateze reciproc cu respect, considerație și cu înțelegere. Comportamentul rău-intenționat sub formă de abuz verbal, discriminare, hărțuire și alte forme de comportament jignitor sau toxic nu va fi tolerat.',
+					'English': 'It is expected of members to treat each other with respect, consideration and understanding. ' +
+						'Malicious behaviour in the form of verbal abuse, discrimination, harassment and other forms of hurtful or toxic behaviour will not be tolerated.',
+					'Polish': 'Od członków oczekuje się traktowania siebie nawzajem z szacunkiem, rozwagą, oraz zrozumieniem. ' +
+						'Złośliwe zachowanie w postaci obelg słownych, dyskryminacji, nękania lub innych wcieleń krzywdzących lub toksycznych zachowań nie będzie tolerowane.',
+					'Romanian': 'Se așteaptă de la membri să se trateze reciproc cu respect, considerație și cu înțelegere. ' +
+						'Comportamentul rău-intenționat sub formă de abuz verbal, discriminare, hărțuire și alte forme de comportament jignitor sau toxic nu va fi tolerat.',
 				},
 			},
 			quality: {
@@ -53,18 +50,12 @@ class Information {
 					'Romanian': 'Nu fi insuportabil/ă.',
 				},
 				content: {
-					'English': (guild: Guild) =>
-						`It is expected of contributions made to the server to be of decent quality. Trolling, spamming, flooding, shitposting (outside of the ${
-							getChannelMention(guild, memesChannel)
-						} channel) and other forms of annoying behaviour are sorely discouraged.`,
-					'Polish': (guild: Guild) =>
-						`Oczekuje się, że wkłady wnoszone na serwer będą przyzwoitej jakości. Zniechęcamy do trollingu, spamowania, floodowania, shitpostingu (poza kanałem ${
-							getChannelMention(guild, memesChannel)
-						} channel), oraz innych form irytującego zachowania.`,
-					'Romanian': (guild: Guild) =>
-						`Se așteaptă ca contribuțiile făcute pe server să fie de o calitate decentă. Trolling-ul, spamming-ul, flooding-ul, shitposting-ul (în afara canalului ${
-							getChannelMention(guild, memesChannel)
-						}) și alte forme de comportament enervant sunt puternic descurajate.`,
+					'English': 'It is expected of contributions made to the server to be of decent quality. ' +
+						'Trolling, spamming, flooding, shitposting (outside of the channel for memes) and other forms of annoying behaviour are sorely discouraged.',
+					'Polish': 'Oczekuje się, że wkłady wnoszone na serwer będą przyzwoitej jakości. ' +
+						'Zniechęcamy do trollingu, spamowania, floodowania, shitpostingu (poza kanałem dla memów), oraz innych form irytującego zachowania.',
+					'Romanian': 'Se așteaptă ca contribuțiile făcute pe server să fie de o calitate decentă. ' +
+						'Trolling-ul, spamming-ul, flooding-ul, shitposting-ul (în afara canalului pentru meme-uri) și alte forme de comportament enervant sunt puternic descurajate.',
 				},
 			},
 			relevance: {
@@ -79,12 +70,15 @@ class Information {
 					'Romanian': 'Postează un conținut relevant.',
 				},
 				content: {
-					'English': (_guild: Guild) =>
-						'It is expected of contributions made to the server to be placed in their relevant channel and category. Contributions made in inappropriate channels for their subject will be asked to be moved to their relevant channel.',
-					'Polish': (_guild: Guild) =>
-						'Oczekuje się, że wkłady wnoszone na serwer będą umieszczane w odpowiednim kanale oraz kategorii. Wkłady w kanałach nieodpowiednich dla ich tematyki będą proszone o przeniesienie ich na odpowiedni kanał.',
-					'Romanian': (_guild: Guild) =>
-						'Se așteaptă ca contribuțiile făcute pe server să fie plasate în canalul și categoria sa corespunzătoare. Contribuțiile făcute în canale nepotrivite pentru subiectul său vor fi solicitate să fie mutate în canalul său potrivitor.',
+					'English':
+						'It is expected of contributions made to the server to be placed in their relevant channel and category. ' +
+						'Contributions made in inappropriate channels for their subject will be asked to be moved to their relevant channel.',
+					'Polish':
+						'Oczekuje się, że wkłady wnoszone na serwer będą umieszczane w odpowiednim kanale oraz kategorii. ' +
+						'Wkłady w kanałach nieodpowiednich dla ich tematyki będą proszone o przeniesienie ich na odpowiedni kanał.',
+					'Romanian':
+						'Se așteaptă ca contribuțiile făcute pe server să fie plasate în canalul și categoria sa corespunzătoare. ' +
+						'Contribuțiile făcute în canale nepotrivite pentru subiectul său vor fi solicitate să fie mutate în canalul său potrivitor.',
 				},
 			},
 			suitability: {
@@ -99,12 +93,13 @@ class Information {
 					'Romanian': 'Postează un conținut adecvat.',
 				},
 				content: {
-					'English': (_guild: Guild) =>
-						'It is expected of contributions made to the server to be appropriate for viewing by minors. Age-restricted (NSFW) and NSFL content is strictly prohibited. If you wouldn\'t show it to a minor, you shouldn\'t post it.',
-					'Polish': (_guild: Guild) =>
-						'Oczekuje się, że wkłady wnoszone na serwer będą stosowne dla oglądania przez osoby młodsze. Wszelkie treści z ograniczeniem wiekowym (NSFW) lub o charakterze drastycznym (NSFL) są kompletnie wzbronione. Jeśli nie pokazał(a)byś treści osobie młodszej, nie wysyłaj jej na serwer.',
-					'Romanian': (_guild: Guild) =>
-						'Se așteaptă că contribuțiile făcute pe server să fie potrivite pentru minori. Tot conținutul cu o restricție de vârstă (NSFW) sau de natură atroce (NSFL) este complet interzis. Dacă nu ai arăta conținutul unui adolescent, să nu îl trimiți pe server.',
+					'English': 'It is expected of contributions made to the server to be appropriate for viewing by minors. ' +
+						'Age-restricted (NSFW) and NSFL content is strictly prohibited. If you wouldn\'t show it to a minor, you shouldn\'t post it.',
+					'Polish': 'Oczekuje się, że wkłady wnoszone na serwer będą stosowne dla oglądania przez osoby młodsze. ' +
+						'Wszelkie treści z ograniczeniem wiekowym (NSFW) lub o charakterze drastycznym (NSFL) są kompletnie wzbronione. ' +
+						'Jeśli nie pokazał(a)byś treści osobie młodszej, nie wysyłaj jej na serwer.',
+					'Romanian': 'Se așteaptă că contribuțiile făcute pe server să fie potrivite pentru minori. ' +
+						'Tot conținutul cu o restricție de vârstă (NSFW) sau de natură atroce (NSFL) este complet interzis. Dacă nu ai arăta conținutul unui adolescent, să nu îl trimiți pe server.',
 				},
 			},
 			exclusivity: {
@@ -119,13 +114,13 @@ class Information {
 					'Romanian': 'Nu face reclamă.',
 				},
 				content: {
-					'English': (_guild: Guild) =>
+					'English':
 						'It is expected of members to not use this space for advertising, and active attempts at it (including unsolicited DMs) are prohibited.',
-					'Polish': (_guild: Guild) =>
-						'Oczekuje się, że członkowie nie będą używać tej przestrzeni do reklamacji, w tym samego/samej siebie.' +
+					'Polish':
+						'Oczekuje się, że członkowie nie będą używać tej przestrzeni do reklamacji, w tym samego/samej siebie. ' +
 						'Zabrania się aktywnych prób reklamacji (w tym niechcianych wiadomości prywatnych).',
-					'Romanian': (_guild: Guild) =>
-						'Se așteaptă de la membrii serverului ca aceștia să nu se folosească de acest spațiu pentru a-și face reclamă.' +
+					'Romanian':
+						'Se așteaptă de la membrii serverului ca aceștia să nu se folosească de acest spațiu pentru a-și face reclamă. ' +
 						'Încercările active de a face publicitate (inclusiv mesajele private nesolicitate) sunt interzise.',
 				},
 			},
@@ -137,15 +132,15 @@ class Information {
 				},
 				summary: {
 					'English': 'Respect the rules.',
-					'Polish': 'Uszanuj zasady.',
+					'Polish': 'Szanuj zasady.',
 					'Romanian': 'Respectă regulamentul.',
 				},
 				content: {
-					'English': (_guild: Guild) =>
+					'English':
 						'For members who show no regard for the server rules, and are not interested in making useful contributions, a permanent ban may be issued.',
-					'Polish': (_guild: Guild) =>
+					'Polish':
 						'Członkowie, którzy nie liczą się z regułami serwera, i ci, którzy nie są zainteresowani wnoszeniem użytecznego wkładu na serwer, mogą dostać permabana.',
-					'Romanian': (_guild: Guild) =>
+					'Romanian':
 						'Membrii care nu arată nicio considerație față de regulament, și cei care nu sunt deloc interesați în a face contribuții constructive pe server pot primi un ban permanent.',
 				},
 			},
