@@ -8,9 +8,8 @@ import {
 } from 'discordeno';
 import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
 import { Song, SongListingContentTypes, SongStream } from 'logos/src/commands/music/data/types.ts';
-import { collection } from 'logos/src/commands/music/parameters.ts';
 import { OptionBuilder } from 'logos/src/commands/command.ts';
-import { show } from 'logos/src/commands/parameters.ts';
+import { show, collection } from 'logos/src/commands/parameters.ts';
 import { Client } from 'logos/src/client.ts';
 import { chunk, paginate, parseArguments, trim } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';

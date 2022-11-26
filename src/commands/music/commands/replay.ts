@@ -8,8 +8,8 @@ import {
 } from 'discordeno';
 import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
 import { SongListingContentTypes } from 'logos/src/commands/music/data/types.ts';
-import { collection } from 'logos/src/commands/music/parameters.ts';
 import { OptionBuilder } from 'logos/src/commands/command.ts';
+import { collection } from 'logos/src/commands/parameters.ts';
 import { Client } from 'logos/src/client.ts';
 import { parseArguments } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';

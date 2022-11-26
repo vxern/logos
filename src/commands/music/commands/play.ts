@@ -8,8 +8,8 @@ import {
 import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
 import { ListingResolver, sources } from 'logos/src/commands/music/data/sources/sources.ts';
 import { SongListingContentTypes } from 'logos/src/commands/music/data/types.ts';
-import { query } from 'logos/src/commands/music/parameters.ts';
 import { OptionBuilder } from 'logos/src/commands/command.ts';
+import { query } from 'logos/src/commands/parameters.ts';
 import { Client } from 'logos/src/client.ts';
 import { parseArguments } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
