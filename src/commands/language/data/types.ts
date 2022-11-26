@@ -1,5 +1,5 @@
 import { DiscordEmbedField } from 'discordeno';
-import { Language } from 'logos/types.ts';
+import { Language, WordTypes } from 'logos/types.ts';
 
 enum DictionaryScopes {
 	/** Provides definitions in the same language as the headword. */
@@ -37,20 +37,6 @@ interface Definition extends TaggedValue<string> {
 
 // deno-lint-ignore no-empty-interface
 interface Etymology extends TaggedValue<string | undefined> {}
-
-enum WordTypes {
-	Noun,
-	Verb,
-	Adjective,
-	Adverb,
-	Adposition,
-	Affix,
-	Pronoun,
-	Determiner,
-	Conjunction,
-	Interjection,
-	Unknown,
-}
 
 type InflectionTable = { title: string; fields: DiscordEmbedField[] }[];
 

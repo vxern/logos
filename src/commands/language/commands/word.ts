@@ -15,13 +15,14 @@ import {
 	sendInteractionResponse,
 } from 'discordeno';
 import { Commands, createLocalisations, localise, Words } from 'logos/assets/localisations/mod.ts';
-import { DictionaryEntry, TaggedValue, WordTypes } from 'logos/src/commands/language/data/types.ts';
+import { DictionaryEntry, TaggedValue } from 'logos/src/commands/language/data/types.ts';
 import { CommandBuilder } from 'logos/src/commands/command.ts';
 import { show } from 'logos/src/commands/parameters.ts';
 import { Client } from 'logos/src/client.ts';
 import { chunk, createInteractionCollector, diagnosticMentionUser, fromHex, parseArguments } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import { BulletStyles, list } from 'logos/formatting.ts';
+import { WordTypes } from 'logos/types.ts';
 
 const command: CommandBuilder = {
 	...createLocalisations(Commands.word),

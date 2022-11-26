@@ -1,8 +1,8 @@
 import { Expressions } from 'logos/assets/localisations/expressions.ts';
+import { getLocalisations } from 'logos/assets/localisations/languages.ts';
 import { localise } from 'logos/assets/localisations/types.ts';
 import { code } from 'logos/formatting.ts';
 import { Language } from 'logos/types.ts';
-import { getLocalisations } from 'logos/assets/localisations/languages.ts';
 
 class Services {
 	static readonly entry = {

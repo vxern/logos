@@ -13,5 +13,19 @@ function typedDefaultLanguage<T extends Language>(language: T): T {
 
 const defaultLanguage = typedDefaultLanguage('English');
 
-export { defaultLanguage, supportedLanguages };
+enum WordTypes {
+	Noun,
+	Verb,
+	Adjective,
+	Adverb,
+	Adposition,
+	Affix,
+	Pronoun,
+	Determiner,
+	Conjunction,
+	Interjection,
+	Unknown,
+}
+
+export { defaultLanguage, supportedLanguages, WordTypes };
 export type { Language };
