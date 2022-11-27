@@ -427,6 +427,7 @@ function createVerificationPrompt(
  */
 function chunk<T>(array: T[], size: number): T[][] {
 	if (array.length === 0) return [[]];
+	if (size === 0) throw new Error('The size of a chunk cannot be zero.');
 
 	const chunks = [];
 	for (let index = 0; index < array.length; index += size) {
