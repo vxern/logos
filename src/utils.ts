@@ -436,6 +436,9 @@ function chunk<T>(array: T[], size: number): T[][] {
 	return chunks;
 }
 
+const stringTrail = '...';
+const stringContinued = '(...)';
+
 /**
  * Taking a string, trims it to the desired length and returns it.
  *
@@ -444,7 +447,17 @@ function chunk<T>(array: T[], size: number): T[][] {
  * @returns The trimmed string.
  */
 function trim(string: string, length: number): string {
-	return string.length <= length ? string : `${string.slice(0, Math.max(length - 3, 0))}...`;
+	if (string.length <= length) return string;
+
+	if (!string.includes(' ')) {
+		return string.slice(0, Math.max(length - stringTrail.length)) + stringTrail;
+	}
+
+	const slice = string.slice(0, length);
+	const indexOfLastSpace = slice.lastIndexOf(' ');
+	const gap = slice.length - (indexOfLastSpace + 1);
+
+	return slice.slice(0, slice.length - Math.max(gap, stringContinued.length)) + stringContinued;
 }
 
 /**
