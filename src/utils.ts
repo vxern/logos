@@ -585,6 +585,8 @@ function addParametersToURL(
 		.map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
 		.join('&');
 
+	if (query.length === 0) return url;
+
 	return `${url}?${query}`;
 }
 
