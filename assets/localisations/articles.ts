@@ -1,37 +1,44 @@
-import { Expression, Localisations } from 'logos/assets/localisations/types.ts';
+import { Expressions } from 'logos/assets/localisations/expressions.ts';
+import { getLocalisationsForLanguage } from 'logos/assets/localisations/utils.ts';
 import { Language } from 'logos/types.ts';
 
 class Articles {
-	static readonly article: Record<string, Localisations<string>> = {
+	static readonly article = {
 		title: {
 			'English': 'Title of the article',
 			'Polish': 'Tytuł artykułu',
+			'Romanian': 'Titlul articolului',
 		},
+		// If possible, use something alike to 'content' rather than 'body'.
 		body: {
 			'English': 'Body of the article',
 			'Polish': 'Treść artykułu',
+			'Romanian': 'Conținutul articolului',
 		},
 		footer: {
 			'English': 'Additional information and/or notes',
 			'Polish': 'Dodatkowe informacje i/lub notatki',
+			'Romanian': 'Informații suplimentare și/sau notițe',
 		},
 	};
 
-	static readonly verification: Record<
-		string,
-		Localisations<Expression<Language>>
-	> = {
+	static readonly verification = {
 		reason: {
-			'English': (language) => `What is your reason for learning ${language}?`,
-			'Polish': (language) => `Jaki jest powód dla którego uczysz się ${language}?`,
+			'English': (language: Language) => `What is your reason for learning ${language}?`,
+			'Polish': (language: Language) =>
+				`Jaki jest powód dla którego uczysz się ${
+					Expressions.polish.cases.genitive.languages[language].toLowerCase()
+				}?`,
+			'Romanian': (language: Language) =>
+				`Care este motivul pentru care înveți ${getLocalisationsForLanguage(language)}?`,
 		},
 		aim: {
-			'English': (_language) => 'How will you benefit from becoming a member?',
-			'Polish': (_language) => 'Jaką korzyść przyniesie Tobie członkostwo?',
+			'English': (_language: Language) => 'How will you benefit from becoming a member?',
+			'Polish': (_language: Language) => 'Jaką korzyść przyniesie Tobie członkostwo?',
 		},
 		whereFound: {
-			'English': (language) => `Where did you find out about Learn ${language}?`,
-			'Polish': (language) => `Gdzie dowiedziałeś/aś się o Learn ${language}?`,
+			'English': (language: Language) => `Where did you find out about Learn ${language}?`,
+			'Polish': (language: Language) => `Gdzie dowiedziałeś/aś się o Learn ${language}?`,
 		},
 	};
 }

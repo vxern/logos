@@ -1,10 +1,152 @@
-import { Localisations } from 'logos/assets/localisations/types.ts';
+import { Locales, Localization as DiscordLocalisation } from 'discordeno';
+import { localeByLanguage, localisationsByLanguage } from 'logos/assets/localisations/languages.ts';
+import { defaultLanguage, Language } from 'logos/types.ts';
 
-class Utils {
-	static readonly continuedOnNextPage: Localisations<string> = {
-		'English': 'Continued on the next page...',
-		'Polish': 'Kontynuacja na następnej stronie...',
+type LocalisationsByLanguage<L extends string> =
+	& Required<Record<Language, Localisations<string>>>
+	& Record<L, Localisations<string>>;
+
+function inferLanguages<L extends string>(
+	localisations: LocalisationsByLanguage<L>,
+): LocalisationsByLanguage<L> {
+	return localisations;
+}
+
+// Obtained from https://www.deepl.com/docs-api/translate-text/translate-text.
+type TranslationLanguage = Language | keyof typeof localisationsByLanguage;
+
+type Expression<T> = (argument: T) => string;
+type Localisations<T> = Partial<Record<Language, T>> & { [defaultLanguage]: T };
+type DiscordLocalisations = Required<Record<'name' | 'description', Localisations<string>>>;
+type CommandLocalisations<
+	OptionKeys extends string,
+	StringKeys extends string,
+	OptionsType extends Record<OptionKeys, unknown> | undefined = undefined,
+	StringsType extends Record<StringKeys, unknown> | undefined = undefined,
+> =
+	& DiscordLocalisations
+	& (
+		OptionsType extends undefined ? {
+				options?: OptionsType;
+			}
+			: {
+				options: OptionsType;
+			}
+	)
+	& (
+		StringsType extends undefined ? {
+				strings?: StringsType;
+			}
+			: {
+				strings: StringsType;
+			}
+	);
+
+const languageByLocale: Partial<Record<Locales, Language>> = {
+	'en-GB': 'English',
+	'en-US': 'English',
+	'pl': 'Polish',
+	'ro': 'Romanian',
+};
+
+function getLanguageByLocale(locale: Locales): Language | undefined {
+	return languageByLocale[locale];
+}
+
+function createDiscordLocalisations(
+	localisations: Localisations<string>,
+): DiscordLocalisation {
+	return Object.fromEntries(
+		(<[Language, string][]> Object.entries(localisations))
+			.filter(([key, _value]) => key !== defaultLanguage)
+			.map(([key, value]) => [getLocaleForLanguage(key), value]),
+	);
+}
+
+interface DiscordLocalisationFields {
+	name: string;
+	nameLocalizations: DiscordLocalisation;
+	description: string;
+	descriptionLocalizations: DiscordLocalisation;
+}
+
+function createLocalisations(
+	commandLocalisations: DiscordLocalisations,
+): DiscordLocalisationFields {
+	return {
+		name: commandLocalisations.name[defaultLanguage],
+		nameLocalizations: createDiscordLocalisations(commandLocalisations.name),
+		description: commandLocalisations.description[defaultLanguage],
+		descriptionLocalizations: createDiscordLocalisations(
+			commandLocalisations.description,
+		),
 	};
 }
 
-export { Utils };
+function localise<T>(
+	localisations: Localisations<T>,
+	locale: string | undefined,
+): T {
+	if (!locale || !(locale in languageByLocale)) {
+		return localisations[defaultLanguage];
+	}
+
+	const language = getLanguageByLocale(<Locales> locale)!;
+	if (!(language in localisations)) {
+		return localisations[defaultLanguage];
+	}
+
+	return localisations[language]!;
+}
+
+function ensureType<T>(object: T): T {
+	return object;
+}
+
+function typedLocalisations<
+	OptionKeys extends string,
+	StringKeys extends string,
+	OptionsType extends Record<OptionKeys, unknown> | undefined,
+	StringsType extends Record<StringKeys, unknown> | undefined,
+>(
+	localisations: CommandLocalisations<
+		OptionKeys,
+		StringKeys,
+		OptionsType,
+		StringsType
+	>,
+): CommandLocalisations<
+	OptionKeys,
+	StringKeys,
+	OptionsType,
+	StringsType
+> {
+	return localisations;
+}
+
+function getLocalisationsForLanguage(
+	language: TranslationLanguage,
+): Localisations<string> {
+	if (!(language in localisationsByLanguage)) {
+		return { [defaultLanguage]: language };
+	}
+	return localisationsByLanguage[language];
+}
+
+function getLocaleForLanguage(
+	language: Language,
+): typeof localeByLanguage[keyof typeof localeByLanguage] {
+	return localeByLanguage[language] ?? 'en-GB';
+}
+
+export {
+	createLocalisations,
+	ensureType,
+	getLanguageByLocale,
+	getLocaleForLanguage,
+	getLocalisationsForLanguage,
+	inferLanguages,
+	localise,
+	typedLocalisations,
+};
+export type { CommandLocalisations, DiscordLocalisations, Expression, Localisations, TranslationLanguage };

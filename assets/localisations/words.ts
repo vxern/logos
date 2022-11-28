@@ -1,4 +1,4 @@
-import { Localisations } from 'logos/assets/localisations/types.ts';
+import { Localisations } from 'logos/assets/localisations/utils.ts';
 import { WordTypes } from 'logos/types.ts';
 
 class Words {

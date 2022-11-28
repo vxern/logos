@@ -1,6 +1,5 @@
 import { Expressions } from 'logos/assets/localisations/expressions.ts';
-import { getLocalisations } from 'logos/assets/localisations/languages.ts';
-import { localise } from 'logos/assets/localisations/types.ts';
+import { getLocalisationsForLanguage, localise } from 'logos/assets/localisations/utils.ts';
 import { code } from 'logos/formatting.ts';
 import { Language } from 'logos/types.ts';
 
@@ -13,19 +12,19 @@ class Services {
 				'Romanian': 'Competență Lingvistică',
 			},
 			body: {
-				'English': (guildLanguage: Language) =>
+				'English': (language: Language) =>
 					`Select the role that most accurately describes your ${
-						localise(getLocalisations(guildLanguage), 'English')
+						localise(getLocalisationsForLanguage(language), 'English')
 					} language proficiency.\n\n` +
 					`ℹ️ **You can always change this later using the ${code('/profile roles')} command.**`,
-				'Polish': (guildLanguage: Language) =>
+				'Polish': (language: Language) =>
 					`Wybierz rolę, która najlepiej przedstawia Twoją biegłość w języku ${
-						Expressions.polish.cases.instrumental.languages[guildLanguage]
+						Expressions.polish.cases.instrumental.languages[language]
 					}.\n\n` +
 					`ℹ️ **Pamiętaj, że możesz ją później zmienić używając komendy ${code('/profile roles')}.**`,
-				'Romanian': (guildLanguage: Language) =>
+				'Romanian': (language: Language) =>
 					`Alege rolul care îți reprezintă cel mai bine competența în limba ${
-						localise(getLocalisations(guildLanguage), 'Romanian')
+						localise(getLocalisationsForLanguage(language), 'Romanian')
 					}.\n\n` +
 					`ℹ️ **Ține minte că o poți schimba mai apoi folosind comanda ${code('/profile roles')}.**`,
 			},

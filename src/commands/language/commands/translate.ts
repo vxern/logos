@@ -9,7 +9,12 @@ import {
 	InteractionTypes,
 	sendInteractionResponse,
 } from 'discordeno';
-import { Commands, createLocalisations, getLocalisations, localise } from 'logos/assets/localisations/mod.ts';
+import {
+	Commands,
+	createLocalisations,
+	getLocalisationsForLanguage,
+	localise,
+} from 'logos/assets/localisations/mod.ts';
 import { resolveToSupportedLanguage } from 'logos/src/commands/language/module.ts';
 import { CommandBuilder } from 'logos/src/commands/command.ts';
 import { show } from 'logos/src/commands/parameters.ts';
@@ -241,8 +246,8 @@ async function translate(
 	// Ensures that an empty translation string does not result in embed failure.
 	const translatedText = translation.text.trim().length !== 0 ? translation.text : '⠀';
 
-	const sourceLanguageName = localise(getLocalisations(sourceLanguage.name), interaction.locale);
-	const targetLanguageName = localise(getLocalisations(targetLanguage.name), interaction.locale);
+	const sourceLanguageName = localise(getLocalisationsForLanguage(sourceLanguage.name), interaction.locale);
+	const targetLanguageName = localise(getLocalisationsForLanguage(targetLanguage.name), interaction.locale);
 
 	const isLong = text.length > 950;
 

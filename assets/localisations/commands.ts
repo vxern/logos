@@ -1,31 +1,15 @@
 import { ApplicationCommandOptionTypes, User } from 'discordeno';
 import { Expressions } from 'logos/assets/localisations/expressions.ts';
-import { getLocale, getLocalisations, TranslationLanguage } from 'logos/assets/localisations/languages.ts';
-import { CommandLocalisations, localise } from 'logos/assets/localisations/types.ts';
+import {
+	getLocaleForLanguage,
+	getLocalisationsForLanguage,
+	localise,
+	TranslationLanguage,
+	typedLocalisations,
+} from 'logos/assets/localisations/utils.ts';
 import { emojis, links } from 'logos/constants.ts';
 import { capitalise, list } from 'logos/formatting.ts';
 import { Language } from 'logos/types.ts';
-
-function typedLocalisations<
-	OptionKeys extends string,
-	StringKeys extends string,
-	OptionsType extends Record<OptionKeys, unknown> | undefined,
-	StringsType extends Record<StringKeys, unknown> | undefined,
->(
-	localisations: CommandLocalisations<
-		OptionKeys,
-		StringKeys,
-		OptionsType,
-		StringsType
-	>,
-): CommandLocalisations<
-	OptionKeys,
-	StringKeys,
-	OptionsType,
-	StringsType
-> {
-	return localisations;
-}
 
 class Commands {
 	static readonly information = typedLocalisations({
@@ -277,7 +261,7 @@ class Commands {
 		strings: {
 			resourcesStoredHere: {
 				'English': (language: Language) =>
-					`Resources for learning ${localise(getLocalisations(language), 'English')} are stored here`,
+					`Resources for learning ${localise(getLocalisationsForLanguage(language), 'English')} are stored here`,
 				'Polish': (language: Language) =>
 					`Zasoby do nauki ${
 						Expressions.polish.cases.genitive.languages[language].toLowerCase()
@@ -374,17 +358,18 @@ class Commands {
 			},
 			sourceLanguage: {
 				'English': (languageName: TranslationLanguage) =>
-					localise(getLocalisations(languageName), getLocale('English')),
+					localise(getLocalisationsForLanguage(languageName), getLocaleForLanguage('English')),
 				'Polish': (languageName: TranslationLanguage) => Expressions.polish.cases.genitive.languages[languageName],
 				'Romanian': (languageName: TranslationLanguage) =>
-					localise(getLocalisations(languageName), getLocale('Romanian')),
+					localise(getLocalisationsForLanguage(languageName), getLocaleForLanguage('Romanian')),
 			},
 			targetLanguage: {
 				'English': (languageName: TranslationLanguage) =>
-					localise(getLocalisations(languageName), getLocale('English')),
-				'Polish': (languageName: TranslationLanguage) => localise(getLocalisations(languageName), getLocale('Polish')),
+					localise(getLocalisationsForLanguage(languageName), getLocaleForLanguage('English')),
+				'Polish': (languageName: TranslationLanguage) =>
+					localise(getLocalisationsForLanguage(languageName), getLocaleForLanguage('Polish')),
 				'Romanian': (languageName: TranslationLanguage) =>
-					localise(getLocalisations(languageName), getLocale('Romanian')),
+					localise(getLocalisationsForLanguage(languageName), getLocaleForLanguage('Romanian')),
 			},
 			sourceText: {
 				'English': 'Source Text',
@@ -493,7 +478,7 @@ class Commands {
 					);
 					return `Omitted ${numberExpression}. ` +
 						`To display more results, enable the '${
-							localise(this.word.options.verbose.name, getLocale('English'))
+							localise(this.word.options.verbose.name, getLocaleForLanguage('English'))
 						}' flag.`;
 				},
 				'Polish': (results: number) => {
@@ -505,7 +490,7 @@ class Commands {
 					);
 					return `Ominięto ${numberExpression}. ` +
 						`Aby wyświetlić więcej rezultatów, użyj flagi '${
-							localise(this.word.options.verbose.name, getLocale('Polish'))
+							localise(this.word.options.verbose.name, getLocaleForLanguage('Polish'))
 						}'.`;
 				},
 				'Romanian': (results: number) => {
@@ -516,7 +501,7 @@ class Commands {
 					);
 					return `${numberExpression} au fost omise. ` +
 						`Pentru a afișa mai multe rezultate, activează fanionul '${
-							localise(this.word.options.verbose.name, getLocale('Romanian'))
+							localise(this.word.options.verbose.name, getLocaleForLanguage('Romanian'))
 						}'.`;
 				},
 			},

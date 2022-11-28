@@ -1,4 +1,5 @@
 import { Expressions } from 'logos/assets/localisations/expressions.ts';
+import { Localisations } from 'logos/assets/localisations/utils.ts';
 
 class Misc {
 	static readonly client = {
@@ -18,19 +19,9 @@ class Misc {
 					'Romanian': ['s', 'sec', 'secundă', 'secunde'],
 				},
 				display: {
-					'English': (number: number) =>
-						Expressions.english.methods.pluralise(
-							number.toString(),
-							'second',
-							'seconds',
-						),
+					'English': (number: number) => Expressions.english.methods.pluralise(number.toString(), 'second', 'seconds'),
 					'Polish': (number: number) =>
-						Expressions.polish.methods.pluralise(
-							number.toString(),
-							'sekunda',
-							'sekundy',
-							'sekund',
-						),
+						Expressions.polish.methods.pluralise(number.toString(), 'sekunda', 'sekundy', 'sekund'),
 					'Romanian': (number: number) =>
 						Expressions.romanian.methods.pluralise(
 							number.toString(),
@@ -208,6 +199,11 @@ class Misc {
 				},
 			},
 		},
+	};
+
+	static readonly continuedOnNextPage: Localisations<string> = {
+		'English': 'Continued on the next page...',
+		'Polish': 'Kontynuacja na następnej stronie...',
 	};
 }
 
