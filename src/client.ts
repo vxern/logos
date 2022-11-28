@@ -74,6 +74,7 @@ function createCache(): Cache {
 
 type Client = Readonly<{
 	metadata: {
+		isTest: boolean;
 		version: string;
 		supportedTranslationLanguages: SupportedLanguage[];
 	};
@@ -100,7 +101,7 @@ function createClient(metadata: Client['metadata'], features: Client['features']
 	};
 }
 
-function initialiseClient(metadata: Client['metadata'], features: Client['features']): void {
+function initialiseClient(metadata: Client['metadata'], features: Client['features']): [Client, Bot] {
 	const client = createClient(metadata, features);
 
 	const bot = createBot({
@@ -111,8 +112,9 @@ function initialiseClient(metadata: Client['metadata'], features: Client['featur
 	});
 
 	startServices([client, bot]);
+	startBot(bot);
 
-	return void startBot(bot);
+	return [client, bot];
 }
 
 function createLogger(): Logger {
