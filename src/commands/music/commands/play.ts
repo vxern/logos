@@ -21,7 +21,7 @@ const command: OptionBuilder = {
 		{
 			...createLocalisations(Commands.music.options.play.options.file),
 			type: ApplicationCommandOptionTypes.SubCommand,
-			handle: playExternal,
+			handle: handleRequestExternal,
 			options: [{
 				...createLocalisations(
 					Commands.music.options.play.options.file.options.url,
@@ -33,17 +33,17 @@ const command: OptionBuilder = {
 		...Object.entries(sources).map<OptionBuilder>(([name, resolve]) => ({
 			...createLocalisations(Commands.music.options.play.options.source(name)),
 			type: ApplicationCommandOptionTypes.SubCommand,
-			handle: ([client, bot], interaction) => playSongListing([client, bot], interaction, resolve),
+			handle: ([client, bot], interaction) => handleRequestSongListing([client, bot], interaction, resolve),
 			options: [query],
 		})),
 	],
 };
 
-function playExternal(
+function handleRequestExternal(
 	clientWithBot: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {
-	return playSongListing(
+	return handleRequestSongListing(
 		clientWithBot,
 		interaction,
 		(_client, interaction, query) =>
@@ -63,7 +63,7 @@ function playExternal(
 	);
 }
 
-async function playSongListing(
+async function handleRequestSongListing(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 	resolveToSongListing: ListingResolver,
@@ -116,5 +116,5 @@ async function playSongListing(
 	});
 }
 
-export { playSongListing };
+export { handleRequestSongListing };
 export default command;

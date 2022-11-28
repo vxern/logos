@@ -17,11 +17,11 @@ import configuration from 'logos/configuration.ts';
 const command: OptionBuilder = {
 	...createLocalisations(Commands.music.options.replay),
 	type: ApplicationCommandOptionTypes.SubCommand,
-	handle: replaySong,
+	handle: handleReplayAction,
 	options: [collection],
 };
 
-function replaySong(
+function handleReplayAction(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): void {

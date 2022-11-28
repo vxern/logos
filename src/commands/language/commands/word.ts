@@ -27,7 +27,7 @@ import { WordTypes } from 'logos/types.ts';
 const command: CommandBuilder = {
 	...createLocalisations(Commands.word),
 	defaultMemberPermissions: ['VIEW_CHANNEL'],
-	handle: word,
+	handle: handleSearchWord,
 	options: [{
 		...createLocalisations(Commands.word.options.word),
 		type: ApplicationCommandOptionTypes.String,
@@ -44,7 +44,7 @@ enum Views {
 }
 
 /** Allows the user to look up a word and get information about it. */
-async function word(
+async function handleSearchWord(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {
@@ -147,7 +147,7 @@ async function word(
 	const generateEmbed = (entry: DictionaryEntry): Embed => {
 		switch (currentView) {
 			case Views.Definitions: {
-				return getEmbed(entry, interaction.locale, verbose ?? false);
+				return entryToEmbed(entry, interaction.locale, verbose ?? false);
 			}
 			case Views.Inflection: {
 				return entry.inflectionTable!.at(inflectionTableIndex)!;
@@ -296,7 +296,7 @@ async function word(
 	return void displayMenu();
 }
 
-function getEmbed(
+function entryToEmbed(
 	entry: DictionaryEntry,
 	locale: string | undefined,
 	verbose: boolean,

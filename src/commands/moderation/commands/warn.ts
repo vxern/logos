@@ -12,7 +12,7 @@ import {
 import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
 import { CommandBuilder } from 'logos/src/commands/command.ts';
 import { reason, user } from 'logos/src/commands/parameters.ts';
-import { getRelevantWarnings } from 'logos/src/commands/moderation/module.ts';
+import { getActiveWarnings } from 'logos/src/commands/moderation/module.ts';
 import { log } from 'logos/src/controllers/logging/logging.ts';
 import { getOrCreateUser } from 'logos/src/database/functions/users.ts';
 import { createWarning, getWarnings } from 'logos/src/database/functions/warnings.ts';
@@ -25,11 +25,11 @@ import { defaultLanguage } from 'logos/types.ts';
 const command: CommandBuilder = {
 	...createLocalisations(Commands.warn),
 	defaultMemberPermissions: ['MODERATE_MEMBERS'],
-	handle: warnUser,
+	handle: handleWarnUser,
 	options: [user, reason],
 };
 
-async function warnUser(
+async function handleWarnUser(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {
@@ -132,7 +132,7 @@ async function warnUser(
 
 	log([client, bot], guild, 'memberWarnAdd', member, document.data, interaction.user);
 
-	const relevantWarnings = getRelevantWarnings(warnings);
+	const relevantWarnings = getActiveWarnings(warnings);
 
 	sendInteractionResponse(bot, interaction.id, interaction.token, {
 		type: InteractionResponseTypes.ChannelMessageWithSource,

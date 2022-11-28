@@ -18,11 +18,11 @@ import { displayTime, mention, MentionTypes } from 'logos/formatting.ts';
 const command: OptionBuilder = {
 	...createLocalisations(Commands.music.options.now),
 	type: ApplicationCommandOptionTypes.SubCommand,
-	handle: displayNowPlaying,
+	handle: handleDisplayCurrentlyPlaying,
 	options: [collection, show],
 };
 
-function displayNowPlaying(
+function handleDisplayCurrentlyPlaying(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): void {

@@ -18,7 +18,7 @@ import { Periods, timeDescriptors } from 'logos/constants.ts';
 import { displayTime, mention, MentionTypes } from 'logos/formatting.ts';
 import { defaultLanguage } from 'logos/types.ts';
 
-async function setTimeout(
+async function handleSetTimeout(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {
@@ -285,4 +285,4 @@ function getTimestampFromExpression(
 	return [timeExpression, total];
 }
 
-export { setTimeout };
+export { handleSetTimeout };

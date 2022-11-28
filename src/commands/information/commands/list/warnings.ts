@@ -15,7 +15,7 @@ import { chunk, paginate, parseArguments, trim } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import { displayTime, list } from 'logos/formatting.ts';
 
-async function listWarnings(
+async function handleDisplayWarnings(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {
@@ -90,4 +90,4 @@ async function listWarnings(
 	});
 }
 
-export { listWarnings };
+export { handleDisplayWarnings };

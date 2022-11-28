@@ -10,11 +10,11 @@ import { parseArguments } from 'logos/src/utils.ts';
 const command: OptionBuilder = {
 	...createLocalisations(Commands.music.options.history),
 	type: ApplicationCommandOptionTypes.SubCommand,
-	handle: displaySongHistory,
+	handle: handleDisplayPlaybackHistory,
 	options: [show],
 };
 
-function displaySongHistory(
+function handleDisplayPlaybackHistory(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): void {

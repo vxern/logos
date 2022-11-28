@@ -21,7 +21,7 @@ import { deepLApiEndpoints } from 'logos/constants.ts';
 const command: CommandBuilder = {
 	...createLocalisations(Commands.translate),
 	defaultMemberPermissions: ['VIEW_CHANNEL'],
-	handle: translate,
+	handle: handleTranslateText,
 	options: [{
 		...createLocalisations(Commands.translate.options.from),
 		type: ApplicationCommandOptionTypes.String,
@@ -53,7 +53,7 @@ interface Translation {
 	text: string;
 }
 
-async function getTranslation(
+async function translateText(
 	sourceLanguageCode: string,
 	targetLanguageCode: string,
 	text: string,
@@ -81,7 +81,7 @@ async function getTranslation(
 }
 
 /** Allows the user to translate text from one language to another through the DeepL API. */
-async function translate(
+async function handleTranslateText(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {
@@ -221,7 +221,7 @@ async function translate(
 			`as requested by ${diagnosticMentionUser(interaction.user, true)} on ${guild.name}...`,
 	);
 
-	const translation = await getTranslation(sourceLanguage.code, targetLanguage.code, text);
+	const translation = await translateText(sourceLanguage.code, targetLanguage.code, text);
 	if (!translation) {
 		return void editOriginalInteractionResponse(
 			bot,

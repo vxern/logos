@@ -24,14 +24,14 @@ import { mention, MentionTypes } from 'logos/formatting.ts';
 const command: CommandBuilder = {
 	...createLocalisations(Commands.praise),
 	defaultMemberPermissions: ['VIEW_CHANNEL'],
-	handle: praise,
+	handle: handlePraiseUser,
 	options: [user, {
 		...createLocalisations(Commands.praise.options.comment),
 		type: ApplicationCommandOptionTypes.String,
 	}],
 };
 
-async function praise(
+async function handlePraiseUser(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {

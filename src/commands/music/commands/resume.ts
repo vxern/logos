@@ -15,10 +15,10 @@ import { defaultLanguage } from 'logos/types.ts';
 const command: OptionBuilder = {
 	...createLocalisations(Commands.music.options.resume),
 	type: ApplicationCommandOptionTypes.SubCommand,
-	handle: resumeSong,
+	handle: handleResumePlayback,
 };
 
-function resumeSong(
+function handleResumePlayback(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): void {
@@ -98,4 +98,4 @@ function resumeSong(
 }
 
 export default command;
-export { resumeSong };
+export { handleResumePlayback };

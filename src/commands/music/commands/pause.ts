@@ -7,7 +7,7 @@ import {
 	sendInteractionResponse,
 } from 'discordeno';
 import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
-import { resumeSong } from 'logos/src/commands/music/commands/resume.ts';
+import { handleResumePlayback } from 'logos/src/commands/music/commands/resume.ts';
 import { OptionBuilder } from 'logos/src/commands/command.ts';
 import { Client } from 'logos/src/client.ts';
 import configuration from 'logos/configuration.ts';
@@ -16,10 +16,10 @@ import { defaultLanguage } from 'logos/types.ts';
 const command: OptionBuilder = {
 	...createLocalisations(Commands.music.options.pause),
 	type: ApplicationCommandOptionTypes.SubCommand,
-	handle: pauseSong,
+	handle: handlePausePlayback,
 };
 
-function pauseSong(
+function handlePausePlayback(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): void {
@@ -53,7 +53,7 @@ function pauseSong(
 	}
 
 	if (musicController.isPaused) {
-		return resumeSong([client, bot], interaction);
+		return handleResumePlayback([client, bot], interaction);
 	}
 
 	musicController.pause();

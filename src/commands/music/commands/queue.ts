@@ -9,11 +9,11 @@ import { parseArguments } from 'logos/src/utils.ts';
 const command: OptionBuilder = {
 	...createLocalisations(Commands.music.options.queue),
 	type: ApplicationCommandOptionTypes.SubCommand,
-	handle: displaySongQueue,
+	handle: handleDisplayPlaybackQueue,
 	options: [show],
 };
 
-function displaySongQueue(
+function handleDisplayPlaybackQueue(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): void {

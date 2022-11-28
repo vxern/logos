@@ -15,10 +15,10 @@ import { defaultLanguage } from 'logos/types.ts';
 const command: OptionBuilder = {
 	...createLocalisations(Commands.music.options.stop),
 	type: ApplicationCommandOptionTypes.SubCommand,
-	handle: stopSession,
+	handle: handleStopPlayback,
 };
 
-function stopSession(
+function handleStopPlayback(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): void {

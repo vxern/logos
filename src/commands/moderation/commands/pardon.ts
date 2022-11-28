@@ -12,7 +12,7 @@ import {
 import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
 import { getOrCreateUser } from 'logos/src/database/functions/users.ts';
 import { deleteWarning, getWarnings } from 'logos/src/database/functions/warnings.ts';
-import { getRelevantWarnings } from 'logos/src/commands/moderation/module.ts';
+import { getActiveWarnings } from 'logos/src/commands/moderation/module.ts';
 import { CommandBuilder } from 'logos/src/commands/command.ts';
 import { user } from 'logos/src/commands/parameters.ts';
 import { log } from 'logos/src/controllers/logging/logging.ts';
@@ -25,7 +25,7 @@ import { defaultLanguage } from 'logos/types.ts';
 const command: CommandBuilder = {
 	...createLocalisations(Commands.pardon),
 	defaultMemberPermissions: ['MODERATE_MEMBERS'],
-	handle: pardonUser,
+	handle: handlePardonUser,
 	options: [
 		user,
 		{
@@ -37,7 +37,7 @@ const command: CommandBuilder = {
 	],
 };
 
-async function pardonUser(
+async function handlePardonUser(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {
@@ -90,7 +90,7 @@ async function pardonUser(
 	const warnings = await getWarnings(client, subject.ref);
 	if (!warnings) return displayErrorOrEmptyChoices();
 
-	const relevantWarnings = getRelevantWarnings(warnings);
+	const relevantWarnings = getActiveWarnings(warnings);
 	relevantWarnings.reverse();
 
 	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete) {

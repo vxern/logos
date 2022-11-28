@@ -15,7 +15,7 @@ import { diagnosticMentionUser, guildAsAuthor, parseArguments } from 'logos/src/
 import configuration from 'logos/configuration.ts';
 import { defaultLanguage } from 'logos/types.ts';
 
-async function clearTimeout(
+async function handleClearTimeout(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {
@@ -103,4 +103,4 @@ async function clearTimeout(
 	});
 }
 
-export { clearTimeout };
+export { handleClearTimeout };

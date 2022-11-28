@@ -4,7 +4,7 @@ import { Client } from 'logos/src/client.ts';
 import { parseArguments } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 
-function setVolume(
+function handleSetVolume(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): void {
@@ -68,4 +68,4 @@ function setVolume(
 	);
 }
 
-export { setVolume };
+export { handleSetVolume };

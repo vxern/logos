@@ -33,14 +33,14 @@ import { defaultLanguage, Language } from 'logos/types.ts';
 const command: OptionBuilder = {
 	...createLocalisations(Commands.profile.options.roles),
 	type: ApplicationCommandOptionTypes.SubCommand,
-	handle: selectRoles,
+	handle: handleOpenRoleSelectionMenu,
 };
 
 /**
  * Displays a role selection menu to the user and allows them to assign or unassign roles
  * from within it.
  */
-function selectRoles(
+function handleOpenRoleSelectionMenu(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): void {

@@ -19,7 +19,7 @@ import { defaultLanguage } from 'logos/types.ts';
 const command: CommandBuilder = {
 	...createLocalisations(Commands.suggest),
 	defaultMemberPermissions: ['VIEW_CHANNEL'],
-	handle: makeSuggestion,
+	handle: handleMakeSuggestion,
 	options: [{
 		...createLocalisations(Commands.suggest.options.suggestion),
 		type: ApplicationCommandOptionTypes.String,
@@ -27,7 +27,7 @@ const command: CommandBuilder = {
 	}],
 };
 
-function makeSuggestion(
+function handleMakeSuggestion(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): void {

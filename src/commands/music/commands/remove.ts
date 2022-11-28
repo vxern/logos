@@ -27,10 +27,10 @@ import { defaultLanguage } from 'logos/types.ts';
 const command: OptionBuilder = {
 	...createLocalisations(Commands.music.options.remove),
 	type: ApplicationCommandOptionTypes.SubCommand,
-	handle: removeSongListing,
+	handle: handleRemoveSongListing,
 };
 
-function removeSongListing(
+function handleRemoveSongListing(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): void {

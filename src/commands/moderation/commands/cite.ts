@@ -18,7 +18,7 @@ import { defaultLanguage } from 'logos/types.ts';
 const command: CommandBuilder = {
 	...createLocalisations(Commands.cite),
 	defaultMemberPermissions: ['VIEW_CHANNEL'],
-	handle: citeRule,
+	handle: handleCiteRule,
 	options: [{
 		...createLocalisations(Commands.cite.options.rule),
 		type: ApplicationCommandOptionTypes.String,
@@ -27,7 +27,7 @@ const command: CommandBuilder = {
 	}],
 };
 
-function citeRule(
+function handleCiteRule(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): void {

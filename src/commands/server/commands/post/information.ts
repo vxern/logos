@@ -12,7 +12,7 @@ import informationSections from 'logos/src/commands/server/data/information/info
 import { Client } from 'logos/src/client.ts';
 import configuration from 'logos/configuration.ts';
 
-async function postInformation(
+async function handlePostInformationMessage(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {
@@ -52,4 +52,4 @@ async function postInformation(
 	);
 }
 
-export { postInformation };
+export { handlePostInformationMessage };

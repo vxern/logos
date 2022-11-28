@@ -23,10 +23,10 @@ const command: OptionBuilder = {
 	...createLocalisations(Commands.profile.options.view),
 	type: ApplicationCommandOptionTypes.SubCommand,
 	options: [{ ...user, required: false }, show],
-	handle: viewProfile,
+	handle: handleDisplayProfile,
 };
 
-async function viewProfile(
+async function handleDisplayProfile(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {

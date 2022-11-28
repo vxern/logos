@@ -20,11 +20,11 @@ import configuration from 'logos/configuration.ts';
 const command: CommandBuilder = {
 	...createLocalisations(Commands.game),
 	defaultMemberPermissions: ['VIEW_CHANNEL'],
-	handle: startGame,
+	handle: handleStartGame,
 };
 
 /** Starts a simple game of 'choose the correct word to fit in the blank'. */
-async function startGame(
+async function handleStartGame(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {

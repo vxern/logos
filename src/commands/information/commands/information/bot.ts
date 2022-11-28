@@ -11,8 +11,7 @@ import { Commands, localise } from 'logos/assets/localisations/mod.ts';
 import { Client } from 'logos/src/client.ts';
 import configuration from 'logos/configuration.ts';
 
-/** Displays information about the bot (application). */
-async function displayBotInformation(
+async function handleDisplayBotInformation(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {
@@ -81,4 +80,4 @@ async function displayBotInformation(
 	);
 }
 
-export { displayBotInformation };
+export { handleDisplayBotInformation };

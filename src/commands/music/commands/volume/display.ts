@@ -11,7 +11,7 @@ import { parseArguments } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import { defaultLanguage } from 'logos/types.ts';
 
-function displayVolume(
+function handleDisplayVolume(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): void {
@@ -49,4 +49,4 @@ function displayVolume(
 	);
 }
 
-export { displayVolume };
+export { handleDisplayVolume };

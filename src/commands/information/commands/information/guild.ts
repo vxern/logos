@@ -16,7 +16,7 @@ import { displayTime, mention, MentionTypes } from 'logos/formatting.ts';
 import { defaultLanguage } from 'logos/types.ts';
 
 /** Displays information about the guild that this command was executed in. */
-function displayGuildInformation(
+function handleDisplayGuildInformation(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): void {
@@ -256,4 +256,4 @@ function getPercentageComposition(number: number, total: number): string {
 	return ((number / total) * 100).toPrecision(3);
 }
 
-export { displayGuildInformation };
+export { handleDisplayGuildInformation };

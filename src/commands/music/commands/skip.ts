@@ -18,11 +18,11 @@ import { defaultLanguage } from 'logos/types.ts';
 const command: OptionBuilder = {
 	...createLocalisations(Commands.music.options.skip),
 	type: ApplicationCommandOptionTypes.SubCommand,
-	handle: skipSong,
+	handle: handleSkipAction,
 	options: [collection, by, to],
 };
 
-function skipSong(
+function handleSkipAction(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): void {

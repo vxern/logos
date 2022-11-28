@@ -18,12 +18,12 @@ import { defaultLanguage } from 'logos/types.ts';
 const command: CommandBuilder = {
 	...createLocalisations(Commands.resources),
 	defaultMemberPermissions: ['VIEW_CHANNEL'],
-	handle: resources,
+	handle: handleDisplayResources,
 	options: [show],
 };
 
 /** Displays a message with information on where to find the resources for a given language. */
-function resources(
+function handleDisplayResources(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): void {

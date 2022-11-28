@@ -14,7 +14,7 @@ import { fromHex, getChannelMention } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import { defaultLanguage } from 'logos/types.ts';
 
-function postWelcome(
+function handlePostWelcomeMessage(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): void {
@@ -68,4 +68,4 @@ function postWelcome(
 	);
 }
 
-export { postWelcome };
+export { handlePostWelcomeMessage };
