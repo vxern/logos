@@ -1,22 +1,14 @@
 import { Language } from 'logos/types.ts';
-import { TranslationLanguage } from 'logos/assets/localisations/languages.ts';
-import { ensureType } from 'logos/assets/localisations/types.ts';
-
-type TranslationLanguageMappings = Required<
-	Record<TranslationLanguage, string>
->;
-
-type LanguageMappings = Required<Record<Language, string>>;
+import { TranslationLanguage } from 'logos/assets/localisations/utils.ts';
+import { ensureType } from 'logos/assets/localisations/utils.ts';
 
 class Expressions {
 	static readonly english = {
 		methods: {
-			pluralise: (
-				number: string,
-				singular: string,
-				plural: string,
-			) => {
+			pluralise: (number: string, singular: string, plural: string) => {
+				// 1 is the only number the singular form goes with in English.
 				if (number === '1') return `${number} ${singular}`;
+
 				return `${number} ${plural}`;
 			},
 		},
@@ -26,7 +18,7 @@ class Expressions {
 		cases: {
 			// Do not change key names.
 			genitive: {
-				languages: ensureType<TranslationLanguageMappings>({
+				languages: ensureType<Required<Record<TranslationLanguage, string>>>({
 					'Armenian': 'Ormiańskiego',
 					'Belarusian': 'Białoruskiego',
 					'Bulgarian': 'Bułgarskiego',
@@ -74,18 +66,16 @@ class Expressions {
 			},
 		},
 		methods: {
-			pluralise: (
-				number: string,
-				singular: string,
-				plural: string,
-				genitive: string,
-			) => {
-				if (['1', '12', '13', '14'].some((digits) => number === digits)) {
-					return `${number} ${singular}`;
-				}
-				if (['2', '3', '4'].some((digit) => number.endsWith(digit))) {
-					return `${number} ${plural}`;
-				}
+			pluralise: (number: string, singular: string, plural: string, genitive: string) => {
+				// 1 is the only number the singular form goes with in Polish.
+				if (number === '1') return `${number} ${singular}`;
+
+				// Numbers 12, 13 and 14 and other numbers ending in them are followed by the plural genitive.
+				if (['12', '13', '14'].some((digits) => number.endsWith(digits))) return `${number} ${genitive}`;
+
+				// Numbers ending in 2, 3 and 4
+				if (['2', '3', '4'].some((digit) => number.endsWith(digit))) return `${number} ${plural}`;
+
 				return `${number} ${genitive}`;
 			},
 		},
@@ -95,7 +85,7 @@ class Expressions {
 		cases: {
 			genitive: {
 				indefinite: {
-					languages: ensureType<LanguageMappings>({
+					languages: ensureType<Required<Record<Language, string>>>({
 						'Armenian': 'armene',
 						'Belarusian': 'belaruse',
 						'English': 'engleze',
@@ -106,15 +96,14 @@ class Expressions {
 			},
 		},
 		methods: {
-			pluralise: (
-				number: string,
-				singular: string,
-				plural: string,
-			) => {
+			pluralise: (number: string, singular: string, plural: string) => {
+				// 1 is the only number the singular form goes with in Romanian.
 				if (number === '1') return `${number} ${singular}`;
-				if (
-					number.length === 1 || (number.length === 2 && number.at(0) === '1')
-				) return `${number} ${plural}`;
+
+				// Until the number 20, Romanian nouns follow the standard number + plural rule.
+				if (Number(number) < 20) return `${number} ${plural}`;
+
+				// Once the number reaches 20, Romanian begins slotting a 'de' between the number and the plural form of the word.
 				return `${number} de ${plural}`;
 			},
 		},
