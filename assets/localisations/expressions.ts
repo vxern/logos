@@ -1,6 +1,5 @@
+import { ensureType, TranslationLanguage } from 'logos/assets/localisations/utils.ts';
 import { Language } from 'logos/types.ts';
-import { TranslationLanguage } from 'logos/assets/localisations/utils.ts';
-import { ensureType } from 'logos/assets/localisations/utils.ts';
 
 class Expressions {
 	static readonly english = {

@@ -1,5 +1,5 @@
 import { Expressions } from 'logos/assets/localisations/expressions.ts';
-import { getLocalisationsForLanguage } from 'logos/assets/localisations/utils.ts';
+import { getLocaleForLanguage, getLocalisationsForLanguage, localise } from 'logos/assets/localisations/utils.ts';
 import { Language } from 'logos/types.ts';
 
 class Articles {
@@ -30,15 +30,19 @@ class Articles {
 					Expressions.polish.cases.genitive.languages[language].toLowerCase()
 				}?`,
 			'Romanian': (language: Language) =>
-				`Care este motivul pentru care înveți ${getLocalisationsForLanguage(language)}?`,
+				`Care este motivul pentru care înveți ${
+					localise(getLocalisationsForLanguage(language), getLocaleForLanguage('Romanian'))!.toLowerCase()
+				}?`,
 		},
 		aim: {
 			'English': (_language: Language) => 'How will you benefit from becoming a member?',
 			'Polish': (_language: Language) => 'Jaką korzyść przyniesie Tobie członkostwo?',
+			'Romanian': (_language: Language) => 'Ce folos ți va aduce apartenența?',
 		},
 		whereFound: {
 			'English': (language: Language) => `Where did you find out about Learn ${language}?`,
 			'Polish': (language: Language) => `Gdzie dowiedziałeś/aś się o Learn ${language}?`,
+			'Romanian': (language: Language) => `Unde ai aflat despre Learn ${language}?`,
 		},
 	};
 }
