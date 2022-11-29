@@ -1,5 +1,5 @@
 import { Locales, Localization as DiscordLocalisation } from 'discordeno';
-import { localeByLanguage, localisationsByLanguage } from 'logos/assets/localisations/languages.ts';
+import { localisationsByLanguage } from 'logos/assets/localisations/languages.ts';
 import { defaultLanguage, Language } from 'logos/types.ts';
 
 type LocalisationsByLanguage<L extends string> =
@@ -47,6 +47,12 @@ const languageByLocale: Partial<Record<Locales, Language>> = {
 	'en-US': 'English',
 	'pl': 'Polish',
 	'ro': 'Romanian',
+};
+
+const localeByLanguage: Partial<Record<Language, `${Locales}`>> = {
+	'English': 'en-GB',
+	'Polish': 'pl',
+	'Romanian': 'ro',
 };
 
 function getLanguageByLocale(locale: Locales): Language | undefined {

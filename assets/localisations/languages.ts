@@ -1,6 +1,4 @@
-import { Locales } from 'discordeno';
 import { inferLanguages } from 'logos/assets/localisations/utils.ts';
-import { Language } from 'logos/types.ts';
 
 // Do not change key names.
 const localisationsByLanguage = inferLanguages({
@@ -160,10 +158,4 @@ const localisationsByLanguage = inferLanguages({
 	},
 });
 
-const localeByLanguage: Partial<Record<Language, `${Locales}`>> = {
-	'English': 'en-GB',
-	'Polish': 'pl',
-	'Romanian': 'ro',
-};
-
-export { localeByLanguage, localisationsByLanguage };
+export { localisationsByLanguage };
