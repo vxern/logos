@@ -427,6 +427,7 @@ function createVerificationPrompt(
  */
 function chunk<T>(array: T[], size: number): T[][] {
 	if (array.length === 0) return [[]];
+	if (size === 0) throw new Error('The size of a chunk cannot be zero.');
 
 	const chunks = [];
 	for (let index = 0; index < array.length; index += size) {
@@ -434,6 +435,9 @@ function chunk<T>(array: T[], size: number): T[][] {
 	}
 	return chunks;
 }
+
+const stringTrail = '...';
+const stringContinued = '(...)';
 
 /**
  * Taking a string, trims it to the desired length and returns it.
@@ -443,7 +447,17 @@ function chunk<T>(array: T[], size: number): T[][] {
  * @returns The trimmed string.
  */
 function trim(string: string, length: number): string {
-	return string.length <= length ? string : `${string.slice(0, Math.max(length - 3, 0))}...`;
+	if (string.length <= length) return string;
+
+	if (!string.includes(' ')) {
+		return string.slice(0, Math.max(length - stringTrail.length)) + stringTrail;
+	}
+
+	const slice = string.slice(0, length);
+	const indexOfLastSpace = slice.lastIndexOf(' ');
+	const gap = slice.length - (indexOfLastSpace + 1);
+
+	return slice.slice(0, slice.length - Math.max(gap, stringContinued.length)) + stringContinued;
 }
 
 /**
@@ -570,6 +584,8 @@ function addParametersToURL(
 	const query = Object.entries(parameters)
 		.map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
 		.join('&');
+
+	if (query.length === 0) return url;
 
 	return `${url}?${query}`;
 }
