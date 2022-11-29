@@ -43,12 +43,25 @@ function getLanguageByLocale(locale: Locales): Language | undefined {
 	return languageByLocale[locale];
 }
 
-function createDiscordLocalisations(localisations: Localisations<string>): DiscordLocalisation {
-	return Object.fromEntries(
-		(<[Language, string][]> Object.entries(localisations))
-			.filter(([key, _value]) => key !== defaultLanguage)
-			.map(([key, value]) => [getLocaleForLanguage(key), value]),
-	);
+function getLocaleByLanguage(language: Language): typeof localeByLanguage[keyof typeof localeByLanguage] {
+	return localeByLanguage[language] ?? 'en-GB';
+}
+
+function localise<T>(localisations: Localisations<T>, locale: string | undefined): T {
+	if (!locale || !(locale in languageByLocale)) {
+		return localisations[defaultLanguage];
+	}
+
+	const language = getLanguageByLocale(<Locales> locale)!;
+	if (!(language in localisations)) {
+		return localisations[defaultLanguage];
+	}
+
+	return localisations[language]!;
+}
+
+function getLocalisationsForLanguage(language: TranslationLanguage): Localisations<string> {
+	return localisationsByLanguage[language];
 }
 
 interface DiscordLocalisationFields {
@@ -69,17 +82,12 @@ function createLocalisations(commandLocalisations: DiscordLocalisations): Discor
 	};
 }
 
-function localise<T>(localisations: Localisations<T>, locale: string | undefined): T {
-	if (!locale || !(locale in languageByLocale)) {
-		return localisations[defaultLanguage];
-	}
-
-	const language = getLanguageByLocale(<Locales> locale)!;
-	if (!(language in localisations)) {
-		return localisations[defaultLanguage];
-	}
-
-	return localisations[language]!;
+function createDiscordLocalisations(localisations: Localisations<string>): DiscordLocalisation {
+	return Object.fromEntries(
+		(<[Language, string][]> Object.entries(localisations))
+			.filter(([key, _value]) => key !== defaultLanguage)
+			.map(([key, value]) => [getLocaleByLanguage(key), value]),
+	);
 }
 
 function ensureType<T>(object: T): T {
@@ -97,22 +105,11 @@ function typedLocalisations<
 	return localisations;
 }
 
-function getLocalisationsForLanguage(language: TranslationLanguage): Localisations<string> {
-	if (!(language in localisationsByLanguage)) {
-		return { [defaultLanguage]: language };
-	}
-	return localisationsByLanguage[language];
-}
-
-function getLocaleForLanguage(language: Language): typeof localeByLanguage[keyof typeof localeByLanguage] {
-	return localeByLanguage[language] ?? 'en-GB';
-}
-
 export {
 	createLocalisations,
 	ensureType,
 	getLanguageByLocale,
-	getLocaleForLanguage,
+	getLocaleByLanguage,
 	getLocalisationsForLanguage,
 	inferLanguages,
 	localise,

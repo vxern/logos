@@ -1,5 +1,5 @@
 import { Expressions } from 'logos/assets/localisations/expressions.ts';
-import { getLocaleForLanguage, getLocalisationsForLanguage, localise } from 'logos/assets/localisations/utils.ts';
+import { getLocaleByLanguage, getLocalisationsForLanguage, localise } from 'logos/assets/localisations/utils.ts';
 import { Language } from 'logos/types.ts';
 
 class Articles {
@@ -25,7 +25,7 @@ class Articles {
 	static readonly verification = {
 		reason: {
 			'English': (language: Language) => {
-				const languageLocalised = localise(getLocalisationsForLanguage(language), getLocaleForLanguage('English'));
+				const languageLocalised = localise(getLocalisationsForLanguage(language), getLocaleByLanguage('English'));
 
 				return `What is your reason for learning ${languageLocalised}?`;
 			},
@@ -37,7 +37,7 @@ class Articles {
 			'Romanian': (language: Language) => {
 				const languageLocalised = localise(
 					getLocalisationsForLanguage(language),
-					getLocaleForLanguage('Romanian'),
+					getLocaleByLanguage('Romanian'),
 				).toLowerCase();
 
 				return `Care este motivul pentru care înveți ${languageLocalised}?`;

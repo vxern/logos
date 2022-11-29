@@ -1,7 +1,7 @@
 import { ApplicationCommandOptionTypes } from 'discordeno';
 import { Expressions } from 'logos/assets/localisations/expressions.ts';
 import {
-	getLocaleForLanguage,
+	getLocaleByLanguage,
 	getLocalisationsForLanguage,
 	localise,
 	TranslationLanguage,
@@ -267,7 +267,7 @@ class Commands {
 			// No full stop here.
 			resourcesStoredHere: {
 				'English': (language: Language) => {
-					const languageLocalised = localise(getLocalisationsForLanguage(language), getLocaleForLanguage('English'));
+					const languageLocalised = localise(getLocalisationsForLanguage(language), getLocaleByLanguage('English'));
 
 					return `Resources for learning ${languageLocalised} are stored here`;
 				},
@@ -375,7 +375,7 @@ class Commands {
 			// If you have used the word 'source' instead of 'from', use the nominative case.
 			sourceLanguage: {
 				'English': (language: TranslationLanguage) => {
-					const languageLocalised = localise(getLocalisationsForLanguage(language), getLocaleForLanguage('English'));
+					const languageLocalised = localise(getLocalisationsForLanguage(language), getLocaleByLanguage('English'));
 
 					return languageLocalised;
 				},
@@ -385,7 +385,7 @@ class Commands {
 					return languageLocalised;
 				},
 				'Romanian': (language: TranslationLanguage) => {
-					const languageLocalised = localise(getLocalisationsForLanguage(language), getLocaleForLanguage('Romanian'));
+					const languageLocalised = localise(getLocalisationsForLanguage(language), getLocaleByLanguage('Romanian'));
 
 					return languageLocalised;
 				},
@@ -394,17 +394,17 @@ class Commands {
 			// If you have used the word 'target' instead of 'to', use the nominative case.
 			targetLanguage: {
 				'English': (language: TranslationLanguage) => {
-					const languageLocalised = localise(getLocalisationsForLanguage(language), getLocaleForLanguage('English'));
+					const languageLocalised = localise(getLocalisationsForLanguage(language), getLocaleByLanguage('English'));
 
 					return languageLocalised;
 				},
 				'Polish': (language: TranslationLanguage) => {
-					const languageLocalised = localise(getLocalisationsForLanguage(language), getLocaleForLanguage('Polish'));
+					const languageLocalised = localise(getLocalisationsForLanguage(language), getLocaleByLanguage('Polish'));
 
 					return languageLocalised;
 				},
 				'Romanian': (language: TranslationLanguage) => {
-					const languageLocalised = localise(getLocalisationsForLanguage(language), getLocaleForLanguage('Romanian'));
+					const languageLocalised = localise(getLocalisationsForLanguage(language), getLocaleByLanguage('Romanian'));
 
 					return languageLocalised;
 				},
@@ -514,7 +514,7 @@ class Commands {
 						'definition',
 						'definitions',
 					);
-					const flag = localise(this.word.options.verbose.name, getLocaleForLanguage('English'));
+					const flag = localise(this.word.options.verbose.name, getLocaleByLanguage('English'));
 
 					return `Omitted ${numberExpression}. ` +
 						`To display more results, enable the ${code(flag)} flag.`;
@@ -526,7 +526,7 @@ class Commands {
 						'znaczenia',
 						'znaczeń',
 					);
-					const flag = localise(this.word.options.verbose.name, getLocaleForLanguage('Polish'));
+					const flag = localise(this.word.options.verbose.name, getLocaleByLanguage('Polish'));
 
 					return `Ominięto ${numberExpression}. ` +
 						`Aby wyświetlić więcej rezultatów, użyj flagi ${code(flag)}.`;
@@ -537,7 +537,7 @@ class Commands {
 						'definiție',
 						'definiții',
 					);
-					const flag = localise(this.word.options.verbose.name, getLocaleForLanguage('Romanian'));
+					const flag = localise(this.word.options.verbose.name, getLocaleByLanguage('Romanian'));
 
 					return `Au fost omise ${numberExpression}. ` +
 						`Pentru a afișa mai multe rezultate, activează fanionul ${code(flag)}.`;
