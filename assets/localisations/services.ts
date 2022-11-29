@@ -1,6 +1,5 @@
 import { Expressions } from 'logos/assets/localisations/expressions.ts';
-import { getLocalisations } from 'logos/assets/localisations/languages.ts';
-import { localise } from 'logos/assets/localisations/types.ts';
+import { getLocalisationsForLanguage, localise } from 'logos/assets/localisations/utils.ts';
 import { code } from 'logos/formatting.ts';
 import { Language } from 'logos/types.ts';
 
@@ -13,21 +12,24 @@ class Services {
 				'Romanian': 'Competență Lingvistică',
 			},
 			body: {
-				'English': (guildLanguage: Language) =>
-					`Select the role that most accurately describes your ${
-						localise(getLocalisations(guildLanguage), 'English')
-					} language proficiency.\n\n` +
-					`ℹ️ **You can always change this later using the ${code('/profile roles')} command.**`,
-				'Polish': (guildLanguage: Language) =>
-					`Wybierz rolę, która najlepiej przedstawia Twoją biegłość w języku ${
-						Expressions.polish.cases.instrumental.languages[guildLanguage]
-					}.\n\n` +
-					`ℹ️ **Pamiętaj, że możesz ją później zmienić używając komendy ${code('/profile roles')}.**`,
-				'Romanian': (guildLanguage: Language) =>
-					`Alege rolul care îți reprezintă cel mai bine competența în limba ${
-						localise(getLocalisations(guildLanguage), 'Romanian')
-					}.\n\n` +
-					`ℹ️ **Ține minte că o poți schimba mai apoi folosind comanda ${code('/profile roles')}.**`,
+				'English': (language: Language) => {
+					const languageLocalised = localise(getLocalisationsForLanguage(language), 'English');
+
+					return `Select the role that most accurately describes your ${languageLocalised} language proficiency.\n\n` +
+						`ℹ️ **You can always change this later using the ${code('/profile roles')} command.**`;
+				},
+				'Polish': (language: Language) => {
+					const languageLocalised = Expressions.polish.cases.instrumental.languages[language];
+
+					return `Wybierz rolę, która najlepiej przedstawia Twoją biegłość w języku ${languageLocalised}.\n\n` +
+						`ℹ️ **Pamiętaj, że możesz ją później zmienić używając komendy ${code('/profile roles')}.**`;
+				},
+				'Romanian': (language: Language) => {
+					const languageLocalised = localise(getLocalisationsForLanguage(language), 'Romanian');
+
+					return `Alege rolul care îți reprezintă cel mai bine competența în limba ${languageLocalised}.\n\n` +
+						`ℹ️ **Ține minte că îl poți schimba mai apoi folosind comanda ${code('/profile roles')}.**`;
+				},
 			},
 		},
 		rejected: {
@@ -55,7 +57,7 @@ class Services {
 				body: {
 					'English': 'Your answers to the verification questions have been submitted.\n\n' +
 						'Your request to join the server will be reviewed by a staff member, and you will be notified via DMs when your entry request is accepted.',
-					'Polish': 'Wysłano Twoje odpowiedzi na pytania weryfikacyjne.\n\n' +
+					'Polish': 'Twoje odpowiedzi na pytania weryfikacyjne zostały wysłane.\n\n' +
 						'Twoja prośba o dołączenie do serwera będzie przejrzana przez jednego z moderatorów.' +
 						'Gdy to się wydarzy, zostaniesz powiadomiony/a poprzez DM.',
 					'Romanian': 'Răspunsurile tale la întrebările de verificate au fost transmitate.\n\n' +

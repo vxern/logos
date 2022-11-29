@@ -1,4 +1,5 @@
 import { Expressions } from 'logos/assets/localisations/expressions.ts';
+import { Localisations } from 'logos/assets/localisations/utils.ts';
 
 class Misc {
 	static readonly client = {
@@ -18,25 +19,26 @@ class Misc {
 					'Romanian': ['s', 'sec', 'secundă', 'secunde'],
 				},
 				display: {
-					'English': (number: number) =>
-						Expressions.english.methods.pluralise(
-							number.toString(),
-							'second',
-							'seconds',
-						),
-					'Polish': (number: number) =>
-						Expressions.polish.methods.pluralise(
+					'English': (number: number) => {
+						const numberExpression = Expressions.english.methods.pluralise(number.toString(), 'second', 'seconds');
+
+						return numberExpression;
+					},
+					'Polish': (number: number) => {
+						const numberExpression = Expressions.polish.methods.pluralise(
 							number.toString(),
 							'sekunda',
 							'sekundy',
 							'sekund',
-						),
-					'Romanian': (number: number) =>
-						Expressions.romanian.methods.pluralise(
-							number.toString(),
-							'secundă',
-							'secunde',
-						),
+						);
+
+						return numberExpression;
+					},
+					'Romanian': (number: number) => {
+						const numberExpression = Expressions.romanian.methods.pluralise(number.toString(), 'secundă', 'secunde');
+
+						return numberExpression;
+					},
 				},
 			},
 			minute: {
@@ -46,25 +48,26 @@ class Misc {
 					'Romanian': ['m', 'min', 'minut', 'minute'],
 				},
 				display: {
-					'English': (number: number) =>
-						Expressions.english.methods.pluralise(
-							number.toString(),
-							'minute',
-							'minutes',
-						),
-					'Polish': (number: number) =>
-						Expressions.polish.methods.pluralise(
+					'English': (number: number) => {
+						const numberExpression = Expressions.english.methods.pluralise(number.toString(), 'minute', 'minutes');
+
+						return numberExpression;
+					},
+					'Polish': (number: number) => {
+						const numberExpression = Expressions.polish.methods.pluralise(
 							number.toString(),
 							'minuta',
 							'minuty',
 							'minut',
-						),
-					'Romanian': (number: number) =>
-						Expressions.romanian.methods.pluralise(
-							number.toString(),
-							'minut',
-							'minute',
-						),
+						);
+
+						return numberExpression;
+					},
+					'Romanian': (number: number) => {
+						const numberExpression = Expressions.romanian.methods.pluralise(number.toString(), 'minut', 'minute');
+
+						return numberExpression;
+					},
 				},
 			},
 			hour: {
@@ -74,25 +77,26 @@ class Misc {
 					'Romanian': ['o', 'oră', 'ore'],
 				},
 				display: {
-					'English': (number: number) =>
-						Expressions.english.methods.pluralise(
-							number.toString(),
-							'hour',
-							'hours',
-						),
-					'Polish': (number: number) =>
-						Expressions.polish.methods.pluralise(
+					'English': (number: number) => {
+						const numberExpression = Expressions.english.methods.pluralise(number.toString(), 'hour', 'hours');
+
+						return numberExpression;
+					},
+					'Polish': (number: number) => {
+						const numberExpression = Expressions.polish.methods.pluralise(
 							number.toString(),
 							'godzina',
 							'godziny',
 							'godzin',
-						),
-					'Romanian': (number: number) =>
-						Expressions.romanian.methods.pluralise(
-							number.toString(),
-							'oră',
-							'ore',
-						),
+						);
+
+						return numberExpression;
+					},
+					'Romanian': (number: number) => {
+						const numberExpression = Expressions.romanian.methods.pluralise(number.toString(), 'oră', 'ore');
+
+						return numberExpression;
+					},
 				},
 			},
 			day: {
@@ -102,25 +106,26 @@ class Misc {
 					'Romanian': ['z', 'zi', 'zile'],
 				},
 				display: {
-					'English': (number: number) =>
-						Expressions.english.methods.pluralise(
-							number.toString(),
-							'day',
-							'days',
-						),
-					'Polish': (number: number) =>
-						Expressions.polish.methods.pluralise(
+					'English': (number: number) => {
+						const numberExpression = Expressions.english.methods.pluralise(number.toString(), 'day', 'days');
+
+						return numberExpression;
+					},
+					'Polish': (number: number) => {
+						const numberExpression = Expressions.polish.methods.pluralise(
 							number.toString(),
 							'dzień',
 							'dni',
 							'dni',
-						),
-					'Romanian': (number: number) =>
-						Expressions.romanian.methods.pluralise(
-							number.toString(),
-							'zi',
-							'zile',
-						),
+						);
+
+						return numberExpression;
+					},
+					'Romanian': (number: number) => {
+						const numberExpression = Expressions.romanian.methods.pluralise(number.toString(), 'zi', 'zile');
+
+						return numberExpression;
+					},
 				},
 			},
 			week: {
@@ -130,25 +135,30 @@ class Misc {
 					'Romanian': ['S', 'săptămână', 'săptămâni'],
 				},
 				display: {
-					'English': (number: number) =>
-						Expressions.english.methods.pluralise(
-							number.toString(),
-							'week',
-							'weeks',
-						),
-					'Polish': (number: number) =>
-						Expressions.polish.methods.pluralise(
+					'English': (number: number) => {
+						const numberExpression = Expressions.english.methods.pluralise(number.toString(), 'week', 'weeks');
+
+						return numberExpression;
+					},
+					'Polish': (number: number) => {
+						const numberExpression = Expressions.polish.methods.pluralise(
 							number.toString(),
 							'tydzień',
 							'tygodnie',
 							'tygodni',
-						),
-					'Romanian': (number: number) =>
-						Expressions.romanian.methods.pluralise(
+						);
+
+						return numberExpression;
+					},
+					'Romanian': (number: number) => {
+						const numberExpression = Expressions.romanian.methods.pluralise(
 							number.toString(),
 							'săptămână',
 							'săptămâni',
-						),
+						);
+
+						return numberExpression;
+					},
 				},
 			},
 			month: {
@@ -158,25 +168,26 @@ class Misc {
 					'Romanian': ['l', 'lună', 'luni'],
 				},
 				display: {
-					'English': (number: number) =>
-						Expressions.english.methods.pluralise(
-							number.toString(),
-							'month',
-							'months',
-						),
-					'Polish': (number: number) =>
-						Expressions.polish.methods.pluralise(
+					'English': (number: number) => {
+						const numberExpression = Expressions.english.methods.pluralise(number.toString(), 'month', 'months');
+
+						return numberExpression;
+					},
+					'Polish': (number: number) => {
+						const numberExpression = Expressions.polish.methods.pluralise(
 							number.toString(),
 							'miesiąc',
 							'miesiące',
 							'miesięcy',
-						),
-					'Romanian': (number: number) =>
-						Expressions.romanian.methods.pluralise(
-							number.toString(),
-							'lună',
-							'luni',
-						),
+						);
+
+						return numberExpression;
+					},
+					'Romanian': (number: number) => {
+						const numberExpression = Expressions.romanian.methods.pluralise(number.toString(), 'lună', 'luni');
+
+						return numberExpression;
+					},
 				},
 			},
 			year: {
@@ -186,28 +197,34 @@ class Misc {
 					'Romanian': ['a', 'an', 'ani'],
 				},
 				display: {
-					'English': (number: number) =>
-						Expressions.english.methods.pluralise(
-							number.toString(),
-							'year',
-							'years',
-						),
-					'Polish': (number: number) =>
-						Expressions.polish.methods.pluralise(
+					'English': (number: number) => {
+						const numberExpression = Expressions.english.methods.pluralise(number.toString(), 'year', 'years');
+
+						return numberExpression;
+					},
+					'Polish': (number: number) => {
+						const numberExpression = Expressions.polish.methods.pluralise(
 							number.toString(),
 							'rok',
 							'lata',
 							'lat',
-						),
-					'Romanian': (number: number) =>
-						Expressions.romanian.methods.pluralise(
-							number.toString(),
-							'an',
-							'ani',
-						),
+						);
+
+						return numberExpression;
+					},
+					'Romanian': (number: number) => {
+						const numberExpression = Expressions.romanian.methods.pluralise(number.toString(), 'an', 'ani');
+
+						return numberExpression;
+					},
 				},
 			},
 		},
+	};
+
+	static readonly continuedOnNextPage: Localisations<string> = {
+		'English': 'Continued on the next page...',
+		'Polish': 'Kontynuacja na następnej stronie...',
 	};
 }
 

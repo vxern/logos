@@ -1,20 +1,5 @@
-import { Locales } from 'discordeno';
-import { Localisations } from 'logos/assets/localisations/types.ts';
-import { defaultLanguage, Language } from 'logos/types.ts';
+import { inferLanguages } from 'logos/assets/localisations/utils.ts';
 
-type LocalisationsByLanguage<L extends string> =
-	& Required<Record<Language, Localisations<string>>>
-	& Record<L, Localisations<string>>;
-
-function inferLanguages<L extends string>(
-	localisations: LocalisationsByLanguage<L>,
-): LocalisationsByLanguage<L> {
-	return localisations;
-}
-
-type TranslationLanguage = keyof typeof localisationsByLanguage;
-
-// https://www.deepl.com/docs-api/translate-text/translate-text
 // Do not change key names.
 const localisationsByLanguage = inferLanguages({
 	'Armenian': {
@@ -173,26 +158,4 @@ const localisationsByLanguage = inferLanguages({
 	},
 });
 
-const localeByLanguage: Partial<Record<Language, `${Locales}`>> = {
-	'English': 'en-GB',
-	'Polish': 'pl',
-	'Romanian': 'ro',
-};
-
-function getLocalisations(
-	language: TranslationLanguage,
-): Localisations<string> {
-	if (!(language in localisationsByLanguage)) {
-		return { [defaultLanguage]: language };
-	}
-	return localisationsByLanguage[language];
-}
-
-function getLocale(
-	language: Language,
-): typeof localeByLanguage[keyof typeof localeByLanguage] {
-	return localeByLanguage[language] ?? 'en-GB';
-}
-
-export { getLocale, getLocalisations };
-export type { TranslationLanguage };
+export { localisationsByLanguage };

@@ -7,6 +7,5 @@ export * from 'logos/assets/localisations/misc.ts';
 export * from 'logos/assets/localisations/parameters.ts';
 export * from 'logos/assets/localisations/roles.ts';
 export * from 'logos/assets/localisations/services.ts';
-export * from 'logos/assets/localisations/types.ts';
 export * from 'logos/assets/localisations/utils.ts';
 export * from 'logos/assets/localisations/words.ts';

@@ -145,7 +145,6 @@ class Information {
 				},
 			},
 		},
-		// Do not localise; this is a public feedback message.
 		moderationPolicy: {
 			header: {
 				'English': 'Moderation policy',

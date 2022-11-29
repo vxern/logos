@@ -28,7 +28,7 @@ import {
 	User,
 } from 'discordeno';
 import * as Snowflake from 'snowflake';
-import { localise, Utils } from 'logos/assets/localisations/mod.ts';
+import { localise, Misc } from 'logos/assets/localisations/mod.ts';
 import { addCollector, Client } from 'logos/src/client.ts';
 import configuration from 'logos/configuration.ts';
 import { code, mention, MentionTypes } from 'logos/formatting.ts';
@@ -212,7 +212,7 @@ function paginate<T>(
 		delete embed.fields;
 	}
 
-	const footerText = localise(Utils.continuedOnNextPage, interaction.locale);
+	const footerText = localise(Misc.continuedOnNextPage, interaction.locale);
 
 	const generateEmbed: () => Embed[] = () => [{
 		...embed,

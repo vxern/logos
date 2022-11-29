@@ -1,13 +1,5 @@
-import { DiscordLocalisations } from 'logos/assets/localisations/types.ts';
-
-function typedLocalisations<OptionKeys extends string>(
-	localisations: Record<OptionKeys, DiscordLocalisations>,
-): Record<OptionKeys, DiscordLocalisations> {
-	return localisations;
-}
-
 class Parameters {
-	static readonly global = typedLocalisations({
+	static readonly global = {
 		elements: {
 			name: {
 				'English': 'number',
@@ -56,9 +48,9 @@ class Parameters {
 				'Romanian': 'Dacă da, rezultatul va fi afișat altor utilizatori.',
 			},
 		},
-	});
+	};
 
-	static readonly moderation = typedLocalisations({
+	static readonly moderation = {
 		duration: {
 			name: {
 				'English': 'duration',
@@ -78,14 +70,17 @@ class Parameters {
 				'Romanian': 'motiv',
 			},
 			description: {
-				'English': 'The reason for the sanction or its repeal. It should be descriptive.',
-				'Polish': 'Powód dla sankcji lub dla jej uchylenia. Powinien być szczegółowy.',
-				'Romanian': 'Motivul pentru sancțiune sau anularea acesteia. Ar trebui să fie detaliat.',
+				'English': 'The reason for the sanction or its repeal. ' +
+					'It should be descriptive.',
+				'Polish': 'Powód dla sankcji lub dla jej uchylenia. ' +
+					'Powinien być szczegółowy.',
+				'Romanian': 'Motivul pentru sancțiune sau anularea acesteia. ' +
+					'Ar trebui să fie detaliat.',
 			},
 		},
-	});
+	};
 
-	static readonly music = typedLocalisations({
+	static readonly music = {
 		index: {
 			name: {
 				'English': 'index',
@@ -170,9 +165,9 @@ class Parameters {
 				'Romanian': 'Indexul melodiei sau al înregistrării până la care să fie sărit peste.',
 			},
 		},
-	});
+	};
 
-	static readonly social = typedLocalisations({
+	static readonly social = {
 		roles: {
 			name: {
 				'English': 'role',
@@ -185,7 +180,7 @@ class Parameters {
 				'Romanian': 'Numele rolului.',
 			},
 		},
-	});
+	};
 }
 
 export { Parameters };

@@ -45,7 +45,7 @@ async function handleDisplayBotInformation(
 						value: localise(
 							Commands.information.options.bot.strings.whoAmI.body,
 							interaction.locale,
-						)(botUser),
+						)(botUser.username),
 					}, {
 						name: localise(
 							Commands.information.options.bot.strings.howWasIMade.header,
