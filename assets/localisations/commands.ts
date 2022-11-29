@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionTypes, User } from 'discordeno';
+import { ApplicationCommandOptionTypes } from 'discordeno';
 import { Expressions } from 'logos/assets/localisations/expressions.ts';
 import {
 	getLocaleForLanguage,
@@ -8,7 +8,7 @@ import {
 	typedLocalisations,
 } from 'logos/assets/localisations/utils.ts';
 import { emojis, links } from 'logos/constants.ts';
-import { capitalise, list } from 'logos/formatting.ts';
+import { capitalise, code, list } from 'logos/formatting.ts';
 import { Language } from 'logos/types.ts';
 
 class Commands {
@@ -43,8 +43,8 @@ class Commands {
 							'Romanian': 'Cine sunt?',
 						},
 						body: {
-							'English': (botUser: User) =>
-								`I am **${botUser.username}**, an application created to offer language-learning Discord communities with the highest quality features, such as:
+							'English': (botUsername: string) =>
+								`I am **${botUsername}**, an application created to offer language-learning Discord communities with the highest quality features, such as:
               ${
 									list([
 										'🫂 Rich social interactions',
@@ -55,8 +55,8 @@ class Commands {
 										'🔁 Server structure synchronisation',
 									])
 								}`,
-							'Polish': (botUser: User) =>
-								`Nazywam się **${botUser.username}**. Jestem aplikacją stworzoną do zaoferowania społecznościom języcznym na Discordzie najwyższej jakości funkcji, takich jak:
+							'Polish': (botUsername: string) =>
+								`Nazywam się **${botUsername}**. Jestem aplikacją stworzoną do zaoferowania społecznościom języcznym na Discordzie najwyższej jakości funkcji, takich jak:
               ${
 									list([
 										'🫂 Bogate interakcje socjalne',
@@ -67,8 +67,8 @@ class Commands {
 										'🔁 Synchronizacja struktury serwera',
 									])
 								}`,
-							'Romanian': (botUser: User) =>
-								`Mă numesc **${botUser.username}**. Sunt o aplicație creată pentru a oferi comunităților lingvistice Discord funcții de cea mai înaltă calitate, cum ar fi:
+							'Romanian': (botUsername: string) =>
+								`Mă numesc **${botUsername}**. Sunt o aplicație creată pentru a oferi comunităților lingvistice Discord funcții de cea mai înaltă calitate, cum ar fi:
               ${
 									list([
 										'🫂 Interacțiuni sociale bogate',
@@ -89,11 +89,14 @@ class Commands {
 						},
 						body: {
 							'English':
-								`I am powered by [${emojis.typescript} TypeScript](${links.typescriptWebsite}) running within [${emojis.deno} Deno](${links.denoWebsite}). I interact with [Discord\'s API](${links.discordApiWebsite}) with the help of the [${emojis.discordeno} discordeno](${links.discordenoRepository}) library.`,
+								`I am powered by [${emojis.typescript} TypeScript](${links.typescriptWebsite}) running within [${emojis.deno} Deno](${links.denoWebsite}). ` +
+								`I interact with [Discord\'s API](${links.discordApiWebsite}) with the help of the [${emojis.discordeno} discordeno](${links.discordenoRepository}) library.`,
 							'Polish':
-								`Jestem zasilany przez [${emojis.typescript} TypeScript](${links.typescriptWebsite}), działający w ramach [${emojis.deno} Deno](${links.denoWebsite}). Współdziałam z [API Discorda](${links.discordApiWebsite}) za pomocą biblioteki [${emojis.discordeno} discordeno](${links.discordenoRepository}).`,
+								`Jestem zasilany przez [${emojis.typescript} TypeScript](${links.typescriptWebsite}), działający w ramach [${emojis.deno} Deno](${links.denoWebsite}). ` +
+								`Współdziałam z [API Discorda](${links.discordApiWebsite}) za pomocą biblioteki [${emojis.discordeno} discordeno](${links.discordenoRepository}).`,
 							'Romanian':
-								`Sunt alimentat de către [${emojis.typescript} TypeScript](${links.typescriptWebsite}), care se execută în cadrul [${emojis.deno} Deno](${links.denoWebsite}). Interacționez cu [API-ul Discord-ului](${links.discordApiWebsite}) cu ajutorul bibliotecii [${emojis.discordeno} discordeno](${links.discordenoRepository}).`,
+								`Sunt alimentat de către [${emojis.typescript} TypeScript](${links.typescriptWebsite}), care se execută în cadrul [${emojis.deno} Deno](${links.denoWebsite}). ` +
+								`Interacționez cu [API-ul Discord-ului](${links.discordApiWebsite}) cu ajutorul bibliotecii [${emojis.discordeno} discordeno](${links.discordenoRepository}).`,
 						},
 					},
 					howToAddToServer: {
@@ -103,12 +106,12 @@ class Commands {
 							'Romanian': 'Cum poți să mă adaugi pe serverul tău?',
 						},
 						body: {
-							'English':
-								`It is not possible at this point in time. I was made for the purpose of managing a select few language-learning communities, such as [🇦🇲 Learn Armenian](${links.learnArmenianListingWebsite}) and [🇷🇴 Learn Romanian](${links.learnRomanianListingWebsite}).`,
-							'Polish':
-								`Na chwilę obecną nie można tego zrobić. Zostałem stworzony w celu zarządzania kilkoma wybranymi społecznościami językowymi, takimi jak [🇦🇲 Learn Armenian](${links.learnArmenianListingWebsite}) oraz [🇷🇴 Learn Romanian](${links.learnRomanianListingWebsite}).`,
-							'Romanian':
-								`La acest moment asta nu este posibil. Am fost creat cu scopul de a nu gestiona decât câteva comunități lingvistice selecte, cum ar fi [🇦🇲 Learn Armenian](${links.learnArmenianListingWebsite}) și [🇷🇴 Learn Romanian](${links.learnRomanianListingWebsite}).`,
+							'English': `It is not possible at this point in time. ` +
+								`I was made for the purpose of managing a select few language-learning communities, such as [🇦🇲 Learn Armenian](${links.learnArmenianListingWebsite}) and [🇷🇴 Learn Romanian](${links.learnRomanianListingWebsite}).`,
+							'Polish': `Na chwilę obecną nie można tego zrobić. ` +
+								`Zostałem stworzony w celu zarządzania kilkoma wybranymi społecznościami językowymi, takimi jak [🇦🇲 Learn Armenian](${links.learnArmenianListingWebsite}) oraz [🇷🇴 Learn Romanian](${links.learnRomanianListingWebsite}).`,
+							'Romanian': `La acest moment asta nu este posibil. ` +
+								`Am fost creat cu scopul de a nu gestiona decât câteva comunități lingvistice selecte, cum ar fi [🇦🇲 Learn Armenian](${links.learnArmenianListingWebsite}) și [🇷🇴 Learn Romanian](${links.learnRomanianListingWebsite}).`,
 						},
 					},
 					amIOpenSource: {
@@ -118,12 +121,14 @@ class Commands {
 							'Romanian': 'Sunt open-source?',
 						},
 						body: {
-							'English':
-								`Unfortunately, no. However, my predecessor, Talon, *is*. You can view his source code [here](${links.talonRepositoryLink}).`,
-							'Polish':
-								`Niestety nie, chociaż kod źródłowy mojego poprzednika, Talona, jest publiczny. Można zajrzeć w jego kod źródłowy [o tu](${links.talonRepositoryLink}).`,
-							'Romanian':
-								`Nu, din păcate. Deși, codul-sursă al predecesorului meu, al lui Talon, este public. Îl puteți vedea [chiar aici](${links.talonRepositoryLink}).`,
+							'English': `Unfortunately, no. ` +
+								`However, my predecessor, Talon, *is*. ` +
+								`You can view his source code [here](${links.talonRepositoryLink}).`,
+							'Polish': `Niestety nie, chociaż kod źródłowy mojego poprzednika, Talona, jest publiczny. ` +
+								`Można zajrzeć w jego kod źródłowy [o tu](${links.talonRepositoryLink}).`,
+							'Romanian': `Nu, din păcate. ` +
+								`Deși, codul-sursă al predecesorului meu, al lui Talon, este public. ` +
+								`Îl puteți vedea [chiar aici](${links.talonRepositoryLink}).`,
 						},
 					},
 				},
@@ -259,17 +264,23 @@ class Commands {
 			'Romanian': 'Afișează o listă cu resurse pentru învățarea limbii.',
 		},
 		strings: {
+			// No full stop here.
 			resourcesStoredHere: {
-				'English': (language: Language) =>
-					`Resources for learning ${localise(getLocalisationsForLanguage(language), 'English')} are stored here`,
-				'Polish': (language: Language) =>
-					`Zasoby do nauki ${
-						Expressions.polish.cases.genitive.languages[language].toLowerCase()
-					} są przechowywane tutaj`,
-				'Romanian': (language: Language) =>
-					`Resursele pentru învățatul limbii ${
-						Expressions.romanian.cases.genitive.indefinite.languages[language]
-					} sunt stocate aici`,
+				'English': (language: Language) => {
+					const languageLocalised = localise(getLocalisationsForLanguage(language), getLocaleForLanguage('English'));
+
+					return `Resources for learning ${languageLocalised} are stored here`;
+				},
+				'Polish': (language: Language) => {
+					const languageLocalised = Expressions.polish.cases.genitive.languages[language].toLowerCase();
+
+					return `Zasoby do nauki ${languageLocalised} są przechowywane tutaj`;
+				},
+				'Romanian': (language: Language) => {
+					const languageLocalised = Expressions.romanian.cases.genitive.indefinite.languages[language];
+
+					return `Resursele pentru învățatul limbii ${languageLocalised} sunt stocate aici`;
+				},
 			},
 		},
 	});
@@ -286,6 +297,8 @@ class Commands {
 			'Romanian': 'Traduce textul dat din limbă-sursă în limbă-țintă.',
 		},
 		options: {
+			// If your language has a grammatical case to express the idea of 'translate __from English__',
+			// use the word 'source' here.
 			from: {
 				name: {
 					'English': 'from',
@@ -298,6 +311,8 @@ class Commands {
 					'Romanian': 'Limbă-sursă.',
 				},
 			},
+			// If your language has a grammatical case to express the idea of 'translate __to English__',
+			// use the word 'target' here.
 			to: {
 				name: {
 					'English': 'to',
@@ -356,20 +371,43 @@ class Commands {
 					'Romanian': 'Atât limba-sursă, cât și limba-țintă sunt nevalide.',
 				},
 			},
+			// This word comes after your translation for the word 'from', as in 'translate from English'.
+			// If you have used the word 'source' instead of 'from', use the nominative case.
 			sourceLanguage: {
-				'English': (languageName: TranslationLanguage) =>
-					localise(getLocalisationsForLanguage(languageName), getLocaleForLanguage('English')),
-				'Polish': (languageName: TranslationLanguage) => Expressions.polish.cases.genitive.languages[languageName],
-				'Romanian': (languageName: TranslationLanguage) =>
-					localise(getLocalisationsForLanguage(languageName), getLocaleForLanguage('Romanian')),
+				'English': (language: TranslationLanguage) => {
+					const languageLocalised = localise(getLocalisationsForLanguage(language), getLocaleForLanguage('English'));
+
+					return languageLocalised;
+				},
+				'Polish': (language: TranslationLanguage) => {
+					const languageLocalised = Expressions.polish.cases.genitive.languages[language];
+
+					return languageLocalised;
+				},
+				'Romanian': (language: TranslationLanguage) => {
+					const languageLocalised = localise(getLocalisationsForLanguage(language), getLocaleForLanguage('Romanian'));
+
+					return languageLocalised;
+				},
 			},
+			// This word comes after your translation for the word 'to', as in 'translate to English'.
+			// If you have used the word 'target' instead of 'to', use the nominative case.
 			targetLanguage: {
-				'English': (languageName: TranslationLanguage) =>
-					localise(getLocalisationsForLanguage(languageName), getLocaleForLanguage('English')),
-				'Polish': (languageName: TranslationLanguage) =>
-					localise(getLocalisationsForLanguage(languageName), getLocaleForLanguage('Polish')),
-				'Romanian': (languageName: TranslationLanguage) =>
-					localise(getLocalisationsForLanguage(languageName), getLocaleForLanguage('Romanian')),
+				'English': (language: TranslationLanguage) => {
+					const languageLocalised = localise(getLocalisationsForLanguage(language), getLocaleForLanguage('English'));
+
+					return languageLocalised;
+				},
+				'Polish': (language: TranslationLanguage) => {
+					const languageLocalised = localise(getLocalisationsForLanguage(language), getLocaleForLanguage('Polish'));
+
+					return languageLocalised;
+				},
+				'Romanian': (language: TranslationLanguage) => {
+					const languageLocalised = localise(getLocalisationsForLanguage(language), getLocaleForLanguage('Romanian'));
+
+					return languageLocalised;
+				},
 			},
 			sourceText: {
 				'English': 'Source Text',
@@ -476,10 +514,10 @@ class Commands {
 						'definition',
 						'definitions',
 					);
+					const flag = localise(this.word.options.verbose.name, getLocaleForLanguage('English'));
+
 					return `Omitted ${numberExpression}. ` +
-						`To display more results, enable the '${
-							localise(this.word.options.verbose.name, getLocaleForLanguage('English'))
-						}' flag.`;
+						`To display more results, enable the ${code(flag)} flag.`;
 				},
 				'Polish': (results: number) => {
 					const numberExpression = Expressions.polish.methods.pluralise(
@@ -488,10 +526,10 @@ class Commands {
 						'znaczenia',
 						'znaczeń',
 					);
+					const flag = localise(this.word.options.verbose.name, getLocaleForLanguage('Polish'));
+
 					return `Ominięto ${numberExpression}. ` +
-						`Aby wyświetlić więcej rezultatów, użyj flagi '${
-							localise(this.word.options.verbose.name, getLocaleForLanguage('Polish'))
-						}'.`;
+						`Aby wyświetlić więcej rezultatów, użyj flagi ${code(flag)}.`;
 				},
 				'Romanian': (results: number) => {
 					const numberExpression = Expressions.romanian.methods.pluralise(
@@ -499,10 +537,10 @@ class Commands {
 						'definiție',
 						'definiții',
 					);
-					return `${numberExpression} au fost omise. ` +
-						`Pentru a afișa mai multe rezultate, activează fanionul '${
-							localise(this.word.options.verbose.name, getLocaleForLanguage('Romanian'))
-						}'.`;
+					const flag = localise(this.word.options.verbose.name, getLocaleForLanguage('Romanian'));
+
+					return `Au fost omise ${numberExpression}. ` +
+						`Pentru a afișa mai multe rezultate, activează fanionul ${code(flag)}.`;
 				},
 			},
 			page: {
@@ -843,11 +881,14 @@ class Commands {
 			},
 			timedOut: {
 				'English': (userMention: string, until: string) =>
-					`User ${userMention} has been timed out. The timeout will expire ${until}.`,
+					`User ${userMention} has been timed out. ` +
+					`The timeout will expire ${until}.`,
 				'Polish': (userMention: string, until: string) =>
-					`Użytkownik ${userMention} został wyciszony. Wyciszenie wygaśnie ${until}.`,
+					`Użytkownik ${userMention} został wyciszony. ` +
+					`Wyciszenie wygaśnie ${until}.`,
 				'Romanian': (userMention: string, until: string) =>
-					`Utilizatorul ${userMention} a primit un timeout. Timeout-ul va expira ${until}.`,
+					`Utilizatorul ${userMention} a primit un timeout. ` +
+					`Timeout-ul va expira ${until}.`,
 			},
 			timedOutWithReason: {
 				'English': (userMention: string, until: string, reason: string) =>
@@ -965,11 +1006,14 @@ class Commands {
 			},
 			warned: {
 				'English': (userMention: string, warningCount: number) =>
-					`User ${userMention} has been warned. They now have ${warningCount} warnings.`,
+					`User ${userMention} has been warned. ` +
+					`They now have ${warningCount} warnings.`,
 				'Polish': (userMention: string, warningCount: number) =>
-					`Użytkownik ${userMention} został ostrzeżony. Razem ostrzeżeń: ${warningCount}.`,
+					`Użytkownik ${userMention} został ostrzeżony. ` +
+					`Razem ostrzeżeń: ${warningCount}.`,
 				'Romanian': (userMention: string, warningCount: number) =>
-					`Utilizatorul ${userMention} a fost avertizat. Avertizări în total: ${warningCount}.`,
+					`Utilizatorul ${userMention} a fost avertizat. ` +
+					`Avertizări în total: ${warningCount}.`,
 			},
 			// Do not localise; this is a public feedback message.
 			reachedKickStage: {
@@ -1131,7 +1175,6 @@ class Commands {
 						'Polish': 'Nie ma utworu do zapauzowania.',
 						'Romanian': 'Nu este o melodie pentru a o pauza.',
 					},
-					// Do not localise; this is a public feedback message.
 					paused: {
 						header: { 'English': 'Paused' },
 						body: { 'English': 'Paused the playback of music.' },
@@ -1209,7 +1252,6 @@ class Commands {
 						'English':
 							'The queue is full; Try removing a song from the song queue, skip the current song to advance the queue immediately, or wait until the current song stops playing.',
 					},
-					// Do not localise; this is a public feedback message.
 					queued: {
 						header: {
 							'English': 'Listing queued',
@@ -1272,7 +1314,6 @@ class Commands {
 						'Polish': 'Nie udało się usunąć zaznaczonego utworu.',
 						'Romanian': 'Nu s-a putut elimina melodia selectată.',
 					},
-					// Do not localise; this is a public feedback message.
 					removed: {
 						header: { 'English': 'Removed' },
 						body: {
@@ -1331,7 +1372,6 @@ class Commands {
 						'Polish': 'Obecny utwór nie jest zatrzymany.',
 						'Romanian': 'Melodia actuală nu este oprită.',
 					},
-					// Do not localise; this is a public feedback message.
 					resumed: {
 						header: { 'English': 'Resumed' },
 						body: { 'English': 'Music playback has been resumed.' },
@@ -1375,7 +1415,6 @@ class Commands {
 						'Romanian': 'Nu este un set de melodii de sărit peste.\n\n' +
 							'Încearcă să sari peste melodia actuală.',
 					},
-					// Do not localise; this is a public feedback message.
 					skipped: {
 						header: { 'English': 'Skipped' },
 						body: {
@@ -1402,7 +1441,6 @@ class Commands {
 						'Polish': 'Bot obecnie nie odtwarza muzyki.',
 						'Romanian': 'Nu se redă muzică.',
 					},
-					// Do not localise; this is a public feedback message.
 					stopped: {
 						header: { 'English': 'Stopped' },
 						body: {
@@ -1441,7 +1479,6 @@ class Commands {
 						'Polish': 'Ostatnio odtworzony wpis nie może zostać przywrócony, ponieważ kolejka jest pełna.',
 						'Romanian': 'Ultima înregistrare nu poate fi înapoiată fiindcă coada deja este plină.',
 					},
-					// Do not localise; this is a public feedback message.
 					unskipped: {
 						header: { 'English': 'Unskipped' },
 						body: {
@@ -1522,7 +1559,6 @@ class Commands {
 								'Romanian': (maxVolume: number) =>
 									`Volumul trebuie să fie mai mare decât zero, dar și nu mai mare decât ${maxVolume}%.`,
 							},
-							// Do not localise; this is a public feedback message.
 							volumeSet: {
 								header: { 'English': 'Volume set' },
 								body: {
@@ -1556,7 +1592,6 @@ class Commands {
 				'Polish': 'Argument przewinięcia musi być większy niż zero.',
 				'Romanian': 'Argumentul trebuie să fie mai mare decât zero.',
 			},
-			// Do not localise; this is a public feedback message.
 			allDone: {
 				header: {
 					'English': 'All done!',
@@ -1565,7 +1600,6 @@ class Commands {
 					'English': 'Can I go home for today?',
 				},
 			},
-			// Do not localise; this is a public feedback message.
 			couldNotLoadTrack: {
 				header: {
 					'English': 'Couldn\'t load track',
@@ -1574,7 +1608,6 @@ class Commands {
 					'English': (songTitle: string) => `The track, **${songTitle}**, could not be loaded.`,
 				},
 			},
-			// Do not localise (not even 'parts'); this is a public feedback message.
 			playing: {
 				header: {
 					'English': 'Now playing',
@@ -1643,7 +1676,6 @@ class Commands {
 					'Romanian': 'Postează un mesaj care conține un bun-venit pentru membri noi ai serverului.',
 				},
 				strings: {
-					// Do not localise; this is a public feedback message.
 					welcome: {
 						header: {
 							'English': (guildName: string) => `Welcome to **${guildName}**`,
@@ -1653,7 +1685,6 @@ class Commands {
 								`To enter the server and become its official member, read the information in the ${channelMention} channel to get yourself familiarised with the server guidelines, and then press the button below.`,
 						},
 					},
-					// Do not localise; this is a public feedback message.
 					// No full stop here.
 					acceptedRules: {
 						'English': 'I have read the rules, and agree to abide by them',

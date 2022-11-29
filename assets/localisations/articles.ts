@@ -24,25 +24,34 @@ class Articles {
 
 	static readonly verification = {
 		reason: {
-			'English': (language: Language) => `What is your reason for learning ${language}?`,
-			'Polish': (language: Language) =>
-				`Jaki jest powód dla którego uczysz się ${
-					Expressions.polish.cases.genitive.languages[language].toLowerCase()
-				}?`,
-			'Romanian': (language: Language) =>
-				`Care este motivul pentru care înveți ${
-					localise(getLocalisationsForLanguage(language), getLocaleForLanguage('Romanian'))!.toLowerCase()
-				}?`,
+			'English': (language: Language) => {
+				const languageLocalised = localise(getLocalisationsForLanguage(language), getLocaleForLanguage('English'));
+
+				return `What is your reason for learning ${languageLocalised}?`;
+			},
+			'Polish': (language: Language) => {
+				const languageLocalised = Expressions.polish.cases.genitive.languages[language].toLowerCase();
+
+				return `Jaki jest powód dla którego uczysz się ${languageLocalised}?`;
+			},
+			'Romanian': (language: Language) => {
+				const languageLocalised = localise(
+					getLocalisationsForLanguage(language),
+					getLocaleForLanguage('Romanian'),
+				).toLowerCase();
+
+				return `Care este motivul pentru care înveți ${languageLocalised}?`;
+			},
 		},
 		aim: {
-			'English': (_language: Language) => 'How will you benefit from becoming a member?',
-			'Polish': (_language: Language) => 'Jaką korzyść przyniesie Tobie członkostwo?',
-			'Romanian': (_language: Language) => 'Ce folos ți va aduce apartenența?',
+			'English': 'How will you benefit from becoming a member?',
+			'Polish': 'Jaką korzyść przyniesie Tobie członkostwo?',
+			'Romanian': 'Ce folos ți va aduce apartenența?',
 		},
 		whereFound: {
-			'English': (language: Language) => `Where did you find out about Learn ${language}?`,
-			'Polish': (language: Language) => `Gdzie dowiedziałeś/aś się o Learn ${language}?`,
-			'Romanian': (language: Language) => `Unde ai aflat despre Learn ${language}?`,
+			'English': (guildName: string) => `Where did you find out about ${guildName}?`,
+			'Polish': (guildName: string) => `Gdzie dowiedziałeś/aś się o ${guildName}?`,
+			'Romanian': (guildName: string) => `Unde ai aflat despre ${guildName}?`,
 		},
 	};
 }

@@ -62,7 +62,6 @@ class Words {
 
 	static readonly typeNameToType: Localisations<Record<string, WordTypes>> = {
 		'English': {},
-		'Polish': {},
 		'Romanian': {
 			'substantiv': WordTypes.Noun,
 			'substantiv masculin': WordTypes.Noun,

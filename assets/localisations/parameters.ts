@@ -70,9 +70,12 @@ class Parameters {
 				'Romanian': 'motiv',
 			},
 			description: {
-				'English': 'The reason for the sanction or its repeal. It should be descriptive.',
-				'Polish': 'Powód dla sankcji lub dla jej uchylenia. Powinien być szczegółowy.',
-				'Romanian': 'Motivul pentru sancțiune sau anularea acesteia. Ar trebui să fie detaliat.',
+				'English': 'The reason for the sanction or its repeal. ' +
+					'It should be descriptive.',
+				'Polish': 'Powód dla sankcji lub dla jej uchylenia. ' +
+					'Powinien być szczegółowy.',
+				'Romanian': 'Motivul pentru sancțiune sau anularea acesteia. ' +
+					'Ar trebui să fie detaliat.',
 			},
 		},
 	};
