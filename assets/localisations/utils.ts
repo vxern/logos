@@ -6,9 +6,7 @@ type LocalisationsByLanguage<L extends string> =
 	& Required<Record<Language, Localisations<string>>>
 	& Record<L, Localisations<string>>;
 
-function inferLanguages<L extends string>(
-	localisations: LocalisationsByLanguage<L>,
-): LocalisationsByLanguage<L> {
+function inferLanguages<L extends string>(localisations: LocalisationsByLanguage<L>): LocalisationsByLanguage<L> {
 	return localisations;
 }
 
@@ -25,22 +23,8 @@ type CommandLocalisations<
 	StringsType extends Record<StringKeys, unknown> | undefined = undefined,
 > =
 	& DiscordLocalisations
-	& (
-		OptionsType extends undefined ? {
-				options?: OptionsType;
-			}
-			: {
-				options: OptionsType;
-			}
-	)
-	& (
-		StringsType extends undefined ? {
-				strings?: StringsType;
-			}
-			: {
-				strings: StringsType;
-			}
-	);
+	& (OptionsType extends undefined ? { options?: OptionsType } : { options: OptionsType })
+	& (StringsType extends undefined ? { strings?: StringsType } : { strings: StringsType });
 
 const languageByLocale: Partial<Record<Locales, Language>> = {
 	'en-GB': 'English',
@@ -59,9 +43,7 @@ function getLanguageByLocale(locale: Locales): Language | undefined {
 	return languageByLocale[locale];
 }
 
-function createDiscordLocalisations(
-	localisations: Localisations<string>,
-): DiscordLocalisation {
+function createDiscordLocalisations(localisations: Localisations<string>): DiscordLocalisation {
 	return Object.fromEntries(
 		(<[Language, string][]> Object.entries(localisations))
 			.filter(([key, _value]) => key !== defaultLanguage)
@@ -76,9 +58,7 @@ interface DiscordLocalisationFields {
 	descriptionLocalizations: DiscordLocalisation;
 }
 
-function createLocalisations(
-	commandLocalisations: DiscordLocalisations,
-): DiscordLocalisationFields {
+function createLocalisations(commandLocalisations: DiscordLocalisations): DiscordLocalisationFields {
 	return {
 		name: commandLocalisations.name[defaultLanguage],
 		nameLocalizations: createDiscordLocalisations(commandLocalisations.name),
@@ -89,10 +69,7 @@ function createLocalisations(
 	};
 }
 
-function localise<T>(
-	localisations: Localisations<T>,
-	locale: string | undefined,
-): T {
+function localise<T>(localisations: Localisations<T>, locale: string | undefined): T {
 	if (!locale || !(locale in languageByLocale)) {
 		return localisations[defaultLanguage];
 	}
@@ -115,33 +92,19 @@ function typedLocalisations<
 	OptionsType extends Record<OptionKeys, unknown> | undefined,
 	StringsType extends Record<StringKeys, unknown> | undefined,
 >(
-	localisations: CommandLocalisations<
-		OptionKeys,
-		StringKeys,
-		OptionsType,
-		StringsType
-	>,
-): CommandLocalisations<
-	OptionKeys,
-	StringKeys,
-	OptionsType,
-	StringsType
-> {
+	localisations: CommandLocalisations<OptionKeys, StringKeys, OptionsType, StringsType>,
+): CommandLocalisations<OptionKeys, StringKeys, OptionsType, StringsType> {
 	return localisations;
 }
 
-function getLocalisationsForLanguage(
-	language: TranslationLanguage,
-): Localisations<string> {
+function getLocalisationsForLanguage(language: TranslationLanguage): Localisations<string> {
 	if (!(language in localisationsByLanguage)) {
 		return { [defaultLanguage]: language };
 	}
 	return localisationsByLanguage[language];
 }
 
-function getLocaleForLanguage(
-	language: Language,
-): typeof localeByLanguage[keyof typeof localeByLanguage] {
+function getLocaleForLanguage(language: Language): typeof localeByLanguage[keyof typeof localeByLanguage] {
 	return localeByLanguage[language] ?? 'en-GB';
 }
 
