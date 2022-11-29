@@ -2,10 +2,11 @@ import { ensureType, TranslationLanguage } from 'logos/assets/localisations/util
 import { Language } from 'logos/types.ts';
 
 class Expressions {
+	// TODO: Think about changing '0 words' to 'no words'.
 	static readonly english = {
 		methods: {
 			pluralise: (number: string, singular: string, plural: string) => {
-				// 1 is the only number the singular form goes with in English.
+				// 1 is the only positive number the singular form goes with in English.
 				if (number === '1') return `${number} ${singular}`;
 
 				return `${number} ${plural}`;
@@ -66,7 +67,7 @@ class Expressions {
 		},
 		methods: {
 			pluralise: (number: string, singular: string, plural: string, genitive: string) => {
-				// 1 is the only number the singular form goes with in Polish.
+				// 1 is the only positive number the singular form goes with in Polish.
 				if (number === '1') return `${number} ${singular}`;
 
 				// Numbers 12, 13 and 14 and other numbers ending in them are followed by the plural genitive.
@@ -96,7 +97,7 @@ class Expressions {
 		},
 		methods: {
 			pluralise: (number: string, singular: string, plural: string) => {
-				// 1 is the only number the singular form goes with in Romanian.
+				// 1 is the only positive number the singular form goes with in Romanian.
 				if (number === '1') return `${number} ${singular}`;
 
 				// Until the number 20, Romanian nouns follow the standard number + plural rule.
