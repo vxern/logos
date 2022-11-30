@@ -2,7 +2,7 @@ import { ensureType, TranslationLanguage } from 'logos/assets/localisations/util
 import { Language } from 'logos/types.ts';
 
 class Expressions {
-	// TODO: Think about changing '0 words' to 'no words'.
+	// TODO(vxern): Think about changing '0 words' to 'no words'.
 	static readonly english = {
 		methods: {
 			pluralise: (number: string, singular: string, plural: string) => {

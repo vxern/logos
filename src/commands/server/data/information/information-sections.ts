@@ -4,7 +4,7 @@ import { Client } from 'logos/src/client.ts';
 import { fromHex, getTextChannel } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import { links } from 'logos/constants.ts';
-import { mention, MentionTypes } from 'logos/formatting.ts';
+import { list, mention, MentionTypes } from 'logos/formatting.ts';
 import { defaultLanguage } from 'logos/types.ts';
 
 /** Represents a section of guild information. */
@@ -44,12 +44,12 @@ const informationSections: Record<string, InformationSection> = {
 
 			fields.push({
 				name: `ℹ️  ${localise(Information.rules.moderationPolicy.header, defaultLanguage)}`,
-				value: localise(
-					Information.rules.moderationPolicy.body,
-					defaultLanguage,
-				)(
-					moderatorRoleMention,
-				),
+				value: list([
+					localise(Information.rules.moderationPolicy.body.points.one, defaultLanguage)(moderatorRoleMention),
+					localise(Information.rules.moderationPolicy.body.points.two, defaultLanguage),
+					localise(Information.rules.moderationPolicy.body.points.three, defaultLanguage),
+					localise(Information.rules.moderationPolicy.body.points.four, defaultLanguage),
+				]),
 				inline: false,
 			});
 
