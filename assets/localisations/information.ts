@@ -1,5 +1,3 @@
-import { list } from 'logos/formatting.ts';
-
 class Information {
 	static readonly rules = {
 		lastUpdated: {
@@ -147,18 +145,45 @@ class Information {
 		},
 		moderationPolicy: {
 			header: {
-				'English': 'Moderation policy',
+				'English': 'Moderation Policy',
+				'Polish': 'Polityka Moderowania',
+				'Romanian': 'Politică de Moderare',
 			},
 			body: {
-				'English': (moderatorRoleMention: string) =>
-					list(
-						[
+				points: {
+					one: {
+						'English': (moderatorRoleMention: string) =>
 							`The server abides by a 3-warn moderation policy, enforced by the server's ${moderatorRoleMention}s.`,
-							'The above rules apply to the entirety of the server, and a breach thereof will cause a warning to be issued. Warnings expire after a period of two months.',
-							'Depending on the circumstances, a timeout may be issued to the member for the duration of 5, 15, or 60 minutes respectively.',
-							'If a member has already received three warnings, the fourth warning will warrant a kick from the server. If they rejoin, and are warned again, they will be banned permanently.',
-						],
-					),
+						'Polish': (moderatorRoleMention: string) =>
+							`Na serwerze obowiązuje polityka moderacji na bazie trzech ostrzeżeń, zgodnie z którą działają moderatorzy serwera (osoby z rolą ${moderatorRoleMention}).`,
+						'Romanian': (moderatorRoleMention: string) =>
+							`Serverul respectă o politică de moderație cu trei avertismente. Moderatorii (persoanele cu rolul ${moderatorRoleMention}) aplică regulile în conformitate cu această politică de moderare.`,
+					},
+					two: {
+						'English':
+							'The above rules apply to the entirety of the server, and a breach thereof will result in a warning being issued. Warnings expire after a period of two months.',
+						'Polish':
+							'Reguły serwera obowiązują dla każdego użytkownika, a poważne ich naruszenie zaskutkuje ostrzeżeniem. Ostrzeżenia wygasają po upływie dwóch miesięcy.',
+						'Romanian':
+							'Regulile serverului se aplică tuturor membri, iar o încălcare gravă a acestora va rezulta în acordarea unui avertisment. Avertismentele expiră după o perioadă de două luni.',
+					},
+					three: {
+						'English':
+							'If a user has already received three warnings, the fourth warning will warrant a kick from the server.',
+						'Polish':
+							'W przypadku gdy użytkownik ma już trzy ostrzeżenia, przy otrzymaniu czwartego ostrzeżenia, użytkownik zostanie automatycznie usunięty z serwera.',
+						'Romanian':
+							'În cazul în care un anumit utilizator are deja trei avertismente, împreună cu primirea celui de-al patrulea avertisment, utilizatorul va fi scos de pe server (kicked).',
+					},
+					four: {
+						'English':
+							'In case of it having been found that a user had knowingly and constantly been breaking the server rules and/or ignoring suggestions of the staff, the user will be permanently banned from the server.',
+						'Polish':
+							'Jeśli zostanie stwierdzone, że użytkownik ten świadomie i stale lekceważył reguły serwera i/lub ignorował sugestie moderatorów, użytkownik zostanie trwale wykluczony z serwera.',
+						'Romanian':
+							'Dacă se va determina că acest utilizator -- în mod conștient și persistent -- a desconsiderat regulile serverului și/sau a ignorat sugestiile moderatorilor, utilizatorul va fi exlus permanent din server (banned).',
+					},
+				},
 			},
 		},
 	};

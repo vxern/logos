@@ -811,7 +811,7 @@ class Commands {
 			userDoesNotHaveWarnings: {
 				'English': 'This user has not received any warnings.',
 				'Polish': 'Ten użytkownik jeszcze nie dostał ostrzeżenia.',
-				'Romanian': 'Acest utilizator nu a primit încă o avertizare.',
+				'Romanian': 'Acest utilizator nu a primit un avertisment încă.',
 			},
 			warnings: {
 				'English': 'Warnings',
@@ -933,19 +933,19 @@ class Commands {
 		description: {
 			'English': 'Removes the last given warning to a user.',
 			'Polish': 'Usuwa ostatnie ostrzeżenie dane użytkownikowi.',
-			'Romanian': 'Șterge ultima avertizare dată unui utilizator.',
+			'Romanian': 'Șterge ultimul avertisment acordat unui utilizator.',
 		},
 		options: {
 			warning: {
 				name: {
 					'English': 'warning',
 					'Polish': 'ostrzeżenie',
-					'Romanian': 'avertizare',
+					'Romanian': 'avertisment',
 				},
 				description: {
 					'English': 'The warning to remove.',
 					'Polish': 'Ostrzeżenie, które ma zostać usunięte.',
-					'Romanian': 'Avertizarea care să fie ștearsă.',
+					'Romanian': 'Avertismentul care să fie eliminat.',
 				},
 			},
 		},
@@ -953,12 +953,12 @@ class Commands {
 			failed: {
 				'English': 'Failed to remove warning.',
 				'Polish': 'Nie udało się usunąć ostrzeżenia.',
-				'Romanian': 'Nu s-a putut elimina avertizarea.',
+				'Romanian': 'Nu s-a putut elimina avertismentul.',
 			},
 			alreadyRemoved: {
 				'English': 'The selected warning has already been removed.',
 				'Polish': 'To ostrzeżenie już zostało usunięte.',
-				'Romanian': 'Avertizarea selectată a fost deja eliminată.',
+				'Romanian': 'Avertismentul selectat a fost deja eliminat.',
 			},
 			pardoned: {
 				'English': (userMention: string, reason: string) =>
@@ -966,7 +966,7 @@ class Commands {
 				'Polish': (userMention: string, reason: string) =>
 					`Użytkownik ${userMention} został ułaskawiony z jego ostrzeżenia za: ${reason}`,
 				'Romanian': (userMention: string, reason: string) =>
-					`Utilizatorul ${userMention} a fost grațiat de avertizarea sa pentru: ${reason}`,
+					`Utilizatorul ${userMention} a fost grațiat de avertismentul care i a fost acordat pentru: ${reason}`,
 			},
 			// Do not localise; this is a public feedback message.
 			pardonedDirect: {
@@ -1037,6 +1037,19 @@ class Commands {
 					`You have been warned for: ${reason}\n\n` +
 					`This is warning no. ${warningCount} of ${warningLimit}.`,
 			},
+		},
+	});
+
+	static readonly policy = typedLocalisations({
+		name: {
+			'English': 'policy',
+			'Polish': 'polityka',
+			'Romanian': 'politică',
+		},
+		description: {
+			'English': 'Displays the server moderation policy.',
+			'Polish': 'Wyświetla politykę moderowania serwera.',
+			'Romanian': 'Afișează politica de moderare a serverului.',
 		},
 	});
 
