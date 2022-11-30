@@ -16,11 +16,11 @@ import { capitalise } from 'logos/formatting.ts';
 import { defaultLanguage } from 'logos/types.ts';
 
 const command: CommandBuilder = {
-	...createLocalisations(Commands.cite),
+	...createLocalisations(Commands.rule),
 	defaultMemberPermissions: ['VIEW_CHANNEL'],
 	handle: handleCiteRule,
 	options: [{
-		...createLocalisations(Commands.cite.options.rule),
+		...createLocalisations(Commands.rule.options.rule),
 		type: ApplicationCommandOptionTypes.String,
 		required: true,
 		autocomplete: true,
@@ -66,7 +66,7 @@ function handleCiteRule(
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(
-							Commands.cite.strings.invalidRule,
+							Commands.rule.strings.invalidRule,
 							interaction.locale,
 						),
 						color: configuration.interactions.responses.colors.red,

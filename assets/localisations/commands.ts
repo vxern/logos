@@ -743,11 +743,11 @@ class Commands {
 		},
 	});
 
-	static readonly cite = typedLocalisations({
+	static readonly rule = typedLocalisations({
 		name: {
-			'English': 'cite',
-			'Polish': 'zacytuj',
-			'Romanian': 'citare',
+			'English': 'rule',
+			'Polish': 'reguła',
+			'Romanian': 'regulă',
 		},
 		description: {
 			'English': 'Cites a server rule.',
