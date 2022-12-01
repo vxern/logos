@@ -162,20 +162,21 @@ async function handlePardonUser(
 		},
 	);
 
-	const dmChannel = await getDmChannel(bot, member.id);
-
-	return void sendMessage(bot, dmChannel.id, {
-		embeds: [
-			{
-				author: guildAsAuthor(bot, guild),
-				description: localise(
-					Commands.pardon.strings.pardonedDirect,
-					defaultLanguage,
-				)(deletedWarning.data.reason, displayTime(deletedWarning.ts)),
-				color: configuration.interactions.responses.colors.green,
-			},
-		],
-	});
+	const dmChannel = await getDmChannel(bot, member.id).catch(() => undefined);
+	if (dmChannel !== undefined) {
+		return void sendMessage(bot, dmChannel.id, {
+			embeds: [
+				{
+					author: guildAsAuthor(bot, guild),
+					description: localise(
+						Commands.pardon.strings.pardonedDirect,
+						defaultLanguage,
+					)(deletedWarning.data.reason, displayTime(deletedWarning.ts)),
+					color: configuration.interactions.responses.colors.green,
+				},
+			],
+		});
+	}
 }
 
 export default command;

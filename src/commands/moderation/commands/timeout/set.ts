@@ -146,10 +146,11 @@ async function handleSetTimeout(
 
 		return void sendMessage(bot, textChannel.id, {
 			embeds: [{
-				description: localise(
-					Commands.timeout.strings.timedOutWithReason,
-					interaction.locale,
-				)(mention(member.id, MentionTypes.User), displayTime(until), reason),
+				description: localise(Commands.timeout.strings.timedOutWithReason, interaction.locale)(
+					mention(member.id, MentionTypes.User),
+					displayTime(until),
+					reason,
+				),
 				color: configuration.interactions.responses.colors.yellow,
 			}],
 		});
@@ -159,10 +160,7 @@ async function handleSetTimeout(
 		embeds: [
 			{
 				author: guildAsAuthor(bot, guild),
-				description: localise(
-					Commands.timeout.strings.timedOutDirect,
-					defaultLanguage,
-				)(displayTime(until), reason),
+				description: localise(Commands.timeout.strings.timedOutDirect, defaultLanguage)(displayTime(until), reason),
 				color: configuration.interactions.responses.colors.yellow,
 			},
 		],
