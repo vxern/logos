@@ -28,7 +28,7 @@ import {
 import { Client } from 'logos/src/client.ts';
 import { createInteractionCollector } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
-import { defaultLanguage, Language } from 'logos/types.ts';
+import { defaultLocale, Language } from 'logos/types.ts';
 
 const command: OptionBuilder = {
 	...createLocalisations(Commands.profile.options.roles),
@@ -156,7 +156,7 @@ function createRoleSelectionMenu(
 
 		if (category.type === RoleCategoryTypes.Category) {
 			menuRoles = resolveRoles(category.collection, data.language);
-			menuRolesResolved = menuRoles.map((role) => rolesByName.get(localise(role.name, defaultLanguage))!);
+			menuRolesResolved = menuRoles.map((role) => rolesByName.get(localise(role.name, defaultLocale))!);
 			memberRolesIncludedInMenu = memberRoleIds.filter(
         (roleId) => menuRolesResolved.some((role) => role.id === roleId)
 			);

@@ -1,6 +1,6 @@
 import { Locales, Localization as DiscordLocalisation } from 'discordeno';
 import { localisationsByLanguage } from 'logos/assets/localisations/languages.ts';
-import { defaultLanguage, Language } from 'logos/types.ts';
+import { defaultLanguage, getLanguageByLocale, getLocaleByLanguage, Language, languageByLocale } from 'logos/types.ts';
 
 type LocalisationsByLanguage<L extends string> =
 	& Required<Record<Language, Localisations<string>>>
@@ -25,27 +25,6 @@ type CommandLocalisations<
 	& DiscordLocalisations
 	& (OptionsType extends undefined ? { options?: OptionsType } : { options: OptionsType })
 	& (StringsType extends undefined ? { strings?: StringsType } : { strings: StringsType });
-
-const languageByLocale: Partial<Record<Locales, Language>> = {
-	'en-GB': 'English',
-	'en-US': 'English',
-	'pl': 'Polish',
-	'ro': 'Romanian',
-};
-
-const localeByLanguage: Partial<Record<Language, `${Locales}`>> = {
-	'English': 'en-GB',
-	'Polish': 'pl',
-	'Romanian': 'ro',
-};
-
-function getLanguageByLocale(locale: Locales): Language | undefined {
-	return languageByLocale[locale];
-}
-
-function getLocaleByLanguage(language: Language): typeof localeByLanguage[keyof typeof localeByLanguage] {
-	return localeByLanguage[language] ?? 'en-GB';
-}
 
 function localise<T>(localisations: Localisations<T>, locale: string | undefined): T {
 	if (locale === undefined || !(locale in languageByLocale)) {
