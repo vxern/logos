@@ -64,7 +64,7 @@ const informationSections: Record<string, InformationSection> = {
 		image: 'https://i.imgur.com/snJaKYm.png',
 		generateEmbed: async ([_client, bot], guild) => {
 			const invite = await getInvite(bot, guild);
-			if (!invite) return;
+			if (invite === undefined) return;
 
 			return {
 				color: fromHex('#637373'),
@@ -84,10 +84,10 @@ async function getInvite(
 	const invites = (await getInvites(bot, guild.id)).array();
 	const viableInvites = invites.filter((invite) => invite.maxAge === 0);
 	const mostViableInvite = viableInvites.find((invite) => invite.maxAge === 0 && invite.inviter?.id === guild.ownerId);
-	if (mostViableInvite) return mostViableInvite;
+	if (mostViableInvite !== undefined) return mostViableInvite;
 
 	const inviteLinkChannel = getTextChannel(guild, 'welcome');
-	if (!inviteLinkChannel) return undefined;
+	if (inviteLinkChannel === undefined) return undefined;
 
 	const newInvite = await createInvite(bot, inviteLinkChannel.id, {
 		maxAge: 0,

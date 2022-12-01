@@ -38,10 +38,7 @@ async function handleSetTimeout(
 		interaction.type === InteractionTypes.ApplicationCommandAutocomplete &&
 		focused?.name === 'duration'
 	) {
-		const timestamp = getTimestampFromExpression(
-			duration!,
-			interaction.locale,
-		);
+		const timestamp = getTimestampFromExpression(duration!, interaction.locale);
 
 		return void sendInteractionResponse(
 			bot,
@@ -50,20 +47,16 @@ async function handleSetTimeout(
 			{
 				type: InteractionResponseTypes.ApplicationCommandAutocompleteResult,
 				data: {
-					choices: !timestamp ? [] : [{ name: timestamp[0], value: timestamp[1].toString() }],
+					choices: timestamp === undefined ? [] : [{ name: timestamp[0], value: timestamp[1].toString() }],
 				},
 			},
 		);
 	}
 
-	const member = resolveInteractionToMember(
-		[client, bot],
-		interaction,
-		user!,
-	);
-	if (!member) return;
+	const member = resolveInteractionToMember([client, bot], interaction, user!);
+	if (member === undefined) return;
 
-	if (!reason) return;
+	if (reason === undefined) return;
 
 	const displayError = (error: string): void => {
 		return void sendInteractionResponse(
@@ -125,17 +118,9 @@ async function handleSetTimeout(
 	);
 
 	const guild = client.cache.guilds.get(interaction.guildId!);
-	if (!guild) return;
+	if (guild === undefined) return;
 
-	log(
-		[client, bot],
-		guild,
-		'memberTimeoutAdd',
-		member,
-		until,
-		reason,
-		interaction.user,
-	);
+	log([client, bot], guild, 'memberTimeoutAdd', member, until, reason, interaction.user);
 
 	sendInteractionResponse(bot, interaction.id, interaction.token, {
 		type: InteractionResponseTypes.ChannelMessageWithSource,
@@ -151,13 +136,13 @@ async function handleSetTimeout(
 		},
 	});
 
-	const dmChannel = await getDmChannel(bot, member.id);
-	if (!dmChannel) {
+	const dmChannel = await getDmChannel(bot, member.id).catch(() => undefined);
+	if (dmChannel === undefined) {
 		const textChannel = client.cache.channels.get(interaction.channelId!);
-		if (!textChannel) return;
+		if (textChannel === undefined) return;
 
 		const user = member.user;
-		if (!user) return;
+		if (user === undefined) return;
 
 		return void sendMessage(bot, textChannel.id, {
 			embeds: [{

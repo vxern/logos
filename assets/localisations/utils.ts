@@ -48,7 +48,7 @@ function getLocaleByLanguage(language: Language): typeof localeByLanguage[keyof 
 }
 
 function localise<T>(localisations: Localisations<T>, locale: string | undefined): T {
-	if (!locale || !(locale in languageByLocale)) {
+	if (locale === undefined || !(locale in languageByLocale)) {
 		return localisations[defaultLanguage];
 	}
 

@@ -157,12 +157,13 @@ function convertToMilliseconds(number: number): number {
 }
 
 function mentionUser(user: DiscordUser | undefined, id: bigint): string {
-	return !user ? `an unknown user (ID ${id})` : diagnosticMentionUser(user, true);
+	return user === undefined ? `an unknown user (ID ${id})` : diagnosticMentionUser(user, true);
 }
 
 function getUserMentionByReference(client: Client, reference: Reference): string {
 	const userDocument = client.database.users.get(reference.value.id);
-	if (!userDocument) return `an unknown, uncached user`;
+	if (userDocument === undefined) return `an unknown, uncached user`;
+
 	const id = BigInt(userDocument.data.account.id);
 	const user = client.cache.users.get(id);
 	return mentionUser(user, id);

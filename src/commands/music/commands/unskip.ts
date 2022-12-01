@@ -27,13 +27,13 @@ function handleUnskipAction(
 	interaction: Interaction,
 ): void {
 	const musicController = client.music.get(interaction.guildId!);
-	if (!musicController) return;
+	if (musicController === undefined) return;
 
 	const [canAct, _] = musicController.verifyMemberVoiceState(interaction);
 	if (!canAct) return;
 
 	const data = interaction.data;
-	if (!data) return;
+	if (data === undefined) return;
 
 	const [{ collection, by, to }] = parseArguments(interaction.data?.options, {
 		collection: 'boolean',
@@ -41,15 +41,15 @@ function handleUnskipAction(
 		to: 'number',
 	});
 
-	if (by && isNaN(by)) return;
-	if (to && isNaN(to)) return;
+	if (by !== undefined && isNaN(by)) return;
+	if (to !== undefined && isNaN(to)) return;
 
 	const songListing = musicController.current;
 
-	const isUnskippingListing = !songListing ||
+	const isUnskippingListing = songListing !== undefined ||
 		songListing.content.type !== SongListingContentTypes.Collection ||
 		(songListing.content.type === SongListingContentTypes.Collection &&
-			(collection || songListing.content.position === 0));
+			(collection !== undefined || songListing.content.position === 0));
 
 	if (isUnskippingListing && musicController.history.length === 0) {
 		return void sendInteractionResponse(
@@ -73,7 +73,7 @@ function handleUnskipAction(
 	}
 
 	if (
-		collection &&
+		collection !== undefined &&
 		songListing?.content.type !== SongListingContentTypes.Collection
 	) {
 		return void sendInteractionResponse(
@@ -117,7 +117,7 @@ function handleUnskipAction(
 		);
 	}
 
-	if (by && to) {
+	if (by !== undefined && to !== undefined) {
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -138,7 +138,7 @@ function handleUnskipAction(
 		);
 	}
 
-	if ((by && by <= 0) || (to && to <= 0)) {
+	if ((by !== undefined && by <= 0) || (to !== undefined && to <= 0)) {
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -165,10 +165,10 @@ function handleUnskipAction(
 			to: to,
 		});
 	} else {
-		if (by) {
+		if (by !== undefined) {
 			if (
 				songListing.content.type === SongListingContentTypes.Collection &&
-				!collection
+				collection === undefined
 			) {
 				const listingToUnskip = Math.min(by, songListing.content.position);
 
@@ -184,10 +184,10 @@ function handleUnskipAction(
 					to: undefined,
 				});
 			}
-		} else if (to) {
+		} else if (to !== undefined) {
 			if (
 				songListing.content.type === SongListingContentTypes.Collection &&
-				!collection
+				collection === undefined
 			) {
 				const listingToSkipTo = Math.max(to, 1);
 

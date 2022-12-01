@@ -40,7 +40,7 @@ class DexonlineAdapter implements DictionaryAdapter<Dexonline.Results> {
 			let entry: DictionaryEntry;
 			// If the inflection table entry is not indexed, rely on the entries being ordered.
 			if (index === 0) {
-				entry = entriesByWord.find((entry) => !entry.inflectionTable)!;
+				entry = entriesByWord.find((entry) => entry.inflectionTable === undefined)!;
 			} // Otherwise, use the index directly.
 			else {
 				if (index >= entriesByWord.length) continue;
@@ -48,7 +48,7 @@ class DexonlineAdapter implements DictionaryAdapter<Dexonline.Results> {
 				entry = entriesByWord.at(index)!;
 			}
 
-			if (!entry.type) continue;
+			if (entry.type === undefined) continue;
 
 			const type = entry.type[0]!;
 			if (!supportedTypesForInflection.includes(type)) continue;
@@ -116,39 +116,45 @@ class DexonlineAdapter implements DictionaryAdapter<Dexonline.Results> {
 					value: genitiveDative!.map((terms) => terms.join(', ')).join('\n'),
 					inline: true,
 				},
-				...(vocative
-					? [
-						numberColumn,
-						{
-							name: localise(Commands.word.strings.nouns.cases.vocative, locale),
-							value: vocative!.map((terms) => terms.join(', ')).join('\n'),
-							inline: true,
-						},
-					]
-					: []),
+				...(
+					vocative !== undefined
+						? [
+							numberColumn,
+							{
+								name: localise(Commands.word.strings.nouns.cases.vocative, locale),
+								value: vocative!.map((terms) => terms.join(', ')).join('\n'),
+								inline: true,
+							},
+						]
+						: []
+				),
 			],
 		}];
 	}
 
 	private verbTableRowsToTable(rows: string[][], locale: string | undefined): InflectionTable {
 		const [infinitive, longInfinitive, pastParticiple, presentParticiple, imperativeSingle, imperativePlural] = rows
-			.slice(2, 3).map(
-				(
-					columns,
-				) => columns.slice(2),
-			).at(0)!.map((word) => word.split(' ').at(word.startsWith('(a)') ? 1 : 0)!);
+			.slice(2, 3)
+			.map((columns) => columns.slice(2))
+			.at(0)!
+			.map(
+				(word) => word.split(' ').at(word.startsWith('(a)') ? 1 : 0)!,
+			);
 
 		const [present, subjunctive, imperfect, simplePerfect, pluperfect] = rows.slice(5)
 			.map((columns) => columns.slice(2))
-			.reduce<string[][]>((columns, row) => {
-				for (const [element, index] of row.map<[string, number]>((r, i) => [r, i])) {
-					columns[index] = [
-						...(columns[index] ?? []),
-						element.split(' ').at(element.startsWith('(să)') ? 1 : 0)!,
-					];
-				}
-				return columns;
-			}, []);
+			.reduce<string[][]>(
+				(columns, row) => {
+					for (const [element, index] of row.map<[string, number]>((r, i) => [r, i])) {
+						columns[index] = [
+							...(columns[index] ?? []),
+							element.split(' ').at(element.startsWith('(să)') ? 1 : 0)!,
+						];
+					}
+					return columns;
+				},
+				[],
+			);
 
 		const imperative = `${imperativeSingle!}\n${imperativePlural!}`;
 		const supine = `de ${pastParticiple}`;

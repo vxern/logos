@@ -29,10 +29,10 @@ async function handleStartGame(
 	interaction: Interaction,
 ): Promise<void> {
 	const guild = client.cache.guilds.get(interaction.guildId!);
-	if (!guild) return;
+	if (guild === undefined) return;
 
 	const sentencePairs = client.features.sentencePairs.get(guild.language);
-	if (!sentencePairs || sentencePairs.length === 0) {
+	if (sentencePairs === undefined || sentencePairs.length === 0) {
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -105,10 +105,10 @@ async function handleStartGame(
 			});
 
 			const selectionCustomId = selection.data?.customId;
-			if (!selectionCustomId) return;
+			if (selectionCustomId === undefined) return;
 
 			const indexString = selectionCustomId.split('|').at(1);
-			if (!indexString) return;
+			if (indexString === undefined) return;
 
 			const index = Number(indexString);
 			if (isNaN(index)) return;

@@ -48,7 +48,7 @@ function onAcceptRules(
 	}
 
 	const guild = client.cache.guilds.get(interaction.guildId!);
-	if (!guild) return;
+	if (guild === undefined) return;
 
 	return void sendInteractionResponse(
 		bot,
@@ -105,10 +105,7 @@ interface EntryDecision {
 function screenUser(user: User): EntryDecision {
 	const createdAt = snowflakeToTimestamp(user.id);
 
-	if (
-		(Date.now() - createdAt) <
-			configuration.guilds.entry.minimumRequiredAge
-	) {
+	if ((Date.now() - createdAt) < configuration.guilds.entry.minimumRequiredAge) {
 		return {
 			canEnter: false,
 			reason: Services.entry.rejected.reasons.accountTooNew,

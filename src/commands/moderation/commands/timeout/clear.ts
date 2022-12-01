@@ -22,17 +22,12 @@ async function handleClearTimeout(
 	const [{ user }] = parseArguments(interaction.data?.options, {});
 	if (user === undefined) return;
 
-	const member = resolveInteractionToMember(
-		[client, bot],
-		interaction,
-		user,
-	);
-	if (!member) return;
+	const member = resolveInteractionToMember([client, bot], interaction, user);
+	if (member === undefined) return;
 
-	const timedOutUntil = member.communicationDisabledUntil;
+	const timedOutUntil = member.communicationDisabledUntil ?? undefined;
 
-	const notTimedOut = !timedOutUntil ||
-		timedOutUntil < Date.now();
+	const notTimedOut = timedOutUntil === undefined || timedOutUntil < Date.now();
 
 	if (notTimedOut) {
 		return void sendInteractionResponse(
@@ -63,7 +58,7 @@ async function handleClearTimeout(
 	);
 
 	const guild = client.cache.guilds.get(interaction.guildId!);
-	if (!guild) return;
+	if (guild === undefined) return;
 
 	log([client, bot], guild, 'memberTimeoutRemove', member, interaction.user);
 
@@ -87,7 +82,6 @@ async function handleClearTimeout(
 	);
 
 	const dmChannel = await getDmChannel(bot, member.id);
-	if (!dmChannel) return;
 
 	return void sendMessage(bot, dmChannel.id, {
 		embeds: [

@@ -16,7 +16,6 @@ async function handleDisplayBotInformation(
 	interaction: Interaction,
 ): Promise<void> {
 	const botUser = client.cache.users.get(bot.id) ?? await getUser(bot, bot.id);
-	if (!botUser) return;
 
 	return void sendInteractionResponse(
 		bot,

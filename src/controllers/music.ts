@@ -60,7 +60,7 @@ class MusicController {
 
 	/** Gets the current song from the current listing. */
 	get currentSong(): Song | SongStream | undefined {
-		if (!this.current) return undefined;
+		if (this.current === undefined) return undefined;
 
 		if (this.current.content.type === SongListingContentTypes.Collection) {
 			return this.current.content.songs[this.current.content.position];
@@ -75,7 +75,7 @@ class MusicController {
 	}
 
 	get isOccupied(): boolean {
-		return !!this.player.playingSince;
+		return (this.player.playingSince ?? undefined) !== undefined;
 	}
 
 	/** Indicates whether the controller is paused or not. */
@@ -85,9 +85,9 @@ class MusicController {
 
 	/** Returns, in milliseconds, how long the current song has been playing for. */
 	get runningTime(): number | undefined {
-		if (!this.player.playingSince) return undefined;
+		if ((this.player.playingSince ?? undefined) === undefined) return undefined;
 
-		return Date.now() - this.player.playingSince;
+		return Date.now() - this.player.playingSince!;
 	}
 
 	/** Checks the user's voice state, ensuring it is valid for playing music. */
@@ -97,7 +97,7 @@ class MusicController {
 		const voiceState = this.guild.voiceStates.get(interaction.user.id);
 
 		// The user is not in a voice channel.
-		if (!voiceState || !voiceState.channelId) {
+		if (voiceState === undefined || voiceState.channelId === undefined) {
 			sendInteractionResponse(
 				this.client.bot,
 				interaction.id,
@@ -243,7 +243,7 @@ class MusicController {
 		}];
 
 		if (this.isOccupied) {
-			if (!interaction) {
+			if (interaction === undefined) {
 				return sendMessage(client.bot, this.textChannel.id, { embeds });
 			}
 
@@ -271,7 +271,7 @@ class MusicController {
 
 		if (!this.isLoop) {
 			if (
-				this.current &&
+				this.current !== undefined &&
 				this.current.content.type !== SongListingContentTypes.Collection
 			) {
 				this.moveToHistory(this.current);
@@ -280,7 +280,7 @@ class MusicController {
 
 			if (
 				this.queue.length !== 0 &&
-				(!this.current ||
+				(this.current === undefined ||
 					this.current.content.type !== SongListingContentTypes.Collection)
 			) {
 				this.current = this.queue.shift()!;
@@ -288,7 +288,7 @@ class MusicController {
 		}
 
 		if (
-			this.current &&
+			this.current !== undefined &&
 			this.current.content.type === SongListingContentTypes.Collection
 		) {
 			if (
@@ -309,7 +309,7 @@ class MusicController {
 			}
 		}
 
-		if (!this.current) {
+		if (this.current === undefined) {
 			this.disconnectTimeoutID = setTimeout(
 				() => this.reset(),
 				configuration.music.disconnectTimeout,
@@ -349,7 +349,7 @@ class MusicController {
 				color: configuration.interactions.responses.colors.red,
 			}];
 
-			if (!interaction) {
+			if (interaction === undefined) {
 				return sendMessage(this.client.bot, this.textChannel.id, { embeds });
 			}
 
@@ -422,18 +422,12 @@ class MusicController {
 			color: configuration.interactions.responses.colors.invisible,
 		}];
 
-		if (!interaction) {
+		if (interaction === undefined) {
 			return sendMessage(this.client.bot, this.textChannel.id, { embeds });
 		}
 
 		if (isDeferred) {
-			return editOriginalInteractionResponse(
-				this.client.bot,
-				interaction.token,
-				{
-					embeds,
-				},
-			);
+			return editOriginalInteractionResponse(this.client.bot, interaction.token, { embeds });
 		}
 
 		return sendInteractionResponse(
@@ -460,11 +454,11 @@ class MusicController {
 
 				this.current = undefined;
 			} else {
-				if (by) {
+				if (by !== undefined) {
 					this.current.content.position += by - 1;
 				}
 
-				if (to) {
+				if (to !== undefined) {
 					this.current.content.position = to! - 2;
 				}
 			}
@@ -488,7 +482,7 @@ class MusicController {
 				unskipCollection ||
 				this.current.content.position === 0
 			) {
-				if (this.current) {
+				if (this.current !== undefined) {
 					this.queue.unshift(this.current);
 				}
 
@@ -496,22 +490,22 @@ class MusicController {
 
 				this.current = undefined;
 			} else {
-				if (by) {
+				if (by !== undefined) {
 					this.current.content.position -= by + 1;
 				}
 
-				if (to) {
+				if (to !== undefined) {
 					this.current.content.position = to! - 2;
 				}
 
-				if (!by && !to) {
+				if (by === undefined && to === undefined) {
 					this.current.content.position -= 2;
 				}
 			}
 		} else {
 			const songsToMoveToQueue = Math.min(by ?? to ?? 1, this.history.length);
 
-			if (this.current) {
+			if (this.current !== undefined) {
 				this.queue.unshift(this.current);
 
 				this.current = undefined;
@@ -522,7 +516,7 @@ class MusicController {
 			}
 		}
 
-		if (this.player.track) {
+		if ((this.player.track ?? undefined) !== undefined) {
 			this.player.stop();
 		} else {
 			this.advanceQueueAndPlay();

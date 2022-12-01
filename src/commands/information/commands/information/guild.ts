@@ -21,17 +21,14 @@ function handleDisplayGuildInformation(
 	interaction: Interaction,
 ): void {
 	const guild = client.cache.guilds.get(interaction.guildId!);
-	if (!guild) return;
+	if (guild === undefined) return;
 
 	const owner = client.cache.users.get(guild.ownerId);
-	if (!owner) return;
+	if (owner === undefined) return;
 
-	const hasDistinctOwner = owner && owner.username !== guild.name;
+	const hasDistinctOwner = owner.username !== guild.name;
 
-	const proficiencyRoleFrequencies = getProficiencyRoleFrequencies(
-		client,
-		guild,
-	);
+	const proficiencyRoleFrequencies = getProficiencyRoleFrequencies(client, guild);
 
 	return void sendInteractionResponse(
 		bot,
@@ -181,8 +178,9 @@ function getProficiencyRoleFrequencies(
 	const proficiencyCategory = getProficiencyCategory();
 	const proficiencies = proficiencyCategory.collection.list;
 	const proficiencyRoleNames = proficiencies.map((proficiency) => proficiency.name[defaultLanguage]);
-	const proficiencyRoles = guild.roles.array().filter((role) => proficiencyRoleNames.includes(role.name));
-	proficiencyRoles.sort((a, b) => a.position - b.position);
+	const proficiencyRoles = guild.roles.array()
+		.filter((role) => proficiencyRoleNames.includes(role.name))
+		.sort((a, b) => a.position - b.position);
 	const proficiencyRoleIds = proficiencyRoles.map((role) => role.id);
 
 	const membersIndiscriminate = Array.from(client.cache.members.values());

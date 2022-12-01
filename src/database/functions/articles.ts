@@ -57,7 +57,7 @@ async function fetchArticles<
 		),
 	);
 
-	if (!documents) {
+	if (documents === undefined) {
 		client.log.error(`Failed to fetch articles whose ${parameter} matches the query '${value}'.`);
 		return undefined;
 	}
@@ -129,7 +129,7 @@ async function createArticle(
 		$.Create($.Collection('Articles'), { data: article }),
 	);
 
-	if (!document) {
+	if (document === undefined) {
 		client.log.error(`Failed to create article '${article.content.title}'.`);
 		return undefined;
 	}
@@ -170,15 +170,13 @@ async function changeArticle(
 		$.Create($.Collection('ArticleChanges'), { data: change }),
 	);
 
-	if (!document) {
+	if (document === undefined) {
 		client.log.error('Failed to create article change.');
 		return undefined;
 	}
 
 	if (
-		!client.database.articleChangesByArticleReference.has(
-			document.data.article.value.id,
-		)
+		!client.database.articleChangesByArticleReference.has(document.data.article.value.id)
 	) {
 		await fetchArticleChanges(
 			client,
@@ -235,7 +233,7 @@ async function fetchArticleChanges<
 
 	const parameterPrinted = parameter === 'articleReference' ? 'article reference' : parameter;
 
-	if (!documents) {
+	if (documents === undefined) {
 		client.log.error(
 			`Failed to fetch article changes whose ${parameterPrinted} matches the query '${value}'.`,
 		);

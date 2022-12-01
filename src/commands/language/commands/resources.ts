@@ -28,14 +28,11 @@ function handleDisplayResources(
 	interaction: Interaction,
 ): void {
 	const guild = client.cache.guilds.get(interaction.guildId!);
-	if (!guild) return;
+	if (guild === undefined) return;
 
 	const repositoryLink = links.generateLanguageRepositoryLink(guild.language);
 
-	const [{ show }] = parseArguments(
-		interaction.data?.options,
-		{ show: 'boolean' },
-	);
+	const [{ show }] = parseArguments(interaction.data?.options, { show: 'boolean' });
 
 	return void sendInteractionResponse(
 		bot,

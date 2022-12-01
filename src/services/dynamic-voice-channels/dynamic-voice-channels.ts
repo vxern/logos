@@ -20,7 +20,7 @@ function onVoiceStateUpdate(
 	voiceState: VoiceState,
 ): void {
 	const guild = client.cache.guilds.get(voiceState.guildId);
-	if (!guild) return;
+	if (guild === undefined) return;
 
 	const voiceChannelStatesTuples = getVoiceChannelStatesTuples(guild);
 	if (voiceChannelStatesTuples.length === 0) return;
@@ -28,9 +28,9 @@ function onVoiceStateUpdate(
 	const previousState = previousVoiceStateByUserId.get(voiceState.userId);
 	const currentState = voiceState;
 
-	if (!previousState?.channelId) {
+	if (previousState?.channelId === undefined) {
 		onConnect(bot, guild, voiceChannelStatesTuples, currentState);
-	} else if (previousState.channelId && !currentState.channelId) {
+	} else if (previousState.channelId !== undefined && currentState.channelId === undefined) {
 		onDisconnect(bot, voiceChannelStatesTuples, previousState);
 	} else {
 		onDisconnect(bot, voiceChannelStatesTuples, previousState);
@@ -104,9 +104,9 @@ function getVoiceChannelStatesTuples(guild: Guild): VoiceChannelStatesTuple[] {
 
 function getRelevantVoiceChannels(guild: Guild): Channel[] {
 	const channels = guild.channels
-		.filter((channel) =>
-			channel.type === ChannelTypes.GuildVoice &&
-			channel.name! === configuration.guilds.channels.voiceChat
+		.filter(
+			(channel) =>
+				channel.type === ChannelTypes.GuildVoice && channel.name! === configuration.guilds.channels.voiceChat,
 		).array();
 
 	channels.sort((a, b) => a.position === b.position ? Number(a.id - b.id) : a.position! - b.position!);
@@ -118,7 +118,7 @@ function getRelevantVoiceStates(
 	guild: Guild,
 	channelIds: bigint[],
 ): Collection<bigint, VoiceState[]> {
-	const voiceStates = guild.voiceStates.array().filter((voiceState) => voiceState.channelId);
+	const voiceStates = guild.voiceStates.array().filter((voiceState) => voiceState.channelId !== undefined);
 	return new Collection(
 		channelIds.map((channelId) => [
 			channelId,

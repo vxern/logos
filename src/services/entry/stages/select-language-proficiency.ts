@@ -27,12 +27,12 @@ function onSelectLanguageProficiency(
 	);
 
 	const guild = client.cache.guilds.get(interaction.guildId!);
-	if (!guild) return;
+	if (guild === undefined) return;
 
 	const proficiency = proficiencies[parseInt(parameter)]!;
 
 	const roleResolved = guild.roles.array().find((role) => role.name === localise(proficiency.name, defaultLanguage));
-	if (!roleResolved) return;
+	if (roleResolved === undefined) return;
 
 	return void addRole(
 		bot,

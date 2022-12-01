@@ -22,14 +22,14 @@ const command: CommandBuilder = {
 
 function handleDisplayModerationPolicy([client, bot]: [Client, Bot], interaction: Interaction): void {
 	const guild = client.cache.guilds.get(interaction.guildId!);
-	if (!guild) return;
+	if (guild === undefined) return;
 
 	const [{ show }] = parseArguments(interaction.data?.options, { show: 'boolean' });
 
 	const moderatorRoleId = guild.roles.array().find(
 		(role) => role.name === configuration.guilds.moderation.moderator,
 	)?.id;
-	const moderatorRoleMention = moderatorRoleId
+	const moderatorRoleMention = moderatorRoleId !== undefined
 		? mention(moderatorRoleId, MentionTypes.Role)
 		: configuration.guilds.moderation.moderator.toLowerCase();
 

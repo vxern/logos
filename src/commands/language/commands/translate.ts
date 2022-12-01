@@ -58,6 +58,10 @@ interface Translation {
 	text: string;
 }
 
+interface TranslationResult {
+	translations: DeepLTranslation[];
+}
+
 async function translateText(
 	sourceLanguageCode: string,
 	targetLanguageCode: string,
@@ -75,8 +79,8 @@ async function translateText(
 	);
 	if (!response.ok) return;
 
-	const results = (<{ translations: DeepLTranslation[] }> await response.json()).translations;
-	if (results.length !== 1) return;
+	const results = (await response.json() as TranslationResult).translations;
+	if (results.length === 0) return;
 
 	const result = results.at(0)!;
 	return {
@@ -91,7 +95,7 @@ async function handleTranslateText(
 	interaction: Interaction,
 ): Promise<void> {
 	const guild = client.cache.guilds.get(interaction.guildId!);
-	if (!guild) return;
+	if (guild === undefined) return;
 
 	const [{ from, to, text, show }, focused] = parseArguments(
 		interaction.data?.options,
@@ -99,7 +103,7 @@ async function handleTranslateText(
 	);
 
 	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete) {
-		if (!focused || focused.value === undefined) return;
+		if (focused === undefined || focused.value === undefined) return;
 
 		const isInputtingSourceLanguage = focused.name === 'from';
 		const localisations = isInputtingSourceLanguage
@@ -108,12 +112,10 @@ async function handleTranslateText(
 
 		const inputLowercase = (<string> focused.value).toLowerCase();
 		const choices = client.metadata.supportedTranslationLanguages
-			.map((language) => {
-				return {
-					name: localise(localisations, interaction.locale)(language.name),
-					value: language.code,
-				};
-			})
+			.map((language) => ({
+				name: localise(localisations, interaction.locale)(language.name),
+				value: language.code,
+			}))
 			.filter((choice) => choice.name && choice.name.toLowerCase().includes(inputLowercase))
 			.slice(0, 25);
 
@@ -130,7 +132,7 @@ async function handleTranslateText(
 		);
 	}
 
-	if (!from || !to || !text) return;
+	if (from === undefined || to === undefined || text === undefined) return;
 
 	if (from === to) {
 		return void sendInteractionResponse(
@@ -178,7 +180,7 @@ async function handleTranslateText(
 
 	const sourceLanguage = resolveToSupportedLanguage(client, from);
 	const targetLanguage = resolveToSupportedLanguage(client, to);
-	if (!sourceLanguage || !targetLanguage) {
+	if (sourceLanguage === undefined || targetLanguage === undefined) {
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -188,9 +190,9 @@ async function handleTranslateText(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: !sourceLanguage
+						description: sourceLanguage === undefined
 							? (
-								!targetLanguage
+								targetLanguage === undefined
 									? localise(
 										Commands.translate.strings.invalid.both,
 										interaction.locale,
@@ -227,7 +229,7 @@ async function handleTranslateText(
 	);
 
 	const translation = await translateText(sourceLanguage.code, targetLanguage.code, text);
-	if (!translation) {
+	if (translation === undefined) {
 		return void editOriginalInteractionResponse(
 			bot,
 			interaction.token,
@@ -249,6 +251,8 @@ async function handleTranslateText(
 	const sourceLanguageName = localise(getLocalisationsForLanguage(sourceLanguage.name), interaction.locale);
 	const targetLanguageName = localise(getLocalisationsForLanguage(targetLanguage.name), interaction.locale);
 
+	// TODO(vxern): This is a hard-coded, custom upper limit. The actual limit is 1024.
+	//  As such, the check could be improved for precision reasons.
 	const isLong = text.length > 950;
 
 	let embeds: Embed[] = [];

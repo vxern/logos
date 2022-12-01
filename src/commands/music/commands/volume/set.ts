@@ -9,16 +9,13 @@ function handleSetVolume(
 	interaction: Interaction,
 ): void {
 	const musicController = client.music.get(interaction.guildId!);
-	if (!musicController) return;
+	if (musicController === undefined) return;
 
 	const [canAct, _] = musicController.verifyMemberVoiceState(interaction);
 	if (!canAct) return;
 
-	const [{ volume }] = parseArguments(interaction.data?.options, {
-		volume: 'number',
-	});
-
-	if (!volume || isNaN(volume)) return;
+	const [{ volume }] = parseArguments(interaction.data?.options, { volume: 'number' });
+	if (volume === undefined || isNaN(volume)) return;
 
 	if (volume < 0 || volume > configuration.music.maxima.volume) {
 		return void sendInteractionResponse(

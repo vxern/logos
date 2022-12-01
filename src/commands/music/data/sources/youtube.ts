@@ -19,34 +19,28 @@ const urlExpression = new RegExp(
 );
 
 const resolver: ListingResolver = async (client, interaction, query) => {
-	const urlExpressionExecuted = urlExpression.exec(query);
-	if (!urlExpressionExecuted) {
+	const urlExpressionExecuted = urlExpression.exec(query) ?? undefined;
+	if (urlExpressionExecuted === undefined) {
 		return search(client, interaction, query);
 	}
 
-	const url = urlExpressionExecuted[0]!;
-
+	const url = urlExpressionExecuted.at(0)!;
 	if (url.includes('&list=')) {
 		const playlist = await YouTube.getPlaylist(query);
-
 		return fromYouTubePlaylist(playlist, interaction.user.id);
 	}
 
 	const video = await YouTube.getVideo(query);
-
 	return fromYouTubeVideo(video, interaction.user.id);
 };
 
-async function search(
-	client: Client,
-	interaction: Interaction,
-	query: string,
-): Promise<SongListing | undefined> {
-	const results = <(Video | Playlist)[]> await YouTube.search(query, {
-		limit: 20,
-		type: 'all',
-		safeSearch: false,
-	}).then((result) => result.filter((element) => element.type === 'video' || element.type === 'playlist'));
+async function search(client: Client, interaction: Interaction, query: string): Promise<SongListing | undefined> {
+	const results = await YouTube.search(
+		query,
+		{ limit: 20, type: 'all', safeSearch: false },
+	).then(
+		(result) => result.filter((element) => element.type === 'video' || element.type === 'playlist'),
+	) as Array<Video | Playlist>;
 	if (results.length === 0) return undefined;
 
 	return new Promise<SongListing | undefined>((resolve) => {
@@ -61,10 +55,8 @@ async function search(
 						type: InteractionResponseTypes.DeferredUpdateMessage,
 					});
 
-					const indexString = <string | undefined> selection.data?.values?.at(
-						0,
-					);
-					if (!indexString) return resolve(undefined);
+					const indexString = <string | undefined> selection.data?.values?.at(0);
+					if (indexString === undefined) return resolve(undefined);
 
 					const index = Number(indexString);
 					if (isNaN(index)) return resolve(undefined);
@@ -120,7 +112,7 @@ function fromYouTubeVideo(
 	video: Video,
 	requestedBy: bigint,
 ): SongListing | undefined {
-	if (!video.id) return undefined;
+	if (video.id === undefined) return undefined;
 
 	return {
 		source: 'YouTube',
@@ -141,7 +133,7 @@ function fromYouTubePlaylist(
 	playlist: Playlist,
 	requestedBy: bigint,
 ): SongListing | undefined {
-	if (!playlist.id) return undefined;
+	if (playlist.id === undefined) return undefined;
 
 	return {
 		source: 'YouTube',

@@ -30,7 +30,7 @@ const service: ServiceStarter = (clientWithBot) => {
 			doesNotExpire: true,
 			onCollect: (_bot, interaction) => {
 				const selectionCustomId = interaction.data?.customId;
-				if (!selectionCustomId) return;
+				if (selectionCustomId === undefined) return;
 
 				const [step, parameter] = <[Step, string]> selectionCustomId.split('|');
 

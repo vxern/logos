@@ -47,7 +47,7 @@ async function fetchPraises<
 
 	const action = parameter === 'author' ? 'given' : 'received';
 
-	if (!documents) {
+	if (documents === undefined) {
 		client.log.error(`Failed to fetch praises ${action} by ${userMention}.`);
 		return undefined;
 	}
@@ -100,7 +100,7 @@ async function createPraise(
 	const authorMention = getUserMentionByReference(client, praise.author);
 	const subjectMention = getUserMentionByReference(client, praise.subject);
 
-	if (!document) {
+	if (document === undefined) {
 		client.log.error(`Failed to create praise given by ${authorMention} to ${subjectMention}.`);
 		return undefined;
 	}

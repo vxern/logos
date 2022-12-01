@@ -36,12 +36,8 @@ async function handleWarnUser(
 	const [{ user, reason }] = parseArguments(interaction.data?.options, {});
 	if (user === undefined) return;
 
-	const member = resolveInteractionToMember(
-		[client, bot],
-		interaction,
-		user,
-	);
-	if (!member) return;
+	const member = resolveInteractionToMember([client, bot], interaction, user);
+	if (member === undefined) return;
 
 	if (member.id === interaction.member?.id) {
 		return void sendInteractionResponse(
@@ -65,10 +61,10 @@ async function handleWarnUser(
 	}
 
 	const guild = client.cache.guilds.get(interaction.guildId!);
-	if (!guild) return;
+	if (guild === undefined) return;
 
 	const moderatorRoleId = guild.roles.find((role) => role.name === configuration.guilds.moderation.moderator)?.id;
-	if (!moderatorRoleId) return;
+	if (moderatorRoleId === undefined) return;
 
 	const isModerator = member.roles.includes(moderatorRoleId);
 	if (isModerator) {
@@ -113,22 +109,22 @@ async function handleWarnUser(
 		);
 	};
 
-	if (!user || !reason) return displayWarnError();
+	if (reason!.length === 0) return displayWarnError();
 
 	const subject = await getOrCreateUser(client, 'id', member.id.toString());
-	if (!subject) return displayWarnError();
+	if (subject === undefined) return displayWarnError();
 
 	const author = await getOrCreateUser(client, 'id', interaction.user.id.toString());
-	if (!author) return displayWarnError();
+	if (author === undefined) return displayWarnError();
 
 	const warnings = await getWarnings(client, subject.ref);
-	if (!warnings) return displayWarnError();
+	if (warnings === undefined) return displayWarnError();
 
 	const document = await createWarning(
 		client,
-		{ author: author.ref, subject: subject.ref, reason },
+		{ author: author.ref, subject: subject.ref, reason: reason! },
 	);
-	if (!document) return displayWarnError();
+	if (document === undefined) return displayWarnError();
 
 	log([client, bot], guild, 'memberWarnAdd', member, document.data, interaction.user);
 
@@ -151,8 +147,8 @@ async function handleWarnUser(
 	const reachedKickStage = relevantWarnings.length >= configuration.guilds.moderation.warnings.maximum + 1;
 	const reachedBanStage = relevantWarnings.length >= configuration.guilds.moderation.warnings.maximum + 2;
 
-	const dmChannel = await getDmChannel(bot, member.id);
-	if (dmChannel) {
+	const dmChannel = await getDmChannel(bot, member.id).catch(() => undefined);
+	if (dmChannel !== undefined) {
 		sendMessage(bot, dmChannel.id, {
 			embeds: [
 				{
@@ -165,14 +161,14 @@ async function handleWarnUser(
 										description: localise(
 											Commands.warn.strings.reachedBanStage,
 											defaultLanguage,
-										)(reason),
+										)(reason!),
 										color: configuration.interactions.responses.colors.darkRed,
 									}
 									: {
 										description: localise(
 											Commands.warn.strings.reachedKickStage,
 											defaultLanguage,
-										)(reason),
+										)(reason!),
 										color: configuration.interactions.responses.colors.red,
 									}
 							)
@@ -181,7 +177,7 @@ async function handleWarnUser(
 									Commands.warn.strings.warnedDirect,
 									defaultLanguage,
 								)(
-									reason,
+									reason!,
 									relevantWarnings.length,
 									configuration.guilds.moderation.warnings.maximum,
 								),

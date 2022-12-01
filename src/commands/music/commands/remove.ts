@@ -35,11 +35,9 @@ function handleRemoveSongListing(
 	interaction: Interaction,
 ): void {
 	const musicController = client.music.get(interaction.guildId!);
-	if (!musicController) return;
+	if (musicController === undefined) return;
 
-	const [canAct, _voiceState] = musicController.verifyMemberVoiceState(
-		interaction,
-	);
+	const [canAct, _voiceState] = musicController.verifyMemberVoiceState(interaction);
 	if (!canAct) return;
 
 	if (musicController.queue.length === 0) {
@@ -149,7 +147,7 @@ function handleRemoveSongListing(
 		type: InteractionTypes.MessageComponent,
 		userId: interaction.user.id,
 		onCollect: (bot, selection) => {
-			if (!selection.data) return;
+			if (selection.data === undefined) return;
 
 			const action = selection.data.customId!.split('|')[1]!;
 
@@ -177,16 +175,14 @@ function handleRemoveSongListing(
 			userId: interaction.user.id,
 			limit: 1,
 			onCollect: (bot, selection) => {
-				const indexString = <string | undefined> selection.data?.values?.at(
-					0,
-				);
-				if (!indexString) return;
+				const indexString = <string | undefined> selection.data?.values?.at(0);
+				if (indexString === undefined) return;
 
 				const index = Number(indexString);
 				if (isNaN(index)) return;
 
 				const songListing = musicController.queue.splice(index, 1)?.at(0);
-				if (!songListing) {
+				if (songListing === undefined) {
 					return void sendInteractionResponse(
 						bot,
 						selection.id,

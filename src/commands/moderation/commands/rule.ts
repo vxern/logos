@@ -12,7 +12,6 @@ import { CommandBuilder } from 'logos/src/commands/command.ts';
 import { Client } from 'logos/src/client.ts';
 import { parseArguments } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
-import { capitalise } from 'logos/formatting.ts';
 import { defaultLanguage } from 'logos/types.ts';
 
 const command: CommandBuilder = {
@@ -32,17 +31,15 @@ function handleCiteRule(
 	interaction: Interaction,
 ): void {
 	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete) {
-		const choices = Object.values(Information.rules.rules).map((
-			rule,
-			index,
-		) => ({
-			name: `#${index + 1}: ${
-				localise(rule.title, interaction.locale).toLowerCase().split(' ').map(
-					capitalise,
-				).join(' ')
-			}`,
-			value: index.toString(),
-		}));
+		const choices = Object.values(Information.rules.rules).map((rule, indexZeroBased) => {
+			const index = indexZeroBased + 1;
+			const titleWithTLDR = localise(rule.title, interaction.locale);
+
+			return {
+				name: `#${index}: ${titleWithTLDR}`,
+				value: indexZeroBased.toString(),
+			};
+		});
 
 		return void sendInteractionResponse(
 			bot,
@@ -80,13 +77,13 @@ function handleCiteRule(
 		interaction.data?.options,
 		{ rule: 'number' },
 	);
-	if (!rule) return displayInvalidRuleError();
+	if (rule === undefined) return displayInvalidRuleError();
 
 	const ruleParsed = Object.values(Information.rules.rules).at(rule);
-	if (!ruleParsed) return displayInvalidRuleError();
+	if (ruleParsed === undefined) return displayInvalidRuleError();
 
 	const guild = client.cache.guilds.get(interaction.guildId!);
-	if (!guild) return;
+	if (guild === undefined) return;
 
 	return void sendInteractionResponse(
 		bot,
