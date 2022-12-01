@@ -9,7 +9,7 @@ import {
 	RoleCollectionTypes,
 } from 'logos/src/commands/social/data/types.ts';
 import { trim } from 'logos/src/utils.ts';
-import { defaultLanguage, Language } from 'logos/types.ts';
+import { defaultLocale, Language } from 'logos/types.ts';
 
 type ProficiencyCategory = RoleCategory & {
 	type: RoleCategoryTypes.Category;
@@ -22,7 +22,7 @@ type ProficiencyCategory = RoleCategory & {
  * @returns The category with proficiency roles.
  */
 function getProficiencyCategory(): ProficiencyCategory {
-	return <ProficiencyCategory> roles.find((category) => localise(category.name, defaultLanguage) === 'Proficiency')!;
+	return <ProficiencyCategory> roles.find((category) => localise(category.name, defaultLocale) === 'Proficiency')!;
 }
 
 function createSelectOptionsFromCategories(

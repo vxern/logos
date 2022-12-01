@@ -5,7 +5,7 @@ import { fromHex, getTextChannel } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import { links } from 'logos/constants.ts';
 import { list, mention, MentionTypes } from 'logos/formatting.ts';
-import { defaultLanguage } from 'logos/types.ts';
+import { defaultLocale } from 'logos/types.ts';
 
 /** Represents a section of guild information. */
 interface InformationSection {
@@ -27,10 +27,10 @@ const informationSections: Record<string, InformationSection> = {
 			const fields = [];
 			for (const rule of Object.values(Information.rules.rules)) {
 				fields.push({
-					name: `💠  **${localise(rule.title, defaultLanguage).toUpperCase()}**  ~  ${
-						localise(Information.rules.tldr, defaultLanguage)
-					}: *${localise(rule.summary, defaultLanguage)}*`,
-					value: localise(rule.content, defaultLanguage),
+					name: `💠  **${localise(rule.title, defaultLocale).toUpperCase()}**  ~  ${
+						localise(Information.rules.tldr, defaultLocale)
+					}: *${localise(rule.summary, defaultLocale)}*`,
+					value: localise(rule.content, defaultLocale),
 					inline: false,
 				});
 			}
@@ -43,18 +43,18 @@ const informationSections: Record<string, InformationSection> = {
 				: configuration.guilds.moderation.moderator.toLowerCase();
 
 			fields.push({
-				name: `ℹ️  ${localise(Information.rules.moderationPolicy.header, defaultLanguage)}`,
+				name: `ℹ️  ${localise(Information.rules.moderationPolicy.header, defaultLocale)}`,
 				value: list([
-					localise(Information.rules.moderationPolicy.body.points.one, defaultLanguage)(moderatorRoleMention),
-					localise(Information.rules.moderationPolicy.body.points.two, defaultLanguage),
-					localise(Information.rules.moderationPolicy.body.points.three, defaultLanguage),
-					localise(Information.rules.moderationPolicy.body.points.four, defaultLanguage),
+					localise(Information.rules.moderationPolicy.body.points.one, defaultLocale)(moderatorRoleMention),
+					localise(Information.rules.moderationPolicy.body.points.two, defaultLocale),
+					localise(Information.rules.moderationPolicy.body.points.three, defaultLocale),
+					localise(Information.rules.moderationPolicy.body.points.four, defaultLocale),
 				]),
 				inline: false,
 			});
 
 			return {
-				description: localise(Information.rules.lastUpdated, defaultLanguage),
+				description: localise(Information.rules.lastUpdated, defaultLocale),
 				color: fromHex('#ff9a76'),
 				fields: fields,
 			};
@@ -69,7 +69,7 @@ const informationSections: Record<string, InformationSection> = {
 			return {
 				color: fromHex('#637373'),
 				fields: [{
-					name: `🔗  ${localise(Information.invite, defaultLanguage)}`,
+					name: `🔗  ${localise(Information.invite, defaultLocale)}`,
 					value: `**${links.generateDiscordInviteLink(invite.code)}**`,
 				}],
 			};

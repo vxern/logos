@@ -12,7 +12,7 @@ import { CommandBuilder } from 'logos/src/commands/command.ts';
 import { Client } from 'logos/src/client.ts';
 import { parseArguments } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
-import { defaultLanguage } from 'logos/types.ts';
+import { defaultLocale } from 'logos/types.ts';
 
 const command: CommandBuilder = {
 	...createLocalisations(Commands.rule),
@@ -93,10 +93,10 @@ function handleCiteRule(
 			type: InteractionResponseTypes.ChannelMessageWithSource,
 			data: {
 				embeds: [{
-					title: `${localise(Information.rules.rule, defaultLanguage)} #${rule + 1}: ${
-						localise(ruleParsed.title, defaultLanguage)
-					} ~ ${localise(Information.rules.tldr, defaultLanguage)}: *${localise(ruleParsed.summary, defaultLanguage)}*`,
-					description: localise(ruleParsed.content, defaultLanguage),
+					title: `${localise(Information.rules.rule, defaultLocale)} #${rule + 1}: ${
+						localise(ruleParsed.title, defaultLocale)
+					} ~ ${localise(Information.rules.tldr, defaultLocale)}: *${localise(ruleParsed.summary, defaultLocale)}*`,
+					description: localise(ruleParsed.content, defaultLocale),
 					color: configuration.interactions.responses.colors.blue,
 				}],
 			},

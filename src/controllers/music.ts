@@ -16,7 +16,7 @@ import { Song, SongListing, SongListingContentTypes, SongStream } from 'logos/sr
 import { Client } from 'logos/src/client.ts';
 import configuration from 'logos/configuration.ts';
 import { mention, MentionTypes } from 'logos/formatting.ts';
-import { defaultLanguage } from 'logos/types.ts';
+import { defaultLocale } from 'logos/types.ts';
 
 class MusicController {
 	private client: Client;
@@ -232,12 +232,12 @@ class MusicController {
 			title: `👍 ${
 				localise(
 					Commands.music.options.play.strings.queued.header,
-					defaultLanguage,
+					defaultLocale,
 				)
 			}`,
 			description: localise(
 				Commands.music.options.play.strings.queued.body,
-				defaultLanguage,
+				defaultLocale,
 			)(songListing.content.title),
 			color: configuration.interactions.responses.colors.green,
 		}];
@@ -317,11 +317,8 @@ class MusicController {
 
 			return sendMessage(this.client.bot, this.textChannel.id, {
 				embeds: [{
-					title: `👏 ${localise(Commands.music.strings.allDone.header, defaultLanguage)}`,
-					description: localise(
-						Commands.music.strings.allDone.body,
-						defaultLanguage,
-					),
+					title: `👏 ${localise(Commands.music.strings.allDone.header, defaultLocale)}`,
+					description: localise(Commands.music.strings.allDone.body, defaultLocale),
 					color: configuration.interactions.responses.colors.blue,
 				}],
 			});
@@ -340,11 +337,11 @@ class MusicController {
 			const embeds = [{
 				title: localise(
 					Commands.music.strings.couldNotLoadTrack.header,
-					defaultLanguage,
+					defaultLocale,
 				),
 				description: localise(
 					Commands.music.strings.couldNotLoadTrack.body,
-					defaultLanguage,
+					defaultLocale,
 				)(currentSong.title),
 				color: configuration.interactions.responses.colors.red,
 			}];
@@ -398,17 +395,17 @@ class MusicController {
 			title: `${configuration.music.symbols[this.current.content.type]} ${
 				localise(
 					Commands.music.strings.playing.header,
-					defaultLanguage,
+					defaultLocale,
 				)
 			} ${SongListingContentTypes[this.current.content.type]!.toLowerCase()}`,
 			description: localise(
 				Commands.music.strings.playing.body,
-				defaultLanguage,
+				defaultLocale,
 			)(
 				this.current.content.type === SongListingContentTypes.Collection
 					? localise(
 						Commands.music.strings.playing.parts.displayTrack,
-						defaultLanguage,
+						defaultLocale,
 					)(
 						this.current.content.position + 1,
 						this.current.content.songs.length,

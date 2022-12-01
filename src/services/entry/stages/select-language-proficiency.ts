@@ -31,7 +31,7 @@ function onSelectLanguageProficiency(
 
 	const proficiency = proficiencies[parseInt(parameter)]!;
 
-	const roleResolved = guild.roles.array().find((role) => role.name === localise(proficiency.name, defaultLanguage));
+	const roleResolved = guild.roles.array().find((role) => role.name === localise(proficiency.name, defaultLocale));
 	if (roleResolved === undefined) return;
 
 	return void addRole(

@@ -13,7 +13,7 @@ import { by, collection, to } from 'logos/src/commands/parameters.ts';
 import { Client } from 'logos/src/client.ts';
 import { parseArguments } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
-import { defaultLanguage } from 'logos/types.ts';
+import { defaultLocale } from 'logos/types.ts';
 
 const command: OptionBuilder = {
 	...createLocalisations(Commands.music.options.skip),
@@ -194,8 +194,8 @@ function handleSkipAction(
 			type: InteractionResponseTypes.ChannelMessageWithSource,
 			data: {
 				embeds: [{
-					title: `⏭️ ${localise(messageLocalisations.header, defaultLanguage)}`,
-					description: localise(messageLocalisations.body, defaultLanguage),
+					title: `⏭️ ${localise(messageLocalisations.header, defaultLocale)}`,
+					description: localise(messageLocalisations.body, defaultLocale),
 					color: configuration.interactions.responses.colors.invisible,
 				}],
 			},
