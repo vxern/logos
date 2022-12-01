@@ -186,10 +186,9 @@ function handleDisplayCurrentlyPlaying(
 						},
 					],
 					footer: {
-						text: localise(
-							Commands.music.options.now.strings.sourcedFrom,
-							interaction.locale,
-						)(currentListing.source),
+						text: localise(Commands.music.options.now.strings.sourcedFrom, interaction.locale)(
+							currentListing.source ?? localise(Commands.music.options.now.strings.theInternet, interaction.locale),
+						),
 					},
 				}],
 			},

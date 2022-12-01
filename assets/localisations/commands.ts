@@ -1164,10 +1164,15 @@ class Commands {
 						'Romanian': (timestamp: string) => `De la ${timestamp}.`,
 					},
 					sourcedFrom: {
-						'English': (origin: string | undefined) => `This listing was sourced from ${origin ?? 'the internet'}.`,
-						'Polish': (origin: string | undefined) => `Ten wpis został pobrany z ${origin ?? 'internetu'}.`,
-						'Romanian': (origin: string | undefined) =>
-							`Această înregistrare a fost furnizată de pe ${origin ?? 'internet'}.`,
+						'English': (origin: string) => `This listing was sourced from ${origin}.`,
+						'Polish': (origin: string) => `Ten wpis został pobrany z ${origin}.`,
+						'Romanian': (origin: string) => `Această înregistrare a fost furnizată de pe ${origin}.`,
+					},
+					// This string fits with the above ones. 'This listing was sourced from __the internet__'.
+					theInternet: {
+						'English': 'the internet',
+						'Polish': 'internetu',
+						'Romanian': 'internet',
 					},
 				},
 			},
@@ -1428,12 +1433,13 @@ class Commands {
 						'Romanian': 'Nu este un set de melodii de sărit peste.\n\n' +
 							'Încearcă să sari peste melodia actuală.',
 					},
-					skipped: {
+					skippedSong: {
 						header: { 'English': 'Skipped' },
-						body: {
-							'English': (skipCollection: boolean) =>
-								`The ${!skipCollection ? 'song' : 'song collection'} has been skipped.`,
-						},
+						body: { 'English': 'The song has been skipped.' },
+					},
+					skippedSongCollection: {
+						header: { 'English': 'Skipped' },
+						body: { 'English': 'The song collection has been skipped.' },
 					},
 				},
 			},

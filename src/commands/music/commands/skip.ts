@@ -182,6 +182,10 @@ function handleSkipAction(
 		});
 	}
 
+	const messageLocalisations = (collection ?? false)
+		? Commands.music.options.skip.strings.skippedSongCollection
+		: Commands.music.options.skip.strings.skippedSong;
+
 	return void sendInteractionResponse(
 		bot,
 		interaction.id,
@@ -190,16 +194,8 @@ function handleSkipAction(
 			type: InteractionResponseTypes.ChannelMessageWithSource,
 			data: {
 				embeds: [{
-					title: `⏭️ ${
-						localise(
-							Commands.music.options.skip.strings.skipped.header,
-							defaultLanguage,
-						)
-					}`,
-					description: localise(
-						Commands.music.options.skip.strings.skipped.body,
-						defaultLanguage,
-					)(collection ?? false),
+					title: `⏭️ ${localise(messageLocalisations.header, defaultLanguage)}`,
+					description: localise(messageLocalisations.body, defaultLanguage),
 					color: configuration.interactions.responses.colors.invisible,
 				}],
 			},
