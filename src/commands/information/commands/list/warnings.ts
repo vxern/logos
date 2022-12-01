@@ -22,12 +22,8 @@ async function handleDisplayWarnings(
 	const [{ user }] = parseArguments(interaction.data?.options, {});
 	if (user === undefined) return;
 
-	const member = resolveInteractionToMember(
-		[client, bot],
-		interaction,
-		user,
-	);
-	if (!member) return;
+	const member = resolveInteractionToMember([client, bot], interaction, user);
+	if (member === undefined) return;
 
 	const displayError = (): void => {
 		return void sendInteractionResponse(
@@ -51,15 +47,12 @@ async function handleDisplayWarnings(
 	};
 
 	const subject = await getOrCreateUser(client, 'id', member.id.toString());
-	if (!subject) return displayError();
+	if (subject === undefined) return displayError();
 
 	const warnings = await getWarnings(client, subject.ref);
-	if (!warnings) return displayError();
+	if (warnings === undefined) return displayError();
 
-	const pages = chunk(
-		warnings,
-		configuration.interactions.responses.resultsPerPage,
-	);
+	const pages = chunk(warnings, configuration.interactions.responses.resultsPerPage);
 
 	const generateWarningsPage = (
 		warnings: Document<Warning>[],

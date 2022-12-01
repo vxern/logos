@@ -70,10 +70,10 @@ function getTextChannel(
  * @param user - The user object.
  * @returns The mention.
  */
-function diagnosticMentionUser(user: User, plain?: boolean): string {
+function diagnosticMentionUser(user: User, doNotFormat?: boolean): string {
 	const tag = `${user.username}#${user.discriminator}`;
 
-	if (plain) return `${tag} (${user.id})`;
+	if (doNotFormat) return `${tag} (${user.id})`;
 
 	return `${code(tag)} (${code(user.id.toString())})`;
 }
@@ -256,7 +256,7 @@ function paginate<T>(
 		type: InteractionTypes.MessageComponent,
 		doesNotExpire: true,
 		onCollect: (bot, selection) => {
-			if (!selection.data) return;
+			if (selection.data === undefined) return;
 
 			const action = selection.data.customId!.split('|')[1]!;
 
@@ -331,13 +331,13 @@ function createInteractionCollector(
 
 	const conditions: (interaction: Interaction) => boolean[] = (interaction) => [
 		interaction.type === settings.type,
-		!!interaction.data && !!interaction.data.customId &&
+		interaction.data !== undefined && interaction.data.customId !== undefined &&
 		(
 				!interaction.data.customId.includes('|') ? interaction.data.customId : interaction.data.customId.split('|')[0]!
 			) === (
 				!customId.includes('|') ? customId : customId.split('|')[0]!
 			),
-		!settings.userId ? true : interaction.user.id === settings.userId,
+		settings.userId === undefined ? true : interaction.user.id === settings.userId,
 	];
 
 	addCollector(clientWithBot, 'interactionCreate', {
@@ -358,7 +358,7 @@ function createVerificationPrompt(
 	settings: { title: string; fields: DiscordEmbedField[] },
 ): Promise<[boolean, Member] | undefined> {
 	const guild = client.cache.guilds.get(guildId);
-	if (!guild) return new Promise(() => undefined);
+	if (guild === undefined) return new Promise(() => undefined);
 
 	const verificationChannel = guild.channels.array().find((channel) =>
 		channel.type === ChannelTypes.GuildText &&
@@ -366,7 +366,7 @@ function createVerificationPrompt(
 			configuration.guilds.channels.verification,
 		)
 	);
-	if (!verificationChannel) return new Promise(() => undefined);
+	if (verificationChannel === undefined) return new Promise(() => undefined);
 
 	return new Promise((resolve) => {
 		const customId = createInteractionCollector([client, bot], {
@@ -383,7 +383,7 @@ function createVerificationPrompt(
 				);
 
 				const customId = interaction.data?.customId;
-				if (!customId) return;
+				if (customId === undefined) return;
 
 				const accepted = customId.split('|')[1]! === 'true';
 
@@ -492,7 +492,7 @@ type Author = NonNullable<Embed['author']>;
 
 function guildAsAuthor(bot: Bot, guild: Guild): Author | undefined {
 	const iconURL = getGuildIconURLFormatted(bot, guild);
-	if (!iconURL) return undefined;
+	if (iconURL === undefined) return undefined;
 
 	return {
 		name: guild.name,
@@ -504,7 +504,7 @@ type Thumbnail = NonNullable<Embed['thumbnail']>;
 
 function guildAsThumbnail(bot: Bot, guild: Guild): Thumbnail | undefined {
 	const iconURL = getGuildIconURLFormatted(bot, guild);
-	if (!iconURL) return undefined;
+	if (iconURL === undefined) return undefined;
 
 	return { url: iconURL };
 }
@@ -530,7 +530,7 @@ function parseArguments<
 			focused = option;
 		}
 
-		if (option.options) {
+		if (option.options !== undefined) {
 			const [parsedArgs, parsedFocused] = parseArguments(
 				option.options,
 				customTypes,
@@ -564,7 +564,7 @@ function parseArguments<
 
 function getChannelMention(guild: Guild, name: string): string {
 	const channel = getTextChannel(guild, name);
-	if (!channel) return name;
+	if (channel === undefined) return name;
 
 	return mention(channel.id, MentionTypes.Channel);
 }

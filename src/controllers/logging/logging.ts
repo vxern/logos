@@ -10,11 +10,8 @@ const clientEventNames = <(keyof ClientEvents)[]> Object.keys(
 );
 
 function setupLogging([client, bot]: [Client, Bot], guild: Guild): void {
-	const logChannel = getTextChannel(
-		guild,
-		configuration.guilds.channels.logging,
-	);
-	if (!logChannel) return;
+	const logChannel = getTextChannel(guild, configuration.guilds.channels.logging);
+	if (logChannel === undefined) return;
 
 	for (const eventName of clientEventNames) {
 		const handleEvent = bot.events[eventName];
@@ -34,11 +31,8 @@ function log<K extends keyof Events>(
 	event: K,
 	...args: Events[K]
 ): void {
-	const logChannel = getTextChannel(
-		guild,
-		configuration.guilds.channels.logging,
-	);
-	if (!logChannel) return;
+	const logChannel = getTextChannel(guild, configuration.guilds.channels.logging);
+	if (logChannel === undefined) return;
 
 	return logToChannel([client, bot], logChannel, event, ...args);
 }
@@ -50,7 +44,7 @@ function logToChannel<K extends keyof Events>(
 	...args: Events[K]
 ): void {
 	const entry = messageGenerators[event];
-	if (!entry) return;
+	if (entry === undefined) return;
 
 	const filter = entry.filter(client, channel.guildId, ...args);
 	if (!filter) return;

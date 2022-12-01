@@ -26,7 +26,7 @@ async function fetchWarnings(
 
 	const userMention = getUserMentionByReference(client, reference);
 
-	if (!documents) {
+	if (documents === undefined) {
 		client.log.error(`Failed to fetch warnings for ${userMention}. Reference: ${reference}`);
 		return undefined;
 	}
@@ -69,7 +69,7 @@ async function createWarning(
 
 	const userMention = getUserMentionByReference(client, warning.subject);
 
-	if (!document) {
+	if (document === undefined) {
 		client.log.error(`Failed to create warning for ${userMention}.`);
 		return undefined;
 	}
@@ -102,7 +102,7 @@ async function deleteWarning(
 
 	const userMention = getUserMentionByReference(client, warning.data.subject);
 
-	if (!document) {
+	if (document === undefined) {
 		client.log.error(`Failed to delete warning for ${userMention}.`);
 		return undefined;
 	}

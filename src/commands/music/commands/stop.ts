@@ -23,7 +23,7 @@ function handleStopPlayback(
 	interaction: Interaction,
 ): void {
 	const musicController = client.music.get(interaction.guildId!);
-	if (!musicController) return;
+	if (musicController === undefined) return;
 
 	const [canAct, _] = musicController.verifyMemberVoiceState(interaction);
 	if (!canAct) return;

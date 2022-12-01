@@ -9,7 +9,7 @@ import {
 import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
 import { Song, SongListingContentTypes, SongStream } from 'logos/src/commands/music/data/types.ts';
 import { OptionBuilder } from 'logos/src/commands/command.ts';
-import { show, collection } from 'logos/src/commands/parameters.ts';
+import { collection, show } from 'logos/src/commands/parameters.ts';
 import { Client } from 'logos/src/client.ts';
 import { chunk, paginate, parseArguments, trim } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
@@ -27,11 +27,11 @@ function handleDisplayCurrentlyPlaying(
 	interaction: Interaction,
 ): void {
 	const musicController = client.music.get(interaction.guildId!);
-	if (!musicController) return;
+	if (musicController === undefined) return;
 
 	const currentListing = musicController.current;
 
-	if (!musicController.isOccupied || !currentListing) {
+	if (!musicController.isOccupied || currentListing === undefined) {
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -60,7 +60,7 @@ function handleDisplayCurrentlyPlaying(
 		},
 	);
 
-	if (collection) {
+	if (collection !== undefined) {
 		if (currentListing?.content.type !== SongListingContentTypes.Collection) {
 			return void sendInteractionResponse(
 				bot,

@@ -69,21 +69,17 @@ async function handleRequestSongListing(
 	resolveToSongListing: ListingResolver,
 ): Promise<void> {
 	const musicController = client.music.get(interaction.guildId!);
-	if (!musicController) return;
+	if (musicController === undefined) return;
 
 	const [{ query }] = parseArguments(interaction.data?.options, {});
-	if (!query) return;
+	if (query === undefined) return;
 
 	const [canPlay, voiceState] = musicController.verifyCanPlay(interaction);
-	if (!canPlay || !voiceState) return;
+	if (!canPlay || voiceState === undefined) return;
 
-	const songListing = await resolveToSongListing(
-		client,
-		interaction,
-		query,
-	);
+	const songListing = await resolveToSongListing(client, interaction, query);
 
-	if (!songListing) {
+	if (songListing === undefined) {
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -104,10 +100,10 @@ async function handleRequestSongListing(
 	}
 
 	const textChannel = client.cache.channels.get(interaction.channelId!);
-	if (!textChannel) return;
+	if (textChannel === undefined) return;
 
 	const voiceChannel = client.cache.channels.get(voiceState.channelId!);
-	if (!voiceChannel) return;
+	if (voiceChannel === undefined) return;
 
 	return void musicController.play(client, {
 		interaction: interaction,

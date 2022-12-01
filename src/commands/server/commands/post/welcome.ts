@@ -19,7 +19,7 @@ function handlePostWelcomeMessage(
 	interaction: Interaction,
 ): void {
 	const guild = client.cache.guilds.get(interaction.guildId!);
-	if (!guild) return;
+	if (guild === undefined) return;
 
 	sendMessage(bot, interaction.channelId!, {
 		embeds: [{

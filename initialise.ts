@@ -10,8 +10,8 @@ import { Client, initialiseClient } from 'logos/src/client.ts';
 import { capitalise } from 'logos/formatting.ts';
 import { Language, supportedLanguages } from 'logos/types.ts';
 
-async function readDotEnvFile(fileUri: string, template = false): Promise<dotenv.DotenvConfig | undefined> {
-	const kind = template ? 'environment template' : 'environment';
+async function readDotEnvFile(fileUri: string, isTemplate = false): Promise<dotenv.DotenvConfig | undefined> {
+	const kind = isTemplate ? 'environment template' : 'environment';
 
 	let contents: string;
 	try {
@@ -19,7 +19,7 @@ async function readDotEnvFile(fileUri: string, template = false): Promise<dotenv
 	} catch (error) {
 		if (error instanceof Deno.errors.NotFound) {
 			console.error(`Missing ${kind} file.`);
-			if (!template) {
+			if (!isTemplate) {
 				return undefined;
 			}
 		}
@@ -46,7 +46,7 @@ function readEnvironment({
 }): void {
 	const requiredKeys = Object.keys(templateEnvConfiguration);
 
-	const presentKeys = Object.keys(envConfiguration ? envConfiguration : Deno.env.toObject());
+	const presentKeys = Object.keys(envConfiguration !== undefined ? envConfiguration : Deno.env.toObject());
 
 	const missingKeys = requiredKeys.filter((requiredKey) => !presentKeys.includes(requiredKey));
 	if (missingKeys.length !== 0) {
@@ -54,7 +54,7 @@ function readEnvironment({
 		Deno.exit(1);
 	}
 
-	if (!envConfiguration) return;
+	if (envConfiguration === undefined) return;
 
 	for (const [key, value] of <[string, string][]> Object.entries(envConfiguration)) {
 		Deno.env.set(key, value);
@@ -88,7 +88,7 @@ async function readSentenceFiles(directoryUri: string): Promise<[Language, strin
 	for (const file of files) {
 		const languageName = capitalise(file.name.split('.').at(0)!);
 
-		if (!(Array.from<string>(supportedLanguages).includes(languageName))) {
+		if (!Array.from<string>(supportedLanguages).includes(languageName)) {
 			console.warn(
 				`File '${file.name}' contains sentences for a language '${languageName}' not supported by the application. Skipping...`,
 			);

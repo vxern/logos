@@ -30,19 +30,13 @@ async function handleDisplayProfile(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {
-	const [{ user, show }] = parseArguments(interaction.data?.options, {
-		show: 'boolean',
-	});
+	const [{ user, show }] = parseArguments(interaction.data?.options, { show: 'boolean' });
 
-	const member = resolveInteractionToMember(
-		[client, bot],
-		interaction,
-		user ?? interaction.user.id.toString(),
-	);
-	if (!member) return;
+	const member = resolveInteractionToMember([client, bot], interaction, user ?? interaction.user.id.toString());
+	if (member === undefined) return;
 
 	const target = member.user;
-	if (!target) return;
+	if (target === undefined) return;
 
 	function showProfileViewFailure(): void {
 		return void sendInteractionResponse(
@@ -66,16 +60,16 @@ async function handleDisplayProfile(
 	}
 
 	const subject = await getOrCreateUser(client, 'id', member.id.toString());
-	if (!subject) return showProfileViewFailure();
+	if (subject === undefined) return showProfileViewFailure();
 
 	const praisesReceived = await getPraises(client, 'subject', subject.ref);
-	if (!praisesReceived) return showProfileViewFailure();
+	if (praisesReceived === undefined) return showProfileViewFailure();
 
 	const praisesSent = await getPraises(client, 'author', subject.ref);
-	if (!praisesSent) return showProfileViewFailure();
+	if (praisesSent === undefined) return showProfileViewFailure();
 
 	const warningsReceived = await getWarnings(client, subject.ref);
-	if (!warningsReceived) return showProfileViewFailure();
+	if (warningsReceived === undefined) return showProfileViewFailure();
 
 	const locale = !show ? interaction.locale : defaultLanguage;
 
@@ -99,7 +93,7 @@ async function handleDisplayProfile(
 							target.discriminator,
 							{ avatar: target.avatar, size: 4096, format: 'webp' },
 						);
-						if (!iconURL) return;
+						if (iconURL === undefined) return;
 
 						return { url: iconURL };
 					})(),

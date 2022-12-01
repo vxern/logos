@@ -155,26 +155,26 @@ function createEventHandlers(client: Client): Partial<EventHandlers> {
 			}
 
 			const commandName = interaction.data?.name;
-			if (!commandName) return;
+			if (commandName === undefined) return;
 
 			const subCommandGroupOption = interaction.data?.options?.find((option) =>
 				option.type === ApplicationCommandOptionTypes.SubCommandGroup
 			);
 
 			let commandNameFull: string;
-			if (subCommandGroupOption) {
+			if (subCommandGroupOption !== undefined) {
 				const subCommandGroupName = subCommandGroupOption.name;
-				const subCommandName = subCommandGroupOption.options?.find((option) =>
-					option.type === ApplicationCommandOptionTypes.SubCommand
+				const subCommandName = subCommandGroupOption.options?.find(
+					(option) => option.type === ApplicationCommandOptionTypes.SubCommand,
 				)?.name;
-				if (!subCommandName) return;
+				if (subCommandName === undefined) return;
 
 				commandNameFull = `${commandName} ${subCommandGroupName} ${subCommandName}`;
 			} else {
 				const subCommandName = interaction.data?.options?.find((option) =>
 					option.type === ApplicationCommandOptionTypes.SubCommand
 				)?.name;
-				if (!subCommandName) {
+				if (subCommandName === undefined) {
 					commandNameFull = commandName;
 				} else {
 					commandNameFull = `${commandName} ${subCommandName}`;
@@ -182,7 +182,7 @@ function createEventHandlers(client: Client): Partial<EventHandlers> {
 			}
 
 			const handle = client.handlers.get(commandNameFull);
-			if (!handle) return;
+			if (handle === undefined) return;
 
 			Promise.resolve(handle([client, bot], interaction)).catch((exception) => {
 				Sentry.captureException(exception);
@@ -247,7 +247,7 @@ function withCaching(
 
 		client.cache.users.set(user.id, user);
 
-		if (payload.member && payload.guild_id) {
+		if (payload.member !== undefined && payload.guild_id !== undefined) {
 			const guildId = bot.transformers.snowflake(payload.guild_id);
 
 			const member = bot.transformers.member(
@@ -295,21 +295,21 @@ function createCommandHandlers(
 	const handlers = new Map<string, InteractionHandler>();
 
 	for (const command of commands) {
-		if (command.handle) {
+		if (command.handle !== undefined) {
 			handlers.set(command.name, command.handle);
 		}
 
-		if (!command.options) continue;
+		if (command.options === undefined) continue;
 
 		for (const option of command.options) {
-			if (option.handle) {
+			if (option.handle !== undefined) {
 				handlers.set(`${command.name} ${option.name}`, option.handle);
 			}
 
-			if (!option.options) continue;
+			if (option.options === undefined) continue;
 
 			for (const subOption of option.options) {
-				if (subOption.handle) {
+				if (subOption.handle !== undefined) {
 					handlers.set(
 						`${command.name} ${option.name} ${subOption.name}`,
 						subOption.handle,
@@ -323,9 +323,8 @@ function createCommandHandlers(
 }
 
 function getLanguage(guildName: string): Language {
-	const guildNameMatch = configuration.guilds.nameExpression.exec(guildName) ??
-		undefined;
-	if (!guildNameMatch) return defaultLanguage;
+	const guildNameMatch = configuration.guilds.nameExpression.exec(guildName) ?? undefined;
+	if (guildNameMatch === undefined) return defaultLanguage;
 
 	const languageString = guildNameMatch.at(1)!;
 
@@ -356,7 +355,7 @@ function addCollector<T extends keyof EventHandlers>(
 		onEnd();
 	};
 
-	if (collector.limit) {
+	if (collector.limit !== undefined) {
 		let emitCount = 0;
 		const onCollect = collector.onCollect;
 		collector.onCollect = (...args) => {
@@ -370,7 +369,7 @@ function addCollector<T extends keyof EventHandlers>(
 		};
 	}
 
-	if (collector.removeAfter) {
+	if (collector.removeAfter !== undefined) {
 		setTimeout(collector.onEnd, collector.removeAfter!);
 	}
 
@@ -420,7 +419,7 @@ function resolveIdentifierToMembers(
 	id ??= userMentionExpression.exec(identifier)?.at(1);
 	id ??= userIDExpression.exec(identifier)?.at(0);
 
-	if (!id) {
+	if (id === undefined) {
 		const members = Array.from(client.cache.members.values()).filter((member) => member.guildId === guildId);
 
 		const identifierLowercase = identifier.toLowerCase();
@@ -440,12 +439,10 @@ function resolveIdentifierToMembers(
 	}
 
 	const guild = client.cache.guilds.get(guildId);
-	if (!guild) return;
+	if (guild === undefined) return;
 
-	const member = client.cache.members.get(
-		snowflakeToBigint(`${id}${guild.id}`),
-	);
-	if (!member) return;
+	const member = client.cache.members.get(snowflakeToBigint(`${id}${guild.id}`));
+	if (member === undefined) return;
 
 	return [[member], true];
 }
@@ -460,7 +457,7 @@ function resolveInteractionToMember(
 		interaction.guildId!,
 		identifier,
 	);
-	if (!result) return;
+	if (result === undefined) return;
 
 	const [matchedMembers, isId] = result;
 	if (isId) return matchedMembers.at(0);

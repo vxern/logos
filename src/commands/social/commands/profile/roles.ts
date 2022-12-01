@@ -45,11 +45,9 @@ function handleOpenRoleSelectionMenu(
 	interaction: Interaction,
 ): void {
 	const guild = client.cache.guilds.get(interaction.guildId!);
-	if (!guild) return;
+	if (guild === undefined) return;
 
-	const rootCategories = getRelevantCategories(roles, guild.language).map((
-		[category, _index],
-	) => category);
+	const rootCategories = getRelevantCategories(roles, guild.language).map(([category, _index]) => category);
 
 	return createRoleSelectionMenu(
 		[client, bot],
@@ -133,21 +131,17 @@ function createRoleSelectionMenu(
 	data: BrowsingData,
 ): void {
 	const guild = client.cache.guilds.get(interaction.guildId!);
-	if (!guild) return;
+	if (guild === undefined) return;
 
 	const emojiIdsByName = new Map(
 		guild.emojis.map((emoji) => [emoji.name!, emoji.id!]),
 	);
 
-	const member = client.cache.members.get(
-		snowflakeToBigint(`${interaction.user.id}${guild.id}`),
-	);
-	if (!member) return;
+	const member = client.cache.members.get(snowflakeToBigint(`${interaction.user.id}${guild.id}`));
+	if (member === undefined) return;
 
 	const memberRoleIds = [...member.roles];
-	const rolesByName = new Map(
-		guild.roles.array().map((role) => [role.name, role]),
-	);
+	const rolesByName = new Map(guild.roles.array().map((role) => [role.name, role]));
 
 	let category: RoleCategory;
 	let menuRoles: Role[];
@@ -163,8 +157,8 @@ function createRoleSelectionMenu(
 		if (category.type === RoleCategoryTypes.Category) {
 			menuRoles = resolveRoles(category.collection, data.language);
 			menuRolesResolved = menuRoles.map((role) => rolesByName.get(localise(role.name, defaultLanguage))!);
-			memberRolesIncludedInMenu = memberRoleIds.filter((roleId) =>
-				menuRolesResolved.some((role) => role.id === roleId)
+			memberRolesIncludedInMenu = memberRoleIds.filter(
+        (roleId) => menuRolesResolved.some((role) => role.id === roleId)
 			);
 		}
 
@@ -220,7 +214,7 @@ function createRoleSelectionMenu(
 				});
 
 				const indexString = selection.data?.values?.at(0);
-				if (!indexString) return;
+				if (indexString === undefined) return;
 
 				const index = Number(indexString);
 				if (isNaN(index)) return;
@@ -266,7 +260,7 @@ function createRoleSelectionMenu(
 						}
 						memberRolesIncludedInMenu = [];
 					} else if (
-						category.limit &&
+						category.limit !== undefined &&
 						memberRolesIncludedInMenu.length >= category.limit
 					) {
 						sendInteractionResponse(
@@ -326,7 +320,6 @@ function displaySelectMenu(
 	locale: string | undefined,
 ): InteractionResponse {
 	const isInRootCategory = data.navigationData.indexesAccessed.length === 0;
-
 	if (!isInRootCategory) {
 		selectOptions.push({
 			label: localise(Commands.profile.options.roles.strings.back, locale),

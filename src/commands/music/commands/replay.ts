@@ -26,20 +26,16 @@ function handleReplayAction(
 	interaction: Interaction,
 ): void {
 	const musicController = client.music.get(interaction.guildId!);
-	if (!musicController) return;
+	if (musicController === undefined) return;
 
-	const [canAct, _voiceState] = musicController.verifyMemberVoiceState(
-		interaction,
-	);
+	const [canAct, _voiceState] = musicController.verifyMemberVoiceState(interaction);
 	if (!canAct) return;
 
-	const [{ collection }] = parseArguments(interaction.data?.options, {
-		collection: 'boolean',
-	});
+	const [{ collection }] = parseArguments(interaction.data?.options, { collection: 'boolean' });
 
 	const currentListing = musicController.current;
 
-	if (!musicController.isOccupied || !currentListing) {
+	if (!musicController.isOccupied || currentListing === undefined) {
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -61,7 +57,7 @@ function handleReplayAction(
 	}
 
 	if (
-		collection &&
+		collection !== undefined &&
 		currentListing.content.type !== SongListingContentTypes.Collection
 	) {
 		return void sendInteractionResponse(

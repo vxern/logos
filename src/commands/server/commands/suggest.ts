@@ -32,16 +32,13 @@ function handleMakeSuggestion(
 	interaction: Interaction,
 ): void {
 	const guild = client.cache.guilds.get(interaction.guildId!);
-	if (!guild) return;
+	if (guild === undefined) return;
 
-	const conferenceChannel = getTextChannel(
-		guild,
-		configuration.guilds.channels.conference,
-	);
-	if (!conferenceChannel) return;
+	const conferenceChannel = getTextChannel(guild, configuration.guilds.channels.conference);
+	if (conferenceChannel === undefined) return;
 
 	const [{ suggestion }] = parseArguments(interaction.data?.options, {});
-	if (!suggestion) return;
+	if (suggestion === undefined) return;
 
 	sendMessage(bot, conferenceChannel.id, {
 		embeds: [{

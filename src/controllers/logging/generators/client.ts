@@ -39,20 +39,20 @@ const client: MessageGenerators<ClientEvents> = {
 		title: '⬆️ Message updated',
 		message: (client, _bot, message, oldMessage) => {
 			const author = client.cache.users.get(message.authorId);
-			if (!author) return;
+			if (author === undefined) return;
 
 			return `${diagnosticMentionUser(author)} updated their message in ${
 				mention(message.channelId, MentionTypes.Channel)
 			}.
 
 **BEFORE**
-${oldMessage ? codeMultiline(oldMessage.content) : '*No message*'}
+${oldMessage !== undefined ? codeMultiline(oldMessage.content) : '*No message*'}
 **AFTER**
 ${codeMultiline(message.content)}`;
 		},
 		filter: (client, originGuildId, _bot, message, oldMessage) => {
 			const author = client.cache.users.get(message.authorId);
-			if (!author) return false;
+			if (author === undefined) return false;
 
 			return originGuildId === message.guildId && !author.toggles.bot &&
 				message.content !== oldMessage?.content;
@@ -61,11 +61,12 @@ ${codeMultiline(message.content)}`;
 	},
 	messageDelete: {
 		title: '❌ Message deleted',
-		message: (client, _bot, _payload, message) => {
-			if (!message) return;
+		message: (client, _bot, payload, _message) => {
+			const message = client.cache.messages.get(payload.id);
+			if (message === undefined) return;
 
 			const author = client.cache.users.get(message.authorId);
-			if (!author) return;
+			if (author === undefined) return;
 
 			return `${diagnosticMentionUser(author)} deleted their message in ${
 				mention(message.channelId, MentionTypes.Channel)
@@ -74,13 +75,14 @@ ${codeMultiline(message.content)}`;
 **CONTENT**
 ${codeMultiline(message.content)}`;
 		},
-		filter: (client, originGuildId, _bot, payload, message) => {
-			if (!message) return false;
+		filter: (client, originGuildId, _bot, payload, _message) => {
+			const message = client.cache.messages.get(payload.id);
+			if (message === undefined) return false;
 
 			const author = client.cache.users.get(message.authorId);
-			if (!author) return false;
+			if (author === undefined) return false;
 
-			return (message ? originGuildId === message.guildId : originGuildId === payload.guildId) && !author.toggles.bot;
+			return originGuildId === message.guildId && !author.toggles.bot;
 		},
 		color: configuration.interactions.responses.colors.red,
 	},

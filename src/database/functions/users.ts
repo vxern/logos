@@ -37,7 +37,7 @@ async function fetchUser<
 		),
 	);
 
-	if (!document) {
+	if (document === undefined) {
 		const parameterPrinted = parameter === 'id' ? 'ID' : 'document reference';
 		client.log.debug(`Couldn't find a user in the database whose ${parameterPrinted} matches '${value}'.`);
 		return undefined;
@@ -70,7 +70,7 @@ async function createUser(
 	const user_ = client.cache.users.get(id);
 	const userMention = mentionUser(user_, id);
 
-	if (!document) {
+	if (document === undefined) {
 		client.log.error(`Failed to create a user document in the database for ${userMention}.`);
 		return undefined;
 	}
@@ -104,7 +104,7 @@ async function getOrCreateUser<
 		: Array.from(client.database.users.values()).find((document) => document.data.account.id === value);
 
 	const cacheOrFetch = cacheValue ?? await fetchUser(client, parameter, value);
-	if (cacheOrFetch) return cacheOrFetch;
+	if (cacheOrFetch !== undefined) return cacheOrFetch;
 
 	if (parameter === 'id') {
 		return await createUser(client, { account: { id: <string> value } });

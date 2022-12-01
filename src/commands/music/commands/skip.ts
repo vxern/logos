@@ -27,15 +27,13 @@ function handleSkipAction(
 	interaction: Interaction,
 ): void {
 	const musicController = client.music.get(interaction.guildId!);
-	if (!musicController) return;
+	if (musicController === undefined) return;
 
-	const [canAct, _voiceState] = musicController.verifyMemberVoiceState(
-		interaction,
-	);
+	const [canAct, _voiceState] = musicController.verifyMemberVoiceState(interaction);
 	if (!canAct) return;
 
 	const data = interaction.data;
-	if (!data) return;
+	if (data === undefined) return;
 
 	const [{ collection, by, to }] = parseArguments(interaction.data?.options, {
 		collection: 'boolean',
@@ -43,12 +41,12 @@ function handleSkipAction(
 		to: 'number',
 	});
 
-	if (by && isNaN(by)) return;
-	if (to && isNaN(to)) return;
+	if (by !== undefined && isNaN(by)) return;
+	if (to !== undefined && isNaN(to)) return;
 
 	const songListing = musicController.current;
 
-	if (!musicController.isOccupied || !songListing) {
+	if (!musicController.isOccupied || songListing === undefined) {
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -70,7 +68,7 @@ function handleSkipAction(
 	}
 
 	if (
-		collection &&
+		collection !== undefined &&
 		songListing.content.type !== SongListingContentTypes.Collection
 	) {
 		return void sendInteractionResponse(
@@ -93,7 +91,7 @@ function handleSkipAction(
 		);
 	}
 
-	if (by && to) {
+	if (by !== undefined && to !== undefined) {
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -114,7 +112,7 @@ function handleSkipAction(
 		);
 	}
 
-	if ((by && by <= 0) || (to && to <= 0)) {
+	if ((by !== undefined && by <= 0) || (to !== undefined && to <= 0)) {
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -135,10 +133,10 @@ function handleSkipAction(
 		);
 	}
 
-	if (by) {
+	if (by !== undefined) {
 		if (
 			songListing.content.type === SongListingContentTypes.Collection &&
-			!collection
+			collection === undefined
 		) {
 			const listingsToSkip = Math.min(
 				by,
@@ -158,10 +156,10 @@ function handleSkipAction(
 				to: undefined,
 			});
 		}
-	} else if (to) {
+	} else if (to !== undefined) {
 		if (
 			songListing.content.type === SongListingContentTypes.Collection &&
-			!collection
+			collection === undefined
 		) {
 			const listingToSkipTo = Math.min(to, songListing.content.songs.length);
 

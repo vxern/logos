@@ -17,14 +17,14 @@ async function handlePostInformationMessage(
 	interaction: Interaction,
 ): Promise<void> {
 	const guild = client.cache.guilds.get(interaction.guildId!);
-	if (!guild) return;
+	if (guild === undefined) return;
 
 	const sections = Object.values(informationSections);
 	const embeds = <Embed[]> (
 		await Promise.all(
 			sections.map((section) => section.generateEmbed([client, bot], guild)),
 		)
-	).filter((embed) => embed);
+	).filter((embed) => embed !== undefined);
 
 	sendMessage(
 		bot,

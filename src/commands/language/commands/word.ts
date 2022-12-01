@@ -21,7 +21,7 @@ import { show } from 'logos/src/commands/parameters.ts';
 import { Client } from 'logos/src/client.ts';
 import { chunk, createInteractionCollector, diagnosticMentionUser, fromHex, parseArguments } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
-import { BulletStyles, list } from 'logos/formatting.ts';
+import { BulletStyles, code, list } from 'logos/formatting.ts';
 import { WordTypes } from 'logos/types.ts';
 
 const command: CommandBuilder = {
@@ -52,13 +52,13 @@ async function handleSearchWord(
 		interaction.data?.options,
 		{ verbose: 'boolean', show: 'boolean' },
 	);
-	if (!word) return;
+	if (word === undefined) return;
 
 	const guild = client.cache.guilds.get(interaction.guildId!);
-	if (!guild) return;
+	if (guild === undefined) return;
 
 	const dictionaries = client.features.dictionaryAdapters.get('Romanian');
-	if (!dictionaries) {
+	if (dictionaries === undefined) {
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -97,12 +97,12 @@ async function handleSearchWord(
 	const entries: DictionaryEntry[] = [];
 	for (const dictionary of dictionaries) {
 		const data = await dictionary.query(word, guild.language);
-		if (!data) continue;
+		if (data === undefined) continue;
 
-		const entries_ = dictionary.parse(data, interaction.locale);
-		if (!entries_) continue;
+		const entriesNew = dictionary.parse(data, interaction.locale);
+		if (entriesNew === undefined) continue;
 
-		entries.push(...entries_);
+		entries.push(...entriesNew);
 	}
 
 	if (entries.length === 0) {
@@ -111,10 +111,7 @@ async function handleSearchWord(
 			interaction.token,
 			{
 				embeds: [{
-					description: localise(
-						Commands.word.strings.noResults,
-						interaction.locale,
-					),
+					description: localise(Commands.word.strings.noResults, interaction.locale),
 					color: configuration.interactions.responses.colors.yellow,
 				}],
 			},
@@ -130,7 +127,7 @@ async function handleSearchWord(
 	const getEntry = () => entries.at(dictionaryEntryIndex)!;
 
 	const displayMenu = (selection?: Interaction): void => {
-		if (selection) {
+		if (selection !== undefined) {
 			sendInteractionResponse(bot, selection.id, selection.token, {
 				type: InteractionResponseTypes.DeferredUpdateMessage,
 			});
@@ -202,7 +199,7 @@ async function handleSearchWord(
 				break;
 			}
 			case Views.Inflection: {
-				if (!entry.inflectionTable) return [];
+				if (entry.inflectionTable === undefined) return [];
 
 				const rows = chunk(entry.inflectionTable, 5);
 				rows.reverse();
@@ -210,7 +207,7 @@ async function handleSearchWord(
 				const buttonId = createInteractionCollector([client, bot], {
 					type: InteractionTypes.MessageComponent,
 					onCollect: (_bot, selection) => {
-						if (!entry.inflectionTable || !selection.data) return void displayMenu(selection);
+						if (entry.inflectionTable === undefined || selection.data === undefined) return void displayMenu(selection);
 
 						const [_buttonId, indexString] = selection.data.customId!.split('|');
 						const index = Number(indexString);
@@ -262,7 +259,7 @@ async function handleSearchWord(
 			},
 		});
 
-		if (entry.definitions) {
+		if (entry.definitions !== undefined) {
 			row.push({
 				type: MessageComponentTypes.Button,
 				label: localise(Commands.word.strings.definitions, interaction.locale),
@@ -272,7 +269,7 @@ async function handleSearchWord(
 			});
 		}
 
-		if (entry.inflectionTable) {
+		if (entry.inflectionTable !== undefined) {
 			row.push({
 				type: MessageComponentTypes.Button,
 				label: localise(Commands.word.strings.inflection, interaction.locale),
@@ -303,7 +300,7 @@ function entryToEmbed(
 ): Embed {
 	const fields: DiscordEmbedField[] = [];
 
-	if (entry.definitions && entry.definitions.length !== 0) {
+	if (entry.definitions !== undefined && entry.definitions.length !== 0) {
 		const definitionsStringified = stringifyEntries(entry.definitions, BulletStyles.Diamond);
 		const definitionsFitted = fitStringsToFieldSize(definitionsStringified, locale, verbose);
 
@@ -313,7 +310,7 @@ function entryToEmbed(
 		});
 	}
 
-	if (entry.expressions && entry.expressions.length !== 0) {
+	if (entry.expressions !== undefined && entry.expressions.length !== 0) {
 		const expressionsStringified = stringifyEntries(entry.expressions, BulletStyles.Arrow);
 		const expressionsFitted = fitStringsToFieldSize(expressionsStringified, locale, verbose);
 
@@ -323,15 +320,15 @@ function entryToEmbed(
 		});
 	}
 
-	if (entry.etymologies && entry.etymologies.length !== 0) {
+	if (entry.etymologies !== undefined && entry.etymologies.length !== 0) {
 		fields.push({
 			name: localise(Commands.word.strings.fields.etymology, locale),
 			value: entry.etymologies.map((etymology) => {
-				if (!etymology.tags) {
+				if (etymology.tags === undefined) {
 					return `**${etymology.value}**`;
 				}
 
-				if (!etymology.value) {
+				if (etymology.value === undefined) {
 					return tagsToString(etymology.tags);
 				}
 
@@ -341,7 +338,7 @@ function entryToEmbed(
 	}
 
 	let description: string;
-	if (!entry.type) {
+	if (entry.type === undefined) {
 		description = localise(Words.types[WordTypes.Unknown], locale);
 	} else {
 		const [type, typeString] = entry.type;
@@ -360,12 +357,12 @@ function entryToEmbed(
 }
 
 function tagsToString(tags: string[]): string {
-	return tags.map((tag) => `\`${tag}\``).join(' ');
+	return tags.map((tag) => code(tag)).join(' ');
 }
 
 function stringifyEntries(entries: TaggedValue<string>[], bulletStyle: BulletStyles): string[] {
 	const entriesStringified = entries.map((entry) => {
-		if (!entry.tags) {
+		if (entry.tags === undefined) {
 			return entry.value;
 		}
 

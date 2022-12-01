@@ -38,12 +38,8 @@ async function handlePraiseUser(
 	const [{ user, comment }] = parseArguments(interaction.data?.options, {});
 	if (user === undefined) return;
 
-	const member = resolveInteractionToMember(
-		[client, bot],
-		interaction,
-		user,
-	);
-	if (!member) return;
+	const member = resolveInteractionToMember([client, bot], interaction, user);
+	if (member === undefined) return;
 
 	if (member.id === interaction.member?.id) {
 		return void sendInteractionResponse(
@@ -88,27 +84,26 @@ async function handlePraiseUser(
 	};
 
 	const author = await getOrCreateUser(client, 'id', interaction.user.id.toString());
-	if (!author) return showPraiseFailure();
+	if (author === undefined) return showPraiseFailure();
 
 	const praisesByAuthor = await getPraises(client, 'author', author.ref);
-	if (!praisesByAuthor) return showPraiseFailure();
+	if (praisesByAuthor === undefined) return showPraiseFailure();
 
 	const praiseTimestamps = praisesByAuthor
 		.map((document) => document.ts)
 		.sort((a, b) => b - a); // From most recent to least recent.
 	const timestampSlice = praiseTimestamps.slice(0, configuration.guilds.praises.maximum);
 	const canPraise = timestampSlice.length < configuration.guilds.praises.maximum ||
-		timestampSlice.some((timestamp) => (Date.now() - timestamp) >= configuration.guilds.praises.interval);
+		timestampSlice.some(
+			(timestamp) => (Date.now() - timestamp) >= configuration.guilds.praises.interval,
+		);
 	if (!canPraise) {
 		return void editOriginalInteractionResponse(
 			bot,
 			interaction.token,
 			{
 				embeds: [{
-					description: localise(
-						Commands.praise.strings.waitBeforePraising,
-						interaction.locale,
-					),
+					description: localise(Commands.praise.strings.waitBeforePraising, interaction.locale),
 					color: configuration.interactions.responses.colors.yellow,
 				}],
 			},
@@ -116,24 +111,20 @@ async function handlePraiseUser(
 	}
 
 	const subject = await getOrCreateUser(client, 'id', member.id.toString());
-	if (!subject) return showPraiseFailure();
+	if (subject === undefined) return showPraiseFailure();
 
-	const praise: Praise = {
-		author: author.ref,
-		subject: subject.ref,
-		comment: comment,
-	};
+	const praise: Praise = { author: author.ref, subject: subject.ref, comment: comment };
 
 	const document = await createPraise(client, praise);
-	if (!document) return showPraiseFailure();
+	if (document === undefined) return showPraiseFailure();
 
 	const guild = client.cache.guilds.get(interaction.guildId!);
-	if (!guild) return;
+	if (guild === undefined) return;
 
 	log([client, bot], guild, 'praiseAdd', member, praise, interaction.user);
 
-	const dmChannel = await getDmChannel(bot, member.id);
-	if (dmChannel) {
+	const dmChannel = await getDmChannel(bot, member.id).catch(() => undefined);
+	if (dmChannel !== undefined) {
 		sendMessage(bot, dmChannel.id, {
 			embeds: [
 				{

@@ -60,7 +60,7 @@ function getRelevantCategories(
 		}
 
 		if (category.collection.type === RoleCollectionTypes.CollectionLocalised) {
-			if (!language) continue;
+			if (language === undefined) continue;
 			if (!(language in category.collection.lists)) continue;
 		}
 
@@ -95,13 +95,13 @@ function createSelectOptionsFromCollection(
 				? `[${localise(Commands.profile.options.roles.strings.assigned, locale)}] ${localisedName}`
 				: localisedName,
 			value: index.toString(),
-			description: role.description ? localise(role.description, locale) : undefined,
+			description: role.description !== undefined ? localise(role.description, locale) : undefined,
 			emoji: (() => {
-				if (!role.emoji) return;
+				if (role.emoji === undefined) return;
 				if (emojiExpression.test(role.emoji)) return { name: role.emoji };
 
 				const id = emojiIdsByName.get(role.emoji);
-				if (!id) return { name: '❓' };
+				if (id === undefined) return { name: '❓' };
 
 				return { name: role.emoji, id };
 			})(),
@@ -123,7 +123,7 @@ function resolveRoles(
 	language: Language | undefined,
 ): Role[] {
 	if (collection.type === RoleCollectionTypes.CollectionLocalised) {
-		if (!language) return [];
+		if (language === undefined) return [];
 
 		return collection.lists[language] ?? [];
 	}
