@@ -1,6 +1,7 @@
 import {
 	ApplicationCommandFlags,
 	Bot,
+	Channel,
 	ChannelTypes,
 	Guild,
 	Interaction,
@@ -141,26 +142,16 @@ function handleDisplayGuildInformation(
 function displayInformationAboutChannels(guild: Guild, locale: string | undefined): string {
 	const channels = guild.channels.array();
 
-	const getCountByType = (type: ChannelTypes): number => {
-		return channels.filter((channel) => channel.type === type).length;
-	};
-
-	const textChannelsCount = getCountByType(ChannelTypes.GuildText);
-	const voiceChannelsCount = getCountByType(ChannelTypes.GuildVoice);
+	const textChannelsCount = getChannelCountByType(channels, ChannelTypes.GuildText);
+	const voiceChannelsCount = getChannelCountByType(channels, ChannelTypes.GuildVoice);
 
 	return `📜 ${textChannelsCount} ${
-		localise(
-			Commands.information.options.guild.strings.channelTypes
-				.text,
-			locale,
-		)
-	} | 🔊 ${voiceChannelsCount} ${
-		localise(
-			Commands.information.options.guild.strings.channelTypes
-				.voice,
-			locale,
-		)
-	}`;
+		localise(Commands.information.options.guild.strings.channelTypes.text, locale)
+	} | 🔊 ${voiceChannelsCount} ${localise(Commands.information.options.guild.strings.channelTypes.voice, locale)}`;
+}
+
+function getChannelCountByType(channels: Channel[], type: ChannelTypes): number {
+	return channels.filter((channel) => channel.type === type).length;
 }
 
 /**
@@ -180,7 +171,7 @@ function getProficiencyRoleFrequencies(
 	const proficiencyRoleNames = proficiencies.map((proficiency) => proficiency.name[defaultLanguage]);
 	const proficiencyRoles = guild.roles.array()
 		.filter((role) => proficiencyRoleNames.includes(role.name))
-		.sort((a, b) => a.position - b.position);
+		.toSorted((a, b) => a.position - b.position);
 	const proficiencyRoleIds = proficiencyRoles.map((role) => role.id);
 
 	const membersIndiscriminate = Array.from(client.cache.members.values());

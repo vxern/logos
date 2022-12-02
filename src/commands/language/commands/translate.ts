@@ -117,9 +117,8 @@ async function handleTranslateText(
 				value: language.code,
 			}))
 			.filter((choice) => choice.name && choice.name.toLowerCase().includes(inputLowercase))
-			.slice(0, 25);
-
-		choices.sort((previous, next) => previous.name.localeCompare(next.name));
+			.slice(0, 25)
+			.toSorted((previous, next) => previous.name.localeCompare(next.name));
 
 		return void sendInteractionResponse(
 			bot,

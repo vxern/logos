@@ -61,87 +61,40 @@ function handleRemoveSongListing(
 		);
 	}
 
-	const queueChunks = chunk(
-		musicController.queue,
-		configuration.music.maxima.songs.page,
-	);
+	const pages = chunk(musicController.queue, configuration.music.maxima.songs.page);
 
-	let pageIndex = 0;
-	let page: SongListing[];
-
-	const isFirst = () => pageIndex === 0;
-	const isLast = () => pageIndex === queueChunks.length - 1;
-
-	const generateSelectMenu = (): ActionRow => {
-		page = queueChunks.at(pageIndex)!;
-
-		return {
-			type: MessageComponentTypes.ActionRow,
-			components: [{
-				type: MessageComponentTypes.SelectMenu,
-				customId: selectMenuCustomId,
-				minValues: 1,
-				maxValues: 1,
-				options: page.map<SelectOption>((
-					songListing,
-					index,
-				) => ({
-					emoji: {
-						name: configuration.music.symbols[songListing.content.type]!,
-					},
-					label: trim(songListing.content.title, 100),
-					value: (pageIndex * configuration.music.maxima.songs.page + index)
-						.toString(),
-				})),
-			}],
-		};
-	};
-
-	const generateButtons = (): MessageComponents => {
-		const buttons: ButtonComponent[] = [];
-
-		if (!isFirst()) {
-			buttons.push({
-				type: MessageComponentTypes.Button,
-				customId: `${buttonsCustomId}|PREVIOUS`,
-				style: ButtonStyles.Secondary,
-				label: '«',
-			});
-		}
-
-		if (!isLast()) {
-			buttons.push({
-				type: MessageComponentTypes.Button,
-				customId: `${buttonsCustomId}|NEXT`,
-				style: ButtonStyles.Secondary,
-				label: '»',
-			});
-		}
-
-		return buttons.length === 0 ? [] : [{
-			type: MessageComponentTypes.ActionRow,
-			components: <[ButtonComponent] | [
-				ButtonComponent | ButtonComponent,
-			]> buttons,
-		}];
-	};
-
-	const generateEmbed: () => InteractionCallbackData = () => ({
-		embeds: [{
-			description: localise(
-				Commands.music.options.remove.strings.selectSongToRemove,
-				interaction.locale,
-			),
-			color: configuration.interactions.responses.colors.blue,
-			footer: isLast() ? undefined : {
-				text: localise(
-					Commands.music.options.remove.strings.continuedOnTheNextPage,
-					interaction.locale,
-				),
+	return void sendInteractionResponse(
+		bot,
+		interaction.id,
+		interaction.token,
+		{
+			type: InteractionResponseTypes.ChannelMessageWithSource,
+			data: {
+				flags: ApplicationCommandFlags.Ephemeral,
+				...generateEmbed([client, bot], interaction, {
+					pages,
+					remove: (index) => musicController.queue.splice(index, 1)?.at(0),
+					pageIndex: 0,
+				}, interaction.locale),
 			},
-		}],
-		components: [generateSelectMenu(), ...generateButtons()],
-	});
+		},
+	);
+}
+
+interface RemoveListingData {
+	readonly pages: SongListing[][];
+	readonly remove: (index: number) => SongListing | undefined;
+	pageIndex: number;
+}
+
+function generateEmbed(
+	[client, bot]: [Client, Bot],
+	interaction: Interaction,
+	data: RemoveListingData,
+	locale: string | undefined,
+): InteractionCallbackData {
+	const isFirst = data.pageIndex === 0;
+	const isLast = data.pageIndex === data.pages.length - 1;
 
 	const buttonsCustomId = createInteractionCollector([client, bot], {
 		type: InteractionTypes.MessageComponent,
@@ -153,10 +106,10 @@ function handleRemoveSongListing(
 
 			switch (action) {
 				case 'PREVIOUS':
-					if (!isFirst()) pageIndex--;
+					if (!isFirst) data.pageIndex--;
 					break;
 				case 'NEXT':
-					if (!isLast()) pageIndex++;
+					if (!isLast) data.pageIndex++;
 					break;
 			}
 
@@ -164,7 +117,7 @@ function handleRemoveSongListing(
 				type: InteractionResponseTypes.DeferredUpdateMessage,
 			});
 
-			editOriginalInteractionResponse(bot, interaction.token, generateEmbed());
+			editOriginalInteractionResponse(bot, interaction.token, generateEmbed([client, bot], interaction, data, locale));
 		},
 	});
 
@@ -181,7 +134,7 @@ function handleRemoveSongListing(
 				const index = Number(indexString);
 				if (isNaN(index)) return;
 
-				const songListing = musicController.queue.splice(index, 1)?.at(0);
+				const songListing = data.remove(index);
 				if (songListing === undefined) {
 					return void sendInteractionResponse(
 						bot,
@@ -210,16 +163,8 @@ function handleRemoveSongListing(
 						type: InteractionResponseTypes.ChannelMessageWithSource,
 						data: {
 							embeds: [{
-								title: `❌ ${
-									localise(
-										Commands.music.options.remove.strings.removed.header,
-										defaultLanguage,
-									)
-								}`,
-								description: localise(
-									Commands.music.options.remove.strings.removed.body,
-									defaultLanguage,
-								)(
+								title: `❌ ${localise(Commands.music.options.remove.strings.removed.header, defaultLanguage)}`,
+								description: localise(Commands.music.options.remove.strings.removed.body, defaultLanguage)(
 									songListing.content.title,
 									mention(selection.user.id, MentionTypes.User),
 								),
@@ -232,18 +177,65 @@ function handleRemoveSongListing(
 		},
 	);
 
-	return void sendInteractionResponse(
-		bot,
-		interaction.id,
-		interaction.token,
-		{
-			type: InteractionResponseTypes.ChannelMessageWithSource,
-			data: {
-				flags: ApplicationCommandFlags.Ephemeral,
-				...generateEmbed(),
+	return {
+		embeds: [{
+			description: localise(Commands.music.options.remove.strings.selectSongToRemove, locale),
+			color: configuration.interactions.responses.colors.blue,
+			footer: isLast ? undefined : {
+				text: localise(Commands.music.options.remove.strings.continuedOnTheNextPage, locale),
 			},
-		},
-	);
+		}],
+		components: [generateSelectMenu(data, selectMenuCustomId), ...generateButtons(buttonsCustomId, isFirst, isLast)],
+	};
+}
+
+function generateSelectMenu(data: RemoveListingData, selectMenuCustomId: string): ActionRow {
+	const page = data.pages.at(data.pageIndex)!;
+
+	return {
+		type: MessageComponentTypes.ActionRow,
+		components: [{
+			type: MessageComponentTypes.SelectMenu,
+			customId: selectMenuCustomId,
+			minValues: 1,
+			maxValues: 1,
+			options: page.map<SelectOption>(
+				(songListing, index) => ({
+					emoji: { name: configuration.music.symbols[songListing.content.type]! },
+					label: trim(songListing.content.title, 100),
+					value: (data.pageIndex * configuration.music.maxima.songs.page + index).toString(),
+				}),
+			),
+		}],
+	};
+}
+
+function generateButtons(buttonsCustomId: string, isFirst: boolean, isLast: boolean): MessageComponents {
+	const buttons: ButtonComponent[] = [];
+
+	if (!isFirst) {
+		buttons.push({
+			type: MessageComponentTypes.Button,
+			customId: `${buttonsCustomId}|PREVIOUS`,
+			style: ButtonStyles.Secondary,
+			label: '«',
+		});
+	}
+
+	if (!isLast) {
+		buttons.push({
+			type: MessageComponentTypes.Button,
+			customId: `${buttonsCustomId}|NEXT`,
+			style: ButtonStyles.Secondary,
+			label: '»',
+		});
+	}
+
+	// @ts-ignore: It is guaranteed that there will be fewer than five buttons.
+	return buttons.length === 0 ? [] : [{
+		type: MessageComponentTypes.ActionRow,
+		components: buttons,
+	}];
 }
 
 export default command;

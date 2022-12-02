@@ -67,31 +67,15 @@ async function handlePraiseUser(
 		data: { flags: ApplicationCommandFlags.Ephemeral },
 	});
 
-	const showPraiseFailure = (): void => {
-		return void editOriginalInteractionResponse(
-			bot,
-			interaction.token,
-			{
-				embeds: [{
-					description: localise(
-						Commands.praise.strings.failed,
-						interaction.locale,
-					),
-					color: configuration.interactions.responses.colors.red,
-				}],
-			},
-		);
-	};
-
 	const author = await getOrCreateUser(client, 'id', interaction.user.id.toString());
-	if (author === undefined) return showPraiseFailure();
+	if (author === undefined) return showError(bot, interaction);
 
 	const praisesByAuthor = await getPraises(client, 'author', author.ref);
-	if (praisesByAuthor === undefined) return showPraiseFailure();
+	if (praisesByAuthor === undefined) return showError(bot, interaction);
 
 	const praiseTimestamps = praisesByAuthor
 		.map((document) => document.ts)
-		.sort((a, b) => b - a); // From most recent to least recent.
+		.toSorted((a, b) => b - a); // From most recent to least recent.
 	const timestampSlice = praiseTimestamps.slice(0, configuration.guilds.praises.maximum);
 	const canPraise = timestampSlice.length < configuration.guilds.praises.maximum ||
 		timestampSlice.some(
@@ -111,12 +95,12 @@ async function handlePraiseUser(
 	}
 
 	const subject = await getOrCreateUser(client, 'id', member.id.toString());
-	if (subject === undefined) return showPraiseFailure();
+	if (subject === undefined) return showError(bot, interaction);
 
 	const praise: Praise = { author: author.ref, subject: subject.ref, comment: comment };
 
 	const document = await createPraise(client, praise);
-	if (document === undefined) return showPraiseFailure();
+	if (document === undefined) return showError(bot, interaction);
 
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (guild === undefined) return;
@@ -150,6 +134,19 @@ async function handlePraiseUser(
 					interaction.locale,
 				)(mention(member.id, MentionTypes.User)),
 				color: configuration.interactions.responses.colors.green,
+			}],
+		},
+	);
+}
+
+function showError(bot: Bot, interaction: Interaction): void {
+	return void editOriginalInteractionResponse(
+		bot,
+		interaction.token,
+		{
+			embeds: [{
+				description: localise(Commands.praise.strings.failed, interaction.locale),
+				color: configuration.interactions.responses.colors.red,
 			}],
 		},
 	);

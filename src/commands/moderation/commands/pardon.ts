@@ -47,47 +47,13 @@ async function handlePardonUser(
 	const member = resolveInteractionToMember([client, bot], interaction, user);
 	if (member === undefined) return;
 
-	const displayErrorOrEmptyChoices = (): void => {
-		if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete) {
-			return void sendInteractionResponse(
-				bot,
-				interaction.id,
-				interaction.token,
-				{
-					type: InteractionResponseTypes.ApplicationCommandAutocompleteResult,
-					data: { choices: [] },
-				},
-			);
-		}
-
-		return void sendInteractionResponse(
-			bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						description: localise(
-							Commands.pardon.strings.failed,
-							interaction.locale,
-						),
-						color: configuration.interactions.responses.colors.red,
-					}],
-				},
-			},
-		);
-	};
-
 	const subject = await getOrCreateUser(client, 'id', member.id.toString());
-	if (subject === undefined) return displayErrorOrEmptyChoices();
+	if (subject === undefined) return displayErrorOrEmptyChoices(bot, interaction);
 
 	const warnings = await getWarnings(client, subject.ref);
-	if (warnings === undefined) return displayErrorOrEmptyChoices();
+	if (warnings === undefined) return displayErrorOrEmptyChoices(bot, interaction);
 
-	const relevantWarnings = getActiveWarnings(warnings);
-	relevantWarnings.reverse();
+	const relevantWarnings = getActiveWarnings(warnings).toReversed();
 
 	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete) {
 		return void sendInteractionResponse(
@@ -106,34 +72,20 @@ async function handlePardonUser(
 		);
 	}
 
-	const displayUnwarnError = (description: string): void => {
-		return void sendInteractionResponse(
-			bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						description: description,
-						color: configuration.interactions.responses.colors.red,
-					}],
-				},
-			},
-		);
-	};
-
 	const warningToRemove = relevantWarnings.find((relevantWarning) => relevantWarning.ref.value.id === warning);
 	if (warningToRemove === undefined) {
-		return displayUnwarnError(
+		return displayError(
+			bot,
+			interaction,
 			localise(Commands.pardon.strings.alreadyRemoved, interaction.locale),
 		);
 	}
 
 	const deletedWarning = await deleteWarning(client, warningToRemove);
 	if (deletedWarning === undefined) {
-		return displayUnwarnError(
+		return displayError(
+			bot,
+			interaction,
 			localise(Commands.pardon.strings.failed, interaction.locale),
 		);
 	}
@@ -152,10 +104,10 @@ async function handlePardonUser(
 			data: {
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
-					description: localise(
-						Commands.pardon.strings.pardoned,
-						interaction.locale,
-					)(mention(member.id, MentionTypes.User), deletedWarning.data.reason),
+					description: localise(Commands.pardon.strings.pardoned, interaction.locale)(
+						mention(member.id, MentionTypes.User),
+						deletedWarning.data.reason,
+					),
 					color: configuration.interactions.responses.colors.green,
 				}],
 			},
@@ -177,6 +129,54 @@ async function handlePardonUser(
 			],
 		});
 	}
+}
+
+function displayErrorOrEmptyChoices(bot: Bot, interaction: Interaction): void {
+	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete) {
+		return void sendInteractionResponse(
+			bot,
+			interaction.id,
+			interaction.token,
+			{
+				type: InteractionResponseTypes.ApplicationCommandAutocompleteResult,
+				data: { choices: [] },
+			},
+		);
+	}
+
+	return void sendInteractionResponse(
+		bot,
+		interaction.id,
+		interaction.token,
+		{
+			type: InteractionResponseTypes.ChannelMessageWithSource,
+			data: {
+				flags: ApplicationCommandFlags.Ephemeral,
+				embeds: [{
+					description: localise(Commands.pardon.strings.failed, interaction.locale),
+					color: configuration.interactions.responses.colors.red,
+				}],
+			},
+		},
+	);
+}
+
+function displayError(bot: Bot, interaction: Interaction, error: string): void {
+	return void sendInteractionResponse(
+		bot,
+		interaction.id,
+		interaction.token,
+		{
+			type: InteractionResponseTypes.ChannelMessageWithSource,
+			data: {
+				flags: ApplicationCommandFlags.Ephemeral,
+				embeds: [{
+					description: error,
+					color: configuration.interactions.responses.colors.red,
+				}],
+			},
+		},
+	);
 }
 
 export default command;

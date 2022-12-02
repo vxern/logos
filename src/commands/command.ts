@@ -12,20 +12,11 @@ type WithRequired<T, K extends keyof T> =
 type LocalisationFields = 'nameLocalizations' | 'descriptionLocalizations';
 
 /** Describes the handler of an interaction. */
-type InteractionHandler = (
-	[client, bot]: [Client, Bot],
-	interaction: Interaction,
-) => void | Promise<void>;
+type InteractionHandler = ([client, bot]: [Client, Bot], interaction: Interaction) => void | Promise<void>;
 
-type CommandLocalised = WithRequired<
-	CreateSlashApplicationCommand,
-	LocalisationFields
->;
+type CommandLocalised = WithRequired<CreateSlashApplicationCommand, LocalisationFields>;
 
-type OptionLocalised = WithRequired<
-	ApplicationCommandOption,
-	LocalisationFields
->;
+type OptionLocalised = WithRequired<ApplicationCommandOption, LocalisationFields>;
 
 type Command =
 	& WithRequired<Omit<CommandLocalised, 'options'>, 'defaultMemberPermissions'>
@@ -34,10 +25,7 @@ type Command =
 		options?: Option[];
 	};
 
-type Option = Omit<OptionLocalised, 'options'> & {
-	handle?: InteractionHandler;
-	options?: Option[];
-};
+type Option = Omit<OptionLocalised, 'options'> & { handle?: InteractionHandler; options?: Option[] };
 
 type CommandBuilder = Command;
 

@@ -38,11 +38,6 @@ const command: CommandBuilder = {
 	}, show],
 };
 
-enum Views {
-	Definitions = 0,
-	Inflection,
-}
-
 /** Allows the user to look up a word and get information about it. */
 async function handleSearchWord(
 	[client, bot]: [Client, Bot],
@@ -118,179 +113,214 @@ async function handleSearchWord(
 		);
 	}
 
-	let currentView = Views.Definitions;
-	let dictionaryEntryIndex = 0;
-	let inflectionTableIndex = 0;
+	return void displayMenu(
+		[client, bot],
+		interaction,
+		undefined,
+		{
+			entries,
+			currentView: ContentTabs.Definitions,
+			dictionaryEntryIndex: 0,
+			inflectionTableIndex: 0,
+			verbose: verbose ?? false,
+		},
+	);
+}
 
-	const isFirst = () => dictionaryEntryIndex === 0;
-	const isLast = () => dictionaryEntryIndex === entries.length - 1;
-	const getEntry = () => entries.at(dictionaryEntryIndex)!;
+enum ContentTabs {
+	Definitions = 0,
+	Inflection,
+}
 
-	const displayMenu = (selection?: Interaction): void => {
-		if (selection !== undefined) {
-			sendInteractionResponse(bot, selection.id, selection.token, {
-				type: InteractionResponseTypes.DeferredUpdateMessage,
-			});
-		}
+interface WordViewData {
+	readonly entries: DictionaryEntry[];
+	currentView: ContentTabs;
+	dictionaryEntryIndex: number;
+	inflectionTableIndex: number;
+	verbose: boolean;
+}
 
-		const entry = getEntry();
-
-		editOriginalInteractionResponse(bot, interaction.token, {
-			embeds: [generateEmbed(entry)],
-			components: generateButtons(entry),
+function displayMenu(
+	[client, bot]: [Client, Bot],
+	interaction: Interaction,
+	selection: Interaction | undefined,
+	data: WordViewData,
+): void {
+	if (selection !== undefined) {
+		sendInteractionResponse(bot, selection.id, selection.token, {
+			type: InteractionResponseTypes.DeferredUpdateMessage,
 		});
-	};
+	}
 
-	const generateEmbed = (entry: DictionaryEntry): Embed => {
-		switch (currentView) {
-			case Views.Definitions: {
-				return entryToEmbed(entry, interaction.locale, verbose ?? false);
-			}
-			case Views.Inflection: {
-				return entry.inflectionTable!.at(inflectionTableIndex)!;
-			}
+	const entry = data.entries.at(data.dictionaryEntryIndex)!;
+
+	editOriginalInteractionResponse(bot, interaction.token, {
+		embeds: [generateEmbed(data, entry, interaction.locale)],
+		components: generateButtons([client, bot], interaction, data, entry),
+	});
+}
+
+function generateEmbed(
+	data: WordViewData,
+	entry: DictionaryEntry,
+	locale: string | undefined,
+): Embed {
+	switch (data.currentView) {
+		case ContentTabs.Definitions: {
+			return entryToEmbed(entry, locale, data.verbose);
 		}
-	};
+		case ContentTabs.Inflection: {
+			return entry.inflectionTable!.at(data.inflectionTableIndex)!;
+		}
+	}
+}
 
-	const generateButtons = (entry: DictionaryEntry): MessageComponents => {
-		const paginationControls: ButtonComponent[][] = [];
+function generateButtons(
+	[client, bot]: [Client, Bot],
+	interaction: Interaction,
+	data: WordViewData,
+	entry: DictionaryEntry,
+): MessageComponents {
+	const paginationControls: ButtonComponent[][] = [];
 
-		switch (currentView) {
-			case Views.Definitions: {
-				if (isFirst() && isLast()) break;
+	switch (data.currentView) {
+		case ContentTabs.Definitions: {
+			const isFirst = data.dictionaryEntryIndex === 0;
+			const isLast = data.dictionaryEntryIndex === data.entries.length - 1;
 
-				const previousPageButtonId = createInteractionCollector([client, bot], {
-					type: InteractionTypes.MessageComponent,
-					onCollect: (_bot, selection) => {
-						if (!isFirst()) dictionaryEntryIndex--;
-						return void displayMenu(selection);
-					},
-				});
+			if (isFirst && isLast) break;
 
-				const nextPageButtonId = createInteractionCollector([client, bot], {
-					type: InteractionTypes.MessageComponent,
-					onCollect: (_bot, selection) => {
-						if (!isLast()) dictionaryEntryIndex++;
-						return void displayMenu(selection);
-					},
-				});
+			const previousPageButtonId = createInteractionCollector([client, bot], {
+				type: InteractionTypes.MessageComponent,
+				onCollect: (_bot, selection) => {
+					if (!isFirst) data.dictionaryEntryIndex--;
+					return void displayMenu([client, bot], interaction, selection, data);
+				},
+			});
 
-				paginationControls.push([{
-					type: MessageComponentTypes.Button,
-					label: '«',
-					customId: previousPageButtonId,
-					style: ButtonStyles.Secondary,
-					disabled: isFirst(),
-				}, {
-					type: MessageComponentTypes.Button,
-					label: `${localise(Commands.word.strings.page, interaction.locale)} ${
-						dictionaryEntryIndex + 1
-					}/${entries.length}`,
-					style: ButtonStyles.Secondary,
-					customId: 'none',
-				}, {
-					type: MessageComponentTypes.Button,
-					label: '»',
-					customId: nextPageButtonId,
-					style: ButtonStyles.Secondary,
-					disabled: isLast(),
-				}]);
+			const nextPageButtonId = createInteractionCollector([client, bot], {
+				type: InteractionTypes.MessageComponent,
+				onCollect: (_bot, selection) => {
+					if (!isLast) data.dictionaryEntryIndex++;
+					return void displayMenu([client, bot], interaction, selection, data);
+				},
+			});
 
-				break;
-			}
-			case Views.Inflection: {
-				if (entry.inflectionTable === undefined) return [];
+			paginationControls.push([{
+				type: MessageComponentTypes.Button,
+				label: '«',
+				customId: previousPageButtonId,
+				style: ButtonStyles.Secondary,
+				disabled: isFirst,
+			}, {
+				type: MessageComponentTypes.Button,
+				label: `${localise(Commands.word.strings.page, interaction.locale)} ${
+					data.dictionaryEntryIndex + 1
+				}/${data.entries.length}`,
+				style: ButtonStyles.Secondary,
+				customId: 'none',
+			}, {
+				type: MessageComponentTypes.Button,
+				label: '»',
+				customId: nextPageButtonId,
+				style: ButtonStyles.Secondary,
+				disabled: isLast,
+			}]);
 
-				const rows = chunk(entry.inflectionTable, 5);
-				rows.reverse();
+			break;
+		}
+		case ContentTabs.Inflection: {
+			if (entry.inflectionTable === undefined) return [];
 
-				const buttonId = createInteractionCollector([client, bot], {
-					type: InteractionTypes.MessageComponent,
-					onCollect: (_bot, selection) => {
-						if (entry.inflectionTable === undefined || selection.data === undefined) return void displayMenu(selection);
+			const rows = chunk(entry.inflectionTable, 5);
+			rows.reverse();
 
-						const [_buttonId, indexString] = selection.data.customId!.split('|');
-						const index = Number(indexString);
-
-						if (index >= 0 && index <= entry.inflectionTable?.length) {
-							inflectionTableIndex = index;
-						}
-
-						return void displayMenu(selection);
-					},
-				});
-
-				for (const [row, rowIndex] of rows.map<[typeof entry.inflectionTable, number]>((r, i) => [r, i])) {
-					const buttons = row.map<ButtonComponent>((table, index) => {
-						const index_ = rowIndex * 5 + index;
-
-						return {
-							type: MessageComponentTypes.Button,
-							label: table.title,
-							customId: `${buttonId}|${index_}`,
-							disabled: inflectionTableIndex === index_,
-							style: ButtonStyles.Secondary,
-						};
-					});
-
-					if (buttons.length > 1) {
-						paginationControls.unshift(buttons);
+			const buttonId = createInteractionCollector([client, bot], {
+				type: InteractionTypes.MessageComponent,
+				onCollect: (_bot, selection) => {
+					if (entry.inflectionTable === undefined || selection.data === undefined) {
+						return void displayMenu([client, bot], interaction, selection, data);
 					}
+
+					const [_buttonId, indexString] = selection.data.customId!.split('|');
+					const index = Number(indexString);
+
+					if (index >= 0 && index <= entry.inflectionTable?.length) {
+						data.inflectionTableIndex = index;
+					}
+
+					return void displayMenu([client, bot], interaction, selection, data);
+				},
+			});
+
+			for (const [row, rowIndex] of rows.map<[typeof entry.inflectionTable, number]>((r, i) => [r, i])) {
+				const buttons = row.map<ButtonComponent>((table, index) => {
+					const index_ = rowIndex * 5 + index;
+
+					return {
+						type: MessageComponentTypes.Button,
+						label: table.title,
+						customId: `${buttonId}|${index_}`,
+						disabled: data.inflectionTableIndex === index_,
+						style: ButtonStyles.Secondary,
+					};
+				});
+
+				if (buttons.length > 1) {
+					paginationControls.unshift(buttons);
 				}
 			}
 		}
+	}
 
-		const row: ButtonComponent[] = [];
+	const row: ButtonComponent[] = [];
 
-		const definitionsMenuButtonId = createInteractionCollector([client, bot], {
-			type: InteractionTypes.MessageComponent,
-			onCollect: (_bot, selection) => {
-				inflectionTableIndex = 0;
-				currentView = Views.Definitions;
-				return void displayMenu(selection);
-			},
+	const definitionsMenuButtonId = createInteractionCollector([client, bot], {
+		type: InteractionTypes.MessageComponent,
+		onCollect: (_bot, selection) => {
+			data.inflectionTableIndex = 0;
+			data.currentView = ContentTabs.Definitions;
+			return void displayMenu([client, bot], interaction, selection, data);
+		},
+	});
+
+	const inflectionMenuButtonId = createInteractionCollector([client, bot], {
+		type: InteractionTypes.MessageComponent,
+		onCollect: (_bot, selection) => {
+			data.currentView = ContentTabs.Inflection;
+			return void displayMenu([client, bot], interaction, selection, data);
+		},
+	});
+
+	if (entry.definitions !== undefined) {
+		row.push({
+			type: MessageComponentTypes.Button,
+			label: localise(Commands.word.strings.definitions, interaction.locale),
+			disabled: data.currentView === ContentTabs.Definitions,
+			customId: definitionsMenuButtonId,
+			style: ButtonStyles.Primary,
 		});
+	}
 
-		const inflectionMenuButtonId = createInteractionCollector([client, bot], {
-			type: InteractionTypes.MessageComponent,
-			onCollect: (_bot, selection) => {
-				currentView = Views.Inflection;
-				return void displayMenu(selection);
-			},
+	if (entry.inflectionTable !== undefined) {
+		row.push({
+			type: MessageComponentTypes.Button,
+			label: localise(Commands.word.strings.inflection, interaction.locale),
+			disabled: data.currentView === ContentTabs.Inflection,
+			customId: inflectionMenuButtonId,
+			style: ButtonStyles.Primary,
 		});
+	}
 
-		if (entry.definitions !== undefined) {
-			row.push({
-				type: MessageComponentTypes.Button,
-				label: localise(Commands.word.strings.definitions, interaction.locale),
-				disabled: currentView === Views.Definitions,
-				customId: definitionsMenuButtonId,
-				style: ButtonStyles.Primary,
-			});
-		}
+	if (row.length > 1) {
+		paginationControls.push(row);
+	}
 
-		if (entry.inflectionTable !== undefined) {
-			row.push({
-				type: MessageComponentTypes.Button,
-				label: localise(Commands.word.strings.inflection, interaction.locale),
-				disabled: currentView === Views.Inflection,
-				customId: inflectionMenuButtonId,
-				style: ButtonStyles.Primary,
-			});
-		}
-
-		if (row.length > 1) {
-			paginationControls.push(row);
-		}
-
-		// @ts-ignore: It is sure that there will be no more than 5 buttons.
-		return paginationControls.map((row) => ({
-			type: MessageComponentTypes.ActionRow,
-			components: row,
-		}));
-	};
-
-	return void displayMenu();
+	// @ts-ignore: It is sure that there will be no more than 5 buttons.
+	return paginationControls.map((row) => ({
+		type: MessageComponentTypes.ActionRow,
+		components: row,
+	}));
 }
 
 function entryToEmbed(

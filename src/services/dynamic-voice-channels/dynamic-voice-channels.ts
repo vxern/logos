@@ -107,9 +107,7 @@ function getRelevantVoiceChannels(guild: Guild): Channel[] {
 		.filter(
 			(channel) =>
 				channel.type === ChannelTypes.GuildVoice && channel.name! === configuration.guilds.channels.voiceChat,
-		).array();
-
-	channels.sort((a, b) => a.position === b.position ? Number(a.id - b.id) : a.position! - b.position!);
+		).array().toSorted((a, b) => a.position === b.position ? Number(a.id - b.id) : a.position! - b.position!);
 
 	return channels;
 }

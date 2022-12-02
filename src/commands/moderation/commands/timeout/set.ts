@@ -58,26 +58,10 @@ async function handleSetTimeout(
 
 	if (reason === undefined) return;
 
-	const displayError = (error: string): void => {
-		return void sendInteractionResponse(
-			bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						description: error,
-						color: configuration.interactions.responses.colors.yellow,
-					}],
-				},
-			},
-		);
-	};
-
 	if (member.id === interaction.member?.id) {
 		return displayError(
+			bot,
+			interaction,
 			localise(Commands.timeout.strings.cannotTimeoutSelf, interaction.locale),
 		);
 	}
@@ -86,36 +70,31 @@ async function handleSetTimeout(
 
 	if (Number.isNaN(duration)) {
 		return displayError(
+			bot,
+			interaction,
 			localise(Commands.timeout.strings.invalidDuration, interaction.locale),
 		);
 	}
 
 	if (durationParsed < Periods.minute) {
 		return displayError(
-			localise(
-				Commands.timeout.strings.durationMustBeLongerThanMinute,
-				interaction.locale,
-			),
+			bot,
+			interaction,
+			localise(Commands.timeout.strings.durationMustBeLongerThanMinute, interaction.locale),
 		);
 	}
 
 	if (durationParsed > Periods.week) {
 		return displayError(
-			localise(
-				Commands.timeout.strings.durationMustBeShorterThanWeek,
-				interaction.locale,
-			),
+			bot,
+			interaction,
+			localise(Commands.timeout.strings.durationMustBeShorterThanWeek, interaction.locale),
 		);
 	}
 
 	const until = Date.now() + durationParsed;
 
-	await editMember(
-		bot,
-		interaction.guildId!,
-		member.id,
-		{ communicationDisabledUntil: until },
-	);
+	await editMember(bot, interaction.guildId!, member.id, { communicationDisabledUntil: until });
 
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (guild === undefined) return;
@@ -236,12 +215,8 @@ function getTimestampFromExpression(
 		return undefined;
 	}
 
-	const keysWithValues: [
-		(number: number) => string,
-		[number, number],
-		number,
-	][] = periodNames
-		.map(
+	const keysWithValues = periodNames
+		.map<[(number: number) => string, [number, number], number]>(
 			(key, index) => {
 				const [descriptors, milliseconds] = timeDescriptorsWithLocalisations.find(
 					([descriptors, _value]) => localise(descriptors.descriptors, locale).includes(key),
@@ -252,9 +227,8 @@ function getTimestampFromExpression(
 					quantifiers.at(index)! * milliseconds,
 				], index];
 			},
-		);
-
-	keysWithValues.sort((previous, next) => next[2] - previous[2]);
+		)
+		.toSorted((previous, next) => next[2] - previous[2]);
 
 	const timeExpressions = [];
 	let total = 0;
@@ -266,6 +240,24 @@ function getTimestampFromExpression(
 	const timeExpression = timeExpressions.join(', ');
 
 	return [timeExpression, total];
+}
+
+function displayError(bot: Bot, interaction: Interaction, error: string): void {
+	return void sendInteractionResponse(
+		bot,
+		interaction.id,
+		interaction.token,
+		{
+			type: InteractionResponseTypes.ChannelMessageWithSource,
+			data: {
+				flags: ApplicationCommandFlags.Ephemeral,
+				embeds: [{
+					description: error,
+					color: configuration.interactions.responses.colors.yellow,
+				}],
+			},
+		},
+	);
 }
 
 export { handleSetTimeout };
