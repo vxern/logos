@@ -803,7 +803,7 @@ class Commands {
 			},
 		},
 		strings: {
-			warningsUnableToBeShown: {
+			unableToDisplayWarnings: {
 				'English': 'The warnings for the given user could not be shown.',
 				'Polish': 'Nie udało się wyświetlić ostrzeżeń dla danego użytkownika.',
 				'Romanian': 'Avertizările pentru utilizatorul dat nu au putut fi afișate.',

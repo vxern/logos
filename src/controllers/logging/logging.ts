@@ -34,38 +34,38 @@ function log<K extends keyof Events>(
 	const logChannel = getTextChannel(guild, configuration.guilds.channels.logging);
 	if (logChannel === undefined) return;
 
-	return logToChannel([client, bot], logChannel, event, ...args);
+	return void logToChannel([client, bot], logChannel, event, ...args);
 }
 
-function logToChannel<K extends keyof Events>(
+async function logToChannel<K extends keyof Events>(
 	[client, bot]: [Client, Bot],
 	channel: Channel,
 	event: K,
 	...args: Events[K]
-): void {
+): Promise<void> {
 	const entry = messageGenerators[event];
 	if (entry === undefined) return;
 
 	const filter = entry.filter(client, channel.guildId, ...args);
 	if (!filter) return;
 
-	const logMessage = (message: string) =>
-		void sendMessage(bot, channel.id, {
-			embeds: [{
-				title: entry.title,
-				description: message,
-				color: entry.color,
-			}],
-		});
+	const message = await new Promise<string | undefined>((resolve) => {
+		const result = entry.message(client, ...args);
+		if (result === undefined) return resolve(undefined);
 
-	const messageOrPromise = entry.message(client, ...args);
-	if (messageOrPromise === undefined) return;
+		if (typeof result === 'string') return resolve(result);
 
-	if (typeof messageOrPromise === 'string') {
-		return logMessage(messageOrPromise);
-	}
+		return result.then((message) => resolve(message));
+	});
+	if (message === undefined) return;
 
-	return void messageOrPromise.then((message) => logMessage(message));
+	return void sendMessage(bot, channel.id, {
+		embeds: [{
+			title: entry.title,
+			description: message,
+			color: entry.color,
+		}],
+	});
 }
 
 export { log, setupLogging };

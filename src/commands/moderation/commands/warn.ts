@@ -88,43 +88,22 @@ async function handleWarnUser(
 		);
 	}
 
-	const displayWarnError = (): void => {
-		return void sendInteractionResponse(
-			bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						description: localise(
-							Commands.warn.strings.failed,
-							interaction.locale,
-						),
-						color: configuration.interactions.responses.colors.red,
-					}],
-				},
-			},
-		);
-	};
-
-	if (reason!.length === 0) return displayWarnError();
+	if (reason!.length === 0) return displayError(bot, interaction);
 
 	const subject = await getOrCreateUser(client, 'id', member.id.toString());
-	if (subject === undefined) return displayWarnError();
+	if (subject === undefined) return displayError(bot, interaction);
 
 	const author = await getOrCreateUser(client, 'id', interaction.user.id.toString());
-	if (author === undefined) return displayWarnError();
+	if (author === undefined) return displayError(bot, interaction);
 
 	const warnings = await getWarnings(client, subject.ref);
-	if (warnings === undefined) return displayWarnError();
+	if (warnings === undefined) return displayError(bot, interaction);
 
 	const document = await createWarning(
 		client,
 		{ author: author.ref, subject: subject.ref, reason: reason! },
 	);
-	if (document === undefined) return displayWarnError();
+	if (document === undefined) return displayError(bot, interaction);
 
 	log([client, bot], guild, 'memberWarnAdd', member, document.data, interaction.user);
 
@@ -208,6 +187,24 @@ async function handleWarnUser(
 			`Kicked due to having received too many warnings (${relevantWarnings.length}).`,
 		);
 	}
+}
+
+function displayError(bot: Bot, interaction: Interaction): void {
+	return void sendInteractionResponse(
+		bot,
+		interaction.id,
+		interaction.token,
+		{
+			type: InteractionResponseTypes.ChannelMessageWithSource,
+			data: {
+				flags: ApplicationCommandFlags.Ephemeral,
+				embeds: [{
+					description: localise(Commands.warn.strings.failed, interaction.locale),
+					color: configuration.interactions.responses.colors.red,
+				}],
+			},
+		},
+	);
 }
 
 export default command;

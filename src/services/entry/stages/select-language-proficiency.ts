@@ -9,7 +9,7 @@ import {
 import { localise } from 'logos/assets/localisations/mod.ts';
 import { getProficiencyCategory } from 'logos/src/commands/social/module.ts';
 import { Client } from 'logos/src/client.ts';
-import { defaultLanguage } from 'logos/types.ts';
+import { defaultLocale } from 'logos/types.ts';
 
 const proficiencyCategory = getProficiencyCategory();
 const proficiencies = proficiencyCategory.collection.list;

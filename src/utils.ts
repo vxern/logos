@@ -195,62 +195,14 @@ function paginate<T>(
 	}: {
 		elements: T[];
 		embed: Omit<Embed, 'footer'>;
-		view: {
-			title: string;
-			generate: (element: T, index: number) => string;
-		};
+		view: PaginationDisplayData<T>;
 		show: boolean;
 	},
 ): void {
-	let pageIndex = 0;
+	const data: PaginationData<T> = { elements, view, pageIndex: 0 };
 
-	const isFirst = () => pageIndex === 0;
-	const isLast = () => pageIndex === elements.length - 1;
-
-	const existingFields = embed.fields ?? [];
-	if ('fields' in embed) {
-		delete embed.fields;
-	}
-
-	const footerText = localise(Misc.continuedOnNextPage, interaction.locale);
-
-	const generateEmbed: () => Embed[] = () => [{
-		...embed,
-		fields: [{
-			name: elements.length === 1 ? view.title : `${view.title} ~ Page ${pageIndex + 1}/${elements.length}`,
-			value: view.generate(elements.at(pageIndex)!, pageIndex),
-		}, ...existingFields],
-		footer: isLast() ? undefined : { text: footerText },
-	}];
-
-	const generateButtons = (): MessageComponents => {
-		const buttons: ButtonComponent[] = [];
-
-		if (!isFirst()) {
-			buttons.push({
-				type: MessageComponentTypes.Button,
-				customId: `${customId}|PREVIOUS`,
-				style: ButtonStyles.Secondary,
-				label: '«',
-			});
-		}
-
-		if (!isLast()) {
-			buttons.push({
-				type: MessageComponentTypes.Button,
-				customId: `${customId}|NEXT`,
-				style: ButtonStyles.Secondary,
-				label: '»',
-			});
-		}
-
-		return buttons.length === 0 ? [] : [{
-			type: MessageComponentTypes.ActionRow,
-			components: <[ButtonComponent] | [
-				ButtonComponent | ButtonComponent,
-			]> buttons,
-		}];
-	};
+	const isFirst = () => data.pageIndex === 0;
+	const isLast = () => data.pageIndex === data.elements.length - 1;
 
 	const customId = createInteractionCollector([client, bot], {
 		type: InteractionTypes.MessageComponent,
@@ -262,10 +214,10 @@ function paginate<T>(
 
 			switch (action) {
 				case 'PREVIOUS':
-					if (!isFirst()) pageIndex--;
+					if (!isFirst) data.pageIndex--;
 					break;
 				case 'NEXT':
-					if (!isLast()) pageIndex++;
+					if (!isLast) data.pageIndex++;
 					break;
 			}
 
@@ -274,8 +226,8 @@ function paginate<T>(
 			});
 
 			editOriginalInteractionResponse(bot, interaction.token, {
-				embeds: generateEmbed(),
-				components: generateButtons(),
+				embeds: [getPageEmbed(data, embed, isLast(), interaction.locale)],
+				components: generateButtons(customId, isFirst(), isLast()),
 			});
 		},
 	});
@@ -288,11 +240,67 @@ function paginate<T>(
 			type: InteractionResponseTypes.ChannelMessageWithSource,
 			data: {
 				flags: !show ? ApplicationCommandFlags.Ephemeral : undefined,
-				embeds: generateEmbed(),
-				components: generateButtons(),
+				embeds: [getPageEmbed(data, embed, data.pageIndex === data.elements.length - 1, interaction.locale)],
+				components: generateButtons(customId, isFirst(), isLast()),
 			},
 		},
 	);
+}
+
+interface PaginationDisplayData<T> {
+	readonly title: string;
+	readonly generate: (element: T, index: number) => string;
+}
+
+interface PaginationData<T> {
+	readonly elements: T[];
+	readonly view: PaginationDisplayData<T>;
+
+	pageIndex: number;
+}
+
+function getPageEmbed<T>(data: PaginationData<T>, embed: Embed, isLast: boolean, locale: string | undefined): Embed {
+	return {
+		...embed,
+		fields: [
+			{
+				name: data.elements.length === 1
+					? data.view.title
+					: `${data.view.title} ~ Page ${data.pageIndex + 1}/${data.elements.length}`,
+				value: data.view.generate(data.elements.at(data.pageIndex)!, data.pageIndex),
+			},
+			...(embed.fields ?? []),
+		],
+		footer: isLast ? undefined : { text: localise(Misc.continuedOnNextPage, locale) },
+	};
+}
+
+function generateButtons(customId: string, isFirst: boolean, isLast: boolean): MessageComponents {
+	const buttons: ButtonComponent[] = [];
+
+	if (!isFirst) {
+		buttons.push({
+			type: MessageComponentTypes.Button,
+			customId: `${customId}|PREVIOUS`,
+			style: ButtonStyles.Secondary,
+			label: '«',
+		});
+	}
+
+	if (!isLast) {
+		buttons.push({
+			type: MessageComponentTypes.Button,
+			customId: `${customId}|NEXT`,
+			style: ButtonStyles.Secondary,
+			label: '»',
+		});
+	}
+
+	// @ts-ignore: It is guaranteed that there will be fewer or as many as 5 buttons.
+	return buttons.length === 0 ? [] : [{
+		type: MessageComponentTypes.ActionRow,
+		components: buttons,
+	}];
 }
 
 /** Settings for interaction collection. */
@@ -329,19 +337,8 @@ function createInteractionCollector(
 ): string {
 	const customId = settings.customId ?? Snowflake.generate();
 
-	const conditions: (interaction: Interaction) => boolean[] = (interaction) => [
-		interaction.type === settings.type,
-		interaction.data !== undefined && interaction.data.customId !== undefined &&
-		(
-				!interaction.data.customId.includes('|') ? interaction.data.customId : interaction.data.customId.split('|')[0]!
-			) === (
-				!customId.includes('|') ? customId : customId.split('|')[0]!
-			),
-		settings.userId === undefined ? true : interaction.user.id === settings.userId,
-	];
-
 	addCollector(clientWithBot, 'interactionCreate', {
-		filter: (_bot, interaction) => conditions(interaction).every((condition) => condition),
+		filter: (_bot, interaction) => compileChecks(interaction, settings, customId).every((condition) => condition),
 		limit: settings.limit,
 		removeAfter: settings.doesNotExpire ? undefined : configuration.core.collectors.maxima.timeout,
 		onCollect: settings.onCollect ?? (() => {}),
@@ -349,6 +346,19 @@ function createInteractionCollector(
 	});
 
 	return customId;
+}
+
+function compileChecks(
+	interaction: Interaction,
+	settings: InteractionCollectorSettings,
+	customId: string,
+): boolean[] {
+	return [
+		interaction.type === settings.type,
+		interaction.data !== undefined && interaction.data.customId !== undefined &&
+		interaction.data.customId.split('|').at(0)! === customId.split('|').at(0)!,
+		settings.userId === undefined ? true : interaction.user.id === settings.userId,
+	];
 }
 
 /** Creates a verification prompt in the verifications channel. */

@@ -64,37 +64,7 @@ async function handleStartGame(
 	);
 
 	let sentenceSelection: SentenceSelection;
-
-	const createGameView = (): InteractionCallbackData => {
-		sentenceSelection = createSentenceSelection(sentencePairs);
-
-		return {
-			embeds: [{
-				color: ribbonColor,
-				fields: [{
-					name: localise(Commands.game.strings.sentence, interaction.locale),
-					value: sentenceSelection.pair.sentence,
-				}, {
-					name: localise(Commands.game.strings.translation, interaction.locale),
-					value: sentenceSelection.pair.translation,
-				}],
-			}],
-			components: [{
-				type: MessageComponentTypes.ActionRow,
-				// @ts-ignore: There are always 4 buttons for the 4 sentences selected.
-				components: sentenceSelection.choices.map(
-					(choice, index) => ({
-						type: MessageComponentTypes.Button,
-						style: ButtonStyles.Success,
-						label: choice,
-						customId: `${customId}|${index}`,
-					}),
-				),
-			}],
-		};
-	};
-
-	let ribbonColor = configuration.interactions.responses.colors.blue;
+	let embedColor = configuration.interactions.responses.colors.blue;
 
 	const customId = createInteractionCollector([client, bot], {
 		type: InteractionTypes.MessageComponent,
@@ -118,23 +88,59 @@ async function handleStartGame(
 			const choice = sentenceSelection.choices.at(index);
 			const isCorrect = choice === sentenceSelection.word;
 
-			ribbonColor = isCorrect
+			embedColor = isCorrect
 				? configuration.interactions.responses.colors.green
 				: configuration.interactions.responses.colors.red;
+
+			sentenceSelection = createSentenceSelection(sentencePairs);
 
 			return void editOriginalInteractionResponse(
 				bot,
 				interaction.token,
-				createGameView(),
+				createGameView(customId, sentenceSelection, embedColor, interaction.locale),
 			);
 		},
 	});
 
+	sentenceSelection = createSentenceSelection(sentencePairs);
+
 	return void editOriginalInteractionResponse(
 		bot,
 		interaction.token,
-		createGameView(),
+		createGameView(customId, sentenceSelection, embedColor, interaction.locale),
 	);
+}
+
+function createGameView(
+	customId: string,
+	sentenceSelection: SentenceSelection,
+	embedColor: number,
+	locale: string | undefined,
+): InteractionCallbackData {
+	return {
+		embeds: [{
+			color: embedColor,
+			fields: [{
+				name: localise(Commands.game.strings.sentence, locale),
+				value: sentenceSelection.pair.sentence,
+			}, {
+				name: localise(Commands.game.strings.translation, locale),
+				value: sentenceSelection.pair.translation,
+			}],
+		}],
+		components: [{
+			type: MessageComponentTypes.ActionRow,
+			// @ts-ignore: There are always 4 buttons for the 4 sentences selected.
+			components: sentenceSelection.choices.map(
+				(choice, index) => ({
+					type: MessageComponentTypes.Button,
+					style: ButtonStyles.Success,
+					label: choice,
+					customId: `${customId}|${index}`,
+				}),
+			),
+		}],
+	};
 }
 
 /**

@@ -52,35 +52,14 @@ function handleCiteRule(
 		);
 	}
 
-	const displayInvalidRuleError = (): void => {
-		return void sendInteractionResponse(
-			bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						description: localise(
-							Commands.rule.strings.invalidRule,
-							interaction.locale,
-						),
-						color: configuration.interactions.responses.colors.red,
-					}],
-				},
-			},
-		);
-	};
-
 	const [{ rule }] = parseArguments(
 		interaction.data?.options,
 		{ rule: 'number' },
 	);
-	if (rule === undefined) return displayInvalidRuleError();
+	if (rule === undefined) return displayInvalidRuleError(bot, interaction);
 
 	const ruleParsed = Object.values(Information.rules.rules).at(rule);
-	if (ruleParsed === undefined) return displayInvalidRuleError();
+	if (ruleParsed === undefined) return displayInvalidRuleError(bot, interaction);
 
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (guild === undefined) return;
@@ -98,6 +77,27 @@ function handleCiteRule(
 					} ~ ${localise(Information.rules.tldr, defaultLocale)}: *${localise(ruleParsed.summary, defaultLocale)}*`,
 					description: localise(ruleParsed.content, defaultLocale),
 					color: configuration.interactions.responses.colors.blue,
+				}],
+			},
+		},
+	);
+}
+
+function displayInvalidRuleError(bot: Bot, interaction: Interaction): void {
+	return void sendInteractionResponse(
+		bot,
+		interaction.id,
+		interaction.token,
+		{
+			type: InteractionResponseTypes.ChannelMessageWithSource,
+			data: {
+				flags: ApplicationCommandFlags.Ephemeral,
+				embeds: [{
+					description: localise(
+						Commands.rule.strings.invalidRule,
+						interaction.locale,
+					),
+					color: configuration.interactions.responses.colors.red,
 				}],
 			},
 		},
