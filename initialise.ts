@@ -10,7 +10,7 @@ import { Client, initialiseClient } from 'logos/src/client.ts';
 import { capitalise } from 'logos/formatting.ts';
 import { Language, supportedLanguages } from 'logos/types.ts';
 
-async function readDotEnvFile(fileUri: string, isTemplate = false): Promise<dotenv.DotenvConfig> {
+async function readDotEnvFile(fileUri: string, isTemplate = false): Promise<dotenv.DotenvConfig | undefined> {
 	const kind = isTemplate ? 'environment template' : 'environment';
 
 	let contents: string;
@@ -19,7 +19,9 @@ async function readDotEnvFile(fileUri: string, isTemplate = false): Promise<dote
 	} catch (error) {
 		if (error instanceof Deno.errors.NotFound) {
 			console.error(`Missing ${kind} file.`);
-			Deno.exit(1);
+			if (!isTemplate) {
+				return undefined;
+			}
 		}
 
 		console.error(`Unknown error while reading ${kind} file: ${error}`);
@@ -119,7 +121,7 @@ async function initialise({ isTest }: { isTest: boolean }): Promise<[Client, Bot
 		readDotEnvFile('.env.example', true),
 	]);
 
-	readEnvironment({ envConfiguration, templateEnvConfiguration });
+	readEnvironment({ envConfiguration, templateEnvConfiguration: templateEnvConfiguration! });
 
 	Sentry.init({ dsn: Deno.env.get('SENTRY_SECRET'), environment: Deno.env.get('ENVIRONMENT') });
 
