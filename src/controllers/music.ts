@@ -228,17 +228,11 @@ class MusicController {
 			this.textChannel = channels.text;
 		}
 
+		const queuedString = localise(Commands.music.options.play.strings.queued.header, defaultLocale);
+
 		const embeds = [{
-			title: `👍 ${
-				localise(
-					Commands.music.options.play.strings.queued.header,
-					defaultLocale,
-				)
-			}`,
-			description: localise(
-				Commands.music.options.play.strings.queued.body,
-				defaultLocale,
-			)(songListing.content.title),
+			title: `👍 ${queuedString}`,
+			description: localise(Commands.music.options.play.strings.queued.body, defaultLocale)(songListing.content.title),
 			color: configuration.interactions.responses.colors.green,
 		}];
 
@@ -315,9 +309,11 @@ class MusicController {
 				configuration.music.disconnectTimeout,
 			);
 
+			const allDoneString = localise(Commands.music.strings.allDone.header, defaultLocale);
+
 			return sendMessage(this.client.bot, this.textChannel.id, {
 				embeds: [{
-					title: `👏 ${localise(Commands.music.strings.allDone.header, defaultLocale)}`,
+					title: `👏 ${allDoneString}`,
 					description: localise(Commands.music.strings.allDone.body, defaultLocale),
 					color: configuration.interactions.responses.colors.blue,
 				}],
@@ -391,22 +387,15 @@ class MusicController {
 
 		this.player.play(track.track);
 
+		const symbol = configuration.music.symbols[this.current.content.type];
+		const playingString = localise(Commands.music.strings.playing.header, defaultLocale);
+		const type = localise(localisationsBySongListingType[this.current.content.type], defaultLocale).toLowerCase();
+
 		const embeds = [{
-			title: `${configuration.music.symbols[this.current.content.type]} ${
-				localise(
-					Commands.music.strings.playing.header,
-					defaultLocale,
-				)
-			} ${SongListingContentTypes[this.current.content.type]!.toLowerCase()}`,
-			description: localise(
-				Commands.music.strings.playing.body,
-				defaultLocale,
-			)(
+			title: `${symbol} ${playingString} ${type}`,
+			description: localise(Commands.music.strings.playing.body, defaultLocale)(
 				this.current.content.type === SongListingContentTypes.Collection
-					? localise(
-						Commands.music.strings.playing.parts.displayTrack,
-						defaultLocale,
-					)(
+					? localise(Commands.music.strings.playing.parts.displayTrack, defaultLocale)(
 						this.current.content.position + 1,
 						this.current.content.songs.length,
 						this.current.content.title,
@@ -571,5 +560,11 @@ class MusicController {
 		this.setVolume(configuration.music.maxima.volume);
 	}
 }
+
+const localisationsBySongListingType = {
+	[SongListingContentTypes.Song]: Commands.music.strings.type.song,
+	[SongListingContentTypes.External]: Commands.music.strings.type.external,
+	[SongListingContentTypes.Collection]: Commands.music.strings.type.songCollection,
+};
 
 export { MusicController };

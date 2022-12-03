@@ -318,9 +318,11 @@ ${trim(change.content.body, 300)}`;
 			const memberUser = client.cache.users.get(member.id);
 			if (memberUser === undefined) return;
 
-			return `${diagnosticMentionUser(memberUser)} has been praised by ${diagnosticMentionUser(by)}. Comment: ${
-				praise.comment ?? 'None.'
-			}`;
+			const comment = praise.comment ?? 'None.';
+
+			return `${diagnosticMentionUser(memberUser)} has been praised by ${
+				diagnosticMentionUser(by)
+			}. Comment: ${comment}`;
 		},
 		filter: (_client, originGuildId, member, _praise, _by) => originGuildId === member.guildId,
 		color: configuration.interactions.responses.colors.green,

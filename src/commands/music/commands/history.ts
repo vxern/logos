@@ -25,17 +25,12 @@ function handleDisplayPlaybackHistory(
 		show: 'boolean',
 	});
 
-	const listingHistory = lodash.cloneDeep(musicController.history);
+	const listingHistory = lodash.cloneDeep(musicController.history).toReversed();
 
-	listingHistory.reverse();
+  const titleString = localise(Commands.music.options.history.strings.playbackHistory, interaction.locale);
 
 	return displayListings([client, bot], interaction, {
-		title: `📋 ${
-			localise(
-				Commands.music.options.history.strings.playbackHistory,
-				interaction.locale,
-			)
-		}`,
+		title: `📋 ${titleString}`,
 		songListings: listingHistory,
 		show: show ?? false,
 	});

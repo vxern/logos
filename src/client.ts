@@ -219,9 +219,7 @@ function withCaching(
 	transformers.member = (bot, payload, ...args) => {
 		const result = member(bot, payload, ...args);
 
-		const memberSnowflake = bot.transformers.snowflake(
-			`${result.id}${result.guildId}`,
-		);
+		const memberSnowflake = bot.transformers.snowflake(`${result.id}${result.guildId}`);
 
 		client.cache.members.set(memberSnowflake, result);
 
@@ -250,16 +248,9 @@ function withCaching(
 		if (payload.member !== undefined && payload.guild_id !== undefined) {
 			const guildId = bot.transformers.snowflake(payload.guild_id);
 
-			const member = bot.transformers.member(
-				bot,
-				payload.member,
-				guildId,
-				user.id,
-			);
+			const member = bot.transformers.member(bot, payload.member, guildId, user.id);
 
-			const memberSnowflake = bot.transformers.snowflake(
-				`${member.id}${member.guildId}`,
-			);
+			const memberSnowflake = bot.transformers.snowflake(`${member.id}${member.guildId}`);
 
 			client.cache.members.set(memberSnowflake, member);
 		}
@@ -278,10 +269,7 @@ function withCaching(
 	transformers.voiceState = (bot, payload) => {
 		const result = voiceState(bot, payload);
 
-		client.cache.guilds.get(result.guildId)?.voiceStates.set(
-			result.userId,
-			result,
-		);
+		client.cache.guilds.get(result.guildId)?.voiceStates.set(result.userId, result);
 
 		return result;
 	};
@@ -310,10 +298,7 @@ function createCommandHandlers(
 
 			for (const subOption of option.options) {
 				if (subOption.handle !== undefined) {
-					handlers.set(
-						`${command.name} ${option.name} ${subOption.name}`,
-						subOption.handle,
-					);
+					handlers.set(`${command.name} ${option.name} ${subOption.name}`, subOption.handle);
 				}
 			}
 		}

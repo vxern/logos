@@ -211,6 +211,8 @@ function handleUnskipAction(
 		}
 	}
 
+	const unskippedString = localise(Commands.music.options.unskip.strings.unskipped.header, defaultLanguage);
+
 	return void sendInteractionResponse(
 		bot,
 		interaction.id,
@@ -219,16 +221,8 @@ function handleUnskipAction(
 			type: InteractionResponseTypes.ChannelMessageWithSource,
 			data: {
 				embeds: [{
-					title: `⏮️ ${
-						localise(
-							Commands.music.options.unskip.strings.unskipped.header,
-							defaultLanguage,
-						)
-					}`,
-					description: localise(
-						Commands.music.options.unskip.strings.unskipped.body,
-						defaultLanguage,
-					),
+					title: `⏮️ ${unskippedString}`,
+					description: localise(Commands.music.options.unskip.strings.unskipped.body, defaultLanguage),
 					color: configuration.interactions.responses.colors.invisible,
 				}],
 			},

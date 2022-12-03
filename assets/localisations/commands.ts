@@ -1632,21 +1632,25 @@ class Commands {
 					'English': 'Now playing',
 				},
 				body: {
-					'English': (
-						displayTrack: string,
-						songTitle: string,
-						songUrl: string,
-						userMention: string,
-					) => `Now playing ${displayTrack} [**${songTitle}**](${songUrl}) as requested by ${userMention}.`,
+					'English': (displayTrack: string, songTitle: string, songUrl: string, userMention: string) =>
+						`Now playing ${displayTrack} [**${songTitle}**](${songUrl}) as requested by ${userMention}.`,
 				},
 				parts: {
 					displayTrack: {
-						'English': (
-							position: number,
-							songCount: number,
-							listingTitle: string,
-						) => `track **${position}/${songCount}** of **${listingTitle}**: `,
+						'English': (position: number, songCount: number, listingTitle: string) =>
+							`track **${position}/${songCount}** of **${listingTitle}**: `,
 					},
+				},
+			},
+			type: {
+				song: {
+					'English': 'Song',
+				},
+				songCollection: {
+					'English': 'Song Collection',
+				},
+				external: {
+					'English': 'External',
 				},
 			},
 		},

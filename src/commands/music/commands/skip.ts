@@ -186,6 +186,8 @@ function handleSkipAction(
 		? Commands.music.options.skip.strings.skippedSongCollection
 		: Commands.music.options.skip.strings.skippedSong;
 
+  const messageString = localise(messageLocalisations.header, defaultLocale);
+
 	return void sendInteractionResponse(
 		bot,
 		interaction.id,
@@ -194,7 +196,7 @@ function handleSkipAction(
 			type: InteractionResponseTypes.ChannelMessageWithSource,
 			data: {
 				embeds: [{
-					title: `⏭️ ${localise(messageLocalisations.header, defaultLocale)}`,
+					title: `⏭️ ${messageString}`,
 					description: localise(messageLocalisations.body, defaultLocale),
 					color: configuration.interactions.responses.colors.invisible,
 				}],

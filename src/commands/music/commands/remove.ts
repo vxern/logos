@@ -155,6 +155,8 @@ function generateEmbed(
 					);
 				}
 
+				const removedString = localise(Commands.music.options.remove.strings.removed.header, defaultLanguage);
+
 				return void sendInteractionResponse(
 					bot,
 					selection.id,
@@ -163,7 +165,7 @@ function generateEmbed(
 						type: InteractionResponseTypes.ChannelMessageWithSource,
 						data: {
 							embeds: [{
-								title: `❌ ${localise(Commands.music.options.remove.strings.removed.header, defaultLanguage)}`,
+								title: `❌ ${removedString}`,
 								description: localise(Commands.music.options.remove.strings.removed.body, defaultLanguage)(
 									songListing.content.title,
 									mention(selection.user.id, MentionTypes.User),

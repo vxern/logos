@@ -22,8 +22,10 @@ function handleDisplayPlaybackQueue(
 
 	const [{ show }] = parseArguments(interaction.data?.options, { show: 'boolean' });
 
+  const queueString = localise(Commands.music.options.queue.strings.queue, interaction.locale);
+
 	return displayListings([client, bot], interaction, {
-		title: `📋 ${localise(Commands.music.options.queue.strings.queue, interaction.locale)}`,
+		title: `📋 ${queueString}`,
 		songListings: musicController.queue,
 		show: show ?? false,
 	});

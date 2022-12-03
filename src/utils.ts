@@ -592,7 +592,10 @@ function addParametersToURL(
 	parameters: Record<string, string>,
 ): string {
 	const query = Object.entries(parameters)
-		.map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+		.map(([key, value]) => {
+      const valueEncoded = encodeURIComponent(value);
+      return `${key}=${valueEncoded}`;
+    })
 		.join('&');
 
 	if (query.length === 0) return url;

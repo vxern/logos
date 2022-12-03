@@ -41,12 +41,14 @@ const client: MessageGenerators<ClientEvents> = {
 			const author = client.cache.users.get(message.authorId);
 			if (author === undefined) return;
 
+      const before = oldMessage !== undefined ? codeMultiline(oldMessage.content) : '*No message*';
+
 			return `${diagnosticMentionUser(author)} updated their message in ${
 				mention(message.channelId, MentionTypes.Channel)
 			}.
 
 **BEFORE**
-${oldMessage !== undefined ? codeMultiline(oldMessage.content) : '*No message*'}
+${before}
 **AFTER**
 ${codeMultiline(message.content)}`;
 		},

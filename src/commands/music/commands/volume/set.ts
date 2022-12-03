@@ -39,6 +39,8 @@ function handleSetVolume(
 
 	musicController.setVolume(volume);
 
+	const volumeString = localise(Commands.music.options.volume.options.set.strings.volumeSet.header, interaction.locale);
+
 	return void sendInteractionResponse(
 		bot,
 		interaction.id,
@@ -47,13 +49,7 @@ function handleSetVolume(
 			type: InteractionResponseTypes.ChannelMessageWithSource,
 			data: {
 				embeds: [{
-					title: `🔊 ${
-						localise(
-							Commands.music.options.volume.options.set.strings.volumeSet
-								.header,
-							interaction.locale,
-						)
-					}`,
+					title: `🔊 ${volumeString}`,
 					description: localise(
 						Commands.music.options.volume.options.set.strings.volumeSet.body,
 						interaction.locale,
