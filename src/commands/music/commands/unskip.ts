@@ -61,10 +61,7 @@ function handleUnskipAction(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(
-							Commands.music.options.unskip.strings.nowhereToUnskipTo,
-							interaction.locale,
-						),
+						description: localise(Commands.music.options.unskip.strings.nowhereToUnskipTo, interaction.locale),
 						color: configuration.interactions.responses.colors.yellow,
 					}],
 				},
@@ -85,10 +82,7 @@ function handleUnskipAction(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(
-							Commands.music.options.unskip.strings.noSongCollectionToUnskip,
-							interaction.locale,
-						),
+						description: localise(Commands.music.options.unskip.strings.noSongCollectionToUnskip, interaction.locale),
 						color: configuration.interactions.responses.colors.yellow,
 					}],
 				},
@@ -106,10 +100,7 @@ function handleUnskipAction(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(
-							Commands.music.options.unskip.strings.cannotUnskipDueToFullQueue,
-							interaction.locale,
-						),
+						description: localise(Commands.music.options.unskip.strings.cannotUnskipDueToFullQueue, interaction.locale),
 						color: configuration.interactions.responses.colors.red,
 					}],
 				},
@@ -127,10 +118,7 @@ function handleUnskipAction(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(
-							Commands.music.strings.tooManySkipArguments,
-							interaction.locale,
-						),
+						description: localise(Commands.music.strings.tooManySkipArguments, interaction.locale),
 						color: configuration.interactions.responses.colors.red,
 					}],
 				},
@@ -148,10 +136,7 @@ function handleUnskipAction(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(
-							Commands.music.strings.mustBeGreaterThanZero,
-							interaction.locale,
-						),
+						description: localise(Commands.music.strings.mustBeGreaterThanZero, interaction.locale),
 						color: configuration.interactions.responses.colors.red,
 					}],
 				},

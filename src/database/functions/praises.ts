@@ -105,15 +105,25 @@ async function createPraise(
 		return undefined;
 	}
 
+	const promises = [];
+
 	if (!client.database.praisesByAuthor.has(praise.author.value.id)) {
-		await fetchPraises(client, 'author', praise.author);
+		promises.push(
+			fetchPraises(client, 'author', praise.author).then(() =>
+				client.database.praisesByAuthor.get(praise.author.value.id)!.push(document)
+			),
+		);
 	}
-	client.database.praisesByAuthor.get(praise.author.value.id)!.push(document);
 
 	if (!client.database.praisesBySubject.has(praise.subject.value.id)) {
-		await fetchPraises(client, 'subject', praise.subject);
+		promises.push(
+			fetchPraises(client, 'subject', praise.subject).then(() =>
+				client.database.praisesBySubject.get(praise.subject.value.id)!.push(document)
+			),
+		);
 	}
-	client.database.praisesBySubject.get(praise.subject.value.id)!.push(document);
+
+	await Promise.all(promises);
 
 	client.log.debug(`Created praise document given by ${authorMention} to ${subjectMention}.`);
 

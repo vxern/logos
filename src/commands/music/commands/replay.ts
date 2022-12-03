@@ -45,10 +45,7 @@ function handleReplayAction(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(
-							Commands.music.options.replay.strings.noSongToReplay,
-							interaction.locale,
-						),
+						description: localise(Commands.music.options.replay.strings.noSongToReplay, interaction.locale),
 						color: configuration.interactions.responses.colors.yellow,
 					}],
 				},
@@ -69,10 +66,7 @@ function handleReplayAction(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(
-							Commands.music.options.replay.strings.noSongCollectionToReplay,
-							interaction.locale,
-						),
+						description: localise(Commands.music.options.replay.strings.noSongCollectionToReplay, interaction.locale),
 						color: configuration.interactions.responses.colors.yellow,
 					}],
 				},

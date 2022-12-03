@@ -474,10 +474,7 @@ function resolveInteractionToMember(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(
-							Misc.client.invalidUser,
-							interaction.locale,
-						),
+						description: localise(Misc.client.invalidUser, interaction.locale),
 						color: configuration.interactions.responses.colors.red,
 					}],
 				},

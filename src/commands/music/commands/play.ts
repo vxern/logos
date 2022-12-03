@@ -52,10 +52,7 @@ function handleRequestExternal(
 					requestedBy: interaction.user.id,
 					content: {
 						type: SongListingContentTypes.External,
-						title: localise(
-							Commands.music.options.play.strings.externalFile,
-							interaction.locale,
-						),
+						title: localise(Commands.music.options.play.strings.externalFile, interaction.locale),
 						url: query,
 					},
 				})
@@ -88,10 +85,7 @@ async function handleRequestSongListing(
 				type: InteractionResponseTypes.ChannelMessageWithSource,
 				data: {
 					embeds: [{
-						description: localise(
-							Commands.music.options.play.strings.songNotFound,
-							interaction.locale,
-						),
+						description: localise(Commands.music.options.play.strings.songNotFound, interaction.locale),
 						color: configuration.interactions.responses.colors.red,
 					}],
 				},

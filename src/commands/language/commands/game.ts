@@ -42,10 +42,7 @@ async function handleStartGame(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(
-							Commands.game.strings.noSentencesAvailable,
-							interaction.locale,
-						),
+						description: localise(Commands.game.strings.noSentencesAvailable, interaction.locale),
 						color: configuration.interactions.responses.colors.yellow,
 					}],
 				},

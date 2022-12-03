@@ -52,19 +52,13 @@ function handleDisplayGuildInformation(
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
 					thumbnail: guildAsThumbnail(bot, guild),
-					title: localise(
-						Commands.information.options.guild.strings.informationAbout,
-						interaction.locale,
-					)(guild.name),
+					title: localise(Commands.information.options.guild.strings.informationAbout, interaction.locale)(guild.name),
 					color: configuration.interactions.responses.colors.invisible,
 					fields: [
 						{
 							name: `🖋️ ${descriptionString}`,
 							value: guild.description ??
-								localise(
-									Commands.information.options.guild.strings.noDescription,
-									interaction.locale,
-								),
+								localise(Commands.information.options.guild.strings.noDescription, interaction.locale),
 							inline: true,
 						},
 						{

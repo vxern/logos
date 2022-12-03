@@ -120,10 +120,10 @@ async function handlePardonUser(
 			embeds: [
 				{
 					author: guildAsAuthor(bot, guild),
-					description: localise(
-						Commands.pardon.strings.pardonedDirect,
-						defaultLanguage,
-					)(deletedWarning.data.reason, displayTime(deletedWarning.ts)),
+					description: localise(Commands.pardon.strings.pardonedDirect, defaultLanguage)(
+						deletedWarning.data.reason,
+						displayTime(deletedWarning.ts),
+					),
 					color: configuration.interactions.responses.colors.green,
 				},
 			],

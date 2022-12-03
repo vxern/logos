@@ -49,10 +49,7 @@ async function handleWarnUser(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(
-							Commands.warn.strings.cannotWarnSelf,
-							interaction.locale,
-						),
+						description: localise(Commands.warn.strings.cannotWarnSelf, interaction.locale),
 						color: configuration.interactions.responses.colors.yellow,
 					}],
 				},
@@ -77,10 +74,7 @@ async function handleWarnUser(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(
-							Commands.warn.strings.cannotWarnCertainUsers,
-							interaction.locale,
-						),
+						description: localise(Commands.warn.strings.cannotWarnCertainUsers, interaction.locale),
 						color: configuration.interactions.responses.colors.yellow,
 					}],
 				},
@@ -90,22 +84,24 @@ async function handleWarnUser(
 
 	if (reason!.length === 0) return displayError(bot, interaction);
 
-	const subject = await getOrCreateUser(client, 'id', member.id.toString());
-	if (subject === undefined) return displayError(bot, interaction);
+	const [subject, author] = await Promise.all([
+		getOrCreateUser(client, 'id', member.id.toString()),
+		getOrCreateUser(client, 'id', interaction.user.id.toString()),
+	]);
 
-	const author = await getOrCreateUser(client, 'id', interaction.user.id.toString());
-	if (author === undefined) return displayError(bot, interaction);
+	if (subject === undefined || author === undefined) return displayError(bot, interaction);
 
-	const warnings = await getWarnings(client, subject.ref);
-	if (warnings === undefined) return displayError(bot, interaction);
+	const [warnings, document, dmChannel] = await Promise.all([
+		getWarnings(client, subject.ref),
+		createWarning(client, { author: author.ref, subject: subject.ref, reason: reason! }),
+		getDmChannel(bot, member.id).catch(() => undefined),
+	]);
 
-	const document = await createWarning(
-		client,
-		{ author: author.ref, subject: subject.ref, reason: reason! },
-	);
-	if (document === undefined) return displayError(bot, interaction);
+	if (document !== undefined) {
+		log([client, bot], guild, 'memberWarnAdd', member, document.data, interaction.user);
+	}
 
-	log([client, bot], guild, 'memberWarnAdd', member, document.data, interaction.user);
+	if (warnings === undefined || document === undefined) return displayError(bot, interaction);
 
 	const relevantWarnings = getActiveWarnings(warnings);
 
@@ -115,7 +111,7 @@ async function handleWarnUser(
 			flags: ApplicationCommandFlags.Ephemeral,
 			embeds: [{
 				description: localise(Commands.warn.strings.warned, interaction.locale)(
-					mention(member!.id, MentionTypes.User),
+					mention(member.id, MentionTypes.User),
 					relevantWarnings.length,
 				),
 				color: configuration.interactions.responses.colors.blue,
@@ -126,7 +122,6 @@ async function handleWarnUser(
 	const reachedKickStage = relevantWarnings.length >= configuration.guilds.moderation.warnings.maximum + 1;
 	const reachedBanStage = relevantWarnings.length >= configuration.guilds.moderation.warnings.maximum + 2;
 
-	const dmChannel = await getDmChannel(bot, member.id).catch(() => undefined);
 	if (dmChannel !== undefined) {
 		sendMessage(bot, dmChannel.id, {
 			embeds: [
@@ -137,25 +132,16 @@ async function handleWarnUser(
 							? (
 								reachedBanStage
 									? {
-										description: localise(
-											Commands.warn.strings.reachedBanStage,
-											defaultLanguage,
-										)(reason!),
+										description: localise(Commands.warn.strings.reachedBanStage, defaultLanguage)(reason!),
 										color: configuration.interactions.responses.colors.darkRed,
 									}
 									: {
-										description: localise(
-											Commands.warn.strings.reachedKickStage,
-											defaultLanguage,
-										)(reason!),
+										description: localise(Commands.warn.strings.reachedKickStage, defaultLanguage)(reason!),
 										color: configuration.interactions.responses.colors.red,
 									}
 							)
 							: {
-								description: localise(
-									Commands.warn.strings.warnedDirect,
-									defaultLanguage,
-								)(
+								description: localise(Commands.warn.strings.warnedDirect, defaultLanguage)(
 									reason!,
 									relevantWarnings.length,
 									configuration.guilds.moderation.warnings.maximum,

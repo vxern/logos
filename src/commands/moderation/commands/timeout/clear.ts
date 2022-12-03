@@ -39,10 +39,7 @@ async function handleClearTimeout(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(
-							Commands.timeout.strings.notTimedOut,
-							interaction.locale,
-						),
+						description: localise(Commands.timeout.strings.notTimedOut, interaction.locale),
 						color: configuration.interactions.responses.colors.yellow,
 					}],
 				},
@@ -50,15 +47,13 @@ async function handleClearTimeout(
 		);
 	}
 
-	await editMember(
-		bot,
-		interaction.guildId!,
-		member.id,
-		{ communicationDisabledUntil: null },
-	);
-
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (guild === undefined) return;
+
+	const [_member, dmChannel] = await Promise.all([
+		editMember(bot, interaction.guildId!, member.id, { communicationDisabledUntil: null }),
+		getDmChannel(bot, member.id).catch(() => undefined),
+	]);
 
 	log([client, bot], guild, 'memberTimeoutRemove', member, interaction.user);
 
@@ -71,26 +66,21 @@ async function handleClearTimeout(
 			data: {
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
-					description: localise(
-						Commands.timeout.strings.timeoutCleared,
-						interaction.locale,
-					)(diagnosticMentionUser(member.user!)),
+					description: localise(Commands.timeout.strings.timeoutCleared, interaction.locale)(
+						diagnosticMentionUser(member.user!),
+					),
 					color: configuration.interactions.responses.colors.green,
 				}],
 			},
 		},
 	);
 
-	const dmChannel = await getDmChannel(bot, member.id).catch(() => undefined);
 	if (dmChannel !== undefined) {
 		return void sendMessage(bot, dmChannel.id, {
 			embeds: [
 				{
 					author: guildAsAuthor(bot, guild),
-					description: localise(
-						Commands.timeout.strings.timeoutClearedDirect,
-						defaultLanguage,
-					),
+					description: localise(Commands.timeout.strings.timeoutClearedDirect, defaultLanguage),
 					color: configuration.interactions.responses.colors.green,
 				},
 			],

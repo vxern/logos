@@ -34,6 +34,8 @@ function handleDisplayResources(
 
 	const [{ show }] = parseArguments(interaction.data?.options, { show: 'boolean' });
 
+	const locale = show ? defaultLanguage : interaction.locale;
+
 	return void sendInteractionResponse(
 		bot,
 		interaction.id,
@@ -46,10 +48,7 @@ function handleDisplayResources(
 					type: MessageComponentTypes.ActionRow,
 					components: [{
 						type: MessageComponentTypes.Button,
-						label: localise(
-							Commands.resources.strings.resourcesStoredHere,
-							show ? defaultLanguage : interaction.locale,
-						)(guild.language),
+						label: localise(Commands.resources.strings.resourcesStoredHere, locale)(guild.language),
 						style: ButtonStyles.Link,
 						url: repositoryLink,
 					}],

@@ -10,7 +10,7 @@ import { Client, initialiseClient } from 'logos/src/client.ts';
 import { capitalise } from 'logos/formatting.ts';
 import { Language, supportedLanguages } from 'logos/types.ts';
 
-async function readDotEnvFile(fileUri: string, isTemplate = false): Promise<dotenv.DotenvConfig | undefined> {
+async function readDotEnvFile(fileUri: string, isTemplate = false): Promise<dotenv.DotenvConfig> {
 	const kind = isTemplate ? 'environment template' : 'environment';
 
 	let contents: string;
@@ -19,9 +19,7 @@ async function readDotEnvFile(fileUri: string, isTemplate = false): Promise<dote
 	} catch (error) {
 		if (error instanceof Deno.errors.NotFound) {
 			console.error(`Missing ${kind} file.`);
-			if (!isTemplate) {
-				return undefined;
-			}
+			Deno.exit(1);
 		}
 
 		console.error(`Unknown error while reading ${kind} file: ${error}`);
@@ -61,15 +59,28 @@ function readEnvironment({
 	}
 }
 
-async function readVersion(): Promise<string> {
-	const version = new TextDecoder().decode(
-		await Deno.run({
-			cmd: ['git', 'tag', '--sort=-committerdate', '--list', 'v*'],
-			stdout: 'piped',
-		}).output(),
-	).split('\n').at(0);
+const defaultSoftwareNotice = 'Deno';
 
-	return version ?? 'Deno';
+async function readVersion(): Promise<string> {
+	const decoder = new TextDecoder();
+
+	const command = Deno.run({
+		cmd: ['git', 'tag', '--sort=-committerdate', '--list', 'v*'],
+		stdout: 'piped',
+		stderr: 'null',
+	});
+	const [status, contents] = await Promise.all([command.status(), command.output()]);
+	if (!status.success) {
+		const command = Deno.run({ cmd: ['deno', '--version'], stdout: 'piped', stderr: 'null' });
+		const [status, contents] = await Promise.all([command.status(), command.output()]);
+		if (!status.success) return defaultSoftwareNotice;
+
+		const denoVersion = decoder.decode(contents).split(' ').at(1);
+		return `Deno v${denoVersion}` ?? defaultSoftwareNotice;
+	}
+
+	const programVersion = decoder.decode(contents).split('\n').at(0);
+	return programVersion ?? defaultSoftwareNotice;
 }
 
 /**
@@ -103,20 +114,24 @@ async function readSentenceFiles(directoryUri: string): Promise<[Language, strin
 }
 
 async function initialise({ isTest }: { isTest: boolean }): Promise<[Client, Bot]> {
-	readEnvironment({
-		envConfiguration: await readDotEnvFile('.env'),
-		templateEnvConfiguration: (await readDotEnvFile('.env.example', true))!,
-	});
+	const [envConfiguration, templateEnvConfiguration] = await Promise.all([
+		readDotEnvFile('.env'),
+		readDotEnvFile('.env.example', true),
+	]);
+
+	readEnvironment({ envConfiguration, templateEnvConfiguration });
 
 	Sentry.init({ dsn: Deno.env.get('SENTRY_SECRET'), environment: Deno.env.get('ENVIRONMENT') });
 
-	return initialiseClient({
-		isTest,
-		version: await readVersion() ?? 'Deno',
-		supportedTranslationLanguages: await getSupportedLanguages(),
-	}, {
+	const [version, supportedTranslationLanguages, sentenceFiles] = await Promise.all([
+		readVersion(),
+		getSupportedLanguages(),
+		readSentenceFiles('./assets/sentences'),
+	]);
+
+	return initialiseClient({ isTest, version, supportedTranslationLanguages }, {
 		dictionaryAdapters: loadDictionaryAdapters(),
-		sentencePairs: loadSentencePairs(await readSentenceFiles('./assets/sentences')),
+		sentencePairs: loadSentencePairs(sentenceFiles),
 	});
 }
 

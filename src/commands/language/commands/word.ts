@@ -63,10 +63,7 @@ async function handleSearchWord(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(
-							Commands.word.strings.noDictionaryAdapters,
-							interaction.locale,
-						),
+						description: localise(Commands.word.strings.noDictionaryAdapters, interaction.locale),
 						color: configuration.interactions.responses.colors.yellow,
 					}],
 				},

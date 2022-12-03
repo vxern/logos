@@ -36,10 +36,7 @@ function onAcceptRules(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						title: localise(
-							Services.entry.rejected.entryDenied,
-							interaction.locale,
-						),
+						title: localise(Services.entry.rejected.entryDenied, interaction.locale),
 						description: localise(screening.reason!, interaction.locale),
 					}],
 				},
@@ -59,14 +56,8 @@ function onAcceptRules(
 			data: {
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
-					title: localise(
-						Services.entry.selectProficiency.header,
-						interaction.locale,
-					),
-					description: localise(
-						Services.entry.selectProficiency.body,
-						interaction.locale,
-					)(guild.language),
+					title: localise(Services.entry.selectProficiency.header, interaction.locale),
+					description: localise(Services.entry.selectProficiency.body, interaction.locale)(guild.language),
 				}],
 				components: [{
 					type: MessageComponentTypes.ActionRow,

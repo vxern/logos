@@ -28,50 +28,25 @@ async function handleDisplayBotInformation(
 				embeds: [{
 					title: botUser.username,
 					thumbnail: {
-						url: getAvatarURL(
-							bot,
-							bot.id,
-							botUser.discriminator,
-							{ avatar: botUser.avatar, size: 4096, format: 'png' },
-						),
+						url: getAvatarURL(bot, bot.id, botUser.discriminator, {
+							avatar: botUser.avatar,
+							size: 4096,
+							format: 'png',
+						}),
 					},
 					color: configuration.interactions.responses.colors.invisible,
 					fields: [{
-						name: localise(
-							Commands.information.options.bot.strings.whoAmI.header,
-							interaction.locale,
-						),
-						value: localise(
-							Commands.information.options.bot.strings.whoAmI.body,
-							interaction.locale,
-						)(botUser.username),
+						name: localise(Commands.information.options.bot.strings.whoAmI.header, interaction.locale),
+						value: localise(Commands.information.options.bot.strings.whoAmI.body, interaction.locale)(botUser.username),
 					}, {
-						name: localise(
-							Commands.information.options.bot.strings.howWasIMade.header,
-							interaction.locale,
-						),
-						value: localise(
-							Commands.information.options.bot.strings.howWasIMade.body,
-							interaction.locale,
-						),
+						name: localise(Commands.information.options.bot.strings.howWasIMade.header, interaction.locale),
+						value: localise(Commands.information.options.bot.strings.howWasIMade.body, interaction.locale),
 					}, {
-						name: localise(
-							Commands.information.options.bot.strings.howToAddToServer.header,
-							interaction.locale,
-						),
-						value: localise(
-							Commands.information.options.bot.strings.howToAddToServer.body,
-							interaction.locale,
-						),
+						name: localise(Commands.information.options.bot.strings.howToAddToServer.header, interaction.locale),
+						value: localise(Commands.information.options.bot.strings.howToAddToServer.body, interaction.locale),
 					}, {
-						name: localise(
-							Commands.information.options.bot.strings.amIOpenSource.header,
-							interaction.locale,
-						),
-						value: localise(
-							Commands.information.options.bot.strings.amIOpenSource.body,
-							interaction.locale,
-						),
+						name: localise(Commands.information.options.bot.strings.amIOpenSource.header, interaction.locale),
+						value: localise(Commands.information.options.bot.strings.amIOpenSource.body, interaction.locale),
 					}],
 				}],
 			},

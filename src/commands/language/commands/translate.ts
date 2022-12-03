@@ -144,8 +144,7 @@ async function handleTranslateText(
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(
-							Commands.translate.strings
-								.targetLanguageMustBeDifferentFromSource,
+							Commands.translate.strings.targetLanguageMustBeDifferentFromSource,
 							interaction.locale,
 						),
 						color: configuration.interactions.responses.colors.yellow,
@@ -166,10 +165,7 @@ async function handleTranslateText(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(
-							Commands.translate.strings.textCannotBeEmpty,
-							interaction.locale,
-						),
+						description: localise(Commands.translate.strings.textCannotBeEmpty, interaction.locale),
 						color: configuration.interactions.responses.colors.yellow,
 					}],
 				},
@@ -192,19 +188,10 @@ async function handleTranslateText(
 						description: sourceLanguage === undefined
 							? (
 								targetLanguage === undefined
-									? localise(
-										Commands.translate.strings.invalid.both,
-										interaction.locale,
-									)
-									: localise(
-										Commands.translate.strings.invalid.source,
-										interaction.locale,
-									)
+									? localise(Commands.translate.strings.invalid.both, interaction.locale)
+									: localise(Commands.translate.strings.invalid.source, interaction.locale)
 							)
-							: localise(
-								Commands.translate.strings.invalid.target,
-								interaction.locale,
-							),
+							: localise(Commands.translate.strings.invalid.target, interaction.locale),
 						color: configuration.interactions.responses.colors.red,
 					}],
 				},
@@ -234,10 +221,7 @@ async function handleTranslateText(
 			interaction.token,
 			{
 				embeds: [{
-					description: localise(
-						Commands.translate.strings.failed,
-						interaction.locale,
-					),
+					description: localise(Commands.translate.strings.failed, interaction.locale),
 					color: configuration.interactions.responses.colors.red,
 				}],
 			},
@@ -263,16 +247,11 @@ async function handleTranslateText(
 				value: text,
 				inline: false,
 			}, {
-				name: localise(
-					Commands.translate.strings.translation,
-					interaction.locale,
-				),
+				name: localise(Commands.translate.strings.translation, interaction.locale),
 				value: translatedText,
 				inline: false,
 			}],
-			footer: {
-				text: `${sourceLanguageName} ➜ ${targetLanguageName}`,
-			},
+			footer: { text: `${sourceLanguageName} ➜ ${targetLanguageName}` },
 		}];
 	} else {
 		embeds = [{
@@ -283,9 +262,7 @@ async function handleTranslateText(
 			color: configuration.interactions.responses.colors.blue,
 			title: localise(Commands.translate.strings.translation, interaction.locale),
 			description: translatedText,
-			footer: {
-				text: `${sourceLanguageName} ➜ ${targetLanguageName}`,
-			},
+			footer: { text: `${sourceLanguageName} ➜ ${targetLanguageName}` },
 		}];
 	}
 
