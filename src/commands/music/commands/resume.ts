@@ -38,10 +38,7 @@ function handleResumePlayback(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(
-							Commands.music.options.resume.strings.noSongToResume,
-							interaction.locale,
-						),
+						description: localise(Commands.music.options.resume.strings.noSongToResume, interaction.locale),
 						color: configuration.interactions.responses.colors.yellow,
 					}],
 				},
@@ -59,10 +56,7 @@ function handleResumePlayback(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(
-							Commands.music.options.resume.strings.notCurrentlyPaused,
-							interaction.locale,
-						),
+						description: localise(Commands.music.options.resume.strings.notCurrentlyPaused, interaction.locale),
 						color: configuration.interactions.responses.colors.yellow,
 					}],
 				},

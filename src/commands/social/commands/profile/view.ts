@@ -48,10 +48,7 @@ async function handleDisplayProfile(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(
-							Commands.profile.options.view.strings.failed,
-							interaction.locale,
-						),
+						description: localise(Commands.profile.options.view.strings.failed, interaction.locale),
 						color: configuration.interactions.responses.colors.red,
 					}],
 				},
@@ -62,14 +59,15 @@ async function handleDisplayProfile(
 	const subject = await getOrCreateUser(client, 'id', member.id.toString());
 	if (subject === undefined) return showProfileViewFailure();
 
-	const praisesReceived = await getPraises(client, 'subject', subject.ref);
-	if (praisesReceived === undefined) return showProfileViewFailure();
+	const [praisesReceived, praisesSent, warningsReceived] = await Promise.all([
+		getPraises(client, 'subject', subject.ref),
+		getPraises(client, 'author', subject.ref),
+		getWarnings(client, subject.ref),
+	]);
 
-	const praisesSent = await getPraises(client, 'author', subject.ref);
-	if (praisesSent === undefined) return showProfileViewFailure();
-
-	const warningsReceived = await getWarnings(client, subject.ref);
-	if (warningsReceived === undefined) return showProfileViewFailure();
+	if (praisesReceived === undefined || praisesSent === undefined || warningsReceived === undefined) {
+		return showProfileViewFailure();
+	}
 
 	const locale = !show ? interaction.locale : defaultLanguage;
 
@@ -89,10 +87,7 @@ async function handleDisplayProfile(
 			data: {
 				flags: !show ? ApplicationCommandFlags.Ephemeral : undefined,
 				embeds: [{
-					title: localise(
-						Commands.profile.options.view.strings.informationForUser,
-						locale,
-					)(target.username),
+					title: localise(Commands.profile.options.view.strings.informationForUser, locale)(target.username),
 					thumbnail: (() => {
 						const iconURL = getAvatarURL(
 							bot,

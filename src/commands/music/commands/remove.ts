@@ -50,10 +50,7 @@ function handleRemoveSongListing(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(
-							Commands.music.options.remove.strings.noListingToRemove,
-							interaction.locale,
-						),
+						description: localise(Commands.music.options.remove.strings.noListingToRemove, interaction.locale),
 						color: configuration.interactions.responses.colors.yellow,
 					}],
 				},
@@ -144,10 +141,7 @@ function generateEmbed(
 							type: InteractionResponseTypes.ChannelMessageWithSource,
 							data: {
 								embeds: [{
-									description: localise(
-										Commands.music.options.remove.strings.failedToRemoveSong,
-										interaction.locale,
-									),
+									description: localise(Commands.music.options.remove.strings.failedToRemoveSong, interaction.locale),
 									color: configuration.interactions.responses.colors.yellow,
 								}],
 							},

@@ -175,32 +175,30 @@ async function changeArticle(
 		return undefined;
 	}
 
-	if (
-		!client.database.articleChangesByArticleReference.has(document.data.article.value.id)
-	) {
-		await fetchArticleChanges(
-			client,
-			'articleReference',
-			document.data.article,
+	const promises = [];
+
+	if (!client.database.articleChangesByArticleReference.has(document.data.article.value.id)) {
+		promises.push(
+			fetchArticleChanges(client, 'articleReference', document.data.article).then(() =>
+				client.database.articleChangesByArticleReference.get(document.data.article.value.id)!
+					.push(document)
+			),
 		);
 	}
 
-	client.database.articleChangesByArticleReference.get(document.data.article.value.id)!
-		.push(
-			document,
-		);
 	if (!client.database.articleChangesByAuthor.has(document.data.author.value.id)) {
-		await fetchArticleChanges(
-			client,
-			'author',
-			document.data.author,
+		promises.push(
+			fetchArticleChanges(client, 'author', document.data.author).then(() =>
+				client.database.articleChangesByAuthor.get(document.data.author.value.id)!.push(
+					document,
+				)
+			),
 		);
 	}
-	client.database.articleChangesByAuthor.get(document.data.author.value.id)!.push(
-		document,
-	);
 
-	client.log.debug(`Created article change to article '${change.content.title}'.`);
+	await Promise.all(promises);
+
+	client.log.debug(`Created article change for article '${change.content.title}'.`);
 
 	return document;
 }
@@ -296,7 +294,7 @@ async function processArticles(
 		),
 	);
 
-	if (documentsChanges.map(([_document, change]) => change).includes(undefined)) {
+	if (documentsChanges.map(([_document, changes]) => changes).includes(undefined)) {
 		return;
 	}
 

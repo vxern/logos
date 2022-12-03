@@ -54,10 +54,7 @@ function displayUnableToDisplayWarningsError(bot: Bot, interaction: Interaction)
 			data: {
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
-					description: localise(
-						Commands.list.strings.unableToDisplayWarnings,
-						interaction.locale,
-					),
+					description: localise(Commands.list.strings.unableToDisplayWarnings, interaction.locale),
 					color: configuration.interactions.responses.colors.red,
 				}],
 			},

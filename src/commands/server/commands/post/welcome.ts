@@ -23,14 +23,10 @@ function handlePostWelcomeMessage(
 
 	sendMessage(bot, interaction.channelId!, {
 		embeds: [{
-			title: localise(
-				Commands.post.options.welcome.strings.welcome.header,
-				defaultLanguage,
-			)(guild.name),
-			description: localise(
-				Commands.post.options.welcome.strings.welcome.body,
-				defaultLanguage,
-			)(getChannelMention(guild, 'rules')),
+			title: localise(Commands.post.options.welcome.strings.welcome.header, defaultLanguage)(guild.name),
+			description: localise(Commands.post.options.welcome.strings.welcome.body, defaultLanguage)(
+				getChannelMention(guild, 'rules'),
+			),
 			color: fromHex('#f28123'),
 		}],
 		components: [{
@@ -38,10 +34,7 @@ function handlePostWelcomeMessage(
 			components: [{
 				type: MessageComponentTypes.Button,
 				style: ButtonStyles.Secondary,
-				label: localise(
-					Commands.post.options.welcome.strings.acceptedRules,
-					defaultLanguage,
-				),
+				label: localise(Commands.post.options.welcome.strings.acceptedRules, defaultLanguage),
 				customId: 'ACCEPTED_RULES',
 				emoji: { name: '✅' },
 			}],
@@ -57,10 +50,7 @@ function handlePostWelcomeMessage(
 			data: {
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
-					description: localise(
-						Commands.post.options.welcome.strings.posted,
-						interaction.locale,
-					),
+					description: localise(Commands.post.options.welcome.strings.posted, interaction.locale),
 					color: configuration.interactions.responses.colors.blue,
 				}],
 			},

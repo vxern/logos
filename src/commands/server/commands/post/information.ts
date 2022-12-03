@@ -21,9 +21,7 @@ async function handlePostInformationMessage(
 
 	const sections = Object.values(informationSections);
 	const embeds = <Embed[]> (
-		await Promise.all(
-			sections.map((section) => section.generateEmbed([client, bot], guild)),
-		)
+		await Promise.all(sections.map((section) => section.generateEmbed([client, bot], guild)))
 	).filter((embed) => embed !== undefined);
 
 	sendMessage(
@@ -41,10 +39,7 @@ async function handlePostInformationMessage(
 			data: {
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
-					description: localise(
-						Commands.post.options.information.strings.posted,
-						interaction.locale,
-					),
+					description: localise(Commands.post.options.information.strings.posted, interaction.locale),
 					color: configuration.interactions.responses.colors.blue,
 				}],
 			},

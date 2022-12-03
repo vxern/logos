@@ -56,10 +56,7 @@ function handleSkipAction(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(
-							Commands.music.options.skip.strings.noSongToSkip,
-							interaction.locale,
-						),
+						description: localise(Commands.music.options.skip.strings.noSongToSkip, interaction.locale),
 						color: configuration.interactions.responses.colors.yellow,
 					}],
 				},
@@ -80,10 +77,7 @@ function handleSkipAction(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(
-							Commands.music.options.skip.strings.noSongCollectionToSkip,
-							interaction.locale,
-						),
+						description: localise(Commands.music.options.skip.strings.noSongCollectionToSkip, interaction.locale),
 						color: configuration.interactions.responses.colors.yellow,
 					}],
 				},
@@ -101,10 +95,7 @@ function handleSkipAction(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(
-							Commands.music.strings.tooManySkipArguments,
-							interaction.locale,
-						),
+						description: localise(Commands.music.strings.tooManySkipArguments, interaction.locale),
 						color: configuration.interactions.responses.colors.red,
 					}],
 				},
@@ -122,10 +113,7 @@ function handleSkipAction(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(
-							Commands.music.strings.mustBeGreaterThanZero,
-							interaction.locale,
-						),
+						description: localise(Commands.music.strings.mustBeGreaterThanZero, interaction.locale),
 						color: configuration.interactions.responses.colors.red,
 					}],
 				},
@@ -186,7 +174,7 @@ function handleSkipAction(
 		? Commands.music.options.skip.strings.skippedSongCollection
 		: Commands.music.options.skip.strings.skippedSong;
 
-  const messageString = localise(messageLocalisations.header, defaultLocale);
+	const messageString = localise(messageLocalisations.header, defaultLocale);
 
 	return void sendInteractionResponse(
 		bot,

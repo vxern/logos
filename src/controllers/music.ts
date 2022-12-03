@@ -108,10 +108,7 @@ class MusicController {
 						flags: ApplicationCommandFlags.Ephemeral,
 						embeds: [
 							{
-								description: localise(
-									Commands.music.options.play.strings.mustBeInVoiceChannel,
-									interaction.locale,
-								),
+								description: localise(Commands.music.options.play.strings.mustBeInVoiceChannel, interaction.locale),
 								color: configuration.interactions.responses.colors.yellow,
 							},
 						],
@@ -132,8 +129,7 @@ class MusicController {
 						flags: ApplicationCommandFlags.Ephemeral,
 						embeds: [{
 							description: localise(
-								Commands.music.options.play.strings
-									.alreadyPlayingInAnotherVoiceChannel,
+								Commands.music.options.play.strings.alreadyPlayingInAnotherVoiceChannel,
 								interaction.locale,
 							),
 							color: configuration.interactions.responses.colors.yellow,
@@ -176,10 +172,7 @@ class MusicController {
 					data: {
 						flags: ApplicationCommandFlags.Ephemeral,
 						embeds: [{
-							description: localise(
-								Commands.music.options.play.strings.queueIsFull,
-								interaction.locale,
-							),
+							description: localise(Commands.music.options.play.strings.queueIsFull, interaction.locale),
 							color: configuration.interactions.responses.colors.yellow,
 						}],
 					},
@@ -322,23 +315,15 @@ class MusicController {
 
 		const currentSong = this.currentSong!;
 
-		const tracksResponse = await this.player.node.rest.loadTracks(
-			currentSong.url,
-		);
+		const tracksResponse = await this.player.node.rest.loadTracks(currentSong.url);
 
 		if (
 			tracksResponse.loadType === LoadType.LoadFailed ||
 			tracksResponse.loadType === LoadType.NoMatches
 		) {
 			const embeds = [{
-				title: localise(
-					Commands.music.strings.couldNotLoadTrack.header,
-					defaultLocale,
-				),
-				description: localise(
-					Commands.music.strings.couldNotLoadTrack.body,
-					defaultLocale,
-				)(currentSong.title),
+				title: localise(Commands.music.strings.couldNotLoadTrack.header, defaultLocale),
+				description: localise(Commands.music.strings.couldNotLoadTrack.body, defaultLocale)(currentSong.title),
 				color: configuration.interactions.responses.colors.red,
 			}];
 

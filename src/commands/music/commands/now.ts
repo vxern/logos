@@ -41,10 +41,7 @@ function handleDisplayCurrentlyPlaying(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(
-							Commands.music.options.now.strings.noSongPlaying,
-							interaction.locale,
-						),
+						description: localise(Commands.music.options.now.strings.noSongPlaying, interaction.locale),
 						color: configuration.interactions.responses.colors.yellow,
 					}],
 				},
@@ -71,10 +68,7 @@ function handleDisplayCurrentlyPlaying(
 					data: {
 						flags: ApplicationCommandFlags.Ephemeral,
 						embeds: [{
-							description: localise(
-								Commands.music.options.now.strings.noCollectionPlaying,
-								interaction.locale,
-							),
+							description: localise(Commands.music.options.now.strings.noCollectionPlaying, interaction.locale),
 							color: configuration.interactions.responses.colors.yellow,
 						}],
 					},

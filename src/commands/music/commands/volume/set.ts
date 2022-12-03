@@ -26,10 +26,9 @@ function handleSetVolume(
 				type: InteractionResponseTypes.ChannelMessageWithSource,
 				data: {
 					embeds: [{
-						description: localise(
-							Commands.music.options.volume.options.set.strings.invalidVolume,
-							interaction.locale,
-						)(configuration.music.maxima.volume),
+						description: localise(Commands.music.options.volume.options.set.strings.invalidVolume, interaction.locale)(
+							configuration.music.maxima.volume,
+						),
 						color: configuration.interactions.responses.colors.red,
 					}],
 				},
@@ -50,10 +49,9 @@ function handleSetVolume(
 			data: {
 				embeds: [{
 					title: `🔊 ${volumeString}`,
-					description: localise(
-						Commands.music.options.volume.options.set.strings.volumeSet.body,
-						interaction.locale,
-					)(volume),
+					description: localise(Commands.music.options.volume.options.set.strings.volumeSet.body, interaction.locale)(
+						volume,
+					),
 					color: configuration.interactions.responses.colors.invisible,
 				}],
 			},

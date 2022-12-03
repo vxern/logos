@@ -51,10 +51,7 @@ async function handlePraiseUser(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(
-							Commands.praise.strings.cannotPraiseSelf,
-							interaction.locale,
-						),
+						description: localise(Commands.praise.strings.cannotPraiseSelf, interaction.locale),
 						color: configuration.interactions.responses.colors.yellow,
 					}],
 				},
@@ -67,8 +64,12 @@ async function handlePraiseUser(
 		data: { flags: ApplicationCommandFlags.Ephemeral },
 	});
 
-	const author = await getOrCreateUser(client, 'id', interaction.user.id.toString());
-	if (author === undefined) return showError(bot, interaction);
+	const [author, subject] = await Promise.all([
+		getOrCreateUser(client, 'id', interaction.user.id.toString()),
+		getOrCreateUser(client, 'id', member.id.toString()),
+	]);
+
+	if (author === undefined || subject === undefined) return showError(bot, interaction);
 
 	const praisesByAuthor = await getPraises(client, 'author', author.ref);
 	if (praisesByAuthor === undefined) return showError(bot, interaction);
@@ -94,24 +95,24 @@ async function handlePraiseUser(
 		);
 	}
 
-	const subject = await getOrCreateUser(client, 'id', member.id.toString());
-	if (subject === undefined) return showError(bot, interaction);
-
 	const praise: Praise = { author: author.ref, subject: subject.ref, comment: comment };
-
-	const document = await createPraise(client, praise);
-	if (document === undefined) return showError(bot, interaction);
 
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (guild === undefined) return;
 
+	const [document, dmChannel] = await Promise.all([
+		createPraise(client, praise),
+		getDmChannel(bot, member.id).catch(() => undefined),
+	]);
+
+	if (document === undefined) return showError(bot, interaction);
+
 	log([client, bot], guild, 'praiseAdd', member, praise, interaction.user);
 
-	const dmChannel = await getDmChannel(bot, member.id).catch(() => undefined);
 	if (dmChannel !== undefined) {
-    const praisedString = localise(Commands.praise.strings.praisedDirect, interaction.locale)(
-      mention(interaction.user.id, MentionTypes.User),
-    );
+		const praisedString = localise(Commands.praise.strings.praisedDirect, interaction.locale)(
+			mention(interaction.user.id, MentionTypes.User),
+		);
 
 		sendMessage(bot, dmChannel.id, {
 			embeds: [
@@ -129,10 +130,9 @@ async function handlePraiseUser(
 		interaction.token,
 		{
 			embeds: [{
-				description: localise(
-					Commands.praise.strings.praised,
-					interaction.locale,
-				)(mention(member.id, MentionTypes.User)),
+				description: localise(Commands.praise.strings.praised, interaction.locale)(
+					mention(member.id, MentionTypes.User),
+				),
 				color: configuration.interactions.responses.colors.green,
 			}],
 		},

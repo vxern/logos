@@ -39,10 +39,7 @@ function handlePausePlayback(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(
-							Commands.music.options.pause.strings.noSongToPause,
-							interaction.locale,
-						),
+						description: localise(Commands.music.options.pause.strings.noSongToPause, interaction.locale),
 						color: configuration.interactions.responses.colors.yellow,
 					}],
 				},

@@ -38,10 +38,7 @@ function handleStopPlayback(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(
-							Commands.music.options.stop.strings.notPlayingMusic,
-							interaction.locale,
-						),
+						description: localise(Commands.music.options.stop.strings.notPlayingMusic, interaction.locale),
 						color: configuration.interactions.responses.colors.yellow,
 					}],
 				},

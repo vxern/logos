@@ -94,10 +94,13 @@ async function handleSetTimeout(
 
 	const until = Date.now() + durationParsed;
 
-	await editMember(bot, interaction.guildId!, member.id, { communicationDisabledUntil: until });
-
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (guild === undefined) return;
+
+	const [_member, dmChannel] = await Promise.all([
+		editMember(bot, interaction.guildId!, member.id, { communicationDisabledUntil: until }),
+		getDmChannel(bot, member.id).catch(() => undefined),
+	]);
 
 	log([client, bot], guild, 'memberTimeoutAdd', member, until, reason, interaction.user);
 
@@ -106,16 +109,15 @@ async function handleSetTimeout(
 		data: {
 			flags: ApplicationCommandFlags.Ephemeral,
 			embeds: [{
-				description: localise(
-					Commands.timeout.strings.timedOut,
-					interaction.locale,
-				)(mention(member.id, MentionTypes.User), displayTime(until)),
+				description: localise(Commands.timeout.strings.timedOut, interaction.locale)(
+					mention(member.id, MentionTypes.User),
+					displayTime(until),
+				),
 				color: configuration.interactions.responses.colors.blue,
 			}],
 		},
 	});
 
-	const dmChannel = await getDmChannel(bot, member.id).catch(() => undefined);
 	if (dmChannel === undefined) {
 		const textChannel = client.cache.channels.get(interaction.channelId!);
 		if (textChannel === undefined) return;

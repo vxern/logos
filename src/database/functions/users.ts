@@ -103,8 +103,8 @@ async function getOrCreateUser<
 		? client.database.users.get((<Reference> value).value.id)
 		: Array.from(client.database.users.values()).find((document) => document.data.account.id === value);
 
-	const cacheOrFetch = cacheValue ?? await fetchUser(client, parameter, value);
-	if (cacheOrFetch !== undefined) return cacheOrFetch;
+	const cachedOrFetched = cacheValue ?? await fetchUser(client, parameter, value);
+	if (cachedOrFetched !== undefined) return cachedOrFetched;
 
 	if (parameter === 'id') {
 		return await createUser(client, { account: { id: <string> value } });
