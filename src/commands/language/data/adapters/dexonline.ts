@@ -95,10 +95,12 @@ class DexonlineAdapter implements DictionaryAdapter<Dexonline.Results> {
 		}
 		vocative![0] = vocative!.at(0)!.at(0)!.split(' ');
 
+		const singularString = localise(Commands.word.strings.nouns.singular, locale);
+		const pluralString = localise(Commands.word.strings.nouns.plural, locale);
+
 		const numberColumn = {
 			name: '⠀',
-			value: `**${localise(Commands.word.strings.nouns.singular, locale)}**\n` +
-				`**${localise(Commands.word.strings.nouns.plural, locale)}**`,
+			value: `**${singularString}**\n` + `**${pluralString}**`,
 			inline: true,
 		};
 
@@ -264,9 +266,12 @@ class DexonlineAdapter implements DictionaryAdapter<Dexonline.Results> {
 						inline: true,
 					},
 					{
-						name: `${localise(Commands.word.strings.verbs.tenses.futureIntended, locale)} (${
-							localise(Commands.word.strings.verbs.popular, locale)
-						})`,
+						name: (() => {
+							const futureIntendedString = localise(Commands.word.strings.verbs.tenses.futureIntended, locale);
+							const popularString = localise(Commands.word.strings.verbs.popular, locale);
+
+							return `${futureIntendedString} (${popularString})`;
+						})(),
 						value: indicativeFutureIntended!.join('\n'),
 						inline: true,
 					},
@@ -345,10 +350,12 @@ class DexonlineAdapter implements DictionaryAdapter<Dexonline.Results> {
 			2,
 		);
 
+		const singularString = localise(Commands.word.strings.nouns.singular, locale);
+		const pluralString = localise(Commands.word.strings.nouns.plural, locale);
+
 		const numberColumn = {
 			name: '⠀',
-			value: `**${localise(Commands.word.strings.nouns.singular, locale)}**\n` +
-				`**${localise(Commands.word.strings.nouns.plural, locale)}**`,
+			value: `**${singularString}**\n` + `**${pluralString}**`,
 			inline: true,
 		};
 
@@ -380,10 +387,12 @@ class DexonlineAdapter implements DictionaryAdapter<Dexonline.Results> {
 			2,
 		);
 
+		const singularString = localise(Commands.word.strings.nouns.singular, locale);
+		const pluralString = localise(Commands.word.strings.nouns.plural, locale);
+
 		const numberColumn = {
 			name: '⠀',
-			value: `**${localise(Commands.word.strings.nouns.singular, locale)}**\n` +
-				`**${localise(Commands.word.strings.nouns.plural, locale)}**`,
+			value: `**${singularString}**\n` + `**${pluralString}**`,
 			inline: true,
 		};
 

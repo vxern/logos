@@ -25,14 +25,20 @@ function displayListings(
 		},
 		view: {
 			title: localise(Commands.music.strings.listings, interaction.locale),
-			generate: (page, pageIndex) =>
-				page.length === 0 ? localise(Commands.music.strings.listEmpty, interaction.locale) : list(
-					page.map((listing, index) =>
-						`${pageIndex * 10 + (index + 1)}. ${
-							(configuration.music.symbols)[listing.content.type]
-						} ~ ${listing.content.title}`
-					),
-				),
+			generate: (page, pageIndex) => {
+				if (page.length === 0) {
+					return localise(Commands.music.strings.listEmpty, interaction.locale);
+				}
+
+				return list(
+					page.map((listing, index) => {
+						const indexDisplayed = pageIndex * 10 + (index + 1);
+						const symbol = configuration.music.symbols[listing.content.type];
+
+						return `${indexDisplayed}. ${symbol} ~ ${listing.content.title}`;
+					}),
+				);
+			},
 		},
 		show: show,
 	});

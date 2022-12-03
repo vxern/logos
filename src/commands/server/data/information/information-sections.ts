@@ -13,10 +13,7 @@ interface InformationSection {
 	image: string;
 
 	/** The method to generate the embed. */
-	generateEmbed: (
-		[client, bot]: [Client, Bot],
-		guild: Guild,
-	) => Promise<Embed | undefined> | (Embed | undefined);
+	generateEmbed: ([client, bot]: [Client, Bot], guild: Guild) => Promise<Embed | undefined> | (Embed | undefined);
 }
 
 /** The defined sections of information for guilds. */
@@ -26,10 +23,12 @@ const informationSections: Record<string, InformationSection> = {
 		generateEmbed: (_clientWithBot, guild) => {
 			const fields = [];
 			for (const rule of Object.values(Information.rules.rules)) {
+				const titleString = localise(rule.title, defaultLocale).toUpperCase();
+				const tldrString = localise(Information.rules.tldr, defaultLocale);
+				const summaryString = localise(rule.summary, defaultLocale);
+
 				fields.push({
-					name: `💠  **${localise(rule.title, defaultLocale).toUpperCase()}**  ~  ${
-						localise(Information.rules.tldr, defaultLocale)
-					}: *${localise(rule.summary, defaultLocale)}*`,
+					name: `💠  **${titleString}**  ~  ${tldrString}: *${summaryString}*`,
 					value: localise(rule.content, defaultLocale),
 					inline: false,
 				});
@@ -42,8 +41,10 @@ const informationSections: Record<string, InformationSection> = {
 				? mention(moderatorRoleId, MentionTypes.Role)
 				: configuration.guilds.moderation.moderator.toLowerCase();
 
+			const moderationPolicyString = localise(Information.rules.moderationPolicy.header, defaultLocale);
+
 			fields.push({
-				name: `ℹ️  ${localise(Information.rules.moderationPolicy.header, defaultLocale)}`,
+				name: `ℹ️  ${moderationPolicyString}`,
 				value: list([
 					localise(Information.rules.moderationPolicy.body.points.one, defaultLocale)(moderatorRoleMention),
 					localise(Information.rules.moderationPolicy.body.points.two, defaultLocale),
@@ -66,12 +67,12 @@ const informationSections: Record<string, InformationSection> = {
 			const invite = await getInvite(bot, guild);
 			if (invite === undefined) return;
 
+			const inviteString = localise(Information.invite, defaultLocale);
+			const link = links.generateDiscordInviteLink(invite.code);
+
 			return {
 				color: fromHex('#637373'),
-				fields: [{
-					name: `🔗  ${localise(Information.invite, defaultLocale)}`,
-					value: `**${links.generateDiscordInviteLink(invite.code)}**`,
-				}],
+				fields: [{ name: `🔗  ${inviteString}`, value: `**${link}**` }],
 			};
 		},
 	},

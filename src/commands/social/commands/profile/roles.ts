@@ -317,12 +317,14 @@ function displaySelectMenu(
 
 	const category = data.viewData!.category;
 
+	const categoryNameString = localise(category.name, locale);
+
 	return {
 		type: InteractionResponseTypes.ChannelMessageWithSource,
 		data: {
 			flags: ApplicationCommandFlags.Ephemeral,
 			embeds: [{
-				title: `${category.emoji}  ${localise(category.name, locale)}`,
+				title: `${category.emoji}  ${categoryNameString}`,
 				description: localise(category.description, locale),
 				color: category.color,
 			}],
@@ -371,6 +373,8 @@ function createSelectOptionsFromCollection(
 
 	const viewData = data.viewData!;
 
+	const assignedString = localise(Commands.profile.options.roles.strings.assigned, locale);
+
 	for (let index = 0; index < viewData.menuRoles.length; index++) {
 		const [role, roleResolved] = [viewData.menuRoles.at(index)!, viewData.menuRolesResolved.at(index)!];
 		const memberHasRole = viewData.memberRolesIncludedInMenu.includes(roleResolved.id);
@@ -378,9 +382,7 @@ function createSelectOptionsFromCollection(
 		const localisedName = localise(role.name, locale);
 
 		selectOptions.push({
-			label: memberHasRole
-				? `[${localise(Commands.profile.options.roles.strings.assigned, locale)}] ${localisedName}`
-				: localisedName,
+			label: memberHasRole ? `[${assignedString}] ${localisedName}` : localisedName,
 			value: index.toString(),
 			description: role.description !== undefined ? localise(role.description, locale) : undefined,
 			emoji: (() => {

@@ -20,6 +20,8 @@ function handleDisplayVolume(
 
 	const [{ show }] = parseArguments(interaction.data?.options, { show: 'boolean' });
 
+	const volumeString = localise(Commands.music.options.volume.options.display.strings.volume.header, defaultLanguage);
+
 	return void sendInteractionResponse(
 		bot,
 		interaction.id,
@@ -29,17 +31,10 @@ function handleDisplayVolume(
 			data: {
 				flags: !show ? ApplicationCommandFlags.Ephemeral : undefined,
 				embeds: [{
-					title: `🔊 ${
-						localise(
-							Commands.music.options.volume.options.display.strings.volume
-								.header,
-							defaultLanguage,
-						)
-					}`,
-					description: localise(
-						Commands.music.options.volume.options.display.strings.volume.body,
-						defaultLanguage,
-					)(musicController.volume),
+					title: `🔊 ${volumeString}`,
+					description: localise(Commands.music.options.volume.options.display.strings.volume.body, defaultLanguage)(
+						musicController.volume,
+					),
 					color: configuration.interactions.responses.colors.invisible,
 				}],
 			},

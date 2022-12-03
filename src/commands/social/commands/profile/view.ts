@@ -73,6 +73,13 @@ async function handleDisplayProfile(
 
 	const locale = !show ? interaction.locale : defaultLanguage;
 
+	const rolesString = localise(Commands.profile.options.view.strings.roles, locale);
+	const statisticsString = localise(Commands.profile.options.view.strings.statistics, locale);
+	const praisesString = localise(Commands.profile.options.view.strings.praises, locale);
+	const warningsString = localise(Commands.profile.options.view.strings.warnings, locale);
+	const receivedString = localise(Commands.profile.options.view.strings.received, locale);
+	const sentString = localise(Commands.profile.options.view.strings.sent, locale);
+
 	return void sendInteractionResponse(
 		bot,
 		interaction.id,
@@ -98,48 +105,14 @@ async function handleDisplayProfile(
 						return { url: iconURL };
 					})(),
 					fields: [{
-						name: `💼 ${
-							localise(
-								Commands.profile.options.view.strings.roles,
-								locale,
-							)
-						}`,
+						name: `💼 ${rolesString}`,
 						value: member.roles.map((roleId) => mention(roleId, MentionTypes.Role)).join(' '),
 						inline: false,
 					}, {
-						name: `🧮 ${
-							localise(
-								Commands.profile.options.view.strings.statistics,
-								locale,
-							)
-						}`,
-						value: `🙏 ${
-							localise(
-								Commands.profile.options.view.strings.praises,
-								locale,
-							)
-						} — ${
-							localise(
-								Commands.profile.options.view.strings.received,
-								locale,
-							)
-						} ${praisesReceived.length} • ${
-							localise(
-								Commands.profile.options.view.strings.sent,
-								locale,
-							)
-						} ${praisesSent.length}
-😖 ${
-							localise(
-								Commands.profile.options.view.strings.warnings,
-								locale,
-							)
-						} — ${
-							localise(
-								Commands.profile.options.view.strings.received,
-								locale,
-							)
-						} ${warningsReceived.length}`,
+						name: `🧮 ${statisticsString}`,
+						value:
+							`🙏 ${praisesString} — ${receivedString} ${praisesReceived.length} • ${sentString} ${praisesSent.length}
+😖 ${warningsString} — ${receivedString} ${warningsReceived.length}`,
 						inline: false,
 					}],
 				}],

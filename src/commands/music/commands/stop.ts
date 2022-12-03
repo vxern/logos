@@ -51,6 +51,8 @@ function handleStopPlayback(
 
 	musicController.reset();
 
+	const stoppedString = localise(Commands.music.options.stop.strings.stopped.header, defaultLanguage);
+
 	return void sendInteractionResponse(
 		bot,
 		interaction.id,
@@ -59,16 +61,8 @@ function handleStopPlayback(
 			type: InteractionResponseTypes.ChannelMessageWithSource,
 			data: {
 				embeds: [{
-					title: `⏹️ ${
-						localise(
-							Commands.music.options.stop.strings.stopped.header,
-							defaultLanguage,
-						)
-					}`,
-					description: localise(
-						Commands.music.options.stop.strings.stopped.body,
-						defaultLanguage,
-					),
+					title: `⏹️ ${stoppedString}`,
+					description: localise(Commands.music.options.stop.strings.stopped.body, defaultLanguage),
 					color: configuration.interactions.responses.colors.blue,
 				}],
 			},

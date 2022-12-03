@@ -40,18 +40,15 @@ function handleMakeSuggestion(
 	const [{ suggestion }] = parseArguments(interaction.data?.options, {});
 	if (suggestion === undefined) return;
 
+	const suggestionReceived = localise(Commands.suggest.strings.suggestionReceived.header, defaultLanguage);
+
 	sendMessage(bot, conferenceChannel.id, {
 		embeds: [{
-			title: `🌿 ${
-				localise(
-					Commands.suggest.strings.suggestionReceived.header,
-					defaultLanguage,
-				)
-			}`,
-			description: localise(
-				Commands.suggest.strings.suggestionReceived.body,
-				defaultLanguage,
-			)(mention(interaction.user.id, MentionTypes.User), suggestion),
+			title: `🌿 ${suggestionReceived}`,
+			description: localise(Commands.suggest.strings.suggestionReceived.body, defaultLanguage)(
+				mention(interaction.user.id, MentionTypes.User),
+				suggestion,
+			),
 			color: configuration.interactions.responses.colors.darkGreen,
 		}],
 	});
@@ -65,23 +62,14 @@ function handleMakeSuggestion(
 			data: {
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
-					description: localise(
-						Commands.suggest.strings.suggestionMade,
-						interaction.locale,
-					),
+					description: localise(Commands.suggest.strings.suggestionMade, interaction.locale),
 					color: configuration.interactions.responses.colors.green,
 				}],
 			},
 		},
 	);
 
-	return log(
-		[client, bot],
-		guild,
-		'suggestionSend',
-		interaction.member!,
-		suggestion,
-	);
+	return log([client, bot], guild, 'suggestionSend', interaction.member!, suggestion);
 }
 
 export default command;

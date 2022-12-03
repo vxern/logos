@@ -56,6 +56,8 @@ function handlePausePlayback(
 
 	musicController.pause();
 
+	const pausedString = localise(Commands.music.options.pause.strings.paused.header, defaultLanguage);
+
 	return void sendInteractionResponse(
 		bot,
 		interaction.id,
@@ -64,16 +66,8 @@ function handlePausePlayback(
 			type: InteractionResponseTypes.ChannelMessageWithSource,
 			data: {
 				embeds: [{
-					title: `⏸️ ${
-						localise(
-							Commands.music.options.pause.strings.paused.header,
-							defaultLanguage,
-						)
-					}`,
-					description: localise(
-						Commands.music.options.pause.strings.paused.body,
-						defaultLanguage,
-					),
+					title: `⏸️ ${pausedString}`,
+					description: localise(Commands.music.options.pause.strings.paused.body, defaultLanguage),
 					color: configuration.interactions.responses.colors.invisible,
 				}],
 			},

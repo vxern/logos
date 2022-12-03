@@ -109,15 +109,15 @@ async function handlePraiseUser(
 
 	const dmChannel = await getDmChannel(bot, member.id).catch(() => undefined);
 	if (dmChannel !== undefined) {
+    const praisedString = localise(Commands.praise.strings.praisedDirect, interaction.locale)(
+      mention(interaction.user.id, MentionTypes.User),
+    );
+
 		sendMessage(bot, dmChannel.id, {
 			embeds: [
 				{
 					author: guildAsAuthor(bot, guild),
-					description: `${
-						localise(Commands.praise.strings.praisedDirect, interaction.locale)(
-							mention(interaction.user.id, MentionTypes.User),
-						)
-					} 🥳`,
+					description: `${praisedString} 🥳`,
 					color: configuration.interactions.responses.colors.green,
 				},
 			],

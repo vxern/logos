@@ -206,6 +206,8 @@ function generateButtons(
 				},
 			});
 
+			const pageString = localise(Commands.word.strings.page, interaction.locale);
+
 			paginationControls.push([{
 				type: MessageComponentTypes.Button,
 				label: '«',
@@ -214,9 +216,7 @@ function generateButtons(
 				disabled: isFirst,
 			}, {
 				type: MessageComponentTypes.Button,
-				label: `${localise(Commands.word.strings.page, interaction.locale)} ${
-					data.dictionaryEntryIndex + 1
-				}/${data.entries.length}`,
+				label: `${pageString} ${data.dictionaryEntryIndex + 1}/${data.entries.length}`,
 				style: ButtonStyles.Secondary,
 				customId: 'none',
 			}, {
@@ -428,7 +428,8 @@ function fitStringsToFieldSize(
 
 	let fittedString = stringsToDisplay.join('\n');
 	if (stringsOmitted !== 0) {
-		fittedString += `\n*${localise(Commands.word.strings.definitionsOmitted, locale)(stringsOmitted)}*`;
+		const definitionsOmittedString = localise(Commands.word.strings.definitionsOmitted, locale)(stringsOmitted);
+		fittedString += `\n*${definitionsOmittedString}*`;
 	}
 
 	return fittedString;

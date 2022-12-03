@@ -72,6 +72,8 @@ function handleResumePlayback(
 
 	musicController.resume();
 
+	const resumedString = localise(Commands.music.options.resume.strings.resumed.header, defaultLanguage);
+
 	return void sendInteractionResponse(
 		bot,
 		interaction.id,
@@ -80,16 +82,8 @@ function handleResumePlayback(
 			type: InteractionResponseTypes.ChannelMessageWithSource,
 			data: {
 				embeds: [{
-					title: `▶️ ${
-						localise(
-							Commands.music.options.resume.strings.resumed.header,
-							defaultLanguage,
-						)
-					}`,
-					description: localise(
-						Commands.music.options.resume.strings.resumed.body,
-						defaultLanguage,
-					),
+					title: `▶️ ${resumedString}`,
+					description: localise(Commands.music.options.resume.strings.resumed.body, defaultLanguage),
 					color: configuration.interactions.responses.colors.invisible,
 				}],
 			},

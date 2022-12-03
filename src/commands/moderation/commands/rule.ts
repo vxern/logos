@@ -64,6 +64,11 @@ function handleCiteRule(
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (guild === undefined) return;
 
+	const ruleString = localise(Information.rules.rule, defaultLocale);
+	const ruleTitleString = localise(ruleParsed.title, defaultLocale);
+	const tldrString = localise(Information.rules.tldr, defaultLocale);
+	const summaryString = localise(ruleParsed.summary, defaultLocale);
+
 	return void sendInteractionResponse(
 		bot,
 		interaction.id,
@@ -72,9 +77,7 @@ function handleCiteRule(
 			type: InteractionResponseTypes.ChannelMessageWithSource,
 			data: {
 				embeds: [{
-					title: `${localise(Information.rules.rule, defaultLocale)} #${rule + 1}: ${
-						localise(ruleParsed.title, defaultLocale)
-					} ~ ${localise(Information.rules.tldr, defaultLocale)}: *${localise(ruleParsed.summary, defaultLocale)}*`,
+					title: `${ruleString} #${rule + 1}: ${ruleTitleString} ~ ${tldrString}: *${summaryString}*`,
 					description: localise(ruleParsed.content, defaultLocale),
 					color: configuration.interactions.responses.colors.blue,
 				}],
@@ -93,10 +96,7 @@ function displayInvalidRuleError(bot: Bot, interaction: Interaction): void {
 			data: {
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
-					description: localise(
-						Commands.rule.strings.invalidRule,
-						interaction.locale,
-					),
+					description: localise(Commands.rule.strings.invalidRule, interaction.locale),
 					color: configuration.interactions.responses.colors.red,
 				}],
 			},

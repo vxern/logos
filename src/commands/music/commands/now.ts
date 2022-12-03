@@ -84,38 +84,33 @@ function handleDisplayCurrentlyPlaying(
 
 		const collection = currentListing.content;
 
+		const nowPlayingString = localise(Commands.music.options.now.strings.nowPlaying, interaction.locale);
+
 		return void paginate([client, bot], interaction, {
 			elements: chunk(collection.songs, configuration.music.maxima.songs.page),
 			embed: {
-				title: `⬇️ ${
-					localise(
-						Commands.music.options.now.strings.nowPlaying,
-						interaction.locale,
-					)
-				}`,
+				title: `⬇️ ${nowPlayingString}`,
 				color: configuration.interactions.responses.colors.blue,
 			},
 			view: {
-				title: localise(
-					Commands.music.options.now.strings.songs,
-					interaction.locale,
-				),
+				title: localise(Commands.music.options.now.strings.songs, interaction.locale),
 				generate: (songs, pageIndex) =>
 					songs.length !== 0
 						? songs.map((song, index) => {
 							const isCurrent = pageIndex * 10 + index === collection.position;
-							const songString = `[${
-								trim(
-									song.title
-										.replaceAll('(', '❨')
-										.replaceAll(')', '❩')
-										.replaceAll('[', '⁅')
-										.replaceAll(']', '⁆'),
-									50,
-								)
-							}](${song.url})`;
 
-							return `${pageIndex * 10 + (index + 1)}. ${isCurrent ? `**${songString}**` : songString}`;
+							const titleFormatted = trim(
+								song.title
+									.replaceAll('(', '❨')
+									.replaceAll(')', '❩')
+									.replaceAll('[', '⁅')
+									.replaceAll(']', '⁆'),
+								50,
+							);
+							const titleHyperlink = `[${titleFormatted}](${song.url})`;
+							const titleHighlighted = isCurrent ? `**${titleHyperlink}**` : titleHyperlink;
+
+							return `${pageIndex * 10 + (index + 1)}. ${titleHighlighted}`;
 						}).join('\n')
 						: localise(Commands.music.strings.listEmpty, interaction.locale),
 			},
@@ -124,6 +119,8 @@ function handleDisplayCurrentlyPlaying(
 	}
 
 	const song = <Song | SongStream> currentListing.content;
+
+	const nowPlayingString = localise(Commands.music.options.now.strings.nowPlaying, interaction.locale);
 
 	return void sendInteractionResponse(
 		bot,
@@ -134,54 +131,32 @@ function handleDisplayCurrentlyPlaying(
 			data: {
 				flags: !show ? ApplicationCommandFlags.Ephemeral : undefined,
 				embeds: [{
-					title: `⬇️ ${
-						localise(
-							Commands.music.options.now.strings.nowPlaying,
-							interaction.locale,
-						)
-					}`,
+					title: `⬇️ ${nowPlayingString}`,
 					fields: [
-						...currentListing.content.type ===
-								SongListingContentTypes.Collection
+						...currentListing.content.type === SongListingContentTypes.Collection
 							? [{
-								name: localise(
-									Commands.music.options.now.strings.collection,
-									interaction.locale,
-								),
+								name: localise(Commands.music.options.now.strings.collection, interaction.locale),
 								value: currentListing.content.title,
 							}, {
-								name: localise(
-									Commands.music.options.now.strings.track,
-									interaction.locale,
-								),
+								name: localise(Commands.music.options.now.strings.track, interaction.locale),
 								value: `${currentListing.content.position + 1}/${currentListing.content.songs.length}`,
 							}]
 							: [],
 						{
-							name: localise(
-								Commands.music.options.now.strings.title,
-								interaction.locale,
-							),
+							name: localise(Commands.music.options.now.strings.title, interaction.locale),
 							value: `[${song.title}](${song.url})`,
 							inline: false,
 						},
 						{
-							name: localise(
-								Commands.music.options.now.strings.requestedBy,
-								interaction.locale,
-							),
+							name: localise(Commands.music.options.now.strings.requestedBy, interaction.locale),
 							value: mention(currentListing.requestedBy, MentionTypes.User),
 							inline: false,
 						},
 						{
-							name: localise(
-								Commands.music.options.now.strings.runningTime,
-								interaction.locale,
+							name: localise(Commands.music.options.now.strings.runningTime, interaction.locale),
+							value: localise(Commands.music.options.now.strings.playingSince, interaction.locale)(
+								displayTime(musicController.runningTime!),
 							),
-							value: localise(
-								Commands.music.options.now.strings.playingSince,
-								interaction.locale,
-							)(displayTime(musicController.runningTime!)),
 							inline: false,
 						},
 					],
