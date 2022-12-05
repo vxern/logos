@@ -2,7 +2,7 @@ import { Expressions } from 'logos/assets/localisations/expressions.ts';
 import { getLocaleByLanguage, getLocalisationsForLanguage, localise } from 'logos/assets/localisations/utils.ts';
 import { Language } from 'logos/types.ts';
 
-class Articles {
+class Modals {
 	static readonly article = {
 		title: {
 			'English': 'Title of the article',
@@ -56,4 +56,4 @@ class Articles {
 	};
 }
 
-export { Articles };
+export { Modals };
