@@ -1,5 +1,4 @@
 import {
-	ActionRow,
 	ApplicationCommandFlags,
 	Bot,
 	ButtonComponent,
@@ -14,17 +13,14 @@ import {
 	getGuildIconURL,
 	Guild,
 	Interaction,
-	InteractionCallbackData,
 	InteractionDataOption,
 	InteractionResponseTypes,
 	InteractionTypes,
 	Member,
 	MessageComponents,
 	MessageComponentTypes,
-	SelectOption,
 	sendInteractionResponse,
 	sendMessage,
-	TextStyles,
 	User,
 } from 'discordeno';
 import * as Snowflake from 'snowflake';
@@ -32,7 +28,6 @@ import { localise, Misc } from 'logos/assets/localisations/mod.ts';
 import { addCollector, Client } from 'logos/src/client.ts';
 import configuration from 'logos/configuration.ts';
 import { code, mention, MentionTypes } from 'logos/formatting.ts';
-import { Language } from 'logos/types.ts';
 
 /**
  * Parses a 6-digit hex value prefixed with a hashtag to a number.
@@ -76,108 +71,6 @@ function diagnosticMentionUser(user: User, doNotFormat?: boolean): string {
 	if (doNotFormat) return `${tag} (${user.id})`;
 
 	return `${code(tag)} (${code(user.id.toString())})`;
-}
-
-/** Represents an interactable form. */
-interface Form {
-	/** The title of a form. */
-	title: string;
-
-	/** The text fields defined within the form. */
-	fields: {
-		[key: string]:
-			& {
-				/** The label on a particular text field. */
-				label: string | ((language: string) => string);
-			}
-			& ({
-				type: 'TEXT_INPUT';
-
-				/** The 'style' of this text field. */
-				style: TextStyles;
-
-				/** Whether this text field is required to be filled or not. */
-				required?: boolean;
-
-				/** The filled content of this text field. */
-				value?: string;
-
-				/**
-				 * The minimum number of characters required to be inputted into this
-				 * text field.
-				 */
-				minimum: number;
-
-				/**
-				 * The maximum number of characters allowed to be inputted into this
-				 * text field.
-				 */
-				maximum: number;
-			} | {
-				type: 'SELECT';
-
-				/** The available selection options. */
-				options: SelectOption[];
-
-				/** The minimum number of selections to be made. */
-				minimum: number | undefined;
-
-				/** The maximum number of selections to be made. */
-				maximum: number | undefined;
-			});
-	};
-}
-
-/**
- * Taking a form object, converts it to a modal.
- *
- * @param form - The form to convert.
- * @param customId - The custom ID of the modal.
- * @param language - (Optional) The language of the guild the modal is being created for.
- * @returns The form converted into a modal.
- */
-function toModal(
-	form: Form,
-	customId: string,
-	language?: Language,
-): InteractionCallbackData {
-	const components = Object.entries(form.fields).map<ActionRow>(
-		([name, field]) => {
-			const idWithFieldName = `${customId}|${name}`;
-			const label = typeof field.label === 'function' ? field.label(language!) : field.label;
-
-			return {
-				type: MessageComponentTypes.ActionRow,
-				components: [
-					field.type === 'TEXT_INPUT'
-						? {
-							type: MessageComponentTypes.InputText,
-							customId: idWithFieldName,
-							label: label,
-							style: field.style,
-							value: field.value,
-							required: field.required,
-							minLength: field.minimum === 0 ? undefined : field.minimum,
-							maxLength: field.maximum,
-						}
-						: {
-							type: MessageComponentTypes.SelectMenu,
-							customId: idWithFieldName,
-							placeholder: label,
-							minValues: field.minimum,
-							maxValues: field.maximum,
-							options: field.options,
-						},
-				],
-			};
-		},
-	);
-
-	return {
-		title: form.title,
-		customId: customId,
-		components: components,
-	};
 }
 
 /**
@@ -617,7 +510,5 @@ export {
 	parseArguments,
 	random,
 	snowflakeToTimestamp,
-	toModal,
 	trim,
 };
-export type { Form };
