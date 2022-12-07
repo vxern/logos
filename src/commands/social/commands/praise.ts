@@ -14,8 +14,7 @@ import { CommandBuilder } from 'logos/src/commands/command.ts';
 import { user } from 'logos/src/commands/parameters.ts';
 import { log } from 'logos/src/controllers/logging/logging.ts';
 import { Praise } from 'logos/src/database/structs/users/praise.ts';
-import { createPraise, getPraises } from 'logos/src/database/functions/praises.ts';
-import { getOrCreateUser } from 'logos/src/database/functions/users.ts';
+import { getOrCreateUser } from 'logos/src/database/adapters/users.ts';
 import { Client, resolveInteractionToMember } from 'logos/src/client.ts';
 import { guildAsAuthor, parseArguments } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
@@ -71,7 +70,7 @@ async function handlePraiseUser(
 
 	if (author === undefined || subject === undefined) return showError(bot, interaction);
 
-	const praisesByAuthor = await getPraises(client, 'author', author.ref);
+	const praisesByAuthor = await client.database.adapters.praises.get(client, 'author', author.ref);
 	if (praisesByAuthor === undefined) return showError(bot, interaction);
 
 	const praiseTimestamps = praisesByAuthor
@@ -101,7 +100,7 @@ async function handlePraiseUser(
 	if (guild === undefined) return;
 
 	const [document, dmChannel] = await Promise.all([
-		createPraise(client, praise),
+		client.database.adapters.praises.create(client, praise),
 		getDmChannel(bot, member.id).catch(() => undefined),
 	]);
 

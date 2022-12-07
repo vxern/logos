@@ -14,8 +14,7 @@ import { CommandBuilder } from 'logos/src/commands/command.ts';
 import { reason, user } from 'logos/src/commands/parameters.ts';
 import { getActiveWarnings } from 'logos/src/commands/moderation/module.ts';
 import { log } from 'logos/src/controllers/logging/logging.ts';
-import { getOrCreateUser } from 'logos/src/database/functions/users.ts';
-import { createWarning, getWarnings } from 'logos/src/database/functions/warnings.ts';
+import { getOrCreateUser } from 'logos/src/database/adapters/users.ts';
 import { Client, resolveInteractionToMember } from 'logos/src/client.ts';
 import { guildAsAuthor, parseArguments } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
@@ -92,8 +91,8 @@ async function handleWarnUser(
 	if (subject === undefined || author === undefined) return displayError(bot, interaction);
 
 	const [warnings, document, dmChannel] = await Promise.all([
-		getWarnings(client, subject.ref),
-		createWarning(client, { author: author.ref, subject: subject.ref, reason: reason! }),
+		client.database.adapters.warnings.get(client, 'reference', subject.ref),
+		client.database.adapters.warnings.create(client, { author: author.ref, subject: subject.ref, reason: reason! }),
 		getDmChannel(bot, member.id).catch(() => undefined),
 	]);
 
