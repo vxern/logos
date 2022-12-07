@@ -1,7 +1,7 @@
 import { Expressions } from 'logos/assets/localisations/expressions.ts';
 import { getLocalisationsForLanguage, localise } from 'logos/assets/localisations/utils.ts';
 import { code } from 'logos/formatting.ts';
-import { Language } from 'logos/types.ts';
+import { getLocaleByLanguage, Language } from 'logos/types.ts';
 
 class Services {
 	static readonly entry = {
@@ -13,7 +13,7 @@ class Services {
 			},
 			body: {
 				'English': (language: Language) => {
-					const languageLocalised = localise(getLocalisationsForLanguage(language), 'English');
+					const languageLocalised = localise(getLocalisationsForLanguage(language), getLocaleByLanguage('English'));
 
 					return `Select the role that most accurately describes your ${languageLocalised} language proficiency.\n\n` +
 						`ℹ️ **You can always change this later using the ${code('/profile roles')} command.**`;
@@ -25,7 +25,8 @@ class Services {
 						`ℹ️ **Pamiętaj, że możesz ją później zmienić używając komendy ${code('/profile roles')}.**`;
 				},
 				'Romanian': (language: Language) => {
-					const languageLocalised = localise(getLocalisationsForLanguage(language), 'Romanian');
+					const languageLocalised = localise(getLocalisationsForLanguage(language), getLocaleByLanguage('Romanian'))
+						.toLowerCase();
 
 					return `Alege rolul care îți reprezintă cel mai bine competența în limba ${languageLocalised}.\n\n` +
 						`ℹ️ **Ține minte că îl poți schimba mai apoi folosind comanda ${code('/profile roles')}.**`;
@@ -64,6 +65,17 @@ class Services {
 						'Cererea ta de a te alătura serverului va fi examinată de către un moderator.' +
 						'Când aceasta se va întâmpla, vei fi notificat/ă în DM-uri.',
 				},
+			},
+			// Use something more akin to 'accept into our group' than 'accept request'.
+			accept: {
+				'English': 'Accept',
+				'Polish': 'Przyjmij',
+				'Romanian': 'Primește',
+			},
+			dismiss: {
+				'English': 'Dismiss',
+				'Polish': 'Odtrąć',
+				'Romanian': 'Respinge',
 			},
 		},
 	};
