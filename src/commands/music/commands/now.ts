@@ -12,9 +12,9 @@ import { OptionBuilder } from 'logos/src/commands/command.ts';
 import { collection, show } from 'logos/src/commands/parameters.ts';
 import { Client } from 'logos/src/client.ts';
 import { parseArguments } from 'logos/src/interactions.ts';
-import { chunk, paginate, trim } from 'logos/src/utils.ts';
+import { chunk, paginate } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
-import { displayTime, mention, MentionTypes } from 'logos/formatting.ts';
+import { displayTime, mention, MentionTypes, trim } from 'logos/formatting.ts';
 
 const command: OptionBuilder = {
 	...createLocalisations(Commands.music.options.now),

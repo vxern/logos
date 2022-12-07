@@ -4,9 +4,9 @@ import { Article } from 'logos/src/database/structs/articles/article.ts';
 import { Praise } from 'logos/src/database/structs/users/praise.ts';
 import { Warning } from 'logos/src/database/structs/users/warning.ts';
 import { MessageGenerators } from 'logos/src/controllers/logging/generators/generators.ts';
-import { diagnosticMentionUser, trim } from 'logos/src/utils.ts';
+import { diagnosticMentionUser } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
-import { code, codeMultiline, displayTime } from 'logos/formatting.ts';
+import { code, codeMultiline, displayTime, trim } from 'logos/formatting.ts';
 
 /** Type representing events that occur within a guild. */
 type GuildEvents = {

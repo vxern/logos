@@ -20,9 +20,9 @@ import { SongListing } from 'logos/src/commands/music/data/types.ts';
 import { OptionBuilder } from 'logos/src/commands/command.ts';
 import { Client } from 'logos/src/client.ts';
 import { createInteractionCollector } from 'logos/src/interactions.ts';
-import { chunk, trim } from 'logos/src/utils.ts';
+import { chunk } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
-import { mention, MentionTypes } from 'logos/formatting.ts';
+import { mention, MentionTypes, trim } from 'logos/formatting.ts';
 import { defaultLanguage } from 'logos/types.ts';
 
 const command: OptionBuilder = {
