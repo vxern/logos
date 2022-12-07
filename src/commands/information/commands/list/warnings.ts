@@ -10,8 +10,8 @@ import { getOrCreateUser } from 'logos/src/database/adapters/users.ts';
 import { Warning } from 'logos/src/database/structs/users/warning.ts';
 import { Document } from 'logos/src/database/structs/document.ts';
 import { Client, resolveInteractionToMember } from 'logos/src/client.ts';
-import { parseArguments } from 'logos/src/interactions.ts';
-import { chunk, paginate } from 'logos/src/utils.ts';
+import { paginate, parseArguments } from 'logos/src/interactions.ts';
+import { chunk } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import { displayTime, list, trim } from 'logos/formatting.ts';
 

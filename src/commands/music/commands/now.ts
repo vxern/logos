@@ -11,8 +11,8 @@ import { Song, SongListingContentTypes, SongStream } from 'logos/src/commands/mu
 import { OptionBuilder } from 'logos/src/commands/command.ts';
 import { collection, show } from 'logos/src/commands/parameters.ts';
 import { Client } from 'logos/src/client.ts';
-import { parseArguments } from 'logos/src/interactions.ts';
-import { chunk, paginate } from 'logos/src/utils.ts';
+import { paginate, parseArguments } from 'logos/src/interactions.ts';
+import { chunk } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import { displayTime, mention, MentionTypes, trim } from 'logos/formatting.ts';
 
