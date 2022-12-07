@@ -40,7 +40,7 @@ async function handlePostInformationMessage(
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
 					description: localise(Commands.post.options.information.strings.posted, interaction.locale),
-					color: configuration.interactions.responses.colors.blue,
+					color: configuration.messages.colors.blue,
 				}],
 			},
 		},

@@ -21,7 +21,7 @@ function displayListings(
 		elements: pages,
 		embed: {
 			title: title,
-			color: configuration.interactions.responses.colors.blue,
+			color: configuration.messages.colors.blue,
 		},
 		view: {
 			title: localise(Commands.music.strings.listings, interaction.locale),

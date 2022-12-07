@@ -43,7 +43,7 @@ async function handleStartGame(
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(Commands.game.strings.noSentencesAvailable, interaction.locale),
-						color: configuration.interactions.responses.colors.yellow,
+						color: configuration.messages.colors.yellow,
 					}],
 				},
 			},
@@ -61,7 +61,7 @@ async function handleStartGame(
 	);
 
 	let sentenceSelection: SentenceSelection;
-	let embedColor = configuration.interactions.responses.colors.blue;
+	let embedColor = configuration.messages.colors.blue;
 
 	const customId = createInteractionCollector([client, bot], {
 		type: InteractionTypes.MessageComponent,
@@ -85,9 +85,7 @@ async function handleStartGame(
 			const choice = sentenceSelection.choices.at(index);
 			const isCorrect = choice === sentenceSelection.word;
 
-			embedColor = isCorrect
-				? configuration.interactions.responses.colors.green
-				: configuration.interactions.responses.colors.red;
+			embedColor = isCorrect ? configuration.messages.colors.green : configuration.messages.colors.red;
 
 			sentenceSelection = createSentenceSelection(sentencePairs);
 

@@ -35,11 +35,11 @@ const informationSections: Record<string, InformationSection> = {
 			}
 
 			const moderatorRoleId = guild.roles.array().find((role) =>
-				role.name === configuration.guilds.moderation.moderator
+				role.name === configuration.permissions.moderatorRoleName
 			)?.id;
 			const moderatorRoleMention = moderatorRoleId
 				? mention(moderatorRoleId, MentionTypes.Role)
-				: configuration.guilds.moderation.moderator.toLowerCase();
+				: configuration.permissions.moderatorRoleName.toLowerCase();
 
 			const moderationPolicyString = localise(Information.rules.moderationPolicy.header, defaultLocale);
 

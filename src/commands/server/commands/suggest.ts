@@ -49,7 +49,7 @@ function handleMakeSuggestion(
 				mention(interaction.user.id, MentionTypes.User),
 				suggestion,
 			),
-			color: configuration.interactions.responses.colors.darkGreen,
+			color: configuration.messages.colors.darkGreen,
 		}],
 	});
 
@@ -63,7 +63,7 @@ function handleMakeSuggestion(
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
 					description: localise(Commands.suggest.strings.suggestionMade, interaction.locale),
-					color: configuration.interactions.responses.colors.green,
+					color: configuration.messages.colors.green,
 				}],
 			},
 		},

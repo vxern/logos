@@ -31,11 +31,11 @@ async function handleDisplayWarnings(
 	const warnings = await getWarnings(client, subject.ref);
 	if (warnings === undefined) return displayUnableToDisplayWarningsError(bot, interaction);
 
-	const pages = chunk(warnings, configuration.interactions.responses.resultsPerPage);
+	const pages = chunk(warnings, configuration.resultsPerPage);
 
 	return paginate([client, bot], interaction, {
 		elements: pages,
-		embed: { color: configuration.interactions.responses.colors.blue },
+		embed: { color: configuration.messages.colors.blue },
 		view: {
 			title: localise(Commands.list.strings.warnings, interaction.locale),
 			generate: (warnings, _index) => generateWarningsPage(warnings, interaction.locale),
@@ -55,7 +55,7 @@ function displayUnableToDisplayWarningsError(bot: Bot, interaction: Interaction)
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
 					description: localise(Commands.list.strings.unableToDisplayWarnings, interaction.locale),
-					color: configuration.interactions.responses.colors.red,
+					color: configuration.messages.colors.red,
 				}],
 			},
 		},

@@ -14,26 +14,26 @@ const client: MessageGenerators<ClientEvents> = {
 		title: '⚔️ User banned',
 		message: (_client, _bot, user, _guildId) => `${diagnosticMentionUser(user)} has been banned.`,
 		filter: (_client, originGuildId, _bot, user, guildId) => originGuildId === guildId && !user.toggles.bot,
-		color: configuration.interactions.responses.colors.red,
+		color: configuration.messages.colors.red,
 	},
 	guildBanRemove: {
 		title: '😇 User unbanned',
 		message: (_client, _bot, user, _guildId) => `${diagnosticMentionUser(user)} has been unbanned.`,
 		filter: (_client, originGuildId, _bot, user, guildId) => originGuildId === guildId && !user.toggles.bot,
-		color: configuration.interactions.responses.colors.yellow,
+		color: configuration.messages.colors.yellow,
 	},
 	guildMemberAdd: {
 		title: '😁 User joined',
 		message: (_client, _bot, _member, user) => `${diagnosticMentionUser(user)} has joined the server.`,
 		filter: (_client, originGuildId, _bot, member, user) => originGuildId === member.guildId && !user.toggles.bot,
-		color: configuration.interactions.responses.colors.green,
+		color: configuration.messages.colors.green,
 	},
 	guildMemberRemove: {
 		title: '😔 User kicked or left',
 		message: (_client, _bot, user, _guildId) =>
 			`${diagnosticMentionUser(user)} has left the server, or they have been kicked.`,
 		filter: (_client, originGuildId, _bot, user, guildId) => originGuildId === guildId && !user.toggles.bot,
-		color: configuration.interactions.responses.colors.yellow,
+		color: configuration.messages.colors.yellow,
 	},
 	messageUpdate: {
 		title: '⬆️ Message updated',
@@ -41,7 +41,7 @@ const client: MessageGenerators<ClientEvents> = {
 			const author = client.cache.users.get(message.authorId);
 			if (author === undefined) return;
 
-      const before = oldMessage !== undefined ? codeMultiline(oldMessage.content) : '*No message*';
+			const before = oldMessage !== undefined ? codeMultiline(oldMessage.content) : '*No message*';
 
 			return `${diagnosticMentionUser(author)} updated their message in ${
 				mention(message.channelId, MentionTypes.Channel)
@@ -59,7 +59,7 @@ ${codeMultiline(message.content)}`;
 			return originGuildId === message.guildId && !author.toggles.bot &&
 				message.content !== oldMessage?.content;
 		},
-		color: configuration.interactions.responses.colors.blue,
+		color: configuration.messages.colors.blue,
 	},
 	messageDelete: {
 		title: '❌ Message deleted',
@@ -86,7 +86,7 @@ ${codeMultiline(message.content)}`;
 
 			return originGuildId === message.guildId && !author.toggles.bot;
 		},
-		color: configuration.interactions.responses.colors.red,
+		color: configuration.messages.colors.red,
 	},
 };
 

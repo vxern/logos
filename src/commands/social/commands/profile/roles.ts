@@ -53,7 +53,7 @@ function handleOpenRoleSelectionMenu(
 					type: RoleCategoryTypes.CategoryGroup,
 					name: Commands.profile.options.roles.strings.selectCategory.header,
 					description: Commands.profile.options.roles.strings.selectCategory.body,
-					color: configuration.interactions.responses.colors.invisible,
+					color: configuration.messages.colors.invisible,
 					emoji: '💭',
 					categories: rootCategories,
 				},

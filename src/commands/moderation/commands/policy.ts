@@ -27,11 +27,11 @@ function handleDisplayModerationPolicy([client, bot]: [Client, Bot], interaction
 	const [{ show }] = parseArguments(interaction.data?.options, { show: 'boolean' });
 
 	const moderatorRoleId = guild.roles.array().find(
-		(role) => role.name === configuration.guilds.moderation.moderator,
+		(role) => role.name === configuration.permissions.moderatorRoleName,
 	)?.id;
 	const moderatorRoleMention = moderatorRoleId !== undefined
 		? mention(moderatorRoleId, MentionTypes.Role)
-		: configuration.guilds.moderation.moderator.toLowerCase();
+		: configuration.permissions.moderatorRoleName.toLowerCase();
 
 	return void sendInteractionResponse(bot, interaction.id, interaction.token, {
 		type: InteractionResponseTypes.ChannelMessageWithSource,

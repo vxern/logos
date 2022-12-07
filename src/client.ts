@@ -308,7 +308,7 @@ function createCommandHandlers(
 }
 
 function getLanguage(guildName: string): Language {
-	const guildNameMatch = configuration.guilds.nameExpression.exec(guildName) ?? undefined;
+	const guildNameMatch = configuration.guilds.namePattern.exec(guildName) ?? undefined;
 	if (guildNameMatch === undefined) return defaultLanguage;
 
 	const languageString = guildNameMatch.at(1)!;
@@ -475,7 +475,7 @@ function resolveInteractionToMember(
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(Misc.client.invalidUser, interaction.locale),
-						color: configuration.interactions.responses.colors.red,
+						color: configuration.messages.colors.red,
 					}],
 				},
 			},

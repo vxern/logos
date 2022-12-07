@@ -340,7 +340,7 @@ function createInteractionCollector(
 	addCollector(clientWithBot, 'interactionCreate', {
 		filter: (_bot, interaction) => compileChecks(interaction, settings, customId).every((condition) => condition),
 		limit: settings.limit,
-		removeAfter: settings.doesNotExpire ? undefined : configuration.core.collectors.maxima.timeout,
+		removeAfter: settings.doesNotExpire ? undefined : configuration.collectors.expiresIn,
 		onCollect: settings.onCollect ?? (() => {}),
 		onEnd: settings.onEnd ?? (() => {}),
 	});
@@ -372,9 +372,7 @@ function createVerificationPrompt(
 
 	const verificationChannel = guild.channels.array().find((channel) =>
 		channel.type === ChannelTypes.GuildText &&
-		channel.name?.toLowerCase().includes(
-			configuration.guilds.channels.verification,
-		)
+		channel.name?.toLowerCase().includes(configuration.guilds.channels.verification)
 	);
 	if (verificationChannel === undefined) return new Promise(() => undefined);
 
@@ -593,9 +591,9 @@ function addParametersToURL(
 ): string {
 	const query = Object.entries(parameters)
 		.map(([key, value]) => {
-      const valueEncoded = encodeURIComponent(value);
-      return `${key}=${valueEncoded}`;
-    })
+			const valueEncoded = encodeURIComponent(value);
+			return `${key}=${valueEncoded}`;
+		})
 		.join('&');
 
 	if (query.length === 0) return url;

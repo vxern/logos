@@ -20,7 +20,7 @@ const command: OptionBuilder = {
 		handle: handleSetVolume,
 		options: [{
 			...createLocalisations(
-				Commands.music.options.volume.options.set.options.volume(configuration.music.maxima.volume),
+				Commands.music.options.volume.options.set.options.volume(configuration.music.limits.volume),
 			),
 			type: ApplicationCommandOptionTypes.Integer,
 			required: true,

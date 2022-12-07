@@ -51,14 +51,14 @@ function handleRemoveSongListing(
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(Commands.music.options.remove.strings.noListingToRemove, interaction.locale),
-						color: configuration.interactions.responses.colors.yellow,
+						color: configuration.messages.colors.yellow,
 					}],
 				},
 			},
 		);
 	}
 
-	const pages = chunk(musicController.queue, configuration.music.maxima.songs.page);
+	const pages = chunk(musicController.queue, configuration.music.limits.songs.page);
 
 	return void sendInteractionResponse(
 		bot,
@@ -142,7 +142,7 @@ function generateEmbed(
 							data: {
 								embeds: [{
 									description: localise(Commands.music.options.remove.strings.failedToRemoveSong, interaction.locale),
-									color: configuration.interactions.responses.colors.yellow,
+									color: configuration.messages.colors.yellow,
 								}],
 							},
 						},
@@ -164,7 +164,7 @@ function generateEmbed(
 									songListing.content.title,
 									mention(selection.user.id, MentionTypes.User),
 								),
-								color: configuration.interactions.responses.colors.invisible,
+								color: configuration.messages.colors.invisible,
 							}],
 						},
 					},
@@ -176,7 +176,7 @@ function generateEmbed(
 	return {
 		embeds: [{
 			description: localise(Commands.music.options.remove.strings.selectSongToRemove, locale),
-			color: configuration.interactions.responses.colors.blue,
+			color: configuration.messages.colors.blue,
 			footer: isLast ? undefined : {
 				text: localise(Commands.music.options.remove.strings.continuedOnTheNextPage, locale),
 			},
@@ -199,7 +199,7 @@ function generateSelectMenu(data: RemoveListingData, selectMenuCustomId: string)
 				(songListing, index) => ({
 					emoji: { name: configuration.music.symbols[songListing.content.type]! },
 					label: trim(songListing.content.title, 100),
-					value: (data.pageIndex * configuration.music.maxima.songs.page + index).toString(),
+					value: (data.pageIndex * configuration.music.limits.songs.page + index).toString(),
 				}),
 			),
 		}],

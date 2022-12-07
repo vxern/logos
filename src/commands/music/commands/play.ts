@@ -86,7 +86,7 @@ async function handleRequestSongListing(
 				data: {
 					embeds: [{
 						description: localise(Commands.music.options.play.strings.songNotFound, interaction.locale),
-						color: configuration.interactions.responses.colors.red,
+						color: configuration.messages.colors.red,
 					}],
 				},
 			},

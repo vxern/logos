@@ -39,7 +39,7 @@ function handleResumePlayback(
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(Commands.music.options.resume.strings.noSongToResume, interaction.locale),
-						color: configuration.interactions.responses.colors.yellow,
+						color: configuration.messages.colors.yellow,
 					}],
 				},
 			},
@@ -57,7 +57,7 @@ function handleResumePlayback(
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(Commands.music.options.resume.strings.notCurrentlyPaused, interaction.locale),
-						color: configuration.interactions.responses.colors.yellow,
+						color: configuration.messages.colors.yellow,
 					}],
 				},
 			},
@@ -78,7 +78,7 @@ function handleResumePlayback(
 				embeds: [{
 					title: `▶️ ${resumedString}`,
 					description: localise(Commands.music.options.resume.strings.resumed.body, defaultLanguage),
-					color: configuration.interactions.responses.colors.invisible,
+					color: configuration.messages.colors.invisible,
 				}],
 			},
 		},

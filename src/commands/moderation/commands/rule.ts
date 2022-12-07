@@ -79,7 +79,7 @@ function handleCiteRule(
 				embeds: [{
 					title: `${ruleString} #${rule + 1}: ${ruleTitleString} ~ ${tldrString}: *${summaryString}*`,
 					description: localise(ruleParsed.content, defaultLocale),
-					color: configuration.interactions.responses.colors.blue,
+					color: configuration.messages.colors.blue,
 				}],
 			},
 		},
@@ -97,7 +97,7 @@ function displayInvalidRuleError(bot: Bot, interaction: Interaction): void {
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
 					description: localise(Commands.rule.strings.invalidRule, interaction.locale),
-					color: configuration.interactions.responses.colors.red,
+					color: configuration.messages.colors.red,
 				}],
 			},
 		},

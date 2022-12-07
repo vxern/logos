@@ -96,7 +96,7 @@ interface EntryDecision {
 function screenUser(user: User): EntryDecision {
 	const createdAt = snowflakeToTimestamp(user.id);
 
-	if ((Date.now() - createdAt) < configuration.guilds.entry.minimumRequiredAge) {
+	if ((Date.now() - createdAt) < configuration.services.entry.minimumRequiredAge) {
 		return {
 			canEnter: false,
 			reason: Services.entry.rejected.reasons.accountTooNew,

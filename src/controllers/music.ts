@@ -38,7 +38,7 @@ class MusicController {
 	queue: SongListing[] = [];
 
 	/** The volume at which music is being played. */
-	volume = configuration.music.maxima.volume;
+	volume = configuration.music.limits.volume;
 
 	/**
 	 * Indicates whether the current song is to be played again once it ends.
@@ -71,7 +71,7 @@ class MusicController {
 
 	/** Checks whether the queue holds fewer items than the limit. */
 	get canPushToQueue(): boolean {
-		return this.queue.length < configuration.music.maxima.songs.queue;
+		return this.queue.length < configuration.music.limits.songs.queue;
 	}
 
 	get isOccupied(): boolean {
@@ -109,7 +109,7 @@ class MusicController {
 						embeds: [
 							{
 								description: localise(Commands.music.options.play.strings.mustBeInVoiceChannel, interaction.locale),
-								color: configuration.interactions.responses.colors.yellow,
+								color: configuration.messages.colors.yellow,
 							},
 						],
 					},
@@ -132,7 +132,7 @@ class MusicController {
 								Commands.music.options.play.strings.alreadyPlayingInAnotherVoiceChannel,
 								interaction.locale,
 							),
-							color: configuration.interactions.responses.colors.yellow,
+							color: configuration.messages.colors.yellow,
 						}],
 					},
 				},
@@ -173,7 +173,7 @@ class MusicController {
 						flags: ApplicationCommandFlags.Ephemeral,
 						embeds: [{
 							description: localise(Commands.music.options.play.strings.queueIsFull, interaction.locale),
-							color: configuration.interactions.responses.colors.yellow,
+							color: configuration.messages.colors.yellow,
 						}],
 					},
 				},
@@ -185,7 +185,7 @@ class MusicController {
 	}
 
 	private moveToHistory(listing: SongListing): void {
-		if (this.history.length === configuration.music.maxima.songs.history) {
+		if (this.history.length === configuration.music.limits.songs.history) {
 			this.history.shift();
 		}
 
@@ -226,7 +226,7 @@ class MusicController {
 		const embeds = [{
 			title: `👍 ${queuedString}`,
 			description: localise(Commands.music.options.play.strings.queued.body, defaultLocale)(songListing.content.title),
-			color: configuration.interactions.responses.colors.green,
+			color: configuration.messages.colors.green,
 		}];
 
 		if (this.isOccupied) {
@@ -308,7 +308,7 @@ class MusicController {
 				embeds: [{
 					title: `👏 ${allDoneString}`,
 					description: localise(Commands.music.strings.allDone.body, defaultLocale),
-					color: configuration.interactions.responses.colors.blue,
+					color: configuration.messages.colors.blue,
 				}],
 			});
 		}
@@ -324,7 +324,7 @@ class MusicController {
 			const embeds = [{
 				title: localise(Commands.music.strings.couldNotLoadTrack.header, defaultLocale),
 				description: localise(Commands.music.strings.couldNotLoadTrack.body, defaultLocale)(currentSong.title),
-				color: configuration.interactions.responses.colors.red,
+				color: configuration.messages.colors.red,
 			}];
 
 			if (interaction === undefined) {
@@ -390,7 +390,7 @@ class MusicController {
 				currentSong.url,
 				mention(this.current.requestedBy, MentionTypes.User),
 			),
-			color: configuration.interactions.responses.colors.invisible,
+			color: configuration.messages.colors.invisible,
 		}];
 
 		if (interaction === undefined) {
@@ -542,7 +542,7 @@ class MusicController {
 		this.player.pause(false);
 		this.player.disconnect();
 
-		this.setVolume(configuration.music.maxima.volume);
+		this.setVolume(configuration.music.limits.volume);
 	}
 }
 

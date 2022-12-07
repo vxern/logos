@@ -64,7 +64,7 @@ async function handleSearchWord(
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(Commands.word.strings.noDictionaryAdapters, interaction.locale),
-						color: configuration.interactions.responses.colors.yellow,
+						color: configuration.messages.colors.yellow,
 					}],
 				},
 			},
@@ -104,7 +104,7 @@ async function handleSearchWord(
 			{
 				embeds: [{
 					description: localise(Commands.word.strings.noResults, interaction.locale),
-					color: configuration.interactions.responses.colors.yellow,
+					color: configuration.messages.colors.yellow,
 				}],
 			},
 		);

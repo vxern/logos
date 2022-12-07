@@ -108,7 +108,7 @@ async function handlePardonUser(
 						mention(member.id, MentionTypes.User),
 						deletedWarning.data.reason,
 					),
-					color: configuration.interactions.responses.colors.green,
+					color: configuration.messages.colors.green,
 				}],
 			},
 		},
@@ -124,7 +124,7 @@ async function handlePardonUser(
 						deletedWarning.data.reason,
 						displayTime(deletedWarning.ts),
 					),
-					color: configuration.interactions.responses.colors.green,
+					color: configuration.messages.colors.green,
 				},
 			],
 		});
@@ -154,7 +154,7 @@ function displayErrorOrEmptyChoices(bot: Bot, interaction: Interaction): void {
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
 					description: localise(Commands.pardon.strings.failed, interaction.locale),
-					color: configuration.interactions.responses.colors.red,
+					color: configuration.messages.colors.red,
 				}],
 			},
 		},
@@ -172,7 +172,7 @@ function displayError(bot: Bot, interaction: Interaction, error: string): void {
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
 					description: error,
-					color: configuration.interactions.responses.colors.red,
+					color: configuration.messages.colors.red,
 				}],
 			},
 		},
