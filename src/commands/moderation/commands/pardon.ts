@@ -10,8 +10,7 @@ import {
 	sendMessage,
 } from 'discordeno';
 import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
-import { getOrCreateUser } from 'logos/src/database/functions/users.ts';
-import { deleteWarning, getWarnings } from 'logos/src/database/functions/warnings.ts';
+import { getOrCreateUser } from 'logos/src/database/adapters/users.ts';
 import { getActiveWarnings } from 'logos/src/commands/moderation/module.ts';
 import { CommandBuilder } from 'logos/src/commands/command.ts';
 import { user } from 'logos/src/commands/parameters.ts';
@@ -50,7 +49,7 @@ async function handlePardonUser(
 	const subject = await getOrCreateUser(client, 'id', member.id.toString());
 	if (subject === undefined) return displayErrorOrEmptyChoices(bot, interaction);
 
-	const warnings = await getWarnings(client, subject.ref);
+	const warnings = await client.database.adapters.warnings.get(client, 'reference', subject.ref);
 	if (warnings === undefined) return displayErrorOrEmptyChoices(bot, interaction);
 
 	const relevantWarnings = getActiveWarnings(warnings).toReversed();
@@ -72,8 +71,8 @@ async function handlePardonUser(
 		);
 	}
 
-	const warningToRemove = relevantWarnings.find((relevantWarning) => relevantWarning.ref.value.id === warning);
-	if (warningToRemove === undefined) {
+	const warningToDelete = relevantWarnings.find((relevantWarning) => relevantWarning.ref.value.id === warning);
+	if (warningToDelete === undefined) {
 		return displayError(
 			bot,
 			interaction,
@@ -81,7 +80,7 @@ async function handlePardonUser(
 		);
 	}
 
-	const deletedWarning = await deleteWarning(client, warningToRemove);
+	const deletedWarning = await client.database.adapters.warnings.delete(client, warningToDelete);
 	if (deletedWarning === undefined) {
 		return displayError(
 			bot,

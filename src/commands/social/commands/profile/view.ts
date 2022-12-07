@@ -10,9 +10,7 @@ import {
 import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
 import { OptionBuilder } from 'logos/src/commands/command.ts';
 import { show, user } from 'logos/src/commands/parameters.ts';
-import { getPraises } from 'logos/src/database/functions/praises.ts';
-import { getOrCreateUser } from 'logos/src/database/functions/users.ts';
-import { getWarnings } from 'logos/src/database/functions/warnings.ts';
+import { getOrCreateUser } from 'logos/src/database/adapters/users.ts';
 import { Client, resolveInteractionToMember } from 'logos/src/client.ts';
 import { parseArguments } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
@@ -60,9 +58,9 @@ async function handleDisplayProfile(
 	if (subject === undefined) return showProfileViewFailure();
 
 	const [praisesReceived, praisesSent, warningsReceived] = await Promise.all([
-		getPraises(client, 'subject', subject.ref),
-		getPraises(client, 'author', subject.ref),
-		getWarnings(client, subject.ref),
+		client.database.adapters.praises.get(client, 'subject', subject.ref),
+		client.database.adapters.praises.get(client, 'author', subject.ref),
+		client.database.adapters.warnings.get(client, 'reference', subject.ref),
 	]);
 
 	if (praisesReceived === undefined || praisesSent === undefined || warningsReceived === undefined) {

@@ -6,8 +6,7 @@ import {
 	sendInteractionResponse,
 } from 'discordeno';
 import { Commands, localise } from 'logos/assets/localisations/mod.ts';
-import { getOrCreateUser } from 'logos/src/database/functions/users.ts';
-import { getWarnings } from 'logos/src/database/functions/warnings.ts';
+import { getOrCreateUser } from 'logos/src/database/adapters/users.ts';
 import { Warning } from 'logos/src/database/structs/users/warning.ts';
 import { Document } from 'logos/src/database/structs/document.ts';
 import { Client, resolveInteractionToMember } from 'logos/src/client.ts';
@@ -28,7 +27,7 @@ async function handleDisplayWarnings(
 	const subject = await getOrCreateUser(client, 'id', member.id.toString());
 	if (subject === undefined) return displayUnableToDisplayWarningsError(bot, interaction);
 
-	const warnings = await getWarnings(client, subject.ref);
+	const warnings = await client.database.adapters.warnings.get(client, 'reference', subject.ref);
 	if (warnings === undefined) return displayUnableToDisplayWarningsError(bot, interaction);
 
 	const pages = chunk(warnings, configuration.resultsPerPage);
