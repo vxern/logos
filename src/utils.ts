@@ -224,16 +224,6 @@ function trim(string: string, length: number): string {
 	return slice.slice(0, slice.length - Math.max(gap, stringContinued.length)) + stringContinued;
 }
 
-/**
- * Generates a pseudo-random number.
- *
- * @param max - The maximum value to generate.
- * @returns A pseudo-random number between 0 and {@link max}.
- */
-function random(max: number): number {
-	return Math.floor(Math.random() * max);
-}
-
 const beginningOfDiscordEpoch = 1420070400000n;
 const snowflakeBitsToDiscard = 22n;
 
@@ -361,7 +351,6 @@ export {
 	guildAsThumbnail,
 	paginate,
 	parseArguments,
-	random,
 	snowflakeToTimestamp,
 	trim,
 };
