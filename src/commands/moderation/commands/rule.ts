@@ -10,7 +10,7 @@ import {
 import { Commands, createLocalisations, Information, localise } from 'logos/assets/localisations/mod.ts';
 import { CommandBuilder } from 'logos/src/commands/command.ts';
 import { Client } from 'logos/src/client.ts';
-import { parseArguments } from 'logos/src/utils.ts';
+import { parseArguments } from 'logos/src/interactions.ts';
 import configuration from 'logos/configuration.ts';
 import { defaultLocale } from 'logos/types.ts';
 

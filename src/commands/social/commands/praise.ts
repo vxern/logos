@@ -16,7 +16,8 @@ import { log } from 'logos/src/controllers/logging/logging.ts';
 import { Praise } from 'logos/src/database/structs/users/praise.ts';
 import { getOrCreateUser } from 'logos/src/database/adapters/users.ts';
 import { Client, resolveInteractionToMember } from 'logos/src/client.ts';
-import { guildAsAuthor, parseArguments } from 'logos/src/utils.ts';
+import { parseArguments } from 'logos/src/interactions.ts';
+import { guildAsAuthor } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import { mention, MentionTypes } from 'logos/formatting.ts';
 

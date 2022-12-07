@@ -19,7 +19,8 @@ import { resolveToSupportedLanguage } from 'logos/src/commands/language/module.t
 import { CommandBuilder } from 'logos/src/commands/command.ts';
 import { show } from 'logos/src/commands/parameters.ts';
 import { Client } from 'logos/src/client.ts';
-import { addParametersToURL, diagnosticMentionUser, parseArguments } from 'logos/src/utils.ts';
+import { parseArguments } from 'logos/src/interactions.ts';
+import { addParametersToURL, diagnosticMentionUser } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import { deepLApiEndpoints } from 'logos/constants.ts';
 

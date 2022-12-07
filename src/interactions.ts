@@ -1,4 +1,4 @@
-import { Bot, EventHandlers, Interaction, InteractionTypes } from 'discordeno';
+import { Bot, EventHandlers, Interaction, InteractionDataOption, InteractionTypes } from 'discordeno';
 import * as Snowflake from 'snowflake';
 import { addCollector, Client } from 'logos/src/client.ts';
 import configuration from 'logos/configuration.ts';
@@ -61,4 +61,57 @@ function compileChecks(
 	];
 }
 
-export { createInteractionCollector };
+type CustomTypeIndicators = Record<string, 'number' | 'boolean'>;
+type CustomTypeIndicatorsTyped<C extends CustomTypeIndicators> = {
+	[key in keyof C]: (C[key] extends 'number' ? number : boolean) | undefined;
+};
+
+function parseArguments<
+	T extends Record<string, string | undefined>,
+	R extends CustomTypeIndicatorsTyped<C> & T,
+	C extends Record<string, 'number' | 'boolean'>,
+>(
+	options: InteractionDataOption[] | undefined,
+	customTypes: C,
+): [R, InteractionDataOption | undefined] {
+	let args: Record<string, unknown> = {};
+
+	let focused: InteractionDataOption | undefined = undefined;
+	for (const option of options ?? []) {
+		if (option.focused) {
+			focused = option;
+		}
+
+		if (option.options !== undefined) {
+			const [parsedArgs, parsedFocused] = parseArguments(
+				option.options,
+				customTypes,
+			);
+			focused = parsedFocused ?? focused;
+			args = { ...args, ...parsedArgs };
+			continue;
+		}
+
+		if (option.value === undefined) {
+			args[option.name] = undefined;
+			continue;
+		}
+
+		switch (customTypes[option.name]) {
+			case 'boolean': {
+				args[option.name] = <boolean> option.value;
+				continue;
+			}
+			case 'number': {
+				args[option.name] = parseInt(<string> option.value);
+				continue;
+			}
+		}
+
+		args[option.name] = <string> option.value;
+	}
+
+	return [args as R, focused];
+}
+
+export { createInteractionCollector, parseArguments };

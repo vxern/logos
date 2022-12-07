@@ -19,8 +19,8 @@ import { DictionaryEntry, TaggedValue } from 'logos/src/commands/language/data/t
 import { CommandBuilder } from 'logos/src/commands/command.ts';
 import { show } from 'logos/src/commands/parameters.ts';
 import { Client } from 'logos/src/client.ts';
-import { createInteractionCollector } from 'logos/src/interactions.ts';
-import { chunk, diagnosticMentionUser, fromHex, parseArguments } from 'logos/src/utils.ts';
+import { createInteractionCollector, parseArguments } from 'logos/src/interactions.ts';
+import { chunk, diagnosticMentionUser, fromHex } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import { BulletStyles, code, list } from 'logos/formatting.ts';
 import { WordTypes } from 'logos/types.ts';
