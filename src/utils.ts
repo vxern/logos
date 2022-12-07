@@ -229,15 +229,6 @@ function guildAsAuthor(bot: Bot, guild: Guild): Author | undefined {
 	};
 }
 
-type Thumbnail = NonNullable<Embed['thumbnail']>;
-
-function guildAsThumbnail(bot: Bot, guild: Guild): Thumbnail | undefined {
-	const iconURL = getGuildIconURLFormatted(bot, guild);
-	if (iconURL === undefined) return undefined;
-
-	return { url: iconURL };
-}
-
 /**
  * Taking a URL and a list of parameters, returns the URL with the parameters appended
  * to it.
@@ -270,7 +261,6 @@ export {
 	getGuildIconURLFormatted,
 	getTextChannel,
 	guildAsAuthor,
-	guildAsThumbnail,
 	paginate,
 	snowflakeToTimestamp,
 };

@@ -3,6 +3,7 @@ import {
 	Bot,
 	Channel,
 	ChannelTypes,
+	Embed,
 	Guild,
 	Interaction,
 	InteractionResponseTypes,
@@ -11,7 +12,7 @@ import {
 import { Commands, localise } from 'logos/assets/localisations/mod.ts';
 import { getProficiencyCategory } from 'logos/src/commands/social/module.ts';
 import { Client } from 'logos/src/client.ts';
-import { guildAsThumbnail, snowflakeToTimestamp } from 'logos/src/utils.ts';
+import { getGuildIconURLFormatted, snowflakeToTimestamp } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import { displayTime, mention, MentionTypes } from 'logos/formatting.ts';
 import { defaultLanguage } from 'logos/types.ts';
@@ -197,6 +198,15 @@ function displayProficiencyRoleDistribution(
  */
 function getPercentageComposition(number: number, total: number): string {
 	return ((number / total) * 100).toPrecision(3);
+}
+
+type Thumbnail = NonNullable<Embed['thumbnail']>;
+
+function guildAsThumbnail(bot: Bot, guild: Guild): Thumbnail | undefined {
+	const iconURL = getGuildIconURLFormatted(bot, guild);
+	if (iconURL === undefined) return undefined;
+
+	return { url: iconURL };
 }
 
 export { handleDisplayGuildInformation };
