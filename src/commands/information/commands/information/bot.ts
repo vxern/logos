@@ -34,7 +34,7 @@ async function handleDisplayBotInformation(
 							format: 'png',
 						}),
 					},
-					color: configuration.interactions.responses.colors.invisible,
+					color: configuration.messages.colors.invisible,
 					fields: [{
 						name: localise(Commands.information.options.bot.strings.whoAmI.header, interaction.locale),
 						value: localise(Commands.information.options.bot.strings.whoAmI.body, interaction.locale)(botUser.username),

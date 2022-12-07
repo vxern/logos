@@ -6,7 +6,7 @@ function getActiveWarnings(
 	warnings: Document<Warning>[],
 ): Document<Warning>[] {
 	return warnings.filter(
-		(warning) => (Date.now() - warning.ts) < configuration.guilds.moderation.warnings.interval,
+		(warning) => (Date.now() - warning.ts) < configuration.commands.warn.within,
 	);
 }
 

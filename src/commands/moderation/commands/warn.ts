@@ -50,7 +50,7 @@ async function handleWarnUser(
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(Commands.warn.strings.cannotWarnSelf, interaction.locale),
-						color: configuration.interactions.responses.colors.yellow,
+						color: configuration.messages.colors.yellow,
 					}],
 				},
 			},
@@ -60,7 +60,7 @@ async function handleWarnUser(
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (guild === undefined) return;
 
-	const moderatorRoleId = guild.roles.find((role) => role.name === configuration.guilds.moderation.moderator)?.id;
+	const moderatorRoleId = guild.roles.find((role) => role.name === configuration.permissions.moderatorRoleName)?.id;
 	if (moderatorRoleId === undefined) return;
 
 	const isModerator = member.roles.includes(moderatorRoleId);
@@ -75,7 +75,7 @@ async function handleWarnUser(
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(Commands.warn.strings.cannotWarnCertainUsers, interaction.locale),
-						color: configuration.interactions.responses.colors.yellow,
+						color: configuration.messages.colors.yellow,
 					}],
 				},
 			},
@@ -114,13 +114,13 @@ async function handleWarnUser(
 					mention(member.id, MentionTypes.User),
 					relevantWarnings.length,
 				),
-				color: configuration.interactions.responses.colors.blue,
+				color: configuration.messages.colors.blue,
 			}],
 		},
 	});
 
-	const reachedKickStage = relevantWarnings.length >= configuration.guilds.moderation.warnings.maximum + 1;
-	const reachedBanStage = relevantWarnings.length >= configuration.guilds.moderation.warnings.maximum + 2;
+	const reachedKickStage = relevantWarnings.length >= configuration.commands.warn.limit + 1;
+	const reachedBanStage = relevantWarnings.length >= configuration.commands.warn.limit + 2;
 
 	if (dmChannel !== undefined) {
 		sendMessage(bot, dmChannel.id, {
@@ -133,20 +133,20 @@ async function handleWarnUser(
 								reachedBanStage
 									? {
 										description: localise(Commands.warn.strings.reachedBanStage, defaultLanguage)(reason!),
-										color: configuration.interactions.responses.colors.darkRed,
+										color: configuration.messages.colors.darkRed,
 									}
 									: {
 										description: localise(Commands.warn.strings.reachedKickStage, defaultLanguage)(reason!),
-										color: configuration.interactions.responses.colors.red,
+										color: configuration.messages.colors.red,
 									}
 							)
 							: {
 								description: localise(Commands.warn.strings.warnedDirect, defaultLanguage)(
 									reason!,
 									relevantWarnings.length,
-									configuration.guilds.moderation.warnings.maximum,
+									configuration.commands.warn.limit,
 								),
-								color: configuration.interactions.responses.colors.yellow,
+								color: configuration.messages.colors.yellow,
 							}
 					),
 				},
@@ -186,7 +186,7 @@ function displayError(bot: Bot, interaction: Interaction): void {
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
 					description: localise(Commands.warn.strings.failed, interaction.locale),
-					color: configuration.interactions.responses.colors.red,
+					color: configuration.messages.colors.red,
 				}],
 			},
 		},

@@ -35,7 +35,7 @@ function handleDisplayVolume(
 					description: localise(Commands.music.options.volume.options.display.strings.volume.body, defaultLanguage)(
 						musicController.volume,
 					),
-					color: configuration.interactions.responses.colors.invisible,
+					color: configuration.messages.colors.invisible,
 				}],
 			},
 		},

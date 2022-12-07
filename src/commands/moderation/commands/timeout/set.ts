@@ -113,7 +113,7 @@ async function handleSetTimeout(
 					mention(member.id, MentionTypes.User),
 					displayTime(until),
 				),
-				color: configuration.interactions.responses.colors.blue,
+				color: configuration.messages.colors.blue,
 			}],
 		},
 	});
@@ -132,7 +132,7 @@ async function handleSetTimeout(
 					displayTime(until),
 					reason,
 				),
-				color: configuration.interactions.responses.colors.yellow,
+				color: configuration.messages.colors.yellow,
 			}],
 		});
 	}
@@ -142,7 +142,7 @@ async function handleSetTimeout(
 			{
 				author: guildAsAuthor(bot, guild),
 				description: localise(Commands.timeout.strings.timedOutDirect, defaultLanguage)(displayTime(until), reason),
-				color: configuration.interactions.responses.colors.yellow,
+				color: configuration.messages.colors.yellow,
 			},
 		],
 	});
@@ -255,7 +255,7 @@ function displayError(bot: Bot, interaction: Interaction, error: string): void {
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
 					description: error,
-					color: configuration.interactions.responses.colors.yellow,
+					color: configuration.messages.colors.yellow,
 				}],
 			},
 		},

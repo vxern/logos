@@ -62,7 +62,7 @@ function handleUnskipAction(
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(Commands.music.options.unskip.strings.nowhereToUnskipTo, interaction.locale),
-						color: configuration.interactions.responses.colors.yellow,
+						color: configuration.messages.colors.yellow,
 					}],
 				},
 			},
@@ -83,7 +83,7 @@ function handleUnskipAction(
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(Commands.music.options.unskip.strings.noSongCollectionToUnskip, interaction.locale),
-						color: configuration.interactions.responses.colors.yellow,
+						color: configuration.messages.colors.yellow,
 					}],
 				},
 			},
@@ -101,7 +101,7 @@ function handleUnskipAction(
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(Commands.music.options.unskip.strings.cannotUnskipDueToFullQueue, interaction.locale),
-						color: configuration.interactions.responses.colors.red,
+						color: configuration.messages.colors.red,
 					}],
 				},
 			},
@@ -119,7 +119,7 @@ function handleUnskipAction(
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(Commands.music.strings.tooManySkipArguments, interaction.locale),
-						color: configuration.interactions.responses.colors.red,
+						color: configuration.messages.colors.red,
 					}],
 				},
 			},
@@ -137,7 +137,7 @@ function handleUnskipAction(
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(Commands.music.strings.mustBeGreaterThanZero, interaction.locale),
-						color: configuration.interactions.responses.colors.red,
+						color: configuration.messages.colors.red,
 					}],
 				},
 			},
@@ -208,7 +208,7 @@ function handleUnskipAction(
 				embeds: [{
 					title: `⏮️ ${unskippedString}`,
 					description: localise(Commands.music.options.unskip.strings.unskipped.body, defaultLanguage),
-					color: configuration.interactions.responses.colors.invisible,
+					color: configuration.messages.colors.invisible,
 				}],
 			},
 		},

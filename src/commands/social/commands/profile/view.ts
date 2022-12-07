@@ -49,7 +49,7 @@ async function handleDisplayProfile(
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(Commands.profile.options.view.strings.failed, interaction.locale),
-						color: configuration.interactions.responses.colors.red,
+						color: configuration.messages.colors.red,
 					}],
 				},
 			},

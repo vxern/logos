@@ -40,7 +40,7 @@ async function handleClearTimeout(
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(Commands.timeout.strings.notTimedOut, interaction.locale),
-						color: configuration.interactions.responses.colors.yellow,
+						color: configuration.messages.colors.yellow,
 					}],
 				},
 			},
@@ -69,7 +69,7 @@ async function handleClearTimeout(
 					description: localise(Commands.timeout.strings.timeoutCleared, interaction.locale)(
 						diagnosticMentionUser(member.user!),
 					),
-					color: configuration.interactions.responses.colors.green,
+					color: configuration.messages.colors.green,
 				}],
 			},
 		},
@@ -81,7 +81,7 @@ async function handleClearTimeout(
 				{
 					author: guildAsAuthor(bot, guild),
 					description: localise(Commands.timeout.strings.timeoutClearedDirect, defaultLanguage),
-					color: configuration.interactions.responses.colors.green,
+					color: configuration.messages.colors.green,
 				},
 			],
 		});

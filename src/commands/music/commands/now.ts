@@ -42,7 +42,7 @@ function handleDisplayCurrentlyPlaying(
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(Commands.music.options.now.strings.noSongPlaying, interaction.locale),
-						color: configuration.interactions.responses.colors.yellow,
+						color: configuration.messages.colors.yellow,
 					}],
 				},
 			},
@@ -69,7 +69,7 @@ function handleDisplayCurrentlyPlaying(
 						flags: ApplicationCommandFlags.Ephemeral,
 						embeds: [{
 							description: localise(Commands.music.options.now.strings.noCollectionPlaying, interaction.locale),
-							color: configuration.interactions.responses.colors.yellow,
+							color: configuration.messages.colors.yellow,
 						}],
 					},
 				},
@@ -81,10 +81,10 @@ function handleDisplayCurrentlyPlaying(
 		const nowPlayingString = localise(Commands.music.options.now.strings.nowPlaying, interaction.locale);
 
 		return void paginate([client, bot], interaction, {
-			elements: chunk(collection.songs, configuration.music.maxima.songs.page),
+			elements: chunk(collection.songs, configuration.music.limits.songs.page),
 			embed: {
 				title: `⬇️ ${nowPlayingString}`,
-				color: configuration.interactions.responses.colors.blue,
+				color: configuration.messages.colors.blue,
 			},
 			view: {
 				title: localise(Commands.music.options.now.strings.songs, interaction.locale),

@@ -46,7 +46,7 @@ function handleReplayAction(
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(Commands.music.options.replay.strings.noSongToReplay, interaction.locale),
-						color: configuration.interactions.responses.colors.yellow,
+						color: configuration.messages.colors.yellow,
 					}],
 				},
 			},
@@ -67,7 +67,7 @@ function handleReplayAction(
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(Commands.music.options.replay.strings.noSongCollectionToReplay, interaction.locale),
-						color: configuration.interactions.responses.colors.yellow,
+						color: configuration.messages.colors.yellow,
 					}],
 				},
 			},

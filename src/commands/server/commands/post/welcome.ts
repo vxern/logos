@@ -51,7 +51,7 @@ function handlePostWelcomeMessage(
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
 					description: localise(Commands.post.options.welcome.strings.posted, interaction.locale),
-					color: configuration.interactions.responses.colors.blue,
+					color: configuration.messages.colors.blue,
 				}],
 			},
 		},

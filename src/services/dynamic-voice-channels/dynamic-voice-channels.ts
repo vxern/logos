@@ -59,7 +59,7 @@ function onConnect(
 	if (freeChannels !== 0) return;
 
 	// If the channel limit has already been reached, do not process.
-	if (voiceChannelStatesTuples.length >= configuration.guilds.dynamicVoiceChannels.maximum) return;
+	if (voiceChannelStatesTuples.length >= configuration.services.dynamicVoiceChannels.limit) return;
 
 	const anchor = voiceChannelStatesTuples.at(0)![0];
 

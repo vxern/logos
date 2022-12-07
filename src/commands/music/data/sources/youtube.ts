@@ -79,7 +79,7 @@ async function search(client: Client, interaction: Interaction, query: string): 
 				embeds: [{
 					title: 'Select a song / song collection',
 					description: 'Select a song or song collection from the choices below.',
-					color: configuration.interactions.responses.colors.blue,
+					color: configuration.messages.colors.blue,
 				}],
 				components: [{
 					type: MessageComponentTypes.ActionRow,

@@ -39,7 +39,7 @@ function handleStopPlayback(
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(Commands.music.options.stop.strings.notPlayingMusic, interaction.locale),
-						color: configuration.interactions.responses.colors.yellow,
+						color: configuration.messages.colors.yellow,
 					}],
 				},
 			},
@@ -60,7 +60,7 @@ function handleStopPlayback(
 				embeds: [{
 					title: `⏹️ ${stoppedString}`,
 					description: localise(Commands.music.options.stop.strings.stopped.body, defaultLanguage),
-					color: configuration.interactions.responses.colors.blue,
+					color: configuration.messages.colors.blue,
 				}],
 			},
 		},

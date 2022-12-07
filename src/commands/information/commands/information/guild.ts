@@ -53,7 +53,7 @@ function handleDisplayGuildInformation(
 				embeds: [{
 					thumbnail: guildAsThumbnail(bot, guild),
 					title: localise(Commands.information.options.guild.strings.informationAbout, interaction.locale)(guild.name),
-					color: configuration.interactions.responses.colors.invisible,
+					color: configuration.messages.colors.invisible,
 					fields: [
 						{
 							name: `🖋️ ${descriptionString}`,
@@ -85,7 +85,7 @@ function handleDisplayGuildInformation(
 							: {
 								name: `⚖️ ${moderatorsString}`,
 								value: localise(Commands.information.options.guild.strings.overseenByModerators, interaction.locale)(
-									configuration.guilds.moderation.moderator.toLowerCase(),
+									configuration.permissions.moderatorRoleName.toLowerCase(),
 								),
 								inline: false,
 							},

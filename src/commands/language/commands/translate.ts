@@ -147,7 +147,7 @@ async function handleTranslateText(
 							Commands.translate.strings.targetLanguageMustBeDifferentFromSource,
 							interaction.locale,
 						),
-						color: configuration.interactions.responses.colors.yellow,
+						color: configuration.messages.colors.yellow,
 					}],
 				},
 			},
@@ -166,7 +166,7 @@ async function handleTranslateText(
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(Commands.translate.strings.textCannotBeEmpty, interaction.locale),
-						color: configuration.interactions.responses.colors.yellow,
+						color: configuration.messages.colors.yellow,
 					}],
 				},
 			},
@@ -192,7 +192,7 @@ async function handleTranslateText(
 									: localise(Commands.translate.strings.invalid.source, interaction.locale)
 							)
 							: localise(Commands.translate.strings.invalid.target, interaction.locale),
-						color: configuration.interactions.responses.colors.red,
+						color: configuration.messages.colors.red,
 					}],
 				},
 			},
@@ -222,7 +222,7 @@ async function handleTranslateText(
 			{
 				embeds: [{
 					description: localise(Commands.translate.strings.failed, interaction.locale),
-					color: configuration.interactions.responses.colors.red,
+					color: configuration.messages.colors.red,
 				}],
 			},
 		);
@@ -241,7 +241,7 @@ async function handleTranslateText(
 	let embeds: Embed[] = [];
 	if (!isLong) {
 		embeds = [{
-			color: configuration.interactions.responses.colors.blue,
+			color: configuration.messages.colors.blue,
 			fields: [{
 				name: localise(Commands.translate.strings.sourceText, interaction.locale),
 				value: text,
@@ -255,11 +255,11 @@ async function handleTranslateText(
 		}];
 	} else {
 		embeds = [{
-			color: configuration.interactions.responses.colors.blue,
+			color: configuration.messages.colors.blue,
 			title: localise(Commands.translate.strings.sourceText, interaction.locale),
 			description: text,
 		}, {
-			color: configuration.interactions.responses.colors.blue,
+			color: configuration.messages.colors.blue,
 			title: localise(Commands.translate.strings.translation, interaction.locale),
 			description: translatedText,
 			footer: { text: `${sourceLanguageName} ➜ ${targetLanguageName}` },

@@ -52,7 +52,7 @@ async function handlePraiseUser(
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(Commands.praise.strings.cannotPraiseSelf, interaction.locale),
-						color: configuration.interactions.responses.colors.yellow,
+						color: configuration.messages.colors.yellow,
 					}],
 				},
 			},
@@ -77,10 +77,10 @@ async function handlePraiseUser(
 	const praiseTimestamps = praisesByAuthor
 		.map((document) => document.ts)
 		.toSorted((a, b) => b - a); // From most recent to least recent.
-	const timestampSlice = praiseTimestamps.slice(0, configuration.guilds.praises.maximum);
-	const canPraise = timestampSlice.length < configuration.guilds.praises.maximum ||
+	const timestampSlice = praiseTimestamps.slice(0, configuration.commands.praise.limit);
+	const canPraise = timestampSlice.length < configuration.commands.praise.limit ||
 		timestampSlice.some(
-			(timestamp) => (Date.now() - timestamp) >= configuration.guilds.praises.interval,
+			(timestamp) => (Date.now() - timestamp) >= configuration.commands.praise.within,
 		);
 	if (!canPraise) {
 		return void editOriginalInteractionResponse(
@@ -89,7 +89,7 @@ async function handlePraiseUser(
 			{
 				embeds: [{
 					description: localise(Commands.praise.strings.waitBeforePraising, interaction.locale),
-					color: configuration.interactions.responses.colors.yellow,
+					color: configuration.messages.colors.yellow,
 				}],
 			},
 		);
@@ -119,7 +119,7 @@ async function handlePraiseUser(
 				{
 					author: guildAsAuthor(bot, guild),
 					description: `${praisedString} 🥳`,
-					color: configuration.interactions.responses.colors.green,
+					color: configuration.messages.colors.green,
 				},
 			],
 		});
@@ -133,7 +133,7 @@ async function handlePraiseUser(
 				description: localise(Commands.praise.strings.praised, interaction.locale)(
 					mention(member.id, MentionTypes.User),
 				),
-				color: configuration.interactions.responses.colors.green,
+				color: configuration.messages.colors.green,
 			}],
 		},
 	);
@@ -146,7 +146,7 @@ function showError(bot: Bot, interaction: Interaction): void {
 		{
 			embeds: [{
 				description: localise(Commands.praise.strings.failed, interaction.locale),
-				color: configuration.interactions.responses.colors.red,
+				color: configuration.messages.colors.red,
 			}],
 		},
 	);

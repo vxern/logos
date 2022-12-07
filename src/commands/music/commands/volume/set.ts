@@ -17,7 +17,7 @@ function handleSetVolume(
 	const [{ volume }] = parseArguments(interaction.data?.options, { volume: 'number' });
 	if (volume === undefined || isNaN(volume)) return;
 
-	if (volume < 0 || volume > configuration.music.maxima.volume) {
+	if (volume < 0 || volume > configuration.music.limits.volume) {
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -27,9 +27,9 @@ function handleSetVolume(
 				data: {
 					embeds: [{
 						description: localise(Commands.music.options.volume.options.set.strings.invalidVolume, interaction.locale)(
-							configuration.music.maxima.volume,
+							configuration.music.limits.volume,
 						),
-						color: configuration.interactions.responses.colors.red,
+						color: configuration.messages.colors.red,
 					}],
 				},
 			},
@@ -52,7 +52,7 @@ function handleSetVolume(
 					description: localise(Commands.music.options.volume.options.set.strings.volumeSet.body, interaction.locale)(
 						volume,
 					),
-					color: configuration.interactions.responses.colors.invisible,
+					color: configuration.messages.colors.invisible,
 				}],
 			},
 		},

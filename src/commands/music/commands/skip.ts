@@ -57,7 +57,7 @@ function handleSkipAction(
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(Commands.music.options.skip.strings.noSongToSkip, interaction.locale),
-						color: configuration.interactions.responses.colors.yellow,
+						color: configuration.messages.colors.yellow,
 					}],
 				},
 			},
@@ -78,7 +78,7 @@ function handleSkipAction(
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(Commands.music.options.skip.strings.noSongCollectionToSkip, interaction.locale),
-						color: configuration.interactions.responses.colors.yellow,
+						color: configuration.messages.colors.yellow,
 					}],
 				},
 			},
@@ -96,7 +96,7 @@ function handleSkipAction(
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(Commands.music.strings.tooManySkipArguments, interaction.locale),
-						color: configuration.interactions.responses.colors.red,
+						color: configuration.messages.colors.red,
 					}],
 				},
 			},
@@ -114,7 +114,7 @@ function handleSkipAction(
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(Commands.music.strings.mustBeGreaterThanZero, interaction.locale),
-						color: configuration.interactions.responses.colors.red,
+						color: configuration.messages.colors.red,
 					}],
 				},
 			},
@@ -186,7 +186,7 @@ function handleSkipAction(
 				embeds: [{
 					title: `⏭️ ${messageString}`,
 					description: localise(messageLocalisations.body, defaultLocale),
-					color: configuration.interactions.responses.colors.invisible,
+					color: configuration.messages.colors.invisible,
 				}],
 			},
 		},
