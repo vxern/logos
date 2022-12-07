@@ -5,8 +5,6 @@ import {
 	ButtonStyles,
 	Channel,
 	ChannelTypes,
-	deleteMessage,
-	DiscordEmbedField,
 	editOriginalInteractionResponse,
 	Embed,
 	EventHandlers,
@@ -16,11 +14,9 @@ import {
 	InteractionDataOption,
 	InteractionResponseTypes,
 	InteractionTypes,
-	Member,
 	MessageComponents,
 	MessageComponentTypes,
 	sendInteractionResponse,
-	sendMessage,
 	User,
 } from 'discordeno';
 import * as Snowflake from 'snowflake';
@@ -254,71 +250,6 @@ function compileChecks(
 	];
 }
 
-/** Creates a verification prompt in the verifications channel. */
-function createVerificationPrompt(
-	[client, bot]: [Client, Bot],
-	guildId: bigint,
-	settings: { title: string; fields: DiscordEmbedField[] },
-): Promise<[boolean, Member] | undefined> {
-	const guild = client.cache.guilds.get(guildId);
-	if (guild === undefined) return new Promise(() => undefined);
-
-	const verificationChannel = guild.channels.array().find((channel) =>
-		channel.type === ChannelTypes.GuildText &&
-		channel.name?.toLowerCase().includes(configuration.guilds.channels.verification)
-	);
-	if (verificationChannel === undefined) return new Promise(() => undefined);
-
-	return new Promise((resolve) => {
-		const customId = createInteractionCollector([client, bot], {
-			type: InteractionTypes.MessageComponent,
-			doesNotExpire: true,
-			limit: 1,
-			onCollect: async (bot, interaction) => {
-				const verificationMessage = await verificationMessagePromise;
-
-				deleteMessage(
-					bot,
-					verificationMessage.channelId,
-					verificationMessage.id,
-				);
-
-				const customId = interaction.data?.customId;
-				if (customId === undefined) return;
-
-				const accepted = customId.split('|')[1]! === 'true';
-
-				resolve([accepted, interaction.member!]);
-			},
-		});
-
-		const verificationMessagePromise = sendMessage(
-			bot,
-			verificationChannel.id,
-			{
-				embeds: [{
-					title: settings.title,
-					fields: settings.fields,
-				}],
-				components: [{
-					type: MessageComponentTypes.ActionRow,
-					components: [{
-						type: MessageComponentTypes.Button,
-						label: 'Accept',
-						customId: `${customId}|true`,
-						style: ButtonStyles.Success,
-					}, {
-						type: MessageComponentTypes.Button,
-						label: 'Reject',
-						customId: `${customId}|false`,
-						style: ButtonStyles.Danger,
-					}],
-				}],
-			},
-		);
-	});
-}
-
 /**
  * Taking an array, splits it into parts of equal sizes.
  *
@@ -491,7 +422,6 @@ export {
 	addParametersToURL,
 	chunk,
 	createInteractionCollector,
-	createVerificationPrompt,
 	diagnosticMentionUser,
 	fromHex,
 	getGuildIconURLFormatted,
