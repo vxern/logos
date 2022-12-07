@@ -27,7 +27,7 @@ import * as Snowflake from 'snowflake';
 import { localise, Misc } from 'logos/assets/localisations/mod.ts';
 import { addCollector, Client } from 'logos/src/client.ts';
 import configuration from 'logos/configuration.ts';
-import { code, mention, MentionTypes } from 'logos/formatting.ts';
+import { code } from 'logos/formatting.ts';
 
 /**
  * Parses a 6-digit hex value prefixed with a hashtag to a number.
@@ -463,13 +463,6 @@ function parseArguments<
 	return [args as R, focused];
 }
 
-function getChannelMention(guild: Guild, name: string): string {
-	const channel = getTextChannel(guild, name);
-	if (channel === undefined) return name;
-
-	return mention(channel.id, MentionTypes.Channel);
-}
-
 /**
  * Taking a URL and a list of parameters, returns the URL with the parameters appended
  * to it.
@@ -501,7 +494,6 @@ export {
 	createVerificationPrompt,
 	diagnosticMentionUser,
 	fromHex,
-	getChannelMention,
 	getGuildIconURLFormatted,
 	getTextChannel,
 	guildAsAuthor,
