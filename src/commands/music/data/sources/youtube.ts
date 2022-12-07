@@ -11,7 +11,8 @@ import { Playlist, Video, YouTube } from 'youtube_sr';
 import { ListingResolver } from 'logos/src/commands/music/data/sources/sources.ts';
 import { SongListing, SongListingContentTypes } from 'logos/src/commands/music/data/types.ts';
 import { Client } from 'logos/src/client.ts';
-import { createInteractionCollector, trim } from 'logos/src/utils.ts';
+import { createInteractionCollector } from 'logos/src/interactions.ts';
+import { trim } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 
 const urlExpression = new RegExp(

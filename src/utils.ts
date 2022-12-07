@@ -7,7 +7,6 @@ import {
 	ChannelTypes,
 	editOriginalInteractionResponse,
 	Embed,
-	EventHandlers,
 	getGuildIconURL,
 	Guild,
 	Interaction,
@@ -19,10 +18,9 @@ import {
 	sendInteractionResponse,
 	User,
 } from 'discordeno';
-import * as Snowflake from 'snowflake';
 import { localise, Misc } from 'logos/assets/localisations/mod.ts';
-import { addCollector, Client } from 'logos/src/client.ts';
-import configuration from 'logos/configuration.ts';
+import { Client } from 'logos/src/client.ts';
+import { createInteractionCollector } from 'logos/src/interactions.ts';
 import { code } from 'logos/formatting.ts';
 
 /**
@@ -44,10 +42,7 @@ function fromHex(color: string): number {
  * @param name - The name of the channel to find.
  * @returns The found channel.
  */
-function getTextChannel(
-	guild: Guild,
-	name: string,
-): Channel | undefined {
+function getTextChannel(guild: Guild, name: string): Channel | undefined {
 	const nameAsLowercase = name.toLowerCase();
 
 	const textChannels = guild.channels.array().filter((channel) => channel.type === ChannelTypes.GuildText);
@@ -76,12 +71,7 @@ function diagnosticMentionUser(user: User, doNotFormat?: boolean): string {
 function paginate<T>(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
-	{
-		elements,
-		embed,
-		view,
-		show,
-	}: {
+	{ elements, embed, view, show }: {
 		elements: T[];
 		embed: Omit<Embed, 'footer'>;
 		view: PaginationDisplayData<T>;
@@ -190,64 +180,6 @@ function generateButtons(customId: string, isFirst: boolean, isLast: boolean): M
 		type: MessageComponentTypes.ActionRow,
 		components: buttons,
 	}];
-}
-
-/** Settings for interaction collection. */
-interface InteractionCollectorSettings {
-	/** The type of interaction to listen for. */
-	type: InteractionTypes;
-
-	/**
-	 * The accepted respondent to the collector. If unset, any user will be able
-	 * to respond.
-	 */
-	userId?: bigint;
-
-	/** The ID of the interaction to listen for. */
-	customId?: string;
-
-	/** Whether this collector is to last forever or not. */
-	doesNotExpire?: boolean;
-
-	/** How many interactions to collect before de-initialising. */
-	limit?: number;
-
-	onCollect?: (...args: Parameters<EventHandlers['interactionCreate']>) => void;
-	onEnd?: () => void;
-}
-
-/**
- * Taking a {@link Client} and {@link InteractionCollectorSettings}, creates an
- * interaction collector.
- */
-function createInteractionCollector(
-	clientWithBot: [Client, Bot],
-	settings: InteractionCollectorSettings,
-): string {
-	const customId = settings.customId ?? Snowflake.generate();
-
-	addCollector(clientWithBot, 'interactionCreate', {
-		filter: (_bot, interaction) => compileChecks(interaction, settings, customId).every((condition) => condition),
-		limit: settings.limit,
-		removeAfter: settings.doesNotExpire ? undefined : configuration.collectors.expiresIn,
-		onCollect: settings.onCollect ?? (() => {}),
-		onEnd: settings.onEnd ?? (() => {}),
-	});
-
-	return customId;
-}
-
-function compileChecks(
-	interaction: Interaction,
-	settings: InteractionCollectorSettings,
-	customId: string,
-): boolean[] {
-	return [
-		interaction.type === settings.type,
-		interaction.data !== undefined && interaction.data.customId !== undefined &&
-		interaction.data.customId.split('|').at(0)! === customId.split('|').at(0)!,
-		settings.userId === undefined ? true : interaction.user.id === settings.userId,
-	];
 }
 
 /**
@@ -421,7 +353,6 @@ function addParametersToURL(
 export {
 	addParametersToURL,
 	chunk,
-	createInteractionCollector,
 	diagnosticMentionUser,
 	fromHex,
 	getGuildIconURLFormatted,

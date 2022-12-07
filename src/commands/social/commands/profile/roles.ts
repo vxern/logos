@@ -21,7 +21,8 @@ import roles from 'logos/src/commands/social/data/roles.ts';
 import { Role, RoleCategory, RoleCategoryTypes } from 'logos/src/commands/social/data/types.ts';
 import { getRelevantCategories, resolveRoles } from 'logos/src/commands/social/module.ts';
 import { Client } from 'logos/src/client.ts';
-import { createInteractionCollector, trim } from 'logos/src/utils.ts';
+import { createInteractionCollector } from 'logos/src/interactions.ts';
+import { trim } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import { defaultLocale, Language } from 'logos/types.ts';
 

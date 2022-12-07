@@ -14,7 +14,8 @@ import { Commands, createLocalisations, localise } from 'logos/assets/localisati
 import { SentencePair } from 'logos/src/commands/language/data/types.ts';
 import { CommandBuilder } from 'logos/src/commands/command.ts';
 import { Client } from 'logos/src/client.ts';
-import { createInteractionCollector, random } from 'logos/src/utils.ts';
+import { createInteractionCollector } from 'logos/src/interactions.ts';
+import { random } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 
 const command: CommandBuilder = {
