@@ -14,6 +14,7 @@ import { Client } from 'logos/src/client.ts';
 import { fromHex, getTextChannel } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import { mention, MentionTypes } from 'logos/formatting.ts';
+import { staticComponentIds } from 'logos/constants.ts';
 import { defaultLanguage } from 'logos/types.ts';
 
 function handlePostWelcomeMessage(
@@ -37,7 +38,7 @@ function handlePostWelcomeMessage(
 				type: MessageComponentTypes.Button,
 				style: ButtonStyles.Secondary,
 				label: localise(Commands.post.options.welcome.strings.acceptedRules, defaultLanguage),
-				customId: 'ACCEPTED_RULES',
+				customId: staticComponentIds.acceptedRules,
 				emoji: { name: '✅' },
 			}],
 		}],

@@ -97,7 +97,7 @@ const generators: Required<MessageGenerators<GuildEvents>> = {
 		color: configuration.messages.colors.red,
 	},
 	entryRequestAccept: {
-		title: '✔️ Entry granted',
+		title: '✅ Entry granted',
 		message: (client, member) => {
 			const user = client.cache.users.get(member.id);
 			if (user === undefined) return;
