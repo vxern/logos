@@ -20,6 +20,11 @@ const timeDescriptors: [string, number][] = [
 	['year', Periods.year],
 ];
 
+const staticComponentIds = {
+	acceptedRules: 'accepted_rules',
+	selectedLanguageProficiency: 'selected_language_proficiency',
+};
+
 const links = {
 	typescriptWebsite: 'https://www.typescriptlang.org/',
 	denoWebsite: 'https://deno.land/',
@@ -47,4 +52,4 @@ const deepLApiEndpoints = {
 	translate: `${deepLApiBaseLink}/translate`,
 };
 
-export { deepLApiEndpoints, emojis, links, Periods, timeDescriptors };
+export { deepLApiEndpoints, emojis, links, Periods, staticComponentIds, timeDescriptors };
