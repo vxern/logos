@@ -10,8 +10,6 @@ import {
 	sendMessage,
 } from 'discordeno';
 import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
-import { getOrCreateUser } from 'logos/src/database/functions/users.ts';
-import { deleteWarning, getWarnings } from 'logos/src/database/functions/warnings.ts';
 import { getActiveWarnings } from 'logos/src/commands/moderation/module.ts';
 import { CommandBuilder } from 'logos/src/commands/command.ts';
 import { user } from 'logos/src/commands/parameters.ts';
@@ -47,13 +45,18 @@ async function handlePardonUser(
 	const member = resolveInteractionToMember([client, bot], interaction, user);
 	if (member === undefined) return;
 
-	const subject = await getOrCreateUser(client, 'id', member.id.toString());
+	const subject = await client.database.adapters.users.getOrFetchOrCreate(
+		client,
+		'id',
+		member.id.toString(),
+		member.id,
+	);
 	if (subject === undefined) return displayErrorOrEmptyChoices(bot, interaction);
 
-	const warnings = await getWarnings(client, subject.ref);
+	const warnings = await client.database.adapters.warnings.getOrFetch(client, 'recipient', subject.ref);
 	if (warnings === undefined) return displayErrorOrEmptyChoices(bot, interaction);
 
-	const relevantWarnings = getActiveWarnings(warnings).toReversed();
+	const relevantWarnings = Array.from(getActiveWarnings(warnings).values()).toReversed();
 
 	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete) {
 		return void sendInteractionResponse(
@@ -72,16 +75,12 @@ async function handlePardonUser(
 		);
 	}
 
-	const warningToRemove = relevantWarnings.find((relevantWarning) => relevantWarning.ref.value.id === warning);
-	if (warningToRemove === undefined) {
-		return displayError(
-			bot,
-			interaction,
-			localise(Commands.pardon.strings.alreadyRemoved, interaction.locale),
-		);
+	const warningToDelete = relevantWarnings.find((relevantWarning) => relevantWarning.ref.value.id === warning);
+	if (warningToDelete === undefined) {
+		return displayError(bot, interaction, localise(Commands.pardon.strings.alreadyRemoved, interaction.locale));
 	}
 
-	const deletedWarning = await deleteWarning(client, warningToRemove);
+	const deletedWarning = await client.database.adapters.warnings.delete(client, warningToDelete);
 	if (deletedWarning === undefined) {
 		return displayError(
 			bot,

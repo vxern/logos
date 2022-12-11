@@ -6,10 +6,8 @@ import {
 	sendInteractionResponse,
 } from 'discordeno';
 import { Commands, localise } from 'logos/assets/localisations/mod.ts';
-import { getOrCreateUser } from 'logos/src/database/functions/users.ts';
-import { getWarnings } from 'logos/src/database/functions/warnings.ts';
-import { Warning } from 'logos/src/database/structs/users/warning.ts';
-import { Document } from 'logos/src/database/structs/document.ts';
+import { Warning } from 'logos/src/database/structs/mod.ts';
+import { Document } from 'logos/src/database/document.ts';
 import { Client, resolveInteractionToMember } from 'logos/src/client.ts';
 import { chunk, paginate, parseArguments, trim } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
@@ -25,13 +23,18 @@ async function handleDisplayWarnings(
 	const member = resolveInteractionToMember([client, bot], interaction, user);
 	if (member === undefined) return;
 
-	const subject = await getOrCreateUser(client, 'id', member.id.toString());
-	if (subject === undefined) return displayUnableToDisplayWarningsError(bot, interaction);
+	const recipient = await client.database.adapters.users.getOrFetchOrCreate(
+		client,
+		'id',
+		member.id.toString(),
+		member.id,
+	);
+	if (recipient === undefined) return displayUnableToDisplayWarningsError(bot, interaction);
 
-	const warnings = await getWarnings(client, subject.ref);
+	const warnings = await client.database.adapters.warnings.getOrFetch(client, 'recipient', recipient.ref);
 	if (warnings === undefined) return displayUnableToDisplayWarningsError(bot, interaction);
 
-	const pages = chunk(warnings, configuration.resultsPerPage);
+	const pages = chunk(Array.from(warnings.values()), configuration.resultsPerPage);
 
 	return paginate([client, bot], interaction, {
 		elements: pages,

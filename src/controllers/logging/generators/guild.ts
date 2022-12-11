@@ -1,8 +1,5 @@
 import { Member, User } from 'discordeno';
-import { ArticleChange } from 'logos/src/database/structs/articles/article-change.ts';
-import { Article } from 'logos/src/database/structs/articles/article.ts';
-import { Praise } from 'logos/src/database/structs/users/praise.ts';
-import { Warning } from 'logos/src/database/structs/users/warning.ts';
+import { Article, ArticleChange, Praise, Warning } from 'logos/src/database/structs/mod.ts';
 import { MessageGenerators } from 'logos/src/controllers/logging/generators/generators.ts';
 import { diagnosticMentionUser, trim } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';

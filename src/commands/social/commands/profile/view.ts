@@ -10,9 +10,6 @@ import {
 import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
 import { OptionBuilder } from 'logos/src/commands/command.ts';
 import { show, user } from 'logos/src/commands/parameters.ts';
-import { getPraises } from 'logos/src/database/functions/praises.ts';
-import { getOrCreateUser } from 'logos/src/database/functions/users.ts';
-import { getWarnings } from 'logos/src/database/functions/warnings.ts';
 import { Client, resolveInteractionToMember } from 'logos/src/client.ts';
 import { parseArguments } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
@@ -56,16 +53,20 @@ async function handleDisplayProfile(
 		);
 	}
 
-	const subject = await getOrCreateUser(client, 'id', member.id.toString());
+	const subject = await client.database.adapters.users.getOrFetchOrCreate(
+		client,
+		'id',
+		member.id.toString(),
+		member.id,
+	);
 	if (subject === undefined) return showProfileViewFailure();
 
-	const [praisesReceived, praisesSent, warningsReceived] = await Promise.all([
-		getPraises(client, 'subject', subject.ref),
-		getPraises(client, 'author', subject.ref),
-		getWarnings(client, subject.ref),
+	const [praisesSent, praisesReceived, warningsReceived] = await Promise.all([
+		client.database.adapters.praises.getOrFetch(client, 'sender', subject.ref),
+		client.database.adapters.praises.getOrFetch(client, 'recipient', subject.ref),
+		client.database.adapters.warnings.getOrFetch(client, 'recipient', subject.ref),
 	]);
-
-	if (praisesReceived === undefined || praisesSent === undefined || warningsReceived === undefined) {
+	if (praisesSent === undefined || praisesReceived === undefined || warningsReceived === undefined) {
 		return showProfileViewFailure();
 	}
 
@@ -105,9 +106,8 @@ async function handleDisplayProfile(
 						inline: false,
 					}, {
 						name: `🧮 ${statisticsString}`,
-						value:
-							`🙏 ${praisesString} — ${receivedString} ${praisesReceived.length} • ${sentString} ${praisesSent.length}
-😖 ${warningsString} — ${receivedString} ${warningsReceived.length}`,
+						value: `🙏 ${praisesString} — ${receivedString} ${praisesReceived.size} • ${sentString} ${praisesSent.size}
+😖 ${warningsString} — ${receivedString} ${warningsReceived.size}`,
 						inline: false,
 					}],
 				}],

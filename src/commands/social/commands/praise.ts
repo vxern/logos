@@ -13,9 +13,7 @@ import { Commands, createLocalisations, localise } from 'logos/assets/localisati
 import { CommandBuilder } from 'logos/src/commands/command.ts';
 import { user } from 'logos/src/commands/parameters.ts';
 import { log } from 'logos/src/controllers/logging/logging.ts';
-import { Praise } from 'logos/src/database/structs/users/praise.ts';
-import { createPraise, getPraises } from 'logos/src/database/functions/praises.ts';
-import { getOrCreateUser } from 'logos/src/database/functions/users.ts';
+import { Praise } from 'logos/src/database/structs/mod.ts';
 import { Client, resolveInteractionToMember } from 'logos/src/client.ts';
 import { guildAsAuthor, parseArguments } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
@@ -65,16 +63,21 @@ async function handlePraiseUser(
 	});
 
 	const [author, subject] = await Promise.all([
-		getOrCreateUser(client, 'id', interaction.user.id.toString()),
-		getOrCreateUser(client, 'id', member.id.toString()),
+		client.database.adapters.users.getOrFetchOrCreate(
+			client,
+			'id',
+			interaction.user.id.toString(),
+			interaction.user.id,
+		),
+		client.database.adapters.users.getOrFetchOrCreate(client, 'id', member.id.toString(), member.id),
 	]);
 
 	if (author === undefined || subject === undefined) return showError(bot, interaction);
 
-	const praisesByAuthor = await getPraises(client, 'author', author.ref);
-	if (praisesByAuthor === undefined) return showError(bot, interaction);
+	const praisesBySender = await client.database.adapters.praises.getOrFetch(client, 'sender', author.ref);
+	if (praisesBySender === undefined) return showError(bot, interaction);
 
-	const praiseTimestamps = praisesByAuthor
+	const praiseTimestamps = Array.from(praisesBySender.values())
 		.map((document) => document.ts)
 		.toSorted((a, b) => b - a); // From most recent to least recent.
 	const timestampSlice = praiseTimestamps.slice(0, configuration.commands.praise.limit);
@@ -95,13 +98,13 @@ async function handlePraiseUser(
 		);
 	}
 
-	const praise: Praise = { author: author.ref, subject: subject.ref, comment: comment };
+	const praise: Praise = { sender: author.ref, recipient: subject.ref, comment: comment };
 
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (guild === undefined) return;
 
 	const [document, dmChannel] = await Promise.all([
-		createPraise(client, praise),
+		client.database.adapters.praises.create(client, praise),
 		getDmChannel(bot, member.id).catch(() => undefined),
 	]);
 
