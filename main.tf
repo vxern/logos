@@ -37,20 +37,20 @@ resource "fauna_collection" "warnings" {
   name = "Warnings"
 }
 
-resource "fauna_index" "get_article_changes_by_article_reference" {
-  depends_on = [fauna_collection.article_changes]
-
-  name   = "GetArticleChangesByArticleReference"
-  source = "ArticleChanges"
-  terms { field = ["data", "article"] }
-}
-
 resource "fauna_index" "get_article_changes_by_author" {
-  depends_on = [fauna_collection.article_changes, fauna_index.get_article_changes_by_article_reference]
+  depends_on = [fauna_collection.article_changes]
 
   name   = "GetArticleChangesByAuthor"
   source = "ArticleChanges"
   terms { field = ["data", "author"] }
+}
+
+resource "fauna_index" "get_article_changes_by_article" {
+  depends_on = [fauna_collection.article_changes, fauna_index.get_article_changes_by_author]
+
+  name   = "GetArticleChangesByArticle"
+  source = "ArticleChanges"
+  terms { field = ["data", "article"] }
 }
 
 resource "fauna_index" "get_articles_by_author" {
@@ -69,29 +69,20 @@ resource "fauna_index" "get_articles_by_language" {
   terms { field = ["data", "language"] }
 }
 
-resource "fauna_index" "get_articles_by_language_and_dialect" {
-  depends_on = [fauna_collection.articles, fauna_index.get_articles_by_language]
-
-  name   = "GetArticlesByLanguageAndDialect"
-  source = "Articles"
-  terms { field = ["data", "language"] }
-  terms { field = ["data", "dialect"] }
-}
-
-resource "fauna_index" "get_praises_by_author" {
+resource "fauna_index" "get_praises_by_sender" {
   depends_on = [fauna_collection.praises]
 
-  name   = "GetPraisesByAuthor"
+  name   = "GetPraisesBySender"
   source = "Praises"
-  terms { field = ["data", "author"] }
+  terms { field = ["data", "sender"] }
 }
 
-resource "fauna_index" "get_praises_by_subject" {
-  depends_on = [fauna_collection.praises, fauna_index.get_praises_by_author]
+resource "fauna_index" "get_praises_by_recipient" {
+  depends_on = [fauna_collection.praises, fauna_index.get_praises_by_sender]
 
-  name   = "GetPraisesBySubject"
+  name   = "GetPraisesByRecipient"
   source = "Praises"
-  terms { field = ["data", "subject"] }
+  terms { field = ["data", "recipient"] }
 }
 
 resource "fauna_index" "get_user_by_id" {
@@ -104,12 +95,12 @@ resource "fauna_index" "get_user_by_id" {
   serialized = true
 }
 
-resource "fauna_index" "get_warnings_by_subject" {
+resource "fauna_index" "get_warnings_by_recipient" {
   depends_on = [fauna_collection.warnings]
 
-  name   = "GetWarningsBySubject"
+  name   = "GetWarningsByRecipient"
   source = "Warnings"
-  terms { field = ["data", "subject"] }
+  terms { field = ["data", "recipient"] }
 }
 
 resource "fauna_function" "update_article" {
