@@ -1,5 +1,6 @@
-import { assert, assertEquals, assertThrows } from 'std/testing/asserts.ts';
-import { addParametersToURL, chunk, fromHex, random, snowflakeToTimestamp, trim } from 'logos/src/utils.ts';
+import { assertEquals, assertThrows } from 'std/testing/asserts.ts';
+import { addParametersToURL, chunk, fromHex, snowflakeToTimestamp } from 'logos/src/utils.ts';
+import { trim } from 'logos/formatting.ts';
 
 Deno.test('utils', async (test) => {
 	await test.step('fromHex', async (test) => {
@@ -77,23 +78,6 @@ Deno.test('utils', async (test) => {
 				const result = trim('This is a sample sentence.', 15);
 				assertEquals(result, 'This is a (...)');
 			});
-		});
-	});
-
-	await test.step('random', async (test) => {
-		await test.step('zero', () => {
-			const result = random(0);
-			assertEquals(result, 0);
-		});
-
-		await test.step('one', () => {
-			const results = Array.from(Array(500), () => random(1));
-			assert(() => results.every((number) => number === 0));
-		});
-
-		await test.step('two', () => {
-			const results = Array.from(Array(500), () => random(2));
-			assert(() => !results.some((number) => number === 2));
 		});
 	});
 

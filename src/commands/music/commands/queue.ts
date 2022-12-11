@@ -4,7 +4,7 @@ import { displayListings } from 'logos/src/commands/music/module.ts';
 import { OptionBuilder } from 'logos/src/commands/command.ts';
 import { show } from 'logos/src/commands/parameters.ts';
 import { Client } from 'logos/src/client.ts';
-import { parseArguments } from 'logos/src/utils.ts';
+import { parseArguments } from 'logos/src/interactions.ts';
 
 const command: OptionBuilder = {
 	...createLocalisations(Commands.music.options.queue),

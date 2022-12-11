@@ -2,6 +2,7 @@ import {
 	ApplicationCommandFlags,
 	Bot,
 	ButtonStyles,
+	Guild,
 	Interaction,
 	InteractionResponseTypes,
 	MessageComponentTypes,
@@ -10,8 +11,9 @@ import {
 } from 'discordeno';
 import { Commands, localise } from 'logos/assets/localisations/mod.ts';
 import { Client } from 'logos/src/client.ts';
-import { fromHex, getChannelMention } from 'logos/src/utils.ts';
+import { fromHex, getTextChannel } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
+import { mention, MentionTypes } from 'logos/formatting.ts';
 import { defaultLanguage } from 'logos/types.ts';
 
 function handlePostWelcomeMessage(
@@ -56,6 +58,13 @@ function handlePostWelcomeMessage(
 			},
 		},
 	);
+}
+
+function getChannelMention(guild: Guild, name: string): string {
+	const channel = getTextChannel(guild, name);
+	if (channel === undefined) return name;
+
+	return mention(channel.id, MentionTypes.Channel);
 }
 
 export { handlePostWelcomeMessage };

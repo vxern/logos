@@ -12,7 +12,8 @@ import {
 import { Commands, localise, Misc } from 'logos/assets/localisations/mod.ts';
 import { log } from 'logos/src/controllers/logging/logging.ts';
 import { Client, resolveInteractionToMember } from 'logos/src/client.ts';
-import { guildAsAuthor, parseArguments } from 'logos/src/utils.ts';
+import { parseArguments } from 'logos/src/interactions.ts';
+import { guildAsAuthor } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import { Periods, timeDescriptors } from 'logos/constants.ts';
 import { displayTime, mention, MentionTypes } from 'logos/formatting.ts';

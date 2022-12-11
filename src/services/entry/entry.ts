@@ -3,7 +3,7 @@ import { onAcceptRules } from 'logos/src/services/entry/stages/accept-rules.ts';
 import { onSelectLanguageProficiency } from 'logos/src/services/entry/stages/select-language-proficiency.ts';
 import { ServiceStarter } from 'logos/src/services/services.ts';
 import { Client } from 'logos/src/client.ts';
-import { createInteractionCollector } from 'logos/src/utils.ts';
+import { createInteractionCollector } from 'logos/src/interactions.ts';
 
 const entrySteps = [
 	'ACCEPTED_RULES',

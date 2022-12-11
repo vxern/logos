@@ -9,7 +9,7 @@ import { Commands, createLocalisations, Information, localise } from 'logos/asse
 import { CommandBuilder } from 'logos/src/commands/command.ts';
 import { show } from 'logos/src/commands/parameters.ts';
 import { Client } from 'logos/src/client.ts';
-import { parseArguments } from 'logos/src/utils.ts';
+import { parseArguments } from 'logos/src/interactions.ts';
 import configuration from 'logos/configuration.ts';
 import { BulletStyles, list, mention, MentionTypes } from 'logos/formatting.ts';
 

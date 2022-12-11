@@ -2,7 +2,8 @@ import { Bot, Interaction } from 'discordeno';
 import { Commands, localise } from 'logos/assets/localisations/mod.ts';
 import { SongListing } from 'logos/src/commands/music/data/types.ts';
 import { Client } from 'logos/src/client.ts';
-import { chunk, paginate } from 'logos/src/utils.ts';
+import { paginate } from 'logos/src/interactions.ts';
+import { chunk } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import { list } from 'logos/formatting.ts';
 

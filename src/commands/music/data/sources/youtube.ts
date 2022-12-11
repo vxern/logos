@@ -11,8 +11,9 @@ import { Playlist, Video, YouTube } from 'youtube_sr';
 import { ListingResolver } from 'logos/src/commands/music/data/sources/sources.ts';
 import { SongListing, SongListingContentTypes } from 'logos/src/commands/music/data/types.ts';
 import { Client } from 'logos/src/client.ts';
-import { createInteractionCollector, trim } from 'logos/src/utils.ts';
+import { createInteractionCollector } from 'logos/src/interactions.ts';
 import configuration from 'logos/configuration.ts';
+import { trim } from 'logos/formatting.ts';
 
 const urlExpression = new RegExp(
 	/^(?:https?:)?(?:\/\/)?(?:youtu\.be\/|(?:www\.|m\.)?youtube\.com\/(?:watch|v|embed)(?:\.php)?(?:\?.*v=|\/))([a-zA-Z0-9\_-]{7,15})(?:[\?&][a-zA-Z0-9\_-]+=[a-zA-Z0-9\_-]+)*$/,

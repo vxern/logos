@@ -11,7 +11,7 @@ import { SongListingContentTypes } from 'logos/src/commands/music/data/types.ts'
 import { OptionBuilder } from 'logos/src/commands/command.ts';
 import { by, collection, to } from 'logos/src/commands/parameters.ts';
 import { Client } from 'logos/src/client.ts';
-import { parseArguments } from 'logos/src/utils.ts';
+import { parseArguments } from 'logos/src/interactions.ts';
 import configuration from 'logos/configuration.ts';
 import { defaultLanguage } from 'logos/types.ts';
 

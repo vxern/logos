@@ -9,9 +9,10 @@ import { Commands, localise } from 'logos/assets/localisations/mod.ts';
 import { Warning } from 'logos/src/database/structs/mod.ts';
 import { Document } from 'logos/src/database/document.ts';
 import { Client, resolveInteractionToMember } from 'logos/src/client.ts';
-import { chunk, paginate, parseArguments, trim } from 'logos/src/utils.ts';
+import { paginate, parseArguments } from 'logos/src/interactions.ts';
+import { chunk } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
-import { displayTime, list } from 'logos/formatting.ts';
+import { displayTime, list, trim } from 'logos/formatting.ts';
 
 async function handleDisplayWarnings(
 	[client, bot]: [Client, Bot],

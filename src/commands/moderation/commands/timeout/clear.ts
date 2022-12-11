@@ -11,7 +11,8 @@ import {
 import { Commands, localise } from 'logos/assets/localisations/mod.ts';
 import { log } from 'logos/src/controllers/logging/logging.ts';
 import { Client, resolveInteractionToMember } from 'logos/src/client.ts';
-import { diagnosticMentionUser, guildAsAuthor, parseArguments } from 'logos/src/utils.ts';
+import { parseArguments } from 'logos/src/interactions.ts';
+import { diagnosticMentionUser, guildAsAuthor } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import { defaultLanguage } from 'logos/types.ts';
 

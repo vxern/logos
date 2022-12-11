@@ -11,7 +11,8 @@ import { Commands, createLocalisations, localise } from 'logos/assets/localisati
 import { CommandBuilder } from 'logos/src/commands/command.ts';
 import { log } from 'logos/src/controllers/logging/logging.ts';
 import { Client } from 'logos/src/client.ts';
-import { getTextChannel, parseArguments } from 'logos/src/utils.ts';
+import { parseArguments } from 'logos/src/interactions.ts';
+import { getTextChannel } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import { mention, MentionTypes } from 'logos/formatting.ts';
 import { defaultLanguage } from 'logos/types.ts';

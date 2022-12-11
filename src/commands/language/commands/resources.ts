@@ -11,7 +11,7 @@ import { Commands, createLocalisations, localise } from 'logos/assets/localisati
 import { CommandBuilder } from 'logos/src/commands/command.ts';
 import { show } from 'logos/src/commands/parameters.ts';
 import { Client } from 'logos/src/client.ts';
-import { parseArguments } from 'logos/src/utils.ts';
+import { parseArguments } from 'logos/src/interactions.ts';
 import { links } from 'logos/constants.ts';
 import { defaultLanguage } from 'logos/types.ts';
 

@@ -14,7 +14,7 @@ import { Commands, createLocalisations, localise } from 'logos/assets/localisati
 import { SentencePair } from 'logos/src/commands/language/data/types.ts';
 import { CommandBuilder } from 'logos/src/commands/command.ts';
 import { Client } from 'logos/src/client.ts';
-import { createInteractionCollector, random } from 'logos/src/utils.ts';
+import { createInteractionCollector } from 'logos/src/interactions.ts';
 import configuration from 'logos/configuration.ts';
 
 const command: CommandBuilder = {
@@ -199,6 +199,16 @@ function createSentenceSelection(
 		word: word,
 		choices: shuffled,
 	};
+}
+
+/**
+ * Generates a pseudo-random number.
+ *
+ * @param max - The maximum value to generate.
+ * @returns A pseudo-random number between 0 and {@link max}.
+ */
+function random(max: number): number {
+	return Math.floor(Math.random() * max);
 }
 
 export default command;
