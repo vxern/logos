@@ -1,12 +1,12 @@
-import { Warning } from 'logos/src/database/structs/users/warning.ts';
-import { Document } from 'logos/src/database/structs/document.ts';
+import { Warning } from 'logos/src/database/structs/mod.ts';
+import { Document } from 'logos/src/database/document.ts';
 import configuration from 'logos/configuration.ts';
 
-function getActiveWarnings(
-	warnings: Document<Warning>[],
-): Document<Warning>[] {
-	return warnings.filter(
-		(warning) => (Date.now() - warning.ts) < configuration.commands.warn.within,
+function getActiveWarnings(warnings: Map<string, Document<Warning>>): Map<string, Document<Warning>> {
+	return new Map(
+		Array.from(warnings.entries()).filter(
+			([_referenceId, warning]) => (Date.now() - warning.ts) < configuration.commands.warn.within,
+		),
 	);
 }
 

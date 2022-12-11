@@ -1,4 +1,4 @@
-import { Reference } from 'logos/src/database/structs/document.ts';
+import { Reference } from 'logos/src/database/document.ts';
 
 /** Represents a warning given to a user. */
 interface Warning {
@@ -6,7 +6,7 @@ interface Warning {
 	author: Reference;
 
 	/** The document reference to the user that this warning was given to. */
-	subject: Reference;
+	recipient: Reference;
 
 	/** The reason for this warning. */
 	reason: string;

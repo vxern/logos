@@ -14,8 +14,6 @@ import { CommandBuilder } from 'logos/src/commands/command.ts';
 import { reason, user } from 'logos/src/commands/parameters.ts';
 import { getActiveWarnings } from 'logos/src/commands/moderation/module.ts';
 import { log } from 'logos/src/controllers/logging/logging.ts';
-import { getOrCreateUser } from 'logos/src/database/functions/users.ts';
-import { createWarning, getWarnings } from 'logos/src/database/functions/warnings.ts';
 import { Client, resolveInteractionToMember } from 'logos/src/client.ts';
 import { guildAsAuthor, parseArguments } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
@@ -84,16 +82,21 @@ async function handleWarnUser(
 
 	if (reason!.length === 0) return displayError(bot, interaction);
 
-	const [subject, author] = await Promise.all([
-		getOrCreateUser(client, 'id', member.id.toString()),
-		getOrCreateUser(client, 'id', interaction.user.id.toString()),
+	const [author, recipient] = await Promise.all([
+		client.database.adapters.users.getOrFetchOrCreate(
+			client,
+			'id',
+			interaction.user.id.toString(),
+			interaction.user.id,
+		),
+		client.database.adapters.users.getOrFetchOrCreate(client, 'id', member.id.toString(), member.id),
 	]);
 
-	if (subject === undefined || author === undefined) return displayError(bot, interaction);
+	if (author === undefined || recipient === undefined) return displayError(bot, interaction);
 
 	const [warnings, document, dmChannel] = await Promise.all([
-		getWarnings(client, subject.ref),
-		createWarning(client, { author: author.ref, subject: subject.ref, reason: reason! }),
+		client.database.adapters.warnings.getOrFetch(client, 'recipient', recipient.ref),
+		client.database.adapters.warnings.create(client, { author: author.ref, recipient: recipient.ref, reason: reason! }),
 		getDmChannel(bot, member.id).catch(() => undefined),
 	]);
 
@@ -112,15 +115,15 @@ async function handleWarnUser(
 			embeds: [{
 				description: localise(Commands.warn.strings.warned, interaction.locale)(
 					mention(member.id, MentionTypes.User),
-					relevantWarnings.length,
+					relevantWarnings.size,
 				),
 				color: configuration.messages.colors.blue,
 			}],
 		},
 	});
 
-	const reachedKickStage = relevantWarnings.length >= configuration.commands.warn.limit + 1;
-	const reachedBanStage = relevantWarnings.length >= configuration.commands.warn.limit + 2;
+	const reachedKickStage = relevantWarnings.size >= configuration.commands.warn.limit + 1;
+	const reachedBanStage = relevantWarnings.size >= configuration.commands.warn.limit + 2;
 
 	if (dmChannel !== undefined) {
 		sendMessage(bot, dmChannel.id, {
@@ -143,7 +146,7 @@ async function handleWarnUser(
 							: {
 								description: localise(Commands.warn.strings.warnedDirect, defaultLanguage)(
 									reason!,
-									relevantWarnings.length,
+									relevantWarnings.size,
 									configuration.commands.warn.limit,
 								),
 								color: configuration.messages.colors.yellow,
@@ -160,7 +163,7 @@ async function handleWarnUser(
 			interaction.guildId!,
 			member.id,
 			{
-				reason: `Banned due to having received too many warnings (${relevantWarnings.length}).`,
+				reason: `Banned due to having received too many warnings (${relevantWarnings.size}).`,
 			},
 		);
 	}
@@ -170,7 +173,7 @@ async function handleWarnUser(
 			bot,
 			interaction.guildId!,
 			member.id,
-			`Kicked due to having received too many warnings (${relevantWarnings.length}).`,
+			`Kicked due to having received too many warnings (${relevantWarnings.size}).`,
 		);
 	}
 }
