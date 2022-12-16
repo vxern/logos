@@ -17,7 +17,7 @@ import { guildAsAuthor } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import { Periods, timeDescriptors } from 'logos/constants.ts';
 import { displayTime, mention, MentionTypes } from 'logos/formatting.ts';
-import { defaultLanguage } from 'logos/types.ts';
+import { defaultLocale } from 'logos/types.ts';
 
 async function handleSetTimeout(
 	[client, bot]: [Client, Bot],
@@ -142,7 +142,7 @@ async function handleSetTimeout(
 		embeds: [
 			{
 				author: guildAsAuthor(bot, guild),
-				description: localise(Commands.timeout.strings.timedOutDirect, defaultLanguage)(displayTime(until), reason),
+				description: localise(Commands.timeout.strings.timedOutDirect, defaultLocale)(displayTime(until), reason),
 				color: configuration.messages.colors.yellow,
 			},
 		],

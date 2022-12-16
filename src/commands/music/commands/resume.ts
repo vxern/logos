@@ -10,7 +10,7 @@ import { Commands, createLocalisations, localise } from 'logos/assets/localisati
 import { OptionBuilder } from 'logos/src/commands/command.ts';
 import { Client } from 'logos/src/client.ts';
 import configuration from 'logos/configuration.ts';
-import { defaultLanguage } from 'logos/types.ts';
+import { defaultLocale } from 'logos/types.ts';
 
 const command: OptionBuilder = {
 	...createLocalisations(Commands.music.options.resume),
@@ -66,7 +66,7 @@ function handleResumePlayback(
 
 	musicController.resume();
 
-	const resumedString = localise(Commands.music.options.resume.strings.resumed.header, defaultLanguage);
+	const resumedString = localise(Commands.music.options.resume.strings.resumed.header, defaultLocale);
 
 	return void sendInteractionResponse(
 		bot,
@@ -77,7 +77,7 @@ function handleResumePlayback(
 			data: {
 				embeds: [{
 					title: `▶️ ${resumedString}`,
-					description: localise(Commands.music.options.resume.strings.resumed.body, defaultLanguage),
+					description: localise(Commands.music.options.resume.strings.resumed.body, defaultLocale),
 					color: configuration.messages.colors.invisible,
 				}],
 			},

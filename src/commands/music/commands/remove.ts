@@ -23,7 +23,7 @@ import { createInteractionCollector } from 'logos/src/interactions.ts';
 import { chunk } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import { mention, MentionTypes, trim } from 'logos/formatting.ts';
-import { defaultLanguage } from 'logos/types.ts';
+import { defaultLocale } from 'logos/types.ts';
 
 const command: OptionBuilder = {
 	...createLocalisations(Commands.music.options.remove),
@@ -150,7 +150,7 @@ function generateEmbed(
 					);
 				}
 
-				const removedString = localise(Commands.music.options.remove.strings.removed.header, defaultLanguage);
+				const removedString = localise(Commands.music.options.remove.strings.removed.header, defaultLocale);
 
 				return void sendInteractionResponse(
 					bot,
@@ -161,7 +161,7 @@ function generateEmbed(
 						data: {
 							embeds: [{
 								title: `❌ ${removedString}`,
-								description: localise(Commands.music.options.remove.strings.removed.body, defaultLanguage)(
+								description: localise(Commands.music.options.remove.strings.removed.body, defaultLocale)(
 									songListing.content.title,
 									mention(selection.user.id, MentionTypes.User),
 								),

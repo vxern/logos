@@ -9,7 +9,7 @@ import { Commands, localise } from 'logos/assets/localisations/mod.ts';
 import { Client } from 'logos/src/client.ts';
 import { parseArguments } from 'logos/src/interactions.ts';
 import configuration from 'logos/configuration.ts';
-import { defaultLanguage } from 'logos/types.ts';
+import { defaultLocale } from 'logos/types.ts';
 
 function handleDisplayVolume(
 	[client, bot]: [Client, Bot],
@@ -20,7 +20,7 @@ function handleDisplayVolume(
 
 	const [{ show }] = parseArguments(interaction.data?.options, { show: 'boolean' });
 
-	const volumeString = localise(Commands.music.options.volume.options.display.strings.volume.header, defaultLanguage);
+	const volumeString = localise(Commands.music.options.volume.options.display.strings.volume.header, defaultLocale);
 
 	return void sendInteractionResponse(
 		bot,
@@ -32,7 +32,7 @@ function handleDisplayVolume(
 				flags: !show ? ApplicationCommandFlags.Ephemeral : undefined,
 				embeds: [{
 					title: `🔊 ${volumeString}`,
-					description: localise(Commands.music.options.volume.options.display.strings.volume.body, defaultLanguage)(
+					description: localise(Commands.music.options.volume.options.display.strings.volume.body, defaultLocale)(
 						musicController.volume,
 					),
 					color: configuration.messages.colors.invisible,

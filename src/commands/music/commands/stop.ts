@@ -10,7 +10,7 @@ import { Commands, createLocalisations, localise } from 'logos/assets/localisati
 import { OptionBuilder } from 'logos/src/commands/command.ts';
 import { Client } from 'logos/src/client.ts';
 import configuration from 'logos/configuration.ts';
-import { defaultLanguage } from 'logos/types.ts';
+import { defaultLocale } from 'logos/types.ts';
 
 const command: OptionBuilder = {
 	...createLocalisations(Commands.music.options.stop),
@@ -48,7 +48,7 @@ function handleStopPlayback(
 
 	musicController.reset();
 
-	const stoppedString = localise(Commands.music.options.stop.strings.stopped.header, defaultLanguage);
+	const stoppedString = localise(Commands.music.options.stop.strings.stopped.header, defaultLocale);
 
 	return void sendInteractionResponse(
 		bot,
@@ -59,7 +59,7 @@ function handleStopPlayback(
 			data: {
 				embeds: [{
 					title: `⏹️ ${stoppedString}`,
-					description: localise(Commands.music.options.stop.strings.stopped.body, defaultLanguage),
+					description: localise(Commands.music.options.stop.strings.stopped.body, defaultLocale),
 					color: configuration.messages.colors.blue,
 				}],
 			},
