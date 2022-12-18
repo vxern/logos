@@ -19,7 +19,7 @@ import { parseArguments } from 'logos/src/interactions.ts';
 import { guildAsAuthor } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import { displayTime, mention, MentionTypes } from 'logos/formatting.ts';
-import { defaultLanguage } from 'logos/types.ts';
+import { defaultLocale } from 'logos/types.ts';
 
 const command: CommandBuilder = {
 	...createLocalisations(Commands.pardon),
@@ -120,7 +120,7 @@ async function handlePardonUser(
 			embeds: [
 				{
 					author: guildAsAuthor(bot, guild),
-					description: localise(Commands.pardon.strings.pardonedDirect, defaultLanguage)(
+					description: localise(Commands.pardon.strings.pardonedDirect, defaultLocale)(
 						deletedWarning.data.reason,
 						displayTime(deletedWarning.ts),
 					),

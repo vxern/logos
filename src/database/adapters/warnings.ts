@@ -50,7 +50,7 @@ const adapter: DatabaseAdapters['warnings'] = {
 		const documents = await dispatchQuery<Warning[]>(
 			client,
 			$.Map(
-				$.Paginate($.Match(index, parameterValue as Fauna.ExprVal)),
+				$.Paginate($.Match(index, parameterValue as Fauna.ExprArg)),
 				$.Lambda('warning', $.Get($.Var('warning'))),
 			),
 		);

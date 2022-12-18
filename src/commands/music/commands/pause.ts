@@ -11,7 +11,7 @@ import { handleResumePlayback } from 'logos/src/commands/music/commands/resume.t
 import { OptionBuilder } from 'logos/src/commands/command.ts';
 import { Client } from 'logos/src/client.ts';
 import configuration from 'logos/configuration.ts';
-import { defaultLanguage } from 'logos/types.ts';
+import { defaultLocale } from 'logos/types.ts';
 
 const command: OptionBuilder = {
 	...createLocalisations(Commands.music.options.pause),
@@ -53,7 +53,7 @@ function handlePausePlayback(
 
 	musicController.pause();
 
-	const pausedString = localise(Commands.music.options.pause.strings.paused.header, defaultLanguage);
+	const pausedString = localise(Commands.music.options.pause.strings.paused.header, defaultLocale);
 
 	return void sendInteractionResponse(
 		bot,
@@ -64,7 +64,7 @@ function handlePausePlayback(
 			data: {
 				embeds: [{
 					title: `⏸️ ${pausedString}`,
-					description: localise(Commands.music.options.pause.strings.paused.body, defaultLanguage),
+					description: localise(Commands.music.options.pause.strings.paused.body, defaultLocale),
 					color: configuration.messages.colors.invisible,
 				}],
 			},

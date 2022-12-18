@@ -6,6 +6,7 @@ import {
 	Channel,
 	createBot,
 	createTransformers,
+	DiscordMessage,
 	editShardStatus,
 	EventHandlers,
 	fetchMembers,
@@ -101,15 +102,17 @@ function createClient(metadata: Client['metadata'], features: Client['features']
 	};
 }
 
-function initialiseClient(metadata: Client['metadata'], features: Client['features']): [Client, Bot] {
+async function initialiseClient(metadata: Client['metadata'], features: Client['features']): Promise<[Client, Bot]> {
 	const client = createClient(metadata, features);
 
-	const bot = createBot({
+	await prefetchDataFromDatabase(client, client.database);
+
+	const bot = overrideEventHandlers(createBot({
 		token: Deno.env.get('DISCORD_SECRET')!,
-		intents: Intents.Guilds | Intents.GuildMembers | Intents.GuildVoiceStates,
+		intents: Intents.Guilds | Intents.GuildMembers | Intents.GuildVoiceStates | Intents.GuildMessages,
 		events: createEventHandlers(client),
 		transformers: withCaching(client, createTransformers({})),
-	});
+	}));
 
 	startServices([client, bot]);
 	startBot(bot);
@@ -117,11 +120,28 @@ function initialiseClient(metadata: Client['metadata'], features: Client['featur
 	return [client, bot];
 }
 
+async function prefetchDataFromDatabase(client: Client, database: Database): Promise<void> {
+	await Promise.all([
+		database.adapters.entryRequests.prefetch(client),
+	]);
+}
+
 function createLogger(): Logger {
 	return new Logger({
 		minLogLevel: Deno.env.get('ENVIRONMENT') === 'development' ? 'debug' : 'info',
 		levelIndicator: 'full',
 	});
+}
+
+function overrideEventHandlers(bot: Bot): Bot {
+	bot.handlers.MESSAGE_UPDATE = (bot, data) => {
+		const messageData = data.d as DiscordMessage;
+		if (!('author' in messageData)) return;
+
+		bot.events.messageUpdate(bot, bot.transformers.message(bot, messageData));
+	};
+
+	return bot;
 }
 
 function createEventHandlers(client: Client): Partial<EventHandlers> {
@@ -135,13 +155,14 @@ function createEventHandlers(client: Client): Partial<EventHandlers> {
 				}],
 				status: 'online',
 			}),
-		guildCreate: (bot, guild) => {
-			fetchMembers(bot, guild.id, { limit: 0, query: '' });
-
+		guildCreate: async (bot, guild) => {
 			upsertGuildApplicationCommands(bot, guild.id, commands);
 
 			registerGuild(client, guild);
+
 			setupLogging([client, bot], guild);
+
+			await fetchMembers(bot, guild.id, { limit: 0, query: '' });
 		},
 		channelDelete: (_bot, channel) => {
 			client.cache.channels.delete(channel.id);

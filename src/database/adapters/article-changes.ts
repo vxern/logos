@@ -1,6 +1,5 @@
 import * as Fauna from 'fauna';
 import { ArticleChange } from 'logos/src/database/structs/mod.ts';
-import { Document } from 'logos/src/database/document.ts';
 import {
 	CacheAdapter,
 	DatabaseAdapters,
@@ -8,6 +7,7 @@ import {
 	setNested,
 	stringifyValue,
 } from 'logos/src/database/database.ts';
+import { Document } from 'logos/src/database/document.ts';
 import { ArticleChangeIndexes, articleChangeIndexParameterToIndex } from 'logos/src/database/indexes.ts';
 
 const $ = Fauna.query;
@@ -31,20 +31,10 @@ const cache: CacheAdapter<ArticleChange, ArticleChangeIndexes<Map<string, Docume
 		const articleChangeReferenceId = stringifyValue(articleChange.ref);
 
 		if (parameter === 'author') {
-			return setNested(
-				client.database.cache.articleChangesByAuthor,
-				value,
-				articleChangeReferenceId,
-				articleChange,
-			);
+			return setNested(client.database.cache.articleChangesByAuthor, value, articleChangeReferenceId, articleChange);
 		}
 
-		return setNested(
-			client.database.cache.articleChangesByArticle,
-			value,
-			articleChangeReferenceId,
-			articleChange,
-		);
+		return setNested(client.database.cache.articleChangesByArticle, value, articleChangeReferenceId, articleChange);
 	},
 	setAll: (client, parameter, value, articleChanges) => {
 		if (articleChanges.length === 0) {
@@ -70,7 +60,7 @@ const adapter: DatabaseAdapters['articleChanges'] = {
 		const documents = await dispatchQuery<ArticleChange[]>(
 			client,
 			$.Map(
-				$.Paginate($.Match($.FaunaIndex(index), parameterValue as Fauna.ExprVal)),
+				$.Paginate($.Match($.FaunaIndex(index), parameterValue as Fauna.ExprArg)),
 				$.Lambda('articleChange', $.Get($.Var('articleChange'))),
 			),
 		);

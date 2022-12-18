@@ -14,7 +14,8 @@ import { Client } from 'logos/src/client.ts';
 import { fromHex, getTextChannel } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import { mention, MentionTypes } from 'logos/formatting.ts';
-import { defaultLanguage } from 'logos/types.ts';
+import { staticComponentIds } from 'logos/constants.ts';
+import { defaultLocale } from 'logos/types.ts';
 
 function handlePostWelcomeMessage(
 	[client, bot]: [Client, Bot],
@@ -25,8 +26,8 @@ function handlePostWelcomeMessage(
 
 	sendMessage(bot, interaction.channelId!, {
 		embeds: [{
-			title: localise(Commands.post.options.welcome.strings.welcome.header, defaultLanguage)(guild.name),
-			description: localise(Commands.post.options.welcome.strings.welcome.body, defaultLanguage)(
+			title: localise(Commands.post.options.welcome.strings.welcome.header, defaultLocale)(guild.name),
+			description: localise(Commands.post.options.welcome.strings.welcome.body, defaultLocale)(
 				getChannelMention(guild, 'rules'),
 			),
 			color: fromHex('#f28123'),
@@ -36,8 +37,8 @@ function handlePostWelcomeMessage(
 			components: [{
 				type: MessageComponentTypes.Button,
 				style: ButtonStyles.Secondary,
-				label: localise(Commands.post.options.welcome.strings.acceptedRules, defaultLanguage),
-				customId: 'ACCEPTED_RULES',
+				label: localise(Commands.post.options.welcome.strings.acceptedRules, defaultLocale),
+				customId: staticComponentIds.acceptedRules,
 				emoji: { name: '✅' },
 			}],
 		}],

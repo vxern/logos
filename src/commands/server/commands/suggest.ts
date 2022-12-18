@@ -15,7 +15,7 @@ import { parseArguments } from 'logos/src/interactions.ts';
 import { getTextChannel } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import { mention, MentionTypes } from 'logos/formatting.ts';
-import { defaultLanguage } from 'logos/types.ts';
+import { defaultLocale } from 'logos/types.ts';
 
 const command: CommandBuilder = {
 	...createLocalisations(Commands.suggest),
@@ -41,12 +41,12 @@ function handleMakeSuggestion(
 	const [{ suggestion }] = parseArguments(interaction.data?.options, {});
 	if (suggestion === undefined) return;
 
-	const suggestionReceived = localise(Commands.suggest.strings.suggestionReceived.header, defaultLanguage);
+	const suggestionReceived = localise(Commands.suggest.strings.suggestionReceived.header, defaultLocale);
 
 	sendMessage(bot, conferenceChannel.id, {
 		embeds: [{
 			title: `🌿 ${suggestionReceived}`,
-			description: localise(Commands.suggest.strings.suggestionReceived.body, defaultLanguage)(
+			description: localise(Commands.suggest.strings.suggestionReceived.body, defaultLocale)(
 				mention(interaction.user.id, MentionTypes.User),
 				suggestion,
 			),

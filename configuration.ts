@@ -4,9 +4,6 @@ import { Periods } from 'logos/constants.ts';
 
 const configuration = {
 	permissions: {
-		developerIds: [
-			217319536485990400n, // vxern
-		],
 		moderatorRoleName: 'Guide',
 	},
 	collectors: {
@@ -74,6 +71,9 @@ const configuration = {
 			minimumRequiredAge: 2 * Periods.day,
 			verification: {
 				disabledOn: [] as string[],
+				proportionVotesToAccept: 0.2,
+				proportionVotesToReject: 0.5,
+				defaultVotesRequired: 2,
 			},
 		},
 		dynamicVoiceChannels: {

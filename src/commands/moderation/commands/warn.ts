@@ -19,7 +19,7 @@ import { parseArguments } from 'logos/src/interactions.ts';
 import { guildAsAuthor } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import { mention, MentionTypes } from 'logos/formatting.ts';
-import { defaultLanguage } from 'logos/types.ts';
+import { defaultLocale } from 'logos/types.ts';
 
 const command: CommandBuilder = {
 	...createLocalisations(Commands.warn),
@@ -136,16 +136,16 @@ async function handleWarnUser(
 							? (
 								reachedBanStage
 									? {
-										description: localise(Commands.warn.strings.reachedBanStage, defaultLanguage)(reason!),
+										description: localise(Commands.warn.strings.reachedBanStage, defaultLocale)(reason!),
 										color: configuration.messages.colors.darkRed,
 									}
 									: {
-										description: localise(Commands.warn.strings.reachedKickStage, defaultLanguage)(reason!),
+										description: localise(Commands.warn.strings.reachedKickStage, defaultLocale)(reason!),
 										color: configuration.messages.colors.red,
 									}
 							)
 							: {
-								description: localise(Commands.warn.strings.warnedDirect, defaultLanguage)(
+								description: localise(Commands.warn.strings.warnedDirect, defaultLocale)(
 									reason!,
 									relevantWarnings.size,
 									configuration.commands.warn.limit,

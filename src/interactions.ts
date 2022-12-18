@@ -1,4 +1,5 @@
 import {
+	ActionRow,
 	ApplicationCommandFlags,
 	Bot,
 	ButtonComponent,
@@ -14,6 +15,7 @@ import {
 	MessageComponentTypes,
 	sendInteractionResponse,
 } from 'discordeno';
+import { lodash } from 'lodash';
 import * as Snowflake from 'snowflake';
 import { localise, Misc } from 'logos/assets/localisations/mod.ts';
 import { addCollector, Client } from 'logos/src/client.ts';
@@ -248,4 +250,92 @@ function generateButtons(customId: string, isFirst: boolean, isLast: boolean): M
 	}];
 }
 
-export { createInteractionCollector, paginate, parseArguments };
+type ComposerContent<T extends string> = Record<T, string | undefined>;
+type ComposerActionRow<T extends string> = {
+	type: MessageComponentTypes.ActionRow;
+	components: [ActionRow['components'][0] & { customId: T }];
+};
+
+type Modal<T extends string> = { title: string; fields: ComposerActionRow<T>[] };
+
+async function createModalComposer<T extends string>(
+	[client, bot]: [Client, Bot],
+	interaction: Interaction,
+	{ onSubmit, onInvalid, modal }: {
+		onSubmit: (submission: Interaction, data: ComposerContent<T>) => Promise<boolean>;
+		onInvalid: () => Promise<Interaction | undefined>;
+		modal: Modal<T>;
+	},
+): Promise<void> {
+	const fields = lodash.cloneDeep(modal.fields);
+
+	let anchor = interaction;
+	let content: ComposerContent<T> | undefined = undefined;
+
+	while (true) {
+		const isComplete = await new Promise<boolean>((resolve) => {
+			const modalId = createInteractionCollector([client, bot], {
+				type: InteractionTypes.ModalSubmit,
+				userId: interaction.user.id,
+				limit: 1,
+				onCollect: (_bot, submission) => {
+					content = parseComposerContent(submission);
+					if (content === undefined) return resolve(false);
+
+					return onSubmit(submission, content).then((isValid) => resolve(isValid));
+				},
+			});
+
+			if (content !== undefined) {
+				for (
+					const [value, index] of (Object.values(content) as (string | undefined)[])
+						.map<[string | undefined, number]>((v, i) => [v, i])
+				) {
+					const component = fields[index]!.components[0];
+					if ('value' in component) {
+						component.value = value;
+					}
+				}
+			}
+
+			sendInteractionResponse(bot, anchor.id, anchor.token, {
+				type: InteractionResponseTypes.Modal,
+				data: {
+					title: modal.title,
+					customId: modalId,
+					components: fields,
+				},
+			});
+		});
+
+		if (isComplete) return;
+
+		const newAnchor = await onInvalid();
+		if (newAnchor === undefined) return;
+
+		anchor = newAnchor;
+	}
+}
+
+function parseComposerContent<T extends string>(submission: Interaction): ComposerContent<T> | undefined {
+	const content: Partial<ComposerContent<T>> = {};
+
+	const fields = submission?.data?.components?.map((component) => component.components?.at(0));
+	if (fields === undefined) return;
+
+	for (const field of fields) {
+		const key = field!.customId as T;
+		const value = field!.value!;
+
+		if (value.length === 0) {
+			content[key] = undefined;
+		} else {
+			content[key] = value;
+		}
+	}
+
+	return content as ComposerContent<T>;
+}
+
+export { createInteractionCollector, createModalComposer, paginate, parseArguments };
+export type { InteractionCollectorSettings, Modal };
