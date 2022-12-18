@@ -23,6 +23,8 @@ const timeDescriptors: [string, number][] = [
 const staticComponentIds = {
 	acceptedRules: 'accepted_rules',
 	selectedLanguageProficiency: 'selected_language_proficiency',
+	requestedVerification: 'requested_verification',
+	verification: 'verification',
 };
 
 const links = {

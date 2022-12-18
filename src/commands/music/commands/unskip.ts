@@ -13,7 +13,7 @@ import { by, collection, to } from 'logos/src/commands/parameters.ts';
 import { Client } from 'logos/src/client.ts';
 import { parseArguments } from 'logos/src/interactions.ts';
 import configuration from 'logos/configuration.ts';
-import { defaultLanguage } from 'logos/types.ts';
+import { defaultLocale } from 'logos/types.ts';
 
 const command: OptionBuilder = {
 	...createLocalisations(Commands.music.options.unskip),
@@ -196,7 +196,7 @@ function handleUnskipAction(
 		}
 	}
 
-	const unskippedString = localise(Commands.music.options.unskip.strings.unskipped.header, defaultLanguage);
+	const unskippedString = localise(Commands.music.options.unskip.strings.unskipped.header, defaultLocale);
 
 	return void sendInteractionResponse(
 		bot,
@@ -207,7 +207,7 @@ function handleUnskipAction(
 			data: {
 				embeds: [{
 					title: `⏮️ ${unskippedString}`,
-					description: localise(Commands.music.options.unskip.strings.unskipped.body, defaultLanguage),
+					description: localise(Commands.music.options.unskip.strings.unskipped.body, defaultLocale),
 					color: configuration.messages.colors.invisible,
 				}],
 			},

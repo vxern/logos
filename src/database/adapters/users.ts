@@ -37,10 +37,10 @@ const adapter: DatabaseAdapters['users'] = {
 
 		let query: Fauna.Expr;
 		if (parameter === 'reference') {
-			query = $.Get(parameterValue as Fauna.values.Ref);
+			query = $.Get(parameterValue as Fauna.ExprArg);
 		} else {
 			const index = userIndexParameterToIndex[parameter as Exclude<typeof parameter, 'reference'>];
-			query = $.Get($.Match(index, parameterValue as Fauna.ExprVal));
+			query = $.Get($.Match(index, parameterValue as Fauna.ExprArg));
 		}
 
 		const document = await dispatchQuery<User>(client, query);
@@ -59,6 +59,11 @@ const adapter: DatabaseAdapters['users'] = {
 		client.log.debug(`Fetched user document for ${userMention}.`);
 
 		return cache.get(client, parameter, value);
+	},
+	getOrFetch: async (client, parameter, parameterValue) => {
+		const value = stringifyValue(parameterValue);
+
+		return cache.get(client, parameter, value) ?? await adapter.fetch(client, parameter, parameterValue);
 	},
 	getOrFetchOrCreate: async (client, parameter, parameterValue, id) => {
 		const value = stringifyValue(parameterValue);
@@ -85,6 +90,28 @@ const adapter: DatabaseAdapters['users'] = {
 		cache.set(client, 'id', id, document);
 
 		client.log.debug(`Created user document for ${userMention}.`);
+
+		return document;
+	},
+	update: async (client, user) => {
+		const document = await dispatchQuery<User>(client, $.Update(user.ref, { data: user.data }));
+
+		const idAsNumber = BigInt(user.data.account.id);
+		const user_ = client.cache.users.get(idAsNumber);
+		const userMention = mentionUser(user_, idAsNumber);
+
+		if (document === undefined) {
+			client.log.error(`Failed to create a user document in the database for ${userMention}.`);
+			return undefined;
+		}
+
+		const referenceId = stringifyValue(document.ref);
+		const id = user.data.account.id;
+
+		cache.set(client, 'reference', referenceId, document);
+		cache.set(client, 'id', id, document);
+
+		client.log.debug(`Updated user document for ${userMention}.`);
 
 		return document;
 	},

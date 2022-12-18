@@ -14,7 +14,7 @@ import { Client, resolveInteractionToMember } from 'logos/src/client.ts';
 import { parseArguments } from 'logos/src/interactions.ts';
 import { diagnosticMentionUser, guildAsAuthor } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
-import { defaultLanguage } from 'logos/types.ts';
+import { defaultLocale } from 'logos/types.ts';
 
 async function handleClearTimeout(
 	[client, bot]: [Client, Bot],
@@ -81,7 +81,7 @@ async function handleClearTimeout(
 			embeds: [
 				{
 					author: guildAsAuthor(bot, guild),
-					description: localise(Commands.timeout.strings.timeoutClearedDirect, defaultLanguage),
+					description: localise(Commands.timeout.strings.timeoutClearedDirect, defaultLocale),
 					color: configuration.messages.colors.green,
 				},
 			],
