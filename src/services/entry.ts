@@ -1,6 +1,9 @@
 import { Bot, Interaction, InteractionTypes } from 'discordeno';
-import { handleAcceptRules } from 'logos/src/services/entry/stages/accept-rules.ts';
-import { handleSelectLanguageProficiency } from 'logos/src/services/entry/stages/select-language-proficiency.ts';
+import {
+	handleAcceptRules,
+	handleRequestVerification,
+	handleSelectLanguageProficiency,
+} from 'logos/src/services/entry-stages/mod.ts';
 import { ServiceStarter } from 'logos/src/services/services.ts';
 import { Client } from 'logos/src/client.ts';
 import { createInteractionCollector } from 'logos/src/interactions.ts';
@@ -14,10 +17,13 @@ type EntryInteractionHandler = (
 
 const interactionHandlers: Record<string, EntryInteractionHandler> = {
 	[staticComponentIds.acceptedRules]: handleAcceptRules,
+	[staticComponentIds.requestedVerification]: handleRequestVerification,
 	[staticComponentIds.selectedLanguageProficiency]: handleSelectLanguageProficiency,
 };
 
-const service: ServiceStarter = ([client, bot]) => {
+const service: ServiceStarter = setupEntryProcess;
+
+function setupEntryProcess([client, bot]: [Client, Bot]): void {
 	for (const step of Object.keys(interactionHandlers)) {
 		createInteractionCollector([client, bot], {
 			type: InteractionTypes.MessageComponent,
@@ -34,6 +40,6 @@ const service: ServiceStarter = ([client, bot]) => {
 			},
 		});
 	}
-};
+}
 
 export default service;
