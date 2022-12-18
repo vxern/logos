@@ -66,7 +66,7 @@ class Modals {
 			aim: {
 				'English': 'How will you benefit from becoming a member?',
 				'Polish': 'Jaką korzyść przyniesie Tobie członkostwo?',
-				'Romanian': 'Ce folos ți va aduce apartenența?',
+				'Romanian': 'Ce folos îți va aduce apartenența?',
 			},
 			whereFound: {
 				'English': (guildName: string) => `Where did you find out about ${guildName}?`,

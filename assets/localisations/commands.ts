@@ -231,7 +231,7 @@ class Commands {
 		description: {
 			'English': 'Pick the correct word out of four to fit in the blank.',
 			'Polish': 'Wybierz słowo, które pasuje do luki w zdaniu.',
-			'Romanian': 'Alege cuvântul care se potrivește cu spațiul gol în propoziție.',
+			'Romanian': 'Alege cuvântul care se potrivește cu spațiul gol din propoziție.',
 		},
 		strings: {
 			sentence: {
@@ -269,17 +269,17 @@ class Commands {
 				'English': (language: Language) => {
 					const languageLocalised = localise(getLocalisationsForLanguage(language), getLocaleByLanguage('English'));
 
-					return `Resources for learning ${languageLocalised} are stored here`;
+					return `We store resources for learning ${languageLocalised} just here`;
 				},
 				'Polish': (language: Language) => {
 					const languageLocalised = Expressions.polish.cases.genitive.languages[language].toLowerCase();
 
-					return `Zasoby do nauki ${languageLocalised} są przechowywane tutaj`;
+					return `Przechowywujemy swoje zasoby do nauki ${languageLocalised} o tu`;
 				},
 				'Romanian': (language: Language) => {
 					const languageLocalised = Expressions.romanian.cases.genitive.indefinite.languages[language];
 
-					return `Resursele pentru învățatul limbii ${languageLocalised} sunt stocate aici`;
+					return `Stocăm resursele pentru învățatul limbii ${languageLocalised} chiar aici`;
 				},
 			},
 		},
@@ -743,40 +743,6 @@ class Commands {
 		},
 	});
 
-	static readonly rule = typedLocalisations({
-		name: {
-			'English': 'rule',
-			'Polish': 'reguła',
-			'Romanian': 'regulă',
-		},
-		description: {
-			'English': 'Cites a server rule.',
-			'Polish': 'Cytuje jedną z reguł serwera.',
-			'Romanian': 'Citează o regulă din regulament.',
-		},
-		options: {
-			rule: {
-				name: {
-					'English': 'rule',
-					'Polish': 'reguła',
-					'Romanian': 'regulă',
-				},
-				description: {
-					'English': 'The rule to cite.',
-					'Polish': 'Reguła, która ma być zacytowana.',
-					'Romanian': 'Regula care să fie citată.',
-				},
-			},
-		},
-		strings: {
-			invalidRule: {
-				'English': 'Invalid rule.',
-				'Polish': 'Nieprawidłowa reguła.',
-				'Romanian': 'Regulă invalidă.',
-			},
-		},
-	});
-
 	static readonly list = typedLocalisations({
 		name: {
 			'English': 'list',
@@ -817,6 +783,106 @@ class Commands {
 				'English': 'Warnings',
 				'Polish': 'Ostrzeżenia',
 				'Romanian': 'Avertizări',
+			},
+		},
+	});
+
+	static readonly pardon = typedLocalisations({
+		name: {
+			'English': 'pardon',
+			'Polish': 'ułaskaw',
+			'Romanian': 'grațiere',
+		},
+		description: {
+			'English': 'Removes the last given warning to a user.',
+			'Polish': 'Usuwa ostatnie ostrzeżenie dane użytkownikowi.',
+			'Romanian': 'Șterge ultimul avertisment acordat unui utilizator.',
+		},
+		options: {
+			warning: {
+				name: {
+					'English': 'warning',
+					'Polish': 'ostrzeżenie',
+					'Romanian': 'avertisment',
+				},
+				description: {
+					'English': 'The warning to remove.',
+					'Polish': 'Ostrzeżenie, które ma zostać usunięte.',
+					'Romanian': 'Avertismentul care să fie eliminat.',
+				},
+			},
+		},
+		strings: {
+			failed: {
+				'English': 'Failed to remove warning.',
+				'Polish': 'Nie udało się usunąć ostrzeżenia.',
+				'Romanian': 'Nu s-a putut elimina avertismentul.',
+			},
+			alreadyRemoved: {
+				'English': 'The selected warning has already been removed.',
+				'Polish': 'To ostrzeżenie już zostało usunięte.',
+				'Romanian': 'Avertismentul selectat a fost deja eliminat.',
+			},
+			pardoned: {
+				'English': (userMention: string, reason: string) =>
+					`User ${userMention} has been pardoned from their warning for: ${reason}`,
+				'Polish': (userMention: string, reason: string) =>
+					`Użytkownik ${userMention} został ułaskawiony z jego ostrzeżenia za: ${reason}`,
+				'Romanian': (userMention: string, reason: string) =>
+					`Utilizatorul ${userMention} a fost grațiat de avertismentul care i a fost acordat pentru: ${reason}`,
+			},
+			// Do not localise; this is a public feedback message.
+			pardonedDirect: {
+				'English': (reason: string, relativeTime: string) =>
+					`You have been pardoned from the warning given to you ${relativeTime}.\n\n` +
+					`This warning was given to you for: ${reason}`,
+			},
+		},
+	});
+
+	static readonly policy = typedLocalisations({
+		name: {
+			'English': 'policy',
+			'Polish': 'polityka',
+			'Romanian': 'politică',
+		},
+		description: {
+			'English': 'Displays the server moderation policy.',
+			'Polish': 'Wyświetla politykę moderowania serwera.',
+			'Romanian': 'Afișează politica de moderare a serverului.',
+		},
+	});
+
+	static readonly rule = typedLocalisations({
+		name: {
+			'English': 'rule',
+			'Polish': 'reguła',
+			'Romanian': 'regulă',
+		},
+		description: {
+			'English': 'Cites a server rule.',
+			'Polish': 'Cytuje jedną z reguł serwera.',
+			'Romanian': 'Citează o regulă din regulament.',
+		},
+		options: {
+			rule: {
+				name: {
+					'English': 'rule',
+					'Polish': 'reguła',
+					'Romanian': 'regulă',
+				},
+				description: {
+					'English': 'The rule to cite.',
+					'Polish': 'Reguła, która ma być zacytowana.',
+					'Romanian': 'Regula care să fie citată.',
+				},
+			},
+		},
+		strings: {
+			invalidRule: {
+				'English': 'Invalid rule.',
+				'Polish': 'Nieprawidłowa reguła.',
+				'Romanian': 'Regulă invalidă.',
 			},
 		},
 	});
@@ -924,59 +990,6 @@ class Commands {
 		},
 	});
 
-	static readonly pardon = typedLocalisations({
-		name: {
-			'English': 'pardon',
-			'Polish': 'ułaskaw',
-			'Romanian': 'grațiere',
-		},
-		description: {
-			'English': 'Removes the last given warning to a user.',
-			'Polish': 'Usuwa ostatnie ostrzeżenie dane użytkownikowi.',
-			'Romanian': 'Șterge ultimul avertisment acordat unui utilizator.',
-		},
-		options: {
-			warning: {
-				name: {
-					'English': 'warning',
-					'Polish': 'ostrzeżenie',
-					'Romanian': 'avertisment',
-				},
-				description: {
-					'English': 'The warning to remove.',
-					'Polish': 'Ostrzeżenie, które ma zostać usunięte.',
-					'Romanian': 'Avertismentul care să fie eliminat.',
-				},
-			},
-		},
-		strings: {
-			failed: {
-				'English': 'Failed to remove warning.',
-				'Polish': 'Nie udało się usunąć ostrzeżenia.',
-				'Romanian': 'Nu s-a putut elimina avertismentul.',
-			},
-			alreadyRemoved: {
-				'English': 'The selected warning has already been removed.',
-				'Polish': 'To ostrzeżenie już zostało usunięte.',
-				'Romanian': 'Avertismentul selectat a fost deja eliminat.',
-			},
-			pardoned: {
-				'English': (userMention: string, reason: string) =>
-					`User ${userMention} has been pardoned from their warning for: ${reason}`,
-				'Polish': (userMention: string, reason: string) =>
-					`Użytkownik ${userMention} został ułaskawiony z jego ostrzeżenia za: ${reason}`,
-				'Romanian': (userMention: string, reason: string) =>
-					`Utilizatorul ${userMention} a fost grațiat de avertismentul care i a fost acordat pentru: ${reason}`,
-			},
-			// Do not localise; this is a public feedback message.
-			pardonedDirect: {
-				'English': (reason: string, relativeTime: string) =>
-					`You have been pardoned from the warning given to you ${relativeTime}.\n\n` +
-					`This warning was given to you for: ${reason}`,
-			},
-		},
-	});
-
 	static readonly warn = typedLocalisations({
 		name: {
 			'English': 'warn',
@@ -1037,19 +1050,6 @@ class Commands {
 					`You have been warned for: ${reason}\n\n` +
 					`This is warning no. ${warningCount} of ${warningLimit}.`,
 			},
-		},
-	});
-
-	static readonly policy = typedLocalisations({
-		name: {
-			'English': 'policy',
-			'Polish': 'polityka',
-			'Romanian': 'politică',
-		},
-		description: {
-			'English': 'Displays the server moderation policy.',
-			'Polish': 'Wyświetla politykę moderowania serwera.',
-			'Romanian': 'Afișează politica de moderare a serverului.',
 		},
 	});
 
