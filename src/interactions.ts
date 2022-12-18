@@ -256,13 +256,15 @@ type ComposerActionRow<T extends string> = {
 	components: [ActionRow['components'][0] & { customId: T }];
 };
 
+type Modal<T extends string> = { title: string; fields: ComposerActionRow<T>[] };
+
 async function createModalComposer<T extends string>(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 	{ onSubmit, onInvalid, modal }: {
 		onSubmit: (submission: Interaction, data: ComposerContent<T>) => Promise<boolean>;
 		onInvalid: () => Promise<Interaction | undefined>;
-		modal: { title: string; fields: ComposerActionRow<T>[] };
+		modal: Modal<T>;
 	},
 ): Promise<void> {
 	const fields = lodash.cloneDeep(modal.fields);
@@ -336,3 +338,4 @@ function parseComposerContent<T extends string>(submission: Interaction): Compos
 }
 
 export { createInteractionCollector, createModalComposer, paginate, parseArguments };
+export type { InteractionCollectorSettings, Modal };
