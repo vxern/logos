@@ -60,7 +60,7 @@ const adapter: DatabaseAdapters['articles'] = {
 		const documents = await dispatchQuery<Article[]>(
 			client,
 			$.Map(
-				$.Paginate($.Match($.FaunaIndex(index), parameterValue as Fauna.ExprVal)),
+				$.Paginate($.Match($.FaunaIndex(index), parameterValue as Fauna.ExprArg)),
 				$.Lambda('article', $.Get($.Var('article'))),
 			),
 		);

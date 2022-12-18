@@ -1,16 +1,20 @@
+// deno-lint-ignore-file ban-types
 import { User as DiscordUser } from 'discordeno';
 import * as Sentry from 'sentry';
 import * as Fauna from 'fauna';
 import articles from 'logos/src/database/adapters/articles.ts';
 import articleChanges from 'logos/src/database/adapters/article-changes.ts';
+import entryRequests from 'logos/src/database/adapters/entry-requests.ts';
 import praises from 'logos/src/database/adapters/praises.ts';
 import users from 'logos/src/database/adapters/users.ts';
 import warnings from 'logos/src/database/adapters/warnings.ts';
-import { Article, ArticleChange, Praise, User, Warning } from 'logos/src/database/structs/mod.ts';
+import { Article, ArticleChange, EntryRequest, Praise, User, Warning } from 'logos/src/database/structs/mod.ts';
 import { Document, Reference } from 'logos/src/database/document.ts';
 import {
 	ArticleChangeIndexes,
 	ArticleIndexes,
+	EntryRequestIndexes,
+	IndexesSignature,
 	PraiseIndexes,
 	UserIndexes,
 	WarningIndexes,
@@ -18,66 +22,105 @@ import {
 import { Client } from 'logos/src/client.ts';
 import { diagnosticMentionUser } from 'logos/src/utils.ts';
 
-type IndexesSignature<T = unknown> = Record<string, [takes: string | Reference, returns: T]>;
+type QueryTypes = 'read' | 'write' | 'exists' | 'other';
+type GetReturnType<
+	QueryType extends QueryTypes,
+	ReturnTypeRaw,
+	ReturnsData extends boolean,
+	ReturnType = QueryType extends 'read' ? ReturnTypeRaw
+		: (ReturnTypeRaw extends Map<string, infer T> ? T : ReturnTypeRaw),
+> = {
+	'read': ReturnType | undefined;
+	'write': void;
+	'exists': boolean;
+	'other': void;
+}[ReturnsData extends true ? 'read' : QueryType];
 
-type ParametrisedQuery<
+type Query<
 	Index extends IndexesSignature,
-	QueryType extends 'read' | 'write' | 'exists' | 'custom',
-	IsCache extends boolean = false,
-	DataType = never,
-	ExtraParameters extends unknown[] = never,
+	QueryType extends QueryTypes,
+	QueryFlags extends {
+		takesParameter?: boolean;
+		takesDocument?: boolean;
+		takesStringifiedValue?: boolean;
+		returnsData?: boolean;
+		returnsPromise?: boolean;
+	} = {},
+	DataType = unknown,
+	ExtraParameters extends unknown[] = [],
 > = <
 	Parameter extends keyof Index,
 	ParameterMetadata extends Index[Parameter],
-	ParameterType = ParameterMetadata[0],
-	ReturnType = ParameterMetadata[1] extends (infer T)[] ? Map<string, Document<T>> : Document<ParameterMetadata[1]>,
+	ParameterType extends ParameterMetadata[0] = ParameterMetadata[0],
+	IndexReturnType extends ParameterMetadata[1] = ParameterMetadata[1],
+	ReturnType = GetReturnType<QueryType, IndexReturnType, QueryFlags['returnsData'] extends true ? true : false>,
 >(
 	client: Client,
-	parameter: Parameter,
 	...args: [
-		...IsCache extends true ? [value: string] : [parameterValue: ParameterType],
-		...QueryType extends 'write' ? [object: Document<DataType>]
-			: (QueryType extends 'custom' ? ExtraParameters : []),
+		...QueryFlags['takesParameter'] extends false ? [] : [parameter: Parameter],
+		...QueryFlags['takesParameter'] extends false ? []
+			: (QueryFlags['takesStringifiedValue'] extends true ? [value: string] : [parameterValue: ParameterType]),
+		...QueryType extends 'write'
+			? (QueryFlags['takesDocument'] extends true ? [document: Document<DataType>] : [object: DataType])
+			: [],
+		...QueryType extends 'other' ? ExtraParameters : [],
 	]
-) => IsCache extends false ? Promise<ReturnType | undefined>
-	: (QueryType extends 'read' ? (ReturnType | undefined) : (QueryType extends 'exists' ? boolean : void));
+) => QueryFlags['returnsPromise'] extends false ? ReturnType : Promise<ReturnType>;
 
 type DatabaseAdapterRequiredMethods<DataType, Indexes extends IndexesSignature> = {
-	readonly create: (client: Client, object: DataType) => Promise<Document<DataType> | undefined>;
-	readonly fetch: ParametrisedQuery<Indexes, 'read'>;
+	readonly create: Query<Indexes, 'write', { takesParameter: false; returnsData: true }, DataType>;
+	readonly fetch: Query<Indexes, 'read'>;
+	readonly prefetch: Query<Indexes, 'other', { takesParameter: false }>;
 };
 
 type DatabaseAdapterOptionalMethods<DataType, Indexes extends IndexesSignature> = {
-	readonly update: ParametrisedQuery<Indexes, 'write'>;
-	readonly delete: (client: Client, document: Document<DataType>) => Promise<Document<DataType> | undefined>;
+	readonly update: Query<Indexes, 'write', { takesParameter: false; takesDocument: true }, DataType>;
+	readonly delete: Query<Indexes, 'write', { takesParameter: false; takesDocument: true; returnsData: true }, DataType>;
 
 	// These are helper functions. Perhaps they should be present somewhere else.
-	readonly getOrFetch: ParametrisedQuery<Indexes, 'read'>;
-	readonly getOrFetchOrCreate: ParametrisedQuery<Indexes, 'custom', false, never, [id: bigint]>;
+	readonly get: Query<Indexes, 'read', { returnsPromise: false }, DataType>;
+	readonly getOrFetch: Query<Indexes, 'read', {}, DataType>;
+	readonly getOrFetchOrCreate: Query<Indexes, 'other', { returnsData: true }, DataType, [id: bigint]>;
 };
 
 type DatabaseAdapter<
 	DataType,
 	Indexes extends IndexesSignature,
 	SupportsMethods extends keyof DatabaseAdapterOptionalMethods<DataType, Indexes> = never,
+	IsPrefetch extends boolean = false,
 > =
-	& DatabaseAdapterRequiredMethods<DataType, Indexes>
+	& Omit<DatabaseAdapterRequiredMethods<DataType, Indexes>, IsPrefetch extends true ? 'fetch' : 'prefetch'>
 	& Pick<DatabaseAdapterOptionalMethods<DataType, Indexes>, SupportsMethods>;
 
 type CacheAdapterRequiredMethods<DataType, Indexes extends IndexesSignature, IsSingleton extends boolean = true> =
 	& {
-		readonly get: ParametrisedQuery<Indexes, 'read', true, DataType>;
-		readonly set: ParametrisedQuery<Indexes, 'write', true, DataType>;
+		readonly get: Query<Indexes, 'read', { takesStringifiedValue: true; returnsPromise: false }, DataType>;
+		readonly set: Query<
+			Indexes,
+			'write',
+			{ takesDocument: true; takesStringifiedValue: true; returnsPromise: false },
+			DataType
+		>;
 	}
 	& (IsSingleton extends false ? {
-			readonly has: ParametrisedQuery<Indexes, 'exists', true>;
-			readonly setAll: ParametrisedQuery<Indexes, 'custom', true, DataType, [objects: Document<DataType>[]]>;
+			readonly has: Query<Indexes, 'exists', { takesStringifiedValue: true; returnsPromise: false }>;
+			readonly setAll: Query<
+				Indexes,
+				'other',
+				{ takesStringifiedValue: true; returnsPromise: false },
+				DataType,
+				[objects: Document<DataType>[]]
+			>;
 		}
-		// deno-lint-ignore ban-types
 		: {});
 
 type CacheAdapterOptionalMethods<DataType, Indexes extends IndexesSignature> = {
-	readonly delete: ParametrisedQuery<Indexes, 'write', true, DataType>;
+	readonly delete: Query<
+		Indexes,
+		'write',
+		{ takesDocument: true; takesStringifiedValue: true; returnsPromise: false },
+		DataType
+	>;
 };
 
 type CacheAdapter<
@@ -96,28 +139,13 @@ type CacheAdapter<
 interface DatabaseAdapters {
 	articleChanges: DatabaseAdapter<ArticleChange, ArticleChangeIndexes, 'getOrFetch'>;
 	articles: DatabaseAdapter<Article, ArticleIndexes, 'getOrFetch'>;
+	entryRequests: DatabaseAdapter<EntryRequest, EntryRequestIndexes, 'get' | 'update', true>;
 	praises: DatabaseAdapter<Praise, PraiseIndexes, 'getOrFetch'>;
-	users: DatabaseAdapter<User, UserIndexes, 'getOrFetchOrCreate'>;
+	users: DatabaseAdapter<User, UserIndexes, 'getOrFetch' | 'getOrFetchOrCreate' | 'update'>;
 	warnings: DatabaseAdapter<Warning, WarningIndexes, 'getOrFetch' | 'delete'>;
 }
 
-interface Cache {
-	/**
-	 * Cached users.
-	 *
-	 * The keys are stringified user document references.\
-	 * The values are the user document with that reference.
-	 */
-	usersByReference: Map<string, Document<User>>;
-
-	/**
-	 * Cached users.
-	 *
-	 * The keys are Discord user IDs (snowflakes).\
-	 * The values are the user document with that user ID.
-	 */
-	usersById: Map<string, Document<User>>;
-
+interface Cache extends Record<string, Map<string, unknown>> {
 	/**
 	 * Cached article changes.
 	 *
@@ -151,12 +179,12 @@ interface Cache {
 	articlesByLanguage: Map<string, Map<string, Document<Article>>>;
 
 	/**
-	 * Cached user warnings.
+	 * Cached entry requests.
 	 *
-	 * The keys are stringified user document references.\
-	 * The values are warning documents mapped by their stringified document reference.
+	 * The keys are stringified user document references concatenated with guild IDs.\
+	 * The values are entry request documents mapped by their stringified document reference.
 	 */
-	warningsByRecipient: Map<string, Map<string, Document<Warning>>>;
+	entryRequestBySubmitterAndGuild: Map<string, Document<EntryRequest>>;
 
 	/**
 	 * Cached user praises.
@@ -173,6 +201,30 @@ interface Cache {
 	 * The values are praise documents mapped by their stringified document reference.
 	 */
 	praisesByRecipient: Map<string, Map<string, Document<Praise>>>;
+
+	/**
+	 * Cached users.
+	 *
+	 * The keys are stringified user document references.\
+	 * The values are the user document with that reference.
+	 */
+	usersByReference: Map<string, Document<User>>;
+
+	/**
+	 * Cached users.
+	 *
+	 * The keys are Discord user IDs (snowflakes).\
+	 * The values are the user document with that user ID.
+	 */
+	usersById: Map<string, Document<User>>;
+
+	/**
+	 * Cached user warnings.
+	 *
+	 * The keys are stringified user document references.\
+	 * The values are warning documents mapped by their stringified document reference.
+	 */
+	warningsByRecipient: Map<string, Map<string, Document<Warning>>>;
 }
 
 /**
@@ -197,17 +249,18 @@ function createDatabase(): Database {
 			port: 443,
 		}),
 		cache: {
-			usersByReference: new Map(),
-			usersById: new Map(),
 			articlesByLanguage: new Map(),
 			articlesByAuthor: new Map(),
 			articleChangesByArticle: new Map(),
 			articleChangesByAuthor: new Map(),
-			warningsByRecipient: new Map(),
+			entryRequestBySubmitterAndGuild: new Map(),
 			praisesBySender: new Map(),
 			praisesByRecipient: new Map(),
+			usersByReference: new Map(),
+			usersById: new Map(),
+			warningsByRecipient: new Map(),
 		},
-		adapters: { articles, articleChanges, praises, users, warnings },
+		adapters: { articles, articleChanges, entryRequests, praises, users, warnings },
 	};
 }
 
