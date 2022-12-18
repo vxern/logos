@@ -25,6 +25,10 @@ resource "fauna_collection" "articles" {
   name = "Articles"
 }
 
+resource "fauna_collection" "entry_requests" {
+  name = "EntryRequests"
+}
+
 resource "fauna_collection" "praises" {
   name = "Praises"
 }
