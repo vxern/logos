@@ -25,10 +25,10 @@ function handleReplayAction(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): void {
-	const musicController = client.music.get(interaction.guildId!);
+	const musicController = client.features.music.controllers.get(interaction.guildId!);
 	if (musicController === undefined) return;
 
-	const [canAct, _voiceState] = musicController.verifyMemberVoiceState(interaction);
+	const [canAct, _voiceState] = musicController.verifyMemberVoiceState(bot, interaction);
 	if (!canAct) return;
 
 	const [{ collection }] = parseArguments(interaction.data?.options, { collection: 'boolean' });
@@ -74,7 +74,7 @@ function handleReplayAction(
 		);
 	}
 
-	return musicController.replay(interaction, collection);
+	return musicController.replay(bot, interaction, collection ?? false);
 }
 
 export default command;

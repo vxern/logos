@@ -1,5 +1,6 @@
 import {
 	ApplicationCommandFlags,
+	Bot,
 	Channel,
 	editOriginalInteractionResponse,
 	Guild,
@@ -17,6 +18,10 @@ import { Client } from 'logos/src/client.ts';
 import configuration from 'logos/configuration.ts';
 import { mention, MentionTypes } from 'logos/formatting.ts';
 import { defaultLocale } from 'logos/types.ts';
+
+function setupMusicController(client: Client, guild: Guild): void {
+	client.features.music.controllers.set(guild.id, new MusicController(client, guild));
+}
 
 class MusicController {
 	private client: Client;
@@ -55,7 +60,7 @@ class MusicController {
 	constructor(client: Client, guild: Guild) {
 		this.client = client;
 		this.guild = guild;
-		this.player = this.client.node.createPlayer(BigInt(this.guild.id));
+		this.player = this.client.features.music.node.createPlayer(this.guild.id);
 	}
 
 	/** Gets the current song from the current listing. */
@@ -92,6 +97,7 @@ class MusicController {
 
 	/** Checks the user's voice state, ensuring it is valid for playing music. */
 	verifyMemberVoiceState(
+		bot: Bot,
 		interaction: Interaction,
 	): [boolean, VoiceState | undefined] {
 		const voiceState = this.guild.voiceStates.get(interaction.user.id);
@@ -99,7 +105,7 @@ class MusicController {
 		// The user is not in a voice channel.
 		if (voiceState === undefined || voiceState.channelId === undefined) {
 			sendInteractionResponse(
-				this.client.bot,
+				bot,
 				interaction.id,
 				interaction.token,
 				{
@@ -120,7 +126,7 @@ class MusicController {
 
 		if (this.isOccupied && this.voiceChannel.id !== voiceState.channelId) {
 			sendInteractionResponse(
-				this.client.bot,
+				bot,
 				interaction.id,
 				interaction.token,
 				{
@@ -148,23 +154,20 @@ class MusicController {
 	 * whether or not the user is in a voice channel, and if they have provided
 	 * the correct arguments.
 	 *
+	 * @param bot - The bot instance to use.
 	 * @param interaction - The command interaction.
 	 * @returns A tuple with the first item indicating whether the user can play
 	 * music, and the second being the user's voice state.
 	 */
-	verifyCanPlay(
-		interaction: Interaction,
-	): [boolean, VoiceState | undefined] {
-		const [canPlay, voiceState] = this.verifyMemberVoiceState(
-			interaction,
-		);
+	verifyCanPlay(bot: Bot, interaction: Interaction): [boolean, VoiceState | undefined] {
+		const [canPlay, voiceState] = this.verifyMemberVoiceState(bot, interaction);
 
 		if (!canPlay) return [canPlay, voiceState];
 
 		// The user cannot add to the queue due to one reason or another.
 		if (!this.canPushToQueue) {
 			sendInteractionResponse(
-				this.client.bot,
+				bot,
 				interaction.id,
 				interaction.token,
 				{
@@ -201,7 +204,7 @@ class MusicController {
 	 * queues the listing, and optionally plays it.
 	 */
 	play(
-		client: Client,
+		bot: Bot,
 		{ interaction, songListing, channels }: {
 			interaction: Interaction | undefined;
 			songListing: SongListing;
@@ -231,11 +234,11 @@ class MusicController {
 
 		if (this.isOccupied) {
 			if (interaction === undefined) {
-				return sendMessage(client.bot, this.textChannel.id, { embeds });
+				return sendMessage(bot, this.textChannel.id, { embeds });
 			}
 
 			return sendInteractionResponse(
-				client.bot,
+				bot,
 				interaction.id,
 				interaction.token,
 				{
@@ -245,10 +248,11 @@ class MusicController {
 			);
 		}
 
-		return this.advanceQueueAndPlay(interaction);
+		return this.advanceQueueAndPlay(bot, interaction);
 	}
 
 	private async advanceQueueAndPlay(
+		bot: Bot,
 		interaction?: Interaction,
 		isDeferred?: boolean,
 	): Promise<unknown> {
@@ -256,7 +260,7 @@ class MusicController {
 
 		const wasLooped = this.isLoop;
 
-		if (!this.isLoop) {
+		if (!wasLooped) {
 			if (
 				this.current !== undefined &&
 				this.current.content.type !== SongListingContentTypes.Collection
@@ -304,7 +308,7 @@ class MusicController {
 
 			const allDoneString = localise(Commands.music.strings.allDone.header, defaultLocale);
 
-			return sendMessage(this.client.bot, this.textChannel.id, {
+			return sendMessage(bot, this.textChannel.id, {
 				embeds: [{
 					title: `👏 ${allDoneString}`,
 					description: localise(Commands.music.strings.allDone.body, defaultLocale),
@@ -328,12 +332,12 @@ class MusicController {
 			}];
 
 			if (interaction === undefined) {
-				return sendMessage(this.client.bot, this.textChannel.id, { embeds });
+				return sendMessage(bot, this.textChannel.id, { embeds });
 			}
 
 			if (isDeferred) {
 				return editOriginalInteractionResponse(
-					this.client.bot,
+					bot,
 					interaction.token,
 					{
 						embeds,
@@ -342,7 +346,7 @@ class MusicController {
 			}
 
 			return sendInteractionResponse(
-				this.client.bot,
+				bot,
 				interaction.id,
 				interaction.token,
 				{
@@ -366,7 +370,7 @@ class MusicController {
 					return;
 				}
 
-				this.advanceQueueAndPlay();
+				this.advanceQueueAndPlay(bot);
 			},
 		);
 
@@ -394,15 +398,15 @@ class MusicController {
 		}];
 
 		if (interaction === undefined) {
-			return sendMessage(this.client.bot, this.textChannel.id, { embeds });
+			return sendMessage(bot, this.textChannel.id, { embeds });
 		}
 
 		if (isDeferred) {
-			return editOriginalInteractionResponse(this.client.bot, interaction.token, { embeds });
+			return editOriginalInteractionResponse(bot, interaction.token, { embeds });
 		}
 
 		return sendInteractionResponse(
-			this.client.bot,
+			bot,
 			interaction.id,
 			interaction.token,
 			{
@@ -445,6 +449,7 @@ class MusicController {
 	}
 
 	unskip(
+		bot: Bot,
 		unskipCollection: boolean,
 		{ by, to }: { by: number | undefined; to: number | undefined },
 	): void {
@@ -490,7 +495,7 @@ class MusicController {
 		if ((this.player.track ?? undefined) !== undefined) {
 			this.player.stop();
 		} else {
-			this.advanceQueueAndPlay();
+			this.advanceQueueAndPlay(bot);
 		}
 	}
 
@@ -510,6 +515,7 @@ class MusicController {
 	}
 
 	replay(
+		bot: Bot,
 		interaction: Interaction,
 		replayCollection: boolean,
 	): void {
@@ -527,7 +533,7 @@ class MusicController {
 
 		this.breakPreviousLoop = true;
 		this.player.stop();
-		this.advanceQueueAndPlay(interaction);
+		this.advanceQueueAndPlay(bot, interaction);
 	}
 
 	reset(): void {
@@ -552,4 +558,4 @@ const localisationsBySongListingType = {
 	[SongListingContentTypes.Collection]: Commands.music.strings.type.songCollection,
 };
 
-export { MusicController };
+export { MusicController, setupMusicController };

@@ -17,6 +17,7 @@ import {
 	InteractionTypes,
 	Member,
 	Message,
+	send as sendShardPayload,
 	sendInteractionResponse,
 	snowflakeToBigint,
 	startBot,
@@ -26,12 +27,14 @@ import {
 } from 'discordeno';
 import * as Sentry from 'sentry';
 import { Log as Logger } from 'tl_log';
+import { Node as LavalinkNode, SendGatewayPayload } from 'lavadeno';
 import { localise, Misc } from 'logos/assets/localisations/mod.ts';
 import { DictionaryAdapter, SentencePair } from 'logos/src/commands/language/data/types.ts';
 import { SupportedLanguage } from 'logos/src/commands/language/module.ts';
 import { Command, InteractionHandler } from 'logos/src/commands/command.ts';
 import { setupLogging } from 'logos/src/controllers/logging/logging.ts';
-import commands from 'logos/src/commands/commands.ts';
+import { MusicController, setupMusicController } from 'logos/src/controllers/music.ts';
+import { getCommands } from 'logos/src/commands/commands.ts';
 import { createDatabase, Database } from 'logos/src/database/database.ts';
 import services from 'logos/src/services/services.ts';
 import { diagnosticMentionUser } from 'logos/src/utils.ts';
@@ -75,49 +78,73 @@ function createCache(): Cache {
 
 type Client = Readonly<{
 	metadata: {
-		isTest: boolean;
 		version: string;
 		supportedTranslationLanguages: SupportedLanguage[];
 	};
 	log: Logger;
-	database: Database;
 	cache: Cache;
+	database: Database;
+	commands: Command[];
 	collectors: Map<Event, Set<Collector<Event>>>;
 	handlers: Map<string, InteractionHandler>;
 	features: {
 		dictionaryAdapters: Map<Language, DictionaryAdapter<unknown>[]>;
 		sentencePairs: Map<Language, SentencePair[]>;
+		music: {
+			node: LavalinkNode;
+			controllers: Map<bigint, MusicController>;
+		};
 	};
 }>;
 
 function createClient(metadata: Client['metadata'], features: Client['features']): Client {
+	const commands = getCommands();
+
 	return {
 		metadata,
 		log: createLogger(),
-		database: createDatabase(),
 		cache: createCache(),
+		database: createDatabase(),
+		commands,
 		collectors: new Map(),
 		handlers: createCommandHandlers(commands),
 		features,
 	};
 }
 
-async function initialiseClient(metadata: Client['metadata'], features: Client['features']): Promise<[Client, Bot]> {
-	const client = createClient(metadata, features);
+async function initialiseClient(
+	metadata: Client['metadata'],
+	features: Omit<Client['features'], 'music'>,
+): Promise<[Client, Bot]> {
+	const musicFeature = createMusicFeature(
+		(guildId, payload) => {
+			const shardId = client.cache.guilds.get(guildId)?.shardId;
+			if (shardId === undefined) return;
+
+			const shard = bot.gateway.manager.shards.find((shard) => shard.id === shardId);
+			if (shard === undefined) return;
+
+			return void sendShardPayload(shard, payload, true);
+		},
+	);
+
+	const client = createClient(metadata, { ...features, music: musicFeature });
 
 	await prefetchDataFromDatabase(client, client.database);
 
-	const bot = overrideEventHandlers(createBot({
+	const bot = overrideDefaultEventHandlers(createBot({
 		token: Deno.env.get('DISCORD_SECRET')!,
 		intents: Intents.Guilds | Intents.GuildMembers | Intents.GuildVoiceStates | Intents.GuildMessages,
-		events: createEventHandlers(client),
+		events: withMusicEvents(createEventHandlers(client), client.features.music.node),
 		transformers: withCaching(client, createTransformers({})),
 	}));
 
 	startServices([client, bot]);
-	startBot(bot);
 
-	return [client, bot];
+	return Promise.all([
+		...(Deno.env.get('ENVIRONMENT') === 'development' ? [client.features.music.node.connect(bot.id)] : []),
+		startBot(bot),
+	]).then(() => [client, bot]);
 }
 
 async function prefetchDataFromDatabase(client: Client, database: Database): Promise<void> {
@@ -133,7 +160,45 @@ function createLogger(): Logger {
 	});
 }
 
-function overrideEventHandlers(bot: Bot): Bot {
+function createMusicFeature(sendGatewayPayload: SendGatewayPayload): Client['features']['music'] {
+	const node = new LavalinkNode({
+		connection: {
+			host: Deno.env.get('LAVALINK_HOST')!,
+			port: Number(Deno.env.get('LAVALINK_PORT')!),
+			password: Deno.env.get('LAVALINK_PASSWORD')!,
+			secure: true,
+		},
+		sendGatewayPayload,
+	});
+
+	return {
+		node,
+		controllers: new Map(),
+	};
+}
+
+function withMusicEvents(events: Partial<EventHandlers>, node: LavalinkNode): Partial<EventHandlers> {
+	return {
+		...events,
+		voiceStateUpdate: (_bot, payload) => {
+			node.handleVoiceUpdate({
+				session_id: payload.sessionId,
+				channel_id: payload.channelId !== undefined ? `${payload.channelId}` : null,
+				guild_id: `${payload.guildId}`,
+				user_id: `${payload.userId}`,
+			});
+		},
+		voiceServerUpdate: (_bot, payload) => {
+			node.handleVoiceUpdate({
+				token: payload.token,
+				endpoint: payload.endpoint!,
+				guild_id: `${payload.guildId}`,
+			});
+		},
+	};
+}
+
+function overrideDefaultEventHandlers(bot: Bot): Bot {
 	bot.handlers.MESSAGE_UPDATE = (bot, data) => {
 		const messageData = data.d as DiscordMessage;
 		if (!('author' in messageData)) return;
@@ -156,11 +221,12 @@ function createEventHandlers(client: Client): Partial<EventHandlers> {
 				status: 'online',
 			}),
 		guildCreate: async (bot, guild) => {
-			upsertGuildApplicationCommands(bot, guild.id, commands);
+			upsertGuildApplicationCommands(bot, guild.id, client.commands);
 
 			registerGuild(client, guild);
 
 			setupLogging([client, bot], guild);
+			setupMusicController(client, guild);
 
 			await fetchMembers(bot, guild.id, { limit: 0, query: '' });
 		},

@@ -23,10 +23,10 @@ function handlePausePlayback(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): void {
-	const musicController = client.music.get(interaction.guildId!);
+	const musicController = client.features.music.controllers.get(interaction.guildId!);
 	if (musicController === undefined) return;
 
-	const [canAct, _voiceState] = musicController.verifyMemberVoiceState(interaction);
+	const [canAct, _voiceState] = musicController.verifyMemberVoiceState(bot, interaction);
 	if (!canAct) return;
 
 	if (!musicController.isOccupied) {

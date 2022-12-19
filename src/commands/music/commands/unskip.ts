@@ -26,10 +26,10 @@ function handleUnskipAction(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): void {
-	const musicController = client.music.get(interaction.guildId!);
+	const musicController = client.features.music.controllers.get(interaction.guildId!);
 	if (musicController === undefined) return;
 
-	const [canAct, _] = musicController.verifyMemberVoiceState(interaction);
+	const [canAct, _] = musicController.verifyMemberVoiceState(bot, interaction);
 	if (!canAct) return;
 
 	const data = interaction.data;
@@ -46,7 +46,7 @@ function handleUnskipAction(
 
 	const songListing = musicController.current;
 
-	const isUnskippingListing = songListing !== undefined ||
+	const isUnskippingListing = songListing === undefined ||
 		songListing.content.type !== SongListingContentTypes.Collection ||
 		(songListing.content.type === SongListingContentTypes.Collection &&
 			(collection !== undefined || songListing.content.position === 0));
@@ -144,8 +144,10 @@ function handleUnskipAction(
 		);
 	}
 
+	const isUnskippingCollection = collection ?? false;
+
 	if (isUnskippingListing) {
-		musicController.unskip(collection, {
+		musicController.unskip(bot, isUnskippingCollection, {
 			by: by,
 			to: to,
 		});
@@ -157,14 +159,14 @@ function handleUnskipAction(
 			) {
 				const listingToUnskip = Math.min(by, songListing.content.position);
 
-				musicController.unskip(collection, {
+				musicController.unskip(bot, isUnskippingCollection, {
 					by: listingToUnskip,
 					to: undefined,
 				});
 			} else {
 				const listingsToUnskip = Math.min(by, musicController.history.length);
 
-				musicController.unskip(collection, {
+				musicController.unskip(bot, isUnskippingCollection, {
 					by: listingsToUnskip,
 					to: undefined,
 				});
@@ -176,20 +178,20 @@ function handleUnskipAction(
 			) {
 				const listingToSkipTo = Math.max(to, 1);
 
-				musicController.unskip(collection, {
+				musicController.unskip(bot, isUnskippingCollection, {
 					by: undefined,
 					to: listingToSkipTo,
 				});
 			} else {
 				const listingToSkipTo = Math.min(to, musicController.history.length);
 
-				musicController.unskip(collection, {
+				musicController.unskip(bot, isUnskippingCollection, {
 					by: undefined,
 					to: listingToSkipTo,
 				});
 			}
 		} else {
-			musicController.unskip(collection, {
+			musicController.unskip(bot, isUnskippingCollection, {
 				by: undefined,
 				to: undefined,
 			});
