@@ -13,6 +13,6 @@
 		"sentry": "https://deno.land/x/sentry_deno@v0.2.2/main.ts",
 		"snowflake": "https://deno.land/x/deno_snowflake@v1.0.1/snowflake.ts",
 		"tl_log": "https://deno.land/x/tl_log@0.1.1/mod.ts",
-		"youtube_sr": "https://deno.land/x/youtube_sr@v4.3.4/mod.ts"
+		"youtube": "https://deno.land/x/youtube_sr@v4.3.4-deno/mod.ts"
 	}
 }
