@@ -18,7 +18,7 @@ function handleDisplayPlaybackHistory(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): void {
-	const musicController = client.music.get(interaction.guildId!);
+	const musicController = client.features.music.controllers.get(interaction.guildId!);
 	if (musicController === undefined) return;
 
 	const [{ show }] = parseArguments(interaction.data?.options, {
@@ -27,7 +27,7 @@ function handleDisplayPlaybackHistory(
 
 	const listingHistory = lodash.cloneDeep(musicController.history).toReversed();
 
-  const titleString = localise(Commands.music.options.history.strings.playbackHistory, interaction.locale);
+	const titleString = localise(Commands.music.options.history.strings.playbackHistory, interaction.locale);
 
 	return displayListings([client, bot], interaction, {
 		title: `📋 ${titleString}`,

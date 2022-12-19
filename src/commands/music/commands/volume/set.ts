@@ -8,10 +8,10 @@ function handleSetVolume(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): void {
-	const musicController = client.music.get(interaction.guildId!);
+	const musicController = client.features.music.controllers.get(interaction.guildId!);
 	if (musicController === undefined) return;
 
-	const [canAct, _] = musicController.verifyMemberVoiceState(interaction);
+	const [canAct, _] = musicController.verifyMemberVoiceState(bot, interaction);
 	if (!canAct) return;
 
 	const [{ volume }] = parseArguments(interaction.data?.options, { volume: 'number' });

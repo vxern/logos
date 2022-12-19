@@ -16,7 +16,7 @@ function displayListings(
 		show: boolean;
 	},
 ): void {
-	const pages = chunk(songListings, configuration.music.maxima.songs.page);
+	const pages = chunk(songListings, configuration.music.limits.songs.page);
 
 	return paginate(clientWithBot, interaction, {
 		elements: pages,

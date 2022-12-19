@@ -17,12 +17,12 @@ function handleDisplayPlaybackQueue(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): void {
-	const musicController = client.music.get(interaction.guildId!);
+	const musicController = client.features.music.controllers.get(interaction.guildId!);
 	if (musicController === undefined) return;
 
 	const [{ show }] = parseArguments(interaction.data?.options, { show: 'boolean' });
 
-  const queueString = localise(Commands.music.options.queue.strings.queue, interaction.locale);
+	const queueString = localise(Commands.music.options.queue.strings.queue, interaction.locale);
 
 	return displayListings([client, bot], interaction, {
 		title: `📋 ${queueString}`,

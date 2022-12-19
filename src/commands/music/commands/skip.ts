@@ -26,10 +26,10 @@ function handleSkipAction(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): void {
-	const musicController = client.music.get(interaction.guildId!);
+	const musicController = client.features.music.controllers.get(interaction.guildId!);
 	if (musicController === undefined) return;
 
-	const [canAct, _voiceState] = musicController.verifyMemberVoiceState(interaction);
+	const [canAct, _voiceState] = musicController.verifyMemberVoiceState(bot, interaction);
 	if (!canAct) return;
 
 	const data = interaction.data;
@@ -121,6 +121,8 @@ function handleSkipAction(
 		);
 	}
 
+	const isSkippingCollection = collection ?? false;
+
 	if (by !== undefined) {
 		if (
 			songListing.content.type === SongListingContentTypes.Collection &&
@@ -132,14 +134,14 @@ function handleSkipAction(
 					(songListing.content.position + 1),
 			);
 
-			musicController.skip(collection, {
+			musicController.skip(isSkippingCollection, {
 				by: listingsToSkip,
 				to: undefined,
 			});
 		} else {
 			const listingsToSkip = Math.min(by, musicController.queue.length);
 
-			musicController.skip(collection, {
+			musicController.skip(isSkippingCollection, {
 				by: listingsToSkip,
 				to: undefined,
 			});
@@ -151,20 +153,20 @@ function handleSkipAction(
 		) {
 			const listingToSkipTo = Math.min(to, songListing.content.songs.length);
 
-			musicController.skip(collection, {
+			musicController.skip(isSkippingCollection, {
 				by: undefined,
 				to: listingToSkipTo,
 			});
 		} else {
 			const listingToSkipTo = Math.min(to, musicController.queue.length);
 
-			musicController.skip(collection, {
+			musicController.skip(isSkippingCollection, {
 				by: undefined,
 				to: listingToSkipTo,
 			});
 		}
 	} else {
-		musicController.skip(collection, {
+		musicController.skip(isSkippingCollection, {
 			by: undefined,
 			to: undefined,
 		});

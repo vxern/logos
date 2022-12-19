@@ -1,5 +1,6 @@
 import {
 	ApplicationCommandFlags,
+	Bot,
 	Interaction,
 	InteractionResponseTypes,
 	InteractionTypes,
@@ -7,7 +8,7 @@ import {
 	SelectOption,
 	sendInteractionResponse,
 } from 'discordeno';
-import { Playlist, Video, YouTube } from 'youtube_sr';
+import { Playlist, Video, YouTube } from 'youtube';
 import { ListingResolver } from 'logos/src/commands/music/data/sources/sources.ts';
 import { SongListing, SongListingContentTypes } from 'logos/src/commands/music/data/types.ts';
 import { Client } from 'logos/src/client.ts';
@@ -19,10 +20,10 @@ const urlExpression = new RegExp(
 	/^(?:https?:)?(?:\/\/)?(?:youtu\.be\/|(?:www\.|m\.)?youtube\.com\/(?:watch|v|embed)(?:\.php)?(?:\?.*v=|\/))([a-zA-Z0-9\_-]{7,15})(?:[\?&][a-zA-Z0-9\_-]+=[a-zA-Z0-9\_-]+)*$/,
 );
 
-const resolver: ListingResolver = async (client, interaction, query) => {
+const resolver: ListingResolver = async ([client, bot], interaction, query) => {
 	const urlExpressionExecuted = urlExpression.exec(query) ?? undefined;
 	if (urlExpressionExecuted === undefined) {
-		return search(client, interaction, query);
+		return search([client, bot], interaction, query);
 	}
 
 	const url = urlExpressionExecuted.at(0)!;
@@ -35,7 +36,11 @@ const resolver: ListingResolver = async (client, interaction, query) => {
 	return fromYouTubeVideo(video, interaction.user.id);
 };
 
-async function search(client: Client, interaction: Interaction, query: string): Promise<SongListing | undefined> {
+async function search(
+	[client, bot]: [Client, Bot],
+	interaction: Interaction,
+	query: string,
+): Promise<SongListing | undefined> {
 	const results = await YouTube.search(
 		query,
 		{ limit: 20, type: 'all', safeSearch: false },
@@ -46,7 +51,7 @@ async function search(client: Client, interaction: Interaction, query: string): 
 
 	return new Promise<SongListing | undefined>((resolve) => {
 		const customId = createInteractionCollector(
-			client,
+			[client, bot],
 			{
 				type: InteractionTypes.MessageComponent,
 				userId: interaction.user.id,
@@ -73,7 +78,7 @@ async function search(client: Client, interaction: Interaction, query: string): 
 			},
 		);
 
-		sendInteractionResponse(client.bot, interaction.id, interaction.token, {
+		sendInteractionResponse(bot, interaction.id, interaction.token, {
 			type: InteractionResponseTypes.ChannelMessageWithSource,
 			data: {
 				flags: ApplicationCommandFlags.Ephemeral,
@@ -130,10 +135,7 @@ function fromYouTubeVideo(
 /**
  * Creates a song listing from a YouTube playlist.
  */
-function fromYouTubePlaylist(
-	playlist: Playlist,
-	requestedBy: bigint,
-): SongListing | undefined {
+function fromYouTubePlaylist(playlist: Playlist, requestedBy: bigint): SongListing | undefined {
 	if (playlist.id === undefined) return undefined;
 
 	return {
