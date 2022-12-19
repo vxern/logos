@@ -34,7 +34,7 @@ import { SupportedLanguage } from 'logos/src/commands/language/module.ts';
 import { Command, InteractionHandler } from 'logos/src/commands/command.ts';
 import { setupLogging } from 'logos/src/controllers/logging/logging.ts';
 import { MusicController, setupMusicController } from 'logos/src/controllers/music.ts';
-import commands from 'logos/src/commands/commands.ts';
+import { getCommands } from 'logos/src/commands/commands.ts';
 import { createDatabase, Database } from 'logos/src/database/database.ts';
 import services from 'logos/src/services/services.ts';
 import { diagnosticMentionUser } from 'logos/src/utils.ts';
@@ -78,13 +78,13 @@ function createCache(): Cache {
 
 type Client = Readonly<{
 	metadata: {
-		isTest: boolean;
 		version: string;
 		supportedTranslationLanguages: SupportedLanguage[];
 	};
 	log: Logger;
 	cache: Cache;
 	database: Database;
+	commands: Command[];
 	collectors: Map<Event, Set<Collector<Event>>>;
 	handlers: Map<string, InteractionHandler>;
 	features: {
@@ -98,11 +98,14 @@ type Client = Readonly<{
 }>;
 
 function createClient(metadata: Client['metadata'], features: Client['features']): Client {
+	const commands = getCommands();
+
 	return {
 		metadata,
 		log: createLogger(),
 		cache: createCache(),
 		database: createDatabase(),
+		commands,
 		collectors: new Map(),
 		handlers: createCommandHandlers(commands),
 		features,
@@ -163,6 +166,7 @@ function createMusicFeature(sendGatewayPayload: SendGatewayPayload): Client['fea
 			host: Deno.env.get('LAVALINK_HOST')!,
 			port: Number(Deno.env.get('LAVALINK_PORT')!),
 			password: Deno.env.get('LAVALINK_PASSWORD')!,
+			secure: true,
 		},
 		sendGatewayPayload,
 	});
@@ -217,7 +221,7 @@ function createEventHandlers(client: Client): Partial<EventHandlers> {
 				status: 'online',
 			}),
 		guildCreate: async (bot, guild) => {
-			upsertGuildApplicationCommands(bot, guild.id, commands);
+			upsertGuildApplicationCommands(bot, guild.id, client.commands);
 
 			registerGuild(client, guild);
 

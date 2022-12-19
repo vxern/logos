@@ -5,7 +5,7 @@ import music from 'logos/src/commands/music/commands.ts';
 import server from 'logos/src/commands/server/commands.ts';
 import social from 'logos/src/commands/social/commands.ts';
 
-const commands = [
+const getCommands = () => [
 	...information,
 	...language,
 	...moderation,
@@ -14,4 +14,4 @@ const commands = [
 	...social,
 ];
 
-export default commands;
+export { getCommands };
