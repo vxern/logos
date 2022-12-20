@@ -13,12 +13,9 @@ const command: OptionBuilder = {
 	options: [show],
 };
 
-function handleDisplayPlaybackQueue(
-	[client, bot]: [Client, Bot],
-	interaction: Interaction,
-): void {
-	const musicController = client.features.music.controllers.get(interaction.guildId!);
-	if (musicController === undefined) return;
+function handleDisplayPlaybackQueue([client, bot]: [Client, Bot], interaction: Interaction): void {
+	const controller = client.features.music.controllers.get(interaction.guildId!);
+	if (controller === undefined) return;
 
 	const [{ show }] = parseArguments(interaction.data?.options, { show: 'boolean' });
 
@@ -26,7 +23,7 @@ function handleDisplayPlaybackQueue(
 
 	return displayListings([client, bot], interaction, {
 		title: `📋 ${queueString}`,
-		songListings: musicController.queue,
+		songListings: controller.listingQueue,
 		show: show ?? false,
 	});
 }

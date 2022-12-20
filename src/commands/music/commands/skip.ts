@@ -7,9 +7,9 @@ import {
 	sendInteractionResponse,
 } from 'discordeno';
 import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
-import { SongListingContentTypes } from 'logos/src/commands/music/data/types.ts';
 import { OptionBuilder } from 'logos/src/commands/command.ts';
 import { by, collection, to } from 'logos/src/commands/parameters.ts';
+import { getVoiceState, isCollection, isOccupied, skip, verifyVoiceState } from 'logos/src/controllers/music.ts';
 import { Client } from 'logos/src/client.ts';
 import { parseArguments } from 'logos/src/interactions.ts';
 import configuration from 'logos/configuration.ts';
@@ -22,15 +22,14 @@ const command: OptionBuilder = {
 	options: [collection, by, to],
 };
 
-function handleSkipAction(
-	[client, bot]: [Client, Bot],
-	interaction: Interaction,
-): void {
-	const musicController = client.features.music.controllers.get(interaction.guildId!);
-	if (musicController === undefined) return;
+function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction): void {
+	const controller = client.features.music.controllers.get(interaction.guildId!);
+	if (controller === undefined) return;
 
-	const [canAct, _voiceState] = musicController.verifyMemberVoiceState(bot, interaction);
-	if (!canAct) return;
+	const voiceState = getVoiceState(client, interaction);
+
+	const isVoiceStateVerified = verifyVoiceState(bot, interaction, controller, voiceState);
+	if (!isVoiceStateVerified) return;
 
 	const data = interaction.data;
 	if (data === undefined) return;
@@ -44,9 +43,7 @@ function handleSkipAction(
 	if (by !== undefined && isNaN(by)) return;
 	if (to !== undefined && isNaN(to)) return;
 
-	const songListing = musicController.current;
-
-	if (!musicController.isOccupied || songListing === undefined) {
+	if (!isOccupied(controller.player) || controller.currentListing === undefined) {
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -64,10 +61,7 @@ function handleSkipAction(
 		);
 	}
 
-	if (
-		collection !== undefined &&
-		songListing.content.type !== SongListingContentTypes.Collection
-	) {
+	if (collection !== undefined && !isCollection(controller.currentListing?.content)) {
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -124,52 +118,26 @@ function handleSkipAction(
 	const isSkippingCollection = collection ?? false;
 
 	if (by !== undefined) {
-		if (
-			songListing.content.type === SongListingContentTypes.Collection &&
-			collection === undefined
-		) {
-			const listingsToSkip = Math.min(
+		let listingsToSkip!: number;
+		if (isCollection(controller.currentListing?.content) && collection === undefined) {
+			listingsToSkip = Math.min(
 				by,
-				songListing.content.songs.length -
-					(songListing.content.position + 1),
+				controller.currentListing!.content.songs.length - (controller.currentListing!.content.position + 1),
 			);
-
-			musicController.skip(isSkippingCollection, {
-				by: listingsToSkip,
-				to: undefined,
-			});
 		} else {
-			const listingsToSkip = Math.min(by, musicController.queue.length);
-
-			musicController.skip(isSkippingCollection, {
-				by: listingsToSkip,
-				to: undefined,
-			});
+			listingsToSkip = Math.min(by, controller.listingQueue.length);
 		}
+		skip(controller, isSkippingCollection, { by: listingsToSkip });
 	} else if (to !== undefined) {
-		if (
-			songListing.content.type === SongListingContentTypes.Collection &&
-			collection === undefined
-		) {
-			const listingToSkipTo = Math.min(to, songListing.content.songs.length);
-
-			musicController.skip(isSkippingCollection, {
-				by: undefined,
-				to: listingToSkipTo,
-			});
+		let listingToSkipTo!: number;
+		if (isCollection(controller.currentListing?.content) && collection === undefined) {
+			listingToSkipTo = Math.min(to, controller.currentListing!.content.songs.length);
 		} else {
-			const listingToSkipTo = Math.min(to, musicController.queue.length);
-
-			musicController.skip(isSkippingCollection, {
-				by: undefined,
-				to: listingToSkipTo,
-			});
+			listingToSkipTo = Math.min(to, controller.listingQueue.length);
 		}
+		skip(controller, isSkippingCollection, { to: listingToSkipTo });
 	} else {
-		musicController.skip(isSkippingCollection, {
-			by: undefined,
-			to: undefined,
-		});
+		skip(controller, isSkippingCollection, {});
 	}
 
 	const messageLocalisations = (collection ?? false)

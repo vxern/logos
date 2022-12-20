@@ -1,9 +1,8 @@
 import {
 	ApplicationCommandFlags,
 	Bot,
-	Channel,
 	editOriginalInteractionResponse,
-	Guild,
+	Embed,
 	Interaction,
 	InteractionResponseTypes,
 	sendInteractionResponse,
@@ -13,543 +12,547 @@ import {
 import { Player } from 'lavadeno';
 import { LoadType } from 'lavalink_types';
 import { Commands, localise } from 'logos/assets/localisations/mod.ts';
-import { Song, SongListing, SongListingContentTypes, SongStream } from 'logos/src/commands/music/data/types.ts';
+import {
+	Song,
+	SongCollection,
+	SongListing,
+	SongListingContentTypes,
+	SongStream,
+} from 'logos/src/commands/music/data/types.ts';
 import { Client } from 'logos/src/client.ts';
 import configuration from 'logos/configuration.ts';
 import { mention, MentionTypes } from 'logos/formatting.ts';
 import { defaultLocale } from 'logos/types.ts';
 
-function setupMusicController(client: Client, guild: Guild): void {
-	client.features.music.controllers.set(guild.id, new MusicController(client, guild));
+function setupMusicController(client: Client, guildId: bigint): void {
+	client.features.music.controllers.set(guildId, createMusicController(client, guildId));
 }
 
-class MusicController {
-	private client: Client;
-	private guild: Guild;
+const disconnectTimeoutIdByGuildId = new Map<bigint, number>();
 
-	/** The audio player associated with this controller. */
-	private player: Player;
+interface MusicController {
+	readonly player: Player;
 
-	/** The voice channel music is being played in. */
-	private voiceChannel!: Channel;
-	/** The text channel associated with the playback. */
-	private textChannel!: Channel;
+	voiceChannelId: bigint | undefined;
+	feedbackChannelId: bigint | undefined;
 
-	/** List of songs which have already been played. */
-	history: SongListing[] = [];
-	/** The current song listing being played. */
-	current?: SongListing;
-	/** List of song listings due to be played. */
-	queue: SongListing[] = [];
+	readonly listingHistory: SongListing[];
+	currentListing: SongListing | undefined;
+	readonly listingQueue: SongListing[];
 
-	/** The volume at which music is being played. */
-	volume = configuration.music.limits.volume;
+	flags: {
+		loop: boolean;
+		breakLoop: boolean;
+	};
+}
 
-	/**
-	 * Indicates whether the current song is to be played again once it ends.
-	 */
-	private isLoop = false;
-
-	private disconnectTimeoutID: number | undefined = undefined;
-
-	private breakPreviousLoop = false;
-
-	readonly onQueueChange: Map<string, () => void> = new Map();
-
-	/** Constructs a {@link MusicController}. */
-	constructor(client: Client, guild: Guild) {
-		this.client = client;
-		this.guild = guild;
-		this.player = this.client.features.music.node.createPlayer(this.guild.id);
-	}
-
-	/** Gets the current song from the current listing. */
-	get currentSong(): Song | SongStream | undefined {
-		if (this.current === undefined) return undefined;
-
-		if (this.current.content.type === SongListingContentTypes.Collection) {
-			return this.current.content.songs[this.current.content.position];
-		}
-
-		return this.current.content;
-	}
-
-	/** Checks whether the queue holds fewer items than the limit. */
-	get canPushToQueue(): boolean {
-		return this.queue.length < configuration.music.limits.songs.queue;
-	}
-
-	get isOccupied(): boolean {
-		return (this.player.playingSince ?? undefined) !== undefined;
-	}
-
-	/** Indicates whether the controller is paused or not. */
-	get isPaused(): boolean {
-		return this.player.paused;
-	}
-
-	/** Returns, in milliseconds, how long the current song has been playing for. */
-	get runningTime(): number | undefined {
-		if ((this.player.playingSince ?? undefined) === undefined) return undefined;
-
-		return Date.now() - this.player.playingSince!;
-	}
-
-	/** Checks the user's voice state, ensuring it is valid for playing music. */
-	verifyMemberVoiceState(
-		bot: Bot,
-		interaction: Interaction,
-	): [boolean, VoiceState | undefined] {
-		const voiceState = this.guild.voiceStates.get(interaction.user.id);
-
-		// The user is not in a voice channel.
-		if (voiceState === undefined || voiceState.channelId === undefined) {
-			sendInteractionResponse(
-				bot,
-				interaction.id,
-				interaction.token,
-				{
-					type: InteractionResponseTypes.ChannelMessageWithSource,
-					data: {
-						flags: ApplicationCommandFlags.Ephemeral,
-						embeds: [
-							{
-								description: localise(Commands.music.options.play.strings.mustBeInVoiceChannel, interaction.locale),
-								color: configuration.messages.colors.yellow,
-							},
-						],
-					},
-				},
-			);
-			return [false, voiceState];
-		}
-
-		if (this.isOccupied && this.voiceChannel.id !== voiceState.channelId) {
-			sendInteractionResponse(
-				bot,
-				interaction.id,
-				interaction.token,
-				{
-					type: InteractionResponseTypes.ChannelMessageWithSource,
-					data: {
-						flags: ApplicationCommandFlags.Ephemeral,
-						embeds: [{
-							description: localise(
-								Commands.music.options.play.strings.alreadyPlayingInAnotherVoiceChannel,
-								interaction.locale,
-							),
-							color: configuration.messages.colors.yellow,
-						}],
-					},
-				},
-			);
-			return [false, voiceState];
-		}
-
-		return [true, voiceState];
-	}
-
-	/**
-	 * Checks if the user can play music by verifying several factors, such as
-	 * whether or not the user is in a voice channel, and if they have provided
-	 * the correct arguments.
-	 *
-	 * @param bot - The bot instance to use.
-	 * @param interaction - The command interaction.
-	 * @returns A tuple with the first item indicating whether the user can play
-	 * music, and the second being the user's voice state.
-	 */
-	verifyCanPlay(bot: Bot, interaction: Interaction): [boolean, VoiceState | undefined] {
-		const [canPlay, voiceState] = this.verifyMemberVoiceState(bot, interaction);
-
-		if (!canPlay) return [canPlay, voiceState];
-
-		// The user cannot add to the queue due to one reason or another.
-		if (!this.canPushToQueue) {
-			sendInteractionResponse(
-				bot,
-				interaction.id,
-				interaction.token,
-				{
-					type: InteractionResponseTypes.ChannelMessageWithSource,
-					data: {
-						flags: ApplicationCommandFlags.Ephemeral,
-						embeds: [{
-							description: localise(Commands.music.options.play.strings.queueIsFull, interaction.locale),
-							color: configuration.messages.colors.yellow,
-						}],
-					},
-				},
-			);
-			return [false, voiceState];
-		}
-
-		return [true, voiceState];
-	}
-
-	private moveToHistory(listing: SongListing): void {
-		if (this.history.length === configuration.music.limits.songs.history) {
-			this.history.shift();
-		}
-
-		if (listing.content.type === SongListingContentTypes.Collection) {
-			listing.content.position--;
-		}
-
-		this.history.push(listing);
-	}
-
-	/**
-	 * Taking a listing and the voice and text channels associated with the request to play,
-	 * queues the listing, and optionally plays it.
-	 */
-	play(
-		bot: Bot,
-		{ interaction, songListing, channels }: {
-			interaction: Interaction | undefined;
-			songListing: SongListing;
-			channels: { voice: Channel; text: Channel };
+function createMusicController(
+	client: Client,
+	guildId: bigint,
+): MusicController {
+	return {
+		player: client.features.music.node.createPlayer(guildId),
+		voiceChannelId: undefined,
+		feedbackChannelId: undefined,
+		listingHistory: [],
+		currentListing: undefined,
+		listingQueue: [],
+		flags: {
+			loop: false,
+			breakLoop: false,
 		},
-	): Promise<unknown> {
-		clearTimeout(this.disconnectTimeoutID);
+	};
+}
 
-		this.queue.push(songListing);
+function getCurrentSong(controller: MusicController): Song | SongStream | undefined {
+	if (controller.currentListing === undefined) return undefined;
 
-		// If the player is not connected to a voice channel, or if it is connected
-		// to a different voice channel, connect to the new voice channel.
-		if (!this.player.connected) {
-			this.player.connect(channels.voice.id, { deafen: true });
-
-			this.voiceChannel = channels.voice;
-			this.textChannel = channels.text;
-		}
-
-		const queuedString = localise(Commands.music.options.play.strings.queued.header, defaultLocale);
-
-		const embeds = [{
-			title: `👍 ${queuedString}`,
-			description: localise(Commands.music.options.play.strings.queued.body, defaultLocale)(songListing.content.title),
-			color: configuration.messages.colors.green,
-		}];
-
-		if (this.isOccupied) {
-			if (interaction === undefined) {
-				return sendMessage(bot, this.textChannel.id, { embeds });
-			}
-
-			return sendInteractionResponse(
-				bot,
-				interaction.id,
-				interaction.token,
-				{
-					type: InteractionResponseTypes.ChannelMessageWithSource,
-					data: { embeds },
-				},
-			);
-		}
-
-		return this.advanceQueueAndPlay(bot, interaction);
+	if (isCollection(controller.currentListing.content)) {
+		return getCurrentTrack(controller.currentListing.content);
 	}
 
-	private async advanceQueueAndPlay(
-		bot: Bot,
-		interaction?: Interaction,
-		isDeferred?: boolean,
-	): Promise<unknown> {
-		clearTimeout(this.disconnectTimeoutID);
+	return controller.currentListing.content;
+}
 
-		const wasLooped = this.isLoop;
+function getCurrentTrack(collection: SongCollection): Song | undefined {
+	return collection.songs[collection.position];
+}
 
-		if (!wasLooped) {
-			if (
-				this.current !== undefined &&
-				this.current.content.type !== SongListingContentTypes.Collection
-			) {
-				this.moveToHistory(this.current);
-				this.current = undefined;
-			}
+function isQueueVacant(listingQueue: SongListing[]): boolean {
+	return listingQueue.length < configuration.music.limits.songs.queue;
+}
 
-			if (
-				this.queue.length !== 0 &&
-				(this.current === undefined ||
-					this.current.content.type !== SongListingContentTypes.Collection)
-			) {
-				this.current = this.queue.shift()!;
-			}
-		}
+function isQueueEmpty(listingQueue: SongListing[]): boolean {
+	return listingQueue.length === 0;
+}
 
-		if (
-			this.current !== undefined &&
-			this.current.content.type === SongListingContentTypes.Collection
-		) {
-			if (
-				this.current.content.position !== this.current.content.songs.length - 1
-			) {
-				this.current.content.position++;
-			} else {
-				if (this.isLoop) {
-					this.current.content.position = 0;
-				} else {
-					this.moveToHistory(this.current);
-					if (this.queue.length !== 0) {
-						this.current = this.queue.shift()!;
-					} else {
-						this.current = undefined;
-					}
-				}
-			}
-		}
+function isHistoryVacant(listingHistory: SongListing[]): boolean {
+	return listingHistory.length < configuration.music.limits.songs.history;
+}
 
-		if (this.current === undefined) {
-			this.disconnectTimeoutID = setTimeout(
-				() => this.reset(),
-				configuration.music.disconnectTimeout,
-			);
+function isOccupied(player: Player): boolean {
+	return (player.track ?? undefined) !== undefined;
+}
 
-			const allDoneString = localise(Commands.music.strings.allDone.header, defaultLocale);
+function isPaused(player: Player): boolean {
+	return player.paused;
+}
 
-			return sendMessage(bot, this.textChannel.id, {
-				embeds: [{
-					title: `👏 ${allDoneString}`,
-					description: localise(Commands.music.strings.allDone.body, defaultLocale),
-					color: configuration.messages.colors.blue,
-				}],
-			});
-		}
+function getRunningTimeMilliseconds(player: Player): number | undefined {
+	const playingSince = player.playingSince ?? undefined;
+	if (playingSince === undefined) return undefined;
 
-		const currentSong = this.currentSong!;
+	return Date.now() - playingSince;
+}
 
-		const tracksResponse = await this.player.node.rest.loadTracks(currentSong.url);
+function getVoiceState(client: Client, interaction: Interaction): VoiceState | undefined {
+	const guild = client.cache.guilds.get(interaction.guildId!);
+	if (guild === undefined) return undefined;
 
-		if (
-			tracksResponse.loadType === LoadType.LoadFailed ||
-			tracksResponse.loadType === LoadType.NoMatches
-		) {
-			const embeds = [{
-				title: localise(Commands.music.strings.couldNotLoadTrack.header, defaultLocale),
-				description: localise(Commands.music.strings.couldNotLoadTrack.body, defaultLocale)(currentSong.title),
-				color: configuration.messages.colors.red,
-			}];
+	const voiceState = guild.voiceStates.get(interaction.user.id);
+	return voiceState;
+}
 
-			if (interaction === undefined) {
-				return sendMessage(bot, this.textChannel.id, { embeds });
-			}
-
-			if (isDeferred) {
-				return editOriginalInteractionResponse(
-					bot,
-					interaction.token,
-					{
-						embeds,
-					},
-				);
-			}
-
-			return sendInteractionResponse(
-				bot,
-				interaction.id,
-				interaction.token,
-				{
-					type: InteractionResponseTypes.ChannelMessageWithSource,
-					data: { embeds },
-				},
-			);
-		}
-
-		const track = tracksResponse.tracks[0]!;
-
-		if (this.current?.content.type === SongListingContentTypes.External) {
-			this.current.content.title = track.info.title;
-		}
-
-		this.player.once(
-			'trackEnd',
-			(_track, _reason) => {
-				if (this.breakPreviousLoop) {
-					this.breakPreviousLoop = false;
-					return;
-				}
-
-				this.advanceQueueAndPlay(bot);
-			},
-		);
-
-		this.player.play(track.track);
-
-		const symbol = configuration.music.symbols[this.current.content.type];
-		const playingString = localise(Commands.music.strings.playing.header, defaultLocale);
-		const type = localise(localisationsBySongListingType[this.current.content.type], defaultLocale).toLowerCase();
-
-		const embeds = [{
-			title: `${symbol} ${playingString} ${type}`,
-			description: localise(Commands.music.strings.playing.body, defaultLocale)(
-				this.current.content.type === SongListingContentTypes.Collection
-					? localise(Commands.music.strings.playing.parts.displayTrack, defaultLocale)(
-						this.current.content.position + 1,
-						this.current.content.songs.length,
-						this.current.content.title,
-					)
-					: '',
-				currentSong.title,
-				currentSong.url,
-				mention(this.current.requestedBy, MentionTypes.User),
-			),
-			color: configuration.messages.colors.invisible,
-		}];
-
-		if (interaction === undefined) {
-			return sendMessage(bot, this.textChannel.id, { embeds });
-		}
-
-		if (isDeferred) {
-			return editOriginalInteractionResponse(bot, interaction.token, { embeds });
-		}
-
-		return sendInteractionResponse(
+function verifyVoiceState(
+	bot: Bot,
+	interaction: Interaction,
+	controller: MusicController,
+	voiceState: VoiceState | undefined,
+): boolean {
+	if (voiceState === undefined || voiceState.channelId === undefined) {
+		sendInteractionResponse(
 			bot,
 			interaction.id,
 			interaction.token,
 			{
 				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: { embeds },
+				data: {
+					flags: ApplicationCommandFlags.Ephemeral,
+					embeds: [
+						{
+							description: localise(Commands.music.options.play.strings.mustBeInVoiceChannel, interaction.locale),
+							color: configuration.messages.colors.yellow,
+						},
+					],
+				},
 			},
 		);
+		return false;
 	}
 
-	skip(
-		skipCollection: boolean,
-		{ by, to }: { by: number | undefined; to: number | undefined },
-	): void {
-		if (this.current?.content.type === SongListingContentTypes.Collection) {
-			if (
-				skipCollection ||
-				this.current.content.position === this.current.content.songs.length - 1
-			) {
-				this.moveToHistory(this.current!);
-
-				this.current = undefined;
-			} else {
-				if (by !== undefined) {
-					this.current.content.position += by - 1;
-				}
-
-				if (to !== undefined) {
-					this.current.content.position = to! - 2;
-				}
-			}
-		}
-
-		const songsToMoveToHistory = Math.min(by ?? to ?? 0, this.queue.length);
-
-		for (let i = 0; i < songsToMoveToHistory; i++) {
-			this.moveToHistory(this.queue.shift()!);
-		}
-
-		this.player.stop();
+	if (isOccupied(controller.player) && voiceState.channelId !== controller.voiceChannelId) {
+		sendInteractionResponse(
+			bot,
+			interaction.id,
+			interaction.token,
+			{
+				type: InteractionResponseTypes.ChannelMessageWithSource,
+				data: {
+					flags: ApplicationCommandFlags.Ephemeral,
+					embeds: [{
+						description: localise(
+							Commands.music.options.play.strings.alreadyPlayingInAnotherVoiceChannel,
+							interaction.locale,
+						),
+						color: configuration.messages.colors.yellow,
+					}],
+				},
+			},
+		);
+		return false;
 	}
 
-	unskip(
-		bot: Bot,
-		unskipCollection: boolean,
-		{ by, to }: { by: number | undefined; to: number | undefined },
-	): void {
-		if (this.current?.content.type === SongListingContentTypes.Collection) {
-			if (
-				unskipCollection ||
-				this.current.content.position === 0
-			) {
-				if (this.current !== undefined) {
-					this.queue.unshift(this.current);
-				}
+	return true;
+}
 
-				this.queue.unshift(this.history.pop()!);
+function verifyCanRequestPlayback(
+	bot: Bot,
+	interaction: Interaction,
+	controller: MusicController,
+	voiceState: VoiceState | undefined,
+): boolean {
+	const isVoiceStateVerified = verifyVoiceState(bot, interaction, controller, voiceState);
+	if (!isVoiceStateVerified) return false;
 
-				this.current = undefined;
+	if (!isQueueVacant(controller.listingQueue)) {
+		sendInteractionResponse(
+			bot,
+			interaction.id,
+			interaction.token,
+			{
+				type: InteractionResponseTypes.ChannelMessageWithSource,
+				data: {
+					flags: ApplicationCommandFlags.Ephemeral,
+					embeds: [{
+						description: localise(Commands.music.options.play.strings.queueIsFull, interaction.locale),
+						color: configuration.messages.colors.yellow,
+					}],
+				},
+			},
+		);
+		return false;
+	}
+
+	return true;
+}
+
+function moveListingToHistory(controller: MusicController, listing: SongListing): void {
+	if (!isHistoryVacant(controller.listingHistory)) {
+		controller.listingHistory.shift();
+	}
+
+	// Adjust the position for being incremented automatically when played next time.
+	if (isCollection(listing.content)) {
+		listing.content.position--;
+	}
+
+	controller.listingHistory.push(listing);
+}
+
+function tryClearDisconnectTimeout(guildId: bigint): void {
+	const disconnectTimeoutId = disconnectTimeoutIdByGuildId.get(guildId);
+	if (disconnectTimeoutId !== undefined) {
+		disconnectTimeoutIdByGuildId.delete(guildId);
+		clearTimeout(disconnectTimeoutId);
+	}
+}
+
+function setDisconnectTimeout(client: Client, guildId: bigint): void {
+	disconnectTimeoutIdByGuildId.set(
+		guildId,
+		setTimeout(() => reset(client, guildId), configuration.music.disconnectTimeout),
+	);
+}
+
+function receiveNewListing(
+	[client, bot]: [Client, Bot],
+	interaction: Interaction | undefined,
+	guildId: bigint,
+	controller: MusicController,
+	listing: SongListing,
+	voiceChannelId: bigint,
+	feedbackChannelId: bigint,
+): void {
+	tryClearDisconnectTimeout(guildId);
+
+	controller.listingQueue.push(listing);
+
+	// If the player is not connected to a voice channel, or if it is connected
+	// to a different voice channel, connect to the new voice channel.
+	if (!controller.player.connected) {
+		controller.player.connect(voiceChannelId, { deafen: true });
+
+		controller.voiceChannelId = voiceChannelId;
+		controller.feedbackChannelId = feedbackChannelId;
+	}
+
+	// TODO(vxern): If there are no users in the voice channel, make this message ephemeral and localise it appropriately.
+
+	const queuedString = localise(Commands.music.options.play.strings.queued.header, defaultLocale);
+	const embed: Embed = {
+		title: `👍 ${queuedString}`,
+		description: localise(Commands.music.options.play.strings.queued.body, defaultLocale)(listing.content.title),
+		color: configuration.messages.colors.green,
+	};
+
+	if (isOccupied(controller.player)) {
+		if (interaction === undefined) {
+			return void sendMessage(bot, controller.feedbackChannelId!, { embeds: [embed] });
+		}
+
+		return void sendInteractionResponse(bot, interaction.id, interaction.token, {
+			type: InteractionResponseTypes.ChannelMessageWithSource,
+			data: { embeds: [embed] },
+		});
+	}
+
+	return advanceQueueAndPlay([client, bot], interaction, guildId, controller, false);
+}
+
+function isCollection(object: Song | SongStream | SongCollection | undefined): object is SongCollection {
+	return object?.type === SongListingContentTypes.Collection;
+}
+
+function isExternal(object: Song | SongStream | SongCollection | undefined): object is SongStream {
+	return object?.type === SongListingContentTypes.External;
+}
+
+function isFirstInCollection(collection: SongCollection): boolean {
+	return collection.position === 0;
+}
+
+function isLastInCollection(collection: SongCollection): boolean {
+	return collection.position === collection.songs.length - 1;
+}
+
+function advanceQueueAndPlay(
+	[client, bot]: [Client, Bot],
+	interaction: Interaction | undefined,
+	guildId: bigint,
+	controller: MusicController,
+	isDeferred: boolean,
+): void {
+	tryClearDisconnectTimeout(guildId);
+
+	if (!controller.flags.loop) {
+		if (controller.currentListing !== undefined && !isCollection(controller.currentListing?.content)) {
+			moveListingToHistory(controller, controller.currentListing);
+			controller.currentListing = undefined;
+		}
+
+		if (
+			!isQueueEmpty(controller.listingQueue) &&
+			(controller.currentListing === undefined || !isCollection(controller.currentListing?.content))
+		) {
+			controller.currentListing = controller.listingQueue.shift();
+		}
+	}
+
+	if (isCollection(controller.currentListing?.content)) {
+		if (isLastInCollection(controller.currentListing!.content)) {
+			if (controller.flags.loop) {
+				controller.currentListing!.content.position = 0;
 			} else {
-				if (by !== undefined) {
-					this.current.content.position -= by + 1;
-				}
-
-				if (to !== undefined) {
-					this.current.content.position = to! - 2;
-				}
-
-				if (by === undefined && to === undefined) {
-					this.current.content.position -= 2;
-				}
+				moveListingToHistory(controller, controller.currentListing!);
+				controller.currentListing = controller.listingQueue.shift();
 			}
 		} else {
-			const songsToMoveToQueue = Math.min(by ?? to ?? 1, this.history.length);
+			controller.currentListing!.content.position++;
+		}
+	}
 
-			if (this.current !== undefined) {
-				this.queue.unshift(this.current);
+	if (controller.currentListing === undefined) {
+		setDisconnectTimeout(client, guildId);
 
-				this.current = undefined;
-			}
+		// TODO(vxern): If there are no users in the voice channel, make this message ephemeral and localise it appropriately.
 
-			for (let i = 0; i < songsToMoveToQueue; i++) {
-				this.queue.unshift(this.history.pop()!);
-			}
+		const allDoneString = localise(Commands.music.strings.allDone.header, defaultLocale);
+
+		return void sendMessage(bot, controller.feedbackChannelId!, {
+			embeds: [{
+				title: `👏 ${allDoneString}`,
+				description: localise(Commands.music.strings.allDone.body, defaultLocale),
+				color: configuration.messages.colors.blue,
+			}],
+		});
+	}
+
+	return void loadSong([client, bot], interaction, guildId, controller, getCurrentSong(controller)!, isDeferred);
+}
+
+async function loadSong(
+	[client, bot]: [Client, Bot],
+	interaction: Interaction | undefined,
+	guildId: bigint,
+	controller: MusicController,
+	song: Song | SongStream,
+	isDeferred: boolean,
+): Promise<boolean> {
+	const result = await controller.player.node.rest.loadTracks(song.url);
+
+	if (result.loadType === LoadType.LoadFailed || result.loadType === LoadType.NoMatches) {
+		const embed: Embed = {
+			title: localise(Commands.music.strings.couldNotLoadTrack.header, defaultLocale),
+			description: localise(Commands.music.strings.couldNotLoadTrack.body, defaultLocale)(song.title),
+			color: configuration.messages.colors.red,
+		};
+
+		if (interaction === undefined) {
+			sendMessage(bot, controller.feedbackChannelId!, { embeds: [embed] });
+			return false;
 		}
 
-		if ((this.player.track ?? undefined) !== undefined) {
-			this.player.stop();
+		if (isDeferred) {
+			editOriginalInteractionResponse(bot, interaction.token, { embeds: [embed] });
+			return false;
+		}
+
+		sendInteractionResponse(bot, interaction.id, interaction.token, {
+			type: InteractionResponseTypes.ChannelMessageWithSource,
+			data: { embeds: [embed] },
+		});
+		return false;
+	}
+
+	const track = result.tracks[0]!;
+
+	if (isExternal(controller.currentListing?.content)) {
+		controller.currentListing!.content.title = track.info.title;
+	}
+
+	controller.player.once('trackEnd', (_track, _reason) => {
+		if (controller.flags.breakLoop) {
+			controller.flags.breakLoop = false;
+			return;
+		}
+
+		advanceQueueAndPlay([client, bot], undefined, guildId, controller, false);
+	});
+
+	controller.player.play(track.track);
+
+	const symbol = configuration.music.symbols[song.type];
+	const playingString = localise(Commands.music.strings.playing.header, defaultLocale);
+	const type = localise(localisationsBySongListingType[song.type], defaultLocale).toLowerCase();
+
+	const embed: Embed = {
+		title: `${symbol} ${playingString} ${type}`,
+		description: localise(Commands.music.strings.playing.body, defaultLocale)(
+			isCollection(controller.currentListing?.content)
+				? localise(Commands.music.strings.playing.parts.displayTrack, defaultLocale)(
+					controller.currentListing!.content.position + 1,
+					controller.currentListing!.content.songs.length,
+					controller.currentListing!.content.title,
+				)
+				: '',
+			song.title,
+			song.url,
+			mention(controller.currentListing!.requestedBy, MentionTypes.User),
+		),
+		color: configuration.messages.colors.invisible,
+	};
+
+	if (interaction === undefined) {
+		sendMessage(bot, controller.feedbackChannelId!, { embeds: [embed] });
+		return true;
+	}
+
+	if (isDeferred) {
+		editOriginalInteractionResponse(bot, interaction.token, { embeds: [embed] });
+		return true;
+	}
+
+	sendInteractionResponse(
+		bot,
+		interaction.id,
+		interaction.token,
+		{
+			type: InteractionResponseTypes.ChannelMessageWithSource,
+			data: { embeds: [embed] },
+		},
+	);
+	return true;
+}
+
+interface PositionControls {
+	by: number;
+	to: number;
+}
+
+function skip(controller: MusicController, skipCollection: boolean, { by, to }: Partial<PositionControls>): void {
+	if (isCollection(controller.currentListing?.content)) {
+		if (skipCollection || isLastInCollection(controller.currentListing!.content)) {
+			moveListingToHistory(controller, controller.currentListing!);
+			controller.currentListing = undefined;
 		} else {
-			this.advanceQueueAndPlay(bot);
-		}
-	}
+			if (by !== undefined) {
+				controller.currentListing!.content.position += by - 1;
+			}
 
-	/** Sets the volume of the player. */
-	setVolume(volume: number): void {
-		this.volume = volume;
-
-		this.player.setVolume(this.volume);
-	}
-
-	pause(): void {
-		this.player.pause(true);
-	}
-
-	resume(): void {
-		this.player.pause(false);
-	}
-
-	replay(
-		bot: Bot,
-		interaction: Interaction,
-		replayCollection: boolean,
-	): void {
-		const previousLoopState = this.isLoop;
-		this.isLoop = true;
-		this.player.once('trackStart', () => this.isLoop = previousLoopState);
-
-		if (this.current?.content.type === SongListingContentTypes.Collection) {
-			if (replayCollection) {
-				this.current.content.position = -1;
-			} else {
-				this.current!.content.position--;
+			if (to !== undefined) {
+				controller.currentListing!.content.position = to - 2;
 			}
 		}
-
-		this.breakPreviousLoop = true;
-		this.player.stop();
-		this.advanceQueueAndPlay(bot, interaction);
 	}
 
-	reset(): void {
-		this.history = [];
-		this.current = undefined;
-		this.queue = [];
+	const listingsToMoveToHistory = Math.min(by ?? to ?? 0, controller.listingQueue.length);
 
-		this.isLoop = false;
-		this.isPaused;
-
-		this.player.stop();
-		this.player.pause(false);
-		this.player.disconnect();
-
-		this.setVolume(configuration.music.limits.volume);
+	for (let _ = 0; _ < listingsToMoveToHistory; _++) {
+		const listing = controller.listingQueue.shift();
+		if (listing !== undefined) {
+			moveListingToHistory(controller, listing);
+		}
 	}
+
+	return void controller.player.stop();
+}
+
+function unskip(
+	[client, bot]: [Client, Bot],
+	guildId: bigint,
+	controller: MusicController,
+	unskipCollection: boolean,
+	{ by, to }: Partial<PositionControls>,
+): void {
+	if (isCollection(controller.currentListing?.content)) {
+		if (unskipCollection || isFirstInCollection(controller.currentListing!.content)) {
+			controller.listingQueue.unshift(controller.listingHistory.pop()!);
+			controller.currentListing = undefined;
+		} else {
+			if (by !== undefined) {
+				controller.currentListing!.content.position -= by + 1;
+			}
+
+			if (to !== undefined) {
+				controller.currentListing!.content.position = to! - 2;
+			}
+
+			if (by === undefined && to === undefined) {
+				controller.currentListing!.content.position -= 2;
+			}
+		}
+	} else {
+		const listingsToMoveToQueue = Math.min(by ?? to ?? 1, controller.listingHistory.length);
+
+		if (controller.currentListing !== undefined) {
+			controller.listingQueue.unshift(controller.currentListing);
+			controller.currentListing = undefined;
+		}
+
+		for (let _ = 0; _ < listingsToMoveToQueue; _++) {
+			controller.listingQueue.unshift(controller.listingHistory.pop()!);
+		}
+	}
+
+	if ((controller.player.track ?? undefined) !== undefined) {
+		controller.player.stop();
+	} else {
+		advanceQueueAndPlay([client, bot], undefined, guildId, controller, false);
+	}
+}
+
+function setVolume(player: Player, volume: number): void {
+	return void player.setVolume(volume);
+}
+
+function pause(player: Player): void {
+	return void player.pause(true);
+}
+
+function resume(player: Player): void {
+	return void player.pause(false);
+}
+
+function replay(
+	[client, bot]: [Client, Bot],
+	interaction: Interaction,
+	controller: MusicController,
+	replayCollection: boolean,
+): void {
+	const previousLoopState = controller.flags.loop;
+	controller.flags.loop = true;
+	controller.player.once('trackStart', () => controller.flags.loop = previousLoopState);
+
+	if (isCollection(controller.currentListing?.content)) {
+		if (replayCollection) {
+			controller.currentListing!.content.position = -1;
+		} else {
+			controller.currentListing!.content.position--;
+		}
+	}
+
+	controller.flags.breakLoop = true;
+	controller.player.stop();
+	return advanceQueueAndPlay([client, bot], interaction, interaction.guildId!, controller, false);
+}
+
+function reset(client: Client, guildId: bigint): void {
+	const controller = client.features.music.controllers.get(guildId);
+	if (controller !== undefined) {
+		controller.player.destroy();
+	}
+
+	return setupMusicController(client, guildId);
 }
 
 const localisationsBySongListingType = {
@@ -558,4 +561,24 @@ const localisationsBySongListingType = {
 	[SongListingContentTypes.Collection]: Commands.music.strings.type.songCollection,
 };
 
-export { MusicController, setupMusicController };
+export {
+	getRunningTimeMilliseconds,
+	getVoiceState,
+	isCollection,
+	isOccupied,
+	isPaused,
+	isQueueEmpty,
+	isQueueVacant,
+	pause,
+	receiveNewListing,
+	replay,
+	reset,
+	resume,
+	setupMusicController,
+	setVolume,
+	skip,
+	unskip,
+	verifyCanRequestPlayback,
+	verifyVoiceState,
+};
+export type { MusicController };
