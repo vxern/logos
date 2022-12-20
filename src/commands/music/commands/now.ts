@@ -10,7 +10,7 @@ import { Commands, createLocalisations, localise } from 'logos/assets/localisati
 import { Song, SongStream } from 'logos/src/commands/music/data/types.ts';
 import { OptionBuilder } from 'logos/src/commands/command.ts';
 import { collection, show } from 'logos/src/commands/parameters.ts';
-import { getRunningTimeMilliseconds, isCollection, isOccupied } from 'logos/src/controllers/music.ts';
+import { isCollection, isOccupied } from 'logos/src/controllers/music.ts';
 import { Client } from 'logos/src/client.ts';
 import { paginate, parseArguments } from 'logos/src/interactions.ts';
 import { chunk } from 'logos/src/utils.ts';
@@ -141,9 +141,11 @@ function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], interaction
 						},
 						{
 							name: localise(Commands.music.options.now.strings.runningTime, interaction.locale),
-							value: localise(Commands.music.options.now.strings.playingSince, interaction.locale)(
-								displayTime(getRunningTimeMilliseconds(controller.player)!),
-							),
+							value: (controller.player.playingSince ?? undefined) !== undefined
+								? localise(Commands.music.options.now.strings.playingSince, interaction.locale)(
+									displayTime(controller.player.playingSince!),
+								)
+								: localise(Commands.music.options.now.strings.startTimeUnknown, interaction.locale),
 							inline: false,
 						},
 					],

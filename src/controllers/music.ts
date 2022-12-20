@@ -98,13 +98,6 @@ function isPaused(player: Player): boolean {
 	return player.paused;
 }
 
-function getRunningTimeMilliseconds(player: Player): number | undefined {
-	const playingSince = player.playingSince ?? undefined;
-	if (playingSince === undefined) return undefined;
-
-	return Date.now() - playingSince;
-}
-
 function getVoiceState(client: Client, interaction: Interaction): VoiceState | undefined {
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (guild === undefined) return undefined;
@@ -562,7 +555,6 @@ const localisationsBySongListingType = {
 };
 
 export {
-	getRunningTimeMilliseconds,
 	getVoiceState,
 	isCollection,
 	isOccupied,
