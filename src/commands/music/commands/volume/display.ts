@@ -15,12 +15,14 @@ function handleDisplayVolume(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): void {
-	const musicController = client.features.music.controllers.get(interaction.guildId!);
-	if (musicController === undefined) return;
+	const controller = client.features.music.controllers.get(interaction.guildId!);
+	if (controller === undefined) return;
 
 	const [{ show }] = parseArguments(interaction.data?.options, { show: 'boolean' });
 
-	const volumeString = localise(Commands.music.options.volume.options.display.strings.volume.header, defaultLocale);
+	const locale = show ? defaultLocale : interaction.locale;
+
+	const volumeString = localise(Commands.music.options.volume.options.display.strings.volume.header, locale);
 
 	return void sendInteractionResponse(
 		bot,
@@ -32,8 +34,8 @@ function handleDisplayVolume(
 				flags: !show ? ApplicationCommandFlags.Ephemeral : undefined,
 				embeds: [{
 					title: `🔊 ${volumeString}`,
-					description: localise(Commands.music.options.volume.options.display.strings.volume.body, defaultLocale)(
-						musicController.volume,
+					description: localise(Commands.music.options.volume.options.display.strings.volume.body, locale)(
+						controller.player.volume,
 					),
 					color: configuration.messages.colors.invisible,
 				}],

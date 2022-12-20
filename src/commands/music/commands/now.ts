@@ -7,9 +7,10 @@ import {
 	sendInteractionResponse,
 } from 'discordeno';
 import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
-import { Song, SongListingContentTypes, SongStream } from 'logos/src/commands/music/data/types.ts';
+import { Song, SongStream } from 'logos/src/commands/music/data/types.ts';
 import { OptionBuilder } from 'logos/src/commands/command.ts';
 import { collection, show } from 'logos/src/commands/parameters.ts';
+import { isCollection, isOccupied } from 'logos/src/controllers/music.ts';
 import { Client } from 'logos/src/client.ts';
 import { paginate, parseArguments } from 'logos/src/interactions.ts';
 import { chunk } from 'logos/src/utils.ts';
@@ -23,16 +24,13 @@ const command: OptionBuilder = {
 	options: [collection, show],
 };
 
-function handleDisplayCurrentlyPlaying(
-	[client, bot]: [Client, Bot],
-	interaction: Interaction,
-): void {
-	const musicController = client.features.music.controllers.get(interaction.guildId!);
-	if (musicController === undefined) return;
+function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], interaction: Interaction): void {
+	const controller = client.features.music.controllers.get(interaction.guildId!);
+	if (controller === undefined) return;
 
-	const currentListing = musicController.current;
+	const currentListing = controller.currentListing;
 
-	if (!musicController.isOccupied || currentListing === undefined) {
+	if (!isOccupied(controller.player) || currentListing === undefined) {
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -50,16 +48,10 @@ function handleDisplayCurrentlyPlaying(
 		);
 	}
 
-	const [{ collection, show }] = parseArguments(
-		interaction.data?.options,
-		{
-			collection: 'boolean',
-			show: 'boolean',
-		},
-	);
+	const [{ collection, show }] = parseArguments(interaction.data?.options, { collection: 'boolean', show: 'boolean' });
 
 	if (collection !== undefined) {
-		if (currentListing?.content.type !== SongListingContentTypes.Collection) {
+		if (!isCollection(currentListing?.content)) {
 			return void sendInteractionResponse(
 				bot,
 				interaction.id,
@@ -128,7 +120,7 @@ function handleDisplayCurrentlyPlaying(
 				embeds: [{
 					title: `⬇️ ${nowPlayingString}`,
 					fields: [
-						...currentListing.content.type === SongListingContentTypes.Collection
+						...isCollection(currentListing?.content)
 							? [{
 								name: localise(Commands.music.options.now.strings.collection, interaction.locale),
 								value: currentListing.content.title,
@@ -149,9 +141,11 @@ function handleDisplayCurrentlyPlaying(
 						},
 						{
 							name: localise(Commands.music.options.now.strings.runningTime, interaction.locale),
-							value: localise(Commands.music.options.now.strings.playingSince, interaction.locale)(
-								displayTime(musicController.runningTime!),
-							),
+							value: (controller.player.playingSince ?? undefined) !== undefined
+								? localise(Commands.music.options.now.strings.playingSince, interaction.locale)(
+									displayTime(controller.player.playingSince!),
+								)
+								: localise(Commands.music.options.now.strings.startTimeUnknown, interaction.locale),
 							inline: false,
 						},
 					],

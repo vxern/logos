@@ -7,9 +7,16 @@ import {
 	sendInteractionResponse,
 } from 'discordeno';
 import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
-import { SongListingContentTypes } from 'logos/src/commands/music/data/types.ts';
 import { OptionBuilder } from 'logos/src/commands/command.ts';
 import { by, collection, to } from 'logos/src/commands/parameters.ts';
+import {
+	getVoiceState,
+	isCollection,
+	isOccupied,
+	isQueueVacant,
+	unskip,
+	verifyVoiceState,
+} from 'logos/src/controllers/music.ts';
 import { Client } from 'logos/src/client.ts';
 import { parseArguments } from 'logos/src/interactions.ts';
 import configuration from 'logos/configuration.ts';
@@ -22,15 +29,14 @@ const command: OptionBuilder = {
 	options: [collection, by, to],
 };
 
-function handleUnskipAction(
-	[client, bot]: [Client, Bot],
-	interaction: Interaction,
-): void {
-	const musicController = client.features.music.controllers.get(interaction.guildId!);
-	if (musicController === undefined) return;
+function handleUnskipAction([client, bot]: [Client, Bot], interaction: Interaction): void {
+	const controller = client.features.music.controllers.get(interaction.guildId!);
+	if (controller === undefined) return;
 
-	const [canAct, _] = musicController.verifyMemberVoiceState(bot, interaction);
-	if (!canAct) return;
+	const voiceState = getVoiceState(client, interaction);
+
+	const isVoiceStateVerified = verifyVoiceState(bot, interaction, controller, voiceState);
+	if (!isVoiceStateVerified) return;
 
 	const data = interaction.data;
 	if (data === undefined) return;
@@ -44,14 +50,15 @@ function handleUnskipAction(
 	if (by !== undefined && isNaN(by)) return;
 	if (to !== undefined && isNaN(to)) return;
 
-	const songListing = musicController.current;
+	const isUnskippingListing = (() => {
+		if (controller.currentListing === undefined) return true;
+		if (!isCollection(controller.currentListing?.content)) return true;
+		if (collection !== undefined || controller.currentListing!.content.position === 0) return true;
 
-	const isUnskippingListing = songListing === undefined ||
-		songListing.content.type !== SongListingContentTypes.Collection ||
-		(songListing.content.type === SongListingContentTypes.Collection &&
-			(collection !== undefined || songListing.content.position === 0));
+		return false;
+	})();
 
-	if (isUnskippingListing && musicController.history.length === 0) {
+	if (isUnskippingListing && controller.listingHistory.length === 0) {
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -69,10 +76,7 @@ function handleUnskipAction(
 		);
 	}
 
-	if (
-		collection !== undefined &&
-		songListing?.content.type !== SongListingContentTypes.Collection
-	) {
+	if (collection !== undefined && !isCollection(controller.currentListing?.content)) {
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -90,7 +94,7 @@ function handleUnskipAction(
 		);
 	}
 
-	if (musicController.isOccupied && !musicController.canPushToQueue) {
+	if (isOccupied(controller.player) && !isQueueVacant(controller.listingQueue)) {
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -147,54 +151,26 @@ function handleUnskipAction(
 	const isUnskippingCollection = collection ?? false;
 
 	if (isUnskippingListing) {
-		musicController.unskip(bot, isUnskippingCollection, {
-			by: by,
-			to: to,
-		});
+		unskip([client, bot], interaction.guildId!, controller, isUnskippingCollection, { by: by, to: to });
 	} else {
 		if (by !== undefined) {
-			if (
-				songListing.content.type === SongListingContentTypes.Collection &&
-				collection === undefined
-			) {
-				const listingToUnskip = Math.min(by, songListing.content.position);
-
-				musicController.unskip(bot, isUnskippingCollection, {
-					by: listingToUnskip,
-					to: undefined,
-				});
+			let listingsToUnskip!: number;
+			if (isCollection(controller.currentListing?.content) && collection === undefined) {
+				listingsToUnskip = Math.min(by, controller.currentListing!.content.position);
 			} else {
-				const listingsToUnskip = Math.min(by, musicController.history.length);
-
-				musicController.unskip(bot, isUnskippingCollection, {
-					by: listingsToUnskip,
-					to: undefined,
-				});
+				listingsToUnskip = Math.min(by, controller.listingHistory.length);
 			}
+			unskip([client, bot], interaction.guildId!, controller, isUnskippingCollection, { by: listingsToUnskip });
 		} else if (to !== undefined) {
-			if (
-				songListing.content.type === SongListingContentTypes.Collection &&
-				collection === undefined
-			) {
-				const listingToSkipTo = Math.max(to, 1);
-
-				musicController.unskip(bot, isUnskippingCollection, {
-					by: undefined,
-					to: listingToSkipTo,
-				});
+			let listingToSkipTo!: number;
+			if (isCollection(controller.currentListing?.content) && collection === undefined) {
+				listingToSkipTo = Math.max(to, 1);
 			} else {
-				const listingToSkipTo = Math.min(to, musicController.history.length);
-
-				musicController.unskip(bot, isUnskippingCollection, {
-					by: undefined,
-					to: listingToSkipTo,
-				});
+				listingToSkipTo = Math.min(to, controller.listingHistory.length);
 			}
+			unskip([client, bot], interaction.guildId!, controller, isUnskippingCollection, { to: listingToSkipTo });
 		} else {
-			musicController.unskip(bot, isUnskippingCollection, {
-				by: undefined,
-				to: undefined,
-			});
+			unskip([client, bot], interaction.guildId!, controller, isUnskippingCollection, {});
 		}
 	}
 

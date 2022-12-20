@@ -1163,6 +1163,11 @@ class Commands {
 						'Polish': (timestamp: string) => `Od ${timestamp}.`,
 						'Romanian': (timestamp: string) => `De la ${timestamp}.`,
 					},
+					startTimeUnknown: {
+						'English': 'Start time unknown.',
+						'Polish': 'Czas rozpoczęcia odtwarzania nieznany.',
+						'Romanian': 'Oră de început a redării necunoscută.',
+					},
 					sourcedFrom: {
 						'English': (origin: string) => `This listing was sourced from ${origin}.`,
 						'Polish': (origin: string) => `Ten wpis został pobrany z ${origin}.`,

@@ -18,6 +18,7 @@ import {
 import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
 import { SongListing } from 'logos/src/commands/music/data/types.ts';
 import { OptionBuilder } from 'logos/src/commands/command.ts';
+import { getVoiceState, isQueueEmpty, verifyVoiceState } from 'logos/src/controllers/music.ts';
 import { Client } from 'logos/src/client.ts';
 import { createInteractionCollector } from 'logos/src/interactions.ts';
 import { chunk } from 'logos/src/utils.ts';
@@ -31,17 +32,16 @@ const command: OptionBuilder = {
 	handle: handleRemoveSongListing,
 };
 
-function handleRemoveSongListing(
-	[client, bot]: [Client, Bot],
-	interaction: Interaction,
-): void {
-	const musicController = client.features.music.controllers.get(interaction.guildId!);
-	if (musicController === undefined) return;
+function handleRemoveSongListing([client, bot]: [Client, Bot], interaction: Interaction): void {
+	const controller = client.features.music.controllers.get(interaction.guildId!);
+	if (controller === undefined) return;
 
-	const [canAct, _voiceState] = musicController.verifyMemberVoiceState(bot, interaction);
-	if (!canAct) return;
+	const voiceState = getVoiceState(client, interaction);
 
-	if (musicController.queue.length === 0) {
+	const isVoiceStateVerified = verifyVoiceState(bot, interaction, controller, voiceState);
+	if (!isVoiceStateVerified) return;
+
+	if (isQueueEmpty(controller.listingQueue)) {
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -59,7 +59,7 @@ function handleRemoveSongListing(
 		);
 	}
 
-	const pages = chunk(musicController.queue, configuration.music.limits.songs.page);
+	const pages = chunk(controller.listingQueue, configuration.music.limits.songs.page);
 
 	return void sendInteractionResponse(
 		bot,
@@ -71,7 +71,7 @@ function handleRemoveSongListing(
 				flags: ApplicationCommandFlags.Ephemeral,
 				...generateEmbed([client, bot], interaction, {
 					pages,
-					remove: (index) => musicController.queue.splice(index, 1)?.at(0),
+					remove: (index) => controller.listingQueue.splice(index, 1)?.at(0),
 					pageIndex: 0,
 				}, interaction.locale),
 			},

@@ -29,16 +29,12 @@ async function handleSetTimeout(
 	);
 
 	if (
-		interaction.type !== InteractionTypes.ApplicationCommandAutocomplete &&
-		user === undefined && duration === undefined
+		interaction.type !== InteractionTypes.ApplicationCommandAutocomplete && user === undefined && duration === undefined
 	) {
 		return;
 	}
 
-	if (
-		interaction.type === InteractionTypes.ApplicationCommandAutocomplete &&
-		focused?.name === 'duration'
-	) {
+	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete && focused?.name === 'duration') {
 		const timestamp = getTimestampFromExpression(duration!, interaction.locale);
 
 		return void sendInteractionResponse(
@@ -57,7 +53,7 @@ async function handleSetTimeout(
 	const member = resolveInteractionToMember([client, bot], interaction, user!);
 	if (member === undefined) return;
 
-	if (reason === undefined) return;
+	if (interaction.type !== InteractionTypes.ApplicationCommandAutocomplete && focused?.name !== 'reason') return;
 
 	if (member.id === interaction.member?.id) {
 		return displayError(
@@ -103,7 +99,7 @@ async function handleSetTimeout(
 		getDmChannel(bot, member.id).catch(() => undefined),
 	]);
 
-	log([client, bot], guild, 'memberTimeoutAdd', member, until, reason, interaction.user);
+	log([client, bot], guild, 'memberTimeoutAdd', member, until, reason!, interaction.user);
 
 	sendInteractionResponse(bot, interaction.id, interaction.token, {
 		type: InteractionResponseTypes.ChannelMessageWithSource,
@@ -131,7 +127,7 @@ async function handleSetTimeout(
 				description: localise(Commands.timeout.strings.timedOutWithReason, interaction.locale)(
 					mention(member.id, MentionTypes.User),
 					displayTime(until),
-					reason,
+					reason!,
 				),
 				color: configuration.messages.colors.yellow,
 			}],
@@ -142,7 +138,7 @@ async function handleSetTimeout(
 		embeds: [
 			{
 				author: guildAsAuthor(bot, guild),
-				description: localise(Commands.timeout.strings.timedOutDirect, defaultLocale)(displayTime(until), reason),
+				description: localise(Commands.timeout.strings.timedOutDirect, defaultLocale)(displayTime(until), reason!),
 				color: configuration.messages.colors.yellow,
 			},
 		],

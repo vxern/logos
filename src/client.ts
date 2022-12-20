@@ -226,7 +226,7 @@ function createEventHandlers(client: Client): Partial<EventHandlers> {
 			registerGuild(client, guild);
 
 			setupLogging([client, bot], guild);
-			setupMusicController(client, guild);
+			setupMusicController(client, guild.id);
 
 			await fetchMembers(bot, guild.id, { limit: 0, query: '' });
 		},

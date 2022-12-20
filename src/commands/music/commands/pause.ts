@@ -9,6 +9,7 @@ import {
 import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
 import { handleResumePlayback } from 'logos/src/commands/music/commands/resume.ts';
 import { OptionBuilder } from 'logos/src/commands/command.ts';
+import { getVoiceState, isOccupied, isPaused, pause, verifyVoiceState } from 'logos/src/controllers/music.ts';
 import { Client } from 'logos/src/client.ts';
 import configuration from 'logos/configuration.ts';
 import { defaultLocale } from 'logos/types.ts';
@@ -19,17 +20,15 @@ const command: OptionBuilder = {
 	handle: handlePausePlayback,
 };
 
-function handlePausePlayback(
-	[client, bot]: [Client, Bot],
-	interaction: Interaction,
-): void {
-	const musicController = client.features.music.controllers.get(interaction.guildId!);
-	if (musicController === undefined) return;
+function handlePausePlayback([client, bot]: [Client, Bot], interaction: Interaction): void {
+	const controller = client.features.music.controllers.get(interaction.guildId!);
+	if (controller === undefined) return;
 
-	const [canAct, _voiceState] = musicController.verifyMemberVoiceState(bot, interaction);
-	if (!canAct) return;
+	const voiceState = getVoiceState(client, interaction);
+	const isVerifiedVoiceState = verifyVoiceState(bot, interaction, controller, voiceState);
+	if (!isVerifiedVoiceState) return;
 
-	if (!musicController.isOccupied) {
+	if (!isOccupied(controller.player)) {
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -47,11 +46,11 @@ function handlePausePlayback(
 		);
 	}
 
-	if (musicController.isPaused) {
+	if (isPaused(controller.player)) {
 		return handleResumePlayback([client, bot], interaction);
 	}
 
-	musicController.pause();
+	pause(controller.player);
 
 	const pausedString = localise(Commands.music.options.pause.strings.paused.header, defaultLocale);
 
