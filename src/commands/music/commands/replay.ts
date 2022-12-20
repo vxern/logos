@@ -7,9 +7,9 @@ import {
 	sendInteractionResponse,
 } from 'discordeno';
 import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
-import { SongListingContentTypes } from 'logos/src/commands/music/data/types.ts';
 import { OptionBuilder } from 'logos/src/commands/command.ts';
 import { collection } from 'logos/src/commands/parameters.ts';
+import { getVoiceState, isCollection, isOccupied, replay, verifyVoiceState } from 'logos/src/controllers/music.ts';
 import { Client } from 'logos/src/client.ts';
 import { parseArguments } from 'logos/src/interactions.ts';
 import configuration from 'logos/configuration.ts';
@@ -21,21 +21,20 @@ const command: OptionBuilder = {
 	options: [collection],
 };
 
-function handleReplayAction(
-	[client, bot]: [Client, Bot],
-	interaction: Interaction,
-): void {
-	const musicController = client.music.get(interaction.guildId!);
-	if (musicController === undefined) return;
+function handleReplayAction([client, bot]: [Client, Bot], interaction: Interaction): void {
+	const controller = client.features.music.controllers.get(interaction.guildId!);
+	if (controller === undefined) return;
 
-	const [canAct, _voiceState] = musicController.verifyMemberVoiceState(interaction);
-	if (!canAct) return;
+	const voiceState = getVoiceState(client, interaction);
+
+	const isVoiceStateVerified = verifyVoiceState(bot, interaction, controller, voiceState);
+	if (!isVoiceStateVerified) return;
 
 	const [{ collection }] = parseArguments(interaction.data?.options, { collection: 'boolean' });
 
-	const currentListing = musicController.current;
+	const currentListing = controller.currentListing;
 
-	if (!musicController.isOccupied || currentListing === undefined) {
+	if (!isOccupied(controller.player) || currentListing === undefined) {
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -53,10 +52,7 @@ function handleReplayAction(
 		);
 	}
 
-	if (
-		collection !== undefined &&
-		currentListing.content.type !== SongListingContentTypes.Collection
-	) {
+	if (collection !== undefined && !isCollection(currentListing?.content)) {
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -74,7 +70,7 @@ function handleReplayAction(
 		);
 	}
 
-	return musicController.replay(interaction, collection);
+	return replay([client, bot], interaction, controller, collection ?? false);
 }
 
 export default command;

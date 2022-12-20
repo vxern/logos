@@ -1,11 +1,11 @@
-import { Interaction } from 'discordeno';
+import { Bot, Interaction } from 'discordeno';
 import youtube from 'logos/src/commands/music/data/sources/youtube.ts';
 import { SongListing } from 'logos/src/commands/music/data/types.ts';
 import { Client } from 'logos/src/client.ts';
 
 /** Obtains a song listing from a source. */
 type ListingResolver = (
-	client: Client,
+	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 	query: string,
 ) => Promise<SongListing | undefined>;

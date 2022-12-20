@@ -8,6 +8,7 @@ import {
 } from 'discordeno';
 import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
 import { OptionBuilder } from 'logos/src/commands/command.ts';
+import { getVoiceState, isOccupied, isPaused, resume, verifyVoiceState } from 'logos/src/controllers/music.ts';
 import { Client } from 'logos/src/client.ts';
 import configuration from 'logos/configuration.ts';
 import { defaultLocale } from 'logos/types.ts';
@@ -18,17 +19,16 @@ const command: OptionBuilder = {
 	handle: handleResumePlayback,
 };
 
-function handleResumePlayback(
-	[client, bot]: [Client, Bot],
-	interaction: Interaction,
-): void {
-	const musicController = client.music.get(interaction.guildId!);
-	if (musicController === undefined) return;
+function handleResumePlayback(	[client, bot]: [Client, Bot],	interaction: Interaction,): void {
+	const controller = client.features.music.controllers.get(interaction.guildId!);
+	if (controller === undefined) return;
 
-	const [canAct, _] = musicController.verifyMemberVoiceState(interaction);
-	if (!canAct) return;
+	const voiceState = getVoiceState(client, interaction);
 
-	if (!musicController.isOccupied) {
+	const isVoiceStateVerified = verifyVoiceState(bot, interaction, controller, voiceState);
+	if (!isVoiceStateVerified) return;
+
+	if (!isOccupied(controller.player)) {
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -46,7 +46,7 @@ function handleResumePlayback(
 		);
 	}
 
-	if (!musicController.isPaused) {
+	if (!isPaused(controller.player)) {
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -64,7 +64,7 @@ function handleResumePlayback(
 		);
 	}
 
-	musicController.resume();
+	resume(controller.player);
 
 	const resumedString = localise(Commands.music.options.resume.strings.resumed.header, defaultLocale);
 

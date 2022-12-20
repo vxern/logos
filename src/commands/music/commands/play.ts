@@ -10,6 +10,7 @@ import { ListingResolver, sources } from 'logos/src/commands/music/data/sources/
 import { SongListingContentTypes } from 'logos/src/commands/music/data/types.ts';
 import { OptionBuilder } from 'logos/src/commands/command.ts';
 import { query } from 'logos/src/commands/parameters.ts';
+import { getVoiceState, receiveNewListing, verifyCanRequestPlayback } from 'logos/src/controllers/music.ts';
 import { Client } from 'logos/src/client.ts';
 import { parseArguments } from 'logos/src/interactions.ts';
 import configuration from 'logos/configuration.ts';
@@ -65,18 +66,20 @@ async function handleRequestSongListing(
 	interaction: Interaction,
 	resolveToSongListing: ListingResolver,
 ): Promise<void> {
-	const musicController = client.music.get(interaction.guildId!);
-	if (musicController === undefined) return;
+	const controller = client.features.music.controllers.get(interaction.guildId!);
+	if (controller === undefined) return;
 
 	const [{ query }] = parseArguments(interaction.data?.options, {});
 	if (query === undefined) return;
 
-	const [canPlay, voiceState] = musicController.verifyCanPlay(interaction);
+	const voiceState = getVoiceState(client, interaction);
+
+	const canPlay = verifyCanRequestPlayback(bot, interaction, controller, voiceState);
 	if (!canPlay || voiceState === undefined) return;
 
-	const songListing = await resolveToSongListing(client, interaction, query);
+	const listing = await resolveToSongListing([client, bot], interaction, query);
 
-	if (songListing === undefined) {
+	if (listing === undefined) {
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -93,17 +96,21 @@ async function handleRequestSongListing(
 		);
 	}
 
-	const textChannel = client.cache.channels.get(interaction.channelId!);
-	if (textChannel === undefined) return;
+	const feedbackChannelId = client.cache.channels.get(interaction.channelId!)?.id;
+	if (feedbackChannelId === undefined) return;
 
-	const voiceChannel = client.cache.channels.get(voiceState.channelId!);
-	if (voiceChannel === undefined) return;
+	const voiceChannelId = client.cache.channels.get(voiceState.channelId!)?.id;
+	if (voiceChannelId === undefined) return;
 
-	return void musicController.play(client, {
-		interaction: interaction,
-		songListing: songListing,
-		channels: { text: textChannel, voice: voiceChannel },
-	});
+	return void receiveNewListing(
+		[client, bot],
+		interaction,
+		interaction.guildId!,
+		controller,
+		listing,
+		voiceChannelId,
+		feedbackChannelId,
+	);
 }
 
 export { handleRequestSongListing };

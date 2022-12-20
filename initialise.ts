@@ -115,7 +115,7 @@ async function readSentenceFiles(directoryUri: string): Promise<[Language, strin
 	return Promise.all(results);
 }
 
-async function initialise({ isTest }: { isTest: boolean }): Promise<[Client, Bot]> {
+async function initialise(): Promise<[Client, Bot]> {
 	const [envConfiguration, templateEnvConfiguration] = await Promise.all([
 		readDotEnvFile('.env'),
 		readDotEnvFile('.env.example', true),
@@ -131,7 +131,7 @@ async function initialise({ isTest }: { isTest: boolean }): Promise<[Client, Bot
 		readSentenceFiles('./assets/sentences'),
 	]);
 
-	return initialiseClient({ isTest, version, supportedTranslationLanguages }, {
+	return initialiseClient({ version, supportedTranslationLanguages }, {
 		dictionaryAdapters: loadDictionaryAdapters(),
 		sentencePairs: loadSentencePairs(sentenceFiles),
 	});

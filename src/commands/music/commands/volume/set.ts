@@ -1,5 +1,6 @@
 import { Bot, Interaction, InteractionResponseTypes, sendInteractionResponse } from 'discordeno';
 import { Commands, localise } from 'logos/assets/localisations/mod.ts';
+import { getVoiceState, setVolume, verifyVoiceState } from 'logos/src/controllers/music.ts';
 import { Client } from 'logos/src/client.ts';
 import { parseArguments } from 'logos/src/interactions.ts';
 import configuration from 'logos/configuration.ts';
@@ -8,11 +9,13 @@ function handleSetVolume(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): void {
-	const musicController = client.music.get(interaction.guildId!);
-	if (musicController === undefined) return;
+	const controller = client.features.music.controllers.get(interaction.guildId!);
+	if (controller === undefined) return;
 
-	const [canAct, _] = musicController.verifyMemberVoiceState(interaction);
-	if (!canAct) return;
+	const voiceState = getVoiceState(client, interaction);
+
+	const isVoiceStateVerified = verifyVoiceState(bot, interaction, controller, voiceState);
+	if (!isVoiceStateVerified) return;
 
 	const [{ volume }] = parseArguments(interaction.data?.options, { volume: 'number' });
 	if (volume === undefined || isNaN(volume)) return;
@@ -36,7 +39,7 @@ function handleSetVolume(
 		);
 	}
 
-	musicController.setVolume(volume);
+	setVolume(controller.player, volume);
 
 	const volumeString = localise(Commands.music.options.volume.options.set.strings.volumeSet.header, interaction.locale);
 

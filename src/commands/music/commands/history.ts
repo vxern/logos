@@ -14,20 +14,15 @@ const command: OptionBuilder = {
 	options: [show],
 };
 
-function handleDisplayPlaybackHistory(
-	[client, bot]: [Client, Bot],
-	interaction: Interaction,
-): void {
-	const musicController = client.music.get(interaction.guildId!);
-	if (musicController === undefined) return;
+function handleDisplayPlaybackHistory([client, bot]: [Client, Bot], interaction: Interaction): void {
+	const controller = client.features.music.controllers.get(interaction.guildId!);
+	if (controller === undefined) return;
 
-	const [{ show }] = parseArguments(interaction.data?.options, {
-		show: 'boolean',
-	});
+	const [{ show }] = parseArguments(interaction.data?.options, { show: 'boolean' });
 
-	const listingHistory = lodash.cloneDeep(musicController.history).toReversed();
+	const listingHistory = lodash.cloneDeep(controller.listingHistory).toReversed();
 
-  const titleString = localise(Commands.music.options.history.strings.playbackHistory, interaction.locale);
+	const titleString = localise(Commands.music.options.history.strings.playbackHistory, interaction.locale);
 
 	return displayListings([client, bot], interaction, {
 		title: `📋 ${titleString}`,
