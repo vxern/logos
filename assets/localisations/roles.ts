@@ -390,6 +390,42 @@ class Roles {
 						'Romanian': 'Sunt de origine meglenoromână.',
 					},
 				},
+				{
+					name: {
+						'English': 'Romani',
+						'Polish': 'Romskie',
+						'Romanian': 'Romă',
+					},
+					description: {
+						'English': 'I am of Romani heritage.',
+						'Polish': 'Z pochodzenia jestem Romem.',
+						'Romanian': 'Sunt de origine romă.',
+					},
+				},
+				{
+					name: {
+						'English': 'Hungarian (Szekler, Csango)',
+						'Polish': 'Węgierskie (sekelowskie, czangowskie)',
+						'Romanian': 'Maghiară (secuiască, ceangăiască)',
+					},
+					description: {
+						'English': 'I am of Hungarian heritage.',
+						'Polish': 'Z pochodzenia jestem Węgrem.',
+						'Romanian': 'Sunt de origine maghiară.',
+					},
+				},
+				{
+					name: {
+						'English': 'German (Saxon, Swabian)',
+						'Polish': 'Niemieckie (saksońskie, szwabskie)',
+						'Romanian': 'Germană (sasă, șvabă)',
+					},
+					description: {
+						'English': 'I am of German heritage.',
+						'Polish': 'Z pochodzenia jestem Niemcem.',
+						'Romanian': 'Sunt de origine germană.',
+					},
+				},
 			],
 		},
 	};
