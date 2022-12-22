@@ -38,6 +38,7 @@ import { diagnosticMentionUser, getAllMessages, getTextChannel, guildAsAuthor } 
 import { defaultLocale } from 'logos/types.ts';
 import configuration from 'logos/configuration.ts';
 import { staticComponentIds } from 'logos/constants.ts';
+import { trim } from 'logos/formatting.ts';
 
 const verificationPromptHandlers = new Map<string, NonNullable<InteractionCollectorSettings['onCollect']>>();
 
@@ -392,7 +393,7 @@ function generateVerificationQuestionModal<T extends string>(
 			components: [{
 				customId: 'reason',
 				type: MessageComponentTypes.InputText,
-				label: localise(Modals.verification.fields.reason, locale)(guild.language),
+				label: trim(localise(Modals.verification.fields.reason, locale)(guild.language), 45),
 				style: TextStyles.Paragraph,
 				required: true,
 				minLength: 20,
@@ -403,7 +404,7 @@ function generateVerificationQuestionModal<T extends string>(
 			components: [{
 				customId: 'aim',
 				type: MessageComponentTypes.InputText,
-				label: localise(Modals.verification.fields.aim, locale),
+				label: trim(localise(Modals.verification.fields.aim, locale), 45),
 				style: TextStyles.Paragraph,
 				required: true,
 				minLength: 20,
@@ -414,7 +415,7 @@ function generateVerificationQuestionModal<T extends string>(
 			components: [{
 				customId: 'where_found',
 				type: MessageComponentTypes.InputText,
-				label: localise(Modals.verification.fields.whereFound, locale)(guild.name),
+				label: trim(localise(Modals.verification.fields.whereFound, locale)(guild.name), 45),
 				style: TextStyles.Short,
 				required: true,
 				minLength: 5,
