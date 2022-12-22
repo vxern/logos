@@ -2,7 +2,7 @@
 	"imports": {
 		"std/": "https://deno.land/std@0.161.0/",
 		"cheerio": "https://deno.land/x/cheerio@1.0.7/mod.ts",
-		"discordeno": "https://raw.githubusercontent.com/vxern/discordeno/main/mod.ts",
+		"discordeno": "https://raw.githubusercontent.com/discordeno/discordeno/df5910612147aa96c20aa028c8914c264df93538/mod.ts",
 		"dotenv_load": "https://deno.land/x/dotenv@v3.2.0/load.ts",
 		"faunadb": "https://deno.land/x/fauna@5.0.0-deno-alpha9/mod.ts",
 		"lavadeno": "https://deno.land/x/lavadeno@3.2.3/mod.ts",
