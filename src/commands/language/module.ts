@@ -4,7 +4,7 @@ import dexonline from 'logos/src/commands/language/data/adapters/dexonline.ts';
 import { DictionaryAdapter, SentencePair, WordTypes } from 'logos/src/commands/language/data/types.ts';
 import { Client } from 'logos/src/client.ts';
 import { addParametersToURL } from 'logos/src/utils.ts';
-import { deepLApiEndpoints } from 'logos/constants.ts';
+import constants from 'logos/constants.ts';
 import { Language, supportedLanguages } from 'logos/types.ts';
 
 const dictionaryAdapters: DictionaryAdapter<any>[] = [dexonline];
@@ -80,7 +80,7 @@ interface SupportedLanguage {
 
 async function getSupportedLanguages(): Promise<SupportedLanguage[]> {
 	const response = await fetch(
-		addParametersToURL(deepLApiEndpoints.languages, {
+		addParametersToURL(constants.endpoints.deepl.languages, {
 			'auth_key': Deno.env.get('DEEPL_SECRET')!,
 			'type': 'target',
 		}),

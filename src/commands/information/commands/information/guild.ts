@@ -14,7 +14,8 @@ import { getProficiencyCategory } from 'logos/src/commands/social/module.ts';
 import { Client } from 'logos/src/client.ts';
 import { getGuildIconURLFormatted, snowflakeToTimestamp } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
-import { displayTime, mention, MentionTypes } from 'logos/formatting.ts';
+import constants from 'logos/constants.ts';
+import { mention, MentionTypes, timestamp } from 'logos/formatting.ts';
 import { defaultLanguage } from 'logos/types.ts';
 
 /** Displays information about the guild that this command was executed in. */
@@ -54,7 +55,7 @@ function handleDisplayGuildInformation(
 				embeds: [{
 					thumbnail: guildAsThumbnail(bot, guild),
 					title: localise(Commands.information.options.guild.strings.informationAbout, interaction.locale)(guild.name),
-					color: configuration.messages.colors.invisible,
+					color: constants.colors.invisible,
 					fields: [
 						{
 							name: `🖋️ ${descriptionString}`,
@@ -69,7 +70,7 @@ function handleDisplayGuildInformation(
 						},
 						{
 							name: `⏱️ ${createdString}`,
-							value: displayTime(snowflakeToTimestamp(guild.id)),
+							value: timestamp(snowflakeToTimestamp(guild.id)),
 							inline: true,
 						},
 						{

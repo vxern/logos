@@ -1,3 +1,5 @@
+import constants from 'logos/constants.ts';
+
 /** Represents a musical piece, playable singly by the music controller. */
 interface Song {
 	type: SongListingContentTypes.Song;
@@ -62,5 +64,11 @@ interface SongStream {
 	url: string;
 }
 
-export { SongListingContentTypes };
+const listingTypeToEmoji = {
+	[SongListingContentTypes.Song]: constants.emojis.music.song,
+	[SongListingContentTypes.External]: constants.emojis.music.external,
+	[SongListingContentTypes.Collection]: constants.emojis.music.collection,
+} satisfies Record<`${SongListingContentTypes}`, string>;
+
+export { listingTypeToEmoji, SongListingContentTypes };
 export type { Song, SongCollection, SongListing, SongStream };

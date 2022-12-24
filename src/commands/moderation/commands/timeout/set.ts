@@ -14,9 +14,8 @@ import { log } from 'logos/src/controllers/logging/logging.ts';
 import { Client, resolveInteractionToMember } from 'logos/src/client.ts';
 import { parseArguments } from 'logos/src/interactions.ts';
 import { guildAsAuthor } from 'logos/src/utils.ts';
-import configuration from 'logos/configuration.ts';
-import { Periods, timeDescriptors } from 'logos/constants.ts';
-import { displayTime, mention, MentionTypes } from 'logos/formatting.ts';
+import constants, { Periods } from 'logos/constants.ts';
+import { mention, MentionTypes, timestamp } from 'logos/formatting.ts';
 import { defaultLocale } from 'logos/types.ts';
 
 async function handleSetTimeout(
@@ -108,9 +107,9 @@ async function handleSetTimeout(
 			embeds: [{
 				description: localise(Commands.timeout.strings.timedOut, interaction.locale)(
 					mention(member.id, MentionTypes.User),
-					displayTime(until),
+					timestamp(until),
 				),
-				color: configuration.messages.colors.blue,
+				color: constants.colors.blue,
 			}],
 		},
 	});
@@ -126,10 +125,10 @@ async function handleSetTimeout(
 			embeds: [{
 				description: localise(Commands.timeout.strings.timedOutWithReason, interaction.locale)(
 					mention(member.id, MentionTypes.User),
-					displayTime(until),
+					timestamp(until),
 					reason!,
 				),
-				color: configuration.messages.colors.yellow,
+				color: constants.colors.dullYellow,
 			}],
 		});
 	}
@@ -138,8 +137,8 @@ async function handleSetTimeout(
 		embeds: [
 			{
 				author: guildAsAuthor(bot, guild),
-				description: localise(Commands.timeout.strings.timedOutDirect, defaultLocale)(displayTime(until), reason!),
-				color: configuration.messages.colors.yellow,
+				description: localise(Commands.timeout.strings.timedOutDirect, defaultLocale)(timestamp(until), reason!),
+				color: constants.colors.dullYellow,
 			},
 		],
 	});
@@ -174,7 +173,7 @@ function getTimestampFromExpression(
 	// One of the values is equal to 0.
 	if (quantifiers.includes(0)) return undefined;
 
-	const timeDescriptorsWithLocalisations = timeDescriptors.map<
+	const timeDescriptorsWithLocalisations = constants.timeDescriptors.map<
 		[typeof Misc.time.periods[keyof typeof Misc.time.periods], number]
 	>(
 		([descriptor, period]) => {
@@ -206,7 +205,7 @@ function getTimestampFromExpression(
 
 			return frequencies;
 		},
-		Array.from({ length: timeDescriptors.length }, () => 0),
+		Array.from({ length: constants.timeDescriptors.length }, () => 0),
 	);
 
 	// If one of the keys is duplicate.
@@ -252,7 +251,7 @@ function displayError(bot: Bot, interaction: Interaction, error: string): void {
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
 					description: error,
-					color: configuration.messages.colors.yellow,
+					color: constants.colors.dullYellow,
 				}],
 			},
 		},

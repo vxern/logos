@@ -20,8 +20,8 @@ import { CommandBuilder } from 'logos/src/commands/command.ts';
 import { show } from 'logos/src/commands/parameters.ts';
 import { Client } from 'logos/src/client.ts';
 import { createInteractionCollector, parseArguments } from 'logos/src/interactions.ts';
-import { chunk, diagnosticMentionUser, fromHex } from 'logos/src/utils.ts';
-import configuration from 'logos/configuration.ts';
+import { chunk, diagnosticMentionUser } from 'logos/src/utils.ts';
+import constants from 'logos/constants.ts';
 import { BulletStyles, code, list } from 'logos/formatting.ts';
 import { WordTypes } from 'logos/types.ts';
 
@@ -65,7 +65,7 @@ async function handleSearchWord(
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(Commands.word.strings.noDictionaryAdapters, interaction.locale),
-						color: configuration.messages.colors.yellow,
+						color: constants.colors.dullYellow,
 					}],
 				},
 			},
@@ -105,7 +105,7 @@ async function handleSearchWord(
 			{
 				embeds: [{
 					description: localise(Commands.word.strings.noResults, interaction.locale),
-					color: configuration.messages.colors.yellow,
+					color: constants.colors.dullYellow,
 				}],
 			},
 		);
@@ -380,7 +380,7 @@ function entryToEmbed(
 		title: entry.title ?? entry.word,
 		description: `***${description}***`,
 		fields,
-		color: fromHex('#d6e3f8'),
+		color: constants.colors.husky,
 	};
 }
 

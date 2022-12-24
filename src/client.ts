@@ -39,6 +39,7 @@ import { createDatabase, Database } from 'logos/src/database/database.ts';
 import services from 'logos/src/services/services.ts';
 import { diagnosticMentionUser } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
+import constants from 'logos/constants.ts';
 import { defaultLanguage, Language, supportedLanguages } from 'logos/types.ts';
 
 interface Collector<
@@ -562,7 +563,7 @@ function resolveInteractionToMember(
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(Misc.client.invalidUser, interaction.locale),
-						color: configuration.messages.colors.red,
+						color: constants.colors.red,
 					}],
 				},
 			},

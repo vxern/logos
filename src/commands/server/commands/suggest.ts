@@ -14,6 +14,7 @@ import { Client } from 'logos/src/client.ts';
 import { parseArguments } from 'logos/src/interactions.ts';
 import { getTextChannel } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
+import constants from 'logos/constants.ts';
 import { mention, MentionTypes } from 'logos/formatting.ts';
 import { defaultLocale } from 'logos/types.ts';
 
@@ -35,7 +36,7 @@ function handleMakeSuggestion(
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (guild === undefined) return;
 
-	const conferenceChannel = getTextChannel(guild, configuration.guilds.channels.conference);
+	const conferenceChannel = getTextChannel(guild, configuration.guilds.channels.moderation);
 	if (conferenceChannel === undefined) return;
 
 	const [{ suggestion }] = parseArguments(interaction.data?.options, {});
@@ -50,7 +51,7 @@ function handleMakeSuggestion(
 				mention(interaction.user.id, MentionTypes.User),
 				suggestion,
 			),
-			color: configuration.messages.colors.darkGreen,
+			color: constants.colors.darkGreen,
 		}],
 	});
 
@@ -64,7 +65,7 @@ function handleMakeSuggestion(
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
 					description: localise(Commands.suggest.strings.suggestionMade, interaction.locale),
-					color: configuration.messages.colors.green,
+					color: constants.colors.lightGreen,
 				}],
 			},
 		},

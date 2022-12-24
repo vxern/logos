@@ -1,5 +1,3 @@
-import { SongListingContentTypes } from 'logos/src/commands/music/data/types.ts';
-import { fromHex } from 'logos/src/utils.ts';
 import { Periods } from 'logos/constants.ts';
 
 const configuration = {
@@ -21,20 +19,11 @@ const configuration = {
 		namePattern: new RegExp('^Learn ([A-Z][a-z]*)$'),
 		channels: {
 			logging: 'journal',
-			conference: 'conference',
+			moderation: 'moderation',
 			verification: 'verifications',
+			information: 'rules',
+			welcome: 'welcome',
 			voiceChat: 'Voice Chat',
-		},
-	},
-	messages: {
-		colors: {
-			invisible: fromHex('#36393f'),
-			red: fromHex('#b42f2f'),
-			darkRed: fromHex('#820000'),
-			green: fromHex('#89ef59'),
-			darkGreen: fromHex('#479621'),
-			blue: fromHex('#6269ed'),
-			yellow: fromHex('#f2f277'),
 		},
 	},
 	resultsPerPage: 10,
@@ -50,11 +39,6 @@ const configuration = {
 	},
 	// Configuration settings pertaining to music.
 	music: {
-		symbols: <Record<string, string>> {
-			[SongListingContentTypes.Song]: '🎵',
-			[SongListingContentTypes.External]: '📁',
-			[SongListingContentTypes.Collection]: '🎶',
-		},
 		disconnectTimeout: 10 * Periods.minute,
 		limits: {
 			// The maximum volume

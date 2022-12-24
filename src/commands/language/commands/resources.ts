@@ -12,7 +12,7 @@ import { CommandBuilder } from 'logos/src/commands/command.ts';
 import { show } from 'logos/src/commands/parameters.ts';
 import { Client } from 'logos/src/client.ts';
 import { parseArguments } from 'logos/src/interactions.ts';
-import { links } from 'logos/constants.ts';
+import constants from 'logos/constants.ts';
 import { defaultLanguage } from 'logos/types.ts';
 
 const command: CommandBuilder = {
@@ -30,7 +30,7 @@ function handleDisplayResources(
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (guild === undefined) return;
 
-	const repositoryLink = links.generateLanguageRepositoryLink(guild.language);
+	const repositoryLink = constants.links.generateLanguageRepositoryLink(guild.language);
 
 	const [{ show }] = parseArguments(interaction.data?.options, { show: 'boolean' });
 

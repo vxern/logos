@@ -16,13 +16,14 @@ import {
 	sendInteractionResponse,
 } from 'discordeno';
 import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
-import { SongListing } from 'logos/src/commands/music/data/types.ts';
+import { listingTypeToEmoji, SongListing } from 'logos/src/commands/music/data/types.ts';
 import { OptionBuilder } from 'logos/src/commands/command.ts';
 import { getVoiceState, isQueueEmpty, verifyVoiceState } from 'logos/src/controllers/music.ts';
 import { Client } from 'logos/src/client.ts';
 import { createInteractionCollector } from 'logos/src/interactions.ts';
 import { chunk } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
+import constants from 'logos/constants.ts';
 import { mention, MentionTypes, trim } from 'logos/formatting.ts';
 import { defaultLocale } from 'logos/types.ts';
 
@@ -52,7 +53,7 @@ function handleRemoveSongListing([client, bot]: [Client, Bot], interaction: Inte
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(Commands.music.options.remove.strings.noListingToRemove, interaction.locale),
-						color: configuration.messages.colors.yellow,
+						color: constants.colors.dullYellow,
 					}],
 				},
 			},
@@ -143,7 +144,7 @@ function generateEmbed(
 							data: {
 								embeds: [{
 									description: localise(Commands.music.options.remove.strings.failedToRemoveSong, interaction.locale),
-									color: configuration.messages.colors.yellow,
+									color: constants.colors.dullYellow,
 								}],
 							},
 						},
@@ -165,7 +166,7 @@ function generateEmbed(
 									songListing.content.title,
 									mention(selection.user.id, MentionTypes.User),
 								),
-								color: configuration.messages.colors.invisible,
+								color: constants.colors.invisible,
 							}],
 						},
 					},
@@ -177,7 +178,7 @@ function generateEmbed(
 	return {
 		embeds: [{
 			description: localise(Commands.music.options.remove.strings.selectSongToRemove, locale),
-			color: configuration.messages.colors.blue,
+			color: constants.colors.blue,
 			footer: isLast ? undefined : {
 				text: localise(Commands.music.options.remove.strings.continuedOnTheNextPage, locale),
 			},
@@ -198,7 +199,7 @@ function generateSelectMenu(data: RemoveListingData, selectMenuCustomId: string)
 			maxValues: 1,
 			options: page.map<SelectOption>(
 				(songListing, index) => ({
-					emoji: { name: configuration.music.symbols[songListing.content.type]! },
+					emoji: { name: listingTypeToEmoji[songListing.content.type] },
 					label: trim(songListing.content.title, 100),
 					value: (data.pageIndex * configuration.music.limits.songs.page + index).toString(),
 				}),

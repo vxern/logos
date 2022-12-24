@@ -19,7 +19,7 @@ import {
 } from 'logos/src/controllers/music.ts';
 import { Client } from 'logos/src/client.ts';
 import { parseArguments } from 'logos/src/interactions.ts';
-import configuration from 'logos/configuration.ts';
+import constants from 'logos/constants.ts';
 import { defaultLocale } from 'logos/types.ts';
 
 const command: OptionBuilder = {
@@ -69,7 +69,7 @@ function handleUnskipAction([client, bot]: [Client, Bot], interaction: Interacti
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(Commands.music.options.unskip.strings.nowhereToUnskipTo, interaction.locale),
-						color: configuration.messages.colors.yellow,
+						color: constants.colors.dullYellow,
 					}],
 				},
 			},
@@ -87,7 +87,7 @@ function handleUnskipAction([client, bot]: [Client, Bot], interaction: Interacti
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(Commands.music.options.unskip.strings.noSongCollectionToUnskip, interaction.locale),
-						color: configuration.messages.colors.yellow,
+						color: constants.colors.dullYellow,
 					}],
 				},
 			},
@@ -105,7 +105,7 @@ function handleUnskipAction([client, bot]: [Client, Bot], interaction: Interacti
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(Commands.music.options.unskip.strings.cannotUnskipDueToFullQueue, interaction.locale),
-						color: configuration.messages.colors.red,
+						color: constants.colors.red,
 					}],
 				},
 			},
@@ -123,7 +123,7 @@ function handleUnskipAction([client, bot]: [Client, Bot], interaction: Interacti
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(Commands.music.strings.tooManySkipArguments, interaction.locale),
-						color: configuration.messages.colors.red,
+						color: constants.colors.red,
 					}],
 				},
 			},
@@ -141,7 +141,7 @@ function handleUnskipAction([client, bot]: [Client, Bot], interaction: Interacti
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(Commands.music.strings.mustBeGreaterThanZero, interaction.locale),
-						color: configuration.messages.colors.red,
+						color: constants.colors.red,
 					}],
 				},
 			},
@@ -186,7 +186,7 @@ function handleUnskipAction([client, bot]: [Client, Bot], interaction: Interacti
 				embeds: [{
 					title: `⏮️ ${unskippedString}`,
 					description: localise(Commands.music.options.unskip.strings.unskipped.body, defaultLocale),
-					color: configuration.messages.colors.invisible,
+					color: constants.colors.invisible,
 				}],
 			},
 		},

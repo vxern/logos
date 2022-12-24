@@ -10,7 +10,7 @@ import { Commands, createLocalisations, localise } from 'logos/assets/localisati
 import { OptionBuilder } from 'logos/src/commands/command.ts';
 import { getVoiceState, isOccupied, isPaused, resume, verifyVoiceState } from 'logos/src/controllers/music.ts';
 import { Client } from 'logos/src/client.ts';
-import configuration from 'logos/configuration.ts';
+import constants from 'logos/constants.ts';
 import { defaultLocale } from 'logos/types.ts';
 
 const command: OptionBuilder = {
@@ -19,7 +19,7 @@ const command: OptionBuilder = {
 	handle: handleResumePlayback,
 };
 
-function handleResumePlayback(	[client, bot]: [Client, Bot],	interaction: Interaction,): void {
+function handleResumePlayback([client, bot]: [Client, Bot], interaction: Interaction): void {
 	const controller = client.features.music.controllers.get(interaction.guildId!);
 	if (controller === undefined) return;
 
@@ -39,7 +39,7 @@ function handleResumePlayback(	[client, bot]: [Client, Bot],	interaction: Intera
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(Commands.music.options.resume.strings.noSongToResume, interaction.locale),
-						color: configuration.messages.colors.yellow,
+						color: constants.colors.dullYellow,
 					}],
 				},
 			},
@@ -57,7 +57,7 @@ function handleResumePlayback(	[client, bot]: [Client, Bot],	interaction: Intera
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(Commands.music.options.resume.strings.notCurrentlyPaused, interaction.locale),
-						color: configuration.messages.colors.yellow,
+						color: constants.colors.dullYellow,
 					}],
 				},
 			},
@@ -78,7 +78,7 @@ function handleResumePlayback(	[client, bot]: [Client, Bot],	interaction: Intera
 				embeds: [{
 					title: `▶️ ${resumedString}`,
 					description: localise(Commands.music.options.resume.strings.resumed.body, defaultLocale),
-					color: configuration.messages.colors.invisible,
+					color: constants.colors.invisible,
 				}],
 			},
 		},

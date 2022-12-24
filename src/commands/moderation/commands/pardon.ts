@@ -17,8 +17,8 @@ import { log } from 'logos/src/controllers/logging/logging.ts';
 import { Client, resolveInteractionToMember } from 'logos/src/client.ts';
 import { parseArguments } from 'logos/src/interactions.ts';
 import { guildAsAuthor } from 'logos/src/utils.ts';
-import configuration from 'logos/configuration.ts';
-import { displayTime, mention, MentionTypes } from 'logos/formatting.ts';
+import constants from 'logos/constants.ts';
+import { mention, MentionTypes, timestamp } from 'logos/formatting.ts';
 import { defaultLocale } from 'logos/types.ts';
 
 const command: CommandBuilder = {
@@ -68,7 +68,7 @@ async function handlePardonUser(
 				type: InteractionResponseTypes.ApplicationCommandAutocompleteResult,
 				data: {
 					choices: relevantWarnings.map((warning) => ({
-						name: `${warning.data.reason} (${displayTime(warning.ts)})`,
+						name: `${warning.data.reason} (${timestamp(warning.ts)})`,
 						value: warning.ref.value.id,
 					})),
 				},
@@ -108,7 +108,7 @@ async function handlePardonUser(
 						mention(member.id, MentionTypes.User),
 						deletedWarning.data.reason,
 					),
-					color: configuration.messages.colors.green,
+					color: constants.colors.lightGreen,
 				}],
 			},
 		},
@@ -122,9 +122,9 @@ async function handlePardonUser(
 					author: guildAsAuthor(bot, guild),
 					description: localise(Commands.pardon.strings.pardonedDirect, defaultLocale)(
 						deletedWarning.data.reason,
-						displayTime(deletedWarning.ts),
+						timestamp(deletedWarning.ts),
 					),
-					color: configuration.messages.colors.green,
+					color: constants.colors.lightGreen,
 				},
 			],
 		});
@@ -154,7 +154,7 @@ function displayErrorOrEmptyChoices(bot: Bot, interaction: Interaction): void {
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
 					description: localise(Commands.pardon.strings.failed, interaction.locale),
-					color: configuration.messages.colors.red,
+					color: constants.colors.red,
 				}],
 			},
 		},
@@ -172,7 +172,7 @@ function displayError(bot: Bot, interaction: Interaction, error: string): void {
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
 					description: error,
-					color: configuration.messages.colors.red,
+					color: constants.colors.red,
 				}],
 			},
 		},

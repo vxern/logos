@@ -12,7 +12,7 @@ import { OptionBuilder } from 'logos/src/commands/command.ts';
 import { show, user } from 'logos/src/commands/parameters.ts';
 import { Client, resolveInteractionToMember } from 'logos/src/client.ts';
 import { parseArguments } from 'logos/src/interactions.ts';
-import configuration from 'logos/configuration.ts';
+import constants from 'logos/constants.ts';
 import { mention, MentionTypes } from 'logos/formatting.ts';
 import { defaultLanguage } from 'logos/types.ts';
 
@@ -46,7 +46,7 @@ async function handleDisplayProfile(
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(Commands.profile.options.view.strings.failed, interaction.locale),
-						color: configuration.messages.colors.red,
+						color: constants.colors.red,
 					}],
 				},
 			},

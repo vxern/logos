@@ -13,7 +13,7 @@ import { getProficiencyCategory } from 'logos/src/commands/social/module.ts';
 import { Client } from 'logos/src/client.ts';
 import { defaultLocale } from 'logos/types.ts';
 import configuration from 'logos/configuration.ts';
-import { staticComponentIds } from 'logos/constants.ts';
+import constants from 'logos/constants.ts';
 
 const proficiencyCategory = getProficiencyCategory();
 const proficiencies = proficiencyCategory.collection.list;
@@ -49,7 +49,7 @@ async function handleSelectLanguageProficiency(
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(Services.entry.needsVerification, interaction.locale)(guild.name),
-						color: configuration.messages.colors.blue,
+						color: constants.colors.blue,
 					}],
 					components: [{
 						type: MessageComponentTypes.ActionRow,
@@ -57,7 +57,7 @@ async function handleSelectLanguageProficiency(
 							type: MessageComponentTypes.Button,
 							style: ButtonStyles.Secondary,
 							label: localise(Services.entry.iUnderstand, interaction.locale),
-							customId: `${staticComponentIds.requestedVerification}|${requestedRole.id}`,
+							customId: `${constants.staticComponentIds.requestedVerification}|${requestedRole.id}`,
 							emoji: { name: '✅' },
 						}],
 					}],

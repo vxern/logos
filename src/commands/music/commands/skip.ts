@@ -12,7 +12,7 @@ import { by, collection, to } from 'logos/src/commands/parameters.ts';
 import { getVoiceState, isCollection, isOccupied, skip, verifyVoiceState } from 'logos/src/controllers/music.ts';
 import { Client } from 'logos/src/client.ts';
 import { parseArguments } from 'logos/src/interactions.ts';
-import configuration from 'logos/configuration.ts';
+import constants from 'logos/constants.ts';
 import { defaultLocale } from 'logos/types.ts';
 
 const command: OptionBuilder = {
@@ -54,7 +54,7 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(Commands.music.options.skip.strings.noSongToSkip, interaction.locale),
-						color: configuration.messages.colors.yellow,
+						color: constants.colors.dullYellow,
 					}],
 				},
 			},
@@ -72,7 +72,7 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(Commands.music.options.skip.strings.noSongCollectionToSkip, interaction.locale),
-						color: configuration.messages.colors.yellow,
+						color: constants.colors.dullYellow,
 					}],
 				},
 			},
@@ -90,7 +90,7 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(Commands.music.strings.tooManySkipArguments, interaction.locale),
-						color: configuration.messages.colors.red,
+						color: constants.colors.red,
 					}],
 				},
 			},
@@ -108,7 +108,7 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(Commands.music.strings.mustBeGreaterThanZero, interaction.locale),
-						color: configuration.messages.colors.red,
+						color: constants.colors.red,
 					}],
 				},
 			},
@@ -156,7 +156,7 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 				embeds: [{
 					title: `⏭️ ${messageString}`,
 					description: localise(messageLocalisations.body, defaultLocale),
-					color: configuration.messages.colors.invisible,
+					color: constants.colors.invisible,
 				}],
 			},
 		},

@@ -13,7 +13,7 @@ import { ListingResolver } from 'logos/src/commands/music/data/sources/sources.t
 import { SongListing, SongListingContentTypes } from 'logos/src/commands/music/data/types.ts';
 import { Client } from 'logos/src/client.ts';
 import { createInteractionCollector } from 'logos/src/interactions.ts';
-import configuration from 'logos/configuration.ts';
+import constants from 'logos/constants.ts';
 import { trim } from 'logos/formatting.ts';
 
 const urlExpression = new RegExp(
@@ -85,7 +85,7 @@ async function search(
 				embeds: [{
 					title: 'Select a song / song collection',
 					description: 'Select a song or song collection from the choices below.',
-					color: configuration.messages.colors.blue,
+					color: constants.colors.blue,
 				}],
 				components: [{
 					type: MessageComponentTypes.ActionRow,
@@ -96,10 +96,7 @@ async function search(
 						maxValues: 1,
 						options: results.map<SelectOption>((result, index) => ({
 							emoji: {
-								name: result.type === 'video'
-									? configuration.music.symbols[SongListingContentTypes.Song]
-									: configuration.music
-										.symbols[SongListingContentTypes.Collection],
+								name: result.type === 'video' ? constants.emojis.music.song : constants.emojis.music.collection,
 							},
 							label: trim(result.title!, 100),
 							value: index.toString(),

@@ -9,7 +9,7 @@ import {
 } from 'discordeno';
 import { Commands, localise } from 'logos/assets/localisations/mod.ts';
 import { Client } from 'logos/src/client.ts';
-import configuration from 'logos/configuration.ts';
+import constants from 'logos/constants.ts';
 
 async function handleDisplayBotInformation(
 	[client, bot]: [Client, Bot],
@@ -34,19 +34,35 @@ async function handleDisplayBotInformation(
 							format: 'png',
 						}),
 					},
-					color: configuration.messages.colors.invisible,
+					color: constants.colors.invisible,
 					fields: [{
 						name: localise(Commands.information.options.bot.strings.whoAmI.header, interaction.locale),
 						value: localise(Commands.information.options.bot.strings.whoAmI.body, interaction.locale)(botUser.username),
 					}, {
 						name: localise(Commands.information.options.bot.strings.howWasIMade.header, interaction.locale),
-						value: localise(Commands.information.options.bot.strings.howWasIMade.body, interaction.locale),
+						value: localise(
+							Commands.information.options.bot.strings.howWasIMade.body(
+								`[${constants.emojis.custom.typescript} TypeScript](${constants.links.typescriptWebsite})`,
+								`[${constants.emojis.custom.deno} Deno](${constants.links.denoWebsite})`,
+								'',
+								`[${constants.emojis.custom.discordeno} discordeno](${constants.links.discordenoRepository})`,
+							),
+							interaction.locale,
+						),
 					}, {
 						name: localise(Commands.information.options.bot.strings.howToAddToServer.header, interaction.locale),
-						value: localise(Commands.information.options.bot.strings.howToAddToServer.body, interaction.locale),
+						value: localise(
+							Commands.information.options.bot.strings.howToAddToServer.body(
+								`[🇦🇲 Learn Armenian](${constants.links.learnArmenianListingWebsite})`,
+								`[🇷🇴 Learn Romanian](${constants.links.learnRomanianListingWebsite})`,
+							),
+							interaction.locale,
+						),
 					}, {
 						name: localise(Commands.information.options.bot.strings.amIOpenSource.header, interaction.locale),
-						value: localise(Commands.information.options.bot.strings.amIOpenSource.body, interaction.locale),
+						value: localise(Commands.information.options.bot.strings.amIOpenSource.body, interaction.locale)(
+							constants.links.talonRepositoryLink,
+						),
 					}],
 				}],
 			},

@@ -18,6 +18,7 @@ import { Client, resolveInteractionToMember } from 'logos/src/client.ts';
 import { parseArguments } from 'logos/src/interactions.ts';
 import { guildAsAuthor } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
+import constants from 'logos/constants.ts';
 import { mention, MentionTypes } from 'logos/formatting.ts';
 import { defaultLocale } from 'logos/types.ts';
 
@@ -49,7 +50,7 @@ async function handleWarnUser(
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(Commands.warn.strings.cannotWarnSelf, interaction.locale),
-						color: configuration.messages.colors.yellow,
+						color: constants.colors.dullYellow,
 					}],
 				},
 			},
@@ -74,7 +75,7 @@ async function handleWarnUser(
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(Commands.warn.strings.cannotWarnCertainUsers, interaction.locale),
-						color: configuration.messages.colors.yellow,
+						color: constants.colors.dullYellow,
 					}],
 				},
 			},
@@ -118,7 +119,7 @@ async function handleWarnUser(
 					mention(member.id, MentionTypes.User),
 					relevantWarnings.size,
 				),
-				color: configuration.messages.colors.blue,
+				color: constants.colors.blue,
 			}],
 		},
 	});
@@ -137,11 +138,11 @@ async function handleWarnUser(
 								reachedBanStage
 									? {
 										description: localise(Commands.warn.strings.reachedBanStage, defaultLocale)(reason!),
-										color: configuration.messages.colors.darkRed,
+										color: constants.colors.darkRed,
 									}
 									: {
 										description: localise(Commands.warn.strings.reachedKickStage, defaultLocale)(reason!),
-										color: configuration.messages.colors.red,
+										color: constants.colors.red,
 									}
 							)
 							: {
@@ -150,7 +151,7 @@ async function handleWarnUser(
 									relevantWarnings.size,
 									configuration.commands.warn.limit,
 								),
-								color: configuration.messages.colors.yellow,
+								color: constants.colors.dullYellow,
 							}
 					),
 				},
@@ -190,7 +191,7 @@ function displayError(bot: Bot, interaction: Interaction): void {
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
 					description: localise(Commands.warn.strings.failed, interaction.locale),
-					color: configuration.messages.colors.red,
+					color: constants.colors.red,
 				}],
 			},
 		},

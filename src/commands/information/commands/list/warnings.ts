@@ -12,7 +12,8 @@ import { Client, resolveInteractionToMember } from 'logos/src/client.ts';
 import { paginate, parseArguments } from 'logos/src/interactions.ts';
 import { chunk } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
-import { displayTime, list, trim } from 'logos/formatting.ts';
+import constants from 'logos/constants.ts';
+import { list, timestamp, trim } from 'logos/formatting.ts';
 
 async function handleDisplayWarnings(
 	[client, bot]: [Client, Bot],
@@ -39,7 +40,7 @@ async function handleDisplayWarnings(
 
 	return paginate([client, bot], interaction, {
 		elements: pages,
-		embed: { color: configuration.messages.colors.blue },
+		embed: { color: constants.colors.blue },
 		view: {
 			title: localise(Commands.list.strings.warnings, interaction.locale),
 			generate: (warnings, _index) => generateWarningsPage(warnings, interaction.locale),
@@ -59,7 +60,7 @@ function displayUnableToDisplayWarningsError(bot: Bot, interaction: Interaction)
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
 					description: localise(Commands.list.strings.unableToDisplayWarnings, interaction.locale),
-					color: configuration.messages.colors.red,
+					color: constants.colors.red,
 				}],
 			},
 		},
@@ -72,7 +73,7 @@ function generateWarningsPage(warnings: Document<Warning>[], locale: string | un
 	}
 
 	return list(
-		warnings.map((warning) => `${trim(warning.data.reason, 50)} (${displayTime(warning.ts)})`),
+		warnings.map((warning) => `${trim(warning.data.reason, 50)} (${timestamp(warning.ts)})`),
 	);
 }
 
