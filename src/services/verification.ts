@@ -297,11 +297,9 @@ async function initiateVerificationProcess(
 		return false;
 	}
 
-	const modal = generateVerificationQuestionModal(guild, interaction.locale);
-
 	return new Promise((resolve) => {
 		createModalComposer([client, bot], interaction, {
-			modal,
+			modal: generateVerificationQuestionModal(guild, interaction.locale),
 			onSubmit: async (submission, answers) => {
 				const submitterReferenceId = stringifyValue(submitterDocument.ref);
 
