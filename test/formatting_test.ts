@@ -4,10 +4,10 @@ import {
 	capitalise,
 	code,
 	codeMultiline,
-	displayTime,
 	list,
 	mention,
 	MentionTypes,
+	timestamp,
 } from 'logos/formatting.ts';
 
 Deno.test('formatting', async (test) => {
@@ -66,7 +66,7 @@ Deno.test('formatting', async (test) => {
 
 	await test.step('display time', async (test) => {
 		await test.step('timestamp', () => {
-			const result = displayTime(1640995200);
+			const result = timestamp(1640995200);
 			assertEquals(result, '<t:1640995:R>');
 		});
 	});
