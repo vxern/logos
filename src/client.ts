@@ -221,7 +221,7 @@ function createEventHandlers(client: Client): Partial<EventHandlers> {
 				}],
 				status: 'online',
 			}),
-		guildCreate: async (bot, guild) => {
+		guildCreate: (bot, guild) => {
 			upsertGuildApplicationCommands(bot, guild.id, client.commands);
 
 			registerGuild(client, guild);
@@ -229,7 +229,7 @@ function createEventHandlers(client: Client): Partial<EventHandlers> {
 			setupLogging([client, bot], guild);
 			setupMusicController(client, guild.id);
 
-			await fetchMembers(bot, guild.id, { limit: 0, query: '' });
+			fetchMembers(bot, guild.id, { limit: 0, query: '' });
 		},
 		channelDelete: (_bot, channel) => {
 			client.cache.channels.delete(channel.id);
