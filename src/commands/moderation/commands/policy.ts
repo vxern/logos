@@ -5,7 +5,7 @@ import {
 	InteractionResponseTypes,
 	sendInteractionResponse,
 } from 'discordeno';
-import { Commands, createLocalisations, Information, localise } from 'logos/assets/localisations/mod.ts';
+import { Commands, createLocalisations, localise, Services } from 'logos/assets/localisations/mod.ts';
 import { CommandBuilder } from 'logos/src/commands/command.ts';
 import { show } from 'logos/src/commands/parameters.ts';
 import { Client } from 'logos/src/client.ts';
@@ -38,12 +38,14 @@ function handleDisplayModerationPolicy([client, bot]: [Client, Bot], interaction
 		data: {
 			flags: !show ? ApplicationCommandFlags.Ephemeral : undefined,
 			embeds: [{
-				title: localise(Information.rules.moderationPolicy.header, interaction.locale),
+				title: localise(Services.notices.notices.information.rules.moderationPolicy.header, interaction.locale),
 				description: list([
-					localise(Information.rules.moderationPolicy.body.points.one, interaction.locale)(moderatorRoleMention),
-					localise(Information.rules.moderationPolicy.body.points.two, interaction.locale),
-					localise(Information.rules.moderationPolicy.body.points.three, interaction.locale),
-					localise(Information.rules.moderationPolicy.body.points.four, interaction.locale),
+					localise(Services.notices.notices.information.rules.moderationPolicy.body.points.one, interaction.locale)(
+						moderatorRoleMention,
+					),
+					localise(Services.notices.notices.information.rules.moderationPolicy.body.points.two, interaction.locale),
+					localise(Services.notices.notices.information.rules.moderationPolicy.body.points.three, interaction.locale),
+					localise(Services.notices.notices.information.rules.moderationPolicy.body.points.four, interaction.locale),
 				], BulletStyles.Arrow),
 			}],
 		},

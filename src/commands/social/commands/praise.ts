@@ -17,7 +17,8 @@ import { Praise } from 'logos/src/database/structs/mod.ts';
 import { Client, resolveInteractionToMember } from 'logos/src/client.ts';
 import { parseArguments } from 'logos/src/interactions.ts';
 import { guildAsAuthor } from 'logos/src/utils.ts';
-import configuration from 'logos/configuration.ts';
+import configuration from "logos/configuration.ts";
+import constants from 'logos/constants.ts';
 import { mention, MentionTypes } from 'logos/formatting.ts';
 
 const command: CommandBuilder = {
@@ -51,7 +52,7 @@ async function handlePraiseUser(
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(Commands.praise.strings.cannotPraiseSelf, interaction.locale),
-						color: configuration.messages.colors.yellow,
+						color: constants.colors.dullYellow,
 					}],
 				},
 			},
@@ -93,7 +94,7 @@ async function handlePraiseUser(
 			{
 				embeds: [{
 					description: localise(Commands.praise.strings.waitBeforePraising, interaction.locale),
-					color: configuration.messages.colors.yellow,
+					color: constants.colors.dullYellow,
 				}],
 			},
 		);
@@ -123,7 +124,7 @@ async function handlePraiseUser(
 				{
 					author: guildAsAuthor(bot, guild),
 					description: `${praisedString} 🥳`,
-					color: configuration.messages.colors.green,
+					color: constants.colors.lightGreen,
 				},
 			],
 		});
@@ -137,7 +138,7 @@ async function handlePraiseUser(
 				description: localise(Commands.praise.strings.praised, interaction.locale)(
 					mention(member.id, MentionTypes.User),
 				),
-				color: configuration.messages.colors.green,
+				color: constants.colors.lightGreen,
 			}],
 		},
 	);
@@ -150,7 +151,7 @@ function showError(bot: Bot, interaction: Interaction): void {
 		{
 			embeds: [{
 				description: localise(Commands.praise.strings.failed, interaction.locale),
-				color: configuration.messages.colors.red,
+				color: constants.colors.red,
 			}],
 		},
 	);

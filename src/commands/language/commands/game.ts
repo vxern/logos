@@ -15,7 +15,7 @@ import { SentencePair } from 'logos/src/commands/language/data/types.ts';
 import { CommandBuilder } from 'logos/src/commands/command.ts';
 import { Client } from 'logos/src/client.ts';
 import { createInteractionCollector } from 'logos/src/interactions.ts';
-import configuration from 'logos/configuration.ts';
+import constants from 'logos/constants.ts';
 
 const command: CommandBuilder = {
 	...createLocalisations(Commands.game),
@@ -43,7 +43,7 @@ async function handleStartGame(
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(Commands.game.strings.noSentencesAvailable, interaction.locale),
-						color: configuration.messages.colors.yellow,
+						color: constants.colors.dullYellow,
 					}],
 				},
 			},
@@ -61,7 +61,7 @@ async function handleStartGame(
 	);
 
 	let sentenceSelection: SentenceSelection;
-	let embedColor = configuration.messages.colors.blue;
+	let embedColor = constants.colors.blue;
 
 	const customId = createInteractionCollector([client, bot], {
 		type: InteractionTypes.MessageComponent,
@@ -85,7 +85,7 @@ async function handleStartGame(
 			const choice = sentenceSelection.choices.at(index);
 			const isCorrect = choice === sentenceSelection.word;
 
-			embedColor = isCorrect ? configuration.messages.colors.green : configuration.messages.colors.red;
+			embedColor = isCorrect ? constants.colors.lightGreen : constants.colors.red;
 
 			sentenceSelection = createSentenceSelection(sentencePairs);
 

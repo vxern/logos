@@ -22,7 +22,7 @@ import { Role, RoleCategory, RoleCategoryTypes } from 'logos/src/commands/social
 import { getRelevantCategories, resolveRoles } from 'logos/src/commands/social/module.ts';
 import { Client } from 'logos/src/client.ts';
 import { createInteractionCollector } from 'logos/src/interactions.ts';
-import configuration from 'logos/configuration.ts';
+import constants from 'logos/constants.ts';
 import { trim } from 'logos/formatting.ts';
 import { defaultLocale, Language } from 'logos/types.ts';
 
@@ -54,7 +54,7 @@ function handleOpenRoleSelectionMenu(
 					type: RoleCategoryTypes.CategoryGroup,
 					name: Commands.profile.options.roles.strings.selectCategory.header,
 					description: Commands.profile.options.roles.strings.selectCategory.body,
-					color: configuration.messages.colors.invisible,
+					color: constants.colors.invisible,
 					emoji: '💭',
 					categories: rootCategories,
 				},

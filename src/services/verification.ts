@@ -37,7 +37,7 @@ import {
 import { diagnosticMentionUser, getAllMessages, getTextChannel, guildAsAuthor } from 'logos/src/utils.ts';
 import { defaultLocale } from 'logos/types.ts';
 import configuration from 'logos/configuration.ts';
-import { staticComponentIds } from 'logos/constants.ts';
+import constants from 'logos/constants.ts';
 import { trim } from 'logos/formatting.ts';
 
 const verificationPromptHandlers = new Map<string, NonNullable<InteractionCollectorSettings['onCollect']>>();
@@ -51,7 +51,7 @@ const service: ServiceStarter = ([client, bot]) => {
 function setupVoteHandler([client, bot]: [Client, Bot]): void {
 	createInteractionCollector([client, bot], {
 		type: InteractionTypes.MessageComponent,
-		customId: staticComponentIds.verification,
+		customId: constants.staticComponentIds.verification,
 		doesNotExpire: true,
 		onCollect: (_bot, selection) => {
 			const [_customId, userId, guildId, _isAccept] = selection.data!.customId!.split('|');
@@ -107,7 +107,7 @@ function registerPastEntryRequests([client, bot]: [Client, Bot]): void {
 	const { guildCreate } = bot.events;
 
 	bot.events.guildCreate = async (bot, guild_) => {
-		await guildCreate(bot, guild_);
+		guildCreate(bot, guild_);
 
 		const guild = client.cache.guilds.get(guild_.id)!;
 
@@ -290,16 +290,18 @@ async function initiateVerificationProcess(
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
 					description: localise(Services.entry.alreadySubmittedAnswers, interaction.locale),
-					color: configuration.messages.colors.yellow,
+					color: constants.colors.dullYellow,
 				}],
 			},
 		});
 		return false;
 	}
 
+	const modal = generateVerificationQuestionModal(guild, interaction.locale);
+
 	return new Promise((resolve) => {
 		createModalComposer([client, bot], interaction, {
-			modal: generateVerificationQuestionModal(guild, interaction.locale),
+			modal,
 			onSubmit: async (submission, answers) => {
 				const submitterReferenceId = stringifyValue(submitterDocument.ref);
 
@@ -310,7 +312,7 @@ async function initiateVerificationProcess(
 							flags: ApplicationCommandFlags.Ephemeral,
 							embeds: [{
 								description: localise(Services.entry.alreadySubmittedAnswers, submission.locale),
-								color: configuration.messages.colors.darkRed,
+								color: constants.colors.darkRed,
 							}],
 						},
 					});
@@ -371,7 +373,7 @@ async function initiateVerificationProcess(
 					embeds: [{
 						title: localise(Services.entry.answersSubmitted.header, interaction.locale),
 						description: localise(Services.entry.answersSubmitted.body, interaction.locale),
-						color: configuration.messages.colors.green,
+						color: constants.colors.lightGreen,
 					}],
 				});
 
@@ -436,7 +438,7 @@ function displayVerifyError(bot: Bot, interaction: Interaction): void {
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
 					description: localise(Services.entry.failedToVerifyAccount, interaction.locale),
-					color: configuration.messages.colors.red,
+					color: constants.colors.red,
 				}],
 			},
 		},
@@ -547,14 +549,14 @@ function getVerificationPrompt(
 				label: requiredAcceptanceVotes === 1
 					? localise(Services.entry.vote.accept, defaultLocale)
 					: localise(Services.entry.vote.acceptMultiple, defaultLocale)(votesToAccept),
-				customId: `${staticComponentIds.verification}|${user.id}|${guild.id}|true`,
+				customId: `${constants.staticComponentIds.verification}|${user.id}|${guild.id}|true`,
 			}, {
 				type: MessageComponentTypes.Button,
 				style: ButtonStyles.Danger,
 				label: requiredRejectionVotes === 1
 					? localise(Services.entry.vote.reject, defaultLocale)
 					: localise(Services.entry.vote.rejectMultiple, defaultLocale)(votesToReject),
-				customId: `${staticComponentIds.verification}|${user.id}|${guild.id}|false`,
+				customId: `${constants.staticComponentIds.verification}|${user.id}|${guild.id}|false`,
 			}],
 		}],
 	};
@@ -620,7 +622,7 @@ async function handleVote(
 						flags: ApplicationCommandFlags.Ephemeral,
 						embeds: [{
 							description: localise(Services.entry.vote.alreadyVotedToAccept, interaction.locale),
-							color: configuration.messages.colors.yellow,
+							color: constants.colors.dullYellow,
 						}],
 					},
 				},
@@ -638,7 +640,7 @@ async function handleVote(
 						flags: ApplicationCommandFlags.Ephemeral,
 						embeds: [{
 							description: localise(Services.entry.vote.alreadyVotedToReject, interaction.locale),
-							color: configuration.messages.colors.yellow,
+							color: constants.colors.dullYellow,
 						}],
 					},
 				},
@@ -671,7 +673,7 @@ async function handleVote(
 						flags: ApplicationCommandFlags.Ephemeral,
 						embeds: [{
 							description: localise(Services.entry.vote.stanceOnVoteChanged, interaction.locale),
-							color: configuration.messages.colors.green,
+							color: constants.colors.lightGreen,
 						}],
 					},
 				},
@@ -751,7 +753,7 @@ async function handleVote(
 					{
 						author: guildAsAuthor(bot, guild),
 						description: `🥳 ${entryRequestAcceptedString}`,
-						color: configuration.messages.colors.green,
+						color: constants.colors.lightGreen,
 					},
 				],
 			});
@@ -773,7 +775,7 @@ async function handleVote(
 					{
 						author: guildAsAuthor(bot, guild),
 						description: `😕 ${entryRequestRejectedString}`,
-						color: configuration.messages.colors.green,
+						color: constants.colors.lightGreen,
 					},
 				],
 			});
@@ -812,7 +814,7 @@ function displayVoteError(bot: Bot, interaction: Interaction): void {
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
 					description: localise(Services.entry.vote.failed, interaction.locale),
-					color: configuration.messages.colors.red,
+					color: constants.colors.red,
 				}],
 			},
 		},
@@ -830,7 +832,7 @@ function displayUserStateError(bot: Bot, interaction: Interaction): void {
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
 					description: localise(Services.entry.vote.failedToUpdateVerificationState, interaction.locale),
-					color: configuration.messages.colors.red,
+					color: constants.colors.red,
 				}],
 			},
 		},

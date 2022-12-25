@@ -10,7 +10,7 @@ import { Commands, createLocalisations, localise } from 'logos/assets/localisati
 import { OptionBuilder } from 'logos/src/commands/command.ts';
 import { getVoiceState, isOccupied, reset, verifyVoiceState } from 'logos/src/controllers/music.ts';
 import { Client } from 'logos/src/client.ts';
-import configuration from 'logos/configuration.ts';
+import constants from 'logos/constants.ts';
 import { defaultLocale } from 'logos/types.ts';
 
 const command: OptionBuilder = {
@@ -39,7 +39,7 @@ function handleStopPlayback([client, bot]: [Client, Bot], interaction: Interacti
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(Commands.music.options.stop.strings.notPlayingMusic, interaction.locale),
-						color: configuration.messages.colors.yellow,
+						color: constants.colors.dullYellow,
 					}],
 				},
 			},
@@ -60,7 +60,7 @@ function handleStopPlayback([client, bot]: [Client, Bot], interaction: Interacti
 				embeds: [{
 					title: `⏹️ ${stoppedString}`,
 					description: localise(Commands.music.options.stop.strings.stopped.body, defaultLocale),
-					color: configuration.messages.colors.blue,
+					color: constants.colors.blue,
 				}],
 			},
 		},

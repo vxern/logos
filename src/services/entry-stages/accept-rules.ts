@@ -14,7 +14,7 @@ import { getProficiencyCategory } from 'logos/src/commands/social/module.ts';
 import { Client } from 'logos/src/client.ts';
 import { snowflakeToTimestamp } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
-import { staticComponentIds } from 'logos/constants.ts';
+import constants from 'logos/constants.ts';
 
 const proficiencyCategory = getProficiencyCategory();
 const proficiencies = proficiencyCategory.collection.list;
@@ -46,7 +46,7 @@ async function handleAcceptRules(
 					(proficiency, index) => ({
 						type: MessageComponentTypes.Button,
 						label: localise(proficiency.name, interaction.locale),
-						customId: `${staticComponentIds.selectedLanguageProficiency}|${index}`,
+						customId: `${constants.staticComponentIds.selectedLanguageProficiency}|${index}`,
 						style: ButtonStyles.Secondary,
 						emoji: { name: proficiency.emoji },
 					}),
@@ -63,7 +63,7 @@ async function vetUser([client, bot]: [Client, Bot], interaction: Interaction): 
 			flags: ApplicationCommandFlags.Ephemeral,
 			embeds: [{
 				description: localise(Services.entry.verifyingAccount, interaction.locale),
-				color: configuration.messages.colors.blue,
+				color: constants.colors.blue,
 			}],
 		},
 	});
@@ -75,7 +75,7 @@ async function vetUser([client, bot]: [Client, Bot], interaction: Interaction): 
 			flags: ApplicationCommandFlags.Ephemeral,
 			embeds: [{
 				description: localise(Services.entry.accountTooNew, interaction.locale),
-				color: configuration.messages.colors.yellow,
+				color: constants.colors.dullYellow,
 			}],
 		});
 		return false;
@@ -92,7 +92,7 @@ async function vetUser([client, bot]: [Client, Bot], interaction: Interaction): 
 			flags: ApplicationCommandFlags.Ephemeral,
 			embeds: [{
 				description: localise(Services.entry.failedToVerifyAccount, interaction.locale),
-				color: configuration.messages.colors.red,
+				color: constants.colors.red,
 			}],
 		});
 
@@ -113,7 +113,7 @@ async function vetUser([client, bot]: [Client, Bot], interaction: Interaction): 
 			flags: ApplicationCommandFlags.Ephemeral,
 			embeds: [{
 				description: localise(Services.entry.alreadySubmittedAnswers, interaction.locale),
-				color: configuration.messages.colors.yellow,
+				color: constants.colors.dullYellow,
 			}],
 		});
 		return false;
@@ -125,7 +125,7 @@ async function vetUser([client, bot]: [Client, Bot], interaction: Interaction): 
 			flags: ApplicationCommandFlags.Ephemeral,
 			embeds: [{
 				description: localise(Services.entry.entryRequestRejectedPreviously, interaction.locale),
-				color: configuration.messages.colors.red,
+				color: constants.colors.red,
 			}],
 		});
 		return false;

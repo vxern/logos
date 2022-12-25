@@ -21,8 +21,7 @@ import { show } from 'logos/src/commands/parameters.ts';
 import { Client } from 'logos/src/client.ts';
 import { parseArguments } from 'logos/src/interactions.ts';
 import { addParametersToURL, diagnosticMentionUser } from 'logos/src/utils.ts';
-import configuration from 'logos/configuration.ts';
-import { deepLApiEndpoints } from 'logos/constants.ts';
+import constants from 'logos/constants.ts';
 
 const command: CommandBuilder = {
 	...createLocalisations(Commands.translate),
@@ -71,7 +70,7 @@ async function translateText(
 	const sourceLanguageCodeBase = sourceLanguageCode.split('-').at(0)!;
 
 	const response = await fetch(
-		addParametersToURL(deepLApiEndpoints.translate, {
+		addParametersToURL(constants.endpoints.deepl.translate, {
 			'auth_key': Deno.env.get('DEEPL_SECRET')!,
 			'text': text,
 			'source_lang': sourceLanguageCodeBase,
@@ -148,7 +147,7 @@ async function handleTranslateText(
 							Commands.translate.strings.targetLanguageMustBeDifferentFromSource,
 							interaction.locale,
 						),
-						color: configuration.messages.colors.yellow,
+						color: constants.colors.dullYellow,
 					}],
 				},
 			},
@@ -167,7 +166,7 @@ async function handleTranslateText(
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(Commands.translate.strings.textCannotBeEmpty, interaction.locale),
-						color: configuration.messages.colors.yellow,
+						color: constants.colors.dullYellow,
 					}],
 				},
 			},
@@ -193,7 +192,7 @@ async function handleTranslateText(
 									: localise(Commands.translate.strings.invalid.source, interaction.locale)
 							)
 							: localise(Commands.translate.strings.invalid.target, interaction.locale),
-						color: configuration.messages.colors.red,
+						color: constants.colors.red,
 					}],
 				},
 			},
@@ -223,7 +222,7 @@ async function handleTranslateText(
 			{
 				embeds: [{
 					description: localise(Commands.translate.strings.failed, interaction.locale),
-					color: configuration.messages.colors.red,
+					color: constants.colors.red,
 				}],
 			},
 		);
@@ -242,7 +241,7 @@ async function handleTranslateText(
 	let embeds: Embed[] = [];
 	if (!isLong) {
 		embeds = [{
-			color: configuration.messages.colors.blue,
+			color: constants.colors.blue,
 			fields: [{
 				name: localise(Commands.translate.strings.sourceText, interaction.locale),
 				value: text,
@@ -256,11 +255,11 @@ async function handleTranslateText(
 		}];
 	} else {
 		embeds = [{
-			color: configuration.messages.colors.blue,
+			color: constants.colors.blue,
 			title: localise(Commands.translate.strings.sourceText, interaction.locale),
 			description: text,
 		}, {
-			color: configuration.messages.colors.blue,
+			color: constants.colors.blue,
 			title: localise(Commands.translate.strings.translation, interaction.locale),
 			description: translatedText,
 			footer: { text: `${sourceLanguageName} ➜ ${targetLanguageName}` },

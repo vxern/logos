@@ -39,6 +39,7 @@ import { createDatabase, Database } from 'logos/src/database/database.ts';
 import services from 'logos/src/services/services.ts';
 import { diagnosticMentionUser } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
+import constants from 'logos/constants.ts';
 import { defaultLanguage, Language, supportedLanguages } from 'logos/types.ts';
 
 interface Collector<
@@ -220,7 +221,7 @@ function createEventHandlers(client: Client): Partial<EventHandlers> {
 				}],
 				status: 'online',
 			}),
-		guildCreate: async (bot, guild) => {
+		guildCreate: (bot, guild) => {
 			upsertGuildApplicationCommands(bot, guild.id, client.commands);
 
 			registerGuild(client, guild);
@@ -228,7 +229,7 @@ function createEventHandlers(client: Client): Partial<EventHandlers> {
 			setupLogging([client, bot], guild);
 			setupMusicController(client, guild.id);
 
-			await fetchMembers(bot, guild.id, { limit: 0, query: '' });
+			fetchMembers(bot, guild.id, { limit: 0, query: '' });
 		},
 		channelDelete: (_bot, channel) => {
 			client.cache.channels.delete(channel.id);
@@ -562,7 +563,7 @@ function resolveInteractionToMember(
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(Misc.client.invalidUser, interaction.locale),
-						color: configuration.messages.colors.red,
+						color: constants.colors.red,
 					}],
 				},
 			},

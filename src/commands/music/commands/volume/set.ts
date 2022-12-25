@@ -4,6 +4,7 @@ import { getVoiceState, setVolume, verifyVoiceState } from 'logos/src/controller
 import { Client } from 'logos/src/client.ts';
 import { parseArguments } from 'logos/src/interactions.ts';
 import configuration from 'logos/configuration.ts';
+import constants from 'logos/constants.ts';
 
 function handleSetVolume(
 	[client, bot]: [Client, Bot],
@@ -32,7 +33,7 @@ function handleSetVolume(
 						description: localise(Commands.music.options.volume.options.set.strings.invalidVolume, interaction.locale)(
 							configuration.music.limits.volume,
 						),
-						color: configuration.messages.colors.red,
+						color: constants.colors.red,
 					}],
 				},
 			},
@@ -55,7 +56,7 @@ function handleSetVolume(
 					description: localise(Commands.music.options.volume.options.set.strings.volumeSet.body, interaction.locale)(
 						volume,
 					),
-					color: configuration.messages.colors.invisible,
+					color: constants.colors.invisible,
 				}],
 			},
 		},

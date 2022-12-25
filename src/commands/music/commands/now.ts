@@ -15,7 +15,8 @@ import { Client } from 'logos/src/client.ts';
 import { paginate, parseArguments } from 'logos/src/interactions.ts';
 import { chunk } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
-import { displayTime, mention, MentionTypes, trim } from 'logos/formatting.ts';
+import constants from 'logos/constants.ts';
+import { mention, MentionTypes, timestamp, trim } from 'logos/formatting.ts';
 
 const command: OptionBuilder = {
 	...createLocalisations(Commands.music.options.now),
@@ -41,7 +42,7 @@ function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], interaction
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(Commands.music.options.now.strings.noSongPlaying, interaction.locale),
-						color: configuration.messages.colors.yellow,
+						color: constants.colors.dullYellow,
 					}],
 				},
 			},
@@ -62,7 +63,7 @@ function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], interaction
 						flags: ApplicationCommandFlags.Ephemeral,
 						embeds: [{
 							description: localise(Commands.music.options.now.strings.noCollectionPlaying, interaction.locale),
-							color: configuration.messages.colors.yellow,
+							color: constants.colors.dullYellow,
 						}],
 					},
 				},
@@ -77,7 +78,7 @@ function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], interaction
 			elements: chunk(collection.songs, configuration.music.limits.songs.page),
 			embed: {
 				title: `⬇️ ${nowPlayingString}`,
-				color: configuration.messages.colors.blue,
+				color: constants.colors.blue,
 			},
 			view: {
 				title: localise(Commands.music.options.now.strings.songs, interaction.locale),
@@ -143,7 +144,7 @@ function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], interaction
 							name: localise(Commands.music.options.now.strings.runningTime, interaction.locale),
 							value: (controller.player.playingSince ?? undefined) !== undefined
 								? localise(Commands.music.options.now.strings.playingSince, interaction.locale)(
-									displayTime(controller.player.playingSince!),
+									timestamp(controller.player.playingSince!),
 								)
 								: localise(Commands.music.options.now.strings.startTimeUnknown, interaction.locale),
 							inline: false,

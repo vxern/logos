@@ -50,14 +50,25 @@ function list(items: string[], bulletStyle: BulletStyles = BulletStyles.Arrow): 
 	return items.map((item) => `${bullet} ${item}`).join('\n');
 }
 
+enum TimestampFormat {
+	ShortTime = 't',
+	LongTime = 'T',
+	ShortDate = 'd',
+	LongDate = 'D',
+	ShortDateTime = 'f',
+	LongDateTime = 'F',
+	Relative = 'R',
+}
+
 /**
  * Taking a unix timestamp, returns a formatted, human-readable time expression.
  *
  * @param timestamp - Unix timestamp.
+ * @param format - The format to use for displaying the timestamp.
  * @returns The formatted, human-readable time expression.
  */
-function displayTime(timestamp: number): string {
-	return `<t:${Math.floor(timestamp / 1000)}:R>`;
+function timestamp(timestamp: number, format = TimestampFormat.Relative): string {
+	return `<t:${Math.floor(timestamp / 1000)}:${format}>`;
 }
 
 /** Defines the type of Discord mention. */
@@ -109,4 +120,4 @@ function trim(string: string, length: number): string {
 	return slice.slice(0, slice.length - Math.max(gap, stringContinued.length)) + stringContinued;
 }
 
-export { BulletStyles, capitalise, code, codeMultiline, displayTime, list, mention, MentionTypes, trim };
+export { BulletStyles, capitalise, code, codeMultiline, list, mention, MentionTypes, timestamp, TimestampFormat, trim };

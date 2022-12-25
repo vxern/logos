@@ -13,6 +13,7 @@ import { Player } from 'lavadeno';
 import { LoadType } from 'lavalink_types';
 import { Commands, localise } from 'logos/assets/localisations/mod.ts';
 import {
+	listingTypeToEmoji,
 	Song,
 	SongCollection,
 	SongListing,
@@ -21,6 +22,7 @@ import {
 } from 'logos/src/commands/music/data/types.ts';
 import { Client } from 'logos/src/client.ts';
 import configuration from 'logos/configuration.ts';
+import constants from 'logos/constants.ts';
 import { mention, MentionTypes } from 'logos/formatting.ts';
 import { defaultLocale } from 'logos/types.ts';
 
@@ -124,7 +126,7 @@ function verifyVoiceState(
 					embeds: [
 						{
 							description: localise(Commands.music.options.play.strings.mustBeInVoiceChannel, interaction.locale),
-							color: configuration.messages.colors.yellow,
+							color: constants.colors.dullYellow,
 						},
 					],
 				},
@@ -147,7 +149,7 @@ function verifyVoiceState(
 							Commands.music.options.play.strings.alreadyPlayingInAnotherVoiceChannel,
 							interaction.locale,
 						),
-						color: configuration.messages.colors.yellow,
+						color: constants.colors.dullYellow,
 					}],
 				},
 			},
@@ -178,7 +180,7 @@ function verifyCanRequestPlayback(
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(Commands.music.options.play.strings.queueIsFull, interaction.locale),
-						color: configuration.messages.colors.yellow,
+						color: constants.colors.dullYellow,
 					}],
 				},
 			},
@@ -245,7 +247,7 @@ function receiveNewListing(
 	const embed: Embed = {
 		title: `👍 ${queuedString}`,
 		description: localise(Commands.music.options.play.strings.queued.body, defaultLocale)(listing.content.title),
-		color: configuration.messages.colors.green,
+		color: constants.colors.lightGreen,
 	};
 
 	if (isOccupied(controller.player)) {
@@ -325,7 +327,7 @@ function advanceQueueAndPlay(
 			embeds: [{
 				title: `👏 ${allDoneString}`,
 				description: localise(Commands.music.strings.allDone.body, defaultLocale),
-				color: configuration.messages.colors.blue,
+				color: constants.colors.blue,
 			}],
 		});
 	}
@@ -347,7 +349,7 @@ async function loadSong(
 		const embed: Embed = {
 			title: localise(Commands.music.strings.couldNotLoadTrack.header, defaultLocale),
 			description: localise(Commands.music.strings.couldNotLoadTrack.body, defaultLocale)(song.title),
-			color: configuration.messages.colors.red,
+			color: constants.colors.red,
 		};
 
 		if (interaction === undefined) {
@@ -384,12 +386,12 @@ async function loadSong(
 
 	controller.player.play(track.track);
 
-	const symbol = configuration.music.symbols[song.type];
+	const emoji = listingTypeToEmoji[song.type];
 	const playingString = localise(Commands.music.strings.playing.header, defaultLocale);
 	const type = localise(localisationsBySongListingType[song.type], defaultLocale).toLowerCase();
 
 	const embed: Embed = {
-		title: `${symbol} ${playingString} ${type}`,
+		title: `${emoji} ${playingString} ${type}`,
 		description: localise(Commands.music.strings.playing.body, defaultLocale)(
 			isCollection(controller.currentListing?.content)
 				? localise(Commands.music.strings.playing.parts.displayTrack, defaultLocale)(
@@ -402,7 +404,7 @@ async function loadSong(
 			song.url,
 			mention(controller.currentListing!.requestedBy, MentionTypes.User),
 		),
-		color: configuration.messages.colors.invisible,
+		color: constants.colors.invisible,
 	};
 
 	if (interaction === undefined) {

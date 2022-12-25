@@ -13,7 +13,7 @@ import { log } from 'logos/src/controllers/logging/logging.ts';
 import { Client, resolveInteractionToMember } from 'logos/src/client.ts';
 import { parseArguments } from 'logos/src/interactions.ts';
 import { diagnosticMentionUser, guildAsAuthor } from 'logos/src/utils.ts';
-import configuration from 'logos/configuration.ts';
+import constants from 'logos/constants.ts';
 import { defaultLocale } from 'logos/types.ts';
 
 async function handleClearTimeout(
@@ -41,7 +41,7 @@ async function handleClearTimeout(
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(Commands.timeout.strings.notTimedOut, interaction.locale),
-						color: configuration.messages.colors.yellow,
+						color: constants.colors.dullYellow,
 					}],
 				},
 			},
@@ -70,7 +70,7 @@ async function handleClearTimeout(
 					description: localise(Commands.timeout.strings.timeoutCleared, interaction.locale)(
 						diagnosticMentionUser(member.user!),
 					),
-					color: configuration.messages.colors.green,
+					color: constants.colors.lightGreen,
 				}],
 			},
 		},
@@ -82,7 +82,7 @@ async function handleClearTimeout(
 				{
 					author: guildAsAuthor(bot, guild),
 					description: localise(Commands.timeout.strings.timeoutClearedDirect, defaultLocale),
-					color: configuration.messages.colors.green,
+					color: constants.colors.lightGreen,
 				},
 			],
 		});

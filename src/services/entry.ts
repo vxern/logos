@@ -7,7 +7,7 @@ import {
 import { ServiceStarter } from 'logos/src/services/services.ts';
 import { Client } from 'logos/src/client.ts';
 import { createInteractionCollector } from 'logos/src/interactions.ts';
-import { staticComponentIds } from 'logos/constants.ts';
+import constants from 'logos/constants.ts';
 
 type EntryInteractionHandler = (
 	[client, bot]: [Client, Bot],
@@ -16,9 +16,9 @@ type EntryInteractionHandler = (
 ) => Promise<void> | void;
 
 const interactionHandlers: Record<string, EntryInteractionHandler> = {
-	[staticComponentIds.acceptedRules]: handleAcceptRules,
-	[staticComponentIds.requestedVerification]: handleRequestVerification,
-	[staticComponentIds.selectedLanguageProficiency]: handleSelectLanguageProficiency,
+	[constants.staticComponentIds.acceptedRules]: handleAcceptRules,
+	[constants.staticComponentIds.requestedVerification]: handleRequestVerification,
+	[constants.staticComponentIds.selectedLanguageProficiency]: handleSelectLanguageProficiency,
 };
 
 const service: ServiceStarter = setupEntryProcess;

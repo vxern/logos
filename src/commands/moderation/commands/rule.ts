@@ -7,11 +7,11 @@ import {
 	InteractionTypes,
 	sendInteractionResponse,
 } from 'discordeno';
-import { Commands, createLocalisations, Information, localise } from 'logos/assets/localisations/mod.ts';
+import { Commands, createLocalisations, localise, Services } from 'logos/assets/localisations/mod.ts';
 import { CommandBuilder } from 'logos/src/commands/command.ts';
 import { Client } from 'logos/src/client.ts';
 import { parseArguments } from 'logos/src/interactions.ts';
-import configuration from 'logos/configuration.ts';
+import constants from 'logos/constants.ts';
 import { defaultLocale } from 'logos/types.ts';
 
 const command: CommandBuilder = {
@@ -30,8 +30,10 @@ function handleCiteRule(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): void {
+	const rules = Object.values(Services.notices.notices.information.rules.rules);
+
 	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete) {
-		const choices = Object.values(Information.rules.rules).map((rule, indexZeroBased) => {
+		const choices = rules.map((rule, indexZeroBased) => {
 			const index = indexZeroBased + 1;
 			const titleWithTLDR = localise(rule.title, interaction.locale);
 
@@ -52,21 +54,18 @@ function handleCiteRule(
 		);
 	}
 
-	const [{ rule }] = parseArguments(
-		interaction.data?.options,
-		{ rule: 'number' },
-	);
+	const [{ rule }] = parseArguments(interaction.data?.options, { rule: 'number' });
 	if (rule === undefined) return displayInvalidRuleError(bot, interaction);
 
-	const ruleParsed = Object.values(Information.rules.rules).at(rule);
+	const ruleParsed = rules.at(rule);
 	if (ruleParsed === undefined) return displayInvalidRuleError(bot, interaction);
 
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (guild === undefined) return;
 
-	const ruleString = localise(Information.rules.rule, defaultLocale);
+	const ruleString = localise(Services.notices.notices.information.rules.rule, defaultLocale);
 	const ruleTitleString = localise(ruleParsed.title, defaultLocale);
-	const tldrString = localise(Information.rules.tldr, defaultLocale);
+	const tldrString = localise(Services.notices.notices.information.rules.tldr, defaultLocale);
 	const summaryString = localise(ruleParsed.summary, defaultLocale);
 
 	return void sendInteractionResponse(
@@ -79,7 +78,7 @@ function handleCiteRule(
 				embeds: [{
 					title: `${ruleString} #${rule + 1}: ${ruleTitleString} ~ ${tldrString}: *${summaryString}*`,
 					description: localise(ruleParsed.content, defaultLocale),
-					color: configuration.messages.colors.blue,
+					color: constants.colors.blue,
 				}],
 			},
 		},
@@ -97,7 +96,7 @@ function displayInvalidRuleError(bot: Bot, interaction: Interaction): void {
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
 					description: localise(Commands.rule.strings.invalidRule, interaction.locale),
-					color: configuration.messages.colors.red,
+					color: constants.colors.red,
 				}],
 			},
 		},

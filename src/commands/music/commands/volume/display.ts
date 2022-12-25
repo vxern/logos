@@ -8,7 +8,7 @@ import {
 import { Commands, localise } from 'logos/assets/localisations/mod.ts';
 import { Client } from 'logos/src/client.ts';
 import { parseArguments } from 'logos/src/interactions.ts';
-import configuration from 'logos/configuration.ts';
+import constants from 'logos/constants.ts';
 import { defaultLocale } from 'logos/types.ts';
 
 function handleDisplayVolume(
@@ -37,7 +37,7 @@ function handleDisplayVolume(
 					description: localise(Commands.music.options.volume.options.display.strings.volume.body, locale)(
 						controller.player.volume,
 					),
-					color: configuration.messages.colors.invisible,
+					color: constants.colors.invisible,
 				}],
 			},
 		},

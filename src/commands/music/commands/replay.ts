@@ -12,7 +12,7 @@ import { collection } from 'logos/src/commands/parameters.ts';
 import { getVoiceState, isCollection, isOccupied, replay, verifyVoiceState } from 'logos/src/controllers/music.ts';
 import { Client } from 'logos/src/client.ts';
 import { parseArguments } from 'logos/src/interactions.ts';
-import configuration from 'logos/configuration.ts';
+import constants from 'logos/constants.ts';
 
 const command: OptionBuilder = {
 	...createLocalisations(Commands.music.options.replay),
@@ -45,7 +45,7 @@ function handleReplayAction([client, bot]: [Client, Bot], interaction: Interacti
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(Commands.music.options.replay.strings.noSongToReplay, interaction.locale),
-						color: configuration.messages.colors.yellow,
+						color: constants.colors.dullYellow,
 					}],
 				},
 			},
@@ -63,7 +63,7 @@ function handleReplayAction([client, bot]: [Client, Bot], interaction: Interacti
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(Commands.music.options.replay.strings.noSongCollectionToReplay, interaction.locale),
-						color: configuration.messages.colors.yellow,
+						color: constants.colors.dullYellow,
 					}],
 				},
 			},

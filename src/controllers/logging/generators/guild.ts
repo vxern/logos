@@ -2,8 +2,8 @@ import { Member, User } from 'discordeno';
 import { Article, ArticleChange, Praise, Warning } from 'logos/src/database/structs/mod.ts';
 import { MessageGenerators } from 'logos/src/controllers/logging/generators/generators.ts';
 import { diagnosticMentionUser } from 'logos/src/utils.ts';
-import configuration from 'logos/configuration.ts';
-import { code, codeMultiline, displayTime, trim } from 'logos/formatting.ts';
+import constants from 'logos/constants.ts';
+import { code, codeMultiline, timestamp, trim } from 'logos/formatting.ts';
 
 /** Type representing events that occur within a guild. */
 type GuildEvents = {
@@ -81,7 +81,7 @@ const generators: Required<MessageGenerators<GuildEvents>> = {
 			}`;
 		},
 		filter: (_client, originGuildId, _user, by) => originGuildId === by.guildId,
-		color: configuration.messages.colors.green,
+		color: constants.colors.lightGreen,
 	},
 	verificationRequestReject: {
 		title: '❌ Verification request rejected',
@@ -94,7 +94,7 @@ const generators: Required<MessageGenerators<GuildEvents>> = {
 			}`;
 		},
 		filter: (_client, originGuildId, _user, by) => originGuildId === by.guildId,
-		color: configuration.messages.colors.red,
+		color: constants.colors.red,
 	},
 	entryRequestAccept: {
 		title: '✅ Entry granted',
@@ -105,7 +105,7 @@ const generators: Required<MessageGenerators<GuildEvents>> = {
 			return `Entry has been granted to ${diagnosticMentionUser(user)}.`;
 		},
 		filter: (_client, originGuildId, member) => originGuildId === member.guildId,
-		color: configuration.messages.colors.green,
+		color: constants.colors.lightGreen,
 	},
 	entryRequestReject: {
 		title: '❌ Entry refused',
@@ -119,7 +119,7 @@ const generators: Required<MessageGenerators<GuildEvents>> = {
 ${codeMultiline(reason)}`;
 		},
 		filter: (_client, originGuildId, member, _reason) => originGuildId === member.guildId,
-		color: configuration.messages.colors.green,
+		color: constants.colors.lightGreen,
 	},
 	articleCreate: {
 		title: '📜 Article created',
@@ -134,7 +134,7 @@ ${codeMultiline(reason)}`;
 ${trim(article.content.body, 300)}`;
 		},
 		filter: (_client, originGuildId, _article, by) => originGuildId === by.guildId,
-		color: configuration.messages.colors.green,
+		color: constants.colors.lightGreen,
 	},
 	articleCreateAccept: {
 		title: '✔️ Article verified',
@@ -149,7 +149,7 @@ ${trim(article.content.body, 300)}`;
 ${trim(article.content.body, 300)}`;
 		},
 		filter: (_client, originGuildId, _article, by) => originGuildId === by.guildId,
-		color: configuration.messages.colors.green,
+		color: constants.colors.lightGreen,
 	},
 	articleCreateReject: {
 		title: '❌ Article rejected',
@@ -164,7 +164,7 @@ ${trim(article.content.body, 300)}`;
 ${trim(article.content.body, 300)}`;
 		},
 		filter: (_client, originGuildId, _article, by) => originGuildId === by.guildId,
-		color: configuration.messages.colors.red,
+		color: constants.colors.red,
 	},
 	articleEdit: {
 		title: '✍️ Article edited',
@@ -179,7 +179,7 @@ ${trim(article.content.body, 300)}`;
 ${trim(change.content.body, 300)}`;
 		},
 		filter: (_client, originGuildId, _article, _change, by) => originGuildId === by.guildId,
-		color: configuration.messages.colors.blue,
+		color: constants.colors.blue,
 	},
 	articleEditAccept: {
 		title: '✔️ Article edit accepted',
@@ -194,7 +194,7 @@ ${trim(change.content.body, 300)}`;
 ${trim(change.content.body, 300)}`;
 		},
 		filter: (_client, originGuildId, _article, _change, by) => originGuildId === by.guildId,
-		color: configuration.messages.colors.green,
+		color: constants.colors.lightGreen,
 	},
 	articleEditReject: {
 		title: '❌ Article edit rejected',
@@ -209,7 +209,7 @@ ${trim(change.content.body, 300)}`;
 ${trim(change.content.body, 300)}`;
 		},
 		filter: (_client, originGuildId, _article, _change, by) => originGuildId === by.guildId,
-		color: configuration.messages.colors.red,
+		color: constants.colors.red,
 	},
 	articleLock: {
 		title: '🔐 Article locked',
@@ -220,7 +220,7 @@ ${trim(change.content.body, 300)}`;
 			return `The article ${code(article.content.title)} has been locked by ${diagnosticMentionUser(user)}.`;
 		},
 		filter: (_client, originGuildId, _article, by) => originGuildId === by.guildId,
-		color: configuration.messages.colors.yellow,
+		color: constants.colors.dullYellow,
 	},
 	moderatorInquestLaunch: {
 		title: '❗ Inquest launched',
@@ -231,7 +231,7 @@ ${trim(change.content.body, 300)}`;
 			return `An inquest has been launched into ${diagnosticMentionUser(memberUser)} by ${diagnosticMentionUser(by)}.`;
 		},
 		filter: (_client, originGuildId, member, _by) => originGuildId === member.guildId,
-		color: configuration.messages.colors.darkRed,
+		color: constants.colors.darkRed,
 	},
 	moderatorInquestPass: {
 		title: '✔️ Inquest resulted in acquittance',
@@ -244,7 +244,7 @@ ${trim(change.content.body, 300)}`;
 			}, and resulted in a pass.`;
 		},
 		filter: (_client, originGuildId, member, _by) => originGuildId === member.guildId,
-		color: configuration.messages.colors.green,
+		color: constants.colors.lightGreen,
 	},
 	moderatorInquestFail: {
 		title: '❌ Inquest resulted in failure',
@@ -257,7 +257,7 @@ ${trim(change.content.body, 300)}`;
 			}, and resulted in a failure.`;
 		},
 		filter: (_client, originGuildId, member, _by) => originGuildId === member.guildId,
-		color: configuration.messages.colors.red,
+		color: constants.colors.red,
 	},
 	memberWarnAdd: {
 		title: '⚠️ Member warned',
@@ -270,7 +270,7 @@ ${trim(change.content.body, 300)}`;
 			} for: ${warning.reason}`;
 		},
 		filter: (_client, originGuildId, member, _warning, _by) => originGuildId === member.guildId,
-		color: configuration.messages.colors.yellow,
+		color: constants.colors.dullYellow,
 	},
 	memberWarnRemove: {
 		title: '😇 Member pardoned',
@@ -283,7 +283,7 @@ ${trim(change.content.body, 300)}`;
 			} regarding their warning for: ${warning.reason}`;
 		},
 		filter: (_client, originGuildId, member, _warning, _by) => originGuildId === member.guildId,
-		color: configuration.messages.colors.blue,
+		color: constants.colors.blue,
 	},
 	memberTimeoutAdd: {
 		title: '⏳ Member timed out',
@@ -292,11 +292,11 @@ ${trim(change.content.body, 300)}`;
 			if (memberUser === undefined) return;
 
 			return `${diagnosticMentionUser(memberUser)} has been timed out by ${diagnosticMentionUser(by)} until ${
-				displayTime(until)
+				timestamp(until)
 			} for: ${reason}`;
 		},
 		filter: (_client, originGuildId, member, _until, _reason, _by) => originGuildId === member.guildId,
-		color: configuration.messages.colors.yellow,
+		color: constants.colors.dullYellow,
 	},
 	memberTimeoutRemove: {
 		title: `😇 Member's timeout cleared`,
@@ -307,7 +307,7 @@ ${trim(change.content.body, 300)}`;
 			return `The timeout of ${diagnosticMentionUser(memberUser)} has been cleared by: ${diagnosticMentionUser(by)}`;
 		},
 		filter: (_client, originGuildId, member, _by) => originGuildId === member.guildId,
-		color: configuration.messages.colors.blue,
+		color: constants.colors.blue,
 	},
 	praiseAdd: {
 		title: `🙏 Member praised`,
@@ -322,7 +322,7 @@ ${trim(change.content.body, 300)}`;
 			}. Comment: ${comment}`;
 		},
 		filter: (_client, originGuildId, member, _praise, _by) => originGuildId === member.guildId,
-		color: configuration.messages.colors.green,
+		color: constants.colors.lightGreen,
 	},
 	suggestionSend: {
 		title: `🌿 Suggestion made`,
@@ -334,7 +334,7 @@ ${trim(change.content.body, 300)}`;
 				`Suggestion: *${suggestion}*`;
 		},
 		filter: (_client, originGuildId, member, _suggestion) => originGuildId === member.guildId,
-		color: configuration.messages.colors.darkGreen,
+		color: constants.colors.darkGreen,
 	},
 };
 

@@ -11,7 +11,7 @@ import { handleResumePlayback } from 'logos/src/commands/music/commands/resume.t
 import { OptionBuilder } from 'logos/src/commands/command.ts';
 import { getVoiceState, isOccupied, isPaused, pause, verifyVoiceState } from 'logos/src/controllers/music.ts';
 import { Client } from 'logos/src/client.ts';
-import configuration from 'logos/configuration.ts';
+import constants from 'logos/constants.ts';
 import { defaultLocale } from 'logos/types.ts';
 
 const command: OptionBuilder = {
@@ -39,7 +39,7 @@ function handlePausePlayback([client, bot]: [Client, Bot], interaction: Interact
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(Commands.music.options.pause.strings.noSongToPause, interaction.locale),
-						color: configuration.messages.colors.yellow,
+						color: constants.colors.dullYellow,
 					}],
 				},
 			},
@@ -64,7 +64,7 @@ function handlePausePlayback([client, bot]: [Client, Bot], interaction: Interact
 				embeds: [{
 					title: `⏸️ ${pausedString}`,
 					description: localise(Commands.music.options.pause.strings.paused.body, defaultLocale),
-					color: configuration.messages.colors.invisible,
+					color: constants.colors.invisible,
 				}],
 			},
 		},

@@ -7,7 +7,6 @@ import {
 	TranslationLanguage,
 	typedLocalisations,
 } from 'logos/assets/localisations/utils.ts';
-import { emojis, links } from 'logos/constants.ts';
 import { capitalise, code, list } from 'logos/formatting.ts';
 import { Language } from 'logos/types.ts';
 
@@ -87,17 +86,14 @@ class Commands {
 							'Polish': 'Jak mnie stworzono?',
 							'Romanian': 'Cum am fost creat?',
 						},
-						body: {
-							'English':
-								`I am powered by [${emojis.typescript} TypeScript](${links.typescriptWebsite}) running within [${emojis.deno} Deno](${links.denoWebsite}). ` +
-								`I interact with [Discord\'s API](${links.discordApiWebsite}) with the help of the [${emojis.discordeno} discordeno](${links.discordenoRepository}) library.`,
-							'Polish':
-								`Jestem zasilany przez [${emojis.typescript} TypeScript](${links.typescriptWebsite}), działający w ramach [${emojis.deno} Deno](${links.denoWebsite}). ` +
-								`Współdziałam z [API Discorda](${links.discordApiWebsite}) za pomocą biblioteki [${emojis.discordeno} discordeno](${links.discordenoRepository}).`,
-							'Romanian':
-								`Sunt alimentat de către [${emojis.typescript} TypeScript](${links.typescriptWebsite}), care se execută în cadrul [${emojis.deno} Deno](${links.denoWebsite}). ` +
-								`Interacționez cu [API-ul Discord-ului](${links.discordApiWebsite}) cu ajutorul bibliotecii [${emojis.discordeno} discordeno](${links.discordenoRepository}).`,
-						},
+						body: (typescript: string, deno: string, discordApiLink: string, discordeno: string) => ({
+							'English': `I am powered by ${typescript} running within ${deno}. ` +
+								`I interact with [Discord\'s API](${discordApiLink}) with the help of the ${discordeno} library.`,
+							'Polish': `Jestem zasilany przez ${typescript}, działający w ramach ${deno}. ` +
+								`Współdziałam z [API Discorda](${discordApiLink}) za pomocą biblioteki ${discordeno}.`,
+							'Romanian': `Sunt alimentat de către ${typescript}, care se execută în cadrul ${deno}. ` +
+								`Interacționez cu [API-ul Discord-ului](${discordApiLink}) cu ajutorul bibliotecii ${discordeno}.`,
+						}),
 					},
 					howToAddToServer: {
 						header: {
@@ -105,14 +101,14 @@ class Commands {
 							'Polish': 'Jak można dodać mnie na własny serwer?',
 							'Romanian': 'Cum poți să mă adaugi pe serverul tău?',
 						},
-						body: {
+						body: (learnArmenian: string, learnRomanian: string) => ({
 							'English': `It is not possible at this point in time. ` +
-								`I was made for the purpose of managing a select few language-learning communities, such as [🇦🇲 Learn Armenian](${links.learnArmenianListingWebsite}) and [🇷🇴 Learn Romanian](${links.learnRomanianListingWebsite}).`,
+								`I was made for the purpose of managing a select few language-learning communities, such as ${learnArmenian} and ${learnRomanian}.`,
 							'Polish': `Na chwilę obecną nie można tego zrobić. ` +
-								`Zostałem stworzony w celu zarządzania kilkoma wybranymi społecznościami językowymi, takimi jak [🇦🇲 Learn Armenian](${links.learnArmenianListingWebsite}) oraz [🇷🇴 Learn Romanian](${links.learnRomanianListingWebsite}).`,
+								`Zostałem stworzony w celu zarządzania kilkoma wybranymi społecznościami językowymi, takimi jak ${learnArmenian} oraz ${learnRomanian}.`,
 							'Romanian': `La acest moment asta nu este posibil. ` +
-								`Am fost creat cu scopul de a nu gestiona decât câteva comunități lingvistice selecte, cum ar fi [🇦🇲 Learn Armenian](${links.learnArmenianListingWebsite}) și [🇷🇴 Learn Romanian](${links.learnRomanianListingWebsite}).`,
-						},
+								`Am fost creat cu scopul de a nu gestiona decât câteva comunități lingvistice selecte, cum ar fi ${learnArmenian} și ${learnRomanian}.`,
+						}),
 					},
 					amIOpenSource: {
 						header: {
@@ -121,14 +117,17 @@ class Commands {
 							'Romanian': 'Sunt open-source?',
 						},
 						body: {
-							'English': `Unfortunately, no. ` +
+							'English': (talonRepositoryLink: string) =>
+								`Unfortunately, no. ` +
 								`However, my predecessor, Talon, *is*. ` +
-								`You can view his source code [here](${links.talonRepositoryLink}).`,
-							'Polish': `Niestety nie, chociaż kod źródłowy mojego poprzednika, Talona, jest publiczny. ` +
-								`Można zajrzeć w jego kod źródłowy [o tu](${links.talonRepositoryLink}).`,
-							'Romanian': `Nu, din păcate. ` +
+								`You can view his source code [here](${talonRepositoryLink}).`,
+							'Polish': (talonRepositoryLink: string) =>
+								`Niestety nie, chociaż kod źródłowy mojego poprzednika, Talona, jest publiczny. ` +
+								`Można zajrzeć w jego kod źródłowy [o tu](${talonRepositoryLink}).`,
+							'Romanian': (talonRepositoryLink: string) =>
+								`Nu, din păcate. ` +
 								`Deși, codul-sursă al predecesorului meu, al lui Talon, este public. ` +
-								`Îl puteți vedea [chiar aici](${links.talonRepositoryLink}).`,
+								`Îl puteți vedea [chiar aici](${talonRepositoryLink}).`,
 						},
 					},
 				},
@@ -1656,72 +1655,6 @@ class Commands {
 				},
 				external: {
 					'English': 'External',
-				},
-			},
-		},
-	});
-
-	static readonly post = typedLocalisations({
-		name: {
-			'English': 'post',
-			'Polish': 'wstaw',
-			'Romanian': 'postare',
-		},
-		description: {
-			'English': 'Allows the user to post various core server messages, such as the server rules.',
-			'Polish': 'Pozwala użytkownikowi na wstawianie różnych wiadomości serwerowych, takich jak regulamin.',
-			'Romanian': 'Permite utilizatorului postarea diverselor mesaje de server, precum regulamentul.',
-		},
-		options: {
-			information: {
-				name: {
-					'English': 'rules',
-					'Polish': 'regulamin',
-					'Romanian': 'regulament',
-				},
-				description: {
-					'English': 'Posts a message containing the server rules.',
-					'Polish': 'Wstawia wiadomość zawierającą regulamin.',
-					'Romanian': 'Postează un mesaj care conține regulamentul.',
-				},
-				strings: {
-					posted: {
-						'English': 'Rules posted.',
-						'Polish': 'Reguły opublikowane.',
-						'Romanian': 'Reguli publicate.',
-					},
-				},
-			},
-			welcome: {
-				name: {
-					'English': 'welcome',
-					'Polish': 'powitanie',
-					'Romanian': 'bun-venit',
-				},
-				description: {
-					'English': 'Posts a message containing the welcome message.',
-					'Polish': 'Wstawia wiadomość zawierającą powitanie dla nowych członków serwera.',
-					'Romanian': 'Postează un mesaj care conține un bun-venit pentru membri noi ai serverului.',
-				},
-				strings: {
-					welcome: {
-						header: {
-							'English': (guildName: string) => `Welcome to **${guildName}**`,
-						},
-						body: {
-							'English': (channelMention: string) =>
-								`To enter the server and become its official member, read the information in the ${channelMention} channel to get yourself familiarised with the server guidelines, and then press the button below.`,
-						},
-					},
-					// No full stop here.
-					acceptedRules: {
-						'English': 'I have read the rules, and agree to abide by them',
-					},
-					posted: {
-						'English': 'Welcome posted.',
-						'Polish': 'Powitanie opublikowane.',
-						'Romanian': 'Bun-venit publicat.',
-					},
 				},
 			},
 		},

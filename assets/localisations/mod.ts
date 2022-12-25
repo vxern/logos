@@ -1,6 +1,5 @@
 export * from 'logos/assets/localisations/commands.ts';
 export * from 'logos/assets/localisations/expressions.ts';
-export * from 'logos/assets/localisations/information.ts';
 export * from 'logos/assets/localisations/languages.ts';
 export * from 'logos/assets/localisations/misc.ts';
 export * from 'logos/assets/localisations/modals.ts';
