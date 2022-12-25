@@ -25,6 +25,7 @@ import constants from 'logos/constants.ts';
 
 const command: CommandBuilder = {
 	...createLocalisations(Commands.translate),
+	isRateLimited: true,
 	defaultMemberPermissions: ['VIEW_CHANNEL'],
 	handle: handleTranslateText,
 	options: [{

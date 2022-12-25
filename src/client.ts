@@ -41,6 +41,7 @@ import { diagnosticMentionUser } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import constants from 'logos/constants.ts';
 import { defaultLanguage, Language, supportedLanguages } from 'logos/types.ts';
+import { timestamp } from '../formatting.ts';
 
 interface Collector<
 	E extends keyof EventHandlers,
@@ -95,6 +96,8 @@ type Client = Readonly<{
 			node: LavalinkNode;
 			controllers: Map<bigint, MusicController>;
 		};
+		// The keys are user IDs, the values are command usage timestamps mapped by command IDs.
+		rateLimiting: Map<bigint, Map<bigint, number[]>>;
 	};
 }>;
 
@@ -365,6 +368,46 @@ function withCaching(
 	return transformers;
 }
 
+function withRateLimiting(handle: InteractionHandler): InteractionHandler {
+	return ([client, bot], interaction) => {
+		const commandId = interaction.data?.id;
+		if (commandId === undefined) return handle([client, bot], interaction);
+
+		if (!client.features.rateLimiting.has(interaction.user.id)) {
+			client.features.rateLimiting.set(interaction.user.id, new Map());
+		}
+
+		const executedAt = Date.now();
+
+		const timestampsByCommandId = client.features.rateLimiting.get(interaction.user.id)!;
+		const timestamps = [...(timestampsByCommandId.get(commandId) ?? []), executedAt];
+		const activeTimestamps = timestamps.filter(
+			(timestamp) => (Date.now() - timestamp) <= configuration.rateLimiting.within,
+		);
+
+		if (activeTimestamps.length > configuration.rateLimiting.limit) {
+			const firstTimestamp = activeTimestamps[0]!;
+			const now = Date.now();
+			const nextValidUsageTimestamp = timestamp(now + configuration.rateLimiting.within - (now - firstTimestamp));
+
+			return void sendInteractionResponse(bot, interaction.id, interaction.token, {
+				type: InteractionResponseTypes.ChannelMessageWithSource,
+				data: {
+					flags: ApplicationCommandFlags.Ephemeral,
+					embeds: [{
+						description: localise(Misc.usedCommandTooManyTimes, interaction.locale)(nextValidUsageTimestamp),
+						color: constants.colors.yellow,
+					}],
+				},
+			});
+		}
+
+		timestampsByCommandId.set(commandId, activeTimestamps);
+
+		return handle([client, bot], interaction);
+	};
+}
+
 function createCommandHandlers(
 	commands: Command[],
 ): Map<string, InteractionHandler> {
@@ -372,21 +415,29 @@ function createCommandHandlers(
 
 	for (const command of commands) {
 		if (command.handle !== undefined) {
-			handlers.set(command.name, command.handle);
+			handlers.set(command.name, command.isRateLimited ? withRateLimiting(command.handle) : command.handle);
 		}
 
 		if (command.options === undefined) continue;
 
 		for (const option of command.options) {
 			if (option.handle !== undefined) {
-				handlers.set(`${command.name} ${option.name}`, option.handle);
+				handlers.set(
+					`${command.name} ${option.name}`,
+					command.isRateLimited || option.isRateLimited ? withRateLimiting(option.handle) : option.handle,
+				);
 			}
 
 			if (option.options === undefined) continue;
 
 			for (const subOption of option.options) {
 				if (subOption.handle !== undefined) {
-					handlers.set(`${command.name} ${option.name} ${subOption.name}`, subOption.handle);
+					handlers.set(
+						`${command.name} ${option.name} ${subOption.name}`,
+						command.isRateLimited || option.isRateLimited || subOption.isRateLimited
+							? withRateLimiting(subOption.handle)
+							: subOption.handle,
+					);
 				}
 			}
 		}

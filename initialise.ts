@@ -134,6 +134,7 @@ async function initialise(): Promise<[Client, Bot]> {
 	return initialiseClient({ version, supportedTranslationLanguages }, {
 		dictionaryAdapters: loadDictionaryAdapters(),
 		sentencePairs: loadSentencePairs(sentenceFiles),
+    rateLimiting: new Map(),
 	});
 }
 

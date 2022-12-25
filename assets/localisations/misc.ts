@@ -1,5 +1,5 @@
 import { Expressions } from 'logos/assets/localisations/expressions.ts';
-import { Localisations } from 'logos/assets/localisations/utils.ts';
+import { Expression, Localisations } from 'logos/assets/localisations/utils.ts';
 
 class Misc {
 	static readonly client = {
@@ -225,6 +225,18 @@ class Misc {
 	static readonly continuedOnNextPage: Localisations<string> = {
 		'English': 'Continued on the next page...',
 		'Polish': 'Kontynuacja na następnej stronie...',
+	};
+
+	static readonly usedCommandTooManyTimes: Localisations<Expression<string>> = {
+		'English': (timestamp: string) =>
+			'You have used this command too many times in too short of time.\n\n' +
+			`You will be able to use the command again ${timestamp}.`,
+		'Polish': (timestamp: string) =>
+			'Użyłeś/aś polecenia zbyt wiele razy w zbyt krótkim czasie.\n\n' +
+			`Będziesz mógł/mogła ponownie użyć polecenia ${timestamp}.`,
+		'Romanian': (timestamp: string) =>
+			'Ai folosit comanda de prea multe ori într-un timp prea scurt.\n\n' +
+			`Vei putea folosi comanda din nou ${timestamp}.`,
 	};
 }
 
