@@ -18,14 +18,17 @@ type CommandLocalised = WithRequired<CreateSlashApplicationCommand, Localisation
 
 type OptionLocalised = WithRequired<ApplicationCommandOption, LocalisationFields>;
 
+interface CommandFeatures {
+	isRateLimited?: boolean;
+	handle?: InteractionHandler;
+	options?: Option[];
+}
+
 type Command =
 	& WithRequired<Omit<CommandLocalised, 'options'>, 'defaultMemberPermissions'>
-	& {
-		handle?: InteractionHandler;
-		options?: Option[];
-	};
+	& CommandFeatures;
 
-type Option = Omit<OptionLocalised, 'options'> & { handle?: InteractionHandler; options?: Option[] };
+type Option = Omit<OptionLocalised, 'options'> & CommandFeatures;
 
 type CommandBuilder = Command;
 

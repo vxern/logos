@@ -27,6 +27,7 @@ import { WordTypes } from 'logos/types.ts';
 
 const command: CommandBuilder = {
 	...createLocalisations(Commands.word),
+	isRateLimited: true,
 	defaultMemberPermissions: ['VIEW_CHANNEL'],
 	handle: handleSearchWord,
 	options: [{

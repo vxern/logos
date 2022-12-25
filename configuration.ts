@@ -37,6 +37,10 @@ const configuration = {
 			within: 6 * Periods.hour,
 		},
 	},
+	rateLimiting: {
+		limit: 3,
+		within: 1 * Periods.minute,
+	},
 	// Configuration settings pertaining to music.
 	music: {
 		disconnectTimeout: 10 * Periods.minute,
