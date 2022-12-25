@@ -38,6 +38,7 @@ import { diagnosticMentionUser, getAllMessages, getTextChannel, guildAsAuthor } 
 import { defaultLocale } from 'logos/types.ts';
 import configuration from 'logos/configuration.ts';
 import constants from 'logos/constants.ts';
+import { trim } from 'logos/formatting.ts';
 
 const verificationPromptHandlers = new Map<string, NonNullable<InteractionCollectorSettings['onCollect']>>();
 
@@ -106,7 +107,7 @@ function registerPastEntryRequests([client, bot]: [Client, Bot]): void {
 	const { guildCreate } = bot.events;
 
 	bot.events.guildCreate = async (bot, guild_) => {
-		await guildCreate(bot, guild_);
+		guildCreate(bot, guild_);
 
 		const guild = client.cache.guilds.get(guild_.id)!;
 
@@ -296,9 +297,11 @@ async function initiateVerificationProcess(
 		return false;
 	}
 
+	const modal = generateVerificationQuestionModal(guild, interaction.locale);
+
 	return new Promise((resolve) => {
 		createModalComposer([client, bot], interaction, {
-			modal: generateVerificationQuestionModal(guild, interaction.locale),
+			modal,
 			onSubmit: async (submission, answers) => {
 				const submitterReferenceId = stringifyValue(submitterDocument.ref);
 
@@ -392,7 +395,7 @@ function generateVerificationQuestionModal<T extends string>(
 			components: [{
 				customId: 'reason',
 				type: MessageComponentTypes.InputText,
-				label: localise(Modals.verification.fields.reason, locale)(guild.language),
+				label: trim(localise(Modals.verification.fields.reason, locale)(guild.language), 45),
 				style: TextStyles.Paragraph,
 				required: true,
 				minLength: 20,
@@ -403,7 +406,7 @@ function generateVerificationQuestionModal<T extends string>(
 			components: [{
 				customId: 'aim',
 				type: MessageComponentTypes.InputText,
-				label: localise(Modals.verification.fields.aim, locale),
+				label: trim(localise(Modals.verification.fields.aim, locale), 45),
 				style: TextStyles.Paragraph,
 				required: true,
 				minLength: 20,
@@ -414,7 +417,7 @@ function generateVerificationQuestionModal<T extends string>(
 			components: [{
 				customId: 'where_found',
 				type: MessageComponentTypes.InputText,
-				label: localise(Modals.verification.fields.whereFound, locale)(guild.name),
+				label: trim(localise(Modals.verification.fields.whereFound, locale)(guild.name), 45),
 				style: TextStyles.Short,
 				required: true,
 				minLength: 5,
