@@ -6,6 +6,7 @@ import articles from 'logos/src/database/adapters/articles.ts';
 import articleChanges from 'logos/src/database/adapters/article-changes.ts';
 import entryRequests from 'logos/src/database/adapters/entry-requests.ts';
 import praises from 'logos/src/database/adapters/praises.ts';
+import reports from 'logos/src/database/adapters/reports.ts';
 import users from 'logos/src/database/adapters/users.ts';
 import warnings from 'logos/src/database/adapters/warnings.ts';
 import { Article, ArticleChange, EntryRequest, Praise, Report, User, Warning } from 'logos/src/database/structs/mod.ts';
@@ -16,6 +17,7 @@ import {
 	EntryRequestIndexes,
 	IndexesSignature,
 	PraiseIndexes,
+	ReportIndexes,
 	UserIndexes,
 	WarningIndexes,
 } from 'logos/src/database/indexes.ts';
@@ -141,6 +143,7 @@ interface DatabaseAdapters {
 	articles: DatabaseAdapter<Article, ArticleIndexes, 'getOrFetch'>;
 	entryRequests: DatabaseAdapter<EntryRequest, EntryRequestIndexes, 'get' | 'update', true>;
 	praises: DatabaseAdapter<Praise, PraiseIndexes, 'getOrFetch'>;
+	reports: DatabaseAdapter<Report, ReportIndexes, 'get', true>;
 	users: DatabaseAdapter<User, UserIndexes, 'getOrFetch' | 'getOrFetchOrCreate' | 'update'>;
 	warnings: DatabaseAdapter<Warning, WarningIndexes, 'getOrFetch' | 'delete'>;
 }
@@ -278,7 +281,7 @@ function createDatabase(): Database {
 			usersById: new Map(),
 			warningsByRecipient: new Map(),
 		},
-		adapters: { articles, articleChanges, entryRequests, praises, users, warnings },
+		adapters: { articles, articleChanges, entryRequests, reports, praises, users, warnings },
 	};
 }
 
