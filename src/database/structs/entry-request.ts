@@ -20,7 +20,7 @@ interface EntryRequest {
 	/** The document references to the moderators who have voted to reject this entry request. */
 	votedAgainst: Reference[];
 
-	/** Whether this entry request has been decided on and  */
+	/** Whether this entry request has been decided on and the user has either been accepted or rejected. */
 	isFinalised: boolean;
 }
 
