@@ -154,6 +154,7 @@ async function initialiseClient(
 async function prefetchDataFromDatabase(client: Client, database: Database): Promise<void> {
 	await Promise.all([
 		database.adapters.entryRequests.prefetch(client),
+		database.adapters.reports.prefetch(client),
 	]);
 }
 
