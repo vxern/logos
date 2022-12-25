@@ -1,4 +1,4 @@
-import { Article, ArticleChange, EntryRequest, Praise, User, Warning } from 'logos/src/database/structs/mod.ts';
+import { Article, ArticleChange, EntryRequest, Praise, Report, User, Warning } from 'logos/src/database/structs/mod.ts';
 import { Document, Reference } from 'logos/src/database/document.ts';
 import { Language } from 'logos/types.ts';
 
@@ -23,6 +23,11 @@ type EntryRequestIndexes<T = Document<EntryRequest>> = {
 type PraiseIndexes<T = Map<string, Document<Praise>>> = {
 	sender: [takes: Reference, returns: T];
 	recipient: [takes: Reference, returns: T];
+};
+
+type ReportIndexes<T = Document<Report>> = {
+	authorAndGuild: [takes: [Reference, string], returns: T];
+	recipientAndGuild: [takes: [Reference, string], returns: T];
 };
 
 type UserIndexes<T = Document<User>> = {
@@ -70,6 +75,7 @@ export type {
 	EntryRequestIndexes,
 	IndexesSignature,
 	PraiseIndexes,
+	ReportIndexes,
 	UserIndexes,
 	WarningIndexes,
 };
