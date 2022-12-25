@@ -8,7 +8,7 @@ import entryRequests from 'logos/src/database/adapters/entry-requests.ts';
 import praises from 'logos/src/database/adapters/praises.ts';
 import users from 'logos/src/database/adapters/users.ts';
 import warnings from 'logos/src/database/adapters/warnings.ts';
-import { Article, ArticleChange, EntryRequest, Praise, User, Warning } from 'logos/src/database/structs/mod.ts';
+import { Article, ArticleChange, EntryRequest, Praise, Report, User, Warning } from 'logos/src/database/structs/mod.ts';
 import { Document, Reference } from 'logos/src/database/document.ts';
 import {
 	ArticleChangeIndexes,
@@ -203,6 +203,22 @@ interface Cache extends Record<string, Map<string, unknown>> {
 	praisesByRecipient: Map<string, Map<string, Document<Praise>>>;
 
 	/**
+	 * Cached user reports.
+	 *
+	 * The keys are stringified user document references.\
+	 * The values are report documents mapped by their stringified document reference.
+	 */
+	reportsByAuthorAndGuild: Map<string, Map<string, Document<Report>>>;
+
+	/**
+	 * Cached user reports.
+	 *
+	 * The keys are stringified user document references.\
+	 * The values are report documents mapped by their stringified document reference.
+	 */
+	reportsByRecipientAndGuild: Map<string, Map<string, Document<Report>>>;
+
+	/**
 	 * Cached users.
 	 *
 	 * The keys are stringified user document references.\
@@ -256,6 +272,8 @@ function createDatabase(): Database {
 			entryRequestBySubmitterAndGuild: new Map(),
 			praisesBySender: new Map(),
 			praisesByRecipient: new Map(),
+			reportsByAuthorAndGuild: new Map(),
+			reportsByRecipientAndGuild: new Map(),
 			usersByReference: new Map(),
 			usersById: new Map(),
 			warningsByRecipient: new Map(),
