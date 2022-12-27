@@ -522,54 +522,55 @@ function addCollector<T extends keyof EventHandlers>(
 	collectors.add(collector);
 }
 
-const userMentionExpression = new RegExp(/^<@!?([0-9]{18})>$/);
-const userIDExpression = new RegExp(/^[0-9]{18}$/);
+const userIDPattern = new RegExp(/^([0-9]{17,20})$/);
+const userMentionPattern = new RegExp(/^<@!?([0-9]{17,20})>$/);
 
-/**
- * @param client - The client instance to use.
- * @param guildId - The id of the guild whose members to resolve to.
- * @param identifier - The user identifier to match to members.
- * @param options - Additional options to use when resolving to members.
- *
- * @returns A tuple containing the members matched to the identifier and a
- * boolean value indicating whether the identifier is a user ID.
- */
+function extractIDFromIdentifier(identifier: string): string | undefined {
+	return userIDPattern.exec(identifier)?.at(1) ?? userMentionPattern.exec(identifier)?.at(1);
+}
+
+const userTagPattern = new RegExp(/^(.{2,32}#[0-9]{4})$/);
+
+function isValidIdentifier(identifier: string): boolean {
+	return userIDPattern.test(identifier) || userMentionPattern.test(identifier) || userTagPattern.test(identifier);
+}
+
 function resolveIdentifierToMembers(
 	client: Client,
 	guildId: bigint,
 	identifier: string,
 	options: { includeBots: boolean } = { includeBots: false },
-): [Member[], boolean] | undefined {
-	let id: string | undefined = undefined;
-	id ??= userMentionExpression.exec(identifier)?.at(1);
-	id ??= userIDExpression.exec(identifier)?.at(0);
+): [members: Member[], isId: boolean] | undefined {
+	const id = extractIDFromIdentifier(identifier);
+	if (id !== undefined) {
+		const guild = client.cache.guilds.get(guildId);
+		if (guild === undefined) return;
 
-	if (id === undefined) {
-		const members = Array.from(client.cache.members.values()).filter((member) => member.guildId === guildId);
+		const member = client.cache.members.get(snowflakeToBigint(`${id}${guild.id}`));
+		if (member === undefined) return;
 
-		const identifierLowercase = identifier.toLowerCase();
-		return [
-			members.filter((member) => {
-				if (!options.includeBots && member.user?.toggles.bot) return false;
-				if (member.user?.username.toLowerCase().includes(identifierLowercase)) {
-					return true;
-				}
-				if (member.nick?.toLowerCase().includes(identifierLowercase)) {
-					return true;
-				}
-				return false;
-			}),
-			false,
-		];
+		return [[member], true];
 	}
 
-	const guild = client.cache.guilds.get(guildId);
-	if (guild === undefined) return;
+	const cachedMembers = Array.from(client.cache.members.values());
+	const members = cachedMembers.filter((member) => member.guildId === guildId);
 
-	const member = client.cache.members.get(snowflakeToBigint(`${id}${guild.id}`));
-	if (member === undefined) return;
+	if (userTagPattern.test(identifier)) {
+		const member = members.find(
+			(member) => member.user !== undefined && `${member.user.username}#${member.user.discriminator}` === identifier,
+		);
+		return [member !== undefined ? [member] : [], false];
+	}
 
-	return [[member], true];
+	const identifierLowercase = identifier.toLowerCase();
+	const matchedMembers = members.filter((member) => {
+		if (member.user?.toggles.bot && !options.includeBots) return false;
+		if (member.user?.username.toLowerCase().includes(identifierLowercase)) return true;
+		if (member.nick?.toLowerCase().includes(identifierLowercase)) return true;
+		return false;
+	});
+
+	return [matchedMembers, false];
 }
 
 function resolveInteractionToMember(
@@ -577,11 +578,7 @@ function resolveInteractionToMember(
 	interaction: Interaction,
 	identifier: string,
 ): Member | undefined {
-	const result = resolveIdentifierToMembers(
-		client,
-		interaction.guildId!,
-		identifier,
-	);
+	const result = resolveIdentifierToMembers(client, interaction.guildId!, identifier);
 	if (result === undefined) return;
 
 	const [matchedMembers, isId] = result;
@@ -625,5 +622,5 @@ function resolveInteractionToMember(
 	return matchedMembers.at(0);
 }
 
-export { addCollector, initialiseClient, resolveInteractionToMember };
+export { addCollector, initialiseClient, isValidIdentifier, resolveInteractionToMember, resolveIdentifierToMembers };
 export type { Client, Collector, WithLanguage };
