@@ -50,12 +50,12 @@ interface InteractionCollectorSettings {
  * interaction collector.
  */
 function createInteractionCollector(
-	clientWithBot: [Client, Bot],
+	[client, bot]: [Client, Bot],
 	settings: InteractionCollectorSettings,
 ): string {
 	const customId = settings.customId ?? Snowflake.generate();
 
-	addCollector(clientWithBot, 'interactionCreate', {
+	addCollector([client, bot], 'interactionCreate', {
 		filter: (_bot, interaction) => compileChecks(interaction, settings, customId).every((condition) => condition),
 		limit: settings.limit,
 		removeAfter: settings.doesNotExpire ? undefined : configuration.collectors.expiresIn,
@@ -253,7 +253,7 @@ function generateButtons(customId: string, isFirst: boolean, isLast: boolean): M
 type ComposerContent<T extends string> = Record<T, string | undefined>;
 type ComposerActionRow<T extends string> = {
 	type: MessageComponentTypes.ActionRow;
-	components: [ActionRow['components'][0] & { customId: T }];
+	components: [ActionRow['components'][0] & { type: MessageComponentTypes.InputText; customId: T }];
 };
 
 type Modal<T extends string> = { title: string; fields: ComposerActionRow<T>[] };
@@ -262,8 +262,8 @@ async function createModalComposer<T extends string>(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 	{ onSubmit, onInvalid, modal }: {
-		onSubmit: (submission: Interaction, data: ComposerContent<T>) => Promise<boolean>;
-		onInvalid: () => Promise<Interaction | undefined>;
+		onSubmit: (submission: Interaction, data: ComposerContent<T>) => Promise<true | string>;
+		onInvalid: (submission: Interaction, reason?: string) => Promise<Interaction | undefined>;
 		modal: Modal<T>;
 	},
 ): Promise<void> {
@@ -273,28 +273,25 @@ async function createModalComposer<T extends string>(
 	let content: ComposerContent<T> | undefined = undefined;
 
 	while (true) {
-		const isComplete = await new Promise<boolean>((resolve) => {
+		const [submission, result] = await new Promise<[Interaction, boolean | string]>((resolve) => {
 			const modalId = createInteractionCollector([client, bot], {
 				type: InteractionTypes.ModalSubmit,
 				userId: interaction.user.id,
 				limit: 1,
 				onCollect: (_bot, submission) => {
 					content = parseComposerContent(submission);
-					if (content === undefined) return resolve(false);
+					if (content === undefined) return resolve([submission, false]);
 
-					return onSubmit(submission, content).then((isValid) => resolve(isValid));
+					return onSubmit(submission, content).then((result) => resolve([submission, result]));
 				},
 			});
 
 			if (content !== undefined) {
+				const answers = Object.values(content) as (string | undefined)[];
 				for (
-					const [value, index] of (Object.values(content) as (string | undefined)[])
-						.map<[string | undefined, number]>((v, i) => [v, i])
+					const [value, index] of answers.map<[string | undefined, number]>((v, i) => [v, i])
 				) {
-					const component = fields[index]!.components[0];
-					if ('value' in component) {
-						component.value = value;
-					}
+					fields[index]!.components[0].value = value;
 				}
 			}
 
@@ -308,9 +305,9 @@ async function createModalComposer<T extends string>(
 			});
 		});
 
-		if (isComplete) return;
+		if (typeof result === 'boolean' && result) return;
 
-		const newAnchor = await onInvalid();
+		const newAnchor = await (typeof result === 'string' ? onInvalid(submission, result) : onInvalid(submission));
 		if (newAnchor === undefined) return;
 
 		anchor = newAnchor;
