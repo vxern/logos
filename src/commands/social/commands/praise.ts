@@ -80,7 +80,7 @@ async function handlePraiseUser(
 	if (praisesBySender === undefined) return showError(bot, interaction);
 
 	const praises = Array.from(praisesBySender.values());
-	if (!verifyIsWithinLimits(praises, configuration.commands.praise.limit, configuration.commands.praise.within)) {
+	if (!verifyIsWithinLimits(praises, configuration.commands.praise.limitUses, configuration.commands.praise.within)) {
 		return void editOriginalInteractionResponse(
 			bot,
 			interaction.token,

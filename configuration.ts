@@ -33,15 +33,15 @@ const configuration = {
 	resultsPerPage: 10,
 	commands: {
 		report: {
-			limit: 2,
+			limitUses: 2,
 			within: 30 * Periods.minute,
 		},
 		warn: {
-			limit: 3,
+			limitUses: 3,
 			within: 2 * Periods.month,
 		},
 		praise: {
-			limit: 3,
+			limitUses: 3,
 			within: 6 * Periods.hour,
 		},
 	},

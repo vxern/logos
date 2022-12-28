@@ -43,6 +43,7 @@ enum ReportError {
 	Failure = 'failure',
 	UsersSpecifiedIncorrectly = 'users_specified_incorrectly',
 	UserSpecifiedMoreThanOnce = 'user_specified_more_than_once',
+	TooManyUsersSpecified = 'too_many_users_specified',
 	CannotReportSelf = 'cannot_report_self',
 }
 
@@ -68,7 +69,7 @@ async function handleInitiateReportProcess(
 	);
 	if (reportsByAuthorAndGuild !== undefined) {
 		const reports = Array.from(reportsByAuthorAndGuild.values());
-		if (!verifyIsWithinLimits(reports, configuration.commands.report.limit, configuration.commands.report.within)) {
+		if (!verifyIsWithinLimits(reports, configuration.commands.report.limitUses, configuration.commands.report.within)) {
 			return void sendInteractionResponse(
 				bot,
 				interaction.id,

@@ -124,8 +124,8 @@ async function handleWarnUser(
 		},
 	});
 
-	const reachedKickStage = relevantWarnings.size >= configuration.commands.warn.limit + 1;
-	const reachedBanStage = relevantWarnings.size >= configuration.commands.warn.limit + 2;
+	const reachedKickStage = relevantWarnings.size >= configuration.commands.warn.limitUses + 1;
+	const reachedBanStage = relevantWarnings.size >= configuration.commands.warn.limitUses + 2;
 
 	if (dmChannel !== undefined) {
 		sendMessage(bot, dmChannel.id, {
@@ -149,7 +149,7 @@ async function handleWarnUser(
 								description: localise(Commands.warn.strings.warnedDirect, defaultLocale)(
 									reason!,
 									relevantWarnings.size,
-									configuration.commands.warn.limit,
+									configuration.commands.warn.limitUses,
 								),
 								color: constants.colors.dullYellow,
 							}
