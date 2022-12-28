@@ -397,7 +397,7 @@ function withRateLimiting(handle: InteractionHandler): InteractionHandler {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(Misc.usedCommandTooManyTimes, interaction.locale)(nextValidUsageTimestamp),
-						color: constants.colors.yellow,
+						color: constants.colors.dullYellow,
 					}],
 				},
 			});
@@ -622,5 +622,5 @@ function resolveInteractionToMember(
 	return matchedMembers.at(0);
 }
 
-export { addCollector, initialiseClient, isValidIdentifier, resolveInteractionToMember, resolveIdentifierToMembers };
+export { addCollector, initialiseClient, isValidIdentifier, resolveIdentifierToMembers, resolveInteractionToMember };
 export type { Client, Collector, WithLanguage };
