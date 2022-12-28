@@ -43,7 +43,7 @@ enum ReportError {
 	Failure = 'failure',
 	UsersSpecifiedIncorrectly = 'users_specified_incorrectly',
 	UserSpecifiedMoreThanOnce = 'user_specified_more_than_once',
-	TooManyUsersSpecified = 'too_many_users_specified',
+	SpecifiedTooManyUsers = 'too_many_users_specified',
 	CannotReportSelf = 'cannot_report_self',
 }
 
@@ -110,6 +110,10 @@ async function handleInitiateReportProcess(
 				if (usersToReport.findLastIndex((user_) => user_.id === user.id) !== index) {
 					return ReportError.UserSpecifiedMoreThanOnce;
 				}
+			}
+
+			if (usersToReport.length > configuration.commands.report.limitUsers) {
+				return ReportError.SpecifiedTooManyUsers;
 			}
 
 			const recipients = await Promise.all(
@@ -253,6 +257,15 @@ function handleSubmittedInvalidReport(
 			case ReportError.UserSpecifiedMoreThanOnce: {
 				embed = {
 					description: localise(Commands.report.strings.specifiedUserMoreThanOnce, submission.locale),
+					color: constants.colors.dullYellow,
+				};
+				break;
+			}
+			case ReportError.SpecifiedTooManyUsers: {
+				embed = {
+					description: localise(Commands.report.strings.specifiedTooManyUsers, submission.locale)(
+						configuration.commands.report.limitUsers,
+					),
 					color: constants.colors.dullYellow,
 				};
 				break;

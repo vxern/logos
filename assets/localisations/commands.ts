@@ -926,6 +926,39 @@ class Commands {
 				'Polish': 'Zanim ponownie spróbujesz zgłosić użytkownika, powinieneś/powinnaś troszeczkę poczekać.',
 				'Romanian': 'Ar trebui să-ți iei puțin timp înainte de a încerca să depui din nou o plângere împotriva cuiva.',
 			},
+			specifiedTooManyUsers: {
+				'English': (limit: number) => {
+					const numberExpression = Expressions.english.methods.pluralise(
+						limit.toString(),
+						'user',
+						'users',
+					);
+
+					return 'You have tried to report too many users at once. ' +
+						`You can only report up to ${numberExpression} at once.`;
+				},
+				'Polish': (limit: number) => {
+					const numberExpression = Expressions.polish.methods.pluralise(
+						limit.toString(),
+						'użytkownika',
+						'użytkowników',
+						'użytkowników',
+					);
+
+					return 'Próbowałeś/aś zgłosić zbyt wielu użytkowników jednocześnie. ' +
+						`Maksymalnie można zgłosić tylko ${numberExpression}.`;
+				},
+				'Romanian': (limit: number) => {
+					const numberExpression = Expressions.romanian.methods.pluralise(
+						limit.toString(),
+						'utilizator',
+						'utilizatori',
+					);
+
+					return 'Ai încercat să reporți prea mulți membri în același timp. ' +
+						`Se poate raporta un maxim de numai ${numberExpression} în fiecare raport.`;
+				},
+			},
 		},
 	});
 

@@ -35,6 +35,7 @@ const configuration = {
 		report: {
 			limitUses: 2,
 			within: 30 * Periods.minute,
+			limitUsers: 5,
 		},
 		warn: {
 			limitUses: 3,
