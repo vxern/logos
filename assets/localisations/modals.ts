@@ -75,6 +75,64 @@ class Modals {
 			},
 		},
 	};
+
+	static readonly report = {
+		title: {
+			'English': 'User report',
+			'Polish': 'Skarga',
+			'Romanian': 'Plângere',
+		},
+		fields: {
+			reason: {
+				'English': 'What is the reason for the report?',
+				'Polish': 'Jaki jest powód skargi?',
+				'Romanian': 'Care este cauza plângerii?',
+			},
+			usersToReport: {
+				'English': 'Users to report',
+				'Polish': 'Użytkownicy do zgłoszenia',
+				'Romanian': 'Utilizatori de raportat',
+			},
+			linkToMessage: {
+				'English': 'Link to the message for context',
+				'Polish': 'Link do wiadomości dla kontekstu',
+				'Romanian': 'Link către mesajul pentru context',
+			},
+		},
+	};
+
+	static readonly prompts = {
+		// The equivalent of 'next', 'continue' or 'onwards' in your language, as seen in message prompts.
+		continue: {
+			'English': 'Continue',
+			'Polish': 'Dalej',
+			'Romanian': 'Înapoi',
+		},
+		cancel: {
+			'English': 'Cancel',
+			'Polish': 'Anuluj',
+			'Romanian': 'Anulează',
+		},
+		yourProgressWillBeLost: {
+			'English': 'Your progress will be lost.',
+			'Polish': 'Twój postęp będzie utracony.',
+			'Romanian': 'Progresul tău va fi pierdut.',
+		},
+		// No full stop here.
+		// The 'composer' is the form submission prompt where the user is able to compose articles, verification answers, etc.
+		yesLeaveTheComposer: {
+			'English': 'Yes, I want to leave the composer',
+			'Polish': 'Tak, chcę opuścić kompozytor',
+			'Romanian': 'Da, vreau să părăsesc compozitorul',
+		},
+		// No full stop here.
+		// The 'composer' is the form submission prompt where the user is able to compose articles, verification answers, etc.
+		noTakeMeBackToTheComposer: {
+			'English': 'No, take me back to the composer',
+			'Polish': 'Nie, zabierz mnie z powrotem do kompozytora',
+			'Romanian': 'Nu, ia-mă înapoi la compozitor',
+		},
+	};
 }
 
 export { Modals };
