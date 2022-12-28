@@ -1,6 +1,6 @@
 import { Reference } from 'logos/src/database/document.ts';
 
-/** Represents a report submitted against a user. */
+/** Represents a report submitted against one or multiple users. */
 interface Report {
 	/** The document reference to the author of this report. */
 	author: Reference;
@@ -11,7 +11,10 @@ interface Report {
 	/** The document reference to the users this report concerns. */
 	recipients: Reference[];
 
-	/** Optional: Link to a particular message. */
+	/** The reason for this report. */
+	reason: string;
+
+	/** Link to message for context. */
 	messageLink?: string;
 
 	/** Whether or not this report has been resolved. */
