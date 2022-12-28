@@ -94,7 +94,7 @@ const adapter: DatabaseAdapters['users'] = {
 		return document;
 	},
 	update: async (client, user) => {
-		const document = await dispatchQuery<User>(client, $.Update(user.ref, user));
+		const document = await dispatchQuery<User>(client, $.Update(user.ref, { data: user.data }));
 
 		const idAsNumber = BigInt(user.data.account.id);
 		const user_ = client.cache.users.get(idAsNumber);

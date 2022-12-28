@@ -136,7 +136,7 @@ const adapter: DatabaseAdapters['reports'] = {
 		return document;
 	},
 	update: async (client, report) => {
-		const document = await dispatchQuery<Report>(client, $.Update(report.ref, report));
+		const document = await dispatchQuery<Report>(client, $.Update(report.ref, { data: report.data }));
 
 		const authorReferenceId = stringifyValue(report.data.author);
 		const recipientReferenceIds = report.data.recipients.map((recipient) => stringifyValue(recipient));
