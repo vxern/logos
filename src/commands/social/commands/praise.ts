@@ -16,8 +16,8 @@ import { log } from 'logos/src/controllers/logging/logging.ts';
 import { Praise } from 'logos/src/database/structs/mod.ts';
 import { Client, resolveInteractionToMember } from 'logos/src/client.ts';
 import { parseArguments } from 'logos/src/interactions.ts';
-import { guildAsAuthor } from 'logos/src/utils.ts';
-import configuration from "logos/configuration.ts";
+import { guildAsAuthor, verifyIsWithinLimits } from 'logos/src/utils.ts';
+import configuration from 'logos/configuration.ts';
 import constants from 'logos/constants.ts';
 import { mention, MentionTypes } from 'logos/formatting.ts';
 
@@ -79,15 +79,8 @@ async function handlePraiseUser(
 	const praisesBySender = await client.database.adapters.praises.getOrFetch(client, 'sender', author.ref);
 	if (praisesBySender === undefined) return showError(bot, interaction);
 
-	const praiseTimestamps = Array.from(praisesBySender.values())
-		.map((document) => document.ts)
-		.toSorted((a, b) => b - a); // From most recent to least recent.
-	const timestampSlice = praiseTimestamps.slice(0, configuration.commands.praise.limit);
-	const canPraise = timestampSlice.length < configuration.commands.praise.limit ||
-		timestampSlice.some(
-			(timestamp) => (Date.now() - timestamp) >= configuration.commands.praise.within,
-		);
-	if (!canPraise) {
+	const praises = Array.from(praisesBySender.values());
+	if (!verifyIsWithinLimits(praises, configuration.commands.praise.limit, configuration.commands.praise.within)) {
 		return void editOriginalInteractionResponse(
 			bot,
 			interaction.token,
@@ -109,7 +102,6 @@ async function handlePraiseUser(
 		client.database.adapters.praises.create(client, praise),
 		getDmChannel(bot, member.id).catch(() => undefined),
 	]);
-
 	if (document === undefined) return showError(bot, interaction);
 
 	log([client, bot], guild, 'praiseAdd', member, praise, interaction.user);
