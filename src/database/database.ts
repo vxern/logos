@@ -143,7 +143,7 @@ interface DatabaseAdapters {
 	articles: DatabaseAdapter<Article, ArticleIndexes, 'getOrFetch'>;
 	entryRequests: DatabaseAdapter<EntryRequest, EntryRequestIndexes, 'get' | 'update', true>;
 	praises: DatabaseAdapter<Praise, PraiseIndexes, 'getOrFetch'>;
-	reports: DatabaseAdapter<Report, ReportIndexes, 'get', true>;
+	reports: DatabaseAdapter<Report, ReportIndexes, 'get' | 'update', true>;
 	users: DatabaseAdapter<User, UserIndexes, 'getOrFetch' | 'getOrFetchOrCreate' | 'update'>;
 	warnings: DatabaseAdapter<Warning, WarningIndexes, 'getOrFetch' | 'delete'>;
 }

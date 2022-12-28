@@ -98,16 +98,16 @@ const adapter: DatabaseAdapters['reports'] = {
 			$.Create($.Collection('Reports'), { data: report }),
 		);
 
-		const authorMention = getUserMentionByReference(client, report.author);
-		const recipientMentions = report.recipients
-			.map((recipient) => getUserMentionByReference(client, recipient))
-			.join(', ');
-
 		// TODO(vxern): Possible security risk of pointing to a report that stores information about the submitter as well as other users involved.
 
 		const authorReferenceId = stringifyValue(report.author);
 		const recipientReferenceIds = report.recipients.map((recipient) => stringifyValue(recipient));
 		const guildId = stringifyValue(report.guild);
+
+		const authorMention = getUserMentionByReference(client, report.author);
+		const recipientMentions = report.recipients
+			.map((recipient) => getUserMentionByReference(client, recipient))
+			.join(', ');
 
 		if (document === undefined) {
 			client.log.error(
@@ -131,6 +131,44 @@ const adapter: DatabaseAdapters['reports'] = {
 
 		client.log.debug(
 			`Created report submitted by ${authorMention} on guild with ID ${guildId} for ${recipientMentions}.`,
+		);
+
+		return document;
+	},
+	update: async (client, report) => {
+		const document = await dispatchQuery<Report>(client, $.Update(report.ref, report));
+
+		const authorReferenceId = stringifyValue(report.data.author);
+		const recipientReferenceIds = report.data.recipients.map((recipient) => stringifyValue(recipient));
+		const guildId = stringifyValue(report.data.guild);
+
+		const authorMention = getUserMentionByReference(client, report.data.author);
+		const recipientMentions = report.data.recipients
+			.map((recipient) => getUserMentionByReference(client, recipient))
+			.join(', ');
+
+		if (document === undefined) {
+			client.log.error(
+				`Failed to update report submitted by ${authorMention} on guild with ID ${guildId} for ${recipientMentions}.`,
+			);
+			return undefined;
+		}
+
+		{
+			const compositeId = `${authorReferenceId}${guildId}`;
+
+			cache.set(client, 'authorAndGuild', compositeId, document);
+		}
+		{
+			for (const recipientReferenceId of recipientReferenceIds) {
+				const compositeId = `${recipientReferenceId}${guildId}`;
+
+				cache.set(client, 'recipientAndGuild', compositeId, document);
+			}
+		}
+
+		client.log.debug(
+			`Updated report submitted by ${authorMention} on guild with ID ${guildId} for ${recipientMentions}.`,
 		);
 
 		return document;
