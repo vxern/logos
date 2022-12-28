@@ -64,17 +64,26 @@ function setupVoteHandler([client, bot]: [Client, Bot]): void {
 	});
 }
 
-function extractUserID(prompt: Message): bigint | undefined {
-	const id = prompt.embeds.at(0)?.footer?.text;
-	if (id === undefined) return undefined;
+interface VerificationPromptMetadata {
+	submitterId: bigint;
+}
 
-	return BigInt(id);
+const metadataSeparator = '・';
+
+function extractMetadata(prompt: Message): VerificationPromptMetadata | undefined {
+	const metadata = prompt.embeds.at(0)?.footer?.text;
+	if (metadata === undefined) return undefined;
+
+	const [userId] = metadata.split(metadataSeparator);
+	if (userId === undefined) return undefined;
+
+	return { submitterId: BigInt(userId) };
 }
 
 function getValidPrompts(bot: Bot, prompts: Message[]): Message[] {
 	return prompts.filter(
 		(prompt) => {
-			if (extractUserID(prompt) === undefined) {
+			if (extractMetadata(prompt) === undefined) {
 				deleteMessage(bot, prompt.channelId, prompt.id);
 				return false;
 			}
@@ -131,7 +140,7 @@ function registerPastEntryRequests([client, bot]: [Client, Bot]): void {
 		const verificationPromptsAll = await getAllMessages(bot, verificationChannelId);
 		const verificationPrompts = getValidPrompts(bot, verificationPromptsAll);
 		const verificationPromptBySubmitterId = new Map(
-			verificationPrompts.map((prompt) => [extractUserID(prompt)!, prompt]),
+			verificationPrompts.map((prompt) => [extractMetadata(prompt)!.submitterId, prompt]),
 		);
 
 		for (const entryRequest of entryRequests) {
@@ -175,11 +184,11 @@ function registerPastEntryRequests([client, bot]: [Client, Bot]): void {
 					continue;
 				}
 
-				messageId = await displayVerificationPrompt(
+				messageId = await sendMessage(
 					bot,
 					verificationChannelId,
 					getVerificationPrompt(bot, guild, submitter, entryRequest.data, getNecessaryVotes(guild, entryRequest.data)),
-				);
+				).then((message) => message.id);
 			} else {
 				messageId = prompt.id;
 			}
@@ -188,10 +197,7 @@ function registerPastEntryRequests([client, bot]: [Client, Bot]): void {
 			submitterIdByMessageId.set(messageId, submitterId);
 			messageIdBySubmitterAndGuild.set(`${submitterReferenceId}${guild.id}`, messageId);
 
-			registerVerificationHandler(client, guild.id, verificationChannelId, [
-				BigInt(submitterDocument.data.account.id),
-				submitterDocument.ref,
-			]);
+			registerVerificationHandler(client, guild.id, verificationChannelId, [submitterId, submitterDocument.ref]);
 		}
 
 		// These are the prompts which aren't connected to any entry request.
@@ -225,11 +231,11 @@ function ensureVerificationPromptPersistence([client, bot]: [Client, Bot]): void
 
 		const guild = client.cache.guilds.get(guildId)!;
 
-		const newMessageId = await displayVerificationPrompt(
+		const newMessageId = await sendMessage(
 			bot,
 			channelId,
 			getVerificationPrompt(bot, guild, submitter, entryRequest.data, getNecessaryVotes(guild, entryRequest.data)),
-		);
+		).then((message) => message.id);
 		entryRequestByMessageId.delete(messageId);
 		submitterIdByMessageId.delete(messageId);
 		entryRequestByMessageId.set(newMessageId, entryRequest);
@@ -261,6 +267,10 @@ function ensureVerificationPromptPersistence([client, bot]: [Client, Bot]): void
 	};
 }
 
+enum VerificationError {
+	Failure = 'failure',
+}
+
 async function initiateVerificationProcess(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
@@ -273,10 +283,7 @@ async function initiateVerificationProcess(
 		interaction.user.id.toString(),
 		interaction.user.id,
 	);
-	if (submitterDocument === undefined) {
-		displayVerifyError(bot, interaction);
-		return false;
-	}
+	if (submitterDocument === undefined) return false;
 
 	const entryRequest = client.database.adapters.entryRequests.get(
 		client,
@@ -336,10 +343,7 @@ async function initiateVerificationProcess(
 						isFinalised: false,
 					},
 				);
-				if (entryRequest === undefined) {
-					displayVerifyError(bot, interaction);
-					return false;
-				}
+				if (entryRequest === undefined) return VerificationError.Failure;
 
 				const verificationChannelId = verificationChannelIdByGuildId.get(guild.id)!;
 
@@ -350,7 +354,7 @@ async function initiateVerificationProcess(
 					[interaction.user.id, submitterDocument.ref],
 				).then((isVerified) => resolve(isVerified));
 
-				const messageId = await displayVerificationPrompt(
+				const messageId = await sendMessage(
 					bot,
 					verificationChannelId,
 					getVerificationPrompt(
@@ -360,7 +364,7 @@ async function initiateVerificationProcess(
 						entryRequest.data,
 						getNecessaryVotes(guild, entryRequest.data),
 					),
-				);
+				).then((message) => message.id);
 
 				entryRequestByMessageId.set(messageId, entryRequest);
 				submitterIdByMessageId.set(messageId, interaction.user.id);
@@ -377,7 +381,22 @@ async function initiateVerificationProcess(
 
 				return true;
 			},
-			onInvalid: () => new Promise((resolve) => resolve(undefined)),
+			// deno-lint-ignore require-await
+			onInvalid: async (submission, error) => {
+				switch (error) {
+					case VerificationError.Failure:
+					default: {
+						editOriginalInteractionResponse(bot, submission.token, {
+							flags: ApplicationCommandFlags.Ephemeral,
+							embeds: [{
+								description: localise(Services.entry.failedToVerifyAccount, interaction.locale),
+								color: constants.colors.red,
+							}],
+						});
+						return undefined;
+					}
+				}
+			},
 		});
 	});
 }
@@ -425,24 +444,6 @@ function generateVerificationQuestionModal<T extends string>(
 	} as Modal<T>;
 }
 
-function displayVerifyError(bot: Bot, interaction: Interaction): void {
-	return void sendInteractionResponse(
-		bot,
-		interaction.id,
-		interaction.token,
-		{
-			type: InteractionResponseTypes.ChannelMessageWithSource,
-			data: {
-				flags: ApplicationCommandFlags.Ephemeral,
-				embeds: [{
-					description: localise(Services.entry.failedToVerifyAccount, interaction.locale),
-					color: constants.colors.red,
-				}],
-			},
-		},
-	);
-}
-
 function registerVerificationHandler(
 	client: Client,
 	guildId: bigint,
@@ -452,7 +453,6 @@ function registerVerificationHandler(
 	return new Promise((resolve) => {
 		verificationPromptHandlers.set(`${submitterId}|${guildId}`, async (bot, selection) => {
 			const isAccepted = await handleVote([client, bot], selection, [submitterId, submitterReference]);
-
 			if (isAccepted === null) return;
 
 			const submitterReferenceId = stringifyValue(submitterReference);
@@ -467,15 +467,6 @@ function registerVerificationHandler(
 			return resolve(isAccepted);
 		});
 	});
-}
-
-async function displayVerificationPrompt(
-	bot: Bot,
-	channelId: bigint,
-	verificationPrompt: CreateMessage,
-): Promise<bigint> {
-	const message = await sendMessage(bot, channelId, verificationPrompt);
-	return message.id;
 }
 
 type NecessaryVotes = [
@@ -696,14 +687,15 @@ async function handleVote(
 		updatedEntryRequest.data.isFinalised = true;
 	}
 
-	await client.database.adapters.entryRequests.update(client, updatedEntryRequest);
+	const updatedEntryRequestDocument = await client.database.adapters.entryRequests.update(client, updatedEntryRequest);
+	if (updatedEntryRequestDocument === undefined) return undefined;
 
 	const submitterReferenceId = stringifyValue(entryRequest.data.submitter);
 	const compositeId = `${submitterReferenceId}${guild.id}`;
 
 	const messageId = messageIdBySubmitterAndGuild.get(compositeId)!;
 
-	entryRequestByMessageId.set(messageId, updatedEntryRequest);
+	entryRequestByMessageId.set(messageId, updatedEntryRequestDocument);
 
 	const submitterDocument = await client.database.adapters.users.getOrFetchOrCreate(
 		client,
