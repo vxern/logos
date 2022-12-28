@@ -852,6 +852,83 @@ class Commands {
 		},
 	});
 
+	static readonly report = typedLocalisations({
+		name: {
+			'English': 'report',
+			'Polish': 'skarga',
+			'Romanian': 'plângere',
+		},
+		description: {
+			'English': 'Allows the user to create a user report.',
+			'Polish': 'Umożliwia użytkownikowi złożenie skargi na użytkownika.',
+			'Romanian': 'Permite utilizatorului să depună o plângere împotriva unuia sau mai mulți utilizatori.',
+		},
+		strings: {
+			reportSubmitted: {
+				// Use exclamation if possible.
+				header: {
+					'English': 'Report submitted!',
+					'Polish': 'Skarga złożona!',
+					'Romanian': 'Plângere depusă!',
+				},
+				body: {
+					'English': 'Your report has been submitted. ' +
+						'The report will be reviewed by the server staff, but you will not be notified directly about the outcome of a particular report.',
+					'Polish': 'Twoja skarga została złożona.' +
+						'Moderatorzy serwera przejrzą raport, ale nie zostaniesz bezpośrednio powiadomiony/a o jego skutku.',
+					'Romanian': 'Plângerea ta a fost depusă.' +
+						'Moderatorii serverului vor analiza raportul, dar nu vei fi informat/ă direct despre rezultatul său.',
+				},
+			},
+			failedToSubmitReport: {
+				'English': 'Failed to submit report.',
+				'Polish': 'Nie udało się złożyć skargi.',
+				'Romanian': 'Nu s-a putut depune plângerea.',
+			},
+			specifiedUsersIncorrectly: (exampleExpression: string) => ({
+				'English': 'You have incorrectly specified which users to report.\n\n' +
+					'To identify a user, include their ID or tag. ' +
+					//'Alternatively, users can be named directly. ' +
+					'User identifiers must be separated using a comma.\n\n' +
+					`Example of a valid expression:\n${exampleExpression}`,
+				'Polish': 'Niewłaściwie zidentyfikowałeś/aś użytkowników przeciw którym ma być złożona skarga.' +
+					'Aby zidentyfikować użytkownika, użyj jego ID lub tagu. ' +
+					//'Można wymienić użytkownika także niebezpośrednio, wymieniając jego nazwę użytkownika / nick. ' +
+					'Identyfikatory użytkowników muszą być oddzielone za pomocą przecinka.\n\n' +
+					`Przykład:\n${exampleExpression}`,
+				'Romanian': 'Ai identificat incorect utilizatorii împotriva cărora să fie depusă plângerea.' +
+					'Pentru a identifica un utilizator, menționează-i folosindu-i ID-ul sau tag-ul. ' +
+					//'De asemenea, se poate menționa utilizatorul indirect folosindu-i numele.\n\n' +
+					'Identificările utilizatorilor trebuie să fie separate folosind virgula.' +
+					`De exemplu:\n${exampleExpression}`,
+			}),
+			specifiedUserMoreThanOnce: {
+				'English': 'You have specified the same user more than once.\n\n' +
+					'Before attempting to submit the report again, make sure each user is only mentioned once in the report.',
+				'Polish': 'Zidentyfikowałeś/aś tego samego użytkownika więcej niż jeden raz.\n\n' +
+					'Zanim spróbujesz ponownie wysłać skargę, upewnij się, że istnieje tylko jedna wzmianka o każdym pojedynczym użytkowniku.',
+				'Romanian': 'Ai identificat același utilizator de mai multe ori.\n\n' +
+					'Înainte de a încerca din nou să transmiți plângerea, asigurează-te că fiecare utilizator este menționat doar o singură dată în raport.',
+			},
+			cannotSubmitReportAgainstSelf: {
+				'English': 'You cannot submit a report against yourself.',
+				'Polish': 'Nie możesz złożyć skargi przeciw samemu/samej sobie.',
+				'Romanian': 'Nu poți depune o plângere împotriva ta.',
+			},
+			areYouSureToStopSubmitting: {
+				'English': 'Are you sure you want to stop submitting the report?',
+				'Polish': 'Czy jesteś pewny/a, że chcesz anulować składanie skargi?',
+				'Romanian': 'Ești sigur/ă că vrei să anulezi depunerea plângerii?',
+			},
+			waitBeforeReporting: {
+				'English': 'You have already made a few reports recently.\n\n' +
+					'You should wait before reporting somebody again.',
+				'Polish': 'Zanim ponownie spróbujesz zgłosić użytkownika, powinieneś/powinnaś troszeczkę poczekać.',
+				'Romanian': 'Ar trebui să-ți iei puțin timp înainte de a încerca să depui din nou o plângere împotriva cuiva.',
+			},
+		},
+	});
+
 	static readonly rule = typedLocalisations({
 		name: {
 			'English': 'rule',
