@@ -76,7 +76,7 @@ type DatabaseAdapterRequiredMethods<DataType, Indexes extends IndexesSignature> 
 };
 
 type DatabaseAdapterOptionalMethods<DataType, Indexes extends IndexesSignature> = {
-	readonly update: Query<Indexes, 'write', { takesParameter: false; takesDocument: true }, DataType>;
+	readonly update: Query<Indexes, 'write', { takesParameter: false; takesDocument: true; returnsData: true }, DataType>;
 	readonly delete: Query<Indexes, 'write', { takesParameter: false; takesDocument: true; returnsData: true }, DataType>;
 
 	// These are helper functions. Perhaps they should be present somewhere else.
