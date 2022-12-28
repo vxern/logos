@@ -263,7 +263,7 @@ async function createModalComposer<T extends string>(
 	interaction: Interaction,
 	{ onSubmit, onInvalid, modal }: {
 		onSubmit: (submission: Interaction, data: ComposerContent<T>) => Promise<true | string>;
-		onInvalid: (submission: Interaction, reason?: string) => Promise<Interaction | undefined>;
+		onInvalid: (submission: Interaction, error?: string) => Promise<Interaction | undefined>;
 		modal: Modal<T>;
 	},
 ): Promise<void> {
