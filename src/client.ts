@@ -138,7 +138,8 @@ async function initialiseClient(
 
 	const bot = overrideDefaultEventHandlers(createBot({
 		token: Deno.env.get('DISCORD_SECRET')!,
-		intents: Intents.Guilds | Intents.GuildMembers | Intents.GuildVoiceStates | Intents.GuildMessages,
+		intents: Intents.Guilds | Intents.GuildMembers | Intents.GuildVoiceStates | Intents.GuildMessages |
+			Intents.MessageContent,
 		events: withMusicEvents(createEventHandlers(client), client.features.music.node),
 		transformers: withCaching(client, createTransformers({})),
 	}));

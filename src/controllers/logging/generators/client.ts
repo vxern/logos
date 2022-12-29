@@ -49,6 +49,7 @@ const client: MessageGenerators<ClientEvents> = {
 
 **BEFORE**
 ${before}
+
 **AFTER**
 ${codeMultiline(message.content)}`;
 		},
