@@ -93,7 +93,12 @@ async function handlePraiseUser(
 		);
 	}
 
-	const praise: Praise = { sender: author.ref, recipient: subject.ref, comment: comment };
+	const praise: Praise = {
+		createdAt: Date.now(),
+		sender: author.ref,
+		recipient: subject.ref,
+		comment: comment,
+	};
 
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (guild === undefined) return;

@@ -10,7 +10,7 @@ import reports from 'logos/src/database/adapters/reports.ts';
 import users from 'logos/src/database/adapters/users.ts';
 import warnings from 'logos/src/database/adapters/warnings.ts';
 import { Article, ArticleChange, EntryRequest, Praise, Report, User, Warning } from 'logos/src/database/structs/mod.ts';
-import { Document, Reference } from 'logos/src/database/document.ts';
+import { BaseDocumentProperties, Document, Reference } from 'logos/src/database/document.ts';
 import {
 	ArticleChangeIndexes,
 	ArticleIndexes,
@@ -48,7 +48,7 @@ type Query<
 		returnsData?: boolean;
 		returnsPromise?: boolean;
 	} = {},
-	DataType = unknown,
+	DataType extends BaseDocumentProperties = BaseDocumentProperties,
 	ExtraParameters extends unknown[] = [],
 > = <
 	Parameter extends keyof Index,
@@ -69,13 +69,13 @@ type Query<
 	]
 ) => QueryFlags['returnsPromise'] extends false ? ReturnType : Promise<ReturnType>;
 
-type DatabaseAdapterRequiredMethods<DataType, Indexes extends IndexesSignature> = {
+type DatabaseAdapterRequiredMethods<DataType extends BaseDocumentProperties, Indexes extends IndexesSignature> = {
 	readonly create: Query<Indexes, 'write', { takesParameter: false; returnsData: true }, DataType>;
 	readonly fetch: Query<Indexes, 'read'>;
 	readonly prefetch: Query<Indexes, 'other', { takesParameter: false }>;
 };
 
-type DatabaseAdapterOptionalMethods<DataType, Indexes extends IndexesSignature> = {
+type DatabaseAdapterOptionalMethods<DataType extends BaseDocumentProperties, Indexes extends IndexesSignature> = {
 	readonly update: Query<Indexes, 'write', { takesParameter: false; takesDocument: true; returnsData: true }, DataType>;
 	readonly delete: Query<Indexes, 'write', { takesParameter: false; takesDocument: true; returnsData: true }, DataType>;
 
@@ -86,7 +86,7 @@ type DatabaseAdapterOptionalMethods<DataType, Indexes extends IndexesSignature> 
 };
 
 type DatabaseAdapter<
-	DataType,
+	DataType extends BaseDocumentProperties,
 	Indexes extends IndexesSignature,
 	SupportsMethods extends keyof DatabaseAdapterOptionalMethods<DataType, Indexes> = never,
 	IsPrefetch extends boolean = false,
@@ -94,7 +94,11 @@ type DatabaseAdapter<
 	& Omit<DatabaseAdapterRequiredMethods<DataType, Indexes>, IsPrefetch extends true ? 'fetch' : 'prefetch'>
 	& Pick<DatabaseAdapterOptionalMethods<DataType, Indexes>, SupportsMethods>;
 
-type CacheAdapterRequiredMethods<DataType, Indexes extends IndexesSignature, IsSingleton extends boolean = true> =
+type CacheAdapterRequiredMethods<
+	DataType extends BaseDocumentProperties,
+	Indexes extends IndexesSignature,
+	IsSingleton extends boolean = true,
+> =
 	& {
 		readonly get: Query<Indexes, 'read', { takesStringifiedValue: true; returnsPromise: false }, DataType>;
 		readonly set: Query<
@@ -116,7 +120,7 @@ type CacheAdapterRequiredMethods<DataType, Indexes extends IndexesSignature, IsS
 		}
 		: {});
 
-type CacheAdapterOptionalMethods<DataType, Indexes extends IndexesSignature> = {
+type CacheAdapterOptionalMethods<DataType extends BaseDocumentProperties, Indexes extends IndexesSignature> = {
 	readonly delete: Query<
 		Indexes,
 		'write',
@@ -126,7 +130,7 @@ type CacheAdapterOptionalMethods<DataType, Indexes extends IndexesSignature> = {
 };
 
 type CacheAdapter<
-	DataType,
+	DataType extends BaseDocumentProperties,
 	Indexes extends IndexesSignature,
 	SupportsMethods extends keyof CacheAdapterOptionalMethods<DataType, Indexes> = never,
 > =
@@ -286,16 +290,6 @@ function createDatabase(): Database {
 }
 
 /**
- * 'Unpacks' a nested type from an array, function or promise.
- *
- * @typeParam T - The type from which to extract the nested type.
- */
-type Unpacked<T> = T extends (infer U)[] ? U
-	: T extends (...args: unknown[]) => infer U ? U
-	: T extends Promise<infer U> ? U
-	: T;
-
-/**
  * Sends a query to Fauna and returns the result, handling any errors that may
  * have occurred during dispatch.
  *
@@ -303,9 +297,9 @@ type Unpacked<T> = T extends (infer U)[] ? U
  * @returns The response object.
  */
 async function dispatchQuery<
-	T extends unknown | unknown[],
-	B = Unpacked<T>,
-	R = T extends Array<B> ? Document<B>[] : Document<T>,
+	T extends BaseDocumentProperties | BaseDocumentProperties[],
+	R = T extends (infer B extends BaseDocumentProperties)[] ? Document<B>[]
+		: (T extends BaseDocumentProperties ? Document<T> : never),
 >(
 	client: Client,
 	expression: Fauna.Expr,
@@ -323,20 +317,10 @@ async function dispatchQuery<
 	}
 
 	if (!Array.isArray(result.data)) {
-		result.ts = convertToMilliseconds(<number> result.ts);
-
 		return <R> (<unknown> result);
 	}
 
-	for (const element of result.data) {
-		element.ts = convertToMilliseconds(<number> element.ts);
-	}
-
 	return <R> (<unknown> result.data);
-}
-
-function convertToMilliseconds(number: number): number {
-	return number / 1000;
 }
 
 function mentionUser(user: DiscordUser | undefined, id: bigint): string {

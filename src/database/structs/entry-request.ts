@@ -2,6 +2,9 @@ import { Reference } from 'logos/src/database/document.ts';
 
 /** Represents an entry request submitted by the user upon attempting to join the server. */
 interface EntryRequest {
+	/** Unix timestamp of the creation of this entry request document. */
+	createdAt: number;
+
 	/** The document reference to the submitter of this request. */
 	submitter: Reference;
 

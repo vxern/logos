@@ -68,7 +68,7 @@ async function handlePardonUser(
 				type: InteractionResponseTypes.ApplicationCommandAutocompleteResult,
 				data: {
 					choices: relevantWarnings.map((warning) => ({
-						name: `${warning.data.reason} (${timestamp(warning.ts)})`,
+						name: `${warning.data.reason} (${timestamp(warning.data.createdAt)})`,
 						value: warning.ref.value.id,
 					})),
 				},
@@ -122,7 +122,7 @@ async function handlePardonUser(
 					author: guildAsAuthor(bot, guild),
 					description: localise(Commands.pardon.strings.pardonedDirect, defaultLocale)(
 						deletedWarning.data.reason,
-						timestamp(deletedWarning.ts),
+						timestamp(deletedWarning.data.createdAt),
 					),
 					color: constants.colors.lightGreen,
 				},

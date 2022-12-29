@@ -98,7 +98,12 @@ async function handleWarnUser(
 
 	const [warnings, document, dmChannel] = await Promise.all([
 		client.database.adapters.warnings.getOrFetch(client, 'recipient', recipient.ref),
-		client.database.adapters.warnings.create(client, { author: author.ref, recipient: recipient.ref, reason: reason! }),
+		client.database.adapters.warnings.create(client, {
+			createdAt: Date.now(),
+			author: author.ref,
+			recipient: recipient.ref,
+			reason: reason!,
+		}),
 		getDmChannel(bot, member.id).catch(() => undefined),
 	]);
 

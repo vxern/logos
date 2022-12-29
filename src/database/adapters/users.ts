@@ -69,7 +69,10 @@ const adapter: DatabaseAdapters['users'] = {
 		const value = stringifyValue(parameterValue);
 
 		return cache.get(client, parameter, value) ?? await adapter.fetch(client, parameter, parameterValue) ??
-			adapter.create(client, { account: { id: `${id}` } });
+			adapter.create(client, {
+				createdAt: Date.now(),
+				account: { id: `${id}` },
+			});
 	},
 	create: async (client, user) => {
 		const document = await dispatchQuery<User>(client, $.Create($.Collection('Users'), { data: user }));

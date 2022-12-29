@@ -334,6 +334,7 @@ async function initiateVerificationProcess(
 				const entryRequest = await client.database.adapters.entryRequests.create(
 					client,
 					{
+						createdAt: Date.now(),
 						submitter: submitterDocument.ref,
 						guild: guild.id.toString(),
 						answers,

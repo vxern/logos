@@ -146,9 +146,9 @@ async function getAllMessages(bot: Bot, channelId: bigint): Promise<Message[]> {
 	return messages;
 }
 
-function verifyIsWithinLimits<T>(documents: Document<T>[], limit: number, limitingTimePeriod: number): boolean {
+function verifyIsWithinLimits(documents: Document[], limit: number, limitingTimePeriod: number): boolean {
 	const actionTimestamps = documents
-		.map((document) => document.ts)
+		.map((document) => document.data.createdAt)
 		.toSorted((a, b) => b - a); // From most recent to least recent.
 	const relevantTimestamps = actionTimestamps.slice(0, limit);
 

@@ -3,6 +3,9 @@ import { Reference } from 'logos/src/database/document.ts';
 
 /** Represents a change made to an article. */
 interface ArticleChange {
+	/** Unix timestamp of the creation of this article change document. */
+	createdAt: number;
+
 	/** The document reference to the author of this change. */
 	author: Reference;
 
