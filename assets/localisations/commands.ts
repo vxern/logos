@@ -150,7 +150,7 @@ class Commands {
 						'Romanian': (guildName: string) => `Informații despre **${guildName}**`,
 					},
 					noDescription: {
-						'English': 'No description provided.',
+						'English': 'No description specified.',
 						'Polish': 'Brak opisu.',
 						'Romanian': 'Fără descriere.',
 					},
@@ -1040,7 +1040,7 @@ class Commands {
 		},
 		strings: {
 			invalidDuration: {
-				'English': 'The provided duration is invalid.',
+				'English': 'The specified duration is invalid.',
 				'Polish': 'Określony okres czasu nie jest prawidłowy.',
 				'Romanian': 'Durata precizată nu este validă.',
 			},
@@ -1083,7 +1083,7 @@ class Commands {
 					`The timeout will expire ${until}.`,
 			},
 			notTimedOut: {
-				'English': 'The provided user is not currently timed out.',
+				'English': 'The specified user is not currently timed out.',
 				'Polish': 'Ten użytkownik nie jest wyciszony.',
 				'Romanian': 'Acest utilizator nu a avut un timeout impus pe el.',
 			},
