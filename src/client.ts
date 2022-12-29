@@ -372,6 +372,8 @@ function withCaching(
 
 function withRateLimiting(handle: InteractionHandler): InteractionHandler {
 	return ([client, bot], interaction) => {
+		if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete) return handle([client, bot], interaction);
+
 		const commandId = interaction.data?.id;
 		if (commandId === undefined) return handle([client, bot], interaction);
 
