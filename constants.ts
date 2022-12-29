@@ -71,11 +71,6 @@ const colors = {
 };
 
 const emojis = {
-	custom: {
-		typescript: '<:TypeScript:1034795288185024592>',
-		deno: '<:Deno:1034795684852932729>',
-		discordeno: '<:Discordeno:1034795720315777086>',
-	},
 	music: {
 		song: '🎵',
 		external: '📁',

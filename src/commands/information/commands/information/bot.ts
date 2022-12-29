@@ -42,10 +42,10 @@ async function handleDisplayBotInformation(
 						name: localise(Commands.information.options.bot.strings.howWasIMade.header, interaction.locale),
 						value: localise(
 							Commands.information.options.bot.strings.howWasIMade.body(
-								`[${constants.emojis.custom.typescript} TypeScript](${constants.links.typescriptWebsite})`,
-								`[${constants.emojis.custom.deno} Deno](${constants.links.denoWebsite})`,
-								'',
-								`[${constants.emojis.custom.discordeno} discordeno](${constants.links.discordenoRepository})`,
+								`[TypeScript](${constants.links.typescriptWebsite})`,
+								`[Deno](${constants.links.denoWebsite})`,
+								constants.links.discordApiWebsite,
+								`[discordeno](${constants.links.discordenoRepository})`,
 							),
 							interaction.locale,
 						),
