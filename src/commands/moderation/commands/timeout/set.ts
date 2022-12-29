@@ -22,10 +22,7 @@ async function handleSetTimeout(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {
-	const [{ user, duration, reason }, focused] = parseArguments(
-		interaction.data?.options,
-		{},
-	);
+	const [{ user, duration, reason }, focused] = parseArguments(interaction.data?.options, {});
 
 	if (
 		interaction.type !== InteractionTypes.ApplicationCommandAutocomplete && user === undefined && duration === undefined
@@ -49,18 +46,13 @@ async function handleSetTimeout(
 		);
 	}
 
-	const member = resolveInteractionToMember([client, bot], interaction, user!);
+	const member = resolveInteractionToMember([client, bot], interaction, user!, {
+		restrictToNonSelf: true,
+		excludeModerators: true,
+	});
 	if (member === undefined) return;
 
 	if (interaction.type !== InteractionTypes.ApplicationCommandAutocomplete && focused?.name !== 'reason') return;
-
-	if (member.id === interaction.member?.id) {
-		return displayError(
-			bot,
-			interaction,
-			localise(Commands.timeout.strings.cannotTimeoutSelf, interaction.locale),
-		);
-	}
 
 	const durationParsed = Number(duration);
 

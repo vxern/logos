@@ -43,7 +43,7 @@ async function handlePardonUser(
 	const [{ user, warning }] = parseArguments(interaction.data?.options, {});
 	if (user === undefined) return;
 
-	const member = resolveInteractionToMember([client, bot], interaction, user);
+	const member = resolveInteractionToMember([client, bot], interaction, user, {restrictToNonSelf: true, excludeModerators: true});
 	if (member === undefined) return;
 
 	const subject = await client.database.adapters.users.getOrFetchOrCreate(
@@ -78,7 +78,7 @@ async function handlePardonUser(
 
 	const warningToDelete = relevantWarnings.find((relevantWarning) => relevantWarning.ref.value.id === warning);
 	if (warningToDelete === undefined) {
-		return displayError(bot, interaction, localise(Commands.pardon.strings.alreadyRemoved, interaction.locale));
+		return displayError(bot, interaction, localise(Commands.pardon.strings.invalidWarning, interaction.locale));
 	}
 
 	const deletedWarning = await client.database.adapters.warnings.delete(client, warningToDelete);

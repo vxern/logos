@@ -822,10 +822,10 @@ class Commands {
 				'Polish': 'Nie udało się usunąć ostrzeżenia.',
 				'Romanian': 'Nu s-a putut elimina avertismentul.',
 			},
-			alreadyRemoved: {
-				'English': 'The selected warning has already been removed.',
-				'Polish': 'To ostrzeżenie już zostało usunięte.',
-				'Romanian': 'Avertismentul selectat a fost deja eliminat.',
+			invalidWarning: {
+				'English': 'The warning you specified is invalid.',
+				'Polish': 'Ostrzeżenie, które sprecyzowałeś/aś, jest nieprawidłowe.',
+				'Romanian': 'Avertismentul pe care l-ai specificat este invalid.',
 			},
 			pardoned: {
 				'English': (userMention: string, reason: string) =>
@@ -1039,11 +1039,6 @@ class Commands {
 			},
 		},
 		strings: {
-			cannotTimeoutSelf: {
-				'English': 'You cannot time yourself out.',
-				'Polish': 'Nie można wyciszyć siebie samego.',
-				'Romanian': 'Nu îți poți seta însuți un timeout.',
-			},
 			invalidDuration: {
 				'English': 'The provided duration is invalid.',
 				'Polish': 'Określony okres czasu nie jest prawidłowy.',
@@ -1116,11 +1111,6 @@ class Commands {
 			'Romanian': 'Avertizează un utilizator.',
 		},
 		strings: {
-			cannotWarnSelf: {
-				'English': 'You cannot warn yourself.',
-				'Polish': 'Nie można ostrzec siebie samego.',
-				'Romanian': 'Nu te poți avertiza pe tine însuți.',
-			},
 			cannotWarnCertainUsers: {
 				'English': 'Neither bots nor server moderators can be warned.',
 				'Polish': 'Nie można ostrzegać ani botów, ani moderatorów serwera.',

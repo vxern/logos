@@ -539,6 +539,8 @@ function isValidIdentifier(identifier: string): boolean {
 interface MemberNarrowingOptions {
 	includeBots: boolean;
 	restrictToSelf: boolean;
+	restrictToNonSelf: boolean;
+	excludeModerators: boolean;
 }
 
 function resolveIdentifierToMembers(
@@ -546,22 +548,37 @@ function resolveIdentifierToMembers(
 	guildId: bigint,
 	userId: bigint,
 	identifier: string,
-	options: Partial<MemberNarrowingOptions> = { includeBots: false, restrictToSelf: false },
+	options: Partial<MemberNarrowingOptions> = {},
 ): [members: Member[], isId: boolean] | undefined {
 	const asker = client.cache.members.get(snowflakeToBigint(`${userId}${guildId}`));
 	if (asker === undefined) return undefined;
+
+	const guild = client.cache.guilds.get(guildId);
+	if (guild === undefined) return undefined;
+
+	const moderatorRoleId = guild.roles.array().find((role) => role.name === configuration.permissions.moderatorRoleName)
+		?.id;
+	if (moderatorRoleId === undefined) return undefined;
 
 	const id = extractIDFromIdentifier(identifier);
 	if (id !== undefined) {
 		const member = client.cache.members.get(snowflakeToBigint(`${id}${guildId}`));
 		if (member === undefined) return undefined;
 		if (options.restrictToSelf && member.id !== asker.id) return undefined;
+		if (options.restrictToNonSelf && member.id === asker.id) return undefined;
+		if (options.excludeModerators && member.roles.includes(moderatorRoleId)) {
+			return undefined;
+		}
 
 		return [[member], true];
 	}
 
 	const cachedMembers = options.restrictToSelf ? [asker] : Array.from(client.cache.members.values());
-	const members = cachedMembers.filter((member) => member.guildId === guildId);
+	const members = cachedMembers.filter((member: Member) =>
+		member.guildId === guildId &&
+		(!options.restrictToNonSelf ? true : member.user?.id !== asker.user?.id) &&
+		(!options.excludeModerators ? true : !member.roles.includes(moderatorRoleId))
+	);
 
 	if (userTagPattern.test(identifier)) {
 		const member = members.find(

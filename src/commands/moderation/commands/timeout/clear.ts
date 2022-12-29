@@ -23,7 +23,7 @@ async function handleClearTimeout(
 	const [{ user }] = parseArguments(interaction.data?.options, {});
 	if (user === undefined) return;
 
-	const member = resolveInteractionToMember([client, bot], interaction, user);
+	const member = resolveInteractionToMember([client, bot], interaction, user, {restrictToNonSelf: true, excludeModerators: true});
 	if (member === undefined) return;
 
 	const timedOutUntil = member.communicationDisabledUntil ?? undefined;

@@ -36,26 +36,8 @@ async function handleWarnUser(
 	const [{ user, reason }] = parseArguments(interaction.data?.options, {});
 	if (user === undefined) return;
 
-	const member = resolveInteractionToMember([client, bot], interaction, user);
+	const member = resolveInteractionToMember([client, bot], interaction, user, {restrictToNonSelf: true, excludeModerators: true});
 	if (member === undefined) return;
-
-	if (member.id === interaction.member?.id) {
-		return void sendInteractionResponse(
-			bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						description: localise(Commands.warn.strings.cannotWarnSelf, interaction.locale),
-						color: constants.colors.dullYellow,
-					}],
-				},
-			},
-		);
-	}
 
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (guild === undefined) return;
