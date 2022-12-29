@@ -163,9 +163,9 @@ class Commands {
 							`Acest server este supravegheat de cătr-un grup de oameni cu rolul **${capitalise(moderatorRoleName)}**.`,
 					},
 					withoutProficiencyRole: {
-						'English': 'without a specified proficiency.',
-						'Polish': 'bez określonej biegłości.',
-						'Romanian': 'fără o competență specifizată.',
+						'English': 'without a specified language proficiency.',
+						'Polish': 'bez określonej znajomości języka.',
+						'Romanian': 'fără o competență lingvistică specificată.',
 					},
 					fields: {
 						description: {
@@ -188,20 +188,20 @@ class Commands {
 							'Polish': 'Kanały',
 							'Romanian': 'Canale',
 						},
-						serverOwner: {
-							'English': 'Server Owner',
-							'Polish': 'Właściciel Serwera',
-							'Romanian': 'Properietarul Serverului',
+						owner: {
+							'English': 'Owner',
+							'Polish': 'Właściciel',
+							'Romanian': 'Properietar',
 						},
 						moderators: {
 							'English': 'Moderators',
 							'Polish': 'Moderatorzy',
 							'Romanian': 'Moderatori',
 						},
-						proficiencyDistribution: {
-							'English': 'Proficiency Distribution',
-							'Polish': 'Dystrybucja Biegłości',
-							'Romanian': 'Distribuție de Competență',
+						distributionOfMembersLanguageProficiency: {
+							'English': 'Distribution of members\' language proficiency',
+							'Polish': 'Rozkład biegłości języcznej członków serwera',
+							'Romanian': 'Distribuția competențelor lingvistice ale membrilor',
 						},
 					},
 					channelTypes: {
