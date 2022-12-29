@@ -34,6 +34,7 @@ import constants from 'logos/constants.ts';
 import { trim } from 'logos/formatting.ts';
 import configuration from 'logos/configuration.ts';
 import { getTextChannel, verifyIsWithinLimits } from 'logos/src/utils.ts';
+import { log } from '../../../controllers/logging/logging.ts';
 
 const command: CommandBuilder = {
 	...createLocalisations(Commands.report),
@@ -148,6 +149,15 @@ async function handleInitiateReportProcess(
 
 			const recipientAndWarningsTuples = await getRecipientAndWarningsTuples(client, recipients);
 			if (recipientAndWarningsTuples === undefined) return ReportError.Failure;
+
+			log(
+				[client, bot],
+				guild,
+				'reportSubmit',
+				interaction.member!,
+				recipientAndWarningsTuples.map(([recipient, _warnings]) => recipient),
+				report.data,
+			);
 
 			const messageId = await sendMessage(
 				bot,
