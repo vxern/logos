@@ -471,6 +471,10 @@ class Services {
 		alreadyMarkedAsUnresolved: {
 			'English': 'This report has already been marked as unresolved.',
 		},
+		// Do not localise; this is a public feedback message.
+		previousInfractionsOfReportedUsers: {
+			'English': 'Previous infractions of reported users',
+		},
 	};
 }
 

@@ -16,7 +16,8 @@ import {
 } from 'discordeno';
 import { lodash } from 'lodash';
 import { localise, Services } from 'logos/assets/localisations/mod.ts';
-import { Report, User } from 'logos/src/database/structs/mod.ts';
+import { generateWarningsPage } from 'logos/src/commands/information/commands/list/warnings.ts';
+import { Report, User, Warning } from 'logos/src/database/structs/mod.ts';
 import { Document, Reference } from 'logos/src/database/document.ts';
 import { stringifyValue } from 'logos/src/database/database.ts';
 import { ServiceStarter } from 'logos/src/services/services.ts';
@@ -180,12 +181,13 @@ function registerPastReports([client, bot]: [Client, Bot]): void {
 				).then((recipients) => recipients.includes(undefined) ? undefined : recipients as unknown as Document<User>[]);
 				if (recipients === undefined) return;
 
-				const recipientIds = recipients.map((recipient) => BigInt(recipient.data.account.id));
+				const recipientAndWarningsTuples = await getRecipientAndWarningsTuples(client, recipients);
+				if (recipientAndWarningsTuples === undefined) return;
 
 				messageId = await sendMessage(
 					bot,
 					reportChannelId,
-					getReportPrompt(bot, guild, author, recipientIds, report),
+					getReportPrompt(bot, guild, author, recipientAndWarningsTuples, report),
 				).then((message) => message.id);
 			} else {
 				reportPromptsByAuthorId.get(authorId)!.delete(reportReferenceId);
@@ -237,14 +239,15 @@ function ensureReportPromptPersistence([client, bot]: [Client, Bot]): void {
 		).then((recipients) => recipients.includes(undefined) ? undefined : recipients as unknown as Document<User>[]);
 		if (recipients === undefined) return;
 
-		const recipientIds = recipients.map((recipient) => BigInt(recipient.data.account.id));
+		const recipientAndWarningsTuples = await getRecipientAndWarningsTuples(client, recipients);
+		if (recipientAndWarningsTuples === undefined) return;
 
 		const guild = client.cache.guilds.get(guildId)!;
 
 		const newMessageId = await sendMessage(
 			bot,
 			channelId,
-			getReportPrompt(bot, guild, author, recipientIds, report),
+			getReportPrompt(bot, guild, author, recipientAndWarningsTuples, report),
 		).then((message) => message.id);
 		reportByMessageId.delete(messageId);
 		authorIdByMessageId.delete(messageId);
@@ -274,6 +277,32 @@ function ensureReportPromptPersistence([client, bot]: [Client, Bot]): void {
 
 		messageUpdate(bot, message, oldMessage);
 	};
+}
+
+type RecipientAndWarningsTuple = [recipient: DiscordUser, warnings: Document<Warning>[]];
+
+// deno-lint-ignore require-await
+async function getRecipientAndWarningsTuples(
+	client: Client,
+	recipientDocuments: Document<User>[],
+): Promise<RecipientAndWarningsTuple[] | undefined> {
+	const promises: Promise<RecipientAndWarningsTuple>[] = [];
+	for (const recipientDocument of recipientDocuments) {
+		const recipient = client.cache.users.get(BigInt(recipientDocument.data.account.id));
+		if (recipient === undefined) return undefined;
+
+		const warningsPromise = client.database.adapters.warnings.getOrFetch(client, 'recipient', recipientDocument.ref);
+		promises.push(
+			new Promise((resolve, reject) =>
+				warningsPromise.then((warnings) => {
+					if (warnings === undefined) return void reject();
+					return void resolve([recipient, Array.from(warnings.values())]);
+				})
+			),
+		);
+	}
+
+	return Promise.all(promises).catch(() => undefined);
 }
 
 function registerReportHandler(
@@ -343,7 +372,7 @@ function getReportPrompt(
 	bot: Bot,
 	guild: WithLanguage<Guild>,
 	author: DiscordUser,
-	recipientIds: bigint[],
+	recipientAndWarningsTuples: RecipientAndWarningsTuple[],
 	reportDocument: Document<Report>,
 ): CreateMessage {
 	const reportReferenceId = stringifyValue(reportDocument.ref);
@@ -369,11 +398,13 @@ function getReportPrompt(
 				},
 				{
 					name: localise(Services.reports.submittedAt, defaultLocale),
-					value: timestamp(reportDocument.ts),
+					value: timestamp(reportDocument.data.createdAt),
 				},
 				{
 					name: localise(Services.reports.reportedUsers, defaultLocale),
-					value: recipientIds.map((recipientId) => mention(recipientId, MentionTypes.User)).join(', '),
+					value: recipientAndWarningsTuples.map(([recipient, _recipientWarnings]) =>
+						mention(recipient.id, MentionTypes.User)
+					).join(', '),
 				},
 				{
 					name: localise(Services.reports.reasonForReport, defaultLocale),
@@ -387,6 +418,14 @@ function getReportPrompt(
 					: []),
 			],
 			footer: { text: `${author.id}${metadataSeparator}${reportReferenceId}` },
+		}, {
+			title: localise(Services.reports.previousInfractionsOfReportedUsers, defaultLocale),
+			fields: recipientAndWarningsTuples.map(
+				([recipient, warnings]) => ({
+					name: diagnosticMentionUser(recipient),
+					value: generateWarningsPage(warnings, defaultLocale),
+				}),
+			),
 		}],
 		components: [{
 			type: MessageComponentTypes.ActionRow,
@@ -410,4 +449,11 @@ function getReportPrompt(
 }
 
 export default service;
-export { authorIdByMessageId, getReportPrompt, messageIdByReportReferenceId, registerReportHandler, reportByMessageId };
+export {
+	authorIdByMessageId,
+	getRecipientAndWarningsTuples,
+	getReportPrompt,
+	messageIdByReportReferenceId,
+	registerReportHandler,
+	reportByMessageId,
+};

@@ -22,8 +22,10 @@ import { stringifyValue } from 'logos/src/database/database.ts';
 import { Document } from 'logos/src/database/document.ts';
 import {
 	authorIdByMessageId,
+	getRecipientAndWarningsTuples,
 	getReportPrompt,
 	messageIdByReportReferenceId,
+	registerReportHandler,
 	reportByMessageId,
 } from 'logos/src/services/reports.ts';
 import { Client, isValidIdentifier, resolveIdentifierToMembers } from 'logos/src/client.ts';
@@ -130,6 +132,7 @@ async function handleInitiateReportProcess(
 			const report = await client.database.adapters.reports.create(
 				client,
 				{
+					createdAt: Date.now(),
 					author: authorDocument.ref,
 					guild: guild.id.toString(),
 					recipients: recipients.map((recipient) => recipient.ref),
@@ -143,12 +146,13 @@ async function handleInitiateReportProcess(
 			const reportChannelId = getTextChannel(guild, configuration.guilds.channels.reports)?.id;
 			if (reportChannelId === undefined) return true;
 
-			const recipientIds = recipients.map((recipient) => BigInt(recipient.data.account.id));
+			const recipientAndWarningsTuples = await getRecipientAndWarningsTuples(client, recipients);
+			if (recipientAndWarningsTuples === undefined) return ReportError.Failure;
 
 			const messageId = await sendMessage(
 				bot,
 				reportChannelId,
-				getReportPrompt(bot, guild, interaction.user, recipientIds, report),
+				getReportPrompt(bot, guild, interaction.user, recipientAndWarningsTuples, report),
 			).then((message) => message.id);
 
 			const reportReferenceId = stringifyValue(report.ref);
@@ -156,6 +160,14 @@ async function handleInitiateReportProcess(
 			reportByMessageId.set(messageId, report);
 			authorIdByMessageId.set(messageId, interaction.user.id);
 			messageIdByReportReferenceId.set(reportReferenceId, messageId);
+
+			registerReportHandler(
+				client,
+				guild.id,
+				reportChannelId,
+				[interaction.user.id, authorDocument.ref],
+				reportReferenceId,
+			);
 
 			editOriginalInteractionResponse(bot, submission.token, {
 				flags: ApplicationCommandFlags.Ephemeral,
