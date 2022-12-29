@@ -33,6 +33,10 @@ resource "fauna_collection" "praises" {
   name = "Praises"
 }
 
+resource "fauna_collection" "reports" {
+  name = "Reports"
+}
+
 resource "fauna_collection" "users" {
   name = "Users"
 }

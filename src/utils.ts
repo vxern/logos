@@ -1,5 +1,6 @@
 import { Bot, Channel, ChannelTypes, Embed, getGuildIconURL, getMessages, Guild, Message, User } from 'discordeno';
 import { code } from 'logos/formatting.ts';
+import { Document } from 'logos/src/database/document.ts';
 
 /**
  * Parses a 6-digit hex value prefixed with a hashtag to a number.
@@ -145,6 +146,23 @@ async function getAllMessages(bot: Bot, channelId: bigint): Promise<Message[]> {
 	return messages;
 }
 
+function verifyIsWithinLimits(documents: Document[], limit: number, limitingTimePeriod: number): boolean {
+	const actionTimestamps = documents
+		.map((document) => document.data.createdAt)
+		.toSorted((a, b) => b - a); // From most recent to least recent.
+	const relevantTimestamps = actionTimestamps.slice(0, limit);
+
+	if (relevantTimestamps.length < limit) return true; // Has not reached the limit, regardless of the limiting time period.
+
+	const now = Date.now();
+	for (const timestamp of relevantTimestamps) {
+		if ((now - timestamp) < limitingTimePeriod) continue;
+		return true;
+	}
+
+	return false;
+}
+
 export {
 	addParametersToURL,
 	chunk,
@@ -155,4 +173,5 @@ export {
 	getTextChannel,
 	guildAsAuthor,
 	snowflakeToTimestamp,
+	verifyIsWithinLimits,
 };

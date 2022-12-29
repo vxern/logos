@@ -69,12 +69,12 @@ function displayUnableToDisplayWarningsError(bot: Bot, interaction: Interaction)
 
 function generateWarningsPage(warnings: Document<Warning>[], locale: string | undefined): string {
 	if (warnings.length === 0) {
-		return localise(Commands.list.strings.userDoesNotHaveWarnings, locale);
+		return `*${localise(Commands.list.strings.userDoesNotHaveWarnings, locale)}*`;
 	}
 
 	return list(
-		warnings.map((warning) => `${trim(warning.data.reason, 50)} (${timestamp(warning.ts)})`),
+		warnings.map((warning) => `${trim(warning.data.reason, 50)} (${timestamp(warning.data.createdAt)})`),
 	);
 }
 
-export { handleDisplayWarnings };
+export { generateWarningsPage, handleDisplayWarnings };

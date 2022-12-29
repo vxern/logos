@@ -429,6 +429,53 @@ class Services {
 			},
 		},
 	};
+
+	static readonly reports = {
+		// Do not localise; this is a public feedback message.
+		submittedBy: {
+			'English': 'Submitted by',
+		},
+		// Do not localise; this is a public feedback message.
+		submittedAt: {
+			'English': 'Submitted at',
+		},
+		// Do not localise; this is a public feedback message.
+		reportedUsers: {
+			'English': 'Reported users',
+		},
+		// Do not localise; this is a public feedback message.
+		reasonForReport: {
+			'English': 'Reason for report',
+		},
+		// Do not localise; this is a public feedback message.
+		linkToMessage: {
+			'English': 'Link to message',
+		},
+		// Do not localise; this is a public feedback message.
+		noLinkToMessageProvided: {
+			'English': 'No link to message provided.',
+		},
+		// Do not localise; this is a public feedback message.
+		markAsResolved: {
+			'English': 'Mark as resolved',
+		},
+		// Do not localise; this is a public feedback message.
+		markAsUnresolved: {
+			'English': 'Mark as unresolved',
+		},
+		// Do not localise; this is a public feedback message.
+		alreadyMarkedAsResolved: {
+			'English': 'This report has already been marked as resolved.',
+		},
+		// Do not localise; this is a public feedback message.
+		alreadyMarkedAsUnresolved: {
+			'English': 'This report has already been marked as unresolved.',
+		},
+		// Do not localise; this is a public feedback message.
+		previousInfractionsOfReportedUsers: {
+			'English': 'Previous infractions of reported users',
+		},
+	};
 }
 
 export { Services };

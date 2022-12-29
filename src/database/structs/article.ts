@@ -16,6 +16,9 @@ interface ArticleTextContent {
 
 /** Represents an article explaining a concept or a difference between terms. */
 interface Article {
+	/** Unix timestamp of the creation of this article document. */
+	createdAt: number;
+
 	/** The document reference to the author of this article. */
 	author: Reference;
 
@@ -33,19 +36,15 @@ interface Article {
  * Taking an article and an array of changes made to it, gets the most
  * up-to-date content.
  */
-function getMostRecentArticleContent({
-	article,
-	changes,
-}: {
-	article: Article;
-	changes: Document<ArticleChange>[];
-}): ArticleTextContent {
+function getMostRecentArticleContent(
+	{ article, changes }: { article: Article; changes: Document<ArticleChange>[] },
+): ArticleTextContent {
 	if (changes.length === 0) {
 		return article.content;
 	}
 
 	const mostRecentChange = changes.reduce((change, current) => {
-		if (current.ts > change.ts) {
+		if (current.data.createdAt > change.data.createdAt) {
 			return current;
 		}
 

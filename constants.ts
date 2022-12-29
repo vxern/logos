@@ -26,6 +26,7 @@ const staticComponentIds = {
 	selectedLanguageProficiency: 'selected_language_proficiency',
 	requestedVerification: 'requested_verification',
 	verification: 'verification',
+	reports: 'reports',
 };
 
 const links = {

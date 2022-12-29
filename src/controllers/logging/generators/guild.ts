@@ -1,5 +1,5 @@
 import { Member, User } from 'discordeno';
-import { Article, ArticleChange, Praise, Warning } from 'logos/src/database/structs/mod.ts';
+import { Article, ArticleChange, Praise, Report, Warning } from 'logos/src/database/structs/mod.ts';
 import { MessageGenerators } from 'logos/src/controllers/logging/generators/generators.ts';
 import { diagnosticMentionUser } from 'logos/src/utils.ts';
 import constants from 'logos/constants.ts';
@@ -66,6 +66,9 @@ type GuildEvents = {
 
 	/** A suggestion has been made. */
 	suggestionSend: [member: Member, suggestion: string];
+
+	/** A report has been submitted. */
+	reportSubmit: [author: Member, recipients: User[], report: Report];
 };
 
 /** Contains the message generators for (custom) guild events. */
@@ -335,6 +338,28 @@ ${trim(change.content.body, 300)}`;
 		},
 		filter: (_client, originGuildId, member, _suggestion) => originGuildId === member.guildId,
 		color: constants.colors.darkGreen,
+	},
+	reportSubmit: {
+		title: `💢 Report submitted`,
+		message: (client, author, recipients, report) => {
+			const authorUser = client.cache.users.get(author.id);
+			if (authorUser === undefined) return;
+
+			const messageLink = report.messageLink ?? '*No message link*.';
+
+			return `${diagnosticMentionUser(authorUser)} has submitted a report.
+
+**REASON**
+${report.reason}
+
+**REPORTED USERS**
+${recipients.map((recipient) => diagnosticMentionUser(recipient)).join(', ')}
+
+**MESSAGE LINK**
+${messageLink}`;
+		},
+		filter: (_client, originGuildId, author, _recipients, _report) => originGuildId === author.guildId,
+		color: constants.colors.darkRed,
 	},
 };
 

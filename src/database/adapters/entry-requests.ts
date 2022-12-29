@@ -81,10 +81,7 @@ const adapter: DatabaseAdapters['entryRequests'] = {
 		return document;
 	},
 	update: async (client, entryRequest) => {
-		const document = await dispatchQuery<EntryRequest>(
-			client,
-			$.Update(entryRequest.ref, { data: entryRequest.data }),
-		);
+		const document = await dispatchQuery<EntryRequest>(client, $.Update(entryRequest.ref, { data: entryRequest.data }));
 
 		const submitterReferenceId = stringifyValue(entryRequest.data.submitter);
 		const guildId = stringifyValue(entryRequest.data.guild);

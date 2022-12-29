@@ -1,9 +1,13 @@
+interface BaseDocumentProperties {
+	createdAt: number;
+}
+
 /** Contains the base properties of data structures stored in the database. */
-interface Document<T> {
+interface Document<T extends BaseDocumentProperties = BaseDocumentProperties> {
 	/** The document reference to this resource in the database. */
 	ref: Reference;
 
-	/** The timestamp of when this resource was created. */
+	/** The timestamp of when this resource was created or updated. */
 	ts: number;
 
 	/** The data contained within this resource. */
@@ -22,4 +26,4 @@ interface Reference {
 	};
 }
 
-export type { Document, Reference };
+export type { BaseDocumentProperties, Document, Reference };

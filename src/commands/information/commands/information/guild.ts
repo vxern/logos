@@ -139,8 +139,8 @@ function getProficiencyRoleFrequencies(
 		.toSorted((a, b) => a.position - b.position);
 	const proficiencyRoleIds = proficiencyRoles.map((role) => role.id);
 
-	const membersIndiscriminate = Array.from(client.cache.members.values());
-	const members = membersIndiscriminate.filter((member) =>
+	const cachedMembers = Array.from(client.cache.members.values());
+	const members = cachedMembers.filter((member) =>
 		!client.cache.users.get(member.id)?.toggles.bot &&
 		member.guildId === guild.id
 	);

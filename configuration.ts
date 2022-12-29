@@ -19,21 +19,30 @@ const configuration = {
 		namePattern: new RegExp('^Learn ([A-Z][a-z]*)$'),
 		channels: {
 			logging: 'journal',
+
 			moderation: 'moderation',
+			reports: 'reports',
 			verification: 'verifications',
+
 			information: 'rules',
 			welcome: 'welcome',
+
 			voiceChat: 'Voice Chat',
 		},
 	},
 	resultsPerPage: 10,
 	commands: {
+		report: {
+			limitUses: 2,
+			within: 30 * Periods.minute,
+			limitUsers: 5,
+		},
 		warn: {
-			limit: 3,
+			limitUses: 3,
 			within: 2 * Periods.month,
 		},
 		praise: {
-			limit: 3,
+			limitUses: 3,
 			within: 6 * Periods.hour,
 		},
 	},

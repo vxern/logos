@@ -18,6 +18,9 @@ interface Profile {
 
 /** Represents a user. */
 interface User {
+	/** Unix timestamp of the creation of this user document. */
+	createdAt: number;
+
 	/** User's account data. */
 	account: Account;
 
