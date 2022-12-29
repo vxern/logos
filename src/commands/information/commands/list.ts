@@ -6,12 +6,12 @@ import { user } from 'logos/src/commands/parameters.ts';
 
 const command: CommandBuilder = {
 	...createLocalisations(Commands.list),
-	defaultMemberPermissions: ['MODERATE_MEMBERS'],
+	defaultMemberPermissions: ['VIEW_CHANNEL'],
 	options: [{
 		...createLocalisations(Commands.list.options.warnings),
 		type: ApplicationCommandOptionTypes.SubCommand,
 		handle: handleDisplayWarnings,
-		options: [user],
+		options: [{...user, required: false}],
 	}],
 };
 

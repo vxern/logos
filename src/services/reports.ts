@@ -423,7 +423,7 @@ function getReportPrompt(
 			fields: recipientAndWarningsTuples.map(
 				([recipient, warnings]) => ({
 					name: diagnosticMentionUser(recipient),
-					value: generateWarningsPage(warnings, defaultLocale),
+					value: generateWarningsPage(warnings, false, defaultLocale),
 				}),
 			),
 		}],

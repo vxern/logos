@@ -1,6 +1,7 @@
 import {
 	ApplicationCommandFlags,
 	Bot,
+	calculatePermissions,
 	Interaction,
 	InteractionResponseTypes,
 	sendInteractionResponse,
@@ -19,11 +20,16 @@ async function handleDisplayWarnings(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {
-	const [{ user }] = parseArguments(interaction.data?.options, {});
-	if (user === undefined) return;
+	const isModerator = calculatePermissions(interaction.member!.permissions!).includes('MODERATE_MEMBERS');
 
-	const member = resolveInteractionToMember([client, bot], interaction, user);
+	const [{ user }] = parseArguments(interaction.data?.options, {});
+
+	const member = resolveInteractionToMember([client, bot], interaction, user ?? interaction.user.id.toString(), {
+		restrictToSelf: !isModerator,
+	});
 	if (member === undefined) return;
+
+  const isSelf = member.id === interaction.user.id;
 
 	const recipient = await client.database.adapters.users.getOrFetchOrCreate(
 		client,
@@ -43,7 +49,7 @@ async function handleDisplayWarnings(
 		embed: { color: constants.colors.blue },
 		view: {
 			title: localise(Commands.list.strings.warnings, interaction.locale),
-			generate: (warnings, _index) => generateWarningsPage(warnings, interaction.locale),
+			generate: (warnings, _index) => generateWarningsPage(warnings, isSelf, interaction.locale),
 		},
 		show: false,
 	});
@@ -67,9 +73,13 @@ function displayUnableToDisplayWarningsError(bot: Bot, interaction: Interaction)
 	);
 }
 
-function generateWarningsPage(warnings: Document<Warning>[], locale: string | undefined): string {
+function generateWarningsPage(warnings: Document<Warning>[], isSelf: boolean, locale: string | undefined): string {
 	if (warnings.length === 0) {
-		return `*${localise(Commands.list.strings.userDoesNotHaveWarnings, locale)}*`;
+		if (isSelf) {
+			return `*${localise(Commands.list.strings.hasNoActiveWarningsDirect, locale)}*`;
+		}
+
+		return `*${localise(Commands.list.strings.hasNoActiveWarnings, locale)}*`;
 	}
 
 	return list(

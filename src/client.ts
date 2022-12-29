@@ -536,24 +536,31 @@ function isValidIdentifier(identifier: string): boolean {
 	return userIDPattern.test(identifier) || userMentionPattern.test(identifier) || userTagPattern.test(identifier);
 }
 
+interface MemberNarrowingOptions {
+	includeBots: boolean;
+	restrictToSelf: boolean;
+}
+
 function resolveIdentifierToMembers(
 	client: Client,
 	guildId: bigint,
+	userId: bigint,
 	identifier: string,
-	options: { includeBots: boolean } = { includeBots: false },
+	options: Partial<MemberNarrowingOptions> = { includeBots: false, restrictToSelf: false },
 ): [members: Member[], isId: boolean] | undefined {
+	const asker = client.cache.members.get(snowflakeToBigint(`${userId}${guildId}`));
+	if (asker === undefined) return undefined;
+
 	const id = extractIDFromIdentifier(identifier);
 	if (id !== undefined) {
-		const guild = client.cache.guilds.get(guildId);
-		if (guild === undefined) return;
-
-		const member = client.cache.members.get(snowflakeToBigint(`${id}${guild.id}`));
-		if (member === undefined) return;
+		const member = client.cache.members.get(snowflakeToBigint(`${id}${guildId}`));
+		if (member === undefined) return undefined;
+		if (options.restrictToSelf && member.id !== asker.id) return undefined;
 
 		return [[member], true];
 	}
 
-	const cachedMembers = Array.from(client.cache.members.values());
+	const cachedMembers = options.restrictToSelf ? [asker] : Array.from(client.cache.members.values());
 	const members = cachedMembers.filter((member) => member.guildId === guildId);
 
 	if (userTagPattern.test(identifier)) {
@@ -578,8 +585,9 @@ function resolveInteractionToMember(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 	identifier: string,
+	options?: Partial<MemberNarrowingOptions>,
 ): Member | undefined {
-	const result = resolveIdentifierToMembers(client, interaction.guildId!, identifier);
+	const result = resolveIdentifierToMembers(client, interaction.guildId!, interaction.user.id, identifier, options);
 	if (result === undefined) return;
 
 	const [matchedMembers, isId] = result;

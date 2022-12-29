@@ -773,10 +773,15 @@ class Commands {
 				'Polish': 'Nie udało się wyświetlić ostrzeżeń dla danego użytkownika.',
 				'Romanian': 'Avertizările pentru utilizatorul dat nu au putut fi afișate.',
 			},
-			userDoesNotHaveWarnings: {
-				'English': 'This user has not received any warnings.',
-				'Polish': 'Ten użytkownik jeszcze nie dostał ostrzeżenia.',
-				'Romanian': 'Acest utilizator nu a primit un avertisment încă.',
+			hasNoActiveWarningsDirect: {
+				'English': 'You have no active warnings.',
+				'Polish': 'Nie masz żadnych aktywnych ostrzeżeń.',
+				'Romanian': 'Nu ai avertismente active.',
+			},
+			hasNoActiveWarnings: {
+				'English': 'This user does not have any active warnings.',
+				'Polish': 'Ten użytkownik nie ma żadnych aktywnych ostrzeżeń.',
+				'Romanian': 'Acest utilizator nu are avertismente active.',
 			},
 			warnings: {
 				'English': 'Warnings',
