@@ -956,7 +956,7 @@ class Commands {
 					);
 
 					return 'Ai încercat să reporți prea mulți membri în același timp. ' +
-						`Se poate raporta un maxim de numai ${numberExpression} în fiecare raport.`;
+						`Poți raporta numai până la ${numberExpression} concomitent.`;
 				},
 			},
 		},
