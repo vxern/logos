@@ -1,4 +1,5 @@
 {
+	"lock": false,
 	"importMap": "./imports.json",
 	"compilerOptions": {
 		"allowJs": false,
