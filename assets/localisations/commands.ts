@@ -1765,11 +1765,11 @@ class Commands {
 		},
 	});
 
-	static readonly suggest = typedLocalisations({
+	static readonly suggestion = typedLocalisations({
 		name: {
-			'English': 'suggest',
-			'Polish': 'zasugeruj',
-			'Romanian': 'sugerează',
+			'English': 'suggestion',
+			'Polish': 'sugestia',
+			'Romanian': 'sugestie',
 		},
 		description: {
 			'English': 'Passes a suggestion over to the server staff.',
