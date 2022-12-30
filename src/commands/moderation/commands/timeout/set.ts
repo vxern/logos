@@ -22,10 +22,7 @@ async function handleSetTimeout(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {
-	const [{ user, duration, reason }, focused] = parseArguments(
-		interaction.data?.options,
-		{},
-	);
+	const [{ user, duration, reason }, focused] = parseArguments(interaction.data?.options, {});
 
 	if (
 		interaction.type !== InteractionTypes.ApplicationCommandAutocomplete && user === undefined && duration === undefined
@@ -49,18 +46,13 @@ async function handleSetTimeout(
 		);
 	}
 
-	const member = resolveInteractionToMember([client, bot], interaction, user!);
+	const member = resolveInteractionToMember([client, bot], interaction, user!, {
+		restrictToNonSelf: true,
+		excludeModerators: true,
+	});
 	if (member === undefined) return;
 
 	if (interaction.type !== InteractionTypes.ApplicationCommandAutocomplete && focused?.name !== 'reason') return;
-
-	if (member.id === interaction.member?.id) {
-		return displayError(
-			bot,
-			interaction,
-			localise(Commands.timeout.strings.cannotTimeoutSelf, interaction.locale),
-		);
-	}
 
 	const durationParsed = Number(duration);
 
@@ -145,7 +137,7 @@ async function handleSetTimeout(
 }
 
 const digitsExpression = new RegExp(/\d+/g);
-const stringsExpression = new RegExp(/\D+/g);
+const stringsExpression = new RegExp(/\p{L}+/gu);
 
 function extractNumbers(expression: string): number[] {
 	return (expression.match(digitsExpression) ?? []).map((digits) => Number(digits));
@@ -190,7 +182,7 @@ function getTimestampFromExpression(
 		[],
 	);
 
-	// If one of the keys is invalid.
+	// If any one of the keys is invalid.
 	if (periodNames.some((key) => !validTimeDescriptors.includes(key))) {
 		return undefined;
 	}
@@ -216,14 +208,16 @@ function getTimestampFromExpression(
 	const keysWithValues = periodNames
 		.map<[(number: number) => string, [number, number], number]>(
 			(key, index) => {
-				const [descriptors, milliseconds] = timeDescriptorsWithLocalisations.find(
+				const timeDescriptorIndex = timeDescriptorsWithLocalisations.findIndex(
 					([descriptors, _value]) => localise(descriptors.descriptors, locale).includes(key),
 				)!;
+
+				const [descriptors, milliseconds] = timeDescriptorsWithLocalisations.at(timeDescriptorIndex!)!;
 
 				return [localise(descriptors.display, locale), [
 					quantifiers.at(index)!,
 					quantifiers.at(index)! * milliseconds,
-				], index];
+				], timeDescriptorIndex];
 			},
 		)
 		.toSorted((previous, next) => next[2] - previous[2]);

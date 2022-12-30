@@ -37,10 +37,10 @@ function handleDisplayGuildInformation(
 	const membersString = localise(Commands.information.options.guild.strings.fields.members, interaction.locale);
 	const createdString = localise(Commands.information.options.guild.strings.fields.created, interaction.locale);
 	const channelsString = localise(Commands.information.options.guild.strings.fields.channels, interaction.locale);
-	const ownerString = localise(Commands.information.options.guild.strings.fields.serverOwner, interaction.locale);
+	const ownerString = localise(Commands.information.options.guild.strings.fields.owner, interaction.locale);
 	const moderatorsString = localise(Commands.information.options.guild.strings.fields.moderators, interaction.locale);
 	const proficiencyDistributionString = localise(
-		Commands.information.options.guild.strings.fields.proficiencyDistribution,
+		Commands.information.options.guild.strings.fields.distributionOfMembersLanguageProficiency,
 		interaction.locale,
 	);
 

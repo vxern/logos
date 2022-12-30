@@ -17,6 +17,7 @@ import {
 } from 'discordeno';
 import { Commands, createLocalisations, localise, Modals } from 'logos/assets/localisations/mod.ts';
 import { CommandBuilder } from 'logos/src/commands/command.ts';
+import { log } from 'logos/src/controllers/logging/logging.ts';
 import { User } from 'logos/src/database/structs/mod.ts';
 import { stringifyValue } from 'logos/src/database/database.ts';
 import { Document } from 'logos/src/database/document.ts';
@@ -34,7 +35,6 @@ import constants from 'logos/constants.ts';
 import { trim } from 'logos/formatting.ts';
 import configuration from 'logos/configuration.ts';
 import { getTextChannel, verifyIsWithinLimits } from 'logos/src/utils.ts';
-import { log } from '../../../controllers/logging/logging.ts';
 
 const command: CommandBuilder = {
 	...createLocalisations(Commands.report),
@@ -106,7 +106,7 @@ async function handleInitiateReportProcess(
 				return ReportError.UsersSpecifiedIncorrectly;
 			}
 
-			const usersToReport = parseUserReportString(client, guild.id, answers.users_to_report!);
+			const usersToReport = parseUserReportString([client, bot], guild.id, answers.users_to_report!);
 			if (usersToReport === undefined) return ReportError.Failure;
 
 			for (const [user, index] of usersToReport.map<[DiscordUser, number]>((user, index) => [user, index])) {
@@ -365,9 +365,9 @@ function validateUserReportString(userString: string): boolean {
 		.every((identifier) => isValidIdentifier(identifier));
 }
 
-function parseUserReportString(client: Client, guildId: bigint, userString: string): DiscordUser[] | undefined {
+function parseUserReportString([client, bot]: [Client, Bot], guildId: bigint, userString: string): DiscordUser[] | undefined {
 	const identifiers = userString.split(',').map((identifier) => identifier.trim());
-	const members = identifiers.map((identifier) => resolveIdentifierToMembers(client, guildId, identifier)?.[0]?.[0]);
+	const members = identifiers.map((identifier) => resolveIdentifierToMembers(client, guildId, bot.id, identifier)?.[0]?.[0]);
 	if (members.includes(undefined)) return undefined;
 	return (members as Member[]).map((member) => member.user!);
 }

@@ -372,6 +372,8 @@ function withCaching(
 
 function withRateLimiting(handle: InteractionHandler): InteractionHandler {
 	return ([client, bot], interaction) => {
+		if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete) return handle([client, bot], interaction);
+
 		const commandId = interaction.data?.id;
 		if (commandId === undefined) return handle([client, bot], interaction);
 
@@ -536,25 +538,49 @@ function isValidIdentifier(identifier: string): boolean {
 	return userIDPattern.test(identifier) || userMentionPattern.test(identifier) || userTagPattern.test(identifier);
 }
 
+interface MemberNarrowingOptions {
+	includeBots: boolean;
+	restrictToSelf: boolean;
+	restrictToNonSelf: boolean;
+	excludeModerators: boolean;
+}
+
 function resolveIdentifierToMembers(
 	client: Client,
 	guildId: bigint,
+	userId: bigint,
 	identifier: string,
-	options: { includeBots: boolean } = { includeBots: false },
+	options: Partial<MemberNarrowingOptions> = {},
 ): [members: Member[], isId: boolean] | undefined {
+	const asker = client.cache.members.get(snowflakeToBigint(`${userId}${guildId}`));
+	if (asker === undefined) return undefined;
+
+	const guild = client.cache.guilds.get(guildId);
+	if (guild === undefined) return undefined;
+
+	const moderatorRoleId = guild.roles.array().find((role) => role.name === configuration.permissions.moderatorRoleName)
+		?.id;
+	if (moderatorRoleId === undefined) return undefined;
+
 	const id = extractIDFromIdentifier(identifier);
 	if (id !== undefined) {
-		const guild = client.cache.guilds.get(guildId);
-		if (guild === undefined) return;
-
-		const member = client.cache.members.get(snowflakeToBigint(`${id}${guild.id}`));
-		if (member === undefined) return;
+		const member = client.cache.members.get(snowflakeToBigint(`${id}${guildId}`));
+		if (member === undefined) return undefined;
+		if (options.restrictToSelf && member.id !== asker.id) return undefined;
+		if (options.restrictToNonSelf && member.id === asker.id) return undefined;
+		if (options.excludeModerators && member.roles.includes(moderatorRoleId)) {
+			return undefined;
+		}
 
 		return [[member], true];
 	}
 
-	const cachedMembers = Array.from(client.cache.members.values());
-	const members = cachedMembers.filter((member) => member.guildId === guildId);
+	const cachedMembers = options.restrictToSelf ? [asker] : Array.from(client.cache.members.values());
+	const members = cachedMembers.filter((member: Member) =>
+		member.guildId === guildId &&
+		(!options.restrictToNonSelf ? true : member.user?.id !== asker.user?.id) &&
+		(!options.excludeModerators ? true : !member.roles.includes(moderatorRoleId))
+	);
 
 	if (userTagPattern.test(identifier)) {
 		const member = members.find(
@@ -578,8 +604,9 @@ function resolveInteractionToMember(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 	identifier: string,
+	options?: Partial<MemberNarrowingOptions>,
 ): Member | undefined {
-	const result = resolveIdentifierToMembers(client, interaction.guildId!, identifier);
+	const result = resolveIdentifierToMembers(client, interaction.guildId!, interaction.user.id, identifier, options);
 	if (result === undefined) return;
 
 	const [matchedMembers, isId] = result;

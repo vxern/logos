@@ -19,11 +19,11 @@ import { mention, MentionTypes } from 'logos/formatting.ts';
 import { defaultLocale } from 'logos/types.ts';
 
 const command: CommandBuilder = {
-	...createLocalisations(Commands.suggest),
+	...createLocalisations(Commands.suggestion),
 	defaultMemberPermissions: ['VIEW_CHANNEL'],
 	handle: handleMakeSuggestion,
 	options: [{
-		...createLocalisations(Commands.suggest.options.suggestion),
+		...createLocalisations(Commands.suggestion.options.suggestion),
 		type: ApplicationCommandOptionTypes.String,
 		required: true,
 	}],
@@ -42,12 +42,12 @@ function handleMakeSuggestion(
 	const [{ suggestion }] = parseArguments(interaction.data?.options, {});
 	if (suggestion === undefined) return;
 
-	const suggestionReceived = localise(Commands.suggest.strings.suggestionReceived.header, defaultLocale);
+	const suggestionReceived = localise(Commands.suggestion.strings.suggestionReceived.header, defaultLocale);
 
 	sendMessage(bot, conferenceChannel.id, {
 		embeds: [{
 			title: `🌿 ${suggestionReceived}`,
-			description: localise(Commands.suggest.strings.suggestionReceived.body, defaultLocale)(
+			description: localise(Commands.suggestion.strings.suggestionReceived.body, defaultLocale)(
 				mention(interaction.user.id, MentionTypes.User),
 				suggestion,
 			),
@@ -64,7 +64,7 @@ function handleMakeSuggestion(
 			data: {
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
-					description: localise(Commands.suggest.strings.suggestionMade, interaction.locale),
+					description: localise(Commands.suggestion.strings.suggestionMade, interaction.locale),
 					color: constants.colors.lightGreen,
 				}],
 			},

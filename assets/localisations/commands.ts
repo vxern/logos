@@ -150,7 +150,7 @@ class Commands {
 						'Romanian': (guildName: string) => `Informații despre **${guildName}**`,
 					},
 					noDescription: {
-						'English': 'No description provided.',
+						'English': 'No description specified.',
 						'Polish': 'Brak opisu.',
 						'Romanian': 'Fără descriere.',
 					},
@@ -163,9 +163,9 @@ class Commands {
 							`Acest server este supravegheat de cătr-un grup de oameni cu rolul **${capitalise(moderatorRoleName)}**.`,
 					},
 					withoutProficiencyRole: {
-						'English': 'without a specified proficiency.',
-						'Polish': 'bez określonej biegłości.',
-						'Romanian': 'fără o competență specifizată.',
+						'English': 'without a specified language proficiency.',
+						'Polish': 'bez określonej znajomości języka.',
+						'Romanian': 'fără o competență lingvistică specificată.',
 					},
 					fields: {
 						description: {
@@ -188,20 +188,20 @@ class Commands {
 							'Polish': 'Kanały',
 							'Romanian': 'Canale',
 						},
-						serverOwner: {
-							'English': 'Server Owner',
-							'Polish': 'Właściciel Serwera',
-							'Romanian': 'Properietarul Serverului',
+						owner: {
+							'English': 'Owner',
+							'Polish': 'Właściciel',
+							'Romanian': 'Properietar',
 						},
 						moderators: {
 							'English': 'Moderators',
 							'Polish': 'Moderatorzy',
 							'Romanian': 'Moderatori',
 						},
-						proficiencyDistribution: {
-							'English': 'Proficiency Distribution',
-							'Polish': 'Dystrybucja Biegłości',
-							'Romanian': 'Distribuție de Competență',
+						distributionOfMembersLanguageProficiency: {
+							'English': 'Distribution of members\' language proficiency',
+							'Polish': 'Rozkład biegłości języcznej członków serwera',
+							'Romanian': 'Distribuția competențelor lingvistice ale membrilor',
 						},
 					},
 					channelTypes: {
@@ -773,10 +773,15 @@ class Commands {
 				'Polish': 'Nie udało się wyświetlić ostrzeżeń dla danego użytkownika.',
 				'Romanian': 'Avertizările pentru utilizatorul dat nu au putut fi afișate.',
 			},
-			userDoesNotHaveWarnings: {
-				'English': 'This user has not received any warnings.',
-				'Polish': 'Ten użytkownik jeszcze nie dostał ostrzeżenia.',
-				'Romanian': 'Acest utilizator nu a primit un avertisment încă.',
+			hasNoActiveWarningsDirect: {
+				'English': 'You have no active warnings.',
+				'Polish': 'Nie masz żadnych aktywnych ostrzeżeń.',
+				'Romanian': 'Nu ai avertismente active.',
+			},
+			hasNoActiveWarnings: {
+				'English': 'This user does not have any active warnings.',
+				'Polish': 'Ten użytkownik nie ma żadnych aktywnych ostrzeżeń.',
+				'Romanian': 'Acest utilizator nu are avertismente active.',
 			},
 			warnings: {
 				'English': 'Warnings',
@@ -817,10 +822,10 @@ class Commands {
 				'Polish': 'Nie udało się usunąć ostrzeżenia.',
 				'Romanian': 'Nu s-a putut elimina avertismentul.',
 			},
-			alreadyRemoved: {
-				'English': 'The selected warning has already been removed.',
-				'Polish': 'To ostrzeżenie już zostało usunięte.',
-				'Romanian': 'Avertismentul selectat a fost deja eliminat.',
+			invalidWarning: {
+				'English': 'The warning you specified is invalid.',
+				'Polish': 'Ostrzeżenie, które sprecyzowałeś/aś, jest nieprawidłowe.',
+				'Romanian': 'Avertismentul pe care l-ai specificat este invalid.',
 			},
 			pardoned: {
 				'English': (userMention: string, reason: string) =>
@@ -1034,13 +1039,8 @@ class Commands {
 			},
 		},
 		strings: {
-			cannotTimeoutSelf: {
-				'English': 'You cannot time yourself out.',
-				'Polish': 'Nie można wyciszyć siebie samego.',
-				'Romanian': 'Nu îți poți seta însuți un timeout.',
-			},
 			invalidDuration: {
-				'English': 'The provided duration is invalid.',
+				'English': 'The specified duration is invalid.',
 				'Polish': 'Określony okres czasu nie jest prawidłowy.',
 				'Romanian': 'Durata precizată nu este validă.',
 			},
@@ -1083,7 +1083,7 @@ class Commands {
 					`The timeout will expire ${until}.`,
 			},
 			notTimedOut: {
-				'English': 'The provided user is not currently timed out.',
+				'English': 'The specified user is not currently timed out.',
 				'Polish': 'Ten użytkownik nie jest wyciszony.',
 				'Romanian': 'Acest utilizator nu a avut un timeout impus pe el.',
 			},
@@ -1111,11 +1111,6 @@ class Commands {
 			'Romanian': 'Avertizează un utilizator.',
 		},
 		strings: {
-			cannotWarnSelf: {
-				'English': 'You cannot warn yourself.',
-				'Polish': 'Nie można ostrzec siebie samego.',
-				'Romanian': 'Nu te poți avertiza pe tine însuți.',
-			},
 			cannotWarnCertainUsers: {
 				'English': 'Neither bots nor server moderators can be warned.',
 				'Polish': 'Nie można ostrzegać ani botów, ani moderatorów serwera.',
@@ -1770,11 +1765,11 @@ class Commands {
 		},
 	});
 
-	static readonly suggest = typedLocalisations({
+	static readonly suggestion = typedLocalisations({
 		name: {
-			'English': 'suggest',
-			'Polish': 'zasugeruj',
-			'Romanian': 'sugerează',
+			'English': 'suggestion',
+			'Polish': 'sugestia',
+			'Romanian': 'sugestie',
 		},
 		description: {
 			'English': 'Passes a suggestion over to the server staff.',
