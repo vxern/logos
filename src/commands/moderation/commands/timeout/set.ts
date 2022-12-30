@@ -137,7 +137,7 @@ async function handleSetTimeout(
 }
 
 const digitsExpression = new RegExp(/\d+/g);
-const stringsExpression = new RegExp(/\D+/g);
+const stringsExpression = new RegExp(/\p{L}+/gu);
 
 function extractNumbers(expression: string): number[] {
 	return (expression.match(digitsExpression) ?? []).map((digits) => Number(digits));
