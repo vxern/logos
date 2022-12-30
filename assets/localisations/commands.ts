@@ -552,6 +552,11 @@ class Commands {
 				'Polish': 'Znaczenia',
 				'Romanian': 'Definiții',
 			},
+			definitionsForWord: {
+				'English': (word: string) => `Definitions for '${word}'`,
+				'Polish': (word: string) => `Znaczenia dla słowa '${word}'`,
+				'Romanian': (word: string) => `Definiții pentru cuvântul '${word}'`,
+			},
 			inflection: {
 				'English': 'Inflection',
 				'Polish': 'Odmiana',
