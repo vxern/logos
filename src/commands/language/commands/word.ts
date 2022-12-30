@@ -23,7 +23,7 @@ import { createInteractionCollector, parseArguments } from 'logos/src/interactio
 import { chunk, diagnosticMentionUser } from 'logos/src/utils.ts';
 import constants from 'logos/constants.ts';
 import { BulletStyles, code, list } from 'logos/formatting.ts';
-import { WordTypes } from 'logos/types.ts';
+import { defaultLocale, WordTypes } from 'logos/types.ts';
 
 const command: CommandBuilder = {
 	...createLocalisations(Commands.word),
@@ -73,6 +73,8 @@ async function handleSearchWord(
 		);
 	}
 
+	const locale = show ? defaultLocale : interaction.locale;
+
 	await sendInteractionResponse(
 		bot,
 		interaction.id,
@@ -93,7 +95,7 @@ async function handleSearchWord(
 		const data = await dictionary.query(word, guild.language);
 		if (data === undefined) continue;
 
-		const entriesNew = dictionary.parse(data, interaction.locale);
+		const entriesNew = dictionary.parse(data, locale);
 		if (entriesNew === undefined) continue;
 
 		entries.push(...entriesNew);
@@ -105,7 +107,7 @@ async function handleSearchWord(
 			interaction.token,
 			{
 				embeds: [{
-					description: localise(Commands.word.strings.noResults, interaction.locale),
+					description: localise(Commands.word.strings.noResults, locale),
 					color: constants.colors.dullYellow,
 				}],
 			},
@@ -123,6 +125,7 @@ async function handleSearchWord(
 			inflectionTableIndex: 0,
 			verbose: verbose ?? false,
 		},
+		locale,
 	);
 }
 
@@ -144,6 +147,7 @@ function displayMenu(
 	interaction: Interaction,
 	selection: Interaction | undefined,
 	data: WordViewData,
+	locale: string | undefined,
 ): void {
 	if (selection !== undefined) {
 		sendInteractionResponse(bot, selection.id, selection.token, {
@@ -154,8 +158,8 @@ function displayMenu(
 	const entry = data.entries.at(data.dictionaryEntryIndex)!;
 
 	editOriginalInteractionResponse(bot, interaction.token, {
-		embeds: [generateEmbed(data, entry, interaction.locale)],
-		components: generateButtons([client, bot], interaction, data, entry),
+		embeds: [generateEmbed(data, entry, locale)],
+		components: generateButtons([client, bot], interaction, data, entry, locale),
 	});
 }
 
@@ -179,6 +183,7 @@ function generateButtons(
 	interaction: Interaction,
 	data: WordViewData,
 	entry: DictionaryEntry,
+	locale: string | undefined,
 ): MessageComponents {
 	const paginationControls: ButtonComponent[][] = [];
 
@@ -193,7 +198,7 @@ function generateButtons(
 				type: InteractionTypes.MessageComponent,
 				onCollect: (_bot, selection) => {
 					if (!isFirst) data.dictionaryEntryIndex--;
-					return void displayMenu([client, bot], interaction, selection, data);
+					return void displayMenu([client, bot], interaction, selection, data, locale);
 				},
 			});
 
@@ -201,11 +206,11 @@ function generateButtons(
 				type: InteractionTypes.MessageComponent,
 				onCollect: (_bot, selection) => {
 					if (!isLast) data.dictionaryEntryIndex++;
-					return void displayMenu([client, bot], interaction, selection, data);
+					return void displayMenu([client, bot], interaction, selection, data, locale);
 				},
 			});
 
-			const pageString = localise(Commands.word.strings.page, interaction.locale);
+			const pageString = localise(Commands.word.strings.page, locale);
 
 			paginationControls.push([{
 				type: MessageComponentTypes.Button,
@@ -238,7 +243,7 @@ function generateButtons(
 				type: InteractionTypes.MessageComponent,
 				onCollect: (_bot, selection) => {
 					if (entry.inflectionTable === undefined || selection.data === undefined) {
-						return void displayMenu([client, bot], interaction, selection, data);
+						return void displayMenu([client, bot], interaction, selection, data, locale);
 					}
 
 					const [_buttonId, indexString] = selection.data.customId!.split('|');
@@ -248,7 +253,7 @@ function generateButtons(
 						data.inflectionTableIndex = index;
 					}
 
-					return void displayMenu([client, bot], interaction, selection, data);
+					return void displayMenu([client, bot], interaction, selection, data, locale);
 				},
 			});
 
@@ -279,7 +284,7 @@ function generateButtons(
 		onCollect: (_bot, selection) => {
 			data.inflectionTableIndex = 0;
 			data.currentView = ContentTabs.Definitions;
-			return void displayMenu([client, bot], interaction, selection, data);
+			return void displayMenu([client, bot], interaction, selection, data, locale);
 		},
 	});
 
@@ -287,14 +292,14 @@ function generateButtons(
 		type: InteractionTypes.MessageComponent,
 		onCollect: (_bot, selection) => {
 			data.currentView = ContentTabs.Inflection;
-			return void displayMenu([client, bot], interaction, selection, data);
+			return void displayMenu([client, bot], interaction, selection, data, locale);
 		},
 	});
 
 	if (entry.definitions !== undefined) {
 		row.push({
 			type: MessageComponentTypes.Button,
-			label: localise(Commands.word.strings.definitions, interaction.locale),
+			label: localise(Commands.word.strings.definitions, locale),
 			disabled: data.currentView === ContentTabs.Definitions,
 			customId: definitionsMenuButtonId,
 			style: ButtonStyles.Primary,
@@ -304,7 +309,7 @@ function generateButtons(
 	if (entry.inflectionTable !== undefined) {
 		row.push({
 			type: MessageComponentTypes.Button,
-			label: localise(Commands.word.strings.inflection, interaction.locale),
+			label: localise(Commands.word.strings.inflection, locale),
 			disabled: data.currentView === ContentTabs.Inflection,
 			customId: inflectionMenuButtonId,
 			style: ButtonStyles.Primary,
