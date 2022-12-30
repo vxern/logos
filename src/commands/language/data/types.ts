@@ -32,6 +32,7 @@ interface TaggedValue<T> {
 interface Expression extends TaggedValue<string> {}
 
 interface Definition extends TaggedValue<string> {
+	definitions?: Definition[];
 	expressions?: Expression[];
 }
 
@@ -81,4 +82,4 @@ interface SentencePair {
 }
 
 export { DictionaryAdapter, DictionaryProvisions, DictionaryScopes, WordTypes };
-export type { DictionaryEntry, SentencePair, TaggedValue };
+export type { Definition, DictionaryEntry, Expression, SentencePair, TaggedValue };

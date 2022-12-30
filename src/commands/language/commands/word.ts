@@ -15,7 +15,7 @@ import {
 	sendInteractionResponse,
 } from 'discordeno';
 import { Commands, createLocalisations, localise, Words } from 'logos/assets/localisations/mod.ts';
-import { DictionaryEntry, TaggedValue } from 'logos/src/commands/language/data/types.ts';
+import { Definition, DictionaryEntry, Expression } from 'logos/src/commands/language/data/types.ts';
 import { CommandBuilder } from 'logos/src/commands/command.ts';
 import { show } from 'logos/src/commands/parameters.ts';
 import { Client } from 'logos/src/client.ts';
@@ -330,7 +330,7 @@ function entryToEmbed(
 	const fields: DiscordEmbedField[] = [];
 
 	if (entry.definitions !== undefined && entry.definitions.length !== 0) {
-		const definitionsStringified = stringifyEntries(entry.definitions, BulletStyles.Diamond);
+		const definitionsStringified = stringifyEntries(entry.definitions, 'definitions', BulletStyles.Diamond);
 		const definitionsFitted = fitStringsToFieldSize(definitionsStringified, locale, verbose);
 
 		fields.push({
@@ -340,7 +340,7 @@ function entryToEmbed(
 	}
 
 	if (entry.expressions !== undefined && entry.expressions.length !== 0) {
-		const expressionsStringified = stringifyEntries(entry.expressions, BulletStyles.Arrow);
+		const expressionsStringified = stringifyEntries(entry.expressions, 'expressions', BulletStyles.Arrow);
 		const expressionsFitted = fitStringsToFieldSize(expressionsStringified, locale, verbose);
 
 		fields.push({
@@ -389,16 +389,32 @@ function tagsToString(tags: string[]): string {
 	return tags.map((tag) => code(tag)).join(' ');
 }
 
-function stringifyEntries(entries: TaggedValue<string>[], bulletStyle: BulletStyles): string[] {
+function stringifyEntries(
+	entries: Definition[] | Expression[],
+	entryType: 'definitions' | 'expressions',
+	bulletStyle: BulletStyles,
+	depth = 0,
+): string[] {
 	const entriesStringified = entries.map((entry) => {
-		if (entry.tags === undefined) {
-			return entry.value;
+		const root = entry.tags === undefined ? entry.value : `${tagsToString(entry.tags)} ${entry.value}`;
+
+		if (
+			entryType === 'definitions' && (entry as Definition)?.value.endsWith(':') &&
+			(entry as Definition)?.definitions !== undefined
+		) {
+			const entriesStringified = stringifyEntries(
+				(entry as Definition).definitions!,
+				'definitions',
+				bulletStyle,
+				depth + 1,
+			).join('\n');
+			return `${root}\n${entriesStringified}`;
 		}
 
-		return `${tagsToString(entry.tags)} ${entry.value}`;
+		return root;
 	});
 	const entriesEnlisted = list(entriesStringified, bulletStyle);
-	const entriesDelisted = entriesEnlisted.split('\n');
+	const entriesDelisted = entriesEnlisted.split('\n').map((entry) => `${'⠀'.repeat(depth * 2)}${entry}`);
 
 	return entriesDelisted;
 }
@@ -428,7 +444,7 @@ function fitStringsToFieldSize(
 	let fittedString = stringsToDisplay.join('\n');
 	if (stringsOmitted !== 0) {
 		const definitionsOmittedString = localise(Commands.word.strings.definitionsOmitted, locale)(stringsOmitted);
-		fittedString += `\n*${definitionsOmittedString}*`;
+		fittedString += `\n\n*${definitionsOmittedString}*`;
 	}
 
 	return fittedString;
