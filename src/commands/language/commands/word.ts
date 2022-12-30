@@ -158,22 +158,22 @@ function displayMenu(
 	const entry = data.entries.at(data.dictionaryEntryIndex)!;
 
 	editOriginalInteractionResponse(bot, interaction.token, {
-		embeds: [generateEmbed(data, entry, locale)],
+		embeds: generateEmbeds(data, entry, locale),
 		components: generateButtons([client, bot], interaction, data, entry, locale),
 	});
 }
 
-function generateEmbed(
+function generateEmbeds(
 	data: WordViewData,
 	entry: DictionaryEntry,
 	locale: string | undefined,
-): Embed {
+): Embed[] {
 	switch (data.currentView) {
 		case ContentTabs.Definitions: {
-			return entryToEmbed(entry, locale, data.verbose);
+			return entryToEmbeds(entry, locale, data.verbose);
 		}
 		case ContentTabs.Inflection: {
-			return entry.inflectionTable!.at(data.inflectionTableIndex)!;
+			return [entry.inflectionTable!.at(data.inflectionTableIndex)!];
 		}
 	}
 }
@@ -327,67 +327,78 @@ function generateButtons(
 	}));
 }
 
-function entryToEmbed(
-	entry: DictionaryEntry,
-	locale: string | undefined,
-	verbose: boolean,
-): Embed {
+function entryToEmbeds(entry: DictionaryEntry, locale: string | undefined, verbose: boolean): Embed[] {
+	let typeDisplayed!: string;
+	if (entry.type === undefined) {
+		typeDisplayed = localise(Words.types[WordTypes.Unknown], locale);
+	} else {
+		const [type, typeString] = entry.type;
+		typeDisplayed = localise(Words.types[type], locale);
+		if (type === WordTypes.Unknown) {
+			typeDisplayed += ` — '${typeString}'`;
+		}
+	}
+	typeDisplayed = `***${typeDisplayed}***`;
+
+	const word = entry.word;
+
+	const embeds: Embed[] = [];
 	const fields: DiscordEmbedField[] = [];
 
 	if (entry.definitions !== undefined && entry.definitions.length !== 0) {
 		const definitionsStringified = stringifyEntries(entry.definitions, 'definitions', BulletStyles.Diamond);
 		const definitionsFitted = fitStringsToFieldSize(definitionsStringified, locale, verbose);
 
-		fields.push({
-			name: localise(Commands.word.strings.fields.definitions, locale),
-			value: definitionsFitted,
-		});
+		if (!verbose) {
+			fields.push({ name: localise(Commands.word.strings.fields.definitions, locale), value: definitionsFitted });
+		} else {
+			embeds.push({
+				title: localise(Commands.word.strings.definitionsForWord, locale)(word),
+				description: `${typeDisplayed}\n\n${definitionsFitted}`,
+				color: constants.colors.husky,
+			});
+		}
 	}
 
 	if (entry.expressions !== undefined && entry.expressions.length !== 0) {
 		const expressionsStringified = stringifyEntries(entry.expressions, 'expressions', BulletStyles.Arrow);
 		const expressionsFitted = fitStringsToFieldSize(expressionsStringified, locale, verbose);
 
-		fields.push({
-			name: localise(Commands.word.strings.fields.expressions, locale),
-			value: expressionsFitted,
-		});
-	}
+		const sectionName = localise(Commands.word.strings.fields.expressions, locale);
 
-	if (entry.etymologies !== undefined && entry.etymologies.length !== 0) {
-		fields.push({
-			name: localise(Commands.word.strings.fields.etymology, locale),
-			value: entry.etymologies.map((etymology) => {
-				if (etymology.tags === undefined) {
-					return `**${etymology.value}**`;
-				}
-
-				if (etymology.value === undefined) {
-					return tagsToString(etymology.tags);
-				}
-
-				return `${tagsToString(etymology.tags)} **${etymology.value}**`;
-			}).join('\n'),
-		});
-	}
-
-	let description: string;
-	if (entry.type === undefined) {
-		description = localise(Words.types[WordTypes.Unknown], locale);
-	} else {
-		const [type, typeString] = entry.type;
-		description = localise(Words.types[type], locale);
-		if (type === WordTypes.Unknown) {
-			description += ` — '${typeString}'`;
+		if (!verbose) {
+			fields.push({ name: sectionName, value: expressionsFitted });
+		} else {
+			embeds.push({ title: sectionName, description: expressionsFitted, color: constants.colors.husky });
 		}
 	}
 
-	return {
-		title: entry.title ?? entry.word,
-		description: `***${description}***`,
-		fields,
-		color: constants.colors.husky,
-	};
+	if (entry.etymologies !== undefined && entry.etymologies.length !== 0) {
+		const sectionName = localise(Commands.word.strings.fields.etymology, locale);
+		const etymology = entry.etymologies.map((etymology) => {
+			if (etymology.tags === undefined) {
+				return `**${etymology.value}**`;
+			}
+
+			if (etymology.value === undefined) {
+				return tagsToString(etymology.tags);
+			}
+
+			return `${tagsToString(etymology.tags)} **${etymology.value}**`;
+		}).join('\n');
+
+		if (!verbose) {
+			fields.push({ name: sectionName, value: etymology });
+		} else {
+			embeds.push({ title: sectionName, description: etymology, color: constants.colors.husky });
+		}
+	}
+
+	if (!verbose) {
+		return [{ title: word, description: typeDisplayed, fields, color: constants.colors.husky }];
+	}
+
+	return embeds;
 }
 
 function tagsToString(tags: string[]): string {
