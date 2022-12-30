@@ -182,7 +182,7 @@ function getTimestampFromExpression(
 		[],
 	);
 
-	// If one of the keys is invalid.
+	// If any one of the keys is invalid.
 	if (periodNames.some((key) => !validTimeDescriptors.includes(key))) {
 		return undefined;
 	}
@@ -208,14 +208,16 @@ function getTimestampFromExpression(
 	const keysWithValues = periodNames
 		.map<[(number: number) => string, [number, number], number]>(
 			(key, index) => {
-				const [descriptors, milliseconds] = timeDescriptorsWithLocalisations.find(
+				const timeDescriptorIndex = timeDescriptorsWithLocalisations.findIndex(
 					([descriptors, _value]) => localise(descriptors.descriptors, locale).includes(key),
 				)!;
+
+				const [descriptors, milliseconds] = timeDescriptorsWithLocalisations.at(timeDescriptorIndex!)!;
 
 				return [localise(descriptors.display, locale), [
 					quantifiers.at(index)!,
 					quantifiers.at(index)! * milliseconds,
-				], index];
+				], timeDescriptorIndex];
 			},
 		)
 		.toSorted((previous, next) => next[2] - previous[2]);
