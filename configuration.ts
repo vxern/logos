@@ -48,7 +48,7 @@ const configuration = {
 	},
 	rateLimiting: {
 		limit: 3,
-		within: 1 * Periods.minute,
+		within: 30 * Periods.second,
 	},
 	// Configuration settings pertaining to music.
 	music: {
