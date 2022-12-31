@@ -39,7 +39,7 @@ import { getTextChannel, verifyIsWithinLimits } from 'logos/src/utils.ts';
 const command: CommandBuilder = {
 	...createLocalisations(Commands.report),
 	defaultMemberPermissions: ['VIEW_CHANNEL'],
-	handle: handleInitiateReportProcess,
+	handle: handleMakeReport,
 };
 
 enum ReportError {
@@ -50,7 +50,7 @@ enum ReportError {
 	CannotReportSelf = 'cannot_report_self',
 }
 
-async function handleInitiateReportProcess(
+async function handleMakeReport(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {
@@ -365,9 +365,15 @@ function validateUserReportString(userString: string): boolean {
 		.every((identifier) => isValidIdentifier(identifier));
 }
 
-function parseUserReportString([client, bot]: [Client, Bot], guildId: bigint, userString: string): DiscordUser[] | undefined {
+function parseUserReportString(
+	[client, bot]: [Client, Bot],
+	guildId: bigint,
+	userString: string,
+): DiscordUser[] | undefined {
 	const identifiers = userString.split(',').map((identifier) => identifier.trim());
-	const members = identifiers.map((identifier) => resolveIdentifierToMembers(client, guildId, bot.id, identifier)?.[0]?.[0]);
+	const members = identifiers.map((identifier) =>
+		resolveIdentifierToMembers(client, guildId, bot.id, identifier)?.[0]?.[0]
+	);
 	if (members.includes(undefined)) return undefined;
 	return (members as Member[]).map((member) => member.user!);
 }
