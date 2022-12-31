@@ -27,6 +27,7 @@ const staticComponentIds = {
 	requestedVerification: 'requested_verification',
 	verification: 'verification',
 	reports: 'reports',
+	suggestions: 'suggestions',
 };
 
 const links = {
@@ -68,6 +69,7 @@ const colors = {
 	green: fromHex('#00cc66'), // Alienated
 	greenishLightGray: fromHex('#c5e0d8'), // Ulthuan gray
 	orange: fromHex('#f28123'), // Beer
+	purple: fromHex('#870eff'),
 };
 
 const emojis = {

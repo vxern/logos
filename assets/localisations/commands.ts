@@ -1796,23 +1796,34 @@ class Commands {
 			},
 		},
 		strings: {
-			// Do not localise; this is a public feedback message.
-			suggestionReceived: {
+			suggestionSent: {
+				// Use exclamation if possible.
 				header: {
-					'English': 'Suggestion!',
+					'English': 'Suggestion sent!',
+					'Polish': 'Sugestia wysłana!',
+					'Romanian': 'Sugestie trimisă!',
 				},
 				body: {
-					'English': (userMention: string, suggestion: string) =>
-						`${userMention} has made a suggestion.\n\n` + `Suggestion: *${suggestion}*`,
+					'English': 'Your suggestion has been passed over to the server staff.',
+					'Polish': 'Twoja sugestia została przekazana moderacji serwera.',
+					'Romanian': 'Sugestia ta a fost transmisă personalului serverului.',
 				},
 			},
-			suggestionMade: {
-				'English': 'Your suggestion has been passed over to the server staff.\n\n' +
-					'We will keep you posted for developments regarding it.',
-				'Polish': 'Twoja sugestia została przekazana moderacji serwera.\n\n' +
-					'Będziemy na bieżąco informować Cię o zmianach w jej zakresie.',
-				'Romanian': 'Sugestia ta a fost transmisă personalului serverului.\n\n' +
-					'Te vom ține la curent cu evoluțiile din cadrul acesteia.',
+			failedToSendSuggestion: {
+				'English': 'Failed to send suggestion.',
+				'Polish': 'Nie udało się wysłać sugestii.',
+				'Romanian': 'Nu s-a putut trimite sugestia.',
+			},
+			areYouSureToStopSubmitting: {
+				'English': 'Are you sure you want to stop submitting the suggestion?',
+				'Polish': 'Czy jesteś pewny/a, że chcesz anulować składanie sugestii?',
+				'Romanian': 'Ești sigur/ă că vrei să anulezi depunerea sugestiei?',
+			},
+			waitBeforeSuggesting: {
+				'English': 'You have already made a few suggestions recently.\n\n' +
+					'You should wait before making a suggestion again.',
+				'Polish': 'Zanim ponownie spróbujesz coś zasugerować, powinieneś/powinnaś troszeczkę poczekać.',
+				'Romanian': 'Ar trebui să-ți iei puțin timp înainte de a încerca să depui din nou o sugestie.',
 			},
 		},
 	});

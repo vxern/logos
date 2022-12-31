@@ -37,6 +37,10 @@ resource "fauna_collection" "reports" {
   name = "Reports"
 }
 
+resource "fauna_collection" "suggestions" {
+  name = "Suggestions"
+}
+
 resource "fauna_collection" "users" {
   name = "Users"
 }

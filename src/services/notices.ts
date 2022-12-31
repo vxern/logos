@@ -9,7 +9,7 @@ import {
 	lastUpdatedAt as welcomeLastUpdatedAt,
 } from 'logos/src/services/notice-generators/welcome.ts';
 import { ServiceStarter } from 'logos/src/services/services.ts';
-import { Client } from 'logos/src/client.ts';
+import { Client, extendEventHandler } from 'logos/src/client.ts';
 import { getAllMessages, getTextChannel } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import { timestamp, TimestampFormat } from 'logos/formatting.ts';
@@ -40,41 +40,31 @@ const noticeChannelIdsByGuildId: Record<NoticeTypes, Map<bigint, bigint>> = {
 const noticeByChannelId = new Map<bigint, Message>();
 
 function registerPastNotices([client, bot]: [Client, Bot]): void {
-	const { guildCreate } = bot.events;
-
-	bot.events.guildCreate = async (bot, guild_) => {
-		await guildCreate(bot, guild_);
-
-		const guild = client.cache.guilds.get(guild_.id)!;
+	extendEventHandler(bot, 'guildCreate', { append: true }, (_, { id: guildId }) => {
+		const guild = client.cache.guilds.get(guildId)!;
 
 		for (const notice of Object.keys(noticeGenerators) as NoticeTypes[]) {
 			registerPastNotice([client, bot], guild, notice);
 		}
-	};
+	});
 }
 
 function ensureNoticePersistence(bot: Bot): void {
-	const { messageDelete, messageUpdate } = bot.events;
-
 	// Anti-tampering feature; detects notices being deleted.
-	bot.events.messageDelete = (bot, payload) => {
-		const [messageId, channelId, _guildId] = [payload.id, payload.channelId, payload.guildId!];
-
+	extendEventHandler(bot, 'messageDelete', { prepend: true }, (_, { id, channelId }) => {
 		// If the deleted message was not a notice.
-		if (!noticeIds.includes(messageId)) {
-			return messageDelete(bot, payload);
+		if (!noticeIds.includes(id)) {
+			return;
 		}
 
 		postAndRegisterNotice(bot, channelId);
-
-		messageDelete(bot, payload);
-	};
+	});
 
 	// Anti-tampering feature; detects embeds being deleted from notices.
-	bot.events.messageUpdate = (bot, message, oldMessage) => {
+	extendEventHandler(bot, 'messageUpdate', { prepend: true }, (bot, message, _) => {
 		// If the message was updated in any other channel apart from a verification channel.
 		if (!noticeIds.includes(message.id)) {
-			return messageUpdate(bot, message, oldMessage);
+			return;
 		}
 
 		// If the embed is still present, it wasn't an embed having been deleted. Do not do anything.
@@ -82,9 +72,7 @@ function ensureNoticePersistence(bot: Bot): void {
 
 		// Delete the message and allow the bot to handle the deletion.
 		deleteMessage(bot, message.channelId, message.id);
-
-		messageUpdate(bot, message, oldMessage);
-	};
+	});
 }
 
 async function registerPastNotice([client, bot]: [Client, Bot], guild: Guild, type: NoticeTypes): Promise<void> {

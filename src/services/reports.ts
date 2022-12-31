@@ -21,7 +21,7 @@ import { Report, User, Warning } from 'logos/src/database/structs/mod.ts';
 import { Document, Reference } from 'logos/src/database/document.ts';
 import { stringifyValue } from 'logos/src/database/database.ts';
 import { ServiceStarter } from 'logos/src/services/services.ts';
-import { Client, WithLanguage } from 'logos/src/client.ts';
+import { Client, extendEventHandler, WithLanguage } from 'logos/src/client.ts';
 import { createInteractionCollector, InteractionCollectorSettings } from 'logos/src/interactions.ts';
 import { diagnosticMentionUser, getAllMessages, getTextChannel } from 'logos/src/utils.ts';
 import { defaultLocale } from 'logos/types.ts';
@@ -108,11 +108,7 @@ function registerPastReports([client, bot]: [Client, Bot]): void {
 		}
 	}
 
-	const { guildCreate } = bot.events;
-
-	bot.events.guildCreate = async (bot, guild_) => {
-		guildCreate(bot, guild_);
-
+	extendEventHandler(bot, 'guildCreate', { append: true }, async (bot, guild_) => {
 		const guild = client.cache.guilds.get(guild_.id)!;
 
 		const reportChannelId = getTextChannel(guild, configuration.guilds.channels.reports)?.id;
@@ -208,25 +204,21 @@ function registerPastReports([client, bot]: [Client, Bot]): void {
 		for (const prompt of remainingReportPrompts) {
 			deleteMessage(bot, prompt.channelId, prompt.id);
 		}
-	};
+	});
 }
 
 function ensureReportPromptPersistence([client, bot]: [Client, Bot]): void {
-	const { messageDelete, messageUpdate } = bot.events;
-
 	// Anti-tampering feature; detects report prompts being deleted.
-	bot.events.messageDelete = async (bot, payload) => {
-		const [messageId, channelId, guildId] = [payload.id, payload.channelId, payload.guildId!];
-
+	extendEventHandler(bot, 'messageDelete', { prepend: true }, async (_bot, { id, channelId, guildId }) => {
 		// If the message was deleted from any other channel apart from a report channel.
-		if (reportChannelIdByGuildId.get(guildId) !== channelId) {
-			return messageDelete(bot, payload);
+		if (reportChannelIdByGuildId.get(guildId!) !== channelId) {
+			return;
 		}
 
-		const report = reportByMessageId.get(messageId);
+		const report = reportByMessageId.get(id);
 		if (report === undefined) return;
 
-		const authorId = authorIdByMessageId.get(messageId);
+		const authorId = authorIdByMessageId.get(id);
 		if (authorId === undefined) return;
 
 		const author = client.cache.users.get(authorId);
@@ -242,15 +234,15 @@ function ensureReportPromptPersistence([client, bot]: [Client, Bot]): void {
 		const recipientAndWarningsTuples = await getRecipientAndWarningsTuples(client, recipients);
 		if (recipientAndWarningsTuples === undefined) return;
 
-		const guild = client.cache.guilds.get(guildId)!;
+		const guild = client.cache.guilds.get(guildId!)!;
 
 		const newMessageId = await sendMessage(
 			bot,
 			channelId,
 			getReportPrompt(bot, guild, author, recipientAndWarningsTuples, report),
 		).then((message) => message.id);
-		reportByMessageId.delete(messageId);
-		authorIdByMessageId.delete(messageId);
+		reportByMessageId.delete(id);
+		authorIdByMessageId.delete(id);
 		reportByMessageId.set(newMessageId, report);
 		authorIdByMessageId.set(newMessageId, authorId);
 
@@ -258,25 +250,21 @@ function ensureReportPromptPersistence([client, bot]: [Client, Bot]): void {
 
 		messageIdByReportReferenceId.delete(reportReferenceId);
 		messageIdByReportReferenceId.set(reportReferenceId, newMessageId);
-
-		messageDelete(bot, payload);
-	};
+	});
 
 	// Anti-tampering feature; detects embeds being deleted from report prompts.
-	bot.events.messageUpdate = (bot, message, oldMessage) => {
+	extendEventHandler(bot, 'messageUpdate', { prepend: true }, (bot, { id, channelId, guildId, embeds }) => {
 		// If the message was updated in any other channel apart from a report channel.
-		if (reportChannelIdByGuildId.get(message.guildId!) !== message.channelId) {
-			return messageUpdate(bot, message, oldMessage);
+		if (reportChannelIdByGuildId.get(guildId!) !== channelId) {
+			return;
 		}
 
 		// If the embed is still present, it wasn't an embed having been deleted. Do not do anything.
-		if (message.embeds.length === 1) return;
+		if (embeds.length === 1) return;
 
 		// Delete the message and allow the bot to handle the deletion.
-		deleteMessage(bot, message.channelId, message.id);
-
-		messageUpdate(bot, message, oldMessage);
-	};
+		deleteMessage(bot, channelId, id);
+	});
 }
 
 type RecipientAndWarningsTuple = [recipient: DiscordUser, warnings: Document<Warning>[]];
@@ -330,7 +318,7 @@ function registerReportHandler(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(Services.reports.alreadyMarkedAsResolved, defaultLocale),
+						description: localise(Services.alreadyMarkedAsResolved, defaultLocale),
 						color: constants.colors.dullYellow,
 					}],
 				},
@@ -343,7 +331,7 @@ function registerReportHandler(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(Services.reports.alreadyMarkedAsUnresolved, defaultLocale),
+						description: localise(Services.alreadyMarkedAsUnresolved, defaultLocale),
 						color: constants.colors.dullYellow,
 					}],
 				},
@@ -381,6 +369,7 @@ function getReportPrompt(
 	return {
 		embeds: [{
 			title: diagnosticMentionUser(author),
+			color: constants.colors.darkRed,
 			thumbnail: (() => {
 				const iconURL = getAvatarURL(bot, author.id, author.discriminator, {
 					avatar: author.avatar,
@@ -393,11 +382,11 @@ function getReportPrompt(
 			})(),
 			fields: [
 				{
-					name: localise(Services.reports.submittedBy, defaultLocale),
+					name: localise(Services.submittedBy, defaultLocale),
 					value: mention(author.id, MentionTypes.User),
 				},
 				{
-					name: localise(Services.reports.submittedAt, defaultLocale),
+					name: localise(Services.submittedAt, defaultLocale),
 					value: timestamp(reportDocument.data.createdAt),
 				},
 				{
@@ -434,13 +423,13 @@ function getReportPrompt(
 					? {
 						type: MessageComponentTypes.Button,
 						style: ButtonStyles.Primary,
-						label: localise(Services.reports.markAsResolved, defaultLocale),
+						label: localise(Services.markAsResolved, defaultLocale),
 						customId: `${constants.staticComponentIds.reports}|${author.id}|${guild.id}|${reportReferenceId}|true`,
 					}
 					: {
 						type: MessageComponentTypes.Button,
 						style: ButtonStyles.Secondary,
-						label: localise(Services.reports.markAsUnresolved, defaultLocale),
+						label: localise(Services.markAsUnresolved, defaultLocale),
 						customId: `${constants.staticComponentIds.reports}|${author.id}|${guild.id}|${reportReferenceId}|false`,
 					},
 			],

@@ -1,7 +1,7 @@
 import { Bot, Channel, Guild, sendMessage } from 'discordeno';
 import { ClientEvents } from 'logos/src/controllers/logging/generators/client.ts';
 import generators, { Events } from 'logos/src/controllers/logging/generators/generators.ts';
-import { Client } from 'logos/src/client.ts';
+import { Client, extendEventHandler } from 'logos/src/client.ts';
 import { getTextChannel } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 
@@ -13,13 +13,10 @@ function setupLogging([client, bot]: [Client, Bot], guild: Guild): void {
 	const logChannel = getTextChannel(guild, configuration.guilds.channels.logging);
 	if (logChannel === undefined) return;
 
-	for (const eventName of clientEventNames) {
-		const handleEvent = bot.events[eventName];
-		bot.events[eventName] = (...args: Parameters<typeof handleEvent>) => {
-			// @ts-ignore: Fix type error.
-			handleEvent(...args);
-			logToChannel([client, bot], logChannel, eventName, ...args);
-		};
+	for (const event of clientEventNames) {
+		extendEventHandler(bot, event, { append: true }, (...args) => {
+			logToChannel([client, bot], logChannel, event, ...args);
+		});
 	}
 }
 

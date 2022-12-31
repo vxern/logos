@@ -1,5 +1,5 @@
-import suggest from 'logos/src/commands/server/commands/suggest.ts';
+import suggestion from 'logos/src/commands/server/commands/suggestion.ts';
 
-const commands = [suggest];
+const commands = [suggestion];
 
 export default commands;

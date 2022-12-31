@@ -40,8 +40,8 @@ import services from 'logos/src/services/services.ts';
 import { diagnosticMentionUser } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import constants from 'logos/constants.ts';
+import { timestamp } from 'logos/formatting.ts';
 import { defaultLanguage, Language, supportedLanguages } from 'logos/types.ts';
-import { timestamp } from '../formatting.ts';
 
 interface Collector<
 	E extends keyof EventHandlers,
@@ -156,6 +156,7 @@ async function prefetchDataFromDatabase(client: Client, database: Database): Pro
 	await Promise.all([
 		database.adapters.entryRequests.prefetch(client),
 		database.adapters.reports.prefetch(client),
+		database.adapters.suggestions.prefetch(client),
 	]);
 }
 
@@ -504,10 +505,8 @@ function addCollector<T extends keyof EventHandlers>(
 	if (!client.collectors.has(event)) {
 		client.collectors.set(event, new Set());
 
-		const eventHandler = <(...args: Parameters<EventHandlers[T]>) => void> bot
-			.events[event];
-		bot.events[event] = <EventHandlers[T]> ((...args: Parameters<typeof eventHandler>) => {
-			const collectors = <Set<Collector<T>>> client.collectors.get(event)!;
+		extendEventHandler(bot, event, { prepend: true }, (...args) => {
+			const collectors = client.collectors.get(event)!;
 
 			for (const collector of collectors) {
 				if (!collector.filter(...args)) {
@@ -516,8 +515,6 @@ function addCollector<T extends keyof EventHandlers>(
 
 				collector.onCollect(...args);
 			}
-
-			eventHandler(...args);
 		});
 	}
 
@@ -650,5 +647,37 @@ function resolveInteractionToMember(
 	return matchedMembers.at(0);
 }
 
-export { addCollector, initialiseClient, isValidIdentifier, resolveIdentifierToMembers, resolveInteractionToMember };
+function extendEventHandler<
+	Event extends keyof EventHandlers,
+	Handler extends EventHandlers[Event],
+>(
+	bot: Bot,
+	eventName: Event,
+	{ prepend = false, append = false }: { prepend: true; append?: false } | { prepend?: false; append: true },
+	extension: (...args: Parameters<Handler>) => unknown,
+): void {
+	const events = bot.events;
+
+	const handler = events[eventName] as (...args: Parameters<Handler>) => unknown;
+	events[eventName] = (
+		(prepend || !append)
+			? (...args: Parameters<Handler>) => {
+				extension(...args);
+				handler(...args);
+			}
+			: (...args: Parameters<Handler>) => {
+				handler(...args);
+				extension(...args);
+			}
+	) as Handler;
+}
+
+export {
+	addCollector,
+	extendEventHandler,
+	initialiseClient,
+	isValidIdentifier,
+	resolveIdentifierToMembers,
+	resolveInteractionToMember,
+};
 export type { Client, Collector, WithLanguage };

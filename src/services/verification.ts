@@ -27,7 +27,7 @@ import { EntryRequest, User } from 'logos/src/database/structs/mod.ts';
 import { Document, Reference } from 'logos/src/database/document.ts';
 import { stringifyValue } from 'logos/src/database/database.ts';
 import { ServiceStarter } from 'logos/src/services/services.ts';
-import { Client, WithLanguage } from 'logos/src/client.ts';
+import { Client, extendEventHandler, WithLanguage } from 'logos/src/client.ts';
 import {
 	createInteractionCollector,
 	createModalComposer,
@@ -113,12 +113,8 @@ function registerPastEntryRequests([client, bot]: [Client, Bot]): void {
 		}
 	}
 
-	const { guildCreate } = bot.events;
-
-	bot.events.guildCreate = async (bot, guild_) => {
-		guildCreate(bot, guild_);
-
-		const guild = client.cache.guilds.get(guild_.id)!;
+	extendEventHandler(bot, 'guildCreate', { append: true }, async (bot, { id: guildId }) => {
+		const guild = client.cache.guilds.get(guildId)!;
 
 		const entryRequests = entryRequestsByGuildId.get(guild.id) ?? [];
 		const unfinalisedEntryRequestsCount = entryRequests.filter((request) => !request.data.isFinalised).length;
@@ -205,39 +201,35 @@ function registerPastEntryRequests([client, bot]: [Client, Bot]): void {
 		for (const prompt of remainingVerificationPrompts) {
 			deleteMessage(bot, prompt.channelId, prompt.id);
 		}
-	};
+	});
 }
 
 function ensureVerificationPromptPersistence([client, bot]: [Client, Bot]): void {
-	const { messageDelete, messageUpdate } = bot.events;
-
 	// Anti-tampering feature; detects verification prompts being deleted.
-	bot.events.messageDelete = async (bot, payload) => {
-		const [messageId, channelId, guildId] = [payload.id, payload.channelId, payload.guildId!];
-
+	extendEventHandler(bot, 'messageDelete', { prepend: true }, async (bot, { id, channelId, guildId }) => {
 		// If the message was deleted from any other channel apart from a verification channel.
-		if (verificationChannelIdByGuildId.get(guildId) !== channelId) {
-			return messageDelete(bot, payload);
+		if (verificationChannelIdByGuildId.get(guildId!) !== channelId) {
+			return;
 		}
 
-		const entryRequest = entryRequestByMessageId.get(messageId);
+		const entryRequest = entryRequestByMessageId.get(id);
 		if (entryRequest === undefined || entryRequest.data.isFinalised) return;
 
-		const submitterId = submitterIdByMessageId.get(messageId);
+		const submitterId = submitterIdByMessageId.get(id);
 		if (submitterId === undefined) return;
 
 		const submitter = client.cache.users.get(submitterId);
 		if (submitter === undefined) return;
 
-		const guild = client.cache.guilds.get(guildId)!;
+		const guild = client.cache.guilds.get(id)!;
 
 		const newMessageId = await sendMessage(
 			bot,
 			channelId,
 			getVerificationPrompt(bot, guild, submitter, entryRequest.data, getNecessaryVotes(guild, entryRequest.data)),
 		).then((message) => message.id);
-		entryRequestByMessageId.delete(messageId);
-		submitterIdByMessageId.delete(messageId);
+		entryRequestByMessageId.delete(id);
+		submitterIdByMessageId.delete(id);
 		entryRequestByMessageId.set(newMessageId, entryRequest);
 		submitterIdByMessageId.set(newMessageId, submitterId);
 
@@ -246,25 +238,21 @@ function ensureVerificationPromptPersistence([client, bot]: [Client, Bot]): void
 
 		messageIdBySubmitterAndGuild.delete(compositeId);
 		messageIdBySubmitterAndGuild.set(compositeId, newMessageId);
-
-		messageDelete(bot, payload);
-	};
+	});
 
 	// Anti-tampering feature; detects embeds being deleted from verification prompts.
-	bot.events.messageUpdate = (bot, message, oldMessage) => {
+	extendEventHandler(bot, 'messageUpdate', { prepend: true }, (bot, { id, channelId, guildId, embeds }, _) => {
 		// If the message was updated in any other channel apart from a verification channel.
-		if (verificationChannelIdByGuildId.get(message.guildId!) !== message.channelId) {
-			return messageUpdate(bot, message, oldMessage);
+		if (verificationChannelIdByGuildId.get(guildId!) !== channelId) {
+			return;
 		}
 
 		// If the embed is still present, it wasn't an embed having been deleted. Do not do anything.
-		if (message.embeds.length === 1) return;
+		if (embeds.length === 1) return;
 
 		// Delete the message and allow the bot to handle the deletion.
-		deleteMessage(bot, message.channelId, message.id);
-
-		messageUpdate(bot, message, oldMessage);
-	};
+		deleteMessage(bot, channelId, id);
+	});
 }
 
 enum VerificationError {
@@ -507,6 +495,7 @@ function getVerificationPrompt(
 	return {
 		embeds: [{
 			title: diagnosticMentionUser(user),
+			color: constants.colors.purple,
 			thumbnail: (() => {
 				const iconURL = getAvatarURL(bot, user.id, user.discriminator, {
 					avatar: user.avatar,

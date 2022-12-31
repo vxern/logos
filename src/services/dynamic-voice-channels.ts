@@ -1,24 +1,17 @@
 import { Bot, Channel, ChannelTypes, Collection, createChannel, deleteChannel, Guild, VoiceState } from 'discordeno';
-import { Client } from 'logos/src/client.ts';
+import { Client, extendEventHandler } from 'logos/src/client.ts';
 import { ServiceStarter } from 'logos/src/services/services.ts';
 import configuration from 'logos/configuration.ts';
 
 const previousVoiceStateByUserId = new Map<bigint, VoiceState>();
 
 const service: ServiceStarter = ([client, bot]) => {
-	const voiceStateUpdate = bot.events.voiceStateUpdate;
-
-	bot.events.voiceStateUpdate = (bot, voiceState) => {
-		voiceStateUpdate(bot, voiceState);
-		onVoiceStateUpdate(client, bot, voiceState);
-	};
+	extendEventHandler(bot, 'voiceStateUpdate', { append: true }, (_bot, voiceState) => {
+		onVoiceStateUpdate([client, bot], voiceState);
+	});
 };
 
-function onVoiceStateUpdate(
-	client: Client,
-	bot: Bot,
-	voiceState: VoiceState,
-): void {
+function onVoiceStateUpdate([client, bot]: [Client, Bot], voiceState: VoiceState): void {
 	const guild = client.cache.guilds.get(voiceState.guildId);
 	if (guild === undefined) return;
 

@@ -7,9 +7,19 @@ import articleChanges from 'logos/src/database/adapters/article-changes.ts';
 import entryRequests from 'logos/src/database/adapters/entry-requests.ts';
 import praises from 'logos/src/database/adapters/praises.ts';
 import reports from 'logos/src/database/adapters/reports.ts';
+import suggestions from 'logos/src/database/adapters/suggestions.ts';
 import users from 'logos/src/database/adapters/users.ts';
 import warnings from 'logos/src/database/adapters/warnings.ts';
-import { Article, ArticleChange, EntryRequest, Praise, Report, User, Warning } from 'logos/src/database/structs/mod.ts';
+import {
+	Article,
+	ArticleChange,
+	EntryRequest,
+	Praise,
+	Report,
+	Suggestion,
+	User,
+	Warning,
+} from 'logos/src/database/structs/mod.ts';
 import { BaseDocumentProperties, Document, Reference } from 'logos/src/database/document.ts';
 import {
 	ArticleChangeIndexes,
@@ -18,6 +28,7 @@ import {
 	IndexesSignature,
 	PraiseIndexes,
 	ReportIndexes,
+	SuggestionIndexes,
 	UserIndexes,
 	WarningIndexes,
 } from 'logos/src/database/indexes.ts';
@@ -148,6 +159,7 @@ interface DatabaseAdapters {
 	entryRequests: DatabaseAdapter<EntryRequest, EntryRequestIndexes, 'get' | 'update', true>;
 	praises: DatabaseAdapter<Praise, PraiseIndexes, 'getOrFetch'>;
 	reports: DatabaseAdapter<Report, ReportIndexes, 'get' | 'update', true>;
+	suggestions: DatabaseAdapter<Suggestion, SuggestionIndexes, 'get' | 'update', true>;
 	users: DatabaseAdapter<User, UserIndexes, 'getOrFetch' | 'getOrFetchOrCreate' | 'update'>;
 	warnings: DatabaseAdapter<Warning, WarningIndexes, 'getOrFetch' | 'delete'>;
 }
@@ -188,7 +200,7 @@ interface Cache extends Record<string, Map<string, unknown>> {
 	/**
 	 * Cached entry requests.
 	 *
-	 * The keys are stringified user document references concatenated with guild IDs.\
+	 * The keys are stringified user document references combined with guild IDs.\
 	 * The values are entry request documents mapped by their stringified document reference.
 	 */
 	entryRequestBySubmitterAndGuild: Map<string, Document<EntryRequest>>;
@@ -212,7 +224,7 @@ interface Cache extends Record<string, Map<string, unknown>> {
 	/**
 	 * Cached user reports.
 	 *
-	 * The keys are stringified user document references.\
+	 * The keys are stringified user document references combined with guild IDs.\
 	 * The values are report documents mapped by their stringified document reference.
 	 */
 	reportsByAuthorAndGuild: Map<string, Map<string, Document<Report>>>;
@@ -220,10 +232,18 @@ interface Cache extends Record<string, Map<string, unknown>> {
 	/**
 	 * Cached user reports.
 	 *
-	 * The keys are stringified user document references.\
+	 * The keys are stringified user document references combined with guild IDs.\
 	 * The values are report documents mapped by their stringified document reference.
 	 */
 	reportsByRecipientAndGuild: Map<string, Map<string, Document<Report>>>;
+
+	/**
+	 * Cached suggestions.
+	 *
+	 * The keys are stringified user document references combined with guild IDs.\
+	 * The values are suggestion documents mapped by their stringified document reference.
+	 */
+	suggestionsByAuthorAndGuild: Map<string, Map<string, Document<Suggestion>>>;
 
 	/**
 	 * Cached users.
@@ -281,11 +301,12 @@ function createDatabase(): Database {
 			praisesByRecipient: new Map(),
 			reportsByAuthorAndGuild: new Map(),
 			reportsByRecipientAndGuild: new Map(),
+			suggestionsByAuthorAndGuild: new Map(),
 			usersByReference: new Map(),
 			usersById: new Map(),
 			warningsByRecipient: new Map(),
 		},
-		adapters: { articles, articleChanges, entryRequests, reports, praises, users, warnings },
+		adapters: { articles, articleChanges, entryRequests, reports, praises, suggestions, users, warnings },
 	};
 }
 
