@@ -156,6 +156,7 @@ async function prefetchDataFromDatabase(client: Client, database: Database): Pro
 	await Promise.all([
 		database.adapters.entryRequests.prefetch(client),
 		database.adapters.reports.prefetch(client),
+		database.adapters.suggestions.prefetch(client),
 	]);
 }
 
