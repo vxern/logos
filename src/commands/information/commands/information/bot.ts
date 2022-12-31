@@ -64,6 +64,13 @@ async function handleDisplayBotInformation(
 							constants.links.talonRepositoryLink,
 						),
 					}],
+				}, {
+					title: localise(Commands.information.options.bot.strings.contributions, interaction.locale),
+					color: constants.colors.invisible,
+					fields: constants.contributors.map((contributor) => ({
+						name: `${contributor.username} — ${contributor.contribution}`,
+						value: Object.entries(contributor.links).map(([platform, url]) => `[${platform}](${url})`).join(' · '),
+					})),
 				}],
 			},
 		},

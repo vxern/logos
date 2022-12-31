@@ -45,6 +45,16 @@ const links = {
 	generateDiscordInviteLink: (inviteCode: string) => `https://discord.gg/${inviteCode}`,
 };
 
+const contributors = [
+	{
+		username: 'Nemokosch#9980',
+		contribution: '🇭🇺',
+		links: {
+			'Github Account': 'https://github.com/2colours',
+		},
+	},
+];
+
 const images = {
 	rules: 'https://i.imgur.com/wRBpXcY.png',
 	inviteLink: 'https://i.imgur.com/snJaKYm.png',
@@ -87,5 +97,5 @@ const endpoints = {
 	},
 };
 
-export default { endpoints, links, images, colors, emojis, staticComponentIds, timeDescriptors };
+export default { contributors, endpoints, links, images, colors, emojis, staticComponentIds, timeDescriptors };
 export { Periods };
