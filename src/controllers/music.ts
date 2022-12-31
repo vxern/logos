@@ -378,7 +378,10 @@ async function loadSong(
 	}
 
 	controller.player.once('trackEnd', (_track, _reason) => {
-		if (controller.flags.isDestroyed) return;
+		if (controller.flags.isDestroyed) {
+			setDisconnectTimeout(client, guildId);
+			return;
+		}
 
 		if (controller.flags.breakLoop) {
 			controller.flags.breakLoop = false;
