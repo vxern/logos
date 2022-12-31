@@ -1,7 +1,6 @@
 import {
 	ApplicationCommandFlags,
 	Bot,
-	editOriginalInteractionResponse,
 	Embed,
 	Interaction,
 	InteractionResponseTypes,
@@ -226,7 +225,6 @@ function setDisconnectTimeout(client: Client, guildId: bigint): void {
 
 function receiveNewListing(
 	[client, bot]: [Client, Bot],
-	interaction: Interaction | undefined,
 	guildId: bigint,
 	controller: MusicController,
 	listing: SongListing,
@@ -256,17 +254,10 @@ function receiveNewListing(
 	};
 
 	if (isOccupied(controller.player)) {
-		if (interaction === undefined) {
-			return void sendMessage(bot, controller.feedbackChannelId!, { embeds: [embed] });
-		}
-
-		return void sendInteractionResponse(bot, interaction.id, interaction.token, {
-			type: InteractionResponseTypes.ChannelMessageWithSource,
-			data: { embeds: [embed] },
-		});
+		return void sendMessage(bot, controller.feedbackChannelId!, { embeds: [embed] });
 	}
 
-	return advanceQueueAndPlay([client, bot], interaction, guildId, controller, false);
+	return advanceQueueAndPlay([client, bot], guildId, controller);
 }
 
 function isCollection(object: Song | SongStream | SongCollection | undefined): object is SongCollection {
@@ -287,10 +278,8 @@ function isLastInCollection(collection: SongCollection): boolean {
 
 function advanceQueueAndPlay(
 	[client, bot]: [Client, Bot],
-	interaction: Interaction | undefined,
 	guildId: bigint,
 	controller: MusicController,
-	isDeferred: boolean,
 ): void {
 	tryClearDisconnectTimeout(guildId);
 
@@ -337,16 +326,14 @@ function advanceQueueAndPlay(
 		});
 	}
 
-	return void loadSong([client, bot], interaction, guildId, controller, getCurrentSong(controller)!, isDeferred);
+	return void loadSong([client, bot], guildId, controller, getCurrentSong(controller)!);
 }
 
 async function loadSong(
 	[client, bot]: [Client, Bot],
-	interaction: Interaction | undefined,
 	guildId: bigint,
 	controller: MusicController,
 	song: Song | SongStream,
-	isDeferred: boolean,
 ): Promise<boolean> {
 	const result = await controller.player.node.rest.loadTracks(song.url);
 
@@ -357,20 +344,7 @@ async function loadSong(
 			color: constants.colors.red,
 		};
 
-		if (interaction === undefined) {
-			sendMessage(bot, controller.feedbackChannelId!, { embeds: [embed] });
-			return false;
-		}
-
-		if (isDeferred) {
-			editOriginalInteractionResponse(bot, interaction.token, { embeds: [embed] });
-			return false;
-		}
-
-		sendInteractionResponse(bot, interaction.id, interaction.token, {
-			type: InteractionResponseTypes.ChannelMessageWithSource,
-			data: { embeds: [embed] },
-		});
+		sendMessage(bot, controller.feedbackChannelId!, { embeds: [embed] });
 		return false;
 	}
 
@@ -391,7 +365,7 @@ async function loadSong(
 			return;
 		}
 
-		advanceQueueAndPlay([client, bot], undefined, guildId, controller, false);
+		advanceQueueAndPlay([client, bot], guildId, controller);
 	});
 
 	controller.player.play(track.track);
@@ -417,25 +391,7 @@ async function loadSong(
 		color: constants.colors.invisible,
 	};
 
-	if (interaction === undefined) {
-		sendMessage(bot, controller.feedbackChannelId!, { embeds: [embed] });
-		return true;
-	}
-
-	if (isDeferred) {
-		editOriginalInteractionResponse(bot, interaction.token, { embeds: [embed] });
-		return true;
-	}
-
-	sendInteractionResponse(
-		bot,
-		interaction.id,
-		interaction.token,
-		{
-			type: InteractionResponseTypes.ChannelMessageWithSource,
-			data: { embeds: [embed] },
-		},
-	);
+	sendMessage(bot, controller.feedbackChannelId!, { embeds: [embed] });
 	return true;
 }
 
@@ -502,11 +458,7 @@ function unskip(
 	} else {
 		const listingsToMoveToQueue = Math.min(by ?? to ?? 1, controller.listingHistory.length);
 
-		console.debug(`${listingsToMoveToQueue} listings to move to queue`);
-
 		if (controller.currentListing !== undefined) {
-			console.debug('moving current listing to queue');
-
 			controller.listingQueue.unshift(controller.currentListing);
 			controller.currentListing = undefined;
 		}
@@ -519,7 +471,7 @@ function unskip(
 	if ((controller.player.track ?? undefined) !== undefined) {
 		controller.player.stop();
 	} else {
-		advanceQueueAndPlay([client, bot], undefined, guildId, controller, false);
+		advanceQueueAndPlay([client, bot], guildId, controller);
 	}
 }
 
@@ -555,7 +507,7 @@ function replay(
 
 	controller.flags.breakLoop = true;
 	controller.player.stop();
-	return advanceQueueAndPlay([client, bot], interaction, interaction.guildId!, controller, false);
+	return advanceQueueAndPlay([client, bot], interaction.guildId!, controller);
 }
 
 function reset(client: Client, guildId: bigint): void {

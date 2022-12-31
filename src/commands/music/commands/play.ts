@@ -104,7 +104,6 @@ async function handleRequestSongListing(
 
 	return void receiveNewListing(
 		[client, bot],
-		interaction,
 		interaction.guildId!,
 		controller,
 		listing,
