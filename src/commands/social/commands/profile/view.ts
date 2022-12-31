@@ -14,7 +14,7 @@ import { Client, resolveInteractionToMember } from 'logos/src/client.ts';
 import { parseArguments } from 'logos/src/interactions.ts';
 import constants from 'logos/constants.ts';
 import { mention, MentionTypes } from 'logos/formatting.ts';
-import { defaultLanguage } from 'logos/types.ts';
+import { defaultLocale } from 'logos/types.ts';
 
 const command: OptionBuilder = {
 	...createLocalisations(Commands.profile.options.view),
@@ -70,7 +70,7 @@ async function handleDisplayProfile(
 		return showProfileViewFailure();
 	}
 
-	const locale = !show ? interaction.locale : defaultLanguage;
+	const locale = show ? defaultLocale : interaction.locale;
 
 	const rolesString = localise(Commands.profile.options.view.strings.roles, locale);
 	const statisticsString = localise(Commands.profile.options.view.strings.statistics, locale);

@@ -17,6 +17,7 @@ import { chunk } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import constants from 'logos/constants.ts';
 import { mention, MentionTypes, timestamp, trim } from 'logos/formatting.ts';
+import { defaultLocale } from '../../../../types.ts';
 
 const command: OptionBuilder = {
 	...createLocalisations(Commands.music.options.now),
@@ -51,6 +52,8 @@ function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], interaction
 
 	const [{ collection, show }] = parseArguments(interaction.data?.options, { collection: 'boolean', show: 'boolean' });
 
+	const locale = show ? defaultLocale : interaction.locale;
+
 	if (collection !== undefined) {
 		if (!isCollection(currentListing?.content)) {
 			return void sendInteractionResponse(
@@ -72,7 +75,7 @@ function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], interaction
 
 		const collection = currentListing.content;
 
-		const nowPlayingString = localise(Commands.music.options.now.strings.nowPlaying, interaction.locale);
+		const nowPlayingString = localise(Commands.music.options.now.strings.nowPlaying, locale);
 
 		return void paginate([client, bot], interaction, {
 			elements: chunk(collection.songs, configuration.music.limits.songs.page),
@@ -81,7 +84,7 @@ function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], interaction
 				color: constants.colors.blue,
 			},
 			view: {
-				title: localise(Commands.music.options.now.strings.songs, interaction.locale),
+				title: localise(Commands.music.options.now.strings.songs, locale),
 				generate: (songs, pageIndex) =>
 					songs.length !== 0
 						? songs.map((song, index) => {
@@ -100,7 +103,7 @@ function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], interaction
 
 							return `${pageIndex * 10 + (index + 1)}. ${titleHighlighted}`;
 						}).join('\n')
-						: localise(Commands.music.strings.listEmpty, interaction.locale),
+						: localise(Commands.music.strings.listEmpty, locale),
 			},
 			show: show ?? false,
 		});
@@ -108,7 +111,7 @@ function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], interaction
 
 	const song = <Song | SongStream> currentListing.content;
 
-	const nowPlayingString = localise(Commands.music.options.now.strings.nowPlaying, interaction.locale);
+	const nowPlayingString = localise(Commands.music.options.now.strings.nowPlaying, locale);
 
 	return void sendInteractionResponse(
 		bot,
@@ -123,36 +126,36 @@ function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], interaction
 					fields: [
 						...isCollection(currentListing?.content)
 							? [{
-								name: localise(Commands.music.options.now.strings.collection, interaction.locale),
+								name: localise(Commands.music.options.now.strings.collection, locale),
 								value: currentListing.content.title,
 							}, {
-								name: localise(Commands.music.options.now.strings.track, interaction.locale),
+								name: localise(Commands.music.options.now.strings.track, locale),
 								value: `${currentListing.content.position + 1}/${currentListing.content.songs.length}`,
 							}]
 							: [],
 						{
-							name: localise(Commands.music.options.now.strings.title, interaction.locale),
+							name: localise(Commands.music.options.now.strings.title, locale),
 							value: `[${song.title}](${song.url})`,
 							inline: false,
 						},
 						{
-							name: localise(Commands.music.options.now.strings.requestedBy, interaction.locale),
+							name: localise(Commands.music.options.now.strings.requestedBy, locale),
 							value: mention(currentListing.requestedBy, MentionTypes.User),
 							inline: false,
 						},
 						{
-							name: localise(Commands.music.options.now.strings.runningTime, interaction.locale),
+							name: localise(Commands.music.options.now.strings.runningTime, locale),
 							value: (controller.player.playingSince ?? undefined) !== undefined
-								? localise(Commands.music.options.now.strings.playingSince, interaction.locale)(
+								? localise(Commands.music.options.now.strings.playingSince, locale)(
 									timestamp(controller.player.playingSince!),
 								)
-								: localise(Commands.music.options.now.strings.startTimeUnknown, interaction.locale),
+								: localise(Commands.music.options.now.strings.startTimeUnknown, locale),
 							inline: false,
 						},
 					],
 					footer: {
-						text: localise(Commands.music.options.now.strings.sourcedFrom, interaction.locale)(
-							currentListing.source ?? localise(Commands.music.options.now.strings.theInternet, interaction.locale),
+						text: localise(Commands.music.options.now.strings.sourcedFrom, locale)(
+							currentListing.source ?? localise(Commands.music.options.now.strings.theInternet, locale),
 						),
 					},
 				}],

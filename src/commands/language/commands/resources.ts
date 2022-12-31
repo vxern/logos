@@ -13,7 +13,7 @@ import { show } from 'logos/src/commands/parameters.ts';
 import { Client } from 'logos/src/client.ts';
 import { parseArguments } from 'logos/src/interactions.ts';
 import constants from 'logos/constants.ts';
-import { defaultLanguage } from 'logos/types.ts';
+import { defaultLocale } from 'logos/types.ts';
 
 const command: CommandBuilder = {
 	...createLocalisations(Commands.resources),
@@ -34,7 +34,7 @@ function handleDisplayResources(
 
 	const [{ show }] = parseArguments(interaction.data?.options, { show: 'boolean' });
 
-	const locale = show ? defaultLanguage : interaction.locale;
+	const locale = show ? defaultLocale : interaction.locale;
 
 	return void sendInteractionResponse(
 		bot,
