@@ -560,7 +560,8 @@ function reset(client: Client, guildId: bigint): void {
 	const controller = client.features.music.controllers.get(guildId);
 	if (controller !== undefined) {
 		controller.flags.isDestroyed = true;
-		controller.player.destroy();
+		controller.player.stop();
+		controller.player.disconnect();
 	}
 
 	return setupMusicController(client, guildId);
