@@ -1,6 +1,7 @@
 import {
 	ApplicationCommandFlags,
 	Bot,
+	deleteOriginalInteractionResponse,
 	Interaction,
 	InteractionResponseTypes,
 	InteractionTypes,
@@ -25,6 +26,12 @@ const resolver: ListingResolver = async ([client, bot], interaction, query) => {
 	if (urlExpressionExecuted === undefined) {
 		return search([client, bot], interaction, query);
 	}
+
+	sendInteractionResponse(bot, interaction.id, interaction.token, {
+		type: InteractionResponseTypes.DeferredChannelMessageWithSource,
+	});
+
+	deleteOriginalInteractionResponse(bot, interaction.token);
 
 	const url = urlExpressionExecuted.at(0)!;
 	if (url.includes('&list=')) {

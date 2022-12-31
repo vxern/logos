@@ -9,6 +9,27 @@ const service: ServiceStarter = ([client, bot]) => {
 	extendEventHandler(bot, 'voiceStateUpdate', { append: true }, (_bot, voiceState) => {
 		onVoiceStateUpdate([client, bot], voiceState);
 	});
+
+	extendEventHandler(bot, 'guildCreate', { append: true }, (_bot, { id: guildId }) => {
+		const guild = client.cache.guilds.get(guildId);
+		if (guild === undefined) return;
+
+		const voiceChannelStatesTuples = getVoiceChannelStatesTuples(guild);
+		if (voiceChannelStatesTuples.length === 0) return;
+
+		const freeChannels = voiceChannelStatesTuples.filter(([_channel, states]) => states.length === 0)
+			.map(([channel]) => channel);
+		// If there is up to one free channel already, do not process.
+		if (freeChannels.length <= 1) return;
+
+		const freeChannelIds = freeChannels.map((channel) => channel.id);
+
+		freeChannelIds.splice(0, 1);
+
+		for (const channelId of freeChannelIds) {
+			deleteChannel(bot, channelId);
+		}
+	});
 };
 
 function onVoiceStateUpdate([client, bot]: [Client, Bot], voiceState: VoiceState): void {
@@ -41,9 +62,11 @@ function onConnect(
 	voiceChannelStatesTuples: VoiceChannelStatesTuple[],
 	currentState: VoiceState,
 ): void {
-	const [_channel, states] = voiceChannelStatesTuples.find(([channel, _states]) =>
-		channel.id === currentState.channelId!
-	)!;
+	const tuple = voiceChannelStatesTuples.find(([channel, _states]) => channel.id === currentState.channelId!);
+	if (tuple === undefined) return;
+
+	const [_channel, states] = tuple;
+
 	// If somebody is already connected to the channel, do not process.
 	if (states.length !== 1) return;
 
@@ -75,9 +98,9 @@ function onDisconnect(
 	// If somebody is still connected to the channel, do not process.
 	if (states.length !== 0) return;
 
-	const freeChannels = voiceChannelStatesTuples.filter(([_channel, states]) => states.length === 0).length;
+	const freeChannelsCount = voiceChannelStatesTuples.filter(([_channel, states]) => states.length === 0).length;
 	// If there is up to one free channel already, do not process.
-	if (freeChannels <= 1) return;
+	if (freeChannelsCount <= 1) return;
 
 	return void deleteChannel(bot, previousState.channelId!);
 }
