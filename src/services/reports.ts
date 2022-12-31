@@ -318,7 +318,7 @@ function registerReportHandler(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(Services.reports.alreadyMarkedAsResolved, defaultLocale),
+						description: localise(Services.alreadyMarkedAsResolved, defaultLocale),
 						color: constants.colors.dullYellow,
 					}],
 				},
@@ -331,7 +331,7 @@ function registerReportHandler(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(Services.reports.alreadyMarkedAsUnresolved, defaultLocale),
+						description: localise(Services.alreadyMarkedAsUnresolved, defaultLocale),
 						color: constants.colors.dullYellow,
 					}],
 				},
@@ -369,6 +369,7 @@ function getReportPrompt(
 	return {
 		embeds: [{
 			title: diagnosticMentionUser(author),
+			color: constants.colors.darkRed,
 			thumbnail: (() => {
 				const iconURL = getAvatarURL(bot, author.id, author.discriminator, {
 					avatar: author.avatar,
@@ -381,11 +382,11 @@ function getReportPrompt(
 			})(),
 			fields: [
 				{
-					name: localise(Services.reports.submittedBy, defaultLocale),
+					name: localise(Services.submittedBy, defaultLocale),
 					value: mention(author.id, MentionTypes.User),
 				},
 				{
-					name: localise(Services.reports.submittedAt, defaultLocale),
+					name: localise(Services.submittedAt, defaultLocale),
 					value: timestamp(reportDocument.data.createdAt),
 				},
 				{
@@ -422,13 +423,13 @@ function getReportPrompt(
 					? {
 						type: MessageComponentTypes.Button,
 						style: ButtonStyles.Primary,
-						label: localise(Services.reports.markAsResolved, defaultLocale),
+						label: localise(Services.markAsResolved, defaultLocale),
 						customId: `${constants.staticComponentIds.reports}|${author.id}|${guild.id}|${reportReferenceId}|true`,
 					}
 					: {
 						type: MessageComponentTypes.Button,
 						style: ButtonStyles.Secondary,
-						label: localise(Services.reports.markAsUnresolved, defaultLocale),
+						label: localise(Services.markAsUnresolved, defaultLocale),
 						customId: `${constants.staticComponentIds.reports}|${author.id}|${guild.id}|${reportReferenceId}|false`,
 					},
 			],

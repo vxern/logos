@@ -101,6 +101,21 @@ class Modals {
 		},
 	};
 
+	static readonly suggestion = {
+		title: {
+			'English': 'Suggestion',
+			'Polish': 'Sugestia',
+			'Romanian': 'Sugestie',
+		},
+		fields: {
+			suggestion: {
+				'English': 'What is your suggestion?',
+				'Polish': 'Jaka jest twoja sugestia?',
+				'Romanian': 'Care este sugestia ta?',
+			},
+		},
+	};
+
 	static readonly prompts = {
 		// The equivalent of 'next', 'continue' or 'onwards' in your language, as seen in message prompts.
 		continue: {

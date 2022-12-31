@@ -430,15 +430,37 @@ class Services {
 		},
 	};
 
+	// Do not localise; this is a public feedback message.
+	static readonly submittedBy = {
+		'English': 'Submitted by',
+	};
+
+	// Do not localise; this is a public feedback message.
+	static readonly submittedAt = {
+		'English': 'Submitted at',
+	};
+
+	// Do not localise; this is a public feedback message.
+	static readonly markAsResolved = {
+		'English': 'Mark issue as resolved',
+	};
+
+	// Do not localise; this is a public feedback message.
+	static readonly markAsUnresolved = {
+		'English': 'Mark issue as unresolved',
+	};
+
+	// Do not localise; this is a public feedback message.
+	static readonly alreadyMarkedAsResolved = {
+		'English': 'This issue has already been marked as resolved.',
+	};
+
+	// Do not localise; this is a public feedback message.
+	static readonly alreadyMarkedAsUnresolved = {
+		'English': 'This issue has already been marked as unresolved.',
+	};
+
 	static readonly reports = {
-		// Do not localise; this is a public feedback message.
-		submittedBy: {
-			'English': 'Submitted by',
-		},
-		// Do not localise; this is a public feedback message.
-		submittedAt: {
-			'English': 'Submitted at',
-		},
 		// Do not localise; this is a public feedback message.
 		reportedUsers: {
 			'English': 'Reported users',
@@ -456,24 +478,15 @@ class Services {
 			'English': 'No link to message provided.',
 		},
 		// Do not localise; this is a public feedback message.
-		markAsResolved: {
-			'English': 'Mark as resolved',
-		},
-		// Do not localise; this is a public feedback message.
-		markAsUnresolved: {
-			'English': 'Mark as unresolved',
-		},
-		// Do not localise; this is a public feedback message.
-		alreadyMarkedAsResolved: {
-			'English': 'This report has already been marked as resolved.',
-		},
-		// Do not localise; this is a public feedback message.
-		alreadyMarkedAsUnresolved: {
-			'English': 'This report has already been marked as unresolved.',
-		},
-		// Do not localise; this is a public feedback message.
 		previousInfractionsOfReportedUsers: {
 			'English': 'Previous infractions of reported users',
+		},
+	};
+
+	static readonly suggestions = {
+		// Do not localise; this is a public feedback message.
+		suggestion: {
+			'English': 'Suggestion',
 		},
 	};
 }
