@@ -130,6 +130,11 @@ class Commands {
 								`Îl puteți vedea [chiar aici](${talonRepositoryLink}).`,
 						},
 					},
+					contributions: {
+						'English': 'Contributions',
+						'Polish': 'Wkład',
+						'Romanian': 'Contribuții',
+					},
 				},
 			},
 			guild: {
