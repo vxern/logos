@@ -1,5 +1,5 @@
 import { Member, User } from 'discordeno';
-import { Article, ArticleChange, Praise, Report, Warning } from 'logos/src/database/structs/mod.ts';
+import { Article, ArticleChange, Praise, Report, Suggestion, Warning } from 'logos/src/database/structs/mod.ts';
 import { MessageGenerators } from 'logos/src/controllers/logging/generators/generators.ts';
 import { diagnosticMentionUser } from 'logos/src/utils.ts';
 import constants from 'logos/constants.ts';
@@ -65,7 +65,7 @@ type GuildEvents = {
 	praiseAdd: [member: Member, praise: Praise, by: User];
 
 	/** A suggestion has been made. */
-	suggestionSend: [member: Member, suggestion: string];
+	suggestionSend: [member: Member, suggestion: Suggestion];
 
 	/** A report has been submitted. */
 	reportSubmit: [author: Member, recipients: User[], report: Report];
@@ -334,7 +334,7 @@ ${trim(change.content.body, 300)}`;
 			if (memberUser === undefined) return;
 
 			return `${diagnosticMentionUser(memberUser)} has made a suggestion.\n\n` +
-				`Suggestion: *${suggestion}*`;
+				`Suggestion: *${suggestion.suggestion}*`;
 		},
 		filter: (_client, originGuildId, member, _suggestion) => originGuildId === member.guildId,
 		color: constants.colors.darkGreen,
