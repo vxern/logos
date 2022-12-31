@@ -19,10 +19,11 @@ const configuration = {
 		namePattern: new RegExp('^Learn ([A-Z][a-z]*)$'),
 		channels: {
 			logging: 'journal',
+			verification: 'verifications',
+			reports: 'reports',
+			suggestions: 'suggestions',
 
 			moderation: 'moderation',
-			reports: 'reports',
-			verification: 'verifications',
 
 			information: 'rules',
 			welcome: 'welcome',
@@ -36,6 +37,10 @@ const configuration = {
 			limitUses: 2,
 			within: 30 * Periods.minute,
 			limitUsers: 5,
+		},
+		suggestion: {
+			limitUses: 3,
+			within: 2 * Periods.hour,
 		},
 		warn: {
 			limitUses: 3,
