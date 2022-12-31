@@ -53,8 +53,11 @@ function createMusicController(
 	client: Client,
 	guildId: bigint,
 ): MusicController {
+	const player = client.features.music.node.createPlayer(guildId);
+	player.setVolume(configuration.music.defaultVolume);
+
 	return {
-		player: client.features.music.node.createPlayer(guildId),
+		player,
 		voiceChannelId: undefined,
 		feedbackChannelId: undefined,
 		listingHistory: [],

@@ -57,6 +57,7 @@ const configuration = {
 	},
 	// Configuration settings pertaining to music.
 	music: {
+		defaultVolume: 50,
 		disconnectTimeout: 10 * Periods.minute,
 		limits: {
 			// The maximum volume
