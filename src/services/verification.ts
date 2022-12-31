@@ -495,6 +495,7 @@ function getVerificationPrompt(
 	return {
 		embeds: [{
 			title: diagnosticMentionUser(user),
+			color: constants.colors.purple,
 			thumbnail: (() => {
 				const iconURL = getAvatarURL(bot, user.id, user.discriminator, {
 					avatar: user.avatar,
