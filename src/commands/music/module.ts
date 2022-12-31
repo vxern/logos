@@ -9,20 +9,22 @@ import constants from 'logos/constants.ts';
 import { list } from 'logos/formatting.ts';
 
 function displayListings(
-	clientWithBot: [Client, Bot],
+	[client, bot]: [Client, Bot],
 	interaction: Interaction,
-	{ title, songListings, show }: { title: string; songListings: SongListing[]; show: boolean },
+	{ title, songListings }: { title: string; songListings: SongListing[] },
+	show: boolean,
+	locale: string | undefined,
 ): void {
 	const pages = chunk(songListings, configuration.music.limits.songs.page);
 
-	return paginate(clientWithBot, interaction, {
+	return paginate([client, bot], interaction, {
 		elements: pages,
 		embed: { title: title, color: constants.colors.blue },
 		view: {
-			title: localise(Commands.music.strings.listings, interaction.locale),
+			title: localise(Commands.music.strings.listings, locale),
 			generate: (page, pageIndex) => {
 				if (page.length === 0) {
-					return localise(Commands.music.strings.listEmpty, interaction.locale);
+					return localise(Commands.music.strings.listEmpty, locale);
 				}
 
 				return list(
@@ -35,7 +37,7 @@ function displayListings(
 				);
 			},
 		},
-		show: show,
+		show,
 	});
 }
 

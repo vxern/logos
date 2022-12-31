@@ -5,6 +5,7 @@ import { OptionBuilder } from 'logos/src/commands/command.ts';
 import { show } from 'logos/src/commands/parameters.ts';
 import { Client } from 'logos/src/client.ts';
 import { parseArguments } from 'logos/src/interactions.ts';
+import { defaultLocale } from 'logos/types.ts';
 
 const command: OptionBuilder = {
 	...createLocalisations(Commands.music.options.queue),
@@ -19,13 +20,20 @@ function handleDisplayPlaybackQueue([client, bot]: [Client, Bot], interaction: I
 
 	const [{ show }] = parseArguments(interaction.data?.options, { show: 'boolean' });
 
-	const queueString = localise(Commands.music.options.queue.strings.queue, interaction.locale);
+	const locale = show ? defaultLocale : interaction.locale;
 
-	return displayListings([client, bot], interaction, {
-		title: `📋 ${queueString}`,
-		songListings: controller.listingQueue,
-		show: show ?? false,
-	});
+	const queueString = localise(Commands.music.options.queue.strings.queue, locale);
+
+	return displayListings(
+		[client, bot],
+		interaction,
+		{
+			title: `📋 ${queueString}`,
+			songListings: controller.listingQueue,
+		},
+		show ?? false,
+		locale,
+	);
 }
 
 export default command;
