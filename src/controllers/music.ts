@@ -43,6 +43,7 @@ interface MusicController {
 	readonly listingQueue: SongListing[];
 
 	flags: {
+		isDestroyed: boolean;
 		loop: boolean;
 		breakLoop: boolean;
 	};
@@ -60,6 +61,7 @@ function createMusicController(
 		currentListing: undefined,
 		listingQueue: [],
 		flags: {
+			isDestroyed: false,
 			loop: false,
 			breakLoop: false,
 		},
@@ -376,6 +378,8 @@ async function loadSong(
 	}
 
 	controller.player.once('trackEnd', (_track, _reason) => {
+		if (controller.flags.isDestroyed) return;
+
 		if (controller.flags.breakLoop) {
 			controller.flags.breakLoop = false;
 			return;
@@ -489,7 +493,11 @@ function unskip(
 	} else {
 		const listingsToMoveToQueue = Math.min(by ?? to ?? 1, controller.listingHistory.length);
 
+		console.debug(`${listingsToMoveToQueue} listings to move to queue`);
+
 		if (controller.currentListing !== undefined) {
+			console.debug('moving current listing to queue');
+
 			controller.listingQueue.unshift(controller.currentListing);
 			controller.currentListing = undefined;
 		}
@@ -544,6 +552,7 @@ function replay(
 function reset(client: Client, guildId: bigint): void {
 	const controller = client.features.music.controllers.get(guildId);
 	if (controller !== undefined) {
+		controller.flags.isDestroyed = true;
 		controller.player.destroy();
 	}
 
