@@ -478,6 +478,7 @@ function unskip(
 ): void {
 	if (isCollection(controller.currentListing?.content)) {
 		if (unskipCollection || isFirstInCollection(controller.currentListing!.content)) {
+			controller.listingQueue.unshift(controller.currentListing!);
 			controller.listingQueue.unshift(controller.listingHistory.pop()!);
 			controller.currentListing = undefined;
 		} else {
