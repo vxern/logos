@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     fauna = {
-      source  = "linguition/fauna"
+      source  = "wordcollector/fauna"
       version = "0.1.1"
     }
   }

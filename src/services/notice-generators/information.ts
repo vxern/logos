@@ -26,13 +26,13 @@ function getRulesSection(guild: Guild): Embed {
 	const rules = Object.values(Services.notices.notices.information.rules.rules);
 
 	const fields = [];
-	for (const rule of rules) {
+	for (const [rule, index] of rules.map<[typeof rules[number], number]>((rule, index) => [rule, index])) {
 		const titleString = localise(rule.title, defaultLocale).toUpperCase();
 		const tldrString = localise(Services.notices.notices.information.rules.tldr, defaultLocale);
 		const summaryString = localise(rule.summary, defaultLocale);
 
 		fields.push({
-			name: `💠  **${titleString}**  ~  ${tldrString}: *${summaryString}*`,
+			name: `💠  #${index + 1} ~ **${titleString}**  ~  ${tldrString}: *${summaryString}*`,
 			value: localise(rule.content, defaultLocale),
 			inline: false,
 		});

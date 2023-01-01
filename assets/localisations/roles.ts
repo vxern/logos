@@ -314,7 +314,7 @@ class Roles {
 			'English': 'Roles identifying one\'s ethnicity.',
 			'Hungarian': 'Valakinek az etnikumát leíró rangok.',
 			'Polish': 'Rangi reprezentujące pochodzenie etniczne.',
-			'Romanian': 'Roluri care reprezintă etnie.',
+			'Romanian': 'Roluri care reprezintă etnia.',
 		},
 		languages: {
 			'Armenian': [
@@ -421,6 +421,48 @@ class Roles {
 						'Hungarian': 'Meglenoromán származású vagyok.',
 						'Polish': 'Z pochodzenia jestem meglenorumunem.',
 						'Romanian': 'Sunt de origine meglenoromână.',
+					},
+				},
+				{
+					name: {
+						'English': 'Romani',
+						// TODO: Add Hungarian translation.
+						'Polish': 'Romskie',
+						'Romanian': 'Romă',
+					},
+					description: {
+						'English': 'I am of Romani heritage.',
+						// TODO: Add Hungarian translation.
+						'Polish': 'Z pochodzenia jestem Romem.',
+						'Romanian': 'Sunt de origine romă.',
+					},
+				},
+				{
+					name: {
+						'English': 'Hungarian (Szekler, Csango)',
+						// TODO: Add Hungarian translation.
+						'Polish': 'Węgierskie (sekelowskie, czangowskie)',
+						'Romanian': 'Maghiară (secuiască, ceangăiască)',
+					},
+					description: {
+						'English': 'I am of Hungarian heritage.',
+						// TODO: Add Hungarian translation.
+						'Polish': 'Z pochodzenia jestem Węgrem.',
+						'Romanian': 'Sunt de origine maghiară.',
+					},
+				},
+				{
+					name: {
+						'English': 'German (Saxon, Swabian)',
+						// TODO: Add Hungarian translation.
+						'Polish': 'Niemieckie (saksońskie, szwabskie)',
+						'Romanian': 'Germană (sasă, șvabă)',
+					},
+					description: {
+						'English': 'I am of German heritage.',
+						// TODO: Add Hungarian translation.
+						'Polish': 'Z pochodzenia jestem Niemcem.',
+						'Romanian': 'Sunt de origine germană.',
 					},
 				},
 			],
