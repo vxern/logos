@@ -1,6 +1,6 @@
 import { Locales, Localization as DiscordLocalisation } from 'discordeno';
 import { localisationsByLanguage } from 'logos/assets/localisations/languages.ts';
-import { defaultLanguage, getLanguageByLocale, getLocaleByLanguage, Language, languageByLocale } from 'logos/types.ts';
+import { defaultLanguage, getLanguageByLocale, getLocaleForLanguage, Language, languageByLocale } from 'logos/types.ts';
 
 type LocalisationsByLanguage<L extends string> =
 	& Required<Record<Language, Localisations<string>>>
@@ -65,7 +65,7 @@ function createDiscordLocalisations(localisations: Localisations<string>): Disco
 	return Object.fromEntries(
 		(<[Language, string][]> Object.entries(localisations))
 			.filter(([key, _value]) => key !== defaultLanguage)
-			.map(([key, value]) => [getLocaleByLanguage(key), value]),
+			.map(([key, value]) => [getLocaleForLanguage(key), value]),
 	);
 }
 
@@ -88,7 +88,7 @@ export {
 	createLocalisations,
 	ensureType,
 	getLanguageByLocale,
-	getLocaleByLanguage,
+	getLocaleForLanguage,
 	getLocalisationsForLanguage,
 	inferLanguages,
 	localise,
