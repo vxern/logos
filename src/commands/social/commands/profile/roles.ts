@@ -402,3 +402,4 @@ function createSelectOptionsFromCollection(
 }
 
 export default command;
+export { handleOpenRoleSelectionMenu };

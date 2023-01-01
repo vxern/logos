@@ -21,6 +21,21 @@ class Services {
 						`To enter the server and become its official member, read the information in the ${rulesChannelMention} channel to get yourself familiarised with the server guidelines, and then press the button below.`,
 				},
 			},
+			roles: {
+				roles: {
+					header: {
+						'English': 'How to pick roles',
+					},
+					body: {
+						'English': `You can select roles using the ${code('/profile roles')} command. ` +
+							'This command can be run anywhere on the server, and will open a browseable selection menu where you can pick the roles you want.\n\n' +
+							'Alternatively, you can press the button below to open the menu right within this channel.',
+					},
+				},
+				clickHereToSelectRoles: {
+					'English': 'Click here to select roles',
+				},
+			},
 			information: {
 				rules: {
 					tldr: {

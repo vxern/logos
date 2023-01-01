@@ -4,6 +4,7 @@ import {
 	generateInformationNotice,
 	lastUpdatedAt as informationLastUpdatedAt,
 } from 'logos/src/services/notice-generators/information.ts';
+import { generateRoleNotice, lastUpdatedAt as rolesLastUpdatedAt } from 'logos/src/services/notice-generators/roles.ts';
 import {
 	generateWelcomeNotice,
 	lastUpdatedAt as welcomeLastUpdatedAt,
@@ -18,12 +19,14 @@ type NoticeGenerator = (bot: Bot, guild: Guild) => CreateMessage | Promise<Creat
 
 const noticeGenerators = {
 	'information': generateInformationNotice,
+	'roles': generateRoleNotice,
 	'welcome': generateWelcomeNotice,
 } satisfies Partial<Record<keyof typeof configuration.guilds.channels, NoticeGenerator>>;
 type NoticeTypes = keyof typeof noticeGenerators;
 
 const lastUpdates: Record<NoticeTypes, Date> = {
 	'information': informationLastUpdatedAt,
+	'roles': rolesLastUpdatedAt,
 	'welcome': welcomeLastUpdatedAt,
 };
 
@@ -35,6 +38,7 @@ const service: ServiceStarter = ([client, bot]: [Client, Bot]) => {
 const noticeIds: bigint[] = [];
 const noticeChannelIdsByGuildId: Record<NoticeTypes, Map<bigint, bigint>> = {
 	'information': new Map(),
+	'roles': new Map(),
 	'welcome': new Map(),
 };
 const noticeByChannelId = new Map<bigint, Message>();

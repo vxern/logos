@@ -28,6 +28,7 @@ const staticComponentIds = {
 	verification: 'verification',
 	reports: 'reports',
 	suggestions: 'suggestions',
+	selectRoles: 'select_roles',
 };
 
 const links = {
