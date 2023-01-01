@@ -38,7 +38,7 @@ function handleStopPlayback([client, bot]: [Client, Bot], interaction: Interacti
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(Commands.music.options.stop.strings.notPlayingMusic, interaction.locale),
+						description: localise(Commands.music.strings.notPlayingMusic, interaction.locale),
 						color: constants.colors.dullYellow,
 					}],
 				},

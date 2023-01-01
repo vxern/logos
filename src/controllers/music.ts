@@ -487,6 +487,10 @@ function resume(player: Player): void {
 	return void player.pause(false);
 }
 
+function skipTo(player: Player, timestampMilliseconds: number): void {
+	return void player.seek(timestampMilliseconds);
+}
+
 function replay(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
@@ -542,6 +546,7 @@ export {
 	setupMusicController,
 	setVolume,
 	skip,
+	skipTo,
 	unskip,
 	verifyCanRequestPlayback,
 	verifyVoiceState,

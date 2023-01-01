@@ -7,6 +7,7 @@ import queue from 'logos/src/commands/music/commands/queue.ts';
 import remove from 'logos/src/commands/music/commands/remove.ts';
 import replay from 'logos/src/commands/music/commands/replay.ts';
 import resume from 'logos/src/commands/music/commands/resume.ts';
+import skipTo from 'logos/src/commands/music/commands/skip-to.ts';
 import skip from 'logos/src/commands/music/commands/skip.ts';
 import stop from 'logos/src/commands/music/commands/stop.ts';
 import unskip from 'logos/src/commands/music/commands/unskip.ts';
@@ -24,9 +25,10 @@ const music: CommandBuilder = {
 		queue,
 		remove,
 		replay,
+		resume,
+    skipTo,
 		skip,
 		stop,
-		resume,
 		unskip,
 		volume,
 	],

@@ -105,28 +105,16 @@ class Parameters {
 				'Romanian': 'Titlul melodiei, link-ul către aceasta sau către unui set de melodii.',
 			},
 		},
-		byTimestamp: {
+		timestamp: {
 			name: {
-				'English': 'by',
-				'Polish': 'o',
-				'Romanian': 'peste',
+				'English': 'timestamp',
+				'Polish': 'znacznik-czasu',
+				'Romanian': 'marcaj-de-timp',
 			},
 			description: {
-				'English': 'The time period representation in the format `hh:mm:ss`.',
-				'Polish': 'Reprezentacja okresu czasowego w formacie `gg:mm:ss`.',
-				'Romanian': 'Reprezentarea unei perioade de timp în formatul `oo:mm:ss`.',
-			},
-		},
-		toTimestamp: {
-			name: {
-				'English': 'to',
-				'Polish': 'do',
-				'Romanian': 'către',
-			},
-			description: {
-				'English': 'The time period representation in the format `hh:mm:ss`.',
-				'Polish': 'Reprezentacja okresu czasowego w formacie `gg:mm:ss`.',
-				'Romanian': 'Reprezentarea unei perioade de timp în formatul `oo:mm:ss`.',
+				'English': 'The timestamp to seek.',
+				'Polish': 'Znacznik czasu w piosence, określający dokąd przewinąć.',
+				'Romanian': 'Marcajul de timp din cântec la care să se treacă.',
 			},
 		},
 		collection: {
