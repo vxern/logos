@@ -103,7 +103,7 @@ async function registerPastNotice([client, bot]: [Client, Bot], guild: Guild, ty
 	const latestNotice = notices.splice(0, 1).at(0)!;
 	const timestamp = extractTimestamp(latestNotice)!;
 
-	if (timestamp < lastUpdates[type].getTime() / 1000) {
+	if (timestamp !== lastUpdates[type].getTime() / 1000) {
 		client.log.info(`Found outdated notice in ${type} channel on ${guild.name}. Recreating...`);
 
 		deleteMessage(bot, latestNotice.channelId, latestNotice.id);
