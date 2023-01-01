@@ -1179,18 +1179,6 @@ class Commands {
 			'Romanian': 'Permite utilizatorului gestionarea redării muzicii într-un canal de voce.',
 		},
 		options: {
-			forward: {
-				name: {
-					'English': 'forward',
-					'Polish': 'przewiń-do-przodu',
-					'Romanian': 'derulare-înainte',
-				},
-				description: {
-					'English': 'Fast-forwards the currently playing song.',
-					'Polish': 'Przewija obecnie grający utwór do przodu.',
-					'Romanian': 'Derulează melodia în curs de redare înainte.',
-				},
-			},
 			history: {
 				name: {
 					'English': 'history',
@@ -1515,16 +1503,22 @@ class Commands {
 					},
 				},
 			},
-			rewind: {
+			skipTo: {
 				name: {
-					'English': 'rewind',
-					'Polish': 'przewiń-do-tyłu',
-					'Romanian': 'derulare-înapoi',
+					'English': 'seek',
+					'Polish': 'przewiń-do-punktu',
+					'Romanian': 'sărire-la-punct',
 				},
 				description: {
-					'English': 'Rewinds the currently playing song.',
-					'Polish': 'Przewija obecnie grający utwór do tyłu.',
-					'Romanian': 'Derulează melodia în curs de redare înapoi.',
+					'English': 'Skips to a given point in the currently playing song.',
+					'Polish': 'Przewija do danego punktu w obecnie grającym utworze.',
+					'Romanian': 'Avansează până la un anumit punct într-o melodie.',
+				},
+				strings: {
+					skippedTo: {
+						header: { 'English': 'Skipped to timestamp' },
+						body: { 'English': 'Playback has skipped to the specified timestamp.' },
+					},
 				},
 			},
 			skip: {
@@ -1574,11 +1568,6 @@ class Commands {
 					'Romanian': 'Oprește sesiunea actuală de ascultare.',
 				},
 				strings: {
-					notPlayingMusic: {
-						'English': 'The bot is currently not playing music.',
-						'Polish': 'Bot obecnie nie odtwarza muzyki.',
-						'Romanian': 'Nu se redă muzică.',
-					},
 					stopped: {
 						header: { 'English': 'Stopped' },
 						body: {
@@ -1675,27 +1664,27 @@ class Commands {
 							'Romanian': 'Setează volumul redării.',
 						},
 						options: {
-							volume: (maxVolume: number) => ({
+							volume: (negative: number) => ({
 								name: {
 									'English': 'volume',
 									'Polish': 'głośność',
 									'Romanian': 'volum',
 								},
 								description: {
-									'English': `A number between 0 and ${maxVolume}.`,
-									'Polish': `Liczba między 0 i ${maxVolume}.`,
-									'Romanian': `Un număr între 0 și ${maxVolume}.`,
+									'English': `A number between 0 and ${negative}.`,
+									'Polish': `Liczba między 0 i ${negative}.`,
+									'Romanian': `Un număr între 0 și ${negative}.`,
 								},
 							}),
 						},
 						strings: {
 							invalidVolume: {
-								'English': (maxVolume: number) =>
-									`Song volume may not be negative, and it may not be higher than ${maxVolume}%.`,
-								'Polish': (maxVolume: number) =>
-									`Głośność musi być większa niż zero, oraz nie większa niż ${maxVolume}%.`,
-								'Romanian': (maxVolume: number) =>
-									`Volumul trebuie să fie mai mare decât zero, dar și nu mai mare decât ${maxVolume}%.`,
+								'English': (negative: number) =>
+									`Song volume may not be negative, and it may not be higher than ${negative}%.`,
+								'Polish': (negative: number) =>
+									`Głośność musi być większa niż zero, oraz nie większa niż ${negative}%.`,
+								'Romanian': (negative: number) =>
+									`Volumul trebuie să fie mai mare decât zero, dar și nu mai mare decât ${negative}%.`,
 							},
 							volumeSet: {
 								header: { 'English': 'Volume set' },
@@ -1709,6 +1698,11 @@ class Commands {
 			},
 		},
 		strings: {
+			notPlayingMusic: {
+				'English': 'The bot is currently not playing music.',
+				'Polish': 'Bot obecnie nie odtwarza muzyki.',
+				'Romanian': 'Nu se redă muzică.',
+			},
 			listings: {
 				'English': 'Listings',
 				'Polish': 'Wpisy',

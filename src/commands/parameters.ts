@@ -51,16 +51,11 @@ const query: OptionBuilder = {
 	required: true,
 };
 
-const byTimestamp: OptionBuilder = {
-	...createLocalisations(Parameters.music.byTimestamp),
-	type: ApplicationCommandOptionTypes.Integer,
-	required: false,
-};
-
-const toTimestamp: OptionBuilder = {
-	...createLocalisations(Parameters.music.toTimestamp),
-	type: ApplicationCommandOptionTypes.Integer,
-	required: false,
+const timestamp: OptionBuilder = {
+	...createLocalisations(Parameters.music.timestamp),
+	type: ApplicationCommandOptionTypes.String,
+	required: true,
+	autocomplete: true,
 };
 
 const collection: OptionBuilder = {
@@ -84,19 +79,4 @@ const role: OptionBuilder = {
 	required: true,
 };
 
-export {
-	by,
-	byTimestamp,
-	collection,
-	duration,
-	elementIndex,
-	elements,
-	query,
-	reason,
-	role,
-	show,
-	songIndex,
-	to,
-	toTimestamp,
-	user,
-};
+export { by, collection, duration, elementIndex, elements, query, reason, role, show, songIndex, timestamp, to, user };
