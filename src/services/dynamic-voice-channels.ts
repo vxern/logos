@@ -17,6 +17,12 @@ const service: ServiceStarter = ([client, bot]) => {
 		const voiceChannelStatesTuples = getVoiceChannelStatesTuples(guild);
 		if (voiceChannelStatesTuples.length === 0) return;
 
+		for (const [_channel, voiceStates] of voiceChannelStatesTuples) {
+			for (const voiceState of voiceStates) {
+				onVoiceStateUpdate([client, bot], voiceState);
+			}
+		}
+
 		const freeChannels = voiceChannelStatesTuples.filter(([_channel, states]) => states.length === 0)
 			.map(([channel]) => channel);
 		// If there is up to one free channel already, do not process.
