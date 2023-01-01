@@ -23,7 +23,7 @@ import { createInteractionCollector, parseArguments } from 'logos/src/interactio
 import { chunk, diagnosticMentionUser } from 'logos/src/utils.ts';
 import constants from 'logos/constants.ts';
 import { BulletStyles, code, list } from 'logos/formatting.ts';
-import { defaultLanguage, defaultLocale, WordTypes } from 'logos/types.ts';
+import { defaultLocale, WordTypes } from 'logos/types.ts';
 
 const command: CommandBuilder = {
 	...createLocalisations(Commands.word),

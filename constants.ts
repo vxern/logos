@@ -21,6 +21,8 @@ const timeDescriptors: [string, number][] = [
 	['year', Periods.year],
 ];
 
+const interactionTokenExpiryInterval = 14 * Periods.minute + 50 * Periods.second; // Just below 15 minutes.
+
 const staticComponentIds = {
 	acceptedRules: 'accepted_rules',
 	selectedLanguageProficiency: 'selected_language_proficiency',
@@ -98,5 +100,15 @@ const endpoints = {
 	},
 };
 
-export default { contributors, endpoints, links, images, colors, emojis, staticComponentIds, timeDescriptors };
+export default {
+	contributors,
+	endpoints,
+	links,
+	images,
+	colors,
+	emojis,
+	staticComponentIds,
+	timeDescriptors,
+	interactionTokenExpiryInterval,
+};
 export { Periods };

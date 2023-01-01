@@ -4,9 +4,6 @@ const configuration = {
 	permissions: {
 		moderatorRoleName: 'Guide',
 	},
-	collectors: {
-		expiresIn: 6 * Periods.hour,
-	},
 	database: {
 		cache: {
 			limits: {

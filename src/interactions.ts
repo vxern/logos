@@ -19,8 +19,7 @@ import { lodash } from 'lodash';
 import * as Snowflake from 'snowflake';
 import { localise, Misc } from 'logos/assets/localisations/mod.ts';
 import { addCollector, Client } from 'logos/src/client.ts';
-import configuration from 'logos/configuration.ts';
-import constants from '../constants.ts';
+import constants from 'logos/constants.ts';
 
 /** Settings for interaction collection. */
 interface InteractionCollectorSettings {
@@ -59,7 +58,7 @@ function createInteractionCollector(
 	addCollector([client, bot], 'interactionCreate', {
 		filter: (_bot, interaction) => compileChecks(interaction, settings, customId).every((condition) => condition),
 		limit: settings.limit,
-		removeAfter: settings.doesNotExpire ? undefined : configuration.collectors.expiresIn,
+		removeAfter: settings.doesNotExpire ? undefined : constants.interactionTokenExpiryInterval,
 		onCollect: settings.onCollect ?? (() => {}),
 		onEnd: settings.onEnd ?? (() => {}),
 	});
