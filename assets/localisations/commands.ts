@@ -1354,6 +1354,18 @@ class Commands {
 					}),
 				},
 				strings: {
+					selectSong: {
+						header: {
+							'English': 'Select song or song collection',
+							'Polish': 'Wybierz utwór lub zbiór utworów',
+							'Romanian': 'Selectează o melodie sau un set de melodii',
+						},
+						body: {
+							'English': 'Select a song or song collection from the choices below.',
+							'Polish': 'Wybierz utwór lub zbiór utworów z listy poniżej.',
+							'Romanian': 'Selectează o melodie sau un set de melodii din lista de mai jos.',
+						},
+					},
 					externalFile: {
 						'English': 'External file',
 						'Polish': 'Zewnętrzny plik',

@@ -16,6 +16,8 @@ import { Client } from 'logos/src/client.ts';
 import { createInteractionCollector } from 'logos/src/interactions.ts';
 import constants from 'logos/constants.ts';
 import { trim } from 'logos/formatting.ts';
+import { Commands } from '../../../../../assets/localisations/mod.ts';
+import { localise } from '../../../../../assets/localisations/mod.ts';
 
 const urlExpression = new RegExp(
 	/^(?:https?:)?(?:\/\/)?(?:youtu\.be\/|(?:www\.|m\.)?youtube\.com\/(?:watch|v|embed)(?:\.php)?(?:\?.*v=|\/))([a-zA-Z0-9\_-]{7,15})(?:[\?&][a-zA-Z0-9\_-]+=[a-zA-Z0-9\_-]+)*$/,
@@ -90,8 +92,8 @@ async function search(
 			data: {
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
-					title: 'Select a song / song collection',
-					description: 'Select a song or song collection from the choices below.',
+					title: localise(Commands.music.options.play.strings.selectSong.header, interaction.locale),
+					description: localise(Commands.music.options.play.strings.selectSong.body, interaction.locale),
 					color: constants.colors.blue,
 				}],
 				components: [{
