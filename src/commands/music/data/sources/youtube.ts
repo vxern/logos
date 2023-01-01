@@ -1,61 +1,66 @@
-import { Playlist, Video, YouTube } from 'youtube_sr';
 import {
 	ApplicationCommandFlags,
+	Bot,
+	deleteOriginalInteractionResponse,
 	Interaction,
 	InteractionResponseTypes,
 	InteractionTypes,
 	MessageComponentTypes,
 	SelectOption,
 	sendInteractionResponse,
-} from '../../../../../deps.ts';
-import { Client } from '../../../../client.ts';
-import configuration from '../../../../configuration.ts';
-import { createInteractionCollector, trim } from '../../../../utils.ts';
-import { SongListing, SongListingContentTypes } from '../song-listing.ts';
-import { ListingResolver } from './sources.ts';
+} from 'discordeno';
+import { Playlist, Video, YouTube } from 'youtube';
+import { ListingResolver } from 'logos/src/commands/music/data/sources/sources.ts';
+import { SongListing, SongListingContentTypes } from 'logos/src/commands/music/data/types.ts';
+import { Client } from 'logos/src/client.ts';
+import { createInteractionCollector } from 'logos/src/interactions.ts';
+import constants from 'logos/constants.ts';
+import { trim } from 'logos/formatting.ts';
+import { Commands } from '../../../../../assets/localisations/mod.ts';
+import { localise } from '../../../../../assets/localisations/mod.ts';
 
 const urlExpression = new RegExp(
 	/^(?:https?:)?(?:\/\/)?(?:youtu\.be\/|(?:www\.|m\.)?youtube\.com\/(?:watch|v|embed)(?:\.php)?(?:\?.*v=|\/))([a-zA-Z0-9\_-]{7,15})(?:[\?&][a-zA-Z0-9\_-]+=[a-zA-Z0-9\_-]+)*$/,
 );
 
-const resolver: ListingResolver = async (client, interaction, query) => {
-	const urlExpressionExecuted = urlExpression.exec(query);
-	if (!urlExpressionExecuted) {
-		return search(client, interaction, query);
+const resolver: ListingResolver = async ([client, bot], interaction, query) => {
+	const urlExpressionExecuted = urlExpression.exec(query) ?? undefined;
+	if (urlExpressionExecuted === undefined) {
+		return search([client, bot], interaction, query);
 	}
 
-	const url = urlExpressionExecuted[0]!;
+	sendInteractionResponse(bot, interaction.id, interaction.token, {
+		type: InteractionResponseTypes.DeferredChannelMessageWithSource,
+	});
 
+	deleteOriginalInteractionResponse(bot, interaction.token);
+
+	const url = urlExpressionExecuted.at(0)!;
 	if (url.includes('&list=')) {
 		const playlist = await YouTube.getPlaylist(query);
-
 		return fromYouTubePlaylist(playlist, interaction.user.id);
 	}
 
 	const video = await YouTube.getVideo(query);
-
 	return fromYouTubeVideo(video, interaction.user.id);
 };
 
 async function search(
-	client: Client,
+	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 	query: string,
 ): Promise<SongListing | undefined> {
-	const results = <(Video | Playlist)[]> await YouTube.search(query, {
-		limit: 20,
-		type: 'all',
-		safeSearch: false,
-	}).then((result) =>
-		result.filter((element) =>
-			element.type === 'video' || element.type === 'playlist'
-		)
-	);
+	const results = await YouTube.search(
+		query,
+		{ limit: 20, type: 'all', safeSearch: false },
+	).then(
+		(result) => result.filter((element) => element.type === 'video' || element.type === 'playlist'),
+	) as Array<Video | Playlist>;
 	if (results.length === 0) return undefined;
 
 	return new Promise<SongListing | undefined>((resolve) => {
 		const customId = createInteractionCollector(
-			client,
+			[client, bot],
 			{
 				type: InteractionTypes.MessageComponent,
 				userId: interaction.user.id,
@@ -65,10 +70,8 @@ async function search(
 						type: InteractionResponseTypes.DeferredUpdateMessage,
 					});
 
-					const indexString = <string | undefined> selection.data?.values?.at(
-						0,
-					);
-					if (!indexString) return resolve(undefined);
+					const indexString = <string | undefined> selection.data?.values?.at(0);
+					if (indexString === undefined) return resolve(undefined);
 
 					const index = Number(indexString);
 					if (isNaN(index)) return resolve(undefined);
@@ -84,15 +87,14 @@ async function search(
 			},
 		);
 
-		sendInteractionResponse(client.bot, interaction.id, interaction.token, {
+		sendInteractionResponse(bot, interaction.id, interaction.token, {
 			type: InteractionResponseTypes.ChannelMessageWithSource,
 			data: {
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
-					title: 'Select a song / song collection',
-					description:
-						'Select a song or song collection from the choices below.',
-					color: configuration.interactions.responses.colors.blue,
+					title: localise(Commands.music.options.play.strings.selectSong.header, interaction.locale),
+					description: localise(Commands.music.options.play.strings.selectSong.body, interaction.locale),
+					color: constants.colors.blue,
 				}],
 				components: [{
 					type: MessageComponentTypes.ActionRow,
@@ -103,10 +105,7 @@ async function search(
 						maxValues: 1,
 						options: results.map<SelectOption>((result, index) => ({
 							emoji: {
-								name: result.type === 'video'
-									? configuration.music.symbols[SongListingContentTypes.Song]
-									: configuration.music
-										.symbols[SongListingContentTypes.Collection],
+								name: result.type === 'video' ? constants.emojis.music.song : constants.emojis.music.collection,
 							},
 							label: trim(result.title!, 100),
 							value: index.toString(),
@@ -125,7 +124,7 @@ function fromYouTubeVideo(
 	video: Video,
 	requestedBy: bigint,
 ): SongListing | undefined {
-	if (!video.id) return undefined;
+	if (video.id === undefined) return undefined;
 
 	return {
 		source: 'YouTube',
@@ -142,11 +141,8 @@ function fromYouTubeVideo(
 /**
  * Creates a song listing from a YouTube playlist.
  */
-function fromYouTubePlaylist(
-	playlist: Playlist,
-	requestedBy: bigint,
-): SongListing | undefined {
-	if (!playlist.id) return undefined;
+function fromYouTubePlaylist(playlist: Playlist, requestedBy: bigint): SongListing | undefined {
+	if (playlist.id === undefined) return undefined;
 
 	return {
 		source: 'YouTube',

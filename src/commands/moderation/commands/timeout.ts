@@ -1,11 +1,9 @@
-import { Commands } from '../../../../assets/localisations/commands.ts';
-import { createLocalisations } from '../../../../assets/localisations/types.ts';
-import { ApplicationCommandOptionTypes } from '../../../../deps.ts';
-import { CommandBuilder } from '../../../commands/command.ts';
-import { user } from '../../parameters.ts';
-import { duration, reason } from '../parameters.ts';
-import { clearTimeout } from './timeout/clear.ts';
-import { setTimeout } from './timeout/set.ts';
+import { ApplicationCommandOptionTypes } from 'discordeno';
+import { Commands, createLocalisations } from 'logos/assets/localisations/mod.ts';
+import { handleSetTimeout } from 'logos/src/commands/moderation/commands/timeout/set.ts';
+import { handleClearTimeout } from 'logos/src/commands/moderation/commands/timeout/clear.ts';
+import { CommandBuilder } from 'logos/src/commands/command.ts';
+import { duration, reason, user } from 'logos/src/commands/parameters.ts';
 
 const command: CommandBuilder = {
 	...createLocalisations(Commands.timeout),
@@ -14,11 +12,11 @@ const command: CommandBuilder = {
 		...createLocalisations(Commands.timeout.options.set),
 		type: ApplicationCommandOptionTypes.SubCommand,
 		options: [user, duration, reason],
-		handle: setTimeout,
+		handle: handleSetTimeout,
 	}, {
 		...createLocalisations(Commands.timeout.options.clear),
 		type: ApplicationCommandOptionTypes.SubCommand,
-		handle: clearTimeout,
+		handle: handleClearTimeout,
 		options: [user],
 	}],
 };

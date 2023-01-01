@@ -1,8 +1,3 @@
-import { Commands } from '../../../../assets/localisations/commands.ts';
-import {
-	createLocalisations,
-	localise,
-} from '../../../../assets/localisations/types.ts';
 import {
 	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
@@ -10,60 +5,60 @@ import {
 	Interaction,
 	InteractionResponseTypes,
 	sendInteractionResponse,
-} from '../../../../deps.ts';
-import { Client } from '../../../client.ts';
-import { OptionBuilder } from '../../../commands/command.ts';
-import configuration from '../../../configuration.ts';
-import { defaultLanguage } from '../../../types.ts';
-import { SongListingContentTypes } from '../data/song-listing.ts';
-import { by, collection, to } from '../parameters.ts';
+} from 'discordeno';
+import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
+import { OptionBuilder } from 'logos/src/commands/command.ts';
+import { by, collection, to } from 'logos/src/commands/parameters.ts';
+import {
+	getVoiceState,
+	isCollection,
+	isOccupied,
+	isQueueVacant,
+	unskip,
+	verifyVoiceState,
+} from 'logos/src/controllers/music.ts';
+import { Client } from 'logos/src/client.ts';
+import { parseArguments } from 'logos/src/interactions.ts';
+import constants from 'logos/constants.ts';
+import { defaultLocale } from 'logos/types.ts';
 
 const command: OptionBuilder = {
 	...createLocalisations(Commands.music.options.unskip),
 	type: ApplicationCommandOptionTypes.SubCommand,
-	handle: unskip,
+	handle: handleUnskipAction,
 	options: [collection, by, to],
 };
 
-function unskip(
-	[client, bot]: [Client, Bot],
-	interaction: Interaction,
-): void {
-	const musicController = client.music.get(interaction.guildId!);
-	if (!musicController) return;
+function handleUnskipAction([client, bot]: [Client, Bot], interaction: Interaction): void {
+	const controller = client.features.music.controllers.get(interaction.guildId!);
+	if (controller === undefined) return;
 
-	const [canAct, _] = musicController.verifyMemberVoiceState(interaction);
-	if (!canAct) return;
+	const voiceState = getVoiceState(client, interaction);
+
+	const isVoiceStateVerified = verifyVoiceState(bot, interaction, controller, voiceState);
+	if (!isVoiceStateVerified) return;
 
 	const data = interaction.data;
-	if (!data) return;
+	if (data === undefined) return;
 
-	const unskipCollection =
-		(<boolean | undefined> data.options?.at(0)?.options?.find((
-			option,
-		) => option.name === 'collection')?.value) ?? false;
+	const [{ collection, by, to }] = parseArguments(interaction.data?.options, {
+		collection: 'boolean',
+		by: 'number',
+		to: 'number',
+	});
 
-	const byString = <string | undefined> data.options?.at(0)?.options?.find((
-		option,
-	) => option.name === 'by')?.value;
-	const toString = <string | undefined> data.options?.at(0)?.options?.find((
-		option,
-	) => option.name === 'to')?.value;
+	if (by !== undefined && isNaN(by)) return;
+	if (to !== undefined && isNaN(to)) return;
 
-	const by = byString ? Number(byString) : undefined;
-	if (by && isNaN(by)) return;
+	const isUnskippingListing = (() => {
+		if (controller.currentListing === undefined) return true;
+		if (!isCollection(controller.currentListing?.content)) return true;
+		if (collection !== undefined || controller.currentListing!.content.position === 0) return true;
 
-	const to = toString ? Number(toString) : undefined;
-	if (to && isNaN(to)) return;
+		return false;
+	})();
 
-	const songListing = musicController.current;
-
-	const isUnskippingListing = !songListing ||
-		songListing.content.type !== SongListingContentTypes.Collection ||
-		(songListing.content.type === SongListingContentTypes.Collection &&
-			(unskipCollection || songListing.content.position === 0));
-
-	if (isUnskippingListing && musicController.history.length === 0) {
+	if (isUnskippingListing && controller.listingHistory.length === 0) {
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -73,21 +68,15 @@ function unskip(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(
-							Commands.music.options.unskip.strings.nowhereToUnskipTo,
-							interaction.locale,
-						),
-						color: configuration.interactions.responses.colors.yellow,
+						description: localise(Commands.music.options.unskip.strings.nowhereToUnskipTo, interaction.locale),
+						color: constants.colors.dullYellow,
 					}],
 				},
 			},
 		);
 	}
 
-	if (
-		unskipCollection &&
-		songListing?.content.type !== SongListingContentTypes.Collection
-	) {
+	if (collection !== undefined && !isCollection(controller.currentListing?.content)) {
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -97,18 +86,15 @@ function unskip(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(
-							Commands.music.options.unskip.strings.noSongCollectionToUnskip,
-							interaction.locale,
-						),
-						color: configuration.interactions.responses.colors.yellow,
+						description: localise(Commands.music.options.unskip.strings.noSongCollectionToUnskip, interaction.locale),
+						color: constants.colors.dullYellow,
 					}],
 				},
 			},
 		);
 	}
 
-	if (musicController.isOccupied && !musicController.canPushToQueue) {
+	if (isOccupied(controller.player) && !isQueueVacant(controller.listingQueue)) {
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -118,18 +104,15 @@ function unskip(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(
-							Commands.music.options.unskip.strings.cannotUnskipDueToFullQueue,
-							interaction.locale,
-						),
-						color: configuration.interactions.responses.colors.red,
+						description: localise(Commands.music.options.unskip.strings.cannotUnskipDueToFullQueue, interaction.locale),
+						color: constants.colors.red,
 					}],
 				},
 			},
 		);
 	}
 
-	if (by && to) {
+	if (by !== undefined && to !== undefined) {
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -139,18 +122,15 @@ function unskip(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(
-							Commands.music.strings.tooManySkipArguments,
-							interaction.locale,
-						),
-						color: configuration.interactions.responses.colors.red,
+						description: localise(Commands.music.strings.tooManySkipArguments, interaction.locale),
+						color: constants.colors.red,
 					}],
 				},
 			},
 		);
 	}
 
-	if ((by && by <= 0) || (to && to <= 0)) {
+	if ((by !== undefined && by <= 0) || (to !== undefined && to <= 0)) {
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -160,68 +140,41 @@ function unskip(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(
-							Commands.music.strings.mustBeGreaterThanZero,
-							interaction.locale,
-						),
-						color: configuration.interactions.responses.colors.red,
+						description: localise(Commands.music.strings.mustBeGreaterThanZero, interaction.locale),
+						color: constants.colors.red,
 					}],
 				},
 			},
 		);
 	}
+
+	const isUnskippingCollection = collection ?? false;
 
 	if (isUnskippingListing) {
-		musicController.unskip(unskipCollection, {
-			by: by,
-			to: to,
-		});
+		unskip([client, bot], interaction.guildId!, controller, isUnskippingCollection, { by: by, to: to });
 	} else {
-		if (by) {
-			if (
-				songListing.content.type === SongListingContentTypes.Collection &&
-				!unskipCollection
-			) {
-				const listingToUnskip = Math.min(by, songListing.content.position);
-
-				musicController.unskip(unskipCollection, {
-					by: listingToUnskip,
-					to: undefined,
-				});
+		if (by !== undefined) {
+			let listingsToUnskip!: number;
+			if (isCollection(controller.currentListing?.content) && collection === undefined) {
+				listingsToUnskip = Math.min(by, controller.currentListing!.content.position);
 			} else {
-				const listingsToUnskip = Math.min(by, musicController.history.length);
-
-				musicController.unskip(unskipCollection, {
-					by: listingsToUnskip,
-					to: undefined,
-				});
+				listingsToUnskip = Math.min(by, controller.listingHistory.length);
 			}
-		} else if (to) {
-			if (
-				songListing.content.type === SongListingContentTypes.Collection &&
-				!unskipCollection
-			) {
-				const listingToSkipTo = Math.max(to, 1);
-
-				musicController.unskip(unskipCollection, {
-					by: undefined,
-					to: listingToSkipTo,
-				});
+			unskip([client, bot], interaction.guildId!, controller, isUnskippingCollection, { by: listingsToUnskip });
+		} else if (to !== undefined) {
+			let listingToSkipTo!: number;
+			if (isCollection(controller.currentListing?.content) && collection === undefined) {
+				listingToSkipTo = Math.max(to, 1);
 			} else {
-				const listingToSkipTo = Math.min(to, musicController.history.length);
-
-				musicController.unskip(unskipCollection, {
-					by: undefined,
-					to: listingToSkipTo,
-				});
+				listingToSkipTo = Math.min(to, controller.listingHistory.length);
 			}
+			unskip([client, bot], interaction.guildId!, controller, isUnskippingCollection, { to: listingToSkipTo });
 		} else {
-			musicController.unskip(unskipCollection, {
-				by: undefined,
-				to: undefined,
-			});
+			unskip([client, bot], interaction.guildId!, controller, isUnskippingCollection, {});
 		}
 	}
+
+	const unskippedString = localise(Commands.music.options.unskip.strings.unskipped.header, defaultLocale);
 
 	return void sendInteractionResponse(
 		bot,
@@ -231,17 +184,9 @@ function unskip(
 			type: InteractionResponseTypes.ChannelMessageWithSource,
 			data: {
 				embeds: [{
-					title: `⏮️ ${
-						localise(
-							Commands.music.options.unskip.strings.unskipped.header,
-							defaultLanguage,
-						)
-					}`,
-					description: localise(
-						Commands.music.options.unskip.strings.unskipped.body,
-						defaultLanguage,
-					),
-					color: configuration.interactions.responses.colors.invisible,
+					title: `⏮️ ${unskippedString}`,
+					description: localise(Commands.music.options.unskip.strings.unskipped.body, defaultLocale),
+					color: constants.colors.invisible,
 				}],
 			},
 		},

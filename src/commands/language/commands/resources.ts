@@ -1,8 +1,3 @@
-import { Commands } from '../../../../assets/localisations/commands.ts';
-import {
-	createLocalisations,
-	localise,
-} from '../../../../assets/localisations/types.ts';
 import {
 	ApplicationCommandFlags,
 	Bot,
@@ -11,35 +6,35 @@ import {
 	InteractionResponseTypes,
 	MessageComponentTypes,
 	sendInteractionResponse,
-} from '../../../../deps.ts';
-import { Client } from '../../../client.ts';
-import { CommandBuilder } from '../../../commands/command.ts';
-import { links } from '../../../constants.ts';
-import { defaultLanguage } from '../../../types.ts';
-import { show } from '../../parameters.ts';
+} from 'discordeno';
+import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
+import { CommandBuilder } from 'logos/src/commands/command.ts';
+import { show } from 'logos/src/commands/parameters.ts';
+import { Client } from 'logos/src/client.ts';
+import { parseArguments } from 'logos/src/interactions.ts';
+import constants from 'logos/constants.ts';
+import { defaultLocale } from 'logos/types.ts';
 
 const command: CommandBuilder = {
 	...createLocalisations(Commands.resources),
 	defaultMemberPermissions: ['VIEW_CHANNEL'],
-	handle: resources,
+	handle: handleDisplayResources,
 	options: [show],
 };
 
 /** Displays a message with information on where to find the resources for a given language. */
-function resources(
+function handleDisplayResources(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): void {
 	const guild = client.cache.guilds.get(interaction.guildId!);
-	if (!guild) return;
+	if (guild === undefined) return;
 
-	const repositoryLink = links.generateLanguageRepositoryLink(guild.language);
+	const repositoryLink = constants.links.generateLanguageRepositoryLink(guild.language);
 
-	const show =
-		<boolean> interaction.data?.options?.find((option) =>
-			option.name === 'show'
-		)?.value ??
-			false;
+	const [{ show }] = parseArguments(interaction.data?.options, { show: 'boolean' });
+
+	const locale = show ? defaultLocale : interaction.locale;
 
 	return void sendInteractionResponse(
 		bot,
@@ -53,10 +48,7 @@ function resources(
 					type: MessageComponentTypes.ActionRow,
 					components: [{
 						type: MessageComponentTypes.Button,
-						label: localise(
-							Commands.resources.strings.resourcesStoredHere,
-							show ? defaultLanguage : interaction.locale,
-						)(guild.language),
+						label: localise(Commands.resources.strings.resourcesStoredHere, locale)(guild.language),
 						style: ButtonStyles.Link,
 						url: repositoryLink,
 					}],

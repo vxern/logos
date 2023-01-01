@@ -1,8 +1,3 @@
-import { Commands } from '../../../../assets/localisations/commands.ts';
-import {
-	createLocalisations,
-	localise,
-} from '../../../../assets/localisations/types.ts';
 import {
 	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
@@ -10,29 +5,30 @@ import {
 	Interaction,
 	InteractionResponseTypes,
 	sendInteractionResponse,
-} from '../../../../deps.ts';
-import { Client } from '../../../client.ts';
-import { OptionBuilder } from '../../../commands/command.ts';
-import configuration from '../../../configuration.ts';
-import { defaultLanguage } from '../../../types.ts';
+} from 'discordeno';
+import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
+import { OptionBuilder } from 'logos/src/commands/command.ts';
+import { getVoiceState, isOccupied, isPaused, resume, verifyVoiceState } from 'logos/src/controllers/music.ts';
+import { Client } from 'logos/src/client.ts';
+import constants from 'logos/constants.ts';
+import { defaultLocale } from 'logos/types.ts';
 
 const command: OptionBuilder = {
 	...createLocalisations(Commands.music.options.resume),
 	type: ApplicationCommandOptionTypes.SubCommand,
-	handle: resumeSong,
+	handle: handleResumePlayback,
 };
 
-function resumeSong(
-	[client, bot]: [Client, Bot],
-	interaction: Interaction,
-): void {
-	const musicController = client.music.get(interaction.guildId!);
-	if (!musicController) return;
+function handleResumePlayback([client, bot]: [Client, Bot], interaction: Interaction): void {
+	const controller = client.features.music.controllers.get(interaction.guildId!);
+	if (controller === undefined) return;
 
-	const [canAct, _] = musicController.verifyMemberVoiceState(interaction);
-	if (!canAct) return;
+	const voiceState = getVoiceState(client, interaction);
 
-	if (!musicController.isOccupied) {
+	const isVoiceStateVerified = verifyVoiceState(bot, interaction, controller, voiceState);
+	if (!isVoiceStateVerified) return;
+
+	if (!isOccupied(controller.player)) {
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -42,18 +38,15 @@ function resumeSong(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(
-							Commands.music.options.resume.strings.noSongToResume,
-							interaction.locale,
-						),
-						color: configuration.interactions.responses.colors.yellow,
+						description: localise(Commands.music.options.resume.strings.noSongToResume, interaction.locale),
+						color: constants.colors.dullYellow,
 					}],
 				},
 			},
 		);
 	}
 
-	if (!musicController.isPaused) {
+	if (!isPaused(controller.player)) {
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -63,18 +56,17 @@ function resumeSong(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(
-							Commands.music.options.resume.strings.notCurrentlyPaused,
-							interaction.locale,
-						),
-						color: configuration.interactions.responses.colors.yellow,
+						description: localise(Commands.music.options.resume.strings.notCurrentlyPaused, interaction.locale),
+						color: constants.colors.dullYellow,
 					}],
 				},
 			},
 		);
 	}
 
-	musicController.resume();
+	resume(controller.player);
+
+	const resumedString = localise(Commands.music.options.resume.strings.resumed.header, defaultLocale);
 
 	return void sendInteractionResponse(
 		bot,
@@ -84,17 +76,9 @@ function resumeSong(
 			type: InteractionResponseTypes.ChannelMessageWithSource,
 			data: {
 				embeds: [{
-					title: `▶️ ${
-						localise(
-							Commands.music.options.resume.strings.resumed.header,
-							defaultLanguage,
-						)
-					}`,
-					description: localise(
-						Commands.music.options.resume.strings.resumed.body,
-						defaultLanguage,
-					),
-					color: configuration.interactions.responses.colors.invisible,
+					title: `▶️ ${resumedString}`,
+					description: localise(Commands.music.options.resume.strings.resumed.body, defaultLocale),
+					color: constants.colors.invisible,
 				}],
 			},
 		},
@@ -102,4 +86,4 @@ function resumeSong(
 }
 
 export default command;
-export { resumeSong };
+export { handleResumePlayback };

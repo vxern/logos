@@ -1,38 +1,47 @@
-import { Commands } from '../../../../../assets/localisations/commands.ts';
-import { localise } from '../../../../../assets/localisations/types.ts';
 import {
 	ApplicationCommandFlags,
 	Bot,
+	Channel,
 	ChannelTypes,
-	getGuildIconURL,
+	Embed,
 	Guild,
 	Interaction,
 	InteractionResponseTypes,
 	sendInteractionResponse,
-} from '../../../../../deps.ts';
-import { Client } from '../../../../client.ts';
-import configuration from '../../../../configuration.ts';
-import { displayTime, mention, MentionTypes } from '../../../../formatting.ts';
-import { defaultLanguage } from '../../../../types.ts';
-import { snowflakeToTimestamp } from '../../../../utils.ts';
-import { getProficiencyCategory } from '../../../social/module.ts';
+} from 'discordeno';
+import { Commands, localise } from 'logos/assets/localisations/mod.ts';
+import { getProficiencyCategory } from 'logos/src/commands/social/module.ts';
+import { Client } from 'logos/src/client.ts';
+import { getGuildIconURLFormatted, snowflakeToTimestamp } from 'logos/src/utils.ts';
+import configuration from 'logos/configuration.ts';
+import constants from 'logos/constants.ts';
+import { mention, MentionTypes, timestamp } from 'logos/formatting.ts';
+import { defaultLanguage } from 'logos/types.ts';
 
 /** Displays information about the guild that this command was executed in. */
-function displayGuildInformation(
+function handleDisplayGuildInformation(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): void {
 	const guild = client.cache.guilds.get(interaction.guildId!);
-	if (!guild) return;
+	if (guild === undefined) return;
 
 	const owner = client.cache.users.get(guild.ownerId);
-	if (!owner) return;
+	if (owner === undefined) return;
 
-	const hasDistinctOwner = owner && owner.username !== guild.name;
+	const hasDistinctOwner = owner.username !== guild.name;
 
-	const proficiencyRoleFrequencies = getProficiencyRoleFrequencies(
-		client,
-		guild,
+	const proficiencyRoleFrequencies = getProficiencyRoleFrequencies(client, guild);
+
+	const descriptionString = localise(Commands.information.options.guild.strings.fields.description, interaction.locale);
+	const membersString = localise(Commands.information.options.guild.strings.fields.members, interaction.locale);
+	const createdString = localise(Commands.information.options.guild.strings.fields.created, interaction.locale);
+	const channelsString = localise(Commands.information.options.guild.strings.fields.channels, interaction.locale);
+	const ownerString = localise(Commands.information.options.guild.strings.fields.owner, interaction.locale);
+	const moderatorsString = localise(Commands.information.options.guild.strings.fields.moderators, interaction.locale);
+	const proficiencyDistributionString = localise(
+		Commands.information.options.guild.strings.fields.distributionOfMembersLanguageProficiency,
+		interaction.locale,
 	);
 
 	return void sendInteractionResponse(
@@ -44,137 +53,47 @@ function displayGuildInformation(
 			data: {
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
-					title: localise(
-						Commands.information.options.guild.strings.informationAbout,
-						interaction.locale,
-					)(guild.name),
-					...(() => {
-						const iconURL = getGuildIconURL(bot, guild.id, guild.icon, {
-							size: 4096,
-							format: 'png',
-						});
-						if (!iconURL) return {};
-
-						const icon = { url: iconURL };
-
-						return {
-							author: { ...icon, name: '' },
-							thumbnail: icon,
-						};
-					})(),
-					color: configuration.interactions.responses.colors.invisible,
+					thumbnail: guildAsThumbnail(bot, guild),
+					title: localise(Commands.information.options.guild.strings.informationAbout, interaction.locale)(guild.name),
+					color: constants.colors.invisible,
 					fields: [
 						{
-							name: `🖋️ ${
-								localise(
-									Commands.information.options.guild.strings.fields.description,
-									interaction.locale,
-								)
-							}`,
+							name: `🖋️ ${descriptionString}`,
 							value: guild.description ??
-								localise(
-									Commands.information.options.guild.strings.noDescription,
-									interaction.locale,
-								),
+								localise(Commands.information.options.guild.strings.noDescription, interaction.locale),
 							inline: true,
 						},
 						{
-							name: `🧑 ${
-								localise(
-									Commands.information.options.guild.strings.fields.members,
-									interaction.locale,
-								)
-							}`,
+							name: `🧑 ${membersString}`,
 							value: guild.memberCount.toString(),
 							inline: true,
 						},
 						{
-							name: `⏱️ ${
-								localise(
-									Commands.information.options.guild.strings.fields.created,
-									interaction.locale,
-								)
-							}`,
-							value: displayTime(snowflakeToTimestamp(guild.id)),
+							name: `⏱️ ${createdString}`,
+							value: timestamp(snowflakeToTimestamp(guild.id)),
 							inline: true,
 						},
 						{
-							name: `🗯️ ${
-								localise(
-									Commands.information.options.guild.strings.fields.channels,
-									interaction.locale,
-								)
-							}`,
-							value: (() => {
-								const channels = guild.channels.array();
-
-								const getCountByType = (type: ChannelTypes): number => {
-									return channels.filter((channel) => channel.type === type)
-										.length;
-								};
-
-								const textChannelsCount = getCountByType(
-									ChannelTypes.GuildText,
-								);
-								const voiceChannelsCount = getCountByType(
-									ChannelTypes.GuildVoice,
-								);
-
-								return `📜 ${textChannelsCount} ${
-									localise(
-										Commands.information.options.guild.strings.channelTypes
-											.text,
-										interaction.locale,
-									)
-								} | 🔊 ${voiceChannelsCount} ${
-									localise(
-										Commands.information.options.guild.strings.channelTypes
-											.voice,
-										interaction.locale,
-									)
-								}`;
-							})(),
+							name: `🗯️ ${channelsString}`,
+							value: displayInformationAboutChannels(guild, interaction.locale),
 							inline: true,
 						},
 						hasDistinctOwner
 							? {
-								name: `👑 ${
-									localise(
-										Commands.information.options.guild.strings.fields
-											.serverOwner,
-										interaction.locale,
-									)
-								}`,
+								name: `👑 ${ownerString}`,
 								value: mention(owner.id, MentionTypes.User),
 								inline: true,
 							}
-							: ((moderatorRoleName) => ({
-								name: `⚖️ ${
-									localise(
-										Commands.information.options.guild.strings.fields
-											.moderators,
-										interaction.locale,
-									)
-								}`,
-								value: localise(
-									Commands.information.options.guild.strings
-										.overseenByModerators,
-									interaction.locale,
-								)(moderatorRoleName),
+							: {
+								name: `⚖️ ${moderatorsString}`,
+								value: localise(Commands.information.options.guild.strings.overseenByModerators, interaction.locale)(
+									configuration.permissions.moderatorRoleName.toLowerCase(),
+								),
 								inline: false,
-							}))(configuration.guilds.moderation.moderator.toLowerCase()),
+							},
 						{
-							name: `🎓 ${
-								localise(
-									Commands.information.options.guild.strings.fields
-										.proficiencyDistribution,
-									interaction.locale,
-								)
-							}`,
-							value: displayProficiencyRoleDistribution(
-								proficiencyRoleFrequencies,
-								interaction.locale,
-							),
+							name: `🎓 ${proficiencyDistributionString}`,
+							value: displayProficiencyRoleDistribution(proficiencyRoleFrequencies, interaction.locale),
 							inline: false,
 						},
 					],
@@ -184,8 +103,24 @@ function displayGuildInformation(
 	);
 }
 
+function displayInformationAboutChannels(guild: Guild, locale: string | undefined): string {
+	const channels = guild.channels.array();
+
+	const textChannelsCount = getChannelCountByType(channels, ChannelTypes.GuildText);
+	const voiceChannelsCount = getChannelCountByType(channels, ChannelTypes.GuildVoice);
+
+	const textChannelsString = localise(Commands.information.options.guild.strings.channelTypes.text, locale);
+	const voiceChannelsString = localise(Commands.information.options.guild.strings.channelTypes.voice, locale);
+
+	return `📜 ${textChannelsCount} ${textChannelsString} | 🔊 ${voiceChannelsCount} ${voiceChannelsString}`;
+}
+
+function getChannelCountByType(channels: Channel[], type: ChannelTypes): number {
+	return channels.filter((channel) => channel.type === type).length;
+}
+
 /**
- * Taking a guild object, gets a distribution of proficiency roles of its members.
+ * Taking a guild object, gets the distribution of proficiency roles of its members.
  *
  * @param client - The client instance to use.
  * @param guild - The guild of which the role frequencies to get.
@@ -197,16 +132,15 @@ function getProficiencyRoleFrequencies(
 	guild: Guild,
 ): Map<bigint, number> {
 	const proficiencyCategory = getProficiencyCategory();
-	const proficiencies = proficiencyCategory.collection!.list!;
-	const proficiencyNames = proficiencies.map((proficiency) =>
-		proficiency.name[defaultLanguage]
-	);
-	const proficiencyRoleIds = guild.roles.array().filter((role) =>
-		proficiencyNames.includes(role.name)
-	).map((role) => role.id);
+	const proficiencies = proficiencyCategory.collection.list;
+	const proficiencyRoleNames = proficiencies.map((proficiency) => proficiency.name[defaultLanguage]);
+	const proficiencyRoles = guild.roles.array()
+		.filter((role) => proficiencyRoleNames.includes(role.name))
+		.toSorted((a, b) => a.position - b.position);
+	const proficiencyRoleIds = proficiencyRoles.map((role) => role.id);
 
-	const membersIndiscriminate = Array.from(client.cache.members.values());
-	const members = membersIndiscriminate.filter((member) =>
+	const cachedMembers = Array.from(client.cache.members.values());
+	const members = cachedMembers.filter((member) =>
 		!client.cache.users.get(member.id)?.toggles.bot &&
 		member.guildId === guild.id
 	);
@@ -218,9 +152,7 @@ function getProficiencyRoleFrequencies(
 	}
 
 	for (const member of members) {
-		const relevantRoleIds = member.roles.filter((roleId) =>
-			proficiencyRoleIds.includes(roleId)
-		);
+		const relevantRoleIds = member.roles.filter((roleId) => proficiencyRoleIds.includes(roleId));
 
 		if (relevantRoleIds.length === 0) {
 			relevantRoleIds.push(-1n);
@@ -243,28 +175,17 @@ function displayProficiencyRoleDistribution(
 	proficiencyRoleFrequencies: Map<bigint, number>,
 	locale: string | undefined,
 ): string {
-	const total = Array.from(proficiencyRoleFrequencies.values()).reduce((a, b) =>
-		a + b
-	);
+	const total = Array.from(proficiencyRoleFrequencies.values()).reduce((a, b) => a + b);
 
 	const strings: string[] = [];
-	for (
-		const [roleId, frequency] of Array.from(
-			proficiencyRoleFrequencies.entries(),
-		)
-	) {
+	for (const [roleId, frequency] of Array.from(proficiencyRoleFrequencies.entries())) {
 		const percentageComposition = getPercentageComposition(frequency, total);
 		const roleMention = roleId === -1n
-			? localise(
-				Commands.information.options.guild.strings.withoutProficiencyRole,
-				locale,
-			)
+			? localise(Commands.information.options.guild.strings.withoutProficiencyRole, locale)
 			: mention(roleId, MentionTypes.Role);
 
-		strings.push(`${frequency} (${percentageComposition}%) ${roleMention}`);
+		strings.unshift(`${frequency} (${percentageComposition}%) ${roleMention}`);
 	}
-
-	strings.reverse();
 
 	return strings.join('\n');
 }
@@ -280,4 +201,13 @@ function getPercentageComposition(number: number, total: number): string {
 	return ((number / total) * 100).toPrecision(3);
 }
 
-export { displayGuildInformation };
+type Thumbnail = NonNullable<Embed['thumbnail']>;
+
+function guildAsThumbnail(bot: Bot, guild: Guild): Thumbnail | undefined {
+	const iconURL = getGuildIconURLFormatted(bot, guild);
+	if (iconURL === undefined) return undefined;
+
+	return { url: iconURL };
+}
+
+export { handleDisplayGuildInformation };

@@ -1,8 +1,3 @@
-import { Commands } from '../../../../assets/localisations/commands.ts';
-import {
-	createLocalisations,
-	localise,
-} from '../../../../assets/localisations/types.ts';
 import {
 	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
@@ -10,40 +5,36 @@ import {
 	Interaction,
 	InteractionResponseTypes,
 	sendInteractionResponse,
-} from '../../../../deps.ts';
-import { Client } from '../../../client.ts';
-import { OptionBuilder } from '../../../commands/command.ts';
-import configuration from '../../../configuration.ts';
-import { SongListingContentTypes } from '../data/song-listing.ts';
-import { collection } from '../parameters.ts';
+} from 'discordeno';
+import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
+import { OptionBuilder } from 'logos/src/commands/command.ts';
+import { collection } from 'logos/src/commands/parameters.ts';
+import { getVoiceState, isCollection, isOccupied, replay, verifyVoiceState } from 'logos/src/controllers/music.ts';
+import { Client } from 'logos/src/client.ts';
+import { parseArguments } from 'logos/src/interactions.ts';
+import constants from 'logos/constants.ts';
 
 const command: OptionBuilder = {
 	...createLocalisations(Commands.music.options.replay),
 	type: ApplicationCommandOptionTypes.SubCommand,
-	handle: replaySong,
+	handle: handleReplayAction,
 	options: [collection],
 };
 
-function replaySong(
-	[client, bot]: [Client, Bot],
-	interaction: Interaction,
-): void {
-	const musicController = client.music.get(interaction.guildId!);
-	if (!musicController) return;
+function handleReplayAction([client, bot]: [Client, Bot], interaction: Interaction): void {
+	const controller = client.features.music.controllers.get(interaction.guildId!);
+	if (controller === undefined) return;
 
-	const [canAct, _voiceState] = musicController.verifyMemberVoiceState(
-		interaction,
-	);
-	if (!canAct) return;
+	const voiceState = getVoiceState(client, interaction);
 
-	const replayCollection =
-		(<boolean | undefined> interaction.data?.options?.at(0)?.options?.find((
-			option,
-		) => option.name === 'collection')?.value) ?? false;
+	const isVoiceStateVerified = verifyVoiceState(bot, interaction, controller, voiceState);
+	if (!isVoiceStateVerified) return;
 
-	const currentListing = musicController.current;
+	const [{ collection }] = parseArguments(interaction.data?.options, { collection: 'boolean' });
 
-	if (!musicController.isOccupied || !currentListing) {
+	const currentListing = controller.currentListing;
+
+	if (!isOccupied(controller.player) || currentListing === undefined) {
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -53,21 +44,15 @@ function replaySong(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(
-							Commands.music.options.replay.strings.noSongToReplay,
-							interaction.locale,
-						),
-						color: configuration.interactions.responses.colors.yellow,
+						description: localise(Commands.music.options.replay.strings.noSongToReplay, interaction.locale),
+						color: constants.colors.dullYellow,
 					}],
 				},
 			},
 		);
 	}
 
-	if (
-		replayCollection &&
-		currentListing.content.type !== SongListingContentTypes.Collection
-	) {
+	if (collection !== undefined && !isCollection(currentListing?.content)) {
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -77,18 +62,15 @@ function replaySong(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(
-							Commands.music.options.replay.strings.noSongCollectionToReplay,
-							interaction.locale,
-						),
-						color: configuration.interactions.responses.colors.yellow,
+						description: localise(Commands.music.options.replay.strings.noSongCollectionToReplay, interaction.locale),
+						color: constants.colors.dullYellow,
 					}],
 				},
 			},
 		);
 	}
 
-	return musicController.replay(interaction, replayCollection);
+	return replay([client, bot], interaction, controller, collection ?? false);
 }
 
 export default command;

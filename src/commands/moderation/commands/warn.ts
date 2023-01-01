@@ -1,172 +1,85 @@
-import { Commands } from '../../../../assets/localisations/commands.ts';
-import {
-	createLocalisations,
-	localise,
-} from '../../../../assets/localisations/types.ts';
 import {
 	ApplicationCommandFlags,
 	banMember,
 	Bot,
 	getDmChannel,
-	getGuildIconURL,
 	Interaction,
 	InteractionResponseTypes,
 	kickMember,
 	sendInteractionResponse,
 	sendMessage,
-} from '../../../../deps.ts';
-import { Client, resolveInteractionToMember } from '../../../client.ts';
-import { CommandBuilder } from '../../../commands/command.ts';
-import configuration from '../../../configuration.ts';
-import { log } from '../../../controllers/logging.ts';
-import { getOrCreateUser } from '../../../database/functions/users.ts';
-import {
-	createWarning,
-	getWarnings,
-} from '../../../database/functions/warnings.ts';
-import { mention, MentionTypes } from '../../../formatting.ts';
-import { defaultLanguage } from '../../../types.ts';
-import { user } from '../../parameters.ts';
-import { getRelevantWarnings } from '../module.ts';
-import { reason } from '../parameters.ts';
+} from 'discordeno';
+import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
+import { CommandBuilder } from 'logos/src/commands/command.ts';
+import { reason, user } from 'logos/src/commands/parameters.ts';
+import { getActiveWarnings } from 'logos/src/commands/moderation/module.ts';
+import { log } from 'logos/src/controllers/logging/logging.ts';
+import { Client, resolveInteractionToMember } from 'logos/src/client.ts';
+import { parseArguments } from 'logos/src/interactions.ts';
+import { guildAsAuthor } from 'logos/src/utils.ts';
+import configuration from 'logos/configuration.ts';
+import constants from 'logos/constants.ts';
+import { mention, MentionTypes } from 'logos/formatting.ts';
+import { defaultLocale } from 'logos/types.ts';
 
 const command: CommandBuilder = {
 	...createLocalisations(Commands.warn),
 	defaultMemberPermissions: ['MODERATE_MEMBERS'],
-	handle: warnUser,
+	handle: handleWarnUser,
 	options: [user, reason],
 };
 
-async function warnUser(
+async function handleWarnUser(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {
-	const data = interaction.data;
-	if (!data) return;
+	const [{ user, reason }] = parseArguments(interaction.data?.options, {});
+	if (user === undefined) return;
 
-	const userIdentifier = <string | undefined> data.options?.at(0)?.value;
-	const reason = <string | undefined> data.options?.at(1)?.value;
-	if (userIdentifier === undefined || reason === undefined) return;
-
-	const member = resolveInteractionToMember(
-		[client, bot],
-		interaction,
-		userIdentifier,
-	);
-	if (!member) return;
-
-	if (member.id === interaction.member?.id) {
-		return void sendInteractionResponse(
-			bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						description: localise(
-							Commands.warn.strings.cannotWarnSelf,
-							interaction.locale,
-						),
-						color: configuration.interactions.responses.colors.yellow,
-					}],
-				},
-			},
-		);
-	}
+	const member = resolveInteractionToMember([client, bot], interaction, user, {
+		restrictToNonSelf: true,
+		excludeModerators: true,
+	});
+	if (member === undefined) return;
 
 	const guild = client.cache.guilds.get(interaction.guildId!);
-	if (!guild) return;
+	if (guild === undefined) return;
 
-	const moderatorRoleId = guild.roles.find((role) =>
-		role.name === configuration.guilds.moderation.moderator
-	)?.id;
-	if (!moderatorRoleId) return;
+	const moderatorRoleId = guild.roles.find((role) => role.name === configuration.permissions.moderatorRoleName)?.id;
+	if (moderatorRoleId === undefined) return;
 
-	const isModerator = member.roles.includes(moderatorRoleId);
-	if (isModerator) {
-		return void sendInteractionResponse(
-			bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						description: localise(
-							Commands.warn.strings.cannotWarnCertainUsers,
-							interaction.locale,
-						),
-						color: configuration.interactions.responses.colors.yellow,
-					}],
-				},
-			},
-		);
+	if (reason!.length === 0) return displayError(bot, interaction);
+
+	const [author, recipient] = await Promise.all([
+		client.database.adapters.users.getOrFetchOrCreate(
+			client,
+			'id',
+			interaction.user.id.toString(),
+			interaction.user.id,
+		),
+		client.database.adapters.users.getOrFetchOrCreate(client, 'id', member.id.toString(), member.id),
+	]);
+
+	if (author === undefined || recipient === undefined) return displayError(bot, interaction);
+
+	const [warnings, document, dmChannel] = await Promise.all([
+		client.database.adapters.warnings.getOrFetch(client, 'recipient', recipient.ref),
+		client.database.adapters.warnings.create(client, {
+			createdAt: Date.now(),
+			author: author.ref,
+			recipient: recipient.ref,
+			reason: reason!,
+		}),
+		getDmChannel(bot, member.id).catch(() => undefined),
+	]);
+
+	if (document !== undefined) {
+		log([client, bot], guild, 'memberWarnAdd', member, document.data, interaction.user);
 	}
 
-	const displayWarnError = (): void => {
-		return void sendInteractionResponse(
-			bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						description: localise(
-							Commands.warn.strings.failed,
-							interaction.locale,
-						),
-						color: configuration.interactions.responses.colors.red,
-					}],
-				},
-			},
-		);
-	};
+	if (warnings === undefined || document === undefined) return displayError(bot, interaction);
 
-	const subject = await getOrCreateUser(
-		client.database,
-		'id',
-		member.id.toString(),
-	);
-	if (!subject) return displayWarnError();
-
-	const author = await getOrCreateUser(
-		client.database,
-		'id',
-		interaction.user.id.toString(),
-	);
-	if (!author) return displayWarnError();
-
-	const warnings = await getWarnings(
-		client.database,
-		subject.ref,
-	);
-	if (!warnings) return displayWarnError();
-
-	const document = await createWarning(
-		client.database,
-		{
-			author: author.ref,
-			subject: subject.ref,
-			reason: reason,
-		},
-	);
-	if (!document) return displayWarnError();
-
-	log(
-		[client, bot],
-		guild,
-		'memberWarnAdd',
-		member,
-		document.data,
-		interaction.user,
-	);
-
-	const relevantWarnings = getRelevantWarnings(warnings);
+	const relevantWarnings = getActiveWarnings(warnings);
 
 	sendInteractionResponse(bot, interaction.id, interaction.token, {
 		type: InteractionResponseTypes.ChannelMessageWithSource,
@@ -174,62 +87,42 @@ async function warnUser(
 			flags: ApplicationCommandFlags.Ephemeral,
 			embeds: [{
 				description: localise(Commands.warn.strings.warned, interaction.locale)(
-					mention(member!.id, MentionTypes.User),
-					relevantWarnings.length,
+					mention(member.id, MentionTypes.User),
+					relevantWarnings.size,
 				),
-				color: configuration.interactions.responses.colors.blue,
+				color: constants.colors.blue,
 			}],
 		},
 	});
 
-	const reachedKickStage = relevantWarnings.length >=
-		configuration.guilds.moderation.warnings.maximum + 1;
-	const reachedBanStage = relevantWarnings.length >=
-		configuration.guilds.moderation.warnings.maximum + 2;
+	const reachedKickStage = relevantWarnings.size >= configuration.commands.warn.limitUses + 1;
+	const reachedBanStage = relevantWarnings.size >= configuration.commands.warn.limitUses + 2;
 
-	const dmChannel = await getDmChannel(bot, member.id);
-	if (dmChannel) {
+	if (dmChannel !== undefined) {
 		sendMessage(bot, dmChannel.id, {
 			embeds: [
 				{
-					thumbnail: (() => {
-						const iconURL = getGuildIconURL(bot, guild.id, guild.icon, {
-							size: 64,
-							format: 'webp',
-						});
-						if (!iconURL) return;
-
-						return { url: iconURL };
-					})(),
+					author: guildAsAuthor(bot, guild),
 					...(
 						reachedKickStage
 							? (
 								reachedBanStage
 									? {
-										description: localise(
-											Commands.warn.strings.reachedBanStage,
-											defaultLanguage,
-										)(reason),
-										color: configuration.interactions.responses.colors.darkRed,
+										description: localise(Commands.warn.strings.reachedBanStage, defaultLocale)(reason!),
+										color: constants.colors.darkRed,
 									}
 									: {
-										description: localise(
-											Commands.warn.strings.reachedKickStage,
-											defaultLanguage,
-										)(reason),
-										color: configuration.interactions.responses.colors.red,
+										description: localise(Commands.warn.strings.reachedKickStage, defaultLocale)(reason!),
+										color: constants.colors.red,
 									}
 							)
 							: {
-								description: localise(
-									Commands.warn.strings.warnedDirect,
-									defaultLanguage,
-								)(
-									reason,
-									relevantWarnings.length,
-									configuration.guilds.moderation.warnings.maximum,
+								description: localise(Commands.warn.strings.warnedDirect, defaultLocale)(
+									reason!,
+									relevantWarnings.size,
+									configuration.commands.warn.limitUses,
 								),
-								color: configuration.interactions.responses.colors.yellow,
+								color: constants.colors.dullYellow,
 							}
 					),
 				},
@@ -243,8 +136,7 @@ async function warnUser(
 			interaction.guildId!,
 			member.id,
 			{
-				reason:
-					`Banned due to having received too many warnings (${relevantWarnings.length}).`,
+				reason: `Banned due to having received too many warnings (${relevantWarnings.size}).`,
 			},
 		);
 	}
@@ -254,9 +146,27 @@ async function warnUser(
 			bot,
 			interaction.guildId!,
 			member.id,
-			`Kicked due to having received too many warnings (${relevantWarnings.length}).`,
+			`Kicked due to having received too many warnings (${relevantWarnings.size}).`,
 		);
 	}
+}
+
+function displayError(bot: Bot, interaction: Interaction): void {
+	return void sendInteractionResponse(
+		bot,
+		interaction.id,
+		interaction.token,
+		{
+			type: InteractionResponseTypes.ChannelMessageWithSource,
+			data: {
+				flags: ApplicationCommandFlags.Ephemeral,
+				embeds: [{
+					description: localise(Commands.warn.strings.failed, interaction.locale),
+					color: constants.colors.red,
+				}],
+			},
+		},
+	);
 }
 
 export default command;

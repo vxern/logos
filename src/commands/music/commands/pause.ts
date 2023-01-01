@@ -1,8 +1,3 @@
-import { Commands } from '../../../../assets/localisations/commands.ts';
-import {
-	createLocalisations,
-	localise,
-} from '../../../../assets/localisations/types.ts';
 import {
 	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
@@ -10,32 +5,30 @@ import {
 	Interaction,
 	InteractionResponseTypes,
 	sendInteractionResponse,
-} from '../../../../deps.ts';
-import { Client } from '../../../client.ts';
-import { OptionBuilder } from '../../../commands/command.ts';
-import configuration from '../../../configuration.ts';
-import { defaultLanguage } from '../../../types.ts';
-import { resumeSong } from './resume.ts';
+} from 'discordeno';
+import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
+import { handleResumePlayback } from 'logos/src/commands/music/commands/resume.ts';
+import { OptionBuilder } from 'logos/src/commands/command.ts';
+import { getVoiceState, isOccupied, isPaused, pause, verifyVoiceState } from 'logos/src/controllers/music.ts';
+import { Client } from 'logos/src/client.ts';
+import constants from 'logos/constants.ts';
+import { defaultLocale } from 'logos/types.ts';
 
 const command: OptionBuilder = {
 	...createLocalisations(Commands.music.options.pause),
 	type: ApplicationCommandOptionTypes.SubCommand,
-	handle: pauseSong,
+	handle: handlePausePlayback,
 };
 
-function pauseSong(
-	[client, bot]: [Client, Bot],
-	interaction: Interaction,
-): void {
-	const musicController = client.music.get(interaction.guildId!);
-	if (!musicController) return;
+function handlePausePlayback([client, bot]: [Client, Bot], interaction: Interaction): void {
+	const controller = client.features.music.controllers.get(interaction.guildId!);
+	if (controller === undefined) return;
 
-	const [canAct, _voiceState] = musicController.verifyMemberVoiceState(
-		interaction,
-	);
-	if (!canAct) return;
+	const voiceState = getVoiceState(client, interaction);
+	const isVerifiedVoiceState = verifyVoiceState(bot, interaction, controller, voiceState);
+	if (!isVerifiedVoiceState) return;
 
-	if (!musicController.isOccupied) {
+	if (!isOccupied(controller.player)) {
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -45,22 +38,21 @@ function pauseSong(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(
-							Commands.music.options.pause.strings.noSongToPause,
-							interaction.locale,
-						),
-						color: configuration.interactions.responses.colors.yellow,
+						description: localise(Commands.music.options.pause.strings.noSongToPause, interaction.locale),
+						color: constants.colors.dullYellow,
 					}],
 				},
 			},
 		);
 	}
 
-	if (musicController.isPaused) {
-		return resumeSong([client, bot], interaction);
+	if (isPaused(controller.player)) {
+		return handleResumePlayback([client, bot], interaction);
 	}
 
-	musicController.pause();
+	pause(controller.player);
+
+	const pausedString = localise(Commands.music.options.pause.strings.paused.header, defaultLocale);
 
 	return void sendInteractionResponse(
 		bot,
@@ -70,17 +62,9 @@ function pauseSong(
 			type: InteractionResponseTypes.ChannelMessageWithSource,
 			data: {
 				embeds: [{
-					title: `⏸️ ${
-						localise(
-							Commands.music.options.pause.strings.paused.header,
-							defaultLanguage,
-						)
-					}`,
-					description: localise(
-						Commands.music.options.pause.strings.paused.body,
-						defaultLanguage,
-					),
-					color: configuration.interactions.responses.colors.invisible,
+					title: `⏸️ ${pausedString}`,
+					description: localise(Commands.music.options.pause.strings.paused.body, defaultLocale),
+					color: constants.colors.invisible,
 				}],
 			},
 		},

@@ -1,11 +1,10 @@
-import { Commands } from '../../../../assets/localisations/commands.ts';
-import { createLocalisations } from '../../../../assets/localisations/types.ts';
-import { ApplicationCommandOptionTypes } from '../../../../deps.ts';
-import { OptionBuilder } from '../../../commands/command.ts';
-import configuration from '../../../configuration.ts';
-import { show } from '../../parameters.ts';
-import { displayVolume } from './volume/display.ts';
-import { setVolume } from './volume/set.ts';
+import { ApplicationCommandOptionTypes } from 'discordeno';
+import { Commands, createLocalisations } from 'logos/assets/localisations/mod.ts';
+import { handleDisplayVolume } from 'logos/src/commands/music/commands/volume/display.ts';
+import { handleSetVolume } from 'logos/src/commands/music/commands/volume/set.ts';
+import { OptionBuilder } from 'logos/src/commands/command.ts';
+import { show } from 'logos/src/commands/parameters.ts';
+import configuration from 'logos/configuration.ts';
 
 const command: OptionBuilder = {
 	...createLocalisations(Commands.music.options.volume),
@@ -13,17 +12,15 @@ const command: OptionBuilder = {
 	options: [{
 		...createLocalisations(Commands.music.options.volume.options.display),
 		type: ApplicationCommandOptionTypes.SubCommand,
-		handle: displayVolume,
+		handle: handleDisplayVolume,
 		options: [show],
 	}, {
 		...createLocalisations(Commands.music.options.volume.options.set),
 		type: ApplicationCommandOptionTypes.SubCommand,
-		handle: setVolume,
+		handle: handleSetVolume,
 		options: [{
 			...createLocalisations(
-				Commands.music.options.volume.options.set.options.volume(
-					configuration.music.maxima.volume,
-				),
+				Commands.music.options.volume.options.set.options.volume(configuration.music.limits.volume),
 			),
 			type: ApplicationCommandOptionTypes.Integer,
 			required: true,

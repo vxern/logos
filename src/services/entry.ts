@@ -1,51 +1,45 @@
-import { Bot, Interaction, InteractionTypes } from '../../deps.ts';
-import { ServiceStarter } from './service.ts';
-import { createInteractionCollector } from '../utils.ts';
-import { onAcceptRules } from './entry/accept-rules.ts';
-import { onSelectLanguageProficiency } from './entry/select-language-proficiency.ts';
-import { Client } from '../client.ts';
-
-const entrySteps = [
-	'ACCEPTED_RULES',
-	'SELECTED_LANGUAGE_PROFICIENCY',
-] as const;
-type Step = (typeof entrySteps)[number];
+import { Bot, Interaction, InteractionTypes } from 'discordeno';
+import {
+	handleAcceptRules,
+	handleRequestVerification,
+	handleSelectLanguageProficiency,
+} from 'logos/src/services/entry-stages/mod.ts';
+import { ServiceStarter } from 'logos/src/services/services.ts';
+import { Client } from 'logos/src/client.ts';
+import { createInteractionCollector } from 'logos/src/interactions.ts';
+import constants from 'logos/constants.ts';
 
 type EntryInteractionHandler = (
 	[client, bot]: [Client, Bot],
-	interaction: Interaction & { type: InteractionTypes.MessageComponent },
+	interaction: Interaction,
 	parameter: string,
 ) => Promise<void> | void;
 
-const interactionHandlers: { [key in Step]: EntryInteractionHandler } = {
-	'ACCEPTED_RULES': onAcceptRules,
-	'SELECTED_LANGUAGE_PROFICIENCY': onSelectLanguageProficiency,
+const interactionHandlers: Record<string, EntryInteractionHandler> = {
+	[constants.staticComponentIds.acceptedRules]: handleAcceptRules,
+	[constants.staticComponentIds.requestedVerification]: handleRequestVerification,
+	[constants.staticComponentIds.selectedLanguageProficiency]: handleSelectLanguageProficiency,
 };
 
-const service: ServiceStarter = (clientWithBot) => {
-	for (const entryStep of entrySteps) {
-		createInteractionCollector(clientWithBot, {
+const service: ServiceStarter = setupEntryProcess;
+
+function setupEntryProcess([client, bot]: [Client, Bot]): void {
+	for (const step of Object.keys(interactionHandlers)) {
+		createInteractionCollector([client, bot], {
 			type: InteractionTypes.MessageComponent,
-			customId: entryStep,
+			customId: step,
 			doesNotExpire: true,
 			onCollect: (_bot, interaction) => {
 				const selectionCustomId = interaction.data?.customId;
-				if (!selectionCustomId) return;
+				if (selectionCustomId === undefined) return;
 
-				const [step, parameter] = <[Step, string]> selectionCustomId.split('|');
+				const [step, parameter] = selectionCustomId.split('|') as [string, string];
+				const handleInteraction = interactionHandlers[step as keyof typeof interactionHandlers]!;
 
-				const handleInteraction = interactionHandlers[step];
-
-				return void handleInteraction(
-					clientWithBot,
-					<Interaction & {
-						type: InteractionTypes.MessageComponent;
-					}> interaction,
-					parameter,
-				);
+				return void handleInteraction([client, bot], interaction, parameter);
 			},
 		});
 	}
-};
+}
 
 export default service;

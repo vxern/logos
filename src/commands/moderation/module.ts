@@ -1,21 +1,13 @@
-import configuration from '../../configuration.ts';
-import { Document } from '../../database/structs/document.ts';
-import { Warning } from '../../database/structs/users/warning.ts';
-import cite from './commands/cite.ts';
-import pardon from './commands/pardon.ts';
-import timeout from './commands/timeout.ts';
-import warn from './commands/warn.ts';
+import { Warning } from 'logos/src/database/structs/mod.ts';
+import { Document } from 'logos/src/database/document.ts';
+import configuration from 'logos/configuration.ts';
 
-const commands = [cite, pardon, timeout, warn];
-
-function getRelevantWarnings(
-	warnings: Document<Warning>[],
-): Document<Warning>[] {
-	return warnings.filter((warning) => {
-		return (Date.now() - warning.ts) <
-			configuration.guilds.moderation.warnings.interval;
-	});
+function getActiveWarnings(warnings: Map<string, Document<Warning>>): Map<string, Document<Warning>> {
+	return new Map(
+		Array.from(warnings.entries()).filter(
+			([_referenceId, warning]) => (Date.now() - warning.data.createdAt) < configuration.commands.warn.within,
+		),
+	);
 }
 
-export default commands;
-export { getRelevantWarnings };
+export { getActiveWarnings };

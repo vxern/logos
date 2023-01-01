@@ -1,8 +1,3 @@
-import { Commands } from '../../../../../assets/localisations/commands.ts';
-import {
-	createLocalisations,
-	localise,
-} from '../../../../../assets/localisations/types.ts';
 import {
 	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
@@ -11,46 +6,34 @@ import {
 	Interaction,
 	InteractionResponseTypes,
 	sendInteractionResponse,
-} from '../../../../../deps.ts';
-import { Client, resolveInteractionToMember } from '../../../../client.ts';
-import configuration from '../../../../configuration.ts';
-import { getPraises } from '../../../../database/functions/praises.ts';
-import { getOrCreateUser } from '../../../../database/functions/users.ts';
-import { getWarnings } from '../../../../database/functions/warnings.ts';
-import { mention, MentionTypes } from '../../../../formatting.ts';
-import { defaultLanguage } from '../../../../types.ts';
-import { OptionBuilder } from '../../../command.ts';
-import { show, user } from '../../../parameters.ts';
+} from 'discordeno';
+import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
+import { OptionBuilder } from 'logos/src/commands/command.ts';
+import { show, user } from 'logos/src/commands/parameters.ts';
+import { Client, resolveInteractionToMember } from 'logos/src/client.ts';
+import { parseArguments } from 'logos/src/interactions.ts';
+import constants from 'logos/constants.ts';
+import { mention, MentionTypes } from 'logos/formatting.ts';
+import { defaultLocale } from 'logos/types.ts';
 
 const command: OptionBuilder = {
 	...createLocalisations(Commands.profile.options.view),
 	type: ApplicationCommandOptionTypes.SubCommand,
 	options: [{ ...user, required: false }, show],
-	handle: viewProfile,
+	handle: handleDisplayProfile,
 };
 
-async function viewProfile(
+async function handleDisplayProfile(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {
-	const userIdentifier = <string | undefined> interaction.data?.options?.at(0)
-		?.options?.at(0)?.value;
+	const [{ user, show }] = parseArguments(interaction.data?.options, { show: 'boolean' });
 
-	const show =
-		(<boolean | undefined> interaction.data?.options?.at(0)?.options?.find((
-			option,
-		) => option.name === 'show')
-			?.value) ?? false;
+	const member = resolveInteractionToMember([client, bot], interaction, user ?? interaction.user.id.toString());
+	if (member === undefined) return;
 
-	const member = resolveInteractionToMember(
-		[client, bot],
-		interaction,
-		userIdentifier ?? interaction.user.id.toString(),
-	);
-	if (!member) return;
-
-	const user = member.user;
-	if (!user) return;
+	const target = member.user;
+	if (target === undefined) return;
 
 	function showProfileViewFailure(): void {
 		return void sendInteractionResponse(
@@ -62,38 +45,39 @@ async function viewProfile(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(
-							Commands.profile.options.view.strings.failed,
-							interaction.locale,
-						),
-						color: configuration.interactions.responses.colors.red,
+						description: localise(Commands.profile.options.view.strings.failed, interaction.locale),
+						color: constants.colors.red,
 					}],
 				},
 			},
 		);
 	}
 
-	const subject = await getOrCreateUser(
-		client.database,
+	const subject = await client.database.adapters.users.getOrFetchOrCreate(
+		client,
 		'id',
 		member.id.toString(),
+		member.id,
 	);
-	if (!subject) return showProfileViewFailure();
+	if (subject === undefined) return showProfileViewFailure();
 
-	const praisesReceived = await getPraises(
-		client.database,
-		'subject',
-		subject.ref,
-	);
-	if (!praisesReceived) return showProfileViewFailure();
+	const [praisesSent, praisesReceived, warningsReceived] = await Promise.all([
+		client.database.adapters.praises.getOrFetch(client, 'sender', subject.ref),
+		client.database.adapters.praises.getOrFetch(client, 'recipient', subject.ref),
+		client.database.adapters.warnings.getOrFetch(client, 'recipient', subject.ref),
+	]);
+	if (praisesSent === undefined || praisesReceived === undefined || warningsReceived === undefined) {
+		return showProfileViewFailure();
+	}
 
-	const praisesSent = await getPraises(client.database, 'author', subject.ref);
-	if (!praisesSent) return showProfileViewFailure();
+	const locale = show ? defaultLocale : interaction.locale;
 
-	const warningsReceived = await getWarnings(client.database, subject.ref);
-	if (!warningsReceived) return showProfileViewFailure();
-
-	const locale = !show ? interaction.locale : defaultLanguage;
+	const rolesString = localise(Commands.profile.options.view.strings.roles, locale);
+	const statisticsString = localise(Commands.profile.options.view.strings.statistics, locale);
+	const praisesString = localise(Commands.profile.options.view.strings.praises, locale);
+	const warningsString = localise(Commands.profile.options.view.strings.warnings, locale);
+	const receivedString = localise(Commands.profile.options.view.strings.received, locale);
+	const sentString = localise(Commands.profile.options.view.strings.sent, locale);
 
 	return void sendInteractionResponse(
 		bot,
@@ -104,66 +88,26 @@ async function viewProfile(
 			data: {
 				flags: !show ? ApplicationCommandFlags.Ephemeral : undefined,
 				embeds: [{
-					title: localise(
-						Commands.profile.options.view.strings.informationForUser,
-						locale,
-					)(user.username),
+					title: localise(Commands.profile.options.view.strings.informationForUser, locale)(target.username),
 					thumbnail: (() => {
 						const iconURL = getAvatarURL(
 							bot,
-							user.id,
-							user.discriminator,
-							{ avatar: user.avatar, size: 4096, format: 'webp' },
+							target.id,
+							target.discriminator,
+							{ avatar: target.avatar, size: 4096, format: 'webp' },
 						);
-						if (!iconURL) return;
+						if (iconURL === undefined) return;
 
 						return { url: iconURL };
 					})(),
 					fields: [{
-						name: `💼 ${
-							localise(
-								Commands.profile.options.view.strings.roles,
-								locale,
-							)
-						}`,
-						value: member.roles.map((roleId) =>
-							mention(roleId, MentionTypes.Role)
-						).join(' '),
+						name: `💼 ${rolesString}`,
+						value: member.roles.map((roleId) => mention(roleId, MentionTypes.Role)).join(' '),
 						inline: false,
 					}, {
-						name: `🧮 ${
-							localise(
-								Commands.profile.options.view.strings.statistics,
-								locale,
-							)
-						}`,
-						value: `🙏 ${
-							localise(
-								Commands.profile.options.view.strings.praises,
-								locale,
-							)
-						} — ${
-							localise(
-								Commands.profile.options.view.strings.received,
-								locale,
-							)
-						} ${praisesReceived.length} • ${
-							localise(
-								Commands.profile.options.view.strings.sent,
-								locale,
-							)
-						} ${praisesSent.length}
-😖 ${
-							localise(
-								Commands.profile.options.view.strings.warnings,
-								locale,
-							)
-						} — ${
-							localise(
-								Commands.profile.options.view.strings.received,
-								locale,
-							)
-						} ${warningsReceived.length}`,
+						name: `🧮 ${statisticsString}`,
+						value: `🙏 ${praisesString} — ${receivedString} ${praisesReceived.size} • ${sentString} ${praisesSent.size}
+😖 ${warningsString} — ${receivedString} ${warningsReceived.size}`,
 						inline: false,
 					}],
 				}],

@@ -1,21 +1,19 @@
-import { OptionBuilder } from '../../../commands/command.ts';
-import configuration from '../../../configuration.ts';
-import { ListingResolver, sources } from '../data/sources/sources.ts';
-import { query } from '../parameters.ts';
-import { Client } from '../../../client.ts';
 import {
 	ApplicationCommandOptionTypes,
 	Bot,
 	Interaction,
 	InteractionResponseTypes,
 	sendInteractionResponse,
-} from '../../../../deps.ts';
-import { SongListingContentTypes } from '../data/song-listing.ts';
-import {
-	createLocalisations,
-	localise,
-} from '../../../../assets/localisations/types.ts';
-import { Commands } from '../../../../assets/localisations/commands.ts';
+} from 'discordeno';
+import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
+import { ListingResolver, sources } from 'logos/src/commands/music/data/sources/sources.ts';
+import { SongListingContentTypes } from 'logos/src/commands/music/data/types.ts';
+import { OptionBuilder } from 'logos/src/commands/command.ts';
+import { query } from 'logos/src/commands/parameters.ts';
+import { getVoiceState, receiveNewListing, verifyCanRequestPlayback } from 'logos/src/controllers/music.ts';
+import { Client } from 'logos/src/client.ts';
+import { parseArguments } from 'logos/src/interactions.ts';
+import constants from 'logos/constants.ts';
 
 const command: OptionBuilder = {
 	...createLocalisations(Commands.music.options.play),
@@ -24,7 +22,7 @@ const command: OptionBuilder = {
 		{
 			...createLocalisations(Commands.music.options.play.options.file),
 			type: ApplicationCommandOptionTypes.SubCommand,
-			handle: playStream,
+			handle: handleRequestExternal,
 			options: [{
 				...createLocalisations(
 					Commands.music.options.play.options.file.options.url,
@@ -36,18 +34,17 @@ const command: OptionBuilder = {
 		...Object.entries(sources).map<OptionBuilder>(([name, resolve]) => ({
 			...createLocalisations(Commands.music.options.play.options.source(name)),
 			type: ApplicationCommandOptionTypes.SubCommand,
-			handle: ([client, bot], interaction) =>
-				playSongListing([client, bot], interaction, resolve),
+			handle: ([client, bot], interaction) => handleRequestSongListing([client, bot], interaction, resolve),
 			options: [query],
 		})),
 	],
 };
 
-function playStream(
+function handleRequestExternal(
 	clientWithBot: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {
-	return playSongListing(
+	return handleRequestSongListing(
 		clientWithBot,
 		interaction,
 		(_client, interaction, query) =>
@@ -56,10 +53,7 @@ function playStream(
 					requestedBy: interaction.user.id,
 					content: {
 						type: SongListingContentTypes.External,
-						title: localise(
-							Commands.music.options.play.strings.externalFile,
-							interaction.locale,
-						),
+						title: localise(Commands.music.options.play.strings.externalFile, interaction.locale),
 						url: query,
 					},
 				})
@@ -67,28 +61,25 @@ function playStream(
 	);
 }
 
-async function playSongListing(
+async function handleRequestSongListing(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 	resolveToSongListing: ListingResolver,
 ): Promise<void> {
-	const musicController = client.music.get(interaction.guildId!);
-	if (!musicController) return;
+	const controller = client.features.music.controllers.get(interaction.guildId!);
+	if (controller === undefined) return;
 
-	const titleOrUrl = <string | undefined> interaction.data?.options?.at(0)
-		?.options?.at(0)?.options?.at(0)?.value;
-	if (!titleOrUrl) return;
+	const [{ query }] = parseArguments(interaction.data?.options, {});
+	if (query === undefined) return;
 
-	const [canPlay, voiceState] = musicController.verifyCanPlay(interaction);
-	if (!canPlay || !voiceState) return;
+	const voiceState = getVoiceState(client, interaction);
 
-	const songListing = await resolveToSongListing(
-		client,
-		interaction,
-		titleOrUrl,
-	);
+	const canPlay = verifyCanRequestPlayback(bot, interaction, controller, voiceState);
+	if (!canPlay || voiceState === undefined) return;
 
-	if (!songListing) {
+	const listing = await resolveToSongListing([client, bot], interaction, query);
+
+	if (listing === undefined) {
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -97,29 +88,29 @@ async function playSongListing(
 				type: InteractionResponseTypes.ChannelMessageWithSource,
 				data: {
 					embeds: [{
-						description: localise(
-							Commands.music.options.play.strings.songNotFound,
-							interaction.locale,
-						),
-						color: configuration.interactions.responses.colors.red,
+						description: localise(Commands.music.options.play.strings.songNotFound, interaction.locale),
+						color: constants.colors.red,
 					}],
 				},
 			},
 		);
 	}
 
-	const textChannel = client.cache.channels.get(interaction.channelId!);
-	if (!textChannel) return;
+	const feedbackChannelId = client.cache.channels.get(interaction.channelId!)?.id;
+	if (feedbackChannelId === undefined) return;
 
-	const voiceChannel = client.cache.channels.get(voiceState.channelId!);
-	if (!voiceChannel) return;
+	const voiceChannelId = client.cache.channels.get(voiceState.channelId!)?.id;
+	if (voiceChannelId === undefined) return;
 
-	return void musicController.play(client, {
-		interaction: interaction,
-		songListing: songListing,
-		channels: { text: textChannel, voice: voiceChannel },
-	});
+	return void receiveNewListing(
+		[client, bot],
+		interaction.guildId!,
+		controller,
+		listing,
+		voiceChannelId,
+		feedbackChannelId,
+	);
 }
 
-export { playSongListing };
+export { handleRequestSongListing };
 export default command;

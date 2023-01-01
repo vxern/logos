@@ -1,8 +1,7 @@
-import { Commands } from '../../../../assets/localisations/commands.ts';
-import { createLocalisations } from '../../../../assets/localisations/types.ts';
-import { CommandBuilder } from '../../../commands/command.ts';
-import roles from './profile/roles.ts';
-import view from './profile/view.ts';
+import { Commands, createLocalisations } from 'logos/assets/localisations/mod.ts';
+import roles from 'logos/src/commands/social/commands/profile/roles.ts';
+import view from 'logos/src/commands/social/commands/profile/view.ts';
+import { CommandBuilder } from 'logos/src/commands/command.ts';
 
 const command: CommandBuilder = {
 	...createLocalisations(Commands.profile),

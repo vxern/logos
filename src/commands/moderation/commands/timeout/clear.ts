@@ -3,41 +3,32 @@ import {
 	Bot,
 	editMember,
 	getDmChannel,
-	getGuildIconURL,
 	Interaction,
 	InteractionResponseTypes,
 	sendInteractionResponse,
 	sendMessage,
-} from '../../../../../deps.ts';
-import { Client, resolveInteractionToMember } from '../../../../client.ts';
-import configuration from '../../../../configuration.ts';
-import { mentionUser } from '../../../../utils.ts';
-import { log } from '../../../../controllers/logging.ts';
-import { localise } from '../../../../../assets/localisations/types.ts';
-import { Commands } from '../../../../../assets/localisations/commands.ts';
-import { defaultLanguage } from '../../../../types.ts';
+} from 'discordeno';
+import { Commands, localise } from 'logos/assets/localisations/mod.ts';
+import { log } from 'logos/src/controllers/logging/logging.ts';
+import { Client, resolveInteractionToMember } from 'logos/src/client.ts';
+import { parseArguments } from 'logos/src/interactions.ts';
+import { diagnosticMentionUser, guildAsAuthor } from 'logos/src/utils.ts';
+import constants from 'logos/constants.ts';
+import { defaultLocale } from 'logos/types.ts';
 
-async function clearTimeout(
+async function handleClearTimeout(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {
-	const userIdentifier = <string | undefined> interaction.data?.options?.at(0)
-		?.options?.at(
-			0,
-		)?.value;
-	if (userIdentifier === undefined) return;
+	const [{ user }] = parseArguments(interaction.data?.options, {});
+	if (user === undefined) return;
 
-	const member = resolveInteractionToMember(
-		[client, bot],
-		interaction,
-		userIdentifier,
-	);
-	if (!member) return;
+	const member = resolveInteractionToMember([client, bot], interaction, user, {restrictToNonSelf: true, excludeModerators: true});
+	if (member === undefined) return;
 
-	const timedOutUntil = member.communicationDisabledUntil;
+	const timedOutUntil = member.communicationDisabledUntil ?? undefined;
 
-	const notTimedOut = !timedOutUntil ||
-		timedOutUntil < Date.now();
+	const notTimedOut = timedOutUntil === undefined || timedOutUntil < Date.now();
 
 	if (notTimedOut) {
 		return void sendInteractionResponse(
@@ -49,26 +40,21 @@ async function clearTimeout(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(
-							Commands.timeout.strings.notTimedOut,
-							interaction.locale,
-						),
-						color: configuration.interactions.responses.colors.yellow,
+						description: localise(Commands.timeout.strings.notTimedOut, interaction.locale),
+						color: constants.colors.dullYellow,
 					}],
 				},
 			},
 		);
 	}
 
-	await editMember(
-		bot,
-		interaction.guildId!,
-		member.id,
-		{ communicationDisabledUntil: null },
-	);
-
 	const guild = client.cache.guilds.get(interaction.guildId!);
-	if (!guild) return;
+	if (guild === undefined) return;
+
+	const [_member, dmChannel] = await Promise.all([
+		editMember(bot, interaction.guildId!, member.id, { communicationDisabledUntil: null }),
+		getDmChannel(bot, member.id).catch(() => undefined),
+	]);
 
 	log([client, bot], guild, 'memberTimeoutRemove', member, interaction.user);
 
@@ -81,39 +67,26 @@ async function clearTimeout(
 			data: {
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
-					description: localise(
-						Commands.timeout.strings.timeoutCleared,
-						interaction.locale,
-					)(mentionUser(member.user!)),
-					color: configuration.interactions.responses.colors.green,
+					description: localise(Commands.timeout.strings.timeoutCleared, interaction.locale)(
+						diagnosticMentionUser(member.user!),
+					),
+					color: constants.colors.lightGreen,
 				}],
 			},
 		},
 	);
 
-	const dmChannel = await getDmChannel(bot, member.id);
-	if (!dmChannel) return;
-
-	return void sendMessage(bot, dmChannel.id, {
-		embeds: [
-			{
-				thumbnail: (() => {
-					const iconURL = getGuildIconURL(bot, guild.id, guild.icon, {
-						size: 64,
-						format: 'webp',
-					});
-					if (!iconURL) return;
-
-					return { url: iconURL };
-				})(),
-				description: localise(
-					Commands.timeout.strings.timeoutClearedDirect,
-					defaultLanguage,
-				),
-				color: configuration.interactions.responses.colors.green,
-			},
-		],
-	});
+	if (dmChannel !== undefined) {
+		return void sendMessage(bot, dmChannel.id, {
+			embeds: [
+				{
+					author: guildAsAuthor(bot, guild),
+					description: localise(Commands.timeout.strings.timeoutClearedDirect, defaultLocale),
+					color: constants.colors.lightGreen,
+				},
+			],
+		});
+	}
 }
 
-export { clearTimeout };
+export { handleClearTimeout };

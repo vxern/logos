@@ -1,13 +1,12 @@
-import { fromHex } from '../../../utils.ts';
-import { RoleCategory, RoleCategoryTypes } from './structures/role-category.ts';
-import { RoleCollectionTypes } from './structures/role-collection.ts';
-import { Roles } from '../../../../assets/localisations/roles.ts';
+import { Roles } from 'logos/assets/localisations/mod.ts';
+import { RoleCategory, RoleCategoryTypes, RoleCollectionTypes } from 'logos/src/commands/social/data/types.ts';
+import constants from 'logos/constants.ts';
 
 const categories: RoleCategory[] = [
 	{
 		...Roles.proficiency,
 		type: RoleCategoryTypes.Category,
-		color: fromHex('#1c1c1c'),
+		color: constants.colors.black,
 		emoji: '🎓',
 		restrictToOneRole: true,
 		collection: {
@@ -29,14 +28,14 @@ const categories: RoleCategory[] = [
 	},
 	{
 		...Roles.personalisation,
-		color: fromHex('#ffe548'),
+		color: constants.colors.yellow,
 		emoji: '🌈',
 		type: RoleCategoryTypes.CategoryGroup,
 		categories: [
 			{
 				...Roles.personalisation.categories.orthography,
 				type: RoleCategoryTypes.Category,
-				color: fromHex('#d6e3f8'),
+				color: constants.colors.husky,
 				emoji: '🖋️',
 				restrictToOneRole: true,
 				collection: {
@@ -52,7 +51,7 @@ const categories: RoleCategory[] = [
 			{
 				...Roles.personalisation.categories.gender,
 				type: RoleCategoryTypes.Category,
-				color: fromHex('#ff4b3e'),
+				color: constants.colors.orangeRed,
 				emoji: '⚧',
 				restrictToOneRole: true,
 				collection: {
@@ -75,7 +74,7 @@ const categories: RoleCategory[] = [
 			{
 				...Roles.personalisation.categories.abroad,
 				type: RoleCategoryTypes.Category,
-				color: fromHex('#d6e3f8'),
+				color: constants.colors.husky,
 				emoji: '🌎',
 				restrictToOneRole: false,
 				collection: {
@@ -91,7 +90,7 @@ const categories: RoleCategory[] = [
 	{
 		...Roles.learning,
 		type: RoleCategoryTypes.Category,
-		color: fromHex('#daddd8'),
+		color: constants.colors.lightGray,
 		emoji: '📖',
 		restrictToOneRole: false,
 		collection: {
@@ -114,7 +113,7 @@ const categories: RoleCategory[] = [
 	{
 		...Roles.ethnicity,
 		type: RoleCategoryTypes.Category,
-		color: fromHex('#68d8d6'),
+		color: constants.colors.turquoise,
 		emoji: '🗾',
 		restrictToOneRole: false,
 		limit: 2,
@@ -129,7 +128,7 @@ const categories: RoleCategory[] = [
 	{
 		...Roles.dialects,
 		type: RoleCategoryTypes.Category,
-		color: fromHex('#00cc66'),
+		color: constants.colors.green,
 		emoji: '🏷️',
 		restrictToOneRole: false,
 		collection: {
@@ -142,7 +141,7 @@ const categories: RoleCategory[] = [
 	{
 		...Roles.regions,
 		type: RoleCategoryTypes.Category,
-		color: fromHex('#c5e0d8'),
+		color: constants.colors.greenishLightGray,
 		emoji: '🤷‍♂️',
 		restrictToOneRole: false,
 		limit: 2,

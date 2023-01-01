@@ -1,37 +1,34 @@
-import { Commands } from '../../../../assets/localisations/commands.ts';
-import {
-	createLocalisations,
-	localise,
-} from '../../../../assets/localisations/types.ts';
 import {
 	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
 	Bot,
+	Interaction,
 	InteractionResponseTypes,
-} from '../../../../deps.ts';
-import { Interaction, sendInteractionResponse } from '../../../../deps.ts';
-import { Client } from '../../../client.ts';
-import { OptionBuilder } from '../../../commands/command.ts';
-import configuration from '../../../configuration.ts';
-import { defaultLanguage } from '../../../types.ts';
+	sendInteractionResponse,
+} from 'discordeno';
+import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
+import { OptionBuilder } from 'logos/src/commands/command.ts';
+import { getVoiceState, isOccupied, reset, verifyVoiceState } from 'logos/src/controllers/music.ts';
+import { Client } from 'logos/src/client.ts';
+import constants from 'logos/constants.ts';
+import { defaultLocale } from 'logos/types.ts';
 
 const command: OptionBuilder = {
 	...createLocalisations(Commands.music.options.stop),
 	type: ApplicationCommandOptionTypes.SubCommand,
-	handle: stopSession,
+	handle: handleStopPlayback,
 };
 
-function stopSession(
-	[client, bot]: [Client, Bot],
-	interaction: Interaction,
-): void {
-	const musicController = client.music.get(interaction.guildId!);
-	if (!musicController) return;
+function handleStopPlayback([client, bot]: [Client, Bot], interaction: Interaction): void {
+	const controller = client.features.music.controllers.get(interaction.guildId!);
+	if (controller === undefined) return;
 
-	const [canAct, _] = musicController.verifyMemberVoiceState(interaction);
-	if (!canAct) return;
+	const voiceState = getVoiceState(client, interaction);
 
-	if (!musicController.isOccupied) {
+	const isVoiceStateVerified = verifyVoiceState(bot, interaction, controller, voiceState);
+	if (!isVoiceStateVerified) return;
+
+	if (!isOccupied(controller.player)) {
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -41,18 +38,17 @@ function stopSession(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(
-							Commands.music.options.stop.strings.notPlayingMusic,
-							interaction.locale,
-						),
-						color: configuration.interactions.responses.colors.yellow,
+						description: localise(Commands.music.strings.notPlayingMusic, interaction.locale),
+						color: constants.colors.dullYellow,
 					}],
 				},
 			},
 		);
 	}
 
-	musicController.reset();
+	reset(client, interaction.guildId!);
+
+	const stoppedString = localise(Commands.music.options.stop.strings.stopped.header, defaultLocale);
 
 	return void sendInteractionResponse(
 		bot,
@@ -62,17 +58,9 @@ function stopSession(
 			type: InteractionResponseTypes.ChannelMessageWithSource,
 			data: {
 				embeds: [{
-					title: `⏹️ ${
-						localise(
-							Commands.music.options.stop.strings.stopped.header,
-							defaultLanguage,
-						)
-					}`,
-					description: localise(
-						Commands.music.options.stop.strings.stopped.body,
-						defaultLanguage,
-					),
-					color: configuration.interactions.responses.colors.blue,
+					title: `⏹️ ${stoppedString}`,
+					description: localise(Commands.music.options.stop.strings.stopped.body, defaultLocale),
+					color: constants.colors.blue,
 				}],
 			},
 		},

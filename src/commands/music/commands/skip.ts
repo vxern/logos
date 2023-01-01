@@ -1,8 +1,3 @@
-import { Commands } from '../../../../assets/localisations/commands.ts';
-import {
-	createLocalisations,
-	localise,
-} from '../../../../assets/localisations/types.ts';
 import {
 	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
@@ -10,57 +5,45 @@ import {
 	Interaction,
 	InteractionResponseTypes,
 	sendInteractionResponse,
-} from '../../../../deps.ts';
-import { Client } from '../../../client.ts';
-import { OptionBuilder } from '../../../commands/command.ts';
-import configuration from '../../../configuration.ts';
-import { defaultLanguage } from '../../../types.ts';
-import { SongListingContentTypes } from '../data/song-listing.ts';
-import { by, collection, to } from '../parameters.ts';
+} from 'discordeno';
+import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
+import { OptionBuilder } from 'logos/src/commands/command.ts';
+import { by, collection, to } from 'logos/src/commands/parameters.ts';
+import { getVoiceState, isCollection, isOccupied, skip, verifyVoiceState } from 'logos/src/controllers/music.ts';
+import { Client } from 'logos/src/client.ts';
+import { parseArguments } from 'logos/src/interactions.ts';
+import constants from 'logos/constants.ts';
+import { defaultLocale } from 'logos/types.ts';
 
 const command: OptionBuilder = {
 	...createLocalisations(Commands.music.options.skip),
 	type: ApplicationCommandOptionTypes.SubCommand,
-	handle: skipSong,
+	handle: handleSkipAction,
 	options: [collection, by, to],
 };
 
-function skipSong(
-	[client, bot]: [Client, Bot],
-	interaction: Interaction,
-): void {
-	const musicController = client.music.get(interaction.guildId!);
-	if (!musicController) return;
+function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction): void {
+	const controller = client.features.music.controllers.get(interaction.guildId!);
+	if (controller === undefined) return;
 
-	const [canAct, _voiceState] = musicController.verifyMemberVoiceState(
-		interaction,
-	);
-	if (!canAct) return;
+	const voiceState = getVoiceState(client, interaction);
+
+	const isVoiceStateVerified = verifyVoiceState(bot, interaction, controller, voiceState);
+	if (!isVoiceStateVerified) return;
 
 	const data = interaction.data;
-	if (!data) return;
+	if (data === undefined) return;
 
-	const skipCollection =
-		(<boolean | undefined> data.options?.at(0)?.options?.find((option) =>
-			option.name === 'collection'
-		)?.value) ?? false;
+	const [{ collection, by, to }] = parseArguments(interaction.data?.options, {
+		collection: 'boolean',
+		by: 'number',
+		to: 'number',
+	});
 
-	const byString = <string | undefined> data.options?.at(0)?.options?.find((
-		option,
-	) => option.name === 'by')?.value;
-	const toString = <string | undefined> data.options?.at(0)?.options?.find((
-		option,
-	) => option.name === 'to')?.value;
+	if (by !== undefined && isNaN(by)) return;
+	if (to !== undefined && isNaN(to)) return;
 
-	const by = byString ? Number(byString) : undefined;
-	if (by && isNaN(by)) return;
-
-	const to = toString ? Number(toString) : undefined;
-	if (to && isNaN(to)) return;
-
-	const songListing = musicController.current;
-
-	if (!musicController.isOccupied || !songListing) {
+	if (!isOccupied(controller.player) || controller.currentListing === undefined) {
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -70,21 +53,15 @@ function skipSong(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(
-							Commands.music.options.skip.strings.noSongToSkip,
-							interaction.locale,
-						),
-						color: configuration.interactions.responses.colors.yellow,
+						description: localise(Commands.music.options.skip.strings.noSongToSkip, interaction.locale),
+						color: constants.colors.dullYellow,
 					}],
 				},
 			},
 		);
 	}
 
-	if (
-		skipCollection &&
-		songListing.content.type !== SongListingContentTypes.Collection
-	) {
+	if (collection !== undefined && !isCollection(controller.currentListing?.content)) {
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -94,18 +71,15 @@ function skipSong(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(
-							Commands.music.options.skip.strings.noSongCollectionToSkip,
-							interaction.locale,
-						),
-						color: configuration.interactions.responses.colors.yellow,
+						description: localise(Commands.music.options.skip.strings.noSongCollectionToSkip, interaction.locale),
+						color: constants.colors.dullYellow,
 					}],
 				},
 			},
 		);
 	}
 
-	if (by && to) {
+	if (by !== undefined && to !== undefined) {
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -115,18 +89,15 @@ function skipSong(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(
-							Commands.music.strings.tooManySkipArguments,
-							interaction.locale,
-						),
-						color: configuration.interactions.responses.colors.red,
+						description: localise(Commands.music.strings.tooManySkipArguments, interaction.locale),
+						color: constants.colors.red,
 					}],
 				},
 			},
 		);
 	}
 
-	if ((by && by <= 0) || (to && to <= 0)) {
+	if ((by !== undefined && by <= 0) || (to !== undefined && to <= 0)) {
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -136,65 +107,44 @@ function skipSong(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(
-							Commands.music.strings.mustBeGreaterThanZero,
-							interaction.locale,
-						),
-						color: configuration.interactions.responses.colors.red,
+						description: localise(Commands.music.strings.mustBeGreaterThanZero, interaction.locale),
+						color: constants.colors.red,
 					}],
 				},
 			},
 		);
 	}
 
-	if (by) {
-		if (
-			songListing.content.type === SongListingContentTypes.Collection &&
-			!skipCollection
-		) {
-			const listingsToSkip = Math.min(
+	const isSkippingCollection = collection ?? false;
+
+	if (by !== undefined) {
+		let listingsToSkip!: number;
+		if (isCollection(controller.currentListing?.content) && collection === undefined) {
+			listingsToSkip = Math.min(
 				by,
-				songListing.content.songs.length -
-					(songListing.content.position + 1),
+				controller.currentListing!.content.songs.length - (controller.currentListing!.content.position + 1),
 			);
-
-			musicController.skip(skipCollection, {
-				by: listingsToSkip,
-				to: undefined,
-			});
 		} else {
-			const listingsToSkip = Math.min(by, musicController.queue.length);
-
-			musicController.skip(skipCollection, {
-				by: listingsToSkip,
-				to: undefined,
-			});
+			listingsToSkip = Math.min(by, controller.listingQueue.length);
 		}
-	} else if (to) {
-		if (
-			songListing.content.type === SongListingContentTypes.Collection &&
-			!skipCollection
-		) {
-			const listingToSkipTo = Math.min(to, songListing.content.songs.length);
-
-			musicController.skip(skipCollection, {
-				by: undefined,
-				to: listingToSkipTo,
-			});
+		skip(controller, isSkippingCollection, { by: listingsToSkip });
+	} else if (to !== undefined) {
+		let listingToSkipTo!: number;
+		if (isCollection(controller.currentListing?.content) && collection === undefined) {
+			listingToSkipTo = Math.min(to, controller.currentListing!.content.songs.length);
 		} else {
-			const listingToSkipTo = Math.min(to, musicController.queue.length);
-
-			musicController.skip(skipCollection, {
-				by: undefined,
-				to: listingToSkipTo,
-			});
+			listingToSkipTo = Math.min(to, controller.listingQueue.length);
 		}
+		skip(controller, isSkippingCollection, { to: listingToSkipTo });
 	} else {
-		musicController.skip(skipCollection, {
-			by: undefined,
-			to: undefined,
-		});
+		skip(controller, isSkippingCollection, {});
 	}
+
+	const messageLocalisations = (collection ?? false)
+		? Commands.music.options.skip.strings.skippedSongCollection
+		: Commands.music.options.skip.strings.skippedSong;
+
+	const messageString = localise(messageLocalisations.header, defaultLocale);
 
 	return void sendInteractionResponse(
 		bot,
@@ -204,17 +154,9 @@ function skipSong(
 			type: InteractionResponseTypes.ChannelMessageWithSource,
 			data: {
 				embeds: [{
-					title: `⏭️ ${
-						localise(
-							Commands.music.options.skip.strings.skipped.header,
-							defaultLanguage,
-						)
-					}`,
-					description: localise(
-						Commands.music.options.skip.strings.skipped.body,
-						defaultLanguage,
-					)(skipCollection),
-					color: configuration.interactions.responses.colors.invisible,
+					title: `⏭️ ${messageString}`,
+					description: localise(messageLocalisations.body, defaultLocale),
+					color: constants.colors.invisible,
 				}],
 			},
 		},

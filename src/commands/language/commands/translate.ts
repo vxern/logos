@@ -1,34 +1,33 @@
-// deno-lint-ignore-file camelcase
-import 'dotenv_load';
-import { Commands } from '../../../../assets/localisations/commands.ts';
-import {
-	getLocalisations,
-	TranslationLanguage,
-} from '../../../../assets/localisations/languages.ts';
-import {
-	createLocalisations,
-	localise,
-} from '../../../../assets/localisations/types.ts';
 import {
 	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
 	Bot,
 	editOriginalInteractionResponse,
+	Embed,
 	Interaction,
 	InteractionResponseTypes,
 	InteractionTypes,
 	sendInteractionResponse,
-} from '../../../../deps.ts';
-import { Client } from '../../../client.ts';
-import { CommandBuilder } from '../../../commands/command.ts';
-import configuration from '../../../configuration.ts';
-import { deepLApiEndpoints } from '../../../constants.ts';
-import { show } from '../../parameters.ts';
+} from 'discordeno';
+import {
+	Commands,
+	createLocalisations,
+	getLocalisationsForLanguage,
+	localise,
+} from 'logos/assets/localisations/mod.ts';
+import { resolveToSupportedLanguage } from 'logos/src/commands/language/module.ts';
+import { CommandBuilder } from 'logos/src/commands/command.ts';
+import { show } from 'logos/src/commands/parameters.ts';
+import { Client } from 'logos/src/client.ts';
+import { parseArguments } from 'logos/src/interactions.ts';
+import { addParametersToURL, diagnosticMentionUser } from 'logos/src/utils.ts';
+import constants from 'logos/constants.ts';
 
 const command: CommandBuilder = {
 	...createLocalisations(Commands.translate),
+	isRateLimited: true,
 	defaultMemberPermissions: ['VIEW_CHANNEL'],
-	handle: translate,
+	handle: handleTranslateText,
 	options: [{
 		...createLocalisations(Commands.translate.options.from),
 		type: ApplicationCommandOptionTypes.String,
@@ -46,50 +45,8 @@ const command: CommandBuilder = {
 	}, show],
 };
 
-interface DeepLSupportedLanguage {
-	language: string;
-	name: TranslationLanguage;
-	supports_formality: boolean;
-}
-
-/** Represents a supported language object sent by DeepL. */
-interface SupportedLanguage {
-	/** The language name */
-	name: TranslationLanguage;
-
-	/** The language code. */
-	code: string;
-
-	/** Whether the formality option is supported for this language. */
-	supportsFormality: boolean;
-}
-
-const deepLSecret = Deno.env.get('DEEPL_SECRET')!;
-
-const supportedLanguages = await getSupportedLanguages();
-
-async function getSupportedLanguages(): Promise<SupportedLanguage[]> {
-	const response = await fetch(
-		addParametersToURL(deepLApiEndpoints.languages, {
-			'auth_key': deepLSecret,
-			'type': 'target',
-		}),
-	);
-	if (!response.ok) return [];
-
-	const results = <DeepLSupportedLanguage[]> await response.json().catch(
-		() => [],
-	);
-
-	return results.map((result) => ({
-		name: result.name,
-		code: result.language,
-		supportsFormality: result.supports_formality,
-	}));
-}
-
 interface DeepLTranslation {
-	detected_source_language: string;
+	'detected_source_language': string;
 	text: string;
 }
 
@@ -102,7 +59,11 @@ interface Translation {
 	text: string;
 }
 
-async function getTranslation(
+interface TranslationResult {
+	translations: DeepLTranslation[];
+}
+
+async function translateText(
 	sourceLanguageCode: string,
 	targetLanguageCode: string,
 	text: string,
@@ -110,8 +71,8 @@ async function getTranslation(
 	const sourceLanguageCodeBase = sourceLanguageCode.split('-').at(0)!;
 
 	const response = await fetch(
-		addParametersToURL(deepLApiEndpoints.translate, {
-			'auth_key': deepLSecret,
+		addParametersToURL(constants.endpoints.deepl.translate, {
+			'auth_key': Deno.env.get('DEEPL_SECRET')!,
 			'text': text,
 			'source_lang': sourceLanguageCodeBase,
 			'target_lang': targetLanguageCode,
@@ -119,9 +80,8 @@ async function getTranslation(
 	);
 	if (!response.ok) return;
 
-	const results =
-		(<{ translations: DeepLTranslation[] }> await response.json()).translations;
-	if (results.length !== 1) return;
+	const results = (await response.json() as TranslationResult).translations;
+	if (results.length === 0) return;
 
 	const result = results.at(0)!;
 	return {
@@ -130,49 +90,36 @@ async function getTranslation(
 	};
 }
 
-function resolveToSupportedLanguage(
-	languageOrCode: string,
-): SupportedLanguage | undefined {
-	const languageOrCodeLowercase = languageOrCode.toLowerCase();
-	return supportedLanguages.find((language) =>
-		language.code.toLowerCase() === languageOrCodeLowercase ||
-		language.name.toLowerCase() === languageOrCode
-	);
-}
-
 /** Allows the user to translate text from one language to another through the DeepL API. */
-async function translate(
+async function handleTranslateText(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {
 	const guild = client.cache.guilds.get(interaction.guildId!);
-	if (!guild) return;
+	if (guild === undefined) return;
+
+	const [{ from, to, text, show }, focused] = parseArguments(
+		interaction.data?.options,
+		{ show: 'boolean' },
+	);
 
 	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete) {
-		const inputOption = interaction.data?.options?.find((
-			option,
-		) => option.focused);
-		if (inputOption === undefined || inputOption.value === undefined) return;
+		if (focused === undefined || focused.value === undefined) return;
 
-		const isInputtingSourceLanguage = inputOption.name === 'from';
+		const isInputtingSourceLanguage = focused.name === 'from';
 		const localisations = isInputtingSourceLanguage
-			? Commands.translate.strings.source
-			: Commands.translate.strings.target;
+			? Commands.translate.strings.sourceLanguage
+			: Commands.translate.strings.targetLanguage;
 
-		const inputLowercase = (<string> inputOption.value).toLowerCase();
-		const choices = supportedLanguages
-			.map((language) => {
-				return {
-					name: localise(localisations, interaction.locale)(language.name),
-					value: language.code,
-				};
-			})
-			.filter((choice) =>
-				choice.name && choice.name.toLowerCase().includes(inputLowercase)
-			)
-			.slice(0, 25);
-
-		choices.sort((previous, next) => previous.name.localeCompare(next.name));
+		const inputLowercase = (<string> focused.value).toLowerCase();
+		const choices = client.metadata.supportedTranslationLanguages
+			.map((language) => ({
+				name: localise(localisations, interaction.locale)(language.name),
+				value: language.code,
+			}))
+			.filter((choice) => choice.name && choice.name.toLowerCase().includes(inputLowercase))
+			.slice(0, 25)
+			.toSorted((previous, next) => previous.name.localeCompare(next.name));
 
 		return void sendInteractionResponse(
 			bot,
@@ -185,15 +132,9 @@ async function translate(
 		);
 	}
 
-	const data = interaction.data;
-	if (!data) return;
+	if (from === undefined || to === undefined || text === undefined) return;
 
-	const sourceLanguageOrCode = <string | undefined> data.options?.at(0)?.value;
-	const targetLanguageOrCode = <string | undefined> data.options?.at(1)?.value;
-	const text = <string | undefined> data.options?.at(2)?.value;
-	if (!(sourceLanguageOrCode && targetLanguageOrCode && text)) return;
-
-	if (sourceLanguageOrCode === targetLanguageOrCode) {
+	if (from === to) {
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -204,11 +145,10 @@ async function translate(
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(
-							Commands.translate.strings
-								.targetLanguageMustBeDifferentFromSource,
+							Commands.translate.strings.targetLanguageMustBeDifferentFromSource,
 							interaction.locale,
 						),
-						color: configuration.interactions.responses.colors.yellow,
+						color: constants.colors.dullYellow,
 					}],
 				},
 			},
@@ -226,20 +166,17 @@ async function translate(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(
-							Commands.translate.strings.textCannotBeEmpty,
-							interaction.locale,
-						),
-						color: configuration.interactions.responses.colors.yellow,
+						description: localise(Commands.translate.strings.textCannotBeEmpty, interaction.locale),
+						color: constants.colors.dullYellow,
 					}],
 				},
 			},
 		);
 	}
 
-	const sourceLanguage = resolveToSupportedLanguage(sourceLanguageOrCode);
-	const targetLanguage = resolveToSupportedLanguage(targetLanguageOrCode);
-	if (!sourceLanguage || !targetLanguage) {
+	const sourceLanguage = resolveToSupportedLanguage(client, from);
+	const targetLanguage = resolveToSupportedLanguage(client, to);
+	if (sourceLanguage === undefined || targetLanguage === undefined) {
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -249,32 +186,19 @@ async function translate(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: !sourceLanguage
+						description: sourceLanguage === undefined
 							? (
-								!targetLanguage
-									? localise(
-										Commands.translate.strings.invalid.both,
-										interaction.locale,
-									)
-									: localise(
-										Commands.translate.strings.invalid.source,
-										interaction.locale,
-									)
+								targetLanguage === undefined
+									? localise(Commands.translate.strings.invalid.both, interaction.locale)
+									: localise(Commands.translate.strings.invalid.source, interaction.locale)
 							)
-							: localise(
-								Commands.translate.strings.invalid.target,
-								interaction.locale,
-							),
-						color: configuration.interactions.responses.colors.red,
+							: localise(Commands.translate.strings.invalid.target, interaction.locale),
+						color: constants.colors.red,
 					}],
 				},
 			},
 		);
 	}
-
-	const show =
-		<boolean> data.options?.find((option) => option.name === 'show')?.value ??
-			false;
 
 	await sendInteractionResponse(
 		bot,
@@ -286,84 +210,68 @@ async function translate(
 		},
 	);
 
-	const translation = await getTranslation(
-		sourceLanguage.code,
-		targetLanguage.code,
-		text,
+	client.log.info(
+		`Translating a text of length ${text.length} from ${sourceLanguage.name} to ${targetLanguage.name} ` +
+			`as requested by ${diagnosticMentionUser(interaction.user, true)} on ${guild.name}...`,
 	);
-	if (!translation) {
+
+	const translation = await translateText(sourceLanguage.code, targetLanguage.code, text);
+	if (translation === undefined) {
 		return void editOriginalInteractionResponse(
 			bot,
 			interaction.token,
 			{
 				embeds: [{
-					description: localise(
-						Commands.translate.strings.failed,
-						interaction.locale,
-					),
-					color: configuration.interactions.responses.colors.red,
+					description: localise(Commands.translate.strings.failed, interaction.locale),
+					color: constants.colors.red,
 				}],
 			},
 		);
 	}
 
-	// Ensures that an empty translation string doesn't result in embed failure.
-	const translatedText = translation.text.trim().length !== 0
-		? translation.text
-		: '⠀';
+	// Ensures that an empty translation string does not result in embed failure.
+	const translatedText = translation.text.trim().length !== 0 ? translation.text : '⠀';
 
-	const sourceLanguageName = localise(
-		getLocalisations(sourceLanguage.name),
-		interaction.locale,
-	);
-	const targetLanguageName = localise(
-		getLocalisations(targetLanguage.name),
-		interaction.locale,
-	);
+	const sourceLanguageName = localise(getLocalisationsForLanguage(sourceLanguage.name), interaction.locale);
+	const targetLanguageName = localise(getLocalisationsForLanguage(targetLanguage.name), interaction.locale);
+
+	// TODO(vxern): This is a hard-coded, custom upper limit. The actual limit is 1024.
+	//  As such, the check could be improved for precision reasons.
+	const isLong = text.length > 950;
+
+	let embeds: Embed[] = [];
+	if (!isLong) {
+		embeds = [{
+			color: constants.colors.blue,
+			fields: [{
+				name: localise(Commands.translate.strings.sourceText, interaction.locale),
+				value: text,
+				inline: false,
+			}, {
+				name: localise(Commands.translate.strings.translation, interaction.locale),
+				value: translatedText,
+				inline: false,
+			}],
+			footer: { text: `${sourceLanguageName} ➜ ${targetLanguageName}` },
+		}];
+	} else {
+		embeds = [{
+			color: constants.colors.blue,
+			title: localise(Commands.translate.strings.sourceText, interaction.locale),
+			description: text,
+		}, {
+			color: constants.colors.blue,
+			title: localise(Commands.translate.strings.translation, interaction.locale),
+			description: translatedText,
+			footer: { text: `${sourceLanguageName} ➜ ${targetLanguageName}` },
+		}];
+	}
 
 	return void editOriginalInteractionResponse(
 		bot,
 		interaction.token,
-		{
-			embeds: [{
-				color: configuration.interactions.responses.colors.blue,
-				fields: [{
-					name: localise(Commands.translate.strings.text, interaction.locale),
-					value: text,
-					inline: false,
-				}, {
-					name: localise(
-						Commands.translate.strings.translation,
-						interaction.locale,
-					),
-					value: translatedText,
-					inline: false,
-				}],
-				footer: {
-					text: `${sourceLanguageName} ➜ ${targetLanguageName}`,
-				},
-			}],
-		},
+		{ embeds },
 	);
-}
-
-/**
- * Taking a URL and a list of parameters, returns the URL with the parameters appended
- * to it.
- *
- * @param url - The URL to format.
- * @param parameters - The parameters to append to the URL.
- * @returns The formatted URL.
- */
-function addParametersToURL(
-	url: string,
-	parameters: Record<string, string>,
-): string {
-	const query = Object.entries(parameters)
-		.map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
-		.join('&');
-
-	return `${url}?${query}`;
 }
 
 export default command;

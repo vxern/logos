@@ -6,6 +6,7 @@ import {
 	Channel,
 	createBot,
 	createTransformers,
+	DiscordMessage,
 	editShardStatus,
 	EventHandlers,
 	fetchMembers,
@@ -16,24 +17,31 @@ import {
 	InteractionTypes,
 	Member,
 	Message,
+	send as sendShardPayload,
 	sendInteractionResponse,
 	snowflakeToBigint,
 	startBot,
 	Transformers,
 	upsertGuildApplicationCommands,
 	User,
-} from '../deps.ts';
-import services from './services/service.ts';
-//import { MusicController } from './controllers/music.ts';
-import { createDatabase, Database } from './database/database.ts';
-import configuration from './configuration.ts';
-import { Command, InteractionHandler } from './commands/command.ts';
-import { defaultLanguage, Language, supportedLanguages } from './types.ts';
-import { commandBuilders } from './commands/modules.ts';
-import { mentionUser } from './utils.ts';
-import { setupLogging } from './controllers/logging.ts';
-import { localise } from '../assets/localisations/types.ts';
-import { Misc } from '../assets/localisations/misc.ts';
+} from 'discordeno';
+import * as Sentry from 'sentry';
+import { Log as Logger } from 'tl_log';
+import { Node as LavalinkNode, SendGatewayPayload } from 'lavadeno';
+import { localise, Misc } from 'logos/assets/localisations/mod.ts';
+import { DictionaryAdapter, SentencePair } from 'logos/src/commands/language/data/types.ts';
+import { SupportedLanguage } from 'logos/src/commands/language/module.ts';
+import { Command, InteractionHandler } from 'logos/src/commands/command.ts';
+import { setupLogging } from 'logos/src/controllers/logging/logging.ts';
+import { MusicController, setupMusicController } from 'logos/src/controllers/music.ts';
+import { getCommands } from 'logos/src/commands/commands.ts';
+import { createDatabase, Database } from 'logos/src/database/database.ts';
+import services from 'logos/src/services/services.ts';
+import { diagnosticMentionUser } from 'logos/src/utils.ts';
+import configuration from 'logos/configuration.ts';
+import constants from 'logos/constants.ts';
+import { timestamp } from 'logos/formatting.ts';
+import { defaultLanguage, Language, supportedLanguages } from 'logos/types.ts';
 
 interface Collector<
 	E extends keyof EventHandlers,
@@ -71,115 +79,218 @@ function createCache(): Cache {
 }
 
 type Client = Readonly<{
-	database: Database;
+	metadata: {
+		version: string;
+		supportedTranslationLanguages: SupportedLanguage[];
+	};
+	log: Logger;
 	cache: Cache;
+	database: Database;
+	commands: Command[];
 	collectors: Map<Event, Set<Collector<Event>>>;
 	handlers: Map<string, InteractionHandler>;
+	features: {
+		dictionaryAdapters: Map<Language, DictionaryAdapter<unknown>[]>;
+		sentencePairs: Map<Language, SentencePair[]>;
+		music: {
+			node: LavalinkNode;
+			controllers: Map<bigint, MusicController>;
+		};
+		// The keys are user IDs, the values are command usage timestamps mapped by command IDs.
+		rateLimiting: Map<bigint, Map<bigint, number[]>>;
+	};
 }>;
 
-function createClient(): Client {
+function createClient(metadata: Client['metadata'], features: Client['features']): Client {
+	const commands = getCommands();
+
 	return {
-		database: createDatabase(),
+		metadata,
+		log: createLogger(),
 		cache: createCache(),
+		database: createDatabase(),
+		commands,
 		collectors: new Map(),
-		handlers: createCommandHandlers(commandBuilders),
+		handlers: createCommandHandlers(commands),
+		features,
 	};
 }
 
-function initialiseClient(): void {
-	const client = createClient();
+async function initialiseClient(
+	metadata: Client['metadata'],
+	features: Omit<Client['features'], 'music'>,
+): Promise<[Client, Bot]> {
+	const musicFeature = createMusicFeature(
+		(guildId, payload) => {
+			const shardId = client.cache.guilds.get(guildId)?.shardId;
+			if (shardId === undefined) return;
 
-	const eventHandlers = createEventHandlers(client);
-	const cacheHandlers = createCacheHandlers(client, createTransformers({}));
+			const shard = bot.gateway.manager.shards.find((shard) => shard.id === shardId);
+			if (shard === undefined) return;
 
-	const bot = createBot({
+			return void sendShardPayload(shard, payload, true);
+		},
+	);
+
+	const client = createClient(metadata, { ...features, music: musicFeature });
+
+	await prefetchDataFromDatabase(client, client.database);
+
+	const bot = overrideDefaultEventHandlers(createBot({
 		token: Deno.env.get('DISCORD_SECRET')!,
-		intents: Intents.Guilds | Intents.GuildMembers | Intents.GuildVoiceStates,
-		events: eventHandlers,
-		transformers: cacheHandlers,
-	});
+		intents: Intents.Guilds | Intents.GuildMembers | Intents.GuildVoiceStates | Intents.GuildMessages |
+			Intents.MessageContent,
+		events: withMusicEvents(createEventHandlers(client), client.features.music.node),
+		transformers: withCaching(client, createTransformers({})),
+	}));
 
 	startServices([client, bot]);
 
-	return void startBot(bot);
+	return Promise.all([
+		client.features.music.node.connect(bot.id),
+		startBot(bot),
+	]).then(() => [client, bot]);
 }
 
-const version = new TextDecoder().decode(
-	await Deno.run({
-		cmd: ['git', 'tag', '--sort=-committerdate', '--list', 'v*'],
-		stdout: 'piped',
-	}).output(),
-).split('\n').at(0);
+async function prefetchDataFromDatabase(client: Client, database: Database): Promise<void> {
+	await Promise.all([
+		database.adapters.entryRequests.prefetch(client),
+		database.adapters.reports.prefetch(client),
+		database.adapters.suggestions.prefetch(client),
+	]);
+}
+
+function createLogger(): Logger {
+	return new Logger({
+		minLogLevel: Deno.env.get('ENVIRONMENT') === 'development' ? 'debug' : 'info',
+		levelIndicator: 'full',
+	});
+}
+
+function createMusicFeature(sendGatewayPayload: SendGatewayPayload): Client['features']['music'] {
+	const node = new LavalinkNode({
+		connection: {
+			host: Deno.env.get('LAVALINK_HOST')!,
+			port: Number(Deno.env.get('LAVALINK_PORT')!),
+			password: Deno.env.get('LAVALINK_PASSWORD')!,
+			secure: true,
+		},
+		sendGatewayPayload,
+	});
+
+	return {
+		node,
+		controllers: new Map(),
+	};
+}
+
+function withMusicEvents(events: Partial<EventHandlers>, node: LavalinkNode): Partial<EventHandlers> {
+	return {
+		...events,
+		voiceStateUpdate: (_bot, payload) => {
+			node.handleVoiceUpdate({
+				session_id: payload.sessionId,
+				channel_id: payload.channelId !== undefined ? `${payload.channelId}` : null,
+				guild_id: `${payload.guildId}`,
+				user_id: `${payload.userId}`,
+			});
+		},
+		voiceServerUpdate: (_bot, payload) => {
+			node.handleVoiceUpdate({
+				token: payload.token,
+				endpoint: payload.endpoint!,
+				guild_id: `${payload.guildId}`,
+			});
+		},
+	};
+}
+
+function overrideDefaultEventHandlers(bot: Bot): Bot {
+	bot.handlers.MESSAGE_UPDATE = (bot, data) => {
+		const messageData = data.d as DiscordMessage;
+		if (!('author' in messageData)) return;
+
+		bot.events.messageUpdate(bot, bot.transformers.message(bot, messageData));
+	};
+
+	return bot;
+}
 
 function createEventHandlers(client: Client): Partial<EventHandlers> {
 	return {
-		ready: (bot, payload) => {
-			if (!version) return;
-
+		ready: (bot, payload) =>
 			editShardStatus(bot, payload.shardId, {
 				activities: [{
-					name: version,
+					name: client.metadata.version,
 					type: ActivityTypes.Streaming,
 					createdAt: Date.now(),
 				}],
 				status: 'online',
-			});
-		},
+			}),
 		guildCreate: (bot, guild) => {
-			fetchMembers(bot, guild.id, { limit: 0, query: '' });
-
-			upsertGuildApplicationCommands(bot, guild.id, commandBuilders);
+			upsertGuildApplicationCommands(bot, guild.id, client.commands);
 
 			registerGuild(client, guild);
+
 			setupLogging([client, bot], guild);
+			setupMusicController(client, guild.id);
+
+			fetchMembers(bot, guild.id, { limit: 0, query: '' });
+		},
+		channelDelete: (_bot, channel) => {
+			client.cache.channels.delete(channel.id);
+			client.cache.guilds.get(channel.guildId)?.channels.delete(channel.id);
 		},
 		interactionCreate: (bot, interaction) => {
+			if (interaction.data?.customId === 'none') {
+				return <unknown> sendInteractionResponse(bot, interaction.id, interaction.token, {
+					type: InteractionResponseTypes.DeferredUpdateMessage,
+				});
+			}
+
 			const commandName = interaction.data?.name;
-			if (!commandName) return;
+			if (commandName === undefined) return;
 
 			const subCommandGroupOption = interaction.data?.options?.find((option) =>
 				option.type === ApplicationCommandOptionTypes.SubCommandGroup
 			);
 
 			let commandNameFull: string;
-			if (subCommandGroupOption) {
+			if (subCommandGroupOption !== undefined) {
 				const subCommandGroupName = subCommandGroupOption.name;
-				const subCommandName = subCommandGroupOption.options?.find((option) =>
-					option.type === ApplicationCommandOptionTypes.SubCommand
+				const subCommandName = subCommandGroupOption.options?.find(
+					(option) => option.type === ApplicationCommandOptionTypes.SubCommand,
 				)?.name;
-				if (!subCommandName) return;
+				if (subCommandName === undefined) return;
 
-				commandNameFull =
-					`${commandName} ${subCommandGroupName} ${subCommandName}`;
+				commandNameFull = `${commandName} ${subCommandGroupName} ${subCommandName}`;
 			} else {
 				const subCommandName = interaction.data?.options?.find((option) =>
 					option.type === ApplicationCommandOptionTypes.SubCommand
 				)?.name;
-				if (!subCommandName) {
+				if (subCommandName === undefined) {
 					commandNameFull = commandName;
 				} else {
 					commandNameFull = `${commandName} ${subCommandName}`;
 				}
 			}
 
-			const handler = client.handlers.get(commandNameFull);
-			if (!handler) return;
+			const handle = client.handlers.get(commandNameFull);
+			if (handle === undefined) return;
 
-			try {
-				handler([client, bot], interaction);
-			} catch (exception) {
-				console.error(exception);
-			}
+			Promise.resolve(handle([client, bot], interaction)).catch((exception) => {
+				Sentry.captureException(exception);
+				client.log.error(exception);
+			});
 		},
 	};
 }
 
-function createCacheHandlers(
+function withCaching(
 	client: Client,
 	transformers: Transformers,
 ): Transformers {
-	const { guild, user, member, channel, message, role, voiceState } =
-		transformers;
+	const { guild, user, member, channel, message, role, voiceState } = transformers;
 
 	transformers.guild = (bot, payload) => {
 		const result = guild(bot, payload);
@@ -202,9 +313,7 @@ function createCacheHandlers(
 	transformers.member = (bot, payload, ...args) => {
 		const result = member(bot, payload, ...args);
 
-		const memberSnowflake = bot.transformers.snowflake(
-			`${result.id}${result.guildId}`,
-		);
+		const memberSnowflake = bot.transformers.snowflake(`${result.id}${result.guildId}`);
 
 		client.cache.members.set(memberSnowflake, result);
 
@@ -215,6 +324,8 @@ function createCacheHandlers(
 		const result = channel(...args);
 
 		client.cache.channels.set(result.id, result);
+
+		client.cache.guilds.get(result.guildId)?.channels.set(result.id, result);
 
 		return result;
 	};
@@ -228,19 +339,12 @@ function createCacheHandlers(
 
 		client.cache.users.set(user.id, user);
 
-		if (payload.member && payload.guild_id) {
+		if (payload.member !== undefined && payload.guild_id !== undefined) {
 			const guildId = bot.transformers.snowflake(payload.guild_id);
 
-			const member = bot.transformers.member(
-				bot,
-				payload.member,
-				guildId,
-				user.id,
-			);
+			const member = bot.transformers.member(bot, payload.member, guildId, user.id);
 
-			const memberSnowflake = bot.transformers.snowflake(
-				`${member.id}${member.guildId}`,
-			);
+			const memberSnowflake = bot.transformers.snowflake(`${member.id}${member.guildId}`);
 
 			client.cache.members.set(memberSnowflake, member);
 		}
@@ -259,15 +363,54 @@ function createCacheHandlers(
 	transformers.voiceState = (bot, payload) => {
 		const result = voiceState(bot, payload);
 
-		client.cache.guilds.get(result.guildId)?.voiceStates.set(
-			result.userId,
-			result,
-		);
+		client.cache.guilds.get(result.guildId)?.voiceStates.set(result.userId, result);
 
 		return result;
 	};
 
 	return transformers;
+}
+
+function withRateLimiting(handle: InteractionHandler): InteractionHandler {
+	return ([client, bot], interaction) => {
+		if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete) return handle([client, bot], interaction);
+
+		const commandId = interaction.data?.id;
+		if (commandId === undefined) return handle([client, bot], interaction);
+
+		if (!client.features.rateLimiting.has(interaction.user.id)) {
+			client.features.rateLimiting.set(interaction.user.id, new Map());
+		}
+
+		const executedAt = Date.now();
+
+		const timestampsByCommandId = client.features.rateLimiting.get(interaction.user.id)!;
+		const timestamps = [...(timestampsByCommandId.get(commandId) ?? []), executedAt];
+		const activeTimestamps = timestamps.filter(
+			(timestamp) => (Date.now() - timestamp) <= configuration.rateLimiting.within,
+		);
+
+		if (activeTimestamps.length > configuration.rateLimiting.limit) {
+			const firstTimestamp = activeTimestamps[0]!;
+			const now = Date.now();
+			const nextValidUsageTimestamp = timestamp(now + configuration.rateLimiting.within - (now - firstTimestamp));
+
+			return void sendInteractionResponse(bot, interaction.id, interaction.token, {
+				type: InteractionResponseTypes.ChannelMessageWithSource,
+				data: {
+					flags: ApplicationCommandFlags.Ephemeral,
+					embeds: [{
+						description: localise(Misc.usedCommandTooManyTimes, interaction.locale)(nextValidUsageTimestamp),
+						color: constants.colors.dullYellow,
+					}],
+				},
+			});
+		}
+
+		timestampsByCommandId.set(commandId, activeTimestamps);
+
+		return handle([client, bot], interaction);
+	};
 }
 
 function createCommandHandlers(
@@ -276,24 +419,29 @@ function createCommandHandlers(
 	const handlers = new Map<string, InteractionHandler>();
 
 	for (const command of commands) {
-		if (command.handle) {
-			handlers.set(command.name, command.handle);
+		if (command.handle !== undefined) {
+			handlers.set(command.name, command.isRateLimited ? withRateLimiting(command.handle) : command.handle);
 		}
 
-		if (!command.options) continue;
+		if (command.options === undefined) continue;
 
 		for (const option of command.options) {
-			if (option.handle) {
-				handlers.set(`${command.name} ${option.name}`, option.handle);
+			if (option.handle !== undefined) {
+				handlers.set(
+					`${command.name} ${option.name}`,
+					command.isRateLimited || option.isRateLimited ? withRateLimiting(option.handle) : option.handle,
+				);
 			}
 
-			if (!option.options) continue;
+			if (option.options === undefined) continue;
 
 			for (const subOption of option.options) {
-				if (subOption.handle) {
+				if (subOption.handle !== undefined) {
 					handlers.set(
 						`${command.name} ${option.name} ${subOption.name}`,
-						subOption.handle,
+						command.isRateLimited || option.isRateLimited || subOption.isRateLimited
+							? withRateLimiting(subOption.handle)
+							: subOption.handle,
 					);
 				}
 			}
@@ -304,9 +452,8 @@ function createCommandHandlers(
 }
 
 function getLanguage(guildName: string): Language {
-	const guildNameMatch = configuration.guilds.nameExpression.exec(guildName) ??
-		undefined;
-	if (!guildNameMatch) return defaultLanguage;
+	const guildNameMatch = configuration.guilds.namePattern.exec(guildName) ?? undefined;
+	if (guildNameMatch === undefined) return defaultLanguage;
 
 	const languageString = guildNameMatch.at(1)!;
 
@@ -337,7 +484,7 @@ function addCollector<T extends keyof EventHandlers>(
 		onEnd();
 	};
 
-	if (collector.limit) {
+	if (collector.limit !== undefined) {
 		let emitCount = 0;
 		const onCollect = collector.onCollect;
 		collector.onCollect = (...args) => {
@@ -351,100 +498,113 @@ function addCollector<T extends keyof EventHandlers>(
 		};
 	}
 
-	if (collector.removeAfter) {
+	if (collector.removeAfter !== undefined) {
 		setTimeout(collector.onEnd, collector.removeAfter!);
 	}
 
 	if (!client.collectors.has(event)) {
 		client.collectors.set(event, new Set());
 
-		const eventHandler = <(...args: Parameters<EventHandlers[T]>) => void> bot
-			.events[event];
-		bot.events[event] =
-			<EventHandlers[T]> ((...args: Parameters<typeof eventHandler>) => {
-				const collectors = <Set<Collector<T>>> client.collectors.get(event)!;
+		extendEventHandler(bot, event, { prepend: true }, (...args) => {
+			const collectors = client.collectors.get(event)!;
 
-				for (const collector of collectors) {
-					if (!collector.filter(...args)) {
-						continue;
-					}
-
-					collector.onCollect(...args);
+			for (const collector of collectors) {
+				if (!collector.filter(...args)) {
+					continue;
 				}
 
-				eventHandler(...args);
-			});
+				collector.onCollect(...args);
+			}
+		});
 	}
 
 	const collectors = <Set<Collector<T>>> client.collectors.get(event)!;
 	collectors.add(collector);
 }
 
-const userMentionExpression = new RegExp(/^<@!?([0-9]{18,19})>$/);
-const userIDExpression = new RegExp(/^[0-9]{18,19}$/);
+const userIDPattern = new RegExp(/^([0-9]{17,20})$/);
+const userMentionPattern = new RegExp(/^<@!?([0-9]{17,20})>$/);
 
-/**
- * @param client - The client instance to use.
- * @param guildId - The id of the guild whose members to resolve to.
- * @param identifier - The user identifier to match to members.
- * @param options - Additional options to use when resolving to members.
- *
- * @returns A tuple containing the members matched to the identifier and a
- * boolean value indicating whether the identifier is a user ID.
- */
+function extractIDFromIdentifier(identifier: string): string | undefined {
+	return userIDPattern.exec(identifier)?.at(1) ?? userMentionPattern.exec(identifier)?.at(1);
+}
+
+const userTagPattern = new RegExp(/^(.{2,32}#[0-9]{4})$/);
+
+function isValidIdentifier(identifier: string): boolean {
+	return userIDPattern.test(identifier) || userMentionPattern.test(identifier) || userTagPattern.test(identifier);
+}
+
+interface MemberNarrowingOptions {
+	includeBots: boolean;
+	restrictToSelf: boolean;
+	restrictToNonSelf: boolean;
+	excludeModerators: boolean;
+}
+
 function resolveIdentifierToMembers(
 	client: Client,
 	guildId: bigint,
+	userId: bigint,
 	identifier: string,
-	options: { includeBots: boolean } = { includeBots: false },
-): [Member[], boolean] | undefined {
-	let id: string | undefined = undefined;
-	id ??= userMentionExpression.exec(identifier)?.at(1);
-	id ??= userIDExpression.exec(identifier)?.at(0);
-
-	if (!id) {
-		const members = Array.from(client.cache.members.values()).filter((member) =>
-			member.guildId === guildId
-		);
-
-		const identifierLowercase = identifier.toLowerCase();
-		return [
-			members.filter((member) => {
-				if (!options.includeBots && member.user?.toggles.bot) return false;
-				if (member.user?.username.toLowerCase().includes(identifierLowercase)) {
-					return true;
-				}
-				if (member.nick?.toLowerCase().includes(identifierLowercase)) {
-					return true;
-				}
-				return false;
-			}),
-			false,
-		];
-	}
+	options: Partial<MemberNarrowingOptions> = {},
+): [members: Member[], isId: boolean] | undefined {
+	const asker = client.cache.members.get(snowflakeToBigint(`${userId}${guildId}`));
+	if (asker === undefined) return undefined;
 
 	const guild = client.cache.guilds.get(guildId);
-	if (!guild) return;
+	if (guild === undefined) return undefined;
 
-	const member = client.cache.members.get(
-		snowflakeToBigint(`${id}${guild.id}`),
+	const moderatorRoleId = guild.roles.array().find((role) => role.name === configuration.permissions.moderatorRoleName)
+		?.id;
+	if (moderatorRoleId === undefined) return undefined;
+
+	const id = extractIDFromIdentifier(identifier);
+	if (id !== undefined) {
+		const member = client.cache.members.get(snowflakeToBigint(`${id}${guildId}`));
+		if (member === undefined) return undefined;
+		if (options.restrictToSelf && member.id !== asker.id) return undefined;
+		if (options.restrictToNonSelf && member.id === asker.id) return undefined;
+		if (options.excludeModerators && member.roles.includes(moderatorRoleId)) {
+			return undefined;
+		}
+
+		return [[member], true];
+	}
+
+	const cachedMembers = options.restrictToSelf ? [asker] : Array.from(client.cache.members.values());
+	const members = cachedMembers.filter((member: Member) =>
+		member.guildId === guildId &&
+		(!options.restrictToNonSelf ? true : member.user?.id !== asker.user?.id) &&
+		(!options.excludeModerators ? true : !member.roles.includes(moderatorRoleId))
 	);
-	if (!member) return;
 
-	return [[member], true];
+	if (userTagPattern.test(identifier)) {
+		const member = members.find(
+			(member) => member.user !== undefined && `${member.user.username}#${member.user.discriminator}` === identifier,
+		);
+		return [member !== undefined ? [member] : [], false];
+	}
+
+	const identifierLowercase = identifier.toLowerCase();
+	const matchedMembers = members.filter((member) => {
+		if (member.user?.toggles.bot && !options.includeBots) return false;
+		if (member.user?.username.toLowerCase().includes(identifierLowercase)) return true;
+		if (member.nick?.toLowerCase().includes(identifierLowercase)) return true;
+		return false;
+	});
+
+	return [matchedMembers, false];
 }
 
 function resolveInteractionToMember(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 	identifier: string,
+	options?: Partial<MemberNarrowingOptions>,
 ): Member | undefined {
-	const result = resolveIdentifierToMembers(
-		client,
-		interaction.guildId!,
-		identifier,
-	);
-	if (!result) return;
+	const result = resolveIdentifierToMembers(client, interaction.guildId!, interaction.user.id, identifier, options);
+	if (result === undefined) return;
 
 	const [matchedMembers, isId] = result;
 	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete) {
@@ -455,14 +615,13 @@ function resolveInteractionToMember(
 			{
 				type: InteractionResponseTypes.ApplicationCommandAutocompleteResult,
 				data: {
-					choices:
-						(isId ? [matchedMembers.at(0)!] : matchedMembers.slice(0, 20))
-							.map(
-								(member) => ({
-									name: mentionUser(member.user!, true),
-									value: member.id.toString(),
-								}),
-							),
+					choices: (isId ? [matchedMembers.at(0)!] : matchedMembers.slice(0, 20))
+						.map(
+							(member) => ({
+								name: diagnosticMentionUser(member.user!, true),
+								value: member.id.toString(),
+							}),
+						),
 				},
 			},
 		);
@@ -478,11 +637,8 @@ function resolveInteractionToMember(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(
-							Misc.client.invalidUser,
-							interaction.locale,
-						),
-						color: configuration.interactions.responses.colors.red,
+						description: localise(Misc.client.invalidUser, interaction.locale),
+						color: constants.colors.red,
 					}],
 				},
 			},
@@ -492,5 +648,37 @@ function resolveInteractionToMember(
 	return matchedMembers.at(0);
 }
 
-export { addCollector, initialiseClient, resolveInteractionToMember };
+function extendEventHandler<
+	Event extends keyof EventHandlers,
+	Handler extends EventHandlers[Event],
+>(
+	bot: Bot,
+	eventName: Event,
+	{ prepend = false, append = false }: { prepend: true; append?: false } | { prepend?: false; append: true },
+	extension: (...args: Parameters<Handler>) => unknown,
+): void {
+	const events = bot.events;
+
+	const handler = events[eventName] as (...args: Parameters<Handler>) => unknown;
+	events[eventName] = (
+		(prepend || !append)
+			? (...args: Parameters<Handler>) => {
+				extension(...args);
+				handler(...args);
+			}
+			: (...args: Parameters<Handler>) => {
+				handler(...args);
+				extension(...args);
+			}
+	) as Handler;
+}
+
+export {
+	addCollector,
+	extendEventHandler,
+	initialiseClient,
+	isValidIdentifier,
+	resolveIdentifierToMembers,
+	resolveInteractionToMember,
+};
 export type { Client, Collector, WithLanguage };

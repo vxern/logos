@@ -1,12 +1,6 @@
-import { Commands } from '../../../../assets/localisations/commands.ts';
-import {
-	createLocalisations,
-	localise,
-} from '../../../../assets/localisations/types.ts';
 import {
 	ApplicationCommandFlags,
 	Bot,
-	ButtonComponent,
 	ButtonStyles,
 	editOriginalInteractionResponse,
 	Interaction,
@@ -15,30 +9,30 @@ import {
 	InteractionTypes,
 	MessageComponentTypes,
 	sendInteractionResponse,
-} from '../../../../deps.ts';
-import { Client } from '../../../client.ts';
-import { CommandBuilder } from '../../../commands/command.ts';
-import configuration from '../../../configuration.ts';
-import { createInteractionCollector, random } from '../../../utils.ts';
-import { SentencePair } from '../data/sentence.ts';
-import { sentencePairsByLanguage } from '../module.ts';
+} from 'discordeno';
+import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
+import { SentencePair } from 'logos/src/commands/language/data/types.ts';
+import { CommandBuilder } from 'logos/src/commands/command.ts';
+import { Client } from 'logos/src/client.ts';
+import { createInteractionCollector } from 'logos/src/interactions.ts';
+import constants from 'logos/constants.ts';
 
 const command: CommandBuilder = {
 	...createLocalisations(Commands.game),
 	defaultMemberPermissions: ['VIEW_CHANNEL'],
-	handle: startGame,
+	handle: handleStartGame,
 };
 
 /** Starts a simple game of 'choose the correct word to fit in the blank'. */
-async function startGame(
+async function handleStartGame(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {
 	const guild = client.cache.guilds.get(interaction.guildId!);
-	if (!guild) return;
+	if (guild === undefined) return;
 
-	const sentencePairs = sentencePairsByLanguage.get(guild.language);
-	if (!sentencePairs || sentencePairs.length === 0) {
+	const sentencePairs = client.features.sentencePairs.get(guild.language);
+	if (sentencePairs === undefined || sentencePairs.length === 0) {
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -48,11 +42,8 @@ async function startGame(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(
-							Commands.game.strings.noSentencesAvailable,
-							interaction.locale,
-						),
-						color: configuration.interactions.responses.colors.yellow,
+						description: localise(Commands.game.strings.noSentencesAvailable, interaction.locale),
+						color: constants.colors.dullYellow,
 					}],
 				},
 			},
@@ -70,41 +61,7 @@ async function startGame(
 	);
 
 	let sentenceSelection: SentenceSelection;
-
-	const createGameView = (): InteractionCallbackData => {
-		sentenceSelection = createSentenceSelection(sentencePairs);
-
-		return {
-			embeds: [{
-				color: ribbonColor,
-				fields: [{
-					name: localise(Commands.game.strings.sentence, interaction.locale),
-					value: sentenceSelection.pair.sentence,
-				}, {
-					name: localise(Commands.game.strings.translation, interaction.locale),
-					value: sentenceSelection.pair.translation,
-				}],
-			}],
-			components: [{
-				type: MessageComponentTypes.ActionRow,
-				components: <[
-					ButtonComponent,
-					ButtonComponent,
-					ButtonComponent,
-					ButtonComponent,
-				]> (<unknown> sentenceSelection.choices.map(
-					(choice, index) => ({
-						type: MessageComponentTypes.Button,
-						style: ButtonStyles.Success,
-						label: choice,
-						customId: `${customId}|${index}`,
-					}),
-				)),
-			}],
-		};
-	};
-
-	let ribbonColor = configuration.interactions.responses.colors.blue;
+	let embedColor = constants.colors.blue;
 
 	const customId = createInteractionCollector([client, bot], {
 		type: InteractionTypes.MessageComponent,
@@ -115,10 +72,10 @@ async function startGame(
 			});
 
 			const selectionCustomId = selection.data?.customId;
-			if (!selectionCustomId) return;
+			if (selectionCustomId === undefined) return;
 
 			const indexString = selectionCustomId.split('|').at(1);
-			if (!indexString) return;
+			if (indexString === undefined) return;
 
 			const index = Number(indexString);
 			if (isNaN(index)) return;
@@ -128,23 +85,57 @@ async function startGame(
 			const choice = sentenceSelection.choices.at(index);
 			const isCorrect = choice === sentenceSelection.word;
 
-			ribbonColor = isCorrect
-				? configuration.interactions.responses.colors.green
-				: configuration.interactions.responses.colors.red;
+			embedColor = isCorrect ? constants.colors.lightGreen : constants.colors.red;
+
+			sentenceSelection = createSentenceSelection(sentencePairs);
 
 			return void editOriginalInteractionResponse(
 				bot,
 				interaction.token,
-				createGameView(),
+				createGameView(customId, sentenceSelection, embedColor, interaction.locale),
 			);
 		},
 	});
 
+	sentenceSelection = createSentenceSelection(sentencePairs);
+
 	return void editOriginalInteractionResponse(
 		bot,
 		interaction.token,
-		createGameView(),
+		createGameView(customId, sentenceSelection, embedColor, interaction.locale),
 	);
+}
+
+function createGameView(
+	customId: string,
+	sentenceSelection: SentenceSelection,
+	embedColor: number,
+	locale: string | undefined,
+): InteractionCallbackData {
+	return {
+		embeds: [{
+			color: embedColor,
+			fields: [{
+				name: localise(Commands.game.strings.sentence, locale),
+				value: sentenceSelection.pair.sentence,
+			}, {
+				name: localise(Commands.game.strings.translation, locale),
+				value: sentenceSelection.pair.translation,
+			}],
+		}],
+		components: [{
+			type: MessageComponentTypes.ActionRow,
+			// @ts-ignore: There are always 4 buttons for the 4 sentences selected.
+			components: sentenceSelection.choices.map(
+				(choice, index) => ({
+					type: MessageComponentTypes.Button,
+					style: ButtonStyles.Success,
+					label: choice,
+					customId: `${customId}|${index}`,
+				}),
+			),
+		}],
+	};
 }
 
 /**
@@ -208,6 +199,16 @@ function createSentenceSelection(
 		word: word,
 		choices: shuffled,
 	};
+}
+
+/**
+ * Generates a pseudo-random number.
+ *
+ * @param max - The maximum value to generate.
+ * @returns A pseudo-random number between 0 and {@link max}.
+ */
+function random(max: number): number {
+	return Math.floor(Math.random() * max);
 }
 
 export default command;

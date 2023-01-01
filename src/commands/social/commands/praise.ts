@@ -4,71 +4,42 @@ import {
 	Bot,
 	editOriginalInteractionResponse,
 	getDmChannel,
-	getGuildIconURL,
 	Interaction,
 	InteractionResponseTypes,
 	sendInteractionResponse,
 	sendMessage,
-} from '../../../../deps.ts';
-import { Client, resolveInteractionToMember } from '../../../client.ts';
-import { CommandBuilder } from '../../../commands/command.ts';
-import configuration from '../../../configuration.ts';
-import { Praise } from '../../../database/structs/users/praise.ts';
-import { mention, MentionTypes } from '../../../formatting.ts';
-import { user } from '../../parameters.ts';
-import {
-	createPraise,
-	getPraises,
-} from '../../../database/functions/praises.ts';
-import { getOrCreateUser } from '../../../database/functions/users.ts';
-import { log } from '../../../controllers/logging.ts';
+} from 'discordeno';
+import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
+import { CommandBuilder } from 'logos/src/commands/command.ts';
+import { user } from 'logos/src/commands/parameters.ts';
+import { log } from 'logos/src/controllers/logging/logging.ts';
+import { Praise } from 'logos/src/database/structs/mod.ts';
+import { Client, resolveInteractionToMember } from 'logos/src/client.ts';
+import { parseArguments } from 'logos/src/interactions.ts';
+import { guildAsAuthor, verifyIsWithinLimits } from 'logos/src/utils.ts';
+import configuration from 'logos/configuration.ts';
+import constants from 'logos/constants.ts';
+import { mention, MentionTypes } from 'logos/formatting.ts';
 
 const command: CommandBuilder = {
-	name: 'praise',
-	nameLocalizations: {
-		pl: 'pochwal',
-		ro: 'lăudare',
-	},
-	description: 'Praises a user for their contribution.',
-	descriptionLocalizations: {
-		pl: 'Chwali użytkownika za jego wkład.',
-		ro: 'Laudă un utilizator pentru contribuțiile sale.',
-	},
+	...createLocalisations(Commands.praise),
 	defaultMemberPermissions: ['VIEW_CHANNEL'],
-	handle: praise,
+	handle: handlePraiseUser,
 	options: [user, {
-		name: 'comment',
-		nameLocalizations: {
-			pl: 'komentarz',
-			ro: 'comentariu',
-		},
-		description: 'A comment to attach to the praise.',
-		descriptionLocalizations: {
-			pl: 'Komentarz, który ma zostać załączony do pochwały.',
-			ro: 'Comentariul care să fie atașat la laudă.',
-		},
+		...createLocalisations(Commands.praise.options.comment),
 		type: ApplicationCommandOptionTypes.String,
 	}],
 };
 
-async function praise(
+async function handlePraiseUser(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {
-	const data = interaction.data;
-	if (!data) return;
+	const [{ user, comment }] = parseArguments(interaction.data?.options, {});
+	if (user === undefined) return;
 
-	const userIdentifier = <string | undefined> data.options?.at(0)?.value;
-	if (userIdentifier === undefined) return;
-
-	const member = resolveInteractionToMember(
-		[client, bot],
-		interaction,
-		userIdentifier,
-	);
-	if (!member) return;
-
-	const comment = <string | undefined> data.options?.at(1)?.value;
+	const member = resolveInteractionToMember([client, bot], interaction, user);
+	if (member === undefined) return;
 
 	if (member.id === interaction.member?.id) {
 		return void sendInteractionResponse(
@@ -80,8 +51,8 @@ async function praise(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: 'You cannot praise yourself!',
-						color: configuration.interactions.responses.colors.red,
+						description: localise(Commands.praise.strings.cannotPraiseSelf, interaction.locale),
+						color: constants.colors.dullYellow,
 					}],
 				},
 			},
@@ -93,104 +64,64 @@ async function praise(
 		data: { flags: ApplicationCommandFlags.Ephemeral },
 	});
 
-	const showPraiseFailure = (): void => {
+	const [author, subject] = await Promise.all([
+		client.database.adapters.users.getOrFetchOrCreate(
+			client,
+			'id',
+			interaction.user.id.toString(),
+			interaction.user.id,
+		),
+		client.database.adapters.users.getOrFetchOrCreate(client, 'id', member.id.toString(), member.id),
+	]);
+
+	if (author === undefined || subject === undefined) return showError(bot, interaction);
+
+	const praisesBySender = await client.database.adapters.praises.getOrFetch(client, 'sender', author.ref);
+	if (praisesBySender === undefined) return showError(bot, interaction);
+
+	const praises = Array.from(praisesBySender.values());
+	if (!verifyIsWithinLimits(praises, configuration.commands.praise.limitUses, configuration.commands.praise.within)) {
 		return void editOriginalInteractionResponse(
 			bot,
 			interaction.token,
 			{
 				embeds: [{
-					title: 'Failed to praise user',
-					description: `Your praise failed to be submitted.`,
-					color: configuration.interactions.responses.colors.red,
-				}],
-			},
-		);
-	};
-
-	const author = await getOrCreateUser(
-		client.database,
-		'id',
-		interaction.user.id.toString(),
-	);
-	if (!author) return showPraiseFailure();
-
-	const praisesByAuthor = await getPraises(
-		client.database,
-		'author',
-		author.ref,
-	);
-	if (!praisesByAuthor) return showPraiseFailure();
-
-	const praiseTimestamps = praisesByAuthor
-		.map((document) => document.ts)
-		.sort((a, b) => b - a); // From most recent to least recent.
-	const timestampSlice = praiseTimestamps.slice(
-		0,
-		configuration.guilds.praises.maximum,
-	);
-	const canPraise = timestampSlice.length <
-			configuration.guilds.praises.maximum ||
-		timestampSlice.some((timestamp) =>
-			(Date.now() - timestamp) >=
-				configuration.guilds.praises.interval
-		);
-	if (!canPraise) {
-		return void editOriginalInteractionResponse(
-			bot,
-			interaction.token,
-			{
-				embeds: [{
-					title: 'Wait before praising again',
-					description:
-						`You have already praised a user recently. You must wait before praising somebody again.`,
-					color: configuration.interactions.responses.colors.yellow,
+					description: localise(Commands.praise.strings.waitBeforePraising, interaction.locale),
+					color: constants.colors.dullYellow,
 				}],
 			},
 		);
 	}
 
-	const subject = await getOrCreateUser(
-		client.database,
-		'id',
-		member.id.toString(),
-	);
-	if (!subject) return showPraiseFailure();
-
 	const praise: Praise = {
-		author: author.ref,
-		subject: subject.ref,
+		createdAt: Date.now(),
+		sender: author.ref,
+		recipient: subject.ref,
 		comment: comment,
 	};
 
-	const document = await createPraise(client.database, praise);
-	if (!document) return showPraiseFailure();
-
 	const guild = client.cache.guilds.get(interaction.guildId!);
-	if (!guild) return;
+	if (guild === undefined) return;
+
+	const [document, dmChannel] = await Promise.all([
+		client.database.adapters.praises.create(client, praise),
+		getDmChannel(bot, member.id).catch(() => undefined),
+	]);
+	if (document === undefined) return showError(bot, interaction);
 
 	log([client, bot], guild, 'praiseAdd', member, praise, interaction.user);
 
-	const dmChannel = await getDmChannel(bot, member.id);
-	if (dmChannel) {
+	if (dmChannel !== undefined) {
+		const praisedString = localise(Commands.praise.strings.praisedDirect, interaction.locale)(
+			mention(interaction.user.id, MentionTypes.User),
+		);
+
 		sendMessage(bot, dmChannel.id, {
 			embeds: [
 				{
-					thumbnail: (() => {
-						const iconURL = getGuildIconURL(bot, guild.id, guild.icon, {
-							size: 4096,
-							format: 'png',
-						});
-						if (!iconURL) return undefined;
-
-						return {
-							url: iconURL,
-						};
-					})(),
-					title: 'You have been praised!',
-					description: `The user ${
-						mention(interaction.user.id, MentionTypes.User)
-					} has praised you for your contributions.`,
-					color: configuration.interactions.responses.colors.green,
+					author: guildAsAuthor(bot, guild),
+					description: `${praisedString} 🥳`,
+					color: constants.colors.lightGreen,
 				},
 			],
 		});
@@ -201,10 +132,23 @@ async function praise(
 		interaction.token,
 		{
 			embeds: [{
-				title: 'User praised',
-				description:
-					`The user has been praised and notified (if they have their DMs open).`,
-				color: configuration.interactions.responses.colors.green,
+				description: localise(Commands.praise.strings.praised, interaction.locale)(
+					mention(member.id, MentionTypes.User),
+				),
+				color: constants.colors.lightGreen,
+			}],
+		},
+	);
+}
+
+function showError(bot: Bot, interaction: Interaction): void {
+	return void editOriginalInteractionResponse(
+		bot,
+		interaction.token,
+		{
+			embeds: [{
+				description: localise(Commands.praise.strings.failed, interaction.locale),
+				color: constants.colors.red,
 			}],
 		},
 	);

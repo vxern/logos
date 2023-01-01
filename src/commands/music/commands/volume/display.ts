@@ -1,26 +1,28 @@
-import { Commands } from '../../../../../assets/localisations/commands.ts';
-import { localise } from '../../../../../assets/localisations/types.ts';
 import {
 	ApplicationCommandFlags,
 	Bot,
 	Interaction,
 	InteractionResponseTypes,
 	sendInteractionResponse,
-} from '../../../../../deps.ts';
-import { Client } from '../../../../client.ts';
-import configuration from '../../../../configuration.ts';
-import { defaultLanguage } from '../../../../types.ts';
+} from 'discordeno';
+import { Commands, localise } from 'logos/assets/localisations/mod.ts';
+import { Client } from 'logos/src/client.ts';
+import { parseArguments } from 'logos/src/interactions.ts';
+import constants from 'logos/constants.ts';
+import { defaultLocale } from 'logos/types.ts';
 
-function displayVolume(
+function handleDisplayVolume(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): void {
-	const musicController = client.music.get(interaction.guildId!);
-	if (!musicController) return;
+	const controller = client.features.music.controllers.get(interaction.guildId!);
+	if (controller === undefined) return;
 
-	const show =
-		(<boolean | undefined> interaction.data?.options?.at(0)?.options?.at(0)
-			?.value) ?? false;
+	const [{ show }] = parseArguments(interaction.data?.options, { show: 'boolean' });
+
+	const locale = show ? defaultLocale : interaction.locale;
+
+	const volumeString = localise(Commands.music.options.volume.options.display.strings.volume.header, locale);
 
 	return void sendInteractionResponse(
 		bot,
@@ -31,22 +33,15 @@ function displayVolume(
 			data: {
 				flags: !show ? ApplicationCommandFlags.Ephemeral : undefined,
 				embeds: [{
-					title: `🔊 ${
-						localise(
-							Commands.music.options.volume.options.display.strings.volume
-								.header,
-							defaultLanguage,
-						)
-					}`,
-					description: localise(
-						Commands.music.options.volume.options.display.strings.volume.body,
-						defaultLanguage,
-					)(musicController.volume),
-					color: configuration.interactions.responses.colors.invisible,
+					title: `🔊 ${volumeString}`,
+					description: localise(Commands.music.options.volume.options.display.strings.volume.body, locale)(
+						controller.player.volume,
+					),
+					color: constants.colors.invisible,
 				}],
 			},
 		},
 	);
 }
 
-export { displayVolume };
+export { handleDisplayVolume };

@@ -3,36 +3,28 @@ import {
 	ApplicationCommandOptionTypes,
 	Bot,
 	getDmChannel,
-	getGuildIconURL,
 	Interaction,
 	InteractionResponseTypes,
 	InteractionTypes,
 	sendInteractionResponse,
 	sendMessage,
-} from '../../../../deps.ts';
-import { Client, resolveInteractionToMember } from '../../../client.ts';
-import { CommandBuilder } from '../../../commands/command.ts';
-import configuration from '../../../configuration.ts';
-import { getOrCreateUser } from '../../../database/functions/users.ts';
-import {
-	deleteWarning,
-	getWarnings,
-} from '../../../database/functions/warnings.ts';
-import { user } from '../../parameters.ts';
-import { getRelevantWarnings } from '../module.ts';
-import { log } from '../../../controllers/logging.ts';
-import { displayTime, mention, MentionTypes } from '../../../formatting.ts';
-import {
-	createLocalisations,
-	localise,
-} from '../../../../assets/localisations/types.ts';
-import { Commands } from '../../../../assets/localisations/commands.ts';
-import { defaultLanguage } from '../../../types.ts';
+} from 'discordeno';
+import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
+import { getActiveWarnings } from 'logos/src/commands/moderation/module.ts';
+import { CommandBuilder } from 'logos/src/commands/command.ts';
+import { user } from 'logos/src/commands/parameters.ts';
+import { log } from 'logos/src/controllers/logging/logging.ts';
+import { Client, resolveInteractionToMember } from 'logos/src/client.ts';
+import { parseArguments } from 'logos/src/interactions.ts';
+import { guildAsAuthor } from 'logos/src/utils.ts';
+import constants from 'logos/constants.ts';
+import { mention, MentionTypes, timestamp } from 'logos/formatting.ts';
+import { defaultLocale } from 'logos/types.ts';
 
 const command: CommandBuilder = {
 	...createLocalisations(Commands.pardon),
 	defaultMemberPermissions: ['MODERATE_MEMBERS'],
-	handle: unwarnUser,
+	handle: handlePardonUser,
 	options: [
 		user,
 		{
@@ -44,76 +36,28 @@ const command: CommandBuilder = {
 	],
 };
 
-async function unwarnUser(
+async function handlePardonUser(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {
-	const data = interaction.data;
-	if (!data) return;
+	const [{ user, warning }] = parseArguments(interaction.data?.options, {});
+	if (user === undefined) return;
 
-	const userIdentifierOption = data.options?.find((option) =>
-		option.name === 'user'
-	);
-	const warningOption = data.options?.find((option) =>
-		option.name === 'warning'
-	);
-	if (!userIdentifierOption && !warningOption) return;
+	const member = resolveInteractionToMember([client, bot], interaction, user, {restrictToNonSelf: true, excludeModerators: true});
+	if (member === undefined) return;
 
-	const userIdentifier = <string | undefined> userIdentifierOption?.value;
-	if (userIdentifier === undefined) return;
-
-	const member = resolveInteractionToMember(
-		[client, bot],
-		interaction,
-		userIdentifier,
-	);
-	if (!member) return;
-
-	const displayErrorOrEmptyChoices = (): void => {
-		if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete) {
-			return void sendInteractionResponse(
-				bot,
-				interaction.id,
-				interaction.token,
-				{
-					type: InteractionResponseTypes.ApplicationCommandAutocompleteResult,
-					data: { choices: [] },
-				},
-			);
-		}
-
-		return void sendInteractionResponse(
-			bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						description: localise(
-							Commands.pardon.strings.failed,
-							interaction.locale,
-						),
-						color: configuration.interactions.responses.colors.red,
-					}],
-				},
-			},
-		);
-	};
-
-	const subject = await getOrCreateUser(
-		client.database,
+	const subject = await client.database.adapters.users.getOrFetchOrCreate(
+		client,
 		'id',
 		member.id.toString(),
+		member.id,
 	);
-	if (!subject) return displayErrorOrEmptyChoices();
+	if (subject === undefined) return displayErrorOrEmptyChoices(bot, interaction);
 
-	const warnings = await getWarnings(client.database, subject.ref);
-	if (!warnings) return displayErrorOrEmptyChoices();
+	const warnings = await client.database.adapters.warnings.getOrFetch(client, 'recipient', subject.ref);
+	if (warnings === undefined) return displayErrorOrEmptyChoices(bot, interaction);
 
-	const relevantWarnings = getRelevantWarnings(warnings);
-	relevantWarnings.reverse();
+	const relevantWarnings = Array.from(getActiveWarnings(warnings).values()).toReversed();
 
 	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete) {
 		return void sendInteractionResponse(
@@ -124,7 +68,7 @@ async function unwarnUser(
 				type: InteractionResponseTypes.ApplicationCommandAutocompleteResult,
 				data: {
 					choices: relevantWarnings.map((warning) => ({
-						name: `${warning.data.reason} (${displayTime(warning.ts)})`,
+						name: `${warning.data.reason} (${timestamp(warning.data.createdAt)})`,
 						value: warning.ref.value.id,
 					})),
 				},
@@ -132,52 +76,24 @@ async function unwarnUser(
 		);
 	}
 
-	const displayUnwarnError = (description: string): void => {
-		return void sendInteractionResponse(
-			bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						description: description,
-						color: configuration.interactions.responses.colors.red,
-					}],
-				},
-			},
-		);
-	};
-
-	const warningReferenceID = <string> warningOption!.value!;
-	const warningToRemove = relevantWarnings.find((warning) =>
-		warning.ref.value.id === warningReferenceID
-	);
-	if (!warningToRemove) {
-		return displayUnwarnError(
-			localise(Commands.pardon.strings.alreadyRemoved, interaction.locale),
-		);
+	const warningToDelete = relevantWarnings.find((relevantWarning) => relevantWarning.ref.value.id === warning);
+	if (warningToDelete === undefined) {
+		return displayError(bot, interaction, localise(Commands.pardon.strings.invalidWarning, interaction.locale));
 	}
 
-	const warning = await deleteWarning(client.database, warningToRemove);
-	if (!warning) {
-		return displayUnwarnError(
+	const deletedWarning = await client.database.adapters.warnings.delete(client, warningToDelete);
+	if (deletedWarning === undefined) {
+		return displayError(
+			bot,
+			interaction,
 			localise(Commands.pardon.strings.failed, interaction.locale),
 		);
 	}
 
 	const guild = client.cache.guilds.get(interaction.guildId!);
-	if (!guild) return;
+	if (guild === undefined) return;
 
-	log(
-		[client, bot],
-		guild,
-		'memberWarnRemove',
-		member,
-		warning.data,
-		interaction.user,
-	);
+	log([client, bot], guild, 'memberWarnRemove', member, deletedWarning.data, interaction.user);
 
 	sendInteractionResponse(
 		bot,
@@ -188,39 +104,79 @@ async function unwarnUser(
 			data: {
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
-					description: localise(
-						Commands.pardon.strings.pardoned,
-						interaction.locale,
-					)(mention(member.id, MentionTypes.User), warning.data.reason),
-					color: configuration.interactions.responses.colors.green,
+					description: localise(Commands.pardon.strings.pardoned, interaction.locale)(
+						mention(member.id, MentionTypes.User),
+						deletedWarning.data.reason,
+					),
+					color: constants.colors.lightGreen,
 				}],
 			},
 		},
 	);
 
-	const dmChannel = await getDmChannel(bot, member.id);
-	if (!dmChannel) return;
+	const dmChannel = await getDmChannel(bot, member.id).catch(() => undefined);
+	if (dmChannel !== undefined) {
+		return void sendMessage(bot, dmChannel.id, {
+			embeds: [
+				{
+					author: guildAsAuthor(bot, guild),
+					description: localise(Commands.pardon.strings.pardonedDirect, defaultLocale)(
+						deletedWarning.data.reason,
+						timestamp(deletedWarning.data.createdAt),
+					),
+					color: constants.colors.lightGreen,
+				},
+			],
+		});
+	}
+}
 
-	return void sendMessage(bot, dmChannel.id, {
-		embeds: [
+function displayErrorOrEmptyChoices(bot: Bot, interaction: Interaction): void {
+	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete) {
+		return void sendInteractionResponse(
+			bot,
+			interaction.id,
+			interaction.token,
 			{
-				thumbnail: (() => {
-					const iconURL = getGuildIconURL(bot, guild.id, guild.icon, {
-						size: 64,
-						format: 'webp',
-					});
-					if (!iconURL) return;
-
-					return { url: iconURL };
-				})(),
-				description: localise(
-					Commands.pardon.strings.pardonedDirect,
-					defaultLanguage,
-				)(warning.data.reason, displayTime(warning.ts)),
-				color: configuration.interactions.responses.colors.green,
+				type: InteractionResponseTypes.ApplicationCommandAutocompleteResult,
+				data: { choices: [] },
 			},
-		],
-	});
+		);
+	}
+
+	return void sendInteractionResponse(
+		bot,
+		interaction.id,
+		interaction.token,
+		{
+			type: InteractionResponseTypes.ChannelMessageWithSource,
+			data: {
+				flags: ApplicationCommandFlags.Ephemeral,
+				embeds: [{
+					description: localise(Commands.pardon.strings.failed, interaction.locale),
+					color: constants.colors.red,
+				}],
+			},
+		},
+	);
+}
+
+function displayError(bot: Bot, interaction: Interaction, error: string): void {
+	return void sendInteractionResponse(
+		bot,
+		interaction.id,
+		interaction.token,
+		{
+			type: InteractionResponseTypes.ChannelMessageWithSource,
+			data: {
+				flags: ApplicationCommandFlags.Ephemeral,
+				embeds: [{
+					description: error,
+					color: constants.colors.red,
+				}],
+			},
+		},
+	);
 }
 
 export default command;

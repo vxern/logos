@@ -1,102 +1,90 @@
-import { Commands } from '../../../../../assets/localisations/commands.ts';
-import { localise } from '../../../../../assets/localisations/types.ts';
 import {
 	ApplicationCommandFlags,
 	Bot,
+	calculatePermissions,
 	Interaction,
 	InteractionResponseTypes,
 	sendInteractionResponse,
-} from '../../../../../deps.ts';
-import { Client, resolveInteractionToMember } from '../../../../client.ts';
-import configuration from '../../../../configuration.ts';
-import { getOrCreateUser } from '../../../../database/functions/users.ts';
-import { getWarnings } from '../../../../database/functions/warnings.ts';
-import { Document } from '../../../../database/structs/document.ts';
-import { Warning } from '../../../../database/structs/users/warning.ts';
-import { displayTime, list } from '../../../../formatting.ts';
-import { chunk, paginate, trim } from '../../../../utils.ts';
+} from 'discordeno';
+import { Commands, localise } from 'logos/assets/localisations/mod.ts';
+import { Warning } from 'logos/src/database/structs/mod.ts';
+import { Document } from 'logos/src/database/document.ts';
+import { Client, resolveInteractionToMember } from 'logos/src/client.ts';
+import { paginate, parseArguments } from 'logos/src/interactions.ts';
+import { chunk } from 'logos/src/utils.ts';
+import configuration from 'logos/configuration.ts';
+import constants from 'logos/constants.ts';
+import { list, timestamp, trim } from 'logos/formatting.ts';
 
-async function listWarnings(
+async function handleDisplayWarnings(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {
-	const userIdentifier = <string | undefined> interaction.data?.options?.at(0)
-		?.options?.at(
-			0,
-		)?.value;
-	if (userIdentifier === undefined) return;
+	const isModerator = calculatePermissions(interaction.member!.permissions!).includes('MODERATE_MEMBERS');
 
-	const member = resolveInteractionToMember(
-		[client, bot],
-		interaction,
-		userIdentifier,
-	);
-	if (!member) return;
+	const [{ user }] = parseArguments(interaction.data?.options, {});
 
-	const displayError = (): void => {
-		return void sendInteractionResponse(
-			bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						description: localise(
-							Commands.list.strings.warningsUnableToBeShown,
-							interaction.locale,
-						),
-						color: configuration.interactions.responses.colors.red,
-					}],
-				},
-			},
-		);
-	};
+	const member = resolveInteractionToMember([client, bot], interaction, user ?? interaction.user.id.toString(), {
+		restrictToSelf: !isModerator,
+	});
+	if (member === undefined) return;
 
-	const subject = await getOrCreateUser(
-		client.database,
+  const isSelf = member.id === interaction.user.id;
+
+	const recipient = await client.database.adapters.users.getOrFetchOrCreate(
+		client,
 		'id',
 		member.id.toString(),
+		member.id,
 	);
-	if (!subject) return displayError();
+	if (recipient === undefined) return displayUnableToDisplayWarningsError(bot, interaction);
 
-	const warnings = await getWarnings(client.database, subject.ref);
-	if (!warnings) return displayError();
+	const warnings = await client.database.adapters.warnings.getOrFetch(client, 'recipient', recipient.ref);
+	if (warnings === undefined) return displayUnableToDisplayWarningsError(bot, interaction);
 
-	const pages = chunk(
-		warnings,
-		configuration.interactions.responses.resultsPerPage,
-	);
-
-	const generateWarningsPage = (
-		warnings: Document<Warning>[],
-		_index: number,
-	): string => {
-		if (warnings.length === 0) {
-			return localise(
-				Commands.list.strings.userDoesNotHaveWarnings,
-				interaction.locale,
-			);
-		}
-
-		return list(
-			warnings.map(
-				(warning) =>
-					`${trim(warning.data.reason, 50)} (${displayTime(warning.ts)})`,
-			),
-		);
-	};
+	const pages = chunk(Array.from(warnings.values()), configuration.resultsPerPage);
 
 	return paginate([client, bot], interaction, {
 		elements: pages,
-		embed: { color: configuration.interactions.responses.colors.blue },
+		embed: { color: constants.colors.blue },
 		view: {
 			title: localise(Commands.list.strings.warnings, interaction.locale),
-			generate: generateWarningsPage,
+			generate: (warnings, _index) => generateWarningsPage(warnings, isSelf, interaction.locale),
 		},
 		show: false,
 	});
 }
 
-export { listWarnings };
+function displayUnableToDisplayWarningsError(bot: Bot, interaction: Interaction): void {
+	return void sendInteractionResponse(
+		bot,
+		interaction.id,
+		interaction.token,
+		{
+			type: InteractionResponseTypes.ChannelMessageWithSource,
+			data: {
+				flags: ApplicationCommandFlags.Ephemeral,
+				embeds: [{
+					description: localise(Commands.list.strings.unableToDisplayWarnings, interaction.locale),
+					color: constants.colors.red,
+				}],
+			},
+		},
+	);
+}
+
+function generateWarningsPage(warnings: Document<Warning>[], isSelf: boolean, locale: string | undefined): string {
+	if (warnings.length === 0) {
+		if (isSelf) {
+			return `*${localise(Commands.list.strings.hasNoActiveWarningsDirect, locale)}*`;
+		}
+
+		return `*${localise(Commands.list.strings.hasNoActiveWarnings, locale)}*`;
+	}
+
+	return list(
+		warnings.map((warning) => `${trim(warning.data.reason, 50)} (${timestamp(warning.data.createdAt)})`),
+	);
+}
+
+export { generateWarningsPage, handleDisplayWarnings };
