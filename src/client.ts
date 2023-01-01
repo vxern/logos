@@ -147,7 +147,7 @@ async function initialiseClient(
 	startServices([client, bot]);
 
 	return Promise.all([
-		...(Deno.env.get('ENVIRONMENT') === 'development' ? [client.features.music.node.connect(bot.id)] : []),
+		client.features.music.node.connect(bot.id),
 		startBot(bot),
 	]).then(() => [client, bot]);
 }

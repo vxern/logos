@@ -9,7 +9,7 @@ const getCommands = () => [
 	...information,
 	...language,
 	...moderation,
-	...(Deno.env.get('ENVIRONMENT') === 'development' ? music : []),
+	...music,
 	...server,
 	...social,
 ];
