@@ -54,7 +54,7 @@ async function handleSearchWord(
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (guild === undefined) return;
 
-	const dictionaries = client.features.dictionaryAdapters.get(defaultLanguage);
+	const dictionaries = client.features.dictionaryAdapters.get(guild.language);
 	if (dictionaries === undefined) {
 		return void sendInteractionResponse(
 			bot,
