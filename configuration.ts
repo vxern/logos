@@ -26,6 +26,7 @@ const configuration = {
 			moderation: 'moderation',
 
 			information: 'rules',
+			roles: 'roles',
 			welcome: 'welcome',
 
 			voiceChat: 'Voice Chat',

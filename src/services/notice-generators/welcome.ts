@@ -16,7 +16,6 @@ function generateWelcomeNotice(_bot: Bot, guild: Guild): CreateMessage {
 	);
 
 	return {
-		content: getLastUpdateString(lastUpdatedAt, defaultLocale),
 		embeds: [{
 			title: localise(Services.notices.notices.welcome.header, defaultLocale)(guild.name),
 			description: `${updateString}\n\n` + welcomeString,
