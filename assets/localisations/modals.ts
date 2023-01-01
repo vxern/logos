@@ -1,5 +1,5 @@
 import { Expressions } from 'logos/assets/localisations/expressions.ts';
-import { getLocaleByLanguage, getLocalisationsForLanguage, localise } from 'logos/assets/localisations/utils.ts';
+import { getLocaleForLanguage, getLocalisationsForLanguage, localise } from 'logos/assets/localisations/utils.ts';
 import { Language } from 'logos/types.ts';
 
 class Modals {
@@ -45,7 +45,7 @@ class Modals {
 		fields: {
 			reason: {
 				'English': (language: Language) => {
-					const languageLocalised = localise(getLocalisationsForLanguage(language), getLocaleByLanguage('English'));
+					const languageLocalised = localise(getLocalisationsForLanguage(language), getLocaleForLanguage('English'));
 
 					return `What is your reason for learning ${languageLocalised}?`;
 				},
@@ -57,7 +57,7 @@ class Modals {
 				'Romanian': (language: Language) => {
 					const languageLocalised = localise(
 						getLocalisationsForLanguage(language),
-						getLocaleByLanguage('Romanian'),
+						getLocaleForLanguage('Romanian'),
 					).toLowerCase();
 
 					return `Care este motivul pentru care înveți ${languageLocalised}?`;

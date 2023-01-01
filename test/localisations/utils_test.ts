@@ -3,7 +3,7 @@ import { Locales } from 'discordeno';
 import {
 	createLocalisations,
 	getLanguageByLocale,
-	getLocaleByLanguage,
+	getLocaleForLanguage,
 	localise,
 } from 'logos/assets/localisations/utils.ts';
 import { defaultLanguage } from 'logos/types.ts';
@@ -21,14 +21,14 @@ Deno.test('utils', async (test) => {
 		});
 	});
 
-	await test.step('getLocaleByLanguage', async (test) => {
+	await test.step('getLocaleForLanguage', async (test) => {
 		await test.step('unsupported language', () => {
-			const result = getLocaleByLanguage('Belarusian');
+			const result = getLocaleForLanguage('Belarusian');
 			assertEquals(result, 'en-GB');
 		});
 
 		await test.step('supported language', () => {
-			const result = getLocaleByLanguage('Romanian');
+			const result = getLocaleForLanguage('Romanian');
 			assertEquals(result, 'ro');
 		});
 	});

@@ -15,7 +15,7 @@ import {
 	SelectOption,
 	sendInteractionResponse,
 } from 'discordeno';
-import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
+import { Commands, createLocalisations, localise, Misc } from 'logos/assets/localisations/mod.ts';
 import { listingTypeToEmoji, SongListing } from 'logos/src/commands/music/data/types.ts';
 import { OptionBuilder } from 'logos/src/commands/command.ts';
 import { getVoiceState, isQueueEmpty, verifyVoiceState } from 'logos/src/controllers/music.ts';
@@ -180,7 +180,7 @@ function generateEmbed(
 			description: localise(Commands.music.options.remove.strings.selectSongToRemove, locale),
 			color: constants.colors.blue,
 			footer: isLast ? undefined : {
-				text: localise(Commands.music.options.remove.strings.continuedOnTheNextPage, locale),
+				text: localise(Misc.continuedOnNextPage, locale),
 			},
 		}],
 		components: [generateSelectMenu(data, selectMenuCustomId), ...generateButtons(buttonsCustomId, isFirst, isLast)],

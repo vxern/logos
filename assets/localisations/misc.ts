@@ -5,6 +5,7 @@ class Misc {
 	static readonly client = {
 		invalidUser: {
 			'English': 'Invalid user.',
+			'Hungarian': 'Érvénytelen felhasználó.',
 			'Polish': 'Nieprawidłowy użytkownik.',
 			'Romanian': 'Utilizator nevalid.',
 		},
@@ -15,12 +16,18 @@ class Misc {
 			second: {
 				descriptors: {
 					'English': ['s', 'sec', 'second', 'seconds'],
+					'Hungarian': ['m', 'mp', 'másodperc'],
 					'Polish': ['s', 'sek', 'sekund', 'sekunda', 'sekundy'],
 					'Romanian': ['s', 'sec', 'secundă', 'secunde'],
 				},
 				display: {
 					'English': (number: number) => {
 						const numberExpression = Expressions.english.methods.pluralise(number.toString(), 'second', 'seconds');
+
+						return numberExpression;
+					},
+					'Hungarian': (number: number) => {
+						const numberExpression = `${number} másodperc`;
 
 						return numberExpression;
 					},
@@ -44,12 +51,18 @@ class Misc {
 			minute: {
 				descriptors: {
 					'English': ['m', 'min', 'minute', 'mins', 'minutes'],
+					'Hungarian': ['p', 'perc'],
 					'Polish': ['m', 'min', 'minut', 'minuta', 'minuty'],
 					'Romanian': ['m', 'min', 'minut', 'minute'],
 				},
 				display: {
 					'English': (number: number) => {
 						const numberExpression = Expressions.english.methods.pluralise(number.toString(), 'minute', 'minutes');
+
+						return numberExpression;
+					},
+					'Hungarian': (number: number) => {
+						const numberExpression = `${number} perc`;
 
 						return numberExpression;
 					},
@@ -73,12 +86,18 @@ class Misc {
 			hour: {
 				descriptors: {
 					'English': ['h', 'hr', 'hour', 'hrs', 'hours'],
+					'Hungarian': ['ó', 'óra'],
 					'Polish': ['g', 'godzin', 'godzina', 'godziny'],
 					'Romanian': ['o', 'oră', 'ore'],
 				},
 				display: {
 					'English': (number: number) => {
 						const numberExpression = Expressions.english.methods.pluralise(number.toString(), 'hour', 'hours');
+
+						return numberExpression;
+					},
+					'Hungarian': (number: number) => {
+						const numberExpression = `${number} óra`;
 
 						return numberExpression;
 					},
@@ -102,12 +121,18 @@ class Misc {
 			day: {
 				descriptors: {
 					'English': ['d', 'day', 'days'],
+					'Hungarian': ['n', 'nap'],
 					'Polish': ['d', 'dz', 'dni', 'dzień'],
 					'Romanian': ['z', 'zi', 'zile'],
 				},
 				display: {
 					'English': (number: number) => {
 						const numberExpression = Expressions.english.methods.pluralise(number.toString(), 'day', 'days');
+
+						return numberExpression;
+					},
+					'Hungarian': (number: number) => {
+						const numberExpression = `${number} nap`;
 
 						return numberExpression;
 					},
@@ -131,12 +156,18 @@ class Misc {
 			week: {
 				descriptors: {
 					'English': ['w', 'wk', 'week', 'wks', 'weeks'],
+					'Hungarian': ['h', 'hét'],
 					'Polish': ['t', 'tygodni', 'tydzień', 'tygodnie'],
 					'Romanian': ['S', 'săptămână', 'săptămâni'],
 				},
 				display: {
 					'English': (number: number) => {
 						const numberExpression = Expressions.english.methods.pluralise(number.toString(), 'week', 'weeks');
+
+						return numberExpression;
+					},
+					'Hungarian': (number: number) => {
+						const numberExpression = `${number} hét`;
 
 						return numberExpression;
 					},
@@ -164,12 +195,18 @@ class Misc {
 			month: {
 				descriptors: {
 					'English': ['M', 'mth', 'month', 'mths', 'months'],
+					'Hungarian': ['H', 'hónap'],
 					'Polish': ['M', 'ms', 'miesięcy', 'miesiąc', 'miesiące'],
 					'Romanian': ['l', 'lună', 'luni'],
 				},
 				display: {
 					'English': (number: number) => {
 						const numberExpression = Expressions.english.methods.pluralise(number.toString(), 'month', 'months');
+
+						return numberExpression;
+					},
+					'Hungarian': (number: number) => {
+						const numberExpression = `${number} hónap`;
 
 						return numberExpression;
 					},
@@ -193,12 +230,18 @@ class Misc {
 			year: {
 				descriptors: {
 					'English': ['y', 'yr', 'year', 'yrs', 'years'],
+					'Hungarian': ['é', 'év'],
 					'Polish': ['r', 'lat', 'rok', 'lata'],
 					'Romanian': ['a', 'an', 'ani'],
 				},
 				display: {
 					'English': (number: number) => {
 						const numberExpression = Expressions.english.methods.pluralise(number.toString(), 'year', 'years');
+
+						return numberExpression;
+					},
+					'Hungarian': (number: number) => {
+						const numberExpression = `${number} év`;
 
 						return numberExpression;
 					},
@@ -224,13 +267,16 @@ class Misc {
 
 	static readonly continuedOnNextPage: Localisations<string> = {
 		'English': 'Continued on the next page...',
+		'Hungarian': 'Folytatódik a következő oldalon...',
 		'Polish': 'Kontynuacja na następnej stronie...',
+		'Romanian': 'Continuare pe următoarea pagină...',
 	};
 
 	static readonly usedCommandTooManyTimes: Localisations<Expression<string>> = {
 		'English': (timestamp: string) =>
 			'You have used this command too many times in too short of time.\n\n' +
 			`You will be able to use the command again ${timestamp}.`,
+		// TODO: Add Hungarian localisation.
 		'Polish': (timestamp: string) =>
 			'Użyłeś/aś polecenia zbyt wiele razy w zbyt krótkim czasie.\n\n' +
 			`Będziesz mógł/mogła ponownie użyć polecenia ${timestamp}.`,
