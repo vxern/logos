@@ -2265,6 +2265,12 @@ class Commands {
 							`Ai atins limita rolurilor pe care le poți obține din cadrul categoriei '${categoryName}'.` +
 							'Pentru a alege un rol nou, dezasociază unul dintre rolurile existente.',
 					},
+					cannotUnassignRole: {
+						'English': 'You cannot unassign this role. You can only exchange it for another.',
+						// TODO: Hungarian localisation.
+						'Polish': 'Nie możesz usunąć tej rangi, możesz ją tylko wymienić na inną.',
+						'Romanian': 'Nu se poate elimina acest rol, este posibil doar să o schimbi cu alta. ',
+					},
 					chooseCategory: {
 						'English': 'Choose a category.',
 						'Hungarian': 'Válassz egy kategóriát.',

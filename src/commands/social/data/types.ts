@@ -53,34 +53,14 @@ type RoleCategoryGroup = {
 };
 
 /** The base of a standalone role category. */
-type RoleCategoryStandalone<
-	T = SingleAssignableRoleCategory | MultipleAssignableRoleCategory,
-> = {
+interface RoleCategoryStandalone {
 	type: RoleCategoryTypes.Category;
 
-	/** Whether or not only one role can be selected from this category. */
-	restrictToOneRole: boolean;
-} & T;
-
-/** A role category that allows only one role to be selected from it at any one time. */
-type SingleAssignableRoleCategory = {
-	// Because only one role can be selected at any one time from this category, and
-	// once a role has been selected, it cannot be unselected again, the message to be
-	// shown when a role is unassigned will never be shown to the user.
 	collection: RoleCollection;
 
-	restrictToOneRole: true;
-};
-
-/** A role category that allows more than one role to be selected from it. */
-type MultipleAssignableRoleCategory = {
-	collection: RoleCollection;
-
-	restrictToOneRole: false;
-
-	/** The maximum number of roles that can be selected from this category. */
-	limit?: number;
-};
+	maximum?: number;
+	minimum?: number;
+}
 
 /** Represents a thematic selection of {@link Role}s. */
 type RoleCategory =
