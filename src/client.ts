@@ -607,6 +607,8 @@ function resolveInteractionToMember(
 	if (result === undefined) return;
 
 	const [matchedMembers, isId] = result;
+	if (isId) return matchedMembers.at(0);
+
 	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete) {
 		return void sendInteractionResponse(
 			bot,

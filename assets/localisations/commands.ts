@@ -967,10 +967,10 @@ class Commands {
 			'Romanian': 'grațiere',
 		},
 		description: {
-			'English': 'Removes the last given warning to a user.',
-			'Hungarian': 'Eltávolítja egy felhasználó legutolsó figyelmeztetését.',
-			'Polish': 'Usuwa ostatnie ostrzeżenie dane użytkownikowi.',
-			'Romanian': 'Șterge ultimul avertisment acordat unui utilizator.',
+			'English': 'Removes one of the warnings previously given to a user.',
+			// TODO: Hungarian localisation.
+			'Polish': 'Usuwa jedno z ostrzeżeń poprzednio przyjęte przez użytkownika.',
+			'Romanian': 'Elimină unul dintre avertismentele acceptate anterior de către utilizator.',
 		},
 		options: {
 			warning: {
@@ -1217,7 +1217,7 @@ class Commands {
 					'Romanian': 'setare',
 				},
 				description: {
-					'English': 'Times out a user, making them unable to interact on the server.',
+					'English': 'Times a user out, making them unable to interact on the server.',
 					'Hungarian': 'Felfüggeszti a felhasználót, aki így nem tud semmilyen interakciót végrehajtani a szerveren.',
 					'Polish': 'Wycisza użytkownika, uniemożliwiając mu interakcję z serwerem (pisanie, mówienie w VC, itp.).',
 					'Romanian': 'Face ca un utilizator să nu mai poată interacționa în server.',
