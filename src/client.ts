@@ -65,7 +65,10 @@ type Cache = Readonly<{
 	users: Map<bigint, User>;
 	members: Map<bigint, Member>;
 	channels: Map<bigint, Channel>;
-	messages: Map<bigint, Message>;
+	messages: {
+		latest: Map<bigint, Message>;
+		previous: Map<bigint, Message>;
+	};
 }>;
 
 function createCache(): Cache {
@@ -74,7 +77,10 @@ function createCache(): Cache {
 		users: new Map(),
 		members: new Map(),
 		channels: new Map(),
-		messages: new Map(),
+		messages: {
+			latest: new Map(),
+			previous: new Map(),
+		},
 	};
 }
 
@@ -337,7 +343,12 @@ function withCaching(
 	transformers.message = (bot, payload) => {
 		const result = message(bot, payload);
 
-		client.cache.messages.set(result.id, result);
+		const previousMessage = client.cache.messages.latest.get(result.id);
+		if (previousMessage !== undefined) {
+			client.cache.messages.previous.set(result.id, previousMessage);
+		}
+
+		client.cache.messages.latest.set(result.id, result);
 
 		const user = bot.transformers.user(bot, payload.author);
 

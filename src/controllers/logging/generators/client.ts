@@ -36,7 +36,10 @@ const client: MessageGenerators<ClientEvents> = {
 	},
 	messageUpdate: {
 		title: '⬆️ Message updated',
-		message: (client, _bot, message, oldMessage) => {
+		message: (client, _bot, message, _oldMessage) => {
+			const oldMessage = client.cache.messages.previous.get(message.id);
+			if (oldMessage === undefined) return;
+
 			const author = client.cache.users.get(message.authorId);
 			if (author === undefined) return;
 
@@ -48,7 +51,6 @@ const client: MessageGenerators<ClientEvents> = {
 
 **BEFORE**
 ${before}
-
 **AFTER**
 ${codeMultiline(message.content)}`;
 		},
@@ -64,7 +66,7 @@ ${codeMultiline(message.content)}`;
 	messageDelete: {
 		title: '❌ Message deleted',
 		message: (client, _bot, payload, _message) => {
-			const message = client.cache.messages.get(payload.id);
+			const message = client.cache.messages.latest.get(payload.id);
 			if (message === undefined) return;
 
 			const author = client.cache.users.get(message.authorId);
@@ -78,7 +80,7 @@ ${codeMultiline(message.content)}`;
 ${codeMultiline(message.content)}`;
 		},
 		filter: (client, originGuildId, _bot, payload, _message) => {
-			const message = client.cache.messages.get(payload.id);
+			const message = client.cache.messages.latest.get(payload.id);
 			if (message === undefined) return false;
 
 			const author = client.cache.users.get(message.authorId);
