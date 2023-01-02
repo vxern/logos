@@ -29,9 +29,8 @@ const client: MessageGenerators<ClientEvents> = {
 		color: constants.colors.lightGreen,
 	},
 	guildMemberRemove: {
-		title: '😔 User kicked or left',
-		message: (_client, _bot, user, _guildId) =>
-			`${diagnosticMentionUser(user)} has left the server, or they have been kicked.`,
+		title: '😔 User left',
+		message: (_client, _bot, user, _guildId) => `${diagnosticMentionUser(user)} has left the server.`,
 		filter: (_client, originGuildId, _bot, user, guildId) => originGuildId === guildId && !user.toggles.bot,
 		color: constants.colors.dullYellow,
 	},
