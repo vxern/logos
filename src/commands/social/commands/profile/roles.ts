@@ -109,10 +109,13 @@ interface NavigationData {
  * @param data - Navigation data for the selection menu.
  * @returns The category the user is now viewing.
  */
-function traverseRoleSelectionTree(data: NavigationData): RoleCategory {
-	return data.indexesAccessed.reduce<RoleCategory>(
-		(category, next) => (category as CategoryGroupRoleCategory).categories.at(next)!,
-		data.root,
+function traverseRoleSelectionTree(data: NavigationData): [RoleCategory, ...RoleCategory[]] {
+	return data.indexesAccessed.reduce<[RoleCategory, ...RoleCategory[]]>(
+		(categories, next) => {
+			categories.push((categories.at(-1)! as CategoryGroupRoleCategory).categories.at(next)!);
+			return categories;
+		},
+		[data.root],
 	);
 }
 
@@ -170,6 +173,14 @@ function createRoleSelectionMenu(
 				const alreadyHasRole = viewData.memberRolesIncludedInMenu.includes(role.id);
 
 				if (alreadyHasRole) {
+					if (
+						viewData.category.minimum !== undefined &&
+						viewData.memberRolesIncludedInMenu.length <= viewData.category.minimum
+					) {
+						displayData = traverseRoleTreeAndDisplay(bot, interaction, displayData, true);
+						return;
+					}
+
 					removeRole(bot, guild.id, member.id, role.id, 'User-requested role removal.');
 					displayData.roleData.memberRoleIds.splice(
 						displayData.roleData.memberRoleIds.findIndex((roleId) => roleId === role.id)!,
@@ -180,7 +191,7 @@ function createRoleSelectionMenu(
 						1,
 					);
 				} else {
-					if (viewData.category.restrictToOneRole) {
+					if (viewData.category.maximum === 1) {
 						for (const memberRoleId of viewData.memberRolesIncludedInMenu) {
 							removeRole(bot, guild.id, member.id, memberRoleId);
 							displayData.roleData.memberRoleIds.splice(
@@ -190,8 +201,8 @@ function createRoleSelectionMenu(
 						}
 						viewData.memberRolesIncludedInMenu = [];
 					} else if (
-						viewData.category.limit !== undefined &&
-						viewData.memberRolesIncludedInMenu.length >= viewData.category.limit
+						viewData.category.maximum !== undefined &&
+						viewData.memberRolesIncludedInMenu.length >= viewData.category.maximum
 					) {
 						sendInteractionResponse(
 							bot,
@@ -263,7 +274,8 @@ function traverseRoleTreeAndDisplay(
 	data: RoleDisplayData,
 	editResponse = true,
 ): RoleDisplayData {
-	const category = traverseRoleSelectionTree(data.browsingData.navigationData);
+	const categories = traverseRoleSelectionTree(data.browsingData.navigationData);
+	const category = categories.at(-1)!;
 
 	let selectOptions: SelectOption[];
 	if (category.type === RoleCategoryTypes.Category) {
@@ -292,7 +304,7 @@ function traverseRoleTreeAndDisplay(
 
 	data.viewData!.category = category;
 
-	const menu = displaySelectMenu(data, selectOptions, interaction.locale);
+	const menu = displaySelectMenu(data, categories, selectOptions, interaction.locale);
 
 	if (editResponse) {
 		editOriginalInteractionResponse(bot, interaction.token, menu.data!);
@@ -305,6 +317,7 @@ function traverseRoleTreeAndDisplay(
 
 function displaySelectMenu(
 	data: RoleDisplayData,
+	categories: [RoleCategory, ...RoleCategory[]],
 	selectOptions: SelectOption[],
 	locale: string | undefined,
 ): InteractionResponse {
@@ -316,16 +329,19 @@ function displaySelectMenu(
 		});
 	}
 
-	const category = data.viewData!.category;
+	const category = categories.at(-1)!;
 
-	const categoryNameString = localise(category.name, locale);
+	const title = (categories.length > 1 ? categories.slice(1) : categories).map((category) => {
+		const categoryNameString = localise(category.name, locale);
+		return `${category.emoji}  ${categoryNameString}`;
+	}).join(' »  ');
 
 	return {
 		type: InteractionResponseTypes.ChannelMessageWithSource,
 		data: {
 			flags: ApplicationCommandFlags.Ephemeral,
 			embeds: [{
-				title: `${category.emoji}  ${categoryNameString}`,
+				title,
 				description: localise(category.description, locale),
 				color: category.color,
 			}],

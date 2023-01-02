@@ -6,6 +6,7 @@ import {
 	sendInteractionResponse,
 } from 'discordeno';
 import { Commands, localise } from 'logos/assets/localisations/mod.ts';
+import { getVoiceState, verifyVoiceState } from 'logos/src/controllers/music.ts';
 import { Client } from 'logos/src/client.ts';
 import { parseArguments } from 'logos/src/interactions.ts';
 import constants from 'logos/constants.ts';
@@ -19,6 +20,15 @@ function handleDisplayVolume(
 	if (controller === undefined) return;
 
 	const [{ show }] = parseArguments(interaction.data?.options, { show: 'boolean' });
+
+	const isVoiceStateVerified = verifyVoiceState(
+		bot,
+		interaction,
+		controller,
+		getVoiceState(client, interaction.guildId!, interaction.user.id),
+		'check',
+	);
+	if (!isVoiceStateVerified) return;
 
 	const locale = show ? defaultLocale : interaction.locale;
 

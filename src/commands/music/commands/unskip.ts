@@ -33,9 +33,13 @@ function handleUnskipAction([client, bot]: [Client, Bot], interaction: Interacti
 	const controller = client.features.music.controllers.get(interaction.guildId!);
 	if (controller === undefined) return;
 
-	const voiceState = getVoiceState(client, interaction);
-
-	const isVoiceStateVerified = verifyVoiceState(bot, interaction, controller, voiceState);
+	const isVoiceStateVerified = verifyVoiceState(
+		bot,
+		interaction,
+		controller,
+		getVoiceState(client, interaction.guildId!, interaction.user.id),
+		'manipulate',
+	);
 	if (!isVoiceStateVerified) return;
 
 	const data = interaction.data;

@@ -182,7 +182,7 @@ class Commands {
 				strings: {
 					informationAbout: {
 						'English': (guildName: string) => `Information about **${guildName}**`,
-						'Hungarian': (guildName: string) => `Információk - **${guildName}**`,
+						'Hungarian': (guildName: string) => `Információk – **${guildName}**`,
 						'Polish': (guildName: string) => `Informacje o **${guildName}**`,
 						'Romanian': (guildName: string) => `Informații despre **${guildName}**`,
 					},
@@ -950,6 +950,12 @@ class Commands {
 				'Polish': 'Ostrzeżenia',
 				'Romanian': 'Avertizări',
 			},
+			warning: {
+				'English': (index: number, timestamp: string) => `Warning #${index}, given ${timestamp}`,
+				// TODO: Add Hungarian translations.
+				'Polish': (index: number, timestamp: string) => `Ostrzeżenie nr. ${index}, przydzielone ${timestamp}`,
+				'Romanian': (index: number, timestamp: string) => `Avertismentul nr. ${index}, atribuit ${timestamp}`,
+			},
 		},
 	});
 
@@ -961,10 +967,10 @@ class Commands {
 			'Romanian': 'grațiere',
 		},
 		description: {
-			'English': 'Removes the last given warning to a user.',
-			'Hungarian': 'Eltávolítja egy felhasználó legutolsó figyelmeztetését.',
-			'Polish': 'Usuwa ostatnie ostrzeżenie dane użytkownikowi.',
-			'Romanian': 'Șterge ultimul avertisment acordat unui utilizator.',
+			'English': 'Removes one of the warnings previously given to a user.',
+			// TODO: Hungarian localisation.
+			'Polish': 'Usuwa jedno z ostrzeżeń poprzednio przyjęte przez użytkownika.',
+			'Romanian': 'Elimină unul dintre avertismentele acceptate anterior de către utilizator.',
 		},
 		options: {
 			warning: {
@@ -1211,7 +1217,7 @@ class Commands {
 					'Romanian': 'setare',
 				},
 				description: {
-					'English': 'Times out a user, making them unable to interact on the server.',
+					'English': 'Times a user out, making them unable to interact on the server.',
 					'Hungarian': 'Felfüggeszti a felhasználót, aki így nem tud semmilyen interakciót végrehajtani a szerveren.',
 					'Polish': 'Wycisza użytkownika, uniemożliwiając mu interakcję z serwerem (pisanie, mówienie w VC, itp.).',
 					'Romanian': 'Face ca un utilizator să nu mai poată interacționa în server.',
@@ -1611,12 +1617,6 @@ class Commands {
 						'Romanian': 'Nu s-a putut găsi melodia.\n\n' +
 							'Încearcă să cauți melodia într-un mod diferit, sau să redai o altă melodie.',
 					},
-					mustBeInVoiceChannel: {
-						'English': 'To manipulate music, you must be in a voice channel.',
-						// TODO: Add Hungarian localisation.
-						'Polish': 'Aby móc kontrolować odtwarzanie muzyki, wpierw musisz się znajdywać w kanale głosowym.',
-						'Romanian': 'Pentru a gestiona redarea muzicii, trebuie mai întâi să întri în canal de voce.',
-					},
 					alreadyPlayingInAnotherVoiceChannel: {
 						'English': 'The bot is playing music in another voice channel.',
 						// TODO: Add Hungarian localisation.
@@ -1997,6 +1997,18 @@ class Commands {
 				'Polish': 'Bot obecnie nie odtwarza muzyki.',
 				'Romanian': 'Nu se redă muzică.',
 			},
+			mustBeInVoiceChannelToManipulate: {
+				'English': 'To manipulate music, you must be in a voice channel.',
+				// TODO: Add Hungarian localisation.
+				'Polish': 'Aby móc kontrolować odtwarzanie muzyki, wpierw musisz się znajdywać w kanale głosowym.',
+				'Romanian': 'Pentru a gestiona redarea muzicii, trebuie mai întâi să intri în canal de voce.',
+			},
+			mustBeInVoiceChannelToCheck: {
+				'English': 'To check playback-related information, you must be in a voice channel.',
+				// TODO: Add Hungarian localisation.
+				'Polish': 'Aby móc sprawdzić informacje o odtwarzaniu muzyki, wpierw musisz się znajdywać w kanale głosowym.',
+				'Romanian': 'Pentru a verifica informații despre redarea muzicii, trebuie mai întâi să intri în canal de voce.',
+			},
 			listings: {
 				'English': 'Listings',
 				'Hungarian': 'Elemek',
@@ -2259,6 +2271,12 @@ class Commands {
 							`Ai atins limita rolurilor pe care le poți obține din cadrul categoriei '${categoryName}'.` +
 							'Pentru a alege un rol nou, dezasociază unul dintre rolurile existente.',
 					},
+					cannotUnassignRole: {
+						'English': 'You cannot unassign this role. You can only exchange it for another.',
+						// TODO: Hungarian localisation.
+						'Polish': 'Nie możesz usunąć tej rangi, możesz ją tylko wymienić na inną.',
+						'Romanian': 'Nu se poate elimina acest rol, este posibil doar să o schimbi cu alta. ',
+					},
 					chooseCategory: {
 						'English': 'Choose a category.',
 						'Hungarian': 'Válassz egy kategóriát.',
@@ -2307,7 +2325,7 @@ class Commands {
 					},
 					informationForUser: {
 						'English': (username: string) => `Information about ${username}`,
-						'Hungarian': (username: string) => `Információ - ${username}`,
+						'Hungarian': (username: string) => `Információ – ${username}`,
 						'Polish': (username: string) => `Informacje o użytkowniku ${username}`,
 						'Romanian': (username: string) => `Informații despre ${username}`,
 					},

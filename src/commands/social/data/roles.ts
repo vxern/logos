@@ -6,9 +6,10 @@ const categories: RoleCategory[] = [
 	{
 		...Roles.proficiency,
 		type: RoleCategoryTypes.Category,
-		color: constants.colors.black,
+		color: constants.colors.gray,
 		emoji: '🎓',
-		restrictToOneRole: true,
+		minimum: 1,
+		maximum: 1,
 		collection: {
 			type: RoleCollectionTypes.Collection,
 			list: [{
@@ -37,7 +38,7 @@ const categories: RoleCategory[] = [
 				type: RoleCategoryTypes.Category,
 				color: constants.colors.husky,
 				emoji: '🖋️',
-				restrictToOneRole: true,
+				maximum: 1,
 				collection: {
 					type: RoleCollectionTypes.CollectionLocalised,
 					lists: {
@@ -53,7 +54,7 @@ const categories: RoleCategory[] = [
 				type: RoleCategoryTypes.Category,
 				color: constants.colors.orangeRed,
 				emoji: '⚧',
-				restrictToOneRole: true,
+				maximum: 1,
 				collection: {
 					type: RoleCollectionTypes.Collection,
 					list: [{
@@ -76,7 +77,6 @@ const categories: RoleCategory[] = [
 				type: RoleCategoryTypes.Category,
 				color: constants.colors.husky,
 				emoji: '🌎',
-				restrictToOneRole: false,
 				collection: {
 					type: RoleCollectionTypes.Collection,
 					list: [{
@@ -92,7 +92,6 @@ const categories: RoleCategory[] = [
 		type: RoleCategoryTypes.Category,
 		color: constants.colors.lightGray,
 		emoji: '📖',
-		restrictToOneRole: false,
 		collection: {
 			type: RoleCollectionTypes.Collection,
 			list: [{
@@ -115,8 +114,7 @@ const categories: RoleCategory[] = [
 		type: RoleCategoryTypes.Category,
 		color: constants.colors.turquoise,
 		emoji: '🗾',
-		restrictToOneRole: false,
-		limit: 2,
+		maximum: 2,
 		collection: {
 			type: RoleCollectionTypes.CollectionLocalised,
 			lists: {
@@ -130,7 +128,6 @@ const categories: RoleCategory[] = [
 		type: RoleCategoryTypes.Category,
 		color: constants.colors.green,
 		emoji: '🏷️',
-		restrictToOneRole: false,
 		collection: {
 			type: RoleCollectionTypes.CollectionLocalised,
 			lists: {
@@ -143,8 +140,7 @@ const categories: RoleCategory[] = [
 		type: RoleCategoryTypes.Category,
 		color: constants.colors.greenishLightGray,
 		emoji: '🤷‍♂️',
-		restrictToOneRole: false,
-		limit: 2,
+		maximum: 2,
 		collection: {
 			type: RoleCollectionTypes.CollectionLocalised,
 			lists: {

@@ -29,15 +29,19 @@ async function handleSkipToTimestamp(
 	const controller = client.features.music.controllers.get(interaction.guildId!);
 	if (controller === undefined) return;
 
-	const voiceState = getVoiceState(client, interaction);
-
-	const isVoiceStateVerified = verifyVoiceState(bot, interaction, controller, voiceState);
+	const isVoiceStateVerified = verifyVoiceState(
+		bot,
+		interaction,
+		controller,
+		getVoiceState(client, interaction.guildId!, interaction.user.id),
+		'manipulate',
+	);
 	if (!isVoiceStateVerified) return;
 
 	const [{ timestamp: timestampExpression }, focused] = parseArguments(interaction.data?.options, {});
 
 	if (focused !== undefined) {
-		const timestamp = parseTimeExpression(timestampExpression!, interaction.locale);
+		const timestamp = parseTimeExpression(timestampExpression!, false, interaction.locale);
 
 		return void sendInteractionResponse(
 			bot,

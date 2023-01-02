@@ -29,15 +29,17 @@ const client: MessageGenerators<ClientEvents> = {
 		color: constants.colors.lightGreen,
 	},
 	guildMemberRemove: {
-		title: '😔 User kicked or left',
-		message: (_client, _bot, user, _guildId) =>
-			`${diagnosticMentionUser(user)} has left the server, or they have been kicked.`,
+		title: '😔 User left',
+		message: (_client, _bot, user, _guildId) => `${diagnosticMentionUser(user)} has left the server.`,
 		filter: (_client, originGuildId, _bot, user, guildId) => originGuildId === guildId && !user.toggles.bot,
 		color: constants.colors.dullYellow,
 	},
 	messageUpdate: {
 		title: '⬆️ Message updated',
-		message: (client, _bot, message, oldMessage) => {
+		message: (client, _bot, message, _oldMessage) => {
+			const oldMessage = client.cache.messages.previous.get(message.id);
+			if (oldMessage === undefined) return;
+
 			const author = client.cache.users.get(message.authorId);
 			if (author === undefined) return;
 
@@ -49,7 +51,6 @@ const client: MessageGenerators<ClientEvents> = {
 
 **BEFORE**
 ${before}
-
 **AFTER**
 ${codeMultiline(message.content)}`;
 		},
@@ -65,7 +66,7 @@ ${codeMultiline(message.content)}`;
 	messageDelete: {
 		title: '❌ Message deleted',
 		message: (client, _bot, payload, _message) => {
-			const message = client.cache.messages.get(payload.id);
+			const message = client.cache.messages.latest.get(payload.id);
 			if (message === undefined) return;
 
 			const author = client.cache.users.get(message.authorId);
@@ -79,7 +80,7 @@ ${codeMultiline(message.content)}`;
 ${codeMultiline(message.content)}`;
 		},
 		filter: (client, originGuildId, _bot, payload, _message) => {
-			const message = client.cache.messages.get(payload.id);
+			const message = client.cache.messages.latest.get(payload.id);
 			if (message === undefined) return false;
 
 			const author = client.cache.users.get(message.authorId);

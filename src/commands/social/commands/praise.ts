@@ -6,6 +6,7 @@ import {
 	getDmChannel,
 	Interaction,
 	InteractionResponseTypes,
+	InteractionTypes,
 	sendInteractionResponse,
 	sendMessage,
 } from 'discordeno';
@@ -35,11 +36,13 @@ async function handlePraiseUser(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {
-	const [{ user, comment }] = parseArguments(interaction.data?.options, {});
+	const [{ user, comment }, focused] = parseArguments(interaction.data?.options, {});
 	if (user === undefined) return;
 
 	const member = resolveInteractionToMember([client, bot], interaction, user);
 	if (member === undefined) return;
+
+	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete && focused?.name === 'user') return;
 
 	if (member.id === interaction.member?.id) {
 		return void sendInteractionResponse(

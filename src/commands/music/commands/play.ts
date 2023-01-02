@@ -1,4 +1,5 @@
 import {
+	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
 	Bot,
 	Interaction,
@@ -72,13 +73,12 @@ async function handleRequestSongListing(
 	const [{ query }] = parseArguments(interaction.data?.options, {});
 	if (query === undefined) return;
 
-	const voiceState = getVoiceState(client, interaction);
+	const voiceState = getVoiceState(client, interaction.guildId!, interaction.user.id);
 
 	const canPlay = verifyCanRequestPlayback(bot, interaction, controller, voiceState);
-	if (!canPlay || voiceState === undefined) return;
+	if (!canPlay) return;
 
 	const listing = await resolveToSongListing([client, bot], interaction, query);
-
 	if (listing === undefined) {
 		return void sendInteractionResponse(
 			bot,
@@ -87,6 +87,7 @@ async function handleRequestSongListing(
 			{
 				type: InteractionResponseTypes.ChannelMessageWithSource,
 				data: {
+					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(Commands.music.options.play.strings.songNotFound, interaction.locale),
 						color: constants.colors.red,
@@ -99,7 +100,7 @@ async function handleRequestSongListing(
 	const feedbackChannelId = client.cache.channels.get(interaction.channelId!)?.id;
 	if (feedbackChannelId === undefined) return;
 
-	const voiceChannelId = client.cache.channels.get(voiceState.channelId!)?.id;
+	const voiceChannelId = client.cache.channels.get(voiceState!.channelId!)?.id;
 	if (voiceChannelId === undefined) return;
 
 	return void receiveNewListing(

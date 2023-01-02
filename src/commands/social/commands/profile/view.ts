@@ -5,6 +5,7 @@ import {
 	getAvatarURL,
 	Interaction,
 	InteractionResponseTypes,
+	InteractionTypes,
 	sendInteractionResponse,
 } from 'discordeno';
 import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
@@ -27,10 +28,12 @@ async function handleDisplayProfile(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {
-	const [{ user, show }] = parseArguments(interaction.data?.options, { show: 'boolean' });
+	const [{ user, show }, focused] = parseArguments(interaction.data?.options, { show: 'boolean' });
 
 	const member = resolveInteractionToMember([client, bot], interaction, user ?? interaction.user.id.toString());
 	if (member === undefined) return;
+
+	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete && focused?.name === 'user') return;
 
 	const target = member.user;
 	if (target === undefined) return;
@@ -106,8 +109,9 @@ async function handleDisplayProfile(
 						inline: false,
 					}, {
 						name: `🧮 ${statisticsString}`,
-						value: `🙏 ${praisesString} — ${receivedString} ${praisesReceived.size} • ${sentString} ${praisesSent.size}
-😖 ${warningsString} — ${receivedString} ${warningsReceived.size}`,
+						value:
+							`🙏 ${praisesString} • ${receivedString} – ${praisesReceived.size} • ${sentString} – ${praisesSent.size}
+😖 ${warningsString} • ${receivedString} – ${warningsReceived.size}`,
 						inline: false,
 					}],
 				}],

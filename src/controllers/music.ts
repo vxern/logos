@@ -8,6 +8,7 @@ import {
 	sendMessage,
 	VoiceState,
 } from 'discordeno';
+import { EventEmitter } from 'event';
 import { Player } from 'lavadeno';
 import { LoadType } from 'lavalink_types';
 import { Commands, localise } from 'logos/assets/localisations/mod.ts';
@@ -31,8 +32,12 @@ function setupMusicController(client: Client, guildId: bigint): void {
 
 const disconnectTimeoutIdByGuildId = new Map<bigint, number>();
 
+type MusicEvents = { queueUpdate: []; historyUpdate: []; stop: [] };
+
 interface MusicController {
 	readonly player: Player;
+
+	readonly events: EventEmitter<MusicEvents>;
 
 	voiceChannelId: bigint | undefined;
 	feedbackChannelId: bigint | undefined;
@@ -57,6 +62,7 @@ function createMusicController(
 
 	return {
 		player,
+		events: new EventEmitter(0),
 		voiceChannelId: undefined,
 		feedbackChannelId: undefined,
 		listingHistory: [],
@@ -104,19 +110,22 @@ function isPaused(player: Player): boolean {
 	return player.paused;
 }
 
-function getVoiceState(client: Client, interaction: Interaction): VoiceState | undefined {
-	const guild = client.cache.guilds.get(interaction.guildId!);
+function getVoiceState(client: Client, guildId: bigint, userId: bigint): VoiceState | undefined {
+	const guild = client.cache.guilds.get(guildId);
 	if (guild === undefined) return undefined;
 
-	const voiceState = guild.voiceStates.get(interaction.user.id);
+	const voiceState = guild.voiceStates.get(userId);
 	return voiceState;
 }
+
+type MusicAction = 'manipulate' | 'check';
 
 function verifyVoiceState(
 	bot: Bot,
 	interaction: Interaction,
 	controller: MusicController,
 	voiceState: VoiceState | undefined,
+	action: MusicAction,
 ): boolean {
 	if (voiceState === undefined || voiceState.channelId === undefined) {
 		sendInteractionResponse(
@@ -129,7 +138,12 @@ function verifyVoiceState(
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [
 						{
-							description: localise(Commands.music.options.play.strings.mustBeInVoiceChannel, interaction.locale),
+							description: localise(
+								action === 'manipulate'
+									? Commands.music.strings.mustBeInVoiceChannelToManipulate
+									: Commands.music.strings.mustBeInVoiceChannelToCheck,
+								interaction.locale,
+							),
 							color: constants.colors.dullYellow,
 						},
 					],
@@ -170,7 +184,7 @@ function verifyCanRequestPlayback(
 	controller: MusicController,
 	voiceState: VoiceState | undefined,
 ): boolean {
-	const isVoiceStateVerified = verifyVoiceState(bot, interaction, controller, voiceState);
+	const isVoiceStateVerified = verifyVoiceState(bot, interaction, controller, voiceState, 'manipulate');
 	if (!isVoiceStateVerified) return false;
 
 	if (!isQueueVacant(controller.listingQueue)) {
@@ -206,6 +220,7 @@ function moveListingToHistory(controller: MusicController, listing: SongListing)
 	}
 
 	controller.listingHistory.push(listing);
+	controller.events.emit('historyUpdate');
 }
 
 function tryClearDisconnectTimeout(guildId: bigint): void {
@@ -234,6 +249,7 @@ function receiveNewListing(
 	tryClearDisconnectTimeout(guildId);
 
 	controller.listingQueue.push(listing);
+	controller.events.emit('queueUpdate');
 
 	// If the player is not connected to a voice channel, or if it is connected
 	// to a different voice channel, connect to the new voice channel.
@@ -294,6 +310,7 @@ function advanceQueueAndPlay(
 			(controller.currentListing === undefined || !isCollection(controller.currentListing?.content))
 		) {
 			controller.currentListing = controller.listingQueue.shift();
+			controller.events.emit('queueUpdate');
 		}
 	}
 
@@ -304,6 +321,7 @@ function advanceQueueAndPlay(
 			} else {
 				moveListingToHistory(controller, controller.currentListing!);
 				controller.currentListing = controller.listingQueue.shift();
+				controller.events.emit('queueUpdate');
 			}
 		} else {
 			controller.currentListing!.content.position++;
@@ -425,6 +443,10 @@ function skip(controller: MusicController, skipCollection: boolean, { by, to }: 
 		}
 	}
 
+	if (listingsToMoveToHistory !== 0) {
+		controller.events.emit('queueUpdate');
+	}
+
 	return void controller.player.stop();
 }
 
@@ -441,6 +463,8 @@ function unskip(
 
 			controller.listingQueue.unshift(controller.currentListing!);
 			controller.listingQueue.unshift(controller.listingHistory.pop()!);
+			controller.events.emit('queueUpdate');
+			controller.events.emit('historyUpdate');
 			controller.currentListing = undefined;
 		} else {
 			if (by !== undefined) {
@@ -460,11 +484,17 @@ function unskip(
 
 		if (controller.currentListing !== undefined) {
 			controller.listingQueue.unshift(controller.currentListing);
+			controller.events.emit('queueUpdate');
 			controller.currentListing = undefined;
 		}
 
 		for (let _ = 0; _ < listingsToMoveToQueue; _++) {
 			controller.listingQueue.unshift(controller.listingHistory.pop()!);
+		}
+
+		if (listingsToMoveToQueue !== 0) {
+			controller.events.emit('queueUpdate');
+			controller.events.emit('historyUpdate');
 		}
 	}
 
@@ -518,11 +548,18 @@ function reset(client: Client, guildId: bigint): void {
 	const controller = client.features.music.controllers.get(guildId);
 	if (controller !== undefined) {
 		controller.flags.isDestroyed = true;
-		controller.player.stop();
+		controller.events.emit('stop');
 		controller.player.disconnect();
+		controller.player.stop();
 	}
 
 	return setupMusicController(client, guildId);
+}
+
+function remove(controller: MusicController, index: number): SongListing | undefined {
+	const listing = controller.listingQueue.splice(index, 1)?.at(0);
+	controller.events.emit('queueUpdate');
+	return listing;
 }
 
 const localisationsBySongListingType = {
@@ -540,6 +577,7 @@ export {
 	isQueueVacant,
 	pause,
 	receiveNewListing,
+	remove,
 	replay,
 	reset,
 	resume,

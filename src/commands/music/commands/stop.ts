@@ -8,7 +8,7 @@ import {
 } from 'discordeno';
 import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
 import { OptionBuilder } from 'logos/src/commands/command.ts';
-import { getVoiceState, isOccupied, reset, verifyVoiceState } from 'logos/src/controllers/music.ts';
+import { getVoiceState, reset, verifyVoiceState } from 'logos/src/controllers/music.ts';
 import { Client } from 'logos/src/client.ts';
 import constants from 'logos/constants.ts';
 import { defaultLocale } from 'logos/types.ts';
@@ -23,12 +23,17 @@ function handleStopPlayback([client, bot]: [Client, Bot], interaction: Interacti
 	const controller = client.features.music.controllers.get(interaction.guildId!);
 	if (controller === undefined) return;
 
-	const voiceState = getVoiceState(client, interaction);
-
-	const isVoiceStateVerified = verifyVoiceState(bot, interaction, controller, voiceState);
+	const isVoiceStateVerified = verifyVoiceState(
+		bot,
+		interaction,
+		controller,
+		getVoiceState(client, interaction.guildId!, interaction.user.id),
+		'manipulate',
+	);
 	if (!isVoiceStateVerified) return;
 
-	if (!isOccupied(controller.player)) {
+	const botVoiceState = getVoiceState(client, interaction.guildId!, bot.id);
+	if (botVoiceState === undefined) {
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
