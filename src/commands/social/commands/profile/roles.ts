@@ -144,7 +144,7 @@ function createRoleSelectionMenu(
 		{
 			type: InteractionTypes.MessageComponent,
 			userId: interaction.user.id,
-			onCollect: (bot, selection) => {
+			onCollect: async (bot, selection) => {
 				sendInteractionResponse(bot, selection.id, selection.token, {
 					type: InteractionResponseTypes.DeferredUpdateMessage,
 				});
@@ -191,17 +191,8 @@ function createRoleSelectionMenu(
 						1,
 					);
 				} else {
-					if (viewData.category.maximum === 1) {
-						for (const memberRoleId of viewData.memberRolesIncludedInMenu) {
-							removeRole(bot, guild.id, member.id, memberRoleId);
-							displayData.roleData.memberRoleIds.splice(
-								displayData.roleData.memberRoleIds.findIndex((roleId) => roleId === memberRoleId)!,
-								1,
-							);
-						}
-						viewData.memberRolesIncludedInMenu = [];
-					} else if (
-						viewData.category.maximum !== undefined &&
+					if (
+						viewData.category.maximum !== undefined && viewData.category.maximum !== 1 &&
 						viewData.memberRolesIncludedInMenu.length >= viewData.category.maximum
 					) {
 						sendInteractionResponse(
@@ -225,7 +216,19 @@ function createRoleSelectionMenu(
 						return;
 					}
 
-					addRole(bot, guild.id, member.id, role.id, 'User-requested role addition.');
+					await addRole(bot, guild.id, member.id, role.id, 'User-requested role addition.');
+
+					if (viewData.category.maximum === 1) {
+						for (const memberRoleId of viewData.memberRolesIncludedInMenu) {
+							removeRole(bot, guild.id, member.id, memberRoleId);
+							displayData.roleData.memberRoleIds.splice(
+								displayData.roleData.memberRoleIds.findIndex((roleId) => roleId === memberRoleId)!,
+								1,
+							);
+						}
+						viewData.memberRolesIncludedInMenu = [];
+					}
+
 					displayData.roleData.memberRoleIds.push(role.id);
 					displayData.viewData!.memberRolesIncludedInMenu.push(role.id);
 				}
