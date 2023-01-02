@@ -75,7 +75,7 @@ async function handleRequestSongListing(
 	const voiceState = getVoiceState(client, interaction);
 
 	const canPlay = verifyCanRequestPlayback(bot, interaction, controller, voiceState);
-	if (!canPlay || voiceState === undefined) return;
+	if (!canPlay) return;
 
 	const listing = await resolveToSongListing([client, bot], interaction, query);
 
@@ -99,7 +99,7 @@ async function handleRequestSongListing(
 	const feedbackChannelId = client.cache.channels.get(interaction.channelId!)?.id;
 	if (feedbackChannelId === undefined) return;
 
-	const voiceChannelId = client.cache.channels.get(voiceState.channelId!)?.id;
+	const voiceChannelId = client.cache.channels.get(voiceState!.channelId!)?.id;
 	if (voiceChannelId === undefined) return;
 
 	return void receiveNewListing(

@@ -112,11 +112,14 @@ function getVoiceState(client: Client, interaction: Interaction): VoiceState | u
 	return voiceState;
 }
 
+type MusicAction = 'manipulate' | 'check';
+
 function verifyVoiceState(
 	bot: Bot,
 	interaction: Interaction,
 	controller: MusicController,
 	voiceState: VoiceState | undefined,
+	action: MusicAction,
 ): boolean {
 	if (voiceState === undefined || voiceState.channelId === undefined) {
 		sendInteractionResponse(
@@ -129,7 +132,12 @@ function verifyVoiceState(
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [
 						{
-							description: localise(Commands.music.options.play.strings.mustBeInVoiceChannel, interaction.locale),
+							description: localise(
+								action === 'manipulate'
+									? Commands.music.strings.mustBeInVoiceChannelToManipulate
+									: Commands.music.strings.mustBeInVoiceChannelToCheck,
+								interaction.locale,
+							),
 							color: constants.colors.dullYellow,
 						},
 					],
@@ -170,7 +178,7 @@ function verifyCanRequestPlayback(
 	controller: MusicController,
 	voiceState: VoiceState | undefined,
 ): boolean {
-	const isVoiceStateVerified = verifyVoiceState(bot, interaction, controller, voiceState);
+	const isVoiceStateVerified = verifyVoiceState(bot, interaction, controller, voiceState, 'manipulate');
 	if (!isVoiceStateVerified) return false;
 
 	if (!isQueueVacant(controller.listingQueue)) {

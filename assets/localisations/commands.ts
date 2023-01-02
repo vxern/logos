@@ -1617,12 +1617,6 @@ class Commands {
 						'Romanian': 'Nu s-a putut găsi melodia.\n\n' +
 							'Încearcă să cauți melodia într-un mod diferit, sau să redai o altă melodie.',
 					},
-					mustBeInVoiceChannel: {
-						'English': 'To manipulate music, you must be in a voice channel.',
-						// TODO: Add Hungarian localisation.
-						'Polish': 'Aby móc kontrolować odtwarzanie muzyki, wpierw musisz się znajdywać w kanale głosowym.',
-						'Romanian': 'Pentru a gestiona redarea muzicii, trebuie mai întâi să întri în canal de voce.',
-					},
 					alreadyPlayingInAnotherVoiceChannel: {
 						'English': 'The bot is playing music in another voice channel.',
 						// TODO: Add Hungarian localisation.
@@ -2002,6 +1996,18 @@ class Commands {
 				'Hungarian': 'A bot jelenleg nem játszik le zenét.',
 				'Polish': 'Bot obecnie nie odtwarza muzyki.',
 				'Romanian': 'Nu se redă muzică.',
+			},
+			mustBeInVoiceChannelToManipulate: {
+				'English': 'To manipulate music, you must be in a voice channel.',
+				// TODO: Add Hungarian localisation.
+				'Polish': 'Aby móc kontrolować odtwarzanie muzyki, wpierw musisz się znajdywać w kanale głosowym.',
+				'Romanian': 'Pentru a gestiona redarea muzicii, trebuie mai întâi să intri în canal de voce.',
+			},
+			mustBeInVoiceChannelToCheck: {
+				'English': 'To check playback-related information, you must be in a voice channel.',
+				// TODO: Add Hungarian localisation.
+				'Polish': 'Aby móc sprawdzić informacje o odtwarzaniu muzyki, wpierw musisz się znajdywać w kanale głosowym.',
+				'Romanian': 'Pentru a verifica informații despre redarea muzicii, trebuie mai întâi să intri în canal de voce.',
 			},
 			listings: {
 				'English': 'Listings',
