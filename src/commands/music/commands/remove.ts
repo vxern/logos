@@ -75,14 +75,14 @@ function handleRemoveSongListing([client, bot]: [Client, Bot], interaction: Inte
 		interaction.locale,
 	);
 
-	controller.emitter.on('queueUpdate', () =>
+	controller.events.on('queueUpdate', () =>
 		editOriginalInteractionResponse(
 			bot,
 			interaction.token,
 			generateEmbed([client, bot], interaction, controller, removeListingData, interaction.locale),
 		));
 
-	controller.emitter.on('stop', () => deleteOriginalInteractionResponse(bot, interaction.token));
+	controller.events.on('stop', () => deleteOriginalInteractionResponse(bot, interaction.token));
 
 	return void sendInteractionResponse(
 		bot,

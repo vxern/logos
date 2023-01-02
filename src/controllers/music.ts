@@ -32,12 +32,12 @@ function setupMusicController(client: Client, guildId: bigint): void {
 
 const disconnectTimeoutIdByGuildId = new Map<bigint, number>();
 
-type MusicEvents = { queueUpdate: []; stop: [] };
+type MusicEvents = { queueUpdate: []; historyUpdate: []; stop: [] };
 
 interface MusicController {
 	readonly player: Player;
 
-	readonly emitter: EventEmitter<MusicEvents>;
+	readonly events: EventEmitter<MusicEvents>;
 
 	voiceChannelId: bigint | undefined;
 	feedbackChannelId: bigint | undefined;
@@ -62,7 +62,7 @@ function createMusicController(
 
 	return {
 		player,
-		emitter: new EventEmitter(0),
+		events: new EventEmitter(0),
 		voiceChannelId: undefined,
 		feedbackChannelId: undefined,
 		listingHistory: [],
@@ -220,6 +220,7 @@ function moveListingToHistory(controller: MusicController, listing: SongListing)
 	}
 
 	controller.listingHistory.push(listing);
+	controller.events.emit('historyUpdate');
 }
 
 function tryClearDisconnectTimeout(guildId: bigint): void {
@@ -248,7 +249,7 @@ function receiveNewListing(
 	tryClearDisconnectTimeout(guildId);
 
 	controller.listingQueue.push(listing);
-	controller.emitter.emit('queueUpdate');
+	controller.events.emit('queueUpdate');
 
 	// If the player is not connected to a voice channel, or if it is connected
 	// to a different voice channel, connect to the new voice channel.
@@ -309,7 +310,7 @@ function advanceQueueAndPlay(
 			(controller.currentListing === undefined || !isCollection(controller.currentListing?.content))
 		) {
 			controller.currentListing = controller.listingQueue.shift();
-			controller.emitter.emit('queueUpdate');
+			controller.events.emit('queueUpdate');
 		}
 	}
 
@@ -320,7 +321,7 @@ function advanceQueueAndPlay(
 			} else {
 				moveListingToHistory(controller, controller.currentListing!);
 				controller.currentListing = controller.listingQueue.shift();
-				controller.emitter.emit('queueUpdate');
+				controller.events.emit('queueUpdate');
 			}
 		} else {
 			controller.currentListing!.content.position++;
@@ -443,7 +444,7 @@ function skip(controller: MusicController, skipCollection: boolean, { by, to }: 
 	}
 
 	if (listingsToMoveToHistory !== 0) {
-		controller.emitter.emit('queueUpdate');
+		controller.events.emit('queueUpdate');
 	}
 
 	return void controller.player.stop();
@@ -462,7 +463,8 @@ function unskip(
 
 			controller.listingQueue.unshift(controller.currentListing!);
 			controller.listingQueue.unshift(controller.listingHistory.pop()!);
-			controller.emitter.emit('queueUpdate');
+			controller.events.emit('queueUpdate');
+			controller.events.emit('historyUpdate');
 			controller.currentListing = undefined;
 		} else {
 			if (by !== undefined) {
@@ -482,7 +484,7 @@ function unskip(
 
 		if (controller.currentListing !== undefined) {
 			controller.listingQueue.unshift(controller.currentListing);
-			controller.emitter.emit('queueUpdate');
+			controller.events.emit('queueUpdate');
 			controller.currentListing = undefined;
 		}
 
@@ -491,7 +493,8 @@ function unskip(
 		}
 
 		if (listingsToMoveToQueue !== 0) {
-			controller.emitter.emit('queueUpdate');
+			controller.events.emit('queueUpdate');
+			controller.events.emit('historyUpdate');
 		}
 	}
 
@@ -545,7 +548,7 @@ function reset(client: Client, guildId: bigint): void {
 	const controller = client.features.music.controllers.get(guildId);
 	if (controller !== undefined) {
 		controller.flags.isDestroyed = true;
-		controller.emitter.emit('stop');
+		controller.events.emit('stop');
 		controller.player.disconnect();
 		controller.player.stop();
 	}
@@ -555,7 +558,7 @@ function reset(client: Client, guildId: bigint): void {
 
 function remove(controller: MusicController, index: number): SongListing | undefined {
 	const listing = controller.listingQueue.splice(index, 1)?.at(0);
-	controller.emitter.emit('queueUpdate');
+	controller.events.emit('queueUpdate');
 	return listing;
 }
 
