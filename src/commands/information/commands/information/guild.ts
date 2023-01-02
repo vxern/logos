@@ -112,7 +112,7 @@ function displayInformationAboutChannels(guild: Guild, locale: string | undefine
 	const textChannelsString = localise(Commands.information.options.guild.strings.channelTypes.text, locale);
 	const voiceChannelsString = localise(Commands.information.options.guild.strings.channelTypes.voice, locale);
 
-	return `📜 ${textChannelsCount} ${textChannelsString} | 🔊 ${voiceChannelsCount} ${voiceChannelsString}`;
+	return `📜 ${textChannelsString} – ${textChannelsCount} | 🔊 ${voiceChannelsString} – ${voiceChannelsCount}`;
 }
 
 function getChannelCountByType(channels: Channel[], type: ChannelTypes): number {

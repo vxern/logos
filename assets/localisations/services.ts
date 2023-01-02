@@ -551,8 +551,8 @@ class Services {
 			'English': 'No link to message provided.',
 		},
 		// Do not localise; this is a public feedback message.
-		previousInfractionsOfReportedUsers: {
-			'English': 'Previous infractions of reported users',
+		previousInfractions: {
+			'English': (username: string) => `Previous infractions of ${username}`,
 		},
 	};
 

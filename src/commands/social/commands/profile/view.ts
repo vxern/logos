@@ -106,8 +106,9 @@ async function handleDisplayProfile(
 						inline: false,
 					}, {
 						name: `🧮 ${statisticsString}`,
-						value: `🙏 ${praisesString} — ${receivedString} ${praisesReceived.size} • ${sentString} ${praisesSent.size}
-😖 ${warningsString} — ${receivedString} ${warningsReceived.size}`,
+						value:
+							`🙏 ${praisesString} • ${receivedString} – ${praisesReceived.size} • ${sentString} – ${praisesSent.size}
+😖 ${warningsString} • ${receivedString} – ${warningsReceived.size}`,
 						inline: false,
 					}],
 				}],

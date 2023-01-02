@@ -182,7 +182,7 @@ class Commands {
 				strings: {
 					informationAbout: {
 						'English': (guildName: string) => `Information about **${guildName}**`,
-						'Hungarian': (guildName: string) => `Információk - **${guildName}**`,
+						'Hungarian': (guildName: string) => `Információk – **${guildName}**`,
 						'Polish': (guildName: string) => `Informacje o **${guildName}**`,
 						'Romanian': (guildName: string) => `Informații despre **${guildName}**`,
 					},
@@ -949,6 +949,12 @@ class Commands {
 				'Hungarian': 'Figyelmeztetések',
 				'Polish': 'Ostrzeżenia',
 				'Romanian': 'Avertizări',
+			},
+			warning: {
+				'English': (index: number, timestamp: string) => `Warning #${index}, given ${timestamp}`,
+				// TODO: Add Hungarian translations.
+				'Polish': (index: number, timestamp: string) => `Ostrzeżenie nr. ${index}, przydzielone ${timestamp}`,
+				'Romanian': (index: number, timestamp: string) => `Avertismentul nr. ${index}, atribuit ${timestamp}`,
 			},
 		},
 	});
@@ -2307,7 +2313,7 @@ class Commands {
 					},
 					informationForUser: {
 						'English': (username: string) => `Information about ${username}`,
-						'Hungarian': (username: string) => `Információ - ${username}`,
+						'Hungarian': (username: string) => `Információ – ${username}`,
 						'Polish': (username: string) => `Informacje o użytkowniku ${username}`,
 						'Romanian': (username: string) => `Informații despre ${username}`,
 					},

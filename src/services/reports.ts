@@ -367,55 +367,53 @@ function getReportPrompt(
 	const report = reportDocument.data;
 
 	return {
-		embeds: [{
-			title: diagnosticMentionUser(author),
-			color: constants.colors.darkRed,
-			thumbnail: (() => {
-				const iconURL = getAvatarURL(bot, author.id, author.discriminator, {
-					avatar: author.avatar,
-					size: 32,
-					format: 'webp',
-				});
-				if (iconURL === undefined) return;
+		embeds: [
+			{
+				title: diagnosticMentionUser(author),
+				color: constants.colors.darkRed,
+				thumbnail: (() => {
+					const iconURL = getAvatarURL(bot, author.id, author.discriminator, {
+						avatar: author.avatar,
+						size: 32,
+						format: 'webp',
+					});
+					if (iconURL === undefined) return;
 
-				return { url: iconURL };
-			})(),
-			fields: [
-				{
-					name: localise(Services.submittedBy, defaultLocale),
-					value: mention(author.id, MentionTypes.User),
-				},
-				{
-					name: localise(Services.submittedAt, defaultLocale),
-					value: timestamp(reportDocument.data.createdAt),
-				},
-				{
-					name: localise(Services.reports.reportedUsers, defaultLocale),
-					value: recipientAndWarningsTuples.map(([recipient, _recipientWarnings]) =>
-						mention(recipient.id, MentionTypes.User)
-					).join(', '),
-				},
-				{
-					name: localise(Services.reports.reasonForReport, defaultLocale),
-					value: report.reason,
-				},
-				...(report.messageLink
-					? [{
-						name: localise(Services.reports.linkToMessage, defaultLocale),
-						value: report.messageLink,
-					}]
-					: []),
-			],
-			footer: { text: `${author.id}${metadataSeparator}${reportReferenceId}` },
-		}, {
-			title: localise(Services.reports.previousInfractionsOfReportedUsers, defaultLocale),
-			fields: recipientAndWarningsTuples.map(
-				([recipient, warnings]) => ({
-					name: diagnosticMentionUser(recipient),
-					value: generateWarningsPage(warnings, false, defaultLocale),
-				}),
-			),
-		}],
+					return { url: iconURL };
+				})(),
+				fields: [
+					{
+						name: localise(Services.submittedBy, defaultLocale),
+						value: mention(author.id, MentionTypes.User),
+					},
+					{
+						name: localise(Services.submittedAt, defaultLocale),
+						value: timestamp(reportDocument.data.createdAt),
+					},
+					{
+						name: localise(Services.reports.reportedUsers, defaultLocale),
+						value: recipientAndWarningsTuples.map(([recipient, _recipientWarnings]) =>
+							mention(recipient.id, MentionTypes.User)
+						).join(', '),
+					},
+					{
+						name: localise(Services.reports.reasonForReport, defaultLocale),
+						value: report.reason,
+					},
+					...(report.messageLink
+						? [{
+							name: localise(Services.reports.linkToMessage, defaultLocale),
+							value: report.messageLink,
+						}]
+						: []),
+				],
+				footer: { text: `${author.id}${metadataSeparator}${reportReferenceId}` },
+			},
+			...recipientAndWarningsTuples.map(([recipient, warnings]) => ({
+				...generateWarningsPage(warnings, false, defaultLocale),
+				title: localise(Services.reports.previousInfractions, defaultLocale)(diagnosticMentionUser(recipient, true)),
+			})),
+		],
 		components: [{
 			type: MessageComponentTypes.ActionRow,
 			components: [
