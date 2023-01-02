@@ -1,4 +1,5 @@
 import {
+	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
 	Bot,
 	Interaction,
@@ -78,7 +79,6 @@ async function handleRequestSongListing(
 	if (!canPlay) return;
 
 	const listing = await resolveToSongListing([client, bot], interaction, query);
-
 	if (listing === undefined) {
 		return void sendInteractionResponse(
 			bot,
@@ -87,6 +87,7 @@ async function handleRequestSongListing(
 			{
 				type: InteractionResponseTypes.ChannelMessageWithSource,
 				data: {
+					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(Commands.music.options.play.strings.songNotFound, interaction.locale),
 						color: constants.colors.red,

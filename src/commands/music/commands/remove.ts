@@ -5,6 +5,7 @@ import {
 	Bot,
 	ButtonComponent,
 	ButtonStyles,
+	deleteOriginalInteractionResponse,
 	editOriginalInteractionResponse,
 	Interaction,
 	InteractionCallbackData,
@@ -18,7 +19,7 @@ import {
 import { Commands, createLocalisations, localise, Misc } from 'logos/assets/localisations/mod.ts';
 import { listingTypeToEmoji, SongListing } from 'logos/src/commands/music/data/types.ts';
 import { OptionBuilder } from 'logos/src/commands/command.ts';
-import { getVoiceState, isQueueEmpty, verifyVoiceState } from 'logos/src/controllers/music.ts';
+import { getVoiceState, isQueueEmpty, MusicController, remove, verifyVoiceState } from 'logos/src/controllers/music.ts';
 import { Client } from 'logos/src/client.ts';
 import { createInteractionCollector } from 'logos/src/interactions.ts';
 import { chunk } from 'logos/src/utils.ts';
@@ -64,7 +65,24 @@ function handleRemoveSongListing([client, bot]: [Client, Bot], interaction: Inte
 		);
 	}
 
-	const pages = chunk(controller.listingQueue, configuration.music.limits.songs.page);
+	const removeListingData = { pageIndex: 0 };
+
+	const interactionResponseData = generateEmbed(
+		[client, bot],
+		interaction,
+		controller,
+		removeListingData,
+		interaction.locale,
+	);
+
+	controller.emitter.on('queueUpdate', () =>
+		editOriginalInteractionResponse(
+			bot,
+			interaction.token,
+			generateEmbed([client, bot], interaction, controller, removeListingData, interaction.locale),
+		));
+
+	controller.emitter.on('stop', () => deleteOriginalInteractionResponse(bot, interaction.token));
 
 	return void sendInteractionResponse(
 		bot,
@@ -74,30 +92,27 @@ function handleRemoveSongListing([client, bot]: [Client, Bot], interaction: Inte
 			type: InteractionResponseTypes.ChannelMessageWithSource,
 			data: {
 				flags: ApplicationCommandFlags.Ephemeral,
-				...generateEmbed([client, bot], interaction, {
-					pages,
-					remove: (index) => controller.listingQueue.splice(index, 1)?.at(0),
-					pageIndex: 0,
-				}, interaction.locale),
+				...interactionResponseData,
 			},
 		},
 	);
 }
 
 interface RemoveListingData {
-	readonly pages: SongListing[][];
-	readonly remove: (index: number) => SongListing | undefined;
 	pageIndex: number;
 }
 
 function generateEmbed(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
+	controller: MusicController,
 	data: RemoveListingData,
 	locale: string | undefined,
 ): InteractionCallbackData {
+	const pages = chunk(controller.listingQueue, configuration.music.limits.songs.page);
+
 	const isFirst = data.pageIndex === 0;
-	const isLast = data.pageIndex === data.pages.length - 1;
+	const isLast = data.pageIndex === pages.length - 1;
 
 	const buttonsCustomId = createInteractionCollector([client, bot], {
 		type: InteractionTypes.MessageComponent,
@@ -120,7 +135,11 @@ function generateEmbed(
 				type: InteractionResponseTypes.DeferredUpdateMessage,
 			});
 
-			editOriginalInteractionResponse(bot, interaction.token, generateEmbed([client, bot], interaction, data, locale));
+			editOriginalInteractionResponse(
+				bot,
+				interaction.token,
+				generateEmbed([client, bot], interaction, controller, data, locale),
+			);
 		},
 	});
 
@@ -137,7 +156,7 @@ function generateEmbed(
 				const index = Number(indexString);
 				if (isNaN(index)) return;
 
-				const songListing = data.remove(index);
+				const songListing = remove(controller, index);
 				if (songListing === undefined) {
 					return void sendInteractionResponse(
 						bot,
@@ -179,20 +198,31 @@ function generateEmbed(
 		},
 	);
 
+	if (pages.at(0)?.length === 0) {
+		return {
+			embeds: [{
+				description: localise(Commands.music.options.remove.strings.noListingToRemove, locale),
+				color: constants.colors.blue,
+			}],
+			components: [],
+		};
+	}
+
 	return {
 		embeds: [{
 			description: localise(Commands.music.options.remove.strings.selectSongToRemove, locale),
 			color: constants.colors.blue,
-			footer: isLast ? undefined : {
-				text: localise(Misc.continuedOnNextPage, locale),
-			},
+			footer: isLast ? undefined : { text: localise(Misc.continuedOnNextPage, locale) },
 		}],
-		components: [generateSelectMenu(data, selectMenuCustomId), ...generateButtons(buttonsCustomId, isFirst, isLast)],
+		components: [
+			generateSelectMenu(data, pages, selectMenuCustomId),
+			...generateButtons(buttonsCustomId, isFirst, isLast),
+		],
 	};
 }
 
-function generateSelectMenu(data: RemoveListingData, selectMenuCustomId: string): ActionRow {
-	const page = data.pages.at(data.pageIndex)!;
+function generateSelectMenu(data: RemoveListingData, pages: SongListing[][], selectMenuCustomId: string): ActionRow {
+	const page = pages.at(data.pageIndex)!;
 
 	return {
 		type: MessageComponentTypes.ActionRow,

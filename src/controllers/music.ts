@@ -8,6 +8,7 @@ import {
 	sendMessage,
 	VoiceState,
 } from 'discordeno';
+import { EventEmitter } from 'event';
 import { Player } from 'lavadeno';
 import { LoadType } from 'lavalink_types';
 import { Commands, localise } from 'logos/assets/localisations/mod.ts';
@@ -31,8 +32,12 @@ function setupMusicController(client: Client, guildId: bigint): void {
 
 const disconnectTimeoutIdByGuildId = new Map<bigint, number>();
 
+type MusicEvents = { queueUpdate: []; stop: [] };
+
 interface MusicController {
 	readonly player: Player;
+
+	readonly emitter: EventEmitter<MusicEvents>;
 
 	voiceChannelId: bigint | undefined;
 	feedbackChannelId: bigint | undefined;
@@ -57,6 +62,7 @@ function createMusicController(
 
 	return {
 		player,
+		emitter: new EventEmitter(0),
 		voiceChannelId: undefined,
 		feedbackChannelId: undefined,
 		listingHistory: [],
@@ -242,6 +248,7 @@ function receiveNewListing(
 	tryClearDisconnectTimeout(guildId);
 
 	controller.listingQueue.push(listing);
+	controller.emitter.emit('queueUpdate');
 
 	// If the player is not connected to a voice channel, or if it is connected
 	// to a different voice channel, connect to the new voice channel.
@@ -302,6 +309,7 @@ function advanceQueueAndPlay(
 			(controller.currentListing === undefined || !isCollection(controller.currentListing?.content))
 		) {
 			controller.currentListing = controller.listingQueue.shift();
+			controller.emitter.emit('queueUpdate');
 		}
 	}
 
@@ -312,6 +320,7 @@ function advanceQueueAndPlay(
 			} else {
 				moveListingToHistory(controller, controller.currentListing!);
 				controller.currentListing = controller.listingQueue.shift();
+				controller.emitter.emit('queueUpdate');
 			}
 		} else {
 			controller.currentListing!.content.position++;
@@ -433,6 +442,10 @@ function skip(controller: MusicController, skipCollection: boolean, { by, to }: 
 		}
 	}
 
+	if (listingsToMoveToHistory !== 0) {
+		controller.emitter.emit('queueUpdate');
+	}
+
 	return void controller.player.stop();
 }
 
@@ -449,6 +462,7 @@ function unskip(
 
 			controller.listingQueue.unshift(controller.currentListing!);
 			controller.listingQueue.unshift(controller.listingHistory.pop()!);
+			controller.emitter.emit('queueUpdate');
 			controller.currentListing = undefined;
 		} else {
 			if (by !== undefined) {
@@ -468,11 +482,16 @@ function unskip(
 
 		if (controller.currentListing !== undefined) {
 			controller.listingQueue.unshift(controller.currentListing);
+			controller.emitter.emit('queueUpdate');
 			controller.currentListing = undefined;
 		}
 
 		for (let _ = 0; _ < listingsToMoveToQueue; _++) {
 			controller.listingQueue.unshift(controller.listingHistory.pop()!);
+		}
+
+		if (listingsToMoveToQueue !== 0) {
+			controller.emitter.emit('queueUpdate');
 		}
 	}
 
@@ -526,11 +545,18 @@ function reset(client: Client, guildId: bigint): void {
 	const controller = client.features.music.controllers.get(guildId);
 	if (controller !== undefined) {
 		controller.flags.isDestroyed = true;
+		controller.emitter.emit('stop');
 		controller.player.disconnect();
 		controller.player.stop();
 	}
 
 	return setupMusicController(client, guildId);
+}
+
+function remove(controller: MusicController, index: number): SongListing | undefined {
+	const listing = controller.listingQueue.splice(index, 1)?.at(0);
+	controller.emitter.emit('queueUpdate');
+	return listing;
 }
 
 const localisationsBySongListingType = {
@@ -548,6 +574,7 @@ export {
 	isQueueVacant,
 	pause,
 	receiveNewListing,
+	remove,
 	replay,
 	reset,
 	resume,
