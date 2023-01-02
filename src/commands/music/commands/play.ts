@@ -72,7 +72,7 @@ async function handleRequestSongListing(
 	const [{ query }] = parseArguments(interaction.data?.options, {});
 	if (query === undefined) return;
 
-	const voiceState = getVoiceState(client, interaction);
+	const voiceState = getVoiceState(client, interaction.guildId!, interaction.user.id);
 
 	const canPlay = verifyCanRequestPlayback(bot, interaction, controller, voiceState);
 	if (!canPlay) return;

@@ -30,7 +30,7 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 		bot,
 		interaction,
 		controller,
-		getVoiceState(client, interaction),
+		getVoiceState(client, interaction.guildId!, interaction.user.id),
 		'manipulate',
 	);
 	if (!isVoiceStateVerified) return;

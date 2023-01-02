@@ -104,11 +104,11 @@ function isPaused(player: Player): boolean {
 	return player.paused;
 }
 
-function getVoiceState(client: Client, interaction: Interaction): VoiceState | undefined {
-	const guild = client.cache.guilds.get(interaction.guildId!);
+function getVoiceState(client: Client, guildId: bigint, userId: bigint): VoiceState | undefined {
+	const guild = client.cache.guilds.get(guildId);
 	if (guild === undefined) return undefined;
 
-	const voiceState = guild.voiceStates.get(interaction.user.id);
+	const voiceState = guild.voiceStates.get(userId);
 	return voiceState;
 }
 
@@ -526,8 +526,8 @@ function reset(client: Client, guildId: bigint): void {
 	const controller = client.features.music.controllers.get(guildId);
 	if (controller !== undefined) {
 		controller.flags.isDestroyed = true;
-		controller.player.stop();
 		controller.player.disconnect();
+		controller.player.stop();
 	}
 
 	return setupMusicController(client, guildId);

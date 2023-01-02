@@ -24,7 +24,7 @@ function handlePausePlayback([client, bot]: [Client, Bot], interaction: Interact
 	const controller = client.features.music.controllers.get(interaction.guildId!);
 	if (controller === undefined) return;
 
-	const isVoiceStateVerified = verifyVoiceState(bot, interaction, controller, getVoiceState(client, interaction), 'manipulate');
+	const isVoiceStateVerified = verifyVoiceState(bot, interaction, controller, getVoiceState(client, interaction.guildId!, interaction.user.id), 'manipulate');
 	if (!isVoiceStateVerified) return;
 
 	if (!isOccupied(controller.player)) {

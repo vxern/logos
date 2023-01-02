@@ -25,7 +25,7 @@ function handleDisplayVolume(
 		bot,
 		interaction,
 		controller,
-		getVoiceState(client, interaction),
+		getVoiceState(client, interaction.guildId!, interaction.user.id),
 		'check',
 	);
 	if (!isVoiceStateVerified) return;

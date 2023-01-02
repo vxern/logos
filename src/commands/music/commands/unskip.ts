@@ -37,7 +37,7 @@ function handleUnskipAction([client, bot]: [Client, Bot], interaction: Interacti
 		bot,
 		interaction,
 		controller,
-		getVoiceState(client, interaction),
+		getVoiceState(client, interaction.guildId!, interaction.user.id),
 		'manipulate',
 	);
 	if (!isVoiceStateVerified) return;

@@ -27,7 +27,7 @@ function handleResumePlayback([client, bot]: [Client, Bot], interaction: Interac
 		bot,
 		interaction,
 		controller,
-		getVoiceState(client, interaction),
+		getVoiceState(client, interaction.guildId!, interaction.user.id),
 		'manipulate',
 	);
 	if (!isVoiceStateVerified) return;
