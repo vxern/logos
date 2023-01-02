@@ -31,7 +31,7 @@ async function handleSetTimeout(
 	}
 
 	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete && focused?.name === 'duration') {
-		const timestamp = parseTimeExpression(duration!, interaction.locale);
+		const timestamp = parseTimeExpression(duration!, true, interaction.locale);
 
 		return void sendInteractionResponse(
 			bot,

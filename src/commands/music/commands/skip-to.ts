@@ -41,7 +41,7 @@ async function handleSkipToTimestamp(
 	const [{ timestamp: timestampExpression }, focused] = parseArguments(interaction.data?.options, {});
 
 	if (focused !== undefined) {
-		const timestamp = parseTimeExpression(timestampExpression!, interaction.locale);
+		const timestamp = parseTimeExpression(timestampExpression!, false, interaction.locale);
 
 		return void sendInteractionResponse(
 			bot,

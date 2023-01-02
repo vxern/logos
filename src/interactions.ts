@@ -345,10 +345,57 @@ function extractStrings(expression: string): string[] {
 	return expression.match(stringsExpression) ?? [];
 }
 
+// Expression to detect HH:MM:SS, MM:SS and SS timestamps.
+const shortTimeExpression = new RegExp(
+	/^(?:(0?[0-9]|1[0-9]|2[0-4]):)?(?:(0?[0-9]|[1-5][0-9]|60):)?(0?[0-9]|[1-5][0-9]|60)$/,
+);
+
 function parseTimeExpression(
 	expression: string,
+	convertToPhrase: boolean,
 	locale: string | undefined,
 ): [correctedExpression: string, period: number] | undefined {
+	if (shortTimeExpression.test(expression)) return parseShortTimeExpression(expression, convertToPhrase, locale);
+	return parseTimeExpressionPhrase(expression, locale);
+}
+
+function parseShortTimeExpression(
+	expression: string,
+	convertToPhrase: boolean,
+	locale: string | undefined,
+): ReturnType<typeof parseTimeExpression> {
+	const [secondsPart, minutesPart, hoursPart] = shortTimeExpression.exec(expression)!.slice(0).toReversed();
+
+	const [seconds, minutes, hours] = [secondsPart, minutesPart, hoursPart].map((part) =>
+		part !== undefined ? Number(part) : undefined
+	) as [number, ...number[]];
+
+	if (!convertToPhrase) {
+		let totalSeconds = seconds;
+		if (minutes !== undefined) {
+			totalSeconds += minutes * 60;
+		}
+		if (hours !== undefined) {
+			totalSeconds += hours * 60 * 60;
+		}
+		return [expression, totalSeconds * 1000];
+	}
+
+	let correctedExpression = `${seconds} ${localise(Misc.time.periods.second.descriptors, locale).at(-1)}`;
+	if (minutes !== undefined) {
+		correctedExpression += ` ${minutes} ${localise(Misc.time.periods.minute.descriptors, locale).at(-1)}`;
+	}
+	if (hours !== undefined) {
+		correctedExpression += ` ${hours} ${localise(Misc.time.periods.hour.descriptors, locale).at(-1)}`;
+	}
+
+	return parseTimeExpressionPhrase(correctedExpression, locale);
+}
+
+function parseTimeExpressionPhrase(
+	expression: string,
+	locale: string | undefined,
+): ReturnType<typeof parseTimeExpression> {
 	// Extract the digits present in the expression.
 	const quantifiers = extractNumbers(expression).map((string) => Number(string));
 	// Extract the strings present in the expression.
