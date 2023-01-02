@@ -52,7 +52,7 @@ async function handleSetTimeout(
 	});
 	if (member === undefined) return;
 
-	if (interaction.type !== InteractionTypes.ApplicationCommandAutocomplete && focused?.name !== 'reason') return;
+	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete && focused?.name === 'user') return;
 
 	const durationParsed = Number(duration);
 

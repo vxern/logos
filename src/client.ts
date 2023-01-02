@@ -32,9 +32,9 @@ import { localise, Misc } from 'logos/assets/localisations/mod.ts';
 import { DictionaryAdapter, SentencePair } from 'logos/src/commands/language/data/types.ts';
 import { SupportedLanguage } from 'logos/src/commands/language/module.ts';
 import { Command, InteractionHandler } from 'logos/src/commands/command.ts';
+import { getCommands } from 'logos/src/commands/commands.ts';
 import { setupLogging } from 'logos/src/controllers/logging/logging.ts';
 import { MusicController, setupMusicController } from 'logos/src/controllers/music.ts';
-import { getCommands } from 'logos/src/commands/commands.ts';
 import { createDatabase, Database } from 'logos/src/database/database.ts';
 import services from 'logos/src/services/services.ts';
 import { diagnosticMentionUser } from 'logos/src/utils.ts';
@@ -548,7 +548,7 @@ function resolveIdentifierToMembers(
 	userId: bigint,
 	identifier: string,
 	options: Partial<MemberNarrowingOptions> = {},
-): [members: Member[], isId: boolean] | undefined {
+): [members: Member[], isResolved: boolean] | undefined {
 	const asker = client.cache.members.get(snowflakeToBigint(`${userId}${guildId}`));
 	if (asker === undefined) return undefined;
 
@@ -583,7 +583,11 @@ function resolveIdentifierToMembers(
 		const member = members.find(
 			(member) => member.user !== undefined && `${member.user.username}#${member.user.discriminator}` === identifier,
 		);
-		return [member !== undefined ? [member] : [], false];
+		if (member === undefined) {
+			return [[], false];
+		}
+
+		return [[member], true];
 	}
 
 	const identifierLowercase = identifier.toLowerCase();
@@ -606,8 +610,8 @@ function resolveInteractionToMember(
 	const result = resolveIdentifierToMembers(client, interaction.guildId!, interaction.user.id, identifier, options);
 	if (result === undefined) return;
 
-	const [matchedMembers, isId] = result;
-	if (isId) return matchedMembers.at(0);
+	const [matchedMembers, isResolved] = result;
+	if (isResolved) return matchedMembers.at(0);
 
 	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete) {
 		return void sendInteractionResponse(
@@ -617,7 +621,7 @@ function resolveInteractionToMember(
 			{
 				type: InteractionResponseTypes.ApplicationCommandAutocompleteResult,
 				data: {
-					choices: (isId ? [matchedMembers.at(0)!] : matchedMembers.slice(0, 20))
+					choices: matchedMembers.slice(0, 20)
 						.map(
 							(member) => ({
 								name: diagnosticMentionUser(member.user!, true),

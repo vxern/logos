@@ -40,11 +40,16 @@ async function handlePardonUser(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {
-	const [{ user, warning }] = parseArguments(interaction.data?.options, {});
+	const [{ user, warning }, focused] = parseArguments(interaction.data?.options, {});
 	if (user === undefined) return;
 
-	const member = resolveInteractionToMember([client, bot], interaction, user, {restrictToNonSelf: true, excludeModerators: true});
+	const member = resolveInteractionToMember([client, bot], interaction, user, {
+		restrictToNonSelf: true,
+		excludeModerators: true,
+	});
 	if (member === undefined) return;
+
+	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete && focused?.name === 'user') return;
 
 	const subject = await client.database.adapters.users.getOrFetchOrCreate(
 		client,

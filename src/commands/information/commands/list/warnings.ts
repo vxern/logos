@@ -5,6 +5,7 @@ import {
 	Embed,
 	Interaction,
 	InteractionResponseTypes,
+	InteractionTypes,
 	sendInteractionResponse,
 } from 'discordeno';
 import { Commands, localise } from 'logos/assets/localisations/mod.ts';
@@ -21,12 +22,14 @@ async function handleDisplayWarnings(
 ): Promise<void> {
 	const isModerator = calculatePermissions(interaction.member!.permissions!).includes('MODERATE_MEMBERS');
 
-	const [{ user }] = parseArguments(interaction.data?.options, {});
+	const [{ user }, focused] = parseArguments(interaction.data?.options, {});
 
 	const member = resolveInteractionToMember([client, bot], interaction, user ?? interaction.user.id.toString(), {
 		restrictToSelf: !isModerator,
 	});
 	if (member === undefined) return;
+
+	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete && focused?.name === 'user') return;
 
 	const isSelf = member.id === interaction.user.id;
 

@@ -5,6 +5,7 @@ import {
 	getDmChannel,
 	Interaction,
 	InteractionResponseTypes,
+	InteractionTypes,
 	sendInteractionResponse,
 	sendMessage,
 } from 'discordeno';
@@ -20,11 +21,16 @@ async function handleClearTimeout(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {
-	const [{ user }] = parseArguments(interaction.data?.options, {});
+	const [{ user }, focused] = parseArguments(interaction.data?.options, {});
 	if (user === undefined) return;
 
-	const member = resolveInteractionToMember([client, bot], interaction, user, {restrictToNonSelf: true, excludeModerators: true});
+	const member = resolveInteractionToMember([client, bot], interaction, user, {
+		restrictToNonSelf: true,
+		excludeModerators: true,
+	});
 	if (member === undefined) return;
+
+	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete && focused?.name === 'user') return;
 
 	const timedOutUntil = member.communicationDisabledUntil ?? undefined;
 

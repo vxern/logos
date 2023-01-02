@@ -5,6 +5,7 @@ import {
 	getDmChannel,
 	Interaction,
 	InteractionResponseTypes,
+	InteractionTypes,
 	kickMember,
 	sendInteractionResponse,
 	sendMessage,
@@ -33,7 +34,7 @@ async function handleWarnUser(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {
-	const [{ user, reason }] = parseArguments(interaction.data?.options, {});
+	const [{ user, reason }, focused] = parseArguments(interaction.data?.options, {});
 	if (user === undefined) return;
 
 	const member = resolveInteractionToMember([client, bot], interaction, user, {
@@ -41,6 +42,8 @@ async function handleWarnUser(
 		excludeModerators: true,
 	});
 	if (member === undefined) return;
+
+	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete && focused?.name === 'user') return;
 
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (guild === undefined) return;

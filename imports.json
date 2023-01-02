@@ -4,7 +4,7 @@
 		"std/": "https://deno.land/std@0.165.0/",
 		"cheerio": "https://deno.land/x/cheerio@1.0.7/mod.ts",
 		"dexonline": "https://deno.land/x/dexonline@v3.2.3/mod.ts",
-		"discordeno": "https://raw.githubusercontent.com/discordeno/discordeno/df5910612147aa96c20aa028c8914c264df93538/mod.ts",
+		"discordeno": "https://raw.githubusercontent.com/vxern/discordeno/53a47cda36a5c6160b098aaf164d028c1bd5f468/mod.ts",
 		"fauna": "https://deno.land/x/fauna@5.0.0-deno-alpha9/mod.ts",
 		"lavadeno": "https://deno.land/x/lavadeno@3.3.0/mod.ts",
 		"lavalink_types": "https://deno.land/x/lavalink_types@2.0.6/mod.ts",
