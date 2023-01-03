@@ -669,10 +669,7 @@ function resolveInteractionToMember(
 	return matchedMembers.at(0);
 }
 
-function extendEventHandler<
-	Event extends keyof EventHandlers,
-	Handler extends EventHandlers[Event],
->(
+function extendEventHandler<Event extends keyof EventHandlers, Handler extends EventHandlers[Event]>(
 	bot: Bot,
 	eventName: Event,
 	{ prepend = false, append = false }: { prepend: true; append?: false } | { prepend?: false; append: true },
