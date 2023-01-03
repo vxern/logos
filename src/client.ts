@@ -327,6 +327,8 @@ function withCaching(
 
 		client.cache.members.set(memberSnowflake, result);
 
+		client.cache.guilds.get(result.guildId)?.members.set(result.id, result);
+
 		return result;
 	};
 
@@ -587,9 +589,8 @@ function resolveIdentifierToMembers(
 		return [[member], true];
 	}
 
-	const cachedMembers = options.restrictToSelf ? [asker] : Array.from(client.cache.members.values());
+	const cachedMembers = options.restrictToSelf ? [asker] : guild.members.array();
 	const members = cachedMembers.filter((member: Member) =>
-		member.guildId === guildId &&
 		(!options.restrictToNonSelf ? true : member.user?.id !== asker.user?.id) &&
 		(!options.excludeModerators ? true : !member.roles.includes(moderatorRoleId))
 	);
