@@ -1,23 +1,31 @@
 import { Member, User } from 'discordeno';
-import { Article, ArticleChange, Praise, Report, Suggestion, Warning } from 'logos/src/database/structs/mod.ts';
+import { localise } from 'logos/assets/localisations/mod.ts';
+import { Modals } from 'logos/assets/localisations/mod.ts';
+import {
+	Article,
+	ArticleChange,
+	EntryRequest,
+	Praise,
+	Report,
+	Suggestion,
+	Warning,
+} from 'logos/src/database/structs/mod.ts';
 import { MessageGenerators } from 'logos/src/controllers/logging/generators/generators.ts';
 import { diagnosticMentionUser } from 'logos/src/utils.ts';
 import constants from 'logos/constants.ts';
 import { code, codeMultiline, timestamp, trim } from 'logos/formatting.ts';
+import { defaultLocale } from 'logos/types.ts';
 
 /** Type representing events that occur within a guild. */
 type GuildEvents = {
-	/** A verification request has been accepted. */
-	verificationRequestAccept: [user: User, by: Member];
-
-	/** A verification request has been rejected. */
-	verificationRequestReject: [user: User, by: Member];
+	/** An entry request has been submitted. */
+	entryRequestSubmit: [user: User, entryRequest: EntryRequest];
 
 	/** An entry request has been accepted. */
-	entryRequestAccept: [member: Member];
+	entryRequestAccept: [user: User, by: Member];
 
 	/** An entry request has been rejected. */
-	entryRequestReject: [member: Member, reason: string];
+	entryRequestReject: [user: User, by: Member];
 
 	/** An article has been created. */
 	articleCreate: [article: Article, by: Member];
@@ -73,56 +81,55 @@ type GuildEvents = {
 
 /** Contains the message generators for (custom) guild events. */
 const generators: Required<MessageGenerators<GuildEvents>> = {
-	verificationRequestAccept: {
-		title: '✔️ Verification request accepted',
-		message: (client, user, by) => {
-			const byUser = client.cache.users.get(by.id);
-			if (byUser === undefined) return;
+	entryRequestSubmit: {
+		title: 'ℹ️ Entry request submitted',
+		message: (client, user, entryRequest) => {
+			const guild = client.cache.guilds.get(BigInt(entryRequest.guild));
+			if (guild === undefined) return;
 
-			return `${diagnosticMentionUser(user)}'s verification request has been accepted by ${
-				diagnosticMentionUser(byUser)
-			}`;
+			const reasonString = localise(Modals.verification.fields.reason, defaultLocale)(guild.language);
+			const aimString = localise(Modals.verification.fields.aim, defaultLocale);
+			const whereFoundString = localise(Modals.verification.fields.whereFound, defaultLocale)(guild.language);
+
+			return `${diagnosticMentionUser(user)} has submitted a request to join the server.
+
+**${reasonString}**
+${codeMultiline(entryRequest.answers.reason!)}
+**${aimString}**
+${codeMultiline(entryRequest.answers.aim!)}
+**${whereFoundString}**
+${codeMultiline(entryRequest.answers.where_found!)}
+`;
 		},
-		filter: (_client, originGuildId, _user, by) => originGuildId === by.guildId,
+		filter: (client, originGuildId, _user, entryRequest) => {
+			const guild = client.cache.guilds.get(BigInt(entryRequest.guild));
+			if (guild === undefined) return false;
+
+			return originGuildId === guild.id;
+		},
 		color: constants.colors.lightGreen,
 	},
-	verificationRequestReject: {
-		title: '❌ Verification request rejected',
+	entryRequestAccept: {
+		title: '✔️ Entry request accepted',
 		message: (client, user, by) => {
 			const byUser = client.cache.users.get(by.id);
 			if (byUser === undefined) return;
 
-			return `${diagnosticMentionUser(user)}'s verification request has been rejected by ${
-				diagnosticMentionUser(byUser)
-			}`;
+			return `${diagnosticMentionUser(user)}'s entry request has been accepted by ${diagnosticMentionUser(byUser)}`;
 		},
 		filter: (_client, originGuildId, _user, by) => originGuildId === by.guildId,
-		color: constants.colors.red,
-	},
-	entryRequestAccept: {
-		title: '✅ Entry granted',
-		message: (client, member) => {
-			const user = client.cache.users.get(member.id);
-			if (user === undefined) return;
-
-			return `Entry has been granted to ${diagnosticMentionUser(user)}.`;
-		},
-		filter: (_client, originGuildId, member) => originGuildId === member.guildId,
 		color: constants.colors.lightGreen,
 	},
 	entryRequestReject: {
-		title: '❌ Entry refused',
-		message: (client, member, reason) => {
-			const user = client.cache.users.get(member.id);
-			if (user === undefined) return;
+		title: '❌ Entry request rejected',
+		message: (client, user, by) => {
+			const byUser = client.cache.users.get(by.id);
+			if (byUser === undefined) return;
 
-			return `Entry has been refused to ${diagnosticMentionUser(user)}.
-
-**REASON**
-${codeMultiline(reason)}`;
+			return `${diagnosticMentionUser(user)}'s entry request has been rejected by ${diagnosticMentionUser(byUser)}`;
 		},
-		filter: (_client, originGuildId, member, _reason) => originGuildId === member.guildId,
-		color: constants.colors.lightGreen,
+		filter: (_client, originGuildId, _user, by) => originGuildId === by.guildId,
+		color: constants.colors.red,
 	},
 	articleCreate: {
 		title: '📜 Article created',

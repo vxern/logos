@@ -359,6 +359,8 @@ async function initiateVerificationProcess(
 				submitterIdByMessageId.set(messageId, interaction.user.id);
 				messageIdBySubmitterAndGuild.set(`${submitterReferenceId}${guild.id}`, messageId);
 
+				log([client, bot], guild, 'entryRequestSubmit', interaction.user, entryRequest.data);
+
 				editOriginalInteractionResponse(bot, submission.token, {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
@@ -775,7 +777,7 @@ async function handleVote(
 	log(
 		[client, bot],
 		guild,
-		isAccepted ? 'verificationRequestAccept' : 'verificationRequestReject',
+		isAccepted ? 'entryRequestAccept' : 'entryRequestReject',
 		submitter,
 		interaction.member!,
 	);
