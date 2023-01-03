@@ -221,7 +221,7 @@ function ensureVerificationPromptPersistence([client, bot]: [Client, Bot]): void
 		const submitter = client.cache.users.get(submitterId);
 		if (submitter === undefined) return;
 
-		const guild = client.cache.guilds.get(id)!;
+		const guild = client.cache.guilds.get(guildId!)!;
 
 		const newMessageId = await sendMessage(
 			bot,
