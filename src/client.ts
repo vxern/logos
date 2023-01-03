@@ -157,7 +157,7 @@ async function initialiseClient(
 	startServices([client, bot]);
 
 	return Promise.all([
-		client.features.music.node.connect(bot.id),
+		setupLavalinkNode([client, bot]),
 		startBot(bot),
 	]).then(() => [client, bot]);
 }
@@ -488,6 +488,33 @@ function startServices([client, bot]: [Client, Bot]): void {
 	for (const startService of services) {
 		startService([client, bot]);
 	}
+}
+
+function setupLavalinkNode([client, bot]: [Client, Bot]): Promise<void> {
+	client.features.music.node.on(
+		'connect',
+		(took) => client.log.info(`Connection with the Lavalink node has been established. Time taken: ${took}ms`),
+	);
+	client.features.music.node.on(
+		'error',
+		(error) => client.log.error(`The Lavalink node has encountered an error:\n${error}`),
+	);
+	client.features.music.node.on(
+		'disconnect',
+		(code, reason) => {
+			client.log.info(
+				`Disconnected from the Lavalink node. Code ${code}, reason: ${reason}\n` +
+					'Attempting to reconnect...',
+			);
+			return void connectToLavalinkNode([client, bot]);
+		},
+	);
+	return connectToLavalinkNode([client, bot]);
+}
+
+function connectToLavalinkNode([client, bot]: [Client, Bot]): Promise<void> {
+	client.log.info('Connecting to the Lavalink node...');
+	return client.features.music.node.connect(bot.id);
 }
 
 function addCollector<T extends keyof EventHandlers>(
