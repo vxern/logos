@@ -720,13 +720,15 @@ async function handleVote(
 
 		client.log.info(`User with ID ${submitterDocument.data.account.id} has been accepted onto guild ${guild.name}.`);
 
-		addRole(
-			bot,
-			guild.id,
-			submitterId,
-			BigInt(entryRequest.data.requestedRole),
-			'User-requested role addition.',
-		).catch();
+		try {
+			addRole(
+				bot,
+				guild.id,
+				submitterId,
+				BigInt(entryRequest.data.requestedRole),
+				'User-requested role addition.',
+			);
+		} catch {}
 
 		if (dmChannel !== undefined) {
 			const entryRequestAcceptedString = localise(Services.entry.acceptedDirect, defaultLocale)(guild.name);
