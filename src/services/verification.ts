@@ -469,7 +469,8 @@ function getNecessaryVotes(guild: Guild, entryRequest: EntryRequest): NecessaryV
 	const moderatorRoleId = guild.roles.array()
 		.find((role) => role.name === configuration.permissions.moderatorRoleName)?.id;
 	const moderatorCount = moderatorRoleId !== undefined
-		? guild.members.array().filter((member) => member.roles.includes(moderatorRoleId)).length
+		? guild.members.array().filter((member) => member.roles.includes(moderatorRoleId) && !member.user?.toggles.bot)
+			.length
 		: configuration.services.entry.verification.defaultVotesRequired;
 
 	const requiredAcceptanceVotes = Math.max(
