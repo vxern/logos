@@ -3,7 +3,7 @@ import { Client, extendEventHandler } from 'logos/src/client.ts';
 import { ServiceStarter } from 'logos/src/services/services.ts';
 import configuration from 'logos/configuration.ts';
 
-const previousVoiceStateByUserId = new Map<bigint, VoiceState>();
+const previousVoiceStates = new Map<`${/*userId:*/ bigint}${/*guildId:*/ bigint}`, VoiceState>();
 
 const service: ServiceStarter = ([client, bot]) => {
 	extendEventHandler(bot, 'voiceStateUpdate', { append: true }, (_bot, voiceState) => {
@@ -45,19 +45,18 @@ function onVoiceStateUpdate([client, bot]: [Client, Bot], voiceState: VoiceState
 	const voiceChannelStatesTuples = getVoiceChannelStatesTuples(guild);
 	if (voiceChannelStatesTuples.length === 0) return;
 
-	const previousState = previousVoiceStateByUserId.get(voiceState.userId);
-	const currentState = voiceState;
+	const previousState = previousVoiceStates.get(`${voiceState.userId}${voiceState.guildId}`);
 
 	if (previousState?.channelId === undefined) {
-		onConnect(bot, guild, voiceChannelStatesTuples, currentState);
-	} else if (previousState.channelId !== undefined && currentState.channelId === undefined) {
+		onConnect(bot, guild, voiceChannelStatesTuples, voiceState);
+	} else if (previousState.channelId !== undefined && voiceState.channelId === undefined) {
 		onDisconnect(bot, voiceChannelStatesTuples, previousState);
 	} else {
 		onDisconnect(bot, voiceChannelStatesTuples, previousState);
-		onConnect(bot, guild, voiceChannelStatesTuples, currentState);
+		onConnect(bot, guild, voiceChannelStatesTuples, voiceState);
 	}
 
-	previousVoiceStateByUserId.set(currentState.userId, voiceState);
+	previousVoiceStates.set(`${voiceState.userId}${voiceState.guildId}`, voiceState);
 }
 
 type VoiceChannelStatesTuple = [Channel, VoiceState[]];
