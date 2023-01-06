@@ -89,7 +89,7 @@ const generators: Required<MessageGenerators<GuildEvents>> = {
 
 			const reasonString = localise(Modals.verification.fields.reason, defaultLocale)(guild.language);
 			const aimString = localise(Modals.verification.fields.aim, defaultLocale);
-			const whereFoundString = localise(Modals.verification.fields.whereFound, defaultLocale)(guild.language);
+			const whereFoundString = localise(Modals.verification.fields.whereFound, defaultLocale)(guild.name);
 
 			return `${diagnosticMentionUser(user)} has submitted a request to join the server.
 
