@@ -549,8 +549,9 @@ function reset(client: Client, guildId: bigint): void {
 	if (controller !== undefined) {
 		controller.flags.isDestroyed = true;
 		controller.events.emit('stop');
-		controller.player.disconnect();
 		controller.player.stop();
+		controller.player.pause(false);
+		controller.player.disconnect();
 	}
 
 	return setupMusicController(client, guildId);
