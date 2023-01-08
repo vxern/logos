@@ -46,8 +46,14 @@ interface SongListing {
 	/** The source of the song listing. */
 	source?: string;
 
-	/** The ID of the user who requested the song listing. */
+	/** The ID of the user who requested this song listing. */
 	requestedBy: bigint;
+
+	/**
+	 * IDs of user who were present at the time of the addition of this song listing,
+	 * and can therefore manipulate it.
+	 */
+	managerIds: bigint[];
 
 	/** The content of this song listing. */
 	content: Song | SongCollection | SongStream;

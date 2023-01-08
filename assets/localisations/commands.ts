@@ -2076,6 +2076,13 @@ class Commands {
 					'English': 'External',
 				},
 			},
+			cannotManipulateIfHadBeenAbsent: {
+				'English': 'You cannot manipulate the playback of music that you were not present to see get queued.',
+				// TODO: Add Hungarian translation.
+				'Polish':
+					'Nie możesz kontrolować odtwarzania muzyki, którą dodano do kolejki wtedy, gdy ciebie jeszcze w kanale nie było.',
+				'Romanian': 'Nu poți controla redarea muzicii care a fost pusă în absența ta.',
+			},
 		},
 	});
 

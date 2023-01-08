@@ -9,7 +9,13 @@ import {
 import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
 import { OptionBuilder } from 'logos/src/commands/command.ts';
 import { collection } from 'logos/src/commands/parameters.ts';
-import { getVoiceState, isCollection, isOccupied, replay, verifyVoiceState } from 'logos/src/controllers/music.ts';
+import {
+	getVoiceState,
+	isCollection,
+	isOccupied,
+	replay,
+	verifyCanManipulatePlayback,
+} from 'logos/src/controllers/music.ts';
 import { Client } from 'logos/src/client.ts';
 import { parseArguments } from 'logos/src/interactions.ts';
 import constants from 'logos/constants.ts';
@@ -25,12 +31,11 @@ function handleReplayAction([client, bot]: [Client, Bot], interaction: Interacti
 	const controller = client.features.music.controllers.get(interaction.guildId!);
 	if (controller === undefined) return;
 
-	const isVoiceStateVerified = verifyVoiceState(
+	const isVoiceStateVerified = verifyCanManipulatePlayback(
 		bot,
 		interaction,
 		controller,
 		getVoiceState(client, interaction.guildId!, interaction.user.id),
-		'manipulate',
 	);
 	if (!isVoiceStateVerified) return;
 

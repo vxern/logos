@@ -52,6 +52,7 @@ function handleRequestExternal(
 			new Promise((resolve) =>
 				resolve({
 					requestedBy: interaction.user.id,
+					managerIds: [],
 					content: {
 						type: SongListingContentTypes.External,
 						title: localise(Commands.music.options.play.strings.externalFile, interaction.locale),
@@ -74,6 +75,9 @@ async function handleRequestSongListing(
 	if (query === undefined) return;
 
 	const voiceState = getVoiceState(client, interaction.guildId!, interaction.user.id);
+
+	const guild = client.cache.guilds.get(interaction.guildId!);
+	if (guild === undefined) return;
 
 	const canPlay = verifyCanRequestPlayback(bot, interaction, controller, voiceState);
 	if (!canPlay) return;
@@ -103,14 +107,7 @@ async function handleRequestSongListing(
 	const voiceChannelId = client.cache.channels.get(voiceState!.channelId!)?.id;
 	if (voiceChannelId === undefined) return;
 
-	return void receiveNewListing(
-		[client, bot],
-		interaction.guildId!,
-		controller,
-		listing,
-		voiceChannelId,
-		feedbackChannelId,
-	);
+	return void receiveNewListing([client, bot], guild, controller, listing, voiceChannelId, feedbackChannelId);
 }
 
 export { handleRequestSongListing };

@@ -128,7 +128,8 @@ function fromYouTubeVideo(
 
 	return {
 		source: 'YouTube',
-		requestedBy: requestedBy,
+		requestedBy,
+		managerIds: [],
 		content: {
 			type: SongListingContentTypes.Song,
 			title: video.title!,
@@ -146,7 +147,8 @@ function fromYouTubePlaylist(playlist: Playlist, requestedBy: bigint): SongListi
 
 	return {
 		source: 'YouTube',
-		requestedBy: requestedBy,
+		requestedBy,
+		managerIds: [],
 		content: {
 			type: SongListingContentTypes.Collection,
 			title: playlist.title!,

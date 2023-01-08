@@ -8,7 +8,13 @@ import {
 } from 'discordeno';
 import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
 import { OptionBuilder } from 'logos/src/commands/command.ts';
-import { getVoiceState, isOccupied, isPaused, resume, verifyVoiceState } from 'logos/src/controllers/music.ts';
+import {
+	getVoiceState,
+	isOccupied,
+	isPaused,
+	resume,
+	verifyCanManipulatePlayback,
+} from 'logos/src/controllers/music.ts';
 import { Client } from 'logos/src/client.ts';
 import constants from 'logos/constants.ts';
 import { defaultLocale } from 'logos/types.ts';
@@ -23,12 +29,11 @@ function handleResumePlayback([client, bot]: [Client, Bot], interaction: Interac
 	const controller = client.features.music.controllers.get(interaction.guildId!);
 	if (controller === undefined) return;
 
-	const isVoiceStateVerified = verifyVoiceState(
+	const isVoiceStateVerified = verifyCanManipulatePlayback(
 		bot,
 		interaction,
 		controller,
 		getVoiceState(client, interaction.guildId!, interaction.user.id),
-		'manipulate',
 	);
 	if (!isVoiceStateVerified) return;
 

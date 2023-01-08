@@ -1,6 +1,6 @@
 import { Bot, Interaction, InteractionResponseTypes, sendInteractionResponse } from 'discordeno';
 import { Commands, localise } from 'logos/assets/localisations/mod.ts';
-import { getVoiceState, setVolume, verifyVoiceState } from 'logos/src/controllers/music.ts';
+import { getVoiceState, setVolume, verifyCanManipulatePlayback } from 'logos/src/controllers/music.ts';
 import { Client } from 'logos/src/client.ts';
 import { parseArguments } from 'logos/src/interactions.ts';
 import configuration from 'logos/configuration.ts';
@@ -13,12 +13,11 @@ function handleSetVolume(
 	const controller = client.features.music.controllers.get(interaction.guildId!);
 	if (controller === undefined) return;
 
-	const isVoiceStateVerified = verifyVoiceState(
+	const isVoiceStateVerified = verifyCanManipulatePlayback(
 		bot,
 		interaction,
 		controller,
 		getVoiceState(client, interaction.guildId!, interaction.user.id),
-		'manipulate',
 	);
 	if (!isVoiceStateVerified) return;
 

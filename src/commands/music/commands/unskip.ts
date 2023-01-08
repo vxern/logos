@@ -15,7 +15,7 @@ import {
 	isOccupied,
 	isQueueVacant,
 	unskip,
-	verifyVoiceState,
+	verifyCanManipulatePlayback,
 } from 'logos/src/controllers/music.ts';
 import { Client } from 'logos/src/client.ts';
 import { parseArguments } from 'logos/src/interactions.ts';
@@ -33,12 +33,11 @@ function handleUnskipAction([client, bot]: [Client, Bot], interaction: Interacti
 	const controller = client.features.music.controllers.get(interaction.guildId!);
 	if (controller === undefined) return;
 
-	const isVoiceStateVerified = verifyVoiceState(
+	const isVoiceStateVerified = verifyCanManipulatePlayback(
 		bot,
 		interaction,
 		controller,
 		getVoiceState(client, interaction.guildId!, interaction.user.id),
-		'manipulate',
 	);
 	if (!isVoiceStateVerified) return;
 

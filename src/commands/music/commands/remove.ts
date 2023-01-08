@@ -19,7 +19,13 @@ import {
 import { Commands, createLocalisations, localise, Misc } from 'logos/assets/localisations/mod.ts';
 import { listingTypeToEmoji, SongListing } from 'logos/src/commands/music/data/types.ts';
 import { OptionBuilder } from 'logos/src/commands/command.ts';
-import { getVoiceState, isQueueEmpty, MusicController, remove, verifyVoiceState } from 'logos/src/controllers/music.ts';
+import {
+	getVoiceState,
+	isQueueEmpty,
+	MusicController,
+	remove,
+	verifyCanManipulatePlayback,
+} from 'logos/src/controllers/music.ts';
 import { Client } from 'logos/src/client.ts';
 import { createInteractionCollector } from 'logos/src/interactions.ts';
 import { chunk } from 'logos/src/utils.ts';
@@ -38,12 +44,11 @@ function handleRemoveSongListing([client, bot]: [Client, Bot], interaction: Inte
 	const controller = client.features.music.controllers.get(interaction.guildId!);
 	if (controller === undefined) return;
 
-	const isVoiceStateVerified = verifyVoiceState(
+	const isVoiceStateVerified = verifyCanManipulatePlayback(
 		bot,
 		interaction,
 		controller,
 		getVoiceState(client, interaction.guildId!, interaction.user.id),
-		'manipulate',
 	);
 	if (!isVoiceStateVerified) return;
 

@@ -2,6 +2,7 @@ import {
 	ApplicationCommandFlags,
 	Bot,
 	Embed,
+	Guild,
 	Interaction,
 	InteractionResponseTypes,
 	sendInteractionResponse,
@@ -209,6 +210,37 @@ function verifyCanRequestPlayback(
 	return true;
 }
 
+function verifyCanManipulatePlayback(
+	bot: Bot,
+	interaction: Interaction,
+	controller: MusicController,
+	voiceState: VoiceState | undefined,
+): boolean {
+	const isVoiceStateVerified = verifyVoiceState(bot, interaction, controller, voiceState, 'manipulate');
+	if (!isVoiceStateVerified) return false;
+
+	if (controller.currentListing !== undefined && !controller.currentListing.managerIds.includes(interaction.user.id)) {
+		sendInteractionResponse(
+			bot,
+			interaction.id,
+			interaction.token,
+			{
+				type: InteractionResponseTypes.ChannelMessageWithSource,
+				data: {
+					flags: ApplicationCommandFlags.Ephemeral,
+					embeds: [{
+						description: localise(Commands.music.strings.cannotManipulateIfHadBeenAbsent, interaction.locale),
+						color: constants.colors.dullYellow,
+					}],
+				},
+			},
+		);
+		return false;
+	}
+
+	return true;
+}
+
 function moveListingToHistory(controller: MusicController, listing: SongListing): void {
 	if (!isHistoryVacant(controller.listingHistory)) {
 		controller.listingHistory.shift();
@@ -240,16 +272,20 @@ function setDisconnectTimeout(client: Client, guildId: bigint): void {
 
 function receiveNewListing(
 	[client, bot]: [Client, Bot],
-	guildId: bigint,
+	guild: Guild,
 	controller: MusicController,
 	listing: SongListing,
 	voiceChannelId: bigint,
 	feedbackChannelId: bigint,
 ): void {
-	tryClearDisconnectTimeout(guildId);
+	tryClearDisconnectTimeout(guild.id);
 
 	controller.listingQueue.push(listing);
 	controller.events.emit('queueUpdate');
+
+	const voiceStates = getVoiceStatesForChannel(guild, voiceChannelId);
+	const managerIds = voiceStates.map((voiceState) => voiceState.userId);
+	listing.managerIds = managerIds;
 
 	// If the player is not connected to a voice channel, or if it is connected
 	// to a different voice channel, connect to the new voice channel.
@@ -273,7 +309,7 @@ function receiveNewListing(
 		return void sendMessage(bot, controller.feedbackChannelId!, { embeds: [embed] });
 	}
 
-	return advanceQueueAndPlay([client, bot], guildId, controller);
+	return advanceQueueAndPlay([client, bot], guild.id, controller);
 }
 
 function isCollection(object: Song | SongStream | SongCollection | undefined): object is SongCollection {
@@ -563,6 +599,13 @@ function remove(controller: MusicController, index: number): SongListing | undef
 	return listing;
 }
 
+function getVoiceStatesForChannel(guild: Guild, channelId: bigint): VoiceState[] {
+	const guildVoiceStates = guild.voiceStates.array().filter((voiceState) => voiceState.channelId !== undefined);
+	const relevantVoiceStates = guildVoiceStates.filter((voiceState) => voiceState.channelId! === channelId);
+
+	return relevantVoiceStates;
+}
+
 const localisationsBySongListingType = {
 	[SongListingContentTypes.Song]: Commands.music.strings.type.song,
 	[SongListingContentTypes.External]: Commands.music.strings.type.external,
@@ -587,6 +630,7 @@ export {
 	skip,
 	skipTo,
 	unskip,
+	verifyCanManipulatePlayback,
 	verifyCanRequestPlayback,
 	verifyVoiceState,
 };
