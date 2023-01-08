@@ -36,7 +36,7 @@ const resolver: ListingResolver = async ([client, bot], interaction, query) => {
 	deleteOriginalInteractionResponse(bot, interaction.token);
 
 	const url = urlExpressionExecuted.at(0)!;
-	if (url.includes('&list=')) {
+	if (url.includes('list=')) {
 		const playlist = await YouTube.getPlaylist(query);
 		return fromYouTubePlaylist(playlist, interaction.user.id);
 	}
