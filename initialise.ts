@@ -56,7 +56,7 @@ function readEnvironment({
 
 	if (envConfiguration === undefined) return;
 
-	for (const [key, value] of <[string, string][]> Object.entries(envConfiguration)) {
+	for (const [key, value] of Object.entries(envConfiguration) as [key: string, value: string][]) {
 		Deno.env.set(key, value);
 	}
 }
@@ -108,7 +108,7 @@ async function readSentenceFiles(directoryUri: string): Promise<[Language, strin
 			continue;
 		}
 
-		const language = <Language> languageName;
+		const language = languageName as Language;
 		results.push(Deno.readTextFile(`${directoryUri}/${file.name}`).then((contents) => [language, contents]));
 	}
 
@@ -134,7 +134,7 @@ async function initialise(): Promise<[Client, Bot]> {
 	return initialiseClient({ version, supportedTranslationLanguages }, {
 		dictionaryAdapters: loadDictionaryAdapters(),
 		sentencePairs: loadSentencePairs(sentenceFiles),
-    rateLimiting: new Map(),
+		rateLimiting: new Map(),
 	});
 }
 

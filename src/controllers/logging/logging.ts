@@ -5,9 +5,8 @@ import { Client, extendEventHandler } from 'logos/src/client.ts';
 import { getTextChannel } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 
-const clientEventNames = <(keyof ClientEvents)[]> Object.keys(
-	generators.client,
-);
+type ClientEventNames = keyof ClientEvents;
+const clientEventNames = Object.keys(generators.client) as ClientEventNames[];
 
 function setupLogging([client, bot]: [Client, Bot], guild: Guild): void {
 	const logChannel = getTextChannel(guild, configuration.guilds.channels.logging);

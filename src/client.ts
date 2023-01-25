@@ -253,9 +253,10 @@ function createEventHandlers(client: Client): Partial<EventHandlers> {
 		},
 		interactionCreate: (bot, interaction) => {
 			if (interaction.data?.customId === 'none') {
-				return <unknown> sendInteractionResponse(bot, interaction.id, interaction.token, {
+				sendInteractionResponse(bot, interaction.id, interaction.token, {
 					type: InteractionResponseTypes.DeferredUpdateMessage,
 				});
+				return;
 			}
 
 			const commandName = interaction.data?.name;
@@ -562,7 +563,7 @@ function addCollector<T extends keyof EventHandlers>(
 		});
 	}
 
-	const collectors = <Set<Collector<T>>> client.collectors.get(event)!;
+	const collectors = client.collectors.get(event)! as Set<Collector<T>>;
 	collectors.add(collector);
 }
 

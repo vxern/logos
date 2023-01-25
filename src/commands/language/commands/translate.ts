@@ -111,7 +111,7 @@ async function handleTranslateText(
 			? Commands.translate.strings.sourceLanguage
 			: Commands.translate.strings.targetLanguage;
 
-		const inputLowercase = (<string> focused.value).toLowerCase();
+		const inputLowercase = (focused.value as string).toLowerCase();
 		const choices = client.metadata.supportedTranslationLanguages
 			.map((language) => ({
 				name: localise(localisations, interaction.locale)(language.name),

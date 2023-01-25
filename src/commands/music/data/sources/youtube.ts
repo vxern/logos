@@ -70,7 +70,7 @@ async function search(
 						type: InteractionResponseTypes.DeferredUpdateMessage,
 					});
 
-					const indexString = <string | undefined> selection.data?.values?.at(0);
+					const indexString = selection.data?.values?.at(0) as string | undefined;
 					if (indexString === undefined) return resolve(undefined);
 
 					const index = Number(indexString);

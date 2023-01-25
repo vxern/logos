@@ -109,7 +109,7 @@ function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], interaction
 		});
 	}
 
-	const song = <Song | SongStream> currentListing.content;
+	const song = currentListing.content as Song | SongStream;
 
 	const nowPlayingString = localise(Commands.music.options.now.strings.nowPlaying, locale);
 

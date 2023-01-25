@@ -20,7 +20,9 @@ type ProficiencyCategory = RoleCategory & {
  * @returns The category with proficiency roles.
  */
 function getProficiencyCategory(): ProficiencyCategory {
-	return <ProficiencyCategory> roles.find((category) => localise(category.name, defaultLocale) === 'Proficiency')!;
+	return roles.find(
+		(category) => localise(category.name, defaultLocale) === 'Proficiency',
+	)! as ProficiencyCategory;
 }
 
 function getRelevantCategories(

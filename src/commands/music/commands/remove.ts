@@ -164,7 +164,7 @@ function generateEmbed(
 			userId: interaction.user.id,
 			limit: 1,
 			onCollect: (bot, selection) => {
-				const indexString = <string | undefined> selection.data?.values?.at(0);
+				const indexString = selection.data?.values?.at(0) as string | undefined;
 				if (indexString === undefined) return;
 
 				const index = Number(indexString);

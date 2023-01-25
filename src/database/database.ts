@@ -338,10 +338,10 @@ async function dispatchQuery<
 	}
 
 	if (!Array.isArray(result.data)) {
-		return <R> (<unknown> result);
+		return result as unknown as R;
 	}
 
-	return <R> (<unknown> result.data);
+	return result.data as unknown as R;
 }
 
 function mentionUser(user: DiscordUser | undefined, id: bigint): string {

@@ -39,13 +39,13 @@ function loadSentencePairs(languageFileContents: [Language, string][]): Map<Lang
 	}
 
 	for (const [language, contents] of languageFileContents) {
-		const records = <[string, string, string, string][]> csv.parse(
+		const records = csv.parse(
 			contents,
 			{
 				lazyQuotes: true,
 				separator: '\t',
 			},
-		);
+		) as [sentenceId: string, sentence: string, translationId: string, translation: string][];
 
 		for (const [_, sentence, __, translation] of records) {
 			result.get(language)!.push({
@@ -85,9 +85,7 @@ async function getSupportedLanguages(): Promise<SupportedLanguage[]> {
 	);
 	if (!response.ok) return [];
 
-	const results = <DeepLSupportedLanguage[]> await response.json().catch(
-		() => [],
-	);
+	const results = await response.json().catch(() => []) as DeepLSupportedLanguage[];
 
 	return results.map((result) => ({
 		name: result.name,
