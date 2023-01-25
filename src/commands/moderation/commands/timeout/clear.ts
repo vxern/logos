@@ -57,7 +57,7 @@ async function handleClearTimeout(
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (guild === undefined) return;
 
-	const [_member, dmChannel] = await Promise.all([
+	const [_, dmChannel] = await Promise.all([
 		editMember(bot, interaction.guildId!, member.id, { communicationDisabledUntil: null }),
 		getDmChannel(bot, member.id).catch(() => undefined),
 	]);

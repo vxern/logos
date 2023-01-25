@@ -56,7 +56,7 @@ function createInteractionCollector(
 	const customId = settings.customId ?? Snowflake.generate();
 
 	addCollector([client, bot], 'interactionCreate', {
-		filter: (_bot, interaction) => compileChecks(interaction, settings, customId).every((condition) => condition),
+		filter: (_, interaction) => compileChecks(interaction, settings, customId).every((condition) => condition),
 		limit: settings.limit,
 		removeAfter: settings.doesNotExpire ? undefined : constants.interactionTokenExpiryInterval,
 		onCollect: settings.onCollect ?? (() => {}),
@@ -278,7 +278,7 @@ async function createModalComposer<T extends string>(
 				type: InteractionTypes.ModalSubmit,
 				userId: interaction.user.id,
 				limit: 1,
-				onCollect: (_bot, submission) => {
+				onCollect: (_, submission) => {
 					content = parseComposerContent(submission);
 					if (content === undefined) return resolve([submission, false]);
 

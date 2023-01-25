@@ -9,7 +9,7 @@ import constants from 'logos/constants.ts';
 
 const lastUpdatedAt = new Date(2022, 11, 25);
 
-function generateWelcomeNotice(_bot: Bot, guild: Guild): CreateMessage {
+function generateWelcomeNotice(_: Bot, guild: Guild): CreateMessage {
 	const updateString = getLastUpdateString(lastUpdatedAt, defaultLocale);
 	const welcomeString = localise(Services.notices.notices.welcome.body, defaultLocale)(
 		getChannelMention(guild, configuration.guilds.channels.information),

@@ -47,9 +47,7 @@ function loadSentencePairs(languageFileContents: [Language, string][]): Map<Lang
 			},
 		);
 
-		for (
-			const [_sentenceID, sentence, _translationID, translation] of records
-		) {
+		for (const [_, sentence, __, translation] of records) {
 			result.get(language)!.push({
 				sentence: sentence!,
 				translation: translation!,

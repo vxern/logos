@@ -42,8 +42,8 @@ function setupActionHandler([client, bot]: [Client, Bot]): void {
 		type: InteractionTypes.MessageComponent,
 		customId: constants.staticComponentIds.reports,
 		doesNotExpire: true,
-		onCollect: (_bot, selection) => {
-			const [_customId, authorId, guildId, reportReference, _isClose] = selection.data!.customId!.split('|');
+		onCollect: (_, selection) => {
+			const [__, authorId, guildId, reportReference, ___] = selection.data!.customId!.split('|');
 
 			const handle = reportPromptHandlers.get(`${authorId}|${guildId}|${reportReference}`);
 			if (handle === undefined) return;
@@ -209,7 +209,7 @@ function registerPastReports([client, bot]: [Client, Bot]): void {
 
 function ensureReportPromptPersistence([client, bot]: [Client, Bot]): void {
 	// Anti-tampering feature; detects report prompts being deleted.
-	extendEventHandler(bot, 'messageDelete', { prepend: true }, async (_bot, { id, channelId, guildId }) => {
+	extendEventHandler(bot, 'messageDelete', { prepend: true }, async (_, { id, channelId, guildId }) => {
 		// If the message was deleted from any other channel apart from a report channel.
 		if (reportChannelIdByGuildId.get(guildId!) !== channelId) {
 			return;

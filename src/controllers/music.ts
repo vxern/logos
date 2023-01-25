@@ -408,7 +408,7 @@ async function loadSong(
 		controller.currentListing!.content.title = track.info.title;
 	}
 
-	controller.player.once('trackEnd', (_track, _reason) => {
+	controller.player.once('trackEnd', (_, __) => {
 		if (controller.flags.isDestroyed) {
 			setDisconnectTimeout(client, guildId);
 			return;

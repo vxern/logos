@@ -196,7 +196,7 @@ function generateButtons(
 
 			const previousPageButtonId = createInteractionCollector([client, bot], {
 				type: InteractionTypes.MessageComponent,
-				onCollect: (_bot, selection) => {
+				onCollect: (_, selection) => {
 					if (!isFirst) data.dictionaryEntryIndex--;
 					return void displayMenu([client, bot], interaction, selection, data, locale);
 				},
@@ -204,7 +204,7 @@ function generateButtons(
 
 			const nextPageButtonId = createInteractionCollector([client, bot], {
 				type: InteractionTypes.MessageComponent,
-				onCollect: (_bot, selection) => {
+				onCollect: (_, selection) => {
 					if (!isLast) data.dictionaryEntryIndex++;
 					return void displayMenu([client, bot], interaction, selection, data, locale);
 				},
@@ -241,12 +241,12 @@ function generateButtons(
 
 			const buttonId = createInteractionCollector([client, bot], {
 				type: InteractionTypes.MessageComponent,
-				onCollect: (_bot, selection) => {
+				onCollect: (_, selection) => {
 					if (entry.inflectionTable === undefined || selection.data === undefined) {
 						return void displayMenu([client, bot], interaction, selection, data, locale);
 					}
 
-					const [_buttonId, indexString] = selection.data.customId!.split('|');
+					const [__, indexString] = selection.data.customId!.split('|');
 					const index = Number(indexString);
 
 					if (index >= 0 && index <= entry.inflectionTable?.length) {
@@ -281,7 +281,7 @@ function generateButtons(
 
 	const definitionsMenuButtonId = createInteractionCollector([client, bot], {
 		type: InteractionTypes.MessageComponent,
-		onCollect: (_bot, selection) => {
+		onCollect: (_, selection) => {
 			data.inflectionTableIndex = 0;
 			data.currentView = ContentTabs.Definitions;
 			return void displayMenu([client, bot], interaction, selection, data, locale);
@@ -290,7 +290,7 @@ function generateButtons(
 
 	const inflectionMenuButtonId = createInteractionCollector([client, bot], {
 		type: InteractionTypes.MessageComponent,
-		onCollect: (_bot, selection) => {
+		onCollect: (_, selection) => {
 			data.currentView = ContentTabs.Inflection;
 			return void displayMenu([client, bot], interaction, selection, data, locale);
 		},

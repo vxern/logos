@@ -41,8 +41,8 @@ function setupActionHandler([client, bot]: [Client, Bot]): void {
 		type: InteractionTypes.MessageComponent,
 		customId: constants.staticComponentIds.suggestions,
 		doesNotExpire: true,
-		onCollect: (_bot, selection) => {
-			const [_customId, authorId, guildId, suggestionReference, _isClose] = selection.data!.customId!.split('|');
+		onCollect: (_, selection) => {
+			const [__, authorId, guildId, suggestionReference, ___] = selection.data!.customId!.split('|');
 
 			const handle = suggestionPromptHandlers.get(`${authorId}|${guildId}|${suggestionReference}`);
 			if (handle === undefined) return;
@@ -201,7 +201,7 @@ function registerPastSuggestions([client, bot]: [Client, Bot]): void {
 
 function ensureSuggestionPromptPersistence([client, bot]: [Client, Bot]): void {
 	// Anti-tampering feature; detects suggestion prompts being deleted.
-	extendEventHandler(bot, 'messageDelete', { prepend: true }, async (_bot, { id, channelId, guildId }) => {
+	extendEventHandler(bot, 'messageDelete', { prepend: true }, async (_, { id, channelId, guildId }) => {
 		// If the message was deleted from any other channel apart from a suggestion channel.
 		if (suggestionChannelIdByGuildId.get(guildId!) !== channelId) {
 			return;

@@ -117,7 +117,7 @@ ${codeMultiline(entryRequest.answers.where_found!)}
 
 			return `${diagnosticMentionUser(user)}'s entry request has been accepted by ${diagnosticMentionUser(byUser)}`;
 		},
-		filter: (_client, originGuildId, _user, by) => originGuildId === by.guildId,
+		filter: (_, originGuildId, __, by) => originGuildId === by.guildId,
 		color: constants.colors.lightGreen,
 	},
 	entryRequestReject: {
@@ -128,7 +128,7 @@ ${codeMultiline(entryRequest.answers.where_found!)}
 
 			return `${diagnosticMentionUser(user)}'s entry request has been rejected by ${diagnosticMentionUser(byUser)}`;
 		},
-		filter: (_client, originGuildId, _user, by) => originGuildId === by.guildId,
+		filter: (_, originGuildId, __, by) => originGuildId === by.guildId,
 		color: constants.colors.red,
 	},
 	articleCreate: {
@@ -143,7 +143,7 @@ ${codeMultiline(entryRequest.answers.where_found!)}
         
 ${trim(article.content.body, 300)}`;
 		},
-		filter: (_client, originGuildId, _article, by) => originGuildId === by.guildId,
+		filter: (_, originGuildId, __, by) => originGuildId === by.guildId,
 		color: constants.colors.lightGreen,
 	},
 	articleCreateAccept: {
@@ -158,7 +158,7 @@ ${trim(article.content.body, 300)}`;
 
 ${trim(article.content.body, 300)}`;
 		},
-		filter: (_client, originGuildId, _article, by) => originGuildId === by.guildId,
+		filter: (_, originGuildId, __, by) => originGuildId === by.guildId,
 		color: constants.colors.lightGreen,
 	},
 	articleCreateReject: {
@@ -173,7 +173,7 @@ ${trim(article.content.body, 300)}`;
         
 ${trim(article.content.body, 300)}`;
 		},
-		filter: (_client, originGuildId, _article, by) => originGuildId === by.guildId,
+		filter: (_, originGuildId, __, by) => originGuildId === by.guildId,
 		color: constants.colors.red,
 	},
 	articleEdit: {
@@ -188,12 +188,12 @@ ${trim(article.content.body, 300)}`;
   
 ${trim(change.content.body, 300)}`;
 		},
-		filter: (_client, originGuildId, _article, _change, by) => originGuildId === by.guildId,
+		filter: (_, originGuildId, __, ___, by) => originGuildId === by.guildId,
 		color: constants.colors.blue,
 	},
 	articleEditAccept: {
 		title: '✔️ Article edit accepted',
-		message: (client, _article, change, by) => {
+		message: (client, _, change, by) => {
 			const user = client.cache.users.get(by.id);
 			if (user === undefined) return;
 
@@ -203,12 +203,12 @@ ${trim(change.content.body, 300)}`;
 
 ${trim(change.content.body, 300)}`;
 		},
-		filter: (_client, originGuildId, _article, _change, by) => originGuildId === by.guildId,
+		filter: (_, originGuildId, __, ___, by) => originGuildId === by.guildId,
 		color: constants.colors.lightGreen,
 	},
 	articleEditReject: {
 		title: '❌ Article edit rejected',
-		message: (client, _article, change, by) => {
+		message: (client, _, change, by) => {
 			const user = client.cache.users.get(by.id);
 			if (user === undefined) return;
 
@@ -218,7 +218,7 @@ ${trim(change.content.body, 300)}`;
 
 ${trim(change.content.body, 300)}`;
 		},
-		filter: (_client, originGuildId, _article, _change, by) => originGuildId === by.guildId,
+		filter: (_, originGuildId, __, ___, by) => originGuildId === by.guildId,
 		color: constants.colors.red,
 	},
 	articleLock: {
@@ -229,7 +229,7 @@ ${trim(change.content.body, 300)}`;
 
 			return `The article ${code(article.content.title)} has been locked by ${diagnosticMentionUser(user)}.`;
 		},
-		filter: (_client, originGuildId, _article, by) => originGuildId === by.guildId,
+		filter: (_, originGuildId, __, by) => originGuildId === by.guildId,
 		color: constants.colors.dullYellow,
 	},
 	moderatorInquestLaunch: {
@@ -240,7 +240,7 @@ ${trim(change.content.body, 300)}`;
 
 			return `An inquest has been launched into ${diagnosticMentionUser(memberUser)} by ${diagnosticMentionUser(by)}.`;
 		},
-		filter: (_client, originGuildId, member, _by) => originGuildId === member.guildId,
+		filter: (_, originGuildId, member, __) => originGuildId === member.guildId,
 		color: constants.colors.darkRed,
 	},
 	moderatorInquestPass: {
@@ -253,7 +253,7 @@ ${trim(change.content.body, 300)}`;
 				diagnosticMentionUser(by)
 			}, and resulted in a pass.`;
 		},
-		filter: (_client, originGuildId, member, _by) => originGuildId === member.guildId,
+		filter: (_, originGuildId, member, __) => originGuildId === member.guildId,
 		color: constants.colors.lightGreen,
 	},
 	moderatorInquestFail: {
@@ -266,7 +266,7 @@ ${trim(change.content.body, 300)}`;
 				diagnosticMentionUser(by)
 			}, and resulted in a failure.`;
 		},
-		filter: (_client, originGuildId, member, _by) => originGuildId === member.guildId,
+		filter: (_, originGuildId, member, __) => originGuildId === member.guildId,
 		color: constants.colors.red,
 	},
 	memberWarnAdd: {
@@ -279,7 +279,7 @@ ${trim(change.content.body, 300)}`;
 				diagnosticMentionUser(by)
 			} for: ${warning.reason}`;
 		},
-		filter: (_client, originGuildId, member, _warning, _by) => originGuildId === member.guildId,
+		filter: (_, originGuildId, member, __, ___) => originGuildId === member.guildId,
 		color: constants.colors.dullYellow,
 	},
 	memberWarnRemove: {
@@ -292,7 +292,7 @@ ${trim(change.content.body, 300)}`;
 				diagnosticMentionUser(by)
 			} regarding their warning for: ${warning.reason}`;
 		},
-		filter: (_client, originGuildId, member, _warning, _by) => originGuildId === member.guildId,
+		filter: (_, originGuildId, member, __, ___) => originGuildId === member.guildId,
 		color: constants.colors.blue,
 	},
 	memberTimeoutAdd: {
@@ -305,7 +305,7 @@ ${trim(change.content.body, 300)}`;
 				timestamp(until)
 			} for: ${reason}`;
 		},
-		filter: (_client, originGuildId, member, _until, _reason, _by) => originGuildId === member.guildId,
+		filter: (_, originGuildId, member, __, ___, ____) => originGuildId === member.guildId,
 		color: constants.colors.dullYellow,
 	},
 	memberTimeoutRemove: {
@@ -316,7 +316,7 @@ ${trim(change.content.body, 300)}`;
 
 			return `The timeout of ${diagnosticMentionUser(memberUser)} has been cleared by: ${diagnosticMentionUser(by)}`;
 		},
-		filter: (_client, originGuildId, member, _by) => originGuildId === member.guildId,
+		filter: (_, originGuildId, member, __) => originGuildId === member.guildId,
 		color: constants.colors.blue,
 	},
 	praiseAdd: {
@@ -343,7 +343,7 @@ ${trim(change.content.body, 300)}`;
 			return `${diagnosticMentionUser(memberUser)} has made a suggestion.\n\n` +
 				`Suggestion: *${suggestion.suggestion}*`;
 		},
-		filter: (_client, originGuildId, member, _suggestion) => originGuildId === member.guildId,
+		filter: (_, originGuildId, member, __) => originGuildId === member.guildId,
 		color: constants.colors.darkGreen,
 	},
 	reportSubmit: {
@@ -365,7 +365,7 @@ ${recipients.map((recipient) => diagnosticMentionUser(recipient)).join(', ')}
 **MESSAGE LINK**
 ${messageLink}`;
 		},
-		filter: (_client, originGuildId, author, _recipients, _report) => originGuildId === author.guildId,
+		filter: (_, originGuildId, author, __, ___) => originGuildId === author.guildId,
 		color: constants.colors.darkRed,
 	},
 };

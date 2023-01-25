@@ -197,7 +197,7 @@ function createMusicFeature(sendGatewayPayload: SendGatewayPayload): Client['fea
 function withMusicEvents(events: Partial<EventHandlers>, node: LavalinkNode): Partial<EventHandlers> {
 	return {
 		...events,
-		voiceStateUpdate: (_bot, payload) => {
+		voiceStateUpdate: (_, payload) => {
 			node.handleVoiceUpdate({
 				session_id: payload.sessionId,
 				channel_id: payload.channelId !== undefined ? `${payload.channelId}` : null,
@@ -205,7 +205,7 @@ function withMusicEvents(events: Partial<EventHandlers>, node: LavalinkNode): Pa
 				user_id: `${payload.userId}`,
 			});
 		},
-		voiceServerUpdate: (_bot, payload) => {
+		voiceServerUpdate: (_, payload) => {
 			node.handleVoiceUpdate({
 				token: payload.token,
 				endpoint: payload.endpoint!,
@@ -247,7 +247,7 @@ function createEventHandlers(client: Client): Partial<EventHandlers> {
 
 			fetchMembers(bot, guild.id, { limit: 0, query: '' });
 		},
-		channelDelete: (_bot, channel) => {
+		channelDelete: (_, channel) => {
 			client.cache.channels.delete(channel.id);
 			client.cache.guilds.get(channel.guildId)?.channels.delete(channel.id);
 		},

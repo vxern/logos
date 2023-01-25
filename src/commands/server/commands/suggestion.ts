@@ -160,7 +160,7 @@ function handleSubmittedInvalidSuggestion(
 	return new Promise((resolve) => {
 		const continueId = createInteractionCollector([client, bot], {
 			type: InteractionTypes.MessageComponent,
-			onCollect: (_bot, selection) => {
+			onCollect: (_, selection) => {
 				deleteOriginalInteractionResponse(bot, submission.token);
 				resolve(selection);
 			},
@@ -168,15 +168,15 @@ function handleSubmittedInvalidSuggestion(
 
 		const cancelId = createInteractionCollector([client, bot], {
 			type: InteractionTypes.MessageComponent,
-			onCollect: (_bot, cancelSelection) => {
+			onCollect: (_, cancelSelection) => {
 				const returnId = createInteractionCollector([client, bot], {
 					type: InteractionTypes.MessageComponent,
-					onCollect: (_bot, returnSelection) => resolve(returnSelection),
+					onCollect: (_, returnSelection) => resolve(returnSelection),
 				});
 
 				const leaveId = createInteractionCollector([client, bot], {
 					type: InteractionTypes.MessageComponent,
-					onCollect: (_bot, _leaveSelection) => {
+					onCollect: (_, _leaveSelection) => {
 						deleteOriginalInteractionResponse(bot, submission.token);
 						deleteOriginalInteractionResponse(bot, cancelSelection.token);
 						resolve(undefined);

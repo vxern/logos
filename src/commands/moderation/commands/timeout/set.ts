@@ -85,7 +85,7 @@ async function handleSetTimeout(
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (guild === undefined) return;
 
-	const [_member, dmChannel] = await Promise.all([
+	const [_, dmChannel] = await Promise.all([
 		editMember(bot, interaction.guildId!, member.id, { communicationDisabledUntil: until }),
 		getDmChannel(bot, member.id).catch(() => undefined),
 	]);

@@ -53,8 +53,8 @@ function setupVoteHandler([client, bot]: [Client, Bot]): void {
 		type: InteractionTypes.MessageComponent,
 		customId: constants.staticComponentIds.verification,
 		doesNotExpire: true,
-		onCollect: (_bot, selection) => {
-			const [_customId, userId, guildId, _isAccept] = selection.data!.customId!.split('|');
+		onCollect: (_, selection) => {
+			const [__, userId, guildId, ___] = selection.data!.customId!.split('|');
 
 			const handle = verificationPromptHandlers.get(`${userId}|${guildId}`);
 			if (handle === undefined) return;
@@ -583,7 +583,7 @@ async function handleVote(
 
 	const isAccept = interaction.data!.customId!.split('|')[3]! === 'true';
 
-	const [[_requiredAcceptanceVotes, requiredRejectionVotes], [votesToAccept, votesToReject]] = getNecessaryVotes(
+	const [[_, requiredRejectionVotes], [votesToAccept, votesToReject]] = getNecessaryVotes(
 		guild,
 		entryRequest.data,
 	);

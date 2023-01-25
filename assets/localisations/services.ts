@@ -326,7 +326,7 @@ class Services {
 			'English': (guildName: string) =>
 				`Before you can enter ${guildName}, you must first verify yourself by answering a set of verification questions.\n\n` +
 				'Please answer them honestly as rejections are permanent, and you won\'t be able to submit a new set of answers.',
-			'Polish': (_guildName: string) =>
+			'Polish': (_: string) =>
 				`Zanim wstąpisz na serwer, wpierw musisz się zweryfikować odpowiadając na kilka pytań weryfikacyjnych.\n\n` +
 				'Prosimy odpowiadać szczerze, gdyż odrzucenie prośby o dołączenie jest na stałe.',
 			'Romanian': (guildName: string) =>

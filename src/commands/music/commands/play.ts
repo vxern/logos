@@ -48,7 +48,7 @@ function handleRequestExternal(
 	return handleRequestSongListing(
 		clientWithBot,
 		interaction,
-		(_client, interaction, query) =>
+		(_, interaction, query) =>
 			new Promise((resolve) =>
 				resolve({
 					requestedBy: interaction.user.id,
