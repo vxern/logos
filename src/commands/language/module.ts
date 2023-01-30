@@ -1,7 +1,7 @@
 import * as csv from 'std/encoding/csv.ts';
 import { getLocaleForLanguage, localise, TranslationLanguage, Words } from 'logos/assets/localisations/mod.ts';
 import dexonline from 'logos/src/commands/language/data/adapters/dexonline.ts';
-import { DictionaryAdapter, SentencePair, WordTypes } from 'logos/src/commands/language/data/types.ts';
+import { DictionaryAdapter, SentencePair, WordClasses } from 'logos/src/commands/language/data/types.ts';
 import { Client } from 'logos/src/client.ts';
 import { addParametersToURL } from 'logos/src/utils.ts';
 import constants from 'logos/constants.ts';
@@ -105,9 +105,9 @@ function resolveToSupportedLanguage(
 	);
 }
 
-function getWordType(typeString: string, language: Language): WordTypes {
-	return localise(Words.typeNameToType, getLocaleForLanguage(language))[typeString] ?? WordTypes.Unknown;
+function getWordClass(wordClassString: string, language: Language): WordClasses {
+	return localise(Words.typeNameToType, getLocaleForLanguage(language))[wordClassString] ?? WordClasses.Unknown;
 }
 
-export { getSupportedLanguages, getWordType, loadDictionaryAdapters, loadSentencePairs, resolveToSupportedLanguage };
+export { getSupportedLanguages, getWordClass, loadDictionaryAdapters, loadSentencePairs, resolveToSupportedLanguage };
 export type { SupportedLanguage };

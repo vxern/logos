@@ -43,7 +43,7 @@ function getLocaleForLanguage(language: Language): typeof localeByLanguage[keyof
 	return localeByLanguage[language] ?? 'en-GB';
 }
 
-enum WordTypes {
+enum WordClasses {
 	Noun,
 	Verb,
 	Adjective,
@@ -57,14 +57,19 @@ enum WordTypes {
 	Unknown,
 }
 
+function isUnknownWordClass(wordClass: WordClasses): boolean {
+	return wordClass === WordClasses.Unknown;
+}
+
 export {
 	defaultLanguage,
 	defaultLocale,
 	getLanguageByLocale,
 	getLocaleForLanguage,
+	isUnknownWordClass,
 	languageByLocale,
 	localeByLanguage,
 	supportedLanguages,
-	WordTypes,
+	WordClasses,
 };
 export type { Language };

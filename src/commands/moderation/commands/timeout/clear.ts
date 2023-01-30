@@ -5,14 +5,13 @@ import {
 	getDmChannel,
 	Interaction,
 	InteractionResponseTypes,
-	InteractionTypes,
 	sendInteractionResponse,
 	sendMessage,
 } from 'discordeno';
 import { Commands, localise } from 'logos/assets/localisations/mod.ts';
 import { log } from 'logos/src/controllers/logging/logging.ts';
 import { Client, resolveInteractionToMember } from 'logos/src/client.ts';
-import { parseArguments } from 'logos/src/interactions.ts';
+import { isAutocomplete, parseArguments } from 'logos/src/interactions.ts';
 import { diagnosticMentionUser, guildAsAuthor } from 'logos/src/utils.ts';
 import constants from 'logos/constants.ts';
 import { defaultLocale } from 'logos/types.ts';
@@ -30,7 +29,7 @@ async function handleClearTimeout(
 	});
 	if (member === undefined) return;
 
-	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete && focused?.name === 'user') return;
+	if (isAutocomplete(interaction) && focused?.name === 'user') return;
 
 	const timedOutUntil = member.communicationDisabledUntil ?? undefined;
 

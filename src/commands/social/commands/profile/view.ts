@@ -5,14 +5,13 @@ import {
 	getAvatarURL,
 	Interaction,
 	InteractionResponseTypes,
-	InteractionTypes,
 	sendInteractionResponse,
 } from 'discordeno';
 import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
 import { OptionBuilder } from 'logos/src/commands/command.ts';
 import { show, user } from 'logos/src/commands/parameters.ts';
 import { Client, resolveInteractionToMember } from 'logos/src/client.ts';
-import { parseArguments } from 'logos/src/interactions.ts';
+import { isAutocomplete, parseArguments } from 'logos/src/interactions.ts';
 import constants from 'logos/constants.ts';
 import { mention, MentionTypes } from 'logos/formatting.ts';
 import { defaultLocale } from 'logos/types.ts';
@@ -33,7 +32,7 @@ async function handleDisplayProfile(
 	const member = resolveInteractionToMember([client, bot], interaction, user ?? interaction.user.id.toString());
 	if (member === undefined) return;
 
-	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete && focused?.name === 'user') return;
+	if (isAutocomplete(interaction) && focused?.name === 'user') return;
 
 	const target = member.user;
 	if (target === undefined) return;

@@ -5,7 +5,6 @@ import {
 	getDmChannel,
 	Interaction,
 	InteractionResponseTypes,
-	InteractionTypes,
 	kickMember,
 	sendInteractionResponse,
 	sendMessage,
@@ -16,7 +15,7 @@ import { reason, user } from 'logos/src/commands/parameters.ts';
 import { getActiveWarnings } from 'logos/src/commands/moderation/module.ts';
 import { log } from 'logos/src/controllers/logging/logging.ts';
 import { Client, resolveInteractionToMember } from 'logos/src/client.ts';
-import { parseArguments } from 'logos/src/interactions.ts';
+import { isAutocomplete, parseArguments } from 'logos/src/interactions.ts';
 import { guildAsAuthor } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import constants from 'logos/constants.ts';
@@ -43,7 +42,7 @@ async function handleWarnUser(
 	});
 	if (member === undefined) return;
 
-	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete && focused?.name === 'user') return;
+	if (isAutocomplete(interaction) && focused?.name === 'user') return;
 
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (guild === undefined) return;

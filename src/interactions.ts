@@ -21,6 +21,12 @@ import { localise, Misc } from 'logos/assets/localisations/mod.ts';
 import { addCollector, Client } from 'logos/src/client.ts';
 import constants from 'logos/constants.ts';
 
+type AutocompleteInteraction = Interaction & { type: InteractionTypes.ApplicationCommandAutocomplete };
+
+function isAutocomplete(interaction: Interaction): interaction is AutocompleteInteraction {
+	return isAutocomplete(interaction);
+}
+
 /** Settings for interaction collection. */
 interface InteractionCollectorSettings {
 	/** The type of interaction to listen for. */
@@ -479,5 +485,12 @@ function parseTimeExpressionPhrase(
 	return [correctedExpression, total];
 }
 
-export { createInteractionCollector, createModalComposer, paginate, parseArguments, parseTimeExpression };
+export {
+	createInteractionCollector,
+	createModalComposer,
+	isAutocomplete,
+	paginate,
+	parseArguments,
+	parseTimeExpression,
+};
 export type { InteractionCollectorSettings, Modal };

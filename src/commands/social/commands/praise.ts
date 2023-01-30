@@ -6,7 +6,6 @@ import {
 	getDmChannel,
 	Interaction,
 	InteractionResponseTypes,
-	InteractionTypes,
 	sendInteractionResponse,
 	sendMessage,
 } from 'discordeno';
@@ -16,7 +15,7 @@ import { user } from 'logos/src/commands/parameters.ts';
 import { log } from 'logos/src/controllers/logging/logging.ts';
 import { Praise } from 'logos/src/database/structs/mod.ts';
 import { Client, resolveInteractionToMember } from 'logos/src/client.ts';
-import { parseArguments } from 'logos/src/interactions.ts';
+import { isAutocomplete, parseArguments } from 'logos/src/interactions.ts';
 import { guildAsAuthor, verifyIsWithinLimits } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import constants from 'logos/constants.ts';
@@ -42,7 +41,7 @@ async function handlePraiseUser(
 	const member = resolveInteractionToMember([client, bot], interaction, user);
 	if (member === undefined) return;
 
-	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete && focused?.name === 'user') return;
+	if (isAutocomplete(interaction) && focused?.name === 'user') return;
 
 	if (member.id === interaction.member?.id) {
 		return void sendInteractionResponse(

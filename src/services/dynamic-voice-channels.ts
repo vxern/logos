@@ -2,6 +2,7 @@ import { Bot, Channel, ChannelTypes, Collection, createChannel, deleteChannel, G
 import { Client, extendEventHandler } from 'logos/src/client.ts';
 import { ServiceStarter } from 'logos/src/services/services.ts';
 import configuration from 'logos/configuration.ts';
+import { isVoice } from '../utils.ts';
 
 const previousVoiceStates = new Map<`${/*userId:*/ bigint}${/*guildId:*/ bigint}`, VoiceState>();
 
@@ -124,9 +125,12 @@ function getVoiceChannelStatesTuples(guild: Guild): VoiceChannelStatesTuple[] {
 function getRelevantVoiceChannels(guild: Guild): Channel[] {
 	const channels = guild.channels
 		.filter(
-			(channel) =>
-				channel.type === ChannelTypes.GuildVoice && channel.name! === configuration.guilds.channels.voiceChat,
-		).array().toSorted((a, b) => a.position === b.position ? Number(a.id - b.id) : a.position! - b.position!);
+			(channel) => isVoice(channel) && channel.name! === configuration.guilds.channels.voiceChat,
+		)
+		.array()
+		.toSorted(
+			(a, b) => a.position === b.position ? Number(a.id - b.id) : a.position! - b.position!,
+		);
 
 	return channels;
 }

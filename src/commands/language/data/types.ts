@@ -1,5 +1,5 @@
 import { DiscordEmbedField } from 'discordeno';
-import { Language, WordTypes } from 'logos/types.ts';
+import { Language, WordClasses } from 'logos/types.ts';
 
 enum DictionaryScopes {
 	/** Provides definitions in the same language as the headword. */
@@ -48,19 +48,19 @@ interface DictionaryEntry {
 	/** The string to display as the title of this entry. */
 	title?: string;
 
-	/** The type of a word. */
-	type?: [WordTypes, string];
+	/** The word class of the topic word. */
+	wordClass?: [wordClass: WordClasses, wordClassUnresolved: string];
 
-	/** The definitions of a word entry. */
+	/** The definitions for the topic word. */
 	definitions?: Definition[];
 
-	/** The expressions of a word entry. */
+	/** The expressions for the topic word. */
 	expressions?: Expression[];
 
-	/** The etymologies of a word entry. */
+	/** The etymologies for the topic word. */
 	etymologies?: Etymology[];
 
-	/** The inflection of a word entry. */
+	/** The inflection of the topic word. */
 	inflectionTable?: InflectionTable;
 }
 
@@ -81,5 +81,5 @@ interface SentencePair {
 	translation: string;
 }
 
-export { DictionaryAdapter, DictionaryProvisions, DictionaryScopes, WordTypes };
+export { DictionaryAdapter, DictionaryProvisions, DictionaryScopes, WordClasses };
 export type { Definition, DictionaryEntry, Expression, SentencePair, TaggedValue };

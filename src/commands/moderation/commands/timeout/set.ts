@@ -12,7 +12,7 @@ import {
 import { Commands, localise } from 'logos/assets/localisations/mod.ts';
 import { log } from 'logos/src/controllers/logging/logging.ts';
 import { Client, resolveInteractionToMember } from 'logos/src/client.ts';
-import { parseArguments, parseTimeExpression } from 'logos/src/interactions.ts';
+import { isAutocomplete, parseArguments, parseTimeExpression } from 'logos/src/interactions.ts';
 import { guildAsAuthor } from 'logos/src/utils.ts';
 import constants, { Periods } from 'logos/constants.ts';
 import { mention, MentionTypes, timestamp } from 'logos/formatting.ts';
@@ -30,7 +30,7 @@ async function handleSetTimeout(
 		return;
 	}
 
-	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete && focused?.name === 'duration') {
+	if (isAutocomplete(interaction) && focused?.name === 'duration') {
 		const timestamp = parseTimeExpression(duration!, true, interaction.locale);
 
 		return void sendInteractionResponse(
@@ -52,7 +52,7 @@ async function handleSetTimeout(
 	});
 	if (member === undefined) return;
 
-	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete && focused?.name === 'user') return;
+	if (isAutocomplete(interaction) && focused?.name === 'user') return;
 
 	const durationParsed = Number(duration);
 

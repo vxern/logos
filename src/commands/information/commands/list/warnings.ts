@@ -5,14 +5,13 @@ import {
 	Embed,
 	Interaction,
 	InteractionResponseTypes,
-	InteractionTypes,
 	sendInteractionResponse,
 } from 'discordeno';
 import { Commands, localise } from 'logos/assets/localisations/mod.ts';
 import { Warning } from 'logos/src/database/structs/mod.ts';
 import { Document } from 'logos/src/database/document.ts';
 import { Client, resolveInteractionToMember } from 'logos/src/client.ts';
-import { parseArguments } from 'logos/src/interactions.ts';
+import { isAutocomplete, parseArguments } from 'logos/src/interactions.ts';
 import constants from 'logos/constants.ts';
 import { timestamp } from 'logos/formatting.ts';
 
@@ -29,7 +28,7 @@ async function handleDisplayWarnings(
 	});
 	if (member === undefined) return;
 
-	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete && focused?.name === 'user') return;
+	if (isAutocomplete(interaction) && focused?.name === 'user') return;
 
 	const isSelf = member.id === interaction.user.id;
 

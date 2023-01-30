@@ -9,15 +9,14 @@ import {
 	SelectOption,
 	sendInteractionResponse,
 } from 'discordeno';
-import { Playlist, Video, YouTube } from 'youtube';
+import { Channel, Playlist, Video, YouTube } from 'youtube';
+import { Commands, localise } from 'logos/assets/localisations/mod.ts';
 import { ListingResolver } from 'logos/src/commands/music/data/sources/sources.ts';
 import { SongListing, SongListingContentTypes } from 'logos/src/commands/music/data/types.ts';
 import { Client } from 'logos/src/client.ts';
 import { createInteractionCollector } from 'logos/src/interactions.ts';
 import constants from 'logos/constants.ts';
 import { trim } from 'logos/formatting.ts';
-import { Commands } from '../../../../../assets/localisations/mod.ts';
-import { localise } from '../../../../../assets/localisations/mod.ts';
 
 const urlExpression = new RegExp(
 	/^(?:https?:)?(?:\/\/)?(?:youtu\.be\/|(?:www\.|m\.)?youtube\.com\/(?:watch|v|embed)(?:\.php)?(?:\?.*v=|\/))([a-zA-Z0-9\_-]{7,15})(?:[\?&][a-zA-Z0-9\_-]+=[a-zA-Z0-9\_-]+)*$/,
@@ -50,13 +49,11 @@ async function search(
 	interaction: Interaction,
 	query: string,
 ): Promise<SongListing | undefined> {
-	const results = await YouTube.search(
-		query,
-		{ limit: 20, type: 'all', safeSearch: false },
-	).then(
-		(result) => result.filter((element) => element.type === 'video' || element.type === 'playlist'),
-	) as Array<Video | Playlist>;
-	if (results.length === 0) return undefined;
+	const items = await YouTube.search(query, { limit: 20, type: 'all', safeSearch: false })
+		.then(
+			(item) => item.filter((element) => isPlaylist(element) || isVideo(element)),
+		) as Array<Video | Playlist>;
+	if (items.length === 0) return undefined;
 
 	return new Promise<SongListing | undefined>((resolve) => {
 		const customId = createInteractionCollector(
@@ -76,13 +73,13 @@ async function search(
 					const index = Number(indexString);
 					if (isNaN(index)) return resolve(undefined);
 
-					const result = results.at(index)!;
-					if (result.type === 'video') {
-						return resolve(fromYouTubeVideo(result, interaction.user.id));
+					const item = items.at(index)!;
+					if (isPlaylist(item)) {
+						const playlist = await YouTube.getPlaylist(item.url!);
+						return resolve(fromYouTubePlaylist(playlist, interaction.user.id));
 					}
 
-					const playlist = await YouTube.getPlaylist(result.url!);
-					return resolve(fromYouTubePlaylist(playlist, interaction.user.id));
+					return resolve(fromYouTubeVideo(item, interaction.user.id));
 				},
 			},
 		);
@@ -103,18 +100,30 @@ async function search(
 						customId: customId,
 						minValues: 1,
 						maxValues: 1,
-						options: results.map<SelectOption>((result, index) => ({
-							emoji: {
-								name: result.type === 'video' ? constants.emojis.music.song : constants.emojis.music.collection,
-							},
-							label: trim(result.title!, 100),
-							value: index.toString(),
-						})),
+						options: items.map<SelectOption>(
+							(result, index) => ({
+								emoji: {
+									name: isVideo(result) ? constants.emojis.music.song : constants.emojis.music.collection,
+								},
+								label: trim(result.title!, 100),
+								value: index.toString(),
+							}),
+						),
 					}],
 				}],
 			},
 		});
 	});
+}
+
+type YouTubeItem = Playlist | Video | Channel;
+
+function isPlaylist(item: YouTubeItem): item is Playlist {
+	return item.type === 'playlist';
+}
+
+function isVideo(item: YouTubeItem): item is Video {
+	return item.type === 'video';
 }
 
 /**

@@ -4,13 +4,13 @@ import {
 	DictionaryAdapter,
 	DictionaryEntry,
 	DictionaryProvisions,
-	WordTypes,
+	WordClasses,
 } from 'logos/src/commands/language/data/types.ts';
-import { getWordType } from 'logos/src/commands/language/module.ts';
+import { getWordClass } from 'logos/src/commands/language/module.ts';
 import { chunk } from 'logos/src/utils.ts';
 import { Language } from 'logos/types.ts';
 
-const supportedTypesForInflection = [WordTypes.Noun, WordTypes.Verb, WordTypes.Adjective, WordTypes.Determiner];
+const supportedTypesForInflection = [WordClasses.Noun, WordClasses.Verb, WordClasses.Adjective, WordClasses.Determiner];
 
 type InflectionTable = NonNullable<DictionaryEntry['inflectionTable']>;
 
@@ -26,7 +26,7 @@ class DexonlineAdapter implements DictionaryAdapter<Dexonline.Results> {
 		const entries = results.synthesis.map<DictionaryEntry>((result) => ({
 			word: result.lemma,
 			title: result.lemma,
-			type: [getWordType(result.type, 'Romanian'), result.type],
+			wordClass: [getWordClass(result.type, 'Romanian'), result.type],
 			definitions: result.definitions,
 			etymologies: result.etymology,
 			expressions: result.expressions,
@@ -48,9 +48,9 @@ class DexonlineAdapter implements DictionaryAdapter<Dexonline.Results> {
 				entry = entriesByWord.at(index)!;
 			}
 
-			if (entry.type === undefined) continue;
+			if (entry.wordClass === undefined) continue;
 
-			const type = entry.type[0]!;
+			const type = entry.wordClass[0]!;
 			if (!supportedTypesForInflection.includes(type)) continue;
 
 			const inflectionTable = this.tableRowsToFields(type, table, locale);
@@ -61,18 +61,18 @@ class DexonlineAdapter implements DictionaryAdapter<Dexonline.Results> {
 		return entries.length === 0 ? undefined : entries;
 	}
 
-	private tableRowsToFields(wordType: WordTypes, rows: string[][], locale: string | undefined): InflectionTable {
-		switch (wordType) {
-			case WordTypes.Noun: {
+	private tableRowsToFields(wordClass: WordClasses, rows: string[][], locale: string | undefined): InflectionTable {
+		switch (wordClass) {
+			case WordClasses.Noun: {
 				return this.nounTableRowsToTable(rows, locale);
 			}
-			case WordTypes.Verb: {
+			case WordClasses.Verb: {
 				return this.verbTableRowsToTable(rows, locale);
 			}
-			case WordTypes.Adjective: {
+			case WordClasses.Adjective: {
 				return this.adjectiveTableRowsToTable(rows, locale);
 			}
-			case WordTypes.Determiner: {
+			case WordClasses.Determiner: {
 				return this.determinerTableRowsToTable(rows, locale);
 			}
 		}

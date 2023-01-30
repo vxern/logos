@@ -4,13 +4,12 @@ import {
 	Bot,
 	Interaction,
 	InteractionResponseTypes,
-	InteractionTypes,
 	sendInteractionResponse,
 } from 'discordeno';
 import { Commands, createLocalisations, localise, Services } from 'logos/assets/localisations/mod.ts';
 import { CommandBuilder } from 'logos/src/commands/command.ts';
 import { Client } from 'logos/src/client.ts';
-import { parseArguments } from 'logos/src/interactions.ts';
+import { isAutocomplete, parseArguments } from 'logos/src/interactions.ts';
 import constants from 'logos/constants.ts';
 import { defaultLocale } from 'logos/types.ts';
 
@@ -32,7 +31,7 @@ function handleCiteRule(
 ): void {
 	const rules = Object.values(Services.notices.notices.information.rules.rules);
 
-	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete) {
+	if (isAutocomplete(interaction)) {
 		const choices = rules.map((rule, indexZeroBased) => {
 			const index = indexZeroBased + 1;
 			const titleWithTLDR = localise(rule.title, interaction.locale);

@@ -13,8 +13,8 @@ import {
 	Guild,
 	Intents,
 	Interaction,
+	InteractionDataOption,
 	InteractionResponseTypes,
-	InteractionTypes,
 	Member,
 	Message,
 	send as sendShardPayload,
@@ -42,6 +42,7 @@ import configuration from 'logos/configuration.ts';
 import constants from 'logos/constants.ts';
 import { timestamp } from 'logos/formatting.ts';
 import { defaultLanguage, Language, supportedLanguages } from 'logos/types.ts';
+import { isAutocomplete } from './interactions.ts';
 
 interface Collector<
 	E extends keyof EventHandlers,
@@ -262,23 +263,19 @@ function createEventHandlers(client: Client): Partial<EventHandlers> {
 			const commandName = interaction.data?.name;
 			if (commandName === undefined) return;
 
-			const subCommandGroupOption = interaction.data?.options?.find((option) =>
-				option.type === ApplicationCommandOptionTypes.SubCommandGroup
-			);
+			const subCommandGroupOption = interaction.data?.options?.find((option) => isSubcommandGroup(option));
 
 			let commandNameFull: string;
 			if (subCommandGroupOption !== undefined) {
 				const subCommandGroupName = subCommandGroupOption.name;
 				const subCommandName = subCommandGroupOption.options?.find(
-					(option) => option.type === ApplicationCommandOptionTypes.SubCommand,
+					(option) => isSubcommand(option),
 				)?.name;
 				if (subCommandName === undefined) return;
 
 				commandNameFull = `${commandName} ${subCommandGroupName} ${subCommandName}`;
 			} else {
-				const subCommandName = interaction.data?.options?.find((option) =>
-					option.type === ApplicationCommandOptionTypes.SubCommand
-				)?.name;
+				const subCommandName = interaction.data?.options?.find((option) => isSubcommand(option))?.name;
 				if (subCommandName === undefined) {
 					commandNameFull = commandName;
 				} else {
@@ -391,7 +388,7 @@ function withCaching(
 
 function withRateLimiting(handle: InteractionHandler): InteractionHandler {
 	return ([client, bot], interaction) => {
-		if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete) return handle([client, bot], interaction);
+		if (isAutocomplete(interaction)) return handle([client, bot], interaction);
 
 		const commandId = interaction.data?.id;
 		if (commandId === undefined) return handle([client, bot], interaction);
@@ -657,7 +654,7 @@ function resolveInteractionToMember(
 	const [matchedMembers, isResolved] = result;
 	if (isResolved) return matchedMembers.at(0);
 
-	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete) {
+	if (isAutocomplete(interaction)) {
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -718,6 +715,14 @@ function extendEventHandler<Event extends keyof EventHandlers, Handler extends E
 				extension(...args);
 			}
 	) as Handler;
+}
+
+function isSubcommandGroup(option: InteractionDataOption): boolean {
+	return option.type === ApplicationCommandOptionTypes.SubCommandGroup;
+}
+
+function isSubcommand(option: InteractionDataOption): boolean {
+	return option.type === ApplicationCommandOptionTypes.SubCommand;
 }
 
 export {

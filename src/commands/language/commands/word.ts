@@ -23,7 +23,7 @@ import { createInteractionCollector, parseArguments } from 'logos/src/interactio
 import { chunk, diagnosticMentionUser } from 'logos/src/utils.ts';
 import constants from 'logos/constants.ts';
 import { BulletStyles, code, list } from 'logos/formatting.ts';
-import { defaultLocale, WordTypes } from 'logos/types.ts';
+import { defaultLocale, isUnknownWordClass, WordClasses } from 'logos/types.ts';
 
 const command: CommandBuilder = {
 	...createLocalisations(Commands.word),
@@ -328,17 +328,17 @@ function generateButtons(
 }
 
 function entryToEmbeds(entry: DictionaryEntry, locale: string | undefined, verbose: boolean): Embed[] {
-	let typeDisplayed!: string;
-	if (entry.type === undefined) {
-		typeDisplayed = localise(Words.types[WordTypes.Unknown], locale);
+	let wordClassDisplayed: string;
+	if (entry.wordClass === undefined) {
+		wordClassDisplayed = localise(Words.classes[WordClasses.Unknown], locale);
 	} else {
-		const [type, typeString] = entry.type;
-		typeDisplayed = localise(Words.types[type], locale);
-		if (type === WordTypes.Unknown) {
-			typeDisplayed += ` — '${typeString}'`;
+		const [wordClass, wordClassUnresolved] = entry.wordClass;
+		wordClassDisplayed = localise(Words.classes[wordClass], locale);
+		if (isUnknownWordClass(wordClass)) {
+			wordClassDisplayed += ` — '${wordClassUnresolved}'`;
 		}
 	}
-	typeDisplayed = `***${typeDisplayed}***`;
+	wordClassDisplayed = `***${wordClassDisplayed}***`;
 
 	const word = entry.word;
 
@@ -354,7 +354,7 @@ function entryToEmbeds(entry: DictionaryEntry, locale: string | undefined, verbo
 		} else {
 			embeds.push({
 				title: localise(Commands.word.strings.definitionsForWord, locale)(word),
-				description: `${typeDisplayed}\n\n${definitionsFitted}`,
+				description: `${wordClassDisplayed}\n\n${definitionsFitted}`,
 				color: constants.colors.husky,
 			});
 		}
@@ -395,7 +395,7 @@ function entryToEmbeds(entry: DictionaryEntry, locale: string | undefined, verbo
 	}
 
 	if (!verbose) {
-		return [{ title: word, description: typeDisplayed, fields, color: constants.colors.husky }];
+		return [{ title: word, description: wordClassDisplayed, fields, color: constants.colors.husky }];
 	}
 
 	return embeds;
@@ -405,25 +405,23 @@ function tagsToString(tags: string[]): string {
 	return tags.map((tag) => code(tag)).join(' ');
 }
 
-function stringifyEntries(
-	entries: Definition[] | Expression[],
-	entryType: 'definitions' | 'expressions',
-	bulletStyle: BulletStyles,
-	depth = 0,
-): string[] {
+type EntryType = 'definitions' | 'expressions';
+
+function isDefinition(_entry: Definition | Expression, entryType: EntryType): _entry is Definition {
+	return entryType === 'definitions';
+}
+
+function stringifyEntries<
+	T extends EntryType,
+	E extends Definition[] | Expression[] = T extends 'definitions' ? Definition[] : Expression[],
+>(entries: E, entryType: T, bulletStyle: BulletStyles, depth = 0): string[] {
 	const entriesStringified = entries.map((entry) => {
 		const root = entry.tags === undefined ? entry.value : `${tagsToString(entry.tags)} ${entry.value}`;
 
 		if (
-			entryType === 'definitions' && (entry as Definition)?.value.endsWith(':') &&
-			(entry as Definition)?.definitions !== undefined
+			isDefinition(entry, entryType) && entry.value.endsWith(':') && entry.definitions !== undefined
 		) {
-			const entriesStringified = stringifyEntries(
-				(entry as Definition).definitions!,
-				'definitions',
-				bulletStyle,
-				depth + 1,
-			).join('\n');
+			const entriesStringified = stringifyEntries(entry.definitions!, 'definitions', bulletStyle, depth + 1).join('\n');
 			return `${root}\n${entriesStringified}`;
 		}
 

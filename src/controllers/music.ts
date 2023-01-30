@@ -312,12 +312,12 @@ function receiveNewListing(
 	return advanceQueueAndPlay([client, bot], guild.id, controller);
 }
 
-function isCollection(object: Song | SongStream | SongCollection | undefined): object is SongCollection {
-	return object?.type === SongListingContentTypes.Collection;
+function isCollection(object: Song | SongStream | SongCollection): object is SongCollection {
+	return object.type === SongListingContentTypes.Collection;
 }
 
-function isExternal(object: Song | SongStream | SongCollection | undefined): object is SongStream {
-	return object?.type === SongListingContentTypes.External;
+function isExternal(object: Song | SongStream | SongCollection): object is SongStream {
+	return object.type === SongListingContentTypes.External;
 }
 
 function isFirstInCollection(collection: SongCollection): boolean {
@@ -336,31 +336,31 @@ function advanceQueueAndPlay(
 	tryClearDisconnectTimeout(guildId);
 
 	if (!controller.flags.loop) {
-		if (controller.currentListing !== undefined && !isCollection(controller.currentListing?.content)) {
+		if (controller.currentListing !== undefined && !isCollection(controller.currentListing.content)) {
 			moveListingToHistory(controller, controller.currentListing);
 			controller.currentListing = undefined;
 		}
 
 		if (
 			!isQueueEmpty(controller.listingQueue) &&
-			(controller.currentListing === undefined || !isCollection(controller.currentListing?.content))
+			(controller.currentListing === undefined || !isCollection(controller.currentListing.content))
 		) {
 			controller.currentListing = controller.listingQueue.shift();
 			controller.events.emit('queueUpdate');
 		}
 	}
 
-	if (isCollection(controller.currentListing?.content)) {
-		if (isLastInCollection(controller.currentListing!.content)) {
+	if (controller.currentListing?.content !== undefined && isCollection(controller.currentListing.content)) {
+		if (isLastInCollection(controller.currentListing.content)) {
 			if (controller.flags.loop) {
-				controller.currentListing!.content.position = 0;
+				controller.currentListing.content.position = 0;
 			} else {
-				moveListingToHistory(controller, controller.currentListing!);
+				moveListingToHistory(controller, controller.currentListing);
 				controller.currentListing = controller.listingQueue.shift();
 				controller.events.emit('queueUpdate');
 			}
 		} else {
-			controller.currentListing!.content.position++;
+			controller.currentListing.content.position++;
 		}
 	}
 
@@ -404,8 +404,8 @@ async function loadSong(
 
 	const track = result.tracks[0]!;
 
-	if (isExternal(controller.currentListing?.content)) {
-		controller.currentListing!.content.title = track.info.title;
+	if (controller.currentListing?.content !== undefined && isExternal(controller.currentListing.content)) {
+		controller.currentListing.content.title = track.info.title;
 	}
 
 	controller.player.once('trackEnd', (_, __) => {
@@ -431,11 +431,11 @@ async function loadSong(
 	const embed: Embed = {
 		title: `${emoji} ${playingString} ${type}`,
 		description: localise(Commands.music.strings.playing.body, defaultLocale)(
-			isCollection(controller.currentListing?.content)
+			controller.currentListing?.content !== undefined && isCollection(controller.currentListing.content)
 				? localise(Commands.music.strings.playing.parts.displayTrack, defaultLocale)(
-					controller.currentListing!.content.position + 1,
-					controller.currentListing!.content.songs.length,
-					controller.currentListing!.content.title,
+					controller.currentListing.content.position + 1,
+					controller.currentListing.content.songs.length,
+					controller.currentListing.content.title,
 				)
 				: '',
 			song.title,
@@ -455,17 +455,17 @@ interface PositionControls {
 }
 
 function skip(controller: MusicController, skipCollection: boolean, { by, to }: Partial<PositionControls>): void {
-	if (isCollection(controller.currentListing?.content)) {
-		if (skipCollection || isLastInCollection(controller.currentListing!.content)) {
-			moveListingToHistory(controller, controller.currentListing!);
+	if (controller.currentListing?.content !== undefined && isCollection(controller.currentListing.content)) {
+		if (skipCollection || isLastInCollection(controller.currentListing.content)) {
+			moveListingToHistory(controller, controller.currentListing);
 			controller.currentListing = undefined;
 		} else {
 			if (by !== undefined) {
-				controller.currentListing!.content.position += by - 1;
+				controller.currentListing.content.position += by - 1;
 			}
 
 			if (to !== undefined) {
-				controller.currentListing!.content.position = to - 2;
+				controller.currentListing.content.position = to - 2;
 			}
 		}
 	}
@@ -493,26 +493,26 @@ function unskip(
 	unskipCollection: boolean,
 	{ by, to }: Partial<PositionControls>,
 ): void {
-	if (isCollection(controller.currentListing?.content)) {
-		if (unskipCollection || isFirstInCollection(controller.currentListing!.content)) {
-			controller.currentListing!.content.position -= 1;
+	if (controller.currentListing?.content !== undefined && isCollection(controller.currentListing.content)) {
+		if (unskipCollection || isFirstInCollection(controller.currentListing.content)) {
+			controller.currentListing.content.position -= 1;
 
-			controller.listingQueue.unshift(controller.currentListing!);
+			controller.listingQueue.unshift(controller.currentListing);
 			controller.listingQueue.unshift(controller.listingHistory.pop()!);
 			controller.events.emit('queueUpdate');
 			controller.events.emit('historyUpdate');
 			controller.currentListing = undefined;
 		} else {
 			if (by !== undefined) {
-				controller.currentListing!.content.position -= by + 1;
+				controller.currentListing.content.position -= by + 1;
 			}
 
 			if (to !== undefined) {
-				controller.currentListing!.content.position = to! - 2;
+				controller.currentListing.content.position = to! - 2;
 			}
 
 			if (by === undefined && to === undefined) {
-				controller.currentListing!.content.position -= 2;
+				controller.currentListing.content.position -= 2;
 			}
 		}
 	} else {
@@ -567,11 +567,11 @@ function replay(
 	controller.flags.loop = true;
 	controller.player.once('trackStart', () => controller.flags.loop = previousLoopState);
 
-	if (isCollection(controller.currentListing?.content)) {
+	if (controller.currentListing?.content !== undefined && isCollection(controller.currentListing.content)) {
 		if (replayCollection) {
-			controller.currentListing!.content.position = -1;
+			controller.currentListing.content.position = -1;
 		} else {
-			controller.currentListing!.content.position--;
+			controller.currentListing.content.position--;
 		}
 	}
 

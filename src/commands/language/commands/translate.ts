@@ -6,7 +6,6 @@ import {
 	Embed,
 	Interaction,
 	InteractionResponseTypes,
-	InteractionTypes,
 	sendInteractionResponse,
 } from 'discordeno';
 import {
@@ -19,7 +18,7 @@ import { resolveToSupportedLanguage } from 'logos/src/commands/language/module.t
 import { CommandBuilder } from 'logos/src/commands/command.ts';
 import { show } from 'logos/src/commands/parameters.ts';
 import { Client } from 'logos/src/client.ts';
-import { parseArguments } from 'logos/src/interactions.ts';
+import { isAutocomplete, parseArguments } from 'logos/src/interactions.ts';
 import { addParametersToURL, diagnosticMentionUser } from 'logos/src/utils.ts';
 import constants from 'logos/constants.ts';
 
@@ -103,7 +102,7 @@ async function handleTranslateText(
 		{ show: 'boolean' },
 	);
 
-	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete) {
+	if (isAutocomplete(interaction)) {
 		if (focused === undefined || focused.value === undefined) return;
 
 		const isInputtingSourceLanguage = focused.name === 'from';

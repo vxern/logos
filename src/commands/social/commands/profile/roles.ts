@@ -18,7 +18,13 @@ import {
 import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
 import { OptionBuilder } from 'logos/src/commands/command.ts';
 import roles from 'logos/src/commands/social/data/roles.ts';
-import { Role, RoleCategory, RoleCategoryTypes } from 'logos/src/commands/social/data/types.ts';
+import {
+	isCategory,
+	isCategoryGroup,
+	Role,
+	RoleCategory,
+	RoleCategoryTypes,
+} from 'logos/src/commands/social/data/types.ts';
 import { getRelevantCategories, resolveRoles } from 'logos/src/commands/social/module.ts';
 import { Client } from 'logos/src/client.ts';
 import { createInteractionCollector } from 'logos/src/interactions.ts';
@@ -163,7 +169,7 @@ function createRoleSelectionMenu(
 
 				const viewData = displayData.viewData!;
 
-				if (viewData.category.type === RoleCategoryTypes.CategoryGroup) {
+				if (isCategoryGroup(viewData.category)) {
 					data.navigationData.indexesAccessed.push(index);
 					displayData = traverseRoleTreeAndDisplay(bot, selection, displayData);
 					return;
@@ -281,7 +287,7 @@ function traverseRoleTreeAndDisplay(
 	const category = categories.at(-1)!;
 
 	let selectOptions: SelectOption[];
-	if (category.type === RoleCategoryTypes.Category) {
+	if (isCategory(category)) {
 		const menuRoles = resolveRoles(category.collection, data.browsingData.language);
 		const menuRolesResolved = menuRoles.map((role) =>
 			data.roleData.rolesByName.get(localise(role.name, defaultLocale))!
@@ -354,7 +360,7 @@ function displaySelectMenu(
 					type: MessageComponentTypes.SelectMenu,
 					customId: data.customId,
 					options: selectOptions,
-					placeholder: category.type === RoleCategoryTypes.CategoryGroup
+					placeholder: isCategoryGroup(category)
 						? localise(Commands.profile.options.roles.strings.chooseCategory, locale)
 						: localise(Commands.profile.options.roles.strings.chooseRole, locale),
 				}],

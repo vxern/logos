@@ -5,7 +5,6 @@ import {
 	getDmChannel,
 	Interaction,
 	InteractionResponseTypes,
-	InteractionTypes,
 	sendInteractionResponse,
 	sendMessage,
 } from 'discordeno';
@@ -15,7 +14,7 @@ import { CommandBuilder } from 'logos/src/commands/command.ts';
 import { user } from 'logos/src/commands/parameters.ts';
 import { log } from 'logos/src/controllers/logging/logging.ts';
 import { Client, resolveInteractionToMember } from 'logos/src/client.ts';
-import { parseArguments } from 'logos/src/interactions.ts';
+import { isAutocomplete, parseArguments } from 'logos/src/interactions.ts';
 import { guildAsAuthor } from 'logos/src/utils.ts';
 import constants from 'logos/constants.ts';
 import { mention, MentionTypes, timestamp } from 'logos/formatting.ts';
@@ -49,7 +48,7 @@ async function handlePardonUser(
 	});
 	if (member === undefined) return;
 
-	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete && focused?.name === 'user') return;
+	if (isAutocomplete(interaction) && focused?.name === 'user') return;
 
 	const subject = await client.database.adapters.users.getOrFetchOrCreate(
 		client,
@@ -64,7 +63,7 @@ async function handlePardonUser(
 
 	const relevantWarnings = Array.from(getActiveWarnings(warnings).values()).toReversed();
 
-	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete) {
+	if (isAutocomplete(interaction)) {
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -137,7 +136,7 @@ async function handlePardonUser(
 }
 
 function displayErrorOrEmptyChoices(bot: Bot, interaction: Interaction): void {
-	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete) {
+	if (isAutocomplete(interaction)) {
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
