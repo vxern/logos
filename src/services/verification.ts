@@ -466,10 +466,15 @@ type NecessaryVotes = [
 ];
 
 function getNecessaryVotes(guild: Guild, entryRequest: EntryRequest): NecessaryVotes {
-	const moderatorRoleId = guild.roles.array()
-		.find((role) => role.name === configuration.permissions.moderatorRoleName)?.id;
-	const moderatorCount = moderatorRoleId !== undefined
-		? guild.members.array().filter((member) => member.roles.includes(moderatorRoleId) && !member.user?.toggles.bot)
+	const moderatorRoleIds = guild.roles.array().filter((role) =>
+		[configuration.permissions.moderatorRoleNames.main, ...configuration.permissions.moderatorRoleNames.others]
+			.includes(role.name)
+	)
+		.map((role) => role.id);
+	const moderatorCount = moderatorRoleIds.length !== 0
+		? guild.members.array().filter((member) =>
+			moderatorRoleIds.some((roleId) => member.roles.includes(roleId)) && !member.user?.toggles.bot
+		)
 			.length
 		: configuration.services.entry.verification.defaultVotesRequired;
 

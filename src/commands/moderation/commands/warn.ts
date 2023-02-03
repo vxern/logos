@@ -48,8 +48,12 @@ async function handleWarnUser(
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (guild === undefined) return;
 
-	const moderatorRoleId = guild.roles.find((role) => role.name === configuration.permissions.moderatorRoleName)?.id;
-	if (moderatorRoleId === undefined) return;
+	const moderatorRoleIds = guild.roles.array().filter((role) =>
+		[configuration.permissions.moderatorRoleNames.main, ...configuration.permissions.moderatorRoleNames.others]
+			.includes(role.name)
+	)
+		.map((role) => role.id);
+	if (moderatorRoleIds.length === 0) return undefined;
 
 	if (reason!.length === 0) return displayError(bot, interaction);
 

@@ -87,7 +87,7 @@ function handleDisplayGuildInformation(
 							: {
 								name: `⚖️ ${moderatorsString}`,
 								value: localise(Commands.information.options.guild.strings.overseenByModerators, interaction.locale)(
-									configuration.permissions.moderatorRoleName.toLowerCase(),
+									configuration.permissions.moderatorRoleNames.main.toLowerCase(),
 								),
 								inline: false,
 							},

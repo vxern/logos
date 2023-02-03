@@ -3,7 +3,10 @@ import { Language } from 'logos/types.ts';
 
 const configuration = {
 	permissions: {
-		moderatorRoleName: 'Guide',
+		moderatorRoleNames: {
+			main: 'Guide',
+			others: ['Trainee Guide'],
+		},
 	},
 	database: {
 		cache: {
