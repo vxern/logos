@@ -238,17 +238,23 @@ class Services {
 								},
 								three: {
 									'English':
-										'If a user has already received three warnings, the fourth warning will cause the user to be timed out.' +
+										'If a user has already received three warnings, the fourth warning will cause the user to be timed out.',
+									// TODO: Add Hungarian translation.
+									'Polish':
+										'W przypadku gdy użytkownik ma już trzy ostrzeżenia, przy otrzymaniu czwartego ostrzeżenia, użytkownik dostanie timeout.',
+									'Romanian':
+										'În cazul în care un anumit utilizator are deja trei avertismente, împreună cu primirea celui de-al patrulea avertisment, utilizatorul va primi un timeout.',
+								},
+								four: {
+									'English':
 										'Consequently, the server staff will be informed of the limit being passed and, subsequently, will review the circumstances and determine an appropriate course of action.',
 									// TODO: Add Hungarian translation.
 									'Polish':
-										'W przypadku gdy użytkownik ma już trzy ostrzeżenia, przy otrzymaniu czwartego ostrzeżenia, użytkownik dostanie timeout.' +
 										'Następnie, moderatorzy serwera zostaną poinformowani o tym, iż ów limit ostrzeżeń przekroczono, po czym moderatorzy przejrzą oraz zbadają sytuację, i zdecydują, co dalej.',
 									'Romanian':
-										'În cazul în care un anumit utilizator are deja trei avertismente, împreună cu primirea celui de-al patrulea avertisment, utilizatorul va primi un timeout.' +
 										'În consecință, personalul serverului va fi informat cu privire la depășirea limitei și, ulterior, va analiza circumstanțele depășirii și va stabili un curs de acțiune adecvat.',
 								},
-								four: {
+								five: {
 									'English':
 										'In case of it having been found that a user had knowingly and constantly been breaking the server rules and/or ignoring suggestions of the staff, the user will be permanently banned from the server.',
 									// TODO: Add Hungarian translation.
