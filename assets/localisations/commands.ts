@@ -1355,16 +1355,13 @@ class Commands {
 					`This is warning no. ${warningCount} of ${warningLimit}.`,
 			},
 			// Do not localise; this is a public feedback message.
-			reachedKickStage: {
-				'English': (reason: string) =>
-					`You have been warned for: ${reason}\n\n` +
-					'You have surpassed the maximum number of warnings, and have subsequently been kicked from the server.',
+			reachedLimit: {
+				'English': (userMention: string, limit: number) => `${userMention} has reached the warning limit (${limit}).`,
 			},
 			// Do not localise; this is a public feedback message.
-			reachedBanStage: {
-				'English': (reason: string) =>
-					`You have been warned for: ${reason}\n\n` +
-					'You have surpassed the maximum number of warnings twice, and have subsequently been permanently banned from the server.',
+			passedLimit: {
+				'English': (userMention: string, limit: number, count: number) =>
+					`${userMention} has *surpassed* the warning limit (${limit}), having just received warning no. ${count}, and has subsequently been timed out for the period of a day.`,
 			},
 		},
 	});

@@ -46,6 +46,7 @@ const configuration = {
 		warn: {
 			limitUses: 3,
 			within: 2 * Periods.month,
+			timeoutDuration: Periods.day,
 		},
 		praise: {
 			limitUses: 3,
