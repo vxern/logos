@@ -60,6 +60,7 @@ function getRulesSection(guild: Guild): Embed {
 			localise(Services.notices.notices.information.rules.moderationPolicy.body.points.two, defaultLocale),
 			localise(Services.notices.notices.information.rules.moderationPolicy.body.points.three, defaultLocale),
 			localise(Services.notices.notices.information.rules.moderationPolicy.body.points.four, defaultLocale),
+			localise(Services.notices.notices.information.rules.moderationPolicy.body.points.five, defaultLocale),
 		]),
 		inline: false,
 	});
