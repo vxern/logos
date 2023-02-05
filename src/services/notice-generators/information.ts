@@ -7,7 +7,7 @@ import { defaultLocale } from 'logos/types.ts';
 import { list, mention, MentionTypes } from 'logos/formatting.ts';
 import constants from 'logos/constants.ts';
 
-const lastUpdatedAt = new Date(2022, 8, 8);
+const lastUpdatedAt = new Date(2023, 1, 5);
 
 async function generateInformationNotice(bot: Bot, guild: Guild): Promise<CreateMessage> {
 	const ruleSection = getRulesSection(guild);

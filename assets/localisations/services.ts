@@ -229,21 +229,24 @@ class Services {
 								},
 								two: {
 									'English':
-										'The above rules apply to the entirety of the server, and a breach thereof will result in a warning being issued. Warnings expire after a period of two months.',
+										'The above rules apply to the entirety of the server, and a breach thereof will result in a warning being issued. Warnings expire after a period of __two months__.',
 									// TODO: Add Hungarian translation.
 									'Polish':
-										'Reguły serwera obowiązują dla każdego użytkownika, a poważne ich naruszenie zaskutkuje ostrzeżeniem. Ostrzeżenia wygasają po upływie dwóch miesięcy.',
+										'Reguły serwera obowiązują dla każdego użytkownika, a poważne ich naruszenie zaskutkuje ostrzeżeniem. Ostrzeżenia wygasają po upływie __dwóch miesięcy__.',
 									'Romanian':
-										'Regulile serverului se aplică tuturor membri, iar o încălcare gravă a acestora va rezulta în acordarea unui avertisment. Avertismentele expiră după o perioadă de două luni.',
+										'Regulile serverului se aplică tuturor membri, iar o încălcare gravă a acestora va rezulta în acordarea unui avertisment. Avertismentele expiră după o __perioadă de două luni__.',
 								},
 								three: {
 									'English':
-										'If a user has already received three warnings, the fourth warning will warrant a kick from the server.',
+										'If a user has already received three warnings, the fourth warning will cause the user to be timed out.' +
+										'Consequently, the server staff will be informed of the limit being passed and, subsequently, will review the circumstances and determine an appropriate course of action.',
 									// TODO: Add Hungarian translation.
 									'Polish':
-										'W przypadku gdy użytkownik ma już trzy ostrzeżenia, przy otrzymaniu czwartego ostrzeżenia, użytkownik zostanie automatycznie usunięty z serwera.',
+										'W przypadku gdy użytkownik ma już trzy ostrzeżenia, przy otrzymaniu czwartego ostrzeżenia, użytkownik dostanie timeout.' +
+										'Następnie, moderatorzy serwera zostaną poinformowani o tym, iż ów limit ostrzeżeń przekroczono, po czym moderatorzy przejrzą oraz zbadają sytuację, i zdecydują, co dalej.',
 									'Romanian':
-										'În cazul în care un anumit utilizator are deja trei avertismente, împreună cu primirea celui de-al patrulea avertisment, utilizatorul va fi scos de pe server (kicked).',
+										'În cazul în care un anumit utilizator are deja trei avertismente, împreună cu primirea celui de-al patrulea avertisment, utilizatorul va primi un timeout.' +
+										'În consecință, personalul serverului va fi informat cu privire la depășirea limitei și, ulterior, va analiza circumstanțele depășirii și va stabili un curs de acțiune adecvat.',
 								},
 								four: {
 									'English':

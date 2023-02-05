@@ -1,12 +1,10 @@
 import {
 	ApplicationCommandFlags,
-	banMember,
 	Bot,
-	getDmChannel,
+	editMember,
 	Interaction,
 	InteractionResponseTypes,
 	InteractionTypes,
-	kickMember,
 	sendInteractionResponse,
 	sendMessage,
 } from 'discordeno';
@@ -17,7 +15,7 @@ import { getActiveWarnings } from 'logos/src/commands/moderation/module.ts';
 import { log } from 'logos/src/controllers/logging/logging.ts';
 import { Client, resolveInteractionToMember } from 'logos/src/client.ts';
 import { parseArguments } from 'logos/src/interactions.ts';
-import { guildAsAuthor } from 'logos/src/utils.ts';
+import { diagnosticMentionUser, getTextChannel } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import constants from 'logos/constants.ts';
 import { mention, MentionTypes } from 'logos/formatting.ts';
@@ -69,7 +67,7 @@ async function handleWarnUser(
 
 	if (author === undefined || recipient === undefined) return displayError(bot, interaction);
 
-	const [warnings, document, dmChannel] = await Promise.all([
+	const [warnings, document] = await Promise.all([
 		client.database.adapters.warnings.getOrFetch(client, 'recipient', recipient.ref),
 		client.database.adapters.warnings.create(client, {
 			createdAt: Date.now(),
@@ -77,7 +75,6 @@ async function handleWarnUser(
 			recipient: recipient.ref,
 			reason: reason!,
 		}),
-		getDmChannel(bot, member.id).catch(() => undefined),
 	]);
 
 	if (document !== undefined) {
@@ -102,59 +99,44 @@ async function handleWarnUser(
 		},
 	});
 
-	const reachedKickStage = relevantWarnings.size >= configuration.commands.warn.limitUses + 1;
-	const reachedBanStage = relevantWarnings.size >= configuration.commands.warn.limitUses + 2;
+	const moderationChannelId = getTextChannel(guild, configuration.guilds.channels.moderation)?.id;
+	if (moderationChannelId === undefined) return;
 
-	if (dmChannel !== undefined) {
-		sendMessage(bot, dmChannel.id, {
-			embeds: [
-				{
-					author: guildAsAuthor(bot, guild),
-					...(
-						reachedKickStage
-							? (
-								reachedBanStage
-									? {
-										description: localise(Commands.warn.strings.reachedBanStage, defaultLocale)(reason!),
-										color: constants.colors.darkRed,
-									}
-									: {
-										description: localise(Commands.warn.strings.reachedKickStage, defaultLocale)(reason!),
-										color: constants.colors.red,
-									}
-							)
-							: {
-								description: localise(Commands.warn.strings.warnedDirect, defaultLocale)(
-									reason!,
-									relevantWarnings.size,
-									configuration.commands.warn.limitUses,
-								),
-								color: constants.colors.dullYellow,
-							}
-					),
-				},
-			],
+	const passedLimit = relevantWarnings.size > configuration.commands.warn.limitUses;
+	if (passedLimit) {
+		const passedLimitMessage = localise(Commands.warn.strings.passedLimit, defaultLocale)(
+			diagnosticMentionUser(member.user!),
+			configuration.commands.warn.limitUses,
+			relevantWarnings.size,
+		);
+
+		try {
+			editMember(bot, guild.id, member.id, {
+				communicationDisabledUntil: Date.now() + configuration.commands.warn.timeoutDuration,
+			});
+		} catch {}
+
+		return void sendMessage(bot, moderationChannelId, {
+			embeds: [{
+				description: `❗ ${passedLimitMessage}`,
+				color: constants.colors.red,
+			}],
 		});
 	}
 
-	if (reachedBanStage) {
-		return banMember(
-			bot,
-			interaction.guildId!,
-			member.id,
-			{
-				reason: `Banned due to having received too many warnings (${relevantWarnings.size}).`,
-			},
+	const reachedLimit = relevantWarnings.size === configuration.commands.warn.limitUses;
+	if (reachedLimit) {
+		const reachedLimitMessage = localise(Commands.warn.strings.reachedLimit, defaultLocale)(
+			diagnosticMentionUser(member.user!),
+			configuration.commands.warn.limitUses,
 		);
-	}
 
-	if (reachedKickStage) {
-		return kickMember(
-			bot,
-			interaction.guildId!,
-			member.id,
-			`Kicked due to having received too many warnings (${relevantWarnings.size}).`,
-		);
+		return void sendMessage(bot, moderationChannelId, {
+			embeds: [{
+				description: `⚠️ ${reachedLimitMessage}`,
+				color: constants.colors.yellow,
+			}],
+		});
 	}
 }
 
