@@ -46,6 +46,7 @@ function handleDisplayModerationPolicy([client, bot]: [Client, Bot], interaction
 					localise(Services.notices.notices.information.rules.moderationPolicy.body.points.two, interaction.locale),
 					localise(Services.notices.notices.information.rules.moderationPolicy.body.points.three, interaction.locale),
 					localise(Services.notices.notices.information.rules.moderationPolicy.body.points.four, interaction.locale),
+					localise(Services.notices.notices.information.rules.moderationPolicy.body.points.five, interaction.locale),
 				], BulletStyles.Arrow),
 			}],
 		},
