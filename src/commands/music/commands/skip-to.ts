@@ -29,14 +29,6 @@ async function handleSkipToTimestamp(
 	const controller = client.features.music.controllers.get(interaction.guildId!);
 	if (controller === undefined) return;
 
-	const isVoiceStateVerified = verifyCanManipulatePlayback(
-		bot,
-		interaction,
-		controller,
-		getVoiceState(client, interaction.guildId!, interaction.user.id),
-	);
-	if (!isVoiceStateVerified) return;
-
 	const [{ timestamp: timestampExpression }, focused] = parseArguments(interaction.data?.options, {});
 
 	if (focused !== undefined) {
@@ -54,6 +46,14 @@ async function handleSkipToTimestamp(
 			},
 		);
 	}
+
+	const isVoiceStateVerified = verifyCanManipulatePlayback(
+		bot,
+		interaction,
+		controller,
+		getVoiceState(client, interaction.guildId!, interaction.user.id),
+	);
+	if (!isVoiceStateVerified) return;
 
 	const playingSince = controller.player.playingSince!;
 
