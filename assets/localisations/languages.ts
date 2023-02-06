@@ -122,6 +122,12 @@ const localisationsByLanguage = inferLanguages({
 		'Polish': 'Japoński',
 		'Romanian': 'Japoneză',
 	},
+	'Korean': {
+		'English': 'Korean',
+		'Hungarian': 'Koreai',
+		'Polish': 'Korejski',
+		'Romanian': 'Coreeană',
+	},
 	'Latvian': {
 		'English': 'Latvian',
 		'Hungarian': 'Lett',
@@ -133,6 +139,12 @@ const localisationsByLanguage = inferLanguages({
 		'Hungarian': 'Litván',
 		'Polish': 'Litewski',
 		'Romanian': 'Lituaniană',
+	},
+	'Norwegian (Bokmål)': {
+		'English': 'Norwegian',
+		'Hungarian': 'Norvég',
+		'Polish': 'Norweski',
+		'Romanian': 'Norvegiană',
 	},
 	'Polish': {
 		'English': 'Polish',
