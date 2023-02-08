@@ -38,11 +38,13 @@ function getRulesSection(guild: Guild): Embed {
 		});
 	}
 
-	const moderatorRoleId = guild.roles.array().find((role) => role.name === configuration.permissions.moderatorRoleName)
+	const moderatorRoleId = guild.roles.array().find((role) =>
+		role.name === configuration.permissions.moderatorRoleNames.main
+	)
 		?.id;
 	const moderatorRoleMention = moderatorRoleId
 		? mention(moderatorRoleId, MentionTypes.Role)
-		: configuration.permissions.moderatorRoleName.toLowerCase();
+		: configuration.permissions.moderatorRoleNames.main.toLowerCase();
 
 	const moderationPolicyString = localise(
 		Services.notices.notices.information.rules.moderationPolicy.header,

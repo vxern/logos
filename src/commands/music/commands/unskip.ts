@@ -79,7 +79,10 @@ function handleUnskipAction([client, bot]: [Client, Bot], interaction: Interacti
 		);
 	}
 
-	if (collection !== undefined && !isCollection(controller.currentListing?.content)) {
+	if (
+		collection !== undefined &&
+		(controller.currentListing?.content === undefined || !isCollection(controller.currentListing?.content))
+	) {
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -158,7 +161,10 @@ function handleUnskipAction([client, bot]: [Client, Bot], interaction: Interacti
 	} else {
 		if (by !== undefined) {
 			let listingsToUnskip!: number;
-			if (isCollection(controller.currentListing?.content) && collection === undefined) {
+			if (
+				controller.currentListing?.content !== undefined && isCollection(controller.currentListing.content) &&
+				collection === undefined
+			) {
 				listingsToUnskip = Math.min(by, controller.currentListing!.content.position);
 			} else {
 				listingsToUnskip = Math.min(by, controller.listingHistory.length);
@@ -166,7 +172,10 @@ function handleUnskipAction([client, bot]: [Client, Bot], interaction: Interacti
 			unskip([client, bot], interaction.guildId!, controller, isUnskippingCollection, { by: listingsToUnskip });
 		} else if (to !== undefined) {
 			let listingToSkipTo!: number;
-			if (isCollection(controller.currentListing?.content) && collection === undefined) {
+			if (
+				controller.currentListing?.content !== undefined && isCollection(controller.currentListing.content) &&
+				collection === undefined
+			) {
 				listingToSkipTo = Math.max(to, 1);
 			} else {
 				listingToSkipTo = Math.min(to, controller.listingHistory.length);

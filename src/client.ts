@@ -597,9 +597,12 @@ function resolveIdentifierToMembers(
 	const guild = client.cache.guilds.get(guildId);
 	if (guild === undefined) return undefined;
 
-	const moderatorRoleId = guild.roles.array().find((role) => role.name === configuration.permissions.moderatorRoleName)
-		?.id;
-	if (moderatorRoleId === undefined) return undefined;
+	const moderatorRoleIds = guild.roles.array().filter((role) =>
+		[configuration.permissions.moderatorRoleNames.main, ...configuration.permissions.moderatorRoleNames.others]
+			.includes(role.name)
+	)
+		.map((role) => role.id);
+	if (moderatorRoleIds.length === 0) return undefined;
 
 	const id = extractIDFromIdentifier(identifier);
 	if (id !== undefined) {
@@ -607,7 +610,7 @@ function resolveIdentifierToMembers(
 		if (member === undefined) return undefined;
 		if (options.restrictToSelf && member.id !== asker.id) return undefined;
 		if (options.restrictToNonSelf && member.id === asker.id) return undefined;
-		if (options.excludeModerators && member.roles.includes(moderatorRoleId)) {
+		if (options.excludeModerators && moderatorRoleIds.some((roleId) => member.roles.includes(roleId))) {
 			return undefined;
 		}
 
@@ -617,7 +620,7 @@ function resolveIdentifierToMembers(
 	const cachedMembers = options.restrictToSelf ? [asker] : guild.members.array();
 	const members = cachedMembers.filter((member: Member) =>
 		(!options.restrictToNonSelf ? true : member.user?.id !== asker.user?.id) &&
-		(!options.excludeModerators ? true : !member.roles.includes(moderatorRoleId))
+		(!options.excludeModerators ? true : !moderatorRoleIds.some((roleId) => member.roles.includes(roleId)))
 	);
 
 	if (userTagPattern.test(identifier)) {
