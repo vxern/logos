@@ -103,7 +103,7 @@ async function handleSkipToTimestamp(
 			type: InteractionResponseTypes.ChannelMessageWithSource,
 			data: {
 				embeds: [{
-					title: `🔍 ${skippedToString}`,
+					title: `${constants.symbols.music.skippedTo} ${skippedToString}`,
 					description: localise(Commands.music.options.skipTo.strings.skippedTo.body, defaultLocale),
 					color: constants.colors.blue,
 				}],

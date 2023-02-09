@@ -58,7 +58,7 @@ async function handleSelectLanguageProficiency(
 							style: ButtonStyles.Secondary,
 							label: localise(Services.entry.iUnderstand, interaction.locale),
 							customId: `${constants.staticComponentIds.requestedVerification}|${requestedRole.id}`,
-							emoji: { name: '✅' },
+							emoji: { name: constants.symbols.understood },
 						}],
 					}],
 				},

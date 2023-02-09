@@ -55,7 +55,7 @@ function handleSetVolume(
 			type: InteractionResponseTypes.ChannelMessageWithSource,
 			data: {
 				embeds: [{
-					title: `🔊 ${volumeString}`,
+					title: `${constants.symbols.music.volume} ${volumeString}`,
 					description: localise(Commands.music.options.volume.options.set.strings.volumeSet.body, interaction.locale)(
 						volume,
 					),

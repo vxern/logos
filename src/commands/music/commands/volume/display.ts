@@ -43,7 +43,7 @@ function handleDisplayVolume(
 			data: {
 				flags: !show ? ApplicationCommandFlags.Ephemeral : undefined,
 				embeds: [{
-					title: `🔊 ${volumeString}`,
+					title: `${constants.symbols.music.volume} ${volumeString}`,
 					description: localise(Commands.music.options.volume.options.display.strings.volume.body, locale)(
 						controller.player.volume,
 					),

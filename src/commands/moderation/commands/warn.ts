@@ -117,7 +117,7 @@ async function handleWarnUser(
 
 		return void sendMessage(bot, moderationChannelId, {
 			embeds: [{
-				description: `❗ ${passedLimitMessage}`,
+				description: `${constants.symbols.indicators.exclamation} ${passedLimitMessage}`,
 				color: constants.colors.red,
 			}],
 		});
@@ -132,7 +132,7 @@ async function handleWarnUser(
 
 		return void sendMessage(bot, moderationChannelId, {
 			embeds: [{
-				description: `⚠️ ${reachedLimitMessage}`,
+				description: `${constants.symbols.indicators.warning} ${reachedLimitMessage}`,
 				color: constants.colors.yellow,
 			}],
 		});

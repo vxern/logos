@@ -9,6 +9,7 @@ import {
 	MentionTypes,
 	timestamp,
 } from 'logos/formatting.ts';
+import constants from '../constants.ts';
 
 Deno.test('formatting', async (test) => {
 	await test.step('capitalisation', async (test) => {
@@ -47,9 +48,9 @@ Deno.test('formatting', async (test) => {
 			const result = list(['one', 'two', 'three']);
 			assertEquals(
 				result,
-				`➜ one
-➜ two
-➜ three`,
+				`${constants.symbols.bullets.arrow} one
+${constants.symbols.bullets.arrow} two
+${constants.symbols.bullets.arrow} three`,
 			);
 		});
 
@@ -57,9 +58,9 @@ Deno.test('formatting', async (test) => {
 			const result = list(['one', 'two', 'three'], BulletStyles.Diamond);
 			assertEquals(
 				result,
-				`♦️ one
-♦️ two
-♦️ three`,
+				`${constants.symbols.bullets.diamond} one
+${constants.symbols.bullets.diamond} two
+${constants.symbols.bullets.diamond} three`,
 			);
 		});
 	});

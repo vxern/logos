@@ -57,13 +57,11 @@ interface SuggestionPromptMetadata {
 	suggestionReferenceId: string;
 }
 
-const metadataSeparator = '・';
-
 function extractMetadata(prompt: Message): SuggestionPromptMetadata | undefined {
 	const metadata = prompt.embeds.at(0)?.footer?.text;
 	if (metadata === undefined) return undefined;
 
-	const [authorId, suggestionReferenceId] = metadata.split(metadataSeparator);
+	const [authorId, suggestionReferenceId] = metadata.split(constants.symbols.meta.metadataSeparator);
 	if (authorId === undefined || suggestionReferenceId === undefined) return undefined;
 
 	return { authorId: BigInt(authorId), suggestionReferenceId };
@@ -351,7 +349,7 @@ function getSuggestionPrompt(
 					value: suggestionDocument.data.suggestion,
 				},
 			],
-			footer: { text: `${author.id}${metadataSeparator}${suggestionReferenceId}` },
+			footer: { text: `${author.id}${constants.symbols.meta.metadataSeparator}${suggestionReferenceId}` },
 		}],
 		components: [{
 			type: MessageComponentTypes.ActionRow,

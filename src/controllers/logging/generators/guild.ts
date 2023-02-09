@@ -82,7 +82,7 @@ type GuildEvents = {
 /** Contains the message generators for (custom) guild events. */
 const generators: Required<MessageGenerators<GuildEvents>> = {
 	entryRequestSubmit: {
-		title: 'ℹ️ Entry request submitted',
+		title: `${constants.symbols.events.entryRequest.submitted} Entry request submitted`,
 		message: (client, user, entryRequest) => {
 			const guild = client.cache.guilds.get(BigInt(entryRequest.guild));
 			if (guild === undefined) return;
@@ -110,7 +110,7 @@ ${codeMultiline(entryRequest.answers.where_found!)}
 		color: constants.colors.lightGreen,
 	},
 	entryRequestAccept: {
-		title: '✔️ Entry request accepted',
+		title: `${constants.symbols.events.entryRequest.accepted} Entry request accepted`,
 		message: (client, user, by) => {
 			const byUser = client.cache.users.get(by.id);
 			if (byUser === undefined) return;
@@ -121,7 +121,7 @@ ${codeMultiline(entryRequest.answers.where_found!)}
 		color: constants.colors.lightGreen,
 	},
 	entryRequestReject: {
-		title: '❌ Entry request rejected',
+		title: `${constants.symbols.events.entryRequest.rejected} Entry request rejected`,
 		message: (client, user, by) => {
 			const byUser = client.cache.users.get(by.id);
 			if (byUser === undefined) return;
@@ -132,7 +132,7 @@ ${codeMultiline(entryRequest.answers.where_found!)}
 		color: constants.colors.red,
 	},
 	articleCreate: {
-		title: '📜 Article created',
+		title: `${constants.symbols.events.article.created} Article created`,
 		message: (client, article, by) => {
 			const user = client.cache.users.get(by.id);
 			if (user === undefined) return;
@@ -147,7 +147,7 @@ ${trim(article.content.body, 300)}`;
 		color: constants.colors.lightGreen,
 	},
 	articleCreateAccept: {
-		title: '✔️ Article verified',
+		title: `${constants.symbols.events.article.accepted} Article verified`,
 		message: (client, article, by) => {
 			const user = client.cache.users.get(by.id);
 			if (user === undefined) return;
@@ -162,7 +162,7 @@ ${trim(article.content.body, 300)}`;
 		color: constants.colors.lightGreen,
 	},
 	articleCreateReject: {
-		title: '❌ Article rejected',
+		title: `${constants.symbols.events.article.rejected} Article rejected`,
 		message: (client, article, by) => {
 			const user = client.cache.users.get(by.id);
 			if (user === undefined) return;
@@ -177,7 +177,7 @@ ${trim(article.content.body, 300)}`;
 		color: constants.colors.red,
 	},
 	articleEdit: {
-		title: '✍️ Article edited',
+		title: `${constants.symbols.events.article.edited} Article edited`,
 		message: (client, article, change, by) => {
 			const user = client.cache.users.get(by.id);
 			if (user === undefined) return;
@@ -192,7 +192,7 @@ ${trim(change.content.body, 300)}`;
 		color: constants.colors.blue,
 	},
 	articleEditAccept: {
-		title: '✔️ Article edit accepted',
+		title: `${constants.symbols.events.article.editAccepted} Article edit accepted`,
 		message: (client, _, change, by) => {
 			const user = client.cache.users.get(by.id);
 			if (user === undefined) return;
@@ -207,7 +207,7 @@ ${trim(change.content.body, 300)}`;
 		color: constants.colors.lightGreen,
 	},
 	articleEditReject: {
-		title: '❌ Article edit rejected',
+		title: `${constants.symbols.events.article.editRejected} Article edit rejected`,
 		message: (client, _, change, by) => {
 			const user = client.cache.users.get(by.id);
 			if (user === undefined) return;
@@ -222,7 +222,7 @@ ${trim(change.content.body, 300)}`;
 		color: constants.colors.red,
 	},
 	articleLock: {
-		title: '🔐 Article locked',
+		title: `${constants.symbols.events.article.locked} Article locked`,
 		message: (client, article, by) => {
 			const user = client.cache.users.get(by.id);
 			if (user === undefined) return;
@@ -233,7 +233,7 @@ ${trim(change.content.body, 300)}`;
 		color: constants.colors.dullYellow,
 	},
 	moderatorInquestLaunch: {
-		title: '❗ Inquest launched',
+		title: `${constants.symbols.events.inquest.launched} Inquest launched`,
 		message: (client, member, by) => {
 			const memberUser = client.cache.users.get(member.id);
 			if (memberUser === undefined) return;
@@ -244,7 +244,7 @@ ${trim(change.content.body, 300)}`;
 		color: constants.colors.darkRed,
 	},
 	moderatorInquestPass: {
-		title: '✔️ Inquest resulted in acquittance',
+		title: `${constants.symbols.events.inquest.passed} Inquest resulted in acquittance`,
 		message: (client, member, by) => {
 			const memberUser = client.cache.users.get(member.id);
 			if (memberUser === undefined) return;
@@ -257,7 +257,7 @@ ${trim(change.content.body, 300)}`;
 		color: constants.colors.lightGreen,
 	},
 	moderatorInquestFail: {
-		title: '❌ Inquest resulted in failure',
+		title: `${constants.symbols.events.inquest.failed} Inquest resulted in failure`,
 		message: (client, member, by) => {
 			const memberUser = client.cache.users.get(member.id);
 			if (memberUser === undefined) return;
@@ -270,7 +270,7 @@ ${trim(change.content.body, 300)}`;
 		color: constants.colors.red,
 	},
 	memberWarnAdd: {
-		title: '⚠️ Member warned',
+		title: `${constants.symbols.events.warned} Member warned`,
 		message: (client, member, warning, by) => {
 			const memberUser = client.cache.users.get(member.id);
 			if (memberUser === undefined) return;
@@ -283,7 +283,7 @@ ${trim(change.content.body, 300)}`;
 		color: constants.colors.dullYellow,
 	},
 	memberWarnRemove: {
-		title: '😇 Member pardoned',
+		title: `${constants.symbols.events.pardoned} Member pardoned`,
 		message: (client, member, warning, by) => {
 			const memberUser = client.cache.users.get(member.id);
 			if (memberUser === undefined) return;
@@ -296,7 +296,7 @@ ${trim(change.content.body, 300)}`;
 		color: constants.colors.blue,
 	},
 	memberTimeoutAdd: {
-		title: '⏳ Member timed out',
+		title: `${constants.symbols.events.timeout.added} Member timed out`,
 		message: (client, member, until, reason, by) => {
 			const memberUser = client.cache.users.get(member.id);
 			if (memberUser === undefined) return;
@@ -309,7 +309,7 @@ ${trim(change.content.body, 300)}`;
 		color: constants.colors.dullYellow,
 	},
 	memberTimeoutRemove: {
-		title: `😇 Member's timeout cleared`,
+		title: `${constants.symbols.events.timeout.removed} Member's timeout cleared`,
 		message: (client, member, by) => {
 			const memberUser = client.cache.users.get(member.id);
 			if (memberUser === undefined) return;
@@ -320,7 +320,7 @@ ${trim(change.content.body, 300)}`;
 		color: constants.colors.blue,
 	},
 	praiseAdd: {
-		title: `🙏 Member praised`,
+		title: `${constants.symbols.events.praised} Member praised`,
 		message: (client, member, praise, by) => {
 			const memberUser = client.cache.users.get(member.id);
 			if (memberUser === undefined) return;
@@ -335,7 +335,7 @@ ${trim(change.content.body, 300)}`;
 		color: constants.colors.lightGreen,
 	},
 	suggestionSend: {
-		title: `🌿 Suggestion made`,
+		title: `${constants.symbols.events.suggestion} Suggestion made`,
 		message: (client, member, suggestion) => {
 			const memberUser = client.cache.users.get(member.id);
 			if (memberUser === undefined) return;
@@ -347,7 +347,7 @@ ${trim(change.content.body, 300)}`;
 		color: constants.colors.darkGreen,
 	},
 	reportSubmit: {
-		title: `💢 Report submitted`,
+		title: `${constants.symbols.events.report} Report submitted`,
 		message: (client, author, recipients, report) => {
 			const authorUser = client.cache.users.get(author.id);
 			if (authorUser === undefined) return;

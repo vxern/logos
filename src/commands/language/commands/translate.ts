@@ -229,7 +229,7 @@ async function handleTranslateText(
 	}
 
 	// Ensures that an empty translation string does not result in embed failure.
-	const translatedText = translation.text.trim().length !== 0 ? translation.text : '⠀';
+	const translatedText = translation.text.trim().length !== 0 ? translation.text : constants.symbols.meta.whitespace;
 
 	const sourceLanguageName = localise(getLocalisationsForLanguage(sourceLanguage.name), interaction.locale);
 	const targetLanguageName = localise(getLocalisationsForLanguage(targetLanguage.name), interaction.locale);
@@ -251,7 +251,7 @@ async function handleTranslateText(
 				value: translatedText,
 				inline: false,
 			}],
-			footer: { text: `${sourceLanguageName} ➜ ${targetLanguageName}` },
+			footer: { text: `${sourceLanguageName} ${constants.symbols.indicators.arrowRight} ${targetLanguageName}` },
 		}];
 	} else {
 		embeds = [{
@@ -262,7 +262,7 @@ async function handleTranslateText(
 			color: constants.colors.blue,
 			title: localise(Commands.translate.strings.translation, interaction.locale),
 			description: translatedText,
-			footer: { text: `${sourceLanguageName} ➜ ${targetLanguageName}` },
+			footer: { text: `${sourceLanguageName} ${constants.symbols.indicators.arrowRight} ${targetLanguageName}` },
 		}];
 	}
 

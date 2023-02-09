@@ -177,7 +177,7 @@ class Roles {
 							'Romanian': 'Sunt o persoană transgen.',
 						},
 					},
-					nonBinary: {
+					nonbinary: {
 						name: {
 							'English': 'Non-binary',
 							'Hungarian': 'Nembináris',

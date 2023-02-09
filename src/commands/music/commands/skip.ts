@@ -163,7 +163,7 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 			type: InteractionResponseTypes.ChannelMessageWithSource,
 			data: {
 				embeds: [{
-					title: `⏭️ ${messageString}`,
+					title: `${constants.symbols.music.skipped} ${messageString}`,
 					description: localise(messageLocalisations.body, defaultLocale),
 					color: constants.colors.invisible,
 				}],

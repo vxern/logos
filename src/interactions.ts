@@ -236,7 +236,7 @@ function generateButtons(customId: string, isFirst: boolean, isLast: boolean): M
 			type: MessageComponentTypes.Button,
 			customId: `${customId}|PREVIOUS`,
 			style: ButtonStyles.Secondary,
-			label: '«',
+			label: constants.symbols.interactions.menu.controls.back,
 		});
 	}
 
@@ -245,7 +245,7 @@ function generateButtons(customId: string, isFirst: boolean, isLast: boolean): M
 			type: MessageComponentTypes.Button,
 			customId: `${customId}|NEXT`,
 			style: ButtonStyles.Secondary,
-			label: '»',
+			label: constants.symbols.interactions.menu.controls.forward,
 		});
 	}
 

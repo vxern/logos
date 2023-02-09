@@ -198,7 +198,7 @@ function generateEmbed(
 						type: InteractionResponseTypes.ChannelMessageWithSource,
 						data: {
 							embeds: [{
-								title: `❌ ${removedString}`,
+								title: `${constants.symbols.music.removed} ${removedString}`,
 								description: localise(Commands.music.options.remove.strings.removed.body, defaultLocale)(
 									songListing.content.title,
 									mention(selection.user.id, MentionTypes.User),
@@ -264,7 +264,7 @@ function generateButtons(buttonsCustomId: string, isFirst: boolean, isLast: bool
 			type: MessageComponentTypes.Button,
 			customId: `${buttonsCustomId}|PREVIOUS`,
 			style: ButtonStyles.Secondary,
-			label: '«',
+			label: constants.symbols.interactions.menu.controls.back,
 		});
 	}
 
@@ -273,7 +273,7 @@ function generateButtons(buttonsCustomId: string, isFirst: boolean, isLast: bool
 			type: MessageComponentTypes.Button,
 			customId: `${buttonsCustomId}|NEXT`,
 			style: ButtonStyles.Secondary,
-			label: '»',
+			label: constants.symbols.interactions.menu.controls.forward,
 		});
 	}
 

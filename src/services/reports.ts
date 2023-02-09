@@ -58,13 +58,11 @@ interface ReportPromptMetadata {
 	reportReferenceId: string;
 }
 
-const metadataSeparator = '・';
-
 function extractMetadata(prompt: Message): ReportPromptMetadata | undefined {
 	const metadata = prompt.embeds.at(0)?.footer?.text;
 	if (metadata === undefined) return undefined;
 
-	const [authorId, reportReferenceId] = metadata.split(metadataSeparator);
+	const [authorId, reportReferenceId] = metadata.split(constants.symbols.meta.metadataSeparator);
 	if (authorId === undefined || reportReferenceId === undefined) return undefined;
 
 	return { authorId: BigInt(authorId), reportReferenceId: reportReferenceId };
@@ -407,7 +405,7 @@ function getReportPrompt(
 						}]
 						: []),
 				],
-				footer: { text: `${author.id}${metadataSeparator}${reportReferenceId}` },
+				footer: { text: `${author.id}${constants.symbols.meta.metadataSeparator}${reportReferenceId}` },
 			},
 			...recipientAndWarningsTuples.map(([recipient, warnings]) => ({
 				...generateWarningsPage(warnings, false, defaultLocale),

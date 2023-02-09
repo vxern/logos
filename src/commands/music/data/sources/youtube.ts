@@ -103,7 +103,7 @@ async function search(
 						options: items.map<SelectOption>(
 							(result, index) => ({
 								emoji: {
-									name: isVideo(result) ? constants.emojis.music.song : constants.emojis.music.collection,
+									name: isVideo(result) ? constants.symbols.music.song : constants.symbols.music.collection,
 								},
 								label: trim(result.title!, 100),
 								value: index.toString(),

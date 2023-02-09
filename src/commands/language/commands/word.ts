@@ -214,7 +214,7 @@ function generateButtons(
 
 			paginationControls.push([{
 				type: MessageComponentTypes.Button,
-				label: '«',
+				label: constants.symbols.interactions.menu.controls.back,
 				customId: previousPageButtonId,
 				style: ButtonStyles.Secondary,
 				disabled: isFirst,
@@ -225,7 +225,7 @@ function generateButtons(
 				customId: 'none',
 			}, {
 				type: MessageComponentTypes.Button,
-				label: '»',
+				label: constants.symbols.interactions.menu.controls.forward,
 				customId: nextPageButtonId,
 				style: ButtonStyles.Secondary,
 				disabled: isLast,
@@ -428,7 +428,9 @@ function stringifyEntries<
 		return root;
 	});
 	const entriesEnlisted = list(entriesStringified, bulletStyle);
-	const entriesDelisted = entriesEnlisted.split('\n').map((entry) => `${'⠀'.repeat(depth * 2)}${entry}`);
+	const entriesDelisted = entriesEnlisted.split('\n').map((entry) =>
+		`${constants.symbols.meta.whitespace.repeat(depth * 2)}${entry}`
+	);
 
 	return entriesDelisted;
 }

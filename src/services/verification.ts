@@ -68,13 +68,11 @@ interface VerificationPromptMetadata {
 	submitterId: bigint;
 }
 
-const metadataSeparator = '・';
-
 function extractMetadata(prompt: Message): VerificationPromptMetadata | undefined {
 	const metadata = prompt.embeds.at(0)?.footer?.text;
 	if (metadata === undefined) return undefined;
 
-	const [userId] = metadata.split(metadataSeparator);
+	const [userId] = metadata.split(constants.symbols.meta.metadataSeparator);
 	if (userId === undefined) return undefined;
 
 	return { submitterId: BigInt(userId) };
@@ -743,7 +741,7 @@ async function handleVote(
 				embeds: [
 					{
 						author: guildAsAuthor(bot, guild),
-						description: `🥳 ${entryRequestAcceptedString}`,
+						description: `${constants.symbols.responses.celebration} ${entryRequestAcceptedString}`,
 						color: constants.colors.lightGreen,
 					},
 				],
@@ -765,7 +763,7 @@ async function handleVote(
 				embeds: [
 					{
 						author: guildAsAuthor(bot, guild),
-						description: `😕 ${entryRequestRejectedString}`,
+						description: `${constants.symbols.responses.upset} ${entryRequestRejectedString}`,
 						color: constants.colors.lightGreen,
 					},
 				],

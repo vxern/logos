@@ -80,7 +80,7 @@ function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], interaction
 		return void paginate([client, bot], interaction, {
 			elements: chunk(collection.songs, configuration.music.limits.songs.page),
 			embed: {
-				title: `⬇️ ${nowPlayingString}`,
+				title: `${constants.symbols.music.nowPlaying} ${nowPlayingString}`,
 				color: constants.colors.blue,
 			},
 			view: {
@@ -122,7 +122,7 @@ function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], interaction
 			data: {
 				flags: !show ? ApplicationCommandFlags.Ephemeral : undefined,
 				embeds: [{
-					title: `⬇️ ${nowPlayingString}`,
+					title: `${constants.symbols.music.nowPlaying} ${nowPlayingString}`,
 					fields: [
 						...isCollection(currentListing?.content)
 							? [{

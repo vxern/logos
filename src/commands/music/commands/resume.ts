@@ -85,7 +85,7 @@ function handleResumePlayback([client, bot]: [Client, Bot], interaction: Interac
 			type: InteractionResponseTypes.ChannelMessageWithSource,
 			data: {
 				embeds: [{
-					title: `▶️ ${resumedString}`,
+					title: `${constants.symbols.music.resumed} ${resumedString}`,
 					description: localise(Commands.music.options.resume.strings.resumed.body, defaultLocale),
 					color: constants.colors.invisible,
 				}],

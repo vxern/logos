@@ -6,6 +6,7 @@ import { OptionBuilder } from 'logos/src/commands/command.ts';
 import { show } from 'logos/src/commands/parameters.ts';
 import { Client } from 'logos/src/client.ts';
 import { parseArguments } from 'logos/src/interactions.ts';
+import constants from 'logos/constants.ts';
 import { defaultLocale } from 'logos/types.ts';
 
 const command: OptionBuilder = {
@@ -30,7 +31,7 @@ function handleDisplayPlaybackHistory([client, bot]: [Client, Bot], interaction:
 	return displayListings(
 		[client, bot],
 		interaction,
-		{ title: `📋 ${titleString}`, songListings: listingHistory },
+		{ title: `${constants.symbols.music.list} ${titleString}`, songListings: listingHistory },
 		show ?? false,
 		locale,
 	);

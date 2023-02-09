@@ -8,6 +8,7 @@ import {
 } from 'logos/src/commands/language/data/types.ts';
 import { getWordClass } from 'logos/src/commands/language/module.ts';
 import { chunk } from 'logos/src/utils.ts';
+import constants from 'logos/constants.ts';
 import { Language } from 'logos/types.ts';
 
 const supportedTypesForInflection = [WordClasses.Noun, WordClasses.Verb, WordClasses.Adjective, WordClasses.Determiner];
@@ -99,7 +100,7 @@ class DexonlineAdapter implements DictionaryAdapter<Dexonline.Results> {
 		const pluralString = localise(Commands.word.strings.nouns.plural, locale);
 
 		const numberColumn = {
-			name: '⠀',
+			name: constants.symbols.meta.whitespace,
 			value: `**${singularString}**\n` + `**${pluralString}**`,
 			inline: true,
 		};
@@ -354,7 +355,7 @@ class DexonlineAdapter implements DictionaryAdapter<Dexonline.Results> {
 		const pluralString = localise(Commands.word.strings.nouns.plural, locale);
 
 		const numberColumn = {
-			name: '⠀',
+			name: constants.symbols.meta.whitespace,
 			value: `**${singularString}**\n` + `**${pluralString}**`,
 			inline: true,
 		};
@@ -391,7 +392,7 @@ class DexonlineAdapter implements DictionaryAdapter<Dexonline.Results> {
 		const pluralString = localise(Commands.word.strings.nouns.plural, locale);
 
 		const numberColumn = {
-			name: '⠀',
+			name: constants.symbols.meta.whitespace,
 			value: `**${singularString}**\n` + `**${pluralString}**`,
 			inline: true,
 		};

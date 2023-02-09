@@ -28,7 +28,7 @@ function generateWelcomeNotice(_: Bot, guild: Guild): CreateMessage {
 				style: ButtonStyles.Secondary,
 				label: localise(Services.entry.acceptedRules, defaultLocale),
 				customId: constants.staticComponentIds.acceptedRules,
-				emoji: { name: '✅' },
+				emoji: { name: constants.symbols.understood },
 			}],
 		}],
 	};

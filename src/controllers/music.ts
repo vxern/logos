@@ -300,7 +300,7 @@ function receiveNewListing(
 
 	const queuedString = localise(Commands.music.options.play.strings.queued.header, defaultLocale);
 	const embed: Embed = {
-		title: `👍 ${queuedString}`,
+		title: `${constants.symbols.music.queued} ${queuedString}`,
 		description: localise(Commands.music.options.play.strings.queued.body, defaultLocale)(listing.content.title),
 		color: constants.colors.lightGreen,
 	};
@@ -373,7 +373,7 @@ function advanceQueueAndPlay(
 
 		return void sendMessage(bot, controller.feedbackChannelId!, {
 			embeds: [{
-				title: `👏 ${allDoneString}`,
+				title: `${constants.symbols.music.allDone} ${allDoneString}`,
 				description: localise(Commands.music.strings.allDone.body, defaultLocale),
 				color: constants.colors.blue,
 			}],

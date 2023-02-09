@@ -122,7 +122,7 @@ async function handlePraiseUser(
 			embeds: [
 				{
 					author: guildAsAuthor(bot, guild),
-					description: `${praisedString} 🥳`,
+					description: `${constants.symbols.responses.celebration} ${praisedString}`,
 					color: constants.colors.lightGreen,
 				},
 			],

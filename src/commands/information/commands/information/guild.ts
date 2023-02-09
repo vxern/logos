@@ -58,41 +58,41 @@ function handleDisplayGuildInformation(
 					color: constants.colors.invisible,
 					fields: [
 						{
-							name: `🖋️ ${descriptionString}`,
+							name: `${constants.symbols.guild.description} ${descriptionString}`,
 							value: guild.description ??
 								localise(Commands.information.options.guild.strings.noDescription, interaction.locale),
 							inline: true,
 						},
 						{
-							name: `🧑 ${membersString}`,
+							name: `${constants.symbols.guild.members} ${membersString}`,
 							value: guild.memberCount.toString(),
 							inline: true,
 						},
 						{
-							name: `⏱️ ${createdString}`,
+							name: `${constants.symbols.guild.created} ${createdString}`,
 							value: timestamp(snowflakeToTimestamp(guild.id)),
 							inline: true,
 						},
 						{
-							name: `🗯️ ${channelsString}`,
+							name: `${constants.symbols.guild.channels.channels} ${channelsString}`,
 							value: displayInformationAboutChannels(guild, interaction.locale),
 							inline: true,
 						},
 						hasDistinctOwner
 							? {
-								name: `👑 ${ownerString}`,
+								name: `${constants.symbols.guild.owner} ${ownerString}`,
 								value: mention(owner.id, MentionTypes.User),
 								inline: true,
 							}
 							: {
-								name: `⚖️ ${moderatorsString}`,
+								name: `${constants.symbols.guild.moderators} ${moderatorsString}`,
 								value: localise(Commands.information.options.guild.strings.overseenByModerators, interaction.locale)(
 									configuration.permissions.moderatorRoleNames.main.toLowerCase(),
 								),
 								inline: false,
 							},
 						{
-							name: `🎓 ${proficiencyDistributionString}`,
+							name: `${constants.symbols.guild.proficiencyDistribution} ${proficiencyDistributionString}`,
 							value: displayProficiencyRoleDistribution(proficiencyRoleFrequencies, interaction.locale),
 							inline: false,
 						},
@@ -112,7 +112,7 @@ function displayInformationAboutChannels(guild: Guild, locale: string | undefine
 	const textChannelsString = localise(Commands.information.options.guild.strings.channelTypes.text, locale);
 	const voiceChannelsString = localise(Commands.information.options.guild.strings.channelTypes.voice, locale);
 
-	return `📜 ${textChannelsString} – ${textChannelsCount} | 🔊 ${voiceChannelsString} – ${voiceChannelsCount}`;
+	return `${constants.symbols.guild.channels.text} ${textChannelsString} – ${textChannelsCount} | ${constants.symbols.guild.channels.voice} ${voiceChannelsString} – ${voiceChannelsCount}`;
 }
 
 function getChannelCountByType(channels: Channel[], type: ChannelTypes): number {

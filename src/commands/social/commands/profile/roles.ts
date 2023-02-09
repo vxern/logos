@@ -61,7 +61,7 @@ function handleOpenRoleSelectionMenu(
 					name: Commands.profile.options.roles.strings.selectCategory.header,
 					description: Commands.profile.options.roles.strings.selectCategory.body,
 					color: constants.colors.invisible,
-					emoji: '💭',
+					emoji: constants.symbols.roles.noCategory,
 					categories: rootCategories,
 				},
 				indexesAccessed: [],
@@ -343,7 +343,7 @@ function displaySelectMenu(
 	const title = (categories.length > 1 ? categories.slice(1) : categories).map((category) => {
 		const categoryNameString = localise(category.name, locale);
 		return `${category.emoji}  ${categoryNameString}`;
-	}).join(' »  ');
+	}).join(` ${constants.symbols.indicators.arrowRight}  `);
 
 	return {
 		type: InteractionResponseTypes.ChannelMessageWithSource,
@@ -416,7 +416,7 @@ function createSelectOptionsFromCollection(
 				if (emojiExpression.test(role.emoji)) return { name: role.emoji };
 
 				const id = data.roleData.emojiIdsByName.get(role.emoji);
-				if (id === undefined) return { name: '❓' };
+				if (id === undefined) return { name: constants.symbols.roles.noCategory };
 
 				return { name: role.emoji, id };
 			})(),

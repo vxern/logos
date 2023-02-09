@@ -196,7 +196,7 @@ function handleUnskipAction([client, bot]: [Client, Bot], interaction: Interacti
 			type: InteractionResponseTypes.ChannelMessageWithSource,
 			data: {
 				embeds: [{
-					title: `⏮️ ${unskippedString}`,
+					title: `${constants.symbols.music.unskipped} ${unskippedString}`,
 					description: localise(Commands.music.options.unskip.strings.unskipped.body, defaultLocale),
 					color: constants.colors.invisible,
 				}],

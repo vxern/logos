@@ -103,14 +103,14 @@ async function handleDisplayProfile(
 						return { url: iconURL };
 					})(),
 					fields: [{
-						name: `💼 ${rolesString}`,
+						name: `${constants.symbols.profile.roles} ${rolesString}`,
 						value: member.roles.map((roleId) => mention(roleId, MentionTypes.Role)).join(' '),
 						inline: false,
 					}, {
-						name: `🧮 ${statisticsString}`,
+						name: `${constants.symbols.profile.statistics.statistics} ${statisticsString}`,
 						value:
-							`🙏 ${praisesString} • ${receivedString} – ${praisesReceived.size} • ${sentString} – ${praisesSent.size}
-😖 ${warningsString} • ${receivedString} – ${warningsReceived.size}`,
+							`${constants.symbols.profile.statistics.praises} ${praisesString} • ${receivedString} – ${praisesReceived.size} • ${sentString} – ${praisesSent.size}
+${constants.symbols.profile.statistics.warnings} ${warningsString} • ${receivedString} – ${warningsReceived.size}`,
 						inline: false,
 					}],
 				}],

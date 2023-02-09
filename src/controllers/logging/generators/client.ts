@@ -11,31 +11,31 @@ type ClientEvents = {
 /** Stores the message generators for client events. */
 const client: MessageGenerators<ClientEvents> = {
 	guildBanAdd: {
-		title: '⚔️ User banned',
+		title: `${constants.symbols.events.user.banned} User banned`,
 		message: (_, __, user, ___) => `${diagnosticMentionUser(user)} has been banned.`,
 		filter: (_, originGuildId, __, user, guildId) => originGuildId === guildId && !user.toggles.bot,
 		color: constants.colors.red,
 	},
 	guildBanRemove: {
-		title: '😇 User unbanned',
+		title: `${constants.symbols.events.user.unbanned} User unbanned`,
 		message: (_, __, user, ___) => `${diagnosticMentionUser(user)} has been unbanned.`,
 		filter: (_, originGuildId, __, user, guildId) => originGuildId === guildId && !user.toggles.bot,
 		color: constants.colors.dullYellow,
 	},
 	guildMemberAdd: {
-		title: '😁 User joined',
+		title: `${constants.symbols.events.user.joined} User joined`,
 		message: (_, __, ___, user) => `${diagnosticMentionUser(user)} has joined the server.`,
 		filter: (_, originGuildId, __, member, user) => originGuildId === member.guildId && !user.toggles.bot,
 		color: constants.colors.lightGreen,
 	},
 	guildMemberRemove: {
-		title: '😔 User left',
+		title: `${constants.symbols.events.user.left} User left`,
 		message: (_, __, user, ___) => `${diagnosticMentionUser(user)} has left the server.`,
 		filter: (_, originGuildId, __, user, guildId) => originGuildId === guildId && !user.toggles.bot,
 		color: constants.colors.dullYellow,
 	},
 	messageUpdate: {
-		title: '⬆️ Message updated',
+		title: `${constants.symbols.events.message.updated} Message updated`,
 		message: (client, _, message, __) => {
 			const oldMessage = client.cache.messages.previous.get(message.id);
 			if (oldMessage === undefined) return;
@@ -64,7 +64,7 @@ ${codeMultiline(message.content)}`;
 		color: constants.colors.blue,
 	},
 	messageDelete: {
-		title: '❌ Message deleted',
+		title: `${constants.symbols.events.message.deleted} Message deleted`,
 		message: (client, _, payload, __) => {
 			const message = client.cache.messages.latest.get(payload.id);
 			if (message === undefined) return;
