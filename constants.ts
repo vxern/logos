@@ -116,20 +116,6 @@ const symbols = {
 			accepted: '✔️',
 			rejected: '❌',
 		},
-		article: {
-			created: '📜',
-			accepted: '✔️',
-			rejected: '❌',
-			edited: '✍️',
-			editAccepted: '✔️',
-			editRejected: '❌',
-			locked: '🔐',
-		},
-		inquest: {
-			launched: '❗',
-			passed: '✔️',
-			failed: '❌',
-		},
 		warned: '⚠️',
 		pardoned: '😇',
 		timeout: {

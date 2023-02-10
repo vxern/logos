@@ -145,7 +145,6 @@ const categories: RoleCategory[] = [
 			type: RoleCollectionTypes.CollectionLocalised,
 			lists: {
 				'Armenian': Roles.regions.languages['Armenian'],
-				'Belarusian': Roles.regions.languages['Belarusian'],
 				'Romanian': Roles.regions.languages['Romanian'],
 			},
 		},

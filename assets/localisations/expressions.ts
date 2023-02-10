@@ -90,7 +90,6 @@ class Expressions {
 				indefinite: {
 					languages: ensureType<Required<Record<Language, string>>>({
 						'Armenian': 'armene',
-						'Belarusian': 'belaruse',
 						'English': 'engleze',
 						'Hungarian': 'maghiare',
 						'Polish': 'poloneze',

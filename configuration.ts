@@ -7,14 +7,6 @@ const configuration = {
 			others: ['Trainee Guide'],
 		},
 	},
-	database: {
-		cache: {
-			limits: {
-				articles: 500,
-				users: 300,
-			},
-		},
-	},
 	guilds: {
 		namePattern: new RegExp('^Learn ([A-Z][a-z]*)$'),
 		channels: {

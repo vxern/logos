@@ -589,31 +589,6 @@ class Roles {
 					'English': 'Yerevan / Երևան',
 				},
 			}],
-			'Belarusian': [{
-				name: {
-					'English': 'Brest / Брэсцкая',
-				},
-			}, {
-				name: {
-					'English': 'Hrodna / Гродзенская',
-				},
-			}, {
-				name: {
-					'English': 'Homel / Гомельская',
-				},
-			}, {
-				name: {
-					'English': 'Mahilyow / Магілёўская',
-				},
-			}, {
-				name: {
-					'English': 'Minsk / Мінская',
-				},
-			}, {
-				name: {
-					'English': 'Vitsebsk / Вiцебская',
-				},
-			}],
 			'Romanian': [{
 				name: {
 					'English': 'Banat',

@@ -2,7 +2,6 @@ import { Locales } from 'discordeno';
 
 const supportedLanguages = [
 	'Armenian',
-	'Belarusian',
 	'English',
 	'Hungarian',
 	'Polish',

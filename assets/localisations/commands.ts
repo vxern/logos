@@ -51,48 +51,36 @@ class Commands {
 								`I am **${botUsername}**, an application created to offer language-learning Discord communities with the highest quality features, such as:
               ${
 									list([
-										'🫂 Rich social interactions',
 										'💼 Intuitive role management',
 										'📚 Translation and morphology look-ups',
 										'🎶 Music playback',
-										'📜 Article creation',
-										'🔁 Server structure synchronisation',
 									])
 								}`,
 							'Hungarian': (botUsername: string) =>
 								`**${botUsername}** vagyok - egy alkalmazás, ami arra készült, hogy nyelvtanuló szerverek számára kiváló minőségű funkciókat biztosítson, mint például:
                 ${
 									list([
-										'🫂 Szociális interakciók kavalkádja',
 										'💼 Intuitív rangkezelés',
 										'📚 Fordítás és morfémaelemzés',
 										'🎶 Zenelejátszás',
-										'📜 Cikkek létrehozása, olvasása',
-										'🔁 Szerverstruktúra szinkronizálása',
 									])
 								}`,
 							'Polish': (botUsername: string) =>
 								`Nazywam się **${botUsername}**. Jestem aplikacją stworzoną do zaoferowania społecznościom języcznym na Discordzie najwyższej jakości funkcji, takich jak:
               ${
 									list([
-										'🫂 Bogate interakcje socjalne',
 										'💼 Intuitywne wybieranie ról',
 										'📚 Tłumaczenia, wyszukiwanie znaczeń oraz innych informacji o słowach',
 										'🎶 Odtwarzanie muzyki',
-										'📜 Tworzenie oraz czytanie artykułów lingwistycznych',
-										'🔁 Synchronizacja struktury serwera',
 									])
 								}`,
 							'Romanian': (botUsername: string) =>
 								`Mă numesc **${botUsername}**. Sunt o aplicație creată pentru a oferi comunităților lingvistice Discord funcții de cea mai înaltă calitate, cum ar fi:
               ${
 									list([
-										'🫂 Interacțiuni sociale bogate',
 										'💼 Gestionarea intuitivă a rolurilor',
 										'📚 Traduceri și căutarea cuvintelor',
 										'🎶 Redarea muzicii',
-										'📜 Crearea și citirea articolelor lingvistice',
-										'🔁 Sincronizarea structurii serverului',
 									])
 								}`,
 						},

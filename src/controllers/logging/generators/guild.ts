@@ -1,19 +1,11 @@
 import { Member, User } from 'discordeno';
 import { localise } from 'logos/assets/localisations/mod.ts';
 import { Modals } from 'logos/assets/localisations/mod.ts';
-import {
-	Article,
-	ArticleChange,
-	EntryRequest,
-	Praise,
-	Report,
-	Suggestion,
-	Warning,
-} from 'logos/src/database/structs/mod.ts';
+import { EntryRequest, Praise, Report, Suggestion, Warning } from 'logos/src/database/structs/mod.ts';
 import { MessageGenerators } from 'logos/src/controllers/logging/generators/generators.ts';
 import { diagnosticMentionUser } from 'logos/src/utils.ts';
 import constants from 'logos/constants.ts';
-import { code, codeMultiline, timestamp, trim } from 'logos/formatting.ts';
+import { codeMultiline, timestamp } from 'logos/formatting.ts';
 import { defaultLocale } from 'logos/types.ts';
 
 /** Type representing events that occur within a guild. */
@@ -26,36 +18,6 @@ type GuildEvents = {
 
 	/** An entry request has been rejected. */
 	entryRequestReject: [user: User, by: Member];
-
-	/** An article has been created. */
-	articleCreate: [article: Article, by: Member];
-
-	/** An article creation request has been accepted. */
-	articleCreateAccept: [article: Article, by: Member];
-
-	/** An article creation request has been rejected. */
-	articleCreateReject: [article: Article, by: Member];
-
-	/** An article has been edited. */
-	articleEdit: [article: Article, change: ArticleChange, by: Member];
-
-	/** An article edit request has been accepted. */
-	articleEditAccept: [article: Article, change: ArticleChange, by: Member];
-
-	/** An article edit request been rejected. */
-	articleEditReject: [article: Article, change: ArticleChange, by: Member];
-
-	/** An article has been locked. */
-	articleLock: [article: Article, by: Member];
-
-	/** An inquest has been started into a moderator. */
-	moderatorInquestLaunch: [member: Member, by: User];
-
-	/** A moderator has passed an inquest. */
-	moderatorInquestPass: [member: Member, by: User];
-
-	/** A moderator has failed an inquest. */
-	moderatorInquestFail: [member: Member, by: User];
 
 	/** A member has been warned. */
 	memberWarnAdd: [member: Member, warning: Warning, by: User];
@@ -129,144 +91,6 @@ ${codeMultiline(entryRequest.answers.where_found!)}
 			return `${diagnosticMentionUser(user)}'s entry request has been rejected by ${diagnosticMentionUser(byUser)}`;
 		},
 		filter: (_, originGuildId, __, by) => originGuildId === by.guildId,
-		color: constants.colors.red,
-	},
-	articleCreate: {
-		title: `${constants.symbols.events.article.created} Article created`,
-		message: (client, article, by) => {
-			const user = client.cache.users.get(by.id);
-			if (user === undefined) return;
-
-			return `An article has been created by ${diagnosticMentionUser(user)}:
-
-**${article.content.title}**
-        
-${trim(article.content.body, 300)}`;
-		},
-		filter: (_, originGuildId, __, by) => originGuildId === by.guildId,
-		color: constants.colors.lightGreen,
-	},
-	articleCreateAccept: {
-		title: `${constants.symbols.events.article.accepted} Article verified`,
-		message: (client, article, by) => {
-			const user = client.cache.users.get(by.id);
-			if (user === undefined) return;
-
-			return `An article submission has been verified by ${diagnosticMentionUser(user)}:
-
-**${article.content.title}**
-
-${trim(article.content.body, 300)}`;
-		},
-		filter: (_, originGuildId, __, by) => originGuildId === by.guildId,
-		color: constants.colors.lightGreen,
-	},
-	articleCreateReject: {
-		title: `${constants.symbols.events.article.rejected} Article rejected`,
-		message: (client, article, by) => {
-			const user = client.cache.users.get(by.id);
-			if (user === undefined) return;
-
-			return `An article submission has been rejected by ${diagnosticMentionUser(user)}:
-
-**${article.content.title}**
-        
-${trim(article.content.body, 300)}`;
-		},
-		filter: (_, originGuildId, __, by) => originGuildId === by.guildId,
-		color: constants.colors.red,
-	},
-	articleEdit: {
-		title: `${constants.symbols.events.article.edited} Article edited`,
-		message: (client, article, change, by) => {
-			const user = client.cache.users.get(by.id);
-			if (user === undefined) return;
-
-			return `The article ${code(article.content.title)} has been edited by ${diagnosticMentionUser(user)}:
-  
-**${change.content.title}**
-  
-${trim(change.content.body, 300)}`;
-		},
-		filter: (_, originGuildId, __, ___, by) => originGuildId === by.guildId,
-		color: constants.colors.blue,
-	},
-	articleEditAccept: {
-		title: `${constants.symbols.events.article.editAccepted} Article edit accepted`,
-		message: (client, _, change, by) => {
-			const user = client.cache.users.get(by.id);
-			if (user === undefined) return;
-
-			return `An article edit has been verified by ${diagnosticMentionUser(user)}:
-
-**${change.content.title}**
-
-${trim(change.content.body, 300)}`;
-		},
-		filter: (_, originGuildId, __, ___, by) => originGuildId === by.guildId,
-		color: constants.colors.lightGreen,
-	},
-	articleEditReject: {
-		title: `${constants.symbols.events.article.editRejected} Article edit rejected`,
-		message: (client, _, change, by) => {
-			const user = client.cache.users.get(by.id);
-			if (user === undefined) return;
-
-			return `An article edit has been rejected by ${diagnosticMentionUser(user)}:
-
-**${change.content.title}**
-
-${trim(change.content.body, 300)}`;
-		},
-		filter: (_, originGuildId, __, ___, by) => originGuildId === by.guildId,
-		color: constants.colors.red,
-	},
-	articleLock: {
-		title: `${constants.symbols.events.article.locked} Article locked`,
-		message: (client, article, by) => {
-			const user = client.cache.users.get(by.id);
-			if (user === undefined) return;
-
-			return `The article ${code(article.content.title)} has been locked by ${diagnosticMentionUser(user)}.`;
-		},
-		filter: (_, originGuildId, __, by) => originGuildId === by.guildId,
-		color: constants.colors.dullYellow,
-	},
-	moderatorInquestLaunch: {
-		title: `${constants.symbols.events.inquest.launched} Inquest launched`,
-		message: (client, member, by) => {
-			const memberUser = client.cache.users.get(member.id);
-			if (memberUser === undefined) return;
-
-			return `An inquest has been launched into ${diagnosticMentionUser(memberUser)} by ${diagnosticMentionUser(by)}.`;
-		},
-		filter: (_, originGuildId, member, __) => originGuildId === member.guildId,
-		color: constants.colors.darkRed,
-	},
-	moderatorInquestPass: {
-		title: `${constants.symbols.events.inquest.passed} Inquest resulted in acquittance`,
-		message: (client, member, by) => {
-			const memberUser = client.cache.users.get(member.id);
-			if (memberUser === undefined) return;
-
-			return `An inquest into ${diagnosticMentionUser(memberUser)} has been reviewed by ${
-				diagnosticMentionUser(by)
-			}, and resulted in a pass.`;
-		},
-		filter: (_, originGuildId, member, __) => originGuildId === member.guildId,
-		color: constants.colors.lightGreen,
-	},
-	moderatorInquestFail: {
-		title: `${constants.symbols.events.inquest.failed} Inquest resulted in failure`,
-		message: (client, member, by) => {
-			const memberUser = client.cache.users.get(member.id);
-			if (memberUser === undefined) return;
-
-			return `An inquest into ${diagnosticMentionUser(memberUser)} has been reviewed by ${
-				diagnosticMentionUser(by)
-			}, and resulted in a failure.`;
-		},
-		filter: (_, originGuildId, member, __) => originGuildId === member.guildId,
 		color: constants.colors.red,
 	},
 	memberWarnAdd: {
