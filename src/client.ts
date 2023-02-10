@@ -36,13 +36,13 @@ import { getCommands } from 'logos/src/commands/commands.ts';
 import { setupLogging } from 'logos/src/controllers/logging/logging.ts';
 import { MusicController, setupMusicController } from 'logos/src/controllers/music.ts';
 import { createDatabase, Database } from 'logos/src/database/database.ts';
+import { isAutocomplete } from 'logos/src/interactions.ts';
 import services from 'logos/src/services/services.ts';
 import { diagnosticMentionUser } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import constants from 'logos/constants.ts';
 import { timestamp } from 'logos/formatting.ts';
 import { defaultLanguage, Language, supportedLanguages } from 'logos/types.ts';
-import { isAutocomplete } from './interactions.ts';
 
 interface Collector<
 	E extends keyof EventHandlers,

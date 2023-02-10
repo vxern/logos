@@ -17,7 +17,7 @@ import { chunk } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import constants from 'logos/constants.ts';
 import { mention, MentionTypes, timestamp, trim } from 'logos/formatting.ts';
-import { defaultLocale } from '../../../../types.ts';
+import { defaultLocale } from 'logos/types.ts';
 
 const command: OptionBuilder = {
 	...createLocalisations(Commands.music.options.now),
