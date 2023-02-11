@@ -234,9 +234,7 @@ async function handleTranslateText(
 	const sourceLanguageName = localise(getLocalisationsForLanguage(sourceLanguage.name), interaction.locale);
 	const targetLanguageName = localise(getLocalisationsForLanguage(targetLanguage.name), interaction.locale);
 
-	// TODO(vxern): This is a hard-coded, custom upper limit. The actual limit is 1024.
-	//  As such, the check could be improved for precision reasons.
-	const isLong = text.length > 950;
+	const isLong = text.length > 896; // 7/8 of 1024. Leaves room for text overhead.
 
 	let embeds: Embed[] = [];
 	if (!isLong) {

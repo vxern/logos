@@ -296,8 +296,6 @@ function receiveNewListing(
 		controller.feedbackChannelId = feedbackChannelId;
 	}
 
-	// TODO(vxern): If there are no users in the voice channel, make this message ephemeral and localise it appropriately.
-
 	const queuedString = localise(Commands.music.options.play.strings.queued.header, defaultLocale);
 	const embed: Embed = {
 		title: `${constants.symbols.music.queued} ${queuedString}`,
@@ -366,8 +364,6 @@ function advanceQueueAndPlay(
 
 	if (controller.currentListing === undefined) {
 		setDisconnectTimeout(client, guildId);
-
-		// TODO(vxern): If there are no users in the voice channel, make this message ephemeral and localise it appropriately.
 
 		const allDoneString = localise(Commands.music.strings.allDone.header, defaultLocale);
 

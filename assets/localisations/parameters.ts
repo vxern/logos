@@ -117,7 +117,6 @@ class Parameters {
 			},
 			description: {
 				'English': 'The title or a link to the song or song collection.',
-				// TODO: Add Hungarian localisation.
 				'Polish': 'Tytuł lub link do utworu lub zbioru utworów.',
 				'Romanian': 'Titlul melodiei, link-ul către aceasta sau către unui set de melodii.',
 			},
@@ -131,7 +130,6 @@ class Parameters {
 			},
 			description: {
 				'English': 'The timestamp to seek.',
-				// TODO: Add Hungarian translation.
 				'Polish': 'Znacznik czasu w piosence, określający dokąd przewinąć.',
 				'Romanian': 'Marcajul de timp din cântec la care să se treacă.',
 			},

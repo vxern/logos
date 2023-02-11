@@ -148,7 +148,6 @@ class Commands {
 					},
 					contributions: {
 						'English': 'Contributions',
-						// TODO: Add Hungarian localisation.
 						'Polish': 'Wkład',
 						'Romanian': 'Contribuții',
 					},
@@ -235,7 +234,6 @@ class Commands {
 						},
 						distributionOfMembersLanguageProficiency: {
 							'English': 'Distribution of members\' language proficiency',
-							// TODO: Change localisation?
 							'Hungarian': 'Összetétel jártasság szerint',
 							'Polish': 'Rozkład biegłości języcznej członków serwera',
 							'Romanian': 'Distribuția competențelor lingvistice ale membrilor',
@@ -655,7 +653,6 @@ class Commands {
 			},
 			definitionsForWord: {
 				'English': (word: string) => `Definitions for '${word}'`,
-				// TODO: Add Hungarian localisation.
 				'Polish': (word: string) => `Znaczenia dla słowa '${word}'`,
 				'Romanian': (word: string) => `Definiții pentru cuvântul '${word}'`,
 			},
@@ -928,7 +925,6 @@ class Commands {
 			},
 			hasNoActiveWarningsDirect: {
 				'English': 'You have no active warnings.',
-				// TODO: Add Hungarian translations.
 				'Polish': 'Nie masz żadnych aktywnych ostrzeżeń.',
 				'Romanian': 'Nu ai avertismente active.',
 			},
@@ -940,7 +936,6 @@ class Commands {
 			},
 			warning: {
 				'English': (index: number, timestamp: string) => `Warning #${index}, given ${timestamp}`,
-				// TODO: Add Hungarian translations.
 				'Polish': (index: number, timestamp: string) => `Ostrzeżenie nr. ${index}, przydzielone ${timestamp}`,
 				'Romanian': (index: number, timestamp: string) => `Avertismentul nr. ${index}, atribuit ${timestamp}`,
 			},
@@ -956,7 +951,6 @@ class Commands {
 		},
 		description: {
 			'English': 'Removes one of the warnings previously given to a user.',
-			// TODO: Hungarian localisation.
 			'Polish': 'Usuwa jedno z ostrzeżeń poprzednio przyjęte przez użytkownika.',
 			'Romanian': 'Elimină unul dintre avertismentele acceptate anterior de către utilizator.',
 		},
@@ -985,7 +979,6 @@ class Commands {
 			},
 			invalidWarning: {
 				'English': 'The warning you specified is invalid.',
-				// TODO: Add Hungarian translation.
 				'Polish': 'Ostrzeżenie, które sprecyzowałeś/aś, jest nieprawidłowe.',
 				'Romanian': 'Avertismentul pe care l-ai specificat este invalid.',
 			},
@@ -1011,13 +1004,11 @@ class Commands {
 	static readonly policy = typedLocalisations({
 		name: {
 			'English': 'policy',
-			// TODO: Add Hungarian localisation.
 			'Polish': 'polityka',
 			'Romanian': 'politică',
 		},
 		description: {
 			'English': 'Displays the server moderation policy.',
-			// TODO: Add Hungarian localisation.
 			'Polish': 'Wyświetla politykę moderowania serwera.',
 			'Romanian': 'Afișează politica de moderare a serverului.',
 		},
@@ -1026,13 +1017,11 @@ class Commands {
 	static readonly report = typedLocalisations({
 		name: {
 			'English': 'report',
-			// TODO: Add Hungarian localisation.
 			'Polish': 'skarga',
 			'Romanian': 'plângere',
 		},
 		description: {
 			'English': 'Allows the user to create a user report.',
-			// TODO: Add Hungarian localisation.
 			'Polish': 'Umożliwia użytkownikowi złożenie skargi na użytkownika.',
 			'Romanian': 'Permite utilizatorului să depună o plângere împotriva unuia sau mai mulți utilizatori.',
 		},
@@ -1041,14 +1030,12 @@ class Commands {
 				// Use exclamation if possible.
 				header: {
 					'English': 'Report submitted!',
-					// TODO: Add Hungarian localisation.
 					'Polish': 'Skarga złożona!',
 					'Romanian': 'Plângere depusă!',
 				},
 				body: {
 					'English': 'Your report has been submitted. ' +
 						'The report will be reviewed by the server staff, but you will not be notified directly about the outcome of a particular report.',
-					// TODO: Add Hungarian localisation.
 					'Polish': 'Twoja skarga została złożona.' +
 						'Moderatorzy serwera przejrzą raport, ale nie zostaniesz bezpośrednio powiadomiony/a o jego skutku.',
 					'Romanian': 'Plângerea ta a fost depusă.' +
@@ -1057,32 +1044,26 @@ class Commands {
 			},
 			failedToSubmitReport: {
 				'English': 'Failed to submit report.',
-				// TODO: Add Hungarian localisation.
 				'Polish': 'Nie udało się złożyć skargi.',
 				'Romanian': 'Nu s-a putut depune plângerea.',
 			},
 			specifiedUsersIncorrectly: (exampleExpression: string) => ({
 				'English': 'You have incorrectly specified which users to report.\n\n' +
 					'To identify a user, include their ID or tag. ' +
-					//'Alternatively, users can be named directly. ' +
 					'User identifiers must be separated using a comma.\n\n' +
 					`Example of a valid expression:\n${exampleExpression}`,
-				// TODO: Add Hungarian localisation.
 				'Polish': 'Niewłaściwie zidentyfikowałeś/aś użytkowników przeciw którym ma być złożona skarga.' +
 					'Aby zidentyfikować użytkownika, użyj jego ID lub tagu. ' +
-					//'Można wymienić użytkownika także niebezpośrednio, wymieniając jego nazwę użytkownika / nick. ' +
 					'Identyfikatory użytkowników muszą być oddzielone za pomocą przecinka.\n\n' +
 					`Przykład:\n${exampleExpression}`,
 				'Romanian': 'Ai identificat incorect utilizatorii împotriva cărora să fie depusă plângerea.' +
 					'Pentru a identifica un utilizator, menționează-i folosindu-i ID-ul sau tag-ul. ' +
-					//'De asemenea, se poate menționa utilizatorul indirect folosindu-i numele.\n\n' +
 					'Identificările utilizatorilor trebuie să fie separate folosind virgula.' +
 					`De exemplu:\n${exampleExpression}`,
 			}),
 			specifiedUserMoreThanOnce: {
 				'English': 'You have specified the same user more than once.\n\n' +
 					'Before attempting to submit the report again, make sure each user is only mentioned once in the report.',
-				// TODO: Add Hungarian localisation.
 				'Polish': 'Zidentyfikowałeś/aś tego samego użytkownika więcej niż jeden raz.\n\n' +
 					'Zanim spróbujesz ponownie wysłać skargę, upewnij się, że istnieje tylko jedna wzmianka o każdym pojedynczym użytkowniku.',
 				'Romanian': 'Ai identificat același utilizator de mai multe ori.\n\n' +
@@ -1090,20 +1071,17 @@ class Commands {
 			},
 			cannotSubmitReportAgainstSelf: {
 				'English': 'You cannot submit a report against yourself.',
-				// TODO: Add Hungarian localisation.
 				'Polish': 'Nie możesz złożyć skargi przeciw samemu/samej sobie.',
 				'Romanian': 'Nu poți depune o plângere împotriva ta.',
 			},
 			areYouSureToStopSubmitting: {
 				'English': 'Are you sure you want to stop submitting the report?',
-				// TODO: Add Hungarian localisation.
 				'Polish': 'Czy jesteś pewny/a, że chcesz anulować składanie skargi?',
 				'Romanian': 'Ești sigur/ă că vrei să anulezi depunerea plângerii?',
 			},
 			waitBeforeReporting: {
 				'English': 'You have already made a few reports recently.\n\n' +
 					'You should wait before reporting somebody again.',
-				// TODO: Add Hungarian localisation.
 				'Polish': 'Zanim ponownie spróbujesz zgłosić użytkownika, powinieneś/powinnaś troszeczkę poczekać.',
 				'Romanian': 'Ar trebui să-ți iei puțin timp înainte de a încerca să depui din nou o plângere împotriva cuiva.',
 			},
@@ -1118,7 +1096,6 @@ class Commands {
 					return 'You have tried to report too many users at once. ' +
 						`You can only report up to ${numberExpression} at once.`;
 				},
-				// TODO: Add Hungarian localisation.
 				'Polish': (limit: number) => {
 					const numberExpression = Expressions.polish.methods.pluralise(
 						limit.toString(),
@@ -1472,7 +1449,6 @@ class Commands {
 					},
 					startTimeUnknown: {
 						'English': 'Start time unknown.',
-						// TODO: Add Hungarian localisation.
 						'Polish': 'Czas rozpoczęcia odtwarzania nieznany.',
 						'Romanian': 'Oră de început a redării necunoscută.',
 					},
@@ -1575,13 +1551,11 @@ class Commands {
 					selectSong: {
 						header: {
 							'English': 'Select song or song collection',
-							// TODO: Add Hungarian localisation.
 							'Polish': 'Wybierz utwór lub zbiór utworów',
 							'Romanian': 'Selectează o melodie sau un set de melodii',
 						},
 						body: {
 							'English': 'Select a song or song collection from the choices below.',
-							// TODO: Add Hungarian localisation.
 							'Polish': 'Wybierz utwór lub zbiór utworów z listy poniżej.',
 							'Romanian': 'Selectează o melodie sau un set de melodii din lista de mai jos.',
 						},
@@ -1604,14 +1578,12 @@ class Commands {
 					},
 					alreadyPlayingInAnotherVoiceChannel: {
 						'English': 'The bot is playing music in another voice channel.',
-						// TODO: Add Hungarian localisation.
 						'Polish': 'Bot odtwarza już muzykę w innym kanale.',
 						'Romanian': 'Bot-ul redă deja muzică într-un canal diferit.',
 					},
 					queueIsFull: {
 						'English':
 							'The queue is full. Try removing a song from the song queue, skip the current song to advance the queue immediately, or wait until the current song finishes playing.',
-						// TODO: Add Hungarian localisation.
 						'Polish':
 							'Kolejka jest pełna. Spróbuj usunąć jeden z utworów znajdujących się w kolejce, przewiń obecnie odtwarzany utwór aby sprawić, by kolejka się przesunęła, lub poczekaj, aż odtwarzanie utworu samo się zakończy.',
 						'Romanian':
@@ -1757,13 +1729,11 @@ class Commands {
 			skipTo: {
 				name: {
 					'English': 'seek',
-					// TODO: Add Hungarian localisation.
 					'Polish': 'przewiń-do-punktu',
 					'Romanian': 'sărire-la-punct',
 				},
 				description: {
 					'English': 'Skips to a given point in the currently playing song.',
-					// TODO: Add Hungarian localisation.
 					'Polish': 'Przewija do danego punktu w obecnie grającym utworze.',
 					'Romanian': 'Avansează până la un anumit punct într-o melodie.',
 				},
@@ -1984,13 +1954,11 @@ class Commands {
 			},
 			mustBeInVoiceChannelToManipulate: {
 				'English': 'To manipulate music, you must be in a voice channel.',
-				// TODO: Add Hungarian localisation.
 				'Polish': 'Aby móc kontrolować odtwarzanie muzyki, wpierw musisz się znajdywać w kanale głosowym.',
 				'Romanian': 'Pentru a gestiona redarea muzicii, trebuie mai întâi să intri în canal de voce.',
 			},
 			mustBeInVoiceChannelToCheck: {
 				'English': 'To check playback-related information, you must be in a voice channel.',
-				// TODO: Add Hungarian localisation.
 				'Polish': 'Aby móc sprawdzić informacje o odtwarzaniu muzyki, wpierw musisz się znajdywać w kanale głosowym.',
 				'Romanian': 'Pentru a verifica informații despre redarea muzicii, trebuie mai întâi să intri în canal de voce.',
 			},
@@ -2063,7 +2031,6 @@ class Commands {
 			},
 			cannotManipulateIfHadBeenAbsent: {
 				'English': 'You cannot manipulate the playback of music that you were not present to see get queued.',
-				// TODO: Add Hungarian translation.
 				'Polish':
 					'Nie możesz kontrolować odtwarzania muzyki, którą dodano do kolejki wtedy, gdy ciebie jeszcze w kanale nie było.',
 				'Romanian': 'Nu poți controla redarea muzicii care a fost pusă în absența ta.',
@@ -2105,7 +2072,6 @@ class Commands {
 				// Use exclamation if possible.
 				header: {
 					'English': 'Suggestion sent!',
-					// TODO: Add Hungarian localisation.
 					'Polish': 'Sugestia wysłana!',
 					'Romanian': 'Sugestie trimisă!',
 				},
@@ -2118,20 +2084,17 @@ class Commands {
 			},
 			failedToSendSuggestion: {
 				'English': 'Failed to send suggestion.',
-				// TODO: Add Hungarian localisation.
 				'Polish': 'Nie udało się wysłać sugestii.',
 				'Romanian': 'Nu s-a putut trimite sugestia.',
 			},
 			areYouSureToStopSubmitting: {
 				'English': 'Are you sure you want to stop submitting the suggestion?',
-				// TODO: Add Hungarian localisation.
 				'Polish': 'Czy jesteś pewny/a, że chcesz anulować składanie sugestii?',
 				'Romanian': 'Ești sigur/ă că vrei să anulezi depunerea sugestiei?',
 			},
 			waitBeforeSuggesting: {
 				'English': 'You have already made a few suggestions recently.\n\n' +
 					'You should wait before making a suggestion again.',
-				// TODO: Add Hungarian localisation.
 				'Polish': 'Zanim ponownie spróbujesz coś zasugerować, powinieneś/powinnaś troszeczkę poczekać.',
 				'Romanian': 'Ar trebui să-ți iei puțin timp înainte de a încerca să depui din nou o sugestie.',
 			},
@@ -2265,7 +2228,6 @@ class Commands {
 					},
 					cannotUnassignRole: {
 						'English': 'You cannot unassign this role. You can only exchange it for another.',
-						// TODO: Hungarian localisation.
 						'Polish': 'Nie możesz usunąć tej rangi, możesz ją tylko wymienić na inną.',
 						'Romanian': 'Nu se poate elimina acest rol, este posibil doar să o schimbi cu alta. ',
 					},

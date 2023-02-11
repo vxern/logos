@@ -47,7 +47,6 @@ class Words {
 		},
 		[WordClasses.Determiner]: {
 			'English': 'determiner',
-			// TODO: Add Hungarian localisation.
 			'Polish': 'określnik',
 			'Romanian': 'demonstrativ',
 		},

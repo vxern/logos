@@ -212,7 +212,6 @@ class Services {
 					moderationPolicy: {
 						header: {
 							'English': 'Moderation Policy',
-							// TODO: Add Hungarian translation.
 							'Polish': 'Polityka Moderowania',
 							'Romanian': 'Politică de Moderare',
 						},
@@ -221,7 +220,6 @@ class Services {
 								one: {
 									'English': (moderatorRoleMention: string) =>
 										`The server abides by a 3-warn moderation policy, enforced by the server's ${moderatorRoleMention}s.`,
-									// TODO: Add Hungarian translation.
 									'Polish': (moderatorRoleMention: string) =>
 										`Na serwerze obowiązuje polityka moderacji na bazie trzech ostrzeżeń, zgodnie z którą działają moderatorzy serwera (osoby z rolą ${moderatorRoleMention}).`,
 									'Romanian': (moderatorRoleMention: string) =>
@@ -230,7 +228,6 @@ class Services {
 								two: {
 									'English':
 										'The above rules apply to the entirety of the server, and a breach thereof will result in a warning being issued. Warnings expire after a period of __two months__.',
-									// TODO: Add Hungarian translation.
 									'Polish':
 										'Reguły serwera obowiązują dla każdego użytkownika, a poważne ich naruszenie zaskutkuje ostrzeżeniem. Ostrzeżenia wygasają po upływie __dwóch miesięcy__.',
 									'Romanian':
@@ -239,7 +236,6 @@ class Services {
 								three: {
 									'English':
 										'If a user has already received three warnings, the fourth warning will cause the user to be timed out.',
-									// TODO: Add Hungarian translation.
 									'Polish':
 										'W przypadku gdy użytkownik ma już trzy ostrzeżenia, przy otrzymaniu czwartego ostrzeżenia, użytkownik dostanie timeout.',
 									'Romanian':
@@ -248,7 +244,6 @@ class Services {
 								four: {
 									'English':
 										'Consequently, the server staff will be informed of the limit being passed and, subsequently, will review the circumstances and determine an appropriate course of action.',
-									// TODO: Add Hungarian translation.
 									'Polish':
 										'Następnie, moderatorzy serwera zostaną poinformowani o tym, iż ów limit ostrzeżeń przekroczono, po czym moderatorzy przejrzą oraz zbadają sytuację, i zdecydują, co dalej.',
 									'Romanian':
@@ -257,7 +252,6 @@ class Services {
 								five: {
 									'English':
 										'In case of it having been found that a user had knowingly and constantly been breaking the server rules and/or ignoring suggestions of the staff, the user will be permanently banned from the server.',
-									// TODO: Add Hungarian translation.
 									'Polish':
 										'Jeśli zostanie stwierdzone, że użytkownik ten świadomie i stale lekceważył reguły serwera i/lub ignorował sugestie moderatorów, użytkownik zostanie trwale wykluczony z serwera.',
 									'Romanian':
@@ -371,7 +365,6 @@ class Services {
 			body: {
 				'English': 'Your answers to the verification questions have been submitted.\n\n' +
 					'Your request to join the server will be reviewed by the server staff, and you will be notified via DMs when your entry request is accepted.',
-				// TODO: Staff member -> Server staff
 				'Hungarian': 'A hitelesítő kérdésekre adott válaszaid továbbítva lettek.\n\n' +
 					'A csatlakozási kérelmedet egy stábtag fogja elbírálni, az eredményről DM-ben kapsz értesítést.',
 				'Polish': 'Twoje odpowiedzi na pytania weryfikacyjne zostały wysłane.\n\n' +
@@ -384,7 +377,6 @@ class Services {
 		},
 		failedToSubmitAnswers: {
 			'English': 'Failed to submit answers to the verification questions.',
-			// TODO: Add Hungarian localisations.
 			'Polish': 'Nie udało się przesłać odpowiedzi na pytania weryfikacyjne.',
 			'Romanian': 'Nu am reușit să transmitem răspunsurile tale la întrebări.',
 		},
@@ -392,7 +384,6 @@ class Services {
 			'English': (guildName: string) =>
 				`Your request to join ${guildName} has been accepted.\n\n` +
 				'Thank you for the wait.',
-			// TODO: Add Hungarian localisations.
 			'Polish': (guildName: string) =>
 				`Zaakceptowano twoją prośbę o dołączenie do ${guildName}.\n\n` +
 				'Dziękujemy Ci, że poczekałeś/aś.',
@@ -404,7 +395,6 @@ class Services {
 			'English': (guildName: string) =>
 				`Your request to join ${guildName} has been rejected. This decision was made by a majority of the server's moderation team.\n\n` +
 				'You will not be able to return to the server.',
-			// TODO: Add Hungarian localisations.
 			'Polish': (guildName: string) =>
 				`Odrzucono twoją prośbę o dołączenie do ${guildName}. Decyzja o odrzucenie jej została podjęta przez większość personelu serwera.\n\n` +
 				'Nie będziesz mógł/mogła ponownie wejść na serwer.',
@@ -415,7 +405,6 @@ class Services {
 		vote: {
 			accept: {
 				'English': 'Accept',
-				// TODO: Add Hungarian localisations.
 				'Polish': 'Akceptuj',
 				'Romanian': 'Acceptă',
 			},
@@ -429,7 +418,6 @@ class Services {
 
 					return `Accept (${numberExpression} needed)`;
 				},
-				// TODO: Add Hungarian localisations.
 				'Polish': (votesNeeded: number) => {
 					const numberExpression = Expressions.polish.methods.pluralise(
 						votesNeeded.toString(),
@@ -448,7 +436,6 @@ class Services {
 			},
 			reject: {
 				'English': 'Reject',
-				// TODO: Add Hungarian localisations.
 				'Polish': 'Odrzuć',
 				'Romanian': 'Refuză',
 			},
@@ -462,7 +449,6 @@ class Services {
 
 					return `Reject (${numberExpression} needed)`;
 				},
-				// TODO: Add Hungarian localisations.
 				'Polish': (votesNeeded: number) => {
 					const numberExpression = Expressions.polish.methods.pluralise(
 						votesNeeded.toString(),
@@ -481,31 +467,26 @@ class Services {
 			},
 			failed: {
 				'English': 'Failed to register vote.',
-				// TODO: Add Hungarian localisations.
 				'Polish': 'Nie udało się zarejestrować głosu.',
 				'Romanian': 'Nu am reușit să înregistrăm votul.',
 			},
 			failedToUpdateVerificationState: {
 				'English': 'Failed to update verification state.',
-				// TODO: Add Hungarian localisations.
 				'Polish': 'Nie udało się zaktualizować stanu weryfikacji.',
 				'Romanian': 'Nu am reușit să actualizăm starea de verificare.',
 			},
 			alreadyVotedToAccept: {
 				'English': 'You have already voted in favour of this user\'s entry request being accepted.',
-				// TODO: Add Hungarian localisations.
 				'Polish': 'Już wcześniej głosowałeś na rzecz akceptacji prośby użytkownika o dołączenie do serwera.',
 				'Romanian': 'Ai votat deja în favoarea acceptării cererii utilizatorului de a se alătura serverului.',
 			},
 			alreadyVotedToReject: {
 				'English': 'You have already voted against this user\'s entry request being accepted.',
-				// TODO: Add Hungarian localisations.
 				'Polish': 'Już wcześniej głosowałeś przeciwko akceptacji prośby użytkownika o dołączenie do serwera.',
 				'Romanian': 'Ai votat deja împotriva cererii utilizatorului de a se alătura serverului.',
 			},
 			stanceOnVoteChanged: {
 				'English': 'Your stance in this vote has been changed.',
-				// TODO: Add Hungarian localisations.
 				'Polish': 'Zmieniono twoją pozycję w głosowaniu.',
 				'Romanian': 'S-a schimbat poziția ta în acest vot.',
 			},

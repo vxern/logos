@@ -2,10 +2,12 @@ import { ensureType, TranslationLanguage } from 'logos/assets/localisations/util
 import { Language } from 'logos/types.ts';
 
 class Expressions {
-	// TODO(vxern): Think about changing '0 words' to 'no words'.
 	static readonly english = {
 		methods: {
 			pluralise: (number: string, singular: string, plural: string) => {
+				// If 0, replace with 'no'.
+				if (number === '0') return `no ${plural}`;
+
 				// 1 is the only positive number the singular form goes with in English.
 				if (number === '1') return `${number} ${singular}`;
 
