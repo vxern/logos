@@ -1,6 +1,7 @@
 import {
 	ApplicationCommandFlags,
 	Bot,
+	ButtonComponent,
 	ButtonStyles,
 	editOriginalInteractionResponse,
 	Interaction,
@@ -127,7 +128,6 @@ function createGameView(
 		}],
 		components: [{
 			type: MessageComponentTypes.ActionRow,
-			// @ts-ignore: There are always 4 buttons for the 4 sentences selected.
 			components: sentenceSelection.choices.map(
 				(choice, index) => ({
 					type: MessageComponentTypes.Button,
@@ -135,7 +135,7 @@ function createGameView(
 					label: choice,
 					customId: encodeId<WordButtonID>(customId, [index.toString()]),
 				}),
-			),
+			) as [ButtonComponent],
 		}],
 	};
 }

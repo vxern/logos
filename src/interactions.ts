@@ -251,10 +251,9 @@ function generateButtons(customId: string, isFirst: boolean, isLast: boolean): M
 		});
 	}
 
-	// @ts-ignore: It is guaranteed that there will be fewer or as many as 5 buttons.
 	return buttons.length === 0 ? [] : [{
 		type: MessageComponentTypes.ActionRow,
-		components: buttons,
+		components: buttons as [ButtonComponent],
 	}];
 }
 

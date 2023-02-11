@@ -43,7 +43,6 @@ async function handleAcceptRules(
 			}],
 			components: [{
 				type: MessageComponentTypes.ActionRow,
-				// @ts-ignore: There are only 4 proficiency roles, therefore only 4 buttons. (max is 5)
 				components: proficiencies.map<ButtonComponent>(
 					(proficiency, index) => ({
 						type: MessageComponentTypes.Button,
@@ -54,7 +53,7 @@ async function handleAcceptRules(
 						style: ButtonStyles.Secondary,
 						emoji: { name: proficiency.emoji },
 					}),
-				),
+				) as [ButtonComponent],
 			}],
 		},
 	);

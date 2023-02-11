@@ -322,10 +322,9 @@ function generateButtons(
 		paginationControls.push(row);
 	}
 
-	// @ts-ignore: It is sure that there will be no more than 5 buttons.
 	return paginationControls.map((row) => ({
 		type: MessageComponentTypes.ActionRow,
-		components: row,
+		components: row as [ButtonComponent],
 	}));
 }
 
