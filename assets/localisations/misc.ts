@@ -272,6 +272,13 @@ class Misc {
 		'Romanian': 'Continuare pe următoarea pagină...',
 	};
 
+	static readonly page: Localisations<string> = {
+		'English': 'Page',
+		// TODO: Add Hungarian localisations.
+		'Polish': 'Strona',
+		'Romanian': 'Pagina',
+	};
+
 	static readonly usedCommandTooManyTimes: Localisations<Expression<string>> = {
 		'English': (timestamp: string) =>
 			'You have used this command too many times in too short of time.\n\n' +

@@ -221,7 +221,7 @@ function getPageEmbed<T>(data: PaginationData<T>, embed: Embed, isLast: boolean,
 			{
 				name: data.elements.length === 1
 					? data.view.title
-					: `${data.view.title} ~ Page ${data.pageIndex + 1}/${data.elements.length}`,
+					: `${data.view.title} ~ ${localise(Misc.page, locale)} ${data.pageIndex + 1}/${data.elements.length}`,
 				value: data.view.generate(data.elements.at(data.pageIndex)!, data.pageIndex),
 			},
 			...(embed.fields ?? []),
