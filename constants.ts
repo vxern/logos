@@ -24,6 +24,7 @@ const timeDescriptors: [string, number][] = [
 const interactionTokenExpiryInterval = 14 * Periods.minute + 50 * Periods.second; // Just below 15 minutes.
 
 const staticComponentIds = {
+	none: 'none',
 	acceptedRules: 'accepted_rules',
 	selectedLanguageProficiency: 'selected_language_proficiency',
 	requestedVerification: 'requested_verification',
@@ -93,6 +94,7 @@ const symbols = {
 	meta: {
 		whitespace: '⠀',
 		metadataSeparator: '・',
+		idSeparator: '|',
 	},
 	ruleBullet: '💠',
 	understood: '✅',

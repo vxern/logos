@@ -80,7 +80,7 @@ function compileChecks(
 	return [
 		interaction.type === settings.type,
 		interaction.data !== undefined && interaction.data.customId !== undefined &&
-		interaction.data.customId.split('|').at(0)! === customId.split('|').at(0)!,
+		decodeId(interaction.data.customId)[0] === decodeId(customId)[0],
 		settings.userId === undefined ? true : interaction.user.id === settings.userId,
 	];
 }
@@ -138,6 +138,8 @@ function parseArguments<
 	return [args as R, focused];
 }
 
+type ControlButtonID = [type: 'previous' | 'next'];
+
 /**
  * Paginates an array of elements, allowing the user to browse between pages
  * in an embed view.
@@ -163,13 +165,13 @@ function paginate<T>(
 		onCollect: (bot, selection) => {
 			if (selection.data === undefined) return;
 
-			const action = selection.data.customId!.split('|')[1]!;
+			const [_, action] = decodeId<ControlButtonID>(selection.data.customId!);
 
 			switch (action) {
-				case 'PREVIOUS':
+				case 'previous':
 					if (!isFirst) data.pageIndex--;
 					break;
-				case 'NEXT':
+				case 'next':
 					if (!isLast) data.pageIndex++;
 					break;
 			}
@@ -234,7 +236,7 @@ function generateButtons(customId: string, isFirst: boolean, isLast: boolean): M
 	if (!isFirst) {
 		buttons.push({
 			type: MessageComponentTypes.Button,
-			customId: `${customId}|PREVIOUS`,
+			customId: encodeId<ControlButtonID>(customId, ['previous']),
 			style: ButtonStyles.Secondary,
 			label: constants.symbols.interactions.menu.controls.back,
 		});
@@ -243,7 +245,7 @@ function generateButtons(customId: string, isFirst: boolean, isLast: boolean): M
 	if (!isLast) {
 		buttons.push({
 			type: MessageComponentTypes.Button,
-			customId: `${customId}|NEXT`,
+			customId: encodeId<ControlButtonID>(customId, ['next']),
 			style: ButtonStyles.Secondary,
 			label: constants.symbols.interactions.menu.controls.forward,
 		});
@@ -485,12 +487,25 @@ function parseTimeExpressionPhrase(
 	return [correctedExpression, total];
 }
 
+type ComponentIDMetadata = [arg: string, ...args: string[]];
+
+function encodeId<T extends ComponentIDMetadata>(customId: string, args: T): string {
+	return [customId, ...args].join(constants.symbols.meta.idSeparator);
+}
+
+function decodeId<T extends ComponentIDMetadata, R = [string, ...T]>(customId: string): R {
+	return customId.split(constants.symbols.meta.idSeparator) as R;
+}
+
 export {
 	createInteractionCollector,
 	createModalComposer,
+	decodeId,
+	encodeId,
+	generateButtons,
 	isAutocomplete,
 	paginate,
 	parseArguments,
 	parseTimeExpression,
 };
-export type { InteractionCollectorSettings, Modal };
+export type { ControlButtonID, InteractionCollectorSettings, Modal };

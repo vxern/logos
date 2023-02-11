@@ -3,15 +3,12 @@ import {
 	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
 	Bot,
-	ButtonComponent,
-	ButtonStyles,
 	deleteOriginalInteractionResponse,
 	editOriginalInteractionResponse,
 	Interaction,
 	InteractionCallbackData,
 	InteractionResponseTypes,
 	InteractionTypes,
-	MessageComponents,
 	MessageComponentTypes,
 	SelectOption,
 	sendInteractionResponse,
@@ -27,7 +24,7 @@ import {
 	verifyCanManipulatePlayback,
 } from 'logos/src/controllers/music.ts';
 import { Client } from 'logos/src/client.ts';
-import { createInteractionCollector } from 'logos/src/interactions.ts';
+import { ControlButtonID, createInteractionCollector, decodeId, generateButtons } from 'logos/src/interactions.ts';
 import { chunk } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import constants from 'logos/constants.ts';
@@ -134,13 +131,13 @@ function generateEmbed(
 		onCollect: (bot, selection) => {
 			if (selection.data === undefined) return;
 
-			const action = selection.data.customId!.split('|')[1]!;
+			const [_, action] = decodeId<ControlButtonID>(selection.data.customId!);
 
 			switch (action) {
-				case 'PREVIOUS':
+				case 'previous':
 					if (!isFirst) data.pageIndex--;
 					break;
-				case 'NEXT':
+				case 'next':
 					if (!isLast) data.pageIndex++;
 					break;
 			}
@@ -254,34 +251,6 @@ function generateSelectMenu(data: RemoveListingData, pages: SongListing[][], sel
 			),
 		}],
 	};
-}
-
-function generateButtons(buttonsCustomId: string, isFirst: boolean, isLast: boolean): MessageComponents {
-	const buttons: ButtonComponent[] = [];
-
-	if (!isFirst) {
-		buttons.push({
-			type: MessageComponentTypes.Button,
-			customId: `${buttonsCustomId}|PREVIOUS`,
-			style: ButtonStyles.Secondary,
-			label: constants.symbols.interactions.menu.controls.back,
-		});
-	}
-
-	if (!isLast) {
-		buttons.push({
-			type: MessageComponentTypes.Button,
-			customId: `${buttonsCustomId}|NEXT`,
-			style: ButtonStyles.Secondary,
-			label: constants.symbols.interactions.menu.controls.forward,
-		});
-	}
-
-	// @ts-ignore: It is guaranteed that there will be fewer than five buttons.
-	return buttons.length === 0 ? [] : [{
-		type: MessageComponentTypes.ActionRow,
-		components: buttons,
-	}];
 }
 
 export default command;

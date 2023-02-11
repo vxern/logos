@@ -14,7 +14,7 @@ import { Commands, createLocalisations, localise } from 'logos/assets/localisati
 import { SentencePair } from 'logos/src/commands/language/data/types.ts';
 import { CommandBuilder } from 'logos/src/commands/command.ts';
 import { Client } from 'logos/src/client.ts';
-import { createInteractionCollector } from 'logos/src/interactions.ts';
+import { createInteractionCollector, decodeId, encodeId } from 'logos/src/interactions.ts';
 import constants from 'logos/constants.ts';
 
 const command: CommandBuilder = {
@@ -22,6 +22,8 @@ const command: CommandBuilder = {
 	defaultMemberPermissions: ['VIEW_CHANNEL'],
 	handle: handleStartGame,
 };
+
+type WordButtonID = [index: string];
 
 /** Starts a simple game of 'choose the correct word to fit in the blank'. */
 async function handleStartGame(
@@ -74,7 +76,7 @@ async function handleStartGame(
 			const selectionCustomId = selection.data?.customId;
 			if (selectionCustomId === undefined) return;
 
-			const indexString = selectionCustomId.split('|').at(1);
+			const [_, indexString] = decodeId<WordButtonID>(selectionCustomId);
 			if (indexString === undefined) return;
 
 			const index = Number(indexString);
@@ -131,7 +133,7 @@ function createGameView(
 					type: MessageComponentTypes.Button,
 					style: ButtonStyles.Success,
 					label: choice,
-					customId: `${customId}|${index}`,
+					customId: encodeId<WordButtonID>(customId, [index.toString()]),
 				}),
 			),
 		}],

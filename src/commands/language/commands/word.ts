@@ -19,7 +19,7 @@ import { Definition, DictionaryEntry, Expression } from 'logos/src/commands/lang
 import { CommandBuilder } from 'logos/src/commands/command.ts';
 import { show } from 'logos/src/commands/parameters.ts';
 import { Client } from 'logos/src/client.ts';
-import { createInteractionCollector, parseArguments } from 'logos/src/interactions.ts';
+import { createInteractionCollector, decodeId, encodeId, parseArguments } from 'logos/src/interactions.ts';
 import { chunk, diagnosticMentionUser } from 'logos/src/utils.ts';
 import constants from 'logos/constants.ts';
 import { BulletStyles, code, list } from 'logos/formatting.ts';
@@ -178,6 +178,8 @@ function generateEmbeds(
 	}
 }
 
+type MenuButtonID = [index: string];
+
 function generateButtons(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
@@ -222,7 +224,7 @@ function generateButtons(
 				type: MessageComponentTypes.Button,
 				label: `${pageString} ${data.dictionaryEntryIndex + 1}/${data.entries.length}`,
 				style: ButtonStyles.Secondary,
-				customId: 'none',
+				customId: constants.staticComponentIds.none,
 			}, {
 				type: MessageComponentTypes.Button,
 				label: constants.symbols.interactions.menu.controls.forward,
@@ -246,7 +248,7 @@ function generateButtons(
 						return void displayMenu([client, bot], interaction, selection, data, locale);
 					}
 
-					const [__, indexString] = selection.data.customId!.split('|');
+					const [__, indexString] = decodeId<MenuButtonID>(selection.data.customId!);
 					const index = Number(indexString);
 
 					if (index >= 0 && index <= entry.inflectionTable?.length) {
@@ -264,7 +266,7 @@ function generateButtons(
 					return {
 						type: MessageComponentTypes.Button,
 						label: table.title,
-						customId: `${buttonId}|${index_}`,
+						customId: encodeId<MenuButtonID>(buttonId, [index_.toString()]),
 						disabled: data.inflectionTableIndex === index_,
 						style: ButtonStyles.Secondary,
 					};

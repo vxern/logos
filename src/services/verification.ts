@@ -31,6 +31,8 @@ import { Client, extendEventHandler, WithLanguage } from 'logos/src/client.ts';
 import {
 	createInteractionCollector,
 	createModalComposer,
+	decodeId,
+	encodeId,
 	InteractionCollectorSettings,
 	Modal,
 } from 'logos/src/interactions.ts';
@@ -54,9 +56,9 @@ function setupVoteHandler([client, bot]: [Client, Bot]): void {
 		customId: constants.staticComponentIds.verification,
 		doesNotExpire: true,
 		onCollect: (_, selection) => {
-			const [__, userId, guildId, ___] = selection.data!.customId!.split('|');
+			const [__, userId, guildId, ___] = decodeId<VerificationPromptButtonID>(selection.data!.customId!);
 
-			const handle = verificationPromptHandlers.get(`${userId}|${guildId}`);
+			const handle = verificationPromptHandlers.get([userId, guildId].join(constants.symbols.meta.idSeparator));
 			if (handle === undefined) return;
 
 			return void handle(bot, selection);
@@ -440,21 +442,24 @@ function registerVerificationHandler(
 	[submitterId, submitterReference]: [bigint, Reference],
 ): Promise<boolean> {
 	return new Promise((resolve) => {
-		verificationPromptHandlers.set(`${submitterId}|${guildId}`, async (bot, selection) => {
-			const isAccepted = await handleVote([client, bot], selection, [submitterId, submitterReference]);
-			if (isAccepted === null) return;
+		verificationPromptHandlers.set(
+			[submitterId, guildId].join(constants.symbols.meta.idSeparator),
+			async (bot, selection) => {
+				const isAccepted = await handleVote([client, bot], selection, [submitterId, submitterReference]);
+				if (isAccepted === null) return;
 
-			const submitterReferenceId = stringifyValue(submitterReference);
+				const submitterReferenceId = stringifyValue(submitterReference);
 
-			const messageId = messageIdBySubmitterAndGuild.get(`${submitterReferenceId}${guildId}`);
-			if (messageId === undefined) return;
+				const messageId = messageIdBySubmitterAndGuild.get(`${submitterReferenceId}${guildId}`);
+				if (messageId === undefined) return;
 
-			deleteMessage(bot, channelId, messageId);
+				deleteMessage(bot, channelId, messageId);
 
-			if (isAccepted === undefined) return;
+				if (isAccepted === undefined) return;
 
-			return resolve(isAccepted);
-		});
+				return resolve(isAccepted);
+			},
+		);
 	});
 }
 
@@ -491,6 +496,8 @@ function getNecessaryVotes(guild: Guild, entryRequest: EntryRequest): NecessaryV
 
 	return [[requiredAcceptanceVotes, requiredRejectionVotes], [votesToAccept, votesToReject]];
 }
+
+type VerificationPromptButtonID = [userId: string, guildId: string, isResolved: string];
 
 function getVerificationPrompt(
 	bot: Bot,
@@ -535,14 +542,20 @@ function getVerificationPrompt(
 				label: requiredAcceptanceVotes === 1
 					? localise(Services.entry.vote.accept, defaultLocale)
 					: localise(Services.entry.vote.acceptMultiple, defaultLocale)(votesToAccept),
-				customId: `${constants.staticComponentIds.verification}|${user.id}|${guild.id}|true`,
+				customId: encodeId<VerificationPromptButtonID>(
+					constants.staticComponentIds.reports,
+					[user.id.toString(), guild.id.toString(), `${true}`],
+				),
 			}, {
 				type: MessageComponentTypes.Button,
 				style: ButtonStyles.Danger,
 				label: requiredRejectionVotes === 1
 					? localise(Services.entry.vote.reject, defaultLocale)
 					: localise(Services.entry.vote.rejectMultiple, defaultLocale)(votesToReject),
-				customId: `${constants.staticComponentIds.verification}|${user.id}|${guild.id}|false`,
+				customId: encodeId<VerificationPromptButtonID>(
+					constants.staticComponentIds.reports,
+					[user.id.toString(), guild.id.toString(), `${false}`],
+				),
 			}],
 		}],
 	};
@@ -585,7 +598,7 @@ async function handleVote(
 		stringifyValue(voterReference) === voterReferenceId
 	);
 
-	const isAccept = interaction.data!.customId!.split('|')[3]! === 'true';
+	const isAccept = decodeId<VerificationPromptButtonID>(interaction.data!.customId!)[3] === 'true';
 
 	const [[_, requiredRejectionVotes], [votesToAccept, votesToReject]] = getNecessaryVotes(
 		guild,
@@ -779,7 +792,9 @@ async function handleVote(
 
 	await client.database.adapters.users.update(client, updatedSubmitterDocument);
 
-	verificationPromptHandlers.delete(`${submitterDocument.data.account.id}|${guild.id}`);
+	verificationPromptHandlers.delete(
+		[submitterDocument.data.account.id, guild.id].join(constants.symbols.meta.idSeparator),
+	);
 
 	log(
 		[client, bot],

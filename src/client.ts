@@ -253,7 +253,7 @@ function createEventHandlers(client: Client): Partial<EventHandlers> {
 			client.cache.guilds.get(channel.guildId)?.channels.delete(channel.id);
 		},
 		interactionCreate: (bot, interaction) => {
-			if (interaction.data?.customId === 'none') {
+			if (interaction.data?.customId === constants.staticComponentIds.none) {
 				sendInteractionResponse(bot, interaction.id, interaction.token, {
 					type: InteractionResponseTypes.DeferredUpdateMessage,
 				});

@@ -21,7 +21,12 @@ import { Document, Reference } from 'logos/src/database/document.ts';
 import { stringifyValue } from 'logos/src/database/database.ts';
 import { ServiceStarter } from 'logos/src/services/services.ts';
 import { Client, extendEventHandler, WithLanguage } from 'logos/src/client.ts';
-import { createInteractionCollector, InteractionCollectorSettings } from 'logos/src/interactions.ts';
+import {
+	createInteractionCollector,
+	decodeId,
+	encodeId,
+	InteractionCollectorSettings,
+} from 'logos/src/interactions.ts';
 import { diagnosticMentionUser, getAllMessages, getTextChannel } from 'logos/src/utils.ts';
 import { defaultLocale } from 'logos/types.ts';
 import configuration from 'logos/configuration.ts';
@@ -42,9 +47,13 @@ function setupActionHandler([client, bot]: [Client, Bot]): void {
 		customId: constants.staticComponentIds.suggestions,
 		doesNotExpire: true,
 		onCollect: (_, selection) => {
-			const [__, authorId, guildId, suggestionReference, ___] = selection.data!.customId!.split('|');
+			const [__, authorId, guildId, suggestionReferenceId, ___] = decodeId<SuggestionPromptButtonID>(
+				selection.data!.customId!,
+			);
 
-			const handle = suggestionPromptHandlers.get(`${authorId}|${guildId}|${suggestionReference}`);
+			const handle = suggestionPromptHandlers.get(
+				[authorId, guildId, suggestionReferenceId].join(constants.symbols.meta.idSeparator),
+			);
 			if (handle === undefined) return;
 
 			return void handle(bot, selection);
@@ -254,64 +263,69 @@ function registerSuggestionHandler(
 	[authorId, authorReference]: [bigint, Reference],
 	suggestionReferenceId: string,
 ): void {
-	suggestionPromptHandlers.set(`${authorId}|${guildId}|${suggestionReferenceId}`, async (bot, selection) => {
-		const isClose = selection.data!.customId!.split('|')[4]! === 'true';
+	suggestionPromptHandlers.set(
+		[authorId, guildId, suggestionReferenceId].join(constants.symbols.meta.idSeparator),
+		async (bot, selection) => {
+			const isResolved = decodeId<SuggestionPromptButtonID>(selection.data!.customId!)[4] === 'true';
 
-		const suggestions = client.database.adapters.suggestions.get(client, 'authorAndGuild', [
-			authorReference,
-			guildId.toString(),
-		]);
-		if (suggestions === undefined) return;
+			const suggestions = client.database.adapters.suggestions.get(client, 'authorAndGuild', [
+				authorReference,
+				guildId.toString(),
+			]);
+			if (suggestions === undefined) return;
 
-		const suggestion = suggestions.get(suggestionReferenceId.toString());
-		if (suggestion === undefined) return;
+			const suggestion = suggestions.get(suggestionReferenceId.toString());
+			if (suggestion === undefined) return;
 
-		if (isClose && suggestion.data.isResolved) {
-			return void sendInteractionResponse(bot, selection.id, selection.token, {
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						description: localise(Services.alreadyMarkedAsResolved, defaultLocale),
-						color: constants.colors.dullYellow,
-					}],
-				},
-			});
-		}
+			if (isResolved && suggestion.data.isResolved) {
+				return void sendInteractionResponse(bot, selection.id, selection.token, {
+					type: InteractionResponseTypes.ChannelMessageWithSource,
+					data: {
+						flags: ApplicationCommandFlags.Ephemeral,
+						embeds: [{
+							description: localise(Services.alreadyMarkedAsResolved, defaultLocale),
+							color: constants.colors.dullYellow,
+						}],
+					},
+				});
+			}
 
-		if (!isClose && !suggestion.data.isResolved) {
-			return void sendInteractionResponse(bot, selection.id, selection.token, {
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						description: localise(Services.alreadyMarkedAsUnresolved, defaultLocale),
-						color: constants.colors.dullYellow,
-					}],
-				},
-			});
-		}
+			if (!isResolved && !suggestion.data.isResolved) {
+				return void sendInteractionResponse(bot, selection.id, selection.token, {
+					type: InteractionResponseTypes.ChannelMessageWithSource,
+					data: {
+						flags: ApplicationCommandFlags.Ephemeral,
+						embeds: [{
+							description: localise(Services.alreadyMarkedAsUnresolved, defaultLocale),
+							color: constants.colors.dullYellow,
+						}],
+					},
+				});
+			}
 
-		const updatedSuggestionContent = lodash.cloneDeep(suggestion) as Document<Suggestion>;
+			const updatedSuggestionContent = lodash.cloneDeep(suggestion) as Document<Suggestion>;
 
-		updatedSuggestionContent.data.isResolved = isClose;
+			updatedSuggestionContent.data.isResolved = isResolved;
 
-		const updatedSuggestionDocument = await client.database.adapters.suggestions.update(
-			client,
-			updatedSuggestionContent,
-		);
-		if (updatedSuggestionDocument === undefined) return;
+			const updatedSuggestionDocument = await client.database.adapters.suggestions.update(
+				client,
+				updatedSuggestionContent,
+			);
+			if (updatedSuggestionDocument === undefined) return;
 
-		const messageId = messageIdBySuggestionReferenceId.get(suggestionReferenceId);
-		if (messageId === undefined) return;
+			const messageId = messageIdBySuggestionReferenceId.get(suggestionReferenceId);
+			if (messageId === undefined) return;
 
-		suggestionByMessageId.set(messageId, updatedSuggestionDocument);
+			suggestionByMessageId.set(messageId, updatedSuggestionDocument);
 
-		deleteMessage(bot, channelId, messageId);
+			deleteMessage(bot, channelId, messageId);
 
-		return;
-	});
+			return;
+		},
+	);
 }
+
+type SuggestionPromptButtonID = [authorId: string, guildId: string, suggestionReferenceId: string, isResolved: string];
 
 function getSuggestionPrompt(
 	bot: Bot,
@@ -359,15 +373,19 @@ function getSuggestionPrompt(
 						type: MessageComponentTypes.Button,
 						style: ButtonStyles.Primary,
 						label: localise(Services.markAsResolved, defaultLocale),
-						customId:
-							`${constants.staticComponentIds.suggestions}|${author.id}|${guild.id}|${suggestionReferenceId}|true`,
+						customId: encodeId<SuggestionPromptButtonID>(
+							constants.staticComponentIds.reports,
+							[author.id.toString(), guild.id.toString(), suggestionReferenceId, `${true}`],
+						),
 					}
 					: {
 						type: MessageComponentTypes.Button,
 						style: ButtonStyles.Secondary,
 						label: localise(Services.markAsUnresolved, defaultLocale),
-						customId:
-							`${constants.staticComponentIds.suggestions}|${author.id}|${guild.id}|${suggestionReferenceId}|false`,
+						customId: encodeId<SuggestionPromptButtonID>(
+							constants.staticComponentIds.reports,
+							[author.id.toString(), guild.id.toString(), suggestionReferenceId, `${false}`],
+						),
 					},
 			],
 		}],
