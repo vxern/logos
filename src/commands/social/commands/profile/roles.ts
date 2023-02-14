@@ -42,10 +42,7 @@ const command: OptionBuilder = {
  * Displays a role selection menu to the user and allows them to assign or unassign roles
  * from within it.
  */
-function handleOpenRoleSelectionMenu(
-	[client, bot]: [Client, Bot],
-	interaction: Interaction,
-): void {
+function handleOpenRoleSelectionMenu([client, bot]: [Client, Bot], interaction: Interaction): void {
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (guild === undefined) return;
 

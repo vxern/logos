@@ -130,7 +130,7 @@ const symbols = {
 	},
 	music: {
 		song: '🎵',
-		external: '📁',
+		file: '📁',
 		collection: '🎶',
 		list: '📋',
 		queued: '👍',

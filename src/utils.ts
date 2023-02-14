@@ -93,7 +93,7 @@ function getGuildIconURLFormatted(bot: Bot, guild: Guild): string | undefined {
 
 type Author = NonNullable<Embed['author']>;
 
-function guildAsAuthor(bot: Bot, guild: Guild): Author | undefined {
+function getAuthor(bot: Bot, guild: Guild): Author | undefined {
 	const iconURL = getGuildIconURLFormatted(bot, guild);
 	if (iconURL === undefined) return undefined;
 
@@ -181,9 +181,9 @@ export {
 	diagnosticMentionUser,
 	fromHex,
 	getAllMessages,
+	getAuthor,
 	getGuildIconURLFormatted,
 	getTextChannel,
-	guildAsAuthor,
 	isText,
 	isVoice,
 	snowflakeToTimestamp,

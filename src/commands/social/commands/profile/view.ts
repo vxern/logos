@@ -10,8 +10,8 @@ import {
 import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
 import { OptionBuilder } from 'logos/src/commands/command.ts';
 import { show, user } from 'logos/src/commands/parameters.ts';
-import { Client, resolveInteractionToMember } from 'logos/src/client.ts';
-import { isAutocomplete, parseArguments } from 'logos/src/interactions.ts';
+import { autocompleteMembers, Client, resolveInteractionToMember } from 'logos/src/client.ts';
+import { parseArguments } from 'logos/src/interactions.ts';
 import constants from 'logos/constants.ts';
 import { mention, MentionTypes } from 'logos/formatting.ts';
 import { defaultLocale } from 'logos/types.ts';
@@ -19,20 +19,22 @@ import { defaultLocale } from 'logos/types.ts';
 const command: OptionBuilder = {
 	...createLocalisations(Commands.profile.options.view),
 	type: ApplicationCommandOptionTypes.SubCommand,
-	options: [{ ...user, required: false }, show],
 	handle: handleDisplayProfile,
+	handleAutocomplete: handleDisplayProfileAutocomplete,
+	options: [{ ...user, required: false }, show],
 };
 
-async function handleDisplayProfile(
-	[client, bot]: [Client, Bot],
-	interaction: Interaction,
-): Promise<void> {
-	const [{ user, show }, focused] = parseArguments(interaction.data?.options, { show: 'boolean' });
+async function handleDisplayProfileAutocomplete([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+	const [{ user }] = parseArguments(interaction.data?.options, {});
+
+	return autocompleteMembers([client, bot], interaction, user!);
+}
+
+async function handleDisplayProfile([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+	const [{ user, show }] = parseArguments(interaction.data?.options, { show: 'boolean' });
 
 	const member = resolveInteractionToMember([client, bot], interaction, user ?? interaction.user.id.toString());
 	if (member === undefined) return;
-
-	if (isAutocomplete(interaction) && focused?.name === 'user') return;
 
 	const target = member.user;
 	if (target === undefined) return;

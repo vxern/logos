@@ -54,10 +54,7 @@ interface MusicController {
 	};
 }
 
-function createMusicController(
-	client: Client,
-	guildId: bigint,
-): MusicController {
+function createMusicController(client: Client, guildId: bigint): MusicController {
 	const player = client.features.music.node.createPlayer(guildId);
 	player.setVolume(configuration.music.defaultVolume);
 
@@ -69,11 +66,7 @@ function createMusicController(
 		listingHistory: [],
 		currentListing: undefined,
 		listingQueue: [],
-		flags: {
-			isDestroyed: false,
-			loop: false,
-			breakLoop: false,
-		},
+		flags: { isDestroyed: false, loop: false, breakLoop: false },
 	};
 }
 
@@ -278,6 +271,13 @@ function receiveNewListing(
 	voiceChannelId: bigint,
 	feedbackChannelId: bigint,
 ): void {
+	function getVoiceStatesForChannel(guild: Guild, channelId: bigint): VoiceState[] {
+		const guildVoiceStates = guild.voiceStates.array().filter((voiceState) => voiceState.channelId !== undefined);
+		const relevantVoiceStates = guildVoiceStates.filter((voiceState) => voiceState.channelId! === channelId);
+
+		return relevantVoiceStates;
+	}
+
 	tryClearDisconnectTimeout(guild.id);
 
 	controller.listingQueue.push(listing);
@@ -315,7 +315,7 @@ function isCollection(object: Song | SongStream | SongCollection): object is Son
 }
 
 function isExternal(object: Song | SongStream | SongCollection): object is SongStream {
-	return object.type === SongListingContentTypes.External;
+	return object.type === SongListingContentTypes.File;
 }
 
 function isFirstInCollection(collection: SongCollection): boolean {
@@ -326,11 +326,7 @@ function isLastInCollection(collection: SongCollection): boolean {
 	return collection.position === collection.songs.length - 1;
 }
 
-function advanceQueueAndPlay(
-	[client, bot]: [Client, Bot],
-	guildId: bigint,
-	controller: MusicController,
-): void {
+function advanceQueueAndPlay([client, bot]: [Client, Bot], guildId: bigint, controller: MusicController): void {
 	tryClearDisconnectTimeout(guildId);
 
 	if (!controller.flags.loop) {
@@ -595,16 +591,9 @@ function remove(controller: MusicController, index: number): SongListing | undef
 	return listing;
 }
 
-function getVoiceStatesForChannel(guild: Guild, channelId: bigint): VoiceState[] {
-	const guildVoiceStates = guild.voiceStates.array().filter((voiceState) => voiceState.channelId !== undefined);
-	const relevantVoiceStates = guildVoiceStates.filter((voiceState) => voiceState.channelId! === channelId);
-
-	return relevantVoiceStates;
-}
-
 const localisationsBySongListingType = {
 	[SongListingContentTypes.Song]: Commands.music.strings.type.song,
-	[SongListingContentTypes.External]: Commands.music.strings.type.external,
+	[SongListingContentTypes.File]: Commands.music.strings.type.external,
 	[SongListingContentTypes.Collection]: Commands.music.strings.type.songCollection,
 };
 

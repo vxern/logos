@@ -12,11 +12,11 @@ import {
 import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
 import { CommandBuilder } from 'logos/src/commands/command.ts';
 import { user } from 'logos/src/commands/parameters.ts';
-import { log } from 'logos/src/controllers/logging/logging.ts';
+import { logEvent } from 'logos/src/controllers/logging/logging.ts';
 import { Praise } from 'logos/src/database/structs/mod.ts';
-import { Client, resolveInteractionToMember } from 'logos/src/client.ts';
-import { isAutocomplete, parseArguments } from 'logos/src/interactions.ts';
-import { guildAsAuthor, verifyIsWithinLimits } from 'logos/src/utils.ts';
+import { autocompleteMembers, Client, resolveInteractionToMember } from 'logos/src/client.ts';
+import { parseArguments } from 'logos/src/interactions.ts';
+import { getAuthor, verifyIsWithinLimits } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import constants from 'logos/constants.ts';
 import { mention, MentionTypes } from 'logos/formatting.ts';
@@ -25,23 +25,25 @@ const command: CommandBuilder = {
 	...createLocalisations(Commands.praise),
 	defaultMemberPermissions: ['VIEW_CHANNEL'],
 	handle: handlePraiseUser,
+  handleAutocomplete: handlePraiseUserAutocomplete,
 	options: [user, {
 		...createLocalisations(Commands.praise.options.comment),
 		type: ApplicationCommandOptionTypes.String,
 	}],
 };
 
-async function handlePraiseUser(
-	[client, bot]: [Client, Bot],
-	interaction: Interaction,
-): Promise<void> {
-	const [{ user, comment }, focused] = parseArguments(interaction.data?.options, {});
+async function handlePraiseUserAutocomplete([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+	const [{ user }] = parseArguments(interaction.data?.options, {});
+
+	return autocompleteMembers([client, bot], interaction, user!);
+}
+
+async function handlePraiseUser([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+	const [{ user, comment }] = parseArguments(interaction.data?.options, {});
 	if (user === undefined) return;
 
 	const member = resolveInteractionToMember([client, bot], interaction, user);
 	if (member === undefined) return;
-
-	if (isAutocomplete(interaction) && focused?.name === 'user') return;
 
 	if (member.id === interaction.member?.id) {
 		return void sendInteractionResponse(
@@ -111,7 +113,7 @@ async function handlePraiseUser(
 	]);
 	if (document === undefined) return showError(bot, interaction);
 
-	log([client, bot], guild, 'praiseAdd', member, praise, interaction.user);
+	logEvent([client, bot], guild, 'praiseAdd', [member, praise, interaction.user]);
 
 	if (dmChannel !== undefined) {
 		const praisedString = localise(Commands.praise.strings.praisedDirect, interaction.locale)(
@@ -121,7 +123,7 @@ async function handlePraiseUser(
 		sendMessage(bot, dmChannel.id, {
 			embeds: [
 				{
-					author: guildAsAuthor(bot, guild),
+					author: getAuthor(bot, guild),
 					description: `${constants.symbols.responses.celebration} ${praisedString}`,
 					color: constants.colors.lightGreen,
 				},

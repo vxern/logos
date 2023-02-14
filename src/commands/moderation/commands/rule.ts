@@ -9,7 +9,7 @@ import {
 import { Commands, createLocalisations, localise, Services } from 'logos/assets/localisations/mod.ts';
 import { CommandBuilder } from 'logos/src/commands/command.ts';
 import { Client } from 'logos/src/client.ts';
-import { isAutocomplete, parseArguments } from 'logos/src/interactions.ts';
+import { parseArguments } from 'logos/src/interactions.ts';
 import constants from 'logos/constants.ts';
 import { defaultLocale } from 'logos/types.ts';
 
@@ -17,6 +17,7 @@ const command: CommandBuilder = {
 	...createLocalisations(Commands.rule),
 	defaultMemberPermissions: ['VIEW_CHANNEL'],
 	handle: handleCiteRule,
+	handleAutocomplete: handleCiteRuleAutocomplete,
 	options: [{
 		...createLocalisations(Commands.rule.options.rule),
 		type: ApplicationCommandOptionTypes.String,
@@ -25,39 +26,42 @@ const command: CommandBuilder = {
 	}],
 };
 
-function handleCiteRule(
-	[client, bot]: [Client, Bot],
-	interaction: Interaction,
-): void {
+function handleCiteRuleAutocomplete([_, bot]: [Client, Bot], interaction: Interaction): void {
+	const [{ rule: ruleOrUndefined }] = parseArguments(interaction.data?.options, {});
+	const ruleQuery = ruleOrUndefined ?? '';
+
 	const rules = Object.values(Services.notices.notices.information.rules.rules);
 
-	if (isAutocomplete(interaction)) {
-		const choices = rules.map((rule, indexZeroBased) => {
-			const index = indexZeroBased + 1;
-			const titleWithTLDR = localise(rule.title, interaction.locale);
+	const ruleQueryLowercase = ruleQuery.toLowerCase();
+	const choices = rules.map((rule, indexZeroBased) => {
+		const index = indexZeroBased + 1;
+		const titleWithTLDR = localise(rule.title, interaction.locale);
 
-			return {
-				name: `#${index}: ${titleWithTLDR}`,
-				value: indexZeroBased.toString(),
-			};
-		});
+		return {
+			name: `#${index}: ${titleWithTLDR}`,
+			value: indexZeroBased.toString(),
+		};
+	}).filter((choice) => choice.name.toLowerCase().includes(ruleQueryLowercase));
 
-		return void sendInteractionResponse(
-			bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ApplicationCommandAutocompleteResult,
-				data: { choices },
-			},
-		);
-	}
+	return void sendInteractionResponse(
+		bot,
+		interaction.id,
+		interaction.token,
+		{
+			type: InteractionResponseTypes.ApplicationCommandAutocompleteResult,
+			data: { choices },
+		},
+	);
+}
+
+function handleCiteRule([client, bot]: [Client, Bot], interaction: Interaction): void {
+	const rules = Object.values(Services.notices.notices.information.rules.rules);
 
 	const [{ rule }] = parseArguments(interaction.data?.options, { rule: 'number' });
-	if (rule === undefined) return displayInvalidRuleError(bot, interaction);
+	if (rule === undefined) return displayError(bot, interaction);
 
 	const ruleParsed = rules.at(rule);
-	if (ruleParsed === undefined) return displayInvalidRuleError(bot, interaction);
+	if (ruleParsed === undefined) return displayError(bot, interaction);
 
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (guild === undefined) return;
@@ -84,7 +88,7 @@ function handleCiteRule(
 	);
 }
 
-function displayInvalidRuleError(bot: Bot, interaction: Interaction): void {
+function displayError(bot: Bot, interaction: Interaction): void {
 	return void sendInteractionResponse(
 		bot,
 		interaction.id,

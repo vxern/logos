@@ -18,11 +18,11 @@ import { createInteractionCollector } from 'logos/src/interactions.ts';
 import constants from 'logos/constants.ts';
 import { trim } from 'logos/formatting.ts';
 
-const urlExpression = new RegExp(
-	/^(?:https?:)?(?:\/\/)?(?:youtu\.be\/|(?:www\.|m\.)?youtube\.com\/(?:watch|v|embed)(?:\.php)?(?:\?.*v=|\/))([a-zA-Z0-9\_-]{7,15})(?:[\?&][a-zA-Z0-9\_-]+=[a-zA-Z0-9\_-]+)*$/,
-);
-
 const resolver: ListingResolver = async ([client, bot], interaction, query) => {
+	const urlExpression = new RegExp(
+		/^(?:https?:)?(?:\/\/)?(?:youtu\.be\/|(?:www\.|m\.)?youtube\.com\/(?:watch|v|embed)(?:\.php)?(?:\?.*v=|\/))([a-zA-Z0-9\_-]{7,15})(?:[\?&][a-zA-Z0-9\_-]+=[a-zA-Z0-9\_-]+)*$/,
+	);
+
 	const urlExpressionExecuted = urlExpression.exec(query) ?? undefined;
 	if (urlExpressionExecuted === undefined) {
 		return search([client, bot], interaction, query);
@@ -49,11 +49,9 @@ async function search(
 	interaction: Interaction,
 	query: string,
 ): Promise<SongListing | undefined> {
-	const items = await YouTube.search(query, { limit: 20, type: 'all', safeSearch: false })
-		.then(
-			(item) => item.filter((element) => isPlaylist(element) || isVideo(element)),
-		) as Array<Video | Playlist>;
-	if (items.length === 0) return undefined;
+	const resultsAll = await YouTube.search(query, { limit: 20, type: 'all', safeSearch: false });
+	const results = resultsAll.filter((element) => isPlaylist(element) || isVideo(element)) as Array<Playlist | Video>;
+	if (results.length === 0) return undefined;
 
 	return new Promise<SongListing | undefined>((resolve) => {
 		const customId = createInteractionCollector(
@@ -73,13 +71,13 @@ async function search(
 					const index = Number(indexString);
 					if (isNaN(index)) return resolve(undefined);
 
-					const item = items.at(index)!;
-					if (isPlaylist(item)) {
-						const playlist = await YouTube.getPlaylist(item.url!);
+					const result = results.at(index)!;
+					if (isPlaylist(result)) {
+						const playlist = await YouTube.getPlaylist(result.url!);
 						return resolve(fromYouTubePlaylist(playlist, interaction.user.id));
 					}
 
-					return resolve(fromYouTubeVideo(item, interaction.user.id));
+					return resolve(fromYouTubeVideo(result, interaction.user.id));
 				},
 			},
 		);
@@ -100,7 +98,7 @@ async function search(
 						customId: customId,
 						minValues: 1,
 						maxValues: 1,
-						options: items.map<SelectOption>(
+						options: results.map<SelectOption>(
 							(result, index) => ({
 								emoji: {
 									name: isVideo(result) ? constants.symbols.music.song : constants.symbols.music.collection,
@@ -116,23 +114,17 @@ async function search(
 	});
 }
 
-type YouTubeItem = Playlist | Video | Channel;
+type Result = Playlist | Video | Channel;
 
-function isPlaylist(item: YouTubeItem): item is Playlist {
-	return item.type === 'playlist';
+function isPlaylist(result: Result): result is Playlist {
+	return result.type === 'playlist';
 }
 
-function isVideo(item: YouTubeItem): item is Video {
-	return item.type === 'video';
+function isVideo(result: Result): result is Video {
+	return result.type === 'video';
 }
 
-/**
- * Creates a song listing from a YouTube video.
- */
-function fromYouTubeVideo(
-	video: Video,
-	requestedBy: bigint,
-): SongListing | undefined {
+function fromYouTubeVideo(video: Video, requestedBy: bigint): SongListing | undefined {
 	if (video.id === undefined) return undefined;
 
 	return {
@@ -148,9 +140,6 @@ function fromYouTubeVideo(
 	};
 }
 
-/**
- * Creates a song listing from a YouTube playlist.
- */
 function fromYouTubePlaylist(playlist: Playlist, requestedBy: bigint): SongListing | undefined {
 	if (playlist.id === undefined) return undefined;
 

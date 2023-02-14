@@ -140,11 +140,17 @@ const localisationsByLanguage = inferLanguages({
 		'Polish': 'Litewski',
 		'Romanian': 'Lituaniană',
 	},
-	'Norwegian (Bokmål)': {
+	'Norwegian': {
 		'English': 'Norwegian',
 		'Hungarian': 'Norvég',
 		'Polish': 'Norweski',
 		'Romanian': 'Norvegiană',
+	},
+	'Norwegian (Bokmål)': {
+		'English': 'Norwegian (Bokmål)',
+		'Hungarian': 'Norvég (Bokmål)',
+		'Polish': 'Norweski (Bokmål)',
+		'Romanian': 'Norvegiană (Bokmål)',
 	},
 	'Polish': {
 		'English': 'Polish',

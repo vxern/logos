@@ -60,7 +60,7 @@ function onVoiceStateUpdate([client, bot]: [Client, Bot], voiceState: VoiceState
 	previousVoiceStates.set(`${voiceState.userId}${voiceState.guildId}`, voiceState);
 }
 
-type VoiceChannelStatesTuple = [Channel, VoiceState[]];
+type VoiceChannelStatesTuple = [channel: Channel, voiceStates: VoiceState[]];
 
 function onConnect(
 	bot: Bot,
@@ -93,11 +93,7 @@ function onConnect(
 	});
 }
 
-function onDisconnect(
-	bot: Bot,
-	voiceChannelStatesTuples: VoiceChannelStatesTuple[],
-	previousState: VoiceState,
-): void {
+function onDisconnect(bot: Bot, voiceChannelStatesTuples: VoiceChannelStatesTuple[], previousState: VoiceState): void {
 	const [_, states] = voiceChannelStatesTuples.find(([channel, _states]) => channel.id === previousState.channelId!)!;
 	// If somebody is still connected to the channel, do not process.
 	if (states.length !== 0) return;

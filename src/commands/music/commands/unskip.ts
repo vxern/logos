@@ -30,6 +30,14 @@ const command: OptionBuilder = {
 };
 
 function handleUnskipAction([client, bot]: [Client, Bot], interaction: Interaction): void {
+	const [{ collection, by: songsToUnskip, to: songToUnskipTo }] = parseArguments(
+		interaction.data?.options,
+		{ collection: 'boolean', by: 'number', to: 'number' },
+	);
+
+	if (songsToUnskip !== undefined && isNaN(songsToUnskip)) return;
+	if (songToUnskipTo !== undefined && isNaN(songToUnskipTo)) return;
+
 	const controller = client.features.music.controllers.get(interaction.guildId!);
 	if (controller === undefined) return;
 
@@ -40,18 +48,6 @@ function handleUnskipAction([client, bot]: [Client, Bot], interaction: Interacti
 		getVoiceState(client, interaction.guildId!, interaction.user.id),
 	);
 	if (!isVoiceStateVerified) return;
-
-	const data = interaction.data;
-	if (data === undefined) return;
-
-	const [{ collection, by, to }] = parseArguments(interaction.data?.options, {
-		collection: 'boolean',
-		by: 'number',
-		to: 'number',
-	});
-
-	if (by !== undefined && isNaN(by)) return;
-	if (to !== undefined && isNaN(to)) return;
 
 	const isUnskippingListing = (() => {
 		if (controller.currentListing === undefined) return true;
@@ -118,7 +114,8 @@ function handleUnskipAction([client, bot]: [Client, Bot], interaction: Interacti
 		);
 	}
 
-	if (by !== undefined && to !== undefined) {
+	// If both the 'to' and the 'by' parameter have been supplied.
+	if (songsToUnskip !== undefined && songToUnskipTo !== undefined) {
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -136,7 +133,8 @@ function handleUnskipAction([client, bot]: [Client, Bot], interaction: Interacti
 		);
 	}
 
-	if ((by !== undefined && by <= 0) || (to !== undefined && to <= 0)) {
+	// If either the 'to' parameter or the 'by' parameter are negative.
+	if ((songsToUnskip !== undefined && songsToUnskip <= 0) || (songToUnskipTo !== undefined && songToUnskipTo <= 0)) {
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -157,28 +155,31 @@ function handleUnskipAction([client, bot]: [Client, Bot], interaction: Interacti
 	const isUnskippingCollection = collection ?? false;
 
 	if (isUnskippingListing) {
-		unskip([client, bot], interaction.guildId!, controller, isUnskippingCollection, { by: by, to: to });
+		unskip([client, bot], interaction.guildId!, controller, isUnskippingCollection, {
+			by: songsToUnskip,
+			to: songToUnskipTo,
+		});
 	} else {
-		if (by !== undefined) {
+		if (songsToUnskip !== undefined) {
 			let listingsToUnskip!: number;
 			if (
 				controller.currentListing?.content !== undefined && isCollection(controller.currentListing.content) &&
 				collection === undefined
 			) {
-				listingsToUnskip = Math.min(by, controller.currentListing!.content.position);
+				listingsToUnskip = Math.min(songsToUnskip, controller.currentListing!.content.position);
 			} else {
-				listingsToUnskip = Math.min(by, controller.listingHistory.length);
+				listingsToUnskip = Math.min(songsToUnskip, controller.listingHistory.length);
 			}
 			unskip([client, bot], interaction.guildId!, controller, isUnskippingCollection, { by: listingsToUnskip });
-		} else if (to !== undefined) {
+		} else if (songToUnskipTo !== undefined) {
 			let listingToSkipTo!: number;
 			if (
 				controller.currentListing?.content !== undefined && isCollection(controller.currentListing.content) &&
 				collection === undefined
 			) {
-				listingToSkipTo = Math.max(to, 1);
+				listingToSkipTo = Math.max(songToUnskipTo, 1);
 			} else {
-				listingToSkipTo = Math.min(to, controller.listingHistory.length);
+				listingToSkipTo = Math.min(songToUnskipTo, controller.listingHistory.length);
 			}
 			unskip([client, bot], interaction.guildId!, controller, isUnskippingCollection, { to: listingToSkipTo });
 		} else {

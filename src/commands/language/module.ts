@@ -41,17 +41,11 @@ function loadSentencePairs(languageFileContents: [Language, string][]): Map<Lang
 	for (const [language, contents] of languageFileContents) {
 		const records = csv.parse(
 			contents,
-			{
-				lazyQuotes: true,
-				separator: '\t',
-			},
+			{ lazyQuotes: true, separator: '\t' },
 		) as [sentenceId: string, sentence: string, translationId: string, translation: string][];
 
 		for (const [_, sentence, __, translation] of records) {
-			result.get(language)!.push({
-				sentence: sentence!,
-				translation: translation!,
-			});
+			result.get(language)!.push({ sentence, translation });
 		}
 	}
 
@@ -94,10 +88,7 @@ async function getSupportedLanguages(): Promise<SupportedLanguage[]> {
 	}));
 }
 
-function resolveToSupportedLanguage(
-	client: Client,
-	languageOrCode: string,
-): SupportedLanguage | undefined {
+function resolveToSupportedLanguage(client: Client, languageOrCode: string): SupportedLanguage | undefined {
 	const languageOrCodeLowercase = languageOrCode.toLowerCase();
 	return client.metadata.supportedTranslationLanguages.find((language) =>
 		language.code.toLowerCase() === languageOrCodeLowercase ||

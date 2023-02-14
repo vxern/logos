@@ -15,7 +15,7 @@ import {
 } from 'discordeno';
 import { Commands, createLocalisations, localise, Modals } from 'logos/assets/localisations/mod.ts';
 import { CommandBuilder } from 'logos/src/commands/command.ts';
-import { log } from 'logos/src/controllers/logging/logging.ts';
+import { logEvent } from 'logos/src/controllers/logging/logging.ts';
 import {
 	authorIdByMessageId,
 	getSuggestionPrompt,
@@ -41,10 +41,7 @@ enum SuggestionError {
 	Failure = 'failure',
 }
 
-async function handleMakeSuggestion(
-	[client, bot]: [Client, Bot],
-	interaction: Interaction,
-): Promise<void> {
+async function handleMakeSuggestion([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (guild === undefined) return;
 
@@ -113,7 +110,7 @@ async function handleMakeSuggestion(
 			const suggestionChannelId = getTextChannel(guild, configuration.guilds.channels.suggestions)?.id;
 			if (suggestionChannelId === undefined) return true;
 
-			log([client, bot], guild, 'suggestionSend', interaction.member!, suggestion.data);
+			logEvent([client, bot], guild, 'suggestionSend', [interaction.member!, suggestion.data]);
 
 			const messageId = await sendMessage(
 				bot,

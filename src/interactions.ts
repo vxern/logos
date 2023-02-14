@@ -24,7 +24,7 @@ import constants from 'logos/constants.ts';
 type AutocompleteInteraction = Interaction & { type: InteractionTypes.ApplicationCommandAutocomplete };
 
 function isAutocomplete(interaction: Interaction): interaction is AutocompleteInteraction {
-	return isAutocomplete(interaction);
+	return interaction.type === InteractionTypes.ApplicationCommandAutocomplete;
 }
 
 /** Settings for interaction collection. */
@@ -72,11 +72,7 @@ function createInteractionCollector(
 	return customId;
 }
 
-function compileChecks(
-	interaction: Interaction,
-	settings: InteractionCollectorSettings,
-	customId: string,
-): boolean[] {
+function compileChecks(interaction: Interaction, settings: InteractionCollectorSettings, customId: string): boolean[] {
 	return [
 		interaction.type === settings.type,
 		interaction.data !== undefined && interaction.data.customId !== undefined &&
@@ -107,10 +103,7 @@ function parseArguments<
 		}
 
 		if (option.options !== undefined) {
-			const [parsedArgs, parsedFocused] = parseArguments(
-				option.options,
-				customTypes,
-			);
+			const [parsedArgs, parsedFocused] = parseArguments(option.options, customTypes);
 			focused = parsedFocused ?? focused;
 			args = { ...args, ...parsedArgs };
 			continue;
@@ -341,20 +334,9 @@ function parseComposerContent<T extends string>(submission: Interaction): Compos
 	return content as ComposerContent<T>;
 }
 
-const digitsExpression = new RegExp(/\d+/g);
-const stringsExpression = new RegExp(/\p{L}+/gu);
-
-function extractNumbers(expression: string): number[] {
-	return (expression.match(digitsExpression) ?? []).map((digits) => Number(digits));
-}
-
-function extractStrings(expression: string): string[] {
-	return expression.match(stringsExpression) ?? [];
-}
-
 // Expression to detect HH:MM:SS, MM:SS and SS timestamps.
 const shortTimeExpression = new RegExp(
-	/^(?:(0?[0-9]|1[0-9]|2[0-4]):)?(?:(0?[0-9]|[1-5][0-9]|60):)?(0?[0-9]|[1-5][0-9]|60)$/,
+	/^(?:(?:(0?[0-9]|1[0-9]|2[0-4]):)?(?:(0?[0-9]|[1-5][0-9]|60):))?(0?[0-9]|[1-5][0-9]|60)$/,
 );
 
 function parseTimeExpression(
@@ -371,7 +353,7 @@ function parseShortTimeExpression(
 	convertToPhrase: boolean,
 	locale: string | undefined,
 ): ReturnType<typeof parseTimeExpression> {
-	const [secondsPart, minutesPart, hoursPart] = shortTimeExpression.exec(expression)!.slice(0).toReversed();
+	const [secondsPart, minutesPart, hoursPart] = shortTimeExpression.exec(expression)!.slice(1).toReversed();
 
 	const [seconds, minutes, hours] = [secondsPart, minutesPart, hoursPart].map((part) =>
 		part !== undefined ? Number(part) : undefined
@@ -388,12 +370,15 @@ function parseShortTimeExpression(
 		return [expression, totalSeconds * 1000];
 	}
 
-	let correctedExpression = `${seconds} ${localise(Misc.time.periods.second.descriptors, locale).at(-1)}`;
-	if (minutes !== undefined) {
-		correctedExpression += ` ${minutes} ${localise(Misc.time.periods.minute.descriptors, locale).at(-1)}`;
+	let correctedExpression = '';
+	if (seconds !== undefined && seconds !== 0) {
+		correctedExpression += `${seconds} ${localise(Misc.time.periods.second.descriptors, locale).at(-1)} `;
+	}
+	if (minutes !== undefined && minutes !== 0) {
+		correctedExpression += `${minutes} ${localise(Misc.time.periods.minute.descriptors, locale).at(-1)} `;
 	}
 	if (hours !== undefined) {
-		correctedExpression += ` ${hours} ${localise(Misc.time.periods.hour.descriptors, locale).at(-1)}`;
+		correctedExpression += `${hours} ${localise(Misc.time.periods.hour.descriptors, locale).at(-1)}`;
 	}
 
 	return parseTimeExpressionPhrase(correctedExpression, locale);
@@ -403,6 +388,16 @@ function parseTimeExpressionPhrase(
 	expression: string,
 	locale: string | undefined,
 ): ReturnType<typeof parseTimeExpression> {
+	function extractNumbers(expression: string): number[] {
+		const digitsExpression = new RegExp(/\d+/g);
+		return (expression.match(digitsExpression) ?? []).map((digits) => Number(digits));
+	}
+
+	function extractStrings(expression: string): string[] {
+		const stringsExpression = new RegExp(/\p{L}+/gu);
+		return expression.match(stringsExpression) ?? [];
+	}
+
 	// Extract the digits present in the expression.
 	const quantifiers = extractNumbers(expression).map((string) => Number(string));
 	// Extract the strings present in the expression.

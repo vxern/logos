@@ -3,9 +3,13 @@ import { Document } from 'logos/src/database/document.ts';
 import configuration from 'logos/configuration.ts';
 
 function getActiveWarnings(warnings: Map<string, Document<Warning>>): Map<string, Document<Warning>> {
+	const entries = Array.from(warnings.entries());
+
+	const now = Date.now();
+
 	return new Map(
-		Array.from(warnings.entries()).filter(
-			([_, warning]) => (Date.now() - warning.data.createdAt) < configuration.commands.warn.within,
+		entries.filter(
+			([_, warning]) => (now - warning.data.createdAt) < configuration.commands.warn.within,
 		),
 	);
 }

@@ -11,10 +11,7 @@ import { Commands, localise } from 'logos/assets/localisations/mod.ts';
 import { Client } from 'logos/src/client.ts';
 import constants from 'logos/constants.ts';
 
-async function handleDisplayBotInformation(
-	[client, bot]: [Client, Bot],
-	interaction: Interaction,
-): Promise<void> {
+async function handleDisplayBotInformation([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const botUser = client.cache.users.get(bot.id) ?? await getUser(bot, bot.id);
 
 	return void sendInteractionResponse(

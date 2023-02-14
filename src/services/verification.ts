@@ -22,7 +22,7 @@ import {
 } from 'discordeno';
 import { lodash } from 'lodash';
 import { localise, Modals, Services } from 'logos/assets/localisations/mod.ts';
-import { log } from 'logos/src/controllers/logging/logging.ts';
+import { logEvent } from 'logos/src/controllers/logging/logging.ts';
 import { EntryRequest, User } from 'logos/src/database/structs/mod.ts';
 import { Document, Reference } from 'logos/src/database/document.ts';
 import { stringifyValue } from 'logos/src/database/database.ts';
@@ -36,7 +36,7 @@ import {
 	InteractionCollectorSettings,
 	Modal,
 } from 'logos/src/interactions.ts';
-import { diagnosticMentionUser, getAllMessages, getTextChannel, guildAsAuthor } from 'logos/src/utils.ts';
+import { diagnosticMentionUser, getAllMessages, getAuthor, getTextChannel } from 'logos/src/utils.ts';
 import { defaultLocale } from 'logos/types.ts';
 import configuration from 'logos/configuration.ts';
 import constants from 'logos/constants.ts';
@@ -359,7 +359,7 @@ async function initiateVerificationProcess(
 				submitterIdByMessageId.set(messageId, interaction.user.id);
 				messageIdBySubmitterAndGuild.set(`${submitterReferenceId}${guild.id}`, messageId);
 
-				log([client, bot], guild, 'entryRequestSubmit', interaction.user, entryRequest.data);
+				logEvent([client, bot], guild, 'entryRequestSubmit', [interaction.user, entryRequest.data]);
 
 				editOriginalInteractionResponse(bot, submission.token, {
 					flags: ApplicationCommandFlags.Ephemeral,
@@ -753,7 +753,7 @@ async function handleVote(
 			sendMessage(bot, dmChannel.id, {
 				embeds: [
 					{
-						author: guildAsAuthor(bot, guild),
+						author: getAuthor(bot, guild),
 						description: `${constants.symbols.responses.celebration} ${entryRequestAcceptedString}`,
 						color: constants.colors.lightGreen,
 					},
@@ -775,7 +775,7 @@ async function handleVote(
 			await sendMessage(bot, dmChannel.id, {
 				embeds: [
 					{
-						author: guildAsAuthor(bot, guild),
+						author: getAuthor(bot, guild),
 						description: `${constants.symbols.responses.upset} ${entryRequestRejectedString}`,
 						color: constants.colors.lightGreen,
 					},
@@ -796,12 +796,11 @@ async function handleVote(
 		[submitterDocument.data.account.id, guild.id].join(constants.symbols.meta.idSeparator),
 	);
 
-	log(
+	logEvent(
 		[client, bot],
 		guild,
 		isAccepted ? 'entryRequestAccept' : 'entryRequestReject',
-		submitter,
-		interaction.member!,
+		[submitter, interaction.member!],
 	);
 
 	return isRejected ? false : isAccepted;

@@ -1210,11 +1210,10 @@ class Commands {
 				'Polish': 'Określony okres czasu nie jest prawidłowy.',
 				'Romanian': 'Durata precizată nu este validă.',
 			},
-			durationMustBeLongerThanMinute: {
-				'English': 'The duration must be longer than a minute.',
-				'Hungarian': 'A megadott időtartam érvénytelen.',
+			durationCannotBeLessThanOneMinute: {
+				'English': 'The timeout must last at least a minute.',
 				'Polish': 'Wyciszenie musi trwać przynajmniej minutę.',
-				'Romanian': 'Pauza trebuie să dureze mai mult decât un minut.',
+				'Romanian': 'Pauza trebuie să dureze cel puțin un minut.',
 			},
 			durationMustBeShorterThanWeek: {
 				'English': 'The duration must not be longer than a week.',
@@ -2046,26 +2045,9 @@ class Commands {
 			'Romanian': 'sugestie',
 		},
 		description: {
-			'English': 'Passes a suggestion over to the server staff.',
-			'Hungarian': 'Elküld egy javaslatot a szerver stábjának.',
-			'Polish': 'Przekazuje sugestię moderacji serwera.',
-			'Romanian': 'Transmite o sugestie personalului serverului.',
-		},
-		options: {
-			suggestion: {
-				name: {
-					'English': 'suggestion',
-					'Hungarian': 'tartalom',
-					'Polish': 'sugestia',
-					'Romanian': 'sugestie',
-				},
-				description: {
-					'English': 'The suggestion to pass over to the server staff.',
-					'Hungarian': 'A továbbítandó javaslat.',
-					'Polish': 'Sugestia, która ma zostać przekazana moderacji serwera.',
-					'Romanian': 'Sugestia care să fie transmisă personalului serverului.',
-				},
-			},
+			'English': 'Allows the user to make a suggestion for the community.',
+			'Polish': 'Pozwala użytkownikowi na przekazanie sugestii moderacji serwera.',
+			'Romanian': 'Permite utilizatorului să transmite o sugestie personalului serverului.',
 		},
 		strings: {
 			suggestionSent: {

@@ -16,10 +16,10 @@ const command: OptionBuilder = {
 };
 
 function handleDisplayPlaybackQueue([client, bot]: [Client, Bot], interaction: Interaction): void {
+	const [{ show }] = parseArguments(interaction.data?.options, { show: 'boolean' });
+
 	const controller = client.features.music.controllers.get(interaction.guildId!);
 	if (controller === undefined) return;
-
-	const [{ show }] = parseArguments(interaction.data?.options, { show: 'boolean' });
 
 	const locale = show ? defaultLocale : interaction.locale;
 

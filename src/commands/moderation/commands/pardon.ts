@@ -1,10 +1,12 @@
 import {
 	ApplicationCommandFlags,
+	ApplicationCommandOptionChoice,
 	ApplicationCommandOptionTypes,
 	Bot,
 	getDmChannel,
 	Interaction,
 	InteractionResponseTypes,
+	Member,
 	sendInteractionResponse,
 	sendMessage,
 } from 'discordeno';
@@ -12,18 +14,21 @@ import { Commands, createLocalisations, localise } from 'logos/assets/localisati
 import { getActiveWarnings } from 'logos/src/commands/moderation/module.ts';
 import { CommandBuilder } from 'logos/src/commands/command.ts';
 import { user } from 'logos/src/commands/parameters.ts';
-import { log } from 'logos/src/controllers/logging/logging.ts';
-import { Client, resolveInteractionToMember } from 'logos/src/client.ts';
+import { logEvent } from 'logos/src/controllers/logging/logging.ts';
+import { autocompleteMembers, Client, resolveInteractionToMember } from 'logos/src/client.ts';
 import { isAutocomplete, parseArguments } from 'logos/src/interactions.ts';
-import { guildAsAuthor } from 'logos/src/utils.ts';
+import { getAuthor } from 'logos/src/utils.ts';
 import constants from 'logos/constants.ts';
 import { mention, MentionTypes, timestamp } from 'logos/formatting.ts';
 import { defaultLocale } from 'logos/types.ts';
+import { Document } from 'logos/src/database/document.ts';
+import { Warning } from 'logos/src/database/structs/mod.ts';
 
 const command: CommandBuilder = {
 	...createLocalisations(Commands.pardon),
 	defaultMemberPermissions: ['MODERATE_MEMBERS'],
 	handle: handlePardonUser,
+	handleAutocomplete: handlePardonUserAutocomplete,
 	options: [
 		user,
 		{
@@ -35,11 +40,77 @@ const command: CommandBuilder = {
 	],
 };
 
-async function handlePardonUser(
+async function getRelevantWarnings(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
-): Promise<void> {
+	member: Member,
+): Promise<Document<Warning>[] | undefined> {
+	const subject = await client.database.adapters.users.getOrFetchOrCreate(
+		client,
+		'id',
+		member.id.toString(),
+		member.id,
+	);
+	if (subject === undefined) return void displayErrorOrEmptyChoices(bot, interaction);
+
+	const warnings = await client.database.adapters.warnings.getOrFetch(client, 'recipient', subject.ref);
+	if (warnings === undefined) return void displayErrorOrEmptyChoices(bot, interaction);
+
+	const relevantWarnings = Array.from(getActiveWarnings(warnings).values()).toReversed();
+	return relevantWarnings;
+}
+
+async function handlePardonUserAutocomplete([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const [{ user, warning }, focused] = parseArguments(interaction.data?.options, {});
+
+	if (focused?.name === 'user') {
+		return autocompleteMembers(
+			[client, bot],
+			interaction,
+			user!,
+			{
+				restrictToNonSelf: true,
+				excludeModerators: true,
+			},
+		);
+	}
+
+	if (focused?.name === 'warning') {
+		if (user === undefined) return;
+
+		const member = resolveInteractionToMember([client, bot], interaction, user, {
+			restrictToNonSelf: true,
+			excludeModerators: true,
+		});
+		if (member === undefined) return;
+
+		const relevantWarnings = await getRelevantWarnings([client, bot], interaction, member);
+		if (relevantWarnings === undefined) return;
+
+		const warningLowercase = warning!.toLowerCase();
+		const choices = relevantWarnings
+			.map<ApplicationCommandOptionChoice>((warning) => ({
+				name: `${warning.data.reason} (${timestamp(warning.data.createdAt)})`,
+				value: warning.ref.value.id,
+			}))
+			.filter((choice) => choice.name.toLowerCase().includes(warningLowercase));
+
+		console.debug(choices);
+
+		return void sendInteractionResponse(
+			bot,
+			interaction.id,
+			interaction.token,
+			{
+				type: InteractionResponseTypes.ApplicationCommandAutocompleteResult,
+				data: { choices },
+			},
+		);
+	}
+}
+
+async function handlePardonUser([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+	const [{ user, warning }] = parseArguments(interaction.data?.options, {});
 	if (user === undefined) return;
 
 	const member = resolveInteractionToMember([client, bot], interaction, user, {
@@ -48,37 +119,8 @@ async function handlePardonUser(
 	});
 	if (member === undefined) return;
 
-	if (isAutocomplete(interaction) && focused?.name === 'user') return;
-
-	const subject = await client.database.adapters.users.getOrFetchOrCreate(
-		client,
-		'id',
-		member.id.toString(),
-		member.id,
-	);
-	if (subject === undefined) return displayErrorOrEmptyChoices(bot, interaction);
-
-	const warnings = await client.database.adapters.warnings.getOrFetch(client, 'recipient', subject.ref);
-	if (warnings === undefined) return displayErrorOrEmptyChoices(bot, interaction);
-
-	const relevantWarnings = Array.from(getActiveWarnings(warnings).values()).toReversed();
-
-	if (isAutocomplete(interaction)) {
-		return void sendInteractionResponse(
-			bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ApplicationCommandAutocompleteResult,
-				data: {
-					choices: relevantWarnings.map((warning) => ({
-						name: `${warning.data.reason} (${timestamp(warning.data.createdAt)})`,
-						value: warning.ref.value.id,
-					})),
-				},
-			},
-		);
-	}
+	const relevantWarnings = await getRelevantWarnings([client, bot], interaction, member);
+	if (relevantWarnings === undefined) return;
 
 	const warningToDelete = relevantWarnings.find((relevantWarning) => relevantWarning.ref.value.id === warning);
 	if (warningToDelete === undefined) {
@@ -97,7 +139,7 @@ async function handlePardonUser(
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (guild === undefined) return;
 
-	log([client, bot], guild, 'memberWarnRemove', member, deletedWarning.data, interaction.user);
+	logEvent([client, bot], guild, 'memberWarnRemove', [member, deletedWarning.data, interaction.user]);
 
 	sendInteractionResponse(
 		bot,
@@ -123,7 +165,7 @@ async function handlePardonUser(
 		return void sendMessage(bot, dmChannel.id, {
 			embeds: [
 				{
-					author: guildAsAuthor(bot, guild),
+					author: getAuthor(bot, guild),
 					description: localise(Commands.pardon.strings.pardonedDirect, defaultLocale)(
 						deletedWarning.data.reason,
 						timestamp(deletedWarning.data.createdAt),

@@ -9,9 +9,7 @@ type Events = ClientEvents & GuildEvents;
  * and guild events.
  */
 type MessageGenerators<E extends ClientEvents | GuildEvents = Events> = Partial<
-	{
-		[key in keyof E]: LogEntry<E, key>;
-	}
+	{ [key in keyof E]: LogEntry<E, key> }
 >;
 
 /**

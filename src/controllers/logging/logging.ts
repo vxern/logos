@@ -21,11 +21,11 @@ function setupLogging([client, bot]: [Client, Bot], guild: Guild): void {
 
 const messageGenerators = { ...generators.client, ...generators.guild };
 
-function log<K extends keyof Events>(
+function logEvent<K extends keyof Events>(
 	[client, bot]: [Client, Bot],
 	guild: Guild,
 	event: K,
-	...args: Events[K]
+	args: Events[K],
 ): void {
 	const logChannel = getTextChannel(guild, configuration.guilds.channels.logging);
 	if (logChannel === undefined) return;
@@ -64,4 +64,4 @@ async function logToChannel<K extends keyof Events>(
 	});
 }
 
-export { log, setupLogging };
+export { logEvent, setupLogging };

@@ -25,13 +25,10 @@ type ProficiencyCategory = RoleCategory & {
 function getProficiencyCategory(): ProficiencyCategory {
 	return roles.find(
 		(category) => localise(category.name, defaultLocale) === 'Proficiency',
-	)! as ProficiencyCategory;
+	) as ProficiencyCategory;
 }
 
-function getRelevantCategories(
-	categories: RoleCategory[],
-	language: Language | undefined,
-): [RoleCategory, number][] {
+function getRelevantCategories(categories: RoleCategory[], language: Language | undefined): [RoleCategory, number][] {
 	const selectedRoleCategories: [RoleCategory, number][] = [];
 
 	for (let index = 0; index < categories.length; index++) {
@@ -60,10 +57,7 @@ function getRelevantCategories(
  * @param language - The language concerning the guild.
  * @returns The list of roles within the collection.
  */
-function resolveRoles(
-	collection: RoleCollection,
-	language: Language | undefined,
-): Role[] {
+function resolveRoles(collection: RoleCollection, language: Language | undefined): Role[] {
 	if (isStandalone(collection)) {
 		return collection.list;
 	}

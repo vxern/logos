@@ -6,10 +6,7 @@ import { parseArguments } from 'logos/src/interactions.ts';
 import configuration from 'logos/configuration.ts';
 import constants from 'logos/constants.ts';
 
-function handleSetVolume(
-	[client, bot]: [Client, Bot],
-	interaction: Interaction,
-): void {
+function handleSetVolume([client, bot]: [Client, Bot], interaction: Interaction): void {
 	const controller = client.features.music.controllers.get(interaction.guildId!);
 	if (controller === undefined) return;
 

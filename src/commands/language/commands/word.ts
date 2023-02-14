@@ -29,7 +29,7 @@ const command: CommandBuilder = {
 	...createLocalisations(Commands.word),
 	isRateLimited: true,
 	defaultMemberPermissions: ['VIEW_CHANNEL'],
-	handle: handleSearchWord,
+	handle: handleFindWord,
 	options: [{
 		...createLocalisations(Commands.word.options.word),
 		type: ApplicationCommandOptionTypes.String,
@@ -41,14 +41,8 @@ const command: CommandBuilder = {
 };
 
 /** Allows the user to look up a word and get information about it. */
-async function handleSearchWord(
-	[client, bot]: [Client, Bot],
-	interaction: Interaction,
-): Promise<void> {
-	const [{ word, verbose, show }] = parseArguments(
-		interaction.data?.options,
-		{ verbose: 'boolean', show: 'boolean' },
-	);
+async function handleFindWord([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+	const [{ word, verbose, show }] = parseArguments(interaction.data?.options, { verbose: 'boolean', show: 'boolean' });
 	if (word === undefined) return;
 
 	const guild = client.cache.guilds.get(interaction.guildId!);
@@ -117,7 +111,6 @@ async function handleSearchWord(
 	return void displayMenu(
 		[client, bot],
 		interaction,
-		undefined,
 		{
 			entries,
 			currentView: ContentTabs.Definitions,
@@ -145,16 +138,9 @@ interface WordViewData {
 function displayMenu(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
-	selection: Interaction | undefined,
 	data: WordViewData,
 	locale: string | undefined,
 ): void {
-	if (selection !== undefined) {
-		sendInteractionResponse(bot, selection.id, selection.token, {
-			type: InteractionResponseTypes.DeferredUpdateMessage,
-		});
-	}
-
 	const entry = data.entries.at(data.dictionaryEntryIndex)!;
 
 	editOriginalInteractionResponse(bot, interaction.token, {
@@ -199,16 +185,24 @@ function generateButtons(
 			const previousPageButtonId = createInteractionCollector([client, bot], {
 				type: InteractionTypes.MessageComponent,
 				onCollect: (_, selection) => {
+					sendInteractionResponse(bot, selection.id, selection.token, {
+						type: InteractionResponseTypes.DeferredUpdateMessage,
+					});
+
 					if (!isFirst) data.dictionaryEntryIndex--;
-					return void displayMenu([client, bot], interaction, selection, data, locale);
+					return void displayMenu([client, bot], interaction, data, locale);
 				},
 			});
 
 			const nextPageButtonId = createInteractionCollector([client, bot], {
 				type: InteractionTypes.MessageComponent,
 				onCollect: (_, selection) => {
+					sendInteractionResponse(bot, selection.id, selection.token, {
+						type: InteractionResponseTypes.DeferredUpdateMessage,
+					});
+
 					if (!isLast) data.dictionaryEntryIndex++;
-					return void displayMenu([client, bot], interaction, selection, data, locale);
+					return void displayMenu([client, bot], interaction, data, locale);
 				},
 			});
 
@@ -238,14 +232,13 @@ function generateButtons(
 		case ContentTabs.Inflection: {
 			if (entry.inflectionTable === undefined) return [];
 
-			const rows = chunk(entry.inflectionTable, 5);
-			rows.reverse();
+			const rows = chunk(entry.inflectionTable, 5).reverse();
 
 			const buttonId = createInteractionCollector([client, bot], {
 				type: InteractionTypes.MessageComponent,
 				onCollect: (_, selection) => {
 					if (entry.inflectionTable === undefined || selection.data === undefined) {
-						return void displayMenu([client, bot], interaction, selection, data, locale);
+						return void displayMenu([client, bot], interaction, data, locale);
 					}
 
 					const [__, indexString] = decodeId<MenuButtonID>(selection.data.customId!);
@@ -255,7 +248,7 @@ function generateButtons(
 						data.inflectionTableIndex = index;
 					}
 
-					return void displayMenu([client, bot], interaction, selection, data, locale);
+					return void displayMenu([client, bot], interaction, data, locale);
 				},
 			});
 
@@ -284,17 +277,25 @@ function generateButtons(
 	const definitionsMenuButtonId = createInteractionCollector([client, bot], {
 		type: InteractionTypes.MessageComponent,
 		onCollect: (_, selection) => {
+			sendInteractionResponse(bot, selection.id, selection.token, {
+				type: InteractionResponseTypes.DeferredUpdateMessage,
+			});
+
 			data.inflectionTableIndex = 0;
 			data.currentView = ContentTabs.Definitions;
-			return void displayMenu([client, bot], interaction, selection, data, locale);
+			return void displayMenu([client, bot], interaction, data, locale);
 		},
 	});
 
 	const inflectionMenuButtonId = createInteractionCollector([client, bot], {
 		type: InteractionTypes.MessageComponent,
 		onCollect: (_, selection) => {
+			sendInteractionResponse(bot, selection.id, selection.token, {
+				type: InteractionResponseTypes.DeferredUpdateMessage,
+			});
+
 			data.currentView = ContentTabs.Inflection;
-			return void displayMenu([client, bot], interaction, selection, data, locale);
+			return void displayMenu([client, bot], interaction, data, locale);
 		},
 	});
 
@@ -339,7 +340,7 @@ function entryToEmbeds(entry: DictionaryEntry, locale: string | undefined, verbo
 			wordClassDisplayed += ` — '${wordClassUnresolved}'`;
 		}
 	}
-	wordClassDisplayed = `***${wordClassDisplayed}***`;
+	const wordClassFormatted = `***${wordClassDisplayed}***`;
 
 	const word = entry.word;
 
@@ -355,7 +356,7 @@ function entryToEmbeds(entry: DictionaryEntry, locale: string | undefined, verbo
 		} else {
 			embeds.push({
 				title: localise(Commands.word.strings.definitionsForWord, locale)(word),
-				description: `${wordClassDisplayed}\n\n${definitionsFitted}`,
+				description: `${wordClassFormatted}\n\n${definitionsFitted}`,
 				color: constants.colors.husky,
 			});
 		}
@@ -396,7 +397,7 @@ function entryToEmbeds(entry: DictionaryEntry, locale: string | undefined, verbo
 	}
 
 	if (!verbose) {
-		return [{ title: word, description: wordClassDisplayed, fields, color: constants.colors.husky }];
+		return [{ title: word, description: wordClassFormatted, fields, color: constants.colors.husky }];
 	}
 
 	return embeds;

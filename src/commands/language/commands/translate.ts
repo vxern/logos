@@ -18,7 +18,7 @@ import { resolveToSupportedLanguage } from 'logos/src/commands/language/module.t
 import { CommandBuilder } from 'logos/src/commands/command.ts';
 import { show } from 'logos/src/commands/parameters.ts';
 import { Client } from 'logos/src/client.ts';
-import { isAutocomplete, parseArguments } from 'logos/src/interactions.ts';
+import { parseArguments } from 'logos/src/interactions.ts';
 import { addParametersToURL, diagnosticMentionUser } from 'logos/src/utils.ts';
 import constants from 'logos/constants.ts';
 
@@ -27,6 +27,7 @@ const command: CommandBuilder = {
 	isRateLimited: true,
 	defaultMemberPermissions: ['VIEW_CHANNEL'],
 	handle: handleTranslateText,
+	handleAutocomplete: handleTranslateTextAutocomplete,
 	options: [{
 		...createLocalisations(Commands.translate.options.from),
 		type: ApplicationCommandOptionTypes.String,
@@ -44,93 +45,44 @@ const command: CommandBuilder = {
 	}, show],
 };
 
-interface DeepLTranslation {
-	'detected_source_language': string;
-	text: string;
-}
+async function handleTranslateTextAutocomplete([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+	const [_, focused] = parseArguments(interaction.data?.options, { show: 'boolean' });
 
-/** Represents a response to a translation query. */
-interface Translation {
-	/** The language detected from the text sent to be translated. */
-	detectedSourceLanguage: string;
-
-	/** The translated text. */
-	text: string;
-}
-
-interface TranslationResult {
-	translations: DeepLTranslation[];
-}
-
-async function translateText(
-	sourceLanguageCode: string,
-	targetLanguageCode: string,
-	text: string,
-): Promise<Translation | undefined> {
-	const sourceLanguageCodeBase = sourceLanguageCode.split('-').at(0)!;
-
-	const response = await fetch(
-		addParametersToURL(constants.endpoints.deepl.translate, {
-			'auth_key': Deno.env.get('DEEPL_SECRET')!,
-			'text': text,
-			'source_lang': sourceLanguageCodeBase,
-			'target_lang': targetLanguageCode,
-		}),
-	);
-	if (!response.ok) return;
-
-	const results = (await response.json() as TranslationResult).translations;
-	if (results.length === 0) return;
-
-	const result = results.at(0)!;
-	return {
-		detectedSourceLanguage: result.detected_source_language,
-		text: result.text,
-	};
-}
-
-/** Allows the user to translate text from one language to another through the DeepL API. */
-async function handleTranslateText(
-	[client, bot]: [Client, Bot],
-	interaction: Interaction,
-): Promise<void> {
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (guild === undefined) return;
 
-	const [{ from, to, text, show }, focused] = parseArguments(
-		interaction.data?.options,
-		{ show: 'boolean' },
+	if (focused === undefined || focused.value === undefined) return;
+
+	const isInputtingSourceLanguage = focused.name === 'from';
+	const localisations = isInputtingSourceLanguage
+		? Commands.translate.strings.sourceLanguage
+		: Commands.translate.strings.targetLanguage;
+
+	const inputLowercase = (focused.value as string).toLowerCase();
+
+	const choices = client.metadata.supportedTranslationLanguages
+		.map((language) => ({
+			name: localise(localisations, interaction.locale)(language.name),
+			value: language.code,
+		}))
+		.filter((choice) => choice.name && choice.name.toLowerCase().includes(inputLowercase))
+		.slice(0, 25)
+		.toSorted((previous, next) => previous.name.localeCompare(next.name));
+
+	return void sendInteractionResponse(
+		bot,
+		interaction.id,
+		interaction.token,
+		{
+			type: InteractionResponseTypes.ApplicationCommandAutocompleteResult,
+			data: { choices },
+		},
 	);
+}
 
-	if (isAutocomplete(interaction)) {
-		if (focused === undefined || focused.value === undefined) return;
-
-		const isInputtingSourceLanguage = focused.name === 'from';
-		const localisations = isInputtingSourceLanguage
-			? Commands.translate.strings.sourceLanguage
-			: Commands.translate.strings.targetLanguage;
-
-		const inputLowercase = (focused.value as string).toLowerCase();
-		const choices = client.metadata.supportedTranslationLanguages
-			.map((language) => ({
-				name: localise(localisations, interaction.locale)(language.name),
-				value: language.code,
-			}))
-			.filter((choice) => choice.name && choice.name.toLowerCase().includes(inputLowercase))
-			.slice(0, 25)
-			.toSorted((previous, next) => previous.name.localeCompare(next.name));
-
-		return void sendInteractionResponse(
-			bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ApplicationCommandAutocompleteResult,
-				data: { choices },
-			},
-		);
-	}
-
+/** Allows the user to translate text from one language to another through the DeepL API. */
+async function handleTranslateText([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+	const [{ from, to, text, show }] = parseArguments(interaction.data?.options, { show: 'boolean' });
 	if (from === undefined || to === undefined || text === undefined) return;
 
 	if (from === to) {
@@ -209,12 +161,15 @@ async function handleTranslateText(
 		},
 	);
 
+	const guild = client.cache.guilds.get(interaction.guildId!);
+	if (guild === undefined) return;
+
 	client.log.info(
 		`Translating a text of length ${text.length} from ${sourceLanguage.name} to ${targetLanguage.name} ` +
 			`as requested by ${diagnosticMentionUser(interaction.user, true)} on ${guild.name}...`,
 	);
 
-	const translation = await translateText(sourceLanguage.code, targetLanguage.code, text);
+	const translation = await translate(sourceLanguage.code, targetLanguage.code, text);
 	if (translation === undefined) {
 		return void editOriginalInteractionResponse(
 			bot,
@@ -269,6 +224,51 @@ async function handleTranslateText(
 		interaction.token,
 		{ embeds },
 	);
+}
+
+interface DeepLTranslation {
+	'detected_source_language': string;
+	text: string;
+}
+
+/** Represents a response to a translation query. */
+interface Translation {
+	/** The language detected from the text sent to be translated. */
+	detectedSourceLanguage: string;
+
+	/** The translated text. */
+	text: string;
+}
+
+interface TranslationResult {
+	translations: DeepLTranslation[];
+}
+
+async function translate(
+	sourceLanguageCode: string,
+	targetLanguageCode: string,
+	text: string,
+): Promise<Translation | undefined> {
+	const sourceLanguageCodeBase = sourceLanguageCode.split('-').at(0)!;
+
+	const response = await fetch(
+		addParametersToURL(constants.endpoints.deepl.translate, {
+			'auth_key': Deno.env.get('DEEPL_SECRET')!,
+			'text': text,
+			'source_lang': sourceLanguageCodeBase,
+			'target_lang': targetLanguageCode,
+		}),
+	);
+	if (!response.ok) return;
+
+	const results = (await response.json() as TranslationResult).translations;
+	if (results.length === 0) return;
+
+	const result = results.at(0)!;
+	return {
+		detectedSourceLanguage: result.detected_source_language,
+		text: result.text,
+	};
 }
 
 export default command;

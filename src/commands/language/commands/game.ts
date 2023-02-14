@@ -27,10 +27,7 @@ const command: CommandBuilder = {
 type WordButtonID = [index: string];
 
 /** Starts a simple game of 'choose the correct word to fit in the blank'. */
-async function handleStartGame(
-	[client, bot]: [Client, Bot],
-	interaction: Interaction,
-): Promise<void> {
+async function handleStartGame([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (guild === undefined) return;
 
@@ -95,7 +92,7 @@ async function handleStartGame(
 			return void editOriginalInteractionResponse(
 				bot,
 				interaction.token,
-				createGameView(customId, sentenceSelection, embedColor, interaction.locale),
+				getGameView(customId, sentenceSelection, embedColor, interaction.locale),
 			);
 		},
 	});
@@ -105,11 +102,11 @@ async function handleStartGame(
 	return void editOriginalInteractionResponse(
 		bot,
 		interaction.token,
-		createGameView(customId, sentenceSelection, embedColor, interaction.locale),
+		getGameView(customId, sentenceSelection, embedColor, interaction.locale),
 	);
 }
 
-function createGameView(
+function getGameView(
 	customId: string,
 	sentenceSelection: SentenceSelection,
 	embedColor: number,
@@ -155,62 +152,40 @@ interface SentenceSelection {
 	choices: string[];
 }
 
-/**
- * Takes an array, duplicates it, shuffles it and returns the shuffled view.
- *
- * @param array - The array to shuffle.
- * @returns The shuffled array.
- */
-function shuffle<T>(array: T[]): T[] {
-	const shuffled = Array.from(array);
+function createSentenceSelection(sentencePairs: SentencePair[]): SentenceSelection {
+	function shuffle<T>(array: T[]): T[] {
+		const shuffled = Array.from(array);
 
-	for (let index = 0; index < array.length - 1; index++) {
-		const random = Math.floor(Math.random() * (index + 1));
-		const temporary = shuffled.at(index)!;
-		shuffled[index] = shuffled.at(random)!;
-		shuffled[random] = temporary!;
+		for (let index = 0; index < array.length - 1; index++) {
+			const random = Math.floor(Math.random() * (index + 1));
+			const temporary = shuffled.at(index)!;
+			shuffled[index] = shuffled.at(random)!;
+			shuffled[random] = temporary!;
+		}
+
+		return shuffled;
 	}
 
-	return shuffled;
-}
+	function random(max: number): number {
+		return Math.floor(Math.random() * max);
+	}
 
-function createSentenceSelection(
-	sentencePairs: SentencePair[],
-): SentenceSelection {
 	const indexes = Array.from({ length: 4 }, () => random(sentencePairs.length));
-
-	const pair = sentencePairs.at(indexes.at(0)!)!;
+	const pair = sentencePairs.at(indexes.shift()!)!;
 	const words = pair.sentence.split(' ');
 	const wordIndex = random(words.length);
 	const word = words.at(wordIndex)!;
 	words[wordIndex] = '\\_'.repeat(word.split('').length);
 	pair.sentence = words.join(' ');
 
-	indexes.shift();
-
 	const choices: string[] = [word];
 	for (const index of indexes) {
 		const words = sentencePairs.at(index)!.sentence.split(' ');
 		choices.push(words.at(random(words.length))!);
 	}
-
 	const shuffled = shuffle(choices);
 
-	return {
-		pair: pair,
-		word: word,
-		choices: shuffled,
-	};
-}
-
-/**
- * Generates a pseudo-random number.
- *
- * @param max - The maximum value to generate.
- * @returns A pseudo-random number between 0 and {@link max}.
- */
-function random(max: number): number {
-	return Math.floor(Math.random() * max);
+	return { pair, word, choices: shuffled };
 }
 
 export default command;

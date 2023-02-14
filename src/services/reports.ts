@@ -16,7 +16,7 @@ import {
 } from 'discordeno';
 import { lodash } from 'lodash';
 import { localise, Services } from 'logos/assets/localisations/mod.ts';
-import { generateWarningsPage } from 'logos/src/commands/information/commands/list/warnings.ts';
+import { getWarningPage } from 'logos/src/commands/information/commands/list/warnings.ts';
 import { Report, User, Warning } from 'logos/src/database/structs/mod.ts';
 import { Document, Reference } from 'logos/src/database/document.ts';
 import { stringifyValue } from 'logos/src/database/database.ts';
@@ -420,7 +420,7 @@ function getReportPrompt(
 				footer: { text: `${author.id}${constants.symbols.meta.metadataSeparator}${reportReferenceId}` },
 			},
 			...recipientAndWarningsTuples.map(([recipient, warnings]) => ({
-				...generateWarningsPage(warnings, false, defaultLocale),
+				...getWarningPage(warnings, false, defaultLocale),
 				title: localise(Services.reports.previousInfractions, defaultLocale)(diagnosticMentionUser(recipient, true)),
 			})),
 		],

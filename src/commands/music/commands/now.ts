@@ -27,6 +27,8 @@ const command: OptionBuilder = {
 };
 
 function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], interaction: Interaction): void {
+	const [{ collection, show }] = parseArguments(interaction.data?.options, { collection: 'boolean', show: 'boolean' });
+
 	const controller = client.features.music.controllers.get(interaction.guildId!);
 	if (controller === undefined) return;
 
@@ -49,8 +51,6 @@ function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], interaction
 			},
 		);
 	}
-
-	const [{ collection, show }] = parseArguments(interaction.data?.options, { collection: 'boolean', show: 'boolean' });
 
 	const locale = show ? defaultLocale : interaction.locale;
 
