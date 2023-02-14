@@ -42,6 +42,7 @@ class Expressions {
 					'Korean': 'Korejskiego',
 					'Latvian': 'Łotewskiego',
 					'Lithuanian': 'Litewskiego',
+					'Norwegian': 'Norweskiego',
 					'Norwegian (Bokmål)': 'Norweskiego',
 					'Polish': 'Polskiego',
 					'Portuguese': 'Portugalskiego',
