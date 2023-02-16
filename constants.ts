@@ -24,6 +24,7 @@ const timeDescriptors: [string, number][] = [
 const interactionTokenExpiryInterval = 14 * Periods.minute + 50 * Periods.second; // Just below 15 minutes.
 
 const staticComponentIds = {
+	none: 'none',
 	acceptedRules: 'accepted_rules',
 	selectedLanguageProficiency: 'selected_language_proficiency',
 	requestedVerification: 'requested_verification',
@@ -84,11 +85,158 @@ const colors = {
 	orange: fromHex('#f28123'), // Beer
 };
 
-const emojis = {
+enum BulletStyles {
+	Arrow = 'arrow',
+	Diamond = 'diamond',
+}
+
+const symbols = {
+	meta: {
+		whitespace: '⠀',
+		metadataSeparator: '・',
+		idSeparator: '|',
+	},
+	ruleBullet: '💠',
+	understood: '✅',
+	information: {
+		information: 'ℹ️',
+		inviteLink: '🔗',
+	},
+	events: {
+		user: {
+			banned: '⚔️',
+			unbanned: '😇',
+			joined: '😁',
+			left: '😔',
+		},
+		message: {
+			updated: '⬆️',
+			deleted: '❌',
+		},
+		entryRequest: {
+			submitted: 'ℹ️',
+			accepted: '✔️',
+			rejected: '❌',
+		},
+		warned: '⚠️',
+		pardoned: '😇',
+		timeout: {
+			added: '⏳',
+			removed: '😇',
+		},
+		praised: '🙏',
+		suggestion: '🌿',
+		report: '💢',
+	},
 	music: {
 		song: '🎵',
-		external: '📁',
+		file: '📁',
 		collection: '🎶',
+		list: '📋',
+		queued: '👍',
+		allDone: '👏',
+		nowPlaying: '⬇️',
+		paused: '⏸️',
+		removed: '❌',
+		resumed: '▶️',
+		skippedTo: '🔍',
+		skipped: '⏭️',
+		stopped: '⏹️',
+		unskipped: '⏮️',
+		volume: '🔊',
+	},
+	indicators: {
+		exclamation: '❗',
+		warning: '⚠️',
+		arrowRight: '➜',
+	},
+	responses: {
+		celebration: '🥳',
+		upset: '😕',
+	},
+	guild: {
+		description: '🖋️',
+		members: '🧑',
+		created: '⏱️',
+		channels: {
+			channels: '🗯️',
+			text: '📜',
+			voice: '🔊',
+		},
+		owner: '👑',
+		moderators: '⚖️',
+		proficiencyDistribution: '🎓',
+	},
+	interactions: {
+		menu: {
+			controls: {
+				back: '«',
+				forward: '»',
+			},
+		},
+	},
+	bullets: {
+		arrow: '➜',
+		diamond: '♦️',
+	} satisfies Record<BulletStyles, string>,
+	strings: {
+		trail: '...',
+		continued: '(...)',
+	},
+	roles: {
+		noCategory: '💭',
+		unknownEmoji: '❓',
+		categories: {
+			proficiency: {
+				category: '🎓',
+				beginner: '🟩',
+				intermediate: '🟦',
+				advanced: '🟥',
+				native: '🟨',
+			},
+			personalisation: {
+				category: '🌈',
+				orthography: {
+					category: '🖋️',
+					idinist: 'Idini',
+				},
+				gender: {
+					category: '⚧',
+					male: '♂️',
+					female: '♀️',
+					transgender: '⚧',
+					nonbinary: '❔',
+				},
+				abroad: {
+					category: '🌎',
+					diasporan: '🌎',
+				},
+			},
+			learning: {
+				category: '📖',
+				classroomAttendee: '📖',
+				correctMe: '✍️',
+				dailyPhrase: '🌞',
+				voicechatter: '🗣️',
+			},
+			ethnicity: {
+				category: '🗾',
+			},
+			dialects: {
+				category: '🏷️',
+			},
+			regions: {
+				category: '🤷‍♂️',
+			},
+		},
+	},
+	profile: {
+		roles: '💼',
+		statistics: {
+			statistics: '🧮',
+			praises: '🙏',
+			warnings: '😖',
+		},
 	},
 };
 
@@ -105,9 +253,9 @@ export default {
 	links,
 	images,
 	colors,
-	emojis,
+	symbols,
 	staticComponentIds,
 	timeDescriptors,
 	interactionTokenExpiryInterval,
 };
-export { Periods };
+export { BulletStyles, Periods };

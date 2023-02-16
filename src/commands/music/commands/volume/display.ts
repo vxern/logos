@@ -12,14 +12,11 @@ import { parseArguments } from 'logos/src/interactions.ts';
 import constants from 'logos/constants.ts';
 import { defaultLocale } from 'logos/types.ts';
 
-function handleDisplayVolume(
-	[client, bot]: [Client, Bot],
-	interaction: Interaction,
-): void {
+function handleDisplayVolume([client, bot]: [Client, Bot], interaction: Interaction): void {
+	const [{ show }] = parseArguments(interaction.data?.options, { show: 'boolean' });
+
 	const controller = client.features.music.controllers.get(interaction.guildId!);
 	if (controller === undefined) return;
-
-	const [{ show }] = parseArguments(interaction.data?.options, { show: 'boolean' });
 
 	const isVoiceStateVerified = verifyVoiceState(
 		bot,
@@ -43,7 +40,7 @@ function handleDisplayVolume(
 			data: {
 				flags: !show ? ApplicationCommandFlags.Ephemeral : undefined,
 				embeds: [{
-					title: `🔊 ${volumeString}`,
+					title: `${constants.symbols.music.volume} ${volumeString}`,
 					description: localise(Commands.music.options.volume.options.display.strings.volume.body, locale)(
 						controller.player.volume,
 					),

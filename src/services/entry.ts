@@ -6,7 +6,7 @@ import {
 } from 'logos/src/services/entry-stages/mod.ts';
 import { ServiceStarter } from 'logos/src/services/services.ts';
 import { Client } from 'logos/src/client.ts';
-import { createInteractionCollector } from 'logos/src/interactions.ts';
+import { createInteractionCollector, decodeId } from 'logos/src/interactions.ts';
 import constants from 'logos/constants.ts';
 
 type EntryInteractionHandler = (
@@ -23,6 +23,8 @@ const interactionHandlers: Record<string, EntryInteractionHandler> = {
 
 const service: ServiceStarter = setupEntryProcess;
 
+type EntryStepButtonID = [parameter: string];
+
 function setupEntryProcess([client, bot]: [Client, Bot]): void {
 	for (const step of Object.keys(interactionHandlers)) {
 		createInteractionCollector([client, bot], {
@@ -33,8 +35,8 @@ function setupEntryProcess([client, bot]: [Client, Bot]): void {
 				const selectionCustomId = interaction.data?.customId;
 				if (selectionCustomId === undefined) return;
 
-				const [step, parameter] = selectionCustomId.split('|') as [string, string];
-				const handleInteraction = interactionHandlers[step as keyof typeof interactionHandlers]!;
+				const [stepId, parameter] = decodeId<EntryStepButtonID>(selectionCustomId);
+				const handleInteraction = interactionHandlers[stepId as keyof typeof interactionHandlers]!;
 
 				return void handleInteraction([client, bot], interaction, parameter);
 			},
@@ -43,3 +45,4 @@ function setupEntryProcess([client, bot]: [Client, Bot]): void {
 }
 
 export default service;
+export type { EntryStepButtonID };

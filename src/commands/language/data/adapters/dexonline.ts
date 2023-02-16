@@ -4,13 +4,18 @@ import {
 	DictionaryAdapter,
 	DictionaryEntry,
 	DictionaryProvisions,
-	WordTypes,
+	WordClasses,
 } from 'logos/src/commands/language/data/types.ts';
-import { getWordType } from 'logos/src/commands/language/module.ts';
+import { getWordClass } from 'logos/src/commands/language/module.ts';
 import { chunk } from 'logos/src/utils.ts';
+import constants from 'logos/constants.ts';
 import { Language } from 'logos/types.ts';
 
-const supportedTypesForInflection = [WordTypes.Noun, WordTypes.Verb, WordTypes.Adjective, WordTypes.Determiner];
+const classesWithInflections = [WordClasses.Noun, WordClasses.Verb, WordClasses.Adjective, WordClasses.Determiner];
+
+function hasInflections(wordClass: WordClasses): boolean {
+	return classesWithInflections.includes(wordClass);
+}
 
 type InflectionTable = NonNullable<DictionaryEntry['inflectionTable']>;
 
@@ -23,15 +28,18 @@ class DexonlineAdapter implements DictionaryAdapter<Dexonline.Results> {
 	}
 
 	parse(results: Dexonline.Results, locale: string | undefined): DictionaryEntry[] | undefined {
-		const entries = results.synthesis.map<DictionaryEntry>((result) => ({
-			word: result.lemma,
-			title: result.lemma,
-			type: [getWordType(result.type, 'Romanian'), result.type],
-			definitions: result.definitions,
-			etymologies: result.etymology,
-			expressions: result.expressions,
-			inflectionTable: undefined,
-		}));
+		const entries = results.synthesis.map<DictionaryEntry>((result) => {
+			const wordClass = getWordClass(result.type, 'Romanian');
+			return {
+				word: result.lemma,
+				title: result.lemma,
+				wordClass: [wordClass, result.type],
+				definitions: result.definitions,
+				etymologies: result.etymology,
+				expressions: result.expressions,
+				inflectionTable: undefined,
+			};
+		});
 
 		for (const { index, lemma, table } of results.inflection) {
 			const entriesByWord = entries.filter((entry) => entry.word === lemma);
@@ -48,12 +56,12 @@ class DexonlineAdapter implements DictionaryAdapter<Dexonline.Results> {
 				entry = entriesByWord.at(index)!;
 			}
 
-			if (entry.type === undefined) continue;
+			if (entry.wordClass === undefined) continue;
 
-			const type = entry.type[0]!;
-			if (!supportedTypesForInflection.includes(type)) continue;
+			const wordClass = entry.wordClass[0]!;
+			if (!hasInflections(wordClass)) continue;
 
-			const inflectionTable = this.tableRowsToFields(type, table, locale);
+			const inflectionTable = this.tableRowsToFields(wordClass, table, locale);
 
 			entry.inflectionTable = inflectionTable;
 		}
@@ -61,18 +69,18 @@ class DexonlineAdapter implements DictionaryAdapter<Dexonline.Results> {
 		return entries.length === 0 ? undefined : entries;
 	}
 
-	private tableRowsToFields(wordType: WordTypes, rows: string[][], locale: string | undefined): InflectionTable {
-		switch (wordType) {
-			case WordTypes.Noun: {
+	private tableRowsToFields(wordClass: WordClasses, rows: string[][], locale: string | undefined): InflectionTable {
+		switch (wordClass) {
+			case WordClasses.Noun: {
 				return this.nounTableRowsToTable(rows, locale);
 			}
-			case WordTypes.Verb: {
+			case WordClasses.Verb: {
 				return this.verbTableRowsToTable(rows, locale);
 			}
-			case WordTypes.Adjective: {
+			case WordClasses.Adjective: {
 				return this.adjectiveTableRowsToTable(rows, locale);
 			}
-			case WordTypes.Determiner: {
+			case WordClasses.Determiner: {
 				return this.determinerTableRowsToTable(rows, locale);
 			}
 		}
@@ -82,24 +90,34 @@ class DexonlineAdapter implements DictionaryAdapter<Dexonline.Results> {
 
 	private nounTableRowsToTable(rows: string[][], locale: string | undefined): InflectionTable {
 		const [nominativeAccusative, genitiveDative, vocative] = chunk(
-			rows.slice(1).map(
-				(
-					columns,
-				) => columns.slice(2).map((terms) => terms.split(' ').filter((term) => !term.endsWith('‑')).join(' ')),
-			),
+			rows
+				.slice(1)
+				.map(
+					(columns) =>
+						columns
+							.slice(2)
+							.map(
+								(terms) =>
+									terms
+										.split(' ')
+										.filter((term) => !term.endsWith('‑')).join(' '),
+							),
+				),
 			2,
 		);
 
-		for (const row of vocative!) {
-			row.pop();
+		if (vocative !== undefined) {
+			for (const row of vocative) {
+				row.pop();
+			}
+			vocative[0] = vocative[0]![0]!.split(' ');
 		}
-		vocative![0] = vocative!.at(0)!.at(0)!.split(' ');
 
 		const singularString = localise(Commands.word.strings.nouns.singular, locale);
 		const pluralString = localise(Commands.word.strings.nouns.plural, locale);
 
 		const numberColumn = {
-			name: '⠀',
+			name: constants.symbols.meta.whitespace,
 			value: `**${singularString}**\n` + `**${pluralString}**`,
 			inline: true,
 		};
@@ -140,7 +158,10 @@ class DexonlineAdapter implements DictionaryAdapter<Dexonline.Results> {
 			.map((columns) => columns.slice(2))
 			.at(0)!
 			.map(
-				(word) => word.split(' ').at(word.startsWith('(a)') ? 1 : 0)!,
+				(word) =>
+					word
+						.split(' ')
+						.at(word.startsWith('(a)') ? 1 : 0)!,
 			);
 
 		const [present, subjunctive, imperfect, simplePerfect, pluperfect] = rows.slice(5)
@@ -342,11 +363,19 @@ class DexonlineAdapter implements DictionaryAdapter<Dexonline.Results> {
 
 	private adjectiveTableRowsToTable(rows: string[][], locale: string | undefined): InflectionTable {
 		const [nominativeAccusative, genitiveDative] = chunk(
-			rows.slice(2).map(
-				(
-					columns,
-				) => columns.slice(2, 8).map((terms) => terms.split(' ').filter((term) => !term.endsWith('‑')).join(' ')),
-			),
+			rows
+				.slice(2)
+				.map(
+					(columns) =>
+						columns
+							.slice(2, 8)
+							.map(
+								(terms) =>
+									terms
+										.split(' ')
+										.filter((term) => !term.endsWith('‑')).join(' '),
+							),
+				),
 			2,
 		);
 
@@ -354,7 +383,7 @@ class DexonlineAdapter implements DictionaryAdapter<Dexonline.Results> {
 		const pluralString = localise(Commands.word.strings.nouns.plural, locale);
 
 		const numberColumn = {
-			name: '⠀',
+			name: constants.symbols.meta.whitespace,
 			value: `**${singularString}**\n` + `**${pluralString}**`,
 			inline: true,
 		};
@@ -379,11 +408,20 @@ class DexonlineAdapter implements DictionaryAdapter<Dexonline.Results> {
 
 	private determinerTableRowsToTable(rows: string[][], locale: string | undefined): InflectionTable {
 		const [nominativeAccusative, genitiveDative] = chunk(
-			rows.slice(2).map(
-				(
-					columns,
-				) => columns.slice(2, 8).map((terms) => terms.split(' ').filter((term) => !term.endsWith('‑')).join(' ')),
-			),
+			rows
+				.slice(2)
+				.map(
+					(columns) =>
+						columns
+							.slice(2, 8)
+							.map(
+								(terms) =>
+									terms
+										.split(' ')
+										.filter((term) => !term.endsWith('‑'))
+										.join(' '),
+							),
+				),
 			2,
 		);
 
@@ -391,7 +429,7 @@ class DexonlineAdapter implements DictionaryAdapter<Dexonline.Results> {
 		const pluralString = localise(Commands.word.strings.nouns.plural, locale);
 
 		const numberColumn = {
-			name: '⠀',
+			name: constants.symbols.meta.whitespace,
 			value: `**${singularString}**\n` + `**${pluralString}**`,
 			inline: true,
 		};

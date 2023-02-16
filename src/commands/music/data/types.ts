@@ -34,7 +34,7 @@ interface SongCollection {
 
 enum SongListingContentTypes {
 	Song,
-	External,
+	File,
 	Collection,
 }
 
@@ -61,7 +61,7 @@ interface SongListing {
 
 /** Represents a musical piece in stream format. */
 interface SongStream {
-	type: SongListingContentTypes.External;
+	type: SongListingContentTypes.File;
 
 	/** The title of the stream. */
 	title: string;
@@ -71,9 +71,9 @@ interface SongStream {
 }
 
 const listingTypeToEmoji = {
-	[SongListingContentTypes.Song]: constants.emojis.music.song,
-	[SongListingContentTypes.External]: constants.emojis.music.external,
-	[SongListingContentTypes.Collection]: constants.emojis.music.collection,
+	[SongListingContentTypes.Song]: constants.symbols.music.song,
+	[SongListingContentTypes.File]: constants.symbols.music.file,
+	[SongListingContentTypes.Collection]: constants.symbols.music.collection,
 } satisfies Record<`${SongListingContentTypes}`, string>;
 
 export { listingTypeToEmoji, SongListingContentTypes };

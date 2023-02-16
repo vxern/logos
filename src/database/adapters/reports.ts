@@ -98,8 +98,6 @@ const adapter: DatabaseAdapters['reports'] = {
 			$.Create($.Collection('Reports'), { data: report }),
 		);
 
-		// TODO(vxern): Possible security risk of pointing to a report that stores information about the submitter as well as other users involved.
-
 		const authorReferenceId = stringifyValue(report.author);
 		const recipientReferenceIds = report.recipients.map((recipient) => stringifyValue(recipient));
 		const guildId = stringifyValue(report.guild);

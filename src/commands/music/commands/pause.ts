@@ -72,7 +72,7 @@ function handlePausePlayback([client, bot]: [Client, Bot], interaction: Interact
 			type: InteractionResponseTypes.ChannelMessageWithSource,
 			data: {
 				embeds: [{
-					title: `⏸️ ${pausedString}`,
+					title: `${constants.symbols.music.paused} ${pausedString}`,
 					description: localise(Commands.music.options.pause.strings.paused.body, defaultLocale),
 					color: constants.colors.invisible,
 				}],

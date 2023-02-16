@@ -17,7 +17,7 @@ import { chunk } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import constants from 'logos/constants.ts';
 import { mention, MentionTypes, timestamp, trim } from 'logos/formatting.ts';
-import { defaultLocale } from '../../../../types.ts';
+import { defaultLocale } from 'logos/types.ts';
 
 const command: OptionBuilder = {
 	...createLocalisations(Commands.music.options.now),
@@ -27,6 +27,8 @@ const command: OptionBuilder = {
 };
 
 function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], interaction: Interaction): void {
+	const [{ collection, show }] = parseArguments(interaction.data?.options, { collection: 'boolean', show: 'boolean' });
+
 	const controller = client.features.music.controllers.get(interaction.guildId!);
 	if (controller === undefined) return;
 
@@ -49,8 +51,6 @@ function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], interaction
 			},
 		);
 	}
-
-	const [{ collection, show }] = parseArguments(interaction.data?.options, { collection: 'boolean', show: 'boolean' });
 
 	const locale = show ? defaultLocale : interaction.locale;
 
@@ -80,7 +80,7 @@ function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], interaction
 		return void paginate([client, bot], interaction, {
 			elements: chunk(collection.songs, configuration.music.limits.songs.page),
 			embed: {
-				title: `⬇️ ${nowPlayingString}`,
+				title: `${constants.symbols.music.nowPlaying} ${nowPlayingString}`,
 				color: constants.colors.blue,
 			},
 			view: {
@@ -109,7 +109,7 @@ function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], interaction
 		});
 	}
 
-	const song = <Song | SongStream> currentListing.content;
+	const song = currentListing.content as Song | SongStream;
 
 	const nowPlayingString = localise(Commands.music.options.now.strings.nowPlaying, locale);
 
@@ -122,7 +122,7 @@ function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], interaction
 			data: {
 				flags: !show ? ApplicationCommandFlags.Ephemeral : undefined,
 				embeds: [{
-					title: `⬇️ ${nowPlayingString}`,
+					title: `${constants.symbols.music.nowPlaying} ${nowPlayingString}`,
 					fields: [
 						...isCollection(currentListing?.content)
 							? [{

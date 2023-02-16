@@ -16,13 +16,18 @@ import {
 } from 'discordeno';
 import { lodash } from 'lodash';
 import { localise, Services } from 'logos/assets/localisations/mod.ts';
-import { generateWarningsPage } from 'logos/src/commands/information/commands/list/warnings.ts';
+import { getWarningPage } from 'logos/src/commands/information/commands/list/warnings.ts';
 import { Report, User, Warning } from 'logos/src/database/structs/mod.ts';
 import { Document, Reference } from 'logos/src/database/document.ts';
 import { stringifyValue } from 'logos/src/database/database.ts';
 import { ServiceStarter } from 'logos/src/services/services.ts';
 import { Client, extendEventHandler, WithLanguage } from 'logos/src/client.ts';
-import { createInteractionCollector, InteractionCollectorSettings } from 'logos/src/interactions.ts';
+import {
+	createInteractionCollector,
+	decodeId,
+	encodeId,
+	InteractionCollectorSettings,
+} from 'logos/src/interactions.ts';
 import { diagnosticMentionUser, getAllMessages, getTextChannel } from 'logos/src/utils.ts';
 import { defaultLocale } from 'logos/types.ts';
 import configuration from 'logos/configuration.ts';
@@ -42,10 +47,12 @@ function setupActionHandler([client, bot]: [Client, Bot]): void {
 		type: InteractionTypes.MessageComponent,
 		customId: constants.staticComponentIds.reports,
 		doesNotExpire: true,
-		onCollect: (_bot, selection) => {
-			const [_customId, authorId, guildId, reportReference, _isClose] = selection.data!.customId!.split('|');
+		onCollect: (_, selection) => {
+			const [__, authorId, guildId, reportReference, ___] = decodeId<ReportPromptButtonID>(selection.data!.customId!);
 
-			const handle = reportPromptHandlers.get(`${authorId}|${guildId}|${reportReference}`);
+			const handle = reportPromptHandlers.get(
+				[authorId, guildId, reportReference].join(constants.symbols.meta.idSeparator),
+			);
 			if (handle === undefined) return;
 
 			return void handle(bot, selection);
@@ -58,13 +65,11 @@ interface ReportPromptMetadata {
 	reportReferenceId: string;
 }
 
-const metadataSeparator = '・';
-
 function extractMetadata(prompt: Message): ReportPromptMetadata | undefined {
 	const metadata = prompt.embeds.at(0)?.footer?.text;
 	if (metadata === undefined) return undefined;
 
-	const [authorId, reportReferenceId] = metadata.split(metadataSeparator);
+	const [authorId, reportReferenceId] = metadata.split(constants.symbols.meta.metadataSeparator);
 	if (authorId === undefined || reportReferenceId === undefined) return undefined;
 
 	return { authorId: BigInt(authorId), reportReferenceId: reportReferenceId };
@@ -209,7 +214,7 @@ function registerPastReports([client, bot]: [Client, Bot]): void {
 
 function ensureReportPromptPersistence([client, bot]: [Client, Bot]): void {
 	// Anti-tampering feature; detects report prompts being deleted.
-	extendEventHandler(bot, 'messageDelete', { prepend: true }, async (_bot, { id, channelId, guildId }) => {
+	extendEventHandler(bot, 'messageDelete', { prepend: true }, async (_, { id, channelId, guildId }) => {
 		// If the message was deleted from any other channel apart from a report channel.
 		if (reportChannelIdByGuildId.get(guildId!) !== channelId) {
 			return;
@@ -300,61 +305,66 @@ function registerReportHandler(
 	[authorId, authorReference]: [bigint, Reference],
 	reportReferenceId: string,
 ): void {
-	reportPromptHandlers.set(`${authorId}|${guildId}|${reportReferenceId}`, async (bot, selection) => {
-		const isClose = selection.data!.customId!.split('|')[4]! === 'true';
+	reportPromptHandlers.set(
+		[authorId, guildId, reportReferenceId].join(constants.symbols.meta.idSeparator),
+		async (bot, selection) => {
+			const isResolved = decodeId<ReportPromptButtonID>(selection.data!.customId!)[4] === 'true';
 
-		const reports = client.database.adapters.reports.get(client, 'authorAndGuild', [
-			authorReference,
-			guildId.toString(),
-		]);
-		if (reports === undefined) return;
+			const reports = client.database.adapters.reports.get(client, 'authorAndGuild', [
+				authorReference,
+				guildId.toString(),
+			]);
+			if (reports === undefined) return;
 
-		const report = reports.get(reportReferenceId.toString());
-		if (report === undefined) return;
+			const report = reports.get(reportReferenceId.toString());
+			if (report === undefined) return;
 
-		if (isClose && report.data.isResolved) {
-			return void sendInteractionResponse(bot, selection.id, selection.token, {
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						description: localise(Services.alreadyMarkedAsResolved, defaultLocale),
-						color: constants.colors.dullYellow,
-					}],
-				},
-			});
-		}
+			if (isResolved && report.data.isResolved) {
+				return void sendInteractionResponse(bot, selection.id, selection.token, {
+					type: InteractionResponseTypes.ChannelMessageWithSource,
+					data: {
+						flags: ApplicationCommandFlags.Ephemeral,
+						embeds: [{
+							description: localise(Services.alreadyMarkedAsResolved, defaultLocale),
+							color: constants.colors.dullYellow,
+						}],
+					},
+				});
+			}
 
-		if (!isClose && !report.data.isResolved) {
-			return void sendInteractionResponse(bot, selection.id, selection.token, {
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						description: localise(Services.alreadyMarkedAsUnresolved, defaultLocale),
-						color: constants.colors.dullYellow,
-					}],
-				},
-			});
-		}
+			if (!isResolved && !report.data.isResolved) {
+				return void sendInteractionResponse(bot, selection.id, selection.token, {
+					type: InteractionResponseTypes.ChannelMessageWithSource,
+					data: {
+						flags: ApplicationCommandFlags.Ephemeral,
+						embeds: [{
+							description: localise(Services.alreadyMarkedAsUnresolved, defaultLocale),
+							color: constants.colors.dullYellow,
+						}],
+					},
+				});
+			}
 
-		const updatedReportContent = lodash.cloneDeep(report) as Document<Report>;
+			const updatedReportContent = lodash.cloneDeep(report) as Document<Report>;
 
-		updatedReportContent.data.isResolved = isClose;
+			updatedReportContent.data.isResolved = isResolved;
 
-		const updatedReportDocument = await client.database.adapters.reports.update(client, updatedReportContent);
-		if (updatedReportDocument === undefined) return;
+			const updatedReportDocument = await client.database.adapters.reports.update(client, updatedReportContent);
+			if (updatedReportDocument === undefined) return;
 
-		const messageId = messageIdByReportReferenceId.get(reportReferenceId);
-		if (messageId === undefined) return;
+			const messageId = messageIdByReportReferenceId.get(reportReferenceId);
+			if (messageId === undefined) return;
 
-		reportByMessageId.set(messageId, updatedReportDocument);
+			reportByMessageId.set(messageId, updatedReportDocument);
 
-		deleteMessage(bot, channelId, messageId);
+			deleteMessage(bot, channelId, messageId);
 
-		return;
-	});
+			return;
+		},
+	);
 }
+
+type ReportPromptButtonID = [authorId: string, guildId: string, reportReferenceId: string, isResolved: string];
 
 function getReportPrompt(
 	bot: Bot,
@@ -407,10 +417,10 @@ function getReportPrompt(
 						}]
 						: []),
 				],
-				footer: { text: `${author.id}${metadataSeparator}${reportReferenceId}` },
+				footer: { text: `${author.id}${constants.symbols.meta.metadataSeparator}${reportReferenceId}` },
 			},
 			...recipientAndWarningsTuples.map(([recipient, warnings]) => ({
-				...generateWarningsPage(warnings, false, defaultLocale),
+				...getWarningPage(warnings, false, defaultLocale),
 				title: localise(Services.reports.previousInfractions, defaultLocale)(diagnosticMentionUser(recipient, true)),
 			})),
 		],
@@ -422,13 +432,19 @@ function getReportPrompt(
 						type: MessageComponentTypes.Button,
 						style: ButtonStyles.Primary,
 						label: localise(Services.markAsResolved, defaultLocale),
-						customId: `${constants.staticComponentIds.reports}|${author.id}|${guild.id}|${reportReferenceId}|true`,
+						customId: encodeId<ReportPromptButtonID>(
+							constants.staticComponentIds.reports,
+							[author.id.toString(), guild.id.toString(), reportReferenceId, `${true}`],
+						),
 					}
 					: {
 						type: MessageComponentTypes.Button,
 						style: ButtonStyles.Secondary,
 						label: localise(Services.markAsUnresolved, defaultLocale),
-						customId: `${constants.staticComponentIds.reports}|${author.id}|${guild.id}|${reportReferenceId}|false`,
+						customId: encodeId<ReportPromptButtonID>(
+							constants.staticComponentIds.reports,
+							[author.id.toString(), guild.id.toString(), reportReferenceId, `${false}`],
+						),
 					},
 			],
 		}],

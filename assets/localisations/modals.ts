@@ -3,39 +3,6 @@ import { getLocaleForLanguage, getLocalisationsForLanguage, localise } from 'log
 import { Language } from 'logos/types.ts';
 
 class Modals {
-	static readonly article = {
-		titles: {
-			articleComposer: {
-				'English': 'Article Composer',
-				'Polish': 'Kompozytor artykułów',
-				'Romanian': 'Compozitor de articole',
-			},
-			articleEditor: {
-				'English': 'Article Editor',
-				'Polish': 'Edytor artykułów',
-				'Romanian': 'Editor de articole',
-			},
-		},
-		fields: {
-			title: {
-				'English': 'Title of the article',
-				'Polish': 'Tytuł artykułu',
-				'Romanian': 'Titlul articolului',
-			},
-			// If possible, use something alike to 'content' rather than 'body'.
-			body: {
-				'English': 'Body of the article',
-				'Polish': 'Treść artykułu',
-				'Romanian': 'Conținutul articolului',
-			},
-			footer: {
-				'English': 'Additional information and/or notes',
-				'Polish': 'Dodatkowe informacje i/lub notatki',
-				'Romanian': 'Informații suplimentare și/sau notițe',
-			},
-		},
-	};
-
 	static readonly verification = {
 		title: {
 			'English': 'Verification Questions',
@@ -134,14 +101,14 @@ class Modals {
 			'Romanian': 'Progresul tău va fi pierdut.',
 		},
 		// No full stop here.
-		// The 'composer' is the form submission prompt where the user is able to compose articles, verification answers, etc.
+		// The 'composer' is the form submission prompt where the user is able to compose verification answers, etc.
 		yesLeaveTheComposer: {
 			'English': 'Yes, I want to leave the composer',
 			'Polish': 'Tak, chcę opuścić kompozytor',
 			'Romanian': 'Da, vreau să părăsesc compozitorul',
 		},
 		// No full stop here.
-		// The 'composer' is the form submission prompt where the user is able to compose articles, verification answers, etc.
+		// The 'composer' is the form submission prompt where the user is able to compose verification answers, etc.
 		noTakeMeBackToTheComposer: {
 			'English': 'No, take me back to the composer',
 			'Polish': 'Nie, zabierz mnie z powrotem do kompozytora',

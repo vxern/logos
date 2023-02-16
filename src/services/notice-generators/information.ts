@@ -32,7 +32,7 @@ function getRulesSection(guild: Guild): Embed {
 		const summaryString = localise(rule.summary, defaultLocale);
 
 		fields.push({
-			name: `💠  #${index + 1} ~ **${titleString}**  ~  ${tldrString}: *${summaryString}*`,
+			name: `${constants.symbols.ruleBullet}  #${index + 1} ~ **${titleString}**  ~  ${tldrString}: *${summaryString}*`,
 			value: localise(rule.content, defaultLocale),
 			inline: false,
 		});
@@ -52,7 +52,7 @@ function getRulesSection(guild: Guild): Embed {
 	);
 
 	fields.push({
-		name: `ℹ️  ${moderationPolicyString}`,
+		name: `${constants.symbols.information.information}  ${moderationPolicyString}`,
 		value: list([
 			localise(Services.notices.notices.information.rules.moderationPolicy.body.points.one, defaultLocale)(
 				moderatorRoleMention,
@@ -78,7 +78,7 @@ function getInviteSection(invite: InviteMetadata | BaseInvite): Embed {
 
 	return {
 		color: constants.colors.gray,
-		fields: [{ name: `🔗  ${inviteString}`, value: `**${link}**` }],
+		fields: [{ name: `${constants.symbols.information.inviteLink}  ${inviteString}`, value: `**${link}**` }],
 	};
 }
 

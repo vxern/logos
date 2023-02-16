@@ -19,17 +19,17 @@ import { Definition, DictionaryEntry, Expression } from 'logos/src/commands/lang
 import { CommandBuilder } from 'logos/src/commands/command.ts';
 import { show } from 'logos/src/commands/parameters.ts';
 import { Client } from 'logos/src/client.ts';
-import { createInteractionCollector, parseArguments } from 'logos/src/interactions.ts';
+import { createInteractionCollector, decodeId, encodeId, parseArguments } from 'logos/src/interactions.ts';
 import { chunk, diagnosticMentionUser } from 'logos/src/utils.ts';
 import constants from 'logos/constants.ts';
 import { BulletStyles, code, list } from 'logos/formatting.ts';
-import { defaultLocale, WordTypes } from 'logos/types.ts';
+import { defaultLocale, isUnknownWordClass, WordClasses } from 'logos/types.ts';
 
 const command: CommandBuilder = {
 	...createLocalisations(Commands.word),
 	isRateLimited: true,
 	defaultMemberPermissions: ['VIEW_CHANNEL'],
-	handle: handleSearchWord,
+	handle: handleFindWord,
 	options: [{
 		...createLocalisations(Commands.word.options.word),
 		type: ApplicationCommandOptionTypes.String,
@@ -41,14 +41,8 @@ const command: CommandBuilder = {
 };
 
 /** Allows the user to look up a word and get information about it. */
-async function handleSearchWord(
-	[client, bot]: [Client, Bot],
-	interaction: Interaction,
-): Promise<void> {
-	const [{ word, verbose, show }] = parseArguments(
-		interaction.data?.options,
-		{ verbose: 'boolean', show: 'boolean' },
-	);
+async function handleFindWord([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+	const [{ word, verbose, show }] = parseArguments(interaction.data?.options, { verbose: 'boolean', show: 'boolean' });
 	if (word === undefined) return;
 
 	const guild = client.cache.guilds.get(interaction.guildId!);
@@ -117,7 +111,6 @@ async function handleSearchWord(
 	return void displayMenu(
 		[client, bot],
 		interaction,
-		undefined,
 		{
 			entries,
 			currentView: ContentTabs.Definitions,
@@ -145,16 +138,9 @@ interface WordViewData {
 function displayMenu(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
-	selection: Interaction | undefined,
 	data: WordViewData,
 	locale: string | undefined,
 ): void {
-	if (selection !== undefined) {
-		sendInteractionResponse(bot, selection.id, selection.token, {
-			type: InteractionResponseTypes.DeferredUpdateMessage,
-		});
-	}
-
 	const entry = data.entries.at(data.dictionaryEntryIndex)!;
 
 	editOriginalInteractionResponse(bot, interaction.token, {
@@ -178,6 +164,8 @@ function generateEmbeds(
 	}
 }
 
+type MenuButtonID = [index: string];
+
 function generateButtons(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
@@ -196,17 +184,25 @@ function generateButtons(
 
 			const previousPageButtonId = createInteractionCollector([client, bot], {
 				type: InteractionTypes.MessageComponent,
-				onCollect: (_bot, selection) => {
+				onCollect: (_, selection) => {
+					sendInteractionResponse(bot, selection.id, selection.token, {
+						type: InteractionResponseTypes.DeferredUpdateMessage,
+					});
+
 					if (!isFirst) data.dictionaryEntryIndex--;
-					return void displayMenu([client, bot], interaction, selection, data, locale);
+					return void displayMenu([client, bot], interaction, data, locale);
 				},
 			});
 
 			const nextPageButtonId = createInteractionCollector([client, bot], {
 				type: InteractionTypes.MessageComponent,
-				onCollect: (_bot, selection) => {
+				onCollect: (_, selection) => {
+					sendInteractionResponse(bot, selection.id, selection.token, {
+						type: InteractionResponseTypes.DeferredUpdateMessage,
+					});
+
 					if (!isLast) data.dictionaryEntryIndex++;
-					return void displayMenu([client, bot], interaction, selection, data, locale);
+					return void displayMenu([client, bot], interaction, data, locale);
 				},
 			});
 
@@ -214,7 +210,7 @@ function generateButtons(
 
 			paginationControls.push([{
 				type: MessageComponentTypes.Button,
-				label: '«',
+				label: constants.symbols.interactions.menu.controls.back,
 				customId: previousPageButtonId,
 				style: ButtonStyles.Secondary,
 				disabled: isFirst,
@@ -222,10 +218,10 @@ function generateButtons(
 				type: MessageComponentTypes.Button,
 				label: `${pageString} ${data.dictionaryEntryIndex + 1}/${data.entries.length}`,
 				style: ButtonStyles.Secondary,
-				customId: 'none',
+				customId: constants.staticComponentIds.none,
 			}, {
 				type: MessageComponentTypes.Button,
-				label: '»',
+				label: constants.symbols.interactions.menu.controls.forward,
 				customId: nextPageButtonId,
 				style: ButtonStyles.Secondary,
 				disabled: isLast,
@@ -236,24 +232,23 @@ function generateButtons(
 		case ContentTabs.Inflection: {
 			if (entry.inflectionTable === undefined) return [];
 
-			const rows = chunk(entry.inflectionTable, 5);
-			rows.reverse();
+			const rows = chunk(entry.inflectionTable, 5).reverse();
 
 			const buttonId = createInteractionCollector([client, bot], {
 				type: InteractionTypes.MessageComponent,
-				onCollect: (_bot, selection) => {
+				onCollect: (_, selection) => {
 					if (entry.inflectionTable === undefined || selection.data === undefined) {
-						return void displayMenu([client, bot], interaction, selection, data, locale);
+						return void displayMenu([client, bot], interaction, data, locale);
 					}
 
-					const [_buttonId, indexString] = selection.data.customId!.split('|');
+					const [__, indexString] = decodeId<MenuButtonID>(selection.data.customId!);
 					const index = Number(indexString);
 
 					if (index >= 0 && index <= entry.inflectionTable?.length) {
 						data.inflectionTableIndex = index;
 					}
 
-					return void displayMenu([client, bot], interaction, selection, data, locale);
+					return void displayMenu([client, bot], interaction, data, locale);
 				},
 			});
 
@@ -264,7 +259,7 @@ function generateButtons(
 					return {
 						type: MessageComponentTypes.Button,
 						label: table.title,
-						customId: `${buttonId}|${index_}`,
+						customId: encodeId<MenuButtonID>(buttonId, [index_.toString()]),
 						disabled: data.inflectionTableIndex === index_,
 						style: ButtonStyles.Secondary,
 					};
@@ -281,18 +276,26 @@ function generateButtons(
 
 	const definitionsMenuButtonId = createInteractionCollector([client, bot], {
 		type: InteractionTypes.MessageComponent,
-		onCollect: (_bot, selection) => {
+		onCollect: (_, selection) => {
+			sendInteractionResponse(bot, selection.id, selection.token, {
+				type: InteractionResponseTypes.DeferredUpdateMessage,
+			});
+
 			data.inflectionTableIndex = 0;
 			data.currentView = ContentTabs.Definitions;
-			return void displayMenu([client, bot], interaction, selection, data, locale);
+			return void displayMenu([client, bot], interaction, data, locale);
 		},
 	});
 
 	const inflectionMenuButtonId = createInteractionCollector([client, bot], {
 		type: InteractionTypes.MessageComponent,
-		onCollect: (_bot, selection) => {
+		onCollect: (_, selection) => {
+			sendInteractionResponse(bot, selection.id, selection.token, {
+				type: InteractionResponseTypes.DeferredUpdateMessage,
+			});
+
 			data.currentView = ContentTabs.Inflection;
-			return void displayMenu([client, bot], interaction, selection, data, locale);
+			return void displayMenu([client, bot], interaction, data, locale);
 		},
 	});
 
@@ -320,25 +323,24 @@ function generateButtons(
 		paginationControls.push(row);
 	}
 
-	// @ts-ignore: It is sure that there will be no more than 5 buttons.
 	return paginationControls.map((row) => ({
 		type: MessageComponentTypes.ActionRow,
-		components: row,
+		components: row as [ButtonComponent],
 	}));
 }
 
 function entryToEmbeds(entry: DictionaryEntry, locale: string | undefined, verbose: boolean): Embed[] {
-	let typeDisplayed!: string;
-	if (entry.type === undefined) {
-		typeDisplayed = localise(Words.types[WordTypes.Unknown], locale);
+	let wordClassDisplayed: string;
+	if (entry.wordClass === undefined) {
+		wordClassDisplayed = localise(Words.classes[WordClasses.Unknown], locale);
 	} else {
-		const [type, typeString] = entry.type;
-		typeDisplayed = localise(Words.types[type], locale);
-		if (type === WordTypes.Unknown) {
-			typeDisplayed += ` — '${typeString}'`;
+		const [wordClass, wordClassUnresolved] = entry.wordClass;
+		wordClassDisplayed = localise(Words.classes[wordClass], locale);
+		if (isUnknownWordClass(wordClass)) {
+			wordClassDisplayed += ` — '${wordClassUnresolved}'`;
 		}
 	}
-	typeDisplayed = `***${typeDisplayed}***`;
+	const wordClassFormatted = `***${wordClassDisplayed}***`;
 
 	const word = entry.word;
 
@@ -354,7 +356,7 @@ function entryToEmbeds(entry: DictionaryEntry, locale: string | undefined, verbo
 		} else {
 			embeds.push({
 				title: localise(Commands.word.strings.definitionsForWord, locale)(word),
-				description: `${typeDisplayed}\n\n${definitionsFitted}`,
+				description: `${wordClassFormatted}\n\n${definitionsFitted}`,
 				color: constants.colors.husky,
 			});
 		}
@@ -395,7 +397,7 @@ function entryToEmbeds(entry: DictionaryEntry, locale: string | undefined, verbo
 	}
 
 	if (!verbose) {
-		return [{ title: word, description: typeDisplayed, fields, color: constants.colors.husky }];
+		return [{ title: word, description: wordClassFormatted, fields, color: constants.colors.husky }];
 	}
 
 	return embeds;
@@ -405,32 +407,32 @@ function tagsToString(tags: string[]): string {
 	return tags.map((tag) => code(tag)).join(' ');
 }
 
-function stringifyEntries(
-	entries: Definition[] | Expression[],
-	entryType: 'definitions' | 'expressions',
-	bulletStyle: BulletStyles,
-	depth = 0,
-): string[] {
+type EntryType = 'definitions' | 'expressions';
+
+function isDefinition(_entry: Definition | Expression, entryType: EntryType): _entry is Definition {
+	return entryType === 'definitions';
+}
+
+function stringifyEntries<
+	T extends EntryType,
+	E extends Definition[] | Expression[] = T extends 'definitions' ? Definition[] : Expression[],
+>(entries: E, entryType: T, bulletStyle: BulletStyles, depth = 0): string[] {
 	const entriesStringified = entries.map((entry) => {
 		const root = entry.tags === undefined ? entry.value : `${tagsToString(entry.tags)} ${entry.value}`;
 
 		if (
-			entryType === 'definitions' && (entry as Definition)?.value.endsWith(':') &&
-			(entry as Definition)?.definitions !== undefined
+			isDefinition(entry, entryType) && entry.value.endsWith(':') && entry.definitions !== undefined
 		) {
-			const entriesStringified = stringifyEntries(
-				(entry as Definition).definitions!,
-				'definitions',
-				bulletStyle,
-				depth + 1,
-			).join('\n');
+			const entriesStringified = stringifyEntries(entry.definitions!, 'definitions', bulletStyle, depth + 1).join('\n');
 			return `${root}\n${entriesStringified}`;
 		}
 
 		return root;
 	});
 	const entriesEnlisted = list(entriesStringified, bulletStyle);
-	const entriesDelisted = entriesEnlisted.split('\n').map((entry) => `${'⠀'.repeat(depth * 2)}${entry}`);
+	const entriesDelisted = entriesEnlisted.split('\n').map((entry) =>
+		`${constants.symbols.meta.whitespace.repeat(depth * 2)}${entry}`
+	);
 
 	return entriesDelisted;
 }

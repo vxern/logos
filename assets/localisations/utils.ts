@@ -31,7 +31,7 @@ function localise<T>(localisations: Localisations<T>, locale: string | undefined
 		return localisations[defaultLanguage];
 	}
 
-	const language = getLanguageByLocale(<Locales> locale)!;
+	const language = getLanguageByLocale(locale as Locales)!;
 	if (!(language in localisations)) {
 		return localisations[defaultLanguage];
 	}
@@ -63,7 +63,7 @@ function createLocalisations(commandLocalisations: DiscordLocalisations): Discor
 
 function createDiscordLocalisations(localisations: Localisations<string>): DiscordLocalisation {
 	return Object.fromEntries(
-		(<[Language, string][]> Object.entries(localisations))
+		(Object.entries(localisations) as [language: Language, localisation: string][])
 			.filter(([key, _value]) => key !== defaultLanguage)
 			.map(([key, value]) => [getLocaleForLanguage(key), value]),
 	);

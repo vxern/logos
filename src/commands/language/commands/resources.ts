@@ -23,19 +23,13 @@ const command: CommandBuilder = {
 };
 
 /** Displays a message with information on where to find the resources for a given language. */
-function handleDisplayResources(
-	[client, bot]: [Client, Bot],
-	interaction: Interaction,
-): void {
+function handleDisplayResources([client, bot]: [Client, Bot], interaction: Interaction): void {
+	const [{ show }] = parseArguments(interaction.data?.options, { show: 'boolean' });
+
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (guild === undefined) return;
 
-	const repositoryLink = constants.links.generateLanguageRepositoryLink(guild.language);
-
-	const [{ show }] = parseArguments(interaction.data?.options, { show: 'boolean' });
-
 	const locale = show ? defaultLocale : interaction.locale;
-
 	return void sendInteractionResponse(
 		bot,
 		interaction.id,
@@ -50,7 +44,7 @@ function handleDisplayResources(
 						type: MessageComponentTypes.Button,
 						label: localise(Commands.resources.strings.resourcesStoredHere, locale)(guild.language),
 						style: ButtonStyles.Link,
-						url: repositoryLink,
+						url: constants.links.generateLanguageRepositoryLink(guild.language),
 					}],
 				}],
 			},

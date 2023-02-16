@@ -21,6 +21,7 @@ type OptionLocalised = WithRequired<ApplicationCommandOption, LocalisationFields
 interface CommandFeatures {
 	isRateLimited?: boolean;
 	handle?: InteractionHandler;
+	handleAutocomplete?: InteractionHandler;
 	options?: Option[];
 }
 
@@ -28,7 +29,9 @@ type Command =
 	& WithRequired<Omit<CommandLocalised, 'options'>, 'defaultMemberPermissions'>
 	& CommandFeatures;
 
-type Option = Omit<OptionLocalised, 'options'> & CommandFeatures;
+type Option =
+	& Omit<OptionLocalised, 'options'>
+	& CommandFeatures;
 
 type CommandBuilder = Command;
 

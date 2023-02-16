@@ -28,6 +28,8 @@ const command: OptionBuilder = {
 };
 
 function handleReplayAction([client, bot]: [Client, Bot], interaction: Interaction): void {
+	const [{ collection }] = parseArguments(interaction.data?.options, { collection: 'boolean' });
+
 	const controller = client.features.music.controllers.get(interaction.guildId!);
 	if (controller === undefined) return;
 
@@ -38,8 +40,6 @@ function handleReplayAction([client, bot]: [Client, Bot], interaction: Interacti
 		getVoiceState(client, interaction.guildId!, interaction.user.id),
 	);
 	if (!isVoiceStateVerified) return;
-
-	const [{ collection }] = parseArguments(interaction.data?.options, { collection: 'boolean' });
 
 	const currentListing = controller.currentListing;
 

@@ -9,21 +9,20 @@ import {
 	SelectOption,
 	sendInteractionResponse,
 } from 'discordeno';
-import { Playlist, Video, YouTube } from 'youtube';
+import { Channel, Playlist, Video, YouTube } from 'youtube';
+import { Commands, localise } from 'logos/assets/localisations/mod.ts';
 import { ListingResolver } from 'logos/src/commands/music/data/sources/sources.ts';
 import { SongListing, SongListingContentTypes } from 'logos/src/commands/music/data/types.ts';
 import { Client } from 'logos/src/client.ts';
 import { createInteractionCollector } from 'logos/src/interactions.ts';
 import constants from 'logos/constants.ts';
 import { trim } from 'logos/formatting.ts';
-import { Commands } from '../../../../../assets/localisations/mod.ts';
-import { localise } from '../../../../../assets/localisations/mod.ts';
-
-const urlExpression = new RegExp(
-	/^(?:https?:)?(?:\/\/)?(?:youtu\.be\/|(?:www\.|m\.)?youtube\.com\/(?:watch|v|embed)(?:\.php)?(?:\?.*v=|\/))([a-zA-Z0-9\_-]{7,15})(?:[\?&][a-zA-Z0-9\_-]+=[a-zA-Z0-9\_-]+)*$/,
-);
 
 const resolver: ListingResolver = async ([client, bot], interaction, query) => {
+	const urlExpression = new RegExp(
+		/^(?:https?:)?(?:\/\/)?(?:youtu\.be\/|(?:www\.|m\.)?youtube\.com\/(?:watch|v|embed)(?:\.php)?(?:\?.*v=|\/))([a-zA-Z0-9\_-]{7,15})(?:[\?&][a-zA-Z0-9\_-]+=[a-zA-Z0-9\_-]+)*$/,
+	);
+
 	const urlExpressionExecuted = urlExpression.exec(query) ?? undefined;
 	if (urlExpressionExecuted === undefined) {
 		return search([client, bot], interaction, query);
@@ -50,12 +49,8 @@ async function search(
 	interaction: Interaction,
 	query: string,
 ): Promise<SongListing | undefined> {
-	const results = await YouTube.search(
-		query,
-		{ limit: 20, type: 'all', safeSearch: false },
-	).then(
-		(result) => result.filter((element) => element.type === 'video' || element.type === 'playlist'),
-	) as Array<Video | Playlist>;
+	const resultsAll = await YouTube.search(query, { limit: 20, type: 'all', safeSearch: false });
+	const results = resultsAll.filter((element) => isPlaylist(element) || isVideo(element)) as Array<Playlist | Video>;
 	if (results.length === 0) return undefined;
 
 	return new Promise<SongListing | undefined>((resolve) => {
@@ -70,19 +65,19 @@ async function search(
 						type: InteractionResponseTypes.DeferredUpdateMessage,
 					});
 
-					const indexString = <string | undefined> selection.data?.values?.at(0);
+					const indexString = selection.data?.values?.at(0) as string | undefined;
 					if (indexString === undefined) return resolve(undefined);
 
 					const index = Number(indexString);
 					if (isNaN(index)) return resolve(undefined);
 
 					const result = results.at(index)!;
-					if (result.type === 'video') {
-						return resolve(fromYouTubeVideo(result, interaction.user.id));
+					if (isPlaylist(result)) {
+						const playlist = await YouTube.getPlaylist(result.url!);
+						return resolve(fromYouTubePlaylist(playlist, interaction.user.id));
 					}
 
-					const playlist = await YouTube.getPlaylist(result.url!);
-					return resolve(fromYouTubePlaylist(playlist, interaction.user.id));
+					return resolve(fromYouTubeVideo(result, interaction.user.id));
 				},
 			},
 		);
@@ -103,13 +98,15 @@ async function search(
 						customId: customId,
 						minValues: 1,
 						maxValues: 1,
-						options: results.map<SelectOption>((result, index) => ({
-							emoji: {
-								name: result.type === 'video' ? constants.emojis.music.song : constants.emojis.music.collection,
-							},
-							label: trim(result.title!, 100),
-							value: index.toString(),
-						})),
+						options: results.map<SelectOption>(
+							(result, index) => ({
+								emoji: {
+									name: isVideo(result) ? constants.symbols.music.song : constants.symbols.music.collection,
+								},
+								label: trim(result.title!, 100),
+								value: index.toString(),
+							}),
+						),
 					}],
 				}],
 			},
@@ -117,13 +114,17 @@ async function search(
 	});
 }
 
-/**
- * Creates a song listing from a YouTube video.
- */
-function fromYouTubeVideo(
-	video: Video,
-	requestedBy: bigint,
-): SongListing | undefined {
+type Result = Playlist | Video | Channel;
+
+function isPlaylist(result: Result): result is Playlist {
+	return result.type === 'playlist';
+}
+
+function isVideo(result: Result): result is Video {
+	return result.type === 'video';
+}
+
+function fromYouTubeVideo(video: Video, requestedBy: bigint): SongListing | undefined {
 	if (video.id === undefined) return undefined;
 
 	return {
@@ -139,9 +140,6 @@ function fromYouTubeVideo(
 	};
 }
 
-/**
- * Creates a song listing from a YouTube playlist.
- */
 function fromYouTubePlaylist(playlist: Playlist, requestedBy: bigint): SongListing | undefined {
 	if (playlist.id === undefined) return undefined;
 

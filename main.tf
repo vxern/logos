@@ -17,10 +17,12 @@ provider "fauna" {
   endpoint = "https://db.us.fauna.com"
 }
 
+# Do not delete until data has been migrated.
 resource "fauna_collection" "article_changes" {
   name = "ArticleChanges"
 }
 
+# Do not delete until data has been migrated.
 resource "fauna_collection" "articles" {
   name = "Articles"
 }
@@ -47,38 +49,6 @@ resource "fauna_collection" "users" {
 
 resource "fauna_collection" "warnings" {
   name = "Warnings"
-}
-
-resource "fauna_index" "get_article_changes_by_author" {
-  depends_on = [fauna_collection.article_changes]
-
-  name   = "GetArticleChangesByAuthor"
-  source = "ArticleChanges"
-  terms { field = ["data", "author"] }
-}
-
-resource "fauna_index" "get_article_changes_by_article" {
-  depends_on = [fauna_collection.article_changes, fauna_index.get_article_changes_by_author]
-
-  name   = "GetArticleChangesByArticle"
-  source = "ArticleChanges"
-  terms { field = ["data", "article"] }
-}
-
-resource "fauna_index" "get_articles_by_author" {
-  depends_on = [fauna_collection.articles]
-
-  name   = "GetArticlesByAuthor"
-  source = "Articles"
-  terms { field = ["data", "author"] }
-}
-
-resource "fauna_index" "get_articles_by_language" {
-  depends_on = [fauna_collection.articles, fauna_index.get_articles_by_author]
-
-  name   = "GetArticlesByLanguage"
-  source = "Articles"
-  terms { field = ["data", "language"] }
 }
 
 resource "fauna_index" "get_praises_by_sender" {
@@ -113,37 +83,4 @@ resource "fauna_index" "get_warnings_by_recipient" {
   name   = "GetWarningsByRecipient"
   source = "Warnings"
   terms { field = ["data", "recipient"] }
-}
-
-resource "fauna_function" "update_article" {
-  name = "UpdateArticle"
-  body = <<EOF
-Query(
-  Lambda(
-    "arguments",
-    Let(
-      { article: Select("data", Get(Select("reference", Var("arguments")))) },
-      Let(
-        {
-          previousChanges: If(
-            Not(ContainsField("changes", Var("article"))),
-            [],
-            Select("changes", Var("article"))
-          ),
-          change: Create(Collection("ArticleChanges"), {
-            data: Select("change", Var("arguments"))
-          })
-        },
-        Update(Select("reference", Var("arguments")), {
-          data: {
-            changes: Append(Var("previousChanges"), [
-              Select("ref", Var("change"))
-            ])
-          }
-        })
-      )
-    )
-  )
-)
-EOF
 }

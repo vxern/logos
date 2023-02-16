@@ -11,7 +11,9 @@ import {
 } from 'discordeno';
 import { localise, Services } from 'logos/assets/localisations/mod.ts';
 import { getProficiencyCategory } from 'logos/src/commands/social/module.ts';
+import { EntryStepButtonID } from 'logos/src/services/entry.ts';
 import { Client } from 'logos/src/client.ts';
+import { encodeId } from 'logos/src/interactions.ts';
 import { snowflakeToTimestamp } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import constants from 'logos/constants.ts';
@@ -41,16 +43,17 @@ async function handleAcceptRules(
 			}],
 			components: [{
 				type: MessageComponentTypes.ActionRow,
-				// @ts-ignore: There are only 4 proficiency roles, therefore only 4 buttons. (max is 5)
 				components: proficiencies.map<ButtonComponent>(
 					(proficiency, index) => ({
 						type: MessageComponentTypes.Button,
 						label: localise(proficiency.name, interaction.locale),
-						customId: `${constants.staticComponentIds.selectedLanguageProficiency}|${index}`,
+						customId: encodeId<EntryStepButtonID>(constants.staticComponentIds.selectedLanguageProficiency, [
+							index.toString(),
+						]),
 						style: ButtonStyles.Secondary,
 						emoji: { name: proficiency.emoji },
 					}),
-				),
+				) as [ButtonComponent],
 			}],
 		},
 	);

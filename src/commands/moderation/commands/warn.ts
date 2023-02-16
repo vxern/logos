@@ -4,7 +4,6 @@ import {
 	editMember,
 	Interaction,
 	InteractionResponseTypes,
-	InteractionTypes,
 	sendInteractionResponse,
 	sendMessage,
 } from 'discordeno';
@@ -12,8 +11,8 @@ import { Commands, createLocalisations, localise } from 'logos/assets/localisati
 import { CommandBuilder } from 'logos/src/commands/command.ts';
 import { reason, user } from 'logos/src/commands/parameters.ts';
 import { getActiveWarnings } from 'logos/src/commands/moderation/module.ts';
-import { log } from 'logos/src/controllers/logging/logging.ts';
-import { Client, resolveInteractionToMember } from 'logos/src/client.ts';
+import { logEvent } from 'logos/src/controllers/logging/logging.ts';
+import { autocompleteMembers, Client, resolveInteractionToMember } from 'logos/src/client.ts';
 import { parseArguments } from 'logos/src/interactions.ts';
 import { diagnosticMentionUser, getTextChannel } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
@@ -25,14 +24,26 @@ const command: CommandBuilder = {
 	...createLocalisations(Commands.warn),
 	defaultMemberPermissions: ['MODERATE_MEMBERS'],
 	handle: handleWarnUser,
+	handleAutocomplete: handleWarnUserAutocomplete,
 	options: [user, reason],
 };
 
-async function handleWarnUser(
-	[client, bot]: [Client, Bot],
-	interaction: Interaction,
-): Promise<void> {
-	const [{ user, reason }, focused] = parseArguments(interaction.data?.options, {});
+async function handleWarnUserAutocomplete([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+	const [{ user }] = parseArguments(interaction.data?.options, {});
+
+	return autocompleteMembers(
+		[client, bot],
+		interaction,
+		user!,
+		{
+			restrictToNonSelf: true,
+			excludeModerators: true,
+		},
+	);
+}
+
+async function handleWarnUser([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+	const [{ user, reason }] = parseArguments(interaction.data?.options, {});
 	if (user === undefined) return;
 
 	const member = resolveInteractionToMember([client, bot], interaction, user, {
@@ -40,8 +51,6 @@ async function handleWarnUser(
 		excludeModerators: true,
 	});
 	if (member === undefined) return;
-
-	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete && focused?.name === 'user') return;
 
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (guild === undefined) return;
@@ -78,7 +87,7 @@ async function handleWarnUser(
 	]);
 
 	if (document !== undefined) {
-		log([client, bot], guild, 'memberWarnAdd', member, document.data, interaction.user);
+		logEvent([client, bot], guild, 'memberWarnAdd', [member, document.data, interaction.user]);
 	}
 
 	if (warnings === undefined || document === undefined) return displayError(bot, interaction);
@@ -118,7 +127,7 @@ async function handleWarnUser(
 
 		return void sendMessage(bot, moderationChannelId, {
 			embeds: [{
-				description: `❗ ${passedLimitMessage}`,
+				description: `${constants.symbols.indicators.exclamation} ${passedLimitMessage}`,
 				color: constants.colors.red,
 			}],
 		});
@@ -133,7 +142,7 @@ async function handleWarnUser(
 
 		return void sendMessage(bot, moderationChannelId, {
 			embeds: [{
-				description: `⚠️ ${reachedLimitMessage}`,
+				description: `${constants.symbols.indicators.warning} ${reachedLimitMessage}`,
 				color: constants.colors.yellow,
 			}],
 		});

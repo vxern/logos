@@ -22,7 +22,7 @@ import {
 } from 'discordeno';
 import { lodash } from 'lodash';
 import { localise, Modals, Services } from 'logos/assets/localisations/mod.ts';
-import { log } from 'logos/src/controllers/logging/logging.ts';
+import { logEvent } from 'logos/src/controllers/logging/logging.ts';
 import { EntryRequest, User } from 'logos/src/database/structs/mod.ts';
 import { Document, Reference } from 'logos/src/database/document.ts';
 import { stringifyValue } from 'logos/src/database/database.ts';
@@ -31,10 +31,12 @@ import { Client, extendEventHandler, WithLanguage } from 'logos/src/client.ts';
 import {
 	createInteractionCollector,
 	createModalComposer,
+	decodeId,
+	encodeId,
 	InteractionCollectorSettings,
 	Modal,
 } from 'logos/src/interactions.ts';
-import { diagnosticMentionUser, getAllMessages, getTextChannel, guildAsAuthor } from 'logos/src/utils.ts';
+import { diagnosticMentionUser, getAllMessages, getAuthor, getTextChannel } from 'logos/src/utils.ts';
 import { defaultLocale } from 'logos/types.ts';
 import configuration from 'logos/configuration.ts';
 import constants from 'logos/constants.ts';
@@ -53,10 +55,10 @@ function setupVoteHandler([client, bot]: [Client, Bot]): void {
 		type: InteractionTypes.MessageComponent,
 		customId: constants.staticComponentIds.verification,
 		doesNotExpire: true,
-		onCollect: (_bot, selection) => {
-			const [_customId, userId, guildId, _isAccept] = selection.data!.customId!.split('|');
+		onCollect: (_, selection) => {
+			const [__, userId, guildId, ___] = decodeId<VerificationPromptButtonID>(selection.data!.customId!);
 
-			const handle = verificationPromptHandlers.get(`${userId}|${guildId}`);
+			const handle = verificationPromptHandlers.get([userId, guildId].join(constants.symbols.meta.idSeparator));
 			if (handle === undefined) return;
 
 			return void handle(bot, selection);
@@ -68,13 +70,11 @@ interface VerificationPromptMetadata {
 	submitterId: bigint;
 }
 
-const metadataSeparator = '・';
-
 function extractMetadata(prompt: Message): VerificationPromptMetadata | undefined {
 	const metadata = prompt.embeds.at(0)?.footer?.text;
 	if (metadata === undefined) return undefined;
 
-	const [userId] = metadata.split(metadataSeparator);
+	const [userId] = metadata.split(constants.symbols.meta.metadataSeparator);
 	if (userId === undefined) return undefined;
 
 	return { submitterId: BigInt(userId) };
@@ -359,7 +359,7 @@ async function initiateVerificationProcess(
 				submitterIdByMessageId.set(messageId, interaction.user.id);
 				messageIdBySubmitterAndGuild.set(`${submitterReferenceId}${guild.id}`, messageId);
 
-				log([client, bot], guild, 'entryRequestSubmit', interaction.user, entryRequest.data);
+				logEvent([client, bot], guild, 'entryRequestSubmit', [interaction.user, entryRequest.data]);
 
 				editOriginalInteractionResponse(bot, submission.token, {
 					flags: ApplicationCommandFlags.Ephemeral,
@@ -442,21 +442,24 @@ function registerVerificationHandler(
 	[submitterId, submitterReference]: [bigint, Reference],
 ): Promise<boolean> {
 	return new Promise((resolve) => {
-		verificationPromptHandlers.set(`${submitterId}|${guildId}`, async (bot, selection) => {
-			const isAccepted = await handleVote([client, bot], selection, [submitterId, submitterReference]);
-			if (isAccepted === null) return;
+		verificationPromptHandlers.set(
+			[submitterId, guildId].join(constants.symbols.meta.idSeparator),
+			async (bot, selection) => {
+				const isAccepted = await handleVote([client, bot], selection, [submitterId, submitterReference]);
+				if (isAccepted === null) return;
 
-			const submitterReferenceId = stringifyValue(submitterReference);
+				const submitterReferenceId = stringifyValue(submitterReference);
 
-			const messageId = messageIdBySubmitterAndGuild.get(`${submitterReferenceId}${guildId}`);
-			if (messageId === undefined) return;
+				const messageId = messageIdBySubmitterAndGuild.get(`${submitterReferenceId}${guildId}`);
+				if (messageId === undefined) return;
 
-			deleteMessage(bot, channelId, messageId);
+				deleteMessage(bot, channelId, messageId);
 
-			if (isAccepted === undefined) return;
+				if (isAccepted === undefined) return;
 
-			return resolve(isAccepted);
-		});
+				return resolve(isAccepted);
+			},
+		);
 	});
 }
 
@@ -493,6 +496,8 @@ function getNecessaryVotes(guild: Guild, entryRequest: EntryRequest): NecessaryV
 
 	return [[requiredAcceptanceVotes, requiredRejectionVotes], [votesToAccept, votesToReject]];
 }
+
+type VerificationPromptButtonID = [userId: string, guildId: string, isResolved: string];
 
 function getVerificationPrompt(
 	bot: Bot,
@@ -537,14 +542,20 @@ function getVerificationPrompt(
 				label: requiredAcceptanceVotes === 1
 					? localise(Services.entry.vote.accept, defaultLocale)
 					: localise(Services.entry.vote.acceptMultiple, defaultLocale)(votesToAccept),
-				customId: `${constants.staticComponentIds.verification}|${user.id}|${guild.id}|true`,
+				customId: encodeId<VerificationPromptButtonID>(
+					constants.staticComponentIds.reports,
+					[user.id.toString(), guild.id.toString(), `${true}`],
+				),
 			}, {
 				type: MessageComponentTypes.Button,
 				style: ButtonStyles.Danger,
 				label: requiredRejectionVotes === 1
 					? localise(Services.entry.vote.reject, defaultLocale)
 					: localise(Services.entry.vote.rejectMultiple, defaultLocale)(votesToReject),
-				customId: `${constants.staticComponentIds.verification}|${user.id}|${guild.id}|false`,
+				customId: encodeId<VerificationPromptButtonID>(
+					constants.staticComponentIds.reports,
+					[user.id.toString(), guild.id.toString(), `${false}`],
+				),
 			}],
 		}],
 	};
@@ -587,9 +598,9 @@ async function handleVote(
 		stringifyValue(voterReference) === voterReferenceId
 	);
 
-	const isAccept = interaction.data!.customId!.split('|')[3]! === 'true';
+	const isAccept = decodeId<VerificationPromptButtonID>(interaction.data!.customId!)[3] === 'true';
 
-	const [[_requiredAcceptanceVotes, requiredRejectionVotes], [votesToAccept, votesToReject]] = getNecessaryVotes(
+	const [[_, requiredRejectionVotes], [votesToAccept, votesToReject]] = getNecessaryVotes(
 		guild,
 		entryRequest.data,
 	);
@@ -742,8 +753,8 @@ async function handleVote(
 			sendMessage(bot, dmChannel.id, {
 				embeds: [
 					{
-						author: guildAsAuthor(bot, guild),
-						description: `🥳 ${entryRequestAcceptedString}`,
+						author: getAuthor(bot, guild),
+						description: `${constants.symbols.responses.celebration} ${entryRequestAcceptedString}`,
 						color: constants.colors.lightGreen,
 					},
 				],
@@ -764,8 +775,8 @@ async function handleVote(
 			await sendMessage(bot, dmChannel.id, {
 				embeds: [
 					{
-						author: guildAsAuthor(bot, guild),
-						description: `😕 ${entryRequestRejectedString}`,
+						author: getAuthor(bot, guild),
+						description: `${constants.symbols.responses.upset} ${entryRequestRejectedString}`,
 						color: constants.colors.lightGreen,
 					},
 				],
@@ -781,14 +792,15 @@ async function handleVote(
 
 	await client.database.adapters.users.update(client, updatedSubmitterDocument);
 
-	verificationPromptHandlers.delete(`${submitterDocument.data.account.id}|${guild.id}`);
+	verificationPromptHandlers.delete(
+		[submitterDocument.data.account.id, guild.id].join(constants.symbols.meta.idSeparator),
+	);
 
-	log(
+	logEvent(
 		[client, bot],
 		guild,
 		isAccepted ? 'entryRequestAccept' : 'entryRequestReject',
-		submitter,
-		interaction.member!,
+		[submitter, interaction.member!],
 	);
 
 	return isRejected ? false : isAccepted;

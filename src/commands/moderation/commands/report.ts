@@ -17,7 +17,7 @@ import {
 } from 'discordeno';
 import { Commands, createLocalisations, localise, Modals } from 'logos/assets/localisations/mod.ts';
 import { CommandBuilder } from 'logos/src/commands/command.ts';
-import { log } from 'logos/src/controllers/logging/logging.ts';
+import { logEvent } from 'logos/src/controllers/logging/logging.ts';
 import { User } from 'logos/src/database/structs/mod.ts';
 import { stringifyValue } from 'logos/src/database/database.ts';
 import { Document } from 'logos/src/database/document.ts';
@@ -50,10 +50,7 @@ enum ReportError {
 	CannotReportSelf = 'cannot_report_self',
 }
 
-async function handleMakeReport(
-	[client, bot]: [Client, Bot],
-	interaction: Interaction,
-): Promise<void> {
+async function handleMakeReport([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (guild === undefined) return;
 
@@ -150,13 +147,11 @@ async function handleMakeReport(
 			const recipientAndWarningsTuples = await getRecipientAndWarningsTuples(client, recipients);
 			if (recipientAndWarningsTuples === undefined) return ReportError.Failure;
 
-			log(
+			logEvent(
 				[client, bot],
 				guild,
 				'reportSubmit',
-				interaction.member!,
-				recipientAndWarningsTuples.map(([recipient, _warnings]) => recipient),
-				report.data,
+				[interaction.member!, recipientAndWarningsTuples.map(([recipient, _warnings]) => recipient), report.data],
 			);
 
 			const messageId = await sendMessage(
@@ -204,7 +199,7 @@ function handleSubmittedInvalidReport(
 	return new Promise((resolve) => {
 		const continueId = createInteractionCollector([client, bot], {
 			type: InteractionTypes.MessageComponent,
-			onCollect: (_bot, selection) => {
+			onCollect: (_, selection) => {
 				deleteOriginalInteractionResponse(bot, submission.token);
 				resolve(selection);
 			},
@@ -212,15 +207,15 @@ function handleSubmittedInvalidReport(
 
 		const cancelId = createInteractionCollector([client, bot], {
 			type: InteractionTypes.MessageComponent,
-			onCollect: (_bot, cancelSelection) => {
+			onCollect: (_, cancelSelection) => {
 				const returnId = createInteractionCollector([client, bot], {
 					type: InteractionTypes.MessageComponent,
-					onCollect: (_bot, returnSelection) => resolve(returnSelection),
+					onCollect: (_, returnSelection) => resolve(returnSelection),
 				});
 
 				const leaveId = createInteractionCollector([client, bot], {
 					type: InteractionTypes.MessageComponent,
-					onCollect: (_bot, _leaveSelection) => {
+					onCollect: (_, _leaveSelection) => {
 						deleteOriginalInteractionResponse(bot, submission.token);
 						deleteOriginalInteractionResponse(bot, cancelSelection.token);
 						resolve(undefined);

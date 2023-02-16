@@ -62,7 +62,7 @@ function handleStopPlayback([client, bot]: [Client, Bot], interaction: Interacti
 			type: InteractionResponseTypes.ChannelMessageWithSource,
 			data: {
 				embeds: [{
-					title: `⏹️ ${stoppedString}`,
+					title: `${constants.symbols.music.stopped} ${stoppedString}`,
 					description: localise(Commands.music.options.stop.strings.stopped.body, defaultLocale),
 					color: constants.colors.blue,
 				}],

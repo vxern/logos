@@ -54,10 +54,7 @@ interface MusicController {
 	};
 }
 
-function createMusicController(
-	client: Client,
-	guildId: bigint,
-): MusicController {
+function createMusicController(client: Client, guildId: bigint): MusicController {
 	const player = client.features.music.node.createPlayer(guildId);
 	player.setVolume(configuration.music.defaultVolume);
 
@@ -69,11 +66,7 @@ function createMusicController(
 		listingHistory: [],
 		currentListing: undefined,
 		listingQueue: [],
-		flags: {
-			isDestroyed: false,
-			loop: false,
-			breakLoop: false,
-		},
+		flags: { isDestroyed: false, loop: false, breakLoop: false },
 	};
 }
 
@@ -278,6 +271,13 @@ function receiveNewListing(
 	voiceChannelId: bigint,
 	feedbackChannelId: bigint,
 ): void {
+	function getVoiceStatesForChannel(guild: Guild, channelId: bigint): VoiceState[] {
+		const guildVoiceStates = guild.voiceStates.array().filter((voiceState) => voiceState.channelId !== undefined);
+		const relevantVoiceStates = guildVoiceStates.filter((voiceState) => voiceState.channelId! === channelId);
+
+		return relevantVoiceStates;
+	}
+
 	tryClearDisconnectTimeout(guild.id);
 
 	controller.listingQueue.push(listing);
@@ -296,11 +296,9 @@ function receiveNewListing(
 		controller.feedbackChannelId = feedbackChannelId;
 	}
 
-	// TODO(vxern): If there are no users in the voice channel, make this message ephemeral and localise it appropriately.
-
 	const queuedString = localise(Commands.music.options.play.strings.queued.header, defaultLocale);
 	const embed: Embed = {
-		title: `👍 ${queuedString}`,
+		title: `${constants.symbols.music.queued} ${queuedString}`,
 		description: localise(Commands.music.options.play.strings.queued.body, defaultLocale)(listing.content.title),
 		color: constants.colors.lightGreen,
 	};
@@ -312,12 +310,12 @@ function receiveNewListing(
 	return advanceQueueAndPlay([client, bot], guild.id, controller);
 }
 
-function isCollection(object: Song | SongStream | SongCollection | undefined): object is SongCollection {
-	return object?.type === SongListingContentTypes.Collection;
+function isCollection(object: Song | SongStream | SongCollection): object is SongCollection {
+	return object.type === SongListingContentTypes.Collection;
 }
 
-function isExternal(object: Song | SongStream | SongCollection | undefined): object is SongStream {
-	return object?.type === SongListingContentTypes.External;
+function isExternal(object: Song | SongStream | SongCollection): object is SongStream {
+	return object.type === SongListingContentTypes.File;
 }
 
 function isFirstInCollection(collection: SongCollection): boolean {
@@ -328,52 +326,46 @@ function isLastInCollection(collection: SongCollection): boolean {
 	return collection.position === collection.songs.length - 1;
 }
 
-function advanceQueueAndPlay(
-	[client, bot]: [Client, Bot],
-	guildId: bigint,
-	controller: MusicController,
-): void {
+function advanceQueueAndPlay([client, bot]: [Client, Bot], guildId: bigint, controller: MusicController): void {
 	tryClearDisconnectTimeout(guildId);
 
 	if (!controller.flags.loop) {
-		if (controller.currentListing !== undefined && !isCollection(controller.currentListing?.content)) {
+		if (controller.currentListing !== undefined && !isCollection(controller.currentListing.content)) {
 			moveListingToHistory(controller, controller.currentListing);
 			controller.currentListing = undefined;
 		}
 
 		if (
 			!isQueueEmpty(controller.listingQueue) &&
-			(controller.currentListing === undefined || !isCollection(controller.currentListing?.content))
+			(controller.currentListing === undefined || !isCollection(controller.currentListing.content))
 		) {
 			controller.currentListing = controller.listingQueue.shift();
 			controller.events.emit('queueUpdate');
 		}
 	}
 
-	if (isCollection(controller.currentListing?.content)) {
-		if (isLastInCollection(controller.currentListing!.content)) {
+	if (controller.currentListing?.content !== undefined && isCollection(controller.currentListing.content)) {
+		if (isLastInCollection(controller.currentListing.content)) {
 			if (controller.flags.loop) {
-				controller.currentListing!.content.position = 0;
+				controller.currentListing.content.position = 0;
 			} else {
-				moveListingToHistory(controller, controller.currentListing!);
+				moveListingToHistory(controller, controller.currentListing);
 				controller.currentListing = controller.listingQueue.shift();
 				controller.events.emit('queueUpdate');
 			}
 		} else {
-			controller.currentListing!.content.position++;
+			controller.currentListing.content.position++;
 		}
 	}
 
 	if (controller.currentListing === undefined) {
 		setDisconnectTimeout(client, guildId);
 
-		// TODO(vxern): If there are no users in the voice channel, make this message ephemeral and localise it appropriately.
-
 		const allDoneString = localise(Commands.music.strings.allDone.header, defaultLocale);
 
 		return void sendMessage(bot, controller.feedbackChannelId!, {
 			embeds: [{
-				title: `👏 ${allDoneString}`,
+				title: `${constants.symbols.music.allDone} ${allDoneString}`,
 				description: localise(Commands.music.strings.allDone.body, defaultLocale),
 				color: constants.colors.blue,
 			}],
@@ -404,11 +396,11 @@ async function loadSong(
 
 	const track = result.tracks[0]!;
 
-	if (isExternal(controller.currentListing?.content)) {
-		controller.currentListing!.content.title = track.info.title;
+	if (controller.currentListing?.content !== undefined && isExternal(controller.currentListing.content)) {
+		controller.currentListing.content.title = track.info.title;
 	}
 
-	controller.player.once('trackEnd', (_track, _reason) => {
+	controller.player.once('trackEnd', (_, __) => {
 		if (controller.flags.isDestroyed) {
 			setDisconnectTimeout(client, guildId);
 			return;
@@ -431,11 +423,11 @@ async function loadSong(
 	const embed: Embed = {
 		title: `${emoji} ${playingString} ${type}`,
 		description: localise(Commands.music.strings.playing.body, defaultLocale)(
-			isCollection(controller.currentListing?.content)
+			controller.currentListing?.content !== undefined && isCollection(controller.currentListing.content)
 				? localise(Commands.music.strings.playing.parts.displayTrack, defaultLocale)(
-					controller.currentListing!.content.position + 1,
-					controller.currentListing!.content.songs.length,
-					controller.currentListing!.content.title,
+					controller.currentListing.content.position + 1,
+					controller.currentListing.content.songs.length,
+					controller.currentListing.content.title,
 				)
 				: '',
 			song.title,
@@ -455,17 +447,17 @@ interface PositionControls {
 }
 
 function skip(controller: MusicController, skipCollection: boolean, { by, to }: Partial<PositionControls>): void {
-	if (isCollection(controller.currentListing?.content)) {
-		if (skipCollection || isLastInCollection(controller.currentListing!.content)) {
-			moveListingToHistory(controller, controller.currentListing!);
+	if (controller.currentListing?.content !== undefined && isCollection(controller.currentListing.content)) {
+		if (skipCollection || isLastInCollection(controller.currentListing.content)) {
+			moveListingToHistory(controller, controller.currentListing);
 			controller.currentListing = undefined;
 		} else {
 			if (by !== undefined) {
-				controller.currentListing!.content.position += by - 1;
+				controller.currentListing.content.position += by - 1;
 			}
 
 			if (to !== undefined) {
-				controller.currentListing!.content.position = to - 2;
+				controller.currentListing.content.position = to - 2;
 			}
 		}
 	}
@@ -493,26 +485,26 @@ function unskip(
 	unskipCollection: boolean,
 	{ by, to }: Partial<PositionControls>,
 ): void {
-	if (isCollection(controller.currentListing?.content)) {
-		if (unskipCollection || isFirstInCollection(controller.currentListing!.content)) {
-			controller.currentListing!.content.position -= 1;
+	if (controller.currentListing?.content !== undefined && isCollection(controller.currentListing.content)) {
+		if (unskipCollection || isFirstInCollection(controller.currentListing.content)) {
+			controller.currentListing.content.position -= 1;
 
-			controller.listingQueue.unshift(controller.currentListing!);
+			controller.listingQueue.unshift(controller.currentListing);
 			controller.listingQueue.unshift(controller.listingHistory.pop()!);
 			controller.events.emit('queueUpdate');
 			controller.events.emit('historyUpdate');
 			controller.currentListing = undefined;
 		} else {
 			if (by !== undefined) {
-				controller.currentListing!.content.position -= by + 1;
+				controller.currentListing.content.position -= by + 1;
 			}
 
 			if (to !== undefined) {
-				controller.currentListing!.content.position = to! - 2;
+				controller.currentListing.content.position = to! - 2;
 			}
 
 			if (by === undefined && to === undefined) {
-				controller.currentListing!.content.position -= 2;
+				controller.currentListing.content.position -= 2;
 			}
 		}
 	} else {
@@ -567,11 +559,11 @@ function replay(
 	controller.flags.loop = true;
 	controller.player.once('trackStart', () => controller.flags.loop = previousLoopState);
 
-	if (isCollection(controller.currentListing?.content)) {
+	if (controller.currentListing?.content !== undefined && isCollection(controller.currentListing.content)) {
 		if (replayCollection) {
-			controller.currentListing!.content.position = -1;
+			controller.currentListing.content.position = -1;
 		} else {
-			controller.currentListing!.content.position--;
+			controller.currentListing.content.position--;
 		}
 	}
 
@@ -599,16 +591,9 @@ function remove(controller: MusicController, index: number): SongListing | undef
 	return listing;
 }
 
-function getVoiceStatesForChannel(guild: Guild, channelId: bigint): VoiceState[] {
-	const guildVoiceStates = guild.voiceStates.array().filter((voiceState) => voiceState.channelId !== undefined);
-	const relevantVoiceStates = guildVoiceStates.filter((voiceState) => voiceState.channelId! === channelId);
-
-	return relevantVoiceStates;
-}
-
 const localisationsBySongListingType = {
 	[SongListingContentTypes.Song]: Commands.music.strings.type.song,
-	[SongListingContentTypes.External]: Commands.music.strings.type.external,
+	[SongListingContentTypes.File]: Commands.music.strings.type.external,
 	[SongListingContentTypes.Collection]: Commands.music.strings.type.songCollection,
 };
 

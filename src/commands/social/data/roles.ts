@@ -7,44 +7,44 @@ const categories: RoleCategory[] = [
 		...Roles.proficiency,
 		type: RoleCategoryTypes.Category,
 		color: constants.colors.gray,
-		emoji: '🎓',
+		emoji: constants.symbols.roles.categories.proficiency.category,
 		minimum: 1,
 		maximum: 1,
 		collection: {
 			type: RoleCollectionTypes.Collection,
 			list: [{
 				...Roles.proficiency.roles.beginner,
-				emoji: '🟩',
+				emoji: constants.symbols.roles.categories.proficiency.beginner,
 			}, {
 				...Roles.proficiency.roles.intermediate,
-				emoji: '🟦',
+				emoji: constants.symbols.roles.categories.proficiency.intermediate,
 			}, {
 				...Roles.proficiency.roles.advanced,
-				emoji: '🟥',
+				emoji: constants.symbols.roles.categories.proficiency.advanced,
 			}, {
 				...Roles.proficiency.roles.native,
-				emoji: '🟨',
+				emoji: constants.symbols.roles.categories.proficiency.native,
 			}],
 		},
 	},
 	{
 		...Roles.personalisation,
 		color: constants.colors.yellow,
-		emoji: '🌈',
+		emoji: constants.symbols.roles.categories.personalisation.category,
 		type: RoleCategoryTypes.CategoryGroup,
 		categories: [
 			{
 				...Roles.personalisation.categories.orthography,
 				type: RoleCategoryTypes.Category,
 				color: constants.colors.husky,
-				emoji: '🖋️',
+				emoji: constants.symbols.roles.categories.personalisation.orthography.category,
 				maximum: 1,
 				collection: {
 					type: RoleCollectionTypes.CollectionLocalised,
 					lists: {
 						'Romanian': [{
 							...Roles.personalisation.categories.orthography.roles.idinist,
-							emoji: 'Idini',
+							emoji: constants.symbols.roles.categories.personalisation.orthography.idinist,
 						}],
 					},
 				},
@@ -53,22 +53,22 @@ const categories: RoleCategory[] = [
 				...Roles.personalisation.categories.gender,
 				type: RoleCategoryTypes.Category,
 				color: constants.colors.orangeRed,
-				emoji: '⚧',
+				emoji: constants.symbols.roles.categories.personalisation.gender.category,
 				maximum: 1,
 				collection: {
 					type: RoleCollectionTypes.Collection,
 					list: [{
 						...Roles.personalisation.categories.gender.roles.male,
-						emoji: '♂️',
+						emoji: constants.symbols.roles.categories.personalisation.gender.male,
 					}, {
 						...Roles.personalisation.categories.gender.roles.female,
-						emoji: '♀️',
+						emoji: constants.symbols.roles.categories.personalisation.gender.female,
 					}, {
 						...Roles.personalisation.categories.gender.roles.transgender,
-						emoji: '⚧',
+						emoji: constants.symbols.roles.categories.personalisation.gender.transgender,
 					}, {
-						...Roles.personalisation.categories.gender.roles.nonBinary,
-						emoji: '❔',
+						...Roles.personalisation.categories.gender.roles.nonbinary,
+						emoji: constants.symbols.roles.categories.personalisation.gender.nonbinary,
 					}],
 				},
 			},
@@ -76,12 +76,12 @@ const categories: RoleCategory[] = [
 				...Roles.personalisation.categories.abroad,
 				type: RoleCategoryTypes.Category,
 				color: constants.colors.husky,
-				emoji: '🌎',
+				emoji: constants.symbols.roles.categories.personalisation.abroad.category,
 				collection: {
 					type: RoleCollectionTypes.Collection,
 					list: [{
 						...Roles.personalisation.categories.abroad.roles.diasporan,
-						emoji: '🌎',
+						emoji: constants.symbols.roles.categories.personalisation.abroad.diasporan,
 					}],
 				},
 			},
@@ -91,21 +91,21 @@ const categories: RoleCategory[] = [
 		...Roles.learning,
 		type: RoleCategoryTypes.Category,
 		color: constants.colors.lightGray,
-		emoji: '📖',
+		emoji: constants.symbols.roles.categories.learning.category,
 		collection: {
 			type: RoleCollectionTypes.Collection,
 			list: [{
 				...Roles.learning.roles.classroomAttendee,
-				emoji: '📖',
+				emoji: constants.symbols.roles.categories.learning.classroomAttendee,
 			}, {
 				...Roles.learning.roles.correctMe,
-				emoji: '✍️',
+				emoji: constants.symbols.roles.categories.learning.correctMe,
 			}, {
 				...Roles.learning.roles.dailyPhrase,
-				emoji: '🌞',
+				emoji: constants.symbols.roles.categories.learning.dailyPhrase,
 			}, {
 				...Roles.learning.roles.voicechatter,
-				emoji: '🗣️',
+				emoji: constants.symbols.roles.categories.learning.voicechatter,
 			}],
 		},
 	},
@@ -113,7 +113,7 @@ const categories: RoleCategory[] = [
 		...Roles.ethnicity,
 		type: RoleCategoryTypes.Category,
 		color: constants.colors.turquoise,
-		emoji: '🗾',
+		emoji: constants.symbols.roles.categories.ethnicity.category,
 		maximum: 2,
 		collection: {
 			type: RoleCollectionTypes.CollectionLocalised,
@@ -127,7 +127,7 @@ const categories: RoleCategory[] = [
 		...Roles.dialects,
 		type: RoleCategoryTypes.Category,
 		color: constants.colors.green,
-		emoji: '🏷️',
+		emoji: constants.symbols.roles.categories.dialects.category,
 		collection: {
 			type: RoleCollectionTypes.CollectionLocalised,
 			lists: {
@@ -139,13 +139,12 @@ const categories: RoleCategory[] = [
 		...Roles.regions,
 		type: RoleCategoryTypes.Category,
 		color: constants.colors.greenishLightGray,
-		emoji: '🤷‍♂️',
+		emoji: constants.symbols.roles.categories.regions.category,
 		maximum: 2,
 		collection: {
 			type: RoleCollectionTypes.CollectionLocalised,
 			lists: {
 				'Armenian': Roles.regions.languages['Armenian'],
-				'Belarusian': Roles.regions.languages['Belarusian'],
 				'Romanian': Roles.regions.languages['Romanian'],
 			},
 		},

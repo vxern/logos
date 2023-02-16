@@ -22,14 +22,11 @@ const command: OptionBuilder = {
 	options: [timestamp],
 };
 
-async function handleSkipToTimestamp(
-	[client, bot]: [Client, Bot],
-	interaction: Interaction,
-): Promise<void> {
+async function handleSkipToTimestamp([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+	const [{ timestamp: timestampExpression }, focused] = parseArguments(interaction.data?.options, {});
+
 	const controller = client.features.music.controllers.get(interaction.guildId!);
 	if (controller === undefined) return;
-
-	const [{ timestamp: timestampExpression }, focused] = parseArguments(interaction.data?.options, {});
 
 	if (focused !== undefined) {
 		const timestamp = parseTimeExpression(timestampExpression!, false, interaction.locale);
@@ -103,7 +100,7 @@ async function handleSkipToTimestamp(
 			type: InteractionResponseTypes.ChannelMessageWithSource,
 			data: {
 				embeds: [{
-					title: `🔍 ${skippedToString}`,
+					title: `${constants.symbols.music.skippedTo} ${skippedToString}`,
 					description: localise(Commands.music.options.skipTo.strings.skippedTo.body, defaultLocale),
 					color: constants.colors.blue,
 				}],

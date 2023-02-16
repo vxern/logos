@@ -1,29 +1,30 @@
 import { Bot, Channel, ChannelTypes, Collection, createChannel, deleteChannel, Guild, VoiceState } from 'discordeno';
-import { Client, extendEventHandler } from 'logos/src/client.ts';
 import { ServiceStarter } from 'logos/src/services/services.ts';
+import { Client, extendEventHandler } from 'logos/src/client.ts';
+import { isVoice } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 
 const previousVoiceStates = new Map<`${/*userId:*/ bigint}${/*guildId:*/ bigint}`, VoiceState>();
 
 const service: ServiceStarter = ([client, bot]) => {
-	extendEventHandler(bot, 'voiceStateUpdate', { append: true }, (_bot, voiceState) => {
+	extendEventHandler(bot, 'voiceStateUpdate', { append: true }, (_, voiceState) => {
 		onVoiceStateUpdate([client, bot], voiceState);
 	});
 
-	extendEventHandler(bot, 'guildCreate', { append: true }, (_bot, { id: guildId }) => {
+	extendEventHandler(bot, 'guildCreate', { append: true }, (_, { id: guildId }) => {
 		const guild = client.cache.guilds.get(guildId);
 		if (guild === undefined) return;
 
 		const voiceChannelStatesTuples = getVoiceChannelStatesTuples(guild);
 		if (voiceChannelStatesTuples.length === 0) return;
 
-		for (const [_channel, voiceStates] of voiceChannelStatesTuples) {
+		for (const [_, voiceStates] of voiceChannelStatesTuples) {
 			for (const voiceState of voiceStates) {
 				onVoiceStateUpdate([client, bot], voiceState);
 			}
 		}
 
-		const freeChannels = voiceChannelStatesTuples.filter(([_channel, states]) => states.length === 0)
+		const freeChannels = voiceChannelStatesTuples.filter(([_, states]) => states.length === 0)
 			.map(([channel]) => channel);
 		// If there is up to one free channel already, do not process.
 		if (freeChannels.length <= 1) return;
@@ -59,7 +60,7 @@ function onVoiceStateUpdate([client, bot]: [Client, Bot], voiceState: VoiceState
 	previousVoiceStates.set(`${voiceState.userId}${voiceState.guildId}`, voiceState);
 }
 
-type VoiceChannelStatesTuple = [Channel, VoiceState[]];
+type VoiceChannelStatesTuple = [channel: Channel, voiceStates: VoiceState[]];
 
 function onConnect(
 	bot: Bot,
@@ -70,12 +71,12 @@ function onConnect(
 	const tuple = voiceChannelStatesTuples.find(([channel, _states]) => channel.id === currentState.channelId!);
 	if (tuple === undefined) return;
 
-	const [_channel, states] = tuple;
+	const [_, states] = tuple;
 
 	// If somebody is already connected to the channel, do not process.
 	if (states.length !== 1) return;
 
-	const freeChannels = voiceChannelStatesTuples.filter(([_channel, states]) => states.length === 0).length;
+	const freeChannels = voiceChannelStatesTuples.filter(([_, states]) => states.length === 0).length;
 	// If there is a free channel available already, do not process.
 	if (freeChannels !== 0) return;
 
@@ -92,18 +93,12 @@ function onConnect(
 	});
 }
 
-function onDisconnect(
-	bot: Bot,
-	voiceChannelStatesTuples: VoiceChannelStatesTuple[],
-	previousState: VoiceState,
-): void {
-	const [_channel, states] = voiceChannelStatesTuples.find(([channel, _states]) =>
-		channel.id === previousState.channelId!
-	)!;
+function onDisconnect(bot: Bot, voiceChannelStatesTuples: VoiceChannelStatesTuple[], previousState: VoiceState): void {
+	const [_, states] = voiceChannelStatesTuples.find(([channel, _states]) => channel.id === previousState.channelId!)!;
 	// If somebody is still connected to the channel, do not process.
 	if (states.length !== 0) return;
 
-	const freeChannelsCount = voiceChannelStatesTuples.filter(([_channel, states]) => states.length === 0).length;
+	const freeChannelsCount = voiceChannelStatesTuples.filter(([_, states]) => states.length === 0).length;
 	// If there is up to one free channel already, do not process.
 	if (freeChannelsCount <= 1) return;
 
@@ -126,9 +121,12 @@ function getVoiceChannelStatesTuples(guild: Guild): VoiceChannelStatesTuple[] {
 function getRelevantVoiceChannels(guild: Guild): Channel[] {
 	const channels = guild.channels
 		.filter(
-			(channel) =>
-				channel.type === ChannelTypes.GuildVoice && channel.name! === configuration.guilds.channels.voiceChat,
-		).array().toSorted((a, b) => a.position === b.position ? Number(a.id - b.id) : a.position! - b.position!);
+			(channel) => isVoice(channel) && channel.name! === configuration.guilds.channels.voiceChat,
+		)
+		.array()
+		.toSorted(
+			(a, b) => a.position === b.position ? Number(a.id - b.id) : a.position! - b.position!,
+		);
 
 	return channels;
 }

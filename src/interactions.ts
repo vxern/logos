@@ -21,6 +21,12 @@ import { localise, Misc } from 'logos/assets/localisations/mod.ts';
 import { addCollector, Client } from 'logos/src/client.ts';
 import constants from 'logos/constants.ts';
 
+type AutocompleteInteraction = Interaction & { type: InteractionTypes.ApplicationCommandAutocomplete };
+
+function isAutocomplete(interaction: Interaction): interaction is AutocompleteInteraction {
+	return interaction.type === InteractionTypes.ApplicationCommandAutocomplete;
+}
+
 /** Settings for interaction collection. */
 interface InteractionCollectorSettings {
 	/** The type of interaction to listen for. */
@@ -56,7 +62,7 @@ function createInteractionCollector(
 	const customId = settings.customId ?? Snowflake.generate();
 
 	addCollector([client, bot], 'interactionCreate', {
-		filter: (_bot, interaction) => compileChecks(interaction, settings, customId).every((condition) => condition),
+		filter: (_, interaction) => compileChecks(interaction, settings, customId).every((condition) => condition),
 		limit: settings.limit,
 		removeAfter: settings.doesNotExpire ? undefined : constants.interactionTokenExpiryInterval,
 		onCollect: settings.onCollect ?? (() => {}),
@@ -66,15 +72,11 @@ function createInteractionCollector(
 	return customId;
 }
 
-function compileChecks(
-	interaction: Interaction,
-	settings: InteractionCollectorSettings,
-	customId: string,
-): boolean[] {
+function compileChecks(interaction: Interaction, settings: InteractionCollectorSettings, customId: string): boolean[] {
 	return [
 		interaction.type === settings.type,
 		interaction.data !== undefined && interaction.data.customId !== undefined &&
-		interaction.data.customId.split('|').at(0)! === customId.split('|').at(0)!,
+		decodeId(interaction.data.customId)[0] === decodeId(customId)[0],
 		settings.userId === undefined ? true : interaction.user.id === settings.userId,
 	];
 }
@@ -101,10 +103,7 @@ function parseArguments<
 		}
 
 		if (option.options !== undefined) {
-			const [parsedArgs, parsedFocused] = parseArguments(
-				option.options,
-				customTypes,
-			);
+			const [parsedArgs, parsedFocused] = parseArguments(option.options, customTypes);
 			focused = parsedFocused ?? focused;
 			args = { ...args, ...parsedArgs };
 			continue;
@@ -117,20 +116,22 @@ function parseArguments<
 
 		switch (customTypes[option.name]) {
 			case 'boolean': {
-				args[option.name] = <boolean> option.value;
+				args[option.name] = option.value as boolean;
 				continue;
 			}
 			case 'number': {
-				args[option.name] = parseInt(<string> option.value);
+				args[option.name] = parseInt(option.value as string);
 				continue;
 			}
 		}
 
-		args[option.name] = <string> option.value;
+		args[option.name] = option.value as string;
 	}
 
 	return [args as R, focused];
 }
+
+type ControlButtonID = [type: 'previous' | 'next'];
 
 /**
  * Paginates an array of elements, allowing the user to browse between pages
@@ -157,13 +158,13 @@ function paginate<T>(
 		onCollect: (bot, selection) => {
 			if (selection.data === undefined) return;
 
-			const action = selection.data.customId!.split('|')[1]!;
+			const [_, action] = decodeId<ControlButtonID>(selection.data.customId!);
 
 			switch (action) {
-				case 'PREVIOUS':
+				case 'previous':
 					if (!isFirst) data.pageIndex--;
 					break;
-				case 'NEXT':
+				case 'next':
 					if (!isLast) data.pageIndex++;
 					break;
 			}
@@ -213,7 +214,7 @@ function getPageEmbed<T>(data: PaginationData<T>, embed: Embed, isLast: boolean,
 			{
 				name: data.elements.length === 1
 					? data.view.title
-					: `${data.view.title} ~ Page ${data.pageIndex + 1}/${data.elements.length}`,
+					: `${data.view.title} ~ ${localise(Misc.page, locale)} ${data.pageIndex + 1}/${data.elements.length}`,
 				value: data.view.generate(data.elements.at(data.pageIndex)!, data.pageIndex),
 			},
 			...(embed.fields ?? []),
@@ -228,25 +229,24 @@ function generateButtons(customId: string, isFirst: boolean, isLast: boolean): M
 	if (!isFirst) {
 		buttons.push({
 			type: MessageComponentTypes.Button,
-			customId: `${customId}|PREVIOUS`,
+			customId: encodeId<ControlButtonID>(customId, ['previous']),
 			style: ButtonStyles.Secondary,
-			label: '«',
+			label: constants.symbols.interactions.menu.controls.back,
 		});
 	}
 
 	if (!isLast) {
 		buttons.push({
 			type: MessageComponentTypes.Button,
-			customId: `${customId}|NEXT`,
+			customId: encodeId<ControlButtonID>(customId, ['next']),
 			style: ButtonStyles.Secondary,
-			label: '»',
+			label: constants.symbols.interactions.menu.controls.forward,
 		});
 	}
 
-	// @ts-ignore: It is guaranteed that there will be fewer or as many as 5 buttons.
 	return buttons.length === 0 ? [] : [{
 		type: MessageComponentTypes.ActionRow,
-		components: buttons,
+		components: buttons as [ButtonComponent],
 	}];
 }
 
@@ -278,7 +278,7 @@ async function createModalComposer<T extends string>(
 				type: InteractionTypes.ModalSubmit,
 				userId: interaction.user.id,
 				limit: 1,
-				onCollect: (_bot, submission) => {
+				onCollect: (_, submission) => {
 					content = parseComposerContent(submission);
 					if (content === undefined) return resolve([submission, false]);
 
@@ -481,5 +481,25 @@ function parseTimeExpressionPhrase(
 	return [correctedExpression, total];
 }
 
-export { createInteractionCollector, createModalComposer, paginate, parseArguments, parseTimeExpression };
-export type { InteractionCollectorSettings, Modal };
+type ComponentIDMetadata = [arg: string, ...args: string[]];
+
+function encodeId<T extends ComponentIDMetadata>(customId: string, args: T): string {
+	return [customId, ...args].join(constants.symbols.meta.idSeparator);
+}
+
+function decodeId<T extends ComponentIDMetadata, R = [string, ...T]>(customId: string): R {
+	return customId.split(constants.symbols.meta.idSeparator) as R;
+}
+
+export {
+	createInteractionCollector,
+	createModalComposer,
+	decodeId,
+	encodeId,
+	generateButtons,
+	isAutocomplete,
+	paginate,
+	parseArguments,
+	parseTimeExpression,
+};
+export type { ControlButtonID, InteractionCollectorSettings, Modal };

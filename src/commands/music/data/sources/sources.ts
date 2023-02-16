@@ -11,9 +11,7 @@ type ListingResolver = (
 ) => Promise<SongListing | undefined>;
 
 /** Stores the available music sources. */
-const sources: Record<string, ListingResolver> = {
-	'YouTube': youtube,
-};
+const sources: Record<string, ListingResolver> = { 'YouTube': youtube };
 
 export { sources };
 export type { ListingResolver };

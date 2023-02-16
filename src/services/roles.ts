@@ -10,7 +10,7 @@ const service: ServiceStarter = ([client, bot]: [Client, Bot]) => {
 		type: InteractionTypes.MessageComponent,
 		customId: constants.staticComponentIds.selectRoles,
 		doesNotExpire: true,
-		onCollect: (_bot, interaction) => handleOpenRoleSelectionMenu([client, bot], interaction),
+		onCollect: (_, interaction) => handleOpenRoleSelectionMenu([client, bot], interaction),
 	});
 };
 

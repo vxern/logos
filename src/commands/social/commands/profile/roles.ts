@@ -18,7 +18,13 @@ import {
 import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
 import { OptionBuilder } from 'logos/src/commands/command.ts';
 import roles from 'logos/src/commands/social/data/roles.ts';
-import { Role, RoleCategory, RoleCategoryTypes } from 'logos/src/commands/social/data/types.ts';
+import {
+	isCategory,
+	isCategoryGroup,
+	Role,
+	RoleCategory,
+	RoleCategoryTypes,
+} from 'logos/src/commands/social/data/types.ts';
 import { getRelevantCategories, resolveRoles } from 'logos/src/commands/social/module.ts';
 import { Client } from 'logos/src/client.ts';
 import { createInteractionCollector } from 'logos/src/interactions.ts';
@@ -36,10 +42,7 @@ const command: OptionBuilder = {
  * Displays a role selection menu to the user and allows them to assign or unassign roles
  * from within it.
  */
-function handleOpenRoleSelectionMenu(
-	[client, bot]: [Client, Bot],
-	interaction: Interaction,
-): void {
+function handleOpenRoleSelectionMenu([client, bot]: [Client, Bot], interaction: Interaction): void {
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (guild === undefined) return;
 
@@ -55,7 +58,7 @@ function handleOpenRoleSelectionMenu(
 					name: Commands.profile.options.roles.strings.selectCategory.header,
 					description: Commands.profile.options.roles.strings.selectCategory.body,
 					color: constants.colors.invisible,
-					emoji: '💭',
+					emoji: constants.symbols.roles.noCategory,
 					categories: rootCategories,
 				},
 				indexesAccessed: [],
@@ -163,7 +166,7 @@ function createRoleSelectionMenu(
 
 				const viewData = displayData.viewData!;
 
-				if (viewData.category.type === RoleCategoryTypes.CategoryGroup) {
+				if (isCategoryGroup(viewData.category)) {
 					data.navigationData.indexesAccessed.push(index);
 					displayData = traverseRoleTreeAndDisplay(bot, selection, displayData);
 					return;
@@ -281,7 +284,7 @@ function traverseRoleTreeAndDisplay(
 	const category = categories.at(-1)!;
 
 	let selectOptions: SelectOption[];
-	if (category.type === RoleCategoryTypes.Category) {
+	if (isCategory(category)) {
 		const menuRoles = resolveRoles(category.collection, data.browsingData.language);
 		const menuRolesResolved = menuRoles.map((role) =>
 			data.roleData.rolesByName.get(localise(role.name, defaultLocale))!
@@ -337,7 +340,7 @@ function displaySelectMenu(
 	const title = (categories.length > 1 ? categories.slice(1) : categories).map((category) => {
 		const categoryNameString = localise(category.name, locale);
 		return `${category.emoji}  ${categoryNameString}`;
-	}).join(' »  ');
+	}).join(` ${constants.symbols.indicators.arrowRight}  `);
 
 	return {
 		type: InteractionResponseTypes.ChannelMessageWithSource,
@@ -354,7 +357,7 @@ function displaySelectMenu(
 					type: MessageComponentTypes.SelectMenu,
 					customId: data.customId,
 					options: selectOptions,
-					placeholder: category.type === RoleCategoryTypes.CategoryGroup
+					placeholder: isCategoryGroup(category)
 						? localise(Commands.profile.options.roles.strings.chooseCategory, locale)
 						: localise(Commands.profile.options.roles.strings.chooseRole, locale),
 				}],
@@ -410,7 +413,7 @@ function createSelectOptionsFromCollection(
 				if (emojiExpression.test(role.emoji)) return { name: role.emoji };
 
 				const id = data.roleData.emojiIdsByName.get(role.emoji);
-				if (id === undefined) return { name: '❓' };
+				if (id === undefined) return { name: constants.symbols.roles.noCategory };
 
 				return { name: role.emoji, id };
 			})(),

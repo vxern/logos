@@ -177,7 +177,7 @@ class Roles {
 							'Romanian': 'Sunt o persoană transgen.',
 						},
 					},
-					nonBinary: {
+					nonbinary: {
 						name: {
 							'English': 'Non-binary',
 							'Hungarian': 'Nembináris',
@@ -323,13 +323,11 @@ class Roles {
 				{
 					name: {
 						'English': 'Armeno-Tat',
-						// TODO: Add Hungarian translation.
 						'Polish': 'Armeno-Tackie',
 						'Romanian': 'Armeno-Tată',
 					},
 					description: {
 						'English': 'I am of Armeno-Tat heritage.',
-						// TODO: Add Hungarian translation.
 						'Polish': 'Z pochodzenia jestem Armeno-tatem.',
 						'Romanian': 'Sunt de origine armeno-tată.',
 					},
@@ -368,13 +366,11 @@ class Roles {
 				{
 					name: {
 						'English': 'Crypto-Armenian',
-						// TODO: Add Hungarian translation.
 						'Polish': 'Krypto-Ormiańskie',
 						'Romanian': 'Cripto-Armeană',
 					},
 					description: {
 						'English': 'I am of Crypto-Armenian heritage.',
-						// TODO: Add Hungarian translation.
 						'Polish': 'Z pochodzenia jestem Krypto-ormianinem.',
 						'Romanian': 'Sunt de origine cripto-armeană.',
 					},
@@ -426,13 +422,11 @@ class Roles {
 				{
 					name: {
 						'English': 'Romani',
-						// TODO: Add Hungarian translation.
 						'Polish': 'Romskie',
 						'Romanian': 'Romă',
 					},
 					description: {
 						'English': 'I am of Romani heritage.',
-						// TODO: Add Hungarian translation.
 						'Polish': 'Z pochodzenia jestem Romem.',
 						'Romanian': 'Sunt de origine romă.',
 					},
@@ -440,13 +434,11 @@ class Roles {
 				{
 					name: {
 						'English': 'Hungarian (Szekler, Csango)',
-						// TODO: Add Hungarian translation.
 						'Polish': 'Węgierskie (sekelowskie, czangowskie)',
 						'Romanian': 'Maghiară (secuiască, ceangăiască)',
 					},
 					description: {
 						'English': 'I am of Hungarian heritage.',
-						// TODO: Add Hungarian translation.
 						'Polish': 'Z pochodzenia jestem Węgrem.',
 						'Romanian': 'Sunt de origine maghiară.',
 					},
@@ -454,13 +446,11 @@ class Roles {
 				{
 					name: {
 						'English': 'German (Saxon, Swabian)',
-						// TODO: Add Hungarian translation.
 						'Polish': 'Niemieckie (saksońskie, szwabskie)',
 						'Romanian': 'Germană (sasă, șvabă)',
 					},
 					description: {
 						'English': 'I am of German heritage.',
-						// TODO: Add Hungarian translation.
 						'Polish': 'Z pochodzenia jestem Niemcem.',
 						'Romanian': 'Sunt de origine germană.',
 					},
@@ -587,31 +577,6 @@ class Roles {
 			}, {
 				name: {
 					'English': 'Yerevan / Երևան',
-				},
-			}],
-			'Belarusian': [{
-				name: {
-					'English': 'Brest / Брэсцкая',
-				},
-			}, {
-				name: {
-					'English': 'Hrodna / Гродзенская',
-				},
-			}, {
-				name: {
-					'English': 'Homel / Гомельская',
-				},
-			}, {
-				name: {
-					'English': 'Mahilyow / Магілёўская',
-				},
-			}, {
-				name: {
-					'English': 'Minsk / Мінская',
-				},
-			}, {
-				name: {
-					'English': 'Vitsebsk / Вiцебская',
 				},
 			}],
 			'Romanian': [{

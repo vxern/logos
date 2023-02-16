@@ -10,7 +10,9 @@ import {
 } from 'discordeno';
 import { localise, Services } from 'logos/assets/localisations/mod.ts';
 import { getProficiencyCategory } from 'logos/src/commands/social/module.ts';
+import { EntryStepButtonID } from 'logos/src/services/entry.ts';
 import { Client } from 'logos/src/client.ts';
+import { encodeId } from 'logos/src/interactions.ts';
 import { defaultLocale } from 'logos/types.ts';
 import configuration from 'logos/configuration.ts';
 import constants from 'logos/constants.ts';
@@ -57,8 +59,10 @@ async function handleSelectLanguageProficiency(
 							type: MessageComponentTypes.Button,
 							style: ButtonStyles.Secondary,
 							label: localise(Services.entry.iUnderstand, interaction.locale),
-							customId: `${constants.staticComponentIds.requestedVerification}|${requestedRole.id}`,
-							emoji: { name: '✅' },
+							customId: encodeId<EntryStepButtonID>(constants.staticComponentIds.requestedVerification, [
+								requestedRole.id.toString(),
+							]),
+							emoji: { name: constants.symbols.understood },
 						}],
 					}],
 				},

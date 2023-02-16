@@ -29,6 +29,13 @@ const command: OptionBuilder = {
 };
 
 function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction): void {
+	const [{ collection, by: songsToSkip, to: songToSkipTo }] = parseArguments(
+		interaction.data?.options,
+		{ collection: 'boolean', by: 'number', to: 'number' },
+	);
+	if (songsToSkip !== undefined && isNaN(songsToSkip)) return;
+	if (songToSkipTo !== undefined && isNaN(songToSkipTo)) return;
+
 	const controller = client.features.music.controllers.get(interaction.guildId!);
 	if (controller === undefined) return;
 
@@ -39,18 +46,6 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 		getVoiceState(client, interaction.guildId!, interaction.user.id),
 	);
 	if (!isVoiceStateVerified) return;
-
-	const data = interaction.data;
-	if (data === undefined) return;
-
-	const [{ collection, by, to }] = parseArguments(interaction.data?.options, {
-		collection: 'boolean',
-		by: 'number',
-		to: 'number',
-	});
-
-	if (by !== undefined && isNaN(by)) return;
-	if (to !== undefined && isNaN(to)) return;
 
 	if (!isOccupied(controller.player) || controller.currentListing === undefined) {
 		return void sendInteractionResponse(
@@ -88,7 +83,8 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 		);
 	}
 
-	if (by !== undefined && to !== undefined) {
+	// If both the 'to' and the 'by' parameter have been supplied.
+	if (songsToSkip !== undefined && songToSkipTo !== undefined) {
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -106,7 +102,8 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 		);
 	}
 
-	if ((by !== undefined && by <= 0) || (to !== undefined && to <= 0)) {
+	// If either the 'to' parameter or the 'by' parameter are negative.
+	if ((songsToSkip !== undefined && songsToSkip <= 0) || (songToSkipTo !== undefined && songToSkipTo <= 0)) {
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -126,23 +123,23 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 
 	const isSkippingCollection = collection ?? false;
 
-	if (by !== undefined) {
+	if (songsToSkip !== undefined) {
 		let listingsToSkip!: number;
 		if (isCollection(controller.currentListing?.content) && collection === undefined) {
 			listingsToSkip = Math.min(
-				by,
+				songsToSkip,
 				controller.currentListing!.content.songs.length - (controller.currentListing!.content.position + 1),
 			);
 		} else {
-			listingsToSkip = Math.min(by, controller.listingQueue.length);
+			listingsToSkip = Math.min(songsToSkip, controller.listingQueue.length);
 		}
 		skip(controller, isSkippingCollection, { by: listingsToSkip });
-	} else if (to !== undefined) {
+	} else if (songToSkipTo !== undefined) {
 		let listingToSkipTo!: number;
 		if (isCollection(controller.currentListing?.content) && collection === undefined) {
-			listingToSkipTo = Math.min(to, controller.currentListing!.content.songs.length);
+			listingToSkipTo = Math.min(songToSkipTo, controller.currentListing!.content.songs.length);
 		} else {
-			listingToSkipTo = Math.min(to, controller.listingQueue.length);
+			listingToSkipTo = Math.min(songToSkipTo, controller.listingQueue.length);
 		}
 		skip(controller, isSkippingCollection, { to: listingToSkipTo });
 	} else {
@@ -163,7 +160,7 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 			type: InteractionResponseTypes.ChannelMessageWithSource,
 			data: {
 				embeds: [{
-					title: `⏭️ ${messageString}`,
+					title: `${constants.symbols.music.skipped} ${messageString}`,
 					description: localise(messageLocalisations.body, defaultLocale),
 					color: constants.colors.invisible,
 				}],

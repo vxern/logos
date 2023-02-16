@@ -142,7 +142,7 @@ function extractTimestamp(notice: Message | CreateMessage): number | undefined {
 	if (timestampString === undefined) return undefined;
 	if (!timestampPattern.test(timestampString)) return undefined;
 
-	const [_match, timestamp] = timestampPattern.exec(timestampString)!;
+	const [_, timestamp] = timestampPattern.exec(timestampString)!;
 
 	return Number(timestamp!);
 }

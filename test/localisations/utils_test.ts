@@ -23,7 +23,7 @@ Deno.test('utils', async (test) => {
 
 	await test.step('getLocaleForLanguage', async (test) => {
 		await test.step('unsupported language', () => {
-			const result = getLocaleForLanguage('Belarusian');
+			const result = getLocaleForLanguage('Armenian');
 			assertEquals(result, 'en-GB');
 		});
 
