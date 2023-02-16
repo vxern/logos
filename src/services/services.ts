@@ -10,7 +10,7 @@ import { Client } from 'logos/src/client.ts';
 
 type ServiceStarter = ([client, bot]: [Client, Bot]) => void;
 
-const services = [dynamicVoiceChannels, entry, notices, reports, suggestions, roles, verification];
+const services = [entry, notices, reports, suggestions, roles, verification];
 
 export default services;
 export type { ServiceStarter };
