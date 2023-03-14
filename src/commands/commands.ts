@@ -9,7 +9,7 @@ const getCommands = () => [
 	...information,
 	...language,
 	...moderation,
-	...music,
+	//...music,
 	...server,
 	...social,
 ];
