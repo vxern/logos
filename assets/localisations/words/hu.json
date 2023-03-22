@@ -1,0 +1,13 @@
+{
+	"words.noun": "főnév",
+	"words.verb": "ige",
+	"words.adjective": "melléknév",
+	"words.adverb": "határozószó",
+	"words.adposition": "adpozíció",
+	"words.affix": "affix",
+	"words.pronoun": "névmás",
+	"words.determiner": "determiner",
+	"words.conjunction": "kötőszó",
+	"words.interjection": "indulatszó",
+	"words.unknown": "ismeretlen szófaj"
+}
