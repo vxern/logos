@@ -1,0 +1,7 @@
+{
+	"interactions.invalidUser": "Érvénytelen felhasználó.",
+	"interactions.continuedOnNextPage": "Folytatódik a következő oldalon...",
+	"interactions.page": "Page",
+	"interactions.usedCommandTooManyTimes": "You have used this command too many times in too short of time.",
+	"interactions.canUseCommandIn": "You will be able to use the command again {relative_timestamp}."
+}
