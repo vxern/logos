@@ -1,0 +1,22 @@
+{
+	"rules.tldr": "Strzeszczenie",
+	"rules.rule": "Reguła",
+	"rules.behaviour.title": "Zachowanie",
+	"rules.behaviour.summary": "Staraj się być miły/a.",
+	"rules.behaviour.content": "Od członków oczekuje się traktowania siebie nawzajem z szacunkiem, rozwagą, oraz zrozumieniem. Złośliwe zachowanie w postaci obelg słownych, dyskryminacji, nękania lub innych wcieleń krzywdzących lub toksycznych zachowań nie będzie tolerowane.",
+	"rules.quality.title": "Jakość",
+	"rules.quality.summary": "Nie bądź wstrętny/a.",
+	"rules.quality.content": "Oczekuje się, że wkłady wnoszone na serwer będą przyzwoitej jakości. Zniechęcamy do trollingu, spamowania, floodowania, shitpostingu (poza kanałem dla memów), oraz innych form irytującego zachowania.",
+	"rules.relevance.title": "Odpowiedność",
+	"rules.relevance.summary": "Zamieszczaj treści w ich odpowiednich miejscach.",
+	"rules.relevance.content": "Oczekuje się, że wkłady wnoszone na serwer będą umieszczane w odpowiednim kanale oraz kategorii. Wkłady w kanałach nieodpowiednich dla ich tematyki będą proszone o przeniesienie ich na odpowiedni kanał.",
+	"rules.suitability.title": "Stosowność",
+	"rules.suitability.summary": "Zamieszczaj treści stosowne dla młodszych członków.",
+	"rules.suitability.content": "Oczekuje się, że wkłady wnoszone na serwer będą stosowne dla oglądania przez osoby młodsze. Wszelkie treści z ograniczeniem wiekowym (NSFW) lub o charakterze drastycznym (NSFL) są kompletnie wzbronione. Jeśli nie pokazał(a)byś treści osobie młodszej, nie wysyłaj jej na serwer.",
+	"rules.exclusivity.title": "Wyłączność",
+	"rules.exclusivity.summary": "Nie reklamuj się.",
+	"rules.exclusivity.content": "Oczekuje się, że członkowie nie będą używać tej przestrzeni do reklamacji, w tym samego/samej siebie. Zabrania się aktywnych prób reklamacji (w tym niechcianych wiadomości prywatnych).",
+	"rules.adherence.title": "Przestrzeganie",
+	"rules.adherence.summary": "Szanuj zasady.",
+	"rules.adherence.content": "Członkowie, którzy nie liczą się z regułami serwera, i ci, którzy nie są zainteresowani wnoszeniem użytecznego wkładu na serwer, mogą dostać permabana."
+}
