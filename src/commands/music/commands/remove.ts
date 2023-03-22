@@ -13,9 +13,8 @@ import {
 	SelectOption,
 	sendInteractionResponse,
 } from 'discordeno';
-import { Commands, createLocalisations, localise, Misc } from 'logos/assets/localisations/mod.ts';
 import { listingTypeToEmoji, SongListing } from 'logos/src/commands/music/data/types.ts';
-import { OptionBuilder } from 'logos/src/commands/command.ts';
+import { OptionTemplate } from 'logos/src/commands/command.ts';
 import {
 	getVoiceState,
 	isQueueEmpty,
@@ -23,7 +22,7 @@ import {
 	remove,
 	verifyCanManipulatePlayback,
 } from 'logos/src/controllers/music.ts';
-import { Client } from 'logos/src/client.ts';
+import { Client, localise } from 'logos/src/client.ts';
 import { ControlButtonID, createInteractionCollector, decodeId, generateButtons } from 'logos/src/interactions.ts';
 import { chunk } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
@@ -31,8 +30,8 @@ import constants from 'logos/constants.ts';
 import { mention, MentionTypes, trim } from 'logos/formatting.ts';
 import { defaultLocale } from 'logos/types.ts';
 
-const command: OptionBuilder = {
-	...createLocalisations(Commands.music.options.remove),
+const command: OptionTemplate = {
+	name: 'remove',
 	type: ApplicationCommandOptionTypes.SubCommand,
 	handle: handleRemoveSongListing,
 };
@@ -42,7 +41,7 @@ function handleRemoveSongListing([client, bot]: [Client, Bot], interaction: Inte
 	if (controller === undefined) return;
 
 	const isVoiceStateVerified = verifyCanManipulatePlayback(
-		bot,
+		[client, bot],
 		interaction,
 		controller,
 		getVoiceState(client, interaction.guildId!, interaction.user.id),
@@ -59,7 +58,7 @@ function handleRemoveSongListing([client, bot]: [Client, Bot], interaction: Inte
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(Commands.music.options.remove.strings.noListingToRemove, interaction.locale),
+						description: localise(client, 'music.options.remove.strings.noListingToRemove', interaction.locale)(),
 						color: constants.colors.dullYellow,
 					}],
 				},
@@ -177,7 +176,11 @@ function generateEmbed(
 							type: InteractionResponseTypes.ChannelMessageWithSource,
 							data: {
 								embeds: [{
-									description: localise(Commands.music.options.remove.strings.failedToRemoveSong, interaction.locale),
+									description: localise(
+										client,
+										'music.options.remove.strings.failedToRemoveSong',
+										interaction.locale,
+									)(),
 									color: constants.colors.dullYellow,
 								}],
 							},
@@ -185,7 +188,7 @@ function generateEmbed(
 					);
 				}
 
-				const removedString = localise(Commands.music.options.remove.strings.removed.header, defaultLocale);
+				const removedString = localise(client, 'music.options.remove.strings.removed.header', defaultLocale)();
 
 				return void sendInteractionResponse(
 					bot,
@@ -196,9 +199,11 @@ function generateEmbed(
 						data: {
 							embeds: [{
 								title: `${constants.symbols.music.removed} ${removedString}`,
-								description: localise(Commands.music.options.remove.strings.removed.body, defaultLocale)(
-									songListing.content.title,
-									mention(selection.user.id, MentionTypes.User),
+								description: localise(client, 'music.options.remove.strings.removed.body', defaultLocale)(
+									{
+										'title': songListing.content.title,
+										'user_mention': mention(selection.user.id, MentionTypes.User),
+									},
 								),
 								color: constants.colors.invisible,
 							}],
@@ -212,7 +217,7 @@ function generateEmbed(
 	if (pages.at(0)?.length === 0) {
 		return {
 			embeds: [{
-				description: localise(Commands.music.options.remove.strings.noListingToRemove, locale),
+				description: localise(client, 'music.options.remove.strings.noListingToRemove', locale)(),
 				color: constants.colors.blue,
 			}],
 			components: [],
@@ -221,9 +226,9 @@ function generateEmbed(
 
 	return {
 		embeds: [{
-			description: localise(Commands.music.options.remove.strings.selectSongToRemove, locale),
+			description: localise(client, 'music.options.remove.strings.selectSongToRemove', locale)(),
 			color: constants.colors.blue,
-			footer: isLast ? undefined : { text: localise(Misc.continuedOnNextPage, locale) },
+			footer: isLast ? undefined : { text: localise(client, 'interactions.continuedOnNextPage', locale)() },
 		}],
 		components: [
 			generateSelectMenu(data, pages, selectMenuCustomId),

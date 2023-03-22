@@ -1,4 +1,3 @@
-import { localise } from 'logos/assets/localisations/mod.ts';
 import roles from 'logos/src/commands/social/data/roles.ts';
 import {
 	isCategoryGroup,
@@ -10,7 +9,7 @@ import {
 	RoleCollection,
 	RoleCollectionTypes,
 } from 'logos/src/commands/social/data/types.ts';
-import { defaultLocale, Language } from 'logos/types.ts';
+import { Language } from 'logos/types.ts';
 
 type ProficiencyCategory = RoleCategory & {
 	type: RoleCategoryTypes.Category;
@@ -23,9 +22,7 @@ type ProficiencyCategory = RoleCategory & {
  * @returns The category with proficiency roles.
  */
 function getProficiencyCategory(): ProficiencyCategory {
-	return roles.find(
-		(category) => localise(category.name, defaultLocale) === 'Proficiency',
-	) as ProficiencyCategory;
+	return roles.find((category) => category.id === 'roles.proficiency')! as ProficiencyCategory;
 }
 
 function getRelevantCategories(categories: RoleCategory[], language: Language | undefined): [RoleCategory, number][] {

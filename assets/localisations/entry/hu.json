@@ -1,0 +1,37 @@
+{
+	"entry.welcome.welcome": "",
+	"entry.welcome.toEnter": "",
+	"entry.welcome.acceptedRules": "",
+
+	"entry.proficiencySelection.proficiency": "Nyelvi Jártasság",
+	"entry.proficiencySelection.chooseProficiency": "Válaszd ki azt a rangot, ami a legjobban leírja a jártasságodat a {language} nyelvben.",
+	"entry.proficiencySelection.canChangeRolesLater": "",
+
+	"entry.verification.getVerified": "",
+	"entry.verification.needToVerify": "",
+	"entry.verification.answerHonestly": "",
+	"entry.verification.iUnderstand": "",
+
+	"entry.verification.verifyingAccount": "",
+	"entry.verification.failedToVerifyAccount": "",
+	"entry.verification.accountTooNew": "Biztonsági megfontolások miatt túl új fiókok nem léphetnek be a szerverre.",
+	"entry.verification.entryRequestRejectedPreviously": "",
+	"entry.verification.alreadySubmittedAnswers": "",
+	"entry.verification.answersSubmitted": "A hitelesítő kérdésekre adott válaszaid továbbítva lettek.",
+	"entry.verification.answersWillBeReviewed": "A csatlakozási kérelmedet egy stábtag fogja elbírálni, az eredményről DM-ben kapsz értesítést.",
+	"entry.verification.failedToSubmitAnswers": "",
+	"entry.verification.accepted": "",
+	"entry.verification.thankYouForWaiting": "",
+	"entry.verification.rejected": "",
+	"entry.verification.notAbleToReturn": "",
+
+	"entry.vote.accept": "",
+	"entry.vote.acceptMultiple": "",
+	"entry.vote.reject": "",
+	"entry.vote.rejectMultiple": "",
+	"entry.vote.failed": "",
+	"entry.vote.failedToUpdateVerificationState": "",
+	"entry.vote.alreadyVotedToAccept": "",
+	"entry.vote.alreadyVotedToReject": "",
+	"entry.vote.stanceOnVoteChanged": ""
+}

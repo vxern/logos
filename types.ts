@@ -38,26 +38,8 @@ function getLanguageByLocale(locale: Locales): Language | undefined {
 	return languageByLocale[locale];
 }
 
-function getLocaleForLanguage(language: Language): typeof localeByLanguage[keyof typeof localeByLanguage] {
-	return localeByLanguage[language] ?? 'en-GB';
-}
-
-enum WordClasses {
-	Noun,
-	Verb,
-	Adjective,
-	Adverb,
-	Adposition,
-	Affix,
-	Pronoun,
-	Determiner,
-	Conjunction,
-	Interjection,
-	Unknown,
-}
-
-function isUnknownWordClass(wordClass: WordClasses): boolean {
-	return wordClass === WordClasses.Unknown;
+function getLocaleForLanguage(language: Language): typeof localeByLanguage[keyof typeof localeByLanguage] | undefined {
+	return localeByLanguage[language];
 }
 
 export {
@@ -65,10 +47,8 @@ export {
 	defaultLocale,
 	getLanguageByLocale,
 	getLocaleForLanguage,
-	isUnknownWordClass,
 	languageByLocale,
 	localeByLanguage,
 	supportedLanguages,
-	WordClasses,
 };
 export type { Language };

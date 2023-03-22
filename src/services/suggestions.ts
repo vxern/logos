@@ -15,12 +15,11 @@ import {
 	User as DiscordUser,
 } from 'discordeno';
 import { lodash } from 'lodash';
-import { localise, Services } from 'logos/assets/localisations/mod.ts';
 import { Suggestion } from 'logos/src/database/structs/mod.ts';
 import { Document, Reference } from 'logos/src/database/document.ts';
 import { stringifyValue } from 'logos/src/database/database.ts';
 import { ServiceStarter } from 'logos/src/services/services.ts';
-import { Client, extendEventHandler, WithLanguage } from 'logos/src/client.ts';
+import { Client, extendEventHandler, localise, WithLanguage } from 'logos/src/client.ts';
 import {
 	createInteractionCollector,
 	decodeId,
@@ -176,7 +175,11 @@ function registerPastSuggestions([client, bot]: [Client, Bot]): void {
 					continue;
 				}
 
-				messageId = await sendMessage(bot, suggestionChannelId, getSuggestionPrompt(bot, guild, author, suggestion))
+				messageId = await sendMessage(
+					bot,
+					suggestionChannelId,
+					getSuggestionPrompt([client, bot], guild, author, suggestion),
+				)
 					.then((message) => message.id);
 			} else {
 				suggestionPromptsByAuthorId.get(authorId)!.delete(suggestionReferenceId);
@@ -228,7 +231,7 @@ function ensureSuggestionPromptPersistence([client, bot]: [Client, Bot]): void {
 		const newMessageId = await sendMessage(
 			bot,
 			channelId,
-			getSuggestionPrompt(bot, guild, author, suggestion),
+			getSuggestionPrompt([client, bot], guild, author, suggestion),
 		).then((message) => message.id);
 		suggestionByMessageId.delete(id);
 		authorIdByMessageId.delete(id);
@@ -268,6 +271,8 @@ function registerSuggestionHandler(
 		async (bot, selection) => {
 			const isResolved = decodeId<SuggestionPromptButtonID>(selection.data!.customId!)[4] === 'true';
 
+      console.debug(isResolved);
+
 			const suggestions = client.database.adapters.suggestions.get(client, 'authorAndGuild', [
 				authorReference,
 				guildId.toString(),
@@ -283,7 +288,7 @@ function registerSuggestionHandler(
 					data: {
 						flags: ApplicationCommandFlags.Ephemeral,
 						embeds: [{
-							description: localise(Services.alreadyMarkedAsResolved, defaultLocale),
+							description: localise(client, 'alreadyMarkedAsResolved', defaultLocale)(),
 							color: constants.colors.dullYellow,
 						}],
 					},
@@ -296,7 +301,7 @@ function registerSuggestionHandler(
 					data: {
 						flags: ApplicationCommandFlags.Ephemeral,
 						embeds: [{
-							description: localise(Services.alreadyMarkedAsUnresolved, defaultLocale),
+							description: localise(client, 'alreadyMarkedAsUnresolved', defaultLocale)(),
 							color: constants.colors.dullYellow,
 						}],
 					},
@@ -328,7 +333,7 @@ function registerSuggestionHandler(
 type SuggestionPromptButtonID = [authorId: string, guildId: string, suggestionReferenceId: string, isResolved: string];
 
 function getSuggestionPrompt(
-	bot: Bot,
+	[client, bot]: [Client, Bot],
 	guild: WithLanguage<Guild>,
 	author: DiscordUser,
 	suggestionDocument: Document<Suggestion>,
@@ -351,15 +356,15 @@ function getSuggestionPrompt(
 			})(),
 			fields: [
 				{
-					name: localise(Services.submittedBy, defaultLocale),
+					name: localise(client, 'submittedBy', defaultLocale)(),
 					value: mention(author.id, MentionTypes.User),
 				},
 				{
-					name: localise(Services.submittedAt, defaultLocale),
+					name: localise(client, 'submittedAt', defaultLocale)(),
 					value: timestamp(suggestionDocument.data.createdAt),
 				},
 				{
-					name: localise(Services.suggestions.suggestion, defaultLocale),
+					name: localise(client, 'suggestion.suggestion', defaultLocale)(),
 					value: suggestionDocument.data.suggestion,
 				},
 			],
@@ -372,7 +377,7 @@ function getSuggestionPrompt(
 					? {
 						type: MessageComponentTypes.Button,
 						style: ButtonStyles.Primary,
-						label: localise(Services.markAsResolved, defaultLocale),
+						label: localise(client, 'markAsResolved', defaultLocale)(),
 						customId: encodeId<SuggestionPromptButtonID>(
 							constants.staticComponentIds.reports,
 							[author.id.toString(), guild.id.toString(), suggestionReferenceId, `${true}`],
@@ -381,7 +386,7 @@ function getSuggestionPrompt(
 					: {
 						type: MessageComponentTypes.Button,
 						style: ButtonStyles.Secondary,
-						label: localise(Services.markAsUnresolved, defaultLocale),
+						label: localise(client, 'markAsUnresolved', defaultLocale)(),
 						customId: encodeId<SuggestionPromptButtonID>(
 							constants.staticComponentIds.reports,
 							[author.id.toString(), guild.id.toString(), suggestionReferenceId, `${false}`],

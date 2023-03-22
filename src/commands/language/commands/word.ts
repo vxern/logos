@@ -1,6 +1,7 @@
 import {
 	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
+	ApplicationCommandTypes,
 	Bot,
 	ButtonComponent,
 	ButtonStyles,
@@ -14,28 +15,28 @@ import {
 	MessageComponentTypes,
 	sendInteractionResponse,
 } from 'discordeno';
-import { Commands, createLocalisations, localise, Words } from 'logos/assets/localisations/mod.ts';
 import { Definition, DictionaryEntry, Expression } from 'logos/src/commands/language/data/types.ts';
-import { CommandBuilder } from 'logos/src/commands/command.ts';
+import { CommandTemplate } from 'logos/src/commands/command.ts';
 import { show } from 'logos/src/commands/parameters.ts';
-import { Client } from 'logos/src/client.ts';
+import { Client, localise } from 'logos/src/client.ts';
 import { createInteractionCollector, decodeId, encodeId, parseArguments } from 'logos/src/interactions.ts';
 import { chunk, diagnosticMentionUser } from 'logos/src/utils.ts';
 import constants from 'logos/constants.ts';
 import { BulletStyles, code, list } from 'logos/formatting.ts';
-import { defaultLocale, isUnknownWordClass, WordClasses } from 'logos/types.ts';
+import { defaultLocale } from 'logos/types.ts';
 
-const command: CommandBuilder = {
-	...createLocalisations(Commands.word),
-	isRateLimited: true,
+const command: CommandTemplate = {
+	name: 'word',
+	type: ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ['VIEW_CHANNEL'],
+	isRateLimited: true,
 	handle: handleFindWord,
 	options: [{
-		...createLocalisations(Commands.word.options.word),
+		name: 'word',
 		type: ApplicationCommandOptionTypes.String,
 		required: true,
 	}, {
-		...createLocalisations(Commands.word.options.verbose),
+		name: 'verbose',
 		type: ApplicationCommandOptionTypes.Boolean,
 	}, show],
 };
@@ -59,7 +60,7 @@ async function handleFindWord([client, bot]: [Client, Bot], interaction: Interac
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(Commands.word.strings.noDictionaryAdapters, interaction.locale),
+						description: localise(client, 'word.strings.noDictionaryAdapters', interaction.locale)(),
 						color: constants.colors.dullYellow,
 					}],
 				},
@@ -89,7 +90,7 @@ async function handleFindWord([client, bot]: [Client, Bot], interaction: Interac
 		const data = await dictionary.query(word, guild.language);
 		if (data === undefined) continue;
 
-		const entriesNew = dictionary.parse(data, locale);
+		const entriesNew = dictionary.parse(client, data, locale);
 		if (entriesNew === undefined) continue;
 
 		entries.push(...entriesNew);
@@ -101,7 +102,7 @@ async function handleFindWord([client, bot]: [Client, Bot], interaction: Interac
 			interaction.token,
 			{
 				embeds: [{
-					description: localise(Commands.word.strings.noResults, locale),
+					description: localise(client, 'word.strings.noResults', locale)(),
 					color: constants.colors.dullYellow,
 				}],
 			},
@@ -144,19 +145,20 @@ function displayMenu(
 	const entry = data.entries.at(data.dictionaryEntryIndex)!;
 
 	editOriginalInteractionResponse(bot, interaction.token, {
-		embeds: generateEmbeds(data, entry, locale),
+		embeds: generateEmbeds(client, data, entry, locale),
 		components: generateButtons([client, bot], interaction, data, entry, locale),
 	});
 }
 
 function generateEmbeds(
+	client: Client,
 	data: WordViewData,
 	entry: DictionaryEntry,
 	locale: string | undefined,
 ): Embed[] {
 	switch (data.currentView) {
 		case ContentTabs.Definitions: {
-			return entryToEmbeds(entry, locale, data.verbose);
+			return entryToEmbeds(client, entry, locale, data.verbose);
 		}
 		case ContentTabs.Inflection: {
 			return [entry.inflectionTable!.at(data.inflectionTableIndex)!];
@@ -206,7 +208,7 @@ function generateButtons(
 				},
 			});
 
-			const pageString = localise(Commands.word.strings.page, locale);
+			const pageString = localise(client, 'word.strings.page', locale)();
 
 			paginationControls.push([{
 				type: MessageComponentTypes.Button,
@@ -302,7 +304,7 @@ function generateButtons(
 	if (entry.definitions !== undefined) {
 		row.push({
 			type: MessageComponentTypes.Button,
-			label: localise(Commands.word.strings.definitions, locale),
+			label: localise(client, 'word.strings.definitions', locale)(),
 			disabled: data.currentView === ContentTabs.Definitions,
 			customId: definitionsMenuButtonId,
 			style: ButtonStyles.Primary,
@@ -312,7 +314,7 @@ function generateButtons(
 	if (entry.inflectionTable !== undefined) {
 		row.push({
 			type: MessageComponentTypes.Button,
-			label: localise(Commands.word.strings.inflection, locale),
+			label: localise(client, 'word.strings.inflection', locale)(),
 			disabled: data.currentView === ContentTabs.Inflection,
 			customId: inflectionMenuButtonId,
 			style: ButtonStyles.Primary,
@@ -329,13 +331,44 @@ function generateButtons(
 	}));
 }
 
-function entryToEmbeds(entry: DictionaryEntry, locale: string | undefined, verbose: boolean): Embed[] {
+type WordClass =
+	| 'noun'
+	| 'verb'
+	| 'adjective'
+	| 'adverb'
+	| 'adposition'
+	| 'affix'
+	| 'pronoun'
+	| 'determiner'
+	| 'conjunction'
+	| 'interjection'
+	| 'unknown';
+
+const wordClassToStringKey: Required<Record<WordClass, string>> = {
+	'noun': 'words.noun',
+	'verb': 'words.verb',
+	'adjective': 'words.adjective',
+	'adverb': 'words.adverb',
+	'adposition': 'words.adposition',
+	'affix': 'words.affix',
+	'pronoun': 'words.pronoun',
+	'determiner': 'words.determiner',
+	'conjunction': 'words.conjunction',
+	'interjection': 'words.interjection',
+	'unknown': 'words.unknown',
+};
+
+function isUnknownWordClass(wordClass: WordClass): boolean {
+	return wordClass === 'unknown';
+}
+
+function entryToEmbeds(client: Client, entry: DictionaryEntry, locale: string | undefined, verbose: boolean): Embed[] {
 	let wordClassDisplayed: string;
 	if (entry.wordClass === undefined) {
-		wordClassDisplayed = localise(Words.classes[WordClasses.Unknown], locale);
+		wordClassDisplayed = localise(client, 'words.unknown', locale)();
 	} else {
 		const [wordClass, wordClassUnresolved] = entry.wordClass;
-		wordClassDisplayed = localise(Words.classes[wordClass], locale);
+		wordClassDisplayed = localise(client, wordClassToStringKey[wordClass], locale)();
 		if (isUnknownWordClass(wordClass)) {
 			wordClassDisplayed += ` — '${wordClassUnresolved}'`;
 		}
@@ -349,13 +382,16 @@ function entryToEmbeds(entry: DictionaryEntry, locale: string | undefined, verbo
 
 	if (entry.definitions !== undefined && entry.definitions.length !== 0) {
 		const definitionsStringified = stringifyEntries(entry.definitions, 'definitions', BulletStyles.Diamond);
-		const definitionsFitted = fitStringsToFieldSize(definitionsStringified, locale, verbose);
+		const definitionsFitted = fitStringsToFieldSize(client, definitionsStringified, locale, verbose);
 
 		if (!verbose) {
-			fields.push({ name: localise(Commands.word.strings.fields.definitions, locale), value: definitionsFitted });
+			fields.push({
+				name: localise(client, 'word.strings.fields.definitions', locale)(),
+				value: definitionsFitted,
+			});
 		} else {
 			embeds.push({
-				title: localise(Commands.word.strings.definitionsForWord, locale)(word),
+				title: localise(client, 'word.strings.definitionsForWord', locale)({ 'word': word }),
 				description: `${wordClassFormatted}\n\n${definitionsFitted}`,
 				color: constants.colors.husky,
 			});
@@ -364,9 +400,9 @@ function entryToEmbeds(entry: DictionaryEntry, locale: string | undefined, verbo
 
 	if (entry.expressions !== undefined && entry.expressions.length !== 0) {
 		const expressionsStringified = stringifyEntries(entry.expressions, 'expressions', BulletStyles.Arrow);
-		const expressionsFitted = fitStringsToFieldSize(expressionsStringified, locale, verbose);
+		const expressionsFitted = fitStringsToFieldSize(client, expressionsStringified, locale, verbose);
 
-		const sectionName = localise(Commands.word.strings.fields.expressions, locale);
+		const sectionName = localise(client, 'word.strings.fields.expressions', locale)();
 
 		if (!verbose) {
 			fields.push({ name: sectionName, value: expressionsFitted });
@@ -376,7 +412,7 @@ function entryToEmbeds(entry: DictionaryEntry, locale: string | undefined, verbo
 	}
 
 	if (entry.etymologies !== undefined && entry.etymologies.length !== 0) {
-		const sectionName = localise(Commands.word.strings.fields.etymology, locale);
+		const sectionName = localise(client, 'word.strings.fields.etymology', locale)();
 		const etymology = entry.etymologies.map((etymology) => {
 			if (etymology.tags === undefined) {
 				return `**${etymology.value}**`;
@@ -438,11 +474,12 @@ function stringifyEntries<
 }
 
 function fitStringsToFieldSize(
+	client: Client,
 	strings: string[],
 	locale: string | undefined,
 	verbose: boolean,
 ): string {
-	const overheadString = localise(Commands.word.strings.definitionsOmitted, locale)(strings.length);
+	const overheadString = localise(client, 'word.strings.definitionsOmitted', locale)({ 'number': strings.length });
 	const characterOverhead = overheadString.length + 20;
 
 	const maxCharacterCount = verbose ? 4096 : 1024;
@@ -461,7 +498,9 @@ function fitStringsToFieldSize(
 
 	let fittedString = stringsToDisplay.join('\n');
 	if (stringsOmitted !== 0) {
-		const definitionsOmittedString = localise(Commands.word.strings.definitionsOmitted, locale)(stringsOmitted);
+		const definitionsOmittedString = localise(client, 'word.strings.definitionsOmitted', locale)({
+			'number': stringsOmitted,
+		});
 		fittedString += `\n\n*${definitionsOmittedString}*`;
 	}
 
@@ -469,3 +508,4 @@ function fitStringsToFieldSize(
 }
 
 export default command;
+export type { WordClass };

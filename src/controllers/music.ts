@@ -12,7 +12,6 @@ import {
 import { EventEmitter } from 'event';
 import { Player } from 'lavadeno';
 import { LoadType } from 'lavalink_types';
-import { Commands, localise } from 'logos/assets/localisations/mod.ts';
 import {
 	listingTypeToEmoji,
 	Song,
@@ -21,7 +20,7 @@ import {
 	SongListingContentTypes,
 	SongStream,
 } from 'logos/src/commands/music/data/types.ts';
-import { Client } from 'logos/src/client.ts';
+import { Client, localise } from 'logos/src/client.ts';
 import configuration from 'logos/configuration.ts';
 import constants from 'logos/constants.ts';
 import { mention, MentionTypes } from 'logos/formatting.ts';
@@ -115,7 +114,7 @@ function getVoiceState(client: Client, guildId: bigint, userId: bigint): VoiceSt
 type MusicAction = 'manipulate' | 'check';
 
 function verifyVoiceState(
-	bot: Bot,
+	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 	controller: MusicController,
 	voiceState: VoiceState | undefined,
@@ -133,11 +132,12 @@ function verifyVoiceState(
 					embeds: [
 						{
 							description: localise(
+								client,
 								action === 'manipulate'
-									? Commands.music.strings.mustBeInVoiceChannelToManipulate
-									: Commands.music.strings.mustBeInVoiceChannelToCheck,
+									? 'music.strings.mustBeInVoiceChannelToManipulate'
+									: 'music.strings.mustBeInVoiceChannelToCheck',
 								interaction.locale,
-							),
+							)(),
 							color: constants.colors.dullYellow,
 						},
 					],
@@ -158,9 +158,10 @@ function verifyVoiceState(
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						description: localise(
-							Commands.music.options.play.strings.alreadyPlayingInAnotherVoiceChannel,
+							client,
+							'music.options.play.strings.alreadyPlayingInAnotherVoiceChannel',
 							interaction.locale,
-						),
+						)(),
 						color: constants.colors.dullYellow,
 					}],
 				},
@@ -173,12 +174,12 @@ function verifyVoiceState(
 }
 
 function verifyCanRequestPlayback(
-	bot: Bot,
+	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 	controller: MusicController,
 	voiceState: VoiceState | undefined,
 ): boolean {
-	const isVoiceStateVerified = verifyVoiceState(bot, interaction, controller, voiceState, 'manipulate');
+	const isVoiceStateVerified = verifyVoiceState([client, bot], interaction, controller, voiceState, 'manipulate');
 	if (!isVoiceStateVerified) return false;
 
 	if (!isQueueVacant(controller.listingQueue)) {
@@ -191,7 +192,7 @@ function verifyCanRequestPlayback(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(Commands.music.options.play.strings.queueIsFull, interaction.locale),
+						description: localise(client, 'music.options.play.strings.queueIsFull', interaction.locale)(),
 						color: constants.colors.dullYellow,
 					}],
 				},
@@ -204,12 +205,12 @@ function verifyCanRequestPlayback(
 }
 
 function verifyCanManipulatePlayback(
-	bot: Bot,
+	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 	controller: MusicController,
 	voiceState: VoiceState | undefined,
 ): boolean {
-	const isVoiceStateVerified = verifyVoiceState(bot, interaction, controller, voiceState, 'manipulate');
+	const isVoiceStateVerified = verifyVoiceState([client, bot], interaction, controller, voiceState, 'manipulate');
 	if (!isVoiceStateVerified) return false;
 
 	if (controller.currentListing !== undefined && !controller.currentListing.managerIds.includes(interaction.user.id)) {
@@ -222,7 +223,7 @@ function verifyCanManipulatePlayback(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(Commands.music.strings.cannotManipulateIfHadBeenAbsent, interaction.locale),
+						description: localise(client, 'music.strings.cannotManipulateIfHadBeenAbsent', interaction.locale)(),
 						color: constants.colors.dullYellow,
 					}],
 				},
@@ -296,10 +297,12 @@ function receiveNewListing(
 		controller.feedbackChannelId = feedbackChannelId;
 	}
 
-	const queuedString = localise(Commands.music.options.play.strings.queued.header, defaultLocale);
+	const queuedString = localise(client, 'music.options.play.strings.queued.header', defaultLocale)();
 	const embed: Embed = {
 		title: `${constants.symbols.music.queued} ${queuedString}`,
-		description: localise(Commands.music.options.play.strings.queued.body, defaultLocale)(listing.content.title),
+		description: localise(client, 'music.options.play.strings.queued.body', defaultLocale)(
+			{ 'title': listing.content.title },
+		),
 		color: constants.colors.lightGreen,
 	};
 
@@ -361,12 +364,12 @@ function advanceQueueAndPlay([client, bot]: [Client, Bot], guildId: bigint, cont
 	if (controller.currentListing === undefined) {
 		setDisconnectTimeout(client, guildId);
 
-		const allDoneString = localise(Commands.music.strings.allDone.header, defaultLocale);
+		const allDoneString = localise(client, 'music.strings.allDone.header', defaultLocale)();
 
 		return void sendMessage(bot, controller.feedbackChannelId!, {
 			embeds: [{
 				title: `${constants.symbols.music.allDone} ${allDoneString}`,
-				description: localise(Commands.music.strings.allDone.body, defaultLocale),
+				description: localise(client, 'music.strings.allDone.body', defaultLocale)(),
 				color: constants.colors.blue,
 			}],
 		});
@@ -385,8 +388,8 @@ async function loadSong(
 
 	if (result.loadType === LoadType.LoadFailed || result.loadType === LoadType.NoMatches) {
 		const embed: Embed = {
-			title: localise(Commands.music.strings.couldNotLoadTrack.header, defaultLocale),
-			description: localise(Commands.music.strings.couldNotLoadTrack.body, defaultLocale)(song.title),
+			title: localise(client, 'music.strings.couldNotLoadTrack.header', defaultLocale)(),
+			description: localise(client, 'music.strings.couldNotLoadTrack.body', defaultLocale)({ 'title': song.title }),
 			color: constants.colors.red,
 		};
 
@@ -417,22 +420,29 @@ async function loadSong(
 	controller.player.play(track.track);
 
 	const emoji = listingTypeToEmoji[song.type];
-	const playingString = localise(Commands.music.strings.playing.header, defaultLocale);
-	const type = localise(localisationsBySongListingType[song.type], defaultLocale).toLowerCase();
+	const playingString = localise(client, 'music.strings.playing.header', defaultLocale)();
+	const type = localise(client, localisationsBySongListingType[song.type], defaultLocale)().toLowerCase();
+
+	const songInformation =
+		controller.currentListing?.content !== undefined && isCollection(controller.currentListing.content)
+			? localise(client, 'music.strings.playing.parts.displayTrack', defaultLocale)(
+				{
+					'index': controller.currentListing.content.position + 1,
+					'number': controller.currentListing.content.songs.length,
+					'title': controller.currentListing.content.title,
+				},
+			)
+			: '';
 
 	const embed: Embed = {
 		title: `${emoji} ${playingString} ${type}`,
-		description: localise(Commands.music.strings.playing.body, defaultLocale)(
-			controller.currentListing?.content !== undefined && isCollection(controller.currentListing.content)
-				? localise(Commands.music.strings.playing.parts.displayTrack, defaultLocale)(
-					controller.currentListing.content.position + 1,
-					controller.currentListing.content.songs.length,
-					controller.currentListing.content.title,
-				)
-				: '',
-			song.title,
-			song.url,
-			mention(controller.currentListing!.requestedBy, MentionTypes.User),
+		description: localise(client, 'music.strings.playing.body', defaultLocale)(
+			{
+				'song_information': songInformation,
+				'title': song.title,
+				'url': song.url,
+				'user_mention': mention(controller.currentListing!.requestedBy, MentionTypes.User),
+			},
 		),
 		color: constants.colors.invisible,
 	};
@@ -592,9 +602,9 @@ function remove(controller: MusicController, index: number): SongListing | undef
 }
 
 const localisationsBySongListingType = {
-	[SongListingContentTypes.Song]: Commands.music.strings.type.song,
-	[SongListingContentTypes.File]: Commands.music.strings.type.external,
-	[SongListingContentTypes.Collection]: Commands.music.strings.type.songCollection,
+	[SongListingContentTypes.Song]: 'music.strings.type.song',
+	[SongListingContentTypes.File]: 'music.strings.type.external',
+	[SongListingContentTypes.Collection]: 'music.strings.type.songCollection',
 };
 
 export {

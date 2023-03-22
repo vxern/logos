@@ -1,0 +1,7 @@
+{
+	"interactions.invalidUser": "Nieprawidłowy użytkownik.",
+	"interactions.continuedOnNextPage": "Kontynuacja na następnej stronie...",
+	"interactions.page": "Strona",
+	"interactions.usedCommandTooManyTimes": "Użyłeś/aś polecenia zbyt wiele razy w zbyt krótkim czasie.",
+	"interactions.canUseCommandIn": "Ponownie będziesz mógł/mogła użyć polecenia {relative_timestamp}."
+}

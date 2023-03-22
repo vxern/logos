@@ -1,0 +1,20 @@
+{
+	"verification.title": "Pytania weryfikacyjne",
+	"verification.fields.reason": "Jaki jest powód dla którego się uczysz {language}?",
+	"verification.fields.aim": "Jaką korzyść przyniesie Tobie członkostwo?",
+	"verification.fields.whereFound": "Gdzie dowiedziałeś/aś się o serwerze?",
+
+	"report.title": "Skarga",
+	"report.fields.reason": "Jaki jest powód skargi?",
+	"report.fields.usersToReport": "Użytkownicy do zgłoszenia",
+	"report.fields.linkToMessage": "Link do wiadomości dla kontekstu",
+
+	"suggestion.title": "Sugestia",
+	"suggestion.fields.suggestion": "Jaka jest twoja sugestia?",
+
+	"prompts.continue": "Dalej",
+	"prompts.cancel": "Anuluj",
+	"prompts.yourProgressWillBeLost": "Twój postęp będzie utracony.",
+	"prompts.yesLeaveTheComposer": "Tak, chcę opuścić kompozytor",
+	"prompts.noTakeMeBackToTheComposer": "Nie, zabierz mnie z powrotem do kompozytora"
+}

@@ -10,10 +10,9 @@ import {
 	sendInteractionResponse,
 } from 'discordeno';
 import { Channel, Playlist, Video, YouTube } from 'youtube';
-import { Commands, localise } from 'logos/assets/localisations/mod.ts';
 import { ListingResolver } from 'logos/src/commands/music/data/sources/sources.ts';
 import { SongListing, SongListingContentTypes } from 'logos/src/commands/music/data/types.ts';
-import { Client } from 'logos/src/client.ts';
+import { Client, localise } from 'logos/src/client.ts';
 import { createInteractionCollector } from 'logos/src/interactions.ts';
 import constants from 'logos/constants.ts';
 import { trim } from 'logos/formatting.ts';
@@ -87,8 +86,8 @@ async function search(
 			data: {
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
-					title: localise(Commands.music.options.play.strings.selectSong.header, interaction.locale),
-					description: localise(Commands.music.options.play.strings.selectSong.body, interaction.locale),
+					title: localise(client, 'music.options.play.strings.selectSong.header', interaction.locale)(),
+					description: localise(client, 'music.options.play.strings.selectSong.body', interaction.locale)(),
 					color: constants.colors.blue,
 				}],
 				components: [{

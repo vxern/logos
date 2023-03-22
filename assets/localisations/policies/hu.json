@@ -1,0 +1,13 @@
+{
+	"policies.moderation.header": "",
+	"policies.moderation.points.introduction.header": "",
+	"policies.moderation.points.introduction.body": "",
+	"policies.moderation.points.breach.header": "",
+	"policies.moderation.points.breach.body": "",
+	"policies.moderation.points.warnings.header": "",
+	"policies.moderation.points.warnings.body": "",
+	"policies.moderation.points.furtherAction.header": "",
+	"policies.moderation.points.furtherAction.body": "",
+	"policies.moderation.points.ban.header": "",
+	"policies.moderation.points.ban.body": ""
+}

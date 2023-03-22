@@ -1,5 +1,4 @@
 import { Bot } from 'discordeno';
-import dynamicVoiceChannels from 'logos/src/services/dynamic-voice-channels.ts';
 import entry from 'logos/src/services/entry.ts';
 import notices from 'logos/src/services/notices.ts';
 import reports from 'logos/src/services/reports.ts';

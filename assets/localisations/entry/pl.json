@@ -1,0 +1,37 @@
+{
+	"entry.welcome.welcome": "",
+	"entry.welcome.toEnter": "",
+	"entry.welcome.acceptedRules": "",
+
+	"entry.proficiencySelection.proficiency": "Biegłość Języczna",
+	"entry.proficiencySelection.chooseProficiency": "Wybierz rangę, która najlepiej przedstawia Twoją znajomość języka {language}.",
+	"entry.proficiencySelection.canChangeRolesLater": "Nie martw się, jeśli dokonasz teraz złego wyboru: Zawsze możesz ją zmienić później używając komendy {command}.",
+
+	"entry.verification.getVerified": "Zweryfikuj się",
+	"entry.verification.needToVerify": "Zanim będziesz mógł/mogła wstąpić na serwer, wpierw będziesz musiał/a zweryfikować się odpowiadając na kilka pytań weryfikacyjnych.",
+	"entry.verification.answerHonestly": "Zaleca się szczerze odpowiadać na pytania, ponieważ odrzucenia próśb o dołączenie są trwałe.",
+	"entry.verification.iUnderstand": "Rozumiem, chcę odpowiedzieć na pytania",
+
+	"entry.verification.verifyingAccount": "Trwa weryfikowanie twojego konta...",
+	"entry.verification.failedToVerifyAccount": "Nie udało się zweryfikować twojego konta.",
+	"entry.verification.accountTooNew": "Ze względu na bezpieczeństwo, zbyt nowe konta nie mogą dołączyć do serwera.",
+	"entry.verification.entryRequestRejectedPreviously": "Twoją prośbę o dołączenie poprzednio odrzucono; Nie możesz dołączyć do serwera.",
+	"entry.verification.alreadySubmittedAnswers": "Już odpowiedziałeś na pytania weryfikacyjne. Gdy moderatorzy zweryfikują odpowiedzi, zostaniesz poinformowany/a o ich decyzji.",
+	"entry.verification.answersSubmitted": "Twoje odpowiedzi na pytania weryfikacyjne zostały wysłane.",
+	"entry.verification.answersWillBeReviewed": "Prośba o dołączenie do serwera będzie przejrzana przez moderatorów serwera. Gdy to się wydarzy, zostaniesz powiadomiony/a poprzez DM.",
+	"entry.verification.failedToSubmitAnswers": "Nie udało się przesłać odpowiedzi na pytania weryfikacyjne.",
+	"entry.verification.accepted": "Zaakceptowano twoją prośbę o dołączenie do {guild_name}.",
+	"entry.verification.thankYouForWaiting": "Dziękujemy Ci, że poczekałeś/aś.",
+	"entry.verification.rejected": "Odrzucono twoją prośbę o dołączenie do {guild_name}. Decyzja o odrzucenie jej została podjęta przez większość personelu serwera.",
+	"entry.verification.notAbleToReturn": "Nie będziesz mógł/mogła ponownie wejść na serwer",
+
+	"entry.vote.accept": "Akceptuj",
+	"entry.vote.acceptMultiple": "Akceptuj (potrzeba jeszcze {number | pluralise, one:\"głosu\", two:\"głosów\", many:\"głosów\"})",
+	"entry.vote.reject": "Odrzuć",
+	"entry.vote.rejectMultiple": "Reject (potrzeba jeszcze {number | pluralise, one:\"głosu\", two:\"głosów\", many:\"głosów\"})",
+	"entry.vote.failed": "Nie udało się zarejestrować głosu.",
+	"entry.vote.failedToUpdateVerificationState": "Nie udało się zaktualizować stanu weryfikacji.",
+	"entry.vote.alreadyVotedToAccept": "Już wcześniej głosowałeś na rzecz akceptacji prośby użytkownika o dołączenie do serwera.",
+	"entry.vote.alreadyVotedToReject": "Już wcześniej głosowałeś przeciwko akceptacji prośby użytkownika o dołączenie do serwera.",
+	"entry.vote.stanceOnVoteChanged": "Zmieniono twoją pozycję w głosowaniu."
+}

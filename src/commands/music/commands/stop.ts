@@ -6,15 +6,14 @@ import {
 	InteractionResponseTypes,
 	sendInteractionResponse,
 } from 'discordeno';
-import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
-import { OptionBuilder } from 'logos/src/commands/command.ts';
+import { OptionTemplate } from 'logos/src/commands/command.ts';
 import { getVoiceState, reset, verifyCanManipulatePlayback } from 'logos/src/controllers/music.ts';
-import { Client } from 'logos/src/client.ts';
+import { Client, localise } from 'logos/src/client.ts';
 import constants from 'logos/constants.ts';
 import { defaultLocale } from 'logos/types.ts';
 
-const command: OptionBuilder = {
-	...createLocalisations(Commands.music.options.stop),
+const command: OptionTemplate = {
+	name: 'stop',
 	type: ApplicationCommandOptionTypes.SubCommand,
 	handle: handleStopPlayback,
 };
@@ -24,7 +23,7 @@ function handleStopPlayback([client, bot]: [Client, Bot], interaction: Interacti
 	if (controller === undefined) return;
 
 	const isVoiceStateVerified = verifyCanManipulatePlayback(
-		bot,
+		[client, bot],
 		interaction,
 		controller,
 		getVoiceState(client, interaction.guildId!, interaction.user.id),
@@ -42,7 +41,7 @@ function handleStopPlayback([client, bot]: [Client, Bot], interaction: Interacti
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(Commands.music.strings.notPlayingMusic, interaction.locale),
+						description: localise(client, 'music.strings.notPlayingMusic', interaction.locale)(),
 						color: constants.colors.dullYellow,
 					}],
 				},
@@ -52,7 +51,7 @@ function handleStopPlayback([client, bot]: [Client, Bot], interaction: Interacti
 
 	reset(client, interaction.guildId!);
 
-	const stoppedString = localise(Commands.music.options.stop.strings.stopped.header, defaultLocale);
+	const stoppedString = localise(client, 'music.options.stop.strings.stopped.header', defaultLocale)();
 
 	return void sendInteractionResponse(
 		bot,
@@ -63,7 +62,7 @@ function handleStopPlayback([client, bot]: [Client, Bot], interaction: Interacti
 			data: {
 				embeds: [{
 					title: `${constants.symbols.music.stopped} ${stoppedString}`,
-					description: localise(Commands.music.options.stop.strings.stopped.body, defaultLocale),
+					description: localise(client, 'music.options.stop.strings.stopped.body', defaultLocale)(),
 					color: constants.colors.blue,
 				}],
 			},

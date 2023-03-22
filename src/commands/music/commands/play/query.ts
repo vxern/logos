@@ -5,10 +5,9 @@ import {
 	InteractionResponseTypes,
 	sendInteractionResponse,
 } from 'discordeno';
-import { Commands, localise } from 'logos/assets/localisations/mod.ts';
 import { ListingResolver } from 'logos/src/commands/music/data/sources/sources.ts';
 import { getVoiceState, receiveNewListing, verifyCanRequestPlayback } from 'logos/src/controllers/music.ts';
-import { Client } from 'logos/src/client.ts';
+import { Client, localise } from 'logos/src/client.ts';
 import { parseArguments } from 'logos/src/interactions.ts';
 import constants from 'logos/constants.ts';
 
@@ -28,11 +27,18 @@ async function handleRequestQueryPlayback(
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (guild === undefined) return;
 
-	const canPlay = verifyCanRequestPlayback(bot, interaction, controller, voiceState);
+	const canPlay = verifyCanRequestPlayback([client, bot], interaction, controller, voiceState);
 	if (!canPlay) return;
 
 	const listing = await resolveToSongListing([client, bot], interaction, query);
 	if (listing === undefined) {
+		const songNotFoundString = localise(client, 'music.options.play.strings.songNotFound', interaction.locale)();
+		const tryDifferentQueryString = localise(
+			client,
+			'music.options.play.strings.tryDifferentQuery',
+			interaction.locale,
+		)();
+
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -42,7 +48,7 @@ async function handleRequestQueryPlayback(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(Commands.music.options.play.strings.songNotFound, interaction.locale),
+						description: `${songNotFoundString}\n\n${tryDifferentQueryString}`,
 						color: constants.colors.red,
 					}],
 				},

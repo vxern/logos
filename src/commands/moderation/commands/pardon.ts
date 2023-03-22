@@ -2,37 +2,34 @@ import {
 	ApplicationCommandFlags,
 	ApplicationCommandOptionChoice,
 	ApplicationCommandOptionTypes,
+	ApplicationCommandTypes,
 	Bot,
-	getDmChannel,
 	Interaction,
 	InteractionResponseTypes,
 	Member,
 	sendInteractionResponse,
-	sendMessage,
 } from 'discordeno';
-import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
 import { getActiveWarnings } from 'logos/src/commands/moderation/module.ts';
-import { CommandBuilder } from 'logos/src/commands/command.ts';
+import { CommandTemplate } from 'logos/src/commands/command.ts';
 import { user } from 'logos/src/commands/parameters.ts';
 import { logEvent } from 'logos/src/controllers/logging/logging.ts';
-import { autocompleteMembers, Client, resolveInteractionToMember } from 'logos/src/client.ts';
+import { autocompleteMembers, Client, localise, resolveInteractionToMember } from 'logos/src/client.ts';
 import { isAutocomplete, parseArguments } from 'logos/src/interactions.ts';
-import { getAuthor } from 'logos/src/utils.ts';
 import constants from 'logos/constants.ts';
-import { mention, MentionTypes, timestamp } from 'logos/formatting.ts';
-import { defaultLocale } from 'logos/types.ts';
+import { mention, MentionTypes } from 'logos/formatting.ts';
 import { Document } from 'logos/src/database/document.ts';
 import { Warning } from 'logos/src/database/structs/mod.ts';
 
-const command: CommandBuilder = {
-	...createLocalisations(Commands.pardon),
+const command: CommandTemplate = {
+	name: 'pardon',
+	type: ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ['MODERATE_MEMBERS'],
 	handle: handlePardonUser,
 	handleAutocomplete: handlePardonUserAutocomplete,
 	options: [
 		user,
 		{
-			...createLocalisations(Commands.pardon.options.warning),
+			name: 'warning',
 			type: ApplicationCommandOptionTypes.String,
 			required: true,
 			autocomplete: true,
@@ -51,10 +48,10 @@ async function getRelevantWarnings(
 		member.id.toString(),
 		member.id,
 	);
-	if (subject === undefined) return void displayErrorOrEmptyChoices(bot, interaction);
+	if (subject === undefined) return void displayErrorOrEmptyChoices([client, bot], interaction);
 
 	const warnings = await client.database.adapters.warnings.getOrFetch(client, 'recipient', subject.ref);
-	if (warnings === undefined) return void displayErrorOrEmptyChoices(bot, interaction);
+	if (warnings === undefined) return void displayErrorOrEmptyChoices([client, bot], interaction);
 
 	const relevantWarnings = Array.from(getActiveWarnings(warnings).values()).toReversed();
 	return relevantWarnings;
@@ -90,12 +87,10 @@ async function handlePardonUserAutocomplete([client, bot]: [Client, Bot], intera
 		const warningLowercase = warning!.toLowerCase();
 		const choices = relevantWarnings
 			.map<ApplicationCommandOptionChoice>((warning) => ({
-				name: `${warning.data.reason} (${timestamp(warning.data.createdAt)})`,
+				name: warning.data.reason,
 				value: warning.ref.value.id,
 			}))
 			.filter((choice) => choice.name.toLowerCase().includes(warningLowercase));
-
-		console.debug(choices);
 
 		return void sendInteractionResponse(
 			bot,
@@ -124,16 +119,12 @@ async function handlePardonUser([client, bot]: [Client, Bot], interaction: Inter
 
 	const warningToDelete = relevantWarnings.find((relevantWarning) => relevantWarning.ref.value.id === warning);
 	if (warningToDelete === undefined) {
-		return displayError(bot, interaction, localise(Commands.pardon.strings.invalidWarning, interaction.locale));
+		return displayError(bot, interaction, localise(client, 'pardon.strings.invalidWarning', interaction.locale)());
 	}
 
 	const deletedWarning = await client.database.adapters.warnings.delete(client, warningToDelete);
 	if (deletedWarning === undefined) {
-		return displayError(
-			bot,
-			interaction,
-			localise(Commands.pardon.strings.failed, interaction.locale),
-		);
+		return displayError(bot, interaction, localise(client, 'pardon.strings.failed', interaction.locale)());
 	}
 
 	const guild = client.cache.guilds.get(interaction.guildId!);
@@ -150,34 +141,20 @@ async function handlePardonUser([client, bot]: [Client, Bot], interaction: Inter
 			data: {
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
-					description: localise(Commands.pardon.strings.pardoned, interaction.locale)(
-						mention(member.id, MentionTypes.User),
-						deletedWarning.data.reason,
+					description: localise(client, 'pardon.strings.pardoned', interaction.locale)(
+						{
+							'user_mention': mention(member.id, MentionTypes.User),
+							'reason': deletedWarning.data.reason,
+						},
 					),
 					color: constants.colors.lightGreen,
 				}],
 			},
 		},
 	);
-
-	const dmChannel = await getDmChannel(bot, member.id).catch(() => undefined);
-	if (dmChannel !== undefined) {
-		return void sendMessage(bot, dmChannel.id, {
-			embeds: [
-				{
-					author: getAuthor(bot, guild),
-					description: localise(Commands.pardon.strings.pardonedDirect, defaultLocale)(
-						deletedWarning.data.reason,
-						timestamp(deletedWarning.data.createdAt),
-					),
-					color: constants.colors.lightGreen,
-				},
-			],
-		});
-	}
 }
 
-function displayErrorOrEmptyChoices(bot: Bot, interaction: Interaction): void {
+function displayErrorOrEmptyChoices([client, bot]: [Client, Bot], interaction: Interaction): void {
 	if (isAutocomplete(interaction)) {
 		return void sendInteractionResponse(
 			bot,
@@ -199,7 +176,7 @@ function displayErrorOrEmptyChoices(bot: Bot, interaction: Interaction): void {
 			data: {
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
-					description: localise(Commands.pardon.strings.failed, interaction.locale),
+					description: localise(client, 'pardon.strings.failed', interaction.locale)(),
 					color: constants.colors.red,
 				}],
 			},

@@ -8,10 +8,9 @@ import {
 	MessageComponentTypes,
 	sendInteractionResponse,
 } from 'discordeno';
-import { localise, Services } from 'logos/assets/localisations/mod.ts';
 import { getProficiencyCategory } from 'logos/src/commands/social/module.ts';
 import { EntryStepButtonID } from 'logos/src/services/entry.ts';
-import { Client } from 'logos/src/client.ts';
+import { Client, localise } from 'logos/src/client.ts';
 import { encodeId } from 'logos/src/interactions.ts';
 import { defaultLocale } from 'logos/types.ts';
 import configuration from 'logos/configuration.ts';
@@ -30,7 +29,9 @@ async function handleSelectLanguageProficiency(
 
 	const proficiency = proficiencies[parseInt(parameter)]!;
 
-	const requestedRole = guild.roles.array().find((role) => role.name === localise(proficiency.name, defaultLocale));
+	const requestedRole = guild.roles.array().find((role) =>
+		role.name === localise(client, `${proficiency.id}.name`, defaultLocale)()
+	);
 	if (requestedRole === undefined) return;
 
 	const requiresVerification = !configuration.services.entry.verification.disabledOn.includes(guild.language);
@@ -45,12 +46,17 @@ async function handleSelectLanguageProficiency(
 		const isVerified = !userDocument?.data.account.authorisedOn?.includes(interaction.guildId!.toString());
 
 		if (isVerified) {
+			const needToVerifyString = localise(client, 'entry.verification.needToVerify', interaction.locale)({
+				'guild_name': guild.name,
+			});
+			const answerHonestlyString = localise(client, 'entry.verification.answerHonestly', interaction.locale)();
+
 			return void sendInteractionResponse(bot, interaction.id, interaction.token, {
 				type: InteractionResponseTypes.ChannelMessageWithSource,
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(Services.entry.needsVerification, interaction.locale)(guild.name),
+						description: `${needToVerifyString}\n\n${answerHonestlyString}`,
 						color: constants.colors.blue,
 					}],
 					components: [{
@@ -58,7 +64,7 @@ async function handleSelectLanguageProficiency(
 						components: [{
 							type: MessageComponentTypes.Button,
 							style: ButtonStyles.Secondary,
-							label: localise(Services.entry.iUnderstand, interaction.locale),
+							label: localise(client, 'entry.verification.iUnderstand', interaction.locale)(),
 							customId: encodeId<EntryStepButtonID>(constants.staticComponentIds.requestedVerification, [
 								requestedRole.id.toString(),
 							]),

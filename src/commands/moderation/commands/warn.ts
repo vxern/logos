@@ -1,5 +1,6 @@
 import {
 	ApplicationCommandFlags,
+	ApplicationCommandTypes,
 	Bot,
 	editMember,
 	Interaction,
@@ -7,12 +8,11 @@ import {
 	sendInteractionResponse,
 	sendMessage,
 } from 'discordeno';
-import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
-import { CommandBuilder } from 'logos/src/commands/command.ts';
+import { CommandTemplate } from 'logos/src/commands/command.ts';
 import { reason, user } from 'logos/src/commands/parameters.ts';
 import { getActiveWarnings } from 'logos/src/commands/moderation/module.ts';
 import { logEvent } from 'logos/src/controllers/logging/logging.ts';
-import { autocompleteMembers, Client, resolveInteractionToMember } from 'logos/src/client.ts';
+import { autocompleteMembers, Client, localise, resolveInteractionToMember } from 'logos/src/client.ts';
 import { parseArguments } from 'logos/src/interactions.ts';
 import { diagnosticMentionUser, getTextChannel } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
@@ -20,8 +20,9 @@ import constants from 'logos/constants.ts';
 import { mention, MentionTypes } from 'logos/formatting.ts';
 import { defaultLocale } from 'logos/types.ts';
 
-const command: CommandBuilder = {
-	...createLocalisations(Commands.warn),
+const command: CommandTemplate = {
+	name: 'warn',
+	type: ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ['MODERATE_MEMBERS'],
 	handle: handleWarnUser,
 	handleAutocomplete: handleWarnUserAutocomplete,
@@ -62,7 +63,7 @@ async function handleWarnUser([client, bot]: [Client, Bot], interaction: Interac
 		.map((role) => role.id);
 	if (moderatorRoleIds.length === 0) return undefined;
 
-	if (reason!.length === 0) return displayError(bot, interaction);
+	if (reason!.length === 0) return displayError([client, bot], interaction);
 
 	const [author, recipient] = await Promise.all([
 		client.database.adapters.users.getOrFetchOrCreate(
@@ -74,7 +75,7 @@ async function handleWarnUser([client, bot]: [Client, Bot], interaction: Interac
 		client.database.adapters.users.getOrFetchOrCreate(client, 'id', member.id.toString(), member.id),
 	]);
 
-	if (author === undefined || recipient === undefined) return displayError(bot, interaction);
+	if (author === undefined || recipient === undefined) return displayError([client, bot], interaction);
 
 	const [warnings, document] = await Promise.all([
 		client.database.adapters.warnings.getOrFetch(client, 'recipient', recipient.ref),
@@ -90,7 +91,7 @@ async function handleWarnUser([client, bot]: [Client, Bot], interaction: Interac
 		logEvent([client, bot], guild, 'memberWarnAdd', [member, document.data, interaction.user]);
 	}
 
-	if (warnings === undefined || document === undefined) return displayError(bot, interaction);
+	if (warnings === undefined || document === undefined) return displayError([client, bot], interaction);
 
 	const relevantWarnings = getActiveWarnings(warnings);
 
@@ -99,9 +100,11 @@ async function handleWarnUser([client, bot]: [Client, Bot], interaction: Interac
 		data: {
 			flags: ApplicationCommandFlags.Ephemeral,
 			embeds: [{
-				description: localise(Commands.warn.strings.warned, interaction.locale)(
-					mention(member.id, MentionTypes.User),
-					relevantWarnings.size,
+				description: localise(client, 'warn.strings.warned', interaction.locale)(
+					{
+						'user_mention': mention(member.id, MentionTypes.User),
+						'number': relevantWarnings.size,
+					},
 				),
 				color: constants.colors.blue,
 			}],
@@ -113,10 +116,12 @@ async function handleWarnUser([client, bot]: [Client, Bot], interaction: Interac
 
 	const passedLimit = relevantWarnings.size > configuration.commands.warn.limitUses;
 	if (passedLimit) {
-		const passedLimitMessage = localise(Commands.warn.strings.passedLimit, defaultLocale)(
-			diagnosticMentionUser(member.user!),
-			configuration.commands.warn.limitUses,
-			relevantWarnings.size,
+		const passedLimitString = localise(client, 'warn.strings.passedLimit', defaultLocale)(
+			{
+				'user_mention': diagnosticMentionUser(member.user!),
+				'limit': configuration.commands.warn.limitUses,
+				'number': relevantWarnings.size,
+			},
 		);
 
 		try {
@@ -127,7 +132,7 @@ async function handleWarnUser([client, bot]: [Client, Bot], interaction: Interac
 
 		return void sendMessage(bot, moderationChannelId, {
 			embeds: [{
-				description: `${constants.symbols.indicators.exclamation} ${passedLimitMessage}`,
+				description: `${constants.symbols.indicators.exclamation} ${passedLimitString}`,
 				color: constants.colors.red,
 			}],
 		});
@@ -135,21 +140,23 @@ async function handleWarnUser([client, bot]: [Client, Bot], interaction: Interac
 
 	const reachedLimit = relevantWarnings.size === configuration.commands.warn.limitUses;
 	if (reachedLimit) {
-		const reachedLimitMessage = localise(Commands.warn.strings.reachedLimit, defaultLocale)(
-			diagnosticMentionUser(member.user!),
-			configuration.commands.warn.limitUses,
+		const reachedLimitString = localise(client, 'warn.strings.reachedLimit', defaultLocale)(
+			{
+				'mention_user': diagnosticMentionUser(member.user!),
+				'limit': configuration.commands.warn.limitUses,
+			},
 		);
 
 		return void sendMessage(bot, moderationChannelId, {
 			embeds: [{
-				description: `${constants.symbols.indicators.warning} ${reachedLimitMessage}`,
+				description: `${constants.symbols.indicators.warning} ${reachedLimitString}`,
 				color: constants.colors.yellow,
 			}],
 		});
 	}
 }
 
-function displayError(bot: Bot, interaction: Interaction): void {
+function displayError([client, bot]: [Client, Bot], interaction: Interaction): void {
 	return void sendInteractionResponse(
 		bot,
 		interaction.id,
@@ -159,7 +166,7 @@ function displayError(bot: Bot, interaction: Interaction): void {
 			data: {
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
-					description: localise(Commands.warn.strings.failed, interaction.locale),
+					description: localise(client, 'warn.strings.failed', interaction.locale)(),
 					color: constants.colors.red,
 				}],
 			},

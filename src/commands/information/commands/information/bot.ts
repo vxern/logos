@@ -7,8 +7,7 @@ import {
 	InteractionResponseTypes,
 	sendInteractionResponse,
 } from 'discordeno';
-import { Commands, localise } from 'logos/assets/localisations/mod.ts';
-import { Client } from 'logos/src/client.ts';
+import { Client, localise } from 'logos/src/client.ts';
 import constants from 'logos/constants.ts';
 
 async function handleDisplayBotInformation([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
@@ -33,36 +32,42 @@ async function handleDisplayBotInformation([client, bot]: [Client, Bot], interac
 					},
 					color: constants.colors.invisible,
 					fields: [{
-						name: localise(Commands.information.options.bot.strings.whoAmI.header, interaction.locale),
-						value: localise(Commands.information.options.bot.strings.whoAmI.body, interaction.locale)(botUser.username),
+						name: localise(client, 'information.options.bot.strings.whoAmI.header', interaction.locale)(),
+						value: localise(client, 'information.options.bot.strings.whoAmI.body', interaction.locale)(
+							{ 'username': botUser.username },
+						),
 					}, {
-						name: localise(Commands.information.options.bot.strings.howWasIMade.header, interaction.locale),
-						value: localise(
-							Commands.information.options.bot.strings.howWasIMade.body(
-								`[TypeScript](${constants.links.typescriptWebsite})`,
-								`[Deno](${constants.links.denoWebsite})`,
-								constants.links.discordApiWebsite,
-								`[discordeno](${constants.links.discordenoRepository})`,
-							),
+						name: localise(client, 'information.options.bot.strings.howWasIMade.header', interaction.locale)(),
+						value: localise(client, 'information.options.bot.strings.howWasIMade.body', interaction.locale)(
+							{
+								'language_link': constants.links.typescriptWebsite,
+								'runtime_link': constants.links.denoWebsite,
+								'api_link': constants.links.discordApiWebsite,
+								'library_link': constants.links.discordenoRepository,
+							},
+						),
+					}, {
+						name: localise(
+							client,
+							'information.options.bot.strings.howToAddToServer.header',
 							interaction.locale,
-						),
-					}, {
-						name: localise(Commands.information.options.bot.strings.howToAddToServer.header, interaction.locale),
+						)(),
 						value: localise(
-							Commands.information.options.bot.strings.howToAddToServer.body(
-								`[🇦🇲 Learn Armenian](${constants.links.learnArmenianListingWebsite})`,
-								`[🇷🇴 Learn Romanian](${constants.links.learnRomanianListingWebsite})`,
-							),
+							client,
+							'information.options.bot.strings.howToAddToServer.body',
 							interaction.locale,
+						)(
+							{
+								'learn_armenian_link': constants.links.learnArmenianListingWebsite,
+								'learn_romanian_link': constants.links.learnRomanianListingWebsite,
+							},
 						),
 					}, {
-						name: localise(Commands.information.options.bot.strings.amIOpenSource.header, interaction.locale),
-						value: localise(Commands.information.options.bot.strings.amIOpenSource.body, interaction.locale)(
-							constants.links.talonRepositoryLink,
-						),
+						name: localise(client, 'information.options.bot.strings.amIOpenSource.header', interaction.locale)(),
+						value: localise(client, 'information.options.bot.strings.amIOpenSource.body', interaction.locale)(),
 					}],
 				}, {
-					title: localise(Commands.information.options.bot.strings.contributions, interaction.locale),
+					title: localise(client, 'information.options.bot.strings.contributions', interaction.locale)(),
 					color: constants.colors.invisible,
 					fields: constants.contributors.map((contributor) => ({
 						name: `${contributor.username} — ${contributor.contribution}`,

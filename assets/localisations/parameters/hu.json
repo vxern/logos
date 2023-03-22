@@ -1,0 +1,22 @@
+{
+	"user.name": "felhasználó",
+	"user.description": "A felhasználó neve, tagje, ID-je vagy megemlítése.",
+	"show.name": "megjelenítés",
+	"show.description": "Ha igaz, a találatok másoknak is láthatóvá válnak.",
+
+	"duration.name": "időtartam",
+	"duration.description": "A szankció időtartama.",
+	"reason.name": "ok",
+	"reason.description": "A szankciónak vagy visszavonásának oka. Legyen kifejező.",
+
+	"query.name": "lekérés",
+	"query.description": "",
+	"timestamp.name": "különbség",
+	"timestamp.description": "",
+	"collection.name": "gyűjtemény",
+	"collection.description": "Ha igaz, akkor a művelet a zenegyűjteményen lesz végrehajtva.",
+	"by.name": "lépték",
+	"by.description": "Az átugrandó elemek száma.",
+	"to.name": "cél",
+	"to.description": "Az ugrás végcéljának indexe."
+}

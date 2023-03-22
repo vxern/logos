@@ -1,5 +1,6 @@
 import {
 	ApplicationCommandFlags,
+	ApplicationCommandTypes,
 	Bot,
 	ButtonStyles,
 	deleteOriginalInteractionResponse,
@@ -15,8 +16,7 @@ import {
 	TextStyles,
 	User as DiscordUser,
 } from 'discordeno';
-import { Commands, createLocalisations, localise, Modals } from 'logos/assets/localisations/mod.ts';
-import { CommandBuilder } from 'logos/src/commands/command.ts';
+import { CommandTemplate } from 'logos/src/commands/command.ts';
 import { logEvent } from 'logos/src/controllers/logging/logging.ts';
 import { User } from 'logos/src/database/structs/mod.ts';
 import { stringifyValue } from 'logos/src/database/database.ts';
@@ -29,15 +29,16 @@ import {
 	registerReportHandler,
 	reportByMessageId,
 } from 'logos/src/services/reports.ts';
-import { Client, isValidIdentifier, resolveIdentifierToMembers } from 'logos/src/client.ts';
+import { Client, isValidIdentifier, localise, resolveIdentifierToMembers } from 'logos/src/client.ts';
 import { createInteractionCollector, createModalComposer, Modal } from 'logos/src/interactions.ts';
 import constants from 'logos/constants.ts';
 import { trim } from 'logos/formatting.ts';
 import configuration from 'logos/configuration.ts';
 import { getTextChannel, verifyIsWithinLimits } from 'logos/src/utils.ts';
 
-const command: CommandBuilder = {
-	...createLocalisations(Commands.report),
+const command: CommandTemplate = {
+	name: 'report',
+	type: ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ['VIEW_CHANNEL'],
 	handle: handleMakeReport,
 };
@@ -79,7 +80,7 @@ async function handleMakeReport([client, bot]: [Client, Bot], interaction: Inter
 					data: {
 						flags: ApplicationCommandFlags.Ephemeral,
 						embeds: [{
-							description: localise(Commands.report.strings.waitBeforeReporting, interaction.locale),
+							description: localise(client, 'report.strings.waitBeforeReporting', interaction.locale)(),
 							color: constants.colors.dullYellow,
 						}],
 					},
@@ -89,7 +90,7 @@ async function handleMakeReport([client, bot]: [Client, Bot], interaction: Inter
 	}
 
 	return void createModalComposer([client, bot], interaction, {
-		modal: generateReportModal(interaction.locale),
+		modal: generateReportModal(client, interaction.locale),
 		onSubmit: async (submission, answers) => {
 			await sendInteractionResponse(bot, submission.id, submission.token, {
 				type: InteractionResponseTypes.DeferredChannelMessageWithSource,
@@ -157,7 +158,7 @@ async function handleMakeReport([client, bot]: [Client, Bot], interaction: Inter
 			const messageId = await sendMessage(
 				bot,
 				reportChannelId,
-				getReportPrompt(bot, guild, interaction.user, recipientAndWarningsTuples, report),
+				getReportPrompt([client, bot], guild, interaction.user, recipientAndWarningsTuples, report),
 			).then((message) => message.id);
 
 			const reportReferenceId = stringifyValue(report.ref);
@@ -177,8 +178,8 @@ async function handleMakeReport([client, bot]: [Client, Bot], interaction: Inter
 			editOriginalInteractionResponse(bot, submission.token, {
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
-					title: localise(Commands.report.strings.reportSubmitted.header, interaction.locale),
-					description: localise(Commands.report.strings.reportSubmitted.body, interaction.locale),
+					title: localise(client, 'report.strings.reportSubmitted.header', interaction.locale)(),
+					description: localise(client, 'report.strings.reportSubmitted.body', interaction.locale)(),
 					color: constants.colors.lightGreen,
 				}],
 			});
@@ -227,7 +228,7 @@ function handleSubmittedInvalidReport(
 					data: {
 						flags: ApplicationCommandFlags.Ephemeral,
 						embeds: [{
-							description: localise(Commands.report.strings.areYouSureToStopSubmitting, cancelSelection.locale),
+							description: localise(client, 'report.strings.areYouSureToStopSubmitting', cancelSelection.locale)(),
 							color: constants.colors.dullYellow,
 						}],
 						components: [{
@@ -235,12 +236,12 @@ function handleSubmittedInvalidReport(
 							components: [{
 								type: MessageComponentTypes.Button,
 								customId: returnId,
-								label: localise(Modals.prompts.noTakeMeBackToTheComposer, cancelSelection.locale),
+								label: localise(client, 'prompts.noTakeMeBackToTheComposer', cancelSelection.locale)(),
 								style: ButtonStyles.Success,
 							}, {
 								type: MessageComponentTypes.Button,
 								customId: leaveId,
-								label: localise(Modals.prompts.yesLeaveTheComposer, cancelSelection.locale),
+								label: localise(client, 'prompts.yesLeaveTheComposer', cancelSelection.locale)(),
 								style: ButtonStyles.Danger,
 							}],
 						}],
@@ -255,33 +256,51 @@ function handleSubmittedInvalidReport(
 			default: {
 				editOriginalInteractionResponse(bot, submission.token, {
 					embeds: [{
-						description: localise(Commands.report.strings.failedToSubmitReport, submission.locale),
+						description: localise(client, 'report.strings.failedToSubmitReport', submission.locale)(),
 						color: constants.colors.dullYellow,
 					}],
 				});
 				break;
 			}
 			case ReportError.UsersSpecifiedIncorrectly: {
+				const specifiedUsersIncorrectlyString = localise(
+					client,
+					'report.strings.specifiedUsersIncorrectly',
+					submission.locale,
+				)();
+				const toIdentifyUserString = localise(client, 'report.strings.toIdentifyUser', submission.locale)();
+				const exampleExpressionString = localise(client, 'report.strings.exampleExpression', submission.locale)({
+					'example_expression': '`username#1234, 123456789123456789, Wumpus#0001`',
+				});
+
 				embed = {
-					description: localise(
-						Commands.report.strings.specifiedUsersIncorrectly('`username#1234, 123456789123456789, Wumpus`'),
-						submission.locale,
-					),
+					description: `${specifiedUsersIncorrectlyString}\n\n${toIdentifyUserString}\n\n${exampleExpressionString}`,
 					color: constants.colors.dullYellow,
 				};
 				break;
 			}
 			case ReportError.UserSpecifiedMoreThanOnce: {
+				const specifiedUserMoreThanOnceString = localise(
+					client,
+					'report.strings.specifiedUserMoreThanOnce',
+					submission.locale,
+				)();
+				const makeSureOnlyMentionedOnceString = localise(
+					client,
+					'report.strings.makeSureOnlyMentionedOnce',
+					submission.locale,
+				)();
+
 				embed = {
-					description: localise(Commands.report.strings.specifiedUserMoreThanOnce, submission.locale),
+					description: `${specifiedUserMoreThanOnceString}\n\n${makeSureOnlyMentionedOnceString}`,
 					color: constants.colors.dullYellow,
 				};
 				break;
 			}
 			case ReportError.SpecifiedTooManyUsers: {
 				embed = {
-					description: localise(Commands.report.strings.specifiedTooManyUsers, submission.locale)(
-						configuration.commands.report.limitUsers,
+					description: localise(client, 'report.strings.specifiedTooManyUsers', submission.locale)(
+						{ 'number': configuration.commands.report.limitUsers },
 					),
 					color: constants.colors.dullYellow,
 				};
@@ -289,7 +308,7 @@ function handleSubmittedInvalidReport(
 			}
 			case ReportError.CannotReportSelf: {
 				embed = {
-					description: localise(Commands.report.strings.cannotSubmitReportAgainstSelf, submission.locale),
+					description: localise(client, 'report.strings.cannotSubmitReportAgainstSelf', submission.locale)(),
 					color: constants.colors.dullYellow,
 				};
 			}
@@ -302,12 +321,12 @@ function handleSubmittedInvalidReport(
 				components: [{
 					type: MessageComponentTypes.Button,
 					customId: continueId,
-					label: localise(Modals.prompts.continue, submission.locale),
+					label: localise(client, 'prompts.continue', submission.locale)(),
 					style: ButtonStyles.Success,
 				}, {
 					type: MessageComponentTypes.Button,
 					customId: cancelId,
-					label: localise(Modals.prompts.cancel, submission.locale),
+					label: localise(client, 'prompts.cancel', submission.locale)(),
 					style: ButtonStyles.Danger,
 				}],
 			}],
@@ -315,15 +334,15 @@ function handleSubmittedInvalidReport(
 	});
 }
 
-function generateReportModal<T extends string>(locale: string | undefined): Modal<T> {
+function generateReportModal<T extends string>(client: Client, locale: string | undefined): Modal<T> {
 	return {
-		title: localise(Modals.report.title, locale),
+		title: localise(client, 'report.title', locale)(),
 		fields: [{
 			type: MessageComponentTypes.ActionRow,
 			components: [{
 				customId: 'reason',
 				type: MessageComponentTypes.InputText,
-				label: trim(localise(Modals.report.fields.reason, locale), 45),
+				label: trim(localise(client, 'report.fields.reason', locale)(), 45),
 				style: TextStyles.Paragraph,
 				required: true,
 				minLength: 20,
@@ -334,7 +353,7 @@ function generateReportModal<T extends string>(locale: string | undefined): Moda
 			components: [{
 				customId: 'users_to_report',
 				type: MessageComponentTypes.InputText,
-				label: trim(localise(Modals.report.fields.usersToReport, locale), 45),
+				label: trim(localise(client, 'report.fields.usersToReport', locale)(), 45),
 				style: TextStyles.Short,
 				required: true,
 				maxLength: 200,
@@ -344,7 +363,7 @@ function generateReportModal<T extends string>(locale: string | undefined): Moda
 			components: [{
 				customId: 'message_link',
 				type: MessageComponentTypes.InputText,
-				label: trim(localise(Modals.report.fields.linkToMessage, locale), 45),
+				label: trim(localise(client, 'report.fields.linkToMessage', locale)(), 45),
 				style: TextStyles.Short,
 				required: false,
 				maxLength: 100,

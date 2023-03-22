@@ -6,8 +6,7 @@ import {
 	InteractionResponseTypes,
 	sendInteractionResponse,
 } from 'discordeno';
-import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
-import { OptionBuilder } from 'logos/src/commands/command.ts';
+import { OptionTemplate } from 'logos/src/commands/command.ts';
 import { by, collection, to } from 'logos/src/commands/parameters.ts';
 import {
 	getVoiceState,
@@ -17,13 +16,13 @@ import {
 	unskip,
 	verifyCanManipulatePlayback,
 } from 'logos/src/controllers/music.ts';
-import { Client } from 'logos/src/client.ts';
+import { Client, localise } from 'logos/src/client.ts';
 import { parseArguments } from 'logos/src/interactions.ts';
 import constants from 'logos/constants.ts';
 import { defaultLocale } from 'logos/types.ts';
 
-const command: OptionBuilder = {
-	...createLocalisations(Commands.music.options.unskip),
+const command: OptionTemplate = {
+	name: 'unskip',
 	type: ApplicationCommandOptionTypes.SubCommand,
 	handle: handleUnskipAction,
 	options: [collection, by, to],
@@ -42,7 +41,7 @@ function handleUnskipAction([client, bot]: [Client, Bot], interaction: Interacti
 	if (controller === undefined) return;
 
 	const isVoiceStateVerified = verifyCanManipulatePlayback(
-		bot,
+		[client, bot],
 		interaction,
 		controller,
 		getVoiceState(client, interaction.guildId!, interaction.user.id),
@@ -67,7 +66,7 @@ function handleUnskipAction([client, bot]: [Client, Bot], interaction: Interacti
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(Commands.music.options.unskip.strings.nowhereToUnskipTo, interaction.locale),
+						description: localise(client, 'music.options.unskip.strings.nowhereToUnskipTo', interaction.locale)(),
 						color: constants.colors.dullYellow,
 					}],
 				},
@@ -79,6 +78,17 @@ function handleUnskipAction([client, bot]: [Client, Bot], interaction: Interacti
 		collection !== undefined &&
 		(controller.currentListing?.content === undefined || !isCollection(controller.currentListing?.content))
 	) {
+		const noSongCollectionToUnskipString = localise(
+			client,
+			'music.options.unskip.strings.noSongCollectionToUnskip',
+			interaction.locale,
+		)();
+		const tryUnskippingSong = localise(
+			client,
+			'music.options.unskip.strings.tryUnskippingSong',
+			interaction.locale,
+		)();
+
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -88,7 +98,7 @@ function handleUnskipAction([client, bot]: [Client, Bot], interaction: Interacti
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(Commands.music.options.unskip.strings.noSongCollectionToUnskip, interaction.locale),
+						description: `${noSongCollectionToUnskipString}\n\n${tryUnskippingSong}`,
 						color: constants.colors.dullYellow,
 					}],
 				},
@@ -106,7 +116,11 @@ function handleUnskipAction([client, bot]: [Client, Bot], interaction: Interacti
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(Commands.music.options.unskip.strings.cannotUnskipDueToFullQueue, interaction.locale),
+						description: localise(
+							client,
+							'music.options.unskip.strings.cannotUnskipDueToFullQueue',
+							interaction.locale,
+						)(),
 						color: constants.colors.red,
 					}],
 				},
@@ -125,7 +139,7 @@ function handleUnskipAction([client, bot]: [Client, Bot], interaction: Interacti
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(Commands.music.strings.tooManySkipArguments, interaction.locale),
+						description: localise(client, 'music.strings.tooManySkipArguments', interaction.locale)(),
 						color: constants.colors.red,
 					}],
 				},
@@ -144,7 +158,7 @@ function handleUnskipAction([client, bot]: [Client, Bot], interaction: Interacti
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(Commands.music.strings.mustBeGreaterThanZero, interaction.locale),
+						description: localise(client, 'music.strings.mustBeGreaterThanZero', interaction.locale)(),
 						color: constants.colors.red,
 					}],
 				},
@@ -187,7 +201,7 @@ function handleUnskipAction([client, bot]: [Client, Bot], interaction: Interacti
 		}
 	}
 
-	const unskippedString = localise(Commands.music.options.unskip.strings.unskipped.header, defaultLocale);
+	const unskippedString = localise(client, 'music.options.unskip.strings.unskipped.header', defaultLocale)();
 
 	return void sendInteractionResponse(
 		bot,
@@ -198,7 +212,7 @@ function handleUnskipAction([client, bot]: [Client, Bot], interaction: Interacti
 			data: {
 				embeds: [{
 					title: `${constants.symbols.music.unskipped} ${unskippedString}`,
-					description: localise(Commands.music.options.unskip.strings.unskipped.body, defaultLocale),
+					description: localise(client, 'music.options.unskip.strings.unskipped.body', defaultLocale)(),
 					color: constants.colors.invisible,
 				}],
 			},

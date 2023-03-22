@@ -6,8 +6,7 @@ import {
 	InteractionResponseTypes,
 	sendInteractionResponse,
 } from 'discordeno';
-import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
-import { OptionBuilder } from 'logos/src/commands/command.ts';
+import { OptionTemplate } from 'logos/src/commands/command.ts';
 import {
 	getVoiceState,
 	isOccupied,
@@ -15,12 +14,12 @@ import {
 	resume,
 	verifyCanManipulatePlayback,
 } from 'logos/src/controllers/music.ts';
-import { Client } from 'logos/src/client.ts';
+import { Client, localise } from 'logos/src/client.ts';
 import constants from 'logos/constants.ts';
 import { defaultLocale } from 'logos/types.ts';
 
-const command: OptionBuilder = {
-	...createLocalisations(Commands.music.options.resume),
+const command: OptionTemplate = {
+	name: 'resume',
 	type: ApplicationCommandOptionTypes.SubCommand,
 	handle: handleResumePlayback,
 };
@@ -30,7 +29,7 @@ function handleResumePlayback([client, bot]: [Client, Bot], interaction: Interac
 	if (controller === undefined) return;
 
 	const isVoiceStateVerified = verifyCanManipulatePlayback(
-		bot,
+		[client, bot],
 		interaction,
 		controller,
 		getVoiceState(client, interaction.guildId!, interaction.user.id),
@@ -47,7 +46,7 @@ function handleResumePlayback([client, bot]: [Client, Bot], interaction: Interac
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(Commands.music.options.resume.strings.noSongToResume, interaction.locale),
+						description: localise(client, 'music.options.resume.strings.noSongToResume', interaction.locale)(),
 						color: constants.colors.dullYellow,
 					}],
 				},
@@ -65,7 +64,7 @@ function handleResumePlayback([client, bot]: [Client, Bot], interaction: Interac
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(Commands.music.options.resume.strings.notCurrentlyPaused, interaction.locale),
+						description: localise(client, 'music.options.resume.strings.notCurrentlyPaused', interaction.locale)(),
 						color: constants.colors.dullYellow,
 					}],
 				},
@@ -75,7 +74,7 @@ function handleResumePlayback([client, bot]: [Client, Bot], interaction: Interac
 
 	resume(controller.player);
 
-	const resumedString = localise(Commands.music.options.resume.strings.resumed.header, defaultLocale);
+	const resumedString = localise(client, 'music.options.resume.strings.resumed.header', defaultLocale)();
 
 	return void sendInteractionResponse(
 		bot,
@@ -86,7 +85,7 @@ function handleResumePlayback([client, bot]: [Client, Bot], interaction: Interac
 			data: {
 				embeds: [{
 					title: `${constants.symbols.music.resumed} ${resumedString}`,
-					description: localise(Commands.music.options.resume.strings.resumed.body, defaultLocale),
+					description: localise(client, 'music.options.resume.strings.resumed.body', defaultLocale)(),
 					color: constants.colors.invisible,
 				}],
 			},

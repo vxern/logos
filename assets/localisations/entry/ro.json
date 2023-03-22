@@ -1,0 +1,37 @@
+{
+	"entry.welcome.welcome": "",
+	"entry.welcome.toEnter": "",
+	"entry.welcome.acceptedRules": "",
+
+	"entry.proficiencySelection.proficiency": "Competență Lingvistică",
+	"entry.proficiencySelection.chooseProficiency": "Alege rolul care îți reprezintă cel mai bine competența în limba {language}.",
+	"entry.proficiencySelection.canChangeRolesLater": "Nu te îngrijora dacă alegi greșit, rolul se poate schimba și mai apoi folosind comanda {command}.",
+
+	"entry.verification.getVerified": "Verificare",
+	"entry.verification.needToVerify": "Înainte să poți intra în {guild_name}, trebuie mai întâi să te verifici răspunzând la câteva întrebări de verificare.",
+	"entry.verification.answerHonestly": "Cel mai bine este să răspunzi sincer la întrebări deoarece respingerile sunt permanente.",
+	"entry.verification.iUnderstand": "Înțeleg, și vreau să continui",
+
+	"entry.verification.verifyingAccount": "Se verifică contul tău...",
+	"entry.verification.failedToVerifyAccount": "Nu s-a putut verifica contul tău.",
+	"entry.verification.accountTooNew": "Din motive de securitate, conturile care sunt prea noi nu pot intra pe server.",
+	"entry.verification.entryRequestRejectedPreviously": "Cererea ta de a se alătura serverului a fost respinsă anterior; Nu poți intra pe server.",
+	"entry.verification.alreadySubmittedAnswers": "Ai răspuns deja la întrebările de verificare. Când moderatorii verifică răspunsurile, vei fi informat/ă despre decizia sa.",
+	"entry.verification.answersSubmitted": "Răspunsurile tale la întrebările de verificate au fost trimise.",
+	"entry.verification.answersWillBeReviewed": "Cererea ta de a te alătura serverului va fi examinată de către moderatorii serverului. Când aceasta se va întâmpla, vei fi notificat/ă în DM-uri.",
+	"entry.verification.failedToSubmitAnswers": "Nu am reușit să transmitem răspunsurile tale la întrebări.",
+	"entry.verification.accepted": "Cererea ta de a te alătura serverului {guild_name} a fost acceptată.",
+	"entry.verification.thankYouForWaiting": "Îți mulțumim că ai așteptat.",
+	"entry.verification.rejected": "Cererea ta de a te alătura serverului {guild_name} a fost respinsă. Această decizie a fost luată de majoritatea personalului serverului.",
+	"entry.verification.notAbleToReturn": "Nu vei putea să te mai întorci pe server.",
+
+	"entry.vote.accept": "Acceptă",
+	"entry.vote.acceptMultiple": "Acceptă (sunt necesare încă {number | pluralise, one:\"vot\", two:\"voturi\"})",
+	"entry.vote.reject": "Respinge",
+	"entry.vote.rejectMultiple": "Respinge (sunt necesare încă {number | pluralise, one:\"vot\", two:\"voturi\"})",
+	"entry.vote.failed": "Nu am reușit să înregistrăm votul.",
+	"entry.vote.failedToUpdateVerificationState": "Nu am reușit să actualizăm starea de verificare.",
+	"entry.vote.alreadyVotedToAccept": "Ai votat deja în favoarea acceptării cererii utilizatorului de a se alătura serverului.",
+	"entry.vote.alreadyVotedToReject": "Ai votat deja împotriva cererii utilizatorului de a se alătura serverului.",
+	"entry.vote.stanceOnVoteChanged": "S-a schimbat poziția ta în acest vot."
+}

@@ -15,8 +15,7 @@ import {
 	sendInteractionResponse,
 	snowflakeToBigint,
 } from 'discordeno';
-import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
-import { OptionBuilder } from 'logos/src/commands/command.ts';
+import { OptionTemplate } from 'logos/src/commands/command.ts';
 import roles from 'logos/src/commands/social/data/roles.ts';
 import {
 	isCategory,
@@ -26,14 +25,14 @@ import {
 	RoleCategoryTypes,
 } from 'logos/src/commands/social/data/types.ts';
 import { getRelevantCategories, resolveRoles } from 'logos/src/commands/social/module.ts';
-import { Client } from 'logos/src/client.ts';
+import { Client, localise } from 'logos/src/client.ts';
 import { createInteractionCollector } from 'logos/src/interactions.ts';
 import constants from 'logos/constants.ts';
 import { trim } from 'logos/formatting.ts';
 import { defaultLocale, Language } from 'logos/types.ts';
 
-const command: OptionBuilder = {
-	...createLocalisations(Commands.profile.options.roles),
+const command: OptionTemplate = {
+	name: 'roles',
 	type: ApplicationCommandOptionTypes.SubCommand,
 	handle: handleOpenRoleSelectionMenu,
 };
@@ -55,8 +54,7 @@ function handleOpenRoleSelectionMenu([client, bot]: [Client, Bot], interaction: 
 			navigationData: {
 				root: {
 					type: RoleCategoryTypes.CategoryGroup,
-					name: Commands.profile.options.roles.strings.selectCategory.header,
-					description: Commands.profile.options.roles.strings.selectCategory.body,
+					id: 'roles.noCategory',
 					color: constants.colors.invisible,
 					emoji: constants.symbols.roles.noCategory,
 					categories: rootCategories,
@@ -160,7 +158,7 @@ function createRoleSelectionMenu(
 
 				if (index === -1) {
 					data.navigationData.indexesAccessed.pop();
-					displayData = traverseRoleTreeAndDisplay(bot, selection, displayData);
+					displayData = traverseRoleTreeAndDisplay([client, bot], selection, displayData);
 					return;
 				}
 
@@ -168,7 +166,7 @@ function createRoleSelectionMenu(
 
 				if (isCategoryGroup(viewData.category)) {
 					data.navigationData.indexesAccessed.push(index);
-					displayData = traverseRoleTreeAndDisplay(bot, selection, displayData);
+					displayData = traverseRoleTreeAndDisplay([client, bot], selection, displayData);
 					return;
 				}
 
@@ -180,7 +178,7 @@ function createRoleSelectionMenu(
 						viewData.category.minimum !== undefined &&
 						viewData.memberRolesIncludedInMenu.length <= viewData.category.minimum
 					) {
-						displayData = traverseRoleTreeAndDisplay(bot, interaction, displayData, true);
+						displayData = traverseRoleTreeAndDisplay([client, bot], interaction, displayData, true);
 						return;
 					}
 
@@ -198,6 +196,19 @@ function createRoleSelectionMenu(
 						viewData.category.maximum !== undefined && viewData.category.maximum !== 1 &&
 						viewData.memberRolesIncludedInMenu.length >= viewData.category.maximum
 					) {
+						const reachedLimitString = localise(
+							client,
+							'profile.options.roles.strings.reachedLimit',
+							interaction.locale,
+						)(
+							{ 'category': localise(client, `${viewData.category.id}.name`, interaction.locale)() },
+						);
+						const unassignOneOfExistentRolesString = localise(
+							client,
+							'profile.options.roles.strings.unassignOneOfExistentRoles',
+							interaction.locale,
+						)();
+
 						sendInteractionResponse(
 							bot,
 							interaction.id,
@@ -207,15 +218,13 @@ function createRoleSelectionMenu(
 								data: {
 									flags: ApplicationCommandFlags.Ephemeral,
 									embeds: [{
-										description: localise(Commands.profile.options.roles.strings.reachedLimit, interaction.locale)(
-											localise(viewData.category.name, interaction.locale),
-										),
+										description: `${reachedLimitString}\n\n${unassignOneOfExistentRolesString}`,
 									}],
 								},
 							},
 						);
 
-						displayData = traverseRoleTreeAndDisplay(bot, interaction, displayData, true);
+						displayData = traverseRoleTreeAndDisplay([client, bot], interaction, displayData, true);
 						return;
 					}
 
@@ -236,13 +245,13 @@ function createRoleSelectionMenu(
 					displayData.viewData!.memberRolesIncludedInMenu.push(role.id);
 				}
 
-				displayData = traverseRoleTreeAndDisplay(bot, interaction, displayData, true);
+				displayData = traverseRoleTreeAndDisplay([client, bot], interaction, displayData, true);
 			},
 		},
 	);
 
 	let displayData = traverseRoleTreeAndDisplay(
-		bot,
+		[client, bot],
 		interaction,
 		{
 			customId,
@@ -275,7 +284,7 @@ interface RoleDisplayData {
 }
 
 function traverseRoleTreeAndDisplay(
-	bot: Bot,
+	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 	data: RoleDisplayData,
 	editResponse = true,
@@ -287,7 +296,7 @@ function traverseRoleTreeAndDisplay(
 	if (isCategory(category)) {
 		const menuRoles = resolveRoles(category.collection, data.browsingData.language);
 		const menuRolesResolved = menuRoles.map((role) =>
-			data.roleData.rolesByName.get(localise(role.name, defaultLocale))!
+			data.roleData.rolesByName.get(localise(client, `${role.id}.name`, defaultLocale)())!
 		);
 		const memberRolesIncludedInMenu = data.roleData.memberRoleIds.filter(
 			(roleId) => menuRolesResolved.some((role) => role.id === roleId),
@@ -295,13 +304,14 @@ function traverseRoleTreeAndDisplay(
 
 		data.viewData = { category, menuRoles, menuRolesResolved, memberRolesIncludedInMenu };
 
-		selectOptions = createSelectOptionsFromCollection(data, interaction.locale);
+		selectOptions = createSelectOptionsFromCollection(client, data, interaction.locale);
 	} else {
 		if (data.viewData === undefined) {
 			data.viewData = { category, menuRoles: [], menuRolesResolved: [], memberRolesIncludedInMenu: [] };
 		}
 
 		selectOptions = createSelectOptionsFromCategories(
+			client,
 			category.categories!,
 			data.browsingData.language,
 			interaction.locale,
@@ -310,7 +320,7 @@ function traverseRoleTreeAndDisplay(
 
 	data.viewData!.category = category;
 
-	const menu = displaySelectMenu(data, categories, selectOptions, interaction.locale);
+	const menu = displaySelectMenu(client, data, categories, selectOptions, interaction.locale);
 
 	if (editResponse) {
 		editOriginalInteractionResponse(bot, interaction.token, menu.data!);
@@ -322,6 +332,7 @@ function traverseRoleTreeAndDisplay(
 }
 
 function displaySelectMenu(
+	client: Client,
 	data: RoleDisplayData,
 	categories: [RoleCategory, ...RoleCategory[]],
 	selectOptions: SelectOption[],
@@ -330,7 +341,7 @@ function displaySelectMenu(
 	const isInRootCategory = data.browsingData.navigationData.indexesAccessed.length === 0;
 	if (!isInRootCategory) {
 		selectOptions.push({
-			label: localise(Commands.profile.options.roles.strings.back, locale),
+			label: localise(client, 'profile.options.roles.strings.back', locale)(),
 			value: `${-1}`,
 		});
 	}
@@ -338,7 +349,7 @@ function displaySelectMenu(
 	const category = categories.at(-1)!;
 
 	const title = (categories.length > 1 ? categories.slice(1) : categories).map((category) => {
-		const categoryNameString = localise(category.name, locale);
+		const categoryNameString = localise(client, `${category.id}.name`, locale)();
 		return `${category.emoji}  ${categoryNameString}`;
 	}).join(` ${constants.symbols.indicators.arrowRight}  `);
 
@@ -348,7 +359,7 @@ function displaySelectMenu(
 			flags: ApplicationCommandFlags.Ephemeral,
 			embeds: [{
 				title,
-				description: localise(category.description, locale),
+				description: localise(client, `${category.id}.description`, locale)(),
 				color: category.color,
 			}],
 			components: [{
@@ -358,8 +369,8 @@ function displaySelectMenu(
 					customId: data.customId,
 					options: selectOptions,
 					placeholder: isCategoryGroup(category)
-						? localise(Commands.profile.options.roles.strings.chooseCategory, locale)
-						: localise(Commands.profile.options.roles.strings.chooseRole, locale),
+						? localise(client, 'profile.options.roles.strings.chooseCategory', locale)()
+						: localise(client, 'profile.options.roles.strings.chooseRole', locale)(),
 				}],
 			}],
 		},
@@ -367,6 +378,7 @@ function displaySelectMenu(
 }
 
 function createSelectOptionsFromCategories(
+	client: Client,
 	categories: RoleCategory[],
 	language: Language | undefined,
 	locale: string | undefined,
@@ -376,9 +388,9 @@ function createSelectOptionsFromCategories(
 	const selections: SelectOption[] = [];
 	for (const [category, index] of categorySelections) {
 		selections.push({
-			label: localise(category.name, locale),
+			label: localise(client, `${category.id}.name`, locale)(),
 			value: index.toString(),
-			description: trim(localise(category.description, locale), 100),
+			description: trim(localise(client, `${category.id}.description`, locale)(), 100),
 			emoji: { name: category.emoji },
 		});
 	}
@@ -389,6 +401,7 @@ function createSelectOptionsFromCategories(
 const emojiExpression = /\p{Extended_Pictographic}/u;
 
 function createSelectOptionsFromCollection(
+	client: Client,
 	data: RoleDisplayData,
 	locale: string | undefined,
 ): SelectOption[] {
@@ -396,18 +409,20 @@ function createSelectOptionsFromCollection(
 
 	const viewData = data.viewData!;
 
-	const assignedString = localise(Commands.profile.options.roles.strings.assigned, locale);
+	const assignedString = localise(client, 'profile.options.roles.strings.assigned', locale)();
 
 	for (let index = 0; index < viewData.menuRoles.length; index++) {
 		const [role, roleResolved] = [viewData.menuRoles.at(index)!, viewData.menuRolesResolved.at(index)!];
 		const memberHasRole = viewData.memberRolesIncludedInMenu.includes(roleResolved.id);
 
-		const localisedName = localise(role.name, locale);
+		const localisedName = localise(client, `${role.id}.name`, locale)();
 
 		selectOptions.push({
 			label: memberHasRole ? `[${assignedString}] ${localisedName}` : localisedName,
 			value: index.toString(),
-			description: role.description !== undefined ? localise(role.description, locale) : undefined,
+			description: client.localisations.has(`${role.id}.description`)
+				? localise(client, `${role.id}.description`, locale)()
+				: undefined,
 			emoji: (() => {
 				if (role.emoji === undefined) return;
 				if (emojiExpression.test(role.emoji)) return { name: role.emoji };

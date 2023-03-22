@@ -9,14 +9,13 @@ import {
 	InteractionResponseTypes,
 	sendInteractionResponse,
 } from 'discordeno';
-import { Commands, localise } from 'logos/assets/localisations/mod.ts';
 import { getProficiencyCategory } from 'logos/src/commands/social/module.ts';
-import { Client } from 'logos/src/client.ts';
+import { Client, localise } from 'logos/src/client.ts';
 import { getGuildIconURLFormatted, snowflakeToTimestamp } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import constants from 'logos/constants.ts';
 import { mention, MentionTypes, timestamp } from 'logos/formatting.ts';
-import { defaultLanguage } from 'logos/types.ts';
+import { defaultLocale } from 'logos/types.ts';
 
 /** Displays information about the guild that this command was executed in. */
 function handleDisplayGuildInformation([client, bot]: [Client, Bot], interaction: Interaction): void {
@@ -29,16 +28,29 @@ function handleDisplayGuildInformation([client, bot]: [Client, Bot], interaction
 	const proficiencyRoleFrequencies = getDistribution(client, guild);
 	const isManaged = owner.username !== guild.name;
 
-	const descriptionString = localise(Commands.information.options.guild.strings.fields.description, interaction.locale);
-	const membersString = localise(Commands.information.options.guild.strings.fields.members, interaction.locale);
-	const createdString = localise(Commands.information.options.guild.strings.fields.created, interaction.locale);
-	const channelsString = localise(Commands.information.options.guild.strings.fields.channels, interaction.locale);
-	const ownerString = localise(Commands.information.options.guild.strings.fields.owner, interaction.locale);
-	const moderatorsString = localise(Commands.information.options.guild.strings.fields.moderators, interaction.locale);
-	const proficiencyDistributionString = localise(
-		Commands.information.options.guild.strings.fields.distributionOfMembersLanguageProficiency,
+	const descriptionString = localise(
+		client,
+		'information.options.server.strings.fields.description',
 		interaction.locale,
-	);
+	)();
+	const membersString = localise(client, 'information.options.server.strings.fields.members', interaction.locale)();
+	const createdString = localise(client, 'information.options.server.strings.fields.created', interaction.locale)();
+	const channelsString = localise(
+		client,
+		'information.options.server.strings.fields.channels',
+		interaction.locale,
+	)();
+	const ownerString = localise(client, 'information.options.server.strings.fields.owner', interaction.locale)();
+	const moderatorsString = localise(
+		client,
+		'information.options.server.strings.fields.moderators',
+		interaction.locale,
+	)();
+	const proficiencyDistributionString = localise(
+		client,
+		'information.options.server.strings.fields.distributionOfMembersLanguageProficiency',
+		interaction.locale,
+	)();
 
 	return void sendInteractionResponse(
 		bot,
@@ -50,13 +62,15 @@ function handleDisplayGuildInformation([client, bot]: [Client, Bot], interaction
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
 					thumbnail: getThumbnail(bot, guild),
-					title: localise(Commands.information.options.guild.strings.informationAbout, interaction.locale)(guild.name),
+					title: localise(client, 'information.options.server.strings.informationAbout', interaction.locale)(
+						{ 'guild_name': guild.name },
+					),
 					color: constants.colors.invisible,
 					fields: [
 						{
 							name: `${constants.symbols.guild.description} ${descriptionString}`,
 							value: guild.description ??
-								localise(Commands.information.options.guild.strings.noDescription, interaction.locale),
+								localise(client, 'information.options.server.strings.noDescription', interaction.locale)(),
 							inline: true,
 						},
 						{
@@ -71,14 +85,18 @@ function handleDisplayGuildInformation([client, bot]: [Client, Bot], interaction
 						},
 						{
 							name: `${constants.symbols.guild.channels.channels} ${channelsString}`,
-							value: getChannelInformationSection(guild, interaction.locale),
+							value: getChannelInformationSection(client, guild, interaction.locale),
 							inline: true,
 						},
 						isManaged
 							? {
 								name: `${constants.symbols.guild.moderators} ${moderatorsString}`,
-								value: localise(Commands.information.options.guild.strings.overseenByModerators, interaction.locale)(
-									configuration.permissions.moderatorRoleNames.main.toLowerCase(),
+								value: localise(
+									client,
+									'information.options.server.strings.overseenByModerators',
+									interaction.locale,
+								)(
+									{ 'role_mention': configuration.permissions.moderatorRoleNames.main.toLowerCase() },
 								),
 								inline: false,
 							}
@@ -89,7 +107,7 @@ function handleDisplayGuildInformation([client, bot]: [Client, Bot], interaction
 							},
 						{
 							name: `${constants.symbols.guild.proficiencyDistribution} ${proficiencyDistributionString}`,
-							value: formatDistribution(proficiencyRoleFrequencies, interaction.locale),
+							value: formatDistribution(client, proficiencyRoleFrequencies, interaction.locale),
 							inline: false,
 						},
 					],
@@ -99,7 +117,7 @@ function handleDisplayGuildInformation([client, bot]: [Client, Bot], interaction
 	);
 }
 
-function getChannelInformationSection(guild: Guild, locale: string | undefined): string {
+function getChannelInformationSection(client: Client, guild: Guild, locale: string | undefined): string {
 	function getChannelCountByType(channels: Channel[], type: ChannelTypes): number {
 		return channels.filter((channel) => channel.type === type).length;
 	}
@@ -108,10 +126,11 @@ function getChannelInformationSection(guild: Guild, locale: string | undefined):
 	const textChannelsCount = getChannelCountByType(channels, ChannelTypes.GuildText);
 	const voiceChannelsCount = getChannelCountByType(channels, ChannelTypes.GuildVoice);
 
-	const textChannelsString = localise(Commands.information.options.guild.strings.channelTypes.text, locale);
-	const voiceChannelsString = localise(Commands.information.options.guild.strings.channelTypes.voice, locale);
+	const textChannelsString = localise(client, 'information.options.server.strings.channelTypes.text', locale)();
+	const voiceChannelsString = localise(client, 'information.options.server.strings.channelTypes.voice', locale)();
 
-	return `${constants.symbols.guild.channels.text} ${textChannelsString} – ${textChannelsCount} | ${constants.symbols.guild.channels.voice} ${voiceChannelsString} – ${voiceChannelsCount}`;
+	return `${constants.symbols.guild.channels.text} ${textChannelsString} – ${textChannelsCount}\n` +
+		`${constants.symbols.guild.channels.voice} ${voiceChannelsString} – ${voiceChannelsCount}`;
 }
 
 type ProficiencyRoleDistribution = [withRole: [roleId: bigint, frequency: number][], withoutRole: number];
@@ -120,7 +139,9 @@ type ProficiencyRoleDistribution = [withRole: [roleId: bigint, frequency: number
 function getDistribution(client: Client, guild: Guild): ProficiencyRoleDistribution {
 	const proficiencyCategory = getProficiencyCategory();
 	const proficiencies = proficiencyCategory.collection.list;
-	const proficiencyRoleNames = proficiencies.map((proficiency) => proficiency.name[defaultLanguage]);
+	const proficiencyRoleNames = proficiencies.map((proficiency) =>
+		localise(client, `${proficiency.id}.name`, defaultLocale)()
+	);
 	const proficiencyRoles = guild.roles.array()
 		.filter((role) => proficiencyRoleNames.includes(role.name))
 		.toSorted((a, b) => a.position - b.position);
@@ -149,7 +170,11 @@ function getDistribution(client: Client, guild: Guild): ProficiencyRoleDistribut
 	];
 }
 
-function formatDistribution(distribution: ProficiencyRoleDistribution, locale: string | undefined): string {
+function formatDistribution(
+	client: Client,
+	distribution: ProficiencyRoleDistribution,
+	locale: string | undefined,
+): string {
 	function getPercentageComposition(number: number, total: number): string {
 		return ((number / total) * 100).toPrecision(3);
 	}
@@ -160,13 +185,13 @@ function formatDistribution(distribution: ProficiencyRoleDistribution, locale: s
 
 	const [roleFrequencies, withoutRole] = distribution;
 
-	const total = roleFrequencies.map(([_, value]) => value).reduce((a, b) => a + b);
+	const total = roleFrequencies.map(([_, value]) => value).reduce((a, b) => a + b, 0);
 
 	const strings: string[] = [
 		formatFrequency(
 			withoutRole,
 			getPercentageComposition(withoutRole, total),
-			localise(Commands.information.options.guild.strings.withoutProficiencyRole, locale),
+			localise(client, 'information.options.server.strings.withoutProficiencyRole', locale)(),
 		),
 	];
 	for (const [roleId, frequency] of roleFrequencies) {

@@ -1,8 +1,7 @@
 import { Member, User } from 'discordeno';
-import { localise } from 'logos/assets/localisations/mod.ts';
-import { Modals } from 'logos/assets/localisations/mod.ts';
 import { EntryRequest, Praise, Report, Suggestion, Warning } from 'logos/src/database/structs/mod.ts';
 import { MessageGenerators } from 'logos/src/controllers/logging/generators/generators.ts';
+import { localise } from 'logos/src/client.ts';
 import { diagnosticMentionUser } from 'logos/src/utils.ts';
 import constants from 'logos/constants.ts';
 import { codeMultiline, timestamp } from 'logos/formatting.ts';
@@ -49,9 +48,11 @@ const generators: Required<MessageGenerators<GuildEvents>> = {
 			const guild = client.cache.guilds.get(BigInt(entryRequest.guild));
 			if (guild === undefined) return;
 
-			const reasonString = localise(Modals.verification.fields.reason, defaultLocale)(guild.language);
-			const aimString = localise(Modals.verification.fields.aim, defaultLocale);
-			const whereFoundString = localise(Modals.verification.fields.whereFound, defaultLocale)(guild.name);
+			const reasonString = localise(client, 'verification.fields.reason', defaultLocale)({
+				'language': guild.language,
+			});
+			const aimString = localise(client, 'verification.fields.aim', defaultLocale)();
+			const whereFoundString = localise(client, 'verification.fields.whereFound', defaultLocale)();
 
 			return `${diagnosticMentionUser(user)} has submitted a request to join the server.
 

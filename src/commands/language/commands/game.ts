@@ -1,5 +1,6 @@
 import {
 	ApplicationCommandFlags,
+	ApplicationCommandTypes,
 	Bot,
 	ButtonComponent,
 	ButtonStyles,
@@ -11,15 +12,15 @@ import {
 	MessageComponentTypes,
 	sendInteractionResponse,
 } from 'discordeno';
-import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
 import { SentencePair } from 'logos/src/commands/language/data/types.ts';
-import { CommandBuilder } from 'logos/src/commands/command.ts';
-import { Client } from 'logos/src/client.ts';
+import { CommandTemplate } from 'logos/src/commands/command.ts';
+import { Client, localise } from 'logos/src/client.ts';
 import { createInteractionCollector, decodeId, encodeId } from 'logos/src/interactions.ts';
 import constants from 'logos/constants.ts';
 
-const command: CommandBuilder = {
-	...createLocalisations(Commands.game),
+const command: CommandTemplate = {
+	name: 'game',
+	type: ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ['VIEW_CHANNEL'],
 	handle: handleStartGame,
 };
@@ -42,7 +43,7 @@ async function handleStartGame([client, bot]: [Client, Bot], interaction: Intera
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(Commands.game.strings.noSentencesAvailable, interaction.locale),
+						description: localise(client, 'game.strings.noSentencesAvailable', interaction.locale)(),
 						color: constants.colors.dullYellow,
 					}],
 				},
@@ -92,7 +93,7 @@ async function handleStartGame([client, bot]: [Client, Bot], interaction: Intera
 			return void editOriginalInteractionResponse(
 				bot,
 				interaction.token,
-				getGameView(customId, sentenceSelection, embedColor, interaction.locale),
+				getGameView(client, customId, sentenceSelection, embedColor, interaction.locale),
 			);
 		},
 	});
@@ -102,11 +103,12 @@ async function handleStartGame([client, bot]: [Client, Bot], interaction: Intera
 	return void editOriginalInteractionResponse(
 		bot,
 		interaction.token,
-		getGameView(customId, sentenceSelection, embedColor, interaction.locale),
+		getGameView(client, customId, sentenceSelection, embedColor, interaction.locale),
 	);
 }
 
 function getGameView(
+	client: Client,
 	customId: string,
 	sentenceSelection: SentenceSelection,
 	embedColor: number,
@@ -116,10 +118,10 @@ function getGameView(
 		embeds: [{
 			color: embedColor,
 			fields: [{
-				name: localise(Commands.game.strings.sentence, locale),
+				name: localise(client, 'game.strings.sentence', locale)(),
 				value: sentenceSelection.pair.sentence,
 			}, {
-				name: localise(Commands.game.strings.translation, locale),
+				name: localise(client, 'game.strings.translation', locale)(),
 				value: sentenceSelection.pair.translation,
 			}],
 		}],

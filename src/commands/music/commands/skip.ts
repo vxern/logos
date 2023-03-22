@@ -6,8 +6,7 @@ import {
 	InteractionResponseTypes,
 	sendInteractionResponse,
 } from 'discordeno';
-import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
-import { OptionBuilder } from 'logos/src/commands/command.ts';
+import { OptionTemplate } from 'logos/src/commands/command.ts';
 import { by, collection, to } from 'logos/src/commands/parameters.ts';
 import {
 	getVoiceState,
@@ -16,13 +15,13 @@ import {
 	skip,
 	verifyCanManipulatePlayback,
 } from 'logos/src/controllers/music.ts';
-import { Client } from 'logos/src/client.ts';
+import { Client, localise } from 'logos/src/client.ts';
 import { parseArguments } from 'logos/src/interactions.ts';
 import constants from 'logos/constants.ts';
 import { defaultLocale } from 'logos/types.ts';
 
-const command: OptionBuilder = {
-	...createLocalisations(Commands.music.options.skip),
+const command: OptionTemplate = {
+	name: 'skip',
 	type: ApplicationCommandOptionTypes.SubCommand,
 	handle: handleSkipAction,
 	options: [collection, by, to],
@@ -40,7 +39,7 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 	if (controller === undefined) return;
 
 	const isVoiceStateVerified = verifyCanManipulatePlayback(
-		bot,
+		[client, bot],
 		interaction,
 		controller,
 		getVoiceState(client, interaction.guildId!, interaction.user.id),
@@ -57,7 +56,7 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(Commands.music.options.skip.strings.noSongToSkip, interaction.locale),
+						description: localise(client, 'music.options.skip.strings.noSongToSkip', interaction.locale)(),
 						color: constants.colors.dullYellow,
 					}],
 				},
@@ -66,6 +65,17 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 	}
 
 	if (collection !== undefined && !isCollection(controller.currentListing?.content)) {
+		const noSongCollectionToSkipString = localise(
+			client,
+			'music.options.skip.strings.noSongCollectionToSkip',
+			interaction.locale,
+		)();
+		const trySkippingSong = localise(
+			client,
+			'music.options.skip.strings.trySkippingSong',
+			interaction.locale,
+		)();
+
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -75,7 +85,7 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(Commands.music.options.skip.strings.noSongCollectionToSkip, interaction.locale),
+						description: `${noSongCollectionToSkipString}\n\n${trySkippingSong}`,
 						color: constants.colors.dullYellow,
 					}],
 				},
@@ -94,7 +104,7 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(Commands.music.strings.tooManySkipArguments, interaction.locale),
+						description: localise(client, 'music.strings.tooManySkipArguments', interaction.locale)(),
 						color: constants.colors.red,
 					}],
 				},
@@ -113,7 +123,7 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(Commands.music.strings.mustBeGreaterThanZero, interaction.locale),
+						description: localise(client, 'music.strings.mustBeGreaterThanZero', interaction.locale)(),
 						color: constants.colors.red,
 					}],
 				},
@@ -147,10 +157,10 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 	}
 
 	const messageLocalisations = (collection ?? false)
-		? Commands.music.options.skip.strings.skippedSongCollection
-		: Commands.music.options.skip.strings.skippedSong;
+		? 'music.options.skip.strings.skippedSongCollection'
+		: 'music.options.skip.strings.skippedSong';
 
-	const messageString = localise(messageLocalisations.header, defaultLocale);
+	const messageString = localise(client, `${messageLocalisations}.header`, defaultLocale)();
 
 	return void sendInteractionResponse(
 		bot,
@@ -161,7 +171,7 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 			data: {
 				embeds: [{
 					title: `${constants.symbols.music.skipped} ${messageString}`,
-					description: localise(messageLocalisations.body, defaultLocale),
+					description: localise(client, `${messageLocalisations}.body`, defaultLocale)(),
 					color: constants.colors.invisible,
 				}],
 			},

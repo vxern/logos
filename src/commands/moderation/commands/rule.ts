@@ -1,45 +1,44 @@
 import {
 	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
+	ApplicationCommandTypes,
 	Bot,
 	Interaction,
 	InteractionResponseTypes,
 	sendInteractionResponse,
 } from 'discordeno';
-import { Commands, createLocalisations, localise, Services } from 'logos/assets/localisations/mod.ts';
-import { CommandBuilder } from 'logos/src/commands/command.ts';
-import { Client } from 'logos/src/client.ts';
+import { CommandTemplate } from 'logos/src/commands/command.ts';
+import { Client, localise } from 'logos/src/client.ts';
 import { parseArguments } from 'logos/src/interactions.ts';
 import constants from 'logos/constants.ts';
 import { defaultLocale } from 'logos/types.ts';
+import { show } from 'logos/src/commands/parameters.ts';
 
-const command: CommandBuilder = {
-	...createLocalisations(Commands.rule),
+const command: CommandTemplate = {
+	name: 'rule',
+	type: ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ['VIEW_CHANNEL'],
 	handle: handleCiteRule,
 	handleAutocomplete: handleCiteRuleAutocomplete,
 	options: [{
-		...createLocalisations(Commands.rule.options.rule),
+		name: 'rule',
 		type: ApplicationCommandOptionTypes.String,
 		required: true,
 		autocomplete: true,
-	}],
+	}, show],
 };
 
-function handleCiteRuleAutocomplete([_, bot]: [Client, Bot], interaction: Interaction): void {
+const ruleIds = ['behaviour', 'quality', 'relevance', 'suitability', 'exclusivity', 'adherence'];
+
+function handleCiteRuleAutocomplete([client, bot]: [Client, Bot], interaction: Interaction): void {
 	const [{ rule: ruleOrUndefined }] = parseArguments(interaction.data?.options, {});
 	const ruleQuery = ruleOrUndefined ?? '';
 
-	const rules = Object.values(Services.notices.notices.information.rules.rules);
-
 	const ruleQueryLowercase = ruleQuery.toLowerCase();
-	const choices = rules.map((rule, indexZeroBased) => {
-		const index = indexZeroBased + 1;
-		const titleWithTLDR = localise(rule.title, interaction.locale);
-
+	const choices = ruleIds.map((ruleId, index) => {
 		return {
-			name: `#${index}: ${titleWithTLDR}`,
-			value: indexZeroBased.toString(),
+			name: getRuleTitleFormatted(client, ruleId, index, 'option', interaction.locale),
+			value: index.toString(),
 		};
 	}).filter((choice) => choice.name.toLowerCase().includes(ruleQueryLowercase));
 
@@ -55,21 +54,20 @@ function handleCiteRuleAutocomplete([_, bot]: [Client, Bot], interaction: Intera
 }
 
 function handleCiteRule([client, bot]: [Client, Bot], interaction: Interaction): void {
-	const rules = Object.values(Services.notices.notices.information.rules.rules);
+	const [{ rule: ruleIndex, show }] = parseArguments(interaction.data?.options, { rule: 'number', show: 'boolean' });
+	if (ruleIndex === undefined) return displayError([client, bot], interaction);
 
-	const [{ rule }] = parseArguments(interaction.data?.options, { rule: 'number' });
-	if (rule === undefined) return displayError(bot, interaction);
-
-	const ruleParsed = rules.at(rule);
-	if (ruleParsed === undefined) return displayError(bot, interaction);
+	const ruleId = ruleIds.at(ruleIndex);
+	if (ruleId === undefined) return displayError([client, bot], interaction);
 
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (guild === undefined) return;
 
-	const ruleString = localise(Services.notices.notices.information.rules.rule, defaultLocale);
-	const ruleTitleString = localise(ruleParsed.title, defaultLocale);
-	const tldrString = localise(Services.notices.notices.information.rules.tldr, defaultLocale);
-	const summaryString = localise(ruleParsed.summary, defaultLocale);
+	const locale = show ? defaultLocale : interaction.locale;
+
+	const tldrString = localise(client, `rules.tldr`, locale)();
+	const summaryString = localise(client, `rules.${ruleId}.summary`, locale)();
+	const contentString = localise(client, `rules.${ruleId}.content`, locale)();
 
 	return void sendInteractionResponse(
 		bot,
@@ -78,9 +76,11 @@ function handleCiteRule([client, bot]: [Client, Bot], interaction: Interaction):
 		{
 			type: InteractionResponseTypes.ChannelMessageWithSource,
 			data: {
+				flags: !show ? ApplicationCommandFlags.Ephemeral : undefined,
 				embeds: [{
-					title: `${ruleString} #${rule + 1}: ${ruleTitleString} ~ ${tldrString}: *${summaryString}*`,
-					description: localise(ruleParsed.content, defaultLocale),
+					title: getRuleTitleFormatted(client, ruleId, ruleIndex, 'display', locale),
+					description: contentString,
+					footer: { text: `${tldrString}: ${summaryString}` },
 					color: constants.colors.blue,
 				}],
 			},
@@ -88,7 +88,25 @@ function handleCiteRule([client, bot]: [Client, Bot], interaction: Interaction):
 	);
 }
 
-function displayError(bot: Bot, interaction: Interaction): void {
+function getRuleTitleFormatted(
+	client: Client,
+	ruleId: string,
+	ruleIndex: number,
+	mode: 'option' | 'display',
+	locale: string | undefined,
+): string {
+	const ruleTitleString = localise(client, `rules.${ruleId}.title`, locale)();
+	const summaryString = localise(client, `rules.${ruleId}.summary`, locale)();
+
+	switch (mode) {
+		case 'option':
+			return `#${ruleIndex + 1} ${ruleTitleString} ~ ${summaryString}`;
+		case 'display':
+			return `${ruleIndex + 1} - ${ruleTitleString}`;
+	}
+}
+
+function displayError([client, bot]: [Client, Bot], interaction: Interaction): void {
 	return void sendInteractionResponse(
 		bot,
 		interaction.id,
@@ -98,7 +116,7 @@ function displayError(bot: Bot, interaction: Interaction): void {
 			data: {
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
-					description: localise(Commands.rule.strings.invalidRule, interaction.locale),
+					description: localise(client, 'rule.strings.invalidRule', interaction.locale)(),
 					color: constants.colors.red,
 				}],
 			},
@@ -107,3 +125,4 @@ function displayError(bot: Bot, interaction: Interaction): void {
 }
 
 export default command;
+export { ruleIds };

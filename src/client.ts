@@ -15,6 +15,8 @@ import {
 	Interaction,
 	InteractionDataOption,
 	InteractionResponseTypes,
+	Locales,
+	Localization as DiscordLocalisations,
 	Member,
 	Message,
 	send as sendShardPayload,
@@ -26,23 +28,36 @@ import {
 	User,
 } from 'discordeno';
 import * as Sentry from 'sentry';
-import { Log as Logger } from 'tl_log';
 import { Node as LavalinkNode, SendGatewayPayload } from 'lavadeno';
-import { localise, Misc } from 'logos/assets/localisations/mod.ts';
+import { MessagePipe } from 'messagepipe';
+import { Log as Logger } from 'tl_log';
 import { DictionaryAdapter, SentencePair } from 'logos/src/commands/language/data/types.ts';
 import { SupportedLanguage } from 'logos/src/commands/language/module.ts';
-import { Command, InteractionHandler } from 'logos/src/commands/command.ts';
-import { getCommands } from 'logos/src/commands/commands.ts';
+import {
+	Command,
+	CommandTemplate,
+	InteractionHandler,
+	LocalisationProperties,
+	Option,
+} from 'logos/src/commands/command.ts';
+import commandTemplates from 'logos/src/commands/commands.ts';
 import { setupLogging } from 'logos/src/controllers/logging/logging.ts';
 import { MusicController, setupMusicController } from 'logos/src/controllers/music.ts';
 import { createDatabase, Database } from 'logos/src/database/database.ts';
+import localisationTransformers from 'logos/src/localisation/transformers.ts';
 import { isAutocomplete } from 'logos/src/interactions.ts';
 import services from 'logos/src/services/services.ts';
 import { diagnosticMentionUser } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import constants from 'logos/constants.ts';
 import { timestamp } from 'logos/formatting.ts';
-import { defaultLanguage, Language, supportedLanguages } from 'logos/types.ts';
+import {
+	defaultLanguage,
+	getLanguageByLocale,
+	getLocaleForLanguage,
+	Language,
+	supportedLanguages,
+} from 'logos/types.ts';
 
 interface Collector<ForEvent extends keyof EventHandlers> {
 	filter: (...args: Parameters<EventHandlers[ForEvent]>) => boolean;
@@ -88,6 +103,7 @@ type Client = Readonly<{
 	log: Logger;
 	cache: Cache;
 	database: Database;
+	localisations: Map<string, Map<Language, (args: Record<string, unknown>) => string>>;
 	commands: {
 		commands: Command[];
 		handlers: {
@@ -108,15 +124,22 @@ type Client = Readonly<{
 	};
 }>;
 
-function createClient(metadata: Client['metadata'], features: Client['features']): Client {
-	const commands = getCommands();
-	const handlers = createCommandHandlers(commands);
+function createClient(
+	metadata: Client['metadata'],
+	localisationsStatic: Map<string, Map<Language, string>>,
+	features: Client['features'],
+): Client {
+	const localisations = createLocalisations(localisationsStatic);
+
+	const commands = localiseCommands(localisations, commandTemplates);
+	const handlers = createCommandHandlers(commandTemplates);
 
 	return {
 		metadata,
 		log: createLogger(),
 		cache: createCache(),
 		database: createDatabase(),
+		localisations,
 		commands: { commands, handlers },
 		collectors: new Map(),
 		features,
@@ -125,6 +148,7 @@ function createClient(metadata: Client['metadata'], features: Client['features']
 
 async function initialiseClient(
 	metadata: Client['metadata'],
+	localisations: Map<string, Map<Language, string>>,
 	features: Omit<Client['features'], 'music'>,
 ): Promise<[Client, Bot]> {
 	const musicFeature = createMusicFeature(
@@ -139,7 +163,7 @@ async function initialiseClient(
 		},
 	);
 
-	const client = createClient(metadata, { ...features, music: musicFeature });
+	const client = createClient(metadata, localisations, { ...features, music: musicFeature });
 
 	await prefetchDataFromDatabase(client, client.database);
 
@@ -158,7 +182,7 @@ async function initialiseClient(
 	startServices([client, bot]);
 
 	return Promise.all([
-		// setupLavalinkNode([client, bot]),
+		setupLavalinkNode([client, bot]),
 		startBot(bot),
 	]).then(() => [client, bot]);
 }
@@ -415,12 +439,23 @@ function withRateLimiting(handle: InteractionHandler): InteractionHandler {
 			const now = Date.now();
 			const nextValidUsageTimestamp = timestamp(now + configuration.rateLimiting.within - (now - firstTimestamp));
 
+			const usedCommandTooManyTimesString = localise(
+				client,
+				'interactions.usedCommandTooManyTimes',
+				interaction.locale,
+			)();
+			const canUseCommandInString = localise(
+				client,
+				'interactions.canUseCommandIn',
+				interaction.locale,
+			)({ 'relative_timestamp': nextValidUsageTimestamp });
+
 			return void sendInteractionResponse(bot, interaction.id, interaction.token, {
 				type: InteractionResponseTypes.ChannelMessageWithSource,
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(Misc.usedCommandTooManyTimes, interaction.locale)(nextValidUsageTimestamp),
+						description: `${usedCommandTooManyTimesString}\n\n${canUseCommandInString}`,
 						color: constants.colors.dullYellow,
 					}],
 				},
@@ -433,7 +468,61 @@ function withRateLimiting(handle: InteractionHandler): InteractionHandler {
 	};
 }
 
-function createCommandHandlers(commands: Command[]): Client['commands']['handlers'] {
+function localiseCommands(localisations: Client['localisations'], commandTemplates: CommandTemplate[]): Command[] {
+	function localiseCommandOrOption(key: string): Pick<Command, LocalisationProperties> | undefined {
+		const nameLocalisationsAll = localisations.get(`${key}.name`);
+		const nameLocalisations = nameLocalisationsAll !== undefined
+			? toDiscordLocalisations(nameLocalisationsAll)
+			: undefined;
+
+		const descriptionLocalisationsAll = localisations.get(`${key}.description`);
+		const description = descriptionLocalisationsAll?.get(defaultLanguage)?.({});
+		const descriptionLocalisations = descriptionLocalisationsAll !== undefined
+			? toDiscordLocalisations(descriptionLocalisationsAll)
+			: undefined;
+
+		return {
+			nameLocalizations: nameLocalisations ?? {},
+			description: description ?? localisations.get('noDescription')?.get(defaultLanguage)?.({}) ?? 'No description.',
+			descriptionLocalizations: descriptionLocalisations ?? {},
+		};
+	}
+
+	const commands: Command[] = [];
+	for (let commandTemplate of commandTemplates) {
+		const commandKey = commandTemplate.name;
+		const localisations = localiseCommandOrOption(commandKey);
+		if (localisations === undefined) continue;
+
+		const command: Command = { ...localisations, ...commandTemplate, options: [] };
+
+		for (let optionTemplate of commandTemplate.options ?? []) {
+			const optionKey = [commandKey, 'options', optionTemplate.name].join('.');
+			const localisations = localiseCommandOrOption(optionKey);
+			if (localisations === undefined) continue;
+
+			const option: Option = { ...localisations, ...optionTemplate, options: [] };
+
+			for (let subOptionTemplate of optionTemplate.options ?? []) {
+				const subOptionKey = [optionKey, 'options', subOptionTemplate.name].join('.');
+				const localisations = localiseCommandOrOption(subOptionKey);
+				if (localisations === undefined) continue;
+
+				const subOption: Option = { ...localisations, ...subOptionTemplate, options: [] };
+
+				option.options?.push(subOption);
+			}
+
+			command.options?.push(option);
+		}
+
+		commands.push(command);
+	}
+
+	return commands;
+}
+
+function createCommandHandlers(commands: CommandTemplate[]): Client['commands']['handlers'] {
 	const handlers = new Map<string, InteractionHandler>();
 	const autocompleteHandlers = new Map<string, InteractionHandler>();
 
@@ -716,7 +805,7 @@ function resolveInteractionToMember(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(Misc.client.invalidUser, interaction.locale),
+						description: localise(client, 'interactions.invalidUser', interaction.locale)(),
 						color: constants.colors.red,
 					}],
 				},
@@ -757,13 +846,56 @@ function isSubcommand(option: InteractionDataOption): boolean {
 	return option.type === ApplicationCommandOptionTypes.SubCommand;
 }
 
+type CompiledLocalisation = ReturnType<typeof MessagePipe>['compile'];
+
+function createLocalisations(localisations: Map<string, Map<Language, string>>): Client['localisations'] {
+	const localisedCompilers = new Map<Language, CompiledLocalisation>();
+	for (const [language, transformers] of Object.entries(localisationTransformers)) {
+		localisedCompilers.set(language as Language, MessagePipe(transformers).compile);
+	}
+
+	const result = new Map<string, Map<Language, (args: Record<string, unknown>) => string>>();
+	for (const [key, languages] of localisations.entries()) {
+		const functions = new Map<Language, (args: Record<string, unknown>) => string>();
+
+		for (const [language, string] of languages.entries()) {
+			const compile = localisedCompilers.get(language)!;
+			functions.set(language, compile(string));
+		}
+
+		result.set(key, functions);
+	}
+
+	return result;
+}
+
+function localise(client: Client, key: string, locale: string | undefined): (args?: Record<string, unknown>) => string {
+	const language = (locale !== undefined ? getLanguageByLocale(locale as Locales) : undefined) ?? defaultLanguage;
+
+	const localise = client.localisations.get(key)?.get(language) ?? (() => key);
+
+	return ((args) => localise(args ?? {}));
+}
+
+function toDiscordLocalisations(
+	localisations: Map<Language, (args: Record<string, unknown>) => string>,
+): DiscordLocalisations {
+	return Object.fromEntries(
+		Array.from(localisations.entries())
+			.filter(([key, _value]) => key !== defaultLanguage && getLocaleForLanguage(key) !== undefined)
+			.map<[string, string | undefined]>(([key, localise]) => [getLocaleForLanguage(key)!, localise({})])
+			.filter(([_key, value]) => value?.length !== 0),
+	);
+}
+
 export {
 	addCollector,
 	autocompleteMembers,
 	extendEventHandler,
 	initialiseClient,
 	isValidIdentifier,
+	localise,
 	resolveIdentifierToMembers,
 	resolveInteractionToMember,
 };
-export type { Client, Collector, WithLanguage };
+export type { Client, Collector, CompiledLocalisation, WithLanguage };

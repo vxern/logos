@@ -1,0 +1,7 @@
+{
+	"interactions.invalidUser": "Utilizator nevalid.",
+	"interactions.continuedOnNextPage": "Continuare pe următoarea pagină...",
+	"interactions.page": "Pagina",
+	"interactions.usedCommandTooManyTimes": "Ai folosit comanda de prea multe ori într-un timp prea scurt.",
+	"interactions.canUseCommandIn": "Vei putea folosi din nou comanda {relative_timestamp}."
+}

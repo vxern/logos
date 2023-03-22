@@ -1,5 +1,6 @@
 import {
 	ApplicationCommandFlags,
+	ApplicationCommandTypes,
 	Bot,
 	ButtonStyles,
 	Interaction,
@@ -7,16 +8,16 @@ import {
 	MessageComponentTypes,
 	sendInteractionResponse,
 } from 'discordeno';
-import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
-import { CommandBuilder } from 'logos/src/commands/command.ts';
+import { CommandTemplate } from 'logos/src/commands/command.ts';
 import { show } from 'logos/src/commands/parameters.ts';
-import { Client } from 'logos/src/client.ts';
+import { Client, localise } from 'logos/src/client.ts';
 import { parseArguments } from 'logos/src/interactions.ts';
 import constants from 'logos/constants.ts';
 import { defaultLocale } from 'logos/types.ts';
 
-const command: CommandBuilder = {
-	...createLocalisations(Commands.resources),
+const command: CommandTemplate = {
+	name: 'resources',
+	type: ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ['VIEW_CHANNEL'],
 	handle: handleDisplayResources,
 	options: [show],
@@ -42,7 +43,9 @@ function handleDisplayResources([client, bot]: [Client, Bot], interaction: Inter
 					type: MessageComponentTypes.ActionRow,
 					components: [{
 						type: MessageComponentTypes.Button,
-						label: localise(Commands.resources.strings.resourcesStoredHere, locale)(guild.language),
+						label: localise(client, 'resources.strings.resourcesStoredHere', locale)({
+							'language': localise(client, `languages.${guild.language}`, locale),
+						}),
 						style: ButtonStyles.Link,
 						url: constants.links.generateLanguageRepositoryLink(guild.language),
 					}],

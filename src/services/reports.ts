@@ -15,13 +15,12 @@ import {
 	User as DiscordUser,
 } from 'discordeno';
 import { lodash } from 'lodash';
-import { localise, Services } from 'logos/assets/localisations/mod.ts';
 import { getWarningPage } from 'logos/src/commands/information/commands/list/warnings.ts';
 import { Report, User, Warning } from 'logos/src/database/structs/mod.ts';
 import { Document, Reference } from 'logos/src/database/document.ts';
 import { stringifyValue } from 'logos/src/database/database.ts';
 import { ServiceStarter } from 'logos/src/services/services.ts';
-import { Client, extendEventHandler, WithLanguage } from 'logos/src/client.ts';
+import { Client, extendEventHandler, localise, WithLanguage } from 'logos/src/client.ts';
 import {
 	createInteractionCollector,
 	decodeId,
@@ -188,7 +187,7 @@ function registerPastReports([client, bot]: [Client, Bot]): void {
 				messageId = await sendMessage(
 					bot,
 					reportChannelId,
-					getReportPrompt(bot, guild, author, recipientAndWarningsTuples, report),
+					getReportPrompt([client, bot], guild, author, recipientAndWarningsTuples, report),
 				).then((message) => message.id);
 			} else {
 				reportPromptsByAuthorId.get(authorId)!.delete(reportReferenceId);
@@ -244,7 +243,7 @@ function ensureReportPromptPersistence([client, bot]: [Client, Bot]): void {
 		const newMessageId = await sendMessage(
 			bot,
 			channelId,
-			getReportPrompt(bot, guild, author, recipientAndWarningsTuples, report),
+			getReportPrompt([client, bot], guild, author, recipientAndWarningsTuples, report),
 		).then((message) => message.id);
 		reportByMessageId.delete(id);
 		authorIdByMessageId.delete(id);
@@ -325,7 +324,7 @@ function registerReportHandler(
 					data: {
 						flags: ApplicationCommandFlags.Ephemeral,
 						embeds: [{
-							description: localise(Services.alreadyMarkedAsResolved, defaultLocale),
+							description: localise(client, 'alreadyMarkedAsResolved', defaultLocale)(),
 							color: constants.colors.dullYellow,
 						}],
 					},
@@ -338,7 +337,7 @@ function registerReportHandler(
 					data: {
 						flags: ApplicationCommandFlags.Ephemeral,
 						embeds: [{
-							description: localise(Services.alreadyMarkedAsUnresolved, defaultLocale),
+							description: localise(client, 'alreadyMarkedAsUnresolved', defaultLocale)(),
 							color: constants.colors.dullYellow,
 						}],
 					},
@@ -367,7 +366,7 @@ function registerReportHandler(
 type ReportPromptButtonID = [authorId: string, guildId: string, reportReferenceId: string, isResolved: string];
 
 function getReportPrompt(
-	bot: Bot,
+	[client, bot]: [Client, Bot],
 	guild: WithLanguage<Guild>,
 	author: DiscordUser,
 	recipientAndWarningsTuples: RecipientAndWarningsTuple[],
@@ -393,26 +392,26 @@ function getReportPrompt(
 				})(),
 				fields: [
 					{
-						name: localise(Services.submittedBy, defaultLocale),
+						name: localise(client, 'submittedBy', defaultLocale)(),
 						value: mention(author.id, MentionTypes.User),
 					},
 					{
-						name: localise(Services.submittedAt, defaultLocale),
+						name: localise(client, 'submittedAt', defaultLocale)(),
 						value: timestamp(reportDocument.data.createdAt),
 					},
 					{
-						name: localise(Services.reports.reportedUsers, defaultLocale),
+						name: localise(client, 'reports.reportedUsers', defaultLocale)(),
 						value: recipientAndWarningsTuples.map(([recipient, _recipientWarnings]) =>
 							mention(recipient.id, MentionTypes.User)
 						).join(', '),
 					},
 					{
-						name: localise(Services.reports.reasonForReport, defaultLocale),
+						name: localise(client, 'reports.reasonForReport', defaultLocale)(),
 						value: report.reason,
 					},
 					...(report.messageLink
 						? [{
-							name: localise(Services.reports.linkToMessage, defaultLocale),
+							name: localise(client, 'reports.linkToMessage', defaultLocale)(),
 							value: report.messageLink,
 						}]
 						: []),
@@ -420,8 +419,10 @@ function getReportPrompt(
 				footer: { text: `${author.id}${constants.symbols.meta.metadataSeparator}${reportReferenceId}` },
 			},
 			...recipientAndWarningsTuples.map(([recipient, warnings]) => ({
-				...getWarningPage(warnings, false, defaultLocale),
-				title: localise(Services.reports.previousInfractions, defaultLocale)(diagnosticMentionUser(recipient, true)),
+				...getWarningPage(client, warnings, false, defaultLocale),
+				title: localise(client, 'reports.previousInfractions', defaultLocale)(
+					{ 'username': diagnosticMentionUser(recipient, true) },
+				),
 			})),
 		],
 		components: [{
@@ -431,7 +432,7 @@ function getReportPrompt(
 					? {
 						type: MessageComponentTypes.Button,
 						style: ButtonStyles.Primary,
-						label: localise(Services.markAsResolved, defaultLocale),
+						label: localise(client, 'markAsResolved', defaultLocale)(),
 						customId: encodeId<ReportPromptButtonID>(
 							constants.staticComponentIds.reports,
 							[author.id.toString(), guild.id.toString(), reportReferenceId, `${true}`],
@@ -440,7 +441,7 @@ function getReportPrompt(
 					: {
 						type: MessageComponentTypes.Button,
 						style: ButtonStyles.Secondary,
-						label: localise(Services.markAsUnresolved, defaultLocale),
+						label: localise(client, 'markAsUnresolved', defaultLocale)(),
 						customId: encodeId<ReportPromptButtonID>(
 							constants.staticComponentIds.reports,
 							[author.id.toString(), guild.id.toString(), reportReferenceId, `${false}`],

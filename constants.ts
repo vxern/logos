@@ -11,16 +11,6 @@ class Periods {
 	static readonly year = 365 * Periods.day;
 }
 
-const timeDescriptors: [string, number][] = [
-	['second', Periods.second],
-	['minute', Periods.minute],
-	['hour', Periods.hour],
-	['day', Periods.day],
-	['week', Periods.week],
-	['month', Periods.month],
-	['year', Periods.year],
-];
-
 const interactionTokenExpiryInterval = 14 * Periods.minute + 50 * Periods.second; // Just below 15 minutes.
 
 const staticComponentIds = {
@@ -205,7 +195,7 @@ const symbols = {
 					male: '♂️',
 					female: '♀️',
 					transgender: '⚧',
-					nonbinary: '❔',
+					nonbinary: '🧑',
 				},
 				abroad: {
 					category: '🌎',
@@ -255,7 +245,6 @@ export default {
 	colors,
 	symbols,
 	staticComponentIds,
-	timeDescriptors,
 	interactionTokenExpiryInterval,
 };
 export { BulletStyles, Periods };

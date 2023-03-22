@@ -1,0 +1,22 @@
+{
+	"user.name": "użytkownik",
+	"user.description": "Nazwa użytkownika, jego tag, ID lub wzmianka.",
+	"show.name": "wyświetl",
+	"show.description": "Jeśli tak, rezultat będzie wyświetlony innym użytkownikom.",
+
+	"duration.name": "okres",
+	"duration.description": "Jak długo sankcja ma trwać.",
+	"reason.name": "powód",
+	"reason.description": "Powód dla sankcji lub dla jej uchylenia. Powinien być szczegółowy.",
+
+	"query.name": "zapytanie",
+	"query.description": "Tytuł lub link do utworu lub zbioru utworów.",
+	"timestamp.name": "znacznik-czasu",
+	"timestamp.description": "Znacznik czasu w piosence, określający dokąd przewinąć.",
+	"collection.name": "zbiór",
+	"collection.description": "Jeśli tak, działanie zostanie wykonane na zbiorze utworów.",
+	"by.name": "o",
+	"by.description": "Liczba utworów lub wpisów, które mają być przewinięte.",
+	"to.name": "do",
+	"to.description": "Indeks utworu lub wpisu do którego przewinąć."
+}
