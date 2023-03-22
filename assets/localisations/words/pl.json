@@ -1,0 +1,13 @@
+{
+	"words.noun": "rzeczownik",
+	"words.verb": "czasownik",
+	"words.adjective": "przymiotnik",
+	"words.adverb": "przysłówek",
+	"words.adposition": "adpozycja",
+	"words.affix": "afiks",
+	"words.pronoun": "zaimek",
+	"words.determiner": "określnik",
+	"words.conjunction": "spójnik",
+	"words.interjection": "wykrzyknik",
+	"words.unknown": "część mowy nieznana"
+}
