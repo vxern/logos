@@ -1,0 +1,7 @@
+{
+	"interactions.invalidUser": "Invalid user.",
+	"interactions.continuedOnNextPage": "Continued on the next page...",
+	"interactions.page": "Page",
+	"interactions.usedCommandTooManyTimes": "You have used this command too many times in too short of time.",
+	"interactions.canUseCommandIn": "You will be able to use the command again {relative_timestamp}."
+}
