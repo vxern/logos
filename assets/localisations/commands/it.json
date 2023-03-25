@@ -1,6 +1,6 @@
 {
-	"noDescription": "No description.",
-	"information.name": "information",
+	"noDescription": "Nessuna descrizione.",
+	"information.name": "informazioni",
 	"information.description": "Used to display various information.",
 	"information.options.bot.name": "bot",
 	"information.options.bot.description": "Displays information about the bot.",
