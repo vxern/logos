@@ -5,33 +5,26 @@ type WithRequired<T, K extends keyof T> =
 	& Pick<T, Exclude<keyof T, K>>
 	& Required<Pick<T, K>>;
 
-/**
- * The properties of commands and options that --, for the purposes of this bot, --
- * should be required to be present.
- */
-type LocalisationFields = 'nameLocalizations' | 'descriptionLocalizations';
-
 /** Describes the handler of an interaction. */
 type InteractionHandler = ([client, bot]: [Client, Bot], interaction: Interaction) => void | Promise<void>;
 
-type CommandLocalised = WithRequired<CreateSlashApplicationCommand, LocalisationFields>;
+type Command = CreateSlashApplicationCommand;
 
-type OptionLocalised = WithRequired<ApplicationCommandOption, LocalisationFields>;
+type Option = ApplicationCommandOption;
 
 interface CommandFeatures {
 	isRateLimited?: boolean;
 	handle?: InteractionHandler;
-	options?: Option[];
+	handleAutocomplete?: InteractionHandler;
+	options?: OptionTemplate[];
 }
 
-type Command =
-	& WithRequired<Omit<CommandLocalised, 'options'>, 'defaultMemberPermissions'>
+type LocalisationProperties = 'nameLocalizations' | 'description' | 'descriptionLocalizations';
+
+type CommandTemplate =
+	& WithRequired<Omit<Command, 'options' | LocalisationProperties>, 'defaultMemberPermissions' | 'type'>
 	& CommandFeatures;
 
-type Option = Omit<OptionLocalised, 'options'> & CommandFeatures;
+type OptionTemplate = Omit<Option, 'options' | LocalisationProperties> & CommandFeatures;
 
-type CommandBuilder = Command;
-
-type OptionBuilder = Option;
-
-export type { Command, CommandBuilder, InteractionHandler, OptionBuilder };
+export type { Command, CommandTemplate, InteractionHandler, LocalisationProperties, Option, OptionTemplate };

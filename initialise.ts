@@ -1,5 +1,5 @@
 import * as dotenv from 'std/dotenv/mod.ts';
-import { Bot } from 'discordeno';
+import { Bot, Locales } from 'discordeno';
 import * as Sentry from 'sentry';
 import {
 	getSupportedLanguages,
@@ -8,7 +8,7 @@ import {
 } from 'logos/src/commands/language/module.ts';
 import { Client, initialiseClient } from 'logos/src/client.ts';
 import { capitalise } from 'logos/formatting.ts';
-import { Language, supportedLanguages } from 'logos/types.ts';
+import { getLanguageByLocale, Language, supportedLanguages } from 'logos/types.ts';
 
 async function readDotEnvFile(fileUri: string, isTemplate = false): Promise<dotenv.DotenvConfig | undefined> {
 	const kind = isTemplate ? 'environment template' : 'environment';
@@ -56,7 +56,7 @@ function readEnvironment({
 
 	if (envConfiguration === undefined) return;
 
-	for (const [key, value] of <[string, string][]> Object.entries(envConfiguration)) {
+	for (const [key, value] of Object.entries(envConfiguration) as [key: string, value: string][]) {
 		Deno.env.set(key, value);
 	}
 }
@@ -85,6 +85,46 @@ async function readVersion(): Promise<string> {
 	return programVersion ?? defaultSoftwareNotice;
 }
 
+async function readLocalisations(directoryUri: string): Promise<Map<string, Map<Language, string>>> {
+	const decoder = new TextDecoder();
+
+	const subdirectories: string[] = [];
+	for await (const entry of Deno.readDir(directoryUri)) {
+		if (!entry.isDirectory) continue;
+
+		subdirectories.push(`${directoryUri}/${entry.name}`);
+	}
+
+	const localisationFiles: [Language, string][] = [];
+	for (const subdirectory of subdirectories) {
+		for await (const localeEntry of Deno.readDir(subdirectory)) {
+			if (!localeEntry.isFile) continue;
+
+			const [locale, _] = localeEntry.name.split('.') as [Locales, string];
+			const language = getLanguageByLocale(locale);
+			if (language === undefined) continue;
+
+			localisationFiles.push([language, `${subdirectory}/${localeEntry.name}`]);
+		}
+	}
+
+	const localisations = new Map<string, Map<Language, string>>();
+	for (const [language, path] of localisationFiles) {
+		const strings = await Deno.readFile(path)
+			.then((contents) => decoder.decode(contents))
+			.then((object) => JSON.parse(object) as Record<string, string>);
+
+		for (const [key, value] of Object.entries(strings)) {
+			if (!localisations.has(key)) {
+				localisations.set(key, new Map());
+			}
+			localisations.get(key)!.set(language, value);
+		}
+	}
+
+	return localisations;
+}
+
 /**
  * @returns An array of tuples where the first element is a language and the second
  * element is the contents of its sentence file.
@@ -108,7 +148,7 @@ async function readSentenceFiles(directoryUri: string): Promise<[Language, strin
 			continue;
 		}
 
-		const language = <Language> languageName;
+		const language = languageName as Language;
 		results.push(Deno.readTextFile(`${directoryUri}/${file.name}`).then((contents) => [language, contents]));
 	}
 
@@ -131,10 +171,12 @@ async function initialise(): Promise<[Client, Bot]> {
 		readSentenceFiles('./assets/sentences'),
 	]);
 
-	return initialiseClient({ version, supportedTranslationLanguages }, {
+	const localisations = await readLocalisations('./assets/localisations');
+
+	return initialiseClient({ version, supportedTranslationLanguages }, localisations, {
 		dictionaryAdapters: loadDictionaryAdapters(),
 		sentencePairs: loadSentencePairs(sentenceFiles),
-    rateLimiting: new Map(),
+		rateLimiting: new Map(),
 	});
 }
 

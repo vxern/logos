@@ -1,5 +1,4 @@
 import { Bot, CreateMessage, deleteMessage, Guild, Message, MessageComponents, sendMessage } from 'discordeno';
-import { localise, Services } from 'logos/assets/localisations/mod.ts';
 import {
 	generateInformationNotice,
 	lastUpdatedAt as informationLastUpdatedAt,
@@ -10,12 +9,12 @@ import {
 	lastUpdatedAt as welcomeLastUpdatedAt,
 } from 'logos/src/services/notice-generators/welcome.ts';
 import { ServiceStarter } from 'logos/src/services/services.ts';
-import { Client, extendEventHandler } from 'logos/src/client.ts';
+import { Client, extendEventHandler, localise } from 'logos/src/client.ts';
 import { getAllMessages, getTextChannel } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import { timestamp, TimestampFormat } from 'logos/formatting.ts';
 
-type NoticeGenerator = (bot: Bot, guild: Guild) => CreateMessage | Promise<CreateMessage>;
+type NoticeGenerator = ([client, bot]: [Client, Bot], guild: Guild) => CreateMessage | Promise<CreateMessage>;
 
 const noticeGenerators = {
 	'information': generateInformationNotice,
@@ -96,7 +95,7 @@ async function registerPastNotice([client, bot]: [Client, Bot], guild: Guild, ty
 	if (notices.length === 0) {
 		client.log.info(`Found no notice in ${type} channel on ${guild.name}. Creating...`);
 
-		const noticeContent = await noticeGenerators[type](bot, guild);
+		const noticeContent = await noticeGenerators[type]([client, bot], guild);
 		return void postAndRegisterNotice(bot, channelId, noticeContent);
 	}
 
@@ -108,7 +107,7 @@ async function registerPastNotice([client, bot]: [Client, Bot], guild: Guild, ty
 
 		deleteMessage(bot, latestNotice.channelId, latestNotice.id);
 
-		const noticeContent = await noticeGenerators[type](bot, guild);
+		const noticeContent = await noticeGenerators[type]([client, bot], guild);
 		postAndRegisterNotice(bot, channelId, noticeContent);
 	} else {
 		noticeIds.push(latestNotice.id);
@@ -142,7 +141,7 @@ function extractTimestamp(notice: Message | CreateMessage): number | undefined {
 	if (timestampString === undefined) return undefined;
 	if (!timestampPattern.test(timestampString)) return undefined;
 
-	const [_match, timestamp] = timestampPattern.exec(timestampString)!;
+	const [_, timestamp] = timestampPattern.exec(timestampString)!;
 
 	return Number(timestamp!);
 }
@@ -160,9 +159,9 @@ function getValidNotices(bot: Bot, notices: Message[]): Message[] {
 	);
 }
 
-function getLastUpdateString(updatedAt: Date, locale: string | undefined): string {
-	const lastUpdateString = localise(Services.notices.lastUpdate, locale)(
-		timestamp(updatedAt.getTime(), TimestampFormat.LongDate),
+function getLastUpdateString(client: Client, updatedAt: Date, locale: string | undefined): string {
+	const lastUpdateString = localise(client, 'notices.lastUpdate', locale)(
+		{ 'date': timestamp(updatedAt.getTime(), TimestampFormat.LongDate) },
 	);
 
 	return `*${lastUpdateString}*`;

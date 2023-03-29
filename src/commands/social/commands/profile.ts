@@ -1,10 +1,11 @@
-import { Commands, createLocalisations } from 'logos/assets/localisations/mod.ts';
+import { ApplicationCommandTypes } from 'discordeno';
 import roles from 'logos/src/commands/social/commands/profile/roles.ts';
 import view from 'logos/src/commands/social/commands/profile/view.ts';
-import { CommandBuilder } from 'logos/src/commands/command.ts';
+import { CommandTemplate } from 'logos/src/commands/command.ts';
 
-const command: CommandBuilder = {
-	...createLocalisations(Commands.profile),
+const command: CommandTemplate = {
+	name: 'profile',
+	type: ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ['VIEW_CHANNEL'],
 	options: [view, roles],
 };

@@ -5,35 +5,35 @@ import {
 	getAvatarURL,
 	Interaction,
 	InteractionResponseTypes,
-	InteractionTypes,
 	sendInteractionResponse,
 } from 'discordeno';
-import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
-import { OptionBuilder } from 'logos/src/commands/command.ts';
+import { OptionTemplate } from 'logos/src/commands/command.ts';
 import { show, user } from 'logos/src/commands/parameters.ts';
-import { Client, resolveInteractionToMember } from 'logos/src/client.ts';
+import { autocompleteMembers, Client, localise, resolveInteractionToMember } from 'logos/src/client.ts';
 import { parseArguments } from 'logos/src/interactions.ts';
 import constants from 'logos/constants.ts';
 import { mention, MentionTypes } from 'logos/formatting.ts';
 import { defaultLocale } from 'logos/types.ts';
 
-const command: OptionBuilder = {
-	...createLocalisations(Commands.profile.options.view),
+const command: OptionTemplate = {
+	name: 'view',
 	type: ApplicationCommandOptionTypes.SubCommand,
-	options: [{ ...user, required: false }, show],
 	handle: handleDisplayProfile,
+	handleAutocomplete: handleDisplayProfileAutocomplete,
+	options: [{ ...user, required: false }, show],
 };
 
-async function handleDisplayProfile(
-	[client, bot]: [Client, Bot],
-	interaction: Interaction,
-): Promise<void> {
-	const [{ user, show }, focused] = parseArguments(interaction.data?.options, { show: 'boolean' });
+async function handleDisplayProfileAutocomplete([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+	const [{ user }] = parseArguments(interaction.data?.options, {});
+
+	return autocompleteMembers([client, bot], interaction, user!);
+}
+
+async function handleDisplayProfile([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+	const [{ user, show }] = parseArguments(interaction.data?.options, { show: 'boolean' });
 
 	const member = resolveInteractionToMember([client, bot], interaction, user ?? interaction.user.id.toString());
 	if (member === undefined) return;
-
-	if (interaction.type === InteractionTypes.ApplicationCommandAutocomplete && focused?.name === 'user') return;
 
 	const target = member.user;
 	if (target === undefined) return;
@@ -48,7 +48,7 @@ async function handleDisplayProfile(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(Commands.profile.options.view.strings.failed, interaction.locale),
+						description: localise(client, 'profile.options.view.strings.failed', interaction.locale)(),
 						color: constants.colors.red,
 					}],
 				},
@@ -75,12 +75,12 @@ async function handleDisplayProfile(
 
 	const locale = show ? defaultLocale : interaction.locale;
 
-	const rolesString = localise(Commands.profile.options.view.strings.roles, locale);
-	const statisticsString = localise(Commands.profile.options.view.strings.statistics, locale);
-	const praisesString = localise(Commands.profile.options.view.strings.praises, locale);
-	const warningsString = localise(Commands.profile.options.view.strings.warnings, locale);
-	const receivedString = localise(Commands.profile.options.view.strings.received, locale);
-	const sentString = localise(Commands.profile.options.view.strings.sent, locale);
+	const rolesString = localise(client, 'profile.options.view.strings.roles', locale)();
+	const statisticsString = localise(client, 'profile.options.view.strings.statistics', locale)();
+	const praisesString = localise(client, 'profile.options.view.strings.praises', locale)();
+	const warningsString = localise(client, 'profile.options.view.strings.warnings', locale)();
+	const receivedString = localise(client, 'profile.options.view.strings.received', locale)();
+	const sentString = localise(client, 'profile.options.view.strings.sent', locale)();
 
 	return void sendInteractionResponse(
 		bot,
@@ -91,7 +91,9 @@ async function handleDisplayProfile(
 			data: {
 				flags: !show ? ApplicationCommandFlags.Ephemeral : undefined,
 				embeds: [{
-					title: localise(Commands.profile.options.view.strings.informationForUser, locale)(target.username),
+					title: localise(client, 'profile.options.view.strings.informationForUser', locale)({
+						'username': target.username,
+					}),
 					thumbnail: (() => {
 						const iconURL = getAvatarURL(
 							bot,
@@ -104,14 +106,14 @@ async function handleDisplayProfile(
 						return { url: iconURL };
 					})(),
 					fields: [{
-						name: `💼 ${rolesString}`,
+						name: `${constants.symbols.profile.roles} ${rolesString}`,
 						value: member.roles.map((roleId) => mention(roleId, MentionTypes.Role)).join(' '),
 						inline: false,
 					}, {
-						name: `🧮 ${statisticsString}`,
+						name: `${constants.symbols.profile.statistics.statistics} ${statisticsString}`,
 						value:
-							`🙏 ${praisesString} • ${receivedString} – ${praisesReceived.size} • ${sentString} – ${praisesSent.size}
-😖 ${warningsString} • ${receivedString} – ${warningsReceived.size}`,
+							`${constants.symbols.profile.statistics.praises} ${praisesString} • ${receivedString} – ${praisesReceived.size} • ${sentString} – ${praisesSent.size}
+${constants.symbols.profile.statistics.warnings} ${warningsString} • ${receivedString} – ${warningsReceived.size}`,
 						inline: false,
 					}],
 				}],

@@ -1,0 +1,28 @@
+{
+	"rules.tldr": "Pe scurt",
+	"rules.rule": "Regulă",
+
+	"rules.behaviour.title": "Comportament",
+	"rules.behaviour.summary": "Încearcă să fii drăguț/ă.",
+	"rules.behaviour.content": "Se așteaptă de la membri să se trateze reciproc cu respect, considerație și cu înțelegere. Comportamentul rău-intenționat sub formă de abuz verbal, discriminare, hărțuire și alte forme de comportament jignitor sau toxic nu va fi tolerat.",
+
+	"rules.quality.title": "Calitate",
+	"rules.quality.summary": "Nu fi insuportabil/ă.",
+	"rules.quality.content": "Se așteaptă ca contribuțiile făcute pe server să fie de o calitate decentă. Trolling-ul, spamming-ul, flooding-ul, shitposting-ul (în afara canalului pentru meme-uri) și alte forme de comportament enervant sunt puternic descurajate.",
+
+	"rules.relevance.title": "Relevanță",
+	"rules.relevance.summary": "Postează un conținut relevant.",
+	"rules.relevance.content": "Se așteaptă ca contribuțiile făcute pe server să fie plasate în canalul și categoria sa corespunzătoare. Contribuțiile făcute în canale nepotrivite pentru subiectul său vor fi solicitate să fie mutate în canalul său potrivitor.",
+
+	"rules.suitability.title": "Adecvare",
+	"rules.suitability.summary": "Postează un conținut adecvat.",
+	"rules.suitability.content": "Se așteaptă că contribuțiile făcute pe server să fie potrivite pentru minori. Tot conținutul cu o restricție de vârstă (NSFW) sau de natură atroce (NSFL) este complet interzis. Dacă nu ai arăta conținutul unui adolescent, să nu îl trimiți pe server.",
+
+	"rules.exclusivity.title": "Exclusivitate",
+	"rules.exclusivity.summary": "Nu face reclamă.",
+	"rules.exclusivity.content": "Se așteaptă de la membrii serverului ca aceștia să nu se folosească de acest spațiu pentru a-și face reclamă. Încercările active de a face publicitate (inclusiv mesajele private nesolicitate) sunt interzise.",
+
+	"rules.adherence.title": "Aderență",
+	"rules.adherence.summary": "Respectă regulamentul.",
+	"rules.adherence.content": "Membrii care nu arată nicio considerație față de regulament, și cei care nu sunt deloc interesați în a face contribuții constructive pe server pot primi un ban permanent."
+}

@@ -1,11 +1,11 @@
 import * as csv from 'std/encoding/csv.ts';
-import { getLocaleForLanguage, localise, TranslationLanguage, Words } from 'logos/assets/localisations/mod.ts';
 import dexonline from 'logos/src/commands/language/data/adapters/dexonline.ts';
-import { DictionaryAdapter, SentencePair, WordTypes } from 'logos/src/commands/language/data/types.ts';
+import { DictionaryAdapter, SentencePair } from 'logos/src/commands/language/data/types.ts';
 import { Client } from 'logos/src/client.ts';
 import { addParametersToURL } from 'logos/src/utils.ts';
 import constants from 'logos/constants.ts';
 import { Language, supportedLanguages } from 'logos/types.ts';
+import { WordClass } from './commands/word.ts';
 
 const dictionaryAdapters: DictionaryAdapter<any>[] = [dexonline];
 
@@ -39,21 +39,13 @@ function loadSentencePairs(languageFileContents: [Language, string][]): Map<Lang
 	}
 
 	for (const [language, contents] of languageFileContents) {
-		const records = <[string, string, string, string][]> csv.parse(
+		const records = csv.parse(
 			contents,
-			{
-				lazyQuotes: true,
-				separator: '\t',
-			},
-		);
+			{ lazyQuotes: true, separator: '\t' },
+		) as [sentenceId: string, sentence: string, translationId: string, translation: string][];
 
-		for (
-			const [_sentenceID, sentence, _translationID, translation] of records
-		) {
-			result.get(language)!.push({
-				sentence: sentence!,
-				translation: translation!,
-			});
+		for (const [_, sentence, __, translation] of records) {
+			result.get(language)!.push({ sentence, translation });
 		}
 	}
 
@@ -62,14 +54,14 @@ function loadSentencePairs(languageFileContents: [Language, string][]): Map<Lang
 
 interface DeepLSupportedLanguage {
 	language: string;
-	name: TranslationLanguage;
+	name: string;
 	'supports_formality': boolean;
 }
 
 /** Represents a supported language object sent by DeepL. */
 interface SupportedLanguage {
 	/** The language name */
-	name: TranslationLanguage;
+	name: string;
 
 	/** The language code. */
 	code: string;
@@ -87,9 +79,7 @@ async function getSupportedLanguages(): Promise<SupportedLanguage[]> {
 	);
 	if (!response.ok) return [];
 
-	const results = <DeepLSupportedLanguage[]> await response.json().catch(
-		() => [],
-	);
+	const results = await response.json().catch(() => []) as DeepLSupportedLanguage[];
 
 	return results.map((result) => ({
 		name: result.name,
@@ -98,10 +88,7 @@ async function getSupportedLanguages(): Promise<SupportedLanguage[]> {
 	}));
 }
 
-function resolveToSupportedLanguage(
-	client: Client,
-	languageOrCode: string,
-): SupportedLanguage | undefined {
+function resolveToSupportedLanguage(client: Client, languageOrCode: string): SupportedLanguage | undefined {
 	const languageOrCodeLowercase = languageOrCode.toLowerCase();
 	return client.metadata.supportedTranslationLanguages.find((language) =>
 		language.code.toLowerCase() === languageOrCodeLowercase ||
@@ -109,9 +96,29 @@ function resolveToSupportedLanguage(
 	);
 }
 
-function getWordType(typeString: string, language: Language): WordTypes {
-	return localise(Words.typeNameToType, getLocaleForLanguage(language))[typeString] ?? WordTypes.Unknown;
+const wordClassMappings: Record<string, WordClass> = {
+	'substantiv': 'noun',
+	'substantiv masculin': 'noun',
+	'substantiv feminin': 'noun',
+	'substantiv neutru': 'noun',
+	'substantiv propriu': 'noun',
+	'verb': 'verb',
+	'adjectiv': 'adjective',
+	'adjectiv pronominal': 'determiner',
+	'adverb': 'adverb',
+	'prepoziție': 'adposition',
+	'postpoziție': 'adposition',
+	'prefix': 'affix',
+	'postfix': 'affix',
+	'pronume': 'pronoun',
+	'demonstrativ': 'determiner',
+	'conjuncție': 'conjunction',
+	'interjecție': 'interjection',
+};
+
+function getWordClass(wordClassString: string): WordClass {
+	return wordClassMappings[wordClassString] ?? 'unknown';
 }
 
-export { getSupportedLanguages, getWordType, loadDictionaryAdapters, loadSentencePairs, resolveToSupportedLanguage };
+export { getSupportedLanguages, getWordClass, loadDictionaryAdapters, loadSentencePairs, resolveToSupportedLanguage };
 export type { SupportedLanguage };

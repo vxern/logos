@@ -2,7 +2,6 @@ import { Locales } from 'discordeno';
 
 const supportedLanguages = [
 	'Armenian',
-	'Belarusian',
 	'English',
 	'Hungarian',
 	'Polish',
@@ -39,22 +38,8 @@ function getLanguageByLocale(locale: Locales): Language | undefined {
 	return languageByLocale[locale];
 }
 
-function getLocaleForLanguage(language: Language): typeof localeByLanguage[keyof typeof localeByLanguage] {
-	return localeByLanguage[language] ?? 'en-GB';
-}
-
-enum WordTypes {
-	Noun,
-	Verb,
-	Adjective,
-	Adverb,
-	Adposition,
-	Affix,
-	Pronoun,
-	Determiner,
-	Conjunction,
-	Interjection,
-	Unknown,
+function getLocaleForLanguage(language: Language): typeof localeByLanguage[keyof typeof localeByLanguage] | undefined {
+	return localeByLanguage[language];
 }
 
 export {
@@ -65,6 +50,5 @@ export {
 	languageByLocale,
 	localeByLanguage,
 	supportedLanguages,
-	WordTypes,
 };
 export type { Language };

@@ -1,13 +1,15 @@
-import { localise } from 'logos/assets/localisations/mod.ts';
 import roles from 'logos/src/commands/social/data/roles.ts';
 import {
+	isCategoryGroup,
+	isLocalised,
+	isStandalone,
 	Role,
 	RoleCategory,
 	RoleCategoryTypes,
 	RoleCollection,
 	RoleCollectionTypes,
 } from 'logos/src/commands/social/data/types.ts';
-import { defaultLocale, Language } from 'logos/types.ts';
+import { Language } from 'logos/types.ts';
 
 type ProficiencyCategory = RoleCategory & {
 	type: RoleCategoryTypes.Category;
@@ -20,24 +22,21 @@ type ProficiencyCategory = RoleCategory & {
  * @returns The category with proficiency roles.
  */
 function getProficiencyCategory(): ProficiencyCategory {
-	return <ProficiencyCategory> roles.find((category) => localise(category.name, defaultLocale) === 'Proficiency')!;
+	return roles.find((category) => category.id === 'roles.proficiency')! as ProficiencyCategory;
 }
 
-function getRelevantCategories(
-	categories: RoleCategory[],
-	language: Language | undefined,
-): [RoleCategory, number][] {
+function getRelevantCategories(categories: RoleCategory[], language: Language | undefined): [RoleCategory, number][] {
 	const selectedRoleCategories: [RoleCategory, number][] = [];
 
 	for (let index = 0; index < categories.length; index++) {
 		const category = categories.at(index)!;
 
-		if (category.type === RoleCategoryTypes.CategoryGroup) {
+		if (isCategoryGroup(category)) {
 			selectedRoleCategories.push([category, index]);
 			continue;
 		}
 
-		if (category.collection.type === RoleCollectionTypes.CollectionLocalised) {
+		if (isLocalised(category.collection)) {
 			if (language === undefined) continue;
 			if (!(language in category.collection.lists)) continue;
 		}
@@ -55,17 +54,14 @@ function getRelevantCategories(
  * @param language - The language concerning the guild.
  * @returns The list of roles within the collection.
  */
-function resolveRoles(
-	collection: RoleCollection,
-	language: Language | undefined,
-): Role[] {
-	if (collection.type === RoleCollectionTypes.CollectionLocalised) {
-		if (language === undefined) return [];
-
-		return collection.lists[language] ?? [];
+function resolveRoles(collection: RoleCollection, language: Language | undefined): Role[] {
+	if (isStandalone(collection)) {
+		return collection.list;
 	}
 
-	return collection.list;
+	if (language === undefined) return [];
+
+	return collection.lists[language] ?? [];
 }
 
 export { getProficiencyCategory, getRelevantCategories, resolveRoles };

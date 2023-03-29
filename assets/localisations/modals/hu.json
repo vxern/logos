@@ -1,0 +1,20 @@
+{
+	"verification.title": "",
+	"verification.fields.reason": "",
+	"verification.fields.aim": "",
+	"verification.fields.whereFound": "",
+
+	"report.title": "",
+	"report.fields.reason": "",
+	"report.fields.usersToReport": "",
+	"report.fields.linkToMessage": "",
+
+	"suggestion.title": "",
+	"suggestion.fields.suggestion": "",
+
+	"prompts.continue": "",
+	"prompts.cancel": "",
+	"prompts.yourProgressWillBeLost": "",
+	"prompts.yesLeaveTheComposer": "",
+	"prompts.noTakeMeBackToTheComposer": ""
+}

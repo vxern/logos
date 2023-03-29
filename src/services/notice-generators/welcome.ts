@@ -1,24 +1,24 @@
 import { Bot, ButtonStyles, CreateMessage, Guild, MessageComponentTypes } from 'discordeno';
-import { localise, Services } from 'logos/assets/localisations/mod.ts';
 import { getLastUpdateString } from 'logos/src/services/notices.ts';
+import { Client, localise } from 'logos/src/client.ts';
 import { getTextChannel } from 'logos/src/utils.ts';
 import { mention, MentionTypes } from 'logos/formatting.ts';
 import { defaultLocale } from 'logos/types.ts';
 import configuration from 'logos/configuration.ts';
 import constants from 'logos/constants.ts';
 
-const lastUpdatedAt = new Date(2022, 11, 25);
+const lastUpdatedAt = new Date(2023, 2, 19);
 
-function generateWelcomeNotice(_bot: Bot, guild: Guild): CreateMessage {
-	const updateString = getLastUpdateString(lastUpdatedAt, defaultLocale);
-	const welcomeString = localise(Services.notices.notices.welcome.body, defaultLocale)(
-		getChannelMention(guild, configuration.guilds.channels.information),
+function generateWelcomeNotice([client, _]: [Client, Bot], guild: Guild): CreateMessage {
+	const updateString = getLastUpdateString(client, lastUpdatedAt, defaultLocale);
+	const welcomeString = localise(client, 'entry.welcome.toEnter', defaultLocale)(
+		{ 'information_channel_mention': getChannelMention(guild, configuration.guilds.channels.information) },
 	);
 
 	return {
 		embeds: [{
-			title: localise(Services.notices.notices.welcome.header, defaultLocale)(guild.name),
-			description: `${updateString}\n\n` + welcomeString,
+			title: localise(client, 'entry.welcome.welcome', defaultLocale)({ 'guild_name': guild.name }),
+			description: `${updateString}\n\n${welcomeString}`,
 			color: constants.colors.orange,
 		}],
 		components: [{
@@ -26,9 +26,9 @@ function generateWelcomeNotice(_bot: Bot, guild: Guild): CreateMessage {
 			components: [{
 				type: MessageComponentTypes.Button,
 				style: ButtonStyles.Secondary,
-				label: localise(Services.entry.acceptedRules, defaultLocale),
+				label: localise(client, 'entry.welcome.acceptedRules', defaultLocale)(),
 				customId: constants.staticComponentIds.acceptedRules,
-				emoji: { name: '✅' },
+				emoji: { name: constants.symbols.understood },
 			}],
 		}],
 	};

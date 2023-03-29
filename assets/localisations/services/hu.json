@@ -1,0 +1,19 @@
+{
+	"notices.lastUpdate": "Utolsó frissítés dátuma: {date}",
+	"notices.notices.information.invite": "",
+
+	"reports.reportedUsers": "",
+	"reports.reasonForReport": "",
+	"reports.linkToMessage": "",
+	"reports.noLinkToMessageProvided": "",
+	"reports.previousInfractions": "",
+
+	"suggestion.suggestion": "",
+
+	"submittedBy": "",
+	"submittedAt": "",
+	"markAsResolved": "",
+	"markAsUnresolved": "",
+	"alreadyMarkedAsResolved": "",
+	"alreadyMarkedAsUnresolved": ""
+}

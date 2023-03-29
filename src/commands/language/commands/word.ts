@@ -1,6 +1,7 @@
 import {
 	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
+	ApplicationCommandTypes,
 	Bot,
 	ButtonComponent,
 	ButtonStyles,
@@ -14,41 +15,35 @@ import {
 	MessageComponentTypes,
 	sendInteractionResponse,
 } from 'discordeno';
-import { Commands, createLocalisations, localise, Words } from 'logos/assets/localisations/mod.ts';
 import { Definition, DictionaryEntry, Expression } from 'logos/src/commands/language/data/types.ts';
-import { CommandBuilder } from 'logos/src/commands/command.ts';
+import { CommandTemplate } from 'logos/src/commands/command.ts';
 import { show } from 'logos/src/commands/parameters.ts';
-import { Client } from 'logos/src/client.ts';
-import { createInteractionCollector, parseArguments } from 'logos/src/interactions.ts';
+import { Client, localise } from 'logos/src/client.ts';
+import { createInteractionCollector, decodeId, encodeId, parseArguments } from 'logos/src/interactions.ts';
 import { chunk, diagnosticMentionUser } from 'logos/src/utils.ts';
 import constants from 'logos/constants.ts';
 import { BulletStyles, code, list } from 'logos/formatting.ts';
-import { defaultLocale, WordTypes } from 'logos/types.ts';
+import { defaultLocale } from 'logos/types.ts';
 
-const command: CommandBuilder = {
-	...createLocalisations(Commands.word),
-	isRateLimited: true,
+const command: CommandTemplate = {
+	name: 'word',
+	type: ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ['VIEW_CHANNEL'],
-	handle: handleSearchWord,
+	isRateLimited: true,
+	handle: handleFindWord,
 	options: [{
-		...createLocalisations(Commands.word.options.word),
+		name: 'word',
 		type: ApplicationCommandOptionTypes.String,
 		required: true,
 	}, {
-		...createLocalisations(Commands.word.options.verbose),
+		name: 'verbose',
 		type: ApplicationCommandOptionTypes.Boolean,
 	}, show],
 };
 
 /** Allows the user to look up a word and get information about it. */
-async function handleSearchWord(
-	[client, bot]: [Client, Bot],
-	interaction: Interaction,
-): Promise<void> {
-	const [{ word, verbose, show }] = parseArguments(
-		interaction.data?.options,
-		{ verbose: 'boolean', show: 'boolean' },
-	);
+async function handleFindWord([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+	const [{ word, verbose, show }] = parseArguments(interaction.data?.options, { verbose: 'boolean', show: 'boolean' });
 	if (word === undefined) return;
 
 	const guild = client.cache.guilds.get(interaction.guildId!);
@@ -65,7 +60,7 @@ async function handleSearchWord(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(Commands.word.strings.noDictionaryAdapters, interaction.locale),
+						description: localise(client, 'word.strings.noDictionaryAdapters', interaction.locale)(),
 						color: constants.colors.dullYellow,
 					}],
 				},
@@ -95,7 +90,7 @@ async function handleSearchWord(
 		const data = await dictionary.query(word, guild.language);
 		if (data === undefined) continue;
 
-		const entriesNew = dictionary.parse(data, locale);
+		const entriesNew = dictionary.parse(client, data, locale);
 		if (entriesNew === undefined) continue;
 
 		entries.push(...entriesNew);
@@ -107,7 +102,7 @@ async function handleSearchWord(
 			interaction.token,
 			{
 				embeds: [{
-					description: localise(Commands.word.strings.noResults, locale),
+					description: localise(client, 'word.strings.noResults', locale)(),
 					color: constants.colors.dullYellow,
 				}],
 			},
@@ -117,7 +112,6 @@ async function handleSearchWord(
 	return void displayMenu(
 		[client, bot],
 		interaction,
-		undefined,
 		{
 			entries,
 			currentView: ContentTabs.Definitions,
@@ -145,38 +139,34 @@ interface WordViewData {
 function displayMenu(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
-	selection: Interaction | undefined,
 	data: WordViewData,
 	locale: string | undefined,
 ): void {
-	if (selection !== undefined) {
-		sendInteractionResponse(bot, selection.id, selection.token, {
-			type: InteractionResponseTypes.DeferredUpdateMessage,
-		});
-	}
-
 	const entry = data.entries.at(data.dictionaryEntryIndex)!;
 
 	editOriginalInteractionResponse(bot, interaction.token, {
-		embeds: generateEmbeds(data, entry, locale),
+		embeds: generateEmbeds(client, data, entry, locale),
 		components: generateButtons([client, bot], interaction, data, entry, locale),
 	});
 }
 
 function generateEmbeds(
+	client: Client,
 	data: WordViewData,
 	entry: DictionaryEntry,
 	locale: string | undefined,
 ): Embed[] {
 	switch (data.currentView) {
 		case ContentTabs.Definitions: {
-			return entryToEmbeds(entry, locale, data.verbose);
+			return entryToEmbeds(client, entry, locale, data.verbose);
 		}
 		case ContentTabs.Inflection: {
 			return [entry.inflectionTable!.at(data.inflectionTableIndex)!];
 		}
 	}
 }
+
+type MenuButtonID = [index: string];
 
 function generateButtons(
 	[client, bot]: [Client, Bot],
@@ -196,25 +186,33 @@ function generateButtons(
 
 			const previousPageButtonId = createInteractionCollector([client, bot], {
 				type: InteractionTypes.MessageComponent,
-				onCollect: (_bot, selection) => {
+				onCollect: (_, selection) => {
+					sendInteractionResponse(bot, selection.id, selection.token, {
+						type: InteractionResponseTypes.DeferredUpdateMessage,
+					});
+
 					if (!isFirst) data.dictionaryEntryIndex--;
-					return void displayMenu([client, bot], interaction, selection, data, locale);
+					return void displayMenu([client, bot], interaction, data, locale);
 				},
 			});
 
 			const nextPageButtonId = createInteractionCollector([client, bot], {
 				type: InteractionTypes.MessageComponent,
-				onCollect: (_bot, selection) => {
+				onCollect: (_, selection) => {
+					sendInteractionResponse(bot, selection.id, selection.token, {
+						type: InteractionResponseTypes.DeferredUpdateMessage,
+					});
+
 					if (!isLast) data.dictionaryEntryIndex++;
-					return void displayMenu([client, bot], interaction, selection, data, locale);
+					return void displayMenu([client, bot], interaction, data, locale);
 				},
 			});
 
-			const pageString = localise(Commands.word.strings.page, locale);
+			const pageString = localise(client, 'word.strings.page', locale)();
 
 			paginationControls.push([{
 				type: MessageComponentTypes.Button,
-				label: '«',
+				label: constants.symbols.interactions.menu.controls.back,
 				customId: previousPageButtonId,
 				style: ButtonStyles.Secondary,
 				disabled: isFirst,
@@ -222,10 +220,10 @@ function generateButtons(
 				type: MessageComponentTypes.Button,
 				label: `${pageString} ${data.dictionaryEntryIndex + 1}/${data.entries.length}`,
 				style: ButtonStyles.Secondary,
-				customId: 'none',
+				customId: constants.staticComponentIds.none,
 			}, {
 				type: MessageComponentTypes.Button,
-				label: '»',
+				label: constants.symbols.interactions.menu.controls.forward,
 				customId: nextPageButtonId,
 				style: ButtonStyles.Secondary,
 				disabled: isLast,
@@ -236,24 +234,23 @@ function generateButtons(
 		case ContentTabs.Inflection: {
 			if (entry.inflectionTable === undefined) return [];
 
-			const rows = chunk(entry.inflectionTable, 5);
-			rows.reverse();
+			const rows = chunk(entry.inflectionTable, 5).reverse();
 
 			const buttonId = createInteractionCollector([client, bot], {
 				type: InteractionTypes.MessageComponent,
-				onCollect: (_bot, selection) => {
+				onCollect: (_, selection) => {
 					if (entry.inflectionTable === undefined || selection.data === undefined) {
-						return void displayMenu([client, bot], interaction, selection, data, locale);
+						return void displayMenu([client, bot], interaction, data, locale);
 					}
 
-					const [_buttonId, indexString] = selection.data.customId!.split('|');
+					const [__, indexString] = decodeId<MenuButtonID>(selection.data.customId!);
 					const index = Number(indexString);
 
 					if (index >= 0 && index <= entry.inflectionTable?.length) {
 						data.inflectionTableIndex = index;
 					}
 
-					return void displayMenu([client, bot], interaction, selection, data, locale);
+					return void displayMenu([client, bot], interaction, data, locale);
 				},
 			});
 
@@ -264,7 +261,7 @@ function generateButtons(
 					return {
 						type: MessageComponentTypes.Button,
 						label: table.title,
-						customId: `${buttonId}|${index_}`,
+						customId: encodeId<MenuButtonID>(buttonId, [index_.toString()]),
 						disabled: data.inflectionTableIndex === index_,
 						style: ButtonStyles.Secondary,
 					};
@@ -281,25 +278,33 @@ function generateButtons(
 
 	const definitionsMenuButtonId = createInteractionCollector([client, bot], {
 		type: InteractionTypes.MessageComponent,
-		onCollect: (_bot, selection) => {
+		onCollect: (_, selection) => {
+			sendInteractionResponse(bot, selection.id, selection.token, {
+				type: InteractionResponseTypes.DeferredUpdateMessage,
+			});
+
 			data.inflectionTableIndex = 0;
 			data.currentView = ContentTabs.Definitions;
-			return void displayMenu([client, bot], interaction, selection, data, locale);
+			return void displayMenu([client, bot], interaction, data, locale);
 		},
 	});
 
 	const inflectionMenuButtonId = createInteractionCollector([client, bot], {
 		type: InteractionTypes.MessageComponent,
-		onCollect: (_bot, selection) => {
+		onCollect: (_, selection) => {
+			sendInteractionResponse(bot, selection.id, selection.token, {
+				type: InteractionResponseTypes.DeferredUpdateMessage,
+			});
+
 			data.currentView = ContentTabs.Inflection;
-			return void displayMenu([client, bot], interaction, selection, data, locale);
+			return void displayMenu([client, bot], interaction, data, locale);
 		},
 	});
 
 	if (entry.definitions !== undefined) {
 		row.push({
 			type: MessageComponentTypes.Button,
-			label: localise(Commands.word.strings.definitions, locale),
+			label: localise(client, 'word.strings.definitions', locale)(),
 			disabled: data.currentView === ContentTabs.Definitions,
 			customId: definitionsMenuButtonId,
 			style: ButtonStyles.Primary,
@@ -309,7 +314,7 @@ function generateButtons(
 	if (entry.inflectionTable !== undefined) {
 		row.push({
 			type: MessageComponentTypes.Button,
-			label: localise(Commands.word.strings.inflection, locale),
+			label: localise(client, 'word.strings.inflection', locale)(),
 			disabled: data.currentView === ContentTabs.Inflection,
 			customId: inflectionMenuButtonId,
 			style: ButtonStyles.Primary,
@@ -320,25 +325,55 @@ function generateButtons(
 		paginationControls.push(row);
 	}
 
-	// @ts-ignore: It is sure that there will be no more than 5 buttons.
 	return paginationControls.map((row) => ({
 		type: MessageComponentTypes.ActionRow,
-		components: row,
+		components: row as [ButtonComponent],
 	}));
 }
 
-function entryToEmbeds(entry: DictionaryEntry, locale: string | undefined, verbose: boolean): Embed[] {
-	let typeDisplayed!: string;
-	if (entry.type === undefined) {
-		typeDisplayed = localise(Words.types[WordTypes.Unknown], locale);
+type WordClass =
+	| 'noun'
+	| 'verb'
+	| 'adjective'
+	| 'adverb'
+	| 'adposition'
+	| 'affix'
+	| 'pronoun'
+	| 'determiner'
+	| 'conjunction'
+	| 'interjection'
+	| 'unknown';
+
+const wordClassToStringKey: Required<Record<WordClass, string>> = {
+	'noun': 'words.noun',
+	'verb': 'words.verb',
+	'adjective': 'words.adjective',
+	'adverb': 'words.adverb',
+	'adposition': 'words.adposition',
+	'affix': 'words.affix',
+	'pronoun': 'words.pronoun',
+	'determiner': 'words.determiner',
+	'conjunction': 'words.conjunction',
+	'interjection': 'words.interjection',
+	'unknown': 'words.unknown',
+};
+
+function isUnknownWordClass(wordClass: WordClass): boolean {
+	return wordClass === 'unknown';
+}
+
+function entryToEmbeds(client: Client, entry: DictionaryEntry, locale: string | undefined, verbose: boolean): Embed[] {
+	let wordClassDisplayed: string;
+	if (entry.wordClass === undefined) {
+		wordClassDisplayed = localise(client, 'words.unknown', locale)();
 	} else {
-		const [type, typeString] = entry.type;
-		typeDisplayed = localise(Words.types[type], locale);
-		if (type === WordTypes.Unknown) {
-			typeDisplayed += ` — '${typeString}'`;
+		const [wordClass, wordClassUnresolved] = entry.wordClass;
+		wordClassDisplayed = localise(client, wordClassToStringKey[wordClass], locale)();
+		if (isUnknownWordClass(wordClass)) {
+			wordClassDisplayed += ` — '${wordClassUnresolved}'`;
 		}
 	}
-	typeDisplayed = `***${typeDisplayed}***`;
+	const wordClassFormatted = `***${wordClassDisplayed}***`;
 
 	const word = entry.word;
 
@@ -347,14 +382,17 @@ function entryToEmbeds(entry: DictionaryEntry, locale: string | undefined, verbo
 
 	if (entry.definitions !== undefined && entry.definitions.length !== 0) {
 		const definitionsStringified = stringifyEntries(entry.definitions, 'definitions', BulletStyles.Diamond);
-		const definitionsFitted = fitStringsToFieldSize(definitionsStringified, locale, verbose);
+		const definitionsFitted = fitStringsToFieldSize(client, definitionsStringified, locale, verbose);
 
 		if (!verbose) {
-			fields.push({ name: localise(Commands.word.strings.fields.definitions, locale), value: definitionsFitted });
+			fields.push({
+				name: localise(client, 'word.strings.fields.definitions', locale)(),
+				value: definitionsFitted,
+			});
 		} else {
 			embeds.push({
-				title: localise(Commands.word.strings.definitionsForWord, locale)(word),
-				description: `${typeDisplayed}\n\n${definitionsFitted}`,
+				title: localise(client, 'word.strings.definitionsForWord', locale)({ 'word': word }),
+				description: `${wordClassFormatted}\n\n${definitionsFitted}`,
 				color: constants.colors.husky,
 			});
 		}
@@ -362,9 +400,9 @@ function entryToEmbeds(entry: DictionaryEntry, locale: string | undefined, verbo
 
 	if (entry.expressions !== undefined && entry.expressions.length !== 0) {
 		const expressionsStringified = stringifyEntries(entry.expressions, 'expressions', BulletStyles.Arrow);
-		const expressionsFitted = fitStringsToFieldSize(expressionsStringified, locale, verbose);
+		const expressionsFitted = fitStringsToFieldSize(client, expressionsStringified, locale, verbose);
 
-		const sectionName = localise(Commands.word.strings.fields.expressions, locale);
+		const sectionName = localise(client, 'word.strings.fields.expressions', locale)();
 
 		if (!verbose) {
 			fields.push({ name: sectionName, value: expressionsFitted });
@@ -374,7 +412,7 @@ function entryToEmbeds(entry: DictionaryEntry, locale: string | undefined, verbo
 	}
 
 	if (entry.etymologies !== undefined && entry.etymologies.length !== 0) {
-		const sectionName = localise(Commands.word.strings.fields.etymology, locale);
+		const sectionName = localise(client, 'word.strings.fields.etymology', locale)();
 		const etymology = entry.etymologies.map((etymology) => {
 			if (etymology.tags === undefined) {
 				return `**${etymology.value}**`;
@@ -395,7 +433,7 @@ function entryToEmbeds(entry: DictionaryEntry, locale: string | undefined, verbo
 	}
 
 	if (!verbose) {
-		return [{ title: word, description: typeDisplayed, fields, color: constants.colors.husky }];
+		return [{ title: word, description: wordClassFormatted, fields, color: constants.colors.husky }];
 	}
 
 	return embeds;
@@ -405,42 +443,43 @@ function tagsToString(tags: string[]): string {
 	return tags.map((tag) => code(tag)).join(' ');
 }
 
-function stringifyEntries(
-	entries: Definition[] | Expression[],
-	entryType: 'definitions' | 'expressions',
-	bulletStyle: BulletStyles,
-	depth = 0,
-): string[] {
+type EntryType = 'definitions' | 'expressions';
+
+function isDefinition(_entry: Definition | Expression, entryType: EntryType): _entry is Definition {
+	return entryType === 'definitions';
+}
+
+function stringifyEntries<
+	T extends EntryType,
+	E extends Definition[] | Expression[] = T extends 'definitions' ? Definition[] : Expression[],
+>(entries: E, entryType: T, bulletStyle: BulletStyles, depth = 0): string[] {
 	const entriesStringified = entries.map((entry) => {
 		const root = entry.tags === undefined ? entry.value : `${tagsToString(entry.tags)} ${entry.value}`;
 
 		if (
-			entryType === 'definitions' && (entry as Definition)?.value.endsWith(':') &&
-			(entry as Definition)?.definitions !== undefined
+			isDefinition(entry, entryType) && entry.value.endsWith(':') && entry.definitions !== undefined
 		) {
-			const entriesStringified = stringifyEntries(
-				(entry as Definition).definitions!,
-				'definitions',
-				bulletStyle,
-				depth + 1,
-			).join('\n');
+			const entriesStringified = stringifyEntries(entry.definitions!, 'definitions', bulletStyle, depth + 1).join('\n');
 			return `${root}\n${entriesStringified}`;
 		}
 
 		return root;
 	});
 	const entriesEnlisted = list(entriesStringified, bulletStyle);
-	const entriesDelisted = entriesEnlisted.split('\n').map((entry) => `${'⠀'.repeat(depth * 2)}${entry}`);
+	const entriesDelisted = entriesEnlisted.split('\n').map((entry) =>
+		`${constants.symbols.meta.whitespace.repeat(depth * 2)}${entry}`
+	);
 
 	return entriesDelisted;
 }
 
 function fitStringsToFieldSize(
+	client: Client,
 	strings: string[],
 	locale: string | undefined,
 	verbose: boolean,
 ): string {
-	const overheadString = localise(Commands.word.strings.definitionsOmitted, locale)(strings.length);
+	const overheadString = localise(client, 'word.strings.definitionsOmitted', locale)({ 'number': strings.length });
 	const characterOverhead = overheadString.length + 20;
 
 	const maxCharacterCount = verbose ? 4096 : 1024;
@@ -459,7 +498,9 @@ function fitStringsToFieldSize(
 
 	let fittedString = stringsToDisplay.join('\n');
 	if (stringsOmitted !== 0) {
-		const definitionsOmittedString = localise(Commands.word.strings.definitionsOmitted, locale)(stringsOmitted);
+		const definitionsOmittedString = localise(client, 'word.strings.definitionsOmitted', locale)({
+			'number': stringsOmitted,
+		});
 		fittedString += `\n\n*${definitionsOmittedString}*`;
 	}
 
@@ -467,3 +508,4 @@ function fitStringsToFieldSize(
 }
 
 export default command;
+export type { WordClass };

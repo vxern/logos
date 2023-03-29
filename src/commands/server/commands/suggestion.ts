@@ -1,5 +1,6 @@
 import {
 	ApplicationCommandFlags,
+	ApplicationCommandTypes,
 	Bot,
 	ButtonStyles,
 	deleteOriginalInteractionResponse,
@@ -13,9 +14,8 @@ import {
 	sendMessage,
 	TextStyles,
 } from 'discordeno';
-import { Commands, createLocalisations, localise, Modals } from 'logos/assets/localisations/mod.ts';
-import { CommandBuilder } from 'logos/src/commands/command.ts';
-import { log } from 'logos/src/controllers/logging/logging.ts';
+import { CommandTemplate } from 'logos/src/commands/command.ts';
+import { logEvent } from 'logos/src/controllers/logging/logging.ts';
 import {
 	authorIdByMessageId,
 	getSuggestionPrompt,
@@ -23,7 +23,7 @@ import {
 	registerSuggestionHandler,
 	suggestionByMessageId,
 } from 'logos/src/services/suggestions.ts';
-import { Client } from 'logos/src/client.ts';
+import { Client, localise } from 'logos/src/client.ts';
 import { stringifyValue } from 'logos/src/database/database.ts';
 import { createInteractionCollector, createModalComposer, Modal } from 'logos/src/interactions.ts';
 import { getTextChannel, verifyIsWithinLimits } from 'logos/src/utils.ts';
@@ -31,8 +31,9 @@ import configuration from 'logos/configuration.ts';
 import constants from 'logos/constants.ts';
 import { trim } from 'logos/formatting.ts';
 
-const command: CommandBuilder = {
-	...createLocalisations(Commands.suggestion),
+const command: CommandTemplate = {
+	name: 'suggestion',
+	type: ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ['VIEW_CHANNEL'],
 	handle: handleMakeSuggestion,
 };
@@ -41,10 +42,7 @@ enum SuggestionError {
 	Failure = 'failure',
 }
 
-async function handleMakeSuggestion(
-	[client, bot]: [Client, Bot],
-	interaction: Interaction,
-): Promise<void> {
+async function handleMakeSuggestion([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (guild === undefined) return;
 
@@ -79,7 +77,7 @@ async function handleMakeSuggestion(
 					data: {
 						flags: ApplicationCommandFlags.Ephemeral,
 						embeds: [{
-							description: localise(Commands.suggestion.strings.waitBeforeSuggesting, interaction.locale),
+							description: localise(client, 'suggestion.strings.waitBeforeSuggesting', interaction.locale)(),
 							color: constants.colors.dullYellow,
 						}],
 					},
@@ -89,7 +87,7 @@ async function handleMakeSuggestion(
 	}
 
 	return void createModalComposer([client, bot], interaction, {
-		modal: generateSuggestionModal(interaction.locale),
+		modal: generateSuggestionModal(client, interaction.locale),
 		onSubmit: async (submission, answers) => {
 			await sendInteractionResponse(bot, submission.id, submission.token, {
 				type: InteractionResponseTypes.DeferredChannelMessageWithSource,
@@ -113,12 +111,12 @@ async function handleMakeSuggestion(
 			const suggestionChannelId = getTextChannel(guild, configuration.guilds.channels.suggestions)?.id;
 			if (suggestionChannelId === undefined) return true;
 
-			log([client, bot], guild, 'suggestionSend', interaction.member!, suggestion.data);
+			logEvent([client, bot], guild, 'suggestionSend', [interaction.member!, suggestion.data]);
 
 			const messageId = await sendMessage(
 				bot,
 				suggestionChannelId,
-				getSuggestionPrompt(bot, guild, interaction.user, suggestion),
+				getSuggestionPrompt([client, bot], guild, interaction.user, suggestion),
 			).then((message) => message.id);
 
 			const suggestionReferenceId = stringifyValue(suggestion.ref);
@@ -138,8 +136,8 @@ async function handleMakeSuggestion(
 			editOriginalInteractionResponse(bot, submission.token, {
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
-					title: localise(Commands.suggestion.strings.suggestionSent.header, interaction.locale),
-					description: localise(Commands.suggestion.strings.suggestionSent.body, interaction.locale),
+					title: localise(client, 'suggestion.strings.suggestionSent.header', interaction.locale)(),
+					description: localise(client, 'suggestion.strings.suggestionSent.body', interaction.locale)(),
 					color: constants.colors.lightGreen,
 				}],
 			});
@@ -160,7 +158,7 @@ function handleSubmittedInvalidSuggestion(
 	return new Promise((resolve) => {
 		const continueId = createInteractionCollector([client, bot], {
 			type: InteractionTypes.MessageComponent,
-			onCollect: (_bot, selection) => {
+			onCollect: (_, selection) => {
 				deleteOriginalInteractionResponse(bot, submission.token);
 				resolve(selection);
 			},
@@ -168,15 +166,15 @@ function handleSubmittedInvalidSuggestion(
 
 		const cancelId = createInteractionCollector([client, bot], {
 			type: InteractionTypes.MessageComponent,
-			onCollect: (_bot, cancelSelection) => {
+			onCollect: (_, cancelSelection) => {
 				const returnId = createInteractionCollector([client, bot], {
 					type: InteractionTypes.MessageComponent,
-					onCollect: (_bot, returnSelection) => resolve(returnSelection),
+					onCollect: (_, returnSelection) => resolve(returnSelection),
 				});
 
 				const leaveId = createInteractionCollector([client, bot], {
 					type: InteractionTypes.MessageComponent,
-					onCollect: (_bot, _leaveSelection) => {
+					onCollect: (_, _leaveSelection) => {
 						deleteOriginalInteractionResponse(bot, submission.token);
 						deleteOriginalInteractionResponse(bot, cancelSelection.token);
 						resolve(undefined);
@@ -188,7 +186,11 @@ function handleSubmittedInvalidSuggestion(
 					data: {
 						flags: ApplicationCommandFlags.Ephemeral,
 						embeds: [{
-							description: localise(Commands.suggestion.strings.areYouSureToStopSubmitting, cancelSelection.locale),
+							description: localise(
+								client,
+								'suggestion.strings.areYouSureToStopSubmitting',
+								cancelSelection.locale,
+							)(),
 							color: constants.colors.dullYellow,
 						}],
 						components: [{
@@ -196,12 +198,12 @@ function handleSubmittedInvalidSuggestion(
 							components: [{
 								type: MessageComponentTypes.Button,
 								customId: returnId,
-								label: localise(Modals.prompts.noTakeMeBackToTheComposer, cancelSelection.locale),
+								label: localise(client, 'prompts.noTakeMeBackToTheComposer', cancelSelection.locale)(),
 								style: ButtonStyles.Success,
 							}, {
 								type: MessageComponentTypes.Button,
 								customId: leaveId,
-								label: localise(Modals.prompts.yesLeaveTheComposer, cancelSelection.locale),
+								label: localise(client, 'prompts.yesLeaveTheComposer', cancelSelection.locale)(),
 								style: ButtonStyles.Danger,
 							}],
 						}],
@@ -216,7 +218,7 @@ function handleSubmittedInvalidSuggestion(
 			default: {
 				editOriginalInteractionResponse(bot, submission.token, {
 					embeds: [{
-						description: localise(Commands.suggestion.strings.failedToSendSuggestion, submission.locale),
+						description: localise(client, 'suggestion.strings.failedToSendSuggestion', submission.locale)(),
 						color: constants.colors.dullYellow,
 					}],
 				});
@@ -231,12 +233,12 @@ function handleSubmittedInvalidSuggestion(
 				components: [{
 					type: MessageComponentTypes.Button,
 					customId: continueId,
-					label: localise(Modals.prompts.continue, submission.locale),
+					label: localise(client, 'prompts.continue', submission.locale)(),
 					style: ButtonStyles.Success,
 				}, {
 					type: MessageComponentTypes.Button,
 					customId: cancelId,
-					label: localise(Modals.prompts.cancel, submission.locale),
+					label: localise(client, 'prompts.cancel', submission.locale)(),
 					style: ButtonStyles.Danger,
 				}],
 			}],
@@ -244,15 +246,15 @@ function handleSubmittedInvalidSuggestion(
 	});
 }
 
-function generateSuggestionModal<T extends string>(locale: string | undefined): Modal<T> {
+function generateSuggestionModal<T extends string>(client: Client, locale: string | undefined): Modal<T> {
 	return {
-		title: localise(Modals.suggestion.title, locale),
+		title: localise(client, 'suggestion.title', locale)(),
 		fields: [{
 			type: MessageComponentTypes.ActionRow,
 			components: [{
 				customId: 'suggestion',
 				type: MessageComponentTypes.InputText,
-				label: trim(localise(Modals.suggestion.fields.suggestion, locale), 45),
+				label: trim(localise(client, 'suggestion.fields.suggestion', locale)(), 45),
 				style: TextStyles.Paragraph,
 				required: true,
 				minLength: 20,

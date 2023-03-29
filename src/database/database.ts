@@ -2,28 +2,15 @@
 import { User as DiscordUser } from 'discordeno';
 import * as Sentry from 'sentry';
 import * as Fauna from 'fauna';
-import articles from 'logos/src/database/adapters/articles.ts';
-import articleChanges from 'logos/src/database/adapters/article-changes.ts';
 import entryRequests from 'logos/src/database/adapters/entry-requests.ts';
 import praises from 'logos/src/database/adapters/praises.ts';
 import reports from 'logos/src/database/adapters/reports.ts';
 import suggestions from 'logos/src/database/adapters/suggestions.ts';
 import users from 'logos/src/database/adapters/users.ts';
 import warnings from 'logos/src/database/adapters/warnings.ts';
-import {
-	Article,
-	ArticleChange,
-	EntryRequest,
-	Praise,
-	Report,
-	Suggestion,
-	User,
-	Warning,
-} from 'logos/src/database/structs/mod.ts';
+import { EntryRequest, Praise, Report, Suggestion, User, Warning } from 'logos/src/database/structs/mod.ts';
 import { BaseDocumentProperties, Document, Reference } from 'logos/src/database/document.ts';
 import {
-	ArticleChangeIndexes,
-	ArticleIndexes,
 	EntryRequestIndexes,
 	IndexesSignature,
 	PraiseIndexes,
@@ -154,8 +141,6 @@ type CacheAdapter<
 	& Pick<CacheAdapterOptionalMethods<DataType, Indexes>, SupportsMethods>;
 
 interface DatabaseAdapters {
-	articleChanges: DatabaseAdapter<ArticleChange, ArticleChangeIndexes, 'getOrFetch'>;
-	articles: DatabaseAdapter<Article, ArticleIndexes, 'getOrFetch'>;
 	entryRequests: DatabaseAdapter<EntryRequest, EntryRequestIndexes, 'get' | 'update', true>;
 	praises: DatabaseAdapter<Praise, PraiseIndexes, 'getOrFetch'>;
 	reports: DatabaseAdapter<Report, ReportIndexes, 'get' | 'update', true>;
@@ -165,38 +150,6 @@ interface DatabaseAdapters {
 }
 
 interface Cache extends Record<string, Map<string, unknown>> {
-	/**
-	 * Cached article changes.
-	 *
-	 * The keys are stringified user document references.\
-	 * The values are article change documents mapped by their stringified document reference.
-	 */
-	articleChangesByAuthor: Map<string, Map<string, Document<ArticleChange>>>;
-
-	/**
-	 * Cached article changes.
-	 *
-	 * The keys are stringified user document references.\
-	 * The values are article change documents mapped by their stringified document reference.
-	 */
-	articleChangesByArticle: Map<string, Map<string, Document<ArticleChange>>>;
-
-	/**
-	 * Cached articles.
-	 *
-	 * The keys are stringified user document references.\
-	 * The values are article documents mapped by their stringified document reference.
-	 */
-	articlesByAuthor: Map<string, Map<string, Document<Article>>>;
-
-	/**
-	 * Cached articles.
-	 *
-	 * The keys are languages.\
-	 * The values are article documents mapped by their stringified document reference.
-	 */
-	articlesByLanguage: Map<string, Map<string, Document<Article>>>;
-
 	/**
 	 * Cached entry requests.
 	 *
@@ -292,10 +245,6 @@ function createDatabase(): Database {
 			port: 443,
 		}),
 		cache: {
-			articlesByLanguage: new Map(),
-			articlesByAuthor: new Map(),
-			articleChangesByArticle: new Map(),
-			articleChangesByAuthor: new Map(),
 			entryRequestBySubmitterAndGuild: new Map(),
 			praisesBySender: new Map(),
 			praisesByRecipient: new Map(),
@@ -306,7 +255,7 @@ function createDatabase(): Database {
 			usersById: new Map(),
 			warningsByRecipient: new Map(),
 		},
-		adapters: { articles, articleChanges, entryRequests, reports, praises, suggestions, users, warnings },
+		adapters: { entryRequests, reports, praises, suggestions, users, warnings },
 	};
 }
 
@@ -338,10 +287,10 @@ async function dispatchQuery<
 	}
 
 	if (!Array.isArray(result.data)) {
-		return <R> (<unknown> result);
+		return result as unknown as R;
 	}
 
-	return <R> (<unknown> result.data);
+	return result.data as unknown as R;
 }
 
 function mentionUser(user: DiscordUser | undefined, id: bigint): string {

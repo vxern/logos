@@ -6,9 +6,8 @@ import {
 	InteractionResponseTypes,
 	sendInteractionResponse,
 } from 'discordeno';
-import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
 import { handleResumePlayback } from 'logos/src/commands/music/commands/resume.ts';
-import { OptionBuilder } from 'logos/src/commands/command.ts';
+import { OptionTemplate } from 'logos/src/commands/command.ts';
 import {
 	getVoiceState,
 	isOccupied,
@@ -16,12 +15,12 @@ import {
 	pause,
 	verifyCanManipulatePlayback,
 } from 'logos/src/controllers/music.ts';
-import { Client } from 'logos/src/client.ts';
+import { Client, localise } from 'logos/src/client.ts';
 import constants from 'logos/constants.ts';
 import { defaultLocale } from 'logos/types.ts';
 
-const command: OptionBuilder = {
-	...createLocalisations(Commands.music.options.pause),
+const command: OptionTemplate = {
+	name: 'pause',
 	type: ApplicationCommandOptionTypes.SubCommand,
 	handle: handlePausePlayback,
 };
@@ -31,7 +30,7 @@ function handlePausePlayback([client, bot]: [Client, Bot], interaction: Interact
 	if (controller === undefined) return;
 
 	const isVoiceStateVerified = verifyCanManipulatePlayback(
-		bot,
+		[client, bot],
 		interaction,
 		controller,
 		getVoiceState(client, interaction.guildId!, interaction.user.id),
@@ -48,7 +47,7 @@ function handlePausePlayback([client, bot]: [Client, Bot], interaction: Interact
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(Commands.music.options.pause.strings.noSongToPause, interaction.locale),
+						description: localise(client, 'music.options.pause.strings.noSongToPause', interaction.locale)(),
 						color: constants.colors.dullYellow,
 					}],
 				},
@@ -62,7 +61,7 @@ function handlePausePlayback([client, bot]: [Client, Bot], interaction: Interact
 
 	pause(controller.player);
 
-	const pausedString = localise(Commands.music.options.pause.strings.paused.header, defaultLocale);
+	const pausedString = localise(client, 'music.options.pause.strings.paused.header', defaultLocale)();
 
 	return void sendInteractionResponse(
 		bot,
@@ -72,8 +71,8 @@ function handlePausePlayback([client, bot]: [Client, Bot], interaction: Interact
 			type: InteractionResponseTypes.ChannelMessageWithSource,
 			data: {
 				embeds: [{
-					title: `⏸️ ${pausedString}`,
-					description: localise(Commands.music.options.pause.strings.paused.body, defaultLocale),
+					title: `${constants.symbols.music.paused} ${pausedString}`,
+					description: localise(client, 'music.options.pause.strings.paused.body', defaultLocale)(),
 					color: constants.colors.invisible,
 				}],
 			},

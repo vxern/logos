@@ -1,0 +1,13 @@
+{
+	"policies.moderation.header": "Polityka Moderowania",
+	"policies.moderation.points.introduction.header": "Jak działa moderacja serwera?",
+	"policies.moderation.points.introduction.body": "Na serwerze obowiązuje polityka moderacji na bazie trzech ostrzeżeń, zgodnie z którą działają moderatorzy serwera (osoby z rolą {role_mention}).",
+	"policies.moderation.points.breach.header": "Gdzie obowiązują reguły?",
+	"policies.moderation.points.breach.body": "Reguły serwera obowiązują dla każdego użytkownika, a poważne ich naruszenie zaskutkuje ostrzeżeniem.",
+	"policies.moderation.points.warnings.header": "Co jeśli dostanę parę ostrzeżeń?",
+	"policies.moderation.points.warnings.body": "W przypadku gdy użytkownik ma już trzy ostrzeżenia, przy otrzymaniu czwartego ostrzeżenia, użytkownik dostanie timeout. Ostrzeżenia wygasają po upływie __dwóch miesięcy__.",
+	"policies.moderation.points.furtherAction.header": "A potem?",
+	"policies.moderation.points.furtherAction.body": "Następnie, moderatorzy serwera zostaną poinformowani o tym, że dany limit ostrzeżeń przekroczono, po czym moderatorzy przejrzą oraz zbadają sytuację i zdecydują, co dalej.",
+	"policies.moderation.points.ban.header": "A co jeśli mnie to nie obchodzi?",
+	"policies.moderation.points.ban.body": "Jeśli zostanie stwierdzone, że użytkownik ten świadomie i stale lekceważył reguły serwera i/lub ignorował sugestie moderatorów, użytkownik zostanie trwale wykluczony z serwera."
+}

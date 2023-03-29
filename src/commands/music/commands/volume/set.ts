@@ -1,20 +1,16 @@
 import { Bot, Interaction, InteractionResponseTypes, sendInteractionResponse } from 'discordeno';
-import { Commands, localise } from 'logos/assets/localisations/mod.ts';
 import { getVoiceState, setVolume, verifyCanManipulatePlayback } from 'logos/src/controllers/music.ts';
-import { Client } from 'logos/src/client.ts';
+import { Client, localise } from 'logos/src/client.ts';
 import { parseArguments } from 'logos/src/interactions.ts';
 import configuration from 'logos/configuration.ts';
 import constants from 'logos/constants.ts';
 
-function handleSetVolume(
-	[client, bot]: [Client, Bot],
-	interaction: Interaction,
-): void {
+function handleSetVolume([client, bot]: [Client, Bot], interaction: Interaction): void {
 	const controller = client.features.music.controllers.get(interaction.guildId!);
 	if (controller === undefined) return;
 
 	const isVoiceStateVerified = verifyCanManipulatePlayback(
-		bot,
+		[client, bot],
 		interaction,
 		controller,
 		getVoiceState(client, interaction.guildId!, interaction.user.id),
@@ -33,8 +29,12 @@ function handleSetVolume(
 				type: InteractionResponseTypes.ChannelMessageWithSource,
 				data: {
 					embeds: [{
-						description: localise(Commands.music.options.volume.options.set.strings.invalidVolume, interaction.locale)(
-							configuration.music.limits.volume,
+						description: localise(
+							client,
+							'music.options.volume.options.set.strings.invalidVolume',
+							interaction.locale,
+						)(
+							{ 'volume': configuration.music.limits.volume },
 						),
 						color: constants.colors.red,
 					}],
@@ -45,7 +45,11 @@ function handleSetVolume(
 
 	setVolume(controller.player, volume);
 
-	const volumeString = localise(Commands.music.options.volume.options.set.strings.volumeSet.header, interaction.locale);
+	const volumeString = localise(
+		client,
+		'music.options.volume.options.set.strings.volumeSet.header',
+		interaction.locale,
+	)();
 
 	return void sendInteractionResponse(
 		bot,
@@ -55,9 +59,13 @@ function handleSetVolume(
 			type: InteractionResponseTypes.ChannelMessageWithSource,
 			data: {
 				embeds: [{
-					title: `🔊 ${volumeString}`,
-					description: localise(Commands.music.options.volume.options.set.strings.volumeSet.body, interaction.locale)(
-						volume,
+					title: `${constants.symbols.music.volume} ${volumeString}`,
+					description: localise(
+						client,
+						'music.options.volume.options.set.strings.volumeSet.body',
+						interaction.locale,
+					)(
+						{ 'volume': volume },
 					),
 					color: constants.colors.invisible,
 				}],

@@ -13,6 +13,18 @@ function fromHex(color: string): number {
 	return parseInt(color.replace('#', '0x'));
 }
 
+type TextChannel = Channel & { type: ChannelTypes.GuildText };
+
+type VoiceChannel = Channel & { type: ChannelTypes.GuildVoice };
+
+function isText(channel: Channel): channel is TextChannel {
+	return channel.type === ChannelTypes.GuildText;
+}
+
+function isVoice(channel: Channel): channel is VoiceChannel {
+	return channel.type === ChannelTypes.GuildVoice;
+}
+
 /**
  * Taking a guild and the name of a channel, finds the channel with that name
  * and returns it.
@@ -24,7 +36,7 @@ function fromHex(color: string): number {
 function getTextChannel(guild: Guild, name: string): Channel | undefined {
 	const nameAsLowercase = name.toLowerCase();
 
-	const textChannels = guild.channels.array().filter((channel) => channel.type === ChannelTypes.GuildText);
+	const textChannels = guild.channels.array().filter((channel) => isText(channel));
 
 	return textChannels.find((channel) => channel.name!.toLowerCase().includes(nameAsLowercase));
 }
@@ -81,7 +93,7 @@ function getGuildIconURLFormatted(bot: Bot, guild: Guild): string | undefined {
 
 type Author = NonNullable<Embed['author']>;
 
-function guildAsAuthor(bot: Bot, guild: Guild): Author | undefined {
+function getAuthor(bot: Bot, guild: Guild): Author | undefined {
 	const iconURL = getGuildIconURLFormatted(bot, guild);
 	if (iconURL === undefined) return undefined;
 
@@ -169,9 +181,11 @@ export {
 	diagnosticMentionUser,
 	fromHex,
 	getAllMessages,
+	getAuthor,
 	getGuildIconURLFormatted,
 	getTextChannel,
-	guildAsAuthor,
+	isText,
+	isVoice,
 	snowflakeToTimestamp,
 	verifyIsWithinLimits,
 };

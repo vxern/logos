@@ -3,22 +3,18 @@ import {
 	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
 	Bot,
-	ButtonComponent,
-	ButtonStyles,
 	deleteOriginalInteractionResponse,
 	editOriginalInteractionResponse,
 	Interaction,
 	InteractionCallbackData,
 	InteractionResponseTypes,
 	InteractionTypes,
-	MessageComponents,
 	MessageComponentTypes,
 	SelectOption,
 	sendInteractionResponse,
 } from 'discordeno';
-import { Commands, createLocalisations, localise, Misc } from 'logos/assets/localisations/mod.ts';
 import { listingTypeToEmoji, SongListing } from 'logos/src/commands/music/data/types.ts';
-import { OptionBuilder } from 'logos/src/commands/command.ts';
+import { OptionTemplate } from 'logos/src/commands/command.ts';
 import {
 	getVoiceState,
 	isQueueEmpty,
@@ -26,16 +22,16 @@ import {
 	remove,
 	verifyCanManipulatePlayback,
 } from 'logos/src/controllers/music.ts';
-import { Client } from 'logos/src/client.ts';
-import { createInteractionCollector } from 'logos/src/interactions.ts';
+import { Client, localise } from 'logos/src/client.ts';
+import { ControlButtonID, createInteractionCollector, decodeId, generateButtons } from 'logos/src/interactions.ts';
 import { chunk } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import constants from 'logos/constants.ts';
 import { mention, MentionTypes, trim } from 'logos/formatting.ts';
 import { defaultLocale } from 'logos/types.ts';
 
-const command: OptionBuilder = {
-	...createLocalisations(Commands.music.options.remove),
+const command: OptionTemplate = {
+	name: 'remove',
 	type: ApplicationCommandOptionTypes.SubCommand,
 	handle: handleRemoveSongListing,
 };
@@ -45,7 +41,7 @@ function handleRemoveSongListing([client, bot]: [Client, Bot], interaction: Inte
 	if (controller === undefined) return;
 
 	const isVoiceStateVerified = verifyCanManipulatePlayback(
-		bot,
+		[client, bot],
 		interaction,
 		controller,
 		getVoiceState(client, interaction.guildId!, interaction.user.id),
@@ -62,7 +58,7 @@ function handleRemoveSongListing([client, bot]: [Client, Bot], interaction: Inte
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(Commands.music.options.remove.strings.noListingToRemove, interaction.locale),
+						description: localise(client, 'music.options.remove.strings.noListingToRemove', interaction.locale)(),
 						color: constants.colors.dullYellow,
 					}],
 				},
@@ -134,13 +130,13 @@ function generateEmbed(
 		onCollect: (bot, selection) => {
 			if (selection.data === undefined) return;
 
-			const action = selection.data.customId!.split('|')[1]!;
+			const [_, action] = decodeId<ControlButtonID>(selection.data.customId!);
 
 			switch (action) {
-				case 'PREVIOUS':
+				case 'previous':
 					if (!isFirst) data.pageIndex--;
 					break;
-				case 'NEXT':
+				case 'next':
 					if (!isLast) data.pageIndex++;
 					break;
 			}
@@ -164,7 +160,7 @@ function generateEmbed(
 			userId: interaction.user.id,
 			limit: 1,
 			onCollect: (bot, selection) => {
-				const indexString = <string | undefined> selection.data?.values?.at(0);
+				const indexString = selection.data?.values?.at(0) as string | undefined;
 				if (indexString === undefined) return;
 
 				const index = Number(indexString);
@@ -180,7 +176,11 @@ function generateEmbed(
 							type: InteractionResponseTypes.ChannelMessageWithSource,
 							data: {
 								embeds: [{
-									description: localise(Commands.music.options.remove.strings.failedToRemoveSong, interaction.locale),
+									description: localise(
+										client,
+										'music.options.remove.strings.failedToRemoveSong',
+										interaction.locale,
+									)(),
 									color: constants.colors.dullYellow,
 								}],
 							},
@@ -188,7 +188,7 @@ function generateEmbed(
 					);
 				}
 
-				const removedString = localise(Commands.music.options.remove.strings.removed.header, defaultLocale);
+				const removedString = localise(client, 'music.options.remove.strings.removed.header', defaultLocale)();
 
 				return void sendInteractionResponse(
 					bot,
@@ -198,10 +198,12 @@ function generateEmbed(
 						type: InteractionResponseTypes.ChannelMessageWithSource,
 						data: {
 							embeds: [{
-								title: `❌ ${removedString}`,
-								description: localise(Commands.music.options.remove.strings.removed.body, defaultLocale)(
-									songListing.content.title,
-									mention(selection.user.id, MentionTypes.User),
+								title: `${constants.symbols.music.removed} ${removedString}`,
+								description: localise(client, 'music.options.remove.strings.removed.body', defaultLocale)(
+									{
+										'title': songListing.content.title,
+										'user_mention': mention(selection.user.id, MentionTypes.User),
+									},
 								),
 								color: constants.colors.invisible,
 							}],
@@ -215,7 +217,7 @@ function generateEmbed(
 	if (pages.at(0)?.length === 0) {
 		return {
 			embeds: [{
-				description: localise(Commands.music.options.remove.strings.noListingToRemove, locale),
+				description: localise(client, 'music.options.remove.strings.noListingToRemove', locale)(),
 				color: constants.colors.blue,
 			}],
 			components: [],
@@ -224,9 +226,9 @@ function generateEmbed(
 
 	return {
 		embeds: [{
-			description: localise(Commands.music.options.remove.strings.selectSongToRemove, locale),
+			description: localise(client, 'music.options.remove.strings.selectSongToRemove', locale)(),
 			color: constants.colors.blue,
-			footer: isLast ? undefined : { text: localise(Misc.continuedOnNextPage, locale) },
+			footer: isLast ? undefined : { text: localise(client, 'interactions.continuedOnNextPage', locale)() },
 		}],
 		components: [
 			generateSelectMenu(data, pages, selectMenuCustomId),
@@ -254,34 +256,6 @@ function generateSelectMenu(data: RemoveListingData, pages: SongListing[][], sel
 			),
 		}],
 	};
-}
-
-function generateButtons(buttonsCustomId: string, isFirst: boolean, isLast: boolean): MessageComponents {
-	const buttons: ButtonComponent[] = [];
-
-	if (!isFirst) {
-		buttons.push({
-			type: MessageComponentTypes.Button,
-			customId: `${buttonsCustomId}|PREVIOUS`,
-			style: ButtonStyles.Secondary,
-			label: '«',
-		});
-	}
-
-	if (!isLast) {
-		buttons.push({
-			type: MessageComponentTypes.Button,
-			customId: `${buttonsCustomId}|NEXT`,
-			style: ButtonStyles.Secondary,
-			label: '»',
-		});
-	}
-
-	// @ts-ignore: It is guaranteed that there will be fewer than five buttons.
-	return buttons.length === 0 ? [] : [{
-		type: MessageComponentTypes.ActionRow,
-		components: buttons,
-	}];
 }
 
 export default command;

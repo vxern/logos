@@ -1,13 +1,8 @@
-import { Localisations } from 'logos/assets/localisations/mod.ts';
 import { Language } from 'logos/types.ts';
 
 /** Represents a selectable role within a role selection menu.  */
 interface Role {
-	/** Role name corresponding to the guild role name. */
-	name: Localisations<string>;
-
-	/** Description of this role's purpose. */
-	description?: Localisations<string>;
+	id: string;
 
 	/** Emoji to be displayed next to the role name. */
 	emoji?: string;
@@ -31,11 +26,8 @@ type RoleCategoryBase = {
 	/** The type of this category. */
 	type: RoleCategoryTypes;
 
-	/** The display name of this category. */
-	name: Localisations<string>;
-
-	/** A description for what roles or role categories this role category contains. */
-	description: Localisations<string>;
+	/** This category's identifier. */
+	id?: string;
 
 	/** The colour to be displayed in the embed message when this category is selected. */
 	color: number;
@@ -45,7 +37,7 @@ type RoleCategoryBase = {
 };
 
 /** The base of a group of role categories. */
-type RoleCategoryGroup = {
+type RoleCategoryGroup = RoleCategoryBase & {
 	type: RoleCategoryTypes.CategoryGroup;
 
 	/** The subcategories in this role category. */
@@ -53,22 +45,27 @@ type RoleCategoryGroup = {
 };
 
 /** The base of a standalone role category. */
-interface RoleCategoryStandalone {
+type RoleCategoryStandalone = RoleCategoryBase & {
 	type: RoleCategoryTypes.Category;
 
 	collection: RoleCollection;
 
 	maximum?: number;
 	minimum?: number;
-}
+};
 
 /** Represents a thematic selection of {@link Role}s. */
 type RoleCategory =
-	& RoleCategoryBase
-	& (
-		| RoleCategoryGroup
-		| RoleCategoryStandalone
-	);
+	| RoleCategoryGroup
+	| RoleCategoryStandalone;
+
+function isCategoryGroup(category: RoleCategory): category is RoleCategoryGroup {
+	return category.type === RoleCategoryTypes.CategoryGroup;
+}
+
+function isCategory(category: RoleCategory): category is RoleCategoryStandalone {
+	return category.type === RoleCategoryTypes.Category;
+}
 
 /** The type of role collection. */
 enum RoleCollectionTypes {
@@ -90,7 +87,7 @@ type RoleCollectionBase = {
 };
 
 /** The base of a role collection with a standalone group of roles. */
-type RoleCollectionStandalone = {
+type RoleCollectionStandalone = RoleCollectionBase & {
 	type: RoleCollectionTypes.Collection;
 
 	/** The roles in this role collection. */
@@ -98,7 +95,7 @@ type RoleCollectionStandalone = {
 };
 
 /** The base of a role collection with localised groups of roles. */
-type RoleCollectionLocalised = {
+type RoleCollectionLocalised = RoleCollectionBase & {
 	type: RoleCollectionTypes.CollectionLocalised;
 
 	/** Groups of roles defined by language in this role collection. */
@@ -106,9 +103,15 @@ type RoleCollectionLocalised = {
 };
 
 /** Represents a grouping of roles. */
-type RoleCollection =
-	& RoleCollectionBase
-	& (RoleCollectionStandalone | RoleCollectionLocalised);
+type RoleCollection = RoleCollectionStandalone | RoleCollectionLocalised;
 
-export { RoleCategoryTypes, RoleCollectionTypes };
+function isStandalone(collection: RoleCollection): collection is RoleCollectionStandalone {
+	return collection.type === RoleCollectionTypes.Collection;
+}
+
+function isLocalised(collection: RoleCollection): collection is RoleCollectionLocalised {
+	return collection.type === RoleCollectionTypes.CollectionLocalised;
+}
+
+export { isCategory, isCategoryGroup, isLocalised, isStandalone, RoleCategoryTypes, RoleCollectionTypes };
 export type { Role, RoleCategory, RoleCategoryBase, RoleCategoryStandalone, RoleCollection };
