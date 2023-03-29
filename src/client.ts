@@ -386,7 +386,7 @@ function withCaching(
 		if (payload.member !== undefined && payload.guild_id !== undefined) {
 			const guildId = bot.transformers.snowflake(payload.guild_id);
 
-			const member = bot.transformers.member(bot, payload.member, guildId, user.id);
+			const member = bot.transformers.member(bot, { ...payload.member, user: payload.author }, guildId, user.id);
 
 			const memberSnowflake = bot.transformers.snowflake(`${member.id}${member.guildId}`);
 
