@@ -872,9 +872,16 @@ function createLocalisations(localisations: Map<string, Map<Language, string>>):
 function localise(client: Client, key: string, locale: string | undefined): (args?: Record<string, unknown>) => string {
 	const language = (locale !== undefined ? getLanguageByLocale(locale as Locales) : undefined) ?? defaultLanguage;
 
-	const localise = client.localisations.get(key)?.get(language) ?? (() => key);
+	const getLocalisation = client.localisations.get(key)?.get(language) ?? (() => key);
 
-	return ((args) => localise(args ?? {}));
+	return ((args) => {
+		const string = getLocalisation(args ?? {});
+		if (language !== defaultLanguage && string.trim().length === 0) {
+			return localise(client, key, undefined)(args ?? {});
+		}
+
+		return string;
+	});
 }
 
 function toDiscordLocalisations(
