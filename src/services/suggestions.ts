@@ -271,7 +271,7 @@ function registerSuggestionHandler(
 		async (bot, selection) => {
 			const isResolved = decodeId<SuggestionPromptButtonID>(selection.data!.customId!)[4] === 'true';
 
-      console.debug(isResolved);
+			console.debug(isResolved);
 
 			const suggestions = client.database.adapters.suggestions.get(client, 'authorAndGuild', [
 				authorReference,
@@ -283,12 +283,16 @@ function registerSuggestionHandler(
 			if (suggestion === undefined) return;
 
 			if (isResolved && suggestion.data.isResolved) {
+				const strings = {
+					alreadyMarkedAsResolved: localise(client, 'alreadyMarkedAsResolved', defaultLocale)(),
+				};
+
 				return void sendInteractionResponse(bot, selection.id, selection.token, {
 					type: InteractionResponseTypes.ChannelMessageWithSource,
 					data: {
 						flags: ApplicationCommandFlags.Ephemeral,
 						embeds: [{
-							description: localise(client, 'alreadyMarkedAsResolved', defaultLocale)(),
+							description: strings.alreadyMarkedAsResolved,
 							color: constants.colors.dullYellow,
 						}],
 					},
@@ -296,12 +300,16 @@ function registerSuggestionHandler(
 			}
 
 			if (!isResolved && !suggestion.data.isResolved) {
+				const strings = {
+					alreadyMarkedAsUnresolved: localise(client, 'alreadyMarkedAsUnresolved', defaultLocale)(),
+				};
+
 				return void sendInteractionResponse(bot, selection.id, selection.token, {
 					type: InteractionResponseTypes.ChannelMessageWithSource,
 					data: {
 						flags: ApplicationCommandFlags.Ephemeral,
 						embeds: [{
-							description: localise(client, 'alreadyMarkedAsUnresolved', defaultLocale)(),
+							description: strings.alreadyMarkedAsUnresolved,
 							color: constants.colors.dullYellow,
 						}],
 					},
@@ -340,6 +348,16 @@ function getSuggestionPrompt(
 ): CreateMessage {
 	const suggestionReferenceId = stringifyValue(suggestionDocument.ref);
 
+	const strings = {
+		suggestion: {
+			submittedBy: localise(client, 'submittedBy', defaultLocale)(),
+			submittedAt: localise(client, 'submittedAt', defaultLocale)(),
+			suggestion: localise(client, 'suggestion.suggestion', defaultLocale)(),
+		},
+		markAsResolved: localise(client, 'markAsResolved', defaultLocale)(),
+		markAsUnresolved: localise(client, 'markAsUnresolved', defaultLocale)(),
+	};
+
 	return {
 		embeds: [{
 			title: diagnosticMentionUser(author),
@@ -356,15 +374,15 @@ function getSuggestionPrompt(
 			})(),
 			fields: [
 				{
-					name: localise(client, 'submittedBy', defaultLocale)(),
+					name: strings.suggestion.submittedBy,
 					value: mention(author.id, MentionTypes.User),
 				},
 				{
-					name: localise(client, 'submittedAt', defaultLocale)(),
+					name: strings.suggestion.submittedAt,
 					value: timestamp(suggestionDocument.data.createdAt),
 				},
 				{
-					name: localise(client, 'suggestion.suggestion', defaultLocale)(),
+					name: strings.suggestion.suggestion,
 					value: suggestionDocument.data.suggestion,
 				},
 			],
@@ -377,7 +395,7 @@ function getSuggestionPrompt(
 					? {
 						type: MessageComponentTypes.Button,
 						style: ButtonStyles.Primary,
-						label: localise(client, 'markAsResolved', defaultLocale)(),
+						label: strings.markAsResolved,
 						customId: encodeId<SuggestionPromptButtonID>(
 							constants.staticComponentIds.reports,
 							[author.id.toString(), guild.id.toString(), suggestionReferenceId, `${true}`],
@@ -386,7 +404,7 @@ function getSuggestionPrompt(
 					: {
 						type: MessageComponentTypes.Button,
 						style: ButtonStyles.Secondary,
-						label: localise(client, 'markAsUnresolved', defaultLocale)(),
+						label: strings.markAsUnresolved,
 						customId: encodeId<SuggestionPromptButtonID>(
 							constants.staticComponentIds.reports,
 							[author.id.toString(), guild.id.toString(), suggestionReferenceId, `${false}`],

@@ -33,6 +33,10 @@ async function handleClearTimeout([client, bot]: [Client, Bot], interaction: Int
 	const notTimedOut = timedOutUntil === undefined || timedOutUntil < Date.now();
 
 	if (notTimedOut) {
+		const strings = {
+			notTimedOut: localise(client, 'timeout.strings.notTimedOut', interaction.locale)(),
+		};
+
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -42,7 +46,7 @@ async function handleClearTimeout([client, bot]: [Client, Bot], interaction: Int
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(client, 'timeout.strings.notTimedOut', interaction.locale)(),
+						description: strings.notTimedOut,
 						color: constants.colors.dullYellow,
 					}],
 				},
@@ -53,8 +57,15 @@ async function handleClearTimeout([client, bot]: [Client, Bot], interaction: Int
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (guild === undefined) return;
 
-	await editMember(bot, interaction.guildId!, member.id, { communicationDisabledUntil: null }),
-		logEvent([client, bot], guild, 'memberTimeoutRemove', [member, interaction.user]);
+	await editMember(bot, interaction.guildId!, member.id, { communicationDisabledUntil: null });
+
+	logEvent([client, bot], guild, 'memberTimeoutRemove', [member, interaction.user]);
+
+	const strings = {
+		timeoutCleared: localise(client, 'timeout.strings.timeoutCleared', interaction.locale)(
+			{ 'user_mention': diagnosticMentionUser(member.user!) },
+		),
+	};
 
 	sendInteractionResponse(
 		bot,
@@ -65,9 +76,7 @@ async function handleClearTimeout([client, bot]: [Client, Bot], interaction: Int
 			data: {
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
-					description: localise(client, 'timeout.strings.timeoutCleared', interaction.locale)(
-						{ 'user_mention': diagnosticMentionUser(member.user!) },
-					),
+					description: strings.timeoutCleared,
 					color: constants.colors.lightGreen,
 				}],
 			},

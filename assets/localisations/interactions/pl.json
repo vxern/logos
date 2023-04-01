@@ -1,7 +1,9 @@
 {
-	"interactions.invalidUser": "Nieprawidłowy użytkownik.",
 	"interactions.continuedOnNextPage": "Kontynuacja na następnej stronie...",
 	"interactions.page": "Strona",
-	"interactions.usedCommandTooManyTimes": "Użyłeś/aś polecenia zbyt wiele razy w zbyt krótkim czasie.",
-	"interactions.canUseCommandIn": "Ponownie będziesz mógł/mogła użyć polecenia {relative_timestamp}."
+	"interactions.invalidUser.title": "Nieprawidłowy użytkownik",
+	"interactions.invalidUser.description": "",
+	"interactions.rateLimited.title": "Przekroczono limit żądań",
+	"interactions.rateLimited.description.usedTooManyTimes": "Użyłeś/aś polecenia zbyt wiele razy ({times}) w zbyt krótkim okresie czasu.",
+	"interactions.rateLimited.description.cannotUseAgainUntil": "Będziesz mógł/mogła ponownie użyć polecenia {relative_timestamp}."
 }

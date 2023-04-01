@@ -11,14 +11,19 @@ const lastUpdatedAt = new Date(2023, 2, 19);
 
 function generateWelcomeNotice([client, _]: [Client, Bot], guild: Guild): CreateMessage {
 	const updateString = getLastUpdateString(client, lastUpdatedAt, defaultLocale);
-	const welcomeString = localise(client, 'entry.welcome.toEnter', defaultLocale)(
-		{ 'information_channel_mention': getChannelMention(guild, configuration.guilds.channels.information) },
-	);
+
+	const strings = {
+		title: localise(client, 'entry.welcome.welcome', defaultLocale)({ 'guild_name': guild.name }),
+		toEnter: localise(client, 'entry.welcome.toEnter', defaultLocale)(
+			{ 'information_channel_mention': getChannelMention(guild, configuration.guilds.channels.information) },
+		),
+		acceptedRules: localise(client, 'entry.welcome.acceptedRules', defaultLocale)(),
+	};
 
 	return {
 		embeds: [{
-			title: localise(client, 'entry.welcome.welcome', defaultLocale)({ 'guild_name': guild.name }),
-			description: `${updateString}\n\n${welcomeString}`,
+			title: strings.title,
+			description: `${updateString}\n\n${strings.toEnter}`,
 			color: constants.colors.orange,
 		}],
 		components: [{
@@ -26,7 +31,7 @@ function generateWelcomeNotice([client, _]: [Client, Bot], guild: Guild): Create
 			components: [{
 				type: MessageComponentTypes.Button,
 				style: ButtonStyles.Secondary,
-				label: localise(client, 'entry.welcome.acceptedRules', defaultLocale)(),
+				label: strings.acceptedRules,
 				customId: constants.staticComponentIds.acceptedRules,
 				emoji: { name: constants.symbols.understood },
 			}],

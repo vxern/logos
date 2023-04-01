@@ -119,18 +119,33 @@ async function handlePardonUser([client, bot]: [Client, Bot], interaction: Inter
 
 	const warningToDelete = relevantWarnings.find((relevantWarning) => relevantWarning.ref.value.id === warning);
 	if (warningToDelete === undefined) {
-		return displayError(bot, interaction, localise(client, 'pardon.strings.invalidWarning', interaction.locale)());
+		const strings = {
+			invalidWarning: localise(client, 'pardon.strings.invalidWarning', interaction.locale)(),
+		};
+
+		return displayError(bot, interaction, strings.invalidWarning);
 	}
 
 	const deletedWarning = await client.database.adapters.warnings.delete(client, warningToDelete);
 	if (deletedWarning === undefined) {
-		return displayError(bot, interaction, localise(client, 'pardon.strings.failed', interaction.locale)());
+		const strings = {
+			failed: localise(client, 'pardon.strings.failed', interaction.locale)(),
+		};
+
+		return displayError(bot, interaction, strings.failed);
 	}
 
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (guild === undefined) return;
 
 	logEvent([client, bot], guild, 'memberWarnRemove', [member, deletedWarning.data, interaction.user]);
+
+	const strings = {
+		pardoned: localise(client, 'pardon.strings.pardoned', interaction.locale)({
+			'user_mention': mention(member.id, MentionTypes.User),
+			'reason': deletedWarning.data.reason,
+		}),
+	};
 
 	sendInteractionResponse(
 		bot,
@@ -141,12 +156,7 @@ async function handlePardonUser([client, bot]: [Client, Bot], interaction: Inter
 			data: {
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
-					description: localise(client, 'pardon.strings.pardoned', interaction.locale)(
-						{
-							'user_mention': mention(member.id, MentionTypes.User),
-							'reason': deletedWarning.data.reason,
-						},
-					),
+					description: strings.pardoned,
 					color: constants.colors.lightGreen,
 				}],
 			},
@@ -167,6 +177,10 @@ function displayErrorOrEmptyChoices([client, bot]: [Client, Bot], interaction: I
 		);
 	}
 
+	const strings = {
+		failed: localise(client, 'pardon.strings.failed', interaction.locale)(),
+	};
+
 	return void sendInteractionResponse(
 		bot,
 		interaction.id,
@@ -176,7 +190,7 @@ function displayErrorOrEmptyChoices([client, bot]: [Client, Bot], interaction: I
 			data: {
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
-					description: localise(client, 'pardon.strings.failed', interaction.locale)(),
+					description: strings.failed,
 					color: constants.colors.red,
 				}],
 			},

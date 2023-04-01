@@ -45,6 +45,10 @@ async function handlePraiseUser([client, bot]: [Client, Bot], interaction: Inter
 	if (member === undefined) return;
 
 	if (member.id === interaction.member?.id) {
+		const strings = {
+			cannotPraiseSelf: localise(client, 'praise.strings.cannotPraiseSelf', interaction.locale)(),
+		};
+
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -54,7 +58,7 @@ async function handlePraiseUser([client, bot]: [Client, Bot], interaction: Inter
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(client, 'praise.strings.cannotPraiseSelf', interaction.locale)(),
+						description: strings.cannotPraiseSelf,
 						color: constants.colors.dullYellow,
 					}],
 				},
@@ -84,12 +88,16 @@ async function handlePraiseUser([client, bot]: [Client, Bot], interaction: Inter
 
 	const praises = Array.from(praisesBySender.values());
 	if (!verifyIsWithinLimits(praises, configuration.commands.praise.limitUses, configuration.commands.praise.within)) {
+		const strings = {
+			waitBeforePraising: localise(client, 'praise.strings.waitBeforePraising', interaction.locale)(),
+		};
+
 		return void editOriginalInteractionResponse(
 			bot,
 			interaction.token,
 			{
 				embeds: [{
-					description: localise(client, 'praise.strings.waitBeforePraising', interaction.locale)(),
+					description: strings.waitBeforePraising,
 					color: constants.colors.dullYellow,
 				}],
 			},
@@ -111,14 +119,18 @@ async function handlePraiseUser([client, bot]: [Client, Bot], interaction: Inter
 
 	logEvent([client, bot], guild, 'praiseAdd', [member, praise, interaction.user]);
 
+	const strings = {
+		praised: localise(client, 'praise.strings.praised', interaction.locale)(
+			{ 'user_mention': mention(member.id, MentionTypes.User) },
+		),
+	};
+
 	return void editOriginalInteractionResponse(
 		bot,
 		interaction.token,
 		{
 			embeds: [{
-				description: localise(client, 'praise.strings.praised', interaction.locale)(
-					{ 'user_mention': mention(member.id, MentionTypes.User) },
-				),
+				description: strings.praised,
 				color: constants.colors.lightGreen,
 			}],
 		},
@@ -126,12 +138,16 @@ async function handlePraiseUser([client, bot]: [Client, Bot], interaction: Inter
 }
 
 function showError([client, bot]: [Client, Bot], interaction: Interaction): void {
+	const strings = {
+		failed: localise(client, 'praise.strings.failed', interaction.locale)(),
+	};
+
 	return void editOriginalInteractionResponse(
 		bot,
 		interaction.token,
 		{
 			embeds: [{
-				description: localise(client, 'praise.strings.failed', interaction.locale)(),
+				description: strings.failed,
 				color: constants.colors.red,
 			}],
 		},

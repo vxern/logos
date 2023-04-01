@@ -16,15 +16,18 @@ function displayListings(
 ): void {
 	const pages = chunk(songListings, configuration.music.limits.songs.page);
 
+	const strings = {
+		title: localise(client, 'music.strings.listings', locale)(),
+		listEmpty: localise(client, 'music.strings.listEmpty', locale)(),
+	};
+
 	return paginate([client, bot], interaction, {
 		elements: pages,
 		embed: { title: title, color: constants.colors.blue },
 		view: {
-			title: localise(client, 'music.strings.listings', locale)(),
+			title: strings.title,
 			generate: (page, pageIndex) => {
-				if (page.length === 0) {
-					return localise(client, 'music.strings.listEmpty', locale)();
-				}
+				if (page.length === 0) return strings.listEmpty;
 
 				return list(
 					page.map((listing, index) => {

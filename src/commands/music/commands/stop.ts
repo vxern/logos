@@ -32,6 +32,10 @@ function handleStopPlayback([client, bot]: [Client, Bot], interaction: Interacti
 
 	const botVoiceState = getVoiceState(client, interaction.guildId!, bot.id);
 	if (botVoiceState === undefined) {
+		const strings = {
+			notPlayingMusic: localise(client, 'music.strings.notPlayingMusic', interaction.locale)(),
+		};
+
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -41,7 +45,7 @@ function handleStopPlayback([client, bot]: [Client, Bot], interaction: Interacti
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(client, 'music.strings.notPlayingMusic', interaction.locale)(),
+						description: strings.notPlayingMusic,
 						color: constants.colors.dullYellow,
 					}],
 				},
@@ -51,7 +55,10 @@ function handleStopPlayback([client, bot]: [Client, Bot], interaction: Interacti
 
 	reset(client, interaction.guildId!);
 
-	const stoppedString = localise(client, 'music.options.stop.strings.stopped.header', defaultLocale)();
+	const strings = {
+		title: localise(client, 'music.options.stop.strings.stopped.title', defaultLocale)(),
+		description: localise(client, 'music.options.stop.strings.stopped.description', defaultLocale)(),
+	};
 
 	return void sendInteractionResponse(
 		bot,
@@ -61,8 +68,8 @@ function handleStopPlayback([client, bot]: [Client, Bot], interaction: Interacti
 			type: InteractionResponseTypes.ChannelMessageWithSource,
 			data: {
 				embeds: [{
-					title: `${constants.symbols.music.stopped} ${stoppedString}`,
-					description: localise(client, 'music.options.stop.strings.stopped.body', defaultLocale)(),
+					title: `${constants.symbols.music.stopped} ${strings.title}`,
+					description: strings.description,
 					color: constants.colors.blue,
 				}],
 			},

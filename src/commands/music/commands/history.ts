@@ -25,12 +25,14 @@ function handleDisplayPlaybackHistory([client, bot]: [Client, Bot], interaction:
 
 	const locale = show ? defaultLocale : interaction.locale;
 
-	const titleString = localise(client, 'music.options.history.strings.playbackHistory', locale)();
+	const strings = {
+		title: localise(client, 'music.options.history.strings.playbackHistory', locale)(),
+	};
 
 	return displayListings(
 		[client, bot],
 		interaction,
-		{ title: `${constants.symbols.music.list} ${titleString}`, songListings: listingHistory },
+		{ title: `${constants.symbols.music.list} ${strings.title}`, songListings: listingHistory },
 		show ?? false,
 		locale,
 	);

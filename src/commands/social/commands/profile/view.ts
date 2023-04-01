@@ -39,6 +39,10 @@ async function handleDisplayProfile([client, bot]: [Client, Bot], interaction: I
 	if (target === undefined) return;
 
 	function showProfileViewFailure(): void {
+		const strings = {
+			failed: localise(client, 'profile.options.view.strings.failed', interaction.locale)(),
+		};
+
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -48,7 +52,7 @@ async function handleDisplayProfile([client, bot]: [Client, Bot], interaction: I
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(client, 'profile.options.view.strings.failed', interaction.locale)(),
+						description: strings.failed,
 						color: constants.colors.red,
 					}],
 				},
@@ -75,12 +79,17 @@ async function handleDisplayProfile([client, bot]: [Client, Bot], interaction: I
 
 	const locale = show ? defaultLocale : interaction.locale;
 
-	const rolesString = localise(client, 'profile.options.view.strings.roles', locale)();
-	const statisticsString = localise(client, 'profile.options.view.strings.statistics', locale)();
-	const praisesString = localise(client, 'profile.options.view.strings.praises', locale)();
-	const warningsString = localise(client, 'profile.options.view.strings.warnings', locale)();
-	const receivedString = localise(client, 'profile.options.view.strings.received', locale)();
-	const sentString = localise(client, 'profile.options.view.strings.sent', locale)();
+	const strings = {
+		title: localise(client, 'profile.options.view.strings.informationForUser', locale)({
+			'username': target.username,
+		}),
+		roles: localise(client, 'profile.options.view.strings.roles', locale)(),
+		statistics: localise(client, 'profile.options.view.strings.statistics', locale)(),
+		praises: localise(client, 'profile.options.view.strings.praises', locale)(),
+		warnings: localise(client, 'profile.options.view.strings.warnings', locale)(),
+		received: localise(client, 'profile.options.view.strings.received', locale)(),
+		sent: localise(client, 'profile.options.view.strings.sent', locale)(),
+	};
 
 	return void sendInteractionResponse(
 		bot,
@@ -91,9 +100,7 @@ async function handleDisplayProfile([client, bot]: [Client, Bot], interaction: I
 			data: {
 				flags: !show ? ApplicationCommandFlags.Ephemeral : undefined,
 				embeds: [{
-					title: localise(client, 'profile.options.view.strings.informationForUser', locale)({
-						'username': target.username,
-					}),
+					title: strings.title,
 					thumbnail: (() => {
 						const iconURL = getAvatarURL(
 							bot,
@@ -106,14 +113,14 @@ async function handleDisplayProfile([client, bot]: [Client, Bot], interaction: I
 						return { url: iconURL };
 					})(),
 					fields: [{
-						name: `${constants.symbols.profile.roles} ${rolesString}`,
+						name: `${constants.symbols.profile.roles} ${strings.roles}`,
 						value: member.roles.map((roleId) => mention(roleId, MentionTypes.Role)).join(' '),
 						inline: false,
 					}, {
-						name: `${constants.symbols.profile.statistics.statistics} ${statisticsString}`,
+						name: `${constants.symbols.profile.statistics.statistics} ${strings.statistics}`,
 						value:
-							`${constants.symbols.profile.statistics.praises} ${praisesString} • ${receivedString} – ${praisesReceived.size} • ${sentString} – ${praisesSent.size}
-${constants.symbols.profile.statistics.warnings} ${warningsString} • ${receivedString} – ${warningsReceived.size}`,
+							`${constants.symbols.profile.statistics.praises} ${strings.praises} • ${strings.received} – ${praisesReceived.size} • ${strings.sent} – ${praisesSent.size}
+  ${constants.symbols.profile.statistics.warnings} ${strings.warnings} • ${strings.received} – ${warningsReceived.size}`,
 						inline: false,
 					}],
 				}],

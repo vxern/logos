@@ -38,6 +38,10 @@ function handlePausePlayback([client, bot]: [Client, Bot], interaction: Interact
 	if (!isVoiceStateVerified) return;
 
 	if (!isOccupied(controller.player)) {
+		const strings = {
+			noSongToPause: localise(client, 'music.options.pause.strings.noSongToPause', interaction.locale)(),
+		};
+
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -47,7 +51,7 @@ function handlePausePlayback([client, bot]: [Client, Bot], interaction: Interact
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(client, 'music.options.pause.strings.noSongToPause', interaction.locale)(),
+						description: strings.noSongToPause,
 						color: constants.colors.dullYellow,
 					}],
 				},
@@ -61,7 +65,10 @@ function handlePausePlayback([client, bot]: [Client, Bot], interaction: Interact
 
 	pause(controller.player);
 
-	const pausedString = localise(client, 'music.options.pause.strings.paused.header', defaultLocale)();
+  const strings = {
+    title: localise(client, 'music.options.pause.strings.paused.title', defaultLocale)(),
+    description: localise(client, 'music.options.pause.strings.paused.description', defaultLocale)(),
+  }
 
 	return void sendInteractionResponse(
 		bot,
@@ -71,8 +78,8 @@ function handlePausePlayback([client, bot]: [Client, Bot], interaction: Interact
 			type: InteractionResponseTypes.ChannelMessageWithSource,
 			data: {
 				embeds: [{
-					title: `${constants.symbols.music.paused} ${pausedString}`,
-					description: localise(client, 'music.options.pause.strings.paused.body', defaultLocale)(),
+					title: `${constants.symbols.music.paused} ${strings.title}`,
+					description: strings.description,
 					color: constants.colors.invisible,
 				}],
 			},

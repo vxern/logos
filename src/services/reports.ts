@@ -319,12 +319,16 @@ function registerReportHandler(
 			if (report === undefined) return;
 
 			if (isResolved && report.data.isResolved) {
+				const strings = {
+					alreadyMarkedAsResolved: localise(client, 'alreadyMarkedAsResolved', defaultLocale)(),
+				};
+
 				return void sendInteractionResponse(bot, selection.id, selection.token, {
 					type: InteractionResponseTypes.ChannelMessageWithSource,
 					data: {
 						flags: ApplicationCommandFlags.Ephemeral,
 						embeds: [{
-							description: localise(client, 'alreadyMarkedAsResolved', defaultLocale)(),
+							description: strings.alreadyMarkedAsResolved,
 							color: constants.colors.dullYellow,
 						}],
 					},
@@ -332,12 +336,16 @@ function registerReportHandler(
 			}
 
 			if (!isResolved && !report.data.isResolved) {
+				const strings = {
+					alreadyMarkedAsUnresolved: localise(client, 'alreadyMarkedAsUnresolved', defaultLocale)(),
+				};
+
 				return void sendInteractionResponse(bot, selection.id, selection.token, {
 					type: InteractionResponseTypes.ChannelMessageWithSource,
 					data: {
 						flags: ApplicationCommandFlags.Ephemeral,
 						embeds: [{
-							description: localise(client, 'alreadyMarkedAsUnresolved', defaultLocale)(),
+							description: strings.alreadyMarkedAsUnresolved,
 							color: constants.colors.dullYellow,
 						}],
 					},
@@ -375,6 +383,21 @@ function getReportPrompt(
 	const reportReferenceId = stringifyValue(reportDocument.ref);
 	const report = reportDocument.data;
 
+	const strings = {
+		report: {
+			submittedBy: localise(client, 'submittedBy', defaultLocale)(),
+			submittedAt: localise(client, 'submittedAt', defaultLocale)(),
+			reportedUsers: localise(client, 'reports.reportedUsers', defaultLocale)(),
+			reasonForReport: localise(client, 'reports.reasonForReport', defaultLocale)(),
+			linkToMessage: localise(client, 'reports.linkToMessage', defaultLocale)(),
+		},
+		previousInfractions: {
+			title: localise(client, 'reports.previousInfractions', defaultLocale),
+		},
+		markAsResolved: localise(client, 'markAsResolved', defaultLocale)(),
+		markAsUnresolved: localise(client, 'markAsUnresolved', defaultLocale)(),
+	};
+
 	return {
 		embeds: [
 			{
@@ -392,26 +415,26 @@ function getReportPrompt(
 				})(),
 				fields: [
 					{
-						name: localise(client, 'submittedBy', defaultLocale)(),
+						name: strings.report.submittedBy,
 						value: mention(author.id, MentionTypes.User),
 					},
 					{
-						name: localise(client, 'submittedAt', defaultLocale)(),
+						name: strings.report.submittedAt,
 						value: timestamp(reportDocument.data.createdAt),
 					},
 					{
-						name: localise(client, 'reports.reportedUsers', defaultLocale)(),
+						name: strings.report.reportedUsers,
 						value: recipientAndWarningsTuples.map(([recipient, _recipientWarnings]) =>
 							mention(recipient.id, MentionTypes.User)
 						).join(', '),
 					},
 					{
-						name: localise(client, 'reports.reasonForReport', defaultLocale)(),
+						name: strings.report.reasonForReport,
 						value: report.reason,
 					},
 					...(report.messageLink
 						? [{
-							name: localise(client, 'reports.linkToMessage', defaultLocale)(),
+							name: strings.report.linkToMessage,
 							value: report.messageLink,
 						}]
 						: []),
@@ -420,9 +443,7 @@ function getReportPrompt(
 			},
 			...recipientAndWarningsTuples.map(([recipient, warnings]) => ({
 				...getWarningPage(client, warnings, false, defaultLocale),
-				title: localise(client, 'reports.previousInfractions', defaultLocale)(
-					{ 'username': diagnosticMentionUser(recipient, true) },
-				),
+				title: strings.previousInfractions.title({ 'username': diagnosticMentionUser(recipient, true) }),
 			})),
 		],
 		components: [{
@@ -432,7 +453,7 @@ function getReportPrompt(
 					? {
 						type: MessageComponentTypes.Button,
 						style: ButtonStyles.Primary,
-						label: localise(client, 'markAsResolved', defaultLocale)(),
+						label: strings.markAsResolved,
 						customId: encodeId<ReportPromptButtonID>(
 							constants.staticComponentIds.reports,
 							[author.id.toString(), guild.id.toString(), reportReferenceId, `${true}`],
@@ -441,7 +462,7 @@ function getReportPrompt(
 					: {
 						type: MessageComponentTypes.Button,
 						style: ButtonStyles.Secondary,
-						label: localise(client, 'markAsUnresolved', defaultLocale)(),
+						label: strings.markAsUnresolved,
 						customId: encodeId<ReportPromptButtonID>(
 							constants.staticComponentIds.reports,
 							[author.id.toString(), guild.id.toString(), reportReferenceId, `${false}`],

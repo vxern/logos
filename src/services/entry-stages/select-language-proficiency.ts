@@ -29,9 +29,13 @@ async function handleSelectLanguageProficiency(
 
 	const proficiency = proficiencies[parseInt(parameter)]!;
 
-	const requestedRole = guild.roles.array().find((role) =>
-		role.name === localise(client, `${proficiency.id}.name`, defaultLocale)()
-	);
+	const requestedRole = guild.roles.array().find((role) => {
+		const strings = {
+			name: localise(client, `${proficiency.id}.name`, defaultLocale)(),
+		};
+
+		return role.name === strings.name;
+	});
 	if (requestedRole === undefined) return;
 
 	const requiresVerification = !configuration.services.entry.verification.disabledOn.includes(guild.language);
@@ -46,17 +50,20 @@ async function handleSelectLanguageProficiency(
 		const isVerified = !userDocument?.data.account.authorisedOn?.includes(interaction.guildId!.toString());
 
 		if (isVerified) {
-			const needToVerifyString = localise(client, 'entry.verification.needToVerify', interaction.locale)({
-				'guild_name': guild.name,
-			});
-			const answerHonestlyString = localise(client, 'entry.verification.answerHonestly', interaction.locale)();
+			const strings = {
+				needToVerify: localise(client, 'entry.verification.needToVerify', interaction.locale)({
+					'guild_name': guild.name,
+				}),
+				answerHonestly: localise(client, 'entry.verification.answerHonestly', interaction.locale)(),
+				iUnderstand: localise(client, 'entry.verification.iUnderstand', interaction.locale)(),
+			};
 
 			return void sendInteractionResponse(bot, interaction.id, interaction.token, {
 				type: InteractionResponseTypes.ChannelMessageWithSource,
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: `${needToVerifyString}\n\n${answerHonestlyString}`,
+						description: `${strings.needToVerify}\n\n${strings.answerHonestly}`,
 						color: constants.colors.blue,
 					}],
 					components: [{
@@ -64,7 +71,7 @@ async function handleSelectLanguageProficiency(
 						components: [{
 							type: MessageComponentTypes.Button,
 							style: ButtonStyles.Secondary,
-							label: localise(client, 'entry.verification.iUnderstand', interaction.locale)(),
+							label: strings.iUnderstand,
 							customId: encodeId<EntryStepButtonID>(constants.staticComponentIds.requestedVerification, [
 								requestedRole.id.toString(),
 							]),

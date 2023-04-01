@@ -65,9 +65,11 @@ function handleCiteRule([client, bot]: [Client, Bot], interaction: Interaction):
 
 	const locale = show ? defaultLocale : interaction.locale;
 
-	const tldrString = localise(client, `rules.tldr`, locale)();
-	const summaryString = localise(client, `rules.${ruleId}.summary`, locale)();
-	const contentString = localise(client, `rules.${ruleId}.content`, locale)();
+	const strings = {
+		tldr: localise(client, `rules.tldr`, locale)(),
+		summary: localise(client, `rules.${ruleId}.summary`, locale)(),
+		content: localise(client, `rules.${ruleId}.content`, locale)(),
+	};
 
 	return void sendInteractionResponse(
 		bot,
@@ -79,8 +81,8 @@ function handleCiteRule([client, bot]: [Client, Bot], interaction: Interaction):
 				flags: !show ? ApplicationCommandFlags.Ephemeral : undefined,
 				embeds: [{
 					title: getRuleTitleFormatted(client, ruleId, ruleIndex, 'display', locale),
-					description: contentString,
-					footer: { text: `${tldrString}: ${summaryString}` },
+					description: strings.content,
+					footer: { text: `${strings.tldr}: ${strings.summary}` },
 					color: constants.colors.blue,
 				}],
 			},
@@ -95,18 +97,24 @@ function getRuleTitleFormatted(
 	mode: 'option' | 'display',
 	locale: string | undefined,
 ): string {
-	const ruleTitleString = localise(client, `rules.${ruleId}.title`, locale)();
-	const summaryString = localise(client, `rules.${ruleId}.summary`, locale)();
+	const strings = {
+		title: localise(client, `rules.${ruleId}.title`, locale)(),
+		summary: localise(client, `rules.${ruleId}.summary`, locale)(),
+	};
 
 	switch (mode) {
 		case 'option':
-			return `#${ruleIndex + 1} ${ruleTitleString} ~ ${summaryString}`;
+			return `#${ruleIndex + 1} ${strings.title} ~ ${strings.summary}`;
 		case 'display':
-			return `${ruleIndex + 1} - ${ruleTitleString}`;
+			return `${ruleIndex + 1} - ${strings.title}`;
 	}
 }
 
 function displayError([client, bot]: [Client, Bot], interaction: Interaction): void {
+	const strings = {
+		invalidRule: localise(client, 'rule.strings.invalidRule', interaction.locale)(),
+	};
+
 	return void sendInteractionResponse(
 		bot,
 		interaction.id,
@@ -116,7 +124,7 @@ function displayError([client, bot]: [Client, Bot], interaction: Interaction): v
 			data: {
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
-					description: localise(client, 'rule.strings.invalidRule', interaction.locale)(),
+					description: strings.invalidRule,
 					color: constants.colors.red,
 				}],
 			},

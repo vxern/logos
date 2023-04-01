@@ -1,7 +1,9 @@
 {
-	"interactions.invalidUser": "Érvénytelen felhasználó.",
 	"interactions.continuedOnNextPage": "Folytatódik a következő oldalon...",
 	"interactions.page": "",
-	"interactions.usedCommandTooManyTimes": "",
-	"interactions.canUseCommandIn": ""
+	"interactions.invalidUser.title": "Érvénytelen felhasználó",
+	"interactions.invalidUser.description": "",
+	"interactions.rateLimited.title": "",
+	"interactions.rateLimited.description.usedTooManyTimes": "",
+	"interactions.rateLimited.description.cannotUseAgainUntil": ""
 }

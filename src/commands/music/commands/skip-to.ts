@@ -54,6 +54,10 @@ async function handleSkipToTimestamp([client, bot]: [Client, Bot], interaction: 
 	const playingSince = controller.player.playingSince!;
 
 	if (!isOccupied(controller.player)) {
+		const strings = {
+			notPlayingMusic: localise(client, 'music.strings.notPlayingMusic', interaction.locale)(),
+		};
+
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -63,7 +67,7 @@ async function handleSkipToTimestamp([client, bot]: [Client, Bot], interaction: 
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(client, 'music.strings.notPlayingMusic', interaction.locale)(),
+						description: strings.notPlayingMusic,
 						color: constants.colors.dullYellow,
 					}],
 				},
@@ -72,11 +76,11 @@ async function handleSkipToTimestamp([client, bot]: [Client, Bot], interaction: 
 	}
 
 	if (Number.isNaN(timestampExpression)) {
-		return displayError(
-			bot,
-			interaction,
-			localise(client, 'timeout.strings.invalidDuration', interaction.locale)(),
-		);
+		const strings = {
+			invalidDuration: localise(client, 'timeout.strings.invalidDuration', interaction.locale)(),
+		};
+
+		return displayError(bot, interaction, strings.invalidDuration);
 	}
 
 	const timestamp = Number(timestampExpression);
@@ -89,7 +93,10 @@ async function handleSkipToTimestamp([client, bot]: [Client, Bot], interaction: 
 		skipTo(controller.player, timestamp);
 	}
 
-	const skippedToString = localise(client, 'music.options.skipTo.strings.skippedTo.header', defaultLocale)();
+	const strings = {
+		title: localise(client, 'music.options.skipTo.strings.skippedTo.title', defaultLocale)(),
+		description: localise(client, 'music.options.skipTo.strings.skippedTo.description', defaultLocale)(),
+	};
 
 	return void sendInteractionResponse(
 		bot,
@@ -99,8 +106,8 @@ async function handleSkipToTimestamp([client, bot]: [Client, Bot], interaction: 
 			type: InteractionResponseTypes.ChannelMessageWithSource,
 			data: {
 				embeds: [{
-					title: `${constants.symbols.music.skippedTo} ${skippedToString}`,
-					description: localise(client, 'music.options.skipTo.strings.skippedTo.body', defaultLocale)(),
+					title: `${constants.symbols.music.skippedTo} ${strings.title}`,
+					description: strings.description,
 					color: constants.colors.blue,
 				}],
 			},

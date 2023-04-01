@@ -68,6 +68,11 @@ async function handleDisplayWarnings([client, bot]: [Client, Bot], interaction: 
 }
 
 function displayError([client, bot]: [Client, Bot], interaction: Interaction): void {
+	const strings = {
+		title: localise(client, 'list.options.warnings.strings.failed.title', interaction.locale)(),
+		description: localise(client, 'list.options.warnings.strings.failed.description', interaction.locale)(),
+	};
+
 	return void sendInteractionResponse(
 		bot,
 		interaction.id,
@@ -77,7 +82,8 @@ function displayError([client, bot]: [Client, Bot], interaction: Interaction): v
 			data: {
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
-					description: localise(client, 'list.strings.unableToDisplayWarnings', interaction.locale)(),
+					title: strings.title,
+					description: strings.description,
 					color: constants.colors.red,
 				}],
 			},
@@ -93,24 +99,35 @@ function getWarningPage(
 ): Embed {
 	if (warnings.length === 0) {
 		if (isSelf) {
+			const strings = {
+				self: localise(client, 'list.options.warnings.strings.noActiveWarnings.self', locale)(),
+			};
+
 			return {
-				description: localise(client, 'list.strings.youHaveNoActiveWarnings', locale)(),
+				description: strings.self,
+				color: constants.colors.blue,
+			};
+		} else {
+			const strings = {
+				other: localise(client, 'list.options.warnings.strings.noActiveWarnings.other', locale)(),
+			};
+
+			return {
+				description: strings.other,
 				color: constants.colors.blue,
 			};
 		}
-
-		return {
-			description: localise(client, 'list.strings.hasNoActiveWarnings', locale)(),
-			color: constants.colors.blue,
-		};
 	}
 
-	const formatWarningString = localise(client, 'list.strings.warning', locale);
+	const strings = {
+		title: localise(client, 'list.options.warnings.strings.warnings', locale)(),
+		warning: localise(client, 'list.options.warnings.strings.warningFormatted', locale),
+	};
 
 	return {
-		title: localise(client, 'list.strings.warnings', locale)(),
+		title: strings.title,
 		fields: warnings.map((warning, index) => {
-			const warningString = formatWarningString({
+			const warningString = strings.warning({
 				'index': index + 1,
 				'relative_timestamp': timestamp(warning.data.createdAt),
 			});

@@ -68,6 +68,10 @@ async function handleMakeSuggestion([client, bot]: [Client, Bot], interaction: I
 				configuration.commands.suggestion.within,
 			)
 		) {
+			const strings = {
+				waitBeforeSuggesting: localise(client, 'suggestion.strings.waitBeforeSuggesting', interaction.locale)(),
+			};
+
 			return void sendInteractionResponse(
 				bot,
 				interaction.id,
@@ -77,7 +81,7 @@ async function handleMakeSuggestion([client, bot]: [Client, Bot], interaction: I
 					data: {
 						flags: ApplicationCommandFlags.Ephemeral,
 						embeds: [{
-							description: localise(client, 'suggestion.strings.waitBeforeSuggesting', interaction.locale)(),
+							description: strings.waitBeforeSuggesting,
 							color: constants.colors.dullYellow,
 						}],
 					},
@@ -133,11 +137,16 @@ async function handleMakeSuggestion([client, bot]: [Client, Bot], interaction: I
 				suggestionReferenceId,
 			);
 
+			const strings = {
+				title: localise(client, 'suggestion.strings.suggestionSent.title', interaction.locale)(),
+				description: localise(client, 'suggestion.strings.suggestionSent.description', interaction.locale)(),
+			};
+
 			editOriginalInteractionResponse(bot, submission.token, {
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
-					title: localise(client, 'suggestion.strings.suggestionSent.header', interaction.locale)(),
-					description: localise(client, 'suggestion.strings.suggestionSent.body', interaction.locale)(),
+					title: strings.title,
+					description: strings.description,
 					color: constants.colors.lightGreen,
 				}],
 			});
@@ -181,16 +190,22 @@ function handleSubmittedInvalidSuggestion(
 					},
 				});
 
+				const strings = {
+					areYouSureToStopSubmitting: localise(
+						client,
+						'suggestion.strings.areYouSureToStopSubmitting',
+						cancelSelection.locale,
+					)(),
+					noTakeMeBackToTheComposer: localise(client, 'prompts.noTakeMeBackToTheComposer', cancelSelection.locale)(),
+					yesLeaveTheComposer: localise(client, 'prompts.yesLeaveTheComposer', cancelSelection.locale)(),
+				};
+
 				sendInteractionResponse(bot, cancelSelection.id, cancelSelection.token, {
 					type: InteractionResponseTypes.ChannelMessageWithSource,
 					data: {
 						flags: ApplicationCommandFlags.Ephemeral,
 						embeds: [{
-							description: localise(
-								client,
-								'suggestion.strings.areYouSureToStopSubmitting',
-								cancelSelection.locale,
-							)(),
+							description: strings.areYouSureToStopSubmitting,
 							color: constants.colors.dullYellow,
 						}],
 						components: [{
@@ -198,12 +213,12 @@ function handleSubmittedInvalidSuggestion(
 							components: [{
 								type: MessageComponentTypes.Button,
 								customId: returnId,
-								label: localise(client, 'prompts.noTakeMeBackToTheComposer', cancelSelection.locale)(),
+								label: strings.noTakeMeBackToTheComposer,
 								style: ButtonStyles.Success,
 							}, {
 								type: MessageComponentTypes.Button,
 								customId: leaveId,
-								label: localise(client, 'prompts.yesLeaveTheComposer', cancelSelection.locale)(),
+								label: strings.yesLeaveTheComposer,
 								style: ButtonStyles.Danger,
 							}],
 						}],
@@ -216,15 +231,24 @@ function handleSubmittedInvalidSuggestion(
 		switch (error) {
 			case SuggestionError.Failure:
 			default: {
+				const strings = {
+					failedToSendSuggestion: localise(client, 'suggestion.strings.failedToSendSuggestion', submission.locale)(),
+				};
+
 				editOriginalInteractionResponse(bot, submission.token, {
 					embeds: [{
-						description: localise(client, 'suggestion.strings.failedToSendSuggestion', submission.locale)(),
+						description: strings.failedToSendSuggestion,
 						color: constants.colors.dullYellow,
 					}],
 				});
 				break;
 			}
 		}
+
+		const strings = {
+			continue: localise(client, 'prompts.continue', submission.locale)(),
+			cancel: localise(client, 'prompts.cancel', submission.locale)(),
+		};
 
 		editOriginalInteractionResponse(bot, submission.token, {
 			embeds: [embed],
@@ -233,12 +257,12 @@ function handleSubmittedInvalidSuggestion(
 				components: [{
 					type: MessageComponentTypes.Button,
 					customId: continueId,
-					label: localise(client, 'prompts.continue', submission.locale)(),
+					label: strings.continue,
 					style: ButtonStyles.Success,
 				}, {
 					type: MessageComponentTypes.Button,
 					customId: cancelId,
-					label: localise(client, 'prompts.cancel', submission.locale)(),
+					label: strings.cancel,
 					style: ButtonStyles.Danger,
 				}],
 			}],
@@ -247,14 +271,19 @@ function handleSubmittedInvalidSuggestion(
 }
 
 function generateSuggestionModal<T extends string>(client: Client, locale: string | undefined): Modal<T> {
-	return {
+	const strings = {
 		title: localise(client, 'suggestion.title', locale)(),
+		suggestion: localise(client, 'suggestion.fields.suggestion', locale)(),
+	};
+
+	return {
+		title: strings.title,
 		fields: [{
 			type: MessageComponentTypes.ActionRow,
 			components: [{
 				customId: 'suggestion',
 				type: MessageComponentTypes.InputText,
-				label: trim(localise(client, 'suggestion.fields.suggestion', locale)(), 45),
+				label: trim(strings.suggestion, 45),
 				style: TextStyles.Paragraph,
 				required: true,
 				minLength: 20,

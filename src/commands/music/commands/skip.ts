@@ -47,6 +47,10 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 	if (!isVoiceStateVerified) return;
 
 	if (!isOccupied(controller.player) || controller.currentListing === undefined) {
+		const strings = {
+			noSongToSkip: localise(client, 'music.options.skip.strings.noSongToSkip', interaction.locale)(),
+		};
+
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -56,7 +60,7 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(client, 'music.options.skip.strings.noSongToSkip', interaction.locale)(),
+						description: strings.noSongToSkip,
 						color: constants.colors.dullYellow,
 					}],
 				},
@@ -65,16 +69,18 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 	}
 
 	if (collection !== undefined && !isCollection(controller.currentListing?.content)) {
-		const noSongCollectionToSkipString = localise(
-			client,
-			'music.options.skip.strings.noSongCollectionToSkip',
-			interaction.locale,
-		)();
-		const trySkippingSong = localise(
-			client,
-			'music.options.skip.strings.trySkippingSong',
-			interaction.locale,
-		)();
+		const strings = {
+			noSongCollectionToSkip: localise(
+				client,
+				'music.options.skip.strings.noSongCollectionToSkip',
+				interaction.locale,
+			)(),
+			trySkippingSong: localise(
+				client,
+				'music.options.skip.strings.trySkippingSong',
+				interaction.locale,
+			)(),
+		};
 
 		return void sendInteractionResponse(
 			bot,
@@ -85,7 +91,7 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: `${noSongCollectionToSkipString}\n\n${trySkippingSong}`,
+						description: `${strings.noSongCollectionToSkip}\n\n${strings.trySkippingSong}`,
 						color: constants.colors.dullYellow,
 					}],
 				},
@@ -95,6 +101,10 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 
 	// If both the 'to' and the 'by' parameter have been supplied.
 	if (songsToSkip !== undefined && songToSkipTo !== undefined) {
+		const strings = {
+			tooManySkipArguments: localise(client, 'music.strings.tooManySkipArguments', interaction.locale)(),
+		};
+
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -104,7 +114,7 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(client, 'music.strings.tooManySkipArguments', interaction.locale)(),
+						description: strings.tooManySkipArguments,
 						color: constants.colors.red,
 					}],
 				},
@@ -114,6 +124,10 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 
 	// If either the 'to' parameter or the 'by' parameter are negative.
 	if ((songsToSkip !== undefined && songsToSkip <= 0) || (songToSkipTo !== undefined && songToSkipTo <= 0)) {
+		const strings = {
+			mustBeGreaterThanZero: localise(client, 'music.strings.mustBeGreaterThanZero', interaction.locale)(),
+		};
+
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -123,7 +137,7 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(client, 'music.strings.mustBeGreaterThanZero', interaction.locale)(),
+						description: strings.mustBeGreaterThanZero,
 						color: constants.colors.red,
 					}],
 				},
@@ -156,11 +170,15 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 		skip(controller, isSkippingCollection, {});
 	}
 
-	const messageLocalisations = (collection ?? false)
-		? 'music.options.skip.strings.skippedSongCollection'
-		: 'music.options.skip.strings.skippedSong';
-
-	const messageString = localise(client, `${messageLocalisations}.header`, defaultLocale)();
+	const strings = collection ?? false
+		? {
+			title: localise(client, 'music.options.skip.strings.skippedSongCollection.title', defaultLocale)(),
+			description: localise(client, 'music.options.skip.strings.skippedSongCollection.description', defaultLocale)(),
+		}
+		: {
+			title: localise(client, 'music.options.skip.strings.skippedSong.title', defaultLocale)(),
+			description: localise(client, 'music.options.skip.strings.skippedSong.description', defaultLocale)(),
+		};
 
 	return void sendInteractionResponse(
 		bot,
@@ -170,8 +188,8 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 			type: InteractionResponseTypes.ChannelMessageWithSource,
 			data: {
 				embeds: [{
-					title: `${constants.symbols.music.skipped} ${messageString}`,
-					description: localise(client, `${messageLocalisations}.body`, defaultLocale)(),
+					title: `${constants.symbols.music.skipped} ${strings.title}`,
+					description: strings.description,
 					color: constants.colors.invisible,
 				}],
 			},

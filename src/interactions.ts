@@ -214,7 +214,10 @@ function getPageEmbed<T>(
 	isLast: boolean,
 	locale: string | undefined,
 ): Embed {
-	const pageString = localise(client, 'interactions.page', locale)();
+	const strings = {
+		page: localise(client, 'interactions.page', locale)(),
+		continuedOnNextPage: localise(client, 'interactions.continuedOnNextPage', locale)(),
+	};
 
 	return {
 		...embed,
@@ -222,12 +225,12 @@ function getPageEmbed<T>(
 			{
 				name: data.elements.length === 1
 					? data.view.title
-					: `${data.view.title} ~ ${pageString} ${data.pageIndex + 1}/${data.elements.length}`,
+					: `${data.view.title} ~ ${strings.page} ${data.pageIndex + 1}/${data.elements.length}`,
 				value: data.view.generate(data.elements.at(data.pageIndex)!, data.pageIndex),
 			},
 			...(embed.fields ?? []),
 		],
-		footer: isLast ? undefined : { text: localise(client, 'interactions.continuedOnNextPage', locale)() },
+		footer: isLast ? undefined : { text: strings.continuedOnNextPage },
 	};
 }
 
@@ -384,13 +387,25 @@ function parseShortTimeExpression(
 
 	let correctedExpression = '';
 	if (seconds !== undefined && seconds !== 0) {
-		correctedExpression += `${seconds} ${localise(client, 'units.second', locale)({ 'number': seconds })} `;
+		const strings = {
+			second: localise(client, 'units.second', locale)({ 'number': seconds }),
+		};
+
+		correctedExpression += `${seconds} ${strings.second}`;
 	}
 	if (minutes !== undefined && minutes !== 0) {
-		correctedExpression += `${minutes} ${localise(client, 'units.minute', locale)({ 'number': minutes })} `;
+		const strings = {
+			minute: localise(client, 'units.minute', locale)({ 'number': minutes }),
+		};
+
+		correctedExpression += `${minutes} ${strings.minute}`;
 	}
 	if (hours !== undefined) {
-		correctedExpression += `${hours} ${localise(client, 'units.hour', locale)({ 'number': hours })}`;
+		const strings = {
+			hour: localise(client, 'units.hour', locale)({ 'number': minutes }),
+		};
+
+		correctedExpression += `${hours} ${strings.hour}`;
 	}
 
 	return parseTimeExpressionPhrase(client, correctedExpression, locale);
@@ -489,7 +504,11 @@ function parseTimeExpressionPhrase(
 	const timeExpressions = [];
 	let total = 0;
 	for (const [timeUnit, quantifier] of timeUnitQuantifierTuples) {
-		timeExpressions.push(localise(client, `units.${timeUnit}`, locale)({ 'number': quantifier }));
+		const strings = {
+			unit: localise(client, `units.${timeUnit}`, locale)({ 'number': quantifier }),
+		};
+
+		timeExpressions.push(strings.unit);
 
 		total += quantifier * timeUnitToPeriod[timeUnit];
 	}

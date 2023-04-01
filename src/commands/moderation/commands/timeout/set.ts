@@ -61,27 +61,35 @@ async function handleSetTimeout([client, bot]: [Client, Bot], interaction: Inter
 	const durationParsed = Number(duration);
 
 	if (Number.isNaN(duration)) {
-		return displayError(
-			bot,
-			interaction,
-			localise(client, 'timeout.strings.invalidDuration', interaction.locale)(),
-		);
+		const strings = {
+			invalidDuration: localise(client, 'timeout.strings.invalidDuration', interaction.locale)(),
+		};
+
+		return displayError(bot, interaction, strings.invalidDuration);
 	}
 
 	if (durationParsed < Periods.minute) {
-		return displayError(
-			bot,
-			interaction,
-			localise(client, 'timeout.strings.durationCannotBeLessThanOneMinute', interaction.locale)(),
-		);
+		const strings = {
+			durationCannotBeLessThanOneMinute: localise(
+				client,
+				'timeout.strings.durationCannotBeLessThanOneMinute',
+				interaction.locale,
+			)(),
+		};
+
+		return displayError(bot, interaction, strings.durationCannotBeLessThanOneMinute);
 	}
 
 	if (durationParsed > Periods.week) {
-		return displayError(
-			bot,
-			interaction,
-			localise(client, 'timeout.strings.durationMustBeShorterThanWeek', interaction.locale)(),
-		);
+		const strings = {
+			durationMustBeShorterThanWeek: localise(
+				client,
+				'timeout.strings.durationMustBeShorterThanWeek',
+				interaction.locale,
+			)(),
+		};
+
+		return displayError(bot, interaction, strings.durationMustBeShorterThanWeek);
 	}
 
 	const until = Date.now() + durationParsed;
@@ -89,20 +97,25 @@ async function handleSetTimeout([client, bot]: [Client, Bot], interaction: Inter
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (guild === undefined) return;
 
-	await editMember(bot, interaction.guildId!, member.id, { communicationDisabledUntil: until }),
-		logEvent([client, bot], guild, 'memberTimeoutAdd', [member, until, reason!, interaction.user]);
+	await editMember(bot, interaction.guildId!, member.id, { communicationDisabledUntil: until });
+
+	logEvent([client, bot], guild, 'memberTimeoutAdd', [member, until, reason!, interaction.user]);
+
+	const strings = {
+		timedOut: localise(client, 'timeout.strings.timedOut', interaction.locale)(
+			{
+				'user_mention': mention(member.id, MentionTypes.User),
+				'relative_timestamp': timestamp(until),
+			},
+		),
+	};
 
 	sendInteractionResponse(bot, interaction.id, interaction.token, {
 		type: InteractionResponseTypes.ChannelMessageWithSource,
 		data: {
 			flags: ApplicationCommandFlags.Ephemeral,
 			embeds: [{
-				description: localise(client, 'timeout.strings.timedOut', interaction.locale)(
-					{
-						'user_mention': mention(member.id, MentionTypes.User),
-						'relative_timestamp': timestamp(until),
-					},
-				),
+				description: strings.timedOut,
 				color: constants.colors.blue,
 			}],
 		},

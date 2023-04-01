@@ -439,23 +439,31 @@ function withRateLimiting(handle: InteractionHandler): InteractionHandler {
 			const now = Date.now();
 			const nextValidUsageTimestamp = timestamp(now + configuration.rateLimiting.within - (now - firstTimestamp));
 
-			const usedCommandTooManyTimesString = localise(
-				client,
-				'interactions.usedCommandTooManyTimes',
-				interaction.locale,
-			)();
-			const canUseCommandInString = localise(
-				client,
-				'interactions.canUseCommandIn',
-				interaction.locale,
-			)({ 'relative_timestamp': nextValidUsageTimestamp });
+			const strings = {
+				title: localise(client, 'interactions.rateLimited.title', interaction.locale)(),
+				description: (() => {
+					const usedTooManyTimes = localise(
+						client,
+						'interactions.rateLimited.description.usedTooManyTimes',
+						interaction.locale,
+					)();
+					const cannotUseAgainUntil = localise(
+						client,
+						'interactions.rateLimited.description.cannotUseAgainUntil',
+						interaction.locale,
+					)({ 'relative_timestamp': nextValidUsageTimestamp });
+
+					return `${usedTooManyTimes}\n\n${cannotUseAgainUntil}`;
+				})(),
+			};
 
 			return void sendInteractionResponse(bot, interaction.id, interaction.token, {
 				type: InteractionResponseTypes.ChannelMessageWithSource,
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: `${usedCommandTooManyTimesString}\n\n${canUseCommandInString}`,
+						title: strings.title,
+						description: strings.description,
 						color: constants.colors.dullYellow,
 					}],
 				},
@@ -809,6 +817,11 @@ function resolveInteractionToMember(
 	if (isResolved) return matchedMembers.at(0);
 
 	if (matchedMembers.length === 0) {
+		const strings = {
+			title: localise(client, 'interactions.invalidUser.title', interaction.locale)(),
+			description: localise(client, 'interactions.invalidUser.description', interaction.locale)(),
+		};
+
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -818,7 +831,8 @@ function resolveInteractionToMember(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(client, 'interactions.invalidUser', interaction.locale)(),
+						title: strings.title,
+						description: strings.description,
 						color: constants.colors.red,
 					}],
 				},

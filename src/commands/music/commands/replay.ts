@@ -43,6 +43,10 @@ function handleReplayAction([client, bot]: [Client, Bot], interaction: Interacti
 	const currentListing = controller.currentListing;
 
 	if (!isOccupied(controller.player) || currentListing === undefined) {
+		const strings = {
+			noSongToReplay: localise(client, 'music.options.replay.strings.noSongToReplay', interaction.locale)(),
+		};
+
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -52,7 +56,7 @@ function handleReplayAction([client, bot]: [Client, Bot], interaction: Interacti
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(client, 'music.options.replay.strings.noSongToReplay', interaction.locale)(),
+						description: strings.noSongToReplay,
 						color: constants.colors.dullYellow,
 					}],
 				},
@@ -61,16 +65,18 @@ function handleReplayAction([client, bot]: [Client, Bot], interaction: Interacti
 	}
 
 	if (collection !== undefined && !isCollection(currentListing?.content)) {
-		const noSongCollectionToReplayString = localise(
-			client,
-			'music.options.replay.strings.noSongCollectionToReplay',
-			interaction.locale,
-		)();
-		const tryReplayingSong = localise(
-			client,
-			'music.options.replay.strings.tryReplayingSong',
-			interaction.locale,
-		)();
+		const strings = {
+			noSongCollectionToReplay: localise(
+				client,
+				'music.options.replay.strings.noSongCollectionToReplay',
+				interaction.locale,
+			)(),
+			tryReplaying: localise(
+				client,
+				'music.options.replay.strings.tryReplayingSong',
+				interaction.locale,
+			)(),
+		};
 
 		return void sendInteractionResponse(
 			bot,
@@ -81,7 +87,7 @@ function handleReplayAction([client, bot]: [Client, Bot], interaction: Interacti
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: `${noSongCollectionToReplayString}\n\n${tryReplayingSong}`,
+						description: `${strings.noSongCollectionToReplay}\n\n${strings.tryReplaying}`,
 						color: constants.colors.dullYellow,
 					}],
 				},
