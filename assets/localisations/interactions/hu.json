@@ -1,7 +1,9 @@
 {
-	"interactions.invalidUser": "Érvénytelen felhasználó.",
 	"interactions.continuedOnNextPage": "Folytatódik a következő oldalon...",
 	"interactions.page": "Page",
-	"interactions.usedCommandTooManyTimes": "You have used this command too many times in too short of time.",
-	"interactions.canUseCommandIn": "You will be able to use the command again {relative_timestamp}."
+	"interactions.invalidUser.title": "Érvénytelen felhasználó",
+	"interactions.invalidUser.description": "The user you specified is not valid.",
+	"interactions.rateLimited.title": "You are being rate-limited",
+	"interactions.rateLimited.description.usedTooManyTimes": "You have used this command too many times ({times}) in too short of a span of time.",
+	"interactions.rateLimited.description.cannotUseAgainUntil": "You will once again be able to use the command {relative_timestamp}."
 }
