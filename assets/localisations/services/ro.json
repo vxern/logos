@@ -1,16 +1,16 @@
 {
 	"notices.lastUpdate": "Ultima actualizare: {date}",
-	"notices.notices.information.invite": "Link de invitație permanent",
-	"reports.reportedUsers": "Utilizatori raportați",
+	"notices.notices.information.invite": "Link de invitație permanentă",
+	"reports.reportedUsers": "Utilizatori denunțați",
 	"reports.reasonForReport": "Motivul denunțării",
-	"reports.linkToMessage": "Link to message",
-	"reports.noLinkToMessageProvided": "No link to message provided.",
+	"reports.linkToMessage": "Link-ul mesajului",
+	"reports.noLinkToMessageProvided": "Niciun link către un mesaj nu a fost atașat.",
 	"reports.previousInfractions": "Infracțiunile precedente ale {username}",
 	"suggestion.suggestion": "Sugestie",
 	"submittedBy": "Trimis de",
-	"submittedAt": "Submitted at",
+	"submittedAt": "Trimis la",
 	"markAsResolved": "Marchează cazul ca rezolvată",
 	"markAsUnresolved": "Marchează cazul ca nerezolvată",
-	"alreadyMarkedAsResolved": "Acest caz a fost deja marcat ca nerezolvat.",
-	"alreadyMarkedAsUnresolved": "This issue has already been marked as unresolved."
+	"alreadyMarkedAsResolved": "Acest caz a fost deja marcat ca rezolvat.",
+	"alreadyMarkedAsUnresolved": "Acest caz a fost deja marcat ca nerezolvat."
 }
