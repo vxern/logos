@@ -470,12 +470,15 @@ function withRateLimiting(handle: InteractionHandler): InteractionHandler {
 
 function localiseCommands(localisations: Client['localisations'], commandTemplates: CommandTemplate[]): Command[] {
 	function localiseCommandOrOption(key: string): Pick<Command, LocalisationProperties> | undefined {
-		const nameLocalisationsAll = localisations.get(`${key}.name`);
+		const optionName = key.split('.')!.at(-1)!;
+
+		const nameLocalisationsAll = localisations.get(`${key}.name`) ?? localisations.get(`parameters.${optionName}.name`);
 		const nameLocalisations = nameLocalisationsAll !== undefined
 			? toDiscordLocalisations(nameLocalisationsAll)
 			: undefined;
 
-		const descriptionLocalisationsAll = localisations.get(`${key}.description`);
+		const descriptionLocalisationsAll = localisations.get(`${key}.description`) ??
+			localisations.get(`parameters.${optionName}.description`);
 		const description = descriptionLocalisationsAll?.get(defaultLanguage)?.({});
 		const descriptionLocalisations = descriptionLocalisationsAll !== undefined
 			? toDiscordLocalisations(descriptionLocalisationsAll)
@@ -509,6 +512,16 @@ function localiseCommands(localisations: Client['localisations'], commandTemplat
 				if (localisations === undefined) continue;
 
 				const subOption: Option = { ...localisations, ...subOptionTemplate, options: [] };
+
+				for (let subSubOptionTemplate of subOptionTemplate.options ?? []) {
+					const subSubOptionKey = [subOptionKey, 'options', subSubOptionTemplate.name].join('.');
+					const localisations = localiseCommandOrOption(subSubOptionKey);
+					if (localisations === undefined) continue;
+
+					const subSubOption: Option = { ...localisations, ...subSubOptionTemplate, options: [] };
+
+					subOption.options?.push(subSubOption);
+				}
 
 				option.options?.push(subOption);
 			}
