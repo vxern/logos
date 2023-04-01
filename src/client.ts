@@ -182,7 +182,7 @@ async function initialiseClient(
 	startServices([client, bot]);
 
 	return Promise.all([
-		setupLavalinkNode([client, bot]),
+		//setupLavalinkNode([client, bot]),
 		startBot(bot),
 	]).then(() => [client, bot]);
 }
