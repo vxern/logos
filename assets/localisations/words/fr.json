@@ -1,13 +1,13 @@
 {
-	"words.noun": "noun",
-	"words.verb": "verb",
-	"words.adjective": "adjective",
-	"words.adverb": "adverb",
+	"words.noun": "nom",
+	"words.verb": "verbe",
+	"words.adjective": "adjectif",
+	"words.adverb": "adverbe",
 	"words.adposition": "adposition",
-	"words.affix": "affix",
-	"words.pronoun": "pronoun",
-	"words.determiner": "determiner",
-	"words.conjunction": "conjunction",
+	"words.affix": "affixe",
+	"words.pronoun": "pronom",
+	"words.determiner": "déterminant",
+	"words.conjunction": "conjonction",
 	"words.interjection": "interjection",
-	"words.unknown": "part of speech unknown"
+	"words.unknown": "partie inconnue de la phrase"
 }
