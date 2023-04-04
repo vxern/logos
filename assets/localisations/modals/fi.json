@@ -1,0 +1,17 @@
+{
+	"verification.title": "Verification Questions",
+	"verification.fields.reason": "What is your reason for learning {language}?",
+	"verification.fields.aim": "How will you benefit from becoming a member?",
+	"verification.fields.whereFound": "Where did you find out about the server?",
+	"report.title": "User report",
+	"report.fields.reason": "What is the reason for the report?",
+	"report.fields.usersToReport": "Users to report",
+	"report.fields.linkToMessage": "Link to the message for context",
+	"suggestion.title": "Suggestion",
+	"suggestion.fields.suggestion": "What is your suggestion?",
+	"prompts.continue": "Continue",
+	"prompts.cancel": "Cancel",
+	"prompts.yourProgressWillBeLost": "Your progress will be lost.",
+	"prompts.yesLeaveTheComposer": "Yes, I want to leave the composer",
+	"prompts.noTakeMeBackToTheComposer": "No, take me back to the composer"
+}
