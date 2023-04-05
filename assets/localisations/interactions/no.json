@@ -1,9 +1,9 @@
 {
-	"interactions.continuedOnNextPage": "Continued on the next page...",
-	"interactions.page": "Page",
-	"interactions.invalidUser.title": "Invalid user",
-	"interactions.invalidUser.description": "The user you specified is not valid.",
-	"interactions.rateLimited.title": "You are being rate-limited",
-	"interactions.rateLimited.description.usedTooManyTimes": "You have used this command too many times ({times}) in too short of a span of time.",
-	"interactions.rateLimited.description.cannotUseAgainUntil": "You will once again be able to use the command {relative_timestamp}."
+	"interactions.continuedOnNextPage": "Fortsetter på neste side...",
+	"interactions.page": "Side",
+	"interactions.invalidUser.title": "Ugyldig bruker",
+	"interactions.invalidUser.description": "Brukeren du angav er ugyldig.",
+	"interactions.rateLimited.title": "Du er på en takstgrense",
+	"interactions.rateLimited.description.usedTooManyTimes": "Du har brukt denne kommandoen for mange ganger ({times}) i for kort tid.",
+	"interactions.rateLimited.description.cannotUseAgainUntil": "Du vil igjen kunne bruke kommandoen {relative_timestamp}."
 }
