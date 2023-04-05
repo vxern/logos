@@ -2,7 +2,7 @@
 	"interactions.continuedOnNextPage": "Continuare pe următoarea pagină...",
 	"interactions.page": "Pagina",
 	"interactions.invalidUser.title": "Utilizator invalid",
-	"interactions.invalidUser.description": "The user you specified is not valid.",
+	"interactions.invalidUser.description": "Utilizatorul pe care l-ați specificat nu este valid.",
 	"interactions.rateLimited.title": "Ești limitat/ă la rată de acțiuni",
 	"interactions.rateLimited.description.usedTooManyTimes": "Ai folosit comanda de prea multe ori ({times}) într-un interval de timp prea scurt.",
 	"interactions.rateLimited.description.cannotUseAgainUntil": "Vei putea folosi comanda din nou {relative_timestamp}."
