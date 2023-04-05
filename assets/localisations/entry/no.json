@@ -28,6 +28,6 @@
 	"entry.vote.failed": "Kunne ikke registrere stemmen din.",
 	"entry.vote.failedToUpdateVerificationState": "Kunne ikke oppdater bekreftelsesstatus.",
 	"entry.vote.alreadyVotedToAccept": "Du har allerede stemt for at denne brukerens innreiseforespørsel er akseptert.",
-	"entry.vote.alreadyVotedToReject": "You have already voted against this user's entry request being accepted.",
-	"entry.vote.stanceOnVoteChanged": "Your stance in this vote has been changed."
+	"entry.vote.alreadyVotedToReject": "Du har allerede stemt mot at denne brukerens innreiseforespørsel skal aksepteres.",
+	"entry.vote.stanceOnVoteChanged": "Din holdning til denne avstemningen er endret."
 }
