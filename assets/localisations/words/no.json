@@ -1,13 +1,13 @@
 {
-	"words.noun": "noun",
+	"words.noun": "substantiv",
 	"words.verb": "verb",
-	"words.adjective": "adjective",
+	"words.adjective": "adjektiv",
 	"words.adverb": "adverb",
-	"words.adposition": "adposition",
-	"words.affix": "affix",
-	"words.pronoun": "pronoun",
-	"words.determiner": "determiner",
-	"words.conjunction": "conjunction",
-	"words.interjection": "interjection",
-	"words.unknown": "part of speech unknown"
+	"words.adposition": "apposisjon",
+	"words.affix": "affiks",
+	"words.pronoun": "pronomen",
+	"words.determiner": "determinativ",
+	"words.conjunction": "konjunksjon",
+	"words.interjection": "interjeksjon",
+	"words.unknown": "ukjent del av talen"
 }
