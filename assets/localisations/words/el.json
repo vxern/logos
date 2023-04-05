@@ -1,13 +1,13 @@
 {
-	"words.noun": "noun",
-	"words.verb": "verb",
-	"words.adjective": "adjective",
-	"words.adverb": "adverb",
-	"words.adposition": "adposition",
-	"words.affix": "affix",
-	"words.pronoun": "pronoun",
-	"words.determiner": "determiner",
-	"words.conjunction": "conjunction",
-	"words.interjection": "interjection",
-	"words.unknown": "part of speech unknown"
+	"words.noun": "ουσιαστικό",
+	"words.verb": "ρήμα",
+	"words.adjective": "επίθετο",
+	"words.adverb": "επίρρημα",
+	"words.adposition": "πρόθεση",
+	"words.affix": "πρόσφυμα",
+	"words.pronoun": "αντωνυμία",
+	"words.determiner": "προσδιορισμός",
+	"words.conjunction": "σύνδεση",
+	"words.interjection": "επιφώνημα",
+	"words.unknown": "μέρος της άγνωστης ομιλίας"
 }
