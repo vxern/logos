@@ -7,7 +7,7 @@
 	"entry.proficiencySelection.canChangeRolesLater": "Ikke bekymre deg hvis du gjør feil valg nå: Du kan alltids endre den senere med {command} kommandoen.",
 	"entry.verification.getVerified": "Bli bekreftet",
 	"entry.verification.needToVerify": "Før du kan skrive inn {guild_name}, må du først bekrefte deg ved å svare på et sett med verifiseringsspørsmål.",
-	"entry.verification.answerHonestly": "It's best to answer them honestly as __rejections are permanent__, and you won't be able to submit a new set of answers.",
+	"entry.verification.answerHonestly": "Det er best å svare ærlig, siden __avvisninger er permanente__, og du vil ikke kunne sende inn et nytt sett med svar.",
 	"entry.verification.iUnderstand": "Jeg forstår, og ønsker å fortsette",
 	"entry.verification.verifyingAccount": "Kontoen din blir verifisert...",
 	"entry.verification.failedToVerifyAccount": "Vi kunne ikke verifisere konto ditt.",
