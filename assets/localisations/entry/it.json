@@ -1,5 +1,5 @@
 {
-	"entry.welcome.welcome": "Welcome to **{guild_name}**",
+	"entry.welcome.welcome": "Benvenuto a **{guild_name}**",
 	"entry.welcome.toEnter": "To enter the server and become its official member, read the information in the {information_channel_mention} channel to get yourself familiarised with the server guidelines, and then press the button below.",
 	"entry.welcome.acceptedRules": "I have read the rules, and agree to abide by them",
 	"entry.proficiencySelection.proficiency": "Language proficiency",
