@@ -4,6 +4,6 @@
 	"interactions.invalidUser.title": "Μη έγκυρος χρήστης",
 	"interactions.invalidUser.description": "Ο χρήστης που καθορίσατε δεν είναι έγκυρος.",
 	"interactions.rateLimited.title": "Έχετε περιορισμένο ρυθμό",
-	"interactions.rateLimited.description.usedTooManyTimes": "Έχετε χρησιμοποιήσει αυτή την εντολή πάρα πολλές φορές ({times}) σε πολύ σύντομο χρονικό διάστημα.",
+	"interactions.rateLimited.description.tooManyUses": "You have used this command too many times ({times}) in too short of a span of time.",
 	"interactions.rateLimited.description.cannotUseAgainUntil": "Θα μπορείτε και πάλι να χρησιμοποιήσετε την εντολή {relative_timestamp}."
 }
