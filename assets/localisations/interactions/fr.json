@@ -4,6 +4,6 @@
 	"interactions.invalidUser.title": "Utilisateur non valide",
 	"interactions.invalidUser.description": "L'utilisateur que vous avez spécifié n'est pas valide.",
 	"interactions.rateLimited.title": "Vous êtes soumis à une limitation de taux",
-	"interactions.rateLimited.description.tooManyUses": "You have used this command too many times ({times}) in too short of a span of time.",
+	"interactions.rateLimited.description.tooManyUses": "Vous avez utilisé cette commande trop de fois ({times}) dans un laps de temps trop court.",
 	"interactions.rateLimited.description.cannotUseAgainUntil": "Vous pourrez à nouveau utiliser la commande {relative_timestamp}."
 }
