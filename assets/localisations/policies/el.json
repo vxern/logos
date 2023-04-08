@@ -1,13 +1,13 @@
 {
-	"policies.moderation.title": "Moderation Policy",
-	"policies.moderation.points.introduction.title": "How do moderators moderate the server?",
-	"policies.moderation.points.introduction.description": "The server abides by a 3-warn moderation policy, enforced by the server's {role_mention}s.",
-	"policies.moderation.points.breach.title": "Where do the rules apply?",
-	"policies.moderation.points.breach.description": "The server rules apply to the entirety of the server, and a breach thereof will result in a warning being issued.",
-	"policies.moderation.points.warnings.title": "What happens if I get warned a few times?",
-	"policies.moderation.points.warnings.description": "If a user has already received three warnings, the fourth warning will cause the user to be timed out. Warnings expire after a period of __two months__.",
-	"policies.moderation.points.furtherAction.title": "What happens then?",
-	"policies.moderation.points.furtherAction.description": "Consequently, the server staff will be informed of the limit being passed and, subsequently, will review the circumstances and determine an appropriate course of action.",
-	"policies.moderation.points.ban.title": "What if I don't care?",
-	"policies.moderation.points.ban.description": "In case of it having been found that a user had knowingly and constantly been breaking the server rules and/or ignoring suggestions of the staff, the user will be permanently banned from the server."
+	"policies.moderation.title": "Πολιτική μετριασμού",
+	"policies.moderation.points.introduction.title": "Πώς οι συντονιστές συντονίζουν τον διακομιστή;",
+	"policies.moderation.points.introduction.description": "Ο διακομιστής τηρεί μια πολιτική μετριοπάθειας 3 προειδοποιήσεων, η οποία επιβάλλεται από τα {role_mention}s του διακομιστή.",
+	"policies.moderation.points.breach.title": "Πού εφαρμόζονται οι κανόνες;",
+	"policies.moderation.points.breach.description": "Οι κανόνες του διακομιστή ισχύουν για το σύνολο του διακομιστή και η παραβίασή τους θα έχει ως αποτέλεσμα την έκδοση προειδοποίησης.",
+	"policies.moderation.points.warnings.title": "Τι συμβαίνει αν με προειδοποιήσουν μερικές φορές;",
+	"policies.moderation.points.warnings.description": "Εάν ένας χρήστης έχει ήδη λάβει τρεις προειδοποιήσεις, η τέταρτη προειδοποίηση θα προκαλέσει τη χρονική λήξη του χρήστη. Οι προειδοποιήσεις λήγουν μετά από μια περίοδο __δύο μηνών__.",
+	"policies.moderation.points.furtherAction.title": "Τι συμβαίνει τότε;",
+	"policies.moderation.points.furtherAction.description": "Κατά συνέπεια, το προσωπικό του διακομιστή θα ενημερωθεί για την υπέρβαση του ορίου και, στη συνέχεια, θα επανεξετάσει τις περιστάσεις και θα καθορίσει την κατάλληλη πορεία δράσης.",
+	"policies.moderation.points.ban.title": "Κι αν δεν με νοιάζει;",
+	"policies.moderation.points.ban.description": "Σε περίπτωση που διαπιστωθεί ότι ένας χρήστης παραβιάζει συνειδητά και συνεχώς τους κανόνες του διακομιστή ή/και αγνοεί τις υποδείξεις του προσωπικού, ο χρήστης θα αποκλείεται οριστικά από τον διακομιστή."
 }
