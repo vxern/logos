@@ -1,13 +1,13 @@
 {
-	"policies.moderation.header": "Moderasjonspolitikk",
-	"policies.moderation.points.introduction.header": "Hvordan skal moderatorer moderere serveren?",
-	"policies.moderation.points.introduction.body": "Serveren overholder en modereringspolicy med 3 advarsler, håndhevet av tjenerens {role_mention}-er.",
-	"policies.moderation.points.breach.header": "Hvor gjelder reglene?",
-	"policies.moderation.points.breach.body": "Serverreglene gjelder for hele serveren, og brudd på disse vil resultere i en advarsel.",
-	"policies.moderation.points.warnings.header": "Hva skjer hvis jeg blir varslet noen ganger?",
-	"policies.moderation.points.warnings.body": "Hvis en bruker allerede har mottatt tre advarsler, vil den fjerde advarselen føre til at brukeren blir tidsavbrutt. Advarsler utløper etter en periode på __to måneder__.",
-	"policies.moderation.points.furtherAction.header": "Hva skjer da?",
-	"policies.moderation.points.furtherAction.body": "Følgelig vil serverpersonalet bli informert om at grensen passeres, og vil deretter vurdere omstendighetene og bestemme en passende fremgangsmåte.",
-	"policies.moderation.points.ban.header": "Hva om jeg ikke bryr meg?",
-	"policies.moderation.points.ban.body": "I tilfelle det har blitt funnet at en bruker med viten og konstant har brutt serverreglene og/eller ignorert forslag fra personalet, vil brukeren bli permanent utestengt fra serveren."
+	"policies.moderation.title": "Moderation Policy",
+	"policies.moderation.points.introduction.title": "How do moderators moderate the server?",
+	"policies.moderation.points.introduction.description": "The server abides by a 3-warn moderation policy, enforced by the server's {role_mention}s.",
+	"policies.moderation.points.breach.title": "Where do the rules apply?",
+	"policies.moderation.points.breach.description": "The server rules apply to the entirety of the server, and a breach thereof will result in a warning being issued.",
+	"policies.moderation.points.warnings.title": "What happens if I get warned a few times?",
+	"policies.moderation.points.warnings.description": "If a user has already received three warnings, the fourth warning will cause the user to be timed out. Warnings expire after a period of __two months__.",
+	"policies.moderation.points.furtherAction.title": "What happens then?",
+	"policies.moderation.points.furtherAction.description": "Consequently, the server staff will be informed of the limit being passed and, subsequently, will review the circumstances and determine an appropriate course of action.",
+	"policies.moderation.points.ban.title": "What if I don't care?",
+	"policies.moderation.points.ban.description": "In case of it having been found that a user had knowingly and constantly been breaking the server rules and/or ignoring suggestions of the staff, the user will be permanently banned from the server."
 }
