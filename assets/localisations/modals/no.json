@@ -5,13 +5,12 @@
 	"verification.fields.whereFound": "Hvor fant du ut om serveren?",
 	"report.title": "Bruker rapport",
 	"report.fields.reason": "Hva er grunnen til rapporten?",
-	"report.fields.usersToReport": "Brukere å rapportere",
-	"report.fields.linkToMessage": "Lenke til meldingen for kontekst",
+	"report.fields.users": "Users to report",
+	"report.fields.link": "Link to the message for context",
 	"suggestion.title": "Forslag",
 	"suggestion.fields.suggestion": "Hva er ditt forslag?",
 	"prompts.continue": "Fortsett",
 	"prompts.cancel": "Avbryt",
-	"prompts.yourProgressWillBeLost": "Fremgangen din vil gå tapt.",
-	"prompts.yesLeaveTheComposer": "Ja, jeg vil forlate komponisten",
-	"prompts.noTakeMeBackToTheComposer": "Nei, ta meg tilbake til komponisten"
+	"prompts.leave": "Yes, I want to leave the composer",
+	"prompts.stay": "No, take me back to the composer"
 }
