@@ -1,5 +1,5 @@
 import { Bot, Interaction, InteractionResponseTypes, sendInteractionResponse } from 'discordeno';
-import { getVoiceState, setVolume, verifyCanManipulatePlayback } from 'logos/src/controllers/music.ts';
+import { getVoiceState, setVolume, verifyCanManagePlayback } from 'logos/src/controllers/music.ts';
 import { Client, localise } from 'logos/src/client.ts';
 import { parseArguments } from 'logos/src/interactions.ts';
 import configuration from 'logos/configuration.ts';
@@ -9,7 +9,7 @@ function handleSetVolume([client, bot]: [Client, Bot], interaction: Interaction)
 	const controller = client.features.music.controllers.get(interaction.guildId!);
 	if (controller === undefined) return;
 
-	const isVoiceStateVerified = verifyCanManipulatePlayback(
+	const isVoiceStateVerified = verifyCanManagePlayback(
 		[client, bot],
 		interaction,
 		controller,
@@ -22,13 +22,12 @@ function handleSetVolume([client, bot]: [Client, Bot], interaction: Interaction)
 
 	if (volume < 0 || volume > configuration.music.limits.volume) {
 		const strings = {
-			invalidVolume: localise(
+			title: localise(client, 'music.options.volume.options.set.strings.invalid.title', interaction.locale)(),
+			description: localise(
 				client,
-				'music.options.volume.options.set.strings.invalidVolume',
+				'music.options.volume.options.set.strings.invalid.description',
 				interaction.locale,
-			)(
-				{ 'volume': configuration.music.limits.volume },
-			),
+			)({ 'volume': configuration.music.limits.volume }),
 		};
 
 		return void sendInteractionResponse(
@@ -39,7 +38,8 @@ function handleSetVolume([client, bot]: [Client, Bot], interaction: Interaction)
 				type: InteractionResponseTypes.ChannelMessageWithSource,
 				data: {
 					embeds: [{
-						description: strings.invalidVolume,
+						title: strings.title,
+						description: strings.description,
 						color: constants.colors.red,
 					}],
 				},
@@ -50,16 +50,8 @@ function handleSetVolume([client, bot]: [Client, Bot], interaction: Interaction)
 	setVolume(controller.player, volume);
 
 	const strings = {
-		title: localise(
-			client,
-			'music.options.volume.options.set.strings.volumeSet.title',
-			interaction.locale,
-		)(),
-		description: localise(
-			client,
-			'music.options.volume.options.set.strings.volumeSet.description',
-			interaction.locale,
-		)(
+		title: localise(client, 'music.options.volume.options.set.strings.set.title', interaction.locale)(),
+		description: localise(client, 'music.options.volume.options.set.strings.set.description', interaction.locale)(
 			{ 'volume': volume },
 		),
 	};

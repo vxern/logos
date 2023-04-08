@@ -441,20 +441,18 @@ function withRateLimiting(handle: InteractionHandler): InteractionHandler {
 
 			const strings = {
 				title: localise(client, 'interactions.rateLimited.title', interaction.locale)(),
-				description: (() => {
-					const usedTooManyTimes = localise(
+				description: {
+					tooManyUses: localise(
 						client,
-						'interactions.rateLimited.description.usedTooManyTimes',
+						'interactions.rateLimited.description.tooManyUses',
 						interaction.locale,
-					)();
-					const cannotUseAgainUntil = localise(
+					)(),
+					cannotUseUntil: localise(
 						client,
 						'interactions.rateLimited.description.cannotUseAgainUntil',
 						interaction.locale,
-					)({ 'relative_timestamp': nextValidUsageTimestamp });
-
-					return `${usedTooManyTimes}\n\n${cannotUseAgainUntil}`;
-				})(),
+					)({ 'relative_timestamp': nextValidUsageTimestamp }),
+				},
 			};
 
 			return void sendInteractionResponse(bot, interaction.id, interaction.token, {
@@ -463,7 +461,7 @@ function withRateLimiting(handle: InteractionHandler): InteractionHandler {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						title: strings.title,
-						description: strings.description,
+						description: `${strings.description.tooManyUses}\n\n${strings.description.cannotUseUntil}`,
 						color: constants.colors.dullYellow,
 					}],
 				},
@@ -795,7 +793,7 @@ function autocompleteMembers(
 				choices: matchedMembers.slice(0, 20)
 					.map(
 						(member) => ({
-							name: diagnosticMentionUser(member.user!, true),
+							name: diagnosticMentionUser(member.user!),
 							value: member.id.toString(),
 						}),
 					),
@@ -899,7 +897,8 @@ function createLocalisations(localisations: Map<string, Map<Language, string>>):
 function localise(client: Client, key: string, locale: string | undefined): (args?: Record<string, unknown>) => string {
 	const language = (locale !== undefined ? getLanguageByLocale(locale as Locales) : undefined) ?? defaultLanguage;
 
-	const getLocalisation = client.localisations.get(key)?.get(language) ?? (() => key);
+	const getLocalisation = client.localisations.get(key)?.get(language) ??
+		client.localisations.get(key)?.get(defaultLanguage) ?? (() => key);
 
 	return ((args) => {
 		const string = getLocalisation(args ?? {});

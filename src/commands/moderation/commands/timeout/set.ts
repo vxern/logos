@@ -17,33 +17,27 @@ async function handleSetTimeoutAutocomplete([client, bot]: [Client, Bot], intera
 
 	switch (focused!.name) {
 		case 'user': {
-			if (focused!.name === 'user') {
-				return autocompleteMembers(
-					[client, bot],
-					interaction,
-					user!,
-					{ restrictToNonSelf: true, excludeModerators: true },
-				);
-			}
-			break;
+			return autocompleteMembers(
+				[client, bot],
+				interaction,
+				user!,
+				{ restrictToNonSelf: true, excludeModerators: true },
+			);
 		}
 		case 'duration': {
-			if (focused!.name === 'duration') {
-				const timestamp = parseTimeExpression(client, duration!, true, interaction.locale);
+			const timestamp = parseTimeExpression(client, duration!, true, interaction.locale);
 
-				return void sendInteractionResponse(
-					bot,
-					interaction.id,
-					interaction.token,
-					{
-						type: InteractionResponseTypes.ApplicationCommandAutocompleteResult,
-						data: {
-							choices: timestamp === undefined ? [] : [{ name: timestamp[0], value: timestamp[1].toString() }],
-						},
+			return void sendInteractionResponse(
+				bot,
+				interaction.id,
+				interaction.token,
+				{
+					type: InteractionResponseTypes.ApplicationCommandAutocompleteResult,
+					data: {
+						choices: timestamp === undefined ? [] : [{ name: timestamp[0], value: timestamp[1].toString() }],
 					},
-				);
-			}
-			break;
+				},
+			);
 		}
 	}
 }
@@ -62,34 +56,29 @@ async function handleSetTimeout([client, bot]: [Client, Bot], interaction: Inter
 
 	if (Number.isNaN(duration)) {
 		const strings = {
-			invalidDuration: localise(client, 'timeout.strings.invalidDuration', interaction.locale)(),
+			title: localise(client, 'timeout.strings.durationInvalid.title', interaction.locale)(),
+			description: localise(client, 'timeout.strings.durationInvalid.description', interaction.locale)(),
 		};
 
-		return displayError(bot, interaction, strings.invalidDuration);
+		return displayError(bot, interaction, strings.title, strings.description);
 	}
 
 	if (durationParsed < Periods.minute) {
 		const strings = {
-			durationCannotBeLessThanOneMinute: localise(
-				client,
-				'timeout.strings.durationCannotBeLessThanOneMinute',
-				interaction.locale,
-			)(),
+			title: localise(client, 'timeout.strings.tooShort.title', interaction.locale)(),
+			description: localise(client, 'timeout.strings.tooShort.description', interaction.locale)(),
 		};
 
-		return displayError(bot, interaction, strings.durationCannotBeLessThanOneMinute);
+		return displayError(bot, interaction, strings.title, strings.description);
 	}
 
 	if (durationParsed > Periods.week) {
 		const strings = {
-			durationMustBeShorterThanWeek: localise(
-				client,
-				'timeout.strings.durationMustBeShorterThanWeek',
-				interaction.locale,
-			)(),
+			title: localise(client, 'timeout.strings.tooLong.title', interaction.locale)(),
+			description: localise(client, 'timeout.strings.tooLong.description', interaction.locale)(),
 		};
 
-		return displayError(bot, interaction, strings.durationMustBeShorterThanWeek);
+		return displayError(bot, interaction, strings.title, strings.description);
 	}
 
 	const until = Date.now() + durationParsed;
@@ -102,7 +91,8 @@ async function handleSetTimeout([client, bot]: [Client, Bot], interaction: Inter
 	logEvent([client, bot], guild, 'memberTimeoutAdd', [member, until, reason!, interaction.user]);
 
 	const strings = {
-		timedOut: localise(client, 'timeout.strings.timedOut', interaction.locale)(
+		title: localise(client, 'timeout.strings.timedOut.title', interaction.locale)(),
+		description: localise(client, 'timeout.strings.timedOut.description', interaction.locale)(
 			{
 				'user_mention': mention(member.id, MentionTypes.User),
 				'relative_timestamp': timestamp(until),
@@ -115,14 +105,15 @@ async function handleSetTimeout([client, bot]: [Client, Bot], interaction: Inter
 		data: {
 			flags: ApplicationCommandFlags.Ephemeral,
 			embeds: [{
-				description: strings.timedOut,
+				title: strings.title,
+				description: strings.description,
 				color: constants.colors.blue,
 			}],
 		},
 	});
 }
 
-function displayError(bot: Bot, interaction: Interaction, error: string): void {
+function displayError(bot: Bot, interaction: Interaction, title: string, description: string): void {
 	return void sendInteractionResponse(
 		bot,
 		interaction.id,
@@ -131,10 +122,7 @@ function displayError(bot: Bot, interaction: Interaction, error: string): void {
 			type: InteractionResponseTypes.ChannelMessageWithSource,
 			data: {
 				flags: ApplicationCommandFlags.Ephemeral,
-				embeds: [{
-					description: error,
-					color: constants.colors.dullYellow,
-				}],
+				embeds: [{ title, description, color: constants.colors.dullYellow }],
 			},
 		},
 	);

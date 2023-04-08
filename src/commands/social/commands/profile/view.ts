@@ -40,7 +40,8 @@ async function handleDisplayProfile([client, bot]: [Client, Bot], interaction: I
 
 	function showProfileViewFailure(): void {
 		const strings = {
-			failed: localise(client, 'profile.options.view.strings.failed', interaction.locale)(),
+			title: localise(client, 'profile.options.view.strings.failed.title', interaction.locale)(),
+			description: localise(client, 'profile.options.view.strings.failed.description', interaction.locale)(),
 		};
 
 		return void sendInteractionResponse(
@@ -52,7 +53,8 @@ async function handleDisplayProfile([client, bot]: [Client, Bot], interaction: I
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: strings.failed,
+						title: strings.title,
+						description: strings.description,
 						color: constants.colors.red,
 					}],
 				},
@@ -80,15 +82,15 @@ async function handleDisplayProfile([client, bot]: [Client, Bot], interaction: I
 	const locale = show ? defaultLocale : interaction.locale;
 
 	const strings = {
-		title: localise(client, 'profile.options.view.strings.informationForUser', locale)({
+		title: localise(client, 'profile.options.view.strings.information.title', locale)({
 			'username': target.username,
 		}),
-		roles: localise(client, 'profile.options.view.strings.roles', locale)(),
-		statistics: localise(client, 'profile.options.view.strings.statistics', locale)(),
-		praises: localise(client, 'profile.options.view.strings.praises', locale)(),
-		warnings: localise(client, 'profile.options.view.strings.warnings', locale)(),
-		received: localise(client, 'profile.options.view.strings.received', locale)(),
-		sent: localise(client, 'profile.options.view.strings.sent', locale)(),
+		roles: localise(client, 'profile.options.view.strings.information.description.roles', locale)(),
+		statistics: localise(client, 'profile.options.view.strings.information.description.statistics', locale)(),
+		praises: localise(client, 'profile.options.view.strings.information.description.praises', locale)(),
+		warnings: localise(client, 'profile.options.view.strings.information.description.warnings', locale)(),
+		received: localise(client, 'profile.options.view.strings.information.description.received', locale)(),
+		sent: localise(client, 'profile.options.view.strings.information.description.sent', locale)(),
 	};
 
 	return void sendInteractionResponse(

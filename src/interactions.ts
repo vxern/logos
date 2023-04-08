@@ -437,15 +437,11 @@ function parseTimeExpressionPhrase(
 			timeUnitAliasTuples.push([
 				timeUnit,
 				[
-					`units.${timeUnit}.word`,
-					`units.${timeUnit}.word.alternatives.0`,
-					`units.${timeUnit}.word.alternatives.1`,
+					`units.${timeUnit}.word.one`,
+					`units.${timeUnit}.word.two`,
+					`units.${timeUnit}.word.many`,
 					`units.${timeUnit}.short`,
-					`units.${timeUnit}.short.alternatives.0`,
-					`units.${timeUnit}.short.alternatives.1`,
 					`units.${timeUnit}.shortest`,
-					`units.${timeUnit}.shortest.alternatives.0`,
-					`units.${timeUnit}.shortest.alternatives.1`,
 				].map((key) => localise(client, key, locale)()),
 			]);
 		}

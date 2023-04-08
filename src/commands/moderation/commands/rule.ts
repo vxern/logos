@@ -112,7 +112,8 @@ function getRuleTitleFormatted(
 
 function displayError([client, bot]: [Client, Bot], interaction: Interaction): void {
 	const strings = {
-		invalidRule: localise(client, 'rule.strings.invalidRule', interaction.locale)(),
+		title: localise(client, 'rule.strings.invalid.title', interaction.locale)(),
+		description: localise(client, 'rule.strings.invalid.description', interaction.locale)(),
 	};
 
 	return void sendInteractionResponse(
@@ -124,7 +125,8 @@ function displayError([client, bot]: [Client, Bot], interaction: Interaction): v
 			data: {
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
-					description: strings.invalidRule,
+					title: strings.title,
+					description: strings.description,
 					color: constants.colors.red,
 				}],
 			},

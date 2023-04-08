@@ -7,7 +7,7 @@ import {
 	sendInteractionResponse,
 } from 'discordeno';
 import { OptionTemplate } from 'logos/src/commands/command.ts';
-import { getVoiceState, reset, verifyCanManipulatePlayback } from 'logos/src/controllers/music.ts';
+import { getVoiceState, reset, verifyCanManagePlayback } from 'logos/src/controllers/music.ts';
 import { Client, localise } from 'logos/src/client.ts';
 import constants from 'logos/constants.ts';
 import { defaultLocale } from 'logos/types.ts';
@@ -22,7 +22,7 @@ function handleStopPlayback([client, bot]: [Client, Bot], interaction: Interacti
 	const controller = client.features.music.controllers.get(interaction.guildId!);
 	if (controller === undefined) return;
 
-	const isVoiceStateVerified = verifyCanManipulatePlayback(
+	const isVoiceStateVerified = verifyCanManagePlayback(
 		[client, bot],
 		interaction,
 		controller,
@@ -33,7 +33,8 @@ function handleStopPlayback([client, bot]: [Client, Bot], interaction: Interacti
 	const botVoiceState = getVoiceState(client, interaction.guildId!, bot.id);
 	if (botVoiceState === undefined) {
 		const strings = {
-			notPlayingMusic: localise(client, 'music.strings.notPlayingMusic', interaction.locale)(),
+			title: localise(client, 'music.strings.notPlaying.title', interaction.locale)(),
+			description: localise(client, 'music.strings.notPlaying.description', interaction.locale)(),
 		};
 
 		return void sendInteractionResponse(
@@ -45,7 +46,8 @@ function handleStopPlayback([client, bot]: [Client, Bot], interaction: Interacti
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: strings.notPlayingMusic,
+						title: strings.title,
+						description: strings.description,
 						color: constants.colors.dullYellow,
 					}],
 				},

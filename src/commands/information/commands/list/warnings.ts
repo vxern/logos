@@ -100,28 +100,32 @@ function getWarningPage(
 	if (warnings.length === 0) {
 		if (isSelf) {
 			const strings = {
-				self: localise(client, 'list.options.warnings.strings.noActiveWarnings.self', locale)(),
+				title: localise(client, 'list.options.warnings.strings.noActiveWarnings.title', locale)(),
+				description: localise(client, 'list.options.warnings.strings.noActiveWarnings.description.self', locale)(),
 			};
 
 			return {
-				description: strings.self,
+				title: strings.title,
+				description: strings.description,
 				color: constants.colors.blue,
 			};
 		} else {
 			const strings = {
-				other: localise(client, 'list.options.warnings.strings.noActiveWarnings.other', locale)(),
+				title: localise(client, 'list.options.warnings.strings.noActiveWarnings.title', locale)(),
+				description: localise(client, 'list.options.warnings.strings.noActiveWarnings.description.other', locale)(),
 			};
 
 			return {
-				description: strings.other,
+				title: strings.title,
+				description: strings.description,
 				color: constants.colors.blue,
 			};
 		}
 	}
 
 	const strings = {
-		title: localise(client, 'list.options.warnings.strings.warnings', locale)(),
-		warning: localise(client, 'list.options.warnings.strings.warningFormatted', locale),
+		title: localise(client, 'list.options.warnings.strings.warnings.title', locale)(),
+		warning: localise(client, 'list.options.warnings.strings.warnings.description.warning', locale),
 	};
 
 	return {

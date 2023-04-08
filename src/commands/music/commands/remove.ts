@@ -20,7 +20,7 @@ import {
 	isQueueEmpty,
 	MusicController,
 	remove,
-	verifyCanManipulatePlayback,
+	verifyCanManagePlayback,
 } from 'logos/src/controllers/music.ts';
 import { Client, localise } from 'logos/src/client.ts';
 import { ControlButtonID, createInteractionCollector, decodeId, generateButtons } from 'logos/src/interactions.ts';
@@ -40,7 +40,7 @@ function handleRemoveSongListing([client, bot]: [Client, Bot], interaction: Inte
 	const controller = client.features.music.controllers.get(interaction.guildId!);
 	if (controller === undefined) return;
 
-	const isVoiceStateVerified = verifyCanManipulatePlayback(
+	const isVoiceStateVerified = verifyCanManagePlayback(
 		[client, bot],
 		interaction,
 		controller,
@@ -50,7 +50,8 @@ function handleRemoveSongListing([client, bot]: [Client, Bot], interaction: Inte
 
 	if (isQueueEmpty(controller.listingQueue)) {
 		const strings = {
-			noListingToRemove: localise(client, 'music.options.remove.strings.noListingToRemove', interaction.locale)(),
+			title: localise(client, 'music.options.remove.strings.queueEmpty.description', interaction.locale)(),
+			description: localise(client, 'music.options.remove.strings.queueEmpty.description', interaction.locale)(),
 		};
 
 		return void sendInteractionResponse(
@@ -62,7 +63,8 @@ function handleRemoveSongListing([client, bot]: [Client, Bot], interaction: Inte
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: strings.noListingToRemove,
+						title: strings.title,
+						description: strings.description,
 						color: constants.colors.dullYellow,
 					}],
 				},
@@ -173,11 +175,8 @@ function generateEmbed(
 				const songListing = remove(controller, index);
 				if (songListing === undefined) {
 					const strings = {
-						failedToRemoveSong: localise(
-							client,
-							'music.options.remove.strings.failedToRemoveSong',
-							interaction.locale,
-						)(),
+						title: localise(client, 'music.options.remove.strings.failed.title', interaction.locale)(),
+						description: localise(client, 'music.options.remove.strings.failed.description', interaction.locale)(),
 					};
 
 					return void sendInteractionResponse(
@@ -188,7 +187,8 @@ function generateEmbed(
 							type: InteractionResponseTypes.ChannelMessageWithSource,
 							data: {
 								embeds: [{
-									description: strings.failedToRemoveSong,
+									title: strings.title,
+									description: strings.description,
 									color: constants.colors.dullYellow,
 								}],
 							},
@@ -227,12 +227,14 @@ function generateEmbed(
 
 	if (pages.at(0)?.length === 0) {
 		const strings = {
-			noListingToRemove: localise(client, 'music.options.remove.strings.noListingToRemove', locale)(),
+			title: localise(client, 'music.options.remove.strings.queueEmpty.title', locale)(),
+			description: localise(client, 'music.options.remove.strings.queueEmpty.description', locale)(),
 		};
 
 		return {
 			embeds: [{
-				description: strings.noListingToRemove,
+				title: strings.title,
+				description: strings.description,
 				color: constants.colors.blue,
 			}],
 			components: [],
@@ -240,13 +242,15 @@ function generateEmbed(
 	}
 
 	const strings = {
-		selectSongToRemove: localise(client, 'music.options.remove.strings.selectSongToRemove', locale)(),
+		title: localise(client, 'music.options.remove.strings.selectSong.title', locale)(),
+		description: localise(client, 'music.options.remove.strings.selectSong.description', locale)(),
 		continuedOnNextPage: localise(client, 'interactions.continuedOnNextPage', locale)(),
 	};
 
 	return {
 		embeds: [{
-			description: strings.selectSongToRemove,
+			title: strings.title,
+			description: strings.description,
 			color: constants.colors.blue,
 			footer: isLast ? undefined : { text: strings.continuedOnNextPage },
 		}],

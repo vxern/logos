@@ -7,13 +7,7 @@ import {
 	sendInteractionResponse,
 } from 'discordeno';
 import { OptionTemplate } from 'logos/src/commands/command.ts';
-import {
-	getVoiceState,
-	isOccupied,
-	isPaused,
-	resume,
-	verifyCanManipulatePlayback,
-} from 'logos/src/controllers/music.ts';
+import { getVoiceState, isOccupied, isPaused, resume, verifyCanManagePlayback } from 'logos/src/controllers/music.ts';
 import { Client, localise } from 'logos/src/client.ts';
 import constants from 'logos/constants.ts';
 import { defaultLocale } from 'logos/types.ts';
@@ -28,7 +22,7 @@ function handleResumePlayback([client, bot]: [Client, Bot], interaction: Interac
 	const controller = client.features.music.controllers.get(interaction.guildId!);
 	if (controller === undefined) return;
 
-	const isVoiceStateVerified = verifyCanManipulatePlayback(
+	const isVoiceStateVerified = verifyCanManagePlayback(
 		[client, bot],
 		interaction,
 		controller,
@@ -38,7 +32,8 @@ function handleResumePlayback([client, bot]: [Client, Bot], interaction: Interac
 
 	if (!isOccupied(controller.player)) {
 		const strings = {
-			noSongToResume: localise(client, 'music.options.resume.strings.noSongToResume', interaction.locale)(),
+			title: localise(client, 'music.options.resume.strings.noSong.title', interaction.locale)(),
+			description: localise(client, 'music.options.resume.strings.noSong.description', interaction.locale)(),
 		};
 
 		return void sendInteractionResponse(
@@ -50,7 +45,8 @@ function handleResumePlayback([client, bot]: [Client, Bot], interaction: Interac
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: strings.noSongToResume,
+						title: strings.title,
+						description: strings.description,
 						color: constants.colors.dullYellow,
 					}],
 				},
@@ -60,7 +56,8 @@ function handleResumePlayback([client, bot]: [Client, Bot], interaction: Interac
 
 	if (!isPaused(controller.player)) {
 		const strings = {
-			notCurrentlyPaused: localise(client, 'music.options.resume.strings.notCurrentlyPaused', interaction.locale)(),
+			title: localise(client, 'music.options.resume.strings.notPaused', interaction.locale)(),
+			description: localise(client, 'music.options.resume.strings.notPaused', interaction.locale)(),
 		};
 
 		return void sendInteractionResponse(
@@ -72,7 +69,8 @@ function handleResumePlayback([client, bot]: [Client, Bot], interaction: Interac
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: strings.notCurrentlyPaused,
+						title: strings.title,
+						description: strings.description,
 						color: constants.colors.dullYellow,
 					}],
 				},

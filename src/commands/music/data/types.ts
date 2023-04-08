@@ -51,7 +51,7 @@ interface SongListing {
 
 	/**
 	 * IDs of user who were present at the time of the addition of this song listing,
-	 * and can therefore manipulate it.
+	 * and can therefore manage it.
 	 */
 	managerIds: bigint[];
 

@@ -8,7 +8,6 @@ import {
 	deleteMessage,
 	editOriginalInteractionResponse,
 	getAvatarURL,
-	getDmChannel,
 	Guild,
 	Interaction,
 	InteractionResponseTypes,
@@ -35,7 +34,7 @@ import {
 	InteractionCollectorSettings,
 	Modal,
 } from 'logos/src/interactions.ts';
-import { diagnosticMentionUser, getAllMessages, getAuthor, getTextChannel } from 'logos/src/utils.ts';
+import { diagnosticMentionUser, getAllMessages, getTextChannel } from 'logos/src/utils.ts';
 import { defaultLocale } from 'logos/types.ts';
 import configuration from 'logos/configuration.ts';
 import constants from 'logos/constants.ts';
@@ -291,7 +290,8 @@ async function initiateVerificationProcess(
 	);
 	if (entryRequest !== undefined) {
 		const strings = {
-			alreadySubmittedAnswers: localise(client, 'entry.verification.alreadySubmittedAnswers', interaction.locale)(),
+			title: localise(client, 'entry.verification.answers.alreadyAnswered.title', interaction.locale)(),
+			description: localise(client, 'entry.verification.answers.alreadyAnswered.description', interaction.locale)(),
 		};
 
 		sendInteractionResponse(bot, interaction.id, interaction.token, {
@@ -299,7 +299,8 @@ async function initiateVerificationProcess(
 			data: {
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
-					description: strings.alreadySubmittedAnswers,
+					title: strings.title,
+					description: strings.description,
 					color: constants.colors.dullYellow,
 				}],
 			},
@@ -315,10 +316,11 @@ async function initiateVerificationProcess(
 
 				if (client.database.cache.entryRequestBySubmitterAndGuild.has(`${submitterReferenceId}${guild.id}`)) {
 					const strings = {
-						alreadySubmittedAnswers: localise(
+						title: localise(client, 'entry.verification.answers.alreadyAnswered.title', interaction.locale)(),
+						description: localise(
 							client,
-							'entry.verification.alreadySubmittedAnswers',
-							submission.locale,
+							'entry.verification.answers.alreadyAnswered.description',
+							interaction.locale,
 						)(),
 					};
 
@@ -327,7 +329,8 @@ async function initiateVerificationProcess(
 						data: {
 							flags: ApplicationCommandFlags.Ephemeral,
 							embeds: [{
-								description: strings.alreadySubmittedAnswers,
+								title: strings.title,
+								description: strings.description,
 								color: constants.colors.darkRed,
 							}],
 						},
@@ -385,18 +388,26 @@ async function initiateVerificationProcess(
 				logEvent([client, bot], guild, 'entryRequestSubmit', [interaction.user, entryRequest.data]);
 
 				const strings = {
-					answersSubmitted: localise(client, 'entry.verification.answersSubmitted', interaction.locale)(),
-					answersWillBeReviewed: localise(
-						client,
-						'entry.verification.answersWillBeReviewed',
-						interaction.locale,
-					)(),
+					title: localise(client, 'entry.verification.answers.submitted.title', interaction.locale)(),
+					description: {
+						submitted: localise(
+							client,
+							'entry.verification.answers.submitted.description.submitted',
+							interaction.locale,
+						)(),
+						willBeReviewed: localise(
+							client,
+							'entry.verification.answers.submitted.description.willBeReviewed',
+							interaction.locale,
+						)(),
+					},
 				};
 
 				editOriginalInteractionResponse(bot, submission.token, {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: `${strings.answersSubmitted} ${strings.answersWillBeReviewed}`,
+						title: strings.title,
+						description: `${strings.description.submitted}\n\n${strings.description.willBeReviewed}`,
 						color: constants.colors.lightGreen,
 					}],
 				});
@@ -409,13 +420,15 @@ async function initiateVerificationProcess(
 					case VerificationError.Failure:
 					default: {
 						const strings = {
-							failedToVerifyAccount: localise(client, 'entry.verification.failedToVerifyAccount', interaction.locale)(),
+							title: localise(client, 'entry.verification.answers.failed.title', interaction.locale)(),
+							description: localise(client, 'entry.verification.answers.failed.description', interaction.locale)(),
 						};
 
 						editOriginalInteractionResponse(bot, submission.token, {
 							flags: ApplicationCommandFlags.Ephemeral,
 							embeds: [{
-								description: strings.failedToVerifyAccount,
+								title: strings.title,
+								description: strings.description,
 								color: constants.colors.red,
 							}],
 						});
@@ -555,10 +568,14 @@ function getVerificationPrompt(
 			aim: localise(client, 'verification.fields.aim', defaultLocale)(),
 			whereFound: localise(client, 'verification.fields.whereFound', defaultLocale)(),
 		},
-		accept: localise(client, 'entry.vote.accept', defaultLocale)(),
-		acceptMultiple: localise(client, 'entry.vote.acceptMultiple', defaultLocale)({ 'number': votesToAccept }),
-		reject: localise(client, 'entry.vote.reject', defaultLocale)(),
-		rejectMultiple: localise(client, 'entry.vote.rejectMultiple', defaultLocale)({ 'number': votesToReject }),
+		accept: localise(client, 'entry.verification.vote.accept', defaultLocale)(),
+		acceptMultiple: localise(client, 'entry.verification.vote.acceptMultiple', defaultLocale)({
+			'number': votesToAccept,
+		}),
+		reject: localise(client, 'entry.verification.vote.reject', defaultLocale)(),
+		rejectMultiple: localise(client, 'entry.verification.vote.rejectMultiple', defaultLocale)({
+			'number': votesToReject,
+		}),
 	};
 
 	return {
@@ -663,7 +680,8 @@ async function handleVote(
 		// If the voter has already voted to accept, and is voting to accept again.
 		if (votedToAccept && isAccept) {
 			const strings = {
-				alreadyVotedToAccept: localise(client, 'entry.vote.alreadyVotedToAccept', interaction.locale)(),
+				title: localise(client, 'entry.verification.vote.inFavour.title', interaction.locale)(),
+				description: localise(client, 'entry.verification.vote.inFavour.description', interaction.locale)(),
 			};
 
 			sendInteractionResponse(
@@ -675,7 +693,8 @@ async function handleVote(
 					data: {
 						flags: ApplicationCommandFlags.Ephemeral,
 						embeds: [{
-							description: strings.alreadyVotedToAccept,
+							title: strings.title,
+							description: strings.description,
 							color: constants.colors.dullYellow,
 						}],
 					},
@@ -685,7 +704,8 @@ async function handleVote(
 			// If the voter has already voted to reject, and is voting to reject again.
 		} else if (votedToReject && !isAccept) {
 			const strings = {
-				alreadyVotedToReject: localise(client, 'entry.vote.alreadyVotedToReject', interaction.locale)(),
+				title: localise(client, 'entry.verification.vote.alreadyVoted.against.title', interaction.locale)(),
+				description: localise(client, 'entry.verification.vote.alreadyVoted.against.description', interaction.locale)(),
 			};
 
 			sendInteractionResponse(
@@ -697,7 +717,8 @@ async function handleVote(
 					data: {
 						flags: ApplicationCommandFlags.Ephemeral,
 						embeds: [{
-							description: strings.alreadyVotedToReject,
+							title: strings.title,
+							description: strings.description,
 							color: constants.colors.dullYellow,
 						}],
 					},
@@ -722,7 +743,8 @@ async function handleVote(
 			}
 
 			const strings = {
-				stanceOnVoteChanged: localise(client, 'entry.vote.stanceOnVoteChanged', interaction.locale)(),
+				title: localise(client, 'entry.verification.vote.stanceChanged.title', interaction.locale)(),
+				description: localise(client, 'entry.verification.vote.stanceChanged.description', interaction.locale)(),
 			};
 
 			sendInteractionResponse(
@@ -734,7 +756,8 @@ async function handleVote(
 					data: {
 						flags: ApplicationCommandFlags.Ephemeral,
 						embeds: [{
-							description: strings.stanceOnVoteChanged,
+							title: strings.title,
+							description: strings.description,
 							color: constants.colors.lightGreen,
 						}],
 					},
@@ -789,8 +812,6 @@ async function handleVote(
 
 	const submitter = client.cache.users.get(submitterId)!;
 
-	const dmChannel = await getDmChannel(bot, submitter.id).catch(() => undefined);
-
 	if (isAccepted) {
 		if (updatedSubmitterDocument.data.account.authorisedOn === undefined) {
 			updatedSubmitterDocument.data.account.authorisedOn = [guild.id.toString()];
@@ -809,25 +830,6 @@ async function handleVote(
 				'User-requested role addition.',
 			);
 		} catch {}
-
-		if (dmChannel !== undefined) {
-			const strings = {
-				accepted: localise(client, 'entry.verification.accepted', defaultLocale)({
-					'guild_name': guild.name,
-				}),
-				thankYouForWaiting: localise(client, 'entry.verification.thankYouForWaiting', defaultLocale)(),
-			};
-
-			sendMessage(bot, dmChannel.id, {
-				embeds: [
-					{
-						author: getAuthor(bot, guild),
-						description: `${constants.symbols.responses.celebration} ${strings.accepted} ${strings.thankYouForWaiting}`,
-						color: constants.colors.lightGreen,
-					},
-				],
-			});
-		}
 	} else if (isRejected) {
 		if (updatedSubmitterDocument.data.account.rejectedOn === undefined) {
 			updatedSubmitterDocument.data.account.rejectedOn = [guild.id.toString()];
@@ -836,25 +838,6 @@ async function handleVote(
 		}
 
 		client.log.info(`User with ID ${submitterDocument.data.account.id} has been rejected from guild ${guild.name}.`);
-
-		if (dmChannel !== undefined) {
-			const strings = {
-				rejected: localise(client, 'entry.verification.rejected', defaultLocale)({
-					'guild_name': guild.name,
-				}),
-				notAbleToReturn: localise(client, 'entry.verification.notAbleToReturn', defaultLocale)(),
-			};
-
-			await sendMessage(bot, dmChannel.id, {
-				embeds: [
-					{
-						author: getAuthor(bot, guild),
-						description: `${constants.symbols.responses.upset} ${strings.rejected} ${strings.notAbleToReturn}`,
-						color: constants.colors.lightGreen,
-					},
-				],
-			});
-		}
 
 		banMember(bot, guild.id, submitter.id, {
 			reason: `${
@@ -881,7 +864,8 @@ async function handleVote(
 
 function displayVoteError([client, bot]: [Client, Bot], interaction: Interaction): void {
 	const strings = {
-		failed: localise(client, 'entry.vote.failed', interaction.locale)(),
+		title: localise(client, 'entry.verification.vote.failed.title', interaction.locale)(),
+		description: localise(client, 'entry.verification.vote.failed.description', interaction.locale)(),
 	};
 
 	return void sendInteractionResponse(
@@ -893,7 +877,8 @@ function displayVoteError([client, bot]: [Client, Bot], interaction: Interaction
 			data: {
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
-					description: strings.failed,
+					title: strings.title,
+					description: strings.description,
 					color: constants.colors.red,
 				}],
 			},
@@ -903,11 +888,8 @@ function displayVoteError([client, bot]: [Client, Bot], interaction: Interaction
 
 function displayUserStateError([client, bot]: [Client, Bot], interaction: Interaction): void {
 	const strings = {
-		failedToUpdateVerificationState: localise(
-			client,
-			'entry.vote.failedToUpdateVerificationState',
-			interaction.locale,
-		)(),
+		title: localise(client, 'entry.verification.vote.stateUpdateFailed.title', interaction.locale)(),
+		description: localise(client, 'entry.verification.vote.stateUpdateFailed.description', interaction.locale)(),
 	};
 
 	return void sendInteractionResponse(
@@ -919,7 +901,8 @@ function displayUserStateError([client, bot]: [Client, Bot], interaction: Intera
 			data: {
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
-					description: strings.failedToUpdateVerificationState,
+					title: strings.title,
+					description: strings.description,
 					color: constants.colors.red,
 				}],
 			},

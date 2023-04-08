@@ -10,27 +10,29 @@ async function generateRoleNotice([client, _]: [Client, Bot], __: Guild): Promis
 	const updateString = getLastUpdateString(client, lastUpdatedAt, defaultLocale);
 
 	const strings = {
-		title: localise(client, 'roles.howToPickRoles', defaultLocale)(),
-		selectRolesUsingCommand: localise(client, 'roles.selectRolesUsingCommand', defaultLocale)({
-			'command': '`/profile roles`',
-		}),
-		commandRunnableAnywhere: localise(client, 'roles.commandRunnableAnywhere', defaultLocale)(),
-		pressButtonToOpenMenu: localise(client, 'roles.pressButtonToOpenMenu', defaultLocale)(),
-		clickHereToSelectRoles: localise(client, 'roles.clickHereToSelectRoles', defaultLocale)(),
+		title: localise(client, 'roles.selection.title', defaultLocale)(),
+		description: {
+			usingCommand: localise(client, 'roles.selection.description.usingCommand', defaultLocale)({
+				'command': '`/profile roles`',
+			}),
+			runAnywhere: localise(client, 'roles.selection.description.runAnywhere', defaultLocale)(),
+			pressButton: localise(client, 'roles.selection.description.pressButton', defaultLocale)(),
+			clickHere: localise(client, 'roles.selection.description.clickHere', defaultLocale)(),
+		},
 	};
 
 	return {
 		embeds: [{
 			title: strings.title,
 			description:
-				`${updateString}\n\n${strings.selectRolesUsingCommand} ${strings.commandRunnableAnywhere}\n\n${strings.pressButtonToOpenMenu}`,
+				`${updateString}\n\n${strings.description.usingCommand} ${strings.description.runAnywhere}\n\n${strings.description.pressButton}`,
 			color: constants.colors.turquoise,
 		}],
 		components: [{
 			type: MessageComponentTypes.ActionRow,
 			components: [{
 				type: MessageComponentTypes.Button,
-				label: strings.clickHereToSelectRoles,
+				label: strings.description.clickHere,
 				style: ButtonStyles.Primary,
 				customId: constants.staticComponentIds.selectRoles,
 			}],

@@ -387,9 +387,10 @@ function getReportPrompt(
 		report: {
 			submittedBy: localise(client, 'submittedBy', defaultLocale)(),
 			submittedAt: localise(client, 'submittedAt', defaultLocale)(),
-			reportedUsers: localise(client, 'reports.reportedUsers', defaultLocale)(),
-			reasonForReport: localise(client, 'reports.reasonForReport', defaultLocale)(),
-			linkToMessage: localise(client, 'reports.linkToMessage', defaultLocale)(),
+			users: localise(client, 'reports.users', defaultLocale)(),
+			reason: localise(client, 'reports.reason', defaultLocale)(),
+			link: localise(client, 'reports.link', defaultLocale)(),
+			noLinkProvided: localise(client, 'reports.noLinkProvided', defaultLocale)(),
 		},
 		previousInfractions: {
 			title: localise(client, 'reports.previousInfractions', defaultLocale),
@@ -423,27 +424,25 @@ function getReportPrompt(
 						value: timestamp(reportDocument.data.createdAt),
 					},
 					{
-						name: strings.report.reportedUsers,
+						name: strings.report.users,
 						value: recipientAndWarningsTuples.map(([recipient, _recipientWarnings]) =>
 							mention(recipient.id, MentionTypes.User)
 						).join(', '),
 					},
 					{
-						name: strings.report.reasonForReport,
+						name: strings.report.reason,
 						value: report.reason,
 					},
-					...(report.messageLink
-						? [{
-							name: strings.report.linkToMessage,
-							value: report.messageLink,
-						}]
-						: []),
+					{
+						name: strings.report.link,
+						value: report.messageLink !== undefined ? report.messageLink : `*${strings.report.noLinkProvided}*`,
+					},
 				],
 				footer: { text: `${author.id}${constants.symbols.meta.metadataSeparator}${reportReferenceId}` },
 			},
 			...recipientAndWarningsTuples.map(([recipient, warnings]) => ({
 				...getWarningPage(client, warnings, false, defaultLocale),
-				title: strings.previousInfractions.title({ 'username': diagnosticMentionUser(recipient, true) }),
+				title: strings.previousInfractions.title({ 'username': diagnosticMentionUser(recipient) }),
 			})),
 		],
 		components: [{

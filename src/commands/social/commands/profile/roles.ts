@@ -197,18 +197,21 @@ function createRoleSelectionMenu(
 						viewData.memberRolesIncludedInMenu.length >= viewData.category.maximum
 					) {
 						const strings = {
-							reachedLimit: localise(
-								client,
-								'profile.options.roles.strings.reachedLimit',
-								interaction.locale,
-							)(
-								{ 'category': localise(client, `${viewData.category.id}.name`, interaction.locale)() },
-							),
-							unassignOneOfExistentRoles: localise(
-								client,
-								'profile.options.roles.strings.unassignOneOfExistentRoles',
-								interaction.locale,
-							)(),
+							title: localise(client, 'warn.strings.limitReached.title', defaultLocale)(),
+							description: {
+								limitReached: localise(
+									client,
+									'profile.options.roles.strings.limitReached.description.limitReached',
+									interaction.locale,
+								)(
+									{ 'category': localise(client, `${viewData.category.id}.name`, interaction.locale)() },
+								),
+								toChooseNew: localise(
+									client,
+									'profile.options.roles.strings.limitReached.description.toChooseNew',
+									interaction.locale,
+								)(),
+							},
 						};
 
 						sendInteractionResponse(
@@ -220,7 +223,8 @@ function createRoleSelectionMenu(
 								data: {
 									flags: ApplicationCommandFlags.Ephemeral,
 									embeds: [{
-										description: `${strings.reachedLimit}\n\n${strings.unassignOneOfExistentRoles}`,
+										title: strings.title,
+										description: `${strings.description.limitReached}\n\n${strings.description.toChooseNew}`,
 									}],
 								},
 							},

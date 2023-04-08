@@ -33,8 +33,8 @@ function handleDisplayResources([client, bot]: [Client, Bot], interaction: Inter
 	const locale = show ? defaultLocale : interaction.locale;
 
 	const strings = {
-		resourcesStoredHere: localise(client, 'resources.strings.resourcesStoredHere', locale)({
-			'language': localise(client, `languages.${guild.language}`, locale)(),
+		redirect: localise(client, 'resources.strings.redirect', locale)({
+			'language': localise(client, `languages.${guild.language.toLowerCase()}`, locale)(),
 		}),
 	};
 
@@ -50,7 +50,7 @@ function handleDisplayResources([client, bot]: [Client, Bot], interaction: Inter
 					type: MessageComponentTypes.ActionRow,
 					components: [{
 						type: MessageComponentTypes.Button,
-						label: strings.resourcesStoredHere,
+						label: strings.redirect,
 						style: ButtonStyles.Link,
 						url: constants.links.generateLanguageRepositoryLink(guild.language),
 					}],

@@ -13,7 +13,7 @@ import {
 	isOccupied,
 	isPaused,
 	pause,
-	verifyCanManipulatePlayback,
+	verifyCanManagePlayback,
 } from 'logos/src/controllers/music.ts';
 import { Client, localise } from 'logos/src/client.ts';
 import constants from 'logos/constants.ts';
@@ -29,7 +29,7 @@ function handlePausePlayback([client, bot]: [Client, Bot], interaction: Interact
 	const controller = client.features.music.controllers.get(interaction.guildId!);
 	if (controller === undefined) return;
 
-	const isVoiceStateVerified = verifyCanManipulatePlayback(
+	const isVoiceStateVerified = verifyCanManagePlayback(
 		[client, bot],
 		interaction,
 		controller,
@@ -39,7 +39,8 @@ function handlePausePlayback([client, bot]: [Client, Bot], interaction: Interact
 
 	if (!isOccupied(controller.player)) {
 		const strings = {
-			noSongToPause: localise(client, 'music.options.pause.strings.noSongToPause', interaction.locale)(),
+			title: localise(client, 'music.options.pause.strings.notPlaying.title', interaction.locale)(),
+			description: localise(client, 'music.options.pause.strings.notPlaying.description', interaction.locale)(),
 		};
 
 		return void sendInteractionResponse(
@@ -51,7 +52,8 @@ function handlePausePlayback([client, bot]: [Client, Bot], interaction: Interact
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: strings.noSongToPause,
+						title: strings.title,
+						description: strings.description,
 						color: constants.colors.dullYellow,
 					}],
 				},
@@ -65,10 +67,10 @@ function handlePausePlayback([client, bot]: [Client, Bot], interaction: Interact
 
 	pause(controller.player);
 
-  const strings = {
-    title: localise(client, 'music.options.pause.strings.paused.title', defaultLocale)(),
-    description: localise(client, 'music.options.pause.strings.paused.description', defaultLocale)(),
-  }
+	const strings = {
+		title: localise(client, 'music.options.pause.strings.paused.title', defaultLocale)(),
+		description: localise(client, 'music.options.pause.strings.paused.description', defaultLocale)(),
+	};
 
 	return void sendInteractionResponse(
 		bot,

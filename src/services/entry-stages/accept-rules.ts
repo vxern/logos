@@ -32,12 +32,12 @@ async function handleAcceptRules(
 	if (guild === undefined) return;
 
 	const strings = {
-		title: localise(client, 'entry.proficiencySelection.proficiency', interaction.locale)(),
+		title: localise(client, 'entry.proficiency.title', interaction.locale)(),
 		description: {
-			chooseProficiency: localise(client, 'entry.proficiencySelection.chooseProficiency', interaction.locale)({
+			chooseProficiency: localise(client, 'entry.proficiency.chooseProficiency', interaction.locale)({
 				'language': guild.language,
 			}),
-			canChangeRolesLater: localise(client, 'entry.proficiencySelection.canChangeRolesLater', interaction.locale)({
+			canChangeLater: localise(client, 'entry.proficiency.canChangeLater', interaction.locale)({
 				'command': '`/profile roles`',
 			}),
 		},
@@ -50,7 +50,7 @@ async function handleAcceptRules(
 			flags: ApplicationCommandFlags.Ephemeral,
 			embeds: [{
 				title: strings.title,
-				description: `${strings.description.chooseProficiency}\n\n${strings.description.canChangeRolesLater}`,
+				description: `${strings.description.chooseProficiency}\n\n${strings.description.canChangeLater}`,
 			}],
 			components: [{
 				type: MessageComponentTypes.ActionRow,
@@ -78,7 +78,12 @@ async function handleAcceptRules(
 
 async function vetUser([client, bot]: [Client, Bot], interaction: Interaction): Promise<boolean> {
 	const strings = {
-		verifyingAccount: localise(client, 'entry.verification.verifyingAccount', interaction.locale)(),
+		title: localise(client, 'entry.verification.verifyingAccount.verifyingAccount.title', interaction.locale)(),
+		description: localise(
+			client,
+			'entry.verification.verifyingAccount.verifyingAccount.description',
+			interaction.locale,
+		)(),
 	};
 
 	await sendInteractionResponse(bot, interaction.id, interaction.token, {
@@ -86,7 +91,8 @@ async function vetUser([client, bot]: [Client, Bot], interaction: Interaction): 
 		data: {
 			flags: ApplicationCommandFlags.Ephemeral,
 			embeds: [{
-				description: strings.verifyingAccount,
+				title: strings.title,
+				description: strings.description,
 				color: constants.colors.blue,
 			}],
 		},
@@ -96,13 +102,15 @@ async function vetUser([client, bot]: [Client, Bot], interaction: Interaction): 
 
 	if ((Date.now() - createdAt) < configuration.services.entry.minimumRequiredAge) {
 		const strings = {
-			accountTooNew: localise(client, 'entry.verification.accountTooNew', interaction.locale)(),
+			title: localise(client, 'entry.verification.verifyingAccount.tooNew.title', interaction.locale)(),
+			description: localise(client, 'entry.verification.verifyingAccount.tooNew.description', interaction.locale)(),
 		};
 
 		editOriginalInteractionResponse(bot, interaction.token, {
 			flags: ApplicationCommandFlags.Ephemeral,
 			embeds: [{
-				description: strings.accountTooNew,
+				title: strings.title,
+				description: strings.description,
 				color: constants.colors.dullYellow,
 			}],
 		});
@@ -117,13 +125,15 @@ async function vetUser([client, bot]: [Client, Bot], interaction: Interaction): 
 	);
 	if (userDocument === undefined) {
 		const strings = {
-			failedToVerifyAccount: localise(client, 'entry.verification.failedToVerifyAccount', interaction.locale)(),
+			title: localise(client, 'entry.verification.verifyingAccount.failed.title', interaction.locale)(),
+			description: localise(client, 'entry.verification.verifyingAccount.failed.description', interaction.locale)(),
 		};
 
 		editOriginalInteractionResponse(bot, interaction.token, {
 			flags: ApplicationCommandFlags.Ephemeral,
 			embeds: [{
-				description: strings.failedToVerifyAccount,
+				title: strings.title,
+				description: strings.description,
 				color: constants.colors.red,
 			}],
 		});
@@ -142,13 +152,15 @@ async function vetUser([client, bot]: [Client, Bot], interaction: Interaction): 
 
 	if (entryRequest !== undefined && !entryRequest.data.isFinalised) {
 		const strings = {
-			alreadySubmittedAnswers: localise(client, 'entry.verification.alreadySubmittedAnswers', interaction.locale)(),
+			title: localise(client, 'entry.verification.answers.alreadyAnswered.title', interaction.locale)(),
+			description: localise(client, 'entry.verification.answers.alreadyAnswered.description', interaction.locale)(),
 		};
 
 		editOriginalInteractionResponse(bot, interaction.token, {
 			flags: ApplicationCommandFlags.Ephemeral,
 			embeds: [{
-				description: strings.alreadySubmittedAnswers,
+				title: strings.title,
+				description: strings.description,
 				color: constants.colors.dullYellow,
 			}],
 		});
@@ -158,17 +170,15 @@ async function vetUser([client, bot]: [Client, Bot], interaction: Interaction): 
 	if (userDocument.data.account.authorisedOn?.includes(interaction.guildId!.toString())) return true;
 	if (userDocument.data.account.rejectedOn?.includes(interaction.guildId!.toString())) {
 		const strings = {
-			entryRequestRejectedPreviously: localise(
-				client,
-				'entry.verification.entryRequestRejectedPreviously',
-				interaction.locale,
-			)(),
+			title: localise(client, 'entry.verification.answers.rejectedBefore.title', interaction.locale)(),
+			description: localise(client, 'entry.verification.answers.rejectedBefore.description', interaction.locale)(),
 		};
 
 		editOriginalInteractionResponse(bot, interaction.token, {
 			flags: ApplicationCommandFlags.Ephemeral,
 			embeds: [{
-				description: strings.entryRequestRejectedPreviously,
+				title: strings.title,
+				description: strings.description,
 				color: constants.colors.red,
 			}],
 		});

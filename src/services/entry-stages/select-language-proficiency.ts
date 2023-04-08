@@ -51,11 +51,22 @@ async function handleSelectLanguageProficiency(
 
 		if (isVerified) {
 			const strings = {
-				needToVerify: localise(client, 'entry.verification.needToVerify', interaction.locale)({
-					'guild_name': guild.name,
-				}),
-				answerHonestly: localise(client, 'entry.verification.answerHonestly', interaction.locale)(),
-				iUnderstand: localise(client, 'entry.verification.iUnderstand', interaction.locale)(),
+				title: localise(client, 'entry.verification.getVerified.title', interaction.locale)(),
+				description: {
+					verificationRequired: localise(
+						client,
+						'entry.verification.getVerified.description.verificationRequired',
+						interaction.locale,
+					)({
+						'server_name': guild.name,
+					}),
+					honestAnswers: localise(
+						client,
+						'entry.verification.getVerified.description.honestAnswers',
+						interaction.locale,
+					)(),
+					understood: localise(client, 'entry.verification.getVerified.description.understood', interaction.locale)(),
+				},
 			};
 
 			return void sendInteractionResponse(bot, interaction.id, interaction.token, {
@@ -63,7 +74,8 @@ async function handleSelectLanguageProficiency(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: `${strings.needToVerify}\n\n${strings.answerHonestly}`,
+						title: strings.title,
+						description: `${strings.description.verificationRequired}\n\n${strings.description.honestAnswers}`,
 						color: constants.colors.blue,
 					}],
 					components: [{
@@ -71,7 +83,7 @@ async function handleSelectLanguageProficiency(
 						components: [{
 							type: MessageComponentTypes.Button,
 							style: ButtonStyles.Secondary,
-							label: strings.iUnderstand,
+							label: strings.description.understood,
 							customId: encodeId<EntryStepButtonID>(constants.staticComponentIds.requestedVerification, [
 								requestedRole.id.toString(),
 							]),

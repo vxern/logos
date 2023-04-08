@@ -35,7 +35,8 @@ function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], interaction
 
 	if (!isOccupied(controller.player) || currentListing === undefined) {
 		const strings = {
-			noSongPlaying: localise(client, 'music.options.now.strings.noSongPlaying', interaction.locale)(),
+			title: localise(client, 'music.options.now.strings.noSong.title', interaction.locale)(),
+			description: localise(client, 'music.options.now.strings.noSong.description', interaction.locale)(),
 		};
 
 		return void sendInteractionResponse(
@@ -47,7 +48,8 @@ function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], interaction
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: strings.noSongPlaying,
+						title: strings.title,
+						description: strings.description,
 						color: constants.colors.dullYellow,
 					}],
 				},
@@ -60,16 +62,23 @@ function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], interaction
 	if (collection !== undefined) {
 		if (!isCollection(currentListing?.content)) {
 			const strings = {
-				noCollectionPlaying: localise(
+				title: localise(
 					client,
-					'music.options.now.strings.noCollectionPlaying',
+					'music.options.now.strings.noCollection.title',
 					interaction.locale,
 				)(),
-				requestInformationAboutSong: localise(
-					client,
-					'music.options.now.strings.requestInformationAboutSong',
-					interaction.locale,
-				)(),
+				description: {
+					noCollection: localise(
+						client,
+						'music.options.now.strings.noCollection.description.noCollection',
+						interaction.locale,
+					)(),
+					trySongInstead: localise(
+						client,
+						'music.options.now.strings.noCollection.description.trySongInstead',
+						interaction.locale,
+					)(),
+				},
 			};
 
 			return void sendInteractionResponse(
@@ -81,7 +90,7 @@ function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], interaction
 					data: {
 						flags: ApplicationCommandFlags.Ephemeral,
 						embeds: [{
-							description: `${strings.noCollectionPlaying}\n\n${strings.requestInformationAboutSong}`,
+							description: `${strings.description.noCollection}\n\n${strings.description.trySongInstead}`,
 							color: constants.colors.dullYellow,
 						}],
 					},

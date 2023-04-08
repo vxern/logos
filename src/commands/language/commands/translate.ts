@@ -132,11 +132,27 @@ async function handleTranslateText([client, bot]: [Client, Bot], interaction: In
 	const [{ from, to, text, show }] = parseArguments(interaction.data?.options, { show: 'boolean' });
 	if (from === undefined || to === undefined || text === undefined) return;
 
-	if (from === to) {
+	const sourceLanguage = resolveToSupportedLanguage(client, from);
+	const targetLanguage = resolveToSupportedLanguage(client, to);
+	const isSourceLanguageInvalid = sourceLanguage === undefined;
+	const isTargetLanguageInvalid = targetLanguage === undefined;
+	if (isSourceLanguageInvalid || isTargetLanguageInvalid) {
 		const strings = {
-			title: localise(client, 'translate.strings.mustBeDifferentFromSource.title', interaction.locale)(),
-			description: localise(client, 'translate.strings.mustBeDifferentFromSource.description', interaction.locale)(),
+			source: {
+				title: localise(client, 'translate.strings.invalid.source.title', interaction.locale)(),
+				description: localise(client, 'translate.strings.invalid.source.description', interaction.locale)(),
+			},
+			target: {
+				title: localise(client, 'translate.strings.invalid.target.title', interaction.locale)(),
+				description: localise(client, 'translate.strings.invalid.target.description', interaction.locale)(),
+			},
+			both: {
+				title: localise(client, 'translate.strings.invalid.both.title', interaction.locale)(),
+				description: localise(client, 'translate.strings.invalid.both.description', interaction.locale)(),
+			},
 		};
+
+		const areBothLanguagesInvalid = isSourceLanguageInvalid && isTargetLanguageInvalid;
 
 		return void sendInteractionResponse(
 			bot,
@@ -147,9 +163,23 @@ async function handleTranslateText([client, bot]: [Client, Bot], interaction: In
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						title: strings.title,
-						description: strings.description,
-						color: constants.colors.dullYellow,
+						...areBothLanguagesInvalid
+							? {
+								title: strings.both.title,
+								description: strings.both.description,
+							}
+							: (
+								isSourceLanguageInvalid
+									? {
+										title: strings.source.title,
+										description: strings.source.description,
+									}
+									: {
+										title: strings.target.title,
+										description: strings.target.description,
+									}
+							),
+						color: constants.colors.red,
 					}],
 				},
 			},
@@ -159,8 +189,8 @@ async function handleTranslateText([client, bot]: [Client, Bot], interaction: In
 	const isSourceTextEmpty = text.trim().length === 0;
 	if (isSourceTextEmpty) {
 		const strings = {
-			title: localise(client, 'translate.strings.textCannotBeEmpty.title', interaction.locale)(),
-			description: localise(client, 'translate.strings.textCannotBeEmpty.description', interaction.locale)(),
+			title: localise(client, 'translate.strings.textEmpty.title', interaction.locale)(),
+			description: localise(client, 'translate.strings.textEmpty.description', interaction.locale)(),
 		};
 
 		return void sendInteractionResponse(
@@ -181,14 +211,10 @@ async function handleTranslateText([client, bot]: [Client, Bot], interaction: In
 		);
 	}
 
-	const sourceLanguage = resolveToSupportedLanguage(client, from);
-	const targetLanguage = resolveToSupportedLanguage(client, to);
-	if (sourceLanguage === undefined || targetLanguage === undefined) {
+	if (from === to) {
 		const strings = {
-			title: localise(client, 'translate.strings.invalid.title', interaction.locale)(),
-			source: localise(client, 'translate.strings.invalid.source', interaction.locale)(),
-			both: localise(client, 'translate.strings.invalid.both', interaction.locale)(),
-			target: localise(client, 'translate.strings.invalid.target', interaction.locale)(),
+			title: localise(client, 'translate.strings.languagesNotDifferent.title', interaction.locale)(),
+			description: localise(client, 'translate.strings.languagesNotDifferent.description', interaction.locale)(),
 		};
 
 		return void sendInteractionResponse(
@@ -201,10 +227,8 @@ async function handleTranslateText([client, bot]: [Client, Bot], interaction: In
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
 						title: strings.title,
-						description: sourceLanguage !== undefined ? strings.target : (
-							targetLanguage !== undefined ? strings.source : strings.both
-						),
-						color: constants.colors.red,
+						description: strings.description,
+						color: constants.colors.dullYellow,
 					}],
 				},
 			},
@@ -226,7 +250,7 @@ async function handleTranslateText([client, bot]: [Client, Bot], interaction: In
 
 	client.log.info(
 		`Translating a text of length ${text.length} from ${sourceLanguage.name} to ${targetLanguage.name} ` +
-			`as requested by ${diagnosticMentionUser(interaction.user, true)} on ${guild.name}...`,
+			`as requested by ${diagnosticMentionUser(interaction.user)} on ${guild.name}...`,
 	);
 
 	const locale = show ? defaultLocale : interaction.locale;

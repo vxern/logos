@@ -88,7 +88,7 @@ async function handleFindWord([client, bot]: [Client, Bot], interaction: Interac
 
 	client.log.info(
 		`Looking up the word '${word}' from ${dictionaries.length} dictionaries ` +
-			`as requested by ${diagnosticMentionUser(interaction.user, true)} on ${guild.name}...`,
+			`as requested by ${diagnosticMentionUser(interaction.user)} on ${guild.name}...`,
 	);
 
 	const entries: DictionaryEntry[] = [];
@@ -105,7 +105,9 @@ async function handleFindWord([client, bot]: [Client, Bot], interaction: Interac
 	if (entries.length === 0) {
 		const strings = {
 			title: localise(client, 'word.strings.noResults.title', locale)(),
-			description: localise(client, 'word.strings.noResults.description', locale)(),
+			description: localise(client, 'word.strings.noResults.description', locale)({
+				'word': word,
+			}),
 		};
 
 		return void editOriginalInteractionResponse(
@@ -387,17 +389,17 @@ function isUnknownWordClass(wordClass: WordClass): boolean {
 function entryToEmbeds(client: Client, entry: DictionaryEntry, locale: string | undefined, verbose: boolean): Embed[] {
 	let wordClassDisplayed: string;
 	if (entry.wordClass === undefined) {
-    const strings = {
-      unknown: localise(client, 'words.unknown', locale)(),
-    }
+		const strings = {
+			unknown: localise(client, 'words.unknown', locale)(),
+		};
 
 		wordClassDisplayed = strings.unknown;
 	} else {
 		const [wordClass, wordClassUnresolved] = entry.wordClass;
 
-    const strings = {
-      wordClass: localise(client, wordClassToStringKey[wordClass], locale)()
-    };
+		const strings = {
+			wordClass: localise(client, wordClassToStringKey[wordClass], locale)(),
+		};
 
 		wordClassDisplayed = strings.wordClass;
 		if (isUnknownWordClass(wordClass)) {

@@ -29,43 +29,55 @@ function handleDisplayGuildInformation([client, bot]: [Client, Bot], interaction
 	const isManaged = owner.username !== guild.name;
 
 	const strings = {
-		title: localise(client, 'information.options.server.strings.informationAbout', interaction.locale)(
-			{ 'guild_name': guild.name },
+		title: localise(client, 'information.options.server.strings.information.title', interaction.locale)(
+			{ 'server_name': guild.name },
 		),
-		sections: {
+		description: {
 			description: {
 				title: localise(
 					client,
-					'information.options.server.strings.fields.description',
+					'information.options.server.strings.information.description.description',
 					interaction.locale,
 				)(),
-				noDescription: localise(client, 'information.options.server.strings.noDescription', interaction.locale)(),
+				noDescription: localise(
+					client,
+					'information.options.server.strings.information.description.noDescription',
+					interaction.locale,
+				)(),
 			},
-			members: localise(client, 'information.options.server.strings.fields.members', interaction.locale)(),
-			created: localise(client, 'information.options.server.strings.fields.created', interaction.locale)(),
-			channels: localise(
+			members: localise(
 				client,
-				'information.options.server.strings.fields.channels',
+				'information.options.server.strings.information.description.members',
 				interaction.locale,
 			)(),
-			owner: localise(client, 'information.options.server.strings.fields.owner', interaction.locale)(),
+			created: localise(
+				client,
+				'information.options.server.strings.information.description.created',
+				interaction.locale,
+			)(),
+			channels: localise(
+				client,
+				'information.options.server.strings.information.description.channels',
+				interaction.locale,
+			)(),
+			owner: localise(client, 'information.options.server.strings.information.description.owner', interaction.locale)(),
 			moderators: {
 				title: localise(
 					client,
-					'information.options.server.strings.fields.moderators',
+					'information.options.server.strings.information.description.moderators',
 					interaction.locale,
 				)(),
 				overseenByModerators: localise(
 					client,
-					'information.options.server.strings.overseenByModerators',
+					'information.options.server.strings.information.description.overseenByModerators',
 					interaction.locale,
 				)(
 					{ 'role_mention': configuration.permissions.moderatorRoleNames.main.toLowerCase() },
 				),
 			},
-			proficiencyDistribution: localise(
+			distribution: localise(
 				client,
-				'information.options.server.strings.fields.distributionOfMembersLanguageProficiency',
+				'information.options.server.strings.information.description.distribution',
 				interaction.locale,
 			)(),
 		},
@@ -85,38 +97,38 @@ function handleDisplayGuildInformation([client, bot]: [Client, Bot], interaction
 					color: constants.colors.invisible,
 					fields: [
 						{
-							name: `${constants.symbols.guild.description} ${strings.sections.description.title}`,
-							value: guild.description ?? strings.sections.description.noDescription,
+							name: `${constants.symbols.guild.description} ${strings.description.description.title}`,
+							value: guild.description ?? strings.description.description.noDescription,
 							inline: true,
 						},
 						{
-							name: `${constants.symbols.guild.members} ${strings.sections.members}`,
+							name: `${constants.symbols.guild.members} ${strings.description.members}`,
 							value: guild.memberCount.toString(),
 							inline: true,
 						},
 						{
-							name: `${constants.symbols.guild.created} ${strings.sections.created}`,
+							name: `${constants.symbols.guild.created} ${strings.description.created}`,
 							value: timestamp(snowflakeToTimestamp(guild.id)),
 							inline: true,
 						},
 						{
-							name: `${constants.symbols.guild.channels.channels} ${strings.sections.channels}`,
+							name: `${constants.symbols.guild.channels.channels} ${strings.description.channels}`,
 							value: getChannelInformationSection(client, guild, interaction.locale),
 							inline: true,
 						},
 						isManaged
 							? {
-								name: `${constants.symbols.guild.moderators} ${strings.sections.moderators.title}`,
-								value: strings.sections.moderators.overseenByModerators,
+								name: `${constants.symbols.guild.moderators} ${strings.description.moderators.title}`,
+								value: strings.description.moderators.overseenByModerators,
 								inline: false,
 							}
 							: {
-								name: `${constants.symbols.guild.owner} ${strings.sections.owner}`,
+								name: `${constants.symbols.guild.owner} ${strings.description.owner}`,
 								value: mention(owner.id, MentionTypes.User),
 								inline: true,
 							},
 						{
-							name: `${constants.symbols.guild.proficiencyDistribution} ${strings.sections.proficiencyDistribution}`,
+							name: `${constants.symbols.guild.proficiencyDistribution} ${strings.description.distribution}`,
 							value: formatDistribution(client, proficiencyRoleFrequencies, interaction.locale),
 							inline: false,
 						},
@@ -204,15 +216,15 @@ function formatDistribution(
 	const total = roleFrequencies.map(([_, value]) => value).reduce((a, b) => a + b, 0);
 
 	const strings = {
-		withoutProficiencyRole: localise(
+		withoutProficiency: localise(
 			client,
-			'information.options.server.strings.withoutProficiencyRole',
+			'information.options.server.strings.information.description.withoutProficiency',
 			locale,
 		)(),
 	};
 
 	const stringParts: string[] = [
-		formatFrequency(withoutRole, getPercentageComposition(withoutRole, total), strings.withoutProficiencyRole),
+		formatFrequency(withoutRole, getPercentageComposition(withoutRole, total), strings.withoutProficiency),
 	];
 	for (const [roleId, frequency] of roleFrequencies) {
 		const percentage = getPercentageComposition(frequency, total);
