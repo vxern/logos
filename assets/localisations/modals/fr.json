@@ -5,13 +5,12 @@
 	"verification.fields.whereFound": "Où avez-vous entendu parler du serveur ?",
 	"report.title": "Rapport de l'utilisateur",
 	"report.fields.reason": "Quel est le motif du rapport ?",
-	"report.fields.usersToReport": "Utilisateurs à signaler",
-	"report.fields.linkToMessage": "Lien vers le message pour le contexte",
+	"report.fields.users": "Users to report",
+	"report.fields.link": "Link to the message for context",
 	"suggestion.title": "Suggestion",
 	"suggestion.fields.suggestion": "Quelle est votre suggestion ?",
 	"prompts.continue": "Continuer",
 	"prompts.cancel": "Annuler",
-	"prompts.yourProgressWillBeLost": "Vos progrès seront perdus.",
-	"prompts.yesLeaveTheComposer": "Oui, je veux quitter le compositeur",
-	"prompts.noTakeMeBackToTheComposer": "Non, ramenez-moi au compositeur"
+	"prompts.leave": "Yes, I want to leave the composer",
+	"prompts.stay": "No, take me back to the composer"
 }
