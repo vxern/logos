@@ -418,13 +418,15 @@ async function loadSong(
 			}),
 		};
 
-		const embed: Embed = {
-			title: strings.title,
-			description: strings.description,
-			color: constants.colors.red,
-		};
+		sendMessage(bot, controller.feedbackChannelId!, {
+			embeds: [{
+				title: strings.title,
+				description: strings.description,
+				color: constants.colors.red,
+			}],
+		});
 
-		sendMessage(bot, controller.feedbackChannelId!, { embeds: [embed] });
+		advanceQueueAndPlay([client, bot], guildId, controller);
 
 		return false;
 	}
@@ -435,7 +437,28 @@ async function loadSong(
 		controller.currentListing.content.title = track.info.title;
 	}
 
-	controller.player.once('trackEnd', (_, __) => {
+	const onTrackException = () => {
+		const strings = {
+			title: localise(client, 'music.options.play.strings.failedToPlay.title', defaultLocale)(),
+			description: localise(client, 'music.options.play.strings.failedToPlay.description', defaultLocale)({
+				'title': song.title,
+			}),
+		};
+
+		sendMessage(bot, controller.feedbackChannelId!, {
+			embeds: [{
+				title: strings.title,
+				description: strings.description,
+				color: constants.colors.red,
+			}],
+		});
+
+		advanceQueueAndPlay([client, bot], guildId, controller);
+
+		return false;
+	};
+
+	const onTrackEnd = () => {
 		if (controller.flags.isDestroyed) {
 			setDisconnectTimeout(client, guildId);
 			return;
@@ -446,8 +469,13 @@ async function loadSong(
 			return;
 		}
 
+		controller.player.off('trackException', onTrackException);
+
 		advanceQueueAndPlay([client, bot], guildId, controller);
-	});
+	};
+
+	controller.player.once('trackException', onTrackException);
+	controller.player.once('trackEnd', onTrackEnd);
 
 	controller.player.play(track.track);
 
@@ -471,20 +499,20 @@ async function loadSong(
 		},
 	};
 
-	const embed: Embed = {
-		title: `${emoji} ${strings.title}`,
-		description: strings.description.nowPlaying(
-			{
-				'song_information': strings.description.track,
-				'title': song.title,
-				'url': song.url,
-				'user_mention': mention(controller.currentListing!.requestedBy, MentionTypes.User),
-			},
-		),
-		color: constants.colors.invisible,
-	};
-
-	sendMessage(bot, controller.feedbackChannelId!, { embeds: [embed] });
+	sendMessage(bot, controller.feedbackChannelId!, {
+		embeds: [{
+			title: `${emoji} ${strings.title}`,
+			description: strings.description.nowPlaying(
+				{
+					'song_information': strings.description.track,
+					'title': song.title,
+					'url': song.url,
+					'user_mention': mention(controller.currentListing!.requestedBy, MentionTypes.User),
+				},
+			),
+			color: constants.colors.invisible,
+		}],
+	});
 
 	return true;
 }
