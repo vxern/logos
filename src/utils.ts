@@ -1,5 +1,4 @@
 import { Bot, Channel, ChannelTypes, Embed, getGuildIconURL, getMessages, Guild, Message, User } from 'discordeno';
-import { code } from 'logos/formatting.ts';
 import { Document } from 'logos/src/database/document.ts';
 
 /**
@@ -14,13 +13,11 @@ function fromHex(color: string): number {
 }
 
 type TextChannel = Channel & { type: ChannelTypes.GuildText };
-
 type VoiceChannel = Channel & { type: ChannelTypes.GuildVoice };
 
 function isText(channel: Channel): channel is TextChannel {
 	return channel.type === ChannelTypes.GuildText;
 }
-
 function isVoice(channel: Channel): channel is VoiceChannel {
 	return channel.type === ChannelTypes.GuildVoice;
 }
@@ -47,12 +44,10 @@ function getTextChannel(guild: Guild, name: string): Channel | undefined {
  * @param user - The user object.
  * @returns The mention.
  */
-function diagnosticMentionUser(user: User, doNotFormat?: boolean): string {
+function diagnosticMentionUser(user: User): string {
 	const tag = `${user.username}#${user.discriminator}`;
 
-	if (doNotFormat) return `${tag} (${user.id})`;
-
-	return `${code(tag)} (${code(user.id.toString())})`;
+	return `${tag} (${user.id})`;
 }
 
 /**

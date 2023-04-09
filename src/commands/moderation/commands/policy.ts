@@ -32,12 +32,16 @@ function handleDisplayModerationPolicy([client, bot]: [Client, Bot], interaction
 
 	const locale = show ? defaultLocale : interaction.locale;
 
+	const strings = {
+		title: localise(client, 'policies.moderation.title', interaction.locale)(),
+	};
+
 	return void sendInteractionResponse(bot, interaction.id, interaction.token, {
 		type: InteractionResponseTypes.ChannelMessageWithSource,
 		data: {
 			flags: !show ? ApplicationCommandFlags.Ephemeral : undefined,
 			embeds: [{
-				title: localise(client, 'policies.moderation.header', interaction.locale)(),
+				title: strings.title,
 				fields: getModerationPolicyPoints(client, guild, locale),
 			}],
 		},
@@ -55,23 +59,46 @@ function getModerationPolicyPoints(
 		? mention(moderatorRoleId, MentionTypes.Role)
 		: configuration.permissions.moderatorRoleNames.main.toLowerCase();
 
+	const strings = {
+		introduction: {
+			title: localise(client, 'policies.moderation.points.introduction.title', locale)(),
+			description: localise(client, 'policies.moderation.points.introduction.description', locale)(
+				{ 'role_mention': moderatorRoleMention },
+			),
+		},
+		breach: {
+			title: localise(client, 'policies.moderation.points.breach.title', locale)(),
+			description: localise(client, 'policies.moderation.points.breach.description', locale)(),
+		},
+		warnings: {
+			title: localise(client, 'policies.moderation.points.warnings.title', locale)(),
+			description: localise(client, 'policies.moderation.points.warnings.description', locale)(),
+		},
+		furtherAction: {
+			title: localise(client, 'policies.moderation.points.furtherAction.title', locale)(),
+			description: localise(client, 'policies.moderation.points.furtherAction.description', locale)(),
+		},
+		ban: {
+			title: localise(client, 'policies.moderation.points.ban.title', locale)(),
+			description: localise(client, 'policies.moderation.points.ban.description', locale)(),
+		},
+	};
+
 	return [{
-		name: localise(client, 'policies.moderation.points.introduction.header', locale)(),
-		value: localise(client, 'policies.moderation.points.introduction.body', locale)(
-			{ 'role_mention': moderatorRoleMention },
-		),
+		name: strings.introduction.title,
+		value: strings.introduction.description,
 	}, {
-		name: localise(client, 'policies.moderation.points.breach.header', locale)(),
-		value: localise(client, 'policies.moderation.points.breach.body', locale)(),
+		name: strings.breach.title,
+		value: strings.breach.description,
 	}, {
-		name: localise(client, 'policies.moderation.points.warnings.header', locale)(),
-		value: localise(client, 'policies.moderation.points.warnings.body', locale)(),
+		name: strings.warnings.title,
+		value: strings.warnings.description,
 	}, {
-		name: localise(client, 'policies.moderation.points.furtherAction.header', locale)(),
-		value: localise(client, 'policies.moderation.points.furtherAction.body', locale)(),
+		name: strings.furtherAction.title,
+		value: strings.furtherAction.description,
 	}, {
-		name: localise(client, 'policies.moderation.points.ban.header', locale)(),
-		value: localise(client, 'policies.moderation.points.ban.body', locale)(),
+		name: strings.ban.title,
+		value: strings.ban.description,
 	}];
 }
 

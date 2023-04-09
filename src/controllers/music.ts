@@ -111,7 +111,7 @@ function getVoiceState(client: Client, guildId: bigint, userId: bigint): VoiceSt
 	return voiceState;
 }
 
-type MusicAction = 'manipulate' | 'check';
+type MusicAction = 'manage' | 'check';
 
 function verifyVoiceState(
 	[client, bot]: [Client, Bot],
@@ -121,6 +121,14 @@ function verifyVoiceState(
 	action: MusicAction,
 ): boolean {
 	if (voiceState === undefined || voiceState.channelId === undefined) {
+		const strings = {
+			title: localise(client, 'music.strings.notInVc.title', interaction.locale)(),
+			description: {
+				toManage: localise(client, 'music.strings.notInVc.description.toManage', interaction.locale)(),
+				toCheck: localise(client, 'music.strings.notInVc.description.toCheck', interaction.locale)(),
+			},
+		};
+
 		sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -131,13 +139,8 @@ function verifyVoiceState(
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [
 						{
-							description: localise(
-								client,
-								action === 'manipulate'
-									? 'music.strings.mustBeInVoiceChannelToManipulate'
-									: 'music.strings.mustBeInVoiceChannelToCheck',
-								interaction.locale,
-							)(),
+							title: strings.title,
+							description: action === 'manage' ? strings.description.toManage : strings.description.toCheck,
 							color: constants.colors.dullYellow,
 						},
 					],
@@ -148,6 +151,11 @@ function verifyVoiceState(
 	}
 
 	if (isOccupied(controller.player) && voiceState.channelId !== controller.voiceChannelId) {
+		const strings = {
+			title: localise(client, 'music.options.play.strings.inDifferentVc.title', interaction.locale)(),
+			description: localise(client, 'music.options.play.strings.inDifferentVc.description', interaction.locale)(),
+		};
+
 		sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -157,11 +165,8 @@ function verifyVoiceState(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(
-							client,
-							'music.options.play.strings.alreadyPlayingInAnotherVoiceChannel',
-							interaction.locale,
-						)(),
+						title: strings.title,
+						description: strings.description,
 						color: constants.colors.dullYellow,
 					}],
 				},
@@ -179,10 +184,15 @@ function verifyCanRequestPlayback(
 	controller: MusicController,
 	voiceState: VoiceState | undefined,
 ): boolean {
-	const isVoiceStateVerified = verifyVoiceState([client, bot], interaction, controller, voiceState, 'manipulate');
+	const isVoiceStateVerified = verifyVoiceState([client, bot], interaction, controller, voiceState, 'manage');
 	if (!isVoiceStateVerified) return false;
 
 	if (!isQueueVacant(controller.listingQueue)) {
+		const strings = {
+			title: localise(client, 'music.options.play.strings.queueFull.title', interaction.locale)(),
+			description: localise(client, 'music.options.play.strings.queueFull.description', interaction.locale)(),
+		};
+
 		sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -192,7 +202,8 @@ function verifyCanRequestPlayback(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(client, 'music.options.play.strings.queueIsFull', interaction.locale)(),
+						title: strings.title,
+						description: strings.description,
 						color: constants.colors.dullYellow,
 					}],
 				},
@@ -204,16 +215,21 @@ function verifyCanRequestPlayback(
 	return true;
 }
 
-function verifyCanManipulatePlayback(
+function verifyCanManagePlayback(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 	controller: MusicController,
 	voiceState: VoiceState | undefined,
 ): boolean {
-	const isVoiceStateVerified = verifyVoiceState([client, bot], interaction, controller, voiceState, 'manipulate');
+	const isVoiceStateVerified = verifyVoiceState([client, bot], interaction, controller, voiceState, 'manage');
 	if (!isVoiceStateVerified) return false;
 
 	if (controller.currentListing !== undefined && !controller.currentListing.managerIds.includes(interaction.user.id)) {
+		const strings = {
+			title: localise(client, 'music.strings.cannotChange.title', interaction.locale)(),
+			description: localise(client, 'music.strings.cannotChange.description', interaction.locale)(),
+		};
+
 		sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -223,7 +239,8 @@ function verifyCanManipulatePlayback(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(client, 'music.strings.cannotManipulateIfHadBeenAbsent', interaction.locale)(),
+						title: strings.title,
+						description: strings.description,
 						color: constants.colors.dullYellow,
 					}],
 				},
@@ -297,12 +314,20 @@ function receiveNewListing(
 		controller.feedbackChannelId = feedbackChannelId;
 	}
 
-	const queuedString = localise(client, 'music.options.play.strings.queued.header', defaultLocale)();
-	const embed: Embed = {
-		title: `${constants.symbols.music.queued} ${queuedString}`,
-		description: localise(client, 'music.options.play.strings.queued.body', defaultLocale)(
-			{ 'title': listing.content.title },
+	const strings = {
+		title: localise(client, 'music.options.play.strings.queued.title', defaultLocale)(),
+		description: localise(client, 'music.options.play.strings.queued.description.public', defaultLocale)(
+			{
+				'title': listing.content.title,
+				'url': listing.content.url,
+				'user_mention': mention(listing.requestedBy, MentionTypes.User),
+			},
 		),
+	};
+
+	const embed: Embed = {
+		title: `${constants.symbols.music.queued} ${strings.title}`,
+		description: strings.description,
 		color: constants.colors.lightGreen,
 	};
 
@@ -364,12 +389,15 @@ function advanceQueueAndPlay([client, bot]: [Client, Bot], guildId: bigint, cont
 	if (controller.currentListing === undefined) {
 		setDisconnectTimeout(client, guildId);
 
-		const allDoneString = localise(client, 'music.strings.allDone.header', defaultLocale)();
+		const strings = {
+			title: localise(client, 'music.options.play.strings.finished.title', defaultLocale)(),
+			description: localise(client, 'music.options.play.strings.finished.description', defaultLocale)(),
+		};
 
 		return void sendMessage(bot, controller.feedbackChannelId!, {
 			embeds: [{
-				title: `${constants.symbols.music.allDone} ${allDoneString}`,
-				description: localise(client, 'music.strings.allDone.body', defaultLocale)(),
+				title: `${constants.symbols.music.allDone} ${strings.title}`,
+				description: strings.description,
 				color: constants.colors.blue,
 			}],
 		});
@@ -387,13 +415,23 @@ async function loadSong(
 	const result = await controller.player.node.rest.loadTracks(song.url);
 
 	if (result.loadType === LoadType.LoadFailed || result.loadType === LoadType.NoMatches) {
-		const embed: Embed = {
-			title: localise(client, 'music.strings.couldNotLoadTrack.header', defaultLocale)(),
-			description: localise(client, 'music.strings.couldNotLoadTrack.body', defaultLocale)({ 'title': song.title }),
-			color: constants.colors.red,
+		const strings = {
+			title: localise(client, 'music.options.play.strings.failedToLoad.title', defaultLocale)(),
+			description: localise(client, 'music.options.play.strings.failedToLoad.description', defaultLocale)({
+				'title': song.title,
+			}),
 		};
 
-		sendMessage(bot, controller.feedbackChannelId!, { embeds: [embed] });
+		sendMessage(bot, controller.feedbackChannelId!, {
+			embeds: [{
+				title: strings.title,
+				description: strings.description,
+				color: constants.colors.red,
+			}],
+		});
+
+		advanceQueueAndPlay([client, bot], guildId, controller);
+
 		return false;
 	}
 
@@ -403,7 +441,28 @@ async function loadSong(
 		controller.currentListing.content.title = track.info.title;
 	}
 
-	controller.player.once('trackEnd', (_, __) => {
+	const onTrackException = () => {
+		const strings = {
+			title: localise(client, 'music.options.play.strings.failedToPlay.title', defaultLocale)(),
+			description: localise(client, 'music.options.play.strings.failedToPlay.description', defaultLocale)({
+				'title': song.title,
+			}),
+		};
+
+		sendMessage(bot, controller.feedbackChannelId!, {
+			embeds: [{
+				title: strings.title,
+				description: strings.description,
+				color: constants.colors.red,
+			}],
+		});
+
+		advanceQueueAndPlay([client, bot], guildId, controller);
+
+		return false;
+	};
+
+	const onTrackEnd = () => {
 		if (controller.flags.isDestroyed) {
 			setDisconnectTimeout(client, guildId);
 			return;
@@ -414,40 +473,51 @@ async function loadSong(
 			return;
 		}
 
+		controller.player.off('trackException', onTrackException);
+
 		advanceQueueAndPlay([client, bot], guildId, controller);
-	});
+	};
+
+	controller.player.once('trackException', onTrackException);
+	controller.player.once('trackEnd', onTrackEnd);
 
 	controller.player.play(track.track);
 
 	const emoji = listingTypeToEmoji[song.type];
-	const playingString = localise(client, 'music.strings.playing.header', defaultLocale)();
-	const type = localise(client, localisationsBySongListingType[song.type], defaultLocale)().toLowerCase();
 
-	const songInformation =
-		controller.currentListing?.content !== undefined && isCollection(controller.currentListing.content)
-			? localise(client, 'music.strings.playing.parts.displayTrack', defaultLocale)(
-				{
-					'index': controller.currentListing.content.position + 1,
-					'number': controller.currentListing.content.songs.length,
-					'title': controller.currentListing.content.title,
-				},
-			)
-			: '';
-
-	const embed: Embed = {
-		title: `${emoji} ${playingString} ${type}`,
-		description: localise(client, 'music.strings.playing.body', defaultLocale)(
-			{
-				'song_information': songInformation,
-				'title': song.title,
-				'url': song.url,
-				'user_mention': mention(controller.currentListing!.requestedBy, MentionTypes.User),
-			},
-		),
-		color: constants.colors.invisible,
+	const strings = {
+		title: localise(client, 'music.options.play.strings.nowPlaying.title.nowPlaying', defaultLocale)({
+			'listing_type': localise(client, localisationsBySongListingType[song.type], defaultLocale)(),
+		}),
+		description: {
+			nowPlaying: localise(client, 'music.options.play.strings.nowPlaying.description.nowPlaying', defaultLocale),
+			track: controller.currentListing?.content !== undefined && isCollection(controller.currentListing.content)
+				? localise(client, 'music.options.play.strings.nowPlaying.description.track', defaultLocale)(
+					{
+						'index': controller.currentListing.content.position + 1,
+						'number': controller.currentListing.content.songs.length,
+						'title': controller.currentListing.content.title,
+					},
+				)
+				: '',
+		},
 	};
 
-	sendMessage(bot, controller.feedbackChannelId!, { embeds: [embed] });
+	sendMessage(bot, controller.feedbackChannelId!, {
+		embeds: [{
+			title: `${emoji} ${strings.title}`,
+			description: strings.description.nowPlaying(
+				{
+					'song_information': strings.description.track,
+					'title': song.title,
+					'url': song.url,
+					'user_mention': mention(controller.currentListing!.requestedBy, MentionTypes.User),
+				},
+			),
+			color: constants.colors.invisible,
+		}],
+	});
+
 	return true;
 }
 
@@ -602,9 +672,9 @@ function remove(controller: MusicController, index: number): SongListing | undef
 }
 
 const localisationsBySongListingType = {
-	[SongListingContentTypes.Song]: 'music.strings.type.song',
-	[SongListingContentTypes.File]: 'music.strings.type.external',
-	[SongListingContentTypes.Collection]: 'music.strings.type.songCollection',
+	[SongListingContentTypes.Song]: 'music.options.play.strings.nowPlaying.title.type.song',
+	[SongListingContentTypes.File]: 'music.options.play.strings.nowPlaying.title.type.external',
+	[SongListingContentTypes.Collection]: 'music.options.play.strings.nowPlaying.title.type.songCollection',
 };
 
 export {
@@ -625,7 +695,7 @@ export {
 	skip,
 	skipTo,
 	unskip,
-	verifyCanManipulatePlayback,
+	verifyCanManagePlayback,
 	verifyCanRequestPlayback,
 	verifyVoiceState,
 };

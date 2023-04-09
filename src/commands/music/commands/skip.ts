@@ -8,13 +8,7 @@ import {
 } from 'discordeno';
 import { OptionTemplate } from 'logos/src/commands/command.ts';
 import { by, collection, to } from 'logos/src/commands/parameters.ts';
-import {
-	getVoiceState,
-	isCollection,
-	isOccupied,
-	skip,
-	verifyCanManipulatePlayback,
-} from 'logos/src/controllers/music.ts';
+import { getVoiceState, isCollection, isOccupied, skip, verifyCanManagePlayback } from 'logos/src/controllers/music.ts';
 import { Client, localise } from 'logos/src/client.ts';
 import { parseArguments } from 'logos/src/interactions.ts';
 import constants from 'logos/constants.ts';
@@ -38,7 +32,7 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 	const controller = client.features.music.controllers.get(interaction.guildId!);
 	if (controller === undefined) return;
 
-	const isVoiceStateVerified = verifyCanManipulatePlayback(
+	const isVoiceStateVerified = verifyCanManagePlayback(
 		[client, bot],
 		interaction,
 		controller,
@@ -47,6 +41,11 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 	if (!isVoiceStateVerified) return;
 
 	if (!isOccupied(controller.player) || controller.currentListing === undefined) {
+		const strings = {
+			title: localise(client, 'music.options.skip.strings.noSong.title', interaction.locale)(),
+			description: localise(client, 'music.options.skip.strings.noSong.description', interaction.locale)(),
+		};
+
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -56,7 +55,8 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(client, 'music.options.skip.strings.noSongToSkip', interaction.locale)(),
+						title: strings.title,
+						description: strings.description,
 						color: constants.colors.dullYellow,
 					}],
 				},
@@ -65,16 +65,21 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 	}
 
 	if (collection !== undefined && !isCollection(controller.currentListing?.content)) {
-		const noSongCollectionToSkipString = localise(
-			client,
-			'music.options.skip.strings.noSongCollectionToSkip',
-			interaction.locale,
-		)();
-		const trySkippingSong = localise(
-			client,
-			'music.options.skip.strings.trySkippingSong',
-			interaction.locale,
-		)();
+		const strings = {
+			title: localise(client, 'music.options.skip.strings.noSongCollection.title', interaction.locale)(),
+			description: {
+				noSongCollection: localise(
+					client,
+					'music.options.skip.strings.noSongCollection.description.noSongCollection',
+					interaction.locale,
+				)(),
+				trySongInstead: localise(
+					client,
+					'music.options.skip.strings.noSongCollection.description.trySongInstead',
+					interaction.locale,
+				)(),
+			},
+		};
 
 		return void sendInteractionResponse(
 			bot,
@@ -85,7 +90,8 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: `${noSongCollectionToSkipString}\n\n${trySkippingSong}`,
+						title: strings.title,
+						description: `${strings.description.noSongCollection}\n\n${strings.description.trySongInstead}`,
 						color: constants.colors.dullYellow,
 					}],
 				},
@@ -95,6 +101,11 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 
 	// If both the 'to' and the 'by' parameter have been supplied.
 	if (songsToSkip !== undefined && songToSkipTo !== undefined) {
+		const strings = {
+			title: localise(client, 'music.strings.skips.tooManyArguments.title', interaction.locale)(),
+			description: localise(client, 'music.strings.skips.tooManyArguments.description', interaction.locale)(),
+		};
+
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -104,7 +115,8 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(client, 'music.strings.tooManySkipArguments', interaction.locale)(),
+						title: strings.title,
+						description: strings.description,
 						color: constants.colors.red,
 					}],
 				},
@@ -114,6 +126,11 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 
 	// If either the 'to' parameter or the 'by' parameter are negative.
 	if ((songsToSkip !== undefined && songsToSkip <= 0) || (songToSkipTo !== undefined && songToSkipTo <= 0)) {
+		const strings = {
+			title: localise(client, 'music.strings.skips.invalid.title', interaction.locale)(),
+			description: localise(client, 'music.strings.skips.invalid.description', interaction.locale)(),
+		};
+
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -123,7 +140,8 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(client, 'music.strings.mustBeGreaterThanZero', interaction.locale)(),
+						title: strings.title,
+						description: strings.description,
 						color: constants.colors.red,
 					}],
 				},
@@ -156,11 +174,15 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 		skip(controller, isSkippingCollection, {});
 	}
 
-	const messageLocalisations = (collection ?? false)
-		? 'music.options.skip.strings.skippedSongCollection'
-		: 'music.options.skip.strings.skippedSong';
-
-	const messageString = localise(client, `${messageLocalisations}.header`, defaultLocale)();
+	const strings = collection ?? false
+		? {
+			title: localise(client, 'music.options.skip.strings.skippedSongCollection.title', defaultLocale)(),
+			description: localise(client, 'music.options.skip.strings.skippedSongCollection.description', defaultLocale)(),
+		}
+		: {
+			title: localise(client, 'music.options.skip.strings.skippedSong.title', defaultLocale)(),
+			description: localise(client, 'music.options.skip.strings.skippedSong.description', defaultLocale)(),
+		};
 
 	return void sendInteractionResponse(
 		bot,
@@ -170,8 +192,8 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 			type: InteractionResponseTypes.ChannelMessageWithSource,
 			data: {
 				embeds: [{
-					title: `${constants.symbols.music.skipped} ${messageString}`,
-					description: localise(client, `${messageLocalisations}.body`, defaultLocale)(),
+					title: `${constants.symbols.music.skipped} ${strings.title}`,
+					description: strings.description,
 					color: constants.colors.invisible,
 				}],
 			},

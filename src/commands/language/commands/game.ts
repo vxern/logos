@@ -34,6 +34,11 @@ async function handleStartGame([client, bot]: [Client, Bot], interaction: Intera
 
 	const sentencePairs = client.features.sentencePairs.get(guild.language);
 	if (sentencePairs === undefined || sentencePairs.length === 0) {
+		const strings = {
+			title: localise(client, 'game.strings.noSentencesAvailable.title', interaction.locale)(),
+			description: localise(client, 'game.strings.noSentencesAvailable.description', interaction.locale)(),
+		};
+
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -43,7 +48,8 @@ async function handleStartGame([client, bot]: [Client, Bot], interaction: Intera
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(client, 'game.strings.noSentencesAvailable', interaction.locale)(),
+						title: strings.title,
+						description: strings.description,
 						color: constants.colors.dullYellow,
 					}],
 				},
@@ -114,14 +120,19 @@ function getGameView(
 	embedColor: number,
 	locale: string | undefined,
 ): InteractionCallbackData {
+	const strings = {
+		sentence: localise(client, 'game.strings.sentence', locale)(),
+		translation: localise(client, 'game.strings.translation', locale)(),
+	};
+
 	return {
 		embeds: [{
 			color: embedColor,
 			fields: [{
-				name: localise(client, 'game.strings.sentence', locale)(),
+				name: strings.sentence,
 				value: sentenceSelection.pair.sentence,
 			}, {
-				name: localise(client, 'game.strings.translation', locale)(),
+				name: strings.translation,
 				value: sentenceSelection.pair.translation,
 			}],
 		}],

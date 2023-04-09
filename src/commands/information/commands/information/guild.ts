@@ -28,29 +28,60 @@ function handleDisplayGuildInformation([client, bot]: [Client, Bot], interaction
 	const proficiencyRoleFrequencies = getDistribution(client, guild);
 	const isManaged = owner.username !== guild.name;
 
-	const descriptionString = localise(
-		client,
-		'information.options.server.strings.fields.description',
-		interaction.locale,
-	)();
-	const membersString = localise(client, 'information.options.server.strings.fields.members', interaction.locale)();
-	const createdString = localise(client, 'information.options.server.strings.fields.created', interaction.locale)();
-	const channelsString = localise(
-		client,
-		'information.options.server.strings.fields.channels',
-		interaction.locale,
-	)();
-	const ownerString = localise(client, 'information.options.server.strings.fields.owner', interaction.locale)();
-	const moderatorsString = localise(
-		client,
-		'information.options.server.strings.fields.moderators',
-		interaction.locale,
-	)();
-	const proficiencyDistributionString = localise(
-		client,
-		'information.options.server.strings.fields.distributionOfMembersLanguageProficiency',
-		interaction.locale,
-	)();
+	const strings = {
+		title: localise(client, 'information.options.server.strings.information.title', interaction.locale)(
+			{ 'server_name': guild.name },
+		),
+		description: {
+			description: {
+				title: localise(
+					client,
+					'information.options.server.strings.information.description.description',
+					interaction.locale,
+				)(),
+				noDescription: localise(
+					client,
+					'information.options.server.strings.information.description.noDescription',
+					interaction.locale,
+				)(),
+			},
+			members: localise(
+				client,
+				'information.options.server.strings.information.description.members',
+				interaction.locale,
+			)(),
+			created: localise(
+				client,
+				'information.options.server.strings.information.description.created',
+				interaction.locale,
+			)(),
+			channels: localise(
+				client,
+				'information.options.server.strings.information.description.channels',
+				interaction.locale,
+			)(),
+			owner: localise(client, 'information.options.server.strings.information.description.owner', interaction.locale)(),
+			moderators: {
+				title: localise(
+					client,
+					'information.options.server.strings.information.description.moderators',
+					interaction.locale,
+				)(),
+				overseenByModerators: localise(
+					client,
+					'information.options.server.strings.information.description.overseenByModerators',
+					interaction.locale,
+				)(
+					{ 'role_mention': configuration.permissions.moderatorRoleNames.main.toLowerCase() },
+				),
+			},
+			distribution: localise(
+				client,
+				'information.options.server.strings.information.description.distribution',
+				interaction.locale,
+			)(),
+		},
+	};
 
 	return void sendInteractionResponse(
 		bot,
@@ -62,51 +93,42 @@ function handleDisplayGuildInformation([client, bot]: [Client, Bot], interaction
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
 					thumbnail: getThumbnail(bot, guild),
-					title: localise(client, 'information.options.server.strings.informationAbout', interaction.locale)(
-						{ 'guild_name': guild.name },
-					),
+					title: strings.title,
 					color: constants.colors.invisible,
 					fields: [
 						{
-							name: `${constants.symbols.guild.description} ${descriptionString}`,
-							value: guild.description ??
-								localise(client, 'information.options.server.strings.noDescription', interaction.locale)(),
+							name: `${constants.symbols.guild.description} ${strings.description.description.title}`,
+							value: guild.description ?? strings.description.description.noDescription,
 							inline: true,
 						},
 						{
-							name: `${constants.symbols.guild.members} ${membersString}`,
+							name: `${constants.symbols.guild.members} ${strings.description.members}`,
 							value: guild.memberCount.toString(),
 							inline: true,
 						},
 						{
-							name: `${constants.symbols.guild.created} ${createdString}`,
+							name: `${constants.symbols.guild.created} ${strings.description.created}`,
 							value: timestamp(snowflakeToTimestamp(guild.id)),
 							inline: true,
 						},
 						{
-							name: `${constants.symbols.guild.channels.channels} ${channelsString}`,
+							name: `${constants.symbols.guild.channels.channels} ${strings.description.channels}`,
 							value: getChannelInformationSection(client, guild, interaction.locale),
 							inline: true,
 						},
 						isManaged
 							? {
-								name: `${constants.symbols.guild.moderators} ${moderatorsString}`,
-								value: localise(
-									client,
-									'information.options.server.strings.overseenByModerators',
-									interaction.locale,
-								)(
-									{ 'role_mention': configuration.permissions.moderatorRoleNames.main.toLowerCase() },
-								),
+								name: `${constants.symbols.guild.moderators} ${strings.description.moderators.title}`,
+								value: strings.description.moderators.overseenByModerators,
 								inline: false,
 							}
 							: {
-								name: `${constants.symbols.guild.owner} ${ownerString}`,
+								name: `${constants.symbols.guild.owner} ${strings.description.owner}`,
 								value: mention(owner.id, MentionTypes.User),
 								inline: true,
 							},
 						{
-							name: `${constants.symbols.guild.proficiencyDistribution} ${proficiencyDistributionString}`,
+							name: `${constants.symbols.guild.proficiencyDistribution} ${strings.description.distribution}`,
 							value: formatDistribution(client, proficiencyRoleFrequencies, interaction.locale),
 							inline: false,
 						},
@@ -126,11 +148,13 @@ function getChannelInformationSection(client: Client, guild: Guild, locale: stri
 	const textChannelsCount = getChannelCountByType(channels, ChannelTypes.GuildText);
 	const voiceChannelsCount = getChannelCountByType(channels, ChannelTypes.GuildVoice);
 
-	const textChannelsString = localise(client, 'information.options.server.strings.channelTypes.text', locale)();
-	const voiceChannelsString = localise(client, 'information.options.server.strings.channelTypes.voice', locale)();
+	const strings = {
+		text: localise(client, 'information.options.server.strings.channelTypes.text', locale)(),
+		voice: localise(client, 'information.options.server.strings.channelTypes.voice', locale)(),
+	};
 
-	return `${constants.symbols.guild.channels.text} ${textChannelsString} – ${textChannelsCount}\n` +
-		`${constants.symbols.guild.channels.voice} ${voiceChannelsString} – ${voiceChannelsCount}`;
+	return `${constants.symbols.guild.channels.text} ${strings.text} – ${textChannelsCount}\n` +
+		`${constants.symbols.guild.channels.voice} ${strings.voice} – ${voiceChannelsCount}`;
 }
 
 type ProficiencyRoleDistribution = [withRole: [roleId: bigint, frequency: number][], withoutRole: number];
@@ -139,9 +163,13 @@ type ProficiencyRoleDistribution = [withRole: [roleId: bigint, frequency: number
 function getDistribution(client: Client, guild: Guild): ProficiencyRoleDistribution {
 	const proficiencyCategory = getProficiencyCategory();
 	const proficiencies = proficiencyCategory.collection.list;
-	const proficiencyRoleNames = proficiencies.map((proficiency) =>
-		localise(client, `${proficiency.id}.name`, defaultLocale)()
-	);
+	const proficiencyRoleNames = proficiencies.map((proficiency) => {
+		const strings = {
+			name: localise(client, `${proficiency.id}.name`, defaultLocale)(),
+		};
+
+		return strings.name;
+	});
 	const proficiencyRoles = guild.roles.array()
 		.filter((role) => proficiencyRoleNames.includes(role.name))
 		.toSorted((a, b) => a.position - b.position);
@@ -187,21 +215,25 @@ function formatDistribution(
 
 	const total = roleFrequencies.map(([_, value]) => value).reduce((a, b) => a + b, 0);
 
-	const strings: string[] = [
-		formatFrequency(
-			withoutRole,
-			getPercentageComposition(withoutRole, total),
-			localise(client, 'information.options.server.strings.withoutProficiencyRole', locale)(),
-		),
+	const strings = {
+		withoutProficiency: localise(
+			client,
+			'information.options.server.strings.information.description.withoutProficiency',
+			locale,
+		)(),
+	};
+
+	const stringParts: string[] = [
+		formatFrequency(withoutRole, getPercentageComposition(withoutRole, total), strings.withoutProficiency),
 	];
 	for (const [roleId, frequency] of roleFrequencies) {
 		const percentage = getPercentageComposition(frequency, total);
 		const roleMention = mention(roleId, MentionTypes.Role);
 
-		strings.unshift(`${frequency} (${percentage}%) ${roleMention}`);
+		stringParts.unshift(`${frequency} (${percentage}%) ${roleMention}`);
 	}
 
-	return strings.join('\n');
+	return stringParts.join('\n');
 }
 
 type Thumbnail = NonNullable<Embed['thumbnail']>;

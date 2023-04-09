@@ -28,7 +28,12 @@ function handleDisplayVolume([client, bot]: [Client, Bot], interaction: Interact
 
 	const locale = show ? defaultLocale : interaction.locale;
 
-	const volumeString = localise(client, 'music.options.volume.options.display.strings.volume.header', locale)();
+	const strings = {
+		title: localise(client, 'music.options.volume.options.display.strings.volume.title', locale)(),
+		description: localise(client, 'music.options.volume.options.display.strings.volume.description', locale)(
+			{ 'volume': controller.player.volume },
+		),
+	};
 
 	return void sendInteractionResponse(
 		bot,
@@ -39,10 +44,8 @@ function handleDisplayVolume([client, bot]: [Client, Bot], interaction: Interact
 			data: {
 				flags: !show ? ApplicationCommandFlags.Ephemeral : undefined,
 				embeds: [{
-					title: `${constants.symbols.music.volume} ${volumeString}`,
-					description: localise(client, 'music.options.volume.options.display.strings.volume.body', locale)(
-						{ 'volume': controller.player.volume },
-					),
+					title: `${constants.symbols.music.volume} ${strings.title}`,
+					description: strings.description,
 					color: constants.colors.invisible,
 				}],
 			},

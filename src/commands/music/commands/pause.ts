@@ -13,7 +13,7 @@ import {
 	isOccupied,
 	isPaused,
 	pause,
-	verifyCanManipulatePlayback,
+	verifyCanManagePlayback,
 } from 'logos/src/controllers/music.ts';
 import { Client, localise } from 'logos/src/client.ts';
 import constants from 'logos/constants.ts';
@@ -29,7 +29,7 @@ function handlePausePlayback([client, bot]: [Client, Bot], interaction: Interact
 	const controller = client.features.music.controllers.get(interaction.guildId!);
 	if (controller === undefined) return;
 
-	const isVoiceStateVerified = verifyCanManipulatePlayback(
+	const isVoiceStateVerified = verifyCanManagePlayback(
 		[client, bot],
 		interaction,
 		controller,
@@ -38,6 +38,11 @@ function handlePausePlayback([client, bot]: [Client, Bot], interaction: Interact
 	if (!isVoiceStateVerified) return;
 
 	if (!isOccupied(controller.player)) {
+		const strings = {
+			title: localise(client, 'music.options.pause.strings.notPlaying.title', interaction.locale)(),
+			description: localise(client, 'music.options.pause.strings.notPlaying.description', interaction.locale)(),
+		};
+
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -47,7 +52,8 @@ function handlePausePlayback([client, bot]: [Client, Bot], interaction: Interact
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(client, 'music.options.pause.strings.noSongToPause', interaction.locale)(),
+						title: strings.title,
+						description: strings.description,
 						color: constants.colors.dullYellow,
 					}],
 				},
@@ -61,7 +67,10 @@ function handlePausePlayback([client, bot]: [Client, Bot], interaction: Interact
 
 	pause(controller.player);
 
-	const pausedString = localise(client, 'music.options.pause.strings.paused.header', defaultLocale)();
+	const strings = {
+		title: localise(client, 'music.options.pause.strings.paused.title', defaultLocale)(),
+		description: localise(client, 'music.options.pause.strings.paused.description', defaultLocale)(),
+	};
 
 	return void sendInteractionResponse(
 		bot,
@@ -71,8 +80,8 @@ function handlePausePlayback([client, bot]: [Client, Bot], interaction: Interact
 			type: InteractionResponseTypes.ChannelMessageWithSource,
 			data: {
 				embeds: [{
-					title: `${constants.symbols.music.paused} ${pausedString}`,
-					description: localise(client, 'music.options.pause.strings.paused.body', defaultLocale)(),
+					title: `${constants.symbols.music.paused} ${strings.title}`,
+					description: strings.description,
 					color: constants.colors.invisible,
 				}],
 			},

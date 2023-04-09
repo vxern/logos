@@ -81,13 +81,18 @@ async function search(
 			},
 		);
 
+		const strings = {
+			title: localise(client, 'music.options.play.strings.selectSong.title', interaction.locale)(),
+			description: localise(client, 'music.options.play.strings.selectSong.description', interaction.locale)(),
+		};
+
 		sendInteractionResponse(bot, interaction.id, interaction.token, {
 			type: InteractionResponseTypes.ChannelMessageWithSource,
 			data: {
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
-					title: localise(client, 'music.options.play.strings.selectSong.header', interaction.locale)(),
-					description: localise(client, 'music.options.play.strings.selectSong.body', interaction.locale)(),
+					title: strings.title,
+					description: strings.description,
 					color: constants.colors.blue,
 				}],
 				components: [{
@@ -149,6 +154,7 @@ function fromYouTubePlaylist(playlist: Playlist, requestedBy: bigint): SongListi
 		content: {
 			type: SongListingContentTypes.Collection,
 			title: playlist.title!,
+			url: playlist.url!,
 			songs: playlist.videos.map((video) => ({
 				type: SongListingContentTypes.Song,
 				title: video.title!,

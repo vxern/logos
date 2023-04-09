@@ -13,7 +13,7 @@ import {
 	isCollection,
 	isOccupied,
 	replay,
-	verifyCanManipulatePlayback,
+	verifyCanManagePlayback,
 } from 'logos/src/controllers/music.ts';
 import { Client, localise } from 'logos/src/client.ts';
 import { parseArguments } from 'logos/src/interactions.ts';
@@ -32,7 +32,7 @@ function handleReplayAction([client, bot]: [Client, Bot], interaction: Interacti
 	const controller = client.features.music.controllers.get(interaction.guildId!);
 	if (controller === undefined) return;
 
-	const isVoiceStateVerified = verifyCanManipulatePlayback(
+	const isVoiceStateVerified = verifyCanManagePlayback(
 		[client, bot],
 		interaction,
 		controller,
@@ -43,6 +43,11 @@ function handleReplayAction([client, bot]: [Client, Bot], interaction: Interacti
 	const currentListing = controller.currentListing;
 
 	if (!isOccupied(controller.player) || currentListing === undefined) {
+		const strings = {
+			title: localise(client, 'music.options.replay.strings.noSong.title', interaction.locale)(),
+			description: localise(client, 'music.options.replay.strings.noSong.description', interaction.locale)(),
+		};
+
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -52,7 +57,8 @@ function handleReplayAction([client, bot]: [Client, Bot], interaction: Interacti
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(client, 'music.options.replay.strings.noSongToReplay', interaction.locale)(),
+						title: strings.title,
+						description: strings.description,
 						color: constants.colors.dullYellow,
 					}],
 				},
@@ -61,16 +67,25 @@ function handleReplayAction([client, bot]: [Client, Bot], interaction: Interacti
 	}
 
 	if (collection !== undefined && !isCollection(currentListing?.content)) {
-		const noSongCollectionToReplayString = localise(
-			client,
-			'music.options.replay.strings.noSongCollectionToReplay',
-			interaction.locale,
-		)();
-		const tryReplayingSong = localise(
-			client,
-			'music.options.replay.strings.tryReplayingSong',
-			interaction.locale,
-		)();
+		const strings = {
+			title: localise(
+				client,
+				'music.options.replay.strings.noSongCollection.title',
+				interaction.locale,
+			)(),
+			description: {
+				noSongCollection: localise(
+					client,
+					'music.options.replay.strings.noSongCollection.description.noSongCollection',
+					interaction.locale,
+				)(),
+				trySongInstead: localise(
+					client,
+					'music.options.replay.strings.noSongCollection.description.trySongInstead',
+					interaction.locale,
+				)(),
+			},
+		};
 
 		return void sendInteractionResponse(
 			bot,
@@ -81,7 +96,8 @@ function handleReplayAction([client, bot]: [Client, Bot], interaction: Interacti
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: `${noSongCollectionToReplayString}\n\n${tryReplayingSong}`,
+						title: strings.title,
+						description: `${strings.description.noSongCollection}\n\n${strings.description.trySongInstead}`,
 						color: constants.colors.dullYellow,
 					}],
 				},

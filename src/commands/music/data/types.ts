@@ -28,6 +28,9 @@ interface SongCollection {
 	/** The index of the song that is currently playing. */
 	position: number;
 
+	/** The link to the collection. */
+	url: string;
+
 	/** The songs in the collection. */
 	songs: Song[];
 }
@@ -51,7 +54,7 @@ interface SongListing {
 
 	/**
 	 * IDs of user who were present at the time of the addition of this song listing,
-	 * and can therefore manipulate it.
+	 * and can therefore manage it.
 	 */
 	managerIds: bigint[];
 

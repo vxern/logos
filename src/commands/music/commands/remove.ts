@@ -20,7 +20,7 @@ import {
 	isQueueEmpty,
 	MusicController,
 	remove,
-	verifyCanManipulatePlayback,
+	verifyCanManagePlayback,
 } from 'logos/src/controllers/music.ts';
 import { Client, localise } from 'logos/src/client.ts';
 import { ControlButtonID, createInteractionCollector, decodeId, generateButtons } from 'logos/src/interactions.ts';
@@ -40,7 +40,7 @@ function handleRemoveSongListing([client, bot]: [Client, Bot], interaction: Inte
 	const controller = client.features.music.controllers.get(interaction.guildId!);
 	if (controller === undefined) return;
 
-	const isVoiceStateVerified = verifyCanManipulatePlayback(
+	const isVoiceStateVerified = verifyCanManagePlayback(
 		[client, bot],
 		interaction,
 		controller,
@@ -49,6 +49,11 @@ function handleRemoveSongListing([client, bot]: [Client, Bot], interaction: Inte
 	if (!isVoiceStateVerified) return;
 
 	if (isQueueEmpty(controller.listingQueue)) {
+		const strings = {
+			title: localise(client, 'music.options.remove.strings.queueEmpty.description', interaction.locale)(),
+			description: localise(client, 'music.options.remove.strings.queueEmpty.description', interaction.locale)(),
+		};
+
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -58,7 +63,8 @@ function handleRemoveSongListing([client, bot]: [Client, Bot], interaction: Inte
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(client, 'music.options.remove.strings.noListingToRemove', interaction.locale)(),
+						title: strings.title,
+						description: strings.description,
 						color: constants.colors.dullYellow,
 					}],
 				},
@@ -168,6 +174,11 @@ function generateEmbed(
 
 				const songListing = remove(controller, index);
 				if (songListing === undefined) {
+					const strings = {
+						title: localise(client, 'music.options.remove.strings.failed.title', interaction.locale)(),
+						description: localise(client, 'music.options.remove.strings.failed.description', interaction.locale)(),
+					};
+
 					return void sendInteractionResponse(
 						bot,
 						selection.id,
@@ -176,11 +187,8 @@ function generateEmbed(
 							type: InteractionResponseTypes.ChannelMessageWithSource,
 							data: {
 								embeds: [{
-									description: localise(
-										client,
-										'music.options.remove.strings.failedToRemoveSong',
-										interaction.locale,
-									)(),
+									title: strings.title,
+									description: strings.description,
 									color: constants.colors.dullYellow,
 								}],
 							},
@@ -188,7 +196,15 @@ function generateEmbed(
 					);
 				}
 
-				const removedString = localise(client, 'music.options.remove.strings.removed.header', defaultLocale)();
+				const strings = {
+					title: localise(client, 'music.options.remove.strings.removed.title', defaultLocale)(),
+					description: localise(client, 'music.options.remove.strings.removed.description', defaultLocale)(
+						{
+							'title': songListing.content.title,
+							'user_mention': mention(selection.user.id, MentionTypes.User),
+						},
+					),
+				};
 
 				return void sendInteractionResponse(
 					bot,
@@ -198,13 +214,8 @@ function generateEmbed(
 						type: InteractionResponseTypes.ChannelMessageWithSource,
 						data: {
 							embeds: [{
-								title: `${constants.symbols.music.removed} ${removedString}`,
-								description: localise(client, 'music.options.remove.strings.removed.body', defaultLocale)(
-									{
-										'title': songListing.content.title,
-										'user_mention': mention(selection.user.id, MentionTypes.User),
-									},
-								),
+								title: `${constants.symbols.music.removed} ${strings.title}`,
+								description: strings.description,
 								color: constants.colors.invisible,
 							}],
 						},
@@ -215,20 +226,33 @@ function generateEmbed(
 	);
 
 	if (pages.at(0)?.length === 0) {
+		const strings = {
+			title: localise(client, 'music.options.remove.strings.queueEmpty.title', locale)(),
+			description: localise(client, 'music.options.remove.strings.queueEmpty.description', locale)(),
+		};
+
 		return {
 			embeds: [{
-				description: localise(client, 'music.options.remove.strings.noListingToRemove', locale)(),
+				title: strings.title,
+				description: strings.description,
 				color: constants.colors.blue,
 			}],
 			components: [],
 		};
 	}
 
+	const strings = {
+		title: localise(client, 'music.options.remove.strings.selectSong.title', locale)(),
+		description: localise(client, 'music.options.remove.strings.selectSong.description', locale)(),
+		continuedOnNextPage: localise(client, 'interactions.continuedOnNextPage', locale)(),
+	};
+
 	return {
 		embeds: [{
-			description: localise(client, 'music.options.remove.strings.selectSongToRemove', locale)(),
+			title: strings.title,
+			description: strings.description,
 			color: constants.colors.blue,
-			footer: isLast ? undefined : { text: localise(client, 'interactions.continuedOnNextPage', locale)() },
+			footer: isLast ? undefined : { text: strings.continuedOnNextPage },
 		}],
 		components: [
 			generateSelectMenu(data, pages, selectMenuCustomId),

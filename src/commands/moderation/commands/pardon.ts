@@ -119,18 +119,36 @@ async function handlePardonUser([client, bot]: [Client, Bot], interaction: Inter
 
 	const warningToDelete = relevantWarnings.find((relevantWarning) => relevantWarning.ref.value.id === warning);
 	if (warningToDelete === undefined) {
-		return displayError(bot, interaction, localise(client, 'pardon.strings.invalidWarning', interaction.locale)());
+		const strings = {
+			title: localise(client, 'pardon.strings.invalidWarning.title', interaction.locale)(),
+			description: localise(client, 'pardon.strings.invalidWarning.description', interaction.locale)(),
+		};
+
+		return displayError(bot, interaction, strings.title, strings.description);
 	}
 
 	const deletedWarning = await client.database.adapters.warnings.delete(client, warningToDelete);
 	if (deletedWarning === undefined) {
-		return displayError(bot, interaction, localise(client, 'pardon.strings.failed', interaction.locale)());
+		const strings = {
+			title: localise(client, 'pardon.strings.failed.title', interaction.locale)(),
+			description: localise(client, 'pardon.strings.failed.description', interaction.locale)(),
+		};
+
+		return displayError(bot, interaction, strings.title, strings.description);
 	}
 
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (guild === undefined) return;
 
 	logEvent([client, bot], guild, 'memberWarnRemove', [member, deletedWarning.data, interaction.user]);
+
+	const strings = {
+		title: localise(client, 'pardon.strings.pardoned.title', interaction.locale)(),
+		description: localise(client, 'pardon.strings.pardoned.description', interaction.locale)({
+			'user_mention': mention(member.id, MentionTypes.User),
+			'reason': deletedWarning.data.reason,
+		}),
+	};
 
 	sendInteractionResponse(
 		bot,
@@ -141,12 +159,8 @@ async function handlePardonUser([client, bot]: [Client, Bot], interaction: Inter
 			data: {
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
-					description: localise(client, 'pardon.strings.pardoned', interaction.locale)(
-						{
-							'user_mention': mention(member.id, MentionTypes.User),
-							'reason': deletedWarning.data.reason,
-						},
-					),
+					title: strings.title,
+					description: strings.description,
 					color: constants.colors.lightGreen,
 				}],
 			},
@@ -167,6 +181,11 @@ function displayErrorOrEmptyChoices([client, bot]: [Client, Bot], interaction: I
 		);
 	}
 
+	const strings = {
+		title: localise(client, 'pardon.strings.failed.title', interaction.locale)(),
+		description: localise(client, 'pardon.strings.failed.description', interaction.locale)(),
+	};
+
 	return void sendInteractionResponse(
 		bot,
 		interaction.id,
@@ -176,7 +195,8 @@ function displayErrorOrEmptyChoices([client, bot]: [Client, Bot], interaction: I
 			data: {
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
-					description: localise(client, 'pardon.strings.failed', interaction.locale)(),
+					title: strings.title,
+					description: strings.description,
 					color: constants.colors.red,
 				}],
 			},
@@ -184,7 +204,7 @@ function displayErrorOrEmptyChoices([client, bot]: [Client, Bot], interaction: I
 	);
 }
 
-function displayError(bot: Bot, interaction: Interaction, error: string): void {
+function displayError(bot: Bot, interaction: Interaction, title: string, description: string): void {
 	return void sendInteractionResponse(
 		bot,
 		interaction.id,
@@ -194,7 +214,8 @@ function displayError(bot: Bot, interaction: Interaction, error: string): void {
 			data: {
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
-					description: error,
+					title,
+					description,
 					color: constants.colors.red,
 				}],
 			},

@@ -7,7 +7,7 @@ import {
 	sendInteractionResponse,
 } from 'discordeno';
 import { OptionTemplate } from 'logos/src/commands/command.ts';
-import { getVoiceState, reset, verifyCanManipulatePlayback } from 'logos/src/controllers/music.ts';
+import { getVoiceState, reset, verifyCanManagePlayback } from 'logos/src/controllers/music.ts';
 import { Client, localise } from 'logos/src/client.ts';
 import constants from 'logos/constants.ts';
 import { defaultLocale } from 'logos/types.ts';
@@ -22,7 +22,7 @@ function handleStopPlayback([client, bot]: [Client, Bot], interaction: Interacti
 	const controller = client.features.music.controllers.get(interaction.guildId!);
 	if (controller === undefined) return;
 
-	const isVoiceStateVerified = verifyCanManipulatePlayback(
+	const isVoiceStateVerified = verifyCanManagePlayback(
 		[client, bot],
 		interaction,
 		controller,
@@ -32,6 +32,11 @@ function handleStopPlayback([client, bot]: [Client, Bot], interaction: Interacti
 
 	const botVoiceState = getVoiceState(client, interaction.guildId!, bot.id);
 	if (botVoiceState === undefined) {
+		const strings = {
+			title: localise(client, 'music.strings.notPlaying.title', interaction.locale)(),
+			description: localise(client, 'music.strings.notPlaying.description', interaction.locale)(),
+		};
+
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -41,7 +46,8 @@ function handleStopPlayback([client, bot]: [Client, Bot], interaction: Interacti
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(client, 'music.strings.notPlayingMusic', interaction.locale)(),
+						title: strings.title,
+						description: strings.description,
 						color: constants.colors.dullYellow,
 					}],
 				},
@@ -51,7 +57,10 @@ function handleStopPlayback([client, bot]: [Client, Bot], interaction: Interacti
 
 	reset(client, interaction.guildId!);
 
-	const stoppedString = localise(client, 'music.options.stop.strings.stopped.header', defaultLocale)();
+	const strings = {
+		title: localise(client, 'music.options.stop.strings.stopped.title', defaultLocale)(),
+		description: localise(client, 'music.options.stop.strings.stopped.description', defaultLocale)(),
+	};
 
 	return void sendInteractionResponse(
 		bot,
@@ -61,8 +70,8 @@ function handleStopPlayback([client, bot]: [Client, Bot], interaction: Interacti
 			type: InteractionResponseTypes.ChannelMessageWithSource,
 			data: {
 				embeds: [{
-					title: `${constants.symbols.music.stopped} ${stoppedString}`,
-					description: localise(client, 'music.options.stop.strings.stopped.body', defaultLocale)(),
+					title: `${constants.symbols.music.stopped} ${strings.title}`,
+					description: strings.description,
 					color: constants.colors.blue,
 				}],
 			},

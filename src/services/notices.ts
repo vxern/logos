@@ -160,11 +160,13 @@ function getValidNotices(bot: Bot, notices: Message[]): Message[] {
 }
 
 function getLastUpdateString(client: Client, updatedAt: Date, locale: string | undefined): string {
-	const lastUpdateString = localise(client, 'notices.lastUpdate', locale)(
-		{ 'date': timestamp(updatedAt.getTime(), TimestampFormat.LongDate) },
-	);
+	const strings = {
+		lastUpdate: localise(client, 'notices.lastUpdate', locale)(
+			{ 'date': timestamp(updatedAt.getTime(), TimestampFormat.LongDate) },
+		),
+	};
 
-	return `*${lastUpdateString}*`;
+	return `*${strings.lastUpdate}*`;
 }
 
 export default service;

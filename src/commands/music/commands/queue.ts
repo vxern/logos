@@ -22,15 +22,14 @@ function handleDisplayPlaybackQueue([client, bot]: [Client, Bot], interaction: I
 
 	const locale = show ? defaultLocale : interaction.locale;
 
-	const queueString = localise(client, 'music.options.queue.strings.queue', locale)();
+	const strings = {
+		queue: localise(client, 'music.options.queue.strings.queue', locale)(),
+	};
 
 	return displayListings(
 		[client, bot],
 		interaction,
-		{
-			title: `${constants.symbols.music.list} ${queueString}`,
-			songListings: controller.listingQueue,
-		},
+		{ title: `${constants.symbols.music.list} ${strings.queue}`, songListings: controller.listingQueue },
 		show ?? false,
 		locale,
 	);

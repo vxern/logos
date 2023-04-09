@@ -24,18 +24,18 @@ async function generateInformationNotice([client, bot]: [Client, Bot], guild: Gu
 
 function getRulesSection(client: Client): Embed {
 	const fields = ruleIds.map((ruleId, index) => {
-		const titleString = localise(client, `rules.${ruleId}.title`, defaultLocale)()
-			.toUpperCase();
-		const tldrString = localise(client, 'rules.tldr', defaultLocale)();
-		const summaryString = localise(
-			client,
-			`rules.${ruleId}.summary`,
-			defaultLocale,
-		)();
+		const strings = {
+			title: localise(client, `rules.${ruleId}.title`, defaultLocale)(),
+			tldr: localise(client, 'rules.tldr', defaultLocale)(),
+			summary: localise(client, `rules.${ruleId}.summary`, defaultLocale)(),
+			content: localise(client, `rules.${ruleId}.content`, defaultLocale)(),
+		};
 
 		return {
-			name: `${constants.symbols.ruleBullet}  #${index + 1} ~ **${titleString}**  ~  ${tldrString}: *${summaryString}*`,
-			value: localise(client, `rules.${ruleId}.content`, defaultLocale)(),
+			name: `${constants.symbols.ruleBullet}  #${
+				index + 1
+			} ~ **${strings.title.toUpperCase()}**  ~  ${strings.tldr}: *${strings.summary}*`,
+			value: strings.content,
 			inline: false,
 		};
 	});
@@ -48,12 +48,15 @@ function getRulesSection(client: Client): Embed {
 }
 
 function getInviteSection(client: Client, invite: InviteMetadata | BaseInvite): Embed {
-	const inviteString = localise(client, 'notices.notices.information.invite', defaultLocale)();
 	const link = constants.links.generateDiscordInviteLink(invite.code);
+
+	const strings = {
+		invite: localise(client, 'notices.notices.information.invite', defaultLocale)(),
+	};
 
 	return {
 		color: constants.colors.gray,
-		fields: [{ name: `${constants.symbols.information.inviteLink}  ${inviteString}`, value: `**${link}**` }],
+		fields: [{ name: `${constants.symbols.information.inviteLink}  ${strings.invite}`, value: `**${link}**` }],
 	};
 }
 

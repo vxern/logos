@@ -196,18 +196,23 @@ function createRoleSelectionMenu(
 						viewData.category.maximum !== undefined && viewData.category.maximum !== 1 &&
 						viewData.memberRolesIncludedInMenu.length >= viewData.category.maximum
 					) {
-						const reachedLimitString = localise(
-							client,
-							'profile.options.roles.strings.reachedLimit',
-							interaction.locale,
-						)(
-							{ 'category': localise(client, `${viewData.category.id}.name`, interaction.locale)() },
-						);
-						const unassignOneOfExistentRolesString = localise(
-							client,
-							'profile.options.roles.strings.unassignOneOfExistentRoles',
-							interaction.locale,
-						)();
+						const strings = {
+							title: localise(client, 'warn.strings.limitReached.title', defaultLocale)(),
+							description: {
+								limitReached: localise(
+									client,
+									'profile.options.roles.strings.limitReached.description.limitReached',
+									interaction.locale,
+								)(
+									{ 'category': localise(client, `${viewData.category.id}.name`, interaction.locale)() },
+								),
+								toChooseNew: localise(
+									client,
+									'profile.options.roles.strings.limitReached.description.toChooseNew',
+									interaction.locale,
+								)(),
+							},
+						};
 
 						sendInteractionResponse(
 							bot,
@@ -218,7 +223,8 @@ function createRoleSelectionMenu(
 								data: {
 									flags: ApplicationCommandFlags.Ephemeral,
 									embeds: [{
-										description: `${reachedLimitString}\n\n${unassignOneOfExistentRolesString}`,
+										title: strings.title,
+										description: `${strings.description.limitReached}\n\n${strings.description.toChooseNew}`,
 									}],
 								},
 							},
@@ -295,9 +301,13 @@ function traverseRoleTreeAndDisplay(
 	let selectOptions: SelectOption[];
 	if (isCategory(category)) {
 		const menuRoles = resolveRoles(category.collection, data.browsingData.language);
-		const menuRolesResolved = menuRoles.map((role) =>
-			data.roleData.rolesByName.get(localise(client, `${role.id}.name`, defaultLocale)())!
-		);
+		const menuRolesResolved = menuRoles.map((role) => {
+			const strings = {
+				name: localise(client, `${role.id}.name`, defaultLocale)(),
+			};
+
+			return data.roleData.rolesByName.get(strings.name)!;
+		});
 		const memberRolesIncludedInMenu = data.roleData.memberRoleIds.filter(
 			(roleId) => menuRolesResolved.some((role) => role.id === roleId),
 		);
@@ -340,18 +350,28 @@ function displaySelectMenu(
 ): InteractionResponse {
 	const isInRootCategory = data.browsingData.navigationData.indexesAccessed.length === 0;
 	if (!isInRootCategory) {
-		selectOptions.push({
-			label: localise(client, 'profile.options.roles.strings.back', locale)(),
-			value: `${-1}`,
-		});
+		const strings = {
+			back: localise(client, 'profile.options.roles.strings.back', locale)(),
+		};
+
+		selectOptions.push({ label: strings.back, value: `${-1}` });
 	}
 
 	const category = categories.at(-1)!;
 
 	const title = (categories.length > 1 ? categories.slice(1) : categories).map((category) => {
-		const categoryNameString = localise(client, `${category.id}.name`, locale)();
-		return `${category.emoji}  ${categoryNameString}`;
+		const strings = {
+			categoryName: localise(client, `${category.id}.name`, locale)(),
+		};
+
+		return `${category.emoji}  ${strings.categoryName}`;
 	}).join(` ${constants.symbols.indicators.arrowRight}  `);
+
+	const strings = {
+		description: localise(client, `${category.id}.description`, locale)(),
+		chooseCategory: localise(client, 'profile.options.roles.strings.chooseCategory', locale)(),
+		chooseRole: localise(client, 'profile.options.roles.strings.chooseRole', locale)(),
+	};
 
 	return {
 		type: InteractionResponseTypes.ChannelMessageWithSource,
@@ -359,7 +379,7 @@ function displaySelectMenu(
 			flags: ApplicationCommandFlags.Ephemeral,
 			embeds: [{
 				title,
-				description: localise(client, `${category.id}.description`, locale)(),
+				description: strings.description,
 				color: category.color,
 			}],
 			components: [{
@@ -368,9 +388,7 @@ function displaySelectMenu(
 					type: MessageComponentTypes.SelectMenu,
 					customId: data.customId,
 					options: selectOptions,
-					placeholder: isCategoryGroup(category)
-						? localise(client, 'profile.options.roles.strings.chooseCategory', locale)()
-						: localise(client, 'profile.options.roles.strings.chooseRole', locale)(),
+					placeholder: isCategoryGroup(category) ? strings.chooseCategory : strings.chooseRole,
 				}],
 			}],
 		},
@@ -387,10 +405,15 @@ function createSelectOptionsFromCategories(
 
 	const selections: SelectOption[] = [];
 	for (const [category, index] of categorySelections) {
+		const strings = {
+			name: localise(client, `${category.id}.name`, locale)(),
+			description: localise(client, `${category.id}.description`, locale)(),
+		};
+
 		selections.push({
-			label: localise(client, `${category.id}.name`, locale)(),
+			label: strings.name,
 			value: index.toString(),
-			description: trim(localise(client, `${category.id}.description`, locale)(), 100),
+			description: trim(strings.description, 100),
 			emoji: { name: category.emoji },
 		});
 	}
@@ -409,20 +432,20 @@ function createSelectOptionsFromCollection(
 
 	const viewData = data.viewData!;
 
-	const assignedString = localise(client, 'profile.options.roles.strings.assigned', locale)();
-
 	for (let index = 0; index < viewData.menuRoles.length; index++) {
 		const [role, roleResolved] = [viewData.menuRoles.at(index)!, viewData.menuRolesResolved.at(index)!];
 		const memberHasRole = viewData.memberRolesIncludedInMenu.includes(roleResolved.id);
 
-		const localisedName = localise(client, `${role.id}.name`, locale)();
+		const strings = {
+			assigned: localise(client, 'profile.options.roles.strings.assigned', locale)(),
+			name: localise(client, `${role.id}.name`, locale)(),
+			description: localise(client, `${role.id}.description`, locale),
+		};
 
 		selectOptions.push({
-			label: memberHasRole ? `[${assignedString}] ${localisedName}` : localisedName,
+			label: memberHasRole ? `[${strings.assigned}] ${strings.name}` : strings.name,
 			value: index.toString(),
-			description: client.localisations.has(`${role.id}.description`)
-				? localise(client, `${role.id}.description`, locale)()
-				: undefined,
+			description: client.localisations.has(`${role.id}.description`) ? strings.description() : undefined,
 			emoji: (() => {
 				if (role.emoji === undefined) return;
 				if (emojiExpression.test(role.emoji)) return { name: role.emoji };

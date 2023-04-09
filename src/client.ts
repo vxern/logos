@@ -208,7 +208,6 @@ function createMusicFeature(sendGatewayPayload: SendGatewayPayload): Client['fea
 			host: Deno.env.get('LAVALINK_HOST')!,
 			port: Number(Deno.env.get('LAVALINK_PORT')!),
 			password: Deno.env.get('LAVALINK_PASSWORD')!,
-			secure: true,
 		},
 		sendGatewayPayload,
 	});
@@ -439,23 +438,29 @@ function withRateLimiting(handle: InteractionHandler): InteractionHandler {
 			const now = Date.now();
 			const nextValidUsageTimestamp = timestamp(now + configuration.rateLimiting.within - (now - firstTimestamp));
 
-			const usedCommandTooManyTimesString = localise(
-				client,
-				'interactions.usedCommandTooManyTimes',
-				interaction.locale,
-			)();
-			const canUseCommandInString = localise(
-				client,
-				'interactions.canUseCommandIn',
-				interaction.locale,
-			)({ 'relative_timestamp': nextValidUsageTimestamp });
+			const strings = {
+				title: localise(client, 'interactions.rateLimited.title', interaction.locale)(),
+				description: {
+					tooManyUses: localise(
+						client,
+						'interactions.rateLimited.description.tooManyUses',
+						interaction.locale,
+					)(),
+					cannotUseUntil: localise(
+						client,
+						'interactions.rateLimited.description.cannotUseAgainUntil',
+						interaction.locale,
+					)({ 'relative_timestamp': nextValidUsageTimestamp }),
+				},
+			};
 
 			return void sendInteractionResponse(bot, interaction.id, interaction.token, {
 				type: InteractionResponseTypes.ChannelMessageWithSource,
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: `${usedCommandTooManyTimesString}\n\n${canUseCommandInString}`,
+						title: strings.title,
+						description: `${strings.description.tooManyUses}\n\n${strings.description.cannotUseUntil}`,
 						color: constants.colors.dullYellow,
 					}],
 				},
@@ -612,27 +617,42 @@ function startServices([client, bot]: [Client, Bot]): void {
 function setupLavalinkNode([client, bot]: [Client, Bot]): Promise<void> {
 	client.features.music.node.on(
 		'connect',
-		(took) => client.log.info(`Connection with the Lavalink node has been established. Time taken: ${took}ms`),
+		(timeTakenMs) => client.log.info(`Connected to Lavalink node. Time taken: ${timeTakenMs}ms`),
 	);
+
 	client.features.music.node.on(
 		'error',
-		(error) => client.log.error(`The Lavalink node has encountered an error:\n${error}`),
+		async (error) => {
+			if (error.name === 'ConnectionRefused') return;
+
+			client.log.error(`The Lavalink node has encountered an error:\n${error}`);
+		},
 	);
+
 	client.features.music.node.on(
 		'disconnect',
-		(code, reason) => {
+		async (code, reason) => {
+			if (code === -1) {
+				client.log.warn(`Unable to connect to Lavalink node. Retrying in 5 seconds...`);
+				await new Promise((resolve) => setTimeout(resolve, 5000));
+				return connectToLavalinkNode([client, bot]);
+			}
+
 			client.log.info(
 				`Disconnected from the Lavalink node. Code ${code}, reason: ${reason}\n` +
 					'Attempting to reconnect...',
 			);
-			return void connectToLavalinkNode([client, bot]);
+
+			return connectToLavalinkNode([client, bot]);
 		},
 	);
+
 	return connectToLavalinkNode([client, bot]);
 }
 
 function connectToLavalinkNode([client, bot]: [Client, Bot]): Promise<void> {
-	client.log.info('Connecting to the Lavalink node...');
+	client.log.info('Connecting to Lavalink node...');
+
 	return client.features.music.node.connect(bot.id);
 }
 
@@ -787,7 +807,7 @@ function autocompleteMembers(
 				choices: matchedMembers.slice(0, 20)
 					.map(
 						(member) => ({
-							name: diagnosticMentionUser(member.user!, true),
+							name: diagnosticMentionUser(member.user!),
 							value: member.id.toString(),
 						}),
 					),
@@ -809,6 +829,11 @@ function resolveInteractionToMember(
 	if (isResolved) return matchedMembers.at(0);
 
 	if (matchedMembers.length === 0) {
+		const strings = {
+			title: localise(client, 'interactions.invalidUser.title', interaction.locale)(),
+			description: localise(client, 'interactions.invalidUser.description', interaction.locale)(),
+		};
+
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -818,7 +843,8 @@ function resolveInteractionToMember(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(client, 'interactions.invalidUser', interaction.locale)(),
+						title: strings.title,
+						description: strings.description,
 						color: constants.colors.red,
 					}],
 				},
@@ -885,7 +911,8 @@ function createLocalisations(localisations: Map<string, Map<Language, string>>):
 function localise(client: Client, key: string, locale: string | undefined): (args?: Record<string, unknown>) => string {
 	const language = (locale !== undefined ? getLanguageByLocale(locale as Locales) : undefined) ?? defaultLanguage;
 
-	const getLocalisation = client.localisations.get(key)?.get(language) ?? (() => key);
+	const getLocalisation = client.localisations.get(key)?.get(language) ??
+		client.localisations.get(key)?.get(defaultLanguage) ?? (() => key);
 
 	return ((args) => {
 		const string = getLocalisation(args ?? {});

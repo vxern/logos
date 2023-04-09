@@ -29,9 +29,13 @@ async function handleSelectLanguageProficiency(
 
 	const proficiency = proficiencies[parseInt(parameter)]!;
 
-	const requestedRole = guild.roles.array().find((role) =>
-		role.name === localise(client, `${proficiency.id}.name`, defaultLocale)()
-	);
+	const requestedRole = guild.roles.array().find((role) => {
+		const strings = {
+			name: localise(client, `${proficiency.id}.name`, defaultLocale)(),
+		};
+
+		return role.name === strings.name;
+	});
 	if (requestedRole === undefined) return;
 
 	const requiresVerification = !configuration.services.entry.verification.disabledOn.includes(guild.language);
@@ -46,17 +50,32 @@ async function handleSelectLanguageProficiency(
 		const isVerified = !userDocument?.data.account.authorisedOn?.includes(interaction.guildId!.toString());
 
 		if (isVerified) {
-			const needToVerifyString = localise(client, 'entry.verification.needToVerify', interaction.locale)({
-				'guild_name': guild.name,
-			});
-			const answerHonestlyString = localise(client, 'entry.verification.answerHonestly', interaction.locale)();
+			const strings = {
+				title: localise(client, 'entry.verification.getVerified.title', interaction.locale)(),
+				description: {
+					verificationRequired: localise(
+						client,
+						'entry.verification.getVerified.description.verificationRequired',
+						interaction.locale,
+					)({
+						'server_name': guild.name,
+					}),
+					honestAnswers: localise(
+						client,
+						'entry.verification.getVerified.description.honestAnswers',
+						interaction.locale,
+					)(),
+					understood: localise(client, 'entry.verification.getVerified.description.understood', interaction.locale)(),
+				},
+			};
 
 			return void sendInteractionResponse(bot, interaction.id, interaction.token, {
 				type: InteractionResponseTypes.ChannelMessageWithSource,
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: `${needToVerifyString}\n\n${answerHonestlyString}`,
+						title: strings.title,
+						description: `${strings.description.verificationRequired}\n\n${strings.description.honestAnswers}`,
 						color: constants.colors.blue,
 					}],
 					components: [{
@@ -64,7 +83,7 @@ async function handleSelectLanguageProficiency(
 						components: [{
 							type: MessageComponentTypes.Button,
 							style: ButtonStyles.Secondary,
-							label: localise(client, 'entry.verification.iUnderstand', interaction.locale)(),
+							label: strings.description.understood,
 							customId: encodeId<EntryStepButtonID>(constants.staticComponentIds.requestedVerification, [
 								requestedRole.id.toString(),
 							]),

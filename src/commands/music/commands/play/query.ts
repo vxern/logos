@@ -32,12 +32,21 @@ async function handleRequestQueryPlayback(
 
 	const listing = await resolveToSongListing([client, bot], interaction, query);
 	if (listing === undefined) {
-		const songNotFoundString = localise(client, 'music.options.play.strings.songNotFound', interaction.locale)();
-		const tryDifferentQueryString = localise(
-			client,
-			'music.options.play.strings.tryDifferentQuery',
-			interaction.locale,
-		)();
+		const strings = {
+			title: localise(client, 'music.options.play.strings.notFound.title', interaction.locale)(),
+			description: {
+				notFound: localise(
+					client,
+					'music.options.play.strings.notFound.description.notFound',
+					interaction.locale,
+				)(),
+				tryDifferentQuery: localise(
+					client,
+					'music.options.play.strings.notFound.description.tryDifferentQuery',
+					interaction.locale,
+				)(),
+			},
+		};
 
 		return void sendInteractionResponse(
 			bot,
@@ -48,7 +57,8 @@ async function handleRequestQueryPlayback(
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: `${songNotFoundString}\n\n${tryDifferentQueryString}`,
+						title: strings.title,
+						description: `${strings.description.notFound}\n\n${strings.description.tryDifferentQuery}`,
 						color: constants.colors.red,
 					}],
 				},

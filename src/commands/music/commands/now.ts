@@ -34,6 +34,11 @@ function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], interaction
 	const currentListing = controller.currentListing;
 
 	if (!isOccupied(controller.player) || currentListing === undefined) {
+		const strings = {
+			title: localise(client, 'music.strings.notPlaying.title', interaction.locale)(),
+			description: localise(client, 'music.strings.notPlaying.description', interaction.locale)(),
+		};
+
 		return void sendInteractionResponse(
 			bot,
 			interaction.id,
@@ -43,7 +48,8 @@ function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], interaction
 				data: {
 					flags: ApplicationCommandFlags.Ephemeral,
 					embeds: [{
-						description: localise(client, 'music.options.now.strings.noSongPlaying', interaction.locale)(),
+						title: strings.title,
+						description: strings.description,
 						color: constants.colors.dullYellow,
 					}],
 				},
@@ -53,19 +59,28 @@ function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], interaction
 
 	const locale = show ? defaultLocale : interaction.locale;
 
-	const noCollectionPlayingString = localise(
-		client,
-		'music.options.now.strings.noCollectionPlaying',
-		interaction.locale,
-	)();
-	const requestInformationAboutSongString = localise(
-		client,
-		'music.options.now.strings.requestInformationAboutSong',
-		interaction.locale,
-	)();
-
 	if (collection !== undefined) {
 		if (!isCollection(currentListing?.content)) {
+			const strings = {
+				title: localise(
+					client,
+					'music.options.now.strings.noCollection.title',
+					interaction.locale,
+				)(),
+				description: {
+					noCollection: localise(
+						client,
+						'music.options.now.strings.noCollection.description.noCollection',
+						interaction.locale,
+					)(),
+					trySongInstead: localise(
+						client,
+						'music.options.now.strings.noCollection.description.trySongInstead',
+						interaction.locale,
+					)(),
+				},
+			};
+
 			return void sendInteractionResponse(
 				bot,
 				interaction.id,
@@ -75,7 +90,7 @@ function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], interaction
 					data: {
 						flags: ApplicationCommandFlags.Ephemeral,
 						embeds: [{
-							description: `${noCollectionPlayingString}\n\n${requestInformationAboutSongString}`,
+							description: `${strings.description.noCollection}\n\n${strings.description.trySongInstead}`,
 							color: constants.colors.dullYellow,
 						}],
 					},
@@ -85,16 +100,20 @@ function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], interaction
 
 		const collection = currentListing.content;
 
-		const nowPlayingString = localise(client, 'music.options.now.strings.nowPlaying', locale)();
+		const strings = {
+			nowPlaying: localise(client, 'music.options.now.strings.nowPlaying', locale)(),
+			songs: localise(client, 'music.options.now.strings.songs', locale)(),
+			listEmpty: localise(client, 'music.strings.listEmpty', locale)(),
+		};
 
 		return void paginate([client, bot], interaction, {
 			elements: chunk(collection.songs, configuration.music.limits.songs.page),
 			embed: {
-				title: `${constants.symbols.music.nowPlaying} ${nowPlayingString}`,
+				title: `${constants.symbols.music.nowPlaying} ${strings.nowPlaying}`,
 				color: constants.colors.blue,
 			},
 			view: {
-				title: localise(client, 'music.options.now.strings.songs', locale)(),
+				title: strings.songs,
 				generate: (songs, pageIndex) =>
 					songs.length !== 0
 						? songs.map((song, index) => {
@@ -113,7 +132,7 @@ function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], interaction
 
 							return `${pageIndex * 10 + (index + 1)}. ${titleHighlighted}`;
 						}).join('\n')
-						: localise(client, 'music.strings.listEmpty', locale)(),
+						: strings.listEmpty,
 			},
 			show: show ?? false,
 		});
@@ -121,7 +140,23 @@ function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], interaction
 
 	const song = currentListing.content as Song | SongStream;
 
-	const nowPlayingString = localise(client, 'music.options.now.strings.nowPlaying', locale)();
+	const strings = {
+		nowPlaying: localise(client, 'music.options.now.strings.nowPlaying', locale)(),
+		collection: localise(client, 'music.options.now.strings.collection', locale)(),
+		track: localise(client, 'music.options.now.strings.track', locale)(),
+		title: localise(client, 'music.options.now.strings.title', locale)(),
+		requestedBy: localise(client, 'music.options.now.strings.requestedBy', locale)(),
+		runningTime: localise(client, 'music.options.now.strings.runningTime', locale)(),
+		playingSince: localise(client, 'music.options.now.strings.playingSince', locale)(
+			{ 'relative_timestamp': timestamp(controller.player.playingSince!) },
+		),
+		startTimeUnknown: localise(client, 'music.options.now.strings.startTimeUnknown', locale)(),
+		sourcedFrom: localise(client, 'music.options.now.strings.sourcedFrom', locale)(
+			{
+				'source': currentListing.source ?? localise(client, 'music.options.now.strings.theInternet', locale)(),
+			},
+		),
+	};
 
 	return void sendInteractionResponse(
 		bot,
@@ -132,44 +167,36 @@ function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], interaction
 			data: {
 				flags: !show ? ApplicationCommandFlags.Ephemeral : undefined,
 				embeds: [{
-					title: `${constants.symbols.music.nowPlaying} ${nowPlayingString}`,
+					title: `${constants.symbols.music.nowPlaying} ${strings.nowPlaying}`,
 					fields: [
 						...isCollection(currentListing?.content)
 							? [{
-								name: localise(client, 'music.options.now.strings.collection', locale)(),
+								name: strings.collection,
 								value: currentListing.content.title,
 							}, {
-								name: localise(client, 'music.options.now.strings.track', locale)(),
+								name: strings.track,
 								value: `${currentListing.content.position + 1}/${currentListing.content.songs.length}`,
 							}]
 							: [],
 						{
-							name: localise(client, 'music.options.now.strings.title', locale)(),
+							name: strings.title,
 							value: `[${song.title}](${song.url})`,
 							inline: false,
 						},
 						{
-							name: localise(client, 'music.options.now.strings.requestedBy', locale)(),
+							name: strings.requestedBy,
 							value: mention(currentListing.requestedBy, MentionTypes.User),
 							inline: false,
 						},
 						{
-							name: localise(client, 'music.options.now.strings.runningTime', locale)(),
+							name: strings.runningTime,
 							value: (controller.player.playingSince ?? undefined) !== undefined
-								? localise(client, 'music.options.now.strings.playingSince', locale)(
-									{ 'relative_timestamp': timestamp(controller.player.playingSince!) },
-								)
-								: localise(client, 'music.options.now.strings.startTimeUnknown', locale)(),
+								? strings.playingSince
+								: strings.startTimeUnknown,
 							inline: false,
 						},
 					],
-					footer: {
-						text: localise(client, 'music.options.now.strings.sourcedFrom', locale)(
-							{
-								'source': currentListing.source ?? localise(client, 'music.options.now.strings.theInternet', locale)(),
-							},
-						),
-					},
+					footer: { text: strings.sourcedFrom },
 				}],
 			},
 		},

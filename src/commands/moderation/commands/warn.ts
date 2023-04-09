@@ -95,17 +95,23 @@ async function handleWarnUser([client, bot]: [Client, Bot], interaction: Interac
 
 	const relevantWarnings = getActiveWarnings(warnings);
 
+	const strings = {
+		title: localise(client, 'warn.strings.warned.title', interaction.locale)(),
+		description: localise(client, 'warn.strings.warned.description', interaction.locale)(
+			{
+				'user_mention': mention(member.id, MentionTypes.User),
+				'number': relevantWarnings.size,
+			},
+		),
+	};
+
 	sendInteractionResponse(bot, interaction.id, interaction.token, {
 		type: InteractionResponseTypes.ChannelMessageWithSource,
 		data: {
 			flags: ApplicationCommandFlags.Ephemeral,
 			embeds: [{
-				description: localise(client, 'warn.strings.warned', interaction.locale)(
-					{
-						'user_mention': mention(member.id, MentionTypes.User),
-						'number': relevantWarnings.size,
-					},
-				),
+				title: strings.title,
+				description: strings.description,
 				color: constants.colors.blue,
 			}],
 		},
@@ -114,15 +120,18 @@ async function handleWarnUser([client, bot]: [Client, Bot], interaction: Interac
 	const moderationChannelId = getTextChannel(guild, configuration.guilds.channels.moderation)?.id;
 	if (moderationChannelId === undefined) return;
 
-	const passedLimit = relevantWarnings.size > configuration.commands.warn.limitUses;
-	if (passedLimit) {
-		const passedLimitString = localise(client, 'warn.strings.passedLimit', defaultLocale)(
-			{
-				'user_mention': diagnosticMentionUser(member.user!),
-				'limit': configuration.commands.warn.limitUses,
-				'number': relevantWarnings.size,
-			},
-		);
+	const surpassedLimit = relevantWarnings.size > configuration.commands.warn.limitUses;
+	if (surpassedLimit) {
+		const strings = {
+			title: localise(client, 'warn.strings.limitSurpassed.title', defaultLocale)(),
+			description: localise(client, 'warn.strings.limitSurpassed.description', defaultLocale)(
+				{
+					'user_mention': diagnosticMentionUser(member.user!),
+					'limit': configuration.commands.warn.limitUses,
+					'number': relevantWarnings.size,
+				},
+			),
+		};
 
 		try {
 			editMember(bot, guild.id, member.id, {
@@ -132,7 +141,8 @@ async function handleWarnUser([client, bot]: [Client, Bot], interaction: Interac
 
 		return void sendMessage(bot, moderationChannelId, {
 			embeds: [{
-				description: `${constants.symbols.indicators.exclamation} ${passedLimitString}`,
+				title: `${constants.symbols.indicators.exclamation} ${strings.title}`,
+				description: strings.description,
 				color: constants.colors.red,
 			}],
 		});
@@ -140,16 +150,20 @@ async function handleWarnUser([client, bot]: [Client, Bot], interaction: Interac
 
 	const reachedLimit = relevantWarnings.size === configuration.commands.warn.limitUses;
 	if (reachedLimit) {
-		const reachedLimitString = localise(client, 'warn.strings.reachedLimit', defaultLocale)(
-			{
-				'mention_user': diagnosticMentionUser(member.user!),
-				'limit': configuration.commands.warn.limitUses,
-			},
-		);
+		const strings = {
+			title: localise(client, 'warn.strings.limitReached.title', defaultLocale)(),
+			description: localise(client, 'warn.strings.limitReached.description', defaultLocale)(
+				{
+					'mention_user': diagnosticMentionUser(member.user!),
+					'limit': configuration.commands.warn.limitUses,
+				},
+			),
+		};
 
 		return void sendMessage(bot, moderationChannelId, {
 			embeds: [{
-				description: `${constants.symbols.indicators.warning} ${reachedLimitString}`,
+				title: `${constants.symbols.indicators.warning} ${strings.title}`,
+				description: strings.description,
 				color: constants.colors.yellow,
 			}],
 		});
@@ -157,6 +171,11 @@ async function handleWarnUser([client, bot]: [Client, Bot], interaction: Interac
 }
 
 function displayError([client, bot]: [Client, Bot], interaction: Interaction): void {
+	const strings = {
+		title: localise(client, 'warn.strings.failed.title', interaction.locale)(),
+		description: localise(client, 'warn.strings.failed.description', interaction.locale)(),
+	};
+
 	return void sendInteractionResponse(
 		bot,
 		interaction.id,
@@ -166,7 +185,8 @@ function displayError([client, bot]: [Client, Bot], interaction: Interaction): v
 			data: {
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
-					description: localise(client, 'warn.strings.failed', interaction.locale)(),
+					title: strings.title,
+					description: strings.description,
 					color: constants.colors.red,
 				}],
 			},

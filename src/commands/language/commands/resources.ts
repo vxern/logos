@@ -31,6 +31,13 @@ function handleDisplayResources([client, bot]: [Client, Bot], interaction: Inter
 	if (guild === undefined) return;
 
 	const locale = show ? defaultLocale : interaction.locale;
+
+	const strings = {
+		redirect: localise(client, 'resources.strings.redirect', locale)({
+			'language': localise(client, `languages.${guild.language.toLowerCase()}`, locale)(),
+		}),
+	};
+
 	return void sendInteractionResponse(
 		bot,
 		interaction.id,
@@ -43,9 +50,7 @@ function handleDisplayResources([client, bot]: [Client, Bot], interaction: Inter
 					type: MessageComponentTypes.ActionRow,
 					components: [{
 						type: MessageComponentTypes.Button,
-						label: localise(client, 'resources.strings.resourcesStoredHere', locale)({
-							'language': localise(client, `languages.${guild.language}`, locale),
-						}),
+						label: strings.redirect,
 						style: ButtonStyles.Link,
 						url: constants.links.generateLanguageRepositoryLink(guild.language),
 					}],

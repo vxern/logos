@@ -48,19 +48,21 @@ const generators: Required<MessageGenerators<GuildEvents>> = {
 			const guild = client.cache.guilds.get(BigInt(entryRequest.guild));
 			if (guild === undefined) return;
 
-			const reasonString = localise(client, 'verification.fields.reason', defaultLocale)({
-				'language': guild.language,
-			});
-			const aimString = localise(client, 'verification.fields.aim', defaultLocale)();
-			const whereFoundString = localise(client, 'verification.fields.whereFound', defaultLocale)();
+			const strings = {
+				reason: localise(client, 'verification.fields.reason', defaultLocale)({
+					'language': guild.language,
+				}),
+				aim: localise(client, 'verification.fields.aim', defaultLocale)(),
+				whereFound: localise(client, 'verification.fields.whereFound', defaultLocale)(),
+			};
 
 			return `${diagnosticMentionUser(user)} has submitted a request to join the server.
 
-**${reasonString}**
+**${strings.reason}**
 ${codeMultiline(entryRequest.answers.reason!)}
-**${aimString}**
+**${strings.aim}**
 ${codeMultiline(entryRequest.answers.aim!)}
-**${whereFoundString}**
+**${strings.whereFound}**
 ${codeMultiline(entryRequest.answers.where_found!)}
 `;
 		},
