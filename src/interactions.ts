@@ -346,69 +346,67 @@ function parseComposerContent<T extends string>(submission: Interaction): Compos
 }
 
 // Expression to detect HH:MM:SS, MM:SS and SS timestamps.
-const shortTimeExpression = new RegExp(
+const conciseTimeExpression = new RegExp(
 	/^(?:(?:(0?[0-9]|1[0-9]|2[0-4]):)?(?:(0?[0-9]|[1-5][0-9]|60):))?(0?[0-9]|[1-5][0-9]|60)$/,
 );
 
 function parseTimeExpression(
 	client: Client,
 	expression: string,
-	convertToPhrase: boolean,
 	locale: string | undefined,
 ): [correctedExpression: string, period: number] | undefined {
-	if (shortTimeExpression.test(expression)) {
-		return parseShortTimeExpression(client, expression, convertToPhrase, locale);
+	if (conciseTimeExpression.test(expression)) {
+		return parseConciseTimeExpression(client, expression, locale);
 	}
-	return parseTimeExpressionPhrase(client, expression, locale);
+
+	return parseVerboseTimeExpressionPhrase(client, expression, locale);
 }
 
-function parseShortTimeExpression(
+function parseConciseTimeExpression(
 	client: Client,
 	expression: string,
-	convertToPhrase: boolean,
 	locale: string | undefined,
 ): ReturnType<typeof parseTimeExpression> {
-	const [secondsPart, minutesPart, hoursPart] = shortTimeExpression.exec(expression)!.slice(1).toReversed();
+	const [secondsPart, minutesPart, hoursPart] = conciseTimeExpression.exec(expression)!.slice(1).toReversed();
 
 	const [seconds, minutes, hours] = [secondsPart, minutesPart, hoursPart].map((part) =>
 		part !== undefined ? Number(part) : undefined
 	) as [number, ...number[]];
 
-	if (!convertToPhrase) {
-		let totalSeconds = seconds;
-		if (minutes !== undefined) {
-			totalSeconds += minutes * 60;
-		}
-		if (hours !== undefined) {
-			totalSeconds += hours * 60 * 60;
-		}
-		return [expression, totalSeconds * 1000];
-	}
-
-	let correctedExpression = '';
-	if (seconds !== undefined && seconds !== 0) {
+	let verboseExpressionParts = [];
+	if (seconds !== 0) {
 		const strings = {
-			second: localise(client, 'units.second', locale)({ 'number': seconds }),
+			second: localise(client, 'units.second', defaultLocale)({ 'number': seconds }),
 		};
 
-		correctedExpression += `${seconds} ${strings.second}`;
+		verboseExpressionParts.push(strings.second);
 	}
 	if (minutes !== undefined && minutes !== 0) {
 		const strings = {
-			minute: localise(client, 'units.minute', locale)({ 'number': minutes }),
+			minute: localise(client, 'units.minute', defaultLocale)({ 'number': minutes }),
 		};
 
-		correctedExpression += `${minutes} ${strings.minute}`;
+		verboseExpressionParts.push(strings.minute);
 	}
-	if (hours !== undefined) {
+	if (hours !== undefined && hours !== 0) {
 		const strings = {
-			hour: localise(client, 'units.hour', locale)({ 'number': minutes }),
+			hour: localise(client, 'units.hour', defaultLocale)({ 'number': hours }),
 		};
 
-		correctedExpression += `${hours} ${strings.hour}`;
+		verboseExpressionParts.push(strings.hour);
 	}
+	const verboseExpression = verboseExpressionParts.join(' ');
 
-	return parseTimeExpressionPhrase(client, correctedExpression, locale);
+	const expressionParsed = parseVerboseTimeExpressionPhrase(client, verboseExpression, locale);
+	if (expressionParsed === undefined) return undefined;
+
+	const conciseExpression = [hoursPart ?? '0', minutesPart ?? '0', secondsPart ?? '0'].map((part) =>
+		part.length === 1 ? `0${part}` : part
+	).join(':');
+
+	const [verboseExpressionCorrected, period] = expressionParsed;
+
+	return [`${conciseExpression} (${verboseExpressionCorrected})`, period];
 }
 
 type TimeUnit = 'second' | 'minute' | 'hour' | 'day' | 'week' | 'month' | 'year';
@@ -424,7 +422,7 @@ const timeUnitToPeriod: Required<Record<TimeUnit, number>> = {
 
 const timeUnitsWithAliasesLocalised = new Map<string, Record<TimeUnit, string[]>>();
 
-function parseTimeExpressionPhrase(
+function parseVerboseTimeExpressionPhrase(
 	client: Client,
 	expression: string,
 	locale: string | undefined,
@@ -487,7 +485,6 @@ function parseTimeExpressionPhrase(
 
 		timeUnits.push(timeUnit as TimeUnit);
 	}
-	timeUnits.sort((previous, next) => timeUnitToPeriod[next] - timeUnitToPeriod[previous]);
 
 	// If one of the keys is duplicate.
 	if ((new Set(timeUnits)).size !== timeUnits.length) {
@@ -496,6 +493,7 @@ function parseTimeExpressionPhrase(
 
 	const timeUnitQuantifierTuples = timeUnits
 		.map<[TimeUnit, number]>((timeUnit, index) => [timeUnit, quantifiers[index]!]);
+	timeUnitQuantifierTuples.sort(([previous], [next]) => timeUnitToPeriod[next] - timeUnitToPeriod[previous]);
 
 	const timeExpressions = [];
 	let total = 0;

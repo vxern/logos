@@ -25,7 +25,7 @@ async function handleSetTimeoutAutocomplete([client, bot]: [Client, Bot], intera
 			);
 		}
 		case 'duration': {
-			const timestamp = parseTimeExpression(client, duration!, true, interaction.locale);
+			const timestamp = parseTimeExpression(client, duration!, interaction.locale);
 
 			return void sendInteractionResponse(
 				bot,

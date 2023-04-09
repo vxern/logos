@@ -18,8 +18,30 @@ const command: OptionTemplate = {
 	name: 'skip-to',
 	type: ApplicationCommandOptionTypes.SubCommand,
 	handle: handleSkipToTimestamp,
+	handleAutocomplete: handleSkipToTimestampAutocomplete,
 	options: [timestamp],
 };
+
+async function handleSkipToTimestampAutocomplete(
+	[client, bot]: [Client, Bot],
+	interaction: Interaction,
+): Promise<void> {
+	const [{ timestamp: timestampExpression }] = parseArguments(interaction.data?.options, {});
+
+	const timestamp = parseTimeExpression(client, timestampExpression!, interaction.locale);
+
+	return void sendInteractionResponse(
+		bot,
+		interaction.id,
+		interaction.token,
+		{
+			type: InteractionResponseTypes.ApplicationCommandAutocompleteResult,
+			data: {
+				choices: timestamp === undefined ? [] : [{ name: timestamp[0], value: timestamp[1].toString() }],
+			},
+		},
+	);
+}
 
 async function handleSkipToTimestamp([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const [{ timestamp: timestampExpression }, focused] = parseArguments(interaction.data?.options, {});
@@ -28,7 +50,7 @@ async function handleSkipToTimestamp([client, bot]: [Client, Bot], interaction: 
 	if (controller === undefined) return;
 
 	if (focused !== undefined) {
-		const timestamp = parseTimeExpression(client, timestampExpression!, false, interaction.locale);
+		const timestamp = parseTimeExpression(client, timestampExpression!, interaction.locale);
 
 		return void sendInteractionResponse(
 			bot,
@@ -56,7 +78,7 @@ async function handleSkipToTimestamp([client, bot]: [Client, Bot], interaction: 
 	if (!isOccupied(controller.player)) {
 		const strings = {
 			title: localise(client, 'music.options.skip-to.strings.noSong.title', interaction.locale)(),
-			description: localise(client, 'music.options.skip-to.strings.noSong.title', interaction.locale)(),
+			description: localise(client, 'music.options.skip-to.strings.noSong.description', interaction.locale)(),
 		};
 
 		return void sendInteractionResponse(
