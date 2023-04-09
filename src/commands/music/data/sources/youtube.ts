@@ -154,6 +154,7 @@ function fromYouTubePlaylist(playlist: Playlist, requestedBy: bigint): SongListi
 		content: {
 			type: SongListingContentTypes.Collection,
 			title: playlist.title!,
+			url: playlist.url!,
 			songs: playlist.videos.map((video) => ({
 				type: SongListingContentTypes.Song,
 				title: video.title!,

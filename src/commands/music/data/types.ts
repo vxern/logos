@@ -28,6 +28,9 @@ interface SongCollection {
 	/** The index of the song that is currently playing. */
 	position: number;
 
+	/** The link to the collection. */
+	url: string;
+
 	/** The songs in the collection. */
 	songs: Song[];
 }
