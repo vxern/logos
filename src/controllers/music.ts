@@ -319,7 +319,6 @@ function receiveNewListing(
 		description: localise(client, 'music.options.play.strings.queued.description.public', defaultLocale)(
 			{
 				'title': listing.content.title,
-				'url': listing.content.url,
 				'user_mention': mention(listing.requestedBy, MentionTypes.User),
 			},
 		),
