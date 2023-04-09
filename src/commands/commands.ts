@@ -9,7 +9,7 @@ export default [
 	...information,
 	...language,
 	...moderation,
-	//...music,
+	...music,
 	...server,
 	...social,
 ];
