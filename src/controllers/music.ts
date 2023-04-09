@@ -463,6 +463,8 @@ async function loadSong(
 	};
 
 	const onTrackEnd = () => {
+		controller.player.off('trackException', onTrackException);
+
 		if (controller.flags.isDestroyed) {
 			setDisconnectTimeout(client, guildId);
 			return;
@@ -472,8 +474,6 @@ async function loadSong(
 			controller.flags.breakLoop = false;
 			return;
 		}
-
-		controller.player.off('trackException', onTrackException);
 
 		advanceQueueAndPlay([client, bot], guildId, controller);
 	};
