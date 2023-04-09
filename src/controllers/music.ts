@@ -388,19 +388,6 @@ function advanceQueueAndPlay([client, bot]: [Client, Bot], guildId: bigint, cont
 
 	if (controller.currentListing === undefined) {
 		setDisconnectTimeout(client, guildId);
-
-		const strings = {
-			title: localise(client, 'music.options.play.strings.finished.title', defaultLocale)(),
-			description: localise(client, 'music.options.play.strings.finished.description', defaultLocale)(),
-		};
-
-		return void sendMessage(bot, controller.feedbackChannelId!, {
-			embeds: [{
-				title: `${constants.symbols.music.allDone} ${strings.title}`,
-				description: strings.description,
-				color: constants.colors.blue,
-			}],
-		});
 	}
 
 	return void loadSong([client, bot], guildId, controller, getCurrentSong(controller)!);
