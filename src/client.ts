@@ -182,7 +182,7 @@ async function initialiseClient(
 	startServices([client, bot]);
 
 	return Promise.all([
-		//setupLavalinkNode([client, bot]),
+		setupLavalinkNode([client, bot]),
 		startBot(bot),
 	]).then(() => [client, bot]);
 }
@@ -208,7 +208,6 @@ function createMusicFeature(sendGatewayPayload: SendGatewayPayload): Client['fea
 			host: Deno.env.get('LAVALINK_HOST')!,
 			port: Number(Deno.env.get('LAVALINK_PORT')!),
 			password: Deno.env.get('LAVALINK_PASSWORD')!,
-			secure: true,
 		},
 		sendGatewayPayload,
 	});
@@ -618,27 +617,42 @@ function startServices([client, bot]: [Client, Bot]): void {
 function setupLavalinkNode([client, bot]: [Client, Bot]): Promise<void> {
 	client.features.music.node.on(
 		'connect',
-		(took) => client.log.info(`Connection with the Lavalink node has been established. Time taken: ${took}ms`),
+		(timeTakenMs) => client.log.info(`Connected to Lavalink node. Time taken: ${timeTakenMs}ms`),
 	);
+
 	client.features.music.node.on(
 		'error',
-		(error) => client.log.error(`The Lavalink node has encountered an error:\n${error}`),
+		async (error) => {
+			if (error.name === 'ConnectionRefused') return;
+
+			client.log.error(`The Lavalink node has encountered an error:\n${error}`);
+		},
 	);
+
 	client.features.music.node.on(
 		'disconnect',
-		(code, reason) => {
+		async (code, reason) => {
+			if (code === -1) {
+				client.log.warn(`Unable to connect to Lavalink node. Retrying in 5 seconds...`);
+				await new Promise((resolve) => setTimeout(resolve, 5000));
+				return connectToLavalinkNode([client, bot]);
+			}
+
 			client.log.info(
 				`Disconnected from the Lavalink node. Code ${code}, reason: ${reason}\n` +
 					'Attempting to reconnect...',
 			);
-			return void connectToLavalinkNode([client, bot]);
+
+			return connectToLavalinkNode([client, bot]);
 		},
 	);
+
 	return connectToLavalinkNode([client, bot]);
 }
 
 function connectToLavalinkNode([client, bot]: [Client, Bot]): Promise<void> {
-	client.log.info('Connecting to the Lavalink node...');
+	client.log.info('Connecting to Lavalink node...');
+
 	return client.features.music.node.connect(bot.id);
 }
 
