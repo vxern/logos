@@ -105,7 +105,7 @@ const symbols = {
 		},
 		entryRequest: {
 			submitted: 'ℹ️',
-			accepted: '✔️',
+			accepted: '✅',
 			rejected: '❌',
 		},
 		warned: '⚠️',
@@ -117,6 +117,10 @@ const symbols = {
 		praised: '🙏',
 		suggestion: '🌿',
 		report: '💢',
+		purging: {
+			begin: '⚔️',
+			end: '✅',
+		},
 	},
 	music: {
 		song: '🎵',

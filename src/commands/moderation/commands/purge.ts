@@ -1,0 +1,652 @@
+import {
+	ApplicationCommandFlags,
+	ApplicationCommandOptionTypes,
+	ApplicationCommandTypes,
+	Bot,
+	ButtonStyles,
+	deleteMessage,
+	deleteMessages,
+	deleteOriginalInteractionResponse,
+	editOriginalInteractionResponse,
+	getMessage,
+	getMessages,
+	Interaction,
+	InteractionCallbackData,
+	InteractionResponseTypes,
+	InteractionTypes,
+	Message,
+	MessageComponentTypes,
+	sendInteractionResponse,
+	snowflakeToBigint,
+} from 'discordeno';
+import { CommandTemplate } from 'logos/src/commands/command.ts';
+import { user } from 'logos/src/commands/parameters.ts';
+import { logEvent } from 'logos/src/controllers/logging/logging.ts';
+import {
+	autocompleteMembers,
+	Client,
+	isValidSnowflake,
+	localise,
+	resolveInteractionToMember,
+} from 'logos/src/client.ts';
+import { createInteractionCollector, parseArguments } from 'logos/src/interactions.ts';
+import { chunk, diagnosticMentionUser, snowflakeToTimestamp } from 'logos/src/utils.ts';
+import configuration from 'logos/configuration.ts';
+import constants, { Periods } from 'logos/constants.ts';
+import { mention, MentionTypes, timestamp, trim } from 'logos/formatting.ts';
+
+const command: CommandTemplate = {
+	name: 'purge',
+	type: ApplicationCommandTypes.ChatInput,
+	defaultMemberPermissions: ['MODERATE_MEMBERS'],
+	handle: handlePurgeMessages,
+	handleAutocomplete: handlePurgeMessagesAutocomplete,
+	options: [{
+		name: 'start',
+		type: ApplicationCommandOptionTypes.String,
+		required: true,
+	}, {
+		name: 'end',
+		type: ApplicationCommandOptionTypes.String,
+	}, { ...user, name: 'author', required: false }],
+};
+
+async function handlePurgeMessagesAutocomplete([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+	const [{ author }] = parseArguments(interaction.data?.options, {});
+
+	return autocompleteMembers(
+		[client, bot],
+		interaction,
+		author!,
+		{ includeBots: true },
+	);
+}
+
+async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+	let [{ start, end, author: user }] = parseArguments(interaction.data?.options, {});
+
+	let authorId: bigint | undefined;
+
+	if (user !== undefined) {
+		const authorMember = resolveInteractionToMember([client, bot], interaction, user, {
+			includeBots: true,
+		});
+		if (authorMember === undefined) return;
+
+		authorId = authorMember.id;
+	} else {
+		authorId = undefined;
+	}
+
+	sendInteractionResponse(bot, interaction.id, interaction.token, {
+		type: InteractionResponseTypes.DeferredChannelMessageWithSource,
+		data: {
+			flags: ApplicationCommandFlags.Ephemeral,
+		},
+	});
+
+	const isStartValid = isValidSnowflake(start!);
+	const isEndValid = end === undefined || isValidSnowflake(end!);
+	if (!isStartValid || !isEndValid) {
+		return displaySnowflakesInvalidError([client, bot], interaction, [!isStartValid, !isEndValid]);
+	}
+
+	end = end ?? await getMessages(bot, interaction.channelId!, { limit: 1 })
+		.catch(() => undefined)
+		.then((messages) => messages?.first()?.id?.toString());
+
+	if (end === undefined) {
+		return displayFailedError([client, bot], interaction);
+	}
+
+	if (start === end) {
+		return displayIdsNotDifferentError([client, bot], interaction);
+	}
+
+	let [startId, endId] = [snowflakeToBigint(start!), snowflakeToBigint(end!)];
+
+	if (startId > endId) {
+		[startId, endId] = [endId, startId];
+	}
+
+	const [startTimestamp, endTimestamp] = [snowflakeToTimestamp(startId), snowflakeToTimestamp(endId)];
+
+	const now = Date.now();
+
+	const isStartInFuture = startTimestamp > now;
+	const isEndInFuture = endTimestamp > now;
+	if (isStartInFuture || isEndInFuture) {
+		return displaySnowflakesInvalidError([client, bot], interaction, [isStartInFuture, isEndInFuture]);
+	}
+
+	const [startMessage, endMessage] = await Promise.all([
+		getMessage(bot, interaction.channelId!, startId).catch(() => undefined),
+		getMessage(bot, interaction.channelId!, endId).catch(() => undefined),
+	]);
+
+	const notExistsStart = startMessage === undefined;
+	const notExistsEnd = endMessage === undefined;
+	if (notExistsStart || notExistsEnd) {
+		return displaySnowflakesInvalidError([client, bot], interaction, [notExistsStart, notExistsEnd]);
+	}
+
+	const channelMention = mention(interaction.channelId!, MentionTypes.Channel);
+
+	const [startMessageContent, endMessageContent] = [
+		getMessageContent(client, startMessage, interaction.locale),
+		getMessageContent(client, endMessage, interaction.locale),
+	];
+
+	const strings = {
+		indexing: {
+			title: localise(client, 'purge.strings.indexing.title', interaction.locale)(),
+			description: localise(client, 'purge.strings.indexing.description', interaction.locale)(),
+		},
+		indexed: {
+			title: localise(client, 'purge.strings.indexed.title', interaction.locale)(),
+			description: {
+				some: localise(client, 'purge.strings.indexed.description.some', interaction.locale),
+				none: localise(client, 'purge.strings.indexed.description.none', interaction.locale)(),
+				tryDifferentQuery: localise(
+					client,
+					'purge.strings.indexed.description.tryDifferentQuery',
+					interaction.locale,
+				)(),
+				tooMany: localise(client, 'purge.strings.indexed.description.tooMany', interaction.locale),
+				limited: localise(client, 'purge.strings.indexed.description.limited', interaction.locale),
+			},
+		},
+		start: localise(client, 'purge.strings.start', interaction.locale)(),
+		end: localise(client, 'purge.strings.end', interaction.locale)(),
+		postedStart:
+			(startMessageContent !== undefined
+				? localise(client, 'purge.strings.posted', interaction.locale)
+				: localise(client, 'purge.strings.embedPosted', interaction.locale))({
+					'relative_timestamp': timestamp(startMessage.timestamp),
+					'user_mention': mention(startMessage.authorId, MentionTypes.User),
+				}),
+		postedEnd:
+			(endMessageContent !== undefined
+				? localise(client, 'purge.strings.posted', interaction.locale)
+				: localise(client, 'purge.strings.embedPosted', interaction.locale))({
+					'relative_timestamp': timestamp(endMessage.timestamp),
+					'user_mention': mention(endMessage.authorId, MentionTypes.User),
+				}),
+		messagesFound: localise(client, 'purge.strings.messagesFound', interaction.locale)(),
+		sureToPurge: {
+			title: localise(client, 'purge.strings.sureToPurge.title', interaction.locale)(),
+			description: localise(client, 'purge.strings.sureToPurge.description', interaction.locale),
+		},
+		continue: {
+			title: localise(client, 'purge.strings.continue.title', interaction.locale)(),
+			description: localise(client, 'purge.strings.continue.description', interaction.locale),
+		},
+		yes: localise(client, 'purge.strings.yes', interaction.locale)(),
+		no: localise(client, 'purge.strings.no', interaction.locale)(),
+		purging: {
+			title: localise(client, 'purge.strings.purging.title', interaction.locale)(),
+			description: {
+				purging: localise(client, 'purge.strings.purging.description.purging', interaction.locale),
+				mayTakeTime: localise(client, 'purge.strings.purging.description.mayTakeTime', interaction.locale)(),
+				onceComplete: localise(client, 'purge.strings.purging.description.onceComplete', interaction.locale)(),
+			},
+		},
+		purged: {
+			title: localise(client, 'purge.strings.purged.title', interaction.locale)(),
+			description: localise(client, 'purge.strings.purged.description', interaction.locale),
+		},
+	};
+
+	let messages: Message[] = [];
+
+	const getIndexingProgressResponse = (): InteractionCallbackData => ({
+		embeds: [{
+			title: strings.indexing.title,
+			description: strings.indexing.description,
+			fields: [{
+				name: strings.start,
+				value: startMessageContent !== undefined
+					? `${startMessageContent}\n${strings.postedStart}`
+					: strings.postedStart,
+			}, {
+				name: strings.end,
+				value: endMessageContent !== undefined ? `${endMessageContent}\n${strings.postedEnd}` : strings.postedEnd,
+			}, {
+				name: strings.messagesFound,
+				value: messages.length.toString(),
+			}],
+			color: constants.colors.peach,
+		}],
+	});
+
+	editOriginalInteractionResponse(bot, interaction.token, getIndexingProgressResponse());
+
+	const indexProgressIntervalId = setInterval(
+		() => editOriginalInteractionResponse(bot, interaction.token, getIndexingProgressResponse()),
+		1500,
+	);
+
+	let isFinished = false;
+	while (!isFinished) {
+		if (messages.length >= configuration.commands.purge.maxFound) {
+			clearInterval(indexProgressIntervalId);
+
+			const strings = {
+				title: localise(client, 'purge.strings.rangeTooBig.title', interaction.locale)(),
+				description: {
+					rangeTooBig: localise(client, 'purge.strings.rangeTooBig.description.rangeTooBig', interaction.locale)({
+						'number': configuration.commands.purge.maxFound,
+					}),
+					trySmaller: localise(client, 'purge.strings.rangeTooBig.description.trySmaller', interaction.locale)(),
+				},
+			};
+
+			return void editOriginalInteractionResponse(bot, interaction.token, {
+				embeds: [{
+					title: strings.title,
+					description: `${strings.description.rangeTooBig}\n\n${strings.description.trySmaller}`,
+					color: constants.colors.yellow,
+				}],
+			});
+		}
+
+		const buffer = await getMessages(bot, interaction.channelId!, {
+			after: messages.length === 0 ? startMessage.id : messages.at(-1)!.id,
+			limit: 100,
+		});
+
+		const values = Array.from(buffer.values()).toReversed();
+
+		const lastMessageInRangeIndex = values.findLastIndex((message) => message.id <= endMessage.id);
+		const messagesInRange = values.slice(0, lastMessageInRangeIndex + 1);
+
+		if (messagesInRange.length === 0) {
+			isFinished = true;
+		}
+
+		const messagesToDelete = authorId !== undefined
+			? messagesInRange.filter((message) => message.authorId === authorId)
+			: messagesInRange;
+		messages.push(...messagesToDelete);
+
+		// If the chunk is incomplete or if not all of it is relevant,
+		// there are no more relevant messages; therefore finished.
+		if (messagesInRange.length < 100) {
+			isFinished = true;
+		}
+
+		// If the end message has been found, there are no more relevant messages; therefore finished.
+		if (messagesInRange.at(-1)?.id === endMessage.id) {
+			isFinished = true;
+		}
+	}
+
+	if (authorId === undefined || startMessage.authorId === authorId) {
+		messages.unshift(startMessage);
+	}
+
+	clearInterval(indexProgressIntervalId);
+
+	if (messages.length === 0) {
+		return void editOriginalInteractionResponse(bot, interaction.token, {
+			embeds: [{
+				title: strings.indexed.title,
+				description: `${strings.indexed.description.none}\n\n${strings.indexed.description.tryDifferentQuery}`,
+				fields: [{
+					name: strings.start,
+					value: startMessageContent !== undefined
+						? `${startMessageContent}\n${strings.postedStart}`
+						: strings.postedStart,
+				}, {
+					name: strings.end,
+					value: endMessageContent !== undefined ? `${endMessageContent}\n${strings.postedEnd}` : strings.postedEnd,
+				}, {
+					name: strings.messagesFound,
+					value: messages.length.toString(),
+				}],
+				color: constants.colors.husky,
+			}],
+		});
+	}
+
+	let isShouldContinue = false;
+
+	if (messages.length >= configuration.commands.purge.maxDeletable) {
+		isShouldContinue = await new Promise<boolean>((resolve) => {
+			const continueId = createInteractionCollector([client, bot], {
+				type: InteractionTypes.MessageComponent,
+				onCollect: (_, selection) => {
+					sendInteractionResponse(bot, selection.id, selection.token, {
+						type: InteractionResponseTypes.DeferredUpdateMessage,
+					});
+					resolve(true);
+				},
+			});
+
+			const cancelId = createInteractionCollector([client, bot], {
+				type: InteractionTypes.MessageComponent,
+				onCollect: (_, selection) => {
+					sendInteractionResponse(bot, selection.id, selection.token, {
+						type: InteractionResponseTypes.DeferredUpdateMessage,
+					});
+					resolve(false);
+				},
+			});
+
+			editOriginalInteractionResponse(bot, interaction.token, {
+				embeds: [{
+					title: strings.indexed.title,
+					description: `${
+						strings.indexed.description.tooMany({
+							'number': messages.length,
+							'maximum_deletable': configuration.commands.purge.maxDeletable,
+						})
+					}\n\n${
+						strings.indexed.description.limited({
+							'number': configuration.commands.purge.maxDeletable,
+						})
+					}`,
+					fields: [{
+						name: strings.start,
+						value: startMessageContent !== undefined
+							? `${startMessageContent}\n${strings.postedStart}`
+							: strings.postedStart,
+					}, {
+						name: strings.end,
+						value: endMessageContent !== undefined ? `${endMessageContent}\n${strings.postedEnd}` : strings.postedEnd,
+					}, {
+						name: strings.messagesFound,
+						value: messages.length.toString(),
+					}],
+					color: constants.colors.yellow,
+				}, {
+					title: strings.continue.title,
+					description: strings.continue.description({
+						'number': configuration.commands.purge.maxDeletable,
+						'channel_mention': channelMention,
+						'full_number': messages.length,
+					}),
+					color: constants.colors.husky,
+				}],
+				components: [{
+					type: MessageComponentTypes.ActionRow,
+					components: [{
+						type: MessageComponentTypes.Button,
+						customId: continueId,
+						label: strings.yes,
+						style: ButtonStyles.Success,
+					}, {
+						type: MessageComponentTypes.Button,
+						customId: cancelId,
+						label: strings.no,
+						style: ButtonStyles.Danger,
+					}],
+				}],
+			});
+		});
+
+		if (!isShouldContinue) {
+			return void deleteOriginalInteractionResponse(bot, interaction.token);
+		}
+
+		messages = messages.slice(0, configuration.commands.purge.maxDeletable);
+	}
+
+	const isShouldPurge = isShouldContinue || await new Promise<boolean>((resolve) => {
+		const continueId = createInteractionCollector([client, bot], {
+			type: InteractionTypes.MessageComponent,
+			onCollect: (_, selection) => {
+				sendInteractionResponse(bot, selection.id, selection.token, {
+					type: InteractionResponseTypes.DeferredUpdateMessage,
+				});
+				resolve(true);
+			},
+		});
+
+		const cancelId = createInteractionCollector([client, bot], {
+			type: InteractionTypes.MessageComponent,
+			onCollect: (_, selection) => {
+				sendInteractionResponse(bot, selection.id, selection.token, {
+					type: InteractionResponseTypes.DeferredUpdateMessage,
+				});
+				resolve(false);
+			},
+		});
+
+		editOriginalInteractionResponse(bot, interaction.token, {
+			embeds: [{
+				title: strings.indexed.title,
+				description: strings.indexed.description.some({ 'number': messages.length }),
+				fields: [{
+					name: strings.start,
+					value: startMessageContent !== undefined
+						? `${startMessageContent}\n${strings.postedStart}`
+						: strings.postedStart,
+				}, {
+					name: strings.end,
+					value: endMessageContent !== undefined ? `${endMessageContent}\n${strings.postedEnd}` : strings.postedEnd,
+				}, {
+					name: strings.messagesFound,
+					value: messages.length.toString(),
+				}],
+				color: constants.colors.blue,
+			}, {
+				title: strings.sureToPurge.title,
+				description: strings.sureToPurge.description({
+					'number': messages.length,
+					'channel_mention': channelMention,
+				}),
+				color: constants.colors.husky,
+			}],
+			components: [{
+				type: MessageComponentTypes.ActionRow,
+				components: [{
+					type: MessageComponentTypes.Button,
+					customId: continueId,
+					label: strings.yes,
+					style: ButtonStyles.Success,
+				}, {
+					type: MessageComponentTypes.Button,
+					customId: cancelId,
+					label: strings.no,
+					style: ButtonStyles.Danger,
+				}],
+			}],
+		});
+	});
+
+	if (!isShouldPurge) {
+		return void deleteOriginalInteractionResponse(bot, interaction.token);
+	}
+
+	editOriginalInteractionResponse(bot, interaction.token, {
+		embeds: [{
+			title: strings.purging.title,
+			description: `${
+				strings.purging.description.purging({ 'number': messages.length, 'channel_mention': channelMention })
+			} ${strings.purging.description.mayTakeTime}\n\n${strings.purging.description.onceComplete}`,
+			color: constants.colors.blue,
+		}],
+		components: [],
+	});
+
+	client.log.info(
+		`Purging ${messages.length} message(s) in channel ID ${interaction.channelId!} as requested by ${
+			diagnosticMentionUser(interaction.user)
+		}...`,
+	);
+
+	const [guild, member, channel] = [
+		client.cache.guilds.get(interaction.guildId!),
+		client.cache.members.get(snowflakeToBigint(`${interaction.user.id}${interaction.guildId!}`)),
+		client.cache.channels.get(interaction.channelId!),
+	];
+	if (guild === undefined || member === undefined || channel === undefined) return;
+
+	logEvent([client, bot], guild, 'purgeBegin', [member, channel, messages.length]);
+
+	const twoWeeksAgo = now - Periods.week * 2 + Periods.hour;
+
+	const firstBulkDeletableIndex = messages.findIndex((message) => message.timestamp > twoWeeksAgo);
+	const bulkDeletable = firstBulkDeletableIndex !== -1 ? messages.slice(firstBulkDeletableIndex, messages.length) : [];
+	const nonBulkDeletable = messages.slice(
+		0,
+		firstBulkDeletableIndex !== -1 ? firstBulkDeletableIndex : messages.length,
+	);
+
+	let responseDeleted = false;
+
+	const responseDeletionTimeoutId = setTimeout(() => {
+		responseDeleted = true;
+		deleteOriginalInteractionResponse(bot, interaction.token);
+	}, Periods.minute * 1);
+
+	let deletedCount = 0;
+
+	if (bulkDeletable.length < 2) {
+		nonBulkDeletable.push(...bulkDeletable.splice(0));
+	} else {
+		const bulkDeletableChunks = chunk(bulkDeletable, 100);
+		for (const chunk of bulkDeletableChunks) {
+			const messageIds = chunk.map((message) => message.id);
+
+			await deleteMessages(bot, interaction.channelId!, messageIds).catch();
+
+			deletedCount += messageIds.length;
+		}
+	}
+
+	for (const message of nonBulkDeletable) {
+		await deleteMessage(bot, interaction.channelId!, message.id).catch(() =>
+			client.log.warn(`Couldn't delete message with ID ${message.id}. Perhaps it's already deleted?`)
+		);
+
+		await new Promise((resolve) => setTimeout(resolve, 400));
+
+		deletedCount += 1;
+	}
+
+	client.log.info(
+		`Purged ${deletedCount}/${messages.length} message(s) in channel ID ${interaction.channelId!} as requested by ${
+			diagnosticMentionUser(interaction.user)
+		}.`,
+	);
+
+	logEvent([client, bot], guild, 'purgeEnd', [member, channel, deletedCount]);
+
+	clearTimeout(responseDeletionTimeoutId);
+
+	if (responseDeleted) return;
+
+	editOriginalInteractionResponse(bot, interaction.token, {
+		embeds: [{
+			title: strings.purged.title,
+			description: strings.purged.description({ 'number': deletedCount, 'channel_mention': channelMention }),
+			color: constants.colors.lightGreen,
+		}],
+	});
+}
+
+function displaySnowflakesInvalidError(
+	[client, bot]: [Client, Bot],
+	interaction: Interaction,
+	[isStartInvalid, isEndInvalid]: [boolean, boolean],
+): void {
+	const strings = {
+		start: {
+			title: localise(client, 'purge.strings.invalid.start.title', interaction.locale)(),
+			description: localise(client, 'purge.strings.invalid.start.description', interaction.locale)(),
+		},
+		end: {
+			title: localise(client, 'purge.strings.invalid.end.title', interaction.locale)(),
+			description: localise(client, 'purge.strings.invalid.end.description', interaction.locale)(),
+		},
+		both: {
+			title: localise(client, 'purge.strings.invalid.both.title', interaction.locale)(),
+			description: localise(client, 'purge.strings.invalid.both.description', interaction.locale)(),
+		},
+	};
+
+	const areBothInvalid = isStartInvalid && isEndInvalid;
+
+	return void editOriginalInteractionResponse(
+		bot,
+		interaction.token,
+		{
+			embeds: [{
+				...areBothInvalid
+					? {
+						title: strings.both.title,
+						description: strings.both.description,
+					}
+					: (
+						isStartInvalid
+							? {
+								title: strings.start.title,
+								description: strings.start.description,
+							}
+							: {
+								title: strings.end.title,
+								description: strings.end.description,
+							}
+					),
+				color: constants.colors.red,
+			}],
+		},
+	);
+}
+
+function displayIdsNotDifferentError([client, bot]: [Client, Bot], interaction: Interaction): void {
+	const strings = {
+		title: localise(client, 'purge.strings.idsNotDifferent.title', interaction.locale)(),
+		description: localise(client, 'purge.strings.idsNotDifferent.description', interaction.locale)(),
+	};
+
+	return void editOriginalInteractionResponse(
+		bot,
+		interaction.token,
+		{
+			embeds: [{
+				title: strings.title,
+				description: strings.description,
+				color: constants.colors.red,
+			}],
+		},
+	);
+}
+
+function displayFailedError([client, bot]: [Client, Bot], interaction: Interaction): void {
+	const strings = {
+		title: localise(client, 'purge.strings.failed.title', interaction.locale)(),
+		description: localise(client, 'purge.strings.failed.description', interaction.locale)(),
+	};
+
+	return void editOriginalInteractionResponse(
+		bot,
+		interaction.token,
+		{
+			embeds: [{
+				title: strings.title,
+				description: strings.description,
+				color: constants.colors.red,
+			}],
+		},
+	);
+}
+
+function getMessageContent(client: Client, message: Message, locale: string | undefined): string | undefined {
+	if (message.content.trim().length === 0 && message.embeds.length !== 0) return undefined;
+
+	const content = trim(message.content, 500).trim();
+	if (content.length === 0) {
+		const strings = {
+			noContent: localise(client, 'purge.strings.noContent', locale)(),
+		};
+
+		return `> *${strings.noContent}*`;
+	}
+
+	return `> ${content}`;
+}
+
+export default command;

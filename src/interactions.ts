@@ -19,7 +19,7 @@ import { lodash } from 'lodash';
 import * as Snowflake from 'snowflake';
 import { addCollector, Client, localise } from 'logos/src/client.ts';
 import constants, { Periods } from 'logos/constants.ts';
-import { defaultLocale } from '../types.ts';
+import { defaultLocale } from 'logos/types.ts';
 
 type AutocompleteInteraction = Interaction & { type: InteractionTypes.ApplicationCommandAutocomplete };
 
