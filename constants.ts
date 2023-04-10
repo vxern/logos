@@ -181,12 +181,25 @@ const symbols = {
 		noCategory: '💭',
 		unknownEmoji: '❓',
 		categories: {
-			proficiency: {
+			language: {
 				category: '🎓',
-				beginner: '🟩',
-				intermediate: '🟦',
-				advanced: '🟥',
-				native: '🟨',
+				proficiency: {
+					category: '🔰',
+					beginner: '🟩',
+					intermediate: '🟦',
+					advanced: '🟥',
+					native: '🟨',
+				},
+				cefr: {
+					category: '🔤',
+					a0: '☁️',
+					a1: '⚡',
+					a2: '✨',
+					b1: '⭐',
+					b2: '🌟',
+					c1: '💫',
+					c2: '🌠',
+				},
 			},
 			personalisation: {
 				category: '🌈',
