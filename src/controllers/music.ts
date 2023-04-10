@@ -387,6 +387,7 @@ function advanceQueueAndPlay([client, bot]: [Client, Bot], guildId: bigint, cont
 
 	if (controller.currentListing === undefined) {
 		setDisconnectTimeout(client, guildId);
+		return;
 	}
 
 	return void loadSong([client, bot], guildId, controller, getCurrentSong(controller)!);
