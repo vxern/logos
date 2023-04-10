@@ -180,9 +180,9 @@ const categories: RoleCategory[] = [
 			type: RoleCollectionTypes.CollectionLocalised,
 			lists: {
 				'Armenian': [
-					{ id: 'roles.ethnicity.languages.armenian.roles.western' },
-					{ id: 'roles.ethnicity.languages.armenian.roles.eastern' },
-					{ id: 'roles.ethnicity.languages.armenian.roles.karabakh' },
+					{ id: 'roles.dialects.languages.armenian.roles.western' },
+					{ id: 'roles.dialects.languages.armenian.roles.eastern' },
+					{ id: 'roles.dialects.languages.armenian.roles.karabakh' },
 				],
 			},
 		},
