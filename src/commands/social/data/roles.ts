@@ -3,28 +3,65 @@ import constants from 'logos/constants.ts';
 
 const categories: RoleCategory[] = [
 	{
-		id: 'roles.proficiency',
-		type: RoleCategoryTypes.Category,
+		id: 'roles.language',
 		color: constants.colors.gray,
-		emoji: constants.symbols.roles.categories.proficiency.category,
-		minimum: 1,
-		maximum: 1,
-		collection: {
-			type: RoleCollectionTypes.Collection,
-			list: [{
-				id: 'roles.proficiency.roles.beginner',
-				emoji: constants.symbols.roles.categories.proficiency.beginner,
-			}, {
-				id: 'roles.proficiency.roles.intermediate',
-				emoji: constants.symbols.roles.categories.proficiency.intermediate,
-			}, {
-				id: 'roles.proficiency.roles.advanced',
-				emoji: constants.symbols.roles.categories.proficiency.advanced,
-			}, {
-				id: 'roles.proficiency.roles.native',
-				emoji: constants.symbols.roles.categories.proficiency.native,
-			}],
-		},
+		emoji: constants.symbols.roles.categories.language.category,
+		type: RoleCategoryTypes.CategoryGroup,
+		categories: [{
+			id: 'roles.language.categories.proficiency',
+			type: RoleCategoryTypes.Category,
+			color: constants.colors.gray,
+			emoji: constants.symbols.roles.categories.language.proficiency.category,
+			minimum: 1,
+			maximum: 1,
+			collection: {
+				type: RoleCollectionTypes.Collection,
+				list: [{
+					id: 'roles.language.categories.proficiency.roles.beginner',
+					emoji: constants.symbols.roles.categories.language.proficiency.beginner,
+				}, {
+					id: 'roles.language.categories.proficiency.roles.intermediate',
+					emoji: constants.symbols.roles.categories.language.proficiency.intermediate,
+				}, {
+					id: 'roles.language.categories.proficiency.roles.advanced',
+					emoji: constants.symbols.roles.categories.language.proficiency.advanced,
+				}, {
+					id: 'roles.language.categories.proficiency.roles.native',
+					emoji: constants.symbols.roles.categories.language.proficiency.native,
+				}],
+			},
+		}, {
+			id: 'roles.language.categories.cefr',
+			type: RoleCategoryTypes.Category,
+			color: constants.colors.blue,
+			emoji: constants.symbols.roles.categories.language.cefr.category,
+			maximum: 1,
+			collection: {
+				type: RoleCollectionTypes.Collection,
+				list: [{
+					id: 'roles.language.categories.cefr.roles.a0',
+					emoji: constants.symbols.roles.categories.language.cefr.a0,
+				}, {
+					id: 'roles.language.categories.cefr.roles.a1',
+					emoji: constants.symbols.roles.categories.language.cefr.a1,
+				}, {
+					id: 'roles.language.categories.cefr.roles.a2',
+					emoji: constants.symbols.roles.categories.language.cefr.a2,
+				}, {
+					id: 'roles.language.categories.cefr.roles.b1',
+					emoji: constants.symbols.roles.categories.language.cefr.b1,
+				}, {
+					id: 'roles.language.categories.cefr.roles.b2',
+					emoji: constants.symbols.roles.categories.language.cefr.b2,
+				}, {
+					id: 'roles.language.categories.cefr.roles.c1',
+					emoji: constants.symbols.roles.categories.language.cefr.c1,
+				}, {
+					id: 'roles.language.categories.cefr.roles.c2',
+					emoji: constants.symbols.roles.categories.language.cefr.c2,
+				}],
+			},
+		}],
 	},
 	{
 		id: 'roles.personalisation',

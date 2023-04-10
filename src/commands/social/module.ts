@@ -5,6 +5,7 @@ import {
 	isStandalone,
 	Role,
 	RoleCategory,
+	RoleCategoryGroup,
 	RoleCategoryTypes,
 	RoleCollection,
 	RoleCollectionTypes,
@@ -22,7 +23,8 @@ type ProficiencyCategory = RoleCategory & {
  * @returns The category with proficiency roles.
  */
 function getProficiencyCategory(): ProficiencyCategory {
-	return roles.find((category) => category.id === 'roles.proficiency')! as ProficiencyCategory;
+	return (roles.find((category) => category.id === 'roles.language')! as RoleCategoryGroup)
+		.categories.find((category) => category.id === 'roles.language.categories.proficiency') as ProficiencyCategory;
 }
 
 function getRelevantCategories(categories: RoleCategory[], language: Language | undefined): [RoleCategory, number][] {

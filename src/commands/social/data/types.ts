@@ -114,4 +114,4 @@ function isLocalised(collection: RoleCollection): collection is RoleCollectionLo
 }
 
 export { isCategory, isCategoryGroup, isLocalised, isStandalone, RoleCategoryTypes, RoleCollectionTypes };
-export type { Role, RoleCategory, RoleCategoryBase, RoleCategoryStandalone, RoleCollection };
+export type { Role, RoleCategory, RoleCategoryBase, RoleCategoryGroup, RoleCategoryStandalone, RoleCollection };
