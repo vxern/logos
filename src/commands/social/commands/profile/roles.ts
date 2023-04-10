@@ -411,10 +411,10 @@ function createSelectOptionsFromCategories(
 		};
 
 		selections.push({
-			label: strings.name,
+			label: `${category.emoji} ${strings.name}`,
 			value: index.toString(),
 			description: trim(strings.description, 100),
-			emoji: { name: category.emoji },
+			emoji: { name: '📁' },
 		});
 	}
 
