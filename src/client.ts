@@ -705,17 +705,21 @@ function addCollector<T extends keyof EventHandlers>(
 	collectors.add(collector);
 }
 
-const userIDPattern = new RegExp(/^([0-9]{17,20})$/);
+const snowflakePattern = new RegExp(/^([0-9]{17,20})$/);
 const userMentionPattern = new RegExp(/^<@!?([0-9]{17,20})>$/);
 
+function isValidSnowflake(snowflake: string): boolean {
+	return snowflakePattern.test(snowflake);
+}
+
 function extractIDFromIdentifier(identifier: string): string | undefined {
-	return userIDPattern.exec(identifier)?.at(1) ?? userMentionPattern.exec(identifier)?.at(1);
+	return snowflakePattern.exec(identifier)?.at(1) ?? userMentionPattern.exec(identifier)?.at(1);
 }
 
 const userTagPattern = new RegExp(/^(.{2,32}#[0-9]{4})$/);
 
 function isValidIdentifier(identifier: string): boolean {
-	return userIDPattern.test(identifier) || userMentionPattern.test(identifier) || userTagPattern.test(identifier);
+	return snowflakePattern.test(identifier) || userMentionPattern.test(identifier) || userTagPattern.test(identifier);
 }
 
 interface MemberNarrowingOptions {
@@ -941,6 +945,7 @@ export {
 	extendEventHandler,
 	initialiseClient,
 	isValidIdentifier,
+	isValidSnowflake,
 	localise,
 	resolveIdentifierToMembers,
 	resolveInteractionToMember,

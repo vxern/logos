@@ -27,6 +27,10 @@ const configuration = {
 	},
 	resultsPerPage: 10,
 	commands: {
+		purge: {
+			maxDeletable: 500,
+			maxFound: 1000,
+		},
 		report: {
 			limitUses: 2,
 			within: 30 * Periods.minute,

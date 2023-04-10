@@ -1,10 +1,10 @@
-import { Member, User } from 'discordeno';
+import { Channel, Member, User } from 'discordeno';
 import { EntryRequest, Praise, Report, Suggestion, Warning } from 'logos/src/database/structs/mod.ts';
 import { MessageGenerators } from 'logos/src/controllers/logging/generators/generators.ts';
 import { localise } from 'logos/src/client.ts';
 import { diagnosticMentionUser } from 'logos/src/utils.ts';
 import constants from 'logos/constants.ts';
-import { codeMultiline, timestamp } from 'logos/formatting.ts';
+import { codeMultiline, mention, MentionTypes, timestamp } from 'logos/formatting.ts';
 import { defaultLocale } from 'logos/types.ts';
 
 /** Type representing events that occur within a guild. */
@@ -38,6 +38,12 @@ type GuildEvents = {
 
 	/** A report has been submitted. */
 	reportSubmit: [author: Member, recipients: User[], report: Report];
+
+	/** A purging of messages has been initiated. */
+	purgeBegin: [member: Member, channel: Channel, messageCount: number, author?: User];
+
+	/** A purging of messages is complete. */
+	purgeEnd: [member: Member, channel: Channel, messageCount: number, author?: User];
 };
 
 /** Contains the message generators for (custom) guild events. */
@@ -194,6 +200,40 @@ ${messageLink}`;
 		},
 		filter: (_, originGuildId, author, __, ___) => originGuildId === author.guildId,
 		color: constants.colors.darkRed,
+	},
+	purgeBegin: {
+		title: `${constants.symbols.events.purging.begin} Purging started`,
+		message: (client, member, channel, messageCount, author) => {
+			const user = client.cache.users.get(member.id);
+			if (user === undefined) return;
+
+			const userMention = diagnosticMentionUser(user);
+			const authorMention = author !== undefined ? diagnosticMentionUser(author) : undefined;
+			const channelMention = mention(channel.id, MentionTypes.Channel);
+
+			return `${userMention} has initiated a purging of ${messageCount} messages${
+				author !== undefined ? `sent by ${authorMention}` : ''
+			} in ${channelMention}$.`;
+		},
+		filter: (_, originGuildId, member, __, ___, ____) => originGuildId === member.guildId,
+		color: constants.colors.yellow,
+	},
+	purgeEnd: {
+		title: `${constants.symbols.events.purging.end} Purging complete`,
+		message: (client, member, channel, messageCount, author) => {
+			const user = client.cache.users.get(member.id);
+			if (user === undefined) return;
+
+			const userMention = diagnosticMentionUser(user);
+			const authorMention = author !== undefined ? diagnosticMentionUser(author) : undefined;
+			const channelMention = mention(channel.id, MentionTypes.Channel);
+
+			return `The purging of ${messageCount} messages${
+				author !== undefined ? `sent by ${authorMention}` : ''
+			} in ${channelMention} initiated by ${userMention} is complete.`;
+		},
+		filter: (_, originGuildId, member, __, ___, ____) => originGuildId === member.guildId,
+		color: constants.colors.lightGreen,
 	},
 };
 
