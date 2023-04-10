@@ -8,6 +8,7 @@ import {
 	deleteMessages,
 	deleteOriginalInteractionResponse,
 	editOriginalInteractionResponse,
+	Embed,
 	getMessage,
 	getMessages,
 	Interaction,
@@ -65,6 +66,13 @@ async function handlePurgeMessagesAutocomplete([client, bot]: [Client, Bot], int
 async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	let [{ start, end, author: user }] = parseArguments(interaction.data?.options, {});
 
+	sendInteractionResponse(bot, interaction.id, interaction.token, {
+		type: InteractionResponseTypes.DeferredChannelMessageWithSource,
+		data: {
+			flags: ApplicationCommandFlags.Ephemeral,
+		},
+	});
+
 	let authorId: bigint | undefined;
 
 	if (user !== undefined) {
@@ -77,13 +85,6 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 	} else {
 		authorId = undefined;
 	}
-
-	sendInteractionResponse(bot, interaction.id, interaction.token, {
-		type: InteractionResponseTypes.DeferredChannelMessageWithSource,
-		data: {
-			flags: ApplicationCommandFlags.Ephemeral,
-		},
-	});
 
 	const isStartValid = isValidSnowflake(start!);
 	const isEndValid = end === undefined || isValidSnowflake(end!);
@@ -103,13 +104,13 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 		return displayIdsNotDifferentError([client, bot], interaction);
 	}
 
-	let [startId, endId] = [snowflakeToBigint(start!), snowflakeToBigint(end!)];
+	let [startMessageId, endMessageId] = [snowflakeToBigint(start!), snowflakeToBigint(end!)];
 
-	if (startId > endId) {
-		[startId, endId] = [endId, startId];
+	if (startMessageId > endMessageId) {
+		[startMessageId, endMessageId] = [endMessageId, startMessageId];
 	}
 
-	const [startTimestamp, endTimestamp] = [snowflakeToTimestamp(startId), snowflakeToTimestamp(endId)];
+	const [startTimestamp, endTimestamp] = [snowflakeToTimestamp(startMessageId), snowflakeToTimestamp(endMessageId)];
 
 	const now = Date.now();
 
@@ -120,8 +121,16 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 	}
 
 	const [startMessage, endMessage] = await Promise.all([
-		getMessage(bot, interaction.channelId!, startId).catch(() => undefined),
-		getMessage(bot, interaction.channelId!, endId).catch(() => undefined),
+		getMessage(bot, interaction.channelId!, startMessageId).catch(() => {
+			client.log.warn(`Failed to get start message, ID ${startMessageId}.`);
+
+			return undefined;
+		}),
+		getMessage(bot, interaction.channelId!, endMessageId).catch(() => {
+			client.log.warn(`Failed to get end message, ID ${endMessageId}.`);
+
+			return undefined;
+		}),
 	]);
 
 	const notExistsStart = startMessage === undefined;
@@ -137,87 +146,58 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 		getMessageContent(client, endMessage, interaction.locale),
 	];
 
-	const strings = {
-		indexing: {
-			title: localise(client, 'purge.strings.indexing.title', interaction.locale)(),
-			description: localise(client, 'purge.strings.indexing.description', interaction.locale)(),
-		},
-		indexed: {
-			title: localise(client, 'purge.strings.indexed.title', interaction.locale)(),
-			description: {
-				some: localise(client, 'purge.strings.indexed.description.some', interaction.locale),
-				none: localise(client, 'purge.strings.indexed.description.none', interaction.locale)(),
-				tryDifferentQuery: localise(
-					client,
-					'purge.strings.indexed.description.tryDifferentQuery',
-					interaction.locale,
-				)(),
-				tooMany: localise(client, 'purge.strings.indexed.description.tooMany', interaction.locale),
-				limited: localise(client, 'purge.strings.indexed.description.limited', interaction.locale),
-			},
-		},
-		start: localise(client, 'purge.strings.start', interaction.locale)(),
-		end: localise(client, 'purge.strings.end', interaction.locale)(),
-		postedStart:
-			(startMessageContent !== undefined
-				? localise(client, 'purge.strings.posted', interaction.locale)
-				: localise(client, 'purge.strings.embedPosted', interaction.locale))({
-					'relative_timestamp': timestamp(startMessage.timestamp),
-					'user_mention': mention(startMessage.authorId, MentionTypes.User),
-				}),
-		postedEnd:
-			(endMessageContent !== undefined
-				? localise(client, 'purge.strings.posted', interaction.locale)
-				: localise(client, 'purge.strings.embedPosted', interaction.locale))({
-					'relative_timestamp': timestamp(endMessage.timestamp),
-					'user_mention': mention(endMessage.authorId, MentionTypes.User),
-				}),
-		messagesFound: localise(client, 'purge.strings.messagesFound', interaction.locale)(),
-		sureToPurge: {
-			title: localise(client, 'purge.strings.sureToPurge.title', interaction.locale)(),
-			description: localise(client, 'purge.strings.sureToPurge.description', interaction.locale),
-		},
-		continue: {
-			title: localise(client, 'purge.strings.continue.title', interaction.locale)(),
-			description: localise(client, 'purge.strings.continue.description', interaction.locale),
-		},
-		yes: localise(client, 'purge.strings.yes', interaction.locale)(),
-		no: localise(client, 'purge.strings.no', interaction.locale)(),
-		purging: {
-			title: localise(client, 'purge.strings.purging.title', interaction.locale)(),
-			description: {
-				purging: localise(client, 'purge.strings.purging.description.purging', interaction.locale),
-				mayTakeTime: localise(client, 'purge.strings.purging.description.mayTakeTime', interaction.locale)(),
-				onceComplete: localise(client, 'purge.strings.purging.description.onceComplete', interaction.locale)(),
-			},
-		},
-		purged: {
-			title: localise(client, 'purge.strings.purged.title', interaction.locale)(),
-			description: localise(client, 'purge.strings.purged.description', interaction.locale),
-		},
-	};
-
 	let messages: Message[] = [];
 
-	const getIndexingProgressResponse = (): InteractionCallbackData => ({
-		embeds: [{
-			title: strings.indexing.title,
-			description: strings.indexing.description,
-			fields: [{
-				name: strings.start,
-				value: startMessageContent !== undefined
-					? `${startMessageContent}\n${strings.postedStart}`
-					: strings.postedStart,
-			}, {
-				name: strings.end,
-				value: endMessageContent !== undefined ? `${endMessageContent}\n${strings.postedEnd}` : strings.postedEnd,
-			}, {
-				name: strings.messagesFound,
-				value: messages.length.toString(),
+	const getMessageFields = (): NonNullable<Embed['fields']> => {
+		const strings = {
+			start: localise(client, 'purge.strings.start', interaction.locale)(),
+			postedStart:
+				(startMessageContent !== undefined
+					? localise(client, 'purge.strings.posted', interaction.locale)
+					: localise(client, 'purge.strings.embedPosted', interaction.locale))({
+						'relative_timestamp': timestamp(startMessage.timestamp),
+						'user_mention': mention(startMessage.authorId, MentionTypes.User),
+					}),
+			end: localise(client, 'purge.strings.end', interaction.locale)(),
+			postedEnd:
+				(endMessageContent !== undefined
+					? localise(client, 'purge.strings.posted', interaction.locale)
+					: localise(client, 'purge.strings.embedPosted', interaction.locale))({
+						'relative_timestamp': timestamp(endMessage.timestamp),
+						'user_mention': mention(endMessage.authorId, MentionTypes.User),
+					}),
+			messagesFound: localise(client, 'purge.strings.messagesFound', interaction.locale)(),
+		};
+
+		return [{
+			name: strings.start,
+			value: startMessageContent !== undefined ? `${startMessageContent}\n${strings.postedStart}` : strings.postedStart,
+		}, {
+			name: strings.end,
+			value: endMessageContent !== undefined ? `${endMessageContent}\n${strings.postedEnd}` : strings.postedEnd,
+		}, {
+			name: strings.messagesFound,
+			value: messages.length.toString(),
+		}];
+	};
+
+	const getIndexingProgressResponse = (): InteractionCallbackData => {
+		const strings = {
+			indexing: {
+				title: localise(client, 'purge.strings.indexing.title', interaction.locale)(),
+				description: localise(client, 'purge.strings.indexing.description', interaction.locale)(),
+			},
+		};
+
+		return {
+			embeds: [{
+				title: strings.indexing.title,
+				description: strings.indexing.description,
+				fields: getMessageFields(),
+				color: constants.colors.peach,
 			}],
-			color: constants.colors.peach,
-		}],
-	});
+		};
+	};
 
 	editOriginalInteractionResponse(bot, interaction.token, getIndexingProgressResponse());
 
@@ -250,15 +230,23 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 			});
 		}
 
-		const buffer = await getMessages(bot, interaction.channelId!, {
+		const newMessages = await getMessages(bot, interaction.channelId!, {
 			after: messages.length === 0 ? startMessage.id : messages.at(-1)!.id,
 			limit: 100,
-		});
+		})
+			.then((collection) => Array.from(collection.values()).toReversed())
+			.catch((reason) => {
+				client.log.warn(`Failed to get messages starting with message with ID ${startMessage.id}: ${reason}`);
 
-		const values = Array.from(buffer.values()).toReversed();
+				return [];
+			});
+		if (newMessages.length === 0) {
+			isFinished = true;
+			continue;
+		}
 
-		const lastMessageInRangeIndex = values.findLastIndex((message) => message.id <= endMessage.id);
-		const messagesInRange = values.slice(0, lastMessageInRangeIndex + 1);
+		const lastMessageInRangeIndex = newMessages.findLastIndex((message) => message.id <= endMessage.id);
+		const messagesInRange = newMessages.slice(0, lastMessageInRangeIndex + 1);
 
 		if (messagesInRange.length === 0) {
 			isFinished = true;
@@ -288,22 +276,25 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 	clearInterval(indexProgressIntervalId);
 
 	if (messages.length === 0) {
+		const strings = {
+			indexed: {
+				title: localise(client, 'purge.strings.indexed.title', interaction.locale)(),
+				description: {
+					none: localise(client, 'purge.strings.indexed.description.none', interaction.locale)(),
+					tryDifferentQuery: localise(
+						client,
+						'purge.strings.indexed.description.tryDifferentQuery',
+						interaction.locale,
+					)(),
+				},
+			},
+		};
+
 		return void editOriginalInteractionResponse(bot, interaction.token, {
 			embeds: [{
 				title: strings.indexed.title,
 				description: `${strings.indexed.description.none}\n\n${strings.indexed.description.tryDifferentQuery}`,
-				fields: [{
-					name: strings.start,
-					value: startMessageContent !== undefined
-						? `${startMessageContent}\n${strings.postedStart}`
-						: strings.postedStart,
-				}, {
-					name: strings.end,
-					value: endMessageContent !== undefined ? `${endMessageContent}\n${strings.postedEnd}` : strings.postedEnd,
-				}, {
-					name: strings.messagesFound,
-					value: messages.length.toString(),
-				}],
+				fields: getMessageFields(),
 				color: constants.colors.husky,
 			}],
 		});
@@ -333,6 +324,22 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 				},
 			});
 
+			const strings = {
+				indexed: {
+					title: localise(client, 'purge.strings.indexed.title', interaction.locale)(),
+					description: {
+						tooMany: localise(client, 'purge.strings.indexed.description.tooMany', interaction.locale),
+						limited: localise(client, 'purge.strings.indexed.description.limited', interaction.locale),
+					},
+				},
+				continue: {
+					title: localise(client, 'purge.strings.continue.title', interaction.locale)(),
+					description: localise(client, 'purge.strings.continue.description', interaction.locale),
+				},
+				yes: localise(client, 'purge.strings.yes', interaction.locale)(),
+				no: localise(client, 'purge.strings.no', interaction.locale)(),
+			};
+
 			editOriginalInteractionResponse(bot, interaction.token, {
 				embeds: [{
 					title: strings.indexed.title,
@@ -346,18 +353,7 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 							'number': configuration.commands.purge.maxDeletable,
 						})
 					}`,
-					fields: [{
-						name: strings.start,
-						value: startMessageContent !== undefined
-							? `${startMessageContent}\n${strings.postedStart}`
-							: strings.postedStart,
-					}, {
-						name: strings.end,
-						value: endMessageContent !== undefined ? `${endMessageContent}\n${strings.postedEnd}` : strings.postedEnd,
-					}, {
-						name: strings.messagesFound,
-						value: messages.length.toString(),
-					}],
+					fields: getMessageFields(),
 					color: constants.colors.yellow,
 				}, {
 					title: strings.continue.title,
@@ -386,7 +382,7 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 		});
 
 		if (!isShouldContinue) {
-			return void deleteOriginalInteractionResponse(bot, interaction.token);
+			return void deleteOriginalInteractionResponse(bot, interaction.token).catch();
 		}
 
 		messages = messages.slice(0, configuration.commands.purge.maxDeletable);
@@ -413,22 +409,26 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 			},
 		});
 
+		const strings = {
+			indexed: {
+				title: localise(client, 'purge.strings.indexed.title', interaction.locale)(),
+				description: {
+					some: localise(client, 'purge.strings.indexed.description.some', interaction.locale),
+				},
+			},
+			sureToPurge: {
+				title: localise(client, 'purge.strings.sureToPurge.title', interaction.locale)(),
+				description: localise(client, 'purge.strings.sureToPurge.description', interaction.locale),
+			},
+			yes: localise(client, 'purge.strings.yes', interaction.locale)(),
+			no: localise(client, 'purge.strings.no', interaction.locale)(),
+		};
+
 		editOriginalInteractionResponse(bot, interaction.token, {
 			embeds: [{
 				title: strings.indexed.title,
 				description: strings.indexed.description.some({ 'number': messages.length }),
-				fields: [{
-					name: strings.start,
-					value: startMessageContent !== undefined
-						? `${startMessageContent}\n${strings.postedStart}`
-						: strings.postedStart,
-				}, {
-					name: strings.end,
-					value: endMessageContent !== undefined ? `${endMessageContent}\n${strings.postedEnd}` : strings.postedEnd,
-				}, {
-					name: strings.messagesFound,
-					value: messages.length.toString(),
-				}],
+				fields: getMessageFields(),
 				color: constants.colors.blue,
 			}, {
 				title: strings.sureToPurge.title,
@@ -456,19 +456,32 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 	});
 
 	if (!isShouldPurge) {
-		return void deleteOriginalInteractionResponse(bot, interaction.token);
+		return void deleteOriginalInteractionResponse(bot, interaction.token).catch();
 	}
 
-	editOriginalInteractionResponse(bot, interaction.token, {
-		embeds: [{
-			title: strings.purging.title,
-			description: `${
-				strings.purging.description.purging({ 'number': messages.length, 'channel_mention': channelMention })
-			} ${strings.purging.description.mayTakeTime}\n\n${strings.purging.description.onceComplete}`,
-			color: constants.colors.blue,
-		}],
-		components: [],
-	});
+	{
+		const strings = {
+			purging: {
+				title: localise(client, 'purge.strings.purging.title', interaction.locale)(),
+				description: {
+					purging: localise(client, 'purge.strings.purging.description.purging', interaction.locale),
+					mayTakeTime: localise(client, 'purge.strings.purging.description.mayTakeTime', interaction.locale)(),
+					onceComplete: localise(client, 'purge.strings.purging.description.onceComplete', interaction.locale)(),
+				},
+			},
+		};
+
+		editOriginalInteractionResponse(bot, interaction.token, {
+			embeds: [{
+				title: strings.purging.title,
+				description: `${
+					strings.purging.description.purging({ 'number': messages.length, 'channel_mention': channelMention })
+				} ${strings.purging.description.mayTakeTime}\n\n${strings.purging.description.onceComplete}`,
+				color: constants.colors.blue,
+			}],
+			components: [],
+		});
+	}
 
 	client.log.info(
 		`Purging ${messages.length} message(s) in channel ID ${interaction.channelId!} as requested by ${
@@ -498,7 +511,7 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 
 	const responseDeletionTimeoutId = setTimeout(() => {
 		responseDeleted = true;
-		deleteOriginalInteractionResponse(bot, interaction.token);
+		deleteOriginalInteractionResponse(bot, interaction.token).catch();
 	}, Periods.minute * 1);
 
 	let deletedCount = 0;
@@ -510,15 +523,21 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 		for (const chunk of bulkDeletableChunks) {
 			const messageIds = chunk.map((message) => message.id);
 
-			await deleteMessages(bot, interaction.channelId!, messageIds).catch();
+			await deleteMessages(bot, interaction.channelId!, messageIds).catch((reason) => {
+				client.log.warn(
+					`Failed to delete ${messageIds.length} message(s) from channel with ID ${interaction.channelId!}: ${reason}`,
+				);
+			});
+
+			await new Promise((resolve) => setTimeout(resolve, 400));
 
 			deletedCount += messageIds.length;
 		}
 	}
 
 	for (const message of nonBulkDeletable) {
-		await deleteMessage(bot, interaction.channelId!, message.id).catch(() =>
-			client.log.warn(`Couldn't delete message with ID ${message.id}. Perhaps it's already deleted?`)
+		await deleteMessage(bot, interaction.channelId!, message.id).catch((reason) =>
+			client.log.warn(`Failed to delete message with ID ${message.id}: ${reason}`)
 		);
 
 		await new Promise((resolve) => setTimeout(resolve, 400));
@@ -538,13 +557,22 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 
 	if (responseDeleted) return;
 
-	editOriginalInteractionResponse(bot, interaction.token, {
-		embeds: [{
-			title: strings.purged.title,
-			description: strings.purged.description({ 'number': deletedCount, 'channel_mention': channelMention }),
-			color: constants.colors.lightGreen,
-		}],
-	});
+	{
+		const strings = {
+			purged: {
+				title: localise(client, 'purge.strings.purged.title', interaction.locale)(),
+				description: localise(client, 'purge.strings.purged.description', interaction.locale),
+			},
+		};
+
+		editOriginalInteractionResponse(bot, interaction.token, {
+			embeds: [{
+				title: strings.purged.title,
+				description: strings.purged.description({ 'number': deletedCount, 'channel_mention': channelMention }),
+				color: constants.colors.lightGreen,
+			}],
+		});
+	}
 }
 
 function displaySnowflakesInvalidError(
