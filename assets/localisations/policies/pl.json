@@ -6,8 +6,8 @@
 	"policies.moderation.points.breach.description": "Reguły serwera obowiązują dla każdego użytkownika, a poważne ich naruszenie zaskutkuje wydaniem ostrzeżenia.",
 	"policies.moderation.points.warnings.title": "Co, jeśli dostanę parę ostrzeżeń?",
 	"policies.moderation.points.warnings.description": "W przypadku gdy użytkownik ma już trzy ostrzeżenia, przy otrzymaniu czwartego ostrzeżenia, użytkownik dostanie timeout. Ostrzeżenia wygasają po upływie __dwóch miesięcy__.",
-	"policies.moderation.points.furtherAction.title": "What happens then?",
-	"policies.moderation.points.furtherAction.description": "Consequently, the server staff will be informed of the limit being passed and, subsequently, will review the circumstances and determine an appropriate course of action.",
-	"policies.moderation.points.ban.title": "What if I don't care?",
-	"policies.moderation.points.ban.description": "In case of it having been found that a user had knowingly and constantly been breaking the server rules and/or ignoring suggestions of the staff, the user will be permanently banned from the server."
+	"policies.moderation.points.furtherAction.title": "A potem?",
+	"policies.moderation.points.furtherAction.description": "Następnie, moderatorzy serwera zostaną poinformowani o tym, że dany limit ostrzeżeń przekroczono, po czym przejrzą oraz zbadają sytuację i zdecydują, co dalej.",
+	"policies.moderation.points.ban.title": "A co jeśli mnie to nie obchodzi?",
+	"policies.moderation.points.ban.description": "Jeśli zostanie stwierdzone, że dany użytkownik świadomie i stale lekceważył reguły serwera i/lub ignorował sugestie moderatorów, użytkownik zostanie trwale usunięty z serwera (permaban)."
 }
