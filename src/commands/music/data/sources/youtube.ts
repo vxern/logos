@@ -60,9 +60,7 @@ async function search(
 				userId: interaction.user.id,
 				limit: 1,
 				onCollect: async (bot, selection) => {
-					sendInteractionResponse(bot, selection.id, selection.token, {
-						type: InteractionResponseTypes.DeferredUpdateMessage,
-					});
+					deleteOriginalInteractionResponse(bot, interaction.token).catch();
 
 					const indexString = selection.data?.values?.at(0) as string | undefined;
 					if (indexString === undefined) return resolve(undefined);
