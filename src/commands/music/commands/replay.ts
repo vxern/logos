@@ -43,67 +43,101 @@ function handleReplayAction([client, bot]: [Client, Bot], interaction: Interacti
 
 	const currentListing = controller.currentListing;
 
-	if (!isOccupied(controller.player) || currentListing === undefined) {
-		const strings = {
-			title: localise(client, 'music.options.replay.strings.noSong.title', interaction.locale)(),
-			description: localise(client, 'music.options.replay.strings.noSong.description', interaction.locale)(),
-		};
+	if (!collection) {
+		if (!isOccupied(controller.player) || currentListing === undefined) {
+			const strings = {
+				title: localise(client, 'music.options.replay.strings.noSong.title', interaction.locale)(),
+				description: localise(client, 'music.options.replay.strings.noSong.description', interaction.locale)(),
+			};
 
-		return void sendInteractionResponse(
-			bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						title: strings.title,
-						description: strings.description,
-						color: constants.colors.dullYellow,
-					}],
+			return void sendInteractionResponse(
+				bot,
+				interaction.id,
+				interaction.token,
+				{
+					type: InteractionResponseTypes.ChannelMessageWithSource,
+					data: {
+						flags: ApplicationCommandFlags.Ephemeral,
+						embeds: [{
+							title: strings.title,
+							description: strings.description,
+							color: constants.colors.dullYellow,
+						}],
+					},
 				},
-			},
-		);
-	}
-
-	if (collection !== undefined && !isCollection(currentListing?.content)) {
-		const strings = {
-			title: localise(
-				client,
-				'music.options.replay.strings.noSongCollection.title',
-				interaction.locale,
-			)(),
-			description: {
-				noSongCollection: localise(
+			);
+		}
+	} else {
+		if (!isOccupied(controller.player) || currentListing === undefined) {
+			const strings = {
+				title: localise(
 					client,
-					'music.options.replay.strings.noSongCollection.description.noSongCollection',
+					'music.options.replay.strings.noSongCollection.title',
 					interaction.locale,
 				)(),
-				trySongInstead: localise(
+				description: {
+					noSongCollection: localise(
+						client,
+						'music.options.replay.strings.noSongCollection.description.noSongCollection',
+						interaction.locale,
+					)(),
+				},
+			};
+
+			return void sendInteractionResponse(
+				bot,
+				interaction.id,
+				interaction.token,
+				{
+					type: InteractionResponseTypes.ChannelMessageWithSource,
+					data: {
+						flags: ApplicationCommandFlags.Ephemeral,
+						embeds: [{
+							title: strings.title,
+							description: strings.description.noSongCollection,
+							color: constants.colors.dullYellow,
+						}],
+					},
+				},
+			);
+		} else if (!isCollection(currentListing.content)) {
+			const strings = {
+				title: localise(
 					client,
-					'music.options.replay.strings.noSongCollection.description.trySongInstead',
+					'music.options.replay.strings.noSongCollection.title',
 					interaction.locale,
 				)(),
-			},
-		};
-
-		return void sendInteractionResponse(
-			bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						title: strings.title,
-						description: `${strings.description.noSongCollection}\n\n${strings.description.trySongInstead}`,
-						color: constants.colors.dullYellow,
-					}],
+				description: {
+					noSongCollection: localise(
+						client,
+						'music.options.replay.strings.noSongCollection.description.noSongCollection',
+						interaction.locale,
+					)(),
+					trySongInstead: localise(
+						client,
+						'music.options.replay.strings.noSongCollection.description.trySongInstead',
+						interaction.locale,
+					)(),
 				},
-			},
-		);
+			};
+
+			return void sendInteractionResponse(
+				bot,
+				interaction.id,
+				interaction.token,
+				{
+					type: InteractionResponseTypes.ChannelMessageWithSource,
+					data: {
+						flags: ApplicationCommandFlags.Ephemeral,
+						embeds: [{
+							title: strings.title,
+							description: `${strings.description.noSongCollection}\n\n${strings.description.trySongInstead}`,
+							color: constants.colors.dullYellow,
+						}],
+					},
+				},
+			);
+		}
 	}
 
 	replay([client, bot], interaction, controller, collection ?? false);
