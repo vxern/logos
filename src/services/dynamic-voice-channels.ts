@@ -94,7 +94,12 @@ function onConnect(
 }
 
 function onDisconnect(bot: Bot, voiceChannelStatesTuples: VoiceChannelStatesTuple[], previousState: VoiceState): void {
-	const [_, states] = voiceChannelStatesTuples.find(([channel, _states]) => channel.id === previousState.channelId!)!;
+	const voiceChannelStatesTuple = voiceChannelStatesTuples.find(
+		([channel, _]) => channel.id === previousState.channelId!,
+	);
+	if (voiceChannelStatesTuple === undefined) return;
+
+	const [_, states] = voiceChannelStatesTuple;
 	// If somebody is still connected to the channel, do not process.
 	if (states.length !== 0) return;
 
