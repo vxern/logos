@@ -40,63 +40,103 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 	);
 	if (!isVoiceStateVerified) return;
 
-	if (!isOccupied(controller.player) || controller.currentListing === undefined) {
-		const strings = {
-			title: localise(client, 'music.options.skip.strings.noSong.title', interaction.locale)(),
-			description: localise(client, 'music.options.skip.strings.noSong.description', interaction.locale)(),
-		};
+	const currentListing = controller.currentListing;
 
-		return void sendInteractionResponse(
-			bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						title: strings.title,
-						description: strings.description,
-						color: constants.colors.dullYellow,
-					}],
+	if (!collection) {
+		if (!isOccupied(controller.player) || currentListing === undefined) {
+			const strings = {
+				title: localise(client, 'music.options.skip.strings.noSong.title', interaction.locale)(),
+				description: localise(client, 'music.options.skip.strings.noSong.description', interaction.locale)(),
+			};
+
+			return void sendInteractionResponse(
+				bot,
+				interaction.id,
+				interaction.token,
+				{
+					type: InteractionResponseTypes.ChannelMessageWithSource,
+					data: {
+						flags: ApplicationCommandFlags.Ephemeral,
+						embeds: [{
+							title: strings.title,
+							description: strings.description,
+							color: constants.colors.dullYellow,
+						}],
+					},
 				},
-			},
-		);
-	}
-
-	if (collection !== undefined && !isCollection(controller.currentListing?.content)) {
-		const strings = {
-			title: localise(client, 'music.options.skip.strings.noSongCollection.title', interaction.locale)(),
-			description: {
-				noSongCollection: localise(
+			);
+		}
+	} else {
+		if (!isOccupied(controller.player) || currentListing === undefined) {
+			const strings = {
+				title: localise(
 					client,
-					'music.options.skip.strings.noSongCollection.description.noSongCollection',
+					'music.options.skip.strings.noSongCollection.title',
 					interaction.locale,
 				)(),
-				trySongInstead: localise(
+				description: {
+					noSongCollection: localise(
+						client,
+						'music.options.skip.strings.noSongCollection.description.noSongCollection',
+						interaction.locale,
+					)(),
+				},
+			};
+
+			return void sendInteractionResponse(
+				bot,
+				interaction.id,
+				interaction.token,
+				{
+					type: InteractionResponseTypes.ChannelMessageWithSource,
+					data: {
+						flags: ApplicationCommandFlags.Ephemeral,
+						embeds: [{
+							title: strings.title,
+							description: strings.description.noSongCollection,
+							color: constants.colors.dullYellow,
+						}],
+					},
+				},
+			);
+		} else if (!isCollection(currentListing.content)) {
+			const strings = {
+				title: localise(
 					client,
-					'music.options.skip.strings.noSongCollection.description.trySongInstead',
+					'music.options.skip.strings.noSongCollection.title',
 					interaction.locale,
 				)(),
-			},
-		};
-
-		return void sendInteractionResponse(
-			bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						title: strings.title,
-						description: `${strings.description.noSongCollection}\n\n${strings.description.trySongInstead}`,
-						color: constants.colors.dullYellow,
-					}],
+				description: {
+					noSongCollection: localise(
+						client,
+						'music.options.skip.strings.noSongCollection.description.noSongCollection',
+						interaction.locale,
+					)(),
+					trySongInstead: localise(
+						client,
+						'music.options.skip.strings.noSongCollection.description.trySongInstead',
+						interaction.locale,
+					)(),
 				},
-			},
-		);
+			};
+
+			return void sendInteractionResponse(
+				bot,
+				interaction.id,
+				interaction.token,
+				{
+					type: InteractionResponseTypes.ChannelMessageWithSource,
+					data: {
+						flags: ApplicationCommandFlags.Ephemeral,
+						embeds: [{
+							title: strings.title,
+							description: `${strings.description.noSongCollection}\n\n${strings.description.trySongInstead}`,
+							color: constants.colors.dullYellow,
+						}],
+					},
+				},
+			);
+		}
 	}
 
 	// If both the 'to' and the 'by' parameter have been supplied.
@@ -153,10 +193,10 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 
 	if (songsToSkip !== undefined) {
 		let listingsToSkip!: number;
-		if (isCollection(controller.currentListing?.content) && collection === undefined) {
+		if (isCollection(currentListing.content) && collection === undefined) {
 			listingsToSkip = Math.min(
 				songsToSkip,
-				controller.currentListing!.content.songs.length - (controller.currentListing!.content.position + 1),
+				currentListing.content.songs.length - (currentListing.content.position + 1),
 			);
 		} else {
 			listingsToSkip = Math.min(songsToSkip, controller.listingQueue.length);
@@ -164,8 +204,8 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 		skip(controller, isSkippingCollection, { by: listingsToSkip });
 	} else if (songToSkipTo !== undefined) {
 		let listingToSkipTo!: number;
-		if (isCollection(controller.currentListing?.content) && collection === undefined) {
-			listingToSkipTo = Math.min(songToSkipTo, controller.currentListing!.content.songs.length);
+		if (isCollection(currentListing.content) && collection === undefined) {
+			listingToSkipTo = Math.min(songToSkipTo, currentListing.content.songs.length);
 		} else {
 			listingToSkipTo = Math.min(songToSkipTo, controller.listingQueue.length);
 		}

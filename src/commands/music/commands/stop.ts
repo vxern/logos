@@ -33,8 +33,8 @@ function handleStopPlayback([client, bot]: [Client, Bot], interaction: Interacti
 	const botVoiceState = getVoiceState(client, interaction.guildId!, bot.id);
 	if (botVoiceState === undefined) {
 		const strings = {
-			title: localise(client, 'music.strings.notPlaying.title', interaction.locale)(),
-			description: localise(client, 'music.strings.notPlaying.description', interaction.locale)(),
+			title: localise(client, 'music.options.stop.strings.notPlaying.title', interaction.locale)(),
+			description: localise(client, 'music.options.stop.strings.notPlaying.description', interaction.locale)(),
 		};
 
 		return void sendInteractionResponse(

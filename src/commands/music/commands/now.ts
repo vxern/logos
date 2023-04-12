@@ -6,7 +6,7 @@ import {
 	InteractionResponseTypes,
 	sendInteractionResponse,
 } from 'discordeno';
-import { Song, SongStream } from 'logos/src/commands/music/data/types.ts';
+import { Song, SongCollection, SongStream } from 'logos/src/commands/music/data/types.ts';
 import { OptionTemplate } from 'logos/src/commands/command.ts';
 import { collection, show } from 'logos/src/commands/parameters.ts';
 import { isCollection, isOccupied } from 'logos/src/controllers/music.ts';
@@ -31,51 +31,46 @@ function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], interaction
 	const controller = client.features.music.controllers.get(interaction.guildId!);
 	if (controller === undefined) return;
 
-	const currentListing = controller.currentListing;
-
-	if (!isOccupied(controller.player) || currentListing === undefined) {
-		const strings = {
-			title: localise(client, 'music.strings.notPlaying.title', interaction.locale)(),
-			description: localise(client, 'music.strings.notPlaying.description', interaction.locale)(),
-		};
-
-		return void sendInteractionResponse(
-			bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						title: strings.title,
-						description: strings.description,
-						color: constants.colors.dullYellow,
-					}],
-				},
-			},
-		);
-	}
-
 	const locale = show ? defaultLocale : interaction.locale;
 
-	if (collection !== undefined) {
-		if (!isCollection(currentListing?.content)) {
+	const currentListing = controller.currentListing;
+
+	if (!collection) {
+		if (!isOccupied(controller.player) || currentListing === undefined) {
+			const strings = {
+				title: localise(client, 'music.options.now.strings.noSong.title', interaction.locale)(),
+				description: localise(client, 'music.options.now.strings.noSong.description', interaction.locale)(),
+			};
+
+			return void sendInteractionResponse(
+				bot,
+				interaction.id,
+				interaction.token,
+				{
+					type: InteractionResponseTypes.ChannelMessageWithSource,
+					data: {
+						flags: ApplicationCommandFlags.Ephemeral,
+						embeds: [{
+							title: strings.title,
+							description: strings.description,
+							color: constants.colors.dullYellow,
+						}],
+					},
+				},
+			);
+		}
+	} else {
+		if (!isOccupied(controller.player) || currentListing === undefined) {
 			const strings = {
 				title: localise(
 					client,
-					'music.options.now.strings.noCollection.title',
+					'music.options.now.strings.noSongCollection.title',
 					interaction.locale,
 				)(),
 				description: {
-					noCollection: localise(
+					noSongCollection: localise(
 						client,
-						'music.options.now.strings.noCollection.description.noCollection',
-						interaction.locale,
-					)(),
-					trySongInstead: localise(
-						client,
-						'music.options.now.strings.noCollection.description.trySongInstead',
+						'music.options.now.strings.noSongCollection.description.noSongCollection',
 						interaction.locale,
 					)(),
 				},
@@ -90,15 +85,55 @@ function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], interaction
 					data: {
 						flags: ApplicationCommandFlags.Ephemeral,
 						embeds: [{
-							description: `${strings.description.noCollection}\n\n${strings.description.trySongInstead}`,
+							title: strings.title,
+							description: strings.description.noSongCollection,
+							color: constants.colors.dullYellow,
+						}],
+					},
+				},
+			);
+		} else if (!isCollection(currentListing.content)) {
+			const strings = {
+				title: localise(
+					client,
+					'music.options.now.strings.noSongCollection.title',
+					interaction.locale,
+				)(),
+				description: {
+					noSongCollection: localise(
+						client,
+						'music.options.now.strings.noSongCollection.description.noSongCollection',
+						interaction.locale,
+					)(),
+					trySongInstead: localise(
+						client,
+						'music.options.now.strings.noSongCollection.description.trySongInstead',
+						interaction.locale,
+					)(),
+				},
+			};
+
+			return void sendInteractionResponse(
+				bot,
+				interaction.id,
+				interaction.token,
+				{
+					type: InteractionResponseTypes.ChannelMessageWithSource,
+					data: {
+						flags: ApplicationCommandFlags.Ephemeral,
+						embeds: [{
+							title: strings.title,
+							description: `${strings.description.noSongCollection}\n\n${strings.description.trySongInstead}`,
 							color: constants.colors.dullYellow,
 						}],
 					},
 				},
 			);
 		}
+	}
 
-		const collection = currentListing.content;
+	if (collection) {
+		const collection = currentListing.content as SongCollection;
 
 		const strings = {
 			nowPlaying: localise(client, 'music.options.now.strings.nowPlaying', locale)(),
