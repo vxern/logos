@@ -1,8 +1,8 @@
 {
 	"roles.selection.title": "Comment choisir les rôles",
-	"roles.selection.description.usingCommand": "You can select roles using the {command} command, which will open a browseable selection menu where you can pick the roles you want.",
-	"roles.selection.description.runAnywhere": "This command can be run anywhere on the server.",
-	"roles.selection.description.pressButton": "Alternatively, you can press the button below to open the role selection menu here.",
+	"roles.selection.description.usingCommand": "Vous pouvez sélectionner les rôles en utilisant la commande {command}, qui ouvrira un nouveau menu de sélection navigable où vous pourrez choisir les rôles que vous voulez.",
+	"roles.selection.description.runAnywhere": "Cette commande peut être exécutée n'importe où sur le serveur.",
+	"roles.selection.description.pressButton": "Vous pouvez également ouvrir le menu de sélection des rôles ici en appuyant sur le bouton ci-dessus.",
 	"roles.selection.description.clickHere": "Click here to select roles",
 	"roles.noCategory.name": "Aucune catégorie sélectionnée",
 	"roles.noCategory.description": "Sélectionnez une catégorie de rôle pour obtenir une liste des rôles disponibles.",
