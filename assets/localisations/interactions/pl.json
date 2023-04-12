@@ -2,8 +2,8 @@
 	"interactions.continuedOnNextPage": "Kontynuacja na następnej stronie...",
 	"interactions.page": "Strona",
 	"interactions.invalidUser.title": "Nieprawidłowy użytkownik",
-	"interactions.invalidUser.description": "The user you specified is not valid.",
+	"interactions.invalidUser.description": "Użytkownik, którego sprecyzowałeś/aś, jest nieprawidłowe.",
 	"interactions.rateLimited.title": "Przekroczono limit żądań",
-	"interactions.rateLimited.description.tooManyUses": "You have used this command too many times ({times}) in too short of a span of time.",
+	"interactions.rateLimited.description.tooManyUses": "Użyłeś/aś tego polecenia zbyt wiele razy ({times}) w zbyt krótkim okresie.",
 	"interactions.rateLimited.description.cannotUseAgainUntil": "Będziesz mógł/mogła ponownie użyć polecenia {relative_timestamp}."
 }
