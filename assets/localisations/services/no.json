@@ -9,8 +9,10 @@
 	"suggestion.suggestion": "Forslag",
 	"submittedBy": "Innsendt av",
 	"submittedAt": "Innsendt på",
-	"markAsResolved": "Marker problem som løst",
-	"markAsUnresolved": "Merk problem som uløst",
-	"alreadyMarkedAsResolved": "Dette problemet er allerede merket som løst.",
-	"alreadyMarkedAsUnresolved": "Dette problemet er allerede merket som uløst."
+	"markResolved": "Mark issue as resolved",
+	"markUnresolved": "Mark issue as unresolved",
+	"alreadyMarkedResolved.title": "Already marked resolved",
+	"alreadyMarkedResolved.description": "This issue has already been marked resolved.",
+	"alreadyMarkedUnresolved.": "Already marked unresolved",
+	"alreadyMarkedUnresolved.description": "This issue has already been marked unresolved."
 }
