@@ -320,7 +320,8 @@ function registerReportHandler(
 
 			if (isResolved && report.data.isResolved) {
 				const strings = {
-					alreadyMarkedAsResolved: localise(client, 'alreadyMarkedAsResolved', defaultLocale)(),
+					title: localise(client, 'alreadyMarkedResolved.title', defaultLocale)(),
+					description: localise(client, 'alreadyMarkedResolved.description', defaultLocale)(),
 				};
 
 				return void sendInteractionResponse(bot, selection.id, selection.token, {
@@ -328,7 +329,8 @@ function registerReportHandler(
 					data: {
 						flags: ApplicationCommandFlags.Ephemeral,
 						embeds: [{
-							description: strings.alreadyMarkedAsResolved,
+							title: strings.title,
+							description: strings.description,
 							color: constants.colors.dullYellow,
 						}],
 					},
@@ -337,7 +339,8 @@ function registerReportHandler(
 
 			if (!isResolved && !report.data.isResolved) {
 				const strings = {
-					alreadyMarkedAsUnresolved: localise(client, 'alreadyMarkedAsUnresolved', defaultLocale)(),
+					title: localise(client, 'alreadyMarkedUnresolved.title', defaultLocale)(),
+					description: localise(client, 'alreadyMarkedUnresolved.description', defaultLocale)(),
 				};
 
 				return void sendInteractionResponse(bot, selection.id, selection.token, {
@@ -345,7 +348,8 @@ function registerReportHandler(
 					data: {
 						flags: ApplicationCommandFlags.Ephemeral,
 						embeds: [{
-							description: strings.alreadyMarkedAsUnresolved,
+							title: strings.title,
+							description: strings.description,
 							color: constants.colors.dullYellow,
 						}],
 					},
@@ -395,8 +399,8 @@ function getReportPrompt(
 		previousInfractions: {
 			title: localise(client, 'reports.previousInfractions', defaultLocale),
 		},
-		markAsResolved: localise(client, 'markAsResolved', defaultLocale)(),
-		markAsUnresolved: localise(client, 'markAsUnresolved', defaultLocale)(),
+		markResolved: localise(client, 'markResolved', defaultLocale)(),
+		markUnresolved: localise(client, 'markUnresolved', defaultLocale)(),
 	};
 
 	return {
@@ -452,7 +456,7 @@ function getReportPrompt(
 					? {
 						type: MessageComponentTypes.Button,
 						style: ButtonStyles.Primary,
-						label: strings.markAsResolved,
+						label: strings.markResolved,
 						customId: encodeId<ReportPromptButtonID>(
 							constants.staticComponentIds.reports,
 							[author.id.toString(), guild.id.toString(), reportReferenceId, `${true}`],
@@ -461,7 +465,7 @@ function getReportPrompt(
 					: {
 						type: MessageComponentTypes.Button,
 						style: ButtonStyles.Secondary,
-						label: strings.markAsUnresolved,
+						label: strings.markUnresolved,
 						customId: encodeId<ReportPromptButtonID>(
 							constants.staticComponentIds.reports,
 							[author.id.toString(), guild.id.toString(), reportReferenceId, `${false}`],
