@@ -35,8 +35,8 @@ function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], interaction
 
 	if (!isOccupied(controller.player) || currentListing === undefined) {
 		const strings = {
-			title: localise(client, 'music.strings.notPlaying.title', interaction.locale)(),
-			description: localise(client, 'music.strings.notPlaying.description', interaction.locale)(),
+			title: localise(client, 'music.options.now.strings.noSong.title', interaction.locale)(),
+			description: localise(client, 'music.options.now.strings.noSong.description', interaction.locale)(),
 		};
 
 		return void sendInteractionResponse(
@@ -90,6 +90,7 @@ function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], interaction
 					data: {
 						flags: ApplicationCommandFlags.Ephemeral,
 						embeds: [{
+							title: strings.title,
 							description: `${strings.description.noCollection}\n\n${strings.description.trySongInstead}`,
 							color: constants.colors.dullYellow,
 						}],
