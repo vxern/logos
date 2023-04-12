@@ -1,5 +1,6 @@
 import { ApplicationCommandTypes } from 'discordeno';
 import history from 'logos/src/commands/music/commands/history.ts';
+import loop from 'logos/src/commands/music/commands/loop.ts';
 import now from 'logos/src/commands/music/commands/now.ts';
 import pause from 'logos/src/commands/music/commands/pause.ts';
 import play from 'logos/src/commands/music/commands/play.ts';
@@ -20,6 +21,7 @@ const music: CommandTemplate = {
 	defaultMemberPermissions: ['VIEW_CHANNEL'],
 	options: [
 		history,
+		loop,
 		now,
 		pause,
 		play,

@@ -127,6 +127,8 @@ const symbols = {
 		file: '📁',
 		collection: '🎶',
 		list: '📋',
+		loopEnabled: '🔁',
+		loopDisabled: '⏸️',
 		paused: '⏸️',
 		queued: '👍',
 		nowPlaying: '⬇️',
