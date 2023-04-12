@@ -9,8 +9,10 @@
 	"suggestion.suggestion": "Suggestion",
 	"submittedBy": "Submitted by",
 	"submittedAt": "Submitted at",
-	"markAsResolved": "Mark issue as resolved",
-	"markAsUnresolved": "Mark issue as unresolved",
-	"alreadyMarkedAsResolved": "This issue has already been marked as resolved.",
-	"alreadyMarkedAsUnresolved": "This issue has already been marked as unresolved."
+	"markResolved": "Mark issue as resolved",
+	"markUnresolved": "Mark issue as unresolved",
+	"alreadyMarkedResolved.title": "Already marked resolved",
+	"alreadyMarkedResolved.description": "This issue has already been marked resolved.",
+	"alreadyMarkedUnresolved.": "Already marked unresolved",
+	"alreadyMarkedUnresolved.description": "This issue has already been marked unresolved."
 }
