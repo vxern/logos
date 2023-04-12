@@ -337,6 +337,8 @@
 	"music.options.replay.strings.noSongCollection.title": "There is no song collection to replay.",
 	"music.options.replay.strings.noSongCollection.description.noSongCollection": "There is no song collection to replay.",
 	"music.options.replay.strings.noSongCollection.description.trySongInstead": "Try replaying the current song instead.",
+	"music.options.replay.strings.replaying.title": "Replaying",
+	"music.options.replay.strings.replaying.description": "The current song will be played again.",
 	"music.options.resume.name": "resume",
 	"music.options.resume.description": "Unpauses the currently playing song if it is paused.",
 	"music.options.resume.strings.noSong.title": "No song to resume",

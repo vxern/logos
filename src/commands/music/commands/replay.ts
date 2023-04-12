@@ -18,6 +18,7 @@ import {
 import { Client, localise } from 'logos/src/client.ts';
 import { parseArguments } from 'logos/src/interactions.ts';
 import constants from 'logos/constants.ts';
+import { defaultLocale } from 'logos/types.ts';
 
 const command: OptionTemplate = {
 	name: 'replay',
@@ -105,7 +106,28 @@ function handleReplayAction([client, bot]: [Client, Bot], interaction: Interacti
 		);
 	}
 
-	return replay([client, bot], interaction, controller, collection ?? false);
+	replay([client, bot], interaction, controller, collection ?? false);
+
+	const strings = {
+		title: localise(client, 'music.options.replay.strings.replaying.title', defaultLocale)(),
+		description: localise(client, 'music.options.replay.strings.replaying.description', defaultLocale)(),
+	};
+
+	return void sendInteractionResponse(
+		bot,
+		interaction.id,
+		interaction.token,
+		{
+			type: InteractionResponseTypes.ChannelMessageWithSource,
+			data: {
+				embeds: [{
+					title: `${constants.symbols.music.replaying} ${strings.title}`,
+					description: strings.description,
+					color: constants.colors.invisible,
+				}],
+			},
+		},
+	);
 }
 
 export default command;
