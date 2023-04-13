@@ -13,6 +13,6 @@
 	"markUnresolved": "Marchează cazul ca nerezolvat",
 	"alreadyMarkedResolved.title": "Deja este marcat ca rezolvat",
 	"alreadyMarkedResolved.description": "Acest caz a fost deja marcat ca rezolvat.",
-	"alreadyMarkedUnresolved.": "Deja este marcat ca nerezolvat",
+	"alreadyMarkedUnresolved.title": "Already marked unresolved",
 	"alreadyMarkedUnresolved.description": "Acest caz a fost deja marcat ca nerezolvat."
 }
