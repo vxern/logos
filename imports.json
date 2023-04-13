@@ -6,6 +6,7 @@
 		"discordeno": "https://deno.land/x/discordeno@18.0.1/mod.ts",
 		"event": "https://deno.land/x/event@2.0.1/mod.ts",
 		"fauna": "https://deno.land/x/fauna@5.0.0-deno-alpha9/mod.ts",
+		"messagepipe": "https://esm.sh/messagepipe@0.2.3",
 		"lavadeno": "https://deno.land/x/lavadeno@3.3.0/mod.ts",
 		"lavalink_types": "https://deno.land/x/lavalink_types@2.0.6/mod.ts",
 		"lodash": "https://deno.land/x/deno_ts_lodash@0.0.1/mod.ts",

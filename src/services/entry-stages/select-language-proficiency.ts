@@ -1,21 +1,11 @@
-import {
-	addRole,
-	ApplicationCommandFlags,
-	Bot,
-	ButtonStyles,
-	Interaction,
-	InteractionResponseTypes,
-	MessageComponentTypes,
-	sendInteractionResponse,
-} from 'discordeno';
-import { localise, Services } from 'logos/assets/localisations/mod.ts';
+import { addRole, Bot, ButtonStyles, Interaction, MessageComponentTypes } from 'discordeno';
 import { getProficiencyCategory } from 'logos/src/commands/social/module.ts';
 import { EntryStepButtonID } from 'logos/src/services/entry.ts';
-import { Client } from 'logos/src/client.ts';
-import { encodeId } from 'logos/src/interactions.ts';
-import { defaultLocale } from 'logos/types.ts';
+import { Client, localise } from 'logos/src/client.ts';
+import { acknowledge, encodeId, reply } from 'logos/src/interactions.ts';
 import configuration from 'logos/configuration.ts';
 import constants from 'logos/constants.ts';
+import { defaultLocale } from 'logos/types.ts';
 
 const proficiencyCategory = getProficiencyCategory();
 const proficiencies = proficiencyCategory.collection.list;
@@ -30,7 +20,13 @@ async function handleSelectLanguageProficiency(
 
 	const proficiency = proficiencies[parseInt(parameter)]!;
 
-	const requestedRole = guild.roles.array().find((role) => role.name === localise(proficiency.name, defaultLocale));
+	const requestedRole = guild.roles.array().find((role) => {
+		const strings = {
+			name: localise(client, `${proficiency.id}.name`, defaultLocale)(),
+		};
+
+		return role.name === strings.name;
+	});
 	if (requestedRole === undefined) return;
 
 	const requiresVerification = !configuration.services.entry.verification.disabledOn.includes(guild.language);
@@ -45,32 +41,46 @@ async function handleSelectLanguageProficiency(
 		const isVerified = !userDocument?.data.account.authorisedOn?.includes(interaction.guildId!.toString());
 
 		if (isVerified) {
-			return void sendInteractionResponse(bot, interaction.id, interaction.token, {
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						description: localise(Services.entry.needsVerification, interaction.locale)(guild.name),
-						color: constants.colors.blue,
-					}],
-					components: [{
-						type: MessageComponentTypes.ActionRow,
-						components: [{
-							type: MessageComponentTypes.Button,
-							style: ButtonStyles.Secondary,
-							label: localise(Services.entry.iUnderstand, interaction.locale),
-							customId: encodeId<EntryStepButtonID>(constants.staticComponentIds.requestedVerification, [
-								requestedRole.id.toString(),
-							]),
-							emoji: { name: constants.symbols.understood },
-						}],
-					}],
+			const strings = {
+				title: localise(client, 'entry.verification.getVerified.title', interaction.locale)(),
+				description: {
+					verificationRequired: localise(
+						client,
+						'entry.verification.getVerified.description.verificationRequired',
+						interaction.locale,
+					)({
+						'server_name': guild.name,
+					}),
+					honestAnswers: localise(
+						client,
+						'entry.verification.getVerified.description.honestAnswers',
+						interaction.locale,
+					)(),
+					understood: localise(client, 'entry.verification.getVerified.description.understood', interaction.locale)(),
 				},
+			};
+
+			return void reply([client, bot], interaction, {
+				embeds: [{
+					title: strings.title,
+					description: `${strings.description.verificationRequired}\n\n${strings.description.honestAnswers}`,
+					color: constants.colors.blue,
+				}],
+				components: [{
+					type: MessageComponentTypes.ActionRow,
+					components: [{
+						type: MessageComponentTypes.Button,
+						style: ButtonStyles.Secondary,
+						label: strings.description.understood,
+						customId: encodeId<EntryStepButtonID>(constants.staticComponentIds.requestedVerification, [
+							requestedRole.id.toString(),
+						]),
+						emoji: { name: constants.symbols.understood },
+					}],
+				}],
 			});
 		} else {
-			sendInteractionResponse(bot, interaction.id, interaction.token, {
-				type: InteractionResponseTypes.DeferredUpdateMessage,
-			});
+			acknowledge([client, bot], interaction);
 		}
 	}
 

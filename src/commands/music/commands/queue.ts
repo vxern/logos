@@ -1,15 +1,14 @@
 import { ApplicationCommandOptionTypes, Bot, Interaction } from 'discordeno';
-import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
 import { displayListings } from 'logos/src/commands/music/module.ts';
-import { OptionBuilder } from 'logos/src/commands/command.ts';
+import { OptionTemplate } from 'logos/src/commands/command.ts';
 import { show } from 'logos/src/commands/parameters.ts';
-import { Client } from 'logos/src/client.ts';
+import { Client, localise } from 'logos/src/client.ts';
 import { parseArguments } from 'logos/src/interactions.ts';
 import constants from 'logos/constants.ts';
 import { defaultLocale } from 'logos/types.ts';
 
-const command: OptionBuilder = {
-	...createLocalisations(Commands.music.options.queue),
+const command: OptionTemplate = {
+	name: 'queue',
 	type: ApplicationCommandOptionTypes.SubCommand,
 	handle: handleDisplayPlaybackQueue,
 	options: [show],
@@ -23,15 +22,14 @@ function handleDisplayPlaybackQueue([client, bot]: [Client, Bot], interaction: I
 
 	const locale = show ? defaultLocale : interaction.locale;
 
-	const queueString = localise(Commands.music.options.queue.strings.queue, locale);
+	const strings = {
+		queue: localise(client, 'music.options.queue.strings.queue', locale)(),
+	};
 
 	return displayListings(
 		[client, bot],
 		interaction,
-		{
-			title: `${constants.symbols.music.list} ${queueString}`,
-			songListings: controller.listingQueue,
-		},
+		{ title: `${constants.symbols.music.list} ${strings.queue}`, songListings: controller.listingQueue },
 		show ?? false,
 		locale,
 	);

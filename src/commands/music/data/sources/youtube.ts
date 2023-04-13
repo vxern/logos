@@ -1,7 +1,6 @@
 import {
 	ApplicationCommandFlags,
 	Bot,
-	deleteOriginalInteractionResponse,
 	Interaction,
 	InteractionResponseTypes,
 	InteractionTypes,
@@ -10,11 +9,10 @@ import {
 	sendInteractionResponse,
 } from 'discordeno';
 import { Channel, Playlist, Video, YouTube } from 'youtube';
-import { Commands, localise } from 'logos/assets/localisations/mod.ts';
 import { ListingResolver } from 'logos/src/commands/music/data/sources/sources.ts';
 import { SongListing, SongListingContentTypes } from 'logos/src/commands/music/data/types.ts';
-import { Client } from 'logos/src/client.ts';
-import { createInteractionCollector } from 'logos/src/interactions.ts';
+import { Client, localise } from 'logos/src/client.ts';
+import { createInteractionCollector, deleteReply, postponeReply } from 'logos/src/interactions.ts';
 import constants from 'logos/constants.ts';
 import { trim } from 'logos/formatting.ts';
 
@@ -28,11 +26,7 @@ const resolver: ListingResolver = async ([client, bot], interaction, query) => {
 		return search([client, bot], interaction, query);
 	}
 
-	sendInteractionResponse(bot, interaction.id, interaction.token, {
-		type: InteractionResponseTypes.DeferredChannelMessageWithSource,
-	});
-
-	deleteOriginalInteractionResponse(bot, interaction.token);
+	postponeReply([client, bot], interaction);
 
 	const url = urlExpressionExecuted.at(0)!;
 	if (url.includes('list=')) {
@@ -61,9 +55,7 @@ async function search(
 				userId: interaction.user.id,
 				limit: 1,
 				onCollect: async (bot, selection) => {
-					sendInteractionResponse(bot, selection.id, selection.token, {
-						type: InteractionResponseTypes.DeferredUpdateMessage,
-					});
+					deleteReply([client, bot], interaction);
 
 					const indexString = selection.data?.values?.at(0) as string | undefined;
 					if (indexString === undefined) return resolve(undefined);
@@ -82,13 +74,18 @@ async function search(
 			},
 		);
 
+		const strings = {
+			title: localise(client, 'music.options.play.strings.selectSong.title', interaction.locale)(),
+			description: localise(client, 'music.options.play.strings.selectSong.description', interaction.locale)(),
+		};
+
 		sendInteractionResponse(bot, interaction.id, interaction.token, {
 			type: InteractionResponseTypes.ChannelMessageWithSource,
 			data: {
 				flags: ApplicationCommandFlags.Ephemeral,
 				embeds: [{
-					title: localise(Commands.music.options.play.strings.selectSong.header, interaction.locale),
-					description: localise(Commands.music.options.play.strings.selectSong.body, interaction.locale),
+					title: strings.title,
+					description: strings.description,
 					color: constants.colors.blue,
 				}],
 				components: [{

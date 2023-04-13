@@ -1,19 +1,15 @@
 import { Dexonline } from 'dexonline';
-import { Commands, localise } from 'logos/assets/localisations/mod.ts';
-import {
-	DictionaryAdapter,
-	DictionaryEntry,
-	DictionaryProvisions,
-	WordClasses,
-} from 'logos/src/commands/language/data/types.ts';
+import { WordClass } from 'logos/src/commands/language/commands/word.ts';
+import { DictionaryAdapter, DictionaryEntry, DictionaryProvisions } from 'logos/src/commands/language/data/types.ts';
 import { getWordClass } from 'logos/src/commands/language/module.ts';
+import { Client, localise } from 'logos/src/client.ts';
 import { chunk } from 'logos/src/utils.ts';
 import constants from 'logos/constants.ts';
 import { Language } from 'logos/types.ts';
 
-const classesWithInflections = [WordClasses.Noun, WordClasses.Verb, WordClasses.Adjective, WordClasses.Determiner];
+const classesWithInflections: WordClass[] = ['noun', 'verb', 'adjective', 'determiner'];
 
-function hasInflections(wordClass: WordClasses): boolean {
+function hasInflections(wordClass: WordClass): boolean {
 	return classesWithInflections.includes(wordClass);
 }
 
@@ -27,9 +23,9 @@ class DexonlineAdapter implements DictionaryAdapter<Dexonline.Results> {
 		return Dexonline.get(word);
 	}
 
-	parse(results: Dexonline.Results, locale: string | undefined): DictionaryEntry[] | undefined {
+	parse(client: Client, results: Dexonline.Results, locale: string | undefined): DictionaryEntry[] | undefined {
 		const entries = results.synthesis.map<DictionaryEntry>((result) => {
-			const wordClass = getWordClass(result.type, 'Romanian');
+			const wordClass = getWordClass(result.type);
 			return {
 				word: result.lemma,
 				title: result.lemma,
@@ -61,7 +57,7 @@ class DexonlineAdapter implements DictionaryAdapter<Dexonline.Results> {
 			const wordClass = entry.wordClass[0]!;
 			if (!hasInflections(wordClass)) continue;
 
-			const inflectionTable = this.tableRowsToFields(wordClass, table, locale);
+			const inflectionTable = this.tableRowsToFields(client, wordClass, table, locale);
 
 			entry.inflectionTable = inflectionTable;
 		}
@@ -69,26 +65,31 @@ class DexonlineAdapter implements DictionaryAdapter<Dexonline.Results> {
 		return entries.length === 0 ? undefined : entries;
 	}
 
-	private tableRowsToFields(wordClass: WordClasses, rows: string[][], locale: string | undefined): InflectionTable {
+	private tableRowsToFields(
+		client: Client,
+		wordClass: WordClass,
+		rows: string[][],
+		locale: string | undefined,
+	): InflectionTable {
 		switch (wordClass) {
-			case WordClasses.Noun: {
-				return this.nounTableRowsToTable(rows, locale);
+			case 'noun': {
+				return this.nounTableRowsToTable(client, rows, locale);
 			}
-			case WordClasses.Verb: {
-				return this.verbTableRowsToTable(rows, locale);
+			case 'verb': {
+				return this.verbTableRowsToTable(client, rows, locale);
 			}
-			case WordClasses.Adjective: {
-				return this.adjectiveTableRowsToTable(rows, locale);
+			case 'adjective': {
+				return this.adjectiveTableRowsToTable(client, rows, locale);
 			}
-			case WordClasses.Determiner: {
-				return this.determinerTableRowsToTable(rows, locale);
+			case 'determiner': {
+				return this.determinerTableRowsToTable(client, rows, locale);
 			}
 		}
 
 		return [];
 	}
 
-	private nounTableRowsToTable(rows: string[][], locale: string | undefined): InflectionTable {
+	private nounTableRowsToTable(client: Client, rows: string[][], locale: string | undefined): InflectionTable {
 		const [nominativeAccusative, genitiveDative, vocative] = chunk(
 			rows
 				.slice(1)
@@ -113,26 +114,32 @@ class DexonlineAdapter implements DictionaryAdapter<Dexonline.Results> {
 			vocative[0] = vocative[0]![0]!.split(' ');
 		}
 
-		const singularString = localise(Commands.word.strings.nouns.singular, locale);
-		const pluralString = localise(Commands.word.strings.nouns.plural, locale);
+		const strings = {
+			title: localise(client, 'word.strings.nouns.cases.cases', locale)(),
+			singular: localise(client, 'word.strings.nouns.singular', locale)(),
+			plural: localise(client, 'word.strings.nouns.plural', locale)(),
+			nominativeAccusative: localise(client, 'word.strings.nouns.cases.nominativeAccusative', locale)(),
+			genitiveDative: localise(client, 'word.strings.nouns.cases.genitiveDative', locale)(),
+			vocative: localise(client, 'word.strings.nouns.cases.vocative', locale)(),
+		};
 
 		const numberColumn = {
 			name: constants.symbols.meta.whitespace,
-			value: `**${singularString}**\n` + `**${pluralString}**`,
+			value: `**${strings.singular}**\n` + `**${strings.plural}**`,
 			inline: true,
 		};
 
 		return [{
-			title: localise(Commands.word.strings.nouns.cases.cases, locale),
+			title: strings.title,
 			fields: [
 				numberColumn,
 				{
-					name: localise(Commands.word.strings.nouns.cases.nominativeAccusative, locale),
+					name: strings.nominativeAccusative,
 					value: nominativeAccusative!.map((terms) => terms.join(', ')).join('\n'),
 					inline: true,
 				},
 				{
-					name: localise(Commands.word.strings.nouns.cases.genitiveDative, locale),
+					name: strings.genitiveDative,
 					value: genitiveDative!.map((terms) => terms.join(', ')).join('\n'),
 					inline: true,
 				},
@@ -141,7 +148,7 @@ class DexonlineAdapter implements DictionaryAdapter<Dexonline.Results> {
 						? [
 							numberColumn,
 							{
-								name: localise(Commands.word.strings.nouns.cases.vocative, locale),
+								name: strings.vocative,
 								value: vocative!.map((terms) => terms.join(', ')).join('\n'),
 								inline: true,
 							},
@@ -152,7 +159,7 @@ class DexonlineAdapter implements DictionaryAdapter<Dexonline.Results> {
 		}];
 	}
 
-	private verbTableRowsToTable(rows: string[][], locale: string | undefined): InflectionTable {
+	private verbTableRowsToTable(client: Client, rows: string[][], locale: string | undefined): InflectionTable {
 		const [infinitive, longInfinitive, pastParticiple, presentParticiple, imperativeSingle, imperativePlural] = rows
 			.slice(2, 3)
 			.map((columns) => columns.slice(2))
@@ -185,12 +192,12 @@ class DexonlineAdapter implements DictionaryAdapter<Dexonline.Results> {
 		const subjunctivePresent = subjunctive!.map((conjugation) => `să ${conjugation}`);
 		const subjunctivePerfect = `să fi ${pastParticiple}`;
 
-		const futureAuxiliaryForms = ['voi', 'vei', 'va', 'vom', 'veți', 'vor'];
-		const presumptiveAuxiliaryForms = ['oi', 'ăi', 'o', 'om', 'ăți', 'or'];
-		const pastAuxiliaryForms = ['am', 'ai', 'a', 'am', 'ați', 'au'];
-		const presentHaveForms = ['am', 'ai', 'are', 'avem', 'aveți', 'au'];
-		const imperfectHaveForms = ['aveam', 'aveai', 'avea', 'aveam', 'aveați', 'aveau'];
-		const conditionalAuxiliaryForms = ['aș', 'ai', 'ar', 'am', 'ați', 'ar'];
+		const futureAuxiliaryForms = ['voi', 'vei', 'va', 'vom', 'veți', 'vor'] as const;
+		const presumptiveAuxiliaryForms = ['oi', 'ăi', 'o', 'om', 'ăți', 'or'] as const;
+		const pastAuxiliaryForms = ['am', 'ai', 'a', 'am', 'ați', 'au'] as const;
+		const presentHaveForms = ['am', 'ai', 'are', 'avem', 'aveți', 'au'] as const;
+		const imperfectHaveForms = ['aveam', 'aveai', 'avea', 'aveam', 'aveați', 'aveau'] as const;
+		const conditionalAuxiliaryForms = ['aș', 'ai', 'ar', 'am', 'ați', 'ar'] as const;
 
 		const presumptivePresent = presumptiveAuxiliaryForms
 			.map((auxiliary) => `${auxiliary} ${infinitive}`);
@@ -214,145 +221,183 @@ class DexonlineAdapter implements DictionaryAdapter<Dexonline.Results> {
 		const conditionalPresent = conditionalAuxiliaryForms.map((auxiliary) => `${auxiliary} ${infinitive}`);
 		const conditionalPerfect = conditionalAuxiliaryForms.map((auxiliary) => `${auxiliary} fi ${pastParticiple}`);
 
+		const strings = {
+			moodsAndParticiples: {
+				title: localise(client, 'word.strings.verbs.moodsAndParticiples', locale)(),
+				infinitive: localise(client, 'word.strings.verbs.moods.infinitive', locale)(),
+				longInfinitive: localise(client, 'word.strings.verbs.moods.longInfinitive', locale)(),
+				imperative: localise(client, 'word.strings.verbs.moods.imperative', locale)(),
+				supine: localise(client, 'word.strings.verbs.moods.supine', locale)(),
+				present: localise(client, 'word.strings.verbs.participles.present', locale)(),
+				past: localise(client, 'word.strings.verbs.participles.past', locale)(),
+			},
+			indicative: {
+				title: localise(client, 'word.strings.verbs.moods.indicative', locale)(),
+				present: localise(client, 'word.strings.verbs.tenses.present', locale)(),
+				preterite: localise(client, 'word.strings.verbs.tenses.preterite', locale)(),
+				imperfect: localise(client, 'word.strings.verbs.tenses.imperfect', locale)(),
+				pluperfect: localise(client, 'word.strings.verbs.tenses.pluperfect', locale)(),
+				perfect: localise(client, 'word.strings.verbs.tenses.perfect', locale)(),
+				futureCertain: localise(client, 'word.strings.verbs.tenses.futureCertain', locale)(),
+				futurePlanned: localise(client, 'word.strings.verbs.tenses.futurePlanned', locale)(),
+				futureDecided: localise(client, 'word.strings.verbs.tenses.futureDecided', locale)(),
+				futureIntended: localise(client, 'word.strings.verbs.tenses.futureIntended', locale)(),
+				popular: localise(client, 'word.strings.verbs.popular', locale)(),
+				futureInThePast: localise(client, 'word.strings.verbs.tenses.futureInThePast', locale)(),
+				futurePerfect: localise(client, 'word.strings.verbs.tenses.futurePerfect', locale)(),
+			},
+			subjunctive: {
+				title: localise(client, 'word.strings.verbs.moods.subjunctive', locale)(),
+				present: localise(client, 'word.strings.verbs.tenses.present', locale)(),
+				perfect: localise(client, 'word.strings.verbs.tenses.perfect', locale)(),
+			},
+			conditional: {
+				title: localise(client, 'word.strings.verbs.moods.conditional', locale)(),
+				present: localise(client, 'word.strings.verbs.tenses.present', locale)(),
+				perfect: localise(client, 'word.strings.verbs.tenses.perfect', locale)(),
+			},
+			presumptive: {
+				title: localise(client, 'word.strings.verbs.moods.presumptive', locale)(),
+				present: localise(client, 'word.strings.verbs.tenses.present', locale)(),
+				presentContinuous: localise(client, 'word.strings.verbs.tenses.presentContinuous', locale)(),
+				perfect: localise(client, 'word.strings.verbs.tenses.perfect', locale)(),
+			},
+		};
+
 		return [
 			{
-				title: localise(Commands.word.strings.verbs.moodsAndParticiples, locale),
+				title: strings.moodsAndParticiples.title,
 				fields: [{
-					name: localise(Commands.word.strings.verbs.moods.infinitive, locale),
+					name: strings.moodsAndParticiples.infinitive,
 					value: `a ${infinitive!}`,
 					inline: true,
 				}, {
-					name: localise(Commands.word.strings.verbs.moods.longInfinitive, locale),
+					name: strings.moodsAndParticiples.longInfinitive,
 					value: longInfinitive!,
 					inline: true,
 				}, {
-					name: localise(Commands.word.strings.verbs.moods.imperative, locale),
+					name: strings.moodsAndParticiples.imperative,
 					value: imperative,
 					inline: true,
 				}, {
-					name: localise(Commands.word.strings.verbs.moods.supine, locale),
+					name: strings.moodsAndParticiples.supine,
 					value: supine,
 					inline: true,
 				}, {
-					name: localise(Commands.word.strings.verbs.participles.present, locale),
+					name: strings.moodsAndParticiples.present,
 					value: presentParticiple!,
 					inline: true,
 				}, {
-					name: localise(Commands.word.strings.verbs.participles.past, locale),
+					name: strings.moodsAndParticiples.past,
 					value: pastParticiple!,
 					inline: true,
 				}],
 			},
 			{
-				title: localise(Commands.word.strings.verbs.moods.indicative, locale),
+				title: strings.indicative.title,
 				fields: [
 					{
-						name: localise(Commands.word.strings.verbs.tenses.present, locale),
+						name: strings.indicative.present,
 						value: present!.join('\n'),
 						inline: true,
 					},
 					{
-						name: localise(Commands.word.strings.verbs.tenses.preterite, locale),
+						name: strings.indicative.preterite,
 						value: simplePerfect!.join('\n'),
 						inline: true,
 					},
 					{
-						name: localise(Commands.word.strings.verbs.tenses.imperfect, locale),
+						name: strings.indicative.imperfect,
 						value: imperfect!.join('\n'),
 						inline: true,
 					},
 					{
-						name: localise(Commands.word.strings.verbs.tenses.pluperfect, locale),
+						name: strings.indicative.pluperfect,
 						value: pluperfect!.join('\n'),
 						inline: true,
 					},
 					{
-						name: localise(Commands.word.strings.verbs.tenses.perfect, locale),
+						name: strings.indicative.perfect,
 						value: indicativePerfect!.join('\n'),
 						inline: true,
 					},
 					{
-						name: localise(Commands.word.strings.verbs.tenses.futureCertain, locale),
+						name: strings.indicative.futureCertain,
 						value: indicativeFutureCertain!.join('\n'),
 						inline: true,
 					},
 					{
-						name: localise(Commands.word.strings.verbs.tenses.futurePlanned, locale),
+						name: strings.indicative.futurePlanned,
 						value: indicativeFuturePlanned!.join('\n'),
 						inline: true,
 					},
 					{
-						name: localise(Commands.word.strings.verbs.tenses.futureDecided, locale),
+						name: strings.indicative.futureDecided,
 						value: indicativeFutureDecided!.join('\n'),
 						inline: true,
 					},
 					{
-						name: (() => {
-							const futureIntendedString = localise(Commands.word.strings.verbs.tenses.futureIntended, locale);
-							const popularString = localise(Commands.word.strings.verbs.popular, locale);
-
-							return `${futureIntendedString} (${popularString})`;
-						})(),
+						name: `${strings.indicative.futureIntended} (${strings.indicative.popular})`,
 						value: indicativeFutureIntended!.join('\n'),
 						inline: true,
 					},
 					{
-						name: localise(Commands.word.strings.verbs.tenses.futureInThePast, locale),
+						name: strings.indicative.futureInThePast,
 						value: indicativeFutureInThePast!.join('\n'),
 						inline: true,
 					},
 					{
-						name: localise(Commands.word.strings.verbs.tenses.futurePerfect, locale),
+						name: strings.indicative.futurePerfect,
 						value: indicativeFuturePerfect!.join('\n'),
 						inline: true,
 					},
 				],
 			},
 			{
-				title: localise(Commands.word.strings.verbs.moods.subjunctive, locale),
+				title: strings.subjunctive.title,
 				fields: [
 					{
-						name: localise(Commands.word.strings.verbs.tenses.present, locale),
+						name: strings.subjunctive.present,
 						value: subjunctivePresent!.join('\n'),
 						inline: true,
 					},
 					{
-						name: localise(Commands.word.strings.verbs.tenses.perfect, locale),
+						name: strings.subjunctive.perfect,
 						value: subjunctivePerfect,
 						inline: true,
 					},
 				],
 			},
 			{
-				title: localise(Commands.word.strings.verbs.moods.conditional, locale),
+				title: strings.conditional.title,
 				fields: [
 					{
-						name: localise(Commands.word.strings.verbs.tenses.present, locale),
+						name: strings.conditional.present,
 						value: conditionalPresent!.join('\n'),
 						inline: true,
 					},
 					{
-						name: localise(Commands.word.strings.verbs.tenses.perfect, locale),
+						name: strings.conditional.perfect,
 						value: conditionalPerfect.join('\n'),
 						inline: true,
 					},
 				],
 			},
 			{
-				title: localise(Commands.word.strings.verbs.moods.presumptive, locale),
+				title: strings.presumptive.title,
 				fields: [
 					{
-						name: localise(Commands.word.strings.verbs.tenses.present, locale),
+						name: strings.presumptive.present,
 						value: presumptivePresent!.join('\n'),
 						inline: true,
 					},
 					{
-						name: localise(Commands.word.strings.verbs.tenses.presentContinuous, locale),
+						name: strings.presumptive.presentContinuous,
 						value: presumptivePresentProgressive.join('\n'),
 						inline: true,
 					},
 					{
-						name: localise(Commands.word.strings.verbs.tenses.perfect, locale),
+						name: strings.presumptive.perfect,
 						value: presumptivePerfect.join('\n'),
 						inline: true,
 					},
@@ -361,7 +406,7 @@ class DexonlineAdapter implements DictionaryAdapter<Dexonline.Results> {
 		];
 	}
 
-	private adjectiveTableRowsToTable(rows: string[][], locale: string | undefined): InflectionTable {
+	private adjectiveTableRowsToTable(client: Client, rows: string[][], locale: string | undefined): InflectionTable {
 		const [nominativeAccusative, genitiveDative] = chunk(
 			rows
 				.slice(2)
@@ -379,26 +424,31 @@ class DexonlineAdapter implements DictionaryAdapter<Dexonline.Results> {
 			2,
 		);
 
-		const singularString = localise(Commands.word.strings.nouns.singular, locale);
-		const pluralString = localise(Commands.word.strings.nouns.plural, locale);
+		const strings = {
+			title: localise(client, 'word.strings.nouns.cases.cases', locale)(),
+			singular: localise(client, 'word.strings.nouns.singular', locale)(),
+			plural: localise(client, 'word.strings.nouns.plural', locale)(),
+			nominativeAccusative: localise(client, 'word.strings.nouns.cases.nominativeAccusative', locale)(),
+			genitiveDative: localise(client, 'word.strings.nouns.cases.genitiveDative', locale)(),
+		};
 
 		const numberColumn = {
 			name: constants.symbols.meta.whitespace,
-			value: `**${singularString}**\n` + `**${pluralString}**`,
+			value: `**${strings.singular}**\n` + `**${strings.plural}**`,
 			inline: true,
 		};
 
 		return [{
-			title: localise(Commands.word.strings.nouns.cases.cases, locale),
+			title: strings.title,
 			fields: [
 				numberColumn,
 				{
-					name: localise(Commands.word.strings.nouns.cases.nominativeAccusative, locale),
+					name: strings.nominativeAccusative,
 					value: nominativeAccusative!.map((terms) => terms.join(', ')).join('\n'),
 					inline: true,
 				},
 				{
-					name: localise(Commands.word.strings.nouns.cases.genitiveDative, locale),
+					name: strings.genitiveDative,
 					value: genitiveDative!.map((terms) => terms.join(', ')).join('\n'),
 					inline: true,
 				},
@@ -406,7 +456,7 @@ class DexonlineAdapter implements DictionaryAdapter<Dexonline.Results> {
 		}];
 	}
 
-	private determinerTableRowsToTable(rows: string[][], locale: string | undefined): InflectionTable {
+	private determinerTableRowsToTable(client: Client, rows: string[][], locale: string | undefined): InflectionTable {
 		const [nominativeAccusative, genitiveDative] = chunk(
 			rows
 				.slice(2)
@@ -425,26 +475,31 @@ class DexonlineAdapter implements DictionaryAdapter<Dexonline.Results> {
 			2,
 		);
 
-		const singularString = localise(Commands.word.strings.nouns.singular, locale);
-		const pluralString = localise(Commands.word.strings.nouns.plural, locale);
+		const strings = {
+			title: localise(client, 'word.strings.nouns.cases.cases', locale)(),
+			singular: localise(client, 'word.strings.nouns.singular', locale)(),
+			plural: localise(client, 'word.strings.nouns.plural', locale)(),
+			nominativeAccusative: localise(client, 'word.strings.nouns.cases.nominativeAccusative', locale)(),
+			genitiveDative: localise(client, 'word.strings.nouns.cases.genitiveDative', locale)(),
+		};
 
 		const numberColumn = {
 			name: constants.symbols.meta.whitespace,
-			value: `**${singularString}**\n` + `**${pluralString}**`,
+			value: `**${strings.singular}**\n` + `**${strings.plural}**`,
 			inline: true,
 		};
 
 		return [{
-			title: localise(Commands.word.strings.nouns.cases.cases, locale),
+			title: strings.title,
 			fields: [
 				numberColumn,
 				{
-					name: localise(Commands.word.strings.nouns.cases.nominativeAccusative, locale),
+					name: strings.nominativeAccusative,
 					value: nominativeAccusative!.map((terms) => terms.join(', ')).join('\n'),
 					inline: true,
 				},
 				{
-					name: localise(Commands.word.strings.nouns.cases.genitiveDative, locale),
+					name: strings.genitiveDative,
 					value: genitiveDative!.map((terms) => terms.join(', ')).join('\n'),
 					inline: true,
 				},

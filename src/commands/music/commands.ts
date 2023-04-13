@@ -1,5 +1,6 @@
-import { Commands, createLocalisations } from 'logos/assets/localisations/mod.ts';
+import { ApplicationCommandTypes } from 'discordeno';
 import history from 'logos/src/commands/music/commands/history.ts';
+import loop from 'logos/src/commands/music/commands/loop.ts';
 import now from 'logos/src/commands/music/commands/now.ts';
 import pause from 'logos/src/commands/music/commands/pause.ts';
 import play from 'logos/src/commands/music/commands/play.ts';
@@ -12,13 +13,15 @@ import skip from 'logos/src/commands/music/commands/skip.ts';
 import stop from 'logos/src/commands/music/commands/stop.ts';
 import unskip from 'logos/src/commands/music/commands/unskip.ts';
 import volume from 'logos/src/commands/music/commands/volume.ts';
-import { CommandBuilder } from 'logos/src/commands/command.ts';
+import { CommandTemplate } from 'logos/src/commands/command.ts';
 
-const music: CommandBuilder = {
-	...createLocalisations(Commands.music),
+const music: CommandTemplate = {
+	name: 'music',
+	type: ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ['VIEW_CHANNEL'],
 	options: [
 		history,
+		loop,
 		now,
 		pause,
 		play,
@@ -26,7 +29,7 @@ const music: CommandBuilder = {
 		remove,
 		replay,
 		resume,
-    skipTo,
+		skipTo,
 		skip,
 		stop,
 		unskip,

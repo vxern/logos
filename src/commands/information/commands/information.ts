@@ -1,18 +1,18 @@
-import { ApplicationCommandOptionTypes } from 'discordeno';
-import { Commands, createLocalisations } from 'logos/assets/localisations/mod.ts';
+import { ApplicationCommandOptionTypes, ApplicationCommandTypes } from 'discordeno';
 import { handleDisplayBotInformation } from 'logos/src/commands/information/commands/information/bot.ts';
 import { handleDisplayGuildInformation } from 'logos/src/commands/information/commands/information/guild.ts';
-import { CommandBuilder } from 'logos/src/commands/command.ts';
+import { CommandTemplate } from 'logos/src/commands/command.ts';
 
-const command: CommandBuilder = {
-	...createLocalisations(Commands.information),
+const command: CommandTemplate = {
+	name: 'information',
+	type: ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ['VIEW_CHANNEL'],
 	options: [{
-		...createLocalisations(Commands.information.options.bot),
+		name: 'bot',
 		type: ApplicationCommandOptionTypes.SubCommand,
 		handle: handleDisplayBotInformation,
 	}, {
-		...createLocalisations(Commands.information.options.guild),
+		name: 'server',
 		type: ApplicationCommandOptionTypes.SubCommand,
 		handle: handleDisplayGuildInformation,
 	}],

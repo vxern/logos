@@ -1,17 +1,8 @@
-import {
-	ApplicationCommandFlags,
-	Bot,
-	calculatePermissions,
-	Embed,
-	Interaction,
-	InteractionResponseTypes,
-	sendInteractionResponse,
-} from 'discordeno';
-import { Commands, localise } from 'logos/assets/localisations/mod.ts';
+import { Bot, calculatePermissions, Embed, Interaction } from 'discordeno';
 import { Warning } from 'logos/src/database/structs/mod.ts';
 import { Document } from 'logos/src/database/document.ts';
-import { autocompleteMembers, Client, resolveInteractionToMember } from 'logos/src/client.ts';
-import { parseArguments } from 'logos/src/interactions.ts';
+import { autocompleteMembers, Client, localise, resolveInteractionToMember } from 'logos/src/client.ts';
+import { parseArguments, reply } from 'logos/src/interactions.ts';
 import constants from 'logos/constants.ts';
 import { timestamp } from 'logos/formatting.ts';
 
@@ -53,57 +44,76 @@ async function handleDisplayWarnings([client, bot]: [Client, Bot], interaction: 
 		member.id.toString(),
 		member.id,
 	);
-	if (recipient === undefined) return displayError(bot, interaction);
+	if (recipient === undefined) return displayError([client, bot], interaction);
 
 	const warnings = await client.database.adapters.warnings.getOrFetch(client, 'recipient', recipient.ref)
 		.then((warnings) => warnings !== undefined ? Array.from(warnings.values()) : undefined);
-	if (warnings === undefined) return displayError(bot, interaction);
+	if (warnings === undefined) return displayError([client, bot], interaction);
 
-	return void sendInteractionResponse(bot, interaction.id, interaction.token, {
-		type: InteractionResponseTypes.ChannelMessageWithSource,
-		data: {
-			flags: ApplicationCommandFlags.Ephemeral,
-			embeds: [getWarningPage(warnings, isSelf, interaction.locale)],
-		},
+	return void reply([client, bot], interaction, {
+		embeds: [getWarningPage(client, warnings, isSelf, interaction.locale)],
 	});
 }
 
-function displayError(bot: Bot, interaction: Interaction): void {
-	return void sendInteractionResponse(
-		bot,
-		interaction.id,
-		interaction.token,
-		{
-			type: InteractionResponseTypes.ChannelMessageWithSource,
-			data: {
-				flags: ApplicationCommandFlags.Ephemeral,
-				embeds: [{
-					description: localise(Commands.list.strings.unableToDisplayWarnings, interaction.locale),
-					color: constants.colors.red,
-				}],
-			},
-		},
-	);
+function displayError([client, bot]: [Client, Bot], interaction: Interaction): void {
+	const strings = {
+		title: localise(client, 'list.options.warnings.strings.failed.title', interaction.locale)(),
+		description: localise(client, 'list.options.warnings.strings.failed.description', interaction.locale)(),
+	};
+
+	return void reply([client, bot], interaction, {
+		embeds: [{
+			title: strings.title,
+			description: strings.description,
+			color: constants.colors.red,
+		}],
+	});
 }
 
-function getWarningPage(warnings: Document<Warning>[], isSelf: boolean, locale: string | undefined): Embed {
+function getWarningPage(
+	client: Client,
+	warnings: Document<Warning>[],
+	isSelf: boolean,
+	locale: string | undefined,
+): Embed {
 	if (warnings.length === 0) {
 		if (isSelf) {
+			const strings = {
+				title: localise(client, 'list.options.warnings.strings.noActiveWarnings.title', locale)(),
+				description: localise(client, 'list.options.warnings.strings.noActiveWarnings.description.self', locale)(),
+			};
+
 			return {
-				description: localise(Commands.list.strings.hasNoActiveWarningsDirect, locale),
+				title: strings.title,
+				description: strings.description,
+				color: constants.colors.blue,
+			};
+		} else {
+			const strings = {
+				title: localise(client, 'list.options.warnings.strings.noActiveWarnings.title', locale)(),
+				description: localise(client, 'list.options.warnings.strings.noActiveWarnings.description.other', locale)(),
+			};
+
+			return {
+				title: strings.title,
+				description: strings.description,
 				color: constants.colors.blue,
 			};
 		}
-
-		return { description: localise(Commands.list.strings.hasNoActiveWarnings, locale), color: constants.colors.blue };
 	}
 
-	const formatWarningString = localise(Commands.list.strings.warning, locale);
+	const strings = {
+		title: localise(client, 'list.options.warnings.strings.warnings.title', locale)(),
+		warning: localise(client, 'list.options.warnings.strings.warnings.description.warning', locale),
+	};
 
 	return {
-		title: localise(Commands.list.strings.warnings, locale),
+		title: strings.title,
 		fields: warnings.map((warning, index) => {
-			const warningString = formatWarningString(index + 1, timestamp(warning.data.createdAt));
+			const warningString = strings.warning({
+				'index': index + 1,
+				'relative_timestamp': timestamp(warning.data.createdAt),
+			});
 
 			return { name: warningString, value: `*${warning.data.reason}*` };
 		}),

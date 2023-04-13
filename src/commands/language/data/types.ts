@@ -1,5 +1,7 @@
 import { DiscordEmbedField } from 'discordeno';
-import { Language, WordClasses } from 'logos/types.ts';
+import { WordClass } from 'logos/src/commands/language/commands/word.ts';
+import { Client } from 'logos/src/client.ts';
+import { Language } from 'logos/types.ts';
 
 enum DictionaryScopes {
 	/** Provides definitions in the same language as the headword. */
@@ -49,7 +51,7 @@ interface DictionaryEntry {
 	title?: string;
 
 	/** The word class of the topic word. */
-	wordClass?: [wordClass: WordClasses, wordClassUnresolved: string];
+	wordClass?: [wordClass: WordClass, wordClassUnresolved: string];
 
 	/** The definitions for the topic word. */
 	definitions?: Definition[];
@@ -69,7 +71,7 @@ abstract class DictionaryAdapter<T> {
 	abstract readonly provides: DictionaryProvisions[];
 
 	abstract readonly query: (word: string, language: Language) => Promise<T | undefined>;
-	abstract readonly parse: (contents: T, locale: string | undefined) => DictionaryEntry[] | undefined;
+	abstract readonly parse: (client: Client, contents: T, locale: string | undefined) => DictionaryEntry[] | undefined;
 }
 
 /** Represents a pair of a sentence and its translation. */
@@ -81,5 +83,5 @@ interface SentencePair {
 	translation: string;
 }
 
-export { DictionaryAdapter, DictionaryProvisions, DictionaryScopes, WordClasses };
+export { DictionaryAdapter, DictionaryProvisions, DictionaryScopes };
 export type { Definition, DictionaryEntry, Expression, SentencePair, TaggedValue };

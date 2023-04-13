@@ -1,13 +1,8 @@
-import { Localisations } from 'logos/assets/localisations/mod.ts';
 import { Language } from 'logos/types.ts';
 
 /** Represents a selectable role within a role selection menu.  */
 interface Role {
-	/** Role name corresponding to the guild role name. */
-	name: Localisations<string>;
-
-	/** Description of this role's purpose. */
-	description?: Localisations<string>;
+	id: string;
 
 	/** Emoji to be displayed next to the role name. */
 	emoji?: string;
@@ -31,11 +26,8 @@ type RoleCategoryBase = {
 	/** The type of this category. */
 	type: RoleCategoryTypes;
 
-	/** The display name of this category. */
-	name: Localisations<string>;
-
-	/** A description for what roles or role categories this role category contains. */
-	description: Localisations<string>;
+	/** This category's identifier. */
+	id?: string;
 
 	/** The colour to be displayed in the embed message when this category is selected. */
 	color: number;
@@ -122,4 +114,4 @@ function isLocalised(collection: RoleCollection): collection is RoleCollectionLo
 }
 
 export { isCategory, isCategoryGroup, isLocalised, isStandalone, RoleCategoryTypes, RoleCollectionTypes };
-export type { Role, RoleCategory, RoleCategoryBase, RoleCategoryStandalone, RoleCollection };
+export type { Role, RoleCategory, RoleCategoryBase, RoleCategoryGroup, RoleCategoryStandalone, RoleCollection };

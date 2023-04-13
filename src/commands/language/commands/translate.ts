@@ -1,49 +1,76 @@
-import {
-	ApplicationCommandFlags,
-	ApplicationCommandOptionTypes,
-	Bot,
-	editOriginalInteractionResponse,
-	Embed,
-	Interaction,
-	InteractionResponseTypes,
-	sendInteractionResponse,
-} from 'discordeno';
-import {
-	Commands,
-	createLocalisations,
-	getLocalisationsForLanguage,
-	localise,
-} from 'logos/assets/localisations/mod.ts';
+import { ApplicationCommandOptionTypes, ApplicationCommandTypes, Bot, Embed, Interaction } from 'discordeno';
 import { resolveToSupportedLanguage } from 'logos/src/commands/language/module.ts';
-import { CommandBuilder } from 'logos/src/commands/command.ts';
+import { CommandTemplate } from 'logos/src/commands/command.ts';
 import { show } from 'logos/src/commands/parameters.ts';
-import { Client } from 'logos/src/client.ts';
-import { parseArguments } from 'logos/src/interactions.ts';
+import { Client, localise } from 'logos/src/client.ts';
+import { editReply, parseArguments, postponeReply, reply, respond } from 'logos/src/interactions.ts';
 import { addParametersToURL, diagnosticMentionUser } from 'logos/src/utils.ts';
 import constants from 'logos/constants.ts';
+import { defaultLocale } from 'logos/types.ts';
 
-const command: CommandBuilder = {
-	...createLocalisations(Commands.translate),
-	isRateLimited: true,
+const command: CommandTemplate = {
+	name: 'translate',
+	type: ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ['VIEW_CHANNEL'],
+	isRateLimited: true,
 	handle: handleTranslateText,
 	handleAutocomplete: handleTranslateTextAutocomplete,
 	options: [{
-		...createLocalisations(Commands.translate.options.from),
+		name: 'from',
 		type: ApplicationCommandOptionTypes.String,
 		required: true,
 		autocomplete: true,
 	}, {
-		...createLocalisations(Commands.translate.options.to),
+		name: 'to',
 		type: ApplicationCommandOptionTypes.String,
 		required: true,
 		autocomplete: true,
 	}, {
-		...createLocalisations(Commands.translate.options.text),
+		name: 'text',
 		type: ApplicationCommandOptionTypes.String,
 		required: true,
 	}, show],
 };
+
+const languageNameToStringKey: Record<string, string> = Object.freeze({
+	'Armenian': 'languages.armenian',
+	'Belarusian': 'languages.belarusian',
+	'Bulgarian': 'languages.bulgarian',
+	'Chinese': 'languages.chinese',
+	'Chinese (simplified)': 'languages.chinese.simplified',
+	'Czech': 'languages.czech',
+	'Danish': 'languages.danish',
+	'Dutch': 'languages.dutch',
+	'English': 'languages.english',
+	'English (American)': 'languages.english.american',
+	'English (British)': 'languages.english.british',
+	'Estonian': 'languages.estonian',
+	'Finnish': 'languages.finnish',
+	'French': 'languages.french',
+	'German': 'languages.german',
+	'Greek': 'languages.greek',
+	'Hungarian': 'languages.hungarian',
+	'Indonesian': 'languages.indonesian',
+	'Italian': 'languages.italian',
+	'Japanese': 'languages.japanese',
+	'Korean': 'languages.korean',
+	'Latvian': 'languages.latvian',
+	'Lithuanian': 'languages.lithuanian',
+	'Norwegian': 'languages.norwegian',
+	'Norwegian (Bokmål)': 'languages.norwegian.bokmal',
+	'Polish': 'languages.polish',
+	'Portuguese': 'languages.portuguese',
+	'Portuguese (Brazilian)': 'languages.portuguese.brazilian',
+	'Portuguese (European)': 'languages.portuguese.european',
+	'Romanian': 'languages.romanian',
+	'Russian': 'languages.russian',
+	'Slovak': 'languages.slovak',
+	'Slovenian': 'languages.slovenian',
+	'Spanish': 'languages.spanish',
+	'Swedish': 'languages.swedish',
+	'Turkish': 'languages.turkish',
+	'Ukrainian': 'languages.ukrainian',
+});
 
 async function handleTranslateTextAutocomplete([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const [_, focused] = parseArguments(interaction.data?.options, { show: 'boolean' });
@@ -53,31 +80,33 @@ async function handleTranslateTextAutocomplete([client, bot]: [Client, Bot], int
 
 	if (focused === undefined || focused.value === undefined) return;
 
-	const isInputtingSourceLanguage = focused.name === 'from';
-	const localisations = isInputtingSourceLanguage
-		? Commands.translate.strings.sourceLanguage
-		: Commands.translate.strings.targetLanguage;
-
 	const inputLowercase = (focused.value as string).toLowerCase();
 
 	const choices = client.metadata.supportedTranslationLanguages
-		.map((language) => ({
-			name: localise(localisations, interaction.locale)(language.name),
-			value: language.code,
-		}))
+		.map((language) => {
+			const languageStringKey = languageNameToStringKey[language.name];
+
+			if (languageStringKey === undefined) {
+				return {
+					name: language.name,
+					value: language.code,
+				};
+			}
+
+			const strings = {
+				language: localise(client, languageStringKey, interaction.locale)(),
+			};
+
+			return {
+				name: strings.language,
+				value: language.code,
+			};
+		})
 		.filter((choice) => choice.name && choice.name.toLowerCase().includes(inputLowercase))
 		.slice(0, 25)
 		.toSorted((previous, next) => previous.name.localeCompare(next.name));
 
-	return void sendInteractionResponse(
-		bot,
-		interaction.id,
-		interaction.token,
-		{
-			type: InteractionResponseTypes.ApplicationCommandAutocompleteResult,
-			data: { choices },
-		},
-	);
+	return respond([client, bot], interaction, choices);
 }
 
 /** Allows the user to translate text from one language to another through the DeepL API. */
@@ -85,98 +114,108 @@ async function handleTranslateText([client, bot]: [Client, Bot], interaction: In
 	const [{ from, to, text, show }] = parseArguments(interaction.data?.options, { show: 'boolean' });
 	if (from === undefined || to === undefined || text === undefined) return;
 
-	if (from === to) {
-		return void sendInteractionResponse(
-			bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						description: localise(
-							Commands.translate.strings.targetLanguageMustBeDifferentFromSource,
-							interaction.locale,
-						),
-						color: constants.colors.dullYellow,
-					}],
-				},
+	const sourceLanguage = resolveToSupportedLanguage(client, from);
+	const targetLanguage = resolveToSupportedLanguage(client, to);
+	const isSourceLanguageInvalid = sourceLanguage === undefined;
+	const isTargetLanguageInvalid = targetLanguage === undefined;
+	if (isSourceLanguageInvalid || isTargetLanguageInvalid) {
+		const strings = {
+			source: {
+				title: localise(client, 'translate.strings.invalid.source.title', interaction.locale)(),
+				description: localise(client, 'translate.strings.invalid.source.description', interaction.locale)(),
 			},
-		);
+			target: {
+				title: localise(client, 'translate.strings.invalid.target.title', interaction.locale)(),
+				description: localise(client, 'translate.strings.invalid.target.description', interaction.locale)(),
+			},
+			both: {
+				title: localise(client, 'translate.strings.invalid.both.title', interaction.locale)(),
+				description: localise(client, 'translate.strings.invalid.both.description', interaction.locale)(),
+			},
+		};
+
+		const areBothLanguagesInvalid = isSourceLanguageInvalid && isTargetLanguageInvalid;
+
+		return void reply([client, bot], interaction, {
+			embeds: [{
+				...areBothLanguagesInvalid
+					? {
+						title: strings.both.title,
+						description: strings.both.description,
+					}
+					: (
+						isSourceLanguageInvalid
+							? {
+								title: strings.source.title,
+								description: strings.source.description,
+							}
+							: {
+								title: strings.target.title,
+								description: strings.target.description,
+							}
+					),
+				color: constants.colors.red,
+			}],
+		});
 	}
 
 	const isSourceTextEmpty = text.trim().length === 0;
 	if (isSourceTextEmpty) {
-		return void sendInteractionResponse(
-			bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						description: localise(Commands.translate.strings.textCannotBeEmpty, interaction.locale),
-						color: constants.colors.dullYellow,
-					}],
-				},
-			},
-		);
+		const strings = {
+			title: localise(client, 'translate.strings.textEmpty.title', interaction.locale)(),
+			description: localise(client, 'translate.strings.textEmpty.description', interaction.locale)(),
+		};
+
+		return void reply([client, bot], interaction, {
+			embeds: [{
+				title: strings.title,
+				description: strings.description,
+				color: constants.colors.dullYellow,
+			}],
+		});
 	}
 
-	const sourceLanguage = resolveToSupportedLanguage(client, from);
-	const targetLanguage = resolveToSupportedLanguage(client, to);
-	if (sourceLanguage === undefined || targetLanguage === undefined) {
-		return void sendInteractionResponse(
-			bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						description: sourceLanguage === undefined
-							? (
-								targetLanguage === undefined
-									? localise(Commands.translate.strings.invalid.both, interaction.locale)
-									: localise(Commands.translate.strings.invalid.source, interaction.locale)
-							)
-							: localise(Commands.translate.strings.invalid.target, interaction.locale),
-						color: constants.colors.red,
-					}],
-				},
-			},
-		);
+	if (from === to) {
+		const strings = {
+			title: localise(client, 'translate.strings.languagesNotDifferent.title', interaction.locale)(),
+			description: localise(client, 'translate.strings.languagesNotDifferent.description', interaction.locale)(),
+		};
+
+		return void reply([client, bot], interaction, {
+			embeds: [{
+				title: strings.title,
+				description: strings.description,
+				color: constants.colors.dullYellow,
+			}],
+		});
 	}
 
-	await sendInteractionResponse(
-		bot,
-		interaction.id,
-		interaction.token,
-		{
-			type: InteractionResponseTypes.DeferredChannelMessageWithSource,
-			data: { flags: !show ? ApplicationCommandFlags.Ephemeral : undefined },
-		},
-	);
+	await postponeReply([client, bot], interaction, { visible: show });
 
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (guild === undefined) return;
 
 	client.log.info(
 		`Translating a text of length ${text.length} from ${sourceLanguage.name} to ${targetLanguage.name} ` +
-			`as requested by ${diagnosticMentionUser(interaction.user, true)} on ${guild.name}...`,
+			`as requested by ${diagnosticMentionUser(interaction.user)} on ${guild.name}...`,
 	);
+
+	const locale = show ? defaultLocale : interaction.locale;
 
 	const translation = await translate(sourceLanguage.code, targetLanguage.code, text);
 	if (translation === undefined) {
-		return void editOriginalInteractionResponse(
-			bot,
-			interaction.token,
+		const strings = {
+			title: localise(client, 'translate.strings.failed.title', locale)(),
+			description: localise(client, 'translate.strings.failed.description', locale)(),
+		};
+
+		return void editReply(
+			[client, bot],
+			interaction,
 			{
 				embeds: [{
-					description: localise(Commands.translate.strings.failed, interaction.locale),
+					title: strings.title,
+					description: strings.description,
 					color: constants.colors.red,
 				}],
 			},
@@ -186,44 +225,54 @@ async function handleTranslateText([client, bot]: [Client, Bot], interaction: In
 	// Ensures that an empty translation string does not result in embed failure.
 	const translatedText = translation.text.trim().length !== 0 ? translation.text : constants.symbols.meta.whitespace;
 
-	const sourceLanguageName = localise(getLocalisationsForLanguage(sourceLanguage.name), interaction.locale);
-	const targetLanguageName = localise(getLocalisationsForLanguage(targetLanguage.name), interaction.locale);
+	const sourceLanguageKey = languageNameToStringKey[sourceLanguage.name];
+	const targetLanguageKey = languageNameToStringKey[targetLanguage.name];
+
+	const strings = {
+		sourceLanguageName: sourceLanguageKey !== undefined
+			? localise(client, sourceLanguageKey, locale)()
+			: sourceLanguage.name,
+		targetLanguageName: targetLanguageKey !== undefined
+			? localise(client, targetLanguageKey, locale)()
+			: targetLanguage.name,
+		sourceText: localise(client, 'translate.strings.sourceText', locale)(),
+		translation: localise(client, 'translate.strings.translation', locale)(),
+	};
 
 	const isLong = text.length > 896; // 7/8 of 1024. Leaves room for text overhead.
+
+	const translationIndicator =
+		`${strings.sourceLanguageName} ${constants.symbols.indicators.arrowRight} ${strings.targetLanguageName}`;
 
 	let embeds: Embed[] = [];
 	if (!isLong) {
 		embeds = [{
 			color: constants.colors.blue,
 			fields: [{
-				name: localise(Commands.translate.strings.sourceText, interaction.locale),
+				name: strings.sourceText,
 				value: text,
 				inline: false,
 			}, {
-				name: localise(Commands.translate.strings.translation, interaction.locale),
+				name: strings.translation,
 				value: translatedText,
 				inline: false,
 			}],
-			footer: { text: `${sourceLanguageName} ${constants.symbols.indicators.arrowRight} ${targetLanguageName}` },
+			footer: { text: translationIndicator },
 		}];
 	} else {
 		embeds = [{
 			color: constants.colors.blue,
-			title: localise(Commands.translate.strings.sourceText, interaction.locale),
+			title: strings.sourceText,
 			description: text,
 		}, {
 			color: constants.colors.blue,
-			title: localise(Commands.translate.strings.translation, interaction.locale),
+			title: strings.translation,
 			description: translatedText,
-			footer: { text: `${sourceLanguageName} ${constants.symbols.indicators.arrowRight} ${targetLanguageName}` },
+			footer: { text: translationIndicator },
 		}];
 	}
 
-	return void editOriginalInteractionResponse(
-		bot,
-		interaction.token,
-		{ embeds },
-	);
+	return void editReply([client, bot], interaction, { embeds });
 }
 
 interface DeepLTranslation {

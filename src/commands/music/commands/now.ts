@@ -1,26 +1,18 @@
-import {
-	ApplicationCommandFlags,
-	ApplicationCommandOptionTypes,
-	Bot,
-	Interaction,
-	InteractionResponseTypes,
-	sendInteractionResponse,
-} from 'discordeno';
-import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
-import { Song, SongStream } from 'logos/src/commands/music/data/types.ts';
-import { OptionBuilder } from 'logos/src/commands/command.ts';
+import { ApplicationCommandOptionTypes, Bot, Interaction } from 'discordeno';
+import { Song, SongCollection, SongStream } from 'logos/src/commands/music/data/types.ts';
+import { OptionTemplate } from 'logos/src/commands/command.ts';
 import { collection, show } from 'logos/src/commands/parameters.ts';
 import { isCollection, isOccupied } from 'logos/src/controllers/music.ts';
-import { Client } from 'logos/src/client.ts';
-import { paginate, parseArguments } from 'logos/src/interactions.ts';
+import { Client, localise } from 'logos/src/client.ts';
+import { paginate, parseArguments, reply } from 'logos/src/interactions.ts';
 import { chunk } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import constants from 'logos/constants.ts';
 import { mention, MentionTypes, timestamp, trim } from 'logos/formatting.ts';
 import { defaultLocale } from 'logos/types.ts';
 
-const command: OptionBuilder = {
-	...createLocalisations(Commands.music.options.now),
+const command: OptionTemplate = {
+	name: 'now',
 	type: ApplicationCommandOptionTypes.SubCommand,
 	handle: handleDisplayCurrentlyPlaying,
 	options: [collection, show],
@@ -32,59 +24,97 @@ function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], interaction
 	const controller = client.features.music.controllers.get(interaction.guildId!);
 	if (controller === undefined) return;
 
-	const currentListing = controller.currentListing;
-
-	if (!isOccupied(controller.player) || currentListing === undefined) {
-		return void sendInteractionResponse(
-			bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						description: localise(Commands.music.options.now.strings.noSongPlaying, interaction.locale),
-						color: constants.colors.dullYellow,
-					}],
-				},
-			},
-		);
-	}
-
 	const locale = show ? defaultLocale : interaction.locale;
 
-	if (collection !== undefined) {
-		if (!isCollection(currentListing?.content)) {
-			return void sendInteractionResponse(
-				bot,
-				interaction.id,
-				interaction.token,
-				{
-					type: InteractionResponseTypes.ChannelMessageWithSource,
-					data: {
-						flags: ApplicationCommandFlags.Ephemeral,
-						embeds: [{
-							description: localise(Commands.music.options.now.strings.noCollectionPlaying, interaction.locale),
-							color: constants.colors.dullYellow,
-						}],
-					},
-				},
-			);
+	const currentListing = controller.currentListing;
+
+	if (!collection) {
+		if (!isOccupied(controller.player) || currentListing === undefined) {
+			const strings = {
+				title: localise(client, 'music.options.now.strings.noSong.title', interaction.locale)(),
+				description: localise(client, 'music.options.now.strings.noSong.description', interaction.locale)(),
+			};
+
+			return void reply([client, bot], interaction, {
+				embeds: [{
+					title: strings.title,
+					description: strings.description,
+					color: constants.colors.dullYellow,
+				}],
+			});
 		}
+	} else {
+		if (!isOccupied(controller.player) || currentListing === undefined) {
+			const strings = {
+				title: localise(
+					client,
+					'music.options.now.strings.noSongCollection.title',
+					interaction.locale,
+				)(),
+				description: {
+					noSongCollection: localise(
+						client,
+						'music.options.now.strings.noSongCollection.description.noSongCollection',
+						interaction.locale,
+					)(),
+				},
+			};
 
-		const collection = currentListing.content;
+			return void reply([client, bot], interaction, {
+				embeds: [{
+					title: strings.title,
+					description: strings.description.noSongCollection,
+					color: constants.colors.dullYellow,
+				}],
+			});
+		} else if (!isCollection(currentListing.content)) {
+			const strings = {
+				title: localise(
+					client,
+					'music.options.now.strings.noSongCollection.title',
+					interaction.locale,
+				)(),
+				description: {
+					noSongCollection: localise(
+						client,
+						'music.options.now.strings.noSongCollection.description.noSongCollection',
+						interaction.locale,
+					)(),
+					trySongInstead: localise(
+						client,
+						'music.options.now.strings.noSongCollection.description.trySongInstead',
+						interaction.locale,
+					)(),
+				},
+			};
 
-		const nowPlayingString = localise(Commands.music.options.now.strings.nowPlaying, locale);
+			return void reply([client, bot], interaction, {
+				embeds: [{
+					title: strings.title,
+					description: `${strings.description.noSongCollection}\n\n${strings.description.trySongInstead}`,
+					color: constants.colors.dullYellow,
+				}],
+			});
+		}
+	}
+
+	if (collection) {
+		const collection = currentListing.content as SongCollection;
+
+		const strings = {
+			nowPlaying: localise(client, 'music.options.now.strings.nowPlaying', locale)(),
+			songs: localise(client, 'music.options.now.strings.songs', locale)(),
+			listEmpty: localise(client, 'music.strings.listEmpty', locale)(),
+		};
 
 		return void paginate([client, bot], interaction, {
 			elements: chunk(collection.songs, configuration.music.limits.songs.page),
 			embed: {
-				title: `${constants.symbols.music.nowPlaying} ${nowPlayingString}`,
+				title: `${constants.symbols.music.nowPlaying} ${strings.nowPlaying}`,
 				color: constants.colors.blue,
 			},
 			view: {
-				title: localise(Commands.music.options.now.strings.songs, locale),
+				title: strings.songs,
 				generate: (songs, pageIndex) =>
 					songs.length !== 0
 						? songs.map((song, index) => {
@@ -103,7 +133,7 @@ function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], interaction
 
 							return `${pageIndex * 10 + (index + 1)}. ${titleHighlighted}`;
 						}).join('\n')
-						: localise(Commands.music.strings.listEmpty, locale),
+						: strings.listEmpty,
 			},
 			show: show ?? false,
 		});
@@ -111,57 +141,58 @@ function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], interaction
 
 	const song = currentListing.content as Song | SongStream;
 
-	const nowPlayingString = localise(Commands.music.options.now.strings.nowPlaying, locale);
-
-	return void sendInteractionResponse(
-		bot,
-		interaction.id,
-		interaction.token,
-		{
-			type: InteractionResponseTypes.ChannelMessageWithSource,
-			data: {
-				flags: !show ? ApplicationCommandFlags.Ephemeral : undefined,
-				embeds: [{
-					title: `${constants.symbols.music.nowPlaying} ${nowPlayingString}`,
-					fields: [
-						...isCollection(currentListing?.content)
-							? [{
-								name: localise(Commands.music.options.now.strings.collection, locale),
-								value: currentListing.content.title,
-							}, {
-								name: localise(Commands.music.options.now.strings.track, locale),
-								value: `${currentListing.content.position + 1}/${currentListing.content.songs.length}`,
-							}]
-							: [],
-						{
-							name: localise(Commands.music.options.now.strings.title, locale),
-							value: `[${song.title}](${song.url})`,
-							inline: false,
-						},
-						{
-							name: localise(Commands.music.options.now.strings.requestedBy, locale),
-							value: mention(currentListing.requestedBy, MentionTypes.User),
-							inline: false,
-						},
-						{
-							name: localise(Commands.music.options.now.strings.runningTime, locale),
-							value: (controller.player.playingSince ?? undefined) !== undefined
-								? localise(Commands.music.options.now.strings.playingSince, locale)(
-									timestamp(controller.player.playingSince!),
-								)
-								: localise(Commands.music.options.now.strings.startTimeUnknown, locale),
-							inline: false,
-						},
-					],
-					footer: {
-						text: localise(Commands.music.options.now.strings.sourcedFrom, locale)(
-							currentListing.source ?? localise(Commands.music.options.now.strings.theInternet, locale),
-						),
-					},
-				}],
+	const strings = {
+		nowPlaying: localise(client, 'music.options.now.strings.nowPlaying', locale)(),
+		collection: localise(client, 'music.options.now.strings.collection', locale)(),
+		track: localise(client, 'music.options.now.strings.track', locale)(),
+		title: localise(client, 'music.options.now.strings.title', locale)(),
+		requestedBy: localise(client, 'music.options.now.strings.requestedBy', locale)(),
+		runningTime: localise(client, 'music.options.now.strings.runningTime', locale)(),
+		playingSince: localise(client, 'music.options.now.strings.playingSince', locale)(
+			{ 'relative_timestamp': timestamp(controller.player.playingSince!) },
+		),
+		startTimeUnknown: localise(client, 'music.options.now.strings.startTimeUnknown', locale)(),
+		sourcedFrom: localise(client, 'music.options.now.strings.sourcedFrom', locale)(
+			{
+				'source': currentListing.source ?? localise(client, 'music.options.now.strings.theInternet', locale)(),
 			},
-		},
-	);
+		),
+	};
+
+	return void reply([client, bot], interaction, {
+		embeds: [{
+			title: `${constants.symbols.music.nowPlaying} ${strings.nowPlaying}`,
+			fields: [
+				...isCollection(currentListing?.content)
+					? [{
+						name: strings.collection,
+						value: currentListing.content.title,
+					}, {
+						name: strings.track,
+						value: `${currentListing.content.position + 1}/${currentListing.content.songs.length}`,
+					}]
+					: [],
+				{
+					name: strings.title,
+					value: `[${song.title}](${song.url})`,
+					inline: false,
+				},
+				{
+					name: strings.requestedBy,
+					value: mention(currentListing.requestedBy, MentionTypes.User),
+					inline: false,
+				},
+				{
+					name: strings.runningTime,
+					value: (controller.player.playingSince ?? undefined) !== undefined
+						? strings.playingSince
+						: strings.startTimeUnknown,
+					inline: false,
+				},
+			],
+			footer: { text: strings.sourcedFrom },
+		}],
+	}, { visible: show });
 }
 
 export default command;

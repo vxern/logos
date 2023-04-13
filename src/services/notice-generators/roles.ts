@@ -1,25 +1,38 @@
 import { Bot, ButtonStyles, CreateMessage, Guild, MessageComponentTypes } from 'discordeno';
-import { localise, Services } from 'logos/assets/localisations/mod.ts';
 import { getLastUpdateString } from 'logos/src/services/notices.ts';
+import { Client, localise } from 'logos/src/client.ts';
 import constants from 'logos/constants.ts';
 import { defaultLocale } from 'logos/types.ts';
 
-const lastUpdatedAt = new Date(2023, 0, 1);
+const lastUpdatedAt = new Date(2023, 2, 19);
 
-async function generateRoleNotice(_: Bot, __: Guild): Promise<CreateMessage> {
-	const updateString = getLastUpdateString(lastUpdatedAt, defaultLocale);
+async function generateRoleNotice([client, _]: [Client, Bot], __: Guild): Promise<CreateMessage> {
+	const updateString = getLastUpdateString(client, lastUpdatedAt, defaultLocale);
+
+	const strings = {
+		title: localise(client, 'roles.selection.title', defaultLocale)(),
+		description: {
+			usingCommand: localise(client, 'roles.selection.description.usingCommand', defaultLocale)({
+				'command': '`/profile roles`',
+			}),
+			runAnywhere: localise(client, 'roles.selection.description.runAnywhere', defaultLocale)(),
+			pressButton: localise(client, 'roles.selection.description.pressButton', defaultLocale)(),
+			clickHere: localise(client, 'roles.selection.description.clickHere', defaultLocale)(),
+		},
+	};
 
 	return {
 		embeds: [{
-			title: localise(Services.notices.notices.roles.roles.header, defaultLocale),
-			description: `${updateString}\n\n` + localise(Services.notices.notices.roles.roles.body, defaultLocale),
+			title: strings.title,
+			description:
+				`${updateString}\n\n${strings.description.usingCommand} ${strings.description.runAnywhere}\n\n${strings.description.pressButton}`,
 			color: constants.colors.turquoise,
 		}],
 		components: [{
 			type: MessageComponentTypes.ActionRow,
 			components: [{
 				type: MessageComponentTypes.Button,
-				label: localise(Services.notices.notices.roles.clickHereToSelectRoles, defaultLocale),
+				label: strings.description.clickHere,
 				style: ButtonStyles.Primary,
 				customId: constants.staticComponentIds.selectRoles,
 			}],

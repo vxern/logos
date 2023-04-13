@@ -1,13 +1,16 @@
 import {
 	ActionRow,
 	ApplicationCommandFlags,
+	ApplicationCommandOptionChoice,
 	Bot,
 	ButtonComponent,
 	ButtonStyles,
+	deleteOriginalInteractionResponse,
 	editOriginalInteractionResponse,
 	Embed,
 	EventHandlers,
 	Interaction,
+	InteractionCallbackData,
 	InteractionDataOption,
 	InteractionResponseTypes,
 	InteractionTypes,
@@ -17,9 +20,9 @@ import {
 } from 'discordeno';
 import { lodash } from 'lodash';
 import * as Snowflake from 'snowflake';
-import { localise, Misc } from 'logos/assets/localisations/mod.ts';
-import { addCollector, Client } from 'logos/src/client.ts';
-import constants from 'logos/constants.ts';
+import { addCollector, Client, localise } from 'logos/src/client.ts';
+import constants, { Periods } from 'logos/constants.ts';
+import { defaultLocale } from 'logos/types.ts';
 
 type AutocompleteInteraction = Interaction & { type: InteractionTypes.ApplicationCommandAutocomplete };
 
@@ -156,6 +159,8 @@ function paginate<T>(
 		type: InteractionTypes.MessageComponent,
 		doesNotExpire: true,
 		onCollect: (bot, selection) => {
+			acknowledge([client, bot], selection);
+
 			if (selection.data === undefined) return;
 
 			const [_, action] = decodeId<ControlButtonID>(selection.data.customId!);
@@ -169,30 +174,17 @@ function paginate<T>(
 					break;
 			}
 
-			sendInteractionResponse(bot, selection.id, selection.token, {
-				type: InteractionResponseTypes.DeferredUpdateMessage,
-			});
-
-			editOriginalInteractionResponse(bot, interaction.token, {
-				embeds: [getPageEmbed(data, embed, isLast(), interaction.locale)],
+			editReply([client, bot], interaction, {
+				embeds: [getPageEmbed(client, data, embed, isLast(), interaction.locale)],
 				components: generateButtons(customId, isFirst(), isLast()),
 			});
 		},
 	});
 
-	return void sendInteractionResponse(
-		bot,
-		interaction.id,
-		interaction.token,
-		{
-			type: InteractionResponseTypes.ChannelMessageWithSource,
-			data: {
-				flags: !show ? ApplicationCommandFlags.Ephemeral : undefined,
-				embeds: [getPageEmbed(data, embed, data.pageIndex === data.elements.length - 1, interaction.locale)],
-				components: generateButtons(customId, isFirst(), isLast()),
-			},
-		},
-	);
+	return void reply([client, bot], interaction, {
+		embeds: [getPageEmbed(client, data, embed, data.pageIndex === data.elements.length - 1, interaction.locale)],
+		components: generateButtons(customId, isFirst(), isLast()),
+	}, { visible: show });
 }
 
 interface PaginationDisplayData<T> {
@@ -207,19 +199,30 @@ interface PaginationData<T> {
 	pageIndex: number;
 }
 
-function getPageEmbed<T>(data: PaginationData<T>, embed: Embed, isLast: boolean, locale: string | undefined): Embed {
+function getPageEmbed<T>(
+	client: Client,
+	data: PaginationData<T>,
+	embed: Embed,
+	isLast: boolean,
+	locale: string | undefined,
+): Embed {
+	const strings = {
+		page: localise(client, 'interactions.page', locale)(),
+		continuedOnNextPage: localise(client, 'interactions.continuedOnNextPage', locale)(),
+	};
+
 	return {
 		...embed,
 		fields: [
 			{
 				name: data.elements.length === 1
 					? data.view.title
-					: `${data.view.title} ~ ${localise(Misc.page, locale)} ${data.pageIndex + 1}/${data.elements.length}`,
+					: `${data.view.title} ~ ${strings.page} ${data.pageIndex + 1}/${data.elements.length}`,
 				value: data.view.generate(data.elements.at(data.pageIndex)!, data.pageIndex),
 			},
 			...(embed.fields ?? []),
 		],
-		footer: isLast ? undefined : { text: localise(Misc.continuedOnNextPage, locale) },
+		footer: isLast ? undefined : { text: strings.continuedOnNextPage },
 	};
 }
 
@@ -295,13 +298,10 @@ async function createModalComposer<T extends string>(
 				}
 			}
 
-			sendInteractionResponse(bot, anchor.id, anchor.token, {
-				type: InteractionResponseTypes.Modal,
-				data: {
-					title: modal.title,
-					customId: modalId,
-					components: fields,
-				},
+			showModal([client, bot], anchor, {
+				title: modal.title,
+				customId: modalId,
+				components: fields,
 			});
 		});
 
@@ -335,59 +335,112 @@ function parseComposerContent<T extends string>(submission: Interaction): Compos
 }
 
 // Expression to detect HH:MM:SS, MM:SS and SS timestamps.
-const shortTimeExpression = new RegExp(
+const conciseTimeExpression = new RegExp(
 	/^(?:(?:(0?[0-9]|1[0-9]|2[0-4]):)?(?:(0?[0-9]|[1-5][0-9]|60):))?(0?[0-9]|[1-5][0-9]|60)$/,
 );
 
 function parseTimeExpression(
+	client: Client,
 	expression: string,
-	convertToPhrase: boolean,
 	locale: string | undefined,
 ): [correctedExpression: string, period: number] | undefined {
-	if (shortTimeExpression.test(expression)) return parseShortTimeExpression(expression, convertToPhrase, locale);
-	return parseTimeExpressionPhrase(expression, locale);
+	if (conciseTimeExpression.test(expression)) {
+		return parseConciseTimeExpression(client, expression, locale);
+	}
+
+	return parseVerboseTimeExpressionPhrase(client, expression, locale);
 }
 
-function parseShortTimeExpression(
+function parseConciseTimeExpression(
+	client: Client,
 	expression: string,
-	convertToPhrase: boolean,
 	locale: string | undefined,
 ): ReturnType<typeof parseTimeExpression> {
-	const [secondsPart, minutesPart, hoursPart] = shortTimeExpression.exec(expression)!.slice(1).toReversed();
+	const [secondsPart, minutesPart, hoursPart] = conciseTimeExpression.exec(expression)!.slice(1).toReversed();
 
 	const [seconds, minutes, hours] = [secondsPart, minutesPart, hoursPart].map((part) =>
 		part !== undefined ? Number(part) : undefined
 	) as [number, ...number[]];
 
-	if (!convertToPhrase) {
-		let totalSeconds = seconds;
-		if (minutes !== undefined) {
-			totalSeconds += minutes * 60;
-		}
-		if (hours !== undefined) {
-			totalSeconds += hours * 60 * 60;
-		}
-		return [expression, totalSeconds * 1000];
-	}
+	let verboseExpressionParts = [];
+	if (seconds !== 0) {
+		const strings = {
+			second: localise(client, 'units.second', defaultLocale)({ 'number': seconds }),
+		};
 
-	let correctedExpression = '';
-	if (seconds !== undefined && seconds !== 0) {
-		correctedExpression += `${seconds} ${localise(Misc.time.periods.second.descriptors, locale).at(-1)} `;
+		verboseExpressionParts.push(strings.second);
 	}
 	if (minutes !== undefined && minutes !== 0) {
-		correctedExpression += `${minutes} ${localise(Misc.time.periods.minute.descriptors, locale).at(-1)} `;
-	}
-	if (hours !== undefined) {
-		correctedExpression += `${hours} ${localise(Misc.time.periods.hour.descriptors, locale).at(-1)}`;
-	}
+		const strings = {
+			minute: localise(client, 'units.minute', defaultLocale)({ 'number': minutes }),
+		};
 
-	return parseTimeExpressionPhrase(correctedExpression, locale);
+		verboseExpressionParts.push(strings.minute);
+	}
+	if (hours !== undefined && hours !== 0) {
+		const strings = {
+			hour: localise(client, 'units.hour', defaultLocale)({ 'number': hours }),
+		};
+
+		verboseExpressionParts.push(strings.hour);
+	}
+	const verboseExpression = verboseExpressionParts.join(' ');
+
+	const expressionParsed = parseVerboseTimeExpressionPhrase(client, verboseExpression, locale);
+	if (expressionParsed === undefined) return undefined;
+
+	const conciseExpression = [hoursPart ?? '0', minutesPart ?? '0', secondsPart ?? '0'].map((part) =>
+		part.length === 1 ? `0${part}` : part
+	).join(':');
+
+	const [verboseExpressionCorrected, period] = expressionParsed;
+
+	return [`${conciseExpression} (${verboseExpressionCorrected})`, period];
 }
 
-function parseTimeExpressionPhrase(
+type TimeUnit = 'second' | 'minute' | 'hour' | 'day' | 'week' | 'month' | 'year';
+const timeUnitToPeriod: Required<Record<TimeUnit, number>> = {
+	'second': Periods.second,
+	'minute': Periods.minute,
+	'hour': Periods.hour,
+	'day': Periods.day,
+	'week': Periods.week,
+	'month': Periods.month,
+	'year': Periods.year,
+};
+
+const timeUnitsWithAliasesLocalised = new Map<string, Record<TimeUnit, string[]>>();
+
+function parseVerboseTimeExpressionPhrase(
+	client: Client,
 	expression: string,
 	locale: string | undefined,
 ): ReturnType<typeof parseTimeExpression> {
+	if (!timeUnitsWithAliasesLocalised.has(locale ?? defaultLocale)) {
+		const timeUnits = Object.keys(timeUnitToPeriod) as TimeUnit[];
+		const timeUnitAliasTuples: [TimeUnit, string[]][] = [];
+
+		for (const timeUnit of timeUnits) {
+			timeUnitAliasTuples.push([
+				timeUnit,
+				[
+					`units.${timeUnit}.word.one`,
+					`units.${timeUnit}.word.two`,
+					`units.${timeUnit}.word.many`,
+					`units.${timeUnit}.short`,
+					`units.${timeUnit}.shortest`,
+				].map((key) => localise(client, key, locale)()),
+			]);
+		}
+
+		timeUnitsWithAliasesLocalised.set(
+			locale ?? defaultLocale,
+			Object.fromEntries(timeUnitAliasTuples) as Record<TimeUnit, string[]>,
+		);
+	}
+
+	const timeUnitsWithAliases = timeUnitsWithAliasesLocalised.get(locale ?? defaultLocale)!;
+
 	function extractNumbers(expression: string): number[] {
 		const digitsExpression = new RegExp(/\d+/g);
 		return (expression.match(digitsExpression) ?? []).map((digits) => Number(digits));
@@ -401,81 +454,47 @@ function parseTimeExpressionPhrase(
 	// Extract the digits present in the expression.
 	const quantifiers = extractNumbers(expression).map((string) => Number(string));
 	// Extract the strings present in the expression.
-	const periodNames = extractStrings(expression);
+	const timeUnitAliases = extractStrings(expression);
 
 	// No parameters have been provided for both keys and values.
-	if (periodNames.length === 0 || quantifiers.length === 0) return undefined;
+	if (timeUnitAliases.length === 0 || quantifiers.length === 0) return undefined;
 
 	// The number of values does not match the number of keys.
-	if (quantifiers.length !== periodNames.length) return undefined;
+	if (quantifiers.length !== timeUnitAliases.length) return undefined;
 
 	// One of the values is equal to 0.
 	if (quantifiers.includes(0)) return undefined;
 
-	const timeDescriptorsWithLocalisations = constants.timeDescriptors.map<
-		[typeof Misc.time.periods[keyof typeof Misc.time.periods], number]
-	>(
-		([descriptor, period]) => {
-			const descriptorLocalised = Misc.time.periods[descriptor as keyof typeof Misc.time.periods];
-			return [descriptorLocalised, period];
-		},
-	);
+	const timeUnits: TimeUnit[] = [];
+	for (const timeUnitAlias of timeUnitAliases) {
+		const timeUnit = Object.entries(timeUnitsWithAliases).find(([_, aliases]) => aliases.includes(timeUnitAlias))?.[0];
 
-	const validTimeDescriptors = timeDescriptorsWithLocalisations.reduce<string[]>(
-		(validTimeDescriptors, [descriptors, _period]) => {
-			validTimeDescriptors.push(...localise(descriptors.descriptors, locale));
-			return validTimeDescriptors;
-		},
-		[],
-	);
+		// TODO(vxern): Convey to the user that a time unit is invalid.
+		if (timeUnit === undefined) return undefined;
 
-	// If any one of the keys is invalid.
-	if (periodNames.some((key) => !validTimeDescriptors.includes(key))) {
-		return undefined;
+		timeUnits.push(timeUnit as TimeUnit);
 	}
-
-	const quantifierFrequencies = periodNames.reduce(
-		(frequencies, quantifier) => {
-			const index = timeDescriptorsWithLocalisations.findIndex(([descriptors, _period]) =>
-				localise(descriptors.descriptors, locale).includes(quantifier)
-			);
-
-			frequencies[index]++;
-
-			return frequencies;
-		},
-		Array.from({ length: constants.timeDescriptors.length }, () => 0),
-	);
 
 	// If one of the keys is duplicate.
-	if (quantifierFrequencies.some((count) => count > 1)) {
+	if ((new Set(timeUnits)).size !== timeUnits.length) {
 		return undefined;
 	}
 
-	const keysWithValues = periodNames
-		.map<[(number: number) => string, [number, number], number]>(
-			(key, index) => {
-				const timeDescriptorIndex = timeDescriptorsWithLocalisations.findIndex(
-					([descriptors, _value]) => localise(descriptors.descriptors, locale).includes(key),
-				)!;
-
-				const [descriptors, milliseconds] = timeDescriptorsWithLocalisations.at(timeDescriptorIndex!)!;
-
-				return [localise(descriptors.display, locale), [
-					quantifiers.at(index)!,
-					quantifiers.at(index)! * milliseconds,
-				], timeDescriptorIndex];
-			},
-		)
-		.toSorted((previous, next) => next[2] - previous[2]);
+	const timeUnitQuantifierTuples = timeUnits
+		.map<[TimeUnit, number]>((timeUnit, index) => [timeUnit, quantifiers[index]!]);
+	timeUnitQuantifierTuples.sort(([previous], [next]) => timeUnitToPeriod[next] - timeUnitToPeriod[previous]);
 
 	const timeExpressions = [];
 	let total = 0;
-	for (const [display, [quantifier, milliseconds]] of keysWithValues) {
-		timeExpressions.push(display(quantifier));
-		total += milliseconds;
-	}
+	for (const [timeUnit, quantifier] of timeUnitQuantifierTuples) {
+		const strings = {
+			unit: localise(client, `units.${timeUnit}`, locale)({ 'number': quantifier }),
+		};
 
+		timeExpressions.push(strings.unit);
+
+		total += quantifier * timeUnitToPeriod[timeUnit];
+	}
 	const correctedExpression = timeExpressions.join(', ');
 
 	return [correctedExpression, total];
@@ -491,15 +510,90 @@ function decodeId<T extends ComponentIDMetadata, R = [string, ...T]>(customId: s
 	return customId.split(constants.symbols.meta.idSeparator) as R;
 }
 
+async function acknowledge([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+	return sendInteractionResponse(bot, interaction.id, interaction.token, {
+		type: InteractionResponseTypes.DeferredUpdateMessage,
+	}).catch((reason) => client.log.warn(`Failed to acknowledge interaction: ${reason}`));
+}
+
+async function postponeReply(
+	[client, bot]: [Client, Bot],
+	interaction: Interaction,
+	{ visible = false } = {},
+): Promise<void> {
+	return sendInteractionResponse(bot, interaction.id, interaction.token, {
+		type: InteractionResponseTypes.DeferredChannelMessageWithSource,
+		data: !visible ? { flags: ApplicationCommandFlags.Ephemeral } : {},
+	}).catch((reason) => client.log.warn(`Failed to postpone reply to interaction: ${reason}`));
+}
+
+async function reply(
+	[client, bot]: [Client, Bot],
+	interaction: Interaction,
+	data: Omit<InteractionCallbackData, 'flags'>,
+	{ visible = false } = {},
+): Promise<void> {
+	return sendInteractionResponse(bot, interaction.id, interaction.token, {
+		type: InteractionResponseTypes.ChannelMessageWithSource,
+		data: {
+			flags: !visible ? ApplicationCommandFlags.Ephemeral : undefined,
+			...data,
+		},
+	}).catch((reason) => client.log.warn(`Failed to reply to interaction: ${reason}`));
+}
+
+async function editReply(
+	[client, bot]: [Client, Bot],
+	interaction: Interaction,
+	data: Omit<InteractionCallbackData, 'flags'>,
+): Promise<void> {
+	return editOriginalInteractionResponse(bot, interaction.token, data)
+		.then(() => {})
+		.catch((reason) => client.log.warn(`Failed to edit reply to interaction: ${reason}`));
+}
+
+async function deleteReply([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+	return deleteOriginalInteractionResponse(bot, interaction.token)
+		.catch((reason) => client.log.warn(`Failed to edit reply to interaction: ${reason}`));
+}
+
+async function respond(
+	[client, bot]: [Client, Bot],
+	interaction: Interaction,
+	choices: ApplicationCommandOptionChoice[],
+): Promise<void> {
+	return sendInteractionResponse(bot, interaction.id, interaction.token, {
+		type: InteractionResponseTypes.ApplicationCommandAutocompleteResult,
+		data: { choices },
+	}).catch((reason) => client.log.warn(`Failed to respond to autocomplete interaction: ${reason}`));
+}
+
+async function showModal(
+	[client, bot]: [Client, Bot],
+	interaction: Interaction,
+	data: Omit<InteractionCallbackData, 'flags'>,
+): Promise<void> {
+	return sendInteractionResponse(bot, interaction.id, interaction.token, {
+		type: InteractionResponseTypes.Modal,
+		data,
+	}).catch((reason) => client.log.warn(`Failed to show modal: ${reason}`));
+}
+
 export {
+	acknowledge,
 	createInteractionCollector,
 	createModalComposer,
 	decodeId,
+	deleteReply,
+	editReply,
 	encodeId,
 	generateButtons,
 	isAutocomplete,
 	paginate,
 	parseArguments,
 	parseTimeExpression,
+	postponeReply,
+	reply,
+	respond,
 };
 export type { ControlButtonID, InteractionCollectorSettings, Modal };

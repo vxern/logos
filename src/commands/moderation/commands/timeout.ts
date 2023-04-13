@@ -1,24 +1,24 @@
-import { ApplicationCommandOptionTypes } from 'discordeno';
-import { Commands, createLocalisations } from 'logos/assets/localisations/mod.ts';
+import { ApplicationCommandOptionTypes, ApplicationCommandTypes } from 'discordeno';
 import { handleSetTimeout, handleSetTimeoutAutocomplete } from 'logos/src/commands/moderation/commands/timeout/set.ts';
 import {
 	handleClearTimeout,
 	handleClearTimeoutAutocomplete,
 } from 'logos/src/commands/moderation/commands/timeout/clear.ts';
-import { CommandBuilder } from 'logos/src/commands/command.ts';
+import { CommandTemplate } from 'logos/src/commands/command.ts';
 import { duration, reason, user } from 'logos/src/commands/parameters.ts';
 
-const command: CommandBuilder = {
-	...createLocalisations(Commands.timeout),
+const command: CommandTemplate = {
+	name: 'timeout',
+	type: ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ['MODERATE_MEMBERS'],
 	options: [{
-		...createLocalisations(Commands.timeout.options.set),
+		name: 'set',
 		type: ApplicationCommandOptionTypes.SubCommand,
 		handle: handleSetTimeout,
 		handleAutocomplete: handleSetTimeoutAutocomplete,
 		options: [user, duration, reason],
 	}, {
-		...createLocalisations(Commands.timeout.options.clear),
+		name: 'clear',
 		type: ApplicationCommandOptionTypes.SubCommand,
 		handle: handleClearTimeout,
 		handleAutocomplete: handleClearTimeoutAutocomplete,

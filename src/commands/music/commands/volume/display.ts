@@ -1,14 +1,7 @@
-import {
-	ApplicationCommandFlags,
-	Bot,
-	Interaction,
-	InteractionResponseTypes,
-	sendInteractionResponse,
-} from 'discordeno';
-import { Commands, localise } from 'logos/assets/localisations/mod.ts';
+import { Bot, Interaction } from 'discordeno';
 import { getVoiceState, verifyVoiceState } from 'logos/src/controllers/music.ts';
-import { Client } from 'logos/src/client.ts';
-import { parseArguments } from 'logos/src/interactions.ts';
+import { Client, localise } from 'logos/src/client.ts';
+import { parseArguments, reply } from 'logos/src/interactions.ts';
 import constants from 'logos/constants.ts';
 import { defaultLocale } from 'logos/types.ts';
 
@@ -19,7 +12,7 @@ function handleDisplayVolume([client, bot]: [Client, Bot], interaction: Interact
 	if (controller === undefined) return;
 
 	const isVoiceStateVerified = verifyVoiceState(
-		bot,
+		[client, bot],
 		interaction,
 		controller,
 		getVoiceState(client, interaction.guildId!, interaction.user.id),
@@ -29,26 +22,20 @@ function handleDisplayVolume([client, bot]: [Client, Bot], interaction: Interact
 
 	const locale = show ? defaultLocale : interaction.locale;
 
-	const volumeString = localise(Commands.music.options.volume.options.display.strings.volume.header, locale);
+	const strings = {
+		title: localise(client, 'music.options.volume.options.display.strings.volume.title', locale)(),
+		description: localise(client, 'music.options.volume.options.display.strings.volume.description', locale)(
+			{ 'volume': controller.player.volume },
+		),
+	};
 
-	return void sendInteractionResponse(
-		bot,
-		interaction.id,
-		interaction.token,
-		{
-			type: InteractionResponseTypes.ChannelMessageWithSource,
-			data: {
-				flags: !show ? ApplicationCommandFlags.Ephemeral : undefined,
-				embeds: [{
-					title: `${constants.symbols.music.volume} ${volumeString}`,
-					description: localise(Commands.music.options.volume.options.display.strings.volume.body, locale)(
-						controller.player.volume,
-					),
-					color: constants.colors.invisible,
-				}],
-			},
-		},
-	);
+	return void reply([client, bot], interaction, {
+		embeds: [{
+			title: `${constants.symbols.music.volume} ${strings.title}`,
+			description: strings.description,
+			color: constants.colors.invisible,
+		}],
+	}, { visible: show });
 }
 
 export { handleDisplayVolume };

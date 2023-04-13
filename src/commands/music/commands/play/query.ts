@@ -1,15 +1,8 @@
-import {
-	ApplicationCommandFlags,
-	Bot,
-	Interaction,
-	InteractionResponseTypes,
-	sendInteractionResponse,
-} from 'discordeno';
-import { Commands, localise } from 'logos/assets/localisations/mod.ts';
+import { Bot, Interaction } from 'discordeno';
 import { ListingResolver } from 'logos/src/commands/music/data/sources/sources.ts';
 import { getVoiceState, receiveNewListing, verifyCanRequestPlayback } from 'logos/src/controllers/music.ts';
-import { Client } from 'logos/src/client.ts';
-import { parseArguments } from 'logos/src/interactions.ts';
+import { Client, localise } from 'logos/src/client.ts';
+import { parseArguments, reply } from 'logos/src/interactions.ts';
 import constants from 'logos/constants.ts';
 
 async function handleRequestQueryPlayback(
@@ -28,26 +21,34 @@ async function handleRequestQueryPlayback(
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (guild === undefined) return;
 
-	const canPlay = verifyCanRequestPlayback(bot, interaction, controller, voiceState);
+	const canPlay = verifyCanRequestPlayback([client, bot], interaction, controller, voiceState);
 	if (!canPlay) return;
 
 	const listing = await resolveToSongListing([client, bot], interaction, query);
 	if (listing === undefined) {
-		return void sendInteractionResponse(
-			bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						description: localise(Commands.music.options.play.strings.songNotFound, interaction.locale),
-						color: constants.colors.red,
-					}],
-				},
+		const strings = {
+			title: localise(client, 'music.options.play.strings.notFound.title', interaction.locale)(),
+			description: {
+				notFound: localise(
+					client,
+					'music.options.play.strings.notFound.description.notFound',
+					interaction.locale,
+				)(),
+				tryDifferentQuery: localise(
+					client,
+					'music.options.play.strings.notFound.description.tryDifferentQuery',
+					interaction.locale,
+				)(),
 			},
-		);
+		};
+
+		return void reply([client, bot], interaction, {
+			embeds: [{
+				title: strings.title,
+				description: `${strings.description.notFound}\n\n${strings.description.tryDifferentQuery}`,
+				color: constants.colors.red,
+			}],
+		});
 	}
 
 	const feedbackChannelId = client.cache.channels.get(interaction.channelId!)?.id;

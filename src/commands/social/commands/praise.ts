@@ -1,33 +1,23 @@
-import {
-	ApplicationCommandFlags,
-	ApplicationCommandOptionTypes,
-	Bot,
-	editOriginalInteractionResponse,
-	getDmChannel,
-	Interaction,
-	InteractionResponseTypes,
-	sendInteractionResponse,
-	sendMessage,
-} from 'discordeno';
-import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
-import { CommandBuilder } from 'logos/src/commands/command.ts';
+import { ApplicationCommandOptionTypes, ApplicationCommandTypes, Bot, Interaction } from 'discordeno';
+import { CommandTemplate } from 'logos/src/commands/command.ts';
 import { user } from 'logos/src/commands/parameters.ts';
 import { logEvent } from 'logos/src/controllers/logging/logging.ts';
 import { Praise } from 'logos/src/database/structs/mod.ts';
-import { autocompleteMembers, Client, resolveInteractionToMember } from 'logos/src/client.ts';
-import { parseArguments } from 'logos/src/interactions.ts';
-import { getAuthor, verifyIsWithinLimits } from 'logos/src/utils.ts';
+import { autocompleteMembers, Client, localise, resolveInteractionToMember } from 'logos/src/client.ts';
+import { editReply, parseArguments, postponeReply, reply } from 'logos/src/interactions.ts';
+import { verifyIsWithinLimits } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import constants from 'logos/constants.ts';
 import { mention, MentionTypes } from 'logos/formatting.ts';
 
-const command: CommandBuilder = {
-	...createLocalisations(Commands.praise),
+const command: CommandTemplate = {
+	name: 'praise',
+	type: ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ['VIEW_CHANNEL'],
 	handle: handlePraiseUser,
-  handleAutocomplete: handlePraiseUserAutocomplete,
+	handleAutocomplete: handlePraiseUserAutocomplete,
 	options: [user, {
-		...createLocalisations(Commands.praise.options.comment),
+		name: 'comment',
 		type: ApplicationCommandOptionTypes.String,
 	}],
 };
@@ -46,27 +36,21 @@ async function handlePraiseUser([client, bot]: [Client, Bot], interaction: Inter
 	if (member === undefined) return;
 
 	if (member.id === interaction.member?.id) {
-		return void sendInteractionResponse(
-			bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						description: localise(Commands.praise.strings.cannotPraiseSelf, interaction.locale),
-						color: constants.colors.dullYellow,
-					}],
-				},
-			},
-		);
+		const strings = {
+			title: localise(client, 'praise.strings.cannotPraiseSelf.title', interaction.locale)(),
+			description: localise(client, 'praise.strings.cannotPraiseSelf.description', interaction.locale)(),
+		};
+
+		return void reply([client, bot], interaction, {
+			embeds: [{
+				title: strings.title,
+				description: strings.description,
+				color: constants.colors.dullYellow,
+			}],
+		});
 	}
 
-	await sendInteractionResponse(bot, interaction.id, interaction.token, {
-		type: InteractionResponseTypes.DeferredChannelMessageWithSource,
-		data: { flags: ApplicationCommandFlags.Ephemeral },
-	});
+	await postponeReply([client, bot], interaction);
 
 	const [author, subject] = await Promise.all([
 		client.database.adapters.users.getOrFetchOrCreate(
@@ -78,23 +62,29 @@ async function handlePraiseUser([client, bot]: [Client, Bot], interaction: Inter
 		client.database.adapters.users.getOrFetchOrCreate(client, 'id', member.id.toString(), member.id),
 	]);
 
-	if (author === undefined || subject === undefined) return showError(bot, interaction);
+	if (author === undefined || subject === undefined) {
+		return showError([client, bot], interaction);
+	}
 
 	const praisesBySender = await client.database.adapters.praises.getOrFetch(client, 'sender', author.ref);
-	if (praisesBySender === undefined) return showError(bot, interaction);
+	if (praisesBySender === undefined) {
+		return showError([client, bot], interaction);
+	}
 
 	const praises = Array.from(praisesBySender.values());
 	if (!verifyIsWithinLimits(praises, configuration.commands.praise.limitUses, configuration.commands.praise.within)) {
-		return void editOriginalInteractionResponse(
-			bot,
-			interaction.token,
-			{
-				embeds: [{
-					description: localise(Commands.praise.strings.waitBeforePraising, interaction.locale),
-					color: constants.colors.dullYellow,
-				}],
-			},
-		);
+		const strings = {
+			title: localise(client, 'praise.strings.tooMany.title', interaction.locale)(),
+			description: localise(client, 'praise.strings.tooMany.description', interaction.locale)(),
+		};
+
+		return void editReply([client, bot], interaction, {
+			embeds: [{
+				title: strings.title,
+				description: strings.description,
+				color: constants.colors.dullYellow,
+			}],
+		});
 	}
 
 	const praise: Praise = {
@@ -107,55 +97,42 @@ async function handlePraiseUser([client, bot]: [Client, Bot], interaction: Inter
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (guild === undefined) return;
 
-	const [document, dmChannel] = await Promise.all([
-		client.database.adapters.praises.create(client, praise),
-		getDmChannel(bot, member.id).catch(() => undefined),
-	]);
-	if (document === undefined) return showError(bot, interaction);
+	const document = await client.database.adapters.praises.create(client, praise);
+	if (document === undefined) {
+		return showError([client, bot], interaction);
+	}
 
 	logEvent([client, bot], guild, 'praiseAdd', [member, praise, interaction.user]);
 
-	if (dmChannel !== undefined) {
-		const praisedString = localise(Commands.praise.strings.praisedDirect, interaction.locale)(
-			mention(interaction.user.id, MentionTypes.User),
-		);
+	const strings = {
+		title: localise(client, 'praise.strings.praised.title', interaction.locale)(),
+		description: localise(client, 'praise.strings.praised.description', interaction.locale)(
+			{ 'user_mention': mention(member.id, MentionTypes.User) },
+		),
+	};
 
-		sendMessage(bot, dmChannel.id, {
-			embeds: [
-				{
-					author: getAuthor(bot, guild),
-					description: `${constants.symbols.responses.celebration} ${praisedString}`,
-					color: constants.colors.lightGreen,
-				},
-			],
-		});
-	}
-
-	return void editOriginalInteractionResponse(
-		bot,
-		interaction.token,
-		{
-			embeds: [{
-				description: localise(Commands.praise.strings.praised, interaction.locale)(
-					mention(member.id, MentionTypes.User),
-				),
-				color: constants.colors.lightGreen,
-			}],
-		},
-	);
+	return void editReply([client, bot], interaction, {
+		embeds: [{
+			title: strings.title,
+			description: strings.description,
+			color: constants.colors.lightGreen,
+		}],
+	});
 }
 
-function showError(bot: Bot, interaction: Interaction): void {
-	return void editOriginalInteractionResponse(
-		bot,
-		interaction.token,
-		{
-			embeds: [{
-				description: localise(Commands.praise.strings.failed, interaction.locale),
-				color: constants.colors.red,
-			}],
-		},
-	);
+function showError([client, bot]: [Client, Bot], interaction: Interaction): void {
+	const strings = {
+		title: localise(client, 'praise.strings.failed.title', interaction.locale)(),
+		description: localise(client, 'praise.strings.failed.description', interaction.locale)(),
+	};
+
+	return void editReply([client, bot], interaction, {
+		embeds: [{
+			title: strings.title,
+			description: strings.description,
+			color: constants.colors.red,
+		}],
+	});
 }
 
 export default command;

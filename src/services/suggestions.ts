@@ -1,31 +1,28 @@
 import {
-	ApplicationCommandFlags,
 	Bot,
 	ButtonStyles,
 	CreateMessage,
 	deleteMessage,
 	getAvatarURL,
 	Guild,
-	InteractionResponseTypes,
 	InteractionTypes,
 	Message,
 	MessageComponentTypes,
-	sendInteractionResponse,
 	sendMessage,
 	User as DiscordUser,
 } from 'discordeno';
 import { lodash } from 'lodash';
-import { localise, Services } from 'logos/assets/localisations/mod.ts';
 import { Suggestion } from 'logos/src/database/structs/mod.ts';
 import { Document, Reference } from 'logos/src/database/document.ts';
 import { stringifyValue } from 'logos/src/database/database.ts';
 import { ServiceStarter } from 'logos/src/services/services.ts';
-import { Client, extendEventHandler, WithLanguage } from 'logos/src/client.ts';
+import { Client, extendEventHandler, localise, WithLanguage } from 'logos/src/client.ts';
 import {
 	createInteractionCollector,
 	decodeId,
 	encodeId,
 	InteractionCollectorSettings,
+	reply,
 } from 'logos/src/interactions.ts';
 import { diagnosticMentionUser, getAllMessages, getTextChannel } from 'logos/src/utils.ts';
 import { defaultLocale } from 'logos/types.ts';
@@ -176,7 +173,11 @@ function registerPastSuggestions([client, bot]: [Client, Bot]): void {
 					continue;
 				}
 
-				messageId = await sendMessage(bot, suggestionChannelId, getSuggestionPrompt(bot, guild, author, suggestion))
+				messageId = await sendMessage(
+					bot,
+					suggestionChannelId,
+					getSuggestionPrompt([client, bot], guild, author, suggestion),
+				)
 					.then((message) => message.id);
 			} else {
 				suggestionPromptsByAuthorId.get(authorId)!.delete(suggestionReferenceId);
@@ -228,7 +229,7 @@ function ensureSuggestionPromptPersistence([client, bot]: [Client, Bot]): void {
 		const newMessageId = await sendMessage(
 			bot,
 			channelId,
-			getSuggestionPrompt(bot, guild, author, suggestion),
+			getSuggestionPrompt([client, bot], guild, author, suggestion),
 		).then((message) => message.id);
 		suggestionByMessageId.delete(id);
 		authorIdByMessageId.delete(id);
@@ -278,28 +279,32 @@ function registerSuggestionHandler(
 			if (suggestion === undefined) return;
 
 			if (isResolved && suggestion.data.isResolved) {
-				return void sendInteractionResponse(bot, selection.id, selection.token, {
-					type: InteractionResponseTypes.ChannelMessageWithSource,
-					data: {
-						flags: ApplicationCommandFlags.Ephemeral,
-						embeds: [{
-							description: localise(Services.alreadyMarkedAsResolved, defaultLocale),
-							color: constants.colors.dullYellow,
-						}],
-					},
+				const strings = {
+					title: localise(client, 'alreadyMarkedResolved.title', defaultLocale)(),
+					description: localise(client, 'alreadyMarkedResolved.description', defaultLocale)(),
+				};
+
+				return void reply([client, bot], selection, {
+					embeds: [{
+						title: strings.title,
+						description: strings.description,
+						color: constants.colors.dullYellow,
+					}],
 				});
 			}
 
 			if (!isResolved && !suggestion.data.isResolved) {
-				return void sendInteractionResponse(bot, selection.id, selection.token, {
-					type: InteractionResponseTypes.ChannelMessageWithSource,
-					data: {
-						flags: ApplicationCommandFlags.Ephemeral,
-						embeds: [{
-							description: localise(Services.alreadyMarkedAsUnresolved, defaultLocale),
-							color: constants.colors.dullYellow,
-						}],
-					},
+				const strings = {
+					title: localise(client, 'alreadyMarkedUnresolved.title', defaultLocale)(),
+					description: localise(client, 'alreadyMarkedUnresolved.description', defaultLocale)(),
+				};
+
+				return void reply([client, bot], selection, {
+					embeds: [{
+						title: strings.title,
+						description: strings.description,
+						color: constants.colors.dullYellow,
+					}],
 				});
 			}
 
@@ -328,12 +333,22 @@ function registerSuggestionHandler(
 type SuggestionPromptButtonID = [authorId: string, guildId: string, suggestionReferenceId: string, isResolved: string];
 
 function getSuggestionPrompt(
-	bot: Bot,
+	[client, bot]: [Client, Bot],
 	guild: WithLanguage<Guild>,
 	author: DiscordUser,
 	suggestionDocument: Document<Suggestion>,
 ): CreateMessage {
 	const suggestionReferenceId = stringifyValue(suggestionDocument.ref);
+
+	const strings = {
+		suggestion: {
+			submittedBy: localise(client, 'submittedBy', defaultLocale)(),
+			submittedAt: localise(client, 'submittedAt', defaultLocale)(),
+			suggestion: localise(client, 'suggestion.suggestion', defaultLocale)(),
+		},
+		markResolved: localise(client, 'markResolved', defaultLocale)(),
+		markUnresolved: localise(client, 'markUnresolved', defaultLocale)(),
+	};
 
 	return {
 		embeds: [{
@@ -351,15 +366,15 @@ function getSuggestionPrompt(
 			})(),
 			fields: [
 				{
-					name: localise(Services.submittedBy, defaultLocale),
+					name: strings.suggestion.submittedBy,
 					value: mention(author.id, MentionTypes.User),
 				},
 				{
-					name: localise(Services.submittedAt, defaultLocale),
+					name: strings.suggestion.submittedAt,
 					value: timestamp(suggestionDocument.data.createdAt),
 				},
 				{
-					name: localise(Services.suggestions.suggestion, defaultLocale),
+					name: strings.suggestion.suggestion,
 					value: suggestionDocument.data.suggestion,
 				},
 			],
@@ -372,7 +387,7 @@ function getSuggestionPrompt(
 					? {
 						type: MessageComponentTypes.Button,
 						style: ButtonStyles.Primary,
-						label: localise(Services.markAsResolved, defaultLocale),
+						label: strings.markResolved,
 						customId: encodeId<SuggestionPromptButtonID>(
 							constants.staticComponentIds.reports,
 							[author.id.toString(), guild.id.toString(), suggestionReferenceId, `${true}`],
@@ -381,7 +396,7 @@ function getSuggestionPrompt(
 					: {
 						type: MessageComponentTypes.Button,
 						style: ButtonStyles.Secondary,
-						label: localise(Services.markAsUnresolved, defaultLocale),
+						label: strings.markUnresolved,
 						customId: encodeId<SuggestionPromptButtonID>(
 							constants.staticComponentIds.reports,
 							[author.id.toString(), guild.id.toString(), suggestionReferenceId, `${false}`],

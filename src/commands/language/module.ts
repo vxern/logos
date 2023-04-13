@@ -1,7 +1,7 @@
 import * as csv from 'std/encoding/csv.ts';
-import { getLocaleForLanguage, localise, TranslationLanguage, Words } from 'logos/assets/localisations/mod.ts';
 import dexonline from 'logos/src/commands/language/data/adapters/dexonline.ts';
-import { DictionaryAdapter, SentencePair, WordClasses } from 'logos/src/commands/language/data/types.ts';
+import { WordClass } from 'logos/src/commands/language/commands/word.ts';
+import { DictionaryAdapter, SentencePair } from 'logos/src/commands/language/data/types.ts';
 import { Client } from 'logos/src/client.ts';
 import { addParametersToURL } from 'logos/src/utils.ts';
 import constants from 'logos/constants.ts';
@@ -54,14 +54,14 @@ function loadSentencePairs(languageFileContents: [Language, string][]): Map<Lang
 
 interface DeepLSupportedLanguage {
 	language: string;
-	name: TranslationLanguage;
+	name: string;
 	'supports_formality': boolean;
 }
 
 /** Represents a supported language object sent by DeepL. */
 interface SupportedLanguage {
 	/** The language name */
-	name: TranslationLanguage;
+	name: string;
 
 	/** The language code. */
 	code: string;
@@ -96,8 +96,28 @@ function resolveToSupportedLanguage(client: Client, languageOrCode: string): Sup
 	);
 }
 
-function getWordClass(wordClassString: string, language: Language): WordClasses {
-	return localise(Words.typeNameToType, getLocaleForLanguage(language))[wordClassString] ?? WordClasses.Unknown;
+const wordClassMappings: Record<string, WordClass> = {
+	'substantiv': 'noun',
+	'substantiv masculin': 'noun',
+	'substantiv feminin': 'noun',
+	'substantiv neutru': 'noun',
+	'substantiv propriu': 'noun',
+	'verb': 'verb',
+	'adjectiv': 'adjective',
+	'adjectiv pronominal': 'determiner',
+	'adverb': 'adverb',
+	'prepoziție': 'adposition',
+	'postpoziție': 'adposition',
+	'prefix': 'affix',
+	'postfix': 'affix',
+	'pronume': 'pronoun',
+	'demonstrativ': 'determiner',
+	'conjuncție': 'conjunction',
+	'interjecție': 'interjection',
+};
+
+function getWordClass(wordClassString: string): WordClass {
+	return wordClassMappings[wordClassString] ?? 'unknown';
 }
 
 export { getSupportedLanguages, getWordClass, loadDictionaryAdapters, loadSentencePairs, resolveToSupportedLanguage };

@@ -1,25 +1,30 @@
 import {
-	ApplicationCommandFlags,
+	ApplicationCommandTypes,
 	Bot,
 	ButtonComponent,
 	ButtonStyles,
-	editOriginalInteractionResponse,
 	Interaction,
 	InteractionCallbackData,
-	InteractionResponseTypes,
 	InteractionTypes,
 	MessageComponentTypes,
-	sendInteractionResponse,
 } from 'discordeno';
-import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
 import { SentencePair } from 'logos/src/commands/language/data/types.ts';
-import { CommandBuilder } from 'logos/src/commands/command.ts';
-import { Client } from 'logos/src/client.ts';
-import { createInteractionCollector, decodeId, encodeId } from 'logos/src/interactions.ts';
+import { CommandTemplate } from 'logos/src/commands/command.ts';
+import { Client, localise } from 'logos/src/client.ts';
+import {
+	acknowledge,
+	createInteractionCollector,
+	decodeId,
+	editReply,
+	encodeId,
+	postponeReply,
+	reply,
+} from 'logos/src/interactions.ts';
 import constants from 'logos/constants.ts';
 
-const command: CommandBuilder = {
-	...createLocalisations(Commands.game),
+const command: CommandTemplate = {
+	name: 'game',
+	type: ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ['VIEW_CHANNEL'],
 	handle: handleStartGame,
 };
@@ -33,32 +38,21 @@ async function handleStartGame([client, bot]: [Client, Bot], interaction: Intera
 
 	const sentencePairs = client.features.sentencePairs.get(guild.language);
 	if (sentencePairs === undefined || sentencePairs.length === 0) {
-		return void sendInteractionResponse(
-			bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						description: localise(Commands.game.strings.noSentencesAvailable, interaction.locale),
-						color: constants.colors.dullYellow,
-					}],
-				},
-			},
-		);
+		const strings = {
+			title: localise(client, 'game.strings.noSentencesAvailable.title', interaction.locale)(),
+			description: localise(client, 'game.strings.noSentencesAvailable.description', interaction.locale)(),
+		};
+
+		return void reply([client, bot], interaction, {
+			embeds: [{
+				title: strings.title,
+				description: strings.description,
+				color: constants.colors.dullYellow,
+			}],
+		});
 	}
 
-	await sendInteractionResponse(
-		bot,
-		interaction.id,
-		interaction.token,
-		{
-			type: InteractionResponseTypes.DeferredChannelMessageWithSource,
-			data: { flags: ApplicationCommandFlags.Ephemeral },
-		},
-	);
+	await postponeReply([client, bot], interaction);
 
 	let sentenceSelection: SentenceSelection;
 	let embedColor = constants.colors.blue;
@@ -67,9 +61,7 @@ async function handleStartGame([client, bot]: [Client, Bot], interaction: Intera
 		type: InteractionTypes.MessageComponent,
 		userId: interaction.user.id,
 		onCollect: (bot, selection) => {
-			sendInteractionResponse(bot, selection.id, selection.token, {
-				type: InteractionResponseTypes.DeferredUpdateMessage,
-			});
+			acknowledge([client, bot], selection);
 
 			const selectionCustomId = selection.data?.customId;
 			if (selectionCustomId === undefined) return;
@@ -89,37 +81,43 @@ async function handleStartGame([client, bot]: [Client, Bot], interaction: Intera
 
 			sentenceSelection = createSentenceSelection(sentencePairs);
 
-			return void editOriginalInteractionResponse(
-				bot,
-				interaction.token,
-				getGameView(customId, sentenceSelection, embedColor, interaction.locale),
+			return editReply(
+				[client, bot],
+				interaction,
+				getGameView(client, customId, sentenceSelection, embedColor, interaction.locale),
 			);
 		},
 	});
 
 	sentenceSelection = createSentenceSelection(sentencePairs);
 
-	return void editOriginalInteractionResponse(
-		bot,
-		interaction.token,
-		getGameView(customId, sentenceSelection, embedColor, interaction.locale),
+	return editReply(
+		[client, bot],
+		interaction,
+		getGameView(client, customId, sentenceSelection, embedColor, interaction.locale),
 	);
 }
 
 function getGameView(
+	client: Client,
 	customId: string,
 	sentenceSelection: SentenceSelection,
 	embedColor: number,
 	locale: string | undefined,
 ): InteractionCallbackData {
+	const strings = {
+		sentence: localise(client, 'game.strings.sentence', locale)(),
+		translation: localise(client, 'game.strings.translation', locale)(),
+	};
+
 	return {
 		embeds: [{
 			color: embedColor,
 			fields: [{
-				name: localise(Commands.game.strings.sentence, locale),
+				name: strings.sentence,
 				value: sentenceSelection.pair.sentence,
 			}, {
-				name: localise(Commands.game.strings.translation, locale),
+				name: strings.translation,
 				value: sentenceSelection.pair.translation,
 			}],
 		}],

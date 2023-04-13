@@ -1,13 +1,5 @@
-import {
-	ApplicationCommandFlags,
-	ApplicationCommandOptionTypes,
-	Bot,
-	Interaction,
-	InteractionResponseTypes,
-	sendInteractionResponse,
-} from 'discordeno';
-import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
-import { OptionBuilder } from 'logos/src/commands/command.ts';
+import { ApplicationCommandOptionTypes, Bot, Interaction } from 'discordeno';
+import { OptionTemplate } from 'logos/src/commands/command.ts';
 import { by, collection, to } from 'logos/src/commands/parameters.ts';
 import {
 	getVoiceState,
@@ -15,15 +7,15 @@ import {
 	isOccupied,
 	isQueueVacant,
 	unskip,
-	verifyCanManipulatePlayback,
+	verifyCanManagePlayback,
 } from 'logos/src/controllers/music.ts';
-import { Client } from 'logos/src/client.ts';
-import { parseArguments } from 'logos/src/interactions.ts';
+import { Client, localise } from 'logos/src/client.ts';
+import { parseArguments, reply } from 'logos/src/interactions.ts';
 import constants from 'logos/constants.ts';
 import { defaultLocale } from 'logos/types.ts';
 
-const command: OptionBuilder = {
-	...createLocalisations(Commands.music.options.unskip),
+const command: OptionTemplate = {
+	name: 'unskip',
 	type: ApplicationCommandOptionTypes.SubCommand,
 	handle: handleUnskipAction,
 	options: [collection, by, to],
@@ -41,8 +33,8 @@ function handleUnskipAction([client, bot]: [Client, Bot], interaction: Interacti
 	const controller = client.features.music.controllers.get(interaction.guildId!);
 	if (controller === undefined) return;
 
-	const isVoiceStateVerified = verifyCanManipulatePlayback(
-		bot,
+	const isVoiceStateVerified = verifyCanManagePlayback(
+		[client, bot],
 		interaction,
 		controller,
 		getVoiceState(client, interaction.guildId!, interaction.user.id),
@@ -58,98 +50,94 @@ function handleUnskipAction([client, bot]: [Client, Bot], interaction: Interacti
 	})();
 
 	if (isUnskippingListing && controller.listingHistory.length === 0) {
-		return void sendInteractionResponse(
-			bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						description: localise(Commands.music.options.unskip.strings.nowhereToUnskipTo, interaction.locale),
-						color: constants.colors.dullYellow,
-					}],
-				},
-			},
-		);
+		const strings = {
+			title: localise(client, 'music.options.unskip.strings.historyEmpty.title', interaction.locale)(),
+			description: localise(client, 'music.options.unskip.strings.historyEmpty.description', interaction.locale)(),
+		};
+
+		return void reply([client, bot], interaction, {
+			embeds: [{
+				title: strings.title,
+				description: strings.description,
+				color: constants.colors.dullYellow,
+			}],
+		});
 	}
 
 	if (
 		collection !== undefined &&
 		(controller.currentListing?.content === undefined || !isCollection(controller.currentListing?.content))
 	) {
-		return void sendInteractionResponse(
-			bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						description: localise(Commands.music.options.unskip.strings.noSongCollectionToUnskip, interaction.locale),
-						color: constants.colors.dullYellow,
-					}],
-				},
+		const strings = {
+			title: localise(client, 'music.options.unskip.strings.noSongCollection.title', interaction.locale)(),
+			description: {
+				noSongCollection: localise(
+					client,
+					'music.options.unskip.strings.noSongCollection.description.noSongCollection',
+					interaction.locale,
+				)(),
+				trySongInstead: localise(
+					client,
+					'music.options.unskip.strings.noSongCollection.description.trySongInstead',
+					interaction.locale,
+				)(),
 			},
-		);
+		};
+
+		return void reply([client, bot], interaction, {
+			embeds: [{
+				title: strings.title,
+				description: `${strings.description.noSongCollection}\n\n${strings.description.trySongInstead}`,
+				color: constants.colors.dullYellow,
+			}],
+		});
 	}
 
 	if (isOccupied(controller.player) && !isQueueVacant(controller.listingQueue)) {
-		return void sendInteractionResponse(
-			bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						description: localise(Commands.music.options.unskip.strings.cannotUnskipDueToFullQueue, interaction.locale),
-						color: constants.colors.red,
-					}],
-				},
-			},
-		);
+		const strings = {
+			title: localise(client, 'music.options.unskip.strings.queueFull.title', interaction.locale)(),
+			description: localise(client, 'music.options.unskip.strings.queueFull.description', interaction.locale)(),
+		};
+
+		return void reply([client, bot], interaction, {
+			embeds: [{
+				title: strings.title,
+				description: strings.description,
+				color: constants.colors.dullYellow,
+			}],
+		});
 	}
 
 	// If both the 'to' and the 'by' parameter have been supplied.
 	if (songsToUnskip !== undefined && songToUnskipTo !== undefined) {
-		return void sendInteractionResponse(
-			bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						description: localise(Commands.music.strings.tooManySkipArguments, interaction.locale),
-						color: constants.colors.red,
-					}],
-				},
-			},
-		);
+		const strings = {
+			title: localise(client, 'music.strings.skips.tooManyArguments.title', interaction.locale)(),
+			description: localise(client, 'music.strings.skips.tooManyArguments.description', interaction.locale)(),
+		};
+
+		return void reply([client, bot], interaction, {
+			embeds: [{
+				title: strings.title,
+				description: strings.description,
+				color: constants.colors.yellow,
+			}],
+		});
 	}
 
 	// If either the 'to' parameter or the 'by' parameter are negative.
 	if ((songsToUnskip !== undefined && songsToUnskip <= 0) || (songToUnskipTo !== undefined && songToUnskipTo <= 0)) {
-		return void sendInteractionResponse(
-			bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						description: localise(Commands.music.strings.mustBeGreaterThanZero, interaction.locale),
-						color: constants.colors.red,
-					}],
-				},
-			},
-		);
+		const strings = {
+			title: localise(client, 'music.strings.skips.invalid.title', interaction.locale)(),
+			description: localise(client, 'music.strings.skips.invalid.description', interaction.locale)(),
+		};
+
+		return void reply([client, bot], interaction, {
+			embeds: [{
+				title: strings.title,
+				description: strings.description,
+				color: constants.colors.red,
+			}],
+		});
 	}
 
 	const isUnskippingCollection = collection ?? false;
@@ -187,23 +175,18 @@ function handleUnskipAction([client, bot]: [Client, Bot], interaction: Interacti
 		}
 	}
 
-	const unskippedString = localise(Commands.music.options.unskip.strings.unskipped.header, defaultLocale);
+	const strings = {
+		title: localise(client, 'music.options.unskip.strings.unskipped.title', defaultLocale)(),
+		description: localise(client, 'music.options.unskip.strings.unskipped.description', defaultLocale)(),
+	};
 
-	return void sendInteractionResponse(
-		bot,
-		interaction.id,
-		interaction.token,
-		{
-			type: InteractionResponseTypes.ChannelMessageWithSource,
-			data: {
-				embeds: [{
-					title: `${constants.symbols.music.unskipped} ${unskippedString}`,
-					description: localise(Commands.music.options.unskip.strings.unskipped.body, defaultLocale),
-					color: constants.colors.invisible,
-				}],
-			},
-		},
-	);
+	return void reply([client, bot], interaction, {
+		embeds: [{
+			title: `${constants.symbols.music.unskipped} ${strings.title}`,
+			description: strings.description,
+			color: constants.colors.invisible,
+		}],
+	}, { visible: true });
 }
 
 export default command;

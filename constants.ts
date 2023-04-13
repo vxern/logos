@@ -11,16 +11,6 @@ class Periods {
 	static readonly year = 365 * Periods.day;
 }
 
-const timeDescriptors: [string, number][] = [
-	['second', Periods.second],
-	['minute', Periods.minute],
-	['hour', Periods.hour],
-	['day', Periods.day],
-	['week', Periods.week],
-	['month', Periods.month],
-	['year', Periods.year],
-];
-
 const interactionTokenExpiryInterval = 14 * Periods.minute + 50 * Periods.second; // Just below 15 minutes.
 
 const staticComponentIds = {
@@ -115,7 +105,7 @@ const symbols = {
 		},
 		entryRequest: {
 			submitted: 'ℹ️',
-			accepted: '✔️',
+			accepted: '✅',
 			rejected: '❌',
 		},
 		warned: '⚠️',
@@ -127,16 +117,22 @@ const symbols = {
 		praised: '🙏',
 		suggestion: '🌿',
 		report: '💢',
+		purging: {
+			begin: '⚔️',
+			end: '✅',
+		},
 	},
 	music: {
 		song: '🎵',
 		file: '📁',
 		collection: '🎶',
 		list: '📋',
-		queued: '👍',
-		allDone: '👏',
-		nowPlaying: '⬇️',
+		loopEnabled: '🔁',
+		loopDisabled: '⏸️',
 		paused: '⏸️',
+		queued: '👍',
+		nowPlaying: '⬇️',
+		replaying: '🔁',
 		removed: '❌',
 		resumed: '▶️',
 		skippedTo: '🔍',
@@ -187,12 +183,25 @@ const symbols = {
 		noCategory: '💭',
 		unknownEmoji: '❓',
 		categories: {
-			proficiency: {
+			language: {
 				category: '🎓',
-				beginner: '🟩',
-				intermediate: '🟦',
-				advanced: '🟥',
-				native: '🟨',
+				proficiency: {
+					category: '🔰',
+					beginner: '🟩',
+					intermediate: '🟦',
+					advanced: '🟥',
+					native: '🟨',
+				},
+				cefr: {
+					category: '🔤',
+					a0: '☁️',
+					a1: '⚡',
+					a2: '✨',
+					b1: '⭐',
+					b2: '🌟',
+					c1: '💫',
+					c2: '🌠',
+				},
 			},
 			personalisation: {
 				category: '🌈',
@@ -205,7 +214,7 @@ const symbols = {
 					male: '♂️',
 					female: '♀️',
 					transgender: '⚧',
-					nonbinary: '❔',
+					nonbinary: '🧑',
 				},
 				abroad: {
 					category: '🌎',
@@ -255,7 +264,6 @@ export default {
 	colors,
 	symbols,
 	staticComponentIds,
-	timeDescriptors,
 	interactionTokenExpiryInterval,
 };
 export { BulletStyles, Periods };

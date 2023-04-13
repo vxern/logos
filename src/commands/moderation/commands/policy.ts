@@ -1,20 +1,15 @@
-import {
-	ApplicationCommandFlags,
-	Bot,
-	Interaction,
-	InteractionResponseTypes,
-	sendInteractionResponse,
-} from 'discordeno';
-import { Commands, createLocalisations, localise, Services } from 'logos/assets/localisations/mod.ts';
-import { CommandBuilder } from 'logos/src/commands/command.ts';
+import { ApplicationCommandTypes, Bot, Embed, Guild, Interaction } from 'discordeno';
+import { CommandTemplate } from 'logos/src/commands/command.ts';
 import { show } from 'logos/src/commands/parameters.ts';
-import { Client } from 'logos/src/client.ts';
-import { parseArguments } from 'logos/src/interactions.ts';
+import { Client, localise } from 'logos/src/client.ts';
+import { parseArguments, reply } from 'logos/src/interactions.ts';
 import configuration from 'logos/configuration.ts';
-import { BulletStyles, list, mention, MentionTypes } from 'logos/formatting.ts';
+import { mention, MentionTypes } from 'logos/formatting.ts';
+import { defaultLocale } from 'logos/types.ts';
 
-const command: CommandBuilder = {
-	...createLocalisations(Commands.policy),
+const command: CommandTemplate = {
+	name: 'policy',
+	type: ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ['VIEW_CHANNEL'],
 	handle: handleDisplayModerationPolicy,
 	options: [show],
@@ -26,30 +21,72 @@ function handleDisplayModerationPolicy([client, bot]: [Client, Bot], interaction
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (guild === undefined) return;
 
+	const locale = show ? defaultLocale : interaction.locale;
+
+	const strings = {
+		title: localise(client, 'policies.moderation.title', interaction.locale)(),
+	};
+
+	return void reply([client, bot], interaction, {
+		embeds: [{
+			title: strings.title,
+			fields: getModerationPolicyPoints(client, guild, locale),
+		}],
+	}, { visible: show });
+}
+
+function getModerationPolicyPoints(
+	client: Client,
+	guild: Guild,
+	locale: string | undefined,
+): NonNullable<Embed['fields']> {
 	const moderatorRoleId = guild.roles.array()
 		.find((role) => role.name === configuration.permissions.moderatorRoleNames.main)?.id;
 	const moderatorRoleMention = moderatorRoleId !== undefined
 		? mention(moderatorRoleId, MentionTypes.Role)
 		: configuration.permissions.moderatorRoleNames.main.toLowerCase();
 
-	return void sendInteractionResponse(bot, interaction.id, interaction.token, {
-		type: InteractionResponseTypes.ChannelMessageWithSource,
-		data: {
-			flags: !show ? ApplicationCommandFlags.Ephemeral : undefined,
-			embeds: [{
-				title: localise(Services.notices.notices.information.rules.moderationPolicy.header, interaction.locale),
-				description: list([
-					localise(Services.notices.notices.information.rules.moderationPolicy.body.points.one, interaction.locale)(
-						moderatorRoleMention,
-					),
-					localise(Services.notices.notices.information.rules.moderationPolicy.body.points.two, interaction.locale),
-					localise(Services.notices.notices.information.rules.moderationPolicy.body.points.three, interaction.locale),
-					localise(Services.notices.notices.information.rules.moderationPolicy.body.points.four, interaction.locale),
-					localise(Services.notices.notices.information.rules.moderationPolicy.body.points.five, interaction.locale),
-				], BulletStyles.Arrow),
-			}],
+	const strings = {
+		introduction: {
+			title: localise(client, 'policies.moderation.points.introduction.title', locale)(),
+			description: localise(client, 'policies.moderation.points.introduction.description', locale)(
+				{ 'role_mention': moderatorRoleMention },
+			),
 		},
-	});
+		breach: {
+			title: localise(client, 'policies.moderation.points.breach.title', locale)(),
+			description: localise(client, 'policies.moderation.points.breach.description', locale)(),
+		},
+		warnings: {
+			title: localise(client, 'policies.moderation.points.warnings.title', locale)(),
+			description: localise(client, 'policies.moderation.points.warnings.description', locale)(),
+		},
+		furtherAction: {
+			title: localise(client, 'policies.moderation.points.furtherAction.title', locale)(),
+			description: localise(client, 'policies.moderation.points.furtherAction.description', locale)(),
+		},
+		ban: {
+			title: localise(client, 'policies.moderation.points.ban.title', locale)(),
+			description: localise(client, 'policies.moderation.points.ban.description', locale)(),
+		},
+	};
+
+	return [{
+		name: strings.introduction.title,
+		value: strings.introduction.description,
+	}, {
+		name: strings.breach.title,
+		value: strings.breach.description,
+	}, {
+		name: strings.warnings.title,
+		value: strings.warnings.description,
+	}, {
+		name: strings.furtherAction.title,
+		value: strings.furtherAction.description,
+	}, {
+		name: strings.ban.title,
+		value: strings.ban.description,
+	}];
 }
 
 export default command;

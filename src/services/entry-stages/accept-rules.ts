@@ -1,30 +1,19 @@
-import {
-	ApplicationCommandFlags,
-	Bot,
-	ButtonComponent,
-	ButtonStyles,
-	editOriginalInteractionResponse,
-	Interaction,
-	InteractionResponseTypes,
-	MessageComponentTypes,
-	sendInteractionResponse,
-} from 'discordeno';
-import { localise, Services } from 'logos/assets/localisations/mod.ts';
+import { Bot, ButtonComponent, ButtonStyles, Interaction, MessageComponentTypes } from 'discordeno';
 import { getProficiencyCategory } from 'logos/src/commands/social/module.ts';
 import { EntryStepButtonID } from 'logos/src/services/entry.ts';
-import { Client } from 'logos/src/client.ts';
-import { encodeId } from 'logos/src/interactions.ts';
+import { Client, localise } from 'logos/src/client.ts';
+import { editReply, encodeId, reply } from 'logos/src/interactions.ts';
 import { snowflakeToTimestamp } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import constants from 'logos/constants.ts';
 
 const proficiencyCategory = getProficiencyCategory();
-const proficiencies = proficiencyCategory.collection.list;
+const proficiencyRoles = proficiencyCategory.collection.list;
 
 async function handleAcceptRules(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
-	_parameter: string,
+	_: string,
 ): Promise<void> {
 	const canEnter = await vetUser([client, bot], interaction);
 	if (!canEnter) return;
@@ -32,55 +21,80 @@ async function handleAcceptRules(
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (guild === undefined) return;
 
-	return void editOriginalInteractionResponse(
-		bot,
-		interaction.token,
-		{
-			flags: ApplicationCommandFlags.Ephemeral,
-			embeds: [{
-				title: localise(Services.entry.selectProficiency.header, interaction.locale),
-				description: localise(Services.entry.selectProficiency.body, interaction.locale)(guild.language),
-			}],
-			components: [{
-				type: MessageComponentTypes.ActionRow,
-				components: proficiencies.map<ButtonComponent>(
-					(proficiency, index) => ({
+	const strings = {
+		title: localise(client, 'entry.proficiency.title', interaction.locale)(),
+		description: {
+			chooseProficiency: localise(client, 'entry.proficiency.chooseProficiency', interaction.locale)({
+				'language': guild.language,
+			}),
+			canChangeLater: localise(client, 'entry.proficiency.canChangeLater', interaction.locale)({
+				'command': '`/profile roles`',
+			}),
+		},
+	};
+
+	return void editReply([client, bot], interaction, {
+		embeds: [{
+			title: strings.title,
+			description: `${strings.description.chooseProficiency}\n\n${strings.description.canChangeLater}`,
+		}],
+		components: [{
+			type: MessageComponentTypes.ActionRow,
+			components: proficiencyRoles.map<ButtonComponent>(
+				(proficiencyRole, index) => {
+					const strings = {
+						name: localise(client, `${proficiencyRole.id}.name`, interaction.locale)(),
+					};
+
+					return {
 						type: MessageComponentTypes.Button,
-						label: localise(proficiency.name, interaction.locale),
+						label: strings.name,
 						customId: encodeId<EntryStepButtonID>(constants.staticComponentIds.selectedLanguageProficiency, [
 							index.toString(),
 						]),
 						style: ButtonStyles.Secondary,
-						emoji: { name: proficiency.emoji },
-					}),
-				) as [ButtonComponent],
-			}],
-		},
-	);
+						emoji: { name: proficiencyRole.emoji },
+					};
+				},
+			) as [ButtonComponent],
+		}],
+	});
 }
 
 async function vetUser([client, bot]: [Client, Bot], interaction: Interaction): Promise<boolean> {
-	await sendInteractionResponse(bot, interaction.id, interaction.token, {
-		type: InteractionResponseTypes.ChannelMessageWithSource,
-		data: {
-			flags: ApplicationCommandFlags.Ephemeral,
-			embeds: [{
-				description: localise(Services.entry.verifyingAccount, interaction.locale),
-				color: constants.colors.blue,
-			}],
-		},
+	const strings = {
+		title: localise(client, 'entry.verification.verifyingAccount.verifyingAccount.title', interaction.locale)(),
+		description: localise(
+			client,
+			'entry.verification.verifyingAccount.verifyingAccount.description',
+			interaction.locale,
+		)(),
+	};
+
+	await reply([client, bot], interaction, {
+		embeds: [{
+			title: strings.title,
+			description: strings.description,
+			color: constants.colors.blue,
+		}],
 	});
 
 	const createdAt = snowflakeToTimestamp(interaction.user.id);
 
 	if ((Date.now() - createdAt) < configuration.services.entry.minimumRequiredAge) {
-		editOriginalInteractionResponse(bot, interaction.token, {
-			flags: ApplicationCommandFlags.Ephemeral,
+		const strings = {
+			title: localise(client, 'entry.verification.verifyingAccount.tooNew.title', interaction.locale)(),
+			description: localise(client, 'entry.verification.verifyingAccount.tooNew.description', interaction.locale)(),
+		};
+
+		editReply([client, bot], interaction, {
 			embeds: [{
-				description: localise(Services.entry.accountTooNew, interaction.locale),
+				title: strings.title,
+				description: strings.description,
 				color: constants.colors.dullYellow,
 			}],
 		});
+
 		return false;
 	}
 
@@ -91,10 +105,15 @@ async function vetUser([client, bot]: [Client, Bot], interaction: Interaction): 
 		interaction.user.id,
 	);
 	if (userDocument === undefined) {
-		editOriginalInteractionResponse(bot, interaction.token, {
-			flags: ApplicationCommandFlags.Ephemeral,
+		const strings = {
+			title: localise(client, 'entry.verification.verifyingAccount.failed.title', interaction.locale)(),
+			description: localise(client, 'entry.verification.verifyingAccount.failed.description', interaction.locale)(),
+		};
+
+		editReply([client, bot], interaction, {
 			embeds: [{
-				description: localise(Services.entry.failedToVerifyAccount, interaction.locale),
+				title: strings.title,
+				description: strings.description,
 				color: constants.colors.red,
 			}],
 		});
@@ -112,25 +131,37 @@ async function vetUser([client, bot]: [Client, Bot], interaction: Interaction): 
 	]);
 
 	if (entryRequest !== undefined && !entryRequest.data.isFinalised) {
-		editOriginalInteractionResponse(bot, interaction.token, {
-			flags: ApplicationCommandFlags.Ephemeral,
+		const strings = {
+			title: localise(client, 'entry.verification.answers.alreadyAnswered.title', interaction.locale)(),
+			description: localise(client, 'entry.verification.answers.alreadyAnswered.description', interaction.locale)(),
+		};
+
+		editReply([client, bot], interaction, {
 			embeds: [{
-				description: localise(Services.entry.alreadySubmittedAnswers, interaction.locale),
+				title: strings.title,
+				description: strings.description,
 				color: constants.colors.dullYellow,
 			}],
 		});
+
 		return false;
 	}
 
 	if (userDocument.data.account.authorisedOn?.includes(interaction.guildId!.toString())) return true;
 	if (userDocument.data.account.rejectedOn?.includes(interaction.guildId!.toString())) {
-		editOriginalInteractionResponse(bot, interaction.token, {
-			flags: ApplicationCommandFlags.Ephemeral,
+		const strings = {
+			title: localise(client, 'entry.verification.answers.rejectedBefore.title', interaction.locale)(),
+			description: localise(client, 'entry.verification.answers.rejectedBefore.description', interaction.locale)(),
+		};
+
+		editReply([client, bot], interaction, {
 			embeds: [{
-				description: localise(Services.entry.entryRequestRejectedPreviously, interaction.locale),
+				title: strings.title,
+				description: strings.description,
 				color: constants.colors.red,
 			}],
 		});
+
 		return false;
 	}
 

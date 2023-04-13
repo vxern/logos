@@ -294,7 +294,7 @@ async function dispatchQuery<
 }
 
 function mentionUser(user: DiscordUser | undefined, id: bigint): string {
-	return user === undefined ? `an unknown user (ID ${id})` : diagnosticMentionUser(user, true);
+	return user === undefined ? `an unknown user (ID ${id})` : diagnosticMentionUser(user);
 }
 
 function getUserMentionByReference(client: Client, reference: Reference): string {

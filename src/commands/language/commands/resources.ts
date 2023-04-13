@@ -1,22 +1,14 @@
-import {
-	ApplicationCommandFlags,
-	Bot,
-	ButtonStyles,
-	Interaction,
-	InteractionResponseTypes,
-	MessageComponentTypes,
-	sendInteractionResponse,
-} from 'discordeno';
-import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
-import { CommandBuilder } from 'logos/src/commands/command.ts';
+import { ApplicationCommandTypes, Bot, ButtonStyles, Interaction, MessageComponentTypes } from 'discordeno';
+import { CommandTemplate } from 'logos/src/commands/command.ts';
 import { show } from 'logos/src/commands/parameters.ts';
-import { Client } from 'logos/src/client.ts';
-import { parseArguments } from 'logos/src/interactions.ts';
+import { Client, localise } from 'logos/src/client.ts';
+import { parseArguments, reply } from 'logos/src/interactions.ts';
 import constants from 'logos/constants.ts';
 import { defaultLocale } from 'logos/types.ts';
 
-const command: CommandBuilder = {
-	...createLocalisations(Commands.resources),
+const command: CommandTemplate = {
+	name: 'resources',
+	type: ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ['VIEW_CHANNEL'],
 	handle: handleDisplayResources,
 	options: [show],
@@ -30,26 +22,24 @@ function handleDisplayResources([client, bot]: [Client, Bot], interaction: Inter
 	if (guild === undefined) return;
 
 	const locale = show ? defaultLocale : interaction.locale;
-	return void sendInteractionResponse(
-		bot,
-		interaction.id,
-		interaction.token,
-		{
-			type: InteractionResponseTypes.ChannelMessageWithSource,
-			data: {
-				flags: !show ? ApplicationCommandFlags.Ephemeral : undefined,
-				components: [{
-					type: MessageComponentTypes.ActionRow,
-					components: [{
-						type: MessageComponentTypes.Button,
-						label: localise(Commands.resources.strings.resourcesStoredHere, locale)(guild.language),
-						style: ButtonStyles.Link,
-						url: constants.links.generateLanguageRepositoryLink(guild.language),
-					}],
-				}],
-			},
-		},
-	);
+
+	const strings = {
+		redirect: localise(client, 'resources.strings.redirect', locale)({
+			'language': localise(client, `languages.${guild.language.toLowerCase()}`, locale)(),
+		}),
+	};
+
+	return void reply([client, bot], interaction, {
+		components: [{
+			type: MessageComponentTypes.ActionRow,
+			components: [{
+				type: MessageComponentTypes.Button,
+				label: strings.redirect,
+				style: ButtonStyles.Link,
+				url: constants.links.generateLanguageRepositoryLink(guild.language),
+			}],
+		}],
+	}, { visible: show });
 }
 
 export default command;

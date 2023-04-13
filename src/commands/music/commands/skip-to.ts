@@ -1,51 +1,42 @@
-import {
-	ApplicationCommandFlags,
-	ApplicationCommandOptionTypes,
-	Bot,
-	Interaction,
-	InteractionResponseTypes,
-	sendInteractionResponse,
-} from 'discordeno';
-import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
-import { OptionBuilder } from 'logos/src/commands/command.ts';
+import { ApplicationCommandOptionTypes, Bot, Interaction } from 'discordeno';
+import { OptionTemplate } from 'logos/src/commands/command.ts';
 import { timestamp } from 'logos/src/commands/parameters.ts';
-import { getVoiceState, isOccupied, skipTo, verifyCanManipulatePlayback } from 'logos/src/controllers/music.ts';
-import { Client } from 'logos/src/client.ts';
-import { parseArguments, parseTimeExpression } from 'logos/src/interactions.ts';
+import { getVoiceState, isOccupied, skipTo, verifyCanManagePlayback } from 'logos/src/controllers/music.ts';
+import { Client, localise } from 'logos/src/client.ts';
+import { parseArguments, parseTimeExpression, reply, respond } from 'logos/src/interactions.ts';
 import constants from 'logos/constants.ts';
 import { defaultLocale } from 'logos/types.ts';
 
-const command: OptionBuilder = {
-	...createLocalisations(Commands.music.options.skipTo),
+const command: OptionTemplate = {
+	name: 'skip-to',
 	type: ApplicationCommandOptionTypes.SubCommand,
 	handle: handleSkipToTimestamp,
+	handleAutocomplete: handleSkipToTimestampAutocomplete,
 	options: [timestamp],
 };
 
+async function handleSkipToTimestampAutocomplete(
+	[client, bot]: [Client, Bot],
+	interaction: Interaction,
+): Promise<void> {
+	const [{ timestamp: timestampExpression }] = parseArguments(interaction.data?.options, {});
+
+	const timestamp = parseTimeExpression(client, timestampExpression!, interaction.locale);
+	if (timestamp === undefined) {
+		return respond([client, bot], interaction, []);
+	}
+
+	return respond([client, bot], interaction, [{ name: timestamp[0], value: timestamp[1].toString() }]);
+}
+
 async function handleSkipToTimestamp([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
-	const [{ timestamp: timestampExpression }, focused] = parseArguments(interaction.data?.options, {});
+	const [{ timestamp: timestampExpression }] = parseArguments(interaction.data?.options, {});
 
 	const controller = client.features.music.controllers.get(interaction.guildId!);
 	if (controller === undefined) return;
 
-	if (focused !== undefined) {
-		const timestamp = parseTimeExpression(timestampExpression!, false, interaction.locale);
-
-		return void sendInteractionResponse(
-			bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ApplicationCommandAutocompleteResult,
-				data: {
-					choices: timestamp === undefined ? [] : [{ name: timestamp[0], value: timestamp[1].toString() }],
-				},
-			},
-		);
-	}
-
-	const isVoiceStateVerified = verifyCanManipulatePlayback(
-		bot,
+	const isVoiceStateVerified = verifyCanManagePlayback(
+		[client, bot],
 		interaction,
 		controller,
 		getVoiceState(client, interaction.guildId!, interaction.user.id),
@@ -55,29 +46,22 @@ async function handleSkipToTimestamp([client, bot]: [Client, Bot], interaction: 
 	const playingSince = controller.player.playingSince!;
 
 	if (!isOccupied(controller.player)) {
-		return void sendInteractionResponse(
-			bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						description: localise(Commands.music.strings.notPlayingMusic, interaction.locale),
-						color: constants.colors.dullYellow,
-					}],
-				},
-			},
-		);
+		const strings = {
+			title: localise(client, 'music.options.skip-to.strings.noSong.title', interaction.locale)(),
+			description: localise(client, 'music.options.skip-to.strings.noSong.description', interaction.locale)(),
+		};
+
+		return void reply([client, bot], interaction, {
+			embeds: [{
+				title: strings.title,
+				description: strings.description,
+				color: constants.colors.dullYellow,
+			}],
+		});
 	}
 
 	if (Number.isNaN(timestampExpression)) {
-		return displayError(
-			bot,
-			interaction,
-			localise(Commands.timeout.strings.invalidDuration, interaction.locale),
-		);
+		return displayInvalidTimestampError([client, bot], interaction);
 	}
 
 	const timestamp = Number(timestampExpression);
@@ -90,41 +74,29 @@ async function handleSkipToTimestamp([client, bot]: [Client, Bot], interaction: 
 		skipTo(controller.player, timestamp);
 	}
 
-	const skippedToString = localise(Commands.music.options.skipTo.strings.skippedTo.header, defaultLocale);
+	const strings = {
+		title: localise(client, 'music.options.skip-to.strings.skippedTo.title', defaultLocale)(),
+		description: localise(client, 'music.options.skip-to.strings.skippedTo.description', defaultLocale)(),
+	};
 
-	return void sendInteractionResponse(
-		bot,
-		interaction.id,
-		interaction.token,
-		{
-			type: InteractionResponseTypes.ChannelMessageWithSource,
-			data: {
-				embeds: [{
-					title: `${constants.symbols.music.skippedTo} ${skippedToString}`,
-					description: localise(Commands.music.options.skipTo.strings.skippedTo.body, defaultLocale),
-					color: constants.colors.blue,
-				}],
-			},
-		},
-	);
+	return void reply([client, bot], interaction, {
+		embeds: [{
+			title: `${constants.symbols.music.skippedTo} ${strings.title}`,
+			description: strings.description,
+			color: constants.colors.blue,
+		}],
+	}, { visible: true });
 }
 
-function displayError(bot: Bot, interaction: Interaction, error: string): void {
-	return void sendInteractionResponse(
-		bot,
-		interaction.id,
-		interaction.token,
-		{
-			type: InteractionResponseTypes.ChannelMessageWithSource,
-			data: {
-				flags: ApplicationCommandFlags.Ephemeral,
-				embeds: [{
-					description: error,
-					color: constants.colors.dullYellow,
-				}],
-			},
-		},
-	);
+function displayInvalidTimestampError([client, bot]: [Client, Bot], interaction: Interaction): void {
+	const strings = {
+		title: localise(client, 'music.options.skip-to.strings.invalidTimestamp.title', interaction.locale)(),
+		description: localise(client, 'music.options.skip-to.strings.invalidTimestamp.description', interaction.locale)(),
+	};
+
+	return void reply([client, bot], interaction, {
+		embeds: [{ title: strings.title, description: strings.description, color: constants.colors.red }],
+	});
 }
 
 export default command;

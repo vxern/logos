@@ -1,8 +1,7 @@
-import { Bot, Interaction, InteractionResponseTypes, sendInteractionResponse } from 'discordeno';
-import { Commands, localise } from 'logos/assets/localisations/mod.ts';
-import { getVoiceState, setVolume, verifyCanManipulatePlayback } from 'logos/src/controllers/music.ts';
-import { Client } from 'logos/src/client.ts';
-import { parseArguments } from 'logos/src/interactions.ts';
+import { Bot, Interaction } from 'discordeno';
+import { getVoiceState, setVolume, verifyCanManagePlayback } from 'logos/src/controllers/music.ts';
+import { Client, localise } from 'logos/src/client.ts';
+import { parseArguments, reply } from 'logos/src/interactions.ts';
 import configuration from 'logos/configuration.ts';
 import constants from 'logos/constants.ts';
 
@@ -10,8 +9,8 @@ function handleSetVolume([client, bot]: [Client, Bot], interaction: Interaction)
 	const controller = client.features.music.controllers.get(interaction.guildId!);
 	if (controller === undefined) return;
 
-	const isVoiceStateVerified = verifyCanManipulatePlayback(
-		bot,
+	const isVoiceStateVerified = verifyCanManagePlayback(
+		[client, bot],
 		interaction,
 		controller,
 		getVoiceState(client, interaction.guildId!, interaction.user.id),
@@ -22,45 +21,40 @@ function handleSetVolume([client, bot]: [Client, Bot], interaction: Interaction)
 	if (volume === undefined || isNaN(volume)) return;
 
 	if (volume < 0 || volume > configuration.music.limits.volume) {
-		return void sendInteractionResponse(
-			bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					embeds: [{
-						description: localise(Commands.music.options.volume.options.set.strings.invalidVolume, interaction.locale)(
-							configuration.music.limits.volume,
-						),
-						color: constants.colors.red,
-					}],
-				},
-			},
-		);
+		const strings = {
+			title: localise(client, 'music.options.volume.options.set.strings.invalid.title', interaction.locale)(),
+			description: localise(
+				client,
+				'music.options.volume.options.set.strings.invalid.description',
+				interaction.locale,
+			)({ 'volume': configuration.music.limits.volume }),
+		};
+
+		return void reply([client, bot], interaction, {
+			embeds: [{
+				title: strings.title,
+				description: strings.description,
+				color: constants.colors.red,
+			}],
+		});
 	}
 
 	setVolume(controller.player, volume);
 
-	const volumeString = localise(Commands.music.options.volume.options.set.strings.volumeSet.header, interaction.locale);
+	const strings = {
+		title: localise(client, 'music.options.volume.options.set.strings.set.title', interaction.locale)(),
+		description: localise(client, 'music.options.volume.options.set.strings.set.description', interaction.locale)(
+			{ 'volume': volume },
+		),
+	};
 
-	return void sendInteractionResponse(
-		bot,
-		interaction.id,
-		interaction.token,
-		{
-			type: InteractionResponseTypes.ChannelMessageWithSource,
-			data: {
-				embeds: [{
-					title: `${constants.symbols.music.volume} ${volumeString}`,
-					description: localise(Commands.music.options.volume.options.set.strings.volumeSet.body, interaction.locale)(
-						volume,
-					),
-					color: constants.colors.invisible,
-				}],
-			},
-		},
-	);
+	return void reply([client, bot], interaction, {
+		embeds: [{
+			title: `${constants.symbols.music.volume} ${strings.title}`,
+			description: strings.description,
+			color: constants.colors.invisible,
+		}],
+	});
 }
 
 export { handleSetVolume };

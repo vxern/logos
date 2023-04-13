@@ -1,40 +1,76 @@
-import { Roles } from 'logos/assets/localisations/mod.ts';
 import { RoleCategory, RoleCategoryTypes, RoleCollectionTypes } from 'logos/src/commands/social/data/types.ts';
 import constants from 'logos/constants.ts';
 
 const categories: RoleCategory[] = [
 	{
-		...Roles.proficiency,
-		type: RoleCategoryTypes.Category,
+		id: 'roles.language',
 		color: constants.colors.gray,
-		emoji: constants.symbols.roles.categories.proficiency.category,
-		minimum: 1,
-		maximum: 1,
-		collection: {
-			type: RoleCollectionTypes.Collection,
-			list: [{
-				...Roles.proficiency.roles.beginner,
-				emoji: constants.symbols.roles.categories.proficiency.beginner,
-			}, {
-				...Roles.proficiency.roles.intermediate,
-				emoji: constants.symbols.roles.categories.proficiency.intermediate,
-			}, {
-				...Roles.proficiency.roles.advanced,
-				emoji: constants.symbols.roles.categories.proficiency.advanced,
-			}, {
-				...Roles.proficiency.roles.native,
-				emoji: constants.symbols.roles.categories.proficiency.native,
-			}],
-		},
+		emoji: constants.symbols.roles.categories.language.category,
+		type: RoleCategoryTypes.CategoryGroup,
+		categories: [{
+			id: 'roles.language.categories.proficiency',
+			type: RoleCategoryTypes.Category,
+			color: constants.colors.gray,
+			emoji: constants.symbols.roles.categories.language.proficiency.category,
+			minimum: 1,
+			maximum: 1,
+			collection: {
+				type: RoleCollectionTypes.Collection,
+				list: [{
+					id: 'roles.language.categories.proficiency.roles.beginner',
+					emoji: constants.symbols.roles.categories.language.proficiency.beginner,
+				}, {
+					id: 'roles.language.categories.proficiency.roles.intermediate',
+					emoji: constants.symbols.roles.categories.language.proficiency.intermediate,
+				}, {
+					id: 'roles.language.categories.proficiency.roles.advanced',
+					emoji: constants.symbols.roles.categories.language.proficiency.advanced,
+				}, {
+					id: 'roles.language.categories.proficiency.roles.native',
+					emoji: constants.symbols.roles.categories.language.proficiency.native,
+				}],
+			},
+		}, {
+			id: 'roles.language.categories.cefr',
+			type: RoleCategoryTypes.Category,
+			color: constants.colors.blue,
+			emoji: constants.symbols.roles.categories.language.cefr.category,
+			maximum: 1,
+			collection: {
+				type: RoleCollectionTypes.Collection,
+				list: [{
+					id: 'roles.language.categories.cefr.roles.a0',
+					emoji: constants.symbols.roles.categories.language.cefr.a0,
+				}, {
+					id: 'roles.language.categories.cefr.roles.a1',
+					emoji: constants.symbols.roles.categories.language.cefr.a1,
+				}, {
+					id: 'roles.language.categories.cefr.roles.a2',
+					emoji: constants.symbols.roles.categories.language.cefr.a2,
+				}, {
+					id: 'roles.language.categories.cefr.roles.b1',
+					emoji: constants.symbols.roles.categories.language.cefr.b1,
+				}, {
+					id: 'roles.language.categories.cefr.roles.b2',
+					emoji: constants.symbols.roles.categories.language.cefr.b2,
+				}, {
+					id: 'roles.language.categories.cefr.roles.c1',
+					emoji: constants.symbols.roles.categories.language.cefr.c1,
+				}, {
+					id: 'roles.language.categories.cefr.roles.c2',
+					emoji: constants.symbols.roles.categories.language.cefr.c2,
+				}],
+			},
+		}],
 	},
 	{
-		...Roles.personalisation,
+		id: 'roles.personalisation',
 		color: constants.colors.yellow,
 		emoji: constants.symbols.roles.categories.personalisation.category,
 		type: RoleCategoryTypes.CategoryGroup,
 		categories: [
 			{
-				...Roles.personalisation.categories.orthography,
+				id: 'roles.personalisation.categories.orthography',
 				type: RoleCategoryTypes.Category,
 				color: constants.colors.husky,
 				emoji: constants.symbols.roles.categories.personalisation.orthography.category,
@@ -43,14 +79,14 @@ const categories: RoleCategory[] = [
 					type: RoleCollectionTypes.CollectionLocalised,
 					lists: {
 						'Romanian': [{
-							...Roles.personalisation.categories.orthography.roles.idinist,
+							id: 'roles.personalisation.categories.orthography.roles.idinist',
 							emoji: constants.symbols.roles.categories.personalisation.orthography.idinist,
 						}],
 					},
 				},
 			},
 			{
-				...Roles.personalisation.categories.gender,
+				id: 'roles.personalisation.categories.gender',
 				type: RoleCategoryTypes.Category,
 				color: constants.colors.orangeRed,
 				emoji: constants.symbols.roles.categories.personalisation.gender.category,
@@ -58,29 +94,29 @@ const categories: RoleCategory[] = [
 				collection: {
 					type: RoleCollectionTypes.Collection,
 					list: [{
-						...Roles.personalisation.categories.gender.roles.male,
+						id: 'roles.personalisation.categories.gender.roles.male',
 						emoji: constants.symbols.roles.categories.personalisation.gender.male,
 					}, {
-						...Roles.personalisation.categories.gender.roles.female,
+						id: 'roles.personalisation.categories.gender.roles.female',
 						emoji: constants.symbols.roles.categories.personalisation.gender.female,
 					}, {
-						...Roles.personalisation.categories.gender.roles.transgender,
+						id: 'roles.personalisation.categories.gender.roles.transgender',
 						emoji: constants.symbols.roles.categories.personalisation.gender.transgender,
 					}, {
-						...Roles.personalisation.categories.gender.roles.nonbinary,
+						id: 'roles.personalisation.categories.gender.roles.nonBinary',
 						emoji: constants.symbols.roles.categories.personalisation.gender.nonbinary,
 					}],
 				},
 			},
 			{
-				...Roles.personalisation.categories.abroad,
+				id: 'roles.personalisation.categories.abroad',
 				type: RoleCategoryTypes.Category,
 				color: constants.colors.husky,
 				emoji: constants.symbols.roles.categories.personalisation.abroad.category,
 				collection: {
 					type: RoleCollectionTypes.Collection,
 					list: [{
-						...Roles.personalisation.categories.abroad.roles.diasporan,
+						id: 'roles.personalisation.categories.abroad.roles.diasporan',
 						emoji: constants.symbols.roles.categories.personalisation.abroad.diasporan,
 					}],
 				},
@@ -88,29 +124,29 @@ const categories: RoleCategory[] = [
 		],
 	},
 	{
-		...Roles.learning,
+		id: 'roles.learning',
 		type: RoleCategoryTypes.Category,
 		color: constants.colors.lightGray,
 		emoji: constants.symbols.roles.categories.learning.category,
 		collection: {
 			type: RoleCollectionTypes.Collection,
 			list: [{
-				...Roles.learning.roles.classroomAttendee,
+				id: 'roles.learning.roles.classroomAttendee',
 				emoji: constants.symbols.roles.categories.learning.classroomAttendee,
 			}, {
-				...Roles.learning.roles.correctMe,
+				id: 'roles.learning.roles.correctMe',
 				emoji: constants.symbols.roles.categories.learning.correctMe,
 			}, {
-				...Roles.learning.roles.dailyPhrase,
+				id: 'roles.learning.roles.dailyPhrase',
 				emoji: constants.symbols.roles.categories.learning.dailyPhrase,
 			}, {
-				...Roles.learning.roles.voicechatter,
+				id: 'roles.learning.roles.voicechatter',
 				emoji: constants.symbols.roles.categories.learning.voicechatter,
 			}],
 		},
 	},
 	{
-		...Roles.ethnicity,
+		id: 'roles.ethnicity',
 		type: RoleCategoryTypes.Category,
 		color: constants.colors.turquoise,
 		emoji: constants.symbols.roles.categories.ethnicity.category,
@@ -118,25 +154,41 @@ const categories: RoleCategory[] = [
 		collection: {
 			type: RoleCollectionTypes.CollectionLocalised,
 			lists: {
-				'Armenian': Roles.ethnicity.languages['Armenian'],
-				'Romanian': Roles.ethnicity.languages['Romanian'],
+				'Armenian': [
+					{ id: 'roles.ethnicity.languages.armenian.roles.armenoTat' },
+					{ id: 'roles.ethnicity.languages.armenian.roles.circassian' },
+					{ id: 'roles.ethnicity.languages.armenian.roles.hemshin' },
+					{ id: 'roles.ethnicity.languages.armenian.roles.cryptoArmenian' },
+				],
+				'Romanian': [
+					{ id: 'roles.ethnicity.languages.romanian.roles.aromanian' },
+					{ id: 'roles.ethnicity.languages.romanian.roles.istroRomanian' },
+					{ id: 'roles.ethnicity.languages.romanian.roles.meglenoRomanian' },
+					{ id: 'roles.ethnicity.languages.romanian.roles.romani' },
+					{ id: 'roles.ethnicity.languages.romanian.roles.hungarian' },
+					{ id: 'roles.ethnicity.languages.romanian.roles.german' },
+				],
 			},
 		},
 	},
 	{
-		...Roles.dialects,
+		id: 'roles.dialects',
 		type: RoleCategoryTypes.Category,
 		color: constants.colors.green,
 		emoji: constants.symbols.roles.categories.dialects.category,
 		collection: {
 			type: RoleCollectionTypes.CollectionLocalised,
 			lists: {
-				'Armenian': Roles.dialects.languages['Armenian'],
+				'Armenian': [
+					{ id: 'roles.dialects.languages.armenian.roles.western' },
+					{ id: 'roles.dialects.languages.armenian.roles.eastern' },
+					{ id: 'roles.dialects.languages.armenian.roles.karabakh' },
+				],
 			},
 		},
 	},
 	{
-		...Roles.regions,
+		id: 'roles.regions',
 		type: RoleCategoryTypes.Category,
 		color: constants.colors.greenishLightGray,
 		emoji: constants.symbols.roles.categories.regions.category,
@@ -144,8 +196,31 @@ const categories: RoleCategory[] = [
 		collection: {
 			type: RoleCollectionTypes.CollectionLocalised,
 			lists: {
-				'Armenian': Roles.regions.languages['Armenian'],
-				'Romanian': Roles.regions.languages['Romanian'],
+				'Armenian': [
+					{ id: 'roles.regions.languages.armenian.roles.aragatsotn' },
+					{ id: 'roles.regions.languages.armenian.roles.ararat' },
+					{ id: 'roles.regions.languages.armenian.roles.armavir' },
+					{ id: 'roles.regions.languages.armenian.roles.gegharkunik' },
+					{ id: 'roles.regions.languages.armenian.roles.kotayk' },
+					{ id: 'roles.regions.languages.armenian.roles.lorri' },
+					{ id: 'roles.regions.languages.armenian.roles.shirak' },
+					{ id: 'roles.regions.languages.armenian.roles.syunik' },
+					{ id: 'roles.regions.languages.armenian.roles.tavush' },
+					{ id: 'roles.regions.languages.armenian.roles.vayotsDzor' },
+					{ id: 'roles.regions.languages.armenian.roles.yerevan' },
+				],
+				'Romanian': [
+					{ id: 'roles.regions.languages.romanian.roles.banat' },
+					{ id: 'roles.regions.languages.romanian.roles.basarabia' },
+					{ id: 'roles.regions.languages.romanian.roles.bucovina' },
+					{ id: 'roles.regions.languages.romanian.roles.crisana' },
+					{ id: 'roles.regions.languages.romanian.roles.dobrogea' },
+					{ id: 'roles.regions.languages.romanian.roles.maramures' },
+					{ id: 'roles.regions.languages.romanian.roles.moldova' },
+					{ id: 'roles.regions.languages.romanian.roles.muntenia' },
+					{ id: 'roles.regions.languages.romanian.roles.oltenia' },
+					{ id: 'roles.regions.languages.romanian.roles.transilvania' },
+				],
 			},
 		},
 	},

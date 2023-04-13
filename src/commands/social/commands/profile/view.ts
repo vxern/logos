@@ -1,23 +1,14 @@
-import {
-	ApplicationCommandFlags,
-	ApplicationCommandOptionTypes,
-	Bot,
-	getAvatarURL,
-	Interaction,
-	InteractionResponseTypes,
-	sendInteractionResponse,
-} from 'discordeno';
-import { Commands, createLocalisations, localise } from 'logos/assets/localisations/mod.ts';
-import { OptionBuilder } from 'logos/src/commands/command.ts';
+import { ApplicationCommandOptionTypes, Bot, getAvatarURL, Interaction } from 'discordeno';
+import { OptionTemplate } from 'logos/src/commands/command.ts';
 import { show, user } from 'logos/src/commands/parameters.ts';
-import { autocompleteMembers, Client, resolveInteractionToMember } from 'logos/src/client.ts';
-import { parseArguments } from 'logos/src/interactions.ts';
+import { autocompleteMembers, Client, localise, resolveInteractionToMember } from 'logos/src/client.ts';
+import { parseArguments, reply } from 'logos/src/interactions.ts';
 import constants from 'logos/constants.ts';
 import { mention, MentionTypes } from 'logos/formatting.ts';
 import { defaultLocale } from 'logos/types.ts';
 
-const command: OptionBuilder = {
-	...createLocalisations(Commands.profile.options.view),
+const command: OptionTemplate = {
+	name: 'view',
 	type: ApplicationCommandOptionTypes.SubCommand,
 	handle: handleDisplayProfile,
 	handleAutocomplete: handleDisplayProfileAutocomplete,
@@ -40,21 +31,18 @@ async function handleDisplayProfile([client, bot]: [Client, Bot], interaction: I
 	if (target === undefined) return;
 
 	function showProfileViewFailure(): void {
-		return void sendInteractionResponse(
-			bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						description: localise(Commands.profile.options.view.strings.failed, interaction.locale),
-						color: constants.colors.red,
-					}],
-				},
-			},
-		);
+		const strings = {
+			title: localise(client, 'profile.options.view.strings.failed.title', interaction.locale)(),
+			description: localise(client, 'profile.options.view.strings.failed.description', interaction.locale)(),
+		};
+
+		return void reply([client, bot], interaction, {
+			embeds: [{
+				title: strings.title,
+				description: strings.description,
+				color: constants.colors.red,
+			}],
+		});
 	}
 
 	const subject = await client.database.adapters.users.getOrFetchOrCreate(
@@ -76,49 +64,45 @@ async function handleDisplayProfile([client, bot]: [Client, Bot], interaction: I
 
 	const locale = show ? defaultLocale : interaction.locale;
 
-	const rolesString = localise(Commands.profile.options.view.strings.roles, locale);
-	const statisticsString = localise(Commands.profile.options.view.strings.statistics, locale);
-	const praisesString = localise(Commands.profile.options.view.strings.praises, locale);
-	const warningsString = localise(Commands.profile.options.view.strings.warnings, locale);
-	const receivedString = localise(Commands.profile.options.view.strings.received, locale);
-	const sentString = localise(Commands.profile.options.view.strings.sent, locale);
+	const strings = {
+		title: localise(client, 'profile.options.view.strings.information.title', locale)({
+			'username': target.username,
+		}),
+		roles: localise(client, 'profile.options.view.strings.information.description.roles', locale)(),
+		statistics: localise(client, 'profile.options.view.strings.information.description.statistics', locale)(),
+		praises: localise(client, 'profile.options.view.strings.information.description.praises', locale)(),
+		warnings: localise(client, 'profile.options.view.strings.information.description.warnings', locale)(),
+		received: localise(client, 'profile.options.view.strings.information.description.received', locale)(),
+		sent: localise(client, 'profile.options.view.strings.information.description.sent', locale)(),
+	};
 
-	return void sendInteractionResponse(
-		bot,
-		interaction.id,
-		interaction.token,
-		{
-			type: InteractionResponseTypes.ChannelMessageWithSource,
-			data: {
-				flags: !show ? ApplicationCommandFlags.Ephemeral : undefined,
-				embeds: [{
-					title: localise(Commands.profile.options.view.strings.informationForUser, locale)(target.username),
-					thumbnail: (() => {
-						const iconURL = getAvatarURL(
-							bot,
-							target.id,
-							target.discriminator,
-							{ avatar: target.avatar, size: 4096, format: 'webp' },
-						);
-						if (iconURL === undefined) return;
+	return void reply([client, bot], interaction, {
+		embeds: [{
+			title: strings.title,
+			thumbnail: (() => {
+				const iconURL = getAvatarURL(
+					bot,
+					target.id,
+					target.discriminator,
+					{ avatar: target.avatar, size: 4096, format: 'webp' },
+				);
+				if (iconURL === undefined) return;
 
-						return { url: iconURL };
-					})(),
-					fields: [{
-						name: `${constants.symbols.profile.roles} ${rolesString}`,
-						value: member.roles.map((roleId) => mention(roleId, MentionTypes.Role)).join(' '),
-						inline: false,
-					}, {
-						name: `${constants.symbols.profile.statistics.statistics} ${statisticsString}`,
-						value:
-							`${constants.symbols.profile.statistics.praises} ${praisesString} • ${receivedString} – ${praisesReceived.size} • ${sentString} – ${praisesSent.size}
-${constants.symbols.profile.statistics.warnings} ${warningsString} • ${receivedString} – ${warningsReceived.size}`,
-						inline: false,
-					}],
-				}],
-			},
-		},
-	);
+				return { url: iconURL };
+			})(),
+			fields: [{
+				name: `${constants.symbols.profile.roles} ${strings.roles}`,
+				value: member.roles.map((roleId) => mention(roleId, MentionTypes.Role)).join(' '),
+				inline: false,
+			}, {
+				name: `${constants.symbols.profile.statistics.statistics} ${strings.statistics}`,
+				value:
+					`${constants.symbols.profile.statistics.praises} ${strings.praises} • ${strings.received} – ${praisesReceived.size} • ${strings.sent} – ${praisesSent.size}
+  ${constants.symbols.profile.statistics.warnings} ${strings.warnings} • ${strings.received} – ${warningsReceived.size}`,
+				inline: false,
+			}],
+		}],
+	}, { visible: show });
 }
 
 export default command;
