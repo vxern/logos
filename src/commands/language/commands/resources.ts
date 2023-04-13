@@ -1,17 +1,8 @@
-import {
-	ApplicationCommandFlags,
-	ApplicationCommandTypes,
-	Bot,
-	ButtonStyles,
-	Interaction,
-	InteractionResponseTypes,
-	MessageComponentTypes,
-	sendInteractionResponse,
-} from 'discordeno';
+import { ApplicationCommandTypes, Bot, ButtonStyles, Interaction, MessageComponentTypes } from 'discordeno';
 import { CommandTemplate } from 'logos/src/commands/command.ts';
 import { show } from 'logos/src/commands/parameters.ts';
 import { Client, localise } from 'logos/src/client.ts';
-import { parseArguments } from 'logos/src/interactions.ts';
+import { parseArguments, reply } from 'logos/src/interactions.ts';
 import constants from 'logos/constants.ts';
 import { defaultLocale } from 'logos/types.ts';
 
@@ -38,26 +29,17 @@ function handleDisplayResources([client, bot]: [Client, Bot], interaction: Inter
 		}),
 	};
 
-	return void sendInteractionResponse(
-		bot,
-		interaction.id,
-		interaction.token,
-		{
-			type: InteractionResponseTypes.ChannelMessageWithSource,
-			data: {
-				flags: !show ? ApplicationCommandFlags.Ephemeral : undefined,
-				components: [{
-					type: MessageComponentTypes.ActionRow,
-					components: [{
-						type: MessageComponentTypes.Button,
-						label: strings.redirect,
-						style: ButtonStyles.Link,
-						url: constants.links.generateLanguageRepositoryLink(guild.language),
-					}],
-				}],
-			},
-		},
-	);
+	return void reply([client, bot], interaction, {
+		components: [{
+			type: MessageComponentTypes.ActionRow,
+			components: [{
+				type: MessageComponentTypes.Button,
+				label: strings.redirect,
+				style: ButtonStyles.Link,
+				url: constants.links.generateLanguageRepositoryLink(guild.language),
+			}],
+		}],
+	}, { visible: show });
 }
 
 export default command;

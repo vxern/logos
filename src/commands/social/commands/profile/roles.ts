@@ -1,18 +1,14 @@
 import {
 	addRole,
-	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
 	Bot,
-	editOriginalInteractionResponse,
 	Interaction,
-	InteractionResponse,
-	InteractionResponseTypes,
+	InteractionCallbackData,
 	InteractionTypes,
 	MessageComponentTypes,
 	removeRole,
 	Role as DiscordRole,
 	SelectOption,
-	sendInteractionResponse,
 	snowflakeToBigint,
 } from 'discordeno';
 import { OptionTemplate } from 'logos/src/commands/command.ts';
@@ -26,7 +22,7 @@ import {
 } from 'logos/src/commands/social/data/types.ts';
 import { getRelevantCategories, resolveRoles } from 'logos/src/commands/social/module.ts';
 import { Client, localise } from 'logos/src/client.ts';
-import { createInteractionCollector } from 'logos/src/interactions.ts';
+import { acknowledge, createInteractionCollector, editReply, reply } from 'logos/src/interactions.ts';
 import constants from 'logos/constants.ts';
 import { trim } from 'logos/formatting.ts';
 import { defaultLocale, Language } from 'logos/types.ts';
@@ -146,9 +142,7 @@ function createRoleSelectionMenu(
 			type: InteractionTypes.MessageComponent,
 			userId: interaction.user.id,
 			onCollect: async (bot, selection) => {
-				sendInteractionResponse(bot, selection.id, selection.token, {
-					type: InteractionResponseTypes.DeferredUpdateMessage,
-				});
+				acknowledge([client, bot], selection);
 
 				const indexString = selection.data?.values?.at(0);
 				if (indexString === undefined) return;
@@ -214,21 +208,12 @@ function createRoleSelectionMenu(
 							},
 						};
 
-						sendInteractionResponse(
-							bot,
-							interaction.id,
-							interaction.token,
-							{
-								type: InteractionResponseTypes.ChannelMessageWithSource,
-								data: {
-									flags: ApplicationCommandFlags.Ephemeral,
-									embeds: [{
-										title: strings.title,
-										description: `${strings.description.limitReached}\n\n${strings.description.toChooseNew}`,
-									}],
-								},
-							},
-						);
+						reply([client, bot], interaction, {
+							embeds: [{
+								title: strings.title,
+								description: `${strings.description.limitReached}\n\n${strings.description.toChooseNew}`,
+							}],
+						});
 
 						displayData = traverseRoleTreeAndDisplay([client, bot], interaction, displayData, true);
 						return;
@@ -333,11 +318,13 @@ function traverseRoleTreeAndDisplay(
 	const menu = displaySelectMenu(client, data, categories, selectOptions, interaction.locale);
 
 	if (editResponse) {
-		editOriginalInteractionResponse(bot, interaction.token, menu.data!);
+		editReply([client, bot], interaction, menu!);
+
 		return data;
 	}
 
-	sendInteractionResponse(bot, interaction.id, interaction.token, menu);
+	reply([client, bot], interaction, menu!);
+
 	return data;
 }
 
@@ -347,7 +334,7 @@ function displaySelectMenu(
 	categories: [RoleCategory, ...RoleCategory[]],
 	selectOptions: SelectOption[],
 	locale: string | undefined,
-): InteractionResponse {
+): InteractionCallbackData {
 	const isInRootCategory = data.browsingData.navigationData.indexesAccessed.length === 0;
 	if (!isInRootCategory) {
 		const strings = {
@@ -374,24 +361,20 @@ function displaySelectMenu(
 	};
 
 	return {
-		type: InteractionResponseTypes.ChannelMessageWithSource,
-		data: {
-			flags: ApplicationCommandFlags.Ephemeral,
-			embeds: [{
-				title,
-				description: strings.description,
-				color: category.color,
-			}],
+		embeds: [{
+			title,
+			description: strings.description,
+			color: category.color,
+		}],
+		components: [{
+			type: MessageComponentTypes.ActionRow,
 			components: [{
-				type: MessageComponentTypes.ActionRow,
-				components: [{
-					type: MessageComponentTypes.SelectMenu,
-					customId: data.customId,
-					options: selectOptions,
-					placeholder: isCategoryGroup(category) ? strings.chooseCategory : strings.chooseRole,
-				}],
+				type: MessageComponentTypes.SelectMenu,
+				customId: data.customId,
+				options: selectOptions,
+				placeholder: isCategoryGroup(category) ? strings.chooseCategory : strings.chooseRole,
 			}],
-		},
+		}],
 	};
 }
 

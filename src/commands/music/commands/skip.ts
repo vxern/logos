@@ -1,16 +1,9 @@
-import {
-	ApplicationCommandFlags,
-	ApplicationCommandOptionTypes,
-	Bot,
-	Interaction,
-	InteractionResponseTypes,
-	sendInteractionResponse,
-} from 'discordeno';
+import { ApplicationCommandOptionTypes, Bot, Interaction } from 'discordeno';
 import { OptionTemplate } from 'logos/src/commands/command.ts';
 import { by, collection, to } from 'logos/src/commands/parameters.ts';
 import { getVoiceState, isCollection, isOccupied, skip, verifyCanManagePlayback } from 'logos/src/controllers/music.ts';
 import { Client, localise } from 'logos/src/client.ts';
-import { parseArguments } from 'logos/src/interactions.ts';
+import { parseArguments, reply } from 'logos/src/interactions.ts';
 import constants from 'logos/constants.ts';
 import { defaultLocale } from 'logos/types.ts';
 
@@ -49,22 +42,13 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 				description: localise(client, 'music.options.skip.strings.noSong.description', interaction.locale)(),
 			};
 
-			return void sendInteractionResponse(
-				bot,
-				interaction.id,
-				interaction.token,
-				{
-					type: InteractionResponseTypes.ChannelMessageWithSource,
-					data: {
-						flags: ApplicationCommandFlags.Ephemeral,
-						embeds: [{
-							title: strings.title,
-							description: strings.description,
-							color: constants.colors.dullYellow,
-						}],
-					},
-				},
-			);
+			return void reply([client, bot], interaction, {
+				embeds: [{
+					title: strings.title,
+					description: strings.description,
+					color: constants.colors.dullYellow,
+				}],
+			});
 		}
 	} else {
 		if (!isOccupied(controller.player) || currentListing === undefined) {
@@ -83,22 +67,13 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 				},
 			};
 
-			return void sendInteractionResponse(
-				bot,
-				interaction.id,
-				interaction.token,
-				{
-					type: InteractionResponseTypes.ChannelMessageWithSource,
-					data: {
-						flags: ApplicationCommandFlags.Ephemeral,
-						embeds: [{
-							title: strings.title,
-							description: strings.description.noSongCollection,
-							color: constants.colors.dullYellow,
-						}],
-					},
-				},
-			);
+			return void reply([client, bot], interaction, {
+				embeds: [{
+					title: strings.title,
+					description: strings.description.noSongCollection,
+					color: constants.colors.dullYellow,
+				}],
+			});
 		} else if (!isCollection(currentListing.content)) {
 			const strings = {
 				title: localise(
@@ -120,22 +95,13 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 				},
 			};
 
-			return void sendInteractionResponse(
-				bot,
-				interaction.id,
-				interaction.token,
-				{
-					type: InteractionResponseTypes.ChannelMessageWithSource,
-					data: {
-						flags: ApplicationCommandFlags.Ephemeral,
-						embeds: [{
-							title: strings.title,
-							description: `${strings.description.noSongCollection}\n\n${strings.description.trySongInstead}`,
-							color: constants.colors.dullYellow,
-						}],
-					},
-				},
-			);
+			return void reply([client, bot], interaction, {
+				embeds: [{
+					title: strings.title,
+					description: `${strings.description.noSongCollection}\n\n${strings.description.trySongInstead}`,
+					color: constants.colors.dullYellow,
+				}],
+			});
 		}
 	}
 
@@ -146,22 +112,13 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 			description: localise(client, 'music.strings.skips.tooManyArguments.description', interaction.locale)(),
 		};
 
-		return void sendInteractionResponse(
-			bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						title: strings.title,
-						description: strings.description,
-						color: constants.colors.red,
-					}],
-				},
-			},
-		);
+		return void reply([client, bot], interaction, {
+			embeds: [{
+				title: strings.title,
+				description: strings.description,
+				color: constants.colors.red,
+			}],
+		});
 	}
 
 	// If either the 'to' parameter or the 'by' parameter are negative.
@@ -171,22 +128,13 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 			description: localise(client, 'music.strings.skips.invalid.description', interaction.locale)(),
 		};
 
-		return void sendInteractionResponse(
-			bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						title: strings.title,
-						description: strings.description,
-						color: constants.colors.red,
-					}],
-				},
-			},
-		);
+		return void reply([client, bot], interaction, {
+			embeds: [{
+				title: strings.title,
+				description: strings.description,
+				color: constants.colors.red,
+			}],
+		});
 	}
 
 	const isSkippingCollection = collection ?? false;
@@ -224,21 +172,13 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 			description: localise(client, 'music.options.skip.strings.skippedSong.description', defaultLocale)(),
 		};
 
-	return void sendInteractionResponse(
-		bot,
-		interaction.id,
-		interaction.token,
-		{
-			type: InteractionResponseTypes.ChannelMessageWithSource,
-			data: {
-				embeds: [{
-					title: `${constants.symbols.music.skipped} ${strings.title}`,
-					description: strings.description,
-					color: constants.colors.invisible,
-				}],
-			},
-		},
-	);
+	return void reply([client, bot], interaction, {
+		embeds: [{
+			title: `${constants.symbols.music.skipped} ${strings.title}`,
+			description: strings.description,
+			color: constants.colors.invisible,
+		}],
+	}, { visible: true });
 }
 
 export default command;

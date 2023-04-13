@@ -1,14 +1,7 @@
-import {
-	ApplicationCommandFlags,
-	Bot,
-	editMember,
-	Interaction,
-	InteractionResponseTypes,
-	sendInteractionResponse,
-} from 'discordeno';
+import { Bot, editMember, Interaction } from 'discordeno';
 import { logEvent } from 'logos/src/controllers/logging/logging.ts';
 import { autocompleteMembers, Client, localise, resolveInteractionToMember } from 'logos/src/client.ts';
-import { parseArguments, parseTimeExpression } from 'logos/src/interactions.ts';
+import { parseArguments, parseTimeExpression, reply, respond } from 'logos/src/interactions.ts';
 import constants, { Periods } from 'logos/constants.ts';
 import { mention, MentionTypes, timestamp } from 'logos/formatting.ts';
 
@@ -26,18 +19,11 @@ async function handleSetTimeoutAutocomplete([client, bot]: [Client, Bot], intera
 		}
 		case 'duration': {
 			const timestamp = parseTimeExpression(client, duration!, interaction.locale);
+			if (timestamp === undefined) {
+				return respond([client, bot], interaction, []);
+			}
 
-			return void sendInteractionResponse(
-				bot,
-				interaction.id,
-				interaction.token,
-				{
-					type: InteractionResponseTypes.ApplicationCommandAutocompleteResult,
-					data: {
-						choices: timestamp === undefined ? [] : [{ name: timestamp[0], value: timestamp[1].toString() }],
-					},
-				},
-			);
+			return respond([client, bot], interaction, [{ name: timestamp[0], value: timestamp[1].toString() }]);
 		}
 	}
 }
@@ -55,30 +41,15 @@ async function handleSetTimeout([client, bot]: [Client, Bot], interaction: Inter
 	const durationParsed = Number(duration);
 
 	if (Number.isNaN(duration)) {
-		const strings = {
-			title: localise(client, 'timeout.strings.durationInvalid.title', interaction.locale)(),
-			description: localise(client, 'timeout.strings.durationInvalid.description', interaction.locale)(),
-		};
-
-		return displayError(bot, interaction, strings.title, strings.description);
+		return displayDurationInvalidError([client, bot], interaction);
 	}
 
 	if (durationParsed < Periods.minute) {
-		const strings = {
-			title: localise(client, 'timeout.strings.tooShort.title', interaction.locale)(),
-			description: localise(client, 'timeout.strings.tooShort.description', interaction.locale)(),
-		};
-
-		return displayError(bot, interaction, strings.title, strings.description);
+		return displayTooShortWarning([client, bot], interaction);
 	}
 
 	if (durationParsed > Periods.week) {
-		const strings = {
-			title: localise(client, 'timeout.strings.tooLong.title', interaction.locale)(),
-			description: localise(client, 'timeout.strings.tooLong.description', interaction.locale)(),
-		};
-
-		return displayError(bot, interaction, strings.title, strings.description);
+		return displayTooLongWarning([client, bot], interaction);
 	}
 
 	const until = Date.now() + durationParsed;
@@ -100,32 +71,46 @@ async function handleSetTimeout([client, bot]: [Client, Bot], interaction: Inter
 		),
 	};
 
-	sendInteractionResponse(bot, interaction.id, interaction.token, {
-		type: InteractionResponseTypes.ChannelMessageWithSource,
-		data: {
-			flags: ApplicationCommandFlags.Ephemeral,
-			embeds: [{
-				title: strings.title,
-				description: strings.description,
-				color: constants.colors.blue,
-			}],
-		},
+	return void reply([client, bot], interaction, {
+		embeds: [{
+			title: strings.title,
+			description: strings.description,
+			color: constants.colors.blue,
+		}],
 	});
 }
 
-function displayError(bot: Bot, interaction: Interaction, title: string, description: string): void {
-	return void sendInteractionResponse(
-		bot,
-		interaction.id,
-		interaction.token,
-		{
-			type: InteractionResponseTypes.ChannelMessageWithSource,
-			data: {
-				flags: ApplicationCommandFlags.Ephemeral,
-				embeds: [{ title, description, color: constants.colors.dullYellow }],
-			},
-		},
-	);
+function displayDurationInvalidError([client, bot]: [Client, Bot], interaction: Interaction): void {
+	const strings = {
+		title: localise(client, 'timeout.strings.durationInvalid.title', interaction.locale)(),
+		description: localise(client, 'timeout.strings.durationInvalid.description', interaction.locale)(),
+	};
+
+	return void reply([client, bot], interaction, {
+		embeds: [{ title: strings.title, description: strings.description, color: constants.colors.darkRed }],
+	});
+}
+
+function displayTooShortWarning([client, bot]: [Client, Bot], interaction: Interaction): void {
+	const strings = {
+		title: localise(client, 'timeout.strings.tooShort.title', interaction.locale)(),
+		description: localise(client, 'timeout.strings.tooShort.description', interaction.locale)(),
+	};
+
+	return void reply([client, bot], interaction, {
+		embeds: [{ title: strings.title, description: strings.description, color: constants.colors.yellow }],
+	});
+}
+
+function displayTooLongWarning([client, bot]: [Client, Bot], interaction: Interaction): void {
+	const strings = {
+		title: localise(client, 'timeout.strings.tooLong.title', interaction.locale)(),
+		description: localise(client, 'timeout.strings.tooLong.description', interaction.locale)(),
+	};
+
+	return void reply([client, bot], interaction, {
+		embeds: [{ title: strings.title, description: strings.description, color: constants.colors.yellow }],
+	});
 }
 
 export { handleSetTimeout, handleSetTimeoutAutocomplete };

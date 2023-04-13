@@ -1,19 +1,10 @@
-import {
-	ApplicationCommandFlags,
-	ApplicationCommandOptionTypes,
-	ApplicationCommandTypes,
-	Bot,
-	editOriginalInteractionResponse,
-	Interaction,
-	InteractionResponseTypes,
-	sendInteractionResponse,
-} from 'discordeno';
+import { ApplicationCommandOptionTypes, ApplicationCommandTypes, Bot, Interaction } from 'discordeno';
 import { CommandTemplate } from 'logos/src/commands/command.ts';
 import { user } from 'logos/src/commands/parameters.ts';
 import { logEvent } from 'logos/src/controllers/logging/logging.ts';
 import { Praise } from 'logos/src/database/structs/mod.ts';
 import { autocompleteMembers, Client, localise, resolveInteractionToMember } from 'logos/src/client.ts';
-import { parseArguments } from 'logos/src/interactions.ts';
+import { editReply, parseArguments, postponeReply, reply } from 'logos/src/interactions.ts';
 import { verifyIsWithinLimits } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import constants from 'logos/constants.ts';
@@ -50,28 +41,16 @@ async function handlePraiseUser([client, bot]: [Client, Bot], interaction: Inter
 			description: localise(client, 'praise.strings.cannotPraiseSelf.description', interaction.locale)(),
 		};
 
-		return void sendInteractionResponse(
-			bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						title: strings.title,
-						description: strings.description,
-						color: constants.colors.dullYellow,
-					}],
-				},
-			},
-		);
+		return void reply([client, bot], interaction, {
+			embeds: [{
+				title: strings.title,
+				description: strings.description,
+				color: constants.colors.dullYellow,
+			}],
+		});
 	}
 
-	await sendInteractionResponse(bot, interaction.id, interaction.token, {
-		type: InteractionResponseTypes.DeferredChannelMessageWithSource,
-		data: { flags: ApplicationCommandFlags.Ephemeral },
-	});
+	await postponeReply([client, bot], interaction);
 
 	const [author, subject] = await Promise.all([
 		client.database.adapters.users.getOrFetchOrCreate(
@@ -83,10 +62,14 @@ async function handlePraiseUser([client, bot]: [Client, Bot], interaction: Inter
 		client.database.adapters.users.getOrFetchOrCreate(client, 'id', member.id.toString(), member.id),
 	]);
 
-	if (author === undefined || subject === undefined) return showError([client, bot], interaction);
+	if (author === undefined || subject === undefined) {
+		return showError([client, bot], interaction);
+	}
 
 	const praisesBySender = await client.database.adapters.praises.getOrFetch(client, 'sender', author.ref);
-	if (praisesBySender === undefined) return showError([client, bot], interaction);
+	if (praisesBySender === undefined) {
+		return showError([client, bot], interaction);
+	}
 
 	const praises = Array.from(praisesBySender.values());
 	if (!verifyIsWithinLimits(praises, configuration.commands.praise.limitUses, configuration.commands.praise.within)) {
@@ -95,17 +78,13 @@ async function handlePraiseUser([client, bot]: [Client, Bot], interaction: Inter
 			description: localise(client, 'praise.strings.tooMany.description', interaction.locale)(),
 		};
 
-		return void editOriginalInteractionResponse(
-			bot,
-			interaction.token,
-			{
-				embeds: [{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colors.dullYellow,
-				}],
-			},
-		);
+		return void editReply([client, bot], interaction, {
+			embeds: [{
+				title: strings.title,
+				description: strings.description,
+				color: constants.colors.dullYellow,
+			}],
+		});
 	}
 
 	const praise: Praise = {
@@ -119,7 +98,9 @@ async function handlePraiseUser([client, bot]: [Client, Bot], interaction: Inter
 	if (guild === undefined) return;
 
 	const document = await client.database.adapters.praises.create(client, praise);
-	if (document === undefined) return showError([client, bot], interaction);
+	if (document === undefined) {
+		return showError([client, bot], interaction);
+	}
 
 	logEvent([client, bot], guild, 'praiseAdd', [member, praise, interaction.user]);
 
@@ -130,17 +111,13 @@ async function handlePraiseUser([client, bot]: [Client, Bot], interaction: Inter
 		),
 	};
 
-	return void editOriginalInteractionResponse(
-		bot,
-		interaction.token,
-		{
-			embeds: [{
-				title: strings.title,
-				description: strings.description,
-				color: constants.colors.lightGreen,
-			}],
-		},
-	);
+	return void editReply([client, bot], interaction, {
+		embeds: [{
+			title: strings.title,
+			description: strings.description,
+			color: constants.colors.lightGreen,
+		}],
+	});
 }
 
 function showError([client, bot]: [Client, Bot], interaction: Interaction): void {
@@ -149,17 +126,13 @@ function showError([client, bot]: [Client, Bot], interaction: Interaction): void
 		description: localise(client, 'praise.strings.failed.description', interaction.locale)(),
 	};
 
-	return void editOriginalInteractionResponse(
-		bot,
-		interaction.token,
-		{
-			embeds: [{
-				title: strings.title,
-				description: strings.description,
-				color: constants.colors.red,
-			}],
-		},
-	);
+	return void editReply([client, bot], interaction, {
+		embeds: [{
+			title: strings.title,
+			description: strings.description,
+			color: constants.colors.red,
+		}],
+	});
 }
 
 export default command;

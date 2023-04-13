@@ -1,16 +1,13 @@
 import {
-	ApplicationCommandFlags,
 	Bot,
 	ButtonStyles,
 	CreateMessage,
 	deleteMessage,
 	getAvatarURL,
 	Guild,
-	InteractionResponseTypes,
 	InteractionTypes,
 	Message,
 	MessageComponentTypes,
-	sendInteractionResponse,
 	sendMessage,
 	User as DiscordUser,
 } from 'discordeno';
@@ -26,6 +23,7 @@ import {
 	decodeId,
 	encodeId,
 	InteractionCollectorSettings,
+	reply,
 } from 'logos/src/interactions.ts';
 import { diagnosticMentionUser, getAllMessages, getTextChannel } from 'logos/src/utils.ts';
 import { defaultLocale } from 'logos/types.ts';
@@ -324,16 +322,12 @@ function registerReportHandler(
 					description: localise(client, 'alreadyMarkedResolved.description', defaultLocale)(),
 				};
 
-				return void sendInteractionResponse(bot, selection.id, selection.token, {
-					type: InteractionResponseTypes.ChannelMessageWithSource,
-					data: {
-						flags: ApplicationCommandFlags.Ephemeral,
-						embeds: [{
-							title: strings.title,
-							description: strings.description,
-							color: constants.colors.dullYellow,
-						}],
-					},
+				return void reply([client, bot], selection, {
+					embeds: [{
+						title: strings.title,
+						description: strings.description,
+						color: constants.colors.dullYellow,
+					}],
 				});
 			}
 
@@ -343,16 +337,12 @@ function registerReportHandler(
 					description: localise(client, 'alreadyMarkedUnresolved.description', defaultLocale)(),
 				};
 
-				return void sendInteractionResponse(bot, selection.id, selection.token, {
-					type: InteractionResponseTypes.ChannelMessageWithSource,
-					data: {
-						flags: ApplicationCommandFlags.Ephemeral,
-						embeds: [{
-							title: strings.title,
-							description: strings.description,
-							color: constants.colors.dullYellow,
-						}],
-					},
+				return void reply([client, bot], selection, {
+					embeds: [{
+						title: strings.title,
+						description: strings.description,
+						color: constants.colors.dullYellow,
+					}],
 				});
 			}
 

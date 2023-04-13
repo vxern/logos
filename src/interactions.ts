@@ -1,13 +1,16 @@
 import {
 	ActionRow,
 	ApplicationCommandFlags,
+	ApplicationCommandOptionChoice,
 	Bot,
 	ButtonComponent,
 	ButtonStyles,
+	deleteOriginalInteractionResponse,
 	editOriginalInteractionResponse,
 	Embed,
 	EventHandlers,
 	Interaction,
+	InteractionCallbackData,
 	InteractionDataOption,
 	InteractionResponseTypes,
 	InteractionTypes,
@@ -156,6 +159,8 @@ function paginate<T>(
 		type: InteractionTypes.MessageComponent,
 		doesNotExpire: true,
 		onCollect: (bot, selection) => {
+			acknowledge([client, bot], selection);
+
 			if (selection.data === undefined) return;
 
 			const [_, action] = decodeId<ControlButtonID>(selection.data.customId!);
@@ -169,30 +174,17 @@ function paginate<T>(
 					break;
 			}
 
-			sendInteractionResponse(bot, selection.id, selection.token, {
-				type: InteractionResponseTypes.DeferredUpdateMessage,
-			});
-
-			editOriginalInteractionResponse(bot, interaction.token, {
+			editReply([client, bot], interaction, {
 				embeds: [getPageEmbed(client, data, embed, isLast(), interaction.locale)],
 				components: generateButtons(customId, isFirst(), isLast()),
 			});
 		},
 	});
 
-	return void sendInteractionResponse(
-		bot,
-		interaction.id,
-		interaction.token,
-		{
-			type: InteractionResponseTypes.ChannelMessageWithSource,
-			data: {
-				flags: !show ? ApplicationCommandFlags.Ephemeral : undefined,
-				embeds: [getPageEmbed(client, data, embed, data.pageIndex === data.elements.length - 1, interaction.locale)],
-				components: generateButtons(customId, isFirst(), isLast()),
-			},
-		},
-	);
+	return void reply([client, bot], interaction, {
+		embeds: [getPageEmbed(client, data, embed, data.pageIndex === data.elements.length - 1, interaction.locale)],
+		components: generateButtons(customId, isFirst(), isLast()),
+	}, { visible: show });
 }
 
 interface PaginationDisplayData<T> {
@@ -306,13 +298,10 @@ async function createModalComposer<T extends string>(
 				}
 			}
 
-			sendInteractionResponse(bot, anchor.id, anchor.token, {
-				type: InteractionResponseTypes.Modal,
-				data: {
-					title: modal.title,
-					customId: modalId,
-					components: fields,
-				},
+			showModal([client, bot], anchor, {
+				title: modal.title,
+				customId: modalId,
+				components: fields,
 			});
 		});
 
@@ -521,15 +510,90 @@ function decodeId<T extends ComponentIDMetadata, R = [string, ...T]>(customId: s
 	return customId.split(constants.symbols.meta.idSeparator) as R;
 }
 
+async function acknowledge([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+	return sendInteractionResponse(bot, interaction.id, interaction.token, {
+		type: InteractionResponseTypes.DeferredUpdateMessage,
+	}).catch((reason) => client.log.warn(`Failed to acknowledge interaction: ${reason}`));
+}
+
+async function postponeReply(
+	[client, bot]: [Client, Bot],
+	interaction: Interaction,
+	{ visible = false } = {},
+): Promise<void> {
+	return sendInteractionResponse(bot, interaction.id, interaction.token, {
+		type: InteractionResponseTypes.DeferredChannelMessageWithSource,
+		data: !visible ? { flags: ApplicationCommandFlags.Ephemeral } : {},
+	}).catch((reason) => client.log.warn(`Failed to postpone reply to interaction: ${reason}`));
+}
+
+async function reply(
+	[client, bot]: [Client, Bot],
+	interaction: Interaction,
+	data: Omit<InteractionCallbackData, 'flags'>,
+	{ visible = false } = {},
+): Promise<void> {
+	return sendInteractionResponse(bot, interaction.id, interaction.token, {
+		type: InteractionResponseTypes.ChannelMessageWithSource,
+		data: {
+			flags: !visible ? ApplicationCommandFlags.Ephemeral : undefined,
+			...data,
+		},
+	}).catch((reason) => client.log.warn(`Failed to reply to interaction: ${reason}`));
+}
+
+async function editReply(
+	[client, bot]: [Client, Bot],
+	interaction: Interaction,
+	data: Omit<InteractionCallbackData, 'flags'>,
+): Promise<void> {
+	return editOriginalInteractionResponse(bot, interaction.token, data)
+		.then(() => {})
+		.catch((reason) => client.log.warn(`Failed to edit reply to interaction: ${reason}`));
+}
+
+async function deleteReply([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+	return deleteOriginalInteractionResponse(bot, interaction.token)
+		.catch((reason) => client.log.warn(`Failed to edit reply to interaction: ${reason}`));
+}
+
+async function respond(
+	[client, bot]: [Client, Bot],
+	interaction: Interaction,
+	choices: ApplicationCommandOptionChoice[],
+): Promise<void> {
+	return sendInteractionResponse(bot, interaction.id, interaction.token, {
+		type: InteractionResponseTypes.ApplicationCommandAutocompleteResult,
+		data: { choices },
+	}).catch((reason) => client.log.warn(`Failed to respond to autocomplete interaction: ${reason}`));
+}
+
+async function showModal(
+	[client, bot]: [Client, Bot],
+	interaction: Interaction,
+	data: Omit<InteractionCallbackData, 'flags'>,
+): Promise<void> {
+	return sendInteractionResponse(bot, interaction.id, interaction.token, {
+		type: InteractionResponseTypes.Modal,
+		data,
+	}).catch((reason) => client.log.warn(`Failed to show modal: ${reason}`));
+}
+
 export {
+	acknowledge,
 	createInteractionCollector,
 	createModalComposer,
 	decodeId,
+	deleteReply,
+	editReply,
 	encodeId,
 	generateButtons,
 	isAutocomplete,
 	paginate,
 	parseArguments,
 	parseTimeExpression,
+	postponeReply,
+	reply,
+	respond,
 };
 export type { ControlButtonID, InteractionCollectorSettings, Modal };

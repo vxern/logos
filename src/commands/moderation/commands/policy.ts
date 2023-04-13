@@ -1,17 +1,8 @@
-import {
-	ApplicationCommandFlags,
-	ApplicationCommandTypes,
-	Bot,
-	Embed,
-	Guild,
-	Interaction,
-	InteractionResponseTypes,
-	sendInteractionResponse,
-} from 'discordeno';
+import { ApplicationCommandTypes, Bot, Embed, Guild, Interaction } from 'discordeno';
 import { CommandTemplate } from 'logos/src/commands/command.ts';
 import { show } from 'logos/src/commands/parameters.ts';
 import { Client, localise } from 'logos/src/client.ts';
-import { parseArguments } from 'logos/src/interactions.ts';
+import { parseArguments, reply } from 'logos/src/interactions.ts';
 import configuration from 'logos/configuration.ts';
 import { mention, MentionTypes } from 'logos/formatting.ts';
 import { defaultLocale } from 'logos/types.ts';
@@ -36,16 +27,12 @@ function handleDisplayModerationPolicy([client, bot]: [Client, Bot], interaction
 		title: localise(client, 'policies.moderation.title', interaction.locale)(),
 	};
 
-	return void sendInteractionResponse(bot, interaction.id, interaction.token, {
-		type: InteractionResponseTypes.ChannelMessageWithSource,
-		data: {
-			flags: !show ? ApplicationCommandFlags.Ephemeral : undefined,
-			embeds: [{
-				title: strings.title,
-				fields: getModerationPolicyPoints(client, guild, locale),
-			}],
-		},
-	});
+	return void reply([client, bot], interaction, {
+		embeds: [{
+			title: strings.title,
+			fields: getModerationPolicyPoints(client, guild, locale),
+		}],
+	}, { visible: show });
 }
 
 function getModerationPolicyPoints(

@@ -1,16 +1,7 @@
-import {
-	ApplicationCommandFlags,
-	Bot,
-	Channel,
-	ChannelTypes,
-	Embed,
-	Guild,
-	Interaction,
-	InteractionResponseTypes,
-	sendInteractionResponse,
-} from 'discordeno';
+import { Bot, Channel, ChannelTypes, Embed, Guild, Interaction } from 'discordeno';
 import { getProficiencyCategory } from 'logos/src/commands/social/module.ts';
 import { Client, localise } from 'logos/src/client.ts';
+import { reply } from 'logos/src/interactions.ts';
 import { getGuildIconURLFormatted, snowflakeToTimestamp } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import constants from 'logos/constants.ts';
@@ -83,60 +74,51 @@ function handleDisplayGuildInformation([client, bot]: [Client, Bot], interaction
 		},
 	};
 
-	return void sendInteractionResponse(
-		bot,
-		interaction.id,
-		interaction.token,
-		{
-			type: InteractionResponseTypes.ChannelMessageWithSource,
-			data: {
-				flags: ApplicationCommandFlags.Ephemeral,
-				embeds: [{
-					thumbnail: getThumbnail(bot, guild),
-					title: strings.title,
-					color: constants.colors.invisible,
-					fields: [
-						{
-							name: `${constants.symbols.guild.description} ${strings.description.description.title}`,
-							value: guild.description ?? strings.description.description.noDescription,
-							inline: true,
-						},
-						{
-							name: `${constants.symbols.guild.members} ${strings.description.members}`,
-							value: guild.memberCount.toString(),
-							inline: true,
-						},
-						{
-							name: `${constants.symbols.guild.created} ${strings.description.created}`,
-							value: timestamp(snowflakeToTimestamp(guild.id)),
-							inline: true,
-						},
-						{
-							name: `${constants.symbols.guild.channels.channels} ${strings.description.channels}`,
-							value: getChannelInformationSection(client, guild, interaction.locale),
-							inline: true,
-						},
-						isManaged
-							? {
-								name: `${constants.symbols.guild.moderators} ${strings.description.moderators.title}`,
-								value: strings.description.moderators.overseenByModerators,
-								inline: false,
-							}
-							: {
-								name: `${constants.symbols.guild.owner} ${strings.description.owner}`,
-								value: mention(owner.id, MentionTypes.User),
-								inline: true,
-							},
-						{
-							name: `${constants.symbols.guild.proficiencyDistribution} ${strings.description.distribution}`,
-							value: formatDistribution(client, proficiencyRoleFrequencies, interaction.locale),
-							inline: false,
-						},
-					],
-				}],
-			},
-		},
-	);
+	return void reply([client, bot], interaction, {
+		embeds: [{
+			thumbnail: getThumbnail(bot, guild),
+			title: strings.title,
+			color: constants.colors.invisible,
+			fields: [
+				{
+					name: `${constants.symbols.guild.description} ${strings.description.description.title}`,
+					value: guild.description ?? strings.description.description.noDescription,
+					inline: true,
+				},
+				{
+					name: `${constants.symbols.guild.members} ${strings.description.members}`,
+					value: guild.memberCount.toString(),
+					inline: true,
+				},
+				{
+					name: `${constants.symbols.guild.created} ${strings.description.created}`,
+					value: timestamp(snowflakeToTimestamp(guild.id)),
+					inline: true,
+				},
+				{
+					name: `${constants.symbols.guild.channels.channels} ${strings.description.channels}`,
+					value: getChannelInformationSection(client, guild, interaction.locale),
+					inline: true,
+				},
+				isManaged
+					? {
+						name: `${constants.symbols.guild.moderators} ${strings.description.moderators.title}`,
+						value: strings.description.moderators.overseenByModerators,
+						inline: false,
+					}
+					: {
+						name: `${constants.symbols.guild.owner} ${strings.description.owner}`,
+						value: mention(owner.id, MentionTypes.User),
+						inline: true,
+					},
+				{
+					name: `${constants.symbols.guild.proficiencyDistribution} ${strings.description.distribution}`,
+					value: formatDistribution(client, proficiencyRoleFrequencies, interaction.locale),
+					inline: false,
+				},
+			],
+		}],
+	});
 }
 
 function getChannelInformationSection(client: Client, guild: Guild, locale: string | undefined): string {

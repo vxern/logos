@@ -1,7 +1,6 @@
 import {
 	ApplicationCommandFlags,
 	Bot,
-	deleteOriginalInteractionResponse,
 	Interaction,
 	InteractionResponseTypes,
 	InteractionTypes,
@@ -13,7 +12,7 @@ import { Channel, Playlist, Video, YouTube } from 'youtube';
 import { ListingResolver } from 'logos/src/commands/music/data/sources/sources.ts';
 import { SongListing, SongListingContentTypes } from 'logos/src/commands/music/data/types.ts';
 import { Client, localise } from 'logos/src/client.ts';
-import { createInteractionCollector } from 'logos/src/interactions.ts';
+import { createInteractionCollector, deleteReply, postponeReply } from 'logos/src/interactions.ts';
 import constants from 'logos/constants.ts';
 import { trim } from 'logos/formatting.ts';
 
@@ -27,11 +26,7 @@ const resolver: ListingResolver = async ([client, bot], interaction, query) => {
 		return search([client, bot], interaction, query);
 	}
 
-	sendInteractionResponse(bot, interaction.id, interaction.token, {
-		type: InteractionResponseTypes.DeferredChannelMessageWithSource,
-	});
-
-	deleteOriginalInteractionResponse(bot, interaction.token);
+	postponeReply([client, bot], interaction);
 
 	const url = urlExpressionExecuted.at(0)!;
 	if (url.includes('list=')) {
@@ -60,7 +55,7 @@ async function search(
 				userId: interaction.user.id,
 				limit: 1,
 				onCollect: async (bot, selection) => {
-					deleteOriginalInteractionResponse(bot, interaction.token).catch();
+					deleteReply([client, bot], interaction);
 
 					const indexString = selection.data?.values?.at(0) as string | undefined;
 					if (indexString === undefined) return resolve(undefined);

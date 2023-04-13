@@ -1,23 +1,18 @@
 import {
-	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
 	ApplicationCommandTypes,
 	Bot,
 	ButtonStyles,
 	deleteMessage,
 	deleteMessages,
-	deleteOriginalInteractionResponse,
-	editOriginalInteractionResponse,
 	Embed,
 	getMessage,
 	getMessages,
 	Interaction,
 	InteractionCallbackData,
-	InteractionResponseTypes,
 	InteractionTypes,
 	Message,
 	MessageComponentTypes,
-	sendInteractionResponse,
 	snowflakeToBigint,
 } from 'discordeno';
 import { CommandTemplate } from 'logos/src/commands/command.ts';
@@ -30,7 +25,14 @@ import {
 	localise,
 	resolveInteractionToMember,
 } from 'logos/src/client.ts';
-import { createInteractionCollector, parseArguments } from 'logos/src/interactions.ts';
+import {
+	acknowledge,
+	createInteractionCollector,
+	deleteReply,
+	editReply,
+	parseArguments,
+	postponeReply,
+} from 'logos/src/interactions.ts';
 import { chunk, diagnosticMentionUser, snowflakeToTimestamp } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import constants, { Periods } from 'logos/constants.ts';
@@ -66,12 +68,7 @@ async function handlePurgeMessagesAutocomplete([client, bot]: [Client, Bot], int
 async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	let [{ start, end, author: user }] = parseArguments(interaction.data?.options, {});
 
-	sendInteractionResponse(bot, interaction.id, interaction.token, {
-		type: InteractionResponseTypes.DeferredChannelMessageWithSource,
-		data: {
-			flags: ApplicationCommandFlags.Ephemeral,
-		},
-	});
+	postponeReply([client, bot], interaction);
 
 	let authorId: bigint | undefined;
 
@@ -199,10 +196,10 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 		};
 	};
 
-	editOriginalInteractionResponse(bot, interaction.token, getIndexingProgressResponse());
+	editReply([client, bot], interaction, getIndexingProgressResponse());
 
 	const indexProgressIntervalId = setInterval(
-		() => editOriginalInteractionResponse(bot, interaction.token, getIndexingProgressResponse()),
+		() => editReply([client, bot], interaction, getIndexingProgressResponse()),
 		1500,
 	);
 
@@ -221,7 +218,7 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 				},
 			};
 
-			return void editOriginalInteractionResponse(bot, interaction.token, {
+			return void editReply([client, bot], interaction, {
 				embeds: [{
 					title: strings.title,
 					description: `${strings.description.rangeTooBig}\n\n${strings.description.trySmaller}`,
@@ -290,7 +287,7 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 			},
 		};
 
-		return void editOriginalInteractionResponse(bot, interaction.token, {
+		return void editReply([client, bot], interaction, {
 			embeds: [{
 				title: strings.indexed.title,
 				description: `${strings.indexed.description.none}\n\n${strings.indexed.description.tryDifferentQuery}`,
@@ -307,9 +304,7 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 			const continueId = createInteractionCollector([client, bot], {
 				type: InteractionTypes.MessageComponent,
 				onCollect: (_, selection) => {
-					sendInteractionResponse(bot, selection.id, selection.token, {
-						type: InteractionResponseTypes.DeferredUpdateMessage,
-					});
+					acknowledge([client, bot], selection);
 					resolve(true);
 				},
 			});
@@ -317,9 +312,7 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 			const cancelId = createInteractionCollector([client, bot], {
 				type: InteractionTypes.MessageComponent,
 				onCollect: (_, selection) => {
-					sendInteractionResponse(bot, selection.id, selection.token, {
-						type: InteractionResponseTypes.DeferredUpdateMessage,
-					});
+					acknowledge([client, bot], selection);
 					resolve(false);
 				},
 			});
@@ -340,7 +333,7 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 				no: localise(client, 'purge.strings.no', interaction.locale)(),
 			};
 
-			editOriginalInteractionResponse(bot, interaction.token, {
+			editReply([client, bot], interaction, {
 				embeds: [{
 					title: strings.indexed.title,
 					description: `${
@@ -382,7 +375,7 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 		});
 
 		if (!isShouldContinue) {
-			return void deleteOriginalInteractionResponse(bot, interaction.token).catch();
+			return void deleteReply([client, bot], interaction);
 		}
 
 		messages = messages.slice(0, configuration.commands.purge.maxDeletable);
@@ -392,9 +385,7 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 		const continueId = createInteractionCollector([client, bot], {
 			type: InteractionTypes.MessageComponent,
 			onCollect: (_, selection) => {
-				sendInteractionResponse(bot, selection.id, selection.token, {
-					type: InteractionResponseTypes.DeferredUpdateMessage,
-				});
+				acknowledge([client, bot], selection);
 				resolve(true);
 			},
 		});
@@ -402,9 +393,7 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 		const cancelId = createInteractionCollector([client, bot], {
 			type: InteractionTypes.MessageComponent,
 			onCollect: (_, selection) => {
-				sendInteractionResponse(bot, selection.id, selection.token, {
-					type: InteractionResponseTypes.DeferredUpdateMessage,
-				});
+				acknowledge([client, bot], selection);
 				resolve(false);
 			},
 		});
@@ -424,7 +413,7 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 			no: localise(client, 'purge.strings.no', interaction.locale)(),
 		};
 
-		editOriginalInteractionResponse(bot, interaction.token, {
+		editReply([client, bot], interaction, {
 			embeds: [{
 				title: strings.indexed.title,
 				description: strings.indexed.description.some({ 'number': messages.length }),
@@ -456,7 +445,7 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 	});
 
 	if (!isShouldPurge) {
-		return void deleteOriginalInteractionResponse(bot, interaction.token).catch();
+		return void deleteReply([client, bot], interaction);
 	}
 
 	{
@@ -471,7 +460,7 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 			},
 		};
 
-		editOriginalInteractionResponse(bot, interaction.token, {
+		editReply([client, bot], interaction, {
 			embeds: [{
 				title: strings.purging.title,
 				description: `${
@@ -511,7 +500,7 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 
 	const responseDeletionTimeoutId = setTimeout(() => {
 		responseDeleted = true;
-		deleteOriginalInteractionResponse(bot, interaction.token).catch();
+		return void deleteReply([client, bot], interaction);
 	}, Periods.minute * 1);
 
 	let deletedCount = 0;
@@ -565,7 +554,7 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 			},
 		};
 
-		editOriginalInteractionResponse(bot, interaction.token, {
+		editReply([client, bot], interaction, {
 			embeds: [{
 				title: strings.purged.title,
 				description: strings.purged.description({ 'number': deletedCount, 'channel_mention': channelMention }),
@@ -597,31 +586,27 @@ function displaySnowflakesInvalidError(
 
 	const areBothInvalid = isStartInvalid && isEndInvalid;
 
-	return void editOriginalInteractionResponse(
-		bot,
-		interaction.token,
-		{
-			embeds: [{
-				...areBothInvalid
-					? {
-						title: strings.both.title,
-						description: strings.both.description,
-					}
-					: (
-						isStartInvalid
-							? {
-								title: strings.start.title,
-								description: strings.start.description,
-							}
-							: {
-								title: strings.end.title,
-								description: strings.end.description,
-							}
-					),
-				color: constants.colors.red,
-			}],
-		},
-	);
+	return void editReply([client, bot], interaction, {
+		embeds: [{
+			...areBothInvalid
+				? {
+					title: strings.both.title,
+					description: strings.both.description,
+				}
+				: (
+					isStartInvalid
+						? {
+							title: strings.start.title,
+							description: strings.start.description,
+						}
+						: {
+							title: strings.end.title,
+							description: strings.end.description,
+						}
+				),
+			color: constants.colors.red,
+		}],
+	});
 }
 
 function displayIdsNotDifferentError([client, bot]: [Client, Bot], interaction: Interaction): void {
@@ -630,17 +615,13 @@ function displayIdsNotDifferentError([client, bot]: [Client, Bot], interaction: 
 		description: localise(client, 'purge.strings.idsNotDifferent.description', interaction.locale)(),
 	};
 
-	return void editOriginalInteractionResponse(
-		bot,
-		interaction.token,
-		{
-			embeds: [{
-				title: strings.title,
-				description: strings.description,
-				color: constants.colors.red,
-			}],
-		},
-	);
+	return void editReply([client, bot], interaction, {
+		embeds: [{
+			title: strings.title,
+			description: strings.description,
+			color: constants.colors.red,
+		}],
+	});
 }
 
 function displayFailedError([client, bot]: [Client, Bot], interaction: Interaction): void {
@@ -649,17 +630,13 @@ function displayFailedError([client, bot]: [Client, Bot], interaction: Interacti
 		description: localise(client, 'purge.strings.failed.description', interaction.locale)(),
 	};
 
-	return void editOriginalInteractionResponse(
-		bot,
-		interaction.token,
-		{
-			embeds: [{
-				title: strings.title,
-				description: strings.description,
-				color: constants.colors.red,
-			}],
-		},
-	);
+	return void editReply([client, bot], interaction, {
+		embeds: [{
+			title: strings.title,
+			description: strings.description,
+			color: constants.colors.red,
+		}],
+	});
 }
 
 function getMessageContent(client: Client, message: Message, locale: string | undefined): string | undefined {

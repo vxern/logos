@@ -1,19 +1,10 @@
-import {
-	ApplicationCommandFlags,
-	ApplicationCommandTypes,
-	Bot,
-	editMember,
-	Interaction,
-	InteractionResponseTypes,
-	sendInteractionResponse,
-	sendMessage,
-} from 'discordeno';
+import { ApplicationCommandTypes, Bot, editMember, Interaction, sendMessage } from 'discordeno';
 import { CommandTemplate } from 'logos/src/commands/command.ts';
 import { reason, user } from 'logos/src/commands/parameters.ts';
 import { getActiveWarnings } from 'logos/src/commands/moderation/module.ts';
 import { logEvent } from 'logos/src/controllers/logging/logging.ts';
 import { autocompleteMembers, Client, localise, resolveInteractionToMember } from 'logos/src/client.ts';
-import { parseArguments } from 'logos/src/interactions.ts';
+import { parseArguments, reply } from 'logos/src/interactions.ts';
 import { diagnosticMentionUser, getTextChannel } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import constants from 'logos/constants.ts';
@@ -105,16 +96,12 @@ async function handleWarnUser([client, bot]: [Client, Bot], interaction: Interac
 		),
 	};
 
-	sendInteractionResponse(bot, interaction.id, interaction.token, {
-		type: InteractionResponseTypes.ChannelMessageWithSource,
-		data: {
-			flags: ApplicationCommandFlags.Ephemeral,
-			embeds: [{
-				title: strings.title,
-				description: strings.description,
-				color: constants.colors.blue,
-			}],
-		},
+	reply([client, bot], interaction, {
+		embeds: [{
+			title: strings.title,
+			description: strings.description,
+			color: constants.colors.blue,
+		}],
 	});
 
 	const moderationChannelId = getTextChannel(guild, configuration.guilds.channels.moderation)?.id;
@@ -133,11 +120,9 @@ async function handleWarnUser([client, bot]: [Client, Bot], interaction: Interac
 			),
 		};
 
-		try {
-			editMember(bot, guild.id, member.id, {
-				communicationDisabledUntil: Date.now() + configuration.commands.warn.timeoutDuration,
-			});
-		} catch {}
+		editMember(bot, guild.id, member.id, {
+			communicationDisabledUntil: Date.now() + configuration.commands.warn.timeoutDuration,
+		}).catch(() => client.log.warn(`Failed to edit timeout state of member with ID ${member.id}.`));
 
 		return void sendMessage(bot, moderationChannelId, {
 			embeds: [{
@@ -176,22 +161,13 @@ function displayError([client, bot]: [Client, Bot], interaction: Interaction): v
 		description: localise(client, 'warn.strings.failed.description', interaction.locale)(),
 	};
 
-	return void sendInteractionResponse(
-		bot,
-		interaction.id,
-		interaction.token,
-		{
-			type: InteractionResponseTypes.ChannelMessageWithSource,
-			data: {
-				flags: ApplicationCommandFlags.Ephemeral,
-				embeds: [{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colors.red,
-				}],
-			},
-		},
-	);
+	return void reply([client, bot], interaction, {
+		embeds: [{
+			title: strings.title,
+			description: strings.description,
+			color: constants.colors.red,
+		}],
+	});
 }
 
 export default command;

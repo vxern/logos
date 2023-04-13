@@ -1,13 +1,6 @@
-import {
-	ApplicationCommandFlags,
-	Bot,
-	getAvatarURL,
-	getUser,
-	Interaction,
-	InteractionResponseTypes,
-	sendInteractionResponse,
-} from 'discordeno';
+import { Bot, getAvatarURL, getUser, Interaction } from 'discordeno';
 import { Client, localise } from 'logos/src/client.ts';
+import { reply } from 'logos/src/interactions.ts';
 import constants from 'logos/constants.ts';
 
 async function handleDisplayBotInformation([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
@@ -59,48 +52,39 @@ async function handleDisplayBotInformation([client, bot]: [Client, Bot], interac
 		},
 	};
 
-	return void sendInteractionResponse(
-		bot,
-		interaction.id,
-		interaction.token,
-		{
-			type: InteractionResponseTypes.ChannelMessageWithSource,
-			data: {
-				flags: ApplicationCommandFlags.Ephemeral,
-				embeds: [{
-					title: botUser.username,
-					thumbnail: {
-						url: getAvatarURL(bot, bot.id, botUser.discriminator, {
-							avatar: botUser.avatar,
-							size: 4096,
-							format: 'png',
-						}),
-					},
-					color: constants.colors.invisible,
-					fields: [{
-						name: strings.information.whoAmI.title,
-						value: strings.information.whoAmI.description,
-					}, {
-						name: strings.information.howWasIMade.title,
-						value: strings.information.howWasIMade.description,
-					}, {
-						name: strings.information.howToAddToServer.title,
-						value: strings.information.howToAddToServer.description,
-					}, {
-						name: strings.information.amIOpenSource.title,
-						value: strings.information.amIOpenSource.description,
-					}],
-				}, {
-					title: strings.contributions.title,
-					color: constants.colors.invisible,
-					fields: constants.contributors.map((contributor) => ({
-						name: `${contributor.username} — ${contributor.contribution}`,
-						value: Object.entries(contributor.links).map(([platform, url]) => `[${platform}](${url})`).join(' · '),
-					})),
-				}],
+	return void reply([client, bot], interaction, {
+		embeds: [{
+			title: botUser.username,
+			thumbnail: {
+				url: getAvatarURL(bot, bot.id, botUser.discriminator, {
+					avatar: botUser.avatar,
+					size: 4096,
+					format: 'png',
+				}),
 			},
-		},
-	);
+			color: constants.colors.invisible,
+			fields: [{
+				name: strings.information.whoAmI.title,
+				value: strings.information.whoAmI.description,
+			}, {
+				name: strings.information.howWasIMade.title,
+				value: strings.information.howWasIMade.description,
+			}, {
+				name: strings.information.howToAddToServer.title,
+				value: strings.information.howToAddToServer.description,
+			}, {
+				name: strings.information.amIOpenSource.title,
+				value: strings.information.amIOpenSource.description,
+			}],
+		}, {
+			title: strings.contributions.title,
+			color: constants.colors.invisible,
+			fields: constants.contributors.map((contributor) => ({
+				name: `${contributor.username} — ${contributor.contribution}`,
+				value: Object.entries(contributor.links).map(([platform, url]) => `[${platform}](${url})`).join(' · '),
+			})),
+		}],
+	});
 }
 
 export { handleDisplayBotInformation };

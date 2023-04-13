@@ -1,6 +1,5 @@
 import {
 	ActivityTypes,
-	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
 	Bot,
 	Channel,
@@ -14,13 +13,11 @@ import {
 	Intents,
 	Interaction,
 	InteractionDataOption,
-	InteractionResponseTypes,
 	Locales,
 	Localization as DiscordLocalisations,
 	Member,
 	Message,
 	send as sendShardPayload,
-	sendInteractionResponse,
 	snowflakeToBigint,
 	startBot,
 	Transformers,
@@ -45,11 +42,11 @@ import { setupLogging } from 'logos/src/controllers/logging/logging.ts';
 import { MusicController, setupMusicController } from 'logos/src/controllers/music.ts';
 import { createDatabase, Database } from 'logos/src/database/database.ts';
 import localisationTransformers from 'logos/src/localisation/transformers.ts';
-import { isAutocomplete } from 'logos/src/interactions.ts';
+import { acknowledge, deleteReply, isAutocomplete, reply, respond } from 'logos/src/interactions.ts';
 import services from 'logos/src/services/services.ts';
 import { diagnosticMentionUser } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
-import constants from 'logos/constants.ts';
+import constants, { Periods } from 'logos/constants.ts';
 import { timestamp } from 'logos/formatting.ts';
 import {
 	defaultLanguage,
@@ -277,9 +274,7 @@ function createEventHandlers(client: Client): Partial<EventHandlers> {
 		},
 		interactionCreate: (bot, interaction) => {
 			if (interaction.data?.customId === constants.staticComponentIds.none) {
-				sendInteractionResponse(bot, interaction.id, interaction.token, {
-					type: InteractionResponseTypes.DeferredUpdateMessage,
-				});
+				acknowledge([client, bot], interaction);
 				return;
 			}
 
@@ -436,7 +431,9 @@ function withRateLimiting(handle: InteractionHandler): InteractionHandler {
 		if (activeTimestamps.length > configuration.rateLimiting.limit) {
 			const firstTimestamp = activeTimestamps[0]!;
 			const now = Date.now();
-			const nextValidUsageTimestamp = timestamp(now + configuration.rateLimiting.within - (now - firstTimestamp));
+
+			const nextValidUsageTimestamp = now + configuration.rateLimiting.within - (now - firstTimestamp);
+			const nextValidUsageTimestampFormatted = timestamp(nextValidUsageTimestamp);
 
 			const strings = {
 				title: localise(client, 'interactions.rateLimited.title', interaction.locale)(),
@@ -445,25 +442,23 @@ function withRateLimiting(handle: InteractionHandler): InteractionHandler {
 						client,
 						'interactions.rateLimited.description.tooManyUses',
 						interaction.locale,
-					)(),
+					)({ times: configuration.rateLimiting.limit }),
 					cannotUseUntil: localise(
 						client,
 						'interactions.rateLimited.description.cannotUseAgainUntil',
 						interaction.locale,
-					)({ 'relative_timestamp': nextValidUsageTimestamp }),
+					)({ 'relative_timestamp': nextValidUsageTimestampFormatted }),
 				},
 			};
 
-			return void sendInteractionResponse(bot, interaction.id, interaction.token, {
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						title: strings.title,
-						description: `${strings.description.tooManyUses}\n\n${strings.description.cannotUseUntil}`,
-						color: constants.colors.dullYellow,
-					}],
-				},
+			setTimeout(() => deleteReply([client, bot], interaction), nextValidUsageTimestamp - now - Periods.second);
+
+			return void reply([client, bot], interaction, {
+				embeds: [{
+					title: strings.title,
+					description: `${strings.description.tooManyUses}\n\n${strings.description.cannotUseUntil}`,
+					color: constants.colors.dullYellow,
+				}],
 			});
 		}
 
@@ -801,22 +796,16 @@ function autocompleteMembers(
 
 	const [matchedMembers, _] = result;
 
-	return void sendInteractionResponse(
-		bot,
-		interaction.id,
-		interaction.token,
-		{
-			type: InteractionResponseTypes.ApplicationCommandAutocompleteResult,
-			data: {
-				choices: matchedMembers.slice(0, 20)
-					.map(
-						(member) => ({
-							name: diagnosticMentionUser(member.user!),
-							value: member.id.toString(),
-						}),
-					),
-			},
-		},
+	return void respond(
+		[client, bot],
+		interaction,
+		matchedMembers.slice(0, 20)
+			.map(
+				(member) => ({
+					name: diagnosticMentionUser(member.user!),
+					value: member.id.toString(),
+				}),
+			),
 	);
 }
 
@@ -838,22 +827,15 @@ function resolveInteractionToMember(
 			description: localise(client, 'interactions.invalidUser.description', interaction.locale)(),
 		};
 
-		return void sendInteractionResponse(
-			bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						title: strings.title,
-						description: strings.description,
-						color: constants.colors.red,
-					}],
-				},
-			},
-		);
+		reply([client, bot], interaction, {
+			embeds: [{
+				title: strings.title,
+				description: strings.description,
+				color: constants.colors.red,
+			}],
+		});
+
+		return undefined;
 	}
 
 	return matchedMembers.at(0);

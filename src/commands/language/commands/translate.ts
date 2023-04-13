@@ -1,19 +1,9 @@
-import {
-	ApplicationCommandFlags,
-	ApplicationCommandOptionTypes,
-	ApplicationCommandTypes,
-	Bot,
-	editOriginalInteractionResponse,
-	Embed,
-	Interaction,
-	InteractionResponseTypes,
-	sendInteractionResponse,
-} from 'discordeno';
+import { ApplicationCommandOptionTypes, ApplicationCommandTypes, Bot, Embed, Interaction } from 'discordeno';
 import { resolveToSupportedLanguage } from 'logos/src/commands/language/module.ts';
 import { CommandTemplate } from 'logos/src/commands/command.ts';
 import { show } from 'logos/src/commands/parameters.ts';
 import { Client, localise } from 'logos/src/client.ts';
-import { parseArguments } from 'logos/src/interactions.ts';
+import { editReply, parseArguments, postponeReply, reply, respond } from 'logos/src/interactions.ts';
 import { addParametersToURL, diagnosticMentionUser } from 'logos/src/utils.ts';
 import constants from 'logos/constants.ts';
 import { defaultLocale } from 'logos/types.ts';
@@ -116,15 +106,7 @@ async function handleTranslateTextAutocomplete([client, bot]: [Client, Bot], int
 		.slice(0, 25)
 		.toSorted((previous, next) => previous.name.localeCompare(next.name));
 
-	return void sendInteractionResponse(
-		bot,
-		interaction.id,
-		interaction.token,
-		{
-			type: InteractionResponseTypes.ApplicationCommandAutocompleteResult,
-			data: { choices },
-		},
-	);
+	return respond([client, bot], interaction, choices);
 }
 
 /** Allows the user to translate text from one language to another through the DeepL API. */
@@ -154,36 +136,27 @@ async function handleTranslateText([client, bot]: [Client, Bot], interaction: In
 
 		const areBothLanguagesInvalid = isSourceLanguageInvalid && isTargetLanguageInvalid;
 
-		return void sendInteractionResponse(
-			bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						...areBothLanguagesInvalid
+		return void reply([client, bot], interaction, {
+			embeds: [{
+				...areBothLanguagesInvalid
+					? {
+						title: strings.both.title,
+						description: strings.both.description,
+					}
+					: (
+						isSourceLanguageInvalid
 							? {
-								title: strings.both.title,
-								description: strings.both.description,
+								title: strings.source.title,
+								description: strings.source.description,
 							}
-							: (
-								isSourceLanguageInvalid
-									? {
-										title: strings.source.title,
-										description: strings.source.description,
-									}
-									: {
-										title: strings.target.title,
-										description: strings.target.description,
-									}
-							),
-						color: constants.colors.red,
-					}],
-				},
-			},
-		);
+							: {
+								title: strings.target.title,
+								description: strings.target.description,
+							}
+					),
+				color: constants.colors.red,
+			}],
+		});
 	}
 
 	const isSourceTextEmpty = text.trim().length === 0;
@@ -193,22 +166,13 @@ async function handleTranslateText([client, bot]: [Client, Bot], interaction: In
 			description: localise(client, 'translate.strings.textEmpty.description', interaction.locale)(),
 		};
 
-		return void sendInteractionResponse(
-			bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						title: strings.title,
-						description: strings.description,
-						color: constants.colors.dullYellow,
-					}],
-				},
-			},
-		);
+		return void reply([client, bot], interaction, {
+			embeds: [{
+				title: strings.title,
+				description: strings.description,
+				color: constants.colors.dullYellow,
+			}],
+		});
 	}
 
 	if (from === to) {
@@ -217,33 +181,16 @@ async function handleTranslateText([client, bot]: [Client, Bot], interaction: In
 			description: localise(client, 'translate.strings.languagesNotDifferent.description', interaction.locale)(),
 		};
 
-		return void sendInteractionResponse(
-			bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						title: strings.title,
-						description: strings.description,
-						color: constants.colors.dullYellow,
-					}],
-				},
-			},
-		);
+		return void reply([client, bot], interaction, {
+			embeds: [{
+				title: strings.title,
+				description: strings.description,
+				color: constants.colors.dullYellow,
+			}],
+		});
 	}
 
-	await sendInteractionResponse(
-		bot,
-		interaction.id,
-		interaction.token,
-		{
-			type: InteractionResponseTypes.DeferredChannelMessageWithSource,
-			data: { flags: !show ? ApplicationCommandFlags.Ephemeral : undefined },
-		},
-	);
+	await postponeReply([client, bot], interaction, { visible: show });
 
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (guild === undefined) return;
@@ -262,9 +209,9 @@ async function handleTranslateText([client, bot]: [Client, Bot], interaction: In
 			description: localise(client, 'translate.strings.failed.description', locale)(),
 		};
 
-		return void editOriginalInteractionResponse(
-			bot,
-			interaction.token,
+		return void editReply(
+			[client, bot],
+			interaction,
 			{
 				embeds: [{
 					title: strings.title,
@@ -325,7 +272,7 @@ async function handleTranslateText([client, bot]: [Client, Bot], interaction: In
 		}];
 	}
 
-	return void editOriginalInteractionResponse(bot, interaction.token, { embeds });
+	return void editReply([client, bot], interaction, { embeds });
 }
 
 interface DeepLTranslation {
