@@ -13,6 +13,6 @@
 	"markUnresolved": "Oznacz jako nierozwiązane",
 	"alreadyMarkedResolved.title": "Już oznaczone jako rozwiązane",
 	"alreadyMarkedResolved.description": "Ten temat był już poprzednio oznaczony jako rozwiązany.",
-	"alreadyMarkedUnresolved.": "Już oznaczone jako nierozwiązane",
+	"alreadyMarkedUnresolved.title": "Already marked unresolved",
 	"alreadyMarkedUnresolved.description": "Ten temat był już poprzednio oznaczony jako nierozwiązany."
 }
