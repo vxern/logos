@@ -1,0 +1,13 @@
+{
+	"words.noun": "substantiv",
+	"words.verb": "verb",
+	"words.adjective": "adjektiv",
+	"words.adverb": "adverb",
+	"words.adposition": "apposisjon",
+	"words.affix": "affiks",
+	"words.pronoun": "pronomen",
+	"words.determiner": "determinativ",
+	"words.conjunction": "konjunksjon",
+	"words.interjection": "interjeksjon",
+	"words.unknown": "ukjent del av talen"
+}

@@ -1,0 +1,13 @@
+{
+	"policies.moderation.title": "Politique de modération",
+	"policies.moderation.points.introduction.title": "Comment les modérateurs modèrent-ils le serveur ?",
+	"policies.moderation.points.introduction.description": "Le serveur respecte une politique de modération de 3 avertissements, appliquée par les {role_mention}s du serveur.",
+	"policies.moderation.points.breach.title": "Où les règles s'appliquent-elles ?",
+	"policies.moderation.points.breach.description": "Les règles du serveur s'appliquent à l'ensemble du serveur et toute infraction à ces règles entraînera un avertissement.",
+	"policies.moderation.points.warnings.title": "Que se passe-t-il si je reçois plusieurs avertissements ?",
+	"policies.moderation.points.warnings.description": "Si un utilisateur a déjà reçu trois avertissements, le quatrième avertissement entraînera l'exclusion de l'utilisateur. Les avertissements expirent après une période de __deux mois__.",
+	"policies.moderation.points.furtherAction.title": "Que se passe-t-il alors ?",
+	"policies.moderation.points.furtherAction.description": "En conséquence, le personnel du serveur sera informé du dépassement de la limite et, par la suite, examinera les circonstances et déterminera la marche à suivre appropriée.",
+	"policies.moderation.points.ban.title": "Et si je m'en fiche ?",
+	"policies.moderation.points.ban.description": "S'il s'avère qu'un utilisateur a sciemment et constamment enfreint les règles du serveur et/ou ignoré les suggestions de l'équipe, l'utilisateur sera définitivement banni du serveur."
+}

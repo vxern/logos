@@ -1,0 +1,13 @@
+{
+	"words.noun": "nom",
+	"words.verb": "verbe",
+	"words.adjective": "adjectif",
+	"words.adverb": "adverbe",
+	"words.adposition": "adposition",
+	"words.affix": "affixe",
+	"words.pronoun": "pronom",
+	"words.determiner": "déterminant",
+	"words.conjunction": "conjonction",
+	"words.interjection": "interjection",
+	"words.unknown": "partie inconnue de la phrase"
+}

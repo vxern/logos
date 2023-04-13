@@ -3,12 +3,10 @@
 	"parameters.user.description": "Numele de utilizator, tag-ul, ID-ul sau mențiunea utilizatorului.",
 	"parameters.show.name": "afișare",
 	"parameters.show.description": "Dacă da, rezultatul va fi afișat altor utilizatori.",
-
 	"parameters.duration.name": "durată",
 	"parameters.duration.description": "Durata sancțiunii.",
 	"parameters.reason.name": "motiv",
 	"parameters.reason.description": "Motivul pentru sancțiune sau anularea acesteia. Ar trebui să fie detaliat.",
-
 	"parameters.query.name": "interogare",
 	"parameters.query.description": "Titlul melodiei, link-ul către aceasta sau către unui set de melodii.",
 	"parameters.timestamp.name": "marcaj-de-timp",

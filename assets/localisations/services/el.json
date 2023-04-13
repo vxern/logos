@@ -1,0 +1,18 @@
+{
+	"notices.lastUpdate": "Τελευταία ενημέρωση: {date}",
+	"notices.notices.information.invite": "Μόνιμος σύνδεσμος πρόσκλησης",
+	"reports.users": "Αναφερόμενοι χρήστες",
+	"reports.reason": "Αιτιολόγηση της έκθεσης",
+	"reports.link": "Σύνδεση με το μήνυμα",
+	"reports.noLinkProvided": "Δεν παρέχεται σύνδεσμος στο μήνυμα.",
+	"reports.previousInfractions": "Προηγούμενες παραβάσεις του {username}",
+	"suggestion.suggestion": "Πρόταση",
+	"submittedBy": "Υποβλήθηκε από",
+	"submittedAt": "Υποβλήθηκε στο",
+	"markResolved": "Mark issue as resolved",
+	"markUnresolved": "Mark issue as unresolved",
+	"alreadyMarkedResolved.title": "Already marked resolved",
+	"alreadyMarkedResolved.description": "This issue has already been marked resolved.",
+	"alreadyMarkedUnresolved.title": "Already marked unresolved",
+	"alreadyMarkedUnresolved.description": "This issue has already been marked unresolved."
+}

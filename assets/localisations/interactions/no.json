@@ -1,0 +1,9 @@
+{
+	"interactions.continuedOnNextPage": "Fortsetter på neste side...",
+	"interactions.page": "Side",
+	"interactions.invalidUser.title": "Ugyldig bruker",
+	"interactions.invalidUser.description": "Brukeren du angav er ugyldig.",
+	"interactions.rateLimited.title": "Du er på en takstgrense",
+	"interactions.rateLimited.description.tooManyUses": "You have used this command too many times ({times}) in too short of a span of time.",
+	"interactions.rateLimited.description.cannotUseAgainUntil": "Du vil igjen kunne bruke kommandoen {relative_timestamp}."
+}

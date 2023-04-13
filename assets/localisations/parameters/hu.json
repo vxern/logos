@@ -3,16 +3,14 @@
 	"parameters.user.description": "A felhasználó neve, tagje, ID-je vagy megemlítése.",
 	"parameters.show.name": "megjelenítés",
 	"parameters.show.description": "Ha igaz, a találatok másoknak is láthatóvá válnak.",
-
 	"parameters.duration.name": "időtartam",
 	"parameters.duration.description": "A szankció időtartama.",
 	"parameters.reason.name": "ok",
 	"parameters.reason.description": "A szankciónak vagy visszavonásának oka. Legyen kifejező.",
-
 	"parameters.query.name": "lekérés",
-	"parameters.query.description": "",
+	"parameters.query.description": "The title or a link to the song or song collection.",
 	"parameters.timestamp.name": "különbség",
-	"parameters.timestamp.description": "",
+	"parameters.timestamp.description": "The timestamp to seek.",
 	"parameters.collection.name": "gyűjtemény",
 	"parameters.collection.description": "Ha igaz, akkor a művelet a zenegyűjteményen lesz végrehajtva.",
 	"parameters.by.name": "lépték",

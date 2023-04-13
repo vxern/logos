@@ -1,27 +1,21 @@
 {
 	"rules.tldr": "Röviden",
 	"rules.rule": "Szabály",
-
 	"rules.behaviour.title": "Viselkedés",
 	"rules.behaviour.summary": "Igyekezz kedves lenni.",
 	"rules.behaviour.content": "A tagoknak tisztelettel, megértéssel és belátással kell viseltetniük egymás iránt. Nem elfogadott a verbális bántalmazás, kirekesztés, zaklatás, illetve a rosszindulatú, bántó vagy mérgező viselkedés semmilyen más formája sem.",
-
 	"rules.quality.title": "Minőség",
 	"rules.quality.summary": "Ne legyél kiállhatatlan.",
 	"rules.quality.content": "Mindennemű hozzájárulásnak, aktivitásnak igényesnek (vállalható színvonalúnak) kell lennie. Elítélendő a trollkodás, spammelés, floodolás, shitpostolás (a mémeknek szánt csatornán kívül), és az irritáló viselkedés egyéb formái.",
-
 	"rules.relevance.title": "Relevancia",
 	"rules.relevance.summary": "Posztolj releváns tartalmat.",
 	"rules.relevance.content": "A hozzájárulásokat a maguk helyén - megfelelő csatornában és kategóriában - kell megtenni. Ha bizonyos tartalmat a nem megfelelő csatornába küldesz, meg fogunk kérni, hogy helyezd át a megfelelő helyre.",
-
 	"rules.suitability.title": "Illőség",
 	"rules.suitability.summary": "Fiatalabb tagoknak is elfogadható tartalmat posztolj.",
 	"rules.suitability.content": "A hozzájárulásoknak kiskorúak számára is illendőnek kell lenniük. Szigorúan tilos korhatáros (NSFW) és felkavaró (NSFL) tartalmak megosztása. Ha nem mutatnád meg egy kiskorúnak, akkor ne is posztold.",
-
 	"rules.exclusivity.title": "Kizárólagosság",
 	"rules.exclusivity.summary": "Ne hirdess.",
 	"rules.exclusivity.content": "Minden tagtól elvárt, hogy ne használják ezt a teret hirdetésre. Tilos tevőlegesen próbálkozni ezzel - ideértve a kéretlen privát üzeneteket is.",
-
 	"rules.adherence.title": "Szabálykövetés",
 	"rules.adherence.summary": "Tartsd tiszteletben a szabályokat.",
 	"rules.adherence.content": "Végleges kitiltásban részesülhetnek azok a tagok, akik semmibe veszik a szerver szabályait, és semmilyen módon nem szándékoznak hasznosan hozzájárulni a szerverhez."

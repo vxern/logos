@@ -1,0 +1,18 @@
+{
+	"notices.lastUpdate": "Sist oppdatert: {date}",
+	"notices.notices.information.invite": "Permanent invitasjonslenke",
+	"reports.users": "Reported users",
+	"reports.reason": "Reason for report",
+	"reports.link": "Link to message",
+	"reports.noLinkProvided": "No link to message provided.",
+	"reports.previousInfractions": "Tidligere brudd på {username}",
+	"suggestion.suggestion": "Forslag",
+	"submittedBy": "Innsendt av",
+	"submittedAt": "Innsendt på",
+	"markResolved": "Mark issue as resolved",
+	"markUnresolved": "Mark issue as unresolved",
+	"alreadyMarkedResolved.title": "Already marked resolved",
+	"alreadyMarkedResolved.description": "This issue has already been marked resolved.",
+	"alreadyMarkedUnresolved.title": "Already marked unresolved",
+	"alreadyMarkedUnresolved.description": "This issue has already been marked unresolved."
+}

@@ -1,0 +1,20 @@
+{
+	"parameters.user.name": "bruker",
+	"parameters.user.description": "Brukernavn, tag, ID eller omtale.",
+	"parameters.show.name": "vis",
+	"parameters.show.description": "Hvis satt til sann, vil resultatet vises til andre.",
+	"parameters.duration.name": "varighet",
+	"parameters.duration.description": "Varigheten av sanksjonen.",
+	"parameters.reason.name": "grunn",
+	"parameters.reason.description": "Årsaken til sanksjonen eller dens opphevelse. Den skal være beskrivende.",
+	"parameters.query.name": "spørring",
+	"parameters.query.description": "Tittelen eller en lenke til sangen eller sangsamlingen.",
+	"parameters.timestamp.name": "tidsstempel",
+	"parameters.timestamp.description": "Tidsstempel å søke.",
+	"parameters.collection.name": "samling",
+	"parameters.collection.description": "Hvis satt til true, vil handlingen utføres på sangsamlingen i stedet.",
+	"parameters.by.name": "av",
+	"parameters.by.description": "Antall sanger å hoppe over.",
+	"parameters.to.name": "til",
+	"parameters.to.description": "Indeksen til sporet å hoppe til."
+}
