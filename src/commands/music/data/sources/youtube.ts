@@ -27,6 +27,7 @@ const resolver: ListingResolver = async ([client, bot], interaction, query) => {
 	}
 
 	postponeReply([client, bot], interaction);
+	deleteReply([client, bot], interaction);
 
 	const url = urlExpressionExecuted.at(0)!;
 	if (url.includes('list=')) {
