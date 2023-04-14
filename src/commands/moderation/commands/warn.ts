@@ -104,7 +104,7 @@ async function handleWarnUser([client, bot]: [Client, Bot], interaction: Interac
 		}],
 	});
 
-	const moderationChannelId = getTextChannel(guild, configuration.guilds.channels.moderation)?.id;
+	const moderationChannelId = getTextChannel(guild, configuration.guilds.channels.guideChat)?.id;
 	if (moderationChannelId === undefined) return;
 
 	const surpassedLimit = relevantWarnings.size > configuration.commands.warn.limitUses;

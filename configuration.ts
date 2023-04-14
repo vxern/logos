@@ -16,7 +16,7 @@ const configuration = {
 			reports: 'reports',
 			suggestions: 'suggestions',
 
-			moderation: 'moderation',
+			guideChat: 'guide-chat',
 
 			information: 'rules',
 			roles: 'roles',
