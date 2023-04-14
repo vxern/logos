@@ -321,3 +321,4 @@ async function translate(
 }
 
 export default command;
+export { languageNameToStringKey };
