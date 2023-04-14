@@ -139,7 +139,7 @@ async function handleWarnUser([client, bot]: [Client, Bot], interaction: Interac
 			title: localise(client, 'warn.strings.limitReached.title', defaultLocale)(),
 			description: localise(client, 'warn.strings.limitReached.description', defaultLocale)(
 				{
-					'mention_user': diagnosticMentionUser(member.user!),
+					'user_mention': diagnosticMentionUser(member.user!),
 					'limit': configuration.commands.warn.limitUses,
 				},
 			),
