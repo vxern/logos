@@ -259,6 +259,13 @@ const symbols = {
 		celebration: '🥳',
 		upset: '😕',
 	},
+	bot: {
+		features: {
+			roles: '💼',
+			language: '🎓',
+			music: '🎶',
+		},
+	},
 	guild: {
 		description: '🖋️',
 		members: '🧑',
