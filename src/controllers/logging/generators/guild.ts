@@ -213,7 +213,7 @@ ${messageLink}`;
 
 			return `${userMention} has initiated a purging of ${messageCount} messages${
 				author !== undefined ? `sent by ${authorMention}` : ''
-			} in ${channelMention}$.`;
+			} in ${channelMention}.`;
 		},
 		filter: (_, originGuildId, member, __, ___, ____) => originGuildId === member.guildId,
 		color: constants.colors.yellow,
