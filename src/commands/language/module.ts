@@ -1,11 +1,11 @@
 import * as csv from 'std/encoding/csv.ts';
 import dexonline from 'logos/src/commands/language/data/adapters/dexonline.ts';
+import { WordClass } from 'logos/src/commands/language/commands/word.ts';
 import { DictionaryAdapter, SentencePair } from 'logos/src/commands/language/data/types.ts';
 import { Client } from 'logos/src/client.ts';
 import { addParametersToURL } from 'logos/src/utils.ts';
 import constants from 'logos/constants.ts';
 import { Language, supportedLanguages } from 'logos/types.ts';
-import { WordClass } from './commands/word.ts';
 
 const dictionaryAdapters: DictionaryAdapter<any>[] = [dexonline];
 

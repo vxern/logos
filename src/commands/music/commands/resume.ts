@@ -1,14 +1,8 @@
-import {
-	ApplicationCommandFlags,
-	ApplicationCommandOptionTypes,
-	Bot,
-	Interaction,
-	InteractionResponseTypes,
-	sendInteractionResponse,
-} from 'discordeno';
+import { ApplicationCommandOptionTypes, Bot, Interaction } from 'discordeno';
 import { OptionTemplate } from 'logos/src/commands/command.ts';
 import { getVoiceState, isOccupied, isPaused, resume, verifyCanManagePlayback } from 'logos/src/controllers/music.ts';
 import { Client, localise } from 'logos/src/client.ts';
+import { reply } from 'logos/src/interactions.ts';
 import constants from 'logos/constants.ts';
 import { defaultLocale } from 'logos/types.ts';
 
@@ -36,22 +30,13 @@ function handleResumePlayback([client, bot]: [Client, Bot], interaction: Interac
 			description: localise(client, 'music.options.resume.strings.noSong.description', interaction.locale)(),
 		};
 
-		return void sendInteractionResponse(
-			bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						title: strings.title,
-						description: strings.description,
-						color: constants.colors.dullYellow,
-					}],
-				},
-			},
-		);
+		return void reply([client, bot], interaction, {
+			embeds: [{
+				title: strings.title,
+				description: strings.description,
+				color: constants.colors.dullYellow,
+			}],
+		});
 	}
 
 	if (!isPaused(controller.player)) {
@@ -60,22 +45,13 @@ function handleResumePlayback([client, bot]: [Client, Bot], interaction: Interac
 			description: localise(client, 'music.options.resume.strings.notPaused', interaction.locale)(),
 		};
 
-		return void sendInteractionResponse(
-			bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						title: strings.title,
-						description: strings.description,
-						color: constants.colors.dullYellow,
-					}],
-				},
-			},
-		);
+		return void reply([client, bot], interaction, {
+			embeds: [{
+				title: strings.title,
+				description: strings.description,
+				color: constants.colors.dullYellow,
+			}],
+		});
 	}
 
 	resume(controller.player);
@@ -85,21 +61,13 @@ function handleResumePlayback([client, bot]: [Client, Bot], interaction: Interac
 		description: localise(client, 'music.options.resume.strings.resumed.description', defaultLocale)(),
 	};
 
-	return void sendInteractionResponse(
-		bot,
-		interaction.id,
-		interaction.token,
-		{
-			type: InteractionResponseTypes.ChannelMessageWithSource,
-			data: {
-				embeds: [{
-					title: `${constants.symbols.music.resumed} ${strings.title}`,
-					description: strings.description,
-					color: constants.colors.invisible,
-				}],
-			},
-		},
-	);
+	return void reply([client, bot], interaction, {
+		embeds: [{
+			title: `${constants.symbols.music.resumed} ${strings.title}`,
+			description: strings.description,
+			color: constants.colors.invisible,
+		}],
+	}, { visible: true });
 }
 
 export default command;

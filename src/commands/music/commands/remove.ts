@@ -1,17 +1,12 @@
 import {
 	ActionRow,
-	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
 	Bot,
-	deleteOriginalInteractionResponse,
-	editOriginalInteractionResponse,
 	Interaction,
 	InteractionCallbackData,
-	InteractionResponseTypes,
 	InteractionTypes,
 	MessageComponentTypes,
 	SelectOption,
-	sendInteractionResponse,
 } from 'discordeno';
 import { listingTypeToEmoji, SongListing } from 'logos/src/commands/music/data/types.ts';
 import { OptionTemplate } from 'logos/src/commands/command.ts';
@@ -23,7 +18,16 @@ import {
 	verifyCanManagePlayback,
 } from 'logos/src/controllers/music.ts';
 import { Client, localise } from 'logos/src/client.ts';
-import { ControlButtonID, createInteractionCollector, decodeId, generateButtons } from 'logos/src/interactions.ts';
+import {
+	acknowledge,
+	ControlButtonID,
+	createInteractionCollector,
+	decodeId,
+	deleteReply,
+	editReply,
+	generateButtons,
+	reply,
+} from 'logos/src/interactions.ts';
 import { chunk } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import constants from 'logos/constants.ts';
@@ -54,22 +58,13 @@ function handleRemoveSongListing([client, bot]: [Client, Bot], interaction: Inte
 			description: localise(client, 'music.options.remove.strings.queueEmpty.description', interaction.locale)(),
 		};
 
-		return void sendInteractionResponse(
-			bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						title: strings.title,
-						description: strings.description,
-						color: constants.colors.dullYellow,
-					}],
-				},
-			},
-		);
+		return void reply([client, bot], interaction, {
+			embeds: [{
+				title: strings.title,
+				description: strings.description,
+				color: constants.colors.dullYellow,
+			}],
+		});
 	}
 
 	const removeListingData = { pageIndex: 0 };
@@ -83,35 +78,26 @@ function handleRemoveSongListing([client, bot]: [Client, Bot], interaction: Inte
 	);
 
 	const onQueueUpdateListener = () =>
-		editOriginalInteractionResponse(
-			bot,
-			interaction.token,
+		editReply(
+			[client, bot],
+			interaction,
 			generateEmbed([client, bot], interaction, controller, removeListingData, interaction.locale),
 		);
 
-	const onStopListener = () => deleteOriginalInteractionResponse(bot, interaction.token);
+	const onStopListener = () => deleteReply([client, bot], interaction);
 
 	controller.events.on('queueUpdate', onQueueUpdateListener);
 	controller.events.on('stop', onStopListener);
 
 	setTimeout(
-		() => controller.events.off('queueUpdate', onQueueUpdateListener),
+		() => {
+			controller.events.off('queueUpdate', onQueueUpdateListener);
+			controller.events.off('stop', onStopListener);
+		},
 		constants.interactionTokenExpiryInterval,
 	);
-	setTimeout(() => controller.events.off('stop', onStopListener), constants.interactionTokenExpiryInterval);
 
-	return void sendInteractionResponse(
-		bot,
-		interaction.id,
-		interaction.token,
-		{
-			type: InteractionResponseTypes.ChannelMessageWithSource,
-			data: {
-				flags: ApplicationCommandFlags.Ephemeral,
-				...interactionResponseData,
-			},
-		},
-	);
+	return void reply([client, bot], interaction, interactionResponseData);
 }
 
 interface RemoveListingData {
@@ -134,6 +120,8 @@ function generateEmbed(
 		type: InteractionTypes.MessageComponent,
 		userId: interaction.user.id,
 		onCollect: (bot, selection) => {
+			acknowledge([client, bot], selection);
+
 			if (selection.data === undefined) return;
 
 			const [_, action] = decodeId<ControlButtonID>(selection.data.customId!);
@@ -147,15 +135,7 @@ function generateEmbed(
 					break;
 			}
 
-			sendInteractionResponse(bot, selection.id, selection.token, {
-				type: InteractionResponseTypes.DeferredUpdateMessage,
-			});
-
-			editOriginalInteractionResponse(
-				bot,
-				interaction.token,
-				generateEmbed([client, bot], interaction, controller, data, locale),
-			);
+			editReply([client, bot], interaction, generateEmbed([client, bot], interaction, controller, data, locale));
 		},
 	});
 
@@ -179,21 +159,13 @@ function generateEmbed(
 						description: localise(client, 'music.options.remove.strings.failed.description', interaction.locale)(),
 					};
 
-					return void sendInteractionResponse(
-						bot,
-						selection.id,
-						selection.token,
-						{
-							type: InteractionResponseTypes.ChannelMessageWithSource,
-							data: {
-								embeds: [{
-									title: strings.title,
-									description: strings.description,
-									color: constants.colors.dullYellow,
-								}],
-							},
-						},
-					);
+					return void reply([client, bot], selection, {
+						embeds: [{
+							title: strings.title,
+							description: strings.description,
+							color: constants.colors.dullYellow,
+						}],
+					});
 				}
 
 				const strings = {
@@ -206,21 +178,13 @@ function generateEmbed(
 					),
 				};
 
-				return void sendInteractionResponse(
-					bot,
-					selection.id,
-					selection.token,
-					{
-						type: InteractionResponseTypes.ChannelMessageWithSource,
-						data: {
-							embeds: [{
-								title: `${constants.symbols.music.removed} ${strings.title}`,
-								description: strings.description,
-								color: constants.colors.invisible,
-							}],
-						},
-					},
-				);
+				return void reply([client, bot], selection, {
+					embeds: [{
+						title: `${constants.symbols.music.removed} ${strings.title}`,
+						description: strings.description,
+						color: constants.colors.invisible,
+					}],
+				});
 			},
 		},
 	);

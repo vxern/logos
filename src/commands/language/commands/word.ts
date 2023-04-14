@@ -1,25 +1,30 @@
 import {
-	ApplicationCommandFlags,
 	ApplicationCommandOptionTypes,
 	ApplicationCommandTypes,
 	Bot,
 	ButtonComponent,
 	ButtonStyles,
 	DiscordEmbedField,
-	editOriginalInteractionResponse,
 	Embed,
 	Interaction,
-	InteractionResponseTypes,
 	InteractionTypes,
 	MessageComponents,
 	MessageComponentTypes,
-	sendInteractionResponse,
 } from 'discordeno';
 import { Definition, DictionaryEntry, Expression } from 'logos/src/commands/language/data/types.ts';
 import { CommandTemplate } from 'logos/src/commands/command.ts';
 import { show } from 'logos/src/commands/parameters.ts';
 import { Client, localise } from 'logos/src/client.ts';
-import { createInteractionCollector, decodeId, encodeId, parseArguments } from 'logos/src/interactions.ts';
+import {
+	acknowledge,
+	createInteractionCollector,
+	decodeId,
+	editReply,
+	encodeId,
+	parseArguments,
+	postponeReply,
+	reply,
+} from 'logos/src/interactions.ts';
 import { chunk, diagnosticMentionUser } from 'logos/src/utils.ts';
 import constants from 'logos/constants.ts';
 import { BulletStyles, code, list } from 'logos/formatting.ts';
@@ -56,35 +61,18 @@ async function handleFindWord([client, bot]: [Client, Bot], interaction: Interac
 			description: localise(client, 'word.strings.noDictionaryAdapters.description', interaction.locale)(),
 		};
 
-		return void sendInteractionResponse(
-			bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						title: strings.title,
-						description: strings.description,
-						color: constants.colors.dullYellow,
-					}],
-				},
-			},
-		);
+		return void reply([client, bot], interaction, {
+			embeds: [{
+				title: strings.title,
+				description: strings.description,
+				color: constants.colors.dullYellow,
+			}],
+		});
 	}
 
 	const locale = show ? defaultLocale : interaction.locale;
 
-	await sendInteractionResponse(
-		bot,
-		interaction.id,
-		interaction.token,
-		{
-			type: InteractionResponseTypes.DeferredChannelMessageWithSource,
-			data: { flags: !show ? ApplicationCommandFlags.Ephemeral : undefined },
-		},
-	);
+	await postponeReply([client, bot], interaction, { visible: show });
 
 	client.log.info(
 		`Looking up the word '${word}' from ${dictionaries.length} dictionaries ` +
@@ -110,17 +98,13 @@ async function handleFindWord([client, bot]: [Client, Bot], interaction: Interac
 			}),
 		};
 
-		return void editOriginalInteractionResponse(
-			bot,
-			interaction.token,
-			{
-				embeds: [{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colors.dullYellow,
-				}],
-			},
-		);
+		return void editReply([client, bot], interaction, {
+			embeds: [{
+				title: strings.title,
+				description: strings.description,
+				color: constants.colors.dullYellow,
+			}],
+		});
 	}
 
 	return void displayMenu(
@@ -158,7 +142,7 @@ function displayMenu(
 ): void {
 	const entry = data.entries.at(data.dictionaryEntryIndex)!;
 
-	editOriginalInteractionResponse(bot, interaction.token, {
+	editReply([client, bot], interaction, {
 		embeds: generateEmbeds(client, data, entry, locale),
 		components: generateButtons([client, bot], interaction, data, entry, locale),
 	});
@@ -201,24 +185,22 @@ function generateButtons(
 			const previousPageButtonId = createInteractionCollector([client, bot], {
 				type: InteractionTypes.MessageComponent,
 				onCollect: (_, selection) => {
-					sendInteractionResponse(bot, selection.id, selection.token, {
-						type: InteractionResponseTypes.DeferredUpdateMessage,
-					});
+					acknowledge([client, bot], selection);
 
 					if (!isFirst) data.dictionaryEntryIndex--;
-					return void displayMenu([client, bot], interaction, data, locale);
+
+					return displayMenu([client, bot], interaction, data, locale);
 				},
 			});
 
 			const nextPageButtonId = createInteractionCollector([client, bot], {
 				type: InteractionTypes.MessageComponent,
 				onCollect: (_, selection) => {
-					sendInteractionResponse(bot, selection.id, selection.token, {
-						type: InteractionResponseTypes.DeferredUpdateMessage,
-					});
+					acknowledge([client, bot], selection);
 
 					if (!isLast) data.dictionaryEntryIndex++;
-					return void displayMenu([client, bot], interaction, data, locale);
+
+					return displayMenu([client, bot], interaction, data, locale);
 				},
 			});
 
@@ -295,25 +277,23 @@ function generateButtons(
 	const definitionsMenuButtonId = createInteractionCollector([client, bot], {
 		type: InteractionTypes.MessageComponent,
 		onCollect: (_, selection) => {
-			sendInteractionResponse(bot, selection.id, selection.token, {
-				type: InteractionResponseTypes.DeferredUpdateMessage,
-			});
+			acknowledge([client, bot], selection);
 
 			data.inflectionTableIndex = 0;
 			data.currentView = ContentTabs.Definitions;
-			return void displayMenu([client, bot], interaction, data, locale);
+
+			return displayMenu([client, bot], interaction, data, locale);
 		},
 	});
 
 	const inflectionMenuButtonId = createInteractionCollector([client, bot], {
 		type: InteractionTypes.MessageComponent,
 		onCollect: (_, selection) => {
-			sendInteractionResponse(bot, selection.id, selection.token, {
-				type: InteractionResponseTypes.DeferredUpdateMessage,
-			});
+			acknowledge([client, bot], selection);
 
 			data.currentView = ContentTabs.Inflection;
-			return void displayMenu([client, bot], interaction, data, locale);
+
+			return displayMenu([client, bot], interaction, data, locale);
 		},
 	});
 

@@ -1,14 +1,4 @@
-import {
-	ApplicationCommandFlags,
-	Bot,
-	Embed,
-	Guild,
-	Interaction,
-	InteractionResponseTypes,
-	sendInteractionResponse,
-	sendMessage,
-	VoiceState,
-} from 'discordeno';
+import { Bot, Embed, Guild, Interaction, sendMessage, VoiceState } from 'discordeno';
 import { EventEmitter } from 'event';
 import { Player } from 'lavadeno';
 import { LoadType } from 'lavalink_types';
@@ -21,6 +11,7 @@ import {
 	SongStream,
 } from 'logos/src/commands/music/data/types.ts';
 import { Client, localise } from 'logos/src/client.ts';
+import { reply } from 'logos/src/interactions.ts';
 import configuration from 'logos/configuration.ts';
 import constants from 'logos/constants.ts';
 import { mention, MentionTypes } from 'logos/formatting.ts';
@@ -132,24 +123,14 @@ function verifyVoiceState(
 			},
 		};
 
-		sendInteractionResponse(
-			bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [
-						{
-							title: strings.title,
-							description: action === 'manage' ? strings.description.toManage : strings.description.toCheck,
-							color: constants.colors.dullYellow,
-						},
-					],
-				},
-			},
-		);
+		reply([client, bot], interaction, {
+			embeds: [{
+				title: strings.title,
+				description: action === 'manage' ? strings.description.toManage : strings.description.toCheck,
+				color: constants.colors.dullYellow,
+			}],
+		});
+
 		return false;
 	}
 
@@ -159,22 +140,14 @@ function verifyVoiceState(
 			description: localise(client, 'music.options.play.strings.inDifferentVc.description', interaction.locale)(),
 		};
 
-		sendInteractionResponse(
-			bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						title: strings.title,
-						description: strings.description,
-						color: constants.colors.dullYellow,
-					}],
-				},
-			},
-		);
+		reply([client, bot], interaction, {
+			embeds: [{
+				title: strings.title,
+				description: strings.description,
+				color: constants.colors.dullYellow,
+			}],
+		});
+
 		return false;
 	}
 
@@ -196,22 +169,14 @@ function verifyCanRequestPlayback(
 			description: localise(client, 'music.options.play.strings.queueFull.description', interaction.locale)(),
 		};
 
-		sendInteractionResponse(
-			bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						title: strings.title,
-						description: strings.description,
-						color: constants.colors.dullYellow,
-					}],
-				},
-			},
-		);
+		reply([client, bot], interaction, {
+			embeds: [{
+				title: strings.title,
+				description: strings.description,
+				color: constants.colors.dullYellow,
+			}],
+		});
+
 		return false;
 	}
 
@@ -233,22 +198,14 @@ function verifyCanManagePlayback(
 			description: localise(client, 'music.strings.cannotChange.description', interaction.locale)(),
 		};
 
-		sendInteractionResponse(
-			bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						title: strings.title,
-						description: strings.description,
-						color: constants.colors.dullYellow,
-					}],
-				},
-			},
-		);
+		reply([client, bot], interaction, {
+			embeds: [{
+				title: strings.title,
+				description: strings.description,
+				color: constants.colors.dullYellow,
+			}],
+		});
+
 		return false;
 	}
 

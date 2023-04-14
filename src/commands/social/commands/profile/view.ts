@@ -1,16 +1,8 @@
-import {
-	ApplicationCommandFlags,
-	ApplicationCommandOptionTypes,
-	Bot,
-	getAvatarURL,
-	Interaction,
-	InteractionResponseTypes,
-	sendInteractionResponse,
-} from 'discordeno';
+import { ApplicationCommandOptionTypes, Bot, getAvatarURL, Interaction } from 'discordeno';
 import { OptionTemplate } from 'logos/src/commands/command.ts';
 import { show, user } from 'logos/src/commands/parameters.ts';
 import { autocompleteMembers, Client, localise, resolveInteractionToMember } from 'logos/src/client.ts';
-import { parseArguments } from 'logos/src/interactions.ts';
+import { parseArguments, reply } from 'logos/src/interactions.ts';
 import constants from 'logos/constants.ts';
 import { mention, MentionTypes } from 'logos/formatting.ts';
 import { defaultLocale } from 'logos/types.ts';
@@ -44,22 +36,13 @@ async function handleDisplayProfile([client, bot]: [Client, Bot], interaction: I
 			description: localise(client, 'profile.options.view.strings.failed.description', interaction.locale)(),
 		};
 
-		return void sendInteractionResponse(
-			bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						title: strings.title,
-						description: strings.description,
-						color: constants.colors.red,
-					}],
-				},
-			},
-		);
+		return void reply([client, bot], interaction, {
+			embeds: [{
+				title: strings.title,
+				description: strings.description,
+				color: constants.colors.red,
+			}],
+		});
 	}
 
 	const subject = await client.database.adapters.users.getOrFetchOrCreate(
@@ -93,42 +76,33 @@ async function handleDisplayProfile([client, bot]: [Client, Bot], interaction: I
 		sent: localise(client, 'profile.options.view.strings.information.description.sent', locale)(),
 	};
 
-	return void sendInteractionResponse(
-		bot,
-		interaction.id,
-		interaction.token,
-		{
-			type: InteractionResponseTypes.ChannelMessageWithSource,
-			data: {
-				flags: !show ? ApplicationCommandFlags.Ephemeral : undefined,
-				embeds: [{
-					title: strings.title,
-					thumbnail: (() => {
-						const iconURL = getAvatarURL(
-							bot,
-							target.id,
-							target.discriminator,
-							{ avatar: target.avatar, size: 4096, format: 'webp' },
-						);
-						if (iconURL === undefined) return;
+	return void reply([client, bot], interaction, {
+		embeds: [{
+			title: strings.title,
+			thumbnail: (() => {
+				const iconURL = getAvatarURL(
+					bot,
+					target.id,
+					target.discriminator,
+					{ avatar: target.avatar, size: 4096, format: 'webp' },
+				);
+				if (iconURL === undefined) return;
 
-						return { url: iconURL };
-					})(),
-					fields: [{
-						name: `${constants.symbols.profile.roles} ${strings.roles}`,
-						value: member.roles.map((roleId) => mention(roleId, MentionTypes.Role)).join(' '),
-						inline: false,
-					}, {
-						name: `${constants.symbols.profile.statistics.statistics} ${strings.statistics}`,
-						value:
-							`${constants.symbols.profile.statistics.praises} ${strings.praises} • ${strings.received} – ${praisesReceived.size} • ${strings.sent} – ${praisesSent.size}
+				return { url: iconURL };
+			})(),
+			fields: [{
+				name: `${constants.symbols.profile.roles} ${strings.roles}`,
+				value: member.roles.map((roleId) => mention(roleId, MentionTypes.Role)).join(' '),
+				inline: false,
+			}, {
+				name: `${constants.symbols.profile.statistics.statistics} ${strings.statistics}`,
+				value:
+					`${constants.symbols.profile.statistics.praises} ${strings.praises} • ${strings.received} – ${praisesReceived.size} • ${strings.sent} – ${praisesSent.size}
   ${constants.symbols.profile.statistics.warnings} ${strings.warnings} • ${strings.received} – ${warningsReceived.size}`,
-						inline: false,
-					}],
-				}],
-			},
-		},
-	);
+				inline: false,
+			}],
+		}],
+	}, { visible: show });
 }
 
 export default command;

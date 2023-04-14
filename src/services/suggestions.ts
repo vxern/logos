@@ -1,16 +1,13 @@
 import {
-	ApplicationCommandFlags,
 	Bot,
 	ButtonStyles,
 	CreateMessage,
 	deleteMessage,
 	getAvatarURL,
 	Guild,
-	InteractionResponseTypes,
 	InteractionTypes,
 	Message,
 	MessageComponentTypes,
-	sendInteractionResponse,
 	sendMessage,
 	User as DiscordUser,
 } from 'discordeno';
@@ -25,6 +22,7 @@ import {
 	decodeId,
 	encodeId,
 	InteractionCollectorSettings,
+	reply,
 } from 'logos/src/interactions.ts';
 import { diagnosticMentionUser, getAllMessages, getTextChannel } from 'logos/src/utils.ts';
 import { defaultLocale } from 'logos/types.ts';
@@ -271,8 +269,6 @@ function registerSuggestionHandler(
 		async (bot, selection) => {
 			const isResolved = decodeId<SuggestionPromptButtonID>(selection.data!.customId!)[4] === 'true';
 
-			console.debug(isResolved);
-
 			const suggestions = client.database.adapters.suggestions.get(client, 'authorAndGuild', [
 				authorReference,
 				guildId.toString(),
@@ -284,35 +280,31 @@ function registerSuggestionHandler(
 
 			if (isResolved && suggestion.data.isResolved) {
 				const strings = {
-					alreadyMarkedAsResolved: localise(client, 'alreadyMarkedAsResolved', defaultLocale)(),
+					title: localise(client, 'alreadyMarkedResolved.title', defaultLocale)(),
+					description: localise(client, 'alreadyMarkedResolved.description', defaultLocale)(),
 				};
 
-				return void sendInteractionResponse(bot, selection.id, selection.token, {
-					type: InteractionResponseTypes.ChannelMessageWithSource,
-					data: {
-						flags: ApplicationCommandFlags.Ephemeral,
-						embeds: [{
-							description: strings.alreadyMarkedAsResolved,
-							color: constants.colors.dullYellow,
-						}],
-					},
+				return void reply([client, bot], selection, {
+					embeds: [{
+						title: strings.title,
+						description: strings.description,
+						color: constants.colors.dullYellow,
+					}],
 				});
 			}
 
 			if (!isResolved && !suggestion.data.isResolved) {
 				const strings = {
-					alreadyMarkedAsUnresolved: localise(client, 'alreadyMarkedAsUnresolved', defaultLocale)(),
+					title: localise(client, 'alreadyMarkedUnresolved.title', defaultLocale)(),
+					description: localise(client, 'alreadyMarkedUnresolved.description', defaultLocale)(),
 				};
 
-				return void sendInteractionResponse(bot, selection.id, selection.token, {
-					type: InteractionResponseTypes.ChannelMessageWithSource,
-					data: {
-						flags: ApplicationCommandFlags.Ephemeral,
-						embeds: [{
-							description: strings.alreadyMarkedAsUnresolved,
-							color: constants.colors.dullYellow,
-						}],
-					},
+				return void reply([client, bot], selection, {
+					embeds: [{
+						title: strings.title,
+						description: strings.description,
+						color: constants.colors.dullYellow,
+					}],
 				});
 			}
 
@@ -354,8 +346,8 @@ function getSuggestionPrompt(
 			submittedAt: localise(client, 'submittedAt', defaultLocale)(),
 			suggestion: localise(client, 'suggestion.suggestion', defaultLocale)(),
 		},
-		markAsResolved: localise(client, 'markAsResolved', defaultLocale)(),
-		markAsUnresolved: localise(client, 'markAsUnresolved', defaultLocale)(),
+		markResolved: localise(client, 'markResolved', defaultLocale)(),
+		markUnresolved: localise(client, 'markUnresolved', defaultLocale)(),
 	};
 
 	return {
@@ -395,7 +387,7 @@ function getSuggestionPrompt(
 					? {
 						type: MessageComponentTypes.Button,
 						style: ButtonStyles.Primary,
-						label: strings.markAsResolved,
+						label: strings.markResolved,
 						customId: encodeId<SuggestionPromptButtonID>(
 							constants.staticComponentIds.reports,
 							[author.id.toString(), guild.id.toString(), suggestionReferenceId, `${true}`],
@@ -404,7 +396,7 @@ function getSuggestionPrompt(
 					: {
 						type: MessageComponentTypes.Button,
 						style: ButtonStyles.Secondary,
-						label: strings.markAsUnresolved,
+						label: strings.markUnresolved,
 						customId: encodeId<SuggestionPromptButtonID>(
 							constants.staticComponentIds.reports,
 							[author.id.toString(), guild.id.toString(), suggestionReferenceId, `${false}`],

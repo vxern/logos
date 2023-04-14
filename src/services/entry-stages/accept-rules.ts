@@ -1,18 +1,8 @@
-import {
-	ApplicationCommandFlags,
-	Bot,
-	ButtonComponent,
-	ButtonStyles,
-	editOriginalInteractionResponse,
-	Interaction,
-	InteractionResponseTypes,
-	MessageComponentTypes,
-	sendInteractionResponse,
-} from 'discordeno';
+import { Bot, ButtonComponent, ButtonStyles, Interaction, MessageComponentTypes } from 'discordeno';
 import { getProficiencyCategory } from 'logos/src/commands/social/module.ts';
 import { EntryStepButtonID } from 'logos/src/services/entry.ts';
 import { Client, localise } from 'logos/src/client.ts';
-import { encodeId } from 'logos/src/interactions.ts';
+import { editReply, encodeId, reply } from 'logos/src/interactions.ts';
 import { snowflakeToTimestamp } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import constants from 'logos/constants.ts';
@@ -23,7 +13,7 @@ const proficiencyRoles = proficiencyCategory.collection.list;
 async function handleAcceptRules(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
-	_parameter: string,
+	_: string,
 ): Promise<void> {
 	const canEnter = await vetUser([client, bot], interaction);
 	if (!canEnter) return;
@@ -34,46 +24,41 @@ async function handleAcceptRules(
 	const strings = {
 		title: localise(client, 'entry.proficiency.title', interaction.locale)(),
 		description: {
-			chooseProficiency: localise(client, 'entry.proficiency.chooseProficiency', interaction.locale)({
+			chooseProficiency: localise(client, 'entry.proficiency.description.chooseProficiency', interaction.locale)({
 				'language': guild.language,
 			}),
-			canChangeLater: localise(client, 'entry.proficiency.canChangeLater', interaction.locale)({
+			canChangeLater: localise(client, 'entry.proficiency.description.canChangeLater', interaction.locale)({
 				'command': '`/profile roles`',
 			}),
 		},
 	};
 
-	return void editOriginalInteractionResponse(
-		bot,
-		interaction.token,
-		{
-			flags: ApplicationCommandFlags.Ephemeral,
-			embeds: [{
-				title: strings.title,
-				description: `${strings.description.chooseProficiency}\n\n${strings.description.canChangeLater}`,
-			}],
-			components: [{
-				type: MessageComponentTypes.ActionRow,
-				components: proficiencyRoles.map<ButtonComponent>(
-					(proficiencyRole, index) => {
-						const strings = {
-							name: localise(client, `${proficiencyRole.id}.name`, interaction.locale)(),
-						};
+	return void editReply([client, bot], interaction, {
+		embeds: [{
+			title: strings.title,
+			description: `${strings.description.chooseProficiency}\n\n${strings.description.canChangeLater}`,
+		}],
+		components: [{
+			type: MessageComponentTypes.ActionRow,
+			components: proficiencyRoles.map<ButtonComponent>(
+				(proficiencyRole, index) => {
+					const strings = {
+						name: localise(client, `${proficiencyRole.id}.name`, interaction.locale)(),
+					};
 
-						return {
-							type: MessageComponentTypes.Button,
-							label: strings.name,
-							customId: encodeId<EntryStepButtonID>(constants.staticComponentIds.selectedLanguageProficiency, [
-								index.toString(),
-							]),
-							style: ButtonStyles.Secondary,
-							emoji: { name: proficiencyRole.emoji },
-						};
-					},
-				) as [ButtonComponent],
-			}],
-		},
-	);
+					return {
+						type: MessageComponentTypes.Button,
+						label: strings.name,
+						customId: encodeId<EntryStepButtonID>(constants.staticComponentIds.selectedLanguageProficiency, [
+							index.toString(),
+						]),
+						style: ButtonStyles.Secondary,
+						emoji: { name: proficiencyRole.emoji },
+					};
+				},
+			) as [ButtonComponent],
+		}],
+	});
 }
 
 async function vetUser([client, bot]: [Client, Bot], interaction: Interaction): Promise<boolean> {
@@ -86,16 +71,12 @@ async function vetUser([client, bot]: [Client, Bot], interaction: Interaction): 
 		)(),
 	};
 
-	await sendInteractionResponse(bot, interaction.id, interaction.token, {
-		type: InteractionResponseTypes.ChannelMessageWithSource,
-		data: {
-			flags: ApplicationCommandFlags.Ephemeral,
-			embeds: [{
-				title: strings.title,
-				description: strings.description,
-				color: constants.colors.blue,
-			}],
-		},
+	await reply([client, bot], interaction, {
+		embeds: [{
+			title: strings.title,
+			description: strings.description,
+			color: constants.colors.blue,
+		}],
 	});
 
 	const createdAt = snowflakeToTimestamp(interaction.user.id);
@@ -106,14 +87,14 @@ async function vetUser([client, bot]: [Client, Bot], interaction: Interaction): 
 			description: localise(client, 'entry.verification.verifyingAccount.tooNew.description', interaction.locale)(),
 		};
 
-		editOriginalInteractionResponse(bot, interaction.token, {
-			flags: ApplicationCommandFlags.Ephemeral,
+		editReply([client, bot], interaction, {
 			embeds: [{
 				title: strings.title,
 				description: strings.description,
 				color: constants.colors.dullYellow,
 			}],
 		});
+
 		return false;
 	}
 
@@ -129,8 +110,7 @@ async function vetUser([client, bot]: [Client, Bot], interaction: Interaction): 
 			description: localise(client, 'entry.verification.verifyingAccount.failed.description', interaction.locale)(),
 		};
 
-		editOriginalInteractionResponse(bot, interaction.token, {
-			flags: ApplicationCommandFlags.Ephemeral,
+		editReply([client, bot], interaction, {
 			embeds: [{
 				title: strings.title,
 				description: strings.description,
@@ -156,14 +136,14 @@ async function vetUser([client, bot]: [Client, Bot], interaction: Interaction): 
 			description: localise(client, 'entry.verification.answers.alreadyAnswered.description', interaction.locale)(),
 		};
 
-		editOriginalInteractionResponse(bot, interaction.token, {
-			flags: ApplicationCommandFlags.Ephemeral,
+		editReply([client, bot], interaction, {
 			embeds: [{
 				title: strings.title,
 				description: strings.description,
 				color: constants.colors.dullYellow,
 			}],
 		});
+
 		return false;
 	}
 
@@ -174,14 +154,14 @@ async function vetUser([client, bot]: [Client, Bot], interaction: Interaction): 
 			description: localise(client, 'entry.verification.answers.rejectedBefore.description', interaction.locale)(),
 		};
 
-		editOriginalInteractionResponse(bot, interaction.token, {
-			flags: ApplicationCommandFlags.Ephemeral,
+		editReply([client, bot], interaction, {
 			embeds: [{
 				title: strings.title,
 				description: strings.description,
 				color: constants.colors.red,
 			}],
 		});
+
 		return false;
 	}
 

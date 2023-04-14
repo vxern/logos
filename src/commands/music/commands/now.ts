@@ -1,17 +1,10 @@
-import {
-	ApplicationCommandFlags,
-	ApplicationCommandOptionTypes,
-	Bot,
-	Interaction,
-	InteractionResponseTypes,
-	sendInteractionResponse,
-} from 'discordeno';
+import { ApplicationCommandOptionTypes, Bot, Interaction } from 'discordeno';
 import { Song, SongCollection, SongStream } from 'logos/src/commands/music/data/types.ts';
 import { OptionTemplate } from 'logos/src/commands/command.ts';
 import { collection, show } from 'logos/src/commands/parameters.ts';
 import { isCollection, isOccupied } from 'logos/src/controllers/music.ts';
 import { Client, localise } from 'logos/src/client.ts';
-import { paginate, parseArguments } from 'logos/src/interactions.ts';
+import { paginate, parseArguments, reply } from 'logos/src/interactions.ts';
 import { chunk } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import constants from 'logos/constants.ts';
@@ -42,22 +35,13 @@ function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], interaction
 				description: localise(client, 'music.options.now.strings.noSong.description', interaction.locale)(),
 			};
 
-			return void sendInteractionResponse(
-				bot,
-				interaction.id,
-				interaction.token,
-				{
-					type: InteractionResponseTypes.ChannelMessageWithSource,
-					data: {
-						flags: ApplicationCommandFlags.Ephemeral,
-						embeds: [{
-							title: strings.title,
-							description: strings.description,
-							color: constants.colors.dullYellow,
-						}],
-					},
-				},
-			);
+			return void reply([client, bot], interaction, {
+				embeds: [{
+					title: strings.title,
+					description: strings.description,
+					color: constants.colors.dullYellow,
+				}],
+			});
 		}
 	} else {
 		if (!isOccupied(controller.player) || currentListing === undefined) {
@@ -76,22 +60,13 @@ function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], interaction
 				},
 			};
 
-			return void sendInteractionResponse(
-				bot,
-				interaction.id,
-				interaction.token,
-				{
-					type: InteractionResponseTypes.ChannelMessageWithSource,
-					data: {
-						flags: ApplicationCommandFlags.Ephemeral,
-						embeds: [{
-							title: strings.title,
-							description: strings.description.noSongCollection,
-							color: constants.colors.dullYellow,
-						}],
-					},
-				},
-			);
+			return void reply([client, bot], interaction, {
+				embeds: [{
+					title: strings.title,
+					description: strings.description.noSongCollection,
+					color: constants.colors.dullYellow,
+				}],
+			});
 		} else if (!isCollection(currentListing.content)) {
 			const strings = {
 				title: localise(
@@ -113,22 +88,13 @@ function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], interaction
 				},
 			};
 
-			return void sendInteractionResponse(
-				bot,
-				interaction.id,
-				interaction.token,
-				{
-					type: InteractionResponseTypes.ChannelMessageWithSource,
-					data: {
-						flags: ApplicationCommandFlags.Ephemeral,
-						embeds: [{
-							title: strings.title,
-							description: `${strings.description.noSongCollection}\n\n${strings.description.trySongInstead}`,
-							color: constants.colors.dullYellow,
-						}],
-					},
-				},
-			);
+			return void reply([client, bot], interaction, {
+				embeds: [{
+					title: strings.title,
+					description: `${strings.description.noSongCollection}\n\n${strings.description.trySongInstead}`,
+					color: constants.colors.dullYellow,
+				}],
+			});
 		}
 	}
 
@@ -193,49 +159,40 @@ function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], interaction
 		),
 	};
 
-	return void sendInteractionResponse(
-		bot,
-		interaction.id,
-		interaction.token,
-		{
-			type: InteractionResponseTypes.ChannelMessageWithSource,
-			data: {
-				flags: !show ? ApplicationCommandFlags.Ephemeral : undefined,
-				embeds: [{
-					title: `${constants.symbols.music.nowPlaying} ${strings.nowPlaying}`,
-					fields: [
-						...isCollection(currentListing?.content)
-							? [{
-								name: strings.collection,
-								value: currentListing.content.title,
-							}, {
-								name: strings.track,
-								value: `${currentListing.content.position + 1}/${currentListing.content.songs.length}`,
-							}]
-							: [],
-						{
-							name: strings.title,
-							value: `[${song.title}](${song.url})`,
-							inline: false,
-						},
-						{
-							name: strings.requestedBy,
-							value: mention(currentListing.requestedBy, MentionTypes.User),
-							inline: false,
-						},
-						{
-							name: strings.runningTime,
-							value: (controller.player.playingSince ?? undefined) !== undefined
-								? strings.playingSince
-								: strings.startTimeUnknown,
-							inline: false,
-						},
-					],
-					footer: { text: strings.sourcedFrom },
-				}],
-			},
-		},
-	);
+	return void reply([client, bot], interaction, {
+		embeds: [{
+			title: `${constants.symbols.music.nowPlaying} ${strings.nowPlaying}`,
+			fields: [
+				...isCollection(currentListing?.content)
+					? [{
+						name: strings.collection,
+						value: currentListing.content.title,
+					}, {
+						name: strings.track,
+						value: `${currentListing.content.position + 1}/${currentListing.content.songs.length}`,
+					}]
+					: [],
+				{
+					name: strings.title,
+					value: `[${song.title}](${song.url})`,
+					inline: false,
+				},
+				{
+					name: strings.requestedBy,
+					value: mention(currentListing.requestedBy, MentionTypes.User),
+					inline: false,
+				},
+				{
+					name: strings.runningTime,
+					value: (controller.player.playingSince ?? undefined) !== undefined
+						? strings.playingSince
+						: strings.startTimeUnknown,
+					inline: false,
+				},
+			],
+			footer: { text: strings.sourcedFrom },
+		}],
+	}, { visible: show });
 }
 
 export default command;

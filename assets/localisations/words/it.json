@@ -1,0 +1,13 @@
+{
+	"words.noun": "sostantivo",
+	"words.verb": "verbo",
+	"words.adjective": "aggettivo",
+	"words.adverb": "avverbio",
+	"words.adposition": "adposizione",
+	"words.affix": "affisso",
+	"words.pronoun": "pronome",
+	"words.determiner": "determinante",
+	"words.conjunction": "congiunzione",
+	"words.interjection": "interiezione",
+	"words.unknown": "ignota la parte del discorso"
+}

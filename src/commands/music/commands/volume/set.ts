@@ -1,7 +1,7 @@
-import { Bot, Interaction, InteractionResponseTypes, sendInteractionResponse } from 'discordeno';
+import { Bot, Interaction } from 'discordeno';
 import { getVoiceState, setVolume, verifyCanManagePlayback } from 'logos/src/controllers/music.ts';
 import { Client, localise } from 'logos/src/client.ts';
-import { parseArguments } from 'logos/src/interactions.ts';
+import { parseArguments, reply } from 'logos/src/interactions.ts';
 import configuration from 'logos/configuration.ts';
 import constants from 'logos/constants.ts';
 
@@ -30,21 +30,13 @@ function handleSetVolume([client, bot]: [Client, Bot], interaction: Interaction)
 			)({ 'volume': configuration.music.limits.volume }),
 		};
 
-		return void sendInteractionResponse(
-			bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					embeds: [{
-						title: strings.title,
-						description: strings.description,
-						color: constants.colors.red,
-					}],
-				},
-			},
-		);
+		return void reply([client, bot], interaction, {
+			embeds: [{
+				title: strings.title,
+				description: strings.description,
+				color: constants.colors.red,
+			}],
+		});
 	}
 
 	setVolume(controller.player, volume);
@@ -56,21 +48,13 @@ function handleSetVolume([client, bot]: [Client, Bot], interaction: Interaction)
 		),
 	};
 
-	return void sendInteractionResponse(
-		bot,
-		interaction.id,
-		interaction.token,
-		{
-			type: InteractionResponseTypes.ChannelMessageWithSource,
-			data: {
-				embeds: [{
-					title: `${constants.symbols.music.volume} ${strings.title}`,
-					description: strings.description,
-					color: constants.colors.invisible,
-				}],
-			},
-		},
-	);
+	return void reply([client, bot], interaction, {
+		embeds: [{
+			title: `${constants.symbols.music.volume} ${strings.title}`,
+			description: strings.description,
+			color: constants.colors.invisible,
+		}],
+	});
 }
 
 export { handleSetVolume };

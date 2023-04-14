@@ -3,18 +3,14 @@
 	"verification.fields.reason": "Care este motivul pentru care înveți {language}?",
 	"verification.fields.aim": "Ce folos îți va aduce apartenența?",
 	"verification.fields.whereFound": "Unde ai aflat despre server?",
-
 	"report.title": "Plângere",
 	"report.fields.reason": "Care este cauza plângerii?",
-	"report.fields.usersToReport": "Utilizatori de raportat",
-	"report.fields.linkToMessage": "Link către mesajul pentru context",
-
+	"report.fields.users": "Users to report",
+	"report.fields.link": "Link to the message for context",
 	"suggestion.title": "Sugestie",
 	"suggestion.fields.suggestion": "Care este sugestia ta?",
-
 	"prompts.continue": "Înapoi",
 	"prompts.cancel": "Anulează",
-	"prompts.yourProgressWillBeLost": "Progresul tău va fi pierdut.",
-	"prompts.yesLeaveTheComposer": "Da, vreau să părăsesc compozitorul",
-	"prompts.noTakeMeBackToTheComposer": "Nu, ia-mă înapoi la compozitor"
+	"prompts.leave": "Yes, I want to leave the composer",
+	"prompts.stay": "No, take me back to the composer"
 }

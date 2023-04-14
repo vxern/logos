@@ -1,0 +1,16 @@
+{
+	"verification.title": "Questions relatives à la vérification",
+	"verification.fields.reason": "Quelle est la raison pour laquelle vous apprenez {language} ?",
+	"verification.fields.aim": "Quels sont les avantages d'être membre ?",
+	"verification.fields.whereFound": "Où avez-vous entendu parler du serveur ?",
+	"report.title": "Rapport de l'utilisateur",
+	"report.fields.reason": "Quel est le motif du rapport ?",
+	"report.fields.users": "Users to report",
+	"report.fields.link": "Link to the message for context",
+	"suggestion.title": "Suggestion",
+	"suggestion.fields.suggestion": "Quelle est votre suggestion ?",
+	"prompts.continue": "Continuer",
+	"prompts.cancel": "Annuler",
+	"prompts.leave": "Yes, I want to leave the composer",
+	"prompts.stay": "No, take me back to the composer"
+}

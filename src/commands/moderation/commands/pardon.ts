@@ -1,20 +1,17 @@
 import {
-	ApplicationCommandFlags,
 	ApplicationCommandOptionChoice,
 	ApplicationCommandOptionTypes,
 	ApplicationCommandTypes,
 	Bot,
 	Interaction,
-	InteractionResponseTypes,
 	Member,
-	sendInteractionResponse,
 } from 'discordeno';
 import { getActiveWarnings } from 'logos/src/commands/moderation/module.ts';
 import { CommandTemplate } from 'logos/src/commands/command.ts';
 import { user } from 'logos/src/commands/parameters.ts';
 import { logEvent } from 'logos/src/controllers/logging/logging.ts';
 import { autocompleteMembers, Client, localise, resolveInteractionToMember } from 'logos/src/client.ts';
-import { isAutocomplete, parseArguments } from 'logos/src/interactions.ts';
+import { parseArguments, reply, respond } from 'logos/src/interactions.ts';
 import constants from 'logos/constants.ts';
 import { mention, MentionTypes } from 'logos/formatting.ts';
 import { Document } from 'logos/src/database/document.ts';
@@ -37,26 +34,6 @@ const command: CommandTemplate = {
 	],
 };
 
-async function getRelevantWarnings(
-	[client, bot]: [Client, Bot],
-	interaction: Interaction,
-	member: Member,
-): Promise<Document<Warning>[] | undefined> {
-	const subject = await client.database.adapters.users.getOrFetchOrCreate(
-		client,
-		'id',
-		member.id.toString(),
-		member.id,
-	);
-	if (subject === undefined) return void displayErrorOrEmptyChoices([client, bot], interaction);
-
-	const warnings = await client.database.adapters.warnings.getOrFetch(client, 'recipient', subject.ref);
-	if (warnings === undefined) return void displayErrorOrEmptyChoices([client, bot], interaction);
-
-	const relevantWarnings = Array.from(getActiveWarnings(warnings).values()).toReversed();
-	return relevantWarnings;
-}
-
 async function handlePardonUserAutocomplete([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const [{ user, warning }, focused] = parseArguments(interaction.data?.options, {});
 
@@ -73,16 +50,22 @@ async function handlePardonUserAutocomplete([client, bot]: [Client, Bot], intera
 	}
 
 	if (focused?.name === 'warning') {
-		if (user === undefined) return;
+		if (user === undefined) {
+			return respond([client, bot], interaction, []);
+		}
 
 		const member = resolveInteractionToMember([client, bot], interaction, user, {
 			restrictToNonSelf: true,
 			excludeModerators: true,
 		});
-		if (member === undefined) return;
+		if (member === undefined) {
+			return respond([client, bot], interaction, []);
+		}
 
-		const relevantWarnings = await getRelevantWarnings([client, bot], interaction, member);
-		if (relevantWarnings === undefined) return;
+		const relevantWarnings = await getRelevantWarnings(client, member);
+		if (relevantWarnings === undefined) {
+			return respond([client, bot], interaction, []);
+		}
 
 		const warningLowercase = warning!.toLowerCase();
 		const choices = relevantWarnings
@@ -92,15 +75,7 @@ async function handlePardonUserAutocomplete([client, bot]: [Client, Bot], intera
 			}))
 			.filter((choice) => choice.name.toLowerCase().includes(warningLowercase));
 
-		return void sendInteractionResponse(
-			bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ApplicationCommandAutocompleteResult,
-				data: { choices },
-			},
-		);
+		return respond([client, bot], interaction, choices);
 	}
 }
 
@@ -114,27 +89,19 @@ async function handlePardonUser([client, bot]: [Client, Bot], interaction: Inter
 	});
 	if (member === undefined) return;
 
-	const relevantWarnings = await getRelevantWarnings([client, bot], interaction, member);
-	if (relevantWarnings === undefined) return;
+	const relevantWarnings = await getRelevantWarnings(client, member);
+	if (relevantWarnings === undefined) {
+		return displayFailedError([client, bot], interaction);
+	}
 
 	const warningToDelete = relevantWarnings.find((relevantWarning) => relevantWarning.ref.value.id === warning);
 	if (warningToDelete === undefined) {
-		const strings = {
-			title: localise(client, 'pardon.strings.invalidWarning.title', interaction.locale)(),
-			description: localise(client, 'pardon.strings.invalidWarning.description', interaction.locale)(),
-		};
-
-		return displayError(bot, interaction, strings.title, strings.description);
+		return displayInvalidWarningError([client, bot], interaction);
 	}
 
 	const deletedWarning = await client.database.adapters.warnings.delete(client, warningToDelete);
 	if (deletedWarning === undefined) {
-		const strings = {
-			title: localise(client, 'pardon.strings.failed.title', interaction.locale)(),
-			description: localise(client, 'pardon.strings.failed.description', interaction.locale)(),
-		};
-
-		return displayError(bot, interaction, strings.title, strings.description);
+		return displayFailedError([client, bot], interaction);
 	}
 
 	const guild = client.cache.guilds.get(interaction.guildId!);
@@ -150,77 +117,64 @@ async function handlePardonUser([client, bot]: [Client, Bot], interaction: Inter
 		}),
 	};
 
-	sendInteractionResponse(
-		bot,
-		interaction.id,
-		interaction.token,
-		{
-			type: InteractionResponseTypes.ChannelMessageWithSource,
-			data: {
-				flags: ApplicationCommandFlags.Ephemeral,
-				embeds: [{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colors.lightGreen,
-				}],
-			},
-		},
+	return void reply([client, bot], interaction, {
+		embeds: [{
+			title: strings.title,
+			description: strings.description,
+			color: constants.colors.lightGreen,
+		}],
+	});
+}
+async function getRelevantWarnings(client: Client, member: Member): Promise<Document<Warning>[] | undefined> {
+	const subject = await client.database.adapters.users.getOrFetchOrCreate(
+		client,
+		'id',
+		member.id.toString(),
+		member.id,
 	);
+	if (subject === undefined) return undefined;
+
+	const warnings = await client.database.adapters.warnings.getOrFetch(client, 'recipient', subject.ref);
+	if (warnings === undefined) return undefined;
+
+	const relevantWarnings = Array.from(getActiveWarnings(warnings).values()).toReversed();
+	return relevantWarnings;
 }
 
-function displayErrorOrEmptyChoices([client, bot]: [Client, Bot], interaction: Interaction): void {
-	if (isAutocomplete(interaction)) {
-		return void sendInteractionResponse(
-			bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ApplicationCommandAutocompleteResult,
-				data: { choices: [] },
-			},
-		);
-	}
+function displayInvalidWarningError(
+	[client, bot]: [Client, Bot],
+	interaction: Interaction,
+): void {
+	const strings = {
+		title: localise(client, 'pardon.strings.invalidWarning.title', interaction.locale)(),
+		description: localise(client, 'pardon.strings.invalidWarning.description', interaction.locale)(),
+	};
 
+	return void reply([client, bot], interaction, {
+		embeds: [{
+			title: strings.title,
+			description: strings.description,
+			color: constants.colors.red,
+		}],
+	});
+}
+
+function displayFailedError(
+	[client, bot]: [Client, Bot],
+	interaction: Interaction,
+): void {
 	const strings = {
 		title: localise(client, 'pardon.strings.failed.title', interaction.locale)(),
 		description: localise(client, 'pardon.strings.failed.description', interaction.locale)(),
 	};
 
-	return void sendInteractionResponse(
-		bot,
-		interaction.id,
-		interaction.token,
-		{
-			type: InteractionResponseTypes.ChannelMessageWithSource,
-			data: {
-				flags: ApplicationCommandFlags.Ephemeral,
-				embeds: [{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colors.red,
-				}],
-			},
-		},
-	);
-}
-
-function displayError(bot: Bot, interaction: Interaction, title: string, description: string): void {
-	return void sendInteractionResponse(
-		bot,
-		interaction.id,
-		interaction.token,
-		{
-			type: InteractionResponseTypes.ChannelMessageWithSource,
-			data: {
-				flags: ApplicationCommandFlags.Ephemeral,
-				embeds: [{
-					title,
-					description,
-					color: constants.colors.red,
-				}],
-			},
-		},
-	);
+	return void reply([client, bot], interaction, {
+		embeds: [{
+			title: strings.title,
+			description: strings.description,
+			color: constants.colors.red,
+		}],
+	});
 }
 
 export default command;

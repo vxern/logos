@@ -1,0 +1,18 @@
+{
+	"notices.lastUpdate": "Dernière mise à jour : {date}",
+	"notices.notices.information.invite": "Lien d'invitation permanente",
+	"reports.users": "Utilisateurs signalés",
+	"reports.reason": "Motif du rapport",
+	"reports.link": "Lien vers le message",
+	"reports.noLinkProvided": "Aucun lien avec le message n'est fourni.",
+	"reports.previousInfractions": "Infractions antérieures aux {username}",
+	"suggestion.suggestion": "Suggestion",
+	"submittedBy": "Soumis par",
+	"submittedAt": "Soumis à",
+	"markResolved": "Mark issue as resolved",
+	"markUnresolved": "Mark issue as unresolved",
+	"alreadyMarkedResolved.title": "Already marked resolved",
+	"alreadyMarkedResolved.description": "This issue has already been marked resolved.",
+	"alreadyMarkedUnresolved.title": "Already marked unresolved",
+	"alreadyMarkedUnresolved.description": "This issue has already been marked unresolved."
+}

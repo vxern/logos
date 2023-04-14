@@ -1,16 +1,9 @@
-import {
-	ApplicationCommandFlags,
-	ApplicationCommandOptionTypes,
-	Bot,
-	Interaction,
-	InteractionResponseTypes,
-	sendInteractionResponse,
-} from 'discordeno';
+import { ApplicationCommandOptionTypes, Bot, Interaction } from 'discordeno';
 import { OptionTemplate } from 'logos/src/commands/command.ts';
 import { collection } from 'logos/src/commands/parameters.ts';
 import { getVoiceState, isCollection, isOccupied, verifyCanManagePlayback } from 'logos/src/controllers/music.ts';
 import { Client, localise } from 'logos/src/client.ts';
-import { parseArguments } from 'logos/src/interactions.ts';
+import { parseArguments, reply } from 'logos/src/interactions.ts';
 import constants from 'logos/constants.ts';
 import { defaultLocale } from 'logos/types.ts';
 
@@ -44,22 +37,13 @@ function handleLoopPlayback([client, bot]: [Client, Bot], interaction: Interacti
 				description: localise(client, 'music.options.loop.strings.noSong.description', interaction.locale)(),
 			};
 
-			return void sendInteractionResponse(
-				bot,
-				interaction.id,
-				interaction.token,
-				{
-					type: InteractionResponseTypes.ChannelMessageWithSource,
-					data: {
-						flags: ApplicationCommandFlags.Ephemeral,
-						embeds: [{
-							title: strings.title,
-							description: strings.description,
-							color: constants.colors.dullYellow,
-						}],
-					},
-				},
-			);
+			return void reply([client, bot], interaction, {
+				embeds: [{
+					title: strings.title,
+					description: strings.description,
+					color: constants.colors.dullYellow,
+				}],
+			});
 		}
 	} else {
 		if (!isOccupied(controller.player) || currentListing === undefined) {
@@ -78,22 +62,13 @@ function handleLoopPlayback([client, bot]: [Client, Bot], interaction: Interacti
 				},
 			};
 
-			return void sendInteractionResponse(
-				bot,
-				interaction.id,
-				interaction.token,
-				{
-					type: InteractionResponseTypes.ChannelMessageWithSource,
-					data: {
-						flags: ApplicationCommandFlags.Ephemeral,
-						embeds: [{
-							title: strings.title,
-							description: strings.description.noSongCollection,
-							color: constants.colors.dullYellow,
-						}],
-					},
-				},
-			);
+			return void reply([client, bot], interaction, {
+				embeds: [{
+					title: strings.title,
+					description: strings.description.noSongCollection,
+					color: constants.colors.dullYellow,
+				}],
+			});
 		} else if (!isCollection(currentListing.content)) {
 			const strings = {
 				title: localise(
@@ -115,22 +90,13 @@ function handleLoopPlayback([client, bot]: [Client, Bot], interaction: Interacti
 				},
 			};
 
-			return void sendInteractionResponse(
-				bot,
-				interaction.id,
-				interaction.token,
-				{
-					type: InteractionResponseTypes.ChannelMessageWithSource,
-					data: {
-						flags: ApplicationCommandFlags.Ephemeral,
-						embeds: [{
-							title: strings.title,
-							description: `${strings.description.noSongCollection}\n\n${strings.description.trySongInstead}`,
-							color: constants.colors.dullYellow,
-						}],
-					},
-				},
-			);
+			return void reply([client, bot], interaction, {
+				embeds: [{
+					title: strings.title,
+					description: `${strings.description.noSongCollection}\n\n${strings.description.trySongInstead}`,
+					color: constants.colors.dullYellow,
+				}],
+			});
 		}
 	}
 
@@ -147,21 +113,13 @@ function handleLoopPlayback([client, bot]: [Client, Bot], interaction: Interacti
 				)(),
 			};
 
-			return void sendInteractionResponse(
-				bot,
-				interaction.id,
-				interaction.token,
-				{
-					type: InteractionResponseTypes.ChannelMessageWithSource,
-					data: {
-						embeds: [{
-							title: `${constants.symbols.music.loopDisabled} ${strings.title}`,
-							description: strings.description,
-							color: constants.colors.blue,
-						}],
-					},
-				},
-			);
+			return void reply([client, bot], interaction, {
+				embeds: [{
+					title: `${constants.symbols.music.loopDisabled} ${strings.title}`,
+					description: strings.description,
+					color: constants.colors.blue,
+				}],
+			});
 		}
 
 		const strings = {
@@ -169,21 +127,13 @@ function handleLoopPlayback([client, bot]: [Client, Bot], interaction: Interacti
 			description: localise(client, 'music.options.loop.strings.enabled.description.songCollection', defaultLocale)(),
 		};
 
-		return void sendInteractionResponse(
-			bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					embeds: [{
-						title: `${constants.symbols.music.loopEnabled} ${strings.title}`,
-						description: strings.description,
-						color: constants.colors.blue,
-					}],
-				},
-			},
-		);
+		return void reply([client, bot], interaction, {
+			embeds: [{
+				title: `${constants.symbols.music.loopEnabled} ${strings.title}`,
+				description: strings.description,
+				color: constants.colors.blue,
+			}],
+		});
 	}
 
 	controller.flags.loop.song = !controller.flags.loop.song;
@@ -198,21 +148,13 @@ function handleLoopPlayback([client, bot]: [Client, Bot], interaction: Interacti
 			)(),
 		};
 
-		return void sendInteractionResponse(
-			bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					embeds: [{
-						title: `${constants.symbols.music.loopDisabled} ${strings.title}`,
-						description: strings.description,
-						color: constants.colors.blue,
-					}],
-				},
-			},
-		);
+		return void reply([client, bot], interaction, {
+			embeds: [{
+				title: `${constants.symbols.music.loopDisabled} ${strings.title}`,
+				description: strings.description,
+				color: constants.colors.blue,
+			}],
+		}, { visible: true });
 	}
 
 	const strings = {
@@ -220,21 +162,13 @@ function handleLoopPlayback([client, bot]: [Client, Bot], interaction: Interacti
 		description: localise(client, 'music.options.loop.strings.enabled.description.song', defaultLocale)(),
 	};
 
-	return void sendInteractionResponse(
-		bot,
-		interaction.id,
-		interaction.token,
-		{
-			type: InteractionResponseTypes.ChannelMessageWithSource,
-			data: {
-				embeds: [{
-					title: `${constants.symbols.music.loopEnabled} ${strings.title}`,
-					description: strings.description,
-					color: constants.colors.blue,
-				}],
-			},
-		},
-	);
+	return void reply([client, bot], interaction, {
+		embeds: [{
+			title: `${constants.symbols.music.loopEnabled} ${strings.title}`,
+			description: strings.description,
+			color: constants.colors.blue,
+		}],
+	}, { visible: true });
 }
 
 export default command;

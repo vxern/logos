@@ -1,21 +1,25 @@
 import {
-	ApplicationCommandFlags,
 	ApplicationCommandTypes,
 	Bot,
 	ButtonComponent,
 	ButtonStyles,
-	editOriginalInteractionResponse,
 	Interaction,
 	InteractionCallbackData,
-	InteractionResponseTypes,
 	InteractionTypes,
 	MessageComponentTypes,
-	sendInteractionResponse,
 } from 'discordeno';
 import { SentencePair } from 'logos/src/commands/language/data/types.ts';
 import { CommandTemplate } from 'logos/src/commands/command.ts';
 import { Client, localise } from 'logos/src/client.ts';
-import { createInteractionCollector, decodeId, encodeId } from 'logos/src/interactions.ts';
+import {
+	acknowledge,
+	createInteractionCollector,
+	decodeId,
+	editReply,
+	encodeId,
+	postponeReply,
+	reply,
+} from 'logos/src/interactions.ts';
 import constants from 'logos/constants.ts';
 
 const command: CommandTemplate = {
@@ -39,33 +43,16 @@ async function handleStartGame([client, bot]: [Client, Bot], interaction: Intera
 			description: localise(client, 'game.strings.noSentencesAvailable.description', interaction.locale)(),
 		};
 
-		return void sendInteractionResponse(
-			bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						title: strings.title,
-						description: strings.description,
-						color: constants.colors.dullYellow,
-					}],
-				},
-			},
-		);
+		return void reply([client, bot], interaction, {
+			embeds: [{
+				title: strings.title,
+				description: strings.description,
+				color: constants.colors.dullYellow,
+			}],
+		});
 	}
 
-	await sendInteractionResponse(
-		bot,
-		interaction.id,
-		interaction.token,
-		{
-			type: InteractionResponseTypes.DeferredChannelMessageWithSource,
-			data: { flags: ApplicationCommandFlags.Ephemeral },
-		},
-	);
+	await postponeReply([client, bot], interaction);
 
 	let sentenceSelection: SentenceSelection;
 	let embedColor = constants.colors.blue;
@@ -74,9 +61,7 @@ async function handleStartGame([client, bot]: [Client, Bot], interaction: Intera
 		type: InteractionTypes.MessageComponent,
 		userId: interaction.user.id,
 		onCollect: (bot, selection) => {
-			sendInteractionResponse(bot, selection.id, selection.token, {
-				type: InteractionResponseTypes.DeferredUpdateMessage,
-			});
+			acknowledge([client, bot], selection);
 
 			const selectionCustomId = selection.data?.customId;
 			if (selectionCustomId === undefined) return;
@@ -96,9 +81,9 @@ async function handleStartGame([client, bot]: [Client, Bot], interaction: Intera
 
 			sentenceSelection = createSentenceSelection(sentencePairs);
 
-			return void editOriginalInteractionResponse(
-				bot,
-				interaction.token,
+			return editReply(
+				[client, bot],
+				interaction,
 				getGameView(client, customId, sentenceSelection, embedColor, interaction.locale),
 			);
 		},
@@ -106,9 +91,9 @@ async function handleStartGame([client, bot]: [Client, Bot], interaction: Intera
 
 	sentenceSelection = createSentenceSelection(sentencePairs);
 
-	return void editOriginalInteractionResponse(
-		bot,
-		interaction.token,
+	return editReply(
+		[client, bot],
+		interaction,
 		getGameView(client, customId, sentenceSelection, embedColor, interaction.locale),
 	);
 }

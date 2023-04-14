@@ -1,0 +1,20 @@
+{
+	"parameters.user.name": "χρήστης",
+	"parameters.user.description": "Το όνομα χρήστη, η ετικέτα, το αναγνωριστικό ή η αναφορά του χρήστη.",
+	"parameters.show.name": "εμφάνιση",
+	"parameters.show.description": "Αν οριστεί σε true, το αποτέλεσμα θα εμφανίζεται σε άλλους.",
+	"parameters.duration.name": "διάρκεια",
+	"parameters.duration.description": "Η διάρκεια της κύρωσης.",
+	"parameters.reason.name": "λόγος",
+	"parameters.reason.description": "Ο λόγος της κύρωσης ή της κατάργησής της. Πρέπει να είναι περιγραφικός.",
+	"parameters.query.name": "ερώτημα",
+	"parameters.query.description": "Ο τίτλος ή ένας σύνδεσμος προς το τραγούδι ή τη συλλογή τραγουδιών.",
+	"parameters.timestamp.name": "χρονοσήμανση",
+	"parameters.timestamp.description": "Η χρονική σφραγίδα προς αναζήτηση.",
+	"parameters.collection.name": "συλλογή",
+	"parameters.collection.description": "Αν οριστεί σε true, η ενέργεια θα εκτελεστεί στη συλλογή τραγουδιών.",
+	"parameters.by.name": "από",
+	"parameters.by.description": "Ο αριθμός των τραγουδιών ή των λιστών τραγουδιών που θα παραλειφθούν.",
+	"parameters.to.name": "σε",
+	"parameters.to.description": "Ο δείκτης του κομματιού στο οποίο θέλετε να μεταπηδήσετε."
+}

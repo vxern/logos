@@ -1,14 +1,8 @@
-import {
-	ApplicationCommandFlags,
-	Bot,
-	Interaction,
-	InteractionResponseTypes,
-	sendInteractionResponse,
-} from 'discordeno';
+import { Bot, Interaction } from 'discordeno';
 import { ListingResolver } from 'logos/src/commands/music/data/sources/sources.ts';
 import { getVoiceState, receiveNewListing, verifyCanRequestPlayback } from 'logos/src/controllers/music.ts';
 import { Client, localise } from 'logos/src/client.ts';
-import { parseArguments } from 'logos/src/interactions.ts';
+import { parseArguments, reply } from 'logos/src/interactions.ts';
 import constants from 'logos/constants.ts';
 
 async function handleRequestQueryPlayback(
@@ -48,22 +42,13 @@ async function handleRequestQueryPlayback(
 			},
 		};
 
-		return void sendInteractionResponse(
-			bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						title: strings.title,
-						description: `${strings.description.notFound}\n\n${strings.description.tryDifferentQuery}`,
-						color: constants.colors.red,
-					}],
-				},
-			},
-		);
+		return void reply([client, bot], interaction, {
+			embeds: [{
+				title: strings.title,
+				description: `${strings.description.notFound}\n\n${strings.description.tryDifferentQuery}`,
+				color: constants.colors.red,
+			}],
+		});
 	}
 
 	const feedbackChannelId = client.cache.channels.get(interaction.channelId!)?.id;

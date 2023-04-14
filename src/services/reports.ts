@@ -1,16 +1,13 @@
 import {
-	ApplicationCommandFlags,
 	Bot,
 	ButtonStyles,
 	CreateMessage,
 	deleteMessage,
 	getAvatarURL,
 	Guild,
-	InteractionResponseTypes,
 	InteractionTypes,
 	Message,
 	MessageComponentTypes,
-	sendInteractionResponse,
 	sendMessage,
 	User as DiscordUser,
 } from 'discordeno';
@@ -26,6 +23,7 @@ import {
 	decodeId,
 	encodeId,
 	InteractionCollectorSettings,
+	reply,
 } from 'logos/src/interactions.ts';
 import { diagnosticMentionUser, getAllMessages, getTextChannel } from 'logos/src/utils.ts';
 import { defaultLocale } from 'logos/types.ts';
@@ -320,35 +318,31 @@ function registerReportHandler(
 
 			if (isResolved && report.data.isResolved) {
 				const strings = {
-					alreadyMarkedAsResolved: localise(client, 'alreadyMarkedAsResolved', defaultLocale)(),
+					title: localise(client, 'alreadyMarkedResolved.title', defaultLocale)(),
+					description: localise(client, 'alreadyMarkedResolved.description', defaultLocale)(),
 				};
 
-				return void sendInteractionResponse(bot, selection.id, selection.token, {
-					type: InteractionResponseTypes.ChannelMessageWithSource,
-					data: {
-						flags: ApplicationCommandFlags.Ephemeral,
-						embeds: [{
-							description: strings.alreadyMarkedAsResolved,
-							color: constants.colors.dullYellow,
-						}],
-					},
+				return void reply([client, bot], selection, {
+					embeds: [{
+						title: strings.title,
+						description: strings.description,
+						color: constants.colors.dullYellow,
+					}],
 				});
 			}
 
 			if (!isResolved && !report.data.isResolved) {
 				const strings = {
-					alreadyMarkedAsUnresolved: localise(client, 'alreadyMarkedAsUnresolved', defaultLocale)(),
+					title: localise(client, 'alreadyMarkedUnresolved.title', defaultLocale)(),
+					description: localise(client, 'alreadyMarkedUnresolved.description', defaultLocale)(),
 				};
 
-				return void sendInteractionResponse(bot, selection.id, selection.token, {
-					type: InteractionResponseTypes.ChannelMessageWithSource,
-					data: {
-						flags: ApplicationCommandFlags.Ephemeral,
-						embeds: [{
-							description: strings.alreadyMarkedAsUnresolved,
-							color: constants.colors.dullYellow,
-						}],
-					},
+				return void reply([client, bot], selection, {
+					embeds: [{
+						title: strings.title,
+						description: strings.description,
+						color: constants.colors.dullYellow,
+					}],
 				});
 			}
 
@@ -395,8 +389,8 @@ function getReportPrompt(
 		previousInfractions: {
 			title: localise(client, 'reports.previousInfractions', defaultLocale),
 		},
-		markAsResolved: localise(client, 'markAsResolved', defaultLocale)(),
-		markAsUnresolved: localise(client, 'markAsUnresolved', defaultLocale)(),
+		markResolved: localise(client, 'markResolved', defaultLocale)(),
+		markUnresolved: localise(client, 'markUnresolved', defaultLocale)(),
 	};
 
 	return {
@@ -452,7 +446,7 @@ function getReportPrompt(
 					? {
 						type: MessageComponentTypes.Button,
 						style: ButtonStyles.Primary,
-						label: strings.markAsResolved,
+						label: strings.markResolved,
 						customId: encodeId<ReportPromptButtonID>(
 							constants.staticComponentIds.reports,
 							[author.id.toString(), guild.id.toString(), reportReferenceId, `${true}`],
@@ -461,7 +455,7 @@ function getReportPrompt(
 					: {
 						type: MessageComponentTypes.Button,
 						style: ButtonStyles.Secondary,
-						label: strings.markAsUnresolved,
+						label: strings.markUnresolved,
 						customId: encodeId<ReportPromptButtonID>(
 							constants.staticComponentIds.reports,
 							[author.id.toString(), guild.id.toString(), reportReferenceId, `${false}`],

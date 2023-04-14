@@ -21,7 +21,7 @@
 	"entry.verification.answers.rejectedBefore.description": "Your entry request has been rejected previously; You cannot join the server.",
 	"entry.verification.answers.alreadyAnswered.title": "Already answered questions",
 	"entry.verification.answers.alreadyAnswered.description": "You have already submitted answers to the verification questions. You will be notified once your request to join is reviewed by the moderators.",
-	"entry.verification.answers.submitted.title": "Your answers to the verification questions have been submitted.",
+	"entry.verification.answers.submitted.title": "Answers submitted",
 	"entry.verification.answers.submitted.description.submitted": "Your answers to the verification questions have been submitted.",
 	"entry.verification.answers.submitted.description.willBeReviewed": "Your request to join the server will be reviewed by the server staff, and you will be notified via DMs when your entry request is accepted.",
 	"entry.verification.answers.failed.title": "Failed to submit answers",

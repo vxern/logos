@@ -1,20 +1,16 @@
 import {
 	addRole,
-	ApplicationCommandFlags,
 	banMember,
 	Bot,
 	ButtonStyles,
 	CreateMessage,
 	deleteMessage,
-	editOriginalInteractionResponse,
 	getAvatarURL,
 	Guild,
 	Interaction,
-	InteractionResponseTypes,
 	InteractionTypes,
 	Message,
 	MessageComponentTypes,
-	sendInteractionResponse,
 	sendMessage,
 	TextStyles,
 	User as DiscordUser,
@@ -27,12 +23,16 @@ import { stringifyValue } from 'logos/src/database/database.ts';
 import { ServiceStarter } from 'logos/src/services/services.ts';
 import { Client, extendEventHandler, localise, WithLanguage } from 'logos/src/client.ts';
 import {
+	acknowledge,
 	createInteractionCollector,
 	createModalComposer,
 	decodeId,
+	editReply,
 	encodeId,
 	InteractionCollectorSettings,
 	Modal,
+	postponeReply,
+	reply,
 } from 'logos/src/interactions.ts';
 import { diagnosticMentionUser, getAllMessages, getTextChannel } from 'logos/src/utils.ts';
 import { defaultLocale } from 'logos/types.ts';
@@ -294,17 +294,14 @@ async function initiateVerificationProcess(
 			description: localise(client, 'entry.verification.answers.alreadyAnswered.description', interaction.locale)(),
 		};
 
-		sendInteractionResponse(bot, interaction.id, interaction.token, {
-			type: InteractionResponseTypes.ChannelMessageWithSource,
-			data: {
-				flags: ApplicationCommandFlags.Ephemeral,
-				embeds: [{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colors.dullYellow,
-				}],
-			},
+		reply([client, bot], interaction, {
+			embeds: [{
+				title: strings.title,
+				description: strings.description,
+				color: constants.colors.dullYellow,
+			}],
 		});
+
 		return false;
 	}
 
@@ -324,26 +321,18 @@ async function initiateVerificationProcess(
 						)(),
 					};
 
-					sendInteractionResponse(bot, submission.id, submission.token, {
-						type: InteractionResponseTypes.ChannelMessageWithSource,
-						data: {
-							flags: ApplicationCommandFlags.Ephemeral,
-							embeds: [{
-								title: strings.title,
-								description: strings.description,
-								color: constants.colors.darkRed,
-							}],
-						},
+					reply([client, bot], submission, {
+						embeds: [{
+							title: strings.title,
+							description: strings.description,
+							color: constants.colors.darkRed,
+						}],
 					});
+
 					return true;
 				}
 
-				await sendInteractionResponse(bot, submission.id, submission.token, {
-					type: InteractionResponseTypes.DeferredChannelMessageWithSource,
-					data: {
-						flags: ApplicationCommandFlags.Ephemeral,
-					},
-				});
+				await postponeReply([client, bot], submission);
 
 				const entryRequest = await client.database.adapters.entryRequests.create(
 					client,
@@ -403,8 +392,7 @@ async function initiateVerificationProcess(
 					},
 				};
 
-				editOriginalInteractionResponse(bot, submission.token, {
-					flags: ApplicationCommandFlags.Ephemeral,
+				editReply([client, bot], submission, {
 					embeds: [{
 						title: strings.title,
 						description: `${strings.description.submitted}\n\n${strings.description.willBeReviewed}`,
@@ -424,14 +412,14 @@ async function initiateVerificationProcess(
 							description: localise(client, 'entry.verification.answers.failed.description', interaction.locale)(),
 						};
 
-						editOriginalInteractionResponse(bot, submission.token, {
-							flags: ApplicationCommandFlags.Ephemeral,
+						editReply([client, bot], submission, {
 							embeds: [{
 								title: strings.title,
 								description: strings.description,
 								color: constants.colors.red,
 							}],
 						});
+
 						return undefined;
 					}
 				}
@@ -684,22 +672,14 @@ async function handleVote(
 				description: localise(client, 'entry.verification.vote.inFavour.description', interaction.locale)(),
 			};
 
-			sendInteractionResponse(
-				bot,
-				interaction.id,
-				interaction.token,
-				{
-					type: InteractionResponseTypes.ChannelMessageWithSource,
-					data: {
-						flags: ApplicationCommandFlags.Ephemeral,
-						embeds: [{
-							title: strings.title,
-							description: strings.description,
-							color: constants.colors.dullYellow,
-						}],
-					},
-				},
-			);
+			reply([client, bot], interaction, {
+				embeds: [{
+					title: strings.title,
+					description: strings.description,
+					color: constants.colors.dullYellow,
+				}],
+			});
+
 			return null;
 			// If the voter has already voted to reject, and is voting to reject again.
 		} else if (votedToReject && !isAccept) {
@@ -708,22 +688,14 @@ async function handleVote(
 				description: localise(client, 'entry.verification.vote.alreadyVoted.against.description', interaction.locale)(),
 			};
 
-			sendInteractionResponse(
-				bot,
-				interaction.id,
-				interaction.token,
-				{
-					type: InteractionResponseTypes.ChannelMessageWithSource,
-					data: {
-						flags: ApplicationCommandFlags.Ephemeral,
-						embeds: [{
-							title: strings.title,
-							description: strings.description,
-							color: constants.colors.dullYellow,
-						}],
-					},
-				},
-			);
+			reply([client, bot], interaction, {
+				embeds: [{
+					title: strings.title,
+					description: strings.description,
+					color: constants.colors.dullYellow,
+				}],
+			});
+
 			return null;
 		} else {
 			if (isAccept) {
@@ -747,27 +719,16 @@ async function handleVote(
 				description: localise(client, 'entry.verification.vote.stanceChanged.description', interaction.locale)(),
 			};
 
-			sendInteractionResponse(
-				bot,
-				interaction.id,
-				interaction.token,
-				{
-					type: InteractionResponseTypes.ChannelMessageWithSource,
-					data: {
-						flags: ApplicationCommandFlags.Ephemeral,
-						embeds: [{
-							title: strings.title,
-							description: strings.description,
-							color: constants.colors.lightGreen,
-						}],
-					},
-				},
-			);
+			reply([client, bot], interaction, {
+				embeds: [{
+					title: strings.title,
+					description: strings.description,
+					color: constants.colors.lightGreen,
+				}],
+			});
 		}
 	} else {
-		sendInteractionResponse(bot, interaction.id, interaction.token, {
-			type: InteractionResponseTypes.DeferredUpdateMessage,
-		});
+		acknowledge([client, bot], interaction);
 
 		if (isAccept) {
 			updatedEntryRequest.data.votedFor.push(voter.ref);
@@ -868,22 +829,13 @@ function displayVoteError([client, bot]: [Client, Bot], interaction: Interaction
 		description: localise(client, 'entry.verification.vote.failed.description', interaction.locale)(),
 	};
 
-	return void sendInteractionResponse(
-		bot,
-		interaction.id,
-		interaction.token,
-		{
-			type: InteractionResponseTypes.ChannelMessageWithSource,
-			data: {
-				flags: ApplicationCommandFlags.Ephemeral,
-				embeds: [{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colors.red,
-				}],
-			},
-		},
-	);
+	return void reply([client, bot], interaction, {
+		embeds: [{
+			title: strings.title,
+			description: strings.description,
+			color: constants.colors.red,
+		}],
+	});
 }
 
 function displayUserStateError([client, bot]: [Client, Bot], interaction: Interaction): void {
@@ -892,22 +844,13 @@ function displayUserStateError([client, bot]: [Client, Bot], interaction: Intera
 		description: localise(client, 'entry.verification.vote.stateUpdateFailed.description', interaction.locale)(),
 	};
 
-	return void sendInteractionResponse(
-		bot,
-		interaction.id,
-		interaction.token,
-		{
-			type: InteractionResponseTypes.ChannelMessageWithSource,
-			data: {
-				flags: ApplicationCommandFlags.Ephemeral,
-				embeds: [{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colors.red,
-				}],
-			},
-		},
-	);
+	return void reply([client, bot], interaction, {
+		embeds: [{
+			title: strings.title,
+			description: strings.description,
+			color: constants.colors.red,
+		}],
+	});
 }
 
 export default service;

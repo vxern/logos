@@ -95,8 +95,10 @@ async function readLocalisations(directoryUri: string): Promise<Map<string, Map<
 		subdirectories.push(`${directoryUri}/${entry.name}`);
 	}
 
-	const localisationFiles: [Language, string][] = [];
+	const localisationFiles: [language: Language, path: string, normalise: boolean][] = [];
 	for (const subdirectory of subdirectories) {
+		const normalise = subdirectory.endsWith('/commands');
+
 		for await (const localeEntry of Deno.readDir(subdirectory)) {
 			if (!localeEntry.isFile) continue;
 
@@ -104,20 +106,51 @@ async function readLocalisations(directoryUri: string): Promise<Map<string, Map<
 			const language = getLanguageByLocale(locale);
 			if (language === undefined) continue;
 
-			localisationFiles.push([language, `${subdirectory}/${localeEntry.name}`]);
+			localisationFiles.push([language, `${subdirectory}/${localeEntry.name}`, normalise]);
 		}
 	}
 
 	const localisations = new Map<string, Map<Language, string>>();
-	for (const [language, path] of localisationFiles) {
+	for (const [language, path, normalise] of localisationFiles) {
 		const strings = await Deno.readFile(path)
 			.then((contents) => decoder.decode(contents))
 			.then((object) => JSON.parse(object) as Record<string, string>);
 
+		let lastKey: string | undefined = undefined;
 		for (const [key, value] of Object.entries(strings)) {
+			lastKey = key;
+
 			if (!localisations.has(key)) {
 				localisations.set(key, new Map());
 			}
+
+			if (normalise) {
+				if (
+					key.endsWith('.name') &&
+					(value.includes(' ') || value.includes('/') || value.includes('\'') || value.toLowerCase() !== value)
+				) {
+					console.warn(
+						`${language}: '${key}' is not normalised. Normalising...`,
+					);
+
+					const valueNormalised = value.toLowerCase().split(' ').join('-').replaceAll('/', '-').replaceAll('\'', '-');
+					localisations.get(key)!.set(language, valueNormalised);
+
+					continue;
+				}
+
+				if (key.endsWith('.description') && lastKey.endsWith('.name') && value.length > 100) {
+					console.warn(
+						`${language}: '${key}' is too long (>100 characters). Normalising...`,
+					);
+
+					const valueNormalised = value.slice(0, 100);
+					localisations.get(key)!.set(language, valueNormalised);
+
+					continue;
+				}
+			}
+
 			localisations.get(key)!.set(language, value);
 		}
 	}

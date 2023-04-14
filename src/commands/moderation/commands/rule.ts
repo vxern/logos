@@ -1,15 +1,7 @@
-import {
-	ApplicationCommandFlags,
-	ApplicationCommandOptionTypes,
-	ApplicationCommandTypes,
-	Bot,
-	Interaction,
-	InteractionResponseTypes,
-	sendInteractionResponse,
-} from 'discordeno';
+import { ApplicationCommandOptionTypes, ApplicationCommandTypes, Bot, Interaction } from 'discordeno';
 import { CommandTemplate } from 'logos/src/commands/command.ts';
 import { Client, localise } from 'logos/src/client.ts';
-import { parseArguments } from 'logos/src/interactions.ts';
+import { parseArguments, reply, respond } from 'logos/src/interactions.ts';
 import constants from 'logos/constants.ts';
 import { defaultLocale } from 'logos/types.ts';
 import { show } from 'logos/src/commands/parameters.ts';
@@ -42,15 +34,7 @@ function handleCiteRuleAutocomplete([client, bot]: [Client, Bot], interaction: I
 		};
 	}).filter((choice) => choice.name.toLowerCase().includes(ruleQueryLowercase));
 
-	return void sendInteractionResponse(
-		bot,
-		interaction.id,
-		interaction.token,
-		{
-			type: InteractionResponseTypes.ApplicationCommandAutocompleteResult,
-			data: { choices },
-		},
-	);
+	return void respond([client, bot], interaction, choices);
 }
 
 function handleCiteRule([client, bot]: [Client, Bot], interaction: Interaction): void {
@@ -71,23 +55,14 @@ function handleCiteRule([client, bot]: [Client, Bot], interaction: Interaction):
 		content: localise(client, `rules.${ruleId}.content`, locale)(),
 	};
 
-	return void sendInteractionResponse(
-		bot,
-		interaction.id,
-		interaction.token,
-		{
-			type: InteractionResponseTypes.ChannelMessageWithSource,
-			data: {
-				flags: !show ? ApplicationCommandFlags.Ephemeral : undefined,
-				embeds: [{
-					title: getRuleTitleFormatted(client, ruleId, ruleIndex, 'display', locale),
-					description: strings.content,
-					footer: { text: `${strings.tldr}: ${strings.summary}` },
-					color: constants.colors.blue,
-				}],
-			},
-		},
-	);
+	return void reply([client, bot], interaction, {
+		embeds: [{
+			title: getRuleTitleFormatted(client, ruleId, ruleIndex, 'display', locale),
+			description: strings.content,
+			footer: { text: `${strings.tldr}: ${strings.summary}` },
+			color: constants.colors.blue,
+		}],
+	}, { visible: show });
 }
 
 function getRuleTitleFormatted(
@@ -116,22 +91,13 @@ function displayError([client, bot]: [Client, Bot], interaction: Interaction): v
 		description: localise(client, 'rule.strings.invalid.description', interaction.locale)(),
 	};
 
-	return void sendInteractionResponse(
-		bot,
-		interaction.id,
-		interaction.token,
-		{
-			type: InteractionResponseTypes.ChannelMessageWithSource,
-			data: {
-				flags: ApplicationCommandFlags.Ephemeral,
-				embeds: [{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colors.red,
-				}],
-			},
-		},
-	);
+	return void reply([client, bot], interaction, {
+		embeds: [{
+			title: strings.title,
+			description: strings.description,
+			color: constants.colors.red,
+		}],
+	});
 }
 
 export default command;

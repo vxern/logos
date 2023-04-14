@@ -1,13 +1,13 @@
 {
-	"policies.moderation.header": "Politică de Moderare",
-	"policies.moderation.points.introduction.header": "Cum funcționează moderarea serverului?",
-	"policies.moderation.points.introduction.body": "Serverul respectă o politică de moderare cu trei avertismente. Moderatorii (persoanele cu rolul {role_mention}) aplică regulile în conformitate cu această politică de moderare.",
-	"policies.moderation.points.breach.header": "Cui și unde se aplică regulile?",
-	"policies.moderation.points.breach.body": "Regulile serverului se aplică tuturor membri, iar o încălcare gravă a acestora va rezulta în acordarea unui avertisment.",
-	"policies.moderation.points.warnings.header": "Dacă primit câteva avertismente?",
-	"policies.moderation.points.warnings.body": "În cazul în care un anumit utilizator are deja trei avertismente, împreună cu primirea celui de-al patrulea avertisment, utilizatorul va primi un timeout. Avertismentele expiră după o __perioadă de două luni__.",
-	"policies.moderation.points.furtherAction.header": "Și atunci?",
-	"policies.moderation.points.furtherAction.body": "În consecință, personalul serverului va fi informat cu privire la depășirea limitei și, ulterior, va analiza circumstanțele depășirii și va stabili un curs de acțiune adecvat.",
-	"policies.moderation.points.ban.header": "Și dacă nu-mi pasă de toate acestea?",
-	"policies.moderation.points.ban.body": "Dacă se va determina că acest utilizator -- în mod conștient și persistent -- a desconsiderat regulile serverului și/sau a ignorat sugestiile moderatorilor, utilizatorul va fi exlus permanent din server (banned)."
+	"policies.moderation.title": "Politica de moderare",
+	"policies.moderation.points.introduction.title": "Cum moderează moderatorii serverul?",
+	"policies.moderation.points.introduction.description": "Serverul urmează o politică de 3 avertismente, aplicată de {role_mention} (ghizii) serverului.",
+	"policies.moderation.points.breach.title": "Unde se aplică regulile?",
+	"policies.moderation.points.breach.description": "Regulile se aplică peste tot în server, iar o încălcare a acestora va rezulta într-un avertisment impus asupra inculpatului.",
+	"policies.moderation.points.warnings.title": "Ce se întâmplă dacă am fost avertizat de câteva ori?",
+	"policies.moderation.points.warnings.description": "Dacă un utilizator a primit deja cele trei avertismente, un al patrulea va trimite utilizatorul la colț (timeout). Avertismentele expiră după o perioadă de __două luni__.",
+	"policies.moderation.points.furtherAction.title": "Ce se întâmplă după asta?",
+	"policies.moderation.points.furtherAction.description": "Prin urmare, personalul serverului va fi informat despre limita depășită. Ulterior, aceștia vor analiza circumstanțele și vor decide o acțiune adecvată.",
+	"policies.moderation.points.ban.title": "Ce se întâmplă dacă nu-mi pasă?",
+	"policies.moderation.points.ban.description": "Dacă se va determina că un utilizator, în mod conștient și persistent, a desconsiderat regulile serverului și/sau a ignorat sugestiile moderatorilor, acesta va primi un ban permanent din server."
 }

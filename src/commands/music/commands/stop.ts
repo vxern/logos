@@ -1,14 +1,8 @@
-import {
-	ApplicationCommandFlags,
-	ApplicationCommandOptionTypes,
-	Bot,
-	Interaction,
-	InteractionResponseTypes,
-	sendInteractionResponse,
-} from 'discordeno';
+import { ApplicationCommandOptionTypes, Bot, Interaction } from 'discordeno';
 import { OptionTemplate } from 'logos/src/commands/command.ts';
 import { getVoiceState, reset, verifyCanManagePlayback } from 'logos/src/controllers/music.ts';
 import { Client, localise } from 'logos/src/client.ts';
+import { reply } from 'logos/src/interactions.ts';
 import constants from 'logos/constants.ts';
 import { defaultLocale } from 'logos/types.ts';
 
@@ -37,22 +31,13 @@ function handleStopPlayback([client, bot]: [Client, Bot], interaction: Interacti
 			description: localise(client, 'music.options.stop.strings.notPlaying.description', interaction.locale)(),
 		};
 
-		return void sendInteractionResponse(
-			bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						title: strings.title,
-						description: strings.description,
-						color: constants.colors.dullYellow,
-					}],
-				},
-			},
-		);
+		return void reply([client, bot], interaction, {
+			embeds: [{
+				title: strings.title,
+				description: strings.description,
+				color: constants.colors.dullYellow,
+			}],
+		});
 	}
 
 	reset(client, interaction.guildId!);
@@ -62,21 +47,13 @@ function handleStopPlayback([client, bot]: [Client, Bot], interaction: Interacti
 		description: localise(client, 'music.options.stop.strings.stopped.description', defaultLocale)(),
 	};
 
-	return void sendInteractionResponse(
-		bot,
-		interaction.id,
-		interaction.token,
-		{
-			type: InteractionResponseTypes.ChannelMessageWithSource,
-			data: {
-				embeds: [{
-					title: `${constants.symbols.music.stopped} ${strings.title}`,
-					description: strings.description,
-					color: constants.colors.blue,
-				}],
-			},
-		},
-	);
+	return void reply([client, bot], interaction, {
+		embeds: [{
+			title: `${constants.symbols.music.stopped} ${strings.title}`,
+			description: strings.description,
+			color: constants.colors.blue,
+		}],
+	}, { visible: true });
 }
 
 export default command;

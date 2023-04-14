@@ -1,11 +1,4 @@
-import {
-	ApplicationCommandFlags,
-	ApplicationCommandOptionTypes,
-	Bot,
-	Interaction,
-	InteractionResponseTypes,
-	sendInteractionResponse,
-} from 'discordeno';
+import { ApplicationCommandOptionTypes, Bot, Interaction } from 'discordeno';
 import { OptionTemplate } from 'logos/src/commands/command.ts';
 import { collection } from 'logos/src/commands/parameters.ts';
 import {
@@ -16,7 +9,7 @@ import {
 	verifyCanManagePlayback,
 } from 'logos/src/controllers/music.ts';
 import { Client, localise } from 'logos/src/client.ts';
-import { parseArguments } from 'logos/src/interactions.ts';
+import { parseArguments, reply } from 'logos/src/interactions.ts';
 import constants from 'logos/constants.ts';
 import { defaultLocale } from 'logos/types.ts';
 
@@ -50,22 +43,13 @@ function handleReplayAction([client, bot]: [Client, Bot], interaction: Interacti
 				description: localise(client, 'music.options.replay.strings.noSong.description', interaction.locale)(),
 			};
 
-			return void sendInteractionResponse(
-				bot,
-				interaction.id,
-				interaction.token,
-				{
-					type: InteractionResponseTypes.ChannelMessageWithSource,
-					data: {
-						flags: ApplicationCommandFlags.Ephemeral,
-						embeds: [{
-							title: strings.title,
-							description: strings.description,
-							color: constants.colors.dullYellow,
-						}],
-					},
-				},
-			);
+			return void reply([client, bot], interaction, {
+				embeds: [{
+					title: strings.title,
+					description: strings.description,
+					color: constants.colors.dullYellow,
+				}],
+			});
 		}
 	} else {
 		if (!isOccupied(controller.player) || currentListing === undefined) {
@@ -84,22 +68,13 @@ function handleReplayAction([client, bot]: [Client, Bot], interaction: Interacti
 				},
 			};
 
-			return void sendInteractionResponse(
-				bot,
-				interaction.id,
-				interaction.token,
-				{
-					type: InteractionResponseTypes.ChannelMessageWithSource,
-					data: {
-						flags: ApplicationCommandFlags.Ephemeral,
-						embeds: [{
-							title: strings.title,
-							description: strings.description.noSongCollection,
-							color: constants.colors.dullYellow,
-						}],
-					},
-				},
-			);
+			return void reply([client, bot], interaction, {
+				embeds: [{
+					title: strings.title,
+					description: strings.description.noSongCollection,
+					color: constants.colors.dullYellow,
+				}],
+			});
 		} else if (!isCollection(currentListing.content)) {
 			const strings = {
 				title: localise(
@@ -121,22 +96,13 @@ function handleReplayAction([client, bot]: [Client, Bot], interaction: Interacti
 				},
 			};
 
-			return void sendInteractionResponse(
-				bot,
-				interaction.id,
-				interaction.token,
-				{
-					type: InteractionResponseTypes.ChannelMessageWithSource,
-					data: {
-						flags: ApplicationCommandFlags.Ephemeral,
-						embeds: [{
-							title: strings.title,
-							description: `${strings.description.noSongCollection}\n\n${strings.description.trySongInstead}`,
-							color: constants.colors.dullYellow,
-						}],
-					},
-				},
-			);
+			return void reply([client, bot], interaction, {
+				embeds: [{
+					title: strings.title,
+					description: `${strings.description.noSongCollection}\n\n${strings.description.trySongInstead}`,
+					color: constants.colors.dullYellow,
+				}],
+			});
 		}
 	}
 
@@ -147,21 +113,13 @@ function handleReplayAction([client, bot]: [Client, Bot], interaction: Interacti
 		description: localise(client, 'music.options.replay.strings.replaying.description', defaultLocale)(),
 	};
 
-	return void sendInteractionResponse(
-		bot,
-		interaction.id,
-		interaction.token,
-		{
-			type: InteractionResponseTypes.ChannelMessageWithSource,
-			data: {
-				embeds: [{
-					title: `${constants.symbols.music.replaying} ${strings.title}`,
-					description: strings.description,
-					color: constants.colors.invisible,
-				}],
-			},
-		},
-	);
+	return void reply([client, bot], interaction, {
+		embeds: [{
+			title: `${constants.symbols.music.replaying} ${strings.title}`,
+			description: strings.description,
+			color: constants.colors.invisible,
+		}],
+	}, { visible: true });
 }
 
 export default command;

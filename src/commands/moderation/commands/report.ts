@@ -1,17 +1,12 @@
 import {
-	ApplicationCommandFlags,
 	ApplicationCommandTypes,
 	Bot,
 	ButtonStyles,
-	deleteOriginalInteractionResponse,
-	editOriginalInteractionResponse,
 	Embed,
 	Interaction,
-	InteractionResponseTypes,
 	InteractionTypes,
 	Member,
 	MessageComponentTypes,
-	sendInteractionResponse,
 	sendMessage,
 	TextStyles,
 	User as DiscordUser,
@@ -30,7 +25,15 @@ import {
 	reportByMessageId,
 } from 'logos/src/services/reports.ts';
 import { Client, isValidIdentifier, localise, resolveIdentifierToMembers } from 'logos/src/client.ts';
-import { createInteractionCollector, createModalComposer, Modal } from 'logos/src/interactions.ts';
+import {
+	createInteractionCollector,
+	createModalComposer,
+	deleteReply,
+	editReply,
+	Modal,
+	postponeReply,
+	reply,
+} from 'logos/src/interactions.ts';
 import constants from 'logos/constants.ts';
 import { trim } from 'logos/formatting.ts';
 import configuration from 'logos/configuration.ts';
@@ -76,20 +79,15 @@ async function handleMakeReport([client, bot]: [Client, Bot], interaction: Inter
 
 		const reports = Array.from(reportsByAuthorAndGuild.values());
 		if (!verifyIsWithinLimits(reports, configuration.commands.report.limitUses, configuration.commands.report.within)) {
-			return void sendInteractionResponse(
-				bot,
-				interaction.id,
-				interaction.token,
+			return void reply(
+				[client, bot],
+				interaction,
 				{
-					type: InteractionResponseTypes.ChannelMessageWithSource,
-					data: {
-						flags: ApplicationCommandFlags.Ephemeral,
-						embeds: [{
-							title: strings.title,
-							description: strings.description,
-							color: constants.colors.dullYellow,
-						}],
-					},
+					embeds: [{
+						title: strings.title,
+						description: strings.description,
+						color: constants.colors.dullYellow,
+					}],
 				},
 			);
 		}
@@ -98,12 +96,7 @@ async function handleMakeReport([client, bot]: [Client, Bot], interaction: Inter
 	return void createModalComposer([client, bot], interaction, {
 		modal: generateReportModal(client, interaction.locale),
 		onSubmit: async (submission, answers) => {
-			await sendInteractionResponse(bot, submission.id, submission.token, {
-				type: InteractionResponseTypes.DeferredChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-				},
-			});
+			await postponeReply([client, bot], interaction);
 
 			const userReportString = answers.users_to_report!;
 			if (!validateUserReportString(userReportString)) {
@@ -186,8 +179,7 @@ async function handleMakeReport([client, bot]: [Client, Bot], interaction: Inter
 				description: localise(client, 'report.strings.submitted.description', interaction.locale)(),
 			};
 
-			editOriginalInteractionResponse(bot, submission.token, {
-				flags: ApplicationCommandFlags.Ephemeral,
+			editReply([client, bot], submission, {
 				embeds: [{
 					title: strings.title,
 					description: strings.description,
@@ -212,7 +204,7 @@ function handleSubmittedInvalidReport(
 		const continueId = createInteractionCollector([client, bot], {
 			type: InteractionTypes.MessageComponent,
 			onCollect: (_, selection) => {
-				deleteOriginalInteractionResponse(bot, submission.token);
+				deleteReply([client, bot], submission);
 				resolve(selection);
 			},
 		});
@@ -228,8 +220,8 @@ function handleSubmittedInvalidReport(
 				const leaveId = createInteractionCollector([client, bot], {
 					type: InteractionTypes.MessageComponent,
 					onCollect: (_, _leaveSelection) => {
-						deleteOriginalInteractionResponse(bot, submission.token);
-						deleteOriginalInteractionResponse(bot, cancelSelection.token);
+						deleteReply([client, bot], submission);
+						deleteReply([client, bot], cancelSelection);
 						resolve(undefined);
 					},
 				});
@@ -241,30 +233,26 @@ function handleSubmittedInvalidReport(
 					leave: localise(client, 'prompts.leave', cancelSelection.locale)(),
 				};
 
-				sendInteractionResponse(bot, cancelSelection.id, cancelSelection.token, {
-					type: InteractionResponseTypes.ChannelMessageWithSource,
-					data: {
-						flags: ApplicationCommandFlags.Ephemeral,
-						embeds: [{
-							title: strings.title,
-							description: strings.description,
-							color: constants.colors.dullYellow,
-						}],
+				reply([client, bot], cancelSelection, {
+					embeds: [{
+						title: strings.title,
+						description: strings.description,
+						color: constants.colors.dullYellow,
+					}],
+					components: [{
+						type: MessageComponentTypes.ActionRow,
 						components: [{
-							type: MessageComponentTypes.ActionRow,
-							components: [{
-								type: MessageComponentTypes.Button,
-								customId: returnId,
-								label: strings.stay,
-								style: ButtonStyles.Success,
-							}, {
-								type: MessageComponentTypes.Button,
-								customId: leaveId,
-								label: strings.leave,
-								style: ButtonStyles.Danger,
-							}],
+							type: MessageComponentTypes.Button,
+							customId: returnId,
+							label: strings.stay,
+							style: ButtonStyles.Success,
+						}, {
+							type: MessageComponentTypes.Button,
+							customId: leaveId,
+							label: strings.leave,
+							style: ButtonStyles.Danger,
 						}],
-					},
+					}],
 				});
 			},
 		});
@@ -278,7 +266,7 @@ function handleSubmittedInvalidReport(
 					description: localise(client, 'report.strings.failed.description', submission.locale)(),
 				};
 
-				editOriginalInteractionResponse(bot, submission.token, {
+				editReply([client, bot], submission, {
 					embeds: [{
 						title: strings.title,
 						description: strings.description,
@@ -373,7 +361,7 @@ function handleSubmittedInvalidReport(
 			cancel: localise(client, 'prompts.cancel', submission.locale)(),
 		};
 
-		editOriginalInteractionResponse(bot, submission.token, {
+		editReply([client, bot], submission, {
 			embeds: [embed],
 			components: [{
 				type: MessageComponentTypes.ActionRow,

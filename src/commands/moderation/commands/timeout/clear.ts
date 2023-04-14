@@ -1,14 +1,7 @@
-import {
-	ApplicationCommandFlags,
-	Bot,
-	editMember,
-	Interaction,
-	InteractionResponseTypes,
-	sendInteractionResponse,
-} from 'discordeno';
+import { Bot, editMember, Interaction } from 'discordeno';
 import { logEvent } from 'logos/src/controllers/logging/logging.ts';
 import { autocompleteMembers, Client, localise, resolveInteractionToMember } from 'logos/src/client.ts';
-import { parseArguments } from 'logos/src/interactions.ts';
+import { parseArguments, reply } from 'logos/src/interactions.ts';
 import { diagnosticMentionUser } from 'logos/src/utils.ts';
 import constants from 'logos/constants.ts';
 
@@ -40,22 +33,13 @@ async function handleClearTimeout([client, bot]: [Client, Bot], interaction: Int
 			),
 		};
 
-		return void sendInteractionResponse(
-			bot,
-			interaction.id,
-			interaction.token,
-			{
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						title: strings.title,
-						description: strings.description,
-						color: constants.colors.dullYellow,
-					}],
-				},
-			},
-		);
+		return void reply([client, bot], interaction, {
+			embeds: [{
+				title: strings.title,
+				description: strings.description,
+				color: constants.colors.dullYellow,
+			}],
+		});
 	}
 
 	const guild = client.cache.guilds.get(interaction.guildId!);
@@ -72,22 +56,13 @@ async function handleClearTimeout([client, bot]: [Client, Bot], interaction: Int
 		),
 	};
 
-	sendInteractionResponse(
-		bot,
-		interaction.id,
-		interaction.token,
-		{
-			type: InteractionResponseTypes.ChannelMessageWithSource,
-			data: {
-				flags: ApplicationCommandFlags.Ephemeral,
-				embeds: [{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colors.lightGreen,
-				}],
-			},
-		},
-	);
+	return void reply([client, bot], interaction, {
+		embeds: [{
+			title: strings.title,
+			description: strings.description,
+			color: constants.colors.lightGreen,
+		}],
+	});
 }
 
 export { handleClearTimeout, handleClearTimeoutAutocomplete };

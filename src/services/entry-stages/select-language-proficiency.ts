@@ -1,20 +1,11 @@
-import {
-	addRole,
-	ApplicationCommandFlags,
-	Bot,
-	ButtonStyles,
-	Interaction,
-	InteractionResponseTypes,
-	MessageComponentTypes,
-	sendInteractionResponse,
-} from 'discordeno';
+import { addRole, Bot, ButtonStyles, Interaction, MessageComponentTypes } from 'discordeno';
 import { getProficiencyCategory } from 'logos/src/commands/social/module.ts';
 import { EntryStepButtonID } from 'logos/src/services/entry.ts';
 import { Client, localise } from 'logos/src/client.ts';
-import { encodeId } from 'logos/src/interactions.ts';
-import { defaultLocale } from 'logos/types.ts';
+import { acknowledge, encodeId, reply } from 'logos/src/interactions.ts';
 import configuration from 'logos/configuration.ts';
 import constants from 'logos/constants.ts';
+import { defaultLocale } from 'logos/types.ts';
 
 const proficiencyCategory = getProficiencyCategory();
 const proficiencies = proficiencyCategory.collection.list;
@@ -69,33 +60,27 @@ async function handleSelectLanguageProficiency(
 				},
 			};
 
-			return void sendInteractionResponse(bot, interaction.id, interaction.token, {
-				type: InteractionResponseTypes.ChannelMessageWithSource,
-				data: {
-					flags: ApplicationCommandFlags.Ephemeral,
-					embeds: [{
-						title: strings.title,
-						description: `${strings.description.verificationRequired}\n\n${strings.description.honestAnswers}`,
-						color: constants.colors.blue,
-					}],
+			return void reply([client, bot], interaction, {
+				embeds: [{
+					title: strings.title,
+					description: `${strings.description.verificationRequired}\n\n${strings.description.honestAnswers}`,
+					color: constants.colors.blue,
+				}],
+				components: [{
+					type: MessageComponentTypes.ActionRow,
 					components: [{
-						type: MessageComponentTypes.ActionRow,
-						components: [{
-							type: MessageComponentTypes.Button,
-							style: ButtonStyles.Secondary,
-							label: strings.description.understood,
-							customId: encodeId<EntryStepButtonID>(constants.staticComponentIds.requestedVerification, [
-								requestedRole.id.toString(),
-							]),
-							emoji: { name: constants.symbols.understood },
-						}],
+						type: MessageComponentTypes.Button,
+						style: ButtonStyles.Secondary,
+						label: strings.description.understood,
+						customId: encodeId<EntryStepButtonID>(constants.staticComponentIds.requestedVerification, [
+							requestedRole.id.toString(),
+						]),
+						emoji: { name: constants.symbols.understood },
 					}],
-				},
+				}],
 			});
 		} else {
-			sendInteractionResponse(bot, interaction.id, interaction.token, {
-				type: InteractionResponseTypes.DeferredUpdateMessage,
-			});
+			acknowledge([client, bot], interaction);
 		}
 	}
 

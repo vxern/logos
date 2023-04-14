@@ -1,19 +1,18 @@
 {
 	"notices.lastUpdate": "Ostatnia aktualizacja: {date}",
-	"notices.notices.information.invite": "",
-
-	"reports.reportedUsers": "",
-	"reports.reasonForReport": "",
-	"reports.linkToMessage": "",
-	"reports.noLinkToMessageProvided": "",
-	"reports.previousInfractions": "",
-
-	"suggestion.suggestion": "",
-
-	"submittedBy": "",
-	"submittedAt": "",
-	"markAsResolved": "",
-	"markAsUnresolved": "",
-	"alreadyMarkedAsResolved": "",
-	"alreadyMarkedAsUnresolved": ""
+	"notices.notices.information.invite": "Stały link do zaprosin",
+	"reports.users": "Zgłoszeni użytkownicy",
+	"reports.reason": "Powód dla zgłoszenia",
+	"reports.link": "Link do wiadomości",
+	"reports.noLinkProvided": "Nie podano linku do wiadomości.",
+	"reports.previousInfractions": "Poprzednie przewinienia użytkownika {username}",
+	"suggestion.suggestion": "Sugestia",
+	"submittedBy": "Autor",
+	"submittedAt": "Przesłane",
+	"markResolved": "Oznacz jako rozwiązane",
+	"markUnresolved": "Oznacz jako nierozwiązane",
+	"alreadyMarkedResolved.title": "Już oznaczone jako rozwiązane",
+	"alreadyMarkedResolved.description": "Ten temat był już poprzednio oznaczony jako rozwiązany.",
+	"alreadyMarkedUnresolved.title": "Już oznaczone jako nierozwiązane",
+	"alreadyMarkedUnresolved.description": "Ten temat był już poprzednio oznaczony jako nierozwiązany."
 }
