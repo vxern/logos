@@ -279,7 +279,7 @@
 	"music.options.now.strings.startTimeUnknown": "Başlama zamanı bilinmiyor.",
 	"music.options.now.strings.sourcedFrom": "Bu liste buradan alındı {source}.",
 	"music.options.now.strings.theInternet": "internet",
-	"music.options.pause.name": "durdur",
+	"music.options.pause.name": "duraklat",
 	"music.options.pause.description": "Pauses the currently playing song or song collection.",
 	"music.options.pause.strings.notPlaying.title": "Nothing to pause",
 	"music.options.pause.strings.notPlaying.description": "There is no song to pause.",
