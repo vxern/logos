@@ -2,6 +2,7 @@ import { Bot, getAvatarURL, getUser, Interaction } from 'discordeno';
 import { Client, localise } from 'logos/src/client.ts';
 import { reply } from 'logos/src/interactions.ts';
 import constants from 'logos/constants.ts';
+import { mention, MentionTypes } from 'logos/formatting.ts';
 
 async function handleDisplayBotInformation([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const botUser = client.cache.users.get(bot.id) ?? await getUser(bot, bot.id);
@@ -47,8 +48,8 @@ async function handleDisplayBotInformation([client, bot]: [Client, Bot], interac
 				)(),
 			},
 		},
-		contributions: {
-			title: localise(client, 'information.options.bot.strings.contributions', interaction.locale)(),
+		translators: {
+			title: localise(client, 'information.options.bot.strings.translators.title', interaction.locale)(),
 		},
 	};
 
@@ -77,12 +78,28 @@ async function handleDisplayBotInformation([client, bot]: [Client, Bot], interac
 				value: strings.information.amIOpenSource.description,
 			}],
 		}, {
-			title: strings.contributions.title,
+			title: strings.translators.title,
 			color: constants.colors.invisible,
-			fields: constants.contributors.map((contributor) => ({
-				name: `${contributor.username} — ${contributor.contribution}`,
-				value: Object.entries(contributor.links).map(([platform, url]) => `[${platform}](${url})`).join(' · '),
-			})),
+			fields: Object.entries(constants.contributions.translation).map(([language, data]) => {
+				const contributorsFormatted = data.contributors.map((contributor) => {
+					const userMention = mention(contributor.id, MentionTypes.User);
+
+					if ('links' in contributor) {
+						const linksFormatted = Object.entries(contributor.links)
+							.map(([platform, link]) => `[${platform}](${link})`).join(', ');
+
+						return `${userMention} (${linksFormatted})`;
+					}
+
+					return userMention;
+				}).join('\n');
+
+				return {
+					name: `${language} ${data.flag}`,
+					value: contributorsFormatted,
+					inline: true,
+				};
+			}),
 		}],
 	});
 }

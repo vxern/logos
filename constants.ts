@@ -39,15 +39,124 @@ const links = {
 	generateDiscordInviteLink: (inviteCode: string) => `https://discord.gg/${inviteCode}`,
 };
 
-const contributors = [
-	{
-		username: 'Nemokosch#9980',
-		contribution: '🇭🇺',
+const contributors = {
+	esther: {
+		username: 'Esther',
+		id: 747900197358665758n,
+	},
+	intelProcessor: {
+		username: 'IntelProcessor69',
+		id: 839862207025119252n,
+	},
+	matteos: {
+		username: '16WardM',
+		id: 758385691851096195n,
+	},
+	moorddroom: {
+		username: 'moorddroom',
+		id: 656160896607059981n,
+	},
+	mymy: {
+		username: 'Mymy',
+		id: 859452448191545364n,
+	},
+	neemanUrmash: {
+		username: 'Neeman Urmash',
+		id: 943425310421053481n,
+	},
+	nemokosch: {
+		username: 'Nemokosch',
+		id: 297037173541175296n,
 		links: {
-			'Github Account': 'https://github.com/2colours',
+			'Github': 'https://github.com/2colours',
 		},
 	},
-];
+	serene: {
+		username: 'Serene',
+		id: 797369145367855104n,
+	},
+	shamisem: {
+		username: 'Shamisem',
+		id: 1020296987494596620n,
+	},
+	qirimcak: {
+		username: 'qırımçak',
+		id: 558631025408999424n,
+	},
+	telemaniak: {
+		username: 'Telemaniak',
+		id: 410812091071725598n,
+	},
+	vxern: {
+		username: 'vxern',
+		id: 217319536485990400n,
+		links: {
+			'Github': 'https://github.com/vxern',
+			'LinkedIn': 'https://linkedin.com/in/vxern',
+		},
+	},
+	xXMemeXx: {
+		username: 'xXMemeXx',
+		id: 303605019532460033n,
+		links: {
+			'YouTube': 'https://www.youtube.com/channel/UC4aqpjKwQfkqxmQO0Owy2QQ',
+		},
+	},
+	yeetfe: {
+		username: 'Yeetfe',
+		id: 249248581435916299n,
+	},
+};
+
+const contributions = {
+	translation: {
+		'Dutch': {
+			flag: '🇳🇱',
+			contributors: [contributors.moorddroom],
+		},
+		'French': {
+			flag: '🇫🇷',
+			contributors: [
+				contributors.intelProcessor,
+				contributors.matteos,
+				contributors.moorddroom,
+				contributors.serene,
+				contributors.esther,
+			],
+		},
+		'Greek': {
+			flag: '🇬🇷',
+			contributors: [
+				contributors.intelProcessor,
+				contributors.neemanUrmash,
+			],
+		},
+		'Hungarian': {
+			flag: '🇭🇺',
+			contributors: [contributors.nemokosch],
+		},
+		'Italian': {
+			flag: '🇮🇹',
+			contributors: [contributors.mymy],
+		},
+		'Norwegian': {
+			flag: '🇳🇴',
+			contributors: [contributors.telemaniak],
+		},
+		'Polish': {
+			flag: '🇵🇱',
+			contributors: [contributors.vxern],
+		},
+		'Romanian': {
+			flag: '🇷🇴',
+			contributors: [contributors.vxern, contributors.xXMemeXx],
+		},
+		'Turkish': {
+			flag: '🇹🇷',
+			contributors: [contributors.qirimcak, contributors.yeetfe],
+		},
+	},
+};
 
 const images = {
 	rules: 'https://i.imgur.com/wRBpXcY.png',
@@ -257,7 +366,7 @@ const endpoints = {
 };
 
 export default {
-	contributors,
+	contributions,
 	endpoints,
 	links,
 	images,
