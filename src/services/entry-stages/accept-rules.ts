@@ -24,10 +24,10 @@ async function handleAcceptRules(
 	const strings = {
 		title: localise(client, 'entry.proficiency.title', interaction.locale)(),
 		description: {
-			chooseProficiency: localise(client, 'entry.proficiency.chooseProficiency', interaction.locale)({
+			chooseProficiency: localise(client, 'entry.proficiency.description.chooseProficiency', interaction.locale)({
 				'language': guild.language,
 			}),
-			canChangeLater: localise(client, 'entry.proficiency.canChangeLater', interaction.locale)({
+			canChangeLater: localise(client, 'entry.proficiency.description.canChangeLater', interaction.locale)({
 				'command': '`/profile roles`',
 			}),
 		},
