@@ -259,14 +259,16 @@ function createEventHandlers(client: Client): Partial<EventHandlers> {
 				status: 'online',
 			}),
 		guildCreate: (bot, guild) => {
-			upsertGuildApplicationCommands(bot, guild.id, client.commands.commands);
+			upsertGuildApplicationCommands(bot, guild.id, client.commands.commands)
+				.catch((reason) => client.log.warn(`Failed to upsert commands: ${reason}`));
 
 			registerGuild(client, guild);
 
 			setupLogging([client, bot], guild);
 			setupMusicController(client, guild.id);
 
-			fetchMembers(bot, guild.id, { limit: 0, query: '' });
+			fetchMembers(bot, guild.id, { limit: 0, query: '' })
+				.catch((reason) => client.log.warn(`Failed to fetch members for guild with ID ${guild.id}: ${reason}`));
 		},
 		channelDelete: (_, channel) => {
 			client.cache.channels.delete(channel.id);
@@ -309,10 +311,11 @@ function createEventHandlers(client: Client): Partial<EventHandlers> {
 			}
 			if (handle === undefined) return;
 
-			Promise.resolve(handle([client, bot], interaction)).catch((exception) => {
-				Sentry.captureException(exception);
-				client.log.error(exception);
-			});
+			Promise.resolve(handle([client, bot], interaction))
+				.catch((exception) => {
+					Sentry.captureException(exception);
+					client.log.error(exception);
+				});
 		},
 	};
 }
