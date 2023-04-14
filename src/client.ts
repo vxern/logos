@@ -249,15 +249,23 @@ function overrideDefaultEventHandlers(bot: Bot): Bot {
 
 function createEventHandlers(client: Client): Partial<EventHandlers> {
 	return {
-		ready: (bot, payload) =>
-			editShardStatus(bot, payload.shardId, {
+		ready: (bot, payload) => {
+			const { shardId } = payload;
+
+			const shard = bot.gateway.manager.shards.find((shard) => shard.id === shardId);
+			if (shard !== undefined && shard.socket !== undefined) {
+				shard.socket.onerror = () => {};
+			}
+
+			editShardStatus(bot, shardId, {
 				activities: [{
 					name: client.metadata.version,
 					type: ActivityTypes.Streaming,
 					createdAt: Date.now(),
 				}],
 				status: 'online',
-			}),
+			});
+		},
 		guildCreate: (bot, guild) => {
 			upsertGuildApplicationCommands(bot, guild.id, client.commands.commands)
 				.catch((reason) => client.log.warn(`Failed to upsert commands: ${reason}`));
