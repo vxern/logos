@@ -1,7 +1,7 @@
 {
 	"policies.moderation.title": "Polityka moderowania",
 	"policies.moderation.points.introduction.title": "Jak działa moderacja serwera?",
-	"policies.moderation.points.introduction.description": "The server abides by a 3-warn moderation policy, enforced by the server's guides.",
+	"policies.moderation.points.introduction.description": "Na serwerze obowiązuje polityka moderacji na bazie trzech ostrzeżeń, zgodnie z którą działają moderatorzy serwera.",
 	"policies.moderation.points.breach.title": "Gdzie obowiązują reguły?",
 	"policies.moderation.points.breach.description": "Reguły serwera obowiązują dla każdego użytkownika, a poważne ich naruszenie zaskutkuje wydaniem ostrzeżenia.",
 	"policies.moderation.points.warnings.title": "Co, jeśli dostanę parę ostrzeżeń?",
