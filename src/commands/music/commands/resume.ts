@@ -65,7 +65,7 @@ function handleResumePlayback([client, bot]: [Client, Bot], interaction: Interac
 		embeds: [{
 			title: `${constants.symbols.music.resumed} ${strings.title}`,
 			description: strings.description,
-			color: constants.colors.invisible,
+			color: constants.colors.blue,
 		}],
 	}, { visible: true });
 }

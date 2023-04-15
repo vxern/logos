@@ -33,7 +33,7 @@ function handleDisplayVolume([client, bot]: [Client, Bot], interaction: Interact
 		embeds: [{
 			title: `${constants.symbols.music.volume} ${strings.title}`,
 			description: strings.description,
-			color: constants.colors.invisible,
+			color: constants.colors.blue,
 		}],
 	}, { visible: show });
 }

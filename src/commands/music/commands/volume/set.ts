@@ -52,7 +52,7 @@ function handleSetVolume([client, bot]: [Client, Bot], interaction: Interaction)
 		embeds: [{
 			title: `${constants.symbols.music.volume} ${strings.title}`,
 			description: strings.description,
-			color: constants.colors.invisible,
+			color: constants.colors.blue,
 		}],
 	});
 }

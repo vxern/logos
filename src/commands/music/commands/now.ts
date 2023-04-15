@@ -162,6 +162,7 @@ function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], interaction
 	return void reply([client, bot], interaction, {
 		embeds: [{
 			title: `${constants.symbols.music.nowPlaying} ${strings.nowPlaying}`,
+			color: constants.colors.blue,
 			fields: [
 				...isCollection(currentListing?.content)
 					? [{

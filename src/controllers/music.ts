@@ -467,7 +467,7 @@ async function loadSong(
 					'user_mention': mention(controller.currentListing!.requestedBy, MentionTypes.User),
 				},
 			),
-			color: constants.colors.invisible,
+			color: constants.colors.blue,
 		}],
 	});
 

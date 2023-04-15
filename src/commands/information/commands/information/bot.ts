@@ -74,7 +74,7 @@ async function handleDisplayBotInformation([client, bot]: [Client, Bot], interac
 					format: 'png',
 				}),
 			},
-			color: constants.colors.invisible,
+			color: constants.colors.blue,
 			fields: [{
 				name: strings.information.whoAmI.title,
 				value: `${strings.information.whoAmI.description}\n${featuresFormatted}`,
@@ -90,7 +90,7 @@ async function handleDisplayBotInformation([client, bot]: [Client, Bot], interac
 			}],
 		}, {
 			title: strings.translators.title,
-			color: constants.colors.invisible,
+			color: constants.colors.blue,
 			fields: Object.entries(constants.contributions.translation).map(([language, data]) => {
 				const contributorsFormatted = data.contributors.map((contributor) => {
 					const userMention = mention(contributor.id, MentionTypes.User);

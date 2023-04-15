@@ -78,7 +78,7 @@ function handleDisplayGuildInformation([client, bot]: [Client, Bot], interaction
 		embeds: [{
 			thumbnail: getThumbnail(bot, guild),
 			title: strings.title,
-			color: constants.colors.invisible,
+			color: constants.colors.blue,
 			fields: [
 				{
 					name: `${constants.symbols.guild.description} ${strings.description.description.title}`,

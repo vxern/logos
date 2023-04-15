@@ -176,7 +176,7 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 		embeds: [{
 			title: `${constants.symbols.music.skipped} ${strings.title}`,
 			description: strings.description,
-			color: constants.colors.invisible,
+			color: constants.colors.blue,
 		}],
 	}, { visible: true });
 }
