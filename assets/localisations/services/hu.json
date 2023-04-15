@@ -11,7 +11,7 @@
 	"submittedAt": "Beküldés időpontja -",
 	"markResolved": "Megjelölés megoldottként",
 	"markUnresolved": "Megjelölés megoldatlanként",
-	"alreadyMarkedResolved.title": "Already marked resolved",
+	"alreadyMarkedResolved.title": "Már megoldottnak jelölve",
 	"alreadyMarkedResolved.description": "This issue has already been marked resolved.",
 	"alreadyMarkedUnresolved.title": "Already marked unresolved",
 	"alreadyMarkedUnresolved.description": "This issue has already been marked unresolved."
