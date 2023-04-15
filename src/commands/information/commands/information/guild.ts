@@ -3,7 +3,6 @@ import { getProficiencyCategory } from 'logos/src/commands/social/module.ts';
 import { Client, localise } from 'logos/src/client.ts';
 import { reply } from 'logos/src/interactions.ts';
 import { getGuildIconURLFormatted, snowflakeToTimestamp } from 'logos/src/utils.ts';
-import configuration from 'logos/configuration.ts';
 import constants from 'logos/constants.ts';
 import { mention, MentionTypes, timestamp } from 'logos/formatting.ts';
 import { defaultLocale } from 'logos/types.ts';
@@ -62,9 +61,7 @@ function handleDisplayGuildInformation([client, bot]: [Client, Bot], interaction
 					client,
 					'information.options.server.strings.information.description.overseenByModerators',
 					interaction.locale,
-				)(
-					{ 'role_mention': configuration.permissions.moderatorRoleNames.main.toLowerCase() },
-				),
+				)(),
 			},
 			distribution: localise(
 				client,

@@ -27,7 +27,7 @@
 	"information.options.server.strings.information.description.channels": "Channels",
 	"information.options.server.strings.information.description.owner": "Owner",
 	"information.options.server.strings.information.description.moderators": "Moderators",
-	"information.options.server.strings.information.description.overseenByModerators": "This server is overseen by a collective of {role_mention}s.",
+	"information.options.server.strings.information.description.overseenByModerators": "This server is overseen by a collective of guides.",
 	"information.options.server.strings.information.description.distribution": "Distribution of members' language proficiency",
 	"information.options.server.strings.information.description.withoutProficiency": "without a specified language proficiency.",
 	"information.options.server.strings.channelTypes.text": "Text",

@@ -1,10 +1,8 @@
-import { ApplicationCommandTypes, Bot, Embed, Guild, Interaction } from 'discordeno';
+import { ApplicationCommandTypes, Bot, Embed, Interaction } from 'discordeno';
 import { CommandTemplate } from 'logos/src/commands/command.ts';
 import { show } from 'logos/src/commands/parameters.ts';
 import { Client, localise } from 'logos/src/client.ts';
 import { parseArguments, reply } from 'logos/src/interactions.ts';
-import configuration from 'logos/configuration.ts';
-import { mention, MentionTypes } from 'logos/formatting.ts';
 import { defaultLocale } from 'logos/types.ts';
 
 const command: CommandTemplate = {
@@ -30,28 +28,19 @@ function handleDisplayModerationPolicy([client, bot]: [Client, Bot], interaction
 	return void reply([client, bot], interaction, {
 		embeds: [{
 			title: strings.title,
-			fields: getModerationPolicyPoints(client, guild, locale),
+			fields: getModerationPolicyPoints(client, locale),
 		}],
 	}, { visible: show });
 }
 
 function getModerationPolicyPoints(
 	client: Client,
-	guild: Guild,
 	locale: string | undefined,
 ): NonNullable<Embed['fields']> {
-	const moderatorRoleId = guild.roles.array()
-		.find((role) => role.name === configuration.permissions.moderatorRoleNames.main)?.id;
-	const moderatorRoleMention = moderatorRoleId !== undefined
-		? mention(moderatorRoleId, MentionTypes.Role)
-		: configuration.permissions.moderatorRoleNames.main.toLowerCase();
-
 	const strings = {
 		introduction: {
 			title: localise(client, 'policies.moderation.points.introduction.title', locale)(),
-			description: localise(client, 'policies.moderation.points.introduction.description', locale)(
-				{ 'role_mention': moderatorRoleMention },
-			),
+			description: localise(client, 'policies.moderation.points.introduction.description', locale)(),
 		},
 		breach: {
 			title: localise(client, 'policies.moderation.points.breach.title', locale)(),
