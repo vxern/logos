@@ -26,7 +26,7 @@
 	"information.options.server.strings.information.description.channels": "Kanały",
 	"information.options.server.strings.information.description.owner": "Właściciel",
 	"information.options.server.strings.information.description.moderators": "Moderatorzy",
-	"information.options.server.strings.information.description.overseenByModerators": "Ten serwer jest nadzorowany poprzez grupę osób z rolą **{role_mention}**.",
+	"information.options.server.strings.information.description.overseenByModerators": "This server is overseen by a collective of guides.",
 	"information.options.server.strings.information.description.distribution": "Podział biegłości językowej członków serwera",
 	"information.options.server.strings.information.description.withoutProficiency": "bez określonej znajomości języka.",
 	"information.options.server.strings.channelTypes.text": "Tekstowe",
