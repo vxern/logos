@@ -1,7 +1,7 @@
 {
 	"policies.moderation.title": "Politica de moderare",
 	"policies.moderation.points.introduction.title": "Cum moderează moderatorii serverul?",
-	"policies.moderation.points.introduction.description": "Serverul urmează o politică de 3 avertismente, aplicată de {role_mention} (ghizii) serverului.",
+	"policies.moderation.points.introduction.description": "The server abides by a 3-warn moderation policy, enforced by the server's guides.",
 	"policies.moderation.points.breach.title": "Unde se aplică regulile?",
 	"policies.moderation.points.breach.description": "Regulile se aplică peste tot în server, iar o încălcare a acestora va rezulta într-un avertisment impus asupra inculpatului.",
 	"policies.moderation.points.warnings.title": "Ce se întâmplă dacă am fost avertizat de câteva ori?",
