@@ -5,14 +5,14 @@
 	"reports.reason": "Jelentés oka",
 	"reports.link": "Link az üzenethez",
 	"reports.noLinkProvided": "Nincs megadva link az üzenethez.",
-	"reports.previousInfractions": "Previous infractions of {username}",
+	"reports.previousInfractions": "{username} korábbi szabálysértései",
 	"suggestion.suggestion": "Javaslat",
 	"submittedBy": "Beküldő",
 	"submittedAt": "Beküldés időpontja -",
 	"markResolved": "Megjelölés megoldottként",
 	"markUnresolved": "Megjelölés megoldatlanként",
 	"alreadyMarkedResolved.title": "Már megoldottnak jelölve",
-	"alreadyMarkedResolved.description": "This issue has already been marked resolved.",
-	"alreadyMarkedUnresolved.title": "Already marked unresolved",
-	"alreadyMarkedUnresolved.description": "This issue has already been marked unresolved."
+	"alreadyMarkedResolved.description": "Ez a hibajegy már megoldottnak lett jelölve.",
+	"alreadyMarkedUnresolved.title": "Már megoldatlannak jelölve",
+	"alreadyMarkedUnresolved.description": "Ez a hibajegy már megoldatlannak lett jelölve."
 }
