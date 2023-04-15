@@ -117,7 +117,7 @@ function handleReplayAction([client, bot]: [Client, Bot], interaction: Interacti
 		embeds: [{
 			title: `${constants.symbols.music.replaying} ${strings.title}`,
 			description: strings.description,
-			color: constants.colors.invisible,
+			color: constants.colors.blue,
 		}],
 	}, { visible: true });
 }

@@ -182,7 +182,7 @@ function generateEmbed(
 					embeds: [{
 						title: `${constants.symbols.music.removed} ${strings.title}`,
 						description: strings.description,
-						color: constants.colors.invisible,
+						color: constants.colors.blue,
 					}],
 				});
 			},

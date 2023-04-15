@@ -55,9 +55,9 @@ function handlePausePlayback([client, bot]: [Client, Bot], interaction: Interact
 		embeds: [{
 			title: `${constants.symbols.music.paused} ${strings.title}`,
 			description: strings.description,
-			color: constants.colors.invisible,
+			color: constants.colors.blue,
 		}],
-	});
+	}, { visible: true });
 }
 
 export default command;

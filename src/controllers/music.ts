@@ -394,8 +394,10 @@ async function loadSong(
 		controller.currentListing.content.title = track.info.title;
 	}
 
-	const onTrackException = () => {
+	const onTrackException = (_: string | null, error: Error) => {
 		controller.flags.loop.song = false;
+
+		client.log.warn(`Failed to play track: ${error}`);
 
 		const strings = {
 			title: localise(client, 'music.options.play.strings.failedToPlay.title', defaultLocale)(),
@@ -414,7 +416,7 @@ async function loadSong(
 	};
 
 	const onTrackEnd = () => {
-		controller.player.off('trackException', onTrackException);
+		controller.player.off('trackException', (track, error) => onTrackException(track, error));
 
 		if (controller.flags.isDestroyed) {
 			setDisconnectTimeout(client, guildId);
@@ -429,7 +431,7 @@ async function loadSong(
 		advanceQueueAndPlay([client, bot], guildId, controller);
 	};
 
-	controller.player.once('trackException', onTrackException);
+	controller.player.once('trackException', (track, error) => onTrackException(track, error));
 	controller.player.once('trackEnd', onTrackEnd);
 
 	controller.player.play(track.track);
@@ -465,7 +467,7 @@ async function loadSong(
 					'user_mention': mention(controller.currentListing!.requestedBy, MentionTypes.User),
 				},
 			),
-			color: constants.colors.invisible,
+			color: constants.colors.blue,
 		}],
 	});
 
