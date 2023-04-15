@@ -26,7 +26,7 @@
 	"information.options.server.strings.information.description.channels": "Kanallar",
 	"information.options.server.strings.information.description.owner": "Sahip",
 	"information.options.server.strings.information.description.moderators": "Moderatörler",
-	"information.options.server.strings.information.description.overseenByModerators": "Bu sunucu bir {role_mention} kollektifi tarafından denetlenmektedir.",
+	"information.options.server.strings.information.description.overseenByModerators": "This server is overseen by a collective of guides.",
 	"information.options.server.strings.information.description.distribution": "Üyelerin dil yeterliliği dağılımı",
 	"information.options.server.strings.information.description.withoutProficiency": "belirtilmiş bir dil yeterliliği olmadan.",
 	"information.options.server.strings.channelTypes.text": "Yazı",
