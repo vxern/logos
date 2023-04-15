@@ -1,7 +1,7 @@
 {
 	"policies.moderation.title": "Πολιτική μετριασμού",
 	"policies.moderation.points.introduction.title": "Πώς οι συντονιστές συντονίζουν τον διακομιστή;",
-	"policies.moderation.points.introduction.description": "Ο διακομιστής τηρεί μια πολιτική μετριοπάθειας 3 προειδοποιήσεων, η οποία επιβάλλεται από τα {role_mention}s του διακομιστή.",
+	"policies.moderation.points.introduction.description": "The server abides by a 3-warn moderation policy, enforced by the server's guides.",
 	"policies.moderation.points.breach.title": "Πού εφαρμόζονται οι κανόνες;",
 	"policies.moderation.points.breach.description": "Οι κανόνες του διακομιστή ισχύουν για το σύνολο του διακομιστή και η παραβίασή τους θα έχει ως αποτέλεσμα την έκδοση προειδοποίησης.",
 	"policies.moderation.points.warnings.title": "Τι συμβαίνει αν με προειδοποιήσουν μερικές φορές;",
