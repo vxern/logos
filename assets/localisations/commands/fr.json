@@ -170,7 +170,7 @@
 	"purge.strings.sureToPurge.title": "Êtes-vous sûr de vouloir purger ?",
 	"purge.strings.sureToPurge.description": "En purgeant, vous choisissez à supprimer irrévocablement **{number | pluralise, one:\"message\", two:\"messages\"}** de {channel_mention}.",
 	"purge.strings.continue.title": "Continuer ?",
-	"purge.strings.continue.description": "En purgeant, vous choisissez à supprimer irrévocablement **{number | pluralise, one:\"message\", two:\"messages\"}** de {channel_mention}, qui n'est qu'une fraction des messages **({full_number})** trouvés.",
+	"purge.strings.continue.description": "En purgeant, vous choisissez à supprimer irrévocablement **{number | pluralise, one:\"message\", two:\"messages\"}** de {channel_mention}, qui n'est qu'une fraction des messages trouvés **({full_number})**.",
 	"purge.strings.purging.title": "Purge en cours...",
 	"purge.strings.purging.description.purging": "{number | pluralise, one:\"message est en train d'être supprimé\", two:\"messages sont en train d'être supprimés\"} de {channel_mention}.",
 	"purge.strings.purging.description.mayTakeTime": "Cela peut prendre un peu de temps.",
