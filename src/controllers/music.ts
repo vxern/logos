@@ -416,7 +416,7 @@ async function loadSong(
 	};
 
 	const onTrackEnd = () => {
-		controller.player.off('trackException', (track, error) => onTrackException(track, error));
+		controller.player.off('trackException', onTrackException);
 
 		if (controller.flags.isDestroyed) {
 			setDisconnectTimeout(client, guildId);
@@ -431,7 +431,8 @@ async function loadSong(
 		advanceQueueAndPlay([client, bot], guildId, controller);
 	};
 
-	controller.player.once('trackException', (track, error) => onTrackException(track, error));
+  
+	controller.player.once('trackException', onTrackException);
 	controller.player.once('trackEnd', onTrackEnd);
 
 	controller.player.play(track.track);
