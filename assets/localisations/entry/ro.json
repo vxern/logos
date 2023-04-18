@@ -1,6 +1,6 @@
 {
 	"entry.welcome.title": "Bine ai venit în **{server_name}**",
-	"entry.welcome.description.toEnter": "Pentru a te alătura serverului și să devii un membru oficial, citește informațiile în canalul {information_channel_mention} ca să devii familiarizat cu regulile serverului. După ce ai citit, apasă butonul de mai jos.",
+	"entry.welcome.description.toEnter": "Pentru a te alătura serverului și să devii un membru oficial, citește informațiile din canalul {information_channel_mention} ca să devii familiarizat cu regulile serverului. După ce ai citit, apasă butonul de mai jos.",
 	"entry.welcome.description.acceptedRules": "Am citit regulile și sunt de acord să le respect",
 	"entry.proficiency.title": "Competență Lingvistică",
 	"entry.proficiency.description.chooseProficiency": "Alege rolul care reprezintă cel mai bine competența în limba {language}.",
