@@ -1,10 +1,10 @@
 {
-	"units.second.word.one": "deuxième",
+	"units.second.word.one": "seconde",
 	"units.second.word.two": "secondes",
 	"units.second.word.many": "secondes",
 	"units.second.short": "sec",
 	"units.second.shortest": "s",
-	"units.second": "{nombre | pluriel, un : \"seconde\", deux : \"secondes\"}",
+	"units.second": "{number | pluralise, one:\"seconde\", two:\"secondes\"}",
 	"units.minute.word.one": "minute",
 	"units.minute.word.two": "minutes",
 	"units.minute.word.many": "minutes",
