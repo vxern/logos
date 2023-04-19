@@ -1,6 +1,6 @@
 {
 	"entry.welcome.title": "Bienvenue à **{server_name}**",
-	"entry.welcome.description.toEnter": "Pour entrer dans le serveur et devenir son membre officiel, lisez les informations dans le canal {information_channel_mention} pour vous familiariser avec les directives du serveur, puis appuyez sur le bouton ci-dessous.",
+	"entry.welcome.description.toEnter": "Pour entrer dans le serveur et devenir son membre officiel, lisez les informations dans le salon {information_channel_mention} pour vous familiariser avec les directives du serveur, puis appuyez sur le bouton ci-dessous.",
 	"entry.welcome.description.acceptedRules": "J'ai lu les règles et je m'engage à les respecter",
 	"entry.proficiency.title": "Compétences linguistiques",
 	"entry.proficiency.description.chooseProficiency": "Sélectionnez le rôle qui décrit le mieux vos compétences linguistiques {language}.",
@@ -22,7 +22,7 @@
 	"entry.verification.answers.submitted.title": "Réponses soumises",
 	"entry.verification.answers.submitted.description.submitted": "Vos réponses aux questions de vérification ont été soumises.",
 	"entry.verification.answers.submitted.description.willBeReviewed": "Votre demande de rejoindre le serveur sera examinée par l'équipe du serveur, et vous serez informé par DMs lorsque votre demande d'entrée sera acceptée.",
-	"entry.verification.answers.failed.title": "Échec de soumission de réponses",
+	"entry.verification.answers.failed.title": "Échec de l'envoi des réponses",
 	"entry.verification.answers.failed.description": "Pour des raisons inconnues, l'envoi de vos réponses aux questions de vérification a échoué.",
 	"entry.verification.vote.accept": "Accepter",
 	"entry.verification.vote.acceptMultiple": "Accepter (besoin de {number | pluralise, one:\"vote\", two:\"votes\"})",
