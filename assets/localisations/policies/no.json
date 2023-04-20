@@ -1,7 +1,7 @@
 {
 	"policies.moderation.title": "Moderasjonspolitikk",
 	"policies.moderation.points.introduction.title": "Hvordan skal moderatorer moderere serveren?",
-	"policies.moderation.points.introduction.description": "The server abides by a 3-warn moderation policy, enforced by the server's {role_mention}s.",
+	"policies.moderation.points.introduction.description": "The server abides by a 3-warn moderation policy, enforced by the server's guides.",
 	"policies.moderation.points.breach.title": "Where do the rules apply?",
 	"policies.moderation.points.breach.description": "The server rules apply to the entirety of the server, and a breach thereof will result in a warning being issued.",
 	"policies.moderation.points.warnings.title": "What happens if I get warned a few times?",
