@@ -9,10 +9,10 @@
 	"suggestion.suggestion": "Suggestion",
 	"submittedBy": "Soumis par",
 	"submittedAt": "Soumis à",
-	"markResolved": "Mark issue as resolved",
-	"markUnresolved": "Mark issue as unresolved",
-	"alreadyMarkedResolved.title": "Already marked resolved",
-	"alreadyMarkedResolved.description": "This issue has already been marked resolved.",
-	"alreadyMarkedUnresolved.title": "Already marked unresolved",
-	"alreadyMarkedUnresolved.description": "This issue has already been marked unresolved."
+	"markResolved": "Marquer le problème comme résolu",
+	"markUnresolved": "Marquer le problème comme non résolu",
+	"alreadyMarkedResolved.title": "Déjà marqué comme résolu",
+	"alreadyMarkedResolved.description": "Ce problème a déjà été marqué comme résolu.",
+	"alreadyMarkedUnresolved.title": "Déjà marqué comme non résolu",
+	"alreadyMarkedUnresolved.description": "Ce problème a déjà été marqué comme non résolu."
 }
