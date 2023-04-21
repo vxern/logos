@@ -178,7 +178,7 @@
 	"purge.strings.purged.title": "Succès de purge",
 	"purge.strings.purged.description": "{number | pluralise, one:\"message a été supprimé\", two:\"messages ont été supprimés\"} de {channel_mention}.",
 	"purge.strings.rangeTooBig.title": "Gamme trop grande",
-	"purge.strings.rangeTooBig.description.rangeTooBig": "En indexant la plage de messages sélectionnés, le bot a trouvé davantage de **{number | pluralise, one:\"message\", two:\"messages\"**, qui est trop grand d'une plage.",
+	"purge.strings.rangeTooBig.description.rangeTooBig": "En indexant la plage de messages sélectionnés, le bot a trouvé davantage de **{number | pluralise, one:\"message\", two:\"messages\"}**, qui est trop grand d'une plage.",
 	"purge.strings.rangeTooBig.description.trySmaller": "Essayez de sélectionner une plage de messages plus petite à purger.",
 	"purge.strings.start": "Message de début",
 	"purge.strings.end": "Message de fin",
