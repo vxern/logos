@@ -206,7 +206,7 @@ const categories: RoleCategory[] = [
 					{ id: 'roles.regions.languages.armenian.roles.shirak' },
 					{ id: 'roles.regions.languages.armenian.roles.syunik' },
 					{ id: 'roles.regions.languages.armenian.roles.tavush' },
-					{ id: 'roles.regions.languages.armenian.roles.vayotsDzor' },
+					{ id: 'roles.regions.languages.armenian.roles.vayotsdzor' },
 					{ id: 'roles.regions.languages.armenian.roles.yerevan' },
 				],
 				'Romanian': [
