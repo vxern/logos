@@ -1,8 +1,8 @@
 {
 	"verification.title": "Verification Questions",
-	"verification.fields.reason": "What is your reason for learning {language}?",
+	"verification.fields.reason": "Какова ваша причина изучать {language}?",
 	"verification.fields.aim": "How will you benefit from becoming a member?",
-	"verification.fields.whereFound": "Where did you find out about the server?",
+	"verification.fields.whereFound": "Откуда вы узнали о сервере?",
 	"report.title": "User report",
 	"report.fields.reason": "What is the reason for the report?",
 	"report.fields.users": "Users to report",
@@ -10,7 +10,7 @@
 	"suggestion.title": "Suggestion",
 	"suggestion.fields.suggestion": "What is your suggestion?",
 	"prompts.continue": "Continue",
-	"prompts.cancel": "Cancel",
+	"prompts.cancel": "Отмена",
 	"prompts.leave": "Yes, I want to leave the composer",
 	"prompts.stay": "No, take me back to the composer"
 }
