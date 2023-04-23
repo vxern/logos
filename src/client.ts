@@ -894,8 +894,6 @@ function createLocalisations(localisations: Map<string, Map<Language, string>>):
 	for (const [key, languages] of localisations.entries()) {
 		const functions = new Map<Language, (args: Record<string, unknown>) => string>();
 
-		console.debug(`Processing ${key}...`);
-
 		for (const [language, string] of languages.entries()) {
 			const compile = localisedCompilers.get(language)!;
 			functions.set(language, compile(string));
