@@ -57,7 +57,8 @@ async function handleSetTimeout([client, bot]: [Client, Bot], interaction: Inter
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (guild === undefined) return;
 
-	await editMember(bot, interaction.guildId!, member.id, { communicationDisabledUntil: until });
+	await editMember(bot, interaction.guildId!, member.id, { communicationDisabledUntil: until })
+		.catch(() => client.log.warn(`Failed to time member with ID ${member.id} out.`));
 
 	logEvent([client, bot], guild, 'memberTimeoutAdd', [member, until, reason!, interaction.user]);
 

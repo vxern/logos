@@ -49,12 +49,12 @@ function onVoiceStateUpdate([client, bot]: [Client, Bot], voiceState: VoiceState
 	const previousState = previousVoiceStates.get(`${voiceState.userId}${voiceState.guildId}`);
 
 	if (previousState?.channelId === undefined) {
-		onConnect(bot, guild, voiceChannelStatesTuples, voiceState);
+		onConnect([client, bot], guild, voiceChannelStatesTuples, voiceState);
 	} else if (previousState.channelId !== undefined && voiceState.channelId === undefined) {
-		onDisconnect(bot, voiceChannelStatesTuples, previousState);
+		onDisconnect([client, bot], voiceChannelStatesTuples, previousState);
 	} else {
-		onDisconnect(bot, voiceChannelStatesTuples, previousState);
-		onConnect(bot, guild, voiceChannelStatesTuples, voiceState);
+		onDisconnect([client, bot], voiceChannelStatesTuples, previousState);
+		onConnect([client, bot], guild, voiceChannelStatesTuples, voiceState);
 	}
 
 	previousVoiceStates.set(`${voiceState.userId}${voiceState.guildId}`, voiceState);
@@ -63,7 +63,7 @@ function onVoiceStateUpdate([client, bot]: [Client, Bot], voiceState: VoiceState
 type VoiceChannelStatesTuple = [channel: Channel, voiceStates: VoiceState[]];
 
 function onConnect(
-	bot: Bot,
+	[client, bot]: [Client, Bot],
 	guild: Guild,
 	voiceChannelStatesTuples: VoiceChannelStatesTuple[],
 	currentState: VoiceState,
@@ -90,10 +90,15 @@ function onConnect(
 		type: ChannelTypes.GuildVoice,
 		parentId: anchor.parentId,
 		position: voiceChannelStatesTuples.at(voiceChannelStatesTuples.length - 1)![0].position,
-	});
+	})
+		.catch(() => client.log.warn(`Failed to create voice channel on guild with ID ${guild.id}.`));
 }
 
-function onDisconnect(bot: Bot, voiceChannelStatesTuples: VoiceChannelStatesTuple[], previousState: VoiceState): void {
+function onDisconnect(
+	[client, bot]: [Client, Bot],
+	voiceChannelStatesTuples: VoiceChannelStatesTuple[],
+	previousState: VoiceState,
+): void {
 	const voiceChannelStatesTuple = voiceChannelStatesTuples.find(
 		([channel, _]) => channel.id === previousState.channelId!,
 	);
@@ -107,7 +112,9 @@ function onDisconnect(bot: Bot, voiceChannelStatesTuples: VoiceChannelStatesTupl
 	// If there is up to one free channel already, do not process.
 	if (freeChannelsCount <= 1) return;
 
-	return void deleteChannel(bot, previousState.channelId!);
+	return void deleteChannel(bot, previousState.channelId!).catch(() =>
+		client.log.warn(`Failed to delete voice channel on guild with ID ${previousState.guildId}.`)
+	);
 }
 
 function getVoiceChannelStatesTuples(guild: Guild): VoiceChannelStatesTuple[] {

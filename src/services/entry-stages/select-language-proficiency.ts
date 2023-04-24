@@ -84,7 +84,11 @@ async function handleSelectLanguageProficiency(
 		}
 	}
 
-	return void addRole(bot, guild.id, interaction.user.id, requestedRole.id, 'User-requested role addition.');
+	return void addRole(bot, guild.id, interaction.user.id, requestedRole.id, 'User-requested role addition.').catch(() =>
+		client.log.warn(
+			`Failed to add role with ID ${requestedRole.id} to member with ID ${interaction.user.id} in guild with ID ${guild.id}.`,
+		)
+	);
 }
 
 export { handleSelectLanguageProficiency };

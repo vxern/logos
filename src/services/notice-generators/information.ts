@@ -12,7 +12,7 @@ const lastUpdatedAt = new Date(2023, 2, 19);
 async function generateInformationNotice([client, bot]: [Client, Bot], guild: Guild): Promise<CreateMessage> {
 	const ruleSection = getRulesSection(client);
 
-	const invite = await getOrCreateInvite(bot, guild);
+	const invite = await getOrCreateInvite([client, bot], guild);
 	if (invite === undefined) {
 		return { embeds: [ruleSection] };
 	}
@@ -60,8 +60,17 @@ function getInviteSection(client: Client, invite: InviteMetadata | BaseInvite): 
 	};
 }
 
-async function getOrCreateInvite(bot: Bot, guild: Guild): Promise<InviteMetadata | BaseInvite | undefined> {
-	const invites = (await getInvites(bot, guild.id)).array();
+async function getOrCreateInvite(
+	[client, bot]: [Client, Bot],
+	guild: Guild,
+): Promise<InviteMetadata | BaseInvite | undefined> {
+	const invites = await getInvites(bot, guild.id).then((invites) => invites.array())
+		.catch(() => {
+			client.log.warn(`Failed to get invites on ${guild.name}.`);
+			return undefined;
+		});
+	if (invites === undefined) return undefined;
+
 	const viableInvites = invites.filter((invite) => invite.maxAge === 0);
 	const mostViableInvite = viableInvites.find((invite) => invite.maxAge === 0 && invite.inviter?.id === guild.ownerId);
 	if (mostViableInvite !== undefined) return mostViableInvite;
@@ -74,6 +83,9 @@ async function getOrCreateInvite(bot: Bot, guild: Guild): Promise<InviteMetadata
 		maxUses: 0,
 		temporary: false,
 		unique: false,
+	}).catch(() => {
+		client.log.warn(`Failed to create invite on ${guild.name}.`);
+		return undefined;
 	});
 
 	return newInvite;

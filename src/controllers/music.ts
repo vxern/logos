@@ -291,7 +291,8 @@ function receiveNewListing(
 	};
 
 	if (isOccupied(controller.player)) {
-		return void sendMessage(bot, controller.feedbackChannelId!, { embeds: [embed] });
+		return void sendMessage(bot, controller.feedbackChannelId!, { embeds: [embed] })
+			.catch(() => client.log.warn('Failed to send music feedback message.'));
 	}
 
 	return advanceQueueAndPlay([client, bot], guild.id, controller);
@@ -431,7 +432,6 @@ async function loadSong(
 		advanceQueueAndPlay([client, bot], guildId, controller);
 	};
 
-  
 	controller.player.once('trackException', onTrackException);
 	controller.player.once('trackEnd', onTrackEnd);
 

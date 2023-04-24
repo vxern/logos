@@ -61,7 +61,8 @@ async function logToChannel<K extends keyof Events>(
 			description: message,
 			color: entry.color,
 		}],
-	});
+	})
+		.catch(() => client.log.warn(`Failed to log '${event}' event on guild with ID ${channel.guildId}.`));
 }
 
 export { logEvent, setupLogging };

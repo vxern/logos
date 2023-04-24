@@ -559,6 +559,7 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 				title: strings.purged.title,
 				description: strings.purged.description({ 'number': deletedCount, 'channel_mention': channelMention }),
 				color: constants.colors.lightGreen,
+				image: { url: constants.gifs.done },
 			}],
 		});
 	}

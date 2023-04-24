@@ -1,18 +1,9 @@
-import {
-	ApplicationCommandFlags,
-	Bot,
-	Interaction,
-	InteractionResponseTypes,
-	InteractionTypes,
-	MessageComponentTypes,
-	SelectOption,
-	sendInteractionResponse,
-} from 'discordeno';
+import { Bot, Interaction, InteractionTypes, MessageComponentTypes, SelectOption } from 'discordeno';
 import { Channel, Playlist, Video, YouTube } from 'youtube';
 import { ListingResolver } from 'logos/src/commands/music/data/sources/sources.ts';
 import { SongListing, SongListingContentTypes } from 'logos/src/commands/music/data/types.ts';
 import { Client, localise } from 'logos/src/client.ts';
-import { createInteractionCollector, deleteReply, postponeReply } from 'logos/src/interactions.ts';
+import { createInteractionCollector, deleteReply, postponeReply, reply } from 'logos/src/interactions.ts';
 import constants from 'logos/constants.ts';
 import { trim } from 'logos/formatting.ts';
 
@@ -80,34 +71,30 @@ async function search(
 			description: localise(client, 'music.options.play.strings.selectSong.description', interaction.locale)(),
 		};
 
-		sendInteractionResponse(bot, interaction.id, interaction.token, {
-			type: InteractionResponseTypes.ChannelMessageWithSource,
-			data: {
-				flags: ApplicationCommandFlags.Ephemeral,
-				embeds: [{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colors.blue,
-				}],
+		return void reply([client, bot], interaction, {
+			embeds: [{
+				title: strings.title,
+				description: strings.description,
+				color: constants.colors.blue,
+			}],
+			components: [{
+				type: MessageComponentTypes.ActionRow,
 				components: [{
-					type: MessageComponentTypes.ActionRow,
-					components: [{
-						type: MessageComponentTypes.SelectMenu,
-						customId: customId,
-						minValues: 1,
-						maxValues: 1,
-						options: results.map<SelectOption>(
-							(result, index) => ({
-								emoji: {
-									name: isVideo(result) ? constants.symbols.music.song : constants.symbols.music.collection,
-								},
-								label: trim(result.title!, 100),
-								value: index.toString(),
-							}),
-						),
-					}],
+					type: MessageComponentTypes.SelectMenu,
+					customId: customId,
+					minValues: 1,
+					maxValues: 1,
+					options: results.map<SelectOption>(
+						(result, index) => ({
+							emoji: {
+								name: isVideo(result) ? constants.symbols.music.song : constants.symbols.music.collection,
+							},
+							label: trim(result.title!, 100),
+							value: index.toString(),
+						}),
+					),
 				}],
-			},
+			}],
 		});
 	});
 }

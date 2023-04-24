@@ -123,7 +123,7 @@ function registerPastReports([client, bot]: [Client, Bot]): void {
 
 		reportChannelIdByGuildId.set(guild.id, reportChannelId);
 
-		const reportPromptsAll = await getAllMessages(bot, reportChannelId);
+		const reportPromptsAll = await getAllMessages([client, bot], reportChannelId) ?? [];
 		const reportPrompts = getValidPrompts(bot, reportPromptsAll);
 		const reportPromptsByAuthorId = new Map<bigint, Map<string, Message>>();
 

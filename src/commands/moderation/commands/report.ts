@@ -158,13 +158,18 @@ async function handleMakeReport([client, bot]: [Client, Bot], interaction: Inter
 				bot,
 				reportChannelId,
 				getReportPrompt([client, bot], guild, interaction.user, recipientAndWarningsTuples, report),
-			).then((message) => message.id);
+			).then((message) => message.id).catch(() => {
+        console.warn('Failed to post report.');
+        return undefined;
+      });
 
 			const reportReferenceId = stringifyValue(report.ref);
 
-			reportByMessageId.set(messageId, report);
-			authorIdByMessageId.set(messageId, interaction.user.id);
-			messageIdByReportReferenceId.set(reportReferenceId, messageId);
+      if (messageId !== undefined) {
+        reportByMessageId.set(messageId, report);
+        authorIdByMessageId.set(messageId, interaction.user.id);
+        messageIdByReportReferenceId.set(reportReferenceId, messageId);
+      }
 
 			registerReportHandler(
 				client,

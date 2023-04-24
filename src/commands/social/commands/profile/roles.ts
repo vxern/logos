@@ -176,7 +176,12 @@ function createRoleSelectionMenu(
 						return;
 					}
 
-					removeRole(bot, guild.id, member.id, role.id, 'User-requested role removal.');
+					removeRole(bot, guild.id, member.id, role.id, 'User-requested role removal.')
+						.catch(() =>
+							client.log.warn(
+								`Failed to remove role with ID ${role.id} from member with ID ${member.id} in guild with ID ${guild.id}.`,
+							)
+						);
 					displayData.roleData.memberRoleIds.splice(
 						displayData.roleData.memberRoleIds.findIndex((roleId) => roleId === role.id)!,
 						1,
@@ -219,11 +224,22 @@ function createRoleSelectionMenu(
 						return;
 					}
 
-					await addRole(bot, guild.id, member.id, role.id, 'User-requested role addition.');
+					await addRole(bot, guild.id, member.id, role.id, 'User-requested role addition.')
+						.catch(() =>
+							client.log.warn(
+								`Failed to add role with ID ${role.id} to member with ID ${member.id} in guild with ID ${guild.id}.`,
+							)
+						);
 
 					if (viewData.category.maximum === 1) {
 						for (const memberRoleId of viewData.memberRolesIncludedInMenu) {
-							removeRole(bot, guild.id, member.id, memberRoleId);
+							removeRole(bot, guild.id, member.id, memberRoleId)
+								.catch(() =>
+									client.log.warn(
+										`Failed to remove role with ID ${memberRoleId} from member with ID ${member.id} in guild with ID ${guild.id}.`,
+									)
+								);
+
 							displayData.roleData.memberRoleIds.splice(
 								displayData.roleData.memberRoleIds.findIndex((roleId) => roleId === memberRoleId)!,
 								1,

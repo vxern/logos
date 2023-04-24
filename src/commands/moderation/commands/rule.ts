@@ -60,6 +60,7 @@ function handleCiteRule([client, bot]: [Client, Bot], interaction: Interaction):
 			title: getRuleTitleFormatted(client, ruleId, ruleIndex, 'display', locale),
 			description: strings.content,
 			footer: { text: `${strings.tldr}: ${strings.summary}` },
+			...show ? {} : { image: { url: constants.gifs.chaosWithoutRules } },
 			color: constants.colors.blue,
 		}],
 	}, { visible: show });

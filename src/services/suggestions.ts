@@ -124,7 +124,7 @@ function registerPastSuggestions([client, bot]: [Client, Bot]): void {
 
 		suggestionChannelIdByGuildId.set(guild.id, suggestionChannelId);
 
-		const suggestionPromptsAll = await getAllMessages(bot, suggestionChannelId);
+		const suggestionPromptsAll = await getAllMessages([client, bot], suggestionChannelId) ?? [];
 		const suggestionPrompts = getValidPrompts(bot, suggestionPromptsAll);
 		const suggestionPromptsByAuthorId = new Map<bigint, Map<string, Message>>();
 

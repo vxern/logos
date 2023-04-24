@@ -45,7 +45,8 @@ async function handleClearTimeout([client, bot]: [Client, Bot], interaction: Int
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (guild === undefined) return;
 
-	await editMember(bot, interaction.guildId!, member.id, { communicationDisabledUntil: null });
+	await editMember(bot, interaction.guildId!, member.id, { communicationDisabledUntil: null })
+		.catch(() => client.log.warn(`Failed to remove timeout of member with ID ${member.id}`));
 
 	logEvent([client, bot], guild, 'memberTimeoutRemove', [member, interaction.user]);
 

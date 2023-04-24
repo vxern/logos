@@ -7,7 +7,7 @@ import { defaultLocale } from 'logos/types.ts';
 import configuration from 'logos/configuration.ts';
 import constants from 'logos/constants.ts';
 
-const lastUpdatedAt = new Date(2023, 2, 19);
+const lastUpdatedAt = new Date(2023, 3, 24);
 
 function generateWelcomeNotice([client, _]: [Client, Bot], guild: Guild): CreateMessage {
 	const updateString = getLastUpdateString(client, lastUpdatedAt, defaultLocale);
@@ -26,6 +26,7 @@ function generateWelcomeNotice([client, _]: [Client, Bot], guild: Guild): Create
 		embeds: [{
 			title: strings.title,
 			description: `${updateString}\n\n${strings.description.toEnter}`,
+			image: { url: constants.gifs.followRules },
 			color: constants.colors.orange,
 		}],
 		components: [{

@@ -31,7 +31,7 @@ const lastUpdates: Record<NoticeTypes, Date> = {
 
 const service: ServiceStarter = ([client, bot]: [Client, Bot]) => {
 	registerPastNotices([client, bot]);
-	ensureNoticePersistence(bot);
+	ensureNoticePersistence([client, bot]);
 };
 
 const noticeIds: bigint[] = [];
@@ -52,7 +52,7 @@ function registerPastNotices([client, bot]: [Client, Bot]): void {
 	});
 }
 
-function ensureNoticePersistence(bot: Bot): void {
+function ensureNoticePersistence([client, bot]: [Client, Bot]): void {
 	// Anti-tampering feature; detects notices being deleted.
 	extendEventHandler(bot, 'messageDelete', { prepend: true }, (_, { id, channelId }) => {
 		// If the deleted message was not a notice.
@@ -60,7 +60,7 @@ function ensureNoticePersistence(bot: Bot): void {
 			return;
 		}
 
-		postAndRegisterNotice(bot, channelId);
+		postAndRegisterNotice([client, bot], channelId);
 	});
 
 	// Anti-tampering feature; detects embeds being deleted from notices.
@@ -74,7 +74,12 @@ function ensureNoticePersistence(bot: Bot): void {
 		if (message.embeds.length === 1) return;
 
 		// Delete the message and allow the bot to handle the deletion.
-		deleteMessage(bot, message.channelId, message.id);
+		deleteMessage(bot, message.channelId, message.id)
+			.catch(() =>
+				client.log.warn(
+					`Failed to delete notice with ID ${message.id} from channel with ID ${message.channelId} on guild with ID ${message.guildId}.`,
+				)
+			);
 	});
 }
 
@@ -89,14 +94,14 @@ async function registerPastNotice([client, bot]: [Client, Bot], guild: Guild, ty
 
 	noticeChannelIdsByGuildId[type].set(guild.id, channelId);
 
-	const noticesAll = await getAllMessages(bot, channelId);
-	const notices = getValidNotices(bot, noticesAll);
+	const noticesAll = await getAllMessages([client, bot], channelId) ?? [];
+	const notices = getValidNotices([client, bot], noticesAll);
 
 	if (notices.length === 0) {
 		client.log.info(`Found no notice in ${type} channel on ${guild.name}. Creating...`);
 
 		const noticeContent = await noticeGenerators[type]([client, bot], guild);
-		return void postAndRegisterNotice(bot, channelId, noticeContent);
+		return void postAndRegisterNotice([client, bot], channelId, noticeContent);
 	}
 
 	const latestNotice = notices.splice(0, 1).at(0)!;
@@ -105,10 +110,15 @@ async function registerPastNotice([client, bot]: [Client, Bot], guild: Guild, ty
 	if (timestamp !== lastUpdates[type].getTime() / 1000) {
 		client.log.info(`Found outdated notice in ${type} channel on ${guild.name}. Recreating...`);
 
-		deleteMessage(bot, latestNotice.channelId, latestNotice.id);
+		deleteMessage(bot, latestNotice.channelId, latestNotice.id)
+			.catch(() =>
+				client.log.warn(
+					`Failed to delete notice with ID ${latestNotice.id} from channel with ID ${latestNotice.channelId} on guild with ID ${latestNotice.guildId}.`,
+				)
+			);
 
 		const noticeContent = await noticeGenerators[type]([client, bot], guild);
-		postAndRegisterNotice(bot, channelId, noticeContent);
+		postAndRegisterNotice([client, bot], channelId, noticeContent);
 	} else {
 		noticeIds.push(latestNotice.id);
 		noticeByChannelId.set(latestNotice.channelId, latestNotice);
@@ -119,19 +129,31 @@ async function registerPastNotice([client, bot]: [Client, Bot], guild: Guild, ty
 			`Detected ${notices.length} surplus notice(s) in ${type} channel on ${guild.name}. Deleting older notices...`,
 		);
 		for (const notice of notices) {
-			deleteMessage(bot, notice.channelId, notice.id);
+			deleteMessage(bot, notice.channelId, notice.id)
+				.catch(() =>
+					client.log.warn(
+						`Failed to delete notice with ID ${notice.id} from channel with ID ${notice.channelId} on guild with ID ${notice.guildId}.`,
+					)
+				);
 		}
 	}
 }
 
-async function postAndRegisterNotice(bot: Bot, channelId: bigint, noticeContent?: CreateMessage): Promise<Message> {
+async function postAndRegisterNotice(
+	[client, bot]: [Client, Bot],
+	channelId: bigint,
+	noticeContent?: CreateMessage,
+): Promise<void> {
 	const { embeds, components } = noticeContent ?? noticeByChannelId.get(channelId)!;
-	const notice = await sendMessage(bot, channelId, { embeds, components: components as MessageComponents });
+	const notice = await sendMessage(bot, channelId, { embeds, components: components as MessageComponents })
+		.catch(() => {
+			client.log.warn(`Failed to post notice to channel with ID ${channelId}.`);
+			return undefined;
+		});
+	if (notice === undefined) return undefined;
 
 	noticeIds.push(notice.id);
 	noticeByChannelId.set(channelId, notice);
-
-	return notice;
 }
 
 const timestampPattern = /.+?<t:(\d+):[tTdDfFR]>/;
@@ -146,11 +168,16 @@ function extractTimestamp(notice: Message | CreateMessage): number | undefined {
 	return Number(timestamp!);
 }
 
-function getValidNotices(bot: Bot, notices: Message[]): Message[] {
+function getValidNotices([client, bot]: [Client, Bot], notices: Message[]): Message[] {
 	return notices.filter(
 		(notice) => {
 			if (extractTimestamp(notice) === undefined) {
-				deleteMessage(bot, notice.channelId, notice.id);
+				deleteMessage(bot, notice.channelId, notice.id)
+					.catch(() =>
+						client.log.warn(
+							`Failed to delete notice with ID ${notice.id} from channel with ID ${notice.channelId} on guild with ID ${notice.guildId}.`,
+						)
+					);
 				return false;
 			}
 
