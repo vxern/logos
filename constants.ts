@@ -365,6 +365,12 @@ const symbols = {
 	},
 };
 
+const gifs = {
+	done: 'https://media.tenor.com/3wJ_QISYvxEAAAAC/done-all.gif',
+	followRules: 'https://media.tenor.com/mPxD454ittYAAAAC/rules.gif',
+	chaosWithoutRules: 'https://media.tenor.com/_sFydMmz7YgAAAAd/loop-rules-rule.gif',
+};
+
 const endpoints = {
 	deepl: {
 		languages: 'https://api-free.deepl.com/v2/languages',
@@ -379,6 +385,7 @@ export default {
 	images,
 	colors,
 	symbols,
+	gifs,
 	staticComponentIds,
 	interactionTokenExpiryInterval,
 };
