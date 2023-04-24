@@ -1,5 +1,6 @@
 import { Bot, Channel, ChannelTypes, Embed, getGuildIconURL, getMessages, Guild, Message, User } from 'discordeno';
 import { Document } from 'logos/src/database/document.ts';
+import { Client } from 'logos/src/client.ts';
 
 /**
  * Parses a 6-digit hex value prefixed with a hashtag to a number.
@@ -122,18 +123,7 @@ function addParametersToURL(
 	return `${url}?${query}`;
 }
 
-/**
- * Taking a channel ID, sequentially fetches all messages in a channel.
- *
- * @privateRemarks
- *
- * Use this function solely in channels where the number of messages is expected to be relatively low.
- *
- * @param bot - The bot instance to use to make the requests.
- * @param channelId - The ID of the channel to get the messages of.
- * @returns An array of messages.
- */
-async function getAllMessages(bot: Bot, channelId: bigint): Promise<Message[]> {
+async function getAllMessages([client, bot]: [Client, Bot], channelId: bigint): Promise<Message[] | undefined> {
 	const messages: Message[] = [];
 	let isFinished = false;
 
@@ -141,7 +131,11 @@ async function getAllMessages(bot: Bot, channelId: bigint): Promise<Message[]> {
 		const buffer = await getMessages(bot, channelId, {
 			limit: 100,
 			before: messages.length === 0 ? undefined : messages[messages.length - 1]!.id,
+		}).catch(() => {
+			client.log.warn(`Failed to get all messages from channel with ID ${channelId}.`);
+			return undefined;
 		});
+		if (buffer === undefined) return undefined;
 
 		if (buffer.size < 100) {
 			isFinished = true;

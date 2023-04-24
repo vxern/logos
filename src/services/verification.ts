@@ -131,7 +131,7 @@ function registerPastEntryRequests([client, bot]: [Client, Bot]): void {
 
 		verificationChannelIdByGuildId.set(guild.id, verificationChannelId);
 
-		const verificationPromptsAll = await getAllMessages(bot, verificationChannelId);
+		const verificationPromptsAll = await getAllMessages([client, bot], verificationChannelId) ?? [];
 		const verificationPrompts = getValidPrompts(bot, verificationPromptsAll);
 		const verificationPromptBySubmitterId = new Map(
 			verificationPrompts.map((prompt) => [extractMetadata(prompt)!.submitterId, prompt]),
@@ -782,15 +782,17 @@ async function handleVote(
 
 		client.log.info(`User with ID ${submitterDocument.data.account.id} has been accepted onto guild ${guild.name}.`);
 
-		try {
-			addRole(
-				bot,
-				guild.id,
-				submitterId,
-				BigInt(entryRequest.data.requestedRole),
-				'User-requested role addition.',
-			);
-		} catch {}
+		addRole(
+			bot,
+			guild.id,
+			submitterId,
+			BigInt(entryRequest.data.requestedRole),
+			'User-requested role addition.',
+		).catch(() =>
+			client.log.warn(
+				`Failed to add role with ID ${entryRequest.data.requestedRole} to submitter with ID ${submitterId} in guild with ID ${guild.id}.`,
+			)
+		);
 	} else if (isRejected) {
 		if (updatedSubmitterDocument.data.account.rejectedOn === undefined) {
 			updatedSubmitterDocument.data.account.rejectedOn = [guild.id.toString()];
@@ -804,7 +806,7 @@ async function handleVote(
 			reason: `${
 				requiredRejectionVotes - votesToReject
 			} guide(s) voted against this particular user being granted entry.`,
-		});
+		}).catch(() => client.log.warn(`Failed to ban member with ID ${submitter.id} on guild with ID ${guild.id}.`));
 	}
 
 	await client.database.adapters.users.update(client, updatedSubmitterDocument);

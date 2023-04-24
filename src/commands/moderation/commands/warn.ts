@@ -130,7 +130,7 @@ async function handleWarnUser([client, bot]: [Client, Bot], interaction: Interac
 				description: strings.description,
 				color: constants.colors.red,
 			}],
-		});
+		}).catch(() => client.log.warn('Failed to send message about the warning limit having been surpassed.'));
 	}
 
 	const reachedLimit = relevantWarnings.size === configuration.commands.warn.limitUses;
@@ -151,7 +151,7 @@ async function handleWarnUser([client, bot]: [Client, Bot], interaction: Interac
 				description: strings.description,
 				color: constants.colors.yellow,
 			}],
-		});
+		}).catch(() => client.log.warn('Failed to send message about the warning limit having been reached.'));
 	}
 }
 
