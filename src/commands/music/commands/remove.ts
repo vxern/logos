@@ -184,7 +184,7 @@ function generateEmbed(
 						description: strings.description,
 						color: constants.colors.blue,
 					}],
-				});
+				}, { visible: true });
 			},
 		},
 	);

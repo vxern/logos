@@ -54,7 +54,7 @@ function handleSetVolume([client, bot]: [Client, Bot], interaction: Interaction)
 			description: strings.description,
 			color: constants.colors.blue,
 		}],
-	});
+	}, { visible: true });
 }
 
 export { handleSetVolume };
