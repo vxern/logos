@@ -1,6 +1,7 @@
 import { Bot, Channel, ChannelTypes, Embed, getGuildIconURL, getMessages, Guild, Message, User } from 'discordeno';
 import { Document } from 'logos/src/database/document.ts';
 import { Client } from 'logos/src/client.ts';
+import { mention, MentionTypes } from 'logos/formatting.ts';
 
 /**
  * Parses a 6-digit hex value prefixed with a hashtag to a number.
@@ -37,6 +38,13 @@ function getTextChannel(guild: Guild, name: string): Channel | undefined {
 	const textChannels = guild.channels.array().filter((channel) => isText(channel));
 
 	return textChannels.find((channel) => channel.name!.toLowerCase().includes(nameAsLowercase));
+}
+
+function getChannelMention(guild: Guild, name: string): string {
+	const channel = getTextChannel(guild, name);
+	if (channel === undefined) return name;
+
+	return mention(channel.id, MentionTypes.Channel);
 }
 
 /**
@@ -171,6 +179,7 @@ export {
 	fromHex,
 	getAllMessages,
 	getAuthor,
+	getChannelMention,
 	getGuildIconURLFormatted,
 	getTextChannel,
 	isText,

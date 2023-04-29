@@ -2,7 +2,7 @@ import { addRole, Bot, ButtonStyles, Interaction, MessageComponentTypes } from '
 import { getProficiencyCategory } from 'logos/src/commands/social/module.ts';
 import { EntryStepButtonID } from 'logos/src/services/entry.ts';
 import { Client, localise } from 'logos/src/client.ts';
-import { acknowledge, encodeId, reply } from 'logos/src/interactions.ts';
+import { encodeId, reply } from 'logos/src/interactions.ts';
 import configuration from 'logos/configuration.ts';
 import constants from 'logos/constants.ts';
 import { defaultLocale } from 'logos/types.ts';
@@ -38,9 +38,9 @@ async function handleSelectLanguageProficiency(
 			interaction.user.id,
 		);
 
-		const isVerified = !userDocument?.data.account.authorisedOn?.includes(interaction.guildId!.toString());
+		const isVerified = userDocument?.data.account.authorisedOn?.includes(interaction.guildId!.toString());
 
-		if (isVerified) {
+		if (!isVerified) {
 			const strings = {
 				title: localise(client, 'entry.verification.getVerified.title', interaction.locale)(),
 				description: {
@@ -79,10 +79,28 @@ async function handleSelectLanguageProficiency(
 					}],
 				}],
 			});
-		} else {
-			acknowledge([client, bot], interaction);
 		}
 	}
+
+	const strings = {
+		title: localise(client, 'entry.proficiency.receivedAccess.title', interaction.locale)(),
+		description: {
+			nowMember: localise(client, 'entry.proficiency.receivedAccess.description.nowMember', interaction.locale)({
+				'server_name': guild.name,
+			}),
+			toStart: localise(client, 'entry.proficiency.receivedAccess.description.toStart', interaction.locale)(),
+		},
+	};
+
+	await reply([client, bot], interaction, {
+		embeds: [{
+			title: strings.title,
+			description:
+				`${constants.symbols.responses.celebration} ${strings.description.nowMember}\n\n${strings.description.toStart}`,
+			image: { url: constants.gifs.welcome },
+			color: constants.colors.lightGreen,
+		}],
+	});
 
 	return void addRole(bot, guild.id, interaction.user.id, requestedRole.id, 'User-requested role addition.').catch(() =>
 		client.log.warn(

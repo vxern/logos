@@ -1,8 +1,7 @@
 import { Bot, ButtonStyles, CreateMessage, Guild, MessageComponentTypes } from 'discordeno';
 import { getLastUpdateString } from 'logos/src/services/notices.ts';
 import { Client, localise } from 'logos/src/client.ts';
-import { getTextChannel } from 'logos/src/utils.ts';
-import { mention, MentionTypes } from 'logos/formatting.ts';
+import { getChannelMention } from 'logos/src/utils.ts';
 import { defaultLocale } from 'logos/types.ts';
 import configuration from 'logos/configuration.ts';
 import constants from 'logos/constants.ts';
@@ -40,13 +39,6 @@ function generateWelcomeNotice([client, _]: [Client, Bot], guild: Guild): Create
 			}],
 		}],
 	};
-}
-
-function getChannelMention(guild: Guild, name: string): string {
-	const channel = getTextChannel(guild, name);
-	if (channel === undefined) return name;
-
-	return mention(channel.id, MentionTypes.Channel);
 }
 
 export { generateWelcomeNotice, lastUpdatedAt };
