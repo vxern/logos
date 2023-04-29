@@ -108,11 +108,13 @@ function onDisconnect(
 	// If somebody is still connected to the channel, do not process.
 	if (states.length !== 0) return;
 
-	const freeChannelsCount = voiceChannelStatesTuples.filter(([_, states]) => states.length === 0).length;
+	const freeChannels = voiceChannelStatesTuples.filter(([_, states]) => states.length === 0);
 	// If there is up to one free channel already, do not process.
-	if (freeChannelsCount <= 1) return;
+	if (freeChannels.length <= 1) return;
 
-	return void deleteChannel(bot, previousState.channelId!).catch(() =>
+	const [channelToDelete, __] = freeChannels.at(-1)!;
+
+	return void deleteChannel(bot, channelToDelete.id).catch(() =>
 		client.log.warn(`Failed to delete voice channel on guild with ID ${previousState.guildId}.`)
 	);
 }
