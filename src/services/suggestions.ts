@@ -389,7 +389,7 @@ function getSuggestionPrompt(
 						style: ButtonStyles.Primary,
 						label: strings.markResolved,
 						customId: encodeId<SuggestionPromptButtonID>(
-							constants.staticComponentIds.reports,
+							constants.staticComponentIds.suggestions,
 							[author.id.toString(), guild.id.toString(), suggestionReferenceId, `${true}`],
 						),
 					}
@@ -398,7 +398,7 @@ function getSuggestionPrompt(
 						style: ButtonStyles.Secondary,
 						label: strings.markUnresolved,
 						customId: encodeId<SuggestionPromptButtonID>(
-							constants.staticComponentIds.reports,
+							constants.staticComponentIds.suggestions,
 							[author.id.toString(), guild.id.toString(), suggestionReferenceId, `${false}`],
 						),
 					},
