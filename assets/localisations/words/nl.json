@@ -1,13 +1,13 @@
 {
-	"words.noun": "noun",
-	"words.verb": "verb",
-	"words.adjective": "adjective",
-	"words.adverb": "adverb",
+	"words.noun": "zelfstandig naamwoord",
+	"words.verb": "werkwoord",
+	"words.adjective": "bijvoeglijk naamwoord",
+	"words.adverb": "bijwoord",
 	"words.adposition": "adposition",
 	"words.affix": "affix",
-	"words.pronoun": "pronoun",
-	"words.determiner": "determiner",
-	"words.conjunction": "conjunction",
-	"words.interjection": "interjection",
+	"words.pronoun": "voornaamwoord",
+	"words.determiner": "bepalend voornaamwoord",
+	"words.conjunction": "voegwoord",
+	"words.interjection": "tussenwerpsel",
 	"words.unknown": "part of speech unknown"
 }
