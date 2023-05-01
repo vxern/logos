@@ -237,6 +237,8 @@ function generateButtons(
 			const buttonId = createInteractionCollector([client, bot], {
 				type: InteractionTypes.MessageComponent,
 				onCollect: (_, selection) => {
+					acknowledge([client, bot], selection);
+
 					if (entry.inflectionTable === undefined || selection.data === undefined) {
 						return void displayMenu([client, bot], interaction, data, locale);
 					}
