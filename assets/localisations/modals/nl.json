@@ -9,8 +9,8 @@
 	"report.fields.link": "Link to the message for context",
 	"suggestion.title": "Suggestion",
 	"suggestion.fields.suggestion": "What is your suggestion?",
-	"prompts.continue": "Continue",
-	"prompts.cancel": "Cancel",
+	"prompts.continue": "Doorgaan",
+	"prompts.cancel": "Annuleren",
 	"prompts.leave": "Yes, I want to leave the composer",
 	"prompts.stay": "No, take me back to the composer"
 }
