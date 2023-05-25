@@ -6,11 +6,11 @@ import { list, mention, MentionTypes } from 'logos/formatting.ts';
 
 async function handleDisplayBotInformation([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const botUser = client.cache.users.get(bot.id) ?? await getUser(bot, bot.id).catch(() => {
-    console.warn('Failed to get bot user.');
-    return undefined;
-  });
-  if (botUser === undefined) return;
-  
+		client.log.warn('Failed to get bot user.');
+		return undefined;
+	});
+	if (botUser === undefined) return;
+
 	const strings = {
 		information: {
 			whoAmI: {

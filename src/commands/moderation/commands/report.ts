@@ -159,7 +159,7 @@ async function handleMakeReport([client, bot]: [Client, Bot], interaction: Inter
 				reportChannelId,
 				getReportPrompt([client, bot], guild, interaction.user, recipientAndWarningsTuples, report),
 			).then((message) => message.id).catch(() => {
-        console.warn('Failed to post report.');
+        client.log.warn('Failed to post report.');
         return undefined;
       });
 

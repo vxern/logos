@@ -1,6 +1,7 @@
 import { Bot, Interaction } from 'discordeno';
 import { ListingResolver } from 'logos/src/commands/music/data/sources/sources.ts';
 import { getVoiceState, receiveNewListing, verifyCanRequestPlayback } from 'logos/src/controllers/music.ts';
+import { SongListing } from 'logos/src/commands/music/data/types.ts';
 import { Client, localise } from 'logos/src/client.ts';
 import { parseArguments, reply } from 'logos/src/interactions.ts';
 import constants from 'logos/constants.ts';
@@ -13,6 +14,15 @@ async function handleRequestQueryPlayback(
 	const [{ query }] = parseArguments(interaction.data?.options, {});
 	if (query === undefined) return;
 
+	const listing = await resolveToSongListing([client, bot], interaction, query);
+	return handleRequestPlayback([client, bot], interaction, listing);
+}
+
+async function handleRequestPlayback(
+	[client, bot]: [Client, Bot],
+	interaction: Interaction,
+	listing: SongListing | undefined,
+): Promise<void> {
 	const controller = client.features.music.controllers.get(interaction.guildId!);
 	if (controller === undefined) return;
 
@@ -24,7 +34,6 @@ async function handleRequestQueryPlayback(
 	const canPlay = verifyCanRequestPlayback([client, bot], interaction, controller, voiceState);
 	if (!canPlay) return;
 
-	const listing = await resolveToSongListing([client, bot], interaction, query);
 	if (listing === undefined) {
 		const strings = {
 			title: localise(client, 'music.options.play.strings.notFound.title', interaction.locale)(),
@@ -60,4 +69,4 @@ async function handleRequestQueryPlayback(
 	return void receiveNewListing([client, bot], guild, controller, listing, voiceChannelId, feedbackChannelId);
 }
 
-export { handleRequestQueryPlayback };
+export { handleRequestPlayback, handleRequestQueryPlayback };

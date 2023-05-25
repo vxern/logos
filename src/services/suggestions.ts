@@ -357,8 +357,8 @@ function getSuggestionPrompt(
 			thumbnail: (() => {
 				const iconURL = getAvatarURL(bot, author.id, author.discriminator, {
 					avatar: author.avatar,
-					size: 32,
-					format: 'webp',
+					size: 64,
+					format: 'png',
 				});
 				if (iconURL === undefined) return;
 
