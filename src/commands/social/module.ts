@@ -30,7 +30,7 @@ function getProficiencyCategory(): ProficiencyCategory {
 function getRelevantCategories(categories: RoleCategory[], language: Language | undefined): [RoleCategory, number][] {
 	const selectedRoleCategories: [RoleCategory, number][] = [];
 
-	for (let index = 0; index < categories.length; index++) {
+	for (const index of Array(categories.length).keys()) {
 		const category = categories.at(index)!;
 
 		if (isCategoryGroup(category)) {

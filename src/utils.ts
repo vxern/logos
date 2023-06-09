@@ -70,11 +70,14 @@ function chunk<T>(array: T[], size: number): T[][] {
 	if (array.length === 0) return [[]];
 	if (size === 0) throw new Error('The size of a chunk cannot be zero.');
 
-	const chunks = [];
-	for (let index = 0; index < array.length; index += size) {
-		chunks.push(array.slice(index, index + size));
+	const chunks = array.length <= size ? 1 : Math.floor(array.length / size);
+	const result = [];
+	for (const index of Array(chunks).keys()) {
+		const start = index * size;
+		const end = start + size;
+		result.push(array.slice(start, end));
 	}
-	return chunks;
+	return result;
 }
 
 const beginningOfDiscordEpoch = 1420070400000n;

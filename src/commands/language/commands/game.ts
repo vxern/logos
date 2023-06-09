@@ -154,7 +154,7 @@ function createSentenceSelection(sentencePairs: SentencePair[]): SentenceSelecti
 	function shuffle<T>(array: T[]): T[] {
 		const shuffled = Array.from(array);
 
-		for (let index = 0; index < array.length - 1; index++) {
+		for (const index of Array(array.length - 1).keys()) {
 			const random = Math.floor(Math.random() * (index + 1));
 			const temporary = shuffled.at(index)!;
 			shuffled[index] = shuffled.at(random)!;

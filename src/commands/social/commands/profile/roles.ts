@@ -431,7 +431,7 @@ function createSelectOptionsFromCollection(
 
 	const viewData = data.viewData!;
 
-	for (let index = 0; index < viewData.menuRoles.length; index++) {
+	for (const index of Array(viewData.menuRoles.length).keys()) {
 		const [role, roleResolved] = [viewData.menuRoles.at(index)!, viewData.menuRolesResolved.at(index)!];
 		const memberHasRole = viewData.memberRolesIncludedInMenu.includes(roleResolved.id);
 
