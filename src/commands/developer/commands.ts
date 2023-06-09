@@ -1,5 +1,5 @@
-import set from 'logos/src/commands/developer/commands/set.ts';
+import metadata from 'logos/src/commands/developer/commands/metadata.ts';
 
-const commands = [set];
+const commands = [metadata];
 
 export default commands;

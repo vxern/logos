@@ -5,7 +5,7 @@ import { parseArguments } from 'logos/src/interactions.ts';
 import constants from 'logos/constants.ts';
 import { supportedLanguages } from 'logos/types.ts';
 
-async function handleSetLanguage([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+function handleSetLanguage([client, bot]: [Client, Bot], interaction: Interaction): void {
 	const [{ language: input }] = parseArguments(interaction.data?.options, {});
 	if (input === undefined) return;
 
