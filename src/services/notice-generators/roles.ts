@@ -6,7 +6,7 @@ import { defaultLocale } from 'logos/types.ts';
 
 const lastUpdatedAt = new Date(2023, 2, 19);
 
-async function generateRoleNotice([client, _]: [Client, Bot], __: Guild): Promise<CreateMessage> {
+function generateRoleNotice([client, _]: [Client, Bot], __: Guild): CreateMessage {
 	const updateString = getLastUpdateString(client, lastUpdatedAt, defaultLocale);
 
 	const strings = {

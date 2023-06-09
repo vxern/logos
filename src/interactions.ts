@@ -362,7 +362,7 @@ function parseConciseTimeExpression(
 		part !== undefined ? Number(part) : undefined
 	) as [number, ...number[]];
 
-	let verboseExpressionParts = [];
+	const verboseExpressionParts = [];
 	if (seconds !== 0) {
 		const strings = {
 			second: localise(client, 'units.second', defaultLocale)({ 'number': seconds }),
@@ -510,13 +510,13 @@ function decodeId<T extends ComponentIDMetadata, R = [string, ...T]>(customId: s
 	return customId.split(constants.symbols.meta.idSeparator) as R;
 }
 
-async function acknowledge([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+function acknowledge([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	return sendInteractionResponse(bot, interaction.id, interaction.token, {
 		type: InteractionResponseTypes.DeferredUpdateMessage,
 	}).catch((reason) => client.log.warn(`Failed to acknowledge interaction: ${reason}`));
 }
 
-async function postponeReply(
+function postponeReply(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 	{ visible = false } = {},
@@ -527,7 +527,7 @@ async function postponeReply(
 	}).catch((reason) => client.log.warn(`Failed to postpone reply to interaction: ${reason}`));
 }
 
-async function reply(
+function reply(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 	data: Omit<InteractionCallbackData, 'flags'>,
@@ -542,7 +542,7 @@ async function reply(
 	}).catch((reason) => client.log.warn(`Failed to reply to interaction: ${reason}`));
 }
 
-async function editReply(
+function editReply(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 	data: Omit<InteractionCallbackData, 'flags'>,
@@ -552,12 +552,12 @@ async function editReply(
 		.catch((reason) => client.log.warn(`Failed to edit reply to interaction: ${reason}`));
 }
 
-async function deleteReply([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+function deleteReply([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	return deleteOriginalInteractionResponse(bot, interaction.token)
 		.catch((reason) => client.log.warn(`Failed to edit reply to interaction: ${reason}`));
 }
 
-async function respond(
+function respond(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 	choices: ApplicationCommandOptionChoice[],
@@ -568,7 +568,7 @@ async function respond(
 	}).catch((reason) => client.log.warn(`Failed to respond to autocomplete interaction: ${reason}`));
 }
 
-async function showModal(
+function showModal(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 	data: Omit<InteractionCallbackData, 'flags'>,

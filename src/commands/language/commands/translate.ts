@@ -72,7 +72,7 @@ const languageNameToStringKey: Record<string, string> = Object.freeze({
 	'Ukrainian': 'languages.ukrainian',
 });
 
-async function handleTranslateTextAutocomplete([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+function handleTranslateTextAutocomplete([client, bot]: [Client, Bot], interaction: Interaction): void {
 	const [_, focused] = parseArguments(interaction.data?.options, { show: 'boolean' });
 
 	const guild = client.cache.guilds.get(interaction.guildId!);
@@ -106,7 +106,7 @@ async function handleTranslateTextAutocomplete([client, bot]: [Client, Bot], int
 		.slice(0, 25)
 		.toSorted((previous, next) => previous.name.localeCompare(next.name));
 
-	return respond([client, bot], interaction, choices);
+	respond([client, bot], interaction, choices);
 }
 
 /** Allows the user to translate text from one language to another through the DeepL API. */

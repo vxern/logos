@@ -503,28 +503,28 @@ function localiseCommands(localisations: Client['localisations'], commandTemplat
 	}
 
 	const commands: Command[] = [];
-	for (let commandTemplate of commandTemplates) {
+	for (const commandTemplate of commandTemplates) {
 		const commandKey = commandTemplate.name;
 		const localisations = localiseCommandOrOption(commandKey);
 		if (localisations === undefined) continue;
 
 		const command: Command = { ...localisations, ...commandTemplate, options: [] };
 
-		for (let optionTemplate of commandTemplate.options ?? []) {
+		for (const optionTemplate of commandTemplate.options ?? []) {
 			const optionKey = [commandKey, 'options', optionTemplate.name].join('.');
 			const localisations = localiseCommandOrOption(optionKey);
 			if (localisations === undefined) continue;
 
 			const option: Option = { ...localisations, ...optionTemplate, options: [] };
 
-			for (let subOptionTemplate of optionTemplate.options ?? []) {
+			for (const subOptionTemplate of optionTemplate.options ?? []) {
 				const subOptionKey = [optionKey, 'options', subOptionTemplate.name].join('.');
 				const localisations = localiseCommandOrOption(subOptionKey);
 				if (localisations === undefined) continue;
 
 				const subOption: Option = { ...localisations, ...subOptionTemplate, options: [] };
 
-				for (let subSubOptionTemplate of subOptionTemplate.options ?? []) {
+				for (const subSubOptionTemplate of subOptionTemplate.options ?? []) {
 					const subSubOptionKey = [subOptionKey, 'options', subSubOptionTemplate.name].join('.');
 					const localisations = localiseCommandOrOption(subSubOptionKey);
 					if (localisations === undefined) continue;
@@ -628,7 +628,7 @@ function setupLavalinkNode([client, bot]: [Client, Bot]): Promise<void> {
 
 	client.features.music.node.on(
 		'error',
-		async (error) => {
+		(error) => {
 			if (error.name === 'ConnectionRefused') return;
 
 			client.log.error(`The Lavalink node has encountered an error:\n${error}`);

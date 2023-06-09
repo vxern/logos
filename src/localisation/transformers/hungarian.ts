@@ -1,4 +1,4 @@
-function pluralise(quantity: number, { one }: Record<string, unknown> = {}): string {
+function pluralise(quantity: string, { one }: Record<string, string> = {}): string {
 	return `${quantity} ${one}`;
 }
 

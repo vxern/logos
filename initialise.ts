@@ -41,8 +41,8 @@ function readEnvironment({
 	envConfiguration,
 	templateEnvConfiguration,
 }: {
-	envConfiguration: dotenv.DotenvConfig | undefined;
-	templateEnvConfiguration: dotenv.DotenvConfig;
+	envConfiguration: Record<string, string> | undefined;
+	templateEnvConfiguration: Record<string, string>;
 }): void {
 	const requiredKeys = Object.keys(templateEnvConfiguration);
 
@@ -66,22 +66,26 @@ const defaultSoftwareNotice = 'Deno';
 async function readVersion(): Promise<string> {
 	const decoder = new TextDecoder();
 
-	const command = Deno.run({
-		cmd: ['git', 'tag', '--sort=-committerdate', '--list', 'v*'],
-		stdout: 'piped',
-		stderr: 'null',
-	});
-	const [status, contents] = await Promise.all([command.status(), command.output()]);
-	if (!status.success) {
-		const command = Deno.run({ cmd: ['deno', '--version'], stdout: 'piped', stderr: 'null' });
-		const [status, contents] = await Promise.all([command.status(), command.output()]);
-		if (!status.success) return defaultSoftwareNotice;
+	const { code, stdout: output } = await new Deno.Command(
+		Deno.execPath(),
+		{
+			args: ['git tag', '--sort=-committerdate', '--list v*'],
+			stdout: 'piped',
+			stderr: 'null',
+		},
+	).output();
+	if (code !== 0) {
+		const { code, stdout: output } = await new Deno.Command(
+			Deno.execPath(),
+			{ args: ['deno', '--version'], stdout: 'piped', stderr: 'null' },
+		).output();
+		if (code !== 0) return defaultSoftwareNotice;
 
-		const denoVersion = decoder.decode(contents).split(' ').at(1);
+		const denoVersion = decoder.decode(output).split(' ').at(1);
 		return `Deno v${denoVersion}` ?? defaultSoftwareNotice;
 	}
 
-	const programVersion = decoder.decode(contents).split('\n').at(0);
+	const programVersion = decoder.decode(output).split('\n').at(0);
 	return programVersion ?? defaultSoftwareNotice;
 }
 

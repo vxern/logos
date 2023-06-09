@@ -54,7 +54,7 @@ const command: CommandTemplate = {
 	}, { ...user, name: 'author', required: false }],
 };
 
-async function handlePurgeMessagesAutocomplete([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+function handlePurgeMessagesAutocomplete([client, bot]: [Client, Bot], interaction: Interaction): void {
 	const [{ author }] = parseArguments(interaction.data?.options, {});
 
 	return autocompleteMembers(

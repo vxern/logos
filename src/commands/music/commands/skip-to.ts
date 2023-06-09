@@ -15,21 +15,22 @@ const command: OptionTemplate = {
 	options: [timestamp],
 };
 
-async function handleSkipToTimestampAutocomplete(
+function handleSkipToTimestampAutocomplete(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
-): Promise<void> {
+): void {
 	const [{ timestamp: timestampExpression }] = parseArguments(interaction.data?.options, {});
 
 	const timestamp = parseTimeExpression(client, timestampExpression!, interaction.locale);
 	if (timestamp === undefined) {
-		return respond([client, bot], interaction, []);
+		respond([client, bot], interaction, []);
+		return;
 	}
 
-	return respond([client, bot], interaction, [{ name: timestamp[0], value: timestamp[1].toString() }]);
+	respond([client, bot], interaction, [{ name: timestamp[0], value: timestamp[1].toString() }]);
 }
 
-async function handleSkipToTimestamp([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+function handleSkipToTimestamp([client, bot]: [Client, Bot], interaction: Interaction): void {
 	const [{ timestamp: timestampExpression }] = parseArguments(interaction.data?.options, {});
 
 	const controller = client.features.music.controllers.get(interaction.guildId!);

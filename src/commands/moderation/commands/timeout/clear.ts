@@ -5,7 +5,7 @@ import { parseArguments, reply } from 'logos/src/interactions.ts';
 import { diagnosticMentionUser } from 'logos/src/utils.ts';
 import constants from 'logos/constants.ts';
 
-async function handleClearTimeoutAutocomplete([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+function handleClearTimeoutAutocomplete([client, bot]: [Client, Bot], interaction: Interaction): void {
 	const [{ user }] = parseArguments(interaction.data?.options, {});
 
 	return autocompleteMembers([client, bot], interaction, user!, { restrictToNonSelf: true, excludeModerators: true });

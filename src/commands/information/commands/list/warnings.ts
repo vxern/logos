@@ -6,10 +6,10 @@ import { parseArguments, reply } from 'logos/src/interactions.ts';
 import constants from 'logos/constants.ts';
 import { timestamp } from 'logos/formatting.ts';
 
-async function handleDisplayWarningsAutocomplete(
+function handleDisplayWarningsAutocomplete(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
-): Promise<void> {
+): void {
 	const [{ user }] = parseArguments(interaction.data?.options, {});
 
 	const isModerator = calculatePermissions(interaction.member!.permissions!).includes('MODERATE_MEMBERS');

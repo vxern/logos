@@ -15,7 +15,7 @@ const command: OptionTemplate = {
 	options: [{ ...user, required: false }, show],
 };
 
-async function handleDisplayProfileAutocomplete([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+function handleDisplayProfileAutocomplete([client, bot]: [Client, Bot], interaction: Interaction): void {
 	const [{ user }] = parseArguments(interaction.data?.options, {});
 
 	return autocompleteMembers([client, bot], interaction, user!);
