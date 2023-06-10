@@ -35,6 +35,11 @@ const adapter: DatabaseAdapters['users'] = {
 	fetch: async (client, parameter, parameterValue) => {
 		const value = stringifyValue(parameterValue);
 
+		const cachedPromise = client.database.fetchPromises.users[parameter].get(value);
+		if (cachedPromise !== undefined) {
+			return cachedPromise;
+		}
+
 		let query: Fauna.Expr;
 		if (parameter === 'reference') {
 			query = $.Get(parameterValue as Fauna.ExprArg);
@@ -43,7 +48,12 @@ const adapter: DatabaseAdapters['users'] = {
 			query = $.Get($.Match(index, parameterValue as Fauna.ExprArg));
 		}
 
-		const document = await dispatchQuery<User>(client, query);
+		const promise = dispatchQuery<User>(client, query);
+		client.database.fetchPromises.users[parameter].set(value, promise);
+
+		const document = await promise;
+		client.database.fetchPromises.users[parameter].delete(value);
+
 		if (document === undefined) {
 			client.log.debug(`Couldn't find a user in the database whose '${parameter}' matches '${value}'.`);
 			return undefined;
