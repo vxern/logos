@@ -4,7 +4,7 @@ import { SongListing, SongListingContentTypes } from 'logos/src/commands/music/d
 import { Client, localise } from 'logos/src/client.ts';
 import { deleteReply, parseArguments, postponeReply } from 'logos/src/interactions.ts';
 
-async function handleRequestFilePlayback([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+function handleRequestFilePlayback([client, bot]: [Client, Bot], interaction: Interaction): void {
 	const [{ url }] = parseArguments(interaction.data?.options, {});
 	if (url === undefined) return;
 

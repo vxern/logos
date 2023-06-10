@@ -47,13 +47,23 @@ const adapter: DatabaseAdapters['warnings'] = {
 		const index = warningIndexParameterToIndex[parameter];
 		const value = stringifyValue(parameterValue);
 
-		const documents = await dispatchQuery<Warning[]>(
+		const cachedPromise = client.database.fetchPromises.warnings[parameter].get(value);
+		if (cachedPromise !== undefined) {
+			return cachedPromise;
+		}
+
+		const promise = dispatchQuery<Warning[]>(
 			client,
 			$.Map(
 				$.Paginate($.Match(index, parameterValue as Fauna.ExprArg)),
 				$.Lambda('warning', $.Get($.Var('warning'))),
 			),
 		);
+		client.database.fetchPromises.warnings[parameter].set(value, promise);
+
+		const documents = await promise;
+		client.database.fetchPromises.warnings[parameter].delete(value);
+
 		if (documents === undefined) {
 			client.log.error(`Failed to fetch warnings whose '${parameter}' matches '${value}'.`);
 			return undefined;

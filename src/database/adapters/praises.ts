@@ -57,13 +57,22 @@ const adapter: DatabaseAdapters['praises'] = {
 		const index = praiseIndexParameterToIndex[parameter];
 		const value = stringifyValue(parameterValue);
 
-		const documents = await dispatchQuery<Praise[]>(
+		const cachedPromise = client.database.fetchPromises.praises[parameter].get(value);
+		if (cachedPromise !== undefined) {
+			return cachedPromise;
+		}
+
+		const promise = dispatchQuery<Praise[]>(
 			client,
 			$.Map(
 				$.Paginate($.Match($.FaunaIndex(index), parameterValue as Fauna.ExprArg)),
 				$.Lambda('praise', $.Get($.Var('praise'))),
 			),
 		);
+		client.database.fetchPromises.praises[parameter].set(value, promise);
+
+		const documents = await promise;
+		client.database.fetchPromises.praises[parameter].delete(value);
 
 		if (documents === undefined) {
 			client.log.error(`Failed to fetch praises whose '${parameter}' matches '${value}'.`);

@@ -18,11 +18,11 @@ async function handleRequestQueryPlayback(
 	return handleRequestPlayback([client, bot], interaction, listing);
 }
 
-async function handleRequestPlayback(
+function handleRequestPlayback(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 	listing: SongListing | undefined,
-): Promise<void> {
+): void {
 	const controller = client.features.music.controllers.get(interaction.guildId!);
 	if (controller === undefined) return;
 

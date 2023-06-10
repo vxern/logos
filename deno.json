@@ -1,11 +1,22 @@
 {
 	"lock": false,
 	"importMap": "./imports.json",
+  "tasks": {
+    "start": "deno run --allow-env --allow-net --allow-read --allow-run mod.ts",
+    "start:dev": "deno run --allow-env --allow-net --allow-read --allow-run --watch mod.ts"
+  },
+	"fmt": {
+    "useTabs": true,
+    "lineWidth": 120,
+    "indentWidth": 2,
+    "semiColons": true,
+    "singleQuote": true,
+    "proseWrap": "preserve"
+	},
 	"compilerOptions": {
 		"allowJs": false,
 		"allowUnreachableCode": false,
 		"allowUnusedLabels": false,
-		"checkJs": false,
 		"keyofStringsOnly": true,
 		"noFallthroughCasesInSwitch": true,
 		"noImplicitAny": true,
@@ -113,15 +124,6 @@
 				"use-isnan",
 				"valid-typeof"
 			]
-		}
-	},
-	"fmt": {
-		"options": {
-			"useTabs": true,
-			"lineWidth": 120,
-			"indentWidth": 2,
-			"singleQuote": true,
-			"proseWrap": "preserve"
 		}
 	}
 }

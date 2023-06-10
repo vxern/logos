@@ -230,11 +230,21 @@ interface Cache extends Record<string, Map<string, unknown>> {
 type Database = Readonly<{
 	/** Client used to interface with the Fauna database. */
 	client: Fauna.Client;
-
 	cache: Cache;
-
+	fetchPromises: FetchPromiseCache;
 	adapters: DatabaseAdapters;
 }>;
+
+/** Models a cache for storing the responses to dispatched {@link fetch()} queries. */
+type FetchPromiseCache = {
+	[K0 in keyof WithFetch]: {
+		[K1 in Parameters<WithFetch[K0]['fetch']>[1]]: Map<string, ReturnType<WithFetch[K0]['fetch']>>;
+	};
+};
+
+type WithFetch = {
+	[K in keyof DatabaseAdapters as 'fetch' extends keyof DatabaseAdapters[K] ? K : never]: DatabaseAdapters[K];
+};
 
 function createDatabase(): Database {
 	return {
@@ -254,6 +264,19 @@ function createDatabase(): Database {
 			usersByReference: new Map(),
 			usersById: new Map(),
 			warningsByRecipient: new Map(),
+		},
+		fetchPromises: {
+			praises: {
+				recipient: new Map(),
+				sender: new Map(),
+			},
+			users: {
+				id: new Map(),
+				reference: new Map(),
+			},
+			warnings: {
+				recipient: new Map(),
+			},
 		},
 		adapters: { entryRequests, reports, praises, suggestions, users, warnings },
 	};
@@ -319,4 +342,4 @@ function setNested<MK, K, V>(map: Map<MK, Map<K, V>>, mapKey: MK, key: K, value:
 }
 
 export { createDatabase, dispatchQuery, getUserMentionByReference, mentionUser, setNested, stringifyValue };
-export type { CacheAdapter, Database, DatabaseAdapters };
+export type { CacheAdapter, Database, DatabaseAdapters, WithFetch };

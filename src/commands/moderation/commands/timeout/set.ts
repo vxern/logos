@@ -5,25 +5,27 @@ import { parseArguments, parseTimeExpression, reply, respond } from 'logos/src/i
 import constants, { Periods } from 'logos/constants.ts';
 import { mention, MentionTypes, timestamp } from 'logos/formatting.ts';
 
-async function handleSetTimeoutAutocomplete([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+function handleSetTimeoutAutocomplete([client, bot]: [Client, Bot], interaction: Interaction): void {
 	const [{ user, duration }, focused] = parseArguments(interaction.data?.options, {});
 
 	switch (focused!.name) {
 		case 'user': {
-			return autocompleteMembers(
+			autocompleteMembers(
 				[client, bot],
 				interaction,
 				user!,
 				{ restrictToNonSelf: true, excludeModerators: true },
 			);
+			return;
 		}
 		case 'duration': {
 			const timestamp = parseTimeExpression(client, duration!, interaction.locale);
 			if (timestamp === undefined) {
-				return respond([client, bot], interaction, []);
+				respond([client, bot], interaction, []);
+				return;
 			}
 
-			return respond([client, bot], interaction, [{ name: timestamp[0], value: timestamp[1].toString() }]);
+			respond([client, bot], interaction, [{ name: timestamp[0], value: timestamp[1].toString() }]);
 		}
 	}
 }
