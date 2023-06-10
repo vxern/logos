@@ -598,18 +598,21 @@ function createCommandHandlers(commands: CommandTemplate[]): Client['commands'][
 	return { execute: handlers, autocomplete: autocompleteHandlers };
 }
 
-function getLanguage(guildName: string): Language {
-	const guildNameMatch = configuration.guilds.namePattern.exec(guildName) ?? undefined;
-	if (guildNameMatch === undefined) return defaultLanguage;
+function getImplicitLanguage(guild: Guild): Language {
+	const match = configuration.guilds.namePattern.exec(guild.name) ?? undefined;
+	if (match === undefined) return defaultLanguage;
 
-	const languageString = guildNameMatch.at(1)!;
+	const language = match.at(1)!;
+	const found = supportedLanguages.find((supportedLanguage) => supportedLanguage === language);
+	if (found !== undefined) {
+		return found;
+	}
 
-	return supportedLanguages.find((language) => languageString === language) ??
-		defaultLanguage;
+	return defaultLanguage;
 }
 
 function registerGuild(client: Client, guild: Guild): void {
-	const language = getLanguage(guild.name);
+	const language = getImplicitLanguage(guild);
 
 	client.cache.guilds.set(guild.id, { ...guild, language });
 }
@@ -936,6 +939,7 @@ export {
 	addCollector,
 	autocompleteMembers,
 	extendEventHandler,
+	getImplicitLanguage,
 	initialiseClient,
 	isValidIdentifier,
 	isValidSnowflake,
