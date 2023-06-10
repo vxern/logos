@@ -66,12 +66,16 @@ interface DictionaryEntry {
 	inflectionTable?: InflectionTable;
 }
 
-abstract class DictionaryAdapter<T> {
+abstract class DictionaryAdapter {
 	abstract readonly supports: Language[];
 	abstract readonly provides: DictionaryProvisions[];
 
-	abstract readonly query: (word: string, language: Language) => Promise<T | undefined>;
-	abstract readonly parse: (client: Client, contents: T, locale: string | undefined) => DictionaryEntry[] | undefined;
+	abstract get(
+		client: Client,
+		word: string,
+		language: Language,
+		locale: string | undefined,
+	): Promise<DictionaryEntry[] | undefined>;
 }
 
 /** Represents a pair of a sentence and its translation. */

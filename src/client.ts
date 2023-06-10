@@ -110,7 +110,7 @@ type Client = Readonly<{
 	};
 	collectors: Map<Event, Set<Collector<Event>>>;
 	features: {
-		dictionaryAdapters: Map<Language, DictionaryAdapter<unknown>[]>;
+		dictionaryAdapters: Map<Language, DictionaryAdapter[]>;
 		sentencePairs: Map<Language, SentencePair[]>;
 		music: {
 			node: LavalinkNode;

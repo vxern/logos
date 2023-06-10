@@ -15,15 +15,21 @@ function hasInflections(wordClass: WordClass): boolean {
 
 type InflectionTable = NonNullable<DictionaryEntry['inflectionTable']>;
 
-class DexonlineAdapter implements DictionaryAdapter<Dexonline.Results> {
+class DexonlineAdapter implements DictionaryAdapter {
 	readonly supports: Language[] = ['Romanian'];
 	readonly provides = [DictionaryProvisions.Definitions, DictionaryProvisions.Etymology];
 
-	query(word: string): Promise<Dexonline.Results | undefined> {
-		return Dexonline.get(word);
-	}
+	async get(
+		client: Client,
+		word: string,
+		_: Language,
+		locale: string | undefined,
+	): Promise<DictionaryEntry[] | undefined> {
+		const results = await Dexonline.get(word);
+		if (results === undefined) {
+			return undefined;
+		}
 
-	parse(client: Client, results: Dexonline.Results, locale: string | undefined): DictionaryEntry[] | undefined {
 		const entries = results.synthesis.map<DictionaryEntry>((result) => {
 			const wordClass = getWordClass(result.type);
 			return {

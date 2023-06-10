@@ -81,13 +81,10 @@ async function handleFindWord([client, bot]: [Client, Bot], interaction: Interac
 
 	const entries: DictionaryEntry[] = [];
 	for (const dictionary of dictionaries) {
-		const data = await dictionary.query(word, guild.language);
-		if (data === undefined) continue;
+		const newEntries = await dictionary.get(client, word, guild.language, locale);
+		if (newEntries === undefined) continue;
 
-		const entriesNew = dictionary.parse(client, data, locale);
-		if (entriesNew === undefined) continue;
-
-		entries.push(...entriesNew);
+		entries.push(...newEntries);
 	}
 
 	if (entries.length === 0) {

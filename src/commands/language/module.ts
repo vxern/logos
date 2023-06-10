@@ -7,10 +7,10 @@ import { addParametersToURL } from 'logos/src/utils.ts';
 import constants from 'logos/constants.ts';
 import { Language, supportedLanguages } from 'logos/types.ts';
 
-const dictionaryAdapters: DictionaryAdapter<any>[] = [dexonline];
+const dictionaryAdapters: DictionaryAdapter[] = [dexonline];
 
-function loadDictionaryAdapters(): Map<Language, DictionaryAdapter<any>[]> {
-	const result = new Map<Language, DictionaryAdapter<any>[]>();
+function loadDictionaryAdapters(): Map<Language, DictionaryAdapter[]> {
+	const result = new Map<Language, DictionaryAdapter[]>();
 
 	for (const language of supportedLanguages) {
 		result.set(language, []);
