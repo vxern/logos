@@ -1,2 +1,6 @@
+[phases.setup]
+nixPkgs = ['...', 'deno']
+nixpkgsArchive = '3f1aece3b5b3e0ca6f9f8e0c2804d843b8fed30c'
+
 [start]
-cmd = 'deno run --allow-env --allow-net --allow-read --allow-run mod.ts'
+cmd = 'deno task start'
