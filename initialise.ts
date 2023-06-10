@@ -67,17 +67,17 @@ async function readVersion(): Promise<string> {
 	const decoder = new TextDecoder();
 
 	const { code, stdout: output } = await new Deno.Command(
-		Deno.execPath(),
+		'git',
 		{
-			args: ['git tag', '--sort=-committerdate', '--list v*'],
+			args: ['tag', '--sort=-committerdate', '--list', 'v*'],
 			stdout: 'piped',
 			stderr: 'null',
 		},
 	).output();
 	if (code !== 0) {
 		const { code, stdout: output } = await new Deno.Command(
-			Deno.execPath(),
-			{ args: ['deno', '--version'], stdout: 'piped', stderr: 'null' },
+			'deno',
+			{ args: ['--version'], stdout: 'piped', stderr: 'null' },
 		).output();
 		if (code !== 0) return defaultSoftwareNotice;
 
