@@ -2,8 +2,7 @@
 	"lock": false,
 	"importMap": "./imports.json",
   "tasks": {
-    "start": "deno run --allow-env --allow-net --allow-read --allow-run mod.ts",
-    "start:dev": "deno run --allow-env --allow-net --allow-read --allow-run --watch mod.ts"
+    "start": "deno run --allow-env --allow-net --allow-read --allow-run mod.ts"
   },
 	"fmt": {
     "useTabs": true,

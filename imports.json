@@ -2,6 +2,7 @@
 	"imports": {
 		"logos/": "./",
 		"std/": "https://deno.land/std@0.173.0/",
+    "dom": "https://deno.land/x/deno_dom@v0.1.38/deno-dom-wasm.ts",
 		"dexonline": "https://deno.land/x/dexonline@v3.2.5/mod.ts",
 		"discordeno": "https://deno.land/x/discordeno@18.0.1/mod.ts",
 		"event": "https://deno.land/x/event@2.0.1/mod.ts",
@@ -14,6 +15,7 @@
 		"sentry": "https://deno.land/x/sentry_deno@v0.2.2/main.ts",
 		"snowflake": "https://deno.land/x/deno_snowflake@v1.0.1/snowflake.ts",
 		"tl_log": "https://deno.land/x/tl_log@0.1.1/mod.ts",
+    "wiktionary": "npm:parse-wiktionary@1.0.0",
 		"youtube": "https://deno.land/x/youtube_sr@v4.3.4-deno/mod.ts"
 	}
 }

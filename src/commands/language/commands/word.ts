@@ -11,7 +11,12 @@ import {
 	MessageComponents,
 	MessageComponentTypes,
 } from 'discordeno';
-import { Definition, DictionaryEntry, Expression } from 'logos/src/commands/language/data/types.ts';
+import { Definition, DictionaryEntry, Expression } from 'logos/src/commands/language/dictionaries/adapter.ts';
+import {
+	isUnknownPartOfSpeech,
+	PartOfSpeech,
+	partOfSpeechToStringKey,
+} from 'logos/src/commands/language/dictionaries/parts-of-speech.ts';
 import { CommandTemplate } from 'logos/src/commands/command.ts';
 import { show } from 'logos/src/commands/parameters.ts';
 import { Client, localise } from 'logos/src/client.ts';
@@ -27,7 +32,7 @@ import {
 } from 'logos/src/interactions.ts';
 import { chunk, diagnosticMentionUser } from 'logos/src/utils.ts';
 import constants from 'logos/constants.ts';
-import { BulletStyles, code, list } from 'logos/formatting.ts';
+import { code } from 'logos/formatting.ts';
 import { defaultLocale } from 'logos/types.ts';
 
 const command: CommandTemplate = {
@@ -48,7 +53,10 @@ const command: CommandTemplate = {
 
 /** Allows the user to look up a word and get information about it. */
 async function handleFindWord([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
-	const [{ word, verbose, show }] = parseArguments(interaction.data?.options, { verbose: 'boolean', show: 'boolean' });
+	const [{ word, verbose, show }] = parseArguments(interaction.data?.options, {
+		verbose: 'boolean',
+		show: 'boolean',
+	});
 	if (word === undefined) return;
 
 	const guild = client.cache.guilds.get(interaction.guildId!);
@@ -79,15 +87,51 @@ async function handleFindWord([client, bot]: [Client, Bot], interaction: Interac
 			`as requested by ${diagnosticMentionUser(interaction.user)} on ${guild.name}...`,
 	);
 
-	const entries: DictionaryEntry[] = [];
+	const unclassifiedEntries: DictionaryEntry[] = [];
+	const entriesByPartOfSpeech = new Map<PartOfSpeech, DictionaryEntry[]>();
 	for (const dictionary of dictionaries) {
-		const newEntries = await dictionary.get(client, word, guild.language, locale);
-		if (newEntries === undefined) continue;
+		const entries = await dictionary.getEntries(word, guild.language, client, locale);
+		if (entries === undefined) continue;
 
-		entries.push(...newEntries);
+		const organised = new Map<PartOfSpeech, DictionaryEntry[]>();
+		for (const entry of entries) {
+			const [partOfSpeech, _] = entry.partOfSpeech;
+			if (partOfSpeech === 'unknown') {
+				unclassifiedEntries.push(entry);
+				continue;
+			}
+
+			if (!organised.has(partOfSpeech)) {
+				organised.set(partOfSpeech, [entry]);
+				continue;
+			}
+
+			organised.get(partOfSpeech)!.push(entry);
+		}
+
+		for (const [partOfSpeech, entries] of organised.entries()) {
+			if (!entriesByPartOfSpeech.has(partOfSpeech)) {
+				entriesByPartOfSpeech.set(partOfSpeech, entries);
+				continue;
+			}
+
+			const existingEntries = entriesByPartOfSpeech.get(partOfSpeech)!;
+
+			for (const index of Array(entries).keys()) {
+				const existingEntry = existingEntries[index];
+				const entry = entries[index]!;
+
+				if (existingEntry === undefined) {
+					existingEntries[index] = entry;
+					continue;
+				}
+
+				existingEntries[index] = { ...existingEntry, ...entry };
+			}
+		}
 	}
 
-	if (entries.length === 0) {
+	if (entriesByPartOfSpeech.size === 0) {
 		const strings = {
 			title: localise(client, 'word.strings.noResults.title', locale)(),
 			description: localise(client, 'word.strings.noResults.description', locale)({
@@ -104,6 +148,8 @@ async function handleFindWord([client, bot]: [Client, Bot], interaction: Interac
 		});
 	}
 
+	const entries = sanitiseEntries(Array.from(entriesByPartOfSpeech.values()).flat());
+
 	return void displayMenu(
 		[client, bot],
 		interaction,
@@ -116,6 +162,15 @@ async function handleFindWord([client, bot]: [Client, Bot], interaction: Interac
 		},
 		locale,
 	);
+}
+
+function sanitiseEntries(entries: DictionaryEntry[]): DictionaryEntry[] {
+	for (const entry of entries) {
+		for (const etymology of entry.etymologies ?? []) {
+			etymology.value = etymology.value?.replaceAll('*', '\\*');
+		}
+	}
+	return entries;
 }
 
 enum ContentTabs {
@@ -334,66 +389,61 @@ function generateButtons(
 	}));
 }
 
-type WordClass =
-	| 'noun'
-	| 'verb'
-	| 'adjective'
-	| 'adverb'
-	| 'adposition'
-	| 'affix'
-	| 'pronoun'
-	| 'determiner'
-	| 'conjunction'
-	| 'interjection'
-	| 'unknown';
-
-const wordClassToStringKey: Required<Record<WordClass, string>> = {
-	'noun': 'words.noun',
-	'verb': 'words.verb',
-	'adjective': 'words.adjective',
-	'adverb': 'words.adverb',
-	'adposition': 'words.adposition',
-	'affix': 'words.affix',
-	'pronoun': 'words.pronoun',
-	'determiner': 'words.determiner',
-	'conjunction': 'words.conjunction',
-	'interjection': 'words.interjection',
-	'unknown': 'words.unknown',
-};
-
-function isUnknownWordClass(wordClass: WordClass): boolean {
-	return wordClass === 'unknown';
-}
-
 function entryToEmbeds(client: Client, entry: DictionaryEntry, locale: string | undefined, verbose: boolean): Embed[] {
-	let wordClassDisplayed: string;
-	if (entry.wordClass === undefined) {
+	let partOfSpeechDisplayed: string;
+	if (entry.partOfSpeech === undefined) {
 		const strings = {
 			unknown: localise(client, 'words.unknown', locale)(),
 		};
 
-		wordClassDisplayed = strings.unknown;
+		partOfSpeechDisplayed = strings.unknown;
 	} else {
-		const [wordClass, wordClassUnresolved] = entry.wordClass;
+		const [detected, original] = entry.partOfSpeech;
 
 		const strings = {
-			wordClass: localise(client, wordClassToStringKey[wordClass], locale)(),
+			partOfSpeech: localise(client, partOfSpeechToStringKey[detected], locale)(),
 		};
 
-		wordClassDisplayed = strings.wordClass;
-		if (isUnknownWordClass(wordClass)) {
-			wordClassDisplayed += ` — '${wordClassUnresolved}'`;
+		partOfSpeechDisplayed = strings.partOfSpeech;
+		if (isUnknownPartOfSpeech(detected)) {
+			partOfSpeechDisplayed += ` — '${original}'`;
 		}
 	}
-	const wordClassFormatted = `***${wordClassDisplayed}***`;
+	const partOfSpeechFormatted = `***${partOfSpeechDisplayed}***`;
 
-	const word = entry.word;
+	const word = entry.lemma;
 
 	const embeds: Embed[] = [];
 	const fields: DiscordEmbedField[] = [];
 
+	if (entry.nativeDefinitions !== undefined && entry.nativeDefinitions.length !== 0) {
+		const definitionsStringified = stringifyEntries(entry.nativeDefinitions, 'definitions');
+		const definitionsFitted = fitTextToFieldSize(client, definitionsStringified, locale, verbose);
+
+		if (!verbose) {
+			const strings = {
+				nativeDefinitions: localise(client, 'word.strings.fields.nativeDefinitions', locale)(),
+			};
+
+			fields.push({
+				name: strings.nativeDefinitions,
+				value: definitionsFitted,
+			});
+		} else {
+			const strings = {
+				nativeDefinitionsForWord: localise(client, 'word.strings.nativeDefinitionsForWord', locale)({ 'word': word }),
+			};
+
+			embeds.push({
+				title: strings.nativeDefinitionsForWord,
+				description: `${partOfSpeechFormatted}\n\n${definitionsFitted}`,
+				color: constants.colors.husky,
+			});
+		}
+	}
+
 	if (entry.definitions !== undefined && entry.definitions.length !== 0) {
-		const definitionsStringified = stringifyEntries(entry.definitions, 'definitions', BulletStyles.Diamond);
+		const definitionsStringified = stringifyEntries(entry.definitions, 'definitions');
 		const definitionsFitted = fitTextToFieldSize(client, definitionsStringified, locale, verbose);
 
 		if (!verbose) {
@@ -412,14 +462,14 @@ function entryToEmbeds(client: Client, entry: DictionaryEntry, locale: string | 
 
 			embeds.push({
 				title: strings.definitionsForWord,
-				description: `${wordClassFormatted}\n\n${definitionsFitted}`,
+				description: `${partOfSpeechFormatted}\n\n${definitionsFitted}`,
 				color: constants.colors.husky,
 			});
 		}
 	}
 
 	if (entry.expressions !== undefined && entry.expressions.length !== 0) {
-		const expressionsStringified = stringifyEntries(entry.expressions, 'expressions', BulletStyles.Arrow);
+		const expressionsStringified = stringifyEntries(entry.expressions, 'expressions');
 		const expressionsFitted = fitTextToFieldSize(client, expressionsStringified, locale, verbose);
 
 		const strings = {
@@ -436,14 +486,14 @@ function entryToEmbeds(client: Client, entry: DictionaryEntry, locale: string | 
 	if (entry.etymologies !== undefined && entry.etymologies.length !== 0) {
 		const etymology = entry.etymologies.map((etymology) => {
 			if (etymology.tags === undefined) {
-				return `**${etymology.value}**`;
+				return etymology.value;
 			}
 
-			if (etymology.value === undefined) {
+			if (etymology.value === undefined || etymology.value.length === 0) {
 				return tagsToString(etymology.tags);
 			}
 
-			return `${tagsToString(etymology.tags)} **${etymology.value}**`;
+			return `${tagsToString(etymology.tags)} ${etymology.value}`;
 		}).join('\n');
 
 		const strings = {
@@ -458,7 +508,7 @@ function entryToEmbeds(client: Client, entry: DictionaryEntry, locale: string | 
 	}
 
 	if (!verbose) {
-		return [{ title: word, description: wordClassFormatted, fields, color: constants.colors.husky }];
+		return [{ title: word, description: partOfSpeechFormatted, fields, color: constants.colors.husky }];
 	}
 
 	return embeds;
@@ -474,23 +524,49 @@ function isDefinition(_entry: Definition | Expression, entryType: EntryType): _e
 	return entryType === 'definitions';
 }
 
+const parenthesesExpression = RegExp('\\((.+?)\\)', 'g');
+
 function stringifyEntries<
 	T extends EntryType,
 	E extends Definition[] | Expression[] = T extends 'definitions' ? Definition[] : Expression[],
->(entries: E, entryType: T, bulletStyle: BulletStyles, depth = 0): string[] {
-	const entriesStringified = entries.map((entry) => {
-		const root = entry.tags === undefined ? entry.value : `${tagsToString(entry.tags)} ${entry.value}`;
+>(entries: E, entryType: T, root?: string, depth = 0): string[] {
+	const entriesStringified = entries.map((entry, indexZeroBased) => {
+		const matches = Array.from(entry.value.matchAll(parenthesesExpression))
+			.map((match) => match.at(1)!);
+		const matchesFiltered = matches.filter((match) => matches.indexOf(match) === matches.lastIndexOf(match));
+		const value = matchesFiltered.reduce(
+			(string, match) => string.replace(`(${match})`, `(*${match}*)`),
+			entry.value,
+		);
+
+		const anchor = entry.tags === undefined ? value : `${tagsToString(entry.tags)} ${value}`;
 
 		if (
-			isDefinition(entry, entryType) && entry.value.endsWith(':') && entry.definitions !== undefined
+			isDefinition(entry, entryType) && value.endsWith(':') && entry.definitions !== undefined
 		) {
-			const entriesStringified = stringifyEntries(entry.definitions!, 'definitions', bulletStyle, depth + 1).join('\n');
-			return `${root}\n${entriesStringified}`;
+			const index = indexZeroBased + 1;
+			const newRoot = root === undefined ? `${index}` : `${root}.${index}`;
+			const entriesStringified = stringifyEntries(
+				entry.definitions!,
+				'definitions',
+				newRoot,
+				depth + 1,
+			).join('\n');
+			return `${anchor}\n${entriesStringified}`;
 		}
 
-		return root;
+		return anchor;
 	});
-	const entriesEnlisted = list(entriesStringified, bulletStyle);
+
+	const entriesEnlisted = entriesStringified.map((entry, indexZeroBased) => {
+		const index = indexZeroBased + 1;
+
+		if (root === undefined) {
+			return `${index}. ${entry}`;
+		}
+
+		return `${root}.${index}. ${entry}`;
+	}).join('\n');
 	const entriesDelisted = entriesEnlisted.split('\n').map((entry) =>
 		`${constants.symbols.meta.whitespace.repeat(depth * 2)}${entry}`
 	);
@@ -508,9 +584,9 @@ function fitTextToFieldSize(
 		definitionsOmitted: localise(client, 'word.strings.definitionsOmitted', locale),
 	};
 
-	const characterOverhead = strings.definitionsOmitted({ 'number': textParts.length }).length + 20;
+	const characterOverhead = strings.definitionsOmitted({ 'number': textParts.length, 'flag': 'verbose' }).length + 20;
 
-	const maxCharacterCount = verbose ? 4096 : 1024;
+	const maxCharacterCount = verbose ? 2048 : 512;
 
 	let characterCount = 0;
 	const stringsToDisplay: string[] = [];
@@ -526,11 +602,10 @@ function fitTextToFieldSize(
 
 	let fittedString = stringsToDisplay.join('\n');
 	if (stringsOmitted !== 0) {
-		fittedString += `\n\n*${strings.definitionsOmitted({ 'number': stringsOmitted })}*`;
+		fittedString += `\n*${strings.definitionsOmitted({ 'number': stringsOmitted, 'flag': 'verbose' })}*`;
 	}
 
 	return fittedString;
 }
 
 export default command;
-export type { WordClass };

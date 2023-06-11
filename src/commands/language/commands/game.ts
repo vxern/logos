@@ -8,7 +8,6 @@ import {
 	InteractionTypes,
 	MessageComponentTypes,
 } from 'discordeno';
-import { SentencePair } from 'logos/src/commands/language/data/types.ts';
 import { CommandTemplate } from 'logos/src/commands/command.ts';
 import { Client, localise } from 'logos/src/client.ts';
 import {
@@ -135,6 +134,15 @@ function getGameView(
 	};
 }
 
+/** Represents a pair of a sentence and its translation. */
+interface SentencePair {
+	/** The source sentence. */
+	sentence: string;
+
+	/** The translation of the sentence. */
+	translation: string;
+}
+
 /**
  * Represents a selection of a sentence to be used for the language game of
  * picking the correct word to fit into the blank space.
@@ -187,3 +195,4 @@ function createSentenceSelection(sentencePairs: SentencePair[]): SentenceSelecti
 }
 
 export default command;
+export type { SentencePair };
