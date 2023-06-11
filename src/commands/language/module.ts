@@ -1,13 +1,15 @@
 import * as csv from 'std/encoding/csv.ts';
-import dexonline from 'logos/src/commands/language/data/adapters/dexonline.ts';
-import { WordClass } from 'logos/src/commands/language/commands/word.ts';
-import { DictionaryAdapter, SentencePair } from 'logos/src/commands/language/data/types.ts';
+import dexonline from 'logos/src/commands/language/dictionaries/adapters/dexonline.ts';
+import wiktionary from 'logos/src/commands/language/dictionaries/adapters/wiktionary.ts';
+import { DictionaryAdapter } from 'logos/src/commands/language/dictionaries/adapter.ts';
+import partsOfSpeech, { PartOfSpeech } from 'logos/src/commands/language/dictionaries/parts-of-speech.ts';
+import { SentencePair } from 'logos/src/commands/language/commands/game.ts';
 import { Client } from 'logos/src/client.ts';
 import { addParametersToURL } from 'logos/src/utils.ts';
 import constants from 'logos/constants.ts';
 import { Language, supportedLanguages } from 'logos/types.ts';
 
-const dictionaryAdapters: DictionaryAdapter[] = [dexonline];
+const dictionaryAdapters: DictionaryAdapter[] = [dexonline, wiktionary];
 
 function loadDictionaryAdapters(): Map<Language, DictionaryAdapter[]> {
 	const result = new Map<Language, DictionaryAdapter[]>();
@@ -96,29 +98,34 @@ function resolveToSupportedLanguage(client: Client, languageOrCode: string): Sup
 	);
 }
 
-const wordClassMappings: Record<string, WordClass> = {
-	'substantiv': 'noun',
-	'substantiv masculin': 'noun',
-	'substantiv feminin': 'noun',
-	'substantiv neutru': 'noun',
-	'substantiv propriu': 'noun',
-	'verb': 'verb',
-	'adjectiv': 'adjective',
-	'adjectiv pronominal': 'determiner',
-	'adverb': 'adverb',
-	'prepoziție': 'adposition',
-	'postpoziție': 'adposition',
-	'prefix': 'affix',
-	'postfix': 'affix',
-	'pronume': 'pronoun',
-	'demonstrativ': 'determiner',
-	'conjuncție': 'conjunction',
-	'interjecție': 'interjection',
-};
+function getPartOfSpeech(
+	exact: string,
+	approximate: string,
+	language: Language,
+): [detected: PartOfSpeech, original: string] {
+	const localised = partsOfSpeech[language];
+	if (localised === undefined) {
+		return ['unknown', exact];
+	}
 
-function getWordClass(wordClassString: string): WordClass {
-	return wordClassMappings[wordClassString] ?? 'unknown';
+	const detected = (() => {
+		const exactMatch = localised[exact];
+		if (exactMatch !== undefined) return exactMatch;
+
+		const approximateMatch = localised[approximate];
+		if (approximateMatch !== undefined) return approximateMatch;
+
+		return 'unknown';
+	})();
+
+	return [detected, exact];
 }
 
-export { getSupportedLanguages, getWordClass, loadDictionaryAdapters, loadSentencePairs, resolveToSupportedLanguage };
+export {
+	getPartOfSpeech,
+	getSupportedLanguages,
+	loadDictionaryAdapters,
+	loadSentencePairs,
+	resolveToSupportedLanguage,
+};
 export type { SupportedLanguage };

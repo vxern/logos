@@ -1,50 +1,51 @@
 import { Dexonline } from 'dexonline';
-import { WordClass } from 'logos/src/commands/language/commands/word.ts';
-import { DictionaryAdapter, DictionaryEntry, DictionaryProvisions } from 'logos/src/commands/language/data/types.ts';
-import { getWordClass } from 'logos/src/commands/language/module.ts';
+import { PartOfSpeech } from 'logos/src/commands/language/dictionaries/parts-of-speech.ts';
+import {
+	DictionaryAdapter,
+	DictionaryEntry,
+	DictionaryProvisions,
+} from 'logos/src/commands/language/dictionaries/adapter.ts';
+import { getPartOfSpeech } from 'logos/src/commands/language/module.ts';
 import { Client, localise } from 'logos/src/client.ts';
 import { chunk } from 'logos/src/utils.ts';
 import constants from 'logos/constants.ts';
 import { Language } from 'logos/types.ts';
 
-const classesWithInflections: WordClass[] = ['noun', 'verb', 'adjective', 'determiner'];
+const classesWithInflections: PartOfSpeech[] = ['pronoun', 'noun', 'verb', 'adjective', 'determiner'];
 
-function hasInflections(wordClass: WordClass): boolean {
-	return classesWithInflections.includes(wordClass);
+function hasInflections(partOfSpeech: PartOfSpeech): boolean {
+	return classesWithInflections.includes(partOfSpeech);
 }
 
 type InflectionTable = NonNullable<DictionaryEntry['inflectionTable']>;
 
-class DexonlineAdapter implements DictionaryAdapter {
+class DexonlineAdapter extends DictionaryAdapter<Dexonline.Results> {
+	readonly name = 'Dexonline';
 	readonly supports: Language[] = ['Romanian'];
 	readonly provides = [DictionaryProvisions.Definitions, DictionaryProvisions.Etymology];
 
-	async get(
-		client: Client,
-		word: string,
-		_: Language,
-		locale: string | undefined,
-	): Promise<DictionaryEntry[] | undefined> {
-		const results = await Dexonline.get(word);
-		if (results === undefined) {
-			return undefined;
-		}
+	fetch(lemma: string, _: Language): Promise<Dexonline.Results | undefined> {
+		return Dexonline.get(lemma);
+	}
 
-		const entries = results.synthesis.map<DictionaryEntry>((result) => {
-			const wordClass = getWordClass(result.type);
-			return {
-				word: result.lemma,
+	parse(_: string, results: Dexonline.Results, client: Client, locale: string | undefined): DictionaryEntry[] {
+		const entries: DictionaryEntry[] = [];
+		for (const result of results.synthesis) {
+			const partOfSpeech = getPartOfSpeech(result.type, result.type.split(' ').at(0)!, 'Romanian');
+
+			entries.push({
+				lemma: result.lemma,
 				title: result.lemma,
-				wordClass: [wordClass, result.type],
-				definitions: result.definitions,
+				partOfSpeech,
+				nativeDefinitions: result.definitions,
 				etymologies: result.etymology,
 				expressions: result.expressions,
 				inflectionTable: undefined,
-			};
-		});
+			});
+		}
 
 		for (const { index, lemma, table } of results.inflection) {
-			const entriesByWord = entries.filter((entry) => entry.word === lemma);
+			const entriesByWord = entries.filter((entry) => entry.lemma === lemma);
 			if (entriesByWord.length === 0) continue;
 
 			let entry: DictionaryEntry;
@@ -58,26 +59,29 @@ class DexonlineAdapter implements DictionaryAdapter {
 				entry = entriesByWord.at(index)!;
 			}
 
-			if (entry.wordClass === undefined) continue;
+			if (entry.partOfSpeech === undefined) continue;
 
-			const wordClass = entry.wordClass[0]!;
-			if (!hasInflections(wordClass)) continue;
+			const partOfSpeech = entry.partOfSpeech[0];
+			if (!hasInflections(partOfSpeech)) continue;
 
-			const inflectionTable = this.tableRowsToFields(client, wordClass, table, locale);
+			const inflectionTable = this.tableRowsToFields(client, partOfSpeech, table, locale);
 
 			entry.inflectionTable = inflectionTable;
 		}
 
-		return entries.length === 0 ? undefined : entries;
+		return entries;
 	}
 
 	private tableRowsToFields(
 		client: Client,
-		wordClass: WordClass,
+		partOfSpeech: PartOfSpeech,
 		rows: string[][],
 		locale: string | undefined,
 	): InflectionTable {
-		switch (wordClass) {
+		switch (partOfSpeech) {
+			case 'pronoun': {
+				return this.pronounTableRowsToTable(client, rows, locale);
+			}
 			case 'noun': {
 				return this.nounTableRowsToTable(client, rows, locale);
 			}
@@ -93,6 +97,47 @@ class DexonlineAdapter implements DictionaryAdapter {
 		}
 
 		return [];
+	}
+
+	private pronounTableRowsToTable(client: Client, rows: string[][], locale: string | undefined): InflectionTable {
+		const [nominativeAccusative, genitiveDative] = chunk(
+			rows
+				.slice(1)
+				.map((columns) => columns.slice(2).at(0)!.split(' ').join(', ')),
+			2,
+		);
+
+		const strings = {
+			title: localise(client, 'word.strings.nouns.cases.cases', locale)(),
+			singular: localise(client, 'word.strings.nouns.singular', locale)(),
+			plural: localise(client, 'word.strings.nouns.plural', locale)(),
+			nominativeAccusative: localise(client, 'word.strings.nouns.cases.nominativeAccusative', locale)(),
+			genitiveDative: localise(client, 'word.strings.nouns.cases.genitiveDative', locale)(),
+			vocative: localise(client, 'word.strings.nouns.cases.vocative', locale)(),
+		};
+
+		const numberColumn = {
+			name: constants.symbols.meta.whitespace,
+			value: `**${strings.singular}**\n` + `**${strings.plural}**`,
+			inline: true,
+		};
+
+		return [{
+			title: strings.title,
+			fields: [
+				numberColumn,
+				{
+					name: strings.nominativeAccusative,
+					value: nominativeAccusative!.join('\n'),
+					inline: true,
+				},
+				{
+					name: strings.genitiveDative,
+					value: genitiveDative!.join('\n'),
+					inline: true,
+				},
+			],
+		}];
 	}
 
 	private nounTableRowsToTable(client: Client, rows: string[][], locale: string | undefined): InflectionTable {
@@ -170,12 +215,7 @@ class DexonlineAdapter implements DictionaryAdapter {
 			.slice(2, 3)
 			.map((columns) => columns.slice(2))
 			.at(0)!
-			.map(
-				(word) =>
-					word
-						.split(' ')
-						.at(word.startsWith('(a)') ? 1 : 0)!,
-			);
+			.map((word) => word.split(' ').at(word.startsWith('(a)') ? 1 : 0)!);
 
 		const [present, subjunctive, imperfect, simplePerfect, pluperfect] = rows.slice(5)
 			.map((columns) => columns.slice(2))

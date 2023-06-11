@@ -28,7 +28,8 @@ import * as Sentry from 'sentry';
 import { Node as LavalinkNode, SendGatewayPayload } from 'lavadeno';
 import { MessagePipe } from 'messagepipe';
 import { Log as Logger } from 'tl_log';
-import { DictionaryAdapter, SentencePair } from 'logos/src/commands/language/data/types.ts';
+import { DictionaryAdapter } from 'logos/src/commands/language/dictionaries/adapter.ts';
+import { SentencePair } from 'logos/src/commands/language/commands/game.ts';
 import { SupportedLanguage } from 'logos/src/commands/language/module.ts';
 import {
 	Command,
