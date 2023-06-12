@@ -148,7 +148,7 @@ async function handleFindWord([client, bot]: [Client, Bot], interaction: Interac
 		});
 	}
 
-	const entries = sanitiseEntries(Array.from(entriesByPartOfSpeech.values()).flat());
+	const entries = sanitiseEntries([...Array.from(entriesByPartOfSpeech.values()).flat(), ...unclassifiedEntries]);
 
 	return void displayMenu(
 		[client, bot],

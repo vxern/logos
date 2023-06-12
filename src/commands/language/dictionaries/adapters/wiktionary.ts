@@ -20,7 +20,7 @@ const newlinesExpression = RegExp('\n{1}', 'g');
 
 class WiktionaryAdapter extends DictionaryAdapter<WordData[]> {
 	readonly name = 'Wiktionary';
-	readonly supports = ['Armenian', 'Polish', 'Hungarian', 'Romanian'] as Language[];
+	readonly supports = ['Armenian', 'English', 'Polish', 'Hungarian', 'Romanian'] as Language[];
 	readonly provides = [DictionaryProvisions.Definitions, DictionaryProvisions.Etymology];
 
 	async fetch(lemma: string, language: Language): Promise<WordData[] | undefined> {
@@ -36,7 +36,13 @@ class WiktionaryAdapter extends DictionaryAdapter<WordData[]> {
 		wiktionary.cleanHTML();
 		// @ts-ignore: Accessing private member as a work-around.
 		const data = wiktionary.getWordData(wiktionary.language);
-		if (data.length === 0) return undefined;
+		if (data.length === 0) {
+			// @ts-ignore: Accessing private member as a work-around.
+			const suggestion = wiktionary.dom.getElementById('did-you-mean')?.innerText ?? undefined;
+			if (suggestion === undefined) return undefined;
+
+			return this.fetch(suggestion, language);
+		}
 
 		return data;
 	}
