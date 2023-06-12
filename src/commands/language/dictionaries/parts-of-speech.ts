@@ -6,6 +6,18 @@ type PartOfSpeech =
 	| 'adjective'
 	| 'adverb'
 	| 'adposition'
+	| 'article'
+	| 'proper noun'
+	| 'letter'
+	| 'character'
+	| 'phrase'
+	| 'idiom'
+	| 'symbol'
+	| 'syllable'
+	| 'numeral'
+	| 'initialism'
+	| 'particle'
+	| 'punctuation'
 	| 'affix'
 	| 'pronoun'
 	| 'determiner'
@@ -19,6 +31,18 @@ const partOfSpeechToStringKey: Record<PartOfSpeech, string> = {
 	'adjective': 'words.adjective',
 	'adverb': 'words.adverb',
 	'adposition': 'words.adposition',
+	'article': 'words.article',
+	'proper noun': 'words.properNoun',
+	'letter': 'words.letter',
+	'character': 'words.character',
+	'phrase': 'words.phrase',
+	'idiom': 'words.idiom',
+	'symbol': 'words.symbol',
+	'syllable': 'words.syllable',
+	'numeral': 'words.numeral',
+	'initialism': 'words.initialism',
+	'particle': 'words.particle',
+	'punctuation': 'words.punctuation',
 	'affix': 'words.affix',
 	'pronoun': 'words.pronoun',
 	'determiner': 'words.determiner',
@@ -36,8 +60,25 @@ const partsOfSpeech: Partial<Record<Language, Record<string, PartOfSpeech>>> = {
 		'adjective': 'adjective',
 		'adposition': 'adposition',
 		'preposition': 'adposition',
+		'postposition': 'adposition',
 		'adverb': 'adverb',
 		'affix': 'affix',
+		'prefix': 'affix',
+		'suffix': 'affix',
+		'infix': 'affix',
+		'interfix': 'affix',
+		'article': 'article',
+		'proper noun': 'proper noun',
+		'letter': 'letter',
+		'character': 'character',
+		'phrase': 'phrase',
+		'idiom': 'idiom',
+		'symbol': 'symbol',
+		'syllable': 'syllable',
+		'numeral': 'numeral',
+		'initialism': 'initialism',
+		'particle': 'particle',
+		'punctuation mark': 'punctuation',
 		'conjunction': 'conjunction',
 		'determiner': 'determiner',
 		'interjection': 'interjection',
