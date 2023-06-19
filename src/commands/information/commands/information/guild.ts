@@ -1,5 +1,5 @@
 import { Bot, Channel, ChannelTypes, Embed, Guild, Interaction } from 'discordeno';
-import { getProficiencyCategory } from 'logos/src/commands/social/module.ts';
+import { getProficiencyCategory } from 'logos/src/commands/social/roles/roles.ts';
 import { Client, localise } from 'logos/src/client.ts';
 import { reply } from 'logos/src/interactions.ts';
 import { getGuildIconURLFormatted, snowflakeToTimestamp } from 'logos/src/utils.ts';

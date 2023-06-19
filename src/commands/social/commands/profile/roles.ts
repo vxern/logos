@@ -20,7 +20,7 @@ import {
 	RoleCategory,
 	RoleCategoryTypes,
 } from 'logos/src/commands/social/data/types.ts';
-import { getRelevantCategories, resolveRoles } from 'logos/src/commands/social/module.ts';
+import { getRelevantCategories, resolveRoles } from 'logos/src/commands/social/roles/roles.ts';
 import { Client, localise } from 'logos/src/client.ts';
 import { acknowledge, createInteractionCollector, editReply, reply } from 'logos/src/interactions.ts';
 import constants from 'logos/constants.ts';

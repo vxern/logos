@@ -1,5 +1,5 @@
 import { Bot, ButtonComponent, ButtonStyles, Interaction, MessageComponentTypes } from 'discordeno';
-import { getProficiencyCategory } from 'logos/src/commands/social/module.ts';
+import { getProficiencyCategory } from 'logos/src/commands/social/roles/roles.ts';
 import { EntryStepButtonID } from 'logos/src/services/entry.ts';
 import { Client, localise } from 'logos/src/client.ts';
 import { editReply, encodeId, reply } from 'logos/src/interactions.ts';
