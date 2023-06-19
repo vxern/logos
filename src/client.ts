@@ -96,12 +96,12 @@ function createCache(): Cache {
 type Client = Readonly<{
 	metadata: {
 		version: string;
+		environment: 'production' | 'staging' | 'development' | 'restricted';
 		supportedTranslationLanguages: SupportedLanguage[];
 	};
 	log: Logger;
 	cache: Cache;
 	database: Database;
-	localisations: Map<string, Map<Language, (args: Record<string, unknown>) => string>>;
 	commands: {
 		commands: Command[];
 		handlers: {
@@ -120,12 +120,13 @@ type Client = Readonly<{
 		// The keys are user IDs, the values are command usage timestamps mapped by command IDs.
 		rateLimiting: Map<bigint, Map<bigint, number[]>>;
 	};
+	localisations: Map<string, Map<Language, (args: Record<string, unknown>) => string>>;
 }>;
 
 function createClient(
 	metadata: Client['metadata'],
-	localisationsStatic: Map<string, Map<Language, string>>,
 	features: Client['features'],
+	localisationsStatic: Map<string, Map<Language, string>>,
 ): Client {
 	const localisations = createLocalisations(localisationsStatic);
 
@@ -134,20 +135,20 @@ function createClient(
 
 	return {
 		metadata,
-		log: createLogger(),
+		log: createLogger(metadata.environment),
 		cache: createCache(),
 		database: createDatabase(),
+		features,
 		localisations,
 		commands: { commands, handlers },
 		collectors: new Map(),
-		features,
 	};
 }
 
 async function initialiseClient(
 	metadata: Client['metadata'],
-	localisations: Map<string, Map<Language, string>>,
 	features: Omit<Client['features'], 'music'>,
+	localisations: Map<string, Map<Language, string>>,
 ): Promise<[Client, Bot]> {
 	const musicFeature = createMusicFeature(
 		(guildId, payload) => {
@@ -161,7 +162,7 @@ async function initialiseClient(
 		},
 	);
 
-	const client = createClient(metadata, localisations, { ...features, music: musicFeature });
+	const client = createClient(metadata, { ...features, music: musicFeature }, localisations);
 
 	await prefetchDataFromDatabase(client, client.database);
 
@@ -193,9 +194,9 @@ async function prefetchDataFromDatabase(client: Client, database: Database): Pro
 	]);
 }
 
-function createLogger(): Logger {
+function createLogger(environment: Client['metadata']['environment']): Logger {
 	return new Logger({
-		minLogLevel: Deno.env.get('ENVIRONMENT') === 'development' ? 'debug' : 'info',
+		minLogLevel: environment === 'development' ? 'debug' : 'info',
 		levelIndicator: 'full',
 	});
 }

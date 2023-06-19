@@ -200,7 +200,10 @@ async function initialise(): Promise<[Client, Bot]> {
 
 	readEnvironment({ envConfiguration, templateEnvConfiguration: templateEnvConfiguration! });
 
-	Sentry.init({ dsn: Deno.env.get('SENTRY_SECRET'), environment: Deno.env.get('ENVIRONMENT') });
+	const environment = Deno.env.get('ENVIRONMENT') as Client['metadata']['environment'];
+	Sentry.init({ dsn: Deno.env.get('SENTRY_SECRET'), environment });
+
+	console.debug(`Running in ${environment} mode.`);
 
 	const [version, supportedTranslationLanguages, sentenceFiles] = await Promise.all([
 		readVersion(),
@@ -210,11 +213,11 @@ async function initialise(): Promise<[Client, Bot]> {
 
 	const localisations = await readLocalisations('./assets/localisations');
 
-	return initialiseClient({ version, supportedTranslationLanguages }, localisations, {
+	return initialiseClient({ version, environment, supportedTranslationLanguages }, {
 		dictionaryAdapters: loadDictionaryAdapters(),
 		sentencePairs: loadSentencePairs(sentenceFiles),
 		rateLimiting: new Map(),
-	});
+	}, localisations);
 }
 
 export { initialise };
