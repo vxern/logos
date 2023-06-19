@@ -358,7 +358,7 @@ function displaySelectMenu(
 			back: localise(client, 'profile.options.roles.strings.back', locale)(),
 		};
 
-		selectOptions.push({ label: strings.back, value: `${-1}` });
+		selectOptions.push({ label: trim(strings.back, 25), value: `${-1}` });
 	}
 
 	const category = categories.at(-1)!;
@@ -411,7 +411,7 @@ function createSelectOptionsFromCategories(
 		};
 
 		selections.push({
-			label: `${category.emoji} ${strings.name}`,
+			label: trim(`${category.emoji} ${strings.name}`, 25),
 			value: index.toString(),
 			description: trim(strings.description, 100),
 			emoji: { name: '📁' },
@@ -443,9 +443,9 @@ function createSelectOptionsFromCollection(
 		};
 
 		selectOptions.push({
-			label: memberHasRole ? `[${strings.assigned}] ${strings.name}` : strings.name,
+			label: trim(memberHasRole ? `[${strings.assigned}] ${strings.name}` : strings.name, 25),
 			value: index.toString(),
-			description: client.localisations.has(`${role.id}.description`) ? strings.description() : undefined,
+			description: client.localisations.has(`${role.id}.description`) ? trim(strings.description(), 100) : undefined,
 			emoji: (() => {
 				if (role.emoji === undefined) return;
 				if (emojiExpression.test(role.emoji)) return { name: role.emoji };
