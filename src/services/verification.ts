@@ -3,6 +3,7 @@ import {
 	banMember,
 	Bot,
 	ButtonStyles,
+	calculatePermissions,
 	CreateMessage,
 	deleteMessage,
 	getAvatarURL,
@@ -513,10 +514,9 @@ type NecessaryVotes = [
 ];
 
 function getNecessaryVotes(guild: Guild, entryRequest: EntryRequest): NecessaryVotes {
-	const moderatorRoleIds = guild.roles.array().filter((role) =>
-		[configuration.permissions.moderatorRoleNames.main, ...configuration.permissions.moderatorRoleNames.others]
-			.includes(role.name)
-	)
+	const moderatorRoleIds = guild.roles
+		.array()
+		.filter((role) => calculatePermissions(role.permissions).includes('MODERATE_MEMBERS'))
 		.map((role) => role.id);
 	const moderatorCount = moderatorRoleIds.length !== 0
 		? guild.members.array().filter((member) =>

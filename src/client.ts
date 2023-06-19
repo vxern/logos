@@ -2,8 +2,10 @@ import {
 	ActivityTypes,
 	ApplicationCommandOptionTypes,
 	Bot,
+	calculatePermissions,
 	Channel,
 	createBot,
+	CreateSlashApplicationCommand,
 	createTransformers,
 	DiscordMessage,
 	editShardStatus,
@@ -96,14 +98,17 @@ function createCache(): Cache {
 type Client = Readonly<{
 	metadata: {
 		version: string;
+		environment: 'production' | 'staging' | 'development' | 'restricted';
 		supportedTranslationLanguages: SupportedLanguage[];
 	};
 	log: Logger;
 	cache: Cache;
 	database: Database;
-	localisations: Map<string, Map<Language, (args: Record<string, unknown>) => string>>;
 	commands: {
-		commands: Command[];
+		commands: {
+			visible: Command[];
+			hidden: Command[];
+		};
 		handlers: {
 			execute: Map<string, InteractionHandler>;
 			autocomplete: Map<string, InteractionHandler>;
@@ -120,34 +125,36 @@ type Client = Readonly<{
 		// The keys are user IDs, the values are command usage timestamps mapped by command IDs.
 		rateLimiting: Map<bigint, Map<bigint, number[]>>;
 	};
+	localisations: Map<string, Map<Language, (args: Record<string, unknown>) => string>>;
 }>;
 
 function createClient(
 	metadata: Client['metadata'],
-	localisationsStatic: Map<string, Map<Language, string>>,
 	features: Client['features'],
+	localisationsStatic: Map<string, Map<Language, string>>,
 ): Client {
 	const localisations = createLocalisations(localisationsStatic);
 
 	const commands = localiseCommands(localisations, commandTemplates);
+	const hidden = restrictCommandPermissions(commands);
 	const handlers = createCommandHandlers(commandTemplates);
 
 	return {
 		metadata,
-		log: createLogger(),
+		log: createLogger(metadata.environment),
 		cache: createCache(),
 		database: createDatabase(),
-		localisations,
-		commands: { commands, handlers },
-		collectors: new Map(),
 		features,
+		localisations,
+		commands: { commands: { visible: commands, hidden }, handlers },
+		collectors: new Map(),
 	};
 }
 
 async function initialiseClient(
 	metadata: Client['metadata'],
-	localisations: Map<string, Map<Language, string>>,
 	features: Omit<Client['features'], 'music'>,
+	localisations: Map<string, Map<Language, string>>,
 ): Promise<[Client, Bot]> {
 	const musicFeature = createMusicFeature(
 		(guildId, payload) => {
@@ -161,7 +168,7 @@ async function initialiseClient(
 		},
 	);
 
-	const client = createClient(metadata, localisations, { ...features, music: musicFeature });
+	const client = createClient(metadata, { ...features, music: musicFeature }, localisations);
 
 	await prefetchDataFromDatabase(client, client.database);
 
@@ -193,9 +200,9 @@ async function prefetchDataFromDatabase(client: Client, database: Database): Pro
 	]);
 }
 
-function createLogger(): Logger {
+function createLogger(environment: Client['metadata']['environment']): Logger {
 	return new Logger({
-		minLogLevel: Deno.env.get('ENVIRONMENT') === 'development' ? 'debug' : 'info',
+		minLogLevel: environment === 'development' ? 'debug' : 'info',
 		levelIndicator: 'full',
 	});
 }
@@ -268,7 +275,18 @@ function createEventHandlers(client: Client): Partial<EventHandlers> {
 			});
 		},
 		guildCreate: (bot, guild) => {
-			upsertGuildApplicationCommands(bot, guild.id, client.commands.commands)
+			const commands = (() => {
+				if (client.metadata.environment === 'production' || client.metadata.environment === 'restricted') {
+					return client.commands.commands.visible;
+				}
+
+				const guildId = configuration.guilds.environments[client.metadata.environment];
+				if (guild.id.toString() === guildId) return client.commands.commands.visible;
+
+				return client.commands.commands.hidden;
+			})();
+
+			upsertGuildApplicationCommands(bot, guild.id, commands)
 				.catch((reason) => client.log.warn(`Failed to upsert commands: ${reason}`));
 
 			registerGuild(client, guild);
@@ -599,6 +617,10 @@ function createCommandHandlers(commands: CommandTemplate[]): Client['commands'][
 	return { execute: handlers, autocomplete: autocompleteHandlers };
 }
 
+function restrictCommandPermissions(commands: CreateSlashApplicationCommand[]): CreateSlashApplicationCommand[] {
+	return commands.map((command) => ({ ...command, defaultMemberPermissions: ['ADMINISTRATOR'] }));
+}
+
 function getImplicitLanguage(guild: Guild): Language {
 	const match = configuration.guilds.namePattern.exec(guild.name) ?? undefined;
 	if (match === undefined) return defaultLanguage;
@@ -752,10 +774,9 @@ function resolveIdentifierToMembers(
 	const guild = client.cache.guilds.get(guildId);
 	if (guild === undefined) return undefined;
 
-	const moderatorRoleIds = guild.roles.array().filter((role) =>
-		[configuration.permissions.moderatorRoleNames.main, ...configuration.permissions.moderatorRoleNames.others]
-			.includes(role.name)
-	)
+	const moderatorRoleIds = guild.roles
+		.array()
+		.filter((role) => calculatePermissions(role.permissions).includes('MODERATE_MEMBERS'))
 		.map((role) => role.id);
 	if (moderatorRoleIds.length === 0) return undefined;
 

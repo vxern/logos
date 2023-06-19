@@ -1,14 +1,11 @@
 import { Bot, ButtonComponent, ButtonStyles, Interaction, MessageComponentTypes } from 'discordeno';
-import { getProficiencyCategory } from 'logos/src/commands/social/module.ts';
+import { proficiency } from 'logos/src/commands/social/roles/categories/language.ts';
 import { EntryStepButtonID } from 'logos/src/services/entry.ts';
 import { Client, localise } from 'logos/src/client.ts';
 import { editReply, encodeId, reply } from 'logos/src/interactions.ts';
 import { snowflakeToTimestamp } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import constants from 'logos/constants.ts';
-
-const proficiencyCategory = getProficiencyCategory();
-const proficiencyRoles = proficiencyCategory.collection.list;
 
 async function handleAcceptRules(
 	[client, bot]: [Client, Bot],
@@ -40,7 +37,7 @@ async function handleAcceptRules(
 		}],
 		components: [{
 			type: MessageComponentTypes.ActionRow,
-			components: proficiencyRoles.map<ButtonComponent>(
+			components: proficiency.collection.list.map<ButtonComponent>(
 				(proficiencyRole, index) => {
 					const strings = {
 						name: localise(client, `${proficiencyRole.id}.name`, interaction.locale)(),

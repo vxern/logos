@@ -1,14 +1,10 @@
 import { addRole, Bot, ButtonStyles, Interaction, MessageComponentTypes } from 'discordeno';
-import { getProficiencyCategory } from 'logos/src/commands/social/module.ts';
+import { proficiency } from 'logos/src/commands/social/roles/categories/language.ts';
 import { EntryStepButtonID } from 'logos/src/services/entry.ts';
 import { Client, localise } from 'logos/src/client.ts';
 import { encodeId, reply } from 'logos/src/interactions.ts';
 import configuration from 'logos/configuration.ts';
 import constants from 'logos/constants.ts';
-import { defaultLocale } from 'logos/types.ts';
-
-const proficiencyCategory = getProficiencyCategory();
-const proficiencies = proficiencyCategory.collection.list;
 
 async function handleSelectLanguageProficiency(
 	[client, bot]: [Client, Bot],
@@ -18,18 +14,13 @@ async function handleSelectLanguageProficiency(
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (guild === undefined) return;
 
-	const proficiency = proficiencies[parseInt(parameter)]!;
+	const guildIdString = guild.id.toString();
 
-	const requestedRole = guild.roles.array().find((role) => {
-		const strings = {
-			name: localise(client, `${proficiency.id}.name`, defaultLocale)(),
-		};
+	const roleId = BigInt(proficiency.collection.list[parseInt(parameter)]!.snowflakes[guildIdString]!);
+	const role = guild.roles.get(roleId);
+	if (role === undefined) return;
 
-		return role.name === strings.name;
-	});
-	if (requestedRole === undefined) return;
-
-	const requiresVerification = !configuration.services.entry.verification.disabledOn.includes(guild.language);
+	const requiresVerification = !configuration.services.entry.verification.disabledOn.includes(guildIdString);
 	if (requiresVerification) {
 		const userDocument = await client.database.adapters.users.getOrFetchOrCreate(
 			client,
@@ -73,7 +64,7 @@ async function handleSelectLanguageProficiency(
 						style: ButtonStyles.Secondary,
 						label: strings.description.understood,
 						customId: encodeId<EntryStepButtonID>(constants.staticComponentIds.requestedVerification, [
-							requestedRole.id.toString(),
+							role.id.toString(),
 						]),
 						emoji: { name: constants.symbols.understood },
 					}],
@@ -102,9 +93,9 @@ async function handleSelectLanguageProficiency(
 		}],
 	});
 
-	return void addRole(bot, guild.id, interaction.user.id, requestedRole.id, 'User-requested role addition.').catch(() =>
+	return void addRole(bot, guild.id, interaction.user.id, role.id, 'User-requested role addition.').catch(() =>
 		client.log.warn(
-			`Failed to add role with ID ${requestedRole.id} to member with ID ${interaction.user.id} in guild with ID ${guild.id}.`,
+			`Failed to add role with ID ${role.id} to member with ID ${interaction.user.id} in guild with ID ${guild.id}.`,
 		)
 	);
 }

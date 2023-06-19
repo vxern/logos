@@ -1,15 +1,13 @@
 import { Periods } from 'logos/constants.ts';
-import { Language } from 'logos/types.ts';
+import { Client } from 'logos/src/client.ts';
 
 const configuration = {
-	permissions: {
-		moderatorRoleNames: {
-			main: 'Guide',
-			others: ['Trainee Guide'],
-		},
-	},
 	guilds: {
 		namePattern: new RegExp('^Learn ([A-Z][a-z]*)$'),
+		environments: {
+			'staging': '1055102122137489418',
+			'development': '1055102910658269224',
+		} satisfies Partial<Record<Client['metadata']['environment'], string>>,
 		channels: {
 			logging: 'journal',
 			verification: 'verifications',
@@ -72,7 +70,12 @@ const configuration = {
 		entry: {
 			minimumRequiredAge: 2 * Periods.day,
 			verification: {
-				disabledOn: ['Armenian', 'Romanian'] as Language[],
+				disabledOn: [
+					'432173040638623746', // Learn Romanian
+					'910929726418350110', // Learn Armenian
+					'1055102122137489418', // Staging
+					'1055102910658269224', // Development
+				],
 				proportionVotesToAccept: 0.2,
 				proportionVotesToReject: 0.5,
 				defaultVotesRequired: 2,
