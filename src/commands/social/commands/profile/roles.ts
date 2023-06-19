@@ -14,11 +14,14 @@ import {
 import { OptionTemplate } from 'logos/src/commands/command.ts';
 import roles, { getRoleCategories, getRoles } from 'logos/src/commands/social/roles/roles.ts';
 import {
-	isCategory,
-	isCategoryGroup,
+	isCustom,
+	isGroup,
+	isSingle,
 	Role,
 	RoleCategory,
 	RoleCategoryGroup,
+	RoleCustom,
+	RoleImplicit,
 } from 'logos/src/commands/social/roles/types.ts';
 import { Client, localise } from 'logos/src/client.ts';
 import { acknowledge, createInteractionCollector, editReply, reply } from 'logos/src/interactions.ts';
@@ -129,7 +132,7 @@ function createRoleSelectionMenu(
 	const member = client.cache.members.get(snowflakeToBigint(`${interaction.user.id}${guild.id}`));
 	if (member === undefined) return;
 
-	const rolesByName = new Map(guild.roles.array().map((role) => [role.name, role]));
+	const rolesById = new Map(guild.roles.array().map((role) => [role.id, role]));
 
 	const customId = createInteractionCollector(
 		[client, bot],
@@ -153,7 +156,7 @@ function createRoleSelectionMenu(
 
 				const viewData = displayData.viewData!;
 
-				if (isCategoryGroup(viewData.category)) {
+				if (isGroup(viewData.category)) {
 					data.navigationData.indexesAccessed.push(index);
 					displayData = traverseRoleTreeAndDisplay([client, bot], selection, displayData);
 					return;
@@ -258,7 +261,7 @@ function createRoleSelectionMenu(
 		{
 			customId,
 			browsingData: data,
-			roleData: { emojiIdsByName, rolesByName, memberRoleIds: [...member.roles] },
+			roleData: { emojiIdsByName, rolesById, memberRoleIds: [...member.roles] },
 		},
 		false,
 	);
@@ -266,7 +269,7 @@ function createRoleSelectionMenu(
 
 interface RoleData {
 	emojiIdsByName: Map<string, bigint>;
-	rolesByName: Map<string, DiscordRole>;
+	rolesById: Map<bigint, DiscordRole>;
 	memberRoleIds: bigint[];
 }
 
@@ -295,15 +298,18 @@ function traverseRoleTreeAndDisplay(
 	const category = categories.at(-1)!;
 
 	let selectOptions: SelectOption[];
-	if (isCategory(category)) {
+	if (isSingle(category)) {
 		const menuRoles = getRoles(category.collection, data.browsingData.guildId);
-		const menuRolesResolved = menuRoles.map((role) => {
-			const strings = {
-				name: localise(client, `${role.id}.name`, defaultLocale)(),
-			};
+		const snowflakes = (() => {
+			const collection = category.collection;
+			if (isCustom(collection)) {
+				return (menuRoles as RoleCustom[]).map((role) => BigInt(role.snowflake));
+			}
 
-			return data.roleData.rolesByName.get(strings.name)!;
-		});
+			const guildIdString = interaction.guildId!.toString();
+			return (menuRoles as RoleImplicit[]).map((role) => BigInt(role.snowflakes[guildIdString]!));
+		})();
+		const menuRolesResolved = snowflakes.map((snowflake) => data.roleData.rolesById.get(snowflake)!);
 		const memberRolesIncludedInMenu = data.roleData.memberRoleIds.filter(
 			(roleId) => menuRolesResolved.some((role) => role.id === roleId),
 		);
@@ -383,7 +389,7 @@ function displaySelectMenu(
 				type: MessageComponentTypes.SelectMenu,
 				customId: data.customId,
 				options: selectOptions,
-				placeholder: isCategoryGroup(category) ? strings.chooseCategory : strings.chooseRole,
+				placeholder: isGroup(category) ? strings.chooseCategory : strings.chooseRole,
 			}],
 		}],
 	};

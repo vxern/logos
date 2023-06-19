@@ -10,9 +10,9 @@ const category: RoleCategory = {
 		type: 'custom',
 		lists: {
 			'910929726418350110': [
-				{ id: 'roles.dialects.languages.armenian.roles.western' },
-				{ id: 'roles.dialects.languages.armenian.roles.eastern' },
-				{ id: 'roles.dialects.languages.armenian.roles.karabakh' },
+				{ id: 'roles.dialects.languages.armenian.roles.western', snowflake: '982407478761381898' },
+				{ id: 'roles.dialects.languages.armenian.roles.eastern', snowflake: '982407372733579305' },
+				{ id: 'roles.dialects.languages.armenian.roles.karabakh', snowflake: '1041345453360423033' },
 			],
 		},
 	},

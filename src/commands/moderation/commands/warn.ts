@@ -1,4 +1,4 @@
-import { ApplicationCommandTypes, Bot, editMember, Interaction, sendMessage } from 'discordeno';
+import { ApplicationCommandTypes, Bot, calculatePermissions, editMember, Interaction, sendMessage } from 'discordeno';
 import { CommandTemplate } from 'logos/src/commands/command.ts';
 import { reason, user } from 'logos/src/commands/parameters.ts';
 import { getActiveWarnings } from 'logos/src/commands/moderation/module.ts';
@@ -47,10 +47,9 @@ async function handleWarnUser([client, bot]: [Client, Bot], interaction: Interac
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (guild === undefined) return;
 
-	const moderatorRoleIds = guild.roles.array().filter((role) =>
-		[configuration.permissions.moderatorRoleNames.main, ...configuration.permissions.moderatorRoleNames.others]
-			.includes(role.name)
-	)
+	const moderatorRoleIds = guild.roles
+		.array()
+		.filter((role) => calculatePermissions(role.permissions).includes('MODERATE_MEMBERS'))
 		.map((role) => role.id);
 	if (moderatorRoleIds.length === 0) return undefined;
 

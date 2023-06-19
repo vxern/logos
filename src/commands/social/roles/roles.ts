@@ -5,8 +5,8 @@ import learning from 'logos/src/commands/social/roles/categories/learning.ts';
 import personalisation from 'logos/src/commands/social/roles/categories/personalisation.ts';
 import regions from 'logos/src/commands/social/roles/categories/regions.ts';
 import {
-	isCategoryGroup,
 	isCustom,
+	isGroup,
 	isImplicit,
 	Role,
 	RoleCategory,
@@ -23,7 +23,7 @@ function getRoleCategories(categories: RoleCategory[], guildId: bigint): [catego
 	for (const index of Array(categories.length).keys()) {
 		const category = categories.at(index)!;
 
-		if (isCategoryGroup(category)) {
+		if (isGroup(category)) {
 			selectedRoleCategories.push([category, index]);
 			continue;
 		}

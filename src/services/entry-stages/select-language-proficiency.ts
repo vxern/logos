@@ -5,7 +5,6 @@ import { Client, localise } from 'logos/src/client.ts';
 import { encodeId, reply } from 'logos/src/interactions.ts';
 import configuration from 'logos/configuration.ts';
 import constants from 'logos/constants.ts';
-import { defaultLocale } from 'logos/types.ts';
 
 async function handleSelectLanguageProficiency(
 	[client, bot]: [Client, Bot],
@@ -15,17 +14,13 @@ async function handleSelectLanguageProficiency(
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (guild === undefined) return;
 
-	const roleId = proficiency.collection.list[parseInt(parameter)]!;
-	const role = guild.roles.array().find((role) => {
-		const strings = {
-			name: localise(client, `${roleId}.name`, defaultLocale)(),
-		};
+	const guildIdString = guild.id.toString();
 
-		return role.name === strings.name;
-	});
+	const roleId = BigInt(proficiency.collection.list[parseInt(parameter)]!.snowflakes[guildIdString]!);
+	const role = guild.roles.get(roleId);
 	if (role === undefined) return;
 
-	const requiresVerification = !configuration.services.entry.verification.disabledOn.includes(guild.id.toString());
+	const requiresVerification = !configuration.services.entry.verification.disabledOn.includes(guildIdString);
 	if (requiresVerification) {
 		const userDocument = await client.database.adapters.users.getOrFetchOrCreate(
 			client,

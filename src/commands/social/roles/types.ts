@@ -1,10 +1,20 @@
 /** Represents a selectable role within a role selection menu.  */
-interface Role {
+interface RoleBase {
 	id: string;
 
 	/** Emoji to be displayed next to the role name. */
 	emoji?: string;
 }
+
+interface RoleImplicit extends RoleBase {
+	snowflakes: Record<string, string>;
+}
+
+interface RoleCustom extends RoleBase {
+	snowflake: string;
+}
+
+type Role = RoleImplicit | RoleCustom;
 
 /** The type of role category. */
 type RoleCategoryTypes =
@@ -23,7 +33,7 @@ interface RoleCategoryBase {
 	type: RoleCategoryTypes;
 
 	/** This category's identifier. */
-	id?: string;
+	id: string;
 
 	/** The colour to be displayed in the embed message when this category is selected. */
 	color: number;
@@ -53,11 +63,11 @@ interface RoleCategoryGroup extends RoleCategoryBase {
 /** Represents a thematic selection of {@link Role}s. */
 type RoleCategory = RoleCategorySingle | RoleCategoryGroup;
 
-function isCategory(category: RoleCategory): category is RoleCategorySingle {
+function isSingle(category: RoleCategory): category is RoleCategorySingle {
 	return category.type === 'single';
 }
 
-function isCategoryGroup(category: RoleCategory): category is RoleCategoryGroup {
+function isGroup(category: RoleCategory): category is RoleCategoryGroup {
 	return category.type === 'group';
 }
 
@@ -83,7 +93,7 @@ interface RoleCollectionImplicit extends RoleCollectionBase {
 	type: 'implicit';
 
 	/** The roles in this role collection. */
-	list: Role[];
+	list: RoleImplicit[];
 }
 
 /** The base of a custom role collection. */
@@ -91,7 +101,7 @@ interface RoleCollectionCustom extends RoleCollectionBase {
 	type: 'custom';
 
 	/** Groups of roles defined by guild ID in this role collection. */
-	lists: Record<string, Role[]>;
+	lists: Record<string, RoleCustom[]>;
 }
 
 /** Represents a grouping of roles. */
@@ -105,7 +115,7 @@ function isCustom(collection: RoleCollection): collection is RoleCollectionCusto
 	return collection.type === 'custom';
 }
 
-export { isCategory, isCategoryGroup, isCustom, isImplicit };
+export { isCustom, isGroup, isImplicit, isSingle };
 export type {
 	Role,
 	RoleCategory,
@@ -114,4 +124,6 @@ export type {
 	RoleCategorySingle,
 	RoleCollection,
 	RoleCollectionImplicit,
+	RoleCustom,
+	RoleImplicit,
 };

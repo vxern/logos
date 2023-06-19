@@ -5,7 +5,6 @@ import { reply } from 'logos/src/interactions.ts';
 import { getGuildIconURLFormatted, snowflakeToTimestamp } from 'logos/src/utils.ts';
 import constants from 'logos/constants.ts';
 import { mention, MentionTypes, timestamp } from 'logos/formatting.ts';
-import { defaultLocale } from 'logos/types.ts';
 
 /** Displays information about the guild that this command was executed in. */
 function handleDisplayGuildInformation([client, bot]: [Client, Bot], interaction: Interaction): void {
@@ -140,17 +139,13 @@ type ProficiencyRoleDistribution = [withRole: [roleId: bigint, frequency: number
 
 /** Gets the distribution of proficiency roles of a guild's members. */
 function getDistribution(client: Client, guild: Guild): ProficiencyRoleDistribution {
-	const proficiencyRoleNames = proficiency.collection.list.map((proficiency) => {
-		const strings = {
-			name: localise(client, `${proficiency.id}.name`, defaultLocale)(),
-		};
+	const guildIdString = guild.id.toString();
 
-		return strings.name;
-	});
-	const proficiencyRoles = guild.roles.array()
-		.filter((role) => proficiencyRoleNames.includes(role.name))
-		.toSorted((a, b) => a.position - b.position);
-	const proficiencyRoleIds = proficiencyRoles.map((role) => role.id);
+	const proficiencyRoleIdsUnsorted = proficiency.collection.list
+		.map((role) => BigInt(role.snowflakes[guildIdString]!));
+	const proficiencyRoleIds = proficiencyRoleIdsUnsorted.map((roleId) => guild.roles.get(roleId)!)
+		.toSorted((a, b) => a.position - b.position)
+		.map((role) => role.id);
 
 	const members = guild.members.array().filter((member) => !client.cache.users.get(member.id)?.toggles.bot);
 
