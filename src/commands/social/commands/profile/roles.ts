@@ -12,8 +12,7 @@ import {
 	snowflakeToBigint,
 } from 'discordeno';
 import { OptionTemplate } from 'logos/src/commands/command.ts';
-import roles from 'logos/src/commands/social/roles/categories/roles.ts';
-import {
+import roles, {
 	isCategory,
 	isCategoryGroup,
 	Role,

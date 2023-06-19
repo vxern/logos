@@ -1,5 +1,5 @@
 import { Bot, Channel, ChannelTypes, Embed, Guild, Interaction } from 'discordeno';
-import { getProficiencyCategory } from 'logos/src/commands/social/roles/roles.ts';
+import { proficiency } from 'logos/src/commands/social/roles/categories/language.ts';
 import { Client, localise } from 'logos/src/client.ts';
 import { reply } from 'logos/src/interactions.ts';
 import { getGuildIconURLFormatted, snowflakeToTimestamp } from 'logos/src/utils.ts';
@@ -140,9 +140,7 @@ type ProficiencyRoleDistribution = [withRole: [roleId: bigint, frequency: number
 
 /** Gets the distribution of proficiency roles of a guild's members. */
 function getDistribution(client: Client, guild: Guild): ProficiencyRoleDistribution {
-	const proficiencyCategory = getProficiencyCategory();
-	const proficiencies = proficiencyCategory.collection.list;
-	const proficiencyRoleNames = proficiencies.map((proficiency) => {
+	const proficiencyRoleNames = proficiency.collection.list.map((proficiency) => {
 		const strings = {
 			name: localise(client, `${proficiency.id}.name`, defaultLocale)(),
 		};

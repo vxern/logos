@@ -1,20 +1,12 @@
-import roles from 'logos/src/commands/social/roles/categories/roles.ts';
+import dialects from 'logos/src/commands/social/roles/categories/dialects.ts';
+import ethnicity from 'logos/src/commands/social/roles/categories/ethnicity.ts';
+import language from 'logos/src/commands/social/roles/categories/language.ts';
+import learning from 'logos/src/commands/social/roles/categories/learning.ts';
+import personalisation from 'logos/src/commands/social/roles/categories/personalisation.ts';
+import regions from 'logos/src/commands/social/roles/categories/regions.ts';
 import { Language } from 'logos/types.ts';
 
-type ProficiencyCategory = RoleCategory & {
-	type: RoleCategoryTypes.Category;
-	collection: RoleCollection & { type: RoleCollectionTypes.Collection };
-};
-
-/**
- * Finds and returns the 'Proficiency' category.
- *
- * @returns The category with proficiency roles.
- */
-function getProficiencyCategory(): ProficiencyCategory {
-	return (roles.find((category) => category.id === 'roles.language')! as RoleCategoryGroup)
-		.categories.find((category) => category.id === 'roles.language.categories.proficiency') as ProficiencyCategory;
-}
+const categories: RoleCategory[] = [language, learning, dialects, personalisation, regions, ethnicity];
 
 function getRelevantCategories(categories: RoleCategory[], language: Language | undefined): [RoleCategory, number][] {
 	const selectedRoleCategories: [RoleCategory, number][] = [];
@@ -169,7 +161,6 @@ function isLocalised(collection: RoleCollection): collection is RoleCollectionLo
 }
 
 export {
-	getProficiencyCategory,
 	getRelevantCategories,
 	isCategory,
 	isCategoryGroup,
@@ -179,4 +170,13 @@ export {
 	RoleCategoryTypes,
 	RoleCollectionTypes,
 };
-export type { Role, RoleCategory, RoleCategoryBase, RoleCategoryGroup, RoleCategoryStandalone, RoleCollection };
+export type {
+	Role,
+	RoleCategory,
+	RoleCategoryBase,
+	RoleCategoryGroup,
+	RoleCategoryStandalone,
+	RoleCollection,
+	RoleCollectionStandalone,
+};
+export default categories;
