@@ -1,21 +1,15 @@
-import {
-	RoleCategory,
-	RoleCategoryStandalone,
-	RoleCategoryTypes,
-	RoleCollectionStandalone,
-	RoleCollectionTypes,
-} from 'logos/src/commands/social/roles/roles.ts';
+import { RoleCategory, RoleCategorySingle, RoleCollectionImplicit } from 'logos/src/commands/social/roles/types.ts';
 import constants from 'logos/constants.ts';
 
-const proficiency: RoleCategoryStandalone & { collection: RoleCollectionStandalone } = {
+const proficiency: RoleCategorySingle & { collection: RoleCollectionImplicit } = {
+	type: 'single',
 	id: 'roles.language.categories.proficiency',
-	type: RoleCategoryTypes.Category,
 	color: constants.colors.gray,
 	emoji: constants.symbols.roles.categories.language.proficiency.category,
 	minimum: 1,
 	maximum: 1,
 	collection: {
-		type: RoleCollectionTypes.Collection,
+		type: 'implicit',
 		list: [{
 			id: 'roles.language.categories.proficiency.roles.beginner',
 			emoji: constants.symbols.roles.categories.language.proficiency.beginner,
@@ -33,18 +27,18 @@ const proficiency: RoleCategoryStandalone & { collection: RoleCollectionStandalo
 };
 
 const category: RoleCategory = {
+	type: 'group',
 	id: 'roles.language',
 	color: constants.colors.gray,
 	emoji: constants.symbols.roles.categories.language.category,
-	type: RoleCategoryTypes.CategoryGroup,
 	categories: [proficiency, {
+		type: 'single',
 		id: 'roles.language.categories.cefr',
-		type: RoleCategoryTypes.Category,
 		color: constants.colors.blue,
 		emoji: constants.symbols.roles.categories.language.cefr.category,
 		maximum: 1,
 		collection: {
-			type: RoleCollectionTypes.Collection,
+			type: 'implicit',
 			list: [{
 				id: 'roles.language.categories.cefr.roles.a0',
 				emoji: constants.symbols.roles.categories.language.cefr.a0,

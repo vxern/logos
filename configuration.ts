@@ -1,5 +1,4 @@
 import { Periods } from 'logos/constants.ts';
-import { Language } from 'logos/types.ts';
 
 const configuration = {
 	permissions: {
@@ -72,7 +71,10 @@ const configuration = {
 		entry: {
 			minimumRequiredAge: 2 * Periods.day,
 			verification: {
-				disabledOn: ['Armenian', 'Romanian'] as Language[],
+				disabledOn: [
+					'432173040638623746', // Learn Romanian
+					'910929726418350110', // Learn Armenia',
+				],
 				proportionVotesToAccept: 0.2,
 				proportionVotesToReject: 0.5,
 				defaultVotesRequired: 2,

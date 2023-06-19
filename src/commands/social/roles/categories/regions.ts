@@ -1,16 +1,16 @@
-import { RoleCategory, RoleCategoryTypes, RoleCollectionTypes } from 'logos/src/commands/social/roles/roles.ts';
+import { RoleCategory } from 'logos/src/commands/social/roles/types.ts';
 import constants from 'logos/constants.ts';
 
 const category: RoleCategory = {
+	type: 'single',
 	id: 'roles.regions',
-	type: RoleCategoryTypes.Category,
 	color: constants.colors.greenishLightGray,
 	emoji: constants.symbols.roles.categories.regions.category,
 	maximum: 2,
 	collection: {
-		type: RoleCollectionTypes.CollectionLocalised,
+		type: 'custom',
 		lists: {
-			'Armenian': [
+			'910929726418350110': [
 				{ id: 'roles.regions.languages.armenian.roles.aragatsotn' },
 				{ id: 'roles.regions.languages.armenian.roles.ararat' },
 				{ id: 'roles.regions.languages.armenian.roles.armavir' },
@@ -23,7 +23,7 @@ const category: RoleCategory = {
 				{ id: 'roles.regions.languages.armenian.roles.vayotsdzor' },
 				{ id: 'roles.regions.languages.armenian.roles.yerevan' },
 			],
-			'Romanian': [
+			'432173040638623746': [
 				{ id: 'roles.regions.languages.romanian.roles.banat' },
 				{ id: 'roles.regions.languages.romanian.roles.basarabia' },
 				{ id: 'roles.regions.languages.romanian.roles.bucovina' },

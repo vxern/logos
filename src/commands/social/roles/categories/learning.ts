@@ -1,13 +1,13 @@
-import { RoleCategory, RoleCategoryTypes, RoleCollectionTypes } from 'logos/src/commands/social/roles/roles.ts';
+import { RoleCategory } from 'logos/src/commands/social/roles/types.ts';
 import constants from 'logos/constants.ts';
 
 const category: RoleCategory = {
+	type: 'single',
 	id: 'roles.learning',
-	type: RoleCategoryTypes.Category,
 	color: constants.colors.lightGray,
 	emoji: constants.symbols.roles.categories.learning.category,
 	collection: {
-		type: RoleCollectionTypes.Collection,
+		type: 'implicit',
 		list: [{
 			id: 'roles.learning.roles.classroomAttendee',
 			emoji: constants.symbols.roles.categories.learning.classroomAttendee,

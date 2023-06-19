@@ -25,7 +25,7 @@ async function handleSelectLanguageProficiency(
 	});
 	if (role === undefined) return;
 
-	const requiresVerification = !configuration.services.entry.verification.disabledOn.includes(guild.language);
+	const requiresVerification = !configuration.services.entry.verification.disabledOn.includes(guild.id.toString());
 	if (requiresVerification) {
 		const userDocument = await client.database.adapters.users.getOrFetchOrCreate(
 			client,

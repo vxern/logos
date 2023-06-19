@@ -12,19 +12,19 @@ import {
 	snowflakeToBigint,
 } from 'discordeno';
 import { OptionTemplate } from 'logos/src/commands/command.ts';
-import roles, {
+import roles, { getRoleCategories, getRoles } from 'logos/src/commands/social/roles/roles.ts';
+import {
 	isCategory,
 	isCategoryGroup,
 	Role,
 	RoleCategory,
-	RoleCategoryTypes,
-} from 'logos/src/commands/social/roles/roles.ts';
-import { getRelevantCategories, resolveRoles } from 'logos/src/commands/social/roles/roles.ts';
+	RoleCategoryGroup,
+} from 'logos/src/commands/social/roles/types.ts';
 import { Client, localise } from 'logos/src/client.ts';
 import { acknowledge, createInteractionCollector, editReply, reply } from 'logos/src/interactions.ts';
 import constants from 'logos/constants.ts';
 import { trim } from 'logos/formatting.ts';
-import { defaultLocale, Language } from 'logos/types.ts';
+import { defaultLocale } from 'logos/types.ts';
 
 const command: OptionTemplate = {
 	name: 'roles',
@@ -40,7 +40,7 @@ function handleOpenRoleSelectionMenu([client, bot]: [Client, Bot], interaction: 
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (guild === undefined) return;
 
-	const rootCategories = getRelevantCategories(roles, guild.language).map(([category, _index]) => category);
+	const rootCategories = getRoleCategories(roles, guild.id).map(([category, _index]) => category);
 
 	return createRoleSelectionMenu(
 		[client, bot],
@@ -48,7 +48,7 @@ function handleOpenRoleSelectionMenu([client, bot]: [Client, Bot], interaction: 
 		{
 			navigationData: {
 				root: {
-					type: RoleCategoryTypes.CategoryGroup,
+					type: 'group',
 					id: 'roles.noCategory',
 					color: constants.colors.invisible,
 					emoji: constants.symbols.roles.noCategory,
@@ -56,7 +56,7 @@ function handleOpenRoleSelectionMenu([client, bot]: [Client, Bot], interaction: 
 				},
 				indexesAccessed: [],
 			},
-			language: guild.language,
+			guildId: guild.id,
 		},
 	);
 }
@@ -72,13 +72,9 @@ interface BrowsingData {
 	 */
 	navigationData: NavigationData;
 
-	/** The language of the guild where the interaction was made. */
-	language?: Language;
+	/** The ID of the guild where the interaction was made. */
+	guildId: bigint;
 }
-
-type CategoryGroupRoleCategory = RoleCategory & {
-	type: RoleCategoryTypes.CategoryGroup;
-};
 
 /**
  * Represents a template for data used in navigation between sections of the
@@ -89,7 +85,7 @@ interface NavigationData {
 	 * The root category, which is not part of another category's list of
 	 * categories.
 	 */
-	root: CategoryGroupRoleCategory;
+	root: RoleCategoryGroup;
 
 	/**
 	 * A stack containing the indexes accessed in succession to arrive at the
@@ -108,7 +104,7 @@ interface NavigationData {
 function traverseRoleSelectionTree(data: NavigationData): [RoleCategory, ...RoleCategory[]] {
 	return data.indexesAccessed.reduce<[RoleCategory, ...RoleCategory[]]>(
 		(categories, next) => {
-			categories.push((categories.at(-1)! as CategoryGroupRoleCategory).categories.at(next)!);
+			categories.push((categories.at(-1)! as RoleCategoryGroup).categories.at(next)!);
 			return categories;
 		},
 		[data.root],
@@ -300,7 +296,7 @@ function traverseRoleTreeAndDisplay(
 
 	let selectOptions: SelectOption[];
 	if (isCategory(category)) {
-		const menuRoles = resolveRoles(category.collection, data.browsingData.language);
+		const menuRoles = getRoles(category.collection, data.browsingData.guildId);
 		const menuRolesResolved = menuRoles.map((role) => {
 			const strings = {
 				name: localise(client, `${role.id}.name`, defaultLocale)(),
@@ -323,7 +319,7 @@ function traverseRoleTreeAndDisplay(
 		selectOptions = createSelectOptionsFromCategories(
 			client,
 			category.categories!,
-			data.browsingData.language,
+			data.browsingData.guildId,
 			interaction.locale,
 		);
 	}
@@ -396,10 +392,10 @@ function displaySelectMenu(
 function createSelectOptionsFromCategories(
 	client: Client,
 	categories: RoleCategory[],
-	language: Language | undefined,
+	guildId: bigint,
 	locale: string | undefined,
 ): SelectOption[] {
-	const categorySelections = getRelevantCategories(categories, language);
+	const categorySelections = getRoleCategories(categories, guildId);
 
 	const selections: SelectOption[] = [];
 	for (const [category, index] of categorySelections) {
