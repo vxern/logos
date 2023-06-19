@@ -12,14 +12,14 @@ import {
 	snowflakeToBigint,
 } from 'discordeno';
 import { OptionTemplate } from 'logos/src/commands/command.ts';
-import roles from 'logos/src/commands/social/data/roles.ts';
+import roles from 'logos/src/commands/social/roles/categories/roles.ts';
 import {
 	isCategory,
 	isCategoryGroup,
 	Role,
 	RoleCategory,
 	RoleCategoryTypes,
-} from 'logos/src/commands/social/data/types.ts';
+} from 'logos/src/commands/social/roles/roles.ts';
 import { getRelevantCategories, resolveRoles } from 'logos/src/commands/social/roles/roles.ts';
 import { Client, localise } from 'logos/src/client.ts';
 import { acknowledge, createInteractionCollector, editReply, reply } from 'logos/src/interactions.ts';

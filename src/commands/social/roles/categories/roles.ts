@@ -1,4 +1,4 @@
-import { RoleCategory, RoleCategoryTypes, RoleCollectionTypes } from 'logos/src/commands/social/data/types.ts';
+import { RoleCategory, RoleCategoryTypes, RoleCollectionTypes } from 'logos/src/commands/social/roles/roles.ts';
 import constants from 'logos/constants.ts';
 
 const categories: RoleCategory[] = [
