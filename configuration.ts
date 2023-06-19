@@ -1,14 +1,13 @@
 import { Periods } from 'logos/constants.ts';
+import { Client } from 'logos/src/client.ts';
 
 const configuration = {
-	permissions: {
-		moderatorRoleNames: {
-			main: 'Guide',
-			others: ['Trainee Guide'],
-		},
-	},
 	guilds: {
 		namePattern: new RegExp('^Learn ([A-Z][a-z]*)$'),
+		environments: {
+			'staging': '1055102122137489418',
+			'development': '1055102910658269224',
+		} satisfies Partial<Record<Client['metadata']['environment'], string>>,
 		channels: {
 			logging: 'journal',
 			verification: 'verifications',
