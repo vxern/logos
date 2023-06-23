@@ -1,4 +1,4 @@
-import { Dexonline } from 'dexonline';
+import * as Dexonline from 'dexonline';
 import { PartOfSpeech } from 'logos/src/commands/language/dictionaries/parts-of-speech.ts';
 import {
 	DictionaryAdapter,
@@ -25,7 +25,7 @@ class DexonlineAdapter extends DictionaryAdapter<Dexonline.Results> {
 	readonly provides = [DictionaryProvisions.Definitions, DictionaryProvisions.Etymology];
 
 	fetch(lemma: string, _: Language): Promise<Dexonline.Results | undefined> {
-		return Dexonline.get(lemma);
+		return Dexonline.get(lemma, { mode: 'strict' });
 	}
 
 	parse(_: string, results: Dexonline.Results, client: Client, locale: string | undefined): DictionaryEntry[] {
@@ -44,27 +44,21 @@ class DexonlineAdapter extends DictionaryAdapter<Dexonline.Results> {
 			});
 		}
 
-		for (const { index, lemma, table } of results.inflection) {
-			const entriesByWord = entries.filter((entry) => entry.lemma === lemma);
-			if (entriesByWord.length === 0) continue;
+		for (const { table } of results.inflection) {
+			const partsOfSpeech = table.at(0)!.at(0)!.split('(').at(0)!.trim().split(' / ');
+			const withInflections = partsOfSpeech.map((partOfSpeech) =>
+				getPartOfSpeech(partOfSpeech, partOfSpeech.split(' ').at(0)!, 'Romanian')
+			).filter((partOfSpeech) => hasInflections(partOfSpeech[0]));
+			if (withInflections.length === 0) continue;
 
-			let entry: DictionaryEntry;
-			// If the inflection table entry is not indexed, rely on the entries being ordered.
-			if (index === 0) {
-				entry = entriesByWord.find((entry) => entry.inflectionTable === undefined)!;
-			} // Otherwise, use the index directly.
-			else {
-				if (index >= entriesByWord.length) continue;
+			const entry = entries.find((entry) =>
+				withInflections.some((partOfSpeech) =>
+					entry.partOfSpeech[1] === partOfSpeech[1] || entry.partOfSpeech[0] === partOfSpeech[0]
+				)
+			);
+			if (entry === undefined) continue;
 
-				entry = entriesByWord.at(index)!;
-			}
-
-			if (entry.partOfSpeech === undefined) continue;
-
-			const partOfSpeech = entry.partOfSpeech[0];
-			if (!hasInflections(partOfSpeech)) continue;
-
-			const inflectionTable = this.tableRowsToFields(client, partOfSpeech, table, locale);
+			const inflectionTable = this.tableRowsToFields(client, entry.partOfSpeech[0], table, locale);
 
 			entry.inflectionTable = inflectionTable;
 		}
@@ -75,35 +69,33 @@ class DexonlineAdapter extends DictionaryAdapter<Dexonline.Results> {
 	private tableRowsToFields(
 		client: Client,
 		partOfSpeech: PartOfSpeech,
-		rows: string[][],
+		table: string[][],
 		locale: string | undefined,
 	): InflectionTable {
 		switch (partOfSpeech) {
 			case 'pronoun': {
-				return this.pronounTableRowsToTable(client, rows, locale);
+				return this.pronounTableToFields(client, table, locale);
 			}
 			case 'noun': {
-				return this.nounTableRowsToTable(client, rows, locale);
+				return this.nounTableToFields(client, table, locale);
 			}
 			case 'verb': {
-				return this.verbTableRowsToTable(client, rows, locale);
+				return this.verbTableToFields(client, table, locale);
 			}
 			case 'adjective': {
-				return this.adjectiveTableRowsToTable(client, rows, locale);
+				return this.adjectiveTableToFields(client, table, locale);
 			}
 			case 'determiner': {
-				return this.determinerTableRowsToTable(client, rows, locale);
+				return this.determinerTableToFields(client, table, locale);
 			}
 		}
 
 		return [];
 	}
 
-	private pronounTableRowsToTable(client: Client, rows: string[][], locale: string | undefined): InflectionTable {
+	private pronounTableToFields(client: Client, table: string[][], locale: string | undefined): InflectionTable {
 		const [nominativeAccusative, genitiveDative] = chunk(
-			rows
-				.slice(1)
-				.map((columns) => columns.slice(2).at(0)!.split(' ').join(', ')),
+			table.slice(1).map((columns) => columns.slice(2).join(', ')),
 			2,
 		);
 
@@ -133,28 +125,16 @@ class DexonlineAdapter extends DictionaryAdapter<Dexonline.Results> {
 				},
 				{
 					name: strings.genitiveDative,
-					value: genitiveDative!.join('\n'),
+					value: genitiveDative!.map((part) => part.split(', ').at(0)!).join('\n'),
 					inline: true,
 				},
 			],
 		}];
 	}
 
-	private nounTableRowsToTable(client: Client, rows: string[][], locale: string | undefined): InflectionTable {
+	private nounTableToFields(client: Client, table: string[][], locale: string | undefined): InflectionTable {
 		const [nominativeAccusative, genitiveDative, vocative] = chunk(
-			rows
-				.slice(1)
-				.map(
-					(columns) =>
-						columns
-							.slice(2)
-							.map(
-								(terms) =>
-									terms
-										.split(' ')
-										.filter((term) => !term.endsWith('‑')).join(' '),
-							),
-				),
+			table.slice(1).map((columns) => columns.slice(2)),
 			2,
 		);
 
@@ -162,7 +142,7 @@ class DexonlineAdapter extends DictionaryAdapter<Dexonline.Results> {
 			for (const row of vocative) {
 				row.pop();
 			}
-			vocative[0] = vocative[0]![0]!.split(' ');
+			vocative[0] = vocative[0]![0]!.split(', ');
 		}
 
 		const strings = {
@@ -210,22 +190,18 @@ class DexonlineAdapter extends DictionaryAdapter<Dexonline.Results> {
 		}];
 	}
 
-	private verbTableRowsToTable(client: Client, rows: string[][], locale: string | undefined): InflectionTable {
-		const [infinitive, longInfinitive, pastParticiple, presentParticiple, imperativeSingle, imperativePlural] = rows
+	private verbTableToFields(client: Client, table: string[][], locale: string | undefined): InflectionTable {
+		const [infinitive, longInfinitive, pastParticiple, presentParticiple, imperativeSingle, imperativePlural] = table
 			.slice(2, 3)
 			.map((columns) => columns.slice(2))
-			.at(0)!
-			.map((word) => word.split(' ').at(word.startsWith('(a)') ? 1 : 0)!);
+			.at(0)!;
 
-		const [present, subjunctive, imperfect, simplePerfect, pluperfect] = rows.slice(5)
+		const [present, subjunctive, imperfect, simplePerfect, pluperfect] = table.slice(5)
 			.map((columns) => columns.slice(2))
 			.reduce<string[][]>(
 				(columns, row) => {
 					for (const [element, index] of row.map<[string, number]>((r, i) => [r, i])) {
-						columns[index] = [
-							...(columns[index] ?? []),
-							element.split(' ').at(element.startsWith('(să)') ? 1 : 0)!,
-						];
+						columns[index] = [...(columns[index] ?? []), element];
 					}
 					return columns;
 				},
@@ -452,23 +428,8 @@ class DexonlineAdapter extends DictionaryAdapter<Dexonline.Results> {
 		];
 	}
 
-	private adjectiveTableRowsToTable(client: Client, rows: string[][], locale: string | undefined): InflectionTable {
-		const [nominativeAccusative, genitiveDative] = chunk(
-			rows
-				.slice(2)
-				.map(
-					(columns) =>
-						columns
-							.slice(2, 8)
-							.map(
-								(terms) =>
-									terms
-										.split(' ')
-										.filter((term) => !term.endsWith('‑')).join(' '),
-							),
-				),
-			2,
-		);
+	private adjectiveTableToFields(client: Client, table: string[][], locale: string | undefined): InflectionTable {
+		const [nominativeAccusative, genitiveDative] = chunk(table.slice(2).map((columns) => columns.slice(2, 8)), 2);
 
 		const strings = {
 			title: localise(client, 'word.strings.nouns.cases.cases', locale)(),
@@ -502,24 +463,8 @@ class DexonlineAdapter extends DictionaryAdapter<Dexonline.Results> {
 		}];
 	}
 
-	private determinerTableRowsToTable(client: Client, rows: string[][], locale: string | undefined): InflectionTable {
-		const [nominativeAccusative, genitiveDative] = chunk(
-			rows
-				.slice(2)
-				.map(
-					(columns) =>
-						columns
-							.slice(2, 8)
-							.map(
-								(terms) =>
-									terms
-										.split(' ')
-										.filter((term) => !term.endsWith('‑'))
-										.join(' '),
-							),
-				),
-			2,
-		);
+	private determinerTableToFields(client: Client, table: string[][], locale: string | undefined): InflectionTable {
+		const [nominativeAccusative, genitiveDative] = chunk(table.slice(2).map((columns) => columns.slice(2, 8)), 2);
 
 		const strings = {
 			title: localise(client, 'word.strings.nouns.cases.cases', locale)(),
