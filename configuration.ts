@@ -68,7 +68,7 @@ const configuration = {
 	},
 	services: {
 		entry: {
-			minimumRequiredAge: 2 * Periods.day,
+			minimumRequiredAge: Periods.month,
 			verification: {
 				disabledOn: [
 					'432173040638623746', // Learn Romanian
