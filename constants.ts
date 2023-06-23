@@ -33,8 +33,8 @@ const links = {
 	learnArmenianListingWebsite: 'https://discord.me/learnarmenian',
 	learnRomanianListingWebsite: 'https://discord.me/learnromanian',
 
-	talonRepositoryLink: 'https://github.com/wordcollector/talon',
-	generateLanguageRepositoryLink: (language: Language) => `https://github.com/wordcollector/${language.toLowerCase()}`,
+	talonRepositoryLink: 'https://github.com/vxern/talon',
+	generateLanguageRepositoryLink: (language: Language) => `https://github.com/vxern/${language.toLowerCase()}`,
 
 	generateDiscordInviteLink: (inviteCode: string) => `https://discord.gg/${inviteCode}`,
 };
