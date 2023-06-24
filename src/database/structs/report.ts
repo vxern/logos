@@ -12,7 +12,7 @@ interface Report {
 	guild: string;
 
 	/** The document reference to the users this report concerns. */
-	recipients: Reference[];
+	users: string;
 
 	/** The reason for this report. */
 	reason: string;

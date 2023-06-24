@@ -16,7 +16,6 @@ type PraiseIndexes<T = Map<string, Document<Praise>>> = {
 
 type ReportIndexes<T = Map<string, Document<Report>>> = {
 	authorAndGuild: [takes: [Reference, string], returns: T];
-	recipientAndGuild: [takes: [Reference, string], returns: T];
 };
 
 type SuggestionIndexes<T = Map<string, Document<Suggestion>>> = {

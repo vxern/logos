@@ -258,7 +258,7 @@ function generateSuggestionModal<T extends string>(client: Client, locale: strin
 				label: trim(strings.suggestion, 45),
 				style: TextStyles.Paragraph,
 				required: true,
-				minLength: 20,
+				minLength: 16,
 				maxLength: 256,
 			}],
 		}],

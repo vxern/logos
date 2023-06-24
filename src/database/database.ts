@@ -183,14 +183,6 @@ interface Cache extends Record<string, Map<string, unknown>> {
 	reportsByAuthorAndGuild: Map<string, Map<string, Document<Report>>>;
 
 	/**
-	 * Cached user reports.
-	 *
-	 * The keys are stringified user document references combined with guild IDs.\
-	 * The values are report documents mapped by their stringified document reference.
-	 */
-	reportsByRecipientAndGuild: Map<string, Map<string, Document<Report>>>;
-
-	/**
 	 * Cached suggestions.
 	 *
 	 * The keys are stringified user document references combined with guild IDs.\
