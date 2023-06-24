@@ -1,6 +1,6 @@
 import { addRole, Bot, ButtonStyles, Interaction, MessageComponentTypes } from 'discordeno';
 import { proficiency } from 'logos/src/commands/social/roles/categories/language.ts';
-import { EntryStepButtonID } from 'logos/src/services/entry.ts';
+import { EntryStepButtonID } from 'logos/src/services/entry/entry.ts';
 import { Client, localise } from 'logos/src/client.ts';
 import { encodeId, reply } from 'logos/src/interactions.ts';
 import configuration from 'logos/configuration.ts';

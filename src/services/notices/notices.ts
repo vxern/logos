@@ -2,12 +2,12 @@ import { Bot, CreateMessage, deleteMessage, Guild, Message, MessageComponents, s
 import {
 	generateInformationNotice,
 	lastUpdatedAt as informationLastUpdatedAt,
-} from 'logos/src/services/notice-generators/information.ts';
-import { generateRoleNotice, lastUpdatedAt as rolesLastUpdatedAt } from 'logos/src/services/notice-generators/roles.ts';
+} from 'logos/src/services/notices/channels/information.ts';
+import { generateRoleNotice, lastUpdatedAt as rolesLastUpdatedAt } from 'logos/src/services/notices/channels/roles.ts';
 import {
 	generateWelcomeNotice,
 	lastUpdatedAt as welcomeLastUpdatedAt,
-} from 'logos/src/services/notice-generators/welcome.ts';
+} from 'logos/src/services/notices/channels/welcome.ts';
 import { ServiceStarter } from 'logos/src/services/services.ts';
 import { Client, extendEventHandler, localise } from 'logos/src/client.ts';
 import { getAllMessages, getTextChannel } from 'logos/src/utils.ts';
