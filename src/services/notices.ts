@@ -14,6 +14,11 @@ import { getAllMessages, getTextChannel } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import { timestamp, TimestampFormat } from 'logos/formatting.ts';
 
+const service: ServiceStarter = ([client, bot]: [Client, Bot]) => {
+	registerPastNotices([client, bot]);
+	ensureNoticePersistence([client, bot]);
+};
+
 type NoticeGenerator = ([client, bot]: [Client, Bot], guild: Guild) => CreateMessage | Promise<CreateMessage>;
 
 const noticeGenerators = {
@@ -27,11 +32,6 @@ const lastUpdates: Record<NoticeTypes, Date> = {
 	'information': informationLastUpdatedAt,
 	'roles': rolesLastUpdatedAt,
 	'welcome': welcomeLastUpdatedAt,
-};
-
-const service: ServiceStarter = ([client, bot]: [Client, Bot]) => {
-	registerPastNotices([client, bot]);
-	ensureNoticePersistence([client, bot]);
 };
 
 const noticeIds: bigint[] = [];
