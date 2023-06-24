@@ -68,7 +68,7 @@ const configuration = {
 	},
 	services: {
 		entry: {
-			minimumRequiredAge: Periods.month,
+			minimumRequiredAge: 6 * Periods.month,
 			verification: {
 				disabledOn: [] satisfies string[] as string[],
 				proportionVotesToAccept: 0.2,
