@@ -1,8 +1,9 @@
 import { addRole, Bot, ButtonStyles, Interaction, MessageComponentTypes } from 'discordeno';
 import { proficiency } from 'logos/src/commands/social/roles/categories/language.ts';
-import { EntryStepButtonID } from 'logos/src/services/entry.ts';
+import { EntryStepButtonID } from 'logos/src/services/entry/entry.ts';
 import { Client, localise } from 'logos/src/client.ts';
 import { encodeId, reply } from 'logos/src/interactions.ts';
+import { snowflakeToTimestamp } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import constants from 'logos/constants.ts';
 
@@ -20,7 +21,14 @@ async function handleSelectLanguageProficiency(
 	const role = guild.roles.get(roleId);
 	if (role === undefined) return;
 
-	const requiresVerification = !configuration.services.entry.verification.disabledOn.includes(guildIdString);
+	const canEnter = await vetUser([client, bot], interaction);
+	if (!canEnter) return;
+
+	const createdAt = snowflakeToTimestamp(interaction.user.id);
+	const meetsAccountAgeRequirement = (Date.now() - createdAt) >= configuration.services.entry.minimumRequiredAge;
+
+	const requiresVerification = !configuration.services.entry.verification.disabledOn.includes(guildIdString) &&
+		!meetsAccountAgeRequirement;
 	if (requiresVerification) {
 		const userDocument = await client.database.adapters.users.getOrFetchOrCreate(
 			client,
@@ -98,6 +106,77 @@ async function handleSelectLanguageProficiency(
 			`Failed to add role with ID ${role.id} to member with ID ${interaction.user.id} in guild with ID ${guild.id}.`,
 		)
 	);
+}
+
+async function vetUser([client, bot]: [Client, Bot], interaction: Interaction): Promise<boolean> {
+	const userDocument = await client.database.adapters.users.getOrFetchOrCreate(
+		client,
+		'id',
+		interaction.user.id.toString(),
+		interaction.user.id,
+	);
+	if (userDocument === undefined) {
+		const strings = {
+			title: localise(client, 'entry.verification.verifyingAccount.failed.title', interaction.locale)(),
+			description: localise(client, 'entry.verification.verifyingAccount.failed.description', interaction.locale)(),
+		};
+
+		reply([client, bot], interaction, {
+			embeds: [{
+				title: strings.title,
+				description: strings.description,
+				color: constants.colors.red,
+			}],
+		});
+
+		client.log.error(
+			`Failed to vet user with ID ${interaction.user.id} trying to enter the server due to their user document being returned as undefined.`,
+		);
+
+		return false;
+	}
+
+	const entryRequest = client.database.adapters.entryRequests.get(client, 'submitterAndGuild', [
+		userDocument.ref,
+		interaction.guildId!.toString(),
+	]);
+
+	if (entryRequest !== undefined && !entryRequest.data.isFinalised) {
+		const strings = {
+			title: localise(client, 'entry.verification.answers.alreadyAnswered.title', interaction.locale)(),
+			description: localise(client, 'entry.verification.answers.alreadyAnswered.description', interaction.locale)(),
+		};
+
+		reply([client, bot], interaction, {
+			embeds: [{
+				title: strings.title,
+				description: strings.description,
+				color: constants.colors.dullYellow,
+			}],
+		});
+
+		return false;
+	}
+
+	if (userDocument.data.account.authorisedOn?.includes(interaction.guildId!.toString())) return true;
+	if (userDocument.data.account.rejectedOn?.includes(interaction.guildId!.toString())) {
+		const strings = {
+			title: localise(client, 'entry.verification.answers.rejectedBefore.title', interaction.locale)(),
+			description: localise(client, 'entry.verification.answers.rejectedBefore.description', interaction.locale)(),
+		};
+
+		reply([client, bot], interaction, {
+			embeds: [{
+				title: strings.title,
+				description: strings.description,
+				color: constants.colors.red,
+			}],
+		});
+
+		return false;
+	}
+
+	return true;
 }
 
 export { handleSelectLanguageProficiency };

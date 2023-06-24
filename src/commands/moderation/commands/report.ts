@@ -5,26 +5,14 @@ import {
 	Embed,
 	Interaction,
 	InteractionTypes,
-	Member,
 	MessageComponentTypes,
-	sendMessage,
 	TextStyles,
-	User as DiscordUser,
 } from 'discordeno';
 import { CommandTemplate } from 'logos/src/commands/command.ts';
 import { logEvent } from 'logos/src/controllers/logging/logging.ts';
-import { User } from 'logos/src/database/structs/mod.ts';
 import { stringifyValue } from 'logos/src/database/database.ts';
-import { Document } from 'logos/src/database/document.ts';
-import {
-	authorIdByMessageId,
-	getRecipientAndWarningsTuples,
-	getReportPrompt,
-	messageIdByReportReferenceId,
-	registerReportHandler,
-	reportByMessageId,
-} from 'logos/src/services/reports.ts';
-import { Client, isValidIdentifier, localise, resolveIdentifierToMembers } from 'logos/src/client.ts';
+import reportManager from 'logos/src/services/prompts/managers/reports.ts';
+import { Client, localise } from 'logos/src/client.ts';
 import {
 	createInteractionCollector,
 	createModalComposer,
@@ -48,9 +36,6 @@ const command: CommandTemplate = {
 
 enum ReportError {
 	Failure = 'failure',
-	UsersSpecifiedIncorrectly = 'users_specified_incorrectly',
-	UserSpecifiedMoreThanOnce = 'user_specified_more_than_once',
-	SpecifiedTooManyUsers = 'too_many_users_specified',
 	CannotReportSelf = 'cannot_report_self',
 }
 
@@ -58,18 +43,18 @@ async function handleMakeReport([client, bot]: [Client, Bot], interaction: Inter
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (guild === undefined) return;
 
-	const authorDocument = await client.database.adapters.users.getOrFetchOrCreate(
+	const userDocument = await client.database.adapters.users.getOrFetchOrCreate(
 		client,
 		'id',
 		interaction.user.id.toString(),
 		interaction.user.id,
 	);
-	if (authorDocument === undefined) return;
+	if (userDocument === undefined) return;
 
 	const reportsByAuthorAndGuild = client.database.adapters.reports.get(
 		client,
 		'authorAndGuild',
-		[authorDocument.ref, guild.id.toString()],
+		[userDocument.ref, guild.id.toString()],
 	);
 	if (reportsByAuthorAndGuild !== undefined) {
 		const strings = {
@@ -96,44 +81,15 @@ async function handleMakeReport([client, bot]: [Client, Bot], interaction: Inter
 	return void createModalComposer([client, bot], interaction, {
 		modal: generateReportModal(client, interaction.locale),
 		onSubmit: async (submission, answers) => {
-			await postponeReply([client, bot], interaction);
-
-			const userReportString = answers.users_to_report!;
-			if (!validateUserReportString(userReportString)) {
-				return ReportError.UsersSpecifiedIncorrectly;
-			}
-
-			const usersToReport = parseUserReportString([client, bot], guild.id, answers.users_to_report!);
-			if (usersToReport === undefined) return ReportError.Failure;
-
-			for (const [user, index] of usersToReport.map<[DiscordUser, number]>((user, index) => [user, index])) {
-				if (usersToReport.findLastIndex((user_) => user_.id === user.id) !== index) {
-					return ReportError.UserSpecifiedMoreThanOnce;
-				}
-			}
-
-			if (usersToReport.length > configuration.commands.report.limitUsers) {
-				return ReportError.SpecifiedTooManyUsers;
-			}
-
-			const recipients = await Promise.all(
-				usersToReport.map((user) =>
-					client.database.adapters.users.getOrFetchOrCreate(client, 'id', user.id.toString(), user.id)
-				),
-			).then((recipients) => recipients.includes(undefined) ? undefined : recipients as unknown as Document<User>[]);
-			if (recipients === undefined) return ReportError.Failure;
-
-			if (recipients.some((recipient) => recipient.data.account.id === authorDocument.data.account.id)) {
-				return ReportError.CannotReportSelf;
-			}
+			await postponeReply([client, bot], submission);
 
 			const report = await client.database.adapters.reports.create(
 				client,
 				{
 					createdAt: Date.now(),
-					author: authorDocument.ref,
+					author: userDocument.ref,
 					guild: guild.id.toString(),
-					recipients: recipients.map((recipient) => recipient.ref),
+					users: answers.users!,
 					reason: answers.reason!,
 					messageLink: answers.message_link,
 					isResolved: false,
@@ -141,43 +97,25 @@ async function handleMakeReport([client, bot]: [Client, Bot], interaction: Inter
 			);
 			if (report === undefined) return ReportError.Failure;
 
-			const reportChannelId = getTextChannel(guild, configuration.guilds.channels.reports)?.id;
-			if (reportChannelId === undefined) return true;
+			const channel = getTextChannel(guild, configuration.guilds.channels.reports);
+			if (channel === undefined) return true;
 
-			const recipientAndWarningsTuples = await getRecipientAndWarningsTuples(client, recipients);
-			if (recipientAndWarningsTuples === undefined) return ReportError.Failure;
+			logEvent([client, bot], guild, 'reportSubmit', [
+				interaction.member!,
+				report.data,
+			]);
 
-			logEvent(
-				[client, bot],
-				guild,
-				'reportSubmit',
-				[interaction.member!, recipientAndWarningsTuples.map(([recipient, _warnings]) => recipient), report.data],
-			);
+			const userId = BigInt(userDocument.data.account.id);
+			const reference = stringifyValue(report.ref);
 
-			const messageId = await sendMessage(
-				bot,
-				reportChannelId,
-				getReportPrompt([client, bot], guild, interaction.user, recipientAndWarningsTuples, report),
-			).then((message) => message.id).catch(() => {
-        client.log.warn('Failed to post report.');
-        return undefined;
-      });
+			const user = client.cache.users.get(userId);
+			if (user === undefined) return ReportError.Failure;
 
-			const reportReferenceId = stringifyValue(report.ref);
+			const prompt = await reportManager.savePrompt([client, bot], guild, channel, user, report);
+			if (prompt === undefined) return ReportError.Failure;
 
-      if (messageId !== undefined) {
-        reportByMessageId.set(messageId, report);
-        authorIdByMessageId.set(messageId, interaction.user.id);
-        messageIdByReportReferenceId.set(reportReferenceId, messageId);
-      }
-
-			registerReportHandler(
-				client,
-				guild.id,
-				reportChannelId,
-				[interaction.user.id, authorDocument.ref],
-				reportReferenceId,
-			);
+			reportManager.registerPrompt(prompt, userId, reference, report);
+			reportManager.registerHandler(client, [userId.toString(), guild.id.toString(), reference]);
 
 			const strings = {
 				title: localise(client, 'report.strings.submitted.title', interaction.locale)(),
@@ -280,73 +218,6 @@ function handleSubmittedInvalidReport(
 				});
 				break;
 			}
-			case ReportError.UsersSpecifiedIncorrectly: {
-				const strings = {
-					title: localise(client, 'report.strings.invalidSpecifiers.title', submission.locale)(),
-					description: {
-						specifiedIncorrectly: localise(
-							client,
-							'report.strings.invalidSpecifiers.description.invalidSpecifiers',
-							submission.locale,
-						)(),
-						howToIdentify: localise(
-							client,
-							'report.strings.invalidSpecifiers.description.howToIdentify',
-							submission.locale,
-						)(),
-						example: localise(client, 'report.strings.invalidSpecifiers.description.example', submission.locale)({
-							'example_expression': '> username#1234, 123456789123456789, Wumpus#0001',
-						}),
-					},
-				};
-
-				embed = {
-					title: strings.title,
-					description:
-						`${strings.description.specifiedIncorrectly}\n\n${strings.description.howToIdentify}\n\n${strings.description.example}`,
-					color: constants.colors.dullYellow,
-				};
-				break;
-			}
-			case ReportError.UserSpecifiedMoreThanOnce: {
-				const strings = {
-					title: localise(client, 'report.strings.duplicateUser.title', submission.locale)(),
-					description: {
-						duplicateUser: localise(
-							client,
-							'report.strings.duplicateUser.description.duplicateUser',
-							submission.locale,
-						)(),
-						ensureNotDuplicate: localise(
-							client,
-							'report.strings.duplicateUser.description.ensureNotDuplicate',
-							submission.locale,
-						)(),
-					},
-				};
-
-				embed = {
-					title: strings.title,
-					description: `${strings.description.duplicateUser}\n\n${strings.description.ensureNotDuplicate}`,
-					color: constants.colors.dullYellow,
-				};
-				break;
-			}
-			case ReportError.SpecifiedTooManyUsers: {
-				const strings = {
-					title: localise(client, 'report.strings.title', submission.locale)(),
-					description: localise(client, 'report.strings.description', submission.locale)(
-						{ 'number': configuration.commands.report.limitUsers },
-					),
-				};
-
-				embed = {
-					title: strings.title,
-					description: strings.description,
-					color: constants.colors.dullYellow,
-				};
-				break;
-			}
 			case ReportError.CannotReportSelf: {
 				const strings = {
 					title: localise(client, 'report.strings.cannotReportSelf.title', submission.locale)(),
@@ -404,18 +275,18 @@ function generateReportModal<T extends string>(client: Client, locale: string | 
 				label: trim(strings.reason, 45),
 				style: TextStyles.Paragraph,
 				required: true,
-				minLength: 20,
-				maxLength: 300,
+				minLength: 16,
+				maxLength: 256,
 			}],
 		}, {
 			type: MessageComponentTypes.ActionRow,
 			components: [{
-				customId: 'users_to_report',
+				customId: 'users',
 				type: MessageComponentTypes.InputText,
 				label: trim(strings.users, 45),
 				style: TextStyles.Short,
 				required: true,
-				maxLength: 200,
+				maxLength: 256,
 			}],
 		}, {
 			type: MessageComponentTypes.ActionRow,
@@ -425,30 +296,10 @@ function generateReportModal<T extends string>(client: Client, locale: string | 
 				label: trim(strings.link, 45),
 				style: TextStyles.Short,
 				required: false,
-				maxLength: 100,
+				maxLength: 128,
 			}],
 		}],
 	} as Modal<T>;
-}
-
-function validateUserReportString(userString: string): boolean {
-	return userString
-		.split(',')
-		.map((identifier) => identifier.trim())
-		.every((identifier) => isValidIdentifier(identifier));
-}
-
-function parseUserReportString(
-	[client, bot]: [Client, Bot],
-	guildId: bigint,
-	userString: string,
-): DiscordUser[] | undefined {
-	const identifiers = userString.split(',').map((identifier) => identifier.trim());
-	const members = identifiers.map((identifier) =>
-		resolveIdentifierToMembers(client, guildId, bot.id, identifier)?.[0]?.[0]
-	);
-	if (members.includes(undefined)) return undefined;
-	return (members as Member[]).map((member) => member.user!);
 }
 
 export default command;

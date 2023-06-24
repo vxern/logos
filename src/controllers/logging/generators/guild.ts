@@ -37,7 +37,7 @@ type GuildEvents = {
 	suggestionSend: [member: Member, suggestion: Suggestion];
 
 	/** A report has been submitted. */
-	reportSubmit: [author: Member, recipients: User[], report: Report];
+	reportSubmit: [author: Member, report: Report];
 
 	/** A purging of messages has been initiated. */
 	purgeBegin: [member: Member, channel: Channel, messageCount: number, author?: User];
@@ -181,7 +181,7 @@ ${codeMultiline(entryRequest.answers.where_found!)}
 	},
 	reportSubmit: {
 		title: `${constants.symbols.events.report} Report submitted`,
-		message: (client, author, recipients, report) => {
+		message: (client, author, report) => {
 			const authorUser = client.cache.users.get(author.id);
 			if (authorUser === undefined) return;
 
@@ -193,12 +193,12 @@ ${codeMultiline(entryRequest.answers.where_found!)}
 ${report.reason}
 
 **REPORTED USERS**
-${recipients.map((recipient) => diagnosticMentionUser(recipient)).join(', ')}
+${report.users}
 
 **MESSAGE LINK**
 ${messageLink}`;
 		},
-		filter: (_, originGuildId, author, __, ___) => originGuildId === author.guildId,
+		filter: (_, originGuildId, author, ___) => originGuildId === author.guildId,
 		color: constants.colors.darkRed,
 	},
 	purgeBegin: {

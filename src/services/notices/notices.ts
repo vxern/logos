@@ -2,17 +2,22 @@ import { Bot, CreateMessage, deleteMessage, Guild, Message, MessageComponents, s
 import {
 	generateInformationNotice,
 	lastUpdatedAt as informationLastUpdatedAt,
-} from 'logos/src/services/notice-generators/information.ts';
-import { generateRoleNotice, lastUpdatedAt as rolesLastUpdatedAt } from 'logos/src/services/notice-generators/roles.ts';
+} from 'logos/src/services/notices/channels/information.ts';
+import { generateRoleNotice, lastUpdatedAt as rolesLastUpdatedAt } from 'logos/src/services/notices/channels/roles.ts';
 import {
 	generateWelcomeNotice,
 	lastUpdatedAt as welcomeLastUpdatedAt,
-} from 'logos/src/services/notice-generators/welcome.ts';
+} from 'logos/src/services/notices/channels/welcome.ts';
 import { ServiceStarter } from 'logos/src/services/services.ts';
 import { Client, extendEventHandler, localise } from 'logos/src/client.ts';
 import { getAllMessages, getTextChannel } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import { timestamp, TimestampFormat } from 'logos/formatting.ts';
+
+const service: ServiceStarter = ([client, bot]: [Client, Bot]) => {
+	registerPastNotices([client, bot]);
+	ensureNoticePersistence([client, bot]);
+};
 
 type NoticeGenerator = ([client, bot]: [Client, Bot], guild: Guild) => CreateMessage | Promise<CreateMessage>;
 
@@ -27,11 +32,6 @@ const lastUpdates: Record<NoticeTypes, Date> = {
 	'information': informationLastUpdatedAt,
 	'roles': rolesLastUpdatedAt,
 	'welcome': welcomeLastUpdatedAt,
-};
-
-const service: ServiceStarter = ([client, bot]: [Client, Bot]) => {
-	registerPastNotices([client, bot]);
-	ensureNoticePersistence([client, bot]);
 };
 
 const noticeIds: bigint[] = [];

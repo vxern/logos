@@ -1,9 +1,7 @@
 import { Bot, Interaction, InteractionTypes } from 'discordeno';
-import {
-	handleAcceptRules,
-	handleRequestVerification,
-	handleSelectLanguageProficiency,
-} from 'logos/src/services/entry-stages/mod.ts';
+import { handleAcceptRules } from 'logos/src/services/entry/stages/accept-rules.ts';
+import { handleRequestVerification } from 'logos/src/services/entry/stages/get-verified.ts';
+import { handleSelectLanguageProficiency } from 'logos/src/services/entry/stages/select-language-proficiency.ts';
 import { ServiceStarter } from 'logos/src/services/services.ts';
 import { Client } from 'logos/src/client.ts';
 import { createInteractionCollector, decodeId } from 'logos/src/interactions.ts';

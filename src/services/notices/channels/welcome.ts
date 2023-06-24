@@ -1,5 +1,5 @@
 import { Bot, ButtonStyles, CreateMessage, Guild, MessageComponentTypes } from 'discordeno';
-import { getLastUpdateString } from 'logos/src/services/notices.ts';
+import { getLastUpdateString } from 'logos/src/services/notices/notices.ts';
 import { Client, localise } from 'logos/src/client.ts';
 import { getChannelMention } from 'logos/src/utils.ts';
 import { defaultLocale } from 'logos/types.ts';

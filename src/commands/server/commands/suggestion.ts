@@ -6,20 +6,13 @@ import {
 	Interaction,
 	InteractionTypes,
 	MessageComponentTypes,
-	sendMessage,
 	TextStyles,
 } from 'discordeno';
 import { CommandTemplate } from 'logos/src/commands/command.ts';
 import { logEvent } from 'logos/src/controllers/logging/logging.ts';
-import {
-	authorIdByMessageId,
-	getSuggestionPrompt,
-	messageIdBySuggestionReferenceId,
-	registerSuggestionHandler,
-	suggestionByMessageId,
-} from 'logos/src/services/suggestions.ts';
 import { Client, localise } from 'logos/src/client.ts';
 import { stringifyValue } from 'logos/src/database/database.ts';
+import suggestionManager from 'logos/src/services/prompts/managers/suggestions.ts';
 import {
 	createInteractionCollector,
 	createModalComposer,
@@ -49,17 +42,17 @@ async function handleMakeSuggestion([client, bot]: [Client, Bot], interaction: I
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (guild === undefined) return;
 
-	const authorDocument = await client.database.adapters.users.getOrFetchOrCreate(
+	const userDocument = await client.database.adapters.users.getOrFetchOrCreate(
 		client,
 		'id',
 		interaction.user.id.toString(),
 		interaction.user.id,
 	);
-	if (authorDocument === undefined) return;
+	if (userDocument === undefined) return;
 	const suggestionsByAuthorAndGuild = client.database.adapters.suggestions.get(
 		client,
 		'authorAndGuild',
-		[authorDocument.ref, guild.id.toString()],
+		[userDocument.ref, guild.id.toString()],
 	);
 
 	if (suggestionsByAuthorAndGuild !== undefined) {
@@ -95,7 +88,7 @@ async function handleMakeSuggestion([client, bot]: [Client, Bot], interaction: I
 				client,
 				{
 					createdAt: Date.now(),
-					author: authorDocument.ref,
+					author: userDocument.ref,
 					guild: guild.id.toString(),
 					suggestion: answers.suggestion!,
 					isResolved: false,
@@ -103,30 +96,22 @@ async function handleMakeSuggestion([client, bot]: [Client, Bot], interaction: I
 			);
 			if (suggestion === undefined) return SuggestionError.Failure;
 
-			const suggestionChannelId = getTextChannel(guild, configuration.guilds.channels.suggestions)?.id;
-			if (suggestionChannelId === undefined) return true;
+			const channel = getTextChannel(guild, configuration.guilds.channels.suggestions);
+			if (channel === undefined) return true;
 
 			logEvent([client, bot], guild, 'suggestionSend', [interaction.member!, suggestion.data]);
 
-			const messageId = await sendMessage(
-				bot,
-				suggestionChannelId,
-				getSuggestionPrompt([client, bot], guild, interaction.user, suggestion),
-			).then((message) => message.id);
+			const userId = BigInt(userDocument.data.account.id);
+			const reference = stringifyValue(suggestion.ref);
 
-			const suggestionReferenceId = stringifyValue(suggestion.ref);
+			const user = client.cache.users.get(userId);
+			if (user === undefined) return SuggestionError.Failure;
 
-			suggestionByMessageId.set(messageId, suggestion);
-			authorIdByMessageId.set(messageId, interaction.user.id);
-			messageIdBySuggestionReferenceId.set(suggestionReferenceId, messageId);
+			const prompt = await suggestionManager.savePrompt([client, bot], guild, channel, user, suggestion);
+			if (prompt === undefined) return SuggestionError.Failure;
 
-			registerSuggestionHandler(
-				client,
-				guild.id,
-				suggestionChannelId,
-				[interaction.user.id, authorDocument.ref],
-				suggestionReferenceId,
-			);
+			suggestionManager.registerPrompt(prompt, userId, reference, suggestion);
+			suggestionManager.registerHandler(client, [userId.toString(), guild.id.toString(), reference]);
 
 			const strings = {
 				title: localise(client, 'suggestion.strings.sent.title', interaction.locale)(),
@@ -273,8 +258,8 @@ function generateSuggestionModal<T extends string>(client: Client, locale: strin
 				label: trim(strings.suggestion, 45),
 				style: TextStyles.Paragraph,
 				required: true,
-				minLength: 20,
-				maxLength: 500,
+				minLength: 16,
+				maxLength: 256,
 			}],
 		}],
 	} as Modal<T>;

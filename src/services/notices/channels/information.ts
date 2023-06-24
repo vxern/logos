@@ -1,6 +1,6 @@
 import { BaseInvite, Bot, createInvite, CreateMessage, Embed, getInvites, Guild, InviteMetadata } from 'discordeno';
 import { ruleIds } from 'logos/src/commands/moderation/commands/rule.ts';
-import { getLastUpdateString } from 'logos/src/services/notices.ts';
+import { getLastUpdateString } from 'logos/src/services/notices/notices.ts';
 import { Client, localise } from 'logos/src/client.ts';
 import { getTextChannel } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
