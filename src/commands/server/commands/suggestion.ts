@@ -42,17 +42,17 @@ async function handleMakeSuggestion([client, bot]: [Client, Bot], interaction: I
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (guild === undefined) return;
 
-	const authorDocument = await client.database.adapters.users.getOrFetchOrCreate(
+	const userDocument = await client.database.adapters.users.getOrFetchOrCreate(
 		client,
 		'id',
 		interaction.user.id.toString(),
 		interaction.user.id,
 	);
-	if (authorDocument === undefined) return;
+	if (userDocument === undefined) return;
 	const suggestionsByAuthorAndGuild = client.database.adapters.suggestions.get(
 		client,
 		'authorAndGuild',
-		[authorDocument.ref, guild.id.toString()],
+		[userDocument.ref, guild.id.toString()],
 	);
 
 	if (suggestionsByAuthorAndGuild !== undefined) {
@@ -88,7 +88,7 @@ async function handleMakeSuggestion([client, bot]: [Client, Bot], interaction: I
 				client,
 				{
 					createdAt: Date.now(),
-					author: authorDocument.ref,
+					author: userDocument.ref,
 					guild: guild.id.toString(),
 					suggestion: answers.suggestion!,
 					isResolved: false,
@@ -101,7 +101,7 @@ async function handleMakeSuggestion([client, bot]: [Client, Bot], interaction: I
 
 			logEvent([client, bot], guild, 'suggestionSend', [interaction.member!, suggestion.data]);
 
-			const userId = BigInt(authorDocument.data.account.id);
+			const userId = BigInt(userDocument.data.account.id);
 			const reference = stringifyValue(suggestion.ref);
 
 			const user = client.cache.users.get(userId);

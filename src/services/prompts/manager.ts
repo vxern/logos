@@ -261,19 +261,31 @@ abstract class PromptManager<
 		this.prompts.set(reference, prompt);
 	}
 
+	unregisterPrompt(prompt: Message, reference: string): void {
+		this.documents.delete(prompt.id);
+		this.userIds.delete(prompt.id);
+		this.prompts.delete(reference);
+	}
+
 	registerHandler(client: Client, data: InteractionDataBase): void {
-		const [_, __, reference] = data;
-
 		this.handlers.set(data.join(constants.symbols.meta.idSeparator), async (bot, interaction) => {
-			const [_, ...data] = decodeId<InteractionData>(interaction.data!.customId!);
+			const [_, userId, guildId, reference, ...metadata] = decodeId<InteractionData>(interaction.data!.customId!);
 
-			const updatedDocument = await this.handleInteraction([client, bot], interaction, data);
+			const updatedDocument = await this.handleInteraction(
+				[client, bot],
+				interaction,
+				[userId, guildId, reference, ...metadata] as InteractionData,
+			);
 			if (updatedDocument === undefined) return;
 
 			const prompt = this.prompts.get(reference);
 			if (prompt === undefined) return;
 
-			this.documents.set(prompt.id, updatedDocument);
+			if (updatedDocument === null) {
+				this.unregisterPrompt(prompt, reference);
+			} else {
+				this.documents.set(prompt.id, updatedDocument);
+			}
 
 			deleteMessage(bot, prompt.channelId, prompt.id);
 		});
@@ -283,7 +295,7 @@ abstract class PromptManager<
 		[client, bot]: [Client, Bot],
 		interaction: Interaction,
 		data: InteractionData,
-	): Promise<Document<DataType> | undefined>;
+	): Promise<Document<DataType> | undefined | null>;
 }
 
 export { PromptManager };

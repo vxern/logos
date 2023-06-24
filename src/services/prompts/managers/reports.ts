@@ -153,7 +153,7 @@ class ReportManager extends PromptManager<Report, Metadata, InteractionData> {
 		[client, bot]: [Client, Bot],
 		interaction: Interaction,
 		data: InteractionData,
-	): Promise<Document<Report> | undefined> {
+	): Promise<Document<Report> | null | undefined> {
 		const [userId, guildId, reference, isResolvedString] = data;
 		const isResolved = isResolvedString === 'true';
 

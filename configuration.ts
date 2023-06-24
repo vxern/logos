@@ -70,12 +70,7 @@ const configuration = {
 		entry: {
 			minimumRequiredAge: Periods.month,
 			verification: {
-				disabledOn: [
-					'432173040638623746', // Learn Romanian
-					'910929726418350110', // Learn Armenian
-					'1055102122137489418', // Staging
-					'1055102910658269224', // Development
-				],
+				disabledOn: [] satisfies string[] as string[],
 				proportionVotesToAccept: 0.2,
 				proportionVotesToReject: 0.5,
 				defaultVotesRequired: 2,

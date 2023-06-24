@@ -133,7 +133,7 @@ class SuggestionManager extends PromptManager<Suggestion, Metadata, InteractionD
 		[client, bot]: [Client, Bot],
 		interaction: Interaction,
 		data: InteractionData,
-	): Promise<Document<Suggestion> | undefined> {
+	): Promise<Document<Suggestion> | null | undefined> {
 		const [userId, guildId, reference, isResolvedString] = data;
 		const isResolved = isResolvedString === 'true';
 

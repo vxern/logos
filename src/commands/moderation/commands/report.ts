@@ -43,18 +43,18 @@ async function handleMakeReport([client, bot]: [Client, Bot], interaction: Inter
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (guild === undefined) return;
 
-	const authorDocument = await client.database.adapters.users.getOrFetchOrCreate(
+	const userDocument = await client.database.adapters.users.getOrFetchOrCreate(
 		client,
 		'id',
 		interaction.user.id.toString(),
 		interaction.user.id,
 	);
-	if (authorDocument === undefined) return;
+	if (userDocument === undefined) return;
 
 	const reportsByAuthorAndGuild = client.database.adapters.reports.get(
 		client,
 		'authorAndGuild',
-		[authorDocument.ref, guild.id.toString()],
+		[userDocument.ref, guild.id.toString()],
 	);
 	if (reportsByAuthorAndGuild !== undefined) {
 		const strings = {
@@ -87,7 +87,7 @@ async function handleMakeReport([client, bot]: [Client, Bot], interaction: Inter
 				client,
 				{
 					createdAt: Date.now(),
-					author: authorDocument.ref,
+					author: userDocument.ref,
 					guild: guild.id.toString(),
 					users: answers.users!,
 					reason: answers.reason!,
@@ -105,7 +105,7 @@ async function handleMakeReport([client, bot]: [Client, Bot], interaction: Inter
 				report.data,
 			]);
 
-			const userId = BigInt(authorDocument.data.account.id);
+			const userId = BigInt(userDocument.data.account.id);
 			const reference = stringifyValue(report.ref);
 
 			const user = client.cache.users.get(userId);
