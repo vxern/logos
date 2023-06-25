@@ -195,13 +195,9 @@ class ReportManager extends PromptManager<Report, Metadata, InteractionData> {
 			});
 		}
 
-		const updatedContent = { ...document, data: structuredClone(document.data) as Report } as Document<Report>;
-
-		updatedContent.data.isResolved = isResolved;
-
 		const updatedDocument = await client.database.adapters.reports.update(
 			client,
-			updatedContent,
+			{ ...document, data: { ...document.data, isResolved } },
 		);
 
 		return updatedDocument;

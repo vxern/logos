@@ -175,13 +175,9 @@ class SuggestionManager extends PromptManager<Suggestion, Metadata, InteractionD
 			});
 		}
 
-		const updatedContent = { ...document, data: structuredClone(document.data) as Suggestion } as Document<Suggestion>;
-
-		updatedContent.data.isResolved = isResolved;
-
 		const updatedDocument = await client.database.adapters.suggestions.update(
 			client,
-			updatedContent,
+			{ ...document, data: { ...document.data, isResolved } },
 		);
 
 		return updatedDocument;
