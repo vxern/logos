@@ -1,5 +1,4 @@
 import { ApplicationCommandOptionTypes, Bot, Interaction } from 'discordeno';
-import { lodash } from 'lodash';
 import { displayListings } from 'logos/src/commands/music/module.ts';
 import { OptionTemplate } from 'logos/src/commands/command.ts';
 import { show } from 'logos/src/commands/parameters.ts';
@@ -21,7 +20,7 @@ function handleDisplayPlaybackHistory([client, bot]: [Client, Bot], interaction:
 	const controller = client.features.music.controllers.get(interaction.guildId!);
 	if (controller === undefined) return;
 
-	const listingHistory = lodash.cloneDeep(controller.listingHistory).toReversed();
+	const listingHistory = structuredClone(controller.listingHistory).toReversed();
 
 	const locale = show ? defaultLocale : interaction.locale;
 

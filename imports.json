@@ -10,7 +10,6 @@
 		"messagepipe": "https://esm.sh/messagepipe@0.2.3",
 		"lavadeno": "https://deno.land/x/lavadeno@3.3.0/mod.ts",
 		"lavalink_types": "https://deno.land/x/lavalink_types@2.0.6/mod.ts",
-		"lodash": "https://deno.land/x/deno_ts_lodash@0.0.1/mod.ts",
 		"sentry": "https://deno.land/x/sentry_deno@v0.2.2/main.ts",
 		"snowflake": "https://deno.land/x/deno_snowflake@v1.0.1/snowflake.ts",
 		"tl_log": "https://deno.land/x/tl_log@0.1.1/mod.ts",

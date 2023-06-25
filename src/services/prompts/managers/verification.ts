@@ -10,7 +10,6 @@ import {
 	MessageComponentTypes,
 	User as DiscordUser,
 } from 'discordeno';
-import { lodash } from 'lodash';
 import { EntryRequest, User } from 'logos/src/database/structs/mod.ts';
 import { logEvent } from 'logos/src/controllers/logging/logging.ts';
 import { Document } from 'logos/src/database/document.ts';
@@ -187,7 +186,10 @@ class VerificationManager extends PromptManager<EntryRequest, Metadata, Interact
 			entryRequest.data,
 		);
 
-		const updatedEntryRequestContent = lodash.cloneDeep(entryRequest) as Document<EntryRequest>;
+		const updatedEntryRequestContent = {
+			...entryRequest,
+			data: structuredClone(entryRequest.data) as EntryRequest,
+		} as Document<EntryRequest>;
 
 		// If the voter has already voted to accept or to reject the user.
 		if (alreadyVotedToAccept || alreadyVotedToReject) {
@@ -293,7 +295,7 @@ class VerificationManager extends PromptManager<EntryRequest, Metadata, Interact
 		);
 		if (updatedEntryRequest === undefined) return undefined;
 
-		const updatedUserContent = lodash.cloneDeep(user) as Document<User>;
+		const updatedUserContent = { ...user, data: structuredClone(user.data) as User } as Document<User>;
 
 		if (isAccepted) {
 			if (updatedUserContent.data.account.authorisedOn === undefined) {

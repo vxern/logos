@@ -8,7 +8,6 @@ import {
 	MessageComponentTypes,
 	User as DiscordUser,
 } from 'discordeno';
-import { lodash } from 'lodash';
 import { PromptManager } from 'logos/src/services/prompts/manager.ts';
 import { stringifyValue } from 'logos/src/database/database.ts';
 import { Document } from 'logos/src/database/document.ts';
@@ -196,7 +195,7 @@ class ReportManager extends PromptManager<Report, Metadata, InteractionData> {
 			});
 		}
 
-		const updatedContent = lodash.cloneDeep(document) as Document<Report>;
+		const updatedContent = { ...document, data: structuredClone(document.data) as Report } as Document<Report>;
 
 		updatedContent.data.isResolved = isResolved;
 
