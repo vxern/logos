@@ -136,7 +136,7 @@ class SuggestionManager extends PromptManager<Suggestion, Metadata, InteractionD
 		const [userId, guildId, reference, isResolvedString] = data;
 		const isResolved = isResolvedString === 'true';
 
-		const user = await client.database.adapters.users.getOrFetch(client, 'id', userId);
+		const user = await client.database.adapters.users.getOrFetchOrCreate(client, 'id', userId, BigInt(userId));
 		if (user === undefined) return undefined;
 
 		const documents = client.database.adapters.suggestions.get(client, 'authorAndGuild', [user.ref, guildId]);
