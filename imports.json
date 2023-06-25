@@ -15,6 +15,6 @@
 		"snowflake": "https://deno.land/x/deno_snowflake@v1.0.1/snowflake.ts",
 		"tl_log": "https://deno.land/x/tl_log@0.1.1/mod.ts",
     "wiktionary": "npm:parse-wiktionary@1.0.0",
-		"youtube": "https://deno.land/x/youtube_sr@v4.3.4-deno/mod.ts"
+		"youtube-search": "npm:youtube-sr@4.3.4"
 	}
 }
