@@ -10,7 +10,6 @@ import {
 	MessageComponentTypes,
 	User as DiscordUser,
 } from 'discordeno';
-import { lodash } from 'lodash';
 import { EntryRequest, User } from 'logos/src/database/structs/mod.ts';
 import { logEvent } from 'logos/src/controllers/logging/logging.ts';
 import { Document } from 'logos/src/database/document.ts';
@@ -144,7 +143,7 @@ class VerificationManager extends PromptManager<EntryRequest, Metadata, Interact
 		const [userId, _, __, isAcceptString] = data;
 		const isAccept = isAcceptString === 'true';
 
-		const user = await client.database.adapters.users.getOrFetch(client, 'id', userId);
+		const user = await client.database.adapters.users.getOrFetchOrCreate(client, 'id', userId, BigInt(userId));
 		if (user === undefined) {
 			displayUserStateError([client, bot], interaction);
 			return undefined;
@@ -187,7 +186,8 @@ class VerificationManager extends PromptManager<EntryRequest, Metadata, Interact
 			entryRequest.data,
 		);
 
-		const updatedEntryRequestContent = lodash.cloneDeep(entryRequest) as Document<EntryRequest>;
+		const votedAgainst = [...entryRequest.data.votedAgainst];
+		const votedFor = [...entryRequest.data.votedFor];
 
 		// If the voter has already voted to accept or to reject the user.
 		if (alreadyVotedToAccept || alreadyVotedToReject) {
@@ -233,19 +233,19 @@ class VerificationManager extends PromptManager<EntryRequest, Metadata, Interact
 				return;
 			} else {
 				if (isAccept) {
-					const voterIndex = updatedEntryRequestContent.data.votedAgainst.findIndex((voterReference) =>
+					const voterIndex = votedAgainst.findIndex((voterReference) =>
 						stringifyValue(voterReference) === voterReferenceId
 					);
 
-					updatedEntryRequestContent.data.votedAgainst.splice(voterIndex, 1);
-					updatedEntryRequestContent.data.votedFor.push(voter.ref);
+					votedAgainst.splice(voterIndex, 1);
+					votedFor.push(voter.ref);
 				} else {
-					const voterIndex = updatedEntryRequestContent.data.votedFor.findIndex((voterReference) =>
+					const voterIndex = votedFor.findIndex((voterReference) =>
 						stringifyValue(voterReference) === voterReferenceId
 					);
 
-					updatedEntryRequestContent.data.votedFor.splice(voterIndex, 1);
-					updatedEntryRequestContent.data.votedAgainst.push(voter.ref);
+					votedFor.splice(voterIndex, 1);
+					votedAgainst.push(voter.ref);
 				}
 
 				const strings = {
@@ -265,41 +265,44 @@ class VerificationManager extends PromptManager<EntryRequest, Metadata, Interact
 			acknowledge([client, bot], interaction);
 
 			if (isAccept) {
-				updatedEntryRequestContent.data.votedFor.push(voter.ref);
+				votedFor.push(voter.ref);
 			} else {
-				updatedEntryRequestContent.data.votedAgainst.push(voter.ref);
+				votedAgainst.push(voter.ref);
 			}
 		}
 
-		const isAccepted = updatedEntryRequestContent.data.votedFor.length >= votesToAccept;
-		const isRejected = updatedEntryRequestContent.data.votedAgainst.length >= votesToReject;
+		const isAccepted = votedFor.length >= votesToAccept;
+		const isRejected = votedAgainst.length >= votesToReject;
 
 		const submitter = client.cache.users.get(BigInt(user.data.account.id))!;
 
+		let isFinalised = false;
+
 		if (isAccepted || isRejected) {
+			isFinalised = true;
+
 			logEvent(
 				[client, bot],
 				guild,
 				isAccepted ? 'entryRequestAccept' : 'entryRequestReject',
 				[submitter, interaction.member!],
 			);
-
-			updatedEntryRequestContent.data.isFinalised = true;
 		}
 
 		const updatedEntryRequest = await client.database.adapters.entryRequests.update(
 			client,
-			updatedEntryRequestContent,
+			{ ...entryRequest, data: { ...entryRequest.data, votedAgainst, votedFor, isFinalised } },
 		);
 		if (updatedEntryRequest === undefined) return undefined;
 
-		const updatedUserContent = lodash.cloneDeep(user) as Document<User>;
+		let authorisedOn = user.data.account.authorisedOn !== undefined ? [...user.data.account.authorisedOn] : undefined;
+		let rejectedOn = user.data.account.rejectedOn !== undefined ? [...user.data.account.rejectedOn] : undefined;
 
 		if (isAccepted) {
-			if (updatedUserContent.data.account.authorisedOn === undefined) {
-				updatedUserContent.data.account.authorisedOn = [guild.id.toString()];
-			} else if (!updatedUserContent.data.account.authorisedOn.includes(guild.id.toString())) {
-				updatedUserContent.data.account.authorisedOn.push(guild.id.toString());
+			if (authorisedOn === undefined) {
+				authorisedOn = [guild.id.toString()];
+			} else if (!authorisedOn.includes(guild.id.toString())) {
+				authorisedOn.push(guild.id.toString());
 			}
 
 			client.log.info(`User with ID ${user.data.account.id} has been accepted onto guild ${guild.name}.`);
@@ -311,10 +314,10 @@ class VerificationManager extends PromptManager<EntryRequest, Metadata, Interact
 					)
 				);
 		} else if (isRejected) {
-			if (updatedUserContent.data.account.rejectedOn === undefined) {
-				updatedUserContent.data.account.rejectedOn = [guild.id.toString()];
-			} else if (!updatedUserContent.data.account.rejectedOn.includes(guild.id.toString())) {
-				updatedUserContent.data.account.rejectedOn.push(guild.id.toString());
+			if (rejectedOn === undefined) {
+				rejectedOn = [guild.id.toString()];
+			} else if (!rejectedOn.includes(guild.id.toString())) {
+				rejectedOn.push(guild.id.toString());
 			}
 
 			client.log.info(`User with ID ${user.data.account.id} has been rejected from guild ${guild.name}.`);
@@ -328,7 +331,10 @@ class VerificationManager extends PromptManager<EntryRequest, Metadata, Interact
 			);
 		}
 
-		await client.database.adapters.users.update(client, updatedUserContent);
+		await client.database.adapters.users.update(client, {
+			...user,
+			data: { ...user.data, account: { ...user.data.account, authorisedOn, rejectedOn } },
+		});
 
 		if (isAccepted || isRejected) return null;
 

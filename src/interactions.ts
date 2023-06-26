@@ -18,7 +18,6 @@ import {
 	MessageComponentTypes,
 	sendInteractionResponse,
 } from 'discordeno';
-import { lodash } from 'lodash';
 import * as Snowflake from 'snowflake';
 import { addCollector, Client, localise } from 'logos/src/client.ts';
 import constants, { Periods } from 'logos/constants.ts';
@@ -270,7 +269,7 @@ async function createModalComposer<T extends string>(
 		modal: Modal<T>;
 	},
 ): Promise<void> {
-	const fields = lodash.cloneDeep(modal.fields);
+	const fields = structuredClone(modal.fields);
 
 	let anchor = interaction;
 	let content: ComposerContent<T> | undefined = undefined;

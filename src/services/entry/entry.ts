@@ -3,7 +3,7 @@ import { handleAcceptRules } from 'logos/src/services/entry/stages/accept-rules.
 import { handleRequestVerification } from 'logos/src/services/entry/stages/get-verified.ts';
 import { handleSelectLanguageProficiency } from 'logos/src/services/entry/stages/select-language-proficiency.ts';
 import { ServiceStarter } from 'logos/src/services/services.ts';
-import { Client } from 'logos/src/client.ts';
+import { Client, isServicing } from 'logos/src/client.ts';
 import { createInteractionCollector, decodeId } from 'logos/src/interactions.ts';
 import constants from 'logos/constants.ts';
 
@@ -30,6 +30,8 @@ function setupEntryProcess([client, bot]: [Client, Bot]): void {
 			customId: step,
 			doesNotExpire: true,
 			onCollect: (_bot, interaction) => {
+				if (!isServicing(client, interaction.guildId!)) return;
+
 				const selectionCustomId = interaction.data?.customId;
 				if (selectionCustomId === undefined) return;
 

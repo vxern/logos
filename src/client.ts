@@ -5,7 +5,6 @@ import {
 	calculatePermissions,
 	Channel,
 	createBot,
-	CreateSlashApplicationCommand,
 	createTransformers,
 	DiscordMessage,
 	editShardStatus,
@@ -105,10 +104,8 @@ type Client = Readonly<{
 	cache: Cache;
 	database: Database;
 	commands: {
-		commands: {
-			visible: Command[];
-			hidden: Command[];
-		};
+		global: Command[];
+		local: Command[];
 		handlers: {
 			execute: Map<string, InteractionHandler>;
 			autocomplete: Map<string, InteractionHandler>;
@@ -135,9 +132,10 @@ function createClient(
 ): Client {
 	const localisations = createLocalisations(localisationsStatic);
 
-	const commands = localiseCommands(localisations, commandTemplates);
-	const hidden = restrictCommandPermissions(commands);
-	const handlers = createCommandHandlers(commandTemplates);
+	const local = localiseCommands(localisations, commandTemplates.local);
+	const global = localiseCommands(localisations, commandTemplates.global);
+
+	const handlers = createCommandHandlers(commandTemplates.local);
 
 	return {
 		metadata,
@@ -146,7 +144,7 @@ function createClient(
 		database: createDatabase(),
 		features,
 		localisations,
-		commands: { commands: { visible: commands, hidden }, handlers },
+		commands: { local, global, handlers },
 		collectors: new Map(),
 	};
 }
@@ -276,14 +274,11 @@ function createEventHandlers(client: Client): Partial<EventHandlers> {
 		},
 		guildCreate: (bot, guild) => {
 			const commands = (() => {
-				if (client.metadata.environment === 'production' || client.metadata.environment === 'restricted') {
-					return client.commands.commands.visible;
+				if (isServicing(client, guild.id)) {
+					return client.commands.local;
 				}
 
-				const guildId = configuration.guilds.environments[client.metadata.environment];
-				if (guild.id.toString() === guildId) return client.commands.commands.visible;
-
-				return client.commands.commands.hidden;
+				return client.commands.global;
 			})();
 
 			upsertGuildApplicationCommands(bot, guild.id, commands)
@@ -291,8 +286,11 @@ function createEventHandlers(client: Client): Partial<EventHandlers> {
 
 			registerGuild(client, guild);
 
-			setupLogging([client, bot], guild);
 			setupMusicController(client, guild.id);
+
+			if (!isServicing(client, guild.id)) return;
+
+			setupLogging([client, bot], guild);
 
 			fetchMembers(bot, guild.id, { limit: 0, query: '' })
 				.catch((reason) => client.log.warn(`Failed to fetch members for guild with ID ${guild.id}: ${reason}`));
@@ -615,10 +613,6 @@ function createCommandHandlers(commands: CommandTemplate[]): Client['commands'][
 	}
 
 	return { execute: handlers, autocomplete: autocompleteHandlers };
-}
-
-function restrictCommandPermissions(commands: CreateSlashApplicationCommand[]): CreateSlashApplicationCommand[] {
-	return commands.map((command) => ({ ...command, defaultMemberPermissions: ['ADMINISTRATOR'] }));
 }
 
 function getImplicitLanguage(guild: Guild): Language {
@@ -957,12 +951,18 @@ function toDiscordLocalisations(
 	);
 }
 
+function isServicing(client: Client, guildId: bigint): boolean {
+	const environment = configuration.guilds.environments[guildId.toString()];
+	return environment === client.metadata.environment;
+}
+
 export {
 	addCollector,
 	autocompleteMembers,
 	extendEventHandler,
 	getImplicitLanguage,
 	initialiseClient,
+	isServicing,
 	isValidIdentifier,
 	isValidSnowflake,
 	localise,

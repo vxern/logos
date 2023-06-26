@@ -8,7 +8,6 @@ import {
 	MessageComponentTypes,
 	User as DiscordUser,
 } from 'discordeno';
-import { lodash } from 'lodash';
 import { PromptManager } from 'logos/src/services/prompts/manager.ts';
 import { stringifyValue } from 'logos/src/database/database.ts';
 import { Document } from 'logos/src/database/document.ts';
@@ -137,7 +136,7 @@ class SuggestionManager extends PromptManager<Suggestion, Metadata, InteractionD
 		const [userId, guildId, reference, isResolvedString] = data;
 		const isResolved = isResolvedString === 'true';
 
-		const user = await client.database.adapters.users.getOrFetch(client, 'id', userId);
+		const user = await client.database.adapters.users.getOrFetchOrCreate(client, 'id', userId, BigInt(userId));
 		if (user === undefined) return undefined;
 
 		const documents = client.database.adapters.suggestions.get(client, 'authorAndGuild', [user.ref, guildId]);
@@ -176,13 +175,9 @@ class SuggestionManager extends PromptManager<Suggestion, Metadata, InteractionD
 			});
 		}
 
-		const updatedContent = lodash.cloneDeep(document) as Document<Suggestion>;
-
-		updatedContent.data.isResolved = isResolved;
-
 		const updatedDocument = await client.database.adapters.suggestions.update(
 			client,
-			updatedContent,
+			{ ...document, data: { ...document.data, isResolved } },
 		);
 
 		return updatedDocument;

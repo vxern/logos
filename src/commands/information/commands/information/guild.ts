@@ -1,6 +1,6 @@
 import { Bot, Channel, ChannelTypes, Embed, Guild, Interaction } from 'discordeno';
 import { proficiency } from 'logos/src/commands/social/roles/categories/language.ts';
-import { Client, localise } from 'logos/src/client.ts';
+import { Client, isServicing, localise } from 'logos/src/client.ts';
 import { reply } from 'logos/src/interactions.ts';
 import { getGuildIconURLFormatted, snowflakeToTimestamp } from 'logos/src/utils.ts';
 import constants from 'logos/constants.ts';
@@ -13,9 +13,6 @@ function handleDisplayGuildInformation([client, bot]: [Client, Bot], interaction
 
 	const owner = client.cache.users.get(guild.ownerId);
 	if (owner === undefined) return;
-
-	const proficiencyRoleFrequencies = getDistribution(client, guild);
-	const isManaged = owner.username !== guild.name;
 
 	const strings = {
 		title: localise(client, 'information.options.server.strings.information.title', interaction.locale)(
@@ -96,22 +93,21 @@ function handleDisplayGuildInformation([client, bot]: [Client, Bot], interaction
 					value: getChannelInformationSection(client, guild, interaction.locale),
 					inline: true,
 				},
-				isManaged
-					? {
+				...isServicing(client, guild.id)
+					? [{
 						name: `${constants.symbols.guild.moderators} ${strings.description.moderators.title}`,
 						value: strings.description.moderators.overseenByModerators,
 						inline: false,
-					}
-					: {
+					}, {
+						name: `${constants.symbols.guild.proficiencyDistribution} ${strings.description.distribution}`,
+						value: formatDistribution(client, getDistribution(client, guild), interaction.locale),
+						inline: false,
+					}]
+					: [{
 						name: `${constants.symbols.guild.owner} ${strings.description.owner}`,
 						value: mention(owner.id, MentionTypes.User),
 						inline: true,
-					},
-				{
-					name: `${constants.symbols.guild.proficiencyDistribution} ${strings.description.distribution}`,
-					value: formatDistribution(client, proficiencyRoleFrequencies, interaction.locale),
-					inline: false,
-				},
+					}],
 			],
 		}],
 	});

@@ -9,7 +9,7 @@ import {
 	lastUpdatedAt as welcomeLastUpdatedAt,
 } from 'logos/src/services/notices/channels/welcome.ts';
 import { ServiceStarter } from 'logos/src/services/services.ts';
-import { Client, extendEventHandler, localise } from 'logos/src/client.ts';
+import { Client, extendEventHandler, isServicing, localise } from 'logos/src/client.ts';
 import { getAllMessages, getTextChannel } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 import { timestamp, TimestampFormat } from 'logos/formatting.ts';
@@ -44,6 +44,8 @@ const noticeByChannelId = new Map<bigint, Message>();
 
 function registerPastNotices([client, bot]: [Client, Bot]): void {
 	extendEventHandler(bot, 'guildCreate', { append: true }, (_, { id: guildId }) => {
+		if (!isServicing(client, guildId)) return;
+
 		const guild = client.cache.guilds.get(guildId)!;
 
 		for (const notice of Object.keys(noticeGenerators) as NoticeTypes[]) {
@@ -54,7 +56,9 @@ function registerPastNotices([client, bot]: [Client, Bot]): void {
 
 function ensureNoticePersistence([client, bot]: [Client, Bot]): void {
 	// Anti-tampering feature; detects notices being deleted.
-	extendEventHandler(bot, 'messageDelete', { prepend: true }, (_, { id, channelId }) => {
+	extendEventHandler(bot, 'messageDelete', { prepend: true }, (_, { id, channelId, guildId }) => {
+		if (!isServicing(client, guildId!)) return;
+
 		// If the deleted message was not a notice.
 		if (!noticeIds.includes(id)) {
 			return;
@@ -65,6 +69,8 @@ function ensureNoticePersistence([client, bot]: [Client, Bot]): void {
 
 	// Anti-tampering feature; detects embeds being deleted from notices.
 	extendEventHandler(bot, 'messageUpdate', { prepend: true }, (bot, message, _) => {
+		if (!isServicing(client, message.guildId!)) return;
+
 		// If the message was updated in any other channel apart from a verification channel.
 		if (!noticeIds.includes(message.id)) {
 			return;

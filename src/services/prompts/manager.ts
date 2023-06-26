@@ -13,7 +13,7 @@ import {
 import { User } from 'logos/src/database/structs/mod.ts';
 import { BaseDocumentProperties, Document } from 'logos/src/database/document.ts';
 import { stringifyValue } from 'logos/src/database/database.ts';
-import { Client, extendEventHandler, WithLanguage } from 'logos/src/client.ts';
+import { Client, extendEventHandler, isServicing, WithLanguage } from 'logos/src/client.ts';
 import { createInteractionCollector, decodeId } from 'logos/src/interactions.ts';
 import { getAllMessages, getTextChannel } from 'logos/src/utils.ts';
 import constants from 'logos/constants.ts';
@@ -63,6 +63,8 @@ abstract class PromptManager<
 			customId: this.customId,
 			doesNotExpire: true,
 			onCollect: (bot, selection) => {
+				if (!isServicing(client, selection.guildId!)) return;
+
 				const [_, userId, guildId, reference, ...metadata] = decodeId<InteractionData>(selection.data!.customId!);
 
 				const handle = this.handlers.get([userId, guildId, reference].join(constants.symbols.meta.idSeparator));
@@ -77,9 +79,11 @@ abstract class PromptManager<
 		const documentsByGuildId = this.getAllDocuments(client);
 
 		extendEventHandler(bot, 'guildCreate', { append: true }, async (bot, { id: guildId }) => {
+			if (!isServicing(client, guildId)) return;
+
 			const guild = client.cache.guilds.get(guildId)!;
 
-			client.log.info(`Registering old ${this.type} prompts on ${guild.name} (${guild.id})...`);
+			client.log.info(`Registering ${this.type} prompts on ${guild.name} (${guild.id})...`);
 
 			const channel = this.getChannel(client, guild);
 			if (channel === undefined) return;
@@ -128,6 +132,8 @@ abstract class PromptManager<
 	private ensurePersistence([client, bot]: [Client, Bot]): void {
 		// Anti-tampering feature; detects prompts being deleted.
 		extendEventHandler(bot, 'messageDelete', { prepend: true }, async (_, { id: promptId, channelId, guildId }) => {
+			if (!isServicing(client, guildId!)) return;
+
 			// If the message was deleted from a channel not managed by this prompt manager.
 			if (this.channelIds.get(guildId!) !== channelId) return;
 
@@ -159,6 +165,8 @@ abstract class PromptManager<
 
 		// Anti-tampering feature; detects embeds being deleted from prompts.
 		extendEventHandler(bot, 'messageUpdate', { prepend: true }, (bot, { id: promptId, channelId, guildId, embeds }) => {
+			if (!isServicing(client, guildId!)) return;
+
 			// If the message was updated in a channel not managed by this prompt manager.
 			if (this.channelIds.get(guildId!) !== channelId) return;
 

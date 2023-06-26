@@ -37,6 +37,4 @@ const music: CommandTemplate = {
 	],
 };
 
-const commands = [music];
-
-export default commands;
+export default { local: [music], global: [music] };
