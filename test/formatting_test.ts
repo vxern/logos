@@ -1,5 +1,5 @@
 import { assertEquals } from 'std/testing/asserts.ts';
-import constants from 'logos/constants.ts';
+import constants from 'logos/src/constants.ts';
 import {
 	BulletStyles,
 	capitalise,
@@ -9,7 +9,7 @@ import {
 	mention,
 	MentionTypes,
 	timestamp,
-} from 'logos/formatting.ts';
+} from 'logos/src/formatting.ts';
 
 Deno.test('formatting', async (test) => {
 	await test.step('capitalisation', async (test) => {

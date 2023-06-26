@@ -1,6 +1,6 @@
 import { assertEquals, assertThrows } from 'std/testing/asserts.ts';
-import { addParametersToURL, chunk, fromHex, snowflakeToTimestamp } from 'logos/src/utils.ts';
-import { trim } from 'logos/formatting.ts';
+import { addParametersToURL, chunk, fromHex, snowflakeToTimestamp } from 'logos/src/lib/utils.ts';
+import { trim } from 'logos/src/formatting.ts';
 
 Deno.test('utils', async (test) => {
 	await test.step('fromHex', async (test) => {
