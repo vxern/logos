@@ -5,9 +5,11 @@ const configuration = {
 	guilds: {
 		namePattern: new RegExp('^Learn ([A-Z][a-z]*)$'),
 		environments: {
-			'staging': '1055102122137489418',
-			'development': '1055102910658269224',
-		} satisfies Partial<Record<Client['metadata']['environment'], string>>,
+			'432173040638623746': 'production', // Learn Romanian
+			'910929726418350110': 'production', // Learn Armenian
+			'1055102122137489418': 'staging', // Staging
+			'1055102910658269224': 'development', // Development
+		} satisfies Record<string, Client['metadata']['environment']> as Record<string, Client['metadata']['environment']>,
 		channels: {
 			logging: 'journal',
 			verification: 'verifications',

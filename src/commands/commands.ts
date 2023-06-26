@@ -6,12 +6,9 @@ import music from 'logos/src/commands/music/commands.ts';
 import server from 'logos/src/commands/server/commands.ts';
 import social from 'logos/src/commands/social/commands.ts';
 
-export default [
-	...developer,
-	...information,
-	...language,
-	...moderation,
-	...music,
-	...server,
-	...social,
-];
+const modules = [developer, information, language, moderation, music, server, social];
+
+export default {
+	global: modules.map((module) => module.global).flat(),
+	local: modules.map((module) => module.local).flat(),
+};

@@ -6,6 +6,4 @@ import rule from 'logos/src/commands/moderation/commands/rule.ts';
 import timeout from 'logos/src/commands/moderation/commands/timeout.ts';
 import warn from 'logos/src/commands/moderation/commands/warn.ts';
 
-const commands = [pardon, policy, purge, report, rule, timeout, warn];
-
-export default commands;
+export default { local: [pardon, policy, purge, report, rule, timeout, warn], global: [] };

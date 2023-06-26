@@ -105,7 +105,8 @@ type Client = Readonly<{
 	cache: Cache;
 	database: Database;
 	commands: {
-		commands: {
+		global: Command[];
+		local: {
 			visible: Command[];
 			hidden: Command[];
 		};
@@ -135,9 +136,12 @@ function createClient(
 ): Client {
 	const localisations = createLocalisations(localisationsStatic);
 
-	const commands = localiseCommands(localisations, commandTemplates);
-	const hidden = restrictCommandPermissions(commands);
-	const handlers = createCommandHandlers(commandTemplates);
+	const localCommands = localiseCommands(localisations, commandTemplates.local);
+	const localCommandsHidden = restrictCommandPermissions(localCommands);
+
+	const globalCommands = localiseCommands(localisations, commandTemplates.global);
+
+	const handlers = createCommandHandlers(commandTemplates.local);
 
 	return {
 		metadata,
@@ -146,7 +150,11 @@ function createClient(
 		database: createDatabase(),
 		features,
 		localisations,
-		commands: { commands: { visible: commands, hidden }, handlers },
+		commands: {
+			local: { visible: localCommands, hidden: localCommandsHidden },
+			global: globalCommands,
+			handlers,
+		},
 		collectors: new Map(),
 	};
 }
@@ -276,14 +284,17 @@ function createEventHandlers(client: Client): Partial<EventHandlers> {
 		},
 		guildCreate: (bot, guild) => {
 			const commands = (() => {
-				if (client.metadata.environment === 'production' || client.metadata.environment === 'restricted') {
-					return client.commands.commands.visible;
+				const environment = configuration.guilds.environments[guild.id.toString()];
+				const isGlobal = environment === undefined;
+				if (isGlobal) {
+					return client.commands.global;
 				}
 
-				const guildId = configuration.guilds.environments[client.metadata.environment];
-				if (guild.id.toString() === guildId) return client.commands.commands.visible;
+				if (environment === client.metadata.environment) {
+					return client.commands.local.visible;
+				}
 
-				return client.commands.commands.hidden;
+				return client.commands.local.hidden;
 			})();
 
 			upsertGuildApplicationCommands(bot, guild.id, commands)
