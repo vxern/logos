@@ -10,7 +10,7 @@ import { Client, initialiseClient } from 'logos/src/client.ts';
 import { capitalise } from 'logos/formatting.ts';
 import { getLanguageByLocale, Language, supportedLanguages } from 'logos/types.ts';
 
-async function readDotEnvFile(fileUri: string, isTemplate = false): Promise<dotenv.DotenvConfig | undefined> {
+async function readDotEnvFile(fileUri: string, isTemplate = false): Promise<Record<string, string> | undefined> {
 	const kind = isTemplate ? 'environment template' : 'environment';
 
 	let contents: string;

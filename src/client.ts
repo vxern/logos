@@ -26,7 +26,7 @@ import {
 	User,
 } from 'discordeno';
 import * as Sentry from 'sentry';
-import { Node as LavalinkNode, SendGatewayPayload } from 'lavadeno';
+import * as Lavaclient from 'lavaclient';
 import { MessagePipe } from 'messagepipe';
 import { Log as Logger } from 'tl_log';
 import { DictionaryAdapter } from 'logos/src/commands/language/dictionaries/adapter.ts';
@@ -116,7 +116,7 @@ type Client = Readonly<{
 		dictionaryAdapters: Map<Language, DictionaryAdapter[]>;
 		sentencePairs: Map<Language, SentencePair[]>;
 		music: {
-			node: LavalinkNode;
+			node: Lavaclient.Node;
 			controllers: Map<bigint, MusicController>;
 		};
 		// The keys are user IDs, the values are command usage timestamps mapped by command IDs.
@@ -156,7 +156,7 @@ async function initialiseClient(
 ): Promise<[Client, Bot]> {
 	const musicFeature = createMusicFeature(
 		(guildId, payload) => {
-			const shardId = client.cache.guilds.get(guildId)?.shardId;
+			const shardId = client.cache.guilds.get(BigInt(guildId))?.shardId;
 			if (shardId === undefined) return;
 
 			const shard = bot.gateway.manager.shards.find((shard) => shard.id === shardId);
@@ -184,10 +184,9 @@ async function initialiseClient(
 
 	startServices([client, bot]);
 
-	return Promise.all([
-		setupLavalinkNode([client, bot]),
-		startBot(bot),
-	]).then(() => [client, bot]);
+	setupLavalinkNode([client, bot]);
+
+	return startBot(bot).then(() => [client, bot]);
 }
 
 async function prefetchDataFromDatabase(client: Client, database: Database): Promise<void> {
@@ -205,8 +204,8 @@ function createLogger(environment: Client['metadata']['environment']): Logger {
 	});
 }
 
-function createMusicFeature(sendGatewayPayload: SendGatewayPayload): Client['features']['music'] {
-	const node = new LavalinkNode({
+function createMusicFeature(sendGatewayPayload: Lavaclient.Node['sendGatewayPayload']): Client['features']['music'] {
+	const node = new Lavaclient.Node({
 		connection: {
 			host: Deno.env.get('LAVALINK_HOST')!,
 			port: Number(Deno.env.get('LAVALINK_PORT')!),
@@ -221,7 +220,7 @@ function createMusicFeature(sendGatewayPayload: SendGatewayPayload): Client['fea
 	};
 }
 
-function withMusicEvents(events: Partial<EventHandlers>, node: LavalinkNode): Partial<EventHandlers> {
+function withMusicEvents(events: Partial<EventHandlers>, node: Lavaclient.Node): Partial<EventHandlers> {
 	return {
 		...events,
 		voiceStateUpdate: (_, payload) => {
@@ -640,7 +639,7 @@ function startServices([client, bot]: [Client, Bot]): void {
 	}
 }
 
-function setupLavalinkNode([client, bot]: [Client, Bot]): Promise<void> {
+function setupLavalinkNode([client, bot]: [Client, Bot]): void {
 	client.features.music.node.on(
 		'connect',
 		(timeTakenMs) => client.log.info(`Connected to Lavalink node. Time taken: ${timeTakenMs}ms`),
@@ -657,7 +656,7 @@ function setupLavalinkNode([client, bot]: [Client, Bot]): Promise<void> {
 
 	client.features.music.node.on(
 		'disconnect',
-		async (code, reason) => {
+		async ({ code, reason }) => {
 			if (code === -1) {
 				client.log.warn(`Unable to connect to Lavalink node. Retrying in 5 seconds...`);
 				await new Promise((resolve) => setTimeout(resolve, 5000));
@@ -673,13 +672,13 @@ function setupLavalinkNode([client, bot]: [Client, Bot]): Promise<void> {
 		},
 	);
 
-	return connectToLavalinkNode([client, bot]);
+	connectToLavalinkNode([client, bot]);
 }
 
-function connectToLavalinkNode([client, bot]: [Client, Bot]): Promise<void> {
+function connectToLavalinkNode([client, bot]: [Client, Bot]): void {
 	client.log.info('Connecting to Lavalink node...');
 
-	return client.features.music.node.connect(bot.id);
+	return client.features.music.node.connect(bot.id.toString());
 }
 
 function addCollector<T extends keyof EventHandlers>(

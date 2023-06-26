@@ -1,7 +1,6 @@
 import { Bot, Embed, Guild, Interaction, sendMessage, VoiceState } from 'discordeno';
-import { EventEmitter } from 'events';
-import { Player } from 'lavadeno';
-import { LoadType } from 'lavalink_types';
+import * as Events from 'events';
+import * as Lavaclient from 'lavaclient';
 import {
 	listingTypeToEmoji,
 	Song,
@@ -26,9 +25,9 @@ const disconnectTimeoutIdByGuildId = new Map<bigint, number>();
 type MusicEvents = { queueUpdate: []; historyUpdate: []; stop: [] };
 
 interface MusicController {
-	readonly player: Player;
+	readonly player: Lavaclient.Player;
 
-	readonly events: EventEmitter<MusicEvents>;
+	readonly events: Events.EventEmitter<MusicEvents>;
 
 	voiceChannelId: bigint | undefined;
 	feedbackChannelId: bigint | undefined;
@@ -48,12 +47,12 @@ interface MusicController {
 }
 
 function createMusicController(client: Client, guildId: bigint): MusicController {
-	const player = client.features.music.node.createPlayer(guildId);
+	const player = client.features.music.node.createPlayer(guildId.toString());
 	player.setVolume(configuration.music.defaultVolume);
 
 	return {
 		player,
-		events: new EventEmitter(),
+		events: new Events.EventEmitter(),
 		voiceChannelId: undefined,
 		feedbackChannelId: undefined,
 		listingHistory: [],
@@ -89,11 +88,11 @@ function isHistoryVacant(listingHistory: SongListing[]): boolean {
 	return listingHistory.length < configuration.music.limits.songs.history;
 }
 
-function isOccupied(player: Player): boolean {
+function isOccupied(player: Lavaclient.Player): boolean {
 	return (player.track ?? undefined) !== undefined;
 }
 
-function isPaused(player: Player): boolean {
+function isPaused(player: Lavaclient.Player): boolean {
 	return player.paused;
 }
 
@@ -268,7 +267,7 @@ function receiveNewListing(
 	// If the player is not connected to a voice channel, or if it is connected
 	// to a different voice channel, connect to the new voice channel.
 	if (!controller.player.connected) {
-		controller.player.connect(voiceChannelId, { deafen: true });
+		controller.player.connect(voiceChannelId.toString(), { deafened: true });
 
 		controller.voiceChannelId = voiceChannelId;
 		controller.feedbackChannelId = feedbackChannelId;
@@ -366,7 +365,7 @@ async function loadSong(
 ): Promise<boolean> {
 	const result = await controller.player.node.rest.loadTracks(song.url);
 
-	if (result.loadType === LoadType.LoadFailed || result.loadType === LoadType.NoMatches) {
+	if (result.loadType === 'LOAD_FAILED' || result.loadType === 'NO_MATCHES') {
 		controller.flags.loop.song = false;
 
 		const strings = {
@@ -583,19 +582,19 @@ function unskip(
 	}
 }
 
-function setVolume(player: Player, volume: number): void {
+function setVolume(player: Lavaclient.Player, volume: number): void {
 	return void player.setVolume(volume);
 }
 
-function pause(player: Player): void {
+function pause(player: Lavaclient.Player): void {
 	return void player.pause(true);
 }
 
-function resume(player: Player): void {
+function resume(player: Lavaclient.Player): void {
 	return void player.pause(false);
 }
 
-function skipTo(player: Player, timestampMilliseconds: number): void {
+function skipTo(player: Lavaclient.Player, timestampMilliseconds: number): void {
 	return void player.seek(timestampMilliseconds);
 }
 
