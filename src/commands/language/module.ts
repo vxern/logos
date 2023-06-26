@@ -1,4 +1,4 @@
-import * as csv from 'std/encoding/csv.ts';
+import * as csv from 'std/csv/mod.ts';
 import dexonline from 'logos/src/commands/language/dictionaries/adapters/dexonline.ts';
 import wiktionary from 'logos/src/commands/language/dictionaries/adapters/wiktionary.ts';
 import { DictionaryAdapter } from 'logos/src/commands/language/dictionaries/adapter.ts';

@@ -1,5 +1,5 @@
 import { Bot, Embed, Guild, Interaction, sendMessage, VoiceState } from 'discordeno';
-import { EventEmitter } from 'event';
+import { EventEmitter } from 'events';
 import { Player } from 'lavadeno';
 import { LoadType } from 'lavalink_types';
 import {
@@ -53,7 +53,7 @@ function createMusicController(client: Client, guildId: bigint): MusicController
 
 	return {
 		player,
-		events: new EventEmitter(0),
+		events: new EventEmitter(),
 		voiceChannelId: undefined,
 		feedbackChannelId: undefined,
 		listingHistory: [],

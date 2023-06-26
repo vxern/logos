@@ -1,11 +1,11 @@
 {
 	"imports": {
 		"logos/": "./",
-		"std/": "https://deno.land/std@0.173.0/",
+		"std/": "https://deno.land/std@0.192.0/",
     "dom": "https://deno.land/x/deno_dom@v0.1.38/deno-dom-wasm.ts",
 		"dexonline": "npm:dexonline-scraper@0.1.0",
 		"discordeno": "https://deno.land/x/discordeno@18.0.1/mod.ts",
-		"event": "https://deno.land/x/event@2.0.1/mod.ts",
+		"events": "npm:eventemitter3@5.0.1",
 		"fauna": "https://deno.land/x/fauna@5.0.0-deno-alpha9/mod.ts",
 		"messagepipe": "https://esm.sh/messagepipe@0.2.3",
 		"lavadeno": "https://deno.land/x/lavadeno@3.3.0/mod.ts",
