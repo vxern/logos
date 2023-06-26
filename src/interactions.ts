@@ -18,7 +18,7 @@ import {
 	MessageComponentTypes,
 	sendInteractionResponse,
 } from 'discordeno';
-import * as Snowflake from 'snowflake';
+import { DiscordSnowflake as Snowflake } from 'snowflake';
 import { addCollector, Client, localise } from 'logos/src/client.ts';
 import constants, { Periods } from 'logos/constants.ts';
 import { defaultLocale } from 'logos/types.ts';
@@ -61,7 +61,7 @@ function createInteractionCollector(
 	[client, bot]: [Client, Bot],
 	settings: InteractionCollectorSettings,
 ): string {
-	const customId = settings.customId ?? Snowflake.generate();
+	const customId = settings.customId ?? Snowflake.generate().toString();
 
 	addCollector([client, bot], 'interactionCreate', {
 		filter: (_, interaction) => compileChecks(interaction, settings, customId).every((condition) => condition),

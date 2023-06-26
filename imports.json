@@ -11,7 +11,7 @@
 		"lavadeno": "https://deno.land/x/lavadeno@3.3.0/mod.ts",
 		"lavalink_types": "https://deno.land/x/lavalink_types@2.0.6/mod.ts",
 		"sentry": "npm:@sentry/node@7.56.0",
-		"snowflake": "https://deno.land/x/deno_snowflake@v1.0.1/snowflake.ts",
+		"snowflake": "npm:@sapphire/snowflake@3.5.1",
 		"tl_log": "https://deno.land/x/tl_log@0.1.1/mod.ts",
     "wiktionary": "npm:parse-wiktionary@1.0.0",
 		"youtube-search": "npm:youtube-sr@4.3.4"
