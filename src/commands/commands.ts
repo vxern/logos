@@ -9,6 +9,6 @@ import social from 'logos/src/commands/social/commands.ts';
 const modules = [developer, information, language, moderation, music, server, social];
 
 export default {
-	global: modules.map((module) => module.global).flat(),
 	local: modules.map((module) => module.local).flat(),
+	global: modules.map((module) => module.global).flat(),
 };

@@ -1,6 +1,6 @@
 import { Bot, Channel, ChannelTypes, Collection, createChannel, deleteChannel, Guild, VoiceState } from 'discordeno';
 import { ServiceStarter } from 'logos/src/services/services.ts';
-import { Client, extendEventHandler } from 'logos/src/client.ts';
+import { Client, extendEventHandler, isServicing } from 'logos/src/client.ts';
 import { isVoice } from 'logos/src/utils.ts';
 import configuration from 'logos/configuration.ts';
 
@@ -8,10 +8,14 @@ const previousVoiceStates = new Map<`${/*userId:*/ bigint}${/*guildId:*/ bigint}
 
 const service: ServiceStarter = ([client, bot]) => {
 	extendEventHandler(bot, 'voiceStateUpdate', { append: true }, (_, voiceState) => {
+		if (!isServicing(client, voiceState.guildId)) return;
+
 		onVoiceStateUpdate([client, bot], voiceState);
 	});
 
 	extendEventHandler(bot, 'guildCreate', { append: true }, (_, { id: guildId }) => {
+		if (!isServicing(client, guildId)) return;
+
 		const guild = client.cache.guilds.get(guildId);
 		if (guild === undefined) return;
 
