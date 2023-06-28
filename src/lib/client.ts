@@ -125,6 +125,9 @@ function createClient(
 	return {
 		metadata,
 		log: {
+			default: (...args: unknown[]) => {
+				FancyLog.info(...args);
+			},
 			debug: (...args: unknown[]) => {
 				FancyLog.info(...args);
 			},
