@@ -11,7 +11,7 @@
 	"information.options.bot.strings.whoAmI.features.language": "Translation and morphology look-ups",
 	"information.options.bot.strings.whoAmI.features.music": "Music playback",
 	"information.options.bot.strings.howWasIMade.title": "How was I made?",
-	"information.options.bot.strings.howWasIMade.description": "I am powered by [TypeScript]({language_link}) running within [Deno]({runtime_link}). I interact with [Discord's API]({api_link}) with the help of the [Discordeno]({library_link}) API library.",
+	"information.options.bot.strings.howWasIMade.description": "I am powered by [TypeScript]({language_link}) in [Node.js]({runtime_link}). I interact with [Discord's API]({api_link}) with the help of the [Discordeno]({library_link}) API library.",
 	"information.options.bot.strings.howToAddToServer.title": "How can you add me to your server?",
 	"information.options.bot.strings.howToAddToServer.description": "It is not possible to add me to your own community at this point in time. I was made for the purpose of managing a select few language-learning communities, such as [Learn Romanian]({learn_romanian_link}) and [Learn Armenian]({learn_armenian_link}).",
 	"information.options.bot.strings.amIOpenSource.title": "Am I open-source?",
