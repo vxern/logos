@@ -1,4 +1,4 @@
-import constants, { BulletStyles } from 'logos/src/constants.ts';
+import constants, { BulletStyles } from "./constants.js";
 
 /**
  * Capitalises the first letter of the given text.
@@ -19,7 +19,7 @@ function capitalise(target: string): string {
  * @returns The formatted string of text.
  */
 function code(target: string): string {
-	return '`' + target + '`';
+	return "`" + target + "`";
 }
 
 /**
@@ -29,7 +29,7 @@ function code(target: string): string {
  * @param target - String of text to format.
  */
 function codeMultiline(target: string): string {
-	return '```' + target + '```';
+	return "```" + target + "```";
 }
 
 /**
@@ -40,17 +40,17 @@ function codeMultiline(target: string): string {
  */
 function list(items: string[], bulletStyle: BulletStyles = BulletStyles.Arrow): string {
 	const bullet = constants.symbols.bullets[bulletStyle];
-	return items.map((item) => `${bullet} ${item}`).join('\n');
+	return items.map((item) => `${bullet} ${item}`).join("\n");
 }
 
 enum TimestampFormat {
-	ShortTime = 't',
-	LongTime = 'T',
-	ShortDate = 'd',
-	LongDate = 'D',
-	ShortDateTime = 'f',
-	LongDateTime = 'F',
-	Relative = 'R',
+	ShortTime = "t",
+	LongTime = "T",
+	ShortDate = "d",
+	LongDate = "D",
+	ShortDateTime = "f",
+	LongDateTime = "F",
+	Relative = "R",
 }
 
 /**
@@ -66,9 +66,9 @@ function timestamp(timestamp: number, format = TimestampFormat.Relative): string
 
 /** Defines the type of Discord mention. */
 enum MentionTypes {
-	Channel = '#',
-	Role = '@&',
-	User = '@',
+	Channel = "#",
+	Role = "@&",
+	User = "@",
 }
 
 /**
@@ -92,16 +92,18 @@ function mention(id: bigint, type: MentionTypes): string {
 function trim(string: string, length: number): string {
 	if (string.length <= length) return string;
 
-	if (!string.includes(' ')) {
+	if (!string.includes(" ")) {
 		return string.slice(0, Math.max(length - constants.symbols.strings.trail.length)) + constants.symbols.strings.trail;
 	}
 
 	const slice = string.slice(0, length);
-	const indexOfLastSpace = slice.lastIndexOf(' ');
+	const indexOfLastSpace = slice.lastIndexOf(" ");
 	const gap = slice.length - (indexOfLastSpace + 1);
 
-	return slice.slice(0, slice.length - Math.max(gap, constants.symbols.strings.continued.length)) +
-		constants.symbols.strings.continued;
+	return (
+		slice.slice(0, slice.length - Math.max(gap, constants.symbols.strings.continued.length)) +
+		constants.symbols.strings.continued
+	);
 }
 
 export { BulletStyles, capitalise, code, codeMultiline, list, mention, MentionTypes, timestamp, TimestampFormat, trim };

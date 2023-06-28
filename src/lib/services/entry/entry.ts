@@ -1,11 +1,11 @@
-import { Bot, Interaction, InteractionTypes } from 'discordeno';
-import { handleAcceptRules } from 'logos/src/lib/services/entry/stages/accept-rules.ts';
-import { handleRequestVerification } from 'logos/src/lib/services/entry/stages/get-verified.ts';
-import { handleSelectLanguageProficiency } from 'logos/src/lib/services/entry/stages/select-language-proficiency.ts';
-import { ServiceStarter } from 'logos/src/lib/services/services.ts';
-import { Client, isServicing } from 'logos/src/lib/client.ts';
-import { createInteractionCollector, decodeId } from 'logos/src/lib/interactions.ts';
-import constants from 'logos/src/constants.ts';
+import { Bot, Interaction, InteractionTypes } from "discordeno";
+import { handleAcceptRules } from "./stages/accept-rules.js";
+import { handleRequestVerification } from "./stages/get-verified.js";
+import { handleSelectLanguageProficiency } from "./stages/select-language-proficiency.js";
+import { ServiceStarter } from "../services.js";
+import { Client, isServicing } from "../../client.js";
+import { createInteractionCollector, decodeId } from "../../interactions.js";
+import constants from "../../../constants.js";
 
 type EntryInteractionHandler = (
 	[client, bot]: [Client, Bot],

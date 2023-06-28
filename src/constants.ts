@@ -1,5 +1,5 @@
-import { fromHex } from 'logos/src/lib/utils.ts';
-import { Language } from 'logos/src/types.ts';
+import { fromHex } from "./lib/utils.js";
+import { Language } from "./types.js";
 
 class Periods {
 	static readonly second = 1000;
@@ -14,26 +14,26 @@ class Periods {
 const interactionTokenExpiryInterval = 14 * Periods.minute + 50 * Periods.second; // Just below 15 minutes.
 
 const staticComponentIds = {
-	none: 'none',
-	acceptedRules: 'accepted_rules',
-	selectedLanguageProficiency: 'selected_language_proficiency',
-	requestedVerification: 'requested_verification',
-	verification: 'verification',
-	reports: 'reports',
-	suggestions: 'suggestions',
-	selectRoles: 'select_roles',
+	none: "none",
+	acceptedRules: "accepted_rules",
+	selectedLanguageProficiency: "selected_language_proficiency",
+	requestedVerification: "requested_verification",
+	verification: "verification",
+	reports: "reports",
+	suggestions: "suggestions",
+	selectRoles: "select_roles",
 };
 
 const links = {
-	typescriptWebsite: 'https://www.typescriptlang.org/',
-	denoWebsite: 'https://deno.land/',
-	discordApiWebsite: 'https://discord.com/developers/docs/intro',
-	discordenoRepository: 'https://github.com/discordeno/discordeno',
+	typescriptWebsite: "https://www.typescriptlang.org/",
+	nodeWebsite: "https://nodejs.org/en",
+	discordApiWebsite: "https://discord.com/developers/docs/intro",
+	discordenoRepository: "https://github.com/discordeno/discordeno",
 
-	learnArmenianListingWebsite: 'https://discord.me/learnarmenian',
-	learnRomanianListingWebsite: 'https://discord.me/learnromanian',
+	learnArmenianListingWebsite: "https://discord.me/learnarmenian",
+	learnRomanianListingWebsite: "https://discord.me/learnromanian",
 
-	talonRepositoryLink: 'https://github.com/vxern/talon',
+	talonRepositoryLink: "https://github.com/vxern/talon",
 	generateLanguageRepositoryLink: (language: Language) => `https://github.com/vxern/${language.toLowerCase()}`,
 
 	generateDiscordInviteLink: (inviteCode: string) => `https://discord.gg/${inviteCode}`,
@@ -41,81 +41,81 @@ const links = {
 
 const contributors = {
 	esther: {
-		username: 'Esther',
+		username: "Esther",
 		id: 747900197358665758n,
 	},
 	intelProcessor: {
-		username: 'IntelProcessor69',
+		username: "IntelProcessor69",
 		id: 839862207025119252n,
 	},
 	matteos: {
-		username: '16WardM',
+		username: "16WardM",
 		id: 758385691851096195n,
 	},
 	moorddroom: {
-		username: 'moorddroom',
+		username: "moorddroom",
 		id: 656160896607059981n,
 	},
 	mymy: {
-		username: 'Mymy',
+		username: "Mymy",
 		id: 859452448191545364n,
 	},
 	neemanUrmash: {
-		username: 'Neeman Urmash',
+		username: "Neeman Urmash",
 		id: 943425310421053481n,
 	},
 	nemokosch: {
-		username: 'Nemokosch',
+		username: "Nemokosch",
 		id: 297037173541175296n,
 		links: {
-			'Github': 'https://github.com/2colours',
+			Github: "https://github.com/2colours",
 		},
 	},
 	serene: {
-		username: 'Serene',
+		username: "Serene",
 		id: 797369145367855104n,
 	},
 	shamisem: {
-		username: 'Shamisem',
+		username: "Shamisem",
 		id: 1020296987494596620n,
 	},
 	qirimcak: {
-		username: 'qırımçak',
+		username: "qırımçak",
 		id: 558631025408999424n,
 	},
 	telemaniak: {
-		username: 'Telemaniak',
+		username: "Telemaniak",
 		id: 410812091071725598n,
 	},
 	vxern: {
-		username: 'vxern',
+		username: "vxern",
 		id: 217319536485990400n,
 		links: {
-			'Github': 'https://github.com/vxern',
-			'LinkedIn': 'https://linkedin.com/in/vxern',
+			Github: "https://github.com/vxern",
+			LinkedIn: "https://linkedin.com/in/vxern",
 		},
 	},
 	xXMemeXx: {
-		username: 'xXMemeXx',
+		username: "xXMemeXx",
 		id: 303605019532460033n,
 		links: {
-			'YouTube': 'https://www.youtube.com/channel/UC4aqpjKwQfkqxmQO0Owy2QQ',
+			YouTube: "https://www.youtube.com/channel/UC4aqpjKwQfkqxmQO0Owy2QQ",
 		},
 	},
 	yeetfe: {
-		username: 'Yeetfe',
+		username: "Yeetfe",
 		id: 249248581435916299n,
 	},
 };
 
 const contributions = {
 	translation: {
-		'Dutch': {
-			flag: '🇳🇱',
+		Dutch: {
+			flag: "🇳🇱",
 			contributors: [contributors.moorddroom],
 		},
-		'French': {
-			flag: '🇫🇷',
+		French: {
+			flag: "🇫🇷",
 			contributors: [
 				contributors.intelProcessor,
 				contributors.matteos,
@@ -124,258 +124,255 @@ const contributions = {
 				contributors.esther,
 			],
 		},
-		'Greek': {
-			flag: '🇬🇷',
-			contributors: [
-				contributors.intelProcessor,
-				contributors.neemanUrmash,
-			],
+		Greek: {
+			flag: "🇬🇷",
+			contributors: [contributors.intelProcessor, contributors.neemanUrmash],
 		},
-		'Hungarian': {
-			flag: '🇭🇺',
+		Hungarian: {
+			flag: "🇭🇺",
 			contributors: [contributors.nemokosch],
 		},
-		'Italian': {
-			flag: '🇮🇹',
+		Italian: {
+			flag: "🇮🇹",
 			contributors: [contributors.mymy],
 		},
-		'Norwegian': {
-			flag: '🇳🇴',
+		Norwegian: {
+			flag: "🇳🇴",
 			contributors: [contributors.telemaniak],
 		},
-		'Polish': {
-			flag: '🇵🇱',
+		Polish: {
+			flag: "🇵🇱",
 			contributors: [contributors.vxern],
 		},
-		'Romanian': {
-			flag: '🇷🇴',
+		Romanian: {
+			flag: "🇷🇴",
 			contributors: [contributors.vxern, contributors.xXMemeXx],
 		},
-		'Turkish': {
-			flag: '🇹🇷',
+		Turkish: {
+			flag: "🇹🇷",
 			contributors: [contributors.qirimcak, contributors.yeetfe],
 		},
 	},
 };
 
 const images = {
-	rules: 'https://i.imgur.com/wRBpXcY.png',
-	inviteLink: 'https://i.imgur.com/snJaKYm.png',
+	rules: "https://i.imgur.com/wRBpXcY.png",
+	inviteLink: "https://i.imgur.com/snJaKYm.png",
 };
 
 const colors = {
-	invisible: fromHex('#36393f'),
-	red: fromHex('#b42f2f'),
-	darkRed: fromHex('#820000'),
-	lightGreen: fromHex('#89ef59'),
-	darkGreen: fromHex('#479621'),
-	blue: fromHex('#6269ed'),
-	dullYellow: fromHex('#f2f277'),
-	gray: fromHex('#637373'),
-	peach: fromHex('#ff9a76'),
-	husky: fromHex('#d6e3f8'),
-	black: fromHex('1c1c1c'), // Eerie black
-	yellow: fromHex('#ffe548'), // Gargoyle gas
-	orangeRed: fromHex('#ff4b3e'), // Dusk orange
-	lightGray: fromHex('#daddd8'),
-	turquoise: fromHex('#68d8d6'), // Hammam blue
-	green: fromHex('#00cc66'), // Alienated
-	greenishLightGray: fromHex('#c5e0d8'), // Ulthuan gray
-	orange: fromHex('#f28123'), // Beer
+	invisible: fromHex("#36393f"),
+	red: fromHex("#b42f2f"),
+	darkRed: fromHex("#820000"),
+	lightGreen: fromHex("#89ef59"),
+	darkGreen: fromHex("#479621"),
+	blue: fromHex("#6269ed"),
+	dullYellow: fromHex("#f2f277"),
+	gray: fromHex("#637373"),
+	peach: fromHex("#ff9a76"),
+	husky: fromHex("#d6e3f8"),
+	black: fromHex("1c1c1c"), // Eerie black
+	yellow: fromHex("#ffe548"), // Gargoyle gas
+	orangeRed: fromHex("#ff4b3e"), // Dusk orange
+	lightGray: fromHex("#daddd8"),
+	turquoise: fromHex("#68d8d6"), // Hammam blue
+	green: fromHex("#00cc66"), // Alienated
+	greenishLightGray: fromHex("#c5e0d8"), // Ulthuan gray
+	orange: fromHex("#f28123"), // Beer
 };
 
 enum BulletStyles {
-	Arrow = 'arrow',
-	Diamond = 'diamond',
+	Arrow = "arrow",
+	Diamond = "diamond",
 }
 
 const symbols = {
 	meta: {
-		whitespace: '⠀',
-		metadataSeparator: '・',
-		idSeparator: '|',
+		whitespace: "⠀",
+		metadataSeparator: "・",
+		idSeparator: "|",
 	},
-	ruleBullet: '💠',
-	understood: '✅',
+	ruleBullet: "💠",
+	understood: "✅",
 	information: {
-		information: 'ℹ️',
-		inviteLink: '🔗',
+		information: "ℹ️",
+		inviteLink: "🔗",
 	},
 	events: {
 		user: {
-			banned: '⚔️',
-			unbanned: '😇',
-			joined: '😁',
-			left: '😔',
+			banned: "⚔️",
+			unbanned: "😇",
+			joined: "😁",
+			left: "😔",
 		},
 		message: {
-			updated: '⬆️',
-			deleted: '❌',
+			updated: "⬆️",
+			deleted: "❌",
 		},
 		entryRequest: {
-			submitted: 'ℹ️',
-			accepted: '✅',
-			rejected: '❌',
+			submitted: "ℹ️",
+			accepted: "✅",
+			rejected: "❌",
 		},
-		warned: '⚠️',
-		pardoned: '😇',
+		warned: "⚠️",
+		pardoned: "😇",
 		timeout: {
-			added: '⏳',
-			removed: '😇',
+			added: "⏳",
+			removed: "😇",
 		},
-		praised: '🙏',
-		suggestion: '🌿',
-		report: '💢',
+		praised: "🙏",
+		suggestion: "🌿",
+		report: "💢",
 		purging: {
-			begin: '⚔️',
-			end: '✅',
+			begin: "⚔️",
+			end: "✅",
 		},
 	},
 	music: {
-		song: '🎵',
-		file: '📁',
-		collection: '🎶',
-		list: '📋',
-		loopEnabled: '🔁',
-		loopDisabled: '⏸️',
-		paused: '⏸️',
-		queued: '👍',
-		nowPlaying: '⬇️',
-		replaying: '🔁',
-		removed: '❌',
-		resumed: '▶️',
-		skippedTo: '🔍',
-		skipped: '⏭️',
-		stopped: '⏹️',
-		unskipped: '⏮️',
-		volume: '🔊',
+		song: "🎵",
+		file: "📁",
+		collection: "🎶",
+		list: "📋",
+		loopEnabled: "🔁",
+		loopDisabled: "⏸️",
+		paused: "⏸️",
+		queued: "👍",
+		nowPlaying: "⬇️",
+		replaying: "🔁",
+		removed: "❌",
+		resumed: "▶️",
+		skippedTo: "🔍",
+		skipped: "⏭️",
+		stopped: "⏹️",
+		unskipped: "⏮️",
+		volume: "🔊",
 	},
 	indicators: {
-		exclamation: '❗',
-		warning: '⚠️',
-		arrowRight: '➜',
+		exclamation: "❗",
+		warning: "⚠️",
+		arrowRight: "➜",
 	},
 	responses: {
-		celebration: '🥳',
-		upset: '😕',
+		celebration: "🥳",
+		upset: "😕",
 	},
 	bot: {
 		features: {
-			roles: '💼',
-			language: '🎓',
-			music: '🎶',
+			roles: "💼",
+			language: "🎓",
+			music: "🎶",
 		},
 	},
 	guild: {
-		description: '🖋️',
-		members: '🧑',
-		created: '⏱️',
+		description: "🖋️",
+		members: "🧑",
+		created: "⏱️",
 		channels: {
-			channels: '🗯️',
-			text: '📜',
-			voice: '🔊',
+			channels: "🗯️",
+			text: "📜",
+			voice: "🔊",
 		},
-		owner: '👑',
-		moderators: '⚖️',
-		proficiencyDistribution: '🎓',
+		owner: "👑",
+		moderators: "⚖️",
+		proficiencyDistribution: "🎓",
 	},
 	interactions: {
 		menu: {
 			controls: {
-				back: '«',
-				forward: '»',
+				back: "«",
+				forward: "»",
 			},
 		},
 	},
 	bullets: {
-		arrow: '➜',
-		diamond: '♦️',
+		arrow: "➜",
+		diamond: "♦️",
 	} satisfies Record<BulletStyles, string>,
 	strings: {
-		trail: '...',
-		continued: '(...)',
+		trail: "...",
+		continued: "(...)",
 	},
 	roles: {
-		noCategory: '💭',
-		unknownEmoji: '❓',
+		noCategory: "💭",
+		unknownEmoji: "❓",
 		categories: {
 			language: {
-				category: '🎓',
+				category: "🎓",
 				proficiency: {
-					category: '🔰',
-					beginner: '🟩',
-					intermediate: '🟦',
-					advanced: '🟥',
-					native: '🟨',
+					category: "🔰",
+					beginner: "🟩",
+					intermediate: "🟦",
+					advanced: "🟥",
+					native: "🟨",
 				},
 				cefr: {
-					category: '🔤',
-					a0: '☁️',
-					a1: '⚡',
-					a2: '✨',
-					b1: '⭐',
-					b2: '🌟',
-					c1: '💫',
-					c2: '🌠',
+					category: "🔤",
+					a0: "☁️",
+					a1: "⚡",
+					a2: "✨",
+					b1: "⭐",
+					b2: "🌟",
+					c1: "💫",
+					c2: "🌠",
 				},
 			},
 			personalisation: {
-				category: '🌈',
+				category: "🌈",
 				orthography: {
-					category: '🖋️',
-					idinist: 'Idini',
+					category: "🖋️",
+					idinist: "Idini",
 				},
 				gender: {
-					category: '⚧',
-					male: '♂️',
-					female: '♀️',
-					transgender: '⚧',
-					nonbinary: '🧑',
+					category: "⚧",
+					male: "♂️",
+					female: "♀️",
+					transgender: "⚧",
+					nonbinary: "🧑",
 				},
 				abroad: {
-					category: '🌎',
-					diasporan: '🌎',
+					category: "🌎",
+					diasporan: "🌎",
 				},
 			},
 			learning: {
-				category: '📖',
-				classroomAttendee: '📖',
-				correctMe: '✍️',
-				dailyPhrase: '🌞',
-				voicechatter: '🗣️',
+				category: "📖",
+				classroomAttendee: "📖",
+				correctMe: "✍️",
+				dailyPhrase: "🌞",
+				voicechatter: "🗣️",
 			},
 			ethnicity: {
-				category: '🗾',
+				category: "🗾",
 			},
 			dialects: {
-				category: '🏷️',
+				category: "🏷️",
 			},
 			regions: {
-				category: '🤷‍♂️',
+				category: "🤷‍♂️",
 			},
 		},
 	},
 	profile: {
-		roles: '💼',
+		roles: "💼",
 		statistics: {
-			statistics: '🧮',
-			praises: '🙏',
-			warnings: '😖',
+			statistics: "🧮",
+			praises: "🙏",
+			warnings: "😖",
 		},
 	},
 };
 
 const gifs = {
-	done: 'https://media.tenor.com/3wJ_QISYvxEAAAAC/done-all.gif',
-	followRules: 'https://media.tenor.com/mPxD454ittYAAAAC/rules.gif',
-	chaosWithoutRules: 'https://media.tenor.com/_sFydMmz7YgAAAAd/loop-rules-rule.gif',
-	welcome: 'https://media.tenor.com/u4Pg5kqdaIAAAAAC/welcome.gif',
+	done: "https://media.tenor.com/3wJ_QISYvxEAAAAC/done-all.gif",
+	followRules: "https://media.tenor.com/mPxD454ittYAAAAC/rules.gif",
+	chaosWithoutRules: "https://media.tenor.com/_sFydMmz7YgAAAAd/loop-rules-rule.gif",
+	welcome: "https://media.tenor.com/u4Pg5kqdaIAAAAAC/welcome.gif",
 };
 
 const endpoints = {
 	deepl: {
-		languages: 'https://api-free.deepl.com/v2/languages',
-		translate: 'https://api-free.deepl.com/v2/translate',
+		languages: "https://api-free.deepl.com/v2/languages",
+		translate: "https://api-free.deepl.com/v2/translate",
 	},
 };
 

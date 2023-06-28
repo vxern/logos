@@ -1,11 +1,11 @@
-import { BaseInvite, Bot, createInvite, CreateMessage, Embed, getInvites, Guild, InviteMetadata } from 'discordeno';
-import { ruleIds } from 'logos/src/lib/commands/moderation/commands/rule.ts';
-import { getLastUpdateString } from 'logos/src/lib/services/notices/notices.ts';
-import { Client, localise } from 'logos/src/lib/client.ts';
-import { getTextChannel } from 'logos/src/lib/utils.ts';
-import configuration from 'logos/src/configuration.ts';
-import constants from 'logos/src/constants.ts';
-import { defaultLocale } from 'logos/src/types.ts';
+import { BaseInvite, Bot, createInvite, CreateMessage, Embed, getInvites, Guild, InviteMetadata } from "discordeno";
+import { getLastUpdateString } from "../notices.js";
+import { ruleIds } from "../../../commands/moderation/commands/rule.js";
+import { Client, localise } from "../../../client.js";
+import { getTextChannel } from "../../../utils.js";
+import configuration from "../../../../configuration.js";
+import constants from "../../../../constants.js";
+import { defaultLocale } from "../../../../types.js";
 
 const lastUpdatedAt = new Date(2023, 2, 19);
 
@@ -26,15 +26,15 @@ function getRulesSection(client: Client): Embed {
 	const fields = ruleIds.map((ruleId, index) => {
 		const strings = {
 			title: localise(client, `rules.${ruleId}.title`, defaultLocale)(),
-			tldr: localise(client, 'rules.tldr', defaultLocale)(),
+			tldr: localise(client, "rules.tldr", defaultLocale)(),
 			summary: localise(client, `rules.${ruleId}.summary`, defaultLocale)(),
 			content: localise(client, `rules.${ruleId}.content`, defaultLocale)(),
 		};
 
 		return {
-			name: `${constants.symbols.ruleBullet}  #${
-				index + 1
-			} ~ **${strings.title.toUpperCase()}**  ~  ${strings.tldr}: *${strings.summary}*`,
+			name: `${constants.symbols.ruleBullet}  #${index + 1} ~ **${strings.title.toUpperCase()}**  ~  ${
+				strings.tldr
+			}: *${strings.summary}*`,
 			value: strings.content,
 			inline: false,
 		};
@@ -51,7 +51,7 @@ function getInviteSection(client: Client, invite: InviteMetadata | BaseInvite): 
 	const link = constants.links.generateDiscordInviteLink(invite.code);
 
 	const strings = {
-		invite: localise(client, 'notices.notices.information.invite', defaultLocale)(),
+		invite: localise(client, "notices.notices.information.invite", defaultLocale)(),
 	};
 
 	return {
@@ -64,7 +64,8 @@ async function getOrCreateInvite(
 	[client, bot]: [Client, Bot],
 	guild: Guild,
 ): Promise<InviteMetadata | BaseInvite | undefined> {
-	const invites = await getInvites(bot, guild.id).then((invites) => invites.array())
+	const invites = await getInvites(bot, guild.id)
+		.then((invites) => invites.array())
 		.catch(() => {
 			client.log.warn(`Failed to get invites on ${guild.name}.`);
 			return undefined;

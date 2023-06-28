@@ -1,5 +1,5 @@
-import * as Fauna from 'fauna';
-import { Suggestion } from 'logos/src/lib/database/structs/mod.ts';
+import Fauna from "fauna";
+import { Suggestion } from "../structs/suggestion.js";
 import {
 	CacheAdapter,
 	DatabaseAdapters,
@@ -7,13 +7,13 @@ import {
 	getUserMentionByReference,
 	setNested,
 	stringifyValue,
-} from 'logos/src/lib/database/database.ts';
-import { Document } from 'logos/src/lib/database/document.ts';
-import { SuggestionIndexes } from 'logos/src/lib/database/indexes.ts';
+} from "../database.js";
+import { Document } from "../document.js";
+import { SuggestionIndexes } from "../indexes.js";
 
 const $ = Fauna.query;
 
-const cache: CacheAdapter<Suggestion, SuggestionIndexes<Document<Suggestion>>, 'delete'> = {
+const cache: CacheAdapter<Suggestion, SuggestionIndexes<Document<Suggestion>>, "delete"> = {
 	get: (client, _parameter, value) => {
 		return client.database.cache.suggestionsByAuthorAndGuild.get(value);
 	},
@@ -29,17 +29,14 @@ const cache: CacheAdapter<Suggestion, SuggestionIndexes<Document<Suggestion>>, '
 	},
 };
 
-const adapter: DatabaseAdapters['suggestions'] = {
+const adapter: DatabaseAdapters["suggestions"] = {
 	prefetch: async (client) => {
 		const documents = await dispatchQuery<Suggestion[]>(
 			client,
-			$.Map(
-				$.Paginate($.Documents($.Collection('Suggestions'))),
-				$.Lambda('suggestion', $.Get($.Var('suggestion'))),
-			),
+			$.Map($.Paginate($.Documents($.Collection("Suggestions"))), $.Lambda("suggestion", $.Get($.Var("suggestion")))),
 		);
 		if (documents === undefined) {
-			client.log.error(`Failed to fetch all suggestions.`);
+			client.log.error("Failed to fetch all suggestions.");
 			return;
 		}
 
@@ -48,7 +45,7 @@ const adapter: DatabaseAdapters['suggestions'] = {
 			const guildId = stringifyValue(document.data.guild);
 			const compositeId = `${authorReferenceId}${guildId}`;
 
-			cache.set(client, 'authorAndGuild', compositeId, document);
+			cache.set(client, "authorAndGuild", compositeId, document);
 		}
 
 		client.log.debug(`Fetched ${documents.length} suggestion(s).`);
@@ -64,7 +61,7 @@ const adapter: DatabaseAdapters['suggestions'] = {
 	create: async (client, suggestion) => {
 		const document = await dispatchQuery<Suggestion>(
 			client,
-			$.Create($.Collection('Suggestions'), { data: suggestion }),
+			$.Create($.Collection("Suggestions"), { data: suggestion }),
 		);
 
 		const authorReferenceId = stringifyValue(suggestion.author);
@@ -79,7 +76,7 @@ const adapter: DatabaseAdapters['suggestions'] = {
 
 		const compositeId = `${authorReferenceId}${guildId}`;
 
-		cache.set(client, 'authorAndGuild', compositeId, document);
+		cache.set(client, "authorAndGuild", compositeId, document);
 
 		client.log.debug(`Created suggestion submitted by ${userMention} on guild with ID ${guildId}.`);
 
@@ -100,7 +97,7 @@ const adapter: DatabaseAdapters['suggestions'] = {
 
 		const compositeId = `${authorReferenceId}${guildId}`;
 
-		cache.set(client, 'authorAndGuild', compositeId, document);
+		cache.set(client, "authorAndGuild", compositeId, document);
 
 		client.log.debug(`Updated suggestion submitted by ${userMention} on guild with ID ${guildId}.`);
 

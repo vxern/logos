@@ -1,9 +1,9 @@
-import { Bot, editMember, Interaction } from 'discordeno';
-import { logEvent } from 'logos/src/lib/controllers/logging/logging.ts';
-import { autocompleteMembers, Client, localise, resolveInteractionToMember } from 'logos/src/lib/client.ts';
-import { parseArguments, reply } from 'logos/src/lib/interactions.ts';
-import { diagnosticMentionUser } from 'logos/src/lib/utils.ts';
-import constants from 'logos/src/constants.ts';
+import { Bot, editMember, Interaction } from "discordeno";
+import { logEvent } from "../../../../controllers/logging/logging.js";
+import { autocompleteMembers, Client, localise, resolveInteractionToMember } from "../../../../client.js";
+import { parseArguments, reply } from "../../../../interactions.js";
+import { diagnosticMentionUser } from "../../../../utils.js";
+import constants from "../../../../../constants.js";
 
 function handleClearTimeoutAutocomplete([client, bot]: [Client, Bot], interaction: Interaction): void {
 	const [{ user }] = parseArguments(interaction.data?.options, {});
@@ -27,42 +27,51 @@ async function handleClearTimeout([client, bot]: [Client, Bot], interaction: Int
 
 	if (notTimedOut) {
 		const strings = {
-			title: localise(client, 'timeout.strings.notTimedOut.title', interaction.locale)(),
-			description: localise(client, 'timeout.strings.notTimedOut.description', interaction.locale)(
-				{ 'user_mention': diagnosticMentionUser(member.user!) },
-			),
+			title: localise(client, "timeout.strings.notTimedOut.title", interaction.locale)(),
+			description: localise(
+				client,
+				"timeout.strings.notTimedOut.description",
+				interaction.locale,
+			)({ user_mention: diagnosticMentionUser(member.user!) }),
 		};
 
 		return void reply([client, bot], interaction, {
-			embeds: [{
-				title: strings.title,
-				description: strings.description,
-				color: constants.colors.dullYellow,
-			}],
+			embeds: [
+				{
+					title: strings.title,
+					description: strings.description,
+					color: constants.colors.dullYellow,
+				},
+			],
 		});
 	}
 
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (guild === undefined) return;
 
-	await editMember(bot, interaction.guildId!, member.id, { communicationDisabledUntil: null })
-		.catch(() => client.log.warn(`Failed to remove timeout of member with ID ${member.id}`));
+	await editMember(bot, interaction.guildId!, member.id, { communicationDisabledUntil: null }).catch(() =>
+		client.log.warn(`Failed to remove timeout of member with ID ${member.id}`),
+	);
 
-	logEvent([client, bot], guild, 'memberTimeoutRemove', [member, interaction.user]);
+	logEvent([client, bot], guild, "memberTimeoutRemove", [member, interaction.user]);
 
 	const strings = {
-		title: localise(client, 'timeout.strings.timeoutCleared.title', interaction.locale)(),
-		description: localise(client, 'timeout.strings.timeoutCleared.description', interaction.locale)(
-			{ 'user_mention': diagnosticMentionUser(member.user!) },
-		),
+		title: localise(client, "timeout.strings.timeoutCleared.title", interaction.locale)(),
+		description: localise(
+			client,
+			"timeout.strings.timeoutCleared.description",
+			interaction.locale,
+		)({ user_mention: diagnosticMentionUser(member.user!) }),
 	};
 
 	return void reply([client, bot], interaction, {
-		embeds: [{
-			title: strings.title,
-			description: strings.description,
-			color: constants.colors.lightGreen,
-		}],
+		embeds: [
+			{
+				title: strings.title,
+				description: strings.description,
+				color: constants.colors.lightGreen,
+			},
+		],
 	});
 }
 

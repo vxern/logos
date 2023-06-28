@@ -1,8 +1,8 @@
-import { EventHandlers } from 'discordeno';
-import { MessageGenerators } from 'logos/src/lib/controllers/logging/generators/generators.ts';
-import { diagnosticMentionUser } from 'logos/src/lib/utils.ts';
-import constants from 'logos/src/constants.ts';
-import { codeMultiline, mention, MentionTypes } from 'logos/src/formatting.ts';
+import { EventHandlers } from "discordeno";
+import { MessageGenerators } from "./generators.js";
+import { diagnosticMentionUser } from "../../../utils.js";
+import constants from "../../../../constants.js";
+import { codeMultiline, mention, MentionTypes } from "../../../../formatting.js";
 
 type ClientEvents = {
 	[T in keyof EventHandlers]: Parameters<EventHandlers[T]>;
@@ -43,11 +43,12 @@ const client: MessageGenerators<ClientEvents> = {
 			const author = client.cache.users.get(message.authorId);
 			if (author === undefined) return;
 
-			const before = oldMessage !== undefined ? codeMultiline(oldMessage.content) : '*No message*';
+			const before = oldMessage !== undefined ? codeMultiline(oldMessage.content) : "*No message*";
 
-			return `${diagnosticMentionUser(author)} updated their message in ${
-				mention(message.channelId, MentionTypes.Channel)
-			}.
+			return `${diagnosticMentionUser(author)} updated their message in ${mention(
+				message.channelId,
+				MentionTypes.Channel,
+			)}.
 
 **BEFORE**
 ${before}
@@ -58,8 +59,7 @@ ${codeMultiline(message.content)}`;
 			const author = client.cache.users.get(message.authorId);
 			if (author === undefined) return false;
 
-			return originGuildId === message.guildId && !author.toggles.bot &&
-				message.content !== oldMessage?.content;
+			return originGuildId === message.guildId && !author.toggles.bot && message.content !== oldMessage?.content;
 		},
 		color: constants.colors.blue,
 	},
@@ -72,9 +72,10 @@ ${codeMultiline(message.content)}`;
 			const author = client.cache.users.get(message.authorId);
 			if (author === undefined) return;
 
-			return `${diagnosticMentionUser(author)} deleted their message in ${
-				mention(message.channelId, MentionTypes.Channel)
-			}.
+			return `${diagnosticMentionUser(author)} deleted their message in ${mention(
+				message.channelId,
+				MentionTypes.Channel,
+			)}.
 
 **CONTENT**
 ${codeMultiline(message.content)}`;

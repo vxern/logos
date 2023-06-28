@@ -1,17 +1,10 @@
-import dialects from 'logos/src/lib/commands/social/roles/categories/dialects.ts';
-import ethnicity from 'logos/src/lib/commands/social/roles/categories/ethnicity.ts';
-import language from 'logos/src/lib/commands/social/roles/categories/language.ts';
-import learning from 'logos/src/lib/commands/social/roles/categories/learning.ts';
-import personalisation from 'logos/src/lib/commands/social/roles/categories/personalisation.ts';
-import regions from 'logos/src/lib/commands/social/roles/categories/regions.ts';
-import {
-	isCustom,
-	isGroup,
-	isImplicit,
-	Role,
-	RoleCategory,
-	RoleCollection,
-} from 'logos/src/lib/commands/social/roles/types.ts';
+import dialects from "./categories/dialects.js";
+import ethnicity from "./categories/ethnicity.js";
+import language from "./categories/language.js";
+import learning from "./categories/learning.js";
+import personalisation from "./categories/personalisation.js";
+import regions from "./categories/regions.js";
+import { isCustom, isGroup, isImplicit, Role, RoleCategory, RoleCollection } from "./types.js";
 
 const categories: RoleCategory[] = [language, learning, dialects, personalisation, regions, ethnicity];
 

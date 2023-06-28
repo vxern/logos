@@ -1,4 +1,4 @@
-import { Reference } from 'logos/src/lib/database/document.ts';
+import { Reference } from "../document.js";
 
 /** Represents an entry request submitted by the user upon attempting to join the server. */
 interface EntryRequest {

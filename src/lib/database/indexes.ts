@@ -1,9 +1,14 @@
-import { EntryRequest, Praise, Report, Suggestion, User, Warning } from 'logos/src/lib/database/structs/mod.ts';
-import { Document, Reference } from 'logos/src/lib/database/document.ts';
+import { EntryRequest } from "./structs/entry-request.js";
+import { Praise } from "./structs/praise.js";
+import { Report } from "./structs/report.js";
+import { Suggestion } from "./structs/suggestion.js";
+import { User } from "./structs/user.js";
+import { Warning } from "./structs/warning.js";
+import { Document, Reference } from "./document.js";
 
 type IndexesSignature<T = unknown> = Record<string, [takes: unknown, returns: T]>;
 
-type GetParameterNames<I extends IndexesSignature> = Exclude<keyof I, 'reference'>;
+type GetParameterNames<I extends IndexesSignature> = Exclude<keyof I, "reference">;
 
 type EntryRequestIndexes<T = Document<EntryRequest>> = {
 	submitterAndGuild: [takes: [Reference, string], returns: T];
@@ -32,16 +37,16 @@ type WarningIndexes<T = Map<string, Document<Warning>>> = {
 };
 
 const praiseIndexParameterToIndex: Record<GetParameterNames<PraiseIndexes>, string> = {
-	sender: 'GetPraisesBySender',
-	recipient: 'GetPraisesByRecipient',
+	sender: "GetPraisesBySender",
+	recipient: "GetPraisesByRecipient",
 };
 
 const userIndexParameterToIndex: Record<GetParameterNames<UserIndexes>, string> = {
-	id: 'GetUserByID',
+	id: "GetUserByID",
 };
 
 const warningIndexParameterToIndex: Record<GetParameterNames<WarningIndexes>, string> = {
-	recipient: 'GetWarningsByRecipient',
+	recipient: "GetWarningsByRecipient",
 };
 
 export { praiseIndexParameterToIndex, userIndexParameterToIndex, warningIndexParameterToIndex };

@@ -17,11 +17,11 @@ import {
 	MessageComponents,
 	MessageComponentTypes,
 	sendInteractionResponse,
-} from 'discordeno';
-import { DiscordSnowflake as Snowflake } from 'snowflake';
-import { addCollector, Client, localise } from 'logos/src/lib/client.ts';
-import constants, { Periods } from 'logos/src/constants.ts';
-import { defaultLocale } from 'logos/src/types.ts';
+} from "discordeno";
+import { DiscordSnowflake as Snowflake } from "snowflake";
+import { addCollector, Client, localise } from "./client.js";
+import constants, { Periods } from "../constants.js";
+import { defaultLocale } from "../types.js";
 
 type AutocompleteInteraction = Interaction & { type: InteractionTypes.ApplicationCommandAutocomplete };
 
@@ -49,7 +49,7 @@ interface InteractionCollectorSettings {
 	/** How many interactions to collect before de-initialising. */
 	limit?: number;
 
-	onCollect?: (...args: Parameters<EventHandlers['interactionCreate']>) => void;
+	onCollect?: (...args: Parameters<EventHandlers["interactionCreate"]>) => void;
 	onEnd?: () => void;
 }
 
@@ -57,13 +57,10 @@ interface InteractionCollectorSettings {
  * Taking a {@link Client} and {@link InteractionCollectorSettings}, creates an
  * interaction collector.
  */
-function createInteractionCollector(
-	[client, bot]: [Client, Bot],
-	settings: InteractionCollectorSettings,
-): string {
+function createInteractionCollector([client, bot]: [Client, Bot], settings: InteractionCollectorSettings): string {
 	const customId = settings.customId ?? Snowflake.generate().toString();
 
-	addCollector([client, bot], 'interactionCreate', {
+	addCollector([client, bot], "interactionCreate", {
 		filter: (_, interaction) => compileChecks(interaction, settings, customId).every((condition) => condition),
 		limit: settings.limit,
 		removeAfter: settings.doesNotExpire ? undefined : constants.interactionTokenExpiryInterval,
@@ -77,25 +74,23 @@ function createInteractionCollector(
 function compileChecks(interaction: Interaction, settings: InteractionCollectorSettings, customId: string): boolean[] {
 	return [
 		interaction.type === settings.type,
-		interaction.data !== undefined && interaction.data.customId !== undefined &&
-		decodeId(interaction.data.customId)[0] === decodeId(customId)[0],
+		interaction.data !== undefined &&
+			interaction.data.customId !== undefined &&
+			decodeId(interaction.data.customId)[0] === decodeId(customId)[0],
 		settings.userId === undefined ? true : interaction.user.id === settings.userId,
 	];
 }
 
-type CustomTypeIndicators = Record<string, 'number' | 'boolean'>;
+type CustomTypeIndicators = Record<string, "number" | "boolean">;
 type CustomTypeIndicatorsTyped<C extends CustomTypeIndicators> = {
-	[key in keyof C]: (C[key] extends 'number' ? number : boolean) | undefined;
+	[key in keyof C]: (C[key] extends "number" ? number : boolean) | undefined;
 };
 
 function parseArguments<
 	T extends Record<string, string | undefined>,
 	R extends CustomTypeIndicatorsTyped<C> & T,
-	C extends Record<string, 'number' | 'boolean'>,
->(
-	options: InteractionDataOption[] | undefined,
-	customTypes: C,
-): [R, InteractionDataOption | undefined] {
+	C extends Record<string, "number" | "boolean">,
+>(options: InteractionDataOption[] | undefined, customTypes: C): [R, InteractionDataOption | undefined] {
 	let args: Record<string, unknown> = {};
 
 	let focused: InteractionDataOption | undefined = undefined;
@@ -117,11 +112,11 @@ function parseArguments<
 		}
 
 		switch (customTypes[option.name]) {
-			case 'boolean': {
+			case "boolean": {
 				args[option.name] = option.value as boolean;
 				continue;
 			}
-			case 'number': {
+			case "number": {
 				args[option.name] = parseInt(option.value as string);
 				continue;
 			}
@@ -133,7 +128,7 @@ function parseArguments<
 	return [args as R, focused];
 }
 
-type ControlButtonID = [type: 'previous' | 'next'];
+type ControlButtonID = [type: "previous" | "next"];
 
 /**
  * Paginates an array of elements, allowing the user to browse between pages
@@ -142,9 +137,14 @@ type ControlButtonID = [type: 'previous' | 'next'];
 function paginate<T>(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
-	{ elements, embed, view, show }: {
+	{
+		elements,
+		embed,
+		view,
+		show,
+	}: {
 		elements: T[];
-		embed: Omit<Embed, 'footer'>;
+		embed: Omit<Embed, "footer">;
 		view: PaginationDisplayData<T>;
 		show: boolean;
 	},
@@ -165,10 +165,10 @@ function paginate<T>(
 			const [_, action] = decodeId<ControlButtonID>(selection.data.customId!);
 
 			switch (action) {
-				case 'previous':
+				case "previous":
 					if (!isFirst) data.pageIndex--;
 					break;
-				case 'next':
+				case "next":
 					if (!isLast) data.pageIndex++;
 					break;
 			}
@@ -180,10 +180,15 @@ function paginate<T>(
 		},
 	});
 
-	return void reply([client, bot], interaction, {
-		embeds: [getPageEmbed(client, data, embed, data.pageIndex === data.elements.length - 1, interaction.locale)],
-		components: generateButtons(customId, isFirst(), isLast()),
-	}, { visible: show });
+	return void reply(
+		[client, bot],
+		interaction,
+		{
+			embeds: [getPageEmbed(client, data, embed, data.pageIndex === data.elements.length - 1, interaction.locale)],
+			components: generateButtons(customId, isFirst(), isLast()),
+		},
+		{ visible: show },
+	);
 }
 
 interface PaginationDisplayData<T> {
@@ -206,17 +211,18 @@ function getPageEmbed<T>(
 	locale: string | undefined,
 ): Embed {
 	const strings = {
-		page: localise(client, 'interactions.page', locale)(),
-		continuedOnNextPage: localise(client, 'interactions.continuedOnNextPage', locale)(),
+		page: localise(client, "interactions.page", locale)(),
+		continuedOnNextPage: localise(client, "interactions.continuedOnNextPage", locale)(),
 	};
 
 	return {
 		...embed,
 		fields: [
 			{
-				name: data.elements.length === 1
-					? data.view.title
-					: `${data.view.title} ~ ${strings.page} ${data.pageIndex + 1}/${data.elements.length}`,
+				name:
+					data.elements.length === 1
+						? data.view.title
+						: `${data.view.title} ~ ${strings.page} ${data.pageIndex + 1}/${data.elements.length}`,
 				value: data.view.generate(data.elements.at(data.pageIndex)!, data.pageIndex),
 			},
 			...(embed.fields ?? []),
@@ -231,7 +237,7 @@ function generateButtons(customId: string, isFirst: boolean, isLast: boolean): M
 	if (!isFirst) {
 		buttons.push({
 			type: MessageComponentTypes.Button,
-			customId: encodeId<ControlButtonID>(customId, ['previous']),
+			customId: encodeId<ControlButtonID>(customId, ["previous"]),
 			style: ButtonStyles.Secondary,
 			label: constants.symbols.interactions.menu.controls.back,
 		});
@@ -240,22 +246,26 @@ function generateButtons(customId: string, isFirst: boolean, isLast: boolean): M
 	if (!isLast) {
 		buttons.push({
 			type: MessageComponentTypes.Button,
-			customId: encodeId<ControlButtonID>(customId, ['next']),
+			customId: encodeId<ControlButtonID>(customId, ["next"]),
 			style: ButtonStyles.Secondary,
 			label: constants.symbols.interactions.menu.controls.forward,
 		});
 	}
 
-	return buttons.length === 0 ? [] : [{
-		type: MessageComponentTypes.ActionRow,
-		components: buttons as [ButtonComponent],
-	}];
+	return buttons.length === 0
+		? []
+		: [
+				{
+					type: MessageComponentTypes.ActionRow,
+					components: buttons as [ButtonComponent],
+				},
+		  ];
 }
 
 type ComposerContent<T extends string> = Record<T, string | undefined>;
 type ComposerActionRow<T extends string> = {
 	type: MessageComponentTypes.ActionRow;
-	components: [ActionRow['components'][0] & { type: MessageComponentTypes.InputText; customId: T }];
+	components: [ActionRow["components"][0] & { type: MessageComponentTypes.InputText; customId: T }];
 };
 
 type Modal<T extends string> = { title: string; fields: ComposerActionRow<T>[] };
@@ -263,7 +273,11 @@ type Modal<T extends string> = { title: string; fields: ComposerActionRow<T>[] }
 async function createModalComposer<T extends string>(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
-	{ onSubmit, onInvalid, modal }: {
+	{
+		onSubmit,
+		onInvalid,
+		modal,
+	}: {
 		onSubmit: (submission: Interaction, data: ComposerContent<T>) => Promise<true | string>;
 		onInvalid: (submission: Interaction, error?: string) => Promise<Interaction | undefined>;
 		modal: Modal<T>;
@@ -274,7 +288,8 @@ async function createModalComposer<T extends string>(
 	let anchor = interaction;
 	let content: ComposerContent<T> | undefined = undefined;
 
-	while (true) {
+	let isSubmitting = true;
+	while (isSubmitting) {
 		const [submission, result] = await new Promise<[Interaction, boolean | string]>((resolve) => {
 			const modalId = createInteractionCollector([client, bot], {
 				type: InteractionTypes.ModalSubmit,
@@ -290,9 +305,7 @@ async function createModalComposer<T extends string>(
 
 			if (content !== undefined) {
 				const answers = Object.values(content) as (string | undefined)[];
-				for (
-					const [value, index] of answers.map<[string | undefined, number]>((v, i) => [v, i])
-				) {
+				for (const [value, index] of answers.map<[string | undefined, number]>((v, i) => [v, i])) {
 					fields[index]!.components[0].value = value;
 				}
 			}
@@ -304,10 +317,16 @@ async function createModalComposer<T extends string>(
 			});
 		});
 
-		if (typeof result === 'boolean' && result) return;
+		if (typeof result === "boolean" && result) {
+			isSubmitting = false;
+			break;
+		}
 
-		const newAnchor = await (typeof result === 'string' ? onInvalid(submission, result) : onInvalid(submission));
-		if (newAnchor === undefined) return;
+		const newAnchor = await (typeof result === "string" ? onInvalid(submission, result) : onInvalid(submission));
+		if (newAnchor === undefined) {
+			isSubmitting = false;
+			break;
+		}
 
 		anchor = newAnchor;
 	}
@@ -355,57 +374,57 @@ function parseConciseTimeExpression(
 	expression: string,
 	locale: string | undefined,
 ): ReturnType<typeof parseTimeExpression> {
-	const [secondsPart, minutesPart, hoursPart] = conciseTimeExpression.exec(expression)!.slice(1).toReversed();
+	const [secondsPart, minutesPart, hoursPart] = conciseTimeExpression.exec(expression)!.slice(1).reverse();
 
-	const [seconds, minutes, hours] = [secondsPart, minutesPart, hoursPart].map((part) =>
-		part !== undefined ? Number(part) : undefined
-	) as [number, ...number[]];
+	const [seconds, minutes, hours] = [secondsPart, minutesPart, hoursPart].map((part) => {
+		return part !== undefined ? Number(part) : undefined;
+	}) as [number, ...number[]];
 
 	const verboseExpressionParts = [];
 	if (seconds !== 0) {
 		const strings = {
-			second: localise(client, 'units.second', defaultLocale)({ 'number': seconds }),
+			second: localise(client, "units.second", defaultLocale)({ number: seconds }),
 		};
 
 		verboseExpressionParts.push(strings.second);
 	}
 	if (minutes !== undefined && minutes !== 0) {
 		const strings = {
-			minute: localise(client, 'units.minute', defaultLocale)({ 'number': minutes }),
+			minute: localise(client, "units.minute", defaultLocale)({ number: minutes }),
 		};
 
 		verboseExpressionParts.push(strings.minute);
 	}
 	if (hours !== undefined && hours !== 0) {
 		const strings = {
-			hour: localise(client, 'units.hour', defaultLocale)({ 'number': hours }),
+			hour: localise(client, "units.hour", defaultLocale)({ number: hours }),
 		};
 
 		verboseExpressionParts.push(strings.hour);
 	}
-	const verboseExpression = verboseExpressionParts.join(' ');
+	const verboseExpression = verboseExpressionParts.join(" ");
 
 	const expressionParsed = parseVerboseTimeExpressionPhrase(client, verboseExpression, locale);
 	if (expressionParsed === undefined) return undefined;
 
-	const conciseExpression = [hoursPart ?? '0', minutesPart ?? '0', secondsPart ?? '0'].map((part) =>
-		part.length === 1 ? `0${part}` : part
-	).join(':');
+	const conciseExpression = [hoursPart ?? "0", minutesPart ?? "0", secondsPart ?? "0"]
+		.map((part) => (part.length === 1 ? `0${part}` : part))
+		.join(":");
 
 	const [verboseExpressionCorrected, period] = expressionParsed;
 
 	return [`${conciseExpression} (${verboseExpressionCorrected})`, period];
 }
 
-type TimeUnit = 'second' | 'minute' | 'hour' | 'day' | 'week' | 'month' | 'year';
+type TimeUnit = "second" | "minute" | "hour" | "day" | "week" | "month" | "year";
 const timeUnitToPeriod: Required<Record<TimeUnit, number>> = {
-	'second': Periods.second,
-	'minute': Periods.minute,
-	'hour': Periods.hour,
-	'day': Periods.day,
-	'week': Periods.week,
-	'month': Periods.month,
-	'year': Periods.year,
+	second: Periods.second,
+	minute: Periods.minute,
+	hour: Periods.hour,
+	day: Periods.day,
+	week: Periods.week,
+	month: Periods.month,
+	year: Periods.year,
 };
 
 const timeUnitsWithAliasesLocalised = new Map<string, Record<TimeUnit, string[]>>();
@@ -475,26 +494,28 @@ function parseVerboseTimeExpressionPhrase(
 	}
 
 	// If one of the keys is duplicate.
-	if ((new Set(timeUnits)).size !== timeUnits.length) {
+	if (new Set(timeUnits).size !== timeUnits.length) {
 		return undefined;
 	}
 
-	const timeUnitQuantifierTuples = timeUnits
-		.map<[TimeUnit, number]>((timeUnit, index) => [timeUnit, quantifiers[index]!]);
+	const timeUnitQuantifierTuples = timeUnits.map<[TimeUnit, number]>((timeUnit, index) => [
+		timeUnit,
+		quantifiers[index]!,
+	]);
 	timeUnitQuantifierTuples.sort(([previous], [next]) => timeUnitToPeriod[next] - timeUnitToPeriod[previous]);
 
 	const timeExpressions = [];
 	let total = 0;
 	for (const [timeUnit, quantifier] of timeUnitQuantifierTuples) {
 		const strings = {
-			unit: localise(client, `units.${timeUnit}`, locale)({ 'number': quantifier }),
+			unit: localise(client, `units.${timeUnit}`, locale)({ number: quantifier }),
 		};
 
 		timeExpressions.push(strings.unit);
 
 		total += quantifier * timeUnitToPeriod[timeUnit];
 	}
-	const correctedExpression = timeExpressions.join(', ');
+	const correctedExpression = timeExpressions.join(", ");
 
 	return [correctedExpression, total];
 }
@@ -529,7 +550,7 @@ function postponeReply(
 function reply(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
-	data: Omit<InteractionCallbackData, 'flags'>,
+	data: Omit<InteractionCallbackData, "flags">,
 	{ visible = false } = {},
 ): Promise<void> {
 	return sendInteractionResponse(bot, interaction.id, interaction.token, {
@@ -544,7 +565,7 @@ function reply(
 function editReply(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
-	data: Omit<InteractionCallbackData, 'flags'>,
+	data: Omit<InteractionCallbackData, "flags">,
 ): Promise<void> {
 	return editOriginalInteractionResponse(bot, interaction.token, data)
 		.then(() => {})
@@ -552,8 +573,9 @@ function editReply(
 }
 
 function deleteReply([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
-	return deleteOriginalInteractionResponse(bot, interaction.token)
-		.catch((reason) => client.log.warn(`Failed to edit reply to interaction: ${reason}`));
+	return deleteOriginalInteractionResponse(bot, interaction.token).catch((reason) =>
+		client.log.warn(`Failed to edit reply to interaction: ${reason}`),
+	);
 }
 
 function respond(
@@ -570,7 +592,7 @@ function respond(
 function showModal(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
-	data: Omit<InteractionCallbackData, 'flags'>,
+	data: Omit<InteractionCallbackData, "flags">,
 ): Promise<void> {
 	return sendInteractionResponse(bot, interaction.id, interaction.token, {
 		type: InteractionResponseTypes.Modal,

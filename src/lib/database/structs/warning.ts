@@ -1,4 +1,4 @@
-import { Reference } from 'logos/src/lib/database/document.ts';
+import { Reference } from "../document.js";
 
 /** Represents a warning given to a user. */
 interface Warning {

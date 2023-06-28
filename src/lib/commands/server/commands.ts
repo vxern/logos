@@ -1,3 +1,3 @@
-import suggestion from 'logos/src/lib/commands/server/commands/suggestion.ts';
+import suggestion from "./commands/suggestion.js";
 
 export default { local: [suggestion], global: [] };

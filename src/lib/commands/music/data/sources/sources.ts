@@ -1,7 +1,7 @@
-import { Bot, Interaction } from 'discordeno';
-import youtube from 'logos/src/lib/commands/music/data/sources/youtube.ts';
-import { SongListing } from 'logos/src/lib/commands/music/data/types.ts';
-import { Client } from 'logos/src/lib/client.ts';
+import { Bot, Interaction } from "discordeno";
+import youtube from "./youtube.js";
+import { SongListing } from "../types.js";
+import { Client } from "../../../../client.js";
 
 /** Obtains a song listing from a source. */
 type ListingResolver = (
@@ -11,7 +11,7 @@ type ListingResolver = (
 ) => Promise<SongListing | undefined>;
 
 /** Stores the available music sources. */
-const sources: Record<string, ListingResolver> = { 'YouTube': youtube };
+const sources: Record<string, ListingResolver> = { YouTube: youtube };
 
 export { sources };
 export type { ListingResolver };

@@ -1,15 +1,19 @@
-// deno-lint-ignore-file ban-types
-import { User as DiscordUser } from 'discordeno';
-import * as Sentry from 'sentry';
-import * as Fauna from 'fauna';
-import entryRequests from 'logos/src/lib/database/adapters/entry-requests.ts';
-import praises from 'logos/src/lib/database/adapters/praises.ts';
-import reports from 'logos/src/lib/database/adapters/reports.ts';
-import suggestions from 'logos/src/lib/database/adapters/suggestions.ts';
-import users from 'logos/src/lib/database/adapters/users.ts';
-import warnings from 'logos/src/lib/database/adapters/warnings.ts';
-import { EntryRequest, Praise, Report, Suggestion, User, Warning } from 'logos/src/lib/database/structs/mod.ts';
-import { BaseDocumentProperties, Document, Reference } from 'logos/src/lib/database/document.ts';
+import { User as DiscordUser } from "discordeno";
+import * as Sentry from "sentry";
+import Fauna from "fauna";
+import entryRequests from "./adapters/entry-requests.js";
+import praises from "./adapters/praises.js";
+import reports from "./adapters/reports.js";
+import suggestions from "./adapters/suggestions.js";
+import users from "./adapters/users.js";
+import warnings from "./adapters/warnings.js";
+import { EntryRequest } from "./structs/entry-request.js";
+import { Praise } from "./structs/praise.js";
+import { Report } from "./structs/report.js";
+import { Suggestion } from "./structs/suggestion.js";
+import { User } from "./structs/user.js";
+import { Warning } from "./structs/warning.js";
+import { BaseDocumentProperties, Document } from "./document.js";
 import {
 	EntryRequestIndexes,
 	IndexesSignature,
@@ -18,23 +22,26 @@ import {
 	SuggestionIndexes,
 	UserIndexes,
 	WarningIndexes,
-} from 'logos/src/lib/database/indexes.ts';
-import { Client } from 'logos/src/lib/client.ts';
-import { diagnosticMentionUser } from 'logos/src/lib/utils.ts';
+} from "./indexes.js";
+import { Client } from "../client.js";
+import { diagnosticMentionUser } from "../utils.js";
 
-type QueryTypes = 'read' | 'write' | 'exists' | 'other';
+type QueryTypes = "read" | "write" | "exists" | "other";
 type GetReturnType<
 	QueryType extends QueryTypes,
 	ReturnTypeRaw,
 	ReturnsData extends boolean,
-	ReturnType = QueryType extends 'read' ? ReturnTypeRaw
-		: (ReturnTypeRaw extends Map<string, infer T> ? T : ReturnTypeRaw),
+	ReturnType = QueryType extends "read"
+		? ReturnTypeRaw
+		: ReturnTypeRaw extends Map<string, infer T>
+		? T
+		: ReturnTypeRaw,
 > = {
-	'read': ReturnType | undefined;
-	'write': void;
-	'exists': boolean;
-	'other': void;
-}[ReturnsData extends true ? 'read' : QueryType];
+	read: ReturnType | undefined;
+	write: void;
+	exists: boolean;
+	other: void;
+}[ReturnsData extends true ? "read" : QueryType];
 
 type Query<
 	Index extends IndexesSignature,
@@ -45,7 +52,7 @@ type Query<
 		takesStringifiedValue?: boolean;
 		returnsData?: boolean;
 		returnsPromise?: boolean;
-	} = {},
+	} = Record<string, unknown>,
 	DataType extends BaseDocumentProperties = BaseDocumentProperties,
 	ExtraParameters extends unknown[] = [],
 > = <
@@ -53,34 +60,39 @@ type Query<
 	ParameterMetadata extends Index[Parameter],
 	ParameterType extends ParameterMetadata[0] = ParameterMetadata[0],
 	IndexReturnType extends ParameterMetadata[1] = ParameterMetadata[1],
-	ReturnType = GetReturnType<QueryType, IndexReturnType, QueryFlags['returnsData'] extends true ? true : false>,
+	ReturnType = GetReturnType<QueryType, IndexReturnType, QueryFlags["returnsData"] extends true ? true : false>,
 >(
 	client: Client,
 	...args: [
-		...QueryFlags['takesParameter'] extends false ? [] : [parameter: Parameter],
-		...QueryFlags['takesParameter'] extends false ? []
-			: (QueryFlags['takesStringifiedValue'] extends true ? [value: string] : [parameterValue: ParameterType]),
-		...QueryType extends 'write'
-			? (QueryFlags['takesDocument'] extends true ? [document: Document<DataType>] : [object: DataType])
-			: [],
-		...QueryType extends 'other' ? ExtraParameters : [],
+		...(QueryFlags["takesParameter"] extends false ? [] : [parameter: Parameter]),
+		...(QueryFlags["takesParameter"] extends false
+			? []
+			: QueryFlags["takesStringifiedValue"] extends true
+			? [value: string]
+			: [parameterValue: ParameterType]),
+		...(QueryType extends "write"
+			? QueryFlags["takesDocument"] extends true
+				? [document: Document<DataType>]
+				: [object: DataType]
+			: []),
+		...(QueryType extends "other" ? ExtraParameters : []),
 	]
-) => QueryFlags['returnsPromise'] extends false ? ReturnType : Promise<ReturnType>;
+) => QueryFlags["returnsPromise"] extends false ? ReturnType : Promise<ReturnType>;
 
 type DatabaseAdapterRequiredMethods<DataType extends BaseDocumentProperties, Indexes extends IndexesSignature> = {
-	readonly create: Query<Indexes, 'write', { takesParameter: false; returnsData: true }, DataType>;
-	readonly fetch: Query<Indexes, 'read'>;
-	readonly prefetch: Query<Indexes, 'other', { takesParameter: false }>;
+	readonly create: Query<Indexes, "write", { takesParameter: false; returnsData: true }, DataType>;
+	readonly fetch: Query<Indexes, "read">;
+	readonly prefetch: Query<Indexes, "other", { takesParameter: false }>;
 };
 
 type DatabaseAdapterOptionalMethods<DataType extends BaseDocumentProperties, Indexes extends IndexesSignature> = {
-	readonly update: Query<Indexes, 'write', { takesParameter: false; takesDocument: true; returnsData: true }, DataType>;
-	readonly delete: Query<Indexes, 'write', { takesParameter: false; takesDocument: true; returnsData: true }, DataType>;
+	readonly update: Query<Indexes, "write", { takesParameter: false; takesDocument: true; returnsData: true }, DataType>;
+	readonly delete: Query<Indexes, "write", { takesParameter: false; takesDocument: true; returnsData: true }, DataType>;
 
 	// These are helper functions. Perhaps they should be present somewhere else.
-	readonly get: Query<Indexes, 'read', { returnsPromise: false }, DataType>;
-	readonly getOrFetch: Query<Indexes, 'read', {}, DataType>;
-	readonly getOrFetchOrCreate: Query<Indexes, 'other', { returnsData: true }, DataType, [id: bigint]>;
+	readonly get: Query<Indexes, "read", { returnsPromise: false }, DataType>;
+	readonly getOrFetch: Query<Indexes, "read", Record<string, unknown>, DataType>;
+	readonly getOrFetchOrCreate: Query<Indexes, "other", { returnsData: true }, DataType, [id: bigint]>;
 };
 
 type DatabaseAdapter<
@@ -88,40 +100,38 @@ type DatabaseAdapter<
 	Indexes extends IndexesSignature,
 	SupportsMethods extends keyof DatabaseAdapterOptionalMethods<DataType, Indexes> = never,
 	IsPrefetch extends boolean = false,
-> =
-	& Omit<DatabaseAdapterRequiredMethods<DataType, Indexes>, IsPrefetch extends true ? 'fetch' : 'prefetch'>
-	& Pick<DatabaseAdapterOptionalMethods<DataType, Indexes>, SupportsMethods>;
+> = Omit<DatabaseAdapterRequiredMethods<DataType, Indexes>, IsPrefetch extends true ? "fetch" : "prefetch"> &
+	Pick<DatabaseAdapterOptionalMethods<DataType, Indexes>, SupportsMethods>;
 
 type CacheAdapterRequiredMethods<
 	DataType extends BaseDocumentProperties,
 	Indexes extends IndexesSignature,
 	IsSingleton extends boolean = true,
-> =
-	& {
-		readonly get: Query<Indexes, 'read', { takesStringifiedValue: true; returnsPromise: false }, DataType>;
-		readonly set: Query<
-			Indexes,
-			'write',
-			{ takesDocument: true; takesStringifiedValue: true; returnsPromise: false },
-			DataType
-		>;
-	}
-	& (IsSingleton extends false ? {
-			readonly has: Query<Indexes, 'exists', { takesStringifiedValue: true; returnsPromise: false }>;
+> = {
+	readonly get: Query<Indexes, "read", { takesStringifiedValue: true; returnsPromise: false }, DataType>;
+	readonly set: Query<
+		Indexes,
+		"write",
+		{ takesDocument: true; takesStringifiedValue: true; returnsPromise: false },
+		DataType
+	>;
+} & (IsSingleton extends false
+	? {
+			readonly has: Query<Indexes, "exists", { takesStringifiedValue: true; returnsPromise: false }>;
 			readonly setAll: Query<
 				Indexes,
-				'other',
+				"other",
 				{ takesStringifiedValue: true; returnsPromise: false },
 				DataType,
 				[objects: Document<DataType>[]]
 			>;
-		}
-		: {});
+	  }
+	: Record<string, unknown>);
 
 type CacheAdapterOptionalMethods<DataType extends BaseDocumentProperties, Indexes extends IndexesSignature> = {
 	readonly delete: Query<
 		Indexes,
-		'write',
+		"write",
 		{ takesDocument: true; takesStringifiedValue: true; returnsPromise: false },
 		DataType
 	>;
@@ -131,22 +141,20 @@ type CacheAdapter<
 	DataType extends BaseDocumentProperties,
 	Indexes extends IndexesSignature,
 	SupportsMethods extends keyof CacheAdapterOptionalMethods<DataType, Indexes> = never,
-> =
-	& CacheAdapterRequiredMethods<
-		DataType,
-		Indexes,
-		Indexes extends IndexesSignature<infer ReturnType> ? (ReturnType extends Map<unknown, unknown> ? false : true)
-			: never
-	>
-	& Pick<CacheAdapterOptionalMethods<DataType, Indexes>, SupportsMethods>;
+> = CacheAdapterRequiredMethods<
+	DataType,
+	Indexes,
+	Indexes extends IndexesSignature<infer ReturnType> ? (ReturnType extends Map<unknown, unknown> ? false : true) : never
+> &
+	Pick<CacheAdapterOptionalMethods<DataType, Indexes>, SupportsMethods>;
 
 interface DatabaseAdapters {
-	entryRequests: DatabaseAdapter<EntryRequest, EntryRequestIndexes, 'get' | 'update', true>;
-	praises: DatabaseAdapter<Praise, PraiseIndexes, 'getOrFetch'>;
-	reports: DatabaseAdapter<Report, ReportIndexes, 'get' | 'update', true>;
-	suggestions: DatabaseAdapter<Suggestion, SuggestionIndexes, 'get' | 'update', true>;
-	users: DatabaseAdapter<User, UserIndexes, 'getOrFetch' | 'getOrFetchOrCreate' | 'update'>;
-	warnings: DatabaseAdapter<Warning, WarningIndexes, 'getOrFetch' | 'delete'>;
+	entryRequests: DatabaseAdapter<EntryRequest, EntryRequestIndexes, "get" | "update", true>;
+	praises: DatabaseAdapter<Praise, PraiseIndexes, "getOrFetch">;
+	reports: DatabaseAdapter<Report, ReportIndexes, "get" | "update", true>;
+	suggestions: DatabaseAdapter<Suggestion, SuggestionIndexes, "get" | "update", true>;
+	users: DatabaseAdapter<User, UserIndexes, "getOrFetch" | "getOrFetchOrCreate" | "update">;
+	warnings: DatabaseAdapter<Warning, WarningIndexes, "getOrFetch" | "delete">;
 }
 
 interface Cache extends Record<string, Map<string, unknown>> {
@@ -230,20 +238,20 @@ type Database = Readonly<{
 /** Models a cache for storing the responses to dispatched {@link fetch()} queries. */
 type FetchPromiseCache = {
 	[K0 in keyof WithFetch]: {
-		[K1 in Parameters<WithFetch[K0]['fetch']>[1]]: Map<string, ReturnType<WithFetch[K0]['fetch']>>;
+		[K1 in Parameters<WithFetch[K0]["fetch"]>[1]]: Map<string, ReturnType<WithFetch[K0]["fetch"]>>;
 	};
 };
 
 type WithFetch = {
-	[K in keyof DatabaseAdapters as 'fetch' extends keyof DatabaseAdapters[K] ? K : never]: DatabaseAdapters[K];
+	[K in keyof DatabaseAdapters as "fetch" extends keyof DatabaseAdapters[K] ? K : never]: DatabaseAdapters[K];
 };
 
 function createDatabase(): Database {
 	return {
 		client: new Fauna.Client({
-			secret: Deno.env.get('FAUNA_SECRET')!,
-			domain: 'db.us.fauna.com',
-			scheme: 'https',
+			secret: process.env.FAUNA_SECRET!,
+			domain: "db.us.fauna.com",
+			scheme: "https",
 			port: 443,
 		}),
 		cache: {
@@ -283,23 +291,26 @@ function createDatabase(): Database {
  */
 async function dispatchQuery<
 	T extends BaseDocumentProperties | BaseDocumentProperties[],
-	R = T extends (infer B extends BaseDocumentProperties)[] ? Document<B>[]
-		: (T extends BaseDocumentProperties ? Document<T> : never),
->(
-	client: Client,
-	expression: Fauna.Expr,
-): Promise<R | undefined> {
-	let result: Fauna.values.Document;
+	R = T extends (infer B extends BaseDocumentProperties)[]
+		? Document<B>[]
+		: T extends BaseDocumentProperties
+		? Document<T>
+		: never,
+>(client: Client, expression: Fauna.Expr): Promise<R | undefined> {
+	let result;
 	try {
 		result = await client.database.client.query(expression);
 	} catch (exception) {
-		if (exception.name === 'NotFound') return undefined;
+		if (!(exception instanceof Fauna.errors.FaunaError)) return undefined;
+		if (exception instanceof Fauna.errors.NotFound) return undefined;
 
 		Sentry.captureException(exception);
 		client.log.error(`${exception.message} ~ ${exception.description}`);
 
 		return undefined;
 	}
+
+	if (!("data" in result)) return undefined;
 
 	if (!Array.isArray(result.data)) {
 		return result as unknown as R;
@@ -312,18 +323,18 @@ function mentionUser(user: DiscordUser | undefined, id: bigint): string {
 	return user === undefined ? `an unknown user (ID ${id})` : diagnosticMentionUser(user);
 }
 
-function getUserMentionByReference(client: Client, reference: Reference): string {
-	const document = client.database.cache.usersByReference.get(reference.value.id);
-	if (document === undefined) return `an unknown, uncached user`;
+function getUserMentionByReference(client: Client, reference: Fauna.values.Ref): string {
+	const document = client.database.cache.usersByReference.get(stringifyValue(reference));
+	if (document === undefined) return "an unknown, uncached user";
 
 	const id = BigInt(document.data.account.id);
 	const user = client.cache.users.get(id);
 	return mentionUser(user, id);
 }
 
-function stringifyValue(parameterValue: unknown): string {
-	if (typeof parameterValue === 'object') {
-		return (parameterValue as Reference).value.id;
+function stringifyValue(parameterValue: string | Fauna.values.Ref): string {
+	if (parameterValue instanceof Fauna.values.Ref) {
+		return parameterValue.value.id;
 	}
 
 	return parameterValue as string;

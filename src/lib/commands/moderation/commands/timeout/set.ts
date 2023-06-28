@@ -1,24 +1,19 @@
-import { Bot, editMember, Interaction } from 'discordeno';
-import { logEvent } from 'logos/src/lib/controllers/logging/logging.ts';
-import { autocompleteMembers, Client, localise, resolveInteractionToMember } from 'logos/src/lib/client.ts';
-import { parseArguments, parseTimeExpression, reply, respond } from 'logos/src/lib/interactions.ts';
-import constants, { Periods } from 'logos/src/constants.ts';
-import { mention, MentionTypes, timestamp } from 'logos/src/formatting.ts';
+import { Bot, editMember, Interaction } from "discordeno";
+import { logEvent } from "../../../../controllers/logging/logging.js";
+import { autocompleteMembers, Client, localise, resolveInteractionToMember } from "../../../../client.js";
+import { parseArguments, parseTimeExpression, reply, respond } from "../../../../interactions.js";
+import constants, { Periods } from "../../../../../constants.js";
+import { mention, MentionTypes, timestamp } from "../../../../../formatting.js";
 
 function handleSetTimeoutAutocomplete([client, bot]: [Client, Bot], interaction: Interaction): void {
 	const [{ user, duration }, focused] = parseArguments(interaction.data?.options, {});
 
 	switch (focused!.name) {
-		case 'user': {
-			autocompleteMembers(
-				[client, bot],
-				interaction,
-				user!,
-				{ restrictToNonSelf: true, excludeModerators: true },
-			);
+		case "user": {
+			autocompleteMembers([client, bot], interaction, user!, { restrictToNonSelf: true, excludeModerators: true });
 			return;
 		}
-		case 'duration': {
+		case "duration": {
 			const timestamp = parseTimeExpression(client, duration!, interaction.locale);
 			if (timestamp === undefined) {
 				respond([client, bot], interaction, []);
@@ -59,34 +54,39 @@ async function handleSetTimeout([client, bot]: [Client, Bot], interaction: Inter
 	const guild = client.cache.guilds.get(interaction.guildId!);
 	if (guild === undefined) return;
 
-	await editMember(bot, interaction.guildId!, member.id, { communicationDisabledUntil: until })
-		.catch(() => client.log.warn(`Failed to time member with ID ${member.id} out.`));
+	await editMember(bot, interaction.guildId!, member.id, { communicationDisabledUntil: until }).catch(() =>
+		client.log.warn(`Failed to time member with ID ${member.id} out.`),
+	);
 
-	logEvent([client, bot], guild, 'memberTimeoutAdd', [member, until, reason!, interaction.user]);
+	logEvent([client, bot], guild, "memberTimeoutAdd", [member, until, reason!, interaction.user]);
 
 	const strings = {
-		title: localise(client, 'timeout.strings.timedOut.title', interaction.locale)(),
-		description: localise(client, 'timeout.strings.timedOut.description', interaction.locale)(
-			{
-				'user_mention': mention(member.id, MentionTypes.User),
-				'relative_timestamp': timestamp(until),
-			},
-		),
+		title: localise(client, "timeout.strings.timedOut.title", interaction.locale)(),
+		description: localise(
+			client,
+			"timeout.strings.timedOut.description",
+			interaction.locale,
+		)({
+			user_mention: mention(member.id, MentionTypes.User),
+			relative_timestamp: timestamp(until),
+		}),
 	};
 
 	return void reply([client, bot], interaction, {
-		embeds: [{
-			title: strings.title,
-			description: strings.description,
-			color: constants.colors.blue,
-		}],
+		embeds: [
+			{
+				title: strings.title,
+				description: strings.description,
+				color: constants.colors.blue,
+			},
+		],
 	});
 }
 
 function displayDurationInvalidError([client, bot]: [Client, Bot], interaction: Interaction): void {
 	const strings = {
-		title: localise(client, 'timeout.strings.durationInvalid.title', interaction.locale)(),
-		description: localise(client, 'timeout.strings.durationInvalid.description', interaction.locale)(),
+		title: localise(client, "timeout.strings.durationInvalid.title", interaction.locale)(),
+		description: localise(client, "timeout.strings.durationInvalid.description", interaction.locale)(),
 	};
 
 	return void reply([client, bot], interaction, {
@@ -96,8 +96,8 @@ function displayDurationInvalidError([client, bot]: [Client, Bot], interaction: 
 
 function displayTooShortWarning([client, bot]: [Client, Bot], interaction: Interaction): void {
 	const strings = {
-		title: localise(client, 'timeout.strings.tooShort.title', interaction.locale)(),
-		description: localise(client, 'timeout.strings.tooShort.description', interaction.locale)(),
+		title: localise(client, "timeout.strings.tooShort.title", interaction.locale)(),
+		description: localise(client, "timeout.strings.tooShort.description", interaction.locale)(),
 	};
 
 	return void reply([client, bot], interaction, {
@@ -107,8 +107,8 @@ function displayTooShortWarning([client, bot]: [Client, Bot], interaction: Inter
 
 function displayTooLongWarning([client, bot]: [Client, Bot], interaction: Interaction): void {
 	const strings = {
-		title: localise(client, 'timeout.strings.tooLong.title', interaction.locale)(),
-		description: localise(client, 'timeout.strings.tooLong.description', interaction.locale)(),
+		title: localise(client, "timeout.strings.tooLong.title", interaction.locale)(),
+		description: localise(client, "timeout.strings.tooLong.description", interaction.locale)(),
 	};
 
 	return void reply([client, bot], interaction, {

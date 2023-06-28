@@ -1,8 +1,8 @@
-import { Bot, Interaction } from 'discordeno';
-import { handleRequestPlayback } from 'logos/src/lib/commands/music/commands/play/query.ts';
-import { SongListing, SongListingContentTypes } from 'logos/src/lib/commands/music/data/types.ts';
-import { Client, localise } from 'logos/src/lib/client.ts';
-import { deleteReply, parseArguments, postponeReply } from 'logos/src/lib/interactions.ts';
+import { Bot, Interaction } from "discordeno";
+import { handleRequestPlayback } from "./query.js";
+import { SongListing, SongListingContentTypes } from "../../data/types.js";
+import { Client, localise } from "../../../../client.js";
+import { deleteReply, parseArguments, postponeReply } from "../../../../interactions.js";
 
 function handleRequestFilePlayback([client, bot]: [Client, Bot], interaction: Interaction): void {
 	const [{ url }] = parseArguments(interaction.data?.options, {});
@@ -12,7 +12,7 @@ function handleRequestFilePlayback([client, bot]: [Client, Bot], interaction: In
 	deleteReply([client, bot], interaction);
 
 	const strings = {
-		externalFile: localise(client, 'music.options.play.strings.externalFile', interaction.locale)(),
+		externalFile: localise(client, "music.options.play.strings.externalFile", interaction.locale)(),
 	};
 
 	const listing: SongListing = {

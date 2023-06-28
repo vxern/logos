@@ -1,4 +1,4 @@
-import { Client } from 'logos/src/lib/client.ts';
+import { Client } from "../../client.js";
 
 /** Represents an entry in the log channel. */
 interface LogEntry<E extends Record<string, unknown[]>, K extends keyof E> {

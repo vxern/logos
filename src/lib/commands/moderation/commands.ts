@@ -1,9 +1,9 @@
-import pardon from 'logos/src/lib/commands/moderation/commands/pardon.ts';
-import policy from 'logos/src/lib/commands/moderation/commands/policy.ts';
-import purge from 'logos/src/lib/commands/moderation/commands/purge.ts';
-import report from 'logos/src/lib/commands/moderation/commands/report.ts';
-import rule from 'logos/src/lib/commands/moderation/commands/rule.ts';
-import timeout from 'logos/src/lib/commands/moderation/commands/timeout.ts';
-import warn from 'logos/src/lib/commands/moderation/commands/warn.ts';
+import pardon from "./commands/pardon.js";
+import policy from "./commands/policy.js";
+import purge from "./commands/purge.js";
+import report from "./commands/report.js";
+import rule from "./commands/rule.js";
+import timeout from "./commands/timeout.js";
+import warn from "./commands/warn.js";
 
 export default { local: [pardon, policy, purge, report, rule, timeout, warn], global: [] };

@@ -1,11 +1,11 @@
-import { Bot, Interaction } from 'discordeno';
-import { listingTypeToEmoji, SongListing } from 'logos/src/lib/commands/music/data/types.ts';
-import { Client, localise } from 'logos/src/lib/client.ts';
-import { paginate } from 'logos/src/lib/interactions.ts';
-import { chunk } from 'logos/src/lib/utils.ts';
-import configuration from 'logos/src/configuration.ts';
-import constants from 'logos/src/constants.ts';
-import { list } from 'logos/src/formatting.ts';
+import { Bot, Interaction } from "discordeno";
+import { listingTypeToEmoji, SongListing } from "./data/types.js";
+import { Client, localise } from "../../client.js";
+import { paginate } from "../../interactions.js";
+import { chunk } from "../../utils.js";
+import configuration from "../../../configuration.js";
+import constants from "../../../constants.js";
+import { list } from "../../../formatting.js";
 
 function displayListings(
 	[client, bot]: [Client, Bot],
@@ -17,8 +17,8 @@ function displayListings(
 	const pages = chunk(songListings, configuration.music.limits.songs.page);
 
 	const strings = {
-		title: localise(client, 'music.strings.listings', locale)(),
-		listEmpty: localise(client, 'music.strings.listEmpty', locale)(),
+		title: localise(client, "music.strings.listings", locale)(),
+		listEmpty: localise(client, "music.strings.listEmpty", locale)(),
 	};
 
 	return paginate([client, bot], interaction, {

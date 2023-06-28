@@ -1,28 +1,28 @@
-import { Periods } from 'logos/src/constants.ts';
-import { Client } from 'logos/src/lib/client.ts';
+import { Client } from "./lib/client.js";
+import { Periods } from "./constants.js";
 
 const configuration = {
 	guilds: {
-		namePattern: new RegExp('^Learn ([A-Z][a-z]*)$'),
+		namePattern: new RegExp("^Learn ([A-Z][a-z]*)$"),
 		environments: {
-			'432173040638623746': 'production', // Learn Romanian
-			'910929726418350110': 'production', // Learn Armenian
-			'1055102122137489418': 'staging', // Staging
-			'1055102910658269224': 'development', // Development
-		} satisfies Record<string, Client['metadata']['environment']> as Record<string, Client['metadata']['environment']>,
+			"432173040638623746": "production", // Learn Romanian
+			"910929726418350110": "production", // Learn Armenian
+			"1055102122137489418": "staging", // Staging
+			"1055102910658269224": "development", // Development
+		} satisfies Record<string, Client["metadata"]["environment"]> as Record<string, Client["metadata"]["environment"]>,
 		channels: {
-			logging: 'journal',
-			verification: 'verifications',
-			reports: 'reports',
-			suggestions: 'suggestions',
+			logging: "journal",
+			verification: "verifications",
+			reports: "reports",
+			suggestions: "suggestions",
 
-			guideChat: 'guide-chat',
+			guideChat: "guide-chat",
 
-			information: 'rules',
-			roles: 'roles',
-			welcome: 'welcome',
+			information: "rules",
+			roles: "roles",
+			welcome: "welcome",
 
-			voiceChat: 'Voice Chat',
+			voiceChat: "Voice Chat",
 		},
 	},
 	resultsPerPage: 10,

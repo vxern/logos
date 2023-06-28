@@ -1,44 +1,25 @@
-import { WiktionaryParser } from 'wiktionary';
-import { DOMParser } from 'dom';
-import {
-	DictionaryAdapter,
-	DictionaryEntry,
-	DictionaryProvisions,
-} from 'logos/src/lib/commands/language/dictionaries/adapter.ts';
-import { getPartOfSpeech } from 'logos/src/lib/commands/language/module.ts';
-import { Client } from 'logos/src/lib/client.ts';
-import { Language } from 'logos/src/types.ts';
+import { WiktionaryParser } from "wiktionary";
+import { DictionaryAdapter, DictionaryEntry, DictionaryProvisions } from "../adapter.js";
+import { getPartOfSpeech } from "../../module.js";
+import { Client } from "../../../../client.js";
+import { Language } from "../../../../../types.js";
 
 const wiktionary = new WiktionaryParser();
-// @ts-ignore: Accessing private member as a work-around.
-Object.defineProperty(wiktionary, 'document', { get: () => wiktionary.dom });
-const dom = new DOMParser();
 
-type WordData = ReturnType<typeof wiktionary['parse']> extends Promise<(infer U)[]> ? U : never;
+type WordData = ReturnType<typeof wiktionary["parse"]> extends Promise<(infer U)[]> ? U : never;
 
-const newlinesExpression = RegExp('\n{1}', 'g');
+const newlinesExpression = RegExp("\n{1}", "g");
 
 class WiktionaryAdapter extends DictionaryAdapter<WordData[]> {
-	readonly name = 'Wiktionary';
-	readonly supports = ['Armenian', 'English', 'Polish', 'Hungarian', 'Romanian'] as Language[];
+	readonly name = "Wiktionary";
+	readonly supports = ["Armenian", "English", "Polish", "Hungarian", "Romanian"] as Language[];
 	readonly provides = [DictionaryProvisions.Definitions, DictionaryProvisions.Etymology];
 
 	async fetch(lemma: string, language: Language): Promise<WordData[] | undefined> {
-		// @ts-ignore: Accessing private member as a work-around.
-		const html = await wiktionary.download(lemma);
-		// @ts-ignore: Accessing private member as a work-around.
-		wiktionary.currentWord = lemma;
-		// @ts-ignore: Accessing private member as a work-around.
-		wiktionary.language = language.toLowerCase();
-		// @ts-ignore: Accessing private member as a work-around.
-		wiktionary.dom = dom.parseFromString(html, 'text/html');
-		// @ts-ignore: Accessing private member as a work-around.
-		wiktionary.cleanHTML();
-		// @ts-ignore: Accessing private member as a work-around.
-		const data = wiktionary.getWordData(wiktionary.language);
+		const data = await wiktionary.parse(lemma, language);
 		if (data.length === 0) {
 			// @ts-ignore: Accessing private member as a work-around.
-			const suggestion = wiktionary.dom.getElementById('did-you-mean')?.innerText ?? undefined;
+			const suggestion = wiktionary.dom.getElementById("did-you-mean")?.innerText ?? undefined;
 			if (suggestion === undefined) return undefined;
 
 			return this.fetch(suggestion, language);
@@ -51,15 +32,15 @@ class WiktionaryAdapter extends DictionaryAdapter<WordData[]> {
 		const entries: DictionaryEntry[] = [];
 		for (const result of results) {
 			for (const definition of result.definitions) {
-				const partOfSpeech = getPartOfSpeech(definition.partOfSpeech, definition.partOfSpeech, 'English');
+				const partOfSpeech = getPartOfSpeech(definition.partOfSpeech, definition.partOfSpeech, "English");
 				const [_, ...definitions] = definition.text as [string, ...string[]];
 
 				entries.push({
 					lemma: lemma,
-					title: 'title',
+					title: "title",
 					partOfSpeech,
 					definitions: definitions.map((definition) => ({ value: definition })),
-					etymologies: [{ value: result.etymology.replaceAll(newlinesExpression, '\n\n') }],
+					etymologies: [{ value: result.etymology.replaceAll(newlinesExpression, "\n\n") }],
 				});
 			}
 		}

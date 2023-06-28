@@ -1,3 +1,3 @@
-import metadata from 'logos/src/lib/commands/developer/commands/metadata.ts';
+import metadata from "./commands/metadata.js";
 
 export default { local: [metadata], global: [] };

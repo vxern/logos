@@ -9,14 +9,14 @@ import {
 	Message,
 	sendMessage,
 	User as DiscordUser,
-} from 'discordeno';
-import { User } from 'logos/src/lib/database/structs/mod.ts';
-import { BaseDocumentProperties, Document } from 'logos/src/lib/database/document.ts';
-import { stringifyValue } from 'logos/src/lib/database/database.ts';
-import { Client, extendEventHandler, isServicing, WithLanguage } from 'logos/src/lib/client.ts';
-import { createInteractionCollector, decodeId } from 'logos/src/lib/interactions.ts';
-import { getAllMessages, getTextChannel } from 'logos/src/lib/utils.ts';
-import constants from 'logos/src/constants.ts';
+} from "discordeno";
+import { User } from "../../database/structs/user.js";
+import { BaseDocumentProperties, Document } from "../../database/document.js";
+import { stringifyValue } from "../../database/database.js";
+import { Client, extendEventHandler, isServicing, WithLanguage } from "../../client.js";
+import { createInteractionCollector, decodeId } from "../../interactions.js";
+import { getAllMessages, getTextChannel } from "../../utils.js";
+import constants from "../../../constants.js";
 
 type InteractionDataBase = [userId: string, guildId: string, reference: string];
 
@@ -78,7 +78,7 @@ abstract class PromptManager<
 	private registerOldPrompts([client, bot]: [Client, Bot]): void {
 		const documentsByGuildId = this.getAllDocuments(client);
 
-		extendEventHandler(bot, 'guildCreate', { append: true }, async (bot, { id: guildId }) => {
+		extendEventHandler(bot, "guildCreate", { append: true }, async (bot, { id: guildId }) => {
 			if (!isServicing(client, guildId)) return;
 
 			const guild = client.cache.guilds.get(guildId)!;
@@ -90,7 +90,7 @@ abstract class PromptManager<
 
 			this.channelIds.set(guild.id, channel.id);
 
-			const promptsAll = await getAllMessages([client, bot], channel.id) ?? [];
+			const promptsAll = (await getAllMessages([client, bot], channel.id)) ?? [];
 			const [valid, invalid] = this.filterPrompts(promptsAll);
 
 			const documents = documentsByGuildId.get(guild.id) ?? [];
@@ -121,7 +121,7 @@ abstract class PromptManager<
 				this.registerHandler(client, [userId.toString(), guild.id.toString(), reference]);
 			}
 
-			const expired = Array.from(prompts.values()).map((map) => Array.from(map.values())).flat();
+			const expired = Array.from(prompts.values()).flatMap((map) => Array.from(map.values()));
 
 			for (const prompt of [...invalid, ...expired]) {
 				await deleteMessage(bot, prompt.channelId, prompt.id);
@@ -131,7 +131,7 @@ abstract class PromptManager<
 
 	private ensurePersistence([client, bot]: [Client, Bot]): void {
 		// Anti-tampering feature; detects prompts being deleted.
-		extendEventHandler(bot, 'messageDelete', { prepend: true }, async (_, { id: promptId, channelId, guildId }) => {
+		extendEventHandler(bot, "messageDelete", { prepend: true }, async (_, { id: promptId, channelId, guildId }) => {
 			if (!isServicing(client, guildId!)) return;
 
 			// If the message was deleted from a channel not managed by this prompt manager.
@@ -164,7 +164,7 @@ abstract class PromptManager<
 		});
 
 		// Anti-tampering feature; detects embeds being deleted from prompts.
-		extendEventHandler(bot, 'messageUpdate', { prepend: true }, (bot, { id: promptId, channelId, guildId, embeds }) => {
+		extendEventHandler(bot, "messageUpdate", { prepend: true }, (bot, { id: promptId, channelId, guildId, embeds }) => {
 			if (!isServicing(client, guildId!)) return;
 
 			// If the message was updated in a channel not managed by this prompt manager.
@@ -279,11 +279,12 @@ abstract class PromptManager<
 		this.handlers.set(data.join(constants.symbols.meta.idSeparator), async (bot, interaction) => {
 			const [_, userId, guildId, reference, ...metadata] = decodeId<InteractionData>(interaction.data!.customId!);
 
-			const updatedDocument = await this.handleInteraction(
-				[client, bot],
-				interaction,
-				[userId, guildId, reference, ...metadata] as InteractionData,
-			);
+			const updatedDocument = await this.handleInteraction([client, bot], interaction, [
+				userId,
+				guildId,
+				reference,
+				...metadata,
+			] as InteractionData);
 			if (updatedDocument === undefined) return;
 
 			const prompt = this.prompts.get(reference);

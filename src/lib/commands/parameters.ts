@@ -1,56 +1,56 @@
-import { ApplicationCommandOptionTypes } from 'discordeno';
-import { OptionTemplate } from 'logos/src/lib/commands/command.ts';
+import { ApplicationCommandOptionTypes } from "discordeno";
+import { OptionTemplate } from "./command.js";
 
 const user: OptionTemplate = {
-	name: 'user',
+	name: "user",
 	type: ApplicationCommandOptionTypes.String,
 	required: true,
 	autocomplete: true,
 };
 
 const show: OptionTemplate = {
-	name: 'show',
+	name: "show",
 	type: ApplicationCommandOptionTypes.Boolean,
 };
 
 const duration: OptionTemplate = {
-	name: 'duration',
+	name: "duration",
 	type: ApplicationCommandOptionTypes.String,
 	required: true,
 	autocomplete: true,
 };
 
 const reason: OptionTemplate = {
-	name: 'reason',
+	name: "reason",
 	type: ApplicationCommandOptionTypes.String,
 	required: true,
 };
 
 const query: OptionTemplate = {
-	name: 'query',
+	name: "query",
 	type: ApplicationCommandOptionTypes.String,
 	required: true,
 };
 
 const timestamp: OptionTemplate = {
-	name: 'timestamp',
+	name: "timestamp",
 	type: ApplicationCommandOptionTypes.String,
 	required: true,
 	autocomplete: true,
 };
 
 const collection: OptionTemplate = {
-	name: 'collection',
+	name: "collection",
 	type: ApplicationCommandOptionTypes.Boolean,
 };
 
 const by: OptionTemplate = {
-	name: 'by',
+	name: "by",
 	type: ApplicationCommandOptionTypes.Integer,
 };
 
 const to: OptionTemplate = {
-	name: 'to',
+	name: "to",
 	type: ApplicationCommandOptionTypes.Integer,
 };
 

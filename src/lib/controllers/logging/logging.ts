@@ -1,9 +1,9 @@
-import { Bot, Channel, Guild, sendMessage } from 'discordeno';
-import { ClientEvents } from 'logos/src/lib/controllers/logging/generators/client.ts';
-import generators, { Events } from 'logos/src/lib/controllers/logging/generators/generators.ts';
-import { Client, extendEventHandler } from 'logos/src/lib/client.ts';
-import { getTextChannel } from 'logos/src/lib/utils.ts';
-import configuration from 'logos/src/configuration.ts';
+import { Bot, Channel, Guild, sendMessage } from "discordeno";
+import { ClientEvents } from "./generators/client.js";
+import generators, { Events } from "./generators/generators.js";
+import { Client, extendEventHandler } from "../../client.js";
+import { getTextChannel } from "../../utils.js";
+import configuration from "../../../configuration.js";
 
 type ClientEventNames = keyof ClientEvents;
 const clientEventNames = Object.keys(generators.client) as ClientEventNames[];
@@ -21,12 +21,7 @@ function setupLogging([client, bot]: [Client, Bot], guild: Guild): void {
 
 const messageGenerators = { ...generators.client, ...generators.guild };
 
-function logEvent<K extends keyof Events>(
-	[client, bot]: [Client, Bot],
-	guild: Guild,
-	event: K,
-	args: Events[K],
-): void {
+function logEvent<K extends keyof Events>([client, bot]: [Client, Bot], guild: Guild, event: K, args: Events[K]): void {
 	const logChannel = getTextChannel(guild, configuration.guilds.channels.logging);
 	if (logChannel === undefined) return;
 
@@ -49,20 +44,21 @@ async function logToChannel<K extends keyof Events>(
 		const result = entry.message(client, ...args);
 		if (result === undefined) return resolve(undefined);
 
-		if (typeof result === 'string') return resolve(result);
+		if (typeof result === "string") return resolve(result);
 
 		return result.then((message) => resolve(message));
 	});
 	if (message === undefined) return;
 
 	return void sendMessage(bot, channel.id, {
-		embeds: [{
-			title: entry.title,
-			description: message,
-			color: entry.color,
-		}],
-	})
-		.catch(() => client.log.warn(`Failed to log '${event}' event on guild with ID ${channel.guildId}.`));
+		embeds: [
+			{
+				title: entry.title,
+				description: message,
+				color: entry.color,
+			},
+		],
+	}).catch(() => client.log.warn(`Failed to log '${event}' event on guild with ID ${channel.guildId}.`));
 }
 
 export { logEvent, setupLogging };

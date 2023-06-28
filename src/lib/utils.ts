@@ -1,7 +1,7 @@
-import { Bot, Channel, ChannelTypes, Embed, getGuildIconURL, getMessages, Guild, Message, User } from 'discordeno';
-import { Document } from 'logos/src/lib/database/document.ts';
-import { Client } from 'logos/src/lib/client.ts';
-import { mention, MentionTypes } from 'logos/src/formatting.ts';
+import { Bot, Channel, ChannelTypes, Embed, getGuildIconURL, getMessages, Guild, Message, User } from "discordeno";
+import { Document } from "./database/document.js";
+import { Client } from "./client.js";
+import { mention, MentionTypes } from "../formatting.js";
 
 /**
  * Parses a 6-digit hex value prefixed with a hashtag to a number.
@@ -11,7 +11,7 @@ import { mention, MentionTypes } from 'logos/src/formatting.ts';
  * @returns The decimal form.
  */
 function fromHex(color: string): number {
-	return parseInt(color.replace('#', '0x'));
+	return parseInt(color.replace("#", "0x"));
 }
 
 type TextChannel = Channel & { type: ChannelTypes.GuildText };
@@ -68,7 +68,7 @@ function diagnosticMentionUser(user: User): string {
  */
 function chunk<T>(array: T[], size: number): T[][] {
 	if (array.length === 0) return [[]];
-	if (size === 0) throw new Error('The size of a chunk cannot be zero.');
+	if (size === 0) throw new Error("The size of a chunk cannot be zero.");
 
 	const chunks = array.length <= size ? 1 : Math.floor(array.length / size);
 	const result = [];
@@ -84,21 +84,19 @@ const beginningOfDiscordEpoch = 1420070400000n;
 const snowflakeBitsToDiscard = 22n;
 
 function snowflakeToTimestamp(snowflake: bigint): number {
-	return Number(
-		(snowflake >> snowflakeBitsToDiscard) + beginningOfDiscordEpoch,
-	);
+	return Number((snowflake >> snowflakeBitsToDiscard) + beginningOfDiscordEpoch);
 }
 
 function getGuildIconURLFormatted(bot: Bot, guild: Guild): string | undefined {
 	const iconURL = getGuildIconURL(bot, guild.id, guild.icon, {
 		size: 4096,
-		format: 'png',
+		format: "png",
 	});
 
 	return iconURL;
 }
 
-type Author = NonNullable<Embed['author']>;
+type Author = NonNullable<Embed["author"]>;
 
 function getAuthor(bot: Bot, guild: Guild): Author | undefined {
 	const iconURL = getGuildIconURLFormatted(bot, guild);
@@ -118,16 +116,13 @@ function getAuthor(bot: Bot, guild: Guild): Author | undefined {
  * @param parameters - The parameters to append to the URL.
  * @returns The formatted URL.
  */
-function addParametersToURL(
-	url: string,
-	parameters: Record<string, string>,
-): string {
+function addParametersToURL(url: string, parameters: Record<string, string>): string {
 	const query = Object.entries(parameters)
 		.map(([key, value]) => {
 			const valueEncoded = encodeURIComponent(value);
 			return `${key}=${valueEncoded}`;
 		})
-		.join('&');
+		.join("&");
 
 	if (query.length === 0) return url;
 
@@ -159,16 +154,14 @@ async function getAllMessages([client, bot]: [Client, Bot], channelId: bigint): 
 }
 
 function verifyIsWithinLimits(documents: Document[], limit: number, limitingTimePeriod: number): boolean {
-	const actionTimestamps = documents
-		.map((document) => document.data.createdAt)
-		.toSorted((a, b) => b - a); // From most recent to least recent.
+	const actionTimestamps = documents.map((document) => document.data.createdAt).sort((a, b) => b - a); // From most recent to least recent.
 	const relevantTimestamps = actionTimestamps.slice(0, limit);
 
 	if (relevantTimestamps.length < limit) return true; // Has not reached the limit, regardless of the limiting time period.
 
 	const now = Date.now();
 	for (const timestamp of relevantTimestamps) {
-		if ((now - timestamp) < limitingTimePeriod) continue;
+		if (now - timestamp < limitingTimePeriod) continue;
 		return true;
 	}
 

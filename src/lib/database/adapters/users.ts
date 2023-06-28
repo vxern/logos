@@ -1,5 +1,5 @@
-import * as Fauna from 'fauna';
-import { User } from 'logos/src/lib/database/structs/mod.ts';
+import Fauna from "fauna";
+import { User } from "../structs/user.js";
 import {
 	CacheAdapter,
 	DatabaseAdapters,
@@ -7,22 +7,22 @@ import {
 	getUserMentionByReference,
 	mentionUser,
 	stringifyValue,
-} from 'logos/src/lib/database/database.ts';
-import { Document } from 'logos/src/lib/database/document.ts';
-import { UserIndexes, userIndexParameterToIndex } from 'logos/src/lib/database/indexes.ts';
+} from "../database.js";
+import { Document } from "../document.js";
+import { UserIndexes, userIndexParameterToIndex } from "../indexes.js";
 
 const $ = Fauna.query;
 
 const cache: CacheAdapter<User, UserIndexes<Document<User>>> = {
 	get: (client, parameter, value) => {
-		if (parameter === 'reference') {
+		if (parameter === "reference") {
 			return client.database.cache.usersByReference.get(value);
 		}
 
 		return client.database.cache.usersById.get(value);
 	},
 	set: (client, parameter, value, user) => {
-		if (parameter === 'reference') {
+		if (parameter === "reference") {
 			client.database.cache.usersByReference.set(value, user);
 			return;
 		}
@@ -31,7 +31,7 @@ const cache: CacheAdapter<User, UserIndexes<Document<User>>> = {
 	},
 };
 
-const adapter: DatabaseAdapters['users'] = {
+const adapter: DatabaseAdapters["users"] = {
 	fetch: async (client, parameter, parameterValue) => {
 		const value = stringifyValue(parameterValue);
 
@@ -41,11 +41,11 @@ const adapter: DatabaseAdapters['users'] = {
 		}
 
 		let query: Fauna.Expr;
-		if (parameter === 'reference') {
-			query = $.Get(parameterValue as Fauna.ExprArg);
+		if (parameter === "reference") {
+			query = $.Get(parameterValue);
 		} else {
-			const index = userIndexParameterToIndex[parameter as Exclude<typeof parameter, 'reference'>];
-			query = $.Get($.Match(index, parameterValue as Fauna.ExprArg));
+			const index = userIndexParameterToIndex[parameter as Exclude<typeof parameter, "reference">];
+			query = $.Get($.Match(index, parameterValue));
 		}
 
 		const promise = dispatchQuery<User>(client, query);
@@ -62,8 +62,8 @@ const adapter: DatabaseAdapters['users'] = {
 		const referenceId = stringifyValue(document.ref);
 		const id = document.data.account.id;
 
-		cache.set(client, 'reference', referenceId, document);
-		cache.set(client, 'id', id, document);
+		cache.set(client, "reference", referenceId, document);
+		cache.set(client, "id", id, document);
 
 		const userMention = getUserMentionByReference(client, document.ref);
 		client.log.debug(`Fetched user document for ${userMention}.`);
@@ -73,19 +73,22 @@ const adapter: DatabaseAdapters['users'] = {
 	getOrFetch: async (client, parameter, parameterValue) => {
 		const value = stringifyValue(parameterValue);
 
-		return cache.get(client, parameter, value) ?? await adapter.fetch(client, parameter, parameterValue);
+		return cache.get(client, parameter, value) ?? (await adapter.fetch(client, parameter, parameterValue));
 	},
 	getOrFetchOrCreate: async (client, parameter, parameterValue, id) => {
 		const value = stringifyValue(parameterValue);
 
-		return cache.get(client, parameter, value) ?? await adapter.fetch(client, parameter, parameterValue) ??
+		return (
+			cache.get(client, parameter, value) ??
+			(await adapter.fetch(client, parameter, parameterValue)) ??
 			adapter.create(client, {
 				createdAt: Date.now(),
 				account: { id: `${id}` },
-			});
+			})
+		);
 	},
 	create: async (client, user) => {
-		const document = await dispatchQuery<User>(client, $.Create($.Collection('Users'), { data: user }));
+		const document = await dispatchQuery<User>(client, $.Create($.Collection("Users"), { data: user }));
 
 		const idAsNumber = BigInt(user.account.id);
 		const user_ = client.cache.users.get(idAsNumber);
@@ -99,8 +102,8 @@ const adapter: DatabaseAdapters['users'] = {
 		const referenceId = stringifyValue(document.ref);
 		const id = user.account.id;
 
-		cache.set(client, 'reference', referenceId, document);
-		cache.set(client, 'id', id, document);
+		cache.set(client, "reference", referenceId, document);
+		cache.set(client, "id", id, document);
 
 		client.log.debug(`Created user document for ${userMention}.`);
 
@@ -121,8 +124,8 @@ const adapter: DatabaseAdapters['users'] = {
 		const referenceId = stringifyValue(document.ref);
 		const id = user.data.account.id;
 
-		cache.set(client, 'reference', referenceId, document);
-		cache.set(client, 'id', id, document);
+		cache.set(client, "reference", referenceId, document);
+		cache.set(client, "id", id, document);
 
 		client.log.debug(`Updated user document for ${userMention}.`);
 

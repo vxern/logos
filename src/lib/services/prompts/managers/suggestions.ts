@@ -7,17 +7,18 @@ import {
 	Interaction,
 	MessageComponentTypes,
 	User as DiscordUser,
-} from 'discordeno';
-import { PromptManager } from 'logos/src/lib/services/prompts/manager.ts';
-import { stringifyValue } from 'logos/src/lib/database/database.ts';
-import { Document } from 'logos/src/lib/database/document.ts';
-import { Suggestion, User } from 'logos/src/lib/database/structs/mod.ts';
-import { Client, localise, WithLanguage } from 'logos/src/lib/client.ts';
-import { encodeId, reply } from 'logos/src/lib/interactions.ts';
-import configuration from 'logos/src/configuration.ts';
-import constants from 'logos/src/constants.ts';
-import { mention, MentionTypes, timestamp } from 'logos/src/formatting.ts';
-import { defaultLocale } from 'logos/src/types.ts';
+} from "discordeno";
+import { PromptManager } from "../manager.js";
+import { Suggestion } from "../../../database/structs/suggestion.js";
+import { User } from "../../../database/structs/user.js";
+import { stringifyValue } from "../../../database/database.js";
+import { Document } from "../../../database/document.js";
+import { Client, localise, WithLanguage } from "../../../client.js";
+import { encodeId, reply } from "../../../interactions.js";
+import configuration from "../../../../configuration.js";
+import constants from "../../../../constants.js";
+import { mention, MentionTypes, timestamp } from "../../../../formatting.js";
+import { defaultLocale } from "../../../../types.js";
 
 type Metadata = { userId: bigint; reference: string };
 type InteractionData = [userId: string, guildId: string, reference: string, isResolved: string];
@@ -26,10 +27,9 @@ class SuggestionManager extends PromptManager<Suggestion, Metadata, InteractionD
 	getAllDocuments(client: Client): Map<bigint, Document<Suggestion>[]> {
 		const suggestionsByGuildId = new Map<bigint, Document<Suggestion>[]>();
 
-		for (
-			const suggestions of Array.from(client.database.cache.suggestionsByAuthorAndGuild.values())
-				.map((suggestions) => Array.from(suggestions.values()))
-		) {
+		for (const suggestions of Array.from(client.database.cache.suggestionsByAuthorAndGuild.values()).map(
+			(suggestions) => Array.from(suggestions.values()),
+		)) {
 			if (suggestions.length === 0) continue;
 
 			const guildId = BigInt(suggestions.at(0)!.data.guild);
@@ -46,7 +46,7 @@ class SuggestionManager extends PromptManager<Suggestion, Metadata, InteractionD
 	}
 
 	getUserDocument(client: Client, document: Document<Suggestion>): Promise<Document<User> | undefined> {
-		return client.database.adapters.users.getOrFetch(client, 'reference', document.data.author);
+		return client.database.adapters.users.getOrFetch(client, "reference", document.data.author);
 	}
 
 	decodeMetadata(data: string[]): Metadata | undefined {
@@ -66,65 +66,73 @@ class SuggestionManager extends PromptManager<Suggestion, Metadata, InteractionD
 
 		const strings = {
 			suggestion: {
-				submittedBy: localise(client, 'submittedBy', defaultLocale)(),
-				submittedAt: localise(client, 'submittedAt', defaultLocale)(),
+				submittedBy: localise(client, "submittedBy", defaultLocale)(),
+				submittedAt: localise(client, "submittedAt", defaultLocale)(),
 			},
-			markResolved: localise(client, 'markResolved', defaultLocale)(),
-			markUnresolved: localise(client, 'markUnresolved', defaultLocale)(),
+			markResolved: localise(client, "markResolved", defaultLocale)(),
+			markUnresolved: localise(client, "markUnresolved", defaultLocale)(),
 		};
 
 		return {
-			embeds: [{
-				title: document.data.suggestion,
-				color: constants.colors.green,
-				thumbnail: (() => {
-					const iconURL = getAvatarURL(bot, user.id, user.discriminator, {
-						avatar: user.avatar,
-						size: 64,
-						format: 'png',
-					});
-					if (iconURL === undefined) return;
+			embeds: [
+				{
+					title: document.data.suggestion,
+					color: constants.colors.green,
+					thumbnail: (() => {
+						const iconURL = getAvatarURL(bot, user.id, user.discriminator, {
+							avatar: user.avatar,
+							size: 64,
+							format: "png",
+						});
+						if (iconURL === undefined) return;
 
-					return { url: iconURL };
-				})(),
-				fields: [
-					{
-						name: strings.suggestion.submittedBy,
-						value: mention(user.id, MentionTypes.User),
-						inline: true,
-					},
-					{
-						name: strings.suggestion.submittedAt,
-						value: timestamp(document.data.createdAt),
-						inline: true,
-					},
-				],
-				footer: { text: `${user.id}${constants.symbols.meta.metadataSeparator}${reference}` },
-			}],
-			components: [{
-				type: MessageComponentTypes.ActionRow,
-				components: [
-					!document.data.isResolved
-						? {
-							type: MessageComponentTypes.Button,
-							style: ButtonStyles.Primary,
-							label: strings.markResolved,
-							customId: encodeId<InteractionData>(
-								constants.staticComponentIds.suggestions,
-								[user.id.toString(), guild.id.toString(), reference, `${true}`],
-							),
-						}
-						: {
-							type: MessageComponentTypes.Button,
-							style: ButtonStyles.Secondary,
-							label: strings.markUnresolved,
-							customId: encodeId<InteractionData>(
-								constants.staticComponentIds.suggestions,
-								[user.id.toString(), guild.id.toString(), reference, `${false}`],
-							),
+						return { url: iconURL };
+					})(),
+					fields: [
+						{
+							name: strings.suggestion.submittedBy,
+							value: mention(user.id, MentionTypes.User),
+							inline: true,
 						},
-				],
-			}],
+						{
+							name: strings.suggestion.submittedAt,
+							value: timestamp(document.data.createdAt),
+							inline: true,
+						},
+					],
+					footer: { text: `${user.id}${constants.symbols.meta.metadataSeparator}${reference}` },
+				},
+			],
+			components: [
+				{
+					type: MessageComponentTypes.ActionRow,
+					components: [
+						!document.data.isResolved
+							? {
+									type: MessageComponentTypes.Button,
+									style: ButtonStyles.Primary,
+									label: strings.markResolved,
+									customId: encodeId<InteractionData>(constants.staticComponentIds.suggestions, [
+										user.id.toString(),
+										guild.id.toString(),
+										reference,
+										`${true}`,
+									]),
+							  }
+							: {
+									type: MessageComponentTypes.Button,
+									style: ButtonStyles.Secondary,
+									label: strings.markUnresolved,
+									customId: encodeId<InteractionData>(constants.staticComponentIds.suggestions, [
+										user.id.toString(),
+										guild.id.toString(),
+										reference,
+										`${false}`,
+									]),
+							  },
+					],
+				},
+			],
 		};
 	}
 
@@ -134,12 +142,12 @@ class SuggestionManager extends PromptManager<Suggestion, Metadata, InteractionD
 		data: InteractionData,
 	): Promise<Document<Suggestion> | null | undefined> {
 		const [userId, guildId, reference, isResolvedString] = data;
-		const isResolved = isResolvedString === 'true';
+		const isResolved = isResolvedString === "true";
 
-		const user = await client.database.adapters.users.getOrFetchOrCreate(client, 'id', userId, BigInt(userId));
+		const user = await client.database.adapters.users.getOrFetchOrCreate(client, "id", userId, BigInt(userId));
 		if (user === undefined) return undefined;
 
-		const documents = client.database.adapters.suggestions.get(client, 'authorAndGuild', [user.ref, guildId]);
+		const documents = client.database.adapters.suggestions.get(client, "authorAndGuild", [user.ref, guildId]);
 		if (documents === undefined) return undefined;
 
 		const document = documents.get(reference);
@@ -147,38 +155,42 @@ class SuggestionManager extends PromptManager<Suggestion, Metadata, InteractionD
 
 		if (isResolved && document.data.isResolved) {
 			const strings = {
-				title: localise(client, 'alreadyMarkedResolved.title', defaultLocale)(),
-				description: localise(client, 'alreadyMarkedResolved.description', defaultLocale)(),
+				title: localise(client, "alreadyMarkedResolved.title", defaultLocale)(),
+				description: localise(client, "alreadyMarkedResolved.description", defaultLocale)(),
 			};
 
 			return void reply([client, bot], interaction, {
-				embeds: [{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colors.dullYellow,
-				}],
+				embeds: [
+					{
+						title: strings.title,
+						description: strings.description,
+						color: constants.colors.dullYellow,
+					},
+				],
 			});
 		}
 
-		if (!isResolved && !document.data.isResolved) {
+		if (!(isResolved || document.data.isResolved)) {
 			const strings = {
-				title: localise(client, 'alreadyMarkedUnresolved.title', defaultLocale)(),
-				description: localise(client, 'alreadyMarkedUnresolved.description', defaultLocale)(),
+				title: localise(client, "alreadyMarkedUnresolved.title", defaultLocale)(),
+				description: localise(client, "alreadyMarkedUnresolved.description", defaultLocale)(),
 			};
 
 			return void reply([client, bot], interaction, {
-				embeds: [{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colors.dullYellow,
-				}],
+				embeds: [
+					{
+						title: strings.title,
+						description: strings.description,
+						color: constants.colors.dullYellow,
+					},
+				],
 			});
 		}
 
-		const updatedDocument = await client.database.adapters.suggestions.update(
-			client,
-			{ ...document, data: { ...document.data, isResolved } },
-		);
+		const updatedDocument = await client.database.adapters.suggestions.update(client, {
+			...document,
+			data: { ...document.data, isResolved },
+		});
 
 		return updatedDocument;
 	}
@@ -187,7 +199,7 @@ class SuggestionManager extends PromptManager<Suggestion, Metadata, InteractionD
 const manager = new SuggestionManager({
 	customId: constants.staticComponentIds.suggestions,
 	channelName: configuration.guilds.channels.suggestions,
-	type: 'suggestion',
+	type: "suggestion",
 });
 
 export default manager;

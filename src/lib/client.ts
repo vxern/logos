@@ -1,5 +1,4 @@
 import {
-	ActivityTypes,
 	ApplicationCommandOptionTypes,
 	Bot,
 	calculatePermissions,
@@ -7,7 +6,6 @@ import {
 	createBot,
 	createTransformers,
 	DiscordMessage,
-	editShardStatus,
 	EventHandlers,
 	fetchMembers,
 	Guild,
@@ -24,39 +22,27 @@ import {
 	Transformers,
 	upsertGuildApplicationCommands,
 	User,
-} from 'discordeno';
-import * as Sentry from 'sentry';
-import * as Lavaclient from 'lavaclient';
-import { MessagePipe } from 'messagepipe';
-import { Log as Logger } from 'tl_log';
-import { DictionaryAdapter } from 'logos/src/lib/commands/language/dictionaries/adapter.ts';
-import { SentencePair } from 'logos/src/lib/commands/language/commands/game.ts';
-import { SupportedLanguage } from 'logos/src/lib/commands/language/module.ts';
-import {
-	Command,
-	CommandTemplate,
-	InteractionHandler,
-	LocalisationProperties,
-	Option,
-} from 'logos/src/lib/commands/command.ts';
-import commandTemplates from 'logos/src/lib/commands/commands.ts';
-import { setupLogging } from 'logos/src/lib/controllers/logging/logging.ts';
-import { MusicController, setupMusicController } from 'logos/src/lib/controllers/music.ts';
-import { createDatabase, Database } from 'logos/src/lib/database/database.ts';
-import localisationTransformers from 'logos/src/lib/localisation/transformers.ts';
-import { acknowledge, deleteReply, isAutocomplete, reply, respond } from 'logos/src/lib/interactions.ts';
-import services from 'logos/src/lib/services/services.ts';
-import { diagnosticMentionUser } from 'logos/src/lib/utils.ts';
-import configuration from 'logos/src/configuration.ts';
-import constants, { Periods } from 'logos/src/constants.ts';
-import { timestamp } from 'logos/src/formatting.ts';
-import {
-	defaultLanguage,
-	getLanguageByLocale,
-	getLocaleForLanguage,
-	Language,
-	supportedLanguages,
-} from 'logos/src/types.ts';
+} from "discordeno";
+import * as Sentry from "sentry";
+import * as Lavaclient from "lavaclient";
+import * as MessagePipe from "messagepipe";
+import * as FancyLog from "fancy-log";
+import { DictionaryAdapter } from "./commands/language/dictionaries/adapter.js";
+import { SentencePair } from "./commands/language/commands/game.js";
+import { SupportedLanguage } from "./commands/language/module.js";
+import { Command, CommandTemplate, InteractionHandler, LocalisationProperties, Option } from "./commands/command.js";
+import commandTemplates from "./commands/commands.js";
+import { setupLogging } from "./controllers/logging/logging.js";
+import { MusicController, setupMusicController } from "./controllers/music.js";
+import { createDatabase, Database } from "./database/database.js";
+import localisationTransformers from "./localisation/transformers.js";
+import { acknowledge, deleteReply, isAutocomplete, reply, respond } from "./interactions.js";
+import services from "./services/services.js";
+import { diagnosticMentionUser } from "./utils.js";
+import configuration from "../configuration.js";
+import constants, { Periods } from "../constants.js";
+import { timestamp } from "../formatting.js";
+import { defaultLanguage, getLanguageByLocale, getLocaleForLanguage, Language, supportedLanguages } from "../types.js";
 
 interface Collector<ForEvent extends keyof EventHandlers> {
 	filter: (...args: Parameters<EventHandlers[ForEvent]>) => boolean;
@@ -96,11 +82,10 @@ function createCache(): Cache {
 
 type Client = Readonly<{
 	metadata: {
-		version: string;
-		environment: 'production' | 'staging' | 'development' | 'restricted';
+		environment: "production" | "staging" | "development" | "restricted";
 		supportedTranslationLanguages: SupportedLanguage[];
 	};
-	log: Logger;
+	log: Record<"debug" | keyof typeof FancyLog, (...args: unknown[]) => void>;
 	cache: Cache;
 	database: Database;
 	commands: {
@@ -126,8 +111,8 @@ type Client = Readonly<{
 }>;
 
 function createClient(
-	metadata: Client['metadata'],
-	features: Client['features'],
+	metadata: Client["metadata"],
+	features: Client["features"],
 	localisationsStatic: Map<string, Map<Language, string>>,
 ): Client {
 	const localisations = createLocalisations(localisationsStatic);
@@ -139,7 +124,23 @@ function createClient(
 
 	return {
 		metadata,
-		log: createLogger(metadata.environment),
+		log: {
+			debug: (...args: unknown[]) => {
+				FancyLog.info(...args);
+			},
+			info: (...args: unknown[]) => {
+				FancyLog.info(...args);
+			},
+			dir: (...args: unknown[]) => {
+				FancyLog.dir(...args);
+			},
+			error: (...args: unknown[]) => {
+				FancyLog.error(...args);
+			},
+			warn: (...args: unknown[]) => {
+				FancyLog.warn(args);
+			},
+		},
 		cache: createCache(),
 		database: createDatabase(),
 		features,
@@ -150,37 +151,38 @@ function createClient(
 }
 
 async function initialiseClient(
-	metadata: Client['metadata'],
-	features: Omit<Client['features'], 'music'>,
+	metadata: Client["metadata"],
+	features: Omit<Client["features"], "music">,
 	localisations: Map<string, Map<Language, string>>,
 ): Promise<[Client, Bot]> {
-	const musicFeature = createMusicFeature(
-		(guildId, payload) => {
-			const shardId = client.cache.guilds.get(BigInt(guildId))?.shardId;
-			if (shardId === undefined) return;
+	const musicFeature = createMusicFeature((guildId, payload) => {
+		const shardId = client.cache.guilds.get(BigInt(guildId))?.shardId;
+		if (shardId === undefined) return;
 
-			const shard = bot.gateway.manager.shards.find((shard) => shard.id === shardId);
-			if (shard === undefined) return;
+		const shard = bot.gateway.manager.shards.find((shard) => shard.id === shardId);
+		if (shard === undefined) return;
 
-			return void sendShardPayload(shard, payload, true);
-		},
-	);
+		return void sendShardPayload(shard, payload, true);
+	});
 
 	const client = createClient(metadata, { ...features, music: musicFeature }, localisations);
 
 	await prefetchDataFromDatabase(client, client.database);
 
-	const bot = overrideDefaultEventHandlers(createBot({
-		token: Deno.env.get('DISCORD_SECRET')!,
-		intents: Intents.Guilds |
-			Intents.GuildMembers |
-			Intents.GuildBans |
-			Intents.GuildVoiceStates |
-			Intents.GuildMessages |
-			Intents.MessageContent,
-		events: withMusicEvents(createEventHandlers(client), client.features.music.node),
-		transformers: withCaching(client, createTransformers({})),
-	}));
+	const bot = overrideDefaultEventHandlers(
+		createBot({
+			token: process.env.DISCORD_SECRET!,
+			intents:
+				Intents.Guilds |
+				Intents.GuildMembers |
+				Intents.GuildBans |
+				Intents.GuildVoiceStates |
+				Intents.GuildMessages |
+				Intents.MessageContent,
+			events: withMusicEvents(createEventHandlers(client), client.features.music.node),
+			transformers: withCaching(client, createTransformers({})),
+		}),
+	);
 
 	startServices([client, bot]);
 
@@ -197,19 +199,12 @@ async function prefetchDataFromDatabase(client: Client, database: Database): Pro
 	]);
 }
 
-function createLogger(environment: Client['metadata']['environment']): Logger {
-	return new Logger({
-		minLogLevel: environment === 'development' ? 'debug' : 'info',
-		levelIndicator: 'full',
-	});
-}
-
-function createMusicFeature(sendGatewayPayload: Lavaclient.Node['sendGatewayPayload']): Client['features']['music'] {
+function createMusicFeature(sendGatewayPayload: Lavaclient.Node["sendGatewayPayload"]): Client["features"]["music"] {
 	const node = new Lavaclient.Node({
 		connection: {
-			host: Deno.env.get('LAVALINK_HOST')!,
-			port: Number(Deno.env.get('LAVALINK_PORT')!),
-			password: Deno.env.get('LAVALINK_PASSWORD')!,
+			host: process.env.LAVALINK_HOST!,
+			port: Number(process.env.LAVALINK_PORT!),
+			password: process.env.LAVALINK_PASSWORD!,
 		},
 		sendGatewayPayload,
 	});
@@ -244,7 +239,7 @@ function withMusicEvents(events: Partial<EventHandlers>, node: Lavaclient.Node):
 function overrideDefaultEventHandlers(bot: Bot): Bot {
 	bot.handlers.MESSAGE_UPDATE = (bot, data) => {
 		const messageData = data.d as DiscordMessage;
-		if (!('author' in messageData)) return;
+		if (!("author" in messageData)) return;
 
 		bot.events.messageUpdate(bot, bot.transformers.message(bot, messageData));
 	};
@@ -261,15 +256,6 @@ function createEventHandlers(client: Client): Partial<EventHandlers> {
 			if (shard !== undefined && shard.socket !== undefined) {
 				shard.socket.onerror = () => {};
 			}
-
-			editShardStatus(bot, shardId, {
-				activities: [{
-					name: client.metadata.version,
-					type: ActivityTypes.Streaming,
-					createdAt: Date.now(),
-				}],
-				status: 'online',
-			});
 		},
 		guildCreate: (bot, guild) => {
 			const commands = (() => {
@@ -280,8 +266,9 @@ function createEventHandlers(client: Client): Partial<EventHandlers> {
 				return client.commands.global;
 			})();
 
-			upsertGuildApplicationCommands(bot, guild.id, commands)
-				.catch((reason) => client.log.warn(`Failed to upsert commands: ${reason}`));
+			upsertGuildApplicationCommands(bot, guild.id, commands).catch((reason) =>
+				client.log.warn(`Failed to upsert commands: ${reason}`),
+			);
 
 			registerGuild(client, guild);
 
@@ -291,8 +278,9 @@ function createEventHandlers(client: Client): Partial<EventHandlers> {
 
 			setupLogging([client, bot], guild);
 
-			fetchMembers(bot, guild.id, { limit: 0, query: '' })
-				.catch((reason) => client.log.warn(`Failed to fetch members for guild with ID ${guild.id}: ${reason}`));
+			fetchMembers(bot, guild.id, { limit: 0, query: "" }).catch((reason) =>
+				client.log.warn(`Failed to fetch members for guild with ID ${guild.id}: ${reason}`),
+			);
 		},
 		channelDelete: (_, channel) => {
 			client.cache.channels.delete(channel.id);
@@ -312,9 +300,7 @@ function createEventHandlers(client: Client): Partial<EventHandlers> {
 			let commandNameFull: string;
 			if (subCommandGroupOption !== undefined) {
 				const subCommandGroupName = subCommandGroupOption.name;
-				const subCommandName = subCommandGroupOption.options?.find(
-					(option) => isSubcommand(option),
-				)?.name;
+				const subCommandName = subCommandGroupOption.options?.find((option) => isSubcommand(option))?.name;
 				if (subCommandName === undefined) return;
 
 				commandNameFull = `${commandName} ${subCommandGroupName} ${subCommandName}`;
@@ -335,19 +321,15 @@ function createEventHandlers(client: Client): Partial<EventHandlers> {
 			}
 			if (handle === undefined) return;
 
-			Promise.resolve(handle([client, bot], interaction))
-				.catch((exception) => {
-					Sentry.captureException(exception);
-					client.log.error(exception);
-				});
+			Promise.resolve(handle([client, bot], interaction)).catch((exception) => {
+				Sentry.captureException(exception);
+				client.log.error(exception);
+			});
 		},
 	};
 }
 
-function withCaching(
-	client: Client,
-	transformers: Transformers,
-): Transformers {
+function withCaching(client: Client, transformers: Transformers): Transformers {
 	const { guild, user, member, channel, message, role, voiceState } = transformers;
 
 	transformers.guild = (bot, payload) => {
@@ -452,7 +434,7 @@ function withRateLimiting(handle: InteractionHandler): InteractionHandler {
 		const timestampsByCommandId = client.features.rateLimiting.get(interaction.user.id)!;
 		const timestamps = [...(timestampsByCommandId.get(commandId) ?? []), executedAt];
 		const activeTimestamps = timestamps.filter(
-			(timestamp) => (Date.now() - timestamp) <= configuration.rateLimiting.within,
+			(timestamp) => Date.now() - timestamp <= configuration.rateLimiting.within,
 		);
 
 		if (activeTimestamps.length > configuration.rateLimiting.limit) {
@@ -463,29 +445,31 @@ function withRateLimiting(handle: InteractionHandler): InteractionHandler {
 			const nextValidUsageTimestampFormatted = timestamp(nextValidUsageTimestamp);
 
 			const strings = {
-				title: localise(client, 'interactions.rateLimited.title', interaction.locale)(),
+				title: localise(client, "interactions.rateLimited.title", interaction.locale)(),
 				description: {
 					tooManyUses: localise(
 						client,
-						'interactions.rateLimited.description.tooManyUses',
+						"interactions.rateLimited.description.tooManyUses",
 						interaction.locale,
 					)({ times: configuration.rateLimiting.limit }),
 					cannotUseUntil: localise(
 						client,
-						'interactions.rateLimited.description.cannotUseAgainUntil',
+						"interactions.rateLimited.description.cannotUseAgainUntil",
 						interaction.locale,
-					)({ 'relative_timestamp': nextValidUsageTimestampFormatted }),
+					)({ relative_timestamp: nextValidUsageTimestampFormatted }),
 				},
 			};
 
 			setTimeout(() => deleteReply([client, bot], interaction), nextValidUsageTimestamp - now - Periods.second);
 
 			return void reply([client, bot], interaction, {
-				embeds: [{
-					title: strings.title,
-					description: `${strings.description.tooManyUses}\n\n${strings.description.cannotUseUntil}`,
-					color: constants.colors.dullYellow,
-				}],
+				embeds: [
+					{
+						title: strings.title,
+						description: `${strings.description.tooManyUses}\n\n${strings.description.cannotUseUntil}`,
+						color: constants.colors.dullYellow,
+					},
+				],
 			});
 		}
 
@@ -495,25 +479,23 @@ function withRateLimiting(handle: InteractionHandler): InteractionHandler {
 	};
 }
 
-function localiseCommands(localisations: Client['localisations'], commandTemplates: CommandTemplate[]): Command[] {
+function localiseCommands(localisations: Client["localisations"], commandTemplates: CommandTemplate[]): Command[] {
 	function localiseCommandOrOption(key: string): Pick<Command, LocalisationProperties> | undefined {
-		const optionName = key.split('.')!.at(-1)!;
+		const optionName = key.split(".")!.at(-1)!;
 
 		const nameLocalisationsAll = localisations.get(`${key}.name`) ?? localisations.get(`parameters.${optionName}.name`);
-		const nameLocalisations = nameLocalisationsAll !== undefined
-			? toDiscordLocalisations(nameLocalisationsAll)
-			: undefined;
+		const nameLocalisations =
+			nameLocalisationsAll !== undefined ? toDiscordLocalisations(nameLocalisationsAll) : undefined;
 
-		const descriptionLocalisationsAll = localisations.get(`${key}.description`) ??
-			localisations.get(`parameters.${optionName}.description`);
+		const descriptionLocalisationsAll =
+			localisations.get(`${key}.description`) ?? localisations.get(`parameters.${optionName}.description`);
 		const description = descriptionLocalisationsAll?.get(defaultLanguage)?.({});
-		const descriptionLocalisations = descriptionLocalisationsAll !== undefined
-			? toDiscordLocalisations(descriptionLocalisationsAll)
-			: undefined;
+		const descriptionLocalisations =
+			descriptionLocalisationsAll !== undefined ? toDiscordLocalisations(descriptionLocalisationsAll) : undefined;
 
 		return {
 			nameLocalizations: nameLocalisations ?? {},
-			description: description ?? localisations.get('noDescription')?.get(defaultLanguage)?.({}) ?? 'No description.',
+			description: description ?? localisations.get("noDescription")?.get(defaultLanguage)?.({}) ?? "No description.",
 			descriptionLocalizations: descriptionLocalisations ?? {},
 		};
 	}
@@ -527,21 +509,21 @@ function localiseCommands(localisations: Client['localisations'], commandTemplat
 		const command: Command = { ...localisations, ...commandTemplate, options: [] };
 
 		for (const optionTemplate of commandTemplate.options ?? []) {
-			const optionKey = [commandKey, 'options', optionTemplate.name].join('.');
+			const optionKey = [commandKey, "options", optionTemplate.name].join(".");
 			const localisations = localiseCommandOrOption(optionKey);
 			if (localisations === undefined) continue;
 
 			const option: Option = { ...localisations, ...optionTemplate, options: [] };
 
 			for (const subOptionTemplate of optionTemplate.options ?? []) {
-				const subOptionKey = [optionKey, 'options', subOptionTemplate.name].join('.');
+				const subOptionKey = [optionKey, "options", subOptionTemplate.name].join(".");
 				const localisations = localiseCommandOrOption(subOptionKey);
 				if (localisations === undefined) continue;
 
 				const subOption: Option = { ...localisations, ...subOptionTemplate, options: [] };
 
 				for (const subSubOptionTemplate of subOptionTemplate.options ?? []) {
-					const subSubOptionKey = [subOptionKey, 'options', subSubOptionTemplate.name].join('.');
+					const subSubOptionKey = [subOptionKey, "options", subSubOptionTemplate.name].join(".");
 					const localisations = localiseCommandOrOption(subSubOptionKey);
 					if (localisations === undefined) continue;
 
@@ -562,16 +544,13 @@ function localiseCommands(localisations: Client['localisations'], commandTemplat
 	return commands;
 }
 
-function createCommandHandlers(commands: CommandTemplate[]): Client['commands']['handlers'] {
+function createCommandHandlers(commands: CommandTemplate[]): Client["commands"]["handlers"] {
 	const handlers = new Map<string, InteractionHandler>();
 	const autocompleteHandlers = new Map<string, InteractionHandler>();
 
 	for (const command of commands) {
 		if (command.handle !== undefined) {
-			handlers.set(
-				command.name,
-				command.isRateLimited ? withRateLimiting(command.handle) : command.handle,
-			);
+			handlers.set(command.name, command.isRateLimited ? withRateLimiting(command.handle) : command.handle);
 		}
 
 		if (command.handleAutocomplete !== undefined) {
@@ -640,43 +619,33 @@ function startServices([client, bot]: [Client, Bot]): void {
 }
 
 function setupLavalinkNode([client, bot]: [Client, Bot]): void {
-	client.features.music.node.on(
-		'connect',
-		(timeTakenMs) => client.log.info(`Connected to Lavalink node. Time taken: ${timeTakenMs}ms`),
+	client.features.music.node.on("connect", ({ took: tookMs }) =>
+		client.log.info(`Connected to Lavalink node. Time taken: ${tookMs} ms`),
 	);
 
-	client.features.music.node.on(
-		'error',
-		(error) => {
-			if (error.name === 'ConnectionRefused') return;
+	client.features.music.node.on("error", (error) => {
+		if (error.name === "ConnectionRefused") return;
 
-			client.log.error(`The Lavalink node has encountered an error:\n${error}`);
-		},
-	);
+		client.log.error(`The Lavalink node has encountered an error:\n${error}`);
+	});
 
-	client.features.music.node.on(
-		'disconnect',
-		async ({ code, reason }) => {
-			if (code === -1) {
-				client.log.warn(`Unable to connect to Lavalink node. Retrying in 5 seconds...`);
-				await new Promise((resolve) => setTimeout(resolve, 5000));
-				return connectToLavalinkNode([client, bot]);
-			}
-
-			client.log.info(
-				`Disconnected from the Lavalink node. Code ${code}, reason: ${reason}\n` +
-					'Attempting to reconnect...',
-			);
-
+	client.features.music.node.on("disconnect", async ({ code, reason }) => {
+		if (code === -1) {
+			client.log.warn("Unable to connect to Lavalink node. Retrying in 5 seconds...");
+			await new Promise((resolve) => setTimeout(resolve, 5000));
 			return connectToLavalinkNode([client, bot]);
-		},
-	);
+		}
+
+		client.log.info(`Disconnected from the Lavalink node. Code ${code}, reason: ${reason}\nAttempting to reconnect...`);
+
+		return connectToLavalinkNode([client, bot]);
+	});
 
 	connectToLavalinkNode([client, bot]);
 }
 
 function connectToLavalinkNode([client, bot]: [Client, Bot]): void {
-	client.log.info('Connecting to Lavalink node...');
+	client.log.info("Connecting to Lavalink node...");
 
 	return client.features.music.node.connect(bot.id.toString());
 }
@@ -769,7 +738,7 @@ function resolveIdentifierToMembers(
 
 	const moderatorRoleIds = guild.roles
 		.array()
-		.filter((role) => calculatePermissions(role.permissions).includes('MODERATE_MEMBERS'))
+		.filter((role) => calculatePermissions(role.permissions).includes("MODERATE_MEMBERS"))
 		.map((role) => role.id);
 	if (moderatorRoleIds.length === 0) return undefined;
 
@@ -787,9 +756,10 @@ function resolveIdentifierToMembers(
 	}
 
 	const cachedMembers = options.restrictToSelf ? [asker] : guild.members.array();
-	const members = cachedMembers.filter((member: Member) =>
-		(!options.restrictToNonSelf ? true : member.user?.id !== asker.user?.id) &&
-		(!options.excludeModerators ? true : !moderatorRoleIds.some((roleId) => member.roles.includes(roleId)))
+	const members = cachedMembers.filter(
+		(member: Member) =>
+			(!options.restrictToNonSelf ? true : member.user?.id !== asker.user?.id) &&
+			(!options.excludeModerators ? true : !moderatorRoleIds.some((roleId) => member.roles.includes(roleId))),
 	);
 
 	if (userTagPattern.test(identifier)) {
@@ -828,13 +798,10 @@ function autocompleteMembers(
 	return void respond(
 		[client, bot],
 		interaction,
-		matchedMembers.slice(0, 20)
-			.map(
-				(member) => ({
-					name: diagnosticMentionUser(member.user!),
-					value: member.id.toString(),
-				}),
-			),
+		matchedMembers.slice(0, 20).map((member) => ({
+			name: diagnosticMentionUser(member.user!),
+			value: member.id.toString(),
+		})),
 	);
 }
 
@@ -852,16 +819,18 @@ function resolveInteractionToMember(
 
 	if (matchedMembers.length === 0) {
 		const strings = {
-			title: localise(client, 'interactions.invalidUser.title', interaction.locale)(),
-			description: localise(client, 'interactions.invalidUser.description', interaction.locale)(),
+			title: localise(client, "interactions.invalidUser.title", interaction.locale)(),
+			description: localise(client, "interactions.invalidUser.description", interaction.locale)(),
 		};
 
 		reply([client, bot], interaction, {
-			embeds: [{
-				title: strings.title,
-				description: strings.description,
-				color: constants.colors.red,
-			}],
+			embeds: [
+				{
+					title: strings.title,
+					description: strings.description,
+					color: constants.colors.red,
+				},
+			],
 		});
 
 		return undefined;
@@ -880,15 +849,15 @@ function extendEventHandler<Event extends keyof EventHandlers, Handler extends E
 
 	const handler = events[eventName] as (...args: Parameters<Handler>) => unknown;
 	events[eventName] = (
-		(prepend || !append)
+		prepend || !append
 			? (...args: Parameters<Handler>) => {
-				extension(...args);
-				handler(...args);
-			}
+					extension(...args);
+					handler(...args);
+			  }
 			: (...args: Parameters<Handler>) => {
-				handler(...args);
-				extension(...args);
-			}
+					handler(...args);
+					extension(...args);
+			  }
 	) as Handler;
 }
 
@@ -900,12 +869,12 @@ function isSubcommand(option: InteractionDataOption): boolean {
 	return option.type === ApplicationCommandOptionTypes.SubCommand;
 }
 
-type CompiledLocalisation = ReturnType<typeof MessagePipe>['compile'];
+type CompiledLocalisation = ReturnType<typeof MessagePipe.MessagePipe>["compile"];
 
-function createLocalisations(localisations: Map<string, Map<Language, string>>): Client['localisations'] {
+function createLocalisations(localisations: Map<string, Map<Language, string>>): Client["localisations"] {
 	const localisedCompilers = new Map<Language, CompiledLocalisation>();
 	for (const [language, transformers] of Object.entries(localisationTransformers)) {
-		localisedCompilers.set(language as Language, MessagePipe(transformers).compile);
+		localisedCompilers.set(language as Language, MessagePipe.MessagePipe(transformers).compile);
 	}
 
 	const result = new Map<string, Map<Language, (args: Record<string, unknown>) => string>>();
@@ -926,17 +895,17 @@ function createLocalisations(localisations: Map<string, Map<Language, string>>):
 function localise(client: Client, key: string, locale: string | undefined): (args?: Record<string, unknown>) => string {
 	const language = (locale !== undefined ? getLanguageByLocale(locale as Locales) : undefined) ?? defaultLanguage;
 
-	const getLocalisation = client.localisations.get(key)?.get(language) ??
-		client.localisations.get(key)?.get(defaultLanguage) ?? (() => key);
+	const getLocalisation =
+		client.localisations.get(key)?.get(language) ?? client.localisations.get(key)?.get(defaultLanguage) ?? (() => key);
 
-	return ((args) => {
+	return (args) => {
 		const string = getLocalisation(args ?? {});
 		if (language !== defaultLanguage && string.trim().length === 0) {
 			return localise(client, key, undefined)(args ?? {});
 		}
 
 		return string;
-	});
+	};
 }
 
 function toDiscordLocalisations(

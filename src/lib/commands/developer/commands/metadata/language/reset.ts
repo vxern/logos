@@ -1,7 +1,7 @@
-import { Bot, Interaction } from 'discordeno';
-import { Client, getImplicitLanguage } from 'logos/src/lib/client.ts';
-import { reply } from 'logos/src/lib/interactions.ts';
-import constants from 'logos/src/constants.ts';
+import { Bot, Interaction } from "discordeno";
+import { Client, getImplicitLanguage } from "../../../../../client.js";
+import { reply } from "../../../../../interactions.js";
+import constants from "../../../../../../constants.js";
 
 function handleResetLanguage([client, bot]: [Client, Bot], interaction: Interaction): void {
 	const guild = client.cache.guilds.get(interaction.guildId!);
@@ -11,11 +11,13 @@ function handleResetLanguage([client, bot]: [Client, Bot], interaction: Interact
 	guild.language = language;
 
 	return void reply([client, bot], interaction, {
-		embeds: [{
-			title: 'Server language reset',
-			description: `The server language has been reset to ${language}.`,
-			color: constants.colors.lightGreen,
-		}],
+		embeds: [
+			{
+				title: "Server language reset",
+				description: `The server language has been reset to ${language}.`,
+				color: constants.colors.lightGreen,
+			},
+		],
 	});
 }
 

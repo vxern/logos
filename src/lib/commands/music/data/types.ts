@@ -1,4 +1,4 @@
-import constants from 'logos/src/constants.ts';
+import constants from "../../../../constants.js";
 
 /** Represents a musical piece, playable singly by the music controller. */
 interface Song {
@@ -33,9 +33,9 @@ interface SongCollection {
 }
 
 enum SongListingContentTypes {
-	Song,
-	File,
-	Collection,
+	Song = "song",
+	File = "file",
+	Collection = "collection",
 }
 
 /**

@@ -1,6 +1,6 @@
-import { LogEntry } from 'logos/src/lib/controllers/logging/log-entry.ts';
-import client, { ClientEvents } from 'logos/src/lib/controllers/logging/generators/client.ts';
-import guild, { GuildEvents } from 'logos/src/lib/controllers/logging/generators/guild.ts';
+import client, { ClientEvents } from "./client.js";
+import guild, { GuildEvents } from "./guild.js";
+import { LogEntry } from "../log-entry.js";
 
 type Events = ClientEvents & GuildEvents;
 
@@ -8,9 +8,7 @@ type Events = ClientEvents & GuildEvents;
  * Represents a list of supported log message generators for various client
  * and guild events.
  */
-type MessageGenerators<E extends ClientEvents | GuildEvents = Events> = Partial<
-	{ [key in keyof E]: LogEntry<E, key> }
->;
+type MessageGenerators<E extends ClientEvents | GuildEvents = Events> = Partial<{ [key in keyof E]: LogEntry<E, key> }>;
 
 /**
  * Represents the full collection of message generators for both the client and

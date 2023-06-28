@@ -1,4 +1,4 @@
-import { Reference } from 'logos/src/lib/database/document.ts';
+import { Reference } from "../document.js";
 
 /** Represents a praise given by a user to another user. */
 interface Praise {

@@ -1,27 +1,21 @@
-import * as Fauna from 'fauna';
-import { Praise } from 'logos/src/lib/database/structs/mod.ts';
-import {
-	CacheAdapter,
-	DatabaseAdapters,
-	dispatchQuery,
-	setNested,
-	stringifyValue,
-} from 'logos/src/lib/database/database.ts';
-import { Document } from 'logos/src/lib/database/document.ts';
-import { PraiseIndexes, praiseIndexParameterToIndex } from 'logos/src/lib/database/indexes.ts';
+import Fauna from "fauna";
+import { Praise } from "../structs/praise.js";
+import { CacheAdapter, DatabaseAdapters, dispatchQuery, setNested, stringifyValue } from "../database.js";
+import { Document } from "../document.js";
+import { PraiseIndexes, praiseIndexParameterToIndex } from "../indexes.js";
 
 const $ = Fauna.query;
 
 const cache: CacheAdapter<Praise, PraiseIndexes<Map<string, Document<Praise>>>> = {
 	has: (client, parameter, value) => {
-		if (parameter === 'sender') {
+		if (parameter === "sender") {
 			return client.database.cache.praisesBySender.has(value);
 		}
 
 		return client.database.cache.praisesByRecipient.has(value);
 	},
 	get: (client, parameter, value) => {
-		if (parameter === 'sender') {
+		if (parameter === "sender") {
 			return client.database.cache.praisesBySender.get(value);
 		}
 
@@ -30,7 +24,7 @@ const cache: CacheAdapter<Praise, PraiseIndexes<Map<string, Document<Praise>>>> 
 	set: (client, parameter, value, praise) => {
 		const praiseReferenceId = stringifyValue(praise.ref);
 
-		if (parameter === 'sender') {
+		if (parameter === "sender") {
 			return setNested(client.database.cache.praisesBySender, value, praiseReferenceId, praise);
 		}
 
@@ -38,7 +32,7 @@ const cache: CacheAdapter<Praise, PraiseIndexes<Map<string, Document<Praise>>>> 
 	},
 	setAll: (client, parameter, value, praises) => {
 		if (praises.length === 0) {
-			if (parameter === 'sender') {
+			if (parameter === "sender") {
 				client.database.cache.praisesBySender.set(value, new Map());
 			} else {
 				client.database.cache.praisesByRecipient.set(value, new Map());
@@ -52,7 +46,7 @@ const cache: CacheAdapter<Praise, PraiseIndexes<Map<string, Document<Praise>>>> 
 	},
 };
 
-const adapter: DatabaseAdapters['praises'] = {
+const adapter: DatabaseAdapters["praises"] = {
 	fetch: async (client, parameter, parameterValue) => {
 		const index = praiseIndexParameterToIndex[parameter];
 		const value = stringifyValue(parameterValue);
@@ -64,10 +58,7 @@ const adapter: DatabaseAdapters['praises'] = {
 
 		const promise = dispatchQuery<Praise[]>(
 			client,
-			$.Map(
-				$.Paginate($.Match($.FaunaIndex(index), parameterValue as Fauna.ExprArg)),
-				$.Lambda('praise', $.Get($.Var('praise'))),
-			),
+			$.Map($.Paginate($.Match($.Index(index), parameterValue)), $.Lambda("praise", $.Get($.Var("praise")))),
 		);
 		client.database.fetchPromises.praises[parameter].set(value, promise);
 
@@ -88,13 +79,10 @@ const adapter: DatabaseAdapters['praises'] = {
 	getOrFetch: async (client, parameter, parameterValue) => {
 		const value = stringifyValue(parameterValue);
 
-		return cache.get(client, parameter, value) ?? await adapter.fetch(client, parameter, parameterValue);
+		return cache.get(client, parameter, value) ?? (await adapter.fetch(client, parameter, parameterValue));
 	},
 	create: async (client, praise) => {
-		const document = await dispatchQuery<Praise>(
-			client,
-			$.Create($.Collection('Praises'), { data: praise }),
-		);
+		const document = await dispatchQuery<Praise>(client, $.Create($.Collection("Praises"), { data: praise }));
 
 		const senderReferenceId = stringifyValue(praise.sender);
 		const recipientReferenceId = stringifyValue(praise.recipient);
@@ -107,20 +95,20 @@ const adapter: DatabaseAdapters['praises'] = {
 		}
 
 		const promises = [];
-		if (!cache.has(client, 'sender', senderReferenceId)) {
+		if (!cache.has(client, "sender", senderReferenceId)) {
 			client.log.debug(`Could not find praises for sender with reference ${senderReferenceId}, fetching...`);
 
-			promises.push(adapter.fetch(client, 'sender', praise.sender));
+			promises.push(adapter.fetch(client, "sender", praise.sender));
 		} else {
-			cache.set(client, 'sender', senderReferenceId, document);
+			cache.set(client, "sender", senderReferenceId, document);
 		}
 
-		if (!cache.has(client, 'recipient', recipientReferenceId)) {
+		if (!cache.has(client, "recipient", recipientReferenceId)) {
 			client.log.debug(`Could not find praises for recipient with reference ${recipientReferenceId}, fetching...`);
 
-			promises.push(adapter.fetch(client, 'recipient', praise.recipient));
+			promises.push(adapter.fetch(client, "recipient", praise.recipient));
 		} else {
-			cache.set(client, 'recipient', recipientReferenceId, document);
+			cache.set(client, "recipient", recipientReferenceId, document);
 		}
 		await Promise.all(promises);
 

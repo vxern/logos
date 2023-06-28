@@ -1,6 +1,6 @@
-import { Bot, Embed, Guild, Interaction, sendMessage, VoiceState } from 'discordeno';
-import * as Events from 'events';
-import * as Lavaclient from 'lavaclient';
+import { EventEmitter } from "events";
+import { Bot, Embed, Guild, Interaction, sendMessage, VoiceState } from "discordeno";
+import * as Lavaclient from "lavaclient";
 import {
 	listingTypeToEmoji,
 	Song,
@@ -8,13 +8,13 @@ import {
 	SongListing,
 	SongListingContentTypes,
 	SongStream,
-} from 'logos/src/lib/commands/music/data/types.ts';
-import { Client, localise } from 'logos/src/lib/client.ts';
-import { reply } from 'logos/src/lib/interactions.ts';
-import configuration from 'logos/src/configuration.ts';
-import constants from 'logos/src/constants.ts';
-import { mention, MentionTypes } from 'logos/src/formatting.ts';
-import { defaultLocale } from 'logos/src/types.ts';
+} from "../commands/music/data/types.js";
+import { Client, localise } from "../client.js";
+import { reply } from "../interactions.js";
+import configuration from "../../configuration.js";
+import constants from "../../constants.js";
+import { mention, MentionTypes } from "../../formatting.js";
+import { defaultLocale } from "../../types.js";
 
 function setupMusicController(client: Client, guildId: bigint): void {
 	client.features.music.controllers.set(guildId, createMusicController(client, guildId));
@@ -22,12 +22,10 @@ function setupMusicController(client: Client, guildId: bigint): void {
 
 const disconnectTimeoutIdByGuildId = new Map<bigint, number>();
 
-type MusicEvents = { queueUpdate: []; historyUpdate: []; stop: [] };
-
 interface MusicController {
 	readonly player: Lavaclient.Player;
 
-	readonly events: Events.EventEmitter<MusicEvents>;
+	readonly events: EventEmitter;
 
 	voiceChannelId: bigint | undefined;
 	feedbackChannelId: bigint | undefined;
@@ -52,7 +50,7 @@ function createMusicController(client: Client, guildId: bigint): MusicController
 
 	return {
 		player,
-		events: new Events.EventEmitter(),
+		events: new EventEmitter(),
 		voiceChannelId: undefined,
 		feedbackChannelId: undefined,
 		listingHistory: [],
@@ -104,7 +102,7 @@ function getVoiceState(client: Client, guildId: bigint, userId: bigint): VoiceSt
 	return voiceState;
 }
 
-type MusicAction = 'manage' | 'check';
+type MusicAction = "manage" | "check";
 
 function verifyVoiceState(
 	[client, bot]: [Client, Bot],
@@ -115,19 +113,21 @@ function verifyVoiceState(
 ): boolean {
 	if (voiceState === undefined || voiceState.channelId === undefined) {
 		const strings = {
-			title: localise(client, 'music.strings.notInVc.title', interaction.locale)(),
+			title: localise(client, "music.strings.notInVc.title", interaction.locale)(),
 			description: {
-				toManage: localise(client, 'music.strings.notInVc.description.toManage', interaction.locale)(),
-				toCheck: localise(client, 'music.strings.notInVc.description.toCheck', interaction.locale)(),
+				toManage: localise(client, "music.strings.notInVc.description.toManage", interaction.locale)(),
+				toCheck: localise(client, "music.strings.notInVc.description.toCheck", interaction.locale)(),
 			},
 		};
 
 		reply([client, bot], interaction, {
-			embeds: [{
-				title: strings.title,
-				description: action === 'manage' ? strings.description.toManage : strings.description.toCheck,
-				color: constants.colors.dullYellow,
-			}],
+			embeds: [
+				{
+					title: strings.title,
+					description: action === "manage" ? strings.description.toManage : strings.description.toCheck,
+					color: constants.colors.dullYellow,
+				},
+			],
 		});
 
 		return false;
@@ -135,16 +135,18 @@ function verifyVoiceState(
 
 	if (isOccupied(controller.player) && voiceState.channelId !== controller.voiceChannelId) {
 		const strings = {
-			title: localise(client, 'music.options.play.strings.inDifferentVc.title', interaction.locale)(),
-			description: localise(client, 'music.options.play.strings.inDifferentVc.description', interaction.locale)(),
+			title: localise(client, "music.options.play.strings.inDifferentVc.title", interaction.locale)(),
+			description: localise(client, "music.options.play.strings.inDifferentVc.description", interaction.locale)(),
 		};
 
 		reply([client, bot], interaction, {
-			embeds: [{
-				title: strings.title,
-				description: strings.description,
-				color: constants.colors.dullYellow,
-			}],
+			embeds: [
+				{
+					title: strings.title,
+					description: strings.description,
+					color: constants.colors.dullYellow,
+				},
+			],
 		});
 
 		return false;
@@ -159,21 +161,23 @@ function verifyCanRequestPlayback(
 	controller: MusicController,
 	voiceState: VoiceState | undefined,
 ): boolean {
-	const isVoiceStateVerified = verifyVoiceState([client, bot], interaction, controller, voiceState, 'manage');
+	const isVoiceStateVerified = verifyVoiceState([client, bot], interaction, controller, voiceState, "manage");
 	if (!isVoiceStateVerified) return false;
 
 	if (!isQueueVacant(controller.listingQueue)) {
 		const strings = {
-			title: localise(client, 'music.options.play.strings.queueFull.title', interaction.locale)(),
-			description: localise(client, 'music.options.play.strings.queueFull.description', interaction.locale)(),
+			title: localise(client, "music.options.play.strings.queueFull.title", interaction.locale)(),
+			description: localise(client, "music.options.play.strings.queueFull.description", interaction.locale)(),
 		};
 
 		reply([client, bot], interaction, {
-			embeds: [{
-				title: strings.title,
-				description: strings.description,
-				color: constants.colors.dullYellow,
-			}],
+			embeds: [
+				{
+					title: strings.title,
+					description: strings.description,
+					color: constants.colors.dullYellow,
+				},
+			],
 		});
 
 		return false;
@@ -188,21 +192,23 @@ function verifyCanManagePlayback(
 	controller: MusicController,
 	voiceState: VoiceState | undefined,
 ): boolean {
-	const isVoiceStateVerified = verifyVoiceState([client, bot], interaction, controller, voiceState, 'manage');
+	const isVoiceStateVerified = verifyVoiceState([client, bot], interaction, controller, voiceState, "manage");
 	if (!isVoiceStateVerified) return false;
 
 	if (controller.currentListing !== undefined && !controller.currentListing.managerIds.includes(interaction.user.id)) {
 		const strings = {
-			title: localise(client, 'music.strings.cannotChange.title', interaction.locale)(),
-			description: localise(client, 'music.strings.cannotChange.description', interaction.locale)(),
+			title: localise(client, "music.strings.cannotChange.title", interaction.locale)(),
+			description: localise(client, "music.strings.cannotChange.description", interaction.locale)(),
 		};
 
 		reply([client, bot], interaction, {
-			embeds: [{
-				title: strings.title,
-				description: strings.description,
-				color: constants.colors.dullYellow,
-			}],
+			embeds: [
+				{
+					title: strings.title,
+					description: strings.description,
+					color: constants.colors.dullYellow,
+				},
+			],
 		});
 
 		return false;
@@ -222,7 +228,7 @@ function moveListingToHistory(controller: MusicController, listing: SongListing)
 	}
 
 	controller.listingHistory.push(listing);
-	controller.events.emit('historyUpdate');
+	controller.events.emit("historyUpdate");
 }
 
 function tryClearDisconnectTimeout(guildId: bigint): void {
@@ -236,7 +242,7 @@ function tryClearDisconnectTimeout(guildId: bigint): void {
 function setDisconnectTimeout(client: Client, guildId: bigint): void {
 	disconnectTimeoutIdByGuildId.set(
 		guildId,
-		setTimeout(() => reset(client, guildId), configuration.music.disconnectTimeout),
+		+setTimeout(() => reset(client, guildId), configuration.music.disconnectTimeout),
 	);
 }
 
@@ -258,7 +264,7 @@ function receiveNewListing(
 	tryClearDisconnectTimeout(guild.id);
 
 	controller.listingQueue.push(listing);
-	controller.events.emit('queueUpdate');
+	controller.events.emit("queueUpdate");
 
 	const voiceStates = getVoiceStatesForChannel(guild, voiceChannelId);
 	const managerIds = voiceStates.map((voiceState) => voiceState.userId);
@@ -274,13 +280,15 @@ function receiveNewListing(
 	}
 
 	const strings = {
-		title: localise(client, 'music.options.play.strings.queued.title', defaultLocale)(),
-		description: localise(client, 'music.options.play.strings.queued.description.public', defaultLocale)(
-			{
-				'title': listing.content.title,
-				'user_mention': mention(listing.requestedBy, MentionTypes.User),
-			},
-		),
+		title: localise(client, "music.options.play.strings.queued.title", defaultLocale)(),
+		description: localise(
+			client,
+			"music.options.play.strings.queued.description.public",
+			defaultLocale,
+		)({
+			title: listing.content.title,
+			user_mention: mention(listing.requestedBy, MentionTypes.User),
+		}),
 	};
 
 	const embed: Embed = {
@@ -290,8 +298,9 @@ function receiveNewListing(
 	};
 
 	if (isOccupied(controller.player)) {
-		return void sendMessage(bot, controller.feedbackChannelId!, { embeds: [embed] })
-			.catch(() => client.log.warn('Failed to send music feedback message.'));
+		return void sendMessage(bot, controller.feedbackChannelId!, { embeds: [embed] }).catch(() =>
+			client.log.warn("Failed to send music feedback message."),
+		);
 	}
 
 	return advanceQueueAndPlay([client, bot], guild.id, controller);
@@ -327,7 +336,7 @@ function advanceQueueAndPlay([client, bot]: [Client, Bot], guildId: bigint, cont
 			(controller.currentListing === undefined || !isCollection(controller.currentListing.content))
 		) {
 			controller.currentListing = controller.listingQueue.shift();
-			controller.events.emit('queueUpdate');
+			controller.events.emit("queueUpdate");
 		}
 	}
 
@@ -338,7 +347,7 @@ function advanceQueueAndPlay([client, bot]: [Client, Bot], guildId: bigint, cont
 			} else {
 				moveListingToHistory(controller, controller.currentListing);
 				controller.currentListing = controller.listingQueue.shift();
-				controller.events.emit('queueUpdate');
+				controller.events.emit("queueUpdate");
 			}
 		} else {
 			if (controller.flags.loop.song) {
@@ -365,22 +374,28 @@ async function loadSong(
 ): Promise<boolean> {
 	const result = await controller.player.node.rest.loadTracks(song.url);
 
-	if (result.loadType === 'LOAD_FAILED' || result.loadType === 'NO_MATCHES') {
+	if (result.loadType === "LOAD_FAILED" || result.loadType === "NO_MATCHES") {
 		controller.flags.loop.song = false;
 
 		const strings = {
-			title: localise(client, 'music.options.play.strings.failedToLoad.title', defaultLocale)(),
-			description: localise(client, 'music.options.play.strings.failedToLoad.description', defaultLocale)({
-				'title': song.title,
+			title: localise(client, "music.options.play.strings.failedToLoad.title", defaultLocale)(),
+			description: localise(
+				client,
+				"music.options.play.strings.failedToLoad.description",
+				defaultLocale,
+			)({
+				title: song.title,
 			}),
 		};
 
 		sendMessage(bot, controller.feedbackChannelId!, {
-			embeds: [{
-				title: strings.title,
-				description: strings.description,
-				color: constants.colors.red,
-			}],
+			embeds: [
+				{
+					title: strings.title,
+					description: strings.description,
+					color: constants.colors.red,
+				},
+			],
 		});
 
 		advanceQueueAndPlay([client, bot], guildId, controller);
@@ -400,23 +415,29 @@ async function loadSong(
 		client.log.warn(`Failed to play track: ${error}`);
 
 		const strings = {
-			title: localise(client, 'music.options.play.strings.failedToPlay.title', defaultLocale)(),
-			description: localise(client, 'music.options.play.strings.failedToPlay.description', defaultLocale)({
-				'title': song.title,
+			title: localise(client, "music.options.play.strings.failedToPlay.title", defaultLocale)(),
+			description: localise(
+				client,
+				"music.options.play.strings.failedToPlay.description",
+				defaultLocale,
+			)({
+				title: song.title,
 			}),
 		};
 
 		sendMessage(bot, controller.feedbackChannelId!, {
-			embeds: [{
-				title: strings.title,
-				description: strings.description,
-				color: constants.colors.red,
-			}],
+			embeds: [
+				{
+					title: strings.title,
+					description: strings.description,
+					color: constants.colors.red,
+				},
+			],
 		});
 	};
 
 	const onTrackEnd = () => {
-		controller.player.off('trackException', onTrackException);
+		controller.player.off("trackException", onTrackException);
 
 		if (controller.flags.isDestroyed) {
 			setDisconnectTimeout(client, guildId);
@@ -431,44 +452,51 @@ async function loadSong(
 		advanceQueueAndPlay([client, bot], guildId, controller);
 	};
 
-	controller.player.once('trackException', onTrackException);
-	controller.player.once('trackEnd', onTrackEnd);
+	controller.player.once("trackException", onTrackException);
+	controller.player.once("trackEnd", onTrackEnd);
 
 	controller.player.play(track.track);
 
 	const emoji = listingTypeToEmoji[song.type];
 
 	const strings = {
-		title: localise(client, 'music.options.play.strings.nowPlaying.title.nowPlaying', defaultLocale)({
-			'listing_type': localise(client, localisationsBySongListingType[song.type], defaultLocale)(),
+		title: localise(
+			client,
+			"music.options.play.strings.nowPlaying.title.nowPlaying",
+			defaultLocale,
+		)({
+			listing_type: localise(client, localisationsBySongListingType[song.type], defaultLocale)(),
 		}),
 		description: {
-			nowPlaying: localise(client, 'music.options.play.strings.nowPlaying.description.nowPlaying', defaultLocale),
-			track: controller.currentListing?.content !== undefined && isCollection(controller.currentListing.content)
-				? localise(client, 'music.options.play.strings.nowPlaying.description.track', defaultLocale)(
-					{
-						'index': controller.currentListing.content.position + 1,
-						'number': controller.currentListing.content.songs.length,
-						'title': controller.currentListing.content.title,
-					},
-				)
-				: '',
+			nowPlaying: localise(client, "music.options.play.strings.nowPlaying.description.nowPlaying", defaultLocale),
+			track:
+				controller.currentListing?.content !== undefined && isCollection(controller.currentListing.content)
+					? localise(
+							client,
+							"music.options.play.strings.nowPlaying.description.track",
+							defaultLocale,
+					  )({
+							index: controller.currentListing.content.position + 1,
+							number: controller.currentListing.content.songs.length,
+							title: controller.currentListing.content.title,
+					  })
+					: "",
 		},
 	};
 
 	sendMessage(bot, controller.feedbackChannelId!, {
-		embeds: [{
-			title: `${emoji} ${strings.title}`,
-			description: strings.description.nowPlaying(
-				{
-					'song_information': strings.description.track,
-					'title': song.title,
-					'url': song.url,
-					'user_mention': mention(controller.currentListing!.requestedBy, MentionTypes.User),
-				},
-			),
-			color: constants.colors.blue,
-		}],
+		embeds: [
+			{
+				title: `${emoji} ${strings.title}`,
+				description: strings.description.nowPlaying({
+					song_information: strings.description.track,
+					title: song.title,
+					url: song.url,
+					user_mention: mention(controller.currentListing!.requestedBy, MentionTypes.User),
+				}),
+				color: constants.colors.blue,
+			},
+		],
 	});
 
 	return true;
@@ -505,7 +533,7 @@ function skip(controller: MusicController, skipCollection: boolean, { by, to }: 
 
 	const listingsToMoveToHistory = Math.min(by ?? to ?? 0, controller.listingQueue.length);
 
-	for (let _ = 0; _ < listingsToMoveToHistory; _++) {
+	for (const _ of Array(listingsToMoveToHistory).keys()) {
 		const listing = controller.listingQueue.shift();
 		if (listing !== undefined) {
 			moveListingToHistory(controller, listing);
@@ -513,7 +541,7 @@ function skip(controller: MusicController, skipCollection: boolean, { by, to }: 
 	}
 
 	if (listingsToMoveToHistory !== 0) {
-		controller.events.emit('queueUpdate');
+		controller.events.emit("queueUpdate");
 	}
 
 	return void controller.player.stop();
@@ -533,8 +561,8 @@ function unskip(
 
 				controller.listingQueue.unshift(controller.currentListing);
 				controller.listingQueue.unshift(controller.listingHistory.pop()!);
-				controller.events.emit('queueUpdate');
-				controller.events.emit('historyUpdate');
+				controller.events.emit("queueUpdate");
+				controller.events.emit("historyUpdate");
 				controller.currentListing = undefined;
 			} else {
 				controller.currentListing.content.position = -1;
@@ -561,17 +589,17 @@ function unskip(
 
 		if (controller.currentListing !== undefined) {
 			controller.listingQueue.unshift(controller.currentListing);
-			controller.events.emit('queueUpdate');
+			controller.events.emit("queueUpdate");
 			controller.currentListing = undefined;
 		}
 
-		for (let _ = 0; _ < listingsToMoveToQueue; _++) {
+		for (const _ of Array(listingsToMoveToQueue).keys()) {
 			controller.listingQueue.unshift(controller.listingHistory.pop()!);
 		}
 
 		if (listingsToMoveToQueue !== 0) {
-			controller.events.emit('queueUpdate');
-			controller.events.emit('historyUpdate');
+			controller.events.emit("queueUpdate");
+			controller.events.emit("historyUpdate");
 		}
 	}
 
@@ -607,11 +635,15 @@ function replay(
 	if (replayCollection) {
 		const previousLoopState = controller.flags.loop.collection;
 		controller.flags.loop.collection = true;
-		controller.player.once('trackStart', () => controller.flags.loop.collection = previousLoopState);
+		controller.player.once("trackStart", () => {
+			controller.flags.loop.collection = previousLoopState;
+		});
 	} else {
 		const previousLoopState = controller.flags.loop.song;
 		controller.flags.loop.song = true;
-		controller.player.once('trackStart', () => controller.flags.loop.song = previousLoopState);
+		controller.player.once("trackStart", () => {
+			controller.flags.loop.song = previousLoopState;
+		});
 	}
 
 	if (controller.currentListing?.content !== undefined && isCollection(controller.currentListing.content)) {
@@ -631,7 +663,7 @@ function reset(client: Client, guildId: bigint): void {
 	const controller = client.features.music.controllers.get(guildId);
 	if (controller !== undefined) {
 		controller.flags.isDestroyed = true;
-		controller.events.emit('stop');
+		controller.events.emit("stop");
 		controller.player.stop();
 		controller.player.pause(false);
 		controller.player.disconnect();
@@ -642,14 +674,14 @@ function reset(client: Client, guildId: bigint): void {
 
 function remove(controller: MusicController, index: number): SongListing | undefined {
 	const listing = controller.listingQueue.splice(index, 1)?.at(0);
-	controller.events.emit('queueUpdate');
+	controller.events.emit("queueUpdate");
 	return listing;
 }
 
 const localisationsBySongListingType = {
-	[SongListingContentTypes.Song]: 'music.options.play.strings.nowPlaying.title.type.song',
-	[SongListingContentTypes.File]: 'music.options.play.strings.nowPlaying.title.type.external',
-	[SongListingContentTypes.Collection]: 'music.options.play.strings.nowPlaying.title.type.songCollection',
+	[SongListingContentTypes.Song]: "music.options.play.strings.nowPlaying.title.type.song",
+	[SongListingContentTypes.File]: "music.options.play.strings.nowPlaying.title.type.external",
+	[SongListingContentTypes.Collection]: "music.options.play.strings.nowPlaying.title.type.songCollection",
 };
 
 export {

@@ -1,7 +1,7 @@
-import reports from 'logos/src/lib/services/prompts/managers/reports.ts';
-import suggestions from 'logos/src/lib/services/prompts/managers/suggestions.ts';
-import verification from 'logos/src/lib/services/prompts/managers/verification.ts';
-import { ServiceStarter } from 'logos/src/lib/services/services.ts';
+import reports from "./managers/reports.js";
+import suggestions from "./managers/suggestions.js";
+import verification from "./managers/verification.js";
+import { ServiceStarter } from "../services.js";
 
 const managers = [reports, suggestions, verification];
 

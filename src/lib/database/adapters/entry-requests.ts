@@ -1,18 +1,18 @@
-import * as Fauna from 'fauna';
-import { EntryRequest } from 'logos/src/lib/database/structs/mod.ts';
+import Fauna from "fauna";
+import { EntryRequest } from "../structs/entry-request.js";
 import {
 	CacheAdapter,
 	DatabaseAdapters,
 	dispatchQuery,
 	getUserMentionByReference,
 	stringifyValue,
-} from 'logos/src/lib/database/database.ts';
-import { Document } from 'logos/src/lib/database/document.ts';
-import { EntryRequestIndexes } from 'logos/src/lib/database/indexes.ts';
+} from "../database.js";
+import { Document } from "../document.js";
+import { EntryRequestIndexes } from "../indexes.js";
 
 const $ = Fauna.query;
 
-const cache: CacheAdapter<EntryRequest, EntryRequestIndexes<Document<EntryRequest>>, 'delete'> = {
+const cache: CacheAdapter<EntryRequest, EntryRequestIndexes<Document<EntryRequest>>, "delete"> = {
 	get: (client, _parameter, value) => {
 		return client.database.cache.entryRequestBySubmitterAndGuild.get(value);
 	},
@@ -24,17 +24,17 @@ const cache: CacheAdapter<EntryRequest, EntryRequestIndexes<Document<EntryReques
 	},
 };
 
-const adapter: DatabaseAdapters['entryRequests'] = {
+const adapter: DatabaseAdapters["entryRequests"] = {
 	prefetch: async (client) => {
 		const documents = await dispatchQuery<EntryRequest[]>(
 			client,
 			$.Map(
-				$.Paginate($.Documents($.Collection('EntryRequests'))),
-				$.Lambda('entryRequest', $.Get($.Var('entryRequest'))),
+				$.Paginate($.Documents($.Collection("EntryRequests"))),
+				$.Lambda("entryRequest", $.Get($.Var("entryRequest"))),
 			),
 		);
 		if (documents === undefined) {
-			client.log.error(`Failed to fetch all entry requests.`);
+			client.log.error("Failed to fetch all entry requests.");
 			return;
 		}
 
@@ -43,7 +43,7 @@ const adapter: DatabaseAdapters['entryRequests'] = {
 			const guildId = stringifyValue(document.data.guild);
 			const compositeId = `${submitterReferenceId}${guildId}`;
 
-			cache.set(client, 'submitterAndGuild', compositeId, document);
+			cache.set(client, "submitterAndGuild", compositeId, document);
 		}
 
 		client.log.debug(`Fetched ${documents.length} entry request(s).`);
@@ -59,7 +59,7 @@ const adapter: DatabaseAdapters['entryRequests'] = {
 	create: async (client, entryRequest) => {
 		const document = await dispatchQuery<EntryRequest>(
 			client,
-			$.Create($.Collection('EntryRequests'), { data: entryRequest }),
+			$.Create($.Collection("EntryRequests"), { data: entryRequest }),
 		);
 
 		const userMention = getUserMentionByReference(client, entryRequest.submitter);
@@ -74,7 +74,7 @@ const adapter: DatabaseAdapters['entryRequests'] = {
 
 		const compositeId = `${submitterReferenceId}${guildId}`;
 
-		cache.set(client, 'submitterAndGuild', compositeId, document);
+		cache.set(client, "submitterAndGuild", compositeId, document);
 
 		client.log.debug(`Created entry request for ${userMention} on guild with ID ${guildId}.`);
 
@@ -95,7 +95,7 @@ const adapter: DatabaseAdapters['entryRequests'] = {
 
 		const compositeId = `${submitterReferenceId}${guildId}`;
 
-		cache.set(client, 'submitterAndGuild', compositeId, document);
+		cache.set(client, "submitterAndGuild", compositeId, document);
 
 		client.log.debug(`Updated entry request for ${userMention} on guild with ID ${guildId}.`);
 

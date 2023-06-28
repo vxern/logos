@@ -1,25 +1,28 @@
-import { ApplicationCommandOptionTypes, ApplicationCommandTypes, Bot, Interaction } from 'discordeno';
-import { CommandTemplate } from 'logos/src/lib/commands/command.ts';
-import { user } from 'logos/src/lib/commands/parameters.ts';
-import { logEvent } from 'logos/src/lib/controllers/logging/logging.ts';
-import { Praise } from 'logos/src/lib/database/structs/mod.ts';
-import { autocompleteMembers, Client, localise, resolveInteractionToMember } from 'logos/src/lib/client.ts';
-import { editReply, parseArguments, postponeReply, reply } from 'logos/src/lib/interactions.ts';
-import { verifyIsWithinLimits } from 'logos/src/lib/utils.ts';
-import configuration from 'logos/src/configuration.ts';
-import constants from 'logos/src/constants.ts';
-import { mention, MentionTypes } from 'logos/src/formatting.ts';
+import { ApplicationCommandOptionTypes, ApplicationCommandTypes, Bot, Interaction } from "discordeno";
+import { CommandTemplate } from "../../command.js";
+import { user } from "../../parameters.js";
+import { logEvent } from "../../../controllers/logging/logging.js";
+import { Praise } from "../../../database/structs/praise.js";
+import { autocompleteMembers, Client, localise, resolveInteractionToMember } from "../../../client.js";
+import { editReply, parseArguments, postponeReply, reply } from "../../../interactions.js";
+import { verifyIsWithinLimits } from "../../../utils.js";
+import configuration from "../../../../configuration.js";
+import constants from "../../../../constants.js";
+import { mention, MentionTypes } from "../../../../formatting.js";
 
 const command: CommandTemplate = {
-	name: 'praise',
+	name: "praise",
 	type: ApplicationCommandTypes.ChatInput,
-	defaultMemberPermissions: ['VIEW_CHANNEL'],
+	defaultMemberPermissions: ["VIEW_CHANNEL"],
 	handle: handlePraiseUser,
 	handleAutocomplete: handlePraiseUserAutocomplete,
-	options: [user, {
-		name: 'comment',
-		type: ApplicationCommandOptionTypes.String,
-	}],
+	options: [
+		user,
+		{
+			name: "comment",
+			type: ApplicationCommandOptionTypes.String,
+		},
+	],
 };
 
 function handlePraiseUserAutocomplete([client, bot]: [Client, Bot], interaction: Interaction): void {
@@ -37,16 +40,18 @@ async function handlePraiseUser([client, bot]: [Client, Bot], interaction: Inter
 
 	if (member.id === interaction.member?.id) {
 		const strings = {
-			title: localise(client, 'praise.strings.cannotPraiseSelf.title', interaction.locale)(),
-			description: localise(client, 'praise.strings.cannotPraiseSelf.description', interaction.locale)(),
+			title: localise(client, "praise.strings.cannotPraiseSelf.title", interaction.locale)(),
+			description: localise(client, "praise.strings.cannotPraiseSelf.description", interaction.locale)(),
 		};
 
 		return void reply([client, bot], interaction, {
-			embeds: [{
-				title: strings.title,
-				description: strings.description,
-				color: constants.colors.dullYellow,
-			}],
+			embeds: [
+				{
+					title: strings.title,
+					description: strings.description,
+					color: constants.colors.dullYellow,
+				},
+			],
 		});
 	}
 
@@ -55,18 +60,18 @@ async function handlePraiseUser([client, bot]: [Client, Bot], interaction: Inter
 	const [author, subject] = await Promise.all([
 		client.database.adapters.users.getOrFetchOrCreate(
 			client,
-			'id',
+			"id",
 			interaction.user.id.toString(),
 			interaction.user.id,
 		),
-		client.database.adapters.users.getOrFetchOrCreate(client, 'id', member.id.toString(), member.id),
+		client.database.adapters.users.getOrFetchOrCreate(client, "id", member.id.toString(), member.id),
 	]);
 
 	if (author === undefined || subject === undefined) {
 		return showError([client, bot], interaction);
 	}
 
-	const praisesBySender = await client.database.adapters.praises.getOrFetch(client, 'sender', author.ref);
+	const praisesBySender = await client.database.adapters.praises.getOrFetch(client, "sender", author.ref);
 	if (praisesBySender === undefined) {
 		return showError([client, bot], interaction);
 	}
@@ -74,16 +79,18 @@ async function handlePraiseUser([client, bot]: [Client, Bot], interaction: Inter
 	const praises = Array.from(praisesBySender.values());
 	if (!verifyIsWithinLimits(praises, configuration.commands.praise.limitUses, configuration.commands.praise.within)) {
 		const strings = {
-			title: localise(client, 'praise.strings.tooMany.title', interaction.locale)(),
-			description: localise(client, 'praise.strings.tooMany.description', interaction.locale)(),
+			title: localise(client, "praise.strings.tooMany.title", interaction.locale)(),
+			description: localise(client, "praise.strings.tooMany.description", interaction.locale)(),
 		};
 
 		return void editReply([client, bot], interaction, {
-			embeds: [{
-				title: strings.title,
-				description: strings.description,
-				color: constants.colors.dullYellow,
-			}],
+			embeds: [
+				{
+					title: strings.title,
+					description: strings.description,
+					color: constants.colors.dullYellow,
+				},
+			],
 		});
 	}
 
@@ -102,36 +109,42 @@ async function handlePraiseUser([client, bot]: [Client, Bot], interaction: Inter
 		return showError([client, bot], interaction);
 	}
 
-	logEvent([client, bot], guild, 'praiseAdd', [member, praise, interaction.user]);
+	logEvent([client, bot], guild, "praiseAdd", [member, praise, interaction.user]);
 
 	const strings = {
-		title: localise(client, 'praise.strings.praised.title', interaction.locale)(),
-		description: localise(client, 'praise.strings.praised.description', interaction.locale)(
-			{ 'user_mention': mention(member.id, MentionTypes.User) },
-		),
+		title: localise(client, "praise.strings.praised.title", interaction.locale)(),
+		description: localise(
+			client,
+			"praise.strings.praised.description",
+			interaction.locale,
+		)({ user_mention: mention(member.id, MentionTypes.User) }),
 	};
 
 	return void editReply([client, bot], interaction, {
-		embeds: [{
-			title: strings.title,
-			description: strings.description,
-			color: constants.colors.lightGreen,
-		}],
+		embeds: [
+			{
+				title: strings.title,
+				description: strings.description,
+				color: constants.colors.lightGreen,
+			},
+		],
 	});
 }
 
 function showError([client, bot]: [Client, Bot], interaction: Interaction): void {
 	const strings = {
-		title: localise(client, 'praise.strings.failed.title', interaction.locale)(),
-		description: localise(client, 'praise.strings.failed.description', interaction.locale)(),
+		title: localise(client, "praise.strings.failed.title", interaction.locale)(),
+		description: localise(client, "praise.strings.failed.description", interaction.locale)(),
 	};
 
 	return void editReply([client, bot], interaction, {
-		embeds: [{
-			title: strings.title,
-			description: strings.description,
-			color: constants.colors.red,
-		}],
+		embeds: [
+			{
+				title: strings.title,
+				description: strings.description,
+				color: constants.colors.red,
+			},
+		],
 	});
 }
 

@@ -1,18 +1,18 @@
-import { MessagePipeTransformer } from 'messagepipe';
-import english from 'logos/src/lib/localisation/transformers/english.ts';
-import french from 'logos/src/lib/localisation/transformers/french.ts';
-import hungarian from 'logos/src/lib/localisation/transformers/hungarian.ts';
-import polish from 'logos/src/lib/localisation/transformers/polish.ts';
-import romanian from 'logos/src/lib/localisation/transformers/romanian.ts';
-import { Language } from 'logos/src/types.ts';
+import * as MessagePipe from "messagepipe";
+import english from "./transformers/english.js";
+import french from "./transformers/french.js";
+import hungarian from "./transformers/hungarian.js";
+import polish from "./transformers/polish.js";
+import romanian from "./transformers/romanian.js";
+import { Language } from "../../types.js";
 
-const transformers: Record<Language, Record<string, MessagePipeTransformer<string, string>>> = {
-	'Armenian': {},
-	'English': english,
-	'French': french,
-	'Hungarian': hungarian,
-	'Polish': polish,
-	'Romanian': romanian,
+const transformers: Record<Language, Record<string, MessagePipe.MessagePipeTransformer<string, string>>> = {
+	Armenian: {},
+	English: english,
+	French: french,
+	Hungarian: hungarian,
+	Polish: polish,
+	Romanian: romanian,
 };
 
 export default transformers;

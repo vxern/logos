@@ -1,5 +1,5 @@
-import * as Fauna from 'fauna';
-import { Warning } from 'logos/src/lib/database/structs/mod.ts';
+import Fauna from "fauna";
+import { Warning } from "../structs/warning.js";
 import {
 	CacheAdapter,
 	DatabaseAdapters,
@@ -7,13 +7,13 @@ import {
 	getUserMentionByReference,
 	setNested,
 	stringifyValue,
-} from 'logos/src/lib/database/database.ts';
-import { Document } from 'logos/src/lib/database/document.ts';
-import { WarningIndexes, warningIndexParameterToIndex } from 'logos/src/lib/database/indexes.ts';
+} from "../database.js";
+import { Document } from "../document.js";
+import { WarningIndexes, warningIndexParameterToIndex } from "../indexes.js";
 
 const $ = Fauna.query;
 
-const cache: CacheAdapter<Warning, WarningIndexes<Map<string, Document<Warning>>>, 'delete'> = {
+const cache: CacheAdapter<Warning, WarningIndexes<Map<string, Document<Warning>>>, "delete"> = {
 	has: (client, _parameter, value) => {
 		return client.database.cache.warningsByRecipient.has(value);
 	},
@@ -42,7 +42,7 @@ const cache: CacheAdapter<Warning, WarningIndexes<Map<string, Document<Warning>>
 	},
 };
 
-const adapter: DatabaseAdapters['warnings'] = {
+const adapter: DatabaseAdapters["warnings"] = {
 	fetch: async (client, parameter, parameterValue) => {
 		const index = warningIndexParameterToIndex[parameter];
 		const value = stringifyValue(parameterValue);
@@ -54,10 +54,7 @@ const adapter: DatabaseAdapters['warnings'] = {
 
 		const promise = dispatchQuery<Warning[]>(
 			client,
-			$.Map(
-				$.Paginate($.Match(index, parameterValue as Fauna.ExprArg)),
-				$.Lambda('warning', $.Get($.Var('warning'))),
-			),
+			$.Map($.Paginate($.Match(index, parameterValue)), $.Lambda("warning", $.Get($.Var("warning")))),
 		);
 		client.database.fetchPromises.warnings[parameter].set(value, promise);
 
@@ -78,13 +75,10 @@ const adapter: DatabaseAdapters['warnings'] = {
 	getOrFetch: async (client, parameter, parameterValue) => {
 		const value = stringifyValue(parameterValue);
 
-		return cache.get(client, parameter, value) ?? await adapter.fetch(client, parameter, parameterValue);
+		return cache.get(client, parameter, value) ?? (await adapter.fetch(client, parameter, parameterValue));
 	},
 	create: async (client, warning) => {
-		const document = await dispatchQuery<Warning>(
-			client,
-			$.Create($.Collection('Warnings'), { data: warning }),
-		);
+		const document = await dispatchQuery<Warning>(client, $.Create($.Collection("Warnings"), { data: warning }));
 
 		const userMention = getUserMentionByReference(client, warning.recipient);
 
@@ -96,12 +90,12 @@ const adapter: DatabaseAdapters['warnings'] = {
 		const recipientReferenceId = stringifyValue(warning.recipient);
 
 		const promises = [];
-		if (!cache.has(client, 'recipient', recipientReferenceId)) {
+		if (!cache.has(client, "recipient", recipientReferenceId)) {
 			client.log.debug(`Could not find warnings for recipient with reference ${recipientReferenceId}, fetching...`);
 
-			promises.push(adapter.fetch(client, 'recipient', warning.recipient));
+			promises.push(adapter.fetch(client, "recipient", warning.recipient));
 		} else {
-			cache.set(client, 'recipient', recipientReferenceId, document);
+			cache.set(client, "recipient", recipientReferenceId, document);
 		}
 		await Promise.all(promises);
 
@@ -121,7 +115,7 @@ const adapter: DatabaseAdapters['warnings'] = {
 
 		const recipientId = stringifyValue(warning.data.recipient);
 
-		cache.delete(client, 'recipient', recipientId, warning);
+		cache.delete(client, "recipient", recipientId, warning);
 
 		client.log.debug(`Deleted warning given to ${userMention}.`);
 

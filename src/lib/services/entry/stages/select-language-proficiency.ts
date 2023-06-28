@@ -1,11 +1,11 @@
-import { addRole, Bot, ButtonStyles, Interaction, MessageComponentTypes } from 'discordeno';
-import { proficiency } from 'logos/src/lib/commands/social/roles/categories/language.ts';
-import { EntryStepButtonID } from 'logos/src/lib/services/entry/entry.ts';
-import { Client, localise } from 'logos/src/lib/client.ts';
-import { encodeId, reply } from 'logos/src/lib/interactions.ts';
-import { snowflakeToTimestamp } from 'logos/src/lib/utils.ts';
-import configuration from 'logos/src/configuration.ts';
-import constants from 'logos/src/constants.ts';
+import { addRole, Bot, ButtonStyles, Interaction, MessageComponentTypes } from "discordeno";
+import { proficiency } from "../../../commands/social/roles/categories/language.js";
+import { EntryStepButtonID } from "../../../services/entry/entry.js";
+import { Client, localise } from "../../../client.js";
+import { encodeId, reply } from "../../../interactions.js";
+import { snowflakeToTimestamp } from "../../../utils.js";
+import configuration from "../../../../configuration.js";
+import constants from "../../../../constants.js";
 
 async function handleSelectLanguageProficiency(
 	[client, bot]: [Client, Bot],
@@ -25,14 +25,15 @@ async function handleSelectLanguageProficiency(
 	if (!canEnter) return;
 
 	const createdAt = snowflakeToTimestamp(interaction.user.id);
-	const meetsAccountAgeRequirement = (Date.now() - createdAt) >= configuration.services.entry.minimumRequiredAge;
+	const meetsAccountAgeRequirement = Date.now() - createdAt >= configuration.services.entry.minimumRequiredAge;
 
-	const requiresVerification = !configuration.services.entry.verification.disabledOn.includes(guildIdString) &&
-		!meetsAccountAgeRequirement;
+	const requiresVerification = !(
+		configuration.services.entry.verification.disabledOn.includes(guildIdString) || meetsAccountAgeRequirement
+	);
 	if (requiresVerification) {
 		const userDocument = await client.database.adapters.users.getOrFetchOrCreate(
 			client,
-			'id',
+			"id",
 			interaction.user.id.toString(),
 			interaction.user.id,
 		);
@@ -41,92 +42,105 @@ async function handleSelectLanguageProficiency(
 
 		if (!isVerified) {
 			const strings = {
-				title: localise(client, 'entry.verification.getVerified.title', interaction.locale)(),
+				title: localise(client, "entry.verification.getVerified.title", interaction.locale)(),
 				description: {
 					verificationRequired: localise(
 						client,
-						'entry.verification.getVerified.description.verificationRequired',
+						"entry.verification.getVerified.description.verificationRequired",
 						interaction.locale,
 					)({
-						'server_name': guild.name,
+						server_name: guild.name,
 					}),
 					honestAnswers: localise(
 						client,
-						'entry.verification.getVerified.description.honestAnswers',
+						"entry.verification.getVerified.description.honestAnswers",
 						interaction.locale,
 					)(),
-					understood: localise(client, 'entry.verification.getVerified.description.understood', interaction.locale)(),
+					understood: localise(client, "entry.verification.getVerified.description.understood", interaction.locale)(),
 				},
 			};
 
 			return void reply([client, bot], interaction, {
-				embeds: [{
-					title: strings.title,
-					description: `${strings.description.verificationRequired}\n\n${strings.description.honestAnswers}`,
-					color: constants.colors.blue,
-				}],
-				components: [{
-					type: MessageComponentTypes.ActionRow,
-					components: [{
-						type: MessageComponentTypes.Button,
-						style: ButtonStyles.Secondary,
-						label: strings.description.understood,
-						customId: encodeId<EntryStepButtonID>(constants.staticComponentIds.requestedVerification, [
-							role.id.toString(),
-						]),
-						emoji: { name: constants.symbols.understood },
-					}],
-				}],
+				embeds: [
+					{
+						title: strings.title,
+						description: `${strings.description.verificationRequired}\n\n${strings.description.honestAnswers}`,
+						color: constants.colors.blue,
+					},
+				],
+				components: [
+					{
+						type: MessageComponentTypes.ActionRow,
+						components: [
+							{
+								type: MessageComponentTypes.Button,
+								style: ButtonStyles.Secondary,
+								label: strings.description.understood,
+								customId: encodeId<EntryStepButtonID>(constants.staticComponentIds.requestedVerification, [
+									role.id.toString(),
+								]),
+								emoji: { name: constants.symbols.understood },
+							},
+						],
+					},
+				],
 			});
 		}
 	}
 
 	const strings = {
-		title: localise(client, 'entry.proficiency.receivedAccess.title', interaction.locale)(),
+		title: localise(client, "entry.proficiency.receivedAccess.title", interaction.locale)(),
 		description: {
-			nowMember: localise(client, 'entry.proficiency.receivedAccess.description.nowMember', interaction.locale)({
-				'server_name': guild.name,
+			nowMember: localise(
+				client,
+				"entry.proficiency.receivedAccess.description.nowMember",
+				interaction.locale,
+			)({
+				server_name: guild.name,
 			}),
-			toStart: localise(client, 'entry.proficiency.receivedAccess.description.toStart', interaction.locale)(),
+			toStart: localise(client, "entry.proficiency.receivedAccess.description.toStart", interaction.locale)(),
 		},
 	};
 
 	await reply([client, bot], interaction, {
-		embeds: [{
-			title: strings.title,
-			description:
-				`${constants.symbols.responses.celebration} ${strings.description.nowMember}\n\n${strings.description.toStart}`,
-			image: { url: constants.gifs.welcome },
-			color: constants.colors.lightGreen,
-		}],
+		embeds: [
+			{
+				title: strings.title,
+				description: `${constants.symbols.responses.celebration} ${strings.description.nowMember}\n\n${strings.description.toStart}`,
+				image: { url: constants.gifs.welcome },
+				color: constants.colors.lightGreen,
+			},
+		],
 	});
 
-	return void addRole(bot, guild.id, interaction.user.id, role.id, 'User-requested role addition.').catch(() =>
+	return void addRole(bot, guild.id, interaction.user.id, role.id, "User-requested role addition.").catch(() =>
 		client.log.warn(
 			`Failed to add role with ID ${role.id} to member with ID ${interaction.user.id} in guild with ID ${guild.id}.`,
-		)
+		),
 	);
 }
 
 async function vetUser([client, bot]: [Client, Bot], interaction: Interaction): Promise<boolean> {
 	const userDocument = await client.database.adapters.users.getOrFetchOrCreate(
 		client,
-		'id',
+		"id",
 		interaction.user.id.toString(),
 		interaction.user.id,
 	);
 	if (userDocument === undefined) {
 		const strings = {
-			title: localise(client, 'entry.verification.verifyingAccount.failed.title', interaction.locale)(),
-			description: localise(client, 'entry.verification.verifyingAccount.failed.description', interaction.locale)(),
+			title: localise(client, "entry.verification.verifyingAccount.failed.title", interaction.locale)(),
+			description: localise(client, "entry.verification.verifyingAccount.failed.description", interaction.locale)(),
 		};
 
 		reply([client, bot], interaction, {
-			embeds: [{
-				title: strings.title,
-				description: strings.description,
-				color: constants.colors.red,
-			}],
+			embeds: [
+				{
+					title: strings.title,
+					description: strings.description,
+					color: constants.colors.red,
+				},
+			],
 		});
 
 		client.log.error(
@@ -136,23 +150,25 @@ async function vetUser([client, bot]: [Client, Bot], interaction: Interaction): 
 		return false;
 	}
 
-	const entryRequest = client.database.adapters.entryRequests.get(client, 'submitterAndGuild', [
+	const entryRequest = client.database.adapters.entryRequests.get(client, "submitterAndGuild", [
 		userDocument.ref,
 		interaction.guildId!.toString(),
 	]);
 
 	if (entryRequest !== undefined && !entryRequest.data.isFinalised) {
 		const strings = {
-			title: localise(client, 'entry.verification.answers.alreadyAnswered.title', interaction.locale)(),
-			description: localise(client, 'entry.verification.answers.alreadyAnswered.description', interaction.locale)(),
+			title: localise(client, "entry.verification.answers.alreadyAnswered.title", interaction.locale)(),
+			description: localise(client, "entry.verification.answers.alreadyAnswered.description", interaction.locale)(),
 		};
 
 		reply([client, bot], interaction, {
-			embeds: [{
-				title: strings.title,
-				description: strings.description,
-				color: constants.colors.dullYellow,
-			}],
+			embeds: [
+				{
+					title: strings.title,
+					description: strings.description,
+					color: constants.colors.dullYellow,
+				},
+			],
 		});
 
 		return false;
@@ -161,16 +177,18 @@ async function vetUser([client, bot]: [Client, Bot], interaction: Interaction): 
 	if (userDocument.data.account.authorisedOn?.includes(interaction.guildId!.toString())) return true;
 	if (userDocument.data.account.rejectedOn?.includes(interaction.guildId!.toString())) {
 		const strings = {
-			title: localise(client, 'entry.verification.answers.rejectedBefore.title', interaction.locale)(),
-			description: localise(client, 'entry.verification.answers.rejectedBefore.description', interaction.locale)(),
+			title: localise(client, "entry.verification.answers.rejectedBefore.title", interaction.locale)(),
+			description: localise(client, "entry.verification.answers.rejectedBefore.description", interaction.locale)(),
 		};
 
 		reply([client, bot], interaction, {
-			embeds: [{
-				title: strings.title,
-				description: strings.description,
-				color: constants.colors.red,
-			}],
+			embeds: [
+				{
+					title: strings.title,
+					description: strings.description,
+					color: constants.colors.red,
+				},
+			],
 		});
 
 		return false;

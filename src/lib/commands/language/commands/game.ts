@@ -7,9 +7,9 @@ import {
 	InteractionCallbackData,
 	InteractionTypes,
 	MessageComponentTypes,
-} from 'discordeno';
-import { CommandTemplate } from 'logos/src/lib/commands/command.ts';
-import { Client, localise } from 'logos/src/lib/client.ts';
+} from "discordeno";
+import { CommandTemplate } from "../../command.js";
+import { Client, localise } from "../../../client.js";
 import {
 	acknowledge,
 	createInteractionCollector,
@@ -18,13 +18,13 @@ import {
 	encodeId,
 	postponeReply,
 	reply,
-} from 'logos/src/lib/interactions.ts';
-import constants from 'logos/src/constants.ts';
+} from "../../../interactions.js";
+import constants from "../../../../constants.js";
 
 const command: CommandTemplate = {
-	name: 'game',
+	name: "game",
 	type: ApplicationCommandTypes.ChatInput,
-	defaultMemberPermissions: ['VIEW_CHANNEL'],
+	defaultMemberPermissions: ["VIEW_CHANNEL"],
 	handle: handleStartGame,
 };
 
@@ -38,16 +38,18 @@ async function handleStartGame([client, bot]: [Client, Bot], interaction: Intera
 	const sentencePairs = client.features.sentencePairs.get(guild.language);
 	if (sentencePairs === undefined || sentencePairs.length === 0) {
 		const strings = {
-			title: localise(client, 'game.strings.noSentencesAvailable.title', interaction.locale)(),
-			description: localise(client, 'game.strings.noSentencesAvailable.description', interaction.locale)(),
+			title: localise(client, "game.strings.noSentencesAvailable.title", interaction.locale)(),
+			description: localise(client, "game.strings.noSentencesAvailable.description", interaction.locale)(),
 		};
 
 		return void reply([client, bot], interaction, {
-			embeds: [{
-				title: strings.title,
-				description: strings.description,
-				color: constants.colors.dullYellow,
-			}],
+			embeds: [
+				{
+					title: strings.title,
+					description: strings.description,
+					color: constants.colors.dullYellow,
+				},
+			],
 		});
 	}
 
@@ -105,32 +107,37 @@ function getGameView(
 	locale: string | undefined,
 ): InteractionCallbackData {
 	const strings = {
-		sentence: localise(client, 'game.strings.sentence', locale)(),
-		translation: localise(client, 'game.strings.translation', locale)(),
+		sentence: localise(client, "game.strings.sentence", locale)(),
+		translation: localise(client, "game.strings.translation", locale)(),
 	};
 
 	return {
-		embeds: [{
-			color: embedColor,
-			fields: [{
-				name: strings.sentence,
-				value: sentenceSelection.pair.sentence,
-			}, {
-				name: strings.translation,
-				value: sentenceSelection.pair.translation,
-			}],
-		}],
-		components: [{
-			type: MessageComponentTypes.ActionRow,
-			components: sentenceSelection.choices.map(
-				(choice, index) => ({
+		embeds: [
+			{
+				color: embedColor,
+				fields: [
+					{
+						name: strings.sentence,
+						value: sentenceSelection.pair.sentence,
+					},
+					{
+						name: strings.translation,
+						value: sentenceSelection.pair.translation,
+					},
+				],
+			},
+		],
+		components: [
+			{
+				type: MessageComponentTypes.ActionRow,
+				components: sentenceSelection.choices.map((choice, index) => ({
 					type: MessageComponentTypes.Button,
 					style: ButtonStyles.Success,
 					label: choice,
 					customId: encodeId<WordButtonID>(customId, [index.toString()]),
-				}),
-			) as [ButtonComponent],
-		}],
+				})) as [ButtonComponent],
+			},
+		],
 	};
 }
 
@@ -178,15 +185,15 @@ function createSentenceSelection(sentencePairs: SentencePair[]): SentenceSelecti
 
 	const indexes = Array.from({ length: 4 }, () => random(sentencePairs.length));
 	const pair = sentencePairs.at(indexes.shift()!)!;
-	const words = pair.sentence.split(' ');
+	const words = pair.sentence.split(" ");
 	const wordIndex = random(words.length);
 	const word = words.at(wordIndex)!;
-	words[wordIndex] = '\\_'.repeat(word.split('').length);
-	pair.sentence = words.join(' ');
+	words[wordIndex] = "\\_".repeat(word.split("").length);
+	pair.sentence = words.join(" ");
 
 	const choices: string[] = [word];
 	for (const index of indexes) {
-		const words = sentencePairs.at(index)!.sentence.split(' ');
+		const words = sentencePairs.at(index)!.sentence.split(" ");
 		choices.push(words.at(random(words.length))!);
 	}
 	const shuffled = shuffle(choices);

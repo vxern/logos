@@ -1,4 +1,4 @@
-import praise from 'logos/src/lib/commands/social/commands/praise.ts';
-import profile from 'logos/src/lib/commands/social/commands/profile.ts';
+import praise from "./commands/praise.js";
+import profile from "./commands/profile.js";
 
 export default { local: [praise, profile], global: [praise] };

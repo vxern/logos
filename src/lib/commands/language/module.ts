@@ -1,13 +1,13 @@
-import * as csv from 'std/csv/mod.ts';
-import dexonline from 'logos/src/lib/commands/language/dictionaries/adapters/dexonline.ts';
-import wiktionary from 'logos/src/lib/commands/language/dictionaries/adapters/wiktionary.ts';
-import { DictionaryAdapter } from 'logos/src/lib/commands/language/dictionaries/adapter.ts';
-import partsOfSpeech, { PartOfSpeech } from 'logos/src/lib/commands/language/dictionaries/parts-of-speech.ts';
-import { SentencePair } from 'logos/src/lib/commands/language/commands/game.ts';
-import { Client } from 'logos/src/lib/client.ts';
-import { addParametersToURL } from 'logos/src/lib/utils.ts';
-import constants from 'logos/src/constants.ts';
-import { Language, supportedLanguages } from 'logos/src/types.ts';
+import * as csv from "csv-parse/sync";
+import dexonline from "./dictionaries/adapters/dexonline.js";
+import wiktionary from "./dictionaries/adapters/wiktionary.js";
+import { DictionaryAdapter } from "./dictionaries/adapter.js";
+import partsOfSpeech, { PartOfSpeech } from "./dictionaries/parts-of-speech.js";
+import { SentencePair } from "./commands/game.js";
+import { Client } from "../../client.js";
+import { addParametersToURL } from "../../utils.js";
+import constants from "../../../constants.js";
+import { Language, supportedLanguages } from "../../../types.js";
 
 const dictionaryAdapters: DictionaryAdapter[] = [dexonline, wiktionary];
 
@@ -41,10 +41,12 @@ function loadSentencePairs(languageFileContents: [Language, string][]): Map<Lang
 	}
 
 	for (const [language, contents] of languageFileContents) {
-		const records = csv.parse(
-			contents,
-			{ lazyQuotes: true, separator: '\t' },
-		) as [sentenceId: string, sentence: string, translationId: string, translation: string][];
+		const records = csv.parse(contents, { relaxQuotes: true, delimiter: "	" }) as [
+			sentenceId: string,
+			sentence: string,
+			translationId: string,
+			translation: string,
+		][];
 
 		for (const [_, sentence, __, translation] of records) {
 			result.get(language)!.push({ sentence, translation });
@@ -57,7 +59,7 @@ function loadSentencePairs(languageFileContents: [Language, string][]): Map<Lang
 interface DeepLSupportedLanguage {
 	language: string;
 	name: string;
-	'supports_formality': boolean;
+	supports_formality: boolean;
 }
 
 /** Represents a supported language object sent by DeepL. */
@@ -75,13 +77,13 @@ interface SupportedLanguage {
 async function getSupportedLanguages(): Promise<SupportedLanguage[]> {
 	const response = await fetch(
 		addParametersToURL(constants.endpoints.deepl.languages, {
-			'auth_key': Deno.env.get('DEEPL_SECRET')!,
-			'type': 'target',
+			auth_key: process.env.DEEPL_SECRET!,
+			type: "target",
 		}),
 	);
 	if (!response.ok) return [];
 
-	const results = await response.json().catch(() => []) as DeepLSupportedLanguage[];
+	const results = (await response.json().catch(() => [])) as DeepLSupportedLanguage[];
 
 	return results.map((result) => ({
 		name: result.name,
@@ -92,9 +94,9 @@ async function getSupportedLanguages(): Promise<SupportedLanguage[]> {
 
 function resolveToSupportedLanguage(client: Client, languageOrCode: string): SupportedLanguage | undefined {
 	const languageOrCodeLowercase = languageOrCode.toLowerCase();
-	return client.metadata.supportedTranslationLanguages.find((language) =>
-		language.code.toLowerCase() === languageOrCodeLowercase ||
-		language.name.toLowerCase() === languageOrCode
+	return client.metadata.supportedTranslationLanguages.find(
+		(language) =>
+			language.code.toLowerCase() === languageOrCodeLowercase || language.name.toLowerCase() === languageOrCode,
 	);
 }
 
@@ -105,7 +107,7 @@ function getPartOfSpeech(
 ): [detected: PartOfSpeech, original: string] {
 	const localised = partsOfSpeech[language];
 	if (localised === undefined) {
-		return ['unknown', exact];
+		return ["unknown", exact];
 	}
 
 	const detected = (() => {
@@ -115,7 +117,7 @@ function getPartOfSpeech(
 		const approximateMatch = localised[approximate];
 		if (approximateMatch !== undefined) return approximateMatch;
 
-		return 'unknown';
+		return "unknown";
 	})();
 
 	return [detected, exact];

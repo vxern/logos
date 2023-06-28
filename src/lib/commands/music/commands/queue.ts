@@ -1,21 +1,21 @@
-import { ApplicationCommandOptionTypes, Bot, Interaction } from 'discordeno';
-import { displayListings } from 'logos/src/lib/commands/music/module.ts';
-import { OptionTemplate } from 'logos/src/lib/commands/command.ts';
-import { show } from 'logos/src/lib/commands/parameters.ts';
-import { Client, localise } from 'logos/src/lib/client.ts';
-import { parseArguments } from 'logos/src/lib/interactions.ts';
-import constants from 'logos/src/constants.ts';
-import { defaultLocale } from 'logos/src/types.ts';
+import { ApplicationCommandOptionTypes, Bot, Interaction } from "discordeno";
+import { displayListings } from "../module.js";
+import { OptionTemplate } from "../../command.js";
+import { show } from "../../parameters.js";
+import { Client, localise } from "../../../client.js";
+import { parseArguments } from "../../../interactions.js";
+import constants from "../../../../constants.js";
+import { defaultLocale } from "../../../../types.js";
 
 const command: OptionTemplate = {
-	name: 'queue',
+	name: "queue",
 	type: ApplicationCommandOptionTypes.SubCommand,
 	handle: handleDisplayPlaybackQueue,
 	options: [show],
 };
 
 function handleDisplayPlaybackQueue([client, bot]: [Client, Bot], interaction: Interaction): void {
-	const [{ show }] = parseArguments(interaction.data?.options, { show: 'boolean' });
+	const [{ show }] = parseArguments(interaction.data?.options, { show: "boolean" });
 
 	const controller = client.features.music.controllers.get(interaction.guildId!);
 	if (controller === undefined) return;
@@ -23,7 +23,7 @@ function handleDisplayPlaybackQueue([client, bot]: [Client, Bot], interaction: I
 	const locale = show ? defaultLocale : interaction.locale;
 
 	const strings = {
-		queue: localise(client, 'music.options.queue.strings.queue', locale)(),
+		queue: localise(client, "music.options.queue.strings.queue", locale)(),
 	};
 
 	return displayListings(

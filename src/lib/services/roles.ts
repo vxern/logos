@@ -1,9 +1,9 @@
-import { Bot, InteractionTypes } from 'discordeno';
-import { handleOpenRoleSelectionMenu } from 'logos/src/lib/commands/social/commands/profile/roles.ts';
-import { ServiceStarter } from 'logos/src/lib/services/services.ts';
-import { Client, isServicing } from 'logos/src/lib/client.ts';
-import { createInteractionCollector } from 'logos/src/lib/interactions.ts';
-import constants from 'logos/src/constants.ts';
+import { Bot, InteractionTypes } from "discordeno";
+import { handleOpenRoleSelectionMenu } from "../commands/social/commands/profile/roles.js";
+import { ServiceStarter } from "../services/services.js";
+import { Client, isServicing } from "../client.js";
+import { createInteractionCollector } from "../interactions.js";
+import constants from "../../constants.js";
 
 const service: ServiceStarter = ([client, bot]: [Client, Bot]) => {
 	createInteractionCollector([client, bot], {

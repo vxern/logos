@@ -1,10 +1,10 @@
-import { Bot, Interaction } from 'discordeno';
-import { ListingResolver } from 'logos/src/lib/commands/music/data/sources/sources.ts';
-import { getVoiceState, receiveNewListing, verifyCanRequestPlayback } from 'logos/src/lib/controllers/music.ts';
-import { SongListing } from 'logos/src/lib/commands/music/data/types.ts';
-import { Client, localise } from 'logos/src/lib/client.ts';
-import { parseArguments, reply } from 'logos/src/lib/interactions.ts';
-import constants from 'logos/src/constants.ts';
+import { Bot, Interaction } from "discordeno";
+import { ListingResolver } from "../../data/sources/sources.js";
+import { SongListing } from "../../data/types.js";
+import { getVoiceState, receiveNewListing, verifyCanRequestPlayback } from "../../../../controllers/music.js";
+import { Client, localise } from "../../../../client.js";
+import { parseArguments, reply } from "../../../../interactions.js";
+import constants from "../../../../../constants.js";
 
 async function handleRequestQueryPlayback(
 	[client, bot]: [Client, Bot],
@@ -36,27 +36,25 @@ function handleRequestPlayback(
 
 	if (listing === undefined) {
 		const strings = {
-			title: localise(client, 'music.options.play.strings.notFound.title', interaction.locale)(),
+			title: localise(client, "music.options.play.strings.notFound.title", interaction.locale)(),
 			description: {
-				notFound: localise(
-					client,
-					'music.options.play.strings.notFound.description.notFound',
-					interaction.locale,
-				)(),
+				notFound: localise(client, "music.options.play.strings.notFound.description.notFound", interaction.locale)(),
 				tryDifferentQuery: localise(
 					client,
-					'music.options.play.strings.notFound.description.tryDifferentQuery',
+					"music.options.play.strings.notFound.description.tryDifferentQuery",
 					interaction.locale,
 				)(),
 			},
 		};
 
 		return void reply([client, bot], interaction, {
-			embeds: [{
-				title: strings.title,
-				description: `${strings.description.notFound}\n\n${strings.description.tryDifferentQuery}`,
-				color: constants.colors.red,
-			}],
+			embeds: [
+				{
+					title: strings.title,
+					description: `${strings.description.notFound}\n\n${strings.description.tryDifferentQuery}`,
+					color: constants.colors.red,
+				},
+			],
 		});
 	}
 

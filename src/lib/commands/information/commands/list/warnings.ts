@@ -1,18 +1,15 @@
-import { Bot, calculatePermissions, Embed, Interaction } from 'discordeno';
-import { Warning } from 'logos/src/lib/database/structs/mod.ts';
-import { Document } from 'logos/src/lib/database/document.ts';
-import { autocompleteMembers, Client, localise, resolveInteractionToMember } from 'logos/src/lib/client.ts';
-import { parseArguments, reply } from 'logos/src/lib/interactions.ts';
-import constants from 'logos/src/constants.ts';
-import { timestamp } from 'logos/src/formatting.ts';
+import { Bot, calculatePermissions, Embed, Interaction } from "discordeno";
+import { Warning } from "../../../../database/structs/warning.js";
+import { Document } from "../../../../database/document.js";
+import { autocompleteMembers, Client, localise, resolveInteractionToMember } from "../../../../client.js";
+import { parseArguments, reply } from "../../../../interactions.js";
+import constants from "../../../../../constants.js";
+import { timestamp } from "../../../../../formatting.js";
 
-function handleDisplayWarningsAutocomplete(
-	[client, bot]: [Client, Bot],
-	interaction: Interaction,
-): void {
+function handleDisplayWarningsAutocomplete([client, bot]: [Client, Bot], interaction: Interaction): void {
 	const [{ user }] = parseArguments(interaction.data?.options, {});
 
-	const isModerator = calculatePermissions(interaction.member!.permissions!).includes('MODERATE_MEMBERS');
+	const isModerator = calculatePermissions(interaction.member!.permissions!).includes("MODERATE_MEMBERS");
 
 	return autocompleteMembers(
 		[client, bot],
@@ -26,28 +23,26 @@ function handleDisplayWarningsAutocomplete(
 async function handleDisplayWarnings([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const [{ user }] = parseArguments(interaction.data?.options, {});
 
-	const isModerator = calculatePermissions(interaction.member!.permissions!).includes('MODERATE_MEMBERS');
+	const isModerator = calculatePermissions(interaction.member!.permissions!).includes("MODERATE_MEMBERS");
 
-	const member = resolveInteractionToMember(
-		[client, bot],
-		interaction,
-		user ?? interaction.user.id.toString(),
-		{ restrictToSelf: !isModerator },
-	);
+	const member = resolveInteractionToMember([client, bot], interaction, user ?? interaction.user.id.toString(), {
+		restrictToSelf: !isModerator,
+	});
 	if (member === undefined) return;
 
 	const isSelf = member.id === interaction.user.id;
 
 	const recipient = await client.database.adapters.users.getOrFetchOrCreate(
 		client,
-		'id',
+		"id",
 		member.id.toString(),
 		member.id,
 	);
 	if (recipient === undefined) return displayError([client, bot], interaction);
 
-	const warnings = await client.database.adapters.warnings.getOrFetch(client, 'recipient', recipient.ref)
-		.then((warnings) => warnings !== undefined ? Array.from(warnings.values()) : undefined);
+	const warnings = await client.database.adapters.warnings
+		.getOrFetch(client, "recipient", recipient.ref)
+		.then((warnings) => (warnings !== undefined ? Array.from(warnings.values()) : undefined));
 	if (warnings === undefined) return displayError([client, bot], interaction);
 
 	return void reply([client, bot], interaction, {
@@ -57,16 +52,18 @@ async function handleDisplayWarnings([client, bot]: [Client, Bot], interaction: 
 
 function displayError([client, bot]: [Client, Bot], interaction: Interaction): void {
 	const strings = {
-		title: localise(client, 'list.options.warnings.strings.failed.title', interaction.locale)(),
-		description: localise(client, 'list.options.warnings.strings.failed.description', interaction.locale)(),
+		title: localise(client, "list.options.warnings.strings.failed.title", interaction.locale)(),
+		description: localise(client, "list.options.warnings.strings.failed.description", interaction.locale)(),
 	};
 
 	return void reply([client, bot], interaction, {
-		embeds: [{
-			title: strings.title,
-			description: strings.description,
-			color: constants.colors.red,
-		}],
+		embeds: [
+			{
+				title: strings.title,
+				description: strings.description,
+				color: constants.colors.red,
+			},
+		],
 	});
 }
 
@@ -79,8 +76,8 @@ function getWarningPage(
 	if (warnings.length === 0) {
 		if (isSelf) {
 			const strings = {
-				title: localise(client, 'list.options.warnings.strings.noActiveWarnings.title', locale)(),
-				description: localise(client, 'list.options.warnings.strings.noActiveWarnings.description.self', locale)(),
+				title: localise(client, "list.options.warnings.strings.noActiveWarnings.title", locale)(),
+				description: localise(client, "list.options.warnings.strings.noActiveWarnings.description.self", locale)(),
 			};
 
 			return {
@@ -90,8 +87,8 @@ function getWarningPage(
 			};
 		} else {
 			const strings = {
-				title: localise(client, 'list.options.warnings.strings.noActiveWarnings.title', locale)(),
-				description: localise(client, 'list.options.warnings.strings.noActiveWarnings.description.other', locale)(),
+				title: localise(client, "list.options.warnings.strings.noActiveWarnings.title", locale)(),
+				description: localise(client, "list.options.warnings.strings.noActiveWarnings.description.other", locale)(),
 			};
 
 			return {
@@ -103,16 +100,16 @@ function getWarningPage(
 	}
 
 	const strings = {
-		title: localise(client, 'list.options.warnings.strings.warnings.title', locale)(),
-		warning: localise(client, 'list.options.warnings.strings.warnings.description.warning', locale),
+		title: localise(client, "list.options.warnings.strings.warnings.title", locale)(),
+		warning: localise(client, "list.options.warnings.strings.warnings.description.warning", locale),
 	};
 
 	return {
 		title: strings.title,
 		fields: warnings.map((warning, index) => {
 			const warningString = strings.warning({
-				'index': index + 1,
-				'relative_timestamp': timestamp(warning.data.createdAt),
+				index: index + 1,
+				relative_timestamp: timestamp(warning.data.createdAt),
 			});
 
 			return { name: warningString, value: `*${warning.data.reason}*` };

@@ -1,11 +1,11 @@
-import { Bot, Interaction, InteractionTypes, MessageComponentTypes, SelectOption } from 'discordeno';
-import * as YouTubeSearch from 'youtube-search';
-import { ListingResolver } from 'logos/src/lib/commands/music/data/sources/sources.ts';
-import { SongListing, SongListingContentTypes } from 'logos/src/lib/commands/music/data/types.ts';
-import { Client, localise } from 'logos/src/lib/client.ts';
-import { createInteractionCollector, deleteReply, postponeReply, reply } from 'logos/src/lib/interactions.ts';
-import constants from 'logos/src/constants.ts';
-import { trim } from 'logos/src/formatting.ts';
+import { Bot, Interaction, InteractionTypes, MessageComponentTypes, SelectOption } from "discordeno";
+import * as YouTubeSearch from "youtube-sr";
+import { ListingResolver } from "./sources.js";
+import { SongListing, SongListingContentTypes } from "../types.js";
+import { Client, localise } from "../../../../client.js";
+import { createInteractionCollector, deleteReply, postponeReply, reply } from "../../../../interactions.js";
+import constants from "../../../../../constants.js";
+import { trim } from "../../../../../formatting.js";
 
 const resolver: ListingResolver = async ([client, bot], interaction, query) => {
 	const urlExpression = new RegExp(
@@ -21,7 +21,7 @@ const resolver: ListingResolver = async ([client, bot], interaction, query) => {
 	deleteReply([client, bot], interaction);
 
 	const url = urlExpressionExecuted.at(0)!;
-	if (url.includes('list=')) {
+	if (url.includes("list=")) {
 		const playlist = await YouTubeSearch.YouTube.getPlaylist(query);
 		return fromYouTubePlaylist(playlist, interaction.user.id);
 	}
@@ -35,68 +35,69 @@ async function search(
 	interaction: Interaction,
 	query: string,
 ): Promise<SongListing | undefined> {
-	const resultsAll = await YouTubeSearch.YouTube.search(query, { limit: 20, type: 'all', safeSearch: false });
+	const resultsAll = await YouTubeSearch.YouTube.search(query, { limit: 20, type: "all", safeSearch: false });
 	const results = resultsAll.filter((element) => isPlaylist(element) || isVideo(element)) as Array<
 		YouTubeSearch.Playlist | YouTubeSearch.Video
 	>;
 	if (results.length === 0) return undefined;
 
 	return new Promise<SongListing | undefined>((resolve) => {
-		const customId = createInteractionCollector(
-			[client, bot],
-			{
-				type: InteractionTypes.MessageComponent,
-				userId: interaction.user.id,
-				limit: 1,
-				onCollect: async (bot, selection) => {
-					deleteReply([client, bot], interaction);
+		const customId = createInteractionCollector([client, bot], {
+			type: InteractionTypes.MessageComponent,
+			userId: interaction.user.id,
+			limit: 1,
+			onCollect: async (bot, selection) => {
+				deleteReply([client, bot], interaction);
 
-					const indexString = selection.data?.values?.at(0) as string | undefined;
-					if (indexString === undefined) return resolve(undefined);
+				const indexString = selection.data?.values?.at(0) as string | undefined;
+				if (indexString === undefined) return resolve(undefined);
 
-					const index = Number(indexString);
-					if (isNaN(index)) return resolve(undefined);
+				const index = Number(indexString);
+				if (isNaN(index)) return resolve(undefined);
 
-					const result = results.at(index)!;
-					if (isPlaylist(result)) {
-						const playlist = await YouTubeSearch.YouTube.getPlaylist(result.url!);
-						return resolve(fromYouTubePlaylist(playlist, interaction.user.id));
-					}
+				const result = results.at(index)!;
+				if (isPlaylist(result)) {
+					const playlist = await YouTubeSearch.YouTube.getPlaylist(result.url!);
+					return resolve(fromYouTubePlaylist(playlist, interaction.user.id));
+				}
 
-					return resolve(fromYouTubeVideo(result, interaction.user.id));
-				},
+				return resolve(fromYouTubeVideo(result, interaction.user.id));
 			},
-		);
+		});
 
 		const strings = {
-			title: localise(client, 'music.options.play.strings.selectSong.title', interaction.locale)(),
-			description: localise(client, 'music.options.play.strings.selectSong.description', interaction.locale)(),
+			title: localise(client, "music.options.play.strings.selectSong.title", interaction.locale)(),
+			description: localise(client, "music.options.play.strings.selectSong.description", interaction.locale)(),
 		};
 
 		return void reply([client, bot], interaction, {
-			embeds: [{
-				title: strings.title,
-				description: strings.description,
-				color: constants.colors.blue,
-			}],
-			components: [{
-				type: MessageComponentTypes.ActionRow,
-				components: [{
-					type: MessageComponentTypes.SelectMenu,
-					customId: customId,
-					minValues: 1,
-					maxValues: 1,
-					options: results.map<SelectOption>(
-						(result, index) => ({
-							emoji: {
-								name: isVideo(result) ? constants.symbols.music.song : constants.symbols.music.collection,
-							},
-							label: trim(result.title!, 100),
-							value: index.toString(),
-						}),
-					),
-				}],
-			}],
+			embeds: [
+				{
+					title: strings.title,
+					description: strings.description,
+					color: constants.colors.blue,
+				},
+			],
+			components: [
+				{
+					type: MessageComponentTypes.ActionRow,
+					components: [
+						{
+							type: MessageComponentTypes.SelectMenu,
+							customId: customId,
+							minValues: 1,
+							maxValues: 1,
+							options: results.map<SelectOption>((result, index) => ({
+								emoji: {
+									name: isVideo(result) ? constants.symbols.music.song : constants.symbols.music.collection,
+								},
+								label: trim(result.title!, 100),
+								value: index.toString(),
+							})),
+						},
+					],
+				},
+			],
 		});
 	});
 }
@@ -104,18 +105,18 @@ async function search(
 type Result = YouTubeSearch.Playlist | YouTubeSearch.Video | YouTubeSearch.Channel;
 
 function isPlaylist(result: Result): result is YouTubeSearch.Playlist {
-	return result.type === 'playlist';
+	return result.type === "playlist";
 }
 
 function isVideo(result: Result): result is YouTubeSearch.Video {
-	return result.type === 'video';
+	return result.type === "video";
 }
 
 function fromYouTubeVideo(video: YouTubeSearch.Video, requestedBy: bigint): SongListing | undefined {
 	if (video.id === undefined) return undefined;
 
 	return {
-		source: 'YouTube',
+		source: "YouTube",
 		requestedBy,
 		managerIds: [],
 		content: {
@@ -131,7 +132,7 @@ function fromYouTubePlaylist(playlist: YouTubeSearch.Playlist, requestedBy: bigi
 	if (playlist.id === undefined) return undefined;
 
 	return {
-		source: 'YouTube',
+		source: "YouTube",
 		requestedBy,
 		managerIds: [],
 		content: {

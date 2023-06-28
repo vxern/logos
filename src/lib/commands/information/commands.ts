@@ -1,4 +1,4 @@
-import information from 'logos/src/lib/commands/information/commands/information.ts';
-import list from 'logos/src/lib/commands/information/commands/list.ts';
+import information from "./commands/information.js";
+import list from "./commands/list.js";
 
 export default { local: [information, list], global: [information] };

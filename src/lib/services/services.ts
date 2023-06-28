@@ -1,10 +1,10 @@
-import { Bot } from 'discordeno';
-import entry from 'logos/src/lib/services/entry/entry.ts';
-import notices from 'logos/src/lib/services/notices/notices.ts';
-import prompts from 'logos/src/lib/services/prompts/prompts.ts';
-import dynamicVoiceChannels from 'logos/src/lib/services/dynamic-voice-channels.ts';
-import roles from 'logos/src/lib/services/roles.ts';
-import { Client } from 'logos/src/lib/client.ts';
+import { Bot } from "discordeno";
+import entry from "./entry/entry.js";
+import notices from "./notices/notices.js";
+import prompts from "./prompts/prompts.js";
+import dynamicVoiceChannels from "./dynamic-voice-channels.js";
+import roles from "./roles.js";
+import { Client } from "../client.js";
 
 type ServiceStarter = ([client, bot]: [Client, Bot]) => void;
 

@@ -1,11 +1,15 @@
-import { Channel, Member, User } from 'discordeno';
-import { EntryRequest, Praise, Report, Suggestion, Warning } from 'logos/src/lib/database/structs/mod.ts';
-import { MessageGenerators } from 'logos/src/lib/controllers/logging/generators/generators.ts';
-import { localise } from 'logos/src/lib/client.ts';
-import { diagnosticMentionUser } from 'logos/src/lib/utils.ts';
-import constants from 'logos/src/constants.ts';
-import { codeMultiline, mention, MentionTypes, timestamp } from 'logos/src/formatting.ts';
-import { defaultLocale } from 'logos/src/types.ts';
+import { Channel, Member, User } from "discordeno";
+import { MessageGenerators } from "./generators.js";
+import { EntryRequest } from "../../../database/structs/entry-request.js";
+import { Praise } from "../../../database/structs/praise.js";
+import { Report } from "../../../database/structs/report.js";
+import { Suggestion } from "../../../database/structs/suggestion.js";
+import { Warning } from "../../../database/structs/warning.js";
+import { localise } from "../../../client.js";
+import { diagnosticMentionUser } from "../../../utils.js";
+import constants from "../../../../constants.js";
+import { codeMultiline, mention, MentionTypes, timestamp } from "../../../../formatting.js";
+import { defaultLocale } from "../../../../types.js";
 
 /** Type representing events that occur within a guild. */
 type GuildEvents = {
@@ -55,11 +59,15 @@ const generators: Required<MessageGenerators<GuildEvents>> = {
 			if (guild === undefined) return;
 
 			const strings = {
-				reason: localise(client, 'verification.fields.reason', defaultLocale)({
-					'language': guild.language,
+				reason: localise(
+					client,
+					"verification.fields.reason",
+					defaultLocale,
+				)({
+					language: guild.language,
 				}),
-				aim: localise(client, 'verification.fields.aim', defaultLocale)(),
-				whereFound: localise(client, 'verification.fields.whereFound', defaultLocale)(),
+				aim: localise(client, "verification.fields.aim", defaultLocale)(),
+				whereFound: localise(client, "verification.fields.whereFound", defaultLocale)(),
 			};
 
 			return `${diagnosticMentionUser(user)} has submitted a request to join the server.
@@ -108,9 +116,9 @@ ${codeMultiline(entryRequest.answers.where_found!)}
 			const memberUser = client.cache.users.get(member.id);
 			if (memberUser === undefined) return;
 
-			return `${diagnosticMentionUser(memberUser)} has been warned by ${
-				diagnosticMentionUser(by)
-			} for: ${warning.reason}`;
+			return `${diagnosticMentionUser(memberUser)} has been warned by ${diagnosticMentionUser(by)} for: ${
+				warning.reason
+			}`;
 		},
 		filter: (_, originGuildId, member, __, ___) => originGuildId === member.guildId,
 		color: constants.colors.dullYellow,
@@ -121,9 +129,9 @@ ${codeMultiline(entryRequest.answers.where_found!)}
 			const memberUser = client.cache.users.get(member.id);
 			if (memberUser === undefined) return;
 
-			return `${diagnosticMentionUser(memberUser)} has been pardoned by ${
-				diagnosticMentionUser(by)
-			} regarding their warning for: ${warning.reason}`;
+			return `${diagnosticMentionUser(memberUser)} has been pardoned by ${diagnosticMentionUser(
+				by,
+			)} regarding their warning for: ${warning.reason}`;
 		},
 		filter: (_, originGuildId, member, __, ___) => originGuildId === member.guildId,
 		color: constants.colors.blue,
@@ -134,9 +142,9 @@ ${codeMultiline(entryRequest.answers.where_found!)}
 			const memberUser = client.cache.users.get(member.id);
 			if (memberUser === undefined) return;
 
-			return `${diagnosticMentionUser(memberUser)} has been timed out by ${diagnosticMentionUser(by)} until ${
-				timestamp(until)
-			} for: ${reason}`;
+			return `${diagnosticMentionUser(memberUser)} has been timed out by ${diagnosticMentionUser(by)} until ${timestamp(
+				until,
+			)} for: ${reason}`;
 		},
 		filter: (_, originGuildId, member, __, ___, ____) => originGuildId === member.guildId,
 		color: constants.colors.dullYellow,
@@ -158,11 +166,11 @@ ${codeMultiline(entryRequest.answers.where_found!)}
 			const memberUser = client.cache.users.get(member.id);
 			if (memberUser === undefined) return;
 
-			const comment = praise.comment ?? 'None.';
+			const comment = praise.comment ?? "None.";
 
-			return `${diagnosticMentionUser(memberUser)} has been praised by ${
-				diagnosticMentionUser(by)
-			}. Comment: ${comment}`;
+			return `${diagnosticMentionUser(memberUser)} has been praised by ${diagnosticMentionUser(
+				by,
+			)}. Comment: ${comment}`;
 		},
 		filter: (_client, originGuildId, member, _praise, _by) => originGuildId === member.guildId,
 		color: constants.colors.lightGreen,
@@ -173,8 +181,7 @@ ${codeMultiline(entryRequest.answers.where_found!)}
 			const memberUser = client.cache.users.get(member.id);
 			if (memberUser === undefined) return;
 
-			return `${diagnosticMentionUser(memberUser)} has made a suggestion.\n\n` +
-				`Suggestion: *${suggestion.suggestion}*`;
+			return `${diagnosticMentionUser(memberUser)} has made a suggestion.\n\nSuggestion: *${suggestion.suggestion}*`;
 		},
 		filter: (_, originGuildId, member, __) => originGuildId === member.guildId,
 		color: constants.colors.darkGreen,
@@ -185,7 +192,7 @@ ${codeMultiline(entryRequest.answers.where_found!)}
 			const authorUser = client.cache.users.get(author.id);
 			if (authorUser === undefined) return;
 
-			const messageLink = report.messageLink ?? '*No message link*.';
+			const messageLink = report.messageLink ?? "*No message link*.";
 
 			return `${diagnosticMentionUser(authorUser)} has submitted a report.
 
@@ -212,7 +219,7 @@ ${messageLink}`;
 			const channelMention = mention(channel.id, MentionTypes.Channel);
 
 			return `${userMention} has initiated a purging of ${messageCount} messages${
-				author !== undefined ? `sent by ${authorMention}` : ''
+				author !== undefined ? `sent by ${authorMention}` : ""
 			} in ${channelMention}.`;
 		},
 		filter: (_, originGuildId, member, __, ___, ____) => originGuildId === member.guildId,
@@ -229,7 +236,7 @@ ${messageLink}`;
 			const channelMention = mention(channel.id, MentionTypes.Channel);
 
 			return `The purging of ${messageCount} messages${
-				author !== undefined ? `sent by ${authorMention}` : ''
+				author !== undefined ? `sent by ${authorMention}` : ""
 			} in ${channelMention} initiated by ${userMention} is complete.`;
 		},
 		filter: (_, originGuildId, member, __, ___, ____) => originGuildId === member.guildId,

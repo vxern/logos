@@ -1,14 +1,14 @@
-import { DiscordEmbedField } from 'discordeno';
-import { PartOfSpeech } from 'logos/src/lib/commands/language/dictionaries/parts-of-speech.ts';
-import { Client } from 'logos/src/lib/client.ts';
-import { Language } from 'logos/src/types.ts';
+import { DiscordEmbedField } from "discordeno";
+import { PartOfSpeech } from "./parts-of-speech.js";
+import { Client } from "../../../client.js";
+import { Language } from "../../../../types.js";
 
 enum DictionaryProvisions {
 	/** Provides definitions of a lemma. */
-	Definitions,
+	Definitions = "definitions",
 
 	/** Provides a lemma's etymology. */
-	Etymology,
+	Etymology = "etymology",
 }
 
 interface TaggedValue<T> {

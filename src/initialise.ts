@@ -1,23 +1,20 @@
-import * as dotenv from 'std/dotenv/mod.ts';
-import { Bot, Locales } from 'discordeno';
-import * as Sentry from 'sentry';
-import {
-	getSupportedLanguages,
-	loadDictionaryAdapters,
-	loadSentencePairs,
-} from 'logos/src/lib/commands/language/module.ts';
-import { Client, initialiseClient } from 'logos/src/lib/client.ts';
-import { capitalise } from 'logos/src/formatting.ts';
-import { getLanguageByLocale, Language, supportedLanguages } from 'logos/src/types.ts';
+import * as fs from "fs/promises";
+import * as dotenv from "dotenv";
+import { Bot, Locales } from "discordeno";
+import * as Sentry from "sentry";
+import { getSupportedLanguages, loadDictionaryAdapters, loadSentencePairs } from "./lib/commands/language/module.js";
+import { Client, initialiseClient } from "./lib/client.js";
+import { capitalise } from "./formatting.js";
+import { getLanguageByLocale, Language, supportedLanguages } from "./types.js";
 
 async function readDotEnvFile(fileUri: string, isTemplate = false): Promise<Record<string, string> | undefined> {
-	const kind = isTemplate ? 'environment template' : 'environment';
+	const kind = isTemplate ? "environment template" : "environment";
 
 	let contents: string;
 	try {
-		contents = await Deno.readTextFile(fileUri);
-	} catch (error) {
-		if (error instanceof Deno.errors.NotFound) {
+		contents = await fs.readFile(fileUri, { encoding: "utf-8" });
+	} catch (error: unknown) {
+		if (error instanceof Error && "code" in error && error.code === "ENOENT") {
 			console.error(`Missing ${kind} file.`);
 			if (!isTemplate) {
 				return undefined;
@@ -26,14 +23,14 @@ async function readDotEnvFile(fileUri: string, isTemplate = false): Promise<Reco
 
 		console.error(`Unknown error while reading ${kind} file: ${error}`);
 
-		Deno.exit(1);
+		process.exit(1);
 	}
 
 	try {
 		return dotenv.parse(contents);
 	} catch (error) {
 		console.error(`Unknown error while parsing ${kind} file: ${error}`);
-		Deno.exit(1);
+		process.exit(1);
 	}
 }
 
@@ -46,77 +43,54 @@ function readEnvironment({
 }): void {
 	const requiredKeys = Object.keys(templateEnvConfiguration);
 
-	const presentKeys = Object.keys(envConfiguration !== undefined ? envConfiguration : Deno.env.toObject());
+	const presentKeys = Object.keys(envConfiguration !== undefined ? envConfiguration : process.env);
 
 	const missingKeys = requiredKeys.filter((requiredKey) => !presentKeys.includes(requiredKey));
 	if (missingKeys.length !== 0) {
-		console.error(`Missing one or more required environment variables: ${missingKeys.join(', ')}`);
-		Deno.exit(1);
+		console.error(`Missing one or more required environment variables: ${missingKeys.join(", ")}`);
+		process.exit(1);
 	}
 
 	if (envConfiguration === undefined) return;
 
 	for (const [key, value] of Object.entries(envConfiguration) as [key: string, value: string][]) {
-		Deno.env.set(key, value);
+		process.env[key] = value;
 	}
 }
 
-const defaultSoftwareNotice = 'Deno';
+const decoder = new TextDecoder();
 
-async function readVersion(): Promise<string> {
-	const decoder = new TextDecoder();
+async function readLocalisations(directoryPath: string): Promise<Map<string, Map<Language, string>>> {
+	const directoryPaths: string[] = [];
+	for (const entryPath of await fs.readdir(directoryPath)) {
+		const combinedPath = `${directoryPath}/${entryPath}`;
+		if (!(await fs.stat(combinedPath)).isDirectory()) continue;
 
-	const { code, stdout: output } = await new Deno.Command(
-		'git',
-		{
-			args: ['tag', '--sort=-committerdate', '--list', 'v*'],
-			stdout: 'piped',
-			stderr: 'null',
-		},
-	).output();
-	if (code !== 0) {
-		const { code, stdout: output } = await new Deno.Command(
-			'deno',
-			{ args: ['--version'], stdout: 'piped', stderr: 'null' },
-		).output();
-		if (code !== 0) return defaultSoftwareNotice;
-
-		const denoVersion = decoder.decode(output).split(' ').at(1);
-		return `Deno v${denoVersion}` ?? defaultSoftwareNotice;
-	}
-
-	const programVersion = decoder.decode(output).split('\n').at(0);
-	return programVersion ?? defaultSoftwareNotice;
-}
-
-async function readLocalisations(directoryUri: string): Promise<Map<string, Map<Language, string>>> {
-	const decoder = new TextDecoder();
-
-	const subdirectories: string[] = [];
-	for await (const entry of Deno.readDir(directoryUri)) {
-		if (!entry.isDirectory) continue;
-
-		subdirectories.push(`${directoryUri}/${entry.name}`);
+		directoryPaths.push(combinedPath);
 	}
 
 	const localisationFiles: [language: Language, path: string, normalise: boolean][] = [];
-	for (const subdirectory of subdirectories) {
-		const normalise = subdirectory.endsWith('/commands');
+	for (const directoryPath of directoryPaths) {
+		if (!(await fs.stat(directoryPath)).isDirectory()) continue;
 
-		for await (const localeEntry of Deno.readDir(subdirectory)) {
-			if (!localeEntry.isFile) continue;
+		const normalise = directoryPath.endsWith("/commands");
 
-			const [locale, _] = localeEntry.name.split('.') as [Locales, string];
+		for (const entryPath of await fs.readdir(directoryPath)) {
+			const combinedPath = `${directoryPath}/${entryPath}`;
+			if (!(await fs.stat(combinedPath)).isFile()) continue;
+
+			const [locale, _] = entryPath.split(".") as [Locales, string];
 			const language = getLanguageByLocale(locale);
 			if (language === undefined) continue;
 
-			localisationFiles.push([language, `${subdirectory}/${localeEntry.name}`, normalise]);
+			localisationFiles.push([language, combinedPath, normalise]);
 		}
 	}
 
 	const localisations = new Map<string, Map<Language, string>>();
 	for (const [language, path, normalise] of localisationFiles) {
-		const strings = await Deno.readFile(path)
+		const strings = await fs
+			.readFile(path)
 			.then((contents) => decoder.decode(contents))
 			.then((object) => JSON.parse(object) as Record<string, string>);
 
@@ -130,23 +104,19 @@ async function readLocalisations(directoryUri: string): Promise<Map<string, Map<
 
 			if (normalise) {
 				if (
-					key.endsWith('.name') &&
-					(value.includes(' ') || value.includes('/') || value.includes('\'') || value.toLowerCase() !== value)
+					key.endsWith(".name") &&
+					(value.includes(" ") || value.includes("/") || value.includes("'") || value.toLowerCase() !== value)
 				) {
-					console.warn(
-						`${language}: '${key}' is not normalised. Normalising...`,
-					);
+					console.warn(`${language}: '${key}' is not normalised. Normalising...`);
 
-					const valueNormalised = value.toLowerCase().split(' ').join('-').replaceAll('/', '-').replaceAll('\'', '-');
+					const valueNormalised = value.toLowerCase().split(" ").join("-").replaceAll("/", "-").replaceAll("'", "-");
 					localisations.get(key)!.set(language, valueNormalised);
 
 					continue;
 				}
 
-				if (key.endsWith('.description') && lastKey.endsWith('.name') && value.length > 100) {
-					console.warn(
-						`${language}: '${key}' is too long (>100 characters). Normalising...`,
-					);
+				if (key.endsWith(".description") && lastKey.endsWith(".name") && value.length > 100) {
+					console.warn(`${language}: '${key}' is too long (>100 characters). Normalising...`);
 
 					const valueNormalised = value.slice(0, 100);
 					localisations.get(key)!.set(language, valueNormalised);
@@ -166,27 +136,33 @@ async function readLocalisations(directoryUri: string): Promise<Map<string, Map<
  * @returns An array of tuples where the first element is a language and the second
  * element is the contents of its sentence file.
  */
-async function readSentenceFiles(directoryUri: string): Promise<[Language, string][]> {
-	const files: Deno.DirEntry[] = [];
-	for await (const entry of Deno.readDir(directoryUri)) {
-		if (!entry.isFile) continue;
+async function readSentenceFiles(directoryPath: string): Promise<[Language, string][]> {
+	const filePaths: string[] = [];
+	for (const entryPath of await fs.readdir(directoryPath)) {
+		const combinedPath = `${directoryPath}/${entryPath}`;
+		if ((await fs.stat(combinedPath)).isDirectory()) continue;
 
-		files.push(entry);
+		filePaths.push(combinedPath);
 	}
 
 	const results: Promise<[Language, string]>[] = [];
-	for (const file of files) {
-		const languageName = capitalise(file.name.split('.').at(0)!);
+	for (const filePath of filePaths) {
+		const [_, fileName] = /.+\/([a-z]+)\.tsv/.exec(filePath) ?? [];
+		if (fileName === undefined) {
+			console.warn(`Sentence file '${filePath}' has an invalid name.`);
+			continue;
+		}
 
-		if (!Array.from<string>(supportedLanguages).includes(languageName)) {
+		const language = capitalise(fileName);
+
+		if (!(supportedLanguages as readonly string[]).includes(language)) {
 			console.warn(
-				`File '${file.name}' contains sentences for a language '${languageName}' not supported by the application. Skipping...`,
+				`File '${filePath}' contains sentences for a language '${language}' not supported by the application. Skipping...`,
 			);
 			continue;
 		}
 
-		const language = languageName as Language;
-		results.push(Deno.readTextFile(`${directoryUri}/${file.name}`).then((contents) => [language, contents]));
+		results.push(fs.readFile(filePath).then((contents) => [language as Language, decoder.decode(contents)]));
 	}
 
 	return Promise.all(results);
@@ -194,30 +170,35 @@ async function readSentenceFiles(directoryUri: string): Promise<[Language, strin
 
 async function initialise(): Promise<[Client, Bot]> {
 	const [envConfiguration, templateEnvConfiguration] = await Promise.all([
-		readDotEnvFile('.env'),
-		readDotEnvFile('.env.example', true),
+		readDotEnvFile(".env"),
+		readDotEnvFile(".env.example", true),
 	]);
 
 	readEnvironment({ envConfiguration, templateEnvConfiguration: templateEnvConfiguration! });
 
-	const environment = Deno.env.get('ENVIRONMENT') as Client['metadata']['environment'];
-	Sentry.init({ dsn: Deno.env.get('SENTRY_SECRET'), environment });
+	const environment = process.env.ENVIRONMENT as Client["metadata"]["environment"];
+	Sentry.init({ dsn: process.env.SENTRY_SECRET, environment });
 
 	console.debug(`Running in ${environment} mode.`);
 
-	const [version, supportedTranslationLanguages, sentenceFiles] = await Promise.all([
-		readVersion(),
+	const [supportedTranslationLanguages, sentenceFiles] = await Promise.all([
 		getSupportedLanguages(),
-		readSentenceFiles('./assets/sentences'),
+		readSentenceFiles("./assets/sentences"),
 	]);
 
-	const localisations = await readLocalisations('./assets/localisations');
+	const dictionaryAdapters = loadDictionaryAdapters();
+	const sentencePairs = loadSentencePairs(sentenceFiles);
+	const localisations = await readLocalisations("./assets/localisations");
 
-	return initialiseClient({ version, environment, supportedTranslationLanguages }, {
-		dictionaryAdapters: loadDictionaryAdapters(),
-		sentencePairs: loadSentencePairs(sentenceFiles),
-		rateLimiting: new Map(),
-	}, localisations);
+	console.debug(`Translations supported between ${supportedTranslationLanguages.length} languages.`);
+	console.debug(`Loaded ${Array.from(sentencePairs.values()).flat().length} sentence pairs.`);
+	console.debug(`Loaded ${localisations.size} unique string keys.`);
+
+	return initialiseClient(
+		{ environment, supportedTranslationLanguages },
+		{ dictionaryAdapters, sentencePairs, rateLimiting: new Map() },
+		localisations,
+	);
 }
 
 export { initialise };

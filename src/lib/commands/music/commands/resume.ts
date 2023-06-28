@@ -1,13 +1,13 @@
-import { ApplicationCommandOptionTypes, Bot, Interaction } from 'discordeno';
-import { OptionTemplate } from 'logos/src/lib/commands/command.ts';
-import { getVoiceState, isOccupied, isPaused, resume, verifyCanManagePlayback } from 'logos/src/lib/controllers/music.ts';
-import { Client, localise } from 'logos/src/lib/client.ts';
-import { reply } from 'logos/src/lib/interactions.ts';
-import constants from 'logos/src/constants.ts';
-import { defaultLocale } from 'logos/src/types.ts';
+import { ApplicationCommandOptionTypes, Bot, Interaction } from "discordeno";
+import { OptionTemplate } from "../../command.js";
+import { getVoiceState, isOccupied, isPaused, resume, verifyCanManagePlayback } from "../../../controllers/music.js";
+import { Client, localise } from "../../../client.js";
+import { reply } from "../../../interactions.js";
+import constants from "../../../../constants.js";
+import { defaultLocale } from "../../../../types.js";
 
 const command: OptionTemplate = {
-	name: 'resume',
+	name: "resume",
 	type: ApplicationCommandOptionTypes.SubCommand,
 	handle: handleResumePlayback,
 };
@@ -26,48 +26,59 @@ function handleResumePlayback([client, bot]: [Client, Bot], interaction: Interac
 
 	if (!isOccupied(controller.player)) {
 		const strings = {
-			title: localise(client, 'music.options.resume.strings.noSong.title', interaction.locale)(),
-			description: localise(client, 'music.options.resume.strings.noSong.description', interaction.locale)(),
+			title: localise(client, "music.options.resume.strings.noSong.title", interaction.locale)(),
+			description: localise(client, "music.options.resume.strings.noSong.description", interaction.locale)(),
 		};
 
 		return void reply([client, bot], interaction, {
-			embeds: [{
-				title: strings.title,
-				description: strings.description,
-				color: constants.colors.dullYellow,
-			}],
+			embeds: [
+				{
+					title: strings.title,
+					description: strings.description,
+					color: constants.colors.dullYellow,
+				},
+			],
 		});
 	}
 
 	if (!isPaused(controller.player)) {
 		const strings = {
-			title: localise(client, 'music.options.resume.strings.notPaused', interaction.locale)(),
-			description: localise(client, 'music.options.resume.strings.notPaused', interaction.locale)(),
+			title: localise(client, "music.options.resume.strings.notPaused", interaction.locale)(),
+			description: localise(client, "music.options.resume.strings.notPaused", interaction.locale)(),
 		};
 
 		return void reply([client, bot], interaction, {
-			embeds: [{
-				title: strings.title,
-				description: strings.description,
-				color: constants.colors.dullYellow,
-			}],
+			embeds: [
+				{
+					title: strings.title,
+					description: strings.description,
+					color: constants.colors.dullYellow,
+				},
+			],
 		});
 	}
 
 	resume(controller.player);
 
 	const strings = {
-		title: localise(client, 'music.options.resume.strings.resumed.title', defaultLocale)(),
-		description: localise(client, 'music.options.resume.strings.resumed.description', defaultLocale)(),
+		title: localise(client, "music.options.resume.strings.resumed.title", defaultLocale)(),
+		description: localise(client, "music.options.resume.strings.resumed.description", defaultLocale)(),
 	};
 
-	return void reply([client, bot], interaction, {
-		embeds: [{
-			title: `${constants.symbols.music.resumed} ${strings.title}`,
-			description: strings.description,
-			color: constants.colors.blue,
-		}],
-	}, { visible: true });
+	return void reply(
+		[client, bot],
+		interaction,
+		{
+			embeds: [
+				{
+					title: `${constants.symbols.music.resumed} ${strings.title}`,
+					description: strings.description,
+					color: constants.colors.blue,
+				},
+			],
+		},
+		{ visible: true },
+	);
 }
 
 export default command;
