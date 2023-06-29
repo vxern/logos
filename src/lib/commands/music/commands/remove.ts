@@ -40,9 +40,11 @@ const command: OptionTemplate = {
 	handle: handleRemoveSongListing,
 };
 
-function handleRemoveSongListing([client, bot]: [Client, Bot], interaction: Interaction): void {
+async function handleRemoveSongListing([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const controller = client.features.music.controllers.get(interaction.guildId!);
-	if (controller === undefined) return;
+	if (controller === undefined) {
+		return;
+	}
 
 	const isVoiceStateVerified = verifyCanManagePlayback(
 		[client, bot],
@@ -50,7 +52,9 @@ function handleRemoveSongListing([client, bot]: [Client, Bot], interaction: Inte
 		controller,
 		getVoiceState(client, interaction.guildId!, interaction.user.id),
 	);
-	if (!isVoiceStateVerified) return;
+	if (!isVoiceStateVerified) {
+		return;
+	}
 
 	if (isQueueEmpty(controller.listingQueue)) {
 		const strings = {
@@ -58,7 +62,7 @@ function handleRemoveSongListing([client, bot]: [Client, Bot], interaction: Inte
 			description: localise(client, "music.options.remove.strings.queueEmpty.description", interaction.locale)(),
 		};
 
-		return void reply([client, bot], interaction, {
+		reply([client, bot], interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -67,11 +71,12 @@ function handleRemoveSongListing([client, bot]: [Client, Bot], interaction: Inte
 				},
 			],
 		});
+		return;
 	}
 
 	const removeListingData = { pageIndex: 0 };
 
-	const interactionResponseData = generateEmbed(
+	const interactionResponseData = await generateEmbed(
 		[client, bot],
 		interaction,
 		controller,
@@ -79,14 +84,14 @@ function handleRemoveSongListing([client, bot]: [Client, Bot], interaction: Inte
 		interaction.locale,
 	);
 
-	const onQueueUpdateListener = () =>
+	const onQueueUpdateListener = async () =>
 		editReply(
 			[client, bot],
 			interaction,
-			generateEmbed([client, bot], interaction, controller, removeListingData, interaction.locale),
+			await generateEmbed([client, bot], interaction, controller, removeListingData, interaction.locale),
 		);
 
-	const onStopListener = () => deleteReply([client, bot], interaction);
+	const onStopListener = async () => deleteReply([client, bot], interaction);
 
 	controller.events.on("queueUpdate", onQueueUpdateListener);
 	controller.events.on("stop", onStopListener);
@@ -96,20 +101,20 @@ function handleRemoveSongListing([client, bot]: [Client, Bot], interaction: Inte
 		controller.events.off("stop", onStopListener);
 	}, constants.interactionTokenExpiryInterval);
 
-	return void reply([client, bot], interaction, interactionResponseData);
+	reply([client, bot], interaction, interactionResponseData);
 }
 
 interface RemoveListingData {
 	pageIndex: number;
 }
 
-function generateEmbed(
+async function generateEmbed(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 	controller: MusicController,
 	data: RemoveListingData,
 	locale: string | undefined,
-): InteractionCallbackData {
+): Promise<InteractionCallbackData> {
 	const pages = chunk(controller.listingQueue, configuration.music.limits.songs.page);
 
 	const isFirst = data.pageIndex === 0;
@@ -118,10 +123,12 @@ function generateEmbed(
 	const buttonsCustomId = createInteractionCollector([client, bot], {
 		type: InteractionTypes.MessageComponent,
 		userId: interaction.user.id,
-		onCollect: (bot, selection) => {
+		onCollect: async (bot, selection) => {
 			acknowledge([client, bot], selection);
 
-			if (selection.data === undefined) return;
+			if (selection.data === undefined) {
+				return;
+			}
 
 			const [_, action] = decodeId<ControlButtonID>(selection.data.customId!);
 
@@ -134,7 +141,7 @@ function generateEmbed(
 					break;
 			}
 
-			editReply([client, bot], interaction, generateEmbed([client, bot], interaction, controller, data, locale));
+			editReply([client, bot], interaction, await generateEmbed([client, bot], interaction, controller, data, locale));
 		},
 	});
 
@@ -142,12 +149,16 @@ function generateEmbed(
 		type: InteractionTypes.MessageComponent,
 		userId: interaction.user.id,
 		limit: 1,
-		onCollect: (bot, selection) => {
+		onCollect: async (bot, selection) => {
 			const indexString = selection.data?.values?.at(0) as string | undefined;
-			if (indexString === undefined) return;
+			if (indexString === undefined) {
+				return;
+			}
 
 			const index = Number(indexString);
-			if (isNaN(index)) return;
+			if (isNaN(index)) {
+				return;
+			}
 
 			const songListing = remove(controller, index);
 			if (songListing === undefined) {
@@ -156,7 +167,7 @@ function generateEmbed(
 					description: localise(client, "music.options.remove.strings.failed.description", interaction.locale)(),
 				};
 
-				return void reply([client, bot], selection, {
+				reply([client, bot], selection, {
 					embeds: [
 						{
 							title: strings.title,
@@ -165,6 +176,7 @@ function generateEmbed(
 						},
 					],
 				});
+				return;
 			}
 
 			const strings = {
@@ -179,7 +191,7 @@ function generateEmbed(
 				}),
 			};
 
-			return void reply(
+			reply(
 				[client, bot],
 				selection,
 				{

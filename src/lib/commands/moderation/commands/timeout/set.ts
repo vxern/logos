@@ -5,7 +5,7 @@ import { parseArguments, parseTimeExpression, reply, respond } from "../../../..
 import constants, { Periods } from "../../../../../constants.js";
 import { mention, MentionTypes, timestamp } from "../../../../../formatting.js";
 
-function handleSetTimeoutAutocomplete([client, bot]: [Client, Bot], interaction: Interaction): void {
+async function handleSetTimeoutAutocomplete([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const [{ user, duration }, focused] = parseArguments(interaction.data?.options, {});
 
 	switch (focused!.name) {
@@ -27,32 +27,41 @@ function handleSetTimeoutAutocomplete([client, bot]: [Client, Bot], interaction:
 
 async function handleSetTimeout([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const [{ user, duration, reason }] = parseArguments(interaction.data?.options, {});
-	if (user === undefined || duration === undefined) return;
+	if (user === undefined || duration === undefined) {
+		return;
+	}
 
 	const member = resolveInteractionToMember([client, bot], interaction, user!, {
 		restrictToNonSelf: true,
 		excludeModerators: true,
 	});
-	if (member === undefined) return;
+	if (member === undefined) {
+		return;
+	}
 
 	const durationParsed = Number(duration);
 
 	if (Number.isNaN(duration)) {
-		return displayDurationInvalidError([client, bot], interaction);
+		displayDurationInvalidError([client, bot], interaction);
+		return;
 	}
 
 	if (durationParsed < Periods.minute) {
-		return displayTooShortWarning([client, bot], interaction);
+		displayTooShortWarning([client, bot], interaction);
+		return;
 	}
 
 	if (durationParsed > Periods.week) {
-		return displayTooLongWarning([client, bot], interaction);
+		displayTooLongWarning([client, bot], interaction);
+		return;
 	}
 
 	const until = Date.now() + durationParsed;
 
 	const guild = client.cache.guilds.get(interaction.guildId!);
-	if (guild === undefined) return;
+	if (guild === undefined) {
+		return;
+	}
 
 	await editMember(bot, interaction.guildId!, member.id, { communicationDisabledUntil: until }).catch(() =>
 		client.log.warn(`Failed to time member with ID ${member.id} out.`),
@@ -72,7 +81,7 @@ async function handleSetTimeout([client, bot]: [Client, Bot], interaction: Inter
 		}),
 	};
 
-	return void reply([client, bot], interaction, {
+	reply([client, bot], interaction, {
 		embeds: [
 			{
 				title: strings.title,
@@ -83,35 +92,35 @@ async function handleSetTimeout([client, bot]: [Client, Bot], interaction: Inter
 	});
 }
 
-function displayDurationInvalidError([client, bot]: [Client, Bot], interaction: Interaction): void {
+async function displayDurationInvalidError([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const strings = {
 		title: localise(client, "timeout.strings.durationInvalid.title", interaction.locale)(),
 		description: localise(client, "timeout.strings.durationInvalid.description", interaction.locale)(),
 	};
 
-	return void reply([client, bot], interaction, {
+	reply([client, bot], interaction, {
 		embeds: [{ title: strings.title, description: strings.description, color: constants.colors.darkRed }],
 	});
 }
 
-function displayTooShortWarning([client, bot]: [Client, Bot], interaction: Interaction): void {
+async function displayTooShortWarning([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const strings = {
 		title: localise(client, "timeout.strings.tooShort.title", interaction.locale)(),
 		description: localise(client, "timeout.strings.tooShort.description", interaction.locale)(),
 	};
 
-	return void reply([client, bot], interaction, {
+	reply([client, bot], interaction, {
 		embeds: [{ title: strings.title, description: strings.description, color: constants.colors.yellow }],
 	});
 }
 
-function displayTooLongWarning([client, bot]: [Client, Bot], interaction: Interaction): void {
+async function displayTooLongWarning([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const strings = {
 		title: localise(client, "timeout.strings.tooLong.title", interaction.locale)(),
 		description: localise(client, "timeout.strings.tooLong.description", interaction.locale)(),
 	};
 
-	return void reply([client, bot], interaction, {
+	reply([client, bot], interaction, {
 		embeds: [{ title: strings.title, description: strings.description, color: constants.colors.yellow }],
 	});
 }

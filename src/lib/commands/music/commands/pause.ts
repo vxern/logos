@@ -13,9 +13,11 @@ const command: OptionTemplate = {
 	handle: handlePausePlayback,
 };
 
-function handlePausePlayback([client, bot]: [Client, Bot], interaction: Interaction): void {
+async function handlePausePlayback([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const controller = client.features.music.controllers.get(interaction.guildId!);
-	if (controller === undefined) return;
+	if (controller === undefined) {
+		return;
+	}
 
 	const isVoiceStateVerified = verifyCanManagePlayback(
 		[client, bot],
@@ -23,7 +25,9 @@ function handlePausePlayback([client, bot]: [Client, Bot], interaction: Interact
 		controller,
 		getVoiceState(client, interaction.guildId!, interaction.user.id),
 	);
-	if (!isVoiceStateVerified) return;
+	if (!isVoiceStateVerified) {
+		return;
+	}
 
 	if (!isOccupied(controller.player)) {
 		const strings = {
@@ -31,7 +35,7 @@ function handlePausePlayback([client, bot]: [Client, Bot], interaction: Interact
 			description: localise(client, "music.options.pause.strings.notPlaying.description", interaction.locale)(),
 		};
 
-		return void reply([client, bot], interaction, {
+		reply([client, bot], interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -40,10 +44,12 @@ function handlePausePlayback([client, bot]: [Client, Bot], interaction: Interact
 				},
 			],
 		});
+		return;
 	}
 
 	if (isPaused(controller.player)) {
-		return handleResumePlayback([client, bot], interaction);
+		handleResumePlayback([client, bot], interaction);
+		return;
 	}
 
 	pause(controller.player);
@@ -53,7 +59,7 @@ function handlePausePlayback([client, bot]: [Client, Bot], interaction: Interact
 		description: localise(client, "music.options.pause.strings.paused.description", defaultLocale)(),
 	};
 
-	return void reply(
+	reply(
 		[client, bot],
 		interaction,
 		{

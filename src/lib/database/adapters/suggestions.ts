@@ -20,7 +20,7 @@ const cache: CacheAdapter<Suggestion, SuggestionIndexes<Document<Suggestion>>, "
 	set: (client, _parameter, value, suggestion) => {
 		const suggestionReferenceId = stringifyValue(suggestion.ref);
 
-		return setNested(client.database.cache.suggestionsByAuthorAndGuild, value, suggestionReferenceId, suggestion);
+		setNested(client.database.cache.suggestionsByAuthorAndGuild, value, suggestionReferenceId, suggestion);
 	},
 	delete: (client, _parameter, value, suggestion) => {
 		const suggestionReferenceId = stringifyValue(suggestion.ref);

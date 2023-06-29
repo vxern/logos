@@ -57,10 +57,14 @@ async function handleFindWord([client, bot]: [Client, Bot], interaction: Interac
 		verbose: "boolean",
 		show: "boolean",
 	});
-	if (word === undefined) return;
+	if (word === undefined) {
+		return;
+	}
 
 	const guild = client.cache.guilds.get(interaction.guildId!);
-	if (guild === undefined) return;
+	if (guild === undefined) {
+		return;
+	}
 
 	const dictionaries = client.features.dictionaryAdapters.get(guild.language);
 	if (dictionaries === undefined) {
@@ -69,7 +73,7 @@ async function handleFindWord([client, bot]: [Client, Bot], interaction: Interac
 			description: localise(client, "word.strings.noDictionaryAdapters.description", interaction.locale)(),
 		};
 
-		return void reply([client, bot], interaction, {
+		reply([client, bot], interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -78,6 +82,7 @@ async function handleFindWord([client, bot]: [Client, Bot], interaction: Interac
 				},
 			],
 		});
+		return;
 	}
 
 	const locale = show ? defaultLocale : interaction.locale;
@@ -94,7 +99,9 @@ async function handleFindWord([client, bot]: [Client, Bot], interaction: Interac
 	const entriesByPartOfSpeech = new Map<PartOfSpeech, DictionaryEntry[]>();
 	for (const dictionary of dictionaries) {
 		const entries = await dictionary.getEntries(word, guild.language, client, locale);
-		if (entries === undefined) continue;
+		if (entries === undefined) {
+			continue;
+		}
 
 		const organised = new Map<PartOfSpeech, DictionaryEntry[]>();
 		for (const entry of entries) {
@@ -146,7 +153,7 @@ async function handleFindWord([client, bot]: [Client, Bot], interaction: Interac
 			}),
 		};
 
-		return void editReply([client, bot], interaction, {
+		editReply([client, bot], interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -155,11 +162,12 @@ async function handleFindWord([client, bot]: [Client, Bot], interaction: Interac
 				},
 			],
 		});
+		return;
 	}
 
 	const entries = sanitiseEntries([...Array.from(entriesByPartOfSpeech.values()).flat(), ...unclassifiedEntries]);
 
-	return void displayMenu(
+	displayMenu(
 		[client, bot],
 		interaction,
 		{
@@ -195,12 +203,12 @@ interface WordViewData {
 	verbose: boolean;
 }
 
-function displayMenu(
+async function displayMenu(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 	data: WordViewData,
 	locale: string | undefined,
-): void {
+): Promise<void> {
 	const entry = data.entries.at(data.dictionaryEntryIndex)!;
 
 	editReply([client, bot], interaction, {
@@ -245,23 +253,23 @@ function generateButtons(
 
 			const previousPageButtonId = createInteractionCollector([client, bot], {
 				type: InteractionTypes.MessageComponent,
-				onCollect: (_, selection) => {
+				onCollect: async (_, selection) => {
 					acknowledge([client, bot], selection);
 
 					if (!isFirst) data.dictionaryEntryIndex--;
 
-					return displayMenu([client, bot], interaction, data, locale);
+					displayMenu([client, bot], interaction, data, locale);
 				},
 			});
 
 			const nextPageButtonId = createInteractionCollector([client, bot], {
 				type: InteractionTypes.MessageComponent,
-				onCollect: (_, selection) => {
+				onCollect: async (_, selection) => {
 					acknowledge([client, bot], selection);
 
 					if (!isLast) data.dictionaryEntryIndex++;
 
-					return displayMenu([client, bot], interaction, data, locale);
+					displayMenu([client, bot], interaction, data, locale);
 				},
 			});
 
@@ -295,17 +303,20 @@ function generateButtons(
 			break;
 		}
 		case ContentTabs.Inflection: {
-			if (entry.inflectionTable === undefined) return [];
+			if (entry.inflectionTable === undefined) {
+				return [];
+			}
 
 			const rows = chunk(entry.inflectionTable, 5).reverse();
 
 			const buttonId = createInteractionCollector([client, bot], {
 				type: InteractionTypes.MessageComponent,
-				onCollect: (_, selection) => {
+				onCollect: async (_, selection) => {
 					acknowledge([client, bot], selection);
 
 					if (entry.inflectionTable === undefined || selection.data === undefined) {
-						return void displayMenu([client, bot], interaction, data, locale);
+						displayMenu([client, bot], interaction, data, locale);
+						return;
 					}
 
 					const [__, indexString] = decodeId<MenuButtonID>(selection.data.customId!);
@@ -315,7 +326,7 @@ function generateButtons(
 						data.inflectionTableIndex = index;
 					}
 
-					return void displayMenu([client, bot], interaction, data, locale);
+					displayMenu([client, bot], interaction, data, locale);
 				},
 			});
 
@@ -343,24 +354,24 @@ function generateButtons(
 
 	const definitionsMenuButtonId = createInteractionCollector([client, bot], {
 		type: InteractionTypes.MessageComponent,
-		onCollect: (_, selection) => {
+		onCollect: async (_, selection) => {
 			acknowledge([client, bot], selection);
 
 			data.inflectionTableIndex = 0;
 			data.currentView = ContentTabs.Definitions;
 
-			return displayMenu([client, bot], interaction, data, locale);
+			displayMenu([client, bot], interaction, data, locale);
 		},
 	});
 
 	const inflectionMenuButtonId = createInteractionCollector([client, bot], {
 		type: InteractionTypes.MessageComponent,
-		onCollect: (_, selection) => {
+		onCollect: async (_, selection) => {
 			acknowledge([client, bot], selection);
 
 			data.currentView = ContentTabs.Inflection;
 
-			return displayMenu([client, bot], interaction, data, locale);
+			displayMenu([client, bot], interaction, data, locale);
 		},
 	});
 

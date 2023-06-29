@@ -1,4 +1,4 @@
-import { Bot, getAvatarURL, getUser, Interaction } from "discordeno";
+import { Bot, Embed, getAvatarURL, getUser, Interaction } from "discordeno";
 import { Client, localise } from "../../../../client.js";
 import { reply } from "../../../../interactions.js";
 import constants from "../../../../../constants.js";
@@ -11,7 +11,9 @@ async function handleDisplayBotInformation([client, bot]: [Client, Bot], interac
 			client.log.warn("Failed to get bot user.");
 			return undefined;
 		}));
-	if (botUser === undefined) return;
+	if (botUser === undefined) {
+		return;
+	}
 
 	const strings = {
 		information: {
@@ -72,7 +74,7 @@ async function handleDisplayBotInformation([client, bot]: [Client, Bot], interac
 		`${constants.symbols.bot.features.music} ${strings.information.whoAmI.features.music}`,
 	]);
 
-	return void reply([client, bot], interaction, {
+	reply([client, bot], interaction, {
 		embeds: [
 			{
 				title: botUser.username,
@@ -106,32 +108,40 @@ async function handleDisplayBotInformation([client, bot]: [Client, Bot], interac
 			{
 				title: strings.translators.title,
 				color: constants.colors.blue,
-				fields: Object.entries(constants.contributions.translation).map(([language, data]) => {
-					const contributorsFormatted = data.contributors
-						.map((contributor) => {
-							const userMention = mention(contributor.id, MentionTypes.User);
-
-							if ("links" in contributor) {
-								const linksFormatted = Object.entries(contributor.links)
-									.map(([platform, link]) => `[${platform}](${link})`)
-									.join(", ");
-
-								return `${userMention} (${linksFormatted})`;
-							}
-
-							return userMention;
-						})
-						.join("\n");
-
-					return {
-						name: `${language} ${data.flag}`,
-						value: contributorsFormatted,
-						inline: true,
-					};
-				}),
+				fields: getContributorString(constants.contributions.translation),
 			},
 		],
 	});
+}
+
+type EmbedFields = NonNullable<Embed["fields"]>;
+
+function getContributorString(contributions: typeof constants.contributions.translation): EmbedFields {
+	const fields: EmbedFields = [];
+	for (const [language, data] of Object.entries(contributions)) {
+		const contributorsFormatted = data.contributors
+			.map((contributor) => {
+				const userMention = mention(contributor.id, MentionTypes.User);
+
+				if ("links" in contributor) {
+					const linksFormatted = Object.entries(contributor.links)
+						.map(([platform, link]) => `[${platform}](${link})`)
+						.join(", ");
+
+					return `${userMention} (${linksFormatted})`;
+				}
+
+				return userMention;
+			})
+			.join("\n");
+
+		fields.push({
+			name: `${language} ${data.flag}`,
+			value: contributorsFormatted,
+			inline: true,
+		});
+	}
+	return fields;
 }
 
 export { handleDisplayBotInformation };

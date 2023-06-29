@@ -12,9 +12,11 @@ const command: OptionTemplate = {
 	handle: handleStopPlayback,
 };
 
-function handleStopPlayback([client, bot]: [Client, Bot], interaction: Interaction): void {
+async function handleStopPlayback([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const controller = client.features.music.controllers.get(interaction.guildId!);
-	if (controller === undefined) return;
+	if (controller === undefined) {
+		return;
+	}
 
 	const isVoiceStateVerified = verifyCanManagePlayback(
 		[client, bot],
@@ -22,7 +24,9 @@ function handleStopPlayback([client, bot]: [Client, Bot], interaction: Interacti
 		controller,
 		getVoiceState(client, interaction.guildId!, interaction.user.id),
 	);
-	if (!isVoiceStateVerified) return;
+	if (!isVoiceStateVerified) {
+		return;
+	}
 
 	const botVoiceState = getVoiceState(client, interaction.guildId!, bot.id);
 	if (botVoiceState === undefined) {
@@ -31,7 +35,7 @@ function handleStopPlayback([client, bot]: [Client, Bot], interaction: Interacti
 			description: localise(client, "music.options.stop.strings.notPlaying.description", interaction.locale)(),
 		};
 
-		return void reply([client, bot], interaction, {
+		reply([client, bot], interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -40,6 +44,7 @@ function handleStopPlayback([client, bot]: [Client, Bot], interaction: Interacti
 				},
 			],
 		});
+		return;
 	}
 
 	reset(client, interaction.guildId!);
@@ -49,7 +54,7 @@ function handleStopPlayback([client, bot]: [Client, Bot], interaction: Interacti
 		description: localise(client, "music.options.stop.strings.stopped.description", defaultLocale)(),
 	};
 
-	return void reply(
+	reply(
 		[client, bot],
 		interaction,
 		{

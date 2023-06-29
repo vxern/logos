@@ -23,7 +23,7 @@ const cache: CacheAdapter<Warning, WarningIndexes<Map<string, Document<Warning>>
 	set: (client, _parameter, value, warning) => {
 		const warningReferenceId = stringifyValue(warning.ref);
 
-		return setNested(client.database.cache.warningsByRecipient, value, warningReferenceId, warning);
+		setNested(client.database.cache.warningsByRecipient, value, warningReferenceId, warning);
 	},
 	setAll: (client, parameter, value, warnings) => {
 		if (warnings.length === 0) {

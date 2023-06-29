@@ -18,11 +18,13 @@ const command: OptionTemplate = {
 	options: [collection, show],
 };
 
-function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], interaction: Interaction): void {
+async function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const [{ collection, show }] = parseArguments(interaction.data?.options, { collection: "boolean", show: "boolean" });
 
 	const controller = client.features.music.controllers.get(interaction.guildId!);
-	if (controller === undefined) return;
+	if (controller === undefined) {
+		return;
+	}
 
 	const locale = show ? defaultLocale : interaction.locale;
 
@@ -35,7 +37,7 @@ function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], interaction
 				description: localise(client, "music.options.now.strings.noSong.description", interaction.locale)(),
 			};
 
-			return void reply([client, bot], interaction, {
+			reply([client, bot], interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -44,6 +46,7 @@ function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], interaction
 					},
 				],
 			});
+			return;
 		}
 	} else {
 		if (!isOccupied(controller.player) || currentListing === undefined) {
@@ -58,7 +61,7 @@ function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], interaction
 				},
 			};
 
-			return void reply([client, bot], interaction, {
+			reply([client, bot], interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -67,6 +70,7 @@ function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], interaction
 					},
 				],
 			});
+			return;
 		} else if (!isCollection(currentListing.content)) {
 			const strings = {
 				title: localise(client, "music.options.now.strings.noSongCollection.title", interaction.locale)(),
@@ -84,7 +88,7 @@ function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], interaction
 				},
 			};
 
-			return void reply([client, bot], interaction, {
+			reply([client, bot], interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -93,6 +97,7 @@ function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], interaction
 					},
 				],
 			});
+			return;
 		}
 	}
 
@@ -105,7 +110,7 @@ function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], interaction
 			listEmpty: localise(client, "music.strings.listEmpty", locale)(),
 		};
 
-		return void paginate([client, bot], interaction, {
+		paginate([client, bot], interaction, {
 			elements: chunk(collection.songs, configuration.music.limits.songs.page),
 			embed: {
 				title: `${constants.symbols.music.nowPlaying} ${strings.nowPlaying}`,
@@ -136,6 +141,7 @@ function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], interaction
 			},
 			show: show ?? false,
 		});
+		return;
 	}
 
 	const song = currentListing.content as Song | SongStream;
@@ -162,7 +168,7 @@ function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], interaction
 		}),
 	};
 
-	return void reply(
+	reply(
 		[client, bot],
 		interaction,
 		{

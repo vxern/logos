@@ -22,7 +22,9 @@ function getRoleCategories(categories: RoleCategory[], guildId: bigint): [catego
 		}
 
 		if (isCustom(category.collection)) {
-			if (!(guildIdString in category.collection.lists)) continue;
+			if (!(guildIdString in category.collection.lists)) {
+				continue;
+			}
 		}
 
 		selectedRoleCategories.push([category, index]);

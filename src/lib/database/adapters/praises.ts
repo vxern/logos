@@ -25,10 +25,11 @@ const cache: CacheAdapter<Praise, PraiseIndexes<Map<string, Document<Praise>>>> 
 		const praiseReferenceId = stringifyValue(praise.ref);
 
 		if (parameter === "sender") {
-			return setNested(client.database.cache.praisesBySender, value, praiseReferenceId, praise);
+			setNested(client.database.cache.praisesBySender, value, praiseReferenceId, praise);
+			return;
 		}
 
-		return setNested(client.database.cache.praisesByRecipient, value, praiseReferenceId, praise);
+		setNested(client.database.cache.praisesByRecipient, value, praiseReferenceId, praise);
 	},
 	setAll: (client, parameter, value, praises) => {
 		if (praises.length === 0) {

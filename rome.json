@@ -4,9 +4,6 @@
 		"enabled": true,
 		"rules": {
       "all": true,
-      "correctness": {
-        "noVoidTypeReturn": "off"
-      },
       "suspicious": {
         "noEmptyInterface": "off"
       },

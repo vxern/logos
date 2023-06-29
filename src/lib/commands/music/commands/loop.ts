@@ -14,11 +14,13 @@ const command: OptionTemplate = {
 	options: [collection],
 };
 
-function handleLoopPlayback([client, bot]: [Client, Bot], interaction: Interaction): void {
+async function handleLoopPlayback([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const [{ collection }] = parseArguments(interaction.data?.options, { collection: "boolean" });
 
 	const controller = client.features.music.controllers.get(interaction.guildId!);
-	if (controller === undefined) return;
+	if (controller === undefined) {
+		return;
+	}
 
 	const isVoiceStateVerified = verifyCanManagePlayback(
 		[client, bot],
@@ -26,7 +28,9 @@ function handleLoopPlayback([client, bot]: [Client, Bot], interaction: Interacti
 		controller,
 		getVoiceState(client, interaction.guildId!, interaction.user.id),
 	);
-	if (!isVoiceStateVerified) return;
+	if (!isVoiceStateVerified) {
+		return;
+	}
 
 	const currentListing = controller.currentListing;
 
@@ -37,7 +41,7 @@ function handleLoopPlayback([client, bot]: [Client, Bot], interaction: Interacti
 				description: localise(client, "music.options.loop.strings.noSong.description", interaction.locale)(),
 			};
 
-			return void reply([client, bot], interaction, {
+			reply([client, bot], interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -46,6 +50,7 @@ function handleLoopPlayback([client, bot]: [Client, Bot], interaction: Interacti
 					},
 				],
 			});
+			return;
 		}
 	} else {
 		if (!isOccupied(controller.player) || currentListing === undefined) {
@@ -60,7 +65,7 @@ function handleLoopPlayback([client, bot]: [Client, Bot], interaction: Interacti
 				},
 			};
 
-			return void reply([client, bot], interaction, {
+			reply([client, bot], interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -69,6 +74,7 @@ function handleLoopPlayback([client, bot]: [Client, Bot], interaction: Interacti
 					},
 				],
 			});
+			return;
 		} else if (!isCollection(currentListing.content)) {
 			const strings = {
 				title: localise(client, "music.options.loop.strings.noSongCollection.title", interaction.locale)(),
@@ -86,7 +92,7 @@ function handleLoopPlayback([client, bot]: [Client, Bot], interaction: Interacti
 				},
 			};
 
-			return void reply([client, bot], interaction, {
+			reply([client, bot], interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -95,6 +101,7 @@ function handleLoopPlayback([client, bot]: [Client, Bot], interaction: Interacti
 					},
 				],
 			});
+			return;
 		}
 	}
 
@@ -111,7 +118,7 @@ function handleLoopPlayback([client, bot]: [Client, Bot], interaction: Interacti
 				)(),
 			};
 
-			return void reply([client, bot], interaction, {
+			reply([client, bot], interaction, {
 				embeds: [
 					{
 						title: `${constants.symbols.music.loopDisabled} ${strings.title}`,
@@ -120,6 +127,7 @@ function handleLoopPlayback([client, bot]: [Client, Bot], interaction: Interacti
 					},
 				],
 			});
+			return;
 		}
 
 		const strings = {
@@ -127,7 +135,7 @@ function handleLoopPlayback([client, bot]: [Client, Bot], interaction: Interacti
 			description: localise(client, "music.options.loop.strings.enabled.description.songCollection", defaultLocale)(),
 		};
 
-		return void reply([client, bot], interaction, {
+		reply([client, bot], interaction, {
 			embeds: [
 				{
 					title: `${constants.symbols.music.loopEnabled} ${strings.title}`,
@@ -136,6 +144,7 @@ function handleLoopPlayback([client, bot]: [Client, Bot], interaction: Interacti
 				},
 			],
 		});
+		return;
 	}
 
 	controller.flags.loop.song = !controller.flags.loop.song;
@@ -146,7 +155,7 @@ function handleLoopPlayback([client, bot]: [Client, Bot], interaction: Interacti
 			description: localise(client, "music.options.loop.strings.disabled.description.song", defaultLocale)(),
 		};
 
-		return void reply(
+		reply(
 			[client, bot],
 			interaction,
 			{
@@ -160,6 +169,7 @@ function handleLoopPlayback([client, bot]: [Client, Bot], interaction: Interacti
 			},
 			{ visible: true },
 		);
+		return;
 	}
 
 	const strings = {
@@ -167,7 +177,7 @@ function handleLoopPlayback([client, bot]: [Client, Bot], interaction: Interacti
 		description: localise(client, "music.options.loop.strings.enabled.description.song", defaultLocale)(),
 	};
 
-	return void reply(
+	reply(
 		[client, bot],
 		interaction,
 		{

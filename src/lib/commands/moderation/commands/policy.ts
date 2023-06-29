@@ -13,11 +13,13 @@ const command: CommandTemplate = {
 	options: [show],
 };
 
-function handleDisplayModerationPolicy([client, bot]: [Client, Bot], interaction: Interaction): void {
+async function handleDisplayModerationPolicy([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const [{ show }] = parseArguments(interaction.data?.options, { show: "boolean" });
 
 	const guild = client.cache.guilds.get(interaction.guildId!);
-	if (guild === undefined) return;
+	if (guild === undefined) {
+		return;
+	}
 
 	const locale = show ? defaultLocale : interaction.locale;
 
@@ -25,7 +27,7 @@ function handleDisplayModerationPolicy([client, bot]: [Client, Bot], interaction
 		title: localise(client, "policies.moderation.title", interaction.locale)(),
 	};
 
-	return void reply(
+	reply(
 		[client, bot],
 		interaction,
 		{

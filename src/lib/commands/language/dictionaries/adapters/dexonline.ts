@@ -45,14 +45,18 @@ class DexonlineAdapter extends DictionaryAdapter<Dexonline.Results> {
 			const withInflections = partsOfSpeech
 				.map((partOfSpeech) => getPartOfSpeech(partOfSpeech, partOfSpeech.split(" ").at(0)!, "Romanian"))
 				.filter((partOfSpeech) => hasInflections(partOfSpeech[0]));
-			if (withInflections.length === 0) continue;
+			if (withInflections.length === 0) {
+				continue;
+			}
 
 			const entry = entries.find((entry) =>
 				withInflections.some(
 					(partOfSpeech) => entry.partOfSpeech[1] === partOfSpeech[1] || entry.partOfSpeech[0] === partOfSpeech[0],
 				),
 			);
-			if (entry === undefined) continue;
+			if (entry === undefined) {
+				continue;
+			}
 
 			const inflectionTable = this.tableRowsToFields(client, entry.partOfSpeech[0], table, locale);
 

@@ -39,13 +39,15 @@ const command: OptionTemplate = {
  * Displays a role selection menu to the user and allows them to assign or unassign roles
  * from within it.
  */
-function handleOpenRoleSelectionMenu([client, bot]: [Client, Bot], interaction: Interaction): void {
+async function handleOpenRoleSelectionMenu([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const guild = client.cache.guilds.get(interaction.guildId!);
-	if (guild === undefined) return;
+	if (guild === undefined) {
+		return;
+	}
 
 	const rootCategories = getRoleCategories(roles, guild.id).map(([category, _index]) => category);
 
-	return createRoleSelectionMenu([client, bot], interaction, {
+	createRoleSelectionMenu([client, bot], interaction, {
 		navigationData: {
 			root: {
 				type: "group",
@@ -113,14 +115,22 @@ function traverseRoleSelectionTree(data: NavigationData): [RoleCategory, ...Role
 /**
  * Creates a browsing menu for selecting roles.
  */
-function createRoleSelectionMenu([client, bot]: [Client, Bot], interaction: Interaction, data: BrowsingData): void {
+async function createRoleSelectionMenu(
+	[client, bot]: [Client, Bot],
+	interaction: Interaction,
+	data: BrowsingData,
+): Promise<void> {
 	const guild = client.cache.guilds.get(interaction.guildId!);
-	if (guild === undefined) return;
+	if (guild === undefined) {
+		return;
+	}
 
 	const emojiIdsByName = new Map(guild.emojis.map((emoji) => [emoji.name!, emoji.id!]));
 
 	const member = client.cache.members.get(snowflakeToBigint(`${interaction.user.id}${guild.id}`));
-	if (member === undefined) return;
+	if (member === undefined) {
+		return;
+	}
 
 	const rolesById = new Map(guild.roles.array().map((role) => [role.id, role]));
 
@@ -131,14 +141,18 @@ function createRoleSelectionMenu([client, bot]: [Client, Bot], interaction: Inte
 			acknowledge([client, bot], selection);
 
 			const indexString = selection.data?.values?.at(0);
-			if (indexString === undefined) return;
+			if (indexString === undefined) {
+				return;
+			}
 
 			const index = Number(indexString);
-			if (isNaN(index)) return;
+			if (isNaN(index)) {
+				return;
+			}
 
 			if (index === -1) {
 				data.navigationData.indexesAccessed.pop();
-				displayData = traverseRoleTreeAndDisplay([client, bot], selection, displayData);
+				displayData = await traverseRoleTreeAndDisplay([client, bot], selection, displayData);
 				return;
 			}
 
@@ -146,7 +160,7 @@ function createRoleSelectionMenu([client, bot]: [Client, Bot], interaction: Inte
 
 			if (isGroup(viewData.category)) {
 				data.navigationData.indexesAccessed.push(index);
-				displayData = traverseRoleTreeAndDisplay([client, bot], selection, displayData);
+				displayData = await traverseRoleTreeAndDisplay([client, bot], selection, displayData);
 				return;
 			}
 
@@ -158,7 +172,7 @@ function createRoleSelectionMenu([client, bot]: [Client, Bot], interaction: Inte
 					viewData.category.minimum !== undefined &&
 					viewData.memberRolesIncludedInMenu.length <= viewData.category.minimum
 				) {
-					displayData = traverseRoleTreeAndDisplay([client, bot], interaction, displayData, true);
+					displayData = await traverseRoleTreeAndDisplay([client, bot], interaction, displayData, true);
 					return;
 				}
 
@@ -206,7 +220,7 @@ function createRoleSelectionMenu([client, bot]: [Client, Bot], interaction: Inte
 						],
 					});
 
-					displayData = traverseRoleTreeAndDisplay([client, bot], interaction, displayData, true);
+					displayData = await traverseRoleTreeAndDisplay([client, bot], interaction, displayData, true);
 					return;
 				}
 
@@ -236,11 +250,11 @@ function createRoleSelectionMenu([client, bot]: [Client, Bot], interaction: Inte
 				displayData.viewData!.memberRolesIncludedInMenu.push(role.id);
 			}
 
-			displayData = traverseRoleTreeAndDisplay([client, bot], interaction, displayData, true);
+			displayData = await traverseRoleTreeAndDisplay([client, bot], interaction, displayData, true);
 		},
 	});
 
-	let displayData = traverseRoleTreeAndDisplay(
+	let displayData = await traverseRoleTreeAndDisplay(
 		[client, bot],
 		interaction,
 		{
@@ -273,12 +287,12 @@ interface RoleDisplayData {
 	viewData?: ViewData;
 }
 
-function traverseRoleTreeAndDisplay(
+async function traverseRoleTreeAndDisplay(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 	data: RoleDisplayData,
 	editResponse = true,
-): RoleDisplayData {
+): Promise<RoleDisplayData> {
 	const categories = traverseRoleSelectionTree(data.browsingData.navigationData);
 	const category = categories.at(-1)!;
 
@@ -317,7 +331,7 @@ function traverseRoleTreeAndDisplay(
 
 	data.viewData!.category = category;
 
-	const menu = displaySelectMenu(client, data, categories, selectOptions, interaction.locale);
+	const menu = await displaySelectMenu(client, data, categories, selectOptions, interaction.locale);
 
 	if (editResponse) {
 		editReply([client, bot], interaction, menu!);
@@ -330,13 +344,13 @@ function traverseRoleTreeAndDisplay(
 	return data;
 }
 
-function displaySelectMenu(
+async function displaySelectMenu(
 	client: Client,
 	data: RoleDisplayData,
 	categories: [RoleCategory, ...RoleCategory[]],
 	selectOptions: SelectOption[],
 	locale: string | undefined,
-): InteractionCallbackData {
+): Promise<InteractionCallbackData> {
 	const isInRootCategory = data.browsingData.navigationData.indexesAccessed.length === 0;
 	if (!isInRootCategory) {
 		const strings = {
@@ -440,11 +454,17 @@ function createSelectOptionsFromCollection(
 			value: index.toString(),
 			description: client.localisations.has(`${role.id}.description`) ? trim(strings.description(), 100) : undefined,
 			emoji: (() => {
-				if (role.emoji === undefined) return;
-				if (emojiExpression.test(role.emoji)) return { name: role.emoji };
+				if (role.emoji === undefined) {
+					return;
+				}
+				if (emojiExpression.test(role.emoji)) {
+					return { name: role.emoji };
+				}
 
 				const id = data.roleData.emojiIdsByName.get(role.emoji);
-				if (id === undefined) return { name: constants.symbols.roles.noCategory };
+				if (id === undefined) {
+					return { name: constants.symbols.roles.noCategory };
+				}
 
 				return { name: role.emoji, id };
 			})(),

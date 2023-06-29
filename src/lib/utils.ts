@@ -42,7 +42,9 @@ function getTextChannel(guild: Guild, name: string): Channel | undefined {
 
 function getChannelMention(guild: Guild, name: string): string {
 	const channel = getTextChannel(guild, name);
-	if (channel === undefined) return name;
+	if (channel === undefined) {
+		return name;
+	}
 
 	return mention(channel.id, MentionTypes.Channel);
 }
@@ -67,7 +69,9 @@ function diagnosticMentionUser(user: User): string {
  * @returns The chunked array.
  */
 function chunk<T>(array: T[], size: number): T[][] {
-	if (array.length === 0) return [[]];
+	if (array.length === 0) {
+		return [[]];
+	}
 	if (size === 0) throw new Error("The size of a chunk cannot be zero.");
 
 	const chunks = array.length <= size ? 1 : Math.floor(array.length / size);
@@ -100,7 +104,9 @@ type Author = NonNullable<Embed["author"]>;
 
 function getAuthor(bot: Bot, guild: Guild): Author | undefined {
 	const iconURL = getGuildIconURLFormatted(bot, guild);
-	if (iconURL === undefined) return undefined;
+	if (iconURL === undefined) {
+		return undefined;
+	}
 
 	return {
 		name: guild.name,
@@ -124,7 +130,9 @@ function addParametersToURL(url: string, parameters: Record<string, string>): st
 		})
 		.join("&");
 
-	if (query.length === 0) return url;
+	if (query.length === 0) {
+		return url;
+	}
 
 	return `${url}?${query}`;
 }
@@ -141,7 +149,9 @@ async function getAllMessages([client, bot]: [Client, Bot], channelId: bigint): 
 			client.log.warn(`Failed to get all messages from channel with ID ${channelId}.`);
 			return undefined;
 		});
-		if (buffer === undefined) return undefined;
+		if (buffer === undefined) {
+			return undefined;
+		}
 
 		if (buffer.size < 100) {
 			isFinished = true;
@@ -157,11 +167,16 @@ function verifyIsWithinLimits(documents: Document[], limit: number, limitingTime
 	const actionTimestamps = documents.map((document) => document.data.createdAt).sort((a, b) => b - a); // From most recent to least recent.
 	const relevantTimestamps = actionTimestamps.slice(0, limit);
 
-	if (relevantTimestamps.length < limit) return true; // Has not reached the limit, regardless of the limiting time period.
+	// Has not reached the limit, regardless of the limiting time period.
+	if (relevantTimestamps.length < limit) {
+		return true;
+	}
 
 	const now = Date.now();
 	for (const timestamp of relevantTimestamps) {
-		if (now - timestamp < limitingTimePeriod) continue;
+		if (now - timestamp < limitingTimePeriod) {
+			continue;
+		}
 		return true;
 	}
 

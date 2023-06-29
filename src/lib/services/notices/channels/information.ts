@@ -70,14 +70,20 @@ async function getOrCreateInvite(
 			client.log.warn(`Failed to get invites on ${guild.name}.`);
 			return undefined;
 		});
-	if (invites === undefined) return undefined;
+	if (invites === undefined) {
+		return undefined;
+	}
 
 	const viableInvites = invites.filter((invite) => invite.maxAge === 0);
 	const mostViableInvite = viableInvites.find((invite) => invite.maxAge === 0 && invite.inviter?.id === guild.ownerId);
-	if (mostViableInvite !== undefined) return mostViableInvite;
+	if (mostViableInvite !== undefined) {
+		return mostViableInvite;
+	}
 
 	const inviteLinkChannel = getTextChannel(guild, configuration.guilds.channels.welcome);
-	if (inviteLinkChannel === undefined) return undefined;
+	if (inviteLinkChannel === undefined) {
+		return undefined;
+	}
 
 	const newInvite = await createInvite(bot, inviteLinkChannel.id, {
 		maxAge: 0,

@@ -181,10 +181,7 @@ const colors = {
 	orange: fromHex("#f28123"), // Beer
 };
 
-enum BulletStyles {
-	Arrow = "arrow",
-	Diamond = "diamond",
-}
+type BulletStyle = "arrow" | "diamond";
 
 const symbols = {
 	meta: {
@@ -287,7 +284,7 @@ const symbols = {
 	bullets: {
 		arrow: "➜",
 		diamond: "♦️",
-	} satisfies Record<BulletStyles, string>,
+	} satisfies Record<BulletStyle, string>,
 	strings: {
 		trail: "...",
 		continued: "(...)",
@@ -387,4 +384,4 @@ export default {
 	staticComponentIds,
 	interactionTokenExpiryInterval,
 };
-export { BulletStyles, Periods };
+export { BulletStyle, Periods };

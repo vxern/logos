@@ -25,7 +25,7 @@ const command: CommandTemplate = {
 
 const ruleIds = ["behaviour", "quality", "relevance", "suitability", "exclusivity", "adherence"];
 
-function handleCiteRuleAutocomplete([client, bot]: [Client, Bot], interaction: Interaction): void {
+async function handleCiteRuleAutocomplete([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const [{ rule: ruleOrUndefined }] = parseArguments(interaction.data?.options, {});
 	const ruleQuery = ruleOrUndefined ?? "";
 
@@ -39,18 +39,26 @@ function handleCiteRuleAutocomplete([client, bot]: [Client, Bot], interaction: I
 		})
 		.filter((choice) => choice.name.toLowerCase().includes(ruleQueryLowercase));
 
-	return void respond([client, bot], interaction, choices);
+	respond([client, bot], interaction, choices);
 }
 
-function handleCiteRule([client, bot]: [Client, Bot], interaction: Interaction): void {
+async function handleCiteRule([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const [{ rule: ruleIndex, show }] = parseArguments(interaction.data?.options, { rule: "number", show: "boolean" });
-	if (ruleIndex === undefined) return displayError([client, bot], interaction);
+	if (ruleIndex === undefined) {
+		displayError([client, bot], interaction);
+		return;
+	}
 
 	const ruleId = ruleIds.at(ruleIndex);
-	if (ruleId === undefined) return displayError([client, bot], interaction);
+	if (ruleId === undefined) {
+		displayError([client, bot], interaction);
+		return;
+	}
 
 	const guild = client.cache.guilds.get(interaction.guildId!);
-	if (guild === undefined) return;
+	if (guild === undefined) {
+		return;
+	}
 
 	const locale = show ? defaultLocale : interaction.locale;
 
@@ -60,7 +68,7 @@ function handleCiteRule([client, bot]: [Client, Bot], interaction: Interaction):
 		content: localise(client, `rules.${ruleId}.content`, locale)(),
 	};
 
-	return void reply(
+	reply(
 		[client, bot],
 		interaction,
 		{
@@ -98,13 +106,13 @@ function getRuleTitleFormatted(
 	}
 }
 
-function displayError([client, bot]: [Client, Bot], interaction: Interaction): void {
+async function displayError([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const strings = {
 		title: localise(client, "rule.strings.invalid.title", interaction.locale)(),
 		description: localise(client, "rule.strings.invalid.description", interaction.locale)(),
 	};
 
-	return void reply([client, bot], interaction, {
+	reply([client, bot], interaction, {
 		embeds: [
 			{
 				title: strings.title,

@@ -20,7 +20,7 @@ const cache: CacheAdapter<Report, ReportIndexes<Document<Report>>, "delete"> = {
 	set: (client, _, value, report) => {
 		const reportReferenceId = stringifyValue(report.ref);
 
-		return setNested(client.database.cache.reportsByAuthorAndGuild, value, reportReferenceId, report);
+		setNested(client.database.cache.reportsByAuthorAndGuild, value, reportReferenceId, report);
 	},
 	delete: (client, _, value, report) => {
 		const reportReferenceId = stringifyValue(report.ref);

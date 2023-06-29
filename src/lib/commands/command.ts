@@ -4,7 +4,7 @@ import { Client } from "../client.js";
 type WithRequired<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>> & Required<Pick<T, K>>;
 
 /** Describes the handler of an interaction. */
-type InteractionHandler = ([client, bot]: [Client, Bot], interaction: Interaction) => void | Promise<void>;
+type InteractionHandler = ([client, bot]: [Client, Bot], interaction: Interaction) => Promise<void>;
 
 type Command = CreateSlashApplicationCommand;
 

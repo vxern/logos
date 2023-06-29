@@ -1,12 +1,14 @@
 import { Bot, Interaction } from "discordeno";
 import { handleRequestPlayback } from "./query.js";
-import { SongListing, SongListingContentTypes } from "../../data/types.js";
+import { SongListing } from "../../data/types.js";
 import { Client, localise } from "../../../../client.js";
 import { deleteReply, parseArguments, postponeReply } from "../../../../interactions.js";
 
-function handleRequestFilePlayback([client, bot]: [Client, Bot], interaction: Interaction): void {
+async function handleRequestFilePlayback([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const [{ url }] = parseArguments(interaction.data?.options, {});
-	if (url === undefined) return;
+	if (url === undefined) {
+		return;
+	}
 
 	postponeReply([client, bot], interaction);
 	deleteReply([client, bot], interaction);
@@ -19,13 +21,13 @@ function handleRequestFilePlayback([client, bot]: [Client, Bot], interaction: In
 		requestedBy: interaction.user.id,
 		managerIds: [],
 		content: {
-			type: SongListingContentTypes.File,
+			type: "file",
 			title: strings.externalFile,
 			url,
 		},
 	};
 
-	return handleRequestPlayback([client, bot], interaction, listing);
+	handleRequestPlayback([client, bot], interaction, listing);
 }
 
 export { handleRequestFilePlayback };

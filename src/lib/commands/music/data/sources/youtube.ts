@@ -1,7 +1,7 @@
 import { Bot, Interaction, InteractionTypes, MessageComponentTypes, SelectOption } from "discordeno";
 import * as YouTubeSearch from "youtube-sr";
 import { ListingResolver } from "./sources.js";
-import { SongListing, SongListingContentTypes } from "../types.js";
+import { SongListing } from "../types.js";
 import { Client, localise } from "../../../../client.js";
 import { createInteractionCollector, deleteReply, postponeReply, reply } from "../../../../interactions.js";
 import constants from "../../../../../constants.js";
@@ -39,7 +39,9 @@ async function search(
 	const results = resultsAll.filter((element) => isPlaylist(element) || isVideo(element)) as Array<
 		YouTubeSearch.Playlist | YouTubeSearch.Video
 	>;
-	if (results.length === 0) return undefined;
+	if (results.length === 0) {
+		return undefined;
+	}
 
 	return new Promise<SongListing | undefined>((resolve) => {
 		const customId = createInteractionCollector([client, bot], {
@@ -50,10 +52,14 @@ async function search(
 				deleteReply([client, bot], interaction);
 
 				const indexString = selection.data?.values?.at(0) as string | undefined;
-				if (indexString === undefined) return resolve(undefined);
+				if (indexString === undefined) {
+					return resolve(undefined);
+				}
 
 				const index = Number(indexString);
-				if (isNaN(index)) return resolve(undefined);
+				if (isNaN(index)) {
+					return resolve(undefined);
+				}
 
 				const result = results.at(index)!;
 				if (isPlaylist(result)) {
@@ -70,7 +76,7 @@ async function search(
 			description: localise(client, "music.options.play.strings.selectSong.description", interaction.locale)(),
 		};
 
-		return void reply([client, bot], interaction, {
+		reply([client, bot], interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -113,14 +119,16 @@ function isVideo(result: Result): result is YouTubeSearch.Video {
 }
 
 function fromYouTubeVideo(video: YouTubeSearch.Video, requestedBy: bigint): SongListing | undefined {
-	if (video.id === undefined) return undefined;
+	if (video.id === undefined) {
+		return undefined;
+	}
 
 	return {
 		source: "YouTube",
 		requestedBy,
 		managerIds: [],
 		content: {
-			type: SongListingContentTypes.Song,
+			type: "song",
 			title: video.title!,
 			url: video.url!,
 			duration: video.duration,
@@ -129,17 +137,19 @@ function fromYouTubeVideo(video: YouTubeSearch.Video, requestedBy: bigint): Song
 }
 
 function fromYouTubePlaylist(playlist: YouTubeSearch.Playlist, requestedBy: bigint): SongListing | undefined {
-	if (playlist.id === undefined) return undefined;
+	if (playlist.id === undefined) {
+		return undefined;
+	}
 
 	return {
 		source: "YouTube",
 		requestedBy,
 		managerIds: [],
 		content: {
-			type: SongListingContentTypes.Collection,
+			type: "collection",
 			title: playlist.title!,
 			songs: playlist.videos.map((video) => ({
-				type: SongListingContentTypes.Song,
+				type: "song",
 				title: video.title!,
 				url: video.url!,
 				duration: video.duration,

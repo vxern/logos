@@ -15,36 +15,23 @@ const command: OptionTemplate = {
 	options: [{ ...user, required: false }, show],
 };
 
-function handleDisplayProfileAutocomplete([client, bot]: [Client, Bot], interaction: Interaction): void {
+async function handleDisplayProfileAutocomplete([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const [{ user }] = parseArguments(interaction.data?.options, {});
 
-	return autocompleteMembers([client, bot], interaction, user!);
+	autocompleteMembers([client, bot], interaction, user!);
 }
 
 async function handleDisplayProfile([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const [{ user, show }] = parseArguments(interaction.data?.options, { show: "boolean" });
 
 	const member = resolveInteractionToMember([client, bot], interaction, user ?? interaction.user.id.toString());
-	if (member === undefined) return;
+	if (member === undefined) {
+		return;
+	}
 
 	const target = member.user;
-	if (target === undefined) return;
-
-	function showProfileViewFailure(): void {
-		const strings = {
-			title: localise(client, "profile.options.view.strings.failed.title", interaction.locale)(),
-			description: localise(client, "profile.options.view.strings.failed.description", interaction.locale)(),
-		};
-
-		return void reply([client, bot], interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colors.red,
-				},
-			],
-		});
+	if (target === undefined) {
+		return;
 	}
 
 	const subject = await client.database.adapters.users.getOrFetchOrCreate(
@@ -53,7 +40,10 @@ async function handleDisplayProfile([client, bot]: [Client, Bot], interaction: I
 		member.id.toString(),
 		member.id,
 	);
-	if (subject === undefined) return showProfileViewFailure();
+	if (subject === undefined) {
+		displayError([client, bot], interaction);
+		return;
+	}
 
 	const [praisesSent, praisesReceived, warningsReceived] = await Promise.all([
 		client.database.adapters.praises.getOrFetch(client, "sender", subject.ref),
@@ -61,7 +51,8 @@ async function handleDisplayProfile([client, bot]: [Client, Bot], interaction: I
 		client.database.adapters.warnings.getOrFetch(client, "recipient", subject.ref),
 	]);
 	if (praisesSent === undefined || praisesReceived === undefined || warningsReceived === undefined) {
-		return showProfileViewFailure();
+		displayError([client, bot], interaction);
+		return;
 	}
 
 	const locale = show ? defaultLocale : interaction.locale;
@@ -82,7 +73,7 @@ async function handleDisplayProfile([client, bot]: [Client, Bot], interaction: I
 		sent: localise(client, "profile.options.view.strings.information.description.sent", locale)(),
 	};
 
-	return void reply(
+	reply(
 		[client, bot],
 		interaction,
 		{
@@ -95,7 +86,9 @@ async function handleDisplayProfile([client, bot]: [Client, Bot], interaction: I
 							size: 4096,
 							format: "webp",
 						});
-						if (iconURL === undefined) return;
+						if (iconURL === undefined) {
+							return;
+						}
 
 						return { url: iconURL };
 					})(),
@@ -117,6 +110,23 @@ async function handleDisplayProfile([client, bot]: [Client, Bot], interaction: I
 		},
 		{ visible: show },
 	);
+}
+
+async function displayError([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+	const strings = {
+		title: localise(client, "profile.options.view.strings.failed.title", interaction.locale)(),
+		description: localise(client, "profile.options.view.strings.failed.description", interaction.locale)(),
+	};
+
+	reply([client, bot], interaction, {
+		embeds: [
+			{
+				title: strings.title,
+				description: strings.description,
+				color: constants.colors.red,
+			},
+		],
+	});
 }
 
 export default command;

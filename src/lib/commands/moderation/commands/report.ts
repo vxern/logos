@@ -34,14 +34,13 @@ const command: CommandTemplate = {
 	handle: handleMakeReport,
 };
 
-enum ReportError {
-	Failure = "failure",
-	CannotReportSelf = "cannot_report_self",
-}
+type ReportError = "failure" | "cannot_report_self";
 
 async function handleMakeReport([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const guild = client.cache.guilds.get(interaction.guildId!);
-	if (guild === undefined) return;
+	if (guild === undefined) {
+		return;
+	}
 
 	const userDocument = await client.database.adapters.users.getOrFetchOrCreate(
 		client,
@@ -49,7 +48,9 @@ async function handleMakeReport([client, bot]: [Client, Bot], interaction: Inter
 		interaction.user.id.toString(),
 		interaction.user.id,
 	);
-	if (userDocument === undefined) return;
+	if (userDocument === undefined) {
+		return;
+	}
 
 	const reportsByAuthorAndGuild = client.database.adapters.reports.get(client, "authorAndGuild", [
 		userDocument.ref,
@@ -63,7 +64,7 @@ async function handleMakeReport([client, bot]: [Client, Bot], interaction: Inter
 
 		const reports = Array.from(reportsByAuthorAndGuild.values());
 		if (!verifyIsWithinLimits(reports, configuration.commands.report.limitUses, configuration.commands.report.within)) {
-			return void reply([client, bot], interaction, {
+			reply([client, bot], interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -72,10 +73,11 @@ async function handleMakeReport([client, bot]: [Client, Bot], interaction: Inter
 					},
 				],
 			});
+			return;
 		}
 	}
 
-	return void createModalComposer([client, bot], interaction, {
+	createModalComposer([client, bot], interaction, {
 		modal: generateReportModal(client, interaction.locale),
 		onSubmit: async (submission, answers) => {
 			await postponeReply([client, bot], submission);
@@ -89,10 +91,14 @@ async function handleMakeReport([client, bot]: [Client, Bot], interaction: Inter
 				messageLink: answers.message_link,
 				isResolved: false,
 			});
-			if (report === undefined) return ReportError.Failure;
+			if (report === undefined) {
+				return "failure";
+			}
 
 			const channel = getTextChannel(guild, configuration.guilds.channels.reports);
-			if (channel === undefined) return true;
+			if (channel === undefined) {
+				return true;
+			}
 
 			logEvent([client, bot], guild, "reportSubmit", [interaction.member!, report.data]);
 
@@ -100,10 +106,14 @@ async function handleMakeReport([client, bot]: [Client, Bot], interaction: Inter
 			const reference = stringifyValue(report.ref);
 
 			const user = client.cache.users.get(userId);
-			if (user === undefined) return ReportError.Failure;
+			if (user === undefined) {
+				return "failure";
+			}
 
 			const prompt = await reportManager.savePrompt([client, bot], guild, channel, user, report);
-			if (prompt === undefined) return ReportError.Failure;
+			if (prompt === undefined) {
+				return "failure";
+			}
 
 			reportManager.registerPrompt(prompt, userId, reference, report);
 			reportManager.registerHandler(client, [userId.toString(), guild.id.toString(), reference]);
@@ -125,13 +135,12 @@ async function handleMakeReport([client, bot]: [Client, Bot], interaction: Inter
 
 			return true;
 		},
-		// deno-lint-ignore require-await
 		onInvalid: async (submission, error) =>
 			handleSubmittedInvalidReport([client, bot], submission, error as ReportError | undefined),
 	});
 }
 
-function handleSubmittedInvalidReport(
+async function handleSubmittedInvalidReport(
 	[client, bot]: [Client, Bot],
 	submission: Interaction,
 	error: ReportError | undefined,
@@ -139,7 +148,7 @@ function handleSubmittedInvalidReport(
 	return new Promise((resolve) => {
 		const continueId = createInteractionCollector([client, bot], {
 			type: InteractionTypes.MessageComponent,
-			onCollect: (_, selection) => {
+			onCollect: async (_, selection) => {
 				deleteReply([client, bot], submission);
 				resolve(selection);
 			},
@@ -147,7 +156,7 @@ function handleSubmittedInvalidReport(
 
 		const cancelId = createInteractionCollector([client, bot], {
 			type: InteractionTypes.MessageComponent,
-			onCollect: (_, cancelSelection) => {
+			onCollect: async (_, cancelSelection) => {
 				const returnId = createInteractionCollector([client, bot], {
 					type: InteractionTypes.MessageComponent,
 					onCollect: (_, returnSelection) => resolve(returnSelection),
@@ -155,7 +164,7 @@ function handleSubmittedInvalidReport(
 
 				const leaveId = createInteractionCollector([client, bot], {
 					type: InteractionTypes.MessageComponent,
-					onCollect: (_, _leaveSelection) => {
+					onCollect: async (_, _leaveSelection) => {
 						deleteReply([client, bot], submission);
 						deleteReply([client, bot], cancelSelection);
 						resolve(undefined);
@@ -202,7 +211,7 @@ function handleSubmittedInvalidReport(
 
 		let embed!: Embed;
 		switch (error) {
-			case ReportError.CannotReportSelf: {
+			case "cannot_report_self": {
 				const strings = {
 					title: localise(client, "report.strings.cannotReportSelf.title", submission.locale)(),
 					description: localise(client, "report.strings.cannotReportSelf.description", submission.locale)(),

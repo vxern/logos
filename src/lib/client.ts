@@ -157,15 +157,19 @@ async function initialiseClient(
 	metadata: Client["metadata"],
 	features: Omit<Client["features"], "music">,
 	localisations: Map<string, Map<Language, string>>,
-): Promise<[Client, Bot]> {
-	const musicFeature = createMusicFeature((guildId, payload) => {
+): Promise<void> {
+	const musicFeature = createMusicFeature(async (guildId, payload) => {
 		const shardId = client.cache.guilds.get(BigInt(guildId))?.shardId;
-		if (shardId === undefined) return;
+		if (shardId === undefined) {
+			return;
+		}
 
 		const shard = bot.gateway.manager.shards.find((shard) => shard.id === shardId);
-		if (shard === undefined) return;
+		if (shard === undefined) {
+			return;
+		}
 
-		return void sendShardPayload(shard, payload, true);
+		sendShardPayload(shard, payload, true);
 	});
 
 	const client = createClient(metadata, { ...features, music: musicFeature }, localisations);
@@ -191,7 +195,7 @@ async function initialiseClient(
 
 	setupLavalinkNode([client, bot]);
 
-	return startBot(bot).then(() => [client, bot]);
+	startBot(bot).then(() => [client, bot]);
 }
 
 async function prefetchDataFromDatabase(client: Client, database: Database): Promise<void> {
@@ -221,28 +225,28 @@ function createMusicFeature(sendGatewayPayload: Lavaclient.Node["sendGatewayPayl
 function withMusicEvents(events: Partial<EventHandlers>, node: Lavaclient.Node): Partial<EventHandlers> {
 	return {
 		...events,
-		voiceStateUpdate: (_, payload) => {
+		voiceStateUpdate: async (_, payload) =>
 			node.handleVoiceUpdate({
 				session_id: payload.sessionId,
 				channel_id: payload.channelId !== undefined ? `${payload.channelId}` : null,
 				guild_id: `${payload.guildId}`,
 				user_id: `${payload.userId}`,
-			});
-		},
-		voiceServerUpdate: (_, payload) => {
+			}),
+		voiceServerUpdate: async (_, payload) =>
 			node.handleVoiceUpdate({
 				token: payload.token,
 				endpoint: payload.endpoint!,
 				guild_id: `${payload.guildId}`,
-			});
-		},
+			}),
 	};
 }
 
 function overrideDefaultEventHandlers(bot: Bot): Bot {
 	bot.handlers.MESSAGE_UPDATE = (bot, data) => {
 		const messageData = data.d as DiscordMessage;
-		if (!("author" in messageData)) return;
+		if (!("author" in messageData)) {
+			return;
+		}
 
 		bot.events.messageUpdate(bot, bot.transformers.message(bot, messageData));
 	};
@@ -260,7 +264,7 @@ function createEventHandlers(client: Client): Partial<EventHandlers> {
 				shard.socket.onerror = () => {};
 			}
 		},
-		guildCreate: (bot, guild) => {
+		guildCreate: async (bot, guild) => {
 			const commands = (() => {
 				if (isServicing(client, guild.id)) {
 					return client.commands.local;
@@ -277,7 +281,9 @@ function createEventHandlers(client: Client): Partial<EventHandlers> {
 
 			setupMusicController(client, guild.id);
 
-			if (!isServicing(client, guild.id)) return;
+			if (!isServicing(client, guild.id)) {
+				return;
+			}
 
 			setupLogging([client, bot], guild);
 
@@ -289,14 +295,16 @@ function createEventHandlers(client: Client): Partial<EventHandlers> {
 			client.cache.channels.delete(channel.id);
 			client.cache.guilds.get(channel.guildId)?.channels.delete(channel.id);
 		},
-		interactionCreate: (bot, interaction) => {
+		interactionCreate: async (bot, interaction) => {
 			if (interaction.data?.customId === constants.staticComponentIds.none) {
 				acknowledge([client, bot], interaction);
 				return;
 			}
 
 			const commandName = interaction.data?.name;
-			if (commandName === undefined) return;
+			if (commandName === undefined) {
+				return;
+			}
 
 			const subCommandGroupOption = interaction.data?.options?.find((option) => isSubcommandGroup(option));
 
@@ -304,7 +312,9 @@ function createEventHandlers(client: Client): Partial<EventHandlers> {
 			if (subCommandGroupOption !== undefined) {
 				const subCommandGroupName = subCommandGroupOption.name;
 				const subCommandName = subCommandGroupOption.options?.find((option) => isSubcommand(option))?.name;
-				if (subCommandName === undefined) return;
+				if (subCommandName === undefined) {
+					return;
+				}
 
 				commandNameFull = `${commandName} ${subCommandGroupName} ${subCommandName}`;
 			} else {
@@ -322,7 +332,9 @@ function createEventHandlers(client: Client): Partial<EventHandlers> {
 			} else {
 				handle = client.commands.handlers.execute.get(commandNameFull);
 			}
-			if (handle === undefined) return;
+			if (handle === undefined) {
+				return;
+			}
 
 			Promise.resolve(handle([client, bot], interaction)).catch((exception) => {
 				Sentry.captureException(exception);
@@ -422,11 +434,15 @@ function withCaching(client: Client, transformers: Transformers): Transformers {
 }
 
 function withRateLimiting(handle: InteractionHandler): InteractionHandler {
-	return ([client, bot], interaction) => {
-		if (isAutocomplete(interaction)) return;
+	return async ([client, bot], interaction) => {
+		if (isAutocomplete(interaction)) {
+			return;
+		}
 
 		const commandId = interaction.data?.id;
-		if (commandId === undefined) return handle([client, bot], interaction);
+		if (commandId === undefined) {
+			return handle([client, bot], interaction);
+		}
 
 		if (!client.features.rateLimiting.has(interaction.user.id)) {
 			client.features.rateLimiting.set(interaction.user.id, new Map());
@@ -465,7 +481,7 @@ function withRateLimiting(handle: InteractionHandler): InteractionHandler {
 
 			setTimeout(() => deleteReply([client, bot], interaction), nextValidUsageTimestamp - now - Periods.second);
 
-			return void reply([client, bot], interaction, {
+			reply([client, bot], interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -474,6 +490,7 @@ function withRateLimiting(handle: InteractionHandler): InteractionHandler {
 					},
 				],
 			});
+			return;
 		}
 
 		timestampsByCommandId.set(commandId, activeTimestamps);
@@ -507,28 +524,36 @@ function localiseCommands(localisations: Client["localisations"], commandTemplat
 	for (const commandTemplate of commandTemplates) {
 		const commandKey = commandTemplate.name;
 		const localisations = localiseCommandOrOption(commandKey);
-		if (localisations === undefined) continue;
+		if (localisations === undefined) {
+			continue;
+		}
 
 		const command: Command = { ...localisations, ...commandTemplate, options: [] };
 
 		for (const optionTemplate of commandTemplate.options ?? []) {
 			const optionKey = [commandKey, "options", optionTemplate.name].join(".");
 			const localisations = localiseCommandOrOption(optionKey);
-			if (localisations === undefined) continue;
+			if (localisations === undefined) {
+				continue;
+			}
 
 			const option: Option = { ...localisations, ...optionTemplate, options: [] };
 
 			for (const subOptionTemplate of optionTemplate.options ?? []) {
 				const subOptionKey = [optionKey, "options", subOptionTemplate.name].join(".");
 				const localisations = localiseCommandOrOption(subOptionKey);
-				if (localisations === undefined) continue;
+				if (localisations === undefined) {
+					continue;
+				}
 
 				const subOption: Option = { ...localisations, ...subOptionTemplate, options: [] };
 
 				for (const subSubOptionTemplate of subOptionTemplate.options ?? []) {
 					const subSubOptionKey = [subOptionKey, "options", subSubOptionTemplate.name].join(".");
 					const localisations = localiseCommandOrOption(subSubOptionKey);
-					if (localisations === undefined) continue;
+					if (localisations === undefined) {
+						continue;
+					}
 
 					const subSubOption: Option = { ...localisations, ...subSubOptionTemplate, options: [] };
 
@@ -560,7 +585,9 @@ function createCommandHandlers(commands: CommandTemplate[]): Client["commands"][
 			autocompleteHandlers.set(command.name, command.handleAutocomplete);
 		}
 
-		if (command.options === undefined) continue;
+		if (command.options === undefined) {
+			continue;
+		}
 
 		for (const option of command.options) {
 			if (option.handle !== undefined) {
@@ -574,7 +601,9 @@ function createCommandHandlers(commands: CommandTemplate[]): Client["commands"][
 				autocompleteHandlers.set(`${command.name} ${option.name}`, option.handleAutocomplete);
 			}
 
-			if (option.options === undefined) continue;
+			if (option.options === undefined) {
+				continue;
+			}
 
 			for (const subOption of option.options) {
 				if (subOption.handle !== undefined) {
@@ -598,7 +627,9 @@ function createCommandHandlers(commands: CommandTemplate[]): Client["commands"][
 
 function getImplicitLanguage(guild: Guild): Language {
 	const match = configuration.guilds.namePattern.exec(guild.name) ?? undefined;
-	if (match === undefined) return defaultLanguage;
+	if (match === undefined) {
+		return defaultLanguage;
+	}
 
 	const language = match.at(1)!;
 	const found = supportedLanguages.find((supportedLanguage) => supportedLanguage === language);
@@ -627,21 +658,24 @@ function setupLavalinkNode([client, bot]: [Client, Bot]): void {
 	);
 
 	client.features.music.node.on("error", (error) => {
-		if (error.name === "ConnectionRefused") return;
+		if (error.name === "ConnectionRefused") {
+			return;
+		}
 
 		client.log.error(`The Lavalink node has encountered an error:\n${error}`);
 	});
 
-	client.features.music.node.on("disconnect", async ({ code, reason }) => {
-		if (code === -1) {
+	client.features.music.node.on("disconnect", async (error) => {
+		if (error.code === -1) {
 			client.log.warn("Unable to connect to Lavalink node. Retrying in 5 seconds...");
 			await new Promise((resolve) => setTimeout(resolve, 5000));
-			return connectToLavalinkNode([client, bot]);
+		} else {
+			client.log.info(
+				`Disconnected from the Lavalink node. Code ${error.code}, reason: ${error.reason}\nAttempting to reconnect...`,
+			);
 		}
 
-		client.log.info(`Disconnected from the Lavalink node. Code ${code}, reason: ${reason}\nAttempting to reconnect...`);
-
-		return connectToLavalinkNode([client, bot]);
+		connectToLavalinkNode([client, bot]);
 	});
 
 	connectToLavalinkNode([client, bot]);
@@ -649,8 +683,7 @@ function setupLavalinkNode([client, bot]: [Client, Bot]): void {
 
 function connectToLavalinkNode([client, bot]: [Client, Bot]): void {
 	client.log.info("Connecting to Lavalink node...");
-
-	return client.features.music.node.connect(bot.id.toString());
+	client.features.music.node.connect(bot.id.toString());
 }
 
 function addCollector<T extends keyof EventHandlers>(
@@ -734,23 +767,35 @@ function resolveIdentifierToMembers(
 	options: Partial<MemberNarrowingOptions> = {},
 ): [members: Member[], isResolved: boolean] | undefined {
 	const asker = client.cache.members.get(snowflakeToBigint(`${userId}${guildId}`));
-	if (asker === undefined) return undefined;
+	if (asker === undefined) {
+		return undefined;
+	}
 
 	const guild = client.cache.guilds.get(guildId);
-	if (guild === undefined) return undefined;
+	if (guild === undefined) {
+		return undefined;
+	}
 
 	const moderatorRoleIds = guild.roles
 		.array()
 		.filter((role) => calculatePermissions(role.permissions).includes("MODERATE_MEMBERS"))
 		.map((role) => role.id);
-	if (moderatorRoleIds.length === 0) return undefined;
+	if (moderatorRoleIds.length === 0) {
+		return undefined;
+	}
 
 	const id = extractIDFromIdentifier(identifier);
 	if (id !== undefined) {
 		const member = client.cache.members.get(snowflakeToBigint(`${id}${guildId}`));
-		if (member === undefined) return undefined;
-		if (options.restrictToSelf && member.id !== asker.id) return undefined;
-		if (options.restrictToNonSelf && member.id === asker.id) return undefined;
+		if (member === undefined) {
+			return undefined;
+		}
+		if (options.restrictToSelf && member.id !== asker.id) {
+			return undefined;
+		}
+		if (options.restrictToNonSelf && member.id === asker.id) {
+			return undefined;
+		}
 		if (options.excludeModerators && moderatorRoleIds.some((roleId) => member.roles.includes(roleId))) {
 			return undefined;
 		}
@@ -778,27 +823,35 @@ function resolveIdentifierToMembers(
 
 	const identifierLowercase = identifier.toLowerCase();
 	const matchedMembers = members.filter((member) => {
-		if (member.user?.toggles.bot && !options.includeBots) return false;
-		if (member.user?.username.toLowerCase().includes(identifierLowercase)) return true;
-		if (member.nick?.toLowerCase().includes(identifierLowercase)) return true;
+		if (member.user?.toggles.bot && !options.includeBots) {
+			return false;
+		}
+		if (member.user?.username.toLowerCase().includes(identifierLowercase)) {
+			return true;
+		}
+		if (member.nick?.toLowerCase().includes(identifierLowercase)) {
+			return true;
+		}
 		return false;
 	});
 
 	return [matchedMembers, false];
 }
 
-function autocompleteMembers(
+async function autocompleteMembers(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 	identifier: string,
 	options?: Partial<MemberNarrowingOptions>,
-): void {
+): Promise<void> {
 	const result = resolveIdentifierToMembers(client, interaction.guildId!, interaction.user.id, identifier, options);
-	if (result === undefined) return;
+	if (result === undefined) {
+		return;
+	}
 
 	const [matchedMembers, _] = result;
 
-	return void respond(
+	respond(
 		[client, bot],
 		interaction,
 		matchedMembers.slice(0, 20).map((member) => ({
@@ -815,10 +868,14 @@ function resolveInteractionToMember(
 	options?: Partial<MemberNarrowingOptions>,
 ): Member | undefined {
 	const result = resolveIdentifierToMembers(client, interaction.guildId!, interaction.user.id, identifier, options);
-	if (result === undefined) return;
+	if (result === undefined) {
+		return;
+	}
 
 	const [matchedMembers, isResolved] = result;
-	if (isResolved) return matchedMembers.at(0);
+	if (isResolved) {
+		return matchedMembers.at(0);
+	}
 
 	if (matchedMembers.length === 0) {
 		const strings = {

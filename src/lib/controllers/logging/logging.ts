@@ -10,7 +10,9 @@ const clientEventNames = Object.keys(generators.client) as ClientEventNames[];
 
 function setupLogging([client, bot]: [Client, Bot], guild: Guild): void {
 	const logChannel = getTextChannel(guild, configuration.guilds.channels.logging);
-	if (logChannel === undefined) return;
+	if (logChannel === undefined) {
+		return;
+	}
 
 	for (const event of clientEventNames) {
 		extendEventHandler(bot, event, { append: true }, (...args) => {
@@ -21,11 +23,18 @@ function setupLogging([client, bot]: [Client, Bot], guild: Guild): void {
 
 const messageGenerators = { ...generators.client, ...generators.guild };
 
-function logEvent<K extends keyof Events>([client, bot]: [Client, Bot], guild: Guild, event: K, args: Events[K]): void {
+async function logEvent<K extends keyof Events>(
+	[client, bot]: [Client, Bot],
+	guild: Guild,
+	event: K,
+	args: Events[K],
+): Promise<void> {
 	const logChannel = getTextChannel(guild, configuration.guilds.channels.logging);
-	if (logChannel === undefined) return;
+	if (logChannel === undefined) {
+		return;
+	}
 
-	return void logToChannel([client, bot], logChannel, event, ...args);
+	logToChannel([client, bot], logChannel, event, ...args);
 }
 
 async function logToChannel<K extends keyof Events>(
@@ -35,22 +44,32 @@ async function logToChannel<K extends keyof Events>(
 	...args: Events[K]
 ): Promise<void> {
 	const entry = messageGenerators[event];
-	if (entry === undefined) return;
+	if (entry === undefined) {
+		return;
+	}
 
 	const filter = entry.filter(client, channel.guildId, ...args);
-	if (!filter) return;
+	if (!filter) {
+		return;
+	}
 
 	const message = await new Promise<string | undefined>((resolve) => {
 		const result = entry.message(client, ...args);
-		if (result === undefined) return resolve(undefined);
+		if (result === undefined) {
+			return resolve(undefined);
+		}
 
-		if (typeof result === "string") return resolve(result);
+		if (typeof result === "string") {
+			return resolve(result);
+		}
 
 		return result.then((message) => resolve(message));
 	});
-	if (message === undefined) return;
+	if (message === undefined) {
+		return;
+	}
 
-	return void sendMessage(bot, channel.id, {
+	sendMessage(bot, channel.id, {
 		embeds: [
 			{
 				title: entry.title,

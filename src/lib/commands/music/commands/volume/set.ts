@@ -5,9 +5,11 @@ import { parseArguments, reply } from "../../../../interactions.js";
 import configuration from "../../../../../configuration.js";
 import constants from "../../../../../constants.js";
 
-function handleSetVolume([client, bot]: [Client, Bot], interaction: Interaction): void {
+async function handleSetVolume([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const controller = client.features.music.controllers.get(interaction.guildId!);
-	if (controller === undefined) return;
+	if (controller === undefined) {
+		return;
+	}
 
 	const isVoiceStateVerified = verifyCanManagePlayback(
 		[client, bot],
@@ -15,10 +17,14 @@ function handleSetVolume([client, bot]: [Client, Bot], interaction: Interaction)
 		controller,
 		getVoiceState(client, interaction.guildId!, interaction.user.id),
 	);
-	if (!isVoiceStateVerified) return;
+	if (!isVoiceStateVerified) {
+		return;
+	}
 
 	const [{ volume }] = parseArguments(interaction.data?.options, { volume: "number" });
-	if (volume === undefined || isNaN(volume)) return;
+	if (volume === undefined || isNaN(volume)) {
+		return;
+	}
 
 	if (volume < 0 || volume > configuration.music.limits.volume) {
 		const strings = {
@@ -30,7 +36,7 @@ function handleSetVolume([client, bot]: [Client, Bot], interaction: Interaction)
 			)({ volume: configuration.music.limits.volume }),
 		};
 
-		return void reply([client, bot], interaction, {
+		reply([client, bot], interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -39,6 +45,7 @@ function handleSetVolume([client, bot]: [Client, Bot], interaction: Interaction)
 				},
 			],
 		});
+		return;
 	}
 
 	setVolume(controller.player, volume);
@@ -52,7 +59,7 @@ function handleSetVolume([client, bot]: [Client, Bot], interaction: Interaction)
 		)({ volume: volume }),
 	};
 
-	return void reply(
+	reply(
 		[client, bot],
 		interaction,
 		{

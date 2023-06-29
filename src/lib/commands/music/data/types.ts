@@ -1,8 +1,10 @@
 import constants from "../../../../constants.js";
 
+type SongListingType = "song" | "collection" | "file";
+
 /** Represents a musical piece, playable singly by the music controller. */
 interface Song {
-	type: SongListingContentTypes.Song;
+	type: "song";
 
 	/** The title of the song. */
 	title: string;
@@ -20,7 +22,7 @@ interface Song {
  * occupy a separate place in the queue.
  */
 interface SongCollection {
-	type: SongListingContentTypes.Collection;
+	type: "collection";
 
 	/** The title of the collection. */
 	title: string;
@@ -30,12 +32,6 @@ interface SongCollection {
 
 	/** The songs in the collection. */
 	songs: Song[];
-}
-
-enum SongListingContentTypes {
-	Song = "song",
-	File = "file",
-	Collection = "collection",
 }
 
 /**
@@ -61,7 +57,7 @@ interface SongListing {
 
 /** Represents a musical piece in stream format. */
 interface SongStream {
-	type: SongListingContentTypes.File;
+	type: "file";
 
 	/** The title of the stream. */
 	title: string;
@@ -71,10 +67,10 @@ interface SongStream {
 }
 
 const listingTypeToEmoji = {
-	[SongListingContentTypes.Song]: constants.symbols.music.song,
-	[SongListingContentTypes.File]: constants.symbols.music.file,
-	[SongListingContentTypes.Collection]: constants.symbols.music.collection,
-} satisfies Record<`${SongListingContentTypes}`, string>;
+	song: constants.symbols.music.song,
+	collection: constants.symbols.music.collection,
+	file: constants.symbols.music.file,
+} satisfies Record<SongListingType, string>;
 
-export { listingTypeToEmoji, SongListingContentTypes };
+export { listingTypeToEmoji, SongListingType };
 export type { Song, SongCollection, SongListing, SongStream };

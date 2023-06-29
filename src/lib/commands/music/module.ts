@@ -7,13 +7,13 @@ import configuration from "../../../configuration.js";
 import constants from "../../../constants.js";
 import { list } from "../../../formatting.js";
 
-function displayListings(
+async function displayListings(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 	{ title, songListings }: { title: string; songListings: SongListing[] },
 	show: boolean,
 	locale: string | undefined,
-): void {
+): Promise<void> {
 	const pages = chunk(songListings, configuration.music.limits.songs.page);
 
 	const strings = {
@@ -21,13 +21,15 @@ function displayListings(
 		listEmpty: localise(client, "music.strings.listEmpty", locale)(),
 	};
 
-	return paginate([client, bot], interaction, {
+	paginate([client, bot], interaction, {
 		elements: pages,
 		embed: { title: title, color: constants.colors.blue },
 		view: {
 			title: strings.title,
 			generate: (page, pageIndex) => {
-				if (page.length === 0) return strings.listEmpty;
+				if (page.length === 0) {
+					return strings.listEmpty;
+				}
 
 				return list(
 					page.map((listing, index) => {

@@ -6,7 +6,7 @@ import {
 	Song,
 	SongCollection,
 	SongListing,
-	SongListingContentTypes,
+	SongListingType,
 	SongStream,
 } from "../commands/music/data/types.js";
 import { Client, localise } from "../client.js";
@@ -61,7 +61,9 @@ function createMusicController(client: Client, guildId: bigint): MusicController
 }
 
 function getCurrentSong(controller: MusicController): Song | SongStream | undefined {
-	if (controller.currentListing === undefined) return undefined;
+	if (controller.currentListing === undefined) {
+		return undefined;
+	}
 
 	if (isCollection(controller.currentListing.content)) {
 		return getCurrentTrack(controller.currentListing.content);
@@ -96,7 +98,9 @@ function isPaused(player: Lavaclient.Player): boolean {
 
 function getVoiceState(client: Client, guildId: bigint, userId: bigint): VoiceState | undefined {
 	const guild = client.cache.guilds.get(guildId);
-	if (guild === undefined) return undefined;
+	if (guild === undefined) {
+		return undefined;
+	}
 
 	const voiceState = guild.voiceStates.get(userId);
 	return voiceState;
@@ -162,7 +166,9 @@ function verifyCanRequestPlayback(
 	voiceState: VoiceState | undefined,
 ): boolean {
 	const isVoiceStateVerified = verifyVoiceState([client, bot], interaction, controller, voiceState, "manage");
-	if (!isVoiceStateVerified) return false;
+	if (!isVoiceStateVerified) {
+		return false;
+	}
 
 	if (!isQueueVacant(controller.listingQueue)) {
 		const strings = {
@@ -193,7 +199,9 @@ function verifyCanManagePlayback(
 	voiceState: VoiceState | undefined,
 ): boolean {
 	const isVoiceStateVerified = verifyVoiceState([client, bot], interaction, controller, voiceState, "manage");
-	if (!isVoiceStateVerified) return false;
+	if (!isVoiceStateVerified) {
+		return false;
+	}
 
 	if (controller.currentListing !== undefined && !controller.currentListing.managerIds.includes(interaction.user.id)) {
 		const strings = {
@@ -298,20 +306,21 @@ function receiveNewListing(
 	};
 
 	if (isOccupied(controller.player)) {
-		return void sendMessage(bot, controller.feedbackChannelId!, { embeds: [embed] }).catch(() =>
+		sendMessage(bot, controller.feedbackChannelId!, { embeds: [embed] }).catch(() =>
 			client.log.warn("Failed to send music feedback message."),
 		);
+		return;
 	}
 
-	return advanceQueueAndPlay([client, bot], guild.id, controller);
+	advanceQueueAndPlay([client, bot], guild.id, controller);
 }
 
 function isCollection(object: Song | SongStream | SongCollection): object is SongCollection {
-	return object.type === SongListingContentTypes.Collection;
+	return object.type === "collection";
 }
 
 function isExternal(object: Song | SongStream | SongCollection): object is SongStream {
-	return object.type === SongListingContentTypes.File;
+	return object.type === "file";
 }
 
 function isFirstInCollection(collection: SongCollection): boolean {
@@ -363,7 +372,7 @@ function advanceQueueAndPlay([client, bot]: [Client, Bot], guildId: bigint, cont
 		return;
 	}
 
-	return void loadSong([client, bot], guildId, controller, getCurrentSong(controller)!);
+	loadSong([client, bot], guildId, controller, getCurrentSong(controller)!);
 }
 
 async function loadSong(
@@ -544,7 +553,7 @@ function skip(controller: MusicController, skipCollection: boolean, { by, to }: 
 		controller.events.emit("queueUpdate");
 	}
 
-	return void controller.player.stop();
+	controller.player.stop();
 }
 
 function unskip(
@@ -611,19 +620,19 @@ function unskip(
 }
 
 function setVolume(player: Lavaclient.Player, volume: number): void {
-	return void player.setVolume(volume);
+	player.setVolume(volume);
 }
 
 function pause(player: Lavaclient.Player): void {
-	return void player.pause(true);
+	player.pause(true);
 }
 
 function resume(player: Lavaclient.Player): void {
-	return void player.pause(false);
+	player.pause(false);
 }
 
 function skipTo(player: Lavaclient.Player, timestampMilliseconds: number): void {
-	return void player.seek(timestampMilliseconds);
+	player.seek(timestampMilliseconds);
 }
 
 function replay(
@@ -656,7 +665,7 @@ function replay(
 
 	controller.flags.breakLoop = true;
 	controller.player.stop();
-	return advanceQueueAndPlay([client, bot], interaction.guildId!, controller);
+	advanceQueueAndPlay([client, bot], interaction.guildId!, controller);
 }
 
 function reset(client: Client, guildId: bigint): void {
@@ -669,7 +678,7 @@ function reset(client: Client, guildId: bigint): void {
 		controller.player.disconnect();
 	}
 
-	return setupMusicController(client, guildId);
+	setupMusicController(client, guildId);
 }
 
 function remove(controller: MusicController, index: number): SongListing | undefined {
@@ -679,10 +688,10 @@ function remove(controller: MusicController, index: number): SongListing | undef
 }
 
 const localisationsBySongListingType = {
-	[SongListingContentTypes.Song]: "music.options.play.strings.nowPlaying.title.type.song",
-	[SongListingContentTypes.File]: "music.options.play.strings.nowPlaying.title.type.external",
-	[SongListingContentTypes.Collection]: "music.options.play.strings.nowPlaying.title.type.songCollection",
-};
+	song: "music.options.play.strings.nowPlaying.title.type.song",
+	collection: "music.options.play.strings.nowPlaying.title.type.songCollection",
+	file: "music.options.play.strings.nowPlaying.title.type.external",
+} satisfies Record<SongListingType, string>;
 
 export {
 	getVoiceState,

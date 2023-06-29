@@ -9,18 +9,22 @@ import configuration from "../../../../configuration.js";
 import constants from "../../../../constants.js";
 import { trim } from "../../../../formatting.js";
 
-function handleRequestVerification([client, bot]: [Client, Bot], interaction: Interaction, parameter: string): void {
+async function handleRequestVerification(
+	[client, bot]: [Client, Bot],
+	interaction: Interaction,
+	parameter: string,
+): Promise<void> {
 	const guild = client.cache.guilds.get(interaction.guildId!);
-	if (guild === undefined) return;
+	if (guild === undefined) {
+		return;
+	}
 
 	const requestedRoleId = BigInt(parameter);
 
-	return void initiateVerificationProcess([client, bot], interaction, guild, requestedRoleId);
+	initiateVerificationProcess([client, bot], interaction, guild, requestedRoleId);
 }
 
-enum VerificationError {
-	Failure = "failure",
-}
+type VerificationError = "failure";
 
 async function initiateVerificationProcess(
 	[client, bot]: [Client, Bot],
@@ -34,7 +38,9 @@ async function initiateVerificationProcess(
 		interaction.user.id.toString(),
 		interaction.user.id,
 	);
-	if (userDocument === undefined) return;
+	if (userDocument === undefined) {
+		return;
+	}
 
 	const entryRequest = client.database.adapters.entryRequests.get(client, "submitterAndGuild", [
 		userDocument.ref,
@@ -59,7 +65,7 @@ async function initiateVerificationProcess(
 		return;
 	}
 
-	return void createModalComposer([client, bot], interaction, {
+	createModalComposer<VerificationError>([client, bot], interaction, {
 		modal: generateVerificationQuestionModal(client, guild, interaction.locale),
 		onSubmit: async (submission, answers) => {
 			const submitterReferenceId = stringifyValue(userDocument.ref);
@@ -95,10 +101,14 @@ async function initiateVerificationProcess(
 				requestedRole: requestedRoleId.toString(),
 				isFinalised: false,
 			});
-			if (entryRequest === undefined) return VerificationError.Failure;
+			if (entryRequest === undefined) {
+				return "failure";
+			}
 
 			const channel = getTextChannel(guild, configuration.guilds.channels.verification);
-			if (channel === undefined) return true;
+			if (channel === undefined) {
+				return true;
+			}
 
 			logEvent([client, bot], guild, "entryRequestSubmit", [interaction.user, entryRequest.data]);
 
@@ -106,10 +116,14 @@ async function initiateVerificationProcess(
 			const reference = stringifyValue(entryRequest.ref);
 
 			const user = client.cache.users.get(userId);
-			if (user === undefined) return VerificationError.Failure;
+			if (user === undefined) {
+				return "failure";
+			}
 
 			const prompt = await verificationManager.savePrompt([client, bot], guild, channel, user, entryRequest);
-			if (prompt === undefined) return VerificationError.Failure;
+			if (prompt === undefined) {
+				return "failure";
+			}
 
 			verificationManager.registerPrompt(prompt, userId, reference, entryRequest);
 			verificationManager.registerHandler(client, [userId.toString(), guild.id.toString(), reference]);
@@ -142,7 +156,6 @@ async function initiateVerificationProcess(
 
 			return true;
 		},
-		// deno-lint-ignore require-await
 		onInvalid: async (submission, error) => {
 			switch (error) {
 				default: {

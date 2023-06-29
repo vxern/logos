@@ -24,7 +24,7 @@ const command: OptionTemplate = {
 		...Object.entries(sources).map<OptionTemplate>(([name, resolve]) => ({
 			name: name.toLowerCase(),
 			type: ApplicationCommandOptionTypes.SubCommand,
-			handle: ([client, bot], interaction) => handleRequestQueryPlayback([client, bot], interaction, resolve),
+			handle: async ([client, bot], interaction) => handleRequestQueryPlayback([client, bot], interaction, resolve),
 			options: [query],
 		})),
 	],

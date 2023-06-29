@@ -20,10 +20,10 @@ const command: CommandTemplate = {
 	options: [user, reason],
 };
 
-function handleWarnUserAutocomplete([client, bot]: [Client, Bot], interaction: Interaction): void {
+async function handleWarnUserAutocomplete([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const [{ user }] = parseArguments(interaction.data?.options, {});
 
-	return autocompleteMembers([client, bot], interaction, user!, {
+	autocompleteMembers([client, bot], interaction, user!, {
 		restrictToNonSelf: true,
 		excludeModerators: true,
 	});
@@ -31,24 +31,35 @@ function handleWarnUserAutocomplete([client, bot]: [Client, Bot], interaction: I
 
 async function handleWarnUser([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const [{ user, reason }] = parseArguments(interaction.data?.options, {});
-	if (user === undefined) return;
+	if (user === undefined) {
+		return;
+	}
 
 	const member = resolveInteractionToMember([client, bot], interaction, user, {
 		restrictToNonSelf: true,
 		excludeModerators: true,
 	});
-	if (member === undefined) return;
+	if (member === undefined) {
+		return;
+	}
 
 	const guild = client.cache.guilds.get(interaction.guildId!);
-	if (guild === undefined) return;
+	if (guild === undefined) {
+		return;
+	}
 
 	const moderatorRoleIds = guild.roles
 		.array()
 		.filter((role) => calculatePermissions(role.permissions).includes("MODERATE_MEMBERS"))
 		.map((role) => role.id);
-	if (moderatorRoleIds.length === 0) return undefined;
+	if (moderatorRoleIds.length === 0) {
+		return undefined;
+	}
 
-	if (reason!.length === 0) return displayError([client, bot], interaction);
+	if (reason!.length === 0) {
+		displayError([client, bot], interaction);
+		return;
+	}
 
 	const [author, recipient] = await Promise.all([
 		client.database.adapters.users.getOrFetchOrCreate(
@@ -60,7 +71,10 @@ async function handleWarnUser([client, bot]: [Client, Bot], interaction: Interac
 		client.database.adapters.users.getOrFetchOrCreate(client, "id", member.id.toString(), member.id),
 	]);
 
-	if (author === undefined || recipient === undefined) return displayError([client, bot], interaction);
+	if (author === undefined || recipient === undefined) {
+		displayError([client, bot], interaction);
+		return;
+	}
 
 	const [warnings, document] = await Promise.all([
 		client.database.adapters.warnings.getOrFetch(client, "recipient", recipient.ref),
@@ -76,7 +90,10 @@ async function handleWarnUser([client, bot]: [Client, Bot], interaction: Interac
 		logEvent([client, bot], guild, "memberWarnAdd", [member, document.data, interaction.user]);
 	}
 
-	if (warnings === undefined || document === undefined) return displayError([client, bot], interaction);
+	if (warnings === undefined || document === undefined) {
+		displayError([client, bot], interaction);
+		return;
+	}
 
 	const relevantWarnings = getActiveWarnings(warnings);
 
@@ -103,7 +120,9 @@ async function handleWarnUser([client, bot]: [Client, Bot], interaction: Interac
 	});
 
 	const moderationChannelId = getTextChannel(guild, configuration.guilds.channels.guideChat)?.id;
-	if (moderationChannelId === undefined) return;
+	if (moderationChannelId === undefined) {
+		return;
+	}
 
 	const surpassedLimit = relevantWarnings.size > configuration.commands.warn.limitUses;
 	if (surpassedLimit) {
@@ -124,7 +143,7 @@ async function handleWarnUser([client, bot]: [Client, Bot], interaction: Interac
 			communicationDisabledUntil: Date.now() + configuration.commands.warn.timeoutDuration,
 		}).catch(() => client.log.warn(`Failed to edit timeout state of member with ID ${member.id}.`));
 
-		return void sendMessage(bot, moderationChannelId, {
+		sendMessage(bot, moderationChannelId, {
 			embeds: [
 				{
 					title: `${constants.symbols.indicators.exclamation} ${strings.title}`,
@@ -133,6 +152,7 @@ async function handleWarnUser([client, bot]: [Client, Bot], interaction: Interac
 				},
 			],
 		}).catch(() => client.log.warn("Failed to send message about the warning limit having been surpassed."));
+		return;
 	}
 
 	const reachedLimit = relevantWarnings.size === configuration.commands.warn.limitUses;
@@ -149,7 +169,7 @@ async function handleWarnUser([client, bot]: [Client, Bot], interaction: Interac
 			}),
 		};
 
-		return void sendMessage(bot, moderationChannelId, {
+		sendMessage(bot, moderationChannelId, {
 			embeds: [
 				{
 					title: `${constants.symbols.indicators.warning} ${strings.title}`,
@@ -161,13 +181,13 @@ async function handleWarnUser([client, bot]: [Client, Bot], interaction: Interac
 	}
 }
 
-function displayError([client, bot]: [Client, Bot], interaction: Interaction): void {
+async function displayError([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const strings = {
 		title: localise(client, "warn.strings.failed.title", interaction.locale)(),
 		description: localise(client, "warn.strings.failed.description", interaction.locale)(),
 	};
 
-	return void reply([client, bot], interaction, {
+	reply([client, bot], interaction, {
 		embeds: [
 			{
 				title: strings.title,

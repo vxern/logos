@@ -14,11 +14,13 @@ const command: OptionTemplate = {
 	options: [show],
 };
 
-function handleDisplayPlaybackHistory([client, bot]: [Client, Bot], interaction: Interaction): void {
+async function handleDisplayPlaybackHistory([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const [{ show }] = parseArguments(interaction.data?.options, { show: "boolean" });
 
 	const controller = client.features.music.controllers.get(interaction.guildId!);
-	if (controller === undefined) return;
+	if (controller === undefined) {
+		return;
+	}
 
 	const listingHistory = structuredClone(controller.listingHistory).reverse();
 
@@ -28,7 +30,7 @@ function handleDisplayPlaybackHistory([client, bot]: [Client, Bot], interaction:
 		title: localise(client, "music.options.history.strings.playbackHistory", locale)(),
 	};
 
-	return displayListings(
+	displayListings(
 		[client, bot],
 		interaction,
 		{ title: `${constants.symbols.music.list} ${strings.title}`, songListings: listingHistory },

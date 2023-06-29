@@ -51,7 +51,9 @@ class VerificationManager extends PromptManager<EntryRequest, Metadata, Interact
 
 	decodeMetadata(data: string[]): Metadata | undefined {
 		const [userId, reference] = data;
-		if (userId === undefined || reference === undefined) return undefined;
+		if (userId === undefined || reference === undefined) {
+			return undefined;
+		}
 
 		return { userId: BigInt(userId), reference };
 	}
@@ -104,7 +106,9 @@ class VerificationManager extends PromptManager<EntryRequest, Metadata, Interact
 							size: 64,
 							format: "webp",
 						});
-						if (iconURL === undefined) return;
+						if (iconURL === undefined) {
+							return;
+						}
 
 						return { url: iconURL };
 					})(),
@@ -317,7 +321,9 @@ class VerificationManager extends PromptManager<EntryRequest, Metadata, Interact
 			...entryRequest,
 			data: { ...entryRequest.data, votedAgainst, votedFor, isFinalised },
 		});
-		if (updatedEntryRequest === undefined) return undefined;
+		if (updatedEntryRequest === undefined) {
+			return undefined;
+		}
 
 		let authorisedOn = user.data.account.authorisedOn !== undefined ? [...user.data.account.authorisedOn] : undefined;
 		let rejectedOn = user.data.account.rejectedOn !== undefined ? [...user.data.account.rejectedOn] : undefined;
@@ -365,19 +371,21 @@ class VerificationManager extends PromptManager<EntryRequest, Metadata, Interact
 			data: { ...user.data, account: { ...user.data.account, authorisedOn, rejectedOn } },
 		});
 
-		if (isAccepted || isRejected) return null;
+		if (isAccepted || isRejected) {
+			return null;
+		}
 
 		return updatedEntryRequest;
 	}
 }
 
-function displayVoteError([client, bot]: [Client, Bot], interaction: Interaction): void {
+async function displayVoteError([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const strings = {
 		title: localise(client, "entry.verification.vote.failed.title", interaction.locale)(),
 		description: localise(client, "entry.verification.vote.failed.description", interaction.locale)(),
 	};
 
-	return void reply([client, bot], interaction, {
+	reply([client, bot], interaction, {
 		embeds: [
 			{
 				title: strings.title,
@@ -388,13 +396,13 @@ function displayVoteError([client, bot]: [Client, Bot], interaction: Interaction
 	});
 }
 
-function displayUserStateError([client, bot]: [Client, Bot], interaction: Interaction): void {
+async function displayUserStateError([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const strings = {
 		title: localise(client, "entry.verification.vote.stateUpdateFailed.title", interaction.locale)(),
 		description: localise(client, "entry.verification.vote.stateUpdateFailed.description", interaction.locale)(),
 	};
 
-	return void reply([client, bot], interaction, {
+	reply([client, bot], interaction, {
 		embeds: [
 			{
 				title: strings.title,

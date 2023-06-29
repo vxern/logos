@@ -5,11 +5,13 @@ import { parseArguments, reply } from "../../../../interactions.js";
 import constants from "../../../../../constants.js";
 import { defaultLocale } from "../../../../../types.js";
 
-function handleDisplayVolume([client, bot]: [Client, Bot], interaction: Interaction): void {
+async function handleDisplayVolume([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const [{ show }] = parseArguments(interaction.data?.options, { show: "boolean" });
 
 	const controller = client.features.music.controllers.get(interaction.guildId!);
-	if (controller === undefined) return;
+	if (controller === undefined) {
+		return;
+	}
 
 	const isVoiceStateVerified = verifyVoiceState(
 		[client, bot],
@@ -18,7 +20,9 @@ function handleDisplayVolume([client, bot]: [Client, Bot], interaction: Interact
 		getVoiceState(client, interaction.guildId!, interaction.user.id),
 		"check",
 	);
-	if (!isVoiceStateVerified) return;
+	if (!isVoiceStateVerified) {
+		return;
+	}
 
 	const locale = show ? defaultLocale : interaction.locale;
 
@@ -31,7 +35,7 @@ function handleDisplayVolume([client, bot]: [Client, Bot], interaction: Interact
 		)({ volume: controller.player.volume }),
 	};
 
-	return void reply(
+	reply(
 		[client, bot],
 		interaction,
 		{

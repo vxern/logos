@@ -7,12 +7,16 @@ import constants from "../../../../../constants.js";
 import { mention, MentionTypes, timestamp } from "../../../../../formatting.js";
 
 /** Displays information about the guild that this command was executed in. */
-function handleDisplayGuildInformation([client, bot]: [Client, Bot], interaction: Interaction): void {
+async function handleDisplayGuildInformation([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const guild = client.cache.guilds.get(interaction.guildId!);
-	if (guild === undefined) return;
+	if (guild === undefined) {
+		return;
+	}
 
 	const owner = client.cache.users.get(guild.ownerId);
-	if (owner === undefined) return;
+	if (owner === undefined) {
+		return;
+	}
 
 	const strings = {
 		title: localise(
@@ -69,7 +73,7 @@ function handleDisplayGuildInformation([client, bot]: [Client, Bot], interaction
 		},
 	};
 
-	return void reply([client, bot], interaction, {
+	reply([client, bot], interaction, {
 		embeds: [
 			{
 				thumbnail: getThumbnail(bot, guild),
@@ -216,7 +220,9 @@ type Thumbnail = NonNullable<Embed["thumbnail"]>;
 
 function getThumbnail(bot: Bot, guild: Guild): Thumbnail | undefined {
 	const iconURL = getGuildIconURLFormatted(bot, guild);
-	if (iconURL === undefined) return undefined;
+	if (iconURL === undefined) {
+		return undefined;
+	}
 
 	return { url: iconURL };
 }

@@ -16,7 +16,6 @@ interface TaggedValue<T> {
 	value: T;
 }
 
-// deno-lint-ignore no-empty-interface
 interface Expression extends TaggedValue<string> {}
 
 interface Definition extends TaggedValue<string> {
@@ -24,7 +23,6 @@ interface Definition extends TaggedValue<string> {
 	expressions?: Expression[];
 }
 
-// deno-lint-ignore no-empty-interface
 interface Etymology extends TaggedValue<string | undefined> {}
 
 type InflectionTable = { title: string; fields: DiscordEmbedField[] }[];
@@ -88,7 +86,9 @@ abstract class DictionaryAdapter<DataType = unknown> {
 			client.log.error(reason);
 			return undefined;
 		});
-		if (data === undefined) return undefined;
+		if (data === undefined) {
+			return undefined;
+		}
 
 		let entries: DictionaryEntry[];
 		try {
@@ -98,7 +98,9 @@ abstract class DictionaryAdapter<DataType = unknown> {
 			client.log.error(exception);
 			return undefined;
 		}
-		if (entries.length === 0) return undefined;
+		if (entries.length === 0) {
+			return undefined;
+		}
 
 		return entries;
 	}

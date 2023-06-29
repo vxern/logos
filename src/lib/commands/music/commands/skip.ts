@@ -14,17 +14,23 @@ const command: OptionTemplate = {
 	options: [collection, by, to],
 };
 
-function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction): void {
+async function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const [{ collection, by: songsToSkip, to: songToSkipTo }] = parseArguments(interaction.data?.options, {
 		collection: "boolean",
 		by: "number",
 		to: "number",
 	});
-	if (songsToSkip !== undefined && isNaN(songsToSkip)) return;
-	if (songToSkipTo !== undefined && isNaN(songToSkipTo)) return;
+	if (songsToSkip !== undefined && isNaN(songsToSkip)) {
+		return;
+	}
+	if (songToSkipTo !== undefined && isNaN(songToSkipTo)) {
+		return;
+	}
 
 	const controller = client.features.music.controllers.get(interaction.guildId!);
-	if (controller === undefined) return;
+	if (controller === undefined) {
+		return;
+	}
 
 	const isVoiceStateVerified = verifyCanManagePlayback(
 		[client, bot],
@@ -32,7 +38,9 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 		controller,
 		getVoiceState(client, interaction.guildId!, interaction.user.id),
 	);
-	if (!isVoiceStateVerified) return;
+	if (!isVoiceStateVerified) {
+		return;
+	}
 
 	const currentListing = controller.currentListing;
 
@@ -43,7 +51,7 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 				description: localise(client, "music.options.skip.strings.noSong.description", interaction.locale)(),
 			};
 
-			return void reply([client, bot], interaction, {
+			reply([client, bot], interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -52,6 +60,7 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 					},
 				],
 			});
+			return;
 		}
 	} else {
 		if (!isOccupied(controller.player) || currentListing === undefined) {
@@ -66,7 +75,7 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 				},
 			};
 
-			return void reply([client, bot], interaction, {
+			reply([client, bot], interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -75,6 +84,7 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 					},
 				],
 			});
+			return;
 		} else if (!isCollection(currentListing.content)) {
 			const strings = {
 				title: localise(client, "music.options.skip.strings.noSongCollection.title", interaction.locale)(),
@@ -92,7 +102,7 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 				},
 			};
 
-			return void reply([client, bot], interaction, {
+			reply([client, bot], interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -101,6 +111,7 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 					},
 				],
 			});
+			return;
 		}
 	}
 
@@ -111,7 +122,7 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 			description: localise(client, "music.strings.skips.tooManyArguments.description", interaction.locale)(),
 		};
 
-		return void reply([client, bot], interaction, {
+		reply([client, bot], interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -120,6 +131,7 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 				},
 			],
 		});
+		return;
 	}
 
 	// If either the 'to' parameter or the 'by' parameter are negative.
@@ -129,7 +141,7 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 			description: localise(client, "music.strings.skips.invalid.description", interaction.locale)(),
 		};
 
-		return void reply([client, bot], interaction, {
+		reply([client, bot], interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -138,6 +150,7 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 				},
 			],
 		});
+		return;
 	}
 
 	const isSkippingCollection = collection ?? false;
@@ -180,7 +193,7 @@ function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction
 					description: localise(client, "music.options.skip.strings.skippedSong.description", defaultLocale)(),
 			  };
 
-	return void reply(
+	reply(
 		[client, bot],
 		interaction,
 		{

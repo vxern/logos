@@ -13,16 +13,22 @@ async function handleSelectLanguageProficiency(
 	parameter: string,
 ): Promise<void> {
 	const guild = client.cache.guilds.get(interaction.guildId!);
-	if (guild === undefined) return;
+	if (guild === undefined) {
+		return;
+	}
 
 	const guildIdString = guild.id.toString();
 
 	const roleId = BigInt(proficiency.collection.list[parseInt(parameter)]!.snowflakes[guildIdString]!);
 	const role = guild.roles.get(roleId);
-	if (role === undefined) return;
+	if (role === undefined) {
+		return;
+	}
 
 	const canEnter = await vetUser([client, bot], interaction);
-	if (!canEnter) return;
+	if (!canEnter) {
+		return;
+	}
 
 	const createdAt = snowflakeToTimestamp(interaction.user.id);
 	const meetsAccountAgeRequirement = Date.now() - createdAt >= configuration.services.entry.minimumRequiredAge;
@@ -60,7 +66,7 @@ async function handleSelectLanguageProficiency(
 				},
 			};
 
-			return void reply([client, bot], interaction, {
+			reply([client, bot], interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -85,6 +91,7 @@ async function handleSelectLanguageProficiency(
 					},
 				],
 			});
+			return;
 		}
 	}
 
@@ -113,7 +120,7 @@ async function handleSelectLanguageProficiency(
 		],
 	});
 
-	return void addRole(bot, guild.id, interaction.user.id, role.id, "User-requested role addition.").catch(() =>
+	addRole(bot, guild.id, interaction.user.id, role.id, "User-requested role addition.").catch(() =>
 		client.log.warn(
 			`Failed to add role with ID ${role.id} to member with ID ${interaction.user.id} in guild with ID ${guild.id}.`,
 		),
@@ -174,7 +181,9 @@ async function vetUser([client, bot]: [Client, Bot], interaction: Interaction): 
 		return false;
 	}
 
-	if (userDocument.data.account.authorisedOn?.includes(interaction.guildId!.toString())) return true;
+	if (userDocument.data.account.authorisedOn?.includes(interaction.guildId!.toString())) {
+		return true;
+	}
 	if (userDocument.data.account.rejectedOn?.includes(interaction.guildId!.toString())) {
 		const strings = {
 			title: localise(client, "entry.verification.answers.rejectedBefore.title", interaction.locale)(),

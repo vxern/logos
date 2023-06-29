@@ -34,13 +34,13 @@ const command: CommandTemplate = {
 	handle: handleMakeSuggestion,
 };
 
-enum SuggestionError {
-	Failure = "failure",
-}
+type SuggestionError = "failure";
 
 async function handleMakeSuggestion([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const guild = client.cache.guilds.get(interaction.guildId!);
-	if (guild === undefined) return;
+	if (guild === undefined) {
+		return;
+	}
 
 	const userDocument = await client.database.adapters.users.getOrFetchOrCreate(
 		client,
@@ -48,7 +48,9 @@ async function handleMakeSuggestion([client, bot]: [Client, Bot], interaction: I
 		interaction.user.id.toString(),
 		interaction.user.id,
 	);
-	if (userDocument === undefined) return;
+	if (userDocument === undefined) {
+		return;
+	}
 	const suggestionsByAuthorAndGuild = client.database.adapters.suggestions.get(client, "authorAndGuild", [
 		userDocument.ref,
 		guild.id.toString(),
@@ -68,7 +70,7 @@ async function handleMakeSuggestion([client, bot]: [Client, Bot], interaction: I
 				description: localise(client, "suggestion.strings.tooMany.description", interaction.locale)(),
 			};
 
-			return void reply([client, bot], interaction, {
+			reply([client, bot], interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -77,10 +79,11 @@ async function handleMakeSuggestion([client, bot]: [Client, Bot], interaction: I
 					},
 				],
 			});
+			return;
 		}
 	}
 
-	return void createModalComposer([client, bot], interaction, {
+	createModalComposer([client, bot], interaction, {
 		modal: generateSuggestionModal(client, interaction.locale),
 		onSubmit: async (submission, answers) => {
 			await postponeReply([client, bot], submission);
@@ -92,10 +95,14 @@ async function handleMakeSuggestion([client, bot]: [Client, Bot], interaction: I
 				suggestion: answers.suggestion!,
 				isResolved: false,
 			});
-			if (suggestion === undefined) return SuggestionError.Failure;
+			if (suggestion === undefined) {
+				return "failure";
+			}
 
 			const channel = getTextChannel(guild, configuration.guilds.channels.suggestions);
-			if (channel === undefined) return true;
+			if (channel === undefined) {
+				return true;
+			}
 
 			logEvent([client, bot], guild, "suggestionSend", [interaction.member!, suggestion.data]);
 
@@ -103,10 +110,14 @@ async function handleMakeSuggestion([client, bot]: [Client, Bot], interaction: I
 			const reference = stringifyValue(suggestion.ref);
 
 			const user = client.cache.users.get(userId);
-			if (user === undefined) return SuggestionError.Failure;
+			if (user === undefined) {
+				return "failure";
+			}
 
 			const prompt = await suggestionManager.savePrompt([client, bot], guild, channel, user, suggestion);
-			if (prompt === undefined) return SuggestionError.Failure;
+			if (prompt === undefined) {
+				return "failure";
+			}
 
 			suggestionManager.registerPrompt(prompt, userId, reference, suggestion);
 			suggestionManager.registerHandler(client, [userId.toString(), guild.id.toString(), reference]);
@@ -128,13 +139,12 @@ async function handleMakeSuggestion([client, bot]: [Client, Bot], interaction: I
 
 			return true;
 		},
-		// deno-lint-ignore require-await
 		onInvalid: async (submission, error) =>
 			handleSubmittedInvalidSuggestion([client, bot], submission, error as SuggestionError | undefined),
 	});
 }
 
-function handleSubmittedInvalidSuggestion(
+async function handleSubmittedInvalidSuggestion(
 	[client, bot]: [Client, Bot],
 	submission: Interaction,
 	error: SuggestionError | undefined,
@@ -142,7 +152,7 @@ function handleSubmittedInvalidSuggestion(
 	return new Promise((resolve) => {
 		const continueId = createInteractionCollector([client, bot], {
 			type: InteractionTypes.MessageComponent,
-			onCollect: (_, selection) => {
+			onCollect: async (_, selection) => {
 				deleteReply([client, bot], submission);
 				resolve(selection);
 			},
@@ -150,7 +160,7 @@ function handleSubmittedInvalidSuggestion(
 
 		const cancelId = createInteractionCollector([client, bot], {
 			type: InteractionTypes.MessageComponent,
-			onCollect: (_, cancelSelection) => {
+			onCollect: async (_, cancelSelection) => {
 				const returnId = createInteractionCollector([client, bot], {
 					type: InteractionTypes.MessageComponent,
 					onCollect: (_, returnSelection) => resolve(returnSelection),
@@ -158,7 +168,7 @@ function handleSubmittedInvalidSuggestion(
 
 				const leaveId = createInteractionCollector([client, bot], {
 					type: InteractionTypes.MessageComponent,
-					onCollect: (_, _leaveSelection) => {
+					onCollect: async (_, _leaveSelection) => {
 						deleteReply([client, bot], submission);
 						deleteReply([client, bot], cancelSelection);
 						resolve(undefined);

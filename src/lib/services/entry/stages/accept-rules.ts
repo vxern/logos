@@ -5,9 +5,11 @@ import { Client, localise } from "../../../client.js";
 import { encodeId, reply } from "../../../interactions.js";
 import constants from "../../../../constants.js";
 
-function handleAcceptRules([client, bot]: [Client, Bot], interaction: Interaction, _: string): void {
+async function handleAcceptRules([client, bot]: [Client, Bot], interaction: Interaction, _: string): Promise<void> {
 	const guild = client.cache.guilds.get(interaction.guildId!);
-	if (guild === undefined) return;
+	if (guild === undefined) {
+		return;
+	}
 
 	const strings = {
 		title: localise(client, "entry.proficiency.title", interaction.locale)(),
@@ -29,7 +31,7 @@ function handleAcceptRules([client, bot]: [Client, Bot], interaction: Interactio
 		},
 	};
 
-	return void reply([client, bot], interaction, {
+	reply([client, bot], interaction, {
 		embeds: [
 			{
 				title: strings.title,

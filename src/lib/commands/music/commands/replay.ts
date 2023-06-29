@@ -20,11 +20,13 @@ const command: OptionTemplate = {
 	options: [collection],
 };
 
-function handleReplayAction([client, bot]: [Client, Bot], interaction: Interaction): void {
+async function handleReplayAction([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const [{ collection }] = parseArguments(interaction.data?.options, { collection: "boolean" });
 
 	const controller = client.features.music.controllers.get(interaction.guildId!);
-	if (controller === undefined) return;
+	if (controller === undefined) {
+		return;
+	}
 
 	const isVoiceStateVerified = verifyCanManagePlayback(
 		[client, bot],
@@ -32,7 +34,9 @@ function handleReplayAction([client, bot]: [Client, Bot], interaction: Interacti
 		controller,
 		getVoiceState(client, interaction.guildId!, interaction.user.id),
 	);
-	if (!isVoiceStateVerified) return;
+	if (!isVoiceStateVerified) {
+		return;
+	}
 
 	const currentListing = controller.currentListing;
 
@@ -43,7 +47,7 @@ function handleReplayAction([client, bot]: [Client, Bot], interaction: Interacti
 				description: localise(client, "music.options.replay.strings.noSong.description", interaction.locale)(),
 			};
 
-			return void reply([client, bot], interaction, {
+			reply([client, bot], interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -52,6 +56,7 @@ function handleReplayAction([client, bot]: [Client, Bot], interaction: Interacti
 					},
 				],
 			});
+			return;
 		}
 	} else {
 		if (!isOccupied(controller.player) || currentListing === undefined) {
@@ -66,7 +71,7 @@ function handleReplayAction([client, bot]: [Client, Bot], interaction: Interacti
 				},
 			};
 
-			return void reply([client, bot], interaction, {
+			reply([client, bot], interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -75,6 +80,7 @@ function handleReplayAction([client, bot]: [Client, Bot], interaction: Interacti
 					},
 				],
 			});
+			return;
 		} else if (!isCollection(currentListing.content)) {
 			const strings = {
 				title: localise(client, "music.options.replay.strings.noSongCollection.title", interaction.locale)(),
@@ -92,7 +98,7 @@ function handleReplayAction([client, bot]: [Client, Bot], interaction: Interacti
 				},
 			};
 
-			return void reply([client, bot], interaction, {
+			reply([client, bot], interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -101,6 +107,7 @@ function handleReplayAction([client, bot]: [Client, Bot], interaction: Interacti
 					},
 				],
 			});
+			return;
 		}
 	}
 
@@ -111,7 +118,7 @@ function handleReplayAction([client, bot]: [Client, Bot], interaction: Interacti
 		description: localise(client, "music.options.replay.strings.replaying.description", defaultLocale)(),
 	};
 
-	return void reply(
+	reply(
 		[client, bot],
 		interaction,
 		{

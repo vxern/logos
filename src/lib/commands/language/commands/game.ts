@@ -33,7 +33,9 @@ type WordButtonID = [index: string];
 /** Starts a simple game of 'choose the correct word to fit in the blank'. */
 async function handleStartGame([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const guild = client.cache.guilds.get(interaction.guildId!);
-	if (guild === undefined) return;
+	if (guild === undefined) {
+		return;
+	}
 
 	const sentencePairs = client.features.sentencePairs.get(guild.language);
 	if (sentencePairs === undefined || sentencePairs.length === 0) {
@@ -42,7 +44,7 @@ async function handleStartGame([client, bot]: [Client, Bot], interaction: Intera
 			description: localise(client, "game.strings.noSentencesAvailable.description", interaction.locale)(),
 		};
 
-		return void reply([client, bot], interaction, {
+		reply([client, bot], interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -51,6 +53,7 @@ async function handleStartGame([client, bot]: [Client, Bot], interaction: Intera
 				},
 			],
 		});
+		return;
 	}
 
 	await postponeReply([client, bot], interaction);
@@ -61,19 +64,27 @@ async function handleStartGame([client, bot]: [Client, Bot], interaction: Intera
 	const customId = createInteractionCollector([client, bot], {
 		type: InteractionTypes.MessageComponent,
 		userId: interaction.user.id,
-		onCollect: (bot, selection) => {
+		onCollect: async (bot, selection) => {
 			acknowledge([client, bot], selection);
 
 			const selectionCustomId = selection.data?.customId;
-			if (selectionCustomId === undefined) return;
+			if (selectionCustomId === undefined) {
+				return;
+			}
 
 			const [_, indexString] = decodeId<WordButtonID>(selectionCustomId);
-			if (indexString === undefined) return;
+			if (indexString === undefined) {
+				return;
+			}
 
 			const index = Number(indexString);
-			if (isNaN(index)) return;
+			if (isNaN(index)) {
+				return;
+			}
 
-			if (index < 0 || index > sentenceSelection.choices.length - 1) return;
+			if (index < 0 || index > sentenceSelection.choices.length - 1) {
+				return;
+			}
 
 			const choice = sentenceSelection.choices.at(index);
 			const isCorrect = choice === sentenceSelection.word;
@@ -82,7 +93,7 @@ async function handleStartGame([client, bot]: [Client, Bot], interaction: Intera
 
 			sentenceSelection = createSentenceSelection(sentencePairs);
 
-			return editReply(
+			editReply(
 				[client, bot],
 				interaction,
 				getGameView(client, customId, sentenceSelection, embedColor, interaction.locale),
@@ -92,7 +103,7 @@ async function handleStartGame([client, bot]: [Client, Bot], interaction: Intera
 
 	sentenceSelection = createSentenceSelection(sentencePairs);
 
-	return editReply(
+	editReply(
 		[client, bot],
 		interaction,
 		getGameView(client, customId, sentenceSelection, embedColor, interaction.locale),

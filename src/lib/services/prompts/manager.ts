@@ -62,15 +62,19 @@ abstract class PromptManager<
 			type: InteractionTypes.MessageComponent,
 			customId: this.customId,
 			doesNotExpire: true,
-			onCollect: (bot, selection) => {
-				if (!isServicing(client, selection.guildId!)) return;
+			onCollect: async (bot, selection) => {
+				if (!isServicing(client, selection.guildId!)) {
+					return;
+				}
 
 				const [_, userId, guildId, reference, ...metadata] = decodeId<InteractionData>(selection.data!.customId!);
 
 				const handle = this.handlers.get([userId, guildId, reference].join(constants.symbols.meta.idSeparator));
-				if (handle === undefined) return;
+				if (handle === undefined) {
+					return;
+				}
 
-				return void handle(bot, selection, [userId, guildId, reference, ...metadata] as InteractionData);
+				handle(bot, selection, [userId, guildId, reference, ...metadata] as InteractionData);
 			},
 		});
 	}
@@ -79,14 +83,18 @@ abstract class PromptManager<
 		const documentsByGuildId = this.getAllDocuments(client);
 
 		extendEventHandler(bot, "guildCreate", { append: true }, async (bot, { id: guildId }) => {
-			if (!isServicing(client, guildId)) return;
+			if (!isServicing(client, guildId)) {
+				return;
+			}
 
 			const guild = client.cache.guilds.get(guildId)!;
 
 			client.log.info(`Registering ${this.type} prompts on ${guild.name} (${guild.id})...`);
 
 			const channel = this.getChannel(client, guild);
-			if (channel === undefined) return;
+			if (channel === undefined) {
+				return;
+			}
 
 			this.channelIds.set(guild.id, channel.id);
 
@@ -98,7 +106,9 @@ abstract class PromptManager<
 
 			for (const document of documents) {
 				const userDocument = await this.getUserDocument(client, document);
-				if (userDocument === undefined) continue;
+				if (userDocument === undefined) {
+					continue;
+				}
 
 				const userId = BigInt(userDocument.data.account.id);
 				const reference = stringifyValue(document.ref);
@@ -109,10 +119,14 @@ abstract class PromptManager<
 					prompts.get(userId)?.delete(reference);
 				} else {
 					const user = client.cache.users.get(userId);
-					if (user === undefined) continue;
+					if (user === undefined) {
+						continue;
+					}
 
 					const message = await this.savePrompt([client, bot], guild, channel, user, document);
-					if (message === undefined) continue;
+					if (message === undefined) {
+						continue;
+					}
 
 					prompt = message;
 				}
@@ -132,30 +146,46 @@ abstract class PromptManager<
 	private ensurePersistence([client, bot]: [Client, Bot]): void {
 		// Anti-tampering feature; detects prompts being deleted.
 		extendEventHandler(bot, "messageDelete", { prepend: true }, async (_, { id: promptId, channelId, guildId }) => {
-			if (!isServicing(client, guildId!)) return;
+			if (!isServicing(client, guildId!)) {
+				return;
+			}
 
 			// If the message was deleted from a channel not managed by this prompt manager.
-			if (this.channelIds.get(guildId!) !== channelId) return;
+			if (this.channelIds.get(guildId!) !== channelId) {
+				return;
+			}
 
 			const guild = client.cache.guilds.get(guildId!);
-			if (guild === undefined) return;
+			if (guild === undefined) {
+				return;
+			}
 
 			const channel = client.cache.channels.get(channelId);
-			if (channel === undefined) return;
+			if (channel === undefined) {
+				return;
+			}
 
 			const document = this.documents.get(promptId);
-			if (document === undefined) return;
+			if (document === undefined) {
+				return;
+			}
 
 			const userId = this.userIds.get(promptId);
-			if (userId === undefined) return;
+			if (userId === undefined) {
+				return;
+			}
 
 			const user = client.cache.users.get(userId);
-			if (user === undefined) return;
+			if (user === undefined) {
+				return;
+			}
 
 			const reference = stringifyValue(document.ref);
 
 			const prompt = await this.savePrompt([client, bot], guild, channel, user, document);
-			if (prompt === undefined) return;
+			if (prompt === undefined) {
+				return;
+			}
 
 			this.registerPrompt(prompt, userId, reference, document);
 
@@ -165,13 +195,19 @@ abstract class PromptManager<
 
 		// Anti-tampering feature; detects embeds being deleted from prompts.
 		extendEventHandler(bot, "messageUpdate", { prepend: true }, (bot, { id: promptId, channelId, guildId, embeds }) => {
-			if (!isServicing(client, guildId!)) return;
+			if (!isServicing(client, guildId!)) {
+				return;
+			}
 
 			// If the message was updated in a channel not managed by this prompt manager.
-			if (this.channelIds.get(guildId!) !== channelId) return;
+			if (this.channelIds.get(guildId!) !== channelId) {
+				return;
+			}
 
 			// If the embed is still present, it wasn't an embed having been deleted. Do not do anything.
-			if (embeds.length === 1) return;
+			if (embeds.length === 1) {
+				return;
+			}
 
 			// Delete the message and allow the bot to handle the deletion.
 			deleteMessage(bot, channelId, promptId);
@@ -192,7 +228,9 @@ abstract class PromptManager<
 
 	getMetadata(prompt: Message): string[] | undefined {
 		const metadata = prompt.embeds.at(0)?.footer?.text;
-		if (metadata === undefined) return undefined;
+		if (metadata === undefined) {
+			return undefined;
+		}
 
 		const data = metadata.split(constants.symbols.meta.metadataSeparator);
 		return data;
@@ -285,10 +323,14 @@ abstract class PromptManager<
 				reference,
 				...metadata,
 			] as InteractionData);
-			if (updatedDocument === undefined) return;
+			if (updatedDocument === undefined) {
+				return;
+			}
 
 			const prompt = this.prompts.get(reference);
-			if (prompt === undefined) return;
+			if (prompt === undefined) {
+				return;
+			}
 
 			if (updatedDocument === null) {
 				this.unregisterPrompt(prompt, reference);

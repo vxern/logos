@@ -14,11 +14,13 @@ const command: OptionTemplate = {
 	options: [show],
 };
 
-function handleDisplayPlaybackQueue([client, bot]: [Client, Bot], interaction: Interaction): void {
+async function handleDisplayPlaybackQueue([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const [{ show }] = parseArguments(interaction.data?.options, { show: "boolean" });
 
 	const controller = client.features.music.controllers.get(interaction.guildId!);
-	if (controller === undefined) return;
+	if (controller === undefined) {
+		return;
+	}
 
 	const locale = show ? defaultLocale : interaction.locale;
 
@@ -26,7 +28,7 @@ function handleDisplayPlaybackQueue([client, bot]: [Client, Bot], interaction: I
 		queue: localise(client, "music.options.queue.strings.queue", locale)(),
 	};
 
-	return displayListings(
+	displayListings(
 		[client, bot],
 		interaction,
 		{ title: `${constants.symbols.music.list} ${strings.queue}`, songListings: controller.listingQueue },

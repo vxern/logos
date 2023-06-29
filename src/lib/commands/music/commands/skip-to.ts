@@ -15,7 +15,10 @@ const command: OptionTemplate = {
 	options: [timestamp],
 };
 
-function handleSkipToTimestampAutocomplete([client, bot]: [Client, Bot], interaction: Interaction): void {
+async function handleSkipToTimestampAutocomplete(
+	[client, bot]: [Client, Bot],
+	interaction: Interaction,
+): Promise<void> {
 	const [{ timestamp: timestampExpression }] = parseArguments(interaction.data?.options, {});
 
 	const timestamp = parseTimeExpression(client, timestampExpression!, interaction.locale);
@@ -27,11 +30,13 @@ function handleSkipToTimestampAutocomplete([client, bot]: [Client, Bot], interac
 	respond([client, bot], interaction, [{ name: timestamp[0], value: timestamp[1].toString() }]);
 }
 
-function handleSkipToTimestamp([client, bot]: [Client, Bot], interaction: Interaction): void {
+async function handleSkipToTimestamp([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const [{ timestamp: timestampExpression }] = parseArguments(interaction.data?.options, {});
 
 	const controller = client.features.music.controllers.get(interaction.guildId!);
-	if (controller === undefined) return;
+	if (controller === undefined) {
+		return;
+	}
 
 	const isVoiceStateVerified = verifyCanManagePlayback(
 		[client, bot],
@@ -39,7 +44,9 @@ function handleSkipToTimestamp([client, bot]: [Client, Bot], interaction: Intera
 		controller,
 		getVoiceState(client, interaction.guildId!, interaction.user.id),
 	);
-	if (!isVoiceStateVerified) return;
+	if (!isVoiceStateVerified) {
+		return;
+	}
 
 	const playingSince = controller.player.playingSince!;
 
@@ -49,7 +56,7 @@ function handleSkipToTimestamp([client, bot]: [Client, Bot], interaction: Intera
 			description: localise(client, "music.options.skip-to.strings.noSong.description", interaction.locale)(),
 		};
 
-		return void reply([client, bot], interaction, {
+		reply([client, bot], interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -58,10 +65,12 @@ function handleSkipToTimestamp([client, bot]: [Client, Bot], interaction: Intera
 				},
 			],
 		});
+		return;
 	}
 
 	if (Number.isNaN(timestampExpression)) {
-		return displayInvalidTimestampError([client, bot], interaction);
+		displayInvalidTimestampError([client, bot], interaction);
+		return;
 	}
 
 	const timestamp = Number(timestampExpression);
@@ -79,7 +88,7 @@ function handleSkipToTimestamp([client, bot]: [Client, Bot], interaction: Intera
 		description: localise(client, "music.options.skip-to.strings.skippedTo.description", defaultLocale)(),
 	};
 
-	return void reply(
+	reply(
 		[client, bot],
 		interaction,
 		{
@@ -95,13 +104,13 @@ function handleSkipToTimestamp([client, bot]: [Client, Bot], interaction: Intera
 	);
 }
 
-function displayInvalidTimestampError([client, bot]: [Client, Bot], interaction: Interaction): void {
+async function displayInvalidTimestampError([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const strings = {
 		title: localise(client, "music.options.skip-to.strings.invalidTimestamp.title", interaction.locale)(),
 		description: localise(client, "music.options.skip-to.strings.invalidTimestamp.description", interaction.locale)(),
 	};
 
-	return void reply([client, bot], interaction, {
+	reply([client, bot], interaction, {
 		embeds: [{ title: strings.title, description: strings.description, color: constants.colors.red }],
 	});
 }

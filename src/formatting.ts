@@ -1,4 +1,4 @@
-import constants, { BulletStyles } from "./constants.js";
+import constants, { type BulletStyle } from "./constants.js";
 
 /**
  * Capitalises the first letter of the given text.
@@ -7,7 +7,9 @@ import constants, { BulletStyles } from "./constants.js";
  * @returns The formatted string of text.
  */
 function capitalise(target: string): string {
-	if (target.length === 0) return target;
+	if (target.length === 0) {
+		return target;
+	}
 
 	return target.at(0)!.toUpperCase() + target.slice(1);
 }
@@ -38,7 +40,7 @@ function codeMultiline(target: string): string {
  * @param items - Items in the list.
  * @returns The formatted string of text.
  */
-function list(items: string[], bulletStyle: BulletStyles = BulletStyles.Arrow): string {
+function list(items: string[], bulletStyle: BulletStyle = "arrow"): string {
 	const bullet = constants.symbols.bullets[bulletStyle];
 	return items.map((item) => `${bullet} ${item}`).join("\n");
 }
@@ -90,7 +92,9 @@ function mention(id: bigint, type: MentionTypes): string {
  * @returns The trimmed string.
  */
 function trim(string: string, length: number): string {
-	if (string.length <= length) return string;
+	if (string.length <= length) {
+		return string;
+	}
 
 	if (!string.includes(" ")) {
 		return string.slice(0, Math.max(length - constants.symbols.strings.trail.length)) + constants.symbols.strings.trail;
@@ -106,4 +110,4 @@ function trim(string: string, length: number): string {
 	);
 }
 
-export { BulletStyles, capitalise, code, codeMultiline, list, mention, MentionTypes, timestamp, TimestampFormat, trim };
+export { BulletStyle, capitalise, code, codeMultiline, list, mention, MentionTypes, timestamp, TimestampFormat, trim };

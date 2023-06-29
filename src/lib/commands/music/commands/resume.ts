@@ -12,9 +12,11 @@ const command: OptionTemplate = {
 	handle: handleResumePlayback,
 };
 
-function handleResumePlayback([client, bot]: [Client, Bot], interaction: Interaction): void {
+async function handleResumePlayback([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const controller = client.features.music.controllers.get(interaction.guildId!);
-	if (controller === undefined) return;
+	if (controller === undefined) {
+		return;
+	}
 
 	const isVoiceStateVerified = verifyCanManagePlayback(
 		[client, bot],
@@ -22,7 +24,9 @@ function handleResumePlayback([client, bot]: [Client, Bot], interaction: Interac
 		controller,
 		getVoiceState(client, interaction.guildId!, interaction.user.id),
 	);
-	if (!isVoiceStateVerified) return;
+	if (!isVoiceStateVerified) {
+		return;
+	}
 
 	if (!isOccupied(controller.player)) {
 		const strings = {
@@ -30,7 +34,7 @@ function handleResumePlayback([client, bot]: [Client, Bot], interaction: Interac
 			description: localise(client, "music.options.resume.strings.noSong.description", interaction.locale)(),
 		};
 
-		return void reply([client, bot], interaction, {
+		reply([client, bot], interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -39,6 +43,7 @@ function handleResumePlayback([client, bot]: [Client, Bot], interaction: Interac
 				},
 			],
 		});
+		return;
 	}
 
 	if (!isPaused(controller.player)) {
@@ -47,7 +52,7 @@ function handleResumePlayback([client, bot]: [Client, Bot], interaction: Interac
 			description: localise(client, "music.options.resume.strings.notPaused", interaction.locale)(),
 		};
 
-		return void reply([client, bot], interaction, {
+		reply([client, bot], interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -56,6 +61,7 @@ function handleResumePlayback([client, bot]: [Client, Bot], interaction: Interac
 				},
 			],
 		});
+		return;
 	}
 
 	resume(controller.player);
@@ -65,7 +71,7 @@ function handleResumePlayback([client, bot]: [Client, Bot], interaction: Interac
 		description: localise(client, "music.options.resume.strings.resumed.description", defaultLocale)(),
 	};
 
-	return void reply(
+	reply(
 		[client, bot],
 		interaction,
 		{

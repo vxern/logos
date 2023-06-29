@@ -38,7 +38,9 @@ const noticeByChannelId = new Map<bigint, Message>();
 
 function registerPastNotices([client, bot]: [Client, Bot]): void {
 	extendEventHandler(bot, "guildCreate", { append: true }, (_, { id: guildId }) => {
-		if (!isServicing(client, guildId)) return;
+		if (!isServicing(client, guildId)) {
+			return;
+		}
 
 		const guild = client.cache.guilds.get(guildId)!;
 
@@ -51,7 +53,9 @@ function registerPastNotices([client, bot]: [Client, Bot]): void {
 function ensureNoticePersistence([client, bot]: [Client, Bot]): void {
 	// Anti-tampering feature; detects notices being deleted.
 	extendEventHandler(bot, "messageDelete", { prepend: true }, (_, { id, channelId, guildId }) => {
-		if (!isServicing(client, guildId!)) return;
+		if (!isServicing(client, guildId!)) {
+			return;
+		}
 
 		// If the deleted message was not a notice.
 		if (!noticeIds.includes(id)) {
@@ -63,7 +67,9 @@ function ensureNoticePersistence([client, bot]: [Client, Bot]): void {
 
 	// Anti-tampering feature; detects embeds being deleted from notices.
 	extendEventHandler(bot, "messageUpdate", { prepend: true }, (bot, message, _) => {
-		if (!isServicing(client, message.guildId!)) return;
+		if (!isServicing(client, message.guildId!)) {
+			return;
+		}
 
 		// If the message was updated in any other channel apart from a verification channel.
 		if (!noticeIds.includes(message.id)) {
@@ -71,7 +77,9 @@ function ensureNoticePersistence([client, bot]: [Client, Bot]): void {
 		}
 
 		// If the embed is still present, it wasn't an embed having been deleted. Do not do anything.
-		if (message.embeds.length === 1) return;
+		if (message.embeds.length === 1) {
+			return;
+		}
 
 		// Delete the message and allow the bot to handle the deletion.
 		deleteMessage(bot, message.channelId, message.id).catch(() =>
@@ -100,7 +108,8 @@ async function registerPastNotice([client, bot]: [Client, Bot], guild: Guild, ty
 		client.log.info(`Found no notice in ${type} channel on ${guild.name}. Creating...`);
 
 		const noticeContent = await noticeGenerators[type]([client, bot], guild);
-		return void postAndRegisterNotice([client, bot], channelId, noticeContent);
+		postAndRegisterNotice([client, bot], channelId, noticeContent);
+		return;
 	}
 
 	const latestNotice = notices.splice(0, 1).at(0)!;
@@ -148,7 +157,9 @@ async function postAndRegisterNotice(
 			return undefined;
 		},
 	);
-	if (notice === undefined) return undefined;
+	if (notice === undefined) {
+		return undefined;
+	}
 
 	noticeIds.push(notice.id);
 	noticeByChannelId.set(channelId, notice);
@@ -158,8 +169,12 @@ const timestampPattern = /.+?<t:(\d+):[tTdDfFR]>/;
 
 function extractTimestamp(notice: Message | CreateMessage): number | undefined {
 	const timestampString = notice.embeds?.at(0)?.description?.split("\n")?.at(0)?.replaceAll("*", "");
-	if (timestampString === undefined) return undefined;
-	if (!timestampPattern.test(timestampString)) return undefined;
+	if (timestampString === undefined) {
+		return undefined;
+	}
+	if (!timestampPattern.test(timestampString)) {
+		return undefined;
+	}
 
 	const [_, timestamp] = timestampPattern.exec(timestampString)!;
 

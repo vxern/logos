@@ -15,11 +15,13 @@ const command: CommandTemplate = {
 };
 
 /** Displays a message with information on where to find the resources for a given language. */
-function handleDisplayResources([client, bot]: [Client, Bot], interaction: Interaction): void {
+async function handleDisplayResources([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const [{ show }] = parseArguments(interaction.data?.options, { show: "boolean" });
 
 	const guild = client.cache.guilds.get(interaction.guildId!);
-	if (guild === undefined) return;
+	if (guild === undefined) {
+		return;
+	}
 
 	const locale = show ? defaultLocale : interaction.locale;
 
@@ -33,7 +35,7 @@ function handleDisplayResources([client, bot]: [Client, Bot], interaction: Inter
 		}),
 	};
 
-	return void reply(
+	reply(
 		[client, bot],
 		interaction,
 		{

@@ -39,15 +39,17 @@ async function handlePardonUserAutocomplete([client, bot]: [Client, Bot], intera
 	const [{ user, warning }, focused] = parseArguments(interaction.data?.options, {});
 
 	if (focused?.name === "user") {
-		return autocompleteMembers([client, bot], interaction, user!, {
+		autocompleteMembers([client, bot], interaction, user!, {
 			restrictToNonSelf: true,
 			excludeModerators: true,
 		});
+		return;
 	}
 
 	if (focused?.name === "warning") {
 		if (user === undefined) {
-			return respond([client, bot], interaction, []);
+			respond([client, bot], interaction, []);
+			return;
 		}
 
 		const member = resolveInteractionToMember([client, bot], interaction, user, {
@@ -55,12 +57,14 @@ async function handlePardonUserAutocomplete([client, bot]: [Client, Bot], intera
 			excludeModerators: true,
 		});
 		if (member === undefined) {
-			return respond([client, bot], interaction, []);
+			respond([client, bot], interaction, []);
+			return;
 		}
 
 		const relevantWarnings = await getRelevantWarnings(client, member);
 		if (relevantWarnings === undefined) {
-			return respond([client, bot], interaction, []);
+			respond([client, bot], interaction, []);
+			return;
 		}
 
 		const warningLowercase = warning!.toLowerCase();
@@ -71,37 +75,47 @@ async function handlePardonUserAutocomplete([client, bot]: [Client, Bot], intera
 			}))
 			.filter((choice) => choice.name.toLowerCase().includes(warningLowercase));
 
-		return respond([client, bot], interaction, choices);
+		respond([client, bot], interaction, choices);
+		return;
 	}
 }
 
 async function handlePardonUser([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const [{ user, warning }] = parseArguments(interaction.data?.options, {});
-	if (user === undefined) return;
+	if (user === undefined) {
+		return;
+	}
 
 	const member = resolveInteractionToMember([client, bot], interaction, user, {
 		restrictToNonSelf: true,
 		excludeModerators: true,
 	});
-	if (member === undefined) return;
+	if (member === undefined) {
+		return;
+	}
 
 	const relevantWarnings = await getRelevantWarnings(client, member);
 	if (relevantWarnings === undefined) {
-		return displayFailedError([client, bot], interaction);
+		displayFailedError([client, bot], interaction);
+		return;
 	}
 
 	const warningToDelete = relevantWarnings.find((relevantWarning) => stringifyValue(relevantWarning.ref) === warning);
 	if (warningToDelete === undefined) {
-		return displayInvalidWarningError([client, bot], interaction);
+		displayInvalidWarningError([client, bot], interaction);
+		return;
 	}
 
 	const deletedWarning = await client.database.adapters.warnings.delete(client, warningToDelete);
 	if (deletedWarning === undefined) {
-		return displayFailedError([client, bot], interaction);
+		displayFailedError([client, bot], interaction);
+		return;
 	}
 
 	const guild = client.cache.guilds.get(interaction.guildId!);
-	if (guild === undefined) return;
+	if (guild === undefined) {
+		return;
+	}
 
 	logEvent([client, bot], guild, "memberWarnRemove", [member, deletedWarning.data, interaction.user]);
 
@@ -117,7 +131,7 @@ async function handlePardonUser([client, bot]: [Client, Bot], interaction: Inter
 		}),
 	};
 
-	return void reply([client, bot], interaction, {
+	reply([client, bot], interaction, {
 		embeds: [
 			{
 				title: strings.title,
@@ -127,6 +141,7 @@ async function handlePardonUser([client, bot]: [Client, Bot], interaction: Inter
 		],
 	});
 }
+
 async function getRelevantWarnings(client: Client, member: Member): Promise<Document<Warning>[] | undefined> {
 	const subject = await client.database.adapters.users.getOrFetchOrCreate(
 		client,
@@ -134,22 +149,26 @@ async function getRelevantWarnings(client: Client, member: Member): Promise<Docu
 		member.id.toString(),
 		member.id,
 	);
-	if (subject === undefined) return undefined;
+	if (subject === undefined) {
+		return undefined;
+	}
 
 	const warnings = await client.database.adapters.warnings.getOrFetch(client, "recipient", subject.ref);
-	if (warnings === undefined) return undefined;
+	if (warnings === undefined) {
+		return undefined;
+	}
 
 	const relevantWarnings = Array.from(getActiveWarnings(warnings).values()).reverse();
 	return relevantWarnings;
 }
 
-function displayInvalidWarningError([client, bot]: [Client, Bot], interaction: Interaction): void {
+async function displayInvalidWarningError([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const strings = {
 		title: localise(client, "pardon.strings.invalidWarning.title", interaction.locale)(),
 		description: localise(client, "pardon.strings.invalidWarning.description", interaction.locale)(),
 	};
 
-	return void reply([client, bot], interaction, {
+	reply([client, bot], interaction, {
 		embeds: [
 			{
 				title: strings.title,
@@ -160,13 +179,13 @@ function displayInvalidWarningError([client, bot]: [Client, Bot], interaction: I
 	});
 }
 
-function displayFailedError([client, bot]: [Client, Bot], interaction: Interaction): void {
+async function displayFailedError([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const strings = {
 		title: localise(client, "pardon.strings.failed.title", interaction.locale)(),
 		description: localise(client, "pardon.strings.failed.description", interaction.locale)(),
 	};
 
-	return void reply([client, bot], interaction, {
+	reply([client, bot], interaction, {
 		embeds: [
 			{
 				title: strings.title,

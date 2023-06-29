@@ -5,18 +5,22 @@ import { parseArguments } from "../../../../../interactions.js";
 import constants from "../../../../../../constants.js";
 import { supportedLanguages } from "../../../../../../types.js";
 
-function handleSetLanguage([client, bot]: [Client, Bot], interaction: Interaction): void {
+async function handleSetLanguage([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const [{ language: input }] = parseArguments(interaction.data?.options, {});
-	if (input === undefined) return;
+	if (input === undefined) {
+		return;
+	}
 
 	const guild = client.cache.guilds.get(interaction.guildId!);
-	if (guild === undefined) return;
+	if (guild === undefined) {
+		return;
+	}
 
 	const inputLowercase = input.toLowerCase();
 	const language = supportedLanguages.find((language) => language.toLowerCase().startsWith(inputLowercase));
 
 	if (language === undefined) {
-		return void reply([client, bot], interaction, {
+		reply([client, bot], interaction, {
 			embeds: [
 				{
 					title: "No language found",
@@ -25,11 +29,12 @@ function handleSetLanguage([client, bot]: [Client, Bot], interaction: Interactio
 				},
 			],
 		});
+		return;
 	}
 
 	guild.language = language;
 
-	return void reply([client, bot], interaction, {
+	reply([client, bot], interaction, {
 		embeds: [
 			{
 				title: "Server language set",

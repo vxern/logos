@@ -81,7 +81,9 @@ async function getSupportedLanguages(): Promise<SupportedLanguage[]> {
 			type: "target",
 		}),
 	);
-	if (!response.ok) return [];
+	if (!response.ok) {
+		return [];
+	}
 
 	const results = (await response.json().catch(() => [])) as DeepLSupportedLanguage[];
 
@@ -112,10 +114,14 @@ function getPartOfSpeech(
 
 	const detected = (() => {
 		const exactMatch = localised[exact];
-		if (exactMatch !== undefined) return exactMatch;
+		if (exactMatch !== undefined) {
+			return exactMatch;
+		}
 
 		const approximateMatch = localised[approximate];
-		if (approximateMatch !== undefined) return approximateMatch;
+		if (approximateMatch !== undefined) {
+			return approximateMatch;
+		}
 
 		return "unknown";
 	})();

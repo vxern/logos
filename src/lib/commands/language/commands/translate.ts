@@ -77,13 +77,17 @@ const languageNameToStringKey: Record<string, string> = Object.freeze({
 	Ukrainian: "languages.ukrainian",
 });
 
-function handleTranslateTextAutocomplete([client, bot]: [Client, Bot], interaction: Interaction): void {
+async function handleTranslateTextAutocomplete([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const [_, focused] = parseArguments(interaction.data?.options, { show: "boolean" });
 
 	const guild = client.cache.guilds.get(interaction.guildId!);
-	if (guild === undefined) return;
+	if (guild === undefined) {
+		return;
+	}
 
-	if (focused === undefined || focused.value === undefined) return;
+	if (focused === undefined || focused.value === undefined) {
+		return;
+	}
 
 	const inputLowercase = (focused.value as string).toLowerCase();
 
@@ -117,7 +121,9 @@ function handleTranslateTextAutocomplete([client, bot]: [Client, Bot], interacti
 /** Allows the user to translate text from one language to another through the DeepL API. */
 async function handleTranslateText([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const [{ from, to, text, show }] = parseArguments(interaction.data?.options, { show: "boolean" });
-	if (from === undefined || to === undefined || text === undefined) return;
+	if (from === undefined || to === undefined || text === undefined) {
+		return;
+	}
 
 	const sourceLanguage = resolveToSupportedLanguage(client, from);
 	const targetLanguage = resolveToSupportedLanguage(client, to);
@@ -141,7 +147,7 @@ async function handleTranslateText([client, bot]: [Client, Bot], interaction: In
 
 		const areBothLanguagesInvalid = isSourceLanguageInvalid && isTargetLanguageInvalid;
 
-		return void reply([client, bot], interaction, {
+		reply([client, bot], interaction, {
 			embeds: [
 				{
 					...(areBothLanguagesInvalid
@@ -162,6 +168,7 @@ async function handleTranslateText([client, bot]: [Client, Bot], interaction: In
 				},
 			],
 		});
+		return;
 	}
 
 	const isSourceTextEmpty = text.trim().length === 0;
@@ -171,7 +178,7 @@ async function handleTranslateText([client, bot]: [Client, Bot], interaction: In
 			description: localise(client, "translate.strings.textEmpty.description", interaction.locale)(),
 		};
 
-		return void reply([client, bot], interaction, {
+		reply([client, bot], interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -180,6 +187,7 @@ async function handleTranslateText([client, bot]: [Client, Bot], interaction: In
 				},
 			],
 		});
+		return;
 	}
 
 	if (from === to) {
@@ -188,7 +196,7 @@ async function handleTranslateText([client, bot]: [Client, Bot], interaction: In
 			description: localise(client, "translate.strings.languagesNotDifferent.description", interaction.locale)(),
 		};
 
-		return void reply([client, bot], interaction, {
+		reply([client, bot], interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -197,12 +205,15 @@ async function handleTranslateText([client, bot]: [Client, Bot], interaction: In
 				},
 			],
 		});
+		return;
 	}
 
 	await postponeReply([client, bot], interaction, { visible: show });
 
 	const guild = client.cache.guilds.get(interaction.guildId!);
-	if (guild === undefined) return;
+	if (guild === undefined) {
+		return;
+	}
 
 	client.log.info(
 		`Translating a text of length ${text.length} from ${sourceLanguage.name} to ${
@@ -219,7 +230,7 @@ async function handleTranslateText([client, bot]: [Client, Bot], interaction: In
 			description: localise(client, "translate.strings.failed.description", locale)(),
 		};
 
-		return void editReply([client, bot], interaction, {
+		editReply([client, bot], interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -228,6 +239,7 @@ async function handleTranslateText([client, bot]: [Client, Bot], interaction: In
 				},
 			],
 		});
+		return;
 	}
 
 	// Ensures that an empty translation string does not result in embed failure.
@@ -285,7 +297,7 @@ async function handleTranslateText([client, bot]: [Client, Bot], interaction: In
 		];
 	}
 
-	return void editReply([client, bot], interaction, { embeds });
+	editReply([client, bot], interaction, { embeds });
 }
 
 interface DeepLTranslation {
@@ -321,10 +333,14 @@ async function translate(
 			target_lang: targetLanguageCode,
 		}),
 	);
-	if (!response.ok) return;
+	if (!response.ok) {
+		return;
+	}
 
 	const results = ((await response.json()) as TranslationResult).translations;
-	if (results.length === 0) return;
+	if (results.length === 0) {
+		return;
+	}
 
 	const result = results.at(0)!;
 	return {

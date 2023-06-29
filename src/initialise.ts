@@ -1,6 +1,6 @@
 import * as fs from "fs/promises";
 import * as dotenv from "dotenv";
-import { Bot, Locales } from "discordeno";
+import { Locales } from "discordeno";
 import * as Sentry from "sentry";
 import { getSupportedLanguages, loadDictionaryAdapters, loadSentencePairs } from "./lib/commands/language/module.js";
 import { Client, initialiseClient } from "./lib/client.js";
@@ -51,7 +51,9 @@ function readEnvironment({
 		process.exit(1);
 	}
 
-	if (envConfiguration === undefined) return;
+	if (envConfiguration === undefined) {
+		return;
+	}
 
 	for (const [key, value] of Object.entries(envConfiguration) as [key: string, value: string][]) {
 		process.env[key] = value;
@@ -64,24 +66,32 @@ async function readLocalisations(directoryPath: string): Promise<Map<string, Map
 	const directoryPaths: string[] = [];
 	for (const entryPath of await fs.readdir(directoryPath)) {
 		const combinedPath = `${directoryPath}/${entryPath}`;
-		if (!(await fs.stat(combinedPath)).isDirectory()) continue;
+		if (!(await fs.stat(combinedPath)).isDirectory()) {
+			continue;
+		}
 
 		directoryPaths.push(combinedPath);
 	}
 
 	const localisationFiles: [language: Language, path: string, normalise: boolean][] = [];
 	for (const directoryPath of directoryPaths) {
-		if (!(await fs.stat(directoryPath)).isDirectory()) continue;
+		if (!(await fs.stat(directoryPath)).isDirectory()) {
+			continue;
+		}
 
 		const normalise = directoryPath.endsWith("/commands");
 
 		for (const entryPath of await fs.readdir(directoryPath)) {
 			const combinedPath = `${directoryPath}/${entryPath}`;
-			if (!(await fs.stat(combinedPath)).isFile()) continue;
+			if (!(await fs.stat(combinedPath)).isFile()) {
+				continue;
+			}
 
 			const [locale, _] = entryPath.split(".") as [Locales, string];
 			const language = getLanguageByLocale(locale);
-			if (language === undefined) continue;
+			if (language === undefined) {
+				continue;
+			}
 
 			localisationFiles.push([language, combinedPath, normalise]);
 		}
@@ -140,7 +150,9 @@ async function readSentenceFiles(directoryPath: string): Promise<[Language, stri
 	const filePaths: string[] = [];
 	for (const entryPath of await fs.readdir(directoryPath)) {
 		const combinedPath = `${directoryPath}/${entryPath}`;
-		if ((await fs.stat(combinedPath)).isDirectory()) continue;
+		if ((await fs.stat(combinedPath)).isDirectory()) {
+			continue;
+		}
 
 		filePaths.push(combinedPath);
 	}
@@ -168,7 +180,7 @@ async function readSentenceFiles(directoryPath: string): Promise<[Language, stri
 	return Promise.all(results);
 }
 
-async function initialise(): Promise<[Client, Bot]> {
+async function initialise(): Promise<void> {
 	const [envConfiguration, templateEnvConfiguration] = await Promise.all([
 		readDotEnvFile(".env"),
 		readDotEnvFile(".env.example", true),
@@ -194,7 +206,7 @@ async function initialise(): Promise<[Client, Bot]> {
 	console.debug(`Loaded ${Array.from(sentencePairs.values()).flat().length} sentence pairs.`);
 	console.debug(`Loaded ${localisations.size} unique string keys.`);
 
-	return initialiseClient(
+	initialiseClient(
 		{ environment, supportedTranslationLanguages },
 		{ dictionaryAdapters, sentencePairs, rateLimiting: new Map() },
 		localisations,

@@ -56,7 +56,9 @@ const generators: Required<MessageGenerators<GuildEvents>> = {
 		title: `${constants.symbols.events.entryRequest.submitted} Entry request submitted`,
 		message: (client, user, entryRequest) => {
 			const guild = client.cache.guilds.get(BigInt(entryRequest.guild));
-			if (guild === undefined) return;
+			if (guild === undefined) {
+				return;
+			}
 
 			const strings = {
 				reason: localise(
@@ -82,7 +84,9 @@ ${codeMultiline(entryRequest.answers.where_found!)}
 		},
 		filter: (client, originGuildId, _user, entryRequest) => {
 			const guild = client.cache.guilds.get(BigInt(entryRequest.guild));
-			if (guild === undefined) return false;
+			if (guild === undefined) {
+				return false;
+			}
 
 			return originGuildId === guild.id;
 		},
@@ -92,7 +96,9 @@ ${codeMultiline(entryRequest.answers.where_found!)}
 		title: `${constants.symbols.events.entryRequest.accepted} Entry request accepted`,
 		message: (client, user, by) => {
 			const byUser = client.cache.users.get(by.id);
-			if (byUser === undefined) return;
+			if (byUser === undefined) {
+				return;
+			}
 
 			return `${diagnosticMentionUser(user)}'s entry request has been accepted by ${diagnosticMentionUser(byUser)}`;
 		},
@@ -103,7 +109,9 @@ ${codeMultiline(entryRequest.answers.where_found!)}
 		title: `${constants.symbols.events.entryRequest.rejected} Entry request rejected`,
 		message: (client, user, by) => {
 			const byUser = client.cache.users.get(by.id);
-			if (byUser === undefined) return;
+			if (byUser === undefined) {
+				return;
+			}
 
 			return `${diagnosticMentionUser(user)}'s entry request has been rejected by ${diagnosticMentionUser(byUser)}`;
 		},
@@ -114,7 +122,9 @@ ${codeMultiline(entryRequest.answers.where_found!)}
 		title: `${constants.symbols.events.warned} Member warned`,
 		message: (client, member, warning, by) => {
 			const memberUser = client.cache.users.get(member.id);
-			if (memberUser === undefined) return;
+			if (memberUser === undefined) {
+				return;
+			}
 
 			return `${diagnosticMentionUser(memberUser)} has been warned by ${diagnosticMentionUser(by)} for: ${
 				warning.reason
@@ -127,7 +137,9 @@ ${codeMultiline(entryRequest.answers.where_found!)}
 		title: `${constants.symbols.events.pardoned} Member pardoned`,
 		message: (client, member, warning, by) => {
 			const memberUser = client.cache.users.get(member.id);
-			if (memberUser === undefined) return;
+			if (memberUser === undefined) {
+				return;
+			}
 
 			return `${diagnosticMentionUser(memberUser)} has been pardoned by ${diagnosticMentionUser(
 				by,
@@ -140,7 +152,9 @@ ${codeMultiline(entryRequest.answers.where_found!)}
 		title: `${constants.symbols.events.timeout.added} Member timed out`,
 		message: (client, member, until, reason, by) => {
 			const memberUser = client.cache.users.get(member.id);
-			if (memberUser === undefined) return;
+			if (memberUser === undefined) {
+				return;
+			}
 
 			return `${diagnosticMentionUser(memberUser)} has been timed out by ${diagnosticMentionUser(by)} until ${timestamp(
 				until,
@@ -153,7 +167,9 @@ ${codeMultiline(entryRequest.answers.where_found!)}
 		title: `${constants.symbols.events.timeout.removed} Member's timeout cleared`,
 		message: (client, member, by) => {
 			const memberUser = client.cache.users.get(member.id);
-			if (memberUser === undefined) return;
+			if (memberUser === undefined) {
+				return;
+			}
 
 			return `The timeout of ${diagnosticMentionUser(memberUser)} has been cleared by: ${diagnosticMentionUser(by)}`;
 		},
@@ -164,7 +180,9 @@ ${codeMultiline(entryRequest.answers.where_found!)}
 		title: `${constants.symbols.events.praised} Member praised`,
 		message: (client, member, praise, by) => {
 			const memberUser = client.cache.users.get(member.id);
-			if (memberUser === undefined) return;
+			if (memberUser === undefined) {
+				return;
+			}
 
 			const comment = praise.comment ?? "None.";
 
@@ -179,7 +197,9 @@ ${codeMultiline(entryRequest.answers.where_found!)}
 		title: `${constants.symbols.events.suggestion} Suggestion made`,
 		message: (client, member, suggestion) => {
 			const memberUser = client.cache.users.get(member.id);
-			if (memberUser === undefined) return;
+			if (memberUser === undefined) {
+				return;
+			}
 
 			return `${diagnosticMentionUser(memberUser)} has made a suggestion.\n\nSuggestion: *${suggestion.suggestion}*`;
 		},
@@ -190,7 +210,9 @@ ${codeMultiline(entryRequest.answers.where_found!)}
 		title: `${constants.symbols.events.report} Report submitted`,
 		message: (client, author, report) => {
 			const authorUser = client.cache.users.get(author.id);
-			if (authorUser === undefined) return;
+			if (authorUser === undefined) {
+				return;
+			}
 
 			const messageLink = report.messageLink ?? "*No message link*.";
 
@@ -212,7 +234,9 @@ ${messageLink}`;
 		title: `${constants.symbols.events.purging.begin} Purging started`,
 		message: (client, member, channel, messageCount, author) => {
 			const user = client.cache.users.get(member.id);
-			if (user === undefined) return;
+			if (user === undefined) {
+				return;
+			}
 
 			const userMention = diagnosticMentionUser(user);
 			const authorMention = author !== undefined ? diagnosticMentionUser(author) : undefined;
@@ -229,7 +253,9 @@ ${messageLink}`;
 		title: `${constants.symbols.events.purging.end} Purging complete`,
 		message: (client, member, channel, messageCount, author) => {
 			const user = client.cache.users.get(member.id);
-			if (user === undefined) return;
+			if (user === undefined) {
+				return;
+			}
 
 			const userMention = diagnosticMentionUser(user);
 			const authorMention = author !== undefined ? diagnosticMentionUser(author) : undefined;

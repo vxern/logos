@@ -58,10 +58,10 @@ const command: CommandTemplate = {
 	],
 };
 
-function handlePurgeMessagesAutocomplete([client, bot]: [Client, Bot], interaction: Interaction): void {
+async function handlePurgeMessagesAutocomplete([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const [{ author }] = parseArguments(interaction.data?.options, {});
 
-	return autocompleteMembers([client, bot], interaction, author!, { includeBots: true });
+	autocompleteMembers([client, bot], interaction, author!, { includeBots: true });
 }
 
 async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
@@ -75,7 +75,9 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 		const authorMember = resolveInteractionToMember([client, bot], interaction, user, {
 			includeBots: true,
 		});
-		if (authorMember === undefined) return;
+		if (authorMember === undefined) {
+			return;
+		}
 
 		authorId = authorMember.id;
 	} else {
@@ -85,7 +87,8 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 	const isStartValid = isValidSnowflake(start!);
 	const isEndValid = end === undefined || isValidSnowflake(end!);
 	if (!(isStartValid && isEndValid)) {
-		return displaySnowflakesInvalidError([client, bot], interaction, [!isStartValid, !isEndValid]);
+		displaySnowflakesInvalidError([client, bot], interaction, [!isStartValid, !isEndValid]);
+		return;
 	}
 
 	end =
@@ -95,11 +98,13 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 			.then((messages) => messages?.first()?.id?.toString()));
 
 	if (end === undefined) {
-		return displayFailedError([client, bot], interaction);
+		displayFailedError([client, bot], interaction);
+		return;
 	}
 
 	if (start === end) {
-		return displayIdsNotDifferentError([client, bot], interaction);
+		displayIdsNotDifferentError([client, bot], interaction);
+		return;
 	}
 
 	let [startMessageId, endMessageId] = [snowflakeToBigint(start!), snowflakeToBigint(end!)];
@@ -115,7 +120,8 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 	const isStartInFuture = startTimestamp > now;
 	const isEndInFuture = endTimestamp > now;
 	if (isStartInFuture || isEndInFuture) {
-		return displaySnowflakesInvalidError([client, bot], interaction, [isStartInFuture, isEndInFuture]);
+		displaySnowflakesInvalidError([client, bot], interaction, [isStartInFuture, isEndInFuture]);
+		return;
 	}
 
 	const [startMessage, endMessage] = await Promise.all([
@@ -134,7 +140,8 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 	const notExistsStart = startMessage === undefined;
 	const notExistsEnd = endMessage === undefined;
 	if (notExistsStart || notExistsEnd) {
-		return displaySnowflakesInvalidError([client, bot], interaction, [notExistsStart, notExistsEnd]);
+		displaySnowflakesInvalidError([client, bot], interaction, [notExistsStart, notExistsEnd]);
+		return;
 	}
 
 	const channelMention = mention(interaction.channelId!, MentionTypes.Channel);
@@ -228,7 +235,7 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 				},
 			};
 
-			return void editReply([client, bot], interaction, {
+			editReply([client, bot], interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -237,6 +244,7 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 					},
 				],
 			});
+			return;
 		}
 
 		const newMessages = await getMessages(bot, interaction.channelId!, {
@@ -298,7 +306,7 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 			},
 		};
 
-		return void editReply([client, bot], interaction, {
+		editReply([client, bot], interaction, {
 			embeds: [
 				{
 					title: strings.indexed.title,
@@ -308,6 +316,7 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 				},
 			],
 		});
+		return;
 	}
 
 	let isShouldContinue = false;
@@ -316,7 +325,7 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 		isShouldContinue = await new Promise<boolean>((resolve) => {
 			const continueId = createInteractionCollector([client, bot], {
 				type: InteractionTypes.MessageComponent,
-				onCollect: (_, selection) => {
+				onCollect: async (_, selection) => {
 					acknowledge([client, bot], selection);
 					resolve(true);
 				},
@@ -324,7 +333,7 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 
 			const cancelId = createInteractionCollector([client, bot], {
 				type: InteractionTypes.MessageComponent,
-				onCollect: (_, selection) => {
+				onCollect: async (_, selection) => {
 					acknowledge([client, bot], selection);
 					resolve(false);
 				},
@@ -392,7 +401,8 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 		});
 
 		if (!isShouldContinue) {
-			return void deleteReply([client, bot], interaction);
+			deleteReply([client, bot], interaction);
+			return;
 		}
 
 		messages = messages.slice(0, configuration.commands.purge.maxDeletable);
@@ -403,7 +413,7 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 		(await new Promise<boolean>((resolve) => {
 			const continueId = createInteractionCollector([client, bot], {
 				type: InteractionTypes.MessageComponent,
-				onCollect: (_, selection) => {
+				onCollect: async (_, selection) => {
 					acknowledge([client, bot], selection);
 					resolve(true);
 				},
@@ -411,7 +421,7 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 
 			const cancelId = createInteractionCollector([client, bot], {
 				type: InteractionTypes.MessageComponent,
-				onCollect: (_, selection) => {
+				onCollect: async (_, selection) => {
 					acknowledge([client, bot], selection);
 					resolve(false);
 				},
@@ -472,7 +482,8 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 		}));
 
 	if (!isShouldPurge) {
-		return void deleteReply([client, bot], interaction);
+		deleteReply([client, bot], interaction);
+		return;
 	}
 
 	{
@@ -513,7 +524,9 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 		client.cache.members.get(snowflakeToBigint(`${interaction.user.id}${interaction.guildId!}`)),
 		client.cache.channels.get(interaction.channelId!),
 	];
-	if (guild === undefined || member === undefined || channel === undefined) return;
+	if (guild === undefined || member === undefined || channel === undefined) {
+		return;
+	}
 
 	logEvent([client, bot], guild, "purgeBegin", [member, channel, messages.length]);
 
@@ -528,9 +541,9 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 
 	let responseDeleted = false;
 
-	const responseDeletionTimeoutId = setTimeout(() => {
+	const responseDeletionTimeoutId = setTimeout(async () => {
 		responseDeleted = true;
-		return void deleteReply([client, bot], interaction);
+		deleteReply([client, bot], interaction);
 	}, Periods.minute * 1);
 
 	let deletedCount = 0;
@@ -574,7 +587,9 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 
 	clearTimeout(responseDeletionTimeoutId);
 
-	if (responseDeleted) return;
+	if (responseDeleted) {
+		return;
+	}
 
 	{
 		const strings = {
@@ -597,11 +612,11 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 	}
 }
 
-function displaySnowflakesInvalidError(
+async function displaySnowflakesInvalidError(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 	[isStartInvalid, isEndInvalid]: [boolean, boolean],
-): void {
+): Promise<void> {
 	const strings = {
 		start: {
 			title: localise(client, "purge.strings.invalid.start.title", interaction.locale)(),
@@ -619,7 +634,7 @@ function displaySnowflakesInvalidError(
 
 	const areBothInvalid = isStartInvalid && isEndInvalid;
 
-	return void editReply([client, bot], interaction, {
+	editReply([client, bot], interaction, {
 		embeds: [
 			{
 				...(areBothInvalid
@@ -642,13 +657,13 @@ function displaySnowflakesInvalidError(
 	});
 }
 
-function displayIdsNotDifferentError([client, bot]: [Client, Bot], interaction: Interaction): void {
+async function displayIdsNotDifferentError([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const strings = {
 		title: localise(client, "purge.strings.idsNotDifferent.title", interaction.locale)(),
 		description: localise(client, "purge.strings.idsNotDifferent.description", interaction.locale)(),
 	};
 
-	return void editReply([client, bot], interaction, {
+	editReply([client, bot], interaction, {
 		embeds: [
 			{
 				title: strings.title,
@@ -659,13 +674,13 @@ function displayIdsNotDifferentError([client, bot]: [Client, Bot], interaction: 
 	});
 }
 
-function displayFailedError([client, bot]: [Client, Bot], interaction: Interaction): void {
+async function displayFailedError([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const strings = {
 		title: localise(client, "purge.strings.failed.title", interaction.locale)(),
 		description: localise(client, "purge.strings.failed.description", interaction.locale)(),
 	};
 
-	return void editReply([client, bot], interaction, {
+	editReply([client, bot], interaction, {
 		embeds: [
 			{
 				title: strings.title,
@@ -677,7 +692,9 @@ function displayFailedError([client, bot]: [Client, Bot], interaction: Interacti
 }
 
 function getMessageContent(client: Client, message: Message, locale: string | undefined): string | undefined {
-	if (message.content.trim().length === 0 && message.embeds.length !== 0) return undefined;
+	if (message.content.trim().length === 0 && message.embeds.length !== 0) {
+		return undefined;
+	}
 
 	const content = trim(message.content, 500).trim();
 	if (content.length === 0) {

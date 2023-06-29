@@ -30,7 +30,9 @@ class SuggestionManager extends PromptManager<Suggestion, Metadata, InteractionD
 		for (const suggestions of Array.from(client.database.cache.suggestionsByAuthorAndGuild.values()).map(
 			(suggestions) => Array.from(suggestions.values()),
 		)) {
-			if (suggestions.length === 0) continue;
+			if (suggestions.length === 0) {
+				continue;
+			}
 
 			const guildId = BigInt(suggestions.at(0)!.data.guild);
 
@@ -51,7 +53,9 @@ class SuggestionManager extends PromptManager<Suggestion, Metadata, InteractionD
 
 	decodeMetadata(data: string[]): Metadata | undefined {
 		const [userId, reference] = data;
-		if (userId === undefined || reference === undefined) return undefined;
+		if (userId === undefined || reference === undefined) {
+			return undefined;
+		}
 
 		return { userId: BigInt(userId), reference };
 	}
@@ -84,7 +88,9 @@ class SuggestionManager extends PromptManager<Suggestion, Metadata, InteractionD
 							size: 64,
 							format: "png",
 						});
-						if (iconURL === undefined) return;
+						if (iconURL === undefined) {
+							return;
+						}
 
 						return { url: iconURL };
 					})(),
@@ -145,13 +151,19 @@ class SuggestionManager extends PromptManager<Suggestion, Metadata, InteractionD
 		const isResolved = isResolvedString === "true";
 
 		const user = await client.database.adapters.users.getOrFetchOrCreate(client, "id", userId, BigInt(userId));
-		if (user === undefined) return undefined;
+		if (user === undefined) {
+			return undefined;
+		}
 
 		const documents = client.database.adapters.suggestions.get(client, "authorAndGuild", [user.ref, guildId]);
-		if (documents === undefined) return undefined;
+		if (documents === undefined) {
+			return undefined;
+		}
 
 		const document = documents.get(reference);
-		if (document === undefined) return undefined;
+		if (document === undefined) {
+			return undefined;
+		}
 
 		if (isResolved && document.data.isResolved) {
 			const strings = {
@@ -159,7 +171,7 @@ class SuggestionManager extends PromptManager<Suggestion, Metadata, InteractionD
 				description: localise(client, "alreadyMarkedResolved.description", defaultLocale)(),
 			};
 
-			return void reply([client, bot], interaction, {
+			reply([client, bot], interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -168,6 +180,7 @@ class SuggestionManager extends PromptManager<Suggestion, Metadata, InteractionD
 					},
 				],
 			});
+			return;
 		}
 
 		if (!(isResolved || document.data.isResolved)) {
@@ -176,7 +189,7 @@ class SuggestionManager extends PromptManager<Suggestion, Metadata, InteractionD
 				description: localise(client, "alreadyMarkedUnresolved.description", defaultLocale)(),
 			};
 
-			return void reply([client, bot], interaction, {
+			reply([client, bot], interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -185,6 +198,7 @@ class SuggestionManager extends PromptManager<Suggestion, Metadata, InteractionD
 					},
 				],
 			});
+			return;
 		}
 
 		const updatedDocument = await client.database.adapters.suggestions.update(client, {

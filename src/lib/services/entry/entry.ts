@@ -29,16 +29,20 @@ function setupEntryProcess([client, bot]: [Client, Bot]): void {
 			type: InteractionTypes.MessageComponent,
 			customId: step,
 			doesNotExpire: true,
-			onCollect: (_bot, interaction) => {
-				if (!isServicing(client, interaction.guildId!)) return;
+			onCollect: async (_bot, interaction) => {
+				if (!isServicing(client, interaction.guildId!)) {
+					return;
+				}
 
 				const selectionCustomId = interaction.data?.customId;
-				if (selectionCustomId === undefined) return;
+				if (selectionCustomId === undefined) {
+					return;
+				}
 
 				const [stepId, parameter] = decodeId<EntryStepButtonID>(selectionCustomId);
 				const handleInteraction = interactionHandlers[stepId as keyof typeof interactionHandlers]!;
 
-				return void handleInteraction([client, bot], interaction, parameter);
+				handleInteraction([client, bot], interaction, parameter);
 			},
 		});
 	}

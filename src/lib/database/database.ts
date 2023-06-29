@@ -301,8 +301,9 @@ async function dispatchQuery<
 	try {
 		result = await client.database.client.query(expression);
 	} catch (exception) {
-		if (!(exception instanceof Fauna.errors.FaunaError)) return undefined;
-		if (exception instanceof Fauna.errors.NotFound) return undefined;
+		if (!(exception instanceof Fauna.errors.FaunaError) || exception instanceof Fauna.errors.NotFound) {
+			return undefined;
+		}
 
 		Sentry.captureException(exception);
 		client.log.error(`${exception.message} ~ ${exception.description}`);
@@ -310,7 +311,9 @@ async function dispatchQuery<
 		return undefined;
 	}
 
-	if (!("data" in result)) return undefined;
+	if (!("data" in result)) {
+		return undefined;
+	}
 
 	if (!Array.isArray(result.data)) {
 		return result as unknown as R;
@@ -325,7 +328,9 @@ function mentionUser(user: DiscordUser | undefined, id: bigint): string {
 
 function getUserMentionByReference(client: Client, reference: Fauna.values.Ref): string {
 	const document = client.database.cache.usersByReference.get(stringifyValue(reference));
-	if (document === undefined) return "an unknown, uncached user";
+	if (document === undefined) {
+		return "an unknown, uncached user";
+	}
 
 	const id = BigInt(document.data.account.id);
 	const user = client.cache.users.get(id);

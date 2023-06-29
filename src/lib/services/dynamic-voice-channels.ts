@@ -8,19 +8,27 @@ const previousVoiceStates = new Map<`${/*userId:*/ bigint}${/*guildId:*/ bigint}
 
 const service: ServiceStarter = ([client, bot]) => {
 	extendEventHandler(bot, "voiceStateUpdate", { append: true }, (_, voiceState) => {
-		if (!isServicing(client, voiceState.guildId)) return;
+		if (!isServicing(client, voiceState.guildId)) {
+			return;
+		}
 
 		onVoiceStateUpdate([client, bot], voiceState);
 	});
 
 	extendEventHandler(bot, "guildCreate", { append: true }, (_, { id: guildId }) => {
-		if (!isServicing(client, guildId)) return;
+		if (!isServicing(client, guildId)) {
+			return;
+		}
 
 		const guild = client.cache.guilds.get(guildId);
-		if (guild === undefined) return;
+		if (guild === undefined) {
+			return;
+		}
 
 		const voiceChannelStatesTuples = getVoiceChannelStatesTuples(guild);
-		if (voiceChannelStatesTuples.length === 0) return;
+		if (voiceChannelStatesTuples.length === 0) {
+			return;
+		}
 
 		for (const [_, voiceStates] of voiceChannelStatesTuples) {
 			for (const voiceState of voiceStates) {
@@ -32,7 +40,9 @@ const service: ServiceStarter = ([client, bot]) => {
 			.filter(([_, states]) => states.length === 0)
 			.map(([channel]) => channel);
 		// If there is up to one free channel already, do not process.
-		if (freeChannels.length <= 1) return;
+		if (freeChannels.length <= 1) {
+			return;
+		}
 
 		const freeChannelIds = freeChannels.map((channel) => channel.id);
 
@@ -46,10 +56,14 @@ const service: ServiceStarter = ([client, bot]) => {
 
 function onVoiceStateUpdate([client, bot]: [Client, Bot], voiceState: VoiceState): void {
 	const guild = client.cache.guilds.get(voiceState.guildId);
-	if (guild === undefined) return;
+	if (guild === undefined) {
+		return;
+	}
 
 	const voiceChannelStatesTuples = getVoiceChannelStatesTuples(guild);
-	if (voiceChannelStatesTuples.length === 0) return;
+	if (voiceChannelStatesTuples.length === 0) {
+		return;
+	}
 
 	const previousState = previousVoiceStates.get(`${voiceState.userId}${voiceState.guildId}`);
 
@@ -67,30 +81,38 @@ function onVoiceStateUpdate([client, bot]: [Client, Bot], voiceState: VoiceState
 
 type VoiceChannelStatesTuple = [channel: Channel, voiceStates: VoiceState[]];
 
-function onConnect(
+async function onConnect(
 	[client, bot]: [Client, Bot],
 	guild: Guild,
 	voiceChannelStatesTuples: VoiceChannelStatesTuple[],
 	currentState: VoiceState,
-): void {
+): Promise<void> {
 	const tuple = voiceChannelStatesTuples.find(([channel, _states]) => channel.id === currentState.channelId!);
-	if (tuple === undefined) return;
+	if (tuple === undefined) {
+		return;
+	}
 
 	const [_, states] = tuple;
 
 	// If somebody is already connected to the channel, do not process.
-	if (states.length !== 1) return;
+	if (states.length !== 1) {
+		return;
+	}
 
 	const freeChannels = voiceChannelStatesTuples.filter(([_, states]) => states.length === 0).length;
 	// If there is a free channel available already, do not process.
-	if (freeChannels !== 0) return;
+	if (freeChannels !== 0) {
+		return;
+	}
 
 	// If the channel limit has already been reached, do not process.
-	if (voiceChannelStatesTuples.length >= configuration.services.dynamicVoiceChannels.limit) return;
+	if (voiceChannelStatesTuples.length >= configuration.services.dynamicVoiceChannels.limit) {
+		return;
+	}
 
 	const anchor = voiceChannelStatesTuples.at(0)![0];
 
-	return void createChannel(bot, guild.id, {
+	createChannel(bot, guild.id, {
 		name: configuration.guilds.channels.voiceChat,
 		type: ChannelTypes.GuildVoice,
 		parentId: anchor.parentId,
@@ -98,34 +120,42 @@ function onConnect(
 	}).catch(() => client.log.warn(`Failed to create voice channel on guild with ID ${guild.id}.`));
 }
 
-function onDisconnect(
+async function onDisconnect(
 	[client, bot]: [Client, Bot],
 	voiceChannelStatesTuples: VoiceChannelStatesTuple[],
 	previousState: VoiceState,
-): void {
+): Promise<void> {
 	const voiceChannelStatesTuple = voiceChannelStatesTuples.find(
 		([channel, _]) => channel.id === previousState.channelId!,
 	);
-	if (voiceChannelStatesTuple === undefined) return;
+	if (voiceChannelStatesTuple === undefined) {
+		return;
+	}
 
 	const [_, states] = voiceChannelStatesTuple;
 	// If somebody is still connected to the channel, do not process.
-	if (states.length !== 0) return;
+	if (states.length !== 0) {
+		return;
+	}
 
 	const freeChannels = voiceChannelStatesTuples.filter(([_, states]) => states.length === 0);
 	// If there is up to one free channel already, do not process.
-	if (freeChannels.length <= 1) return;
+	if (freeChannels.length <= 1) {
+		return;
+	}
 
 	const [channelToDelete, __] = freeChannels.at(-1)!;
 
-	return void deleteChannel(bot, channelToDelete.id).catch(() =>
+	deleteChannel(bot, channelToDelete.id).catch(() =>
 		client.log.warn(`Failed to delete voice channel on guild with ID ${previousState.guildId}.`),
 	);
 }
 
 function getVoiceChannelStatesTuples(guild: Guild): VoiceChannelStatesTuple[] {
 	const voiceChannels = getRelevantVoiceChannels(guild);
-	if (voiceChannels.length === 0) return [];
+	if (voiceChannels.length === 0) {
+		return [];
+	}
 
 	const voiceStates = getRelevantVoiceStates(guild, [...voiceChannels.map((channel) => channel.id)]);
 

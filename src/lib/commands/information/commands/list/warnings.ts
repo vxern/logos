@@ -6,12 +6,15 @@ import { parseArguments, reply } from "../../../../interactions.js";
 import constants from "../../../../../constants.js";
 import { timestamp } from "../../../../../formatting.js";
 
-function handleDisplayWarningsAutocomplete([client, bot]: [Client, Bot], interaction: Interaction): void {
+async function handleDisplayWarningsAutocomplete(
+	[client, bot]: [Client, Bot],
+	interaction: Interaction,
+): Promise<void> {
 	const [{ user }] = parseArguments(interaction.data?.options, {});
 
 	const isModerator = calculatePermissions(interaction.member!.permissions!).includes("MODERATE_MEMBERS");
 
-	return autocompleteMembers(
+	autocompleteMembers(
 		[client, bot],
 		interaction,
 		user!,
@@ -28,7 +31,9 @@ async function handleDisplayWarnings([client, bot]: [Client, Bot], interaction: 
 	const member = resolveInteractionToMember([client, bot], interaction, user ?? interaction.user.id.toString(), {
 		restrictToSelf: !isModerator,
 	});
-	if (member === undefined) return;
+	if (member === undefined) {
+		return;
+	}
 
 	const isSelf = member.id === interaction.user.id;
 
@@ -38,25 +43,31 @@ async function handleDisplayWarnings([client, bot]: [Client, Bot], interaction: 
 		member.id.toString(),
 		member.id,
 	);
-	if (recipient === undefined) return displayError([client, bot], interaction);
+	if (recipient === undefined) {
+		displayError([client, bot], interaction);
+		return;
+	}
 
 	const warnings = await client.database.adapters.warnings
 		.getOrFetch(client, "recipient", recipient.ref)
 		.then((warnings) => (warnings !== undefined ? Array.from(warnings.values()) : undefined));
-	if (warnings === undefined) return displayError([client, bot], interaction);
+	if (warnings === undefined) {
+		displayError([client, bot], interaction);
+		return;
+	}
 
-	return void reply([client, bot], interaction, {
+	reply([client, bot], interaction, {
 		embeds: [getWarningPage(client, warnings, isSelf, interaction.locale)],
 	});
 }
 
-function displayError([client, bot]: [Client, Bot], interaction: Interaction): void {
+async function displayError([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const strings = {
 		title: localise(client, "list.options.warnings.strings.failed.title", interaction.locale)(),
 		description: localise(client, "list.options.warnings.strings.failed.description", interaction.locale)(),
 	};
 
-	return void reply([client, bot], interaction, {
+	reply([client, bot], interaction, {
 		embeds: [
 			{
 				title: strings.title,

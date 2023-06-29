@@ -25,18 +25,22 @@ const command: CommandTemplate = {
 	],
 };
 
-function handlePraiseUserAutocomplete([client, bot]: [Client, Bot], interaction: Interaction): void {
+async function handlePraiseUserAutocomplete([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const [{ user }] = parseArguments(interaction.data?.options, {});
 
-	return autocompleteMembers([client, bot], interaction, user!);
+	autocompleteMembers([client, bot], interaction, user!);
 }
 
 async function handlePraiseUser([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const [{ user, comment }] = parseArguments(interaction.data?.options, {});
-	if (user === undefined) return;
+	if (user === undefined) {
+		return;
+	}
 
 	const member = resolveInteractionToMember([client, bot], interaction, user);
-	if (member === undefined) return;
+	if (member === undefined) {
+		return;
+	}
 
 	if (member.id === interaction.member?.id) {
 		const strings = {
@@ -44,7 +48,7 @@ async function handlePraiseUser([client, bot]: [Client, Bot], interaction: Inter
 			description: localise(client, "praise.strings.cannotPraiseSelf.description", interaction.locale)(),
 		};
 
-		return void reply([client, bot], interaction, {
+		reply([client, bot], interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -53,6 +57,7 @@ async function handlePraiseUser([client, bot]: [Client, Bot], interaction: Inter
 				},
 			],
 		});
+		return;
 	}
 
 	await postponeReply([client, bot], interaction);
@@ -68,12 +73,14 @@ async function handlePraiseUser([client, bot]: [Client, Bot], interaction: Inter
 	]);
 
 	if (author === undefined || subject === undefined) {
-		return showError([client, bot], interaction);
+		displayError([client, bot], interaction);
+		return;
 	}
 
 	const praisesBySender = await client.database.adapters.praises.getOrFetch(client, "sender", author.ref);
 	if (praisesBySender === undefined) {
-		return showError([client, bot], interaction);
+		displayError([client, bot], interaction);
+		return;
 	}
 
 	const praises = Array.from(praisesBySender.values());
@@ -83,7 +90,7 @@ async function handlePraiseUser([client, bot]: [Client, Bot], interaction: Inter
 			description: localise(client, "praise.strings.tooMany.description", interaction.locale)(),
 		};
 
-		return void editReply([client, bot], interaction, {
+		editReply([client, bot], interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -92,6 +99,7 @@ async function handlePraiseUser([client, bot]: [Client, Bot], interaction: Inter
 				},
 			],
 		});
+		return;
 	}
 
 	const praise: Praise = {
@@ -102,11 +110,14 @@ async function handlePraiseUser([client, bot]: [Client, Bot], interaction: Inter
 	};
 
 	const guild = client.cache.guilds.get(interaction.guildId!);
-	if (guild === undefined) return;
+	if (guild === undefined) {
+		return;
+	}
 
 	const document = await client.database.adapters.praises.create(client, praise);
 	if (document === undefined) {
-		return showError([client, bot], interaction);
+		displayError([client, bot], interaction);
+		return;
 	}
 
 	logEvent([client, bot], guild, "praiseAdd", [member, praise, interaction.user]);
@@ -120,7 +131,7 @@ async function handlePraiseUser([client, bot]: [Client, Bot], interaction: Inter
 		)({ user_mention: mention(member.id, MentionTypes.User) }),
 	};
 
-	return void editReply([client, bot], interaction, {
+	editReply([client, bot], interaction, {
 		embeds: [
 			{
 				title: strings.title,
@@ -131,13 +142,13 @@ async function handlePraiseUser([client, bot]: [Client, Bot], interaction: Inter
 	});
 }
 
-function showError([client, bot]: [Client, Bot], interaction: Interaction): void {
+async function displayError([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const strings = {
 		title: localise(client, "praise.strings.failed.title", interaction.locale)(),
 		description: localise(client, "praise.strings.failed.description", interaction.locale)(),
 	};
 
-	return void editReply([client, bot], interaction, {
+	editReply([client, bot], interaction, {
 		embeds: [
 			{
 				title: strings.title,

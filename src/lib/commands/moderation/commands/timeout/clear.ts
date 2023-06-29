@@ -5,21 +5,25 @@ import { parseArguments, reply } from "../../../../interactions.js";
 import { diagnosticMentionUser } from "../../../../utils.js";
 import constants from "../../../../../constants.js";
 
-function handleClearTimeoutAutocomplete([client, bot]: [Client, Bot], interaction: Interaction): void {
+async function handleClearTimeoutAutocomplete([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const [{ user }] = parseArguments(interaction.data?.options, {});
 
-	return autocompleteMembers([client, bot], interaction, user!, { restrictToNonSelf: true, excludeModerators: true });
+	autocompleteMembers([client, bot], interaction, user!, { restrictToNonSelf: true, excludeModerators: true });
 }
 
 async function handleClearTimeout([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const [{ user }] = parseArguments(interaction.data?.options, {});
-	if (user === undefined) return;
+	if (user === undefined) {
+		return;
+	}
 
 	const member = resolveInteractionToMember([client, bot], interaction, user, {
 		restrictToNonSelf: true,
 		excludeModerators: true,
 	});
-	if (member === undefined) return;
+	if (member === undefined) {
+		return;
+	}
 
 	const timedOutUntil = member.communicationDisabledUntil ?? undefined;
 
@@ -35,7 +39,7 @@ async function handleClearTimeout([client, bot]: [Client, Bot], interaction: Int
 			)({ user_mention: diagnosticMentionUser(member.user!) }),
 		};
 
-		return void reply([client, bot], interaction, {
+		reply([client, bot], interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -44,10 +48,13 @@ async function handleClearTimeout([client, bot]: [Client, Bot], interaction: Int
 				},
 			],
 		});
+		return;
 	}
 
 	const guild = client.cache.guilds.get(interaction.guildId!);
-	if (guild === undefined) return;
+	if (guild === undefined) {
+		return;
+	}
 
 	await editMember(bot, interaction.guildId!, member.id, { communicationDisabledUntil: null }).catch(() =>
 		client.log.warn(`Failed to remove timeout of member with ID ${member.id}`),
@@ -64,7 +71,7 @@ async function handleClearTimeout([client, bot]: [Client, Bot], interaction: Int
 		)({ user_mention: diagnosticMentionUser(member.user!) }),
 	};
 
-	return void reply([client, bot], interaction, {
+	reply([client, bot], interaction, {
 		embeds: [
 			{
 				title: strings.title,

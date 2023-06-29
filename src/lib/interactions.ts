@@ -134,7 +134,7 @@ type ControlButtonID = [type: "previous" | "next"];
  * Paginates an array of elements, allowing the user to browse between pages
  * in an embed view.
  */
-function paginate<T>(
+async function paginate<T>(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 	{
@@ -148,7 +148,7 @@ function paginate<T>(
 		view: PaginationDisplayData<T>;
 		show: boolean;
 	},
-): void {
+): Promise<void> {
 	const data: PaginationData<T> = { elements, view, pageIndex: 0 };
 
 	const isFirst = () => data.pageIndex === 0;
@@ -157,10 +157,12 @@ function paginate<T>(
 	const customId = createInteractionCollector([client, bot], {
 		type: InteractionTypes.MessageComponent,
 		doesNotExpire: true,
-		onCollect: (bot, selection) => {
+		onCollect: async (bot, selection) => {
 			acknowledge([client, bot], selection);
 
-			if (selection.data === undefined) return;
+			if (selection.data === undefined) {
+				return;
+			}
 
 			const [_, action] = decodeId<ControlButtonID>(selection.data.customId!);
 
@@ -180,7 +182,7 @@ function paginate<T>(
 		},
 	});
 
-	return void reply(
+	reply(
 		[client, bot],
 		interaction,
 		{
@@ -295,11 +297,15 @@ async function createModalComposer<T extends string>(
 				type: InteractionTypes.ModalSubmit,
 				userId: interaction.user.id,
 				limit: 1,
-				onCollect: (_, submission) => {
+				onCollect: async (_, submission) => {
 					content = parseComposerContent(submission);
-					if (content === undefined) return resolve([submission, false]);
+					if (content === undefined) {
+						return resolve([submission, false]);
+					}
 
-					return onSubmit(submission, content).then((result) => resolve([submission, result]));
+					const result = await onSubmit(submission, content);
+
+					resolve([submission, result]);
 				},
 			});
 
@@ -310,7 +316,7 @@ async function createModalComposer<T extends string>(
 				}
 			}
 
-			showModal([client, bot], anchor, {
+			displayModal([client, bot], anchor, {
 				title: modal.title,
 				customId: modalId,
 				components: fields,
@@ -336,7 +342,9 @@ function parseComposerContent<T extends string>(submission: Interaction): Compos
 	const content: Partial<ComposerContent<T>> = {};
 
 	const fields = submission?.data?.components?.map((component) => component.components?.at(0));
-	if (fields === undefined) return;
+	if (fields === undefined) {
+		return;
+	}
 
 	for (const field of fields) {
 		const key = field!.customId as T;
@@ -405,7 +413,9 @@ function parseConciseTimeExpression(
 	const verboseExpression = verboseExpressionParts.join(" ");
 
 	const expressionParsed = parseVerboseTimeExpressionPhrase(client, verboseExpression, locale);
-	if (expressionParsed === undefined) return undefined;
+	if (expressionParsed === undefined) {
+		return undefined;
+	}
 
 	const conciseExpression = [hoursPart ?? "0", minutesPart ?? "0", secondsPart ?? "0"]
 		.map((part) => (part.length === 1 ? `0${part}` : part))
@@ -475,20 +485,28 @@ function parseVerboseTimeExpressionPhrase(
 	const timeUnitAliases = extractStrings(expression);
 
 	// No parameters have been provided for both keys and values.
-	if (timeUnitAliases.length === 0 || quantifiers.length === 0) return undefined;
+	if (timeUnitAliases.length === 0 || quantifiers.length === 0) {
+		return undefined;
+	}
 
 	// The number of values does not match the number of keys.
-	if (quantifiers.length !== timeUnitAliases.length) return undefined;
+	if (quantifiers.length !== timeUnitAliases.length) {
+		return undefined;
+	}
 
 	// One of the values is equal to 0.
-	if (quantifiers.includes(0)) return undefined;
+	if (quantifiers.includes(0)) {
+		return undefined;
+	}
 
 	const timeUnits: TimeUnit[] = [];
 	for (const timeUnitAlias of timeUnitAliases) {
 		const timeUnit = Object.entries(timeUnitsWithAliases).find(([_, aliases]) => aliases.includes(timeUnitAlias))?.[0];
 
 		// TODO(vxern): Convey to the user that a time unit is invalid.
-		if (timeUnit === undefined) return undefined;
+		if (timeUnit === undefined) {
+			return undefined;
+		}
 
 		timeUnits.push(timeUnit as TimeUnit);
 	}
@@ -530,13 +548,13 @@ function decodeId<T extends ComponentIDMetadata, R = [string, ...T]>(customId: s
 	return customId.split(constants.symbols.meta.idSeparator) as R;
 }
 
-function acknowledge([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+async function acknowledge([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	return sendInteractionResponse(bot, interaction.id, interaction.token, {
 		type: InteractionResponseTypes.DeferredUpdateMessage,
 	}).catch((reason) => client.log.warn(`Failed to acknowledge interaction: ${reason}`));
 }
 
-function postponeReply(
+async function postponeReply(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 	{ visible = false } = {},
@@ -547,7 +565,7 @@ function postponeReply(
 	}).catch((reason) => client.log.warn(`Failed to postpone reply to interaction: ${reason}`));
 }
 
-function reply(
+async function reply(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 	data: Omit<InteractionCallbackData, "flags">,
@@ -555,14 +573,11 @@ function reply(
 ): Promise<void> {
 	return sendInteractionResponse(bot, interaction.id, interaction.token, {
 		type: InteractionResponseTypes.ChannelMessageWithSource,
-		data: {
-			flags: !visible ? ApplicationCommandFlags.Ephemeral : undefined,
-			...data,
-		},
+		data: { ...data, flags: !visible ? ApplicationCommandFlags.Ephemeral : undefined },
 	}).catch((reason) => client.log.warn(`Failed to reply to interaction: ${reason}`));
 }
 
-function editReply(
+async function editReply(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 	data: Omit<InteractionCallbackData, "flags">,
@@ -572,13 +587,13 @@ function editReply(
 		.catch((reason) => client.log.warn(`Failed to edit reply to interaction: ${reason}`));
 }
 
-function deleteReply([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+async function deleteReply([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	return deleteOriginalInteractionResponse(bot, interaction.token).catch((reason) =>
 		client.log.warn(`Failed to edit reply to interaction: ${reason}`),
 	);
 }
 
-function respond(
+async function respond(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 	choices: ApplicationCommandOptionChoice[],
@@ -589,7 +604,7 @@ function respond(
 	}).catch((reason) => client.log.warn(`Failed to respond to autocomplete interaction: ${reason}`));
 }
 
-function showModal(
+async function displayModal(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 	data: Omit<InteractionCallbackData, "flags">,

@@ -10,8 +10,10 @@ const service: ServiceStarter = ([client, bot]: [Client, Bot]) => {
 		type: InteractionTypes.MessageComponent,
 		customId: constants.staticComponentIds.selectRoles,
 		doesNotExpire: true,
-		onCollect: (_, interaction) => {
-			if (!isServicing(client, interaction.guildId!)) return;
+		onCollect: async (_, interaction) => {
+			if (!isServicing(client, interaction.guildId!)) {
+				return;
+			}
 
 			handleOpenRoleSelectionMenu([client, bot], interaction);
 		},

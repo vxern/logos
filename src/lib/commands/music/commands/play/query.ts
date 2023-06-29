@@ -12,27 +12,35 @@ async function handleRequestQueryPlayback(
 	resolveToSongListing: ListingResolver,
 ): Promise<void> {
 	const [{ query }] = parseArguments(interaction.data?.options, {});
-	if (query === undefined) return;
+	if (query === undefined) {
+		return;
+	}
 
 	const listing = await resolveToSongListing([client, bot], interaction, query);
-	return handleRequestPlayback([client, bot], interaction, listing);
+	handleRequestPlayback([client, bot], interaction, listing);
 }
 
-function handleRequestPlayback(
+async function handleRequestPlayback(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 	listing: SongListing | undefined,
-): void {
+): Promise<void> {
 	const controller = client.features.music.controllers.get(interaction.guildId!);
-	if (controller === undefined) return;
+	if (controller === undefined) {
+		return;
+	}
 
 	const voiceState = getVoiceState(client, interaction.guildId!, interaction.user.id);
 
 	const guild = client.cache.guilds.get(interaction.guildId!);
-	if (guild === undefined) return;
+	if (guild === undefined) {
+		return;
+	}
 
 	const canPlay = verifyCanRequestPlayback([client, bot], interaction, controller, voiceState);
-	if (!canPlay) return;
+	if (!canPlay) {
+		return;
+	}
 
 	if (listing === undefined) {
 		const strings = {
@@ -47,7 +55,7 @@ function handleRequestPlayback(
 			},
 		};
 
-		return void reply([client, bot], interaction, {
+		reply([client, bot], interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -56,15 +64,20 @@ function handleRequestPlayback(
 				},
 			],
 		});
+		return;
 	}
 
 	const feedbackChannelId = client.cache.channels.get(interaction.channelId!)?.id;
-	if (feedbackChannelId === undefined) return;
+	if (feedbackChannelId === undefined) {
+		return;
+	}
 
 	const voiceChannelId = client.cache.channels.get(voiceState!.channelId!)?.id;
-	if (voiceChannelId === undefined) return;
+	if (voiceChannelId === undefined) {
+		return;
+	}
 
-	return void receiveNewListing([client, bot], guild, controller, listing, voiceChannelId, feedbackChannelId);
+	receiveNewListing([client, bot], guild, controller, listing, voiceChannelId, feedbackChannelId);
 }
 
 export { handleRequestPlayback, handleRequestQueryPlayback };

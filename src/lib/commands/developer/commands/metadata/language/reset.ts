@@ -3,14 +3,16 @@ import { Client, getImplicitLanguage } from "../../../../../client.js";
 import { reply } from "../../../../../interactions.js";
 import constants from "../../../../../../constants.js";
 
-function handleResetLanguage([client, bot]: [Client, Bot], interaction: Interaction): void {
+async function handleResetLanguage([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const guild = client.cache.guilds.get(interaction.guildId!);
-	if (guild === undefined) return;
+	if (guild === undefined) {
+		return;
+	}
 
 	const language = getImplicitLanguage(guild);
 	guild.language = language;
 
-	return void reply([client, bot], interaction, {
+	reply([client, bot], interaction, {
 		embeds: [
 			{
 				title: "Server language reset",

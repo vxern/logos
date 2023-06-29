@@ -3,11 +3,13 @@ import { Client } from "../../../../../client.js";
 import { reply } from "../../../../../interactions.js";
 import constants from "../../../../../../constants.js";
 
-function handleViewLanguage([client, bot]: [Client, Bot], interaction: Interaction): void {
+async function handleViewLanguage([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const guild = client.cache.guilds.get(interaction.guildId!);
-	if (guild === undefined) return;
+	if (guild === undefined) {
+		return;
+	}
 
-	return void reply([client, bot], interaction, {
+	reply([client, bot], interaction, {
 		embeds: [
 			{
 				title: "Server language",

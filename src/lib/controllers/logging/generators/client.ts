@@ -38,10 +38,14 @@ const client: MessageGenerators<ClientEvents> = {
 		title: `${constants.symbols.events.message.updated} Message updated`,
 		message: (client, _, message, __) => {
 			const oldMessage = client.cache.messages.previous.get(message.id);
-			if (oldMessage === undefined) return;
+			if (oldMessage === undefined) {
+				return;
+			}
 
 			const author = client.cache.users.get(message.authorId);
-			if (author === undefined) return;
+			if (author === undefined) {
+				return;
+			}
 
 			const before = oldMessage !== undefined ? codeMultiline(oldMessage.content) : "*No message*";
 
@@ -57,7 +61,9 @@ ${codeMultiline(message.content)}`;
 		},
 		filter: (client, originGuildId, _, message, oldMessage) => {
 			const author = client.cache.users.get(message.authorId);
-			if (author === undefined) return false;
+			if (author === undefined) {
+				return false;
+			}
 
 			return originGuildId === message.guildId && !author.toggles.bot && message.content !== oldMessage?.content;
 		},
@@ -67,10 +73,14 @@ ${codeMultiline(message.content)}`;
 		title: `${constants.symbols.events.message.deleted} Message deleted`,
 		message: (client, _, payload, __) => {
 			const message = client.cache.messages.latest.get(payload.id);
-			if (message === undefined) return;
+			if (message === undefined) {
+				return;
+			}
 
 			const author = client.cache.users.get(message.authorId);
-			if (author === undefined) return;
+			if (author === undefined) {
+				return;
+			}
 
 			return `${diagnosticMentionUser(author)} deleted their message in ${mention(
 				message.channelId,
@@ -82,10 +92,14 @@ ${codeMultiline(message.content)}`;
 		},
 		filter: (client, originGuildId, _, payload, __) => {
 			const message = client.cache.messages.latest.get(payload.id);
-			if (message === undefined) return false;
+			if (message === undefined) {
+				return false;
+			}
 
 			const author = client.cache.users.get(message.authorId);
-			if (author === undefined) return false;
+			if (author === undefined) {
+				return false;
+			}
 
 			return originGuildId === message.guildId && !author.toggles.bot;
 		},

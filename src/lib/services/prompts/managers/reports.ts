@@ -30,7 +30,9 @@ class ReportManager extends PromptManager<Report, Metadata, InteractionData> {
 		for (const reports of Array.from(client.database.cache.reportsByAuthorAndGuild.values()).map((reports) =>
 			Array.from(reports.values()),
 		)) {
-			if (reports.length === 0) continue;
+			if (reports.length === 0) {
+				continue;
+			}
 
 			const guildId = BigInt(reports.at(0)!.data.guild);
 
@@ -51,7 +53,9 @@ class ReportManager extends PromptManager<Report, Metadata, InteractionData> {
 
 	decodeMetadata(data: string[]): Metadata | undefined {
 		const [userId, reference] = data;
-		if (userId === undefined || reference === undefined) return undefined;
+		if (userId === undefined || reference === undefined) {
+			return undefined;
+		}
 
 		return { userId: BigInt(userId), reference };
 	}
@@ -91,7 +95,9 @@ class ReportManager extends PromptManager<Report, Metadata, InteractionData> {
 							size: 32,
 							format: "webp",
 						});
-						if (iconURL === undefined) return;
+						if (iconURL === undefined) {
+							return;
+						}
 
 						return { url: iconURL };
 					})(),
@@ -164,13 +170,19 @@ class ReportManager extends PromptManager<Report, Metadata, InteractionData> {
 		const isResolved = isResolvedString === "true";
 
 		const user = await client.database.adapters.users.getOrFetch(client, "id", userId);
-		if (user === undefined) return undefined;
+		if (user === undefined) {
+			return undefined;
+		}
 
 		const documents = client.database.adapters.reports.get(client, "authorAndGuild", [user.ref, guildId]);
-		if (documents === undefined) return undefined;
+		if (documents === undefined) {
+			return undefined;
+		}
 
 		const document = documents.get(reference);
-		if (document === undefined) return undefined;
+		if (document === undefined) {
+			return undefined;
+		}
 
 		if (isResolved && document.data.isResolved) {
 			const strings = {
@@ -178,7 +190,7 @@ class ReportManager extends PromptManager<Report, Metadata, InteractionData> {
 				description: localise(client, "alreadyMarkedResolved.description", defaultLocale)(),
 			};
 
-			return void reply([client, bot], interaction, {
+			reply([client, bot], interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -187,6 +199,7 @@ class ReportManager extends PromptManager<Report, Metadata, InteractionData> {
 					},
 				],
 			});
+			return;
 		}
 
 		if (!(isResolved || document.data.isResolved)) {
@@ -195,7 +208,7 @@ class ReportManager extends PromptManager<Report, Metadata, InteractionData> {
 				description: localise(client, "alreadyMarkedUnresolved.description", defaultLocale)(),
 			};
 
-			return void reply([client, bot], interaction, {
+			reply([client, bot], interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -204,6 +217,7 @@ class ReportManager extends PromptManager<Report, Metadata, InteractionData> {
 					},
 				],
 			});
+			return;
 		}
 
 		const updatedDocument = await client.database.adapters.reports.update(client, {

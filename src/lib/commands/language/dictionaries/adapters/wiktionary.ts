@@ -20,7 +20,9 @@ class WiktionaryAdapter extends DictionaryAdapter<WordData[]> {
 		if (data.length === 0) {
 			// @ts-ignore: Accessing private member as a work-around.
 			const suggestion = wiktionary.dom.getElementById("did-you-mean")?.innerText ?? undefined;
-			if (suggestion === undefined) return undefined;
+			if (suggestion === undefined) {
+				return undefined;
+			}
 
 			return this.fetch(suggestion, language);
 		}
