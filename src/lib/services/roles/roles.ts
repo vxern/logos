@@ -1,8 +1,8 @@
-import constants from "../../constants.js";
-import { Client, isServicing } from "../client.js";
-import { handleOpenRoleSelectionMenu } from "../commands/social/commands/profile/roles.js";
-import { createInteractionCollector } from "../interactions.js";
-import { ServiceStarter } from "../services/services.js";
+import constants from "../../../constants.js";
+import { Client, isServicing } from "../../client.js";
+import { handleOpenRoleSelectionMenu } from "../../commands/social/commands/profile/roles.js";
+import { createInteractionCollector } from "../../interactions.js";
+import { ServiceStarter } from "../../services/services.js";
 import { Bot, InteractionTypes } from "discordeno";
 
 const service: ServiceStarter = ([client, bot]: [Client, Bot]) => {

@@ -1,7 +1,7 @@
-import configuration from "../../configuration.js";
-import { Client, extendEventHandler, isServicing } from "../client.js";
-import { isVoice } from "../utils.js";
-import { ServiceStarter } from "./services.js";
+import configuration from "../../../configuration.js";
+import { Client, extendEventHandler, isServicing } from "../../client.js";
+import { isVoice } from "../../utils.js";
+import { ServiceStarter } from "./../services.js";
 import { Bot, Channel, ChannelTypes, Collection, Guild, VoiceState, createChannel, deleteChannel } from "discordeno";
 
 const previousVoiceStates = new Map<`${/*userId:*/ bigint}${/*guildId:*/ bigint}`, VoiceState>();
