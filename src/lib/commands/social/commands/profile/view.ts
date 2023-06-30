@@ -1,11 +1,11 @@
-import { ApplicationCommandOptionTypes, Bot, getAvatarURL, Interaction } from "discordeno";
+import constants from "../../../../../constants.js";
+import { MentionTypes, mention } from "../../../../../formatting.js";
+import { defaultLocale } from "../../../../../types.js";
+import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../../client.js";
+import { parseArguments, reply } from "../../../../interactions.js";
 import { OptionTemplate } from "../../../command.js";
 import { show, user } from "../../../parameters.js";
-import { autocompleteMembers, Client, localise, resolveInteractionToMember } from "../../../../client.js";
-import { parseArguments, reply } from "../../../../interactions.js";
-import constants from "../../../../../constants.js";
-import { mention, MentionTypes } from "../../../../../formatting.js";
-import { defaultLocale } from "../../../../../types.js";
+import { ApplicationCommandOptionTypes, Bot, Interaction, getAvatarURL } from "discordeno";
 
 const command: OptionTemplate = {
 	name: "view",
@@ -17,8 +17,11 @@ const command: OptionTemplate = {
 
 async function handleDisplayProfileAutocomplete([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const [{ user }] = parseArguments(interaction.data?.options, {});
+	if (user === undefined) {
+		return;
+	}
 
-	autocompleteMembers([client, bot], interaction, user!);
+	autocompleteMembers([client, bot], interaction, user);
 }
 
 async function handleDisplayProfile([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {

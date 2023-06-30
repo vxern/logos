@@ -1,10 +1,10 @@
-import { Bot, ButtonStyles, CreateMessage, Guild, MessageComponentTypes } from "discordeno";
-import { getLastUpdateString } from "../notices.js";
-import { Client, localise } from "../../../client.js";
-import { getChannelMention } from "../../../utils.js";
 import configuration from "../../../../configuration.js";
 import constants from "../../../../constants.js";
 import { defaultLocale } from "../../../../types.js";
+import { Client, localise } from "../../../client.js";
+import { getChannelMention } from "../../../utils.js";
+import { getLastUpdateString } from "../notices.js";
+import { Bot, ButtonStyles, CreateMessage, Guild, MessageComponentTypes } from "discordeno";
 
 const lastUpdatedAt = new Date(2023, 3, 24);
 
@@ -40,7 +40,7 @@ function generateWelcomeNotice([client, _]: [Client, Bot], guild: Guild): Create
 						type: MessageComponentTypes.Button,
 						style: ButtonStyles.Secondary,
 						label: strings.description.acceptedRules,
-						customId: constants.staticComponentIds.acceptedRules,
+						customId: constants.staticComponentIds.entry.acceptedRules,
 						emoji: { name: constants.symbols.understood },
 					},
 				],

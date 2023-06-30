@@ -1,30 +1,14 @@
+import configuration from "../../../../configuration.js";
+import constants, { Periods } from "../../../../constants.js";
+import { MentionTypes, mention, timestamp, trim } from "../../../../formatting.js";
 import {
-	ApplicationCommandOptionTypes,
-	ApplicationCommandTypes,
-	Bot,
-	ButtonStyles,
-	deleteMessage,
-	deleteMessages,
-	Embed,
-	getMessage,
-	getMessages,
-	Interaction,
-	InteractionCallbackData,
-	InteractionTypes,
-	Message,
-	MessageComponentTypes,
-	snowflakeToBigint,
-} from "discordeno";
-import { CommandTemplate } from "../../command.js";
-import { user } from "../../parameters.js";
-import { logEvent } from "../../../controllers/logging/logging.js";
-import {
-	autocompleteMembers,
 	Client,
+	autocompleteMembers,
 	isValidSnowflake,
 	localise,
 	resolveInteractionToMember,
 } from "../../../client.js";
+import { logEvent } from "../../../controllers/logging/logging.js";
 import {
 	acknowledge,
 	createInteractionCollector,
@@ -34,9 +18,25 @@ import {
 	postponeReply,
 } from "../../../interactions.js";
 import { chunk, diagnosticMentionUser, snowflakeToTimestamp } from "../../../utils.js";
-import configuration from "../../../../configuration.js";
-import constants, { Periods } from "../../../../constants.js";
-import { mention, MentionTypes, timestamp, trim } from "../../../../formatting.js";
+import { CommandTemplate } from "../../command.js";
+import { user } from "../../parameters.js";
+import {
+	ApplicationCommandOptionTypes,
+	ApplicationCommandTypes,
+	Bot,
+	ButtonStyles,
+	Embed,
+	Interaction,
+	InteractionCallbackData,
+	InteractionTypes,
+	Message,
+	MessageComponentTypes,
+	deleteMessage,
+	deleteMessages,
+	getMessage,
+	getMessages,
+	snowflakeToBigint,
+} from "discordeno";
 
 const command: CommandTemplate = {
 	name: "purge",
@@ -60,12 +60,18 @@ const command: CommandTemplate = {
 
 async function handlePurgeMessagesAutocomplete([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const [{ author }] = parseArguments(interaction.data?.options, {});
+	if (author === undefined) {
+		return;
+	}
 
-	autocompleteMembers([client, bot], interaction, author!, { includeBots: true });
+	autocompleteMembers([client, bot], interaction, author, { includeBots: true });
 }
 
 async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
-	let [{ start, end, author: user }] = parseArguments(interaction.data?.options, {});
+	const [{ start, end: provisionalEnd, author: user }] = parseArguments(interaction.data?.options, {});
+	if (start === undefined) {
+		return;
+	}
 
 	postponeReply([client, bot], interaction);
 
@@ -84,16 +90,26 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 		authorId = undefined;
 	}
 
-	const isStartValid = isValidSnowflake(start!);
-	const isEndValid = end === undefined || isValidSnowflake(end!);
+	const isStartValid = isValidSnowflake(start);
+	const isEndValid = provisionalEnd === undefined || isValidSnowflake(provisionalEnd);
 	if (!(isStartValid && isEndValid)) {
 		displaySnowflakesInvalidError([client, bot], interaction, [!isStartValid, !isEndValid]);
 		return;
 	}
 
-	end =
-		end ??
-		(await getMessages(bot, interaction.channelId!, { limit: 1 })
+	const guildId = interaction.guildId;
+	if (guildId === undefined) {
+		return;
+	}
+
+	const channelId = interaction.channelId;
+	if (channelId === undefined) {
+		return;
+	}
+
+	const end =
+		provisionalEnd ??
+		(await getMessages(bot, channelId, { limit: 1 })
 			.catch(() => undefined)
 			.then((messages) => messages?.first()?.id?.toString()));
 
@@ -107,7 +123,7 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 		return;
 	}
 
-	let [startMessageId, endMessageId] = [snowflakeToBigint(start!), snowflakeToBigint(end!)];
+	let [startMessageId, endMessageId] = [snowflakeToBigint(start), snowflakeToBigint(end)];
 
 	if (startMessageId > endMessageId) {
 		[startMessageId, endMessageId] = [endMessageId, startMessageId];
@@ -125,12 +141,12 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 	}
 
 	const [startMessage, endMessage] = await Promise.all([
-		getMessage(bot, interaction.channelId!, startMessageId).catch(() => {
+		getMessage(bot, channelId, startMessageId).catch(() => {
 			client.log.warn(`Failed to get start message, ID ${startMessageId}.`);
 
 			return undefined;
 		}),
-		getMessage(bot, interaction.channelId!, endMessageId).catch(() => {
+		getMessage(bot, channelId, endMessageId).catch(() => {
 			client.log.warn(`Failed to get end message, ID ${endMessageId}.`);
 
 			return undefined;
@@ -144,7 +160,7 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 		return;
 	}
 
-	const channelMention = mention(interaction.channelId!, MentionTypes.Channel);
+	const channelMention = mention(channelId, MentionTypes.Channel);
 
 	const [startMessageContent, endMessageContent] = [
 		getMessageContent(client, startMessage, interaction.locale),
@@ -247,8 +263,8 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 			return;
 		}
 
-		const newMessages = await getMessages(bot, interaction.channelId!, {
-			after: messages.length === 0 ? startMessage.id : messages.at(-1)!.id,
+		const newMessages = await getMessages(bot, channelId, {
+			after: messages.length === 0 ? startMessage.id : messages.at(-1)?.id,
 			limit: 100,
 		})
 			.then((collection) => Array.from(collection.values()).reverse())
@@ -514,15 +530,15 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 	}
 
 	client.log.info(
-		`Purging ${
-			messages.length
-		} message(s) in channel ID ${interaction.channelId!} as requested by ${diagnosticMentionUser(interaction.user)}...`,
+		`Purging ${messages.length} message(s) in channel ID ${channelId} as requested by ${diagnosticMentionUser(
+			interaction.user,
+		)}...`,
 	);
 
 	const [guild, member, channel] = [
-		client.cache.guilds.get(interaction.guildId!),
-		client.cache.members.get(snowflakeToBigint(`${interaction.user.id}${interaction.guildId!}`)),
-		client.cache.channels.get(interaction.channelId!),
+		client.cache.guilds.get(guildId),
+		client.cache.members.get(snowflakeToBigint(`${interaction.user.id}${guildId}`)),
+		client.cache.channels.get(channelId),
 	];
 	if (guild === undefined || member === undefined || channel === undefined) {
 		return;
@@ -555,9 +571,9 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 		for (const chunk of bulkDeletableChunks) {
 			const messageIds = chunk.map((message) => message.id);
 
-			await deleteMessages(bot, interaction.channelId!, messageIds).catch((reason) => {
+			await deleteMessages(bot, channelId, messageIds).catch((reason) => {
 				client.log.warn(
-					`Failed to delete ${messageIds.length} message(s) from channel with ID ${interaction.channelId!}: ${reason}`,
+					`Failed to delete ${messageIds.length} message(s) from channel with ID ${channelId}: ${reason}`,
 				);
 			});
 
@@ -568,7 +584,7 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 	}
 
 	for (const message of nonBulkDeletable) {
-		await deleteMessage(bot, interaction.channelId!, message.id).catch((reason) =>
+		await deleteMessage(bot, channelId, message.id).catch((reason) =>
 			client.log.warn(`Failed to delete message with ID ${message.id}: ${reason}`),
 		);
 
@@ -580,7 +596,7 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 	client.log.info(
 		`Purged ${deletedCount}/${
 			messages.length
-		} message(s) in channel ID ${interaction.channelId!} as requested by ${diagnosticMentionUser(interaction.user)}.`,
+		} message(s) in channel ID ${channelId} as requested by ${diagnosticMentionUser(interaction.user)}.`,
 	);
 
 	logEvent([client, bot], guild, "purgeEnd", [member, channel, deletedCount]);

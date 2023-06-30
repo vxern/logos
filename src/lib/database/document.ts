@@ -1,4 +1,4 @@
-import * as Fauna from "fauna";
+import Fauna from "fauna";
 
 interface BaseDocumentProperties {
 	createdAt: number;
@@ -7,7 +7,7 @@ interface BaseDocumentProperties {
 /** Contains the base properties of data structures stored in the database. */
 interface Document<T extends BaseDocumentProperties = BaseDocumentProperties> {
 	/** The document reference to this resource in the database. */
-	ref: Fauna.Expression<unknown>;
+	ref: Fauna.values.Ref;
 
 	/** The timestamp of when this resource was created or updated. */
 	ts: number;

@@ -1,6 +1,6 @@
+import { LogEntry } from "../log-entry.js";
 import client, { ClientEvents } from "./client.js";
 import guild, { GuildEvents } from "./guild.js";
-import { LogEntry } from "../log-entry.js";
 
 type Events = ClientEvents & GuildEvents;
 

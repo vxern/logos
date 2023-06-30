@@ -1,11 +1,11 @@
-import { ApplicationCommandOptionTypes, Bot, Interaction } from "discordeno";
-import { handleResumePlayback } from "./resume.js";
-import { OptionTemplate } from "../../command.js";
-import { getVoiceState, isOccupied, isPaused, pause, verifyCanManagePlayback } from "../../../controllers/music.js";
-import { Client, localise } from "../../../client.js";
-import { reply } from "../../../interactions.js";
 import constants from "../../../../constants.js";
 import { defaultLocale } from "../../../../types.js";
+import { Client, localise } from "../../../client.js";
+import { getVoiceState, isOccupied, isPaused, pause, verifyCanManagePlayback } from "../../../controllers/music.js";
+import { reply } from "../../../interactions.js";
+import { OptionTemplate } from "../../command.js";
+import { handleResumePlayback } from "./resume.js";
+import { ApplicationCommandOptionTypes, Bot, Interaction } from "discordeno";
 
 const command: OptionTemplate = {
 	name: "pause",
@@ -14,7 +14,12 @@ const command: OptionTemplate = {
 };
 
 async function handlePausePlayback([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
-	const controller = client.features.music.controllers.get(interaction.guildId!);
+	const guildId = interaction.guildId;
+	if (guildId === undefined) {
+		return;
+	}
+
+	const controller = client.features.music.controllers.get(guildId);
 	if (controller === undefined) {
 		return;
 	}
@@ -23,7 +28,7 @@ async function handlePausePlayback([client, bot]: [Client, Bot], interaction: In
 		[client, bot],
 		interaction,
 		controller,
-		getVoiceState(client, interaction.guildId!, interaction.user.id),
+		getVoiceState(client, guildId, interaction.user.id),
 	);
 	if (!isVoiceStateVerified) {
 		return;

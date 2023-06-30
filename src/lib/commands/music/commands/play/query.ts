@@ -1,10 +1,10 @@
-import { Bot, Interaction } from "discordeno";
+import constants from "../../../../../constants.js";
+import { Client, localise } from "../../../../client.js";
+import { getVoiceState, receiveNewListing, verifyCanRequestPlayback } from "../../../../controllers/music.js";
+import { parseArguments, reply } from "../../../../interactions.js";
 import { ListingResolver } from "../../data/sources/sources.js";
 import { SongListing } from "../../data/types.js";
-import { getVoiceState, receiveNewListing, verifyCanRequestPlayback } from "../../../../controllers/music.js";
-import { Client, localise } from "../../../../client.js";
-import { parseArguments, reply } from "../../../../interactions.js";
-import constants from "../../../../../constants.js";
+import { Bot, Interaction } from "discordeno";
 
 async function handleRequestQueryPlayback(
 	[client, bot]: [Client, Bot],
@@ -25,14 +25,27 @@ async function handleRequestPlayback(
 	interaction: Interaction,
 	listing: SongListing | undefined,
 ): Promise<void> {
-	const controller = client.features.music.controllers.get(interaction.guildId!);
+	const channelId = interaction.channelId;
+	if (channelId === undefined) {
+		return;
+	}
+
+	const guildId = interaction.guildId;
+	if (guildId === undefined) {
+		return;
+	}
+
+	const controller = client.features.music.controllers.get(guildId);
 	if (controller === undefined) {
 		return;
 	}
 
-	const voiceState = getVoiceState(client, interaction.guildId!, interaction.user.id);
+	const voiceState = getVoiceState(client, guildId, interaction.user.id);
+	if (voiceState === undefined) {
+		return;
+	}
 
-	const guild = client.cache.guilds.get(interaction.guildId!);
+	const guild = client.cache.guilds.get(guildId);
 	if (guild === undefined) {
 		return;
 	}
@@ -67,12 +80,12 @@ async function handleRequestPlayback(
 		return;
 	}
 
-	const feedbackChannelId = client.cache.channels.get(interaction.channelId!)?.id;
+	const feedbackChannelId = client.cache.channels.get(channelId)?.id;
 	if (feedbackChannelId === undefined) {
 		return;
 	}
 
-	const voiceChannelId = client.cache.channels.get(voiceState!.channelId!)?.id;
+	const voiceChannelId = voiceState.channelId;
 	if (voiceChannelId === undefined) {
 		return;
 	}

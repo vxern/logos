@@ -1,18 +1,11 @@
-import { User as DiscordUser } from "discordeno";
-import * as Sentry from "sentry";
-import Fauna from "fauna";
+import { Client } from "../client.js";
+import { diagnosticMentionUser } from "../utils.js";
 import entryRequests from "./adapters/entry-requests.js";
 import praises from "./adapters/praises.js";
 import reports from "./adapters/reports.js";
 import suggestions from "./adapters/suggestions.js";
 import users from "./adapters/users.js";
 import warnings from "./adapters/warnings.js";
-import { EntryRequest } from "./structs/entry-request.js";
-import { Praise } from "./structs/praise.js";
-import { Report } from "./structs/report.js";
-import { Suggestion } from "./structs/suggestion.js";
-import { User } from "./structs/user.js";
-import { Warning } from "./structs/warning.js";
 import { BaseDocumentProperties, Document } from "./document.js";
 import {
 	EntryRequestIndexes,
@@ -23,8 +16,15 @@ import {
 	UserIndexes,
 	WarningIndexes,
 } from "./indexes.js";
-import { Client } from "../client.js";
-import { diagnosticMentionUser } from "../utils.js";
+import { EntryRequest } from "./structs/entry-request.js";
+import { Praise } from "./structs/praise.js";
+import { Report } from "./structs/report.js";
+import { Suggestion } from "./structs/suggestion.js";
+import { User } from "./structs/user.js";
+import { Warning } from "./structs/warning.js";
+import { User as DiscordUser } from "discordeno";
+import Fauna from "fauna";
+import * as Sentry from "sentry";
 
 type QueryTypes = "read" | "write" | "exists" | "other";
 type GetReturnType<
@@ -246,10 +246,10 @@ type WithFetch = {
 	[K in keyof DatabaseAdapters as "fetch" extends keyof DatabaseAdapters[K] ? K : never]: DatabaseAdapters[K];
 };
 
-function createDatabase(): Database {
+function createDatabase(environment: Client["metadata"]["environment"]): Database {
 	return {
 		client: new Fauna.Client({
-			secret: process.env.FAUNA_SECRET!,
+			secret: environment.faunaSecret,
 			domain: "db.us.fauna.com",
 			scheme: "https",
 			port: 443,

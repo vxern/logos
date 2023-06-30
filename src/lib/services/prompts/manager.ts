@@ -1,22 +1,22 @@
+import constants from "../../../constants.js";
+import { Client, WithLanguage, extendEventHandler, isServicing } from "../../client.js";
+import { stringifyValue } from "../../database/database.js";
+import { BaseDocumentProperties, Document } from "../../database/document.js";
+import { User } from "../../database/structs/user.js";
+import { createInteractionCollector, decodeId } from "../../interactions.js";
+import { getAllMessages, getTextChannel } from "../../utils.js";
 import {
 	Bot,
 	Channel,
 	CreateMessage,
-	deleteMessage,
 	Guild,
 	Interaction,
 	InteractionTypes,
 	Message,
-	sendMessage,
 	User as DiscordUser,
+	deleteMessage,
+	sendMessage,
 } from "discordeno";
-import { User } from "../../database/structs/user.js";
-import { BaseDocumentProperties, Document } from "../../database/document.js";
-import { stringifyValue } from "../../database/database.js";
-import { Client, extendEventHandler, isServicing, WithLanguage } from "../../client.js";
-import { createInteractionCollector, decodeId } from "../../interactions.js";
-import { getAllMessages, getTextChannel } from "../../utils.js";
-import constants from "../../../constants.js";
 
 type InteractionDataBase = [userId: string, guildId: string, reference: string];
 
@@ -63,18 +63,28 @@ abstract class PromptManager<
 			customId: this.customId,
 			doesNotExpire: true,
 			onCollect: async (bot, selection) => {
-				if (!isServicing(client, selection.guildId!)) {
+				const guildId = selection.guildId;
+				if (guildId === undefined) {
+					return undefined;
+				}
+
+				if (!isServicing(client, guildId)) {
 					return;
 				}
 
-				const [_, userId, guildId, reference, ...metadata] = decodeId<InteractionData>(selection.data!.customId!);
+				const customId = selection.data?.customId;
+				if (customId === undefined) {
+					return;
+				}
+
+				const [_, userId, __, reference, ...metadata] = decodeId<InteractionData>(customId);
 
 				const handle = this.handlers.get([userId, guildId, reference].join(constants.symbols.meta.idSeparator));
 				if (handle === undefined) {
 					return;
 				}
 
-				handle(bot, selection, [userId, guildId, reference, ...metadata] as InteractionData);
+				handle(bot, selection, [userId, guildId.toString(), reference, ...metadata] as InteractionData);
 			},
 		});
 	}
@@ -87,7 +97,10 @@ abstract class PromptManager<
 				return;
 			}
 
-			const guild = client.cache.guilds.get(guildId)!;
+			const guild = client.cache.guilds.get(guildId);
+			if (guild === undefined) {
+				return;
+			}
 
 			client.log.info(`Registering ${this.type} prompts on ${guild.name} (${guild.id})...`);
 
@@ -113,9 +126,8 @@ abstract class PromptManager<
 				const userId = BigInt(userDocument.data.account.id);
 				const reference = stringifyValue(document.ref);
 
-				let prompt: Message;
-				if (prompts.get(userId)?.has(reference) ?? false) {
-					prompt = prompts.get(userId)!.get(reference)!;
+				let prompt = prompts.get(userId)?.get(reference);
+				if (prompt !== undefined) {
 					prompts.get(userId)?.delete(reference);
 				} else {
 					const user = client.cache.users.get(userId);
@@ -146,16 +158,20 @@ abstract class PromptManager<
 	private ensurePersistence([client, bot]: [Client, Bot]): void {
 		// Anti-tampering feature; detects prompts being deleted.
 		extendEventHandler(bot, "messageDelete", { prepend: true }, async (_, { id: promptId, channelId, guildId }) => {
-			if (!isServicing(client, guildId!)) {
+			if (guildId === undefined) {
+				return;
+			}
+
+			if (!isServicing(client, guildId)) {
 				return;
 			}
 
 			// If the message was deleted from a channel not managed by this prompt manager.
-			if (this.channelIds.get(guildId!) !== channelId) {
+			if (this.channelIds.get(guildId) !== channelId) {
 				return;
 			}
 
-			const guild = client.cache.guilds.get(guildId!);
+			const guild = client.cache.guilds.get(guildId);
 			if (guild === undefined) {
 				return;
 			}
@@ -195,12 +211,16 @@ abstract class PromptManager<
 
 		// Anti-tampering feature; detects embeds being deleted from prompts.
 		extendEventHandler(bot, "messageUpdate", { prepend: true }, (bot, { id: promptId, channelId, guildId, embeds }) => {
-			if (!isServicing(client, guildId!)) {
+			if (guildId === undefined) {
+				return;
+			}
+
+			if (!isServicing(client, guildId)) {
 				return;
 			}
 
 			// If the message was updated in a channel not managed by this prompt manager.
-			if (this.channelIds.get(guildId!) !== channelId) {
+			if (this.channelIds.get(guildId) !== channelId) {
 				return;
 			}
 
@@ -315,7 +335,12 @@ abstract class PromptManager<
 
 	registerHandler(client: Client, data: InteractionDataBase): void {
 		this.handlers.set(data.join(constants.symbols.meta.idSeparator), async (bot, interaction) => {
-			const [_, userId, guildId, reference, ...metadata] = decodeId<InteractionData>(interaction.data!.customId!);
+			const customId = interaction.data?.customId;
+			if (customId === undefined) {
+				return;
+			}
+
+			const [_, userId, guildId, reference, ...metadata] = decodeId<InteractionData>(customId);
 
 			const updatedDocument = await this.handleInteraction([client, bot], interaction, [
 				userId,

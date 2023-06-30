@@ -1,14 +1,14 @@
-import { ApplicationCommandOptionTypes, ApplicationCommandTypes, Bot, Interaction } from "discordeno";
-import { CommandTemplate } from "../../command.js";
-import { user } from "../../parameters.js";
-import { logEvent } from "../../../controllers/logging/logging.js";
-import { Praise } from "../../../database/structs/praise.js";
-import { autocompleteMembers, Client, localise, resolveInteractionToMember } from "../../../client.js";
-import { editReply, parseArguments, postponeReply, reply } from "../../../interactions.js";
-import { verifyIsWithinLimits } from "../../../utils.js";
 import configuration from "../../../../configuration.js";
 import constants from "../../../../constants.js";
-import { mention, MentionTypes } from "../../../../formatting.js";
+import { MentionTypes, mention } from "../../../../formatting.js";
+import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../client.js";
+import { logEvent } from "../../../controllers/logging/logging.js";
+import { Praise } from "../../../database/structs/praise.js";
+import { editReply, parseArguments, postponeReply, reply } from "../../../interactions.js";
+import { verifyIsWithinLimits } from "../../../utils.js";
+import { CommandTemplate } from "../../command.js";
+import { user } from "../../parameters.js";
+import { ApplicationCommandOptionTypes, ApplicationCommandTypes, Bot, Interaction } from "discordeno";
 
 const command: CommandTemplate = {
 	name: "praise",
@@ -27,8 +27,11 @@ const command: CommandTemplate = {
 
 async function handlePraiseUserAutocomplete([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const [{ user }] = parseArguments(interaction.data?.options, {});
+	if (user === undefined) {
+		return;
+	}
 
-	autocompleteMembers([client, bot], interaction, user!);
+	autocompleteMembers([client, bot], interaction, user);
 }
 
 async function handlePraiseUser([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
@@ -109,7 +112,12 @@ async function handlePraiseUser([client, bot]: [Client, Bot], interaction: Inter
 		comment: comment,
 	};
 
-	const guild = client.cache.guilds.get(interaction.guildId!);
+	const guildId = interaction.guildId;
+	if (guildId === undefined) {
+		return;
+	}
+
+	const guild = client.cache.guilds.get(guildId);
 	if (guild === undefined) {
 		return;
 	}

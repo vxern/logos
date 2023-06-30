@@ -1,6 +1,6 @@
-import { ApplicationCommandOptionTypes, Bot, Interaction } from "discordeno";
-import { OptionTemplate } from "../../command.js";
-import { by, collection, to } from "../../parameters.js";
+import constants from "../../../../constants.js";
+import { defaultLocale } from "../../../../types.js";
+import { Client, localise } from "../../../client.js";
 import {
 	getVoiceState,
 	isCollection,
@@ -9,10 +9,10 @@ import {
 	unskip,
 	verifyCanManagePlayback,
 } from "../../../controllers/music.js";
-import { Client, localise } from "../../../client.js";
 import { parseArguments, reply } from "../../../interactions.js";
-import constants from "../../../../constants.js";
-import { defaultLocale } from "../../../../types.js";
+import { OptionTemplate } from "../../command.js";
+import { by, collection, to } from "../../parameters.js";
+import { ApplicationCommandOptionTypes, Bot, Interaction } from "discordeno";
 
 const command: OptionTemplate = {
 	name: "unskip",
@@ -35,7 +35,12 @@ async function handleUnskipAction([client, bot]: [Client, Bot], interaction: Int
 		return;
 	}
 
-	const controller = client.features.music.controllers.get(interaction.guildId!);
+	const guildId = interaction.guildId;
+	if (guildId === undefined) {
+		return;
+	}
+
+	const controller = client.features.music.controllers.get(guildId);
 	if (controller === undefined) {
 		return;
 	}
@@ -44,7 +49,7 @@ async function handleUnskipAction([client, bot]: [Client, Bot], interaction: Int
 		[client, bot],
 		interaction,
 		controller,
-		getVoiceState(client, interaction.guildId!, interaction.user.id),
+		getVoiceState(client, guildId, interaction.user.id),
 	);
 	if (!isVoiceStateVerified) {
 		return;
@@ -57,7 +62,7 @@ async function handleUnskipAction([client, bot]: [Client, Bot], interaction: Int
 		if (!isCollection(controller.currentListing?.content)) {
 			return true;
 		}
-		if (collection !== undefined || controller.currentListing!.content.position === 0) {
+		if (collection !== undefined || controller.currentListing?.content.position === 0) {
 			return true;
 		}
 
@@ -173,7 +178,7 @@ async function handleUnskipAction([client, bot]: [Client, Bot], interaction: Int
 	const isUnskippingCollection = collection ?? false;
 
 	if (isUnskippingListing) {
-		unskip([client, bot], interaction.guildId!, controller, isUnskippingCollection, {
+		unskip([client, bot], guildId, controller, isUnskippingCollection, {
 			by: songsToUnskip,
 			to: songToUnskipTo,
 		});
@@ -185,11 +190,11 @@ async function handleUnskipAction([client, bot]: [Client, Bot], interaction: Int
 				isCollection(controller.currentListing.content) &&
 				collection === undefined
 			) {
-				listingsToUnskip = Math.min(songsToUnskip, controller.currentListing!.content.position);
+				listingsToUnskip = Math.min(songsToUnskip, controller.currentListing?.content.position);
 			} else {
 				listingsToUnskip = Math.min(songsToUnskip, controller.listingHistory.length);
 			}
-			unskip([client, bot], interaction.guildId!, controller, isUnskippingCollection, { by: listingsToUnskip });
+			unskip([client, bot], guildId, controller, isUnskippingCollection, { by: listingsToUnskip });
 		} else if (songToUnskipTo !== undefined) {
 			let listingToSkipTo!: number;
 			if (
@@ -201,9 +206,9 @@ async function handleUnskipAction([client, bot]: [Client, Bot], interaction: Int
 			} else {
 				listingToSkipTo = Math.min(songToUnskipTo, controller.listingHistory.length);
 			}
-			unskip([client, bot], interaction.guildId!, controller, isUnskippingCollection, { to: listingToSkipTo });
+			unskip([client, bot], guildId, controller, isUnskippingCollection, { to: listingToSkipTo });
 		} else {
-			unskip([client, bot], interaction.guildId!, controller, isUnskippingCollection, {});
+			unskip([client, bot], guildId, controller, isUnskippingCollection, {});
 		}
 	}
 

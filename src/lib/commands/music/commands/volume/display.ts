@@ -1,14 +1,19 @@
-import { Bot, Interaction } from "discordeno";
-import { getVoiceState, verifyVoiceState } from "../../../../controllers/music.js";
-import { Client, localise } from "../../../../client.js";
-import { parseArguments, reply } from "../../../../interactions.js";
 import constants from "../../../../../constants.js";
 import { defaultLocale } from "../../../../../types.js";
+import { Client, localise } from "../../../../client.js";
+import { getVoiceState, verifyVoiceState } from "../../../../controllers/music.js";
+import { parseArguments, reply } from "../../../../interactions.js";
+import { Bot, Interaction } from "discordeno";
 
 async function handleDisplayVolume([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const [{ show }] = parseArguments(interaction.data?.options, { show: "boolean" });
 
-	const controller = client.features.music.controllers.get(interaction.guildId!);
+	const guildId = interaction.guildId;
+	if (guildId === undefined) {
+		return;
+	}
+
+	const controller = client.features.music.controllers.get(guildId);
 	if (controller === undefined) {
 		return;
 	}
@@ -17,7 +22,7 @@ async function handleDisplayVolume([client, bot]: [Client, Bot], interaction: In
 		[client, bot],
 		interaction,
 		controller,
-		getVoiceState(client, interaction.guildId!, interaction.user.id),
+		getVoiceState(client, guildId, interaction.user.id),
 		"check",
 	);
 	if (!isVoiceStateVerified) {

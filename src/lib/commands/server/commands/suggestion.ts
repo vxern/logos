@@ -1,3 +1,22 @@
+import configuration from "../../../../configuration.js";
+import constants from "../../../../constants.js";
+import { trim } from "../../../../formatting.js";
+import { Client, localise } from "../../../client.js";
+import { logEvent } from "../../../controllers/logging/logging.js";
+import { stringifyValue } from "../../../database/database.js";
+import { Suggestion } from "../../../database/structs/suggestion.js";
+import {
+	Modal,
+	createInteractionCollector,
+	createModalComposer,
+	deleteReply,
+	editReply,
+	postponeReply,
+	reply,
+} from "../../../interactions.js";
+import suggestionManager from "../../../services/prompts/managers/suggestions.js";
+import { getTextChannel, verifyIsWithinLimits } from "../../../utils.js";
+import { CommandTemplate } from "../../command.js";
 import {
 	ApplicationCommandTypes,
 	Bot,
@@ -8,24 +27,6 @@ import {
 	MessageComponentTypes,
 	TextStyles,
 } from "discordeno";
-import { CommandTemplate } from "../../command.js";
-import { logEvent } from "../../../controllers/logging/logging.js";
-import { stringifyValue } from "../../../database/database.js";
-import suggestionManager from "../../../services/prompts/managers/suggestions.js";
-import { Client, localise } from "../../../client.js";
-import {
-	createInteractionCollector,
-	createModalComposer,
-	deleteReply,
-	editReply,
-	Modal,
-	postponeReply,
-	reply,
-} from "../../../interactions.js";
-import { getTextChannel, verifyIsWithinLimits } from "../../../utils.js";
-import configuration from "../../../../configuration.js";
-import constants from "../../../../constants.js";
-import { trim } from "../../../../formatting.js";
 
 const command: CommandTemplate = {
 	name: "suggestion",
@@ -37,8 +38,18 @@ const command: CommandTemplate = {
 type SuggestionError = "failure";
 
 async function handleMakeSuggestion([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
-	const guild = client.cache.guilds.get(interaction.guildId!);
+	const guildId = interaction.guildId;
+	if (guildId === undefined) {
+		return;
+	}
+
+	const guild = client.cache.guilds.get(guildId);
 	if (guild === undefined) {
+		return;
+	}
+
+	const member = interaction.member;
+	if (member === undefined) {
 		return;
 	}
 
@@ -83,7 +94,7 @@ async function handleMakeSuggestion([client, bot]: [Client, Bot], interaction: I
 		}
 	}
 
-	createModalComposer([client, bot], interaction, {
+	createModalComposer<Suggestion["answers"]>([client, bot], interaction, {
 		modal: generateSuggestionModal(client, interaction.locale),
 		onSubmit: async (submission, answers) => {
 			await postponeReply([client, bot], submission);
@@ -92,7 +103,7 @@ async function handleMakeSuggestion([client, bot]: [Client, Bot], interaction: I
 				createdAt: Date.now(),
 				author: userDocument.ref,
 				guild: guild.id.toString(),
-				suggestion: answers.suggestion!,
+				answers,
 				isResolved: false,
 			});
 			if (suggestion === undefined) {
@@ -104,7 +115,7 @@ async function handleMakeSuggestion([client, bot]: [Client, Bot], interaction: I
 				return true;
 			}
 
-			logEvent([client, bot], guild, "suggestionSend", [interaction.member!, suggestion.data]);
+			logEvent([client, bot], guild, "suggestionSend", [member, suggestion.data]);
 
 			const userId = BigInt(userDocument.data.account.id);
 			const reference = stringifyValue(suggestion.ref);
@@ -265,7 +276,7 @@ async function handleSubmittedInvalidSuggestion(
 	});
 }
 
-function generateSuggestionModal<T extends string>(client: Client, locale: string | undefined): Modal<T> {
+function generateSuggestionModal(client: Client, locale: string | undefined): Modal<Suggestion["answers"]> {
 	const strings = {
 		title: localise(client, "suggestion.title", locale)(),
 		suggestion: localise(client, "suggestion.fields.suggestion", locale)(),
@@ -289,7 +300,7 @@ function generateSuggestionModal<T extends string>(client: Client, locale: strin
 				],
 			},
 		],
-	} as Modal<T>;
+	};
 }
 
 export default command;

@@ -1,13 +1,13 @@
-import * as csv from "csv-parse/sync";
-import dexonline from "./dictionaries/adapters/dexonline.js";
-import wiktionary from "./dictionaries/adapters/wiktionary.js";
-import { DictionaryAdapter } from "./dictionaries/adapter.js";
-import partsOfSpeech, { PartOfSpeech } from "./dictionaries/parts-of-speech.js";
-import { SentencePair } from "./commands/game.js";
-import { Client } from "../../client.js";
-import { addParametersToURL } from "../../utils.js";
 import constants from "../../../constants.js";
 import { Language, supportedLanguages } from "../../../types.js";
+import { Client } from "../../client.js";
+import { addParametersToURL } from "../../utils.js";
+import { SentencePair } from "./commands/game.js";
+import { DictionaryAdapter } from "./dictionaries/adapter.js";
+import dexonline from "./dictionaries/adapters/dexonline.js";
+import wiktionary from "./dictionaries/adapters/wiktionary.js";
+import partsOfSpeech, { PartOfSpeech } from "./dictionaries/parts-of-speech.js";
+import * as csv from "csv-parse/sync";
 
 const dictionaryAdapters: DictionaryAdapter[] = [dexonline, wiktionary];
 
@@ -20,7 +20,7 @@ function loadDictionaryAdapters(): Map<Language, DictionaryAdapter[]> {
 
 	for (const adapter of dictionaryAdapters) {
 		for (const language of adapter.supports) {
-			result.get(language)!.push(adapter);
+			result.get(language)?.push(adapter);
 		}
 	}
 
@@ -49,7 +49,7 @@ function loadSentencePairs(languageFileContents: [Language, string][]): Map<Lang
 		][];
 
 		for (const [_, sentence, __, translation] of records) {
-			result.get(language)!.push({ sentence, translation });
+			result.get(language)?.push({ sentence, translation });
 		}
 	}
 
@@ -74,10 +74,10 @@ interface SupportedLanguage {
 	supportsFormality: boolean;
 }
 
-async function getSupportedLanguages(): Promise<SupportedLanguage[]> {
+async function getSupportedLanguages(environment: Client["metadata"]["environment"]): Promise<SupportedLanguage[]> {
 	const response = await fetch(
 		addParametersToURL(constants.endpoints.deepl.languages, {
-			auth_key: process.env.DEEPL_SECRET!,
+			auth_key: environment.deeplSecret,
 			type: "target",
 		}),
 	);

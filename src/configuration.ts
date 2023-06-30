@@ -1,5 +1,5 @@
-import { Client } from "./lib/client.js";
 import { Periods } from "./constants.js";
+import { Client } from "./lib/client.js";
 
 const configuration = {
 	guilds: {
@@ -9,7 +9,10 @@ const configuration = {
 			"910929726418350110": "production", // Learn Armenian
 			"1055102122137489418": "staging", // Staging
 			"1055102910658269224": "development", // Development
-		} satisfies Record<string, Client["metadata"]["environment"]> as Record<string, Client["metadata"]["environment"]>,
+		} satisfies Record<string, Client["metadata"]["environment"]["environment"]> as Record<
+			string,
+			Client["metadata"]["environment"]["environment"]
+		>,
 		channels: {
 			logging: "journal",
 			verification: "verifications",

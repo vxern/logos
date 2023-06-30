@@ -7,11 +7,12 @@ import constants, { type BulletStyle } from "./constants.js";
  * @returns The formatted string of text.
  */
 function capitalise(target: string): string {
-	if (target.length === 0) {
+	const [first, ...rest] = target;
+	if (first === undefined) {
 		return target;
 	}
 
-	return target.at(0)!.toUpperCase() + target.slice(1);
+	return first.toUpperCase() + rest.join("");
 }
 
 /**

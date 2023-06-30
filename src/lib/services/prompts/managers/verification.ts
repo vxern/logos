@@ -1,28 +1,28 @@
+import configuration from "../../../../configuration.js";
+import constants from "../../../../constants.js";
+import { defaultLocale } from "../../../../types.js";
+import { Client, WithLanguage, localise } from "../../../client.js";
+import { logEvent } from "../../../controllers/logging/logging.js";
+import { stringifyValue } from "../../../database/database.js";
+import { Document } from "../../../database/document.js";
+import { EntryRequest } from "../../../database/structs/entry-request.js";
+import { User } from "../../../database/structs/user.js";
+import { acknowledge, encodeId, reply } from "../../../interactions.js";
+import { diagnosticMentionUser } from "../../../utils.js";
+import { PromptManager } from "../manager.js";
+import { getNecessaryVotes } from "./verification/votes.js";
 import {
-	addRole,
-	banMember,
 	Bot,
 	ButtonStyles,
 	CreateMessage,
-	getAvatarURL,
 	Guild,
 	Interaction,
 	MessageComponentTypes,
 	User as DiscordUser,
+	addRole,
+	banMember,
+	getAvatarURL,
 } from "discordeno";
-import { getNecessaryVotes } from "./verification/votes.js";
-import { PromptManager } from "../manager.js";
-import { logEvent } from "../../../controllers/logging/logging.js";
-import { EntryRequest } from "../../../database/structs/entry-request.js";
-import { User } from "../../../database/structs/user.js";
-import { stringifyValue } from "../../../database/database.js";
-import { Document } from "../../../database/document.js";
-import { Client, localise, WithLanguage } from "../../../client.js";
-import { acknowledge, encodeId, reply } from "../../../interactions.js";
-import { diagnosticMentionUser } from "../../../utils.js";
-import configuration from "../../../../configuration.js";
-import constants from "../../../../constants.js";
-import { defaultLocale } from "../../../../types.js";
 
 type Metadata = { userId: bigint; reference: string };
 type InteractionData = [userId: string, guildId: string, reference: string, isAccept: string];
@@ -39,7 +39,7 @@ class VerificationManager extends PromptManager<EntryRequest, Metadata, Interact
 				continue;
 			}
 
-			entryRequestsByGuildId.get(guildId)!.push(entryRequest);
+			entryRequestsByGuildId.get(guildId)?.push(entryRequest);
 		}
 
 		return entryRequestsByGuildId;
@@ -115,15 +115,15 @@ class VerificationManager extends PromptManager<EntryRequest, Metadata, Interact
 					fields: [
 						{
 							name: strings.verification.reason,
-							value: document.data.answers.reason!,
+							value: document.data.answers.reason,
 						},
 						{
 							name: strings.verification.aim,
-							value: document.data.answers.aim!,
+							value: document.data.answers.aim,
 						},
 						{
 							name: strings.verification.whereFound,
-							value: document.data.answers.where_found!,
+							value: document.data.answers.whereFound,
 						},
 					],
 					footer: {
@@ -177,7 +177,17 @@ class VerificationManager extends PromptManager<EntryRequest, Metadata, Interact
 			return undefined;
 		}
 
-		const guild = client.cache.guilds.get(interaction.guildId!);
+		const member = interaction.member;
+		if (member === undefined) {
+			return undefined;
+		}
+
+		const guildId = interaction.guildId;
+		if (guildId === undefined) {
+			return undefined;
+		}
+
+		const guild = client.cache.guilds.get(guildId);
 		if (guild === undefined) {
 			displayVoteError([client, bot], interaction);
 			return undefined;
@@ -304,17 +314,17 @@ class VerificationManager extends PromptManager<EntryRequest, Metadata, Interact
 		const isAccepted = votedFor.length >= votesToAccept;
 		const isRejected = votedAgainst.length >= votesToReject;
 
-		const submitter = client.cache.users.get(BigInt(user.data.account.id))!;
+		const submitter = client.cache.users.get(BigInt(user.data.account.id));
+		if (submitter === undefined) {
+			return undefined;
+		}
 
 		let isFinalised = false;
 
 		if (isAccepted || isRejected) {
 			isFinalised = true;
 
-			logEvent([client, bot], guild, isAccepted ? "entryRequestAccept" : "entryRequestReject", [
-				submitter,
-				interaction.member!,
-			]);
+			logEvent([client, bot], guild, isAccepted ? "entryRequestAccept" : "entryRequestReject", [submitter, member]);
 		}
 
 		const updatedEntryRequest = await client.database.adapters.entryRequests.update(client, {

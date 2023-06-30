@@ -1,12 +1,17 @@
-import { Bot, ButtonComponent, ButtonStyles, Interaction, MessageComponentTypes } from "discordeno";
-import { EntryStepButtonID } from "../entry.js";
-import { proficiency } from "../../../commands/social/roles/categories/language.js";
-import { Client, localise } from "../../../client.js";
-import { encodeId, reply } from "../../../interactions.js";
 import constants from "../../../../constants.js";
+import { Client, localise } from "../../../client.js";
+import { proficiency } from "../../../commands/social/roles/categories/language.js";
+import { encodeId, reply } from "../../../interactions.js";
+import { EntryStepButtonID } from "../entry.js";
+import { Bot, ButtonComponent, ButtonStyles, Interaction, MessageComponentTypes } from "discordeno";
 
 async function handleAcceptRules([client, bot]: [Client, Bot], interaction: Interaction, _: string): Promise<void> {
-	const guild = client.cache.guilds.get(interaction.guildId!);
+	const guildId = interaction.guildId;
+	if (guildId === undefined) {
+		return;
+	}
+
+	const guild = client.cache.guilds.get(guildId);
 	if (guild === undefined) {
 		return;
 	}
@@ -49,7 +54,7 @@ async function handleAcceptRules([client, bot]: [Client, Bot], interaction: Inte
 					return {
 						type: MessageComponentTypes.Button,
 						label: strings.name,
-						customId: encodeId<EntryStepButtonID>(constants.staticComponentIds.selectedLanguageProficiency, [
+						customId: encodeId<EntryStepButtonID>(constants.staticComponentIds.entry.selectedLanguageProficiency, [
 							index.toString(),
 						]),
 						style: ButtonStyles.Secondary,

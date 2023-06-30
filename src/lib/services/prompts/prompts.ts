@@ -1,7 +1,7 @@
+import { ServiceStarter } from "../services.js";
 import reports from "./managers/reports.js";
 import suggestions from "./managers/suggestions.js";
 import verification from "./managers/verification.js";
-import { ServiceStarter } from "../services.js";
 
 const managers = [reports, suggestions, verification];
 

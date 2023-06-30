@@ -1,8 +1,8 @@
-import { Bot, Interaction } from "discordeno";
-import { handleRequestPlayback } from "./query.js";
-import { SongListing } from "../../data/types.js";
 import { Client, localise } from "../../../../client.js";
 import { deleteReply, parseArguments, postponeReply } from "../../../../interactions.js";
+import { SongListing } from "../../data/types.js";
+import { handleRequestPlayback } from "./query.js";
+import { Bot, Interaction } from "discordeno";
 
 async function handleRequestFilePlayback([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const [{ url }] = parseArguments(interaction.data?.options, {});

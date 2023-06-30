@@ -1,5 +1,5 @@
-import { ApplicationCommandOptionTypes } from "discordeno";
 import { OptionTemplate } from "./command.js";
+import { ApplicationCommandOptionTypes } from "discordeno";
 
 const user: OptionTemplate = {
 	name: "user",

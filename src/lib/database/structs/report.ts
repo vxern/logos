@@ -1,4 +1,4 @@
-import { Reference } from "../document.js";
+import Fauna from "fauna";
 
 /** Represents a report submitted against one or multiple users. */
 interface Report {
@@ -6,19 +6,22 @@ interface Report {
 	createdAt: number;
 
 	/** The document reference to the author of this report. */
-	author: Reference;
+	author: Fauna.values.Ref;
 
 	/** The ID of the guild this report was submitted on. */
 	guild: string;
 
-	/** The document reference to the users this report concerns. */
-	users: string;
+	/** The report form answers. */
+	answers: {
+		/** The document reference to the users this report concerns. */
+		users: string;
 
-	/** The reason for this report. */
-	reason: string;
+		/** The reason for this report. */
+		reason: string;
 
-	/** Link to message for context. */
-	messageLink?: string;
+		/** Link to message for context. */
+		messageLink?: string;
+	};
 
 	/** Whether or not this report has been resolved. */
 	isResolved: boolean;

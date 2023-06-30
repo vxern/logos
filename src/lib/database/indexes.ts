@@ -1,39 +1,40 @@
+import { Document } from "./document.js";
 import { EntryRequest } from "./structs/entry-request.js";
 import { Praise } from "./structs/praise.js";
 import { Report } from "./structs/report.js";
 import { Suggestion } from "./structs/suggestion.js";
 import { User } from "./structs/user.js";
 import { Warning } from "./structs/warning.js";
-import { Document, Reference } from "./document.js";
+import Fauna from "fauna";
 
 type IndexesSignature<T = unknown> = Record<string, [takes: unknown, returns: T]>;
 
 type GetParameterNames<I extends IndexesSignature> = Exclude<keyof I, "reference">;
 
 type EntryRequestIndexes<T = Document<EntryRequest>> = {
-	submitterAndGuild: [takes: [Reference, string], returns: T];
+	submitterAndGuild: [takes: [Fauna.values.Ref, string], returns: T];
 };
 
 type PraiseIndexes<T = Map<string, Document<Praise>>> = {
-	sender: [takes: Reference, returns: T];
-	recipient: [takes: Reference, returns: T];
+	sender: [takes: Fauna.values.Ref, returns: T];
+	recipient: [takes: Fauna.values.Ref, returns: T];
 };
 
 type ReportIndexes<T = Map<string, Document<Report>>> = {
-	authorAndGuild: [takes: [Reference, string], returns: T];
+	authorAndGuild: [takes: [Fauna.values.Ref, string], returns: T];
 };
 
 type SuggestionIndexes<T = Map<string, Document<Suggestion>>> = {
-	authorAndGuild: [takes: [Reference, string], returns: T];
+	authorAndGuild: [takes: [Fauna.values.Ref, string], returns: T];
 };
 
 type UserIndexes<T = Document<User>> = {
-	reference: [takes: Reference, returns: T];
+	reference: [takes: Fauna.values.Ref, returns: T];
 	id: [takes: string, returns: T];
 };
 
 type WarningIndexes<T = Map<string, Document<Warning>>> = {
-	recipient: [takes: Reference, returns: T];
+	recipient: [takes: Fauna.values.Ref, returns: T];
 };
 
 const praiseIndexParameterToIndex: Record<GetParameterNames<PraiseIndexes>, string> = {

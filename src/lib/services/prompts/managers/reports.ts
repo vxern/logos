@@ -1,24 +1,24 @@
-import {
-	Bot,
-	ButtonStyles,
-	CreateMessage,
-	getAvatarURL,
-	Guild,
-	Interaction,
-	MessageComponentTypes,
-	User as DiscordUser,
-} from "discordeno";
-import { PromptManager } from "../manager.js";
+import configuration from "../../../../configuration.js";
+import constants from "../../../../constants.js";
+import { MentionTypes, mention, timestamp } from "../../../../formatting.js";
+import { defaultLocale } from "../../../../types.js";
+import { Client, WithLanguage, localise } from "../../../client.js";
 import { stringifyValue } from "../../../database/database.js";
 import { Document } from "../../../database/document.js";
 import { Report } from "../../../database/structs/report.js";
 import { User } from "../../../database/structs/user.js";
-import { Client, localise, WithLanguage } from "../../../client.js";
 import { encodeId, reply } from "../../../interactions.js";
-import configuration from "../../../../configuration.js";
-import constants from "../../../../constants.js";
-import { mention, MentionTypes, timestamp } from "../../../../formatting.js";
-import { defaultLocale } from "../../../../types.js";
+import { PromptManager } from "../manager.js";
+import {
+	Bot,
+	ButtonStyles,
+	CreateMessage,
+	Guild,
+	Interaction,
+	MessageComponentTypes,
+	User as DiscordUser,
+	getAvatarURL,
+} from "discordeno";
 
 type Metadata = { userId: bigint; reference: string };
 type InteractionData = [userId: string, guildId: string, reference: string, isResolved: string];
@@ -34,14 +34,19 @@ class ReportManager extends PromptManager<Report, Metadata, InteractionData> {
 				continue;
 			}
 
-			const guildId = BigInt(reports.at(0)!.data.guild);
+			const { guild: guildIdString } = reports.at(0)?.data ?? {};
+			if (guildIdString === undefined) {
+				continue;
+			}
+
+			const guildId = BigInt(guildIdString);
 
 			if (!reportsByGuildId.has(guildId)) {
 				reportsByGuildId.set(guildId, reports);
 				continue;
 			}
 
-			reportsByGuildId.get(guildId)!.push(...reports);
+			reportsByGuildId.get(guildId)?.push(...reports);
 		}
 
 		return reportsByGuildId;
@@ -87,7 +92,7 @@ class ReportManager extends PromptManager<Report, Metadata, InteractionData> {
 		return {
 			embeds: [
 				{
-					title: document.data.reason,
+					title: document.data.answers.reason,
 					color: constants.colors.darkRed,
 					thumbnail: (() => {
 						const iconURL = getAvatarURL(bot, user.id, user.discriminator, {
@@ -104,13 +109,13 @@ class ReportManager extends PromptManager<Report, Metadata, InteractionData> {
 					fields: [
 						{
 							name: strings.report.users,
-							value: document.data.users,
+							value: document.data.answers.users,
 						},
 						{
 							name: strings.report.link,
 							value:
-								document.data.messageLink !== undefined
-									? document.data.messageLink
+								document.data.answers.messageLink !== undefined
+									? document.data.answers.messageLink
 									: `*${strings.report.noLinkProvided}*`,
 							inline: false,
 						},
@@ -132,19 +137,8 @@ class ReportManager extends PromptManager<Report, Metadata, InteractionData> {
 				{
 					type: MessageComponentTypes.ActionRow,
 					components: [
-						!document.data.isResolved
+						document.data.isResolved
 							? {
-									type: MessageComponentTypes.Button,
-									style: ButtonStyles.Primary,
-									label: strings.markResolved,
-									customId: encodeId<InteractionData>(constants.staticComponentIds.reports, [
-										user.id.toString(),
-										guild.id.toString(),
-										reference,
-										`${true}`,
-									]),
-							  }
-							: {
 									type: MessageComponentTypes.Button,
 									style: ButtonStyles.Secondary,
 									label: strings.markUnresolved,
@@ -153,6 +147,17 @@ class ReportManager extends PromptManager<Report, Metadata, InteractionData> {
 										guild.id.toString(),
 										reference,
 										`${false}`,
+									]),
+							  }
+							: {
+									type: MessageComponentTypes.Button,
+									style: ButtonStyles.Primary,
+									label: strings.markResolved,
+									customId: encodeId<InteractionData>(constants.staticComponentIds.reports, [
+										user.id.toString(),
+										guild.id.toString(),
+										reference,
+										`${true}`,
 									]),
 							  },
 					],

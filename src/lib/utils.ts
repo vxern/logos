@@ -1,7 +1,7 @@
-import { Bot, Channel, ChannelTypes, Embed, getGuildIconURL, getMessages, Guild, Message, User } from "discordeno";
-import { Document } from "./database/document.js";
+import { MentionTypes, mention } from "../formatting.js";
 import { Client } from "./client.js";
-import { mention, MentionTypes } from "../formatting.js";
+import { Document } from "./database/document.js";
+import { Bot, Channel, ChannelTypes, Embed, Guild, Message, User, getGuildIconURL, getMessages } from "discordeno";
 
 /**
  * Parses a 6-digit hex value prefixed with a hashtag to a number.
@@ -37,7 +37,7 @@ function getTextChannel(guild: Guild, name: string): Channel | undefined {
 
 	const textChannels = guild.channels.array().filter((channel) => isText(channel));
 
-	return textChannels.find((channel) => channel.name!.toLowerCase().includes(nameAsLowercase));
+	return textChannels.find((channel) => channel.name?.toLowerCase().includes(nameAsLowercase));
 }
 
 function getChannelMention(guild: Guild, name: string): string {
@@ -55,10 +55,10 @@ function getChannelMention(guild: Guild, name: string): string {
  * @param user - The user object.
  * @returns The mention.
  */
-function diagnosticMentionUser(user: User): string {
-	const tag = `${user.username}#${user.discriminator}`;
+function diagnosticMentionUser({ username, discriminator, id }: User): string {
+	const tag = discriminator === "0" ? username : `${username}#${discriminator}`;
 
-	return `${tag} (${user.id})`;
+	return `${tag} (${id})`;
 }
 
 /**
@@ -72,7 +72,9 @@ function chunk<T>(array: T[], size: number): T[][] {
 	if (array.length === 0) {
 		return [[]];
 	}
-	if (size === 0) throw new Error("The size of a chunk cannot be zero.");
+	if (size === 0) {
+		throw "The size of a chunk cannot be zero.";
+	}
 
 	const chunks = array.length <= size ? 1 : Math.floor(array.length / size);
 	const result = [];
@@ -144,7 +146,7 @@ async function getAllMessages([client, bot]: [Client, Bot], channelId: bigint): 
 	while (!isFinished) {
 		const buffer = await getMessages(bot, channelId, {
 			limit: 100,
-			before: messages.length === 0 ? undefined : messages[messages.length - 1]!.id,
+			before: messages.length === 0 ? undefined : messages.at(-1)?.id,
 		}).catch(() => {
 			client.log.warn(`Failed to get all messages from channel with ID ${channelId}.`);
 			return undefined;

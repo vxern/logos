@@ -1,8 +1,8 @@
-import { ApplicationCommandOptionTypes, ApplicationCommandTypes } from "discordeno";
-import { handleSetTimeout, handleSetTimeoutAutocomplete } from "./timeout/set.js";
-import { handleClearTimeout, handleClearTimeoutAutocomplete } from "./timeout/clear.js";
 import { CommandTemplate } from "../../command.js";
 import { duration, reason, user } from "../../parameters.js";
+import { handleClearTimeout, handleClearTimeoutAutocomplete } from "./timeout/clear.js";
+import { handleSetTimeout, handleSetTimeoutAutocomplete } from "./timeout/set.js";
+import { ApplicationCommandOptionTypes, ApplicationCommandTypes } from "discordeno";
 
 const command: CommandTemplate = {
 	name: "timeout",

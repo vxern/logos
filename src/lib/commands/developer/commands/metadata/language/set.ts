@@ -1,9 +1,9 @@
-import { Bot, Interaction } from "discordeno";
+import constants from "../../../../../../constants.js";
+import { supportedLanguages } from "../../../../../../types.js";
 import { Client } from "../../../../../client.js";
 import { reply } from "../../../../../interactions.js";
 import { parseArguments } from "../../../../../interactions.js";
-import constants from "../../../../../../constants.js";
-import { supportedLanguages } from "../../../../../../types.js";
+import { Bot, Interaction } from "discordeno";
 
 async function handleSetLanguage([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const [{ language: input }] = parseArguments(interaction.data?.options, {});
@@ -11,7 +11,12 @@ async function handleSetLanguage([client, bot]: [Client, Bot], interaction: Inte
 		return;
 	}
 
-	const guild = client.cache.guilds.get(interaction.guildId!);
+	const guildId = interaction.guildId;
+	if (guildId === undefined) {
+		return;
+	}
+
+	const guild = client.cache.guilds.get(guildId);
 	if (guild === undefined) {
 		return;
 	}

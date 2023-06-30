@@ -1,9 +1,9 @@
-import { ApplicationCommandOptionTypes } from "discordeno";
-import { handleRequestFilePlayback } from "./play/file.js";
-import { handleRequestQueryPlayback } from "./play/query.js";
-import { sources } from "../data/sources/sources.js";
 import { OptionTemplate } from "../../command.js";
 import { query } from "../../parameters.js";
+import { sources } from "../data/sources/sources.js";
+import { handleRequestFilePlayback } from "./play/file.js";
+import { handleRequestQueryPlayback } from "./play/query.js";
+import { ApplicationCommandOptionTypes } from "discordeno";
 
 const command: OptionTemplate = {
 	name: "play",

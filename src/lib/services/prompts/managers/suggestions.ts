@@ -1,24 +1,24 @@
+import configuration from "../../../../configuration.js";
+import constants from "../../../../constants.js";
+import { MentionTypes, mention, timestamp } from "../../../../formatting.js";
+import { defaultLocale } from "../../../../types.js";
+import { Client, WithLanguage, localise } from "../../../client.js";
+import { stringifyValue } from "../../../database/database.js";
+import { Document } from "../../../database/document.js";
+import { Suggestion } from "../../../database/structs/suggestion.js";
+import { User } from "../../../database/structs/user.js";
+import { encodeId, reply } from "../../../interactions.js";
+import { PromptManager } from "../manager.js";
 import {
 	Bot,
 	ButtonStyles,
 	CreateMessage,
-	getAvatarURL,
 	Guild,
 	Interaction,
 	MessageComponentTypes,
 	User as DiscordUser,
+	getAvatarURL,
 } from "discordeno";
-import { PromptManager } from "../manager.js";
-import { Suggestion } from "../../../database/structs/suggestion.js";
-import { User } from "../../../database/structs/user.js";
-import { stringifyValue } from "../../../database/database.js";
-import { Document } from "../../../database/document.js";
-import { Client, localise, WithLanguage } from "../../../client.js";
-import { encodeId, reply } from "../../../interactions.js";
-import configuration from "../../../../configuration.js";
-import constants from "../../../../constants.js";
-import { mention, MentionTypes, timestamp } from "../../../../formatting.js";
-import { defaultLocale } from "../../../../types.js";
 
 type Metadata = { userId: bigint; reference: string };
 type InteractionData = [userId: string, guildId: string, reference: string, isResolved: string];
@@ -34,14 +34,19 @@ class SuggestionManager extends PromptManager<Suggestion, Metadata, InteractionD
 				continue;
 			}
 
-			const guildId = BigInt(suggestions.at(0)!.data.guild);
+			const { guild: guildIdString } = suggestions.at(0)?.data ?? {};
+			if (guildIdString === undefined) {
+				continue;
+			}
+
+			const guildId = BigInt(guildIdString);
 
 			if (!suggestionsByGuildId.has(guildId)) {
 				suggestionsByGuildId.set(guildId, suggestions);
 				continue;
 			}
 
-			suggestionsByGuildId.get(guildId)!.push(...suggestions);
+			suggestionsByGuildId.get(guildId)?.push(...suggestions);
 		}
 
 		return suggestionsByGuildId;
@@ -80,7 +85,7 @@ class SuggestionManager extends PromptManager<Suggestion, Metadata, InteractionD
 		return {
 			embeds: [
 				{
-					title: document.data.suggestion,
+					title: document.data.answers.suggestion,
 					color: constants.colors.green,
 					thumbnail: (() => {
 						const iconURL = getAvatarURL(bot, user.id, user.discriminator, {
@@ -113,19 +118,8 @@ class SuggestionManager extends PromptManager<Suggestion, Metadata, InteractionD
 				{
 					type: MessageComponentTypes.ActionRow,
 					components: [
-						!document.data.isResolved
+						document.data.isResolved
 							? {
-									type: MessageComponentTypes.Button,
-									style: ButtonStyles.Primary,
-									label: strings.markResolved,
-									customId: encodeId<InteractionData>(constants.staticComponentIds.suggestions, [
-										user.id.toString(),
-										guild.id.toString(),
-										reference,
-										`${true}`,
-									]),
-							  }
-							: {
 									type: MessageComponentTypes.Button,
 									style: ButtonStyles.Secondary,
 									label: strings.markUnresolved,
@@ -134,6 +128,17 @@ class SuggestionManager extends PromptManager<Suggestion, Metadata, InteractionD
 										guild.id.toString(),
 										reference,
 										`${false}`,
+									]),
+							  }
+							: {
+									type: MessageComponentTypes.Button,
+									style: ButtonStyles.Primary,
+									label: strings.markResolved,
+									customId: encodeId<InteractionData>(constants.staticComponentIds.suggestions, [
+										user.id.toString(),
+										guild.id.toString(),
+										reference,
+										`${true}`,
 									]),
 							  },
 					],

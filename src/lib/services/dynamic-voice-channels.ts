@@ -1,8 +1,8 @@
-import { Bot, Channel, ChannelTypes, Collection, createChannel, deleteChannel, Guild, VoiceState } from "discordeno";
-import { ServiceStarter } from "./services.js";
+import configuration from "../../configuration.js";
 import { Client, extendEventHandler, isServicing } from "../client.js";
 import { isVoice } from "../utils.js";
-import configuration from "../../configuration.js";
+import { ServiceStarter } from "./services.js";
+import { Bot, Channel, ChannelTypes, Collection, Guild, VoiceState, createChannel, deleteChannel } from "discordeno";
 
 const previousVoiceStates = new Map<`${/*userId:*/ bigint}${/*guildId:*/ bigint}`, VoiceState>();
 
@@ -87,7 +87,12 @@ async function onConnect(
 	voiceChannelStatesTuples: VoiceChannelStatesTuple[],
 	currentState: VoiceState,
 ): Promise<void> {
-	const tuple = voiceChannelStatesTuples.find(([channel, _states]) => channel.id === currentState.channelId!);
+	const channelId = currentState.channelId;
+	if (channelId === undefined) {
+		return;
+	}
+
+	const tuple = voiceChannelStatesTuples.find(([channel, _states]) => channel.id === channelId);
 	if (tuple === undefined) {
 		return;
 	}
@@ -110,13 +115,16 @@ async function onConnect(
 		return;
 	}
 
-	const anchor = voiceChannelStatesTuples.at(0)![0];
+	const [firstChannel, __] = voiceChannelStatesTuples.at(0) ?? [];
+	if (firstChannel === undefined) {
+		return undefined;
+	}
 
 	createChannel(bot, guild.id, {
 		name: configuration.guilds.channels.voiceChat,
 		type: ChannelTypes.GuildVoice,
-		parentId: anchor.parentId,
-		position: voiceChannelStatesTuples.at(voiceChannelStatesTuples.length - 1)![0].position,
+		parentId: firstChannel.parentId,
+		position: voiceChannelStatesTuples.at(voiceChannelStatesTuples.length - 1)?.[0].position,
 	}).catch(() => client.log.warn(`Failed to create voice channel on guild with ID ${guild.id}.`));
 }
 
@@ -125,9 +133,12 @@ async function onDisconnect(
 	voiceChannelStatesTuples: VoiceChannelStatesTuple[],
 	previousState: VoiceState,
 ): Promise<void> {
-	const voiceChannelStatesTuple = voiceChannelStatesTuples.find(
-		([channel, _]) => channel.id === previousState.channelId!,
-	);
+	const channelId = previousState.channelId;
+	if (channelId === undefined) {
+		return;
+	}
+
+	const voiceChannelStatesTuple = voiceChannelStatesTuples.find(([channel, _]) => channel.id === channelId);
 	if (voiceChannelStatesTuple === undefined) {
 		return;
 	}
@@ -144,7 +155,12 @@ async function onDisconnect(
 		return;
 	}
 
-	const [channelToDelete, __] = freeChannels.at(-1)!;
+	const lastFreeChannel = freeChannels.at(-1);
+	if (lastFreeChannel === undefined) {
+		return;
+	}
+
+	const [channelToDelete, __] = lastFreeChannel;
 
 	deleteChannel(bot, channelToDelete.id).catch(() =>
 		client.log.warn(`Failed to delete voice channel on guild with ID ${previousState.guildId}.`),
@@ -159,14 +175,26 @@ function getVoiceChannelStatesTuples(guild: Guild): VoiceChannelStatesTuple[] {
 
 	const voiceStates = getRelevantVoiceStates(guild, [...voiceChannels.map((channel) => channel.id)]);
 
-	return voiceChannels.map<[Channel, VoiceState[]]>((channel) => [channel, voiceStates.get(channel.id)!]);
+	return voiceChannels.map<[Channel, VoiceState[]]>((channel) => [channel, voiceStates.get(channel.id) ?? []]);
 }
 
 function getRelevantVoiceChannels(guild: Guild): Channel[] {
 	const channels = guild.channels
-		.filter((channel) => isVoice(channel) && channel.name! === configuration.guilds.channels.voiceChat)
+		.filter((channel) => isVoice(channel) && channel.name === configuration.guilds.channels.voiceChat)
 		.array()
-		.sort((a, b) => (a.position === b.position ? Number(a.id - b.id) : a.position! - b.position!));
+		.sort((a, b) => {
+			if (a.position === b.position) {
+				return Number(a.id - b.id);
+			}
+
+			if (a.position === undefined) {
+				return b.position ?? -1;
+			} else if (b.position === undefined) {
+				return a.position ?? 1;
+			}
+
+			return a.position - b.position;
+		});
 
 	return channels;
 }
@@ -174,7 +202,7 @@ function getRelevantVoiceChannels(guild: Guild): Channel[] {
 function getRelevantVoiceStates(guild: Guild, channelIds: bigint[]): Collection<bigint, VoiceState[]> {
 	const voiceStates = guild.voiceStates.array().filter((voiceState) => voiceState.channelId !== undefined);
 	return new Collection(
-		channelIds.map((channelId) => [channelId, voiceStates.filter((voiceState) => voiceState.channelId! === channelId)]),
+		channelIds.map((channelId) => [channelId, voiceStates.filter((voiceState) => voiceState.channelId === channelId)]),
 	);
 }
 

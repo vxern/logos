@@ -1,13 +1,25 @@
+import configuration from "../configuration.js";
+import constants, { Periods } from "../constants.js";
+import { timestamp } from "../formatting.js";
+import { Language, defaultLanguage, getLanguageByLocale, getLocaleForLanguage, supportedLanguages } from "../types.js";
+import { Command, CommandTemplate, InteractionHandler, LocalisationProperties, Option } from "./commands/command.js";
+import commandTemplates from "./commands/commands.js";
+import { SentencePair } from "./commands/language/commands/game.js";
+import { DictionaryAdapter } from "./commands/language/dictionaries/adapter.js";
+import { SupportedLanguage } from "./commands/language/module.js";
+import { setupLogging } from "./controllers/logging/logging.js";
+import { MusicController, setupMusicController } from "./controllers/music.js";
+import { Database, createDatabase } from "./database/database.js";
+import { acknowledge, deleteReply, isAutocomplete, reply, respond } from "./interactions.js";
+import localisationTransformers from "./localisation/transformers.js";
+import services from "./services/services.js";
+import { diagnosticMentionUser } from "./utils.js";
 import {
 	ApplicationCommandOptionTypes,
 	Bot,
-	calculatePermissions,
 	Channel,
-	createBot,
-	createTransformers,
 	DiscordMessage,
 	EventHandlers,
-	fetchMembers,
 	Guild,
 	Intents,
 	Interaction,
@@ -16,33 +28,21 @@ import {
 	Localization as DiscordLocalisations,
 	Member,
 	Message,
+	Transformers,
+	User,
+	calculatePermissions,
+	createBot,
+	createTransformers,
+	fetchMembers,
 	send as sendShardPayload,
 	snowflakeToBigint,
 	startBot,
-	Transformers,
 	upsertGuildApplicationCommands,
-	User,
 } from "discordeno";
-import * as Sentry from "sentry";
+import * as FancyLog from "fancy-log";
 import * as Lavaclient from "lavaclient";
 import * as MessagePipe from "messagepipe";
-import * as FancyLog from "fancy-log";
-import { DictionaryAdapter } from "./commands/language/dictionaries/adapter.js";
-import { SentencePair } from "./commands/language/commands/game.js";
-import { SupportedLanguage } from "./commands/language/module.js";
-import { Command, CommandTemplate, InteractionHandler, LocalisationProperties, Option } from "./commands/command.js";
-import commandTemplates from "./commands/commands.js";
-import { setupLogging } from "./controllers/logging/logging.js";
-import { MusicController, setupMusicController } from "./controllers/music.js";
-import { createDatabase, Database } from "./database/database.js";
-import localisationTransformers from "./localisation/transformers.js";
-import { acknowledge, deleteReply, isAutocomplete, reply, respond } from "./interactions.js";
-import services from "./services/services.js";
-import { diagnosticMentionUser } from "./utils.js";
-import configuration from "../configuration.js";
-import constants, { Periods } from "../constants.js";
-import { timestamp } from "../formatting.js";
-import { defaultLanguage, getLanguageByLocale, getLocaleForLanguage, Language, supportedLanguages } from "../types.js";
+import * as Sentry from "sentry";
 
 interface Collector<ForEvent extends keyof EventHandlers> {
 	filter: (...args: Parameters<EventHandlers[ForEvent]>) => boolean;
@@ -82,7 +82,16 @@ function createCache(): Cache {
 
 type Client = Readonly<{
 	metadata: {
-		environment: "production" | "staging" | "development" | "restricted";
+		environment: {
+			environment: "production" | "staging" | "development" | "restricted";
+			discordSecret: string;
+			faunaSecret: string;
+			deeplSecret: string;
+			sentrySecret: string;
+			lavalinkHost: string;
+			lavalinkPort: string;
+			lavalinkPassword: string;
+		};
 		supportedTranslationLanguages: SupportedLanguage[];
 	};
 	log: Record<"debug" | keyof typeof FancyLog, (...args: unknown[]) => void>;
@@ -145,7 +154,7 @@ function createClient(
 			},
 		},
 		cache: createCache(),
-		database: createDatabase(),
+		database: createDatabase(metadata.environment),
 		features,
 		localisations,
 		commands: { local, global, handlers },
@@ -158,7 +167,7 @@ async function initialiseClient(
 	features: Omit<Client["features"], "music">,
 	localisations: Map<string, Map<Language, string>>,
 ): Promise<void> {
-	const musicFeature = createMusicFeature(async (guildId, payload) => {
+	const musicFeature = createMusicFeature(metadata.environment, async (guildId, payload) => {
 		const shardId = client.cache.guilds.get(BigInt(guildId))?.shardId;
 		if (shardId === undefined) {
 			return;
@@ -178,7 +187,7 @@ async function initialiseClient(
 
 	const bot = overrideDefaultEventHandlers(
 		createBot({
-			token: process.env.DISCORD_SECRET!,
+			token: metadata.environment.discordSecret,
 			intents:
 				Intents.Guilds |
 				Intents.GuildMembers |
@@ -186,7 +195,7 @@ async function initialiseClient(
 				Intents.GuildVoiceStates |
 				Intents.GuildMessages |
 				Intents.MessageContent,
-			events: withMusicEvents(createEventHandlers(client), client.features.music.node),
+			events: withMusicEvents(client, createEventHandlers(client), client.features.music.node),
 			transformers: withCaching(client, createTransformers({})),
 		}),
 	);
@@ -206,12 +215,15 @@ async function prefetchDataFromDatabase(client: Client, database: Database): Pro
 	]);
 }
 
-function createMusicFeature(sendGatewayPayload: Lavaclient.Node["sendGatewayPayload"]): Client["features"]["music"] {
+function createMusicFeature(
+	environment: Client["metadata"]["environment"],
+	sendGatewayPayload: Lavaclient.Node["sendGatewayPayload"],
+): Client["features"]["music"] {
 	const node = new Lavaclient.Node({
 		connection: {
-			host: process.env.LAVALINK_HOST!,
-			port: Number(process.env.LAVALINK_PORT!),
-			password: process.env.LAVALINK_PASSWORD!,
+			host: environment.lavalinkHost,
+			port: Number(environment.lavalinkPort),
+			password: environment.lavalinkPassword,
 		},
 		sendGatewayPayload,
 	});
@@ -222,22 +234,28 @@ function createMusicFeature(sendGatewayPayload: Lavaclient.Node["sendGatewayPayl
 	};
 }
 
-function withMusicEvents(events: Partial<EventHandlers>, node: Lavaclient.Node): Partial<EventHandlers> {
+function withMusicEvents(
+	client: Client,
+	events: Partial<EventHandlers>,
+	node: Lavaclient.Node,
+): Partial<EventHandlers> {
 	return {
 		...events,
-		voiceStateUpdate: async (_, payload) =>
+		voiceStateUpdate: async (_, { sessionId, channelId, guildId, userId }) =>
 			node.handleVoiceUpdate({
-				session_id: payload.sessionId,
-				channel_id: payload.channelId !== undefined ? `${payload.channelId}` : null,
-				guild_id: `${payload.guildId}`,
-				user_id: `${payload.userId}`,
+				session_id: sessionId,
+				channel_id: channelId !== undefined ? `${channelId}` : null,
+				guild_id: `${guildId}`,
+				user_id: `${userId}`,
 			}),
-		voiceServerUpdate: async (_, payload) =>
-			node.handleVoiceUpdate({
-				token: payload.token,
-				endpoint: payload.endpoint!,
-				guild_id: `${payload.guildId}`,
-			}),
+		voiceServerUpdate: async (_, { token, endpoint, guildId }) => {
+			if (endpoint === undefined) {
+				client.log.info(`Discarding voice server update for guild with ID ${guildId}: The endpoint is undefined.`);
+				return;
+			}
+
+			node.handleVoiceUpdate({ token, endpoint, guild_id: `${guildId}` });
+		},
 	};
 }
 
@@ -444,20 +462,20 @@ function withRateLimiting(handle: InteractionHandler): InteractionHandler {
 			return handle([client, bot], interaction);
 		}
 
-		if (!client.features.rateLimiting.has(interaction.user.id)) {
-			client.features.rateLimiting.set(interaction.user.id, new Map());
-		}
-
 		const executedAt = Date.now();
 
-		const timestampsByCommandId = client.features.rateLimiting.get(interaction.user.id)!;
+		const timestampsByCommandId = client.features.rateLimiting.get(interaction.user.id) ?? new Map();
 		const timestamps = [...(timestampsByCommandId.get(commandId) ?? []), executedAt];
 		const activeTimestamps = timestamps.filter(
 			(timestamp) => Date.now() - timestamp <= configuration.rateLimiting.within,
 		);
 
 		if (activeTimestamps.length > configuration.rateLimiting.limit) {
-			const firstTimestamp = activeTimestamps[0]!;
+			const firstTimestamp = activeTimestamps.at(0);
+			if (firstTimestamp) {
+				throw "StateError: Unexpected undefined initial timestamp.";
+			}
+
 			const now = Date.now();
 
 			const nextValidUsageTimestamp = now + configuration.rateLimiting.within - (now - firstTimestamp);
@@ -501,7 +519,11 @@ function withRateLimiting(handle: InteractionHandler): InteractionHandler {
 
 function localiseCommands(localisations: Client["localisations"], commandTemplates: CommandTemplate[]): Command[] {
 	function localiseCommandOrOption(key: string): Pick<Command, LocalisationProperties> | undefined {
-		const optionName = key.split(".")!.at(-1)!;
+		const optionName = key.split(".")?.at(-1);
+		if (optionName === undefined) {
+			console.warn(`Failed to get option name from localisation key '${key}'.`);
+			return undefined;
+		}
 
 		const nameLocalisationsAll = localisations.get(`${key}.name`) ?? localisations.get(`parameters.${optionName}.name`);
 		const nameLocalisations =
@@ -626,12 +648,15 @@ function createCommandHandlers(commands: CommandTemplate[]): Client["commands"][
 }
 
 function getImplicitLanguage(guild: Guild): Language {
-	const match = configuration.guilds.namePattern.exec(guild.name) ?? undefined;
+	const [match, language] = configuration.guilds.namePattern.exec(guild.name) ?? [];
 	if (match === undefined) {
 		return defaultLanguage;
 	}
 
-	const language = match.at(1)!;
+	if (language === undefined) {
+		throw `StateError: '${guild.name}' was matched to the guild name regular expression, but the language part was \`undefined\`.`;
+	}
+
 	const found = supportedLanguages.find((supportedLanguage) => supportedLanguage === language);
 	if (found !== undefined) {
 		return found;
@@ -693,7 +718,7 @@ function addCollector<T extends keyof EventHandlers>(
 ): void {
 	const onEnd = collector.onEnd;
 	collector.onEnd = () => {
-		collectors.delete(collector);
+		collectors?.delete(collector);
 		onEnd();
 	};
 
@@ -711,16 +736,16 @@ function addCollector<T extends keyof EventHandlers>(
 		};
 	}
 
-	if (collector.removeAfter !== undefined) {
-		setTimeout(collector.onEnd, collector.removeAfter!);
+	const { removeAfter } = collector;
+	if (removeAfter !== undefined) {
+		setTimeout(collector.onEnd, removeAfter);
 	}
 
 	if (!client.collectors.has(event)) {
-		client.collectors.set(event, new Set());
+		const collectors: Set<Collector<keyof EventHandlers>> = new Set();
+		client.collectors.set(event, collectors);
 
 		extendEventHandler(bot, event, { prepend: true }, (...args) => {
-			const collectors = client.collectors.get(event)!;
-
 			for (const collector of collectors) {
 				if (!collector.filter(...args)) {
 					continue;
@@ -731,7 +756,11 @@ function addCollector<T extends keyof EventHandlers>(
 		});
 	}
 
-	const collectors = client.collectors.get(event)! as Set<Collector<T>>;
+	const collectors = client.collectors.get(event);
+	if (collectors === undefined) {
+		return;
+	}
+
 	collectors.add(collector);
 }
 
@@ -790,12 +819,15 @@ function resolveIdentifierToMembers(
 		if (member === undefined) {
 			return undefined;
 		}
+
 		if (options.restrictToSelf && member.id !== asker.id) {
 			return undefined;
 		}
+
 		if (options.restrictToNonSelf && member.id === asker.id) {
 			return undefined;
 		}
+
 		if (options.excludeModerators && moderatorRoleIds.some((roleId) => member.roles.includes(roleId))) {
 			return undefined;
 		}
@@ -806,8 +838,8 @@ function resolveIdentifierToMembers(
 	const cachedMembers = options.restrictToSelf ? [asker] : guild.members.array();
 	const members = cachedMembers.filter(
 		(member: Member) =>
-			(!options.restrictToNonSelf ? true : member.user?.id !== asker.user?.id) &&
-			(!options.excludeModerators ? true : !moderatorRoleIds.some((roleId) => member.roles.includes(roleId))),
+			(options.restrictToNonSelf ? member.user?.id !== asker.user?.id : true) &&
+			(options.excludeModerators ? !moderatorRoleIds.some((roleId) => member.roles.includes(roleId)) : true),
 	);
 
 	if (userTagPattern.test(identifier)) {
@@ -844,20 +876,36 @@ async function autocompleteMembers(
 	identifier: string,
 	options?: Partial<MemberNarrowingOptions>,
 ): Promise<void> {
-	const result = resolveIdentifierToMembers(client, interaction.guildId!, interaction.user.id, identifier, options);
+	const guildId = interaction.guildId;
+	if (guildId === undefined) {
+		return undefined;
+	}
+
+	const result = resolveIdentifierToMembers(client, guildId, interaction.user.id, identifier, options);
 	if (result === undefined) {
 		return;
 	}
 
 	const [matchedMembers, _] = result;
 
+	const users: User[] = [];
+	for (const member of matchedMembers) {
+		if (users.length === 20) {
+			break;
+		}
+
+		const user = member.user;
+		if (user === undefined) {
+			continue;
+		}
+
+		users.push(user);
+	}
+
 	respond(
 		[client, bot],
 		interaction,
-		matchedMembers.slice(0, 20).map((member) => ({
-			name: diagnosticMentionUser(member.user!),
-			value: member.id.toString(),
-		})),
+		users.map((user) => ({ name: diagnosticMentionUser(user), value: user.id.toString() })),
 	);
 }
 
@@ -867,7 +915,12 @@ function resolveInteractionToMember(
 	identifier: string,
 	options?: Partial<MemberNarrowingOptions>,
 ): Member | undefined {
-	const result = resolveIdentifierToMembers(client, interaction.guildId!, interaction.user.id, identifier, options);
+	const guildId = interaction.guildId;
+	if (guildId === undefined) {
+		return undefined;
+	}
+
+	const result = resolveIdentifierToMembers(client, guildId, interaction.user.id, identifier, options);
 	if (result === undefined) {
 		return;
 	}
@@ -942,7 +995,12 @@ function createLocalisations(localisations: Map<string, Map<Language, string>>):
 		const functions = new Map<Language, (args: Record<string, unknown>) => string>();
 
 		for (const [language, string] of languages.entries()) {
-			const compile = localisedCompilers.get(language)!;
+			const compile = localisedCompilers.get(language);
+			if (compile === undefined) {
+				console.error(`Failed to compile localisation function for string key '${key}' in ${language}.`);
+				continue;
+			}
+
 			functions.set(language, compile(string));
 		}
 
@@ -971,17 +1029,27 @@ function localise(client: Client, key: string, locale: string | undefined): (arg
 function toDiscordLocalisations(
 	localisations: Map<Language, (args: Record<string, unknown>) => string>,
 ): DiscordLocalisations {
-	return Object.fromEntries(
-		Array.from(localisations.entries())
-			.filter(([key, _value]) => key !== defaultLanguage && getLocaleForLanguage(key) !== undefined)
-			.map<[string, string | undefined]>(([key, localise]) => [getLocaleForLanguage(key)!, localise({})])
-			.filter(([_key, value]) => value?.length !== 0),
-	);
+	const entries = Array.from(localisations.entries());
+	const result: DiscordLocalisations = {};
+	for (const [language, localise] of entries) {
+		const locale = getLocaleForLanguage(language);
+		if (locale === undefined) {
+			continue;
+		}
+
+		const string = localise({});
+		if (string.length === 0) {
+			continue;
+		}
+
+		result[locale] = string;
+	}
+	return result;
 }
 
 function isServicing(client: Client, guildId: bigint): boolean {
 	const environment = configuration.guilds.environments[guildId.toString()];
-	return environment === client.metadata.environment;
+	return environment === client.metadata.environment.environment;
 }
 
 export {

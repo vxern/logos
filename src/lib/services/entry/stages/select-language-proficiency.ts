@@ -1,25 +1,35 @@
-import { addRole, Bot, ButtonStyles, Interaction, MessageComponentTypes } from "discordeno";
-import { proficiency } from "../../../commands/social/roles/categories/language.js";
-import { EntryStepButtonID } from "../../../services/entry/entry.js";
-import { Client, localise } from "../../../client.js";
-import { encodeId, reply } from "../../../interactions.js";
-import { snowflakeToTimestamp } from "../../../utils.js";
 import configuration from "../../../../configuration.js";
 import constants from "../../../../constants.js";
+import { Client, localise } from "../../../client.js";
+import { proficiency } from "../../../commands/social/roles/categories/language.js";
+import { encodeId, reply } from "../../../interactions.js";
+import { EntryStepButtonID } from "../../../services/entry/entry.js";
+import { snowflakeToTimestamp } from "../../../utils.js";
+import { Bot, ButtonStyles, Interaction, MessageComponentTypes, addRole } from "discordeno";
 
 async function handleSelectLanguageProficiency(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 	parameter: string,
 ): Promise<void> {
-	const guild = client.cache.guilds.get(interaction.guildId!);
+	const guildId = interaction.guildId;
+	if (guildId === undefined) {
+		return;
+	}
+
+	const guild = client.cache.guilds.get(guildId);
 	if (guild === undefined) {
 		return;
 	}
 
 	const guildIdString = guild.id.toString();
 
-	const roleId = BigInt(proficiency.collection.list[parseInt(parameter)]!.snowflakes[guildIdString]!);
+	const snowflake = proficiency.collection.list[parseInt(parameter)]?.snowflakes[guildIdString];
+	if (snowflake === undefined) {
+		return;
+	}
+
+	const roleId = BigInt(snowflake);
 	const role = guild.roles.get(roleId);
 	if (role === undefined) {
 		return;
@@ -44,7 +54,7 @@ async function handleSelectLanguageProficiency(
 			interaction.user.id,
 		);
 
-		const isVerified = userDocument?.data.account.authorisedOn?.includes(interaction.guildId!.toString());
+		const isVerified = userDocument?.data.account.authorisedOn?.includes(guildId.toString());
 
 		if (!isVerified) {
 			const strings = {
@@ -82,7 +92,7 @@ async function handleSelectLanguageProficiency(
 								type: MessageComponentTypes.Button,
 								style: ButtonStyles.Secondary,
 								label: strings.description.understood,
-								customId: encodeId<EntryStepButtonID>(constants.staticComponentIds.requestedVerification, [
+								customId: encodeId<EntryStepButtonID>(constants.staticComponentIds.entry.requestedVerification, [
 									role.id.toString(),
 								]),
 								emoji: { name: constants.symbols.understood },
@@ -157,9 +167,14 @@ async function vetUser([client, bot]: [Client, Bot], interaction: Interaction): 
 		return false;
 	}
 
+	const guildId = interaction.guildId;
+	if (guildId === undefined) {
+		return false;
+	}
+
 	const entryRequest = client.database.adapters.entryRequests.get(client, "submitterAndGuild", [
 		userDocument.ref,
-		interaction.guildId!.toString(),
+		guildId.toString(),
 	]);
 
 	if (entryRequest !== undefined && !entryRequest.data.isFinalised) {
@@ -181,10 +196,10 @@ async function vetUser([client, bot]: [Client, Bot], interaction: Interaction): 
 		return false;
 	}
 
-	if (userDocument.data.account.authorisedOn?.includes(interaction.guildId!.toString())) {
+	if (userDocument.data.account.authorisedOn?.includes(guildId.toString())) {
 		return true;
 	}
-	if (userDocument.data.account.rejectedOn?.includes(interaction.guildId!.toString())) {
+	if (userDocument.data.account.rejectedOn?.includes(guildId.toString())) {
 		const strings = {
 			title: localise(client, "entry.verification.answers.rejectedBefore.title", interaction.locale)(),
 			description: localise(client, "entry.verification.answers.rejectedBefore.description", interaction.locale)(),

@@ -1,15 +1,15 @@
-import { ApplicationCommandOptionTypes, Bot, Interaction } from "discordeno";
-import { Song, SongCollection, SongStream } from "../data/types.js";
-import { OptionTemplate } from "../../command.js";
-import { collection, show } from "../../parameters.js";
-import { isCollection, isOccupied } from "../../../controllers/music.js";
-import { Client, localise } from "../../../client.js";
-import { paginate, parseArguments, reply } from "../../../interactions.js";
-import { chunk } from "../../../utils.js";
 import configuration from "../../../../configuration.js";
 import constants from "../../../../constants.js";
-import { mention, MentionTypes, timestamp, trim } from "../../../../formatting.js";
+import { MentionTypes, mention, timestamp, trim } from "../../../../formatting.js";
 import { defaultLocale } from "../../../../types.js";
+import { Client, localise } from "../../../client.js";
+import { isCollection, isOccupied } from "../../../controllers/music.js";
+import { paginate, parseArguments, reply } from "../../../interactions.js";
+import { chunk } from "../../../utils.js";
+import { OptionTemplate } from "../../command.js";
+import { collection, show } from "../../parameters.js";
+import { Song, SongCollection, SongStream } from "../data/types.js";
+import { ApplicationCommandOptionTypes, Bot, Interaction } from "discordeno";
 
 const command: OptionTemplate = {
 	name: "now",
@@ -21,8 +21,18 @@ const command: OptionTemplate = {
 async function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const [{ collection, show }] = parseArguments(interaction.data?.options, { collection: "boolean", show: "boolean" });
 
-	const controller = client.features.music.controllers.get(interaction.guildId!);
+	const guildId = interaction.guildId;
+	if (guildId === undefined) {
+		return;
+	}
+
+	const controller = client.features.music.controllers.get(guildId);
 	if (controller === undefined) {
+		return;
+	}
+
+	const playingSince = controller.player.playingSince;
+	if (playingSince === undefined) {
 		return;
 	}
 
@@ -30,25 +40,7 @@ async function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], inter
 
 	const currentListing = controller.currentListing;
 
-	if (!collection) {
-		if (!isOccupied(controller.player) || currentListing === undefined) {
-			const strings = {
-				title: localise(client, "music.options.now.strings.noSong.title", interaction.locale)(),
-				description: localise(client, "music.options.now.strings.noSong.description", interaction.locale)(),
-			};
-
-			reply([client, bot], interaction, {
-				embeds: [
-					{
-						title: strings.title,
-						description: strings.description,
-						color: constants.colors.dullYellow,
-					},
-				],
-			});
-			return;
-		}
-	} else {
+	if (collection) {
 		if (!isOccupied(controller.player) || currentListing === undefined) {
 			const strings = {
 				title: localise(client, "music.options.now.strings.noSongCollection.title", interaction.locale)(),
@@ -93,6 +85,24 @@ async function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], inter
 					{
 						title: strings.title,
 						description: `${strings.description.noSongCollection}\n\n${strings.description.trySongInstead}`,
+						color: constants.colors.dullYellow,
+					},
+				],
+			});
+			return;
+		}
+	} else {
+		if (!isOccupied(controller.player) || currentListing === undefined) {
+			const strings = {
+				title: localise(client, "music.options.now.strings.noSong.title", interaction.locale)(),
+				description: localise(client, "music.options.now.strings.noSong.description", interaction.locale)(),
+			};
+
+			reply([client, bot], interaction, {
+				embeds: [
+					{
+						title: strings.title,
+						description: strings.description,
 						color: constants.colors.dullYellow,
 					},
 				],
@@ -157,7 +167,7 @@ async function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], inter
 			client,
 			"music.options.now.strings.playingSince",
 			locale,
-		)({ relative_timestamp: timestamp(controller.player.playingSince!) }),
+		)({ relative_timestamp: timestamp(playingSince) }),
 		startTimeUnknown: localise(client, "music.options.now.strings.startTimeUnknown", locale)(),
 		sourcedFrom: localise(
 			client,

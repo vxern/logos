@@ -1,20 +1,20 @@
-import { EventEmitter } from "events";
-import { Bot, Embed, Guild, Interaction, sendMessage, VoiceState } from "discordeno";
-import * as Lavaclient from "lavaclient";
+import configuration from "../../configuration.js";
+import constants from "../../constants.js";
+import { MentionTypes, mention } from "../../formatting.js";
+import { defaultLocale } from "../../types.js";
+import { Client, localise } from "../client.js";
 import {
-	listingTypeToEmoji,
 	Song,
 	SongCollection,
 	SongListing,
 	SongListingType,
 	SongStream,
+	listingTypeToEmoji,
 } from "../commands/music/data/types.js";
-import { Client, localise } from "../client.js";
 import { reply } from "../interactions.js";
-import configuration from "../../configuration.js";
-import constants from "../../constants.js";
-import { mention, MentionTypes } from "../../formatting.js";
-import { defaultLocale } from "../../types.js";
+import { Bot, Embed, Guild, Interaction, VoiceState, sendMessage } from "discordeno";
+import { EventEmitter } from "events";
+import * as Lavaclient from "lavaclient";
 
 function setupMusicController(client: Client, guildId: bigint): void {
 	client.features.music.controllers.set(guildId, createMusicController(client, guildId));
@@ -264,7 +264,7 @@ function receiveNewListing(
 ): void {
 	function getVoiceStatesForChannel(guild: Guild, channelId: bigint): VoiceState[] {
 		const guildVoiceStates = guild.voiceStates.array().filter((voiceState) => voiceState.channelId !== undefined);
-		const relevantVoiceStates = guildVoiceStates.filter((voiceState) => voiceState.channelId! === channelId);
+		const relevantVoiceStates = guildVoiceStates.filter((voiceState) => voiceState.channelId === channelId);
 
 		return relevantVoiceStates;
 	}
@@ -306,7 +306,12 @@ function receiveNewListing(
 	};
 
 	if (isOccupied(controller.player)) {
-		sendMessage(bot, controller.feedbackChannelId!, { embeds: [embed] }).catch(() =>
+		const feedbackChannelId = controller.feedbackChannelId;
+		if (feedbackChannelId === undefined) {
+			return;
+		}
+
+		sendMessage(bot, feedbackChannelId, { embeds: [embed] }).catch(() =>
 			client.log.warn("Failed to send music feedback message."),
 		);
 		return;
@@ -372,7 +377,12 @@ function advanceQueueAndPlay([client, bot]: [Client, Bot], guildId: bigint, cont
 		return;
 	}
 
-	loadSong([client, bot], guildId, controller, getCurrentSong(controller)!);
+	const currentSong = getCurrentSong(controller);
+	if (currentSong === undefined) {
+		return;
+	}
+
+	loadSong([client, bot], guildId, controller, currentSong);
 }
 
 async function loadSong(
@@ -397,22 +407,28 @@ async function loadSong(
 			}),
 		};
 
-		sendMessage(bot, controller.feedbackChannelId!, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colors.red,
-				},
-			],
-		});
+		const feedbackChannelId = controller.feedbackChannelId;
+		if (feedbackChannelId !== undefined) {
+			sendMessage(bot, feedbackChannelId, {
+				embeds: [
+					{
+						title: strings.title,
+						description: strings.description,
+						color: constants.colors.red,
+					},
+				],
+			});
+		}
 
 		advanceQueueAndPlay([client, bot], guildId, controller);
 
 		return false;
 	}
 
-	const track = result.tracks[0]!;
+	const track = result.tracks.at(0);
+	if (track === undefined) {
+		return false;
+	}
 
 	if (controller.currentListing?.content !== undefined && isExternal(controller.currentListing.content)) {
 		controller.currentListing.content.title = track.info.title;
@@ -434,15 +450,18 @@ async function loadSong(
 			}),
 		};
 
-		sendMessage(bot, controller.feedbackChannelId!, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colors.red,
-				},
-			],
-		});
+		const feedbackChannelId = controller.feedbackChannelId;
+		if (feedbackChannelId !== undefined) {
+			sendMessage(bot, feedbackChannelId, {
+				embeds: [
+					{
+						title: strings.title,
+						description: strings.description,
+						color: constants.colors.red,
+					},
+				],
+			});
+		}
 	};
 
 	const onTrackEnd = () => {
@@ -493,20 +512,26 @@ async function loadSong(
 		},
 	};
 
-	sendMessage(bot, controller.feedbackChannelId!, {
-		embeds: [
-			{
-				title: `${emoji} ${strings.title}`,
-				description: strings.description.nowPlaying({
-					song_information: strings.description.track,
-					title: song.title,
-					url: song.url,
-					user_mention: mention(controller.currentListing!.requestedBy, MentionTypes.User),
-				}),
-				color: constants.colors.blue,
-			},
-		],
-	});
+	const feedbackChannelId = controller.feedbackChannelId;
+	if (feedbackChannelId !== undefined) {
+		const currentListing = controller.currentListing;
+		if (currentListing !== undefined) {
+			sendMessage(bot, feedbackChannelId, {
+				embeds: [
+					{
+						title: `${emoji} ${strings.title}`,
+						description: strings.description.nowPlaying({
+							song_information: strings.description.track,
+							title: song.title,
+							url: song.url,
+							user_mention: mention(currentListing.requestedBy, MentionTypes.User),
+						}),
+						color: constants.colors.blue,
+					},
+				],
+			});
+		}
+	}
 
 	return true;
 }
@@ -519,11 +544,11 @@ interface PositionControls {
 function skip(controller: MusicController, skipCollection: boolean, { by, to }: Partial<PositionControls>): void {
 	if (controller.currentListing?.content !== undefined && isCollection(controller.currentListing.content)) {
 		if (skipCollection || isLastInCollection(controller.currentListing.content)) {
-			if (!controller.flags.loop.collection) {
+			if (controller.flags.loop.collection) {
+				controller.currentListing.content.position = -1;
+			} else {
 				moveListingToHistory(controller, controller.currentListing);
 				controller.currentListing = undefined;
-			} else {
-				controller.currentListing.content.position = -1;
 			}
 		} else {
 			if (by !== undefined || to !== undefined) {
@@ -565,16 +590,19 @@ function unskip(
 ): void {
 	if (controller.currentListing?.content !== undefined && isCollection(controller.currentListing.content)) {
 		if (unskipCollection || isFirstInCollection(controller.currentListing.content)) {
-			if (!controller.flags.loop.collection) {
+			if (controller.flags.loop.collection) {
+				controller.currentListing.content.position = -1;
+			} else {
 				controller.currentListing.content.position -= 1;
 
 				controller.listingQueue.unshift(controller.currentListing);
-				controller.listingQueue.unshift(controller.listingHistory.pop()!);
+				const listing = controller.listingHistory.pop();
+				if (listing !== undefined) {
+					controller.listingQueue.unshift(listing);
+				}
 				controller.events.emit("queueUpdate");
 				controller.events.emit("historyUpdate");
 				controller.currentListing = undefined;
-			} else {
-				controller.currentListing.content.position = -1;
 			}
 		} else {
 			if (by !== undefined || to !== undefined) {
@@ -586,7 +614,7 @@ function unskip(
 			}
 
 			if (to !== undefined) {
-				controller.currentListing.content.position = to! - 2;
+				controller.currentListing.content.position = to - 2;
 			}
 
 			if (by === undefined && to === undefined) {
@@ -603,7 +631,10 @@ function unskip(
 		}
 
 		for (const _ of Array(listingsToMoveToQueue).keys()) {
-			controller.listingQueue.unshift(controller.listingHistory.pop()!);
+			const listing = controller.listingHistory.pop();
+			if (listing !== undefined) {
+				controller.listingQueue.unshift(listing);
+			}
 		}
 
 		if (listingsToMoveToQueue !== 0) {
@@ -641,6 +672,11 @@ function replay(
 	controller: MusicController,
 	replayCollection: boolean,
 ): void {
+	const guildId = interaction.guildId;
+	if (guildId === undefined) {
+		return;
+	}
+
 	if (replayCollection) {
 		const previousLoopState = controller.flags.loop.collection;
 		controller.flags.loop.collection = true;
@@ -665,7 +701,7 @@ function replay(
 
 	controller.flags.breakLoop = true;
 	controller.player.stop();
-	advanceQueueAndPlay([client, bot], interaction.guildId!, controller);
+	advanceQueueAndPlay([client, bot], guildId, controller);
 }
 
 function reset(client: Client, guildId: bigint): void {

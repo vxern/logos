@@ -1,10 +1,10 @@
-import { ApplicationCommandOptionTypes, ApplicationCommandTypes, Bot, Interaction } from "discordeno";
-import { CommandTemplate } from "../../command.js";
-import { show } from "../../parameters.js";
-import { Client, localise } from "../../../client.js";
-import { parseArguments, reply, respond } from "../../../interactions.js";
 import constants from "../../../../constants.js";
 import { defaultLocale } from "../../../../types.js";
+import { Client, localise } from "../../../client.js";
+import { parseArguments, reply, respond } from "../../../interactions.js";
+import { CommandTemplate } from "../../command.js";
+import { show } from "../../parameters.js";
+import { ApplicationCommandOptionTypes, ApplicationCommandTypes, Bot, Interaction } from "discordeno";
 
 const command: CommandTemplate = {
 	name: "rule",
@@ -55,7 +55,12 @@ async function handleCiteRule([client, bot]: [Client, Bot], interaction: Interac
 		return;
 	}
 
-	const guild = client.cache.guilds.get(interaction.guildId!);
+	const guildId = interaction.guildId;
+	if (guildId === undefined) {
+		return;
+	}
+
+	const guild = client.cache.guilds.get(guildId);
 	if (guild === undefined) {
 		return;
 	}

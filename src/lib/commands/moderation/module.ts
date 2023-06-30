@@ -1,6 +1,6 @@
-import { Warning } from "../../database/structs/warning.js";
-import { Document } from "../../database/document.js";
 import configuration from "../../../configuration.js";
+import { Document } from "../../database/document.js";
+import { Warning } from "../../database/structs/warning.js";
 
 function getActiveWarnings(warnings: Map<string, Document<Warning>>): Map<string, Document<Warning>> {
 	const entries = Array.from(warnings.entries());

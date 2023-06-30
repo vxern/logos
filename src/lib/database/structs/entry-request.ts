@@ -1,4 +1,4 @@
-import { Reference } from "../document.js";
+import Fauna from "fauna";
 
 /** Represents an entry request submitted by the user upon attempting to join the server. */
 interface EntryRequest {
@@ -6,7 +6,7 @@ interface EntryRequest {
 	createdAt: number;
 
 	/** The document reference to the submitter of this request. */
-	submitter: Reference;
+	submitter: Fauna.values.Ref;
 
 	/** The ID of the guild this request was submitted for. */
 	guild: string;
@@ -15,13 +15,22 @@ interface EntryRequest {
 	requestedRole: string;
 
 	/** The answers to the verification questions. */
-	answers: Record<string, string | undefined>;
+	answers: {
+		/** The reason for which the user is learning a language. */
+		reason: string;
+
+		/** What the user aims to use the server for. (conversation practice, questions, debating, etc.) */
+		aim: string;
+
+		/** Where the user stumbled upon the server. */
+		whereFound: string;
+	};
 
 	/** The document references to the moderators who have voted to accept this entry request. */
-	votedFor: Reference[];
+	votedFor: Fauna.values.Ref[];
 
 	/** The document references to the moderators who have voted to reject this entry request. */
-	votedAgainst: Reference[];
+	votedAgainst: Fauna.values.Ref[];
 
 	/** Whether this entry request has been decided on and the user has either been accepted or rejected. */
 	isFinalised: boolean;

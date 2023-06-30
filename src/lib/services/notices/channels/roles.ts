@@ -1,8 +1,8 @@
-import { Bot, ButtonStyles, CreateMessage, Guild, MessageComponentTypes } from "discordeno";
-import { getLastUpdateString } from "../notices.js";
-import { Client, localise } from "../../../client.js";
 import constants from "../../../../constants.js";
 import { defaultLocale } from "../../../../types.js";
+import { Client, localise } from "../../../client.js";
+import { getLastUpdateString } from "../notices.js";
+import { Bot, ButtonStyles, CreateMessage, Guild, MessageComponentTypes } from "discordeno";
 
 const lastUpdatedAt = new Date(2023, 2, 19);
 

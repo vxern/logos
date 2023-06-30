@@ -1,3 +1,6 @@
+import constants, { Periods } from "../constants.js";
+import { defaultLocale } from "../types.js";
+import { Client, addCollector, localise } from "./client.js";
 import {
 	ActionRow,
 	ApplicationCommandFlags,
@@ -5,8 +8,6 @@ import {
 	Bot,
 	ButtonComponent,
 	ButtonStyles,
-	deleteOriginalInteractionResponse,
-	editOriginalInteractionResponse,
 	Embed,
 	EventHandlers,
 	Interaction,
@@ -14,14 +15,13 @@ import {
 	InteractionDataOption,
 	InteractionResponseTypes,
 	InteractionTypes,
-	MessageComponents,
 	MessageComponentTypes,
+	MessageComponents,
+	deleteOriginalInteractionResponse,
+	editOriginalInteractionResponse,
 	sendInteractionResponse,
 } from "discordeno";
 import { DiscordSnowflake as Snowflake } from "snowflake";
-import { addCollector, Client, localise } from "./client.js";
-import constants, { Periods } from "../constants.js";
-import { defaultLocale } from "../types.js";
 
 type AutocompleteInteraction = Interaction & { type: InteractionTypes.ApplicationCommandAutocomplete };
 
@@ -160,19 +160,26 @@ async function paginate<T>(
 		onCollect: async (bot, selection) => {
 			acknowledge([client, bot], selection);
 
-			if (selection.data === undefined) {
+			const customId = selection.data?.customId;
+			if (customId === undefined) {
 				return;
 			}
 
-			const [_, action] = decodeId<ControlButtonID>(selection.data.customId!);
+			const [_, action] = decodeId<ControlButtonID>(customId);
 
 			switch (action) {
-				case "previous":
-					if (!isFirst) data.pageIndex--;
+				case "previous": {
+					if (!isFirst) {
+						data.pageIndex--;
+					}
 					break;
-				case "next":
-					if (!isLast) data.pageIndex++;
+				}
+				case "next": {
+					if (!isLast) {
+						data.pageIndex++;
+					}
 					break;
+				}
 			}
 
 			editReply([client, bot], interaction, {
@@ -217,6 +224,11 @@ function getPageEmbed<T>(
 		continuedOnNextPage: localise(client, "interactions.continuedOnNextPage", locale)(),
 	};
 
+	const elements = data.elements.at(data.pageIndex);
+	if (elements === undefined) {
+		throw `StateError: Failed to get elements on page with index '${data.pageIndex}'.`;
+	}
+
 	return {
 		...embed,
 		fields: [
@@ -225,7 +237,7 @@ function getPageEmbed<T>(
 					data.elements.length === 1
 						? data.view.title
 						: `${data.view.title} ~ ${strings.page} ${data.pageIndex + 1}/${data.elements.length}`,
-				value: data.view.generate(data.elements.at(data.pageIndex)!, data.pageIndex),
+				value: data.view.generate(elements, data.pageIndex),
 			},
 			...(embed.fields ?? []),
 		],
@@ -264,15 +276,20 @@ function generateButtons(customId: string, isFirst: boolean, isLast: boolean): M
 		  ];
 }
 
-type ComposerContent<T extends string> = Record<T, string | undefined>;
-type ComposerActionRow<T extends string> = {
+type ComposerActionRow<ComposerContent extends Record<string, unknown>, SectionNames = keyof ComposerContent> = {
 	type: MessageComponentTypes.ActionRow;
-	components: [ActionRow["components"][0] & { type: MessageComponentTypes.InputText; customId: T }];
+	components: [ActionRow["components"][0] & { type: MessageComponentTypes.InputText; customId: SectionNames }];
 };
 
-type Modal<T extends string> = { title: string; fields: ComposerActionRow<T>[] };
+type Modal<ComposerContent extends Record<string, unknown>, SectionNames = keyof ComposerContent> = {
+	title: string;
+	fields: ComposerActionRow<ComposerContent, SectionNames>[];
+};
 
-async function createModalComposer<T extends string>(
+async function createModalComposer<
+	ComposerContent extends Record<string, unknown>,
+	SectionNames extends keyof ComposerContent = keyof ComposerContent,
+>(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 	{
@@ -280,15 +297,15 @@ async function createModalComposer<T extends string>(
 		onInvalid,
 		modal,
 	}: {
-		onSubmit: (submission: Interaction, data: ComposerContent<T>) => Promise<true | string>;
+		onSubmit: (submission: Interaction, data: ComposerContent) => Promise<true | string>;
 		onInvalid: (submission: Interaction, error?: string) => Promise<Interaction | undefined>;
-		modal: Modal<T>;
+		modal: Modal<ComposerContent, SectionNames>;
 	},
 ): Promise<void> {
 	const fields = structuredClone(modal.fields);
 
 	let anchor = interaction;
-	let content: ComposerContent<T> | undefined = undefined;
+	let content: ComposerContent | undefined = undefined;
 
 	let isSubmitting = true;
 	while (isSubmitting) {
@@ -312,7 +329,12 @@ async function createModalComposer<T extends string>(
 			if (content !== undefined) {
 				const answers = Object.values(content) as (string | undefined)[];
 				for (const [value, index] of answers.map<[string | undefined, number]>((v, i) => [v, i])) {
-					fields[index]!.components[0].value = value;
+					const field = fields[index];
+					if (field === undefined) {
+						throw `StateError: The number of modal fields (${fields.length}) does not correspond to the number of answers (${answers.length}).`;
+					}
+
+					field.components[0].value = value;
 				}
 			}
 
@@ -338,8 +360,11 @@ async function createModalComposer<T extends string>(
 	}
 }
 
-function parseComposerContent<T extends string>(submission: Interaction): ComposerContent<T> | undefined {
-	const content: Partial<ComposerContent<T>> = {};
+function parseComposerContent<
+	ComposerContent extends Record<string, unknown>,
+	SectionNames extends keyof ComposerContent = keyof ComposerContent,
+>(submission: Interaction): ComposerContent | undefined {
+	const content: Partial<ComposerContent> = {};
 
 	const fields = submission?.data?.components?.map((component) => component.components?.at(0));
 	if (fields === undefined) {
@@ -347,8 +372,8 @@ function parseComposerContent<T extends string>(submission: Interaction): Compos
 	}
 
 	for (const field of fields) {
-		const key = field!.customId as T;
-		const value = field!.value!;
+		const key = field.customId as SectionNames;
+		const value = field.value;
 
 		if (value.length === 0) {
 			content[key] = undefined;
@@ -357,7 +382,7 @@ function parseComposerContent<T extends string>(submission: Interaction): Compos
 		}
 	}
 
-	return content as ComposerContent<T>;
+	return content as ComposerContent;
 }
 
 // Expression to detect HH:MM:SS, MM:SS and SS timestamps.
@@ -370,8 +395,14 @@ function parseTimeExpression(
 	expression: string,
 	locale: string | undefined,
 ): [correctedExpression: string, period: number] | undefined {
-	if (conciseTimeExpression.test(expression)) {
-		return parseConciseTimeExpression(client, expression, locale);
+	const conciseMatch = conciseTimeExpression.exec(expression) ?? undefined;
+	if (conciseMatch !== undefined) {
+		const [_, hours, minutes, seconds] = conciseMatch;
+		if (seconds === undefined) {
+			throw `StateError: The expression '${conciseTimeExpression}' was matched to the concise timestamp regular expression, but the seconds part was \`undefined\`.`;
+		}
+
+		return parseConciseTimeExpression(client, [hours, minutes, seconds], locale);
 	}
 
 	return parseVerboseTimeExpressionPhrase(client, expression, locale);
@@ -379,14 +410,13 @@ function parseTimeExpression(
 
 function parseConciseTimeExpression(
 	client: Client,
-	expression: string,
+	parts: [hours: string | undefined, minutes: string | undefined, seconds: string],
 	locale: string | undefined,
 ): ReturnType<typeof parseTimeExpression> {
-	const [secondsPart, minutesPart, hoursPart] = conciseTimeExpression.exec(expression)!.slice(1).reverse();
-
-	const [seconds, minutes, hours] = [secondsPart, minutesPart, hoursPart].map((part) => {
-		return part !== undefined ? Number(part) : undefined;
-	}) as [number, ...number[]];
+	const [seconds, minutes, hours] = parts.map((part) => (part !== undefined ? Number(part) : undefined)).reverse() as [
+		number,
+		...number[],
+	];
 
 	const verboseExpressionParts = [];
 	if (seconds !== 0) {
@@ -417,7 +447,8 @@ function parseConciseTimeExpression(
 		return undefined;
 	}
 
-	const conciseExpression = [hoursPart ?? "0", minutesPart ?? "0", secondsPart ?? "0"]
+	const conciseExpression = parts
+		.map((part) => part ?? "0")
 		.map((part) => (part.length === 1 ? `0${part}` : part))
 		.join(":");
 
@@ -467,7 +498,10 @@ function parseVerboseTimeExpressionPhrase(
 		);
 	}
 
-	const timeUnitsWithAliases = timeUnitsWithAliasesLocalised.get(locale ?? defaultLocale)!;
+	const timeUnitsWithAliases = timeUnitsWithAliasesLocalised.get(locale ?? defaultLocale);
+	if (timeUnitsWithAliases === undefined) {
+		throw `Failed to get time unit aliases for either locale '${locale}' or '${defaultLocale}'.`;
+	}
 
 	function extractNumbers(expression: string): number[] {
 		const digitsExpression = new RegExp(/\d+/g);
@@ -516,10 +550,17 @@ function parseVerboseTimeExpressionPhrase(
 		return undefined;
 	}
 
-	const timeUnitQuantifierTuples = timeUnits.map<[TimeUnit, number]>((timeUnit, index) => [
+	const timeUnitQuantifierTuples: [TimeUnit, number][] = [];
+	for (const [timeUnit, quantifier] of timeUnits.map<[TimeUnit, number | undefined]>((timeUnit, index) => [
 		timeUnit,
-		quantifiers[index]!,
-	]);
+		quantifiers[index],
+	])) {
+		if (quantifier === undefined) {
+			throw `Failed to get quantifier for time unit '${timeUnit}' and either locale '${locale}' or '${defaultLocale}'.`;
+		}
+
+		timeUnitQuantifierTuples.push([timeUnit, quantifier]);
+	}
 	timeUnitQuantifierTuples.sort(([previous], [next]) => timeUnitToPeriod[next] - timeUnitToPeriod[previous]);
 
 	const timeExpressions = [];
@@ -561,7 +602,7 @@ async function postponeReply(
 ): Promise<void> {
 	return sendInteractionResponse(bot, interaction.id, interaction.token, {
 		type: InteractionResponseTypes.DeferredChannelMessageWithSource,
-		data: !visible ? { flags: ApplicationCommandFlags.Ephemeral } : {},
+		data: visible ? {} : { flags: ApplicationCommandFlags.Ephemeral },
 	}).catch((reason) => client.log.warn(`Failed to postpone reply to interaction: ${reason}`));
 }
 
@@ -573,7 +614,7 @@ async function reply(
 ): Promise<void> {
 	return sendInteractionResponse(bot, interaction.id, interaction.token, {
 		type: InteractionResponseTypes.ChannelMessageWithSource,
-		data: { ...data, flags: !visible ? ApplicationCommandFlags.Ephemeral : undefined },
+		data: { ...data, flags: visible ? undefined : ApplicationCommandFlags.Ephemeral },
 	}).catch((reason) => client.log.warn(`Failed to reply to interaction: ${reason}`));
 }
 

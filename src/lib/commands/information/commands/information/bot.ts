@@ -1,8 +1,8 @@
-import { Bot, Embed, getAvatarURL, getUser, Interaction } from "discordeno";
+import constants from "../../../../../constants.js";
+import { MentionTypes, list, mention } from "../../../../../formatting.js";
 import { Client, localise } from "../../../../client.js";
 import { reply } from "../../../../interactions.js";
-import constants from "../../../../../constants.js";
-import { list, mention, MentionTypes } from "../../../../../formatting.js";
+import { Bot, Embed, Interaction, getAvatarURL, getUser } from "discordeno";
 
 async function handleDisplayBotInformation([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const botUser =

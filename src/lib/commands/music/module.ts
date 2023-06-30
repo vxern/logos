@@ -1,11 +1,11 @@
-import { Bot, Interaction } from "discordeno";
-import { listingTypeToEmoji, SongListing } from "./data/types.js";
-import { Client, localise } from "../../client.js";
-import { paginate } from "../../interactions.js";
-import { chunk } from "../../utils.js";
 import configuration from "../../../configuration.js";
 import constants from "../../../constants.js";
 import { list } from "../../../formatting.js";
+import { Client, localise } from "../../client.js";
+import { paginate } from "../../interactions.js";
+import { chunk } from "../../utils.js";
+import { SongListing, listingTypeToEmoji } from "./data/types.js";
+import { Bot, Interaction } from "discordeno";
 
 async function displayListings(
 	[client, bot]: [Client, Bot],

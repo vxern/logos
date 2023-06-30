@@ -1,11 +1,11 @@
-import * as fs from "fs/promises";
-import * as dotenv from "dotenv";
-import { Locales } from "discordeno";
-import * as Sentry from "sentry";
-import { getSupportedLanguages, loadDictionaryAdapters, loadSentencePairs } from "./lib/commands/language/module.js";
-import { Client, initialiseClient } from "./lib/client.js";
 import { capitalise } from "./formatting.js";
-import { getLanguageByLocale, Language, supportedLanguages } from "./types.js";
+import { Client, initialiseClient } from "./lib/client.js";
+import { getSupportedLanguages, loadDictionaryAdapters, loadSentencePairs } from "./lib/commands/language/module.js";
+import { Language, getLanguageByLocale, supportedLanguages } from "./types.js";
+import { Locales } from "discordeno";
+import * as dotenv from "dotenv";
+import * as fs from "fs/promises";
+import * as Sentry from "sentry";
 
 async function readDotEnvFile(fileUri: string, isTemplate = false): Promise<Record<string, string> | undefined> {
 	const kind = isTemplate ? "environment template" : "environment";
@@ -47,8 +47,7 @@ function readEnvironment({
 
 	const missingKeys = requiredKeys.filter((requiredKey) => !presentKeys.includes(requiredKey));
 	if (missingKeys.length !== 0) {
-		console.error(`Missing one or more required environment variables: ${missingKeys.join(", ")}`);
-		process.exit(1);
+		throw `Missing one or more required environment variables: ${missingKeys.join(", ")}`;
 	}
 
 	if (envConfiguration === undefined) {
@@ -120,7 +119,7 @@ async function readLocalisations(directoryPath: string): Promise<Map<string, Map
 					console.warn(`${language}: '${key}' is not normalised. Normalising...`);
 
 					const valueNormalised = value.toLowerCase().split(" ").join("-").replaceAll("/", "-").replaceAll("'", "-");
-					localisations.get(key)!.set(language, valueNormalised);
+					localisations.get(key)?.set(language, valueNormalised);
 
 					continue;
 				}
@@ -129,13 +128,13 @@ async function readLocalisations(directoryPath: string): Promise<Map<string, Map
 					console.warn(`${language}: '${key}' is too long (>100 characters). Normalising...`);
 
 					const valueNormalised = value.slice(0, 100);
-					localisations.get(key)!.set(language, valueNormalised);
+					localisations.get(key)?.set(language, valueNormalised);
 
 					continue;
 				}
 			}
 
-			localisations.get(key)!.set(language, value);
+			localisations.get(key)?.set(language, value);
 		}
 	}
 
@@ -186,15 +185,37 @@ async function initialise(): Promise<void> {
 		readDotEnvFile(".env.example", true),
 	]);
 
-	readEnvironment({ envConfiguration, templateEnvConfiguration: templateEnvConfiguration! });
+	if (templateEnvConfiguration === undefined) {
+		throw "No template environment file found.";
+	}
 
-	const environment = process.env.ENVIRONMENT as Client["metadata"]["environment"];
-	Sentry.init({ dsn: process.env.SENTRY_SECRET, environment });
+	readEnvironment({ envConfiguration, templateEnvConfiguration });
 
-	console.debug(`Running in ${environment} mode.`);
+	const environmentProvisional: Record<keyof Client["metadata"]["environment"], string | undefined> = {
+		environment: process.env.ENVIRONMENT,
+		discordSecret: process.env.DISCORD_SECRET,
+		faunaSecret: process.env.FAUNA_SECRET,
+		deeplSecret: process.env.DEEPL_SECRET,
+		sentrySecret: process.env.SENTRY_SECRET,
+		lavalinkHost: process.env.LAVALINK_HOST,
+		lavalinkPort: process.env.LAVALINK_PORT,
+		lavalinkPassword: process.env.LAVALINK_PASSWORD,
+	};
+
+	for (const [key, value] of Object.entries(environmentProvisional)) {
+		if (value === undefined) {
+			throw `Value for environment variable '${key}' not provided.`;
+		}
+	}
+
+	const environment = environmentProvisional as Client["metadata"]["environment"];
+
+	Sentry.init({ dsn: process.env.SENTRY_SECRET, environment: environment.environment });
+
+	console.debug(`Running in ${environment.environment} mode.`);
 
 	const [supportedTranslationLanguages, sentenceFiles] = await Promise.all([
-		getSupportedLanguages(),
+		getSupportedLanguages(environment),
 		readSentenceFiles("./assets/sentences"),
 	]);
 

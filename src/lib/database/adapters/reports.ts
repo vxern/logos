@@ -1,5 +1,3 @@
-import Fauna from "fauna";
-import { Report } from "../structs/report.js";
 import {
 	CacheAdapter,
 	DatabaseAdapters,
@@ -10,6 +8,8 @@ import {
 } from "../database.js";
 import { Document } from "../document.js";
 import { ReportIndexes } from "../indexes.js";
+import { Report } from "../structs/report.js";
+import Fauna from "fauna";
 
 const $ = Fauna.query;
 

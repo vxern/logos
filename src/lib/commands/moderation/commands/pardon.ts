@@ -1,3 +1,14 @@
+import constants from "../../../../constants.js";
+import { MentionTypes, mention } from "../../../../formatting.js";
+import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../client.js";
+import { logEvent } from "../../../controllers/logging/logging.js";
+import { stringifyValue } from "../../../database/database.js";
+import { Document } from "../../../database/document.js";
+import { Warning } from "../../../database/structs/warning.js";
+import { parseArguments, reply, respond } from "../../../interactions.js";
+import { CommandTemplate } from "../../command.js";
+import { user } from "../../parameters.js";
+import { getActiveWarnings } from "../module.js";
 import {
 	ApplicationCommandOptionChoice,
 	ApplicationCommandOptionTypes,
@@ -6,17 +17,6 @@ import {
 	Interaction,
 	Member,
 } from "discordeno";
-import { getActiveWarnings } from "../module.js";
-import { CommandTemplate } from "../../command.js";
-import { user } from "../../parameters.js";
-import { logEvent } from "../../../controllers/logging/logging.js";
-import { stringifyValue } from "../../../database/database.js";
-import { Warning } from "../../../database/structs/warning.js";
-import { Document } from "../../../database/document.js";
-import { autocompleteMembers, Client, localise, resolveInteractionToMember } from "../../../client.js";
-import { parseArguments, reply, respond } from "../../../interactions.js";
-import constants from "../../../../constants.js";
-import { mention, MentionTypes } from "../../../../formatting.js";
 
 const command: CommandTemplate = {
 	name: "pardon",
@@ -39,7 +39,11 @@ async function handlePardonUserAutocomplete([client, bot]: [Client, Bot], intera
 	const [{ user, warning }, focused] = parseArguments(interaction.data?.options, {});
 
 	if (focused?.name === "user") {
-		autocompleteMembers([client, bot], interaction, user!, {
+		if (user === undefined) {
+			return;
+		}
+
+		autocompleteMembers([client, bot], interaction, user, {
 			restrictToNonSelf: true,
 			excludeModerators: true,
 		});
@@ -47,7 +51,7 @@ async function handlePardonUserAutocomplete([client, bot]: [Client, Bot], intera
 	}
 
 	if (focused?.name === "warning") {
-		if (user === undefined) {
+		if (user === undefined || warning === undefined) {
 			respond([client, bot], interaction, []);
 			return;
 		}
@@ -67,7 +71,7 @@ async function handlePardonUserAutocomplete([client, bot]: [Client, Bot], intera
 			return;
 		}
 
-		const warningLowercase = warning!.toLowerCase();
+		const warningLowercase = warning.toLowerCase();
 		const choices = relevantWarnings
 			.map<ApplicationCommandOptionChoice>((warning) => ({
 				name: warning.data.reason,
@@ -112,7 +116,12 @@ async function handlePardonUser([client, bot]: [Client, Bot], interaction: Inter
 		return;
 	}
 
-	const guild = client.cache.guilds.get(interaction.guildId!);
+	const guildId = interaction.guildId;
+	if (guildId === undefined) {
+		return;
+	}
+
+	const guild = client.cache.guilds.get(guildId);
 	if (guild === undefined) {
 		return;
 	}

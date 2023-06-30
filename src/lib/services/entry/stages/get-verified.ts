@@ -1,20 +1,26 @@
-import { Bot, Guild, Interaction, MessageComponentTypes, TextStyles } from "discordeno";
-import { logEvent } from "../../../controllers/logging/logging.js";
-import { stringifyValue } from "../../../database/database.js";
-import verificationManager from "../../../services/prompts/managers/verification.js";
-import { Client, localise, WithLanguage } from "../../../client.js";
-import { createModalComposer, editReply, Modal, postponeReply, reply } from "../../../interactions.js";
-import { getTextChannel } from "../../../utils.js";
 import configuration from "../../../../configuration.js";
 import constants from "../../../../constants.js";
 import { trim } from "../../../../formatting.js";
+import { Client, WithLanguage, localise } from "../../../client.js";
+import { logEvent } from "../../../controllers/logging/logging.js";
+import { stringifyValue } from "../../../database/database.js";
+import { EntryRequest } from "../../../database/structs/entry-request.js";
+import { Modal, createModalComposer, editReply, postponeReply, reply } from "../../../interactions.js";
+import verificationManager from "../../../services/prompts/managers/verification.js";
+import { getTextChannel } from "../../../utils.js";
+import { Bot, Guild, Interaction, MessageComponentTypes, TextStyles } from "discordeno";
 
 async function handleRequestVerification(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 	parameter: string,
 ): Promise<void> {
-	const guild = client.cache.guilds.get(interaction.guildId!);
+	const guildId = interaction.guildId;
+	if (guildId === undefined) {
+		return;
+	}
+
+	const guild = client.cache.guilds.get(guildId);
 	if (guild === undefined) {
 		return;
 	}
@@ -23,8 +29,6 @@ async function handleRequestVerification(
 
 	initiateVerificationProcess([client, bot], interaction, guild, requestedRoleId);
 }
-
-type VerificationError = "failure";
 
 async function initiateVerificationProcess(
 	[client, bot]: [Client, Bot],
@@ -65,7 +69,7 @@ async function initiateVerificationProcess(
 		return;
 	}
 
-	createModalComposer<VerificationError>([client, bot], interaction, {
+	createModalComposer<EntryRequest["answers"]>([client, bot], interaction, {
 		modal: generateVerificationQuestionModal(client, guild, interaction.locale),
 		onSubmit: async (submission, answers) => {
 			const submitterReferenceId = stringifyValue(userDocument.ref);
@@ -181,11 +185,11 @@ async function initiateVerificationProcess(
 	});
 }
 
-function generateVerificationQuestionModal<T extends string>(
+function generateVerificationQuestionModal(
 	client: Client,
 	guild: WithLanguage<Guild>,
 	locale: string | undefined,
-): Modal<T> {
+): Modal<EntryRequest["answers"]> {
 	const strings = {
 		title: localise(client, "verification.title", locale)(),
 		reason: localise(client, "verification.fields.reason", locale)({ language: guild.language }),
@@ -228,7 +232,7 @@ function generateVerificationQuestionModal<T extends string>(
 				type: MessageComponentTypes.ActionRow,
 				components: [
 					{
-						customId: "where_found",
+						customId: "whereFound",
 						type: MessageComponentTypes.InputText,
 						label: trim(strings.whereFound, 45),
 						style: TextStyles.Short,
@@ -239,7 +243,7 @@ function generateVerificationQuestionModal<T extends string>(
 				],
 			},
 		],
-	} as Modal<T>;
+	};
 }
 
 export { handleRequestVerification };

@@ -1,5 +1,5 @@
-import { RoleCategory, RoleCategorySingle, RoleCollectionImplicit } from "../types.js";
 import constants from "../../../../../constants.js";
+import { RoleCategory, RoleCategorySingle, RoleCollectionImplicit } from "../types.js";
 
 const proficiency: RoleCategorySingle & { collection: RoleCollectionImplicit } = {
 	type: "single",

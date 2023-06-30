@@ -1,8 +1,8 @@
-import { EventHandlers } from "discordeno";
-import { MessageGenerators } from "./generators.js";
-import { diagnosticMentionUser } from "../../../utils.js";
 import constants from "../../../../constants.js";
-import { codeMultiline, mention, MentionTypes } from "../../../../formatting.js";
+import { MentionTypes, codeMultiline, mention } from "../../../../formatting.js";
+import { diagnosticMentionUser } from "../../../utils.js";
+import { MessageGenerators } from "./generators.js";
+import { EventHandlers } from "discordeno";
 
 type ClientEvents = {
 	[T in keyof EventHandlers]: Parameters<EventHandlers[T]>;

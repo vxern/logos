@@ -1,14 +1,19 @@
-import { Bot, Channel, ChannelTypes, Embed, Guild, Interaction } from "discordeno";
-import { proficiency } from "../../../social/roles/categories/language.js";
+import constants from "../../../../../constants.js";
+import { MentionTypes, mention, timestamp } from "../../../../../formatting.js";
 import { Client, isServicing, localise } from "../../../../client.js";
 import { reply } from "../../../../interactions.js";
 import { getGuildIconURLFormatted, snowflakeToTimestamp } from "../../../../utils.js";
-import constants from "../../../../../constants.js";
-import { mention, MentionTypes, timestamp } from "../../../../../formatting.js";
+import { proficiency } from "../../../social/roles/categories/language.js";
+import { Bot, Channel, ChannelTypes, Embed, Guild, Interaction } from "discordeno";
 
 /** Displays information about the guild that this command was executed in. */
 async function handleDisplayGuildInformation([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
-	const guild = client.cache.guilds.get(interaction.guildId!);
+	const guildId = interaction.guildId;
+	if (guildId === undefined) {
+		return;
+	}
+
+	const guild = client.cache.guilds.get(guildId);
 	if (guild === undefined) {
 		return;
 	}
@@ -149,9 +154,23 @@ type ProficiencyRoleDistribution = [withRole: [roleId: bigint, frequency: number
 function getDistribution(client: Client, guild: Guild): ProficiencyRoleDistribution {
 	const guildIdString = guild.id.toString();
 
-	const proficiencyRoleIdsUnsorted = proficiency.collection.list.map((role) => BigInt(role.snowflakes[guildIdString]!));
+	const proficiencyRoleIdsUnsorted = proficiency.collection.list.map((role) => {
+		const snowflake = role.snowflakes[guildIdString];
+		if (snowflake === undefined) {
+			throw `Could not find the ID of proficiency role '${role.id}'.`;
+		}
+
+		return BigInt(snowflake);
+	});
 	const proficiencyRoleIds = proficiencyRoleIdsUnsorted
-		.map((roleId) => guild.roles.get(roleId)!)
+		.map((roleId) => {
+			const role = guild.roles.get(roleId);
+			if (role === undefined) {
+				throw `StateError: The role with ID '${roleId}' no longer exists.`;
+			}
+
+			return role;
+		})
 		.sort((a, b) => a.position - b.position)
 		.map((role) => role.id);
 

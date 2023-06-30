@@ -1,5 +1,3 @@
-import Fauna from "fauna";
-import { EntryRequest } from "../structs/entry-request.js";
 import {
 	CacheAdapter,
 	DatabaseAdapters,
@@ -9,6 +7,8 @@ import {
 } from "../database.js";
 import { Document } from "../document.js";
 import { EntryRequestIndexes } from "../indexes.js";
+import { EntryRequest } from "../structs/entry-request.js";
+import Fauna from "fauna";
 
 const $ = Fauna.query;
 

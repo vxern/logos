@@ -19,9 +19,9 @@ type Role = RoleImplicit | RoleCustom;
 /** The type of role category. */
 type RoleCategoryTypes =
 	/** A standalone role category. */
-	| 'single'
+	| "single"
 	/** A role category acting as a thematic grouping for other role categories. */
-	| 'group';
+	| "group";
 
 /**
  * The base of a role category.
@@ -44,7 +44,7 @@ interface RoleCategoryBase {
 
 /** The base of a role category. */
 interface RoleCategorySingle extends RoleCategoryBase {
-	type: 'single';
+	type: "single";
 
 	collection: RoleCollection;
 
@@ -54,7 +54,7 @@ interface RoleCategorySingle extends RoleCategoryBase {
 
 /** The base of a group of role categories. */
 interface RoleCategoryGroup extends RoleCategoryBase {
-	type: 'group';
+	type: "group";
 
 	/** The subcategories in this role category. */
 	categories: RoleCategory[];
@@ -64,19 +64,19 @@ interface RoleCategoryGroup extends RoleCategoryBase {
 type RoleCategory = RoleCategorySingle | RoleCategoryGroup;
 
 function isSingle(category: RoleCategory): category is RoleCategorySingle {
-	return category.type === 'single';
+	return category.type === "single";
 }
 
 function isGroup(category: RoleCategory): category is RoleCategoryGroup {
-	return category.type === 'group';
+	return category.type === "group";
 }
 
 /** The type of role collection. */
 type RoleCollectionTypes =
 	/** A collection of roles. */
-	| 'implicit'
+	| "implicit"
 	/** A group of role collections that differ depending on the guild. */
-	| 'custom';
+	| "custom";
 
 /**
  * The base of a role collection.
@@ -90,7 +90,7 @@ type RoleCollectionBase = {
 
 /** The base of an implicit role collection. */
 interface RoleCollectionImplicit extends RoleCollectionBase {
-	type: 'implicit';
+	type: "implicit";
 
 	/** The roles in this role collection. */
 	list: RoleImplicit[];
@@ -98,7 +98,7 @@ interface RoleCollectionImplicit extends RoleCollectionBase {
 
 /** The base of a custom role collection. */
 interface RoleCollectionCustom extends RoleCollectionBase {
-	type: 'custom';
+	type: "custom";
 
 	/** Groups of roles defined by guild ID in this role collection. */
 	lists: Record<string, RoleCustom[]>;
@@ -108,11 +108,11 @@ interface RoleCollectionCustom extends RoleCollectionBase {
 type RoleCollection = RoleCollectionImplicit | RoleCollectionCustom;
 
 function isImplicit(collection: RoleCollection): collection is RoleCollectionImplicit {
-	return collection.type === 'implicit';
+	return collection.type === "implicit";
 }
 
 function isCustom(collection: RoleCollection): collection is RoleCollectionCustom {
-	return collection.type === 'custom';
+	return collection.type === "custom";
 }
 
 export { isCustom, isGroup, isImplicit, isSingle };

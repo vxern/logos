@@ -1,11 +1,11 @@
-import { ApplicationCommandOptionTypes, Bot, Interaction } from "discordeno";
-import { OptionTemplate } from "../../command.js";
-import { by, collection, to } from "../../parameters.js";
-import { getVoiceState, isCollection, isOccupied, skip, verifyCanManagePlayback } from "../../../controllers/music.js";
-import { Client, localise } from "../../../client.js";
-import { parseArguments, reply } from "../../../interactions.js";
 import constants from "../../../../constants.js";
 import { defaultLocale } from "../../../../types.js";
+import { Client, localise } from "../../../client.js";
+import { getVoiceState, isCollection, isOccupied, skip, verifyCanManagePlayback } from "../../../controllers/music.js";
+import { parseArguments, reply } from "../../../interactions.js";
+import { OptionTemplate } from "../../command.js";
+import { by, collection, to } from "../../parameters.js";
+import { ApplicationCommandOptionTypes, Bot, Interaction } from "discordeno";
 
 const command: OptionTemplate = {
 	name: "skip",
@@ -27,7 +27,12 @@ async function handleSkipAction([client, bot]: [Client, Bot], interaction: Inter
 		return;
 	}
 
-	const controller = client.features.music.controllers.get(interaction.guildId!);
+	const guildId = interaction.guildId;
+	if (guildId === undefined) {
+		return;
+	}
+
+	const controller = client.features.music.controllers.get(guildId);
 	if (controller === undefined) {
 		return;
 	}
@@ -36,7 +41,7 @@ async function handleSkipAction([client, bot]: [Client, Bot], interaction: Inter
 		[client, bot],
 		interaction,
 		controller,
-		getVoiceState(client, interaction.guildId!, interaction.user.id),
+		getVoiceState(client, guildId, interaction.user.id),
 	);
 	if (!isVoiceStateVerified) {
 		return;
@@ -44,25 +49,7 @@ async function handleSkipAction([client, bot]: [Client, Bot], interaction: Inter
 
 	const currentListing = controller.currentListing;
 
-	if (!collection) {
-		if (!isOccupied(controller.player) || currentListing === undefined) {
-			const strings = {
-				title: localise(client, "music.options.skip.strings.noSong.title", interaction.locale)(),
-				description: localise(client, "music.options.skip.strings.noSong.description", interaction.locale)(),
-			};
-
-			reply([client, bot], interaction, {
-				embeds: [
-					{
-						title: strings.title,
-						description: strings.description,
-						color: constants.colors.dullYellow,
-					},
-				],
-			});
-			return;
-		}
-	} else {
+	if (collection) {
 		if (!isOccupied(controller.player) || currentListing === undefined) {
 			const strings = {
 				title: localise(client, "music.options.skip.strings.noSongCollection.title", interaction.locale)(),
@@ -107,6 +94,24 @@ async function handleSkipAction([client, bot]: [Client, Bot], interaction: Inter
 					{
 						title: strings.title,
 						description: `${strings.description.noSongCollection}\n\n${strings.description.trySongInstead}`,
+						color: constants.colors.dullYellow,
+					},
+				],
+			});
+			return;
+		}
+	} else {
+		if (!isOccupied(controller.player) || currentListing === undefined) {
+			const strings = {
+				title: localise(client, "music.options.skip.strings.noSong.title", interaction.locale)(),
+				description: localise(client, "music.options.skip.strings.noSong.description", interaction.locale)(),
+			};
+
+			reply([client, bot], interaction, {
+				embeds: [
+					{
+						title: strings.title,
+						description: strings.description,
 						color: constants.colors.dullYellow,
 					},
 				],

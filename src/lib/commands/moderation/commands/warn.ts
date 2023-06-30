@@ -1,15 +1,15 @@
-import { ApplicationCommandTypes, Bot, calculatePermissions, editMember, Interaction, sendMessage } from "discordeno";
-import { getActiveWarnings } from "../module.js";
-import { CommandTemplate } from "../../command.js";
-import { reason, user } from "../../parameters.js";
-import { logEvent } from "../../../controllers/logging/logging.js";
-import { autocompleteMembers, Client, localise, resolveInteractionToMember } from "../../../client.js";
-import { parseArguments, reply } from "../../../interactions.js";
-import { diagnosticMentionUser, getTextChannel } from "../../../utils.js";
 import configuration from "../../../../configuration.js";
 import constants from "../../../../constants.js";
-import { mention, MentionTypes } from "../../../../formatting.js";
+import { MentionTypes, mention } from "../../../../formatting.js";
 import { defaultLocale } from "../../../../types.js";
+import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../client.js";
+import { logEvent } from "../../../controllers/logging/logging.js";
+import { parseArguments, reply } from "../../../interactions.js";
+import { diagnosticMentionUser, getTextChannel } from "../../../utils.js";
+import { CommandTemplate } from "../../command.js";
+import { reason, user } from "../../parameters.js";
+import { getActiveWarnings } from "../module.js";
+import { ApplicationCommandTypes, Bot, Interaction, calculatePermissions, editMember, sendMessage } from "discordeno";
 
 const command: CommandTemplate = {
 	name: "warn",
@@ -22,20 +22,23 @@ const command: CommandTemplate = {
 
 async function handleWarnUserAutocomplete([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const [{ user }] = parseArguments(interaction.data?.options, {});
+	if (user === undefined) {
+		return;
+	}
 
-	autocompleteMembers([client, bot], interaction, user!, {
+	autocompleteMembers([client, bot], interaction, user, {
 		restrictToNonSelf: true,
 		excludeModerators: true,
 	});
 }
 
 async function handleWarnUser([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
-	const [{ user, reason }] = parseArguments(interaction.data?.options, {});
-	if (user === undefined) {
+	const [{ user: userSearchQuery, reason }] = parseArguments(interaction.data?.options, {});
+	if (userSearchQuery === undefined || reason === undefined) {
 		return;
 	}
 
-	const member = resolveInteractionToMember([client, bot], interaction, user, {
+	const member = resolveInteractionToMember([client, bot], interaction, userSearchQuery, {
 		restrictToNonSelf: true,
 		excludeModerators: true,
 	});
@@ -43,7 +46,17 @@ async function handleWarnUser([client, bot]: [Client, Bot], interaction: Interac
 		return;
 	}
 
-	const guild = client.cache.guilds.get(interaction.guildId!);
+	const user = member.user;
+	if (user === undefined) {
+		return;
+	}
+
+	const guildId = interaction.guildId;
+	if (guildId === undefined) {
+		return;
+	}
+
+	const guild = client.cache.guilds.get(guildId);
 	if (guild === undefined) {
 		return;
 	}
@@ -56,7 +69,7 @@ async function handleWarnUser([client, bot]: [Client, Bot], interaction: Interac
 		return undefined;
 	}
 
-	if (reason!.length === 0) {
+	if (reason.length === 0) {
 		displayError([client, bot], interaction);
 		return;
 	}
@@ -82,7 +95,7 @@ async function handleWarnUser([client, bot]: [Client, Bot], interaction: Interac
 			createdAt: Date.now(),
 			author: author.ref,
 			recipient: recipient.ref,
-			reason: reason!,
+			reason,
 		}),
 	]);
 
@@ -133,7 +146,7 @@ async function handleWarnUser([client, bot]: [Client, Bot], interaction: Interac
 				"warn.strings.limitSurpassed.description",
 				defaultLocale,
 			)({
-				user_mention: diagnosticMentionUser(member.user!),
+				user_mention: diagnosticMentionUser(user),
 				limit: configuration.commands.warn.limitUses,
 				number: relevantWarnings.size,
 			}),
@@ -164,7 +177,7 @@ async function handleWarnUser([client, bot]: [Client, Bot], interaction: Interac
 				"warn.strings.limitReached.description",
 				defaultLocale,
 			)({
-				user_mention: diagnosticMentionUser(member.user!),
+				user_mention: diagnosticMentionUser(user),
 				limit: configuration.commands.warn.limitUses,
 			}),
 		};

@@ -1,11 +1,11 @@
-import { BaseInvite, Bot, createInvite, CreateMessage, Embed, getInvites, Guild, InviteMetadata } from "discordeno";
-import { getLastUpdateString } from "../notices.js";
-import { ruleIds } from "../../../commands/moderation/commands/rule.js";
-import { Client, localise } from "../../../client.js";
-import { getTextChannel } from "../../../utils.js";
 import configuration from "../../../../configuration.js";
 import constants from "../../../../constants.js";
 import { defaultLocale } from "../../../../types.js";
+import { Client, localise } from "../../../client.js";
+import { ruleIds } from "../../../commands/moderation/commands/rule.js";
+import { getTextChannel } from "../../../utils.js";
+import { getLastUpdateString } from "../notices.js";
+import { BaseInvite, Bot, CreateMessage, Embed, Guild, InviteMetadata, createInvite, getInvites } from "discordeno";
 
 const lastUpdatedAt = new Date(2023, 2, 19);
 

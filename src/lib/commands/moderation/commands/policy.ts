@@ -1,9 +1,9 @@
-import { ApplicationCommandTypes, Bot, Embed, Interaction } from "discordeno";
-import { CommandTemplate } from "../../command.js";
-import { show } from "../../parameters.js";
+import { defaultLocale } from "../../../../types.js";
 import { Client, localise } from "../../../client.js";
 import { parseArguments, reply } from "../../../interactions.js";
-import { defaultLocale } from "../../../../types.js";
+import { CommandTemplate } from "../../command.js";
+import { show } from "../../parameters.js";
+import { ApplicationCommandTypes, Bot, Embed, Interaction } from "discordeno";
 
 const command: CommandTemplate = {
 	name: "policy",
@@ -16,7 +16,12 @@ const command: CommandTemplate = {
 async function handleDisplayModerationPolicy([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const [{ show }] = parseArguments(interaction.data?.options, { show: "boolean" });
 
-	const guild = client.cache.guilds.get(interaction.guildId!);
+	const guildId = interaction.guildId;
+	if (guildId === undefined) {
+		return;
+	}
+
+	const guild = client.cache.guilds.get(guildId);
 	if (guild === undefined) {
 		return;
 	}
@@ -30,14 +35,7 @@ async function handleDisplayModerationPolicy([client, bot]: [Client, Bot], inter
 	reply(
 		[client, bot],
 		interaction,
-		{
-			embeds: [
-				{
-					title: strings.title,
-					fields: getModerationPolicyPoints(client, locale),
-				},
-			],
-		},
+		{ embeds: [{ title: strings.title, fields: getModerationPolicyPoints(client, locale) }] },
 		{ visible: show },
 	);
 }

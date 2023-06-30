@@ -1,9 +1,9 @@
-import { Bot, Channel, Guild, sendMessage } from "discordeno";
-import { ClientEvents } from "./generators/client.js";
-import generators, { Events } from "./generators/generators.js";
+import configuration from "../../../configuration.js";
 import { Client, extendEventHandler } from "../../client.js";
 import { getTextChannel } from "../../utils.js";
-import configuration from "../../../configuration.js";
+import { ClientEvents } from "./generators/client.js";
+import generators, { Events } from "./generators/generators.js";
+import { Bot, Channel, Guild, sendMessage } from "discordeno";
 
 type ClientEventNames = keyof ClientEvents;
 const clientEventNames = Object.keys(generators.client) as ClientEventNames[];

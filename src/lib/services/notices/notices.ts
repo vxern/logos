@@ -1,12 +1,12 @@
-import { Bot, CreateMessage, deleteMessage, Guild, Message, MessageComponents, sendMessage } from "discordeno";
+import configuration from "../../../configuration.js";
+import { TimestampFormat, timestamp } from "../../../formatting.js";
+import { Client, extendEventHandler, isServicing, localise } from "../../client.js";
+import { getAllMessages, getTextChannel } from "../../utils.js";
+import { ServiceStarter } from "../services.js";
 import { generateInformationNotice, lastUpdatedAt as informationLastUpdatedAt } from "./channels/information.js";
 import { generateRoleNotice, lastUpdatedAt as rolesLastUpdatedAt } from "./channels/roles.js";
 import { generateWelcomeNotice, lastUpdatedAt as welcomeLastUpdatedAt } from "./channels/welcome.js";
-import { ServiceStarter } from "../services.js";
-import { Client, extendEventHandler, isServicing, localise } from "../../client.js";
-import { getAllMessages, getTextChannel } from "../../utils.js";
-import configuration from "../../../configuration.js";
-import { timestamp, TimestampFormat } from "../../../formatting.js";
+import { Bot, CreateMessage, Guild, Message, MessageComponents, deleteMessage, sendMessage } from "discordeno";
 
 const service: ServiceStarter = ([client, bot]: [Client, Bot]) => {
 	registerPastNotices([client, bot]);
@@ -42,7 +42,10 @@ function registerPastNotices([client, bot]: [Client, Bot]): void {
 			return;
 		}
 
-		const guild = client.cache.guilds.get(guildId)!;
+		const guild = client.cache.guilds.get(guildId);
+		if (guild === undefined) {
+			return;
+		}
 
 		for (const notice of Object.keys(noticeGenerators) as NoticeTypes[]) {
 			registerPastNotice([client, bot], guild, notice);
@@ -53,7 +56,11 @@ function registerPastNotices([client, bot]: [Client, Bot]): void {
 function ensureNoticePersistence([client, bot]: [Client, Bot]): void {
 	// Anti-tampering feature; detects notices being deleted.
 	extendEventHandler(bot, "messageDelete", { prepend: true }, (_, { id, channelId, guildId }) => {
-		if (!isServicing(client, guildId!)) {
+		if (guildId === undefined) {
+			return;
+		}
+
+		if (!isServicing(client, guildId)) {
 			return;
 		}
 
@@ -67,7 +74,12 @@ function ensureNoticePersistence([client, bot]: [Client, Bot]): void {
 
 	// Anti-tampering feature; detects embeds being deleted from notices.
 	extendEventHandler(bot, "messageUpdate", { prepend: true }, (bot, message, _) => {
-		if (!isServicing(client, message.guildId!)) {
+		const guildId = message.guildId;
+		if (guildId === undefined) {
+			return;
+		}
+
+		if (!isServicing(client, guildId)) {
 			return;
 		}
 
@@ -112,8 +124,15 @@ async function registerPastNotice([client, bot]: [Client, Bot], guild: Guild, ty
 		return;
 	}
 
-	const latestNotice = notices.splice(0, 1).at(0)!;
-	const timestamp = extractTimestamp(latestNotice)!;
+	const latestNotice = notices.shift();
+	if (latestNotice === undefined) {
+		return;
+	}
+
+	const timestamp = extractTimestamp(latestNotice);
+	if (timestamp === undefined) {
+		return;
+	}
 
 	if (timestamp !== lastUpdates[type].getTime() / 1000) {
 		client.log.info(`Found outdated notice in ${type} channel on ${guild.name}. Recreating...`);
@@ -150,7 +169,11 @@ async function postAndRegisterNotice(
 	channelId: bigint,
 	noticeContent?: CreateMessage,
 ): Promise<void> {
-	const { embeds, components } = noticeContent ?? noticeByChannelId.get(channelId)!;
+	const noticeContent_ = noticeContent ?? noticeByChannelId.get(channelId);
+	if (noticeContent_ === undefined) {
+		return;
+	}
+	const { embeds, components } = noticeContent_;
 	const notice = await sendMessage(bot, channelId, { embeds, components: components as MessageComponents }).catch(
 		() => {
 			client.log.warn(`Failed to post notice to channel with ID ${channelId}.`);
@@ -172,13 +195,13 @@ function extractTimestamp(notice: Message | CreateMessage): number | undefined {
 	if (timestampString === undefined) {
 		return undefined;
 	}
-	if (!timestampPattern.test(timestampString)) {
+
+	const [_, timestamp] = timestampPattern.exec(timestampString) ?? [];
+	if (timestamp === undefined) {
 		return undefined;
 	}
 
-	const [_, timestamp] = timestampPattern.exec(timestampString)!;
-
-	return Number(timestamp!);
+	return Number(timestamp);
 }
 
 function getValidNotices([client, bot]: [Client, Bot], notices: Message[]): Message[] {

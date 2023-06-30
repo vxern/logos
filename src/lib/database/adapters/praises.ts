@@ -1,8 +1,8 @@
-import Fauna from "fauna";
-import { Praise } from "../structs/praise.js";
 import { CacheAdapter, DatabaseAdapters, dispatchQuery, setNested, stringifyValue } from "../database.js";
 import { Document } from "../document.js";
 import { PraiseIndexes, praiseIndexParameterToIndex } from "../indexes.js";
+import { Praise } from "../structs/praise.js";
+import Fauna from "fauna";
 
 const $ = Fauna.query;
 
@@ -96,20 +96,20 @@ const adapter: DatabaseAdapters["praises"] = {
 		}
 
 		const promises = [];
-		if (!cache.has(client, "sender", senderReferenceId)) {
+		if (cache.has(client, "sender", senderReferenceId)) {
+			cache.set(client, "sender", senderReferenceId, document);
+		} else {
 			client.log.debug(`Could not find praises for sender with reference ${senderReferenceId}, fetching...`);
 
 			promises.push(adapter.fetch(client, "sender", praise.sender));
-		} else {
-			cache.set(client, "sender", senderReferenceId, document);
 		}
 
-		if (!cache.has(client, "recipient", recipientReferenceId)) {
+		if (cache.has(client, "recipient", recipientReferenceId)) {
+			cache.set(client, "recipient", recipientReferenceId, document);
+		} else {
 			client.log.debug(`Could not find praises for recipient with reference ${recipientReferenceId}, fetching...`);
 
 			promises.push(adapter.fetch(client, "recipient", praise.recipient));
-		} else {
-			cache.set(client, "recipient", recipientReferenceId, document);
 		}
 		await Promise.all(promises);
 

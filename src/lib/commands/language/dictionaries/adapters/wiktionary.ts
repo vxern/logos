@@ -1,8 +1,8 @@
-import { WiktionaryParser } from "wiktionary";
-import { DictionaryAdapter, DictionaryEntry, DictionaryProvisions } from "../adapter.js";
-import { getPartOfSpeech } from "../../module.js";
-import { Client } from "../../../../client.js";
 import { Language } from "../../../../../types.js";
+import { Client } from "../../../../client.js";
+import { getPartOfSpeech } from "../../module.js";
+import { DictionaryAdapter, DictionaryEntry, DictionaryProvisions } from "../adapter.js";
+import { WiktionaryParser } from "wiktionary";
 
 const wiktionary = new WiktionaryParser();
 
@@ -12,14 +12,14 @@ const newlinesExpression = RegExp("\n{1}", "g");
 
 class WiktionaryAdapter extends DictionaryAdapter<WordData[]> {
 	readonly name = "Wiktionary";
-	readonly supports = ["Armenian", "English", "Polish", "Hungarian", "Romanian"] as Language[];
-	readonly provides = [DictionaryProvisions.Definitions, DictionaryProvisions.Etymology];
+	readonly supports = ["Armenian", "English", "Polish", "Hungarian", "Romanian"] satisfies Language[];
+	readonly provides = ["definitions", "etymology"] satisfies DictionaryProvisions[];
 
 	async fetch(lemma: string, language: Language): Promise<WordData[] | undefined> {
 		const data = await wiktionary.parse(lemma, language);
 		if (data.length === 0) {
-			// @ts-ignore: Accessing private member as a work-around.
-			const suggestion = wiktionary.dom.getElementById("did-you-mean")?.innerText ?? undefined;
+			// @ts-ignore: Accessing private member.
+			const suggestion = wiktionary.document.getElementById("did-you-mean")?.innerText ?? undefined;
 			if (suggestion === undefined) {
 				return undefined;
 			}

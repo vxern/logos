@@ -1,14 +1,4 @@
-import {
-	ApplicationCommandTypes,
-	Bot,
-	ButtonComponent,
-	ButtonStyles,
-	Interaction,
-	InteractionCallbackData,
-	InteractionTypes,
-	MessageComponentTypes,
-} from "discordeno";
-import { CommandTemplate } from "../../command.js";
+import constants from "../../../../constants.js";
 import { Client, localise } from "../../../client.js";
 import {
 	acknowledge,
@@ -19,7 +9,17 @@ import {
 	postponeReply,
 	reply,
 } from "../../../interactions.js";
-import constants from "../../../../constants.js";
+import { CommandTemplate } from "../../command.js";
+import {
+	ApplicationCommandTypes,
+	Bot,
+	ButtonComponent,
+	ButtonStyles,
+	Interaction,
+	InteractionCallbackData,
+	InteractionTypes,
+	MessageComponentTypes,
+} from "discordeno";
 
 const command: CommandTemplate = {
 	name: "game",
@@ -32,7 +32,12 @@ type WordButtonID = [index: string];
 
 /** Starts a simple game of 'choose the correct word to fit in the blank'. */
 async function handleStartGame([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
-	const guild = client.cache.guilds.get(interaction.guildId!);
+	const guildId = interaction.guildId;
+	if (guildId === undefined) {
+		return;
+	}
+
+	const guild = client.cache.guilds.get(guildId);
 	if (guild === undefined) {
 		return;
 	}
@@ -182,9 +187,12 @@ function createSentenceSelection(sentencePairs: SentencePair[]): SentenceSelecti
 
 		for (const index of Array(array.length - 1).keys()) {
 			const random = Math.floor(Math.random() * (index + 1));
-			const temporary = shuffled.at(index)!;
-			shuffled[index] = shuffled.at(random)!;
-			shuffled[random] = temporary!;
+			const [a, b] = [shuffled.at(index), shuffled.at(random)];
+			if (a === undefined || b === undefined) {
+				throw "StateError: Failed to swap elements during sentence selection.";
+			}
+
+			[shuffled[index], shuffled[random]] = [b, a];
 		}
 
 		return shuffled;
@@ -194,18 +202,41 @@ function createSentenceSelection(sentencePairs: SentencePair[]): SentenceSelecti
 		return Math.floor(Math.random() * max);
 	}
 
-	const indexes = Array.from({ length: 4 }, () => random(sentencePairs.length));
-	const pair = sentencePairs.at(indexes.shift()!)!;
+	const [firstIndex, ...rest] = Array.from({ length: 4 }, () => random(sentencePairs.length));
+	if (firstIndex === undefined) {
+		throw "StateError: Failed to get the first index when creating a sentence selection.";
+	}
+
+	const pair = sentencePairs.at(firstIndex);
+	if (pair === undefined) {
+		throw `StateError: Failed to get the sentence pair at index ${firstIndex}.`;
+	}
+
 	const words = pair.sentence.split(" ");
 	const wordIndex = random(words.length);
-	const word = words.at(wordIndex)!;
+	const word = words.at(wordIndex);
+	if (word === undefined) {
+		throw `StateError: Failed to get the word at index ${word} from the sentence pair at index ${firstIndex}.`;
+	}
+
 	words[wordIndex] = "\\_".repeat(word.split("").length);
 	pair.sentence = words.join(" ");
 
 	const choices: string[] = [word];
-	for (const index of indexes) {
-		const words = sentencePairs.at(index)!.sentence.split(" ");
-		choices.push(words.at(random(words.length))!);
+	for (const index of rest) {
+		const sentence = sentencePairs.at(index)?.sentence;
+		if (sentence === undefined) {
+			throw `StateError: Failed to get the sentence pair at index ${index}.`;
+		}
+
+		const words = sentence.split(" ");
+		const wordIndex = random(words.length);
+		const word = words.at(wordIndex);
+		if (word === undefined) {
+			throw `StateError: Failed to get the word at index ${wordIndex} from the sentence pair at index ${index}.`;
+		}
+
+		choices.push(word);
 	}
 	const shuffled = shuffle(choices);
 

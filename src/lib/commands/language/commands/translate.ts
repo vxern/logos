@@ -1,12 +1,12 @@
-import { ApplicationCommandOptionTypes, ApplicationCommandTypes, Bot, Embed, Interaction } from "discordeno";
-import { resolveToSupportedLanguage } from "../module.js";
-import { CommandTemplate } from "../../command.js";
-import { show } from "../../parameters.js";
+import constants from "../../../../constants.js";
+import { defaultLocale } from "../../../../types.js";
 import { Client, localise } from "../../../client.js";
 import { editReply, parseArguments, postponeReply, reply, respond } from "../../../interactions.js";
 import { addParametersToURL, diagnosticMentionUser } from "../../../utils.js";
-import constants from "../../../../constants.js";
-import { defaultLocale } from "../../../../types.js";
+import { CommandTemplate } from "../../command.js";
+import { show } from "../../parameters.js";
+import { resolveToSupportedLanguage } from "../module.js";
+import { ApplicationCommandOptionTypes, ApplicationCommandTypes, Bot, Embed, Interaction } from "discordeno";
 
 const command: CommandTemplate = {
 	name: "translate",
@@ -80,7 +80,12 @@ const languageNameToStringKey: Record<string, string> = Object.freeze({
 async function handleTranslateTextAutocomplete([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const [_, focused] = parseArguments(interaction.data?.options, { show: "boolean" });
 
-	const guild = client.cache.guilds.get(interaction.guildId!);
+	const guildId = interaction.guildId;
+	if (guildId === undefined) {
+		return;
+	}
+
+	const guild = client.cache.guilds.get(guildId);
 	if (guild === undefined) {
 		return;
 	}
@@ -210,7 +215,12 @@ async function handleTranslateText([client, bot]: [Client, Bot], interaction: In
 
 	await postponeReply([client, bot], interaction, { visible: show });
 
-	const guild = client.cache.guilds.get(interaction.guildId!);
+	const guildId = interaction.guildId;
+	if (guildId === undefined) {
+		return;
+	}
+
+	const guild = client.cache.guilds.get(guildId);
 	if (guild === undefined) {
 		return;
 	}
@@ -223,7 +233,7 @@ async function handleTranslateText([client, bot]: [Client, Bot], interaction: In
 
 	const locale = show ? defaultLocale : interaction.locale;
 
-	const translation = await translate(sourceLanguage.code, targetLanguage.code, text);
+	const translation = await translate(client, sourceLanguage.code, targetLanguage.code, text);
 	if (translation === undefined) {
 		const strings = {
 			title: localise(client, "translate.strings.failed.title", locale)(),
@@ -262,7 +272,21 @@ async function handleTranslateText([client, bot]: [Client, Bot], interaction: In
 	const translationIndicator = `${strings.sourceLanguageName} ${constants.symbols.indicators.arrowRight} ${strings.targetLanguageName}`;
 
 	let embeds: Embed[] = [];
-	if (!isLong) {
+	if (isLong) {
+		embeds = [
+			{
+				color: constants.colors.blue,
+				title: strings.sourceText,
+				description: text,
+			},
+			{
+				color: constants.colors.blue,
+				title: strings.translation,
+				description: translatedText,
+				footer: { text: translationIndicator },
+			},
+		];
+	} else {
 		embeds = [
 			{
 				color: constants.colors.blue,
@@ -278,20 +302,6 @@ async function handleTranslateText([client, bot]: [Client, Bot], interaction: In
 						inline: false,
 					},
 				],
-				footer: { text: translationIndicator },
-			},
-		];
-	} else {
-		embeds = [
-			{
-				color: constants.colors.blue,
-				title: strings.sourceText,
-				description: text,
-			},
-			{
-				color: constants.colors.blue,
-				title: strings.translation,
-				description: translatedText,
 				footer: { text: translationIndicator },
 			},
 		];
@@ -319,30 +329,34 @@ interface TranslationResult {
 }
 
 async function translate(
+	client: Client,
 	sourceLanguageCode: string,
 	targetLanguageCode: string,
 	text: string,
 ): Promise<Translation | undefined> {
-	const sourceLanguageCodeBase = sourceLanguageCode.split("-").at(0)!;
+	const [sourceLanguage, _] = sourceLanguageCode.split("-");
+	if (sourceLanguage === undefined) {
+		return undefined;
+	}
 
 	const response = await fetch(
 		addParametersToURL(constants.endpoints.deepl.translate, {
-			auth_key: process.env.DEEPL_SECRET!,
+			auth_key: client.metadata.environment.deeplSecret,
 			text: text,
-			source_lang: sourceLanguageCodeBase,
+			source_lang: sourceLanguage,
 			target_lang: targetLanguageCode,
 		}),
 	);
 	if (!response.ok) {
-		return;
+		return undefined;
 	}
 
 	const results = ((await response.json()) as TranslationResult).translations;
-	if (results.length === 0) {
-		return;
+	const result = results.at(0);
+	if (result === undefined) {
+		return undefined;
 	}
 
-	const result = results.at(0)!;
 	return {
 		detectedSourceLanguage: result.detected_source_language,
 		text: result.text,

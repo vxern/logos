@@ -1,15 +1,15 @@
-import { Channel, Member, User } from "discordeno";
-import { MessageGenerators } from "./generators.js";
+import constants from "../../../../constants.js";
+import { MentionTypes, codeMultiline, mention, timestamp } from "../../../../formatting.js";
+import { defaultLocale } from "../../../../types.js";
+import { localise } from "../../../client.js";
 import { EntryRequest } from "../../../database/structs/entry-request.js";
 import { Praise } from "../../../database/structs/praise.js";
 import { Report } from "../../../database/structs/report.js";
 import { Suggestion } from "../../../database/structs/suggestion.js";
 import { Warning } from "../../../database/structs/warning.js";
-import { localise } from "../../../client.js";
 import { diagnosticMentionUser } from "../../../utils.js";
-import constants from "../../../../constants.js";
-import { codeMultiline, mention, MentionTypes, timestamp } from "../../../../formatting.js";
-import { defaultLocale } from "../../../../types.js";
+import { MessageGenerators } from "./generators.js";
+import { Channel, Member, User } from "discordeno";
 
 /** Type representing events that occur within a guild. */
 type GuildEvents = {
@@ -75,11 +75,11 @@ const generators: Required<MessageGenerators<GuildEvents>> = {
 			return `${diagnosticMentionUser(user)} has submitted a request to join the server.
 
 **${strings.reason}**
-${codeMultiline(entryRequest.answers.reason!)}
+${codeMultiline(entryRequest.answers.reason)}
 **${strings.aim}**
-${codeMultiline(entryRequest.answers.aim!)}
+${codeMultiline(entryRequest.answers.aim)}
 **${strings.whereFound}**
-${codeMultiline(entryRequest.answers.where_found!)}
+${codeMultiline(entryRequest.answers.whereFound)}
 `;
 		},
 		filter: (client, originGuildId, _user, entryRequest) => {
@@ -201,7 +201,9 @@ ${codeMultiline(entryRequest.answers.where_found!)}
 				return;
 			}
 
-			return `${diagnosticMentionUser(memberUser)} has made a suggestion.\n\nSuggestion: *${suggestion.suggestion}*`;
+			return `${diagnosticMentionUser(memberUser)} has made a suggestion.\n\nSuggestion: *${
+				suggestion.answers.suggestion
+			}*`;
 		},
 		filter: (_, originGuildId, member, __) => originGuildId === member.guildId,
 		color: constants.colors.darkGreen,
@@ -214,15 +216,15 @@ ${codeMultiline(entryRequest.answers.where_found!)}
 				return;
 			}
 
-			const messageLink = report.messageLink ?? "*No message link*.";
+			const messageLink = report.answers.messageLink ?? "*No message link*.";
 
 			return `${diagnosticMentionUser(authorUser)} has submitted a report.
 
 **REASON**
-${report.reason}
+${report.answers.reason}
 
 **REPORTED USERS**
-${report.users}
+${report.answers.users}
 
 **MESSAGE LINK**
 ${messageLink}`;

@@ -1,20 +1,28 @@
-import { Bot, editMember, Interaction } from "discordeno";
-import { logEvent } from "../../../../controllers/logging/logging.js";
-import { autocompleteMembers, Client, localise, resolveInteractionToMember } from "../../../../client.js";
-import { parseArguments, parseTimeExpression, reply, respond } from "../../../../interactions.js";
 import constants, { Periods } from "../../../../../constants.js";
-import { mention, MentionTypes, timestamp } from "../../../../../formatting.js";
+import { MentionTypes, mention, timestamp } from "../../../../../formatting.js";
+import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../../client.js";
+import { logEvent } from "../../../../controllers/logging/logging.js";
+import { parseArguments, parseTimeExpression, reply, respond } from "../../../../interactions.js";
+import { Bot, Interaction, editMember } from "discordeno";
 
 async function handleSetTimeoutAutocomplete([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const [{ user, duration }, focused] = parseArguments(interaction.data?.options, {});
 
-	switch (focused!.name) {
+	switch (focused?.name) {
 		case "user": {
-			autocompleteMembers([client, bot], interaction, user!, { restrictToNonSelf: true, excludeModerators: true });
+			if (user === undefined) {
+				return;
+			}
+
+			autocompleteMembers([client, bot], interaction, user, { restrictToNonSelf: true, excludeModerators: true });
 			return;
 		}
 		case "duration": {
-			const timestamp = parseTimeExpression(client, duration!, interaction.locale);
+			if (duration === undefined) {
+				return;
+			}
+
+			const timestamp = parseTimeExpression(client, duration, interaction.locale);
 			if (timestamp === undefined) {
 				respond([client, bot], interaction, []);
 				return;
@@ -31,7 +39,7 @@ async function handleSetTimeout([client, bot]: [Client, Bot], interaction: Inter
 		return;
 	}
 
-	const member = resolveInteractionToMember([client, bot], interaction, user!, {
+	const member = resolveInteractionToMember([client, bot], interaction, user, {
 		restrictToNonSelf: true,
 		excludeModerators: true,
 	});
@@ -56,18 +64,27 @@ async function handleSetTimeout([client, bot]: [Client, Bot], interaction: Inter
 		return;
 	}
 
+	if (reason === undefined) {
+		return;
+	}
+
 	const until = Date.now() + durationParsed;
 
-	const guild = client.cache.guilds.get(interaction.guildId!);
+	const guildId = interaction.guildId;
+	if (guildId === undefined) {
+		return;
+	}
+
+	const guild = client.cache.guilds.get(guildId);
 	if (guild === undefined) {
 		return;
 	}
 
-	await editMember(bot, interaction.guildId!, member.id, { communicationDisabledUntil: until }).catch(() =>
+	await editMember(bot, guildId, member.id, { communicationDisabledUntil: until }).catch(() =>
 		client.log.warn(`Failed to time member with ID ${member.id} out.`),
 	);
 
-	logEvent([client, bot], guild, "memberTimeoutAdd", [member, until, reason!, interaction.user]);
+	logEvent([client, bot], guild, "memberTimeoutAdd", [member, until, reason, interaction.user]);
 
 	const strings = {
 		title: localise(client, "timeout.strings.timedOut.title", interaction.locale)(),

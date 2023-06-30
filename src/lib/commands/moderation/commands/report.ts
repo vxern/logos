@@ -1,3 +1,22 @@
+import configuration from "../../../../configuration.js";
+import constants from "../../../../constants.js";
+import { trim } from "../../../../formatting.js";
+import { Client, localise } from "../../../client.js";
+import { logEvent } from "../../../controllers/logging/logging.js";
+import { stringifyValue } from "../../../database/database.js";
+import { Report } from "../../../database/structs/report.js";
+import {
+	Modal,
+	createInteractionCollector,
+	createModalComposer,
+	deleteReply,
+	editReply,
+	postponeReply,
+	reply,
+} from "../../../interactions.js";
+import reportManager from "../../../services/prompts/managers/reports.js";
+import { getTextChannel, verifyIsWithinLimits } from "../../../utils.js";
+import { CommandTemplate } from "../../command.js";
 import {
 	ApplicationCommandTypes,
 	Bot,
@@ -8,24 +27,6 @@ import {
 	MessageComponentTypes,
 	TextStyles,
 } from "discordeno";
-import { CommandTemplate } from "../../command.js";
-import { logEvent } from "../../../controllers/logging/logging.js";
-import { stringifyValue } from "../../../database/database.js";
-import reportManager from "../../../services/prompts/managers/reports.js";
-import { Client, localise } from "../../../client.js";
-import {
-	createInteractionCollector,
-	createModalComposer,
-	deleteReply,
-	editReply,
-	Modal,
-	postponeReply,
-	reply,
-} from "../../../interactions.js";
-import { getTextChannel, verifyIsWithinLimits } from "../../../utils.js";
-import constants from "../../../../constants.js";
-import { trim } from "../../../../formatting.js";
-import configuration from "../../../../configuration.js";
 
 const command: CommandTemplate = {
 	name: "report",
@@ -37,8 +38,18 @@ const command: CommandTemplate = {
 type ReportError = "failure" | "cannot_report_self";
 
 async function handleMakeReport([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
-	const guild = client.cache.guilds.get(interaction.guildId!);
+	const guildId = interaction.guildId;
+	if (guildId === undefined) {
+		return;
+	}
+
+	const guild = client.cache.guilds.get(guildId);
 	if (guild === undefined) {
+		return;
+	}
+
+	const member = interaction.member;
+	if (member === undefined) {
 		return;
 	}
 
@@ -77,7 +88,7 @@ async function handleMakeReport([client, bot]: [Client, Bot], interaction: Inter
 		}
 	}
 
-	createModalComposer([client, bot], interaction, {
+	createModalComposer<Report["answers"]>([client, bot], interaction, {
 		modal: generateReportModal(client, interaction.locale),
 		onSubmit: async (submission, answers) => {
 			await postponeReply([client, bot], submission);
@@ -86,9 +97,7 @@ async function handleMakeReport([client, bot]: [Client, Bot], interaction: Inter
 				createdAt: Date.now(),
 				author: userDocument.ref,
 				guild: guild.id.toString(),
-				users: answers.users!,
-				reason: answers.reason!,
-				messageLink: answers.message_link,
+				answers,
 				isResolved: false,
 			});
 			if (report === undefined) {
@@ -100,7 +109,7 @@ async function handleMakeReport([client, bot]: [Client, Bot], interaction: Inter
 				return true;
 			}
 
-			logEvent([client, bot], guild, "reportSubmit", [interaction.member!, report.data]);
+			logEvent([client, bot], guild, "reportSubmit", [member, report.data]);
 
 			const userId = BigInt(userDocument.data.account.id);
 			const reference = stringifyValue(report.ref);
@@ -273,7 +282,7 @@ async function handleSubmittedInvalidReport(
 	});
 }
 
-function generateReportModal<T extends string>(client: Client, locale: string | undefined): Modal<T> {
+function generateReportModal(client: Client, locale: string | undefined): Modal<Report["answers"]> {
 	const strings = {
 		title: localise(client, "report.title", locale)(),
 		reason: localise(client, "report.fields.reason", locale)(),
@@ -315,7 +324,7 @@ function generateReportModal<T extends string>(client: Client, locale: string | 
 				type: MessageComponentTypes.ActionRow,
 				components: [
 					{
-						customId: "message_link",
+						customId: "messageLink",
 						type: MessageComponentTypes.InputText,
 						label: trim(strings.link, 45),
 						style: TextStyles.Short,
@@ -325,7 +334,7 @@ function generateReportModal<T extends string>(client: Client, locale: string | 
 				],
 			},
 		],
-	} as Modal<T>;
+	};
 }
 
 export default command;

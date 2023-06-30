@@ -1,6 +1,6 @@
-import { calculatePermissions, Guild } from "discordeno";
-import { EntryRequest } from "../../../../database/structs/entry-request.js";
 import configuration from "../../../../../configuration.js";
+import { EntryRequest } from "../../../../database/structs/entry-request.js";
+import { Guild, calculatePermissions } from "discordeno";
 
 type NecessaryVotes = [
 	[requiredAcceptanceVotes: number, requiredRejectionVotes: number],

@@ -15,9 +15,11 @@ const interactionTokenExpiryInterval = 14 * Periods.minute + 50 * Periods.second
 
 const staticComponentIds = {
 	none: "none",
-	acceptedRules: "accepted_rules",
-	selectedLanguageProficiency: "selected_language_proficiency",
-	requestedVerification: "requested_verification",
+	entry: {
+		acceptedRules: "accepted_rules",
+		selectedLanguageProficiency: "selected_language_proficiency",
+		requestedVerification: "requested_verification",
+	},
 	verification: "verification",
 	reports: "reports",
 	suggestions: "suggestions",

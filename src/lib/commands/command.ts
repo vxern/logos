@@ -1,5 +1,5 @@
-import { ApplicationCommandOption, Bot, CreateSlashApplicationCommand, Interaction } from "discordeno";
 import { Client } from "../client.js";
+import { ApplicationCommandOption, Bot, CreateSlashApplicationCommand, Interaction } from "discordeno";
 
 type WithRequired<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>> & Required<Pick<T, K>>;
 

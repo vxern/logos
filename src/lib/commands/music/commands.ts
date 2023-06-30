@@ -1,4 +1,4 @@
-import { ApplicationCommandTypes } from "discordeno";
+import { CommandTemplate } from "../command.js";
 import history from "./commands/history.js";
 import loop from "./commands/loop.js";
 import now from "./commands/now.js";
@@ -13,7 +13,7 @@ import skip from "./commands/skip.js";
 import stop from "./commands/stop.js";
 import unskip from "./commands/unskip.js";
 import volume from "./commands/volume.js";
-import { CommandTemplate } from "../command.js";
+import { ApplicationCommandTypes } from "discordeno";
 
 const music: CommandTemplate = {
 	name: "music",

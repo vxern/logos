@@ -1,4 +1,4 @@
-import { Reference } from "../document.js";
+import Fauna from "fauna";
 
 /** Represents a praise given by a user to another user. */
 interface Praise {
@@ -6,10 +6,10 @@ interface Praise {
 	createdAt: number;
 
 	/** The document reference to the user that gave this praise. */
-	sender: Reference;
+	sender: Fauna.values.Ref;
 
 	/** The document reference to the user that this praise was given to. */
-	recipient: Reference;
+	recipient: Fauna.values.Ref;
 
 	/** An optional comment attached to this praise. */
 	comment?: string;

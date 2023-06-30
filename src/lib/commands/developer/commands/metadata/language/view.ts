@@ -1,10 +1,15 @@
-import { Bot, Interaction } from "discordeno";
+import constants from "../../../../../../constants.js";
 import { Client } from "../../../../../client.js";
 import { reply } from "../../../../../interactions.js";
-import constants from "../../../../../../constants.js";
+import { Bot, Interaction } from "discordeno";
 
 async function handleViewLanguage([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
-	const guild = client.cache.guilds.get(interaction.guildId!);
+	const guildId = interaction.guildId;
+	if (guildId === undefined) {
+		return;
+	}
+
+	const guild = client.cache.guilds.get(guildId);
 	if (guild === undefined) {
 		return;
 	}

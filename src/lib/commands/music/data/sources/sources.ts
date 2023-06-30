@@ -1,7 +1,7 @@
-import { Bot, Interaction } from "discordeno";
-import youtube from "./youtube.js";
-import { SongListing } from "../types.js";
 import { Client } from "../../../../client.js";
+import { SongListing } from "../types.js";
+import youtube from "./youtube.js";
+import { Bot, Interaction } from "discordeno";
 
 /** Obtains a song listing from a source. */
 type ListingResolver = (

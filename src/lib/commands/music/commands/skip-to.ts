@@ -1,11 +1,11 @@
-import { ApplicationCommandOptionTypes, Bot, Interaction } from "discordeno";
-import { OptionTemplate } from "../../command.js";
-import { timestamp } from "../../parameters.js";
-import { getVoiceState, isOccupied, skipTo, verifyCanManagePlayback } from "../../../controllers/music.js";
-import { Client, localise } from "../../../client.js";
-import { parseArguments, parseTimeExpression, reply, respond } from "../../../interactions.js";
 import constants from "../../../../constants.js";
 import { defaultLocale } from "../../../../types.js";
+import { Client, localise } from "../../../client.js";
+import { getVoiceState, isOccupied, skipTo, verifyCanManagePlayback } from "../../../controllers/music.js";
+import { parseArguments, parseTimeExpression, reply, respond } from "../../../interactions.js";
+import { OptionTemplate } from "../../command.js";
+import { timestamp } from "../../parameters.js";
+import { ApplicationCommandOptionTypes, Bot, Interaction } from "discordeno";
 
 const command: OptionTemplate = {
 	name: "skip-to",
@@ -20,8 +20,11 @@ async function handleSkipToTimestampAutocomplete(
 	interaction: Interaction,
 ): Promise<void> {
 	const [{ timestamp: timestampExpression }] = parseArguments(interaction.data?.options, {});
+	if (timestampExpression === undefined) {
+		return;
+	}
 
-	const timestamp = parseTimeExpression(client, timestampExpression!, interaction.locale);
+	const timestamp = parseTimeExpression(client, timestampExpression, interaction.locale);
 	if (timestamp === undefined) {
 		respond([client, bot], interaction, []);
 		return;
@@ -33,7 +36,12 @@ async function handleSkipToTimestampAutocomplete(
 async function handleSkipToTimestamp([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const [{ timestamp: timestampExpression }] = parseArguments(interaction.data?.options, {});
 
-	const controller = client.features.music.controllers.get(interaction.guildId!);
+	const guildId = interaction.guildId;
+	if (guildId === undefined) {
+		return;
+	}
+
+	const controller = client.features.music.controllers.get(guildId);
 	if (controller === undefined) {
 		return;
 	}
@@ -42,13 +50,16 @@ async function handleSkipToTimestamp([client, bot]: [Client, Bot], interaction: 
 		[client, bot],
 		interaction,
 		controller,
-		getVoiceState(client, interaction.guildId!, interaction.user.id),
+		getVoiceState(client, guildId, interaction.user.id),
 	);
 	if (!isVoiceStateVerified) {
 		return;
 	}
 
-	const playingSince = controller.player.playingSince!;
+	const playingSince = controller.player.playingSince;
+	if (playingSince === undefined) {
+		return;
+	}
 
 	if (!isOccupied(controller.player)) {
 		const strings = {

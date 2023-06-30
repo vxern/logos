@@ -1,23 +1,31 @@
-import { Bot, calculatePermissions, Embed, Interaction } from "discordeno";
-import { Warning } from "../../../../database/structs/warning.js";
-import { Document } from "../../../../database/document.js";
-import { autocompleteMembers, Client, localise, resolveInteractionToMember } from "../../../../client.js";
-import { parseArguments, reply } from "../../../../interactions.js";
 import constants from "../../../../../constants.js";
 import { timestamp } from "../../../../../formatting.js";
+import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../../client.js";
+import { Document } from "../../../../database/document.js";
+import { Warning } from "../../../../database/structs/warning.js";
+import { parseArguments, reply } from "../../../../interactions.js";
+import { Bot, Embed, Interaction, calculatePermissions } from "discordeno";
 
 async function handleDisplayWarningsAutocomplete(
 	[client, bot]: [Client, Bot],
 	interaction: Interaction,
 ): Promise<void> {
 	const [{ user }] = parseArguments(interaction.data?.options, {});
+	if (user === undefined) {
+		return;
+	}
 
-	const isModerator = calculatePermissions(interaction.member!.permissions!).includes("MODERATE_MEMBERS");
+	const permissions = interaction.member?.permissions;
+	if (permissions === undefined) {
+		return;
+	}
+
+	const isModerator = calculatePermissions(permissions).includes("MODERATE_MEMBERS");
 
 	autocompleteMembers(
 		[client, bot],
 		interaction,
-		user!,
+		user,
 		// Stops normal members from viewing other people's warnings.
 		{ restrictToSelf: !isModerator },
 	);
@@ -26,7 +34,12 @@ async function handleDisplayWarningsAutocomplete(
 async function handleDisplayWarnings([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
 	const [{ user }] = parseArguments(interaction.data?.options, {});
 
-	const isModerator = calculatePermissions(interaction.member!.permissions!).includes("MODERATE_MEMBERS");
+	const permissions = interaction.member?.permissions;
+	if (permissions === undefined) {
+		return;
+	}
+
+	const isModerator = calculatePermissions(permissions).includes("MODERATE_MEMBERS");
 
 	const member = resolveInteractionToMember([client, bot], interaction, user ?? interaction.user.id.toString(), {
 		restrictToSelf: !isModerator,

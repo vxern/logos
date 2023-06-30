@@ -1,27 +1,25 @@
-import { Bot, Interaction, InteractionTypes, MessageComponentTypes, SelectOption } from "discordeno";
-import * as YouTubeSearch from "youtube-sr";
-import { ListingResolver } from "./sources.js";
-import { SongListing } from "../types.js";
-import { Client, localise } from "../../../../client.js";
-import { createInteractionCollector, deleteReply, postponeReply, reply } from "../../../../interactions.js";
 import constants from "../../../../../constants.js";
 import { trim } from "../../../../../formatting.js";
+import { Client, localise } from "../../../../client.js";
+import { createInteractionCollector, deleteReply, postponeReply, reply } from "../../../../interactions.js";
+import { Song, SongListing } from "../types.js";
+import { ListingResolver } from "./sources.js";
+import { Bot, Interaction, InteractionTypes, MessageComponentTypes } from "discordeno";
+import * as YouTubeSearch from "youtube-sr";
 
 const resolver: ListingResolver = async ([client, bot], interaction, query) => {
-	const urlExpression = new RegExp(
+	const url = new RegExp(
 		/^(?:https?:)?(?:\/\/)?(?:youtu\.be\/|(?:www\.|m\.)?youtube\.com\/(?:watch|v|embed)(?:\.php)?(?:\?.*v=|\/))([a-zA-Z0-9\_-]{7,15})(?:[\?&][a-zA-Z0-9\_-]+=[a-zA-Z0-9\_-]+)*$/,
 	);
 
-	const urlExpressionExecuted = urlExpression.exec(query) ?? undefined;
-	if (urlExpressionExecuted === undefined) {
+	if (!url.test(query)) {
 		return search([client, bot], interaction, query);
 	}
 
 	postponeReply([client, bot], interaction);
 	deleteReply([client, bot], interaction);
 
-	const url = urlExpressionExecuted.at(0)!;
-	if (url.includes("list=")) {
+	if (query.includes("list=")) {
 		const playlist = await YouTubeSearch.YouTube.getPlaylist(query);
 		return fromYouTubePlaylist(playlist, interaction.user.id);
 	}
@@ -61,9 +59,18 @@ async function search(
 					return resolve(undefined);
 				}
 
-				const result = results.at(index)!;
+				const result = results.at(index);
+				if (result === undefined) {
+					return resolve(undefined);
+				}
+
 				if (isPlaylist(result)) {
-					const playlist = await YouTubeSearch.YouTube.getPlaylist(result.url!);
+					const url = result.url;
+					if (url === undefined) {
+						return resolve(undefined);
+					}
+
+					const playlist = await YouTubeSearch.YouTube.getPlaylist(url);
 					return resolve(fromYouTubePlaylist(playlist, interaction.user.id));
 				}
 
@@ -75,6 +82,22 @@ async function search(
 			title: localise(client, "music.options.play.strings.selectSong.title", interaction.locale)(),
 			description: localise(client, "music.options.play.strings.selectSong.description", interaction.locale)(),
 		};
+
+		const options = [];
+		for (const [result, index] of results.map<[YouTubeSearch.Playlist | YouTubeSearch.Video, number]>(
+			(result, index) => [result, index],
+		)) {
+			const title = result.title;
+			if (title === undefined) {
+				continue;
+			}
+
+			options.push({
+				emoji: { name: isVideo(result) ? constants.symbols.music.song : constants.symbols.music.collection },
+				label: trim(title, 100),
+				value: index.toString(),
+			});
+		}
 
 		reply([client, bot], interaction, {
 			embeds: [
@@ -93,13 +116,7 @@ async function search(
 							customId: customId,
 							minValues: 1,
 							maxValues: 1,
-							options: results.map<SelectOption>((result, index) => ({
-								emoji: {
-									name: isVideo(result) ? constants.symbols.music.song : constants.symbols.music.collection,
-								},
-								label: trim(result.title!, 100),
-								value: index.toString(),
-							})),
+							options,
 						},
 					],
 				},
@@ -123,17 +140,12 @@ function fromYouTubeVideo(video: YouTubeSearch.Video, requestedBy: bigint): Song
 		return undefined;
 	}
 
-	return {
-		source: "YouTube",
-		requestedBy,
-		managerIds: [],
-		content: {
-			type: "song",
-			title: video.title!,
-			url: video.url!,
-			duration: video.duration,
-		},
-	};
+	const { title, url, duration } = video;
+	if (title === undefined || url === undefined) {
+		return undefined;
+	}
+
+	return { source: "YouTube", requestedBy, managerIds: [], content: { type: "song", title, url, duration } };
 }
 
 function fromYouTubePlaylist(playlist: YouTubeSearch.Playlist, requestedBy: bigint): SongListing | undefined {
@@ -141,21 +153,26 @@ function fromYouTubePlaylist(playlist: YouTubeSearch.Playlist, requestedBy: bigi
 		return undefined;
 	}
 
+	const { title } = playlist;
+	if (title === undefined) {
+		return undefined;
+	}
+
+	const tracks: Song[] = [];
+	for (const video of playlist.videos) {
+		const { title, url } = video;
+		if (title === undefined || url === undefined) {
+			continue;
+		}
+
+		tracks.push({ type: "song", title, url, duration: video.duration });
+	}
+
 	return {
 		source: "YouTube",
 		requestedBy,
 		managerIds: [],
-		content: {
-			type: "collection",
-			title: playlist.title!,
-			songs: playlist.videos.map((video) => ({
-				type: "song",
-				title: video.title!,
-				url: video.url!,
-				duration: video.duration,
-			})),
-			position: -1,
-		},
+		content: { type: "collection", title, songs: tracks, position: -1 },
 	};
 }
 

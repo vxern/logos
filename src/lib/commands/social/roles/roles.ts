@@ -4,7 +4,7 @@ import language from "./categories/language.js";
 import learning from "./categories/learning.js";
 import personalisation from "./categories/personalisation.js";
 import regions from "./categories/regions.js";
-import { isCustom, isGroup, isImplicit, Role, RoleCategory, RoleCollection } from "./types.js";
+import { Role, RoleCategory, RoleCollection, isCustom, isGroup, isImplicit } from "./types.js";
 
 const categories: RoleCategory[] = [language, learning, dialects, personalisation, regions, ethnicity];
 
@@ -14,7 +14,10 @@ function getRoleCategories(categories: RoleCategory[], guildId: bigint): [catego
 	const selectedRoleCategories: [category: RoleCategory, index: number][] = [];
 
 	for (const index of Array(categories.length).keys()) {
-		const category = categories.at(index)!;
+		const category = categories.at(index);
+		if (category === undefined) {
+			continue;
+		}
 
 		if (isGroup(category)) {
 			selectedRoleCategories.push([category, index]);

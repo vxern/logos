@@ -1,3 +1,28 @@
+import configuration from "../../../../configuration.js";
+import constants from "../../../../constants.js";
+import { MentionTypes, mention, trim } from "../../../../formatting.js";
+import { defaultLocale } from "../../../../types.js";
+import { Client, localise } from "../../../client.js";
+import {
+	MusicController,
+	getVoiceState,
+	isQueueEmpty,
+	remove,
+	verifyCanManagePlayback,
+} from "../../../controllers/music.js";
+import {
+	ControlButtonID,
+	acknowledge,
+	createInteractionCollector,
+	decodeId,
+	deleteReply,
+	editReply,
+	generateButtons,
+	reply,
+} from "../../../interactions.js";
+import { chunk } from "../../../utils.js";
+import { OptionTemplate } from "../../command.js";
+import { SongListing, listingTypeToEmoji } from "../data/types.js";
 import {
 	ActionRow,
 	ApplicationCommandOptionTypes,
@@ -8,31 +33,6 @@ import {
 	MessageComponentTypes,
 	SelectOption,
 } from "discordeno";
-import { listingTypeToEmoji, SongListing } from "../data/types.js";
-import { OptionTemplate } from "../../command.js";
-import {
-	getVoiceState,
-	isQueueEmpty,
-	MusicController,
-	remove,
-	verifyCanManagePlayback,
-} from "../../../controllers/music.js";
-import { Client, localise } from "../../../client.js";
-import {
-	acknowledge,
-	ControlButtonID,
-	createInteractionCollector,
-	decodeId,
-	deleteReply,
-	editReply,
-	generateButtons,
-	reply,
-} from "../../../interactions.js";
-import { chunk } from "../../../utils.js";
-import configuration from "../../../../configuration.js";
-import constants from "../../../../constants.js";
-import { mention, MentionTypes, trim } from "../../../../formatting.js";
-import { defaultLocale } from "../../../../types.js";
 
 const command: OptionTemplate = {
 	name: "remove",
@@ -41,7 +41,12 @@ const command: OptionTemplate = {
 };
 
 async function handleRemoveSongListing([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
-	const controller = client.features.music.controllers.get(interaction.guildId!);
+	const guildId = interaction.guildId;
+	if (guildId === undefined) {
+		return;
+	}
+
+	const controller = client.features.music.controllers.get(guildId);
 	if (controller === undefined) {
 		return;
 	}
@@ -50,7 +55,7 @@ async function handleRemoveSongListing([client, bot]: [Client, Bot], interaction
 		[client, bot],
 		interaction,
 		controller,
-		getVoiceState(client, interaction.guildId!, interaction.user.id),
+		getVoiceState(client, guildId, interaction.user.id),
 	);
 	if (!isVoiceStateVerified) {
 		return;
@@ -126,19 +131,26 @@ async function generateEmbed(
 		onCollect: async (bot, selection) => {
 			acknowledge([client, bot], selection);
 
-			if (selection.data === undefined) {
+			const customId = selection.data?.customId;
+			if (customId === undefined) {
 				return;
 			}
 
-			const [_, action] = decodeId<ControlButtonID>(selection.data.customId!);
+			const [_, action] = decodeId<ControlButtonID>(customId);
 
 			switch (action) {
-				case "previous":
-					if (!isFirst) data.pageIndex--;
+				case "previous": {
+					if (!isFirst) {
+						data.pageIndex--;
+					}
 					break;
-				case "next":
-					if (!isLast) data.pageIndex++;
+				}
+				case "next": {
+					if (!isLast) {
+						data.pageIndex++;
+					}
 					break;
+				}
 			}
 
 			editReply([client, bot], interaction, await generateEmbed([client, bot], interaction, controller, data, locale));
@@ -249,7 +261,21 @@ async function generateEmbed(
 }
 
 function generateSelectMenu(data: RemoveListingData, pages: SongListing[][], selectMenuCustomId: string): ActionRow {
-	const page = pages.at(data.pageIndex)!;
+	const page = pages.at(data.pageIndex);
+	if (page === undefined) {
+		return {
+			type: MessageComponentTypes.ActionRow,
+			components: [
+				{
+					type: MessageComponentTypes.SelectMenu,
+					customId: selectMenuCustomId,
+					minValues: 1,
+					maxValues: 1,
+					options: [{ label: "?", value: constants.staticComponentIds.none }],
+				},
+			],
+		};
+	}
 
 	return {
 		type: MessageComponentTypes.ActionRow,

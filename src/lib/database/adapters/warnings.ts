@@ -1,5 +1,3 @@
-import Fauna from "fauna";
-import { Warning } from "../structs/warning.js";
 import {
 	CacheAdapter,
 	DatabaseAdapters,
@@ -10,6 +8,8 @@ import {
 } from "../database.js";
 import { Document } from "../document.js";
 import { WarningIndexes, warningIndexParameterToIndex } from "../indexes.js";
+import { Warning } from "../structs/warning.js";
+import Fauna from "fauna";
 
 const $ = Fauna.query;
 
@@ -90,12 +90,12 @@ const adapter: DatabaseAdapters["warnings"] = {
 		const recipientReferenceId = stringifyValue(warning.recipient);
 
 		const promises = [];
-		if (!cache.has(client, "recipient", recipientReferenceId)) {
+		if (cache.has(client, "recipient", recipientReferenceId)) {
+			cache.set(client, "recipient", recipientReferenceId, document);
+		} else {
 			client.log.debug(`Could not find warnings for recipient with reference ${recipientReferenceId}, fetching...`);
 
 			promises.push(adapter.fetch(client, "recipient", warning.recipient));
-		} else {
-			cache.set(client, "recipient", recipientReferenceId, document);
 		}
 		await Promise.all(promises);
 

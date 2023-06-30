@@ -1,21 +1,20 @@
-import { DiscordEmbedField } from "discordeno";
-import { PartOfSpeech } from "./parts-of-speech.js";
-import { Client } from "../../../client.js";
 import { Language } from "../../../../types.js";
+import { Client } from "../../../client.js";
+import { PartOfSpeech } from "./parts-of-speech.js";
+import { DiscordEmbedField } from "discordeno";
 
-enum DictionaryProvisions {
+type DictionaryProvisions =
 	/** Provides definitions of a lemma. */
-	Definitions = "definitions",
-
+	| "definitions"
 	/** Provides a lemma's etymology. */
-	Etymology = "etymology",
-}
+	| "etymology";
 
 interface TaggedValue<T> {
 	tags?: string[];
 	value: T;
 }
 
+// rome-ignore lint/suspicious/noEmptyInterface: Alias.
 interface Expression extends TaggedValue<string> {}
 
 interface Definition extends TaggedValue<string> {
@@ -23,6 +22,7 @@ interface Definition extends TaggedValue<string> {
 	expressions?: Expression[];
 }
 
+// rome-ignore lint/suspicious/noEmptyInterface: Alias.
 interface Etymology extends TaggedValue<string | undefined> {}
 
 type InflectionTable = { title: string; fields: DiscordEmbedField[] }[];

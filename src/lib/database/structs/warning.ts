@@ -1,4 +1,4 @@
-import { Reference } from "../document.js";
+import Fauna from "fauna";
 
 /** Represents a warning given to a user. */
 interface Warning {
@@ -6,10 +6,10 @@ interface Warning {
 	createdAt: number;
 
 	/** The document reference to the user that gave this warning. */
-	author: Reference;
+	author: Fauna.values.Ref;
 
 	/** The document reference to the user that this warning was given to. */
-	recipient: Reference;
+	recipient: Fauna.values.Ref;
 
 	/** The reason for this warning. */
 	reason: string;
