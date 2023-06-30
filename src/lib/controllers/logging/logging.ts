@@ -1,8 +1,8 @@
 import configuration from "../../../configuration.js";
 import { Client, extendEventHandler } from "../../client.js";
 import { getTextChannel } from "../../utils.js";
-import { ClientEvents } from "./generators/client.js";
-import generators, { Events } from "./generators/generators.js";
+import { ClientEvents, Events, MessageGenerators } from "./generator.js";
+import generators from "./generators.js";
 import { Bot, Channel, Guild, sendMessage } from "discordeno";
 
 type ClientEventNames = keyof ClientEvents;
@@ -21,7 +21,7 @@ function setupLogging([client, bot]: [Client, Bot], guild: Guild): void {
 	}
 }
 
-const messageGenerators = { ...generators.client, ...generators.guild };
+const messageGenerators: MessageGenerators<Events> = { ...generators.client, ...generators.guild };
 
 async function logEvent<K extends keyof Events>(
 	[client, bot]: [Client, Bot],
