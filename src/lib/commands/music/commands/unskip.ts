@@ -1,6 +1,7 @@
 import constants from "../../../../constants.js";
 import { defaultLocale } from "../../../../types.js";
 import { Client, localise } from "../../../client.js";
+import { parseArguments, reply } from "../../../interactions.js";
 import {
 	getVoiceState,
 	isCollection,
@@ -8,8 +9,7 @@ import {
 	isQueueVacant,
 	unskip,
 	verifyCanManagePlayback,
-} from "../../../controllers/music.js";
-import { parseArguments, reply } from "../../../interactions.js";
+} from "../../../services/music/music.js";
 import { OptionTemplate } from "../../command.js";
 import { by, collection, to } from "../../parameters.js";
 import { ApplicationCommandOptionTypes, Bot, Interaction } from "discordeno";

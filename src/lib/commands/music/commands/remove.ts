@@ -4,13 +4,6 @@ import { MentionTypes, mention, trim } from "../../../../formatting.js";
 import { defaultLocale } from "../../../../types.js";
 import { Client, localise } from "../../../client.js";
 import {
-	MusicController,
-	getVoiceState,
-	isQueueEmpty,
-	remove,
-	verifyCanManagePlayback,
-} from "../../../controllers/music.js";
-import {
 	ControlButtonID,
 	acknowledge,
 	createInteractionCollector,
@@ -20,6 +13,13 @@ import {
 	generateButtons,
 	reply,
 } from "../../../interactions.js";
+import {
+	MusicController,
+	getVoiceState,
+	isQueueEmpty,
+	remove,
+	verifyCanManagePlayback,
+} from "../../../services/music/music.js";
 import { chunk } from "../../../utils.js";
 import { OptionTemplate } from "../../command.js";
 import { SongListing, listingTypeToEmoji } from "../data/types.js";

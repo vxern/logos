@@ -7,11 +7,11 @@ import commandTemplates from "./commands/commands.js";
 import { SentencePair } from "./commands/language/commands/game.js";
 import { DictionaryAdapter } from "./commands/language/dictionaries/adapter.js";
 import { SupportedLanguage } from "./commands/language/module.js";
-import { MusicController, setupMusicController } from "./controllers/music.js";
 import { Database, createDatabase } from "./database/database.js";
 import { acknowledge, deleteReply, isAutocomplete, reply, respond } from "./interactions.js";
 import localisationTransformers from "./localisation/transformers.js";
 import { setupLogging } from "./services/logging/logging.js";
+import { MusicController, setupMusicController } from "./services/music/music.js";
 import services from "./services/services.js";
 import { diagnosticMentionUser } from "./utils.js";
 import {

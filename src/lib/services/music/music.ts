@@ -1,8 +1,8 @@
-import configuration from "../../configuration.js";
-import constants from "../../constants.js";
-import { MentionTypes, mention } from "../../formatting.js";
-import { defaultLocale } from "../../types.js";
-import { Client, localise } from "../client.js";
+import configuration from "../../../configuration.js";
+import constants from "../../../constants.js";
+import { MentionTypes, mention } from "../../../formatting.js";
+import { defaultLocale } from "../../../types.js";
+import { Client, localise } from "../../client.js";
 import {
 	Song,
 	SongCollection,
@@ -10,8 +10,8 @@ import {
 	SongListingType,
 	SongStream,
 	listingTypeToEmoji,
-} from "../commands/music/data/types.js";
-import { reply } from "../interactions.js";
+} from "../../commands/music/data/types.js";
+import { reply } from "../../interactions.js";
 import { Bot, Embed, Guild, Interaction, VoiceState, sendMessage } from "discordeno";
 import { EventEmitter } from "events";
 import * as Lavaclient from "lavaclient";

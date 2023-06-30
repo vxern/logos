@@ -1,8 +1,8 @@
 import constants from "../../../../../constants.js";
 import { defaultLocale } from "../../../../../types.js";
 import { Client, localise } from "../../../../client.js";
-import { getVoiceState, verifyVoiceState } from "../../../../controllers/music.js";
 import { parseArguments, reply } from "../../../../interactions.js";
+import { getVoiceState, verifyVoiceState } from "../../../../services/music/music.js";
 import { Bot, Interaction } from "discordeno";
 
 async function handleDisplayVolume([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {

@@ -1,8 +1,8 @@
 import constants from "../../../../constants.js";
 import { defaultLocale } from "../../../../types.js";
 import { Client, localise } from "../../../client.js";
-import { getVoiceState, isOccupied, isPaused, resume, verifyCanManagePlayback } from "../../../controllers/music.js";
 import { reply } from "../../../interactions.js";
+import { getVoiceState, isOccupied, isPaused, resume, verifyCanManagePlayback } from "../../../services/music/music.js";
 import { OptionTemplate } from "../../command.js";
 import { ApplicationCommandOptionTypes, Bot, Interaction } from "discordeno";
 
