@@ -1,11 +1,11 @@
 import constants from "../../../../constants.js";
 import { MentionTypes, mention } from "../../../../formatting.js";
 import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../client.js";
-import { logEvent } from "../../../controllers/logging/logging.js";
 import { stringifyValue } from "../../../database/database.js";
 import { Document } from "../../../database/document.js";
 import { Warning } from "../../../database/structs/warning.js";
 import { parseArguments, reply, respond } from "../../../interactions.js";
+import { logEvent } from "../../../services/logging/logging.js";
 import { CommandTemplate } from "../../command.js";
 import { user } from "../../parameters.js";
 import { getActiveWarnings } from "../module.js";

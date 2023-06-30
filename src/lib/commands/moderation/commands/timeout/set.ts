@@ -1,8 +1,8 @@
 import constants, { Periods } from "../../../../../constants.js";
 import { MentionTypes, mention, timestamp } from "../../../../../formatting.js";
 import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../../client.js";
-import { logEvent } from "../../../../controllers/logging/logging.js";
 import { parseArguments, parseTimeExpression, reply, respond } from "../../../../interactions.js";
+import { logEvent } from "../../../../services/logging/logging.js";
 import { Bot, Interaction, editMember } from "discordeno";
 
 async function handleSetTimeoutAutocomplete([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {

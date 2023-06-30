@@ -1,7 +1,7 @@
 import constants from "../../../../../constants.js";
 import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../../client.js";
-import { logEvent } from "../../../../controllers/logging/logging.js";
 import { parseArguments, reply } from "../../../../interactions.js";
+import { logEvent } from "../../../../services/logging/logging.js";
 import { diagnosticMentionUser } from "../../../../utils.js";
 import { Bot, Interaction, editMember } from "discordeno";
 

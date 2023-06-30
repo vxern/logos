@@ -2,7 +2,6 @@ import configuration from "../../../../configuration.js";
 import constants from "../../../../constants.js";
 import { trim } from "../../../../formatting.js";
 import { Client, localise } from "../../../client.js";
-import { logEvent } from "../../../controllers/logging/logging.js";
 import { stringifyValue } from "../../../database/database.js";
 import { Suggestion } from "../../../database/structs/suggestion.js";
 import {
@@ -14,6 +13,7 @@ import {
 	postponeReply,
 	reply,
 } from "../../../interactions.js";
+import { logEvent } from "../../../services/logging/logging.js";
 import suggestionManager from "../../../services/prompts/managers/suggestions.js";
 import { getTextChannel, verifyIsWithinLimits } from "../../../utils.js";
 import { CommandTemplate } from "../../command.js";

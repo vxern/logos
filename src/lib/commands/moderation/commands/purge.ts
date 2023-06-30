@@ -8,7 +8,6 @@ import {
 	localise,
 	resolveInteractionToMember,
 } from "../../../client.js";
-import { logEvent } from "../../../controllers/logging/logging.js";
 import {
 	acknowledge,
 	createInteractionCollector,
@@ -17,6 +16,7 @@ import {
 	parseArguments,
 	postponeReply,
 } from "../../../interactions.js";
+import { logEvent } from "../../../services/logging/logging.js";
 import { chunk, diagnosticMentionUser, snowflakeToTimestamp } from "../../../utils.js";
 import { CommandTemplate } from "../../command.js";
 import { user } from "../../parameters.js";
