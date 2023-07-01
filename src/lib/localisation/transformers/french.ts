@@ -1,9 +1,9 @@
 function pluralise(quantity: string, { one, two }: Record<string, string> = {}): string {
 	if (quantity === "0" || quantity === "1") {
-		return `${quantity} ${one}`;
+		return one ?? "?";
 	}
 
-	return `${quantity} ${two}`;
+	return two ?? "?";
 }
 
 export { pluralise };

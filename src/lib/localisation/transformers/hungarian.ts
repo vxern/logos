@@ -1,5 +1,5 @@
-function pluralise(quantity: string, { one }: Record<string, string> = {}): string {
-	return `${quantity} ${one}`;
+function pluralise(_: string, { one }: Record<string, string> = {}): string {
+	return one ?? "?";
 }
 
 export { pluralise };

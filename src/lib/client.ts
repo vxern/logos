@@ -56,30 +56,6 @@ type Event = keyof EventHandlers;
 
 type WithLanguage<T> = T & { language: Language };
 
-type Cache = Readonly<{
-	guilds: Map<bigint, WithLanguage<Guild>>;
-	users: Map<bigint, User>;
-	members: Map<bigint, Member>;
-	channels: Map<bigint, Channel>;
-	messages: {
-		latest: Map<bigint, Message>;
-		previous: Map<bigint, Message>;
-	};
-}>;
-
-function createCache(): Cache {
-	return {
-		guilds: new Map(),
-		users: new Map(),
-		members: new Map(),
-		channels: new Map(),
-		messages: {
-			latest: new Map(),
-			previous: new Map(),
-		},
-	};
-}
-
 type Client = Readonly<{
 	metadata: {
 		environment: {
@@ -95,7 +71,16 @@ type Client = Readonly<{
 		supportedTranslationLanguages: SupportedLanguage[];
 	};
 	log: Record<"debug" | keyof typeof FancyLog, (...args: unknown[]) => void>;
-	cache: Cache;
+	cache: {
+		guilds: Map<bigint, WithLanguage<Guild>>;
+		users: Map<bigint, User>;
+		members: Map<bigint, Member>;
+		channels: Map<bigint, Channel>;
+		messages: {
+			latest: Map<bigint, Message>;
+			previous: Map<bigint, Message>;
+		};
+	};
 	database: Database;
 	commands: {
 		global: Command[];
@@ -116,18 +101,23 @@ type Client = Readonly<{
 		// The keys are user IDs, the values are command usage timestamps mapped by command IDs.
 		rateLimiting: Map<bigint, Map<bigint, number[]>>;
 	};
-	localisations: Map<string, Map<Language, (args: Record<string, unknown>) => string>>;
+	localisation: {
+		compilers: Record<Language, CompiledLocalisation>;
+		localisations: Map<string, Map<Language, (args: Record<string, unknown>) => string>>;
+	};
 }>;
+
+type CompiledLocalisation = ReturnType<typeof MessagePipe.MessagePipe>["compile"];
 
 function createClient(
 	metadata: Client["metadata"],
 	features: Client["features"],
 	localisationsStatic: Map<string, Map<Language, string>>,
 ): Client {
-	const localisations = createLocalisations(localisationsStatic);
+	const localisation = createLocalisations(localisationsStatic);
 
-	const local = localiseCommands(localisations, commandTemplates.local);
-	const global = localiseCommands(localisations, commandTemplates.global);
+	const local = localiseCommands(localisation.localisations, commandTemplates.local);
+	const global = localiseCommands(localisation.localisations, commandTemplates.global);
 
 	const handlers = createCommandHandlers(commandTemplates.local);
 
@@ -156,9 +146,22 @@ function createClient(
 		cache: createCache(),
 		database: createDatabase(metadata.environment),
 		features,
-		localisations,
+		localisation,
 		commands: { local, global, handlers },
 		collectors: new Map(),
+	};
+}
+
+function createCache(): Client["cache"] {
+	return {
+		guilds: new Map(),
+		users: new Map(),
+		members: new Map(),
+		channels: new Map(),
+		messages: {
+			latest: new Map(),
+			previous: new Map(),
+		},
 	};
 }
 
@@ -517,7 +520,10 @@ function withRateLimiting(handle: InteractionHandler): InteractionHandler {
 	};
 }
 
-function localiseCommands(localisations: Client["localisations"], commandTemplates: CommandTemplate[]): Command[] {
+function localiseCommands(
+	localisations: Client["localisation"]["localisations"],
+	commandTemplates: CommandTemplate[],
+): Command[] {
 	function localiseCommandOrOption(key: string): Pick<Command, LocalisationProperties> | undefined {
 		const optionName = key.split(".")?.at(-1);
 		if (optionName === undefined) {
@@ -982,20 +988,19 @@ function isSubcommand(option: InteractionDataOption): boolean {
 	return option.type === ApplicationCommandOptionTypes.SubCommand;
 }
 
-type CompiledLocalisation = ReturnType<typeof MessagePipe.MessagePipe>["compile"];
-
-function createLocalisations(localisations: Map<string, Map<Language, string>>): Client["localisations"] {
-	const localisedCompilers = new Map<Language, CompiledLocalisation>();
+function createLocalisations(localisationsRaw: Map<string, Map<Language, string>>): Client["localisation"] {
+	const compilersProvisional: Partial<Record<Language, CompiledLocalisation>> = {};
 	for (const [language, transformers] of Object.entries(localisationTransformers)) {
-		localisedCompilers.set(language as Language, MessagePipe.MessagePipe(transformers).compile);
+		compilersProvisional[language as Language] = MessagePipe.MessagePipe(transformers).compile;
 	}
+	const compilers = compilersProvisional as Record<Language, CompiledLocalisation>;
 
-	const result = new Map<string, Map<Language, (args: Record<string, unknown>) => string>>();
-	for (const [key, languages] of localisations.entries()) {
+	const localisations = new Map<string, Map<Language, (args: Record<string, unknown>) => string>>();
+	for (const [key, languages] of localisationsRaw.entries()) {
 		const functions = new Map<Language, (args: Record<string, unknown>) => string>();
 
 		for (const [language, string] of languages.entries()) {
-			const compile = localisedCompilers.get(language);
+			const compile = compilers[language];
 			if (compile === undefined) {
 				console.error(`Failed to compile localisation function for string key '${key}' in ${language}.`);
 				continue;
@@ -1004,17 +1009,19 @@ function createLocalisations(localisations: Map<string, Map<Language, string>>):
 			functions.set(language, compile(string));
 		}
 
-		result.set(key, functions);
+		localisations.set(key, functions);
 	}
 
-	return result;
+	return { compilers, localisations };
 }
 
 function localise(client: Client, key: string, locale: string | undefined): (args?: Record<string, unknown>) => string {
 	const language = (locale !== undefined ? getLanguageByLocale(locale as Locales) : undefined) ?? defaultLanguage;
 
 	const getLocalisation =
-		client.localisations.get(key)?.get(language) ?? client.localisations.get(key)?.get(defaultLanguage) ?? (() => key);
+		client.localisation.localisations.get(key)?.get(language) ??
+		client.localisation.localisations.get(key)?.get(defaultLanguage) ??
+		(() => key);
 
 	return (args) => {
 		const string = getLocalisation(args ?? {});
@@ -1047,6 +1054,18 @@ function toDiscordLocalisations(
 	return result;
 }
 
+function pluralise(client: Client, key: string, language: Language, number: number): string {
+	const compile = client.localisation.compilers[language];
+	const pluralised = compile(
+		`{number | pluralise, one:"${client.localisation.localisations.get(`${key}.one`)?.get(language)?.({
+			one: number,
+		})}", two:"${client.localisation.localisations.get(`${key}.two`)?.get(language)?.({
+			two: number,
+		})}", many:"${client.localisation.localisations.get(`${key}.many`)?.get(language)?.({ many: number })}"}`,
+	)({ number });
+	return pluralised;
+}
+
 function isServicing(client: Client, guildId: bigint): boolean {
 	const environment = configuration.guilds.environments[guildId.toString()];
 	return environment === client.metadata.environment.environment;
@@ -1064,5 +1083,6 @@ export {
 	localise,
 	resolveIdentifierToMembers,
 	resolveInteractionToMember,
+	pluralise,
 };
 export type { Client, Collector, CompiledLocalisation, WithLanguage };

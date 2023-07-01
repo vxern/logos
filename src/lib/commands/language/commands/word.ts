@@ -1,7 +1,7 @@
 import constants from "../../../../constants.js";
 import { code } from "../../../../formatting.js";
-import { defaultLocale } from "../../../../types.js";
-import { Client, localise } from "../../../client.js";
+import { defaultLanguage, defaultLocale, getLanguageByLocale } from "../../../../types.js";
+import { Client, localise, pluralise } from "../../../client.js";
 import {
 	acknowledge,
 	createInteractionCollector,
@@ -642,7 +642,19 @@ function fitTextToFieldSize(client: Client, textParts: string[], locale: string 
 		definitionsOmitted: localise(client, "word.strings.definitionsOmitted", locale),
 	};
 
-	const characterOverhead = strings.definitionsOmitted({ number: textParts.length, flag: "verbose" }).length + 20;
+	const language = getLanguageByLocale(locale) ?? defaultLanguage;
+
+	const characterOverhead =
+		strings.definitionsOmitted({
+			definitions: localise(
+				client,
+				"word.strings.definitionsOmitted",
+				locale,
+			)({
+				definitions: pluralise(client, "word.strings.definitionsOmitted.definitions", language, textParts.length),
+			}),
+			flag: "verbose",
+		}).length + 20;
 
 	const maxCharacterCount = verbose ? 2048 : 512;
 
@@ -662,7 +674,10 @@ function fitTextToFieldSize(client: Client, textParts: string[], locale: string 
 
 	let fittedString = stringsToDisplay.join("\n");
 	if (stringsOmitted !== 0) {
-		fittedString += `\n*${strings.definitionsOmitted({ number: stringsOmitted, flag: "verbose" })}*`;
+		fittedString += `\n*${strings.definitionsOmitted({
+			definitions: pluralise(client, "word.strings.definitionsOmitted.definitions", language, stringsOmitted),
+			flag: "verbose",
+		})}*`;
 	}
 
 	return fittedString;

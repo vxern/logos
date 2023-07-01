@@ -6,13 +6,13 @@ import polish from "./transformers/polish.js";
 import romanian from "./transformers/romanian.js";
 import * as MessagePipe from "messagepipe";
 
-const transformers: Record<Language, Record<string, MessagePipe.MessagePipeTransformer<string, string>>> = {
+const transformers = {
 	Armenian: {},
 	English: english,
 	French: french,
 	Hungarian: hungarian,
 	Polish: polish,
 	Romanian: romanian,
-};
+} satisfies Record<Language, Record<string, MessagePipe.MessagePipeTransformer<string, string>>>;
 
 export default transformers;

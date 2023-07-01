@@ -1,12 +1,14 @@
 import configuration from "../../../../configuration.js";
 import constants, { Periods } from "../../../../constants.js";
 import { MentionTypes, mention, timestamp, trim } from "../../../../formatting.js";
+import { defaultLanguage, getLanguageByLocale } from "../../../../types.js";
 import {
 	Client,
 	autocompleteMembers,
 	isValidSnowflake,
 	localise,
 	resolveInteractionToMember,
+	pluralise,
 } from "../../../client.js";
 import {
 	acknowledge,
@@ -232,6 +234,8 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 		1500,
 	);
 
+	const language = getLanguageByLocale(interaction.locale) ?? defaultLanguage;
+
 	let isFinished = false;
 	while (!isFinished) {
 		if (messages.length >= configuration.commands.purge.maxFound) {
@@ -245,7 +249,12 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 						"purge.strings.rangeTooBig.description.rangeTooBig",
 						interaction.locale,
 					)({
-						number: configuration.commands.purge.maxFound,
+						messages: pluralise(
+							client,
+							"purge.strings.rangeTooBig.description.rangeTooBig.messages",
+							language,
+							configuration.commands.purge.maxFound,
+						),
 					}),
 					trySmaller: localise(client, "purge.strings.rangeTooBig.description.trySmaller", interaction.locale)(),
 				},
@@ -359,13 +368,49 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 				indexed: {
 					title: localise(client, "purge.strings.indexed.title", interaction.locale)(),
 					description: {
-						tooMany: localise(client, "purge.strings.indexed.description.tooMany", interaction.locale),
-						limited: localise(client, "purge.strings.indexed.description.limited", interaction.locale),
+						tooMany: localise(
+							client,
+							"purge.strings.indexed.description.tooMany",
+							interaction.locale,
+						)({
+							messages: pluralise(
+								client,
+								"purge.strings.indexed.description.tooMany.messages",
+								language,
+								messages.length,
+							),
+							maximum_deletable: configuration.commands.purge.maxDeletable,
+						}),
+						limited: localise(
+							client,
+							"purge.strings.indexed.description.limited",
+							interaction.locale,
+						)({
+							messages: pluralise(
+								client,
+								"purge.strings.indexed.description.limited.messages",
+								language,
+								configuration.commands.purge.maxDeletable,
+							),
+						}),
 					},
 				},
 				continue: {
 					title: localise(client, "purge.strings.continue.title", interaction.locale)(),
-					description: localise(client, "purge.strings.continue.description", interaction.locale),
+					description: localise(
+						client,
+						"purge.strings.continue.description",
+						interaction.locale,
+					)({
+						messages: pluralise(
+							client,
+							"purge.strings.continue.description.messages",
+							language,
+							configuration.commands.purge.maxDeletable,
+						),
+						allMessages: pluralise(client, "purge.strings.continue.description.allMessages", language, messages.length),
+						channel_mention: channelMention,
+					}),
 				},
 				yes: localise(client, "purge.strings.yes", interaction.locale)(),
 				no: localise(client, "purge.strings.no", interaction.locale)(),
@@ -375,22 +420,13 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 				embeds: [
 					{
 						title: strings.indexed.title,
-						description: `${strings.indexed.description.tooMany({
-							number: messages.length,
-							maximum_deletable: configuration.commands.purge.maxDeletable,
-						})}\n\n${strings.indexed.description.limited({
-							number: configuration.commands.purge.maxDeletable,
-						})}`,
+						description: `${strings.indexed.description.tooMany}\n\n${strings.indexed.description.limited}`,
 						fields: getMessageFields(),
 						color: constants.colors.yellow,
 					},
 					{
 						title: strings.continue.title,
-						description: strings.continue.description({
-							number: configuration.commands.purge.maxDeletable,
-							channel_mention: channelMention,
-							full_number: messages.length,
-						}),
+						description: strings.continue.description,
 						color: constants.colors.husky,
 					},
 				],
@@ -447,12 +483,25 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 				indexed: {
 					title: localise(client, "purge.strings.indexed.title", interaction.locale)(),
 					description: {
-						some: localise(client, "purge.strings.indexed.description.some", interaction.locale),
+						some: localise(
+							client,
+							"purge.strings.indexed.description.some",
+							interaction.locale,
+						)({
+							messages: pluralise(client, "purge.strings.indexed.description.some.messages", language, messages.length),
+						}),
 					},
 				},
 				sureToPurge: {
 					title: localise(client, "purge.strings.sureToPurge.title", interaction.locale)(),
-					description: localise(client, "purge.strings.sureToPurge.description", interaction.locale),
+					description: localise(
+						client,
+						"purge.strings.sureToPurge.description",
+						interaction.locale,
+					)({
+						messages: pluralise(client, "purge.strings.sureToPurge.description.messages", language, messages.length),
+						channel_mention: channelMention,
+					}),
 				},
 				yes: localise(client, "purge.strings.yes", interaction.locale)(),
 				no: localise(client, "purge.strings.no", interaction.locale)(),
@@ -462,16 +511,13 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 				embeds: [
 					{
 						title: strings.indexed.title,
-						description: strings.indexed.description.some({ number: messages.length }),
+						description: strings.indexed.description.some,
 						fields: getMessageFields(),
 						color: constants.colors.blue,
 					},
 					{
 						title: strings.sureToPurge.title,
-						description: strings.sureToPurge.description({
-							number: messages.length,
-							channel_mention: channelMention,
-						}),
+						description: strings.sureToPurge.description,
 						color: constants.colors.husky,
 					},
 				],
@@ -507,7 +553,19 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 			purging: {
 				title: localise(client, "purge.strings.purging.title", interaction.locale)(),
 				description: {
-					purging: localise(client, "purge.strings.purging.description.purging", interaction.locale),
+					purging: localise(
+						client,
+						"purge.strings.purging.description.purging",
+						interaction.locale,
+					)({
+						messages: pluralise(
+							client,
+							"purge.strings.purging.description.purging.messages",
+							language,
+							messages.length,
+						),
+						channel_mention: channelMention,
+					}),
 					mayTakeTime: localise(client, "purge.strings.purging.description.mayTakeTime", interaction.locale)(),
 					onceComplete: localise(client, "purge.strings.purging.description.onceComplete", interaction.locale)(),
 				},
@@ -518,10 +576,7 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 			embeds: [
 				{
 					title: strings.purging.title,
-					description: `${strings.purging.description.purging({
-						number: messages.length,
-						channel_mention: channelMention,
-					})} ${strings.purging.description.mayTakeTime}\n\n${strings.purging.description.onceComplete}`,
+					description: `${strings.purging.description.purging} ${strings.purging.description.mayTakeTime}\n\n${strings.purging.description.onceComplete}`,
 					color: constants.colors.blue,
 				},
 			],
@@ -611,7 +666,14 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 		const strings = {
 			purged: {
 				title: localise(client, "purge.strings.purged.title", interaction.locale)(),
-				description: localise(client, "purge.strings.purged.description", interaction.locale),
+				description: localise(
+					client,
+					"purge.strings.purged.description",
+					interaction.locale,
+				)({
+					messages: pluralise(client, "purge.strings.purged.description.messages", language, deletedCount),
+					channel_mention: channelMention,
+				}),
 			},
 		};
 
@@ -619,7 +681,7 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 			embeds: [
 				{
 					title: strings.purged.title,
-					description: strings.purged.description({ number: deletedCount, channel_mention: channelMention }),
+					description: strings.purged.description,
 					color: constants.colors.lightGreen,
 					image: { url: constants.gifs.done },
 				},

@@ -20,17 +20,21 @@ const localeByLanguage: Required<Record<typeof defaultLanguage, `${Locales}`>> &
 
 const defaultLocale = localeByLanguage[defaultLanguage];
 
-const languageByLocale: Partial<Record<Locales, Language>> = {
+const languageByLocale = {
 	"en-GB": "English",
 	"en-US": "English",
 	fr: "French",
 	hu: "Hungarian",
 	pl: "Polish",
 	ro: "Romanian",
-};
+} satisfies Partial<Record<Locales, Language>>;
 
-function getLanguageByLocale(locale: Locales): Language | undefined {
-	return languageByLocale[locale];
+function getLanguageByLocale(locale: string | undefined): Language | undefined {
+	if (locale === undefined || !(locale in languageByLocale)) {
+		return undefined;
+	}
+
+	return languageByLocale[locale as keyof typeof languageByLocale];
 }
 
 function getLocaleForLanguage(language: Language): typeof localeByLanguage[keyof typeof localeByLanguage] | undefined {
