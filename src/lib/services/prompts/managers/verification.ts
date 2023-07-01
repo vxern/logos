@@ -1,7 +1,7 @@
 import configuration from "../../../../configuration.js";
 import constants from "../../../../constants.js";
-import { defaultLocale } from "../../../../types.js";
-import { Client, WithLanguage, localise } from "../../../client.js";
+import { defaultLanguage, defaultLocale } from "../../../../types.js";
+import { Client, WithLanguage, localise, pluralise } from "../../../client.js";
 import { stringifyValue } from "../../../database/database.js";
 import { Document } from "../../../database/document.js";
 import { EntryRequest } from "../../../database/structs/entry-request.js";
@@ -83,7 +83,7 @@ class VerificationManager extends PromptManager<EntryRequest, Metadata, Interact
 				"entry.verification.vote.acceptMultiple",
 				defaultLocale,
 			)({
-				number: votesToAccept,
+				votes: pluralise(client, "entry.verification.vote.acceptMultiple.votes", defaultLanguage, votesToAccept),
 			}),
 			reject: localise(client, "entry.verification.vote.reject", defaultLocale)(),
 			rejectMultiple: localise(
@@ -91,7 +91,7 @@ class VerificationManager extends PromptManager<EntryRequest, Metadata, Interact
 				"entry.verification.vote.rejectMultiple",
 				defaultLocale,
 			)({
-				number: votesToReject,
+				votes: pluralise(client, "entry.verification.vote.rejectMultiple.votes", defaultLanguage, votesToReject),
 			}),
 		};
 

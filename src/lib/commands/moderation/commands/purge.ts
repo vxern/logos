@@ -7,8 +7,8 @@ import {
 	autocompleteMembers,
 	isValidSnowflake,
 	localise,
-	resolveInteractionToMember,
 	pluralise,
+	resolveInteractionToMember,
 } from "../../../client.js";
 import {
 	acknowledge,
