@@ -1,6 +1,6 @@
 [phases.setup]
-nixPkgs = ['...', 'deno']
-nixpkgsArchive = '3f1aece3b5b3e0ca6f9f8e0c2804d843b8fed30c'
+nixPkgs = ['nodejs_20']
+nixpkgsArchive = '12bbce3e6c2b298892768d5fb99696b8bbf73ce2'
 
 [start]
-cmd = 'deno task start'
+cmd = 'npm run start'

@@ -1,0 +1,83 @@
+import configuration from "../../../configuration.js";
+import { Client, extendEventHandler } from "../../client.js";
+import { getTextChannel } from "../../utils.js";
+import { ClientEvents, Events, MessageGenerators } from "./generator.js";
+import generators from "./generators.js";
+import { Bot, Channel, Guild, sendMessage } from "discordeno";
+
+type ClientEventNames = keyof ClientEvents;
+const clientEventNames = Object.keys(generators.client) as ClientEventNames[];
+
+function setupLogging([client, bot]: [Client, Bot], guild: Guild): void {
+	const logChannel = getTextChannel(guild, configuration.guilds.channels.logging);
+	if (logChannel === undefined) {
+		return;
+	}
+
+	for (const event of clientEventNames) {
+		extendEventHandler(bot, event, { append: true }, (...args) => {
+			logToChannel([client, bot], logChannel, event, ...args);
+		});
+	}
+}
+
+const messageGenerators: MessageGenerators<Events> = { ...generators.client, ...generators.guild };
+
+async function logEvent<K extends keyof Events>(
+	[client, bot]: [Client, Bot],
+	guild: Guild,
+	event: K,
+	args: Events[K],
+): Promise<void> {
+	const logChannel = getTextChannel(guild, configuration.guilds.channels.logging);
+	if (logChannel === undefined) {
+		return;
+	}
+
+	logToChannel([client, bot], logChannel, event, ...args);
+}
+
+async function logToChannel<K extends keyof Events>(
+	[client, bot]: [Client, Bot],
+	channel: Channel,
+	event: K,
+	...args: Events[K]
+): Promise<void> {
+	const entry = messageGenerators[event];
+	if (entry === undefined) {
+		return;
+	}
+
+	const filter = entry.filter(client, channel.guildId, ...args);
+	if (!filter) {
+		return;
+	}
+
+	const message = await new Promise<string | undefined>((resolve) => {
+		const result = entry.message(client, ...args);
+		if (result === undefined) {
+			return resolve(undefined);
+		}
+
+		if (typeof result === "string") {
+			return resolve(result);
+		}
+
+		return result.then((message) => resolve(message));
+	});
+	if (message === undefined) {
+		return;
+	}
+
+	sendMessage(bot, channel.id, {
+		embeds: [
+			{
+				title: entry.title,
+				description: message,
+				color: entry.color,
+			},
+		],
+	}).catch(() => client.log.warn(`Failed to log '${event}' event on guild with ID ${channel.guildId}.`));
+}
+
+export { logEvent, setupLogging };
