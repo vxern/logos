@@ -1,6 +1,6 @@
 import constants, { Periods } from "../constants.js";
-import { defaultLocale } from "../types.js";
-import { Client, addCollector, localise } from "./client.js";
+import { defaultLanguage, defaultLocale, getLanguageByLocale } from "../types.js";
+import { Client, addCollector, localise, pluralise } from "./client.js";
 import {
 	ActionRow,
 	ApplicationCommandFlags,
@@ -418,24 +418,26 @@ function parseConciseTimeExpression(
 		...number[],
 	];
 
+	const language = getLanguageByLocale(locale) ?? defaultLanguage;
+
 	const verboseExpressionParts = [];
 	if (seconds !== 0) {
 		const strings = {
-			second: localise(client, "units.second", defaultLocale)({ number: seconds }),
+			second: pluralise(client, "units.second.word", language, seconds),
 		};
 
 		verboseExpressionParts.push(strings.second);
 	}
 	if (minutes !== undefined && minutes !== 0) {
 		const strings = {
-			minute: localise(client, "units.minute", defaultLocale)({ number: minutes }),
+			minute: pluralise(client, "units.minute.word", language, minutes),
 		};
 
 		verboseExpressionParts.push(strings.minute);
 	}
 	if (hours !== undefined && hours !== 0) {
 		const strings = {
-			hour: localise(client, "units.hour", defaultLocale)({ number: hours }),
+			hour: pluralise(client, "units.hour.word", language, hours),
 		};
 
 		verboseExpressionParts.push(strings.hour);
@@ -563,11 +565,13 @@ function parseVerboseTimeExpressionPhrase(
 	}
 	timeUnitQuantifierTuples.sort(([previous], [next]) => timeUnitToPeriod[next] - timeUnitToPeriod[previous]);
 
+	const language = getLanguageByLocale(locale) ?? defaultLanguage;
+
 	const timeExpressions = [];
 	let total = 0;
 	for (const [timeUnit, quantifier] of timeUnitQuantifierTuples) {
 		const strings = {
-			unit: localise(client, `units.${timeUnit}`, locale)({ number: quantifier }),
+			unit: pluralise(client, "units.minute.word", language, quantifier),
 		};
 
 		timeExpressions.push(strings.unit);
