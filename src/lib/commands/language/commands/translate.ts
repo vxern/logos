@@ -6,11 +6,11 @@ import { addParametersToURL, diagnosticMentionUser } from "../../../utils.js";
 import { CommandTemplate } from "../../command.js";
 import { show } from "../../parameters.js";
 import { resolveToSupportedLanguage } from "../module.js";
-import { ApplicationCommandOptionTypes, ApplicationCommandTypes, Bot, Embed, Interaction } from "discordeno";
+import * as Discord from "discordeno";
 
 const command: CommandTemplate = {
 	name: "translate",
-	type: ApplicationCommandTypes.ChatInput,
+	type: Discord.ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ["VIEW_CHANNEL"],
 	isRateLimited: true,
 	handle: handleTranslateText,
@@ -18,19 +18,19 @@ const command: CommandTemplate = {
 	options: [
 		{
 			name: "from",
-			type: ApplicationCommandOptionTypes.String,
+			type: Discord.ApplicationCommandOptionTypes.String,
 			required: true,
 			autocomplete: true,
 		},
 		{
 			name: "to",
-			type: ApplicationCommandOptionTypes.String,
+			type: Discord.ApplicationCommandOptionTypes.String,
 			required: true,
 			autocomplete: true,
 		},
 		{
 			name: "text",
-			type: ApplicationCommandOptionTypes.String,
+			type: Discord.ApplicationCommandOptionTypes.String,
 			required: true,
 		},
 		show,
@@ -77,7 +77,10 @@ const languageNameToStringKey: Record<string, string> = Object.freeze({
 	Ukrainian: "languages.ukrainian",
 });
 
-async function handleTranslateTextAutocomplete([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+async function handleTranslateTextAutocomplete(
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
+): Promise<void> {
 	const [_, focused] = parseArguments(interaction.data?.options, { show: "boolean" });
 
 	const guildId = interaction.guildId;
@@ -124,7 +127,10 @@ async function handleTranslateTextAutocomplete([client, bot]: [Client, Bot], int
 }
 
 /** Allows the user to translate text from one language to another through the DeepL API. */
-async function handleTranslateText([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+async function handleTranslateText(
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
+): Promise<void> {
 	const [{ from, to, text, show }] = parseArguments(interaction.data?.options, { show: "boolean" });
 	if (from === undefined || to === undefined || text === undefined) {
 		return;
@@ -271,7 +277,7 @@ async function handleTranslateText([client, bot]: [Client, Bot], interaction: In
 
 	const translationIndicator = `${strings.sourceLanguageName} ${constants.symbols.indicators.arrowRight} ${strings.targetLanguageName}`;
 
-	let embeds: Embed[] = [];
+	let embeds: Discord.Embed[] = [];
 	if (isLong) {
 		embeds = [
 			{

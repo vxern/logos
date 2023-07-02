@@ -11,18 +11,7 @@ import { logEvent } from "../../../services/logging/logging.js";
 import { diagnosticMentionUser } from "../../../utils.js";
 import { PromptManager } from "../manager.js";
 import { getNecessaryVotes } from "./verification/votes.js";
-import {
-	Bot,
-	ButtonStyles,
-	CreateMessage,
-	Guild,
-	Interaction,
-	MessageComponentTypes,
-	User as DiscordUser,
-	addRole,
-	banMember,
-	getAvatarURL,
-} from "discordeno";
+import * as Discord from "discordeno";
 
 type Metadata = { userId: bigint; reference: string };
 type InteractionData = [userId: string, guildId: string, reference: string, isAccept: string];
@@ -59,11 +48,11 @@ class VerificationManager extends PromptManager<EntryRequest, Metadata, Interact
 	}
 
 	getPromptContent(
-		[client, bot]: [Client, Bot],
-		guild: WithLanguage<Guild>,
-		user: DiscordUser,
+		[client, bot]: [Client, Discord.Bot],
+		guild: WithLanguage<Discord.Guild>,
+		user: Discord.User,
 		document: Document<EntryRequest>,
-	): CreateMessage {
+	): Discord.CreateMessage {
 		const reference = stringifyValue(document.ref);
 
 		const [[requiredAcceptanceVotes, requiredRejectionVotes], [votesToAccept, votesToReject]] = getNecessaryVotes(
@@ -101,7 +90,7 @@ class VerificationManager extends PromptManager<EntryRequest, Metadata, Interact
 					title: diagnosticMentionUser(user),
 					color: constants.colors.turquoise,
 					thumbnail: (() => {
-						const iconURL = getAvatarURL(bot, user.id, user.discriminator, {
+						const iconURL = Discord.getAvatarURL(bot, user.id, user.discriminator, {
 							avatar: user.avatar,
 							size: 64,
 							format: "webp",
@@ -133,11 +122,11 @@ class VerificationManager extends PromptManager<EntryRequest, Metadata, Interact
 			],
 			components: [
 				{
-					type: MessageComponentTypes.ActionRow,
+					type: Discord.MessageComponentTypes.ActionRow,
 					components: [
 						{
-							type: MessageComponentTypes.Button,
-							style: ButtonStyles.Success,
+							type: Discord.MessageComponentTypes.Button,
+							style: Discord.ButtonStyles.Success,
 							label: requiredAcceptanceVotes === 1 ? strings.accept : strings.acceptMultiple,
 							customId: encodeId<InteractionData>(constants.staticComponentIds.verification, [
 								user.id.toString(),
@@ -147,8 +136,8 @@ class VerificationManager extends PromptManager<EntryRequest, Metadata, Interact
 							]),
 						},
 						{
-							type: MessageComponentTypes.Button,
-							style: ButtonStyles.Danger,
+							type: Discord.MessageComponentTypes.Button,
+							style: Discord.ButtonStyles.Danger,
 							label: requiredRejectionVotes === 1 ? strings.reject : strings.rejectMultiple,
 							customId: encodeId<InteractionData>(constants.staticComponentIds.verification, [
 								user.id.toString(),
@@ -164,8 +153,8 @@ class VerificationManager extends PromptManager<EntryRequest, Metadata, Interact
 	}
 
 	async handleInteraction(
-		[client, bot]: [Client, Bot],
-		interaction: Interaction,
+		[client, bot]: [Client, Discord.Bot],
+		interaction: Discord.Interaction,
 		data: InteractionData,
 	): Promise<Document<EntryRequest> | null | undefined> {
 		const [userId, _, __, isAcceptString] = data;
@@ -347,7 +336,7 @@ class VerificationManager extends PromptManager<EntryRequest, Metadata, Interact
 
 			client.log.info(`User with ID ${user.data.account.id} has been accepted onto guild ${guild.name}.`);
 
-			addRole(
+			Discord.addRole(
 				bot,
 				guild.id,
 				submitter.id,
@@ -367,7 +356,7 @@ class VerificationManager extends PromptManager<EntryRequest, Metadata, Interact
 
 			client.log.info(`User with ID ${user.data.account.id} has been rejected from guild ${guild.name}.`);
 
-			banMember(bot, guild.id, submitter.id, {
+			Discord.banMember(bot, guild.id, submitter.id, {
 				reason: `${
 					requiredRejectionVotes - votesToReject
 				} guide(s) voted against this particular user being granted entry.`,
@@ -389,7 +378,7 @@ class VerificationManager extends PromptManager<EntryRequest, Metadata, Interact
 	}
 }
 
-async function displayVoteError([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+async function displayVoteError([client, bot]: [Client, Discord.Bot], interaction: Discord.Interaction): Promise<void> {
 	const strings = {
 		title: localise(client, "entry.verification.vote.failed.title", interaction.locale)(),
 		description: localise(client, "entry.verification.vote.failed.description", interaction.locale)(),
@@ -406,7 +395,10 @@ async function displayVoteError([client, bot]: [Client, Bot], interaction: Inter
 	});
 }
 
-async function displayUserStateError([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+async function displayUserStateError(
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
+): Promise<void> {
 	const strings = {
 		title: localise(client, "entry.verification.vote.stateUpdateFailed.title", interaction.locale)(),
 		description: localise(client, "entry.verification.vote.stateUpdateFailed.description", interaction.locale)(),

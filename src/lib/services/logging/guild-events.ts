@@ -3,45 +3,45 @@ import { Praise } from "../../database/structs/praise.js";
 import { Report } from "../../database/structs/report.js";
 import { Suggestion } from "../../database/structs/suggestion.js";
 import { Warning } from "../../database/structs/warning.js";
-import { Channel, Member, User } from "discordeno";
+import * as Discord from "discordeno";
 
 /** Type representing events that occur within a guild. */
 type GuildEvents = {
 	/** An entry request has been submitted. */
-	entryRequestSubmit: [user: User, entryRequest: EntryRequest];
+	entryRequestSubmit: [user: Discord.User, entryRequest: EntryRequest];
 
 	/** An entry request has been accepted. */
-	entryRequestAccept: [user: User, by: Member];
+	entryRequestAccept: [user: Discord.User, by: Discord.Member];
 
 	/** An entry request has been rejected. */
-	entryRequestReject: [user: User, by: Member];
+	entryRequestReject: [user: Discord.User, by: Discord.Member];
 
 	/** A member has been warned. */
-	memberWarnAdd: [member: Member, warning: Warning, by: User];
+	memberWarnAdd: [member: Discord.Member, warning: Warning, by: Discord.User];
 
 	/** A member has had a warning removed from their account. */
-	memberWarnRemove: [member: Member, warning: Warning, by: User];
+	memberWarnRemove: [member: Discord.Member, warning: Warning, by: Discord.User];
 
 	/** A member has been timed out. */
-	memberTimeoutAdd: [member: Member, until: number, reason: string, by: User];
+	memberTimeoutAdd: [member: Discord.Member, until: number, reason: string, by: Discord.User];
 
 	/** A member's timeout has been cleared. */
-	memberTimeoutRemove: [member: Member, by: User];
+	memberTimeoutRemove: [member: Discord.Member, by: Discord.User];
 
 	/** A member has been praised. */
-	praiseAdd: [member: Member, praise: Praise, by: User];
+	praiseAdd: [member: Discord.Member, praise: Praise, by: Discord.User];
 
 	/** A suggestion has been made. */
-	suggestionSend: [member: Member, suggestion: Suggestion];
+	suggestionSend: [member: Discord.Member, suggestion: Suggestion];
 
 	/** A report has been submitted. */
-	reportSubmit: [author: Member, report: Report];
+	reportSubmit: [author: Discord.Member, report: Report];
 
 	/** A purging of messages has been initiated. */
-	purgeBegin: [member: Member, channel: Channel, messageCount: number, author?: User];
+	purgeBegin: [member: Discord.Member, channel: Discord.Channel, messageCount: number, author?: Discord.User];
 
 	/** A purging of messages is complete. */
-	purgeEnd: [member: Member, channel: Channel, messageCount: number, author?: User];
+	purgeEnd: [member: Discord.Member, channel: Discord.Channel, messageCount: number, author?: Discord.User];
 };
 
 export type { GuildEvents };

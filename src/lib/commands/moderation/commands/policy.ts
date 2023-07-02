@@ -3,17 +3,20 @@ import { Client, localise } from "../../../client.js";
 import { parseArguments, reply } from "../../../interactions.js";
 import { CommandTemplate } from "../../command.js";
 import { show } from "../../parameters.js";
-import { ApplicationCommandTypes, Bot, Embed, Interaction } from "discordeno";
+import * as Discord from "discordeno";
 
 const command: CommandTemplate = {
 	name: "policy",
-	type: ApplicationCommandTypes.ChatInput,
+	type: Discord.ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ["VIEW_CHANNEL"],
 	handle: handleDisplayModerationPolicy,
 	options: [show],
 };
 
-async function handleDisplayModerationPolicy([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+async function handleDisplayModerationPolicy(
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
+): Promise<void> {
 	const [{ show }] = parseArguments(interaction.data?.options, { show: "boolean" });
 
 	const guildId = interaction.guildId;
@@ -40,7 +43,7 @@ async function handleDisplayModerationPolicy([client, bot]: [Client, Bot], inter
 	);
 }
 
-function getModerationPolicyPoints(client: Client, locale: string | undefined): NonNullable<Embed["fields"]> {
+function getModerationPolicyPoints(client: Client, locale: string | undefined): NonNullable<Discord.Embed["fields"]> {
 	const strings = {
 		introduction: {
 			title: localise(client, "policies.moderation.points.introduction.title", locale)(),

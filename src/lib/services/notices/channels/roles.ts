@@ -2,11 +2,11 @@ import constants from "../../../../constants.js";
 import { defaultLocale } from "../../../../types.js";
 import { Client, localise } from "../../../client.js";
 import { getLastUpdateString } from "../notices.js";
-import { Bot, ButtonStyles, CreateMessage, Guild, MessageComponentTypes } from "discordeno";
+import * as Discord from "discordeno";
 
 const lastUpdatedAt = new Date(2023, 2, 19);
 
-function generateRoleNotice([client, _]: [Client, Bot], __: Guild): CreateMessage {
+function generateRoleNotice([client, _]: [Client, Discord.Bot], __: Discord.Guild): Discord.CreateMessage {
 	const updateString = getLastUpdateString(client, lastUpdatedAt, defaultLocale);
 
 	const strings = {
@@ -35,12 +35,12 @@ function generateRoleNotice([client, _]: [Client, Bot], __: Guild): CreateMessag
 		],
 		components: [
 			{
-				type: MessageComponentTypes.ActionRow,
+				type: Discord.MessageComponentTypes.ActionRow,
 				components: [
 					{
-						type: MessageComponentTypes.Button,
+						type: Discord.MessageComponentTypes.Button,
 						label: strings.description.clickHere,
-						style: ButtonStyles.Primary,
+						style: Discord.ButtonStyles.Primary,
 						customId: constants.staticComponentIds.selectRoles,
 					},
 				],

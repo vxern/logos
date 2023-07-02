@@ -1,32 +1,32 @@
 import { CommandTemplate } from "../../command.js";
 import { handleResetLanguage } from "./metadata/language/reset.js";
 import { handleSetLanguage } from "./metadata/language/set.js";
-import { ApplicationCommandOptionTypes, ApplicationCommandTypes } from "discordeno";
+import * as Discord from "discordeno";
 
 const command: CommandTemplate = {
 	name: "metadata",
-	type: ApplicationCommandTypes.ChatInput,
+	type: Discord.ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ["ADMINISTRATOR"],
 	options: [
 		{
 			name: "language",
-			type: ApplicationCommandOptionTypes.SubCommandGroup,
+			type: Discord.ApplicationCommandOptionTypes.SubCommandGroup,
 			options: [
 				{
 					name: "set",
-					type: ApplicationCommandOptionTypes.SubCommand,
+					type: Discord.ApplicationCommandOptionTypes.SubCommand,
 					handle: handleSetLanguage,
 					options: [
 						{
 							name: "language",
-							type: ApplicationCommandOptionTypes.String,
+							type: Discord.ApplicationCommandOptionTypes.String,
 							required: true,
 						},
 					],
 				},
 				{
 					name: "reset",
-					type: ApplicationCommandOptionTypes.SubCommand,
+					type: Discord.ApplicationCommandOptionTypes.SubCommand,
 					handle: handleResetLanguage,
 				},
 			],

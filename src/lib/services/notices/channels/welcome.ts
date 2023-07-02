@@ -4,11 +4,11 @@ import { defaultLocale } from "../../../../types.js";
 import { Client, localise } from "../../../client.js";
 import { getChannelMention } from "../../../utils.js";
 import { getLastUpdateString } from "../notices.js";
-import { Bot, ButtonStyles, CreateMessage, Guild, MessageComponentTypes } from "discordeno";
+import * as Discord from "discordeno";
 
 const lastUpdatedAt = new Date(2023, 3, 24);
 
-function generateWelcomeNotice([client, _]: [Client, Bot], guild: Guild): CreateMessage {
+function generateWelcomeNotice([client, _]: [Client, Discord.Bot], guild: Discord.Guild): Discord.CreateMessage {
 	const updateString = getLastUpdateString(client, lastUpdatedAt, defaultLocale);
 
 	const strings = {
@@ -34,11 +34,11 @@ function generateWelcomeNotice([client, _]: [Client, Bot], guild: Guild): Create
 		],
 		components: [
 			{
-				type: MessageComponentTypes.ActionRow,
+				type: Discord.MessageComponentTypes.ActionRow,
 				components: [
 					{
-						type: MessageComponentTypes.Button,
-						style: ButtonStyles.Secondary,
+						type: Discord.MessageComponentTypes.Button,
+						style: Discord.ButtonStyles.Secondary,
 						label: strings.description.acceptedRules,
 						customId: constants.staticComponentIds.entry.acceptedRules,
 						emoji: { name: constants.symbols.understood },

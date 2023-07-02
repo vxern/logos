@@ -22,45 +22,32 @@ import { logEvent } from "../../../services/logging/logging.js";
 import { chunk, diagnosticMentionUser, snowflakeToTimestamp } from "../../../utils.js";
 import { CommandTemplate } from "../../command.js";
 import { user } from "../../parameters.js";
-import {
-	ApplicationCommandOptionTypes,
-	ApplicationCommandTypes,
-	Bot,
-	ButtonStyles,
-	Embed,
-	Interaction,
-	InteractionCallbackData,
-	InteractionTypes,
-	Message,
-	MessageComponentTypes,
-	deleteMessage,
-	deleteMessages,
-	getMessage,
-	getMessages,
-	snowflakeToBigint,
-} from "discordeno";
+import * as Discord from "discordeno";
 
 const command: CommandTemplate = {
 	name: "purge",
-	type: ApplicationCommandTypes.ChatInput,
+	type: Discord.ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ["MODERATE_MEMBERS"],
 	handle: handlePurgeMessages,
 	handleAutocomplete: handlePurgeMessagesAutocomplete,
 	options: [
 		{
 			name: "start",
-			type: ApplicationCommandOptionTypes.String,
+			type: Discord.ApplicationCommandOptionTypes.String,
 			required: true,
 		},
 		{
 			name: "end",
-			type: ApplicationCommandOptionTypes.String,
+			type: Discord.ApplicationCommandOptionTypes.String,
 		},
 		{ ...user, name: "author", required: false },
 	],
 };
 
-async function handlePurgeMessagesAutocomplete([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+async function handlePurgeMessagesAutocomplete(
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
+): Promise<void> {
 	const [{ author }] = parseArguments(interaction.data?.options, {});
 	if (author === undefined) {
 		return;
@@ -69,7 +56,10 @@ async function handlePurgeMessagesAutocomplete([client, bot]: [Client, Bot], int
 	autocompleteMembers([client, bot], interaction, author, { includeBots: true });
 }
 
-async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+async function handlePurgeMessages(
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
+): Promise<void> {
 	const [{ start, end: provisionalEnd, author: user }] = parseArguments(interaction.data?.options, {});
 	if (start === undefined) {
 		return;
@@ -111,7 +101,7 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 
 	const end =
 		provisionalEnd ??
-		(await getMessages(bot, channelId, { limit: 1 })
+		(await Discord.getMessages(bot, channelId, { limit: 1 })
 			.catch(() => undefined)
 			.then((messages) => messages?.first()?.id?.toString()));
 
@@ -125,7 +115,7 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 		return;
 	}
 
-	let [startMessageId, endMessageId] = [snowflakeToBigint(start), snowflakeToBigint(end)];
+	let [startMessageId, endMessageId] = [Discord.snowflakeToBigint(start), Discord.snowflakeToBigint(end)];
 
 	if (startMessageId > endMessageId) {
 		[startMessageId, endMessageId] = [endMessageId, startMessageId];
@@ -143,12 +133,12 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 	}
 
 	const [startMessage, endMessage] = await Promise.all([
-		getMessage(bot, channelId, startMessageId).catch(() => {
+		Discord.getMessage(bot, channelId, startMessageId).catch(() => {
 			client.log.warn(`Failed to get start message, ID ${startMessageId}.`);
 
 			return undefined;
 		}),
-		getMessage(bot, channelId, endMessageId).catch(() => {
+		Discord.getMessage(bot, channelId, endMessageId).catch(() => {
 			client.log.warn(`Failed to get end message, ID ${endMessageId}.`);
 
 			return undefined;
@@ -169,9 +159,9 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 		getMessageContent(client, endMessage, interaction.locale),
 	];
 
-	let messages: Message[] = [];
+	let messages: Discord.Message[] = [];
 
-	const getMessageFields = (): NonNullable<Embed["fields"]> => {
+	const getMessageFields = (): NonNullable<Discord.Embed["fields"]> => {
 		const strings = {
 			start: localise(client, "purge.strings.start", interaction.locale)(),
 			postedStart: (startMessageContent !== undefined
@@ -207,7 +197,7 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 		];
 	};
 
-	const getIndexingProgressResponse = (): InteractionCallbackData => {
+	const getIndexingProgressResponse = (): Discord.InteractionCallbackData => {
 		const strings = {
 			indexing: {
 				title: localise(client, "purge.strings.indexing.title", interaction.locale)(),
@@ -272,7 +262,7 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 			return;
 		}
 
-		const newMessages = await getMessages(bot, channelId, {
+		const newMessages = await Discord.getMessages(bot, channelId, {
 			after: messages.length === 0 ? startMessage.id : messages.at(-1)?.id,
 			limit: 100,
 		})
@@ -349,7 +339,7 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 	if (messages.length >= configuration.commands.purge.maxDeletable) {
 		isShouldContinue = await new Promise<boolean>((resolve) => {
 			const continueId = createInteractionCollector([client, bot], {
-				type: InteractionTypes.MessageComponent,
+				type: Discord.InteractionTypes.MessageComponent,
 				onCollect: async (_, selection) => {
 					acknowledge([client, bot], selection);
 					resolve(true);
@@ -357,7 +347,7 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 			});
 
 			const cancelId = createInteractionCollector([client, bot], {
-				type: InteractionTypes.MessageComponent,
+				type: Discord.InteractionTypes.MessageComponent,
 				onCollect: async (_, selection) => {
 					acknowledge([client, bot], selection);
 					resolve(false);
@@ -432,19 +422,19 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 				],
 				components: [
 					{
-						type: MessageComponentTypes.ActionRow,
+						type: Discord.MessageComponentTypes.ActionRow,
 						components: [
 							{
-								type: MessageComponentTypes.Button,
+								type: Discord.MessageComponentTypes.Button,
 								customId: continueId,
 								label: strings.yes,
-								style: ButtonStyles.Success,
+								style: Discord.ButtonStyles.Success,
 							},
 							{
-								type: MessageComponentTypes.Button,
+								type: Discord.MessageComponentTypes.Button,
 								customId: cancelId,
 								label: strings.no,
-								style: ButtonStyles.Danger,
+								style: Discord.ButtonStyles.Danger,
 							},
 						],
 					},
@@ -464,7 +454,7 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 		isShouldContinue ||
 		(await new Promise<boolean>((resolve) => {
 			const continueId = createInteractionCollector([client, bot], {
-				type: InteractionTypes.MessageComponent,
+				type: Discord.InteractionTypes.MessageComponent,
 				onCollect: async (_, selection) => {
 					acknowledge([client, bot], selection);
 					resolve(true);
@@ -472,7 +462,7 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 			});
 
 			const cancelId = createInteractionCollector([client, bot], {
-				type: InteractionTypes.MessageComponent,
+				type: Discord.InteractionTypes.MessageComponent,
 				onCollect: async (_, selection) => {
 					acknowledge([client, bot], selection);
 					resolve(false);
@@ -523,19 +513,19 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 				],
 				components: [
 					{
-						type: MessageComponentTypes.ActionRow,
+						type: Discord.MessageComponentTypes.ActionRow,
 						components: [
 							{
-								type: MessageComponentTypes.Button,
+								type: Discord.MessageComponentTypes.Button,
 								customId: continueId,
 								label: strings.yes,
-								style: ButtonStyles.Success,
+								style: Discord.ButtonStyles.Success,
 							},
 							{
-								type: MessageComponentTypes.Button,
+								type: Discord.MessageComponentTypes.Button,
 								customId: cancelId,
 								label: strings.no,
-								style: ButtonStyles.Danger,
+								style: Discord.ButtonStyles.Danger,
 							},
 						],
 					},
@@ -592,7 +582,7 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 
 	const [guild, member, channel] = [
 		client.cache.guilds.get(guildId),
-		client.cache.members.get(snowflakeToBigint(`${interaction.user.id}${guildId}`)),
+		client.cache.members.get(Discord.snowflakeToBigint(`${interaction.user.id}${guildId}`)),
 		client.cache.channels.get(channelId),
 	];
 	if (guild === undefined || member === undefined || channel === undefined) {
@@ -626,7 +616,7 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 		for (const chunk of bulkDeletableChunks) {
 			const messageIds = chunk.map((message) => message.id);
 
-			await deleteMessages(bot, channelId, messageIds).catch((reason) => {
+			await Discord.deleteMessages(bot, channelId, messageIds).catch((reason) => {
 				client.log.warn(
 					`Failed to delete ${messageIds.length} message(s) from channel with ID ${channelId}: ${reason}`,
 				);
@@ -639,7 +629,7 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 	}
 
 	for (const message of nonBulkDeletable) {
-		await deleteMessage(bot, channelId, message.id).catch((reason) =>
+		await Discord.deleteMessage(bot, channelId, message.id).catch((reason) =>
 			client.log.warn(`Failed to delete message with ID ${message.id}: ${reason}`),
 		);
 
@@ -691,8 +681,8 @@ async function handlePurgeMessages([client, bot]: [Client, Bot], interaction: In
 }
 
 async function displaySnowflakesInvalidError(
-	[client, bot]: [Client, Bot],
-	interaction: Interaction,
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
 	[isStartInvalid, isEndInvalid]: [boolean, boolean],
 ): Promise<void> {
 	const strings = {
@@ -735,7 +725,10 @@ async function displaySnowflakesInvalidError(
 	});
 }
 
-async function displayIdsNotDifferentError([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+async function displayIdsNotDifferentError(
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
+): Promise<void> {
 	const strings = {
 		title: localise(client, "purge.strings.idsNotDifferent.title", interaction.locale)(),
 		description: localise(client, "purge.strings.idsNotDifferent.description", interaction.locale)(),
@@ -752,7 +745,10 @@ async function displayIdsNotDifferentError([client, bot]: [Client, Bot], interac
 	});
 }
 
-async function displayFailedError([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+async function displayFailedError(
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
+): Promise<void> {
 	const strings = {
 		title: localise(client, "purge.strings.failed.title", interaction.locale)(),
 		description: localise(client, "purge.strings.failed.description", interaction.locale)(),
@@ -769,7 +765,7 @@ async function displayFailedError([client, bot]: [Client, Bot], interaction: Int
 	});
 }
 
-function getMessageContent(client: Client, message: Message, locale: string | undefined): string | undefined {
+function getMessageContent(client: Client, message: Discord.Message, locale: string | undefined): string | undefined {
 	if (message.content.trim().length === 0 && message.embeds.length !== 0) {
 		return undefined;
 	}

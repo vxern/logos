@@ -17,27 +17,21 @@ import { logEvent } from "../../../services/logging/logging.js";
 import suggestionManager from "../../../services/prompts/managers/suggestions.js";
 import { getTextChannel, verifyIsWithinLimits } from "../../../utils.js";
 import { CommandTemplate } from "../../command.js";
-import {
-	ApplicationCommandTypes,
-	Bot,
-	ButtonStyles,
-	Embed,
-	Interaction,
-	InteractionTypes,
-	MessageComponentTypes,
-	TextStyles,
-} from "discordeno";
+import * as Discord from "discordeno";
 
 const command: CommandTemplate = {
 	name: "suggestion",
-	type: ApplicationCommandTypes.ChatInput,
+	type: Discord.ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ["VIEW_CHANNEL"],
 	handle: handleMakeSuggestion,
 };
 
 type SuggestionError = "failure";
 
-async function handleMakeSuggestion([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+async function handleMakeSuggestion(
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
+): Promise<void> {
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
 		return;
@@ -156,13 +150,13 @@ async function handleMakeSuggestion([client, bot]: [Client, Bot], interaction: I
 }
 
 async function handleSubmittedInvalidSuggestion(
-	[client, bot]: [Client, Bot],
-	submission: Interaction,
+	[client, bot]: [Client, Discord.Bot],
+	submission: Discord.Interaction,
 	error: SuggestionError | undefined,
-): Promise<Interaction | undefined> {
+): Promise<Discord.Interaction | undefined> {
 	return new Promise((resolve) => {
 		const continueId = createInteractionCollector([client, bot], {
-			type: InteractionTypes.MessageComponent,
+			type: Discord.InteractionTypes.MessageComponent,
 			onCollect: async (_, selection) => {
 				deleteReply([client, bot], submission);
 				resolve(selection);
@@ -170,15 +164,15 @@ async function handleSubmittedInvalidSuggestion(
 		});
 
 		const cancelId = createInteractionCollector([client, bot], {
-			type: InteractionTypes.MessageComponent,
+			type: Discord.InteractionTypes.MessageComponent,
 			onCollect: async (_, cancelSelection) => {
 				const returnId = createInteractionCollector([client, bot], {
-					type: InteractionTypes.MessageComponent,
+					type: Discord.InteractionTypes.MessageComponent,
 					onCollect: (_, returnSelection) => resolve(returnSelection),
 				});
 
 				const leaveId = createInteractionCollector([client, bot], {
-					type: InteractionTypes.MessageComponent,
+					type: Discord.InteractionTypes.MessageComponent,
 					onCollect: async (_, _leaveSelection) => {
 						deleteReply([client, bot], submission);
 						deleteReply([client, bot], cancelSelection);
@@ -203,19 +197,19 @@ async function handleSubmittedInvalidSuggestion(
 					],
 					components: [
 						{
-							type: MessageComponentTypes.ActionRow,
+							type: Discord.MessageComponentTypes.ActionRow,
 							components: [
 								{
-									type: MessageComponentTypes.Button,
+									type: Discord.MessageComponentTypes.Button,
 									customId: returnId,
 									label: strings.stay,
-									style: ButtonStyles.Success,
+									style: Discord.ButtonStyles.Success,
 								},
 								{
-									type: MessageComponentTypes.Button,
+									type: Discord.MessageComponentTypes.Button,
 									customId: leaveId,
 									label: strings.leave,
-									style: ButtonStyles.Danger,
+									style: Discord.ButtonStyles.Danger,
 								},
 							],
 						},
@@ -224,7 +218,7 @@ async function handleSubmittedInvalidSuggestion(
 			},
 		});
 
-		let embed!: Embed;
+		let embed!: Discord.Embed;
 		switch (error) {
 			default: {
 				const strings = {
@@ -255,19 +249,19 @@ async function handleSubmittedInvalidSuggestion(
 			embeds: [embed],
 			components: [
 				{
-					type: MessageComponentTypes.ActionRow,
+					type: Discord.MessageComponentTypes.ActionRow,
 					components: [
 						{
-							type: MessageComponentTypes.Button,
+							type: Discord.MessageComponentTypes.Button,
 							customId: continueId,
 							label: strings.continue,
-							style: ButtonStyles.Success,
+							style: Discord.ButtonStyles.Success,
 						},
 						{
-							type: MessageComponentTypes.Button,
+							type: Discord.MessageComponentTypes.Button,
 							customId: cancelId,
 							label: strings.cancel,
-							style: ButtonStyles.Danger,
+							style: Discord.ButtonStyles.Danger,
 						},
 					],
 				},
@@ -286,13 +280,13 @@ function generateSuggestionModal(client: Client, locale: string | undefined): Mo
 		title: strings.title,
 		fields: [
 			{
-				type: MessageComponentTypes.ActionRow,
+				type: Discord.MessageComponentTypes.ActionRow,
 				components: [
 					{
 						customId: "suggestion",
-						type: MessageComponentTypes.InputText,
+						type: Discord.MessageComponentTypes.InputText,
 						label: trim(strings.suggestion, 45),
-						style: TextStyles.Paragraph,
+						style: Discord.TextStyles.Paragraph,
 						required: true,
 						minLength: 16,
 						maxLength: 256,

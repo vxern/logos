@@ -3,9 +3,13 @@ import { Client, localise } from "../../../client.js";
 import { proficiency } from "../../../commands/social/roles/categories/language.js";
 import { encodeId, reply } from "../../../interactions.js";
 import { EntryStepButtonID } from "../entry.js";
-import { Bot, ButtonComponent, ButtonStyles, Interaction, MessageComponentTypes } from "discordeno";
+import * as Discord from "discordeno";
 
-async function handleAcceptRules([client, bot]: [Client, Bot], interaction: Interaction, _: string): Promise<void> {
+async function handleAcceptRules(
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
+	_: string,
+): Promise<void> {
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
 		return;
@@ -45,22 +49,22 @@ async function handleAcceptRules([client, bot]: [Client, Bot], interaction: Inte
 		],
 		components: [
 			{
-				type: MessageComponentTypes.ActionRow,
-				components: proficiency.collection.list.map<ButtonComponent>((proficiencyRole, index) => {
+				type: Discord.MessageComponentTypes.ActionRow,
+				components: proficiency.collection.list.map<Discord.ButtonComponent>((proficiencyRole, index) => {
 					const strings = {
 						name: localise(client, `${proficiencyRole.id}.name`, interaction.locale)(),
 					};
 
 					return {
-						type: MessageComponentTypes.Button,
+						type: Discord.MessageComponentTypes.Button,
 						label: strings.name,
 						customId: encodeId<EntryStepButtonID>(constants.staticComponentIds.entry.selectedLanguageProficiency, [
 							index.toString(),
 						]),
-						style: ButtonStyles.Secondary,
+						style: Discord.ButtonStyles.Secondary,
 						emoji: { name: proficiencyRole.emoji },
 					};
-				}) as [ButtonComponent],
+				}) as [Discord.ButtonComponent],
 			},
 		],
 	});

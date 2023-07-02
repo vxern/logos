@@ -2,7 +2,7 @@ import { capitalise } from "./formatting.js";
 import { Client, initialiseClient } from "./lib/client.js";
 import { getSupportedLanguages, loadDictionaryAdapters, loadSentencePairs } from "./lib/commands/language/module.js";
 import { Language, getLanguageByLocale, supportedLanguages } from "./types.js";
-import { Locales } from "discordeno";
+import * as Discord from "discordeno";
 import * as dotenv from "dotenv";
 import * as fs from "fs/promises";
 import * as Sentry from "sentry";
@@ -86,7 +86,7 @@ async function readLocalisations(directoryPath: string): Promise<Map<string, Map
 				continue;
 			}
 
-			const [locale, _] = entryPath.split(".") as [Locales, string];
+			const [locale, _] = entryPath.split(".") as [Discord.Locales, string];
 			const language = getLanguageByLocale(locale);
 			if (language === undefined) {
 				continue;

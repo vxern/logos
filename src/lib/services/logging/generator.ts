@@ -1,11 +1,11 @@
 import { GuildEvents } from "./guild-events.js";
 import { LogEntry } from "./log-entry.js";
-import { EventHandlers } from "discordeno";
+import * as Discord from "discordeno";
 
 type Events = ClientEvents & GuildEvents;
 
 type ClientEvents = {
-	[T in keyof EventHandlers]: Parameters<EventHandlers[T]>;
+	[T in keyof Discord.EventHandlers]: Parameters<Discord.EventHandlers[T]>;
 };
 
 /**

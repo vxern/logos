@@ -5,17 +5,20 @@ import { Client, autocompleteMembers, localise, resolveInteractionToMember } fro
 import { parseArguments, reply } from "../../../../interactions.js";
 import { OptionTemplate } from "../../../command.js";
 import { show, user } from "../../../parameters.js";
-import { ApplicationCommandOptionTypes, Bot, Interaction, getAvatarURL } from "discordeno";
+import * as Discord from "discordeno";
 
 const command: OptionTemplate = {
 	name: "view",
-	type: ApplicationCommandOptionTypes.SubCommand,
+	type: Discord.ApplicationCommandOptionTypes.SubCommand,
 	handle: handleDisplayProfile,
 	handleAutocomplete: handleDisplayProfileAutocomplete,
 	options: [{ ...user, required: false }, show],
 };
 
-async function handleDisplayProfileAutocomplete([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+async function handleDisplayProfileAutocomplete(
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
+): Promise<void> {
 	const [{ user }] = parseArguments(interaction.data?.options, {});
 	if (user === undefined) {
 		return;
@@ -24,7 +27,10 @@ async function handleDisplayProfileAutocomplete([client, bot]: [Client, Bot], in
 	autocompleteMembers([client, bot], interaction, user);
 }
 
-async function handleDisplayProfile([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+async function handleDisplayProfile(
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
+): Promise<void> {
 	const [{ user, show }] = parseArguments(interaction.data?.options, { show: "boolean" });
 
 	const member = resolveInteractionToMember([client, bot], interaction, user ?? interaction.user.id.toString());
@@ -84,7 +90,7 @@ async function handleDisplayProfile([client, bot]: [Client, Bot], interaction: I
 				{
 					title: strings.title,
 					thumbnail: (() => {
-						const iconURL = getAvatarURL(bot, target.id, target.discriminator, {
+						const iconURL = Discord.getAvatarURL(bot, target.id, target.discriminator, {
 							avatar: target.avatar,
 							size: 4096,
 							format: "webp",
@@ -115,7 +121,7 @@ async function handleDisplayProfile([client, bot]: [Client, Bot], interaction: I
 	);
 }
 
-async function displayError([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+async function displayError([client, bot]: [Client, Discord.Bot], interaction: Discord.Interaction): Promise<void> {
 	const strings = {
 		title: localise(client, "profile.options.view.strings.failed.title", interaction.locale)(),
 		description: localise(client, "profile.options.view.strings.failed.description", interaction.locale)(),

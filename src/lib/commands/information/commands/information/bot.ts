@@ -2,12 +2,15 @@ import constants from "../../../../../constants.js";
 import { MentionTypes, list, mention } from "../../../../../formatting.js";
 import { Client, localise } from "../../../../client.js";
 import { reply } from "../../../../interactions.js";
-import { Bot, Embed, Interaction, getAvatarURL, getUser } from "discordeno";
+import * as Discord from "discordeno";
 
-async function handleDisplayBotInformation([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+async function handleDisplayBotInformation(
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
+): Promise<void> {
 	const botUser =
 		client.cache.users.get(bot.id) ??
-		(await getUser(bot, bot.id).catch(() => {
+		(await Discord.getUser(bot, bot.id).catch(() => {
 			client.log.warn("Failed to get bot user.");
 			return undefined;
 		}));
@@ -79,7 +82,7 @@ async function handleDisplayBotInformation([client, bot]: [Client, Bot], interac
 			{
 				title: botUser.username,
 				thumbnail: {
-					url: getAvatarURL(bot, bot.id, botUser.discriminator, {
+					url: Discord.getAvatarURL(bot, bot.id, botUser.discriminator, {
 						avatar: botUser.avatar,
 						size: 4096,
 						format: "png",
@@ -114,7 +117,7 @@ async function handleDisplayBotInformation([client, bot]: [Client, Bot], interac
 	});
 }
 
-type EmbedFields = NonNullable<Embed["fields"]>;
+type EmbedFields = NonNullable<Discord.Embed["fields"]>;
 
 function getContributorString(contributions: typeof constants.contributions.translation): EmbedFields {
 	const fields: EmbedFields = [];

@@ -9,16 +9,7 @@ import { Suggestion } from "../../../database/structs/suggestion.js";
 import { User } from "../../../database/structs/user.js";
 import { encodeId, reply } from "../../../interactions.js";
 import { PromptManager } from "../manager.js";
-import {
-	Bot,
-	ButtonStyles,
-	CreateMessage,
-	Guild,
-	Interaction,
-	MessageComponentTypes,
-	User as DiscordUser,
-	getAvatarURL,
-} from "discordeno";
+import * as Discord from "discordeno";
 
 type Metadata = { userId: bigint; reference: string };
 type InteractionData = [userId: string, guildId: string, reference: string, isResolved: string];
@@ -66,11 +57,11 @@ class SuggestionManager extends PromptManager<Suggestion, Metadata, InteractionD
 	}
 
 	getPromptContent(
-		[client, bot]: [Client, Bot],
-		guild: WithLanguage<Guild>,
-		user: DiscordUser,
+		[client, bot]: [Client, Discord.Bot],
+		guild: WithLanguage<Discord.Guild>,
+		user: Discord.User,
 		document: Document<Suggestion>,
-	): CreateMessage {
+	): Discord.CreateMessage {
 		const reference = stringifyValue(document.ref);
 
 		const strings = {
@@ -88,7 +79,7 @@ class SuggestionManager extends PromptManager<Suggestion, Metadata, InteractionD
 					title: document.data.answers.suggestion,
 					color: constants.colors.green,
 					thumbnail: (() => {
-						const iconURL = getAvatarURL(bot, user.id, user.discriminator, {
+						const iconURL = Discord.getAvatarURL(bot, user.id, user.discriminator, {
 							avatar: user.avatar,
 							size: 64,
 							format: "png",
@@ -116,12 +107,12 @@ class SuggestionManager extends PromptManager<Suggestion, Metadata, InteractionD
 			],
 			components: [
 				{
-					type: MessageComponentTypes.ActionRow,
+					type: Discord.MessageComponentTypes.ActionRow,
 					components: [
 						document.data.isResolved
 							? {
-									type: MessageComponentTypes.Button,
-									style: ButtonStyles.Secondary,
+									type: Discord.MessageComponentTypes.Button,
+									style: Discord.ButtonStyles.Secondary,
 									label: strings.markUnresolved,
 									customId: encodeId<InteractionData>(constants.staticComponentIds.suggestions, [
 										user.id.toString(),
@@ -131,8 +122,8 @@ class SuggestionManager extends PromptManager<Suggestion, Metadata, InteractionD
 									]),
 							  }
 							: {
-									type: MessageComponentTypes.Button,
-									style: ButtonStyles.Primary,
+									type: Discord.MessageComponentTypes.Button,
+									style: Discord.ButtonStyles.Primary,
 									label: strings.markResolved,
 									customId: encodeId<InteractionData>(constants.staticComponentIds.suggestions, [
 										user.id.toString(),
@@ -148,8 +139,8 @@ class SuggestionManager extends PromptManager<Suggestion, Metadata, InteractionD
 	}
 
 	async handleInteraction(
-		[client, bot]: [Client, Bot],
-		interaction: Interaction,
+		[client, bot]: [Client, Discord.Bot],
+		interaction: Discord.Interaction,
 		data: InteractionData,
 	): Promise<Document<Suggestion> | null | undefined> {
 		const [userId, guildId, reference, isResolvedString] = data;

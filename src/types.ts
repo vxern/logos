@@ -1,4 +1,4 @@
-import { Locales } from "discordeno";
+import * as Discord from "discordeno";
 
 const supportedLanguages = ["Armenian", "English", "French", "Hungarian", "Polish", "Romanian"] as const;
 type Language = typeof supportedLanguages[number];
@@ -9,8 +9,8 @@ function typedDefaultLanguage<T extends Language>(language: T): T {
 
 const defaultLanguage = typedDefaultLanguage("English");
 
-const localeByLanguage: Required<Record<typeof defaultLanguage, `${Locales}`>> &
-	Partial<Record<Language, `${Locales}`>> = {
+const localeByLanguage: Required<Record<typeof defaultLanguage, `${Discord.Locales}`>> &
+	Partial<Record<Language, `${Discord.Locales}`>> = {
 	English: "en-GB",
 	French: "fr",
 	Hungarian: "hu",
@@ -27,7 +27,7 @@ const languageByLocale = {
 	hu: "Hungarian",
 	pl: "Polish",
 	ro: "Romanian",
-} satisfies Partial<Record<Locales, Language>>;
+} satisfies Partial<Record<Discord.Locales, Language>>;
 
 function getLanguageByLocale(locale: string | undefined): Language | undefined {
 	if (locale === undefined || !(locale in languageByLocale)) {

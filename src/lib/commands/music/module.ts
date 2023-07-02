@@ -5,11 +5,11 @@ import { Client, localise } from "../../client.js";
 import { paginate } from "../../interactions.js";
 import { chunk } from "../../utils.js";
 import { SongListing, listingTypeToEmoji } from "./data/types.js";
-import { Bot, Interaction } from "discordeno";
+import * as Discord from "discordeno";
 
 async function displayListings(
-	[client, bot]: [Client, Bot],
-	interaction: Interaction,
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
 	{ title, songListings }: { title: string; songListings: SongListing[] },
 	show: boolean,
 	locale: string | undefined,

@@ -12,7 +12,7 @@ import {
 	listingTypeToEmoji,
 } from "../../commands/music/data/types.js";
 import { reply } from "../../interactions.js";
-import { Bot, Embed, Guild, Interaction, VoiceState, sendMessage } from "discordeno";
+import * as Discord from "discordeno";
 import { EventEmitter } from "events";
 import * as Lavaclient from "lavaclient";
 
@@ -96,7 +96,7 @@ function isPaused(player: Lavaclient.Player): boolean {
 	return player.paused;
 }
 
-function getVoiceState(client: Client, guildId: bigint, userId: bigint): VoiceState | undefined {
+function getVoiceState(client: Client, guildId: bigint, userId: bigint): Discord.VoiceState | undefined {
 	const guild = client.cache.guilds.get(guildId);
 	if (guild === undefined) {
 		return undefined;
@@ -109,10 +109,10 @@ function getVoiceState(client: Client, guildId: bigint, userId: bigint): VoiceSt
 type MusicAction = "manage" | "check";
 
 function verifyVoiceState(
-	[client, bot]: [Client, Bot],
-	interaction: Interaction,
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
 	controller: MusicController,
-	voiceState: VoiceState | undefined,
+	voiceState: Discord.VoiceState | undefined,
 	action: MusicAction,
 ): boolean {
 	if (voiceState === undefined || voiceState.channelId === undefined) {
@@ -160,10 +160,10 @@ function verifyVoiceState(
 }
 
 function verifyCanRequestPlayback(
-	[client, bot]: [Client, Bot],
-	interaction: Interaction,
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
 	controller: MusicController,
-	voiceState: VoiceState | undefined,
+	voiceState: Discord.VoiceState | undefined,
 ): boolean {
 	const isVoiceStateVerified = verifyVoiceState([client, bot], interaction, controller, voiceState, "manage");
 	if (!isVoiceStateVerified) {
@@ -193,10 +193,10 @@ function verifyCanRequestPlayback(
 }
 
 function verifyCanManagePlayback(
-	[client, bot]: [Client, Bot],
-	interaction: Interaction,
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
 	controller: MusicController,
-	voiceState: VoiceState | undefined,
+	voiceState: Discord.VoiceState | undefined,
 ): boolean {
 	const isVoiceStateVerified = verifyVoiceState([client, bot], interaction, controller, voiceState, "manage");
 	if (!isVoiceStateVerified) {
@@ -255,14 +255,14 @@ function setDisconnectTimeout(client: Client, guildId: bigint): void {
 }
 
 function receiveNewListing(
-	[client, bot]: [Client, Bot],
-	guild: Guild,
+	[client, bot]: [Client, Discord.Bot],
+	guild: Discord.Guild,
 	controller: MusicController,
 	listing: SongListing,
 	voiceChannelId: bigint,
 	feedbackChannelId: bigint,
 ): void {
-	function getVoiceStatesForChannel(guild: Guild, channelId: bigint): VoiceState[] {
+	function getVoiceStatesForChannel(guild: Discord.Guild, channelId: bigint): Discord.VoiceState[] {
 		const guildVoiceStates = guild.voiceStates.array().filter((voiceState) => voiceState.channelId !== undefined);
 		const relevantVoiceStates = guildVoiceStates.filter((voiceState) => voiceState.channelId === channelId);
 
@@ -299,7 +299,7 @@ function receiveNewListing(
 		}),
 	};
 
-	const embed: Embed = {
+	const embed: Discord.Embed = {
 		title: `${constants.symbols.music.queued} ${strings.title}`,
 		description: strings.description,
 		color: constants.colors.lightGreen,
@@ -311,7 +311,7 @@ function receiveNewListing(
 			return;
 		}
 
-		sendMessage(bot, feedbackChannelId, { embeds: [embed] }).catch(() =>
+		Discord.sendMessage(bot, feedbackChannelId, { embeds: [embed] }).catch(() =>
 			client.log.warn("Failed to send music feedback message."),
 		);
 		return;
@@ -336,7 +336,7 @@ function isLastInCollection(collection: SongCollection): boolean {
 	return collection.position === collection.songs.length - 1;
 }
 
-function advanceQueueAndPlay([client, bot]: [Client, Bot], guildId: bigint, controller: MusicController): void {
+function advanceQueueAndPlay([client, bot]: [Client, Discord.Bot], guildId: bigint, controller: MusicController): void {
 	tryClearDisconnectTimeout(guildId);
 
 	if (!controller.flags.loop.song) {
@@ -386,7 +386,7 @@ function advanceQueueAndPlay([client, bot]: [Client, Bot], guildId: bigint, cont
 }
 
 async function loadSong(
-	[client, bot]: [Client, Bot],
+	[client, bot]: [Client, Discord.Bot],
 	guildId: bigint,
 	controller: MusicController,
 	song: Song | SongStream,
@@ -409,7 +409,7 @@ async function loadSong(
 
 		const feedbackChannelId = controller.feedbackChannelId;
 		if (feedbackChannelId !== undefined) {
-			sendMessage(bot, feedbackChannelId, {
+			Discord.sendMessage(bot, feedbackChannelId, {
 				embeds: [
 					{
 						title: strings.title,
@@ -452,7 +452,7 @@ async function loadSong(
 
 		const feedbackChannelId = controller.feedbackChannelId;
 		if (feedbackChannelId !== undefined) {
-			sendMessage(bot, feedbackChannelId, {
+			Discord.sendMessage(bot, feedbackChannelId, {
 				embeds: [
 					{
 						title: strings.title,
@@ -516,7 +516,7 @@ async function loadSong(
 	if (feedbackChannelId !== undefined) {
 		const currentListing = controller.currentListing;
 		if (currentListing !== undefined) {
-			sendMessage(bot, feedbackChannelId, {
+			Discord.sendMessage(bot, feedbackChannelId, {
 				embeds: [
 					{
 						title: `${emoji} ${strings.title}`,
@@ -582,7 +582,7 @@ function skip(controller: MusicController, skipCollection: boolean, { by, to }: 
 }
 
 function unskip(
-	[client, bot]: [Client, Bot],
+	[client, bot]: [Client, Discord.Bot],
 	guildId: bigint,
 	controller: MusicController,
 	unskipCollection: boolean,
@@ -667,8 +667,8 @@ function skipTo(player: Lavaclient.Player, timestampMilliseconds: number): void 
 }
 
 function replay(
-	[client, bot]: [Client, Bot],
-	interaction: Interaction,
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
 	controller: MusicController,
 	replayCollection: boolean,
 ): void {

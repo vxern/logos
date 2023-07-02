@@ -4,15 +4,18 @@ import { Client, localise } from "../../../client.js";
 import { reply } from "../../../interactions.js";
 import { getVoiceState, reset, verifyCanManagePlayback } from "../../../services/music/music.js";
 import { OptionTemplate } from "../../command.js";
-import { ApplicationCommandOptionTypes, Bot, Interaction } from "discordeno";
+import * as Discord from "discordeno";
 
 const command: OptionTemplate = {
 	name: "stop",
-	type: ApplicationCommandOptionTypes.SubCommand,
+	type: Discord.ApplicationCommandOptionTypes.SubCommand,
 	handle: handleStopPlayback,
 };
 
-async function handleStopPlayback([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+async function handleStopPlayback(
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
+): Promise<void> {
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
 		return;

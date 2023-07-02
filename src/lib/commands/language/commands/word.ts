@@ -17,42 +17,30 @@ import { CommandTemplate } from "../../command.js";
 import { show } from "../../parameters.js";
 import { Definition, DictionaryEntry, Expression } from "../dictionaries/adapter.js";
 import { PartOfSpeech, isUnknownPartOfSpeech, partOfSpeechToStringKey } from "../dictionaries/parts-of-speech.js";
-import {
-	ApplicationCommandOptionTypes,
-	ApplicationCommandTypes,
-	Bot,
-	ButtonComponent,
-	ButtonStyles,
-	DiscordEmbedField,
-	Embed,
-	Interaction,
-	InteractionTypes,
-	MessageComponentTypes,
-	MessageComponents,
-} from "discordeno";
+import * as Discord from "discordeno";
 
 const command: CommandTemplate = {
 	name: "word",
-	type: ApplicationCommandTypes.ChatInput,
+	type: Discord.ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ["VIEW_CHANNEL"],
 	isRateLimited: true,
 	handle: handleFindWord,
 	options: [
 		{
 			name: "word",
-			type: ApplicationCommandOptionTypes.String,
+			type: Discord.ApplicationCommandOptionTypes.String,
 			required: true,
 		},
 		{
 			name: "verbose",
-			type: ApplicationCommandOptionTypes.Boolean,
+			type: Discord.ApplicationCommandOptionTypes.Boolean,
 		},
 		show,
 	],
 };
 
 /** Allows the user to look up a word and get information about it. */
-async function handleFindWord([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+async function handleFindWord([client, bot]: [Client, Discord.Bot], interaction: Discord.Interaction): Promise<void> {
 	const [{ word, verbose, show }] = parseArguments(interaction.data?.options, {
 		verbose: "boolean",
 		show: "boolean",
@@ -212,8 +200,8 @@ interface WordViewData {
 }
 
 async function displayMenu(
-	[client, bot]: [Client, Bot],
-	interaction: Interaction,
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
 	data: WordViewData,
 	locale: string | undefined,
 ): Promise<void> {
@@ -233,7 +221,7 @@ function generateEmbeds(
 	data: WordViewData,
 	entry: DictionaryEntry,
 	locale: string | undefined,
-): Embed[] {
+): Discord.Embed[] {
 	switch (data.currentView) {
 		case ContentTabs.Definitions: {
 			return entryToEmbeds(client, entry, locale, data.verbose);
@@ -252,13 +240,13 @@ function generateEmbeds(
 type MenuButtonID = [index: string];
 
 function generateButtons(
-	[client, bot]: [Client, Bot],
-	interaction: Interaction,
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
 	data: WordViewData,
 	entry: DictionaryEntry,
 	locale: string | undefined,
-): MessageComponents {
-	const paginationControls: ButtonComponent[][] = [];
+): Discord.MessageComponents {
+	const paginationControls: Discord.ButtonComponent[][] = [];
 
 	switch (data.currentView) {
 		case ContentTabs.Definitions: {
@@ -270,7 +258,7 @@ function generateButtons(
 			}
 
 			const previousPageButtonId = createInteractionCollector([client, bot], {
-				type: InteractionTypes.MessageComponent,
+				type: Discord.InteractionTypes.MessageComponent,
 				onCollect: async (_, selection) => {
 					acknowledge([client, bot], selection);
 
@@ -283,7 +271,7 @@ function generateButtons(
 			});
 
 			const nextPageButtonId = createInteractionCollector([client, bot], {
-				type: InteractionTypes.MessageComponent,
+				type: Discord.InteractionTypes.MessageComponent,
 				onCollect: async (_, selection) => {
 					acknowledge([client, bot], selection);
 
@@ -301,23 +289,23 @@ function generateButtons(
 
 			paginationControls.push([
 				{
-					type: MessageComponentTypes.Button,
+					type: Discord.MessageComponentTypes.Button,
 					label: constants.symbols.interactions.menu.controls.back,
 					customId: previousPageButtonId,
-					style: ButtonStyles.Secondary,
+					style: Discord.ButtonStyles.Secondary,
 					disabled: isFirst,
 				},
 				{
-					type: MessageComponentTypes.Button,
+					type: Discord.MessageComponentTypes.Button,
 					label: `${strings.page} ${data.dictionaryEntryIndex + 1}/${data.entries.length}`,
-					style: ButtonStyles.Secondary,
+					style: Discord.ButtonStyles.Secondary,
 					customId: constants.staticComponentIds.none,
 				},
 				{
-					type: MessageComponentTypes.Button,
+					type: Discord.MessageComponentTypes.Button,
 					label: constants.symbols.interactions.menu.controls.forward,
 					customId: nextPageButtonId,
-					style: ButtonStyles.Secondary,
+					style: Discord.ButtonStyles.Secondary,
 					disabled: isLast,
 				},
 			]);
@@ -332,7 +320,7 @@ function generateButtons(
 			const rows = chunk(entry.inflectionTable, 5).reverse();
 
 			const buttonId = createInteractionCollector([client, bot], {
-				type: InteractionTypes.MessageComponent,
+				type: Discord.InteractionTypes.MessageComponent,
 				onCollect: async (_, selection) => {
 					acknowledge([client, bot], selection);
 
@@ -358,15 +346,15 @@ function generateButtons(
 			});
 
 			for (const [row, rowIndex] of rows.map<[typeof entry.inflectionTable, number]>((r, i) => [r, i])) {
-				const buttons = row.map<ButtonComponent>((table, index) => {
+				const buttons = row.map<Discord.ButtonComponent>((table, index) => {
 					const index_ = rowIndex * 5 + index;
 
 					return {
-						type: MessageComponentTypes.Button,
+						type: Discord.MessageComponentTypes.Button,
 						label: table.title,
 						customId: encodeId<MenuButtonID>(buttonId, [index_.toString()]),
 						disabled: data.inflectionTableIndex === index_,
-						style: ButtonStyles.Secondary,
+						style: Discord.ButtonStyles.Secondary,
 					};
 				});
 
@@ -377,10 +365,10 @@ function generateButtons(
 		}
 	}
 
-	const row: ButtonComponent[] = [];
+	const row: Discord.ButtonComponent[] = [];
 
 	const definitionsMenuButtonId = createInteractionCollector([client, bot], {
-		type: InteractionTypes.MessageComponent,
+		type: Discord.InteractionTypes.MessageComponent,
 		onCollect: async (_, selection) => {
 			acknowledge([client, bot], selection);
 
@@ -392,7 +380,7 @@ function generateButtons(
 	});
 
 	const inflectionMenuButtonId = createInteractionCollector([client, bot], {
-		type: InteractionTypes.MessageComponent,
+		type: Discord.InteractionTypes.MessageComponent,
 		onCollect: async (_, selection) => {
 			acknowledge([client, bot], selection);
 
@@ -408,11 +396,11 @@ function generateButtons(
 		};
 
 		row.push({
-			type: MessageComponentTypes.Button,
+			type: Discord.MessageComponentTypes.Button,
 			label: strings.definitions,
 			disabled: data.currentView === ContentTabs.Definitions,
 			customId: definitionsMenuButtonId,
-			style: ButtonStyles.Primary,
+			style: Discord.ButtonStyles.Primary,
 		});
 	}
 
@@ -422,11 +410,11 @@ function generateButtons(
 		};
 
 		row.push({
-			type: MessageComponentTypes.Button,
+			type: Discord.MessageComponentTypes.Button,
 			label: strings.inflection,
 			disabled: data.currentView === ContentTabs.Inflection,
 			customId: inflectionMenuButtonId,
-			style: ButtonStyles.Primary,
+			style: Discord.ButtonStyles.Primary,
 		});
 	}
 
@@ -435,12 +423,17 @@ function generateButtons(
 	}
 
 	return paginationControls.map((row) => ({
-		type: MessageComponentTypes.ActionRow,
-		components: row as [ButtonComponent],
+		type: Discord.MessageComponentTypes.ActionRow,
+		components: row as [Discord.ButtonComponent],
 	}));
 }
 
-function entryToEmbeds(client: Client, entry: DictionaryEntry, locale: string | undefined, verbose: boolean): Embed[] {
+function entryToEmbeds(
+	client: Client,
+	entry: DictionaryEntry,
+	locale: string | undefined,
+	verbose: boolean,
+): Discord.Embed[] {
 	let partOfSpeechDisplayed: string;
 	if (entry.partOfSpeech === undefined) {
 		const strings = {
@@ -464,8 +457,8 @@ function entryToEmbeds(client: Client, entry: DictionaryEntry, locale: string | 
 
 	const word = entry.lemma;
 
-	const embeds: Embed[] = [];
-	const fields: DiscordEmbedField[] = [];
+	const embeds: Discord.Embed[] = [];
+	const fields: NonNullable<Discord.Embed["fields"]> = [];
 
 	if (entry.nativeDefinitions !== undefined && entry.nativeDefinitions.length !== 0) {
 		const definitionsStringified = stringifyEntries(entry.nativeDefinitions, "definitions");

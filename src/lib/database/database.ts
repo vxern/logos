@@ -25,7 +25,7 @@ import { Report } from "./structs/report.js";
 import { Suggestion } from "./structs/suggestion.js";
 import { User } from "./structs/user.js";
 import { Warning } from "./structs/warning.js";
-import { User as DiscordUser } from "discordeno";
+import * as Discord from "discordeno";
 import Fauna from "fauna";
 import * as Sentry from "sentry";
 
@@ -332,7 +332,7 @@ async function dispatchQuery<
 	return result.data as unknown as R;
 }
 
-function mentionUser(user: DiscordUser | undefined, id: bigint): string {
+function mentionUser(user: Discord.User | undefined, id: bigint): string {
 	return user === undefined ? `an unknown user (ID ${id})` : diagnosticMentionUser(user);
 }
 

@@ -4,11 +4,11 @@ import { parseArguments, reply } from "../../../../interactions.js";
 import { getVoiceState, receiveNewListing, verifyCanRequestPlayback } from "../../../../services/music/music.js";
 import { ListingResolver } from "../../data/sources/sources.js";
 import { SongListing } from "../../data/types.js";
-import { Bot, Interaction } from "discordeno";
+import * as Discord from "discordeno";
 
 async function handleRequestQueryPlayback(
-	[client, bot]: [Client, Bot],
-	interaction: Interaction,
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
 	resolveToSongListing: ListingResolver,
 ): Promise<void> {
 	const [{ query }] = parseArguments(interaction.data?.options, {});
@@ -21,8 +21,8 @@ async function handleRequestQueryPlayback(
 }
 
 async function handleRequestPlayback(
-	[client, bot]: [Client, Bot],
-	interaction: Interaction,
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
 	listing: SongListing | undefined,
 ): Promise<void> {
 	const channelId = interaction.channelId;

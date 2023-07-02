@@ -1,57 +1,57 @@
 import { OptionTemplate } from "./command.js";
-import { ApplicationCommandOptionTypes } from "discordeno";
+import * as Discord from "discordeno";
 
 const user: OptionTemplate = {
 	name: "user",
-	type: ApplicationCommandOptionTypes.String,
+	type: Discord.ApplicationCommandOptionTypes.String,
 	required: true,
 	autocomplete: true,
 };
 
 const show: OptionTemplate = {
 	name: "show",
-	type: ApplicationCommandOptionTypes.Boolean,
+	type: Discord.ApplicationCommandOptionTypes.Boolean,
 };
 
 const duration: OptionTemplate = {
 	name: "duration",
-	type: ApplicationCommandOptionTypes.String,
+	type: Discord.ApplicationCommandOptionTypes.String,
 	required: true,
 	autocomplete: true,
 };
 
 const reason: OptionTemplate = {
 	name: "reason",
-	type: ApplicationCommandOptionTypes.String,
+	type: Discord.ApplicationCommandOptionTypes.String,
 	required: true,
 };
 
 const query: OptionTemplate = {
 	name: "query",
-	type: ApplicationCommandOptionTypes.String,
+	type: Discord.ApplicationCommandOptionTypes.String,
 	required: true,
 };
 
 const timestamp: OptionTemplate = {
 	name: "timestamp",
-	type: ApplicationCommandOptionTypes.String,
+	type: Discord.ApplicationCommandOptionTypes.String,
 	required: true,
 	autocomplete: true,
 };
 
 const collection: OptionTemplate = {
 	name: "collection",
-	type: ApplicationCommandOptionTypes.Boolean,
+	type: Discord.ApplicationCommandOptionTypes.Boolean,
 };
 
 const by: OptionTemplate = {
 	name: "by",
-	type: ApplicationCommandOptionTypes.Integer,
+	type: Discord.ApplicationCommandOptionTypes.Integer,
 };
 
 const to: OptionTemplate = {
 	name: "to",
-	type: ApplicationCommandOptionTypes.Integer,
+	type: Discord.ApplicationCommandOptionTypes.Integer,
 };
 
 export { by, collection, duration, query, reason, show, timestamp, to, user };

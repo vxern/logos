@@ -1,7 +1,7 @@
 import { Language } from "../../../../types.js";
 import { Client } from "../../../client.js";
 import { PartOfSpeech } from "./parts-of-speech.js";
-import { DiscordEmbedField } from "discordeno";
+import * as Discord from "discordeno";
 
 type DictionaryProvisions =
 	/** Provides definitions of a lemma. */
@@ -25,7 +25,7 @@ interface Definition extends TaggedValue<string> {
 // rome-ignore lint/suspicious/noEmptyInterface: Alias.
 interface Etymology extends TaggedValue<string | undefined> {}
 
-type InflectionTable = { title: string; fields: DiscordEmbedField[] }[];
+type InflectionTable = { title: string; fields: NonNullable<Discord.Embed["fields"]> }[];
 
 interface DictionaryEntry {
 	/** The topic word of an entry. */

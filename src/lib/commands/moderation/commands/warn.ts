@@ -9,18 +9,21 @@ import { diagnosticMentionUser, getTextChannel } from "../../../utils.js";
 import { CommandTemplate } from "../../command.js";
 import { reason, user } from "../../parameters.js";
 import { getActiveWarnings } from "../module.js";
-import { ApplicationCommandTypes, Bot, Interaction, calculatePermissions, editMember, sendMessage } from "discordeno";
+import * as Discord from "discordeno";
 
 const command: CommandTemplate = {
 	name: "warn",
-	type: ApplicationCommandTypes.ChatInput,
+	type: Discord.ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ["MODERATE_MEMBERS"],
 	handle: handleWarnUser,
 	handleAutocomplete: handleWarnUserAutocomplete,
 	options: [user, reason],
 };
 
-async function handleWarnUserAutocomplete([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+async function handleWarnUserAutocomplete(
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
+): Promise<void> {
 	const [{ user }] = parseArguments(interaction.data?.options, {});
 	if (user === undefined) {
 		return;
@@ -32,7 +35,7 @@ async function handleWarnUserAutocomplete([client, bot]: [Client, Bot], interact
 	});
 }
 
-async function handleWarnUser([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+async function handleWarnUser([client, bot]: [Client, Discord.Bot], interaction: Discord.Interaction): Promise<void> {
 	const [{ user: userSearchQuery, reason }] = parseArguments(interaction.data?.options, {});
 	if (userSearchQuery === undefined || reason === undefined) {
 		return;
@@ -63,7 +66,7 @@ async function handleWarnUser([client, bot]: [Client, Bot], interaction: Interac
 
 	const moderatorRoleIds = guild.roles
 		.array()
-		.filter((role) => calculatePermissions(role.permissions).includes("MODERATE_MEMBERS"))
+		.filter((role) => Discord.calculatePermissions(role.permissions).includes("MODERATE_MEMBERS"))
 		.map((role) => role.id);
 	if (moderatorRoleIds.length === 0) {
 		return undefined;
@@ -152,11 +155,11 @@ async function handleWarnUser([client, bot]: [Client, Bot], interaction: Interac
 			}),
 		};
 
-		editMember(bot, guild.id, member.id, {
+		Discord.editMember(bot, guild.id, member.id, {
 			communicationDisabledUntil: Date.now() + configuration.commands.warn.timeoutDuration,
 		}).catch(() => client.log.warn(`Failed to edit timeout state of member with ID ${member.id}.`));
 
-		sendMessage(bot, moderationChannelId, {
+		Discord.sendMessage(bot, moderationChannelId, {
 			embeds: [
 				{
 					title: `${constants.symbols.indicators.exclamation} ${strings.title}`,
@@ -182,7 +185,7 @@ async function handleWarnUser([client, bot]: [Client, Bot], interaction: Interac
 			}),
 		};
 
-		sendMessage(bot, moderationChannelId, {
+		Discord.sendMessage(bot, moderationChannelId, {
 			embeds: [
 				{
 					title: `${constants.symbols.indicators.warning} ${strings.title}`,
@@ -194,7 +197,7 @@ async function handleWarnUser([client, bot]: [Client, Bot], interaction: Interac
 	}
 }
 
-async function displayError([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+async function displayError([client, bot]: [Client, Discord.Bot], interaction: Discord.Interaction): Promise<void> {
 	const strings = {
 		title: localise(client, "warn.strings.failed.title", interaction.locale)(),
 		description: localise(client, "warn.strings.failed.description", interaction.locale)(),

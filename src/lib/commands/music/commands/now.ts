@@ -9,16 +9,19 @@ import { chunk } from "../../../utils.js";
 import { OptionTemplate } from "../../command.js";
 import { collection, show } from "../../parameters.js";
 import { Song, SongCollection, SongStream } from "../data/types.js";
-import { ApplicationCommandOptionTypes, Bot, Interaction } from "discordeno";
+import * as Discord from "discordeno";
 
 const command: OptionTemplate = {
 	name: "now",
-	type: ApplicationCommandOptionTypes.SubCommand,
+	type: Discord.ApplicationCommandOptionTypes.SubCommand,
 	handle: handleDisplayCurrentlyPlaying,
 	options: [collection, show],
 };
 
-async function handleDisplayCurrentlyPlaying([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+async function handleDisplayCurrentlyPlaying(
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
+): Promise<void> {
 	const [{ collection, show }] = parseArguments(interaction.data?.options, { collection: "boolean", show: "boolean" });
 
 	const guildId = interaction.guildId;

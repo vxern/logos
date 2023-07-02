@@ -9,18 +9,11 @@ import { logEvent } from "../../../services/logging/logging.js";
 import { CommandTemplate } from "../../command.js";
 import { user } from "../../parameters.js";
 import { getActiveWarnings } from "../module.js";
-import {
-	ApplicationCommandOptionChoice,
-	ApplicationCommandOptionTypes,
-	ApplicationCommandTypes,
-	Bot,
-	Interaction,
-	Member,
-} from "discordeno";
+import * as Discord from "discordeno";
 
 const command: CommandTemplate = {
 	name: "pardon",
-	type: ApplicationCommandTypes.ChatInput,
+	type: Discord.ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ["MODERATE_MEMBERS"],
 	handle: handlePardonUser,
 	handleAutocomplete: handlePardonUserAutocomplete,
@@ -28,14 +21,17 @@ const command: CommandTemplate = {
 		user,
 		{
 			name: "warning",
-			type: ApplicationCommandOptionTypes.String,
+			type: Discord.ApplicationCommandOptionTypes.String,
 			required: true,
 			autocomplete: true,
 		},
 	],
 };
 
-async function handlePardonUserAutocomplete([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+async function handlePardonUserAutocomplete(
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
+): Promise<void> {
 	const [{ user, warning }, focused] = parseArguments(interaction.data?.options, {});
 
 	if (focused?.name === "user") {
@@ -73,7 +69,7 @@ async function handlePardonUserAutocomplete([client, bot]: [Client, Bot], intera
 
 		const warningLowercase = warning.toLowerCase();
 		const choices = relevantWarnings
-			.map<ApplicationCommandOptionChoice>((warning) => ({
+			.map<Discord.ApplicationCommandOptionChoice>((warning) => ({
 				name: warning.data.reason,
 				value: stringifyValue(warning.ref),
 			}))
@@ -84,7 +80,7 @@ async function handlePardonUserAutocomplete([client, bot]: [Client, Bot], intera
 	}
 }
 
-async function handlePardonUser([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+async function handlePardonUser([client, bot]: [Client, Discord.Bot], interaction: Discord.Interaction): Promise<void> {
 	const [{ user, warning }] = parseArguments(interaction.data?.options, {});
 	if (user === undefined) {
 		return;
@@ -151,7 +147,7 @@ async function handlePardonUser([client, bot]: [Client, Bot], interaction: Inter
 	});
 }
 
-async function getRelevantWarnings(client: Client, member: Member): Promise<Document<Warning>[] | undefined> {
+async function getRelevantWarnings(client: Client, member: Discord.Member): Promise<Document<Warning>[] | undefined> {
 	const subject = await client.database.adapters.users.getOrFetchOrCreate(
 		client,
 		"id",
@@ -171,7 +167,10 @@ async function getRelevantWarnings(client: Client, member: Member): Promise<Docu
 	return relevantWarnings;
 }
 
-async function displayInvalidWarningError([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+async function displayInvalidWarningError(
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
+): Promise<void> {
 	const strings = {
 		title: localise(client, "pardon.strings.invalidWarning.title", interaction.locale)(),
 		description: localise(client, "pardon.strings.invalidWarning.description", interaction.locale)(),
@@ -188,7 +187,10 @@ async function displayInvalidWarningError([client, bot]: [Client, Bot], interact
 	});
 }
 
-async function displayFailedError([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+async function displayFailedError(
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
+): Promise<void> {
 	const strings = {
 		title: localise(client, "pardon.strings.failed.title", interaction.locale)(),
 		description: localise(client, "pardon.strings.failed.description", interaction.locale)(),

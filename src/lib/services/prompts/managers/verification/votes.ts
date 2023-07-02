@@ -1,16 +1,16 @@
 import configuration from "../../../../../configuration.js";
 import { EntryRequest } from "../../../../database/structs/entry-request.js";
-import { Guild, calculatePermissions } from "discordeno";
+import * as Discord from "discordeno";
 
 type NecessaryVotes = [
 	[requiredAcceptanceVotes: number, requiredRejectionVotes: number],
 	[votesToAccept: number, votesToReject: number],
 ];
 
-function getNecessaryVotes(guild: Guild, entryRequest: EntryRequest): NecessaryVotes {
+function getNecessaryVotes(guild: Discord.Guild, entryRequest: EntryRequest): NecessaryVotes {
 	const moderatorRoleIds = guild.roles
 		.array()
-		.filter((role) => calculatePermissions(role.permissions).includes("MODERATE_MEMBERS"))
+		.filter((role) => Discord.calculatePermissions(role.permissions).includes("MODERATE_MEMBERS"))
 		.map((role) => role.id);
 	const moderatorCount =
 		moderatorRoleIds.length !== 0

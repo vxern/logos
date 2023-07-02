@@ -8,11 +8,11 @@ import { logEvent } from "../../../services/logging/logging.js";
 import { verifyIsWithinLimits } from "../../../utils.js";
 import { CommandTemplate } from "../../command.js";
 import { user } from "../../parameters.js";
-import { ApplicationCommandOptionTypes, ApplicationCommandTypes, Bot, Interaction } from "discordeno";
+import * as Discord from "discordeno";
 
 const command: CommandTemplate = {
 	name: "praise",
-	type: ApplicationCommandTypes.ChatInput,
+	type: Discord.ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ["VIEW_CHANNEL"],
 	handle: handlePraiseUser,
 	handleAutocomplete: handlePraiseUserAutocomplete,
@@ -20,12 +20,15 @@ const command: CommandTemplate = {
 		user,
 		{
 			name: "comment",
-			type: ApplicationCommandOptionTypes.String,
+			type: Discord.ApplicationCommandOptionTypes.String,
 		},
 	],
 };
 
-async function handlePraiseUserAutocomplete([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+async function handlePraiseUserAutocomplete(
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
+): Promise<void> {
 	const [{ user }] = parseArguments(interaction.data?.options, {});
 	if (user === undefined) {
 		return;
@@ -34,7 +37,7 @@ async function handlePraiseUserAutocomplete([client, bot]: [Client, Bot], intera
 	autocompleteMembers([client, bot], interaction, user);
 }
 
-async function handlePraiseUser([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+async function handlePraiseUser([client, bot]: [Client, Discord.Bot], interaction: Discord.Interaction): Promise<void> {
 	const [{ user, comment }] = parseArguments(interaction.data?.options, {});
 	if (user === undefined) {
 		return;
@@ -150,7 +153,7 @@ async function handlePraiseUser([client, bot]: [Client, Bot], interaction: Inter
 	});
 }
 
-async function displayError([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+async function displayError([client, bot]: [Client, Discord.Bot], interaction: Discord.Interaction): Promise<void> {
 	const strings = {
 		title: localise(client, "praise.strings.failed.title", interaction.locale)(),
 		description: localise(client, "praise.strings.failed.description", interaction.locale)(),
