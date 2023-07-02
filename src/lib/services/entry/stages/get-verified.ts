@@ -1,7 +1,8 @@
 import configuration from "../../../../configuration.js";
 import constants from "../../../../constants.js";
 import { trim } from "../../../../formatting.js";
-import { Client, WithLanguage, localise } from "../../../client.js";
+import { Language } from "../../../../types.js";
+import { Client, localise } from "../../../client.js";
 import { stringifyValue } from "../../../database/database.js";
 import { EntryRequest } from "../../../database/structs/entry-request.js";
 import { Modal, createModalComposer, editReply, postponeReply, reply } from "../../../interactions.js";
@@ -33,9 +34,14 @@ async function handleRequestVerification(
 async function initiateVerificationProcess(
 	[client, bot]: [Client, Discord.Bot],
 	interaction: Discord.Interaction,
-	guild: WithLanguage<Discord.Guild>,
+	guild: Discord.Guild,
 	requestedRoleId: bigint,
 ): Promise<void> {
+	const guildDocument = await client.database.adapters.guilds.getOrFetch(client, "id", guild.id.toString());
+	if (guildDocument === undefined) {
+		return;
+	}
+
 	const userDocument = await client.database.adapters.users.getOrFetchOrCreate(
 		client,
 		"id",
@@ -70,7 +76,7 @@ async function initiateVerificationProcess(
 	}
 
 	createModalComposer<EntryRequest["answers"]>([client, bot], interaction, {
-		modal: generateVerificationQuestionModal(client, guild, interaction.locale),
+		modal: generateVerificationQuestionModal(client, guildDocument.data.language, interaction.locale),
 		onSubmit: async (submission, answers) => {
 			const submitterReferenceId = stringifyValue(userDocument.ref);
 
@@ -124,7 +130,13 @@ async function initiateVerificationProcess(
 				return "failure";
 			}
 
-			const prompt = await verificationManager.savePrompt([client, bot], guild, channel, user, entryRequest);
+			const prompt = await verificationManager.savePrompt(
+				[client, bot],
+				[guild, guildDocument],
+				channel,
+				user,
+				entryRequest,
+			);
 			if (prompt === undefined) {
 				return "failure";
 			}
@@ -187,12 +199,12 @@ async function initiateVerificationProcess(
 
 function generateVerificationQuestionModal(
 	client: Client,
-	guild: WithLanguage<Discord.Guild>,
+	language: Language,
 	locale: string | undefined,
 ): Modal<EntryRequest["answers"]> {
 	const strings = {
 		title: localise(client, "verification.title", locale)(),
-		reason: localise(client, "verification.fields.reason", locale)({ language: guild.language }),
+		reason: localise(client, "verification.fields.reason", locale)({ language }),
 		aim: localise(client, "verification.fields.aim", locale)(),
 		whereFound: localise(client, "verification.fields.whereFound", locale)(),
 	};

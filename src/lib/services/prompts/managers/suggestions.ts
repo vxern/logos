@@ -2,9 +2,10 @@ import configuration from "../../../../configuration.js";
 import constants from "../../../../constants.js";
 import { MentionTypes, mention, timestamp } from "../../../../formatting.js";
 import { defaultLocale } from "../../../../types.js";
-import { Client, WithLanguage, localise } from "../../../client.js";
+import { Client, localise } from "../../../client.js";
 import { stringifyValue } from "../../../database/database.js";
 import { Document } from "../../../database/document.js";
+import { Guild } from "../../../database/structs/guild.js";
 import { Suggestion } from "../../../database/structs/suggestion.js";
 import { User } from "../../../database/structs/user.js";
 import { encodeId, reply } from "../../../interactions.js";
@@ -58,7 +59,7 @@ class SuggestionManager extends PromptManager<Suggestion, Metadata, InteractionD
 
 	getPromptContent(
 		[client, bot]: [Client, Discord.Bot],
-		guild: WithLanguage<Discord.Guild>,
+		[guild, _]: [Discord.Guild, Document<Guild>],
 		user: Discord.User,
 		document: Document<Suggestion>,
 	): Discord.CreateMessage {

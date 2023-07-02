@@ -7,20 +7,14 @@ import { GuildEvents, MessageGenerators } from "../generator";
 
 export default {
 	title: `${constants.symbols.events.entryRequest.submitted} Entry request submitted`,
-	message: (client, user, entryRequest) => {
-		const guild = client.cache.guilds.get(BigInt(entryRequest.guild));
-		if (guild === undefined) {
+	message: async (client, user, entryRequest) => {
+		const guildDocument = await client.database.adapters.guilds.getOrFetch(client, "id", entryRequest.guild);
+		if (guildDocument === undefined) {
 			return;
 		}
 
 		const strings = {
-			reason: localise(
-				client,
-				"verification.fields.reason",
-				defaultLocale,
-			)({
-				language: guild.language,
-			}),
+			reason: localise(client, "verification.fields.reason", defaultLocale)({ language: guildDocument.data.language }),
 			aim: localise(client, "verification.fields.aim", defaultLocale)(),
 			whereFound: localise(client, "verification.fields.whereFound", defaultLocale)(),
 		};

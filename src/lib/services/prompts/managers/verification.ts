@@ -1,10 +1,11 @@
 import configuration from "../../../../configuration.js";
 import constants from "../../../../constants.js";
 import { defaultLanguage, defaultLocale } from "../../../../types.js";
-import { Client, WithLanguage, localise, pluralise } from "../../../client.js";
+import { Client, localise, pluralise } from "../../../client.js";
 import { stringifyValue } from "../../../database/database.js";
 import { Document } from "../../../database/document.js";
 import { EntryRequest } from "../../../database/structs/entry-request.js";
+import { Guild } from "../../../database/structs/guild.js";
 import { User } from "../../../database/structs/user.js";
 import { acknowledge, encodeId, reply } from "../../../interactions.js";
 import { logEvent } from "../../../services/logging/logging.js";
@@ -49,7 +50,7 @@ class VerificationManager extends PromptManager<EntryRequest, Metadata, Interact
 
 	getPromptContent(
 		[client, bot]: [Client, Discord.Bot],
-		guild: WithLanguage<Discord.Guild>,
+		[guild, guildDocument]: [Discord.Guild, Document<Guild>],
 		user: Discord.User,
 		document: Document<EntryRequest>,
 	): Discord.CreateMessage {
@@ -62,7 +63,11 @@ class VerificationManager extends PromptManager<EntryRequest, Metadata, Interact
 
 		const strings = {
 			verification: {
-				reason: localise(client, "verification.fields.reason", defaultLocale)({ language: guild.language }),
+				reason: localise(
+					client,
+					"verification.fields.reason",
+					defaultLocale,
+				)({ language: guildDocument.data.language }),
 				aim: localise(client, "verification.fields.aim", defaultLocale)(),
 				whereFound: localise(client, "verification.fields.whereFound", defaultLocale)(),
 			},

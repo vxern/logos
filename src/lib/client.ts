@@ -30,8 +30,6 @@ interface Collector<ForEvent extends keyof Discord.EventHandlers> {
 
 type Event = keyof Discord.EventHandlers;
 
-type WithLanguage<T> = T & { language: Language };
-
 type Client = Readonly<{
 	metadata: {
 		environment: {
@@ -48,7 +46,7 @@ type Client = Readonly<{
 	};
 	log: Record<"debug" | keyof typeof FancyLog, (...args: unknown[]) => void>;
 	cache: {
-		guilds: Map<bigint, WithLanguage<Discord.Guild>>;
+		guilds: Map<bigint, Discord.Guild>;
 		users: Map<bigint, Discord.User>;
 		members: Map<bigint, Discord.Member>;
 		channels: Map<bigint, Discord.Channel>;
@@ -270,11 +268,11 @@ function createEventHandlers(client: Client): Partial<Discord.EventHandlers> {
 				return client.commands.global;
 			})();
 
+			await client.database.adapters.guilds.getOrFetchOrCreate(client, "id", guild.id.toString(), guild.id);
+
 			Discord.upsertGuildApplicationCommands(bot, guild.id, commands).catch((reason) =>
 				client.log.warn(`Failed to upsert commands: ${reason}`),
 			);
-
-			registerGuild(client, guild);
 
 			setupMusicController(client, guild.id);
 
@@ -645,12 +643,6 @@ function getImplicitLanguage(guild: Discord.Guild): Language {
 	}
 
 	return defaultLanguage;
-}
-
-function registerGuild(client: Client, guild: Discord.Guild): void {
-	const language = getImplicitLanguage(guild);
-
-	client.cache.guilds.set(guild.id, { ...guild, language });
 }
 
 function startServices([client, bot]: [Client, Discord.Bot]): void {
@@ -1062,4 +1054,4 @@ export {
 	resolveInteractionToMember,
 	pluralise,
 };
-export type { Client, Collector, CompiledLocalisation, WithLanguage };
+export type { Client, Collector, CompiledLocalisation };

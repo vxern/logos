@@ -6,7 +6,7 @@ interface LogEntry<E extends Record<string, unknown[]>, K extends keyof E> {
 	title: string;
 
 	/** Content of this entry. */
-	message: (client: Client, ...args: E[K]) => Promise<string> | string | undefined;
+	message: (client: Client, ...args: E[K]) => Promise<string | undefined> | string | undefined;
 
 	/** A condition that must be met for this entry to be logged. */
 	filter: (client: Client, originGuildId: bigint, ...args: E[K]) => boolean;

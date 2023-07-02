@@ -1,7 +1,8 @@
 import constants from "../../../constants.js";
-import { Client, WithLanguage, extendEventHandler, isServicing } from "../../client.js";
+import { Client, extendEventHandler, isServicing } from "../../client.js";
 import { stringifyValue } from "../../database/database.js";
 import { BaseDocumentProperties, Document } from "../../database/document.js";
+import { Guild } from "../../database/structs/guild.js";
 import { User } from "../../database/structs/user.js";
 import { createInteractionCollector, decodeId } from "../../interactions.js";
 import { getAllMessages, getTextChannel } from "../../utils.js";
@@ -86,6 +87,11 @@ abstract class PromptManager<
 				return;
 			}
 
+			const guildDocument = await client.database.adapters.guilds.getOrFetch(client, "id", guildId.toString());
+			if (guildDocument === undefined) {
+				return;
+			}
+
 			const guild = client.cache.guilds.get(guildId);
 			if (guild === undefined) {
 				return;
@@ -124,7 +130,7 @@ abstract class PromptManager<
 						continue;
 					}
 
-					const message = await this.savePrompt([client, bot], guild, channel, user, document);
+					const message = await this.savePrompt([client, bot], [guild, guildDocument], channel, user, document);
 					if (message === undefined) {
 						continue;
 					}
@@ -160,6 +166,11 @@ abstract class PromptManager<
 				return;
 			}
 
+			const guildDocument = await client.database.adapters.guilds.getOrFetch(client, "id", guildId.toString());
+			if (guildDocument === undefined) {
+				return;
+			}
+
 			const guild = client.cache.guilds.get(guildId);
 			if (guild === undefined) {
 				return;
@@ -187,7 +198,7 @@ abstract class PromptManager<
 
 			const reference = stringifyValue(document.ref);
 
-			const prompt = await this.savePrompt([client, bot], guild, channel, user, document);
+			const prompt = await this.savePrompt([client, bot], [guild, guildDocument], channel, user, document);
 			if (prompt === undefined) {
 				return;
 			}
@@ -230,7 +241,7 @@ abstract class PromptManager<
 
 	abstract getPromptContent(
 		[client, bot]: [Client, Discord.Bot],
-		guild: WithLanguage<Discord.Guild>,
+		[guild, guildDocument]: [Discord.Guild, Document<Guild>],
 		user: Discord.User,
 		document: Document<DataType>,
 	): Discord.CreateMessage;
@@ -299,12 +310,12 @@ abstract class PromptManager<
 
 	async savePrompt(
 		[client, bot]: [Client, Discord.Bot],
-		guild: WithLanguage<Discord.Guild>,
+		[guild, guildDocument]: [Discord.Guild, Document<Guild>],
 		channel: Discord.Channel,
 		user: Discord.User,
 		document: Document<DataType>,
 	): Promise<Discord.Message | undefined> {
-		const content = this.getPromptContent([client, bot], guild, user, document);
+		const content = this.getPromptContent([client, bot], [guild, guildDocument], user, document);
 		const message = await Discord.sendMessage(bot, channel.id, content).catch(() => {
 			client.log.warn(`Failed to send message in channel with ID ${channel.id}.`);
 			return undefined;

@@ -15,8 +15,8 @@ async function handleAcceptRules(
 		return;
 	}
 
-	const guild = client.cache.guilds.get(guildId);
-	if (guild === undefined) {
+	const guildDocument = await client.database.adapters.guilds.getOrFetch(client, "id", guildId.toString());
+	if (guildDocument === undefined) {
 		return;
 	}
 
@@ -28,7 +28,7 @@ async function handleAcceptRules(
 				"entry.proficiency.description.chooseProficiency",
 				interaction.locale,
 			)({
-				language: guild.language,
+				language: guildDocument.data.language,
 			}),
 			canChangeLater: localise(
 				client,
