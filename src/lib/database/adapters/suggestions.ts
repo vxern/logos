@@ -1,6 +1,6 @@
 import {
 	CacheAdapter,
-	DatabaseAdapters,
+	Database,
 	dispatchQuery,
 	getUserMentionByReference,
 	setNested,
@@ -29,7 +29,7 @@ const cache: CacheAdapter<Suggestion, SuggestionIndexes<Document<Suggestion>>, "
 	},
 };
 
-const adapter: DatabaseAdapters["suggestions"] = {
+const adapter: Database["adapters"]["suggestions"] = {
 	prefetch: async (client) => {
 		const documents = await dispatchQuery<Suggestion[]>(
 			client,

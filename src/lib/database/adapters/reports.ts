@@ -1,6 +1,6 @@
 import {
 	CacheAdapter,
-	DatabaseAdapters,
+	Database,
 	dispatchQuery,
 	getUserMentionByReference,
 	setNested,
@@ -29,7 +29,7 @@ const cache: CacheAdapter<Report, ReportIndexes<Document<Report>>, "delete"> = {
 	},
 };
 
-const adapter: DatabaseAdapters["reports"] = {
+const adapter: Database["adapters"]["reports"] = {
 	prefetch: async (client) => {
 		const documents = await dispatchQuery<Report[]>(
 			client,

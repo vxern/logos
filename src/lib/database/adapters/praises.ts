@@ -1,4 +1,4 @@
-import { CacheAdapter, DatabaseAdapters, dispatchQuery, setNested, stringifyValue } from "../database.js";
+import { CacheAdapter, Database, dispatchQuery, setNested, stringifyValue } from "../database.js";
 import { Document } from "../document.js";
 import { PraiseIndexes, praiseIndexParameterToIndex } from "../indexes.js";
 import { Praise } from "../structs/praise.js";
@@ -47,7 +47,7 @@ const cache: CacheAdapter<Praise, PraiseIndexes<Map<string, Document<Praise>>>> 
 	},
 };
 
-const adapter: DatabaseAdapters["praises"] = {
+const adapter: Database["adapters"]["praises"] = {
 	fetch: async (client, parameter, parameterValue) => {
 		const index = praiseIndexParameterToIndex[parameter];
 		const value = stringifyValue(parameterValue);
