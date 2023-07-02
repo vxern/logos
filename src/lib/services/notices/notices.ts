@@ -6,14 +6,17 @@ import { ServiceStarter } from "../services.js";
 import { generateInformationNotice, lastUpdatedAt as informationLastUpdatedAt } from "./channels/information.js";
 import { generateRoleNotice, lastUpdatedAt as rolesLastUpdatedAt } from "./channels/roles.js";
 import { generateWelcomeNotice, lastUpdatedAt as welcomeLastUpdatedAt } from "./channels/welcome.js";
-import { Bot, CreateMessage, Guild, Message, MessageComponents, deleteMessage, sendMessage } from "discordeno";
+import * as Discord from "discordeno";
 
-const service: ServiceStarter = ([client, bot]: [Client, Bot]) => {
+const service: ServiceStarter = ([client, bot]: [Client, Discord.Bot]) => {
 	registerPastNotices([client, bot]);
 	ensureNoticePersistence([client, bot]);
 };
 
-type NoticeGenerator = ([client, bot]: [Client, Bot], guild: Guild) => CreateMessage | Promise<CreateMessage>;
+type NoticeGenerator = (
+	[client, bot]: [Client, Discord.Bot],
+	guild: Discord.Guild,
+) => Discord.CreateMessage | Promise<Discord.CreateMessage>;
 
 const noticeGenerators = {
 	information: generateInformationNotice,
@@ -34,9 +37,9 @@ const noticeChannelIdsByGuildId: Record<NoticeTypes, Map<bigint, bigint>> = {
 	roles: new Map(),
 	welcome: new Map(),
 };
-const noticeByChannelId = new Map<bigint, Message>();
+const noticeByChannelId = new Map<bigint, Discord.Message>();
 
-function registerPastNotices([client, bot]: [Client, Bot]): void {
+function registerPastNotices([client, bot]: [Client, Discord.Bot]): void {
 	extendEventHandler(bot, "guildCreate", { append: true }, (_, { id: guildId }) => {
 		if (!isServicing(client, guildId)) {
 			return;
@@ -53,7 +56,7 @@ function registerPastNotices([client, bot]: [Client, Bot]): void {
 	});
 }
 
-function ensureNoticePersistence([client, bot]: [Client, Bot]): void {
+function ensureNoticePersistence([client, bot]: [Client, Discord.Bot]): void {
 	// Anti-tampering feature; detects notices being deleted.
 	extendEventHandler(bot, "messageDelete", { prepend: true }, (_, { id, channelId, guildId }) => {
 		if (guildId === undefined) {
@@ -94,7 +97,7 @@ function ensureNoticePersistence([client, bot]: [Client, Bot]): void {
 		}
 
 		// Delete the message and allow the bot to handle the deletion.
-		deleteMessage(bot, message.channelId, message.id).catch(() =>
+		Discord.deleteMessage(bot, message.channelId, message.id).catch(() =>
 			client.log.warn(
 				`Failed to delete notice with ID ${message.id} from channel with ID ${message.channelId} on guild with ID ${message.guildId}.`,
 			),
@@ -102,7 +105,11 @@ function ensureNoticePersistence([client, bot]: [Client, Bot]): void {
 	});
 }
 
-async function registerPastNotice([client, bot]: [Client, Bot], guild: Guild, type: NoticeTypes): Promise<void> {
+async function registerPastNotice(
+	[client, bot]: [Client, Discord.Bot],
+	guild: Discord.Guild,
+	type: NoticeTypes,
+): Promise<void> {
 	const channelId = getTextChannel(guild, configuration.guilds.channels[type])?.id;
 	if (channelId === undefined) {
 		client.log.error(
@@ -137,7 +144,7 @@ async function registerPastNotice([client, bot]: [Client, Bot], guild: Guild, ty
 	if (timestamp !== lastUpdates[type].getTime() / 1000) {
 		client.log.info(`Found outdated notice in ${type} channel on ${guild.name}. Recreating...`);
 
-		deleteMessage(bot, latestNotice.channelId, latestNotice.id).catch(() =>
+		Discord.deleteMessage(bot, latestNotice.channelId, latestNotice.id).catch(() =>
 			client.log.warn(
 				`Failed to delete notice with ID ${latestNotice.id} from channel with ID ${latestNotice.channelId} on guild with ID ${latestNotice.guildId}.`,
 			),
@@ -155,7 +162,7 @@ async function registerPastNotice([client, bot]: [Client, Bot], guild: Guild, ty
 			`Detected ${notices.length} surplus notice(s) in ${type} channel on ${guild.name}. Deleting older notices...`,
 		);
 		for (const notice of notices) {
-			deleteMessage(bot, notice.channelId, notice.id).catch(() =>
+			Discord.deleteMessage(bot, notice.channelId, notice.id).catch(() =>
 				client.log.warn(
 					`Failed to delete notice with ID ${notice.id} from channel with ID ${notice.channelId} on guild with ID ${notice.guildId}.`,
 				),
@@ -165,21 +172,22 @@ async function registerPastNotice([client, bot]: [Client, Bot], guild: Guild, ty
 }
 
 async function postAndRegisterNotice(
-	[client, bot]: [Client, Bot],
+	[client, bot]: [Client, Discord.Bot],
 	channelId: bigint,
-	noticeContent?: CreateMessage,
+	noticeContent?: Discord.CreateMessage,
 ): Promise<void> {
 	const noticeContent_ = noticeContent ?? noticeByChannelId.get(channelId);
 	if (noticeContent_ === undefined) {
 		return;
 	}
 	const { embeds, components } = noticeContent_;
-	const notice = await sendMessage(bot, channelId, { embeds, components: components as MessageComponents }).catch(
-		() => {
-			client.log.warn(`Failed to post notice to channel with ID ${channelId}.`);
-			return undefined;
-		},
-	);
+	const notice = await Discord.sendMessage(bot, channelId, {
+		embeds,
+		components: components as Discord.MessageComponents,
+	}).catch(() => {
+		client.log.warn(`Failed to post notice to channel with ID ${channelId}.`);
+		return undefined;
+	});
 	if (notice === undefined) {
 		return undefined;
 	}
@@ -190,7 +198,7 @@ async function postAndRegisterNotice(
 
 const timestampPattern = /.+?<t:(\d+):[tTdDfFR]>/;
 
-function extractTimestamp(notice: Message | CreateMessage): number | undefined {
+function extractTimestamp(notice: Discord.Message | Discord.CreateMessage): number | undefined {
 	const timestampString = notice.embeds?.at(0)?.description?.split("\n")?.at(0)?.replaceAll("*", "");
 	if (timestampString === undefined) {
 		return undefined;
@@ -204,10 +212,10 @@ function extractTimestamp(notice: Message | CreateMessage): number | undefined {
 	return Number(timestamp);
 }
 
-function getValidNotices([client, bot]: [Client, Bot], notices: Message[]): Message[] {
+function getValidNotices([client, bot]: [Client, Discord.Bot], notices: Discord.Message[]): Discord.Message[] {
 	return notices.filter((notice) => {
 		if (extractTimestamp(notice) === undefined) {
-			deleteMessage(bot, notice.channelId, notice.id).catch(() =>
+			Discord.deleteMessage(bot, notice.channelId, notice.id).catch(() =>
 				client.log.warn(
 					`Failed to delete notice with ID ${notice.id} from channel with ID ${notice.channelId} on guild with ID ${notice.guildId}.`,
 				),

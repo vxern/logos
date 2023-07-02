@@ -3,9 +3,12 @@ import { Client, autocompleteMembers, localise, resolveInteractionToMember } fro
 import { parseArguments, reply } from "../../../../interactions.js";
 import { logEvent } from "../../../../services/logging/logging.js";
 import { diagnosticMentionUser } from "../../../../utils.js";
-import { Bot, Interaction, editMember } from "discordeno";
+import * as Discord from "discordeno";
 
-async function handleClearTimeoutAutocomplete([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+async function handleClearTimeoutAutocomplete(
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
+): Promise<void> {
 	const [{ user }] = parseArguments(interaction.data?.options, {});
 	if (user === undefined) {
 		return;
@@ -14,7 +17,10 @@ async function handleClearTimeoutAutocomplete([client, bot]: [Client, Bot], inte
 	autocompleteMembers([client, bot], interaction, user, { restrictToNonSelf: true, excludeModerators: true });
 }
 
-async function handleClearTimeout([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+async function handleClearTimeout(
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
+): Promise<void> {
 	const [{ user: userSearchQuery }] = parseArguments(interaction.data?.options, {});
 	if (userSearchQuery === undefined) {
 		return;
@@ -69,7 +75,7 @@ async function handleClearTimeout([client, bot]: [Client, Bot], interaction: Int
 		return;
 	}
 
-	await editMember(bot, guildId, member.id, { communicationDisabledUntil: null }).catch(() =>
+	await Discord.editMember(bot, guildId, member.id, { communicationDisabledUntil: null }).catch(() =>
 		client.log.warn(`Failed to remove timeout of member with ID ${member.id}`),
 	);
 

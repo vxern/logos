@@ -2,9 +2,9 @@ import configuration from "../../../configuration.js";
 import { Client, extendEventHandler, isServicing } from "../../client.js";
 import { isVoice } from "../../utils.js";
 import { ServiceStarter } from "./../services.js";
-import { Bot, Channel, ChannelTypes, Collection, Guild, VoiceState, createChannel, deleteChannel } from "discordeno";
+import * as Discord from "discordeno";
 
-const previousVoiceStates = new Map<`${/*userId:*/ bigint}${/*guildId:*/ bigint}`, VoiceState>();
+const previousVoiceStates = new Map<`${/*userId:*/ bigint}${/*guildId:*/ bigint}`, Discord.VoiceState>();
 
 const service: ServiceStarter = ([client, bot]) => {
 	extendEventHandler(bot, "voiceStateUpdate", { append: true }, (_, voiceState) => {
@@ -49,12 +49,12 @@ const service: ServiceStarter = ([client, bot]) => {
 		freeChannelIds.splice(0, 1);
 
 		for (const channelId of freeChannelIds) {
-			deleteChannel(bot, channelId);
+			Discord.deleteChannel(bot, channelId);
 		}
 	});
 };
 
-function onVoiceStateUpdate([client, bot]: [Client, Bot], voiceState: VoiceState): void {
+function onVoiceStateUpdate([client, bot]: [Client, Discord.Bot], voiceState: Discord.VoiceState): void {
 	const guild = client.cache.guilds.get(voiceState.guildId);
 	if (guild === undefined) {
 		return;
@@ -79,13 +79,13 @@ function onVoiceStateUpdate([client, bot]: [Client, Bot], voiceState: VoiceState
 	previousVoiceStates.set(`${voiceState.userId}${voiceState.guildId}`, voiceState);
 }
 
-type VoiceChannelStatesTuple = [channel: Channel, voiceStates: VoiceState[]];
+type VoiceChannelStatesTuple = [channel: Discord.Channel, voiceStates: Discord.VoiceState[]];
 
 async function onConnect(
-	[client, bot]: [Client, Bot],
-	guild: Guild,
+	[client, bot]: [Client, Discord.Bot],
+	guild: Discord.Guild,
 	voiceChannelStatesTuples: VoiceChannelStatesTuple[],
-	currentState: VoiceState,
+	currentState: Discord.VoiceState,
 ): Promise<void> {
 	const channelId = currentState.channelId;
 	if (channelId === undefined) {
@@ -120,18 +120,18 @@ async function onConnect(
 		return undefined;
 	}
 
-	createChannel(bot, guild.id, {
+	Discord.createChannel(bot, guild.id, {
 		name: configuration.guilds.channels.voiceChat,
-		type: ChannelTypes.GuildVoice,
+		type: Discord.ChannelTypes.GuildVoice,
 		parentId: firstChannel.parentId,
 		position: voiceChannelStatesTuples.at(voiceChannelStatesTuples.length - 1)?.[0].position,
 	}).catch(() => client.log.warn(`Failed to create voice channel on guild with ID ${guild.id}.`));
 }
 
 async function onDisconnect(
-	[client, bot]: [Client, Bot],
+	[client, bot]: [Client, Discord.Bot],
 	voiceChannelStatesTuples: VoiceChannelStatesTuple[],
-	previousState: VoiceState,
+	previousState: Discord.VoiceState,
 ): Promise<void> {
 	const channelId = previousState.channelId;
 	if (channelId === undefined) {
@@ -162,12 +162,12 @@ async function onDisconnect(
 
 	const [channelToDelete, __] = lastFreeChannel;
 
-	deleteChannel(bot, channelToDelete.id).catch(() =>
+	Discord.deleteChannel(bot, channelToDelete.id).catch(() =>
 		client.log.warn(`Failed to delete voice channel on guild with ID ${previousState.guildId}.`),
 	);
 }
 
-function getVoiceChannelStatesTuples(guild: Guild): VoiceChannelStatesTuple[] {
+function getVoiceChannelStatesTuples(guild: Discord.Guild): VoiceChannelStatesTuple[] {
 	const voiceChannels = getRelevantVoiceChannels(guild);
 	if (voiceChannels.length === 0) {
 		return [];
@@ -175,10 +175,13 @@ function getVoiceChannelStatesTuples(guild: Guild): VoiceChannelStatesTuple[] {
 
 	const voiceStates = getRelevantVoiceStates(guild, [...voiceChannels.map((channel) => channel.id)]);
 
-	return voiceChannels.map<[Channel, VoiceState[]]>((channel) => [channel, voiceStates.get(channel.id) ?? []]);
+	return voiceChannels.map<[Discord.Channel, Discord.VoiceState[]]>((channel) => [
+		channel,
+		voiceStates.get(channel.id) ?? [],
+	]);
 }
 
-function getRelevantVoiceChannels(guild: Guild): Channel[] {
+function getRelevantVoiceChannels(guild: Discord.Guild): Discord.Channel[] {
 	const channels = guild.channels
 		.filter((channel) => isVoice(channel) && channel.name === configuration.guilds.channels.voiceChat)
 		.array()
@@ -199,9 +202,9 @@ function getRelevantVoiceChannels(guild: Guild): Channel[] {
 	return channels;
 }
 
-function getRelevantVoiceStates(guild: Guild, channelIds: bigint[]): Collection<bigint, VoiceState[]> {
+function getRelevantVoiceStates(guild: Discord.Guild, channelIds: bigint[]): Map<bigint, Discord.VoiceState[]> {
 	const voiceStates = guild.voiceStates.array().filter((voiceState) => voiceState.channelId !== undefined);
-	return new Collection(
+	return new Map(
 		channelIds.map((channelId) => [channelId, voiceStates.filter((voiceState) => voiceState.channelId === channelId)]),
 	);
 }

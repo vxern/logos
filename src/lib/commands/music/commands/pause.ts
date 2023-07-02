@@ -5,15 +5,18 @@ import { reply } from "../../../interactions.js";
 import { getVoiceState, isOccupied, isPaused, pause, verifyCanManagePlayback } from "../../../services/music/music.js";
 import { OptionTemplate } from "../../command.js";
 import { handleResumePlayback } from "./resume.js";
-import { ApplicationCommandOptionTypes, Bot, Interaction } from "discordeno";
+import * as Discord from "discordeno";
 
 const command: OptionTemplate = {
 	name: "pause",
-	type: ApplicationCommandOptionTypes.SubCommand,
+	type: Discord.ApplicationCommandOptionTypes.SubCommand,
 	handle: handlePausePlayback,
 };
 
-async function handlePausePlayback([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+async function handlePausePlayback(
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
+): Promise<void> {
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
 		return;

@@ -5,19 +5,19 @@ import { parseArguments, parseTimeExpression, reply, respond } from "../../../in
 import { getVoiceState, isOccupied, skipTo, verifyCanManagePlayback } from "../../../services/music/music.js";
 import { OptionTemplate } from "../../command.js";
 import { timestamp } from "../../parameters.js";
-import { ApplicationCommandOptionTypes, Bot, Interaction } from "discordeno";
+import * as Discord from "discordeno";
 
 const command: OptionTemplate = {
 	name: "skip-to",
-	type: ApplicationCommandOptionTypes.SubCommand,
+	type: Discord.ApplicationCommandOptionTypes.SubCommand,
 	handle: handleSkipToTimestamp,
 	handleAutocomplete: handleSkipToTimestampAutocomplete,
 	options: [timestamp],
 };
 
 async function handleSkipToTimestampAutocomplete(
-	[client, bot]: [Client, Bot],
-	interaction: Interaction,
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
 ): Promise<void> {
 	const [{ timestamp: timestampExpression }] = parseArguments(interaction.data?.options, {});
 	if (timestampExpression === undefined) {
@@ -33,7 +33,10 @@ async function handleSkipToTimestampAutocomplete(
 	respond([client, bot], interaction, [{ name: timestamp[0], value: timestamp[1].toString() }]);
 }
 
-async function handleSkipToTimestamp([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+async function handleSkipToTimestamp(
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
+): Promise<void> {
 	const [{ timestamp: timestampExpression }] = parseArguments(interaction.data?.options, {});
 
 	const guildId = interaction.guildId;
@@ -115,7 +118,10 @@ async function handleSkipToTimestamp([client, bot]: [Client, Bot], interaction: 
 	);
 }
 
-async function displayInvalidTimestampError([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+async function displayInvalidTimestampError(
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
+): Promise<void> {
 	const strings = {
 		title: localise(client, "music.options.skip-to.strings.invalidTimestamp.title", interaction.locale)(),
 		description: localise(client, "music.options.skip-to.strings.invalidTimestamp.description", interaction.locale)(),

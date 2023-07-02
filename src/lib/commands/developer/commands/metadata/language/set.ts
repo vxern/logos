@@ -3,9 +3,12 @@ import { supportedLanguages } from "../../../../../../types.js";
 import { Client } from "../../../../../client.js";
 import { reply } from "../../../../../interactions.js";
 import { parseArguments } from "../../../../../interactions.js";
-import { Bot, Interaction } from "discordeno";
+import * as Discord from "discordeno";
 
-async function handleSetLanguage([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+async function handleSetLanguage(
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
+): Promise<void> {
 	const [{ language: input }] = parseArguments(interaction.data?.options, {});
 	if (input === undefined) {
 		return;

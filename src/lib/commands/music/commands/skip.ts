@@ -11,16 +11,16 @@ import {
 } from "../../../services/music/music.js";
 import { OptionTemplate } from "../../command.js";
 import { by, collection, to } from "../../parameters.js";
-import { ApplicationCommandOptionTypes, Bot, Interaction } from "discordeno";
+import * as Discord from "discordeno";
 
 const command: OptionTemplate = {
 	name: "skip",
-	type: ApplicationCommandOptionTypes.SubCommand,
+	type: Discord.ApplicationCommandOptionTypes.SubCommand,
 	handle: handleSkipAction,
 	options: [collection, by, to],
 };
 
-async function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+async function handleSkipAction([client, bot]: [Client, Discord.Bot], interaction: Discord.Interaction): Promise<void> {
 	const [{ collection, by: songsToSkip, to: songToSkipTo }] = parseArguments(interaction.data?.options, {
 		collection: "boolean",
 		by: "number",

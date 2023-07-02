@@ -8,11 +8,11 @@ import { Modal, createModalComposer, editReply, postponeReply, reply } from "../
 import { logEvent } from "../../../services/logging/logging.js";
 import verificationManager from "../../../services/prompts/managers/verification.js";
 import { getTextChannel } from "../../../utils.js";
-import { Bot, Guild, Interaction, MessageComponentTypes, TextStyles } from "discordeno";
+import * as Discord from "discordeno";
 
 async function handleRequestVerification(
-	[client, bot]: [Client, Bot],
-	interaction: Interaction,
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
 	parameter: string,
 ): Promise<void> {
 	const guildId = interaction.guildId;
@@ -31,9 +31,9 @@ async function handleRequestVerification(
 }
 
 async function initiateVerificationProcess(
-	[client, bot]: [Client, Bot],
-	interaction: Interaction,
-	guild: WithLanguage<Guild>,
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
+	guild: WithLanguage<Discord.Guild>,
 	requestedRoleId: bigint,
 ): Promise<void> {
 	const userDocument = await client.database.adapters.users.getOrFetchOrCreate(
@@ -187,7 +187,7 @@ async function initiateVerificationProcess(
 
 function generateVerificationQuestionModal(
 	client: Client,
-	guild: WithLanguage<Guild>,
+	guild: WithLanguage<Discord.Guild>,
 	locale: string | undefined,
 ): Modal<EntryRequest["answers"]> {
 	const strings = {
@@ -201,13 +201,13 @@ function generateVerificationQuestionModal(
 		title: strings.title,
 		fields: [
 			{
-				type: MessageComponentTypes.ActionRow,
+				type: Discord.MessageComponentTypes.ActionRow,
 				components: [
 					{
 						customId: "reason",
-						type: MessageComponentTypes.InputText,
+						type: Discord.MessageComponentTypes.InputText,
 						label: trim(strings.reason, 45),
-						style: TextStyles.Paragraph,
+						style: Discord.TextStyles.Paragraph,
 						required: true,
 						minLength: 20,
 						maxLength: 300,
@@ -215,13 +215,13 @@ function generateVerificationQuestionModal(
 				],
 			},
 			{
-				type: MessageComponentTypes.ActionRow,
+				type: Discord.MessageComponentTypes.ActionRow,
 				components: [
 					{
 						customId: "aim",
-						type: MessageComponentTypes.InputText,
+						type: Discord.MessageComponentTypes.InputText,
 						label: trim(strings.aim, 45),
-						style: TextStyles.Paragraph,
+						style: Discord.TextStyles.Paragraph,
 						required: true,
 						minLength: 20,
 						maxLength: 300,
@@ -229,13 +229,13 @@ function generateVerificationQuestionModal(
 				],
 			},
 			{
-				type: MessageComponentTypes.ActionRow,
+				type: Discord.MessageComponentTypes.ActionRow,
 				components: [
 					{
 						customId: "whereFound",
-						type: MessageComponentTypes.InputText,
+						type: Discord.MessageComponentTypes.InputText,
 						label: trim(strings.whereFound, 45),
-						style: TextStyles.Short,
+						style: Discord.TextStyles.Short,
 						required: true,
 						minLength: 5,
 						maxLength: 50,

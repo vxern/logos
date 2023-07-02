@@ -5,11 +5,11 @@ import { proficiency } from "../../../commands/social/roles/categories/language.
 import { encodeId, reply } from "../../../interactions.js";
 import { EntryStepButtonID } from "../../../services/entry/entry.js";
 import { snowflakeToTimestamp } from "../../../utils.js";
-import { Bot, ButtonStyles, Interaction, MessageComponentTypes, addRole } from "discordeno";
+import * as Discord from "discordeno";
 
 async function handleSelectLanguageProficiency(
-	[client, bot]: [Client, Bot],
-	interaction: Interaction,
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
 	parameter: string,
 ): Promise<void> {
 	const guildId = interaction.guildId;
@@ -86,11 +86,11 @@ async function handleSelectLanguageProficiency(
 				],
 				components: [
 					{
-						type: MessageComponentTypes.ActionRow,
+						type: Discord.MessageComponentTypes.ActionRow,
 						components: [
 							{
-								type: MessageComponentTypes.Button,
-								style: ButtonStyles.Secondary,
+								type: Discord.MessageComponentTypes.Button,
+								style: Discord.ButtonStyles.Secondary,
 								label: strings.description.understood,
 								customId: encodeId<EntryStepButtonID>(constants.staticComponentIds.entry.requestedVerification, [
 									role.id.toString(),
@@ -130,14 +130,14 @@ async function handleSelectLanguageProficiency(
 		],
 	});
 
-	addRole(bot, guild.id, interaction.user.id, role.id, "User-requested role addition.").catch(() =>
+	Discord.addRole(bot, guild.id, interaction.user.id, role.id, "User-requested role addition.").catch(() =>
 		client.log.warn(
 			`Failed to add role with ID ${role.id} to member with ID ${interaction.user.id} in guild with ID ${guild.id}.`,
 		),
 	);
 }
 
-async function vetUser([client, bot]: [Client, Bot], interaction: Interaction): Promise<boolean> {
+async function vetUser([client, bot]: [Client, Discord.Bot], interaction: Discord.Interaction): Promise<boolean> {
 	const userDocument = await client.database.adapters.users.getOrFetchOrCreate(
 		client,
 		"id",

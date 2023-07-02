@@ -14,45 +14,21 @@ import { setupLogging } from "./services/logging/logging.js";
 import { MusicController, setupMusicController } from "./services/music/music.js";
 import services from "./services/services.js";
 import { diagnosticMentionUser } from "./utils.js";
-import {
-	ApplicationCommandOptionTypes,
-	Bot,
-	Channel,
-	DiscordMessage,
-	EventHandlers,
-	Guild,
-	Intents,
-	Interaction,
-	InteractionDataOption,
-	Locales,
-	Localization as DiscordLocalisations,
-	Member,
-	Message,
-	Transformers,
-	User,
-	calculatePermissions,
-	createBot,
-	createTransformers,
-	fetchMembers,
-	send as sendShardPayload,
-	snowflakeToBigint,
-	startBot,
-	upsertGuildApplicationCommands,
-} from "discordeno";
+import * as Discord from "discordeno";
 import * as FancyLog from "fancy-log";
 import * as Lavaclient from "lavaclient";
 import * as MessagePipe from "messagepipe";
 import * as Sentry from "sentry";
 
-interface Collector<ForEvent extends keyof EventHandlers> {
-	filter: (...args: Parameters<EventHandlers[ForEvent]>) => boolean;
+interface Collector<ForEvent extends keyof Discord.EventHandlers> {
+	filter: (...args: Parameters<Discord.EventHandlers[ForEvent]>) => boolean;
 	limit?: number;
 	removeAfter?: number;
-	onCollect: (...args: Parameters<EventHandlers[ForEvent]>) => void;
+	onCollect: (...args: Parameters<Discord.EventHandlers[ForEvent]>) => void;
 	onEnd: () => void;
 }
 
-type Event = keyof EventHandlers;
+type Event = keyof Discord.EventHandlers;
 
 type WithLanguage<T> = T & { language: Language };
 
@@ -72,13 +48,13 @@ type Client = Readonly<{
 	};
 	log: Record<"debug" | keyof typeof FancyLog, (...args: unknown[]) => void>;
 	cache: {
-		guilds: Map<bigint, WithLanguage<Guild>>;
-		users: Map<bigint, User>;
-		members: Map<bigint, Member>;
-		channels: Map<bigint, Channel>;
+		guilds: Map<bigint, WithLanguage<Discord.Guild>>;
+		users: Map<bigint, Discord.User>;
+		members: Map<bigint, Discord.Member>;
+		channels: Map<bigint, Discord.Channel>;
 		messages: {
-			latest: Map<bigint, Message>;
-			previous: Map<bigint, Message>;
+			latest: Map<bigint, Discord.Message>;
+			previous: Map<bigint, Discord.Message>;
 		};
 	};
 	database: Database;
@@ -181,7 +157,7 @@ async function initialiseClient(
 			return;
 		}
 
-		sendShardPayload(shard, payload, true);
+		Discord.send(shard, payload, true);
 	});
 
 	const client = createClient(metadata, { ...features, music: musicFeature }, localisations);
@@ -189,17 +165,17 @@ async function initialiseClient(
 	await prefetchDataFromDatabase(client, client.database);
 
 	const bot = overrideDefaultEventHandlers(
-		createBot({
+		Discord.createBot({
 			token: metadata.environment.discordSecret,
 			intents:
-				Intents.Guilds |
-				Intents.GuildMembers |
-				Intents.GuildBans |
-				Intents.GuildVoiceStates |
-				Intents.GuildMessages |
-				Intents.MessageContent,
+				Discord.Intents.Guilds |
+				Discord.Intents.GuildMembers |
+				Discord.Intents.GuildBans |
+				Discord.Intents.GuildVoiceStates |
+				Discord.Intents.GuildMessages |
+				Discord.Intents.MessageContent,
 			events: withMusicEvents(client, createEventHandlers(client), client.features.music.node),
-			transformers: withCaching(client, createTransformers({})),
+			transformers: withCaching(client, Discord.createTransformers({})),
 		}),
 	);
 
@@ -207,7 +183,7 @@ async function initialiseClient(
 
 	setupLavalinkNode([client, bot]);
 
-	startBot(bot).then(() => [client, bot]);
+	Discord.startBot(bot).then(() => [client, bot]);
 }
 
 async function prefetchDataFromDatabase(client: Client, database: Database): Promise<void> {
@@ -239,9 +215,9 @@ function createMusicFeature(
 
 function withMusicEvents(
 	client: Client,
-	events: Partial<EventHandlers>,
+	events: Partial<Discord.EventHandlers>,
 	node: Lavaclient.Node,
-): Partial<EventHandlers> {
+): Partial<Discord.EventHandlers> {
 	return {
 		...events,
 		voiceStateUpdate: async (_, { sessionId, channelId, guildId, userId }) =>
@@ -262,9 +238,9 @@ function withMusicEvents(
 	};
 }
 
-function overrideDefaultEventHandlers(bot: Bot): Bot {
+function overrideDefaultEventHandlers(bot: Discord.Bot): Discord.Bot {
 	bot.handlers.MESSAGE_UPDATE = (bot, data) => {
-		const messageData = data.d as DiscordMessage;
+		const messageData = data.d as Discord.DiscordMessage;
 		if (!("author" in messageData)) {
 			return;
 		}
@@ -275,7 +251,7 @@ function overrideDefaultEventHandlers(bot: Bot): Bot {
 	return bot;
 }
 
-function createEventHandlers(client: Client): Partial<EventHandlers> {
+function createEventHandlers(client: Client): Partial<Discord.EventHandlers> {
 	return {
 		ready: (bot, payload) => {
 			const { shardId } = payload;
@@ -294,7 +270,7 @@ function createEventHandlers(client: Client): Partial<EventHandlers> {
 				return client.commands.global;
 			})();
 
-			upsertGuildApplicationCommands(bot, guild.id, commands).catch((reason) =>
+			Discord.upsertGuildApplicationCommands(bot, guild.id, commands).catch((reason) =>
 				client.log.warn(`Failed to upsert commands: ${reason}`),
 			);
 
@@ -308,7 +284,7 @@ function createEventHandlers(client: Client): Partial<EventHandlers> {
 
 			setupLogging([client, bot], guild);
 
-			fetchMembers(bot, guild.id, { limit: 0, query: "" }).catch((reason) =>
+			Discord.fetchMembers(bot, guild.id, { limit: 0, query: "" }).catch((reason) =>
 				client.log.warn(`Failed to fetch members for guild with ID ${guild.id}: ${reason}`),
 			);
 		},
@@ -365,7 +341,7 @@ function createEventHandlers(client: Client): Partial<EventHandlers> {
 	};
 }
 
-function withCaching(client: Client, transformers: Transformers): Transformers {
+function withCaching(client: Client, transformers: Discord.Transformers): Discord.Transformers {
 	const { guild, user, member, channel, message, role, voiceState } = transformers;
 
 	transformers.guild = (bot, payload) => {
@@ -653,7 +629,7 @@ function createCommandHandlers(commands: CommandTemplate[]): Client["commands"][
 	return { execute: handlers, autocomplete: autocompleteHandlers };
 }
 
-function getImplicitLanguage(guild: Guild): Language {
+function getImplicitLanguage(guild: Discord.Guild): Language {
 	const [match, language] = configuration.guilds.namePattern.exec(guild.name) ?? [];
 	if (match === undefined) {
 		return defaultLanguage;
@@ -671,19 +647,19 @@ function getImplicitLanguage(guild: Guild): Language {
 	return defaultLanguage;
 }
 
-function registerGuild(client: Client, guild: Guild): void {
+function registerGuild(client: Client, guild: Discord.Guild): void {
 	const language = getImplicitLanguage(guild);
 
 	client.cache.guilds.set(guild.id, { ...guild, language });
 }
 
-function startServices([client, bot]: [Client, Bot]): void {
+function startServices([client, bot]: [Client, Discord.Bot]): void {
 	for (const startService of services) {
 		startService([client, bot]);
 	}
 }
 
-function setupLavalinkNode([client, bot]: [Client, Bot]): void {
+function setupLavalinkNode([client, bot]: [Client, Discord.Bot]): void {
 	client.features.music.node.on("connect", ({ took: tookMs }) =>
 		client.log.info(`Connected to Lavalink node. Time taken: ${tookMs} ms`),
 	);
@@ -712,13 +688,13 @@ function setupLavalinkNode([client, bot]: [Client, Bot]): void {
 	connectToLavalinkNode([client, bot]);
 }
 
-function connectToLavalinkNode([client, bot]: [Client, Bot]): void {
+function connectToLavalinkNode([client, bot]: [Client, Discord.Bot]): void {
 	client.log.info("Connecting to Lavalink node...");
 	client.features.music.node.connect(bot.id.toString());
 }
 
-function addCollector<T extends keyof EventHandlers>(
-	[client, bot]: [Client, Bot],
+function addCollector<T extends keyof Discord.EventHandlers>(
+	[client, bot]: [Client, Discord.Bot],
 	event: T,
 	collector: Collector<T>,
 ): void {
@@ -748,7 +724,7 @@ function addCollector<T extends keyof EventHandlers>(
 	}
 
 	if (!client.collectors.has(event)) {
-		const collectors: Set<Collector<keyof EventHandlers>> = new Set();
+		const collectors: Set<Collector<keyof Discord.EventHandlers>> = new Set();
 		client.collectors.set(event, collectors);
 
 		extendEventHandler(bot, event, { prepend: true }, (...args) => {
@@ -800,8 +776,8 @@ function resolveIdentifierToMembers(
 	userId: bigint,
 	identifier: string,
 	options: Partial<MemberNarrowingOptions> = {},
-): [members: Member[], isResolved: boolean] | undefined {
-	const asker = client.cache.members.get(snowflakeToBigint(`${userId}${guildId}`));
+): [members: Discord.Member[], isResolved: boolean] | undefined {
+	const asker = client.cache.members.get(Discord.snowflakeToBigint(`${userId}${guildId}`));
 	if (asker === undefined) {
 		return undefined;
 	}
@@ -813,7 +789,7 @@ function resolveIdentifierToMembers(
 
 	const moderatorRoleIds = guild.roles
 		.array()
-		.filter((role) => calculatePermissions(role.permissions).includes("MODERATE_MEMBERS"))
+		.filter((role) => Discord.calculatePermissions(role.permissions).includes("MODERATE_MEMBERS"))
 		.map((role) => role.id);
 	if (moderatorRoleIds.length === 0) {
 		return undefined;
@@ -821,7 +797,7 @@ function resolveIdentifierToMembers(
 
 	const id = extractIDFromIdentifier(identifier);
 	if (id !== undefined) {
-		const member = client.cache.members.get(snowflakeToBigint(`${id}${guildId}`));
+		const member = client.cache.members.get(Discord.snowflakeToBigint(`${id}${guildId}`));
 		if (member === undefined) {
 			return undefined;
 		}
@@ -843,7 +819,7 @@ function resolveIdentifierToMembers(
 
 	const cachedMembers = options.restrictToSelf ? [asker] : guild.members.array();
 	const members = cachedMembers.filter(
-		(member: Member) =>
+		(member: Discord.Member) =>
 			(options.restrictToNonSelf ? member.user?.id !== asker.user?.id : true) &&
 			(options.excludeModerators ? !moderatorRoleIds.some((roleId) => member.roles.includes(roleId)) : true),
 	);
@@ -877,8 +853,8 @@ function resolveIdentifierToMembers(
 }
 
 async function autocompleteMembers(
-	[client, bot]: [Client, Bot],
-	interaction: Interaction,
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
 	identifier: string,
 	options?: Partial<MemberNarrowingOptions>,
 ): Promise<void> {
@@ -894,7 +870,7 @@ async function autocompleteMembers(
 
 	const [matchedMembers, _] = result;
 
-	const users: User[] = [];
+	const users: Discord.User[] = [];
 	for (const member of matchedMembers) {
 		if (users.length === 20) {
 			break;
@@ -916,11 +892,11 @@ async function autocompleteMembers(
 }
 
 function resolveInteractionToMember(
-	[client, bot]: [Client, Bot],
-	interaction: Interaction,
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
 	identifier: string,
 	options?: Partial<MemberNarrowingOptions>,
-): Member | undefined {
+): Discord.Member | undefined {
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
 		return undefined;
@@ -958,8 +934,8 @@ function resolveInteractionToMember(
 	return matchedMembers.at(0);
 }
 
-function extendEventHandler<Event extends keyof EventHandlers, Handler extends EventHandlers[Event]>(
-	bot: Bot,
+function extendEventHandler<Event extends keyof Discord.EventHandlers, Handler extends Discord.EventHandlers[Event]>(
+	bot: Discord.Bot,
 	eventName: Event,
 	{ prepend = false, append = false }: { prepend: true; append?: false } | { prepend?: false; append: true },
 	extension: (...args: Parameters<Handler>) => unknown,
@@ -980,12 +956,12 @@ function extendEventHandler<Event extends keyof EventHandlers, Handler extends E
 	) as Handler;
 }
 
-function isSubcommandGroup(option: InteractionDataOption): boolean {
-	return option.type === ApplicationCommandOptionTypes.SubCommandGroup;
+function isSubcommandGroup(option: Discord.InteractionDataOption): boolean {
+	return option.type === Discord.ApplicationCommandOptionTypes.SubCommandGroup;
 }
 
-function isSubcommand(option: InteractionDataOption): boolean {
-	return option.type === ApplicationCommandOptionTypes.SubCommand;
+function isSubcommand(option: Discord.InteractionDataOption): boolean {
+	return option.type === Discord.ApplicationCommandOptionTypes.SubCommand;
 }
 
 function createLocalisations(localisationsRaw: Map<string, Map<Language, string>>): Client["localisation"] {
@@ -1016,7 +992,8 @@ function createLocalisations(localisationsRaw: Map<string, Map<Language, string>
 }
 
 function localise(client: Client, key: string, locale: string | undefined): (args?: Record<string, unknown>) => string {
-	const language = (locale !== undefined ? getLanguageByLocale(locale as Locales) : undefined) ?? defaultLanguage;
+	const language =
+		(locale !== undefined ? getLanguageByLocale(locale as Discord.Locales) : undefined) ?? defaultLanguage;
 
 	const getLocalisation =
 		client.localisation.localisations.get(key)?.get(language) ??
@@ -1035,9 +1012,9 @@ function localise(client: Client, key: string, locale: string | undefined): (arg
 
 function toDiscordLocalisations(
 	localisations: Map<Language, (args: Record<string, unknown>) => string>,
-): DiscordLocalisations {
+): Discord.Localization {
 	const entries = Array.from(localisations.entries());
-	const result: DiscordLocalisations = {};
+	const result: Discord.Localization = {};
 	for (const [language, localise] of entries) {
 		const locale = getLocaleForLanguage(language);
 		if (locale === undefined) {

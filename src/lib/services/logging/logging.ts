@@ -3,12 +3,12 @@ import { Client, extendEventHandler } from "../../client.js";
 import { getTextChannel } from "../../utils.js";
 import { ClientEvents, Events, MessageGenerators } from "./generator.js";
 import generators from "./generators.js";
-import { Bot, Channel, Guild, sendMessage } from "discordeno";
+import * as Discord from "discordeno";
 
 type ClientEventNames = keyof ClientEvents;
 const clientEventNames = Object.keys(generators.client) as ClientEventNames[];
 
-function setupLogging([client, bot]: [Client, Bot], guild: Guild): void {
+function setupLogging([client, bot]: [Client, Discord.Bot], guild: Discord.Guild): void {
 	const logChannel = getTextChannel(guild, configuration.guilds.channels.logging);
 	if (logChannel === undefined) {
 		return;
@@ -24,8 +24,8 @@ function setupLogging([client, bot]: [Client, Bot], guild: Guild): void {
 const messageGenerators: MessageGenerators<Events> = { ...generators.client, ...generators.guild };
 
 async function logEvent<K extends keyof Events>(
-	[client, bot]: [Client, Bot],
-	guild: Guild,
+	[client, bot]: [Client, Discord.Bot],
+	guild: Discord.Guild,
 	event: K,
 	args: Events[K],
 ): Promise<void> {
@@ -38,8 +38,8 @@ async function logEvent<K extends keyof Events>(
 }
 
 async function logToChannel<K extends keyof Events>(
-	[client, bot]: [Client, Bot],
-	channel: Channel,
+	[client, bot]: [Client, Discord.Bot],
+	channel: Discord.Channel,
 	event: K,
 	...args: Events[K]
 ): Promise<void> {
@@ -69,7 +69,7 @@ async function logToChannel<K extends keyof Events>(
 		return;
 	}
 
-	sendMessage(bot, channel.id, {
+	Discord.sendMessage(bot, channel.id, {
 		embeds: [
 			{
 				title: entry.title,

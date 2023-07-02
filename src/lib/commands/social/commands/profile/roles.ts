@@ -15,23 +15,11 @@ import {
 	isGroup,
 	isSingle,
 } from "../../roles/types.js";
-import {
-	ApplicationCommandOptionTypes,
-	Bot,
-	Interaction,
-	InteractionCallbackData,
-	InteractionTypes,
-	MessageComponentTypes,
-	Role as DiscordRole,
-	SelectOption,
-	addRole,
-	removeRole,
-	snowflakeToBigint,
-} from "discordeno";
+import * as Discord from "discordeno";
 
 const command: OptionTemplate = {
 	name: "roles",
-	type: ApplicationCommandOptionTypes.SubCommand,
+	type: Discord.ApplicationCommandOptionTypes.SubCommand,
 	handle: handleOpenRoleSelectionMenu,
 };
 
@@ -39,7 +27,10 @@ const command: OptionTemplate = {
  * Displays a role selection menu to the user and allows them to assign or unassign roles
  * from within it.
  */
-async function handleOpenRoleSelectionMenu([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+async function handleOpenRoleSelectionMenu(
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
+): Promise<void> {
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
 		return;
@@ -131,8 +122,8 @@ function traverseRoleSelectionTree(data: NavigationData): [RoleCategory, ...Role
  * Creates a browsing menu for selecting roles.
  */
 async function createRoleSelectionMenu(
-	[client, bot]: [Client, Bot],
-	interaction: Interaction,
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
 	data: BrowsingData,
 ): Promise<void> {
 	const guildId = interaction.guildId;
@@ -154,7 +145,7 @@ async function createRoleSelectionMenu(
 		emojiIdsByName.set(name, id);
 	}
 
-	const member = client.cache.members.get(snowflakeToBigint(`${interaction.user.id}${guild.id}`));
+	const member = client.cache.members.get(Discord.snowflakeToBigint(`${interaction.user.id}${guild.id}`));
 	if (member === undefined) {
 		return;
 	}
@@ -162,7 +153,7 @@ async function createRoleSelectionMenu(
 	const rolesById = new Map(guild.roles.array().map((role) => [role.id, role]));
 
 	const customId = createInteractionCollector([client, bot], {
-		type: InteractionTypes.MessageComponent,
+		type: Discord.InteractionTypes.MessageComponent,
 		userId: interaction.user.id,
 		onCollect: async (bot, selection) => {
 			acknowledge([client, bot], selection);
@@ -210,7 +201,7 @@ async function createRoleSelectionMenu(
 					return;
 				}
 
-				removeRole(bot, guild.id, member.id, role.id, "User-requested role removal.").catch(() =>
+				Discord.removeRole(bot, guild.id, member.id, role.id, "User-requested role removal.").catch(() =>
 					client.log.warn(
 						`Failed to remove role with ID ${role.id} from member with ID ${member.id} in guild with ID ${guild.id}.`,
 					),
@@ -257,7 +248,7 @@ async function createRoleSelectionMenu(
 					return;
 				}
 
-				await addRole(bot, guild.id, member.id, role.id, "User-requested role addition.").catch(() =>
+				await Discord.addRole(bot, guild.id, member.id, role.id, "User-requested role addition.").catch(() =>
 					client.log.warn(
 						`Failed to add role with ID ${role.id} to member with ID ${member.id} in guild with ID ${guild.id}.`,
 					),
@@ -265,7 +256,7 @@ async function createRoleSelectionMenu(
 
 				if (viewData.category.maximum === 1) {
 					for (const memberRoleId of viewData.memberRolesIncludedInMenu) {
-						removeRole(bot, guild.id, member.id, memberRoleId).catch(() =>
+						Discord.removeRole(bot, guild.id, member.id, memberRoleId).catch(() =>
 							client.log.warn(
 								`Failed to remove role with ID ${memberRoleId} from member with ID ${member.id} in guild with ID ${guild.id}.`,
 							),
@@ -300,14 +291,14 @@ async function createRoleSelectionMenu(
 
 interface RoleData {
 	emojiIdsByName: Map<string, bigint>;
-	rolesById: Map<bigint, DiscordRole>;
+	rolesById: Map<bigint, Discord.Role>;
 	memberRoleIds: bigint[];
 }
 
 interface ViewData {
 	category: RoleCategory;
 	menuRoles: Role[];
-	menuRolesResolved: DiscordRole[];
+	menuRolesResolved: Discord.Role[];
 	memberRolesIncludedInMenu: bigint[];
 }
 
@@ -320,8 +311,8 @@ interface RoleDisplayData {
 }
 
 async function traverseRoleTreeAndDisplay(
-	[client, bot]: [Client, Bot],
-	interaction: Interaction,
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
 	data: RoleDisplayData,
 	editResponse = true,
 ): Promise<RoleDisplayData> {
@@ -336,7 +327,7 @@ async function traverseRoleTreeAndDisplay(
 		throw "StateError: The guild ID was unexpectedly `undefined`.";
 	}
 
-	let selectOptions: SelectOption[];
+	let selectOptions: Discord.SelectOption[];
 	if (isSingle(category)) {
 		const menuRoles = getRoles(category.collection, data.browsingData.guildId);
 		const snowflakes = (() => {
@@ -400,9 +391,9 @@ async function displaySelectMenu(
 	client: Client,
 	data: RoleDisplayData,
 	categories: [RoleCategory, ...RoleCategory[]],
-	selectOptions: SelectOption[],
+	selectOptions: Discord.SelectOption[],
 	locale: string | undefined,
-): Promise<InteractionCallbackData> {
+): Promise<Discord.InteractionCallbackData> {
 	const isInRootCategory = data.browsingData.navigationData.indexesAccessed.length === 0;
 	if (!isInRootCategory) {
 		const strings = {
@@ -443,10 +434,10 @@ async function displaySelectMenu(
 		],
 		components: [
 			{
-				type: MessageComponentTypes.ActionRow,
+				type: Discord.MessageComponentTypes.ActionRow,
 				components: [
 					{
-						type: MessageComponentTypes.SelectMenu,
+						type: Discord.MessageComponentTypes.SelectMenu,
 						customId: data.customId,
 						options: selectOptions,
 						placeholder: isGroup(category) ? strings.chooseCategory : strings.chooseRole,
@@ -462,10 +453,10 @@ function createSelectOptionsFromCategories(
 	categories: RoleCategory[],
 	guildId: bigint,
 	locale: string | undefined,
-): SelectOption[] {
+): Discord.SelectOption[] {
 	const categorySelections = getRoleCategories(categories, guildId);
 
-	const selections: SelectOption[] = [];
+	const selections: Discord.SelectOption[] = [];
 	for (const [category, index] of categorySelections) {
 		const strings = {
 			name: localise(client, `${category.id}.name`, locale)(),
@@ -489,8 +480,8 @@ function createSelectOptionsFromCollection(
 	client: Client,
 	data: RoleDisplayData,
 	locale: string | undefined,
-): SelectOption[] {
-	const selectOptions: SelectOption[] = [];
+): Discord.SelectOption[] {
+	const selectOptions: Discord.SelectOption[] = [];
 
 	const viewData = data.viewData;
 	if (viewData === undefined) {
@@ -514,7 +505,9 @@ function createSelectOptionsFromCollection(
 		selectOptions.push({
 			label: trim(memberHasRole ? `[${strings.assigned}] ${strings.name}` : strings.name, 25),
 			value: index.toString(),
-			description: client.localisation.has(`${role.id}.description`) ? trim(strings.description(), 100) : undefined,
+			description: client.localisation.localisations.has(`${role.id}.description`)
+				? trim(strings.description(), 100)
+				: undefined,
 			emoji: (() => {
 				if (role.emoji === undefined) {
 					return;

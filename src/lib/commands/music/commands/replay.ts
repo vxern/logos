@@ -11,16 +11,19 @@ import {
 } from "../../../services/music/music.js";
 import { OptionTemplate } from "../../command.js";
 import { collection } from "../../parameters.js";
-import { ApplicationCommandOptionTypes, Bot, Interaction } from "discordeno";
+import * as Discord from "discordeno";
 
 const command: OptionTemplate = {
 	name: "replay",
-	type: ApplicationCommandOptionTypes.SubCommand,
+	type: Discord.ApplicationCommandOptionTypes.SubCommand,
 	handle: handleReplayAction,
 	options: [collection],
 };
 
-async function handleReplayAction([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+async function handleReplayAction(
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
+): Promise<void> {
 	const [{ collection }] = parseArguments(interaction.data?.options, { collection: "boolean" });
 
 	const guildId = interaction.guildId;

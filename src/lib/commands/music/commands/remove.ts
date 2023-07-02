@@ -23,24 +23,18 @@ import {
 import { chunk } from "../../../utils.js";
 import { OptionTemplate } from "../../command.js";
 import { SongListing, listingTypeToEmoji } from "../data/types.js";
-import {
-	ActionRow,
-	ApplicationCommandOptionTypes,
-	Bot,
-	Interaction,
-	InteractionCallbackData,
-	InteractionTypes,
-	MessageComponentTypes,
-	SelectOption,
-} from "discordeno";
+import * as Discord from "discordeno";
 
 const command: OptionTemplate = {
 	name: "remove",
-	type: ApplicationCommandOptionTypes.SubCommand,
+	type: Discord.ApplicationCommandOptionTypes.SubCommand,
 	handle: handleRemoveSongListing,
 };
 
-async function handleRemoveSongListing([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+async function handleRemoveSongListing(
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
+): Promise<void> {
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
 		return;
@@ -114,19 +108,19 @@ interface RemoveListingData {
 }
 
 async function generateEmbed(
-	[client, bot]: [Client, Bot],
-	interaction: Interaction,
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
 	controller: MusicController,
 	data: RemoveListingData,
 	locale: string | undefined,
-): Promise<InteractionCallbackData> {
+): Promise<Discord.InteractionCallbackData> {
 	const pages = chunk(controller.listingQueue, configuration.music.limits.songs.page);
 
 	const isFirst = data.pageIndex === 0;
 	const isLast = data.pageIndex === pages.length - 1;
 
 	const buttonsCustomId = createInteractionCollector([client, bot], {
-		type: InteractionTypes.MessageComponent,
+		type: Discord.InteractionTypes.MessageComponent,
 		userId: interaction.user.id,
 		onCollect: async (bot, selection) => {
 			acknowledge([client, bot], selection);
@@ -158,7 +152,7 @@ async function generateEmbed(
 	});
 
 	const selectMenuCustomId = createInteractionCollector([client, bot], {
-		type: InteractionTypes.MessageComponent,
+		type: Discord.InteractionTypes.MessageComponent,
 		userId: interaction.user.id,
 		limit: 1,
 		onCollect: async (bot, selection) => {
@@ -260,14 +254,18 @@ async function generateEmbed(
 	};
 }
 
-function generateSelectMenu(data: RemoveListingData, pages: SongListing[][], selectMenuCustomId: string): ActionRow {
+function generateSelectMenu(
+	data: RemoveListingData,
+	pages: SongListing[][],
+	selectMenuCustomId: string,
+): Discord.ActionRow {
 	const page = pages.at(data.pageIndex);
 	if (page === undefined) {
 		return {
-			type: MessageComponentTypes.ActionRow,
+			type: Discord.MessageComponentTypes.ActionRow,
 			components: [
 				{
-					type: MessageComponentTypes.SelectMenu,
+					type: Discord.MessageComponentTypes.SelectMenu,
 					customId: selectMenuCustomId,
 					minValues: 1,
 					maxValues: 1,
@@ -278,14 +276,14 @@ function generateSelectMenu(data: RemoveListingData, pages: SongListing[][], sel
 	}
 
 	return {
-		type: MessageComponentTypes.ActionRow,
+		type: Discord.MessageComponentTypes.ActionRow,
 		components: [
 			{
-				type: MessageComponentTypes.SelectMenu,
+				type: Discord.MessageComponentTypes.SelectMenu,
 				customId: selectMenuCustomId,
 				minValues: 1,
 				maxValues: 1,
-				options: page.map<SelectOption>((songListing, index) => ({
+				options: page.map<Discord.SelectOption>((songListing, index) => ({
 					emoji: { name: listingTypeToEmoji[songListing.content.type] },
 					label: trim(songListing.content.title, 100),
 					value: (data.pageIndex * configuration.music.limits.songs.page + index).toString(),

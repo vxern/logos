@@ -12,16 +12,19 @@ import {
 } from "../../../services/music/music.js";
 import { OptionTemplate } from "../../command.js";
 import { by, collection, to } from "../../parameters.js";
-import { ApplicationCommandOptionTypes, Bot, Interaction } from "discordeno";
+import * as Discord from "discordeno";
 
 const command: OptionTemplate = {
 	name: "unskip",
-	type: ApplicationCommandOptionTypes.SubCommand,
+	type: Discord.ApplicationCommandOptionTypes.SubCommand,
 	handle: handleUnskipAction,
 	options: [collection, by, to],
 };
 
-async function handleUnskipAction([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+async function handleUnskipAction(
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
+): Promise<void> {
 	const [{ collection, by: songsToUnskip, to: songToUnskipTo }] = parseArguments(interaction.data?.options, {
 		collection: "boolean",
 		by: "number",

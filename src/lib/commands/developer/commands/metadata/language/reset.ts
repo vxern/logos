@@ -1,9 +1,12 @@
 import constants from "../../../../../../constants.js";
 import { Client, getImplicitLanguage } from "../../../../../client.js";
 import { reply } from "../../../../../interactions.js";
-import { Bot, Interaction } from "discordeno";
+import * as Discord from "discordeno";
 
-async function handleResetLanguage([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+async function handleResetLanguage(
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
+): Promise<void> {
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
 		return;

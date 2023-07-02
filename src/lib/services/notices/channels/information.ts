@@ -5,11 +5,14 @@ import { Client, localise } from "../../../client.js";
 import { ruleIds } from "../../../commands/moderation/commands/rule.js";
 import { getTextChannel } from "../../../utils.js";
 import { getLastUpdateString } from "../notices.js";
-import { BaseInvite, Bot, CreateMessage, Embed, Guild, InviteMetadata, createInvite, getInvites } from "discordeno";
+import * as Discord from "discordeno";
 
 const lastUpdatedAt = new Date(2023, 2, 19);
 
-async function generateInformationNotice([client, bot]: [Client, Bot], guild: Guild): Promise<CreateMessage> {
+async function generateInformationNotice(
+	[client, bot]: [Client, Discord.Bot],
+	guild: Discord.Guild,
+): Promise<Discord.CreateMessage> {
 	const ruleSection = getRulesSection(client);
 
 	const invite = await getOrCreateInvite([client, bot], guild);
@@ -22,7 +25,7 @@ async function generateInformationNotice([client, bot]: [Client, Bot], guild: Gu
 	return { embeds: [ruleSection, inviteSection] };
 }
 
-function getRulesSection(client: Client): Embed {
+function getRulesSection(client: Client): Discord.Embed {
 	const fields = ruleIds.map((ruleId, index) => {
 		const strings = {
 			title: localise(client, `rules.${ruleId}.title`, defaultLocale)(),
@@ -47,7 +50,7 @@ function getRulesSection(client: Client): Embed {
 	};
 }
 
-function getInviteSection(client: Client, invite: InviteMetadata | BaseInvite): Embed {
+function getInviteSection(client: Client, invite: Discord.InviteMetadata | Discord.BaseInvite): Discord.Embed {
 	const link = constants.links.generateDiscordInviteLink(invite.code);
 
 	const strings = {
@@ -61,10 +64,10 @@ function getInviteSection(client: Client, invite: InviteMetadata | BaseInvite): 
 }
 
 async function getOrCreateInvite(
-	[client, bot]: [Client, Bot],
-	guild: Guild,
-): Promise<InviteMetadata | BaseInvite | undefined> {
-	const invites = await getInvites(bot, guild.id)
+	[client, bot]: [Client, Discord.Bot],
+	guild: Discord.Guild,
+): Promise<Discord.InviteMetadata | Discord.BaseInvite | undefined> {
+	const invites = await Discord.getInvites(bot, guild.id)
 		.then((invites) => invites.array())
 		.catch(() => {
 			client.log.warn(`Failed to get invites on ${guild.name}.`);
@@ -85,7 +88,7 @@ async function getOrCreateInvite(
 		return undefined;
 	}
 
-	const newInvite = await createInvite(bot, inviteLinkChannel.id, {
+	const newInvite = await Discord.createInvite(bot, inviteLinkChannel.id, {
 		maxAge: 0,
 		maxUses: 0,
 		temporary: false,

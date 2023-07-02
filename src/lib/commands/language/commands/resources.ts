@@ -4,18 +4,21 @@ import { Client, localise } from "../../../client.js";
 import { parseArguments, reply } from "../../../interactions.js";
 import { CommandTemplate } from "../../command.js";
 import { show } from "../../parameters.js";
-import { ApplicationCommandTypes, Bot, ButtonStyles, Interaction, MessageComponentTypes } from "discordeno";
+import * as Discord from "discordeno";
 
 const command: CommandTemplate = {
 	name: "resources",
-	type: ApplicationCommandTypes.ChatInput,
+	type: Discord.ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ["VIEW_CHANNEL"],
 	handle: handleDisplayResources,
 	options: [show],
 };
 
 /** Displays a message with information on where to find the resources for a given language. */
-async function handleDisplayResources([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+async function handleDisplayResources(
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
+): Promise<void> {
 	const [{ show }] = parseArguments(interaction.data?.options, { show: "boolean" });
 
 	const guildId = interaction.guildId;
@@ -46,12 +49,12 @@ async function handleDisplayResources([client, bot]: [Client, Bot], interaction:
 		{
 			components: [
 				{
-					type: MessageComponentTypes.ActionRow,
+					type: Discord.MessageComponentTypes.ActionRow,
 					components: [
 						{
-							type: MessageComponentTypes.Button,
+							type: Discord.MessageComponentTypes.Button,
 							label: strings.redirect,
-							style: ButtonStyles.Link,
+							style: Discord.ButtonStyles.Link,
 							url: constants.links.generateLanguageRepositoryLink(guild.language),
 						},
 					],

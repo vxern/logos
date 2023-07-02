@@ -5,11 +5,11 @@ import { ServiceStarter } from "../services.js";
 import { handleAcceptRules } from "./stages/accept-rules.js";
 import { handleRequestVerification } from "./stages/get-verified.js";
 import { handleSelectLanguageProficiency } from "./stages/select-language-proficiency.js";
-import { Bot, Interaction, InteractionTypes } from "discordeno";
+import * as Discord from "discordeno";
 
 type EntryInteractionHandler = (
-	[client, bot]: [Client, Bot],
-	interaction: Interaction,
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
 	parameter: string,
 ) => Promise<void>;
 
@@ -23,10 +23,10 @@ const service: ServiceStarter = setupEntryProcess;
 
 type EntryStepButtonID = [parameter: string];
 
-function setupEntryProcess([client, bot]: [Client, Bot]): void {
+function setupEntryProcess([client, bot]: [Client, Discord.Bot]): void {
 	for (const step of Object.keys(interactionHandlers)) {
 		createInteractionCollector([client, bot], {
-			type: InteractionTypes.MessageComponent,
+			type: Discord.InteractionTypes.MessageComponent,
 			customId: step,
 			doesNotExpire: true,
 			onCollect: async (_bot, interaction) => {

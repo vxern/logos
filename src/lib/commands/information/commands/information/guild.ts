@@ -4,10 +4,13 @@ import { Client, isServicing, localise } from "../../../../client.js";
 import { reply } from "../../../../interactions.js";
 import { getGuildIconURLFormatted, snowflakeToTimestamp } from "../../../../utils.js";
 import { proficiency } from "../../../social/roles/categories/language.js";
-import { Bot, Channel, ChannelTypes, Embed, Guild, Interaction } from "discordeno";
+import * as Discord from "discordeno";
 
 /** Displays information about the guild that this command was executed in. */
-async function handleDisplayGuildInformation([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+async function handleDisplayGuildInformation(
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
+): Promise<void> {
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
 		return;
@@ -131,14 +134,14 @@ async function handleDisplayGuildInformation([client, bot]: [Client, Bot], inter
 	});
 }
 
-function getChannelInformationSection(client: Client, guild: Guild, locale: string | undefined): string {
-	function getChannelCountByType(channels: Channel[], type: ChannelTypes): number {
+function getChannelInformationSection(client: Client, guild: Discord.Guild, locale: string | undefined): string {
+	function getChannelCountByType(channels: Discord.Channel[], type: Discord.ChannelTypes): number {
 		return channels.filter((channel) => channel.type === type).length;
 	}
 
 	const channels = guild.channels.array();
-	const textChannelsCount = getChannelCountByType(channels, ChannelTypes.GuildText);
-	const voiceChannelsCount = getChannelCountByType(channels, ChannelTypes.GuildVoice);
+	const textChannelsCount = getChannelCountByType(channels, Discord.ChannelTypes.GuildText);
+	const voiceChannelsCount = getChannelCountByType(channels, Discord.ChannelTypes.GuildVoice);
 
 	const strings = {
 		text: localise(client, "information.options.server.strings.channelTypes.text", locale)(),
@@ -151,7 +154,7 @@ function getChannelInformationSection(client: Client, guild: Guild, locale: stri
 type ProficiencyRoleDistribution = [withRole: [roleId: bigint, frequency: number][], withoutRole: number];
 
 /** Gets the distribution of proficiency roles of a guild's members. */
-function getDistribution(client: Client, guild: Guild): ProficiencyRoleDistribution {
+function getDistribution(client: Client, guild: Discord.Guild): ProficiencyRoleDistribution {
 	const guildIdString = guild.id.toString();
 
 	const proficiencyRoleIdsUnsorted = proficiency.collection.list.map((role) => {
@@ -235,9 +238,9 @@ function formatDistribution(
 	return stringParts.join("\n");
 }
 
-type Thumbnail = NonNullable<Embed["thumbnail"]>;
+type Thumbnail = NonNullable<Discord.Embed["thumbnail"]>;
 
-function getThumbnail(bot: Bot, guild: Guild): Thumbnail | undefined {
+function getThumbnail(bot: Discord.Bot, guild: Discord.Guild): Thumbnail | undefined {
 	const iconURL = getGuildIconURLFormatted(bot, guild);
 	if (iconURL === undefined) {
 		return undefined;

@@ -4,9 +4,9 @@ import entry from "./entry/entry.js";
 import notices from "./notices/notices.js";
 import prompts from "./prompts/prompts.js";
 import roles from "./roles/roles.js";
-import { Bot } from "discordeno";
+import * as Discord from "discordeno";
 
-type ServiceStarter = ([client, bot]: [Client, Bot]) => void;
+type ServiceStarter = ([client, bot]: [Client, Discord.Bot]) => void;
 
 const services = [entry, dynamicVoiceChannels, notices, prompts, roles];
 

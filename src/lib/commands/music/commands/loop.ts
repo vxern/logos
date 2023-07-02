@@ -5,16 +5,19 @@ import { parseArguments, reply } from "../../../interactions.js";
 import { getVoiceState, isCollection, isOccupied, verifyCanManagePlayback } from "../../../services/music/music.js";
 import { OptionTemplate } from "../../command.js";
 import { collection } from "../../parameters.js";
-import { ApplicationCommandOptionTypes, Bot, Interaction } from "discordeno";
+import * as Discord from "discordeno";
 
 const command: OptionTemplate = {
 	name: "loop",
-	type: ApplicationCommandOptionTypes.SubCommand,
+	type: Discord.ApplicationCommandOptionTypes.SubCommand,
 	handle: handleLoopPlayback,
 	options: [collection],
 };
 
-async function handleLoopPlayback([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+async function handleLoopPlayback(
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
+): Promise<void> {
 	const [{ collection }] = parseArguments(interaction.data?.options, { collection: "boolean" });
 
 	const guildId = interaction.guildId;
