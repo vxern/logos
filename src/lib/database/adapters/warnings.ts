@@ -1,6 +1,6 @@
 import {
 	CacheAdapter,
-	DatabaseAdapters,
+	Database,
 	dispatchQuery,
 	getUserMentionByReference,
 	setNested,
@@ -42,7 +42,7 @@ const cache: CacheAdapter<Warning, WarningIndexes<Map<string, Document<Warning>>
 	},
 };
 
-const adapter: DatabaseAdapters["warnings"] = {
+const adapter: Database["adapters"]["warnings"] = {
 	fetch: async (client, parameter, parameterValue) => {
 		const index = warningIndexParameterToIndex[parameter];
 		const value = stringifyValue(parameterValue);

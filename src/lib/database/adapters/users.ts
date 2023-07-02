@@ -1,6 +1,6 @@
 import {
 	CacheAdapter,
-	DatabaseAdapters,
+	Database,
 	dispatchQuery,
 	getUserMentionByReference,
 	mentionUser,
@@ -31,7 +31,7 @@ const cache: CacheAdapter<User, UserIndexes<Document<User>>> = {
 	},
 };
 
-const adapter: DatabaseAdapters["users"] = {
+const adapter: Database["adapters"]["users"] = {
 	fetch: async (client, parameter, parameterValue) => {
 		const value = stringifyValue(parameterValue);
 
