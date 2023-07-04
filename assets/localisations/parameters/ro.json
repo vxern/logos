@@ -8,7 +8,7 @@
 	"parameters.reason.name": "motiv",
 	"parameters.reason.description": "Motivul pentru sancțiune sau anularea acesteia. Ar trebui să fie detaliat.",
 	"parameters.query.name": "interogare",
-	"parameters.query.description": "Titlul melodiei, link-ul către aceasta sau către unui set de melodii.",
+	"parameters.query.description": "Titlul melodiei, link-ul către aceasta sau către un set de melodii.",
 	"parameters.timestamp.name": "marcaj-de-timp",
 	"parameters.timestamp.description": "Marcajul de timp din cântec la care să se treacă.",
 	"parameters.collection.name": "set",
