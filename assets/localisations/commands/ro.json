@@ -80,7 +80,7 @@
 	"word.strings.fields.synonyms": "Sinonime",
 	"word.strings.fields.antonyms": "Antonime",
 	"word.strings.fields.expressions": "Exprimări",
-	"word.strings.definitionsOmitted": "Omitted {definitions}. To display more results, enable the `{flag}` flag.",
+	"word.strings.definitionsOmitted": "Am omis {definitions}. Pentru a afișa mai multe rezultate, activează",
 	"word.strings.definitionsOmitted.definitions.one": "{one} definition",
 	"word.strings.definitionsOmitted.definitions.two": "{two} definitions",
 	"word.strings.definitionsOmitted.definitions.many": "{many} definitions",
