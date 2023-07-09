@@ -268,7 +268,7 @@
 	"warn.strings.limitSurpassed.title": "Warning limit surpassed",
 	"warn.strings.limitSurpassed.description": "{user_mention} has *surpassed* the warning limit ({limit}), having just received warning no. {number}, and has subsequently been timed out for a day.",
 	"music.name": "müzik",
-	"music.description": "Bir kullanıcının ses kanalında müzik pleybek yapmasına izin verir.",
+	"music.description": "Kullanıcının sen kanalında müzik çalmasına izin verir.",
 	"music.options.history.name": "geçmiş",
 	"music.options.history.description": "Önceden çalınmış şarkıların bir listesini gösterir.",
 	"music.options.history.strings.playbackHistory": "Oynatma geçmişi",
