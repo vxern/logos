@@ -11,6 +11,6 @@
 	"suggestion.fields.suggestion": "Öneriniz nedir?",
 	"prompts.continue": "Devam",
 	"prompts.cancel": "İptal",
-	"prompts.leave": "Yes, I want to leave the composer",
-	"prompts.stay": "No, take me back to the composer"
+	"prompts.leave": "Evet, düzenleyiciden ayrılmak istiyorum",
+	"prompts.stay": "Hayır, beni düzenleyiciye geri götür"
 }
