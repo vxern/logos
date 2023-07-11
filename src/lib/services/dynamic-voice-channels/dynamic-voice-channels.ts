@@ -68,37 +68,37 @@ class DynamicVoiceChannelService extends LocalService {
 
 		const parentChannels = channelsAll.filter((channel) => parentChannelIds.includes(channel.id));
 
-		const channels: DynamicVoiceChannelData[] = [];
-		for (const parentChannel of parentChannels.reverse()) {
+		const parentChannelById = new Map<bigint, DynamicVoiceChannelData>();
+		for (const channel of channelsAll) {
+			const voiceStates = voiceStatesByChannelId.get(channel.id) ?? [];
+
+			const parentChannel = parentChannels.find((parentChannel) => parentChannel.name === channel.name);
+			if (parentChannel === undefined) {
+				continue;
+			}
+
 			const configuration = channelIdConfigurationTuples.find(([channelId, _]) => channelId === parentChannel.id)?.[1];
 			if (configuration === undefined) {
 				return;
 			}
 
-			const voiceStates = voiceStatesByChannelId.get(parentChannel.id) ?? [];
-
-			const childChannels: DynamicVoiceChannelData["children"] = [];
-			while (channelsAll.length !== 0) {
-				const channel = channelsAll.pop();
-				if (channel === undefined) {
-					break;
-				}
-
-				const voiceStates = voiceStatesByChannelId.get(channel.id) ?? [];
-
-				// If the channel is a parent channel.
-				if (parentChannelIds.includes(channel.id)) {
-					continue;
-				}
-
-				// If the channel is a child channel.
-				if (channel.name === parentChannel.name) {
-					childChannels.push({ id: channel.id, voiceStates });
-				}
+			if (!parentChannelById.has(parentChannel.id)) {
+				const voiceStates = voiceStatesByChannelId.get(parentChannel.id) ?? [];
+				parentChannelById.set(parentChannel.id, {
+					parent: { channel: parentChannel, voiceStates },
+					configuration,
+					children: [],
+				});
 			}
 
-			channels.push({ parent: { channel: parentChannel, voiceStates }, children: childChannels, configuration });
+			// If the channel is a parent channel.
+			if (parentChannelIds.includes(channel.id)) {
+				continue;
+			}
+
+			parentChannelById.get(parentChannel.id)?.children.push({ id: channel.id, voiceStates });
 		}
+		const channels = Array.from(parentChannelById.values());
 
 		return channels;
 	}
@@ -226,7 +226,7 @@ class DynamicVoiceChannelService extends LocalService {
 
 		const channelId = oldVoiceState.channelId ?? 0n;
 
-		const channelData = channels.find(
+		const channelData = channels.findLast(
 			(channel) =>
 				channel.parent.channel.id === channelId || channel.children.some((channel) => channel.id === channelId),
 		);
