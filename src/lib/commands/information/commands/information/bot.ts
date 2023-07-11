@@ -1,5 +1,5 @@
 import constants from "../../../../../constants.js";
-import { MentionTypes, list, mention } from "../../../../../formatting.js";
+import { list } from "../../../../../formatting.js";
 import { Client, localise } from "../../../../client.js";
 import { reply } from "../../../../interactions.js";
 import * as Discord from "discordeno";
@@ -124,17 +124,11 @@ function getContributorString(contributions: typeof constants.contributions.tran
 	for (const [language, data] of Object.entries(contributions)) {
 		const contributorsFormatted = data.contributors
 			.map((contributor) => {
-				const userMention = mention(contributor.id, MentionTypes.User);
-
-				if ("links" in contributor) {
-					const linksFormatted = Object.entries(contributor.links)
-						.map(([platform, link]) => `[${platform}](${link})`)
-						.join(", ");
-
-					return `${userMention} (${linksFormatted})`;
+				if ("link" in contributor) {
+					return `**[${contributor.username}](${contributor.link})**`;
 				}
 
-				return userMention;
+				return `**${contributor.username}**`;
 			})
 			.join("\n");
 
