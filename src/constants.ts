@@ -188,7 +188,7 @@ type BulletStyle = "arrow" | "diamond";
 const symbols = {
 	meta: {
 		whitespace: "⠀",
-		metadataSeparator: "・",
+		metadataSeparator: ",",
 		idSeparator: "|",
 	},
 	ruleBullet: "💠",

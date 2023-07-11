@@ -2,22 +2,21 @@ import constants from "../../../../constants.js";
 import { defaultLocale } from "../../../../types.js";
 import { Client, localise } from "../../../client.js";
 import { parseArguments, parseTimeExpression, reply, respond } from "../../../interactions.js";
-import { getVoiceState, isOccupied, skipTo, verifyCanManagePlayback } from "../../../services/music/music.js";
 import { OptionTemplate } from "../../command.js";
 import { timestamp } from "../../parameters.js";
-import { ApplicationCommandOptionTypes, Bot, Interaction } from "discordeno";
+import * as Discord from "discordeno";
 
 const command: OptionTemplate = {
 	name: "skip-to",
-	type: ApplicationCommandOptionTypes.SubCommand,
+	type: Discord.ApplicationCommandOptionTypes.SubCommand,
 	handle: handleSkipToTimestamp,
 	handleAutocomplete: handleSkipToTimestampAutocomplete,
 	options: [timestamp],
 };
 
 async function handleSkipToTimestampAutocomplete(
-	[client, bot]: [Client, Bot],
-	interaction: Interaction,
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
 ): Promise<void> {
 	const [{ timestamp: timestampExpression }] = parseArguments(interaction.data?.options, {});
 	if (timestampExpression === undefined) {
@@ -33,7 +32,10 @@ async function handleSkipToTimestampAutocomplete(
 	respond([client, bot], interaction, [{ name: timestamp[0], value: timestamp[1].toString() }]);
 }
 
-async function handleSkipToTimestamp([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+async function handleSkipToTimestamp(
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
+): Promise<void> {
 	const [{ timestamp: timestampExpression }] = parseArguments(interaction.data?.options, {});
 
 	const guildId = interaction.guildId;
@@ -41,27 +43,22 @@ async function handleSkipToTimestamp([client, bot]: [Client, Bot], interaction: 
 		return;
 	}
 
-	const controller = client.features.music.controllers.get(guildId);
-	if (controller === undefined) {
+	const musicService = client.services.music.music.get(guildId);
+	if (musicService === undefined) {
 		return;
 	}
 
-	const isVoiceStateVerified = verifyCanManagePlayback(
-		[client, bot],
-		interaction,
-		controller,
-		getVoiceState(client, guildId, interaction.user.id),
-	);
-	if (!isVoiceStateVerified) {
+	const isVoiceStateVerified = musicService.verifyCanManagePlayback(bot, interaction);
+	if (isVoiceStateVerified === undefined || !isVoiceStateVerified) {
 		return;
 	}
 
-	const playingSince = controller.player.playingSince;
-	if (playingSince === undefined) {
+	const [isOccupied, playingSince] = [musicService.isOccupied, musicService.playingSince];
+	if (isOccupied === undefined || playingSince === undefined) {
 		return;
 	}
 
-	if (!isOccupied(controller.player)) {
+	if (!isOccupied) {
 		const strings = {
 			title: localise(client, "music.options.skip-to.strings.noSong.title", interaction.locale)(),
 			description: localise(client, "music.options.skip-to.strings.noSong.description", interaction.locale)(),
@@ -87,11 +84,11 @@ async function handleSkipToTimestamp([client, bot]: [Client, Bot], interaction: 
 	const timestamp = Number(timestampExpression);
 
 	if (timestamp < 0) {
-		skipTo(controller.player, 0);
+		musicService.skipTo(0);
 	} else if (timestamp > playingSince) {
-		skipTo(controller.player, playingSince);
+		musicService.skipTo(playingSince);
 	} else {
-		skipTo(controller.player, timestamp);
+		musicService.skipTo(timestamp);
 	}
 
 	const strings = {
@@ -115,7 +112,10 @@ async function handleSkipToTimestamp([client, bot]: [Client, Bot], interaction: 
 	);
 }
 
-async function displayInvalidTimestampError([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+async function displayInvalidTimestampError(
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
+): Promise<void> {
 	const strings = {
 		title: localise(client, "music.options.skip-to.strings.invalidTimestamp.title", interaction.locale)(),
 		description: localise(client, "music.options.skip-to.strings.invalidTimestamp.description", interaction.locale)(),

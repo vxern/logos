@@ -13,13 +13,13 @@ import skip from "./commands/skip.js";
 import stop from "./commands/stop.js";
 import unskip from "./commands/unskip.js";
 import volume from "./commands/volume.js";
-import { ApplicationCommandTypes } from "discordeno";
+import * as Discord from "discordeno";
 
 const music: CommandTemplate = {
 	name: "music",
-	type: ApplicationCommandTypes.ChatInput,
+	type: Discord.ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ["VIEW_CHANNEL"],
 	options: [history, loop, now, pause, play, queue, remove, replay, resume, skipTo, skip, stop, unskip, volume],
 };
 
-export default { local: [music], global: [music] };
+export { music };

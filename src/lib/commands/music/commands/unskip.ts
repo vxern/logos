@@ -2,26 +2,22 @@ import constants from "../../../../constants.js";
 import { defaultLocale } from "../../../../types.js";
 import { Client, localise } from "../../../client.js";
 import { parseArguments, reply } from "../../../interactions.js";
-import {
-	getVoiceState,
-	isCollection,
-	isOccupied,
-	isQueueVacant,
-	unskip,
-	verifyCanManagePlayback,
-} from "../../../services/music/music.js";
+import { isCollection } from "../../../services/music/music.js";
 import { OptionTemplate } from "../../command.js";
 import { by, collection, to } from "../../parameters.js";
-import { ApplicationCommandOptionTypes, Bot, Interaction } from "discordeno";
+import * as Discord from "discordeno";
 
 const command: OptionTemplate = {
 	name: "unskip",
-	type: ApplicationCommandOptionTypes.SubCommand,
+	type: Discord.ApplicationCommandOptionTypes.SubCommand,
 	handle: handleUnskipAction,
 	options: [collection, by, to],
 };
 
-async function handleUnskipAction([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+async function handleUnskipAction(
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
+): Promise<void> {
 	const [{ collection, by: songsToUnskip, to: songToUnskipTo }] = parseArguments(interaction.data?.options, {
 		collection: "boolean",
 		by: "number",
@@ -40,36 +36,41 @@ async function handleUnskipAction([client, bot]: [Client, Bot], interaction: Int
 		return;
 	}
 
-	const controller = client.features.music.controllers.get(guildId);
-	if (controller === undefined) {
+	const musicService = client.services.music.music.get(guildId);
+	if (musicService === undefined) {
 		return;
 	}
 
-	const isVoiceStateVerified = verifyCanManagePlayback(
-		[client, bot],
-		interaction,
-		controller,
-		getVoiceState(client, guildId, interaction.user.id),
-	);
-	if (!isVoiceStateVerified) {
+	const isVoiceStateVerified = musicService.verifyCanManagePlayback(bot, interaction);
+	if (isVoiceStateVerified === undefined || !isVoiceStateVerified) {
+		return;
+	}
+
+	const [history, current, isQueueVacant, isHistoryEmpty] = [
+		musicService.history,
+		musicService.current,
+		musicService.isQueueVacant,
+		musicService.isHistoryEmpty,
+	];
+	if (history === undefined || isQueueVacant === undefined || isHistoryEmpty === undefined) {
 		return;
 	}
 
 	const isUnskippingListing = (() => {
-		if (controller.currentListing === undefined) {
+		if (current === undefined) {
 			return true;
 		}
-		if (!isCollection(controller.currentListing?.content)) {
+		if (!isCollection(current.content)) {
 			return true;
 		}
-		if (collection !== undefined || controller.currentListing?.content.position === 0) {
+		if (collection !== undefined || current.content.position === 0) {
 			return true;
 		}
 
 		return false;
 	})();
 
-	if (isUnskippingListing && controller.listingHistory.length === 0) {
+	if (isUnskippingListing && isHistoryEmpty) {
 		const strings = {
 			title: localise(client, "music.options.unskip.strings.historyEmpty.title", interaction.locale)(),
 			description: localise(client, "music.options.unskip.strings.historyEmpty.description", interaction.locale)(),
@@ -89,7 +90,7 @@ async function handleUnskipAction([client, bot]: [Client, Bot], interaction: Int
 
 	if (
 		collection !== undefined &&
-		(controller.currentListing?.content === undefined || !isCollection(controller.currentListing?.content))
+		(current === undefined || current.content === undefined || !isCollection(current.content))
 	) {
 		const strings = {
 			title: localise(client, "music.options.unskip.strings.noSongCollection.title", interaction.locale)(),
@@ -119,7 +120,7 @@ async function handleUnskipAction([client, bot]: [Client, Bot], interaction: Int
 		return;
 	}
 
-	if (isOccupied(controller.player) && !isQueueVacant(controller.listingQueue)) {
+	if (!isQueueVacant) {
 		const strings = {
 			title: localise(client, "music.options.unskip.strings.queueFull.title", interaction.locale)(),
 			description: localise(client, "music.options.unskip.strings.queueFull.description", interaction.locale)(),
@@ -178,37 +179,36 @@ async function handleUnskipAction([client, bot]: [Client, Bot], interaction: Int
 	const isUnskippingCollection = collection ?? false;
 
 	if (isUnskippingListing) {
-		unskip([client, bot], guildId, controller, isUnskippingCollection, {
-			by: songsToUnskip,
-			to: songToUnskipTo,
-		});
+		musicService.unskip(bot, isUnskippingCollection, { by: songsToUnskip, to: songToUnskipTo });
 	} else {
 		if (songsToUnskip !== undefined) {
 			let listingsToUnskip!: number;
 			if (
-				controller.currentListing?.content !== undefined &&
-				isCollection(controller.currentListing.content) &&
+				current !== undefined &&
+				current.content !== undefined &&
+				isCollection(current.content) &&
 				collection === undefined
 			) {
-				listingsToUnskip = Math.min(songsToUnskip, controller.currentListing?.content.position);
+				listingsToUnskip = Math.min(songsToUnskip, current.content.position);
 			} else {
-				listingsToUnskip = Math.min(songsToUnskip, controller.listingHistory.length);
+				listingsToUnskip = Math.min(songsToUnskip, history.length);
 			}
-			unskip([client, bot], guildId, controller, isUnskippingCollection, { by: listingsToUnskip });
+			musicService.unskip(bot, isUnskippingCollection, { by: listingsToUnskip });
 		} else if (songToUnskipTo !== undefined) {
 			let listingToSkipTo!: number;
 			if (
-				controller.currentListing?.content !== undefined &&
-				isCollection(controller.currentListing.content) &&
+				current !== undefined &&
+				current.content !== undefined &&
+				isCollection(current.content) &&
 				collection === undefined
 			) {
 				listingToSkipTo = Math.max(songToUnskipTo, 1);
 			} else {
-				listingToSkipTo = Math.min(songToUnskipTo, controller.listingHistory.length);
+				listingToSkipTo = Math.min(songToUnskipTo, history.length);
 			}
-			unskip([client, bot], guildId, controller, isUnskippingCollection, { to: listingToSkipTo });
+			musicService.unskip(bot, isUnskippingCollection, { to: listingToSkipTo });
 		} else {
-			unskip([client, bot], guildId, controller, isUnskippingCollection, {});
+			musicService.unskip(bot, isUnskippingCollection, {});
 		}
 	}
 

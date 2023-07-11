@@ -2,39 +2,41 @@ import constants from "../../../../constants.js";
 import { defaultLocale } from "../../../../types.js";
 import { Client, localise } from "../../../client.js";
 import { reply } from "../../../interactions.js";
-import { getVoiceState, isOccupied, isPaused, pause, verifyCanManagePlayback } from "../../../services/music/music.js";
 import { OptionTemplate } from "../../command.js";
 import { handleResumePlayback } from "./resume.js";
-import { ApplicationCommandOptionTypes, Bot, Interaction } from "discordeno";
+import * as Discord from "discordeno";
 
 const command: OptionTemplate = {
 	name: "pause",
-	type: ApplicationCommandOptionTypes.SubCommand,
+	type: Discord.ApplicationCommandOptionTypes.SubCommand,
 	handle: handlePausePlayback,
 };
 
-async function handlePausePlayback([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+async function handlePausePlayback(
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
+): Promise<void> {
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
 		return;
 	}
 
-	const controller = client.features.music.controllers.get(guildId);
-	if (controller === undefined) {
+	const musicService = client.services.music.music.get(guildId);
+	if (musicService === undefined) {
 		return;
 	}
 
-	const isVoiceStateVerified = verifyCanManagePlayback(
-		[client, bot],
-		interaction,
-		controller,
-		getVoiceState(client, guildId, interaction.user.id),
-	);
-	if (!isVoiceStateVerified) {
+	const isVoiceStateVerified = musicService.verifyCanManagePlayback(bot, interaction);
+	if (isVoiceStateVerified === undefined || !isVoiceStateVerified) {
 		return;
 	}
 
-	if (!isOccupied(controller.player)) {
+	const [isOccupied, isPaused] = [musicService.isOccupied, musicService.isPaused];
+	if (isOccupied === undefined || isPaused === undefined) {
+		return;
+	}
+
+	if (!isOccupied) {
 		const strings = {
 			title: localise(client, "music.options.pause.strings.notPlaying.title", interaction.locale)(),
 			description: localise(client, "music.options.pause.strings.notPlaying.description", interaction.locale)(),
@@ -52,12 +54,12 @@ async function handlePausePlayback([client, bot]: [Client, Bot], interaction: In
 		return;
 	}
 
-	if (isPaused(controller.player)) {
+	if (isPaused) {
 		handleResumePlayback([client, bot], interaction);
 		return;
 	}
 
-	pause(controller.player);
+	musicService.pause();
 
 	const strings = {
 		title: localise(client, "music.options.pause.strings.paused.title", defaultLocale)(),

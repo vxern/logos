@@ -1,7 +1,6 @@
-import { MentionTypes, mention } from "../formatting.js";
 import { Client } from "./client.js";
 import { Document } from "./database/document.js";
-import { Bot, Channel, ChannelTypes, Embed, Guild, Message, User, getGuildIconURL, getMessages } from "discordeno";
+import * as Discord from "discordeno";
 
 /**
  * Parses a 6-digit hex value prefixed with a hashtag to a number.
@@ -14,39 +13,14 @@ function fromHex(color: string): number {
 	return parseInt(color.replace("#", "0x"));
 }
 
-type TextChannel = Channel & { type: ChannelTypes.GuildText };
-type VoiceChannel = Channel & { type: ChannelTypes.GuildVoice };
+type TextChannel = Discord.Channel & { type: Discord.ChannelTypes.GuildText };
+type VoiceChannel = Discord.Channel & { type: Discord.ChannelTypes.GuildVoice };
 
-function isText(channel: Channel): channel is TextChannel {
-	return channel.type === ChannelTypes.GuildText;
+function isText(channel: Discord.Channel): channel is TextChannel {
+	return channel.type === Discord.ChannelTypes.GuildText;
 }
-function isVoice(channel: Channel): channel is VoiceChannel {
-	return channel.type === ChannelTypes.GuildVoice;
-}
-
-/**
- * Taking a guild and the name of a channel, finds the channel with that name
- * and returns it.
- *
- * @param guild - The guild whose channels to look through.
- * @param name - The name of the channel to find.
- * @returns The found channel.
- */
-function getTextChannel(guild: Guild, name: string): Channel | undefined {
-	const nameAsLowercase = name.toLowerCase();
-
-	const textChannels = guild.channels.array().filter((channel) => isText(channel));
-
-	return textChannels.find((channel) => channel.name?.toLowerCase().includes(nameAsLowercase));
-}
-
-function getChannelMention(guild: Guild, name: string): string {
-	const channel = getTextChannel(guild, name);
-	if (channel === undefined) {
-		return name;
-	}
-
-	return mention(channel.id, MentionTypes.Channel);
+function isVoice(channel: Discord.Channel): channel is VoiceChannel {
+	return channel.type === Discord.ChannelTypes.GuildVoice;
 }
 
 /**
@@ -55,7 +29,7 @@ function getChannelMention(guild: Guild, name: string): string {
  * @param user - The user object.
  * @returns The mention.
  */
-function diagnosticMentionUser({ username, discriminator, id }: User): string {
+function diagnosticMentionUser({ username, discriminator, id }: Discord.User): string {
 	const tag = discriminator === "0" ? username : `${username}#${discriminator}`;
 
 	return `${tag} (${id})`;
@@ -93,8 +67,8 @@ function snowflakeToTimestamp(snowflake: bigint): number {
 	return Number((snowflake >> snowflakeBitsToDiscard) + beginningOfDiscordEpoch);
 }
 
-function getGuildIconURLFormatted(bot: Bot, guild: Guild): string | undefined {
-	const iconURL = getGuildIconURL(bot, guild.id, guild.icon, {
+function getGuildIconURLFormatted(bot: Discord.Bot, guild: Discord.Guild): string | undefined {
+	const iconURL = Discord.getGuildIconURL(bot, guild.id, guild.icon, {
 		size: 4096,
 		format: "png",
 	});
@@ -102,9 +76,9 @@ function getGuildIconURLFormatted(bot: Bot, guild: Guild): string | undefined {
 	return iconURL;
 }
 
-type Author = NonNullable<Embed["author"]>;
+type Author = NonNullable<Discord.Embed["author"]>;
 
-function getAuthor(bot: Bot, guild: Guild): Author | undefined {
+function getAuthor(bot: Discord.Bot, guild: Discord.Guild): Author | undefined {
 	const iconURL = getGuildIconURLFormatted(bot, guild);
 	if (iconURL === undefined) {
 		return undefined;
@@ -139,12 +113,15 @@ function addParametersToURL(url: string, parameters: Record<string, string>): st
 	return `${url}?${query}`;
 }
 
-async function getAllMessages([client, bot]: [Client, Bot], channelId: bigint): Promise<Message[] | undefined> {
-	const messages: Message[] = [];
+async function getAllMessages(
+	[client, bot]: [Client, Discord.Bot],
+	channelId: bigint,
+): Promise<Discord.Message[] | undefined> {
+	const messages: Discord.Message[] = [];
 	let isFinished = false;
 
 	while (!isFinished) {
-		const buffer = await getMessages(bot, channelId, {
+		const buffer = await Discord.getMessages(bot, channelId, {
 			limit: 100,
 			before: messages.length === 0 ? undefined : messages.at(-1)?.id,
 		}).catch(() => {
@@ -185,6 +162,34 @@ function verifyIsWithinLimits(documents: Document[], limit: number, limitingTime
 	return false;
 }
 
+function fetchMembers(
+	bot: Discord.Bot,
+	guildId: bigint,
+	options?: Omit<Discord.RequestGuildMembers, "guildId">,
+): Promise<void> {
+	const shardId = Discord.calculateShardId(bot.gateway, bot.transformers.snowflake(guildId));
+	return new Promise((resolve) => {
+		const nonce = Date.now().toString();
+		bot.cache.fetchAllMembersProcessingRequests.set(nonce, resolve);
+		const shard = bot.gateway.manager.shards.get(shardId);
+		if (!shard) {
+			throw new Error(`Shard (id: ${shardId}) not found.`);
+		}
+		shard.send({
+			op: Discord.GatewayOpcodes.RequestGuildMembers,
+			d: {
+				guild_id: guildId.toString(),
+				// If a query is provided use it, OR if a limit is NOT provided use ""
+				query: options?.query || (options?.limit ? undefined : ""),
+				limit: options?.limit || 0,
+				presences: options?.presences,
+				user_ids: options?.userIds?.map((id) => id.toString()),
+				nonce,
+			},
+		});
+	});
+}
+
 export {
 	addParametersToURL,
 	chunk,
@@ -192,11 +197,10 @@ export {
 	fromHex,
 	getAllMessages,
 	getAuthor,
-	getChannelMention,
 	getGuildIconURLFormatted,
-	getTextChannel,
 	isText,
 	isVoice,
+	fetchMembers,
 	snowflakeToTimestamp,
 	verifyIsWithinLimits,
 };

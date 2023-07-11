@@ -3,23 +3,41 @@ import { Client, localise } from "../../../client.js";
 import { parseArguments, reply } from "../../../interactions.js";
 import { CommandTemplate } from "../../command.js";
 import { show } from "../../parameters.js";
-import { ApplicationCommandTypes, Bot, Embed, Interaction } from "discordeno";
+import * as Discord from "discordeno";
 
 const command: CommandTemplate = {
 	name: "policy",
-	type: ApplicationCommandTypes.ChatInput,
+	type: Discord.ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ["VIEW_CHANNEL"],
 	handle: handleDisplayModerationPolicy,
 	options: [show],
 };
 
-async function handleDisplayModerationPolicy([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
-	const [{ show }] = parseArguments(interaction.data?.options, { show: "boolean" });
-
+async function handleDisplayModerationPolicy(
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
+): Promise<void> {
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
 		return;
 	}
+
+	const guildDocument = await client.database.adapters.guilds.getOrFetchOrCreate(
+		client,
+		"id",
+		guildId.toString(),
+		guildId,
+	);
+	if (guildDocument === undefined) {
+		return;
+	}
+
+	const configuration = guildDocument.data.features.moderation.features?.policy;
+	if (configuration === undefined || !configuration.enabled) {
+		return;
+	}
+
+	const [{ show }] = parseArguments(interaction.data?.options, { show: "boolean" });
 
 	const guild = client.cache.guilds.get(guildId);
 	if (guild === undefined) {
@@ -40,7 +58,7 @@ async function handleDisplayModerationPolicy([client, bot]: [Client, Bot], inter
 	);
 }
 
-function getModerationPolicyPoints(client: Client, locale: string | undefined): NonNullable<Embed["fields"]> {
+function getModerationPolicyPoints(client: Client, locale: string | undefined): NonNullable<Discord.Embed["fields"]> {
 	const strings = {
 		introduction: {
 			title: localise(client, "policies.moderation.points.introduction.title", locale)(),

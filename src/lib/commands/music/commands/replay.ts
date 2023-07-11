@@ -2,25 +2,22 @@ import constants from "../../../../constants.js";
 import { defaultLocale } from "../../../../types.js";
 import { Client, localise } from "../../../client.js";
 import { parseArguments, reply } from "../../../interactions.js";
-import {
-	getVoiceState,
-	isCollection,
-	isOccupied,
-	replay,
-	verifyCanManagePlayback,
-} from "../../../services/music/music.js";
+import { isCollection } from "../../../services/music/music.js";
 import { OptionTemplate } from "../../command.js";
 import { collection } from "../../parameters.js";
-import { ApplicationCommandOptionTypes, Bot, Interaction } from "discordeno";
+import * as Discord from "discordeno";
 
 const command: OptionTemplate = {
 	name: "replay",
-	type: ApplicationCommandOptionTypes.SubCommand,
+	type: Discord.ApplicationCommandOptionTypes.SubCommand,
 	handle: handleReplayAction,
 	options: [collection],
 };
 
-async function handleReplayAction([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+async function handleReplayAction(
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
+): Promise<void> {
 	const [{ collection }] = parseArguments(interaction.data?.options, { collection: "boolean" });
 
 	const guildId = interaction.guildId;
@@ -28,25 +25,23 @@ async function handleReplayAction([client, bot]: [Client, Bot], interaction: Int
 		return;
 	}
 
-	const controller = client.features.music.controllers.get(guildId);
-	if (controller === undefined) {
+	const musicService = client.services.music.music.get(guildId);
+	if (musicService === undefined) {
 		return;
 	}
 
-	const isVoiceStateVerified = verifyCanManagePlayback(
-		[client, bot],
-		interaction,
-		controller,
-		getVoiceState(client, guildId, interaction.user.id),
-	);
-	if (!isVoiceStateVerified) {
+	const isVoiceStateVerified = musicService.verifyCanManagePlayback(bot, interaction);
+	if (isVoiceStateVerified === undefined || !isVoiceStateVerified) {
 		return;
 	}
 
-	const currentListing = controller.currentListing;
+	const [current, isOccupied] = [musicService.current, musicService.isOccupied];
+	if (current === undefined || isOccupied === undefined) {
+		return;
+	}
 
 	if (collection) {
-		if (!isOccupied(controller.player) || currentListing === undefined) {
+		if (!isOccupied || current === undefined) {
 			const strings = {
 				title: localise(client, "music.options.replay.strings.noSongCollection.title", interaction.locale)(),
 				description: {
@@ -68,7 +63,7 @@ async function handleReplayAction([client, bot]: [Client, Bot], interaction: Int
 				],
 			});
 			return;
-		} else if (!isCollection(currentListing.content)) {
+		} else if (!isCollection(current.content)) {
 			const strings = {
 				title: localise(client, "music.options.replay.strings.noSongCollection.title", interaction.locale)(),
 				description: {
@@ -97,7 +92,7 @@ async function handleReplayAction([client, bot]: [Client, Bot], interaction: Int
 			return;
 		}
 	} else {
-		if (!isOccupied(controller.player) || currentListing === undefined) {
+		if (!isOccupied || current === undefined) {
 			const strings = {
 				title: localise(client, "music.options.replay.strings.noSong.title", interaction.locale)(),
 				description: localise(client, "music.options.replay.strings.noSong.description", interaction.locale)(),
@@ -116,7 +111,7 @@ async function handleReplayAction([client, bot]: [Client, Bot], interaction: Int
 		}
 	}
 
-	replay([client, bot], interaction, controller, collection ?? false);
+	musicService.replay(bot, collection ?? false);
 
 	const strings = {
 		title: localise(client, "music.options.replay.strings.replaying.title", defaultLocale)(),

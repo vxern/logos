@@ -1,14 +1,9 @@
 import { Client } from "../client.js";
 import { diagnosticMentionUser } from "../utils.js";
-import entryRequests from "./adapters/entry-requests.js";
-import praises from "./adapters/praises.js";
-import reports from "./adapters/reports.js";
-import suggestions from "./adapters/suggestions.js";
-import users from "./adapters/users.js";
-import warnings from "./adapters/warnings.js";
 import { BaseDocumentProperties, Document } from "./document.js";
 import {
 	EntryRequestIndexes,
+	GuildIndexes,
 	IndexesSignature,
 	PraiseIndexes,
 	ReportIndexes,
@@ -17,12 +12,13 @@ import {
 	WarningIndexes,
 } from "./indexes.js";
 import { EntryRequest } from "./structs/entry-request.js";
+import { Guild } from "./structs/guild.js";
 import { Praise } from "./structs/praise.js";
 import { Report } from "./structs/report.js";
 import { Suggestion } from "./structs/suggestion.js";
 import { User } from "./structs/user.js";
 import { Warning } from "./structs/warning.js";
-import { User as DiscordUser } from "discordeno";
+import * as Discord from "discordeno";
 import Fauna from "fauna";
 import * as Sentry from "sentry";
 
@@ -148,139 +144,107 @@ type CacheAdapter<
 > &
 	Pick<CacheAdapterOptionalMethods<DataType, Indexes>, SupportsMethods>;
 
-interface DatabaseAdapters {
-	entryRequests: DatabaseAdapter<EntryRequest, EntryRequestIndexes, "get" | "update", true>;
-	praises: DatabaseAdapter<Praise, PraiseIndexes, "getOrFetch">;
-	reports: DatabaseAdapter<Report, ReportIndexes, "get" | "update", true>;
-	suggestions: DatabaseAdapter<Suggestion, SuggestionIndexes, "get" | "update", true>;
-	users: DatabaseAdapter<User, UserIndexes, "getOrFetch" | "getOrFetchOrCreate" | "update">;
-	warnings: DatabaseAdapter<Warning, WarningIndexes, "getOrFetch" | "delete">;
-}
-
-interface Cache extends Record<string, Map<string, unknown>> {
-	/**
-	 * Cached entry requests.
-	 *
-	 * The keys are stringified user document references combined with guild IDs.\
-	 * The values are entry request documents mapped by their stringified document reference.
-	 */
-	entryRequestBySubmitterAndGuild: Map<string, Document<EntryRequest>>;
-
-	/**
-	 * Cached user praises.
-	 *
-	 * The keys are stringified user document references.\
-	 * The values are praise documents mapped by their stringified document reference.
-	 */
-	praisesBySender: Map<string, Map<string, Document<Praise>>>;
-
-	/**
-	 * Cached user praises.
-	 *
-	 * The keys are stringified user document references.\
-	 * The values are praise documents mapped by their stringified document reference.
-	 */
-	praisesByRecipient: Map<string, Map<string, Document<Praise>>>;
-
-	/**
-	 * Cached user reports.
-	 *
-	 * The keys are stringified user document references combined with guild IDs.\
-	 * The values are report documents mapped by their stringified document reference.
-	 */
-	reportsByAuthorAndGuild: Map<string, Map<string, Document<Report>>>;
-
-	/**
-	 * Cached suggestions.
-	 *
-	 * The keys are stringified user document references combined with guild IDs.\
-	 * The values are suggestion documents mapped by their stringified document reference.
-	 */
-	suggestionsByAuthorAndGuild: Map<string, Map<string, Document<Suggestion>>>;
-
-	/**
-	 * Cached users.
-	 *
-	 * The keys are stringified user document references.\
-	 * The values are the user document with that reference.
-	 */
-	usersByReference: Map<string, Document<User>>;
-
-	/**
-	 * Cached users.
-	 *
-	 * The keys are Discord user IDs (snowflakes).\
-	 * The values are the user document with that user ID.
-	 */
-	usersById: Map<string, Document<User>>;
-
-	/**
-	 * Cached user warnings.
-	 *
-	 * The keys are stringified user document references.\
-	 * The values are warning documents mapped by their stringified document reference.
-	 */
-	warningsByRecipient: Map<string, Map<string, Document<Warning>>>;
-}
-
 /**
  * Provides a layer of abstraction over the database solution used to store data
  * and the Discord application.
  */
-type Database = Readonly<{
+type Database = {
 	/** Client used to interface with the Fauna database. */
 	client: Fauna.Client;
-	cache: Cache;
-	fetchPromises: FetchPromiseCache;
-	adapters: DatabaseAdapters;
-}>;
+	cache: {
+		/**
+		 * Cached entry requests.
+		 *
+		 * The keys are stringified user document references combined with guild IDs.\
+		 * The values are entry request documents mapped by their stringified document reference.
+		 */
+		entryRequestBySubmitterAndGuild: Map<string, Document<EntryRequest>>;
+
+		/**
+		 * Cached guilds.
+		 *
+		 * The keys are guild IDs (snowflakes).\
+		 * The values are the guild document with that guild ID.
+		 */
+		guildById: Map<string, Document<Guild>>;
+
+		/**
+		 * Cached user praises.
+		 *
+		 * The keys are stringified user document references.\
+		 * The values are praise documents mapped by their stringified document reference.
+		 */
+		praisesBySender: Map<string, Map<string, Document<Praise>>>;
+
+		/**
+		 * Cached user praises.
+		 *
+		 * The keys are stringified user document references.\
+		 * The values are praise documents mapped by their stringified document reference.
+		 */
+		praisesByRecipient: Map<string, Map<string, Document<Praise>>>;
+
+		/**
+		 * Cached user reports.
+		 *
+		 * The keys are stringified user document references combined with guild IDs.\
+		 * The values are report documents mapped by their stringified document reference.
+		 */
+		reportsByAuthorAndGuild: Map<string, Map<string, Document<Report>>>;
+
+		/**
+		 * Cached suggestions.
+		 *
+		 * The keys are stringified user document references combined with guild IDs.\
+		 * The values are suggestion documents mapped by their stringified document reference.
+		 */
+		suggestionsByAuthorAndGuild: Map<string, Map<string, Document<Suggestion>>>;
+
+		/**
+		 * Cached users.
+		 *
+		 * The keys are stringified user document references.\
+		 * The values are the user document with that reference.
+		 */
+		usersByReference: Map<string, Document<User>>;
+
+		/**
+		 * Cached users.
+		 *
+		 * The keys are Discord user IDs (snowflakes).\
+		 * The values are the user document with that user ID.
+		 */
+		usersById: Map<string, Document<User>>;
+
+		/**
+		 * Cached user warnings.
+		 *
+		 * The keys are stringified user document references.\
+		 * The values are warning documents mapped by their stringified document reference.
+		 */
+		warningsByRecipient: Map<string, Map<string, Document<Warning>>>;
+	};
+	adapters: {
+		entryRequests: DatabaseAdapter<EntryRequest, EntryRequestIndexes, "get" | "update", true>;
+		guilds: DatabaseAdapter<Guild, GuildIndexes, "getOrFetch" | "getOrFetchOrCreate" | "update">;
+		praises: DatabaseAdapter<Praise, PraiseIndexes, "getOrFetch">;
+		reports: DatabaseAdapter<Report, ReportIndexes, "get" | "update", true>;
+		suggestions: DatabaseAdapter<Suggestion, SuggestionIndexes, "get" | "update", true>;
+		users: DatabaseAdapter<User, UserIndexes, "getOrFetch" | "getOrFetchOrCreate" | "update">;
+		warnings: DatabaseAdapter<Warning, WarningIndexes, "getOrFetch" | "delete">;
+	};
+	fetchPromises: {
+		[K0 in keyof WithFetch]: {
+			[K1 in Parameters<WithFetch[K0]["fetch"]>[1]]: Map<string, ReturnType<WithFetch[K0]["fetch"]>>;
+		};
+	};
+};
 
 /** Models a cache for storing the responses to dispatched {@link fetch()} queries. */
-type FetchPromiseCache = {
-	[K0 in keyof WithFetch]: {
-		[K1 in Parameters<WithFetch[K0]["fetch"]>[1]]: Map<string, ReturnType<WithFetch[K0]["fetch"]>>;
-	};
-};
-
 type WithFetch = {
-	[K in keyof DatabaseAdapters as "fetch" extends keyof DatabaseAdapters[K] ? K : never]: DatabaseAdapters[K];
+	[K in
+		keyof Database["adapters"] as "fetch" extends keyof Database["adapters"][K] ? K : never]: Database["adapters"][K];
 };
-
-function createDatabase(environment: Client["metadata"]["environment"]): Database {
-	return {
-		client: new Fauna.Client({
-			secret: environment.faunaSecret,
-			domain: "db.us.fauna.com",
-			scheme: "https",
-			port: 443,
-		}),
-		cache: {
-			entryRequestBySubmitterAndGuild: new Map(),
-			praisesBySender: new Map(),
-			praisesByRecipient: new Map(),
-			reportsByAuthorAndGuild: new Map(),
-			reportsByRecipientAndGuild: new Map(),
-			suggestionsByAuthorAndGuild: new Map(),
-			usersByReference: new Map(),
-			usersById: new Map(),
-			warningsByRecipient: new Map(),
-		},
-		fetchPromises: {
-			praises: {
-				recipient: new Map(),
-				sender: new Map(),
-			},
-			users: {
-				id: new Map(),
-				reference: new Map(),
-			},
-			warnings: {
-				recipient: new Map(),
-			},
-		},
-		adapters: { entryRequests, reports, praises, suggestions, users, warnings },
-	};
-}
 
 /**
  * Sends a query to Fauna and returns the result, handling any errors that may
@@ -322,7 +286,7 @@ async function dispatchQuery<
 	return result.data as unknown as R;
 }
 
-function mentionUser(user: DiscordUser | undefined, id: bigint): string {
+function mentionUser(user: Discord.User | undefined, id: bigint): string {
 	return user === undefined ? `an unknown user (ID ${id})` : diagnosticMentionUser(user);
 }
 
@@ -349,5 +313,5 @@ function setNested<MK, K, V>(map: Map<MK, Map<K, V>>, mapKey: MK, key: K, value:
 	map.get(mapKey)?.set(key, value) ?? map.set(mapKey, new Map([[key, value]]));
 }
 
-export { createDatabase, dispatchQuery, getUserMentionByReference, mentionUser, setNested, stringifyValue };
-export type { CacheAdapter, Database, DatabaseAdapters, WithFetch };
+export { dispatchQuery, getUserMentionByReference, mentionUser, setNested, stringifyValue };
+export type { CacheAdapter, Database, WithFetch };

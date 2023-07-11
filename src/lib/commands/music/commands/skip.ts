@@ -2,25 +2,19 @@ import constants from "../../../../constants.js";
 import { defaultLocale } from "../../../../types.js";
 import { Client, localise } from "../../../client.js";
 import { parseArguments, reply } from "../../../interactions.js";
-import {
-	getVoiceState,
-	isCollection,
-	isOccupied,
-	skip,
-	verifyCanManagePlayback,
-} from "../../../services/music/music.js";
+import { isCollection } from "../../../services/music/music.js";
 import { OptionTemplate } from "../../command.js";
 import { by, collection, to } from "../../parameters.js";
-import { ApplicationCommandOptionTypes, Bot, Interaction } from "discordeno";
+import * as Discord from "discordeno";
 
 const command: OptionTemplate = {
 	name: "skip",
-	type: ApplicationCommandOptionTypes.SubCommand,
+	type: Discord.ApplicationCommandOptionTypes.SubCommand,
 	handle: handleSkipAction,
 	options: [collection, by, to],
 };
 
-async function handleSkipAction([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+async function handleSkipAction([client, bot]: [Client, Discord.Bot], interaction: Discord.Interaction): Promise<void> {
 	const [{ collection, by: songsToSkip, to: songToSkipTo }] = parseArguments(interaction.data?.options, {
 		collection: "boolean",
 		by: "number",
@@ -38,25 +32,23 @@ async function handleSkipAction([client, bot]: [Client, Bot], interaction: Inter
 		return;
 	}
 
-	const controller = client.features.music.controllers.get(guildId);
-	if (controller === undefined) {
+	const musicService = client.services.music.music.get(guildId);
+	if (musicService === undefined) {
 		return;
 	}
 
-	const isVoiceStateVerified = verifyCanManagePlayback(
-		[client, bot],
-		interaction,
-		controller,
-		getVoiceState(client, guildId, interaction.user.id),
-	);
-	if (!isVoiceStateVerified) {
+	const isVoiceStateVerified = musicService.verifyCanManagePlayback(bot, interaction);
+	if (isVoiceStateVerified === undefined || !isVoiceStateVerified) {
 		return;
 	}
 
-	const currentListing = controller.currentListing;
+	const [isOccupied, current, queue] = [musicService.isOccupied, musicService.current, musicService.queue];
+	if (isOccupied === undefined || queue === undefined) {
+		return;
+	}
 
 	if (collection) {
-		if (!isOccupied(controller.player) || currentListing === undefined) {
+		if (!isOccupied || current === undefined) {
 			const strings = {
 				title: localise(client, "music.options.skip.strings.noSongCollection.title", interaction.locale)(),
 				description: {
@@ -78,7 +70,7 @@ async function handleSkipAction([client, bot]: [Client, Bot], interaction: Inter
 				],
 			});
 			return;
-		} else if (!isCollection(currentListing.content)) {
+		} else if (!isCollection(current.content)) {
 			const strings = {
 				title: localise(client, "music.options.skip.strings.noSongCollection.title", interaction.locale)(),
 				description: {
@@ -107,7 +99,7 @@ async function handleSkipAction([client, bot]: [Client, Bot], interaction: Inter
 			return;
 		}
 	} else {
-		if (!isOccupied(controller.player) || currentListing === undefined) {
+		if (!isOccupied || current === undefined) {
 			const strings = {
 				title: localise(client, "music.options.skip.strings.noSong.title", interaction.locale)(),
 				description: localise(client, "music.options.skip.strings.noSong.description", interaction.locale)(),
@@ -168,25 +160,22 @@ async function handleSkipAction([client, bot]: [Client, Bot], interaction: Inter
 
 	if (songsToSkip !== undefined) {
 		let listingsToSkip!: number;
-		if (isCollection(currentListing.content) && collection === undefined) {
-			listingsToSkip = Math.min(
-				songsToSkip,
-				currentListing.content.songs.length - (currentListing.content.position + 1),
-			);
+		if (isCollection(current.content) && collection === undefined) {
+			listingsToSkip = Math.min(songsToSkip, current.content.songs.length - (current.content.position + 1));
 		} else {
-			listingsToSkip = Math.min(songsToSkip, controller.listingQueue.length);
+			listingsToSkip = Math.min(songsToSkip, queue.length);
 		}
-		skip(controller, isSkippingCollection, { by: listingsToSkip });
+		musicService.skip(isSkippingCollection, { by: listingsToSkip });
 	} else if (songToSkipTo !== undefined) {
 		let listingToSkipTo!: number;
-		if (isCollection(currentListing.content) && collection === undefined) {
-			listingToSkipTo = Math.min(songToSkipTo, currentListing.content.songs.length);
+		if (isCollection(current.content) && collection === undefined) {
+			listingToSkipTo = Math.min(songToSkipTo, current.content.songs.length);
 		} else {
-			listingToSkipTo = Math.min(songToSkipTo, controller.listingQueue.length);
+			listingToSkipTo = Math.min(songToSkipTo, queue.length);
 		}
-		skip(controller, isSkippingCollection, { to: listingToSkipTo });
+		musicService.skip(isSkippingCollection, { to: listingToSkipTo });
 	} else {
-		skip(controller, isSkippingCollection, {});
+		musicService.skip(isSkippingCollection, {});
 	}
 
 	const strings =

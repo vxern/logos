@@ -1,14 +1,14 @@
 import { Client } from "../client.js";
-import { ApplicationCommandOption, Bot, CreateSlashApplicationCommand, Interaction } from "discordeno";
+import * as Discord from "discordeno";
 
 type WithRequired<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>> & Required<Pick<T, K>>;
 
 /** Describes the handler of an interaction. */
-type InteractionHandler = ([client, bot]: [Client, Bot], interaction: Interaction) => Promise<void>;
+type InteractionHandler = ([client, bot]: [Client, Discord.Bot], interaction: Discord.Interaction) => Promise<void>;
 
-type Command = CreateSlashApplicationCommand;
+type Command = Discord.CreateSlashApplicationCommand;
 
-type Option = ApplicationCommandOption;
+type Option = Discord.ApplicationCommandOption;
 
 interface CommandFeatures {
 	isRateLimited?: boolean;

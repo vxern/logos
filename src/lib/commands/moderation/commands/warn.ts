@@ -1,26 +1,29 @@
-import configuration from "../../../../configuration.js";
 import constants from "../../../../constants.js";
+import defaults from "../../../../defaults.js";
 import { MentionTypes, mention } from "../../../../formatting.js";
-import { defaultLocale } from "../../../../types.js";
-import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../client.js";
+import { defaultLanguage, defaultLocale, getLanguageByLocale } from "../../../../types.js";
+import { Client, autocompleteMembers, localise, pluralise, resolveInteractionToMember } from "../../../client.js";
+import { timeStructToMilliseconds } from "../../../database/structs/guild.js";
 import { parseArguments, reply } from "../../../interactions.js";
-import { logEvent } from "../../../services/logging/logging.js";
-import { diagnosticMentionUser, getTextChannel } from "../../../utils.js";
+import { diagnosticMentionUser } from "../../../utils.js";
 import { CommandTemplate } from "../../command.js";
 import { reason, user } from "../../parameters.js";
 import { getActiveWarnings } from "../module.js";
-import { ApplicationCommandTypes, Bot, Interaction, calculatePermissions, editMember, sendMessage } from "discordeno";
+import * as Discord from "discordeno";
 
 const command: CommandTemplate = {
 	name: "warn",
-	type: ApplicationCommandTypes.ChatInput,
+	type: Discord.ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ["MODERATE_MEMBERS"],
 	handle: handleWarnUser,
 	handleAutocomplete: handleWarnUserAutocomplete,
 	options: [user, reason],
 };
 
-async function handleWarnUserAutocomplete([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+async function handleWarnUserAutocomplete(
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
+): Promise<void> {
 	const [{ user }] = parseArguments(interaction.data?.options, {});
 	if (user === undefined) {
 		return;
@@ -32,7 +35,27 @@ async function handleWarnUserAutocomplete([client, bot]: [Client, Bot], interact
 	});
 }
 
-async function handleWarnUser([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+async function handleWarnUser([client, bot]: [Client, Discord.Bot], interaction: Discord.Interaction): Promise<void> {
+	const guildId = interaction.guildId;
+	if (guildId === undefined) {
+		return;
+	}
+
+	const guildDocument = await client.database.adapters.guilds.getOrFetchOrCreate(
+		client,
+		"id",
+		guildId.toString(),
+		guildId,
+	);
+	if (guildDocument === undefined) {
+		return;
+	}
+
+	const configuration = guildDocument.data.features.moderation.features?.warns;
+	if (configuration === undefined || !configuration.enabled) {
+		return;
+	}
+
 	const [{ user: userSearchQuery, reason }] = parseArguments(interaction.data?.options, {});
 	if (userSearchQuery === undefined || reason === undefined) {
 		return;
@@ -51,11 +74,6 @@ async function handleWarnUser([client, bot]: [Client, Bot], interaction: Interac
 		return;
 	}
 
-	const guildId = interaction.guildId;
-	if (guildId === undefined) {
-		return;
-	}
-
 	const guild = client.cache.guilds.get(guildId);
 	if (guild === undefined) {
 		return;
@@ -63,7 +81,7 @@ async function handleWarnUser([client, bot]: [Client, Bot], interaction: Interac
 
 	const moderatorRoleIds = guild.roles
 		.array()
-		.filter((role) => calculatePermissions(role.permissions).includes("MODERATE_MEMBERS"))
+		.filter((role) => Discord.calculatePermissions(role.permissions).includes("MODERATE_MEMBERS"))
 		.map((role) => role.id);
 	if (moderatorRoleIds.length === 0) {
 		return undefined;
@@ -99,8 +117,9 @@ async function handleWarnUser([client, bot]: [Client, Bot], interaction: Interac
 		}),
 	]);
 
-	if (document !== undefined) {
-		logEvent([client, bot], guild, "memberWarnAdd", [member, document.data, interaction.user]);
+	if (configuration.journaling && document !== undefined) {
+		const journallingService = client.services.journalling.get(guild.id);
+		journallingService?.log(bot, "memberWarnAdd", { args: [member, document.data, interaction.user] });
 	}
 
 	if (warnings === undefined || document === undefined) {
@@ -108,8 +127,11 @@ async function handleWarnUser([client, bot]: [Client, Bot], interaction: Interac
 		return;
 	}
 
-	const relevantWarnings = getActiveWarnings(warnings);
+	const expirationMilliseconds = timeStructToMilliseconds(configuration.expiration ?? defaults.WARN_EXPIRY);
 
+	const relevantWarnings = getActiveWarnings(warnings, expirationMilliseconds);
+
+	const language = getLanguageByLocale(interaction.locale) ?? defaultLanguage;
 	const strings = {
 		title: localise(client, "warn.strings.warned.title", interaction.locale)(),
 		description: localise(
@@ -118,7 +140,7 @@ async function handleWarnUser([client, bot]: [Client, Bot], interaction: Interac
 			interaction.locale,
 		)({
 			user_mention: mention(member.id, MentionTypes.User),
-			number: relevantWarnings.size,
+			warnings: pluralise(client, "warn.strings.warned.description.warnings", language, relevantWarnings.size),
 		}),
 	};
 
@@ -132,31 +154,45 @@ async function handleWarnUser([client, bot]: [Client, Bot], interaction: Interac
 		],
 	});
 
-	const moderationChannelId = getTextChannel(guild, configuration.guilds.channels.guideChat)?.id;
-	if (moderationChannelId === undefined) {
-		return;
-	}
+	const alertService = client.services.alerts.get(guild.id);
 
-	const surpassedLimit = relevantWarnings.size > configuration.commands.warn.limitUses;
+	const surpassedLimit = relevantWarnings.size > configuration.limit;
 	if (surpassedLimit) {
-		const strings = {
-			title: localise(client, "warn.strings.limitSurpassed.title", defaultLocale)(),
-			description: localise(
-				client,
-				"warn.strings.limitSurpassed.description",
-				defaultLocale,
-			)({
-				user_mention: diagnosticMentionUser(user),
-				limit: configuration.commands.warn.limitUses,
-				number: relevantWarnings.size,
-			}),
-		};
+		let strings;
+		if (configuration.autoTimeout.enabled) {
+			const timeout = configuration.autoTimeout.duration ?? defaults.WARN_TIMEOUT;
 
-		editMember(bot, guild.id, member.id, {
-			communicationDisabledUntil: Date.now() + configuration.commands.warn.timeoutDuration,
-		}).catch(() => client.log.warn(`Failed to edit timeout state of member with ID ${member.id}.`));
+			strings = {
+				title: localise(client, "warn.strings.limitSurpassedTimedOut.title", defaultLocale)(),
+				description: localise(
+					client,
+					"warn.strings.limitSurpassedTimedOut.description",
+					defaultLocale,
+				)({
+					user_mention: diagnosticMentionUser(user),
+					limit: configuration.limit,
+					number: relevantWarnings.size,
+					period: pluralise(client, `units.${timeout[1]}.word`, defaultLanguage, timeout[0]),
+				}),
+			};
 
-		sendMessage(bot, moderationChannelId, {
+			const timeoutMilliseconds = timeStructToMilliseconds(timeout);
+
+			Discord.editMember(bot, guild.id, member.id, {
+				communicationDisabledUntil: Date.now() + timeoutMilliseconds,
+			}).catch(() => client.log.warn(`Failed to edit timeout state of member with ID ${member.id}.`));
+		} else {
+			strings = {
+				title: localise(client, "warn.strings.limitSurpassed.title", defaultLocale)(),
+				description: localise(
+					client,
+					"warn.strings.limitSurpassed.description",
+					defaultLocale,
+				)({ user_mention: diagnosticMentionUser(user), limit: configuration.limit, number: relevantWarnings.size }),
+			};
+		}
+
+		alertService?.alert(bot, {
 			embeds: [
 				{
 					title: `${constants.symbols.indicators.exclamation} ${strings.title}`,
@@ -164,11 +200,12 @@ async function handleWarnUser([client, bot]: [Client, Bot], interaction: Interac
 					color: constants.colors.red,
 				},
 			],
-		}).catch(() => client.log.warn("Failed to send message about the warning limit having been surpassed."));
+		});
+
 		return;
 	}
 
-	const reachedLimit = relevantWarnings.size === configuration.commands.warn.limitUses;
+	const reachedLimit = relevantWarnings.size === defaults.WARN_LIMIT;
 	if (reachedLimit) {
 		const strings = {
 			title: localise(client, "warn.strings.limitReached.title", defaultLocale)(),
@@ -176,13 +213,10 @@ async function handleWarnUser([client, bot]: [Client, Bot], interaction: Interac
 				client,
 				"warn.strings.limitReached.description",
 				defaultLocale,
-			)({
-				user_mention: diagnosticMentionUser(user),
-				limit: configuration.commands.warn.limitUses,
-			}),
+			)({ user_mention: diagnosticMentionUser(user), limit: defaults.WARN_LIMIT }),
 		};
 
-		sendMessage(bot, moderationChannelId, {
+		alertService?.alert(bot, {
 			embeds: [
 				{
 					title: `${constants.symbols.indicators.warning} ${strings.title}`,
@@ -190,11 +224,13 @@ async function handleWarnUser([client, bot]: [Client, Bot], interaction: Interac
 					color: constants.colors.yellow,
 				},
 			],
-		}).catch(() => client.log.warn("Failed to send message about the warning limit having been reached."));
+		});
+
+		return;
 	}
 }
 
-async function displayError([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+async function displayError([client, bot]: [Client, Discord.Bot], interaction: Discord.Interaction): Promise<void> {
 	const strings = {
 		title: localise(client, "warn.strings.failed.title", interaction.locale)(),
 		description: localise(client, "warn.strings.failed.description", interaction.locale)(),

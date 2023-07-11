@@ -10,20 +10,11 @@ import {
 	reply,
 } from "../../../interactions.js";
 import { CommandTemplate } from "../../command.js";
-import {
-	ApplicationCommandTypes,
-	Bot,
-	ButtonComponent,
-	ButtonStyles,
-	Interaction,
-	InteractionCallbackData,
-	InteractionTypes,
-	MessageComponentTypes,
-} from "discordeno";
+import * as Discord from "discordeno";
 
 const command: CommandTemplate = {
 	name: "game",
-	type: ApplicationCommandTypes.ChatInput,
+	type: Discord.ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ["VIEW_CHANNEL"],
 	handle: handleStartGame,
 };
@@ -31,18 +22,18 @@ const command: CommandTemplate = {
 type WordButtonID = [index: string];
 
 /** Starts a simple game of 'choose the correct word to fit in the blank'. */
-async function handleStartGame([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+async function handleStartGame([client, bot]: [Client, Discord.Bot], interaction: Discord.Interaction): Promise<void> {
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
 		return;
 	}
 
-	const guild = client.cache.guilds.get(guildId);
-	if (guild === undefined) {
+	const guildDocument = await client.database.adapters.guilds.getOrFetch(client, "id", guildId.toString());
+	if (guildDocument === undefined) {
 		return;
 	}
 
-	const sentencePairs = client.features.sentencePairs.get(guild.language);
+	const sentencePairs = client.features.sentencePairs.get(guildDocument.data.language);
 	if (sentencePairs === undefined || sentencePairs.length === 0) {
 		const strings = {
 			title: localise(client, "game.strings.noSentencesAvailable.title", interaction.locale)(),
@@ -67,7 +58,7 @@ async function handleStartGame([client, bot]: [Client, Bot], interaction: Intera
 	let embedColor = constants.colors.blue;
 
 	const customId = createInteractionCollector([client, bot], {
-		type: InteractionTypes.MessageComponent,
+		type: Discord.InteractionTypes.MessageComponent,
 		userId: interaction.user.id,
 		onCollect: async (bot, selection) => {
 			acknowledge([client, bot], selection);
@@ -121,7 +112,7 @@ function getGameView(
 	sentenceSelection: SentenceSelection,
 	embedColor: number,
 	locale: string | undefined,
-): InteractionCallbackData {
+): Discord.InteractionCallbackData {
 	const strings = {
 		sentence: localise(client, "game.strings.sentence", locale)(),
 		translation: localise(client, "game.strings.translation", locale)(),
@@ -145,13 +136,13 @@ function getGameView(
 		],
 		components: [
 			{
-				type: MessageComponentTypes.ActionRow,
+				type: Discord.MessageComponentTypes.ActionRow,
 				components: sentenceSelection.choices.map((choice, index) => ({
-					type: MessageComponentTypes.Button,
-					style: ButtonStyles.Success,
+					type: Discord.MessageComponentTypes.Button,
+					style: Discord.ButtonStyles.Success,
 					label: choice,
 					customId: encodeId<WordButtonID>(customId, [index.toString()]),
-				})) as [ButtonComponent],
+				})) as [Discord.ButtonComponent],
 			},
 		],
 	};

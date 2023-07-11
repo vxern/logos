@@ -1,10 +1,5 @@
-import {
-	CacheAdapter,
-	DatabaseAdapters,
-	dispatchQuery,
-	getUserMentionByReference,
-	stringifyValue,
-} from "../database.js";
+import constants from "../../../constants.js";
+import { CacheAdapter, Database, dispatchQuery, getUserMentionByReference, stringifyValue } from "../database.js";
 import { Document } from "../document.js";
 import { EntryRequestIndexes } from "../indexes.js";
 import { EntryRequest } from "../structs/entry-request.js";
@@ -24,7 +19,7 @@ const cache: CacheAdapter<EntryRequest, EntryRequestIndexes<Document<EntryReques
 	},
 };
 
-const adapter: DatabaseAdapters["entryRequests"] = {
+const adapter: Database["adapters"]["entryRequests"] = {
 	prefetch: async (client) => {
 		const documents = await dispatchQuery<EntryRequest[]>(
 			client,
@@ -41,7 +36,7 @@ const adapter: DatabaseAdapters["entryRequests"] = {
 		for (const document of documents) {
 			const submitterReferenceId = stringifyValue(document.data.submitter);
 			const guildId = stringifyValue(document.data.guild);
-			const compositeId = `${submitterReferenceId}${guildId}`;
+			const compositeId = `${submitterReferenceId}${constants.symbols.meta.idSeparator}${guildId}`;
 
 			cache.set(client, "submitterAndGuild", compositeId, document);
 		}
@@ -52,7 +47,7 @@ const adapter: DatabaseAdapters["entryRequests"] = {
 		const [submitter, guild] = parameterValue;
 		const submitterReferenceId = stringifyValue(submitter);
 		const guildId = stringifyValue(guild);
-		const compositeId = `${submitterReferenceId}${guildId}`;
+		const compositeId = `${submitterReferenceId}${constants.symbols.meta.idSeparator}${guildId}`;
 
 		return cache.get(client, parameter, compositeId) as Document<EntryRequest> | undefined;
 	},
@@ -72,7 +67,7 @@ const adapter: DatabaseAdapters["entryRequests"] = {
 			return undefined;
 		}
 
-		const compositeId = `${submitterReferenceId}${guildId}`;
+		const compositeId = `${submitterReferenceId}${constants.symbols.meta.idSeparator}${guildId}`;
 
 		cache.set(client, "submitterAndGuild", compositeId, document);
 
@@ -93,7 +88,7 @@ const adapter: DatabaseAdapters["entryRequests"] = {
 			return undefined;
 		}
 
-		const compositeId = `${submitterReferenceId}${guildId}`;
+		const compositeId = `${submitterReferenceId}${constants.symbols.meta.idSeparator}${guildId}`;
 
 		cache.set(client, "submitterAndGuild", compositeId, document);
 

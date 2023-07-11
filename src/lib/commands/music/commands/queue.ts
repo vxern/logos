@@ -5,16 +5,19 @@ import { parseArguments } from "../../../interactions.js";
 import { OptionTemplate } from "../../command.js";
 import { show } from "../../parameters.js";
 import { displayListings } from "../module.js";
-import { ApplicationCommandOptionTypes, Bot, Interaction } from "discordeno";
+import * as Discord from "discordeno";
 
 const command: OptionTemplate = {
 	name: "queue",
-	type: ApplicationCommandOptionTypes.SubCommand,
+	type: Discord.ApplicationCommandOptionTypes.SubCommand,
 	handle: handleDisplayPlaybackQueue,
 	options: [show],
 };
 
-async function handleDisplayPlaybackQueue([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+async function handleDisplayPlaybackQueue(
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
+): Promise<void> {
 	const [{ show }] = parseArguments(interaction.data?.options, { show: "boolean" });
 
 	const guildId = interaction.guildId;
@@ -22,8 +25,13 @@ async function handleDisplayPlaybackQueue([client, bot]: [Client, Bot], interact
 		return;
 	}
 
-	const controller = client.features.music.controllers.get(guildId);
-	if (controller === undefined) {
+	const musicService = client.services.music.music.get(guildId);
+	if (musicService === undefined) {
+		return;
+	}
+
+	const queue = musicService.queue;
+	if (queue === undefined) {
 		return;
 	}
 
@@ -36,7 +44,7 @@ async function handleDisplayPlaybackQueue([client, bot]: [Client, Bot], interact
 	displayListings(
 		[client, bot],
 		interaction,
-		{ title: `${constants.symbols.music.list} ${strings.queue}`, songListings: controller.listingQueue },
+		{ title: `${constants.symbols.music.list} ${strings.queue}`, songListings: queue },
 		show ?? false,
 		locale,
 	);

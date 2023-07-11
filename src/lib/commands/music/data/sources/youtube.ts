@@ -4,7 +4,7 @@ import { Client, localise } from "../../../../client.js";
 import { createInteractionCollector, deleteReply, postponeReply, reply } from "../../../../interactions.js";
 import { Song, SongListing } from "../types.js";
 import { ListingResolver } from "./sources.js";
-import { Bot, Interaction, InteractionTypes, MessageComponentTypes } from "discordeno";
+import * as Discord from "discordeno";
 import * as YouTubeSearch from "youtube-sr";
 
 const resolver: ListingResolver = async ([client, bot], interaction, query) => {
@@ -29,8 +29,8 @@ const resolver: ListingResolver = async ([client, bot], interaction, query) => {
 };
 
 async function search(
-	[client, bot]: [Client, Bot],
-	interaction: Interaction,
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
 	query: string,
 ): Promise<SongListing | undefined> {
 	const resultsAll = await YouTubeSearch.YouTube.search(query, { limit: 20, type: "all", safeSearch: false });
@@ -43,7 +43,7 @@ async function search(
 
 	return new Promise<SongListing | undefined>((resolve) => {
 		const customId = createInteractionCollector([client, bot], {
-			type: InteractionTypes.MessageComponent,
+			type: Discord.InteractionTypes.MessageComponent,
 			userId: interaction.user.id,
 			limit: 1,
 			onCollect: async (bot, selection) => {
@@ -109,10 +109,10 @@ async function search(
 			],
 			components: [
 				{
-					type: MessageComponentTypes.ActionRow,
+					type: Discord.MessageComponentTypes.ActionRow,
 					components: [
 						{
-							type: MessageComponentTypes.SelectMenu,
+							type: Discord.MessageComponentTypes.SelectMenu,
 							customId: customId,
 							minValues: 1,
 							maxValues: 1,

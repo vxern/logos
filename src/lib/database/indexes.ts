@@ -1,5 +1,6 @@
 import { Document } from "./document.js";
 import { EntryRequest } from "./structs/entry-request.js";
+import { Guild } from "./structs/guild.js";
 import { Praise } from "./structs/praise.js";
 import { Report } from "./structs/report.js";
 import { Suggestion } from "./structs/suggestion.js";
@@ -13,6 +14,10 @@ type GetParameterNames<I extends IndexesSignature> = Exclude<keyof I, "reference
 
 type EntryRequestIndexes<T = Document<EntryRequest>> = {
 	submitterAndGuild: [takes: [Fauna.values.Ref, string], returns: T];
+};
+
+type GuildIndexes<T = Document<Guild>> = {
+	id: [takes: string, returns: T];
 };
 
 type PraiseIndexes<T = Map<string, Document<Praise>>> = {
@@ -37,6 +42,10 @@ type WarningIndexes<T = Map<string, Document<Warning>>> = {
 	recipient: [takes: Fauna.values.Ref, returns: T];
 };
 
+const guildIndexParameterToIndex: Record<GetParameterNames<GuildIndexes>, string> = {
+	id: "GetGuildByID",
+};
+
 const praiseIndexParameterToIndex: Record<GetParameterNames<PraiseIndexes>, string> = {
 	sender: "GetPraisesBySender",
 	recipient: "GetPraisesByRecipient",
@@ -50,9 +59,15 @@ const warningIndexParameterToIndex: Record<GetParameterNames<WarningIndexes>, st
 	recipient: "GetWarningsByRecipient",
 };
 
-export { praiseIndexParameterToIndex, userIndexParameterToIndex, warningIndexParameterToIndex };
+export {
+	guildIndexParameterToIndex,
+	praiseIndexParameterToIndex,
+	userIndexParameterToIndex,
+	warningIndexParameterToIndex,
+};
 export type {
 	EntryRequestIndexes,
+	GuildIndexes,
 	IndexesSignature,
 	PraiseIndexes,
 	ReportIndexes,

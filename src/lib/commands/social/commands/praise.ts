@@ -1,18 +1,18 @@
-import configuration from "../../../../configuration.js";
 import constants from "../../../../constants.js";
+import defaults from "../../../../defaults.js";
 import { MentionTypes, mention } from "../../../../formatting.js";
 import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../client.js";
+import { timeStructToMilliseconds } from "../../../database/structs/guild.js";
 import { Praise } from "../../../database/structs/praise.js";
 import { editReply, parseArguments, postponeReply, reply } from "../../../interactions.js";
-import { logEvent } from "../../../services/logging/logging.js";
 import { verifyIsWithinLimits } from "../../../utils.js";
 import { CommandTemplate } from "../../command.js";
 import { user } from "../../parameters.js";
-import { ApplicationCommandOptionTypes, ApplicationCommandTypes, Bot, Interaction } from "discordeno";
+import * as Discord from "discordeno";
 
 const command: CommandTemplate = {
 	name: "praise",
-	type: ApplicationCommandTypes.ChatInput,
+	type: Discord.ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ["VIEW_CHANNEL"],
 	handle: handlePraiseUser,
 	handleAutocomplete: handlePraiseUserAutocomplete,
@@ -20,12 +20,15 @@ const command: CommandTemplate = {
 		user,
 		{
 			name: "comment",
-			type: ApplicationCommandOptionTypes.String,
+			type: Discord.ApplicationCommandOptionTypes.String,
 		},
 	],
 };
 
-async function handlePraiseUserAutocomplete([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+async function handlePraiseUserAutocomplete(
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
+): Promise<void> {
 	const [{ user }] = parseArguments(interaction.data?.options, {});
 	if (user === undefined) {
 		return;
@@ -34,7 +37,27 @@ async function handlePraiseUserAutocomplete([client, bot]: [Client, Bot], intera
 	autocompleteMembers([client, bot], interaction, user);
 }
 
-async function handlePraiseUser([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+async function handlePraiseUser([client, bot]: [Client, Discord.Bot], interaction: Discord.Interaction): Promise<void> {
+	const guildId = interaction.guildId;
+	if (guildId === undefined) {
+		return;
+	}
+
+	const guildDocument = await client.database.adapters.guilds.getOrFetchOrCreate(
+		client,
+		"id",
+		guildId.toString(),
+		guildId,
+	);
+	if (guildDocument === undefined) {
+		return;
+	}
+
+	const configuration = guildDocument.data.features.social.features?.praises;
+	if (configuration === undefined || !configuration.enabled) {
+		return;
+	}
+
 	const [{ user, comment }] = parseArguments(interaction.data?.options, {});
 	if (user === undefined) {
 		return;
@@ -86,8 +109,10 @@ async function handlePraiseUser([client, bot]: [Client, Bot], interaction: Inter
 		return;
 	}
 
+	const intervalMilliseconds = timeStructToMilliseconds(configuration.rateLimit?.within ?? defaults.PRAISE_INTERVAL);
+
 	const praises = Array.from(praisesBySender.values());
-	if (!verifyIsWithinLimits(praises, configuration.commands.praise.limitUses, configuration.commands.praise.within)) {
+	if (!verifyIsWithinLimits(praises, configuration.rateLimit?.uses ?? defaults.PRAISE_LIMIT, intervalMilliseconds)) {
 		const strings = {
 			title: localise(client, "praise.strings.tooMany.title", interaction.locale)(),
 			description: localise(client, "praise.strings.tooMany.description", interaction.locale)(),
@@ -112,11 +137,6 @@ async function handlePraiseUser([client, bot]: [Client, Bot], interaction: Inter
 		comment: comment,
 	};
 
-	const guildId = interaction.guildId;
-	if (guildId === undefined) {
-		return;
-	}
-
 	const guild = client.cache.guilds.get(guildId);
 	if (guild === undefined) {
 		return;
@@ -128,7 +148,10 @@ async function handlePraiseUser([client, bot]: [Client, Bot], interaction: Inter
 		return;
 	}
 
-	logEvent([client, bot], guild, "praiseAdd", [member, praise, interaction.user]);
+	if (configuration.journaling) {
+		const journallingService = client.services.journalling.get(guild.id);
+		journallingService?.log(bot, "praiseAdd", { args: [member, praise, interaction.user] });
+	}
 
 	const strings = {
 		title: localise(client, "praise.strings.praised.title", interaction.locale)(),
@@ -150,7 +173,7 @@ async function handlePraiseUser([client, bot]: [Client, Bot], interaction: Inter
 	});
 }
 
-async function displayError([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+async function displayError([client, bot]: [Client, Discord.Bot], interaction: Discord.Interaction): Promise<void> {
 	const strings = {
 		title: localise(client, "praise.strings.failed.title", interaction.locale)(),
 		description: localise(client, "praise.strings.failed.description", interaction.locale)(),

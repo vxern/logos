@@ -2,19 +2,22 @@ import constants from "../../../../constants.js";
 import { defaultLocale } from "../../../../types.js";
 import { Client, localise } from "../../../client.js";
 import { parseArguments, reply } from "../../../interactions.js";
-import { getVoiceState, isCollection, isOccupied, verifyCanManagePlayback } from "../../../services/music/music.js";
+import { isCollection } from "../../../services/music/music.js";
 import { OptionTemplate } from "../../command.js";
 import { collection } from "../../parameters.js";
-import { ApplicationCommandOptionTypes, Bot, Interaction } from "discordeno";
+import * as Discord from "discordeno";
 
 const command: OptionTemplate = {
 	name: "loop",
-	type: ApplicationCommandOptionTypes.SubCommand,
+	type: Discord.ApplicationCommandOptionTypes.SubCommand,
 	handle: handleLoopPlayback,
 	options: [collection],
 };
 
-async function handleLoopPlayback([client, bot]: [Client, Bot], interaction: Interaction): Promise<void> {
+async function handleLoopPlayback(
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Discord.Interaction,
+): Promise<void> {
 	const [{ collection }] = parseArguments(interaction.data?.options, { collection: "boolean" });
 
 	const guildId = interaction.guildId;
@@ -22,25 +25,23 @@ async function handleLoopPlayback([client, bot]: [Client, Bot], interaction: Int
 		return;
 	}
 
-	const controller = client.features.music.controllers.get(guildId);
-	if (controller === undefined) {
+	const musicService = client.services.music.music.get(guildId);
+	if (musicService === undefined) {
 		return;
 	}
 
-	const isVoiceStateVerified = verifyCanManagePlayback(
-		[client, bot],
-		interaction,
-		controller,
-		getVoiceState(client, guildId, interaction.user.id),
-	);
-	if (!isVoiceStateVerified) {
+	const isVoiceStateVerified = musicService.verifyCanManagePlayback(bot, interaction);
+	if (isVoiceStateVerified === undefined || !isVoiceStateVerified) {
 		return;
 	}
 
-	const currentListing = controller.currentListing;
+	const [current, isOccupied] = [musicService.current, musicService.isPaused];
+	if (current === undefined || isOccupied === undefined) {
+		return;
+	}
 
 	if (collection) {
-		if (!isOccupied(controller.player) || currentListing === undefined) {
+		if (!isOccupied || current === undefined) {
 			const strings = {
 				title: localise(client, "music.options.loop.strings.noSongCollection.title", interaction.locale)(),
 				description: {
@@ -62,7 +63,7 @@ async function handleLoopPlayback([client, bot]: [Client, Bot], interaction: Int
 				],
 			});
 			return;
-		} else if (!isCollection(currentListing.content)) {
+		} else if (!isCollection(current.content)) {
 			const strings = {
 				title: localise(client, "music.options.loop.strings.noSongCollection.title", interaction.locale)(),
 				description: {
@@ -91,7 +92,7 @@ async function handleLoopPlayback([client, bot]: [Client, Bot], interaction: Int
 			return;
 		}
 	} else {
-		if (!isOccupied(controller.player) || currentListing === undefined) {
+		if (!isOccupied || current === undefined) {
 			const strings = {
 				title: localise(client, "music.options.loop.strings.noSong.title", interaction.locale)(),
 				description: localise(client, "music.options.loop.strings.noSong.description", interaction.locale)(),
@@ -111,9 +112,12 @@ async function handleLoopPlayback([client, bot]: [Client, Bot], interaction: Int
 	}
 
 	if (collection) {
-		controller.flags.loop.collection = !controller.flags.loop.collection;
+		const isLooped = musicService.loop(true);
+		if (isLooped === undefined) {
+			return;
+		}
 
-		if (!controller.flags.loop.collection) {
+		if (!isLooped) {
 			const strings = {
 				title: localise(client, "music.options.loop.strings.disabled.title", defaultLocale)(),
 				description: localise(
@@ -152,9 +156,12 @@ async function handleLoopPlayback([client, bot]: [Client, Bot], interaction: Int
 		return;
 	}
 
-	controller.flags.loop.song = !controller.flags.loop.song;
+	const isLooped = musicService.loop(false);
+	if (isLooped === undefined) {
+		return;
+	}
 
-	if (!controller.flags.loop.song) {
+	if (!isLooped) {
 		const strings = {
 			title: localise(client, "music.options.loop.strings.disabled.title", defaultLocale)(),
 			description: localise(client, "music.options.loop.strings.disabled.description.song", defaultLocale)(),

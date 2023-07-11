@@ -1,14 +1,8 @@
-import developer from "./developer/commands.js";
-import information from "./information/commands.js";
-import language from "./language/commands.js";
-import moderation from "./moderation/commands.js";
-import music from "./music/commands.js";
-import server from "./server/commands.js";
-import social from "./social/commands.js";
+import * as information from "./information/commands.js";
+import * as language from "./language/commands.js";
+import * as moderation from "./moderation/commands.js";
+import * as music from "./music/commands.js";
+import * as server from "./server/commands.js";
+import * as social from "./social/commands.js";
 
-const modules = [developer, information, language, moderation, music, server, social];
-
-export default {
-	local: modules.flatMap((module) => module.local),
-	global: modules.flatMap((module) => module.global),
-};
+export default { ...information, ...language, ...moderation, ...music, ...server, ...social };
