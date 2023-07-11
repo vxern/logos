@@ -1,18 +1,18 @@
 {
-	"notices.lastUpdate": "Son güncelleme {date}",
+	"notices.lastUpdate": "Son güncelleme: {date}",
 	"notices.notices.information.invite": "Kalıcı davet bağlantısı",
-	"reports.users": "Raporlanan kullanıcılar",
-	"reports.reason": "Raporlama sebebi",
+	"reports.users": "Bildirilen kullanıcılar",
+	"reports.reason": "Bildirme sebebi",
 	"reports.link": "Mesajın bağlantısı",
-	"reports.noLinkProvided": "Belirtilen mesaj için bağlantı bulunamadı.",
-	"reports.previousInfractions": "{username} adlı kullanıcın daha önceki ihlalleri",
+	"reports.noLinkProvided": "Mesaja giden bağlantı verilmedi.",
+	"reports.previousInfractions": "{username} adlı kullanıcının daha evvelki kural ihlalleri",
 	"suggestion.suggestion": "Öneri",
 	"submittedBy": "Gönderen",
-	"submittedAt": "Şuraya gönderildi",
+	"submittedAt": "da gönderildi",
 	"markResolved": "Sorunu çözülmüş olarak işaretle",
 	"markUnresolved": "Sorunu çözülmemiş olarak işaretle",
 	"alreadyMarkedResolved.title": "Zaten çözülmüş olarak işaretlenmiş",
 	"alreadyMarkedResolved.description": "Bu sorun zaten çözülmüş olarak işaretlenmiş.",
 	"alreadyMarkedUnresolved.title": "Zaten çözülmemiş olarak işaretlenmiş",
-	"alreadyMarkedUnresolved.description": "Bu sorun zaten çözülmemiş olarak işaretlendi."
+	"alreadyMarkedUnresolved.description": "Bu sorun zaten çözülmemiş olarak işaretlenmiş."
 }
