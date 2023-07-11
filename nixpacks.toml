@@ -1,2 +1,6 @@
+[phases.setup]
+nixPkgs = ['nodejs_20']
+nixpkgsArchive = '12bbce3e6c2b298892768d5fb99696b8bbf73ce2'
+
 [start]
-cmd = 'deno run --allow-env --allow-net --allow-read --allow-run mod.ts'
+cmd = 'npm run start'
