@@ -1,10 +1,13 @@
-function pluralise(quantity: string, { one, two }: Record<string, string> = {}): string {
-	if (quantity === "0" || quantity === "1") {
-		return one ?? "?";
+function pluralise(quantity: string, { one: singular, two: plural }: Record<string, string> = {}): string | undefined {
+	if (singular === undefined || plural === undefined) {
+		return undefined;
 	}
 
-	return two ?? "?";
+	if (quantity === "1") {
+		return singular;
+	}
+
+	return plural;
 }
 
-export { pluralise };
 export default { pluralise };

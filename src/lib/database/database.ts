@@ -1,12 +1,5 @@
 import { Client } from "../client.js";
 import { diagnosticMentionUser } from "../utils.js";
-import entryRequests from "./adapters/entry-requests.js";
-import guilds from "./adapters/guilds.js";
-import praises from "./adapters/praises.js";
-import reports from "./adapters/reports.js";
-import suggestions from "./adapters/suggestions.js";
-import users from "./adapters/users.js";
-import warnings from "./adapters/warnings.js";
 import { BaseDocumentProperties, Document } from "./document.js";
 import {
 	EntryRequestIndexes,
@@ -253,45 +246,6 @@ type WithFetch = {
 		keyof Database["adapters"] as "fetch" extends keyof Database["adapters"][K] ? K : never]: Database["adapters"][K];
 };
 
-function createDatabase(environment: Client["metadata"]["environment"]): Database {
-	return {
-		client: new Fauna.Client({
-			secret: environment.faunaSecret,
-			domain: "db.us.fauna.com",
-			scheme: "https",
-			port: 443,
-		}),
-		cache: {
-			entryRequestBySubmitterAndGuild: new Map(),
-			guildById: new Map(),
-			praisesBySender: new Map(),
-			praisesByRecipient: new Map(),
-			reportsByAuthorAndGuild: new Map(),
-			suggestionsByAuthorAndGuild: new Map(),
-			usersByReference: new Map(),
-			usersById: new Map(),
-			warningsByRecipient: new Map(),
-		},
-		fetchPromises: {
-			guilds: {
-				id: new Map(),
-			},
-			praises: {
-				recipient: new Map(),
-				sender: new Map(),
-			},
-			users: {
-				id: new Map(),
-				reference: new Map(),
-			},
-			warnings: {
-				recipient: new Map(),
-			},
-		},
-		adapters: { entryRequests, guilds, reports, praises, suggestions, users, warnings },
-	};
-}
-
 /**
  * Sends a query to Fauna and returns the result, handling any errors that may
  * have occurred during dispatch.
@@ -359,5 +313,5 @@ function setNested<MK, K, V>(map: Map<MK, Map<K, V>>, mapKey: MK, key: K, value:
 	map.get(mapKey)?.set(key, value) ?? map.set(mapKey, new Map([[key, value]]));
 }
 
-export { createDatabase, dispatchQuery, getUserMentionByReference, mentionUser, setNested, stringifyValue };
+export { dispatchQuery, getUserMentionByReference, mentionUser, setNested, stringifyValue };
 export type { CacheAdapter, Database, WithFetch };

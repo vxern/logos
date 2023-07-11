@@ -2,7 +2,6 @@ import constants from "../../../../constants.js";
 import { defaultLocale } from "../../../../types.js";
 import { Client, localise } from "../../../client.js";
 import { reply } from "../../../interactions.js";
-import { getVoiceState, isOccupied, isPaused, resume, verifyCanManagePlayback } from "../../../services/music/music.js";
 import { OptionTemplate } from "../../command.js";
 import * as Discord from "discordeno";
 
@@ -21,22 +20,22 @@ async function handleResumePlayback(
 		return;
 	}
 
-	const controller = client.features.music.controllers.get(guildId);
-	if (controller === undefined) {
+	const musicService = client.services.music.music.get(guildId);
+	if (musicService === undefined) {
 		return;
 	}
 
-	const isVoiceStateVerified = verifyCanManagePlayback(
-		[client, bot],
-		interaction,
-		controller,
-		getVoiceState(client, guildId, interaction.user.id),
-	);
-	if (!isVoiceStateVerified) {
+	const isVoiceStateVerified = musicService.verifyCanManagePlayback(bot, interaction);
+	if (isVoiceStateVerified === undefined || !isVoiceStateVerified) {
 		return;
 	}
 
-	if (!isOccupied(controller.player)) {
+	const [isOccupied, isPaused] = [musicService.isOccupied, musicService.isPaused];
+	if (isOccupied === undefined || isPaused === undefined) {
+		return;
+	}
+
+	if (!isOccupied) {
 		const strings = {
 			title: localise(client, "music.options.resume.strings.noSong.title", interaction.locale)(),
 			description: localise(client, "music.options.resume.strings.noSong.description", interaction.locale)(),
@@ -54,7 +53,7 @@ async function handleResumePlayback(
 		return;
 	}
 
-	if (!isPaused(controller.player)) {
+	if (!isPaused) {
 		const strings = {
 			title: localise(client, "music.options.resume.strings.notPaused", interaction.locale)(),
 			description: localise(client, "music.options.resume.strings.notPaused", interaction.locale)(),
@@ -72,7 +71,7 @@ async function handleResumePlayback(
 		return;
 	}
 
-	resume(controller.player);
+	musicService.resume();
 
 	const strings = {
 		title: localise(client, "music.options.resume.strings.resumed.title", defaultLocale)(),

@@ -1,8 +1,7 @@
-import configuration from "../../../../../configuration.js";
 import constants from "../../../../../constants.js";
+import defaults from "../../../../../defaults.js";
 import { Client, localise } from "../../../../client.js";
 import { parseArguments, reply } from "../../../../interactions.js";
-import { getVoiceState, setVolume, verifyCanManagePlayback } from "../../../../services/music/music.js";
 import * as Discord from "discordeno";
 
 async function handleSetVolume([client, bot]: [Client, Discord.Bot], interaction: Discord.Interaction): Promise<void> {
@@ -11,18 +10,13 @@ async function handleSetVolume([client, bot]: [Client, Discord.Bot], interaction
 		return;
 	}
 
-	const controller = client.features.music.controllers.get(guildId);
-	if (controller === undefined) {
+	const musicService = client.services.music.music.get(guildId);
+	if (musicService === undefined) {
 		return;
 	}
 
-	const isVoiceStateVerified = verifyCanManagePlayback(
-		[client, bot],
-		interaction,
-		controller,
-		getVoiceState(client, guildId, interaction.user.id),
-	);
-	if (!isVoiceStateVerified) {
+	const isVoiceStateVerified = musicService.verifyCanManagePlayback(bot, interaction);
+	if (isVoiceStateVerified === undefined || !isVoiceStateVerified) {
 		return;
 	}
 
@@ -31,14 +25,14 @@ async function handleSetVolume([client, bot]: [Client, Discord.Bot], interaction
 		return;
 	}
 
-	if (volume < 0 || volume > configuration.music.limits.volume) {
+	if (volume < 0 || volume > defaults.MAX_VOLUME) {
 		const strings = {
 			title: localise(client, "music.options.volume.options.set.strings.invalid.title", interaction.locale)(),
 			description: localise(
 				client,
 				"music.options.volume.options.set.strings.invalid.description",
 				interaction.locale,
-			)({ volume: configuration.music.limits.volume }),
+			)({ volume: defaults.MAX_VOLUME }),
 		};
 
 		reply([client, bot], interaction, {
@@ -53,7 +47,7 @@ async function handleSetVolume([client, bot]: [Client, Discord.Bot], interaction
 		return;
 	}
 
-	setVolume(controller.player, volume);
+	musicService.setVolume(volume);
 
 	const strings = {
 		title: localise(client, "music.options.volume.options.set.strings.set.title", interaction.locale)(),

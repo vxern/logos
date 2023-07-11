@@ -2,7 +2,6 @@ import constants from "../../../../constants.js";
 import { defaultLocale } from "../../../../types.js";
 import { Client, localise } from "../../../client.js";
 import { parseArguments, parseTimeExpression, reply, respond } from "../../../interactions.js";
-import { getVoiceState, isOccupied, skipTo, verifyCanManagePlayback } from "../../../services/music/music.js";
 import { OptionTemplate } from "../../command.js";
 import { timestamp } from "../../parameters.js";
 import * as Discord from "discordeno";
@@ -44,27 +43,22 @@ async function handleSkipToTimestamp(
 		return;
 	}
 
-	const controller = client.features.music.controllers.get(guildId);
-	if (controller === undefined) {
+	const musicService = client.services.music.music.get(guildId);
+	if (musicService === undefined) {
 		return;
 	}
 
-	const isVoiceStateVerified = verifyCanManagePlayback(
-		[client, bot],
-		interaction,
-		controller,
-		getVoiceState(client, guildId, interaction.user.id),
-	);
-	if (!isVoiceStateVerified) {
+	const isVoiceStateVerified = musicService.verifyCanManagePlayback(bot, interaction);
+	if (isVoiceStateVerified === undefined || !isVoiceStateVerified) {
 		return;
 	}
 
-	const playingSince = controller.player.playingSince;
-	if (playingSince === undefined) {
+	const [isOccupied, playingSince] = [musicService.isOccupied, musicService.playingSince];
+	if (isOccupied === undefined || playingSince === undefined) {
 		return;
 	}
 
-	if (!isOccupied(controller.player)) {
+	if (!isOccupied) {
 		const strings = {
 			title: localise(client, "music.options.skip-to.strings.noSong.title", interaction.locale)(),
 			description: localise(client, "music.options.skip-to.strings.noSong.description", interaction.locale)(),
@@ -90,11 +84,11 @@ async function handleSkipToTimestamp(
 	const timestamp = Number(timestampExpression);
 
 	if (timestamp < 0) {
-		skipTo(controller.player, 0);
+		musicService.skipTo(0);
 	} else if (timestamp > playingSince) {
-		skipTo(controller.player, playingSince);
+		musicService.skipTo(playingSince);
 	} else {
-		skipTo(controller.player, timestamp);
+		musicService.skipTo(timestamp);
 	}
 
 	const strings = {

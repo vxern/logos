@@ -22,4 +22,4 @@ const music: CommandTemplate = {
 	options: [history, loop, now, pause, play, queue, remove, replay, resume, skipTo, skip, stop, unskip, volume],
 };
 
-export default { local: [music], global: [music] };
+export { music };

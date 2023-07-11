@@ -1,5 +1,5 @@
-import configuration from "../../../configuration.js";
 import constants from "../../../constants.js";
+import defaults from "../../../defaults.js";
 import { list } from "../../../formatting.js";
 import { Client, localise } from "../../client.js";
 import { paginate } from "../../interactions.js";
@@ -14,7 +14,7 @@ async function displayListings(
 	show: boolean,
 	locale: string | undefined,
 ): Promise<void> {
-	const pages = chunk(songListings, configuration.music.limits.songs.page);
+	const pages = chunk(songListings, defaults.RESULTS_PER_PAGE);
 
 	const strings = {
 		title: localise(client, "music.strings.listings", locale)(),

@@ -478,9 +478,9 @@ function parseVerboseTimeExpressionPhrase(
 			timeUnitAliasTuples.push([
 				timeUnit,
 				[
-					`units.${timeUnit}.word.one`,
-					`units.${timeUnit}.word.two`,
-					`units.${timeUnit}.word.many`,
+					`units.${timeUnit}.one`,
+					`units.${timeUnit}.two`,
+					`units.${timeUnit}.many`,
 					`units.${timeUnit}.short`,
 					`units.${timeUnit}.shortest`,
 				].map((key) => localise(client, key, locale)()),
@@ -564,7 +564,7 @@ function parseVerboseTimeExpressionPhrase(
 	let total = 0;
 	for (const [timeUnit, quantifier] of timeUnitQuantifierTuples) {
 		const strings = {
-			unit: pluralise(client, "units.minute.word", language, quantifier),
+			unit: pluralise(client, `units.${timeUnit}.word`, language, quantifier),
 		};
 
 		timeExpressions.push(strings.unit);

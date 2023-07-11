@@ -2,7 +2,6 @@ import constants from "../../../../constants.js";
 import { defaultLocale } from "../../../../types.js";
 import { Client, localise } from "../../../client.js";
 import { reply } from "../../../interactions.js";
-import { getVoiceState, reset, verifyCanManagePlayback } from "../../../services/music/music.js";
 import { OptionTemplate } from "../../command.js";
 import * as Discord from "discordeno";
 
@@ -21,23 +20,22 @@ async function handleStopPlayback(
 		return;
 	}
 
-	const controller = client.features.music.controllers.get(guildId);
-	if (controller === undefined) {
+	const musicService = client.services.music.music.get(guildId);
+	if (musicService === undefined) {
 		return;
 	}
 
-	const isVoiceStateVerified = verifyCanManagePlayback(
-		[client, bot],
-		interaction,
-		controller,
-		getVoiceState(client, guildId, interaction.user.id),
-	);
-	if (!isVoiceStateVerified) {
+	const isVoiceStateVerified = musicService.verifyCanManagePlayback(bot, interaction);
+	if (isVoiceStateVerified === undefined || !isVoiceStateVerified) {
 		return;
 	}
 
-	const botVoiceState = getVoiceState(client, guildId, bot.id);
-	if (botVoiceState === undefined) {
+	const isOccupied = musicService.isOccupied;
+	if (isOccupied === undefined) {
+		return;
+	}
+
+	if (!isOccupied) {
 		const strings = {
 			title: localise(client, "music.options.stop.strings.notPlaying.title", interaction.locale)(),
 			description: localise(client, "music.options.stop.strings.notPlaying.description", interaction.locale)(),
@@ -55,7 +53,7 @@ async function handleStopPlayback(
 		return;
 	}
 
-	reset(client, guildId);
+	musicService.destroySession();
 
 	const strings = {
 		title: localise(client, "music.options.stop.strings.stopped.title", defaultLocale)(),

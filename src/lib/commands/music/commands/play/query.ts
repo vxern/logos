@@ -1,7 +1,6 @@
 import constants from "../../../../../constants.js";
 import { Client, localise } from "../../../../client.js";
 import { parseArguments, reply } from "../../../../interactions.js";
-import { getVoiceState, receiveNewListing, verifyCanRequestPlayback } from "../../../../services/music/music.js";
 import { ListingResolver } from "../../data/sources/sources.js";
 import { SongListing } from "../../data/types.js";
 import * as Discord from "discordeno";
@@ -16,7 +15,23 @@ async function handleRequestQueryPlayback(
 		return;
 	}
 
+	const guildId = interaction.guildId;
+	if (guildId === undefined) {
+		return;
+	}
+
+	const musicService = client.services.music.music.get(guildId);
+	if (musicService === undefined) {
+		return;
+	}
+
+	const isVoiceStateVerified = musicService.verifyCanRequestPlayback(bot, interaction);
+	if (isVoiceStateVerified === undefined || !isVoiceStateVerified) {
+		return;
+	}
+
 	const listing = await resolveToSongListing([client, bot], interaction, query);
+
 	handleRequestPlayback([client, bot], interaction, listing);
 }
 
@@ -25,36 +40,6 @@ async function handleRequestPlayback(
 	interaction: Discord.Interaction,
 	listing: SongListing | undefined,
 ): Promise<void> {
-	const channelId = interaction.channelId;
-	if (channelId === undefined) {
-		return;
-	}
-
-	const guildId = interaction.guildId;
-	if (guildId === undefined) {
-		return;
-	}
-
-	const controller = client.features.music.controllers.get(guildId);
-	if (controller === undefined) {
-		return;
-	}
-
-	const voiceState = getVoiceState(client, guildId, interaction.user.id);
-	if (voiceState === undefined) {
-		return;
-	}
-
-	const guild = client.cache.guilds.get(guildId);
-	if (guild === undefined) {
-		return;
-	}
-
-	const canPlay = verifyCanRequestPlayback([client, bot], interaction, controller, voiceState);
-	if (!canPlay) {
-		return;
-	}
-
 	if (listing === undefined) {
 		const strings = {
 			title: localise(client, "music.options.play.strings.notFound.title", interaction.locale)(),
@@ -80,17 +65,33 @@ async function handleRequestPlayback(
 		return;
 	}
 
-	const feedbackChannelId = client.cache.channels.get(channelId)?.id;
-	if (feedbackChannelId === undefined) {
+	const guildId = interaction.guildId;
+	if (guildId === undefined) {
 		return;
 	}
 
-	const voiceChannelId = voiceState.channelId;
-	if (voiceChannelId === undefined) {
+	const guild = client.cache.guilds.get(guildId);
+	if (guild === undefined) {
 		return;
 	}
 
-	receiveNewListing([client, bot], guild, controller, listing, voiceChannelId, feedbackChannelId);
+	const musicService = client.services.music.music.get(guildId);
+	if (musicService === undefined) {
+		return;
+	}
+
+	const isVoiceStateVerified = musicService.verifyCanRequestPlayback(bot, interaction);
+	if (isVoiceStateVerified === undefined || !isVoiceStateVerified) {
+		return;
+	}
+
+	const voiceState = guild.voiceStates.get(interaction.user.id);
+	const channelId = voiceState?.channelId;
+	if (channelId === undefined) {
+		return;
+	}
+
+	musicService.receiveNewListing(bot, listing, channelId);
 }
 
 export { handleRequestPlayback, handleRequestQueryPlayback };

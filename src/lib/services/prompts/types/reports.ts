@@ -1,51 +1,45 @@
-import configuration from "../../../../configuration.js";
 import constants from "../../../../constants.js";
 import { MentionTypes, mention, timestamp } from "../../../../formatting.js";
 import { defaultLocale } from "../../../../types.js";
 import { Client, localise } from "../../../client.js";
 import { stringifyValue } from "../../../database/database.js";
 import { Document } from "../../../database/document.js";
-import { Guild } from "../../../database/structs/guild.js";
 import { Report } from "../../../database/structs/report.js";
 import { User } from "../../../database/structs/user.js";
 import { encodeId, reply } from "../../../interactions.js";
-import { PromptManager } from "../manager.js";
+import { getGuildIconURLFormatted } from "../../../utils.js";
+import { PromptService } from "../service.js";
 import * as Discord from "discordeno";
 
 type Metadata = { userId: bigint; reference: string };
 type InteractionData = [userId: string, guildId: string, reference: string, isResolved: string];
 
-class ReportManager extends PromptManager<Report, Metadata, InteractionData> {
-	getAllDocuments(client: Client): Map<bigint, Document<Report>[]> {
-		const reportsByGuildId = new Map<bigint, Document<Report>[]>();
+class ReportService extends PromptService<"reports", Report, Metadata, InteractionData> {
+	constructor(client: Client, guildId: bigint) {
+		super(client, guildId, { type: "reports" });
+	}
 
-		for (const reports of Array.from(client.database.cache.reportsByAuthorAndGuild.values()).map((reports) =>
-			Array.from(reports.values()),
-		)) {
-			if (reports.length === 0) {
-				continue;
-			}
+	getAllDocuments(): Document<Report>[] {
+		const reportsAll: Document<Report>[] = [];
 
-			const { guild: guildIdString } = reports.at(0)?.data ?? {};
+		for (const [compositeId, reports] of this.client.database.cache.reportsByAuthorAndGuild.entries()) {
+			const [_, guildIdString] = compositeId.split(constants.symbols.meta.idSeparator);
 			if (guildIdString === undefined) {
 				continue;
 			}
 
-			const guildId = BigInt(guildIdString);
-
-			if (!reportsByGuildId.has(guildId)) {
-				reportsByGuildId.set(guildId, reports);
+			if (guildIdString !== this.guildIdString) {
 				continue;
 			}
 
-			reportsByGuildId.get(guildId)?.push(...reports);
+			reportsAll.push(...reports.values());
 		}
 
-		return reportsByGuildId;
+		return reportsAll;
 	}
 
-	getUserDocument(client: Client, document: Document<Report>): Promise<Document<User> | undefined> {
-		return client.database.adapters.users.getOrFetch(client, "reference", document.data.author);
+	getUserDocument(document: Document<Report>): Promise<Document<User> | undefined> {
+		return this.client.database.adapters.users.getOrFetch(this.client, "reference", document.data.author);
 	}
 
 	decodeMetadata(data: string[]): Metadata | undefined {
@@ -58,27 +52,31 @@ class ReportManager extends PromptManager<Report, Metadata, InteractionData> {
 	}
 
 	getPromptContent(
-		[client, bot]: [Client, Discord.Bot],
-		[guild, _]: [Discord.Guild, Document<Guild>],
+		bot: Discord.Bot,
 		user: Discord.User,
 		document: Document<Report>,
-	): Discord.CreateMessage {
+	): Discord.CreateMessage | undefined {
+		const guild = this.guild;
+		if (guild === undefined) {
+			return;
+		}
+
 		const reference = stringifyValue(document.ref);
 
 		const strings = {
 			report: {
-				submittedBy: localise(client, "submittedBy", defaultLocale)(),
-				submittedAt: localise(client, "submittedAt", defaultLocale)(),
-				users: localise(client, "reports.users", defaultLocale)(),
-				reason: localise(client, "reports.reason", defaultLocale)(),
-				link: localise(client, "reports.link", defaultLocale)(),
-				noLinkProvided: localise(client, "reports.noLinkProvided", defaultLocale)(),
+				submittedBy: localise(this.client, "submittedBy", defaultLocale)(),
+				submittedAt: localise(this.client, "submittedAt", defaultLocale)(),
+				users: localise(this.client, "reports.users", defaultLocale)(),
+				reason: localise(this.client, "reports.reason", defaultLocale)(),
+				link: localise(this.client, "reports.link", defaultLocale)(),
+				noLinkProvided: localise(this.client, "reports.noLinkProvided", defaultLocale)(),
 			},
 			previousInfractions: {
-				title: localise(client, "reports.previousInfractions", defaultLocale),
+				title: localise(this.client, "reports.previousInfractions", defaultLocale),
 			},
-			markResolved: localise(client, "markResolved", defaultLocale)(),
-			markUnresolved: localise(client, "markUnresolved", defaultLocale)(),
+			markResolved: localise(this.client, "markResolved", defaultLocale)(),
+			markUnresolved: localise(this.client, "markUnresolved", defaultLocale)(),
 		};
 
 		return {
@@ -122,7 +120,13 @@ class ReportManager extends PromptManager<Report, Metadata, InteractionData> {
 							inline: true,
 						},
 					],
-					footer: { text: `${user.id}${constants.symbols.meta.metadataSeparator}${reference}` },
+					footer: {
+						text: guild.name,
+						iconUrl: `${getGuildIconURLFormatted(
+							bot,
+							guild,
+						)}&metadata=${`${user.id}${constants.symbols.meta.metadataSeparator}${reference}`}`,
+					},
 				},
 			],
 			components: [
@@ -136,7 +140,7 @@ class ReportManager extends PromptManager<Report, Metadata, InteractionData> {
 									label: strings.markUnresolved,
 									customId: encodeId<InteractionData>(constants.staticComponentIds.reports, [
 										user.id.toString(),
-										guild.id.toString(),
+										this.guildIdString,
 										reference,
 										`${false}`,
 									]),
@@ -147,7 +151,7 @@ class ReportManager extends PromptManager<Report, Metadata, InteractionData> {
 									label: strings.markResolved,
 									customId: encodeId<InteractionData>(constants.staticComponentIds.reports, [
 										user.id.toString(),
-										guild.id.toString(),
+										this.guildIdString,
 										reference,
 										`${true}`,
 									]),
@@ -159,19 +163,19 @@ class ReportManager extends PromptManager<Report, Metadata, InteractionData> {
 	}
 
 	async handleInteraction(
-		[client, bot]: [Client, Discord.Bot],
+		bot: Discord.Bot,
 		interaction: Discord.Interaction,
 		data: InteractionData,
 	): Promise<Document<Report> | null | undefined> {
 		const [userId, guildId, reference, isResolvedString] = data;
 		const isResolved = isResolvedString === "true";
 
-		const user = await client.database.adapters.users.getOrFetch(client, "id", userId);
+		const user = await this.client.database.adapters.users.getOrFetch(this.client, "id", userId);
 		if (user === undefined) {
 			return undefined;
 		}
 
-		const documents = client.database.adapters.reports.get(client, "authorAndGuild", [user.ref, guildId]);
+		const documents = this.client.database.adapters.reports.get(this.client, "authorAndGuild", [user.ref, guildId]);
 		if (documents === undefined) {
 			return undefined;
 		}
@@ -183,11 +187,11 @@ class ReportManager extends PromptManager<Report, Metadata, InteractionData> {
 
 		if (isResolved && document.data.isResolved) {
 			const strings = {
-				title: localise(client, "alreadyMarkedResolved.title", defaultLocale)(),
-				description: localise(client, "alreadyMarkedResolved.description", defaultLocale)(),
+				title: localise(this.client, "alreadyMarkedResolved.title", defaultLocale)(),
+				description: localise(this.client, "alreadyMarkedResolved.description", defaultLocale)(),
 			};
 
-			reply([client, bot], interaction, {
+			reply([this.client, bot], interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -201,11 +205,11 @@ class ReportManager extends PromptManager<Report, Metadata, InteractionData> {
 
 		if (!(isResolved || document.data.isResolved)) {
 			const strings = {
-				title: localise(client, "alreadyMarkedUnresolved.title", defaultLocale)(),
-				description: localise(client, "alreadyMarkedUnresolved.description", defaultLocale)(),
+				title: localise(this.client, "alreadyMarkedUnresolved.title", defaultLocale)(),
+				description: localise(this.client, "alreadyMarkedUnresolved.description", defaultLocale)(),
 			};
 
-			reply([client, bot], interaction, {
+			reply([this.client, bot], interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -217,7 +221,7 @@ class ReportManager extends PromptManager<Report, Metadata, InteractionData> {
 			return;
 		}
 
-		const updatedDocument = await client.database.adapters.reports.update(client, {
+		const updatedDocument = await this.client.database.adapters.reports.update(this.client, {
 			...document,
 			data: { ...document.data, isResolved },
 		});
@@ -226,10 +230,4 @@ class ReportManager extends PromptManager<Report, Metadata, InteractionData> {
 	}
 }
 
-const manager = new ReportManager({
-	customId: constants.staticComponentIds.reports,
-	channelName: configuration.guilds.channels.reports,
-	type: "report",
-});
-
-export default manager;
+export { ReportService };

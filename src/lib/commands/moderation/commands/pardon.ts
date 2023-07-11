@@ -1,11 +1,12 @@
 import constants from "../../../../constants.js";
+import defaults from "../../../../defaults.js";
 import { MentionTypes, mention } from "../../../../formatting.js";
 import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../client.js";
 import { stringifyValue } from "../../../database/database.js";
 import { Document } from "../../../database/document.js";
+import { timeStructToMilliseconds } from "../../../database/structs/guild.js";
 import { Warning } from "../../../database/structs/warning.js";
 import { parseArguments, reply, respond } from "../../../interactions.js";
-import { logEvent } from "../../../services/logging/logging.js";
 import { CommandTemplate } from "../../command.js";
 import { user } from "../../parameters.js";
 import { getActiveWarnings } from "../module.js";
@@ -32,6 +33,26 @@ async function handlePardonUserAutocomplete(
 	[client, bot]: [Client, Discord.Bot],
 	interaction: Discord.Interaction,
 ): Promise<void> {
+	const guildId = interaction.guildId;
+	if (guildId === undefined) {
+		return;
+	}
+
+	const guildDocument = await client.database.adapters.guilds.getOrFetchOrCreate(
+		client,
+		"id",
+		guildId.toString(),
+		guildId,
+	);
+	if (guildDocument === undefined) {
+		return;
+	}
+
+	const configuration = guildDocument.data.features.moderation.features?.warns;
+	if (configuration === undefined || !configuration.enabled) {
+		return;
+	}
+
 	const [{ user, warning }, focused] = parseArguments(interaction.data?.options, {});
 
 	if (focused?.name === "user") {
@@ -61,7 +82,9 @@ async function handlePardonUserAutocomplete(
 			return;
 		}
 
-		const relevantWarnings = await getRelevantWarnings(client, member);
+		const expiryMilliseconds = timeStructToMilliseconds(configuration.expiration ?? defaults.WARN_EXPIRY);
+
+		const relevantWarnings = await getRelevantWarnings(client, member, expiryMilliseconds);
 		if (relevantWarnings === undefined) {
 			respond([client, bot], interaction, []);
 			return;
@@ -81,6 +104,26 @@ async function handlePardonUserAutocomplete(
 }
 
 async function handlePardonUser([client, bot]: [Client, Discord.Bot], interaction: Discord.Interaction): Promise<void> {
+	const guildId = interaction.guildId;
+	if (guildId === undefined) {
+		return;
+	}
+
+	const guildDocument = await client.database.adapters.guilds.getOrFetchOrCreate(
+		client,
+		"id",
+		guildId.toString(),
+		guildId,
+	);
+	if (guildDocument === undefined) {
+		return;
+	}
+
+	const configuration = guildDocument.data.features.moderation.features?.warns;
+	if (configuration === undefined || !configuration.enabled) {
+		return;
+	}
+
 	const [{ user, warning }] = parseArguments(interaction.data?.options, {});
 	if (user === undefined) {
 		return;
@@ -94,7 +137,9 @@ async function handlePardonUser([client, bot]: [Client, Discord.Bot], interactio
 		return;
 	}
 
-	const relevantWarnings = await getRelevantWarnings(client, member);
+	const expiryMilliseconds = timeStructToMilliseconds(configuration.expiration ?? defaults.WARN_EXPIRY);
+
+	const relevantWarnings = await getRelevantWarnings(client, member, expiryMilliseconds);
 	if (relevantWarnings === undefined) {
 		displayFailedError([client, bot], interaction);
 		return;
@@ -112,17 +157,15 @@ async function handlePardonUser([client, bot]: [Client, Discord.Bot], interactio
 		return;
 	}
 
-	const guildId = interaction.guildId;
-	if (guildId === undefined) {
-		return;
-	}
-
 	const guild = client.cache.guilds.get(guildId);
 	if (guild === undefined) {
 		return;
 	}
 
-	logEvent([client, bot], guild, "memberWarnRemove", [member, deletedWarning.data, interaction.user]);
+	if (configuration.journaling) {
+		const journallingService = client.services.journalling.get(guild.id);
+		journallingService?.log(bot, "memberWarnRemove", { args: [member, deletedWarning.data, interaction.user] });
+	}
 
 	const strings = {
 		title: localise(client, "pardon.strings.pardoned.title", interaction.locale)(),
@@ -147,7 +190,11 @@ async function handlePardonUser([client, bot]: [Client, Discord.Bot], interactio
 	});
 }
 
-async function getRelevantWarnings(client: Client, member: Discord.Member): Promise<Document<Warning>[] | undefined> {
+async function getRelevantWarnings(
+	client: Client,
+	member: Discord.Member,
+	expirationMilliseconds: number,
+): Promise<Document<Warning>[] | undefined> {
 	const subject = await client.database.adapters.users.getOrFetchOrCreate(
 		client,
 		"id",
@@ -163,7 +210,7 @@ async function getRelevantWarnings(client: Client, member: Discord.Member): Prom
 		return undefined;
 	}
 
-	const relevantWarnings = Array.from(getActiveWarnings(warnings).values()).reverse();
+	const relevantWarnings = Array.from(getActiveWarnings(warnings, expirationMilliseconds).values()).reverse();
 	return relevantWarnings;
 }
 

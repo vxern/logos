@@ -1,10 +1,10 @@
-import configuration from "../../../../configuration.js";
 import constants from "../../../../constants.js";
+import defaults from "../../../../defaults.js";
 import { MentionTypes, mention, timestamp, trim } from "../../../../formatting.js";
 import { defaultLocale } from "../../../../types.js";
 import { Client, localise } from "../../../client.js";
 import { paginate, parseArguments, reply } from "../../../interactions.js";
-import { isCollection, isOccupied } from "../../../services/music/music.js";
+import { isCollection } from "../../../services/music/music.js";
 import { chunk } from "../../../utils.js";
 import { OptionTemplate } from "../../command.js";
 import { collection, show } from "../../parameters.js";
@@ -29,22 +29,29 @@ async function handleDisplayCurrentlyPlaying(
 		return;
 	}
 
-	const controller = client.features.music.controllers.get(guildId);
-	if (controller === undefined) {
+	const musicService = client.services.music.music.get(guildId);
+	if (musicService === undefined) {
 		return;
 	}
 
-	const playingSince = controller.player.playingSince;
-	if (playingSince === undefined) {
+	const isVoiceStateVerified = musicService.verifyCanManagePlayback(bot, interaction);
+	if (isVoiceStateVerified === undefined || !isVoiceStateVerified) {
+		return;
+	}
+
+	const [current, isOccupied, playingSince] = [
+		musicService.current,
+		musicService.isOccupied,
+		musicService.playingSince,
+	];
+	if (current === undefined || isOccupied === undefined) {
 		return;
 	}
 
 	const locale = show ? defaultLocale : interaction.locale;
 
-	const currentListing = controller.currentListing;
-
 	if (collection) {
-		if (!isOccupied(controller.player) || currentListing === undefined) {
+		if (!isOccupied || current === undefined) {
 			const strings = {
 				title: localise(client, "music.options.now.strings.noSongCollection.title", interaction.locale)(),
 				description: {
@@ -66,7 +73,7 @@ async function handleDisplayCurrentlyPlaying(
 				],
 			});
 			return;
-		} else if (!isCollection(currentListing.content)) {
+		} else if (!isCollection(current.content)) {
 			const strings = {
 				title: localise(client, "music.options.now.strings.noSongCollection.title", interaction.locale)(),
 				description: {
@@ -95,7 +102,7 @@ async function handleDisplayCurrentlyPlaying(
 			return;
 		}
 	} else {
-		if (!isOccupied(controller.player) || currentListing === undefined) {
+		if (!isOccupied || current === undefined) {
 			const strings = {
 				title: localise(client, "music.options.now.strings.noSong.title", interaction.locale)(),
 				description: localise(client, "music.options.now.strings.noSong.description", interaction.locale)(),
@@ -115,7 +122,7 @@ async function handleDisplayCurrentlyPlaying(
 	}
 
 	if (collection) {
-		const collection = currentListing.content as SongCollection;
+		const collection = current.content as SongCollection;
 
 		const strings = {
 			nowPlaying: localise(client, "music.options.now.strings.nowPlaying", locale)(),
@@ -124,7 +131,7 @@ async function handleDisplayCurrentlyPlaying(
 		};
 
 		paginate([client, bot], interaction, {
-			elements: chunk(collection.songs, configuration.music.limits.songs.page),
+			elements: chunk(collection.songs, defaults.RESULTS_PER_PAGE),
 			embed: {
 				title: `${constants.symbols.music.nowPlaying} ${strings.nowPlaying}`,
 				color: constants.colors.blue,
@@ -157,7 +164,7 @@ async function handleDisplayCurrentlyPlaying(
 		return;
 	}
 
-	const song = currentListing.content as Song | SongStream;
+	const song = current.content as Song | SongStream;
 
 	const strings = {
 		nowPlaying: localise(client, "music.options.now.strings.nowPlaying", locale)(),
@@ -170,14 +177,14 @@ async function handleDisplayCurrentlyPlaying(
 			client,
 			"music.options.now.strings.playingSince",
 			locale,
-		)({ relative_timestamp: timestamp(playingSince) }),
+		)({ relative_timestamp: timestamp(playingSince ?? 0) }),
 		startTimeUnknown: localise(client, "music.options.now.strings.startTimeUnknown", locale)(),
 		sourcedFrom: localise(
 			client,
 			"music.options.now.strings.sourcedFrom",
 			locale,
 		)({
-			source: currentListing.source ?? localise(client, "music.options.now.strings.theInternet", locale)(),
+			source: current.source ?? localise(client, "music.options.now.strings.theInternet", locale)(),
 		}),
 	};
 
@@ -190,15 +197,15 @@ async function handleDisplayCurrentlyPlaying(
 					title: `${constants.symbols.music.nowPlaying} ${strings.nowPlaying}`,
 					color: constants.colors.blue,
 					fields: [
-						...(isCollection(currentListing?.content)
+						...(isCollection(current.content)
 							? [
 									{
 										name: strings.collection,
-										value: currentListing.content.title,
+										value: current.content.title,
 									},
 									{
 										name: strings.track,
-										value: `${currentListing.content.position + 1}/${currentListing.content.songs.length}`,
+										value: `${current.content.position + 1}/${current.content.songs.length}`,
 									},
 							  ]
 							: []),
@@ -209,15 +216,12 @@ async function handleDisplayCurrentlyPlaying(
 						},
 						{
 							name: strings.requestedBy,
-							value: mention(currentListing.requestedBy, MentionTypes.User),
+							value: mention(current.requestedBy, MentionTypes.User),
 							inline: false,
 						},
 						{
 							name: strings.runningTime,
-							value:
-								(controller.player.playingSince ?? undefined) !== undefined
-									? strings.playingSince
-									: strings.startTimeUnknown,
+							value: playingSince !== undefined ? strings.playingSince : strings.startTimeUnknown,
 							inline: false,
 						},
 					],
