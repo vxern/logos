@@ -79,10 +79,10 @@ const adapter: Database["adapters"]["guilds"] = {
 					language: {
 						enabled: true,
 						features: {
-							game: { enabled: true },
+							game: { enabled: false },
 							resources: { enabled: false },
 							translate: { enabled: true },
-							word: { enabled: true },
+							word: { enabled: false },
 						},
 					},
 					moderation: {
