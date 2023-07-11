@@ -193,6 +193,7 @@ async function initialise(): Promise<void> {
 
 	const environmentProvisional: Record<keyof Client["metadata"]["environment"], string | undefined> = {
 		environment: process.env.ENVIRONMENT,
+		version: process.env.npm_package_version,
 		discordSecret: process.env.DISCORD_SECRET,
 		faunaSecret: process.env.FAUNA_SECRET,
 		deeplSecret: process.env.DEEPL_SECRET,

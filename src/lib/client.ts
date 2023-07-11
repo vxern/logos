@@ -31,6 +31,7 @@ import { ReportService } from "./services/prompts/types/reports.js";
 import { SuggestionService } from "./services/prompts/types/suggestions.js";
 import { VerificationService } from "./services/prompts/types/verification.js";
 import { Service, ServiceBase } from "./services/service.js";
+import { StatusService } from "./services/status/service.js";
 import { diagnosticMentionUser, fetchMembers } from "./utils.js";
 import * as Discord from "discordeno";
 import FancyLog from "fancy-log";
@@ -51,6 +52,7 @@ type Client = {
 	metadata: {
 		environment: {
 			environment: "production" | "staging" | "development" | "restricted";
+			version: string;
 			discordSecret: string;
 			faunaSecret: string;
 			deeplSecret: string;
@@ -108,6 +110,7 @@ type Client = {
 			suggestions: Map<bigint, SuggestionService>;
 			verification: Map<bigint, VerificationService>;
 		};
+		status: StatusService;
 	};
 };
 
@@ -211,7 +214,8 @@ function createClient(
 				suggestions: new Map(),
 				verification: new Map(),
 			},
-			roles: new Map(),
+			// @ts-ignore: Late assignment.
+			status: "late_assignment",
 		},
 	};
 }
@@ -269,7 +273,12 @@ async function initialiseClient(
 	client.services.music.lavalink = lavalinkService;
 	await lavalinkService.start(bot);
 
-	return Discord.startBot(bot);
+	await Discord.startBot(bot);
+
+	const statusService = new StatusService(client);
+	client.services.allRegistered.push(statusService);
+	client.services.status = statusService;
+	await statusService.start(bot);
 }
 
 async function prefetchDataFromDatabase(client: Client, database: Database): Promise<void> {
