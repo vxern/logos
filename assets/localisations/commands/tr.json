@@ -317,7 +317,7 @@
 	"music.options.play.options.file.description": "Harici bir ses dosyası çalar.",
 	"music.options.play.options.file.options.url.name": "url",
 	"music.options.play.options.file.options.url.description": "Ses dosyasının bağlantısı.",
-	"music.options.play.options.youtube.name": "youtube",
+	"music.options.play.options.youtube.name": "YouTube",
 	"music.options.play.options.youtube.description": "YouTube'dan bir şarkı oynatır.",
 	"music.options.play.strings.selectSong.title": "Bir girdi seçin",
 	"music.options.play.strings.selectSong.description": "Aşağıdan bir müzik veya müzik listesi seçin.",
