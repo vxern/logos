@@ -5,7 +5,7 @@
 	"policies.moderation.points.breach.title": "Kurallar nerede geçerlidir?",
 	"policies.moderation.points.breach.description": "Sunucu kuralları sunucunun tamamı için geçerlidir ve bunların ihlali bir uyarı verilmesine neden olur.",
 	"policies.moderation.points.warnings.title": "Birkaç kez uyarılırsam ne olur?",
-	"policies.moderation.points.warnings.description": "Eğer kullanıcı çoktan üç oy almışsa dördüncü oy kullanıcının zaman aşımına uğramasına sebep olur. Uyarılar iki ay sonra geçerliliğini yitirir.",
+	"policies.moderation.points.warnings.description": "Eğer kullanıcı çoktan üç uyarı almışsa dördüncü uyarı kullanıcının zaman aşımına uğramasına sebep olur. Uyarılar iki ay sonra geçerliliğini yitirir.",
 	"policies.moderation.points.furtherAction.title": "O zaman ne olacak?",
 	"policies.moderation.points.furtherAction.description": "Sonuç olarak, sunucu personeli geçilen sınır hakkında bilgilendirilecek ve daha sonra koşulları gözden geçirecek ve uygun bir eylem planı belirleyecektir.",
 	"policies.moderation.points.ban.title": "Umursamazsam ne olacak?",
