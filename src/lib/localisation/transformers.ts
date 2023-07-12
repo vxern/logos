@@ -5,6 +5,7 @@ import french from "./transformers/french.js";
 import hungarian from "./transformers/hungarian.js";
 import polish from "./transformers/polish.js";
 import romanian from "./transformers/romanian.js";
+import turkish from "./transformers/turkish.js";
 
 type TransformerType = "pluralise";
 type Transformer = (matchTerm: string, matches: Record<string, string>) => string | undefined;
@@ -16,6 +17,7 @@ const transformers: Record<Language, Record<TransformerType, Transformer>> = {
 	Hungarian: hungarian,
 	Polish: polish,
 	Romanian: romanian,
+	Turkish: turkish,
 };
 
 export default transformers;

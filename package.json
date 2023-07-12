@@ -3,7 +3,7 @@
   "name": "logos",
   "description": "A multi-purpose community bot built to cater to language-learning communities on Discord.",
   "license": "ISC",
-  "version": "3.0.0-alpha.rc6",
+  "version": "3.0.0-alpha.rc7",
   "main": "./dist/index.js",
   "type": "module",
   "keywords": [

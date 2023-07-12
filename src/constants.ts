@@ -45,6 +45,7 @@ const contributors = {
 	asterfields: {
 		username: "@asterfields_",
 		id: "839862207025119252",
+		link: "https://www.instagram.com/asternight1/",
 	},
 	estheroide: {
 		username: "@estheroide",
@@ -77,6 +78,10 @@ const contributors = {
 		id: "217319536485990400",
 		link: "https://github.com/vxern",
 	},
+	yeetfe: {
+		username: "@yeetfe",
+		id: "249248581435916299",
+	},
 };
 
 const contributions = {
@@ -99,6 +104,10 @@ const contributions = {
 		Romanian: {
 			flag: "🇷🇴",
 			contributors: [contributors.victor, contributors.vxern],
+		},
+		Turkish: {
+			flag: "🇹🇷",
+			contributors: [contributors.yeetfe],
 		},
 	},
 };
