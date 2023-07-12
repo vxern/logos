@@ -372,7 +372,7 @@
 	"music.options.resume.strings.notPaused.description": "Mevcut şarkı durdurulmadı.",
 	"music.options.resume.strings.resumed.title": "Devam edildi",
 	"music.options.resume.strings.resumed.description": "Müzik devam ettiriliyor.",
-	"music.options.skip-to.name": "atla",
+	"music.options.skip-to.name": "ilerlet",
 	"music.options.skip-to.description": "Çalan şarkının belirtilen kısmına atlar.",
 	"music.options.skip-to.strings.noSong.title": "Zaman damgası aranacak bir şarkı yok",
 	"music.options.skip-to.strings.noSong.description": "Zaman damgası aranacak şarkı yok.",
