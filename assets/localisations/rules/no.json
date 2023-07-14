@@ -12,7 +12,7 @@
 	"rules.relevance.content": "Det forventes at bidrag til serveren plasseres i deres relevante kanal og kategori. Bidrag gitt i upassende kanaler for emnet deres, vil bli bedt om å bli flyttet til den aktuelle kanalen.",
 	"rules.suitability.title": "Egnethet",
 	"rules.suitability.summary": "Legg ut innhold som er egnet for yngre medlemmer.",
-	"rules.suitability.content": "Det forventes at bidrag til serveren er passende for mindreårige. Aldersbegrenset, NSFW-innhold, og NSFL-innhold er strengt forbudt. Hvis du ikke vil vise det til en mindreårig, bør du ikke legge det ut.",
+	"rules.suitability.content": "Det forventes at bidrag til serveren er passende for mindreårige. Aldersbegrenset (NSFW-innhold) og NSFL-innhold er strengt forbudt. Hvis du ikke vil vise det til en mindreårig, bør du ikke legge det ut.",
 	"rules.exclusivity.title": "Eksklusivt",
 	"rules.exclusivity.summary": "Ikke annonsering.",
 	"rules.exclusivity.content": "Det er forventet at medlemmer ikke skal bruke denne plassen til å reklamere, og aktive forsøk på den (inkludert uforutsette DMs) er forbudt.",
