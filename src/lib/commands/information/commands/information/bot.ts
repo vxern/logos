@@ -3,6 +3,7 @@ import { list } from "../../../../../formatting.js";
 import { Client, localise } from "../../../../client.js";
 import { reply } from "../../../../interactions.js";
 import * as Discord from "discordeno";
+import { chunk } from "../../../../utils.js";
 
 async function handleDisplayBotInformation(
 	[client, bot]: [Client, Discord.Bot],
@@ -122,14 +123,17 @@ type EmbedFields = NonNullable<Discord.Embed["fields"]>;
 function getContributorString(contributions: typeof constants.contributions.translation): EmbedFields {
 	const fields: EmbedFields = [];
 	for (const [language, data] of Object.entries(contributions)) {
-		const contributorsFormatted = data.contributors
-			.map((contributor) => {
+		const contributorsFormatted = chunk(
+			data.contributors.map((contributor) => {
 				if ("link" in contributor) {
 					return `**[${contributor.username}](${contributor.link})**`;
 				}
 
 				return `**${contributor.username}**`;
-			})
+			}),
+			3,
+		)
+			.map((chunks) => chunks.join(" "))
 			.join("\n");
 
 		fields.push({

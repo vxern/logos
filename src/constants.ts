@@ -68,6 +68,10 @@ const contributors = {
 		username: "@at.peace",
 		id: "797369145367855104",
 	},
+	telemaniak: {
+		username: "@telemaniak",
+		id: "410812091071725598",
+	},
 	victor: {
 		username: "@ferb02",
 		id: "303605019532460033",
@@ -96,6 +100,10 @@ const contributions = {
 				contributors.serene,
 				contributors.estheroide,
 			],
+		},
+		Norwegian: {
+			flag: "🇳🇴",
+			contributors: [contributors.telemaniak],
 		},
 		Polish: {
 			flag: "🇵🇱",

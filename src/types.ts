@@ -1,6 +1,15 @@
 import * as Discord from "discordeno";
 
-const supportedLanguages = ["Armenian", "English", "French", "Hungarian", "Polish", "Romanian", "Turkish"] as const;
+const supportedLanguages = [
+	"Armenian",
+	"English",
+	"French",
+	"Hungarian",
+	"Norwegian",
+	"Polish",
+	"Romanian",
+	"Turkish",
+] as const;
 type Language = typeof supportedLanguages[number];
 
 function typedDefaultLanguage<T extends Language>(language: T): T {
@@ -14,6 +23,7 @@ const localeByLanguage: Required<Record<typeof defaultLanguage, `${Discord.Local
 	English: "en-GB",
 	French: "fr",
 	Hungarian: "hu",
+	Norwegian: "no",
 	Polish: "pl",
 	Romanian: "ro",
 	Turkish: "tr",
@@ -26,6 +36,7 @@ const languageByLocale = {
 	"en-US": "English",
 	fr: "French",
 	hu: "Hungarian",
+	no: "Norwegian",
 	pl: "Polish",
 	ro: "Romanian",
 	tr: "Turkish",
