@@ -885,21 +885,31 @@ function addCollector<T extends keyof Discord.EventHandlers>(
 	collectors.add(collector);
 }
 
-const snowflakePattern = new RegExp(/^([0-9]{17,20})$/);
-const userMentionPattern = new RegExp(/^<@!?([0-9]{17,20})>$/);
+const snowflakePattern = new RegExp(/^([0-9]{16,20})$/);
+const userMentionPattern = new RegExp(/^<@!?([0-9]{16,20})>$/);
 
 function isValidSnowflake(snowflake: string): boolean {
 	return snowflakePattern.test(snowflake);
 }
 
 function extractIDFromIdentifier(identifier: string): string | undefined {
-	return snowflakePattern.exec(identifier)?.at(1) ?? userMentionPattern.exec(identifier)?.at(1);
+	return (
+		snowflakePattern.exec(identifier)?.at(1) ??
+		displayPattern.exec(identifier)?.at(2) ??
+		userMentionPattern.exec(identifier)?.at(1)
+	);
 }
 
-const userTagPattern = new RegExp(/^(.{2,32}#[0-9]{4})$/);
+const displayPattern = new RegExp(/^(.{2,32}(?:#[0-9]{4})?) \(?([0-9]{16,20})\)?$/);
+const userTagPattern = new RegExp(/^(.{2,32}(?:#[0-9]{4})?)$/);
 
 function isValidIdentifier(identifier: string): boolean {
-	return snowflakePattern.test(identifier) || userMentionPattern.test(identifier) || userTagPattern.test(identifier);
+	return (
+		snowflakePattern.test(identifier) ||
+		userMentionPattern.test(identifier) ||
+		displayPattern.test(identifier) ||
+		userTagPattern.test(identifier)
+	);
 }
 
 interface MemberNarrowingOptions {

@@ -213,7 +213,7 @@ async function initialise(): Promise<void> {
 
 	Sentry.init({ dsn: process.env.SENTRY_SECRET, environment: environment.environment });
 
-	console.debug(`Running in ${environment.environment} mode.`);
+	console.info(`Running in ${environment.environment} mode.`);
 
 	const [supportedTranslationLanguages, sentenceFiles] = await Promise.all([
 		getSupportedLanguages(environment),
@@ -224,9 +224,9 @@ async function initialise(): Promise<void> {
 	const sentencePairs = loadSentencePairs(sentenceFiles);
 	const localisations = await readLocalisations("./assets/localisations");
 
-	console.debug(`Translations supported between ${supportedTranslationLanguages.length} languages.`);
-	console.debug(`Loaded ${Array.from(sentencePairs.values()).flat().length} sentence pairs.`);
-	console.debug(`Loaded ${localisations.size} unique string keys.`);
+	console.info(`Translations supported between ${supportedTranslationLanguages.length} languages.`);
+	console.info(`Loaded ${Array.from(sentencePairs.values()).flat().length} sentence pairs.`);
+	console.info(`Loaded ${localisations.size} unique string keys.`);
 
 	initialiseClient(
 		{ environment, supportedTranslationLanguages },
