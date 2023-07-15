@@ -759,6 +759,12 @@ class MusicService extends LocalService {
 
 		const listingsToMoveToHistory = Math.min(by ?? to ?? 0, session.listings.queue.length);
 
+		if (session.listings.current !== undefined) {
+			session.listings.history.push(session.listings.current);
+			session.events.emit("queueUpdate");
+			session.listings.current = undefined;
+		}
+
 		for (const _ of Array(listingsToMoveToHistory).keys()) {
 			const listing = session.listings.queue.shift();
 			if (listing !== undefined) {
