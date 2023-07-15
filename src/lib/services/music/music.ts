@@ -460,7 +460,9 @@ class MusicService extends LocalService {
 
 		// If the player is not connected to a voice channel, or if it is connected
 		// to a different voice channel, connect to the new voice channel.
-		session.player.connect(channelId.toString(), { deafened: true });
+		if (!session.player.connected || session.channelId !== channelId) {
+			session.player.connect(channelId.toString(), { deafened: true });
+		}
 
 		if (session.listings.current !== undefined) {
 			const strings = {
@@ -484,6 +486,7 @@ class MusicService extends LocalService {
 			await Discord.sendMessage(bot, session.channelId, { embeds: [embed] }).catch(() =>
 				this.client.log.warn("Failed to send music feedback message."),
 			);
+			return;
 		}
 
 		await this.advanceQueueAndPlay(bot);
