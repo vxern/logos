@@ -12,7 +12,7 @@
 	"information.options.bot.strings.howWasIMade.title": "Hvordan var jeg laget?",
 	"information.options.bot.strings.howWasIMade.description": "Jeg er drevet av [TypeScript]({language_link}) kjører innen [Node.js]({runtime_link}). Jeg samhandler med [Discord's API]({api_link}) med hjelp av [Discordeno]({library_link}) API-bibliotek.",
 	"information.options.bot.strings.howToAddToServer.title": "Hvordan kan du legge meg til serveren din?",
-	"information.options.bot.strings.howToAddToServer.description": "Det er ikke mulig å legge meg til i ditt samfunn på dette tidspunktet. Jeg ble laget for å behandle noen få språklæringssamfunn, for eksempel [Learn Romanian] ({learn_romanian_link}) og [Learn Armenian] ({learn_armenian_link}).",
+	"information.options.bot.strings.howToAddToServer.description": "Det er ikke mulig å legge meg til i ditt samfunn på dette tidspunktet. Jeg ble laget for å behandle noen få språklæringssamfunn, for eksempel [Learn Romanian]({learn_romanian_link}) og [Learn Armenian]({learn_armenian_link}).",
 	"information.options.bot.strings.amIOpenSource.title": "Er jeg åpen kildekode?",
 	"information.options.bot.strings.amIOpenSource.description": "Nei, jeg er ikke åpen kildekode. Det er også ingen planer om å frigi kodebasen min til offentligheten.",
 	"information.options.bot.strings.translators.title": "Oversettere",
