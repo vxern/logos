@@ -1169,7 +1169,7 @@ function pluralise(client: Client, key: string, language: Language, number: numb
 	const { one, two, many } = {
 		one: client.localisations.get(`${key}.one`)?.get(language)?.({ one: number }),
 		two: client.localisations.get(`${key}.two`)?.get(language)?.({ two: number }),
-		many: client.localisations.get(`${key}.many`)?.get(language)?.({ three: number }),
+		many: client.localisations.get(`${key}.many`)?.get(language)?.({ many: number }),
 	};
 	if (one === undefined || two === undefined || many === undefined) {
 		return "?";

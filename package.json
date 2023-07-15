@@ -3,8 +3,7 @@
   "name": "logos",
   "description": "A multi-purpose community bot built to cater to language-learning communities on Discord.",
   "license": "ISC",
-  "version": "3.0.0-alpha.rc7",
-  "main": "./dist/index.js",
+  "version": "3.0.0-alpha.rc8",
   "type": "module",
   "keywords": [
     "javascript",
@@ -17,7 +16,7 @@
     "moderation",
     "music"
   ],
-  "homepage": "https://github.com/vxern/logos",
+  "homepage": "https://logos.wordcollector.co.uk",
   "repository": {
     "type": "git",
     "url": "https://github.com/vxern/logos"
