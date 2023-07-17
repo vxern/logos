@@ -1,7 +1,7 @@
 {
 	"verification.title": "Questions relatives à la vérification",
 	"verification.fields.reason": "Quelle est la raison pour laquelle vous apprenez {language} ?",
-	"verification.fields.aim": "Quels sont les avantages d'être membre ?",
+	"verification.fields.aim": "Quels avantages tirerez-vous à être membre ?",
 	"verification.fields.whereFound": "Où avez-vous entendu parler du serveur ?",
 	"report.title": "Rapport de l'utilisateur",
 	"report.fields.reason": "Quel est le motif du rapport ?",
@@ -11,6 +11,6 @@
 	"suggestion.fields.suggestion": "Quelle est votre suggestion ?",
 	"prompts.continue": "Continuer",
 	"prompts.cancel": "Annuler",
-	"prompts.leave": "Oui, je veux quitter le compositeur",
-	"prompts.stay": "Non, ramenez-moi au compositeur"
+	"prompts.leave": "Oui, je veux quitter le panneau d'édition",
+	"prompts.stay": "Non, ramenez-moi au panneau d'édition"
 }

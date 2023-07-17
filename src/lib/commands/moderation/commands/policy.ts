@@ -17,12 +17,27 @@ async function handleDisplayModerationPolicy(
 	[client, bot]: [Client, Discord.Bot],
 	interaction: Discord.Interaction,
 ): Promise<void> {
-	const [{ show }] = parseArguments(interaction.data?.options, { show: "boolean" });
-
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
 		return;
 	}
+
+	const guildDocument = await client.database.adapters.guilds.getOrFetchOrCreate(
+		client,
+		"id",
+		guildId.toString(),
+		guildId,
+	);
+	if (guildDocument === undefined) {
+		return;
+	}
+
+	const configuration = guildDocument.data.features.moderation.features?.policy;
+	if (configuration === undefined || !configuration.enabled) {
+		return;
+	}
+
+	const [{ show }] = parseArguments(interaction.data?.options, { show: "boolean" });
 
 	const guild = client.cache.guilds.get(guildId);
 	if (guild === undefined) {

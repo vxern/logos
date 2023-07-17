@@ -1,6 +1,6 @@
 import constants from "../../../../../constants.js";
 import { MentionTypes, mention, timestamp } from "../../../../../formatting.js";
-import { Client, isServicing, localise } from "../../../../client.js";
+import { Client, localise } from "../../../../client.js";
 import { reply } from "../../../../interactions.js";
 import { getGuildIconURLFormatted, snowflakeToTimestamp } from "../../../../utils.js";
 import { proficiency } from "../../../social/roles/categories/language.js";
@@ -18,6 +18,16 @@ async function handleDisplayGuildInformation(
 
 	const guild = client.cache.guilds.get(guildId);
 	if (guild === undefined) {
+		return;
+	}
+
+	const guildDocument = await client.database.adapters.guilds.getOrFetchOrCreate(
+		client,
+		"id",
+		guildId.toString(),
+		guildId,
+	);
+	if (guildDocument === undefined) {
 		return;
 	}
 
@@ -108,7 +118,7 @@ async function handleDisplayGuildInformation(
 						value: getChannelInformationSection(client, guild, interaction.locale),
 						inline: true,
 					},
-					...(isServicing(client, guild.id)
+					...(guildDocument.data.isNative
 						? [
 								{
 									name: `${constants.symbols.guild.moderators} ${strings.description.moderators.title}`,

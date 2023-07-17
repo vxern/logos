@@ -25,12 +25,17 @@ async function handleDisplayPlaybackHistory(
 		return;
 	}
 
-	const controller = client.features.music.controllers.get(guildId);
-	if (controller === undefined) {
+	const musicService = client.services.music.music.get(guildId);
+	if (musicService === undefined) {
 		return;
 	}
 
-	const listingHistory = structuredClone(controller.listingHistory).reverse();
+	const historyReversed = musicService.history;
+	if (historyReversed === undefined) {
+		return;
+	}
+
+	const history = structuredClone(historyReversed).reverse();
 
 	const locale = show ? defaultLocale : interaction.locale;
 
@@ -41,7 +46,7 @@ async function handleDisplayPlaybackHistory(
 	displayListings(
 		[client, bot],
 		interaction,
-		{ title: `${constants.symbols.music.list} ${strings.title}`, songListings: listingHistory },
+		{ title: `${constants.symbols.music.list} ${strings.title}`, songListings: history },
 		show ?? false,
 		locale,
 	);

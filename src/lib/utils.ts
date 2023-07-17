@@ -1,4 +1,3 @@
-import { MentionTypes, mention } from "../formatting.js";
 import { Client } from "./client.js";
 import { Document } from "./database/document.js";
 import * as Discord from "discordeno";
@@ -22,31 +21,6 @@ function isText(channel: Discord.Channel): channel is TextChannel {
 }
 function isVoice(channel: Discord.Channel): channel is VoiceChannel {
 	return channel.type === Discord.ChannelTypes.GuildVoice;
-}
-
-/**
- * Taking a guild and the name of a channel, finds the channel with that name
- * and returns it.
- *
- * @param guild - The guild whose channels to look through.
- * @param name - The name of the channel to find.
- * @returns The found channel.
- */
-function getTextChannel(guild: Discord.Guild, name: string): Discord.Channel | undefined {
-	const nameAsLowercase = name.toLowerCase();
-
-	const textChannels = guild.channels.array().filter((channel) => isText(channel));
-
-	return textChannels.find((channel) => channel.name?.toLowerCase().includes(nameAsLowercase));
-}
-
-function getChannelMention(guild: Discord.Guild, name: string): string {
-	const channel = getTextChannel(guild, name);
-	if (channel === undefined) {
-		return name;
-	}
-
-	return mention(channel.id, MentionTypes.Channel);
 }
 
 /**
@@ -188,6 +162,34 @@ function verifyIsWithinLimits(documents: Document[], limit: number, limitingTime
 	return false;
 }
 
+function fetchMembers(
+	bot: Discord.Bot,
+	guildId: bigint,
+	options?: Omit<Discord.RequestGuildMembers, "guildId">,
+): Promise<void> {
+	const shardId = Discord.calculateShardId(bot.gateway, bot.transformers.snowflake(guildId));
+	return new Promise((resolve) => {
+		const nonce = Date.now().toString();
+		bot.cache.fetchAllMembersProcessingRequests.set(nonce, resolve);
+		const shard = bot.gateway.manager.shards.get(shardId);
+		if (!shard) {
+			throw new Error(`Shard (id: ${shardId}) not found.`);
+		}
+		shard.send({
+			op: Discord.GatewayOpcodes.RequestGuildMembers,
+			d: {
+				guild_id: guildId.toString(),
+				// If a query is provided use it, OR if a limit is NOT provided use ""
+				query: options?.query || (options?.limit ? undefined : ""),
+				limit: options?.limit || 0,
+				presences: options?.presences,
+				user_ids: options?.userIds?.map((id) => id.toString()),
+				nonce,
+			},
+		});
+	});
+}
+
 export {
 	addParametersToURL,
 	chunk,
@@ -195,11 +197,10 @@ export {
 	fromHex,
 	getAllMessages,
 	getAuthor,
-	getChannelMention,
 	getGuildIconURLFormatted,
-	getTextChannel,
 	isText,
 	isVoice,
+	fetchMembers,
 	snowflakeToTimestamp,
 	verifyIsWithinLimits,
 };

@@ -3,8 +3,7 @@
   "name": "logos",
   "description": "A multi-purpose community bot built to cater to language-learning communities on Discord.",
   "license": "ISC",
-  "version": "2.14.5",
-  "main": "./dist/index.js",
+  "version": "3.0.0-alpha.rc12",
   "type": "module",
   "keywords": [
     "javascript",
@@ -17,7 +16,7 @@
     "moderation",
     "music"
   ],
-  "homepage": "https://github.com/vxern/logos",
+  "homepage": "https://logos.wordcollector.co.uk",
   "repository": {
     "type": "git",
     "url": "https://github.com/vxern/logos"
@@ -45,7 +44,7 @@
     "fancy-log": "^2.0.0",
     "fauna": "git+https://github.com/vxern/faunadb-js.git#901fbf6ca7d2fa02af987a6ae64e0b58614923c1",
     "lavaclient": "^4.1.1",
-    "messagepipe": "git+https://github.com/vxern/messagepipe.git#a96567e858ffa61b3571acc0f91fa0c644fb6f9e",
+    "object-hash": "^3.0.0",
     "sentry": "npm:@sentry/node@^7.56.0",
     "snowflake": "npm:@sapphire/snowflake@^3.5.1",
     "wiktionary": "npm:parse-wiktionary@^1.0.0",
@@ -56,6 +55,7 @@
     "@types/fancy-log": "^2.0.0",
     "@types/mocha": "^10.0.1",
     "@types/node": "^20.3.2",
+    "@types/object-hash": "^3.0.2",
     "chai": "^4.3.7",
     "mocha": "^10.2.0",
     "rome": "12.1.3",

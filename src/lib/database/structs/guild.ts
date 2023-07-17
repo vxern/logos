@@ -1,12 +1,5 @@
+import { Periods } from "../../../constants";
 import { Language } from "../../../types";
-
-type TimeUnit = "second" | "minute" | "hour" | "day" | "week" | "month" | "year";
-type TimeStruct = [number: number, unit: TimeUnit];
-
-type Activatable<T extends Record<string, unknown>> = { enabled: boolean } & (
-	| ({ enabled: false } & Partial<T>)
-	| ({ enabled: true } & T)
-);
 
 interface Guild {
 	/** A timestamp of when Logos began to manage this guild. */
@@ -16,13 +9,11 @@ interface Guild {
 	id: string;
 
 	/**
-	 * The bot's nickname on this guild.
+	 * Whether the guild is native to Logos.
 	 *
-	 * Must be between 2-32 characters long.
-	 *
-	 * If not set, the bot's nickname will be its username.
+	 * Includes Learn Romanian and Learn Armenian.
 	 */
-	nickname?: string;
+	isNative: boolean;
 
 	/**
 	 * The bot's default language on this guild.
@@ -43,8 +34,38 @@ interface Guild {
 					channelId: string;
 				}>;
 
-				/** User suggestions for the server. */
-				suggestions: Activatable<Record<string, unknown>>;
+				/** Informational notices. */
+				notices: Activatable<{
+					features: {
+						information: Activatable<{
+							channelId: string;
+							inviteLink: string;
+						}>;
+
+						roles: Activatable<{
+							channelId: string;
+						}>;
+
+						welcome: Activatable<{
+							channelId: string;
+							ruleChannelId: string;
+						}>;
+					};
+				}>;
+			};
+		}>;
+
+		language: Activatable<{
+			features: {
+				game: Activatable;
+
+				resources: Activatable<{
+					url: string;
+				}>;
+
+				translate: Activatable;
+
+				word: Activatable;
 			};
 		}>;
 
@@ -52,18 +73,26 @@ interface Guild {
 		moderation: Activatable<{
 			/** Features part of the moderation section. */
 			features: {
+				alerts: Activatable<{
+					channelId: string;
+				}>;
+
+				policy: Activatable;
+
+				rules: Activatable;
+
 				/** Message purging. */
 				purging: Activatable<{
-					journaling: Activatable<{
-						channelId: string;
-					}>;
+					journaling: boolean;
+				}>;
+
+				timeouts: Activatable<{
+					journaling: boolean;
 				}>;
 
 				/** Warning and pardoning users. */
 				warns: Activatable<{
-					journaling: Activatable<{
-						channelId: string;
-					}>;
+					journaling: boolean;
 
 					/**
 					 * Length of time after which warnings expire.
@@ -73,7 +102,7 @@ interface Guild {
 					expiration?: TimeStruct;
 
 					/** The maximum number of warnings a given user can receive before being timed out. */
-					limit?: number;
+					limit: number;
 
 					/**
 					 * Specifies auto-timeouts on limit being crossed.
@@ -81,32 +110,53 @@ interface Guild {
 					 * Implies `limit` being set to a specific value.
 					 */
 					autoTimeout: Activatable<{
-						duration: TimeStruct;
+						duration?: TimeStruct;
 					}>;
 				}>;
 
 				/** User reports. */
 				reports: Activatable<{
-					journaling: Activatable<{
-						channelId: string;
-					}>;
+					channelId: string;
+					journaling: boolean;
+					rateLimit?: RateLimit;
+				}>;
 
-					limit: {
-						uses: number;
-						within: TimeStruct;
+				/** User verification. */
+				verification: Activatable<{
+					channelId: string;
+
+					journaling: boolean;
+
+					/** Users that can partake in accepting / rejecting verification answers. */
+					voting: {
+						roles: string[];
+						users?: string[];
+						verdict: {
+							acceptance: VerificationVerdictRequirement;
+							rejection: VerificationVerdictRequirement;
+						};
 					};
+
+					activation: VerificationActivationRule[];
 				}>;
 			};
 		}>;
 
-		/** Music section of features. */
-		music: Activatable<{
+		/** Server section of features. */
+		server: Activatable<{
 			features: {
+				/** Automatic channel creation/deletion. */
 				dynamicVoiceChannels: Activatable<{
-					channelIds: string[];
+					channels: DynamicVoiceChannel[];
 				}>;
-				music: Activatable<{
-					implicitVolume: number; // Increments of 5, 50 - 100.
+
+				entry: Activatable;
+
+				/** User suggestions for the server. */
+				suggestions: Activatable<{
+					channelId: string;
+					journaling: boolean;
+					rateLimit?: RateLimit;
 				}>;
 			};
 		}>;
@@ -114,15 +164,70 @@ interface Guild {
 		/** Social section of features. */
 		social: Activatable<{
 			features: {
-				praises: Activatable<{
-					limit: {
-						uses: number;
-						within: TimeStruct;
-					};
+				music: Activatable<{
+					implicitVolume: number; // Increments of 5, 50 - 100.
 				}>;
+
+				praises: Activatable<{
+					journaling: boolean;
+					rateLimit?: RateLimit;
+				}>;
+
+				profile: Activatable;
 			};
 		}>;
 	};
 }
 
-export type { Guild };
+type TimeUnit = "second" | "minute" | "hour" | "day" | "week" | "month" | "year";
+type TimeStruct = [number: number, unit: TimeUnit];
+
+const durationByTimeUnit = {
+	second: Periods.second,
+	minute: Periods.minute,
+	hour: Periods.hour,
+	day: Periods.day,
+	week: Periods.week,
+	month: Periods.month,
+	year: Periods.year,
+} satisfies Record<TimeUnit, number>;
+
+function timeStructToMilliseconds([number, unit]: TimeStruct): number {
+	const duration = durationByTimeUnit[unit];
+	return duration * number;
+}
+
+type Activatable<T extends Record<string, unknown> = Record<string, unknown>> = { enabled: boolean } & (
+	| ({ enabled: false } & Partial<T>)
+	| ({ enabled: true } & T)
+);
+
+type RateLimit = {
+	uses: number;
+	within: TimeStruct;
+};
+
+type DynamicVoiceChannel = {
+	id: string;
+	minimum?: number;
+	maximum?: number;
+};
+
+type VerificationVerdictRequirementType = "fraction" | "number";
+type VerificationVerdictRequirement = {
+	type: VerificationVerdictRequirementType;
+	value: unknown;
+} & ({ type: "fraction"; value: number } | { type: "number"; value: number });
+
+type VerificationActivationRuleType = "account-age";
+type VerificationActivationRule =
+	| {
+			type: VerificationActivationRuleType;
+			value: unknown;
+	  } & {
+			type: "account-age";
+			value: TimeStruct;
+	  };
+
+export { timeStructToMilliseconds };
+export type { Guild, DynamicVoiceChannel, TimeStruct };

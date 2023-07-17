@@ -2,7 +2,6 @@ import constants, { Periods } from "../../../../../constants.js";
 import { MentionTypes, mention, timestamp } from "../../../../../formatting.js";
 import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../../client.js";
 import { parseArguments, parseTimeExpression, reply, respond } from "../../../../interactions.js";
-import { logEvent } from "../../../../services/logging/logging.js";
 import * as Discord from "discordeno";
 
 async function handleSetTimeoutAutocomplete(
@@ -37,6 +36,26 @@ async function handleSetTimeoutAutocomplete(
 }
 
 async function handleSetTimeout([client, bot]: [Client, Discord.Bot], interaction: Discord.Interaction): Promise<void> {
+	const guildId = interaction.guildId;
+	if (guildId === undefined) {
+		return;
+	}
+
+	const guildDocument = await client.database.adapters.guilds.getOrFetchOrCreate(
+		client,
+		"id",
+		guildId.toString(),
+		guildId,
+	);
+	if (guildDocument === undefined) {
+		return;
+	}
+
+	const configuration = guildDocument.data.features.moderation.features?.timeouts;
+	if (configuration === undefined || !configuration.enabled) {
+		return;
+	}
+
 	const [{ user, duration, reason }] = parseArguments(interaction.data?.options, {});
 	if (user === undefined || duration === undefined) {
 		return;
@@ -50,11 +69,16 @@ async function handleSetTimeout([client, bot]: [Client, Discord.Bot], interactio
 		return;
 	}
 
-	const durationParsed = Number(duration);
+	let durationParsed = Number(duration);
 
-	if (Number.isNaN(duration)) {
-		displayDurationInvalidError([client, bot], interaction);
-		return;
+	if (Number.isNaN(durationParsed)) {
+		const timestamp = parseTimeExpression(client, duration, interaction.locale);
+		if (timestamp === undefined) {
+			displayDurationInvalidError([client, bot], interaction);
+			return;
+		}
+
+		durationParsed = timestamp[1];
 	}
 
 	if (durationParsed < Periods.minute) {
@@ -73,11 +97,6 @@ async function handleSetTimeout([client, bot]: [Client, Discord.Bot], interactio
 
 	const until = Date.now() + durationParsed;
 
-	const guildId = interaction.guildId;
-	if (guildId === undefined) {
-		return;
-	}
-
 	const guild = client.cache.guilds.get(guildId);
 	if (guild === undefined) {
 		return;
@@ -87,7 +106,10 @@ async function handleSetTimeout([client, bot]: [Client, Discord.Bot], interactio
 		client.log.warn(`Failed to time member with ID ${member.id} out.`),
 	);
 
-	logEvent([client, bot], guild, "memberTimeoutAdd", [member, until, reason, interaction.user]);
+	if (configuration.journaling) {
+		const journallingService = client.services.journalling.get(guild.id);
+		journallingService?.log(bot, "memberTimeoutAdd", { args: [member, until, reason, interaction.user] });
+	}
 
 	const strings = {
 		title: localise(client, "timeout.strings.timedOut.title", interaction.locale)(),

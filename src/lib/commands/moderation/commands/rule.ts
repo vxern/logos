@@ -29,6 +29,26 @@ async function handleCiteRuleAutocomplete(
 	[client, bot]: [Client, Discord.Bot],
 	interaction: Discord.Interaction,
 ): Promise<void> {
+	const guildId = interaction.guildId;
+	if (guildId === undefined) {
+		return;
+	}
+
+	const guildDocument = await client.database.adapters.guilds.getOrFetchOrCreate(
+		client,
+		"id",
+		guildId.toString(),
+		guildId,
+	);
+	if (guildDocument === undefined) {
+		return;
+	}
+
+	const configuration = guildDocument.data.features.moderation.features?.rules;
+	if (configuration === undefined || !configuration.enabled) {
+		return;
+	}
+
 	const [{ rule: ruleOrUndefined }] = parseArguments(interaction.data?.options, {});
 	const ruleQuery = ruleOrUndefined ?? "";
 

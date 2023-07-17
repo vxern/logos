@@ -42,101 +42,64 @@ const links = {
 };
 
 const contributors = {
-	esther: {
-		username: "Esther",
-		id: 747900197358665758n,
+	asterfields: {
+		username: "@asterfields_",
+		id: "839862207025119252",
+		link: "https://www.instagram.com/asternight1/",
 	},
-	intelProcessor: {
-		username: "IntelProcessor69",
-		id: 839862207025119252n,
+	estheroide: {
+		username: "@estheroide",
+		id: "747900197358665758",
+		link: "https://www.instagram.com/yosgatian",
 	},
-	matteos: {
-		username: "16WardM",
-		id: 758385691851096195n,
+	mattheos: {
+		username: "@16wardm",
+		id: "758385691851096195",
 	},
 	moorddroom: {
-		username: "moorddroom",
-		id: 656160896607059981n,
+		username: "@moorddroom",
+		id: "656160896607059981",
 	},
-	mymy: {
-		username: "Mymy",
-		id: 859452448191545364n,
-	},
-	neemanUrmash: {
-		username: "Neeman Urmash",
-		id: 943425310421053481n,
-	},
-	nemokosch: {
-		username: "Nemokosch",
-		id: 297037173541175296n,
-		links: {
-			Github: "https://github.com/2colours",
-		},
+	noxys: {
+		username: "@noxyys",
+		id: "357538166061924353",
 	},
 	serene: {
-		username: "Serene",
-		id: 797369145367855104n,
-	},
-	shamisem: {
-		username: "Shamisem",
-		id: 1020296987494596620n,
-	},
-	qirimcak: {
-		username: "qırımçak",
-		id: 558631025408999424n,
+		username: "@at.peace",
+		id: "797369145367855104",
 	},
 	telemaniak: {
-		username: "Telemaniak",
-		id: 410812091071725598n,
+		username: "@telemaniak",
+		id: "410812091071725598",
+	},
+	victor: {
+		username: "@ferb02",
+		id: "303605019532460033",
+		link: "https://www.youtube.com/channel/UC4aqpjKwQfkqxmQO0Owy2QQ",
 	},
 	vxern: {
-		username: "vxern",
-		id: 217319536485990400n,
-		links: {
-			Github: "https://github.com/vxern",
-			LinkedIn: "https://linkedin.com/in/vxern",
-		},
-	},
-	xXMemeXx: {
-		username: "xXMemeXx",
-		id: 303605019532460033n,
-		links: {
-			YouTube: "https://www.youtube.com/channel/UC4aqpjKwQfkqxmQO0Owy2QQ",
-		},
+		username: "@vxern",
+		id: "217319536485990400",
+		link: "https://github.com/vxern",
 	},
 	yeetfe: {
-		username: "Yeetfe",
-		id: 249248581435916299n,
+		username: "@yeetfe",
+		id: "249248581435916299",
 	},
 };
 
 const contributions = {
 	translation: {
-		Dutch: {
-			flag: "🇳🇱",
-			contributors: [contributors.moorddroom],
-		},
 		French: {
 			flag: "🇫🇷",
 			contributors: [
-				contributors.intelProcessor,
-				contributors.matteos,
+				contributors.mattheos,
+				contributors.asterfields,
+				contributors.noxys,
 				contributors.moorddroom,
 				contributors.serene,
-				contributors.esther,
+				contributors.estheroide,
 			],
-		},
-		Greek: {
-			flag: "🇬🇷",
-			contributors: [contributors.intelProcessor, contributors.neemanUrmash],
-		},
-		Hungarian: {
-			flag: "🇭🇺",
-			contributors: [contributors.nemokosch],
-		},
-		Italian: {
-			flag: "🇮🇹",
-			contributors: [contributors.mymy],
 		},
 		Norwegian: {
 			flag: "🇳🇴",
@@ -148,11 +111,11 @@ const contributions = {
 		},
 		Romanian: {
 			flag: "🇷🇴",
-			contributors: [contributors.vxern, contributors.xXMemeXx],
+			contributors: [contributors.victor, contributors.vxern],
 		},
 		Turkish: {
 			flag: "🇹🇷",
-			contributors: [contributors.qirimcak, contributors.yeetfe],
+			contributors: [contributors.yeetfe],
 		},
 	},
 };
@@ -188,7 +151,7 @@ type BulletStyle = "arrow" | "diamond";
 const symbols = {
 	meta: {
 		whitespace: "⠀",
-		metadataSeparator: "・",
+		metadataSeparator: ",",
 		idSeparator: "|",
 	},
 	ruleBullet: "💠",

@@ -505,9 +505,7 @@ function createSelectOptionsFromCollection(
 		selectOptions.push({
 			label: trim(memberHasRole ? `[${strings.assigned}] ${strings.name}` : strings.name, 25),
 			value: index.toString(),
-			description: client.localisation.localisations.has(`${role.id}.description`)
-				? trim(strings.description(), 100)
-				: undefined,
+			description: client.localisations.has(`${role.id}.description`) ? trim(strings.description(), 100) : undefined,
 			emoji: (() => {
 				if (role.emoji === undefined) {
 					return;

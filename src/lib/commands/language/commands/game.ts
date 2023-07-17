@@ -28,12 +28,12 @@ async function handleStartGame([client, bot]: [Client, Discord.Bot], interaction
 		return;
 	}
 
-	const guild = client.cache.guilds.get(guildId);
-	if (guild === undefined) {
+	const guildDocument = await client.database.adapters.guilds.getOrFetch(client, "id", guildId.toString());
+	if (guildDocument === undefined) {
 		return;
 	}
 
-	const sentencePairs = client.features.sentencePairs.get(guild.language);
+	const sentencePairs = client.features.sentencePairs.get(guildDocument.data.language);
 	if (sentencePairs === undefined || sentencePairs.length === 0) {
 		const strings = {
 			title: localise(client, "game.strings.noSentencesAvailable.title", interaction.locale)(),

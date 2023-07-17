@@ -1,3 +1,4 @@
+import constants from "../../../constants.js";
 import {
 	CacheAdapter,
 	Database,
@@ -43,7 +44,7 @@ const adapter: Database["adapters"]["reports"] = {
 		for (const document of documents) {
 			const guildId = stringifyValue(document.data.guild);
 			const authorReferenceId = stringifyValue(document.data.author);
-			const compositeId = `${authorReferenceId}${guildId}`;
+			const compositeId = `${authorReferenceId}${constants.symbols.meta.idSeparator}${guildId}`;
 
 			cache.set(client, "authorAndGuild", compositeId, document);
 		}
@@ -54,7 +55,7 @@ const adapter: Database["adapters"]["reports"] = {
 		const [author, guild] = parameterValue;
 		const authorReferenceId = stringifyValue(author);
 		const guildId = stringifyValue(guild);
-		const compositeId = `${authorReferenceId}${guildId}`;
+		const compositeId = `${authorReferenceId}${constants.symbols.meta.idSeparator}${guildId}`;
 
 		return cache.get(client, parameter, compositeId) as Document<Report> | undefined;
 	},
@@ -71,7 +72,7 @@ const adapter: Database["adapters"]["reports"] = {
 			return undefined;
 		}
 
-		const compositeId = `${authorReferenceId}${guildId}`;
+		const compositeId = `${authorReferenceId}${constants.symbols.meta.idSeparator}${guildId}`;
 
 		cache.set(client, "authorAndGuild", compositeId, document);
 
@@ -92,7 +93,7 @@ const adapter: Database["adapters"]["reports"] = {
 			return undefined;
 		}
 
-		const compositeId = `${authorReferenceId}${guildId}`;
+		const compositeId = `${authorReferenceId}${constants.symbols.meta.idSeparator}${guildId}`;
 
 		cache.set(client, "authorAndGuild", compositeId, document);
 

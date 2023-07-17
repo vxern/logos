@@ -1,3 +1,4 @@
+import constants from "../../../constants.js";
 import { CacheAdapter, Database, dispatchQuery, getUserMentionByReference, stringifyValue } from "../database.js";
 import { Document } from "../document.js";
 import { EntryRequestIndexes } from "../indexes.js";
@@ -35,7 +36,7 @@ const adapter: Database["adapters"]["entryRequests"] = {
 		for (const document of documents) {
 			const submitterReferenceId = stringifyValue(document.data.submitter);
 			const guildId = stringifyValue(document.data.guild);
-			const compositeId = `${submitterReferenceId}${guildId}`;
+			const compositeId = `${submitterReferenceId}${constants.symbols.meta.idSeparator}${guildId}`;
 
 			cache.set(client, "submitterAndGuild", compositeId, document);
 		}
@@ -46,7 +47,7 @@ const adapter: Database["adapters"]["entryRequests"] = {
 		const [submitter, guild] = parameterValue;
 		const submitterReferenceId = stringifyValue(submitter);
 		const guildId = stringifyValue(guild);
-		const compositeId = `${submitterReferenceId}${guildId}`;
+		const compositeId = `${submitterReferenceId}${constants.symbols.meta.idSeparator}${guildId}`;
 
 		return cache.get(client, parameter, compositeId) as Document<EntryRequest> | undefined;
 	},
@@ -66,7 +67,7 @@ const adapter: Database["adapters"]["entryRequests"] = {
 			return undefined;
 		}
 
-		const compositeId = `${submitterReferenceId}${guildId}`;
+		const compositeId = `${submitterReferenceId}${constants.symbols.meta.idSeparator}${guildId}`;
 
 		cache.set(client, "submitterAndGuild", compositeId, document);
 
@@ -87,7 +88,7 @@ const adapter: Database["adapters"]["entryRequests"] = {
 			return undefined;
 		}
 
-		const compositeId = `${submitterReferenceId}${guildId}`;
+		const compositeId = `${submitterReferenceId}${constants.symbols.meta.idSeparator}${guildId}`;
 
 		cache.set(client, "submitterAndGuild", compositeId, document);
 

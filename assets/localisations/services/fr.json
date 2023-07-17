@@ -5,7 +5,7 @@
 	"reports.reason": "Motif du rapport",
 	"reports.link": "Lien vers le message",
 	"reports.noLinkProvided": "Aucun lien avec le message n'est fourni.",
-	"reports.previousInfractions": "Infractions antérieures aux {username}",
+	"reports.previousInfractions": "Infractions antérieures de {username}",
 	"suggestion.suggestion": "Suggestion",
 	"submittedBy": "Soumis par",
 	"submittedAt": "Soumis à",

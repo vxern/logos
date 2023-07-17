@@ -25,8 +25,13 @@ async function handleDisplayPlaybackQueue(
 		return;
 	}
 
-	const controller = client.features.music.controllers.get(guildId);
-	if (controller === undefined) {
+	const musicService = client.services.music.music.get(guildId);
+	if (musicService === undefined) {
+		return;
+	}
+
+	const queue = musicService.queue;
+	if (queue === undefined) {
 		return;
 	}
 
@@ -39,7 +44,7 @@ async function handleDisplayPlaybackQueue(
 	displayListings(
 		[client, bot],
 		interaction,
-		{ title: `${constants.symbols.music.list} ${strings.queue}`, songListings: controller.listingQueue },
+		{ title: `${constants.symbols.music.list} ${strings.queue}`, songListings: queue },
 		show ?? false,
 		locale,
 	);

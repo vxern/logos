@@ -2,7 +2,6 @@ import constants from "../../../../../constants.js";
 import { defaultLocale } from "../../../../../types.js";
 import { Client, localise } from "../../../../client.js";
 import { parseArguments, reply } from "../../../../interactions.js";
-import { getVoiceState, verifyVoiceState } from "../../../../services/music/music.js";
 import * as Discord from "discordeno";
 
 async function handleDisplayVolume(
@@ -16,21 +15,17 @@ async function handleDisplayVolume(
 		return;
 	}
 
-	const controller = client.features.music.controllers.get(guildId);
-	if (controller === undefined) {
+	const musicService = client.services.music.music.get(guildId);
+	if (musicService === undefined) {
 		return;
 	}
 
-	const isVoiceStateVerified = verifyVoiceState(
-		[client, bot],
-		interaction,
-		controller,
-		getVoiceState(client, guildId, interaction.user.id),
-		"check",
-	);
-	if (!isVoiceStateVerified) {
+	const isVoiceStateVerified = musicService.verifyCanManagePlayback(bot, interaction);
+	if (isVoiceStateVerified === undefined || !isVoiceStateVerified) {
 		return;
 	}
+
+	const volume = musicService.volume;
 
 	const locale = show ? defaultLocale : interaction.locale;
 
@@ -40,7 +35,7 @@ async function handleDisplayVolume(
 			client,
 			"music.options.volume.options.display.strings.volume.description",
 			locale,
-		)({ volume: controller.player.volume }),
+		)({ volume }),
 	};
 
 	reply(

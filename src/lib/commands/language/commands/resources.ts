@@ -26,8 +26,8 @@ async function handleDisplayResources(
 		return;
 	}
 
-	const guild = client.cache.guilds.get(guildId);
-	if (guild === undefined) {
+	const guildDocument = await client.database.adapters.guilds.getOrFetch(client, "id", guildId.toString());
+	if (guildDocument === undefined) {
 		return;
 	}
 
@@ -39,7 +39,7 @@ async function handleDisplayResources(
 			"resources.strings.redirect",
 			locale,
 		)({
-			language: localise(client, `languages.${guild.language.toLowerCase()}`, locale)(),
+			language: localise(client, `languages.${guildDocument.data.language.toLowerCase()}`, locale)(),
 		}),
 	};
 
@@ -55,7 +55,7 @@ async function handleDisplayResources(
 							type: Discord.MessageComponentTypes.Button,
 							label: strings.redirect,
 							style: Discord.ButtonStyles.Link,
-							url: constants.links.generateLanguageRepositoryLink(guild.language),
+							url: constants.links.generateLanguageRepositoryLink(guildDocument.data.language),
 						},
 					],
 				},

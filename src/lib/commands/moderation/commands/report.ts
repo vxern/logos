@@ -1,8 +1,9 @@
-import configuration from "../../../../configuration.js";
 import constants from "../../../../constants.js";
+import defaults from "../../../../defaults.js";
 import { trim } from "../../../../formatting.js";
 import { Client, localise } from "../../../client.js";
 import { stringifyValue } from "../../../database/database.js";
+import { timeStructToMilliseconds } from "../../../database/structs/guild.js";
 import { Report } from "../../../database/structs/report.js";
 import {
 	Modal,
@@ -13,9 +14,7 @@ import {
 	postponeReply,
 	reply,
 } from "../../../interactions.js";
-import { logEvent } from "../../../services/logging/logging.js";
-import reportManager from "../../../services/prompts/managers/reports.js";
-import { getTextChannel, verifyIsWithinLimits } from "../../../utils.js";
+import { verifyIsWithinLimits } from "../../../utils.js";
 import { CommandTemplate } from "../../command.js";
 import * as Discord from "discordeno";
 
@@ -31,6 +30,21 @@ type ReportError = "failure" | "cannot_report_self";
 async function handleMakeReport([client, bot]: [Client, Discord.Bot], interaction: Discord.Interaction): Promise<void> {
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
+		return;
+	}
+
+	const guildDocument = await client.database.adapters.guilds.getOrFetchOrCreate(
+		client,
+		"id",
+		guildId.toString(),
+		guildId,
+	);
+	if (guildDocument === undefined) {
+		return;
+	}
+
+	const configuration = guildDocument.data.features.moderation.features?.reports;
+	if (configuration === undefined || !configuration.enabled) {
 		return;
 	}
 
@@ -64,8 +78,10 @@ async function handleMakeReport([client, bot]: [Client, Discord.Bot], interactio
 			description: localise(client, "report.strings.tooMany.description", interaction.locale)(),
 		};
 
+		const intervalMilliseconds = timeStructToMilliseconds(configuration.rateLimit?.within ?? defaults.REPORT_INTERVAL);
+
 		const reports = Array.from(reportsByAuthorAndGuild.values());
-		if (!verifyIsWithinLimits(reports, configuration.commands.report.limitUses, configuration.commands.report.within)) {
+		if (!verifyIsWithinLimits(reports, configuration.rateLimit?.uses ?? defaults.REPORT_LIMIT, intervalMilliseconds)) {
 			reply([client, bot], interaction, {
 				embeds: [
 					{
@@ -77,6 +93,11 @@ async function handleMakeReport([client, bot]: [Client, Discord.Bot], interactio
 			});
 			return;
 		}
+	}
+
+	const reportService = client.services.prompts.reports.get(guild.id);
+	if (reportService === undefined) {
+		return;
 	}
 
 	createModalComposer<Report["answers"]>([client, bot], interaction, {
@@ -95,12 +116,10 @@ async function handleMakeReport([client, bot]: [Client, Discord.Bot], interactio
 				return "failure";
 			}
 
-			const channel = getTextChannel(guild, configuration.guilds.channels.reports);
-			if (channel === undefined) {
-				return true;
+			if (configuration.journaling) {
+				const journallingService = client.services.journalling.get(guild.id);
+				journallingService?.log(bot, "reportSubmit", { args: [member, report.data] });
 			}
-
-			logEvent([client, bot], guild, "reportSubmit", [member, report.data]);
 
 			const userId = BigInt(userDocument.data.account.id);
 			const reference = stringifyValue(report.ref);
@@ -110,13 +129,13 @@ async function handleMakeReport([client, bot]: [Client, Discord.Bot], interactio
 				return "failure";
 			}
 
-			const prompt = await reportManager.savePrompt([client, bot], guild, channel, user, report);
+			const prompt = await reportService.savePrompt(bot, user, report);
 			if (prompt === undefined) {
 				return "failure";
 			}
 
-			reportManager.registerPrompt(prompt, userId, reference, report);
-			reportManager.registerHandler(client, [userId.toString(), guild.id.toString(), reference]);
+			reportService.registerPrompt(prompt, userId, reference, report);
+			reportService.registerHandler([userId.toString(), guild.id.toString(), reference]);
 
 			const strings = {
 				title: localise(client, "report.strings.submitted.title", interaction.locale)(),

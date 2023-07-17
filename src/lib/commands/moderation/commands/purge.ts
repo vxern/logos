@@ -1,5 +1,5 @@
-import configuration from "../../../../configuration.js";
 import constants, { Periods } from "../../../../constants.js";
+import defaults from "../../../../defaults.js";
 import { MentionTypes, mention, timestamp, trim } from "../../../../formatting.js";
 import { defaultLanguage, getLanguageByLocale } from "../../../../types.js";
 import {
@@ -18,7 +18,6 @@ import {
 	parseArguments,
 	postponeReply,
 } from "../../../interactions.js";
-import { logEvent } from "../../../services/logging/logging.js";
 import { chunk, diagnosticMentionUser, snowflakeToTimestamp } from "../../../utils.js";
 import { CommandTemplate } from "../../command.js";
 import { user } from "../../parameters.js";
@@ -60,6 +59,26 @@ async function handlePurgeMessages(
 	[client, bot]: [Client, Discord.Bot],
 	interaction: Discord.Interaction,
 ): Promise<void> {
+	const guildId = interaction.guildId;
+	if (guildId === undefined) {
+		return;
+	}
+
+	const guildDocument = await client.database.adapters.guilds.getOrFetchOrCreate(
+		client,
+		"id",
+		guildId.toString(),
+		guildId,
+	);
+	if (guildDocument === undefined) {
+		return;
+	}
+
+	const configuration = guildDocument.data.features.moderation.features?.purging;
+	if (configuration === undefined || !configuration.enabled) {
+		return;
+	}
+
 	const [{ start, end: provisionalEnd, author: user }] = parseArguments(interaction.data?.options, {});
 	if (start === undefined) {
 		return;
@@ -86,11 +105,6 @@ async function handlePurgeMessages(
 	const isEndValid = provisionalEnd === undefined || isValidSnowflake(provisionalEnd);
 	if (!(isStartValid && isEndValid)) {
 		displaySnowflakesInvalidError([client, bot], interaction, [!isStartValid, !isEndValid]);
-		return;
-	}
-
-	const guildId = interaction.guildId;
-	if (guildId === undefined) {
 		return;
 	}
 
@@ -228,7 +242,7 @@ async function handlePurgeMessages(
 
 	let isFinished = false;
 	while (!isFinished) {
-		if (messages.length >= configuration.commands.purge.maxFound) {
+		if (messages.length >= defaults.MAX_INDEXABLE_MESSAGES) {
 			clearInterval(indexProgressIntervalId);
 
 			const strings = {
@@ -243,7 +257,7 @@ async function handlePurgeMessages(
 							client,
 							"purge.strings.rangeTooBig.description.rangeTooBig.messages",
 							language,
-							configuration.commands.purge.maxFound,
+							defaults.MAX_INDEXABLE_MESSAGES,
 						),
 					}),
 					trySmaller: localise(client, "purge.strings.rangeTooBig.description.trySmaller", interaction.locale)(),
@@ -336,7 +350,7 @@ async function handlePurgeMessages(
 
 	let isShouldContinue = false;
 
-	if (messages.length >= configuration.commands.purge.maxDeletable) {
+	if (messages.length >= defaults.MAX_DELETABLE_MESSAGES) {
 		isShouldContinue = await new Promise<boolean>((resolve) => {
 			const continueId = createInteractionCollector([client, bot], {
 				type: Discord.InteractionTypes.MessageComponent,
@@ -369,7 +383,7 @@ async function handlePurgeMessages(
 								language,
 								messages.length,
 							),
-							maximum_deletable: configuration.commands.purge.maxDeletable,
+							maximum_deletable: defaults.MAX_DELETABLE_MESSAGES,
 						}),
 						limited: localise(
 							client,
@@ -380,7 +394,7 @@ async function handlePurgeMessages(
 								client,
 								"purge.strings.indexed.description.limited.messages",
 								language,
-								configuration.commands.purge.maxDeletable,
+								defaults.MAX_DELETABLE_MESSAGES,
 							),
 						}),
 					},
@@ -396,7 +410,7 @@ async function handlePurgeMessages(
 							client,
 							"purge.strings.continue.description.messages",
 							language,
-							configuration.commands.purge.maxDeletable,
+							defaults.MAX_DELETABLE_MESSAGES,
 						),
 						allMessages: pluralise(client, "purge.strings.continue.description.allMessages", language, messages.length),
 						channel_mention: channelMention,
@@ -447,7 +461,7 @@ async function handlePurgeMessages(
 			return;
 		}
 
-		messages = messages.slice(0, configuration.commands.purge.maxDeletable);
+		messages = messages.slice(0, defaults.MAX_DELETABLE_MESSAGES);
 	}
 
 	const isShouldPurge =
@@ -589,7 +603,11 @@ async function handlePurgeMessages(
 		return;
 	}
 
-	logEvent([client, bot], guild, "purgeBegin", [member, channel, messages.length]);
+	const journallingService = client.services.journalling.get(guild.id);
+
+	if (configuration.journaling) {
+		journallingService?.log(bot, "purgeBegin", { args: [member, channel, messages.length] });
+	}
 
 	const twoWeeksAgo = now - Periods.week * 2 + Periods.hour;
 
@@ -644,7 +662,9 @@ async function handlePurgeMessages(
 		} message(s) in channel ID ${channelId} as requested by ${diagnosticMentionUser(interaction.user)}.`,
 	);
 
-	logEvent([client, bot], guild, "purgeEnd", [member, channel, deletedCount]);
+	if (configuration.journaling) {
+		journallingService?.log(bot, "purgeEnd", { args: [member, channel, deletedCount] });
+	}
 
 	clearTimeout(responseDeletionTimeoutId);
 

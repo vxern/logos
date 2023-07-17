@@ -54,12 +54,17 @@ async function handleFindWord([client, bot]: [Client, Discord.Bot], interaction:
 		return;
 	}
 
+	const guildDocument = await client.database.adapters.guilds.getOrFetch(client, "id", guildId.toString());
+	if (guildDocument === undefined) {
+		return;
+	}
+
 	const guild = client.cache.guilds.get(guildId);
 	if (guild === undefined) {
 		return;
 	}
 
-	const dictionaries = client.features.dictionaryAdapters.get(guild.language);
+	const dictionaries = client.features.dictionaryAdapters.get(guildDocument.data.language);
 	if (dictionaries === undefined) {
 		const strings = {
 			title: localise(client, "word.strings.noDictionaryAdapters.title", interaction.locale)(),
@@ -91,7 +96,7 @@ async function handleFindWord([client, bot]: [Client, Discord.Bot], interaction:
 	const unclassifiedEntries: DictionaryEntry[] = [];
 	const entriesByPartOfSpeech = new Map<PartOfSpeech, DictionaryEntry[]>();
 	for (const dictionary of dictionaries) {
-		const entries = await dictionary.getEntries(word, guild.language, client, locale);
+		const entries = await dictionary.getEntries(word, guildDocument.data.language, client, locale);
 		if (entries === undefined) {
 			continue;
 		}

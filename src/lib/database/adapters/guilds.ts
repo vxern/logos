@@ -59,25 +59,64 @@ const adapter: Database["adapters"]["guilds"] = {
 			adapter.create(client, {
 				createdAt: Date.now(),
 				id: id.toString(),
+				isNative: false,
 				language: defaultLanguage,
 				features: {
 					information: {
-						enabled: false,
-						features: { journaling: { enabled: false }, suggestions: { enabled: false } },
-					},
-					moderation: {
-						enabled: false,
+						enabled: true,
 						features: {
-							purging: { enabled: false },
-							warns: { enabled: false },
-							reports: { enabled: false },
+							journaling: { enabled: false },
+							notices: {
+								enabled: false,
+								features: {
+									information: { enabled: false },
+									roles: { enabled: false },
+									welcome: { enabled: false },
+								},
+							},
 						},
 					},
-					music: {
+					language: {
 						enabled: true,
-						features: { dynamicVoiceChannels: { enabled: false }, music: { enabled: true, implicitVolume: 100 } },
+						features: {
+							game: { enabled: false },
+							resources: { enabled: false },
+							translate: { enabled: true },
+							word: { enabled: false },
+						},
 					},
-					social: { enabled: false, features: { praises: { enabled: false } } },
+					moderation: {
+						enabled: true,
+						features: {
+							alerts: { enabled: false },
+							policy: { enabled: false },
+							rules: { enabled: false },
+							timeouts: { enabled: true, journaling: true },
+							purging: { enabled: true, journaling: true },
+							warns: { enabled: true, journaling: true, limit: 3, autoTimeout: { enabled: false } },
+							reports: { enabled: false },
+							verification: { enabled: false },
+						},
+					},
+					server: {
+						enabled: true,
+						features: {
+							dynamicVoiceChannels: { enabled: false },
+							entry: { enabled: false },
+							suggestions: { enabled: false },
+						},
+					},
+					social: {
+						enabled: true,
+						features: {
+							music: {
+								enabled: true,
+								implicitVolume: 100,
+							},
+							praises: { enabled: true, journaling: true },
+							profile: { enabled: false },
+						},
+					},
 				},
 			})
 		);

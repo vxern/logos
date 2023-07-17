@@ -1,7 +1,6 @@
 import constants from "../../../../../constants.js";
 import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../../client.js";
 import { parseArguments, reply } from "../../../../interactions.js";
-import { logEvent } from "../../../../services/logging/logging.js";
 import { diagnosticMentionUser } from "../../../../utils.js";
 import * as Discord from "discordeno";
 
@@ -21,6 +20,26 @@ async function handleClearTimeout(
 	[client, bot]: [Client, Discord.Bot],
 	interaction: Discord.Interaction,
 ): Promise<void> {
+	const guildId = interaction.guildId;
+	if (guildId === undefined) {
+		return;
+	}
+
+	const guildDocument = await client.database.adapters.guilds.getOrFetchOrCreate(
+		client,
+		"id",
+		guildId.toString(),
+		guildId,
+	);
+	if (guildDocument === undefined) {
+		return;
+	}
+
+	const configuration = guildDocument.data.features.moderation.features?.timeouts;
+	if (configuration === undefined || !configuration.enabled) {
+		return;
+	}
+
 	const [{ user: userSearchQuery }] = parseArguments(interaction.data?.options, {});
 	if (userSearchQuery === undefined) {
 		return;
@@ -65,11 +84,6 @@ async function handleClearTimeout(
 		return;
 	}
 
-	const guildId = interaction.guildId;
-	if (guildId === undefined) {
-		return;
-	}
-
 	const guild = client.cache.guilds.get(guildId);
 	if (guild === undefined) {
 		return;
@@ -79,7 +93,10 @@ async function handleClearTimeout(
 		client.log.warn(`Failed to remove timeout of member with ID ${member.id}`),
 	);
 
-	logEvent([client, bot], guild, "memberTimeoutRemove", [member, interaction.user]);
+	if (configuration.journaling) {
+		const journallingService = client.services.journalling.get(guild.id);
+		journallingService?.log(bot, "memberTimeoutRemove", { args: [member, interaction.user] });
+	}
 
 	const strings = {
 		title: localise(client, "timeout.strings.timeoutCleared.title", interaction.locale)(),

@@ -1,8 +1,9 @@
-import configuration from "../../../../configuration.js";
 import constants from "../../../../constants.js";
+import defaults from "../../../../defaults.js";
 import { trim } from "../../../../formatting.js";
 import { Client, localise } from "../../../client.js";
 import { stringifyValue } from "../../../database/database.js";
+import { timeStructToMilliseconds } from "../../../database/structs/guild.js";
 import { Suggestion } from "../../../database/structs/suggestion.js";
 import {
 	Modal,
@@ -13,9 +14,7 @@ import {
 	postponeReply,
 	reply,
 } from "../../../interactions.js";
-import { logEvent } from "../../../services/logging/logging.js";
-import suggestionManager from "../../../services/prompts/managers/suggestions.js";
-import { getTextChannel, verifyIsWithinLimits } from "../../../utils.js";
+import { verifyIsWithinLimits } from "../../../utils.js";
 import { CommandTemplate } from "../../command.js";
 import * as Discord from "discordeno";
 
@@ -34,6 +33,21 @@ async function handleMakeSuggestion(
 ): Promise<void> {
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
+		return;
+	}
+
+	const guildDocument = await client.database.adapters.guilds.getOrFetchOrCreate(
+		client,
+		"id",
+		guildId.toString(),
+		guildId,
+	);
+	if (guildDocument === undefined) {
+		return;
+	}
+
+	const configuration = guildDocument.data.features.server.features?.suggestions;
+	if (configuration === undefined || !configuration.enabled) {
 		return;
 	}
 
@@ -61,13 +75,17 @@ async function handleMakeSuggestion(
 		guild.id.toString(),
 	]);
 
+	const intervalMilliseconds = timeStructToMilliseconds(
+		configuration.rateLimit?.within ?? defaults.SUGGESTION_INTERVAL,
+	);
+
 	if (suggestionsByAuthorAndGuild !== undefined) {
 		const suggestions = Array.from(suggestionsByAuthorAndGuild.values());
 		if (
 			!verifyIsWithinLimits(
 				suggestions,
-				configuration.commands.suggestion.limitUses,
-				configuration.commands.suggestion.within,
+				configuration.rateLimit?.uses ?? defaults.SUGGESTION_LIMIT,
+				intervalMilliseconds,
 			)
 		) {
 			const strings = {
@@ -88,6 +106,11 @@ async function handleMakeSuggestion(
 		}
 	}
 
+	const suggestionService = client.services.prompts.suggestions.get(guild.id);
+	if (suggestionService === undefined) {
+		return;
+	}
+
 	createModalComposer<Suggestion["answers"]>([client, bot], interaction, {
 		modal: generateSuggestionModal(client, interaction.locale),
 		onSubmit: async (submission, answers) => {
@@ -104,12 +127,10 @@ async function handleMakeSuggestion(
 				return "failure";
 			}
 
-			const channel = getTextChannel(guild, configuration.guilds.channels.suggestions);
-			if (channel === undefined) {
-				return true;
+			if (configuration.journaling) {
+				const journallingService = client.services.journalling.get(guild.id);
+				journallingService?.log(bot, "suggestionSend", { args: [member, suggestion.data] });
 			}
-
-			logEvent([client, bot], guild, "suggestionSend", [member, suggestion.data]);
 
 			const userId = BigInt(userDocument.data.account.id);
 			const reference = stringifyValue(suggestion.ref);
@@ -119,13 +140,13 @@ async function handleMakeSuggestion(
 				return "failure";
 			}
 
-			const prompt = await suggestionManager.savePrompt([client, bot], guild, channel, user, suggestion);
+			const prompt = await suggestionService.savePrompt(bot, user, suggestion);
 			if (prompt === undefined) {
 				return "failure";
 			}
 
-			suggestionManager.registerPrompt(prompt, userId, reference, suggestion);
-			suggestionManager.registerHandler(client, [userId.toString(), guild.id.toString(), reference]);
+			suggestionService.registerPrompt(prompt, userId, reference, suggestion);
+			suggestionService.registerHandler([userId.toString(), guild.id.toString(), reference]);
 
 			const strings = {
 				title: localise(client, "suggestion.strings.sent.title", interaction.locale)(),
