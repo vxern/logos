@@ -30,7 +30,7 @@ import { WelcomeNoticeService } from "./services/notices/types/welcome.js";
 import { ReportService } from "./services/prompts/types/reports.js";
 import { SuggestionService } from "./services/prompts/types/suggestions.js";
 import { VerificationService } from "./services/prompts/types/verification.js";
-import { Service, ServiceBase } from "./services/service.js";
+import { Service } from "./services/service.js";
 import { StatusService } from "./services/status/service.js";
 import { diagnosticMentionUser, fetchMembers } from "./utils.js";
 import * as Discord from "discordeno";
@@ -91,7 +91,9 @@ type Client = {
 	};
 	localisations: Map<string, Map<Language, (args: Record<string, unknown>) => string>>;
 	services: {
-		allRegistered: Service[];
+		global: Service[];
+		local: Map<bigint, Service[]>;
+	} & {
 		alerts: Map<bigint, AlertService>;
 		dynamicVoiceChannels: Map<bigint, DynamicVoiceChannelService>;
 		entry: Map<bigint, EntryService>;
@@ -194,7 +196,8 @@ function createClient(
 		localisations,
 		collectors: new Map(),
 		services: {
-			allRegistered: [],
+			global: [],
+			local: new Map(),
 			alerts: new Map(),
 			dynamicVoiceChannels: new Map(),
 			entry: new Map(),
@@ -220,6 +223,45 @@ function createClient(
 	};
 }
 
+async function dispatchGlobal<EventName extends keyof Discord.EventHandlers>(
+	client: Client,
+	eventName: EventName,
+	{ args }: { args: Parameters<Discord.EventHandlers[EventName]> },
+): Promise<void> {
+	for (const service of client.services.global) {
+		service[eventName](...args);
+	}
+}
+
+async function dispatchLocal<EventName extends keyof Discord.EventHandlers>(
+	client: Client,
+	guildId: bigint,
+	eventName: EventName,
+	{ args }: { args: Parameters<Discord.EventHandlers[EventName]> },
+): Promise<void> {
+	const services = client.services.local.get(guildId);
+	if (services === undefined) {
+		return;
+	}
+
+	for (const service of services) {
+		service[eventName](...args);
+	}
+}
+
+async function dispatchEvent<EventName extends keyof Discord.EventHandlers>(
+	client: Client,
+	guildId: bigint | undefined,
+	eventName: EventName,
+	{ args }: { args: Parameters<Discord.EventHandlers[EventName]> },
+): Promise<void> {
+	dispatchGlobal(client, eventName, { args });
+
+	if (guildId !== undefined) {
+		dispatchLocal(client, guildId, eventName, { args });
+	}
+}
+
 async function initialiseClient(
 	metadata: Client["metadata"],
 	features: Client["features"],
@@ -239,44 +281,103 @@ async function initialiseClient(
 				Discord.Intents.GuildVoiceStates |
 				Discord.Intents.GuildMessages |
 				Discord.Intents.MessageContent,
-			events: (
-				Object.entries(
-					Discord.createEventHandlers({
-						guildCreate: (...args) => handleGuildCreate(client, ...args),
-						interactionCreate: (...args) => handleInteractionCreate(client, ...args),
-						guildDelete: (_, guildId) => {
-							client.cache.guilds.delete(guildId);
-						},
-						channelDelete: (_, channel) => {
-							client.cache.channels.delete(channel.id);
-							client.cache.guilds.get(channel.guildId)?.channels.delete(channel.id);
-						},
-					}),
-				) as [Exclude<keyof ServiceBase, "debug">, ServiceBase[keyof ServiceBase]][]
-			).reduce<Partial<Omit<Discord.EventHandlers, "debug">>>((events, [event, handle]) => {
-				// @ts-ignore: This is fine.
-				events[event] = (async (...args: Parameters<typeof handle>) => {
-					await handle(...args);
+			events: {
+				async ready(...args) {
+					dispatchGlobal(client, "ready", { args });
+				},
+				async interactionCreate(bot, interaction) {
+					await handleInteractionCreate(client, bot, interaction);
 
-					for (const service of client.services.allRegistered) {
-						service[event](...args);
-					}
-				}) as typeof handle;
-				return events;
-			}, {}),
+					dispatchEvent(client, interaction.guildId, "interactionCreate", { args: [bot, interaction] });
+				},
+				async guildMemberAdd(bot, member, user) {
+					dispatchEvent(client, member.guildId, "guildMemberAdd", { args: [bot, member, user] });
+				},
+				async guildMemberRemove(bot, user, guildId) {
+					dispatchEvent(client, guildId, "guildMemberRemove", { args: [bot, user, guildId] });
+				},
+				async guildMemberUpdate(bot, member, user) {
+					dispatchEvent(client, member.guildId, "guildMemberUpdate", { args: [bot, member, user] });
+				},
+				async messageCreate(bot, message) {
+					dispatchEvent(client, message.guildId, "messageCreate", { args: [bot, message] });
+				},
+				async messageDelete(bot, payload, message) {
+					dispatchEvent(client, payload.guildId, "messageDelete", { args: [bot, payload, message] });
+				},
+				async messageDeleteBulk(bot, payload) {
+					dispatchEvent(client, payload.guildId, "messageDeleteBulk", { args: [bot, payload] });
+				},
+				async messageUpdate(bot, message, oldMessage) {
+					dispatchEvent(client, message.guildId, "messageUpdate", { args: [bot, message, oldMessage] });
+				},
+				async voiceServerUpdate(bot, payload) {
+					dispatchEvent(client, payload.guildId, "voiceServerUpdate", { args: [bot, payload] });
+				},
+				async voiceStateUpdate(bot, voiceState) {
+					dispatchEvent(client, voiceState.guildId, "voiceStateUpdate", { args: [bot, voiceState] });
+				},
+				async channelCreate(bot, channel) {
+					dispatchEvent(client, channel.guildId, "channelCreate", { args: [bot, channel] });
+				},
+				async channelDelete(bot, channel) {
+					client.cache.channels.delete(channel.id);
+					client.cache.guilds.get(channel.guildId)?.channels.delete(channel.id);
+
+					dispatchEvent(client, channel.guildId, "channelDelete", { args: [bot, channel] });
+				},
+				async channelPinsUpdate(bot, data) {
+					dispatchEvent(client, data.guildId, "channelPinsUpdate", { args: [bot, data] });
+				},
+				async channelUpdate(bot, channel) {
+					dispatchEvent(client, channel.guildId, "channelUpdate", { args: [bot, channel] });
+				},
+				async guildEmojisUpdate(bot, payload) {
+					dispatchEvent(client, payload.guildId, "guildEmojisUpdate", { args: [bot, payload] });
+				},
+				async guildBanAdd(bot, user, guildId) {
+					dispatchEvent(client, guildId, "guildBanAdd", { args: [bot, user, guildId] });
+				},
+				async guildBanRemove(bot, user, guildId) {
+					dispatchEvent(client, guildId, "guildBanRemove", { args: [bot, user, guildId] });
+				},
+				async guildCreate(bot, guild) {
+					await handleGuildCreate(client, bot, guild);
+
+					dispatchEvent(client, guild.id, "guildCreate", { args: [bot, guild] });
+				},
+				async guildDelete(bot, id, shardId) {
+					const guildId = id;
+					client.cache.guilds.delete(guildId);
+
+					dispatchEvent(client, guildId, "guildDelete", { args: [bot, guildId, shardId] });
+				},
+				async guildUpdate(bot, guild) {
+					dispatchEvent(client, guild.id, "guildUpdate", { args: [bot, guild] });
+				},
+				async roleCreate(bot, role) {
+					dispatchEvent(client, role.guildId, "roleCreate", { args: [bot, role] });
+				},
+				async roleDelete(bot, role) {
+					dispatchEvent(client, role.guildId, "roleDelete", { args: [bot, role] });
+				},
+				async roleUpdate(bot, role) {
+					dispatchEvent(client, role.guildId, "roleUpdate", { args: [bot, role] });
+				},
+			},
 			transformers: withCaching(client, Discord.createTransformers({})),
 		}),
 	);
 
 	const lavalinkService = new LavalinkService(client, bot);
-	client.services.allRegistered.push(lavalinkService);
+	client.services.global.push(lavalinkService);
 	client.services.music.lavalink = lavalinkService;
 	await lavalinkService.start(bot);
 
 	await Discord.startBot(bot);
 
 	const statusService = new StatusService(client);
-	client.services.allRegistered.push(statusService);
+	client.services.global.push(statusService);
 	client.services.status = statusService;
 	await statusService.start(bot);
 }
@@ -489,7 +590,7 @@ async function handleGuildCreate(client: Client, bot: Discord.Bot, guild: Discor
 		service.start(bot);
 	}
 
-	client.services.allRegistered.push(...services);
+	client.services.local.set(guild.id, services);
 }
 
 async function handleInteractionCreate(
