@@ -6,7 +6,7 @@ import { Document } from "../../../database/document.js";
 import { EntryRequest } from "../../../database/structs/entry-request.js";
 import { User } from "../../../database/structs/user.js";
 import { acknowledge, encodeId, reply } from "../../../interactions.js";
-import { diagnosticMentionUser } from "../../../utils.js";
+import { diagnosticMentionUser, getGuildIconURLFormatted } from "../../../utils.js";
 import { Configurations, PromptService } from "../service.js";
 import * as Discord from "discordeno";
 
@@ -150,7 +150,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 					],
 					footer: {
 						text: guild.name,
-						iconUrl: `${user.id}`,
+						iconUrl: `${getGuildIconURLFormatted(bot, guild)}&metadata=${`${user.id}`}`,
 					},
 				},
 			],
