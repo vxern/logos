@@ -237,7 +237,7 @@ abstract class PromptService<
 	): Discord.CreateMessage | undefined;
 
 	getMetadata(prompt: Discord.Message): string[] | undefined {
-		const metadata = prompt.embeds.at(0)?.footer?.iconUrl?.split("&metadata=").at(-1);
+		const metadata = prompt.embeds.at(-1)?.footer?.iconUrl?.split("&metadata=").at(-1);
 		if (metadata === undefined) {
 			return undefined;
 		}

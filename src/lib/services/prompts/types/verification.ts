@@ -1,4 +1,5 @@
 import constants from "../../../../constants.js";
+import { MentionTypes, TimestampFormat, mention, timestamp } from "../../../../formatting.js";
 import { defaultLanguage, defaultLocale } from "../../../../types.js";
 import { Client, localise, pluralise } from "../../../client.js";
 import { stringifyValue } from "../../../database/database.js";
@@ -6,7 +7,7 @@ import { Document } from "../../../database/document.js";
 import { EntryRequest } from "../../../database/structs/entry-request.js";
 import { User } from "../../../database/structs/user.js";
 import { acknowledge, encodeId, reply } from "../../../interactions.js";
-import { diagnosticMentionUser, getGuildIconURLFormatted } from "../../../utils.js";
+import { diagnosticMentionUser, getGuildIconURLFormatted, snowflakeToTimestamp } from "../../../utils.js";
 import { Configurations, PromptService } from "../service.js";
 import * as Discord from "discordeno";
 
@@ -89,6 +90,10 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 				aim: localise(this.client, "verification.fields.aim", defaultLocale)(),
 				whereFound: localise(this.client, "verification.fields.whereFound", defaultLocale)(),
 			},
+			answers: localise(this.client, "entry.verification.answers", defaultLocale)(),
+			requestedRoles: localise(this.client, "entry.verification.requestedRoles", defaultLocale)(),
+			accountCreated: localise(this.client, "entry.verification.accountCreated", defaultLocale)(),
+			answersSubmitted: localise(this.client, "entry.verification.answersSubmitted", defaultLocale)(),
 			accept: localise(this.client, "entry.verification.vote.accept", defaultLocale)(),
 			acceptMultiple: localise(
 				this.client,
@@ -117,10 +122,13 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 			}),
 		};
 
+		const accountCreatedRelativeTimestamp = timestamp(snowflakeToTimestamp(user.id), TimestampFormat.Relative);
+		const accountCreatedLongDateTimestamp = timestamp(snowflakeToTimestamp(user.id), TimestampFormat.LongDate);
+
 		return {
 			embeds: [
 				{
-					title: diagnosticMentionUser(user),
+					title: strings.answers,
 					color: constants.colors.turquoise,
 					thumbnail: (() => {
 						const iconURL = Discord.getAvatarURL(bot, user.id, user.discriminator, {
@@ -136,16 +144,37 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 					})(),
 					fields: [
 						{
-							name: strings.verification.reason,
+							name: `1. ${strings.verification.reason}`,
 							value: document.data.answers.reason,
 						},
 						{
-							name: strings.verification.aim,
+							name: `2. ${strings.verification.aim}`,
 							value: document.data.answers.aim,
 						},
 						{
-							name: strings.verification.whereFound,
+							name: `3. ${strings.verification.whereFound}`,
 							value: document.data.answers.whereFound,
+						},
+					],
+				},
+				{
+					title: diagnosticMentionUser(user),
+					color: constants.colors.turquoise,
+					fields: [
+						{
+							name: strings.requestedRoles,
+							value: mention(BigInt(document.data.requestedRole), MentionTypes.Role),
+							inline: true,
+						},
+						{
+							name: strings.accountCreated,
+							value: `${accountCreatedLongDateTimestamp} (${accountCreatedRelativeTimestamp})`,
+							inline: true,
+						},
+						{
+							name: strings.answersSubmitted,
+							value: timestamp(document.data.createdAt, TimestampFormat.Relative),
+							inline: true,
 						},
 					],
 					footer: {
