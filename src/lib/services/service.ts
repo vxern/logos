@@ -15,6 +15,7 @@ abstract class Service implements ServiceBase {
 	}
 
 	async start(_: Discord.Bot): Promise<void> {}
+	async stop(_: Discord.Bot): Promise<void> {}
 
 	async debug(..._: Parameters<ServiceBase["debug"]>) {}
 	async auditLogEntryCreate(..._: Parameters<ServiceBase["auditLogEntryCreate"]>) {}
