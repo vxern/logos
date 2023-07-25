@@ -1,7 +1,7 @@
 import constants from "../../../../constants/constants";
+import { defaultLocale } from "../../../../constants/language";
 import defaults from "../../../../defaults";
 import { MentionTypes, mention, timestamp, trim } from "../../../../formatting";
-import { defaultLocale } from "../../../../types";
 import { Client, localise } from "../../../client";
 import { paginate, parseArguments, reply } from "../../../interactions";
 import { isCollection } from "../../../services/music/music";

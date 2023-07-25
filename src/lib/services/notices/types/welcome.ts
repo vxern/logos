@@ -1,6 +1,6 @@
 import constants from "../../../../constants/constants";
+import { defaultLocale } from "../../../../constants/language";
 import { MentionTypes, mention } from "../../../../formatting";
-import { defaultLocale } from "../../../../types";
 import { Client, localise } from "../../../client";
 import { HashableMessageContents, NoticeService } from "../service";
 import * as Discord from "discordeno";

@@ -1,5 +1,5 @@
+import { Language } from "../../../constants/language";
 import time from "../../../constants/time";
-import { Language } from "../../../types";
 
 interface Guild {
 	/** A timestamp of when Logos began to manage this guild. */

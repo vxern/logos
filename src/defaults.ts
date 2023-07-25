@@ -1,4 +1,4 @@
-import { TimeStruct } from "./lib/database/structs/guild.js";
+import { TimeStruct } from "./lib/database/structs/guild";
 
 const RESULTS_PER_PAGE = 10;
 

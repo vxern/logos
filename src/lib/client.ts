@@ -1,8 +1,8 @@
 import constants from "../constants/constants";
+import { Language, defaultLanguage, getLanguageByLocale, getLocaleForLanguage } from "../constants/language";
 import time from "../constants/time";
 import defaults from "../defaults";
 import { timestamp } from "../formatting";
-import { Language, defaultLanguage, getLanguageByLocale, getLocaleForLanguage } from "../types";
 import { Command, CommandTemplate, InteractionHandler, LocalisationProperties, Option } from "./commands/command";
 import commandsRaw from "./commands/commands";
 import { SentencePair } from "./commands/language/commands/game";

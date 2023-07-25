@@ -1,5 +1,5 @@
 import constants from "../../../../constants/constants";
-import { defaultLocale } from "../../../../types";
+import { defaultLocale } from "../../../../constants/language";
 import { Client, localise } from "../../../client";
 import { ruleIds } from "../../../commands/moderation/commands/rule";
 import { HashableMessageContents, NoticeService } from "../service";

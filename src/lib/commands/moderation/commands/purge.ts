@@ -1,8 +1,8 @@
 import constants from "../../../../constants/constants";
+import { defaultLanguage, getLanguageByLocale } from "../../../../constants/language";
 import time from "../../../../constants/time";
 import defaults from "../../../../defaults";
 import { MentionTypes, mention, timestamp, trim } from "../../../../formatting";
-import { defaultLanguage, getLanguageByLocale } from "../../../../types";
 import {
 	Client,
 	autocompleteMembers,

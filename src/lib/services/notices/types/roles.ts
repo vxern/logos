@@ -1,5 +1,5 @@
 import constants from "../../../../constants/constants";
-import { defaultLocale } from "../../../../types";
+import { defaultLocale } from "../../../../constants/language";
 import { Client, localise } from "../../../client";
 import { handleOpenRoleSelectionMenu } from "../../../commands/social/commands/profile/roles";
 import { decodeId } from "../../../interactions";

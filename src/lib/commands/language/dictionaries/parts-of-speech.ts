@@ -1,4 +1,4 @@
-import { Language } from "../../../../types";
+import { Language } from "../../../../constants/language";
 
 type PartOfSpeech =
 	| "noun"

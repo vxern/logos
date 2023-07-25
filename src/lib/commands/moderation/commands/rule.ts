@@ -1,5 +1,5 @@
 import constants from "../../../../constants/constants";
-import { defaultLocale } from "../../../../types";
+import { defaultLocale } from "../../../../constants/language";
 import { Client, localise } from "../../../client";
 import { parseArguments, reply, respond } from "../../../interactions";
 import { CommandTemplate } from "../../command";

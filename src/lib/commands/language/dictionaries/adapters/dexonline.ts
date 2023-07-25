@@ -1,5 +1,5 @@
 import constants from "../../../../../constants/constants";
-import { Language } from "../../../../../types";
+import { Language } from "../../../../../constants/language";
 import { Client, localise } from "../../../../client";
 import { chunk } from "../../../../utils";
 import { getPartOfSpeech } from "../../module";

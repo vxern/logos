@@ -1,6 +1,6 @@
 import constants from "../constants/constants";
+import { defaultLanguage, defaultLocale, getLanguageByLocale } from "../constants/language";
 import time from "../constants/time";
-import { defaultLanguage, defaultLocale, getLanguageByLocale } from "../types";
 import { Client, addCollector, localise, pluralise } from "./client";
 import * as Discord from "discordeno";
 import { DiscordSnowflake as Snowflake } from "snowflake";

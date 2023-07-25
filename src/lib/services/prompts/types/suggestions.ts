@@ -1,6 +1,6 @@
 import constants from "../../../../constants/constants";
+import { defaultLocale } from "../../../../constants/language";
 import { MentionTypes, mention, timestamp } from "../../../../formatting";
-import { defaultLocale } from "../../../../types";
 import { Client, localise } from "../../../client";
 import { stringifyValue } from "../../../database/database";
 import { Document } from "../../../database/document";

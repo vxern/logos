@@ -1,7 +1,7 @@
-import { capitalise } from "./formatting.js";
-import { Client, initialiseClient } from "./lib/client.js";
-import { getSupportedLanguages, loadDictionaryAdapters, loadSentencePairs } from "./lib/commands/language/module.js";
-import { Language, getLanguageByLocale, supportedLanguages } from "./types.js";
+import { capitalise } from "./formatting";
+import { Client, initialiseClient } from "./lib/client";
+import { getSupportedLanguages, loadDictionaryAdapters, loadSentencePairs } from "./lib/commands/language/module";
+import { Language, getLanguageByLocale, supportedLanguages } from "./constants/language";
 import * as Discord from "discordeno";
 import * as dotenv from "dotenv";
 import * as fs from "fs/promises";

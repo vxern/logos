@@ -1,7 +1,7 @@
 import constants from "../../../../constants/constants";
+import { defaultLanguage, defaultLocale, getLanguageByLocale } from "../../../../constants/language";
 import defaults from "../../../../defaults";
 import { code } from "../../../../formatting";
-import { defaultLanguage, defaultLocale, getLanguageByLocale } from "../../../../types";
 import { Client, localise, pluralise } from "../../../client";
 import {
 	acknowledge,

@@ -1,7 +1,7 @@
 import constants from "../../../../constants/constants";
+import { defaultLocale } from "../../../../constants/language";
 import defaults from "../../../../defaults";
 import { MentionTypes, mention, trim } from "../../../../formatting";
-import { defaultLocale } from "../../../../types";
 import { Client, localise } from "../../../client";
 import {
 	ControlButtonID,

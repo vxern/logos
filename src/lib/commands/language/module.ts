@@ -1,5 +1,5 @@
 import constants from "../../../constants/constants";
-import { Language, supportedLanguages } from "../../../types";
+import { Language, supportedLanguages } from "../../../constants/language";
 import { Client } from "../../client";
 import { addParametersToURL } from "../../utils";
 import { SentencePair } from "./commands/game";

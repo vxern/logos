@@ -1,6 +1,6 @@
 import constants from "../../../../../constants/constants";
+import { defaultLocale } from "../../../../../constants/language";
 import { trim } from "../../../../../formatting";
-import { defaultLocale } from "../../../../../types";
 import { Client, localise } from "../../../../client";
 import { acknowledge, createInteractionCollector, editReply, reply } from "../../../../interactions";
 import { OptionTemplate } from "../../../command";

@@ -1,6 +1,6 @@
 import constants from "../../../../../constants/constants";
+import { defaultLocale } from "../../../../../constants/language";
 import { MentionTypes, mention } from "../../../../../formatting";
-import { defaultLocale } from "../../../../../types";
 import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../../client";
 import { parseArguments, reply } from "../../../../interactions";
 import { OptionTemplate } from "../../../command";

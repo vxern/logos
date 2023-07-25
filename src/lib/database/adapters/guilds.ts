@@ -1,4 +1,4 @@
-import { defaultLanguage } from "../../../types";
+import { defaultLanguage } from "../../../constants/language";
 import { CacheAdapter, Database, dispatchQuery, stringifyValue } from "../database";
 import { Document } from "../document";
 import { GuildIndexes, guildIndexParameterToIndex } from "../indexes";

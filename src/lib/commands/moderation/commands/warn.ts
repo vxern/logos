@@ -1,7 +1,7 @@
 import constants from "../../../../constants/constants";
+import { defaultLanguage, defaultLocale, getLanguageByLocale } from "../../../../constants/language";
 import defaults from "../../../../defaults";
 import { MentionTypes, mention } from "../../../../formatting";
-import { defaultLanguage, defaultLocale, getLanguageByLocale } from "../../../../types";
 import { Client, autocompleteMembers, localise, pluralise, resolveInteractionToMember } from "../../../client";
 import { timeStructToMilliseconds } from "../../../database/structs/guild";
 import { parseArguments, reply } from "../../../interactions";

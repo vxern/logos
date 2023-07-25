@@ -1,4 +1,4 @@
-import { Language } from "../../../../../types";
+import { Language } from "../../../../../constants/language";
 import { Client } from "../../../../client";
 import { getPartOfSpeech } from "../../module";
 import { DictionaryAdapter, DictionaryEntry, DictionaryProvisions } from "../adapter";

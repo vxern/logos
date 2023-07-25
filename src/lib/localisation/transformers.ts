@@ -1,4 +1,4 @@
-import { Language } from "../../types";
+import { Language } from "../../constants/language";
 import armenian from "./transformers/armenian";
 import english from "./transformers/english";
 import french from "./transformers/french";

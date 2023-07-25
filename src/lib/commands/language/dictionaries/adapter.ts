@@ -1,4 +1,4 @@
-import { Language } from "../../../../types";
+import { Language } from "../../../../constants/language";
 import { Client } from "../../../client";
 import { PartOfSpeech } from "./parts-of-speech";
 import * as Discord from "discordeno";
