@@ -1,4 +1,4 @@
-import constants from "../../../constants.js";
+import constants from "../../../constants/constants";
 import {
 	CacheAdapter,
 	Database,
@@ -6,10 +6,10 @@ import {
 	getUserMentionByReference,
 	setNested,
 	stringifyValue,
-} from "../database.js";
-import { Document } from "../document.js";
-import { ReportIndexes } from "../indexes.js";
-import { Report } from "../structs/report.js";
+} from "../database";
+import { Document } from "../document";
+import { ReportIndexes } from "../indexes";
+import { Report } from "../structs/report";
 import Fauna from "fauna";
 
 const $ = Fauna.query;

@@ -1,9 +1,9 @@
-import constants from "../../../../../constants.js";
-import { MentionTypes, mention, timestamp } from "../../../../../formatting.js";
-import { Client, localise } from "../../../../client.js";
-import { reply } from "../../../../interactions.js";
-import { getGuildIconURLFormatted, snowflakeToTimestamp } from "../../../../utils.js";
-import { proficiency } from "../../../social/roles/categories/language.js";
+import constants from "../../../../../constants/constants";
+import { MentionTypes, mention, timestamp } from "../../../../../formatting";
+import { Client, localise } from "../../../../client";
+import { reply } from "../../../../interactions";
+import { getGuildIconURLFormatted, snowflakeToTimestamp } from "../../../../utils";
+import { proficiency } from "../../../social/roles/categories/language";
 import * as Discord from "discordeno";
 
 /** Displays information about the guild that this command was executed in. */

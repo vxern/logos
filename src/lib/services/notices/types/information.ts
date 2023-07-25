@@ -1,15 +1,15 @@
-import constants from "../../../../constants.js";
-import { defaultLocale } from "../../../../types.js";
-import { Client, localise } from "../../../client.js";
-import { ruleIds } from "../../../commands/moderation/commands/rule.js";
-import { HashableMessageContent, NoticeService } from "../service.js";
+import constants from "../../../../constants/constants";
+import { defaultLocale } from "../../../../types";
+import { Client, localise } from "../../../client";
+import { ruleIds } from "../../../commands/moderation/commands/rule";
+import { HashableMessageContents, NoticeService } from "../service";
 
 class InformationNoticeService extends NoticeService<"information"> {
 	constructor(client: Client, guildId: bigint) {
 		super(client, guildId, { type: "information" });
 	}
 
-	generateNotice(): HashableMessageContent | undefined {
+	generateNotice(): HashableMessageContents | undefined {
 		const configuration = this.configuration;
 		if (configuration === undefined) {
 			return undefined;

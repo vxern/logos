@@ -1,13 +1,13 @@
-import constants from "../../../../constants.js";
-import defaults from "../../../../defaults.js";
-import { MentionTypes, mention } from "../../../../formatting.js";
-import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../client.js";
-import { timeStructToMilliseconds } from "../../../database/structs/guild.js";
-import { Praise } from "../../../database/structs/praise.js";
-import { editReply, parseArguments, postponeReply, reply } from "../../../interactions.js";
-import { verifyIsWithinLimits } from "../../../utils.js";
-import { CommandTemplate } from "../../command.js";
-import { user } from "../../parameters.js";
+import constants from "../../../../constants/constants";
+import defaults from "../../../../defaults";
+import { MentionTypes, mention } from "../../../../formatting";
+import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../client";
+import { timeStructToMilliseconds } from "../../../database/structs/guild";
+import { Praise } from "../../../database/structs/praise";
+import { editReply, parseArguments, postponeReply, reply } from "../../../interactions";
+import { verifyIsWithinLimits } from "../../../utils";
+import { CommandTemplate } from "../../command";
+import { user } from "../../parameters";
 import * as Discord from "discordeno";
 
 const command: CommandTemplate = {

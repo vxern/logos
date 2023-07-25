@@ -1,8 +1,8 @@
-import { EntryRequest } from "../../database/structs/entry-request.js";
-import { Praise } from "../../database/structs/praise.js";
-import { Report } from "../../database/structs/report.js";
-import { Suggestion } from "../../database/structs/suggestion.js";
-import { Warning } from "../../database/structs/warning.js";
+import { EntryRequest } from "../../database/structs/entry-request";
+import { Praise } from "../../database/structs/praise";
+import { Report } from "../../database/structs/report";
+import { Suggestion } from "../../database/structs/suggestion";
+import { Warning } from "../../database/structs/warning";
 import * as Discord from "discordeno";
 
 /** Type representing events that occur within a guild. */

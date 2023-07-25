@@ -1,7 +1,7 @@
-import { Guild } from "../../database/structs/guild.js";
-import { LocalService } from "../service.js";
-import { Events, MessageGenerators } from "./generator.js";
-import generators from "./generators.js";
+import { Guild } from "../../database/structs/guild";
+import { LocalService } from "../service";
+import { Events, MessageGenerators } from "./generator";
+import generators from "./generators";
 import * as Discord from "discordeno";
 
 const messageGenerators: MessageGenerators<Events> = { ...generators.client, ...generators.guild };

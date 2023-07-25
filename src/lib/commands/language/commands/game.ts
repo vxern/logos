@@ -1,6 +1,6 @@
-import constants from "../../../../constants.js";
-import defaults from "../../../../defaults.js";
-import { Client, localise } from "../../../client.js";
+import constants from "../../../../constants/constants";
+import defaults from "../../../../defaults";
+import { Client, localise } from "../../../client";
 import {
 	acknowledge,
 	createInteractionCollector,
@@ -10,8 +10,8 @@ import {
 	encodeId,
 	postponeReply,
 	reply,
-} from "../../../interactions.js";
-import { CommandTemplate } from "../../command.js";
+} from "../../../interactions";
+import { CommandTemplate } from "../../command";
 import * as Discord from "discordeno";
 
 const command: CommandTemplate = {

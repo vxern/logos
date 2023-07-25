@@ -1,4 +1,4 @@
-import { Client } from "../client.js";
+import { Client } from "../client";
 import * as Discord from "discordeno";
 
 type WithRequired<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>> & Required<Pick<T, K>>;

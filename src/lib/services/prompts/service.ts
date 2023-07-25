@@ -1,12 +1,12 @@
-import constants from "../../../constants.js";
-import { Client } from "../../client.js";
-import { stringifyValue } from "../../database/database.js";
-import { BaseDocumentProperties, Document } from "../../database/document.js";
-import { Guild } from "../../database/structs/guild.js";
-import { User } from "../../database/structs/user.js";
-import { createInteractionCollector, decodeId } from "../../interactions.js";
-import { getAllMessages } from "../../utils.js";
-import { LocalService } from "../service.js";
+import constants from "../../../constants/constants";
+import { Client } from "../../client";
+import { stringifyValue } from "../../database/database";
+import { BaseDocumentProperties, Document } from "../../database/document";
+import { Guild } from "../../database/structs/guild";
+import { User } from "../../database/structs/user";
+import { createInteractionCollector, decodeId } from "../../interactions";
+import { getAllMessages } from "../../utils";
+import { LocalService } from "../service";
 import * as Discord from "discordeno";
 
 type InteractionDataBase = [userId: string, guildId: string, reference: string];
@@ -30,9 +30,9 @@ const configurationLocators: ConfigurationLocators = {
 type CustomIDs = Record<keyof Configurations, string>;
 
 const customIds: CustomIDs = {
-	reports: constants.staticComponentIds.reports,
-	suggestions: constants.staticComponentIds.suggestions,
-	verification: constants.staticComponentIds.verification,
+	reports: constants.components.reports,
+	suggestions: constants.components.suggestions,
+	verification: constants.components.verification,
 };
 
 type PromptTypes = keyof Client["services"]["prompts"];

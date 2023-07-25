@@ -1,4 +1,4 @@
-import { Language } from "../../../../types.js";
+import { Language } from "../../../../types";
 
 type PartOfSpeech =
 	| "noun"

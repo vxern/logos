@@ -1,12 +1,12 @@
-import constants from "../../../constants.js";
-import { Language, supportedLanguages } from "../../../types.js";
-import { Client } from "../../client.js";
-import { addParametersToURL } from "../../utils.js";
-import { SentencePair } from "./commands/game.js";
-import { DictionaryAdapter } from "./dictionaries/adapter.js";
-import dexonline from "./dictionaries/adapters/dexonline.js";
-import wiktionary from "./dictionaries/adapters/wiktionary.js";
-import partsOfSpeech, { PartOfSpeech } from "./dictionaries/parts-of-speech.js";
+import constants from "../../../constants/constants";
+import { Language, supportedLanguages } from "../../../types";
+import { Client } from "../../client";
+import { addParametersToURL } from "../../utils";
+import { SentencePair } from "./commands/game";
+import { DictionaryAdapter } from "./dictionaries/adapter";
+import dexonline from "./dictionaries/adapters/dexonline";
+import wiktionary from "./dictionaries/adapters/wiktionary";
+import partsOfSpeech, { PartOfSpeech } from "./dictionaries/parts-of-speech";
 import * as csv from "csv-parse/sync";
 
 const dictionaryAdapters: DictionaryAdapter[] = [dexonline, wiktionary];

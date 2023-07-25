@@ -1,10 +1,10 @@
-import constants from "../../../../../constants.js";
-import { MentionTypes, mention } from "../../../../../formatting.js";
-import { defaultLocale } from "../../../../../types.js";
-import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../../client.js";
-import { parseArguments, reply } from "../../../../interactions.js";
-import { OptionTemplate } from "../../../command.js";
-import { show, user } from "../../../parameters.js";
+import constants from "../../../../../constants/constants";
+import { MentionTypes, mention } from "../../../../../formatting";
+import { defaultLocale } from "../../../../../types";
+import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../../client";
+import { parseArguments, reply } from "../../../../interactions";
+import { OptionTemplate } from "../../../command";
+import { show, user } from "../../../parameters";
 import * as Discord from "discordeno";
 
 const command: OptionTemplate = {

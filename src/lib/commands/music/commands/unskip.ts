@@ -1,10 +1,10 @@
-import constants from "../../../../constants.js";
-import { defaultLocale } from "../../../../types.js";
-import { Client, localise } from "../../../client.js";
-import { parseArguments, reply } from "../../../interactions.js";
-import { isCollection } from "../../../services/music/music.js";
-import { OptionTemplate } from "../../command.js";
-import { by, collection, to } from "../../parameters.js";
+import constants from "../../../../constants/constants";
+import { defaultLocale } from "../../../../types";
+import { Client, localise } from "../../../client";
+import { parseArguments, reply } from "../../../interactions";
+import { isCollection } from "../../../services/music/music";
+import { OptionTemplate } from "../../command";
+import { by, collection, to } from "../../parameters";
 import * as Discord from "discordeno";
 
 const command: OptionTemplate = {

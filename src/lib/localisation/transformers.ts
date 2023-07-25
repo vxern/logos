@@ -1,12 +1,12 @@
-import { Language } from "../../types.js";
-import armenian from "./transformers/armenian.js";
-import english from "./transformers/english.js";
-import french from "./transformers/french.js";
-import hungarian from "./transformers/hungarian.js";
-import norwegian from "./transformers/norwegian.js";
-import polish from "./transformers/polish.js";
-import romanian from "./transformers/romanian.js";
-import turkish from "./transformers/turkish.js";
+import { Language } from "../../types";
+import armenian from "./transformers/armenian";
+import english from "./transformers/english";
+import french from "./transformers/french";
+import hungarian from "./transformers/hungarian";
+import norwegian from "./transformers/norwegian";
+import polish from "./transformers/polish";
+import romanian from "./transformers/romanian";
+import turkish from "./transformers/turkish";
 
 type TransformerType = "pluralise";
 type Transformer = (matchTerm: string, matches: Record<string, string>) => string | undefined;

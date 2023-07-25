@@ -1,6 +1,6 @@
-import { Client } from "../../../../client.js";
-import { SongListing } from "../types.js";
-import youtube from "./youtube.js";
+import { Client } from "../../../../client";
+import { SongListing } from "../types";
+import youtube from "./youtube";
 import * as Discord from "discordeno";
 
 /** Obtains a song listing from a source. */

@@ -1,8 +1,8 @@
-import { defaultLocale } from "../../../../types.js";
-import { Client, localise } from "../../../client.js";
-import { parseArguments, reply } from "../../../interactions.js";
-import { CommandTemplate } from "../../command.js";
-import { show } from "../../parameters.js";
+import { defaultLocale } from "../../../../types";
+import { Client, localise } from "../../../client";
+import { parseArguments, reply } from "../../../interactions";
+import { CommandTemplate } from "../../command";
+import { show } from "../../parameters";
 import * as Discord from "discordeno";
 
 const command: CommandTemplate = {

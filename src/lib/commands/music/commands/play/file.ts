@@ -1,7 +1,7 @@
-import { Client, localise } from "../../../../client.js";
-import { deleteReply, parseArguments, postponeReply } from "../../../../interactions.js";
-import { SongListing } from "../../data/types.js";
-import { handleRequestPlayback } from "./query.js";
+import { Client, localise } from "../../../../client";
+import { deleteReply, parseArguments, postponeReply } from "../../../../interactions";
+import { SongListing } from "../../data/types";
+import { handleRequestPlayback } from "./query";
 import * as Discord from "discordeno";
 
 async function handleRequestFilePlayback(

@@ -1,8 +1,8 @@
-import constants from "../../../constants.js";
-import defaults from "../../../defaults.js";
-import { MentionTypes, mention } from "../../../formatting.js";
-import { defaultLocale } from "../../../types.js";
-import { Client, localise } from "../../client.js";
+import constants from "../../../constants/constants";
+import defaults from "../../../defaults";
+import { MentionTypes, mention } from "../../../formatting";
+import { defaultLocale } from "../../../types";
+import { Client, localise } from "../../client";
 import {
 	Song,
 	SongCollection,
@@ -10,10 +10,10 @@ import {
 	SongListingType,
 	SongStream,
 	listingTypeToEmoji,
-} from "../../commands/music/data/types.js";
-import { Guild, timeStructToMilliseconds } from "../../database/structs/guild.js";
-import { reply } from "../../interactions.js";
-import { LocalService } from "../service.js";
+} from "../../commands/music/data/types";
+import { Guild, timeStructToMilliseconds } from "../../database/structs/guild";
+import { reply } from "../../interactions";
+import { LocalService } from "../service";
 import * as Discord from "discordeno";
 import { EventEmitter } from "events";
 import * as Lavaclient from "lavaclient";

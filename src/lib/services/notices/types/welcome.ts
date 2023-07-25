@@ -1,8 +1,8 @@
-import constants from "../../../../constants.js";
-import { MentionTypes, mention } from "../../../../formatting.js";
-import { defaultLocale } from "../../../../types.js";
-import { Client, localise } from "../../../client.js";
-import { HashableMessageContent, NoticeService } from "../service.js";
+import constants from "../../../../constants/constants";
+import { MentionTypes, mention } from "../../../../formatting";
+import { defaultLocale } from "../../../../types";
+import { Client, localise } from "../../../client";
+import { HashableMessageContents, NoticeService } from "../service";
 import * as Discord from "discordeno";
 
 class WelcomeNoticeService extends NoticeService<"welcome"> {
@@ -10,7 +10,7 @@ class WelcomeNoticeService extends NoticeService<"welcome"> {
 		super(client, guildId, { type: "welcome" });
 	}
 
-	generateNotice(): HashableMessageContent | undefined {
+	generateNotice(): HashableMessageContents | undefined {
 		const [configuration, guild] = [this.configuration, this.guild];
 		if (configuration === undefined || guild === undefined) {
 			return undefined;
@@ -51,7 +51,7 @@ class WelcomeNoticeService extends NoticeService<"welcome"> {
 							type: Discord.MessageComponentTypes.Button,
 							style: Discord.ButtonStyles.Secondary,
 							label: strings.description.acceptedRules,
-							customId: constants.staticComponentIds.entry.acceptedRules,
+							customId: constants.components.entry.acceptedRules,
 							emoji: { name: constants.symbols.understood },
 						},
 					],

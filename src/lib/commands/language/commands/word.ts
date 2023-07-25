@@ -1,8 +1,8 @@
-import constants from "../../../../constants.js";
-import defaults from "../../../../defaults.js";
-import { code } from "../../../../formatting.js";
-import { defaultLanguage, defaultLocale, getLanguageByLocale } from "../../../../types.js";
-import { Client, localise, pluralise } from "../../../client.js";
+import constants from "../../../../constants/constants";
+import defaults from "../../../../defaults";
+import { code } from "../../../../formatting";
+import { defaultLanguage, defaultLocale, getLanguageByLocale } from "../../../../types";
+import { Client, localise, pluralise } from "../../../client";
 import {
 	acknowledge,
 	createInteractionCollector,
@@ -13,12 +13,12 @@ import {
 	parseArguments,
 	postponeReply,
 	reply,
-} from "../../../interactions.js";
-import { chunk, diagnosticMentionUser } from "../../../utils.js";
-import { CommandTemplate } from "../../command.js";
-import { show } from "../../parameters.js";
-import { Definition, DictionaryEntry, Expression } from "../dictionaries/adapter.js";
-import { PartOfSpeech, isUnknownPartOfSpeech, partOfSpeechToStringKey } from "../dictionaries/parts-of-speech.js";
+} from "../../../interactions";
+import { chunk, diagnosticMentionUser } from "../../../utils";
+import { CommandTemplate } from "../../command";
+import { show } from "../../parameters";
+import { Definition, DictionaryEntry, Expression } from "../dictionaries/adapter";
+import { PartOfSpeech, isUnknownPartOfSpeech, partOfSpeechToStringKey } from "../dictionaries/parts-of-speech";
 import * as Discord from "discordeno";
 
 const command: CommandTemplate = {
@@ -315,7 +315,7 @@ function generateButtons(
 					type: Discord.MessageComponentTypes.Button,
 					label: `${strings.page} ${data.dictionaryEntryIndex + 1}/${data.entries.length}`,
 					style: Discord.ButtonStyles.Secondary,
-					customId: constants.staticComponentIds.none,
+					customId: constants.components.none,
 				},
 				{
 					type: Discord.MessageComponentTypes.Button,

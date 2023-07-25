@@ -1,17 +1,6 @@
-import { Client } from "./client.js";
-import { Document } from "./database/document.js";
+import { Client } from "./client";
+import { Document } from "./database/document";
 import * as Discord from "discordeno";
-
-/**
- * Parses a 6-digit hex value prefixed with a hashtag to a number.
- *
- * @param color - The color represented as a 6-digit hexadecimal value prefixed
- * with a hashtag.
- * @returns The decimal form.
- */
-function fromHex(color: string): number {
-	return parseInt(color.replace("#", "0x"));
-}
 
 type TextChannel = Discord.Channel & { type: Discord.ChannelTypes.GuildText };
 type VoiceChannel = Discord.Channel & { type: Discord.ChannelTypes.GuildVoice };
@@ -194,7 +183,6 @@ export {
 	addParametersToURL,
 	chunk,
 	diagnosticMentionUser,
-	fromHex,
 	getAllMessages,
 	getAuthor,
 	getGuildIconURLFormatted,

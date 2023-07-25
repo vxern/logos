@@ -1,6 +1,7 @@
-import constants, { Periods } from "../constants.js";
-import { defaultLanguage, defaultLocale, getLanguageByLocale } from "../types.js";
-import { Client, addCollector, localise, pluralise } from "./client.js";
+import constants from "../constants/constants";
+import time from "../constants/time";
+import { defaultLanguage, defaultLocale, getLanguageByLocale } from "../types";
+import { Client, addCollector, localise, pluralise } from "./client";
 import * as Discord from "discordeno";
 import { DiscordSnowflake as Snowflake } from "snowflake";
 
@@ -47,7 +48,7 @@ function createInteractionCollector(
 	addCollector([client, bot], "interactionCreate", {
 		filter: (_, interaction) => compileChecks(interaction, settings, customId).every((condition) => condition),
 		limit: settings.limit,
-		removeAfter: settings.doesNotExpire ? undefined : constants.interactionTokenExpiryInterval,
+		removeAfter: settings.doesNotExpire ? undefined : constants.INTERACTION_TOKEN_EXPIRY,
 		onCollect: settings.onCollect ?? (() => {}),
 		onEnd: settings.onEnd ?? (() => {}),
 	});
@@ -454,13 +455,13 @@ function parseConciseTimeExpression(
 
 type TimeUnit = "second" | "minute" | "hour" | "day" | "week" | "month" | "year";
 const timeUnitToPeriod: Required<Record<TimeUnit, number>> = {
-	second: Periods.second,
-	minute: Periods.minute,
-	hour: Periods.hour,
-	day: Periods.day,
-	week: Periods.week,
-	month: Periods.month,
-	year: Periods.year,
+	second: time.second,
+	minute: time.minute,
+	hour: time.hour,
+	day: time.day,
+	week: time.week,
+	month: time.month,
+	year: time.year,
 };
 
 const timeUnitsWithAliasesLocalised = new Map<string, Record<TimeUnit, string[]>>();

@@ -1,6 +1,6 @@
-import { Client } from "../client.js";
-import { diagnosticMentionUser } from "../utils.js";
-import { BaseDocumentProperties, Document } from "./document.js";
+import { Client } from "../client";
+import { diagnosticMentionUser } from "../utils";
+import { BaseDocumentProperties, Document } from "./document";
 import {
 	EntryRequestIndexes,
 	GuildIndexes,
@@ -10,14 +10,14 @@ import {
 	SuggestionIndexes,
 	UserIndexes,
 	WarningIndexes,
-} from "./indexes.js";
-import { EntryRequest } from "./structs/entry-request.js";
-import { Guild } from "./structs/guild.js";
-import { Praise } from "./structs/praise.js";
-import { Report } from "./structs/report.js";
-import { Suggestion } from "./structs/suggestion.js";
-import { User } from "./structs/user.js";
-import { Warning } from "./structs/warning.js";
+} from "./indexes";
+import { EntryRequest } from "./structs/entry-request";
+import { Guild } from "./structs/guild";
+import { Praise } from "./structs/praise";
+import { Report } from "./structs/report";
+import { Suggestion } from "./structs/suggestion";
+import { User } from "./structs/user";
+import { Warning } from "./structs/warning";
 import * as Discord from "discordeno";
 import Fauna from "fauna";
 import * as Sentry from "sentry";

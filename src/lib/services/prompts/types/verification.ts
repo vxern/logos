@@ -1,14 +1,14 @@
-import constants from "../../../../constants.js";
-import { MentionTypes, TimestampFormat, mention, timestamp } from "../../../../formatting.js";
-import { defaultLanguage, defaultLocale } from "../../../../types.js";
-import { Client, localise, pluralise } from "../../../client.js";
-import { stringifyValue } from "../../../database/database.js";
-import { Document } from "../../../database/document.js";
-import { EntryRequest } from "../../../database/structs/entry-request.js";
-import { User } from "../../../database/structs/user.js";
-import { acknowledge, encodeId, reply } from "../../../interactions.js";
-import { diagnosticMentionUser, getGuildIconURLFormatted, snowflakeToTimestamp } from "../../../utils.js";
-import { Configurations, PromptService } from "../service.js";
+import constants from "../../../../constants/constants";
+import { MentionTypes, TimestampFormat, mention, timestamp } from "../../../../formatting";
+import { defaultLanguage, defaultLocale } from "../../../../types";
+import { Client, localise, pluralise } from "../../../client";
+import { stringifyValue } from "../../../database/database";
+import { Document } from "../../../database/document";
+import { EntryRequest } from "../../../database/structs/entry-request";
+import { User } from "../../../database/structs/user";
+import { acknowledge, encodeId, reply } from "../../../interactions";
+import { diagnosticMentionUser, getGuildIconURLFormatted, snowflakeToTimestamp } from "../../../utils";
+import { Configurations, PromptService } from "../service";
 import * as Discord from "discordeno";
 
 type Metadata = { userId: bigint; reference: string };
@@ -191,7 +191,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 							type: Discord.MessageComponentTypes.Button,
 							style: Discord.ButtonStyles.Success,
 							label: voteInformation.acceptance.required === 1 ? strings.accept : strings.acceptMultiple,
-							customId: encodeId<InteractionData>(constants.staticComponentIds.verification, [
+							customId: encodeId<InteractionData>(constants.components.verification, [
 								user.id.toString(),
 								this.guildIdString,
 								reference,
@@ -202,7 +202,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 							type: Discord.MessageComponentTypes.Button,
 							style: Discord.ButtonStyles.Danger,
 							label: voteInformation.rejection.required === 1 ? strings.reject : strings.rejectMultiple,
-							customId: encodeId<InteractionData>(constants.staticComponentIds.verification, [
+							customId: encodeId<InteractionData>(constants.components.verification, [
 								user.id.toString(),
 								this.guildIdString,
 								reference,

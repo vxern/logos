@@ -1,11 +1,11 @@
-import constants from "../../../../constants.js";
-import { defaultLocale } from "../../../../types.js";
-import { Client, localise } from "../../../client.js";
-import { editReply, parseArguments, postponeReply, reply, respond } from "../../../interactions.js";
-import { addParametersToURL, diagnosticMentionUser } from "../../../utils.js";
-import { CommandTemplate } from "../../command.js";
-import { show } from "../../parameters.js";
-import { resolveToSupportedLanguage } from "../module.js";
+import constants from "../../../../constants/constants";
+import { defaultLocale } from "../../../../types";
+import { Client, localise } from "../../../client";
+import { editReply, parseArguments, postponeReply, reply, respond } from "../../../interactions";
+import { addParametersToURL, diagnosticMentionUser } from "../../../utils";
+import { CommandTemplate } from "../../command";
+import { show } from "../../parameters";
+import { resolveToSupportedLanguage } from "../module";
 import * as Discord from "discordeno";
 
 const command: CommandTemplate = {

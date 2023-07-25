@@ -1,8 +1,8 @@
-import { defaultLanguage } from "../../../types.js";
-import { CacheAdapter, Database, dispatchQuery, stringifyValue } from "../database.js";
-import { Document } from "../document.js";
-import { GuildIndexes, guildIndexParameterToIndex } from "../indexes.js";
-import { Guild } from "../structs/guild.js";
+import { defaultLanguage } from "../../../types";
+import { CacheAdapter, Database, dispatchQuery, stringifyValue } from "../database";
+import { Document } from "../document";
+import { GuildIndexes, guildIndexParameterToIndex } from "../indexes";
+import { Guild } from "../structs/guild";
 import Fauna from "fauna";
 
 const $ = Fauna.query;

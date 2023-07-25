@@ -1,8 +1,8 @@
-import { Client } from "../../client.js";
-import { Document } from "../../database/document.js";
-import { Guild } from "../../database/structs/guild.js";
-import { getAllMessages, getGuildIconURLFormatted } from "../../utils.js";
-import { LocalService } from "../service.js";
+import { Client } from "../../client";
+import { Document } from "../../database/document";
+import { Guild } from "../../database/structs/guild";
+import { getAllMessages, getGuildIconURLFormatted } from "../../utils";
+import { LocalService } from "../service";
 import * as Discord from "discordeno";
 import Hash from "object-hash";
 

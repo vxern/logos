@@ -5,10 +5,10 @@ import {
 	getUserMentionByReference,
 	setNested,
 	stringifyValue,
-} from "../database.js";
-import { Document } from "../document.js";
-import { WarningIndexes, warningIndexParameterToIndex } from "../indexes.js";
-import { Warning } from "../structs/warning.js";
+} from "../database";
+import { Document } from "../document";
+import { WarningIndexes, warningIndexParameterToIndex } from "../indexes";
+import { Warning } from "../structs/warning";
 import Fauna from "fauna";
 
 const $ = Fauna.query;

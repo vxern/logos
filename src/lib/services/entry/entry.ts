@@ -1,14 +1,14 @@
-import constants from "../../../constants.js";
-import { trim } from "../../../formatting.js";
-import { Language } from "../../../types.js";
-import { localise } from "../../client.js";
-import { proficiency } from "../../commands/social/roles/categories/language.js";
-import { stringifyValue } from "../../database/database.js";
-import { EntryRequest } from "../../database/structs/entry-request.js";
-import { Guild, timeStructToMilliseconds } from "../../database/structs/guild.js";
-import { Modal, createModalComposer, decodeId, editReply, encodeId, postponeReply, reply } from "../../interactions.js";
-import { snowflakeToTimestamp } from "../../utils.js";
-import { LocalService } from "../service.js";
+import constants from "../../../constants/constants";
+import { trim } from "../../../formatting";
+import { Language } from "../../../types";
+import { localise } from "../../client";
+import { proficiency } from "../../commands/social/roles/categories/language";
+import { stringifyValue } from "../../database/database";
+import { EntryRequest } from "../../database/structs/entry-request";
+import { Guild, timeStructToMilliseconds } from "../../database/structs/guild";
+import { Modal, createModalComposer, decodeId, editReply, encodeId, postponeReply, reply } from "../../interactions";
+import { snowflakeToTimestamp } from "../../utils";
+import { LocalService } from "../service";
 import * as Discord from "discordeno";
 
 type EntryStepButtonID = [parameter: string];
@@ -16,7 +16,7 @@ type EntryStepButtonID = [parameter: string];
 type EntryConfiguration = NonNullable<Guild["features"]["server"]["features"]>["entry"];
 type VerificationConfiguration = NonNullable<Guild["features"]["moderation"]["features"]>["verification"];
 
-const steps = Object.values(constants.staticComponentIds.entry);
+const steps = Object.values(constants.components.entry);
 
 class EntryService extends LocalService {
 	get configuration(): EntryConfiguration | undefined {
@@ -54,15 +54,15 @@ class EntryService extends LocalService {
 
 		const [step, parameter] = decodeId<EntryStepButtonID>(customId);
 		switch (step) {
-			case constants.staticComponentIds.entry.acceptedRules: {
+			case constants.components.entry.acceptedRules: {
 				this.handleAcceptRules(bot, interaction);
 				break;
 			}
-			case constants.staticComponentIds.entry.requestedVerification: {
+			case constants.components.entry.requestedVerification: {
 				this.handleRequestVerification(bot, interaction, parameter);
 				break;
 			}
-			case constants.staticComponentIds.entry.selectedLanguageProficiency: {
+			case constants.components.entry.selectedLanguageProficiency: {
 				this.handleSelectLanguageProficiency(bot, interaction, parameter);
 				break;
 			}
@@ -117,7 +117,7 @@ class EntryService extends LocalService {
 						return {
 							type: Discord.MessageComponentTypes.Button,
 							label: strings.name,
-							customId: encodeId<EntryStepButtonID>(constants.staticComponentIds.entry.selectedLanguageProficiency, [
+							customId: encodeId<EntryStepButtonID>(constants.components.entry.selectedLanguageProficiency, [
 								index.toString(),
 							]),
 							style: Discord.ButtonStyles.Secondary,
@@ -449,7 +449,7 @@ class EntryService extends LocalService {
 									type: Discord.MessageComponentTypes.Button,
 									style: Discord.ButtonStyles.Secondary,
 									label: strings.description.understood,
-									customId: encodeId<EntryStepButtonID>(constants.staticComponentIds.entry.requestedVerification, [
+									customId: encodeId<EntryStepButtonID>(constants.components.entry.requestedVerification, [
 										role.id.toString(),
 									]),
 									emoji: { name: constants.symbols.understood },

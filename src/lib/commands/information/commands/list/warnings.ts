@@ -1,9 +1,9 @@
-import constants from "../../../../../constants.js";
-import { timestamp } from "../../../../../formatting.js";
-import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../../client.js";
-import { Document } from "../../../../database/document.js";
-import { Warning } from "../../../../database/structs/warning.js";
-import { parseArguments, reply } from "../../../../interactions.js";
+import constants from "../../../../../constants/constants";
+import { timestamp } from "../../../../../formatting";
+import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../../client";
+import { Document } from "../../../../database/document";
+import { Warning } from "../../../../database/structs/warning";
+import { parseArguments, reply } from "../../../../interactions";
 import * as Discord from "discordeno";
 
 async function handleDisplayWarningsAutocomplete(

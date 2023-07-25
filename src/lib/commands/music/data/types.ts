@@ -1,4 +1,4 @@
-import constants from "../../../../constants.js";
+import constants from "../../../../constants/constants";
 
 type SongListingType = "song" | "collection" | "file";
 

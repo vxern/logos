@@ -1,10 +1,10 @@
-import constants from "../../../constants.js";
-import defaults from "../../../defaults.js";
-import { list } from "../../../formatting.js";
-import { Client, localise } from "../../client.js";
-import { paginate } from "../../interactions.js";
-import { chunk } from "../../utils.js";
-import { SongListing, listingTypeToEmoji } from "./data/types.js";
+import constants from "../../../constants/constants";
+import defaults from "../../../defaults";
+import { list } from "../../../formatting";
+import { Client, localise } from "../../client";
+import { paginate } from "../../interactions";
+import { chunk } from "../../utils";
+import { SongListing, listingTypeToEmoji } from "./data/types";
 import * as Discord from "discordeno";
 
 async function displayListings(

@@ -1,7 +1,7 @@
-import defaults from "../../../defaults.js";
-import { DynamicVoiceChannel, Guild } from "../../database/structs/guild.js";
-import { isVoice } from "../../utils.js";
-import { LocalService } from "../service.js";
+import defaults from "../../../defaults";
+import { DynamicVoiceChannel, Guild } from "../../database/structs/guild";
+import { isVoice } from "../../utils";
+import { LocalService } from "../service";
 import * as Discord from "discordeno";
 
 type Configuration = NonNullable<Guild["features"]["server"]["features"]>["dynamicVoiceChannels"];

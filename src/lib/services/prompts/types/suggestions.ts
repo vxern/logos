@@ -1,14 +1,14 @@
-import constants from "../../../../constants.js";
-import { MentionTypes, mention, timestamp } from "../../../../formatting.js";
-import { defaultLocale } from "../../../../types.js";
-import { Client, localise } from "../../../client.js";
-import { stringifyValue } from "../../../database/database.js";
-import { Document } from "../../../database/document.js";
-import { Suggestion } from "../../../database/structs/suggestion.js";
-import { User } from "../../../database/structs/user.js";
-import { encodeId, reply } from "../../../interactions.js";
-import { getGuildIconURLFormatted } from "../../../utils.js";
-import { PromptService } from "../service.js";
+import constants from "../../../../constants/constants";
+import { MentionTypes, mention, timestamp } from "../../../../formatting";
+import { defaultLocale } from "../../../../types";
+import { Client, localise } from "../../../client";
+import { stringifyValue } from "../../../database/database";
+import { Document } from "../../../database/document";
+import { Suggestion } from "../../../database/structs/suggestion";
+import { User } from "../../../database/structs/user";
+import { encodeId, reply } from "../../../interactions";
+import { getGuildIconURLFormatted } from "../../../utils";
+import { PromptService } from "../service";
 import * as Discord from "discordeno";
 
 type Metadata = { userId: bigint; reference: string };
@@ -119,7 +119,7 @@ class SuggestionService extends PromptService<"suggestions", Suggestion, Metadat
 									type: Discord.MessageComponentTypes.Button,
 									style: Discord.ButtonStyles.Secondary,
 									label: strings.markUnresolved,
-									customId: encodeId<InteractionData>(constants.staticComponentIds.suggestions, [
+									customId: encodeId<InteractionData>(constants.components.suggestions, [
 										user.id.toString(),
 										this.guildIdString,
 										reference,
@@ -130,7 +130,7 @@ class SuggestionService extends PromptService<"suggestions", Suggestion, Metadat
 									type: Discord.MessageComponentTypes.Button,
 									style: Discord.ButtonStyles.Primary,
 									label: strings.markResolved,
-									customId: encodeId<InteractionData>(constants.staticComponentIds.suggestions, [
+									customId: encodeId<InteractionData>(constants.components.suggestions, [
 										user.id.toString(),
 										this.guildIdString,
 										reference,

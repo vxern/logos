@@ -1,4 +1,4 @@
-import information from "./commands/information.js";
-import list from "./commands/list.js";
+import information from "./commands/information";
+import list from "./commands/list";
 
 export { information, list };

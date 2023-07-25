@@ -1,7 +1,7 @@
-import { CacheAdapter, Database, dispatchQuery, setNested, stringifyValue } from "../database.js";
-import { Document } from "../document.js";
-import { PraiseIndexes, praiseIndexParameterToIndex } from "../indexes.js";
-import { Praise } from "../structs/praise.js";
+import { CacheAdapter, Database, dispatchQuery, setNested, stringifyValue } from "../database";
+import { Document } from "../document";
+import { PraiseIndexes, praiseIndexParameterToIndex } from "../indexes";
+import { Praise } from "../structs/praise";
 import Fauna from "fauna";
 
 const $ = Fauna.query;

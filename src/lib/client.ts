@@ -1,38 +1,39 @@
-import constants, { Periods } from "../constants.js";
-import defaults from "../defaults.js";
-import { timestamp } from "../formatting.js";
-import { Language, defaultLanguage, getLanguageByLocale, getLocaleForLanguage } from "../types.js";
-import { Command, CommandTemplate, InteractionHandler, LocalisationProperties, Option } from "./commands/command.js";
-import commandsRaw from "./commands/commands.js";
-import { SentencePair } from "./commands/language/commands/game.js";
-import { DictionaryAdapter } from "./commands/language/dictionaries/adapter.js";
-import { SupportedLanguage } from "./commands/language/module.js";
-import entryRequests from "./database/adapters/entry-requests.js";
-import guilds from "./database/adapters/guilds.js";
-import praises from "./database/adapters/praises.js";
-import reports from "./database/adapters/reports.js";
-import suggestions from "./database/adapters/suggestions.js";
-import users from "./database/adapters/users.js";
-import warnings from "./database/adapters/warnings.js";
-import { Database } from "./database/database.js";
-import { timeStructToMilliseconds } from "./database/structs/guild.js";
-import { acknowledge, deleteReply, isAutocomplete, reply, respond } from "./interactions.js";
-import transformers from "./localisation/transformers.js";
-import { AlertService } from "./services/alert/alert.js";
-import { DynamicVoiceChannelService } from "./services/dynamic-voice-channels/dynamic-voice-channels.js";
-import { EntryService } from "./services/entry/entry.js";
-import { JournallingService } from "./services/journalling/journalling.js";
-import { LavalinkService } from "./services/music/lavalink.js";
-import { MusicService } from "./services/music/music.js";
-import { InformationNoticeService } from "./services/notices/types/information.js";
-import { RoleNoticeService } from "./services/notices/types/roles.js";
-import { WelcomeNoticeService } from "./services/notices/types/welcome.js";
-import { ReportService } from "./services/prompts/types/reports.js";
-import { SuggestionService } from "./services/prompts/types/suggestions.js";
-import { VerificationService } from "./services/prompts/types/verification.js";
-import { Service } from "./services/service.js";
-import { StatusService } from "./services/status/service.js";
-import { diagnosticMentionUser, fetchMembers } from "./utils.js";
+import constants from "../constants/constants";
+import time from "../constants/time";
+import defaults from "../defaults";
+import { timestamp } from "../formatting";
+import { Language, defaultLanguage, getLanguageByLocale, getLocaleForLanguage } from "../types";
+import { Command, CommandTemplate, InteractionHandler, LocalisationProperties, Option } from "./commands/command";
+import commandsRaw from "./commands/commands";
+import { SentencePair } from "./commands/language/commands/game";
+import { DictionaryAdapter } from "./commands/language/dictionaries/adapter";
+import { SupportedLanguage } from "./commands/language/module";
+import entryRequests from "./database/adapters/entry-requests";
+import guilds from "./database/adapters/guilds";
+import praises from "./database/adapters/praises";
+import reports from "./database/adapters/reports";
+import suggestions from "./database/adapters/suggestions";
+import users from "./database/adapters/users";
+import warnings from "./database/adapters/warnings";
+import { Database } from "./database/database";
+import { timeStructToMilliseconds } from "./database/structs/guild";
+import { acknowledge, deleteReply, isAutocomplete, reply, respond } from "./interactions";
+import transformers from "./localisation/transformers";
+import { AlertService } from "./services/alert/alert";
+import { DynamicVoiceChannelService } from "./services/dynamic-voice-channels/dynamic-voice-channels";
+import { EntryService } from "./services/entry/entry";
+import { JournallingService } from "./services/journalling/journalling";
+import { LavalinkService } from "./services/music/lavalink";
+import { MusicService } from "./services/music/music";
+import { InformationNoticeService } from "./services/notices/types/information";
+import { RoleNoticeService } from "./services/notices/types/roles";
+import { WelcomeNoticeService } from "./services/notices/types/welcome";
+import { ReportService } from "./services/prompts/types/reports";
+import { SuggestionService } from "./services/prompts/types/suggestions";
+import { VerificationService } from "./services/prompts/types/verification";
+import { Service } from "./services/service";
+import { StatusService } from "./services/status/service";
+import { diagnosticMentionUser, fetchMembers } from "./utils";
 import * as Discord from "discordeno";
 import FancyLog from "fancy-log";
 import Fauna from "fauna";
@@ -598,7 +599,7 @@ async function handleInteractionCreate(
 	bot: Discord.Bot,
 	interaction: Discord.Interaction,
 ): Promise<void> {
-	if (interaction.data?.customId === constants.staticComponentIds.none) {
+	if (interaction.data?.customId === constants.components.none) {
 		acknowledge([client, bot], interaction);
 		return;
 	}
@@ -780,7 +781,7 @@ function withRateLimiting(handle: InteractionHandler): InteractionHandler {
 				},
 			};
 
-			setTimeout(() => deleteReply([client, bot], interaction), nextValidUsageTimestamp - now - Periods.second);
+			setTimeout(() => deleteReply([client, bot], interaction), nextValidUsageTimestamp - now - time.second);
 
 			reply([client, bot], interaction, {
 				embeds: [

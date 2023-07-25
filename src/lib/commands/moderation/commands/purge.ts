@@ -1,7 +1,8 @@
-import constants, { Periods } from "../../../../constants.js";
-import defaults from "../../../../defaults.js";
-import { MentionTypes, mention, timestamp, trim } from "../../../../formatting.js";
-import { defaultLanguage, getLanguageByLocale } from "../../../../types.js";
+import constants from "../../../../constants/constants";
+import time from "../../../../constants/time";
+import defaults from "../../../../defaults";
+import { MentionTypes, mention, timestamp, trim } from "../../../../formatting";
+import { defaultLanguage, getLanguageByLocale } from "../../../../types";
 import {
 	Client,
 	autocompleteMembers,
@@ -9,7 +10,7 @@ import {
 	localise,
 	pluralise,
 	resolveInteractionToMember,
-} from "../../../client.js";
+} from "../../../client";
 import {
 	acknowledge,
 	createInteractionCollector,
@@ -17,10 +18,10 @@ import {
 	editReply,
 	parseArguments,
 	postponeReply,
-} from "../../../interactions.js";
-import { chunk, diagnosticMentionUser, snowflakeToTimestamp } from "../../../utils.js";
-import { CommandTemplate } from "../../command.js";
-import { user } from "../../parameters.js";
+} from "../../../interactions";
+import { chunk, diagnosticMentionUser, snowflakeToTimestamp } from "../../../utils";
+import { CommandTemplate } from "../../command";
+import { user } from "../../parameters";
 import * as Discord from "discordeno";
 
 const command: CommandTemplate = {
@@ -609,7 +610,7 @@ async function handlePurgeMessages(
 		journallingService?.log(bot, "purgeBegin", { args: [member, channel, messages.length] });
 	}
 
-	const twoWeeksAgo = now - Periods.week * 2 + Periods.hour;
+	const twoWeeksAgo = now - time.week * 2 + time.hour;
 
 	const firstBulkDeletableIndex = messages.findIndex((message) => message.timestamp > twoWeeksAgo);
 	const bulkDeletable = firstBulkDeletableIndex !== -1 ? messages.slice(firstBulkDeletableIndex, messages.length) : [];
@@ -623,7 +624,7 @@ async function handlePurgeMessages(
 	const responseDeletionTimeoutId = setTimeout(async () => {
 		responseDeleted = true;
 		deleteReply([client, bot], interaction);
-	}, Periods.minute * 1);
+	}, time.minute * 1);
 
 	let deletedCount = 0;
 

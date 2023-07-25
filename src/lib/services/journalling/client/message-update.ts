@@ -1,4 +1,4 @@
-import constants from "../../../../constants";
+import constants from "../../../../constants/constants";
 import { MentionTypes, codeMultiline, mention } from "../../../../formatting";
 import { diagnosticMentionUser } from "../../../utils";
 import { ClientEvents, MessageGenerators } from "../generator";

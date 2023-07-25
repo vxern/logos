@@ -1,8 +1,8 @@
-import constants from "../../../constants.js";
-import { CacheAdapter, Database, dispatchQuery, getUserMentionByReference, stringifyValue } from "../database.js";
-import { Document } from "../document.js";
-import { EntryRequestIndexes } from "../indexes.js";
-import { EntryRequest } from "../structs/entry-request.js";
+import constants from "../../../constants/constants";
+import { CacheAdapter, Database, dispatchQuery, getUserMentionByReference, stringifyValue } from "../database";
+import { Document } from "../document";
+import { EntryRequestIndexes } from "../indexes";
+import { EntryRequest } from "../structs/entry-request";
 import Fauna from "fauna";
 
 const $ = Fauna.query;

@@ -1,4 +1,4 @@
-import constants from "../../../../constants";
+import constants from "../../../../constants/constants";
 import { codeMultiline } from "../../../../formatting";
 import { defaultLocale } from "../../../../types";
 import { localise } from "../../../client";
