@@ -29,6 +29,8 @@ const MAX_QUEUE_ENTRIES = 20;
 const MIN_VOICE_CHANNELS = 0;
 const MAX_VOICE_CHANNELS = 5;
 
+const WARN_MESSAGE_DELETE_TIMEOUT = 1000 * 10; // 10 seconds in milliseconds.
+
 export default {
 	RESULTS_PER_PAGE,
 	RATE_LIMIT,
@@ -50,4 +52,5 @@ export default {
 	MAX_QUEUE_ENTRIES,
 	MIN_VOICE_CHANNELS,
 	MAX_VOICE_CHANNELS,
+	WARN_MESSAGE_DELETE_TIMEOUT,
 };

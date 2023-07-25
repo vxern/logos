@@ -1,4 +1,5 @@
 import constants from "../../../../constants.js";
+import defaults from "../../../../defaults.js";
 import { code } from "../../../../formatting.js";
 import { defaultLanguage, defaultLocale, getLanguageByLocale } from "../../../../types.js";
 import { Client, localise, pluralise } from "../../../client.js";
@@ -6,6 +7,7 @@ import {
 	acknowledge,
 	createInteractionCollector,
 	decodeId,
+	deleteReply,
 	editReply,
 	encodeId,
 	parseArguments,
@@ -154,7 +156,7 @@ async function handleFindWord([client, bot]: [Client, Discord.Bot], interaction:
 			}),
 		};
 
-		editReply([client, bot], interaction, {
+		await editReply([client, bot], interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -163,6 +165,15 @@ async function handleFindWord([client, bot]: [Client, Discord.Bot], interaction:
 				},
 			],
 		});
+
+		setTimeout(
+			() =>
+				deleteReply([client, bot], interaction).catch(() => {
+					console.warn("Failed to delete no results for word message.");
+				}),
+			defaults.WARN_MESSAGE_DELETE_TIMEOUT,
+		);
+
 		return;
 	}
 
