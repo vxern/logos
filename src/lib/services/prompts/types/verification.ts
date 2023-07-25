@@ -179,7 +179,10 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 					],
 					footer: {
 						text: guild.name,
-						iconUrl: `${getGuildIconURLFormatted(bot, guild)}&metadata=${`${user.id}`}`,
+						iconUrl: `${getGuildIconURLFormatted(
+							bot,
+							guild,
+						)}&metadata=${`${user.id}${constants.symbols.meta.metadataSeparator}${reference}`}`,
 					},
 				},
 			],
