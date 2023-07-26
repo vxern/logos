@@ -755,25 +755,25 @@ class MusicService extends LocalService {
 					session.listings.current.content.position = to - 2;
 				}
 			}
-		}
+		} else {
+			const listingsToMoveToHistory = Math.min(by ?? to ?? 0, session.listings.queue.length);
 
-		const listingsToMoveToHistory = Math.min(by ?? to ?? 0, session.listings.queue.length);
-
-		if (session.listings.current !== undefined) {
-			session.listings.history.push(session.listings.current);
-			session.events.emit("queueUpdate");
-			session.listings.current = undefined;
-		}
-
-		for (const _ of Array(listingsToMoveToHistory).keys()) {
-			const listing = session.listings.queue.shift();
-			if (listing !== undefined) {
-				this.moveListingToHistory(listing);
+			if (session.listings.current !== undefined) {
+				session.listings.history.push(session.listings.current);
+				session.events.emit("queueUpdate");
+				session.listings.current = undefined;
 			}
-		}
 
-		if (listingsToMoveToHistory !== 0) {
-			session.events.emit("queueUpdate");
+			for (const _ of Array(listingsToMoveToHistory).keys()) {
+				const listing = session.listings.queue.shift();
+				if (listing !== undefined) {
+					this.moveListingToHistory(listing);
+				}
+			}
+
+			if (listingsToMoveToHistory !== 0) {
+				session.events.emit("queueUpdate");
+			}
 		}
 
 		await session.player.stop();
