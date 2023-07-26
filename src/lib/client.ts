@@ -593,6 +593,8 @@ async function handleGuildCreate(client: Client, bot: Discord.Bot, guild: Discor
 	}
 
 	client.services.local.set(guild.id, services);
+
+	global.gc?.();
 }
 
 async function handleInteractionCreate(

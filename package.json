@@ -3,7 +3,7 @@
   "name": "logos",
   "description": "A multi-purpose community bot built to cater to language-learning communities on Discord.",
   "license": "ISC",
-  "version": "3.0.0-alpha.rc22",
+  "version": "3.0.0-alpha.rc23",
   "type": "module",
   "keywords": [
     "javascript",
@@ -33,7 +33,7 @@
     }
   ],
   "scripts": {
-    "start": "tsx src/index.ts",
+    "start": "tsx --expose-gc src/index.ts",
     "lint": "rome check src/"
   },
   "dependencies": {
