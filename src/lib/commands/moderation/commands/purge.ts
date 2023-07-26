@@ -3,6 +3,7 @@ import { defaultLanguage, getLanguageByLocale } from "../../../../constants/lang
 import time from "../../../../constants/time";
 import defaults from "../../../../defaults";
 import { MentionTypes, mention, timestamp, trim } from "../../../../formatting";
+import * as Logos from "../../../../types";
 import {
 	Client,
 	autocompleteMembers,
@@ -174,7 +175,7 @@ async function handlePurgeMessages(
 		getMessageContent(client, endMessage, interaction.locale),
 	];
 
-	let messages: Discord.Message[] = [];
+	let messages: Logos.Message[] = [];
 
 	const getMessageFields = (): NonNullable<Discord.Embed["fields"]> => {
 		const strings = {
@@ -786,7 +787,7 @@ async function displayFailedError(
 	});
 }
 
-function getMessageContent(client: Client, message: Discord.Message, locale: string | undefined): string | undefined {
+function getMessageContent(client: Client, message: Logos.Message, locale: string | undefined): string | undefined {
 	if (message.content.trim().length === 0 && message.embeds.length !== 0) {
 		return undefined;
 	}

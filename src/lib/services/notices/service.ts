@@ -1,3 +1,4 @@
+import * as Logos from "../../../types";
 import { Client } from "../../client";
 import { Document } from "../../database/document";
 import { Guild } from "../../database/structs/guild";
@@ -197,7 +198,7 @@ abstract class NoticeService<NoticeType extends NoticeTypes> extends LocalServic
 		bot: Discord.Bot,
 		contents: HashableMessageContents,
 		hash: string,
-	): Promise<Discord.Message | undefined> {
+	): Promise<Logos.Message | undefined> {
 		const [channelId, guild] = [this.channelId, this.guild];
 		if (channelId === undefined || guild === undefined) {
 			return undefined;
@@ -210,10 +211,12 @@ abstract class NoticeService<NoticeType extends NoticeTypes> extends LocalServic
 
 		lastEmbed.footer = { text: guild.name, iconUrl: `${getGuildIconURLFormatted(bot, guild)}&hash=${hash}` };
 
-		const message = await Discord.sendMessage(bot, channelId, contents).catch(() => {
-			this.client.log.warn(`Failed to send message in channel with ID ${channelId}.`);
-			return undefined;
-		});
+		const message = await Discord.sendMessage(bot, channelId, contents)
+			.then((message) => Logos.slimMessage(message))
+			.catch(() => {
+				this.client.log.warn(`Failed to send message in channel with ID ${channelId}.`);
+				return undefined;
+			});
 
 		return message;
 	}

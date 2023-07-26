@@ -1,14 +1,15 @@
+import * as Logos from "../types";
 import { Client } from "./client";
 import { Document } from "./database/document";
 import * as Discord from "discordeno";
 
-type TextChannel = Discord.Channel & { type: Discord.ChannelTypes.GuildText };
-type VoiceChannel = Discord.Channel & { type: Discord.ChannelTypes.GuildVoice };
+type TextChannel = Logos.Channel & { type: Discord.ChannelTypes.GuildText };
+type VoiceChannel = Logos.Channel & { type: Discord.ChannelTypes.GuildVoice };
 
-function isText(channel: Discord.Channel): channel is TextChannel {
+function isText(channel: Logos.Channel): channel is TextChannel {
 	return channel.type === Discord.ChannelTypes.GuildText;
 }
-function isVoice(channel: Discord.Channel): channel is VoiceChannel {
+function isVoice(channel: Logos.Channel): channel is VoiceChannel {
 	return channel.type === Discord.ChannelTypes.GuildVoice;
 }
 
@@ -18,7 +19,7 @@ function isVoice(channel: Discord.Channel): channel is VoiceChannel {
  * @param user - The user object.
  * @returns The mention.
  */
-function diagnosticMentionUser({ username, discriminator, id }: Discord.User): string {
+function diagnosticMentionUser({ username, discriminator, id }: Logos.User): string {
 	const tag = discriminator === "0" ? username : `${username}#${discriminator}`;
 
 	return `${tag} (${id})`;
@@ -56,7 +57,7 @@ function snowflakeToTimestamp(snowflake: bigint): number {
 	return Number((snowflake >> snowflakeBitsToDiscard) + beginningOfDiscordEpoch);
 }
 
-function getGuildIconURLFormatted(bot: Discord.Bot, guild: Discord.Guild): string | undefined {
+function getGuildIconURLFormatted(bot: Discord.Bot, guild: Logos.Guild): string | undefined {
 	const iconURL = Discord.getGuildIconURL(bot, guild.id, guild.icon, {
 		size: 4096,
 		format: "png",
@@ -67,7 +68,7 @@ function getGuildIconURLFormatted(bot: Discord.Bot, guild: Discord.Guild): strin
 
 type Author = NonNullable<Discord.Embed["author"]>;
 
-function getAuthor(bot: Discord.Bot, guild: Discord.Guild): Author | undefined {
+function getAuthor(bot: Discord.Bot, guild: Logos.Guild): Author | undefined {
 	const iconURL = getGuildIconURLFormatted(bot, guild);
 	if (iconURL === undefined) {
 		return undefined;
@@ -105,25 +106,27 @@ function addParametersToURL(url: string, parameters: Record<string, string>): st
 async function getAllMessages(
 	[client, bot]: [Client, Discord.Bot],
 	channelId: bigint,
-): Promise<Discord.Message[] | undefined> {
-	const messages: Discord.Message[] = [];
+): Promise<Logos.Message[] | undefined> {
+	const messages: Logos.Message[] = [];
 	let isFinished = false;
 
 	while (!isFinished) {
-		const buffer = await Discord.getMessages(bot, channelId, {
+		const bufferUnoptimised = await Discord.getMessages(bot, channelId, {
 			limit: 100,
 			before: messages.length === 0 ? undefined : messages.at(-1)?.id,
 		}).catch(() => {
 			client.log.warn(`Failed to get all messages from channel with ID ${channelId}.`);
 			return undefined;
 		});
-		if (buffer === undefined) {
+		if (bufferUnoptimised === undefined) {
 			return undefined;
 		}
 
-		if (buffer.size < 100) {
+		if (bufferUnoptimised.size < 100) {
 			isFinished = true;
 		}
+
+		const buffer = bufferUnoptimised?.map((message) => Logos.slimMessage(message));
 
 		messages.push(...buffer.values());
 	}

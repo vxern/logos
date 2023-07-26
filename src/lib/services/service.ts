@@ -1,3 +1,4 @@
+import * as Logos from "../../types";
 import { Client } from "../client";
 import { Document } from "../database/document";
 import { Guild } from "../database/structs/guild";
@@ -83,7 +84,7 @@ abstract class LocalService extends Service {
 	protected readonly guildId: bigint;
 	protected readonly guildIdString: string;
 
-	get guild(): Discord.Guild | undefined {
+	get guild(): Logos.Guild | undefined {
 		return this.client.cache.guilds.get(this.guildId);
 	}
 

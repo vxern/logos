@@ -3,6 +3,7 @@ import { Language, defaultLanguage, getLanguageByLocale, getLocaleForLanguage } 
 import time from "../constants/time";
 import defaults from "../defaults";
 import { timestamp } from "../formatting";
+import * as Logos from "../types";
 import { Command, CommandTemplate, InteractionHandler, LocalisationProperties, Option } from "./commands/command";
 import commandsRaw from "./commands/commands";
 import { SentencePair } from "./commands/language/commands/game";
@@ -66,13 +67,13 @@ type Client = {
 	};
 	log: Record<"debug" | keyof typeof FancyLog, (...args: unknown[]) => void>;
 	cache: {
-		guilds: Map<bigint, Discord.Guild>;
-		users: Map<bigint, Discord.User>;
-		members: Map<bigint, Discord.Member>;
-		channels: Map<bigint, Discord.Channel>;
+		guilds: Map<bigint, Logos.Guild>;
+		users: Map<bigint, Logos.User>;
+		members: Map<bigint, Logos.Member>;
+		channels: Map<bigint, Logos.Channel>;
 		messages: {
-			latest: Map<bigint, Discord.Message>;
-			previous: Map<bigint, Discord.Message>;
+			latest: Map<bigint, Logos.Message>;
+			previous: Map<bigint, Logos.Message>;
 		};
 	};
 	database: Database;
@@ -646,10 +647,11 @@ async function handleInteractionCreate(
 }
 
 function withCaching(client: Client, transformers: Discord.Transformers): Discord.Transformers {
-	const { guild, user, member, channel, message, role, voiceState } = transformers;
+	const { guild, channel, user, member, message, role, voiceState } = transformers;
 
 	transformers.guild = (bot, payload) => {
-		const result = guild(bot, payload);
+		const resultUnoptimised = guild(bot, payload);
+		const result = Logos.slimGuild(resultUnoptimised);
 
 		for (const channel of payload.guild.channels ?? []) {
 			bot.transformers.channel(bot, { channel, guildId: result.id });
@@ -657,19 +659,32 @@ function withCaching(client: Client, transformers: Discord.Transformers): Discor
 
 		client.cache.guilds.set(result.id, result);
 
-		return result;
+		return resultUnoptimised;
+	};
+
+	transformers.channel = (...args) => {
+		const resultUnoptimised = channel(...args);
+		const result = Logos.slimChannel(resultUnoptimised);
+
+		client.cache.channels.set(result.id, result);
+
+		client.cache.guilds.get(result.guildId)?.channels.set(result.id, result);
+
+		return resultUnoptimised;
 	};
 
 	transformers.user = (...args) => {
-		const result = user(...args);
+		const resultUnoptimised = user(...args);
+		const result = Logos.slimUser(resultUnoptimised);
 
 		client.cache.users.set(result.id, result);
 
-		return result;
+		return resultUnoptimised;
 	};
 
 	transformers.member = (bot, payload, ...args) => {
-		const result = member(bot, payload, ...args);
+		const resultUnoptimised = member(bot, payload, ...args);
+		const result = Logos.slimMember(resultUnoptimised);
 
 		const memberSnowflake = bot.transformers.snowflake(`${result.id}${result.guildId}`);
 
@@ -677,21 +692,12 @@ function withCaching(client: Client, transformers: Discord.Transformers): Discor
 
 		client.cache.guilds.get(result.guildId)?.members.set(result.id, result);
 
-		return result;
-	};
-
-	transformers.channel = (...args) => {
-		const result = channel(...args);
-
-		client.cache.channels.set(result.id, result);
-
-		client.cache.guilds.get(result.guildId)?.channels.set(result.id, result);
-
-		return result;
+		return resultUnoptimised;
 	};
 
 	transformers.message = (bot, payload) => {
-		const result = message(bot, payload);
+		const resultUnoptimised = message(bot, payload);
+		const result = Logos.slimMessage(resultUnoptimised);
 
 		const previousMessage = client.cache.messages.latest.get(result.id);
 		if (previousMessage !== undefined) {
@@ -714,23 +720,25 @@ function withCaching(client: Client, transformers: Discord.Transformers): Discor
 			client.cache.members.set(memberSnowflake, member);
 		}
 
-		return result;
+		return resultUnoptimised;
 	};
 
 	transformers.role = (bot, payload) => {
-		const result = role(bot, payload);
+		const resultUnoptimised = role(bot, payload);
+		const result = Logos.slimRole(resultUnoptimised);
 
 		client.cache.guilds.get(result.guildId)?.roles.set(result.id, result);
 
-		return result;
+		return resultUnoptimised;
 	};
 
 	transformers.voiceState = (bot, payload) => {
-		const result = voiceState(bot, payload);
+		const resultUnoptimised = voiceState(bot, payload);
+		const result = Logos.slimVoiceState(resultUnoptimised);
 
 		client.cache.guilds.get(result.guildId)?.voiceStates.set(result.userId, result);
 
-		return result;
+		return resultUnoptimised;
 	};
 
 	return transformers;
@@ -1027,7 +1035,7 @@ function resolveIdentifierToMembers(
 	userId: bigint,
 	identifier: string,
 	options: Partial<MemberNarrowingOptions> = {},
-): [members: Discord.Member[], isResolved: boolean] | undefined {
+): [members: Logos.Member[], isResolved: boolean] | undefined {
 	const asker = client.cache.members.get(Discord.snowflakeToBigint(`${userId}${guildId}`));
 	if (asker === undefined) {
 		return undefined;
@@ -1070,7 +1078,7 @@ function resolveIdentifierToMembers(
 
 	const cachedMembers = options.restrictToSelf ? [asker] : guild.members.array();
 	const members = cachedMembers.filter(
-		(member: Discord.Member) =>
+		(member) =>
 			(options.restrictToNonSelf ? member.user?.id !== asker.user?.id : true) &&
 			(options.excludeModerators ? !moderatorRoleIds.some((roleId) => member.roles.includes(roleId)) : true),
 	);
@@ -1121,7 +1129,7 @@ async function autocompleteMembers(
 
 	const [matchedMembers, _] = result;
 
-	const users: Discord.User[] = [];
+	const users: Logos.User[] = [];
 	for (const member of matchedMembers) {
 		if (users.length === 20) {
 			break;
@@ -1147,7 +1155,7 @@ function resolveInteractionToMember(
 	interaction: Discord.Interaction,
 	identifier: string,
 	options?: Partial<MemberNarrowingOptions>,
-): Discord.Member | undefined {
+): Logos.Member | undefined {
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
 		return undefined;

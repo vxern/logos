@@ -1,6 +1,7 @@
 import constants from "../../../../constants/constants";
 import { defaultLocale } from "../../../../constants/language";
 import { MentionTypes, mention, timestamp } from "../../../../formatting";
+import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
 import { stringifyValue } from "../../../database/database";
 import { Document } from "../../../database/document";
@@ -51,11 +52,7 @@ class ReportService extends PromptService<"reports", Report, Metadata, Interacti
 		return { userId: BigInt(userId), reference };
 	}
 
-	getPromptContent(
-		bot: Discord.Bot,
-		user: Discord.User,
-		document: Document<Report>,
-	): Discord.CreateMessage | undefined {
+	getPromptContent(bot: Discord.Bot, user: Logos.User, document: Document<Report>): Discord.CreateMessage | undefined {
 		const guild = this.guild;
 		if (guild === undefined) {
 			return;

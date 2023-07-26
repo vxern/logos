@@ -1,6 +1,7 @@
 import constants from "../../../../constants/constants";
 import defaults from "../../../../defaults";
 import { MentionTypes, mention } from "../../../../formatting";
+import * as Logos from "../../../../types";
 import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../client";
 import { stringifyValue } from "../../../database/database";
 import { Document } from "../../../database/document";
@@ -192,7 +193,7 @@ async function handlePardonUser([client, bot]: [Client, Discord.Bot], interactio
 
 async function getRelevantWarnings(
 	client: Client,
-	member: Discord.Member,
+	member: Logos.Member,
 	expirationMilliseconds: number,
 ): Promise<Document<Warning>[] | undefined> {
 	const subject = await client.database.adapters.users.getOrFetchOrCreate(

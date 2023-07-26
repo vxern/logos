@@ -1,6 +1,7 @@
 import constants from "../../../constants/constants";
 import { Language } from "../../../constants/language";
 import { trim } from "../../../formatting";
+import * as Logos from "../../../types";
 import { localise } from "../../client";
 import { proficiency } from "../../commands/social/roles/categories/language";
 import { stringifyValue } from "../../database/database";
@@ -590,7 +591,7 @@ class EntryService extends LocalService {
 		return true;
 	}
 
-	requiresVerification(user: Discord.User): boolean | undefined {
+	requiresVerification(user: Logos.User): boolean | undefined {
 		const verificationConfiguration = this.verificationConfiguration;
 		if (verificationConfiguration === undefined) {
 			return undefined;

@@ -1,4 +1,5 @@
 import defaults from "../../../defaults";
+import * as Logos from "../../../types";
 import { DynamicVoiceChannel, Guild } from "../../database/structs/guild";
 import { isVoice } from "../../utils";
 import { LocalService } from "../service";
@@ -6,15 +7,15 @@ import * as Discord from "discordeno";
 
 type Configuration = NonNullable<Guild["features"]["server"]["features"]>["dynamicVoiceChannels"];
 
-type WithVoiceStates<T> = T & { voiceStates: Discord.VoiceState[] };
+type WithVoiceStates<T> = T & { voiceStates: Logos.VoiceState[] };
 type DynamicVoiceChannelData = {
-	parent: WithVoiceStates<{ channel: Discord.Channel }>;
+	parent: WithVoiceStates<{ channel: Logos.Channel }>;
 	children: WithVoiceStates<{ id: bigint }>[];
 	configuration: DynamicVoiceChannel;
 };
 
 class DynamicVoiceChannelService extends LocalService {
-	readonly oldVoiceStates: Map</*userId:*/ bigint, Discord.VoiceState> = new Map();
+	readonly oldVoiceStates: Map</*userId:*/ bigint, Logos.VoiceState> = new Map();
 
 	get configuration(): Configuration | undefined {
 		const guildDocument = this.guildDocument;
@@ -59,7 +60,7 @@ class DynamicVoiceChannelService extends LocalService {
 		const channelIds = channelsAll.map((channel) => channel.id);
 
 		const voiceStateByUserId = guild.voiceStates.filter((voiceState) => voiceState.channelId !== undefined).array();
-		const voiceStatesByChannelId = new Map<bigint, Discord.VoiceState[]>(
+		const voiceStatesByChannelId = new Map<bigint, Logos.VoiceState[]>(
 			channelIds.map((channelId) => [
 				channelId,
 				voiceStateByUserId.filter((voiceState) => voiceState.channelId === channelId),
@@ -147,7 +148,7 @@ class DynamicVoiceChannelService extends LocalService {
 		}
 	}
 
-	async voiceStateUpdate(bot: Discord.Bot, newVoiceState: Discord.VoiceState): Promise<void> {
+	async voiceStateUpdate(bot: Discord.Bot, newVoiceState: Logos.VoiceState): Promise<void> {
 		const [channels, configuration, guild] = [this.channels, this.configuration, this.guild];
 		if (channels === undefined || configuration === undefined || guild === undefined) {
 			return;
@@ -167,7 +168,7 @@ class DynamicVoiceChannelService extends LocalService {
 		this.oldVoiceStates.set(newVoiceState.userId, newVoiceState);
 	}
 
-	private async onConnect(bot: Discord.Bot, newVoiceState: Discord.VoiceState): Promise<void> {
+	private async onConnect(bot: Discord.Bot, newVoiceState: Logos.VoiceState): Promise<void> {
 		const channels = this.channels;
 		if (channels === undefined) {
 			return;
@@ -218,7 +219,7 @@ class DynamicVoiceChannelService extends LocalService {
 		}).catch(() => this.client.log.warn(`Failed to create voice channel on guild with ID ${this.guildId}.`));
 	}
 
-	private async onDisconnect(bot: Discord.Bot, oldVoiceState: Discord.VoiceState): Promise<void> {
+	private async onDisconnect(bot: Discord.Bot, oldVoiceState: Logos.VoiceState): Promise<void> {
 		const channels = this.channels;
 		if (channels === undefined) {
 			return;

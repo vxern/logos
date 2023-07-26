@@ -1,6 +1,7 @@
 import constants from "../../../../constants/constants";
 import { defaultLocale } from "../../../../constants/language";
 import { MentionTypes, mention, timestamp } from "../../../../formatting";
+import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
 import { stringifyValue } from "../../../database/database";
 import { Document } from "../../../database/document";
@@ -53,7 +54,7 @@ class SuggestionService extends PromptService<"suggestions", Suggestion, Metadat
 
 	getPromptContent(
 		bot: Discord.Bot,
-		user: Discord.User,
+		user: Logos.User,
 		document: Document<Suggestion>,
 	): Discord.CreateMessage | undefined {
 		const guild = this.guild;

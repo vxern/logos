@@ -1,6 +1,7 @@
 import constants from "../../../../constants/constants";
 import { defaultLanguage, defaultLocale } from "../../../../constants/language";
 import { MentionTypes, TimestampFormat, mention, timestamp } from "../../../../formatting";
+import * as Logos from "../../../../types";
 import { Client, localise, pluralise } from "../../../client";
 import { stringifyValue } from "../../../database/database";
 import { Document } from "../../../database/document";
@@ -65,7 +66,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 
 	getPromptContent(
 		bot: Discord.Bot,
-		user: Discord.User,
+		user: Logos.User,
 		document: Document<EntryRequest>,
 	): Discord.CreateMessage | undefined {
 		const [guild, guildDocument] = [this.guild, this.guildDocument];

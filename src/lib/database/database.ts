@@ -1,3 +1,4 @@
+import * as Logos from "../../types";
 import { Client } from "../client";
 import { diagnosticMentionUser } from "../utils";
 import { BaseDocumentProperties, Document } from "./document";
@@ -18,7 +19,6 @@ import { Report } from "./structs/report";
 import { Suggestion } from "./structs/suggestion";
 import { User } from "./structs/user";
 import { Warning } from "./structs/warning";
-import * as Discord from "discordeno";
 import Fauna from "fauna";
 import * as Sentry from "sentry";
 
@@ -286,7 +286,7 @@ async function dispatchQuery<
 	return result.data as unknown as R;
 }
 
-function mentionUser(user: Discord.User | undefined, id: bigint): string {
+function mentionUser(user: Logos.User | undefined, id: bigint): string {
 	return user === undefined ? `an unknown user (ID ${id})` : diagnosticMentionUser(user);
 }
 
