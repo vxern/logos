@@ -35,7 +35,7 @@ async function handleLoopPlayback(
 		return;
 	}
 
-	const [current, isOccupied] = [musicService.current, musicService.isPaused];
+	const [current, isOccupied] = [musicService.current, musicService.isOccupied];
 	if (current === undefined || isOccupied === undefined) {
 		return;
 	}
