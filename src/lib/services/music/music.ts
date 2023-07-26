@@ -940,7 +940,7 @@ class MusicService extends LocalService {
 	loop(isCollection: boolean): boolean | undefined {
 		const session = this.session;
 		if (session === undefined) {
-			return;
+			return undefined;
 		}
 
 		if (isCollection) {
