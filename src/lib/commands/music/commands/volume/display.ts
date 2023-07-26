@@ -1,7 +1,7 @@
-import constants from "../../../../../constants.js";
-import { defaultLocale } from "../../../../../types.js";
-import { Client, localise } from "../../../../client.js";
-import { parseArguments, reply } from "../../../../interactions.js";
+import constants from "../../../../../constants/constants";
+import { defaultLocale } from "../../../../../constants/language";
+import { Client, localise } from "../../../../client";
+import { parseArguments, reply } from "../../../../interactions";
 import * as Discord from "discordeno";
 
 async function handleDisplayVolume(

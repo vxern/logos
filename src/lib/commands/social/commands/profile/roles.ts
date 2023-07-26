@@ -1,10 +1,11 @@
-import constants from "../../../../../constants.js";
-import { trim } from "../../../../../formatting.js";
-import { defaultLocale } from "../../../../../types.js";
-import { Client, localise } from "../../../../client.js";
-import { acknowledge, createInteractionCollector, editReply, reply } from "../../../../interactions.js";
-import { OptionTemplate } from "../../../command.js";
-import roles, { getRoleCategories, getRoles } from "../../roles/roles.js";
+import constants from "../../../../../constants/constants";
+import { defaultLocale } from "../../../../../constants/language";
+import { trim } from "../../../../../formatting";
+import * as Logos from "../../../../../types";
+import { Client, localise } from "../../../../client";
+import { acknowledge, createInteractionCollector, editReply, reply } from "../../../../interactions";
+import { OptionTemplate } from "../../../command";
+import roles, { getRoleCategories, getRoles } from "../../roles/roles";
 import {
 	Role,
 	RoleCategory,
@@ -14,7 +15,7 @@ import {
 	isCustom,
 	isGroup,
 	isSingle,
-} from "../../roles/types.js";
+} from "../../roles/types";
 import * as Discord from "discordeno";
 
 const command: OptionTemplate = {
@@ -291,14 +292,14 @@ async function createRoleSelectionMenu(
 
 interface RoleData {
 	emojiIdsByName: Map<string, bigint>;
-	rolesById: Map<bigint, Discord.Role>;
+	rolesById: Map<bigint, Logos.Role>;
 	memberRoleIds: bigint[];
 }
 
 interface ViewData {
 	category: RoleCategory;
 	menuRoles: Role[];
-	menuRolesResolved: Discord.Role[];
+	menuRolesResolved: Logos.Role[];
 	memberRolesIncludedInMenu: bigint[];
 }
 
@@ -485,7 +486,7 @@ function createSelectOptionsFromCollection(
 
 	const viewData = data.viewData;
 	if (viewData === undefined) {
-		return [{ label: "?", value: constants.staticComponentIds.none }];
+		return [{ label: "?", value: constants.components.none }];
 	}
 
 	for (const index of Array(viewData.menuRoles.length).keys()) {

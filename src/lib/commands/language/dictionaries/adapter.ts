@@ -1,6 +1,6 @@
-import { Language } from "../../../../types.js";
-import { Client } from "../../../client.js";
-import { PartOfSpeech } from "./parts-of-speech.js";
+import { Language } from "../../../../constants/language";
+import { Client } from "../../../client";
+import { PartOfSpeech } from "./parts-of-speech";
 import * as Discord from "discordeno";
 
 type DictionaryProvisions =

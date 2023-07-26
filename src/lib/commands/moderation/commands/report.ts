@@ -1,10 +1,10 @@
-import constants from "../../../../constants.js";
-import defaults from "../../../../defaults.js";
-import { trim } from "../../../../formatting.js";
-import { Client, localise } from "../../../client.js";
-import { stringifyValue } from "../../../database/database.js";
-import { timeStructToMilliseconds } from "../../../database/structs/guild.js";
-import { Report } from "../../../database/structs/report.js";
+import constants from "../../../../constants/constants";
+import defaults from "../../../../defaults";
+import { trim } from "../../../../formatting";
+import { Client, localise } from "../../../client";
+import { stringifyValue } from "../../../database/database";
+import { timeStructToMilliseconds } from "../../../database/structs/guild";
+import { Report } from "../../../database/structs/report";
 import {
 	Modal,
 	createInteractionCollector,
@@ -13,9 +13,9 @@ import {
 	editReply,
 	postponeReply,
 	reply,
-} from "../../../interactions.js";
-import { verifyIsWithinLimits } from "../../../utils.js";
-import { CommandTemplate } from "../../command.js";
+} from "../../../interactions";
+import { verifyIsWithinLimits } from "../../../utils";
+import { CommandTemplate } from "../../command";
 import * as Discord from "discordeno";
 
 const command: CommandTemplate = {

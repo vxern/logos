@@ -1,4 +1,4 @@
-import constants from "../../../../constants";
+import constants from "../../../../constants/constants";
 import { MentionTypes, mention } from "../../../../formatting";
 import { diagnosticMentionUser } from "../../../utils";
 import { GuildEvents, MessageGenerators } from "../generator";

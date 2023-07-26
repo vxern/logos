@@ -1,9 +1,9 @@
-import constants from "../../../../../constants.js";
-import { list } from "../../../../../formatting.js";
-import { Client, localise } from "../../../../client.js";
-import { reply } from "../../../../interactions.js";
+import constants from "../../../../../constants/constants";
+import { list } from "../../../../../formatting";
+import { Client, localise } from "../../../../client";
+import { reply } from "../../../../interactions";
+import { chunk } from "../../../../utils";
 import * as Discord from "discordeno";
-import { chunk } from "../../../../utils.js";
 
 async function handleDisplayBotInformation(
 	[client, bot]: [Client, Discord.Bot],

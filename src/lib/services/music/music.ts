@@ -1,8 +1,8 @@
-import constants from "../../../constants.js";
-import defaults from "../../../defaults.js";
-import { MentionTypes, mention } from "../../../formatting.js";
-import { defaultLocale } from "../../../types.js";
-import { Client, localise } from "../../client.js";
+import constants from "../../../constants/constants";
+import { defaultLocale } from "../../../constants/language";
+import defaults from "../../../defaults";
+import { MentionTypes, mention } from "../../../formatting";
+import { Client, localise } from "../../client";
 import {
 	Song,
 	SongCollection,
@@ -10,10 +10,10 @@ import {
 	SongListingType,
 	SongStream,
 	listingTypeToEmoji,
-} from "../../commands/music/data/types.js";
-import { Guild, timeStructToMilliseconds } from "../../database/structs/guild.js";
-import { reply } from "../../interactions.js";
-import { LocalService } from "../service.js";
+} from "../../commands/music/data/types";
+import { Guild, timeStructToMilliseconds } from "../../database/structs/guild";
+import { reply } from "../../interactions";
+import { LocalService } from "../service";
 import * as Discord from "discordeno";
 import { EventEmitter } from "events";
 import * as Lavaclient from "lavaclient";
@@ -755,25 +755,25 @@ class MusicService extends LocalService {
 					session.listings.current.content.position = to - 2;
 				}
 			}
-		}
+		} else {
+			const listingsToMoveToHistory = Math.min(by ?? to ?? 0, session.listings.queue.length);
 
-		const listingsToMoveToHistory = Math.min(by ?? to ?? 0, session.listings.queue.length);
-
-		if (session.listings.current !== undefined) {
-			session.listings.history.push(session.listings.current);
-			session.events.emit("queueUpdate");
-			session.listings.current = undefined;
-		}
-
-		for (const _ of Array(listingsToMoveToHistory).keys()) {
-			const listing = session.listings.queue.shift();
-			if (listing !== undefined) {
-				this.moveListingToHistory(listing);
+			if (session.listings.current !== undefined) {
+				session.listings.history.push(session.listings.current);
+				session.events.emit("queueUpdate");
+				session.listings.current = undefined;
 			}
-		}
 
-		if (listingsToMoveToHistory !== 0) {
-			session.events.emit("queueUpdate");
+			for (const _ of Array(listingsToMoveToHistory).keys()) {
+				const listing = session.listings.queue.shift();
+				if (listing !== undefined) {
+					this.moveListingToHistory(listing);
+				}
+			}
+
+			if (listingsToMoveToHistory !== 0) {
+				session.events.emit("queueUpdate");
+			}
 		}
 
 		await session.player.stop();
@@ -940,7 +940,7 @@ class MusicService extends LocalService {
 	loop(isCollection: boolean): boolean | undefined {
 		const session = this.session;
 		if (session === undefined) {
-			return;
+			return undefined;
 		}
 
 		if (isCollection) {

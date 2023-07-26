@@ -1,9 +1,9 @@
-import constants from "../../../../constants.js";
-import { defaultLocale } from "../../../../types.js";
-import { Client, localise } from "../../../client.js";
-import { handleOpenRoleSelectionMenu } from "../../../commands/social/commands/profile/roles.js";
-import { decodeId } from "../../../interactions.js";
-import { HashableMessageContent, NoticeService } from "../service.js";
+import constants from "../../../../constants/constants";
+import { defaultLocale } from "../../../../constants/language";
+import { Client, localise } from "../../../client";
+import { handleOpenRoleSelectionMenu } from "../../../commands/social/commands/profile/roles";
+import { decodeId } from "../../../interactions";
+import { HashableMessageContent, NoticeService } from "../service";
 import * as Discord from "discordeno";
 
 class RoleNoticeService extends NoticeService<"roles"> {
@@ -44,7 +44,7 @@ class RoleNoticeService extends NoticeService<"roles"> {
 							type: Discord.MessageComponentTypes.Button,
 							label: strings.description.clickHere,
 							style: Discord.ButtonStyles.Primary,
-							customId: constants.staticComponentIds.selectRoles,
+							customId: constants.components.selectRoles,
 						},
 					],
 				},
@@ -63,7 +63,7 @@ class RoleNoticeService extends NoticeService<"roles"> {
 		}
 
 		const [id, ..._] = decodeId(customId);
-		if (id !== constants.staticComponentIds.selectRoles) {
+		if (id !== constants.components.selectRoles) {
 			return;
 		}
 

@@ -1,8 +1,8 @@
-import constants from "../../../../constants.js";
-import defaults from "../../../../defaults.js";
-import { MentionTypes, mention, trim } from "../../../../formatting.js";
-import { defaultLocale } from "../../../../types.js";
-import { Client, localise } from "../../../client.js";
+import constants from "../../../../constants/constants";
+import { defaultLocale } from "../../../../constants/language";
+import defaults from "../../../../defaults";
+import { MentionTypes, mention, trim } from "../../../../formatting";
+import { Client, localise } from "../../../client";
 import {
 	ControlButtonID,
 	acknowledge,
@@ -12,11 +12,11 @@ import {
 	editReply,
 	generateButtons,
 	reply,
-} from "../../../interactions.js";
-import { MusicService } from "../../../services/music/music.js";
-import { chunk } from "../../../utils.js";
-import { OptionTemplate } from "../../command.js";
-import { SongListing, listingTypeToEmoji } from "../data/types.js";
+} from "../../../interactions";
+import { MusicService } from "../../../services/music/music";
+import { chunk } from "../../../utils";
+import { OptionTemplate } from "../../command";
+import { SongListing, listingTypeToEmoji } from "../data/types";
 import * as Discord from "discordeno";
 
 const command: OptionTemplate = {
@@ -101,7 +101,7 @@ async function handleRemoveSongListing(
 	setTimeout(() => {
 		events.off("queueUpdate", onQueueUpdateListener);
 		events.off("stop", onStopListener);
-	}, constants.interactionTokenExpiryInterval);
+	}, constants.INTERACTION_TOKEN_EXPIRY);
 
 	reply([client, bot], interaction, interactionResponseData);
 }
@@ -282,7 +282,7 @@ function generateSelectMenu(
 					customId: selectMenuCustomId,
 					minValues: 1,
 					maxValues: 1,
-					options: [{ label: "?", value: constants.staticComponentIds.none }],
+					options: [{ label: "?", value: constants.components.none }],
 				},
 			],
 		};

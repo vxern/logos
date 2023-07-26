@@ -1,3 +1,3 @@
-import { initialise } from "./initialise.js";
+import { initialise } from "./initialise";
 
 initialise();

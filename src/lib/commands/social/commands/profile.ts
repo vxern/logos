@@ -1,6 +1,6 @@
-import { CommandTemplate } from "../../command.js";
-import roles from "./profile/roles.js";
-import view from "./profile/view.js";
+import { CommandTemplate } from "../../command";
+import roles from "./profile/roles";
+import view from "./profile/view";
 import * as Discord from "discordeno";
 
 const command: CommandTemplate = {

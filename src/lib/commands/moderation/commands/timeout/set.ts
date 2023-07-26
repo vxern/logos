@@ -1,7 +1,8 @@
-import constants, { Periods } from "../../../../../constants.js";
-import { MentionTypes, mention, timestamp } from "../../../../../formatting.js";
-import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../../client.js";
-import { parseArguments, parseTimeExpression, reply, respond } from "../../../../interactions.js";
+import constants from "../../../../../constants/constants";
+import time from "../../../../../constants/time";
+import { MentionTypes, mention, timestamp } from "../../../../../formatting";
+import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../../client";
+import { parseArguments, parseTimeExpression, reply, respond } from "../../../../interactions";
 import * as Discord from "discordeno";
 
 async function handleSetTimeoutAutocomplete(
@@ -81,12 +82,12 @@ async function handleSetTimeout([client, bot]: [Client, Discord.Bot], interactio
 		durationParsed = timestamp[1];
 	}
 
-	if (durationParsed < Periods.minute) {
+	if (durationParsed < time.minute) {
 		displayTooShortWarning([client, bot], interaction);
 		return;
 	}
 
-	if (durationParsed > Periods.week) {
+	if (durationParsed > time.week) {
 		displayTooLongWarning([client, bot], interaction);
 		return;
 	}

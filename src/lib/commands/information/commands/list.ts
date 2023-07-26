@@ -1,6 +1,6 @@
-import { CommandTemplate } from "../../command.js";
-import { user } from "../../parameters.js";
-import { handleDisplayWarnings, handleDisplayWarningsAutocomplete } from "./list/warnings.js";
+import { CommandTemplate } from "../../command";
+import { user } from "../../parameters";
+import { handleDisplayWarnings, handleDisplayWarningsAutocomplete } from "./list/warnings";
 import * as Discord from "discordeno";
 
 const command: CommandTemplate = {

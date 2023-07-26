@@ -1,9 +1,9 @@
-import constants from "../../../../constants.js";
-import { defaultLocale } from "../../../../types.js";
-import { Client, localise } from "../../../client.js";
-import { parseArguments, reply, respond } from "../../../interactions.js";
-import { CommandTemplate } from "../../command.js";
-import { show } from "../../parameters.js";
+import constants from "../../../../constants/constants";
+import { defaultLocale } from "../../../../constants/language";
+import { Client, localise } from "../../../client";
+import { parseArguments, reply, respond } from "../../../interactions";
+import { CommandTemplate } from "../../command";
+import { show } from "../../parameters";
 import * as Discord from "discordeno";
 
 const command: CommandTemplate = {

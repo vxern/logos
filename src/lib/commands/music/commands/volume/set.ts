@@ -1,7 +1,7 @@
-import constants from "../../../../../constants.js";
-import defaults from "../../../../../defaults.js";
-import { Client, localise } from "../../../../client.js";
-import { parseArguments, reply } from "../../../../interactions.js";
+import constants from "../../../../../constants/constants";
+import defaults from "../../../../../defaults";
+import { Client, localise } from "../../../../client";
+import { parseArguments, reply } from "../../../../interactions";
 import * as Discord from "discordeno";
 
 async function handleSetVolume([client, bot]: [Client, Discord.Bot], interaction: Discord.Interaction): Promise<void> {

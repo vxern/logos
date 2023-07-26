@@ -1,4 +1,4 @@
-import constants, { type BulletStyle } from "./constants.js";
+import constants from "./constants/constants";
 
 /**
  * Capitalises the first letter of the given text.
@@ -41,9 +41,8 @@ function codeMultiline(target: string): string {
  * @param items - Items in the list.
  * @returns The formatted string of text.
  */
-function list(items: string[], bulletStyle: BulletStyle = "arrow"): string {
-	const bullet = constants.symbols.bullets[bulletStyle];
-	return items.map((item) => `${bullet} ${item}`).join("\n");
+function list(items: string[]): string {
+	return items.map((item) => `${constants.symbols.bullet} ${item}`).join("\n");
 }
 
 enum TimestampFormat {
@@ -111,4 +110,4 @@ function trim(string: string, length: number): string {
 	);
 }
 
-export { BulletStyle, capitalise, code, codeMultiline, list, mention, MentionTypes, timestamp, TimestampFormat, trim };
+export { capitalise, code, codeMultiline, list, mention, MentionTypes, timestamp, TimestampFormat, trim };

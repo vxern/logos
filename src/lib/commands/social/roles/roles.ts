@@ -1,10 +1,10 @@
-import dialects from "./categories/dialects.js";
-import ethnicity from "./categories/ethnicity.js";
-import language from "./categories/language.js";
-import learning from "./categories/learning.js";
-import personalisation from "./categories/personalisation.js";
-import regions from "./categories/regions.js";
-import { Role, RoleCategory, RoleCollection, isCustom, isGroup, isImplicit } from "./types.js";
+import dialects from "./categories/dialects";
+import ethnicity from "./categories/ethnicity";
+import language from "./categories/language";
+import learning from "./categories/learning";
+import personalisation from "./categories/personalisation";
+import regions from "./categories/regions";
+import { Role, RoleCategory, RoleCollection, isCustom, isGroup, isImplicit } from "./types";
 
 const categories: RoleCategory[] = [language, learning, dialects, personalisation, regions, ethnicity];
 

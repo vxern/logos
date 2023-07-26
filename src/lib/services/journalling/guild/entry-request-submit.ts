@@ -1,6 +1,6 @@
-import constants from "../../../../constants";
+import constants from "../../../../constants/constants";
+import { defaultLocale } from "../../../../constants/language";
 import { codeMultiline } from "../../../../formatting";
-import { defaultLocale } from "../../../../types";
 import { localise } from "../../../client";
 import { diagnosticMentionUser } from "../../../utils";
 import { GuildEvents, MessageGenerators } from "../generator";

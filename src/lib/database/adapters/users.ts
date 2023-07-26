@@ -5,10 +5,10 @@ import {
 	getUserMentionByReference,
 	mentionUser,
 	stringifyValue,
-} from "../database.js";
-import { Document } from "../document.js";
-import { UserIndexes, userIndexParameterToIndex } from "../indexes.js";
-import { User } from "../structs/user.js";
+} from "../database";
+import { Document } from "../document";
+import { UserIndexes, userIndexParameterToIndex } from "../indexes";
+import { User } from "../structs/user";
 import Fauna from "fauna";
 
 const $ = Fauna.query;

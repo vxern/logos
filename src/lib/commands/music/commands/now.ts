@@ -1,14 +1,14 @@
-import constants from "../../../../constants.js";
-import defaults from "../../../../defaults.js";
-import { MentionTypes, mention, timestamp, trim } from "../../../../formatting.js";
-import { defaultLocale } from "../../../../types.js";
-import { Client, localise } from "../../../client.js";
-import { paginate, parseArguments, reply } from "../../../interactions.js";
-import { isCollection } from "../../../services/music/music.js";
-import { chunk } from "../../../utils.js";
-import { OptionTemplate } from "../../command.js";
-import { collection, show } from "../../parameters.js";
-import { Song, SongCollection, SongStream } from "../data/types.js";
+import constants from "../../../../constants/constants";
+import { defaultLocale } from "../../../../constants/language";
+import defaults from "../../../../defaults";
+import { MentionTypes, mention, timestamp, trim } from "../../../../formatting";
+import { Client, localise } from "../../../client";
+import { paginate, parseArguments, reply } from "../../../interactions";
+import { isCollection } from "../../../services/music/music";
+import { chunk } from "../../../utils";
+import { OptionTemplate } from "../../command";
+import { collection, show } from "../../parameters";
+import { Song, SongCollection, SongStream } from "../data/types";
 import * as Discord from "discordeno";
 
 const command: OptionTemplate = {

@@ -1,7 +1,7 @@
-import constants from "../../../../../constants.js";
-import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../../client.js";
-import { parseArguments, reply } from "../../../../interactions.js";
-import { diagnosticMentionUser } from "../../../../utils.js";
+import constants from "../../../../../constants/constants";
+import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../../client";
+import { parseArguments, reply } from "../../../../interactions";
+import { diagnosticMentionUser } from "../../../../utils";
 import * as Discord from "discordeno";
 
 async function handleClearTimeoutAutocomplete(

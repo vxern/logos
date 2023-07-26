@@ -1,10 +1,10 @@
-import constants from "../../../../../constants.js";
-import { Language } from "../../../../../types.js";
-import { Client, localise } from "../../../../client.js";
-import { chunk } from "../../../../utils.js";
-import { getPartOfSpeech } from "../../module.js";
-import { DictionaryAdapter, DictionaryEntry, DictionaryProvisions } from "../adapter.js";
-import { PartOfSpeech } from "../parts-of-speech.js";
+import constants from "../../../../../constants/constants";
+import { Language } from "../../../../../constants/language";
+import { Client, localise } from "../../../../client";
+import { chunk } from "../../../../utils";
+import { getPartOfSpeech } from "../../module";
+import { DictionaryAdapter, DictionaryEntry, DictionaryProvisions } from "../adapter";
+import { PartOfSpeech } from "../parts-of-speech";
 import * as Dexonline from "dexonline";
 
 const classesWithInflections: PartOfSpeech[] = ["pronoun", "noun", "verb", "adjective", "determiner"];

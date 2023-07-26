@@ -1,9 +1,10 @@
-import constants from "../../../../../constants.js";
-import { MentionTypes, mention, timestamp } from "../../../../../formatting.js";
-import { Client, localise } from "../../../../client.js";
-import { reply } from "../../../../interactions.js";
-import { getGuildIconURLFormatted, snowflakeToTimestamp } from "../../../../utils.js";
-import { proficiency } from "../../../social/roles/categories/language.js";
+import constants from "../../../../../constants/constants";
+import { MentionTypes, mention, timestamp } from "../../../../../formatting";
+import * as Logos from "../../../../../types";
+import { Client, localise } from "../../../../client";
+import { reply } from "../../../../interactions";
+import { getGuildIconURLFormatted, snowflakeToTimestamp } from "../../../../utils";
+import { proficiency } from "../../../social/roles/categories/language";
 import * as Discord from "discordeno";
 
 /** Displays information about the guild that this command was executed in. */
@@ -144,8 +145,8 @@ async function handleDisplayGuildInformation(
 	});
 }
 
-function getChannelInformationSection(client: Client, guild: Discord.Guild, locale: string | undefined): string {
-	function getChannelCountByType(channels: Discord.Channel[], type: Discord.ChannelTypes): number {
+function getChannelInformationSection(client: Client, guild: Logos.Guild, locale: string | undefined): string {
+	function getChannelCountByType(channels: Logos.Channel[], type: Discord.ChannelTypes): number {
 		return channels.filter((channel) => channel.type === type).length;
 	}
 
@@ -164,7 +165,7 @@ function getChannelInformationSection(client: Client, guild: Discord.Guild, loca
 type ProficiencyRoleDistribution = [withRole: [roleId: bigint, frequency: number][], withoutRole: number];
 
 /** Gets the distribution of proficiency roles of a guild's members. */
-function getDistribution(client: Client, guild: Discord.Guild): ProficiencyRoleDistribution {
+function getDistribution(client: Client, guild: Logos.Guild): ProficiencyRoleDistribution {
 	const guildIdString = guild.id.toString();
 
 	const proficiencyRoleIdsUnsorted = proficiency.collection.list.map((role) => {
@@ -250,7 +251,7 @@ function formatDistribution(
 
 type Thumbnail = NonNullable<Discord.Embed["thumbnail"]>;
 
-function getThumbnail(bot: Discord.Bot, guild: Discord.Guild): Thumbnail | undefined {
+function getThumbnail(bot: Discord.Bot, guild: Logos.Guild): Thumbnail | undefined {
 	const iconURL = getGuildIconURLFormatted(bot, guild);
 	if (iconURL === undefined) {
 		return undefined;

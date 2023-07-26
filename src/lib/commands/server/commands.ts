@@ -1,3 +1,3 @@
-import suggestion from "./commands/suggestion.js";
+import suggestion from "./commands/suggestion";
 
 export { suggestion };

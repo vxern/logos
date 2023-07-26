@@ -1,14 +1,15 @@
-import constants from "../../../../constants.js";
-import { MentionTypes, mention, timestamp } from "../../../../formatting.js";
-import { defaultLocale } from "../../../../types.js";
-import { Client, localise } from "../../../client.js";
-import { stringifyValue } from "../../../database/database.js";
-import { Document } from "../../../database/document.js";
-import { Report } from "../../../database/structs/report.js";
-import { User } from "../../../database/structs/user.js";
-import { encodeId, reply } from "../../../interactions.js";
-import { getGuildIconURLFormatted } from "../../../utils.js";
-import { PromptService } from "../service.js";
+import constants from "../../../../constants/constants";
+import { defaultLocale } from "../../../../constants/language";
+import { MentionTypes, mention, timestamp } from "../../../../formatting";
+import * as Logos from "../../../../types";
+import { Client, localise } from "../../../client";
+import { stringifyValue } from "../../../database/database";
+import { Document } from "../../../database/document";
+import { Report } from "../../../database/structs/report";
+import { User } from "../../../database/structs/user";
+import { encodeId, reply } from "../../../interactions";
+import { getGuildIconURLFormatted } from "../../../utils";
+import { PromptService } from "../service";
 import * as Discord from "discordeno";
 
 type Metadata = { userId: bigint; reference: string };
@@ -51,11 +52,7 @@ class ReportService extends PromptService<"reports", Report, Metadata, Interacti
 		return { userId: BigInt(userId), reference };
 	}
 
-	getPromptContent(
-		bot: Discord.Bot,
-		user: Discord.User,
-		document: Document<Report>,
-	): Discord.CreateMessage | undefined {
+	getPromptContent(bot: Discord.Bot, user: Logos.User, document: Document<Report>): Discord.CreateMessage | undefined {
 		const guild = this.guild;
 		if (guild === undefined) {
 			return;
@@ -138,7 +135,7 @@ class ReportService extends PromptService<"reports", Report, Metadata, Interacti
 									type: Discord.MessageComponentTypes.Button,
 									style: Discord.ButtonStyles.Secondary,
 									label: strings.markUnresolved,
-									customId: encodeId<InteractionData>(constants.staticComponentIds.reports, [
+									customId: encodeId<InteractionData>(constants.components.reports, [
 										user.id.toString(),
 										this.guildIdString,
 										reference,
@@ -149,7 +146,7 @@ class ReportService extends PromptService<"reports", Report, Metadata, Interacti
 									type: Discord.MessageComponentTypes.Button,
 									style: Discord.ButtonStyles.Primary,
 									label: strings.markResolved,
-									customId: encodeId<InteractionData>(constants.staticComponentIds.reports, [
+									customId: encodeId<InteractionData>(constants.components.reports, [
 										user.id.toString(),
 										this.guildIdString,
 										reference,

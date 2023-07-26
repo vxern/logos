@@ -1,12 +1,13 @@
-import constants from "../../../constants.js";
-import { Client } from "../../client.js";
-import { stringifyValue } from "../../database/database.js";
-import { BaseDocumentProperties, Document } from "../../database/document.js";
-import { Guild } from "../../database/structs/guild.js";
-import { User } from "../../database/structs/user.js";
-import { createInteractionCollector, decodeId } from "../../interactions.js";
-import { getAllMessages } from "../../utils.js";
-import { LocalService } from "../service.js";
+import constants from "../../../constants/constants";
+import * as Logos from "../../../types";
+import { Client } from "../../client";
+import { stringifyValue } from "../../database/database";
+import { BaseDocumentProperties, Document } from "../../database/document";
+import { Guild } from "../../database/structs/guild";
+import { User } from "../../database/structs/user";
+import { createInteractionCollector, decodeId } from "../../interactions";
+import { getAllMessages } from "../../utils";
+import { LocalService } from "../service";
 import * as Discord from "discordeno";
 
 type InteractionDataBase = [userId: string, guildId: string, reference: string];
@@ -30,9 +31,9 @@ const configurationLocators: ConfigurationLocators = {
 type CustomIDs = Record<keyof Configurations, string>;
 
 const customIds: CustomIDs = {
-	reports: constants.staticComponentIds.reports,
-	suggestions: constants.staticComponentIds.suggestions,
-	verification: constants.staticComponentIds.verification,
+	reports: constants.components.reports,
+	suggestions: constants.components.suggestions,
+	verification: constants.components.verification,
 };
 
 type PromptTypes = keyof Client["services"]["prompts"];
@@ -51,7 +52,7 @@ abstract class PromptService<
 		(bot: Discord.Bot, interaction: Discord.Interaction, data: InteractionData) => void
 	> = new Map();
 
-	private readonly prompts: Map</*reference: */ string, Discord.Message> = new Map();
+	private readonly prompts: Map</*reference: */ string, Logos.Message> = new Map();
 
 	private readonly documents: Document<DataType>[];
 	private readonly documentsByPromptId: Map</*promptId: */ bigint, Document<DataType>> = new Map();
@@ -232,11 +233,11 @@ abstract class PromptService<
 
 	abstract getPromptContent(
 		bot: Discord.Bot,
-		user: Discord.User,
+		user: Logos.User,
 		document: Document<DataType>,
 	): Discord.CreateMessage | undefined;
 
-	getMetadata(prompt: Discord.Message): string[] | undefined {
+	getMetadata(prompt: Logos.Message): string[] | undefined {
 		const metadata = prompt.embeds.at(-1)?.footer?.iconUrl?.split("&metadata=").at(-1);
 		if (metadata === undefined) {
 			return undefined;
@@ -246,9 +247,9 @@ abstract class PromptService<
 		return data;
 	}
 
-	filterPrompts(prompts: Discord.Message[]): [valid: [Discord.Message, Metadata][], invalid: Discord.Message[]] {
-		const valid: [Discord.Message, Metadata][] = [];
-		const invalid: Discord.Message[] = [];
+	filterPrompts(prompts: Logos.Message[]): [valid: [Logos.Message, Metadata][], invalid: Logos.Message[]] {
+		const valid: [Logos.Message, Metadata][] = [];
+		const invalid: Logos.Message[] = [];
 		for (const prompt of prompts) {
 			const data = this.getMetadata(prompt);
 			if (data === undefined) {
@@ -268,9 +269,9 @@ abstract class PromptService<
 	}
 
 	sortPrompts(
-		prompts: [Discord.Message, Metadata][],
-	): Map</*userId: */ bigint, Map</*reference: */ string, Discord.Message>> {
-		const promptsSorted = new Map<bigint, Map<string, Discord.Message>>();
+		prompts: [Logos.Message, Metadata][],
+	): Map</*userId: */ bigint, Map</*reference: */ string, Logos.Message>> {
+		const promptsSorted = new Map<bigint, Map<string, Logos.Message>>();
 
 		for (const [prompt, metadata] of prompts) {
 			const { userId, reference } = metadata;
@@ -288,9 +289,9 @@ abstract class PromptService<
 
 	async savePrompt(
 		bot: Discord.Bot,
-		user: Discord.User,
+		user: Logos.User,
 		document: Document<DataType>,
-	): Promise<Discord.Message | undefined> {
+	): Promise<Logos.Message | undefined> {
 		const channelId = this.channelId;
 		if (channelId === undefined) {
 			return undefined;
@@ -301,20 +302,23 @@ abstract class PromptService<
 			return undefined;
 		}
 
-		const message = await Discord.sendMessage(bot, channelId, content).catch(() => {
-			this.client.log.warn(`Failed to send message in channel with ID ${channelId}.`);
-			return undefined;
-		});
+		const message = await Discord.sendMessage(bot, channelId, content)
+			.then((message) => Logos.slimMessage(message))
+			.catch(() => {
+				this.client.log.warn(`Failed to send message in channel with ID ${channelId}.`);
+				return undefined;
+			});
+
 		return message;
 	}
 
-	registerPrompt(prompt: Discord.Message, userId: bigint, reference: string, document: Document<DataType>): void {
+	registerPrompt(prompt: Logos.Message, userId: bigint, reference: string, document: Document<DataType>): void {
 		this.documentsByPromptId.set(prompt.id, document);
 		this.userIds.set(prompt.id, userId);
 		this.prompts.set(reference, prompt);
 	}
 
-	unregisterPrompt(prompt: Discord.Message, reference: string): void {
+	unregisterPrompt(prompt: Logos.Message, reference: string): void {
 		this.documentsByPromptId.delete(prompt.id);
 		this.userIds.delete(prompt.id);
 		this.prompts.delete(reference);

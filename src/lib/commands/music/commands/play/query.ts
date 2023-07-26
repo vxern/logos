@@ -1,8 +1,8 @@
-import constants from "../../../../../constants.js";
-import { Client, localise } from "../../../../client.js";
-import { parseArguments, reply } from "../../../../interactions.js";
-import { ListingResolver } from "../../data/sources/sources.js";
-import { SongListing } from "../../data/types.js";
+import constants from "../../../../../constants/constants";
+import { Client, localise } from "../../../../client";
+import { parseArguments, reply } from "../../../../interactions";
+import { ListingResolver } from "../../data/sources/sources";
+import { SongListing } from "../../data/types";
 import * as Discord from "discordeno";
 
 async function handleRequestQueryPlayback(

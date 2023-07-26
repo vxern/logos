@@ -1,7 +1,7 @@
-import { CommandTemplate } from "../../command.js";
-import { duration, reason, user } from "../../parameters.js";
-import { handleClearTimeout, handleClearTimeoutAutocomplete } from "./timeout/clear.js";
-import { handleSetTimeout, handleSetTimeoutAutocomplete } from "./timeout/set.js";
+import { CommandTemplate } from "../../command";
+import { duration, reason, user } from "../../parameters";
+import { handleClearTimeout, handleClearTimeoutAutocomplete } from "./timeout/clear";
+import { handleSetTimeout, handleSetTimeoutAutocomplete } from "./timeout/set";
 import * as Discord from "discordeno";
 
 const command: CommandTemplate = {

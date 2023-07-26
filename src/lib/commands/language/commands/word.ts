@@ -1,22 +1,24 @@
-import constants from "../../../../constants.js";
-import { code } from "../../../../formatting.js";
-import { defaultLanguage, defaultLocale, getLanguageByLocale } from "../../../../types.js";
-import { Client, localise, pluralise } from "../../../client.js";
+import constants from "../../../../constants/constants";
+import { defaultLanguage, defaultLocale, getLanguageByLocale } from "../../../../constants/language";
+import defaults from "../../../../defaults";
+import { code } from "../../../../formatting";
+import { Client, localise, pluralise } from "../../../client";
 import {
 	acknowledge,
 	createInteractionCollector,
 	decodeId,
+	deleteReply,
 	editReply,
 	encodeId,
 	parseArguments,
 	postponeReply,
 	reply,
-} from "../../../interactions.js";
-import { chunk, diagnosticMentionUser } from "../../../utils.js";
-import { CommandTemplate } from "../../command.js";
-import { show } from "../../parameters.js";
-import { Definition, DictionaryEntry, Expression } from "../dictionaries/adapter.js";
-import { PartOfSpeech, isUnknownPartOfSpeech, partOfSpeechToStringKey } from "../dictionaries/parts-of-speech.js";
+} from "../../../interactions";
+import { chunk, diagnosticMentionUser } from "../../../utils";
+import { CommandTemplate } from "../../command";
+import { show } from "../../parameters";
+import { Definition, DictionaryEntry, Expression } from "../dictionaries/adapter";
+import { PartOfSpeech, isUnknownPartOfSpeech, partOfSpeechToStringKey } from "../dictionaries/parts-of-speech";
 import * as Discord from "discordeno";
 
 const command: CommandTemplate = {
@@ -154,7 +156,7 @@ async function handleFindWord([client, bot]: [Client, Discord.Bot], interaction:
 			}),
 		};
 
-		editReply([client, bot], interaction, {
+		await editReply([client, bot], interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -163,6 +165,15 @@ async function handleFindWord([client, bot]: [Client, Discord.Bot], interaction:
 				},
 			],
 		});
+
+		setTimeout(
+			() =>
+				deleteReply([client, bot], interaction).catch(() => {
+					console.warn("Failed to delete no results for word message.");
+				}),
+			defaults.WARN_MESSAGE_DELETE_TIMEOUT,
+		);
+
 		return;
 	}
 
@@ -304,7 +315,7 @@ function generateButtons(
 					type: Discord.MessageComponentTypes.Button,
 					label: `${strings.page} ${data.dictionaryEntryIndex + 1}/${data.entries.length}`,
 					style: Discord.ButtonStyles.Secondary,
-					customId: constants.staticComponentIds.none,
+					customId: constants.components.none,
 				},
 				{
 					type: Discord.MessageComponentTypes.Button,

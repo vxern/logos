@@ -1,7 +1,7 @@
-import { Language } from "../../../../../types.js";
-import { Client } from "../../../../client.js";
-import { getPartOfSpeech } from "../../module.js";
-import { DictionaryAdapter, DictionaryEntry, DictionaryProvisions } from "../adapter.js";
+import { Language } from "../../../../../constants/language";
+import { Client } from "../../../../client";
+import { getPartOfSpeech } from "../../module";
+import { DictionaryAdapter, DictionaryEntry, DictionaryProvisions } from "../adapter";
 import { WiktionaryParser } from "wiktionary";
 
 const wiktionary = new WiktionaryParser();

@@ -1,5 +1,5 @@
-import { Periods } from "../../../constants";
-import { Language } from "../../../types";
+import { Language } from "../../../constants/language";
+import time from "../../../constants/time";
 
 interface Guild {
 	/** A timestamp of when Logos began to manage this guild. */
@@ -183,13 +183,13 @@ type TimeUnit = "second" | "minute" | "hour" | "day" | "week" | "month" | "year"
 type TimeStruct = [number: number, unit: TimeUnit];
 
 const durationByTimeUnit = {
-	second: Periods.second,
-	minute: Periods.minute,
-	hour: Periods.hour,
-	day: Periods.day,
-	week: Periods.week,
-	month: Periods.month,
-	year: Periods.year,
+	second: time.second,
+	minute: time.minute,
+	hour: time.hour,
+	day: time.day,
+	week: time.week,
+	month: time.month,
+	year: time.year,
 } satisfies Record<TimeUnit, number>;
 
 function timeStructToMilliseconds([number, unit]: TimeStruct): number {

@@ -1,9 +1,9 @@
-import constants from "../../../../constants.js";
-import { defaultLocale } from "../../../../types.js";
-import { Client, localise } from "../../../client.js";
-import { parseArguments, parseTimeExpression, reply, respond } from "../../../interactions.js";
-import { OptionTemplate } from "../../command.js";
-import { timestamp } from "../../parameters.js";
+import constants from "../../../../constants/constants";
+import { defaultLocale } from "../../../../constants/language";
+import { Client, localise } from "../../../client";
+import { parseArguments, parseTimeExpression, reply, respond } from "../../../interactions";
+import { OptionTemplate } from "../../command";
+import { timestamp } from "../../parameters";
 import * as Discord from "discordeno";
 
 const command: OptionTemplate = {

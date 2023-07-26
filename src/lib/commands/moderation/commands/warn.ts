@@ -1,14 +1,14 @@
-import constants from "../../../../constants.js";
-import defaults from "../../../../defaults.js";
-import { MentionTypes, mention } from "../../../../formatting.js";
-import { defaultLanguage, defaultLocale, getLanguageByLocale } from "../../../../types.js";
-import { Client, autocompleteMembers, localise, pluralise, resolveInteractionToMember } from "../../../client.js";
-import { timeStructToMilliseconds } from "../../../database/structs/guild.js";
-import { parseArguments, reply } from "../../../interactions.js";
-import { diagnosticMentionUser } from "../../../utils.js";
-import { CommandTemplate } from "../../command.js";
-import { reason, user } from "../../parameters.js";
-import { getActiveWarnings } from "../module.js";
+import constants from "../../../../constants/constants";
+import { defaultLanguage, defaultLocale, getLanguageByLocale } from "../../../../constants/language";
+import defaults from "../../../../defaults";
+import { MentionTypes, mention } from "../../../../formatting";
+import { Client, autocompleteMembers, localise, pluralise, resolveInteractionToMember } from "../../../client";
+import { timeStructToMilliseconds } from "../../../database/structs/guild";
+import { parseArguments, reply } from "../../../interactions";
+import { diagnosticMentionUser } from "../../../utils";
+import { CommandTemplate } from "../../command";
+import { reason, user } from "../../parameters";
+import { getActiveWarnings } from "../module";
 import * as Discord from "discordeno";
 
 const command: CommandTemplate = {

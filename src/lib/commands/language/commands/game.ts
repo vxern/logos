@@ -1,15 +1,17 @@
-import constants from "../../../../constants.js";
-import { Client, localise } from "../../../client.js";
+import constants from "../../../../constants/constants";
+import defaults from "../../../../defaults";
+import { Client, localise } from "../../../client";
 import {
 	acknowledge,
 	createInteractionCollector,
 	decodeId,
+	deleteReply,
 	editReply,
 	encodeId,
 	postponeReply,
 	reply,
-} from "../../../interactions.js";
-import { CommandTemplate } from "../../command.js";
+} from "../../../interactions";
+import { CommandTemplate } from "../../command";
 import * as Discord from "discordeno";
 
 const command: CommandTemplate = {
@@ -40,7 +42,7 @@ async function handleStartGame([client, bot]: [Client, Discord.Bot], interaction
 			description: localise(client, "game.strings.noSentencesAvailable.description", interaction.locale)(),
 		};
 
-		reply([client, bot], interaction, {
+		await reply([client, bot], interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -49,6 +51,15 @@ async function handleStartGame([client, bot]: [Client, Discord.Bot], interaction
 				},
 			],
 		});
+
+		setTimeout(
+			() =>
+				deleteReply([client, bot], interaction).catch(() => {
+					console.warn("Failed to delete no results for word message.");
+				}),
+			defaults.WARN_MESSAGE_DELETE_TIMEOUT,
+		);
+
 		return;
 	}
 

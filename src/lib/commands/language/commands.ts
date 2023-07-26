@@ -1,6 +1,6 @@
-import game from "./commands/game.js";
-import resources from "./commands/resources.js";
-import translate from "./commands/translate.js";
-import word from "./commands/word.js";
+import game from "./commands/game";
+import resources from "./commands/resources";
+import translate from "./commands/translate";
+import word from "./commands/word";
 
 export { game, resources, translate, word };

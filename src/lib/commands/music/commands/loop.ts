@@ -1,10 +1,10 @@
-import constants from "../../../../constants.js";
-import { defaultLocale } from "../../../../types.js";
-import { Client, localise } from "../../../client.js";
-import { parseArguments, reply } from "../../../interactions.js";
-import { isCollection } from "../../../services/music/music.js";
-import { OptionTemplate } from "../../command.js";
-import { collection } from "../../parameters.js";
+import constants from "../../../../constants/constants";
+import { defaultLocale } from "../../../../constants/language";
+import { Client, localise } from "../../../client";
+import { parseArguments, reply } from "../../../interactions";
+import { isCollection } from "../../../services/music/music";
+import { OptionTemplate } from "../../command";
+import { collection } from "../../parameters";
 import * as Discord from "discordeno";
 
 const command: OptionTemplate = {
@@ -35,7 +35,7 @@ async function handleLoopPlayback(
 		return;
 	}
 
-	const [current, isOccupied] = [musicService.current, musicService.isPaused];
+	const [current, isOccupied] = [musicService.current, musicService.isOccupied];
 	if (current === undefined || isOccupied === undefined) {
 		return;
 	}

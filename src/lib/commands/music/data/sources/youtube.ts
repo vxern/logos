@@ -1,9 +1,9 @@
-import constants from "../../../../../constants.js";
-import { trim } from "../../../../../formatting.js";
-import { Client, localise } from "../../../../client.js";
-import { createInteractionCollector, deleteReply, postponeReply, reply } from "../../../../interactions.js";
-import { Song, SongListing } from "../types.js";
-import { ListingResolver } from "./sources.js";
+import constants from "../../../../../constants/constants";
+import { trim } from "../../../../../formatting";
+import { Client, localise } from "../../../../client";
+import { createInteractionCollector, deleteReply, postponeReply, reply } from "../../../../interactions";
+import { Song, SongListing } from "../types";
+import { ListingResolver } from "./sources";
 import * as Discord from "discordeno";
 import * as YouTubeSearch from "youtube-sr";
 
