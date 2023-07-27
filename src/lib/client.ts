@@ -352,6 +352,12 @@ async function initialiseClient(
 					const guildId = id;
 					client.cache.guilds.delete(guildId);
 
+					const runningServices = client.services.local.get(guildId) ?? [];
+					client.services.local.delete(guildId);
+					for (const runningService of runningServices) {
+						runningService.stop(bot);
+					}
+
 					dispatchEvent(client, guildId, "guildDelete", { args: [bot, guildId, shardId] });
 				},
 				async guildUpdate(bot, guild) {
