@@ -80,7 +80,7 @@ class DynamicVoiceChannelService extends LocalService {
 
 			const configuration = channelIdConfigurationTuples.find(([channelId, _]) => channelId === parentChannel.id)?.[1];
 			if (configuration === undefined) {
-				return;
+				continue;
 			}
 
 			if (!parentChannelById.has(parentChannel.id)) {
@@ -151,6 +151,7 @@ class DynamicVoiceChannelService extends LocalService {
 	async voiceStateUpdate(bot: Discord.Bot, newVoiceState: Logos.VoiceState): Promise<void> {
 		const [channels, configuration, guild] = [this.channels, this.configuration, this.guild];
 		if (channels === undefined || configuration === undefined || guild === undefined) {
+			this.oldVoiceStates.set(newVoiceState.userId, newVoiceState);
 			return;
 		}
 

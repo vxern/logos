@@ -738,7 +738,11 @@ function withCaching(client: Client, transformers: Discord.Transformers): Discor
 		const resultUnoptimised = voiceState(bot, payload);
 		const result = Logos.slimVoiceState(resultUnoptimised);
 
-		client.cache.guilds.get(result.guildId)?.voiceStates.set(result.userId, result);
+		if (result.channelId !== undefined) {
+			client.cache.guilds.get(result.guildId)?.voiceStates.set(result.userId, result);
+		} else {
+			client.cache.guilds.get(result.guildId)?.voiceStates.delete(result.userId);
+		}
 
 		return resultUnoptimised;
 	};
