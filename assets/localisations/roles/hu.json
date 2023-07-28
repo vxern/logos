@@ -94,6 +94,8 @@
 	"roles.dialects.languages.armenian.roles.eastern.description": "Keleti-örményt tanulok.",
 	"roles.dialects.languages.armenian.roles.karabakh.name": "Karabahi örmény",
 	"roles.dialects.languages.armenian.roles.karabakh.description": "Hegyi-karabahi örményt tanulok.",
+	"roles.dialects.languages.armenian.roles.classical.name": "Classical Armenian",
+	"roles.dialects.languages.armenian.roles.classical.description": "I am learning Classical Armenian.",
 	"roles.regions.name": "Térségek",
 	"roles.regions.description": "A származási régiód megadására szolgáló rangok.",
 	"roles.regions.languages.armenian.roles.aragatsotn.name": "Aragats'otn / Արագածոտն",
