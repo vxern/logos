@@ -18,6 +18,7 @@ import users from "./database/adapters/users";
 import warnings from "./database/adapters/warnings";
 import { Database } from "./database/database";
 import { timeStructToMilliseconds } from "./database/structs/guild";
+import diagnostics from "./diagnostics";
 import { acknowledge, deleteReply, isAutocomplete, reply, respond } from "./interactions";
 import transformers from "./localisation/transformers";
 import { AlertService } from "./services/alert/alert";
@@ -40,16 +41,6 @@ import FancyLog from "fancy-log";
 import Fauna from "fauna";
 import * as Sentry from "sentry";
 
-interface Collector<ForEvent extends keyof Discord.EventHandlers> {
-	filter: (...args: Parameters<Discord.EventHandlers[ForEvent]>) => boolean;
-	limit?: number;
-	removeAfter?: number;
-	onCollect: (...args: Parameters<Discord.EventHandlers[ForEvent]>) => void;
-	onEnd: () => void;
-}
-
-type Event = keyof Discord.EventHandlers;
-
 type Client = {
 	metadata: {
 		environment: {
@@ -65,7 +56,7 @@ type Client = {
 		};
 		supportedTranslationLanguages: SupportedLanguage[];
 	};
-	log: Record<"debug" | keyof typeof FancyLog, (...args: unknown[]) => void>;
+	log: Logger;
 	cache: {
 		guilds: Map<bigint, Logos.Guild>;
 		users: Map<bigint, Logos.User>;
@@ -76,7 +67,7 @@ type Client = {
 			previous: Map<bigint, Logos.Message>;
 		};
 	};
-	database: Database;
+	database: { log: Logger } & Database;
 	commands: {
 		commands: Record<keyof typeof commandsRaw, Command>;
 		handlers: {
@@ -118,6 +109,18 @@ type Client = {
 	};
 };
 
+interface Collector<ForEvent extends keyof Discord.EventHandlers> {
+	filter: (...args: Parameters<Discord.EventHandlers[ForEvent]>) => boolean;
+	limit?: number;
+	removeAfter?: number;
+	onCollect: (...args: Parameters<Discord.EventHandlers[ForEvent]>) => void;
+	onEnd: () => void;
+}
+
+type Event = keyof Discord.EventHandlers;
+
+type Logger = Record<"debug" | keyof typeof FancyLog, (...args: unknown[]) => void>;
+
 function createClient(
 	metadata: Client["metadata"],
 	features: Client["features"],
@@ -130,23 +133,7 @@ function createClient(
 
 	return {
 		metadata,
-		log: {
-			debug: (...args: unknown[]) => {
-				FancyLog.info(...args);
-			},
-			info: (...args: unknown[]) => {
-				FancyLog.info(...args);
-			},
-			dir: (...args: unknown[]) => {
-				FancyLog.dir(...args);
-			},
-			error: (...args: unknown[]) => {
-				FancyLog.error(...args);
-			},
-			warn: (...args: unknown[]) => {
-				FancyLog.warn(...args);
-			},
-		},
+		log: createLogger("client"),
 		cache: {
 			guilds: new Map(),
 			users: new Map(),
@@ -158,6 +145,7 @@ function createClient(
 			},
 		},
 		database: {
+			log: createLogger("database"),
 			client: new Fauna.Client({
 				secret: metadata.environment.faunaSecret,
 				domain: "db.us.fauna.com",
@@ -221,6 +209,38 @@ function createClient(
 			},
 			// @ts-ignore: Late assignment.
 			status: "late_assignment",
+		},
+	};
+}
+
+type LoggerType = "client" | "database";
+function createLogger(type: LoggerType): Logger {
+	let typeDisplayed: string;
+	switch (type) {
+		case "client": {
+			typeDisplayed = "[CL]";
+			break;
+		}
+		case "database": {
+			typeDisplayed = "[DB]";
+			break;
+		}
+	}
+	return {
+		debug: (...args: unknown[]) => {
+			FancyLog.info(typeDisplayed, ...args);
+		},
+		info: (...args: unknown[]) => {
+			FancyLog.info(typeDisplayed, ...args);
+		},
+		dir: (...args: unknown[]) => {
+			FancyLog.dir(typeDisplayed, ...args);
+		},
+		error: (...args: unknown[]) => {
+			FancyLog.error(typeDisplayed, ...args);
+		},
+		warn: (...args: unknown[]) => {
+			FancyLog.warn(typeDisplayed, ...args);
 		},
 	};
 }
@@ -349,10 +369,19 @@ async function initialiseClient(
 					dispatchEvent(client, guild.id, "guildCreate", { args: [bot, guild] });
 				},
 				async guildDelete(bot, id, shardId) {
-					const guildId = id;
-					client.cache.guilds.delete(guildId);
+					const guild = client.cache.guilds.get(id);
+					if (guild === undefined) {
+						return undefined;
+					}
+					client.cache.guilds.delete(guild.id);
 
-					dispatchEvent(client, guildId, "guildDelete", { args: [bot, guildId, shardId] });
+					const runningServices = client.services.local.get(guild.id) ?? [];
+					client.services.local.delete(guild.id);
+					for (const runningService of runningServices) {
+						runningService.stop(bot);
+					}
+
+					dispatchEvent(client, guild.id, "guildDelete", { args: [bot, guild.id, shardId] });
 				},
 				async guildUpdate(bot, guild) {
 					dispatchEvent(client, guild.id, "guildUpdate", { args: [bot, guild] });
@@ -406,6 +435,8 @@ function overrideDefaultEventHandlers(bot: Discord.Bot): Discord.Bot {
 }
 
 async function handleGuildCreate(client: Client, bot: Discord.Bot, guild: Discord.Guild): Promise<void> {
+	client.log.info(`Logos added to "${guild.name}" (ID ${guild.id}).`);
+
 	const guildDocument = await client.database.adapters.guilds.getOrFetchOrCreate(
 		client,
 		"id",
@@ -577,20 +608,25 @@ async function handleGuildCreate(client: Client, bot: Discord.Bot, guild: Discor
 	}
 
 	await Discord.upsertGuildApplicationCommands(bot, guild.id, guildCommands).catch((reason) =>
-		client.log.warn(`Failed to upsert commands: ${reason}`),
+		client.log.warn(`Failed to upsert commands on ${diagnostics.display.guild(guild)}: ${reason}`),
 	);
 
-	client.log.info(`Fetching ~${guild.memberCount} members on guild with ID ${guild.id}...`);
+	client.log.info(`Fetching ~${guild.memberCount} members of ${diagnostics.display.guild(guild)}...`);
 
 	await fetchMembers(bot, guild.id, { limit: 0, query: "" }).catch((reason) =>
-		client.log.warn(`Failed to fetch members for guild with ID ${guild.id}: ${reason}`),
+		client.log.warn(`Failed to fetch members of ${diagnostics.display.guild(guild)}: ${reason}`),
 	);
 
-	client.log.info(`Fetched ~${guild.memberCount} members on guild with ID ${guild.id}.`);
+	client.log.info(`Fetched ~${guild.memberCount} members of ${diagnostics.display.guild(guild)}.`);
 
+	client.log.info(`Starting ${services.length} service(s) on ${diagnostics.display.guild(guild)}...`);
+	const promises = [];
 	for (const service of services) {
-		service.start(bot);
+		promises.push(service.start(bot));
 	}
+	Promise.all(promises).then((_) => {
+		client.log.info(`Services started on ${diagnostics.display.guild(guild)}.`);
+	});
 
 	client.services.local.set(guild.id, services);
 
@@ -738,7 +774,11 @@ function withCaching(client: Client, transformers: Discord.Transformers): Discor
 		const resultUnoptimised = voiceState(bot, payload);
 		const result = Logos.slimVoiceState(resultUnoptimised);
 
-		client.cache.guilds.get(result.guildId)?.voiceStates.set(result.userId, result);
+		if (result.channelId !== undefined) {
+			client.cache.guilds.get(result.guildId)?.voiceStates.set(result.userId, result);
+		} else {
+			client.cache.guilds.get(result.guildId)?.voiceStates.delete(result.userId);
+		}
 
 		return resultUnoptimised;
 	};

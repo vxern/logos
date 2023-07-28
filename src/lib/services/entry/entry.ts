@@ -7,6 +7,7 @@ import { proficiency } from "../../commands/social/roles/categories/language";
 import { stringifyValue } from "../../database/database";
 import { EntryRequest } from "../../database/structs/entry-request";
 import { Guild, timeStructToMilliseconds } from "../../database/structs/guild";
+import diagnostics from "../../diagnostics";
 import { Modal, createModalComposer, decodeId, editReply, encodeId, postponeReply, reply } from "../../interactions";
 import { snowflakeToTimestamp } from "../../utils";
 import { LocalService } from "../service";
@@ -490,7 +491,9 @@ class EntryService extends LocalService {
 
 		Discord.addRole(bot, guild.id, interaction.user.id, role.id, "User-requested role addition.").catch(() =>
 			this.client.log.warn(
-				`Failed to add role with ID ${role.id} to member with ID ${interaction.user.id} in guild with ID ${guild.id}.`,
+				`Failed to add ${diagnostics.display.role(role)} to ${diagnostics.display.user(
+					interaction.user,
+				)} on ${diagnostics.display.guild(guild.id)}.`,
 			),
 		);
 	}
@@ -523,7 +526,9 @@ class EntryService extends LocalService {
 			});
 
 			this.client.log.error(
-				`Failed to vet user with ID ${interaction.user.id} trying to enter the server due to their user document being returned as undefined.`,
+				`Failed to vet ${diagnostics.display.user(
+					interaction.user,
+				)} trying to enter the server due to their user document having been returned as undefined.`,
 			);
 
 			return false;

@@ -1,6 +1,7 @@
 import defaults from "../../../defaults";
 import * as Logos from "../../../types";
 import { DynamicVoiceChannel, Guild } from "../../database/structs/guild";
+import diagnostics from "../../diagnostics";
 import { isVoice } from "../../utils";
 import { LocalService } from "../service";
 import * as Discord from "discordeno";
@@ -80,7 +81,7 @@ class DynamicVoiceChannelService extends LocalService {
 
 			const configuration = channelIdConfigurationTuples.find(([channelId, _]) => channelId === parentChannel.id)?.[1];
 			if (configuration === undefined) {
-				return;
+				continue;
 			}
 
 			if (!parentChannelById.has(parentChannel.id)) {
@@ -151,6 +152,7 @@ class DynamicVoiceChannelService extends LocalService {
 	async voiceStateUpdate(bot: Discord.Bot, newVoiceState: Logos.VoiceState): Promise<void> {
 		const [channels, configuration, guild] = [this.channels, this.configuration, this.guild];
 		if (channels === undefined || configuration === undefined || guild === undefined) {
+			this.oldVoiceStates.set(newVoiceState.userId, newVoiceState);
 			return;
 		}
 
@@ -216,7 +218,9 @@ class DynamicVoiceChannelService extends LocalService {
 			type: Discord.ChannelTypes.GuildVoice,
 			parentId: parent.channel.parentId,
 			position: parent.channel.position,
-		}).catch(() => this.client.log.warn(`Failed to create voice channel on guild with ID ${this.guildId}.`));
+		}).catch(() =>
+			this.client.log.warn(`Failed to create voice channel on ${diagnostics.display.guild(this.guildId)}.`),
+		);
 	}
 
 	private async onDisconnect(bot: Discord.Bot, oldVoiceState: Logos.VoiceState): Promise<void> {
@@ -262,7 +266,7 @@ class DynamicVoiceChannelService extends LocalService {
 		}
 
 		Discord.deleteChannel(bot, lastVacantChannelId).catch(() =>
-			this.client.log.warn(`Failed to delete voice channel on guild with ID ${oldVoiceState.guildId}.`),
+			this.client.log.warn(`Failed to delete voice channel on ${diagnostics.display.guild(this.guildId)}.`),
 		);
 	}
 }

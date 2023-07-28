@@ -1,4 +1,5 @@
 import { Client } from "../../client";
+import diagnostics from "../../diagnostics";
 import { GlobalService } from "../service";
 import * as Discord from "discordeno";
 import * as Lavaclient from "lavaclient";
@@ -81,7 +82,9 @@ class LavalinkService extends GlobalService {
 	async voiceServerUpdate(_: Discord.Bot, voiceServerUpdate: Discord.VoiceServerUpdate): Promise<void> {
 		if (voiceServerUpdate.endpoint === undefined) {
 			this.client.log.info(
-				`Discarding voice server update for guild with ID ${voiceServerUpdate.guildId}: The endpoint is undefined.`,
+				`Discarding voice server update for ${diagnostics.display.guild(
+					voiceServerUpdate.guildId,
+				)}: The endpoint is undefined.`,
 			);
 			return;
 		}

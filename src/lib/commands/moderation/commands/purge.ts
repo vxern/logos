@@ -12,6 +12,7 @@ import {
 	pluralise,
 	resolveInteractionToMember,
 } from "../../../client";
+import diagnostics from "../../../diagnostics";
 import {
 	acknowledge,
 	createInteractionCollector,
@@ -284,7 +285,9 @@ async function handlePurgeMessages(
 		})
 			.then((collection) => Array.from(collection.values()).reverse())
 			.catch((reason) => {
-				client.log.warn(`Failed to get messages starting with message with ID ${startMessage.id}: ${reason}`);
+				client.log.warn(
+					`Failed to get messages starting with ${diagnostics.display.message(startMessage.id)}: ${reason}`,
+				);
 
 				return [];
 			});
@@ -591,9 +594,9 @@ async function handlePurgeMessages(
 	}
 
 	client.log.info(
-		`Purging ${messages.length} message(s) in channel ID ${channelId} as requested by ${diagnosticMentionUser(
-			interaction.user,
-		)}...`,
+		`Purging ${messages.length} message(s) in ${diagnostics.display.channel(
+			channelId,
+		)} as requested by ${diagnosticMentionUser(interaction.user)}...`,
 	);
 
 	const [guild, member, channel] = [
@@ -638,7 +641,7 @@ async function handlePurgeMessages(
 
 			await Discord.deleteMessages(bot, channelId, messageIds).catch((reason) => {
 				client.log.warn(
-					`Failed to delete ${messageIds.length} message(s) from channel with ID ${channelId}: ${reason}`,
+					`Failed to delete ${messageIds.length} message(s) from ${diagnostics.display.channel(channelId)}: ${reason}`,
 				);
 			});
 
@@ -650,7 +653,7 @@ async function handlePurgeMessages(
 
 	for (const message of nonBulkDeletable) {
 		await Discord.deleteMessage(bot, channelId, message.id).catch((reason) =>
-			client.log.warn(`Failed to delete message with ID ${message.id}: ${reason}`),
+			client.log.warn(`Failed to delete ${diagnostics.display.message(message)}: ${reason}`),
 		);
 
 		await new Promise((resolve) => setTimeout(resolve, 400));

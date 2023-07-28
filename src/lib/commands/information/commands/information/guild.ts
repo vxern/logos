@@ -2,6 +2,7 @@ import constants from "../../../../../constants/constants";
 import { MentionTypes, mention, timestamp } from "../../../../../formatting";
 import * as Logos from "../../../../../types";
 import { Client, localise } from "../../../../client";
+import diagnostics from "../../../../diagnostics";
 import { reply } from "../../../../interactions";
 import { getGuildIconURLFormatted, snowflakeToTimestamp } from "../../../../utils";
 import { proficiency } from "../../../social/roles/categories/language";
@@ -171,7 +172,7 @@ function getDistribution(client: Client, guild: Logos.Guild): ProficiencyRoleDis
 	const proficiencyRoleIdsUnsorted = proficiency.collection.list.map((role) => {
 		const snowflake = role.snowflakes[guildIdString];
 		if (snowflake === undefined) {
-			throw `Could not find the ID of proficiency role '${role.id}'.`;
+			throw `StateError: Could not get the snowflake of ${diagnostics.display.role(role.id)}.`;
 		}
 
 		return BigInt(snowflake);
@@ -180,7 +181,7 @@ function getDistribution(client: Client, guild: Logos.Guild): ProficiencyRoleDis
 		.map((roleId) => {
 			const role = guild.roles.get(roleId);
 			if (role === undefined) {
-				throw `StateError: The role with ID '${roleId}' no longer exists.`;
+				throw `StateError: The ${diagnostics.display.role(roleId)} no longer exists.`;
 			}
 
 			return role;

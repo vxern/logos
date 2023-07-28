@@ -1,4 +1,5 @@
 import constants from "../../../constants/constants";
+import diagnostics from "../../diagnostics";
 import {
 	CacheAdapter,
 	Database,
@@ -37,7 +38,7 @@ const adapter: Database["adapters"]["suggestions"] = {
 			$.Map($.Paginate($.Documents($.Collection("Suggestions"))), $.Lambda("suggestion", $.Get($.Var("suggestion")))),
 		);
 		if (documents === undefined) {
-			client.log.error("Failed to fetch all suggestions.");
+			client.database.log.error("Failed to fetch all suggestions.");
 			return;
 		}
 
@@ -49,7 +50,7 @@ const adapter: Database["adapters"]["suggestions"] = {
 			cache.set(client, "authorAndGuild", compositeId, document);
 		}
 
-		client.log.debug(`Fetched ${documents.length} suggestion(s).`);
+		client.database.log.debug(`Fetched ${documents.length} suggestion(s).`);
 	},
 	get: (client, parameter, parameterValue) => {
 		const [author, guild] = parameterValue;
@@ -71,7 +72,9 @@ const adapter: Database["adapters"]["suggestions"] = {
 		const userMention = getUserMentionByReference(client, suggestion.author);
 
 		if (document === undefined) {
-			client.log.error(`Failed to create suggestion submitted by ${userMention} on guild with ID ${guildId}.`);
+			client.database.log.error(
+				`Failed to create suggestion submitted by ${userMention} on ${diagnostics.display.guild(guildId)}.`,
+			);
 			return undefined;
 		}
 
@@ -79,7 +82,9 @@ const adapter: Database["adapters"]["suggestions"] = {
 
 		cache.set(client, "authorAndGuild", compositeId, document);
 
-		client.log.debug(`Created suggestion submitted by ${userMention} on guild with ID ${guildId}.`);
+		client.database.log.debug(
+			`Created suggestion submitted by ${userMention} on ${diagnostics.display.guild(guildId)}.`,
+		);
 
 		return document;
 	},
@@ -92,7 +97,9 @@ const adapter: Database["adapters"]["suggestions"] = {
 		const userMention = getUserMentionByReference(client, suggestion.data.author);
 
 		if (document === undefined) {
-			client.log.error(`Failed to update suggestion submitted by ${userMention} on guild with ID ${guildId}.`);
+			client.database.log.error(
+				`Failed to update suggestion submitted by ${userMention} on ${diagnostics.display.guild(guildId)}.`,
+			);
 			return undefined;
 		}
 
@@ -100,7 +107,9 @@ const adapter: Database["adapters"]["suggestions"] = {
 
 		cache.set(client, "authorAndGuild", compositeId, document);
 
-		client.log.debug(`Updated suggestion submitted by ${userMention} on guild with ID ${guildId}.`);
+		client.database.log.debug(
+			`Updated suggestion submitted by ${userMention} on ${diagnostics.display.guild(guildId)}.`,
+		);
 
 		return document;
 	},

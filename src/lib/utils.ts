@@ -1,6 +1,7 @@
 import * as Logos from "../types";
 import { Client } from "./client";
 import { Document } from "./database/document";
+import diagnostics from "./diagnostics";
 import * as Discord from "discordeno";
 
 type TextChannel = Logos.Channel & { type: Discord.ChannelTypes.GuildText };
@@ -115,7 +116,7 @@ async function getAllMessages(
 			limit: 100,
 			before: messages.length === 0 ? undefined : messages.at(-1)?.id,
 		}).catch(() => {
-			client.log.warn(`Failed to get all messages from channel with ID ${channelId}.`);
+			client.log.warn(`Failed to get all messages from ${diagnostics.display.channel(channelId)}.`);
 			return undefined;
 		});
 		if (bufferUnoptimised === undefined) {

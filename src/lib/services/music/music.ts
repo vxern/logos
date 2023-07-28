@@ -12,6 +12,7 @@ import {
 	listingTypeToEmoji,
 } from "../../commands/music/data/types";
 import { Guild, timeStructToMilliseconds } from "../../database/structs/guild";
+import diagnostics from "../../diagnostics";
 import { reply } from "../../interactions";
 import { LocalService } from "../service";
 import * as Discord from "discordeno";
@@ -582,7 +583,9 @@ class MusicService extends LocalService {
 				],
 			}).catch(() =>
 				this.client.log.warn(
-					`Failed to send track load failure to channel with ID ${session.channelId} on guild with ID ${this.guildId}.`,
+					`Failed to send track load failure to ${diagnostics.display.channel(
+						session.channelId,
+					)} on ${diagnostics.display.guild(this.guildId)}.`,
 				),
 			);
 
@@ -635,7 +638,9 @@ class MusicService extends LocalService {
 				],
 			}).catch(() =>
 				this.client.log.warn(
-					`Failed to send track play failure to channel with ID ${session.channelId} on guild with ID ${this.guildId}.`,
+					`Failed to send track play failure to ${diagnostics.display.channel(
+						session.channelId,
+					)} on ${diagnostics.display.guild(this.guildId)}.`,
 				),
 			);
 		};
@@ -715,7 +720,9 @@ class MusicService extends LocalService {
 				],
 			}).catch(() =>
 				this.client.log.warn(
-					`Failed to send now playing message to channel with ID ${session.channelId} on guild with ID ${this.guildId}.`,
+					`Failed to send now playing message to ${diagnostics.display.channel(
+						session.channelId,
+					)} on ${diagnostics.display.guild(this.guildId)}.`,
 				),
 			);
 		}

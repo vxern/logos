@@ -1,4 +1,5 @@
 import { defaultLanguage } from "../../../constants/language";
+import diagnostics from "../../diagnostics";
 import { CacheAdapter, Database, dispatchQuery, stringifyValue } from "../database";
 import { Document } from "../document";
 import { GuildIndexes, guildIndexParameterToIndex } from "../indexes";
@@ -33,7 +34,7 @@ const adapter: Database["adapters"]["guilds"] = {
 		client.database.fetchPromises.guilds[parameter].delete(value);
 
 		if (document === undefined) {
-			client.log.debug(`Couldn't find a guild in the database whose '${parameter}' matches '${value}'.`);
+			client.database.log.debug(`Couldn't find a guild in the database whose '${parameter}' matches '${value}'.`);
 			return undefined;
 		}
 
@@ -41,7 +42,7 @@ const adapter: Database["adapters"]["guilds"] = {
 
 		cache.set(client, "id", id, document);
 
-		client.log.debug(`Fetched guild with ID ${id}.`);
+		client.database.log.debug(`Fetched ${diagnostics.display.guild(id)}.`);
 
 		return cache.get(client, parameter, value);
 	},
@@ -125,7 +126,9 @@ const adapter: Database["adapters"]["guilds"] = {
 		const document = await dispatchQuery<Guild>(client, $.Create($.Collection("Guilds"), { data: guild }));
 
 		if (document === undefined) {
-			client.log.error(`Failed to create a guild document in the database for guild with ID ${guild.id}.`);
+			client.database.log.error(
+				`Failed to create a guild document in the database for ${diagnostics.display.guild(guild.id)}.`,
+			);
 			return undefined;
 		}
 
@@ -133,7 +136,7 @@ const adapter: Database["adapters"]["guilds"] = {
 
 		cache.set(client, "id", id, document);
 
-		client.log.debug(`Created guild document for guild with ID ${id}.`);
+		client.database.log.debug(`Created guild document for ${diagnostics.display.guild(id)}.`);
 
 		return document;
 	},
@@ -141,7 +144,9 @@ const adapter: Database["adapters"]["guilds"] = {
 		const document = await dispatchQuery<Guild>(client, $.Update(guild.ref, { data: guild.data }));
 
 		if (document === undefined) {
-			client.log.error(`Failed to update the guild document in the database for guild with ID ${guild.data.id}.`);
+			client.database.log.error(
+				`Failed to update the guild document in the database for ${diagnostics.display.guild(guild.data.id)}.`,
+			);
 			return undefined;
 		}
 
@@ -149,7 +154,7 @@ const adapter: Database["adapters"]["guilds"] = {
 
 		cache.set(client, "id", id, document);
 
-		client.log.debug(`Updated guild document for guild with ID ${id}.`);
+		client.database.log.debug(`Updated guild document for ${diagnostics.display.guild(id)}.`);
 
 		return document;
 	},
