@@ -1,5 +1,6 @@
 import constants from "../../../../../constants/constants";
 import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../../client";
+import diagnostics from "../../../../diagnostics";
 import { parseArguments, reply } from "../../../../interactions";
 import { diagnosticMentionUser } from "../../../../utils";
 import * as Discord from "discordeno";
@@ -90,7 +91,7 @@ async function handleClearTimeout(
 	}
 
 	await Discord.editMember(bot, guildId, member.id, { communicationDisabledUntil: null }).catch(() =>
-		client.log.warn(`Failed to remove timeout of member with ID ${member.id}`),
+		client.log.warn(`Failed to remove timeout of ${diagnostics.display.member(member)}.`),
 	);
 
 	if (configuration.journaling) {

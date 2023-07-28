@@ -3,6 +3,7 @@ import { defaultLocale } from "../../../../../constants/language";
 import { trim } from "../../../../../formatting";
 import * as Logos from "../../../../../types";
 import { Client, localise } from "../../../../client";
+import diagnostics from "../../../../diagnostics";
 import { acknowledge, createInteractionCollector, editReply, reply } from "../../../../interactions";
 import { OptionTemplate } from "../../../command";
 import roles, { getRoleCategories, getRoles } from "../../roles/roles";
@@ -204,7 +205,9 @@ async function createRoleSelectionMenu(
 
 				Discord.removeRole(bot, guild.id, member.id, role.id, "User-requested role removal.").catch(() =>
 					client.log.warn(
-						`Failed to remove role with ID ${role.id} from member with ID ${member.id} in guild with ID ${guild.id}.`,
+						`Failed to remove ${diagnostics.display.role(role)} from ${diagnostics.display.member(
+							member,
+						)} on ${diagnostics.display.guild(guild)}.`,
 					),
 				);
 
@@ -251,7 +254,9 @@ async function createRoleSelectionMenu(
 
 				await Discord.addRole(bot, guild.id, member.id, role.id, "User-requested role addition.").catch(() =>
 					client.log.warn(
-						`Failed to add role with ID ${role.id} to member with ID ${member.id} in guild with ID ${guild.id}.`,
+						`Failed to add ${diagnostics.display.role(role)} to ${diagnostics.display.member(
+							member,
+						)} on ${diagnostics.display.guild(guild)}.`,
 					),
 				);
 
@@ -259,7 +264,9 @@ async function createRoleSelectionMenu(
 					for (const memberRoleId of viewData.memberRolesIncludedInMenu) {
 						Discord.removeRole(bot, guild.id, member.id, memberRoleId).catch(() =>
 							client.log.warn(
-								`Failed to remove role with ID ${memberRoleId} from member with ID ${member.id} in guild with ID ${guild.id}.`,
+								`Failed to remove ${diagnostics.display.role(role)} from ${diagnostics.display.member(
+									member,
+								)} on ${diagnostics.display.guild(guild)}.`,
 							),
 						);
 
@@ -341,7 +348,7 @@ async function traverseRoleTreeAndDisplay(
 			return (menuRoles as RoleImplicit[]).map((role) => {
 				const snowflake = role.snowflakes[guildIdString];
 				if (snowflake === undefined) {
-					throw `StateError: Could not get the snowflake for a role on guild with ID ${guildIdString}.`;
+					throw `StateError: Could not get the snowflake for a role on ${diagnostics.display.guild(guildIdString)}.`;
 				}
 				return BigInt(snowflake);
 			});
@@ -349,7 +356,7 @@ async function traverseRoleTreeAndDisplay(
 		const menuRolesResolved = snowflakes.map((snowflake) => {
 			const role = data.roleData.rolesById.get(snowflake);
 			if (role === undefined) {
-				throw `StateError: Could not get the role with ID ${snowflake}.`;
+				throw `StateError: Could not get ${diagnostics.display.role(snowflake)}.`;
 			}
 			return role;
 		});

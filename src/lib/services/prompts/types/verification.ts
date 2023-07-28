@@ -7,6 +7,7 @@ import { stringifyValue } from "../../../database/database";
 import { Document } from "../../../database/document";
 import { EntryRequest } from "../../../database/structs/entry-request";
 import { User } from "../../../database/structs/user";
+import diagnostics from "../../../diagnostics";
 import { acknowledge, encodeId, reply } from "../../../interactions";
 import { diagnosticMentionUser, getGuildIconURLFormatted, snowflakeToTimestamp } from "../../../utils";
 import { Configurations, PromptService } from "../service";
@@ -425,7 +426,9 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 				authorisedOn.push(this.guildIdString);
 			}
 
-			this.client.log.info(`User with ID ${user.data.account.id} has been accepted onto guild ${guild.name}.`);
+			this.client.log.info(
+				`Accepted ${diagnostics.display.user(user.data.account.id)} onto ${diagnostics.display.guild(guild)}.`,
+			);
 
 			Discord.addRole(
 				bot,
@@ -435,7 +438,9 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 				"User-requested role addition.",
 			).catch(() =>
 				this.client.log.warn(
-					`Failed to add role with ID ${entryRequest.data.requestedRole} to submitter with ID ${user.data.account.id} in guild with ID ${guild.id}.`,
+					`Failed to add ${diagnostics.display.role(entryRequest.data.requestedRole)} to ${diagnostics.display.user(
+						user.data.account.id,
+					)} on ${diagnostics.display.guild(guild)}.`,
 				),
 			);
 		} else if (isRejected) {
@@ -445,12 +450,16 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 				rejectedOn.push(this.guildIdString);
 			}
 
-			this.client.log.info(`User with ID ${user.data.account.id} has been rejected from guild ${guild.name}.`);
+			this.client.log.info(
+				`Rejected ${diagnostics.display.user(user.data.account.id)} from ${diagnostics.display.guild(guild)}.`,
+			);
 
 			Discord.banMember(bot, this.guildId, submitter.id, {
 				reason: "Voted to reject entry request.",
 			}).catch(() =>
-				this.client.log.warn(`Failed to ban member with ID ${user.data.account.id} on guild with ID ${this.guildId}.`),
+				this.client.log.warn(
+					`Failed to ban ${diagnostics.display.user(user.data.account.id)} on ${diagnostics.display.guild(guild)}.`,
+				),
 			);
 		}
 

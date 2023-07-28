@@ -55,7 +55,7 @@ const adapter: Database["adapters"]["users"] = {
 		client.database.fetchPromises.users[parameter].delete(value);
 
 		if (document === undefined) {
-			client.log.debug(`Couldn't find a user in the database whose '${parameter}' matches '${value}'.`);
+			client.database.log.debug(`Couldn't find a user in the database whose '${parameter}' matches '${value}'.`);
 			return undefined;
 		}
 
@@ -66,7 +66,7 @@ const adapter: Database["adapters"]["users"] = {
 		cache.set(client, "id", id, document);
 
 		const userMention = getUserMentionByReference(client, document.ref);
-		client.log.debug(`Fetched user document for ${userMention}.`);
+		client.database.log.debug(`Fetched user document for ${userMention}.`);
 
 		return cache.get(client, parameter, value);
 	},
@@ -95,7 +95,7 @@ const adapter: Database["adapters"]["users"] = {
 		const userMention = mentionUser(user_, idAsNumber);
 
 		if (document === undefined) {
-			client.log.error(`Failed to create a user document in the database for ${userMention}.`);
+			client.database.log.error(`Failed to create a user document in the database for ${userMention}.`);
 			return undefined;
 		}
 
@@ -105,7 +105,7 @@ const adapter: Database["adapters"]["users"] = {
 		cache.set(client, "reference", referenceId, document);
 		cache.set(client, "id", id, document);
 
-		client.log.debug(`Created user document for ${userMention}.`);
+		client.database.log.debug(`Created user document for ${userMention}.`);
 
 		return document;
 	},
@@ -117,7 +117,7 @@ const adapter: Database["adapters"]["users"] = {
 		const userMention = mentionUser(user_, idAsNumber);
 
 		if (document === undefined) {
-			client.log.error(`Failed to create a user document in the database for ${userMention}.`);
+			client.database.log.error(`Failed to create a user document in the database for ${userMention}.`);
 			return undefined;
 		}
 
@@ -127,7 +127,7 @@ const adapter: Database["adapters"]["users"] = {
 		cache.set(client, "reference", referenceId, document);
 		cache.set(client, "id", id, document);
 
-		client.log.debug(`Updated user document for ${userMention}.`);
+		client.database.log.debug(`Updated user document for ${userMention}.`);
 
 		return document;
 	},

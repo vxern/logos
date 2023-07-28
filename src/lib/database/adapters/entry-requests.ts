@@ -1,4 +1,5 @@
 import constants from "../../../constants/constants";
+import diagnostics from "../../diagnostics";
 import { CacheAdapter, Database, dispatchQuery, getUserMentionByReference, stringifyValue } from "../database";
 import { Document } from "../document";
 import { EntryRequestIndexes } from "../indexes";
@@ -29,7 +30,7 @@ const adapter: Database["adapters"]["entryRequests"] = {
 			),
 		);
 		if (documents === undefined) {
-			client.log.error("Failed to fetch all entry requests.");
+			client.database.log.error("Failed to fetch all entry requests.");
 			return;
 		}
 
@@ -41,7 +42,7 @@ const adapter: Database["adapters"]["entryRequests"] = {
 			cache.set(client, "submitterAndGuild", compositeId, document);
 		}
 
-		client.log.debug(`Fetched ${documents.length} entry request(s).`);
+		client.database.log.debug(`Fetched ${documents.length} entry request(s).`);
 	},
 	get: (client, parameter, parameterValue) => {
 		const [submitter, guild] = parameterValue;
@@ -63,7 +64,9 @@ const adapter: Database["adapters"]["entryRequests"] = {
 		const guildId = stringifyValue(entryRequest.guild);
 
 		if (document === undefined) {
-			client.log.error(`Failed to create entry request for ${userMention} on guild with ID ${guildId}.`);
+			client.database.log.error(
+				`Failed to create entry request for ${userMention} on ${diagnostics.display.guild(guildId)}.`,
+			);
 			return undefined;
 		}
 
@@ -71,7 +74,7 @@ const adapter: Database["adapters"]["entryRequests"] = {
 
 		cache.set(client, "submitterAndGuild", compositeId, document);
 
-		client.log.debug(`Created entry request for ${userMention} on guild with ID ${guildId}.`);
+		client.database.log.debug(`Created entry request for ${userMention} on ${diagnostics.display.guild(guildId)}.`);
 
 		return document;
 	},
@@ -84,7 +87,9 @@ const adapter: Database["adapters"]["entryRequests"] = {
 		const userMention = getUserMentionByReference(client, entryRequest.data.submitter);
 
 		if (document === undefined) {
-			client.log.error(`Failed to update entry request for ${userMention} on guild with ID ${guildId}.`);
+			client.database.log.error(
+				`Failed to update entry request for ${userMention} on ${diagnostics.display.guild(guildId)}.`,
+			);
 			return undefined;
 		}
 
@@ -92,7 +97,7 @@ const adapter: Database["adapters"]["entryRequests"] = {
 
 		cache.set(client, "submitterAndGuild", compositeId, document);
 
-		client.log.debug(`Updated entry request for ${userMention} on guild with ID ${guildId}.`);
+		client.database.log.debug(`Updated entry request for ${userMention} on ${diagnostics.display.guild(guildId)}.`);
 
 		return document;
 	},

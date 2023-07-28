@@ -5,6 +5,7 @@ import { stringifyValue } from "../../database/database";
 import { BaseDocumentProperties, Document } from "../../database/document";
 import { Guild } from "../../database/structs/guild";
 import { User } from "../../database/structs/user";
+import diagnostics from "../../diagnostics";
 import { createInteractionCollector, decodeId } from "../../interactions";
 import { getAllMessages } from "../../utils";
 import { LocalService } from "../service";
@@ -221,7 +222,9 @@ abstract class PromptService<
 		// Delete the message and allow the bot to handle the deletion.
 		Discord.deleteMessage(bot, message.channelId, message.id).catch(() =>
 			this.client.log.warn(
-				`Failed to delete prompt with ID ${message.id} from channel with ID ${message.channelId} on guild with ID ${message.guildId}.`,
+				`Failed to delete prompt ${diagnostics.display.message(message)} from ${diagnostics.display.channel(
+					message.channelId,
+				)} on ${diagnostics.display.guild(message.guildId ?? 0n)}.`,
 			),
 		);
 	}
@@ -305,7 +308,7 @@ abstract class PromptService<
 		const message = await Discord.sendMessage(bot, channelId, content)
 			.then((message) => Logos.slimMessage(message))
 			.catch(() => {
-				this.client.log.warn(`Failed to send message in channel with ID ${channelId}.`);
+				this.client.log.warn(`Failed to send message to ${diagnostics.display.channel(channelId)}.`);
 				return undefined;
 			});
 

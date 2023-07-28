@@ -12,6 +12,8 @@ import * as csv from "csv-parse/sync";
 const dictionaryAdapters: DictionaryAdapter[] = [dexonline, wiktionary];
 
 function loadDictionaryAdapters(): Map<Language, DictionaryAdapter[]> {
+	console.info("[Dictionaries] Loading dictionary adapters...");
+
 	const result = new Map<Language, DictionaryAdapter[]>();
 
 	for (const language of supportedLanguages) {
@@ -29,11 +31,15 @@ function loadDictionaryAdapters(): Map<Language, DictionaryAdapter[]> {
 		adapters.sort((a, b) => b.provides.length - a.provides.length);
 	}
 
+	console.info(`[Dictionaries] Loaded ${dictionaryAdapters.length} dictionar(y/ies)...`);
+
 	return result;
 }
 
 /** Loads dictionary adapters and sentence lists. */
 function loadSentencePairs(languageFileContents: [Language, string][]): Map<Language, SentencePair[]> {
+	console.info(`[Sentences] Loading sentence pairs for ${languageFileContents.length} language(s)...`);
+
 	const result = new Map<Language, SentencePair[]>();
 
 	for (const language of supportedLanguages) {
@@ -52,6 +58,12 @@ function loadSentencePairs(languageFileContents: [Language, string][]): Map<Lang
 			result.get(language)?.push({ sentence, translation });
 		}
 	}
+
+	console.info(
+		`[Sentences] Loaded ${Array.from(result.values()).flat().length} sentence pair(s) spanning ${
+			languageFileContents.length
+		} language(s).`,
+	);
 
 	return result;
 }
@@ -75,6 +87,8 @@ interface SupportedLanguage {
 }
 
 async function getSupportedLanguages(environment: Client["metadata"]["environment"]): Promise<SupportedLanguage[]> {
+	console.info("[Translations] Getting list of supported translation languages from DeepL...");
+
 	const response = await fetch(
 		addParametersToURL(constants.endpoints.deepl.languages, {
 			auth_key: environment.deeplSecret,
@@ -85,13 +99,16 @@ async function getSupportedLanguages(environment: Client["metadata"]["environmen
 		return [];
 	}
 
-	const results = (await response.json().catch(() => [])) as DeepLSupportedLanguage[];
-
-	return results.map((result) => ({
+	const resultsRaw = (await response.json().catch(() => [])) as DeepLSupportedLanguage[];
+	const results = resultsRaw.map((result) => ({
 		name: result.name,
 		code: result.language,
 		supportsFormality: result.supports_formality,
 	}));
+
+	console.info(`[Translations] List of supported translation languages features ${results.length} language(s).`);
+
+	return results;
 }
 
 function resolveToSupportedLanguage(client: Client, languageOrCode: string): SupportedLanguage | undefined {

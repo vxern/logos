@@ -2,6 +2,7 @@ import * as Logos from "../../../types";
 import { Client } from "../../client";
 import { Document } from "../../database/document";
 import { Guild } from "../../database/structs/guild";
+import diagnostics from "../../diagnostics";
 import { getAllMessages, getGuildIconURLFormatted } from "../../utils";
 import { LocalService } from "../service";
 import * as Discord from "discordeno";
@@ -85,7 +86,7 @@ abstract class NoticeService<NoticeType extends NoticeTypes> extends LocalServic
 			return;
 		}
 
-		this.client.log.info(`Registering ${this.type} notices on ${guild.name} (${guild.id})...`);
+		this.client.log.info(`Registering ${this.type} notices on ${diagnostics.display.guild(guild)}...`);
 
 		const expectedContent = this.generateNotice();
 		if (expectedContent === undefined) {
@@ -187,7 +188,9 @@ abstract class NoticeService<NoticeType extends NoticeTypes> extends LocalServic
 		// Delete the message and allow the bot to handle the deletion.
 		Discord.deleteMessage(bot, message.channelId, message.id).catch(() =>
 			this.client.log.warn(
-				`Failed to delete notice with ID ${message.id} from channel with ID ${message.channelId} on guild with ID ${message.guildId}.`,
+				`Failed to delete notice ${diagnostics.display.message(message)} from ${diagnostics.display.channel(
+					message.channelId,
+				)} on ${diagnostics.display.guild(message.guildId ?? 0n)}.`,
 			),
 		);
 	}
@@ -214,7 +217,7 @@ abstract class NoticeService<NoticeType extends NoticeTypes> extends LocalServic
 		const message = await Discord.sendMessage(bot, channelId, contents)
 			.then((message) => Logos.slimMessage(message))
 			.catch(() => {
-				this.client.log.warn(`Failed to send message in channel with ID ${channelId}.`);
+				this.client.log.warn(`Failed to send message to ${diagnostics.display.channel(channelId)}.`);
 				return undefined;
 			});
 

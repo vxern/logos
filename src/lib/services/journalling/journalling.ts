@@ -1,4 +1,5 @@
 import { Guild } from "../../database/structs/guild";
+import diagnostics from "../../diagnostics";
 import { LocalService } from "../service";
 import { Events, MessageGenerators } from "./generator";
 import generators from "./generators";
@@ -68,7 +69,9 @@ class JournallingService extends LocalService {
 					color: journalEntryGenerator.color,
 				},
 			],
-		}).catch(() => this.client.log.warn(`Failed to log '${event}' event on guild with ID ${this.guildId}.`));
+		}).catch(() =>
+			this.client.log.warn(`Failed to log '${event}' event on ${diagnostics.display.guild(this.guildId)}.`),
+		);
 	}
 
 	async guildBanAdd(bot: Discord.Bot, user: Discord.User, guildId: bigint): Promise<void> {

@@ -270,7 +270,7 @@ async function dispatchQuery<
 		}
 
 		Sentry.captureException(exception);
-		client.log.error(`${exception.message} ~ ${exception.description}`);
+		client.database.log.error(`${exception.message} ~ ${exception.description}`);
 
 		return undefined;
 	}

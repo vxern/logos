@@ -4,6 +4,7 @@ import defaults from "../../../../defaults";
 import { MentionTypes, mention } from "../../../../formatting";
 import { Client, autocompleteMembers, localise, pluralise, resolveInteractionToMember } from "../../../client";
 import { timeStructToMilliseconds } from "../../../database/structs/guild";
+import diagnostics from "../../../diagnostics";
 import { parseArguments, reply } from "../../../interactions";
 import { diagnosticMentionUser } from "../../../utils";
 import { CommandTemplate } from "../../command";
@@ -180,7 +181,7 @@ async function handleWarnUser([client, bot]: [Client, Discord.Bot], interaction:
 
 			Discord.editMember(bot, guild.id, member.id, {
 				communicationDisabledUntil: Date.now() + timeoutMilliseconds,
-			}).catch(() => client.log.warn(`Failed to edit timeout state of member with ID ${member.id}.`));
+			}).catch(() => client.log.warn(`Failed to edit timeout state of ${diagnostics.display.member(member)}.`));
 		} else {
 			strings = {
 				title: localise(client, "warn.strings.limitSurpassed.title", defaultLocale)(),

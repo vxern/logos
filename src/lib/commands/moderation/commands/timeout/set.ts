@@ -2,6 +2,7 @@ import constants from "../../../../../constants/constants";
 import time from "../../../../../constants/time";
 import { MentionTypes, mention, timestamp } from "../../../../../formatting";
 import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../../client";
+import diagnostics from "../../../../diagnostics";
 import { parseArguments, parseTimeExpression, reply, respond } from "../../../../interactions";
 import * as Discord from "discordeno";
 
@@ -104,7 +105,7 @@ async function handleSetTimeout([client, bot]: [Client, Discord.Bot], interactio
 	}
 
 	await Discord.editMember(bot, guildId, member.id, { communicationDisabledUntil: until }).catch(() =>
-		client.log.warn(`Failed to time member with ID ${member.id} out.`),
+		client.log.warn(`Failed to time ${diagnostics.display.member(member)} out.`),
 	);
 
 	if (configuration.journaling) {

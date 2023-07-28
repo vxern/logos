@@ -169,7 +169,7 @@ async function handleFindWord([client, bot]: [Client, Discord.Bot], interaction:
 		setTimeout(
 			() =>
 				deleteReply([client, bot], interaction).catch(() => {
-					console.warn("Failed to delete no results for word message.");
+					client.log.warn(`Failed to delete "no results for word" message.`);
 				}),
 			defaults.WARN_MESSAGE_DELETE_TIMEOUT,
 		);
