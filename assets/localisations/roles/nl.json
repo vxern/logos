@@ -94,6 +94,8 @@
 	"roles.dialects.languages.armenian.roles.eastern.description": "I am learning Eastern Armenian.",
 	"roles.dialects.languages.armenian.roles.karabakh.name": "Karabakh Armenian",
 	"roles.dialects.languages.armenian.roles.karabakh.description": "I am learning Karabakh Armenian.",
+	"roles.dialects.languages.armenian.roles.classical.name": "Classical Armenian",
+	"roles.dialects.languages.armenian.roles.classical.description": "I am learning Classical Armenian.",
 	"roles.regions.name": "Regions",
 	"roles.regions.description": "Roles specifying which area of the country one originates from.",
 	"roles.regions.languages.armenian.roles.aragatsotn.name": "Aragats'otn / Արագածոտն",
