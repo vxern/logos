@@ -37,37 +37,27 @@ class LavalinkService extends GlobalService {
 	}
 
 	async start(bot: Discord.Bot): Promise<void> {
-		this.node.on("connect", ({ took: tookMs }) =>
-			this.client.log.info(`Connected to Lavalink node. Time taken: ${tookMs} ms`),
-		);
-
 		this.node.on("error", (error) => {
-			if (error.name === "ConnectionRefused") {
+			if (error.message.includes("ECONNREFUSED")) {
 				return;
 			}
 
-			this.client.log.error(`The Lavalink node has encountered an error:\n${error}`);
+			this.client.log.error(`The audio node has encountered an error: ${error}`);
 		});
 
-		this.node.on("disconnect", async (error) => {
-			if (error.code === -1) {
-				this.client.log.warn("Unable to connect to Lavalink node. Retrying in 5 seconds...");
-				await new Promise((resolve) => setTimeout(resolve, 5000));
-			} else {
-				this.client.log.info(
-					`Disconnected from the Lavalink node. Code ${error.code}, reason: ${error.reason}\nAttempting to reconnect...`,
-				);
-			}
+		this.node.on("disconnect", async (_) => {
+			this.client.log.warn("Unable to reach audio node. Attempting to reconnect...");
 
-			this.connect(bot);
+			await new Promise((resolve) => setTimeout(resolve, 5000));
+
+			this.node.connect(bot.id.toString());
 		});
 
-		return this.connect(bot);
-	}
+		this.node.on("connect", ({ took: tookMs }) =>
+			this.client.log.info(`Connected to audio node. Time taken: ${tookMs} ms`),
+		);
 
-	private async connect(bot: Discord.Bot): Promise<void> {
-		this.client.log.info("Connecting to Lavalink node...");
-		this.node.connect(bot.id.toString());
+		return this.node.connect(bot.id.toString());
 	}
 
 	async voiceStateUpdate(_: Discord.Bot, voiceState: Discord.VoiceState): Promise<void> {

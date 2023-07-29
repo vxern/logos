@@ -38,7 +38,11 @@ interface Session {
 		queue: SongListing[];
 	};
 
+	startedAt: number;
+	restoreAt: number;
+
 	flags: {
+		isDisconnected: boolean;
 		isDestroyed: boolean;
 		loop: {
 			song: boolean;
@@ -202,6 +206,11 @@ class MusicService extends LocalService {
 		this.session = undefined;
 	}
 
+	async start(bot: Discord.Bot): Promise<void> {
+		this.client.services.music.lavalink.node.on("disconnect", () => this.handleConnectionLost(bot));
+		this.client.services.music.lavalink.node.on("connect", () => this.handleConnectionRestored(bot));
+	}
+
 	async voiceStateUpdate(bot: Discord.Bot, __: Discord.VoiceState): Promise<void> {
 		const [guild, session] = [this.guild, this.session];
 		if (guild === undefined || session === undefined) {
@@ -238,7 +247,14 @@ class MusicService extends LocalService {
 				current: undefined,
 				queue: [],
 			},
-			flags: { isDestroyed: false, loop: { song: false, collection: false }, breakLoop: false },
+			startedAt: 0,
+			restoreAt: 0,
+			flags: {
+				isDisconnected: false,
+				isDestroyed: false,
+				loop: { song: false, collection: false },
+				breakLoop: false,
+			},
 		};
 
 		this.session = session;
@@ -256,11 +272,89 @@ class MusicService extends LocalService {
 
 		session.events.emit("stop");
 		session.player.removeAllListeners();
-		session.player.stop();
-		session.player.pause(false);
+		await session.player.stop();
+		await session.player.pause(false);
 		session.player.disconnect();
 
 		clearTimeout(session.disconnectTimeout);
+	}
+
+	handleConnectionLost(bot: Discord.Bot): void {
+		// Discord.leaveVoiceChannel(bot, this.guildId);
+
+		const session = this.session;
+		if (session === undefined) {
+			return;
+		}
+
+		if (session.flags.isDisconnected) {
+			return;
+		}
+
+		const now = Date.now();
+
+		const strings = {
+			title: localise(this.client, "music.strings.outage.halted.title", defaultLocale)(),
+			description: {
+				outage: localise(this.client, "music.strings.outage.halted.description.outage", defaultLocale)(),
+				noLoss: localise(this.client, "music.strings.outage.halted.description.noLoss", defaultLocale)(),
+			},
+		};
+
+		Discord.sendMessage(bot, session.channelId, {
+			embeds: [
+				{
+					title: strings.title,
+					description: `${strings.description.outage}\n\n${strings.description.noLoss}`,
+					color: constants.colors.peach,
+				},
+			],
+		}).catch(() => this.client.log.warn("Failed to send audio halted message."));
+
+		session.player.removeAllListeners();
+
+		session.flags.isDisconnected = true;
+
+		const currentSong = this.currentSong;
+		if (currentSong === undefined) {
+			return;
+		}
+
+		session.restoreAt = session.restoreAt + (now - session.startedAt);
+	}
+
+	async handleConnectionRestored(bot: Discord.Bot): Promise<void> {
+		const oldSession = this.session;
+		if (oldSession === undefined) {
+			return;
+		}
+
+		if (!oldSession.flags.isDisconnected) {
+			return;
+		}
+
+		oldSession.flags.isDisconnected = false;
+
+		const currentSong = this.currentSong;
+		if (currentSong === undefined) {
+			this.destroySession();
+			return;
+		}
+
+		await this.destroySession();
+		await this.createSession(oldSession.channelId);
+
+		const newSession = this.session;
+		if (newSession === undefined) {
+			return;
+		}
+
+		this.session = { ...oldSession, player: newSession.player };
+
+		newSession.player.connect(newSession.channelId.toString(), { deafened: true });
+		newSession.player.connect(newSession.channelId.toString(), { deafened: true });
+
+		this.loadSong(bot, currentSong);
 	}
 
 	verifyVoiceState(bot: Discord.Bot, interaction: Discord.Interaction, action: "manage" | "check"): boolean {
@@ -366,6 +460,32 @@ class MusicService extends LocalService {
 
 		const session = this.session;
 		if (session === undefined) {
+			return false;
+		}
+
+		if (session.flags.isDisconnected) {
+			const strings = {
+				title: localise(this.client, "music.strings.outage.cannotManage.title", interaction.locale)(),
+				description: {
+					outage: localise(this.client, "music.strings.outage.cannotManage.description.outage", interaction.locale)(),
+					backUpSoon: localise(
+						this.client,
+						"music.strings.outage.cannotManage.description.backUpSoon",
+						interaction.locale,
+					)(),
+				},
+			};
+
+			reply([this.client, bot], interaction, {
+				embeds: [
+					{
+						title: strings.title,
+						description: `${strings.description.outage}\n\n${strings.description.backUpSoon}`,
+						color: constants.colors.peach,
+					},
+				],
+			});
+
 			return false;
 		}
 
@@ -651,7 +771,7 @@ class MusicService extends LocalService {
 				return;
 			}
 
-			session.player.off("trackException", onTrackException);
+			session.player.removeAllListeners("trackException");
 
 			if (session.flags.isDestroyed) {
 				this.setDisconnectTimeout();
@@ -663,11 +783,22 @@ class MusicService extends LocalService {
 				return;
 			}
 
+			session.restoreAt = 0;
 			this.advanceQueueAndPlay(bot);
+		};
+
+		const onTrackStart = async () => {
+			const now = Date.now();
+			session.startedAt = now;
+
+			if (session.restoreAt !== 0) {
+				session.player.seek(session.restoreAt);
+			}
 		};
 
 		session.player.once("trackException", onTrackException);
 		session.player.once("trackEnd", onTrackEnd);
+		session.player.once("trackStart", onTrackStart);
 
 		session.player.play(track.track);
 
@@ -929,6 +1060,7 @@ class MusicService extends LocalService {
 			return;
 		}
 
+		session.restoreAt = timestampMilliseconds;
 		session.player.seek(timestampMilliseconds);
 	}
 

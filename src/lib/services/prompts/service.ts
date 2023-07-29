@@ -106,7 +106,7 @@ abstract class PromptService<
 			return;
 		}
 
-		this.client.log.info(`Registering ${this.type} prompts on ${guild.name} (${guild.id})...`);
+		this.client.log.info(`Registering ${this.type} prompts on ${diagnostics.display.guild(guild)}...`);
 
 		const promptsAll = (await getAllMessages([this.client, bot], channelId)) ?? [];
 		const [valid, invalid] = this.filterPrompts(promptsAll);
