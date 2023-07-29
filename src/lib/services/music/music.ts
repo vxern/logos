@@ -280,6 +280,8 @@ class MusicService extends LocalService {
 	}
 
 	handleConnectionLost(bot: Discord.Bot): void {
+		Discord.leaveVoiceChannel(bot, this.guildId).catch(() => this.client.log.warn("Failed to leave voice channel."));
+
 		const session = this.session;
 		if (session === undefined) {
 			return;
@@ -349,7 +351,6 @@ class MusicService extends LocalService {
 
 		this.session = { ...oldSession, player: newSession.player };
 
-		newSession.player.connect(newSession.channelId.toString(), { deafened: true });
 		newSession.player.connect(newSession.channelId.toString(), { deafened: true });
 
 		this.loadSong(bot, currentSong, { paused: oldSession.player.paused, volume: oldSession.player.volume });
