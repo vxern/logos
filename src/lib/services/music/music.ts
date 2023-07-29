@@ -352,7 +352,7 @@ class MusicService extends LocalService {
 		newSession.player.connect(newSession.channelId.toString(), { deafened: true });
 		newSession.player.connect(newSession.channelId.toString(), { deafened: true });
 
-		this.loadSong(bot, currentSong);
+		this.loadSong(bot, currentSong, { paused: oldSession.player.paused, volume: oldSession.player.volume });
 
 		const strings = {
 			title: localise(this.client, "music.strings.outage.restored.title", defaultLocale)(),
@@ -684,7 +684,11 @@ class MusicService extends LocalService {
 		this.loadSong(bot, currentSong);
 	}
 
-	async loadSong(bot: Discord.Bot, song: Song | SongStream): Promise<boolean | undefined> {
+	async loadSong(
+		bot: Discord.Bot,
+		song: Song | SongStream,
+		restore?: { paused: boolean; volume: number },
+	): Promise<boolean | undefined> {
 		const session = this.session;
 		if (session === undefined) {
 			return undefined;
@@ -813,7 +817,7 @@ class MusicService extends LocalService {
 		session.player.once("trackEnd", onTrackEnd);
 		session.player.once("trackStart", onTrackStart);
 
-		session.player.play(track.track);
+		session.player.play(track.track, { pause: restore?.paused, volume: restore?.volume });
 
 		const emoji = listingTypeToEmoji[song.type];
 
