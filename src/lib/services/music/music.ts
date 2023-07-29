@@ -280,8 +280,6 @@ class MusicService extends LocalService {
 	}
 
 	handleConnectionLost(bot: Discord.Bot): void {
-		// Discord.leaveVoiceChannel(bot, this.guildId);
-
 		const session = this.session;
 		if (session === undefined) {
 			return;
@@ -355,6 +353,21 @@ class MusicService extends LocalService {
 		newSession.player.connect(newSession.channelId.toString(), { deafened: true });
 
 		this.loadSong(bot, currentSong);
+
+		const strings = {
+			title: localise(this.client, "music.strings.outage.restored.title", defaultLocale)(),
+			description: localise(this.client, "music.strings.outage.restored.description", defaultLocale)(),
+		};
+
+		Discord.sendMessage(bot, newSession.channelId, {
+			embeds: [
+				{
+					title: strings.title,
+					description: strings.description,
+					color: constants.colors.lightGreen,
+				},
+			],
+		}).catch(() => this.client.log.warn("Failed to send audio restored message."));
 	}
 
 	verifyVoiceState(bot: Discord.Bot, interaction: Discord.Interaction, action: "manage" | "check"): boolean {
