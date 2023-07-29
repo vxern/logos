@@ -33,6 +33,7 @@ import { WelcomeNoticeService } from "./services/notices/types/welcome";
 import { ReportService } from "./services/prompts/types/reports";
 import { SuggestionService } from "./services/prompts/types/suggestions";
 import { VerificationService } from "./services/prompts/types/verification";
+import { RealtimeUpdateService } from "./services/realtime-updates/service";
 import { Service } from "./services/service";
 import { StatusService } from "./services/status/service";
 import { diagnosticMentionUser, fetchMembers } from "./utils";
@@ -105,6 +106,7 @@ type Client = {
 			suggestions: Map<bigint, SuggestionService>;
 			verification: Map<bigint, VerificationService>;
 		};
+		realtimeUpdates: Map<bigint, RealtimeUpdateService>;
 		status: StatusService;
 	};
 };
@@ -207,6 +209,7 @@ function createClient(
 				suggestions: new Map(),
 				verification: new Map(),
 			},
+			realtimeUpdates: new Map(),
 			// @ts-ignore: Late assignment.
 			status: "late_assignment",
 		},
@@ -453,6 +456,11 @@ async function handleGuildCreate(client: Client, bot: Discord.Bot, guild: Discor
 
 	const guildCommands: Command[] = [commands.information];
 	const services: Service[] = [];
+
+	const realtimeUpdateService = new RealtimeUpdateService(client, guild.id, guildDocument.ref);
+	services.push(realtimeUpdateService);
+
+	client.services.realtimeUpdates.set(guild.id, realtimeUpdateService);
 
 	if (configuration.features.information.enabled) {
 		const information = configuration.features.information.features;
