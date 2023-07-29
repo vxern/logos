@@ -645,7 +645,7 @@ async function handlePurgeMessages(
 				);
 			});
 
-			await new Promise((resolve) => setTimeout(resolve, 400));
+			await new Promise((resolve) => setTimeout(resolve, 1000));
 
 			deletedCount += messageIds.length;
 		}
@@ -656,7 +656,7 @@ async function handlePurgeMessages(
 			client.log.warn(`Failed to delete ${diagnostics.display.message(message)}: ${reason}`),
 		);
 
-		await new Promise((resolve) => setTimeout(resolve, 400));
+		await new Promise((resolve) => setTimeout(resolve, 1000));
 
 		deletedCount += 1;
 	}
