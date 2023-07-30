@@ -119,7 +119,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 					this.client,
 					"entry.verification.vote.rejectMultiple.votes",
 					defaultLanguage,
-					voteInformation.rejection.required,
+					voteInformation.rejection.remaining,
 				),
 			}),
 		};
