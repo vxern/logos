@@ -78,12 +78,11 @@ async function handleSkipToTimestamp(
 		return;
 	}
 
-	if (Number.isNaN(timestampExpression)) {
+	const timestamp = Number(timestampExpression);
+	if (!Number.isSafeInteger(timestamp)) {
 		displayInvalidTimestampError([client, bot], interaction);
 		return;
 	}
-
-	const timestamp = Number(timestampExpression);
 
 	if (timestamp < 0) {
 		musicService.skipTo(0);
