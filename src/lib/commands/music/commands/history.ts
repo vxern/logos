@@ -1,7 +1,7 @@
 import constants from "../../../../constants/constants";
 import { defaultLocale } from "../../../../constants/language";
 import { Client, localise } from "../../../client";
-import { parseArguments } from "../../../interactions";
+import { parseArguments, reply } from "../../../interactions";
 import { OptionTemplate } from "../../command";
 import { show } from "../../parameters";
 import { displayListings } from "../module";
@@ -27,6 +27,32 @@ async function handleDisplayPlaybackHistory(
 
 	const musicService = client.services.music.music.get(guildId);
 	if (musicService === undefined) {
+		return;
+	}
+
+	const isVoiceStateVerified = musicService.verifyVoiceState(bot, interaction, "check");
+	if (!isVoiceStateVerified) {
+		return;
+	}
+
+	const isOccupied = musicService.isOccupied;
+	if (!isOccupied) {
+		const strings = {
+			title: localise(client, "music.strings.notPlaying.title", interaction.locale)(),
+			description: {
+				toCheck: localise(client, "music.strings.notPlaying.description.toCheck", interaction.locale)(),
+			},
+		};
+
+		reply([client, bot], interaction, {
+			embeds: [
+				{
+					title: strings.title,
+					description: strings.description.toCheck,
+					color: constants.colors.dullYellow,
+				},
+			],
+		});
 		return;
 	}
 

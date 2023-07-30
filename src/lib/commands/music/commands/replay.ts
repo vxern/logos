@@ -31,39 +31,33 @@ async function handleReplayAction(
 	}
 
 	const isVoiceStateVerified = musicService.verifyCanManagePlayback(bot, interaction);
-	if (isVoiceStateVerified === undefined || !isVoiceStateVerified) {
+	if (!isVoiceStateVerified) {
 		return;
 	}
 
 	const [current, isOccupied] = [musicService.current, musicService.isOccupied];
-	if (current === undefined || isOccupied === undefined) {
+	if (!isOccupied) {
+		const strings = {
+			title: localise(client, "music.strings.notPlaying.title", interaction.locale)(),
+			description: {
+				toManage: localise(client, "music.strings.notPlaying.description.toManage", interaction.locale)(),
+			},
+		};
+
+		reply([client, bot], interaction, {
+			embeds: [
+				{
+					title: strings.title,
+					description: strings.description.toManage,
+					color: constants.colors.dullYellow,
+				},
+			],
+		});
 		return;
 	}
 
 	if (collection) {
-		if (!isOccupied || current === undefined) {
-			const strings = {
-				title: localise(client, "music.options.replay.strings.noSongCollection.title", interaction.locale)(),
-				description: {
-					noSongCollection: localise(
-						client,
-						"music.options.replay.strings.noSongCollection.description.noSongCollection",
-						interaction.locale,
-					)(),
-				},
-			};
-
-			reply([client, bot], interaction, {
-				embeds: [
-					{
-						title: strings.title,
-						description: strings.description.noSongCollection,
-						color: constants.colors.dullYellow,
-					},
-				],
-			});
-			return;
-		} else if (!isCollection(current.content)) {
+		if (current?.content === undefined || !isCollection(current.content)) {
 			const strings = {
 				title: localise(client, "music.options.replay.strings.noSongCollection.title", interaction.locale)(),
 				description: {
@@ -91,24 +85,22 @@ async function handleReplayAction(
 			});
 			return;
 		}
-	} else {
-		if (!isOccupied || current === undefined) {
-			const strings = {
-				title: localise(client, "music.options.replay.strings.noSong.title", interaction.locale)(),
-				description: localise(client, "music.options.replay.strings.noSong.description", interaction.locale)(),
-			};
+	} else if (current?.content === undefined) {
+		const strings = {
+			title: localise(client, "music.options.replay.strings.noSong.title", interaction.locale)(),
+			description: localise(client, "music.options.replay.strings.noSong.description", interaction.locale)(),
+		};
 
-			reply([client, bot], interaction, {
-				embeds: [
-					{
-						title: strings.title,
-						description: strings.description,
-						color: constants.colors.dullYellow,
-					},
-				],
-			});
-			return;
-		}
+		reply([client, bot], interaction, {
+			embeds: [
+				{
+					title: strings.title,
+					description: strings.description,
+					color: constants.colors.dullYellow,
+				},
+			],
+		});
+		return;
 	}
 
 	musicService.replay(bot, collection ?? false);

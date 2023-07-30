@@ -174,13 +174,13 @@ class MusicService extends LocalService {
 		return session.listings.history.length === 0;
 	}
 
-	get isOccupied(): boolean | undefined {
+	get isOccupied(): boolean {
 		const session = this.session;
 		if (session === undefined) {
-			return undefined;
+			return false;
 		}
 
-		return session.player.track !== undefined;
+		return true;
 	}
 
 	get isPaused(): boolean | undefined {
@@ -431,10 +431,6 @@ class MusicService extends LocalService {
 
 	verifyCanRequestPlayback(bot: Discord.Bot, interaction: Discord.Interaction): boolean {
 		const isVoiceStateVerified = this.verifyVoiceState(bot, interaction, "manage");
-		if (isVoiceStateVerified === undefined) {
-			return false;
-		}
-
 		if (!isVoiceStateVerified) {
 			return false;
 		}
@@ -464,20 +460,12 @@ class MusicService extends LocalService {
 
 	verifyCanManagePlayback(bot: Discord.Bot, interaction: Discord.Interaction): boolean {
 		const isVoiceStateVerified = this.verifyVoiceState(bot, interaction, "manage");
-		if (isVoiceStateVerified === undefined) {
-			return false;
-		}
-
 		if (!isVoiceStateVerified) {
 			return false;
 		}
 
 		const session = this.session;
-		if (session === undefined) {
-			return false;
-		}
-
-		if (session.flags.isDisconnected) {
+		if (session?.flags.isDisconnected) {
 			const strings = {
 				title: localise(this.client, "music.strings.outage.cannotManage.title", interaction.locale)(),
 				description: {
@@ -503,7 +491,7 @@ class MusicService extends LocalService {
 			return false;
 		}
 
-		const current = session.listings.current;
+		const current = session?.listings.current;
 		if (current === undefined) {
 			return true;
 		}
@@ -891,17 +879,13 @@ class MusicService extends LocalService {
 			isCollection(session.listings.current.content)
 		) {
 			if (skipCollection || isLastInCollection(session.listings.current.content)) {
-				if (session.flags.loop.collection) {
-					session.listings.current.content.position = -1;
-				} else {
-					this.moveListingToHistory(session.listings.current);
-					session.events.emit("historyUpdate");
-					session.listings.current = undefined;
-				}
+				session.flags.loop.collection = false;
+
+				this.moveListingToHistory(session.listings.current);
+				session.events.emit("historyUpdate");
+				session.listings.current = undefined;
 			} else {
-				if (by !== undefined || to !== undefined) {
-					session.flags.loop.song = false;
-				}
+				session.flags.loop.song = false;
 
 				if (by !== undefined) {
 					session.listings.current.content.position += by - 1;
@@ -928,6 +912,7 @@ class MusicService extends LocalService {
 			}
 
 			if (listingsToMoveToHistory !== 0) {
+				session.flags.loop.song = false;
 				session.events.emit("queueUpdate");
 			}
 		}
@@ -947,24 +932,20 @@ class MusicService extends LocalService {
 			isCollection(session.listings.current.content)
 		) {
 			if (unskipCollection || isFirstInCollection(session.listings.current.content)) {
-				if (session.flags.loop.collection) {
-					session.listings.current.content.position = -1;
-				} else {
-					session.listings.current.content.position -= 1;
+				session.flags.loop.collection = false;
 
-					session.listings.queue.unshift(session.listings.current);
-					const listing = session.listings.history.pop();
-					session.events.emit("historyUpdate");
-					if (listing !== undefined) {
-						session.listings.queue.unshift(listing);
-					}
-					session.events.emit("queueUpdate");
-					session.listings.current = undefined;
+				session.listings.current.content.position -= 1;
+
+				session.listings.queue.unshift(session.listings.current);
+				const listing = session.listings.history.pop();
+				session.events.emit("historyUpdate");
+				if (listing !== undefined) {
+					session.listings.queue.unshift(listing);
 				}
+				session.events.emit("queueUpdate");
+				session.listings.current = undefined;
 			} else {
-				if (by !== undefined || to !== undefined) {
-					session.flags.loop.song = false;
-				}
+				session.flags.loop.song = false;
 
 				if (by !== undefined) {
 					session.listings.current.content.position -= by + 1;

@@ -26,7 +26,7 @@ async function handleRequestQueryPlayback(
 	}
 
 	const isVoiceStateVerified = musicService.verifyCanRequestPlayback(bot, interaction);
-	if (isVoiceStateVerified === undefined || !isVoiceStateVerified) {
+	if (!isVoiceStateVerified) {
 		return;
 	}
 
@@ -58,7 +58,7 @@ async function handleRequestPlayback(
 				{
 					title: strings.title,
 					description: `${strings.description.notFound}\n\n${strings.description.tryDifferentQuery}`,
-					color: constants.colors.red,
+					color: constants.colors.dullYellow,
 				},
 			],
 		});
@@ -81,7 +81,7 @@ async function handleRequestPlayback(
 	}
 
 	const isVoiceStateVerified = musicService.verifyCanRequestPlayback(bot, interaction);
-	if (isVoiceStateVerified === undefined || !isVoiceStateVerified) {
+	if (!isVoiceStateVerified) {
 		return;
 	}
 

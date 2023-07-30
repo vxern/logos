@@ -38,39 +38,33 @@ async function handleSkipAction([client, bot]: [Client, Discord.Bot], interactio
 	}
 
 	const isVoiceStateVerified = musicService.verifyCanManagePlayback(bot, interaction);
-	if (isVoiceStateVerified === undefined || !isVoiceStateVerified) {
+	if (!isVoiceStateVerified) {
 		return;
 	}
 
 	const [isOccupied, current, queue] = [musicService.isOccupied, musicService.current, musicService.queue];
-	if (isOccupied === undefined || queue === undefined) {
+	if (!isOccupied || current === undefined || queue === undefined) {
+		const strings = {
+			title: localise(client, "music.strings.notPlaying.title", interaction.locale)(),
+			description: {
+				toManage: localise(client, "music.strings.notPlaying.description.toManage", interaction.locale)(),
+			},
+		};
+
+		reply([client, bot], interaction, {
+			embeds: [
+				{
+					title: strings.title,
+					description: strings.description.toManage,
+					color: constants.colors.dullYellow,
+				},
+			],
+		});
 		return;
 	}
 
 	if (collection) {
-		if (!isOccupied || current === undefined) {
-			const strings = {
-				title: localise(client, "music.options.skip.strings.noSongCollection.title", interaction.locale)(),
-				description: {
-					noSongCollection: localise(
-						client,
-						"music.options.skip.strings.noSongCollection.description.noSongCollection",
-						interaction.locale,
-					)(),
-				},
-			};
-
-			reply([client, bot], interaction, {
-				embeds: [
-					{
-						title: strings.title,
-						description: strings.description.noSongCollection,
-						color: constants.colors.dullYellow,
-					},
-				],
-			});
-			return;
-		} else if (!isCollection(current.content)) {
+		if (current?.content === undefined || !isCollection(current.content)) {
 			const strings = {
 				title: localise(client, "music.options.skip.strings.noSongCollection.title", interaction.locale)(),
 				description: {
@@ -98,24 +92,22 @@ async function handleSkipAction([client, bot]: [Client, Discord.Bot], interactio
 			});
 			return;
 		}
-	} else {
-		if (!isOccupied || current === undefined) {
-			const strings = {
-				title: localise(client, "music.options.skip.strings.noSong.title", interaction.locale)(),
-				description: localise(client, "music.options.skip.strings.noSong.description", interaction.locale)(),
-			};
+	} else if (current?.content === undefined) {
+		const strings = {
+			title: localise(client, "music.options.skip.strings.noSong.title", interaction.locale)(),
+			description: localise(client, "music.options.skip.strings.noSong.description", interaction.locale)(),
+		};
 
-			reply([client, bot], interaction, {
-				embeds: [
-					{
-						title: strings.title,
-						description: strings.description,
-						color: constants.colors.dullYellow,
-					},
-				],
-			});
-			return;
-		}
+		reply([client, bot], interaction, {
+			embeds: [
+				{
+					title: strings.title,
+					description: strings.description,
+					color: constants.colors.dullYellow,
+				},
+			],
+		});
+		return;
 	}
 
 	// If both the 'to' and the 'by' parameter have been supplied.
