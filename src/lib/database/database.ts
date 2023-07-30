@@ -1,6 +1,6 @@
 import * as Logos from "../../types";
 import { Client } from "../client";
-import { diagnosticMentionUser } from "../utils";
+import diagnostics from "../diagnostics";
 import { BaseDocumentProperties, Document } from "./document";
 import {
 	EntryRequestIndexes,
@@ -287,7 +287,7 @@ async function dispatchQuery<
 }
 
 function mentionUser(user: Logos.User | undefined, id: bigint): string {
-	return user === undefined ? `an unknown user (ID ${id})` : diagnosticMentionUser(user);
+	return user === undefined ? `an unknown user (ID ${id})` : diagnostics.display.user(user);
 }
 
 function getUserMentionByReference(client: Client, reference: Fauna.values.Ref): string {

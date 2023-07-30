@@ -9,7 +9,7 @@ import { EntryRequest } from "../../../database/structs/entry-request";
 import { User } from "../../../database/structs/user";
 import diagnostics from "../../../diagnostics";
 import { acknowledge, encodeId, reply } from "../../../interactions";
-import { diagnosticMentionUser, getGuildIconURLFormatted, snowflakeToTimestamp } from "../../../utils";
+import { getGuildIconURLFormatted, snowflakeToTimestamp } from "../../../utils";
 import { Configurations, PromptService } from "../service";
 import * as Discord from "discordeno";
 
@@ -160,7 +160,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 					],
 				},
 				{
-					title: diagnosticMentionUser(user),
+					title: diagnostics.display.user(user),
 					color: constants.colors.turquoise,
 					fields: [
 						{

@@ -1,5 +1,5 @@
 import constants from "../../../../constants/constants";
-import { diagnosticMentionUser } from "../../../utils";
+import diagnostics from "../../../diagnostics";
 import { GuildEvents, MessageGenerators } from "../generator";
 
 export default {
@@ -10,7 +10,7 @@ export default {
 			return;
 		}
 
-		return `${diagnosticMentionUser(user)}'s entry request has been rejected by ${diagnosticMentionUser(byUser)}`;
+		return `${diagnostics.display.user(user)}'s entry request has been rejected by ${diagnostics.display.user(byUser)}`;
 	},
 	filter: (_, originGuildId, __, by) => originGuildId === by.guildId,
 	color: constants.colors.red,

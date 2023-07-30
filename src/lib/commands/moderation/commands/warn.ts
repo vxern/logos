@@ -6,7 +6,6 @@ import { Client, autocompleteMembers, localise, pluralise, resolveInteractionToM
 import { timeStructToMilliseconds } from "../../../database/structs/guild";
 import diagnostics from "../../../diagnostics";
 import { parseArguments, reply } from "../../../interactions";
-import { diagnosticMentionUser } from "../../../utils";
 import { CommandTemplate } from "../../command";
 import { reason, user } from "../../parameters";
 import { getActiveWarnings } from "../module";
@@ -170,7 +169,7 @@ async function handleWarnUser([client, bot]: [Client, Discord.Bot], interaction:
 					"warn.strings.limitSurpassedTimedOut.description",
 					defaultLocale,
 				)({
-					user_mention: diagnosticMentionUser(user),
+					user_mention: diagnostics.display.user(user),
 					limit: configuration.limit,
 					number: relevantWarnings.size,
 					period: pluralise(client, `units.${timeout[1]}.word`, defaultLanguage, timeout[0]),
@@ -189,7 +188,7 @@ async function handleWarnUser([client, bot]: [Client, Discord.Bot], interaction:
 					client,
 					"warn.strings.limitSurpassed.description",
 					defaultLocale,
-				)({ user_mention: diagnosticMentionUser(user), limit: configuration.limit, number: relevantWarnings.size }),
+				)({ user_mention: diagnostics.display.user(user), limit: configuration.limit, number: relevantWarnings.size }),
 			};
 		}
 
@@ -214,7 +213,7 @@ async function handleWarnUser([client, bot]: [Client, Discord.Bot], interaction:
 				client,
 				"warn.strings.limitReached.description",
 				defaultLocale,
-			)({ user_mention: diagnosticMentionUser(user), limit: defaults.WARN_LIMIT }),
+			)({ user_mention: diagnostics.display.user(user), limit: defaults.WARN_LIMIT }),
 		};
 
 		alertService?.alert(bot, {

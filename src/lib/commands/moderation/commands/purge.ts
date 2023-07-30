@@ -21,7 +21,7 @@ import {
 	parseArguments,
 	postponeReply,
 } from "../../../interactions";
-import { chunk, diagnosticMentionUser, snowflakeToTimestamp } from "../../../utils";
+import { chunk, snowflakeToTimestamp } from "../../../utils";
 import { CommandTemplate } from "../../command";
 import { user } from "../../parameters";
 import * as Discord from "discordeno";
@@ -596,7 +596,7 @@ async function handlePurgeMessages(
 	client.log.info(
 		`Purging ${messages.length} message(s) in ${diagnostics.display.channel(
 			channelId,
-		)} as requested by ${diagnosticMentionUser(interaction.user)}...`,
+		)} as requested by ${diagnostics.display.user(interaction.user)}...`,
 	);
 
 	const [guild, member, channel] = [
@@ -664,7 +664,7 @@ async function handlePurgeMessages(
 	client.log.info(
 		`Purged ${deletedCount}/${
 			messages.length
-		} message(s) in channel ID ${channelId} as requested by ${diagnosticMentionUser(interaction.user)}.`,
+		} message(s) in channel ID ${channelId} as requested by ${diagnostics.display.user(interaction.user)}.`,
 	);
 
 	if (configuration.journaling) {

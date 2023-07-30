@@ -36,7 +36,7 @@ import { VerificationService } from "./services/prompts/types/verification";
 import { RealtimeUpdateService } from "./services/realtime-updates/service";
 import { Service } from "./services/service";
 import { StatusService } from "./services/status/service";
-import { diagnosticMentionUser, fetchMembers } from "./utils";
+import { fetchMembers } from "./utils";
 import * as Discord from "discordeno";
 import FancyLog from "fancy-log";
 import Fauna from "fauna";
@@ -1055,19 +1055,21 @@ function isValidSnowflake(snowflake: string): boolean {
 function extractIDFromIdentifier(identifier: string): string | undefined {
 	return (
 		snowflakePattern.exec(identifier)?.at(1) ??
-		displayPattern.exec(identifier)?.at(2) ??
+		displayPattern.exec(identifier)?.at(1) ??
 		userMentionPattern.exec(identifier)?.at(1)
 	);
 }
 
-const displayPattern = new RegExp(/^(.{2,32}(?:#[0-9]{4})?) \(?([0-9]{16,20})\)?$/);
-const userTagPattern = new RegExp(/^(.{2,32}(?:#[0-9]{4})?)$/);
+const displayPattern = new RegExp(/^.*?\(?([0-9]{16,20})\)?$/);
+const oldUserTagPattern = new RegExp(/^([^@](?:.{1,31})?#(?:[0-9]{4}|0))$/);
+const userTagPattern = new RegExp(/^(@?.{2,32})$/);
 
 function isValidIdentifier(identifier: string): boolean {
 	return (
 		snowflakePattern.test(identifier) ||
 		userMentionPattern.test(identifier) ||
 		displayPattern.test(identifier) ||
+		oldUserTagPattern.test(identifier) ||
 		userTagPattern.test(identifier)
 	);
 }
@@ -1133,10 +1135,23 @@ function resolveIdentifierToMembers(
 			(options.excludeModerators ? !moderatorRoleIds.some((roleId) => member.roles.includes(roleId)) : true),
 	);
 
-	if (userTagPattern.test(identifier)) {
+	if (oldUserTagPattern.test(identifier)) {
+		const identifierLowercase = identifier.toLowerCase();
 		const member = members.find(
-			(member) => member.user !== undefined && `${member.user.username}#${member.user.discriminator}` === identifier,
+			(member) =>
+				member.user !== undefined &&
+				`${member.user.username.toLowerCase()}#${member.user.discriminator}`.includes(identifierLowercase),
 		);
+		if (member === undefined) {
+			return [[], false];
+		}
+
+		return [[member], true];
+	}
+
+	if (userTagPattern.test(identifier)) {
+		const identifierLowercase = identifier.toLowerCase();
+		const member = members.find((member) => member.user?.username?.toLowerCase().includes(identifierLowercase));
 		if (member === undefined) {
 			return [[], false];
 		}
@@ -1148,6 +1163,12 @@ function resolveIdentifierToMembers(
 	const matchedMembers = members.filter((member) => {
 		if (member.user?.toggles.bot && !options.includeBots) {
 			return false;
+		}
+		if (
+			member.user &&
+			`${member.user.username.toLowerCase()}#${member.user.discriminator}`.includes(identifierLowercase)
+		) {
+			return true;
 		}
 		if (member.user?.username.toLowerCase().includes(identifierLowercase)) {
 			return true;
@@ -1196,7 +1217,7 @@ async function autocompleteMembers(
 	respond(
 		[client, bot],
 		interaction,
-		users.map((user) => ({ name: diagnosticMentionUser(user), value: user.id.toString() })),
+		users.map((user) => ({ name: diagnostics.display.user(user, { prettify: true }), value: user.id.toString() })),
 	);
 }
 

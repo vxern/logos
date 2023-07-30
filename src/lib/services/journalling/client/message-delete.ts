@@ -1,6 +1,6 @@
 import constants from "../../../../constants/constants";
 import { MentionTypes, codeMultiline, mention } from "../../../../formatting";
-import { diagnosticMentionUser } from "../../../utils";
+import diagnostics from "../../../diagnostics";
 import { ClientEvents, MessageGenerators } from "../generator";
 
 export default {
@@ -16,7 +16,7 @@ export default {
 			return;
 		}
 
-		return `${diagnosticMentionUser(author)} deleted their message in ${mention(
+		return `${diagnostics.display.user(author)} deleted their message in ${mention(
 			message.channelId,
 			MentionTypes.Channel,
 		)}.

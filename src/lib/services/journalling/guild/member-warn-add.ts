@@ -1,5 +1,5 @@
 import constants from "../../../../constants/constants";
-import { diagnosticMentionUser } from "../../../utils";
+import diagnostics from "../../../diagnostics";
 import { GuildEvents, MessageGenerators } from "../generator";
 
 export default {
@@ -10,7 +10,7 @@ export default {
 			return;
 		}
 
-		return `${diagnosticMentionUser(memberUser)} has been warned by ${diagnosticMentionUser(by)} for: ${
+		return `${diagnostics.display.user(memberUser)} has been warned by ${diagnostics.display.user(by)} for: ${
 			warning.reason
 		}`;
 	},

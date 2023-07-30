@@ -15,18 +15,6 @@ function isVoice(channel: Logos.Channel): channel is VoiceChannel {
 }
 
 /**
- * Taking a user object, creates an informational mention for the user.
- *
- * @param user - The user object.
- * @returns The mention.
- */
-function diagnosticMentionUser({ username, discriminator, id }: Logos.User): string {
-	const tag = discriminator === "0" ? username : `${username}#${discriminator}`;
-
-	return `${tag} (${id})`;
-}
-
-/**
  * Taking an array, splits it into parts of equal sizes.
  *
  * @param array - The array to chunk.
@@ -186,7 +174,6 @@ function fetchMembers(
 export {
 	addParametersToURL,
 	chunk,
-	diagnosticMentionUser,
 	getAllMessages,
 	getAuthor,
 	getGuildIconURLFormatted,

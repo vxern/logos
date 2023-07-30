@@ -1,8 +1,9 @@
 import constants from "../../../../constants/constants";
 import { defaultLocale } from "../../../../constants/language";
 import { Client, localise } from "../../../client";
+import diagnostics from "../../../diagnostics";
 import { editReply, parseArguments, postponeReply, reply, respond } from "../../../interactions";
-import { addParametersToURL, diagnosticMentionUser } from "../../../utils";
+import { addParametersToURL } from "../../../utils";
 import { CommandTemplate } from "../../command";
 import { show } from "../../parameters";
 import { resolveToSupportedLanguage } from "../module";
@@ -234,7 +235,7 @@ async function handleTranslateText(
 	client.log.info(
 		`Translating a text of length ${text.length} from ${sourceLanguage.name} to ${
 			targetLanguage.name
-		} as requested by ${diagnosticMentionUser(interaction.user)} on ${guild.name}...`,
+		} as requested by ${diagnostics.display.user(interaction.user)} on ${guild.name}...`,
 	);
 
 	const locale = show ? defaultLocale : interaction.locale;
