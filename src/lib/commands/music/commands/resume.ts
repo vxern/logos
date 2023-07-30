@@ -26,26 +26,24 @@ async function handleResumePlayback(
 	}
 
 	const isVoiceStateVerified = musicService.verifyCanManagePlayback(bot, interaction);
-	if (isVoiceStateVerified === undefined || !isVoiceStateVerified) {
+	if (!isVoiceStateVerified) {
 		return;
 	}
 
 	const [isOccupied, isPaused] = [musicService.isOccupied, musicService.isPaused];
-	if (isOccupied === undefined || isPaused === undefined) {
-		return;
-	}
-
 	if (!isOccupied) {
 		const strings = {
-			title: localise(client, "music.options.resume.strings.noSong.title", interaction.locale)(),
-			description: localise(client, "music.options.resume.strings.noSong.description", interaction.locale)(),
+			title: localise(client, "music.strings.notPlaying.title", interaction.locale)(),
+			description: {
+				toManage: localise(client, "music.strings.notPlaying.description.toManage", interaction.locale)(),
+			},
 		};
 
 		reply([client, bot], interaction, {
 			embeds: [
 				{
 					title: strings.title,
-					description: strings.description,
+					description: strings.description.toManage,
 					color: constants.colors.dullYellow,
 				},
 			],
@@ -53,10 +51,14 @@ async function handleResumePlayback(
 		return;
 	}
 
+	if (isPaused === undefined) {
+		return;
+	}
+
 	if (!isPaused) {
 		const strings = {
-			title: localise(client, "music.options.resume.strings.notPaused", interaction.locale)(),
-			description: localise(client, "music.options.resume.strings.notPaused", interaction.locale)(),
+			title: localise(client, "music.options.resume.strings.notPaused.title", interaction.locale)(),
+			description: localise(client, "music.options.resume.strings.notPaused.description", interaction.locale)(),
 		};
 
 		reply([client, bot], interaction, {

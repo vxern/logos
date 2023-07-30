@@ -20,8 +20,29 @@ async function handleDisplayVolume(
 		return;
 	}
 
-	const isVoiceStateVerified = musicService.verifyCanManagePlayback(bot, interaction);
-	if (isVoiceStateVerified === undefined || !isVoiceStateVerified) {
+	const isVoiceStateVerified = musicService.verifyVoiceState(bot, interaction, "check");
+	if (!isVoiceStateVerified) {
+		return;
+	}
+
+	const isOccupied = musicService.isOccupied;
+	if (!isOccupied) {
+		const strings = {
+			title: localise(client, "music.strings.notPlaying.title", interaction.locale)(),
+			description: {
+				toCheck: localise(client, "music.strings.notPlaying.description.toCheck", interaction.locale)(),
+			},
+		};
+
+		reply([client, bot], interaction, {
+			embeds: [
+				{
+					title: strings.title,
+					description: strings.description.toCheck,
+					color: constants.colors.dullYellow,
+				},
+			],
+		});
 		return;
 	}
 

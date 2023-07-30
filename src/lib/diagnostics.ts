@@ -10,14 +10,18 @@ function isId<T>(object: Indexable<T>): object is bigint | string {
 
 const diagnostics = {
 	display: {
-		user: (userOrId: Indexable<Logos.User | Discord.User>) => {
+		user: (userOrId: Indexable<Logos.User | Discord.User>, options?: { prettify?: boolean }) => {
 			if (isId(userOrId)) {
 				return `unnamed user (ID ${userOrId})`;
 			}
 
 			const { username, discriminator, id } = userOrId;
 
-			const tag = discriminator === "0" ? username : `${username}#${discriminator}`;
+			const tag = discriminator === "0" ? `@${username}` : `${username}#${discriminator}`;
+
+			if (options?.prettify ?? false) {
+				return `${tag} · ${id}`;
+			}
 
 			return `${tag} (${id})`;
 		},

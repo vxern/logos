@@ -73,7 +73,7 @@ async function handleSetTimeout([client, bot]: [Client, Discord.Bot], interactio
 
 	let durationParsed = Number(duration);
 
-	if (Number.isNaN(durationParsed)) {
+	if (!Number.isSafeInteger(durationParsed)) {
 		const timestamp = parseTimeExpression(client, duration, interaction.locale);
 		if (timestamp === undefined) {
 			displayDurationInvalidError([client, bot], interaction);

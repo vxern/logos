@@ -1,5 +1,5 @@
 import constants from "../../../../constants/constants";
-import { diagnosticMentionUser } from "../../../utils";
+import diagnostics from "../../../diagnostics";
 import { GuildEvents, MessageGenerators } from "../generator";
 
 export default {
@@ -12,7 +12,7 @@ export default {
 
 		const messageLink = report.answers.messageLink ?? "*No message link*.";
 
-		return `${diagnosticMentionUser(authorUser)} has submitted a report.
+		return `${diagnostics.display.user(authorUser)} has submitted a report.
 
 **REASON**
 ${report.answers.reason}

@@ -23,11 +23,7 @@ async function handleDisplayBotInformation(
 		information: {
 			whoAmI: {
 				title: localise(client, "information.options.bot.strings.whoAmI.title", interaction.locale)(),
-				description: localise(
-					client,
-					"information.options.bot.strings.whoAmI.description",
-					interaction.locale,
-				)({ username: botUser.username }),
+				description: localise(client, "information.options.bot.strings.whoAmI.description", interaction.locale)(),
 				features: {
 					roles: localise(client, "information.options.bot.strings.whoAmI.features.roles", interaction.locale)(),
 					language: localise(client, "information.options.bot.strings.whoAmI.features.language", interaction.locale)(),

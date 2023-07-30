@@ -3,6 +3,7 @@ import { defaultLanguage, defaultLocale, getLanguageByLocale } from "../../../..
 import defaults from "../../../../defaults";
 import { code } from "../../../../formatting";
 import { Client, localise, pluralise } from "../../../client";
+import diagnostics from "../../../diagnostics";
 import {
 	acknowledge,
 	createInteractionCollector,
@@ -14,7 +15,7 @@ import {
 	postponeReply,
 	reply,
 } from "../../../interactions";
-import { chunk, diagnosticMentionUser } from "../../../utils";
+import { chunk } from "../../../utils";
 import { CommandTemplate } from "../../command";
 import { show } from "../../parameters";
 import { Definition, DictionaryEntry, Expression } from "../dictionaries/adapter";
@@ -90,7 +91,7 @@ async function handleFindWord([client, bot]: [Client, Discord.Bot], interaction:
 	await postponeReply([client, bot], interaction, { visible: show });
 
 	client.log.info(
-		`Looking up the word '${word}' from ${dictionaries.length} dictionaries as requested by ${diagnosticMentionUser(
+		`Looking up the word '${word}' from ${dictionaries.length} dictionaries as requested by ${diagnostics.display.user(
 			interaction.user,
 		)} on ${guild.name}...`,
 	);

@@ -1,5 +1,5 @@
 import constants from "../../../../constants/constants";
-import { diagnosticMentionUser } from "../../../utils";
+import diagnostics from "../../../diagnostics";
 import { GuildEvents, MessageGenerators } from "../generator";
 
 export default {
@@ -12,7 +12,9 @@ export default {
 
 		const comment = praise.comment ?? "None.";
 
-		return `${diagnosticMentionUser(memberUser)} has been praised by ${diagnosticMentionUser(by)}. Comment: ${comment}`;
+		return `${diagnostics.display.user(memberUser)} has been praised by ${diagnostics.display.user(
+			by,
+		)}. Comment: ${comment}`;
 	},
 	filter: (_client, originGuildId, member, _praise, _by) => originGuildId === member.guildId,
 	color: constants.colors.lightGreen,

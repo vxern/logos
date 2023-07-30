@@ -2,7 +2,6 @@ import constants from "../../../../../constants/constants";
 import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../../client";
 import diagnostics from "../../../../diagnostics";
 import { parseArguments, reply } from "../../../../interactions";
-import { diagnosticMentionUser } from "../../../../utils";
 import * as Discord from "discordeno";
 
 async function handleClearTimeoutAutocomplete(
@@ -70,7 +69,7 @@ async function handleClearTimeout(
 				client,
 				"timeout.strings.notTimedOut.description",
 				interaction.locale,
-			)({ user_mention: diagnosticMentionUser(user) }),
+			)({ user_mention: diagnostics.display.user(user) }),
 		};
 
 		reply([client, bot], interaction, {
@@ -105,7 +104,7 @@ async function handleClearTimeout(
 			client,
 			"timeout.strings.timeoutCleared.description",
 			interaction.locale,
-		)({ user_mention: diagnosticMentionUser(user) }),
+		)({ user_mention: diagnostics.display.user(user) }),
 	};
 
 	reply([client, bot], interaction, {

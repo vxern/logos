@@ -2,7 +2,7 @@ import constants from "../../../../constants/constants";
 import { defaultLocale } from "../../../../constants/language";
 import { codeMultiline } from "../../../../formatting";
 import { localise } from "../../../client";
-import { diagnosticMentionUser } from "../../../utils";
+import diagnostics from "../../../diagnostics";
 import { GuildEvents, MessageGenerators } from "../generator";
 
 export default {
@@ -19,7 +19,7 @@ export default {
 			whereFound: localise(client, "verification.fields.whereFound", defaultLocale)(),
 		};
 
-		return `${diagnosticMentionUser(user)} has submitted a request to join the server.
+		return `${diagnostics.display.user(user)} has submitted a request to join the server.
 
 **${strings.reason}**
 ${codeMultiline(entryRequest.answers.reason)}

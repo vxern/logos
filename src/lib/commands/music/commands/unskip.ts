@@ -24,10 +24,10 @@ async function handleUnskipAction(
 		to: "number",
 	});
 
-	if (songsToUnskip !== undefined && isNaN(songsToUnskip)) {
+	if (songsToUnskip !== undefined && !Number.isSafeInteger(songsToUnskip)) {
 		return;
 	}
-	if (songToUnskipTo !== undefined && isNaN(songToUnskipTo)) {
+	if (songToUnskipTo !== undefined && !Number.isSafeInteger(songToUnskipTo)) {
 		return;
 	}
 
@@ -42,7 +42,28 @@ async function handleUnskipAction(
 	}
 
 	const isVoiceStateVerified = musicService.verifyCanManagePlayback(bot, interaction);
-	if (isVoiceStateVerified === undefined || !isVoiceStateVerified) {
+	if (!isVoiceStateVerified) {
+		return;
+	}
+
+	const isOccupied = musicService.isOccupied;
+	if (!isOccupied) {
+		const strings = {
+			title: localise(client, "music.strings.notPlaying.title", interaction.locale)(),
+			description: {
+				toManage: localise(client, "music.strings.notPlaying.description.toManage", interaction.locale)(),
+			},
+		};
+
+		reply([client, bot], interaction, {
+			embeds: [
+				{
+					title: strings.title,
+					description: strings.description.toManage,
+					color: constants.colors.dullYellow,
+				},
+			],
+		});
 		return;
 	}
 

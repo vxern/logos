@@ -1,6 +1,6 @@
 import constants from "../../../../constants/constants";
 import { timestamp } from "../../../../formatting";
-import { diagnosticMentionUser } from "../../../utils";
+import diagnostics from "../../../diagnostics";
 import { GuildEvents, MessageGenerators } from "../generator";
 
 export default {
@@ -11,9 +11,9 @@ export default {
 			return;
 		}
 
-		return `${diagnosticMentionUser(memberUser)} has been timed out by ${diagnosticMentionUser(by)} until ${timestamp(
-			until,
-		)} for: ${reason}`;
+		return `${diagnostics.display.user(memberUser)} has been timed out by ${diagnostics.display.user(
+			by,
+		)} until ${timestamp(until)} for: ${reason}`;
 	},
 	filter: (_, originGuildId, member, __, ___, ____) => originGuildId === member.guildId,
 	color: constants.colors.dullYellow,

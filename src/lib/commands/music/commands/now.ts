@@ -34,46 +34,38 @@ async function handleDisplayCurrentlyPlaying(
 		return;
 	}
 
-	const isVoiceStateVerified = musicService.verifyCanManagePlayback(bot, interaction);
-	if (isVoiceStateVerified === undefined || !isVoiceStateVerified) {
+	const isVoiceStateVerified = musicService.verifyVoiceState(bot, interaction, "check");
+	if (!isVoiceStateVerified) {
 		return;
 	}
 
-	const [current, isOccupied, playingSince] = [
-		musicService.current,
-		musicService.isOccupied,
-		musicService.playingSince,
-	];
-	if (current === undefined || isOccupied === undefined) {
+	const isOccupied = musicService.isOccupied;
+	if (!isOccupied) {
+		const strings = {
+			title: localise(client, "music.strings.notPlaying.title", interaction.locale)(),
+			description: {
+				toCheck: localise(client, "music.strings.notPlaying.description.toCheck", interaction.locale)(),
+			},
+		};
+
+		reply([client, bot], interaction, {
+			embeds: [
+				{
+					title: strings.title,
+					description: strings.description.toCheck,
+					color: constants.colors.dullYellow,
+				},
+			],
+		});
 		return;
 	}
+
+	const [current, playingSince] = [musicService.current, musicService.playingSince];
 
 	const locale = show ? defaultLocale : interaction.locale;
 
 	if (collection) {
-		if (!isOccupied || current === undefined) {
-			const strings = {
-				title: localise(client, "music.options.now.strings.noSongCollection.title", interaction.locale)(),
-				description: {
-					noSongCollection: localise(
-						client,
-						"music.options.now.strings.noSongCollection.description.noSongCollection",
-						interaction.locale,
-					)(),
-				},
-			};
-
-			reply([client, bot], interaction, {
-				embeds: [
-					{
-						title: strings.title,
-						description: strings.description.noSongCollection,
-						color: constants.colors.dullYellow,
-					},
-				],
-			});
-			return;
-		} else if (!isCollection(current.content)) {
+		if (current?.content === undefined || !isCollection(current.content)) {
 			const strings = {
 				title: localise(client, "music.options.now.strings.noSongCollection.title", interaction.locale)(),
 				description: {
@@ -101,27 +93,25 @@ async function handleDisplayCurrentlyPlaying(
 			});
 			return;
 		}
-	} else {
-		if (!isOccupied || current === undefined) {
-			const strings = {
-				title: localise(client, "music.options.now.strings.noSong.title", interaction.locale)(),
-				description: localise(client, "music.options.now.strings.noSong.description", interaction.locale)(),
-			};
+	} else if (current?.content === undefined) {
+		const strings = {
+			title: localise(client, "music.options.now.strings.noSong.title", interaction.locale)(),
+			description: localise(client, "music.options.now.strings.noSong.description", interaction.locale)(),
+		};
 
-			reply([client, bot], interaction, {
-				embeds: [
-					{
-						title: strings.title,
-						description: strings.description,
-						color: constants.colors.dullYellow,
-					},
-				],
-			});
-			return;
-		}
+		reply([client, bot], interaction, {
+			embeds: [
+				{
+					title: strings.title,
+					description: strings.description,
+					color: constants.colors.dullYellow,
+				},
+			],
+		});
+		return;
 	}
 
-	if (collection) {
+	if (isCollection(current.content)) {
 		const collection = current.content as SongCollection;
 
 		const strings = {
@@ -197,18 +187,6 @@ async function handleDisplayCurrentlyPlaying(
 					title: `${constants.symbols.music.nowPlaying} ${strings.nowPlaying}`,
 					color: constants.colors.blue,
 					fields: [
-						...(isCollection(current.content)
-							? [
-									{
-										name: strings.collection,
-										value: current.content.title,
-									},
-									{
-										name: strings.track,
-										value: `${current.content.position + 1}/${current.content.songs.length}`,
-									},
-							  ]
-							: []),
 						{
 							name: strings.title,
 							value: `[${song.title}](${song.url})`,
