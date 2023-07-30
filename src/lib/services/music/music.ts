@@ -272,9 +272,9 @@ class MusicService extends LocalService {
 
 		session.events.emit("stop");
 		session.player.removeAllListeners();
-		await session.player.stop();
-		await session.player.pause(false);
-		session.player.disconnect();
+		session.player.playing = false;
+		session.player.connected = false;
+		session.player.destroy();
 
 		clearTimeout(session.disconnectTimeout);
 	}
@@ -372,8 +372,34 @@ class MusicService extends LocalService {
 	}
 
 	verifyVoiceState(bot: Discord.Bot, interaction: Discord.Interaction, action: "manage" | "check"): boolean {
-		const guild = this.guild;
+		const [guild, session] = [this.guild, this.session];
 		if (guild === undefined) {
+			return false;
+		}
+
+		if (session?.flags.isDisconnected) {
+			const strings = {
+				title: localise(this.client, "music.strings.outage.cannotManage.title", interaction.locale)(),
+				description: {
+					outage: localise(this.client, "music.strings.outage.cannotManage.description.outage", interaction.locale)(),
+					backUpSoon: localise(
+						this.client,
+						"music.strings.outage.cannotManage.description.backUpSoon",
+						interaction.locale,
+					)(),
+				},
+			};
+
+			reply([this.client, bot], interaction, {
+				embeds: [
+					{
+						title: strings.title,
+						description: `${strings.description.outage}\n\n${strings.description.backUpSoon}`,
+						color: constants.colors.peach,
+					},
+				],
+			});
+
 			return false;
 		}
 
@@ -464,34 +490,7 @@ class MusicService extends LocalService {
 			return false;
 		}
 
-		const session = this.session;
-		if (session?.flags.isDisconnected) {
-			const strings = {
-				title: localise(this.client, "music.strings.outage.cannotManage.title", interaction.locale)(),
-				description: {
-					outage: localise(this.client, "music.strings.outage.cannotManage.description.outage", interaction.locale)(),
-					backUpSoon: localise(
-						this.client,
-						"music.strings.outage.cannotManage.description.backUpSoon",
-						interaction.locale,
-					)(),
-				},
-			};
-
-			reply([this.client, bot], interaction, {
-				embeds: [
-					{
-						title: strings.title,
-						description: `${strings.description.outage}\n\n${strings.description.backUpSoon}`,
-						color: constants.colors.peach,
-					},
-				],
-			});
-
-			return false;
-		}
-
-		const current = session?.listings.current;
+		const current = this.session?.listings.current;
 		if (current === undefined) {
 			return true;
 		}
@@ -800,13 +799,23 @@ class MusicService extends LocalService {
 			if (session.restoreAt !== 0) {
 				session.player.seek(session.restoreAt);
 			}
+
+			if (restore !== undefined) {
+				session.player.pause(restore.paused);
+			}
 		};
 
 		session.player.once("trackException", onTrackException);
 		session.player.once("trackEnd", onTrackEnd);
 		session.player.once("trackStart", onTrackStart);
 
-		session.player.play(track.track, { pause: restore?.paused, volume: restore?.volume });
+		if (restore !== undefined) {
+			session.player.setVolume(restore.volume);
+			session.player.play(track.track);
+			return;
+		}
+
+		session.player.play(track.track);
 
 		const emoji = listingTypeToEmoji[song.type];
 
