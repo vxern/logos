@@ -42,7 +42,7 @@ async function handleSetVolume([client, bot]: [Client, Discord.Bot], interaction
 	}
 
 	const [{ volume }] = parseArguments(interaction.data?.options, { volume: "number" });
-	if (volume === undefined || isNaN(volume)) {
+	if (volume === undefined || !Number.isSafeInteger(volume)) {
 		return;
 	}
 

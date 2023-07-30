@@ -24,10 +24,10 @@ async function handleUnskipAction(
 		to: "number",
 	});
 
-	if (songsToUnskip !== undefined && isNaN(songsToUnskip)) {
+	if (songsToUnskip !== undefined && !Number.isSafeInteger(songsToUnskip)) {
 		return;
 	}
-	if (songToUnskipTo !== undefined && isNaN(songToUnskipTo)) {
+	if (songToUnskipTo !== undefined && !Number.isSafeInteger(songToUnskipTo)) {
 		return;
 	}
 

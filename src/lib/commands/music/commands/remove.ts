@@ -196,7 +196,7 @@ async function generateEmbed(
 			}
 
 			const index = Number(indexString);
-			if (isNaN(index)) {
+			if (!Number.isSafeInteger(index)) {
 				return;
 			}
 

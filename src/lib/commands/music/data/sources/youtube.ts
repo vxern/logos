@@ -55,7 +55,7 @@ async function search(
 				}
 
 				const index = Number(indexString);
-				if (isNaN(index)) {
+				if (!Number.isSafeInteger(index)) {
 					return resolve(undefined);
 				}
 

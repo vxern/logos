@@ -20,10 +20,10 @@ async function handleSkipAction([client, bot]: [Client, Discord.Bot], interactio
 		by: "number",
 		to: "number",
 	});
-	if (songsToSkip !== undefined && isNaN(songsToSkip)) {
+	if (songsToSkip !== undefined && !Number.isSafeInteger(songsToSkip)) {
 		return;
 	}
-	if (songToSkipTo !== undefined && isNaN(songToSkipTo)) {
+	if (songToSkipTo !== undefined && !Number.isSafeInteger(songToSkipTo)) {
 		return;
 	}
 

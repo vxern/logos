@@ -85,7 +85,7 @@ async function handleStartGame([client, bot]: [Client, Discord.Bot], interaction
 			}
 
 			const index = Number(indexString);
-			if (isNaN(index)) {
+			if (!Number.isSafeInteger(index)) {
 				return;
 			}
 
