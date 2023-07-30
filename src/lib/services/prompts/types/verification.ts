@@ -383,8 +383,8 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 		}
 
 		const [isAccepted, isRejected] = [
-			votedFor.length >= voteInformation.acceptance.remaining,
-			votedAgainst.length >= voteInformation.rejection.remaining,
+			votedFor.length >= voteInformation.acceptance.required,
+			votedAgainst.length >= voteInformation.rejection.required,
 		];
 
 		const submitter = this.client.cache.users.get(BigInt(user.data.account.id));
@@ -490,10 +490,11 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 			.map((role) => role.id);
 		const userIds = configuration.voting.users?.map((userId) => BigInt(userId));
 
-		const voterCount = guild.members
-			.filter((member) => userIds?.includes(member.id) || roleIds.some((roleId) => member.roles.includes(roleId)))
-			.filter((member) => !member.user?.toggles.bot)
-			.array().length;
+		const voterCount =
+			guild.members
+				.filter((member) => userIds?.includes(member.id) || roleIds.some((roleId) => member.roles.includes(roleId)))
+				.filter((member) => !member.user?.toggles.bot)
+				.array().length + 10;
 
 		function getVoteInformation<VerdictType extends keyof VoteInformation>(
 			type: VerdictType,
