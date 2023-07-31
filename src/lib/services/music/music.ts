@@ -272,9 +272,11 @@ class MusicService extends LocalService {
 
 		session.events.emit("stop");
 		session.player.removeAllListeners();
+		await session.player.stop();
+		session.player.disconnect();
 		session.player.playing = false;
 		session.player.connected = false;
-		session.player.destroy();
+		await session.player.destroy();
 
 		clearTimeout(session.disconnectTimeout);
 	}
