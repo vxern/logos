@@ -101,6 +101,11 @@ export default {
 		trail: "...",
 		continued: "(...)",
 	},
+	cefr: {
+		a: "🟩",
+		b: "🟨",
+		c: "🟥",
+	},
 	roles: {
 		noCategory: "💭",
 		unknownEmoji: "❓",

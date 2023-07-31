@@ -498,6 +498,10 @@ export async function handleGuildCreate(
 	if (configuration.features.language.enabled) {
 		const language = configuration.features.language.features;
 
+		if (language.cefr?.enabled) {
+			guildCommands.push(commands.cefr);
+		}
+
 		if (language.game.enabled) {
 			guildCommands.push(commands.game);
 		}
