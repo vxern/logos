@@ -88,6 +88,10 @@ interface Guild {
 					journaling: boolean;
 				}>;
 
+				slowmode?: Activatable<{
+					journaling: boolean;
+				}>;
+
 				timeouts: Activatable<{
 					journaling: boolean;
 				}>;

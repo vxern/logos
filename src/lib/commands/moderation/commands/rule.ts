@@ -23,7 +23,7 @@ const command: CommandTemplate = {
 	],
 };
 
-const ruleIds = ["behaviour", "quality", "relevance", "suitability", "exclusivity", "adherence"];
+const ruleIds = ["behaviour", "quality", "relevance", "suitability", "exclusivity", "adherence"] as const;
 
 async function handleCiteRuleAutocomplete(
 	[client, bot]: [Client, Discord.Bot],

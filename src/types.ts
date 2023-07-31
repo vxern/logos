@@ -27,7 +27,7 @@ function slimGuild(guild: Discord.Guild): Guild {
 	};
 }
 
-type Channel = Pick<Discord.Channel, "guildId" | "position" | "name" | "parentId" | "id" | "type">;
+type Channel = Pick<Discord.Channel, "guildId" | "position" | "name" | "parentId" | "id" | "type" | "rateLimitPerUser">;
 
 function slimChannel(channel: Discord.Channel): Channel {
 	return {
@@ -37,6 +37,7 @@ function slimChannel(channel: Discord.Channel): Channel {
 		name: channel.name,
 		parentId: channel.parentId,
 		type: channel.type,
+		rateLimitPerUser: channel.rateLimitPerUser,
 	};
 }
 

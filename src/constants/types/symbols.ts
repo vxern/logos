@@ -28,6 +28,12 @@ export default {
 		},
 		warned: "⚠️",
 		pardoned: "😇",
+		slowmode: {
+			enabled: "🐌",
+			disabled: "🚀",
+			upgraded: "⏫",
+			downgraded: "⏬",
+		},
 		timeout: {
 			added: "⏳",
 			removed: "😇",

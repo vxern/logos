@@ -539,6 +539,10 @@ export async function handleGuildCreate(
 			guildCommands.push(commands.rule);
 		}
 
+		if (moderation.slowmode?.enabled) {
+			guildCommands.push(commands.slowmode);
+		}
+
 		if (moderation.timeouts.enabled) {
 			guildCommands.push(commands.timeout);
 		}

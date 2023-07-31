@@ -1,4 +1,5 @@
 import * as Logos from "../../../types";
+import { SlowmodeLevel } from "../../commands/moderation/commands/slowmode";
 import { EntryRequest } from "../../database/structs/entry-request";
 import { Praise } from "../../database/structs/praise";
 import { Report } from "../../database/structs/report";
@@ -42,6 +43,28 @@ type GuildEvents = {
 
 	/** A purging of messages is complete. */
 	purgeEnd: [member: Logos.Member, channel: Logos.Channel, messageCount: number, author?: Logos.User];
+
+	/** A user has enabled slowmode in a channel. */
+	slowmodeEnable: [user: Logos.User, channel: Logos.Channel, level: SlowmodeLevel];
+
+	/** A user has disabled slowmode in a channel. */
+	slowmodeDisable: [user: Logos.User, channel: Logos.Channel];
+
+	/** A user has upgraded the slowmode level in a channel. */
+	slowmodeUpgrade: [
+		user: Logos.User,
+		channel: Logos.Channel,
+		previousLevel: SlowmodeLevel,
+		currentLevel: SlowmodeLevel,
+	];
+
+	/** A user has downgraded the slowmode level in a channel. */
+	slowmodeDowngrade: [
+		user: Logos.User,
+		channel: Logos.Channel,
+		previousLevel: SlowmodeLevel,
+		currentLevel: SlowmodeLevel,
+	];
 };
 
 export type { GuildEvents };
