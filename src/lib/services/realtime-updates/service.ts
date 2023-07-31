@@ -1,7 +1,7 @@
 import { LocalService } from "../service";
 import * as Discord from "discordeno";
 import Fauna from "fauna";
-import { Client } from "../../client";
+import { Client, handleGuildCreate, handleGuildDelete } from "../../client";
 import { Document } from "../../database/document";
 import { Guild } from "../../database/structs/guild";
 import diagnostics from "../../diagnostics";
@@ -28,8 +28,10 @@ class RealtimeUpdateService extends LocalService {
 		const streamSubscription = this.client.database.client
 			.stream(this.documentReference, { fields: ["action", "document"] })
 			.on("start", (_) => {})
-			.on("version", (data, _) => {
-				this.client.database.log.info(`Guild document updated for ${diagnostics.display.guild(guild)}.`);
+			.on("version", async (data, _) => {
+				this.client.database.log.info(
+					`Detected update to configuration for ${diagnostics.display.guild(guild)}. Updating...`,
+				);
 
 				const document = data.document as Document<Guild> | undefined;
 				if (document === undefined) {
@@ -37,6 +39,9 @@ class RealtimeUpdateService extends LocalService {
 				}
 
 				this.client.database.cache.guildById.set(document.data.id, document);
+
+				await handleGuildDelete(this.client, bot, guild.id);
+				await handleGuildCreate(this.client, bot, guild, { isUpdate: true });
 			})
 			.on("error", (_) => {
 				this.client.database.log.info(

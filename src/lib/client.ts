@@ -372,19 +372,9 @@ async function initialiseClient(
 					dispatchEvent(client, guild.id, "guildCreate", { args: [bot, guild] });
 				},
 				async guildDelete(bot, id, shardId) {
-					const guild = client.cache.guilds.get(id);
-					if (guild === undefined) {
-						return undefined;
-					}
-					client.cache.guilds.delete(guild.id);
+					await handleGuildDelete(client, bot, id);
 
-					const runningServices = client.services.local.get(guild.id) ?? [];
-					client.services.local.delete(guild.id);
-					for (const runningService of runningServices) {
-						runningService.stop(bot);
-					}
-
-					dispatchEvent(client, guild.id, "guildDelete", { args: [bot, guild.id, shardId] });
+					dispatchEvent(client, id, "guildDelete", { args: [bot, id, shardId] });
 				},
 				async guildUpdate(bot, guild) {
 					dispatchEvent(client, guild.id, "guildUpdate", { args: [bot, guild] });
@@ -437,8 +427,15 @@ function overrideDefaultEventHandlers(bot: Discord.Bot): Discord.Bot {
 	return bot;
 }
 
-async function handleGuildCreate(client: Client, bot: Discord.Bot, guild: Discord.Guild): Promise<void> {
-	client.log.info(`Logos added to "${guild.name}" (ID ${guild.id}).`);
+export async function handleGuildCreate(
+	client: Client,
+	bot: Discord.Bot,
+	guild: Discord.Guild | Logos.Guild,
+	options: { isUpdate: boolean } = { isUpdate: false },
+): Promise<void> {
+	if (!options.isUpdate) {
+		client.log.info(`Logos added to "${guild.name}" (ID ${guild.id}).`);
+	}
 
 	const guildDocument = await client.database.adapters.guilds.getOrFetchOrCreate(
 		client,
@@ -619,13 +616,15 @@ async function handleGuildCreate(client: Client, bot: Discord.Bot, guild: Discor
 		client.log.warn(`Failed to upsert commands on ${diagnostics.display.guild(guild)}: ${reason}`),
 	);
 
-	client.log.info(`Fetching ~${guild.memberCount} members of ${diagnostics.display.guild(guild)}...`);
+	if (!options.isUpdate) {
+		client.log.info(`Fetching ~${guild.memberCount} members of ${diagnostics.display.guild(guild)}...`);
 
-	await fetchMembers(bot, guild.id, { limit: 0, query: "" }).catch((reason) =>
-		client.log.warn(`Failed to fetch members of ${diagnostics.display.guild(guild)}: ${reason}`),
-	);
+		await fetchMembers(bot, guild.id, { limit: 0, query: "" }).catch((reason) =>
+			client.log.warn(`Failed to fetch members of ${diagnostics.display.guild(guild)}: ${reason}`),
+		);
 
-	client.log.info(`Fetched ~${guild.memberCount} members of ${diagnostics.display.guild(guild)}.`);
+		client.log.info(`Fetched ~${guild.memberCount} members of ${diagnostics.display.guild(guild)}.`);
+	}
 
 	client.log.info(`Starting ${services.length} service(s) on ${diagnostics.display.guild(guild)}...`);
 	const promises = [];
@@ -639,6 +638,19 @@ async function handleGuildCreate(client: Client, bot: Discord.Bot, guild: Discor
 	client.services.local.set(guild.id, services);
 
 	global.gc?.();
+}
+
+export async function handleGuildDelete(client: Client, bot: Discord.Bot, guildId: bigint): Promise<void> {
+	const guild = client.cache.guilds.get(guildId);
+	if (guild === undefined) {
+		return undefined;
+	}
+
+	const runningServices = client.services.local.get(guild.id) ?? [];
+	client.services.local.delete(guild.id);
+	for (const runningService of runningServices) {
+		runningService.stop(bot);
+	}
 }
 
 async function handleInteractionCreate(
