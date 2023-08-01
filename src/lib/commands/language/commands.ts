@@ -1,3 +1,4 @@
+import answer from "./commands/answer";
 import cefr from "./commands/cefr";
 import correction from "./commands/correction";
 import game from "./commands/game";
@@ -7,4 +8,4 @@ import word from "./commands/word";
 
 const { partial: correctionPartial, full: correctionFull } = correction;
 
-export { cefr, correctionPartial, correctionFull, game, resources, translate, word };
+export { answer, cefr, correctionPartial, correctionFull, game, resources, translate, word };

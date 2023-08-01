@@ -94,6 +94,7 @@ export default {
 		moderators: "⚖️",
 		proficiencyDistribution: "🎓",
 	},
+	answer: "📜",
 	correction: "🖋️",
 	interactions: {
 		menu: {

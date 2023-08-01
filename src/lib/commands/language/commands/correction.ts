@@ -144,15 +144,10 @@ async function handleStartCorrecting(
 				messageReference: { messageId: message.id, channelId: message.channelId, guildId, failIfNotExists: false },
 				embeds: [
 					{
+						description: data.corrected,
 						color: constants.colors.lightGreen,
-						fields: [
-							{
-								name: strings.correction,
-								value: data.corrected,
-							},
-						],
 						footer: {
-							text: strings.suggestedBy,
+							text: `${constants.symbols.correction} ${strings.suggestedBy}`,
 							iconUrl: (() => {
 								if (member.avatar !== undefined) {
 									return getMemberAvatarURL(bot, guildId, interaction.user.id, member.avatar);

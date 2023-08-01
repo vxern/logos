@@ -498,6 +498,10 @@ export async function handleGuildCreate(
 	if (configuration.features.language.enabled) {
 		const language = configuration.features.language.features;
 
+		if (language.answers?.enabled) {
+			guildCommands.push(commands.answer);
+		}
+
 		if (language.corrections?.enabled) {
 			guildCommands.push(commands.correctionFull, commands.correctionPartial);
 		}
