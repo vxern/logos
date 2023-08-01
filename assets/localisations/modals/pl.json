@@ -3,6 +3,9 @@
 	"verification.fields.reason": "Jaki jest powód, dla którego się uczysz {language}?",
 	"verification.fields.aim": "Jaką korzyść przyniesie Ci członkostwo?",
 	"verification.fields.whereFound": "Gdzie dowiedziałeś/aś się o serwerze?",
+	"correction.title": "Correction",
+	"correction.fields.original": "Original text",
+	"correction.fields.corrected": "Corrected text",
 	"report.title": "Skarga",
 	"report.fields.reason": "Jaki jest powód dla skargi?",
 	"report.fields.users": "Użytkownicy do zgłoszenia",
@@ -11,6 +14,6 @@
 	"suggestion.fields.suggestion": "Jaką masz sugestię?",
 	"prompts.continue": "Dalej",
 	"prompts.cancel": "Anuluj",
-	"prompts.leave": "Tak, chcę opuścić kompozytor",
-	"prompts.stay": "Nie, zabierz mnie z powrotem do kompozytora"
+	"prompts.stay": "Take me back",
+	"prompts.leave": "Leave"
 }
