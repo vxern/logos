@@ -3,6 +3,9 @@
 	"verification.fields.reason": "Ποιος είναι ο λόγος για τον οποίο μαθαίνετε {language};",
 	"verification.fields.aim": "Πώς θα ωφεληθείτε αν γίνετε μέλος;",
 	"verification.fields.whereFound": "Πού μάθατε για τον διακομιστή;",
+	"correction.title": "Correction",
+	"correction.fields.original": "Original text",
+	"correction.fields.corrected": "Corrected text",
 	"report.title": "Αναφορά χρήστη",
 	"report.fields.reason": "Ποιος είναι ο λόγος της έκθεσης;",
 	"report.fields.users": "Χρήστες για αναφορά",
@@ -11,6 +14,6 @@
 	"suggestion.fields.suggestion": "Ποια είναι η πρότασή σας;",
 	"prompts.continue": "Συνεχίστε",
 	"prompts.cancel": "Ακύρωση",
-	"prompts.leave": "Ναι, θέλω να φύγω από τον συνθέτη",
-	"prompts.stay": "Όχι, πήγαινέ με πίσω στον συνθέτη"
+	"prompts.stay": "Take me back",
+	"prompts.leave": "Leave"
 }
