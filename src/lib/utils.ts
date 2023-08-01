@@ -171,6 +171,10 @@ function fetchMembers(
 	});
 }
 
+function getMemberAvatarURL(bot: Discord.Bot, guildId: bigint, userId: bigint, avatarHash: bigint): string {
+	return `${bot.constants.CDN_URL}/guilds/${guildId}/users/${userId}/avatars/${avatarHash}`;
+}
+
 export {
 	addParametersToURL,
 	chunk,
@@ -182,4 +186,5 @@ export {
 	fetchMembers,
 	snowflakeToTimestamp,
 	verifyIsWithinLimits,
+	getMemberAvatarURL,
 };

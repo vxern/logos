@@ -28,6 +28,12 @@ export default {
 		},
 		warned: "⚠️",
 		pardoned: "😇",
+		slowmode: {
+			enabled: "🐌",
+			disabled: "🚀",
+			upgraded: "⏫",
+			downgraded: "⏬",
+		},
 		timeout: {
 			added: "⏳",
 			removed: "😇",
@@ -88,6 +94,8 @@ export default {
 		moderators: "⚖️",
 		proficiencyDistribution: "🎓",
 	},
+	answer: "📜",
+	correction: "🖋️",
 	interactions: {
 		menu: {
 			controls: {
@@ -100,6 +108,11 @@ export default {
 	strings: {
 		trail: "...",
 		continued: "(...)",
+	},
+	cefr: {
+		a: "🟩",
+		b: "🟨",
+		c: "🟥",
 	},
 	roles: {
 		noCategory: "💭",

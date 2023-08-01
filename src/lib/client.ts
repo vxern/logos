@@ -498,6 +498,18 @@ export async function handleGuildCreate(
 	if (configuration.features.language.enabled) {
 		const language = configuration.features.language.features;
 
+		if (language.answers?.enabled) {
+			guildCommands.push(commands.answer);
+		}
+
+		if (language.corrections?.enabled) {
+			guildCommands.push(commands.correctionFull, commands.correctionPartial);
+		}
+
+		if (language.cefr?.enabled) {
+			guildCommands.push(commands.cefr);
+		}
+
 		if (language.game.enabled) {
 			guildCommands.push(commands.game);
 		}
@@ -533,6 +545,10 @@ export async function handleGuildCreate(
 
 		if (moderation.rules.enabled) {
 			guildCommands.push(commands.rule);
+		}
+
+		if (moderation.slowmode?.enabled) {
+			guildCommands.push(commands.slowmode);
 		}
 
 		if (moderation.timeouts.enabled) {
@@ -883,6 +899,12 @@ function localiseCommands<CommandsRaw extends Record<string, CommandTemplate>, C
 		}
 
 		const nameLocalisationsAll = localisations.get(`${key}.name`) ?? localisations.get(`parameters.${optionName}.name`);
+		const name = nameLocalisationsAll?.get(defaultLanguage)?.({});
+		if (name === undefined) {
+			console.warn(`Failed to get command name from localisation key '${key}'.`);
+			return undefined;
+		}
+
 		const nameLocalisations =
 			nameLocalisationsAll !== undefined ? toDiscordLocalisations(nameLocalisationsAll) : undefined;
 
@@ -893,6 +915,7 @@ function localiseCommands<CommandsRaw extends Record<string, CommandTemplate>, C
 			descriptionLocalisationsAll !== undefined ? toDiscordLocalisations(descriptionLocalisationsAll) : undefined;
 
 		return {
+			name,
 			nameLocalizations: nameLocalisations ?? {},
 			description: description ?? localisations.get("noDescription")?.get(defaultLanguage)?.({}) ?? "No description.",
 			descriptionLocalizations: descriptionLocalisations ?? {},

@@ -120,6 +120,12 @@ async function loadLocalisations(directoryPath: string): Promise<Map<string, Map
 					key.endsWith(".name") &&
 					(value.includes(" ") || value.includes("/") || value.includes("'") || value.toLowerCase() !== value)
 				) {
+					const command = key.split(".").at(0) ?? "";
+					if (!(`${command}.name` in strings)) {
+						localisations.get(key)?.set(language, value);
+						continue;
+					}
+
 					console.warn(`[Localisations] ${language}: '${key}' is not normalised. Normalising...`);
 
 					const valueNormalised = value.toLowerCase().split(" ").join("-").replaceAll("/", "-").replaceAll("'", "-");

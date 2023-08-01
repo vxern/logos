@@ -57,6 +57,12 @@ interface Guild {
 
 		language: Activatable<{
 			features: {
+				answers?: Activatable;
+
+				corrections?: Activatable;
+
+				cefr?: Activatable<CefrConfiguration>;
+
 				game: Activatable;
 
 				resources: Activatable<{
@@ -83,6 +89,10 @@ interface Guild {
 
 				/** Message purging. */
 				purging: Activatable<{
+					journaling: boolean;
+				}>;
+
+				slowmode?: Activatable<{
 					journaling: boolean;
 				}>;
 
@@ -207,6 +217,25 @@ type RateLimit = {
 	within: TimeStruct;
 };
 
+type CefrLevelExamples = {
+	a1: string;
+	a2: string;
+	b1: string;
+	b2: string;
+	c1: string;
+	c2: string;
+};
+type CefrLevelExamplesExtended = CefrLevelExamples & {
+	a0: string;
+	c3: string;
+};
+type CefrConfiguration<Extended extends boolean = boolean> = {
+	extended: Extended;
+	examples: Activatable<{
+		levels: true extends Extended ? CefrLevelExamplesExtended : CefrLevelExamples;
+	}>;
+};
+
 type DynamicVoiceChannel = {
 	id: string;
 	minimum?: number;
@@ -230,4 +259,4 @@ type VerificationActivationRule =
 	  };
 
 export { timeStructToMilliseconds };
-export type { Guild, DynamicVoiceChannel, TimeStruct };
+export type { Guild, DynamicVoiceChannel, CefrConfiguration, TimeStruct };

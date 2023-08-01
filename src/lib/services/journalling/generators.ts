@@ -15,6 +15,10 @@ import praiseAdd from "./guild/praise-add";
 import purgeBegin from "./guild/purge-begin";
 import purgeEnd from "./guild/purge-end";
 import reportSubmit from "./guild/report-submit";
+import slowmodeDisable from "./guild/slowmode-disable";
+import slowmodeDowngrade from "./guild/slowmode-downgrade";
+import slowmodeEnable from "./guild/slowmode-enable";
+import slowmodeUpgrade from "./guild/slowmode-upgrade";
 import suggestionSend from "./guild/suggestion-send";
 
 export default {
@@ -37,6 +41,10 @@ export default {
 		praiseAdd,
 		purgeBegin,
 		purgeEnd,
+		slowmodeDisable,
+		slowmodeDowngrade,
+		slowmodeEnable,
+		slowmodeUpgrade,
 		reportSubmit,
 		suggestionSend,
 	},
