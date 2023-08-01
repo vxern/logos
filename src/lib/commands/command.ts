@@ -17,14 +17,14 @@ interface CommandFeatures {
 	options?: OptionTemplate[];
 }
 
-type LocalisationProperties = "nameLocalizations" | "description" | "descriptionLocalizations";
+type LocalisationProperties = "name" | "nameLocalizations" | "description" | "descriptionLocalizations";
 
 type CommandTemplate = WithRequired<
-	Omit<Command, "options" | LocalisationProperties>,
+	Omit<Command, "options" | Exclude<LocalisationProperties, "name">>,
 	"defaultMemberPermissions" | "type"
 > &
 	CommandFeatures;
 
-type OptionTemplate = Omit<Option, "options" | LocalisationProperties> & CommandFeatures;
+type OptionTemplate = Omit<Option, "options" | Exclude<LocalisationProperties, "name">> & CommandFeatures;
 
 export type { Command, CommandTemplate, InteractionHandler, LocalisationProperties, Option, OptionTemplate };

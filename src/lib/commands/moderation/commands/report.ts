@@ -178,7 +178,11 @@ async function handleSubmittedInvalidReport(
 			onCollect: async (_, cancelSelection) => {
 				const returnId = createInteractionCollector([client, bot], {
 					type: Discord.InteractionTypes.MessageComponent,
-					onCollect: (_, returnSelection) => resolve(returnSelection),
+					onCollect: (_, returnSelection) => {
+						deleteReply([client, bot], submission);
+						deleteReply([client, bot], cancelSelection);
+						resolve(returnSelection);
+					},
 				});
 
 				const leaveId = createInteractionCollector([client, bot], {

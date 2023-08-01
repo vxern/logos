@@ -57,6 +57,8 @@ interface Guild {
 
 		language: Activatable<{
 			features: {
+				corrections?: Activatable;
+
 				cefr?: Activatable<CefrConfiguration>;
 
 				game: Activatable;
