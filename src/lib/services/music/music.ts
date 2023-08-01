@@ -651,6 +651,7 @@ class MusicService extends LocalService {
 					this.moveListingToHistory(session.listings.current);
 					session.listings.current = session.listings.queue.shift();
 					session.events.emit("queueUpdate");
+					return this.advanceQueueAndPlay(bot);
 				}
 			} else {
 				if (session.flags.loop.song) {
@@ -705,7 +706,7 @@ class MusicService extends LocalService {
 					{
 						title: strings.title,
 						description: strings.description,
-						color: constants.colors.red,
+						color: constants.colors.peach,
 					},
 				],
 			}).catch(() =>
@@ -734,7 +735,7 @@ class MusicService extends LocalService {
 			session.listings.current.content.title = track.info.title;
 		}
 
-		const onTrackException = async (_: string | null, error: Error) => {
+		session.player.once("trackException", async (_: string | null, error: Error) => {
 			const session = this.session;
 			if (session === undefined) {
 				return;
@@ -760,7 +761,7 @@ class MusicService extends LocalService {
 					{
 						title: strings.title,
 						description: strings.description,
-						color: constants.colors.red,
+						color: constants.colors.peach,
 					},
 				],
 			}).catch(() =>
@@ -770,15 +771,13 @@ class MusicService extends LocalService {
 					)} on ${diagnostics.display.guild(this.guildId)}.`,
 				),
 			);
-		};
-
-		const onTrackEnd = async () => {
+		});
+    
+		session.player.once("trackEnd", async () => {
 			const session = this.session;
 			if (session === undefined) {
 				return;
 			}
-
-			session.player.removeAllListeners("trackException");
 
 			if (session.flags.isDestroyed) {
 				this.setDisconnectTimeout();
@@ -792,9 +791,9 @@ class MusicService extends LocalService {
 
 			session.restoreAt = 0;
 			this.advanceQueueAndPlay(bot);
-		};
-
-		const onTrackStart = async () => {
+		});
+    
+		session.player.once("trackStart", async () => {
 			const now = Date.now();
 			session.startedAt = now;
 
@@ -805,11 +804,7 @@ class MusicService extends LocalService {
 			if (restore !== undefined) {
 				session.player.pause(restore.paused);
 			}
-		};
-
-		session.player.once("trackException", onTrackException);
-		session.player.once("trackEnd", onTrackEnd);
-		session.player.once("trackStart", onTrackStart);
+		});
 
 		if (restore !== undefined) {
 			session.player.setVolume(restore.volume);
