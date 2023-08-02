@@ -3,12 +3,12 @@
 	"verification.fields.reason": "Jaki jest powód, dla którego się uczysz {language}?",
 	"verification.fields.aim": "Jaką korzyść przyniesie Ci członkostwo?",
 	"verification.fields.whereFound": "Gdzie dowiedziałeś/aś się o serwerze?",
-	"answer.title": "Answer",
-	"answer.fields.question": "Question",
-	"answer.fields.answer": "Answer",
-	"correction.title": "Correction",
-	"correction.fields.original": "Original text",
-	"correction.fields.corrected": "Corrected text",
+	"answer.title": "Odpowiedź",
+	"answer.fields.question": "Pytanie",
+	"answer.fields.answer": "Odpowiedź",
+	"correction.title": "Poprawki",
+	"correction.fields.original": "Oryginał",
+	"correction.fields.corrected": "Korekta",
 	"report.title": "Skarga",
 	"report.fields.reason": "Jaki jest powód dla skargi?",
 	"report.fields.users": "Użytkownicy do zgłoszenia",
@@ -17,6 +17,6 @@
 	"suggestion.fields.suggestion": "Jaką masz sugestię?",
 	"prompts.continue": "Dalej",
 	"prompts.cancel": "Anuluj",
-	"prompts.stay": "Take me back",
-	"prompts.leave": "Leave"
+	"prompts.stay": "Zabierz mnie z powrotem",
+	"prompts.leave": "Wyjdź"
 }
