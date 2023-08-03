@@ -1,10 +1,10 @@
 {
-	"noDescription": "No description.",
+	"noDescription": "Նկարագրութիւն չգտնուեցաւ։",
 	"information.name": "information",
 	"information.description": "Used to display various information.",
 	"information.options.bot.name": "bot",
 	"information.options.bot.description": "Displays information about the bot.",
-	"information.options.bot.strings.whoAmI.title": "Who am I?",
+	"information.options.bot.strings.whoAmI.title": "Ո՞վ եմ։",
 	"information.options.bot.strings.whoAmI.description": "I am **Logos**, an application created to offer language-learning Discord communities the highest quality features, such as:",
 	"information.options.bot.strings.whoAmI.features.roles": "Intuitive role management",
 	"information.options.bot.strings.whoAmI.features.language": "Translation and morphology look-ups",
