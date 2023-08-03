@@ -1,10 +1,13 @@
 import constants from "../constants/constants";
-import { getLanguageByLocale } from "../constants/language";
+import { Locale, LocalisationLanguage, getLanguageByLocale, getLocaleByLanguage } from "../constants/language";
 import time from "../constants/time";
 import defaults from "../defaults";
 import { Client, addCollector, localise, pluralise } from "./client";
 import * as Discord from "discordeno";
 import { DiscordSnowflake as Snowflake } from "snowflake";
+import { Guild } from "./database/structs/guild";
+import { Document } from "./database/document";
+import { User } from "./database/structs/user";
 
 type AutocompleteInteraction = Discord.Interaction & { type: Discord.InteractionTypes.ApplicationCommandAutocomplete };
 
@@ -655,6 +658,32 @@ async function displayModal(
 	}).catch((reason) => client.log.warn(`Failed to show modal: ${reason}`));
 }
 
+function determineLocalisation(
+	interaction: Discord.Interaction,
+	userDocument: Document<User>,
+	guildConfigurationDocument: Document<Guild>,
+	options?: { show: boolean },
+): [LocalisationLanguage, Locale] {
+	// If the response is public, use the guild localisation locale.
+	if (options?.show ?? false) {
+		const language = guildConfigurationDocument.data.languages?.localisation ?? defaults.LOCALISATION_LANGUAGE;
+		const locale = getLocaleByLanguage(language) ?? defaults.LOCALISATION_LOCALE;
+		return [language, locale];
+	}
+
+	// If the user has configured a custom locale, use the user's preferred locale.
+	if (userDocument.data.account.language !== undefined) {
+		const language = userDocument.data.account.language;
+		const locale = getLocaleByLanguage(language) ?? defaults.LOCALISATION_LOCALE;
+		return [language, locale];
+	}
+
+	// Otherwise default to the user's app language.
+	const locale = (interaction.locale as Discord.Locale | undefined) ?? defaults.LOCALISATION_LOCALE;
+	const language = getLanguageByLocale(locale) ?? defaults.LOCALISATION_LANGUAGE;
+	return [language, locale];
+}
+
 export {
 	acknowledge,
 	createInteractionCollector,
@@ -671,5 +700,6 @@ export {
 	postponeReply,
 	reply,
 	respond,
+	determineLocalisation,
 };
 export type { ControlButtonID, InteractionCollectorSettings, Modal };
