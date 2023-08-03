@@ -208,7 +208,7 @@ function loadDictionaryAdapters(): Map<FeatureLanguage, DictionaryAdapter[]> {
 
 	for (const adapter of dictionaryAdapters) {
 		for (const language of adapter.supports) {
-			result.set(language, [...(result.get(language) ?? []), adapter]);
+			result.get(language)?.push(adapter) ?? result.set(language, [adapter]);
 		}
 	}
 
@@ -237,7 +237,8 @@ function loadSentencePairs(languageFileContents: [FeatureLanguage, string][]): M
 		][];
 
 		for (const [_, sentence, __, translation] of records) {
-			result.set(language, [...(result.get(language) ?? []), { sentence, translation }]);
+			const sentencePair = { sentence, translation };
+			result.get(language)?.push(sentencePair) ?? result.set(language, [sentencePair]);
 		}
 	}
 
