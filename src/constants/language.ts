@@ -13,8 +13,11 @@ const locales = ["hyw", "hye"] as const;
 
 type LocalisationLanguage = typeof languages.localisation[number];
 type FeatureLanguage = typeof languages.feature[number];
+type DefaultLanguage = LocalisationLanguage & FeatureLanguage;
+
 type CustomLocale = typeof locales[number];
 type Locale = Discord.Locale | CustomLocale;
+type DefaultLocale = Discord.Locale;
 
 const mappings = {
 	locales: {
@@ -80,4 +83,4 @@ function isFeatured(language: string): language is FeatureLanguage {
 }
 
 export { getLanguageByLocale, getLocaleByLanguage, isLocalised, isFeatured };
-export type { FeatureLanguage, LocalisationLanguage, Locale };
+export type { FeatureLanguage, LocalisationLanguage, Locale, DefaultLanguage, DefaultLocale };
