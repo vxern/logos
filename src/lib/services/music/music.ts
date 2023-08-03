@@ -1,5 +1,4 @@
 import constants from "../../../constants/constants";
-import { defaultLocale } from "../../../constants/language";
 import defaults from "../../../defaults";
 import { MentionTypes, mention } from "../../../formatting";
 import { Client, localise } from "../../client";
@@ -296,10 +295,10 @@ class MusicService extends LocalService {
 		const now = Date.now();
 
 		const strings = {
-			title: localise(this.client, "music.strings.outage.halted.title", defaultLocale)(),
+			title: localise(this.client, "music.strings.outage.halted.title", defaults.LOCALISATION_LOCALE)(),
 			description: {
-				outage: localise(this.client, "music.strings.outage.halted.description.outage", defaultLocale)(),
-				noLoss: localise(this.client, "music.strings.outage.halted.description.noLoss", defaultLocale)(),
+				outage: localise(this.client, "music.strings.outage.halted.description.outage", defaults.LOCALISATION_LOCALE)(),
+				noLoss: localise(this.client, "music.strings.outage.halted.description.noLoss", defaults.LOCALISATION_LOCALE)(),
 			},
 		};
 
@@ -358,8 +357,8 @@ class MusicService extends LocalService {
 		this.loadSong(bot, currentSong, { paused: oldSession.player.paused, volume: oldSession.player.volume });
 
 		const strings = {
-			title: localise(this.client, "music.strings.outage.restored.title", defaultLocale)(),
-			description: localise(this.client, "music.strings.outage.restored.description", defaultLocale)(),
+			title: localise(this.client, "music.strings.outage.restored.title", defaults.LOCALISATION_LOCALE)(),
+			description: localise(this.client, "music.strings.outage.restored.description", defaults.LOCALISATION_LOCALE)(),
 		};
 
 		Discord.sendMessage(bot, newSession.channelId, {
@@ -590,11 +589,11 @@ class MusicService extends LocalService {
 
 		if (session.listings.current !== undefined) {
 			const strings = {
-				title: localise(this.client, "music.options.play.strings.queued.title", defaultLocale)(),
+				title: localise(this.client, "music.options.play.strings.queued.title", defaults.LOCALISATION_LOCALE)(),
 				description: localise(
 					this.client,
 					"music.options.play.strings.queued.description.public",
-					defaultLocale,
+					defaults.LOCALISATION_LOCALE,
 				)({
 					title: listing.content.title,
 					user_mention: mention(listing.requestedBy, MentionTypes.User),
@@ -691,11 +690,11 @@ class MusicService extends LocalService {
 			session.flags.loop.song = false;
 
 			const strings = {
-				title: localise(this.client, "music.options.play.strings.failedToLoad.title", defaultLocale)(),
+				title: localise(this.client, "music.options.play.strings.failedToLoad.title", defaults.LOCALISATION_LOCALE)(),
 				description: localise(
 					this.client,
 					"music.options.play.strings.failedToLoad.description",
-					defaultLocale,
+					defaults.LOCALISATION_LOCALE,
 				)({
 					title: song.title,
 				}),
@@ -746,11 +745,11 @@ class MusicService extends LocalService {
 			this.client.log.warn(`Failed to play track: ${error}`);
 
 			const strings = {
-				title: localise(this.client, "music.options.play.strings.failedToPlay.title", defaultLocale)(),
+				title: localise(this.client, "music.options.play.strings.failedToPlay.title", defaults.LOCALISATION_LOCALE)(),
 				description: localise(
 					this.client,
 					"music.options.play.strings.failedToPlay.description",
-					defaultLocale,
+					defaults.LOCALISATION_LOCALE,
 				)({
 					title: song.title,
 				}),
@@ -772,7 +771,7 @@ class MusicService extends LocalService {
 				),
 			);
 		});
-    
+
 		session.player.once("trackEnd", async () => {
 			const session = this.session;
 			if (session === undefined) {
@@ -792,7 +791,7 @@ class MusicService extends LocalService {
 			session.restoreAt = 0;
 			this.advanceQueueAndPlay(bot);
 		});
-    
+
 		session.player.once("trackStart", async () => {
 			const now = Date.now();
 			session.startedAt = now;
@@ -820,15 +819,15 @@ class MusicService extends LocalService {
 			title: localise(
 				this.client,
 				"music.options.play.strings.nowPlaying.title.nowPlaying",
-				defaultLocale,
+				defaults.LOCALISATION_LOCALE,
 			)({
-				listing_type: localise(this.client, localisationsBySongListingType[song.type], defaultLocale)(),
+				listing_type: localise(this.client, localisationsBySongListingType[song.type], defaults.LOCALISATION_LOCALE)(),
 			}),
 			description: {
 				nowPlaying: localise(
 					this.client,
 					"music.options.play.strings.nowPlaying.description.nowPlaying",
-					defaultLocale,
+					defaults.LOCALISATION_LOCALE,
 				),
 				track:
 					session.listings.current !== undefined &&
@@ -837,7 +836,7 @@ class MusicService extends LocalService {
 						? localise(
 								this.client,
 								"music.options.play.strings.nowPlaying.description.track",
-								defaultLocale,
+								defaults.LOCALISATION_LOCALE,
 						  )({
 								index: session.listings.current.content.position + 1,
 								number: session.listings.current.content.songs.length,

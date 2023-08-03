@@ -1,4 +1,4 @@
-import { Language } from "../../../../constants/language";
+import { FeatureLanguage } from "../../../../constants/language";
 import { Client } from "../../../client";
 import { PartOfSpeech } from "./parts-of-speech";
 import * as Discord from "discordeno";
@@ -54,9 +54,19 @@ interface DictionaryEntry {
 }
 
 abstract class DictionaryAdapter<DataType = unknown> {
-	abstract readonly name: string;
-	abstract readonly supports: Language[];
-	abstract readonly provides: DictionaryProvisions[];
+	readonly name: string;
+	readonly supports: FeatureLanguage[];
+	readonly provides: DictionaryProvisions[];
+
+	constructor({
+		name,
+		supports,
+		provides,
+	}: { name: string; supports: FeatureLanguage[]; provides: DictionaryProvisions[] }) {
+		this.name = name;
+		this.supports = supports;
+		this.provides = provides;
+	}
 
 	/**
 	 * Fetches data about a {@link lemma} in a {@link language}.
@@ -64,7 +74,7 @@ abstract class DictionaryAdapter<DataType = unknown> {
 	 * @param lemma - The lemma to fetch data about.
 	 * @param language - The language the lemma is in.
 	 */
-	abstract fetch(lemma: string, language: Language): Promise<DataType | undefined>;
+	abstract fetch(lemma: string, language: FeatureLanguage): Promise<DataType | undefined>;
 
 	/**
 	 * Gets dictionary entries for a {@link lemma} in a {@link language}, presenting the information in
@@ -77,7 +87,7 @@ abstract class DictionaryAdapter<DataType = unknown> {
 	 */
 	async getEntries(
 		lemma: string,
-		language: Language,
+		language: FeatureLanguage,
 		client: Client,
 		locale: string | undefined,
 	): Promise<DictionaryEntry[] | undefined> {

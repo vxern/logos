@@ -1,5 +1,5 @@
 import constants from "../../../../constants/constants";
-import { defaultLocale } from "../../../../constants/language";
+import defaults from "../../../../defaults";
 import { Client, localise } from "../../../client";
 import { parseArguments, reply } from "../../../interactions";
 import { isCollection } from "../../../services/music/music";
@@ -106,8 +106,8 @@ async function handleReplayAction(
 	musicService.replay(bot, collection ?? false);
 
 	const strings = {
-		title: localise(client, "music.options.replay.strings.replaying.title", defaultLocale)(),
-		description: localise(client, "music.options.replay.strings.replaying.description", defaultLocale)(),
+		title: localise(client, "music.options.replay.strings.replaying.title", defaults.LOCALISATION_LOCALE)(),
+		description: localise(client, "music.options.replay.strings.replaying.description", defaults.LOCALISATION_LOCALE)(),
 	};
 
 	reply(

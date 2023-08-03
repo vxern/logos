@@ -1,5 +1,5 @@
 import constants from "../../../../../constants/constants";
-import { defaultLocale } from "../../../../../constants/language";
+import defaults from "../../../../../defaults";
 import { Client, localise } from "../../../../client";
 import { parseArguments, reply } from "../../../../interactions";
 import * as Discord from "discordeno";
@@ -48,7 +48,7 @@ async function handleDisplayVolume(
 
 	const volume = musicService.volume;
 
-	const locale = show ? defaultLocale : interaction.locale;
+	const locale = show ? defaults.LOCALISATION_LOCALE : interaction.locale;
 
 	const strings = {
 		title: localise(client, "music.options.volume.options.display.strings.volume.title", locale)(),

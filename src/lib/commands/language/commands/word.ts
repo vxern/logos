@@ -1,5 +1,5 @@
 import constants from "../../../../constants/constants";
-import { defaultLanguage, defaultLocale, getLanguageByLocale } from "../../../../constants/language";
+import { getLanguageByLocale } from "../../../../constants/language";
 import defaults from "../../../../defaults";
 import { code } from "../../../../formatting";
 import { Client, localise, pluralise } from "../../../client";
@@ -67,7 +67,9 @@ async function handleFindWord([client, bot]: [Client, Discord.Bot], interaction:
 		return;
 	}
 
-	const dictionaries = client.features.dictionaryAdapters.get(guildDocument.data.language);
+	const featureLanguage = guildDocument.data.languages?.feature ?? defaults.FEATURE_LANGUAGE;
+
+	const dictionaries = client.features.dictionaryAdapters.get(featureLanguage);
 	if (dictionaries === undefined) {
 		const strings = {
 			title: localise(client, "word.strings.noDictionaryAdapters.title", interaction.locale)(),
@@ -86,7 +88,7 @@ async function handleFindWord([client, bot]: [Client, Discord.Bot], interaction:
 		return;
 	}
 
-	const locale = show ? defaultLocale : interaction.locale;
+	const locale = show ? defaults.LOCALISATION_LOCALE : interaction.locale;
 
 	await postponeReply([client, bot], interaction, { visible: show });
 
@@ -99,7 +101,7 @@ async function handleFindWord([client, bot]: [Client, Discord.Bot], interaction:
 	const unclassifiedEntries: DictionaryEntry[] = [];
 	const entriesByPartOfSpeech = new Map<PartOfSpeech, DictionaryEntry[]>();
 	for (const dictionary of dictionaries) {
-		const entries = await dictionary.getEntries(word, guildDocument.data.language, client, locale);
+		const entries = await dictionary.getEntries(word, featureLanguage, client, locale);
 		if (entries === undefined) {
 			continue;
 		}
@@ -652,7 +654,7 @@ function fitTextToFieldSize(client: Client, textParts: string[], locale: string 
 		definitionsOmitted: localise(client, "word.strings.definitionsOmitted", locale),
 	};
 
-	const language = getLanguageByLocale(locale) ?? defaultLanguage;
+	const language = getLanguageByLocale(locale) ?? defaults.LOCALISATION_LANGUAGE;
 
 	const characterOverhead =
 		strings.definitionsOmitted({

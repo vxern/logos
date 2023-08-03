@@ -1,9 +1,9 @@
 import constants from "../../../../../constants/constants";
-import { Language } from "../../../../../constants/language";
+import { FeatureLanguage } from "../../../../../constants/language";
 import { Client, localise } from "../../../../client";
 import { chunk } from "../../../../utils";
 import { getPartOfSpeech } from "../../module";
-import { DictionaryAdapter, DictionaryEntry, DictionaryProvisions } from "../adapter";
+import { DictionaryAdapter, DictionaryEntry } from "../adapter";
 import { PartOfSpeech } from "../parts-of-speech";
 import * as Dexonline from "dexonline";
 
@@ -16,11 +16,15 @@ function hasInflections(partOfSpeech: PartOfSpeech): boolean {
 type InflectionTable = NonNullable<DictionaryEntry["inflectionTable"]>;
 
 class DexonlineAdapter extends DictionaryAdapter<Dexonline.Results> {
-	readonly name = "Dexonline";
-	readonly supports = ["Romanian"] satisfies Language[];
-	readonly provides = ["definitions", "etymology"] satisfies DictionaryProvisions[];
+	constructor() {
+		super({
+			name: "Dexonline",
+			supports: ["Romanian"],
+			provides: ["definitions", "etymology"],
+		});
+	}
 
-	fetch(lemma: string, _: Language): Promise<Dexonline.Results | undefined> {
+	fetch(lemma: string, _: FeatureLanguage): Promise<Dexonline.Results | undefined> {
 		return Dexonline.get(lemma, { mode: "strict" });
 	}
 

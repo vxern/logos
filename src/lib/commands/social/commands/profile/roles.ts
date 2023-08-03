@@ -1,5 +1,4 @@
 import constants from "../../../../../constants/constants";
-import { defaultLocale } from "../../../../../constants/language";
 import { trim } from "../../../../../formatting";
 import * as Logos from "../../../../../types";
 import { Client, localise } from "../../../../client";
@@ -224,7 +223,7 @@ async function createRoleSelectionMenu(
 					viewData.memberRolesIncludedInMenu.length >= viewData.category.maximum
 				) {
 					const strings = {
-						title: localise(client, "warn.strings.limitReached.title", defaultLocale)(),
+						title: localise(client, "warn.strings.limitReached.title", interaction.locale)(),
 						description: {
 							limitReached: localise(
 								client,

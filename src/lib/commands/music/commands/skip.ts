@@ -1,5 +1,5 @@
 import constants from "../../../../constants/constants";
-import { defaultLocale } from "../../../../constants/language";
+import defaults from "../../../../defaults";
 import { Client, localise } from "../../../client";
 import { parseArguments, reply } from "../../../interactions";
 import { isCollection } from "../../../services/music/music";
@@ -173,16 +173,24 @@ async function handleSkipAction([client, bot]: [Client, Discord.Bot], interactio
 	const strings =
 		collection ?? false
 			? {
-					title: localise(client, "music.options.skip.strings.skippedSongCollection.title", defaultLocale)(),
+					title: localise(
+						client,
+						"music.options.skip.strings.skippedSongCollection.title",
+						defaults.LOCALISATION_LOCALE,
+					)(),
 					description: localise(
 						client,
 						"music.options.skip.strings.skippedSongCollection.description",
-						defaultLocale,
+						defaults.LOCALISATION_LOCALE,
 					)(),
 			  }
 			: {
-					title: localise(client, "music.options.skip.strings.skippedSong.title", defaultLocale)(),
-					description: localise(client, "music.options.skip.strings.skippedSong.description", defaultLocale)(),
+					title: localise(client, "music.options.skip.strings.skippedSong.title", defaults.LOCALISATION_LOCALE)(),
+					description: localise(
+						client,
+						"music.options.skip.strings.skippedSong.description",
+						defaults.LOCALISATION_LOCALE,
+					)(),
 			  };
 
 	reply(

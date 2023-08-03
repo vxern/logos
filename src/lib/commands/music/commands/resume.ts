@@ -1,5 +1,5 @@
 import constants from "../../../../constants/constants";
-import { defaultLocale } from "../../../../constants/language";
+import defaults from "../../../../defaults";
 import { Client, localise } from "../../../client";
 import { reply } from "../../../interactions";
 import { OptionTemplate } from "../../command";
@@ -76,8 +76,8 @@ async function handleResumePlayback(
 	musicService.resume();
 
 	const strings = {
-		title: localise(client, "music.options.resume.strings.resumed.title", defaultLocale)(),
-		description: localise(client, "music.options.resume.strings.resumed.description", defaultLocale)(),
+		title: localise(client, "music.options.resume.strings.resumed.title", defaults.LOCALISATION_LOCALE)(),
+		description: localise(client, "music.options.resume.strings.resumed.description", defaults.LOCALISATION_LOCALE)(),
 	};
 
 	reply(

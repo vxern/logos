@@ -1,4 +1,4 @@
-import { Language } from "../../../../constants/language";
+import { FeatureLanguage } from "../../../../constants/language";
 
 type PartOfSpeech =
 	| "noun"
@@ -55,7 +55,7 @@ function isUnknownPartOfSpeech(partOfSpeech: PartOfSpeech): partOfSpeech is "unk
 	return partOfSpeech === "unknown";
 }
 
-const partsOfSpeech: Partial<Record<Language, Record<string, PartOfSpeech>>> = {
+const partsOfSpeech: Partial<Record<FeatureLanguage, Record<string, PartOfSpeech>>> = {
 	English: {
 		adjective: "adjective",
 		adposition: "adposition",

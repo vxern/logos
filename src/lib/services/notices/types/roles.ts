@@ -1,9 +1,9 @@
 import constants from "../../../../constants/constants";
-import { defaultLocale } from "../../../../constants/language";
+import defaults from "../../../../defaults";
 import { Client, localise } from "../../../client";
 import { handleOpenRoleSelectionMenu } from "../../../commands/social/commands/profile/roles";
 import { decodeId } from "../../../interactions";
-import { HashableMessageContent, NoticeService } from "../service";
+import { HashableMessageContents, NoticeService } from "../service";
 import * as Discord from "discordeno";
 
 class RoleNoticeService extends NoticeService<"roles"> {
@@ -11,20 +11,20 @@ class RoleNoticeService extends NoticeService<"roles"> {
 		super(client, guildId, { type: "roles" });
 	}
 
-	generateNotice(): HashableMessageContent | undefined {
+	generateNotice(): HashableMessageContents | undefined {
 		const strings = {
-			title: localise(this.client, "roles.selection.title", defaultLocale)(),
+			title: localise(this.client, "roles.selection.title", defaults.LOCALISATION_LOCALE)(),
 			description: {
 				usingCommand: localise(
 					this.client,
 					"roles.selection.description.usingCommand",
-					defaultLocale,
+					defaults.LOCALISATION_LOCALE,
 				)({
 					command: "`/profile roles`",
 				}),
-				runAnywhere: localise(this.client, "roles.selection.description.runAnywhere", defaultLocale)(),
-				pressButton: localise(this.client, "roles.selection.description.pressButton", defaultLocale)(),
-				clickHere: localise(this.client, "roles.selection.description.clickHere", defaultLocale)(),
+				runAnywhere: localise(this.client, "roles.selection.description.runAnywhere", defaults.LOCALISATION_LOCALE)(),
+				pressButton: localise(this.client, "roles.selection.description.pressButton", defaults.LOCALISATION_LOCALE)(),
+				clickHere: localise(this.client, "roles.selection.description.clickHere", defaults.LOCALISATION_LOCALE)(),
 			},
 		};
 

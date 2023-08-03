@@ -1,5 +1,5 @@
 import constants from "../../../../constants/constants";
-import { defaultLocale } from "../../../../constants/language";
+import defaults from "../../../../defaults";
 import { Client, localise } from "../../../client";
 import diagnostics from "../../../diagnostics";
 import { editReply, parseArguments, postponeReply, reply, respond } from "../../../interactions";
@@ -238,7 +238,7 @@ async function handleTranslateText(
 		} as requested by ${diagnostics.display.user(interaction.user)} on ${guild.name}...`,
 	);
 
-	const locale = show ? defaultLocale : interaction.locale;
+	const locale = show ? defaults.LOCALISATION_LOCALE : interaction.locale;
 
 	const translation = await translate(client, sourceLanguage.code, targetLanguage.code, text);
 	if (translation === undefined) {

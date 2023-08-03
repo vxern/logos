@@ -1,5 +1,5 @@
 import constants from "../../../../constants/constants";
-import { defaultLocale } from "../../../../constants/language";
+import defaults from "../../../../defaults";
 import { Client, localise } from "../../../client";
 import { parseArguments, reply, respond } from "../../../interactions";
 import { CommandTemplate } from "../../command";
@@ -88,7 +88,7 @@ async function handleCiteRule([client, bot]: [Client, Discord.Bot], interaction:
 		return;
 	}
 
-	const locale = show ? defaultLocale : interaction.locale;
+	const locale = show ? defaults.LOCALISATION_LOCALE : interaction.locale;
 
 	const strings = {
 		tldr: localise(client, "rules.tldr", locale)(),

@@ -1,5 +1,5 @@
 import constants from "../../../../constants/constants";
-import { defaultLanguage, defaultLocale, getLanguageByLocale } from "../../../../constants/language";
+import { getLanguageByLocale } from "../../../../constants/language";
 import defaults from "../../../../defaults";
 import { MentionTypes, mention } from "../../../../formatting";
 import { Client, autocompleteMembers, localise, pluralise, resolveInteractionToMember } from "../../../client";
@@ -131,7 +131,7 @@ async function handleWarnUser([client, bot]: [Client, Discord.Bot], interaction:
 
 	const relevantWarnings = getActiveWarnings(warnings, expirationMilliseconds);
 
-	const language = getLanguageByLocale(interaction.locale) ?? defaultLanguage;
+	const language = getLanguageByLocale(interaction.locale) ?? defaults.LOCALISATION_LANGUAGE;
 	const strings = {
 		title: localise(client, "warn.strings.warned.title", interaction.locale)(),
 		description: localise(
@@ -163,16 +163,16 @@ async function handleWarnUser([client, bot]: [Client, Discord.Bot], interaction:
 			const timeout = configuration.autoTimeout.duration ?? defaults.WARN_TIMEOUT;
 
 			strings = {
-				title: localise(client, "warn.strings.limitSurpassedTimedOut.title", defaultLocale)(),
+				title: localise(client, "warn.strings.limitSurpassedTimedOut.title", defaults.LOCALISATION_LOCALE)(),
 				description: localise(
 					client,
 					"warn.strings.limitSurpassedTimedOut.description",
-					defaultLocale,
+					defaults.LOCALISATION_LOCALE,
 				)({
 					user_mention: diagnostics.display.user(user),
 					limit: configuration.limit,
 					number: relevantWarnings.size,
-					period: pluralise(client, `units.${timeout[1]}.word`, defaultLanguage, timeout[0]),
+					period: pluralise(client, `units.${timeout[1]}.word`, defaults.LOCALISATION_LANGUAGE, timeout[0]),
 				}),
 			};
 
@@ -183,11 +183,11 @@ async function handleWarnUser([client, bot]: [Client, Discord.Bot], interaction:
 			}).catch(() => client.log.warn(`Failed to edit timeout state of ${diagnostics.display.member(member)}.`));
 		} else {
 			strings = {
-				title: localise(client, "warn.strings.limitSurpassed.title", defaultLocale)(),
+				title: localise(client, "warn.strings.limitSurpassed.title", defaults.LOCALISATION_LOCALE)(),
 				description: localise(
 					client,
 					"warn.strings.limitSurpassed.description",
-					defaultLocale,
+					defaults.LOCALISATION_LOCALE,
 				)({ user_mention: diagnostics.display.user(user), limit: configuration.limit, number: relevantWarnings.size }),
 			};
 		}
@@ -208,11 +208,11 @@ async function handleWarnUser([client, bot]: [Client, Discord.Bot], interaction:
 	const reachedLimit = relevantWarnings.size === defaults.WARN_LIMIT;
 	if (reachedLimit) {
 		const strings = {
-			title: localise(client, "warn.strings.limitReached.title", defaultLocale)(),
+			title: localise(client, "warn.strings.limitReached.title", defaults.LOCALISATION_LOCALE)(),
 			description: localise(
 				client,
 				"warn.strings.limitReached.description",
-				defaultLocale,
+				defaults.LOCALISATION_LOCALE,
 			)({ user_mention: diagnostics.display.user(user), limit: defaults.WARN_LIMIT }),
 		};
 

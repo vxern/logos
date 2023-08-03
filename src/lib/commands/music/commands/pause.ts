@@ -1,5 +1,5 @@
 import constants from "../../../../constants/constants";
-import { defaultLocale } from "../../../../constants/language";
+import defaults from "../../../../defaults";
 import { Client, localise } from "../../../client";
 import { reply } from "../../../interactions";
 import { OptionTemplate } from "../../command";
@@ -64,8 +64,8 @@ async function handlePausePlayback(
 	musicService.pause();
 
 	const strings = {
-		title: localise(client, "music.options.pause.strings.paused.title", defaultLocale)(),
-		description: localise(client, "music.options.pause.strings.paused.description", defaultLocale)(),
+		title: localise(client, "music.options.pause.strings.paused.title", defaults.LOCALISATION_LOCALE)(),
+		description: localise(client, "music.options.pause.strings.paused.description", defaults.LOCALISATION_LOCALE)(),
 	};
 
 	reply(

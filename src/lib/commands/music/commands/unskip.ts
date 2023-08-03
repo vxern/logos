@@ -1,5 +1,5 @@
 import constants from "../../../../constants/constants";
-import { defaultLocale } from "../../../../constants/language";
+import defaults from "../../../../defaults";
 import { Client, localise } from "../../../client";
 import { parseArguments, reply } from "../../../interactions";
 import { isCollection } from "../../../services/music/music";
@@ -234,8 +234,8 @@ async function handleUnskipAction(
 	}
 
 	const strings = {
-		title: localise(client, "music.options.unskip.strings.unskipped.title", defaultLocale)(),
-		description: localise(client, "music.options.unskip.strings.unskipped.description", defaultLocale)(),
+		title: localise(client, "music.options.unskip.strings.unskipped.title", defaults.LOCALISATION_LOCALE)(),
+		description: localise(client, "music.options.unskip.strings.unskipped.description", defaults.LOCALISATION_LOCALE)(),
 	};
 
 	reply(

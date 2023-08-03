@@ -1,5 +1,5 @@
 import constants from "../../../../constants/constants";
-import { defaultLocale } from "../../../../constants/language";
+import defaults from "../../../../defaults";
 import { MentionTypes, mention, timestamp } from "../../../../formatting";
 import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
@@ -66,11 +66,11 @@ class SuggestionService extends PromptService<"suggestions", Suggestion, Metadat
 
 		const strings = {
 			suggestion: {
-				submittedBy: localise(this.client, "submittedBy", defaultLocale)(),
-				submittedAt: localise(this.client, "submittedAt", defaultLocale)(),
+				submittedBy: localise(this.client, "submittedBy", defaults.LOCALISATION_LOCALE)(),
+				submittedAt: localise(this.client, "submittedAt", defaults.LOCALISATION_LOCALE)(),
 			},
-			markResolved: localise(this.client, "markResolved", defaultLocale)(),
-			markUnresolved: localise(this.client, "markUnresolved", defaultLocale)(),
+			markResolved: localise(this.client, "markResolved", defaults.LOCALISATION_LOCALE)(),
+			markUnresolved: localise(this.client, "markUnresolved", defaults.LOCALISATION_LOCALE)(),
 		};
 
 		return {
@@ -174,8 +174,8 @@ class SuggestionService extends PromptService<"suggestions", Suggestion, Metadat
 
 		if (isResolved && document.data.isResolved) {
 			const strings = {
-				title: localise(this.client, "alreadyMarkedResolved.title", defaultLocale)(),
-				description: localise(this.client, "alreadyMarkedResolved.description", defaultLocale)(),
+				title: localise(this.client, "alreadyMarkedResolved.title", defaults.LOCALISATION_LOCALE)(),
+				description: localise(this.client, "alreadyMarkedResolved.description", defaults.LOCALISATION_LOCALE)(),
 			};
 
 			reply([this.client, bot], interaction, {
@@ -192,8 +192,8 @@ class SuggestionService extends PromptService<"suggestions", Suggestion, Metadat
 
 		if (!(isResolved || document.data.isResolved)) {
 			const strings = {
-				title: localise(this.client, "alreadyMarkedUnresolved.title", defaultLocale)(),
-				description: localise(this.client, "alreadyMarkedUnresolved.description", defaultLocale)(),
+				title: localise(this.client, "alreadyMarkedUnresolved.title", defaults.LOCALISATION_LOCALE)(),
+				description: localise(this.client, "alreadyMarkedUnresolved.description", defaults.LOCALISATION_LOCALE)(),
 			};
 
 			reply([this.client, bot], interaction, {

@@ -1,4 +1,4 @@
-import { defaultLocale } from "../../../../constants/language";
+import defaults from "../../../../defaults";
 import { Client, localise } from "../../../client";
 import { parseArguments, reply } from "../../../interactions";
 import { CommandTemplate } from "../../command";
@@ -44,7 +44,7 @@ async function handleDisplayModerationPolicy(
 		return;
 	}
 
-	const locale = show ? defaultLocale : interaction.locale;
+	const locale = show ? defaults.LOCALISATION_LOCALE : interaction.locale;
 
 	const strings = {
 		title: localise(client, "policies.moderation.title", interaction.locale)(),

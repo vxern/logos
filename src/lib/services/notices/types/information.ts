@@ -1,5 +1,5 @@
 import constants from "../../../../constants/constants";
-import { defaultLocale } from "../../../../constants/language";
+import defaults from "../../../../defaults";
 import { Client, localise } from "../../../client";
 import { ruleIds } from "../../../commands/moderation/commands/rule";
 import { HashableMessageContents, NoticeService } from "../service";
@@ -21,10 +21,10 @@ class InformationNoticeService extends NoticeService<"information"> {
 
 		const informationFields = ruleIds.map((ruleId, index) => {
 			const strings = {
-				title: localise(this.client, `rules.${ruleId}.title`, defaultLocale)(),
-				tldr: localise(this.client, "rules.tldr", defaultLocale)(),
-				summary: localise(this.client, `rules.${ruleId}.summary`, defaultLocale)(),
-				content: localise(this.client, `rules.${ruleId}.content`, defaultLocale)(),
+				title: localise(this.client, `rules.${ruleId}.title`, defaults.LOCALISATION_LOCALE)(),
+				tldr: localise(this.client, "rules.tldr", defaults.LOCALISATION_LOCALE)(),
+				summary: localise(this.client, `rules.${ruleId}.summary`, defaults.LOCALISATION_LOCALE)(),
+				content: localise(this.client, `rules.${ruleId}.content`, defaults.LOCALISATION_LOCALE)(),
 			};
 
 			return {
@@ -37,7 +37,7 @@ class InformationNoticeService extends NoticeService<"information"> {
 		});
 
 		const strings = {
-			invite: localise(this.client, "notices.notices.information.invite", defaultLocale)(),
+			invite: localise(this.client, "notices.notices.information.invite", defaults.LOCALISATION_LOCALE)(),
 		};
 
 		return {

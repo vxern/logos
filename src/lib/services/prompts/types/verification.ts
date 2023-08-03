@@ -1,5 +1,5 @@
 import constants from "../../../../constants/constants";
-import { defaultLanguage, defaultLocale } from "../../../../constants/language";
+import defaults from "../../../../defaults";
 import { MentionTypes, TimestampFormat, mention, timestamp } from "../../../../formatting";
 import * as Logos from "../../../../types";
 import { Client, localise, pluralise } from "../../../client";
@@ -87,38 +87,38 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 				reason: localise(
 					this.client,
 					"verification.fields.reason",
-					defaultLocale,
+					defaults.LOCALISATION_LOCALE,
 				)({ language: guildDocument.data.language }),
-				aim: localise(this.client, "verification.fields.aim", defaultLocale)(),
-				whereFound: localise(this.client, "verification.fields.whereFound", defaultLocale)(),
+				aim: localise(this.client, "verification.fields.aim", defaults.LOCALISATION_LOCALE)(),
+				whereFound: localise(this.client, "verification.fields.whereFound", defaults.LOCALISATION_LOCALE)(),
 			},
-			answers: localise(this.client, "entry.verification.answers", defaultLocale)(),
-			requestedRoles: localise(this.client, "entry.verification.requestedRoles", defaultLocale)(),
-			accountCreated: localise(this.client, "entry.verification.accountCreated", defaultLocale)(),
-			answersSubmitted: localise(this.client, "entry.verification.answersSubmitted", defaultLocale)(),
-			accept: localise(this.client, "entry.verification.vote.accept", defaultLocale)(),
+			answers: localise(this.client, "entry.verification.answers", defaults.LOCALISATION_LOCALE)(),
+			requestedRoles: localise(this.client, "entry.verification.requestedRoles", defaults.LOCALISATION_LOCALE)(),
+			accountCreated: localise(this.client, "entry.verification.accountCreated", defaults.LOCALISATION_LOCALE)(),
+			answersSubmitted: localise(this.client, "entry.verification.answersSubmitted", defaults.LOCALISATION_LOCALE)(),
+			accept: localise(this.client, "entry.verification.vote.accept", defaults.LOCALISATION_LOCALE)(),
 			acceptMultiple: localise(
 				this.client,
 				"entry.verification.vote.acceptMultiple",
-				defaultLocale,
+				defaults.LOCALISATION_LOCALE,
 			)({
 				votes: pluralise(
 					this.client,
 					"entry.verification.vote.acceptMultiple.votes",
-					defaultLanguage,
+					defaults.LOCALISATION_LANGUAGE,
 					voteInformation.acceptance.remaining,
 				),
 			}),
-			reject: localise(this.client, "entry.verification.vote.reject", defaultLocale)(),
+			reject: localise(this.client, "entry.verification.vote.reject", defaults.LOCALISATION_LOCALE)(),
 			rejectMultiple: localise(
 				this.client,
 				"entry.verification.vote.rejectMultiple",
-				defaultLocale,
+				defaults.LOCALISATION_LOCALE,
 			)({
 				votes: pluralise(
 					this.client,
 					"entry.verification.vote.rejectMultiple.votes",
-					defaultLanguage,
+					defaults.LOCALISATION_LANGUAGE,
 					voteInformation.rejection.remaining,
 				),
 			}),

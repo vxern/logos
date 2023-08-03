@@ -1,6 +1,7 @@
-import { Language } from "../../../constants/language";
+import { FeatureLanguage, LocalisationLanguage } from "../../../constants/language";
 import time from "../../../constants/time";
 
+/** @since v3.0.0 */
 interface Guild {
 	/** A timestamp of when Logos began to manage this guild. */
 	createdAt: number;
@@ -16,11 +17,18 @@ interface Guild {
 	isNative: boolean;
 
 	/**
-	 * The bot's default language on this guild.
+	 * The bot's default feature language on this guild.
 	 *
 	 * The implicit value is 'English'.
 	 */
-	language: Language;
+	/** @deprecated since v3.5.0. {@link languages} is used instead. */
+	language?: FeatureLanguage;
+
+	/** @since v3.5.0 */
+	languages?: {
+		localisation: LocalisationLanguage;
+		feature: FeatureLanguage;
+	};
 
 	/** The bot's features configured for this guild. */
 	features: {
@@ -57,10 +65,13 @@ interface Guild {
 
 		language: Activatable<{
 			features: {
+				/** @since v3.3.0 */
 				answers?: Activatable;
 
+				/** @since v3.4.0 */
 				corrections?: Activatable;
 
+				/** @since v3.1.0 */
 				cefr?: Activatable<CefrConfiguration>;
 
 				game: Activatable;
@@ -92,6 +103,7 @@ interface Guild {
 					journaling: boolean;
 				}>;
 
+				/** @since v3.2.0 */
 				slowmode?: Activatable<{
 					journaling: boolean;
 				}>;

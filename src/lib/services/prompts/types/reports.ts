@@ -1,5 +1,5 @@
 import constants from "../../../../constants/constants";
-import { defaultLocale } from "../../../../constants/language";
+import defaults from "../../../../defaults";
 import { MentionTypes, mention, timestamp } from "../../../../formatting";
 import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
@@ -62,18 +62,18 @@ class ReportService extends PromptService<"reports", Report, Metadata, Interacti
 
 		const strings = {
 			report: {
-				submittedBy: localise(this.client, "submittedBy", defaultLocale)(),
-				submittedAt: localise(this.client, "submittedAt", defaultLocale)(),
-				users: localise(this.client, "reports.users", defaultLocale)(),
-				reason: localise(this.client, "reports.reason", defaultLocale)(),
-				link: localise(this.client, "reports.link", defaultLocale)(),
-				noLinkProvided: localise(this.client, "reports.noLinkProvided", defaultLocale)(),
+				submittedBy: localise(this.client, "submittedBy", defaults.LOCALISATION_LOCALE)(),
+				submittedAt: localise(this.client, "submittedAt", defaults.LOCALISATION_LOCALE)(),
+				users: localise(this.client, "reports.users", defaults.LOCALISATION_LOCALE)(),
+				reason: localise(this.client, "reports.reason", defaults.LOCALISATION_LOCALE)(),
+				link: localise(this.client, "reports.link", defaults.LOCALISATION_LOCALE)(),
+				noLinkProvided: localise(this.client, "reports.noLinkProvided", defaults.LOCALISATION_LOCALE)(),
 			},
 			previousInfractions: {
-				title: localise(this.client, "reports.previousInfractions", defaultLocale),
+				title: localise(this.client, "reports.previousInfractions", defaults.LOCALISATION_LOCALE),
 			},
-			markResolved: localise(this.client, "markResolved", defaultLocale)(),
-			markUnresolved: localise(this.client, "markUnresolved", defaultLocale)(),
+			markResolved: localise(this.client, "markResolved", defaults.LOCALISATION_LOCALE)(),
+			markUnresolved: localise(this.client, "markUnresolved", defaults.LOCALISATION_LOCALE)(),
 		};
 
 		return {
@@ -184,8 +184,8 @@ class ReportService extends PromptService<"reports", Report, Metadata, Interacti
 
 		if (isResolved && document.data.isResolved) {
 			const strings = {
-				title: localise(this.client, "alreadyMarkedResolved.title", defaultLocale)(),
-				description: localise(this.client, "alreadyMarkedResolved.description", defaultLocale)(),
+				title: localise(this.client, "alreadyMarkedResolved.title", defaults.LOCALISATION_LOCALE)(),
+				description: localise(this.client, "alreadyMarkedResolved.description", defaults.LOCALISATION_LOCALE)(),
 			};
 
 			reply([this.client, bot], interaction, {
@@ -202,8 +202,8 @@ class ReportService extends PromptService<"reports", Report, Metadata, Interacti
 
 		if (!(isResolved || document.data.isResolved)) {
 			const strings = {
-				title: localise(this.client, "alreadyMarkedUnresolved.title", defaultLocale)(),
-				description: localise(this.client, "alreadyMarkedUnresolved.description", defaultLocale)(),
+				title: localise(this.client, "alreadyMarkedUnresolved.title", defaults.LOCALISATION_LOCALE)(),
+				description: localise(this.client, "alreadyMarkedUnresolved.description", defaults.LOCALISATION_LOCALE)(),
 			};
 
 			reply([this.client, bot], interaction, {

@@ -1,5 +1,5 @@
 import constants from "../../../../constants/constants";
-import { defaultLocale } from "../../../../constants/language";
+import defaults from "../../../../defaults";
 import { Client, localise } from "../../../client";
 import { parseArguments, reply } from "../../../interactions";
 import { isCollection } from "../../../services/music/music";
@@ -111,11 +111,11 @@ async function handleLoopPlayback(
 
 		if (!isLooped) {
 			const strings = {
-				title: localise(client, "music.options.loop.strings.disabled.title", defaultLocale)(),
+				title: localise(client, "music.options.loop.strings.disabled.title", defaults.LOCALISATION_LOCALE)(),
 				description: localise(
 					client,
 					"music.options.loop.strings.disabled.description.songCollection",
-					defaultLocale,
+					defaults.LOCALISATION_LOCALE,
 				)(),
 			};
 
@@ -132,8 +132,12 @@ async function handleLoopPlayback(
 		}
 
 		const strings = {
-			title: localise(client, "music.options.loop.strings.enabled.title", defaultLocale)(),
-			description: localise(client, "music.options.loop.strings.enabled.description.songCollection", defaultLocale)(),
+			title: localise(client, "music.options.loop.strings.enabled.title", defaults.LOCALISATION_LOCALE)(),
+			description: localise(
+				client,
+				"music.options.loop.strings.enabled.description.songCollection",
+				defaults.LOCALISATION_LOCALE,
+			)(),
 		};
 
 		reply([client, bot], interaction, {
@@ -155,8 +159,12 @@ async function handleLoopPlayback(
 
 	if (!isLooped) {
 		const strings = {
-			title: localise(client, "music.options.loop.strings.disabled.title", defaultLocale)(),
-			description: localise(client, "music.options.loop.strings.disabled.description.song", defaultLocale)(),
+			title: localise(client, "music.options.loop.strings.disabled.title", defaults.LOCALISATION_LOCALE)(),
+			description: localise(
+				client,
+				"music.options.loop.strings.disabled.description.song",
+				defaults.LOCALISATION_LOCALE,
+			)(),
 		};
 
 		reply(
@@ -177,8 +185,12 @@ async function handleLoopPlayback(
 	}
 
 	const strings = {
-		title: localise(client, "music.options.loop.strings.enabled.title", defaultLocale)(),
-		description: localise(client, "music.options.loop.strings.enabled.description.song", defaultLocale)(),
+		title: localise(client, "music.options.loop.strings.enabled.title", defaults.LOCALISATION_LOCALE)(),
+		description: localise(
+			client,
+			"music.options.loop.strings.enabled.description.song",
+			defaults.LOCALISATION_LOCALE,
+		)(),
 	};
 
 	reply(

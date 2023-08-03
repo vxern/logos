@@ -1,5 +1,4 @@
 import constants from "../../../../constants/constants";
-import { defaultLocale } from "../../../../constants/language";
 import defaults from "../../../../defaults";
 import { MentionTypes, mention, timestamp, trim } from "../../../../formatting";
 import { Client, localise } from "../../../client";
@@ -62,7 +61,7 @@ async function handleDisplayCurrentlyPlaying(
 
 	const [current, playingSince] = [musicService.current, musicService.playingSince];
 
-	const locale = show ? defaultLocale : interaction.locale;
+	const locale = show ? defaults.LOCALISATION_LOCALE : interaction.locale;
 
 	if (collection) {
 		if (current?.content === undefined || !isCollection(current.content)) {

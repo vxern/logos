@@ -1,5 +1,5 @@
 import constants from "../../../../../constants/constants";
-import { defaultLocale } from "../../../../../constants/language";
+import defaults from "../../../../../defaults";
 import { MentionTypes, mention } from "../../../../../formatting";
 import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../../client";
 import { parseArguments, reply } from "../../../../interactions";
@@ -64,7 +64,7 @@ async function handleDisplayProfile(
 		return;
 	}
 
-	const locale = show ? defaultLocale : interaction.locale;
+	const locale = show ? defaults.LOCALISATION_LOCALE : interaction.locale;
 
 	const strings = {
 		title: localise(

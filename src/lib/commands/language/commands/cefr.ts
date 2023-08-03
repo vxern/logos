@@ -1,5 +1,5 @@
 import constants from "../../../../constants/constants";
-import { defaultLocale } from "../../../../constants/language";
+import defaults from "../../../../defaults";
 import { Client, localise } from "../../../client";
 import { CefrConfiguration } from "../../../database/structs/guild";
 import {
@@ -50,7 +50,7 @@ async function handleDisplayCefrGuide(
 		return;
 	}
 
-	const locale = show ? defaultLocale : interaction.locale;
+	const locale = show ? defaults.LOCALISATION_LOCALE : interaction.locale;
 
 	const levelExamples = guildDocument.data.features.language.features?.cefr?.examples;
 	if (levelExamples === undefined) {

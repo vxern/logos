@@ -1,5 +1,5 @@
 import constants from "../../../../constants/constants";
-import { defaultLocale } from "../../../../constants/language";
+import defaults from "../../../../defaults";
 import { Client, localise } from "../../../client";
 import { parseArguments, reply } from "../../../interactions";
 import { OptionTemplate } from "../../command";
@@ -63,7 +63,7 @@ async function handleDisplayPlaybackHistory(
 
 	const history = structuredClone(historyReversed).reverse();
 
-	const locale = show ? defaultLocale : interaction.locale;
+	const locale = show ? defaults.LOCALISATION_LOCALE : interaction.locale;
 
 	const strings = {
 		title: localise(client, "music.options.history.strings.playbackHistory", locale)(),

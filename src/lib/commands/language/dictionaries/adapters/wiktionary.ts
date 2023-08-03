@@ -1,7 +1,7 @@
-import { Language } from "../../../../../constants/language";
+import { FeatureLanguage } from "../../../../../constants/language";
 import { Client } from "../../../../client";
 import { getPartOfSpeech } from "../../module";
-import { DictionaryAdapter, DictionaryEntry, DictionaryProvisions } from "../adapter";
+import { DictionaryAdapter, DictionaryEntry } from "../adapter";
 import { WiktionaryParser } from "wiktionary";
 
 const wiktionary = new WiktionaryParser();
@@ -11,11 +11,15 @@ type WordData = ReturnType<typeof wiktionary["parse"]> extends Promise<(infer U)
 const newlinesExpression = RegExp("\n{1}", "g");
 
 class WiktionaryAdapter extends DictionaryAdapter<WordData[]> {
-	readonly name = "Wiktionary";
-	readonly supports = ["Armenian", "English", "Polish", "Hungarian", "Romanian"] satisfies Language[];
-	readonly provides = ["definitions", "etymology"] satisfies DictionaryProvisions[];
+	constructor() {
+		super({
+			name: "Wiktionary",
+			supports: ["Armenian", "Romanian"],
+			provides: ["definitions", "etymology"],
+		});
+	}
 
-	async fetch(lemma: string, language: Language): Promise<WordData[] | undefined> {
+	async fetch(lemma: string, language: FeatureLanguage): Promise<WordData[] | undefined> {
 		const data = await wiktionary.parse(lemma, language);
 		if (data.length === 0) {
 			// @ts-ignore: Accessing private member.

@@ -1,5 +1,5 @@
 import constants from "../../../../constants/constants";
-import { defaultLocale } from "../../../../constants/language";
+import defaults from "../../../../defaults";
 import { Client, localise } from "../../../client";
 import { parseArguments, reply } from "../../../interactions";
 import { CommandTemplate } from "../../command";
@@ -31,7 +31,8 @@ async function handleDisplayResources(
 		return;
 	}
 
-	const locale = show ? defaultLocale : interaction.locale;
+	const locale = show ? defaults.LOCALISATION_LOCALE : interaction.locale;
+	const featureLanguage = guildDocument.data.languages?.feature ?? defaults.FEATURE_LANGUAGE;
 
 	const strings = {
 		redirect: localise(
@@ -39,7 +40,7 @@ async function handleDisplayResources(
 			"resources.strings.redirect",
 			locale,
 		)({
-			language: localise(client, `languages.${guildDocument.data.language.toLowerCase()}`, locale)(),
+			language: localise(client, `languages.${featureLanguage.toLowerCase()}`, locale)(),
 		}),
 	};
 
@@ -55,7 +56,7 @@ async function handleDisplayResources(
 							type: Discord.MessageComponentTypes.Button,
 							label: strings.redirect,
 							style: Discord.ButtonStyles.Link,
-							url: constants.links.generateLanguageRepositoryLink(guildDocument.data.language),
+							url: constants.links.generateLanguageRepositoryLink(featureLanguage),
 						},
 					],
 				},

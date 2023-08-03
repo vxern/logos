@@ -1,5 +1,5 @@
 import constants from "../../../constants/constants";
-import { Language } from "../../../constants/language";
+import { FeatureLanguage } from "../../../constants/language";
 import { trim } from "../../../formatting";
 import * as Logos from "../../../types";
 import { localise } from "../../client";
@@ -311,7 +311,7 @@ class EntryService extends LocalService {
 	}
 
 	private generateVerificationQuestionModal(
-		language: Language,
+		language: FeatureLanguage,
 		locale: string | undefined,
 	): Modal<EntryRequest["answers"]> {
 		const strings = {

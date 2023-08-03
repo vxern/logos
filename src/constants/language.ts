@@ -1,66 +1,83 @@
 import * as Discord from "discordeno";
 
-const supportedLanguages = [
-	"Armenian",
-	"English",
-	"French",
-	"Hungarian",
-	"Norwegian",
-	"Polish",
-	"Romanian",
-	"Turkish",
-] as const;
-type Language = typeof supportedLanguages[number];
+const languages = {
+	localisation: [
+		// Built-in
+		...["English", "French", "Hungarian", "Norwegian", "Polish", "Romanian", "Turkish"],
+		// Custom
+		...["Armenian/Western", "Armenian/Eastern"],
+	],
+	feature: ["Armenian", "English", "Romanian"],
+} as const;
+const locales = ["hyw", "hye"] as const;
 
-function typedDefaultLanguage<T extends Language>(language: T): T {
-	return language;
-}
+type LocalisationLanguage = typeof languages.localisation[number];
+type FeatureLanguage = typeof languages.feature[number];
+type CustomLocale = typeof locales[number];
+type Locale = Discord.Locale | CustomLocale;
 
-const defaultLanguage = typedDefaultLanguage("English");
-
-const localeByLanguage: Required<Record<typeof defaultLanguage, `${Discord.Locales}`>> &
-	Partial<Record<Language, `${Discord.Locales}`>> = {
-	English: "en-GB",
-	French: "fr",
-	Hungarian: "hu",
-	Norwegian: "no",
-	Polish: "pl",
-	Romanian: "ro",
-	Turkish: "tr",
+const mappings = {
+	locales: {
+		// Built-in
+		...({
+			English: "en-GB",
+			French: "fr",
+			Hungarian: "hu",
+			Norwegian: "no",
+			Polish: "pl",
+			Romanian: "ro",
+			Turkish: "tr",
+		} satisfies Partial<Record<LocalisationLanguage, Discord.Locale>>),
+		// Custom
+		...({
+			"Armenian/Western": "hyw",
+			"Armenian/Eastern": "hye",
+		} satisfies Partial<Record<LocalisationLanguage, CustomLocale>>),
+	} satisfies Record<LocalisationLanguage, Locale>,
+	languages: {
+		// Built-in
+		...({
+			"en-GB": "English",
+			"en-US": "English",
+			fr: "French",
+			hu: "Hungarian",
+			no: "Norwegian",
+			pl: "Polish",
+			ro: "Romanian",
+			tr: "Turkish",
+		} satisfies Partial<Record<Discord.Locale, LocalisationLanguage>>),
+		// Custom
+		...({
+			hyw: "Armenian/Western",
+			hye: "Armenian/Eastern",
+		} satisfies Record<CustomLocale, LocalisationLanguage>),
+	},
 };
 
-const defaultLocale = localeByLanguage[defaultLanguage];
-
-const languageByLocale = {
-	"en-GB": "English",
-	"en-US": "English",
-	fr: "French",
-	hu: "Hungarian",
-	no: "Norwegian",
-	pl: "Polish",
-	ro: "Romanian",
-	tr: "Turkish",
-} satisfies Partial<Record<Discord.Locales, Language>>;
-
-function getLanguageByLocale(locale: string | undefined): Language | undefined {
-	if (locale === undefined || !(locale in languageByLocale)) {
+function getLanguageByLocale(locale: string | undefined): LocalisationLanguage | undefined {
+	if (locale === undefined || !(locale in mappings.languages)) {
 		return undefined;
 	}
 
-	return languageByLocale[locale as keyof typeof languageByLocale];
+	return mappings.languages[locale as keyof typeof mappings.languages];
 }
 
-function getLocaleForLanguage(language: Language): typeof localeByLanguage[keyof typeof localeByLanguage] | undefined {
-	return localeByLanguage[language];
+function getLocaleByLanguage(language: LocalisationLanguage): Discord.Locale | undefined {
+	const locale = mappings.locales[language];
+	if (locale in Discord.Locales) {
+		return locale as Discord.Locale;
+	}
+
+	return undefined;
 }
 
-export {
-	defaultLanguage,
-	defaultLocale,
-	getLanguageByLocale,
-	getLocaleForLanguage,
-	languageByLocale,
-	localeByLanguage,
-	supportedLanguages,
-};
-export type { Language };
+function isLocalised(language: string): language is LocalisationLanguage {
+	return (languages.localisation as readonly string[]).includes(language);
+}
+
+function isFeatured(language: string): language is FeatureLanguage {
+	return (languages.feature as readonly string[]).includes(language);
+}
+
+export { getLanguageByLocale, getLocaleByLanguage, isLocalised, isFeatured };
+export type { FeatureLanguage, LocalisationLanguage, Locale };

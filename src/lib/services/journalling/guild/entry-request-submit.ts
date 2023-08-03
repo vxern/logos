@@ -1,5 +1,5 @@
 import constants from "../../../../constants/constants";
-import { defaultLocale } from "../../../../constants/language";
+import defaults from "../../../../defaults";
 import { codeMultiline } from "../../../../formatting";
 import { localise } from "../../../client";
 import diagnostics from "../../../diagnostics";
@@ -14,9 +14,13 @@ export default {
 		}
 
 		const strings = {
-			reason: localise(client, "verification.fields.reason", defaultLocale)({ language: guildDocument.data.language }),
-			aim: localise(client, "verification.fields.aim", defaultLocale)(),
-			whereFound: localise(client, "verification.fields.whereFound", defaultLocale)(),
+			reason: localise(
+				client,
+				"verification.fields.reason",
+				defaults.LOCALISATION_LOCALE,
+			)({ language: guildDocument.data.language }),
+			aim: localise(client, "verification.fields.aim", defaults.LOCALISATION_LOCALE)(),
+			whereFound: localise(client, "verification.fields.whereFound", defaults.LOCALISATION_LOCALE)(),
 		};
 
 		return `${diagnostics.display.user(user)} has submitted a request to join the server.

@@ -1,6 +1,7 @@
 import constants from "../constants/constants";
-import { defaultLanguage, defaultLocale, getLanguageByLocale } from "../constants/language";
+import { getLanguageByLocale } from "../constants/language";
 import time from "../constants/time";
+import defaults from "../defaults";
 import { Client, addCollector, localise, pluralise } from "./client";
 import * as Discord from "discordeno";
 import { DiscordSnowflake as Snowflake } from "snowflake";
@@ -412,7 +413,7 @@ function parseConciseTimeExpression(
 		...number[],
 	];
 
-	const language = getLanguageByLocale(locale) ?? defaultLanguage;
+	const language = getLanguageByLocale(locale) ?? defaults.LOCALISATION_LANGUAGE;
 
 	const verboseExpressionParts = [];
 	if (seconds !== 0) {
@@ -471,7 +472,7 @@ function parseVerboseTimeExpressionPhrase(
 	expression: string,
 	locale: string | undefined,
 ): ReturnType<typeof parseTimeExpression> {
-	if (!timeUnitsWithAliasesLocalised.has(locale ?? defaultLocale)) {
+	if (!timeUnitsWithAliasesLocalised.has(locale ?? defaults.LOCALISATION_LANGUAGE)) {
 		const timeUnits = Object.keys(timeUnitToPeriod) as TimeUnit[];
 		const timeUnitAliasTuples: [TimeUnit, string[]][] = [];
 
@@ -489,14 +490,14 @@ function parseVerboseTimeExpressionPhrase(
 		}
 
 		timeUnitsWithAliasesLocalised.set(
-			locale ?? defaultLocale,
+			locale ?? defaults.LOCALISATION_LANGUAGE,
 			Object.fromEntries(timeUnitAliasTuples) as Record<TimeUnit, string[]>,
 		);
 	}
 
-	const timeUnitsWithAliases = timeUnitsWithAliasesLocalised.get(locale ?? defaultLocale);
+	const timeUnitsWithAliases = timeUnitsWithAliasesLocalised.get(locale ?? defaults.LOCALISATION_LANGUAGE);
 	if (timeUnitsWithAliases === undefined) {
-		throw `Failed to get time unit aliases for either locale '${locale}' or '${defaultLocale}'.`;
+		throw `Failed to get time unit aliases for either locale '${locale}' or '${defaults.LOCALISATION_LOCALE}'.`;
 	}
 
 	function extractNumbers(expression: string): number[] {
@@ -552,14 +553,14 @@ function parseVerboseTimeExpressionPhrase(
 		quantifiers[index],
 	])) {
 		if (quantifier === undefined) {
-			throw `Failed to get quantifier for time unit '${timeUnit}' and either locale '${locale}' or '${defaultLocale}'.`;
+			throw `Failed to get quantifier for time unit '${timeUnit}' and either locale '${locale}' or '${defaults.LOCALISATION_LOCALE}'.`;
 		}
 
 		timeUnitQuantifierTuples.push([timeUnit, quantifier]);
 	}
 	timeUnitQuantifierTuples.sort(([previous], [next]) => timeUnitToPeriod[next] - timeUnitToPeriod[previous]);
 
-	const language = getLanguageByLocale(locale) ?? defaultLanguage;
+	const language = getLanguageByLocale(locale) ?? defaults.LOCALISATION_LANGUAGE;
 
 	const timeExpressions = [];
 	let total = 0;

@@ -1,5 +1,4 @@
 import constants from "../../../../constants/constants";
-import { defaultLocale } from "../../../../constants/language";
 import defaults from "../../../../defaults";
 import { MentionTypes, mention, trim } from "../../../../formatting";
 import { Client, localise } from "../../../client";
@@ -220,11 +219,11 @@ async function generateEmbed(
 			}
 
 			const strings = {
-				title: localise(client, "music.options.remove.strings.removed.title", defaultLocale)(),
+				title: localise(client, "music.options.remove.strings.removed.title", defaults.LOCALISATION_LOCALE)(),
 				description: localise(
 					client,
 					"music.options.remove.strings.removed.description",
-					defaultLocale,
+					defaults.LOCALISATION_LOCALE,
 				)({
 					title: songListing.content.title,
 					user_mention: mention(selection.user.id, MentionTypes.User),

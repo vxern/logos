@@ -1,5 +1,5 @@
 import constants from "../../../../constants/constants";
-import { defaultLanguage, getLanguageByLocale } from "../../../../constants/language";
+import { getLanguageByLocale } from "../../../../constants/language";
 import time from "../../../../constants/time";
 import defaults from "../../../../defaults";
 import { MentionTypes, mention, timestamp, trim } from "../../../../formatting";
@@ -241,7 +241,7 @@ async function handlePurgeMessages(
 		1500,
 	);
 
-	const language = getLanguageByLocale(interaction.locale) ?? defaultLanguage;
+	const language = getLanguageByLocale(interaction.locale) ?? defaults.LOCALISATION_LANGUAGE;
 
 	let isFinished = false;
 	while (!isFinished) {
