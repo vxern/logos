@@ -3,9 +3,9 @@
 	"rules.rule": "Օրէնք",
 	"rules.behaviour.title": "Վարք",
 	"rules.behaviour.summary": "Բարեսէր եղէ՛ք։",
-	"rules.behaviour.content": "It is expected of members to treat each other with respect, consideration and understanding. Malicious behaviour in the form of verbal abuse, discrimination, harassment and other forms of hurtful or toxic behaviour will not be tolerated.",
-	"rules.quality.title": "Quality",
-	"rules.quality.summary": "Do not be obnoxious.",
+	"rules.behaviour.content": "Անդամներ պէտք է իրենք զիրենք յարգեն եւ հասկացողութեան գալ փորձեն։ Թշնամանք, խտրականութիւն, հալածանք, թշնամութիւն չեն հանդուրժուիր։",
+	"rules.quality.title": "Որակ",
+	"rules.quality.summary": "Ատելի մի՛ եղէք։",
 	"rules.quality.content": "It is expected of contributions made to the server to be of decent quality. Trolling, spamming, flooding, shitposting (outside of the channel for memes) and other forms of annoying behaviour are sorely discouraged.",
 	"rules.relevance.title": "Relevance",
 	"rules.relevance.summary": "Post relevant content.",
@@ -14,9 +14,9 @@
 	"rules.suitability.summary": "Post content appropriate for younger members.",
 	"rules.suitability.content": "It is expected of contributions made to the server to be appropriate for viewing by minors. Age-restricted (NSFW) and NSFL content is strictly prohibited. If you wouldn't show it to a minor, you shouldn't post it.",
 	"rules.exclusivity.title": "Exclusivity",
-	"rules.exclusivity.summary": "Do not advertise.",
+	"rules.exclusivity.summary": "Մի՛ հրատարակէք։",
 	"rules.exclusivity.content": "It is expected of members to not use this space for advertising, and active attempts at it (including unsolicited DMs) are prohibited.",
 	"rules.adherence.title": "Դիւրահաւանութիւն",
 	"rules.adherence.summary": "Օրէնքները յարգեցէ՛ք։",
-	"rules.adherence.content": "For members who show no regard for the server rules, and are not interested in making useful contributions, a permanent ban may be issued."
+	"rules.adherence.content": "Յոգեցուցիչ անդամներ, որոնք սերվերին չեն նպաստեր ու օրէնքներուն չեն հնազանդիր, պիտի տարագրուին։"
 }
