@@ -3,7 +3,7 @@
 	"interactions.page": "Էջ",
 	"interactions.invalidUser.title": "Անվաւեր օգտատէր",
 	"interactions.invalidUser.description": "Ձեր մասնաւորած օգտատէրը անվաւեր է։",
-	"interactions.rateLimited.title": "You are being rate-limited",
-	"interactions.rateLimited.description.tooManyUses": "You have used this command too many times ({times}) in too short of a span of time.",
-	"interactions.rateLimited.description.cannotUseAgainUntil": "You will once again be able to use the command {relative_timestamp}."
+	"interactions.rateLimited.title": "Այս հրամանը շատ անգամ օգտագործած էք։",
+	"interactions.rateLimited.description.tooManyUses": "Այս հրամանը շատ անգամ ({times}) վերջերս օգտագործած էք",
+	"interactions.rateLimited.description.cannotUseAgainUntil": "{relative_timestamp}-ին այս հրամանը օգտագործելու իրաւունքն ալ կ'ունենաս։"
 }
