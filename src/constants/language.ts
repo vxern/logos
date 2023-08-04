@@ -57,15 +57,23 @@ const mappings = {
 	},
 };
 
-function getLanguageByLocale(locale: string | undefined): LocalisationLanguage | undefined {
-	if (locale === undefined || !(locale in mappings.languages)) {
+function getLanguageByLocale(locale: Locale): LocalisationLanguage | undefined {
+	if (!(locale in mappings.languages)) {
 		return undefined;
 	}
 
 	return mappings.languages[locale as keyof typeof mappings.languages];
 }
 
-function getLocaleByLanguage(language: LocalisationLanguage): Discord.Locale | undefined {
+function getLocaleByLanguage(language: LocalisationLanguage): Locale | undefined {
+	if (!(language in mappings.locales)) {
+		return undefined;
+	}
+
+	return mappings.locales[language as keyof typeof mappings.locales];
+}
+
+function getDiscordLocaleByLanguage(language: LocalisationLanguage): Discord.Locale | undefined {
 	const locale = mappings.locales[language];
 	if (locale in Discord.Locales) {
 		return locale as Discord.Locale;
@@ -82,5 +90,5 @@ function isFeatured(language: string): language is FeatureLanguage {
 	return (languages.feature as readonly string[]).includes(language);
 }
 
-export { getLanguageByLocale, getLocaleByLanguage, isLocalised, isFeatured };
+export { getLanguageByLocale, getDiscordLocaleByLanguage, getLocaleByLanguage, isLocalised, isFeatured };
 export type { FeatureLanguage, LocalisationLanguage, Locale, DefaultLanguage, DefaultLocale };

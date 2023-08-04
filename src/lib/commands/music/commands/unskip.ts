@@ -1,5 +1,5 @@
 import constants from "../../../../constants/constants";
-import defaults from "../../../../defaults";
+import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
 import { parseArguments, reply } from "../../../interactions";
 import { isCollection } from "../../../services/music/music";
@@ -14,10 +14,9 @@ const command: OptionTemplate = {
 	options: [collection, by, to],
 };
 
-async function handleUnskipAction(
-	[client, bot]: [Client, Discord.Bot],
-	interaction: Discord.Interaction,
-): Promise<void> {
+async function handleUnskipAction([client, bot]: [Client, Discord.Bot], interaction: Logos.Interaction): Promise<void> {
+	const locale = interaction.guildLocale;
+
 	const [{ collection, by: songsToUnskip, to: songToUnskipTo }] = parseArguments(interaction.data?.options, {
 		collection: "boolean",
 		by: "number",
@@ -48,10 +47,11 @@ async function handleUnskipAction(
 
 	const isOccupied = musicService.isOccupied;
 	if (!isOccupied) {
+		const locale = interaction.locale;
 		const strings = {
-			title: localise(client, "music.strings.notPlaying.title", interaction.locale)(),
+			title: localise(client, "music.strings.notPlaying.title", locale)(),
 			description: {
-				toManage: localise(client, "music.strings.notPlaying.description.toManage", interaction.locale)(),
+				toManage: localise(client, "music.strings.notPlaying.description.toManage", locale)(),
 			},
 		};
 
@@ -92,9 +92,10 @@ async function handleUnskipAction(
 	})();
 
 	if (isUnskippingListing && isHistoryEmpty) {
+		const locale = interaction.locale;
 		const strings = {
-			title: localise(client, "music.options.unskip.strings.historyEmpty.title", interaction.locale)(),
-			description: localise(client, "music.options.unskip.strings.historyEmpty.description", interaction.locale)(),
+			title: localise(client, "music.options.unskip.strings.historyEmpty.title", locale)(),
+			description: localise(client, "music.options.unskip.strings.historyEmpty.description", locale)(),
 		};
 
 		reply([client, bot], interaction, {
@@ -113,18 +114,19 @@ async function handleUnskipAction(
 		collection !== undefined &&
 		(current === undefined || current.content === undefined || !isCollection(current.content))
 	) {
+		const locale = interaction.locale;
 		const strings = {
-			title: localise(client, "music.options.unskip.strings.noSongCollection.title", interaction.locale)(),
+			title: localise(client, "music.options.unskip.strings.noSongCollection.title", locale)(),
 			description: {
 				noSongCollection: localise(
 					client,
 					"music.options.unskip.strings.noSongCollection.description.noSongCollection",
-					interaction.locale,
+					locale,
 				)(),
 				trySongInstead: localise(
 					client,
 					"music.options.unskip.strings.noSongCollection.description.trySongInstead",
-					interaction.locale,
+					locale,
 				)(),
 			},
 		};
@@ -142,9 +144,10 @@ async function handleUnskipAction(
 	}
 
 	if (!isQueueVacant) {
+		const locale = interaction.locale;
 		const strings = {
-			title: localise(client, "music.options.unskip.strings.queueFull.title", interaction.locale)(),
-			description: localise(client, "music.options.unskip.strings.queueFull.description", interaction.locale)(),
+			title: localise(client, "music.options.unskip.strings.queueFull.title", locale)(),
+			description: localise(client, "music.options.unskip.strings.queueFull.description", locale)(),
 		};
 
 		reply([client, bot], interaction, {
@@ -161,9 +164,10 @@ async function handleUnskipAction(
 
 	// If both the 'to' and the 'by' parameter have been supplied.
 	if (songsToUnskip !== undefined && songToUnskipTo !== undefined) {
+		const locale = interaction.locale;
 		const strings = {
-			title: localise(client, "music.strings.skips.tooManyArguments.title", interaction.locale)(),
-			description: localise(client, "music.strings.skips.tooManyArguments.description", interaction.locale)(),
+			title: localise(client, "music.strings.skips.tooManyArguments.title", locale)(),
+			description: localise(client, "music.strings.skips.tooManyArguments.description", locale)(),
 		};
 
 		reply([client, bot], interaction, {
@@ -180,9 +184,10 @@ async function handleUnskipAction(
 
 	// If either the 'to' parameter or the 'by' parameter are negative.
 	if ((songsToUnskip !== undefined && songsToUnskip <= 0) || (songToUnskipTo !== undefined && songToUnskipTo <= 0)) {
+		const locale = interaction.locale;
 		const strings = {
-			title: localise(client, "music.strings.skips.invalid.title", interaction.locale)(),
-			description: localise(client, "music.strings.skips.invalid.description", interaction.locale)(),
+			title: localise(client, "music.strings.skips.invalid.title", locale)(),
+			description: localise(client, "music.strings.skips.invalid.description", locale)(),
 		};
 
 		reply([client, bot], interaction, {
@@ -234,8 +239,8 @@ async function handleUnskipAction(
 	}
 
 	const strings = {
-		title: localise(client, "music.options.unskip.strings.unskipped.title", defaults.LOCALISATION_LOCALE)(),
-		description: localise(client, "music.options.unskip.strings.unskipped.description", defaults.LOCALISATION_LOCALE)(),
+		title: localise(client, "music.options.unskip.strings.unskipped.title", locale)(),
+		description: localise(client, "music.options.unskip.strings.unskipped.description", locale)(),
 	};
 
 	reply(

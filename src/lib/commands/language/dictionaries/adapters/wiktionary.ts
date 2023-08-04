@@ -1,4 +1,4 @@
-import { FeatureLanguage } from "../../../../../constants/language";
+import { FeatureLanguage, Locale } from "../../../../../constants/language";
 import { Client } from "../../../../client";
 import { getPartOfSpeech } from "../../module";
 import { DictionaryAdapter, DictionaryEntry } from "../adapter";
@@ -34,7 +34,7 @@ class WiktionaryAdapter extends DictionaryAdapter<WordData[]> {
 		return data;
 	}
 
-	parse(lemma: string, results: WordData[], _: Client, __: string | undefined): DictionaryEntry[] {
+	parse(lemma: string, results: WordData[], _: Client, __: { locale: Locale }): DictionaryEntry[] {
 		const entries: DictionaryEntry[] = [];
 		for (const result of results) {
 			for (const definition of result.definitions) {

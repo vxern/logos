@@ -1,4 +1,5 @@
 import constants from "../../../../constants/constants";
+import { Locale, getLanguageByLocale } from "../../../../constants/language";
 import defaults from "../../../../defaults";
 import { MentionTypes, TimestampFormat, mention, timestamp } from "../../../../formatting";
 import * as Logos from "../../../../types";
@@ -8,7 +9,7 @@ import { Document } from "../../../database/document";
 import { EntryRequest } from "../../../database/structs/entry-request";
 import { User } from "../../../database/structs/user";
 import diagnostics from "../../../diagnostics";
-import { acknowledge, encodeId, reply } from "../../../interactions";
+import { acknowledge, encodeId, getFeatureLanguage, getLocaleData, reply } from "../../../interactions";
 import { getGuildIconURLFormatted, snowflakeToTimestamp } from "../../../utils";
 import { Configurations, PromptService } from "../service";
 import * as Discord from "discordeno";
@@ -82,43 +83,44 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 			return undefined;
 		}
 
+		const guildLocale = this.guildLocale;
+		const guildLanguage = getLanguageByLocale(guildLocale) ?? defaults.LOCALISATION_LANGUAGE;
+
+		const featureLanguage = getFeatureLanguage(guildDocument);
+
 		const strings = {
 			verification: {
-				reason: localise(
-					this.client,
-					"verification.fields.reason",
-					defaults.LOCALISATION_LOCALE,
-				)({ language: guildDocument.data.language }),
-				aim: localise(this.client, "verification.fields.aim", defaults.LOCALISATION_LOCALE)(),
-				whereFound: localise(this.client, "verification.fields.whereFound", defaults.LOCALISATION_LOCALE)(),
+				reason: localise(this.client, "verification.fields.reason", guildLocale)({ language: featureLanguage }),
+				aim: localise(this.client, "verification.fields.aim", guildLocale)(),
+				whereFound: localise(this.client, "verification.fields.whereFound", guildLocale)(),
 			},
-			answers: localise(this.client, "entry.verification.answers", defaults.LOCALISATION_LOCALE)(),
-			requestedRoles: localise(this.client, "entry.verification.requestedRoles", defaults.LOCALISATION_LOCALE)(),
-			accountCreated: localise(this.client, "entry.verification.accountCreated", defaults.LOCALISATION_LOCALE)(),
-			answersSubmitted: localise(this.client, "entry.verification.answersSubmitted", defaults.LOCALISATION_LOCALE)(),
-			accept: localise(this.client, "entry.verification.vote.accept", defaults.LOCALISATION_LOCALE)(),
+			answers: localise(this.client, "entry.verification.answers", guildLocale)(),
+			requestedRoles: localise(this.client, "entry.verification.requestedRoles", guildLocale)(),
+			accountCreated: localise(this.client, "entry.verification.accountCreated", guildLocale)(),
+			answersSubmitted: localise(this.client, "entry.verification.answersSubmitted", guildLocale)(),
+			accept: localise(this.client, "entry.verification.vote.accept", guildLocale)(),
 			acceptMultiple: localise(
 				this.client,
 				"entry.verification.vote.acceptMultiple",
-				defaults.LOCALISATION_LOCALE,
+				guildLocale,
 			)({
 				votes: pluralise(
 					this.client,
 					"entry.verification.vote.acceptMultiple.votes",
-					defaults.LOCALISATION_LANGUAGE,
+					guildLanguage,
 					voteInformation.acceptance.remaining,
 				),
 			}),
-			reject: localise(this.client, "entry.verification.vote.reject", defaults.LOCALISATION_LOCALE)(),
+			reject: localise(this.client, "entry.verification.vote.reject", guildLocale)(),
 			rejectMultiple: localise(
 				this.client,
 				"entry.verification.vote.rejectMultiple",
-				defaults.LOCALISATION_LOCALE,
+				guildLocale,
 			)({
 				votes: pluralise(
 					this.client,
 					"entry.verification.vote.rejectMultiple.votes",
-					defaults.LOCALISATION_LANGUAGE,
+					guildLanguage,
 					voteInformation.rejection.remaining,
 				),
 			}),
@@ -225,6 +227,9 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 		interaction: Discord.Interaction,
 		data: InteractionData,
 	): Promise<Document<EntryRequest> | null | undefined> {
+		const localeData = await getLocaleData(this.client, interaction);
+		const locale = localeData.locale;
+
 		const configuration = this.configuration;
 		if (configuration === undefined || !configuration.enabled) {
 			return undefined;
@@ -240,7 +245,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 			BigInt(userId),
 		);
 		if (user === undefined) {
-			this.displayUserStateError(bot, interaction);
+			this.displayUserStateError(bot, interaction, { locale });
 			return undefined;
 		}
 
@@ -256,7 +261,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 
 		const guild = this.client.cache.guilds.get(guildId);
 		if (guild === undefined) {
-			this.displayVoteError(bot, interaction);
+			this.displayVoteError(bot, interaction, { locale });
 			return undefined;
 		}
 
@@ -273,7 +278,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 			]) as Document<EntryRequest> | undefined,
 		]);
 		if (voter === undefined || entryRequest === undefined) {
-			this.displayVoteError(bot, interaction);
+			this.displayVoteError(bot, interaction, { locale });
 			return undefined;
 		}
 
@@ -299,12 +304,8 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 			// If the voter has already voted to accept, and is voting to accept again.
 			if (alreadyVotedToAccept && isAccept) {
 				const strings = {
-					title: localise(this.client, "entry.verification.vote.alreadyVoted.inFavour.title", interaction.locale)(),
-					description: localise(
-						this.client,
-						"entry.verification.vote.alreadyVoted.inFavour.description",
-						interaction.locale,
-					)(),
+					title: localise(this.client, "entry.verification.vote.alreadyVoted.inFavour.title", locale)(),
+					description: localise(this.client, "entry.verification.vote.alreadyVoted.inFavour.description", locale)(),
 				};
 
 				reply([this.client, bot], interaction, {
@@ -321,12 +322,8 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 				// If the voter has already voted to reject, and is voting to reject again.
 			} else if (alreadyVotedToReject && !isAccept) {
 				const strings = {
-					title: localise(this.client, "entry.verification.vote.alreadyVoted.against.title", interaction.locale)(),
-					description: localise(
-						this.client,
-						"entry.verification.vote.alreadyVoted.against.description",
-						interaction.locale,
-					)(),
+					title: localise(this.client, "entry.verification.vote.alreadyVoted.against.title", locale)(),
+					description: localise(this.client, "entry.verification.vote.alreadyVoted.against.description", locale)(),
 				};
 
 				reply([this.client, bot], interaction, {
@@ -358,8 +355,8 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 				}
 
 				const strings = {
-					title: localise(this.client, "entry.verification.vote.stanceChanged.title", interaction.locale)(),
-					description: localise(this.client, "entry.verification.vote.stanceChanged.description", interaction.locale)(),
+					title: localise(this.client, "entry.verification.vote.stanceChanged.title", locale)(),
+					description: localise(this.client, "entry.verification.vote.stanceChanged.description", locale)(),
 				};
 
 				reply([this.client, bot], interaction, {
@@ -522,10 +519,14 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 		return { acceptance, rejection };
 	}
 
-	private async displayVoteError(bot: Discord.Bot, interaction: Discord.Interaction): Promise<void> {
+	private async displayVoteError(
+		bot: Discord.Bot,
+		interaction: Discord.Interaction,
+		{ locale }: { locale: Locale },
+	): Promise<void> {
 		const strings = {
-			title: localise(this.client, "entry.verification.vote.failed.title", interaction.locale)(),
-			description: localise(this.client, "entry.verification.vote.failed.description", interaction.locale)(),
+			title: localise(this.client, "entry.verification.vote.failed.title", locale)(),
+			description: localise(this.client, "entry.verification.vote.failed.description", locale)(),
 		};
 
 		reply([this.client, bot], interaction, {
@@ -539,10 +540,14 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 		});
 	}
 
-	private async displayUserStateError(bot: Discord.Bot, interaction: Discord.Interaction): Promise<void> {
+	private async displayUserStateError(
+		bot: Discord.Bot,
+		interaction: Discord.Interaction,
+		{ locale }: { locale: Locale },
+	): Promise<void> {
 		const strings = {
-			title: localise(this.client, "entry.verification.vote.stateUpdateFailed.title", interaction.locale)(),
-			description: localise(this.client, "entry.verification.vote.stateUpdateFailed.description", interaction.locale)(),
+			title: localise(this.client, "entry.verification.vote.stateUpdateFailed.title", locale)(),
+			description: localise(this.client, "entry.verification.vote.stateUpdateFailed.description", locale)(),
 		};
 
 		reply([this.client, bot], interaction, {

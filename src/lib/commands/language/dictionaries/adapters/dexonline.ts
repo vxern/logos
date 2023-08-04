@@ -1,5 +1,5 @@
 import constants from "../../../../../constants/constants";
-import { FeatureLanguage } from "../../../../../constants/language";
+import { FeatureLanguage, Locale } from "../../../../../constants/language";
 import { Client, localise } from "../../../../client";
 import { chunk } from "../../../../utils";
 import { getPartOfSpeech } from "../../module";
@@ -28,7 +28,7 @@ class DexonlineAdapter extends DictionaryAdapter<Dexonline.Results> {
 		return Dexonline.get(lemma, { mode: "strict" });
 	}
 
-	parse(_: string, results: Dexonline.Results, client: Client, locale: string | undefined): DictionaryEntry[] {
+	parse(_: string, results: Dexonline.Results, client: Client, { locale }: { locale: Locale }): DictionaryEntry[] {
 		const entries: DictionaryEntry[] = [];
 		for (const result of results.synthesis) {
 			const [topicWord] = result.type.split(" ");
@@ -88,7 +88,7 @@ class DexonlineAdapter extends DictionaryAdapter<Dexonline.Results> {
 				continue;
 			}
 
-			const inflectionTable = this.tableRowsToFields(client, entry.partOfSpeech[0], table, locale);
+			const inflectionTable = this.tableRowsToFields(client, entry.partOfSpeech[0], table, { locale });
 
 			entry.inflectionTable = inflectionTable;
 		}
@@ -100,23 +100,23 @@ class DexonlineAdapter extends DictionaryAdapter<Dexonline.Results> {
 		client: Client,
 		partOfSpeech: PartOfSpeech,
 		table: string[][],
-		locale: string | undefined,
+		{ locale }: { locale: Locale },
 	): InflectionTable | undefined {
 		switch (partOfSpeech) {
 			case "pronoun": {
-				return this.pronounTableToFields(client, table, locale);
+				return this.pronounTableToFields(client, table, { locale });
 			}
 			case "noun": {
-				return this.nounTableToFields(client, table, locale);
+				return this.nounTableToFields(client, table, { locale });
 			}
 			case "verb": {
-				return this.verbTableToFields(client, table, locale);
+				return this.verbTableToFields(client, table, { locale });
 			}
 			case "adjective": {
-				return this.adjectiveTableToFields(client, table, locale);
+				return this.adjectiveTableToFields(client, table, { locale });
 			}
 			case "determiner": {
-				return this.determinerTableToFields(client, table, locale);
+				return this.determinerTableToFields(client, table, { locale });
 			}
 		}
 
@@ -126,7 +126,7 @@ class DexonlineAdapter extends DictionaryAdapter<Dexonline.Results> {
 	private pronounTableToFields(
 		client: Client,
 		table: string[][],
-		locale: string | undefined,
+		{ locale }: { locale: Locale },
 	): InflectionTable | undefined {
 		const [nominativeAccusative, genitiveDative] = chunk(
 			table.slice(1).map((columns) => columns.slice(2).join(", ")),
@@ -174,7 +174,7 @@ class DexonlineAdapter extends DictionaryAdapter<Dexonline.Results> {
 	private nounTableToFields(
 		client: Client,
 		table: string[][],
-		locale: string | undefined,
+		{ locale }: { locale: Locale },
 	): InflectionTable | undefined {
 		const [nominativeAccusative, genitiveDative, vocative] = chunk(
 			table.slice(1).map((columns) => columns.slice(2)),
@@ -242,7 +242,7 @@ class DexonlineAdapter extends DictionaryAdapter<Dexonline.Results> {
 	private verbTableToFields(
 		client: Client,
 		table: string[][],
-		locale: string | undefined,
+		{ locale }: { locale: Locale },
 	): InflectionTable | undefined {
 		const moods = table
 			.slice(2, 3)
@@ -498,7 +498,7 @@ class DexonlineAdapter extends DictionaryAdapter<Dexonline.Results> {
 	private adjectiveTableToFields(
 		client: Client,
 		table: string[][],
-		locale: string | undefined,
+		{ locale }: { locale: Locale },
 	): InflectionTable | undefined {
 		const [nominativeAccusative, genitiveDative] = chunk(
 			table.slice(2).map((columns) => columns.slice(2, 8)),
@@ -545,7 +545,7 @@ class DexonlineAdapter extends DictionaryAdapter<Dexonline.Results> {
 	private determinerTableToFields(
 		client: Client,
 		table: string[][],
-		locale: string | undefined,
+		{ locale }: { locale: Locale },
 	): InflectionTable | undefined {
 		const [nominativeAccusative, genitiveDative] = chunk(
 			table.slice(2).map((columns) => columns.slice(2, 8)),

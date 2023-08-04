@@ -1,5 +1,11 @@
 import constants from "../constants/constants";
-import { FeatureLanguage, LocalisationLanguage, getLanguageByLocale, getLocaleByLanguage } from "../constants/language";
+import {
+	FeatureLanguage,
+	Locale,
+	LocalisationLanguage,
+	getDiscordLocaleByLanguage,
+	getLanguageByLocale,
+} from "../constants/language";
 import time from "../constants/time";
 import defaults from "../defaults";
 import { timestamp } from "../formatting";
@@ -19,7 +25,7 @@ import warnings from "./database/adapters/warnings";
 import { Database } from "./database/database";
 import { timeStructToMilliseconds } from "./database/structs/guild";
 import diagnostics from "./diagnostics";
-import { acknowledge, deleteReply, isAutocomplete, reply, respond } from "./interactions";
+import { acknowledge, deleteReply, getLocaleData, isAutocomplete, reply, respond } from "./interactions";
 import transformers from "./localisation/transformers";
 import { AlertService } from "./services/alert/alert";
 import { DynamicVoiceChannelService } from "./services/dynamic-voice-channels/dynamic-voice-channels";
@@ -311,7 +317,7 @@ async function initialiseClient(
 					dispatchGlobal(client, "ready", { args });
 				},
 				async interactionCreate(bot, interaction) {
-					await handleInteractionCreate(client, bot, interaction);
+					await handleInteractionCreate([client, bot], interaction);
 
 					dispatchEvent(client, interaction.guildId, "interactionCreate", { args: [bot, interaction] });
 				},
@@ -670,21 +676,20 @@ export async function handleGuildDelete(client: Client, bot: Discord.Bot, guildI
 }
 
 async function handleInteractionCreate(
-	client: Client,
-	bot: Discord.Bot,
-	interaction: Discord.Interaction,
+	[client, bot]: [Client, Discord.Bot],
+	interactionRaw: Discord.Interaction,
 ): Promise<void> {
-	if (interaction.data?.customId === constants.components.none) {
-		acknowledge([client, bot], interaction);
+	if (interactionRaw.data?.customId === constants.components.none) {
+		acknowledge([client, bot], interactionRaw);
 		return;
 	}
 
-	const commandName = interaction.data?.name;
+	const commandName = interactionRaw.data?.name;
 	if (commandName === undefined) {
 		return;
 	}
 
-	const subCommandGroupOption = interaction.data?.options?.find((option) => isSubcommandGroup(option));
+	const subCommandGroupOption = interactionRaw.data?.options?.find((option) => isSubcommandGroup(option));
 
 	let commandNameFull: string;
 	if (subCommandGroupOption !== undefined) {
@@ -696,7 +701,7 @@ async function handleInteractionCreate(
 
 		commandNameFull = `${commandName} ${subCommandGroupName} ${subCommandName}`;
 	} else {
-		const subCommandName = interaction.data?.options?.find((option) => isSubcommand(option))?.name;
+		const subCommandName = interactionRaw.data?.options?.find((option) => isSubcommand(option))?.name;
 		if (subCommandName === undefined) {
 			commandNameFull = commandName;
 		} else {
@@ -705,7 +710,7 @@ async function handleInteractionCreate(
 	}
 
 	let handle: InteractionHandler | undefined;
-	if (isAutocomplete(interaction)) {
+	if (isAutocomplete(interactionRaw)) {
 		handle = client.commands.handlers.autocomplete.get(commandNameFull);
 	} else {
 		handle = client.commands.handlers.execute.get(commandNameFull);
@@ -713,6 +718,9 @@ async function handleInteractionCreate(
 	if (handle === undefined) {
 		return;
 	}
+
+	const localeData = await getLocaleData(client, interactionRaw);
+	const interaction: Logos.Interaction = { ...interactionRaw, ...localeData };
 
 	Promise.resolve(handle([client, bot], interaction)).catch((exception) => {
 		Sentry.captureException(exception);
@@ -828,6 +836,8 @@ function withRateLimiting(handle: InteractionHandler): InteractionHandler {
 			return;
 		}
 
+		const locale = interaction.locale;
+
 		const commandId = interaction.data?.id;
 		if (commandId === undefined) {
 			return handle([client, bot], interaction);
@@ -852,17 +862,17 @@ function withRateLimiting(handle: InteractionHandler): InteractionHandler {
 			const nextValidUsageTimestampFormatted = timestamp(nextValidUsageTimestamp);
 
 			const strings = {
-				title: localise(client, "interactions.rateLimited.title", interaction.locale)(),
+				title: localise(client, "interactions.rateLimited.title", locale)(),
 				description: {
 					tooManyUses: localise(
 						client,
 						"interactions.rateLimited.description.tooManyUses",
-						interaction.locale,
+						locale,
 					)({ times: defaults.RATE_LIMIT }),
 					cannotUseUntil: localise(
 						client,
 						"interactions.rateLimited.description.cannotUseAgainUntil",
-						interaction.locale,
+						locale,
 					)({ relative_timestamp: nextValidUsageTimestampFormatted }),
 				},
 			};
@@ -1222,7 +1232,7 @@ function resolveIdentifierToMembers(
 
 async function autocompleteMembers(
 	[client, bot]: [Client, Discord.Bot],
-	interaction: Discord.Interaction,
+	interaction: Logos.Interaction,
 	identifier: string,
 	options?: Partial<MemberNarrowingOptions>,
 ): Promise<void> {
@@ -1261,9 +1271,10 @@ async function autocompleteMembers(
 
 function resolveInteractionToMember(
 	[client, bot]: [Client, Discord.Bot],
-	interaction: Discord.Interaction,
+	interaction: Logos.Interaction,
 	identifier: string,
-	options?: Partial<MemberNarrowingOptions>,
+	options: Partial<MemberNarrowingOptions>,
+	{ locale }: { locale: Locale },
 ): Logos.Member | undefined {
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
@@ -1282,8 +1293,8 @@ function resolveInteractionToMember(
 
 	if (matchedMembers.length === 0) {
 		const strings = {
-			title: localise(client, "interactions.invalidUser.title", interaction.locale)(),
-			description: localise(client, "interactions.invalidUser.description", interaction.locale)(),
+			title: localise(client, "interactions.invalidUser.title", locale)(),
+			description: localise(client, "interactions.invalidUser.description", locale)(),
 		};
 
 		reply([client, bot], interaction, {
@@ -1357,10 +1368,8 @@ function createLocalisations(
 	return localisations;
 }
 
-function localise(client: Client, key: string, locale: string | undefined): (args?: Record<string, unknown>) => string {
-	const language =
-		(locale !== undefined ? getLanguageByLocale(locale as Discord.Locales) : undefined) ??
-		defaults.LOCALISATION_LANGUAGE;
+function localise(client: Client, key: string, locale: Locale | undefined): (args?: Record<string, unknown>) => string {
+	const language = (locale !== undefined ? getLanguageByLocale(locale) : undefined) ?? defaults.LOCALISATION_LANGUAGE;
 
 	const getLocalisation =
 		client.localisations.get(key)?.get(language) ??
@@ -1383,7 +1392,7 @@ function toDiscordLocalisations(
 	const entries = Array.from(localisations.entries());
 	const result: Discord.Localization = {};
 	for (const [language, localise] of entries) {
-		const locale = getLocaleByLanguage(language);
+		const locale = getDiscordLocaleByLanguage(language);
 		if (locale === undefined) {
 			continue;
 		}

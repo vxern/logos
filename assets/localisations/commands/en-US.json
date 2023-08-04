@@ -25,6 +25,7 @@
 	"information.options.server.strings.information.description.members": "Members",
 	"information.options.server.strings.information.description.created": "Created",
 	"information.options.server.strings.information.description.channels": "Channels",
+	"information.options.server.strings.information.description.languages": "Languages",
 	"information.options.server.strings.information.description.owner": "Owner",
 	"information.options.server.strings.information.description.moderators": "Moderators",
 	"information.options.server.strings.information.description.overseenByModerators": "This server is overseen by a collective of guides.",
@@ -32,6 +33,8 @@
 	"information.options.server.strings.information.description.withoutProficiency": "without a specified language proficiency.",
 	"information.options.server.strings.channelTypes.text": "Text",
 	"information.options.server.strings.channelTypes.voice": "Voice",
+	"information.options.server.strings.languageTypes.home": "Home",
+	"information.options.server.strings.languageTypes.target": "Target",
 
   "answer.options.answer.name": "Answer",
   "answer.options.answer.description": "Opens an editor, allowing the user to make corrections to a message.",

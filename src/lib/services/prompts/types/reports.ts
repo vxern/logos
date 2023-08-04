@@ -1,5 +1,4 @@
 import constants from "../../../../constants/constants";
-import defaults from "../../../../defaults";
 import { MentionTypes, mention, timestamp } from "../../../../formatting";
 import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
@@ -7,7 +6,7 @@ import { stringifyValue } from "../../../database/database";
 import { Document } from "../../../database/document";
 import { Report } from "../../../database/structs/report";
 import { User } from "../../../database/structs/user";
-import { encodeId, reply } from "../../../interactions";
+import { encodeId, getLocaleData, reply } from "../../../interactions";
 import { getGuildIconURLFormatted } from "../../../utils";
 import { PromptService } from "../service";
 import * as Discord from "discordeno";
@@ -60,20 +59,21 @@ class ReportService extends PromptService<"reports", Report, Metadata, Interacti
 
 		const reference = stringifyValue(document.ref);
 
+		const guildLocale = this.guildLocale;
 		const strings = {
 			report: {
-				submittedBy: localise(this.client, "submittedBy", defaults.LOCALISATION_LOCALE)(),
-				submittedAt: localise(this.client, "submittedAt", defaults.LOCALISATION_LOCALE)(),
-				users: localise(this.client, "reports.users", defaults.LOCALISATION_LOCALE)(),
-				reason: localise(this.client, "reports.reason", defaults.LOCALISATION_LOCALE)(),
-				link: localise(this.client, "reports.link", defaults.LOCALISATION_LOCALE)(),
-				noLinkProvided: localise(this.client, "reports.noLinkProvided", defaults.LOCALISATION_LOCALE)(),
+				submittedBy: localise(this.client, "submittedBy", guildLocale)(),
+				submittedAt: localise(this.client, "submittedAt", guildLocale)(),
+				users: localise(this.client, "reports.users", guildLocale)(),
+				reason: localise(this.client, "reports.reason", guildLocale)(),
+				link: localise(this.client, "reports.link", guildLocale)(),
+				noLinkProvided: localise(this.client, "reports.noLinkProvided", guildLocale)(),
 			},
 			previousInfractions: {
-				title: localise(this.client, "reports.previousInfractions", defaults.LOCALISATION_LOCALE),
+				title: localise(this.client, "reports.previousInfractions", guildLocale),
 			},
-			markResolved: localise(this.client, "markResolved", defaults.LOCALISATION_LOCALE)(),
-			markUnresolved: localise(this.client, "markUnresolved", defaults.LOCALISATION_LOCALE)(),
+			markResolved: localise(this.client, "markResolved", guildLocale)(),
+			markUnresolved: localise(this.client, "markUnresolved", guildLocale)(),
 		};
 
 		return {
@@ -164,6 +164,9 @@ class ReportService extends PromptService<"reports", Report, Metadata, Interacti
 		interaction: Discord.Interaction,
 		data: InteractionData,
 	): Promise<Document<Report> | null | undefined> {
+		const localeData = await getLocaleData(this.client, interaction);
+		const locale = localeData.locale;
+
 		const [userId, guildId, reference, isResolvedString] = data;
 		const isResolved = isResolvedString === "true";
 
@@ -184,8 +187,8 @@ class ReportService extends PromptService<"reports", Report, Metadata, Interacti
 
 		if (isResolved && document.data.isResolved) {
 			const strings = {
-				title: localise(this.client, "alreadyMarkedResolved.title", defaults.LOCALISATION_LOCALE)(),
-				description: localise(this.client, "alreadyMarkedResolved.description", defaults.LOCALISATION_LOCALE)(),
+				title: localise(this.client, "alreadyMarkedResolved.title", locale)(),
+				description: localise(this.client, "alreadyMarkedResolved.description", locale)(),
 			};
 
 			reply([this.client, bot], interaction, {
@@ -202,8 +205,8 @@ class ReportService extends PromptService<"reports", Report, Metadata, Interacti
 
 		if (!(isResolved || document.data.isResolved)) {
 			const strings = {
-				title: localise(this.client, "alreadyMarkedUnresolved.title", defaults.LOCALISATION_LOCALE)(),
-				description: localise(this.client, "alreadyMarkedUnresolved.description", defaults.LOCALISATION_LOCALE)(),
+				title: localise(this.client, "alreadyMarkedUnresolved.title", locale)(),
+				description: localise(this.client, "alreadyMarkedUnresolved.description", locale)(),
 			};
 
 			reply([this.client, bot], interaction, {

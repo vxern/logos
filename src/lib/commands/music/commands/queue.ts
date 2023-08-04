@@ -1,5 +1,5 @@
 import constants from "../../../../constants/constants";
-import defaults from "../../../../defaults";
+import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
 import { parseArguments, reply } from "../../../interactions";
 import { OptionTemplate } from "../../command";
@@ -16,9 +16,10 @@ const command: OptionTemplate = {
 
 async function handleDisplayPlaybackQueue(
 	[client, bot]: [Client, Discord.Bot],
-	interaction: Discord.Interaction,
+	interaction: Logos.Interaction,
 ): Promise<void> {
 	const [{ show }] = parseArguments(interaction.data?.options, { show: "boolean" });
+	const locale = show ? interaction.guildLocale : interaction.locale;
 
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
@@ -37,10 +38,11 @@ async function handleDisplayPlaybackQueue(
 
 	const isOccupied = musicService.isOccupied;
 	if (!isOccupied) {
+		const locale = interaction.locale;
 		const strings = {
-			title: localise(client, "music.strings.notPlaying.title", interaction.locale)(),
+			title: localise(client, "music.strings.notPlaying.title", locale)(),
 			description: {
-				toCheck: localise(client, "music.strings.notPlaying.description.toCheck", interaction.locale)(),
+				toCheck: localise(client, "music.strings.notPlaying.description.toCheck", locale)(),
 			},
 		};
 
@@ -61,8 +63,6 @@ async function handleDisplayPlaybackQueue(
 		return;
 	}
 
-	const locale = show ? defaults.LOCALISATION_LOCALE : interaction.locale;
-
 	const strings = {
 		queue: localise(client, "music.options.queue.strings.queue", locale)(),
 	};
@@ -72,7 +72,7 @@ async function handleDisplayPlaybackQueue(
 		interaction,
 		{ title: `${constants.symbols.music.list} ${strings.queue}`, songListings: queue },
 		show ?? false,
-		locale,
+		{ locale },
 	);
 }
 

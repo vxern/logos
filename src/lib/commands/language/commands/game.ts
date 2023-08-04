@@ -1,5 +1,7 @@
 import constants from "../../../../constants/constants";
+import { Locale } from "../../../../constants/language";
 import defaults from "../../../../defaults";
+import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
 import {
 	acknowledge,
@@ -24,7 +26,9 @@ const command: CommandTemplate = {
 type WordButtonID = [index: string];
 
 /** Starts a simple game of 'choose the correct word to fit in the blank'. */
-async function handleStartGame([client, bot]: [Client, Discord.Bot], interaction: Discord.Interaction): Promise<void> {
+async function handleStartGame([client, bot]: [Client, Discord.Bot], interaction: Logos.Interaction): Promise<void> {
+	const locale = interaction.locale;
+
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
 		return;
@@ -35,11 +39,11 @@ async function handleStartGame([client, bot]: [Client, Discord.Bot], interaction
 		return;
 	}
 
-	const sentencePairs = client.features.sentencePairs.get(guildDocument.data.language);
+	const sentencePairs = client.features.sentencePairs.get(interaction.featureLanguage);
 	if (sentencePairs === undefined || sentencePairs.length === 0) {
 		const strings = {
-			title: localise(client, "game.strings.noSentencesAvailable.title", interaction.locale)(),
-			description: localise(client, "game.strings.noSentencesAvailable.description", interaction.locale)(),
+			title: localise(client, "game.strings.noSentencesAvailable.title", locale)(),
+			description: localise(client, "game.strings.noSentencesAvailable.description", locale)(),
 		};
 
 		await reply([client, bot], interaction, {
@@ -100,21 +104,13 @@ async function handleStartGame([client, bot]: [Client, Discord.Bot], interaction
 
 			sentenceSelection = createSentenceSelection(sentencePairs);
 
-			editReply(
-				[client, bot],
-				interaction,
-				getGameView(client, customId, sentenceSelection, embedColor, interaction.locale),
-			);
+			editReply([client, bot], interaction, getGameView(client, customId, sentenceSelection, embedColor, { locale }));
 		},
 	});
 
 	sentenceSelection = createSentenceSelection(sentencePairs);
 
-	editReply(
-		[client, bot],
-		interaction,
-		getGameView(client, customId, sentenceSelection, embedColor, interaction.locale),
-	);
+	editReply([client, bot], interaction, getGameView(client, customId, sentenceSelection, embedColor, { locale }));
 }
 
 function getGameView(
@@ -122,7 +118,7 @@ function getGameView(
 	customId: string,
 	sentenceSelection: SentenceSelection,
 	embedColor: number,
-	locale: string | undefined,
+	{ locale }: { locale: Locale },
 ): Discord.InteractionCallbackData {
 	const strings = {
 		sentence: localise(client, "game.strings.sentence", locale)(),
