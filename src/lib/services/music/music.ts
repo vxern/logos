@@ -785,6 +785,8 @@ class MusicService extends LocalService {
 				return;
 			}
 
+			session.player.removeAllListeners("trackException");
+
 			if (session.flags.isDestroyed) {
 				this.setDisconnectTimeout();
 				return;
