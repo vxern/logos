@@ -94,6 +94,8 @@
 	"roles.dialects.languages.armenian.roles.eastern.description": "Doğu Ermenice öğreniyorum.",
 	"roles.dialects.languages.armenian.roles.karabakh.name": "Karabağ Ermenicesi",
 	"roles.dialects.languages.armenian.roles.karabakh.description": "Karabağ Ermenicesi öğreniyorum.",
+	"roles.dialects.languages.armenian.roles.classical.name": "Classical Armenian",
+	"roles.dialects.languages.armenian.roles.classical.description": "I am learning Classical Armenian.",
 	"roles.regions.name": "Bölgeler",
 	"roles.regions.description": "Köken ülkenin hangi bölgesinden gelindiğini belirten roller.",
 	"roles.regions.languages.armenian.roles.aragatsotn.name": "Aragatsotın / Արագածոտն",

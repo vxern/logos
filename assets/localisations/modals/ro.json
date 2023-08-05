@@ -3,6 +3,12 @@
 	"verification.fields.reason": "Care este motivul pentru care înveți {language}?",
 	"verification.fields.aim": "Ce folos îți va aduce apartenența?",
 	"verification.fields.whereFound": "Unde ai aflat despre server?",
+	"answer.title": "Answer",
+	"answer.fields.question": "Question",
+	"answer.fields.answer": "Answer",
+	"correction.title": "Correction",
+	"correction.fields.original": "Original text",
+	"correction.fields.corrected": "Corrected text",
 	"report.title": "Plângere",
 	"report.fields.reason": "Care este cauza plângerii?",
 	"report.fields.users": "Utilizatori de raportat",
@@ -11,6 +17,6 @@
 	"suggestion.fields.suggestion": "Care este sugestia ta?",
 	"prompts.continue": "Înapoi",
 	"prompts.cancel": "Anulează",
-	"prompts.leave": "Da, vreau să părăsesc compozitorul",
-	"prompts.stay": "Nu, ia-mă înapoi la compozitor"
+	"prompts.stay": "Take me back",
+	"prompts.leave": "Leave"
 }
