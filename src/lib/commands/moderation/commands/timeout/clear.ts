@@ -1,12 +1,13 @@
-import constants from "../../../../../constants.js";
-import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../../client.js";
-import { parseArguments, reply } from "../../../../interactions.js";
-import { diagnosticMentionUser } from "../../../../utils.js";
+import constants from "../../../../../constants/constants";
+import * as Logos from "../../../../../types";
+import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../../client";
+import diagnostics from "../../../../diagnostics";
+import { parseArguments, reply } from "../../../../interactions";
 import * as Discord from "discordeno";
 
 async function handleClearTimeoutAutocomplete(
 	[client, bot]: [Client, Discord.Bot],
-	interaction: Discord.Interaction,
+	interaction: Logos.Interaction,
 ): Promise<void> {
 	const [{ user }] = parseArguments(interaction.data?.options, {});
 	if (user === undefined) {
@@ -16,10 +17,9 @@ async function handleClearTimeoutAutocomplete(
 	autocompleteMembers([client, bot], interaction, user, { restrictToNonSelf: true, excludeModerators: true });
 }
 
-async function handleClearTimeout(
-	[client, bot]: [Client, Discord.Bot],
-	interaction: Discord.Interaction,
-): Promise<void> {
+async function handleClearTimeout([client, bot]: [Client, Discord.Bot], interaction: Logos.Interaction): Promise<void> {
+	const locale = interaction.locale;
+
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
 		return;
@@ -45,10 +45,16 @@ async function handleClearTimeout(
 		return;
 	}
 
-	const member = resolveInteractionToMember([client, bot], interaction, userSearchQuery, {
-		restrictToNonSelf: true,
-		excludeModerators: true,
-	});
+	const member = resolveInteractionToMember(
+		[client, bot],
+		interaction,
+		userSearchQuery,
+		{
+			restrictToNonSelf: true,
+			excludeModerators: true,
+		},
+		{ locale },
+	);
 	if (member === undefined) {
 		return;
 	}
@@ -64,12 +70,12 @@ async function handleClearTimeout(
 
 	if (notTimedOut) {
 		const strings = {
-			title: localise(client, "timeout.strings.notTimedOut.title", interaction.locale)(),
+			title: localise(client, "timeout.strings.notTimedOut.title", locale)(),
 			description: localise(
 				client,
 				"timeout.strings.notTimedOut.description",
-				interaction.locale,
-			)({ user_mention: diagnosticMentionUser(user) }),
+				locale,
+			)({ user_mention: diagnostics.display.user(user) }),
 		};
 
 		reply([client, bot], interaction, {
@@ -90,7 +96,7 @@ async function handleClearTimeout(
 	}
 
 	await Discord.editMember(bot, guildId, member.id, { communicationDisabledUntil: null }).catch(() =>
-		client.log.warn(`Failed to remove timeout of member with ID ${member.id}`),
+		client.log.warn(`Failed to remove timeout of ${diagnostics.display.member(member)}.`),
 	);
 
 	if (configuration.journaling) {
@@ -99,12 +105,12 @@ async function handleClearTimeout(
 	}
 
 	const strings = {
-		title: localise(client, "timeout.strings.timeoutCleared.title", interaction.locale)(),
+		title: localise(client, "timeout.strings.timeoutCleared.title", locale)(),
 		description: localise(
 			client,
 			"timeout.strings.timeoutCleared.description",
-			interaction.locale,
-		)({ user_mention: diagnosticMentionUser(user) }),
+			locale,
+		)({ user_mention: diagnostics.display.user(user) }),
 	};
 
 	reply([client, bot], interaction, {

@@ -1,8 +1,8 @@
-import constants from "../../../../constants.js";
-import { defaultLocale } from "../../../../types.js";
-import { Client, localise } from "../../../client.js";
-import { reply } from "../../../interactions.js";
-import { OptionTemplate } from "../../command.js";
+import constants from "../../../../constants/constants";
+import * as Logos from "../../../../types";
+import { Client, localise } from "../../../client";
+import { reply } from "../../../interactions";
+import { OptionTemplate } from "../../command";
 import * as Discord from "discordeno";
 
 const command: OptionTemplate = {
@@ -11,10 +11,9 @@ const command: OptionTemplate = {
 	handle: handleStopPlayback,
 };
 
-async function handleStopPlayback(
-	[client, bot]: [Client, Discord.Bot],
-	interaction: Discord.Interaction,
-): Promise<void> {
+async function handleStopPlayback([client, bot]: [Client, Discord.Bot], interaction: Logos.Interaction): Promise<void> {
+	const locale = interaction.guildLocale;
+
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
 		return;
@@ -26,26 +25,25 @@ async function handleStopPlayback(
 	}
 
 	const isVoiceStateVerified = musicService.verifyCanManagePlayback(bot, interaction);
-	if (isVoiceStateVerified === undefined || !isVoiceStateVerified) {
+	if (!isVoiceStateVerified) {
 		return;
 	}
 
 	const isOccupied = musicService.isOccupied;
-	if (isOccupied === undefined) {
-		return;
-	}
-
 	if (!isOccupied) {
+		const locale = interaction.locale;
 		const strings = {
-			title: localise(client, "music.options.stop.strings.notPlaying.title", interaction.locale)(),
-			description: localise(client, "music.options.stop.strings.notPlaying.description", interaction.locale)(),
+			title: localise(client, "music.strings.notPlaying.title", locale)(),
+			description: {
+				toManage: localise(client, "music.strings.notPlaying.description.toManage", locale)(),
+			},
 		};
 
 		reply([client, bot], interaction, {
 			embeds: [
 				{
 					title: strings.title,
-					description: strings.description,
+					description: strings.description.toManage,
 					color: constants.colors.dullYellow,
 				},
 			],
@@ -56,8 +54,8 @@ async function handleStopPlayback(
 	musicService.destroySession();
 
 	const strings = {
-		title: localise(client, "music.options.stop.strings.stopped.title", defaultLocale)(),
-		description: localise(client, "music.options.stop.strings.stopped.description", defaultLocale)(),
+		title: localise(client, "music.options.stop.strings.stopped.title", locale)(),
+		description: localise(client, "music.options.stop.strings.stopped.description", locale)(),
 	};
 
 	reply(

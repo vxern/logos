@@ -1,15 +1,17 @@
-import constants from "../../../../constants.js";
-import defaults from "../../../../defaults.js";
-import { MentionTypes, mention } from "../../../../formatting.js";
-import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../client.js";
-import { stringifyValue } from "../../../database/database.js";
-import { Document } from "../../../database/document.js";
-import { timeStructToMilliseconds } from "../../../database/structs/guild.js";
-import { Warning } from "../../../database/structs/warning.js";
-import { parseArguments, reply, respond } from "../../../interactions.js";
-import { CommandTemplate } from "../../command.js";
-import { user } from "../../parameters.js";
-import { getActiveWarnings } from "../module.js";
+import constants from "../../../../constants/constants";
+import { Locale } from "../../../../constants/language";
+import defaults from "../../../../defaults";
+import { MentionTypes, mention } from "../../../../formatting";
+import * as Logos from "../../../../types";
+import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../client";
+import { stringifyValue } from "../../../database/database";
+import { Document } from "../../../database/document";
+import { timeStructToMilliseconds } from "../../../database/structs/guild";
+import { Warning } from "../../../database/structs/warning";
+import { parseArguments, reply, respond } from "../../../interactions";
+import { CommandTemplate } from "../../command";
+import { user } from "../../parameters";
+import { getActiveWarnings } from "../module";
 import * as Discord from "discordeno";
 
 const command: CommandTemplate = {
@@ -31,8 +33,10 @@ const command: CommandTemplate = {
 
 async function handlePardonUserAutocomplete(
 	[client, bot]: [Client, Discord.Bot],
-	interaction: Discord.Interaction,
+	interaction: Logos.Interaction,
 ): Promise<void> {
+	const locale = interaction.locale;
+
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
 		return;
@@ -73,10 +77,16 @@ async function handlePardonUserAutocomplete(
 			return;
 		}
 
-		const member = resolveInteractionToMember([client, bot], interaction, user, {
-			restrictToNonSelf: true,
-			excludeModerators: true,
-		});
+		const member = resolveInteractionToMember(
+			[client, bot],
+			interaction,
+			user,
+			{
+				restrictToNonSelf: true,
+				excludeModerators: true,
+			},
+			{ locale },
+		);
 		if (member === undefined) {
 			respond([client, bot], interaction, []);
 			return;
@@ -103,7 +113,9 @@ async function handlePardonUserAutocomplete(
 	}
 }
 
-async function handlePardonUser([client, bot]: [Client, Discord.Bot], interaction: Discord.Interaction): Promise<void> {
+async function handlePardonUser([client, bot]: [Client, Discord.Bot], interaction: Logos.Interaction): Promise<void> {
+	const locale = interaction.locale;
+
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
 		return;
@@ -129,10 +141,16 @@ async function handlePardonUser([client, bot]: [Client, Discord.Bot], interactio
 		return;
 	}
 
-	const member = resolveInteractionToMember([client, bot], interaction, user, {
-		restrictToNonSelf: true,
-		excludeModerators: true,
-	});
+	const member = resolveInteractionToMember(
+		[client, bot],
+		interaction,
+		user,
+		{
+			restrictToNonSelf: true,
+			excludeModerators: true,
+		},
+		{ locale },
+	);
 	if (member === undefined) {
 		return;
 	}
@@ -141,19 +159,19 @@ async function handlePardonUser([client, bot]: [Client, Discord.Bot], interactio
 
 	const relevantWarnings = await getRelevantWarnings(client, member, expiryMilliseconds);
 	if (relevantWarnings === undefined) {
-		displayFailedError([client, bot], interaction);
+		displayFailedError([client, bot], interaction, { locale });
 		return;
 	}
 
 	const warningToDelete = relevantWarnings.find((relevantWarning) => stringifyValue(relevantWarning.ref) === warning);
 	if (warningToDelete === undefined) {
-		displayInvalidWarningError([client, bot], interaction);
+		displayInvalidWarningError([client, bot], interaction, { locale });
 		return;
 	}
 
 	const deletedWarning = await client.database.adapters.warnings.delete(client, warningToDelete);
 	if (deletedWarning === undefined) {
-		displayFailedError([client, bot], interaction);
+		displayFailedError([client, bot], interaction, { locale });
 		return;
 	}
 
@@ -168,11 +186,11 @@ async function handlePardonUser([client, bot]: [Client, Discord.Bot], interactio
 	}
 
 	const strings = {
-		title: localise(client, "pardon.strings.pardoned.title", interaction.locale)(),
+		title: localise(client, "pardon.strings.pardoned.title", locale)(),
 		description: localise(
 			client,
 			"pardon.strings.pardoned.description",
-			interaction.locale,
+			locale,
 		)({
 			user_mention: mention(member.id, MentionTypes.User),
 			reason: deletedWarning.data.reason,
@@ -192,7 +210,7 @@ async function handlePardonUser([client, bot]: [Client, Discord.Bot], interactio
 
 async function getRelevantWarnings(
 	client: Client,
-	member: Discord.Member,
+	member: Logos.Member,
 	expirationMilliseconds: number,
 ): Promise<Document<Warning>[] | undefined> {
 	const subject = await client.database.adapters.users.getOrFetchOrCreate(
@@ -216,11 +234,12 @@ async function getRelevantWarnings(
 
 async function displayInvalidWarningError(
 	[client, bot]: [Client, Discord.Bot],
-	interaction: Discord.Interaction,
+	interaction: Logos.Interaction,
+	{ locale }: { locale: Locale },
 ): Promise<void> {
 	const strings = {
-		title: localise(client, "pardon.strings.invalidWarning.title", interaction.locale)(),
-		description: localise(client, "pardon.strings.invalidWarning.description", interaction.locale)(),
+		title: localise(client, "pardon.strings.invalidWarning.title", locale)(),
+		description: localise(client, "pardon.strings.invalidWarning.description", locale)(),
 	};
 
 	reply([client, bot], interaction, {
@@ -236,11 +255,12 @@ async function displayInvalidWarningError(
 
 async function displayFailedError(
 	[client, bot]: [Client, Discord.Bot],
-	interaction: Discord.Interaction,
+	interaction: Logos.Interaction,
+	{ locale }: { locale: Locale },
 ): Promise<void> {
 	const strings = {
-		title: localise(client, "pardon.strings.failed.title", interaction.locale)(),
-		description: localise(client, "pardon.strings.failed.description", interaction.locale)(),
+		title: localise(client, "pardon.strings.failed.title", locale)(),
+		description: localise(client, "pardon.strings.failed.description", locale)(),
 	};
 
 	reply([client, bot], interaction, {

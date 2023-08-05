@@ -1,5 +1,5 @@
-import constants from "../../../../constants";
-import { diagnosticMentionUser } from "../../../utils";
+import constants from "../../../../constants/constants";
+import diagnostics from "../../../diagnostics";
 import { GuildEvents, MessageGenerators } from "../generator";
 
 export default {
@@ -10,7 +10,7 @@ export default {
 			return;
 		}
 
-		return `${diagnosticMentionUser(memberUser)} has made a suggestion.\n\nSuggestion: *${
+		return `${diagnostics.display.user(memberUser)} has made a suggestion.\n\nSuggestion: *${
 			suggestion.answers.suggestion
 		}*`;
 	},

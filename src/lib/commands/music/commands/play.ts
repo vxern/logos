@@ -1,8 +1,8 @@
-import { OptionTemplate } from "../../command.js";
-import { query } from "../../parameters.js";
-import { sources } from "../data/sources/sources.js";
-import { handleRequestFilePlayback } from "./play/file.js";
-import { handleRequestQueryPlayback } from "./play/query.js";
+import { OptionTemplate } from "../../command";
+import { query } from "../../parameters";
+import { sources } from "../data/sources/sources";
+import { handleRequestFilePlayback } from "./play/file";
+import { handleRequestQueryPlayback } from "./play/query";
 import * as Discord from "discordeno";
 
 const command: OptionTemplate = {

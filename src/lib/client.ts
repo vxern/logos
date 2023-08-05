@@ -1,52 +1,52 @@
-import constants, { Periods } from "../constants.js";
-import defaults from "../defaults.js";
-import { timestamp } from "../formatting.js";
-import { Language, defaultLanguage, getLanguageByLocale, getLocaleForLanguage } from "../types.js";
-import { Command, CommandTemplate, InteractionHandler, LocalisationProperties, Option } from "./commands/command.js";
-import commandsRaw from "./commands/commands.js";
-import { SentencePair } from "./commands/language/commands/game.js";
-import { DictionaryAdapter } from "./commands/language/dictionaries/adapter.js";
-import { SupportedLanguage } from "./commands/language/module.js";
-import entryRequests from "./database/adapters/entry-requests.js";
-import guilds from "./database/adapters/guilds.js";
-import praises from "./database/adapters/praises.js";
-import reports from "./database/adapters/reports.js";
-import suggestions from "./database/adapters/suggestions.js";
-import users from "./database/adapters/users.js";
-import warnings from "./database/adapters/warnings.js";
-import { Database } from "./database/database.js";
-import { timeStructToMilliseconds } from "./database/structs/guild.js";
-import { acknowledge, deleteReply, isAutocomplete, reply, respond } from "./interactions.js";
-import transformers from "./localisation/transformers.js";
-import { AlertService } from "./services/alert/alert.js";
-import { DynamicVoiceChannelService } from "./services/dynamic-voice-channels/dynamic-voice-channels.js";
-import { EntryService } from "./services/entry/entry.js";
-import { JournallingService } from "./services/journalling/journalling.js";
-import { LavalinkService } from "./services/music/lavalink.js";
-import { MusicService } from "./services/music/music.js";
-import { InformationNoticeService } from "./services/notices/types/information.js";
-import { RoleNoticeService } from "./services/notices/types/roles.js";
-import { WelcomeNoticeService } from "./services/notices/types/welcome.js";
-import { ReportService } from "./services/prompts/types/reports.js";
-import { SuggestionService } from "./services/prompts/types/suggestions.js";
-import { VerificationService } from "./services/prompts/types/verification.js";
-import { Service } from "./services/service.js";
-import { StatusService } from "./services/status/service.js";
-import { diagnosticMentionUser, fetchMembers } from "./utils.js";
+import constants from "../constants/constants";
+import {
+	FeatureLanguage,
+	Locale,
+	LocalisationLanguage,
+	getDiscordLocaleByLanguage,
+	getLanguageByLocale,
+} from "../constants/language";
+import time from "../constants/time";
+import defaults from "../defaults";
+import { timestamp } from "../formatting";
+import * as Logos from "../types";
+import { Command, CommandTemplate, InteractionHandler, LocalisationProperties, Option } from "./commands/command";
+import commandsRaw from "./commands/commands";
+import { SentencePair } from "./commands/language/commands/game";
+import { DictionaryAdapter } from "./commands/language/dictionaries/adapter";
+import { SupportedLanguage } from "./commands/language/module";
+import entryRequests from "./database/adapters/entry-requests";
+import guilds from "./database/adapters/guilds";
+import praises from "./database/adapters/praises";
+import reports from "./database/adapters/reports";
+import suggestions from "./database/adapters/suggestions";
+import users from "./database/adapters/users";
+import warnings from "./database/adapters/warnings";
+import { Database } from "./database/database";
+import { timeStructToMilliseconds } from "./database/structs/guild";
+import diagnostics from "./diagnostics";
+import { acknowledge, deleteReply, getLocaleData, isAutocomplete, reply, respond } from "./interactions";
+import transformers from "./localisation/transformers";
+import { AlertService } from "./services/alert/alert";
+import { DynamicVoiceChannelService } from "./services/dynamic-voice-channels/dynamic-voice-channels";
+import { EntryService } from "./services/entry/entry";
+import { JournallingService } from "./services/journalling/journalling";
+import { LavalinkService } from "./services/music/lavalink";
+import { MusicService } from "./services/music/music";
+import { InformationNoticeService } from "./services/notices/types/information";
+import { RoleNoticeService } from "./services/notices/types/roles";
+import { WelcomeNoticeService } from "./services/notices/types/welcome";
+import { ReportService } from "./services/prompts/types/reports";
+import { SuggestionService } from "./services/prompts/types/suggestions";
+import { VerificationService } from "./services/prompts/types/verification";
+import { RealtimeUpdateService } from "./services/realtime-updates/service";
+import { Service } from "./services/service";
+import { StatusService } from "./services/status/service";
+import { fetchMembers } from "./utils";
 import * as Discord from "discordeno";
 import FancyLog from "fancy-log";
 import Fauna from "fauna";
 import * as Sentry from "sentry";
-
-interface Collector<ForEvent extends keyof Discord.EventHandlers> {
-	filter: (...args: Parameters<Discord.EventHandlers[ForEvent]>) => boolean;
-	limit?: number;
-	removeAfter?: number;
-	onCollect: (...args: Parameters<Discord.EventHandlers[ForEvent]>) => void;
-	onEnd: () => void;
-}
-
-type Event = keyof Discord.EventHandlers;
 
 type Client = {
 	metadata: {
@@ -63,18 +63,18 @@ type Client = {
 		};
 		supportedTranslationLanguages: SupportedLanguage[];
 	};
-	log: Record<"debug" | keyof typeof FancyLog, (...args: unknown[]) => void>;
+	log: Logger;
 	cache: {
-		guilds: Map<bigint, Discord.Guild>;
-		users: Map<bigint, Discord.User>;
-		members: Map<bigint, Discord.Member>;
-		channels: Map<bigint, Discord.Channel>;
+		guilds: Map<bigint, Logos.Guild>;
+		users: Map<bigint, Logos.User>;
+		members: Map<bigint, Logos.Member>;
+		channels: Map<bigint, Logos.Channel>;
 		messages: {
-			latest: Map<bigint, Discord.Message>;
-			previous: Map<bigint, Discord.Message>;
+			latest: Map<bigint, Logos.Message>;
+			previous: Map<bigint, Logos.Message>;
 		};
 	};
-	database: Database;
+	database: { log: Logger } & Database;
 	commands: {
 		commands: Record<keyof typeof commandsRaw, Command>;
 		handlers: {
@@ -84,12 +84,12 @@ type Client = {
 	};
 	collectors: Map<Event, Set<Collector<Event>>>;
 	features: {
-		dictionaryAdapters: Map<Language, DictionaryAdapter[]>;
-		sentencePairs: Map<Language, SentencePair[]>;
+		dictionaryAdapters: Map<FeatureLanguage, DictionaryAdapter[]>;
+		sentencePairs: Map<FeatureLanguage, SentencePair[]>;
 		// The keys are user IDs, the values are command usage timestamps mapped by command IDs.
 		rateLimiting: Map<bigint, Map<bigint, number[]>>;
 	};
-	localisations: Map<string, Map<Language, (args: Record<string, unknown>) => string>>;
+	localisations: Map<string, Map<LocalisationLanguage, (args: Record<string, unknown>) => string>>;
 	services: {
 		global: Service[];
 		local: Map<bigint, Service[]>;
@@ -112,14 +112,27 @@ type Client = {
 			suggestions: Map<bigint, SuggestionService>;
 			verification: Map<bigint, VerificationService>;
 		};
+		realtimeUpdates: Map<bigint, RealtimeUpdateService>;
 		status: StatusService;
 	};
 };
 
+interface Collector<ForEvent extends keyof Discord.EventHandlers> {
+	filter: (...args: Parameters<Discord.EventHandlers[ForEvent]>) => boolean;
+	limit?: number;
+	removeAfter?: number;
+	onCollect: (...args: Parameters<Discord.EventHandlers[ForEvent]>) => void;
+	onEnd: () => void;
+}
+
+type Event = keyof Discord.EventHandlers;
+
+type Logger = Record<"debug" | keyof typeof FancyLog, (...args: unknown[]) => void>;
+
 function createClient(
 	metadata: Client["metadata"],
 	features: Client["features"],
-	localisationsStatic: Map<string, Map<Language, string>>,
+	localisationsStatic: Map<string, Map<LocalisationLanguage, string>>,
 ): Client {
 	const localisations = createLocalisations(localisationsStatic);
 
@@ -128,23 +141,7 @@ function createClient(
 
 	return {
 		metadata,
-		log: {
-			debug: (...args: unknown[]) => {
-				FancyLog.info(...args);
-			},
-			info: (...args: unknown[]) => {
-				FancyLog.info(...args);
-			},
-			dir: (...args: unknown[]) => {
-				FancyLog.dir(...args);
-			},
-			error: (...args: unknown[]) => {
-				FancyLog.error(...args);
-			},
-			warn: (...args: unknown[]) => {
-				FancyLog.warn(...args);
-			},
-		},
+		log: createLogger("client"),
 		cache: {
 			guilds: new Map(),
 			users: new Map(),
@@ -156,6 +153,7 @@ function createClient(
 			},
 		},
 		database: {
+			log: createLogger("database"),
 			client: new Fauna.Client({
 				secret: metadata.environment.faunaSecret,
 				domain: "db.us.fauna.com",
@@ -217,8 +215,41 @@ function createClient(
 				suggestions: new Map(),
 				verification: new Map(),
 			},
+			realtimeUpdates: new Map(),
 			// @ts-ignore: Late assignment.
 			status: "late_assignment",
+		},
+	};
+}
+
+type LoggerType = "client" | "database";
+function createLogger(type: LoggerType): Logger {
+	let typeDisplayed: string;
+	switch (type) {
+		case "client": {
+			typeDisplayed = "[CL]";
+			break;
+		}
+		case "database": {
+			typeDisplayed = "[DB]";
+			break;
+		}
+	}
+	return {
+		debug: (...args: unknown[]) => {
+			FancyLog.info(typeDisplayed, ...args);
+		},
+		info: (...args: unknown[]) => {
+			FancyLog.info(typeDisplayed, ...args);
+		},
+		dir: (...args: unknown[]) => {
+			FancyLog.dir(typeDisplayed, ...args);
+		},
+		error: (...args: unknown[]) => {
+			FancyLog.error(typeDisplayed, ...args);
+		},
+		warn: (...args: unknown[]) => {
+			FancyLog.warn(typeDisplayed, ...args);
 		},
 	};
 }
@@ -265,7 +296,7 @@ async function dispatchEvent<EventName extends keyof Discord.EventHandlers>(
 async function initialiseClient(
 	metadata: Client["metadata"],
 	features: Client["features"],
-	localisations: Map<string, Map<Language, string>>,
+	localisations: Map<string, Map<LocalisationLanguage, string>>,
 ): Promise<void> {
 	const client = createClient(metadata, features, localisations);
 
@@ -286,7 +317,7 @@ async function initialiseClient(
 					dispatchGlobal(client, "ready", { args });
 				},
 				async interactionCreate(bot, interaction) {
-					await handleInteractionCreate(client, bot, interaction);
+					await handleInteractionCreate([client, bot], interaction);
 
 					dispatchEvent(client, interaction.guildId, "interactionCreate", { args: [bot, interaction] });
 				},
@@ -347,10 +378,9 @@ async function initialiseClient(
 					dispatchEvent(client, guild.id, "guildCreate", { args: [bot, guild] });
 				},
 				async guildDelete(bot, id, shardId) {
-					const guildId = id;
-					client.cache.guilds.delete(guildId);
+					await handleGuildDelete(client, bot, id);
 
-					dispatchEvent(client, guildId, "guildDelete", { args: [bot, guildId, shardId] });
+					dispatchEvent(client, id, "guildDelete", { args: [bot, id, shardId] });
 				},
 				async guildUpdate(bot, guild) {
 					dispatchEvent(client, guild.id, "guildUpdate", { args: [bot, guild] });
@@ -403,7 +433,16 @@ function overrideDefaultEventHandlers(bot: Discord.Bot): Discord.Bot {
 	return bot;
 }
 
-async function handleGuildCreate(client: Client, bot: Discord.Bot, guild: Discord.Guild): Promise<void> {
+export async function handleGuildCreate(
+	client: Client,
+	bot: Discord.Bot,
+	guild: Discord.Guild | Logos.Guild,
+	options: { isUpdate: boolean } = { isUpdate: false },
+): Promise<void> {
+	if (!options.isUpdate) {
+		client.log.info(`Logos added to "${guild.name}" (ID ${guild.id}).`);
+	}
+
 	const guildDocument = await client.database.adapters.guilds.getOrFetchOrCreate(
 		client,
 		"id",
@@ -420,6 +459,11 @@ async function handleGuildCreate(client: Client, bot: Discord.Bot, guild: Discor
 
 	const guildCommands: Command[] = [commands.information];
 	const services: Service[] = [];
+
+	const realtimeUpdateService = new RealtimeUpdateService(client, guild.id, guildDocument.ref);
+	services.push(realtimeUpdateService);
+
+	client.services.realtimeUpdates.set(guild.id, realtimeUpdateService);
 
 	if (configuration.features.information.enabled) {
 		const information = configuration.features.information.features;
@@ -460,6 +504,18 @@ async function handleGuildCreate(client: Client, bot: Discord.Bot, guild: Discor
 	if (configuration.features.language.enabled) {
 		const language = configuration.features.language.features;
 
+		if (language.answers?.enabled) {
+			guildCommands.push(commands.answer);
+		}
+
+		if (language.corrections?.enabled) {
+			guildCommands.push(commands.correctionFull, commands.correctionPartial);
+		}
+
+		if (language.cefr?.enabled) {
+			guildCommands.push(commands.cefr);
+		}
+
 		if (language.game.enabled) {
 			guildCommands.push(commands.game);
 		}
@@ -495,6 +551,10 @@ async function handleGuildCreate(client: Client, bot: Discord.Bot, guild: Discor
 
 		if (moderation.rules.enabled) {
 			guildCommands.push(commands.rule);
+		}
+
+		if (moderation.slowmode?.enabled) {
+			guildCommands.push(commands.slowmode);
 		}
 
 		if (moderation.timeouts.enabled) {
@@ -575,40 +635,61 @@ async function handleGuildCreate(client: Client, bot: Discord.Bot, guild: Discor
 	}
 
 	await Discord.upsertGuildApplicationCommands(bot, guild.id, guildCommands).catch((reason) =>
-		client.log.warn(`Failed to upsert commands: ${reason}`),
+		client.log.warn(`Failed to upsert commands on ${diagnostics.display.guild(guild)}: ${reason}`),
 	);
 
-	client.log.info(`Fetching ~${guild.memberCount} members on guild with ID ${guild.id}...`);
+	if (!options.isUpdate) {
+		client.log.info(`Fetching ~${guild.memberCount} members of ${diagnostics.display.guild(guild)}...`);
 
-	await fetchMembers(bot, guild.id, { limit: 0, query: "" }).catch((reason) =>
-		client.log.warn(`Failed to fetch members for guild with ID ${guild.id}: ${reason}`),
-	);
+		await fetchMembers(bot, guild.id, { limit: 0, query: "" }).catch((reason) =>
+			client.log.warn(`Failed to fetch members of ${diagnostics.display.guild(guild)}: ${reason}`),
+		);
 
-	client.log.info(`Fetched ~${guild.memberCount} members on guild with ID ${guild.id}.`);
-
-	for (const service of services) {
-		service.start(bot);
+		client.log.info(`Fetched ~${guild.memberCount} members of ${diagnostics.display.guild(guild)}.`);
 	}
 
+	client.log.info(`Starting ${services.length} service(s) on ${diagnostics.display.guild(guild)}...`);
+	const promises = [];
+	for (const service of services) {
+		promises.push(service.start(bot));
+	}
+	Promise.all(promises).then((_) => {
+		client.log.info(`Services started on ${diagnostics.display.guild(guild)}.`);
+	});
+
 	client.services.local.set(guild.id, services);
+
+	global.gc?.();
+}
+
+export async function handleGuildDelete(client: Client, bot: Discord.Bot, guildId: bigint): Promise<void> {
+	const guild = client.cache.guilds.get(guildId);
+	if (guild === undefined) {
+		return undefined;
+	}
+
+	const runningServices = client.services.local.get(guild.id) ?? [];
+	client.services.local.delete(guild.id);
+	for (const runningService of runningServices) {
+		runningService.stop(bot);
+	}
 }
 
 async function handleInteractionCreate(
-	client: Client,
-	bot: Discord.Bot,
-	interaction: Discord.Interaction,
+	[client, bot]: [Client, Discord.Bot],
+	interactionRaw: Discord.Interaction,
 ): Promise<void> {
-	if (interaction.data?.customId === constants.staticComponentIds.none) {
-		acknowledge([client, bot], interaction);
+	if (interactionRaw.data?.customId === constants.components.none) {
+		acknowledge([client, bot], interactionRaw);
 		return;
 	}
 
-	const commandName = interaction.data?.name;
+	const commandName = interactionRaw.data?.name;
 	if (commandName === undefined) {
 		return;
 	}
 
-	const subCommandGroupOption = interaction.data?.options?.find((option) => isSubcommandGroup(option));
+	const subCommandGroupOption = interactionRaw.data?.options?.find((option) => isSubcommandGroup(option));
 
 	let commandNameFull: string;
 	if (subCommandGroupOption !== undefined) {
@@ -620,7 +701,7 @@ async function handleInteractionCreate(
 
 		commandNameFull = `${commandName} ${subCommandGroupName} ${subCommandName}`;
 	} else {
-		const subCommandName = interaction.data?.options?.find((option) => isSubcommand(option))?.name;
+		const subCommandName = interactionRaw.data?.options?.find((option) => isSubcommand(option))?.name;
 		if (subCommandName === undefined) {
 			commandNameFull = commandName;
 		} else {
@@ -629,7 +710,7 @@ async function handleInteractionCreate(
 	}
 
 	let handle: InteractionHandler | undefined;
-	if (isAutocomplete(interaction)) {
+	if (isAutocomplete(interactionRaw)) {
 		handle = client.commands.handlers.autocomplete.get(commandNameFull);
 	} else {
 		handle = client.commands.handlers.execute.get(commandNameFull);
@@ -638,6 +719,9 @@ async function handleInteractionCreate(
 		return;
 	}
 
+	const localeData = await getLocaleData(client, interactionRaw);
+	const interaction: Logos.Interaction = { ...interactionRaw, ...localeData };
+
 	Promise.resolve(handle([client, bot], interaction)).catch((exception) => {
 		Sentry.captureException(exception);
 		client.log.error(exception);
@@ -645,10 +729,11 @@ async function handleInteractionCreate(
 }
 
 function withCaching(client: Client, transformers: Discord.Transformers): Discord.Transformers {
-	const { guild, user, member, channel, message, role, voiceState } = transformers;
+	const { guild, channel, user, member, message, role, voiceState } = transformers;
 
 	transformers.guild = (bot, payload) => {
-		const result = guild(bot, payload);
+		const resultUnoptimised = guild(bot, payload);
+		const result = Logos.slimGuild(resultUnoptimised);
 
 		for (const channel of payload.guild.channels ?? []) {
 			bot.transformers.channel(bot, { channel, guildId: result.id });
@@ -656,19 +741,32 @@ function withCaching(client: Client, transformers: Discord.Transformers): Discor
 
 		client.cache.guilds.set(result.id, result);
 
-		return result;
+		return resultUnoptimised;
+	};
+
+	transformers.channel = (...args) => {
+		const resultUnoptimised = channel(...args);
+		const result = Logos.slimChannel(resultUnoptimised);
+
+		client.cache.channels.set(result.id, result);
+
+		client.cache.guilds.get(result.guildId)?.channels.set(result.id, result);
+
+		return resultUnoptimised;
 	};
 
 	transformers.user = (...args) => {
-		const result = user(...args);
+		const resultUnoptimised = user(...args);
+		const result = Logos.slimUser(resultUnoptimised);
 
 		client.cache.users.set(result.id, result);
 
-		return result;
+		return resultUnoptimised;
 	};
 
 	transformers.member = (bot, payload, ...args) => {
-		const result = member(bot, payload, ...args);
+		const resultUnoptimised = member(bot, payload, ...args);
+		const result = Logos.slimMember(resultUnoptimised);
 
 		const memberSnowflake = bot.transformers.snowflake(`${result.id}${result.guildId}`);
 
@@ -676,21 +774,12 @@ function withCaching(client: Client, transformers: Discord.Transformers): Discor
 
 		client.cache.guilds.get(result.guildId)?.members.set(result.id, result);
 
-		return result;
-	};
-
-	transformers.channel = (...args) => {
-		const result = channel(...args);
-
-		client.cache.channels.set(result.id, result);
-
-		client.cache.guilds.get(result.guildId)?.channels.set(result.id, result);
-
-		return result;
+		return resultUnoptimised;
 	};
 
 	transformers.message = (bot, payload) => {
-		const result = message(bot, payload);
+		const resultUnoptimised = message(bot, payload);
+		const result = Logos.slimMessage(resultUnoptimised);
 
 		const previousMessage = client.cache.messages.latest.get(result.id);
 		if (previousMessage !== undefined) {
@@ -713,23 +802,29 @@ function withCaching(client: Client, transformers: Discord.Transformers): Discor
 			client.cache.members.set(memberSnowflake, member);
 		}
 
-		return result;
+		return resultUnoptimised;
 	};
 
 	transformers.role = (bot, payload) => {
-		const result = role(bot, payload);
+		const resultUnoptimised = role(bot, payload);
+		const result = Logos.slimRole(resultUnoptimised);
 
 		client.cache.guilds.get(result.guildId)?.roles.set(result.id, result);
 
-		return result;
+		return resultUnoptimised;
 	};
 
 	transformers.voiceState = (bot, payload) => {
-		const result = voiceState(bot, payload);
+		const resultUnoptimised = voiceState(bot, payload);
+		const result = Logos.slimVoiceState(resultUnoptimised);
 
-		client.cache.guilds.get(result.guildId)?.voiceStates.set(result.userId, result);
+		if (result.channelId !== undefined) {
+			client.cache.guilds.get(result.guildId)?.voiceStates.set(result.userId, result);
+		} else {
+			client.cache.guilds.get(result.guildId)?.voiceStates.delete(result.userId);
+		}
 
-		return result;
+		return resultUnoptimised;
 	};
 
 	return transformers;
@@ -740,6 +835,8 @@ function withRateLimiting(handle: InteractionHandler): InteractionHandler {
 		if (isAutocomplete(interaction)) {
 			return;
 		}
+
+		const locale = interaction.locale;
 
 		const commandId = interaction.data?.id;
 		if (commandId === undefined) {
@@ -765,22 +862,22 @@ function withRateLimiting(handle: InteractionHandler): InteractionHandler {
 			const nextValidUsageTimestampFormatted = timestamp(nextValidUsageTimestamp);
 
 			const strings = {
-				title: localise(client, "interactions.rateLimited.title", interaction.locale)(),
+				title: localise(client, "interactions.rateLimited.title", locale)(),
 				description: {
 					tooManyUses: localise(
 						client,
 						"interactions.rateLimited.description.tooManyUses",
-						interaction.locale,
+						locale,
 					)({ times: defaults.RATE_LIMIT }),
 					cannotUseUntil: localise(
 						client,
 						"interactions.rateLimited.description.cannotUseAgainUntil",
-						interaction.locale,
+						locale,
 					)({ relative_timestamp: nextValidUsageTimestampFormatted }),
 				},
 			};
 
-			setTimeout(() => deleteReply([client, bot], interaction), nextValidUsageTimestamp - now - Periods.second);
+			setTimeout(() => deleteReply([client, bot], interaction), nextValidUsageTimestamp - now - time.second);
 
 			reply([client, bot], interaction, {
 				embeds: [
@@ -812,18 +909,28 @@ function localiseCommands<CommandsRaw extends Record<string, CommandTemplate>, C
 		}
 
 		const nameLocalisationsAll = localisations.get(`${key}.name`) ?? localisations.get(`parameters.${optionName}.name`);
+		const name = nameLocalisationsAll?.get(defaults.LOCALISATION_LANGUAGE)?.({});
+		if (name === undefined) {
+			console.warn(`Failed to get command name from localisation key '${key}'.`);
+			return undefined;
+		}
+
 		const nameLocalisations =
 			nameLocalisationsAll !== undefined ? toDiscordLocalisations(nameLocalisationsAll) : undefined;
 
 		const descriptionLocalisationsAll =
 			localisations.get(`${key}.description`) ?? localisations.get(`parameters.${optionName}.description`);
-		const description = descriptionLocalisationsAll?.get(defaultLanguage)?.({});
+		const description = descriptionLocalisationsAll?.get(defaults.LOCALISATION_LANGUAGE)?.({});
 		const descriptionLocalisations =
 			descriptionLocalisationsAll !== undefined ? toDiscordLocalisations(descriptionLocalisationsAll) : undefined;
 
 		return {
+			name,
 			nameLocalizations: nameLocalisations ?? {},
-			description: description ?? localisations.get("noDescription")?.get(defaultLanguage)?.({}) ?? "No description.",
+			description:
+				description ??
+				localisations.get("noDescription")?.get(defaults.LOCALISATION_LANGUAGE)?.({}) ??
+				"No description.",
 			descriptionLocalizations: descriptionLocalisations ?? {},
 		};
 	}
@@ -996,19 +1103,21 @@ function isValidSnowflake(snowflake: string): boolean {
 function extractIDFromIdentifier(identifier: string): string | undefined {
 	return (
 		snowflakePattern.exec(identifier)?.at(1) ??
-		displayPattern.exec(identifier)?.at(2) ??
+		displayPattern.exec(identifier)?.at(1) ??
 		userMentionPattern.exec(identifier)?.at(1)
 	);
 }
 
-const displayPattern = new RegExp(/^(.{2,32}(?:#[0-9]{4})?) \(?([0-9]{16,20})\)?$/);
-const userTagPattern = new RegExp(/^(.{2,32}(?:#[0-9]{4})?)$/);
+const displayPattern = new RegExp(/^.*?\(?([0-9]{16,20})\)?$/);
+const oldUserTagPattern = new RegExp(/^([^@](?:.{1,31})?#(?:[0-9]{4}|0))$/);
+const userTagPattern = new RegExp(/^(@?.{2,32})$/);
 
 function isValidIdentifier(identifier: string): boolean {
 	return (
 		snowflakePattern.test(identifier) ||
 		userMentionPattern.test(identifier) ||
 		displayPattern.test(identifier) ||
+		oldUserTagPattern.test(identifier) ||
 		userTagPattern.test(identifier)
 	);
 }
@@ -1026,7 +1135,7 @@ function resolveIdentifierToMembers(
 	userId: bigint,
 	identifier: string,
 	options: Partial<MemberNarrowingOptions> = {},
-): [members: Discord.Member[], isResolved: boolean] | undefined {
+): [members: Logos.Member[], isResolved: boolean] | undefined {
 	const asker = client.cache.members.get(Discord.snowflakeToBigint(`${userId}${guildId}`));
 	if (asker === undefined) {
 		return undefined;
@@ -1069,15 +1178,28 @@ function resolveIdentifierToMembers(
 
 	const cachedMembers = options.restrictToSelf ? [asker] : guild.members.array();
 	const members = cachedMembers.filter(
-		(member: Discord.Member) =>
+		(member) =>
 			(options.restrictToNonSelf ? member.user?.id !== asker.user?.id : true) &&
 			(options.excludeModerators ? !moderatorRoleIds.some((roleId) => member.roles.includes(roleId)) : true),
 	);
 
-	if (userTagPattern.test(identifier)) {
+	if (oldUserTagPattern.test(identifier)) {
+		const identifierLowercase = identifier.toLowerCase();
 		const member = members.find(
-			(member) => member.user !== undefined && `${member.user.username}#${member.user.discriminator}` === identifier,
+			(member) =>
+				member.user !== undefined &&
+				`${member.user.username.toLowerCase()}#${member.user.discriminator}`.includes(identifierLowercase),
 		);
+		if (member === undefined) {
+			return [[], false];
+		}
+
+		return [[member], true];
+	}
+
+	if (userTagPattern.test(identifier)) {
+		const identifierLowercase = identifier.toLowerCase();
+		const member = members.find((member) => member.user?.username?.toLowerCase().includes(identifierLowercase));
 		if (member === undefined) {
 			return [[], false];
 		}
@@ -1089,6 +1211,12 @@ function resolveIdentifierToMembers(
 	const matchedMembers = members.filter((member) => {
 		if (member.user?.toggles.bot && !options.includeBots) {
 			return false;
+		}
+		if (
+			member.user &&
+			`${member.user.username.toLowerCase()}#${member.user.discriminator}`.includes(identifierLowercase)
+		) {
+			return true;
 		}
 		if (member.user?.username.toLowerCase().includes(identifierLowercase)) {
 			return true;
@@ -1104,7 +1232,7 @@ function resolveIdentifierToMembers(
 
 async function autocompleteMembers(
 	[client, bot]: [Client, Discord.Bot],
-	interaction: Discord.Interaction,
+	interaction: Logos.Interaction,
 	identifier: string,
 	options?: Partial<MemberNarrowingOptions>,
 ): Promise<void> {
@@ -1120,7 +1248,7 @@ async function autocompleteMembers(
 
 	const [matchedMembers, _] = result;
 
-	const users: Discord.User[] = [];
+	const users: Logos.User[] = [];
 	for (const member of matchedMembers) {
 		if (users.length === 20) {
 			break;
@@ -1137,16 +1265,17 @@ async function autocompleteMembers(
 	respond(
 		[client, bot],
 		interaction,
-		users.map((user) => ({ name: diagnosticMentionUser(user), value: user.id.toString() })),
+		users.map((user) => ({ name: diagnostics.display.user(user, { prettify: true }), value: user.id.toString() })),
 	);
 }
 
 function resolveInteractionToMember(
 	[client, bot]: [Client, Discord.Bot],
-	interaction: Discord.Interaction,
+	interaction: Logos.Interaction,
 	identifier: string,
-	options?: Partial<MemberNarrowingOptions>,
-): Discord.Member | undefined {
+	options: Partial<MemberNarrowingOptions>,
+	{ locale }: { locale: Locale },
+): Logos.Member | undefined {
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
 		return undefined;
@@ -1164,8 +1293,8 @@ function resolveInteractionToMember(
 
 	if (matchedMembers.length === 0) {
 		const strings = {
-			title: localise(client, "interactions.invalidUser.title", interaction.locale)(),
-			description: localise(client, "interactions.invalidUser.description", interaction.locale)(),
+			title: localise(client, "interactions.invalidUser.title", locale)(),
+			description: localise(client, "interactions.invalidUser.description", locale)(),
 		};
 
 		reply([client, bot], interaction, {
@@ -1214,7 +1343,9 @@ function isSubcommand(option: Discord.InteractionDataOption): boolean {
 	return option.type === Discord.ApplicationCommandOptionTypes.SubCommand;
 }
 
-function createLocalisations(localisationsRaw: Map<string, Map<Language, string>>): Client["localisations"] {
+function createLocalisations(
+	localisationsRaw: Map<string, Map<LocalisationLanguage, string>>,
+): Client["localisations"] {
 	const processLocalisation = (localisation: string, args: Record<string, unknown>) => {
 		let result = localisation;
 		for (const [key, value] of Object.entries(args)) {
@@ -1223,9 +1354,9 @@ function createLocalisations(localisationsRaw: Map<string, Map<Language, string>
 		return result;
 	};
 
-	const localisations = new Map<string, Map<Language, (args: Record<string, unknown>) => string>>();
+	const localisations = new Map<string, Map<LocalisationLanguage, (args: Record<string, unknown>) => string>>();
 	for (const [key, languages] of localisationsRaw.entries()) {
-		const functions = new Map<Language, (args: Record<string, unknown>) => string>();
+		const functions = new Map<LocalisationLanguage, (args: Record<string, unknown>) => string>();
 
 		for (const [language, string] of languages.entries()) {
 			functions.set(language, (args: Record<string, unknown>) => processLocalisation(string, args));
@@ -1237,16 +1368,17 @@ function createLocalisations(localisationsRaw: Map<string, Map<Language, string>
 	return localisations;
 }
 
-function localise(client: Client, key: string, locale: string | undefined): (args?: Record<string, unknown>) => string {
-	const language =
-		(locale !== undefined ? getLanguageByLocale(locale as Discord.Locales) : undefined) ?? defaultLanguage;
+function localise(client: Client, key: string, locale: Locale | undefined): (args?: Record<string, unknown>) => string {
+	const language = (locale !== undefined ? getLanguageByLocale(locale) : undefined) ?? defaults.LOCALISATION_LANGUAGE;
 
 	const getLocalisation =
-		client.localisations.get(key)?.get(language) ?? client.localisations.get(key)?.get(defaultLanguage) ?? (() => key);
+		client.localisations.get(key)?.get(language) ??
+		client.localisations.get(key)?.get(defaults.LOCALISATION_LANGUAGE) ??
+		(() => key);
 
 	return (args) => {
 		const string = getLocalisation(args ?? {});
-		if (language !== defaultLanguage && string.trim().length === 0) {
+		if (language !== defaults.LOCALISATION_LANGUAGE && string.trim().length === 0) {
 			return localise(client, key, undefined)(args ?? {});
 		}
 
@@ -1255,12 +1387,12 @@ function localise(client: Client, key: string, locale: string | undefined): (arg
 }
 
 function toDiscordLocalisations(
-	localisations: Map<Language, (args: Record<string, unknown>) => string>,
+	localisations: Map<LocalisationLanguage, (args: Record<string, unknown>) => string>,
 ): Discord.Localization {
 	const entries = Array.from(localisations.entries());
 	const result: Discord.Localization = {};
 	for (const [language, localise] of entries) {
-		const locale = getLocaleForLanguage(language);
+		const locale = getDiscordLocaleByLanguage(language);
 		if (locale === undefined) {
 			continue;
 		}
@@ -1275,7 +1407,7 @@ function toDiscordLocalisations(
 	return result;
 }
 
-function pluralise(client: Client, key: string, language: Language, number: number): string {
+function pluralise(client: Client, key: string, language: LocalisationLanguage, number: number): string {
 	const pluralise = transformers[language].pluralise;
 	const { one, two, many } = {
 		one: client.localisations.get(`${key}.one`)?.get(language)?.({ one: number }),

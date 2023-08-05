@@ -1,6 +1,7 @@
-import { Client } from "../client.js";
-import { diagnosticMentionUser } from "../utils.js";
-import { BaseDocumentProperties, Document } from "./document.js";
+import * as Logos from "../../types";
+import { Client } from "../client";
+import diagnostics from "../diagnostics";
+import { BaseDocumentProperties, Document } from "./document";
 import {
 	EntryRequestIndexes,
 	GuildIndexes,
@@ -10,15 +11,14 @@ import {
 	SuggestionIndexes,
 	UserIndexes,
 	WarningIndexes,
-} from "./indexes.js";
-import { EntryRequest } from "./structs/entry-request.js";
-import { Guild } from "./structs/guild.js";
-import { Praise } from "./structs/praise.js";
-import { Report } from "./structs/report.js";
-import { Suggestion } from "./structs/suggestion.js";
-import { User } from "./structs/user.js";
-import { Warning } from "./structs/warning.js";
-import * as Discord from "discordeno";
+} from "./indexes";
+import { EntryRequest } from "./structs/entry-request";
+import { Guild } from "./structs/guild";
+import { Praise } from "./structs/praise";
+import { Report } from "./structs/report";
+import { Suggestion } from "./structs/suggestion";
+import { User } from "./structs/user";
+import { Warning } from "./structs/warning";
 import Fauna from "fauna";
 import * as Sentry from "sentry";
 
@@ -270,7 +270,7 @@ async function dispatchQuery<
 		}
 
 		Sentry.captureException(exception);
-		client.log.error(`${exception.message} ~ ${exception.description}`);
+		client.database.log.error(`${exception.message} ~ ${exception.description}`);
 
 		return undefined;
 	}
@@ -286,8 +286,8 @@ async function dispatchQuery<
 	return result.data as unknown as R;
 }
 
-function mentionUser(user: Discord.User | undefined, id: bigint): string {
-	return user === undefined ? `an unknown user (ID ${id})` : diagnosticMentionUser(user);
+function mentionUser(user: Logos.User | undefined, id: bigint): string {
+	return user === undefined ? `an unknown user (ID ${id})` : diagnostics.display.user(user);
 }
 
 function getUserMentionByReference(client: Client, reference: Fauna.values.Ref): string {

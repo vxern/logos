@@ -1,5 +1,5 @@
-import constants from "../../../../../constants.js";
-import { RoleCategory } from "../types.js";
+import constants from "../../../../../constants/constants";
+import { RoleCategory } from "../types";
 
 const category: RoleCategory = {
 	type: "single",
@@ -13,6 +13,7 @@ const category: RoleCategory = {
 				{ id: "roles.dialects.languages.armenian.roles.western", snowflake: "982407478761381898" },
 				{ id: "roles.dialects.languages.armenian.roles.eastern", snowflake: "982407372733579305" },
 				{ id: "roles.dialects.languages.armenian.roles.karabakh", snowflake: "1041345453360423033" },
+				{ id: "roles.dialects.languages.armenian.roles.classical", snowflake: "1134470894530605076" },
 			],
 		},
 	},

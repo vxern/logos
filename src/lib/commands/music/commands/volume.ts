@@ -1,7 +1,7 @@
-import { OptionTemplate } from "../../command.js";
-import { show } from "../../parameters.js";
-import { handleDisplayVolume } from "./volume/display.js";
-import { handleSetVolume } from "./volume/set.js";
+import { OptionTemplate } from "../../command";
+import { show } from "../../parameters";
+import { handleDisplayVolume } from "./volume/display";
+import { handleSetVolume } from "./volume/set";
 import * as Discord from "discordeno";
 
 const command: OptionTemplate = {

@@ -1,18 +1,20 @@
-import constants from "../../../constants.js";
-import defaults from "../../../defaults.js";
-import { list } from "../../../formatting.js";
-import { Client, localise } from "../../client.js";
-import { paginate } from "../../interactions.js";
-import { chunk } from "../../utils.js";
-import { SongListing, listingTypeToEmoji } from "./data/types.js";
+import constants from "../../../constants/constants";
+import { Locale } from "../../../constants/language";
+import defaults from "../../../defaults";
+import { list } from "../../../formatting";
+import * as Logos from "../../../types";
+import { Client, localise } from "../../client";
+import { paginate } from "../../interactions";
+import { chunk } from "../../utils";
+import { SongListing, listingTypeToEmoji } from "./data/types";
 import * as Discord from "discordeno";
 
 async function displayListings(
 	[client, bot]: [Client, Discord.Bot],
-	interaction: Discord.Interaction,
+	interaction: Logos.Interaction,
 	{ title, songListings }: { title: string; songListings: SongListing[] },
 	show: boolean,
-	locale: string | undefined,
+	{ locale }: { locale: Locale },
 ): Promise<void> {
 	const pages = chunk(songListings, defaults.RESULTS_PER_PAGE);
 
@@ -21,28 +23,33 @@ async function displayListings(
 		listEmpty: localise(client, "music.strings.listEmpty", locale)(),
 	};
 
-	paginate([client, bot], interaction, {
-		elements: pages,
-		embed: { title: title, color: constants.colors.blue },
-		view: {
-			title: strings.title,
-			generate: (page, pageIndex) => {
-				if (page.length === 0) {
-					return strings.listEmpty;
-				}
+	paginate(
+		[client, bot],
+		interaction,
+		{
+			elements: pages,
+			embed: { title: title, color: constants.colors.blue },
+			view: {
+				title: strings.title,
+				generate: (page, pageIndex) => {
+					if (page.length === 0) {
+						return strings.listEmpty;
+					}
 
-				return list(
-					page.map((listing, index) => {
-						const indexDisplayed = pageIndex * 10 + (index + 1);
-						const emoji = listingTypeToEmoji[listing.content.type];
+					return list(
+						page.map((listing, index) => {
+							const indexDisplayed = pageIndex * 10 + (index + 1);
+							const emoji = listingTypeToEmoji[listing.content.type];
 
-						return `${indexDisplayed}. ${emoji} ~ ${listing.content.title}`;
-					}),
-				);
+							return `${indexDisplayed}. ${emoji} ~ ${listing.content.title}`;
+						}),
+					);
+				},
 			},
+			show,
 		},
-		show,
-	});
+		{ locale },
+	);
 }
 
 export { displayListings };

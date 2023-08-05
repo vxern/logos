@@ -1,13 +1,14 @@
-import constants from "../../../../../constants.js";
-import { Client, localise } from "../../../../client.js";
-import { parseArguments, reply } from "../../../../interactions.js";
-import { ListingResolver } from "../../data/sources/sources.js";
-import { SongListing } from "../../data/types.js";
+import constants from "../../../../../constants/constants";
+import * as Logos from "../../../../../types";
+import { Client, localise } from "../../../../client";
+import { parseArguments, reply } from "../../../../interactions";
+import { ListingResolver } from "../../data/sources/sources";
+import { SongListing } from "../../data/types";
 import * as Discord from "discordeno";
 
 async function handleRequestQueryPlayback(
 	[client, bot]: [Client, Discord.Bot],
-	interaction: Discord.Interaction,
+	interaction: Logos.Interaction,
 	resolveToSongListing: ListingResolver,
 ): Promise<void> {
 	const [{ query }] = parseArguments(interaction.data?.options, {});
@@ -26,7 +27,7 @@ async function handleRequestQueryPlayback(
 	}
 
 	const isVoiceStateVerified = musicService.verifyCanRequestPlayback(bot, interaction);
-	if (isVoiceStateVerified === undefined || !isVoiceStateVerified) {
+	if (!isVoiceStateVerified) {
 		return;
 	}
 
@@ -37,18 +38,20 @@ async function handleRequestQueryPlayback(
 
 async function handleRequestPlayback(
 	[client, bot]: [Client, Discord.Bot],
-	interaction: Discord.Interaction,
+	interaction: Logos.Interaction,
 	listing: SongListing | undefined,
 ): Promise<void> {
+	const locale = interaction.locale;
+
 	if (listing === undefined) {
 		const strings = {
-			title: localise(client, "music.options.play.strings.notFound.title", interaction.locale)(),
+			title: localise(client, "music.options.play.strings.notFound.title", locale)(),
 			description: {
-				notFound: localise(client, "music.options.play.strings.notFound.description.notFound", interaction.locale)(),
+				notFound: localise(client, "music.options.play.strings.notFound.description.notFound", locale)(),
 				tryDifferentQuery: localise(
 					client,
 					"music.options.play.strings.notFound.description.tryDifferentQuery",
-					interaction.locale,
+					locale,
 				)(),
 			},
 		};
@@ -58,7 +61,7 @@ async function handleRequestPlayback(
 				{
 					title: strings.title,
 					description: `${strings.description.notFound}\n\n${strings.description.tryDifferentQuery}`,
-					color: constants.colors.red,
+					color: constants.colors.dullYellow,
 				},
 			],
 		});
@@ -81,7 +84,7 @@ async function handleRequestPlayback(
 	}
 
 	const isVoiceStateVerified = musicService.verifyCanRequestPlayback(bot, interaction);
-	if (isVoiceStateVerified === undefined || !isVoiceStateVerified) {
+	if (!isVoiceStateVerified) {
 		return;
 	}
 

@@ -1,9 +1,9 @@
-import constants from "../../../../constants.js";
-import { defaultLocale } from "../../../../types.js";
-import { Client, localise } from "../../../client.js";
-import { handleOpenRoleSelectionMenu } from "../../../commands/social/commands/profile/roles.js";
-import { decodeId } from "../../../interactions.js";
-import { HashableMessageContent, NoticeService } from "../service.js";
+import constants from "../../../../constants/constants";
+import * as Logos from "../../../../types";
+import { Client, localise } from "../../../client";
+import { handleOpenRoleSelectionMenu } from "../../../commands/social/commands/profile/roles";
+import { decodeId, getLocaleData } from "../../../interactions";
+import { HashableMessageContents, NoticeService } from "../service";
 import * as Discord from "discordeno";
 
 class RoleNoticeService extends NoticeService<"roles"> {
@@ -11,20 +11,21 @@ class RoleNoticeService extends NoticeService<"roles"> {
 		super(client, guildId, { type: "roles" });
 	}
 
-	generateNotice(): HashableMessageContent | undefined {
+	generateNotice(): HashableMessageContents | undefined {
+		const guildLocale = this.guildLocale;
 		const strings = {
-			title: localise(this.client, "roles.selection.title", defaultLocale)(),
+			title: localise(this.client, "roles.selection.title", guildLocale)(),
 			description: {
 				usingCommand: localise(
 					this.client,
 					"roles.selection.description.usingCommand",
-					defaultLocale,
+					guildLocale,
 				)({
 					command: "`/profile roles`",
 				}),
-				runAnywhere: localise(this.client, "roles.selection.description.runAnywhere", defaultLocale)(),
-				pressButton: localise(this.client, "roles.selection.description.pressButton", defaultLocale)(),
-				clickHere: localise(this.client, "roles.selection.description.clickHere", defaultLocale)(),
+				runAnywhere: localise(this.client, "roles.selection.description.runAnywhere", guildLocale)(),
+				pressButton: localise(this.client, "roles.selection.description.pressButton", guildLocale)(),
+				clickHere: localise(this.client, "roles.selection.description.clickHere", guildLocale)(),
 			},
 		};
 
@@ -44,7 +45,7 @@ class RoleNoticeService extends NoticeService<"roles"> {
 							type: Discord.MessageComponentTypes.Button,
 							label: strings.description.clickHere,
 							style: Discord.ButtonStyles.Primary,
-							customId: constants.staticComponentIds.selectRoles,
+							customId: constants.components.selectRoles,
 						},
 					],
 				},
@@ -52,20 +53,23 @@ class RoleNoticeService extends NoticeService<"roles"> {
 		};
 	}
 
-	async interactionCreate(bot: Discord.Bot, interaction: Discord.Interaction): Promise<void> {
-		if (interaction.type !== Discord.InteractionTypes.MessageComponent) {
+	async interactionCreate(bot: Discord.Bot, interactionRaw: Discord.Interaction): Promise<void> {
+		if (interactionRaw.type !== Discord.InteractionTypes.MessageComponent) {
 			return;
 		}
 
-		const customId = interaction.data?.customId;
+		const customId = interactionRaw.data?.customId;
 		if (customId === undefined) {
 			return;
 		}
 
 		const [id, ..._] = decodeId(customId);
-		if (id !== constants.staticComponentIds.selectRoles) {
+		if (id !== constants.components.selectRoles) {
 			return;
 		}
+
+		const localeData = await getLocaleData(this.client, interactionRaw);
+		const interaction: Logos.Interaction = { ...interactionRaw, ...localeData };
 
 		handleOpenRoleSelectionMenu([this.client, bot], interaction);
 	}

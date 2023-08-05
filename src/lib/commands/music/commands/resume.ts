@@ -1,8 +1,8 @@
-import constants from "../../../../constants.js";
-import { defaultLocale } from "../../../../types.js";
-import { Client, localise } from "../../../client.js";
-import { reply } from "../../../interactions.js";
-import { OptionTemplate } from "../../command.js";
+import constants from "../../../../constants/constants";
+import * as Logos from "../../../../types";
+import { Client, localise } from "../../../client";
+import { reply } from "../../../interactions";
+import { OptionTemplate } from "../../command";
 import * as Discord from "discordeno";
 
 const command: OptionTemplate = {
@@ -13,8 +13,10 @@ const command: OptionTemplate = {
 
 async function handleResumePlayback(
 	[client, bot]: [Client, Discord.Bot],
-	interaction: Discord.Interaction,
+	interaction: Logos.Interaction,
 ): Promise<void> {
+	const locale = interaction.guildLocale;
+
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
 		return;
@@ -26,26 +28,25 @@ async function handleResumePlayback(
 	}
 
 	const isVoiceStateVerified = musicService.verifyCanManagePlayback(bot, interaction);
-	if (isVoiceStateVerified === undefined || !isVoiceStateVerified) {
+	if (!isVoiceStateVerified) {
 		return;
 	}
 
 	const [isOccupied, isPaused] = [musicService.isOccupied, musicService.isPaused];
-	if (isOccupied === undefined || isPaused === undefined) {
-		return;
-	}
-
 	if (!isOccupied) {
+		const locale = interaction.locale;
 		const strings = {
-			title: localise(client, "music.options.resume.strings.noSong.title", interaction.locale)(),
-			description: localise(client, "music.options.resume.strings.noSong.description", interaction.locale)(),
+			title: localise(client, "music.strings.notPlaying.title", locale)(),
+			description: {
+				toManage: localise(client, "music.strings.notPlaying.description.toManage", locale)(),
+			},
 		};
 
 		reply([client, bot], interaction, {
 			embeds: [
 				{
 					title: strings.title,
-					description: strings.description,
+					description: strings.description.toManage,
 					color: constants.colors.dullYellow,
 				},
 			],
@@ -53,10 +54,15 @@ async function handleResumePlayback(
 		return;
 	}
 
+	if (isPaused === undefined) {
+		return;
+	}
+
 	if (!isPaused) {
+		const locale = interaction.locale;
 		const strings = {
-			title: localise(client, "music.options.resume.strings.notPaused", interaction.locale)(),
-			description: localise(client, "music.options.resume.strings.notPaused", interaction.locale)(),
+			title: localise(client, "music.options.resume.strings.notPaused.title", locale)(),
+			description: localise(client, "music.options.resume.strings.notPaused.description", locale)(),
 		};
 
 		reply([client, bot], interaction, {
@@ -74,8 +80,8 @@ async function handleResumePlayback(
 	musicService.resume();
 
 	const strings = {
-		title: localise(client, "music.options.resume.strings.resumed.title", defaultLocale)(),
-		description: localise(client, "music.options.resume.strings.resumed.description", defaultLocale)(),
+		title: localise(client, "music.options.resume.strings.resumed.title", locale)(),
+		description: localise(client, "music.options.resume.strings.resumed.description", locale)(),
 	};
 
 	reply(

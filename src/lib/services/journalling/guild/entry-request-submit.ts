@@ -1,8 +1,10 @@
-import constants from "../../../../constants";
+import constants from "../../../../constants/constants";
+import { getLocaleByLanguage } from "../../../../constants/language";
+import defaults from "../../../../defaults";
 import { codeMultiline } from "../../../../formatting";
-import { defaultLocale } from "../../../../types";
 import { localise } from "../../../client";
-import { diagnosticMentionUser } from "../../../utils";
+import diagnostics from "../../../diagnostics";
+import { getFeatureLanguage, getLocalisationLanguage } from "../../../interactions";
 import { GuildEvents, MessageGenerators } from "../generator";
 
 export default {
@@ -13,13 +15,17 @@ export default {
 			return;
 		}
 
+		const guildLanguage = getLocalisationLanguage(guildDocument);
+		const guildLocale = getLocaleByLanguage(guildLanguage) ?? defaults.LOCALISATION_LOCALE;
+		const featureLanguage = getFeatureLanguage(guildDocument);
+
 		const strings = {
-			reason: localise(client, "verification.fields.reason", defaultLocale)({ language: guildDocument.data.language }),
-			aim: localise(client, "verification.fields.aim", defaultLocale)(),
-			whereFound: localise(client, "verification.fields.whereFound", defaultLocale)(),
+			reason: localise(client, "verification.fields.reason", guildLocale)({ language: featureLanguage }),
+			aim: localise(client, "verification.fields.aim", guildLocale)(),
+			whereFound: localise(client, "verification.fields.whereFound", guildLocale)(),
 		};
 
-		return `${diagnosticMentionUser(user)} has submitted a request to join the server.
+		return `${diagnostics.display.user(user)} has submitted a request to join the server.
 
 **${strings.reason}**
 ${codeMultiline(entryRequest.answers.reason)}

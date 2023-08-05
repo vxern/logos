@@ -1,5 +1,5 @@
-import constants from "../../../../constants";
-import { diagnosticMentionUser } from "../../../utils";
+import constants from "../../../../constants/constants";
+import diagnostics from "../../../diagnostics";
 import { GuildEvents, MessageGenerators } from "../generator";
 
 export default {
@@ -10,7 +10,9 @@ export default {
 			return;
 		}
 
-		return `The timeout of ${diagnosticMentionUser(memberUser)} has been cleared by: ${diagnosticMentionUser(by)}`;
+		return `The timeout of ${diagnostics.display.user(memberUser)} has been cleared by: ${diagnostics.display.user(
+			by,
+		)}`;
 	},
 	filter: (_, originGuildId, member, __) => originGuildId === member.guildId,
 	color: constants.colors.blue,

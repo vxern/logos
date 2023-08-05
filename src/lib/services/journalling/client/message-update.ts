@@ -1,6 +1,6 @@
-import constants from "../../../../constants";
+import constants from "../../../../constants/constants";
 import { MentionTypes, codeMultiline, mention } from "../../../../formatting";
-import { diagnosticMentionUser } from "../../../utils";
+import diagnostics from "../../../diagnostics";
 import { ClientEvents, MessageGenerators } from "../generator";
 
 export default {
@@ -18,7 +18,7 @@ export default {
 
 		const before = oldMessage !== undefined ? codeMultiline(oldMessage.content) : "*No message*";
 
-		return `${diagnosticMentionUser(author)} updated their message in ${mention(
+		return `${diagnostics.display.user(author)} updated their message in ${mention(
 			message.channelId,
 			MentionTypes.Channel,
 		)}.

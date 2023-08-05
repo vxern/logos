@@ -1,10 +1,11 @@
-import { Client } from "../client.js";
+import * as Logos from "../../types";
+import { Client } from "../client";
 import * as Discord from "discordeno";
 
 type WithRequired<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>> & Required<Pick<T, K>>;
 
 /** Describes the handler of an interaction. */
-type InteractionHandler = ([client, bot]: [Client, Discord.Bot], interaction: Discord.Interaction) => Promise<void>;
+type InteractionHandler = ([client, bot]: [Client, Discord.Bot], interaction: Logos.Interaction) => Promise<void>;
 
 type Command = Discord.CreateSlashApplicationCommand;
 
@@ -17,14 +18,14 @@ interface CommandFeatures {
 	options?: OptionTemplate[];
 }
 
-type LocalisationProperties = "nameLocalizations" | "description" | "descriptionLocalizations";
+type LocalisationProperties = "name" | "nameLocalizations" | "description" | "descriptionLocalizations";
 
 type CommandTemplate = WithRequired<
-	Omit<Command, "options" | LocalisationProperties>,
+	Omit<Command, "options" | Exclude<LocalisationProperties, "name">>,
 	"defaultMemberPermissions" | "type"
 > &
 	CommandFeatures;
 
-type OptionTemplate = Omit<Option, "options" | LocalisationProperties> & CommandFeatures;
+type OptionTemplate = Omit<Option, "options" | Exclude<LocalisationProperties, "name">> & CommandFeatures;
 
 export type { Command, CommandTemplate, InteractionHandler, LocalisationProperties, Option, OptionTemplate };

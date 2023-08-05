@@ -1,8 +1,9 @@
-import { defaultLanguage } from "../../../types.js";
-import { CacheAdapter, Database, dispatchQuery, stringifyValue } from "../database.js";
-import { Document } from "../document.js";
-import { GuildIndexes, guildIndexParameterToIndex } from "../indexes.js";
-import { Guild } from "../structs/guild.js";
+import defaults from "../../../defaults";
+import diagnostics from "../../diagnostics";
+import { CacheAdapter, Database, dispatchQuery, stringifyValue } from "../database";
+import { Document } from "../document";
+import { GuildIndexes, guildIndexParameterToIndex } from "../indexes";
+import { Guild } from "../structs/guild";
 import Fauna from "fauna";
 
 const $ = Fauna.query;
@@ -33,7 +34,7 @@ const adapter: Database["adapters"]["guilds"] = {
 		client.database.fetchPromises.guilds[parameter].delete(value);
 
 		if (document === undefined) {
-			client.log.debug(`Couldn't find a guild in the database whose '${parameter}' matches '${value}'.`);
+			client.database.log.debug(`Couldn't find a guild in the database whose '${parameter}' matches '${value}'.`);
 			return undefined;
 		}
 
@@ -41,7 +42,7 @@ const adapter: Database["adapters"]["guilds"] = {
 
 		cache.set(client, "id", id, document);
 
-		client.log.debug(`Fetched guild with ID ${id}.`);
+		client.database.log.debug(`Fetched ${diagnostics.display.guild(id)}.`);
 
 		return cache.get(client, parameter, value);
 	},
@@ -60,7 +61,10 @@ const adapter: Database["adapters"]["guilds"] = {
 				createdAt: Date.now(),
 				id: id.toString(),
 				isNative: false,
-				language: defaultLanguage,
+				languages: {
+					localisation: defaults.LOCALISATION_LANGUAGE,
+					feature: defaults.FEATURE_LANGUAGE,
+				},
 				features: {
 					information: {
 						enabled: true,
@@ -79,6 +83,9 @@ const adapter: Database["adapters"]["guilds"] = {
 					language: {
 						enabled: true,
 						features: {
+							corrections: { enabled: true },
+							answers: { enabled: true },
+							cefr: { enabled: true, extended: false, examples: { enabled: false } },
 							game: { enabled: false },
 							resources: { enabled: false },
 							translate: { enabled: true },
@@ -91,6 +98,7 @@ const adapter: Database["adapters"]["guilds"] = {
 							alerts: { enabled: false },
 							policy: { enabled: false },
 							rules: { enabled: false },
+							slowmode: { enabled: true, journaling: true },
 							timeouts: { enabled: true, journaling: true },
 							purging: { enabled: true, journaling: true },
 							warns: { enabled: true, journaling: true, limit: 3, autoTimeout: { enabled: false } },
@@ -125,7 +133,9 @@ const adapter: Database["adapters"]["guilds"] = {
 		const document = await dispatchQuery<Guild>(client, $.Create($.Collection("Guilds"), { data: guild }));
 
 		if (document === undefined) {
-			client.log.error(`Failed to create a guild document in the database for guild with ID ${guild.id}.`);
+			client.database.log.error(
+				`Failed to create a guild document in the database for ${diagnostics.display.guild(guild.id)}.`,
+			);
 			return undefined;
 		}
 
@@ -133,7 +143,7 @@ const adapter: Database["adapters"]["guilds"] = {
 
 		cache.set(client, "id", id, document);
 
-		client.log.debug(`Created guild document for guild with ID ${id}.`);
+		client.database.log.debug(`Created guild document for ${diagnostics.display.guild(id)}.`);
 
 		return document;
 	},
@@ -141,7 +151,9 @@ const adapter: Database["adapters"]["guilds"] = {
 		const document = await dispatchQuery<Guild>(client, $.Update(guild.ref, { data: guild.data }));
 
 		if (document === undefined) {
-			client.log.error(`Failed to update the guild document in the database for guild with ID ${guild.data.id}.`);
+			client.database.log.error(
+				`Failed to update the guild document in the database for ${diagnostics.display.guild(guild.data.id)}.`,
+			);
 			return undefined;
 		}
 
@@ -149,7 +161,7 @@ const adapter: Database["adapters"]["guilds"] = {
 
 		cache.set(client, "id", id, document);
 
-		client.log.debug(`Updated guild document for guild with ID ${id}.`);
+		client.database.log.debug(`Updated guild document for ${diagnostics.display.guild(id)}.`);
 
 		return document;
 	},

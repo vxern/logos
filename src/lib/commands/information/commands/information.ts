@@ -1,6 +1,6 @@
-import { CommandTemplate } from "../../command.js";
-import { handleDisplayBotInformation } from "./information/bot.js";
-import { handleDisplayGuildInformation } from "./information/guild.js";
+import { CommandTemplate } from "../../command";
+import { handleDisplayBotInformation } from "./information/bot";
+import { handleDisplayGuildInformation } from "./information/guild";
 import * as Discord from "discordeno";
 
 const command: CommandTemplate = {

@@ -1,14 +1,16 @@
-import constants from "../../../../../constants.js";
-import { defaultLocale } from "../../../../../types.js";
-import { Client, localise } from "../../../../client.js";
-import { parseArguments, reply } from "../../../../interactions.js";
+import constants from "../../../../../constants/constants";
+import * as Logos from "../../../../../types";
+import { Client, localise } from "../../../../client";
+import { parseArguments, reply } from "../../../../interactions";
 import * as Discord from "discordeno";
 
 async function handleDisplayVolume(
 	[client, bot]: [Client, Discord.Bot],
-	interaction: Discord.Interaction,
+	interaction: Logos.Interaction,
 ): Promise<void> {
 	const [{ show }] = parseArguments(interaction.data?.options, { show: "boolean" });
+
+	const locale = show ? interaction.guildLocale : interaction.locale;
 
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
@@ -20,14 +22,34 @@ async function handleDisplayVolume(
 		return;
 	}
 
-	const isVoiceStateVerified = musicService.verifyCanManagePlayback(bot, interaction);
-	if (isVoiceStateVerified === undefined || !isVoiceStateVerified) {
+	const isVoiceStateVerified = musicService.verifyVoiceState(bot, interaction, "check");
+	if (!isVoiceStateVerified) {
+		return;
+	}
+
+	const isOccupied = musicService.isOccupied;
+	if (!isOccupied) {
+		const locale = interaction.locale;
+		const strings = {
+			title: localise(client, "music.strings.notPlaying.title", locale)(),
+			description: {
+				toCheck: localise(client, "music.strings.notPlaying.description.toCheck", locale)(),
+			},
+		};
+
+		reply([client, bot], interaction, {
+			embeds: [
+				{
+					title: strings.title,
+					description: strings.description.toCheck,
+					color: constants.colors.dullYellow,
+				},
+			],
+		});
 		return;
 	}
 
 	const volume = musicService.volume;
-
-	const locale = show ? defaultLocale : interaction.locale;
 
 	const strings = {
 		title: localise(client, "music.options.volume.options.display.strings.volume.title", locale)(),

@@ -1,7 +1,7 @@
-import { CacheAdapter, Database, dispatchQuery, setNested, stringifyValue } from "../database.js";
-import { Document } from "../document.js";
-import { PraiseIndexes, praiseIndexParameterToIndex } from "../indexes.js";
-import { Praise } from "../structs/praise.js";
+import { CacheAdapter, Database, dispatchQuery, setNested, stringifyValue } from "../database";
+import { Document } from "../document";
+import { PraiseIndexes, praiseIndexParameterToIndex } from "../indexes";
+import { Praise } from "../structs/praise";
 import Fauna from "fauna";
 
 const $ = Fauna.query;
@@ -67,13 +67,13 @@ const adapter: Database["adapters"]["praises"] = {
 		client.database.fetchPromises.praises[parameter].delete(value);
 
 		if (documents === undefined) {
-			client.log.error(`Failed to fetch praises whose '${parameter}' matches '${value}'.`);
+			client.database.log.error(`Failed to fetch praises whose '${parameter}' matches '${value}'.`);
 			return undefined;
 		}
 
 		cache.setAll(client, parameter, value, documents);
 
-		client.log.debug(`Fetched ${documents.length} praise(s) whose '${parameter}' matches '${value}'.`);
+		client.database.log.debug(`Fetched ${documents.length} praise(s) whose '${parameter}' matches '${value}'.`);
 
 		return cache.get(client, parameter, value);
 	},
@@ -89,7 +89,7 @@ const adapter: Database["adapters"]["praises"] = {
 		const recipientReferenceId = stringifyValue(praise.recipient);
 
 		if (document === undefined) {
-			client.log.error(
+			client.database.log.error(
 				`Failed to create praise sent by user with reference '${senderReferenceId}' to user with reference '${recipientReferenceId}'.`,
 			);
 			return undefined;
@@ -99,7 +99,7 @@ const adapter: Database["adapters"]["praises"] = {
 		if (cache.has(client, "sender", senderReferenceId)) {
 			cache.set(client, "sender", senderReferenceId, document);
 		} else {
-			client.log.debug(`Could not find praises for sender with reference ${senderReferenceId}, fetching...`);
+			client.database.log.debug(`Could not find praises for sender with reference ${senderReferenceId}, fetching...`);
 
 			promises.push(adapter.fetch(client, "sender", praise.sender));
 		}
@@ -107,13 +107,15 @@ const adapter: Database["adapters"]["praises"] = {
 		if (cache.has(client, "recipient", recipientReferenceId)) {
 			cache.set(client, "recipient", recipientReferenceId, document);
 		} else {
-			client.log.debug(`Could not find praises for recipient with reference ${recipientReferenceId}, fetching...`);
+			client.database.log.debug(
+				`Could not find praises for recipient with reference ${recipientReferenceId}, fetching...`,
+			);
 
 			promises.push(adapter.fetch(client, "recipient", praise.recipient));
 		}
 		await Promise.all(promises);
 
-		client.log.debug(
+		client.database.log.debug(
 			`Created praise sent by user with reference '${senderReferenceId}' to user with reference '${recipientReferenceId}'.`,
 		);
 

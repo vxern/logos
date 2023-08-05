@@ -1,16 +1,23 @@
-import constants from "../../../../../constants.js";
-import { MentionTypes, mention, timestamp } from "../../../../../formatting.js";
-import { Client, localise } from "../../../../client.js";
-import { reply } from "../../../../interactions.js";
-import { getGuildIconURLFormatted, snowflakeToTimestamp } from "../../../../utils.js";
-import { proficiency } from "../../../social/roles/categories/language.js";
+import constants from "../../../../../constants/constants";
+import { Locale } from "../../../../../constants/language";
+import { MentionTypes, mention, timestamp } from "../../../../../formatting";
+import * as Logos from "../../../../../types";
+import { Client, localise } from "../../../../client";
+import { Document } from "../../../../database/document";
+import { Guild } from "../../../../database/structs/guild";
+import diagnostics from "../../../../diagnostics";
+import { getFeatureLanguage, getLocalisationLanguage, reply } from "../../../../interactions";
+import { getGuildIconURLFormatted, snowflakeToTimestamp } from "../../../../utils";
+import { proficiency } from "../../../social/roles/categories/language";
 import * as Discord from "discordeno";
 
 /** Displays information about the guild that this command was executed in. */
 async function handleDisplayGuildInformation(
 	[client, bot]: [Client, Discord.Bot],
-	interaction: Discord.Interaction,
+	interaction: Logos.Interaction,
 ): Promise<void> {
+	const locale = interaction.locale;
+
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
 		return;
@@ -40,53 +47,34 @@ async function handleDisplayGuildInformation(
 		title: localise(
 			client,
 			"information.options.server.strings.information.title",
-			interaction.locale,
+			locale,
 		)({ server_name: guild.name }),
 		description: {
 			description: {
-				title: localise(
-					client,
-					"information.options.server.strings.information.description.description",
-					interaction.locale,
-				)(),
+				title: localise(client, "information.options.server.strings.information.description.description", locale)(),
 				noDescription: localise(
 					client,
 					"information.options.server.strings.information.description.noDescription",
-					interaction.locale,
+					locale,
 				)(),
 			},
-			members: localise(
-				client,
-				"information.options.server.strings.information.description.members",
-				interaction.locale,
-			)(),
-			created: localise(
-				client,
-				"information.options.server.strings.information.description.created",
-				interaction.locale,
-			)(),
-			channels: localise(
-				client,
-				"information.options.server.strings.information.description.channels",
-				interaction.locale,
-			)(),
-			owner: localise(client, "information.options.server.strings.information.description.owner", interaction.locale)(),
+			members: localise(client, "information.options.server.strings.information.description.members", locale)(),
+			created: localise(client, "information.options.server.strings.information.description.created", locale)(),
+			channels: localise(client, "information.options.server.strings.information.description.channels", locale)(),
+			languages: localise(client, "information.options.server.strings.information.description.languages", locale)(),
+			owner: localise(client, "information.options.server.strings.information.description.owner", locale)(),
 			moderators: {
-				title: localise(
-					client,
-					"information.options.server.strings.information.description.moderators",
-					interaction.locale,
-				)(),
+				title: localise(client, "information.options.server.strings.information.description.moderators", locale)(),
 				overseenByModerators: localise(
 					client,
 					"information.options.server.strings.information.description.overseenByModerators",
-					interaction.locale,
+					locale,
 				)(),
 			},
 			distribution: localise(
 				client,
 				"information.options.server.strings.information.description.distribution",
-				interaction.locale,
+				locale,
 			)(),
 		},
 	};
@@ -94,7 +82,14 @@ async function handleDisplayGuildInformation(
 	reply([client, bot], interaction, {
 		embeds: [
 			{
-				thumbnail: getThumbnail(bot, guild),
+				thumbnail: (() => {
+					const iconURL = getGuildIconURLFormatted(bot, guild);
+					if (iconURL === undefined) {
+						return undefined;
+					}
+
+					return { url: iconURL };
+				})(),
 				title: strings.title,
 				color: constants.colors.blue,
 				fields: [
@@ -115,7 +110,12 @@ async function handleDisplayGuildInformation(
 					},
 					{
 						name: `${constants.symbols.guild.channels.channels} ${strings.description.channels}`,
-						value: getChannelInformationSection(client, guild, interaction.locale),
+						value: getChannelInformationSection(client, guild, { locale }),
+						inline: true,
+					},
+					{
+						name: `${constants.symbols.guild.languages.languages} ${strings.description.languages}`,
+						value: getLanguageInformationSection(client, guildDocument, { locale }),
 						inline: true,
 					},
 					...(guildDocument.data.isNative
@@ -127,7 +127,7 @@ async function handleDisplayGuildInformation(
 								},
 								{
 									name: `${constants.symbols.guild.proficiencyDistribution} ${strings.description.distribution}`,
-									value: formatDistribution(client, getDistribution(client, guild), interaction.locale),
+									value: formatDistribution(client, getProficiencyRoleDistribution(client, guild), { locale }),
 									inline: false,
 								},
 						  ]
@@ -144,8 +144,8 @@ async function handleDisplayGuildInformation(
 	});
 }
 
-function getChannelInformationSection(client: Client, guild: Discord.Guild, locale: string | undefined): string {
-	function getChannelCountByType(channels: Discord.Channel[], type: Discord.ChannelTypes): number {
+function getChannelInformationSection(client: Client, guild: Logos.Guild, { locale }: { locale: Locale }): string {
+	function getChannelCountByType(channels: Logos.Channel[], type: Discord.ChannelTypes): number {
 		return channels.filter((channel) => channel.type === type).length;
 	}
 
@@ -161,16 +161,32 @@ function getChannelInformationSection(client: Client, guild: Discord.Guild, loca
 	return `${constants.symbols.guild.channels.text} ${strings.text} – ${textChannelsCount}\n${constants.symbols.guild.channels.voice} ${strings.voice} – ${voiceChannelsCount}`;
 }
 
+function getLanguageInformationSection(
+	client: Client,
+	guildDocument: Document<Guild>,
+	{ locale }: { locale: Locale },
+): string {
+	const localisationLanguage = getLocalisationLanguage(guildDocument);
+	const featureLanguage = getFeatureLanguage(guildDocument);
+
+	const strings = {
+		home: localise(client, "information.options.server.strings.languageTypes.home", locale)(),
+		target: localise(client, "information.options.server.strings.languageTypes.target", locale)(),
+	};
+
+	return `${constants.symbols.guild.languages.localisation} ${strings.home} – ${localisationLanguage}\n${constants.symbols.guild.languages.feature} ${strings.target} – ${featureLanguage}`;
+}
+
 type ProficiencyRoleDistribution = [withRole: [roleId: bigint, frequency: number][], withoutRole: number];
 
 /** Gets the distribution of proficiency roles of a guild's members. */
-function getDistribution(client: Client, guild: Discord.Guild): ProficiencyRoleDistribution {
+function getProficiencyRoleDistribution(client: Client, guild: Logos.Guild): ProficiencyRoleDistribution {
 	const guildIdString = guild.id.toString();
 
 	const proficiencyRoleIdsUnsorted = proficiency.collection.list.map((role) => {
 		const snowflake = role.snowflakes[guildIdString];
 		if (snowflake === undefined) {
-			throw `Could not find the ID of proficiency role '${role.id}'.`;
+			throw `StateError: Could not get the snowflake of ${diagnostics.display.role(role.id)}.`;
 		}
 
 		return BigInt(snowflake);
@@ -179,7 +195,7 @@ function getDistribution(client: Client, guild: Discord.Guild): ProficiencyRoleD
 		.map((roleId) => {
 			const role = guild.roles.get(roleId);
 			if (role === undefined) {
-				throw `StateError: The role with ID '${roleId}' no longer exists.`;
+				throw `StateError: The ${diagnostics.display.role(roleId)} no longer exists.`;
 			}
 
 			return role;
@@ -213,7 +229,7 @@ function getDistribution(client: Client, guild: Discord.Guild): ProficiencyRoleD
 function formatDistribution(
 	client: Client,
 	distribution: ProficiencyRoleDistribution,
-	locale: string | undefined,
+	{ locale }: { locale: Locale },
 ): string {
 	function getPercentageComposition(number: number, total: number): string {
 		return ((number / total) * 100).toPrecision(3);
@@ -246,17 +262,6 @@ function formatDistribution(
 	}
 
 	return stringParts.join("\n");
-}
-
-type Thumbnail = NonNullable<Discord.Embed["thumbnail"]>;
-
-function getThumbnail(bot: Discord.Bot, guild: Discord.Guild): Thumbnail | undefined {
-	const iconURL = getGuildIconURLFormatted(bot, guild);
-	if (iconURL === undefined) {
-		return undefined;
-	}
-
-	return { url: iconURL };
 }
 
 export { handleDisplayGuildInformation };

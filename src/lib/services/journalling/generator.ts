@@ -1,5 +1,5 @@
-import { Client } from "../../client.js";
-import { GuildEvents } from "./guild-events.js";
+import { Client } from "../../client";
+import { GuildEvents } from "./guild-events";
 import * as Discord from "discordeno";
 
 type Events = ClientEvents & GuildEvents;

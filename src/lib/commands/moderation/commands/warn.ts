@@ -1,14 +1,15 @@
-import constants from "../../../../constants.js";
-import defaults from "../../../../defaults.js";
-import { MentionTypes, mention } from "../../../../formatting.js";
-import { defaultLanguage, defaultLocale, getLanguageByLocale } from "../../../../types.js";
-import { Client, autocompleteMembers, localise, pluralise, resolveInteractionToMember } from "../../../client.js";
-import { timeStructToMilliseconds } from "../../../database/structs/guild.js";
-import { parseArguments, reply } from "../../../interactions.js";
-import { diagnosticMentionUser } from "../../../utils.js";
-import { CommandTemplate } from "../../command.js";
-import { reason, user } from "../../parameters.js";
-import { getActiveWarnings } from "../module.js";
+import constants from "../../../../constants/constants";
+import { Locale } from "../../../../constants/language";
+import defaults from "../../../../defaults";
+import { MentionTypes, mention } from "../../../../formatting";
+import * as Logos from "../../../../types";
+import { Client, autocompleteMembers, localise, pluralise, resolveInteractionToMember } from "../../../client";
+import { timeStructToMilliseconds } from "../../../database/structs/guild";
+import diagnostics from "../../../diagnostics";
+import { parseArguments, reply } from "../../../interactions";
+import { CommandTemplate } from "../../command";
+import { reason, user } from "../../parameters";
+import { getActiveWarnings } from "../module";
 import * as Discord from "discordeno";
 
 const command: CommandTemplate = {
@@ -22,7 +23,7 @@ const command: CommandTemplate = {
 
 async function handleWarnUserAutocomplete(
 	[client, bot]: [Client, Discord.Bot],
-	interaction: Discord.Interaction,
+	interaction: Logos.Interaction,
 ): Promise<void> {
 	const [{ user }] = parseArguments(interaction.data?.options, {});
 	if (user === undefined) {
@@ -35,7 +36,10 @@ async function handleWarnUserAutocomplete(
 	});
 }
 
-async function handleWarnUser([client, bot]: [Client, Discord.Bot], interaction: Discord.Interaction): Promise<void> {
+async function handleWarnUser([client, bot]: [Client, Discord.Bot], interaction: Logos.Interaction): Promise<void> {
+	const language = interaction.language;
+	const locale = interaction.locale;
+
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
 		return;
@@ -61,10 +65,16 @@ async function handleWarnUser([client, bot]: [Client, Discord.Bot], interaction:
 		return;
 	}
 
-	const member = resolveInteractionToMember([client, bot], interaction, userSearchQuery, {
-		restrictToNonSelf: true,
-		excludeModerators: true,
-	});
+	const member = resolveInteractionToMember(
+		[client, bot],
+		interaction,
+		userSearchQuery,
+		{
+			restrictToNonSelf: true,
+			excludeModerators: true,
+		},
+		{ locale },
+	);
 	if (member === undefined) {
 		return;
 	}
@@ -88,7 +98,7 @@ async function handleWarnUser([client, bot]: [Client, Discord.Bot], interaction:
 	}
 
 	if (reason.length === 0) {
-		displayError([client, bot], interaction);
+		displayError([client, bot], interaction, { locale });
 		return;
 	}
 
@@ -103,7 +113,7 @@ async function handleWarnUser([client, bot]: [Client, Discord.Bot], interaction:
 	]);
 
 	if (author === undefined || recipient === undefined) {
-		displayError([client, bot], interaction);
+		displayError([client, bot], interaction, { locale });
 		return;
 	}
 
@@ -123,7 +133,7 @@ async function handleWarnUser([client, bot]: [Client, Discord.Bot], interaction:
 	}
 
 	if (warnings === undefined || document === undefined) {
-		displayError([client, bot], interaction);
+		displayError([client, bot], interaction, { locale });
 		return;
 	}
 
@@ -131,13 +141,12 @@ async function handleWarnUser([client, bot]: [Client, Discord.Bot], interaction:
 
 	const relevantWarnings = getActiveWarnings(warnings, expirationMilliseconds);
 
-	const language = getLanguageByLocale(interaction.locale) ?? defaultLanguage;
 	const strings = {
-		title: localise(client, "warn.strings.warned.title", interaction.locale)(),
+		title: localise(client, "warn.strings.warned.title", locale)(),
 		description: localise(
 			client,
 			"warn.strings.warned.description",
-			interaction.locale,
+			locale,
 		)({
 			user_mention: mention(member.id, MentionTypes.User),
 			warnings: pluralise(client, "warn.strings.warned.description.warnings", language, relevantWarnings.size),
@@ -162,17 +171,19 @@ async function handleWarnUser([client, bot]: [Client, Discord.Bot], interaction:
 		if (configuration.autoTimeout.enabled) {
 			const timeout = configuration.autoTimeout.duration ?? defaults.WARN_TIMEOUT;
 
+			const language = interaction.guildLanguage;
+			const locale = interaction.guildLocale;
 			strings = {
-				title: localise(client, "warn.strings.limitSurpassedTimedOut.title", defaultLocale)(),
+				title: localise(client, "warn.strings.limitSurpassedTimedOut.title", locale)(),
 				description: localise(
 					client,
 					"warn.strings.limitSurpassedTimedOut.description",
-					defaultLocale,
+					locale,
 				)({
-					user_mention: diagnosticMentionUser(user),
+					user_mention: diagnostics.display.user(user),
 					limit: configuration.limit,
 					number: relevantWarnings.size,
-					period: pluralise(client, `units.${timeout[1]}.word`, defaultLanguage, timeout[0]),
+					period: pluralise(client, `units.${timeout[1]}.word`, language, timeout[0]),
 				}),
 			};
 
@@ -180,15 +191,16 @@ async function handleWarnUser([client, bot]: [Client, Discord.Bot], interaction:
 
 			Discord.editMember(bot, guild.id, member.id, {
 				communicationDisabledUntil: Date.now() + timeoutMilliseconds,
-			}).catch(() => client.log.warn(`Failed to edit timeout state of member with ID ${member.id}.`));
+			}).catch(() => client.log.warn(`Failed to edit timeout state of ${diagnostics.display.member(member)}.`));
 		} else {
+			const locale = interaction.guildLocale;
 			strings = {
-				title: localise(client, "warn.strings.limitSurpassed.title", defaultLocale)(),
+				title: localise(client, "warn.strings.limitSurpassed.title", locale)(),
 				description: localise(
 					client,
 					"warn.strings.limitSurpassed.description",
-					defaultLocale,
-				)({ user_mention: diagnosticMentionUser(user), limit: configuration.limit, number: relevantWarnings.size }),
+					locale,
+				)({ user_mention: diagnostics.display.user(user), limit: configuration.limit, number: relevantWarnings.size }),
 			};
 		}
 
@@ -207,13 +219,14 @@ async function handleWarnUser([client, bot]: [Client, Discord.Bot], interaction:
 
 	const reachedLimit = relevantWarnings.size === defaults.WARN_LIMIT;
 	if (reachedLimit) {
+		const locale = interaction.guildLocale;
 		const strings = {
-			title: localise(client, "warn.strings.limitReached.title", defaultLocale)(),
+			title: localise(client, "warn.strings.limitReached.title", locale)(),
 			description: localise(
 				client,
 				"warn.strings.limitReached.description",
-				defaultLocale,
-			)({ user_mention: diagnosticMentionUser(user), limit: defaults.WARN_LIMIT }),
+				locale,
+			)({ user_mention: diagnostics.display.user(user), limit: defaults.WARN_LIMIT }),
 		};
 
 		alertService?.alert(bot, {
@@ -230,10 +243,14 @@ async function handleWarnUser([client, bot]: [Client, Discord.Bot], interaction:
 	}
 }
 
-async function displayError([client, bot]: [Client, Discord.Bot], interaction: Discord.Interaction): Promise<void> {
+async function displayError(
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Logos.Interaction,
+	{ locale }: { locale: Locale },
+): Promise<void> {
 	const strings = {
-		title: localise(client, "warn.strings.failed.title", interaction.locale)(),
-		description: localise(client, "warn.strings.failed.description", interaction.locale)(),
+		title: localise(client, "warn.strings.failed.title", locale)(),
+		description: localise(client, "warn.strings.failed.description", locale)(),
 	};
 
 	reply([client, bot], interaction, {

@@ -1,8 +1,10 @@
-import { Client } from "../../client.js";
-import { Document } from "../../database/document.js";
-import { Guild } from "../../database/structs/guild.js";
-import { getAllMessages, getGuildIconURLFormatted } from "../../utils.js";
-import { LocalService } from "../service.js";
+import * as Logos from "../../../types";
+import { Client } from "../../client";
+import { Document } from "../../database/document";
+import { Guild } from "../../database/structs/guild";
+import diagnostics from "../../diagnostics";
+import { getAllMessages, getGuildIconURLFormatted } from "../../utils";
+import { LocalService } from "../service";
 import * as Discord from "discordeno";
 import Hash from "object-hash";
 
@@ -84,14 +86,14 @@ abstract class NoticeService<NoticeType extends NoticeTypes> extends LocalServic
 			return;
 		}
 
-		this.client.log.info(`Registering ${this.type} notices on ${guild.name} (${guild.id})...`);
+		this.client.log.info(`Registering ${this.type} notices on ${diagnostics.display.guild(guild)}...`);
 
-		const expectedContent = this.generateNotice();
-		if (expectedContent === undefined) {
+		const expectedContents = this.generateNotice();
+		if (expectedContents === undefined) {
 			return;
 		}
 
-		const expectedHash = NoticeService.hash(expectedContent);
+		const expectedHash = NoticeService.hash(expectedContents);
 
 		const noticesAll = (await getAllMessages([this.client, bot], channelId)) ?? [];
 		if (noticesAll.length > 1) {
@@ -108,7 +110,7 @@ abstract class NoticeService<NoticeType extends NoticeTypes> extends LocalServic
 		}
 
 		if (noticesAll.length === 0) {
-			const notice = await this.saveNotice(bot, expectedContent, expectedHash);
+			const notice = await this.saveNotice(bot, expectedContents, expectedHash);
 			if (notice === undefined) {
 				return;
 			}
@@ -132,7 +134,7 @@ abstract class NoticeService<NoticeType extends NoticeTypes> extends LocalServic
 					this.client.log.warn("Failed to delete notice.");
 				});
 
-				const newNotice = await this.saveNotice(bot, contents, expectedHash);
+				const newNotice = await this.saveNotice(bot, expectedContents, expectedHash);
 				if (newNotice === undefined) {
 					return;
 				}
@@ -186,7 +188,9 @@ abstract class NoticeService<NoticeType extends NoticeTypes> extends LocalServic
 		// Delete the message and allow the bot to handle the deletion.
 		Discord.deleteMessage(bot, message.channelId, message.id).catch(() =>
 			this.client.log.warn(
-				`Failed to delete notice with ID ${message.id} from channel with ID ${message.channelId} on guild with ID ${message.guildId}.`,
+				`Failed to delete notice ${diagnostics.display.message(message)} from ${diagnostics.display.channel(
+					message.channelId,
+				)} on ${diagnostics.display.guild(message.guildId ?? 0n)}.`,
 			),
 		);
 	}
@@ -197,7 +201,7 @@ abstract class NoticeService<NoticeType extends NoticeTypes> extends LocalServic
 		bot: Discord.Bot,
 		contents: HashableMessageContents,
 		hash: string,
-	): Promise<Discord.Message | undefined> {
+	): Promise<Logos.Message | undefined> {
 		const [channelId, guild] = [this.channelId, this.guild];
 		if (channelId === undefined || guild === undefined) {
 			return undefined;
@@ -210,10 +214,12 @@ abstract class NoticeService<NoticeType extends NoticeTypes> extends LocalServic
 
 		lastEmbed.footer = { text: guild.name, iconUrl: `${getGuildIconURLFormatted(bot, guild)}&hash=${hash}` };
 
-		const message = await Discord.sendMessage(bot, channelId, contents).catch(() => {
-			this.client.log.warn(`Failed to send message in channel with ID ${channelId}.`);
-			return undefined;
-		});
+		const message = await Discord.sendMessage(bot, channelId, contents)
+			.then((message) => Logos.slimMessage(message))
+			.catch(() => {
+				this.client.log.warn(`Failed to send message to ${diagnostics.display.channel(channelId)}.`);
+				return undefined;
+			});
 
 		return message;
 	}
@@ -225,7 +231,6 @@ abstract class NoticeService<NoticeType extends NoticeTypes> extends LocalServic
 	static hash(contents: HashableMessageContents): string {
 		return Hash(contents, {
 			algorithm: "md5",
-			respectType: false,
 			unorderedArrays: true,
 			unorderedObjects: true,
 			unorderedSets: true,

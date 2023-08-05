@@ -1,4 +1,4 @@
-import { OptionTemplate } from "./command.js";
+import { OptionTemplate } from "./command";
 import * as Discord from "discordeno";
 
 const user: OptionTemplate = {

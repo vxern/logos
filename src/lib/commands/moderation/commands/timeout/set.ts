@@ -1,13 +1,20 @@
-import constants, { Periods } from "../../../../../constants.js";
-import { MentionTypes, mention, timestamp } from "../../../../../formatting.js";
-import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../../client.js";
-import { parseArguments, parseTimeExpression, reply, respond } from "../../../../interactions.js";
+import constants from "../../../../../constants/constants";
+import { Locale } from "../../../../../constants/language";
+import time from "../../../../../constants/time";
+import { MentionTypes, mention, timestamp } from "../../../../../formatting";
+import * as Logos from "../../../../../types";
+import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../../client";
+import diagnostics from "../../../../diagnostics";
+import { parseArguments, parseTimeExpression, reply, respond } from "../../../../interactions";
 import * as Discord from "discordeno";
 
 async function handleSetTimeoutAutocomplete(
 	[client, bot]: [Client, Discord.Bot],
-	interaction: Discord.Interaction,
+	interaction: Logos.Interaction,
 ): Promise<void> {
+	const language = interaction.language;
+	const locale = interaction.locale;
+
 	const [{ user, duration }, focused] = parseArguments(interaction.data?.options, {});
 
 	switch (focused?.name) {
@@ -24,7 +31,7 @@ async function handleSetTimeoutAutocomplete(
 				return;
 			}
 
-			const timestamp = parseTimeExpression(client, duration, interaction.locale);
+			const timestamp = parseTimeExpression(client, duration, { language, locale });
 			if (timestamp === undefined) {
 				respond([client, bot], interaction, []);
 				return;
@@ -35,7 +42,10 @@ async function handleSetTimeoutAutocomplete(
 	}
 }
 
-async function handleSetTimeout([client, bot]: [Client, Discord.Bot], interaction: Discord.Interaction): Promise<void> {
+async function handleSetTimeout([client, bot]: [Client, Discord.Bot], interaction: Logos.Interaction): Promise<void> {
+	const language = interaction.language;
+	const locale = interaction.locale;
+
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
 		return;
@@ -61,33 +71,39 @@ async function handleSetTimeout([client, bot]: [Client, Discord.Bot], interactio
 		return;
 	}
 
-	const member = resolveInteractionToMember([client, bot], interaction, user, {
-		restrictToNonSelf: true,
-		excludeModerators: true,
-	});
+	const member = resolveInteractionToMember(
+		[client, bot],
+		interaction,
+		user,
+		{
+			restrictToNonSelf: true,
+			excludeModerators: true,
+		},
+		{ locale },
+	);
 	if (member === undefined) {
 		return;
 	}
 
 	let durationParsed = Number(duration);
 
-	if (Number.isNaN(durationParsed)) {
-		const timestamp = parseTimeExpression(client, duration, interaction.locale);
+	if (!Number.isSafeInteger(durationParsed)) {
+		const timestamp = parseTimeExpression(client, duration, { language, locale });
 		if (timestamp === undefined) {
-			displayDurationInvalidError([client, bot], interaction);
+			displayDurationInvalidError([client, bot], interaction, { locale });
 			return;
 		}
 
 		durationParsed = timestamp[1];
 	}
 
-	if (durationParsed < Periods.minute) {
-		displayTooShortWarning([client, bot], interaction);
+	if (durationParsed < time.minute) {
+		displayTooShortWarning([client, bot], interaction, { locale });
 		return;
 	}
 
-	if (durationParsed > Periods.week) {
-		displayTooLongWarning([client, bot], interaction);
+	if (durationParsed > time.week) {
+		displayTooLongWarning([client, bot], interaction, { locale });
 		return;
 	}
 
@@ -103,7 +119,7 @@ async function handleSetTimeout([client, bot]: [Client, Discord.Bot], interactio
 	}
 
 	await Discord.editMember(bot, guildId, member.id, { communicationDisabledUntil: until }).catch(() =>
-		client.log.warn(`Failed to time member with ID ${member.id} out.`),
+		client.log.warn(`Failed to time ${diagnostics.display.member(member)} out.`),
 	);
 
 	if (configuration.journaling) {
@@ -112,11 +128,11 @@ async function handleSetTimeout([client, bot]: [Client, Discord.Bot], interactio
 	}
 
 	const strings = {
-		title: localise(client, "timeout.strings.timedOut.title", interaction.locale)(),
+		title: localise(client, "timeout.strings.timedOut.title", locale)(),
 		description: localise(
 			client,
 			"timeout.strings.timedOut.description",
-			interaction.locale,
+			locale,
 		)({
 			user_mention: mention(member.id, MentionTypes.User),
 			relative_timestamp: timestamp(until),
@@ -136,11 +152,12 @@ async function handleSetTimeout([client, bot]: [Client, Discord.Bot], interactio
 
 async function displayDurationInvalidError(
 	[client, bot]: [Client, Discord.Bot],
-	interaction: Discord.Interaction,
+	interaction: Logos.Interaction,
+	{ locale }: { locale: Locale },
 ): Promise<void> {
 	const strings = {
-		title: localise(client, "timeout.strings.durationInvalid.title", interaction.locale)(),
-		description: localise(client, "timeout.strings.durationInvalid.description", interaction.locale)(),
+		title: localise(client, "timeout.strings.durationInvalid.title", locale)(),
+		description: localise(client, "timeout.strings.durationInvalid.description", locale)(),
 	};
 
 	reply([client, bot], interaction, {
@@ -150,11 +167,12 @@ async function displayDurationInvalidError(
 
 async function displayTooShortWarning(
 	[client, bot]: [Client, Discord.Bot],
-	interaction: Discord.Interaction,
+	interaction: Logos.Interaction,
+	{ locale }: { locale: Locale },
 ): Promise<void> {
 	const strings = {
-		title: localise(client, "timeout.strings.tooShort.title", interaction.locale)(),
-		description: localise(client, "timeout.strings.tooShort.description", interaction.locale)(),
+		title: localise(client, "timeout.strings.tooShort.title", locale)(),
+		description: localise(client, "timeout.strings.tooShort.description", locale)(),
 	};
 
 	reply([client, bot], interaction, {
@@ -164,11 +182,12 @@ async function displayTooShortWarning(
 
 async function displayTooLongWarning(
 	[client, bot]: [Client, Discord.Bot],
-	interaction: Discord.Interaction,
+	interaction: Logos.Interaction,
+	{ locale }: { locale: Locale },
 ): Promise<void> {
 	const strings = {
-		title: localise(client, "timeout.strings.tooLong.title", interaction.locale)(),
-		description: localise(client, "timeout.strings.tooLong.description", interaction.locale)(),
+		title: localise(client, "timeout.strings.tooLong.title", locale)(),
+		description: localise(client, "timeout.strings.tooLong.description", locale)(),
 	};
 
 	reply([client, bot], interaction, {

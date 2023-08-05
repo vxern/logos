@@ -1,6 +1,6 @@
-import { Language } from "../../../../types.js";
-import { Client } from "../../../client.js";
-import { PartOfSpeech } from "./parts-of-speech.js";
+import { FeatureLanguage, Locale } from "../../../../constants/language";
+import { Client } from "../../../client";
+import { PartOfSpeech } from "./parts-of-speech";
 import * as Discord from "discordeno";
 
 type DictionaryProvisions =
@@ -54,9 +54,19 @@ interface DictionaryEntry {
 }
 
 abstract class DictionaryAdapter<DataType = unknown> {
-	abstract readonly name: string;
-	abstract readonly supports: Language[];
-	abstract readonly provides: DictionaryProvisions[];
+	readonly name: string;
+	readonly supports: FeatureLanguage[];
+	readonly provides: DictionaryProvisions[];
+
+	constructor({
+		name,
+		supports,
+		provides,
+	}: { name: string; supports: FeatureLanguage[]; provides: DictionaryProvisions[] }) {
+		this.name = name;
+		this.supports = supports;
+		this.provides = provides;
+	}
 
 	/**
 	 * Fetches data about a {@link lemma} in a {@link language}.
@@ -64,7 +74,7 @@ abstract class DictionaryAdapter<DataType = unknown> {
 	 * @param lemma - The lemma to fetch data about.
 	 * @param language - The language the lemma is in.
 	 */
-	abstract fetch(lemma: string, language: Language): Promise<DataType | undefined>;
+	abstract fetch(lemma: string, language: FeatureLanguage): Promise<DataType | undefined>;
 
 	/**
 	 * Gets dictionary entries for a {@link lemma} in a {@link language}, presenting the information in
@@ -77,9 +87,9 @@ abstract class DictionaryAdapter<DataType = unknown> {
 	 */
 	async getEntries(
 		lemma: string,
-		language: Language,
+		language: FeatureLanguage,
 		client: Client,
-		locale: string | undefined,
+		{ locale }: { locale: Locale },
 	): Promise<DictionaryEntry[] | undefined> {
 		const data = await this.fetch(lemma, language).catch((reason) => {
 			client.log.error(`Failed to get results from ${this.name} for lemma '${lemma}' in ${language}.`);
@@ -92,7 +102,7 @@ abstract class DictionaryAdapter<DataType = unknown> {
 
 		let entries: DictionaryEntry[];
 		try {
-			entries = this.parse(lemma, data, client, locale);
+			entries = this.parse(lemma, data, client, { locale });
 		} catch (exception) {
 			client.log.error(`Failed to format results from ${this.name} for lemma '${lemma}' in ${language}.`);
 			client.log.error(exception);
@@ -113,7 +123,7 @@ abstract class DictionaryAdapter<DataType = unknown> {
 	 * @param client - The client instance to use for localising.
 	 * @param locale - The locale to present the dictionary entries in.
 	 */
-	abstract parse(lemma: string, data: DataType, client: Client, locale: string | undefined): DictionaryEntry[];
+	abstract parse(lemma: string, data: DataType, client: Client, { locale }: { locale: Locale }): DictionaryEntry[];
 }
 
 export type { Definition, DictionaryEntry, Expression };

@@ -1,4 +1,4 @@
-import praise from "./commands/praise.js";
-import profile from "./commands/profile.js";
+import praise from "./commands/praise";
+import profile from "./commands/profile";
 
 export { praise, profile };

@@ -1,11 +1,11 @@
-import { Document } from "./document.js";
-import { EntryRequest } from "./structs/entry-request.js";
-import { Guild } from "./structs/guild.js";
-import { Praise } from "./structs/praise.js";
-import { Report } from "./structs/report.js";
-import { Suggestion } from "./structs/suggestion.js";
-import { User } from "./structs/user.js";
-import { Warning } from "./structs/warning.js";
+import { Document } from "./document";
+import { EntryRequest } from "./structs/entry-request";
+import { Guild } from "./structs/guild";
+import { Praise } from "./structs/praise";
+import { Report } from "./structs/report";
+import { Suggestion } from "./structs/suggestion";
+import { User } from "./structs/user";
+import { Warning } from "./structs/warning";
 import Fauna from "fauna";
 
 type IndexesSignature<T = unknown> = Record<string, [takes: unknown, returns: T]>;

@@ -1,4 +1,5 @@
 import { Guild } from "../../database/structs/guild";
+import diagnostics from "../../diagnostics";
 import { LocalService } from "../service";
 import * as Discord from "discordeno";
 
@@ -39,7 +40,11 @@ class AlertService extends LocalService {
 		}
 
 		Discord.sendMessage(bot, channelId, message).catch(() => {
-			this.client.log.warn(`Failed to send alert to channel with ID ${channelId} on guild with ID ${this.guildId}`);
+			this.client.log.warn(
+				`Failed to send alert to ${diagnostics.display.channel(channelId)} on ${diagnostics.display.guild(
+					this.guildId,
+				)}.`,
+			);
 		});
 	}
 }

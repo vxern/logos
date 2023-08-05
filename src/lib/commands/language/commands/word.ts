@@ -1,22 +1,26 @@
-import constants from "../../../../constants.js";
-import { code } from "../../../../formatting.js";
-import { defaultLanguage, defaultLocale, getLanguageByLocale } from "../../../../types.js";
-import { Client, localise, pluralise } from "../../../client.js";
+import constants from "../../../../constants/constants";
+import { Locale, LocalisationLanguage } from "../../../../constants/language";
+import defaults from "../../../../defaults";
+import { code } from "../../../../formatting";
+import * as Logos from "../../../../types";
+import { Client, localise, pluralise } from "../../../client";
+import diagnostics from "../../../diagnostics";
 import {
 	acknowledge,
 	createInteractionCollector,
 	decodeId,
+	deleteReply,
 	editReply,
 	encodeId,
 	parseArguments,
 	postponeReply,
 	reply,
-} from "../../../interactions.js";
-import { chunk, diagnosticMentionUser } from "../../../utils.js";
-import { CommandTemplate } from "../../command.js";
-import { show } from "../../parameters.js";
-import { Definition, DictionaryEntry, Expression } from "../dictionaries/adapter.js";
-import { PartOfSpeech, isUnknownPartOfSpeech, partOfSpeechToStringKey } from "../dictionaries/parts-of-speech.js";
+} from "../../../interactions";
+import { chunk } from "../../../utils";
+import { CommandTemplate } from "../../command";
+import { show } from "../../parameters";
+import { Definition, DictionaryEntry, Expression } from "../dictionaries/adapter";
+import { PartOfSpeech, isUnknownPartOfSpeech, partOfSpeechToStringKey } from "../dictionaries/parts-of-speech";
 import * as Discord from "discordeno";
 
 const command: CommandTemplate = {
@@ -40,7 +44,7 @@ const command: CommandTemplate = {
 };
 
 /** Allows the user to look up a word and get information about it. */
-async function handleFindWord([client, bot]: [Client, Discord.Bot], interaction: Discord.Interaction): Promise<void> {
+async function handleFindWord([client, bot]: [Client, Discord.Bot], interaction: Logos.Interaction): Promise<void> {
 	const [{ word, verbose, show }] = parseArguments(interaction.data?.options, {
 		verbose: "boolean",
 		show: "boolean",
@@ -48,6 +52,9 @@ async function handleFindWord([client, bot]: [Client, Discord.Bot], interaction:
 	if (word === undefined) {
 		return;
 	}
+
+	const language = show ? interaction.guildLanguage : interaction.language;
+	const locale = show ? interaction.guildLocale : interaction.locale;
 
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
@@ -64,11 +71,11 @@ async function handleFindWord([client, bot]: [Client, Discord.Bot], interaction:
 		return;
 	}
 
-	const dictionaries = client.features.dictionaryAdapters.get(guildDocument.data.language);
+	const dictionaries = client.features.dictionaryAdapters.get(interaction.featureLanguage);
 	if (dictionaries === undefined) {
 		const strings = {
-			title: localise(client, "word.strings.noDictionaryAdapters.title", interaction.locale)(),
-			description: localise(client, "word.strings.noDictionaryAdapters.description", interaction.locale)(),
+			title: localise(client, "word.strings.noDictionaryAdapters.title", locale)(),
+			description: localise(client, "word.strings.noDictionaryAdapters.description", locale)(),
 		};
 
 		reply([client, bot], interaction, {
@@ -83,12 +90,10 @@ async function handleFindWord([client, bot]: [Client, Discord.Bot], interaction:
 		return;
 	}
 
-	const locale = show ? defaultLocale : interaction.locale;
-
 	await postponeReply([client, bot], interaction, { visible: show });
 
 	client.log.info(
-		`Looking up the word '${word}' from ${dictionaries.length} dictionaries as requested by ${diagnosticMentionUser(
+		`Looking up the word '${word}' from ${dictionaries.length} dictionaries as requested by ${diagnostics.display.user(
 			interaction.user,
 		)} on ${guild.name}...`,
 	);
@@ -96,7 +101,7 @@ async function handleFindWord([client, bot]: [Client, Discord.Bot], interaction:
 	const unclassifiedEntries: DictionaryEntry[] = [];
 	const entriesByPartOfSpeech = new Map<PartOfSpeech, DictionaryEntry[]>();
 	for (const dictionary of dictionaries) {
-		const entries = await dictionary.getEntries(word, guildDocument.data.language, client, locale);
+		const entries = await dictionary.getEntries(word, interaction.featureLanguage, client, { locale });
 		if (entries === undefined) {
 			continue;
 		}
@@ -154,7 +159,7 @@ async function handleFindWord([client, bot]: [Client, Discord.Bot], interaction:
 			}),
 		};
 
-		editReply([client, bot], interaction, {
+		await editReply([client, bot], interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -163,6 +168,15 @@ async function handleFindWord([client, bot]: [Client, Discord.Bot], interaction:
 				},
 			],
 		});
+
+		setTimeout(
+			() =>
+				deleteReply([client, bot], interaction).catch(() => {
+					client.log.warn(`Failed to delete "no results for word" message.`);
+				}),
+			defaults.WARN_MESSAGE_DELETE_TIMEOUT,
+		);
+
 		return;
 	}
 
@@ -178,7 +192,7 @@ async function handleFindWord([client, bot]: [Client, Discord.Bot], interaction:
 			inflectionTableIndex: 0,
 			verbose: verbose ?? false,
 		},
-		locale,
+		{ language, locale },
 	);
 }
 
@@ -206,9 +220,9 @@ interface WordViewData {
 
 async function displayMenu(
 	[client, bot]: [Client, Discord.Bot],
-	interaction: Discord.Interaction,
+	interaction: Logos.Interaction,
 	data: WordViewData,
-	locale: string | undefined,
+	{ language, locale }: { language: LocalisationLanguage; locale: Locale },
 ): Promise<void> {
 	const entry = data.entries.at(data.dictionaryEntryIndex);
 	if (entry === undefined) {
@@ -216,8 +230,8 @@ async function displayMenu(
 	}
 
 	editReply([client, bot], interaction, {
-		embeds: generateEmbeds(client, data, entry, locale),
-		components: generateButtons([client, bot], interaction, data, entry, locale),
+		embeds: generateEmbeds(client, data, entry, { language, locale }),
+		components: generateButtons([client, bot], interaction, data, entry, { language, locale }),
 	});
 }
 
@@ -225,11 +239,11 @@ function generateEmbeds(
 	client: Client,
 	data: WordViewData,
 	entry: DictionaryEntry,
-	locale: string | undefined,
+	{ language, locale }: { language: LocalisationLanguage; locale: Locale },
 ): Discord.Embed[] {
 	switch (data.currentView) {
 		case ContentTabs.Definitions: {
-			return entryToEmbeds(client, entry, locale, data.verbose);
+			return entryToEmbeds(client, entry, data.verbose, { language, locale });
 		}
 		case ContentTabs.Inflection: {
 			const inflectionTable = entry.inflectionTable?.at(data.inflectionTableIndex);
@@ -246,10 +260,10 @@ type MenuButtonID = [index: string];
 
 function generateButtons(
 	[client, bot]: [Client, Discord.Bot],
-	interaction: Discord.Interaction,
+	interaction: Logos.Interaction,
 	data: WordViewData,
 	entry: DictionaryEntry,
-	locale: string | undefined,
+	{ language, locale }: { language: LocalisationLanguage; locale: Locale },
 ): Discord.MessageComponents {
 	const paginationControls: Discord.ButtonComponent[][] = [];
 
@@ -271,7 +285,7 @@ function generateButtons(
 						data.dictionaryEntryIndex--;
 					}
 
-					displayMenu([client, bot], interaction, data, locale);
+					displayMenu([client, bot], interaction, data, { language, locale });
 				},
 			});
 
@@ -284,7 +298,7 @@ function generateButtons(
 						data.dictionaryEntryIndex++;
 					}
 
-					displayMenu([client, bot], interaction, data, locale);
+					displayMenu([client, bot], interaction, data, { language, locale });
 				},
 			});
 
@@ -304,7 +318,7 @@ function generateButtons(
 					type: Discord.MessageComponentTypes.Button,
 					label: `${strings.page} ${data.dictionaryEntryIndex + 1}/${data.entries.length}`,
 					style: Discord.ButtonStyles.Secondary,
-					customId: constants.staticComponentIds.none,
+					customId: constants.components.none,
 				},
 				{
 					type: Discord.MessageComponentTypes.Button,
@@ -330,7 +344,7 @@ function generateButtons(
 					acknowledge([client, bot], selection);
 
 					if (entry.inflectionTable === undefined || selection.data === undefined) {
-						displayMenu([client, bot], interaction, data, locale);
+						displayMenu([client, bot], interaction, data, { language, locale });
 						return;
 					}
 
@@ -346,7 +360,7 @@ function generateButtons(
 						data.inflectionTableIndex = index;
 					}
 
-					displayMenu([client, bot], interaction, data, locale);
+					displayMenu([client, bot], interaction, data, { language, locale });
 				},
 			});
 
@@ -380,7 +394,7 @@ function generateButtons(
 			data.inflectionTableIndex = 0;
 			data.currentView = ContentTabs.Definitions;
 
-			displayMenu([client, bot], interaction, data, locale);
+			displayMenu([client, bot], interaction, data, { language, locale });
 		},
 	});
 
@@ -391,7 +405,7 @@ function generateButtons(
 
 			data.currentView = ContentTabs.Inflection;
 
-			displayMenu([client, bot], interaction, data, locale);
+			displayMenu([client, bot], interaction, data, { language, locale });
 		},
 	});
 
@@ -436,8 +450,8 @@ function generateButtons(
 function entryToEmbeds(
 	client: Client,
 	entry: DictionaryEntry,
-	locale: string | undefined,
 	verbose: boolean,
+	{ language, locale }: { language: LocalisationLanguage; locale: Locale },
 ): Discord.Embed[] {
 	let partOfSpeechDisplayed: string;
 	if (entry.partOfSpeech === undefined) {
@@ -467,7 +481,7 @@ function entryToEmbeds(
 
 	if (entry.nativeDefinitions !== undefined && entry.nativeDefinitions.length !== 0) {
 		const definitionsStringified = stringifyEntries(entry.nativeDefinitions, "definitions");
-		const definitionsFitted = fitTextToFieldSize(client, definitionsStringified, locale, verbose);
+		const definitionsFitted = fitTextToFieldSize(client, definitionsStringified, verbose, { language, locale });
 
 		if (verbose) {
 			const strings = {
@@ -493,7 +507,7 @@ function entryToEmbeds(
 
 	if (entry.definitions !== undefined && entry.definitions.length !== 0) {
 		const definitionsStringified = stringifyEntries(entry.definitions, "definitions");
-		const definitionsFitted = fitTextToFieldSize(client, definitionsStringified, locale, verbose);
+		const definitionsFitted = fitTextToFieldSize(client, definitionsStringified, verbose, { language, locale });
 
 		if (verbose) {
 			const strings = {
@@ -519,7 +533,7 @@ function entryToEmbeds(
 
 	if (entry.expressions !== undefined && entry.expressions.length !== 0) {
 		const expressionsStringified = stringifyEntries(entry.expressions, "expressions");
-		const expressionsFitted = fitTextToFieldSize(client, expressionsStringified, locale, verbose);
+		const expressionsFitted = fitTextToFieldSize(client, expressionsStringified, verbose, { language, locale });
 
 		const strings = {
 			expressions: localise(client, "word.strings.fields.expressions", locale)(),
@@ -635,12 +649,15 @@ function stringifyEntries<
 	return entriesDelisted;
 }
 
-function fitTextToFieldSize(client: Client, textParts: string[], locale: string | undefined, verbose: boolean): string {
+function fitTextToFieldSize(
+	client: Client,
+	textParts: string[],
+	verbose: boolean,
+	{ language, locale }: { language: LocalisationLanguage; locale: Locale },
+): string {
 	const strings = {
 		definitionsOmitted: localise(client, "word.strings.definitionsOmitted", locale),
 	};
-
-	const language = getLanguageByLocale(locale) ?? defaultLanguage;
 
 	const characterOverhead =
 		strings.definitionsOmitted({

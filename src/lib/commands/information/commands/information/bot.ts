@@ -1,14 +1,17 @@
-import constants from "../../../../../constants.js";
-import { list } from "../../../../../formatting.js";
-import { Client, localise } from "../../../../client.js";
-import { reply } from "../../../../interactions.js";
+import constants from "../../../../../constants/constants";
+import { list } from "../../../../../formatting";
+import * as Logos from "../../../../../types";
+import { Client, localise } from "../../../../client";
+import { reply } from "../../../../interactions";
+import { chunk } from "../../../../utils";
 import * as Discord from "discordeno";
-import { chunk } from "../../../../utils.js";
 
 async function handleDisplayBotInformation(
 	[client, bot]: [Client, Discord.Bot],
-	interaction: Discord.Interaction,
+	interaction: Logos.Interaction,
 ): Promise<void> {
+	const locale = interaction.locale;
+
 	const botUser =
 		client.cache.users.get(bot.id) ??
 		(await Discord.getUser(bot, bot.id).catch(() => {
@@ -22,24 +25,20 @@ async function handleDisplayBotInformation(
 	const strings = {
 		information: {
 			whoAmI: {
-				title: localise(client, "information.options.bot.strings.whoAmI.title", interaction.locale)(),
-				description: localise(
-					client,
-					"information.options.bot.strings.whoAmI.description",
-					interaction.locale,
-				)({ username: botUser.username }),
+				title: localise(client, "information.options.bot.strings.whoAmI.title", locale)(),
+				description: localise(client, "information.options.bot.strings.whoAmI.description", locale)(),
 				features: {
-					roles: localise(client, "information.options.bot.strings.whoAmI.features.roles", interaction.locale)(),
-					language: localise(client, "information.options.bot.strings.whoAmI.features.language", interaction.locale)(),
-					music: localise(client, "information.options.bot.strings.whoAmI.features.music", interaction.locale)(),
+					roles: localise(client, "information.options.bot.strings.whoAmI.features.roles", locale)(),
+					language: localise(client, "information.options.bot.strings.whoAmI.features.language", locale)(),
+					music: localise(client, "information.options.bot.strings.whoAmI.features.music", locale)(),
 				},
 			},
 			howWasIMade: {
-				title: localise(client, "information.options.bot.strings.howWasIMade.title", interaction.locale)(),
+				title: localise(client, "information.options.bot.strings.howWasIMade.title", locale)(),
 				description: localise(
 					client,
 					"information.options.bot.strings.howWasIMade.description",
-					interaction.locale,
+					locale,
 				)({
 					language_link: constants.links.typescriptWebsite,
 					runtime_link: constants.links.nodeWebsite,
@@ -48,27 +47,23 @@ async function handleDisplayBotInformation(
 				}),
 			},
 			howToAddToServer: {
-				title: localise(client, "information.options.bot.strings.howToAddToServer.title", interaction.locale)(),
+				title: localise(client, "information.options.bot.strings.howToAddToServer.title", locale)(),
 				description: localise(
 					client,
 					"information.options.bot.strings.howToAddToServer.description",
-					interaction.locale,
+					locale,
 				)({
 					learn_armenian_link: constants.links.learnArmenianListingWebsite,
 					learn_romanian_link: constants.links.learnRomanianListingWebsite,
 				}),
 			},
 			amIOpenSource: {
-				title: localise(client, "information.options.bot.strings.amIOpenSource.title", interaction.locale)(),
-				description: localise(
-					client,
-					"information.options.bot.strings.amIOpenSource.description",
-					interaction.locale,
-				)(),
+				title: localise(client, "information.options.bot.strings.amIOpenSource.title", locale)(),
+				description: localise(client, "information.options.bot.strings.amIOpenSource.description", locale)(),
 			},
 		},
 		translators: {
-			title: localise(client, "information.options.bot.strings.translators.title", interaction.locale)(),
+			title: localise(client, "information.options.bot.strings.translators.title", locale)(),
 		},
 	};
 
@@ -118,10 +113,8 @@ async function handleDisplayBotInformation(
 	});
 }
 
-type EmbedFields = NonNullable<Discord.Embed["fields"]>;
-
-function getContributorString(contributions: typeof constants.contributions.translation): EmbedFields {
-	const fields: EmbedFields = [];
+function getContributorString(contributions: typeof constants.contributions.translation): Discord.EmbedField[] {
+	const fields: Discord.EmbedField[] = [];
 	for (const [language, data] of Object.entries(contributions)) {
 		const contributorsFormatted = chunk(
 			data.contributors.map((contributor) => {

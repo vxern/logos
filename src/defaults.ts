@@ -1,4 +1,10 @@
-import { TimeStruct } from "./lib/database/structs/guild.js";
+import { DefaultLanguage, DefaultLocale } from "./constants/language";
+import { TimeStruct } from "./lib/database/structs/guild";
+
+const LOCALISATION_LOCALE: DefaultLocale = "en-GB";
+const LOCALISATION_LANGUAGE: DefaultLanguage = "English";
+const FEATURE_LOCALE: DefaultLocale = "en-GB";
+const FEATURE_LANGUAGE: DefaultLanguage = "English";
 
 const RESULTS_PER_PAGE = 10;
 
@@ -29,7 +35,13 @@ const MAX_QUEUE_ENTRIES = 20;
 const MIN_VOICE_CHANNELS = 0;
 const MAX_VOICE_CHANNELS = 5;
 
+const WARN_MESSAGE_DELETE_TIMEOUT = 1000 * 10; // 10 seconds in milliseconds.
+
 export default {
+	LOCALISATION_LANGUAGE,
+	LOCALISATION_LOCALE,
+	FEATURE_LANGUAGE,
+	FEATURE_LOCALE,
 	RESULTS_PER_PAGE,
 	RATE_LIMIT,
 	RATE_LIMIT_INTERVAL,
@@ -50,4 +62,5 @@ export default {
 	MAX_QUEUE_ENTRIES,
 	MIN_VOICE_CHANNELS,
 	MAX_VOICE_CHANNELS,
+	WARN_MESSAGE_DELETE_TIMEOUT,
 };

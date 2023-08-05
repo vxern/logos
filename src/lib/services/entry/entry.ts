@@ -1,14 +1,25 @@
-import constants from "../../../constants.js";
-import { trim } from "../../../formatting.js";
-import { Language } from "../../../types.js";
-import { localise } from "../../client.js";
-import { proficiency } from "../../commands/social/roles/categories/language.js";
-import { stringifyValue } from "../../database/database.js";
-import { EntryRequest } from "../../database/structs/entry-request.js";
-import { Guild, timeStructToMilliseconds } from "../../database/structs/guild.js";
-import { Modal, createModalComposer, decodeId, editReply, encodeId, postponeReply, reply } from "../../interactions.js";
-import { snowflakeToTimestamp } from "../../utils.js";
-import { LocalService } from "../service.js";
+import constants from "../../../constants/constants";
+import { FeatureLanguage, Locale } from "../../../constants/language";
+import { trim } from "../../../formatting";
+import * as Logos from "../../../types";
+import { localise } from "../../client";
+import { proficiency } from "../../commands/social/roles/categories/language";
+import { stringifyValue } from "../../database/database";
+import { EntryRequest } from "../../database/structs/entry-request";
+import { Guild, timeStructToMilliseconds } from "../../database/structs/guild";
+import diagnostics from "../../diagnostics";
+import {
+	Modal,
+	createModalComposer,
+	decodeId,
+	editReply,
+	encodeId,
+	getLocaleData,
+	postponeReply,
+	reply,
+} from "../../interactions";
+import { snowflakeToTimestamp } from "../../utils";
+import { LocalService } from "../service";
 import * as Discord from "discordeno";
 
 type EntryStepButtonID = [parameter: string];
@@ -16,7 +27,7 @@ type EntryStepButtonID = [parameter: string];
 type EntryConfiguration = NonNullable<Guild["features"]["server"]["features"]>["entry"];
 type VerificationConfiguration = NonNullable<Guild["features"]["moderation"]["features"]>["verification"];
 
-const steps = Object.values(constants.staticComponentIds.entry);
+const steps = Object.values(constants.components.entry);
 
 class EntryService extends LocalService {
 	get configuration(): EntryConfiguration | undefined {
@@ -37,12 +48,12 @@ class EntryService extends LocalService {
 		return guildDocument.data.features.moderation.features?.verification;
 	}
 
-	async interactionCreate(bot: Discord.Bot, interaction: Discord.Interaction): Promise<void> {
-		if (interaction.type !== Discord.InteractionTypes.MessageComponent) {
+	async interactionCreate(bot: Discord.Bot, interactionRaw: Discord.Interaction): Promise<void> {
+		if (interactionRaw.type !== Discord.InteractionTypes.MessageComponent) {
 			return;
 		}
 
-		const customId = interaction.data?.customId;
+		const customId = interactionRaw.data?.customId;
 		if (customId === undefined) {
 			return;
 		}
@@ -52,17 +63,20 @@ class EntryService extends LocalService {
 			return;
 		}
 
+		const localeData = await getLocaleData(this.client, interactionRaw);
+		const interaction: Logos.Interaction = { ...interactionRaw, ...localeData };
+
 		const [step, parameter] = decodeId<EntryStepButtonID>(customId);
 		switch (step) {
-			case constants.staticComponentIds.entry.acceptedRules: {
+			case constants.components.entry.acceptedRules: {
 				this.handleAcceptRules(bot, interaction);
 				break;
 			}
-			case constants.staticComponentIds.entry.requestedVerification: {
+			case constants.components.entry.requestedVerification: {
 				this.handleRequestVerification(bot, interaction, parameter);
 				break;
 			}
-			case constants.staticComponentIds.entry.selectedLanguageProficiency: {
+			case constants.components.entry.selectedLanguageProficiency: {
 				this.handleSelectLanguageProficiency(bot, interaction, parameter);
 				break;
 			}
@@ -73,26 +87,28 @@ class EntryService extends LocalService {
 		}
 	}
 
-	private async handleAcceptRules(bot: Discord.Bot, interaction: Discord.Interaction): Promise<void> {
+	private async handleAcceptRules(bot: Discord.Bot, interaction: Logos.Interaction): Promise<void> {
+		const locale = interaction.locale;
+
 		const guildDocument = this.guildDocument;
 		if (guildDocument === undefined) {
 			return;
 		}
 
 		const strings = {
-			title: localise(this.client, "entry.proficiency.title", interaction.locale)(),
+			title: localise(this.client, "entry.proficiency.title", locale)(),
 			description: {
 				chooseProficiency: localise(
 					this.client,
 					"entry.proficiency.description.chooseProficiency",
-					interaction.locale,
+					locale,
 				)({
-					language: guildDocument.data.language,
+					language: interaction.featureLanguage,
 				}),
 				canChangeLater: localise(
 					this.client,
 					"entry.proficiency.description.canChangeLater",
-					interaction.locale,
+					locale,
 				)({
 					command: "`/profile roles`",
 				}),
@@ -111,13 +127,13 @@ class EntryService extends LocalService {
 					type: Discord.MessageComponentTypes.ActionRow,
 					components: proficiency.collection.list.map<Discord.ButtonComponent>((proficiencyRole, index) => {
 						const strings = {
-							name: localise(this.client, `${proficiencyRole.id}.name`, interaction.locale)(),
+							name: localise(this.client, `${proficiencyRole.id}.name`, locale)(),
 						};
 
 						return {
 							type: Discord.MessageComponentTypes.Button,
 							label: strings.name,
-							customId: encodeId<EntryStepButtonID>(constants.staticComponentIds.entry.selectedLanguageProficiency, [
+							customId: encodeId<EntryStepButtonID>(constants.components.entry.selectedLanguageProficiency, [
 								index.toString(),
 							]),
 							style: Discord.ButtonStyles.Secondary,
@@ -131,9 +147,11 @@ class EntryService extends LocalService {
 
 	private async handleRequestVerification(
 		bot: Discord.Bot,
-		interaction: Discord.Interaction,
+		interaction: Logos.Interaction,
 		parameter: string,
 	): Promise<void> {
+		const locale = interaction.locale;
+
 		const guild = this.guild;
 		if (guild === undefined) {
 			return;
@@ -162,12 +180,8 @@ class EntryService extends LocalService {
 		]);
 		if (entryRequest !== undefined) {
 			const strings = {
-				title: localise(this.client, "entry.verification.answers.alreadyAnswered.title", interaction.locale)(),
-				description: localise(
-					this.client,
-					"entry.verification.answers.alreadyAnswered.description",
-					interaction.locale,
-				)(),
+				title: localise(this.client, "entry.verification.answers.alreadyAnswered.title", locale)(),
+				description: localise(this.client, "entry.verification.answers.alreadyAnswered.description", locale)(),
 			};
 
 			reply([this.client, bot], interaction, {
@@ -189,7 +203,7 @@ class EntryService extends LocalService {
 		}
 
 		createModalComposer<EntryRequest["answers"]>([this.client, bot], interaction, {
-			modal: this.generateVerificationQuestionModal(guildDocument.data.language, interaction.locale),
+			modal: this.generateVerificationQuestionModal(interaction.featureLanguage, { locale }),
 			onSubmit: async (submission, answers) => {
 				const submitterReferenceId = stringifyValue(userDocument.ref);
 
@@ -199,12 +213,8 @@ class EntryService extends LocalService {
 					)
 				) {
 					const strings = {
-						title: localise(this.client, "entry.verification.answers.alreadyAnswered.title", interaction.locale)(),
-						description: localise(
-							this.client,
-							"entry.verification.answers.alreadyAnswered.description",
-							interaction.locale,
-						)(),
+						title: localise(this.client, "entry.verification.answers.alreadyAnswered.title", locale)(),
+						description: localise(this.client, "entry.verification.answers.alreadyAnswered.description", locale)(),
 					};
 
 					reply([this.client, bot], submission, {
@@ -256,17 +266,13 @@ class EntryService extends LocalService {
 				verificationService.registerHandler([userId.toString(), this.guildIdString, reference]);
 
 				const strings = {
-					title: localise(this.client, "entry.verification.answers.submitted.title", interaction.locale)(),
+					title: localise(this.client, "entry.verification.answers.submitted.title", locale)(),
 					description: {
-						submitted: localise(
-							this.client,
-							"entry.verification.answers.submitted.description.submitted",
-							interaction.locale,
-						)(),
+						submitted: localise(this.client, "entry.verification.answers.submitted.description.submitted", locale)(),
 						willBeReviewed: localise(
 							this.client,
 							"entry.verification.answers.submitted.description.willBeReviewed",
-							interaction.locale,
+							locale,
 						)(),
 					},
 				};
@@ -287,8 +293,8 @@ class EntryService extends LocalService {
 				switch (error) {
 					default: {
 						const strings = {
-							title: localise(this.client, "entry.verification.answers.failed.title", interaction.locale)(),
-							description: localise(this.client, "entry.verification.answers.failed.description", interaction.locale)(),
+							title: localise(this.client, "entry.verification.answers.failed.title", locale)(),
+							description: localise(this.client, "entry.verification.answers.failed.description", locale)(),
 						};
 
 						editReply([this.client, bot], submission, {
@@ -309,8 +315,8 @@ class EntryService extends LocalService {
 	}
 
 	private generateVerificationQuestionModal(
-		language: Language,
-		locale: string | undefined,
+		language: FeatureLanguage,
+		{ locale }: { locale: Locale },
 	): Modal<EntryRequest["answers"]> {
 		const strings = {
 			title: localise(this.client, "verification.title", locale)(),
@@ -370,9 +376,11 @@ class EntryService extends LocalService {
 
 	private async handleSelectLanguageProficiency(
 		bot: Discord.Bot,
-		interaction: Discord.Interaction,
+		interaction: Logos.Interaction,
 		parameter: string,
 	): Promise<void> {
+		const locale = interaction.locale;
+
 		const guild = this.guild;
 		if (guild === undefined) {
 			return;
@@ -389,7 +397,7 @@ class EntryService extends LocalService {
 			return;
 		}
 
-		const canEnter = await this.vetUser(bot, interaction);
+		const canEnter = await this.vetUser(bot, interaction, { locale });
 		if (!canEnter) {
 			return;
 		}
@@ -411,25 +419,17 @@ class EntryService extends LocalService {
 
 			if (!isVerified) {
 				const strings = {
-					title: localise(this.client, "entry.verification.getVerified.title", interaction.locale)(),
+					title: localise(this.client, "entry.verification.getVerified.title", locale)(),
 					description: {
 						verificationRequired: localise(
 							this.client,
 							"entry.verification.getVerified.description.verificationRequired",
-							interaction.locale,
+							locale,
 						)({
 							server_name: guild.name,
 						}),
-						honestAnswers: localise(
-							this.client,
-							"entry.verification.getVerified.description.honestAnswers",
-							interaction.locale,
-						)(),
-						understood: localise(
-							this.client,
-							"entry.verification.getVerified.description.understood",
-							interaction.locale,
-						)(),
+						honestAnswers: localise(this.client, "entry.verification.getVerified.description.honestAnswers", locale)(),
+						understood: localise(this.client, "entry.verification.getVerified.description.understood", locale)(),
 					},
 				};
 
@@ -449,7 +449,7 @@ class EntryService extends LocalService {
 									type: Discord.MessageComponentTypes.Button,
 									style: Discord.ButtonStyles.Secondary,
 									label: strings.description.understood,
-									customId: encodeId<EntryStepButtonID>(constants.staticComponentIds.entry.requestedVerification, [
+									customId: encodeId<EntryStepButtonID>(constants.components.entry.requestedVerification, [
 										role.id.toString(),
 									]),
 									emoji: { name: constants.symbols.understood },
@@ -463,16 +463,16 @@ class EntryService extends LocalService {
 		}
 
 		const strings = {
-			title: localise(this.client, "entry.proficiency.receivedAccess.title", interaction.locale)(),
+			title: localise(this.client, "entry.proficiency.receivedAccess.title", locale)(),
 			description: {
 				nowMember: localise(
 					this.client,
 					"entry.proficiency.receivedAccess.description.nowMember",
-					interaction.locale,
+					locale,
 				)({
 					server_name: guild.name,
 				}),
-				toStart: localise(this.client, "entry.proficiency.receivedAccess.description.toStart", interaction.locale)(),
+				toStart: localise(this.client, "entry.proficiency.receivedAccess.description.toStart", locale)(),
 			},
 		};
 
@@ -489,12 +489,18 @@ class EntryService extends LocalService {
 
 		Discord.addRole(bot, guild.id, interaction.user.id, role.id, "User-requested role addition.").catch(() =>
 			this.client.log.warn(
-				`Failed to add role with ID ${role.id} to member with ID ${interaction.user.id} in guild with ID ${guild.id}.`,
+				`Failed to add ${diagnostics.display.role(role)} to ${diagnostics.display.user(
+					interaction.user,
+				)} on ${diagnostics.display.guild(guild.id)}.`,
 			),
 		);
 	}
 
-	private async vetUser(bot: Discord.Bot, interaction: Discord.Interaction): Promise<boolean> {
+	private async vetUser(
+		bot: Discord.Bot,
+		interaction: Logos.Interaction,
+		{ locale }: { locale: Locale },
+	): Promise<boolean> {
 		const userDocument = await this.client.database.adapters.users.getOrFetchOrCreate(
 			this.client,
 			"id",
@@ -503,12 +509,8 @@ class EntryService extends LocalService {
 		);
 		if (userDocument === undefined) {
 			const strings = {
-				title: localise(this.client, "entry.verification.verifyingAccount.failed.title", interaction.locale)(),
-				description: localise(
-					this.client,
-					"entry.verification.verifyingAccount.failed.description",
-					interaction.locale,
-				)(),
+				title: localise(this.client, "entry.verification.verifyingAccount.failed.title", locale)(),
+				description: localise(this.client, "entry.verification.verifyingAccount.failed.description", locale)(),
 			};
 
 			reply([this.client, bot], interaction, {
@@ -522,7 +524,9 @@ class EntryService extends LocalService {
 			});
 
 			this.client.log.error(
-				`Failed to vet user with ID ${interaction.user.id} trying to enter the server due to their user document being returned as undefined.`,
+				`Failed to vet ${diagnostics.display.user(
+					interaction.user,
+				)} trying to enter the server due to their user document having been returned as undefined.`,
 			);
 
 			return false;
@@ -540,12 +544,8 @@ class EntryService extends LocalService {
 
 		if (entryRequest !== undefined && !entryRequest.data.isFinalised) {
 			const strings = {
-				title: localise(this.client, "entry.verification.answers.alreadyAnswered.title", interaction.locale)(),
-				description: localise(
-					this.client,
-					"entry.verification.answers.alreadyAnswered.description",
-					interaction.locale,
-				)(),
+				title: localise(this.client, "entry.verification.answers.alreadyAnswered.title", locale)(),
+				description: localise(this.client, "entry.verification.answers.alreadyAnswered.description", locale)(),
 			};
 
 			reply([this.client, bot], interaction, {
@@ -566,12 +566,8 @@ class EntryService extends LocalService {
 		}
 		if (userDocument.data.account.rejectedOn?.includes(guildId.toString())) {
 			const strings = {
-				title: localise(this.client, "entry.verification.answers.rejectedBefore.title", interaction.locale)(),
-				description: localise(
-					this.client,
-					"entry.verification.answers.rejectedBefore.description",
-					interaction.locale,
-				)(),
+				title: localise(this.client, "entry.verification.answers.rejectedBefore.title", locale)(),
+				description: localise(this.client, "entry.verification.answers.rejectedBefore.description", locale)(),
 			};
 
 			reply([this.client, bot], interaction, {
@@ -590,7 +586,7 @@ class EntryService extends LocalService {
 		return true;
 	}
 
-	requiresVerification(user: Discord.User): boolean | undefined {
+	requiresVerification(user: Logos.User): boolean | undefined {
 		const verificationConfiguration = this.verificationConfiguration;
 		if (verificationConfiguration === undefined) {
 			return undefined;

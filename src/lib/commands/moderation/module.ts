@@ -1,5 +1,5 @@
-import { Document } from "../../database/document.js";
-import { Warning } from "../../database/structs/warning.js";
+import { Document } from "../../database/document";
+import { Warning } from "../../database/structs/warning";
 
 function getActiveWarnings(
 	warnings: Map<string, Document<Warning>>,

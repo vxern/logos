@@ -1,18 +1,18 @@
-import { CommandTemplate } from "../command.js";
-import history from "./commands/history.js";
-import loop from "./commands/loop.js";
-import now from "./commands/now.js";
-import pause from "./commands/pause.js";
-import play from "./commands/play.js";
-import queue from "./commands/queue.js";
-import remove from "./commands/remove.js";
-import replay from "./commands/replay.js";
-import resume from "./commands/resume.js";
-import skipTo from "./commands/skip-to.js";
-import skip from "./commands/skip.js";
-import stop from "./commands/stop.js";
-import unskip from "./commands/unskip.js";
-import volume from "./commands/volume.js";
+import { CommandTemplate } from "../command";
+import history from "./commands/history";
+import loop from "./commands/loop";
+import now from "./commands/now";
+import pause from "./commands/pause";
+import play from "./commands/play";
+import queue from "./commands/queue";
+import remove from "./commands/remove";
+import replay from "./commands/replay";
+import resume from "./commands/resume";
+import skip from "./commands/skip";
+import skipTo from "./commands/skip-to";
+import stop from "./commands/stop";
+import unskip from "./commands/unskip";
+import volume from "./commands/volume";
 import * as Discord from "discordeno";
 
 const music: CommandTemplate = {

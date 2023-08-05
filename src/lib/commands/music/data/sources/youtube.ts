@@ -1,9 +1,10 @@
-import constants from "../../../../../constants.js";
-import { trim } from "../../../../../formatting.js";
-import { Client, localise } from "../../../../client.js";
-import { createInteractionCollector, deleteReply, postponeReply, reply } from "../../../../interactions.js";
-import { Song, SongListing } from "../types.js";
-import { ListingResolver } from "./sources.js";
+import constants from "../../../../../constants/constants";
+import { trim } from "../../../../../formatting";
+import * as Logos from "../../../../../types";
+import { Client, localise } from "../../../../client";
+import { createInteractionCollector, deleteReply, postponeReply, reply } from "../../../../interactions";
+import { Song, SongListing } from "../types";
+import { ListingResolver } from "./sources";
 import * as Discord from "discordeno";
 import * as YouTubeSearch from "youtube-sr";
 
@@ -30,9 +31,11 @@ const resolver: ListingResolver = async ([client, bot], interaction, query) => {
 
 async function search(
 	[client, bot]: [Client, Discord.Bot],
-	interaction: Discord.Interaction,
+	interaction: Logos.Interaction,
 	query: string,
 ): Promise<SongListing | undefined> {
+	const locale = interaction.locale;
+
 	const resultsAll = await YouTubeSearch.YouTube.search(query, { limit: 20, type: "all", safeSearch: false });
 	const results = resultsAll.filter((element) => isPlaylist(element) || isVideo(element)) as Array<
 		YouTubeSearch.Playlist | YouTubeSearch.Video
@@ -55,7 +58,7 @@ async function search(
 				}
 
 				const index = Number(indexString);
-				if (isNaN(index)) {
+				if (!Number.isSafeInteger(index)) {
 					return resolve(undefined);
 				}
 
@@ -79,8 +82,8 @@ async function search(
 		});
 
 		const strings = {
-			title: localise(client, "music.options.play.strings.selectSong.title", interaction.locale)(),
-			description: localise(client, "music.options.play.strings.selectSong.description", interaction.locale)(),
+			title: localise(client, "music.options.play.strings.selectSong.title", locale)(),
+			description: localise(client, "music.options.play.strings.selectSong.description", locale)(),
 		};
 
 		const options = [];

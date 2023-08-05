@@ -1,10 +1,10 @@
-import constants from "../../../../constants.js";
-import { defaultLocale } from "../../../../types.js";
-import { Client, localise } from "../../../client.js";
-import { parseArguments, reply } from "../../../interactions.js";
-import { isCollection } from "../../../services/music/music.js";
-import { OptionTemplate } from "../../command.js";
-import { collection } from "../../parameters.js";
+import constants from "../../../../constants/constants";
+import * as Logos from "../../../../types";
+import { Client, localise } from "../../../client";
+import { parseArguments, reply } from "../../../interactions";
+import { isCollection } from "../../../services/music/music";
+import { OptionTemplate } from "../../command";
+import { collection } from "../../parameters";
 import * as Discord from "discordeno";
 
 const command: OptionTemplate = {
@@ -14,10 +14,9 @@ const command: OptionTemplate = {
 	options: [collection],
 };
 
-async function handleLoopPlayback(
-	[client, bot]: [Client, Discord.Bot],
-	interaction: Discord.Interaction,
-): Promise<void> {
+async function handleLoopPlayback([client, bot]: [Client, Discord.Bot], interaction: Logos.Interaction): Promise<void> {
+	const locale = interaction.guildLocale;
+
 	const [{ collection }] = parseArguments(interaction.data?.options, { collection: "boolean" });
 
 	const guildId = interaction.guildId;
@@ -31,51 +30,47 @@ async function handleLoopPlayback(
 	}
 
 	const isVoiceStateVerified = musicService.verifyCanManagePlayback(bot, interaction);
-	if (isVoiceStateVerified === undefined || !isVoiceStateVerified) {
+	if (!isVoiceStateVerified) {
 		return;
 	}
 
-	const [current, isOccupied] = [musicService.current, musicService.isPaused];
-	if (current === undefined || isOccupied === undefined) {
+	const [current, isOccupied] = [musicService.current, musicService.isOccupied];
+	if (!isOccupied) {
+		const locale = interaction.locale;
+		const strings = {
+			title: localise(client, "music.strings.notPlaying.title", locale)(),
+			description: {
+				toManage: localise(client, "music.strings.notPlaying.description.toManage", locale)(),
+			},
+		};
+
+		reply([client, bot], interaction, {
+			embeds: [
+				{
+					title: strings.title,
+					description: strings.description.toManage,
+					color: constants.colors.dullYellow,
+				},
+			],
+		});
 		return;
 	}
 
 	if (collection) {
-		if (!isOccupied || current === undefined) {
+		if (current?.content === undefined || !isCollection(current.content)) {
+			const locale = interaction.locale;
 			const strings = {
-				title: localise(client, "music.options.loop.strings.noSongCollection.title", interaction.locale)(),
+				title: localise(client, "music.options.loop.strings.noSongCollection.title", locale)(),
 				description: {
 					noSongCollection: localise(
 						client,
 						"music.options.loop.strings.noSongCollection.description.noSongCollection",
-						interaction.locale,
-					)(),
-				},
-			};
-
-			reply([client, bot], interaction, {
-				embeds: [
-					{
-						title: strings.title,
-						description: strings.description.noSongCollection,
-						color: constants.colors.dullYellow,
-					},
-				],
-			});
-			return;
-		} else if (!isCollection(current.content)) {
-			const strings = {
-				title: localise(client, "music.options.loop.strings.noSongCollection.title", interaction.locale)(),
-				description: {
-					noSongCollection: localise(
-						client,
-						"music.options.loop.strings.noSongCollection.description.noSongCollection",
-						interaction.locale,
+						locale,
 					)(),
 					trySongInstead: localise(
 						client,
 						"music.options.loop.strings.noSongCollection.description.trySongInstead",
-						interaction.locale,
+						locale,
 					)(),
 				},
 			};
@@ -91,24 +86,23 @@ async function handleLoopPlayback(
 			});
 			return;
 		}
-	} else {
-		if (!isOccupied || current === undefined) {
-			const strings = {
-				title: localise(client, "music.options.loop.strings.noSong.title", interaction.locale)(),
-				description: localise(client, "music.options.loop.strings.noSong.description", interaction.locale)(),
-			};
+	} else if (current?.content === undefined) {
+		const locale = interaction.locale;
+		const strings = {
+			title: localise(client, "music.options.loop.strings.noSong.title", locale)(),
+			description: localise(client, "music.options.loop.strings.noSong.description", locale)(),
+		};
 
-			reply([client, bot], interaction, {
-				embeds: [
-					{
-						title: strings.title,
-						description: strings.description,
-						color: constants.colors.dullYellow,
-					},
-				],
-			});
-			return;
-		}
+		reply([client, bot], interaction, {
+			embeds: [
+				{
+					title: strings.title,
+					description: strings.description,
+					color: constants.colors.dullYellow,
+				},
+			],
+		});
+		return;
 	}
 
 	if (collection) {
@@ -119,40 +113,46 @@ async function handleLoopPlayback(
 
 		if (!isLooped) {
 			const strings = {
-				title: localise(client, "music.options.loop.strings.disabled.title", defaultLocale)(),
-				description: localise(
-					client,
-					"music.options.loop.strings.disabled.description.songCollection",
-					defaultLocale,
-				)(),
+				title: localise(client, "music.options.loop.strings.disabled.title", locale)(),
+				description: localise(client, "music.options.loop.strings.disabled.description.songCollection", locale)(),
 			};
 
-			reply([client, bot], interaction, {
-				embeds: [
-					{
-						title: `${constants.symbols.music.loopDisabled} ${strings.title}`,
-						description: strings.description,
-						color: constants.colors.blue,
-					},
-				],
-			});
+			reply(
+				[client, bot],
+				interaction,
+				{
+					embeds: [
+						{
+							title: `${constants.symbols.music.loopDisabled} ${strings.title}`,
+							description: strings.description,
+							color: constants.colors.blue,
+						},
+					],
+				},
+				{ visible: true },
+			);
 			return;
 		}
 
 		const strings = {
-			title: localise(client, "music.options.loop.strings.enabled.title", defaultLocale)(),
-			description: localise(client, "music.options.loop.strings.enabled.description.songCollection", defaultLocale)(),
+			title: localise(client, "music.options.loop.strings.enabled.title", locale)(),
+			description: localise(client, "music.options.loop.strings.enabled.description.songCollection", locale)(),
 		};
 
-		reply([client, bot], interaction, {
-			embeds: [
-				{
-					title: `${constants.symbols.music.loopEnabled} ${strings.title}`,
-					description: strings.description,
-					color: constants.colors.blue,
-				},
-			],
-		});
+		reply(
+			[client, bot],
+			interaction,
+			{
+				embeds: [
+					{
+						title: `${constants.symbols.music.loopEnabled} ${strings.title}`,
+						description: strings.description,
+						color: constants.colors.blue,
+					},
+				],
+			},
+			{ visible: true },
+		);
 		return;
 	}
 
@@ -163,8 +163,8 @@ async function handleLoopPlayback(
 
 	if (!isLooped) {
 		const strings = {
-			title: localise(client, "music.options.loop.strings.disabled.title", defaultLocale)(),
-			description: localise(client, "music.options.loop.strings.disabled.description.song", defaultLocale)(),
+			title: localise(client, "music.options.loop.strings.disabled.title", locale)(),
+			description: localise(client, "music.options.loop.strings.disabled.description.song", locale)(),
 		};
 
 		reply(
@@ -185,8 +185,8 @@ async function handleLoopPlayback(
 	}
 
 	const strings = {
-		title: localise(client, "music.options.loop.strings.enabled.title", defaultLocale)(),
-		description: localise(client, "music.options.loop.strings.enabled.description.song", defaultLocale)(),
+		title: localise(client, "music.options.loop.strings.enabled.title", locale)(),
+		description: localise(client, "music.options.loop.strings.enabled.description.song", locale)(),
 	};
 
 	reply(

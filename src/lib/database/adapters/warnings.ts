@@ -5,10 +5,10 @@ import {
 	getUserMentionByReference,
 	setNested,
 	stringifyValue,
-} from "../database.js";
-import { Document } from "../document.js";
-import { WarningIndexes, warningIndexParameterToIndex } from "../indexes.js";
-import { Warning } from "../structs/warning.js";
+} from "../database";
+import { Document } from "../document";
+import { WarningIndexes, warningIndexParameterToIndex } from "../indexes";
+import { Warning } from "../structs/warning";
 import Fauna from "fauna";
 
 const $ = Fauna.query;
@@ -62,13 +62,13 @@ const adapter: Database["adapters"]["warnings"] = {
 		client.database.fetchPromises.warnings[parameter].delete(value);
 
 		if (documents === undefined) {
-			client.log.error(`Failed to fetch warnings whose '${parameter}' matches '${value}'.`);
+			client.database.log.error(`Failed to fetch warnings whose '${parameter}' matches '${value}'.`);
 			return undefined;
 		}
 
 		cache.setAll(client, parameter, value, documents);
 
-		client.log.debug(`Fetched ${documents.length} warning(s) whose '${parameter}' matches '${value}'.`);
+		client.database.log.debug(`Fetched ${documents.length} warning(s) whose '${parameter}' matches '${value}'.`);
 
 		return cache.get(client, parameter, value);
 	},
@@ -83,7 +83,7 @@ const adapter: Database["adapters"]["warnings"] = {
 		const userMention = getUserMentionByReference(client, warning.recipient);
 
 		if (document === undefined) {
-			client.log.error(`Failed to create warning for ${userMention}.`);
+			client.database.log.error(`Failed to create warning for ${userMention}.`);
 			return undefined;
 		}
 
@@ -93,13 +93,15 @@ const adapter: Database["adapters"]["warnings"] = {
 		if (cache.has(client, "recipient", recipientReferenceId)) {
 			cache.set(client, "recipient", recipientReferenceId, document);
 		} else {
-			client.log.debug(`Could not find warnings for recipient with reference ${recipientReferenceId}, fetching...`);
+			client.database.log.debug(
+				`Could not find warnings for recipient with reference ${recipientReferenceId}, fetching...`,
+			);
 
 			promises.push(adapter.fetch(client, "recipient", warning.recipient));
 		}
 		await Promise.all(promises);
 
-		client.log.debug(`Created warning for ${userMention}.`);
+		client.database.log.debug(`Created warning for ${userMention}.`);
 
 		return document;
 	},
@@ -109,7 +111,7 @@ const adapter: Database["adapters"]["warnings"] = {
 		const userMention = getUserMentionByReference(client, warning.data.recipient);
 
 		if (document === undefined) {
-			client.log.error(`Failed to delete warning given to ${userMention}.`);
+			client.database.log.error(`Failed to delete warning given to ${userMention}.`);
 			return undefined;
 		}
 
@@ -117,7 +119,7 @@ const adapter: Database["adapters"]["warnings"] = {
 
 		cache.delete(client, "recipient", recipientId, warning);
 
-		client.log.debug(`Deleted warning given to ${userMention}.`);
+		client.database.log.debug(`Deleted warning given to ${userMention}.`);
 
 		return document;
 	},

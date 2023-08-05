@@ -1,60 +1,8 @@
-import constants from "../../../constants.js";
-import { Language, supportedLanguages } from "../../../types.js";
-import { Client } from "../../client.js";
-import { addParametersToURL } from "../../utils.js";
-import { SentencePair } from "./commands/game.js";
-import { DictionaryAdapter } from "./dictionaries/adapter.js";
-import dexonline from "./dictionaries/adapters/dexonline.js";
-import wiktionary from "./dictionaries/adapters/wiktionary.js";
-import partsOfSpeech, { PartOfSpeech } from "./dictionaries/parts-of-speech.js";
-import * as csv from "csv-parse/sync";
-
-const dictionaryAdapters: DictionaryAdapter[] = [dexonline, wiktionary];
-
-function loadDictionaryAdapters(): Map<Language, DictionaryAdapter[]> {
-	const result = new Map<Language, DictionaryAdapter[]>();
-
-	for (const language of supportedLanguages) {
-		result.set(language, []);
-	}
-
-	for (const adapter of dictionaryAdapters) {
-		for (const language of adapter.supports) {
-			result.get(language)?.push(adapter);
-		}
-	}
-
-	for (const adapters of result.values()) {
-		// Sorts adapters in descending order by how much information they provide.
-		adapters.sort((a, b) => b.provides.length - a.provides.length);
-	}
-
-	return result;
-}
-
-/** Loads dictionary adapters and sentence lists. */
-function loadSentencePairs(languageFileContents: [Language, string][]): Map<Language, SentencePair[]> {
-	const result = new Map<Language, SentencePair[]>();
-
-	for (const language of supportedLanguages) {
-		result.set(language, []);
-	}
-
-	for (const [language, contents] of languageFileContents) {
-		const records = csv.parse(contents, { relaxQuotes: true, delimiter: "	" }) as [
-			sentenceId: string,
-			sentence: string,
-			translationId: string,
-			translation: string,
-		][];
-
-		for (const [_, sentence, __, translation] of records) {
-			result.get(language)?.push({ sentence, translation });
-		}
-	}
-
-	return result;
-}
+import constants from "../../../constants/constants";
+import { FeatureLanguage } from "../../../constants/language";
+import { Client } from "../../client";
+import { addParametersToURL } from "../../utils";
+import partsOfSpeech, { PartOfSpeech } from "./dictionaries/parts-of-speech";
 
 interface DeepLSupportedLanguage {
 	language: string;
@@ -75,6 +23,8 @@ interface SupportedLanguage {
 }
 
 async function getSupportedLanguages(environment: Client["metadata"]["environment"]): Promise<SupportedLanguage[]> {
+	console.info("[Translations] Getting list of supported translation languages from DeepL...");
+
 	const response = await fetch(
 		addParametersToURL(constants.endpoints.deepl.languages, {
 			auth_key: environment.deeplSecret,
@@ -85,13 +35,16 @@ async function getSupportedLanguages(environment: Client["metadata"]["environmen
 		return [];
 	}
 
-	const results = (await response.json().catch(() => [])) as DeepLSupportedLanguage[];
-
-	return results.map((result) => ({
+	const resultsRaw = (await response.json().catch(() => [])) as DeepLSupportedLanguage[];
+	const results = resultsRaw.map((result) => ({
 		name: result.name,
 		code: result.language,
 		supportsFormality: result.supports_formality,
 	}));
+
+	console.info(`[Translations] List of supported translation languages features ${results.length} language(s).`);
+
+	return results;
 }
 
 function resolveToSupportedLanguage(client: Client, languageOrCode: string): SupportedLanguage | undefined {
@@ -105,7 +58,7 @@ function resolveToSupportedLanguage(client: Client, languageOrCode: string): Sup
 function getPartOfSpeech(
 	exact: string,
 	approximate: string,
-	language: Language,
+	language: FeatureLanguage,
 ): [detected: PartOfSpeech, original: string] {
 	const localised = partsOfSpeech[language];
 	if (localised === undefined) {
@@ -129,11 +82,5 @@ function getPartOfSpeech(
 	return [detected, exact];
 }
 
-export {
-	getPartOfSpeech,
-	getSupportedLanguages,
-	loadDictionaryAdapters,
-	loadSentencePairs,
-	resolveToSupportedLanguage,
-};
+export { getPartOfSpeech, getSupportedLanguages, resolveToSupportedLanguage };
 export type { SupportedLanguage };

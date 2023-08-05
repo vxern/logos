@@ -1,8 +1,9 @@
-import { defaultLocale } from "../../../../types.js";
-import { Client, localise } from "../../../client.js";
-import { parseArguments, reply } from "../../../interactions.js";
-import { CommandTemplate } from "../../command.js";
-import { show } from "../../parameters.js";
+import { Locale } from "../../../../constants/language";
+import * as Logos from "../../../../types";
+import { Client, localise } from "../../../client";
+import { parseArguments, reply } from "../../../interactions";
+import { CommandTemplate } from "../../command";
+import { show } from "../../parameters";
 import * as Discord from "discordeno";
 
 const command: CommandTemplate = {
@@ -15,8 +16,10 @@ const command: CommandTemplate = {
 
 async function handleDisplayModerationPolicy(
 	[client, bot]: [Client, Discord.Bot],
-	interaction: Discord.Interaction,
+	interaction: Logos.Interaction,
 ): Promise<void> {
+	const locale = interaction.locale;
+
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
 		return;
@@ -44,21 +47,22 @@ async function handleDisplayModerationPolicy(
 		return;
 	}
 
-	const locale = show ? defaultLocale : interaction.locale;
-
 	const strings = {
-		title: localise(client, "policies.moderation.title", interaction.locale)(),
+		title: localise(client, "policies.moderation.title", locale)(),
 	};
 
 	reply(
 		[client, bot],
 		interaction,
-		{ embeds: [{ title: strings.title, fields: getModerationPolicyPoints(client, locale) }] },
+		{ embeds: [{ title: strings.title, fields: getModerationPolicyPoints(client, { locale }) }] },
 		{ visible: show },
 	);
 }
 
-function getModerationPolicyPoints(client: Client, locale: string | undefined): NonNullable<Discord.Embed["fields"]> {
+function getModerationPolicyPoints(
+	client: Client,
+	{ locale }: { locale: Locale },
+): NonNullable<Discord.Embed["fields"]> {
 	const strings = {
 		introduction: {
 			title: localise(client, "policies.moderation.points.introduction.title", locale)(),

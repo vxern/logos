@@ -1,4 +1,5 @@
-import constants from "../../../constants.js";
+import constants from "../../../constants/constants";
+import diagnostics from "../../diagnostics";
 import {
 	CacheAdapter,
 	Database,
@@ -6,10 +7,10 @@ import {
 	getUserMentionByReference,
 	setNested,
 	stringifyValue,
-} from "../database.js";
-import { Document } from "../document.js";
-import { ReportIndexes } from "../indexes.js";
-import { Report } from "../structs/report.js";
+} from "../database";
+import { Document } from "../document";
+import { ReportIndexes } from "../indexes";
+import { Report } from "../structs/report";
 import Fauna from "fauna";
 
 const $ = Fauna.query;
@@ -37,7 +38,7 @@ const adapter: Database["adapters"]["reports"] = {
 			$.Map($.Paginate($.Documents($.Collection("Reports"))), $.Lambda("report", $.Get($.Var("report")))),
 		);
 		if (documents === undefined) {
-			client.log.error("Failed to fetch all reports.");
+			client.database.log.error("Failed to fetch all reports.");
 			return;
 		}
 
@@ -49,7 +50,7 @@ const adapter: Database["adapters"]["reports"] = {
 			cache.set(client, "authorAndGuild", compositeId, document);
 		}
 
-		client.log.debug(`Fetched ${documents.length} report(s).`);
+		client.database.log.debug(`Fetched ${documents.length} report(s).`);
 	},
 	get: (client, parameter, parameterValue) => {
 		const [author, guild] = parameterValue;
@@ -68,7 +69,9 @@ const adapter: Database["adapters"]["reports"] = {
 		const authorMention = getUserMentionByReference(client, report.author);
 
 		if (document === undefined) {
-			client.log.error(`Failed to create report submitted by ${authorMention} on guild with ID ${guildId}.`);
+			client.database.log.error(
+				`Failed to create report submitted by ${authorMention} on ${diagnostics.display.guild(guildId)}.`,
+			);
 			return undefined;
 		}
 
@@ -76,7 +79,7 @@ const adapter: Database["adapters"]["reports"] = {
 
 		cache.set(client, "authorAndGuild", compositeId, document);
 
-		client.log.debug(`Created report submitted by ${authorMention} on guild with ID ${guildId}.`);
+		client.database.log.debug(`Created report submitted by ${authorMention} on ${diagnostics.display.guild(guildId)}.`);
 
 		return document;
 	},
@@ -89,7 +92,9 @@ const adapter: Database["adapters"]["reports"] = {
 		const authorMention = getUserMentionByReference(client, report.data.author);
 
 		if (document === undefined) {
-			client.log.error(`Failed to update report submitted by ${authorMention} on guild with ID ${guildId}.`);
+			client.database.log.error(
+				`Failed to update report submitted by ${authorMention} on ${diagnostics.display.guild(guildId)}.`,
+			);
 			return undefined;
 		}
 
@@ -97,7 +102,7 @@ const adapter: Database["adapters"]["reports"] = {
 
 		cache.set(client, "authorAndGuild", compositeId, document);
 
-		client.log.debug(`Updated report submitted by ${authorMention} on guild with ID ${guildId}.`);
+		client.database.log.debug(`Updated report submitted by ${authorMention} on ${diagnostics.display.guild(guildId)}.`);
 
 		return document;
 	},

@@ -1,10 +1,12 @@
-import constants from "../../../../../constants.js";
-import { trim } from "../../../../../formatting.js";
-import { defaultLocale } from "../../../../../types.js";
-import { Client, localise } from "../../../../client.js";
-import { acknowledge, createInteractionCollector, editReply, reply } from "../../../../interactions.js";
-import { OptionTemplate } from "../../../command.js";
-import roles, { getRoleCategories, getRoles } from "../../roles/roles.js";
+import constants from "../../../../../constants/constants";
+import { Locale } from "../../../../../constants/language";
+import { trim } from "../../../../../formatting";
+import * as Logos from "../../../../../types";
+import { Client, localise } from "../../../../client";
+import diagnostics from "../../../../diagnostics";
+import { acknowledge, createInteractionCollector, editReply, reply } from "../../../../interactions";
+import { OptionTemplate } from "../../../command";
+import roles, { getRoleCategories, getRoles } from "../../roles/roles";
 import {
 	Role,
 	RoleCategory,
@@ -14,7 +16,7 @@ import {
 	isCustom,
 	isGroup,
 	isSingle,
-} from "../../roles/types.js";
+} from "../../roles/types";
 import * as Discord from "discordeno";
 
 const command: OptionTemplate = {
@@ -29,7 +31,7 @@ const command: OptionTemplate = {
  */
 async function handleOpenRoleSelectionMenu(
 	[client, bot]: [Client, Discord.Bot],
-	interaction: Discord.Interaction,
+	interaction: Logos.Interaction,
 ): Promise<void> {
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
@@ -123,9 +125,11 @@ function traverseRoleSelectionTree(data: NavigationData): [RoleCategory, ...Role
  */
 async function createRoleSelectionMenu(
 	[client, bot]: [Client, Discord.Bot],
-	interaction: Discord.Interaction,
+	interaction: Logos.Interaction,
 	data: BrowsingData,
 ): Promise<void> {
+	const locale = interaction.locale;
+
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
 		return;
@@ -164,13 +168,19 @@ async function createRoleSelectionMenu(
 			}
 
 			const index = Number(indexString);
-			if (isNaN(index)) {
+			if (!Number.isSafeInteger(index)) {
 				return;
 			}
 
 			if (index === -1) {
 				data.navigationData.indexesAccessed.pop();
-				displayData = await traverseRoleTreeAndDisplay([client, bot], selection, displayData);
+				displayData = await traverseRoleTreeAndDisplay(
+					[client, bot],
+					selection,
+					displayData,
+					{ editResponse: true },
+					{ locale },
+				);
 				return;
 			}
 
@@ -181,7 +191,13 @@ async function createRoleSelectionMenu(
 
 			if (isGroup(viewData.category)) {
 				data.navigationData.indexesAccessed.push(index);
-				displayData = await traverseRoleTreeAndDisplay([client, bot], selection, displayData);
+				displayData = await traverseRoleTreeAndDisplay(
+					[client, bot],
+					selection,
+					displayData,
+					{ editResponse: true },
+					{ locale },
+				);
 				return;
 			}
 
@@ -197,13 +213,21 @@ async function createRoleSelectionMenu(
 					viewData.category.minimum !== undefined &&
 					viewData.memberRolesIncludedInMenu.length <= viewData.category.minimum
 				) {
-					displayData = await traverseRoleTreeAndDisplay([client, bot], interaction, displayData, true);
+					displayData = await traverseRoleTreeAndDisplay(
+						[client, bot],
+						interaction,
+						displayData,
+						{ editResponse: true },
+						{ locale },
+					);
 					return;
 				}
 
 				Discord.removeRole(bot, guild.id, member.id, role.id, "User-requested role removal.").catch(() =>
 					client.log.warn(
-						`Failed to remove role with ID ${role.id} from member with ID ${member.id} in guild with ID ${guild.id}.`,
+						`Failed to remove ${diagnostics.display.role(role)} from ${diagnostics.display.member(
+							member,
+						)} on ${diagnostics.display.guild(guild)}.`,
 					),
 				);
 
@@ -220,17 +244,17 @@ async function createRoleSelectionMenu(
 					viewData.memberRolesIncludedInMenu.length >= viewData.category.maximum
 				) {
 					const strings = {
-						title: localise(client, "warn.strings.limitReached.title", defaultLocale)(),
+						title: localise(client, "warn.strings.limitReached.title", locale)(),
 						description: {
 							limitReached: localise(
 								client,
 								"profile.options.roles.strings.limitReached.description.limitReached",
-								interaction.locale,
-							)({ category: localise(client, `${viewData.category.id}.name`, interaction.locale)() }),
+								locale,
+							)({ category: localise(client, `${viewData.category.id}.name`, locale)() }),
 							toChooseNew: localise(
 								client,
 								"profile.options.roles.strings.limitReached.description.toChooseNew",
-								interaction.locale,
+								locale,
 							)(),
 						},
 					};
@@ -244,13 +268,21 @@ async function createRoleSelectionMenu(
 						],
 					});
 
-					displayData = await traverseRoleTreeAndDisplay([client, bot], interaction, displayData, true);
+					displayData = await traverseRoleTreeAndDisplay(
+						[client, bot],
+						interaction,
+						displayData,
+						{ editResponse: true },
+						{ locale },
+					);
 					return;
 				}
 
 				await Discord.addRole(bot, guild.id, member.id, role.id, "User-requested role addition.").catch(() =>
 					client.log.warn(
-						`Failed to add role with ID ${role.id} to member with ID ${member.id} in guild with ID ${guild.id}.`,
+						`Failed to add ${diagnostics.display.role(role)} to ${diagnostics.display.member(
+							member,
+						)} on ${diagnostics.display.guild(guild)}.`,
 					),
 				);
 
@@ -258,7 +290,9 @@ async function createRoleSelectionMenu(
 					for (const memberRoleId of viewData.memberRolesIncludedInMenu) {
 						Discord.removeRole(bot, guild.id, member.id, memberRoleId).catch(() =>
 							client.log.warn(
-								`Failed to remove role with ID ${memberRoleId} from member with ID ${member.id} in guild with ID ${guild.id}.`,
+								`Failed to remove ${diagnostics.display.role(role)} from ${diagnostics.display.member(
+									member,
+								)} on ${diagnostics.display.guild(guild)}.`,
 							),
 						);
 
@@ -273,7 +307,13 @@ async function createRoleSelectionMenu(
 				displayData.viewData?.memberRolesIncludedInMenu.push(role.id);
 			}
 
-			displayData = await traverseRoleTreeAndDisplay([client, bot], interaction, displayData, true);
+			displayData = await traverseRoleTreeAndDisplay(
+				[client, bot],
+				interaction,
+				displayData,
+				{ editResponse: true },
+				{ locale },
+			);
 		},
 	});
 
@@ -285,20 +325,21 @@ async function createRoleSelectionMenu(
 			browsingData: data,
 			roleData: { emojiIdsByName, rolesById, memberRoleIds: [...member.roles] },
 		},
-		false,
+		{ editResponse: false },
+		{ locale },
 	);
 }
 
 interface RoleData {
 	emojiIdsByName: Map<string, bigint>;
-	rolesById: Map<bigint, Discord.Role>;
+	rolesById: Map<bigint, Logos.Role>;
 	memberRoleIds: bigint[];
 }
 
 interface ViewData {
 	category: RoleCategory;
 	menuRoles: Role[];
-	menuRolesResolved: Discord.Role[];
+	menuRolesResolved: Logos.Role[];
 	memberRolesIncludedInMenu: bigint[];
 }
 
@@ -314,7 +355,8 @@ async function traverseRoleTreeAndDisplay(
 	[client, bot]: [Client, Discord.Bot],
 	interaction: Discord.Interaction,
 	data: RoleDisplayData,
-	editResponse = true,
+	{ editResponse }: { editResponse: boolean },
+	{ locale }: { locale: Locale },
 ): Promise<RoleDisplayData> {
 	const categories = traverseRoleSelectionTree(data.browsingData.navigationData);
 	const category = categories.at(-1);
@@ -340,7 +382,7 @@ async function traverseRoleTreeAndDisplay(
 			return (menuRoles as RoleImplicit[]).map((role) => {
 				const snowflake = role.snowflakes[guildIdString];
 				if (snowflake === undefined) {
-					throw `StateError: Could not get the snowflake for a role on guild with ID ${guildIdString}.`;
+					throw `StateError: Could not get the snowflake for a role on ${diagnostics.display.guild(guildIdString)}.`;
 				}
 				return BigInt(snowflake);
 			});
@@ -348,7 +390,7 @@ async function traverseRoleTreeAndDisplay(
 		const menuRolesResolved = snowflakes.map((snowflake) => {
 			const role = data.roleData.rolesById.get(snowflake);
 			if (role === undefined) {
-				throw `StateError: Could not get the role with ID ${snowflake}.`;
+				throw `StateError: Could not get ${diagnostics.display.role(snowflake)}.`;
 			}
 			return role;
 		});
@@ -358,23 +400,20 @@ async function traverseRoleTreeAndDisplay(
 
 		data.viewData = { category, menuRoles, menuRolesResolved, memberRolesIncludedInMenu };
 
-		selectOptions = createSelectOptionsFromCollection(client, data, interaction.locale);
+		selectOptions = createSelectOptionsFromCollection(client, data, { locale });
 	} else {
 		if (data.viewData === undefined) {
 			data.viewData = { category, menuRoles: [], menuRolesResolved: [], memberRolesIncludedInMenu: [] };
 		}
 
-		selectOptions = createSelectOptionsFromCategories(
-			client,
-			category.categories,
-			data.browsingData.guildId,
-			interaction.locale,
-		);
+		selectOptions = createSelectOptionsFromCategories(client, category.categories, data.browsingData.guildId, {
+			locale,
+		});
 	}
 
 	data.viewData.category = category;
 
-	const menu = await displaySelectMenu(client, data, categories, selectOptions, interaction.locale);
+	const menu = await displaySelectMenu(client, data, categories, selectOptions, { locale });
 
 	if (editResponse) {
 		editReply([client, bot], interaction, menu);
@@ -392,7 +431,7 @@ async function displaySelectMenu(
 	data: RoleDisplayData,
 	categories: [RoleCategory, ...RoleCategory[]],
 	selectOptions: Discord.SelectOption[],
-	locale: string | undefined,
+	{ locale }: { locale: Locale },
 ): Promise<Discord.InteractionCallbackData> {
 	const isInRootCategory = data.browsingData.navigationData.indexesAccessed.length === 0;
 	if (!isInRootCategory) {
@@ -452,7 +491,7 @@ function createSelectOptionsFromCategories(
 	client: Client,
 	categories: RoleCategory[],
 	guildId: bigint,
-	locale: string | undefined,
+	{ locale }: { locale: Locale },
 ): Discord.SelectOption[] {
 	const categorySelections = getRoleCategories(categories, guildId);
 
@@ -467,7 +506,7 @@ function createSelectOptionsFromCategories(
 			label: trim(`${category.emoji} ${strings.name}`, 25),
 			value: index.toString(),
 			description: trim(strings.description, 100),
-			emoji: { name: "📁" },
+			emoji: { name: constants.symbols.roles.folder },
 		});
 	}
 
@@ -479,13 +518,13 @@ const emojiExpression = /\p{Extended_Pictographic}/u;
 function createSelectOptionsFromCollection(
 	client: Client,
 	data: RoleDisplayData,
-	locale: string | undefined,
+	{ locale }: { locale: Locale },
 ): Discord.SelectOption[] {
 	const selectOptions: Discord.SelectOption[] = [];
 
 	const viewData = data.viewData;
 	if (viewData === undefined) {
-		return [{ label: "?", value: constants.staticComponentIds.none }];
+		return [{ label: "?", value: constants.components.none }];
 	}
 
 	for (const index of Array(viewData.menuRoles.length).keys()) {

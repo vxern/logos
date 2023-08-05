@@ -1,5 +1,5 @@
-import constants from "../../../../../constants.js";
-import { RoleCategory } from "../types.js";
+import constants from "../../../../../constants/constants";
+import { RoleCategory } from "../types";
 
 const category: RoleCategory = {
 	type: "group",

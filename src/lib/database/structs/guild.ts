@@ -1,6 +1,7 @@
-import { Periods } from "../../../constants";
-import { Language } from "../../../types";
+import { FeatureLanguage, LocalisationLanguage } from "../../../constants/language";
+import time from "../../../constants/time";
 
+/** @since v3.0.0 */
 interface Guild {
 	/** A timestamp of when Logos began to manage this guild. */
 	createdAt: number;
@@ -16,11 +17,18 @@ interface Guild {
 	isNative: boolean;
 
 	/**
-	 * The bot's default language on this guild.
+	 * The bot's default feature language on this guild.
 	 *
 	 * The implicit value is 'English'.
 	 */
-	language: Language;
+	/** @deprecated since v3.5.0. {@link languages} is used instead. */
+	language?: FeatureLanguage;
+
+	/** @since v3.5.0 */
+	languages?: {
+		localisation: LocalisationLanguage;
+		feature: FeatureLanguage;
+	};
 
 	/** The bot's features configured for this guild. */
 	features: {
@@ -57,6 +65,15 @@ interface Guild {
 
 		language: Activatable<{
 			features: {
+				/** @since v3.3.0 */
+				answers?: Activatable;
+
+				/** @since v3.4.0 */
+				corrections?: Activatable;
+
+				/** @since v3.1.0 */
+				cefr?: Activatable<CefrConfiguration>;
+
 				game: Activatable;
 
 				resources: Activatable<{
@@ -83,6 +100,11 @@ interface Guild {
 
 				/** Message purging. */
 				purging: Activatable<{
+					journaling: boolean;
+				}>;
+
+				/** @since v3.2.0 */
+				slowmode?: Activatable<{
 					journaling: boolean;
 				}>;
 
@@ -183,13 +205,13 @@ type TimeUnit = "second" | "minute" | "hour" | "day" | "week" | "month" | "year"
 type TimeStruct = [number: number, unit: TimeUnit];
 
 const durationByTimeUnit = {
-	second: Periods.second,
-	minute: Periods.minute,
-	hour: Periods.hour,
-	day: Periods.day,
-	week: Periods.week,
-	month: Periods.month,
-	year: Periods.year,
+	second: time.second,
+	minute: time.minute,
+	hour: time.hour,
+	day: time.day,
+	week: time.week,
+	month: time.month,
+	year: time.year,
 } satisfies Record<TimeUnit, number>;
 
 function timeStructToMilliseconds([number, unit]: TimeStruct): number {
@@ -205,6 +227,25 @@ type Activatable<T extends Record<string, unknown> = Record<string, unknown>> = 
 type RateLimit = {
 	uses: number;
 	within: TimeStruct;
+};
+
+type CefrLevelExamples = {
+	a1: string;
+	a2: string;
+	b1: string;
+	b2: string;
+	c1: string;
+	c2: string;
+};
+type CefrLevelExamplesExtended = CefrLevelExamples & {
+	a0: string;
+	c3: string;
+};
+type CefrConfiguration<Extended extends boolean = boolean> = {
+	extended: Extended;
+	examples: Activatable<{
+		levels: true extends Extended ? CefrLevelExamplesExtended : CefrLevelExamples;
+	}>;
 };
 
 type DynamicVoiceChannel = {
@@ -230,4 +271,4 @@ type VerificationActivationRule =
 	  };
 
 export { timeStructToMilliseconds };
-export type { Guild, DynamicVoiceChannel, TimeStruct };
+export type { Guild, DynamicVoiceChannel, CefrConfiguration, TimeStruct };

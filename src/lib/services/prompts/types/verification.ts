@@ -1,14 +1,17 @@
-import constants from "../../../../constants.js";
-import { MentionTypes, TimestampFormat, mention, timestamp } from "../../../../formatting.js";
-import { defaultLanguage, defaultLocale } from "../../../../types.js";
-import { Client, localise, pluralise } from "../../../client.js";
-import { stringifyValue } from "../../../database/database.js";
-import { Document } from "../../../database/document.js";
-import { EntryRequest } from "../../../database/structs/entry-request.js";
-import { User } from "../../../database/structs/user.js";
-import { acknowledge, encodeId, reply } from "../../../interactions.js";
-import { diagnosticMentionUser, getGuildIconURLFormatted, snowflakeToTimestamp } from "../../../utils.js";
-import { Configurations, PromptService } from "../service.js";
+import constants from "../../../../constants/constants";
+import { Locale, getLanguageByLocale } from "../../../../constants/language";
+import defaults from "../../../../defaults";
+import { MentionTypes, TimestampFormat, mention, timestamp } from "../../../../formatting";
+import * as Logos from "../../../../types";
+import { Client, localise, pluralise } from "../../../client";
+import { stringifyValue } from "../../../database/database";
+import { Document } from "../../../database/document";
+import { EntryRequest } from "../../../database/structs/entry-request";
+import { User } from "../../../database/structs/user";
+import diagnostics from "../../../diagnostics";
+import { acknowledge, encodeId, getFeatureLanguage, getLocaleData, reply } from "../../../interactions";
+import { getGuildIconURLFormatted, snowflakeToTimestamp } from "../../../utils";
+import { Configurations, PromptService } from "../service";
 import * as Discord from "discordeno";
 
 type Metadata = { userId: bigint; reference: string };
@@ -65,7 +68,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 
 	getPromptContent(
 		bot: Discord.Bot,
-		user: Discord.User,
+		user: Logos.User,
 		document: Document<EntryRequest>,
 	): Discord.CreateMessage | undefined {
 		const [guild, guildDocument] = [this.guild, this.guildDocument];
@@ -80,44 +83,45 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 			return undefined;
 		}
 
+		const guildLocale = this.guildLocale;
+		const guildLanguage = getLanguageByLocale(guildLocale) ?? defaults.LOCALISATION_LANGUAGE;
+
+		const featureLanguage = getFeatureLanguage(guildDocument);
+
 		const strings = {
 			verification: {
-				reason: localise(
-					this.client,
-					"verification.fields.reason",
-					defaultLocale,
-				)({ language: guildDocument.data.language }),
-				aim: localise(this.client, "verification.fields.aim", defaultLocale)(),
-				whereFound: localise(this.client, "verification.fields.whereFound", defaultLocale)(),
+				reason: localise(this.client, "verification.fields.reason", guildLocale)({ language: featureLanguage }),
+				aim: localise(this.client, "verification.fields.aim", guildLocale)(),
+				whereFound: localise(this.client, "verification.fields.whereFound", guildLocale)(),
 			},
-			answers: localise(this.client, "entry.verification.answers", defaultLocale)(),
-			requestedRoles: localise(this.client, "entry.verification.requestedRoles", defaultLocale)(),
-			accountCreated: localise(this.client, "entry.verification.accountCreated", defaultLocale)(),
-			answersSubmitted: localise(this.client, "entry.verification.answersSubmitted", defaultLocale)(),
-			accept: localise(this.client, "entry.verification.vote.accept", defaultLocale)(),
+			answers: localise(this.client, "entry.verification.answers", guildLocale)(),
+			requestedRoles: localise(this.client, "entry.verification.requestedRoles", guildLocale)(),
+			accountCreated: localise(this.client, "entry.verification.accountCreated", guildLocale)(),
+			answersSubmitted: localise(this.client, "entry.verification.answersSubmitted", guildLocale)(),
+			accept: localise(this.client, "entry.verification.vote.accept", guildLocale)(),
 			acceptMultiple: localise(
 				this.client,
 				"entry.verification.vote.acceptMultiple",
-				defaultLocale,
+				guildLocale,
 			)({
 				votes: pluralise(
 					this.client,
 					"entry.verification.vote.acceptMultiple.votes",
-					defaultLanguage,
+					guildLanguage,
 					voteInformation.acceptance.remaining,
 				),
 			}),
-			reject: localise(this.client, "entry.verification.vote.reject", defaultLocale)(),
+			reject: localise(this.client, "entry.verification.vote.reject", guildLocale)(),
 			rejectMultiple: localise(
 				this.client,
 				"entry.verification.vote.rejectMultiple",
-				defaultLocale,
+				guildLocale,
 			)({
 				votes: pluralise(
 					this.client,
 					"entry.verification.vote.rejectMultiple.votes",
-					defaultLanguage,
-					voteInformation.rejection.required,
+					guildLanguage,
+					voteInformation.rejection.remaining,
 				),
 			}),
 		};
@@ -158,7 +162,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 					],
 				},
 				{
-					title: diagnosticMentionUser(user),
+					title: diagnostics.display.user(user),
 					color: constants.colors.turquoise,
 					fields: [
 						{
@@ -179,7 +183,10 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 					],
 					footer: {
 						text: guild.name,
-						iconUrl: `${getGuildIconURLFormatted(bot, guild)}&metadata=${`${user.id}`}`,
+						iconUrl: `${getGuildIconURLFormatted(
+							bot,
+							guild,
+						)}&metadata=${`${user.id}${constants.symbols.meta.metadataSeparator}${reference}`}`,
 					},
 				},
 			],
@@ -191,7 +198,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 							type: Discord.MessageComponentTypes.Button,
 							style: Discord.ButtonStyles.Success,
 							label: voteInformation.acceptance.required === 1 ? strings.accept : strings.acceptMultiple,
-							customId: encodeId<InteractionData>(constants.staticComponentIds.verification, [
+							customId: encodeId<InteractionData>(constants.components.verification, [
 								user.id.toString(),
 								this.guildIdString,
 								reference,
@@ -202,7 +209,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 							type: Discord.MessageComponentTypes.Button,
 							style: Discord.ButtonStyles.Danger,
 							label: voteInformation.rejection.required === 1 ? strings.reject : strings.rejectMultiple,
-							customId: encodeId<InteractionData>(constants.staticComponentIds.verification, [
+							customId: encodeId<InteractionData>(constants.components.verification, [
 								user.id.toString(),
 								this.guildIdString,
 								reference,
@@ -220,6 +227,9 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 		interaction: Discord.Interaction,
 		data: InteractionData,
 	): Promise<Document<EntryRequest> | null | undefined> {
+		const localeData = await getLocaleData(this.client, interaction);
+		const locale = localeData.locale;
+
 		const configuration = this.configuration;
 		if (configuration === undefined || !configuration.enabled) {
 			return undefined;
@@ -235,7 +245,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 			BigInt(userId),
 		);
 		if (user === undefined) {
-			this.displayUserStateError(bot, interaction);
+			this.displayUserStateError(bot, interaction, { locale });
 			return undefined;
 		}
 
@@ -251,7 +261,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 
 		const guild = this.client.cache.guilds.get(guildId);
 		if (guild === undefined) {
-			this.displayVoteError(bot, interaction);
+			this.displayVoteError(bot, interaction, { locale });
 			return undefined;
 		}
 
@@ -268,7 +278,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 			]) as Document<EntryRequest> | undefined,
 		]);
 		if (voter === undefined || entryRequest === undefined) {
-			this.displayVoteError(bot, interaction);
+			this.displayVoteError(bot, interaction, { locale });
 			return undefined;
 		}
 
@@ -294,12 +304,8 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 			// If the voter has already voted to accept, and is voting to accept again.
 			if (alreadyVotedToAccept && isAccept) {
 				const strings = {
-					title: localise(this.client, "entry.verification.vote.alreadyVoted.inFavour.title", interaction.locale)(),
-					description: localise(
-						this.client,
-						"entry.verification.vote.alreadyVoted.inFavour.description",
-						interaction.locale,
-					)(),
+					title: localise(this.client, "entry.verification.vote.alreadyVoted.inFavour.title", locale)(),
+					description: localise(this.client, "entry.verification.vote.alreadyVoted.inFavour.description", locale)(),
 				};
 
 				reply([this.client, bot], interaction, {
@@ -316,12 +322,8 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 				// If the voter has already voted to reject, and is voting to reject again.
 			} else if (alreadyVotedToReject && !isAccept) {
 				const strings = {
-					title: localise(this.client, "entry.verification.vote.alreadyVoted.against.title", interaction.locale)(),
-					description: localise(
-						this.client,
-						"entry.verification.vote.alreadyVoted.against.description",
-						interaction.locale,
-					)(),
+					title: localise(this.client, "entry.verification.vote.alreadyVoted.against.title", locale)(),
+					description: localise(this.client, "entry.verification.vote.alreadyVoted.against.description", locale)(),
 				};
 
 				reply([this.client, bot], interaction, {
@@ -353,8 +355,8 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 				}
 
 				const strings = {
-					title: localise(this.client, "entry.verification.vote.stanceChanged.title", interaction.locale)(),
-					description: localise(this.client, "entry.verification.vote.stanceChanged.description", interaction.locale)(),
+					title: localise(this.client, "entry.verification.vote.stanceChanged.title", locale)(),
+					description: localise(this.client, "entry.verification.vote.stanceChanged.description", locale)(),
 				};
 
 				reply([this.client, bot], interaction, {
@@ -378,8 +380,8 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 		}
 
 		const [isAccepted, isRejected] = [
-			votedFor.length >= voteInformation.acceptance.remaining,
-			votedAgainst.length >= voteInformation.rejection.remaining,
+			votedFor.length >= voteInformation.acceptance.required,
+			votedAgainst.length >= voteInformation.rejection.required,
 		];
 
 		const submitter = this.client.cache.users.get(BigInt(user.data.account.id));
@@ -421,7 +423,9 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 				authorisedOn.push(this.guildIdString);
 			}
 
-			this.client.log.info(`User with ID ${user.data.account.id} has been accepted onto guild ${guild.name}.`);
+			this.client.log.info(
+				`Accepted ${diagnostics.display.user(user.data.account.id)} onto ${diagnostics.display.guild(guild)}.`,
+			);
 
 			Discord.addRole(
 				bot,
@@ -431,7 +435,9 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 				"User-requested role addition.",
 			).catch(() =>
 				this.client.log.warn(
-					`Failed to add role with ID ${entryRequest.data.requestedRole} to submitter with ID ${user.data.account.id} in guild with ID ${guild.id}.`,
+					`Failed to add ${diagnostics.display.role(entryRequest.data.requestedRole)} to ${diagnostics.display.user(
+						user.data.account.id,
+					)} on ${diagnostics.display.guild(guild)}.`,
 				),
 			);
 		} else if (isRejected) {
@@ -441,12 +447,16 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 				rejectedOn.push(this.guildIdString);
 			}
 
-			this.client.log.info(`User with ID ${user.data.account.id} has been rejected from guild ${guild.name}.`);
+			this.client.log.info(
+				`Rejected ${diagnostics.display.user(user.data.account.id)} from ${diagnostics.display.guild(guild)}.`,
+			);
 
 			Discord.banMember(bot, this.guildId, submitter.id, {
 				reason: "Voted to reject entry request.",
 			}).catch(() =>
-				this.client.log.warn(`Failed to ban member with ID ${user.data.account.id} on guild with ID ${this.guildId}.`),
+				this.client.log.warn(
+					`Failed to ban ${diagnostics.display.user(user.data.account.id)} on ${diagnostics.display.guild(guild)}.`,
+				),
 			);
 		}
 
@@ -509,10 +519,14 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 		return { acceptance, rejection };
 	}
 
-	private async displayVoteError(bot: Discord.Bot, interaction: Discord.Interaction): Promise<void> {
+	private async displayVoteError(
+		bot: Discord.Bot,
+		interaction: Discord.Interaction,
+		{ locale }: { locale: Locale },
+	): Promise<void> {
 		const strings = {
-			title: localise(this.client, "entry.verification.vote.failed.title", interaction.locale)(),
-			description: localise(this.client, "entry.verification.vote.failed.description", interaction.locale)(),
+			title: localise(this.client, "entry.verification.vote.failed.title", locale)(),
+			description: localise(this.client, "entry.verification.vote.failed.description", locale)(),
 		};
 
 		reply([this.client, bot], interaction, {
@@ -526,10 +540,14 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 		});
 	}
 
-	private async displayUserStateError(bot: Discord.Bot, interaction: Discord.Interaction): Promise<void> {
+	private async displayUserStateError(
+		bot: Discord.Bot,
+		interaction: Discord.Interaction,
+		{ locale }: { locale: Locale },
+	): Promise<void> {
 		const strings = {
-			title: localise(this.client, "entry.verification.vote.stateUpdateFailed.title", interaction.locale)(),
-			description: localise(this.client, "entry.verification.vote.stateUpdateFailed.description", interaction.locale)(),
+			title: localise(this.client, "entry.verification.vote.stateUpdateFailed.title", locale)(),
+			description: localise(this.client, "entry.verification.vote.stateUpdateFailed.description", locale)(),
 		};
 
 		reply([this.client, bot], interaction, {

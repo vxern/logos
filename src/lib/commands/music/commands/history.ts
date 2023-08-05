@@ -1,10 +1,10 @@
-import constants from "../../../../constants.js";
-import { defaultLocale } from "../../../../types.js";
-import { Client, localise } from "../../../client.js";
-import { parseArguments } from "../../../interactions.js";
-import { OptionTemplate } from "../../command.js";
-import { show } from "../../parameters.js";
-import { displayListings } from "../module.js";
+import constants from "../../../../constants/constants";
+import * as Logos from "../../../../types";
+import { Client, localise } from "../../../client";
+import { parseArguments, reply } from "../../../interactions";
+import { OptionTemplate } from "../../command";
+import { show } from "../../parameters";
+import { displayListings } from "../module";
 import * as Discord from "discordeno";
 
 const command: OptionTemplate = {
@@ -16,9 +16,10 @@ const command: OptionTemplate = {
 
 async function handleDisplayPlaybackHistory(
 	[client, bot]: [Client, Discord.Bot],
-	interaction: Discord.Interaction,
+	interaction: Logos.Interaction,
 ): Promise<void> {
 	const [{ show }] = parseArguments(interaction.data?.options, { show: "boolean" });
+	const locale = show ? interaction.guildLocale : interaction.locale;
 
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
@@ -30,14 +31,39 @@ async function handleDisplayPlaybackHistory(
 		return;
 	}
 
+	const isVoiceStateVerified = musicService.verifyVoiceState(bot, interaction, "check");
+	if (!isVoiceStateVerified) {
+		return;
+	}
+
+	const isOccupied = musicService.isOccupied;
+	if (!isOccupied) {
+		const locale = interaction.locale;
+		const strings = {
+			title: localise(client, "music.strings.notPlaying.title", locale)(),
+			description: {
+				toCheck: localise(client, "music.strings.notPlaying.description.toCheck", locale)(),
+			},
+		};
+
+		reply([client, bot], interaction, {
+			embeds: [
+				{
+					title: strings.title,
+					description: strings.description.toCheck,
+					color: constants.colors.dullYellow,
+				},
+			],
+		});
+		return;
+	}
+
 	const historyReversed = musicService.history;
 	if (historyReversed === undefined) {
 		return;
 	}
 
 	const history = structuredClone(historyReversed).reverse();
-
-	const locale = show ? defaultLocale : interaction.locale;
 
 	const strings = {
 		title: localise(client, "music.options.history.strings.playbackHistory", locale)(),
@@ -48,7 +74,7 @@ async function handleDisplayPlaybackHistory(
 		interaction,
 		{ title: `${constants.symbols.music.list} ${strings.title}`, songListings: history },
 		show ?? false,
-		locale,
+		{ locale },
 	);
 }
 
