@@ -1,4 +1,4 @@
-import { defaultLanguage } from "../../../constants/language";
+import defaults from "../../../defaults";
 import diagnostics from "../../diagnostics";
 import { CacheAdapter, Database, dispatchQuery, stringifyValue } from "../database";
 import { Document } from "../document";
@@ -61,7 +61,10 @@ const adapter: Database["adapters"]["guilds"] = {
 				createdAt: Date.now(),
 				id: id.toString(),
 				isNative: false,
-				language: defaultLanguage,
+				languages: {
+					localisation: defaults.LOCALISATION_LANGUAGE,
+					feature: defaults.FEATURE_LANGUAGE,
+				},
 				features: {
 					information: {
 						enabled: true,
@@ -80,6 +83,9 @@ const adapter: Database["adapters"]["guilds"] = {
 					language: {
 						enabled: true,
 						features: {
+							corrections: { enabled: true },
+							answers: { enabled: true },
+							cefr: { enabled: true, extended: false, examples: { enabled: false } },
 							game: { enabled: false },
 							resources: { enabled: false },
 							translate: { enabled: true },
@@ -92,6 +98,7 @@ const adapter: Database["adapters"]["guilds"] = {
 							alerts: { enabled: false },
 							policy: { enabled: false },
 							rules: { enabled: false },
+							slowmode: { enabled: true, journaling: true },
 							timeouts: { enabled: true, journaling: true },
 							purging: { enabled: true, journaling: true },
 							warns: { enabled: true, journaling: true, limit: 3, autoTimeout: { enabled: false } },

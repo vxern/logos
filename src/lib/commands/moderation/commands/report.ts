@@ -1,6 +1,8 @@
 import constants from "../../../../constants/constants";
+import { Locale } from "../../../../constants/language";
 import defaults from "../../../../defaults";
 import { trim } from "../../../../formatting";
+import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
 import { stringifyValue } from "../../../database/database";
 import { timeStructToMilliseconds } from "../../../database/structs/guild";
@@ -27,7 +29,9 @@ const command: CommandTemplate = {
 
 type ReportError = "failure" | "cannot_report_self";
 
-async function handleMakeReport([client, bot]: [Client, Discord.Bot], interaction: Discord.Interaction): Promise<void> {
+async function handleMakeReport([client, bot]: [Client, Discord.Bot], interaction: Logos.Interaction): Promise<void> {
+	const locale = interaction.locale;
+
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
 		return;
@@ -74,8 +78,8 @@ async function handleMakeReport([client, bot]: [Client, Discord.Bot], interactio
 	]);
 	if (reportsByAuthorAndGuild !== undefined) {
 		const strings = {
-			title: localise(client, "report.strings.tooMany.title", interaction.locale)(),
-			description: localise(client, "report.strings.tooMany.description", interaction.locale)(),
+			title: localise(client, "report.strings.tooMany.title", locale)(),
+			description: localise(client, "report.strings.tooMany.description", locale)(),
 		};
 
 		const intervalMilliseconds = timeStructToMilliseconds(configuration.rateLimit?.within ?? defaults.REPORT_INTERVAL);
@@ -101,7 +105,7 @@ async function handleMakeReport([client, bot]: [Client, Discord.Bot], interactio
 	}
 
 	createModalComposer<Report["answers"]>([client, bot], interaction, {
-		modal: generateReportModal(client, interaction.locale),
+		modal: generateReportModal(client, { locale }),
 		onSubmit: async (submission, answers) => {
 			await postponeReply([client, bot], submission);
 
@@ -138,8 +142,8 @@ async function handleMakeReport([client, bot]: [Client, Discord.Bot], interactio
 			reportService.registerHandler([userId.toString(), guild.id.toString(), reference]);
 
 			const strings = {
-				title: localise(client, "report.strings.submitted.title", interaction.locale)(),
-				description: localise(client, "report.strings.submitted.description", interaction.locale)(),
+				title: localise(client, "report.strings.submitted.title", locale)(),
+				description: localise(client, "report.strings.submitted.description", locale)(),
 			};
 
 			editReply([client, bot], submission, {
@@ -155,7 +159,7 @@ async function handleMakeReport([client, bot]: [Client, Discord.Bot], interactio
 			return true;
 		},
 		onInvalid: async (submission, error) =>
-			handleSubmittedInvalidReport([client, bot], submission, error as ReportError | undefined),
+			handleSubmittedInvalidReport([client, bot], submission, error as ReportError | undefined, { locale }),
 	});
 }
 
@@ -163,6 +167,7 @@ async function handleSubmittedInvalidReport(
 	[client, bot]: [Client, Discord.Bot],
 	submission: Discord.Interaction,
 	error: ReportError | undefined,
+	{ locale }: { locale: Locale },
 ): Promise<Discord.Interaction | undefined> {
 	return new Promise((resolve) => {
 		const continueId = createInteractionCollector([client, bot], {
@@ -195,10 +200,10 @@ async function handleSubmittedInvalidReport(
 				});
 
 				const strings = {
-					title: localise(client, "report.strings.sureToCancel.title", cancelSelection.locale)(),
-					description: localise(client, "report.strings.sureToCancel.description", cancelSelection.locale)(),
-					stay: localise(client, "prompts.stay", cancelSelection.locale)(),
-					leave: localise(client, "prompts.leave", cancelSelection.locale)(),
+					title: localise(client, "report.strings.sureToCancel.title", locale)(),
+					description: localise(client, "report.strings.sureToCancel.description", locale)(),
+					stay: localise(client, "prompts.stay", locale)(),
+					leave: localise(client, "prompts.leave", locale)(),
 				};
 
 				reply([client, bot], cancelSelection, {
@@ -236,8 +241,8 @@ async function handleSubmittedInvalidReport(
 		switch (error) {
 			case "cannot_report_self": {
 				const strings = {
-					title: localise(client, "report.strings.cannotReportSelf.title", submission.locale)(),
-					description: localise(client, "report.strings.cannotReportSelf.description", submission.locale)(),
+					title: localise(client, "report.strings.cannotReportSelf.title", locale)(),
+					description: localise(client, "report.strings.cannotReportSelf.description", locale)(),
 				};
 
 				embed = {
@@ -249,8 +254,8 @@ async function handleSubmittedInvalidReport(
 			}
 			default: {
 				const strings = {
-					title: localise(client, "report.strings.failed.title", submission.locale)(),
-					description: localise(client, "report.strings.failed.description", submission.locale)(),
+					title: localise(client, "report.strings.failed.title", locale)(),
+					description: localise(client, "report.strings.failed.description", locale)(),
 				};
 
 				editReply([client, bot], submission, {
@@ -267,8 +272,8 @@ async function handleSubmittedInvalidReport(
 		}
 
 		const strings = {
-			continue: localise(client, "prompts.continue", submission.locale)(),
-			cancel: localise(client, "prompts.cancel", submission.locale)(),
+			continue: localise(client, "prompts.continue", locale)(),
+			cancel: localise(client, "prompts.cancel", locale)(),
 		};
 
 		editReply([client, bot], submission, {
@@ -296,7 +301,7 @@ async function handleSubmittedInvalidReport(
 	});
 }
 
-function generateReportModal(client: Client, locale: string | undefined): Modal<Report["answers"]> {
+function generateReportModal(client: Client, { locale }: { locale: Locale }): Modal<Report["answers"]> {
 	const strings = {
 		title: localise(client, "report.title", locale)(),
 		reason: localise(client, "report.fields.reason", locale)(),

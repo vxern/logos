@@ -1,5 +1,4 @@
 import constants from "../../../../constants/constants";
-import { defaultLocale } from "../../../../constants/language";
 import { MentionTypes, mention } from "../../../../formatting";
 import { Client, localise } from "../../../client";
 import { HashableMessageContents, NoticeService } from "../service";
@@ -22,15 +21,16 @@ class WelcomeNoticeService extends NoticeService<"welcome"> {
 
 		const ruleChannelId = BigInt(configuration.ruleChannelId);
 
+		const guildLocale = this.guildLocale;
 		const strings = {
-			title: localise(this.client, "entry.welcome.title", defaultLocale)({ server_name: guild.name }),
+			title: localise(this.client, "entry.welcome.title", guildLocale)({ server_name: guild.name }),
 			description: {
 				toEnter: localise(
 					this.client,
 					"entry.welcome.description.toEnter",
-					defaultLocale,
+					guildLocale,
 				)({ information_channel_mention: mention(ruleChannelId, MentionTypes.Channel) }),
-				acceptedRules: localise(this.client, "entry.welcome.description.acceptedRules", defaultLocale)(),
+				acceptedRules: localise(this.client, "entry.welcome.description.acceptedRules", guildLocale)(),
 			},
 		};
 

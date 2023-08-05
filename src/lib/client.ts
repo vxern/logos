@@ -1,5 +1,11 @@
 import constants from "../constants/constants";
-import { Language, defaultLanguage, getLanguageByLocale, getLocaleForLanguage } from "../constants/language";
+import {
+	FeatureLanguage,
+	Locale,
+	LocalisationLanguage,
+	getDiscordLocaleByLanguage,
+	getLanguageByLocale,
+} from "../constants/language";
 import time from "../constants/time";
 import defaults from "../defaults";
 import { timestamp } from "../formatting";
@@ -19,7 +25,7 @@ import warnings from "./database/adapters/warnings";
 import { Database } from "./database/database";
 import { timeStructToMilliseconds } from "./database/structs/guild";
 import diagnostics from "./diagnostics";
-import { acknowledge, deleteReply, isAutocomplete, reply, respond } from "./interactions";
+import { acknowledge, deleteReply, getLocaleData, isAutocomplete, reply, respond } from "./interactions";
 import transformers from "./localisation/transformers";
 import { AlertService } from "./services/alert/alert";
 import { DynamicVoiceChannelService } from "./services/dynamic-voice-channels/dynamic-voice-channels";
@@ -78,12 +84,12 @@ type Client = {
 	};
 	collectors: Map<Event, Set<Collector<Event>>>;
 	features: {
-		dictionaryAdapters: Map<Language, DictionaryAdapter[]>;
-		sentencePairs: Map<Language, SentencePair[]>;
+		dictionaryAdapters: Map<FeatureLanguage, DictionaryAdapter[]>;
+		sentencePairs: Map<FeatureLanguage, SentencePair[]>;
 		// The keys are user IDs, the values are command usage timestamps mapped by command IDs.
 		rateLimiting: Map<bigint, Map<bigint, number[]>>;
 	};
-	localisations: Map<string, Map<Language, (args: Record<string, unknown>) => string>>;
+	localisations: Map<string, Map<LocalisationLanguage, (args: Record<string, unknown>) => string>>;
 	services: {
 		global: Service[];
 		local: Map<bigint, Service[]>;
@@ -126,7 +132,7 @@ type Logger = Record<"debug" | keyof typeof FancyLog, (...args: unknown[]) => vo
 function createClient(
 	metadata: Client["metadata"],
 	features: Client["features"],
-	localisationsStatic: Map<string, Map<Language, string>>,
+	localisationsStatic: Map<string, Map<LocalisationLanguage, string>>,
 ): Client {
 	const localisations = createLocalisations(localisationsStatic);
 
@@ -290,7 +296,7 @@ async function dispatchEvent<EventName extends keyof Discord.EventHandlers>(
 async function initialiseClient(
 	metadata: Client["metadata"],
 	features: Client["features"],
-	localisations: Map<string, Map<Language, string>>,
+	localisations: Map<string, Map<LocalisationLanguage, string>>,
 ): Promise<void> {
 	const client = createClient(metadata, features, localisations);
 
@@ -311,7 +317,7 @@ async function initialiseClient(
 					dispatchGlobal(client, "ready", { args });
 				},
 				async interactionCreate(bot, interaction) {
-					await handleInteractionCreate(client, bot, interaction);
+					await handleInteractionCreate([client, bot], interaction);
 
 					dispatchEvent(client, interaction.guildId, "interactionCreate", { args: [bot, interaction] });
 				},
@@ -670,21 +676,20 @@ export async function handleGuildDelete(client: Client, bot: Discord.Bot, guildI
 }
 
 async function handleInteractionCreate(
-	client: Client,
-	bot: Discord.Bot,
-	interaction: Discord.Interaction,
+	[client, bot]: [Client, Discord.Bot],
+	interactionRaw: Discord.Interaction,
 ): Promise<void> {
-	if (interaction.data?.customId === constants.components.none) {
-		acknowledge([client, bot], interaction);
+	if (interactionRaw.data?.customId === constants.components.none) {
+		acknowledge([client, bot], interactionRaw);
 		return;
 	}
 
-	const commandName = interaction.data?.name;
+	const commandName = interactionRaw.data?.name;
 	if (commandName === undefined) {
 		return;
 	}
 
-	const subCommandGroupOption = interaction.data?.options?.find((option) => isSubcommandGroup(option));
+	const subCommandGroupOption = interactionRaw.data?.options?.find((option) => isSubcommandGroup(option));
 
 	let commandNameFull: string;
 	if (subCommandGroupOption !== undefined) {
@@ -696,7 +701,7 @@ async function handleInteractionCreate(
 
 		commandNameFull = `${commandName} ${subCommandGroupName} ${subCommandName}`;
 	} else {
-		const subCommandName = interaction.data?.options?.find((option) => isSubcommand(option))?.name;
+		const subCommandName = interactionRaw.data?.options?.find((option) => isSubcommand(option))?.name;
 		if (subCommandName === undefined) {
 			commandNameFull = commandName;
 		} else {
@@ -705,7 +710,7 @@ async function handleInteractionCreate(
 	}
 
 	let handle: InteractionHandler | undefined;
-	if (isAutocomplete(interaction)) {
+	if (isAutocomplete(interactionRaw)) {
 		handle = client.commands.handlers.autocomplete.get(commandNameFull);
 	} else {
 		handle = client.commands.handlers.execute.get(commandNameFull);
@@ -713,6 +718,9 @@ async function handleInteractionCreate(
 	if (handle === undefined) {
 		return;
 	}
+
+	const localeData = await getLocaleData(client, interactionRaw);
+	const interaction: Logos.Interaction = { ...interactionRaw, ...localeData };
 
 	Promise.resolve(handle([client, bot], interaction)).catch((exception) => {
 		Sentry.captureException(exception);
@@ -828,6 +836,8 @@ function withRateLimiting(handle: InteractionHandler): InteractionHandler {
 			return;
 		}
 
+		const locale = interaction.locale;
+
 		const commandId = interaction.data?.id;
 		if (commandId === undefined) {
 			return handle([client, bot], interaction);
@@ -852,17 +862,17 @@ function withRateLimiting(handle: InteractionHandler): InteractionHandler {
 			const nextValidUsageTimestampFormatted = timestamp(nextValidUsageTimestamp);
 
 			const strings = {
-				title: localise(client, "interactions.rateLimited.title", interaction.locale)(),
+				title: localise(client, "interactions.rateLimited.title", locale)(),
 				description: {
 					tooManyUses: localise(
 						client,
 						"interactions.rateLimited.description.tooManyUses",
-						interaction.locale,
+						locale,
 					)({ times: defaults.RATE_LIMIT }),
 					cannotUseUntil: localise(
 						client,
 						"interactions.rateLimited.description.cannotUseAgainUntil",
-						interaction.locale,
+						locale,
 					)({ relative_timestamp: nextValidUsageTimestampFormatted }),
 				},
 			};
@@ -899,7 +909,7 @@ function localiseCommands<CommandsRaw extends Record<string, CommandTemplate>, C
 		}
 
 		const nameLocalisationsAll = localisations.get(`${key}.name`) ?? localisations.get(`parameters.${optionName}.name`);
-		const name = nameLocalisationsAll?.get(defaultLanguage)?.({});
+		const name = nameLocalisationsAll?.get(defaults.LOCALISATION_LANGUAGE)?.({});
 		if (name === undefined) {
 			console.warn(`Failed to get command name from localisation key '${key}'.`);
 			return undefined;
@@ -910,14 +920,17 @@ function localiseCommands<CommandsRaw extends Record<string, CommandTemplate>, C
 
 		const descriptionLocalisationsAll =
 			localisations.get(`${key}.description`) ?? localisations.get(`parameters.${optionName}.description`);
-		const description = descriptionLocalisationsAll?.get(defaultLanguage)?.({});
+		const description = descriptionLocalisationsAll?.get(defaults.LOCALISATION_LANGUAGE)?.({});
 		const descriptionLocalisations =
 			descriptionLocalisationsAll !== undefined ? toDiscordLocalisations(descriptionLocalisationsAll) : undefined;
 
 		return {
 			name,
 			nameLocalizations: nameLocalisations ?? {},
-			description: description ?? localisations.get("noDescription")?.get(defaultLanguage)?.({}) ?? "No description.",
+			description:
+				description ??
+				localisations.get("noDescription")?.get(defaults.LOCALISATION_LANGUAGE)?.({}) ??
+				"No description.",
 			descriptionLocalizations: descriptionLocalisations ?? {},
 		};
 	}
@@ -1219,7 +1232,7 @@ function resolveIdentifierToMembers(
 
 async function autocompleteMembers(
 	[client, bot]: [Client, Discord.Bot],
-	interaction: Discord.Interaction,
+	interaction: Logos.Interaction,
 	identifier: string,
 	options?: Partial<MemberNarrowingOptions>,
 ): Promise<void> {
@@ -1258,9 +1271,10 @@ async function autocompleteMembers(
 
 function resolveInteractionToMember(
 	[client, bot]: [Client, Discord.Bot],
-	interaction: Discord.Interaction,
+	interaction: Logos.Interaction,
 	identifier: string,
-	options?: Partial<MemberNarrowingOptions>,
+	options: Partial<MemberNarrowingOptions>,
+	{ locale }: { locale: Locale },
 ): Logos.Member | undefined {
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
@@ -1279,8 +1293,8 @@ function resolveInteractionToMember(
 
 	if (matchedMembers.length === 0) {
 		const strings = {
-			title: localise(client, "interactions.invalidUser.title", interaction.locale)(),
-			description: localise(client, "interactions.invalidUser.description", interaction.locale)(),
+			title: localise(client, "interactions.invalidUser.title", locale)(),
+			description: localise(client, "interactions.invalidUser.description", locale)(),
 		};
 
 		reply([client, bot], interaction, {
@@ -1329,7 +1343,9 @@ function isSubcommand(option: Discord.InteractionDataOption): boolean {
 	return option.type === Discord.ApplicationCommandOptionTypes.SubCommand;
 }
 
-function createLocalisations(localisationsRaw: Map<string, Map<Language, string>>): Client["localisations"] {
+function createLocalisations(
+	localisationsRaw: Map<string, Map<LocalisationLanguage, string>>,
+): Client["localisations"] {
 	const processLocalisation = (localisation: string, args: Record<string, unknown>) => {
 		let result = localisation;
 		for (const [key, value] of Object.entries(args)) {
@@ -1338,9 +1354,9 @@ function createLocalisations(localisationsRaw: Map<string, Map<Language, string>
 		return result;
 	};
 
-	const localisations = new Map<string, Map<Language, (args: Record<string, unknown>) => string>>();
+	const localisations = new Map<string, Map<LocalisationLanguage, (args: Record<string, unknown>) => string>>();
 	for (const [key, languages] of localisationsRaw.entries()) {
-		const functions = new Map<Language, (args: Record<string, unknown>) => string>();
+		const functions = new Map<LocalisationLanguage, (args: Record<string, unknown>) => string>();
 
 		for (const [language, string] of languages.entries()) {
 			functions.set(language, (args: Record<string, unknown>) => processLocalisation(string, args));
@@ -1352,16 +1368,17 @@ function createLocalisations(localisationsRaw: Map<string, Map<Language, string>
 	return localisations;
 }
 
-function localise(client: Client, key: string, locale: string | undefined): (args?: Record<string, unknown>) => string {
-	const language =
-		(locale !== undefined ? getLanguageByLocale(locale as Discord.Locales) : undefined) ?? defaultLanguage;
+function localise(client: Client, key: string, locale: Locale | undefined): (args?: Record<string, unknown>) => string {
+	const language = (locale !== undefined ? getLanguageByLocale(locale) : undefined) ?? defaults.LOCALISATION_LANGUAGE;
 
 	const getLocalisation =
-		client.localisations.get(key)?.get(language) ?? client.localisations.get(key)?.get(defaultLanguage) ?? (() => key);
+		client.localisations.get(key)?.get(language) ??
+		client.localisations.get(key)?.get(defaults.LOCALISATION_LANGUAGE) ??
+		(() => key);
 
 	return (args) => {
 		const string = getLocalisation(args ?? {});
-		if (language !== defaultLanguage && string.trim().length === 0) {
+		if (language !== defaults.LOCALISATION_LANGUAGE && string.trim().length === 0) {
 			return localise(client, key, undefined)(args ?? {});
 		}
 
@@ -1370,12 +1387,12 @@ function localise(client: Client, key: string, locale: string | undefined): (arg
 }
 
 function toDiscordLocalisations(
-	localisations: Map<Language, (args: Record<string, unknown>) => string>,
+	localisations: Map<LocalisationLanguage, (args: Record<string, unknown>) => string>,
 ): Discord.Localization {
 	const entries = Array.from(localisations.entries());
 	const result: Discord.Localization = {};
 	for (const [language, localise] of entries) {
-		const locale = getLocaleForLanguage(language);
+		const locale = getDiscordLocaleByLanguage(language);
 		if (locale === undefined) {
 			continue;
 		}
@@ -1390,7 +1407,7 @@ function toDiscordLocalisations(
 	return result;
 }
 
-function pluralise(client: Client, key: string, language: Language, number: number): string {
+function pluralise(client: Client, key: string, language: LocalisationLanguage, number: number): string {
 	const pluralise = transformers[language].pluralise;
 	const { one, two, many } = {
 		one: client.localisations.get(`${key}.one`)?.get(language)?.({ one: number }),

@@ -90,6 +90,11 @@ export default {
 			text: "📜",
 			voice: "🔊",
 		},
+		languages: {
+			languages: "🌍",
+			localisation: "🏠",
+			feature: "🎯",
+		},
 		owner: "👑",
 		moderators: "⚖️",
 		proficiencyDistribution: "🎓",
@@ -115,6 +120,7 @@ export default {
 		c: "🟥",
 	},
 	roles: {
+		folder: "📁",
 		noCategory: "💭",
 		unknownEmoji: "❓",
 		categories: {

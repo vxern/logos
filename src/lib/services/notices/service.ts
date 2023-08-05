@@ -88,12 +88,12 @@ abstract class NoticeService<NoticeType extends NoticeTypes> extends LocalServic
 
 		this.client.log.info(`Registering ${this.type} notices on ${diagnostics.display.guild(guild)}...`);
 
-		const expectedContent = this.generateNotice();
-		if (expectedContent === undefined) {
+		const expectedContents = this.generateNotice();
+		if (expectedContents === undefined) {
 			return;
 		}
 
-		const expectedHash = NoticeService.hash(expectedContent);
+		const expectedHash = NoticeService.hash(expectedContents);
 
 		const noticesAll = (await getAllMessages([this.client, bot], channelId)) ?? [];
 		if (noticesAll.length > 1) {
@@ -110,7 +110,7 @@ abstract class NoticeService<NoticeType extends NoticeTypes> extends LocalServic
 		}
 
 		if (noticesAll.length === 0) {
-			const notice = await this.saveNotice(bot, expectedContent, expectedHash);
+			const notice = await this.saveNotice(bot, expectedContents, expectedHash);
 			if (notice === undefined) {
 				return;
 			}
@@ -134,7 +134,7 @@ abstract class NoticeService<NoticeType extends NoticeTypes> extends LocalServic
 					this.client.log.warn("Failed to delete notice.");
 				});
 
-				const newNotice = await this.saveNotice(bot, contents, expectedHash);
+				const newNotice = await this.saveNotice(bot, expectedContents, expectedHash);
 				if (newNotice === undefined) {
 					return;
 				}
@@ -231,7 +231,6 @@ abstract class NoticeService<NoticeType extends NoticeTypes> extends LocalServic
 	static hash(contents: HashableMessageContents): string {
 		return Hash(contents, {
 			algorithm: "md5",
-			respectType: false,
 			unorderedArrays: true,
 			unorderedObjects: true,
 			unorderedSets: true,

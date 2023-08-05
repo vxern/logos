@@ -1,5 +1,5 @@
 import constants from "../../../../../constants/constants";
-import { defaultLocale } from "../../../../../constants/language";
+import { Locale } from "../../../../../constants/language";
 import { trim } from "../../../../../formatting";
 import * as Logos from "../../../../../types";
 import { Client, localise } from "../../../../client";
@@ -31,7 +31,7 @@ const command: OptionTemplate = {
  */
 async function handleOpenRoleSelectionMenu(
 	[client, bot]: [Client, Discord.Bot],
-	interaction: Discord.Interaction,
+	interaction: Logos.Interaction,
 ): Promise<void> {
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
@@ -125,9 +125,11 @@ function traverseRoleSelectionTree(data: NavigationData): [RoleCategory, ...Role
  */
 async function createRoleSelectionMenu(
 	[client, bot]: [Client, Discord.Bot],
-	interaction: Discord.Interaction,
+	interaction: Logos.Interaction,
 	data: BrowsingData,
 ): Promise<void> {
+	const locale = interaction.locale;
+
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
 		return;
@@ -172,7 +174,13 @@ async function createRoleSelectionMenu(
 
 			if (index === -1) {
 				data.navigationData.indexesAccessed.pop();
-				displayData = await traverseRoleTreeAndDisplay([client, bot], selection, displayData);
+				displayData = await traverseRoleTreeAndDisplay(
+					[client, bot],
+					selection,
+					displayData,
+					{ editResponse: true },
+					{ locale },
+				);
 				return;
 			}
 
@@ -183,7 +191,13 @@ async function createRoleSelectionMenu(
 
 			if (isGroup(viewData.category)) {
 				data.navigationData.indexesAccessed.push(index);
-				displayData = await traverseRoleTreeAndDisplay([client, bot], selection, displayData);
+				displayData = await traverseRoleTreeAndDisplay(
+					[client, bot],
+					selection,
+					displayData,
+					{ editResponse: true },
+					{ locale },
+				);
 				return;
 			}
 
@@ -199,7 +213,13 @@ async function createRoleSelectionMenu(
 					viewData.category.minimum !== undefined &&
 					viewData.memberRolesIncludedInMenu.length <= viewData.category.minimum
 				) {
-					displayData = await traverseRoleTreeAndDisplay([client, bot], interaction, displayData, true);
+					displayData = await traverseRoleTreeAndDisplay(
+						[client, bot],
+						interaction,
+						displayData,
+						{ editResponse: true },
+						{ locale },
+					);
 					return;
 				}
 
@@ -224,17 +244,17 @@ async function createRoleSelectionMenu(
 					viewData.memberRolesIncludedInMenu.length >= viewData.category.maximum
 				) {
 					const strings = {
-						title: localise(client, "warn.strings.limitReached.title", defaultLocale)(),
+						title: localise(client, "warn.strings.limitReached.title", locale)(),
 						description: {
 							limitReached: localise(
 								client,
 								"profile.options.roles.strings.limitReached.description.limitReached",
-								interaction.locale,
-							)({ category: localise(client, `${viewData.category.id}.name`, interaction.locale)() }),
+								locale,
+							)({ category: localise(client, `${viewData.category.id}.name`, locale)() }),
 							toChooseNew: localise(
 								client,
 								"profile.options.roles.strings.limitReached.description.toChooseNew",
-								interaction.locale,
+								locale,
 							)(),
 						},
 					};
@@ -248,7 +268,13 @@ async function createRoleSelectionMenu(
 						],
 					});
 
-					displayData = await traverseRoleTreeAndDisplay([client, bot], interaction, displayData, true);
+					displayData = await traverseRoleTreeAndDisplay(
+						[client, bot],
+						interaction,
+						displayData,
+						{ editResponse: true },
+						{ locale },
+					);
 					return;
 				}
 
@@ -281,7 +307,13 @@ async function createRoleSelectionMenu(
 				displayData.viewData?.memberRolesIncludedInMenu.push(role.id);
 			}
 
-			displayData = await traverseRoleTreeAndDisplay([client, bot], interaction, displayData, true);
+			displayData = await traverseRoleTreeAndDisplay(
+				[client, bot],
+				interaction,
+				displayData,
+				{ editResponse: true },
+				{ locale },
+			);
 		},
 	});
 
@@ -293,7 +325,8 @@ async function createRoleSelectionMenu(
 			browsingData: data,
 			roleData: { emojiIdsByName, rolesById, memberRoleIds: [...member.roles] },
 		},
-		false,
+		{ editResponse: false },
+		{ locale },
 	);
 }
 
@@ -322,7 +355,8 @@ async function traverseRoleTreeAndDisplay(
 	[client, bot]: [Client, Discord.Bot],
 	interaction: Discord.Interaction,
 	data: RoleDisplayData,
-	editResponse = true,
+	{ editResponse }: { editResponse: boolean },
+	{ locale }: { locale: Locale },
 ): Promise<RoleDisplayData> {
 	const categories = traverseRoleSelectionTree(data.browsingData.navigationData);
 	const category = categories.at(-1);
@@ -366,23 +400,20 @@ async function traverseRoleTreeAndDisplay(
 
 		data.viewData = { category, menuRoles, menuRolesResolved, memberRolesIncludedInMenu };
 
-		selectOptions = createSelectOptionsFromCollection(client, data, interaction.locale);
+		selectOptions = createSelectOptionsFromCollection(client, data, { locale });
 	} else {
 		if (data.viewData === undefined) {
 			data.viewData = { category, menuRoles: [], menuRolesResolved: [], memberRolesIncludedInMenu: [] };
 		}
 
-		selectOptions = createSelectOptionsFromCategories(
-			client,
-			category.categories,
-			data.browsingData.guildId,
-			interaction.locale,
-		);
+		selectOptions = createSelectOptionsFromCategories(client, category.categories, data.browsingData.guildId, {
+			locale,
+		});
 	}
 
 	data.viewData.category = category;
 
-	const menu = await displaySelectMenu(client, data, categories, selectOptions, interaction.locale);
+	const menu = await displaySelectMenu(client, data, categories, selectOptions, { locale });
 
 	if (editResponse) {
 		editReply([client, bot], interaction, menu);
@@ -400,7 +431,7 @@ async function displaySelectMenu(
 	data: RoleDisplayData,
 	categories: [RoleCategory, ...RoleCategory[]],
 	selectOptions: Discord.SelectOption[],
-	locale: string | undefined,
+	{ locale }: { locale: Locale },
 ): Promise<Discord.InteractionCallbackData> {
 	const isInRootCategory = data.browsingData.navigationData.indexesAccessed.length === 0;
 	if (!isInRootCategory) {
@@ -460,7 +491,7 @@ function createSelectOptionsFromCategories(
 	client: Client,
 	categories: RoleCategory[],
 	guildId: bigint,
-	locale: string | undefined,
+	{ locale }: { locale: Locale },
 ): Discord.SelectOption[] {
 	const categorySelections = getRoleCategories(categories, guildId);
 
@@ -475,7 +506,7 @@ function createSelectOptionsFromCategories(
 			label: trim(`${category.emoji} ${strings.name}`, 25),
 			value: index.toString(),
 			description: trim(strings.description, 100),
-			emoji: { name: "📁" },
+			emoji: { name: constants.symbols.roles.folder },
 		});
 	}
 
@@ -487,7 +518,7 @@ const emojiExpression = /\p{Extended_Pictographic}/u;
 function createSelectOptionsFromCollection(
 	client: Client,
 	data: RoleDisplayData,
-	locale: string | undefined,
+	{ locale }: { locale: Locale },
 ): Discord.SelectOption[] {
 	const selectOptions: Discord.SelectOption[] = [];
 

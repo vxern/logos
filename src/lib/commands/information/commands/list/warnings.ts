@@ -1,5 +1,7 @@
 import constants from "../../../../../constants/constants";
+import { Locale } from "../../../../../constants/language";
 import { timestamp } from "../../../../../formatting";
+import * as Logos from "../../../../../types";
 import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../../client";
 import { Document } from "../../../../database/document";
 import { Warning } from "../../../../database/structs/warning";
@@ -8,7 +10,7 @@ import * as Discord from "discordeno";
 
 async function handleDisplayWarningsAutocomplete(
 	[client, bot]: [Client, Discord.Bot],
-	interaction: Discord.Interaction,
+	interaction: Logos.Interaction,
 ): Promise<void> {
 	const [{ user }] = parseArguments(interaction.data?.options, {});
 	if (user === undefined) {
@@ -33,8 +35,10 @@ async function handleDisplayWarningsAutocomplete(
 
 async function handleDisplayWarnings(
 	[client, bot]: [Client, Discord.Bot],
-	interaction: Discord.Interaction,
+	interaction: Logos.Interaction,
 ): Promise<void> {
+	const locale = interaction.locale;
+
 	const [{ user }] = parseArguments(interaction.data?.options, {});
 
 	const permissions = interaction.member?.permissions;
@@ -44,9 +48,15 @@ async function handleDisplayWarnings(
 
 	const isModerator = Discord.calculatePermissions(permissions).includes("MODERATE_MEMBERS");
 
-	const member = resolveInteractionToMember([client, bot], interaction, user ?? interaction.user.id.toString(), {
-		restrictToSelf: !isModerator,
-	});
+	const member = resolveInteractionToMember(
+		[client, bot],
+		interaction,
+		user ?? interaction.user.id.toString(),
+		{
+			restrictToSelf: !isModerator,
+		},
+		{ locale },
+	);
 	if (member === undefined) {
 		return;
 	}
@@ -60,7 +70,7 @@ async function handleDisplayWarnings(
 		member.id,
 	);
 	if (recipient === undefined) {
-		displayError([client, bot], interaction);
+		displayError([client, bot], interaction, { locale });
 		return;
 	}
 
@@ -68,19 +78,23 @@ async function handleDisplayWarnings(
 		.getOrFetch(client, "recipient", recipient.ref)
 		.then((warnings) => (warnings !== undefined ? Array.from(warnings.values()) : undefined));
 	if (warnings === undefined) {
-		displayError([client, bot], interaction);
+		displayError([client, bot], interaction, { locale });
 		return;
 	}
 
 	reply([client, bot], interaction, {
-		embeds: [getWarningPage(client, warnings, isSelf, interaction.locale)],
+		embeds: [getWarningPage(client, warnings, isSelf, { locale })],
 	});
 }
 
-async function displayError([client, bot]: [Client, Discord.Bot], interaction: Discord.Interaction): Promise<void> {
+async function displayError(
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Logos.Interaction,
+	{ locale }: { locale: Locale },
+): Promise<void> {
 	const strings = {
-		title: localise(client, "list.options.warnings.strings.failed.title", interaction.locale)(),
-		description: localise(client, "list.options.warnings.strings.failed.description", interaction.locale)(),
+		title: localise(client, "list.options.warnings.strings.failed.title", locale)(),
+		description: localise(client, "list.options.warnings.strings.failed.description", locale)(),
 	};
 
 	reply([client, bot], interaction, {
@@ -98,7 +112,7 @@ function getWarningPage(
 	client: Client,
 	warnings: Document<Warning>[],
 	isSelf: boolean,
-	locale: string | undefined,
+	{ locale }: { locale: Locale },
 ): Discord.Embed {
 	if (warnings.length === 0) {
 		if (isSelf) {

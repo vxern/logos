@@ -1,5 +1,6 @@
 import constants from "../../../../constants/constants";
-import { defaultLocale } from "../../../../constants/language";
+import { Locale } from "../../../../constants/language";
+import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
 import { CefrConfiguration } from "../../../database/structs/guild";
 import {
@@ -36,9 +37,10 @@ type TabButtonMetadata = [tab: Tab];
 
 async function handleDisplayCefrGuide(
 	[client, bot]: [Client, Discord.Bot],
-	interaction: Discord.Interaction,
+	interaction: Logos.Interaction,
 ): Promise<void> {
 	const [{ show }] = parseArguments(interaction.data?.options, { show: "boolean" });
+	const locale = show ? interaction.guildLocale : interaction.locale;
 
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
@@ -50,8 +52,6 @@ async function handleDisplayCefrGuide(
 		return;
 	}
 
-	const locale = show ? defaultLocale : interaction.locale;
-
 	const levelExamples = guildDocument.data.features.language.features?.cefr?.examples;
 	if (levelExamples === undefined) {
 		return;
@@ -59,9 +59,9 @@ async function handleDisplayCefrGuide(
 
 	const isExtended = guildDocument.data.features.language.features?.cefr?.extended ?? false;
 
-	const guide = getBracketGuide(client, locale, { isExtended });
+	const guide = getBracketGuide(client, { isExtended }, { locale });
 	const examples = levelExamples.enabled
-		? getBracketExamples(client, levelExamples.levels, locale, { isExtended })
+		? getBracketExamples(client, levelExamples.levels, { isExtended }, { locale })
 		: undefined;
 
 	const data: Data = { bracket: "a", tab: "guide" };
@@ -238,8 +238,8 @@ async function handleDisplayCefrGuide(
 
 function getBracketGuide(
 	client: Client,
-	locale: string | undefined,
 	options: { isExtended: boolean },
+	{ locale }: { locale: Locale },
 ): Record<Bracket, Discord.Embed> {
 	const strings = {
 		brackets: {
@@ -348,8 +348,8 @@ function getBracketGuide(
 function getBracketExamples(
 	client: Client,
 	levels: NonNullable<CefrConfiguration["examples"]["levels"]>,
-	locale: string | undefined,
 	options: { isExtended: boolean },
+	{ locale }: { locale: Locale },
 ): Record<Bracket, Discord.Embed> {
 	const strings = {
 		brackets: {

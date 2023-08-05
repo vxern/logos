@@ -1,6 +1,7 @@
 import constants from "../../../../../constants/constants";
-import { defaultLocale } from "../../../../../constants/language";
+import { Locale } from "../../../../../constants/language";
 import { MentionTypes, mention } from "../../../../../formatting";
+import * as Logos from "../../../../../types";
 import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../../client";
 import { parseArguments, reply } from "../../../../interactions";
 import { OptionTemplate } from "../../../command";
@@ -17,7 +18,7 @@ const command: OptionTemplate = {
 
 async function handleDisplayProfileAutocomplete(
 	[client, bot]: [Client, Discord.Bot],
-	interaction: Discord.Interaction,
+	interaction: Logos.Interaction,
 ): Promise<void> {
 	const [{ user }] = parseArguments(interaction.data?.options, {});
 	if (user === undefined) {
@@ -29,11 +30,18 @@ async function handleDisplayProfileAutocomplete(
 
 async function handleDisplayProfile(
 	[client, bot]: [Client, Discord.Bot],
-	interaction: Discord.Interaction,
+	interaction: Logos.Interaction,
 ): Promise<void> {
 	const [{ user, show }] = parseArguments(interaction.data?.options, { show: "boolean" });
+	const locale = show ? interaction.guildLocale : interaction.locale;
 
-	const member = resolveInteractionToMember([client, bot], interaction, user ?? interaction.user.id.toString());
+	const member = resolveInteractionToMember(
+		[client, bot],
+		interaction,
+		user ?? interaction.user.id.toString(),
+		{},
+		{ locale },
+	);
 	if (member === undefined) {
 		return;
 	}
@@ -50,7 +58,8 @@ async function handleDisplayProfile(
 		member.id,
 	);
 	if (subject === undefined) {
-		displayError([client, bot], interaction);
+		const locale = interaction.locale;
+		displayError([client, bot], interaction, { locale });
 		return;
 	}
 
@@ -60,11 +69,10 @@ async function handleDisplayProfile(
 		client.database.adapters.warnings.getOrFetch(client, "recipient", subject.ref),
 	]);
 	if (praisesSent === undefined || praisesReceived === undefined || warningsReceived === undefined) {
-		displayError([client, bot], interaction);
+		const locale = interaction.locale;
+		displayError([client, bot], interaction, { locale });
 		return;
 	}
-
-	const locale = show ? defaultLocale : interaction.locale;
 
 	const strings = {
 		title: localise(
@@ -121,10 +129,14 @@ async function handleDisplayProfile(
 	);
 }
 
-async function displayError([client, bot]: [Client, Discord.Bot], interaction: Discord.Interaction): Promise<void> {
+async function displayError(
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Logos.Interaction,
+	{ locale }: { locale: Locale },
+): Promise<void> {
 	const strings = {
-		title: localise(client, "profile.options.view.strings.failed.title", interaction.locale)(),
-		description: localise(client, "profile.options.view.strings.failed.description", interaction.locale)(),
+		title: localise(client, "profile.options.view.strings.failed.title", locale)(),
+		description: localise(client, "profile.options.view.strings.failed.description", locale)(),
 	};
 
 	reply([client, bot], interaction, {

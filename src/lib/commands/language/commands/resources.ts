@@ -1,5 +1,5 @@
 import constants from "../../../../constants/constants";
-import { defaultLocale } from "../../../../constants/language";
+import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
 import { parseArguments, reply } from "../../../interactions";
 import { CommandTemplate } from "../../command";
@@ -17,21 +17,15 @@ const command: CommandTemplate = {
 /** Displays a message with information on where to find the resources for a given language. */
 async function handleDisplayResources(
 	[client, bot]: [Client, Discord.Bot],
-	interaction: Discord.Interaction,
+	interaction: Logos.Interaction,
 ): Promise<void> {
 	const [{ show }] = parseArguments(interaction.data?.options, { show: "boolean" });
+	const locale = show ? interaction.guildLocale : interaction.locale;
 
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
 		return;
 	}
-
-	const guildDocument = await client.database.adapters.guilds.getOrFetch(client, "id", guildId.toString());
-	if (guildDocument === undefined) {
-		return;
-	}
-
-	const locale = show ? defaultLocale : interaction.locale;
 
 	const strings = {
 		redirect: localise(
@@ -39,7 +33,7 @@ async function handleDisplayResources(
 			"resources.strings.redirect",
 			locale,
 		)({
-			language: localise(client, `languages.${guildDocument.data.language.toLowerCase()}`, locale)(),
+			language: localise(client, `languages.${interaction.featureLanguage}`, locale)(),
 		}),
 	};
 
@@ -55,7 +49,7 @@ async function handleDisplayResources(
 							type: Discord.MessageComponentTypes.Button,
 							label: strings.redirect,
 							style: Discord.ButtonStyles.Link,
-							url: constants.links.generateLanguageRepositoryLink(guildDocument.data.language),
+							url: constants.links.generateLanguageRepositoryLink(interaction.featureLanguage),
 						},
 					],
 				},

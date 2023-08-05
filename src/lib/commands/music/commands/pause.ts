@@ -1,5 +1,5 @@
 import constants from "../../../../constants/constants";
-import { defaultLocale } from "../../../../constants/language";
+import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
 import { reply } from "../../../interactions";
 import { OptionTemplate } from "../../command";
@@ -14,8 +14,10 @@ const command: OptionTemplate = {
 
 async function handlePausePlayback(
 	[client, bot]: [Client, Discord.Bot],
-	interaction: Discord.Interaction,
+	interaction: Logos.Interaction,
 ): Promise<void> {
+	const locale = interaction.guildLocale;
+
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
 		return;
@@ -33,10 +35,11 @@ async function handlePausePlayback(
 
 	const [isOccupied, isPaused] = [musicService.isOccupied, musicService.isPaused];
 	if (!isOccupied) {
+		const locale = interaction.locale;
 		const strings = {
-			title: localise(client, "music.strings.notPlaying.title", interaction.locale)(),
+			title: localise(client, "music.strings.notPlaying.title", locale)(),
 			description: {
-				toManage: localise(client, "music.strings.notPlaying.description.toManage", interaction.locale)(),
+				toManage: localise(client, "music.strings.notPlaying.description.toManage", locale)(),
 			},
 		};
 
@@ -64,8 +67,8 @@ async function handlePausePlayback(
 	musicService.pause();
 
 	const strings = {
-		title: localise(client, "music.options.pause.strings.paused.title", defaultLocale)(),
-		description: localise(client, "music.options.pause.strings.paused.description", defaultLocale)(),
+		title: localise(client, "music.options.pause.strings.paused.title", locale)(),
+		description: localise(client, "music.options.pause.strings.paused.description", locale)(),
 	};
 
 	reply(
