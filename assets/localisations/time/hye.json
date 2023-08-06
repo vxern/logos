@@ -7,7 +7,6 @@
 	"units.second.word.many": "{many} seconds",
 	"units.second.short": "sec",
 	"units.second.shortest": "s",
-
 	"units.minute.one": "minute",
 	"units.minute.two": "minutes",
 	"units.minute.many": "minutes",
@@ -16,7 +15,6 @@
 	"units.minute.word.many": "{many} minutes",
 	"units.minute.short": "min",
 	"units.minute.shortest": "m",
-
 	"units.hour.one": "hour",
 	"units.hour.two": "hours",
 	"units.hour.many": "hours",
@@ -25,7 +23,6 @@
 	"units.hour.word.many": "{many} hours",
 	"units.hour.short": "hr",
 	"units.hour.shortest": "h",
-
 	"units.day.one": "day",
 	"units.day.two": "days",
 	"units.day.many": "days",
@@ -34,7 +31,6 @@
 	"units.day.word.many": "{many} days",
 	"units.day.short": "d",
 	"units.day.shortest": "d",
-
 	"units.week.one": "week",
 	"units.week.two": "weeks",
 	"units.week.many": "weeks",
@@ -43,7 +39,6 @@
 	"units.week.word.many": "{many} weeks",
 	"units.week.short": "wk",
 	"units.week.shortest": "w",
-
 	"units.month.one": "month",
 	"units.month.two": "months",
 	"units.month.many": "months",
@@ -52,7 +47,6 @@
 	"units.month.word.many": "{many} months",
 	"units.month.short": "mth",
 	"units.month.shortest": "M",
-
 	"units.year.one": "year",
 	"units.year.two": "years",
 	"units.year.many": "years",
