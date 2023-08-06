@@ -473,6 +473,5 @@
     "profile.options.view.strings.information.description.received": "Received",
     "profile.options.view.strings.information.description.sent": "Sent",
     "profile.options.view.strings.information.description.praises": "Praises",
-    "profile.options.view.strings.information.description.warnings": "Warnings",
-    "slowmode.strings.levels.emergency": ""
+    "profile.options.view.strings.information.description.warnings": "Warnings"
 }
