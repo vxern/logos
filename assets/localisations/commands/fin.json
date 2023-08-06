@@ -474,10 +474,7 @@
     "profile.options.view.strings.information.description.sent": "Sent",
     "profile.options.view.strings.information.description.praises": "Praises",
     "profile.options.view.strings.information.description.warnings": "Warnings",
-    "cefr.description": "",
     "cefr.strings.levels.c2.title": "",
-    "correction.strings.cannotCorrectOwn.description": "",
     "slowmode.strings.levels.emergency": "",
-    "slowmode.strings.downgraded.title": "",
     "music.strings.outage.cannotManage.description.backUpSoon": ""
 }
