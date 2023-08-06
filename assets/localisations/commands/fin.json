@@ -474,16 +474,10 @@
     "profile.options.view.strings.information.description.sent": "Sent",
     "profile.options.view.strings.information.description.praises": "Praises",
     "profile.options.view.strings.information.description.warnings": "Warnings",
-    "answer.options.answer.description": "",
     "cefr.description": "",
-    "cefr.strings.levels.a2.title": "",
     "cefr.strings.levels.c2.title": "",
-    "correction.strings.textsNotDifferent.title": "",
     "correction.strings.cannotCorrectOwn.description": "",
-    "slowmode.description": "",
     "slowmode.strings.levels.emergency": "",
-    "slowmode.strings.invalid.title": "",
     "slowmode.strings.downgraded.title": "",
-    "music.options.volume.options.set.options.volume.description": "",
     "music.strings.outage.cannotManage.description.backUpSoon": ""
 }
