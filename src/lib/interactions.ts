@@ -3,7 +3,7 @@ import {
 	FeatureLanguage,
 	Locale,
 	LocalisationLanguage,
-	getLanguageByLocale,
+	getDiscordLanguageByLocale,
 	getLocaleByLanguage,
 } from "../constants/language";
 import time from "../constants/time";
@@ -696,21 +696,22 @@ async function getLocaleData(client: Client, interaction: Discord.Interaction): 
 	}
 
 	const guildLanguage = getLocalisationLanguage(guildDocument);
-	const guildLocale = getLocaleByLanguage(guildLanguage) ?? defaults.LOCALISATION_LOCALE;
+	const guildLocale = getLocaleByLanguage(guildLanguage);
 	const featureLanguage = getFeatureLanguage(guildDocument);
 
 	if (!isAutocomplete(interaction)) {
 		// If the user has configured a custom locale, use the user's preferred locale.
 		if (userDocument?.data.account.language !== undefined) {
 			const language = userDocument?.data.account.language;
-			const locale = getLocaleByLanguage(language) ?? defaults.LOCALISATION_LOCALE;
+			const locale = getLocaleByLanguage(language);
 			return { language, locale, guildLanguage, guildLocale, featureLanguage };
 		}
 	}
 
 	// Otherwise default to the user's app language.
-	const locale = (interaction.locale as Discord.Locale | undefined) ?? defaults.LOCALISATION_LOCALE;
-	const language = getLanguageByLocale(locale) ?? defaults.LOCALISATION_LANGUAGE;
+	const appLocale = interaction.locale as Discord.Locale | undefined;
+	const language = getDiscordLanguageByLocale(appLocale) ?? defaults.LOCALISATION_LANGUAGE;
+	const locale = getLocaleByLanguage(language);
 	return { language, locale, guildLanguage, guildLocale, featureLanguage };
 }
 

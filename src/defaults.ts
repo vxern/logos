@@ -1,10 +1,10 @@
-import { DefaultLanguage, DefaultLocale } from "./constants/language";
+import { FeatureLanguage, Locale, LocalisationLanguage } from "./constants/language";
 import { TimeStruct } from "./lib/database/structs/guild";
 
-const LOCALISATION_LOCALE: DefaultLocale = "en-GB";
-const LOCALISATION_LANGUAGE: DefaultLanguage = "English";
-const FEATURE_LOCALE: DefaultLocale = "en-GB";
-const FEATURE_LANGUAGE: DefaultLanguage = "English";
+const LOCALISATION_LOCALE: Locale = "eng-US";
+const LOCALISATION_LANGUAGE: LocalisationLanguage = "English/American";
+const FEATURE_LOCALE: Locale = "eng-US";
+const FEATURE_LANGUAGE: FeatureLanguage = "English";
 
 const RESULTS_PER_PAGE = 10;
 
