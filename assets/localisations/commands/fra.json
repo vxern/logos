@@ -569,6 +569,5 @@
     "profile.options.view.strings.information.description.received": "Reçu",
     "profile.options.view.strings.information.description.sent": "Envoyé",
     "profile.options.view.strings.information.description.praises": "Louanges",
-    "profile.options.view.strings.information.description.warnings": "Avertissements",
-    "settings.strings.settings.fields.language.description.noLanguageSet.defaultShown": ""
+    "profile.options.view.strings.information.description.warnings": "Avertissements"
 }

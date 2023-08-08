@@ -569,6 +569,5 @@
     "profile.options.view.strings.information.description.received": "Alınan",
     "profile.options.view.strings.information.description.sent": "Gönderilen",
     "profile.options.view.strings.information.description.praises": "Övgüler",
-    "profile.options.view.strings.information.description.warnings": "Uyarılar",
-    "settings.strings.cannotClear.title": ""
+    "profile.options.view.strings.information.description.warnings": "Uyarılar"
 }

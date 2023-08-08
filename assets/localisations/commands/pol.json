@@ -568,6 +568,5 @@
     "profile.options.view.strings.information.description.received": "Otrzymano",
     "profile.options.view.strings.information.description.sent": "Wysłano",
     "profile.options.view.strings.information.description.praises": "Pochwały",
-    "profile.options.view.strings.information.description.warnings": "Ostrzeżenia",
-    "settings.strings.invalid.title": ""
+    "profile.options.view.strings.information.description.warnings": "Ostrzeżenia"
 }

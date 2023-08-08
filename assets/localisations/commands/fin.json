@@ -472,11 +472,7 @@
     "profile.options.view.strings.information.description.sent": "Sent",
     "profile.options.view.strings.information.description.praises": "Praises",
     "profile.options.view.strings.information.description.warnings": "Warnings",
-    "settings.strings.settings.fields.language.description.noLanguageSet.defaultShown": "",
     "answer.options.answer.description": "",
-    "cefr.strings.levels.a2.title": "",
     "correction.strings.textsNotDifferent.description": "",
-    "slowmode.options.level.name": "",
-    "slowmode.strings.enabled.title": "",
-    "music.strings.notPlaying.description.toCheck": ""
+    "slowmode.strings.enabled.title": ""
 }

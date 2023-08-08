@@ -569,6 +569,5 @@
     "profile.options.view.strings.information.description.received": "Primite",
     "profile.options.view.strings.information.description.sent": "Trimise",
     "profile.options.view.strings.information.description.praises": "Laude",
-    "profile.options.view.strings.information.description.warnings": "Avertismente",
-    "settings.strings.cannotClear.title": ""
+    "profile.options.view.strings.information.description.warnings": "Avertismente"
 }
