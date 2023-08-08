@@ -570,7 +570,5 @@
     "profile.options.view.strings.information.description.sent": "Envoyé",
     "profile.options.view.strings.information.description.praises": "Louanges",
     "profile.options.view.strings.information.description.warnings": "Avertissements",
-    "settings.options.language.options.clear.description": "",
-    "settings.strings.settings.fields.language.description.noLanguageSet.defaultShown": "",
-    "settings.strings.languageUpdated.description": ""
+    "settings.strings.settings.fields.language.description.noLanguageSet.defaultShown": ""
 }

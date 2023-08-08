@@ -570,7 +570,5 @@
     "profile.options.view.strings.information.description.sent": "Trimise",
     "profile.options.view.strings.information.description.praises": "Laude",
     "profile.options.view.strings.information.description.warnings": "Avertismente",
-    "settings.options.language.options.set.name": "",
-    "settings.strings.cannotClear.title": "",
-    "settings.options.language.description": ""
+    "settings.strings.cannotClear.title": ""
 }

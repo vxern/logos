@@ -472,19 +472,11 @@
     "profile.options.view.strings.information.description.sent": "Sent",
     "profile.options.view.strings.information.description.praises": "Praises",
     "profile.options.view.strings.information.description.warnings": "Warnings",
-    "settings.options.language.options.clear.description": "",
     "settings.strings.settings.fields.language.description.noLanguageSet.defaultShown": "",
-    "settings.strings.languageUpdated.description": "",
     "answer.options.answer.description": "",
-    "cefr.description": "",
     "cefr.strings.levels.a2.title": "",
-    "cefr.strings.levels.c2.title": "",
     "correction.strings.textsNotDifferent.description": "",
-    "correction.strings.failed.title": "",
     "slowmode.options.level.name": "",
-    "slowmode.strings.levels.lockdown": "",
     "slowmode.strings.enabled.title": "",
-    "slowmode.strings.theSame.title": "",
-    "music.strings.notPlaying.description.toCheck": "",
-    "music.strings.outage.restored.description": ""
+    "music.strings.notPlaying.description.toCheck": ""
 }

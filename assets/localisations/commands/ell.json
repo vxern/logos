@@ -570,7 +570,5 @@
     "profile.options.view.strings.information.description.sent": "Sent",
     "profile.options.view.strings.information.description.praises": "Praises",
     "profile.options.view.strings.information.description.warnings": "Warnings",
-    "settings.strings.cannotClear.title": "",
-    "settings.description": "",
-    "settings.strings.languageUpdated.description": ""
+    "settings.description": ""
 }

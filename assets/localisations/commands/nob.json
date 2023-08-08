@@ -570,7 +570,5 @@
     "profile.options.view.strings.information.description.sent": "Sendt",
     "profile.options.view.strings.information.description.praises": "Roser",
     "profile.options.view.strings.information.description.warnings": "Advarsler",
-    "settings.options.language.options.clear.description": "",
-    "settings.strings.settings.fields.language.description.noLanguageSet.defaultShown": "",
-    "settings.strings.languageUpdated.description": ""
+    "settings.strings.settings.fields.language.description.noLanguageSet.defaultShown": ""
 }
