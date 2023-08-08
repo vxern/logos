@@ -27,6 +27,8 @@ interface Guild {
 	/** @since v3.5.0 */
 	languages?: {
 		localisation: LocalisationLanguage;
+		/** @since v3.8.0 */
+		target?: LocalisationLanguage;
 		feature: FeatureLanguage;
 	};
 
@@ -83,6 +85,11 @@ interface Guild {
 				translate: Activatable;
 
 				word: Activatable;
+
+				/** @since v3.8.0 */
+				targetOnly?: Activatable<{
+					channelIds: string[];
+				}>;
 			};
 		}>;
 

@@ -669,6 +669,10 @@ function getLocalisationLanguage(guildDocument: Document<Guild> | undefined): Lo
 	return guildDocument?.data.languages?.localisation ?? defaults.LOCALISATION_LANGUAGE;
 }
 
+function getTargetLanguage(guildDocument: Document<Guild>): LocalisationLanguage {
+	return guildDocument?.data.languages?.target ?? getLocalisationLanguage(guildDocument);
+}
+
 function getFeatureLanguage(guildDocument?: Document<Guild>): FeatureLanguage {
 	return guildDocument?.data.languages?.feature ?? defaults.FEATURE_LANGUAGE;
 }
@@ -695,7 +699,13 @@ async function getLocaleData(client: Client, interaction: Discord.Interaction): 
 		return FALLBACK_LOCALE_DATA;
 	}
 
-	const guildLanguage = getLocalisationLanguage(guildDocument);
+	const targetOnlyChannelIds = getTargetOnlyChannelIds(guildDocument);
+	const isInTargetOnlyChannel =
+		interaction.channelId !== undefined && targetOnlyChannelIds.includes(interaction.channelId);
+
+	const guildLanguage = isInTargetOnlyChannel
+		? getTargetLanguage(guildDocument)
+		: getLocalisationLanguage(guildDocument);
 	const guildLocale = getLocaleByLanguage(guildLanguage);
 	const featureLanguage = getFeatureLanguage(guildDocument);
 
@@ -713,6 +723,20 @@ async function getLocaleData(client: Client, interaction: Discord.Interaction): 
 	const language = getDiscordLanguageByDiscordLocale(appLocale) ?? defaults.LOCALISATION_LANGUAGE;
 	const locale = getLocaleByLanguage(language);
 	return { language, locale, guildLanguage, guildLocale, featureLanguage };
+}
+
+function getTargetOnlyChannelIds(guildDocument: Document<Guild>): bigint[] {
+	const language = guildDocument.data.features.language;
+	if (!language.enabled) {
+		return [];
+	}
+
+	const targetOnly = language.features.targetOnly;
+	if (targetOnly === undefined || !targetOnly.enabled) {
+		return [];
+	}
+
+	return targetOnly.channelIds.map((channelId) => BigInt(channelId));
 }
 
 export {
