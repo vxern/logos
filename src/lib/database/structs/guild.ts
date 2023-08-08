@@ -174,6 +174,12 @@ interface Guild {
 
 				entry: Activatable;
 
+				/** @since v3.7.0 */
+				roleIndicators?: Activatable<{
+					limit: number;
+					roles: RoleWithIndicator[];
+				}>;
+
 				/** User suggestions for the server. */
 				suggestions: Activatable<{
 					channelId: string;
@@ -270,5 +276,7 @@ type VerificationActivationRule =
 			value: TimeStruct;
 	  };
 
+type RoleWithIndicator = { roleId: string; indicator: string };
+
 export { timeStructToMilliseconds };
-export type { Guild, DynamicVoiceChannel, CefrConfiguration, TimeStruct };
+export type { Guild, DynamicVoiceChannel, CefrConfiguration, TimeStruct, RoleWithIndicator };

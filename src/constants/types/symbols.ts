@@ -10,6 +10,10 @@ export default {
 		information: "ℹ️",
 		inviteLink: "🔗",
 	},
+	sigils: {
+		divider: "﹘",
+		separator: "・",
+	},
 	events: {
 		user: {
 			banned: "⚔️",

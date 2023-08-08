@@ -41,6 +41,7 @@ import { ReportService } from "./services/prompts/types/reports";
 import { SuggestionService } from "./services/prompts/types/suggestions";
 import { VerificationService } from "./services/prompts/types/verification";
 import { RealtimeUpdateService } from "./services/realtime-updates/service";
+import { RoleIndicatorService } from "./services/role-indicators/role-indicators";
 import { Service } from "./services/service";
 import { StatusService } from "./services/status/service";
 import { fetchMembers } from "./utils";
@@ -114,6 +115,7 @@ type Client = {
 			verification: Map<bigint, VerificationService>;
 		};
 		realtimeUpdates: Map<bigint, RealtimeUpdateService>;
+		roleIndicators: Map<bigint, RoleIndicatorService>;
 		status: StatusService;
 	};
 };
@@ -217,6 +219,7 @@ function createClient(
 				verification: new Map(),
 			},
 			realtimeUpdates: new Map(),
+			roleIndicators: new Map(),
 			// @ts-ignore: Late assignment.
 			status: "late_assignment",
 		},
@@ -602,6 +605,13 @@ export async function handleGuildCreate(
 			services.push(service);
 
 			client.services.entry.set(guild.id, service);
+		}
+
+		if (server.roleIndicators?.enabled) {
+			const service = new RoleIndicatorService(client, guild.id);
+			services.push(service);
+
+			client.services.roleIndicators.set(guild.id, service);
 		}
 
 		if (server.suggestions.enabled) {

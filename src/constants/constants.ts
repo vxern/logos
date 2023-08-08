@@ -4,6 +4,7 @@ import contributions from "./types/contributions";
 import endpoints from "./types/endpoints";
 import gifs from "./types/gifs";
 import links from "./types/links";
+import patterns from "./types/patterns";
 import symbols from "./types/symbols";
 
 export default {
@@ -16,5 +17,6 @@ export default {
 	endpoints,
 	gifs,
 	links,
+	patterns,
 	symbols,
 };
