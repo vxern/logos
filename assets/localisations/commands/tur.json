@@ -570,10 +570,7 @@
     "profile.options.view.strings.information.description.sent": "Gönderilen",
     "profile.options.view.strings.information.description.praises": "Övgüler",
     "profile.options.view.strings.information.description.warnings": "Uyarılar",
-    "settings.options.language.name": "",
     "settings.options.language.options.set.name": "",
-    "settings.strings.settings.title": "",
     "settings.strings.cannotClear.title": "",
-    "settings.strings.languageUpdated.description": "",
     "settings.strings.invalid.description": ""
 }

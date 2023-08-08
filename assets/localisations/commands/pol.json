@@ -569,10 +569,7 @@
     "profile.options.view.strings.information.description.sent": "Wysłano",
     "profile.options.view.strings.information.description.praises": "Pochwały",
     "profile.options.view.strings.information.description.warnings": "Ostrzeżenia",
-    "settings.options.language.options.set.name": "",
     "settings.strings.settings.title": "",
-    "settings.strings.cannotClear.title": "",
     "settings.strings.invalid.title": "",
-    "settings.name": "",
     "settings.options.language.name": ""
 }
