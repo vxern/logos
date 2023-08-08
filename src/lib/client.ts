@@ -659,8 +659,6 @@ export async function handleGuildCreate(
 	});
 
 	client.services.local.set(guild.id, services);
-
-	global.gc?.();
 }
 
 export async function handleGuildDelete(client: Client, bot: Discord.Bot, guildId: bigint): Promise<void> {
