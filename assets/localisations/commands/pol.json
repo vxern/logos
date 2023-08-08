@@ -569,16 +569,10 @@
     "profile.options.view.strings.information.description.sent": "Wysłano",
     "profile.options.view.strings.information.description.praises": "Pochwały",
     "profile.options.view.strings.information.description.warnings": "Ostrzeżenia",
-    "settings.options.language.description": "",
     "settings.options.language.options.set.name": "",
-    "settings.options.language.options.set.options.language.name": "",
     "settings.strings.settings.title": "",
-    "settings.strings.settings.fields.language.description.noLanguageSet.noLanguageSet": "",
     "settings.strings.cannotClear.title": "",
-    "settings.strings.cleared.title": "",
     "settings.strings.invalid.title": "",
-    "settings.strings.languageUpdated.title": "",
     "settings.name": "",
-    "settings.options.view.name": "",
     "settings.options.language.name": ""
 }

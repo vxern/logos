@@ -570,16 +570,10 @@
     "profile.options.view.strings.information.description.sent": "Sent",
     "profile.options.view.strings.information.description.praises": "Praises",
     "profile.options.view.strings.information.description.warnings": "Warnings",
-    "settings.options.view.name": "",
     "settings.options.language.name": "",
-    "settings.options.language.options.clear.name": "",
     "settings.options.language.options.set.name": "",
-    "settings.options.language.options.set.options.language.name": "",
     "settings.strings.settings.title": "",
-    "settings.strings.settings.fields.language.description.noLanguageSet.noLanguageSet": "",
     "settings.strings.cannotClear.title": "",
-    "settings.strings.cleared.title": "",
     "settings.strings.invalid.title": "",
-    "settings.strings.languageUpdated.title": "",
     "settings.name": ""
 }
