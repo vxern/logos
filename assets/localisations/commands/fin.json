@@ -471,6 +471,5 @@
     "profile.options.view.strings.information.description.received": "Received",
     "profile.options.view.strings.information.description.sent": "Sent",
     "profile.options.view.strings.information.description.praises": "Praises",
-    "profile.options.view.strings.information.description.warnings": "Warnings",
-    "correction.strings.textsNotDifferent.description": ""
+    "profile.options.view.strings.information.description.warnings": "Warnings"
 }
