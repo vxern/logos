@@ -20,12 +20,6 @@ const languages = {
 	feature: ["Armenian", "English", "Romanian"],
 } as const;
 
-type DiscordLanguage = typeof languages.localisation.discord[number];
-type LogosLanguage = typeof languages.localisation.logos[number];
-
-type LocalisationLanguage = DiscordLanguage | LogosLanguage;
-type FeatureLanguage = typeof languages.feature[number];
-
 const languageToLocale = {
 	discord: {
 		"English/American": "en-US",
@@ -57,6 +51,17 @@ const languageToLocale = {
 	} as const satisfies Record<LocalisationLanguage, string>,
 } as const;
 
+const localeToLanguage = {
+	discord: reverseObject(languageToLocale.discord),
+	logos: reverseObject(languageToLocale.logos),
+} as const;
+
+type DiscordLanguage = typeof languages.localisation.discord[number];
+type LogosLanguage = typeof languages.localisation.logos[number];
+
+type LocalisationLanguage = DiscordLanguage | LogosLanguage;
+type FeatureLanguage = typeof languages.feature[number];
+
 type DiscordLocale = typeof languageToLocale.discord[keyof typeof languageToLocale.discord];
 type Locale = typeof languageToLocale.logos[keyof typeof languageToLocale.logos];
 
@@ -68,12 +73,7 @@ function getLocaleByLanguage(language: LocalisationLanguage): Locale {
 	return languageToLocale.logos[language];
 }
 
-const localeToLanguage = {
-	discord: reverseObject(languageToLocale.discord),
-	logos: reverseObject(languageToLocale.logos),
-} as const;
-
-function getDiscordLanguageByLocale(locale: string | undefined): DiscordLanguage | undefined {
+function getDiscordLanguageByDiscordLocale(locale: string | undefined): DiscordLanguage | undefined {
 	if (locale === undefined || !(locale in localeToLanguage.discord)) {
 		return undefined;
 	}
@@ -85,7 +85,15 @@ function getLanguageByLocale(locale: Locale): LocalisationLanguage {
 	return localeToLanguage.logos[locale];
 }
 
+function isBuiltIn(language: string): language is DiscordLanguage {
+	return (languages.localisation.discord as readonly string[]).includes(language);
+}
+
 function isLocalised(language: string): language is LocalisationLanguage {
+	if (isBuiltIn(language)) {
+		return true;
+	}
+
 	return (languages.localisation.logos as readonly string[]).includes(language);
 }
 
@@ -105,12 +113,17 @@ function reverseObject<O extends Record<string, string>>(object: O): Reverse<O> 
 	return reversed as unknown as Reverse<O>;
 }
 
+export default {
+	localisation: [...languages.localisation.discord, ...languages.localisation.logos],
+	feature: languages.feature,
+};
 export {
 	getDiscordLocaleByLanguage,
 	getLanguageByLocale,
-	getDiscordLanguageByLocale,
+	getDiscordLanguageByDiscordLocale,
 	getLocaleByLanguage,
 	isLocalised,
 	isFeatured,
+	isBuiltIn,
 };
 export type { FeatureLanguage, LocalisationLanguage, Locale };

@@ -33,7 +33,7 @@ async function handleDisplayResources(
 			"resources.strings.redirect",
 			locale,
 		)({
-			language: localise(client, `languages.${interaction.featureLanguage}`, locale)(),
+			language: localise(client, `languages.${interaction.featureLanguage.toLowerCase()}`, locale)(),
 		}),
 	};
 

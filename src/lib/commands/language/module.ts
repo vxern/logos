@@ -1,5 +1,5 @@
 import constants from "../../../constants/constants";
-import { FeatureLanguage } from "../../../constants/language";
+import { FeatureLanguage } from "../../../constants/languages";
 import { Client } from "../../client";
 import { addParametersToURL } from "../../utils";
 import partsOfSpeech, { PartOfSpeech } from "./dictionaries/parts-of-speech";

@@ -1,4 +1,4 @@
-import { Locale } from "../../../../constants/language";
+import { Locale } from "../../../../constants/languages";
 import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
 import { parseArguments, reply } from "../../../interactions";

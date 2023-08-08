@@ -1,4 +1,4 @@
-import { LocalisationLanguage } from "../../../constants/language";
+import { LocalisationLanguage } from "../../../constants/languages";
 
 /** Represents a user account. */
 interface Account {

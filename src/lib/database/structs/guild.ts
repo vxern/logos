@@ -1,4 +1,4 @@
-import { FeatureLanguage, LocalisationLanguage } from "../../../constants/language";
+import { FeatureLanguage, LocalisationLanguage } from "../../../constants/languages";
 import time from "../../../constants/time";
 
 /** @since v3.0.0 */

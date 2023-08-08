@@ -1,5 +1,5 @@
 import constants from "../../../constants/constants";
-import { FeatureLanguage, Locale } from "../../../constants/language";
+import { FeatureLanguage, Locale } from "../../../constants/languages";
 import { trim } from "../../../formatting";
 import * as Logos from "../../../types";
 import { localise } from "../../client";

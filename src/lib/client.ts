@@ -5,7 +5,8 @@ import {
 	LocalisationLanguage,
 	getDiscordLocaleByLanguage,
 	getLanguageByLocale,
-} from "../constants/language";
+	isBuiltIn,
+} from "../constants/languages";
 import time from "../constants/time";
 import defaults from "../defaults";
 import { timestamp } from "../formatting";
@@ -457,7 +458,7 @@ export async function handleGuildCreate(
 
 	const commands = client.commands.commands;
 
-	const guildCommands: Command[] = [commands.information];
+	const guildCommands: Command[] = [commands.information, commands.settings];
 	const services: Service[] = [];
 
 	const realtimeUpdateService = new RealtimeUpdateService(client, guild.id, guildDocument.ref);
@@ -1392,6 +1393,10 @@ function toDiscordLocalisations(
 	const entries = Array.from(localisations.entries());
 	const result: Discord.Localization = {};
 	for (const [language, localise] of entries) {
+		if (!isBuiltIn(language)) {
+			continue;
+		}
+
 		const locale = getDiscordLocaleByLanguage(language);
 		if (locale === undefined) {
 			continue;

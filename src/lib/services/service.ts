@@ -1,4 +1,4 @@
-import { Locale, getLocaleByLanguage } from "../../constants/language";
+import { Locale, getLocaleByLanguage } from "../../constants/languages";
 import defaults from "../../defaults";
 import * as Logos from "../../types";
 import { Client } from "../client";

@@ -1,6 +1,5 @@
 import constants from "../../../../constants/constants";
-import { getLocaleByLanguage } from "../../../../constants/language";
-import defaults from "../../../../defaults";
+import { getLocaleByLanguage } from "../../../../constants/languages";
 import { codeMultiline } from "../../../../formatting";
 import { localise } from "../../../client";
 import diagnostics from "../../../diagnostics";
@@ -16,7 +15,7 @@ export default {
 		}
 
 		const guildLanguage = getLocalisationLanguage(guildDocument);
-		const guildLocale = getLocaleByLanguage(guildLanguage) ?? defaults.LOCALISATION_LOCALE;
+		const guildLocale = getLocaleByLanguage(guildLanguage);
 		const featureLanguage = getFeatureLanguage(guildDocument);
 
 		const strings = {

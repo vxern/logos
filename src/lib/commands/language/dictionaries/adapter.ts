@@ -1,4 +1,4 @@
-import { FeatureLanguage, Locale } from "../../../../constants/language";
+import { FeatureLanguage, Locale } from "../../../../constants/languages";
 import { Client } from "../../../client";
 import { PartOfSpeech } from "./parts-of-speech";
 import * as Discord from "discordeno";

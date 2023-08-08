@@ -1,4 +1,4 @@
-import { FeatureLanguage, Locale, LocalisationLanguage } from "./constants/language";
+import { FeatureLanguage, Locale, LocalisationLanguage } from "./constants/languages";
 import * as Discord from "discordeno";
 
 type Guild = Pick<

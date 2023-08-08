@@ -1,5 +1,5 @@
 import constants from "../../../../constants/constants";
-import { Locale, LocalisationLanguage } from "../../../../constants/language";
+import { Locale, LocalisationLanguage } from "../../../../constants/languages";
 import defaults from "../../../../defaults";
 import { code } from "../../../../formatting";
 import * as Logos from "../../../../types";

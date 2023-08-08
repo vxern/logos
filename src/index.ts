@@ -1,4 +1,4 @@
-import { FeatureLanguage, LocalisationLanguage, getLanguageByLocale, isFeatured } from "./constants/language";
+import { FeatureLanguage, Locale, LocalisationLanguage, getLanguageByLocale, isFeatured } from "./constants/languages";
 import { capitalise } from "./formatting";
 import { Client, initialiseClient } from "./lib/client";
 import { SentencePair } from "./lib/commands/language/commands/game";
@@ -6,7 +6,6 @@ import { DictionaryAdapter } from "./lib/commands/language/dictionaries/adapter"
 import dictionaryAdapters from "./lib/commands/language/dictionaries/adapters";
 import { getSupportedLanguages } from "./lib/commands/language/module";
 import * as csv from "csv-parse/sync";
-import * as Discord from "discordeno";
 import * as dotenv from "dotenv";
 import * as fs from "fs/promises";
 import * as Sentry from "sentry";
@@ -94,7 +93,7 @@ async function loadLocalisations(directoryPath: string): Promise<Map<string, Map
 				continue;
 			}
 
-			const [locale, _] = entryPath.split(".") as [Discord.Locales, string];
+			const [locale, _] = entryPath.split(".") as [Locale, string];
 			const language = getLanguageByLocale(locale);
 			if (language === undefined) {
 				continue;

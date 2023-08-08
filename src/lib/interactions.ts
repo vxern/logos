@@ -3,9 +3,9 @@ import {
 	FeatureLanguage,
 	Locale,
 	LocalisationLanguage,
-	getDiscordLanguageByLocale,
+	getDiscordLanguageByDiscordLocale,
 	getLocaleByLanguage,
-} from "../constants/language";
+} from "../constants/languages";
 import time from "../constants/time";
 import defaults from "../defaults";
 import * as Logos from "../types";
@@ -709,8 +709,8 @@ async function getLocaleData(client: Client, interaction: Discord.Interaction): 
 	}
 
 	// Otherwise default to the user's app language.
-	const appLocale = interaction.locale as Discord.Locale | undefined;
-	const language = getDiscordLanguageByLocale(appLocale) ?? defaults.LOCALISATION_LANGUAGE;
+	const appLocale = interaction.locale;
+	const language = getDiscordLanguageByDiscordLocale(appLocale) ?? defaults.LOCALISATION_LANGUAGE;
 	const locale = getLocaleByLanguage(language);
 	return { language, locale, guildLanguage, guildLocale, featureLanguage };
 }

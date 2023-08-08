@@ -1,4 +1,4 @@
-import { FeatureLanguage } from "../../../../constants/language";
+import { FeatureLanguage } from "../../../../constants/languages";
 
 type PartOfSpeech =
 	| "noun"

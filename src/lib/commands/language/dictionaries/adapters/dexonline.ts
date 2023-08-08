@@ -1,5 +1,5 @@
 import constants from "../../../../../constants/constants";
-import { FeatureLanguage, Locale } from "../../../../../constants/language";
+import { FeatureLanguage, Locale } from "../../../../../constants/languages";
 import { Client, localise } from "../../../../client";
 import { chunk } from "../../../../utils";
 import { getPartOfSpeech } from "../../module";

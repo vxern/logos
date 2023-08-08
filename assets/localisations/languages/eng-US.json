@@ -1,5 +1,7 @@
 {
 	"languages.armenian": "Armenian",
+	"languages.armenian.eastern": "Armenian (Eastern)",
+	"languages.armenian.western": "Armenian (Western)",
 	"languages.belarusian": "Belarusian",
 	"languages.bulgarian": "Bulgarian",
 	"languages.chinese": "Chinese",
