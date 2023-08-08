@@ -1,13 +1,13 @@
 {
-	"policies.moderation.title": "Polityka moderowania",
-	"policies.moderation.points.introduction.title": "Jak działa moderacja serwera?",
-	"policies.moderation.points.introduction.description": "Na serwerze obowiązuje polityka moderacji na bazie trzech ostrzeżeń, zgodnie z którą działają moderatorzy serwera.",
-	"policies.moderation.points.breach.title": "Gdzie obowiązują reguły?",
-	"policies.moderation.points.breach.description": "Reguły serwera obowiązują dla każdego użytkownika, a poważne ich naruszenie zaskutkuje wydaniem ostrzeżenia.",
-	"policies.moderation.points.warnings.title": "Co, jeśli dostanę parę ostrzeżeń?",
-	"policies.moderation.points.warnings.description": "W przypadku gdy użytkownik ma już trzy ostrzeżenia, przy otrzymaniu czwartego ostrzeżenia, użytkownik dostanie timeout. Ostrzeżenia wygasają po upływie __dwóch miesięcy__.",
-	"policies.moderation.points.furtherAction.title": "A potem?",
-	"policies.moderation.points.furtherAction.description": "Następnie, moderatorzy serwera zostaną poinformowani o tym, że dany limit ostrzeżeń przekroczono, po czym przejrzą oraz zbadają sytuację i zdecydują, co dalej.",
-	"policies.moderation.points.ban.title": "A co jeśli mnie to nie obchodzi?",
-	"policies.moderation.points.ban.description": "Jeśli zostanie stwierdzone, że dany użytkownik świadomie i stale lekceważył reguły serwera i/lub ignorował sugestie moderatorów, użytkownik zostanie trwale usunięty z serwera (permaban)."
+    "policies.moderation.title": "Polityka moderowania",
+    "policies.moderation.points.introduction.title": "W jaki sposób działa moderowanie serwera?",
+    "policies.moderation.points.introduction.description": "Na serwerze obowiązuje polityka moderowania na bazie trzech ostrzeżeń, zgodnie z którą działają moderatorzy serwera.",
+    "policies.moderation.points.breach.title": "Gdzie obowiązują reguły?",
+    "policies.moderation.points.breach.description": "Reguły serwera obowiązują dla każdego użytkownika, a ich naruszenie zaskutkuje wydaniem ostrzeżenia.",
+    "policies.moderation.points.warnings.title": "Co, jeśli dostałem/am już kilka ostrzeżeń?",
+    "policies.moderation.points.warnings.description": "W przypadku gdy użytkownik ma już trzy ostrzeżenia, przy otrzymaniu czwartego ostrzeżenia, użytkownik zostanie wyciszony na pewny okres czasu. Ostrzeżenia wygasają po upływie __dwóch miesięcy__.",
+    "policies.moderation.points.furtherAction.title": "I co potem?",
+    "policies.moderation.points.furtherAction.description": "Następnie, moderatorzy serwera zostaną poinformowani o tym, że został przekroczony limit ostrzeżeń, po czym ustalą okoliczności zdarzenia, i zdecydują, co dalej.",
+    "policies.moderation.points.ban.title": "A co jeśli mnie to nie obchodzi?",
+    "policies.moderation.points.ban.description": "Jeśli zostanie stwierdzone, że dany użytkownik świadomie i stale lekceważy reguły serwera i/lub ignoruje sugestie moderatorów, użytkownik zostanie usunięty z serwera na stałe."
 }
