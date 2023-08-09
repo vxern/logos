@@ -32,7 +32,7 @@ class RoleIndicatorService extends LocalService {
 				continue;
 			}
 
-			this.guildMemberUpdate(bot, member, member.user);
+			await this.guildMemberUpdate(bot, member, member.user);
 		}
 	}
 
@@ -79,6 +79,9 @@ class RoleIndicatorService extends LocalService {
 				console.warn("Failed to set member's role indicators."),
 			);
 
+			// Fix for Discordeno rate-limiting being broken.
+			await new Promise((resolve) => setTimeout(resolve, 3000));
+
 			return;
 		}
 
@@ -94,6 +97,9 @@ class RoleIndicatorService extends LocalService {
 				console.warn("Failed to set member's role indicators."),
 			);
 
+			// Fix for Discordeno rate-limiting being broken.
+			await new Promise((resolve) => setTimeout(resolve, 3000));
+
 			return;
 		}
 
@@ -106,6 +112,10 @@ class RoleIndicatorService extends LocalService {
 			Discord.editMember(bot, member.guildId, user.id, { nick: username }).catch(() =>
 				console.warn("Failed to reset member's role indicators."),
 			);
+
+			// Fix for Discordeno rate-limiting being broken.
+			await new Promise((resolve) => setTimeout(resolve, 3000));
+
 			return;
 		}
 
@@ -121,6 +131,9 @@ class RoleIndicatorService extends LocalService {
 		Discord.editMember(bot, member.guildId, user.id, { nick: nicknameModified }).catch(() =>
 			console.warn("Failed to update member's role indicators."),
 		);
+
+		// Fix for Discordeno rate-limiting being broken.
+		await new Promise((resolve) => setTimeout(resolve, 3000));
 	}
 }
 
