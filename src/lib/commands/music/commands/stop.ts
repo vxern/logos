@@ -1,5 +1,5 @@
 import constants from "../../../../constants/constants";
-import { defaultLocale } from "../../../../constants/language";
+import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
 import { reply } from "../../../interactions";
 import { OptionTemplate } from "../../command";
@@ -11,10 +11,9 @@ const command: OptionTemplate = {
 	handle: handleStopPlayback,
 };
 
-async function handleStopPlayback(
-	[client, bot]: [Client, Discord.Bot],
-	interaction: Discord.Interaction,
-): Promise<void> {
+async function handleStopPlayback([client, bot]: [Client, Discord.Bot], interaction: Logos.Interaction): Promise<void> {
+	const locale = interaction.guildLocale;
+
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
 		return;
@@ -32,10 +31,11 @@ async function handleStopPlayback(
 
 	const isOccupied = musicService.isOccupied;
 	if (!isOccupied) {
+		const locale = interaction.locale;
 		const strings = {
-			title: localise(client, "music.strings.notPlaying.title", interaction.locale)(),
+			title: localise(client, "music.strings.notPlaying.title", locale)(),
 			description: {
-				toManage: localise(client, "music.strings.notPlaying.description.toManage", interaction.locale)(),
+				toManage: localise(client, "music.strings.notPlaying.description.toManage", locale)(),
 			},
 		};
 
@@ -54,8 +54,8 @@ async function handleStopPlayback(
 	musicService.destroySession();
 
 	const strings = {
-		title: localise(client, "music.options.stop.strings.stopped.title", defaultLocale)(),
-		description: localise(client, "music.options.stop.strings.stopped.description", defaultLocale)(),
+		title: localise(client, "music.options.stop.strings.stopped.title", locale)(),
+		description: localise(client, "music.options.stop.strings.stopped.description", locale)(),
 	};
 
 	reply(

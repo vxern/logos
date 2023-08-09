@@ -1,5 +1,5 @@
 import constants from "../../../../constants/constants";
-import { defaultLocale } from "../../../../constants/language";
+import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
 import { reply } from "../../../interactions";
 import { OptionTemplate } from "../../command";
@@ -13,8 +13,10 @@ const command: OptionTemplate = {
 
 async function handleResumePlayback(
 	[client, bot]: [Client, Discord.Bot],
-	interaction: Discord.Interaction,
+	interaction: Logos.Interaction,
 ): Promise<void> {
+	const locale = interaction.guildLocale;
+
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
 		return;
@@ -32,10 +34,11 @@ async function handleResumePlayback(
 
 	const [isOccupied, isPaused] = [musicService.isOccupied, musicService.isPaused];
 	if (!isOccupied) {
+		const locale = interaction.locale;
 		const strings = {
-			title: localise(client, "music.strings.notPlaying.title", interaction.locale)(),
+			title: localise(client, "music.strings.notPlaying.title", locale)(),
 			description: {
-				toManage: localise(client, "music.strings.notPlaying.description.toManage", interaction.locale)(),
+				toManage: localise(client, "music.strings.notPlaying.description.toManage", locale)(),
 			},
 		};
 
@@ -56,9 +59,10 @@ async function handleResumePlayback(
 	}
 
 	if (!isPaused) {
+		const locale = interaction.locale;
 		const strings = {
-			title: localise(client, "music.options.resume.strings.notPaused.title", interaction.locale)(),
-			description: localise(client, "music.options.resume.strings.notPaused.description", interaction.locale)(),
+			title: localise(client, "music.options.resume.strings.notPaused.title", locale)(),
+			description: localise(client, "music.options.resume.strings.notPaused.description", locale)(),
 		};
 
 		reply([client, bot], interaction, {
@@ -76,8 +80,8 @@ async function handleResumePlayback(
 	musicService.resume();
 
 	const strings = {
-		title: localise(client, "music.options.resume.strings.resumed.title", defaultLocale)(),
-		description: localise(client, "music.options.resume.strings.resumed.description", defaultLocale)(),
+		title: localise(client, "music.options.resume.strings.resumed.title", locale)(),
+		description: localise(client, "music.options.resume.strings.resumed.description", locale)(),
 	};
 
 	reply(

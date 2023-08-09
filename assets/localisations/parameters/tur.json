@@ -1,0 +1,20 @@
+{
+    "parameters.user.name": "kullanıcı",
+    "parameters.user.description": "Kullanıcının kullanıcı adı, tag'i, ID'si veya bahsedilişi.",
+    "parameters.show.name": "göster",
+    "parameters.show.description": "Açıldığında sonuçlar öbürlerine görülebilecek.",
+    "parameters.duration.name": "süre",
+    "parameters.duration.description": "Yaptırımın süresi.",
+    "parameters.reason.name": "sebep",
+    "parameters.reason.description": "Yaptırımın veya yürürlükten kalkması için sebep. Açıklayıcı olmalı.",
+    "parameters.query.name": "girdi",
+    "parameters.query.description": "Bir şarkı veya şarkı koleksiyonuna başlık veya bağlantı.",
+    "parameters.timestamp.name": "zaman-damgası",
+    "parameters.timestamp.description": "Aranacak zaman damgası.",
+    "parameters.collection.name": "koleksiyon",
+    "parameters.collection.description": "Açıldığında, işlem şarkı koleksiyonunda yapılır.",
+    "parameters.by.name": "tarafından",
+    "parameters.by.description": "Geçilecek şarkılar veya şarkı listelerinin sayısı.",
+    "parameters.to.name": "hedef",
+    "parameters.to.description": "Atlanacak parçanın indeksi."
+}

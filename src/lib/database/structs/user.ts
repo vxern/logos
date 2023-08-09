@@ -1,7 +1,16 @@
+import { LocalisationLanguage } from "../../../constants/languages";
+
 /** Represents a user account. */
 interface Account {
 	/** User's Discord ID. */
 	id: string;
+
+	/**
+	 * User's preferred localisation language.
+	 *
+	 * @since v3.5.0
+	 */
+	language?: LocalisationLanguage;
 
 	/** IDs of servers the user's entry request has been accepted on. */
 	authorisedOn?: string[];

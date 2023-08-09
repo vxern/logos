@@ -1,6 +1,8 @@
 import constants from "../../../../constants/constants";
+import { Locale } from "../../../../constants/languages";
 import defaults from "../../../../defaults";
 import { MentionTypes, mention } from "../../../../formatting";
+import * as Logos from "../../../../types";
 import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../client";
 import { timeStructToMilliseconds } from "../../../database/structs/guild";
 import { Praise } from "../../../database/structs/praise";
@@ -27,7 +29,7 @@ const command: CommandTemplate = {
 
 async function handlePraiseUserAutocomplete(
 	[client, bot]: [Client, Discord.Bot],
-	interaction: Discord.Interaction,
+	interaction: Logos.Interaction,
 ): Promise<void> {
 	const [{ user }] = parseArguments(interaction.data?.options, {});
 	if (user === undefined) {
@@ -37,7 +39,9 @@ async function handlePraiseUserAutocomplete(
 	autocompleteMembers([client, bot], interaction, user);
 }
 
-async function handlePraiseUser([client, bot]: [Client, Discord.Bot], interaction: Discord.Interaction): Promise<void> {
+async function handlePraiseUser([client, bot]: [Client, Discord.Bot], interaction: Logos.Interaction): Promise<void> {
+	const locale = interaction.locale;
+
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
 		return;
@@ -63,15 +67,15 @@ async function handlePraiseUser([client, bot]: [Client, Discord.Bot], interactio
 		return;
 	}
 
-	const member = resolveInteractionToMember([client, bot], interaction, user);
+	const member = resolveInteractionToMember([client, bot], interaction, user, {}, { locale });
 	if (member === undefined) {
 		return;
 	}
 
 	if (member.id === interaction.member?.id) {
 		const strings = {
-			title: localise(client, "praise.strings.cannotPraiseSelf.title", interaction.locale)(),
-			description: localise(client, "praise.strings.cannotPraiseSelf.description", interaction.locale)(),
+			title: localise(client, "praise.strings.cannotPraiseSelf.title", locale)(),
+			description: localise(client, "praise.strings.cannotPraiseSelf.description", locale)(),
 		};
 
 		reply([client, bot], interaction, {
@@ -99,13 +103,13 @@ async function handlePraiseUser([client, bot]: [Client, Discord.Bot], interactio
 	]);
 
 	if (author === undefined || subject === undefined) {
-		displayError([client, bot], interaction);
+		displayError([client, bot], interaction, { locale });
 		return;
 	}
 
 	const praisesBySender = await client.database.adapters.praises.getOrFetch(client, "sender", author.ref);
 	if (praisesBySender === undefined) {
-		displayError([client, bot], interaction);
+		displayError([client, bot], interaction, { locale });
 		return;
 	}
 
@@ -114,8 +118,8 @@ async function handlePraiseUser([client, bot]: [Client, Discord.Bot], interactio
 	const praises = Array.from(praisesBySender.values());
 	if (!verifyIsWithinLimits(praises, configuration.rateLimit?.uses ?? defaults.PRAISE_LIMIT, intervalMilliseconds)) {
 		const strings = {
-			title: localise(client, "praise.strings.tooMany.title", interaction.locale)(),
-			description: localise(client, "praise.strings.tooMany.description", interaction.locale)(),
+			title: localise(client, "praise.strings.tooMany.title", locale)(),
+			description: localise(client, "praise.strings.tooMany.description", locale)(),
 		};
 
 		editReply([client, bot], interaction, {
@@ -144,7 +148,7 @@ async function handlePraiseUser([client, bot]: [Client, Discord.Bot], interactio
 
 	const document = await client.database.adapters.praises.create(client, praise);
 	if (document === undefined) {
-		displayError([client, bot], interaction);
+		displayError([client, bot], interaction, { locale });
 		return;
 	}
 
@@ -154,11 +158,11 @@ async function handlePraiseUser([client, bot]: [Client, Discord.Bot], interactio
 	}
 
 	const strings = {
-		title: localise(client, "praise.strings.praised.title", interaction.locale)(),
+		title: localise(client, "praise.strings.praised.title", locale)(),
 		description: localise(
 			client,
 			"praise.strings.praised.description",
-			interaction.locale,
+			locale,
 		)({ user_mention: mention(member.id, MentionTypes.User) }),
 	};
 
@@ -173,10 +177,14 @@ async function handlePraiseUser([client, bot]: [Client, Discord.Bot], interactio
 	});
 }
 
-async function displayError([client, bot]: [Client, Discord.Bot], interaction: Discord.Interaction): Promise<void> {
+async function displayError(
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Logos.Interaction,
+	{ locale }: { locale: Locale },
+): Promise<void> {
 	const strings = {
-		title: localise(client, "praise.strings.failed.title", interaction.locale)(),
-		description: localise(client, "praise.strings.failed.description", interaction.locale)(),
+		title: localise(client, "praise.strings.failed.title", locale)(),
+		description: localise(client, "praise.strings.failed.description", locale)(),
 	};
 
 	editReply([client, bot], interaction, {

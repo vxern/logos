@@ -1,5 +1,5 @@
 import constants from "../../../../constants/constants";
-import { defaultLocale } from "../../../../constants/language";
+import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
 import diagnostics from "../../../diagnostics";
 import { editReply, parseArguments, postponeReply, reply, respond } from "../../../interactions";
@@ -80,8 +80,10 @@ const languageNameToStringKey: Record<string, string> = Object.freeze({
 
 async function handleTranslateTextAutocomplete(
 	[client, bot]: [Client, Discord.Bot],
-	interaction: Discord.Interaction,
+	interaction: Logos.Interaction,
 ): Promise<void> {
+	const locale = interaction.locale;
+
 	const [_, focused] = parseArguments(interaction.data?.options, { show: "boolean" });
 
 	const guildId = interaction.guildId;
@@ -112,7 +114,7 @@ async function handleTranslateTextAutocomplete(
 			}
 
 			const strings = {
-				language: localise(client, languageStringKey, interaction.locale)(),
+				language: localise(client, languageStringKey, locale)(),
 			};
 
 			return {
@@ -130,30 +132,33 @@ async function handleTranslateTextAutocomplete(
 /** Allows the user to translate text from one language to another through the DeepL API. */
 async function handleTranslateText(
 	[client, bot]: [Client, Discord.Bot],
-	interaction: Discord.Interaction,
+	interaction: Logos.Interaction,
 ): Promise<void> {
 	const [{ from, to, text, show }] = parseArguments(interaction.data?.options, { show: "boolean" });
 	if (from === undefined || to === undefined || text === undefined) {
 		return;
 	}
 
+	const locale = show ? interaction.guildLocale : interaction.locale;
+
 	const sourceLanguage = resolveToSupportedLanguage(client, from);
 	const targetLanguage = resolveToSupportedLanguage(client, to);
 	const isSourceLanguageInvalid = sourceLanguage === undefined;
 	const isTargetLanguageInvalid = targetLanguage === undefined;
 	if (isSourceLanguageInvalid || isTargetLanguageInvalid) {
+		const locale = interaction.locale;
 		const strings = {
 			source: {
-				title: localise(client, "translate.strings.invalid.source.title", interaction.locale)(),
-				description: localise(client, "translate.strings.invalid.source.description", interaction.locale)(),
+				title: localise(client, "translate.strings.invalid.source.title", locale)(),
+				description: localise(client, "translate.strings.invalid.source.description", locale)(),
 			},
 			target: {
-				title: localise(client, "translate.strings.invalid.target.title", interaction.locale)(),
-				description: localise(client, "translate.strings.invalid.target.description", interaction.locale)(),
+				title: localise(client, "translate.strings.invalid.target.title", locale)(),
+				description: localise(client, "translate.strings.invalid.target.description", locale)(),
 			},
 			both: {
-				title: localise(client, "translate.strings.invalid.both.title", interaction.locale)(),
-				description: localise(client, "translate.strings.invalid.both.description", interaction.locale)(),
+				title: localise(client, "translate.strings.invalid.both.title", locale)(),
+				description: localise(client, "translate.strings.invalid.both.description", locale)(),
 			},
 		};
 
@@ -185,9 +190,10 @@ async function handleTranslateText(
 
 	const isSourceTextEmpty = text.trim().length === 0;
 	if (isSourceTextEmpty) {
+		const locale = interaction.locale;
 		const strings = {
-			title: localise(client, "translate.strings.textEmpty.title", interaction.locale)(),
-			description: localise(client, "translate.strings.textEmpty.description", interaction.locale)(),
+			title: localise(client, "translate.strings.textEmpty.title", locale)(),
+			description: localise(client, "translate.strings.textEmpty.description", locale)(),
 		};
 
 		reply([client, bot], interaction, {
@@ -203,9 +209,10 @@ async function handleTranslateText(
 	}
 
 	if (from === to) {
+		const locale = interaction.locale;
 		const strings = {
-			title: localise(client, "translate.strings.languagesNotDifferent.title", interaction.locale)(),
-			description: localise(client, "translate.strings.languagesNotDifferent.description", interaction.locale)(),
+			title: localise(client, "translate.strings.languagesNotDifferent.title", locale)(),
+			description: localise(client, "translate.strings.languagesNotDifferent.description", locale)(),
 		};
 
 		reply([client, bot], interaction, {
@@ -237,8 +244,6 @@ async function handleTranslateText(
 			targetLanguage.name
 		} as requested by ${diagnostics.display.user(interaction.user)} on ${guild.name}...`,
 	);
-
-	const locale = show ? defaultLocale : interaction.locale;
 
 	const translation = await translate(client, sourceLanguage.code, targetLanguage.code, text);
 	if (translation === undefined) {

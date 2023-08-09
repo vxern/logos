@@ -1,6 +1,8 @@
 import constants from "../../../../constants/constants";
+import { Locale } from "../../../../constants/languages";
 import defaults from "../../../../defaults";
 import { trim } from "../../../../formatting";
+import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
 import { stringifyValue } from "../../../database/database";
 import { timeStructToMilliseconds } from "../../../database/structs/guild";
@@ -29,8 +31,10 @@ type SuggestionError = "failure";
 
 async function handleMakeSuggestion(
 	[client, bot]: [Client, Discord.Bot],
-	interaction: Discord.Interaction,
+	interaction: Logos.Interaction,
 ): Promise<void> {
+	const locale = interaction.locale;
+
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
 		return;
@@ -89,8 +93,8 @@ async function handleMakeSuggestion(
 			)
 		) {
 			const strings = {
-				title: localise(client, "suggestion.strings.tooMany.title", interaction.locale)(),
-				description: localise(client, "suggestion.strings.tooMany.description", interaction.locale)(),
+				title: localise(client, "suggestion.strings.tooMany.title", locale)(),
+				description: localise(client, "suggestion.strings.tooMany.description", locale)(),
 			};
 
 			reply([client, bot], interaction, {
@@ -112,7 +116,7 @@ async function handleMakeSuggestion(
 	}
 
 	createModalComposer<Suggestion["answers"]>([client, bot], interaction, {
-		modal: generateSuggestionModal(client, interaction.locale),
+		modal: generateSuggestionModal(client, { locale }),
 		onSubmit: async (submission, answers) => {
 			await postponeReply([client, bot], submission);
 
@@ -149,8 +153,8 @@ async function handleMakeSuggestion(
 			suggestionService.registerHandler([userId.toString(), guild.id.toString(), reference]);
 
 			const strings = {
-				title: localise(client, "suggestion.strings.sent.title", interaction.locale)(),
-				description: localise(client, "suggestion.strings.sent.description", interaction.locale)(),
+				title: localise(client, "suggestion.strings.sent.title", locale)(),
+				description: localise(client, "suggestion.strings.sent.description", locale)(),
 			};
 
 			editReply([client, bot], submission, {
@@ -166,7 +170,7 @@ async function handleMakeSuggestion(
 			return true;
 		},
 		onInvalid: async (submission, error) =>
-			handleSubmittedInvalidSuggestion([client, bot], submission, error as SuggestionError | undefined),
+			handleSubmittedInvalidSuggestion([client, bot], submission, error as SuggestionError | undefined, { locale }),
 	});
 }
 
@@ -174,6 +178,7 @@ async function handleSubmittedInvalidSuggestion(
 	[client, bot]: [Client, Discord.Bot],
 	submission: Discord.Interaction,
 	error: SuggestionError | undefined,
+	{ locale }: { locale: Locale },
 ): Promise<Discord.Interaction | undefined> {
 	return new Promise((resolve) => {
 		const continueId = createInteractionCollector([client, bot], {
@@ -206,10 +211,10 @@ async function handleSubmittedInvalidSuggestion(
 				});
 
 				const strings = {
-					title: localise(client, "suggestion.strings.sureToCancel.title", cancelSelection.locale)(),
-					description: localise(client, "suggestion.strings.sureToCancel.description", cancelSelection.locale)(),
-					stay: localise(client, "prompts.stay", cancelSelection.locale)(),
-					leave: localise(client, "prompts.leave", cancelSelection.locale)(),
+					title: localise(client, "suggestion.strings.sureToCancel.title", locale)(),
+					description: localise(client, "suggestion.strings.sureToCancel.description", locale)(),
+					stay: localise(client, "prompts.stay", locale)(),
+					leave: localise(client, "prompts.leave", locale)(),
 				};
 
 				reply([client, bot], cancelSelection, {
@@ -247,8 +252,8 @@ async function handleSubmittedInvalidSuggestion(
 		switch (error) {
 			default: {
 				const strings = {
-					title: localise(client, "suggestion.strings.failed", submission.locale)(),
-					description: localise(client, "suggestion.strings.failed", submission.locale)(),
+					title: localise(client, "suggestion.strings.failed", locale)(),
+					description: localise(client, "suggestion.strings.failed", locale)(),
 				};
 
 				editReply([client, bot], submission, {
@@ -266,8 +271,8 @@ async function handleSubmittedInvalidSuggestion(
 		}
 
 		const strings = {
-			continue: localise(client, "prompts.continue", submission.locale)(),
-			cancel: localise(client, "prompts.cancel", submission.locale)(),
+			continue: localise(client, "prompts.continue", locale)(),
+			cancel: localise(client, "prompts.cancel", locale)(),
 		};
 
 		editReply([client, bot], submission, {
@@ -295,7 +300,7 @@ async function handleSubmittedInvalidSuggestion(
 	});
 }
 
-function generateSuggestionModal(client: Client, locale: string | undefined): Modal<Suggestion["answers"]> {
+function generateSuggestionModal(client: Client, { locale }: { locale: Locale }): Modal<Suggestion["answers"]> {
 	const strings = {
 		title: localise(client, "suggestion.title", locale)(),
 		suggestion: localise(client, "suggestion.fields.suggestion", locale)(),

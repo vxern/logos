@@ -1,0 +1,22 @@
+{
+	"verification.title": "Ερωτήσεις επαλήθευσης",
+	"verification.fields.reason": "Ποιος είναι ο λόγος για τον οποίο μαθαίνετε {language};",
+	"verification.fields.aim": "Πώς θα ωφεληθείτε αν γίνετε μέλος;",
+	"verification.fields.whereFound": "Πού μάθατε για τον διακομιστή;",
+	"answer.title": "Answer",
+	"answer.fields.question": "Question",
+	"answer.fields.answer": "Answer",
+	"correction.title": "Correction",
+	"correction.fields.original": "Original text",
+	"correction.fields.corrected": "Corrected text",
+	"report.title": "Αναφορά χρήστη",
+	"report.fields.reason": "Ποιος είναι ο λόγος της έκθεσης;",
+	"report.fields.users": "Χρήστες για αναφορά",
+	"report.fields.link": "Σύνδεσμος στο μήνυμα για το πλαίσιο",
+	"suggestion.title": "Πρόταση",
+	"suggestion.fields.suggestion": "Ποια είναι η πρότασή σας;",
+	"prompts.continue": "Συνεχίστε",
+	"prompts.cancel": "Ακύρωση",
+	"prompts.stay": "Take me back",
+	"prompts.leave": "Leave"
+}

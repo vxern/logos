@@ -10,6 +10,10 @@ export default {
 		information: "ℹ️",
 		inviteLink: "🔗",
 	},
+	sigils: {
+		divider: "﹘",
+		separator: "・",
+	},
 	events: {
 		user: {
 			banned: "⚔️",
@@ -90,6 +94,11 @@ export default {
 			text: "📜",
 			voice: "🔊",
 		},
+		languages: {
+			languages: "🌍",
+			localisation: "🏠",
+			feature: "🎯",
+		},
 		owner: "👑",
 		moderators: "⚖️",
 		proficiencyDistribution: "🎓",
@@ -115,6 +124,7 @@ export default {
 		c: "🟥",
 	},
 	roles: {
+		folder: "📁",
 		noCategory: "💭",
 		unknownEmoji: "❓",
 		categories: {

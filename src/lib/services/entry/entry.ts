@@ -1,5 +1,5 @@
 import constants from "../../../constants/constants";
-import { Language } from "../../../constants/language";
+import { FeatureLanguage, Locale } from "../../../constants/languages";
 import { trim } from "../../../formatting";
 import * as Logos from "../../../types";
 import { localise } from "../../client";
@@ -8,7 +8,16 @@ import { stringifyValue } from "../../database/database";
 import { EntryRequest } from "../../database/structs/entry-request";
 import { Guild, timeStructToMilliseconds } from "../../database/structs/guild";
 import diagnostics from "../../diagnostics";
-import { Modal, createModalComposer, decodeId, editReply, encodeId, postponeReply, reply } from "../../interactions";
+import {
+	Modal,
+	createModalComposer,
+	decodeId,
+	editReply,
+	encodeId,
+	getLocaleData,
+	postponeReply,
+	reply,
+} from "../../interactions";
 import { snowflakeToTimestamp } from "../../utils";
 import { LocalService } from "../service";
 import * as Discord from "discordeno";
@@ -39,12 +48,12 @@ class EntryService extends LocalService {
 		return guildDocument.data.features.moderation.features?.verification;
 	}
 
-	async interactionCreate(bot: Discord.Bot, interaction: Discord.Interaction): Promise<void> {
-		if (interaction.type !== Discord.InteractionTypes.MessageComponent) {
+	async interactionCreate(bot: Discord.Bot, interactionRaw: Discord.Interaction): Promise<void> {
+		if (interactionRaw.type !== Discord.InteractionTypes.MessageComponent) {
 			return;
 		}
 
-		const customId = interaction.data?.customId;
+		const customId = interactionRaw.data?.customId;
 		if (customId === undefined) {
 			return;
 		}
@@ -53,6 +62,9 @@ class EntryService extends LocalService {
 		if (!steps.includes(id)) {
 			return;
 		}
+
+		const localeData = await getLocaleData(this.client, interactionRaw);
+		const interaction: Logos.Interaction = { ...interactionRaw, ...localeData };
 
 		const [step, parameter] = decodeId<EntryStepButtonID>(customId);
 		switch (step) {
@@ -75,26 +87,28 @@ class EntryService extends LocalService {
 		}
 	}
 
-	private async handleAcceptRules(bot: Discord.Bot, interaction: Discord.Interaction): Promise<void> {
+	private async handleAcceptRules(bot: Discord.Bot, interaction: Logos.Interaction): Promise<void> {
+		const locale = interaction.locale;
+
 		const guildDocument = this.guildDocument;
 		if (guildDocument === undefined) {
 			return;
 		}
 
 		const strings = {
-			title: localise(this.client, "entry.proficiency.title", interaction.locale)(),
+			title: localise(this.client, "entry.proficiency.title", locale)(),
 			description: {
 				chooseProficiency: localise(
 					this.client,
 					"entry.proficiency.description.chooseProficiency",
-					interaction.locale,
+					locale,
 				)({
-					language: guildDocument.data.language,
+					language: interaction.featureLanguage,
 				}),
 				canChangeLater: localise(
 					this.client,
 					"entry.proficiency.description.canChangeLater",
-					interaction.locale,
+					locale,
 				)({
 					command: "`/profile roles`",
 				}),
@@ -113,7 +127,7 @@ class EntryService extends LocalService {
 					type: Discord.MessageComponentTypes.ActionRow,
 					components: proficiency.collection.list.map<Discord.ButtonComponent>((proficiencyRole, index) => {
 						const strings = {
-							name: localise(this.client, `${proficiencyRole.id}.name`, interaction.locale)(),
+							name: localise(this.client, `${proficiencyRole.id}.name`, locale)(),
 						};
 
 						return {
@@ -133,9 +147,11 @@ class EntryService extends LocalService {
 
 	private async handleRequestVerification(
 		bot: Discord.Bot,
-		interaction: Discord.Interaction,
+		interaction: Logos.Interaction,
 		parameter: string,
 	): Promise<void> {
+		const locale = interaction.locale;
+
 		const guild = this.guild;
 		if (guild === undefined) {
 			return;
@@ -164,12 +180,8 @@ class EntryService extends LocalService {
 		]);
 		if (entryRequest !== undefined) {
 			const strings = {
-				title: localise(this.client, "entry.verification.answers.alreadyAnswered.title", interaction.locale)(),
-				description: localise(
-					this.client,
-					"entry.verification.answers.alreadyAnswered.description",
-					interaction.locale,
-				)(),
+				title: localise(this.client, "entry.verification.answers.alreadyAnswered.title", locale)(),
+				description: localise(this.client, "entry.verification.answers.alreadyAnswered.description", locale)(),
 			};
 
 			reply([this.client, bot], interaction, {
@@ -191,7 +203,7 @@ class EntryService extends LocalService {
 		}
 
 		createModalComposer<EntryRequest["answers"]>([this.client, bot], interaction, {
-			modal: this.generateVerificationQuestionModal(guildDocument.data.language, interaction.locale),
+			modal: this.generateVerificationQuestionModal(interaction.featureLanguage, { locale }),
 			onSubmit: async (submission, answers) => {
 				const submitterReferenceId = stringifyValue(userDocument.ref);
 
@@ -201,12 +213,8 @@ class EntryService extends LocalService {
 					)
 				) {
 					const strings = {
-						title: localise(this.client, "entry.verification.answers.alreadyAnswered.title", interaction.locale)(),
-						description: localise(
-							this.client,
-							"entry.verification.answers.alreadyAnswered.description",
-							interaction.locale,
-						)(),
+						title: localise(this.client, "entry.verification.answers.alreadyAnswered.title", locale)(),
+						description: localise(this.client, "entry.verification.answers.alreadyAnswered.description", locale)(),
 					};
 
 					reply([this.client, bot], submission, {
@@ -258,17 +266,13 @@ class EntryService extends LocalService {
 				verificationService.registerHandler([userId.toString(), this.guildIdString, reference]);
 
 				const strings = {
-					title: localise(this.client, "entry.verification.answers.submitted.title", interaction.locale)(),
+					title: localise(this.client, "entry.verification.answers.submitted.title", locale)(),
 					description: {
-						submitted: localise(
-							this.client,
-							"entry.verification.answers.submitted.description.submitted",
-							interaction.locale,
-						)(),
+						submitted: localise(this.client, "entry.verification.answers.submitted.description.submitted", locale)(),
 						willBeReviewed: localise(
 							this.client,
 							"entry.verification.answers.submitted.description.willBeReviewed",
-							interaction.locale,
+							locale,
 						)(),
 					},
 				};
@@ -289,8 +293,8 @@ class EntryService extends LocalService {
 				switch (error) {
 					default: {
 						const strings = {
-							title: localise(this.client, "entry.verification.answers.failed.title", interaction.locale)(),
-							description: localise(this.client, "entry.verification.answers.failed.description", interaction.locale)(),
+							title: localise(this.client, "entry.verification.answers.failed.title", locale)(),
+							description: localise(this.client, "entry.verification.answers.failed.description", locale)(),
 						};
 
 						editReply([this.client, bot], submission, {
@@ -311,8 +315,8 @@ class EntryService extends LocalService {
 	}
 
 	private generateVerificationQuestionModal(
-		language: Language,
-		locale: string | undefined,
+		language: FeatureLanguage,
+		{ locale }: { locale: Locale },
 	): Modal<EntryRequest["answers"]> {
 		const strings = {
 			title: localise(this.client, "verification.title", locale)(),
@@ -372,9 +376,11 @@ class EntryService extends LocalService {
 
 	private async handleSelectLanguageProficiency(
 		bot: Discord.Bot,
-		interaction: Discord.Interaction,
+		interaction: Logos.Interaction,
 		parameter: string,
 	): Promise<void> {
+		const locale = interaction.locale;
+
 		const guild = this.guild;
 		if (guild === undefined) {
 			return;
@@ -391,7 +397,7 @@ class EntryService extends LocalService {
 			return;
 		}
 
-		const canEnter = await this.vetUser(bot, interaction);
+		const canEnter = await this.vetUser(bot, interaction, { locale });
 		if (!canEnter) {
 			return;
 		}
@@ -413,25 +419,17 @@ class EntryService extends LocalService {
 
 			if (!isVerified) {
 				const strings = {
-					title: localise(this.client, "entry.verification.getVerified.title", interaction.locale)(),
+					title: localise(this.client, "entry.verification.getVerified.title", locale)(),
 					description: {
 						verificationRequired: localise(
 							this.client,
 							"entry.verification.getVerified.description.verificationRequired",
-							interaction.locale,
+							locale,
 						)({
 							server_name: guild.name,
 						}),
-						honestAnswers: localise(
-							this.client,
-							"entry.verification.getVerified.description.honestAnswers",
-							interaction.locale,
-						)(),
-						understood: localise(
-							this.client,
-							"entry.verification.getVerified.description.understood",
-							interaction.locale,
-						)(),
+						honestAnswers: localise(this.client, "entry.verification.getVerified.description.honestAnswers", locale)(),
+						understood: localise(this.client, "entry.verification.getVerified.description.understood", locale)(),
 					},
 				};
 
@@ -465,16 +463,16 @@ class EntryService extends LocalService {
 		}
 
 		const strings = {
-			title: localise(this.client, "entry.proficiency.receivedAccess.title", interaction.locale)(),
+			title: localise(this.client, "entry.proficiency.receivedAccess.title", locale)(),
 			description: {
 				nowMember: localise(
 					this.client,
 					"entry.proficiency.receivedAccess.description.nowMember",
-					interaction.locale,
+					locale,
 				)({
 					server_name: guild.name,
 				}),
-				toStart: localise(this.client, "entry.proficiency.receivedAccess.description.toStart", interaction.locale)(),
+				toStart: localise(this.client, "entry.proficiency.receivedAccess.description.toStart", locale)(),
 			},
 		};
 
@@ -498,7 +496,11 @@ class EntryService extends LocalService {
 		);
 	}
 
-	private async vetUser(bot: Discord.Bot, interaction: Discord.Interaction): Promise<boolean> {
+	private async vetUser(
+		bot: Discord.Bot,
+		interaction: Logos.Interaction,
+		{ locale }: { locale: Locale },
+	): Promise<boolean> {
 		const userDocument = await this.client.database.adapters.users.getOrFetchOrCreate(
 			this.client,
 			"id",
@@ -507,12 +509,8 @@ class EntryService extends LocalService {
 		);
 		if (userDocument === undefined) {
 			const strings = {
-				title: localise(this.client, "entry.verification.verifyingAccount.failed.title", interaction.locale)(),
-				description: localise(
-					this.client,
-					"entry.verification.verifyingAccount.failed.description",
-					interaction.locale,
-				)(),
+				title: localise(this.client, "entry.verification.verifyingAccount.failed.title", locale)(),
+				description: localise(this.client, "entry.verification.verifyingAccount.failed.description", locale)(),
 			};
 
 			reply([this.client, bot], interaction, {
@@ -546,12 +544,8 @@ class EntryService extends LocalService {
 
 		if (entryRequest !== undefined && !entryRequest.data.isFinalised) {
 			const strings = {
-				title: localise(this.client, "entry.verification.answers.alreadyAnswered.title", interaction.locale)(),
-				description: localise(
-					this.client,
-					"entry.verification.answers.alreadyAnswered.description",
-					interaction.locale,
-				)(),
+				title: localise(this.client, "entry.verification.answers.alreadyAnswered.title", locale)(),
+				description: localise(this.client, "entry.verification.answers.alreadyAnswered.description", locale)(),
 			};
 
 			reply([this.client, bot], interaction, {
@@ -572,12 +566,8 @@ class EntryService extends LocalService {
 		}
 		if (userDocument.data.account.rejectedOn?.includes(guildId.toString())) {
 			const strings = {
-				title: localise(this.client, "entry.verification.answers.rejectedBefore.title", interaction.locale)(),
-				description: localise(
-					this.client,
-					"entry.verification.answers.rejectedBefore.description",
-					interaction.locale,
-				)(),
+				title: localise(this.client, "entry.verification.answers.rejectedBefore.title", locale)(),
+				description: localise(this.client, "entry.verification.answers.rejectedBefore.description", locale)(),
 			};
 
 			reply([this.client, bot], interaction, {

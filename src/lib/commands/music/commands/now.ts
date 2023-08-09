@@ -1,7 +1,7 @@
 import constants from "../../../../constants/constants";
-import { defaultLocale } from "../../../../constants/language";
 import defaults from "../../../../defaults";
 import { MentionTypes, mention, timestamp, trim } from "../../../../formatting";
+import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
 import { paginate, parseArguments, reply } from "../../../interactions";
 import { isCollection } from "../../../services/music/music";
@@ -20,9 +20,10 @@ const command: OptionTemplate = {
 
 async function handleDisplayCurrentlyPlaying(
 	[client, bot]: [Client, Discord.Bot],
-	interaction: Discord.Interaction,
+	interaction: Logos.Interaction,
 ): Promise<void> {
 	const [{ collection, show }] = parseArguments(interaction.data?.options, { collection: "boolean", show: "boolean" });
+	const locale = show ? interaction.guildLocale : interaction.locale;
 
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
@@ -41,10 +42,11 @@ async function handleDisplayCurrentlyPlaying(
 
 	const isOccupied = musicService.isOccupied;
 	if (!isOccupied) {
+		const locale = interaction.locale;
 		const strings = {
-			title: localise(client, "music.strings.notPlaying.title", interaction.locale)(),
+			title: localise(client, "music.strings.notPlaying.title", locale)(),
 			description: {
-				toCheck: localise(client, "music.strings.notPlaying.description.toCheck", interaction.locale)(),
+				toCheck: localise(client, "music.strings.notPlaying.description.toCheck", locale)(),
 			},
 		};
 
@@ -62,22 +64,21 @@ async function handleDisplayCurrentlyPlaying(
 
 	const [current, playingSince] = [musicService.current, musicService.playingSince];
 
-	const locale = show ? defaultLocale : interaction.locale;
-
 	if (collection) {
 		if (current?.content === undefined || !isCollection(current.content)) {
+			const locale = interaction.locale;
 			const strings = {
-				title: localise(client, "music.options.now.strings.noSongCollection.title", interaction.locale)(),
+				title: localise(client, "music.options.now.strings.noSongCollection.title", locale)(),
 				description: {
 					noSongCollection: localise(
 						client,
 						"music.options.now.strings.noSongCollection.description.noSongCollection",
-						interaction.locale,
+						locale,
 					)(),
 					trySongInstead: localise(
 						client,
 						"music.options.now.strings.noSongCollection.description.trySongInstead",
-						interaction.locale,
+						locale,
 					)(),
 				},
 			};
@@ -94,9 +95,10 @@ async function handleDisplayCurrentlyPlaying(
 			return;
 		}
 	} else if (current?.content === undefined) {
+		const locale = interaction.locale;
 		const strings = {
-			title: localise(client, "music.options.now.strings.noSong.title", interaction.locale)(),
-			description: localise(client, "music.options.now.strings.noSong.description", interaction.locale)(),
+			title: localise(client, "music.options.now.strings.noSong.title", locale)(),
+			description: localise(client, "music.options.now.strings.noSong.description", locale)(),
 		};
 
 		reply([client, bot], interaction, {
@@ -114,43 +116,49 @@ async function handleDisplayCurrentlyPlaying(
 	if (isCollection(current.content)) {
 		const collection = current.content as SongCollection;
 
+		const locale = interaction.locale;
 		const strings = {
 			nowPlaying: localise(client, "music.options.now.strings.nowPlaying", locale)(),
 			songs: localise(client, "music.options.now.strings.songs", locale)(),
 			listEmpty: localise(client, "music.strings.listEmpty", locale)(),
 		};
 
-		paginate([client, bot], interaction, {
-			elements: chunk(collection.songs, defaults.RESULTS_PER_PAGE),
-			embed: {
-				title: `${constants.symbols.music.nowPlaying} ${strings.nowPlaying}`,
-				color: constants.colors.blue,
-			},
-			view: {
-				title: strings.songs,
-				generate: (songs, pageIndex) => {
-					if (songs.length === 0) {
-						return strings.listEmpty;
-					}
-
-					return songs
-						.map((song, index) => {
-							const isCurrent = pageIndex * 10 + index === collection.position;
-
-							const titleFormatted = trim(
-								song.title.replaceAll("(", "❨").replaceAll(")", "❩").replaceAll("[", "⁅").replaceAll("]", "⁆"),
-								50,
-							);
-							const titleHyperlink = `[${titleFormatted}](${song.url})`;
-							const titleHighlighted = isCurrent ? `**${titleHyperlink}**` : titleHyperlink;
-
-							return `${pageIndex * 10 + (index + 1)}. ${titleHighlighted}`;
-						})
-						.join("\n");
+		paginate(
+			[client, bot],
+			interaction,
+			{
+				elements: chunk(collection.songs, defaults.RESULTS_PER_PAGE),
+				embed: {
+					title: `${constants.symbols.music.nowPlaying} ${strings.nowPlaying}`,
+					color: constants.colors.blue,
 				},
+				view: {
+					title: strings.songs,
+					generate: (songs, pageIndex) => {
+						if (songs.length === 0) {
+							return strings.listEmpty;
+						}
+
+						return songs
+							.map((song, index) => {
+								const isCurrent = pageIndex * 10 + index === collection.position;
+
+								const titleFormatted = trim(
+									song.title.replaceAll("(", "❨").replaceAll(")", "❩").replaceAll("[", "⁅").replaceAll("]", "⁆"),
+									50,
+								);
+								const titleHyperlink = `[${titleFormatted}](${song.url})`;
+								const titleHighlighted = isCurrent ? `**${titleHyperlink}**` : titleHyperlink;
+
+								return `${pageIndex * 10 + (index + 1)}. ${titleHighlighted}`;
+							})
+							.join("\n");
+					},
+				},
+				show: show ?? false,
 			},
-			show: show ?? false,
-		});
+			{ locale },
+		);
 		return;
 	}
 

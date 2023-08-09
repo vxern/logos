@@ -1,5 +1,7 @@
 import constants from "../../../../constants/constants";
+import { Locale } from "../../../../constants/languages";
 import { trim } from "../../../../formatting";
+import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
 import diagnostics from "../../../diagnostics";
 import { Modal, acknowledge, createModalComposer, reply } from "../../../interactions";
@@ -21,8 +23,10 @@ interface AnswerData extends Record<string, unknown> {
 
 async function handleStartAnswering(
 	[client, bot]: [Client, Discord.Bot],
-	interaction: Discord.Interaction,
+	interaction: Logos.Interaction,
 ): Promise<void> {
+	const locale = interaction.locale;
+
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
 		return;
@@ -40,8 +44,8 @@ async function handleStartAnswering(
 
 	if (message.isFromBot || message.content.trim().length === 0) {
 		const strings = {
-			title: localise(client, "answer.strings.cannotAnswer.title", interaction.locale)(),
-			description: localise(client, "answer.strings.cannotAnswer.description", interaction.locale)(),
+			title: localise(client, "answer.strings.cannotAnswer.title", locale)(),
+			description: localise(client, "answer.strings.cannotAnswer.description", locale)(),
 		};
 
 		reply([client, bot], interaction, {
@@ -58,8 +62,8 @@ async function handleStartAnswering(
 
 	if (message.authorId === interaction.user.id) {
 		const strings = {
-			title: localise(client, "answer.strings.cannotAnswerOwn.title", interaction.locale)(),
-			description: localise(client, "answer.strings.cannotAnswerOwn.description", interaction.locale)(),
+			title: localise(client, "answer.strings.cannotAnswerOwn.title", locale)(),
+			description: localise(client, "answer.strings.cannotAnswerOwn.description", locale)(),
 		};
 
 		reply([client, bot], interaction, {
@@ -80,16 +84,16 @@ async function handleStartAnswering(
 	};
 
 	createModalComposer([client, bot], interaction, {
-		modal: generateAnswerModal(client, data, interaction.locale),
+		modal: generateAnswerModal(client, data, { locale }),
 		onSubmit: async (submission, data) => {
 			acknowledge([client, bot], submission);
 
 			const strings = {
-				answer: localise(client, "answer.strings.answer", interaction.locale)(),
+				answer: localise(client, "answer.strings.answer", locale)(),
 				submittedBy: localise(
 					client,
 					"answer.strings.submittedBy",
-					interaction.locale,
+					locale,
 				)({ username: diagnostics.display.user(interaction.user, { includeId: false }) }),
 			};
 
@@ -121,7 +125,7 @@ async function handleStartAnswering(
 	});
 }
 
-function generateAnswerModal(client: Client, data: AnswerData, locale: string | undefined): Modal<AnswerData> {
+function generateAnswerModal(client: Client, data: AnswerData, { locale }: { locale: Locale }): Modal<AnswerData> {
 	const strings = {
 		title: localise(client, "answer.title", locale)(),
 		question: localise(client, "answer.fields.question", locale)(),

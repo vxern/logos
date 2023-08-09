@@ -1,0 +1,9 @@
+{
+    "interactions.continuedOnNextPage": "Kontynuacja na następnej stronie...",
+    "interactions.page": "Strona",
+    "interactions.invalidUser.title": "Nieprawidłowy użytkownik",
+    "interactions.invalidUser.description": "Użytkownik, którego sprecyzowałeś/aś, jest nieprawidłowy.",
+    "interactions.rateLimited.title": "Przekroczono limit żądań",
+    "interactions.rateLimited.description.tooManyUses": "Użyłeś/aś tego polecenia zbyt wiele razy ({times}) w zbyt krótkim okresie.",
+    "interactions.rateLimited.description.cannotUseAgainUntil": "Będziesz mógł/mogła ponownie użyć polecenia {relative_timestamp}."
+}

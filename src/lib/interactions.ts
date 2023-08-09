@@ -1,7 +1,18 @@
 import constants from "../constants/constants";
-import { defaultLanguage, defaultLocale, getLanguageByLocale } from "../constants/language";
+import {
+	FeatureLanguage,
+	Locale,
+	LocalisationLanguage,
+	getDiscordLanguageByDiscordLocale,
+	getLocaleByLanguage,
+} from "../constants/languages";
 import time from "../constants/time";
+import defaults from "../defaults";
+import * as Logos from "../types";
+import { InteractionLocaleData } from "../types";
 import { Client, addCollector, localise, pluralise } from "./client";
+import { Document } from "./database/document";
+import { Guild } from "./database/structs/guild";
 import * as Discord from "discordeno";
 import { DiscordSnowflake as Snowflake } from "snowflake";
 
@@ -128,7 +139,7 @@ type ControlButtonID = [type: "previous" | "next"];
  */
 async function paginate<T>(
 	[client, bot]: [Client, Discord.Bot],
-	interaction: Discord.Interaction,
+	interaction: Logos.Interaction,
 	{
 		elements,
 		embed,
@@ -140,6 +151,7 @@ async function paginate<T>(
 		view: PaginationDisplayData<T>;
 		show: boolean;
 	},
+	{ locale }: { locale: Locale },
 ): Promise<void> {
 	const data: PaginationData<T> = { elements, view, pageIndex: 0 };
 
@@ -175,7 +187,7 @@ async function paginate<T>(
 			}
 
 			editReply([client, bot], interaction, {
-				embeds: [getPageEmbed(client, data, embed, isLast(), interaction.locale)],
+				embeds: [getPageEmbed(client, data, embed, isLast(), locale)],
 				components: generateButtons(customId, isFirst(), isLast()),
 			});
 		},
@@ -185,7 +197,7 @@ async function paginate<T>(
 		[client, bot],
 		interaction,
 		{
-			embeds: [getPageEmbed(client, data, embed, data.pageIndex === data.elements.length - 1, interaction.locale)],
+			embeds: [getPageEmbed(client, data, embed, data.pageIndex === data.elements.length - 1, locale)],
 			components: generateButtons(customId, isFirst(), isLast()),
 		},
 		{ visible: show },
@@ -209,7 +221,7 @@ function getPageEmbed<T>(
 	data: PaginationData<T>,
 	embed: Discord.Embed,
 	isLast: boolean,
-	locale: string | undefined,
+	locale: Locale,
 ): Discord.Embed {
 	const strings = {
 		page: localise(client, "interactions.page", locale)(),
@@ -387,7 +399,7 @@ const conciseTimeExpression = new RegExp(
 function parseTimeExpression(
 	client: Client,
 	expression: string,
-	locale: string | undefined,
+	{ language, locale }: { language: LocalisationLanguage; locale: Locale },
 ): [correctedExpression: string, period: number] | undefined {
 	const conciseMatch = conciseTimeExpression.exec(expression) ?? undefined;
 	if (conciseMatch !== undefined) {
@@ -396,23 +408,21 @@ function parseTimeExpression(
 			throw `StateError: The expression '${conciseTimeExpression}' was matched to the concise timestamp regular expression, but the seconds part was \`undefined\`.`;
 		}
 
-		return parseConciseTimeExpression(client, [hours, minutes, seconds], locale);
+		return parseConciseTimeExpression(client, [hours, minutes, seconds], { language, locale });
 	}
 
-	return parseVerboseTimeExpressionPhrase(client, expression, locale);
+	return parseVerboseTimeExpressionPhrase(client, expression, { language, locale });
 }
 
 function parseConciseTimeExpression(
 	client: Client,
 	parts: [hours: string | undefined, minutes: string | undefined, seconds: string],
-	locale: string | undefined,
+	{ language, locale }: { language: LocalisationLanguage; locale: Locale },
 ): ReturnType<typeof parseTimeExpression> {
 	const [seconds, minutes, hours] = parts.map((part) => (part !== undefined ? Number(part) : undefined)).reverse() as [
 		number,
 		...number[],
 	];
-
-	const language = getLanguageByLocale(locale) ?? defaultLanguage;
 
 	const verboseExpressionParts = [];
 	if (seconds !== 0) {
@@ -438,7 +448,7 @@ function parseConciseTimeExpression(
 	}
 	const verboseExpression = verboseExpressionParts.join(" ");
 
-	const expressionParsed = parseVerboseTimeExpressionPhrase(client, verboseExpression, locale);
+	const expressionParsed = parseVerboseTimeExpressionPhrase(client, verboseExpression, { language, locale });
 	if (expressionParsed === undefined) {
 		return undefined;
 	}
@@ -469,9 +479,9 @@ const timeUnitsWithAliasesLocalised = new Map<string, Record<TimeUnit, string[]>
 function parseVerboseTimeExpressionPhrase(
 	client: Client,
 	expression: string,
-	locale: string | undefined,
+	{ language, locale }: { language: LocalisationLanguage; locale: Locale },
 ): ReturnType<typeof parseTimeExpression> {
-	if (!timeUnitsWithAliasesLocalised.has(locale ?? defaultLocale)) {
+	if (!timeUnitsWithAliasesLocalised.has(locale)) {
 		const timeUnits = Object.keys(timeUnitToPeriod) as TimeUnit[];
 		const timeUnitAliasTuples: [TimeUnit, string[]][] = [];
 
@@ -488,15 +498,12 @@ function parseVerboseTimeExpressionPhrase(
 			]);
 		}
 
-		timeUnitsWithAliasesLocalised.set(
-			locale ?? defaultLocale,
-			Object.fromEntries(timeUnitAliasTuples) as Record<TimeUnit, string[]>,
-		);
+		timeUnitsWithAliasesLocalised.set(locale, Object.fromEntries(timeUnitAliasTuples) as Record<TimeUnit, string[]>);
 	}
 
-	const timeUnitsWithAliases = timeUnitsWithAliasesLocalised.get(locale ?? defaultLocale);
+	const timeUnitsWithAliases = timeUnitsWithAliasesLocalised.get(locale);
 	if (timeUnitsWithAliases === undefined) {
-		throw `Failed to get time unit aliases for either locale '${locale}' or '${defaultLocale}'.`;
+		throw `Failed to get time unit aliases for locale '${locale}'.`;
 	}
 
 	function extractNumbers(expression: string): number[] {
@@ -552,14 +559,12 @@ function parseVerboseTimeExpressionPhrase(
 		quantifiers[index],
 	])) {
 		if (quantifier === undefined) {
-			throw `Failed to get quantifier for time unit '${timeUnit}' and either locale '${locale}' or '${defaultLocale}'.`;
+			throw `Failed to get quantifier for time unit '${timeUnit}' and locale '${locale}'.`;
 		}
 
 		timeUnitQuantifierTuples.push([timeUnit, quantifier]);
 	}
 	timeUnitQuantifierTuples.sort(([previous], [next]) => timeUnitToPeriod[next] - timeUnitToPeriod[previous]);
-
-	const language = getLanguageByLocale(locale) ?? defaultLanguage;
 
 	const timeExpressions = [];
 	let total = 0;
@@ -587,7 +592,10 @@ function decodeId<T extends ComponentIDMetadata, R = [string, ...T]>(customId: s
 	return customId.split(constants.symbols.meta.idSeparator) as R;
 }
 
-async function acknowledge([client, bot]: [Client, Discord.Bot], interaction: Discord.Interaction): Promise<void> {
+async function acknowledge(
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Logos.Interaction | Discord.Interaction,
+): Promise<void> {
 	return Discord.sendInteractionResponse(bot, interaction.id, interaction.token, {
 		type: Discord.InteractionResponseTypes.DeferredUpdateMessage,
 	}).catch((reason) => client.log.warn(`Failed to acknowledge interaction: ${reason}`));
@@ -595,7 +603,7 @@ async function acknowledge([client, bot]: [Client, Discord.Bot], interaction: Di
 
 async function postponeReply(
 	[client, bot]: [Client, Discord.Bot],
-	interaction: Discord.Interaction,
+	interaction: Logos.Interaction | Discord.Interaction,
 	{ visible = false } = {},
 ): Promise<void> {
 	return Discord.sendInteractionResponse(bot, interaction.id, interaction.token, {
@@ -606,7 +614,7 @@ async function postponeReply(
 
 async function reply(
 	[client, bot]: [Client, Discord.Bot],
-	interaction: Discord.Interaction,
+	interaction: Logos.Interaction | Discord.Interaction,
 	data: Omit<Discord.InteractionCallbackData, "flags">,
 	{ visible = false } = {},
 ): Promise<void> {
@@ -618,7 +626,7 @@ async function reply(
 
 async function editReply(
 	[client, bot]: [Client, Discord.Bot],
-	interaction: Discord.Interaction,
+	interaction: Logos.Interaction | Discord.Interaction,
 	data: Omit<Discord.InteractionCallbackData, "flags">,
 ): Promise<void> {
 	return Discord.editOriginalInteractionResponse(bot, interaction.token, data)
@@ -626,7 +634,10 @@ async function editReply(
 		.catch((reason) => client.log.warn(`Failed to edit reply to interaction: ${reason}`));
 }
 
-async function deleteReply([client, bot]: [Client, Discord.Bot], interaction: Discord.Interaction): Promise<void> {
+async function deleteReply(
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Logos.Interaction | Discord.Interaction,
+): Promise<void> {
 	return Discord.deleteOriginalInteractionResponse(bot, interaction.token).catch((reason) =>
 		client.log.warn(`Failed to edit reply to interaction: ${reason}`),
 	);
@@ -634,7 +645,7 @@ async function deleteReply([client, bot]: [Client, Discord.Bot], interaction: Di
 
 async function respond(
 	[client, bot]: [Client, Discord.Bot],
-	interaction: Discord.Interaction,
+	interaction: Logos.Interaction | Discord.Interaction,
 	choices: Discord.ApplicationCommandOptionChoice[],
 ): Promise<void> {
 	return Discord.sendInteractionResponse(bot, interaction.id, interaction.token, {
@@ -645,13 +656,87 @@ async function respond(
 
 async function displayModal(
 	[client, bot]: [Client, Discord.Bot],
-	interaction: Discord.Interaction,
+	interaction: Logos.Interaction | Discord.Interaction,
 	data: Omit<Discord.InteractionCallbackData, "flags">,
 ): Promise<void> {
 	return Discord.sendInteractionResponse(bot, interaction.id, interaction.token, {
 		type: Discord.InteractionResponseTypes.Modal,
 		data,
 	}).catch((reason) => client.log.warn(`Failed to show modal: ${reason}`));
+}
+
+function getLocalisationLanguage(guildDocument: Document<Guild> | undefined): LocalisationLanguage {
+	return guildDocument?.data.languages?.localisation ?? defaults.LOCALISATION_LANGUAGE;
+}
+
+function getTargetLanguage(guildDocument: Document<Guild>): LocalisationLanguage {
+	return guildDocument?.data.languages?.target ?? getLocalisationLanguage(guildDocument);
+}
+
+function getFeatureLanguage(guildDocument?: Document<Guild>): FeatureLanguage {
+	return guildDocument?.data.languages?.feature ?? defaults.FEATURE_LANGUAGE;
+}
+
+const FALLBACK_LOCALE_DATA: InteractionLocaleData = {
+	language: defaults.LOCALISATION_LANGUAGE,
+	locale: defaults.LOCALISATION_LOCALE,
+	guildLanguage: defaults.LOCALISATION_LANGUAGE,
+	guildLocale: defaults.LOCALISATION_LOCALE,
+	featureLanguage: defaults.FEATURE_LANGUAGE,
+};
+
+async function getLocaleData(client: Client, interaction: Discord.Interaction): Promise<InteractionLocaleData> {
+	const guildId = interaction.guildId;
+	if (guildId === undefined) {
+		return FALLBACK_LOCALE_DATA;
+	}
+
+	const [userDocument, guildDocument] = await Promise.all([
+		client.database.adapters.users.getOrFetch(client, "id", interaction.user.id.toString()),
+		client.database.adapters.guilds.getOrFetch(client, "id", guildId.toString()),
+	]);
+	if (userDocument === undefined || guildDocument === undefined) {
+		return FALLBACK_LOCALE_DATA;
+	}
+
+	const targetOnlyChannelIds = getTargetOnlyChannelIds(guildDocument);
+	const isInTargetOnlyChannel =
+		interaction.channelId !== undefined && targetOnlyChannelIds.includes(interaction.channelId);
+
+	const guildLanguage = isInTargetOnlyChannel
+		? getTargetLanguage(guildDocument)
+		: getLocalisationLanguage(guildDocument);
+	const guildLocale = getLocaleByLanguage(guildLanguage);
+	const featureLanguage = getFeatureLanguage(guildDocument);
+
+	if (!isAutocomplete(interaction)) {
+		// If the user has configured a custom locale, use the user's preferred locale.
+		if (userDocument?.data.account.language !== undefined) {
+			const language = userDocument?.data.account.language;
+			const locale = getLocaleByLanguage(language);
+			return { language, locale, guildLanguage, guildLocale, featureLanguage };
+		}
+	}
+
+	// Otherwise default to the user's app language.
+	const appLocale = interaction.locale;
+	const language = getDiscordLanguageByDiscordLocale(appLocale) ?? defaults.LOCALISATION_LANGUAGE;
+	const locale = getLocaleByLanguage(language);
+	return { language, locale, guildLanguage, guildLocale, featureLanguage };
+}
+
+function getTargetOnlyChannelIds(guildDocument: Document<Guild>): bigint[] {
+	const language = guildDocument.data.features.language;
+	if (!language.enabled) {
+		return [];
+	}
+
+	const targetOnly = language.features.targetOnly;
+	if (targetOnly === undefined || !targetOnly.enabled) {
+		return [];
+	}
+
+	return targetOnly.channelIds.map((channelId) => BigInt(channelId));
 }
 
 export {
@@ -663,12 +748,15 @@ export {
 	editReply,
 	encodeId,
 	generateButtons,
+	getLocalisationLanguage,
 	isAutocomplete,
 	paginate,
 	parseArguments,
+	getLocaleData,
 	parseTimeExpression,
 	postponeReply,
 	reply,
 	respond,
+	getFeatureLanguage,
 };
 export type { ControlButtonID, InteractionCollectorSettings, Modal };

@@ -1,0 +1,18 @@
+{
+    "notices.lastUpdate": "Ultima actualizare: {date}",
+    "notices.notices.information.invite": "Link permanent de invitație",
+    "reports.users": "Utilizatori denunțați",
+    "reports.reason": "Motivul denunțării",
+    "reports.link": "Linkul mesajului",
+    "reports.noLinkProvided": "Nu a fost atașat niciun link către mesaj.",
+    "reports.previousInfractions": "Infracțiunile precedente ale lui {username}",
+    "suggestion.suggestion": "Sugestie",
+    "submittedBy": "Trimis de către",
+    "submittedAt": "Trimis la",
+    "markResolved": "Marchează cazul ca rezolvat",
+    "markUnresolved": "Marchează cazul ca nerezolvat",
+    "alreadyMarkedResolved.title": "Deja este marcat ca rezolvat",
+    "alreadyMarkedResolved.description": "Acest caz a fost deja marcat ca rezolvat.",
+    "alreadyMarkedUnresolved.title": "Deja este marcat ca nerezolvat",
+    "alreadyMarkedUnresolved.description": "Acest caz a fost deja marcat ca nerezolvat."
+}

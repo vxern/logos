@@ -1,6 +1,7 @@
-import { Language } from "../../../constants/language";
+import { FeatureLanguage, LocalisationLanguage } from "../../../constants/languages";
 import time from "../../../constants/time";
 
+/** @since v3.0.0 */
 interface Guild {
 	/** A timestamp of when Logos began to manage this guild. */
 	createdAt: number;
@@ -16,11 +17,20 @@ interface Guild {
 	isNative: boolean;
 
 	/**
-	 * The bot's default language on this guild.
+	 * The bot's default feature language on this guild.
 	 *
 	 * The implicit value is 'English'.
 	 */
-	language: Language;
+	/** @deprecated since v3.5.0. {@link languages} is used instead. */
+	language?: FeatureLanguage;
+
+	/** @since v3.5.0 */
+	languages?: {
+		localisation: LocalisationLanguage;
+		/** @since v3.8.0 */
+		target?: LocalisationLanguage;
+		feature: FeatureLanguage;
+	};
 
 	/** The bot's features configured for this guild. */
 	features: {
@@ -57,10 +67,13 @@ interface Guild {
 
 		language: Activatable<{
 			features: {
+				/** @since v3.3.0 */
 				answers?: Activatable;
 
+				/** @since v3.4.0 */
 				corrections?: Activatable;
 
+				/** @since v3.1.0 */
 				cefr?: Activatable<CefrConfiguration>;
 
 				game: Activatable;
@@ -72,6 +85,11 @@ interface Guild {
 				translate: Activatable;
 
 				word: Activatable;
+
+				/** @since v3.8.0 */
+				targetOnly?: Activatable<{
+					channelIds: string[];
+				}>;
 			};
 		}>;
 
@@ -92,6 +110,7 @@ interface Guild {
 					journaling: boolean;
 				}>;
 
+				/** @since v3.2.0 */
 				slowmode?: Activatable<{
 					journaling: boolean;
 				}>;
@@ -161,6 +180,12 @@ interface Guild {
 				}>;
 
 				entry: Activatable;
+
+				/** @since v3.7.0 */
+				roleIndicators?: Activatable<{
+					limit: number;
+					roles: RoleWithIndicator[];
+				}>;
 
 				/** User suggestions for the server. */
 				suggestions: Activatable<{
@@ -258,5 +283,7 @@ type VerificationActivationRule =
 			value: TimeStruct;
 	  };
 
+type RoleWithIndicator = { roleId: string; indicator: string };
+
 export { timeStructToMilliseconds };
-export type { Guild, DynamicVoiceChannel, CefrConfiguration, TimeStruct };
+export type { Guild, DynamicVoiceChannel, CefrConfiguration, TimeStruct, RoleWithIndicator };

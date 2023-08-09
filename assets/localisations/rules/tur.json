@@ -1,0 +1,22 @@
+{
+    "rules.tldr": "Kısaca;",
+    "rules.rule": "Kural",
+    "rules.behaviour.title": "Davranış",
+    "rules.behaviour.summary": "Nazik olmaya çalışın.",
+    "rules.behaviour.content": "Kullanıcıların birbirine saygı, önem ve anlayış ile davranması beklenmektedir. Sözlü taciz, ayrımcılık, usandırma ve öbür türlü kırıcı ve usandırıcı davranışlar tolere edilmeyecektir.",
+    "rules.quality.title": "Kalite",
+    "rules.quality.summary": "Çirkinleşmeyin.",
+    "rules.quality.content": "Sunucuya yapılan katkıların düzgün kaliteye dair olması beklenmektedir. Trolleme, spam, flood, shitposting (mem kanalı dışında) ve öbür rahatsız edici davranışlar ziyadesiyle önerilmemektedir.",
+    "rules.relevance.title": "İlgi",
+    "rules.relevance.summary": "İlgili içerik atın.",
+    "rules.relevance.content": "Sunucuya yapılan katkıların ilgili kanal ve kategoriye atılması beklenmektedir. Uygun olmayan kanallara yapılan katkılar ilgili kanallarına taşınmaları için uyarılacaktır.",
+    "rules.suitability.title": "Uygunluk",
+    "rules.suitability.summary": "Genç kullanıcılar için uygun içerikler paylaşın.",
+    "rules.suitability.content": "Sunucuya yapılan katkıların reşit olmayanların görebilmesine uygun olması beklenmektedir. Yaş sınırlamalı (NSFW) ve vahşet içeren (NSFL) içerikler kesin olarak yasaklıdır. Eğer paylaşacağınız şeyi yaşı tutmayan birine gösteremeyecekseniz paylaşmamalısınız.",
+    "rules.exclusivity.title": "Münhasırlık",
+    "rules.exclusivity.summary": "Reklam yapmayın.",
+    "rules.exclusivity.content": "Kullanıcıların bu alanı reklam yapmak için kullanmaması beklenmektedir, ve yapılacak aktif teşebbüsler (DM'den reklam yapmak dahil) yasaktır.",
+    "rules.adherence.title": "Uyum",
+    "rules.adherence.summary": "Kurallara saygı duyun.",
+    "rules.adherence.content": "Sunucu kurallarını kâle almayan ve işe yarar katkıda bulunmaya ilgi duymayan üyeler için kalıcı ban verilebilir."
+}

@@ -1,0 +1,9 @@
+{
+    "interactions.continuedOnNextPage": "Sonraki sayfada devam ediyor...",
+    "interactions.page": "Sayfa",
+    "interactions.invalidUser.title": "Geçersiz kullanıcı",
+    "interactions.invalidUser.description": "Belirttiğiniz kullanıcı geçerli değil.",
+    "interactions.rateLimited.title": "Tepki-limitine tâbi tutuluyorsunuz",
+    "interactions.rateLimited.description.tooManyUses": "Bu komutu pek kısa süre zarfı içerisinde çok kez kullandınız ({times}).",
+    "interactions.rateLimited.description.cannotUseAgainUntil": "Bu komutu yeniden {relative_timestamp}de kullanabilieceksiniz."
+}

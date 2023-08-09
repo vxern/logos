@@ -1,7 +1,10 @@
+import { Locale, getLocaleByLanguage } from "../../constants/languages";
+import defaults from "../../defaults";
 import * as Logos from "../../types";
 import { Client } from "../client";
 import { Document } from "../database/document";
 import { Guild } from "../database/structs/guild";
+import { getLocalisationLanguage } from "../interactions";
 import * as Discord from "discordeno";
 
 type ServiceBase = {
@@ -90,6 +93,18 @@ abstract class LocalService extends Service {
 
 	get guildDocument(): Document<Guild> | undefined {
 		return this.client.database.cache.guildById.get(this.guildIdString);
+	}
+
+	get guildLocale(): Locale {
+		const guildDocument = this.guildDocument;
+		if (guildDocument === undefined) {
+			return defaults.LOCALISATION_LOCALE;
+		}
+
+		const guildLanguage = getLocalisationLanguage(guildDocument);
+		const guildLocale = getLocaleByLanguage(guildLanguage) ?? defaults.LOCALISATION_LOCALE;
+
+		return guildLocale;
 	}
 
 	constructor(client: Client, guildId: bigint) {

@@ -1,4 +1,10 @@
+import { FeatureLanguage, Locale, LocalisationLanguage } from "./constants/languages";
 import { TimeStruct } from "./lib/database/structs/guild";
+
+const LOCALISATION_LOCALE: Locale = "eng-US";
+const LOCALISATION_LANGUAGE: LocalisationLanguage = "English/American";
+const FEATURE_LOCALE: Locale = "eng-US";
+const FEATURE_LANGUAGE: FeatureLanguage = "English";
 
 const RESULTS_PER_PAGE = 10;
 
@@ -32,6 +38,10 @@ const MAX_VOICE_CHANNELS = 5;
 const WARN_MESSAGE_DELETE_TIMEOUT = 1000 * 10; // 10 seconds in milliseconds.
 
 export default {
+	LOCALISATION_LANGUAGE,
+	LOCALISATION_LOCALE,
+	FEATURE_LANGUAGE,
+	FEATURE_LOCALE,
 	RESULTS_PER_PAGE,
 	RATE_LIMIT,
 	RATE_LIMIT_INTERVAL,
