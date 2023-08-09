@@ -1,11 +1,6 @@
 {
-    "cefr.strings.levels.c2.title": "",
     "word.strings.fields.pronunciation": "",
-    "pardon.options.warning.description": "",
     "purge.strings.purged.title": "",
-    "slowmode.strings.theSame.description.chooseDifferent": "",
     "music.options.now.strings.requestedBy": "",
-    "music.options.resume.description": "",
-    "music.strings.skips.tooManyArguments.description": "",
-    "settings.options.language.name": ""
+    "music.strings.skips.tooManyArguments.description": ""
 }
