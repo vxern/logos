@@ -1,20 +1,11 @@
 {
-    "information.options.server.strings.channelTypes.text": "",
     "cefr.strings.levels.c2.title": "",
-    "translate.description": "",
     "word.strings.fields.pronunciation": "",
-    "word.strings.verbs.tenses.imperfect": "",
     "pardon.options.warning.description": "",
-    "purge.strings.indexed.description.some.messages.two": "",
     "purge.strings.purged.title": "",
-    "rule.options.rule.description": "",
     "slowmode.strings.theSame.description.chooseDifferent": "",
-    "warn.strings.limitSurpassedTimedOut.title": "",
     "music.options.now.strings.requestedBy": "",
-    "music.options.play.strings.failedToLoad.description": "",
     "music.options.resume.description": "",
-    "music.options.unskip.strings.historyEmpty.title": "",
     "music.strings.skips.tooManyArguments.description": "",
-    "praise.strings.failed.description": "",
     "settings.options.language.name": ""
 }
