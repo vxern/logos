@@ -1,7 +1,4 @@
 {
-    "policies.moderation.points.introduction.title": "",
     "policies.moderation.points.breach.title": "",
-    "policies.moderation.points.warnings.title": "",
-    "policies.moderation.points.furtherAction.title": "",
-    "policies.moderation.points.ban.title": ""
+    "policies.moderation.points.furtherAction.title": ""
 }
