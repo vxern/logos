@@ -1,5 +1,6 @@
 import constants from "../../../../../constants/constants";
 import { FeatureLanguage, Locale } from "../../../../../constants/languages";
+import licences from "../../../../../constants/licences";
 import { Client, localise } from "../../../../client";
 import { chunk } from "../../../../utils";
 import { getPartOfSpeech } from "../../module";
@@ -28,7 +29,13 @@ class DexonlineAdapter extends DictionaryAdapter<Dexonline.Results> {
 		return Dexonline.get(lemma, { mode: "strict" });
 	}
 
-	parse(_: string, results: Dexonline.Results, client: Client, { locale }: { locale: Locale }): DictionaryEntry[] {
+	parse(
+		_: string,
+		__: FeatureLanguage,
+		results: Dexonline.Results,
+		client: Client,
+		{ locale }: { locale: Locale },
+	): DictionaryEntry[] {
 		const entries: DictionaryEntry[] = [];
 		for (const result of results.synthesis) {
 			const [topicWord] = result.type.split(" ");
@@ -46,6 +53,7 @@ class DexonlineAdapter extends DictionaryAdapter<Dexonline.Results> {
 				etymologies: result.etymology,
 				expressions: result.expressions,
 				inflectionTable: undefined,
+				sources: [[constants.links.generateDexonlineDefinitionLink(result.lemma), licences.dictionaries.dexonline]],
 			});
 		}
 

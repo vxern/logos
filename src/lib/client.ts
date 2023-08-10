@@ -5,6 +5,7 @@ import {
 	LocalisationLanguage,
 	getDiscordLocaleByLanguage,
 	getLanguageByLocale,
+	getLocaleByLanguage,
 	isBuiltIn,
 } from "../constants/languages";
 import time from "../constants/time";
@@ -461,7 +462,7 @@ export async function handleGuildCreate(
 
 	const commands = client.commands.commands;
 
-	const guildCommands: Command[] = [commands.information, commands.settings];
+	const guildCommands: Command[] = [commands.information, commands.licence, commands.settings];
 	const services: Service[] = [];
 
 	const realtimeUpdateService = new RealtimeUpdateService(client, guild.id, guildDocument.ref);
@@ -1421,15 +1422,13 @@ function toDiscordLocalisations(
 }
 
 function pluralise(client: Client, key: string, language: LocalisationLanguage, number: number): string {
+	const locale = getLocaleByLanguage(language);
 	const pluralise = transformers[language].pluralise;
 	const { one, two, many } = {
-		one: client.localisations.get(`${key}.one`)?.get(language)?.({ one: number }),
-		two: client.localisations.get(`${key}.two`)?.get(language)?.({ two: number }),
-		many: client.localisations.get(`${key}.many`)?.get(language)?.({ many: number }),
+		one: localise(client, `${key}.one`, locale)?.({ one: number }),
+		two: localise(client, `${key}.two`, locale)?.({ two: number }),
+		many: localise(client, `${key}.many`, locale)?.({ many: number }),
 	};
-	if (one === undefined || two === undefined || many === undefined) {
-		return "?";
-	}
 
 	const pluralised = pluralise(`${number}`, { one, two, many });
 	if (pluralised === undefined) {

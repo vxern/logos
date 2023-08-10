@@ -158,6 +158,13 @@ async function paginate<T>(
 	const isFirst = () => data.pageIndex === 0;
 	const isLast = () => data.pageIndex === data.elements.length - 1;
 
+	const generateEmbed = (): Discord.InteractionCallbackData => {
+		return {
+			embeds: [getPageEmbed(client, data, embed, isLast(), locale)],
+			components: generateButtons(customId, isFirst(), isLast()),
+		};
+	};
+
 	const customId = createInteractionCollector([client, bot], {
 		type: Discord.InteractionTypes.MessageComponent,
 		doesNotExpire: true,
@@ -173,23 +180,20 @@ async function paginate<T>(
 
 			switch (action) {
 				case "previous": {
-					if (!isFirst) {
+					if (!isFirst()) {
 						data.pageIndex--;
 					}
 					break;
 				}
 				case "next": {
-					if (!isLast) {
+					if (!isLast()) {
 						data.pageIndex++;
 					}
 					break;
 				}
 			}
 
-			editReply([client, bot], interaction, {
-				embeds: [getPageEmbed(client, data, embed, isLast(), locale)],
-				components: generateButtons(customId, isFirst(), isLast()),
-			});
+			editReply([client, bot], interaction, generateEmbed());
 		},
 	});
 
@@ -235,49 +239,37 @@ function getPageEmbed<T>(
 
 	return {
 		...embed,
-		fields: [
-			{
-				name:
-					data.elements.length === 1
-						? data.view.title
-						: `${data.view.title} ~ ${strings.page} ${data.pageIndex + 1}/${data.elements.length}`,
-				value: data.view.generate(elements, data.pageIndex),
-			},
-			...(embed.fields ?? []),
-		],
+		title:
+			data.elements.length === 1
+				? data.view.title
+				: `${data.view.title} ~ ${strings.page} ${data.pageIndex + 1}/${data.elements.length}`,
+		description: data.view.generate(elements, data.pageIndex),
 		footer: isLast ? undefined : { text: strings.continuedOnNextPage },
 	};
 }
 
 function generateButtons(customId: string, isFirst: boolean, isLast: boolean): Discord.MessageComponents {
-	const buttons: Discord.ButtonComponent[] = [];
-
-	if (!isFirst) {
-		buttons.push({
-			type: Discord.MessageComponentTypes.Button,
-			customId: encodeId<ControlButtonID>(customId, ["previous"]),
-			style: Discord.ButtonStyles.Secondary,
-			label: constants.symbols.interactions.menu.controls.back,
-		});
-	}
-
-	if (!isLast) {
-		buttons.push({
-			type: Discord.MessageComponentTypes.Button,
-			customId: encodeId<ControlButtonID>(customId, ["next"]),
-			style: Discord.ButtonStyles.Secondary,
-			label: constants.symbols.interactions.menu.controls.forward,
-		});
-	}
-
-	return buttons.length === 0
-		? []
-		: [
+	return [
+		{
+			type: Discord.MessageComponentTypes.ActionRow,
+			components: [
 				{
-					type: Discord.MessageComponentTypes.ActionRow,
-					components: buttons as [Discord.ButtonComponent],
+					type: Discord.MessageComponentTypes.Button,
+					customId: encodeId<ControlButtonID>(customId, ["previous"]),
+					disabled: isFirst,
+					style: Discord.ButtonStyles.Secondary,
+					label: constants.symbols.interactions.menu.controls.back,
 				},
-		  ];
+				{
+					type: Discord.MessageComponentTypes.Button,
+					customId: encodeId<ControlButtonID>(customId, ["next"]),
+					disabled: isLast,
+					style: Discord.ButtonStyles.Secondary,
+					label: constants.symbols.interactions.menu.controls.forward,
+				},
+			],
+		},
+	];
 }
 
 type ComposerActionRow<ComposerContent extends Record<string, unknown>, SectionNames = keyof ComposerContent> = {

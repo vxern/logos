@@ -1,7 +1,7 @@
 import constants from "../../../../constants/constants";
 import { Locale, LocalisationLanguage } from "../../../../constants/languages";
 import defaults from "../../../../defaults";
-import { code } from "../../../../formatting";
+import { code, trim } from "../../../../formatting";
 import * as Logos from "../../../../types";
 import { Client, localise, pluralise } from "../../../client";
 import diagnostics from "../../../diagnostics";
@@ -142,7 +142,7 @@ async function handleFindWord([client, bot]: [Client, Discord.Bot], interaction:
 					continue;
 				}
 
-				existingEntries[index] = { ...existingEntry, ...entry };
+				existingEntries[index] = { ...existingEntry, ...entry, sources: [...existingEntry.sources, ...entry.sources] };
 			}
 		}
 	}
@@ -542,7 +542,7 @@ function entryToEmbeds(
 		if (verbose) {
 			embeds.push({ title: strings.expressions, description: expressionsFitted, color: constants.colors.husky });
 		} else {
-			fields.push({ name: strings.expressions, value: expressionsFitted });
+			fields.push({ name: strings.expressions, value: trim(expressionsFitted, 1024) });
 		}
 	}
 
@@ -568,15 +568,31 @@ function entryToEmbeds(
 		if (verbose) {
 			embeds.push({ title: strings.etymology, description: etymology, color: constants.colors.husky });
 		} else {
-			fields.push({ name: strings.etymology, value: etymology });
+			fields.push({ name: strings.etymology, value: trim(etymology, 1024) });
 		}
 	}
 
+	const strings = {
+		sourcedResponsibly: localise(
+			client,
+			"word.strings.sourcedResponsibly",
+			locale,
+		)({
+			dictionaries: pluralise(client, "word.strings.sourcedResponsibly.dictionaries", language, entry.sources.length),
+		}),
+	};
+	const sourcesFormatted = entry.sources.map(([link, licence]) => `[${licence.name}](${link})`).join(" · ");
+	const sourceEmbed: Discord.Embed = {
+		description: `${constants.symbols.link} ${sourcesFormatted}`,
+		color: constants.colors.peach,
+		footer: { text: strings.sourcedResponsibly },
+	};
+
 	if (!verbose) {
-		return [{ title: word, description: partOfSpeechFormatted, fields, color: constants.colors.husky }];
+		return [sourceEmbed, { title: word, description: partOfSpeechFormatted, fields, color: constants.colors.husky }];
 	}
 
-	return embeds;
+	return [sourceEmbed, ...embeds];
 }
 
 function tagsToString(tags: string[]): string {

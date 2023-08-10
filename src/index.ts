@@ -235,8 +235,8 @@ function loadSentencePairs(languageFileContents: [FeatureLanguage, string][]): M
 			translation: string,
 		][];
 
-		for (const [_, sentence, __, translation] of records) {
-			const sentencePair = { sentence, translation };
+		for (const [sentenceId, sentence, translationId, translation] of records) {
+			const sentencePair = { sentenceId, sentence, translationId, translation };
 			result.get(language)?.push(sentencePair) ?? result.set(language, [sentencePair]);
 		}
 	}

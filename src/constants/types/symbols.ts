@@ -14,6 +14,7 @@ export default {
 		divider: "﹘",
 		separator: "・",
 	},
+	link: "🔗",
 	events: {
 		user: {
 			banned: "⚔️",

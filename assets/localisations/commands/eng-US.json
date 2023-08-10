@@ -95,6 +95,7 @@
 	"game.strings.translation": "Translation",
 	"game.strings.noSentencesAvailable.title": "No sentences available",
 	"game.strings.noSentencesAvailable.description": "There are no sentences available in the requested language.",
+  "game.strings.sourcedFrom": "Sentences sourced from {source}.",
 
 	"resources.name": "resources",
 	"resources.description": "Redirects to the repository of resources to learn the language.",
@@ -184,6 +185,10 @@
 	"word.strings.nouns.cases.vocative": "Vocative",
 	"word.strings.nouns.singular": "Singular",
 	"word.strings.nouns.plural": "Plural",
+  "word.strings.sourcedResponsibly": "Information sourced with gratitude from {dictionaries}.",
+  "word.strings.sourcedResponsibly.dictionaries.one": "the dictionary above",
+  "word.strings.sourcedResponsibly.dictionaries.two": "the dictionaries above",
+  "word.strings.sourcedResponsibly.dictionaries.many": "the dictionaries above",
 
 	"list.name": "list",
 	"list.description": "Allows the viewing of various information about users.",
@@ -615,5 +620,21 @@
   "settings.strings.invalid.title": "Invalid language",
   "settings.strings.invalid.description": "The language you specified is invalid.",
   "settings.strings.languageUpdated.title": "Updated display language",
-  "settings.strings.languageUpdated.description": "Your display language has been set to {language}."
+  "settings.strings.languageUpdated.description": "Your display language has been set to {language}.",
+
+  "license.name": "licences",
+  "license.description": "Allows the user to view notices for data and software used by the Logos project.",
+  "license.options.dictionary.name": "dictionary",
+  "license.options.dictionary.description": "View licence notices for dictionaries used by Logos.",
+  "license.options.dictionary.options.dictionary.name": "dictionary",
+  "license.options.dictionary.options.dictionary.description": "The dictionary to view the licence for.",
+  "license.options.software.name": "software",
+  "license.options.software.description": "View licence notices for software used by Logos.",
+  "license.options.software.options.package.name": "package",
+  "license.options.software.options.package.description": "The package to view the licence for.",
+  "license.strings.invalid.title": "Invalid licence",
+  "license.strings.invalid.description": "The licence you tried to view is invalid.",
+  "license.strings.license": "Licence – {entity}",
+  "license.strings.source": "Source",
+  "license.strings.copyright": "Copyright Notice"
 }

@@ -1,4 +1,6 @@
+import constants from "../../../../../constants/constants";
 import { FeatureLanguage, Locale } from "../../../../../constants/languages";
+import licences from "../../../../../constants/licences";
 import { Client } from "../../../../client";
 import { getPartOfSpeech } from "../../module";
 import { DictionaryAdapter, DictionaryEntry } from "../adapter";
@@ -34,7 +36,13 @@ class WiktionaryAdapter extends DictionaryAdapter<WordData[]> {
 		return data;
 	}
 
-	parse(lemma: string, results: WordData[], _: Client, __: { locale: Locale }): DictionaryEntry[] {
+	parse(
+		lemma: string,
+		language: FeatureLanguage,
+		results: WordData[],
+		_: Client,
+		__: { locale: Locale },
+	): DictionaryEntry[] {
 		const entries: DictionaryEntry[] = [];
 		for (const result of results) {
 			for (const definition of result.definitions) {
@@ -47,6 +55,9 @@ class WiktionaryAdapter extends DictionaryAdapter<WordData[]> {
 					partOfSpeech,
 					definitions: definitions.map((definition) => ({ value: definition })),
 					etymologies: [{ value: result.etymology.replaceAll(newlinesExpression, "\n\n") }],
+					sources: [
+						[constants.links.generateWiktionaryDefinitionLink(lemma, language), licences.dictionaries.wiktionary],
+					],
 				});
 			}
 		}

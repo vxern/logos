@@ -129,11 +129,10 @@ async function handleDisplayCurrentlyPlaying(
 			{
 				elements: chunk(collection.songs, defaults.RESULTS_PER_PAGE),
 				embed: {
-					title: `${constants.symbols.music.nowPlaying} ${strings.nowPlaying}`,
 					color: constants.colors.blue,
 				},
 				view: {
-					title: strings.songs,
+					title: `${constants.symbols.music.nowPlaying} ${strings.nowPlaying}`,
 					generate: (songs, pageIndex) => {
 						if (songs.length === 0) {
 							return strings.listEmpty;

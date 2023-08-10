@@ -3,10 +3,10 @@ import clear from "./language/clear";
 import set from "./language/set";
 import * as Discord from "discordeno";
 
-const option: OptionTemplate = {
+const command: OptionTemplate = {
 	name: "language",
 	type: Discord.ApplicationCommandOptionTypes.SubCommandGroup,
 	options: [clear, set],
 };
 
-export default option;
+export default command;

@@ -1,4 +1,3 @@
-import constants from "../../../constants/constants";
 import { Locale } from "../../../constants/languages";
 import defaults from "../../../defaults";
 import { list } from "../../../formatting";
@@ -19,7 +18,6 @@ async function displayListings(
 	const pages = chunk(songListings, defaults.RESULTS_PER_PAGE);
 
 	const strings = {
-		title: localise(client, "music.strings.listings", locale)(),
 		listEmpty: localise(client, "music.strings.listEmpty", locale)(),
 	};
 
@@ -28,9 +26,9 @@ async function displayListings(
 		interaction,
 		{
 			elements: pages,
-			embed: { title: title, color: constants.colors.blue },
+			embed: {},
 			view: {
-				title: strings.title,
+				title,
 				generate: (page, pageIndex) => {
 					if (page.length === 0) {
 						return strings.listEmpty;

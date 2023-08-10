@@ -1,4 +1,5 @@
 import { FeatureLanguage, Locale } from "../../../../constants/languages";
+import { DictionaryLicence } from "../../../../constants/licences";
 import { Client } from "../../../client";
 import { PartOfSpeech } from "./parts-of-speech";
 import * as Discord from "discordeno";
@@ -51,6 +52,8 @@ interface DictionaryEntry {
 
 	/** The inflection of the lemma. */
 	inflectionTable?: InflectionTable;
+
+	sources: [link: string, licence: DictionaryLicence][];
 }
 
 abstract class DictionaryAdapter<DataType = unknown> {
@@ -102,7 +105,7 @@ abstract class DictionaryAdapter<DataType = unknown> {
 
 		let entries: DictionaryEntry[];
 		try {
-			entries = this.parse(lemma, data, client, { locale });
+			entries = this.parse(lemma, language, data, client, { locale });
 		} catch (exception) {
 			client.log.error(`Failed to format results from ${this.name} for lemma '${lemma}' in ${language}.`);
 			client.log.error(exception);
@@ -123,7 +126,13 @@ abstract class DictionaryAdapter<DataType = unknown> {
 	 * @param client - The client instance to use for localising.
 	 * @param locale - The locale to present the dictionary entries in.
 	 */
-	abstract parse(lemma: string, data: DataType, client: Client, { locale }: { locale: Locale }): DictionaryEntry[];
+	abstract parse(
+		lemma: string,
+		language: FeatureLanguage,
+		data: DataType,
+		client: Client,
+		{ locale }: { locale: Locale },
+	): DictionaryEntry[];
 }
 
 export type { Definition, DictionaryEntry, Expression };
