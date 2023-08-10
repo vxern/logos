@@ -5,7 +5,6 @@
     "information.options.bot.description": "Zeigt Informationen über den Bot an.",
     "information.options.bot.strings.howToAddToServer.title": "Wie kannst du mich zu deinem Server hinzufügen?",
     "information.options.bot.strings.amIOpenSource.title": "Bin ich open source?",
-    "information.options.bot.strings.translators.title": "Übersetzer",
     "information.options.server.name": "Server",
     "information.options.server.strings.information.title": "Informationen über **{server_name}**",
     "information.options.server.strings.information.description.description": "Beschreibung",

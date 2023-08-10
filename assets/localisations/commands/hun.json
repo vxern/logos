@@ -15,7 +15,6 @@
     "information.options.bot.strings.howToAddToServer.description": "Ez jelenleg nem lehetséges. Néhány meghatározott nyelvtanuló közösség kezelésére készültem, mint például a [Learn Romanian]({learn_romanian_link}) és a [Learn Armenian]({learn_armenian_link}).",
     "information.options.bot.strings.amIOpenSource.title": "Nyílt forráskódú vagyok?",
     "information.options.bot.strings.amIOpenSource.description": "No, I am not open-source. There are also no plans to make my codebase public.",
-    "information.options.bot.strings.translators.title": "Fordítók",
     "information.options.server.name": "szerver",
     "information.options.server.description": "A szerverről jelenít meg információt.",
     "information.options.server.strings.information.title": "**{server_name}** – Információk",

@@ -15,7 +15,6 @@
     "information.options.bot.strings.howToAddToServer.description": "It is not possible to add me to your own community at this point in time. I was made for the purpose of managing a select few language-learning communities, such as [Learn Romanian]({learn_romanian_link}) and [Learn Armenian]({learn_armenian_link}).",
     "information.options.bot.strings.amIOpenSource.title": "Ben ik open source?",
     "information.options.bot.strings.amIOpenSource.description": "Nee, ik ben niet open-source. Er zijn ook geen plannen om mijn codebase openbaar te maken.",
-    "information.options.bot.strings.translators.title": "Translators",
     "information.options.server.name": "server",
     "information.options.server.description": "Geeft informatie over de server weer.",
     "information.options.server.strings.information.title": "Informatie over **{server_name}**",

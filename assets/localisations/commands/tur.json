@@ -15,7 +15,6 @@
     "information.options.bot.strings.howToAddToServer.description": "Beni şu anlık kendi sunucunuza ekleyebilmeniz mümkün değil. [Learn Romanian]({learn_romanian_link}) ve [Learn Armenian]({learn_armenian_link}) gibi birkaç belirli dil öğrenme sunucusunu idare etmek için yapıldım.",
     "information.options.bot.strings.amIOpenSource.title": "Open-source (açık kaynak) mıyım?",
     "information.options.bot.strings.amIOpenSource.description": "Hayır, open-source (açık kaynaklı) değilim. Kod tabanımı halka açık yapmak için de plan yok.",
-    "information.options.bot.strings.translators.title": "Çevirmenler",
     "information.options.server.name": "sunucu",
     "information.options.server.description": "Sunucu hakkında bilgi gösterir.",
     "information.options.server.strings.information.title": "**{server_name}** hakkında bilgi",

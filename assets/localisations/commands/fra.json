@@ -15,7 +15,6 @@
     "information.options.bot.strings.howToAddToServer.description": "Il n'est pas actuellement possible de m'ajouter à votre propre communauté. J'ai été conçu afin de gérer certaines communautés de l'apprentissage des langues, telles que [Learn Romanian]({learn_romanian_link}) et [Learn Armenian]({learn_armenian_link}).",
     "information.options.bot.strings.amIOpenSource.title": "Suis-je open source ?",
     "information.options.bot.strings.amIOpenSource.description": "Non, je ne suis pas open source. Il n'est pas non plus prévu que mon code soit rendu public.",
-    "information.options.bot.strings.translators.title": "Traducteurs",
     "information.options.server.name": "serveur",
     "information.options.server.description": "Affiche des informations sur le serveur.",
     "information.options.server.strings.information.title": "Informations sur **{server_name}**",

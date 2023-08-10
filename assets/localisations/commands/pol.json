@@ -15,7 +15,6 @@
     "information.options.bot.strings.howToAddToServer.description": "Na chwilę obecną, nie można dodać mnie do własnej społeczności. Stworzono mnie w celu zarządzania tylko wybranymi społecznościami, takimi jak [Learn Romanian]({learn_romanian_link}) i [Learn Armenian]({learn_armenian_link}).",
     "information.options.bot.strings.amIOpenSource.title": "Gdzie mogę sprawdzić Twój kod źródłowy?",
     "information.options.bot.strings.amIOpenSource.description": "Jestem o zamkniętym kodzie źródłowym. Obecnie nie ma też planów na to, żeby mój kod źródłowy opublikowano.",
-    "information.options.bot.strings.translators.title": "Tłumacze",
     "information.options.server.name": "serwer",
     "information.options.server.description": "Wyświetla informacje o serwerze.",
     "information.options.server.strings.information.title": "Informacje o serwerze **{server_name}**",

@@ -15,7 +15,6 @@
     "information.options.bot.strings.howToAddToServer.description": "Det er ikke mulig å legge meg til i ditt samfunn på dette tidspunktet. Jeg ble laget for å behandle noen få språklæringssamfunn, for eksempel [Learn Romanian]({learn_romanian_link}) og [Learn Armenian]({learn_armenian_link}).",
     "information.options.bot.strings.amIOpenSource.title": "Er jeg åpen kildekode?",
     "information.options.bot.strings.amIOpenSource.description": "Nei, jeg er ikke åpen kildekode. Det er også ingen planer om å frigi kodebasen min til offentligheten.",
-    "information.options.bot.strings.translators.title": "Oversettere",
     "information.options.server.name": "server",
     "information.options.server.description": "Viser informasjon om serveren.",
     "information.options.server.strings.information.title": "Informasjon om **{server_name}**",
