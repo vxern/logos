@@ -16,7 +16,6 @@
 	"information.options.bot.strings.howToAddToServer.description": "It is not possible to add me to your own community at this point in time. I was made for the purpose of managing a select few language-learning communities, such as [Learn Romanian]({learn_romanian_link}) and [Learn Armenian]({learn_armenian_link}).",
 	"information.options.bot.strings.amIOpenSource.title": "Am I open-source?",
 	"information.options.bot.strings.amIOpenSource.description": "No, I am not open-source. There are also no plans to make my codebase public.",
-	"information.options.bot.strings.translators.title": "Translators",
 	"information.options.server.name": "server",
 	"information.options.server.description": "Displays information about the server.",
 	"information.options.server.strings.information.title": "Information about **{server_name}**",
@@ -636,5 +635,9 @@
   "license.strings.invalid.description": "The licence you tried to view is invalid.",
   "license.strings.license": "Licence – {entity}",
   "license.strings.source": "Source",
-  "license.strings.copyright": "Copyright Notice"
+  "license.strings.copyright": "Copyright Notice",
+
+  "credits.name": "credits",
+  "credits.description": "Shows the credits menu.",
+  "credits.strings.translation": "Translation"
 }

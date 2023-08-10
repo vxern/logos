@@ -3,7 +3,6 @@ import { list } from "../../../../../formatting";
 import * as Logos from "../../../../../types";
 import { Client, localise } from "../../../../client";
 import { reply } from "../../../../interactions";
-import { chunk } from "../../../../utils";
 import * as Discord from "discordeno";
 
 async function handleDisplayBotInformation(
@@ -62,9 +61,6 @@ async function handleDisplayBotInformation(
 				description: localise(client, "information.options.bot.strings.amIOpenSource.description", locale)(),
 			},
 		},
-		translators: {
-			title: localise(client, "information.options.bot.strings.translators.title", locale)(),
-		},
 	};
 
 	const featuresFormatted = list([
@@ -104,38 +100,8 @@ async function handleDisplayBotInformation(
 					},
 				],
 			},
-			{
-				title: strings.translators.title,
-				color: constants.colors.blue,
-				fields: getContributorString(constants.contributions.translation),
-			},
 		],
 	});
-}
-
-function getContributorString(contributions: typeof constants.contributions.translation): Discord.EmbedField[] {
-	const fields: Discord.EmbedField[] = [];
-	for (const [language, data] of Object.entries(contributions)) {
-		const contributorsFormatted = chunk(
-			data.contributors.map((contributor) => {
-				if ("link" in contributor) {
-					return `**[${contributor.username}](${contributor.link})**`;
-				}
-
-				return `**${contributor.username}**`;
-			}),
-			3,
-		)
-			.map((chunks) => chunks.join(" "))
-			.join("\n");
-
-		fields.push({
-			name: `${language} ${data.flag}`,
-			value: contributorsFormatted,
-			inline: true,
-		});
-	}
-	return fields;
 }
 
 export { handleDisplayBotInformation };
