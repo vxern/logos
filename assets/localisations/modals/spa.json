@@ -1,7 +1,4 @@
 {
-    "verification.fields.whereFound": "",
     "correction.title": "",
-    "report.fields.reason": "",
-    "suggestion.fields.suggestion": "",
-    "prompts.leave": ""
+    "suggestion.fields.suggestion": ""
 }
