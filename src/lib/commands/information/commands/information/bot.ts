@@ -72,13 +72,12 @@ async function handleDisplayBotInformation(
 	reply([client, bot], interaction, {
 		embeds: [
 			{
-				title: botUser.username,
-				thumbnail: {
-					url: Discord.getAvatarURL(bot, bot.id, botUser.discriminator, {
+				author: {
+					iconUrl: Discord.getAvatarURL(bot, bot.id, botUser.discriminator, {
 						avatar: botUser.avatar,
-						size: 4096,
 						format: "png",
 					}),
+					name: botUser.username,
 				},
 				color: constants.colors.blue,
 				fields: [
