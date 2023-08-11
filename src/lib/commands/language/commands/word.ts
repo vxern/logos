@@ -489,7 +489,7 @@ function entryToEmbeds(
 			};
 
 			embeds.push({
-				title: strings.nativeDefinitionsForWord,
+				title: `${constants.symbols.word.definitions} ${strings.nativeDefinitionsForWord}`,
 				description: `${partOfSpeechFormatted}\n\n${definitionsFitted}`,
 				color: constants.colors.husky,
 			});
@@ -499,7 +499,7 @@ function entryToEmbeds(
 			};
 
 			fields.push({
-				name: strings.nativeDefinitions,
+				name: `${constants.symbols.word.definitions} ${strings.nativeDefinitions}`,
 				value: definitionsFitted,
 			});
 		}
@@ -515,7 +515,7 @@ function entryToEmbeds(
 			};
 
 			embeds.push({
-				title: strings.definitionsForWord,
+				title: `${constants.symbols.word.definitions} ${strings.definitionsForWord}`,
 				description: `${partOfSpeechFormatted}\n\n${definitionsFitted}`,
 				color: constants.colors.husky,
 			});
@@ -525,7 +525,7 @@ function entryToEmbeds(
 			};
 
 			fields.push({
-				name: strings.definitions,
+				name: `${constants.symbols.word.definitions} ${strings.definitions}`,
 				value: definitionsFitted,
 			});
 		}
@@ -540,9 +540,16 @@ function entryToEmbeds(
 		};
 
 		if (verbose) {
-			embeds.push({ title: strings.expressions, description: expressionsFitted, color: constants.colors.husky });
+			embeds.push({
+				title: `${constants.symbols.word.expressions} ${strings.expressions}`,
+				description: expressionsFitted,
+				color: constants.colors.husky,
+			});
 		} else {
-			fields.push({ name: strings.expressions, value: trim(expressionsFitted, 1024) });
+			fields.push({
+				name: `${constants.symbols.word.expressions} ${strings.expressions}`,
+				value: trim(expressionsFitted, 1024),
+			});
 		}
 	}
 
@@ -566,9 +573,13 @@ function entryToEmbeds(
 		};
 
 		if (verbose) {
-			embeds.push({ title: strings.etymology, description: etymology, color: constants.colors.husky });
+			embeds.push({
+				title: `${constants.symbols.word.etymology} ${strings.etymology}`,
+				description: etymology,
+				color: constants.colors.husky,
+			});
 		} else {
-			fields.push({ name: strings.etymology, value: trim(etymology, 1024) });
+			fields.push({ name: `${constants.symbols.word.etymology} ${strings.etymology}`, value: trim(etymology, 1024) });
 		}
 	}
 
@@ -589,7 +600,15 @@ function entryToEmbeds(
 	};
 
 	if (!verbose) {
-		return [sourceEmbed, { title: word, description: partOfSpeechFormatted, fields, color: constants.colors.husky }];
+		return [
+			sourceEmbed,
+			{
+				title: `${constants.symbols.word.word} ${word}`,
+				description: partOfSpeechFormatted,
+				fields,
+				color: constants.colors.husky,
+			},
+		];
 	}
 
 	return [sourceEmbed, ...embeds];

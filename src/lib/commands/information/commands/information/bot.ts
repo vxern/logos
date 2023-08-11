@@ -82,19 +82,19 @@ async function handleDisplayBotInformation(
 				color: constants.colors.blue,
 				fields: [
 					{
-						name: strings.information.whoAmI.title,
+						name: `${constants.symbols.information.bot} ${strings.information.whoAmI.title}`,
 						value: `${strings.information.whoAmI.description}\n${featuresFormatted}`,
 					},
 					{
-						name: strings.information.howWasIMade.title,
+						name: `${constants.symbols.information.build} ${strings.information.howWasIMade.title}`,
 						value: strings.information.howWasIMade.description,
 					},
 					{
-						name: strings.information.howToAddToServer.title,
+						name: `${constants.symbols.information.handshake} ${strings.information.howToAddToServer.title}`,
 						value: strings.information.howToAddToServer.description,
 					},
 					{
-						name: strings.information.amIOpenSource.title,
+						name: `${constants.symbols.information.unlocked} ${strings.information.amIOpenSource.title}`,
 						value: strings.information.amIOpenSource.description,
 					},
 				],

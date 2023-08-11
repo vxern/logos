@@ -9,6 +9,10 @@ export default {
 	information: {
 		information: "ℹ️",
 		inviteLink: "🔗",
+		bot: "🤖",
+		build: "🛠️",
+		handshake: "🤝",
+		unlocked: "🔓",
 	},
 	sigils: {
 		divider: "﹘",
@@ -50,6 +54,12 @@ export default {
 			begin: "⚔️",
 			end: "✅",
 		},
+	},
+	word: {
+		word: "📜",
+		definitions: "📚",
+		expressions: "💐",
+		etymology: "🌐",
 	},
 	music: {
 		song: "🎵",
@@ -104,6 +114,7 @@ export default {
 		moderators: "⚖️",
 		proficiencyDistribution: "🎓",
 	},
+	warn: "😖",
 	answer: "📜",
 	correction: "🖋️",
 	interactions: {
