@@ -684,8 +684,13 @@ async function getLocaleData(client: Client, interaction: Discord.Interaction): 
 	}
 
 	const [userDocument, guildDocument] = await Promise.all([
-		client.database.adapters.users.getOrFetch(client, "id", interaction.user.id.toString()),
-		client.database.adapters.guilds.getOrFetch(client, "id", guildId.toString()),
+		client.database.adapters.users.getOrFetchOrCreate(
+			client,
+			"id",
+			interaction.user.id.toString(),
+			interaction.user.id,
+		),
+		client.database.adapters.guilds.getOrFetchOrCreate(client, "id", guildId.toString(), guildId),
 	]);
 	if (userDocument === undefined || guildDocument === undefined) {
 		return FALLBACK_LOCALE_DATA;
