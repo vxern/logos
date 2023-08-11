@@ -263,5 +263,6 @@
     "list.options.warnings.strings.noActiveWarnings.title": "Keine aktiven Warnungen",
     "purge.strings.sureToPurge.description.messages.two": "{two} Nachrichten werden gelöscht",
     "purge.strings.sureToPurge.description.messages.many": "{many} Nachrichten werden gelöscht",
-    "word.strings.sourcedResponsibly.dictionaries.many": "Die Wörterbücher oben"
+    "word.strings.sourcedResponsibly.dictionaries.many": "Die Wörterbücher oben",
+    "cefr.strings.levels.c1.description": "Ich habe für eine sehr lange Zeit gelernt. Ich bin nicht nur fähig mich präzise und selbstbewusst auszudrücken, ich kann auch Sprache situativ und kulturbewusst einsetzten. Manchmal stoße ich auf Vokabeln, Merkmale oder Formulierungen der Sprache, die ich noch nicht kannte."
 }
