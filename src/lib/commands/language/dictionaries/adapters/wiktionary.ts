@@ -1,5 +1,5 @@
 import constants from "../../../../../constants/constants";
-import { FeatureLanguage, Locale } from "../../../../../constants/languages";
+import languages, { FeatureLanguage, Locale } from "../../../../../constants/languages";
 import licences from "../../../../../constants/licences";
 import { Client } from "../../../../client";
 import { getPartOfSpeech } from "../../module";
@@ -16,7 +16,7 @@ class WiktionaryAdapter extends DictionaryAdapter<WordData[]> {
 	constructor() {
 		super({
 			name: "Wiktionary",
-			supports: ["Armenian", "Romanian"],
+			supports: languages.feature,
 			provides: ["definitions", "etymology"],
 		});
 	}

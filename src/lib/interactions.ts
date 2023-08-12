@@ -1,6 +1,7 @@
 import constants from "../constants/constants";
 import {
 	FeatureLanguage,
+	LearningLanguage,
 	Locale,
 	LocalisationLanguage,
 	getDiscordLanguageByDiscordLocale,
@@ -672,6 +673,7 @@ function getFeatureLanguage(guildDocument?: Document<Guild>): FeatureLanguage {
 const FALLBACK_LOCALE_DATA: InteractionLocaleData = {
 	language: defaults.LOCALISATION_LANGUAGE,
 	locale: defaults.LOCALISATION_LOCALE,
+	learningLanguage: defaults.LOCALISATION_LANGUAGE,
 	guildLanguage: defaults.LOCALISATION_LANGUAGE,
 	guildLocale: defaults.LOCALISATION_LOCALE,
 	featureLanguage: defaults.FEATURE_LANGUAGE,
@@ -682,6 +684,8 @@ async function getLocaleData(client: Client, interaction: Discord.Interaction): 
 	if (guildId === undefined) {
 		return FALLBACK_LOCALE_DATA;
 	}
+
+	const member = client.cache.members.get(Discord.snowflakeToBigint(`${interaction.user.id}${guildId}`));
 
 	const [userDocument, guildDocument] = await Promise.all([
 		client.database.adapters.users.getOrFetchOrCreate(
@@ -700,9 +704,10 @@ async function getLocaleData(client: Client, interaction: Discord.Interaction): 
 	const isInTargetOnlyChannel =
 		interaction.channelId !== undefined && targetOnlyChannelIds.includes(interaction.channelId);
 
-	const guildLanguage = isInTargetOnlyChannel
-		? getTargetLanguage(guildDocument)
-		: getLocalisationLanguage(guildDocument);
+	const targetLanguage = getTargetLanguage(guildDocument);
+	const learningLanguage = getLearningLanguage(guildDocument, targetLanguage, member);
+
+	const guildLanguage = isInTargetOnlyChannel ? targetLanguage : getLocalisationLanguage(guildDocument);
 	const guildLocale = getLocaleByLanguage(guildLanguage);
 	const featureLanguage = getFeatureLanguage(guildDocument);
 
@@ -711,7 +716,7 @@ async function getLocaleData(client: Client, interaction: Discord.Interaction): 
 		if (userDocument?.data.account.language !== undefined) {
 			const language = userDocument?.data.account.language;
 			const locale = getLocaleByLanguage(language);
-			return { language, locale, guildLanguage, guildLocale, featureLanguage };
+			return { language, locale, learningLanguage, guildLanguage, guildLocale, featureLanguage };
 		}
 	}
 
@@ -719,7 +724,7 @@ async function getLocaleData(client: Client, interaction: Discord.Interaction): 
 	const appLocale = interaction.locale;
 	const language = getDiscordLanguageByDiscordLocale(appLocale) ?? defaults.LOCALISATION_LANGUAGE;
 	const locale = getLocaleByLanguage(language);
-	return { language, locale, guildLanguage, guildLocale, featureLanguage };
+	return { language, locale, learningLanguage, guildLanguage, guildLocale, featureLanguage };
 }
 
 function getTargetOnlyChannelIds(guildDocument: Document<Guild>): bigint[] {
@@ -734,6 +739,35 @@ function getTargetOnlyChannelIds(guildDocument: Document<Guild>): bigint[] {
 	}
 
 	return targetOnly.channelIds.map((channelId) => BigInt(channelId));
+}
+
+function getLearningLanguage(
+	guildDocument: Document<Guild>,
+	guildLearningLanguage: LearningLanguage,
+	member: Logos.Member | undefined,
+): LearningLanguage {
+	if (member === undefined) {
+		return guildLearningLanguage;
+	}
+
+	const language = guildDocument.data.features.language;
+	if (!language.enabled) {
+		return guildLearningLanguage;
+	}
+
+	const roleLanguages = language.features.roleLanguages;
+	if (roleLanguages === undefined || !roleLanguages.enabled) {
+		return guildLearningLanguage;
+	}
+
+	const userLearningLanguage = Object.entries(roleLanguages.ids).find(([key, _]) =>
+		member.roles.includes(BigInt(key)),
+	)?.[1];
+	if (userLearningLanguage === undefined) {
+		return guildLearningLanguage;
+	}
+
+	return userLearningLanguage;
 }
 
 export {

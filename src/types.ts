@@ -1,4 +1,4 @@
-import { FeatureLanguage, Locale, LocalisationLanguage } from "./constants/languages";
+import { FeatureLanguage, LearningLanguage, Locale, LocalisationLanguage } from "./constants/languages";
 import * as Discord from "discordeno";
 
 type Guild = Pick<
@@ -118,6 +118,7 @@ function slimVoiceState(voiceState: Discord.VoiceState): VoiceState {
 interface InteractionLocaleData {
 	locale: Locale;
 	language: LocalisationLanguage;
+	learningLanguage: LearningLanguage;
 	guildLocale: Locale;
 	guildLanguage: LocalisationLanguage;
 	featureLanguage: FeatureLanguage;

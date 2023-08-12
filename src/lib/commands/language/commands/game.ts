@@ -41,7 +41,7 @@ async function handleStartGame([client, bot]: [Client, Discord.Bot], interaction
 		return;
 	}
 
-	const sentencePairs = client.features.sentencePairs.get(interaction.featureLanguage);
+	const sentencePairs = client.features.sentencePairs.get(interaction.learningLanguage);
 	if (sentencePairs === undefined || sentencePairs.length === 0) {
 		const strings = {
 			title: localise(client, "game.strings.noSentencesAvailable.title", locale)(),

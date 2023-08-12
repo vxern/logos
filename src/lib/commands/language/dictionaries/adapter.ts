@@ -58,14 +58,14 @@ interface DictionaryEntry {
 
 abstract class DictionaryAdapter<DataType = unknown> {
 	readonly name: string;
-	readonly supports: FeatureLanguage[];
-	readonly provides: DictionaryProvisions[];
+	readonly supports: readonly FeatureLanguage[];
+	readonly provides: readonly DictionaryProvisions[];
 
 	constructor({
 		name,
 		supports,
 		provides,
-	}: { name: string; supports: FeatureLanguage[]; provides: DictionaryProvisions[] }) {
+	}: { name: string; supports: readonly FeatureLanguage[]; provides: readonly DictionaryProvisions[] }) {
 		this.name = name;
 		this.supports = supports;
 		this.provides = provides;

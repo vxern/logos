@@ -3,48 +3,63 @@ import * as Discord from "discordeno";
 const languages = {
 	localisation: {
 		discord: [
+			"Dutch",
 			"English/American",
 			"English/British",
+			"Finnish",
 			"French",
+			"German",
+			"Greek",
 			"Hungarian",
 			"Norwegian/Bokmål",
 			"Polish",
 			"Romanian",
 			"Turkish",
-			"Dutch",
-			"Greek",
-			"Finnish",
 		],
 		logos: ["Armenian/Western", "Armenian/Eastern"],
 	},
-	feature: ["Armenian", "English", "Romanian"],
+	feature: [
+		"Armenian",
+		"Dutch",
+		"English",
+		"French",
+		"German",
+		"Greek",
+		"Hungarian",
+		"Norwegian",
+		"Polish",
+		"Romanian",
+		"Turkish",
+	],
 } as const;
 
 const languageToLocale = {
 	discord: {
+		Dutch: "nl",
 		"English/American": "en-US",
 		"English/British": "en-GB",
+		Finnish: "fi",
 		French: "fr",
+		German: "de",
+		Greek: "el",
 		Hungarian: "hu",
 		"Norwegian/Bokmål": "no",
 		Polish: "pl",
 		Romanian: "ro",
 		Turkish: "tr",
-		Dutch: "nl",
-		Greek: "el",
-		Finnish: "fi",
 	} satisfies Record<DiscordLanguage, Discord.Locale>,
 	logos: {
-		Greek: "ell",
+		"Armenian/Eastern": "hye",
+		"Armenian/Western": "hyw",
+		Dutch: "nld",
 		"English/American": "eng-US",
 		"English/British": "eng-GB",
 		Finnish: "fin",
 		French: "fra",
+		Greek: "ell",
+		German: "deu",
 		Hungarian: "hun",
 		"Norwegian/Bokmål": "nob",
-		"Armenian/Eastern": "hye",
-		"Armenian/Western": "hyw",
-		Dutch: "nld",
 		Polish: "pol",
 		Romanian: "ron",
 		Turkish: "tur",
@@ -61,6 +76,7 @@ type LogosLanguage = typeof languages.localisation.logos[number];
 
 type LocalisationLanguage = DiscordLanguage | LogosLanguage;
 type FeatureLanguage = typeof languages.feature[number];
+type LearningLanguage = LocalisationLanguage;
 
 type DiscordLocale = typeof languageToLocale.discord[keyof typeof languageToLocale.discord];
 type Locale = typeof languageToLocale.logos[keyof typeof languageToLocale.logos];
@@ -126,4 +142,4 @@ export {
 	isFeatured,
 	isBuiltIn,
 };
-export type { FeatureLanguage, LocalisationLanguage, Locale };
+export type { LearningLanguage, FeatureLanguage, LocalisationLanguage, Locale };

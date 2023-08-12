@@ -1,11 +1,11 @@
+import constants from "../../../../constants/constants";
+import { Locale } from "../../../../constants/languages";
+import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
+import { reply } from "../../../interactions";
+import { chunk } from "../../../utils";
 import { CommandTemplate } from "../../command";
 import * as Discord from "discordeno";
-import * as Logos from "../../../../types";
-import constants from "../../../../constants/constants";
-import { chunk } from "../../../utils";
-import { Locale } from "../../../../constants/languages";
-import { reply } from "../../../interactions";
 
 const command: CommandTemplate = {
 	name: "credits",

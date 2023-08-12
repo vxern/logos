@@ -1,4 +1,11 @@
-import { FeatureLanguage, Locale, LocalisationLanguage, getLanguageByLocale, isFeatured } from "./constants/languages";
+import {
+	FeatureLanguage,
+	LearningLanguage,
+	Locale,
+	LocalisationLanguage,
+	getLanguageByLocale,
+	isLocalised,
+} from "./constants/languages";
 import { capitalise } from "./formatting";
 import { Client, initialiseClient } from "./lib/client";
 import { SentencePair } from "./lib/commands/language/commands/game";
@@ -166,7 +173,7 @@ async function loadLocalisations(directoryPath: string): Promise<Map<string, Map
  * @returns An array of tuples where the first element is a language and the second
  * element is the contents of its sentence file.
  */
-async function readSentenceFiles(directoryPath: string): Promise<[FeatureLanguage, string][]> {
+async function readSentenceFiles(directoryPath: string): Promise<[LearningLanguage, string][]> {
 	const filePaths: string[] = [];
 	for (const entryPath of await fs.readdir(directoryPath)) {
 		const combinedPath = `${directoryPath}/${entryPath}`;
@@ -177,24 +184,32 @@ async function readSentenceFiles(directoryPath: string): Promise<[FeatureLanguag
 		filePaths.push(combinedPath);
 	}
 
-	const results: Promise<[FeatureLanguage, string]>[] = [];
+	const results: Promise<[LearningLanguage, string]>[] = [];
 	for (const filePath of filePaths) {
-		const [_, fileName] = /.+\/([a-z]+)\.tsv/.exec(filePath) ?? [];
+		const [_, fileName] = /^.+\/(.+)\.tsv$/.exec(filePath) ?? [];
 		if (fileName === undefined) {
-			console.warn(`Sentence file '${filePath}' has an invalid name.`);
+			console.warn(`Sentence file '${filePath}' has an invalid format.`);
 			continue;
 		}
 
-		const language = capitalise(fileName);
+		const language = fileName
+			.split("-")
+			.map((part) => capitalise(part))
+			.join("/");
 
-		if (!isFeatured(language)) {
+		if (!isLocalised(language)) {
 			console.warn(
 				`File '${filePath}' contains sentences for a language '${language}' not supported by the application. Skipping...`,
 			);
 			continue;
 		}
 
-		results.push(fs.readFile(filePath).then((contents) => [language, decoder.decode(contents)]));
+		results.push(
+			fs.readFile(filePath).then((buffer) => {
+				const contents = decoder.decode(buffer);
+				return [language, contents];
+			}),
+		);
 	}
 
 	return Promise.all(results);
@@ -222,18 +237,20 @@ function loadDictionaryAdapters(): Map<FeatureLanguage, DictionaryAdapter[]> {
 }
 
 /** Loads dictionary adapters and sentence lists. */
-function loadSentencePairs(languageFileContents: [FeatureLanguage, string][]): Map<FeatureLanguage, SentencePair[]> {
+function loadSentencePairs(languageFileContents: [LearningLanguage, string][]): Map<LearningLanguage, SentencePair[]> {
 	console.info(`[Sentences] Loading sentence pairs for ${languageFileContents.length} language(s)...`);
 
-	const result = new Map<FeatureLanguage, SentencePair[]>();
+	const result = new Map<LearningLanguage, SentencePair[]>();
 
 	for (const [language, contents] of languageFileContents) {
-		const records = csv.parse(contents, { relaxQuotes: true, delimiter: "	" }) as [
-			sentenceId: string,
-			sentence: string,
-			translationId: string,
-			translation: string,
-		][];
+		let records;
+		try {
+			records = csv.parse(contents, { relaxQuotes: true, relaxColumnCount: true, delimiter: "	" }) as
+				| [sentenceId: string, sentence: string, translationId: string, translation: string][];
+		} catch {
+			console.warn(`Failed to load sentences for ${language}.`);
+			continue;
+		}
 
 		for (const [sentenceId, sentence, translationId, translation] of records) {
 			const sentencePair = { sentenceId, sentence, translationId, translation };

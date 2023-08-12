@@ -1,6 +1,7 @@
 import constants from "../constants/constants";
 import {
 	FeatureLanguage,
+	LearningLanguage,
 	Locale,
 	LocalisationLanguage,
 	getDiscordLocaleByLanguage,
@@ -88,7 +89,7 @@ type Client = {
 	collectors: Map<Event, Set<Collector<Event>>>;
 	features: {
 		dictionaryAdapters: Map<FeatureLanguage, DictionaryAdapter[]>;
-		sentencePairs: Map<FeatureLanguage, SentencePair[]>;
+		sentencePairs: Map<LearningLanguage, SentencePair[]>;
 		// The keys are user IDs, the values are command usage timestamps mapped by command IDs.
 		rateLimiting: Map<bigint, Map<bigint, number[]>>;
 	};
