@@ -1,5 +1,6 @@
 import constants from "../../../../constants/constants";
 import { Locale, LocalisationLanguage } from "../../../../constants/languages";
+import localisations from "../../../../constants/localisations";
 import defaults from "../../../../defaults";
 import { code, trim } from "../../../../formatting";
 import * as Logos from "../../../../types";
@@ -20,7 +21,7 @@ import { chunk } from "../../../utils";
 import { CommandTemplate } from "../../command";
 import { show } from "../../parameters";
 import { Definition, DictionaryEntry, Expression } from "../dictionaries/adapter";
-import { PartOfSpeech, isUnknownPartOfSpeech, partOfSpeechToStringKey } from "../dictionaries/parts-of-speech";
+import { PartOfSpeech, isUnknownPartOfSpeech } from "../dictionaries/part-of-speech";
 import * as Discord from "discordeno";
 
 const command: CommandTemplate = {
@@ -71,7 +72,7 @@ async function handleFindWord([client, bot]: [Client, Discord.Bot], interaction:
 		return;
 	}
 
-	const dictionaries = client.features.dictionaryAdapters.get(interaction.featureLanguage);
+	const dictionaries = client.features.dictionaryAdapters.get(interaction.learningLanguage);
 	if (dictionaries === undefined) {
 		const strings = {
 			title: localise(client, "word.strings.noDictionaryAdapters.title", locale)(),
@@ -101,7 +102,7 @@ async function handleFindWord([client, bot]: [Client, Discord.Bot], interaction:
 	const unclassifiedEntries: DictionaryEntry[] = [];
 	const entriesByPartOfSpeech = new Map<PartOfSpeech, DictionaryEntry[]>();
 	for (const dictionary of dictionaries) {
-		const entries = await dictionary.getEntries(word, interaction.featureLanguage, client, { locale });
+		const entries = await dictionary.getEntries(word, interaction.learningLanguage, client, { locale });
 		if (entries === undefined) {
 			continue;
 		}
@@ -464,7 +465,7 @@ function entryToEmbeds(
 		const [detected, original] = entry.partOfSpeech;
 
 		const strings = {
-			partOfSpeech: localise(client, partOfSpeechToStringKey[detected], locale)(),
+			partOfSpeech: localise(client, localisations.partsOfSpeech[detected], locale)(),
 		};
 
 		partOfSpeechDisplayed = strings.partOfSpeech;

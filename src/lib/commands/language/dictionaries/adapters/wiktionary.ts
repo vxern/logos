@@ -1,6 +1,7 @@
 import constants from "../../../../../constants/constants";
-import languages, { FeatureLanguage, Locale } from "../../../../../constants/languages";
+import languages, { LearningLanguage, Locale } from "../../../../../constants/languages";
 import licences from "../../../../../constants/licences";
+import defaults from "../../../../../defaults";
 import { Client } from "../../../../client";
 import { getPartOfSpeech } from "../../module";
 import { DictionaryAdapter, DictionaryEntry } from "../adapter";
@@ -16,12 +17,12 @@ class WiktionaryAdapter extends DictionaryAdapter<WordData[]> {
 	constructor() {
 		super({
 			name: "Wiktionary",
-			supports: languages.feature,
+			supports: languages.localisation,
 			provides: ["definitions", "etymology"],
 		});
 	}
 
-	async fetch(lemma: string, language: FeatureLanguage): Promise<WordData[] | undefined> {
+	async fetch(lemma: string, language: LearningLanguage): Promise<WordData[] | undefined> {
 		const data = await wiktionary.parse(lemma, language);
 		if (data.length === 0) {
 			// @ts-ignore: Accessing private member.
@@ -38,7 +39,7 @@ class WiktionaryAdapter extends DictionaryAdapter<WordData[]> {
 
 	parse(
 		lemma: string,
-		language: FeatureLanguage,
+		language: LearningLanguage,
 		results: WordData[],
 		_: Client,
 		__: { locale: Locale },
@@ -46,7 +47,11 @@ class WiktionaryAdapter extends DictionaryAdapter<WordData[]> {
 		const entries: DictionaryEntry[] = [];
 		for (const result of results) {
 			for (const definition of result.definitions) {
-				const partOfSpeech = getPartOfSpeech(definition.partOfSpeech, definition.partOfSpeech, "English");
+				const partOfSpeech = getPartOfSpeech(
+					definition.partOfSpeech,
+					definition.partOfSpeech,
+					defaults.LOCALISATION_LANGUAGE,
+				);
 				const [_, ...definitions] = definition.text as [string, ...string[]];
 
 				entries.push({

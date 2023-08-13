@@ -1,7 +1,7 @@
-import { FeatureLanguage, Locale } from "../../../../constants/languages";
+import { LearningLanguage, Locale } from "../../../../constants/languages";
 import { DictionaryLicence } from "../../../../constants/licences";
 import { Client } from "../../../client";
-import { PartOfSpeech } from "./parts-of-speech";
+import { PartOfSpeech } from "./part-of-speech";
 import * as Discord from "discordeno";
 
 type DictionaryProvisions =
@@ -58,14 +58,14 @@ interface DictionaryEntry {
 
 abstract class DictionaryAdapter<DataType = unknown> {
 	readonly name: string;
-	readonly supports: readonly FeatureLanguage[];
+	readonly supports: readonly LearningLanguage[];
 	readonly provides: readonly DictionaryProvisions[];
 
 	constructor({
 		name,
 		supports,
 		provides,
-	}: { name: string; supports: readonly FeatureLanguage[]; provides: readonly DictionaryProvisions[] }) {
+	}: { name: string; supports: readonly LearningLanguage[]; provides: readonly DictionaryProvisions[] }) {
 		this.name = name;
 		this.supports = supports;
 		this.provides = provides;
@@ -77,7 +77,7 @@ abstract class DictionaryAdapter<DataType = unknown> {
 	 * @param lemma - The lemma to fetch data about.
 	 * @param language - The language the lemma is in.
 	 */
-	abstract fetch(lemma: string, language: FeatureLanguage): Promise<DataType | undefined>;
+	abstract fetch(lemma: string, language: LearningLanguage): Promise<DataType | undefined>;
 
 	/**
 	 * Gets dictionary entries for a {@link lemma} in a {@link language}, presenting the information in
@@ -90,7 +90,7 @@ abstract class DictionaryAdapter<DataType = unknown> {
 	 */
 	async getEntries(
 		lemma: string,
-		language: FeatureLanguage,
+		language: LearningLanguage,
 		client: Client,
 		{ locale }: { locale: Locale },
 	): Promise<DictionaryEntry[] | undefined> {
@@ -128,7 +128,7 @@ abstract class DictionaryAdapter<DataType = unknown> {
 	 */
 	abstract parse(
 		lemma: string,
-		language: FeatureLanguage,
+		language: LearningLanguage,
 		data: DataType,
 		client: Client,
 		{ locale }: { locale: Locale },

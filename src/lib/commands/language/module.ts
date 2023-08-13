@@ -1,8 +1,9 @@
 import constants from "../../../constants/constants";
-import { FeatureLanguage } from "../../../constants/languages";
+import { LearningLanguage } from "../../../constants/languages";
 import { Client } from "../../client";
 import { addParametersToURL } from "../../utils";
-import partsOfSpeech, { PartOfSpeech } from "./dictionaries/parts-of-speech";
+import { PartOfSpeech } from "./dictionaries/part-of-speech";
+import partsOfSpeech from "./dictionaries/parts-of-speech";
 
 interface DeepLSupportedLanguage {
 	language: string;
@@ -58,9 +59,9 @@ function resolveToSupportedLanguage(client: Client, languageOrCode: string): Sup
 function getPartOfSpeech(
 	exact: string,
 	approximate: string,
-	language: FeatureLanguage,
+	language: LearningLanguage,
 ): [detected: PartOfSpeech, original: string] {
-	const localised = partsOfSpeech[language];
+	const localised = partsOfSpeech[language] as Record<string, PartOfSpeech>;
 	if (localised === undefined) {
 		return ["unknown", exact];
 	}

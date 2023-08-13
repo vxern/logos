@@ -1,6 +1,5 @@
 import constants from "../constants/constants";
 import {
-	FeatureLanguage,
 	LearningLanguage,
 	Locale,
 	LocalisationLanguage,
@@ -88,7 +87,7 @@ type Client = {
 	};
 	collectors: Map<Event, Set<Collector<Event>>>;
 	features: {
-		dictionaryAdapters: Map<FeatureLanguage, DictionaryAdapter[]>;
+		dictionaryAdapters: Map<LearningLanguage, DictionaryAdapter[]>;
 		sentencePairs: Map<LearningLanguage, SentencePair[]>;
 		// The keys are user IDs, the values are command usage timestamps mapped by command IDs.
 		rateLimiting: Map<bigint, Map<bigint, number[]>>;

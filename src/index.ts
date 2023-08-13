@@ -1,5 +1,4 @@
 import {
-	FeatureLanguage,
 	LearningLanguage,
 	Locale,
 	LocalisationLanguage,
@@ -215,10 +214,10 @@ async function readSentenceFiles(directoryPath: string): Promise<[LearningLangua
 	return Promise.all(results);
 }
 
-function loadDictionaryAdapters(): Map<FeatureLanguage, DictionaryAdapter[]> {
+function loadDictionaryAdapters(): Map<LearningLanguage, DictionaryAdapter[]> {
 	console.info("[Dictionaries] Loading dictionary adapters...");
 
-	const result = new Map<FeatureLanguage, DictionaryAdapter[]>();
+	const result = new Map<LearningLanguage, DictionaryAdapter[]>();
 
 	for (const adapter of dictionaryAdapters) {
 		for (const language of adapter.supports) {

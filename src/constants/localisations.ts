@@ -1,3 +1,4 @@
+import { PartOfSpeech } from "../lib/commands/language/dictionaries/part-of-speech";
 import { LocalisationLanguage } from "./languages";
 
 export default {
@@ -17,4 +18,29 @@ export default {
 		Romanian: "languages.romanian",
 		Turkish: "languages.turkish",
 	} as const satisfies Record<LocalisationLanguage, string>,
+	partsOfSpeech: {
+		noun: "words.noun",
+		verb: "words.verb",
+		adjective: "words.adjective",
+		adverb: "words.adverb",
+		adposition: "words.adposition",
+		article: "words.article",
+		"proper-noun": "words.properNoun",
+		letter: "words.letter",
+		character: "words.character",
+		phrase: "words.phrase",
+		idiom: "words.idiom",
+		symbol: "words.symbol",
+		syllable: "words.syllable",
+		numeral: "words.numeral",
+		initialism: "words.initialism",
+		particle: "words.particle",
+		punctuation: "words.punctuation",
+		affix: "words.affix",
+		pronoun: "words.pronoun",
+		determiner: "words.determiner",
+		conjunction: "words.conjunction",
+		interjection: "words.interjection",
+		unknown: "words.unknown",
+	} as const satisfies Record<PartOfSpeech, string>,
 };

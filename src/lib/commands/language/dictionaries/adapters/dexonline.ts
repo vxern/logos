@@ -1,11 +1,11 @@
 import constants from "../../../../../constants/constants";
-import { FeatureLanguage, Locale } from "../../../../../constants/languages";
+import { LearningLanguage, Locale } from "../../../../../constants/languages";
 import licences from "../../../../../constants/licences";
 import { Client, localise } from "../../../../client";
 import { chunk } from "../../../../utils";
 import { getPartOfSpeech } from "../../module";
 import { DictionaryAdapter, DictionaryEntry } from "../adapter";
-import { PartOfSpeech } from "../parts-of-speech";
+import { PartOfSpeech } from "../part-of-speech";
 import * as Dexonline from "dexonline";
 
 const classesWithInflections: PartOfSpeech[] = ["pronoun", "noun", "verb", "adjective", "determiner"];
@@ -25,13 +25,13 @@ class DexonlineAdapter extends DictionaryAdapter<Dexonline.Results> {
 		});
 	}
 
-	fetch(lemma: string, _: FeatureLanguage): Promise<Dexonline.Results | undefined> {
+	fetch(lemma: string, _: LearningLanguage): Promise<Dexonline.Results | undefined> {
 		return Dexonline.get(lemma, { mode: "strict" });
 	}
 
 	parse(
 		_: string,
-		__: FeatureLanguage,
+		__: LearningLanguage,
 		results: Dexonline.Results,
 		client: Client,
 		{ locale }: { locale: Locale },
