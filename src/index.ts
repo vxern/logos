@@ -89,7 +89,7 @@ async function loadLocalisations(directoryPath: string): Promise<Map<string, Map
 			continue;
 		}
 
-		const normalise = directoryPath.endsWith("/commands");
+		const normalise = directoryPath.endsWith("/commands") || directoryPath.endsWith("/parameters");
 
 		for (const entryPath of await fs.readdir(directoryPath)) {
 			const combinedPath = `${directoryPath}/${entryPath}`;
@@ -127,10 +127,12 @@ async function loadLocalisations(directoryPath: string): Promise<Map<string, Map
 					key.endsWith(".name") &&
 					(value.includes(" ") || value.includes("/") || value.includes("'") || value.toLowerCase() !== value)
 				) {
-					const command = key.split(".").at(0) ?? "";
-					if (!(`${command}.name` in strings)) {
-						localisations.get(key)?.set(language, value);
-						continue;
+					if (!key.startsWith("parameters.")) {
+						const command = key.split(".").at(0) ?? "";
+						if (!(`${command}.name` in strings)) {
+							localisations.get(key)?.set(language, value);
+							continue;
+						}
 					}
 
 					console.warn(`[Localisations] ${language}: '${key}' is not normalised. Normalising...`);
