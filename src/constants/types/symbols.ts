@@ -18,6 +18,10 @@ export default {
 		divider: "﹘",
 		separator: "・",
 	},
+	squares: {
+		green: "🟩",
+		white: "⬜",
+	},
 	divider: "—",
 	link: "🔗",
 	events: {
