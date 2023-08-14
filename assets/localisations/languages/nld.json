@@ -35,5 +35,7 @@
     "languages.spanish": "Spaans",
     "languages.swedish": "Zweeds",
     "languages.turkish": "Turks",
-    "languages.ukrainian": "Oekraïens"
+    "languages.ukrainian": "Oekraïens",
+    "languages.armenian.eastern": "Oost-Armeens",
+    "languages.armenian.western": "West-Armeens"
 }
