@@ -37,7 +37,7 @@ async function handleSetLanguageAutocomplete(
 	const languageQuery = languageOrUndefined ?? "";
 
 	const languageQueryLowercase = languageQuery.toLowerCase();
-	const choices = languages.localisation
+	const choices = languages.languages.localisation
 		.map((language) => {
 			return {
 				name: localise(client, localisations.languages[language], locale)(),

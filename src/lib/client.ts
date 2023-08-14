@@ -1,5 +1,5 @@
 import constants from "../constants/constants";
-import {
+import languages, {
 	LearningLanguage,
 	Locale,
 	LocalisationLanguage,
@@ -924,8 +924,14 @@ function localiseCommands<CommandsRaw extends Record<string, CommandTemplate>, C
 			return undefined;
 		}
 
-		const nameLocalisations =
-			nameLocalisationsAll !== undefined ? toDiscordLocalisations(nameLocalisationsAll) : undefined;
+		const nameLocalisations = nameLocalisationsAll !== undefined ? toDiscordLocalisations(nameLocalisationsAll) : {};
+		for (const locale of languages.locales.discord) {
+			if (locale in nameLocalisations) {
+				continue;
+			}
+
+			nameLocalisations[locale] = name;
+		}
 
 		const descriptionLocalisationsAll =
 			localisations.get(`${key}.description`) ?? localisations.get(`parameters.${optionName}.description`);
