@@ -1,8 +1,8 @@
 {
     "noDescription": "Χωρίς Περιγραφή.",
-    "information.name": "Πληροφορίες",
+    "information.name": "πληροφορίες",
     "information.description": "Χρησιμοποιείται για την παρουσίαση διαφόρων πληροφοριών.",
-    "information.options.bot.name": "Διαδικτυακό Ρομπότ",
+    "information.options.bot.name": "διαδικτυακό-ρομπότ",
     "information.options.bot.description": "Προβάλει πληροφορίες για το Διαδικτυακό Ρομπότ.",
     "information.options.bot.strings.whoAmI.title": "Who am I?",
     "information.options.bot.strings.whoAmI.description": "I am **Logos**, an application created to offer language-learning Discord communities the highest quality features, such as:",
