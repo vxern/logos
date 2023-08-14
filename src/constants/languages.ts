@@ -146,7 +146,7 @@ function toFeatureLanguage(language: LocalisationLanguage | LearningLanguage): F
 
 export default {
 	languages: {
-		localisation: [...languages.localisation.discord, ...languages.localisation.logos],
+		localisation: [...languages.localisation.discord, ...languages.localisation.logos].sort(),
 	},
 	locales: {
 		discord: Object.values(languageToLocale.discord),

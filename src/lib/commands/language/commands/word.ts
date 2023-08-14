@@ -1,5 +1,5 @@
 import constants from "../../../../constants/constants";
-import { Locale, LocalisationLanguage } from "../../../../constants/languages";
+import languages, { Locale, LocalisationLanguage, isLocalised } from "../../../../constants/languages";
 import localisations from "../../../../constants/localisations";
 import defaults from "../../../../defaults";
 import { code, trim } from "../../../../formatting";
@@ -16,6 +16,7 @@ import {
 	parseArguments,
 	postponeReply,
 	reply,
+	respond,
 } from "../../../interactions";
 import { chunk } from "../../../utils";
 import { CommandTemplate } from "../../command";
@@ -31,11 +32,17 @@ const command: CommandTemplate = {
 	defaultMemberPermissions: ["VIEW_CHANNEL"],
 	isRateLimited: true,
 	handle: handleFindWord,
+	handleAutocomplete: handleFindWordAutocomplete,
 	options: [
 		{
 			name: "word",
 			type: Discord.ApplicationCommandOptionTypes.String,
 			required: true,
+		},
+		{
+			name: "language",
+			type: Discord.ApplicationCommandOptionTypes.String,
+			autocomplete: true,
 		},
 		{
 			name: "verbose",
@@ -45,9 +52,36 @@ const command: CommandTemplate = {
 	],
 };
 
+async function handleFindWordAutocomplete(
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Logos.Interaction,
+): Promise<void> {
+	const locale = interaction.locale;
+
+	const guildId = interaction.guildId;
+	if (guildId === undefined) {
+		return;
+	}
+
+	const [{ language: languageOrUndefined }] = parseArguments(interaction.data?.options, {});
+	const languageQuery = languageOrUndefined ?? "";
+
+	const languageQueryLowercase = languageQuery.toLowerCase();
+	const choices = languages.languages.localisation
+		.map((language) => {
+			return {
+				name: localise(client, localisations.languages[language], locale)(),
+				value: language,
+			};
+		})
+		.filter((choice) => choice.name.toLowerCase().includes(languageQueryLowercase));
+
+	respond([client, bot], interaction, choices);
+}
+
 /** Allows the user to look up a word and get information about it. */
 async function handleFindWord([client, bot]: [Client, Discord.Bot], interaction: Logos.Interaction): Promise<void> {
-	const [{ word, verbose, show }] = parseArguments(interaction.data?.options, {
+	const [{ language: languageOrUndefined, word, verbose, show }] = parseArguments(interaction.data?.options, {
 		verbose: "boolean",
 		show: "boolean",
 	});
@@ -57,6 +91,26 @@ async function handleFindWord([client, bot]: [Client, Discord.Bot], interaction:
 
 	const language = show ? interaction.guildLanguage : interaction.language;
 	const locale = show ? interaction.guildLocale : interaction.locale;
+
+	if (languageOrUndefined !== undefined && !isLocalised(languageOrUndefined)) {
+		const strings = {
+			title: localise(client, "word.strings.invalid.language.title", locale)(),
+			description: localise(client, "word.strings.invalid.language.description", locale)(),
+		};
+
+		reply([client, bot], interaction, {
+			embeds: [
+				{
+					title: strings.title,
+					description: strings.description,
+					color: constants.colors.red,
+				},
+			],
+		});
+		return;
+	}
+
+	const learningLanguage = languageOrUndefined !== undefined ? languageOrUndefined : interaction.learningLanguage;
 
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
@@ -73,7 +127,7 @@ async function handleFindWord([client, bot]: [Client, Discord.Bot], interaction:
 		return;
 	}
 
-	const dictionaries = adapters[interaction.learningLanguage];
+	const dictionaries = adapters[learningLanguage];
 	if (dictionaries === undefined) {
 		const strings = {
 			title: localise(client, "word.strings.noDictionaryAdapters.title", locale)(),
@@ -108,7 +162,7 @@ async function handleFindWord([client, bot]: [Client, Discord.Bot], interaction:
 			continue;
 		}
 
-		const entries = await dictionary.getEntries(client, word, interaction.learningLanguage, { locale });
+		const entries = await dictionary.getEntries(client, word, learningLanguage, { locale });
 		if (entries === undefined) {
 			continue;
 		}
