@@ -192,7 +192,6 @@
     "cefr.strings.levels.c2.description": "Ich studiere die Sprache nun schon seit Jahren. Ich spreche die Sprache mit Leichtigkeit und bin nie unfähig, detailliert und abwechlungsreich über das zu sprechen, was ich möchte. Wenn es nötig ist, kann ich ganz kreativ mit der Sprache sein und die verschiedenen Verwendungsmöglichkeiten erkennen. Ich habe ein sehr gutes Verständnis dafür, was gut klingt und was nicht, und kann Fehler leicht erkennen, Alternativen anbieten und mich sogar selbst korrigieren.",
     "resources.description": "Leitet zum Repository mit Ressourcen zum Erlernen der Sprache weiter.",
     "word.options.verbose.description": "Wenn auf true gesetzt, werden mehrere (vielleicht unnötige) Informationen gezeigt werden.",
-    "word.strings.fields.synonyms": "Syonyme",
     "word.strings.fields.antonyms": "Antonyme",
     "word.strings.inflection": "Flexion",
     "word.strings.verbs.moodsAndParticiples": "Modi und Partizipen",

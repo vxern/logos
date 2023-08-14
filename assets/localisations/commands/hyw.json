@@ -129,7 +129,6 @@
     "word.strings.fields.nativeDefinitions": "Ընդածին իմաստ",
     "word.strings.fields.definitions": "Սահմանում",
     "word.strings.fields.etymology": "Ստուգապանութիւն",
-    "word.strings.fields.synonyms": "Հոմանիշ",
     "word.strings.fields.antonyms": "Հականիշ",
     "word.strings.fields.expressions": "Արտայայտութիւն",
     "word.strings.definitionsOmitted": "Omitted {definitions}. To display more results, enable the `{flag}` flag.",

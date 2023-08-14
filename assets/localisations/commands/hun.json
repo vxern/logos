@@ -129,7 +129,6 @@
     "word.strings.fields.nativeDefinitions": "Native definitions",
     "word.strings.fields.definitions": "Meghatározások",
     "word.strings.fields.etymology": "Etimológia",
-    "word.strings.fields.synonyms": "Szinonimák",
     "word.strings.fields.antonyms": "Antonimák",
     "word.strings.fields.expressions": "Kifejezések",
     "word.strings.definitionsOmitted": "Omitted {number | pluralise, one:\"definition\", two:\"definitions\"}. To display more results, enable the `{flag}` flag.",

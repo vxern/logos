@@ -129,7 +129,6 @@
     "word.strings.fields.nativeDefinitions": "Definiții native",
     "word.strings.fields.definitions": "Definiții",
     "word.strings.fields.etymology": "Etimologie",
-    "word.strings.fields.synonyms": "Sinonime",
     "word.strings.fields.antonyms": "Antonime",
     "word.strings.fields.expressions": "Exprimări",
     "word.strings.definitionsOmitted": "{definitions}. Pentru a afișa mai multe rezultate, activează fanionul `{flag}`.",

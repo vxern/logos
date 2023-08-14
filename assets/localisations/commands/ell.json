@@ -129,7 +129,6 @@
     "word.strings.fields.nativeDefinitions": "Native definitions",
     "word.strings.fields.definitions": "Definitions",
     "word.strings.fields.etymology": "Etymology",
-    "word.strings.fields.synonyms": "Synonyms",
     "word.strings.fields.antonyms": "Antonyms",
     "word.strings.fields.expressions": "Expressions",
     "word.strings.definitionsOmitted": "Omitted {number | pluralise, one:\"definition\", two:\"definitions\"}. To display more results, enable the `{flag}` flag.",
