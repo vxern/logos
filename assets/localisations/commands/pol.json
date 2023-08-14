@@ -128,7 +128,6 @@
     "word.strings.fields.nativeDefinitions": "Znaczenia rodzime",
     "word.strings.fields.definitions": "Znaczenia",
     "word.strings.fields.etymology": "Etymologia",
-    "word.strings.fields.antonyms": "Antonimy",
     "word.strings.fields.expressions": "Wyrażenia",
     "word.strings.definitionsOmitted": "Ominięto {definitions}. Aby wyświetlić więcej wyników, przełącz opcję `{flag}`.",
     "word.strings.definitionsOmitted.definitions.one": "{one} znaczenie",

@@ -129,7 +129,6 @@
     "word.strings.fields.nativeDefinitions": "Innfødte definisjoner",
     "word.strings.fields.definitions": "Definisjoner",
     "word.strings.fields.etymology": "Etymologi",
-    "word.strings.fields.antonyms": "Antonymer",
     "word.strings.fields.expressions": "Uttrykkene",
     "word.strings.definitionsOmitted": "Utelatt {definitions}. For å vise flere resultater, aktiver `{flag}`-flagget.",
     "word.strings.definitionsOmitted.definitions.one": "{one} definisjon",

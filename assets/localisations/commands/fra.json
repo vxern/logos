@@ -129,7 +129,6 @@
     "word.strings.fields.nativeDefinitions": "Définitions natives",
     "word.strings.fields.definitions": "Définitions",
     "word.strings.fields.etymology": "Étymologie",
-    "word.strings.fields.antonyms": "Antonymes",
     "word.strings.fields.expressions": "Expressions",
     "word.strings.definitionsOmitted": "{definitions}. Afin d'afficher plus de résultats, activer la balise '{flag}'.",
     "word.strings.definitionsOmitted.definitions.one": "{one} définition omise",
