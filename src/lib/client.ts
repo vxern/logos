@@ -1,10 +1,11 @@
 import constants from "../constants/constants";
-import {
-	FeatureLanguage,
+import languages, {
+	LearningLanguage,
 	Locale,
 	LocalisationLanguage,
 	getDiscordLocaleByLanguage,
 	getLanguageByLocale,
+	getLocaleByLanguage,
 	isBuiltIn,
 } from "../constants/languages";
 import time from "../constants/time";
@@ -14,7 +15,6 @@ import * as Logos from "../types";
 import { Command, CommandTemplate, InteractionHandler, LocalisationProperties, Option } from "./commands/command";
 import commandsRaw from "./commands/commands";
 import { SentencePair } from "./commands/language/commands/game";
-import { DictionaryAdapter } from "./commands/language/dictionaries/adapter";
 import { SupportedLanguage } from "./commands/language/module";
 import entryRequests from "./database/adapters/entry-requests";
 import guilds from "./database/adapters/guilds";
@@ -59,6 +59,7 @@ type Client = {
 			faunaSecret: string;
 			deeplSecret: string;
 			sentrySecret: string;
+			wordsSecret: string;
 			lavalinkHost: string;
 			lavalinkPort: string;
 			lavalinkPassword: string;
@@ -86,8 +87,7 @@ type Client = {
 	};
 	collectors: Map<Event, Set<Collector<Event>>>;
 	features: {
-		dictionaryAdapters: Map<FeatureLanguage, DictionaryAdapter[]>;
-		sentencePairs: Map<FeatureLanguage, SentencePair[]>;
+		sentencePairs: Map<LearningLanguage, SentencePair[]>;
 		// The keys are user IDs, the values are command usage timestamps mapped by command IDs.
 		rateLimiting: Map<bigint, Map<bigint, number[]>>;
 	};
@@ -461,7 +461,7 @@ export async function handleGuildCreate(
 
 	const commands = client.commands.commands;
 
-	const guildCommands: Command[] = [commands.information, commands.settings];
+	const guildCommands: Command[] = [commands.information, commands.credits, commands.licence, commands.settings];
 	const services: Service[] = [];
 
 	const realtimeUpdateService = new RealtimeUpdateService(client, guild.id, guildDocument.ref);
@@ -924,8 +924,14 @@ function localiseCommands<CommandsRaw extends Record<string, CommandTemplate>, C
 			return undefined;
 		}
 
-		const nameLocalisations =
-			nameLocalisationsAll !== undefined ? toDiscordLocalisations(nameLocalisationsAll) : undefined;
+		const nameLocalisations = nameLocalisationsAll !== undefined ? toDiscordLocalisations(nameLocalisationsAll) : {};
+		for (const locale of languages.locales.discord) {
+			if (locale in nameLocalisations) {
+				continue;
+			}
+
+			nameLocalisations[locale] = name;
+		}
 
 		const descriptionLocalisationsAll =
 			localisations.get(`${key}.description`) ?? localisations.get(`parameters.${optionName}.description`);
@@ -1421,15 +1427,13 @@ function toDiscordLocalisations(
 }
 
 function pluralise(client: Client, key: string, language: LocalisationLanguage, number: number): string {
+	const locale = getLocaleByLanguage(language);
 	const pluralise = transformers[language].pluralise;
 	const { one, two, many } = {
-		one: client.localisations.get(`${key}.one`)?.get(language)?.({ one: number }),
-		two: client.localisations.get(`${key}.two`)?.get(language)?.({ two: number }),
-		many: client.localisations.get(`${key}.many`)?.get(language)?.({ many: number }),
+		one: localise(client, `${key}.one`, locale)?.({ one: number }),
+		two: localise(client, `${key}.two`, locale)?.({ two: number }),
+		many: localise(client, `${key}.many`, locale)?.({ many: number }),
 	};
-	if (one === undefined || two === undefined || many === undefined) {
-		return "?";
-	}
 
 	const pluralised = pluralise(`${number}`, { one, two, many });
 	if (pluralised === undefined) {

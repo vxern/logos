@@ -1,6 +1,7 @@
 import constants from "../constants/constants";
 import {
 	FeatureLanguage,
+	LearningLanguage,
 	Locale,
 	LocalisationLanguage,
 	getDiscordLanguageByDiscordLocale,
@@ -158,6 +159,13 @@ async function paginate<T>(
 	const isFirst = () => data.pageIndex === 0;
 	const isLast = () => data.pageIndex === data.elements.length - 1;
 
+	const generateEmbed = (): Discord.InteractionCallbackData => {
+		return {
+			embeds: [getPageEmbed(client, data, embed, isLast(), locale)],
+			components: generateButtons(customId, isFirst(), isLast()),
+		};
+	};
+
 	const customId = createInteractionCollector([client, bot], {
 		type: Discord.InteractionTypes.MessageComponent,
 		doesNotExpire: true,
@@ -173,23 +181,20 @@ async function paginate<T>(
 
 			switch (action) {
 				case "previous": {
-					if (!isFirst) {
+					if (!isFirst()) {
 						data.pageIndex--;
 					}
 					break;
 				}
 				case "next": {
-					if (!isLast) {
+					if (!isLast()) {
 						data.pageIndex++;
 					}
 					break;
 				}
 			}
 
-			editReply([client, bot], interaction, {
-				embeds: [getPageEmbed(client, data, embed, isLast(), locale)],
-				components: generateButtons(customId, isFirst(), isLast()),
-			});
+			editReply([client, bot], interaction, generateEmbed());
 		},
 	});
 
@@ -235,49 +240,37 @@ function getPageEmbed<T>(
 
 	return {
 		...embed,
-		fields: [
-			{
-				name:
-					data.elements.length === 1
-						? data.view.title
-						: `${data.view.title} ~ ${strings.page} ${data.pageIndex + 1}/${data.elements.length}`,
-				value: data.view.generate(elements, data.pageIndex),
-			},
-			...(embed.fields ?? []),
-		],
+		title:
+			data.elements.length === 1
+				? data.view.title
+				: `${data.view.title} ~ ${strings.page} ${data.pageIndex + 1}/${data.elements.length}`,
+		description: data.view.generate(elements, data.pageIndex),
 		footer: isLast ? undefined : { text: strings.continuedOnNextPage },
 	};
 }
 
 function generateButtons(customId: string, isFirst: boolean, isLast: boolean): Discord.MessageComponents {
-	const buttons: Discord.ButtonComponent[] = [];
-
-	if (!isFirst) {
-		buttons.push({
-			type: Discord.MessageComponentTypes.Button,
-			customId: encodeId<ControlButtonID>(customId, ["previous"]),
-			style: Discord.ButtonStyles.Secondary,
-			label: constants.symbols.interactions.menu.controls.back,
-		});
-	}
-
-	if (!isLast) {
-		buttons.push({
-			type: Discord.MessageComponentTypes.Button,
-			customId: encodeId<ControlButtonID>(customId, ["next"]),
-			style: Discord.ButtonStyles.Secondary,
-			label: constants.symbols.interactions.menu.controls.forward,
-		});
-	}
-
-	return buttons.length === 0
-		? []
-		: [
+	return [
+		{
+			type: Discord.MessageComponentTypes.ActionRow,
+			components: [
 				{
-					type: Discord.MessageComponentTypes.ActionRow,
-					components: buttons as [Discord.ButtonComponent],
+					type: Discord.MessageComponentTypes.Button,
+					customId: encodeId<ControlButtonID>(customId, ["previous"]),
+					disabled: isFirst,
+					style: Discord.ButtonStyles.Secondary,
+					label: constants.symbols.interactions.menu.controls.back,
 				},
-		  ];
+				{
+					type: Discord.MessageComponentTypes.Button,
+					customId: encodeId<ControlButtonID>(customId, ["next"]),
+					disabled: isLast,
+					style: Discord.ButtonStyles.Secondary,
+					label: constants.symbols.interactions.menu.controls.forward,
+				},
+			],
+		},
+	];
 }
 
 type ComposerActionRow<ComposerContent extends Record<string, unknown>, SectionNames = keyof ComposerContent> = {
@@ -680,6 +673,7 @@ function getFeatureLanguage(guildDocument?: Document<Guild>): FeatureLanguage {
 const FALLBACK_LOCALE_DATA: InteractionLocaleData = {
 	language: defaults.LOCALISATION_LANGUAGE,
 	locale: defaults.LOCALISATION_LOCALE,
+	learningLanguage: defaults.LOCALISATION_LANGUAGE,
 	guildLanguage: defaults.LOCALISATION_LANGUAGE,
 	guildLocale: defaults.LOCALISATION_LOCALE,
 	featureLanguage: defaults.FEATURE_LANGUAGE,
@@ -691,9 +685,16 @@ async function getLocaleData(client: Client, interaction: Discord.Interaction): 
 		return FALLBACK_LOCALE_DATA;
 	}
 
+	const member = client.cache.members.get(Discord.snowflakeToBigint(`${interaction.user.id}${guildId}`));
+
 	const [userDocument, guildDocument] = await Promise.all([
-		client.database.adapters.users.getOrFetch(client, "id", interaction.user.id.toString()),
-		client.database.adapters.guilds.getOrFetch(client, "id", guildId.toString()),
+		client.database.adapters.users.getOrFetchOrCreate(
+			client,
+			"id",
+			interaction.user.id.toString(),
+			interaction.user.id,
+		),
+		client.database.adapters.guilds.getOrFetchOrCreate(client, "id", guildId.toString(), guildId),
 	]);
 	if (userDocument === undefined || guildDocument === undefined) {
 		return FALLBACK_LOCALE_DATA;
@@ -703,9 +704,10 @@ async function getLocaleData(client: Client, interaction: Discord.Interaction): 
 	const isInTargetOnlyChannel =
 		interaction.channelId !== undefined && targetOnlyChannelIds.includes(interaction.channelId);
 
-	const guildLanguage = isInTargetOnlyChannel
-		? getTargetLanguage(guildDocument)
-		: getLocalisationLanguage(guildDocument);
+	const targetLanguage = getTargetLanguage(guildDocument);
+	const learningLanguage = getLearningLanguage(guildDocument, targetLanguage, member);
+
+	const guildLanguage = isInTargetOnlyChannel ? targetLanguage : getLocalisationLanguage(guildDocument);
 	const guildLocale = getLocaleByLanguage(guildLanguage);
 	const featureLanguage = getFeatureLanguage(guildDocument);
 
@@ -714,7 +716,7 @@ async function getLocaleData(client: Client, interaction: Discord.Interaction): 
 		if (userDocument?.data.account.language !== undefined) {
 			const language = userDocument?.data.account.language;
 			const locale = getLocaleByLanguage(language);
-			return { language, locale, guildLanguage, guildLocale, featureLanguage };
+			return { language, locale, learningLanguage, guildLanguage, guildLocale, featureLanguage };
 		}
 	}
 
@@ -722,7 +724,7 @@ async function getLocaleData(client: Client, interaction: Discord.Interaction): 
 	const appLocale = interaction.locale;
 	const language = getDiscordLanguageByDiscordLocale(appLocale) ?? defaults.LOCALISATION_LANGUAGE;
 	const locale = getLocaleByLanguage(language);
-	return { language, locale, guildLanguage, guildLocale, featureLanguage };
+	return { language, locale, learningLanguage, guildLanguage, guildLocale, featureLanguage };
 }
 
 function getTargetOnlyChannelIds(guildDocument: Document<Guild>): bigint[] {
@@ -737,6 +739,35 @@ function getTargetOnlyChannelIds(guildDocument: Document<Guild>): bigint[] {
 	}
 
 	return targetOnly.channelIds.map((channelId) => BigInt(channelId));
+}
+
+function getLearningLanguage(
+	guildDocument: Document<Guild>,
+	guildLearningLanguage: LearningLanguage,
+	member: Logos.Member | undefined,
+): LearningLanguage {
+	if (member === undefined) {
+		return guildLearningLanguage;
+	}
+
+	const language = guildDocument.data.features.language;
+	if (!language.enabled) {
+		return guildLearningLanguage;
+	}
+
+	const roleLanguages = language.features.roleLanguages;
+	if (roleLanguages === undefined || !roleLanguages.enabled) {
+		return guildLearningLanguage;
+	}
+
+	const userLearningLanguage = Object.entries(roleLanguages.ids).find(([key, _]) =>
+		member.roles.includes(BigInt(key)),
+	)?.[1];
+	if (userLearningLanguage === undefined) {
+		return guildLearningLanguage;
+	}
+
+	return userLearningLanguage;
 }
 
 export {

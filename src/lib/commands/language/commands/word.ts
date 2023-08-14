@@ -1,7 +1,8 @@
 import constants from "../../../../constants/constants";
-import { Locale, LocalisationLanguage } from "../../../../constants/languages";
+import languages, { Locale, LocalisationLanguage, isLocalised } from "../../../../constants/languages";
+import localisations from "../../../../constants/localisations";
 import defaults from "../../../../defaults";
-import { code } from "../../../../formatting";
+import { code, trim } from "../../../../formatting";
 import * as Logos from "../../../../types";
 import { Client, localise, pluralise } from "../../../client";
 import diagnostics from "../../../diagnostics";
@@ -15,12 +16,14 @@ import {
 	parseArguments,
 	postponeReply,
 	reply,
+	respond,
 } from "../../../interactions";
 import { chunk } from "../../../utils";
 import { CommandTemplate } from "../../command";
 import { show } from "../../parameters";
 import { Definition, DictionaryEntry, Expression } from "../dictionaries/adapter";
-import { PartOfSpeech, isUnknownPartOfSpeech, partOfSpeechToStringKey } from "../dictionaries/parts-of-speech";
+import adapters from "../dictionaries/adapters";
+import { PartOfSpeech, isUnknownPartOfSpeech } from "../dictionaries/part-of-speech";
 import * as Discord from "discordeno";
 
 const command: CommandTemplate = {
@@ -29,11 +32,17 @@ const command: CommandTemplate = {
 	defaultMemberPermissions: ["VIEW_CHANNEL"],
 	isRateLimited: true,
 	handle: handleFindWord,
+	handleAutocomplete: handleFindWordAutocomplete,
 	options: [
 		{
 			name: "word",
 			type: Discord.ApplicationCommandOptionTypes.String,
 			required: true,
+		},
+		{
+			name: "language",
+			type: Discord.ApplicationCommandOptionTypes.String,
+			autocomplete: true,
 		},
 		{
 			name: "verbose",
@@ -43,9 +52,36 @@ const command: CommandTemplate = {
 	],
 };
 
+async function handleFindWordAutocomplete(
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Logos.Interaction,
+): Promise<void> {
+	const locale = interaction.locale;
+
+	const guildId = interaction.guildId;
+	if (guildId === undefined) {
+		return;
+	}
+
+	const [{ language: languageOrUndefined }] = parseArguments(interaction.data?.options, {});
+	const languageQuery = languageOrUndefined ?? "";
+
+	const languageQueryLowercase = languageQuery.toLowerCase();
+	const choices = languages.languages.localisation
+		.map((language) => {
+			return {
+				name: localise(client, localisations.languages[language], locale)(),
+				value: language,
+			};
+		})
+		.filter((choice) => choice.name.toLowerCase().includes(languageQueryLowercase));
+
+	respond([client, bot], interaction, choices);
+}
+
 /** Allows the user to look up a word and get information about it. */
 async function handleFindWord([client, bot]: [Client, Discord.Bot], interaction: Logos.Interaction): Promise<void> {
-	const [{ word, verbose, show }] = parseArguments(interaction.data?.options, {
+	const [{ language: languageOrUndefined, word, verbose, show }] = parseArguments(interaction.data?.options, {
 		verbose: "boolean",
 		show: "boolean",
 	});
@@ -55,6 +91,26 @@ async function handleFindWord([client, bot]: [Client, Discord.Bot], interaction:
 
 	const language = show ? interaction.guildLanguage : interaction.language;
 	const locale = show ? interaction.guildLocale : interaction.locale;
+
+	if (languageOrUndefined !== undefined && !isLocalised(languageOrUndefined)) {
+		const strings = {
+			title: localise(client, "word.strings.invalid.language.title", locale)(),
+			description: localise(client, "word.strings.invalid.language.description", locale)(),
+		};
+
+		reply([client, bot], interaction, {
+			embeds: [
+				{
+					title: strings.title,
+					description: strings.description,
+					color: constants.colors.red,
+				},
+			],
+		});
+		return;
+	}
+
+	const learningLanguage = languageOrUndefined !== undefined ? languageOrUndefined : interaction.learningLanguage;
 
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
@@ -71,7 +127,7 @@ async function handleFindWord([client, bot]: [Client, Discord.Bot], interaction:
 		return;
 	}
 
-	const dictionaries = client.features.dictionaryAdapters.get(interaction.featureLanguage);
+	const dictionaries = adapters[learningLanguage];
 	if (dictionaries === undefined) {
 		const strings = {
 			title: localise(client, "word.strings.noDictionaryAdapters.title", locale)(),
@@ -100,8 +156,13 @@ async function handleFindWord([client, bot]: [Client, Discord.Bot], interaction:
 
 	const unclassifiedEntries: DictionaryEntry[] = [];
 	const entriesByPartOfSpeech = new Map<PartOfSpeech, DictionaryEntry[]>();
+	let searchesCompleted = 0;
 	for (const dictionary of dictionaries) {
-		const entries = await dictionary.getEntries(word, interaction.featureLanguage, client, { locale });
+		if (dictionary.isFallback && searchesCompleted !== 0) {
+			continue;
+		}
+
+		const entries = await dictionary.getEntries(client, word, learningLanguage, { locale });
 		if (entries === undefined) {
 			continue;
 		}
@@ -142,9 +203,11 @@ async function handleFindWord([client, bot]: [Client, Discord.Bot], interaction:
 					continue;
 				}
 
-				existingEntries[index] = { ...existingEntry, ...entry };
+				existingEntries[index] = { ...existingEntry, ...entry, sources: [...existingEntry.sources, ...entry.sources] };
 			}
 		}
+
+		searchesCompleted++;
 	}
 
 	if (entriesByPartOfSpeech.size === 0) {
@@ -464,7 +527,7 @@ function entryToEmbeds(
 		const [detected, original] = entry.partOfSpeech;
 
 		const strings = {
-			partOfSpeech: localise(client, partOfSpeechToStringKey[detected], locale)(),
+			partOfSpeech: localise(client, localisations.partsOfSpeech[detected], locale)(),
 		};
 
 		partOfSpeechDisplayed = strings.partOfSpeech;
@@ -480,7 +543,7 @@ function entryToEmbeds(
 	const fields: NonNullable<Discord.Embed["fields"]> = [];
 
 	if (entry.nativeDefinitions !== undefined && entry.nativeDefinitions.length !== 0) {
-		const definitionsStringified = stringifyEntries(entry.nativeDefinitions, "definitions");
+		const definitionsStringified = stringifyEntries(client, entry.nativeDefinitions, "definitions", { locale });
 		const definitionsFitted = fitTextToFieldSize(client, definitionsStringified, verbose, { language, locale });
 
 		if (verbose) {
@@ -489,7 +552,7 @@ function entryToEmbeds(
 			};
 
 			embeds.push({
-				title: strings.nativeDefinitionsForWord,
+				title: `${constants.symbols.word.definitions} ${strings.nativeDefinitionsForWord}`,
 				description: `${partOfSpeechFormatted}\n\n${definitionsFitted}`,
 				color: constants.colors.husky,
 			});
@@ -499,14 +562,14 @@ function entryToEmbeds(
 			};
 
 			fields.push({
-				name: strings.nativeDefinitions,
+				name: `${constants.symbols.word.definitions} ${strings.nativeDefinitions}`,
 				value: definitionsFitted,
 			});
 		}
 	}
 
 	if (entry.definitions !== undefined && entry.definitions.length !== 0) {
-		const definitionsStringified = stringifyEntries(entry.definitions, "definitions");
+		const definitionsStringified = stringifyEntries(client, entry.definitions, "definitions", { locale });
 		const definitionsFitted = fitTextToFieldSize(client, definitionsStringified, verbose, { language, locale });
 
 		if (verbose) {
@@ -515,7 +578,7 @@ function entryToEmbeds(
 			};
 
 			embeds.push({
-				title: strings.definitionsForWord,
+				title: `${constants.symbols.word.definitions} ${strings.definitionsForWord}`,
 				description: `${partOfSpeechFormatted}\n\n${definitionsFitted}`,
 				color: constants.colors.husky,
 			});
@@ -525,14 +588,14 @@ function entryToEmbeds(
 			};
 
 			fields.push({
-				name: strings.definitions,
+				name: `${constants.symbols.word.definitions} ${strings.definitions}`,
 				value: definitionsFitted,
 			});
 		}
 	}
 
 	if (entry.expressions !== undefined && entry.expressions.length !== 0) {
-		const expressionsStringified = stringifyEntries(entry.expressions, "expressions");
+		const expressionsStringified = stringifyEntries(client, entry.expressions, "expressions", { locale });
 		const expressionsFitted = fitTextToFieldSize(client, expressionsStringified, verbose, { language, locale });
 
 		const strings = {
@@ -540,9 +603,16 @@ function entryToEmbeds(
 		};
 
 		if (verbose) {
-			embeds.push({ title: strings.expressions, description: expressionsFitted, color: constants.colors.husky });
+			embeds.push({
+				title: `${constants.symbols.word.expressions} ${strings.expressions}`,
+				description: expressionsFitted,
+				color: constants.colors.husky,
+			});
 		} else {
-			fields.push({ name: strings.expressions, value: expressionsFitted });
+			fields.push({
+				name: `${constants.symbols.word.expressions} ${strings.expressions}`,
+				value: trim(expressionsFitted, 1024),
+			});
 		}
 	}
 
@@ -566,17 +636,45 @@ function entryToEmbeds(
 		};
 
 		if (verbose) {
-			embeds.push({ title: strings.etymology, description: etymology, color: constants.colors.husky });
+			embeds.push({
+				title: `${constants.symbols.word.etymology} ${strings.etymology}`,
+				description: etymology,
+				color: constants.colors.husky,
+			});
 		} else {
-			fields.push({ name: strings.etymology, value: etymology });
+			fields.push({ name: `${constants.symbols.word.etymology} ${strings.etymology}`, value: trim(etymology, 1024) });
 		}
 	}
 
+	const strings = {
+		sourcedResponsibly: localise(
+			client,
+			"word.strings.sourcedResponsibly",
+			locale,
+		)({
+			dictionaries: pluralise(client, "word.strings.sourcedResponsibly.dictionaries", language, entry.sources.length),
+		}),
+	};
+	const sourcesFormatted = entry.sources.map(([link, licence]) => `[${licence.name}](${link})`).join(" · ");
+	const sourceEmbed: Discord.Embed = {
+		description: `${constants.symbols.link} ${sourcesFormatted}`,
+		color: constants.colors.peach,
+		footer: { text: strings.sourcedResponsibly },
+	};
+
 	if (!verbose) {
-		return [{ title: word, description: partOfSpeechFormatted, fields, color: constants.colors.husky }];
+		return [
+			sourceEmbed,
+			{
+				title: `${constants.symbols.word.word} ${word}`,
+				description: partOfSpeechFormatted,
+				fields,
+				color: constants.colors.husky,
+			},
+		];
 	}
 
-	return embeds;
+	return [sourceEmbed, ...embeds];
 }
 
 function tagsToString(tags: string[]): string {
@@ -594,7 +692,13 @@ const parenthesesExpression = RegExp("\\((.+?)\\)", "g");
 function stringifyEntries<
 	T extends EntryType,
 	E extends Definition[] | Expression[] = T extends "definitions" ? Definition[] : Expression[],
->(entries: E, entryType: T, root?: string, depth = 0): string[] {
+>(
+	client: Client,
+	entries: E,
+	entryType: T,
+	{ locale }: { locale: Locale },
+	options?: { root: string; depth: number },
+): string[] {
 	const entriesStringified = entries.map((entry, indexZeroBased) => {
 		const parenthesesContents: string[] = [];
 		for (const [match, contents] of entry.value.matchAll(parenthesesExpression)) {
@@ -614,18 +718,69 @@ function stringifyEntries<
 			entry.value,
 		);
 
-		const anchor = entry.tags === undefined ? value : `${tagsToString(entry.tags)} ${value}`;
+		let anchor = entry.tags === undefined ? value : `${tagsToString(entry.tags)} ${value}`;
+		if (isDefinition(entry, entryType)) {
+			if (entry.relations !== undefined) {
+				const strings = {
+					synonyms: localise(client, "word.strings.relations.synonyms", locale)(),
+					antonyms: localise(client, "word.strings.relations.antonyms", locale)(),
+					diminutives: localise(client, "word.strings.relations.diminutives", locale)(),
+					augmentatives: localise(client, "word.strings.relations.augmentatives", locale)(),
+				};
 
-		if (isDefinition(entry, entryType) && value.endsWith(":")) {
-			const definitions = entry.definitions;
-			if (definitions === undefined) {
-				throw "StateError: Definitions were unexpectedly `undefined`.";
+				const synonyms = entry.relations.synonyms ?? [];
+				const antonyms = entry.relations.antonyms ?? [];
+				const diminutives = entry.relations.diminutives ?? [];
+				const augmentatives = entry.relations.augmentatives ?? [];
+
+				if (synonyms.length !== 0 || antonyms.length !== 0) {
+					anchor += "\n  - ";
+					const columns: string[] = [];
+
+					if (synonyms.length !== 0) {
+						columns.push(`**${strings.synonyms}**: ${synonyms.join(", ")}`);
+					}
+
+					if (antonyms.length !== 0) {
+						columns.push(`**${strings.antonyms}**: ${antonyms.join(", ")}`);
+					}
+
+					anchor += columns.join(` ${constants.symbols.divider} `);
+				}
+
+				if (diminutives.length !== 0 || augmentatives.length !== 0) {
+					anchor += "\n  - ";
+					const columns: string[] = [];
+
+					if (diminutives.length !== 0) {
+						columns.push(`**${strings.diminutives}**: ${diminutives.join(", ")}`);
+					}
+
+					if (augmentatives.length !== 0) {
+						columns.push(`**${strings.augmentatives}**: ${augmentatives.join(", ")}`);
+					}
+
+					anchor += columns.join(` ${constants.symbols.divider} `);
+				}
 			}
 
-			const index = indexZeroBased + 1;
-			const newRoot = root === undefined ? `${index}` : `${root}.${index}`;
-			const entriesStringified = stringifyEntries(definitions, "definitions", newRoot, depth + 1).join("\n");
-			return `${anchor}\n${entriesStringified}`;
+			if (value.endsWith(":")) {
+				const definitions = entry.definitions ?? [];
+				if (definitions.length === 0) {
+					return anchor;
+				}
+
+				const index = indexZeroBased + 1;
+				const newRoot = options === undefined ? `${index}` : `${options.root}.${index}`;
+				const entriesStringified = stringifyEntries(
+					client,
+					definitions,
+					"definitions",
+					{ locale },
+					{ root: newRoot, depth: (options?.depth ?? 0) + 1 },
+				).join("\n");
+				return `${anchor}\n${entriesStringified}`;
+			}
 		}
 
 		return anchor;
@@ -635,16 +790,16 @@ function stringifyEntries<
 		.map((entry, indexZeroBased) => {
 			const index = indexZeroBased + 1;
 
-			if (root === undefined) {
+			if (options === undefined) {
 				return `${index}. ${entry}`;
 			}
 
-			return `${root}.${index}. ${entry}`;
+			return `${options.root}.${index}. ${entry}`;
 		})
 		.join("\n");
 	const entriesDelisted = entriesEnlisted
 		.split("\n")
-		.map((entry) => `${constants.symbols.meta.whitespace.repeat(depth * 2)}${entry}`);
+		.map((entry) => `${constants.symbols.meta.whitespace.repeat((options?.depth ?? 0) * 2)}${entry}`);
 
 	return entriesDelisted;
 }

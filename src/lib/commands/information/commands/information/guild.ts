@@ -82,15 +82,17 @@ async function handleDisplayGuildInformation(
 	reply([client, bot], interaction, {
 		embeds: [
 			{
-				thumbnail: (() => {
-					const iconURL = getGuildIconURLFormatted(bot, guild);
-					if (iconURL === undefined) {
-						return undefined;
-					}
+				author: {
+					iconUrl: (() => {
+						const iconURL = getGuildIconURLFormatted(bot, guild);
+						if (iconURL === undefined) {
+							return undefined;
+						}
 
-					return { url: iconURL };
-				})(),
-				title: strings.title,
+						return iconURL;
+					})(),
+					name: strings.title,
+				},
 				color: constants.colors.blue,
 				fields: [
 					{

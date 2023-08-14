@@ -1,6 +1,8 @@
 import constants from "../../../../constants/constants";
 import { Locale } from "../../../../constants/languages";
+import licences from "../../../../constants/licences";
 import defaults from "../../../../defaults";
+import { code } from "../../../../formatting";
 import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
 import {
@@ -39,7 +41,7 @@ async function handleStartGame([client, bot]: [Client, Discord.Bot], interaction
 		return;
 	}
 
-	const sentencePairs = client.features.sentencePairs.get(interaction.featureLanguage);
+	const sentencePairs = client.features.sentencePairs.get(interaction.learningLanguage);
 	if (sentencePairs === undefined || sentencePairs.length === 0) {
 		const strings = {
 			title: localise(client, "game.strings.noSentencesAvailable.title", locale)(),
@@ -123,22 +125,23 @@ function getGameView(
 	const strings = {
 		sentence: localise(client, "game.strings.sentence", locale)(),
 		translation: localise(client, "game.strings.translation", locale)(),
+		sourcedFrom: localise(client, "game.strings.sourcedFrom", locale)({ source: licences.dictionaries.tatoeba.name }),
 	};
+
+	const sentenceSource = constants.links.generateTatoebaSentenceLink(sentenceSelection.pair.sentenceId);
+	const translationSource = constants.links.generateTatoebaSentenceLink(sentenceSelection.pair.translationId);
 
 	return {
 		embeds: [
 			{
+				description: `${constants.symbols.link} [${strings.sentence}](${sentenceSource}) · [${strings.translation}](${translationSource})`,
+				color: constants.colors.peach,
+				footer: { text: strings.sourcedFrom },
+			},
+			{
+				title: sentenceSelection.pair.sentence,
+				footer: { text: sentenceSelection.pair.translation },
 				color: embedColor,
-				fields: [
-					{
-						name: strings.sentence,
-						value: sentenceSelection.pair.sentence,
-					},
-					{
-						name: strings.translation,
-						value: sentenceSelection.pair.translation,
-					},
-				],
 			},
 		],
 		components: [
@@ -157,8 +160,12 @@ function getGameView(
 
 /** Represents a pair of a sentence and its translation. */
 interface SentencePair {
+	sentenceId: string;
+
 	/** The source sentence. */
 	sentence: string;
+
+	translationId: string;
 
 	/** The translation of the sentence. */
 	translation: string;
@@ -180,24 +187,24 @@ interface SentenceSelection {
 }
 
 function createSentenceSelection(sentencePairs: SentencePair[]): SentenceSelection {
+	function random(max: number): number {
+		return Math.floor(Math.random() * max);
+	}
+
 	function shuffle<T>(array: T[]): T[] {
 		const shuffled = Array.from(array);
 
 		for (const index of Array(array.length - 1).keys()) {
-			const random = Math.floor(Math.random() * (index + 1));
-			const [a, b] = [shuffled.at(index), shuffled.at(random)];
+			const randomIndex = random(index + 1);
+			const [a, b] = [shuffled.at(index), shuffled.at(randomIndex)];
 			if (a === undefined || b === undefined) {
 				throw "StateError: Failed to swap elements during sentence selection.";
 			}
 
-			[shuffled[index], shuffled[random]] = [b, a];
+			[shuffled[index], shuffled[randomIndex]] = [b, a];
 		}
 
 		return shuffled;
-	}
-
-	function random(max: number): number {
-		return Math.floor(Math.random() * max);
 	}
 
 	const [firstIndex, ...rest] = Array.from({ length: 4 }, () => random(sentencePairs.length));
@@ -217,7 +224,7 @@ function createSentenceSelection(sentencePairs: SentencePair[]): SentenceSelecti
 		throw `StateError: Failed to get the word at index ${word} from the sentence pair at index ${firstIndex}.`;
 	}
 
-	words[wordIndex] = "\\_".repeat(word.split("").length);
+	words[wordIndex] = code(" ".repeat(word.length + 1));
 	pair.sentence = words.join(" ");
 
 	const choices: string[] = [word];

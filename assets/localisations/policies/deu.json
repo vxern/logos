@@ -1,0 +1,13 @@
+{
+    "policies.moderation.title": "Moderationsrichtlinie",
+    "policies.moderation.points.introduction.title": "Wie moderieren Moderatoren den Server?",
+    "policies.moderation.points.introduction.description": "Der Server befolgt eine 3-Warnungs-Moderationsrichtlinie, die von den Server-Betreibern durchgesetzt wird.",
+    "policies.moderation.points.breach.title": "Wo gelten die Regeln?",
+    "policies.moderation.points.breach.description": "Die Serverregeln gelten für den gesamten Server und ein Verstoß gegen die Regeln führt zu einer Verwarnung.",
+    "policies.moderation.points.warnings.title": "Was passiert, wenn ich mehrmals gewarnt werde?",
+    "policies.moderation.points.warnings.description": "Wenn ein Benutzer schon dreimal gewarnt wurde,dann wird die vierte Warnung zu einer Zeitüberschreitung des Benutzers führen. Warnungen laufen nach __zwei Monaten__ ab.",
+    "policies.moderation.points.furtherAction.title": "Was passiert danach?",
+    "policies.moderation.points.furtherAction.description": "Das Serverpesonal wird dann über die Überschreitung des Limits informiert, und sie werden die Konsequenzen prüfen, um eine geeignete Vorgehensweise festzulegen.",
+    "policies.moderation.points.ban.title": "Was passiert, wenn es mir egal ist?",
+    "policies.moderation.points.ban.description": "Falls es herausgefunden wird, dass ein Benutzer wissentlich und ständig gegen die Regeln verstoßen hat und/oder , dass der Benutzer die Vorschläge des Serverpersonals ignoriert, wird der dauerhaft vom Server gesperrt."
+}

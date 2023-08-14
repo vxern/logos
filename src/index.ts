@@ -1,9 +1,13 @@
-import { FeatureLanguage, Locale, LocalisationLanguage, getLanguageByLocale, isFeatured } from "./constants/languages";
+import {
+	LearningLanguage,
+	Locale,
+	LocalisationLanguage,
+	getLanguageByLocale,
+	isLocalised,
+} from "./constants/languages";
 import { capitalise } from "./formatting";
 import { Client, initialiseClient } from "./lib/client";
 import { SentencePair } from "./lib/commands/language/commands/game";
-import { DictionaryAdapter } from "./lib/commands/language/dictionaries/adapter";
-import dictionaryAdapters from "./lib/commands/language/dictionaries/adapters";
 import { getSupportedLanguages } from "./lib/commands/language/module";
 import * as csv from "csv-parse/sync";
 import * as dotenv from "dotenv";
@@ -166,7 +170,7 @@ async function loadLocalisations(directoryPath: string): Promise<Map<string, Map
  * @returns An array of tuples where the first element is a language and the second
  * element is the contents of its sentence file.
  */
-async function readSentenceFiles(directoryPath: string): Promise<[FeatureLanguage, string][]> {
+async function readSentenceFiles(directoryPath: string): Promise<[LearningLanguage, string][]> {
 	const filePaths: string[] = [];
 	for (const entryPath of await fs.readdir(directoryPath)) {
 		const combinedPath = `${directoryPath}/${entryPath}`;
@@ -177,66 +181,55 @@ async function readSentenceFiles(directoryPath: string): Promise<[FeatureLanguag
 		filePaths.push(combinedPath);
 	}
 
-	const results: Promise<[FeatureLanguage, string]>[] = [];
+	const results: Promise<[LearningLanguage, string]>[] = [];
 	for (const filePath of filePaths) {
-		const [_, fileName] = /.+\/([a-z]+)\.tsv/.exec(filePath) ?? [];
+		const [_, fileName] = /^.+\/(.+)\.tsv$/.exec(filePath) ?? [];
 		if (fileName === undefined) {
-			console.warn(`Sentence file '${filePath}' has an invalid name.`);
+			console.warn(`Sentence file '${filePath}' has an invalid format.`);
 			continue;
 		}
 
-		const language = capitalise(fileName);
+		const language = fileName
+			.split("-")
+			.map((part) => capitalise(part))
+			.join("/");
 
-		if (!isFeatured(language)) {
+		if (!isLocalised(language)) {
 			console.warn(
 				`File '${filePath}' contains sentences for a language '${language}' not supported by the application. Skipping...`,
 			);
 			continue;
 		}
 
-		results.push(fs.readFile(filePath).then((contents) => [language, decoder.decode(contents)]));
+		results.push(
+			fs.readFile(filePath).then((buffer) => {
+				const contents = decoder.decode(buffer);
+				return [language, contents];
+			}),
+		);
 	}
 
 	return Promise.all(results);
 }
 
-function loadDictionaryAdapters(): Map<FeatureLanguage, DictionaryAdapter[]> {
-	console.info("[Dictionaries] Loading dictionary adapters...");
-
-	const result = new Map<FeatureLanguage, DictionaryAdapter[]>();
-
-	for (const adapter of dictionaryAdapters) {
-		for (const language of adapter.supports) {
-			result.get(language)?.push(adapter) ?? result.set(language, [adapter]);
-		}
-	}
-
-	for (const adapters of result.values()) {
-		// Sorts adapters in descending order by how much information they provide.
-		adapters.sort((a, b) => b.provides.length - a.provides.length);
-	}
-
-	console.info(`[Dictionaries] Loaded ${dictionaryAdapters.length} dictionar(y/ies)...`);
-
-	return result;
-}
-
 /** Loads dictionary adapters and sentence lists. */
-function loadSentencePairs(languageFileContents: [FeatureLanguage, string][]): Map<FeatureLanguage, SentencePair[]> {
+function loadSentencePairs(languageFileContents: [LearningLanguage, string][]): Map<LearningLanguage, SentencePair[]> {
 	console.info(`[Sentences] Loading sentence pairs for ${languageFileContents.length} language(s)...`);
 
-	const result = new Map<FeatureLanguage, SentencePair[]>();
+	const result = new Map<LearningLanguage, SentencePair[]>();
 
 	for (const [language, contents] of languageFileContents) {
-		const records = csv.parse(contents, { relaxQuotes: true, delimiter: "	" }) as [
-			sentenceId: string,
-			sentence: string,
-			translationId: string,
-			translation: string,
-		][];
+		let records;
+		try {
+			records = csv.parse(contents, { relaxQuotes: true, relaxColumnCount: true, delimiter: "	" }) as
+				| [sentenceId: string, sentence: string, translationId: string, translation: string][];
+		} catch {
+			console.warn(`Failed to load sentences for ${language}.`);
+			continue;
+		}
 
-		for (const [_, sentence, __, translation] of records) {
-			const sentencePair = { sentence, translation };
+		for (const [sentenceId, sentence, translationId, translation] of records) {
+			const sentencePair = { sentenceId, sentence, translationId, translation };
 			result.get(language)?.push(sentencePair) ?? result.set(language, [sentencePair]);
 		}
 	}
@@ -269,6 +262,7 @@ async function setup(): Promise<void> {
 		faunaSecret: process.env.FAUNA_SECRET,
 		deeplSecret: process.env.DEEPL_SECRET,
 		sentrySecret: process.env.SENTRY_SECRET,
+		wordsSecret: process.env.WORDS_SECRET,
 		lavalinkHost: process.env.LAVALINK_HOST,
 		lavalinkPort: process.env.LAVALINK_PORT,
 		lavalinkPassword: process.env.LAVALINK_PASSWORD,
@@ -291,13 +285,12 @@ async function setup(): Promise<void> {
 		readSentenceFiles("./assets/sentences"),
 	]);
 
-	const dictionaryAdapters = loadDictionaryAdapters();
 	const sentencePairs = loadSentencePairs(sentenceFiles);
 	const localisations = await loadLocalisations("./assets/localisations");
 
 	initialiseClient(
 		{ environment, supportedTranslationLanguages },
-		{ dictionaryAdapters, sentencePairs, rateLimiting: new Map() },
+		{ sentencePairs, rateLimiting: new Map() },
 		localisations,
 	);
 }

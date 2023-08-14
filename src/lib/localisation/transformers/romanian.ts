@@ -6,8 +6,7 @@ function pluralise(
 		return undefined;
 	}
 
-	// 1 is the only positive number the singular form goes with in Romanian.
-	if (quantity === "1") {
+	if (quantity === "1" || quantity === "-1") {
 		return singular;
 	}
 

@@ -109,6 +109,7 @@ async function handleDisplayProfile(
 
 						return { url: iconURL };
 					})(),
+					color: constants.colors.peach,
 					fields: [
 						{
 							name: `${constants.symbols.profile.roles} ${strings.roles}`,

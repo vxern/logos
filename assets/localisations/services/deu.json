@@ -1,0 +1,18 @@
+{
+    "notices.lastUpdate": "Letzte Aktualisierung: {date}",
+    "notices.notices.information.invite": "Permanenter Einladungslink",
+    "reports.users": "Gemeldete Benutzer",
+    "reports.reason": "Grund für Bericht",
+    "reports.link": "Link zur Nachricht",
+    "reports.noLinkProvided": "Keinen Link zur Nachricht wurde bereitgestellt.",
+    "reports.previousInfractions": "Frühere Verstöße von {username}",
+    "suggestion.suggestion": "Vorschalg",
+    "submittedBy": "Eingereicht von",
+    "submittedAt": "Eingereicht bei",
+    "markResolved": "Problem als gelöst markieren",
+    "markUnresolved": "Problem als ungelöst markieren",
+    "alreadyMarkedResolved.title": "Bereits als gelöst markiert",
+    "alreadyMarkedResolved.description": "Der Problem wurde schon als gelöst markiert.",
+    "alreadyMarkedUnresolved.title": "Bereits als ungelöst markiert",
+    "alreadyMarkedUnresolved.description": "Der Problem wurde schon als ungelöst markiert."
+}

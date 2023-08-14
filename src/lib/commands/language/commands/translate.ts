@@ -1,4 +1,5 @@
 import constants from "../../../../constants/constants";
+import localisations from "../../../../constants/localisations";
 import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
 import diagnostics from "../../../diagnostics";
@@ -38,46 +39,6 @@ const command: CommandTemplate = {
 	],
 };
 
-const languageNameToStringKey: Record<string, string> = Object.freeze({
-	Armenian: "languages.armenian",
-	Belarusian: "languages.belarusian",
-	Bulgarian: "languages.bulgarian",
-	Chinese: "languages.chinese",
-	"Chinese (simplified)": "languages.chinese.simplified",
-	Czech: "languages.czech",
-	Danish: "languages.danish",
-	Dutch: "languages.dutch",
-	English: "languages.english",
-	"English (American)": "languages.english.american",
-	"English (British)": "languages.english.british",
-	Estonian: "languages.estonian",
-	Finnish: "languages.finnish",
-	French: "languages.french",
-	German: "languages.german",
-	Greek: "languages.greek",
-	Hungarian: "languages.hungarian",
-	Indonesian: "languages.indonesian",
-	Italian: "languages.italian",
-	Japanese: "languages.japanese",
-	Korean: "languages.korean",
-	Latvian: "languages.latvian",
-	Lithuanian: "languages.lithuanian",
-	Norwegian: "languages.norwegian",
-	"Norwegian (Bokmål)": "languages.norwegian.bokmal",
-	Polish: "languages.polish",
-	Portuguese: "languages.portuguese",
-	"Portuguese (Brazilian)": "languages.portuguese.brazilian",
-	"Portuguese (European)": "languages.portuguese.european",
-	Romanian: "languages.romanian",
-	Russian: "languages.russian",
-	Slovak: "languages.slovak",
-	Slovenian: "languages.slovenian",
-	Spanish: "languages.spanish",
-	Swedish: "languages.swedish",
-	Turkish: "languages.turkish",
-	Ukrainian: "languages.ukrainian",
-});
-
 async function handleTranslateTextAutocomplete(
 	[client, bot]: [Client, Discord.Bot],
 	interaction: Logos.Interaction,
@@ -104,7 +65,7 @@ async function handleTranslateTextAutocomplete(
 
 	const choices = client.metadata.supportedTranslationLanguages
 		.map((language) => {
-			const languageStringKey = languageNameToStringKey[language.name];
+			const languageStringKey = localisations.deeplLanguages[language.name];
 
 			if (languageStringKey === undefined) {
 				return {
@@ -267,8 +228,8 @@ async function handleTranslateText(
 	// Ensures that an empty translation string does not result in embed failure.
 	const translatedText = translation.text.trim().length !== 0 ? translation.text : constants.symbols.meta.whitespace;
 
-	const sourceLanguageKey = languageNameToStringKey[sourceLanguage.name];
-	const targetLanguageKey = languageNameToStringKey[targetLanguage.name];
+	const sourceLanguageKey = localisations.deeplLanguages[sourceLanguage.name];
+	const targetLanguageKey = localisations.deeplLanguages[targetLanguage.name];
 
 	const strings = {
 		sourceLanguageName:
@@ -376,4 +337,3 @@ async function translate(
 }
 
 export default command;
-export { languageNameToStringKey };

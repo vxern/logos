@@ -90,6 +90,11 @@ interface Guild {
 				targetOnly?: Activatable<{
 					channelIds: string[];
 				}>;
+
+				/** @since v3.10.0 */
+				roleLanguages?: Activatable<{
+					ids: Record<string, LocalisationLanguage>;
+				}>;
 			};
 		}>;
 

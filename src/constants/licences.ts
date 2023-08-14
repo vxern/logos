@@ -1,0 +1,70 @@
+import apache from "./licences/apache";
+import bsd from "./licences/bsd";
+import mit from "./licences/mit";
+import mpl from "./licences/mpl";
+
+const licences = {
+	dictionaries: {
+		dexonline: {
+			name: "dexonline.ro",
+			link: "https://dexonline.ro/licenta",
+			notices: {
+				licence:
+					"Baza de definiții a dexonline este liberă; o puteți redistribui și/sau modifica în conformitate cu termenii Licenței Publice Generale GNU așa cum este ea publicată de Free Software Foundation; fie versiunea 2 a Licenței, fie (la latitudinea dumneavoastră) orice versiune ulterioară. Baza de definiții este distribuită cu speranța că vă va fi utilă, dar FĂRĂ NICIO GARANȚIE, chiar fără garanția implicită de vandabilitate sau conformitate unui anumit scop. Citiți Licența Publică Generală GNU pentru detalii. Puteți găsi o copie a Licenței Publice Generale GNU [aici](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html) și o traducere a ei în limba română [aici](https://ro.wikipedia.org/wiki/GPL_%28licen%C8%9B%C4%83,_versiunea_2%29).",
+				copyright: "Copyright © 2004-2023 dexonline (https://dexonline.ro)",
+			},
+		},
+		tatoeba: {
+			name: "tatoeba.org",
+			link: "https://tatoeba.org/en/terms_of_use#section-6",
+			notices: {
+				licence: `Tatoeba's technical infrastructure uses the default [Creative Commons Attribution 2.0 France license (CC-BY 2.0 FR)](https://creativecommons.org/licenses/by/2.0/fr/) for the use of textual sentences. The BY mention implies a single restriction on the use, reuse, modification and distribution of the sentence: a condition of attribution. That is, using, reusing, modifying and distributing the sentence is only allowed if the name of the author is cited.
+        
+        The BY mention is also the basic requirement for audio phrases, which can be contributed under different Creative Commons licenses, involving other conditions. Exceptionally, audio sentences may be under other licenses than Creative Commons, especially if the contributor has not validated the authorization to use the audio phrase elsewhere than on our Website.`,
+			},
+		},
+		wiktionary: {
+			name: "wiktionary.org",
+			link: "https://en.wiktionary.org/wiki/Wiktionary:Copyrights",
+			notices: {
+				licence:
+					"The original texts of Wiktionary entries are dual-licensed to the public under both the [Creative Commons Attribution-ShareAlike 3.0 Unported License (CC-BY-SA)](https://en.wiktionary.org/wiki/Wiktionary:CC-BY-SA) and the [GNU Free Documentation License (GFDL)](https://en.wiktionary.org/wiki/Wiktionary:Text_of_the_GNU_Free_Documentation_License). The full text of both licenses can be found at [Wiktionary:Text of Creative Commons Attribution-ShareAlike 3.0 Unported License](https://en.wiktionary.org/wiki/Wiktionary:Text_of_Creative_Commons_Attribution-ShareAlike_3.0_Unported_License), as well as [Wiktionary:Text of the GNU Free Documentation License](https://en.wiktionary.org/wiki/Wiktionary:Text_of_the_GNU_Free_Documentation_License). Permission is granted to copy, distribute and/or modify the text of all Wiktionary entries under the terms of the Creative Commons Attribution-ShareAlike 3.0 Unported License, and the GNU Free Documentation License, Version 1.1 or any later version published by the [Free Software Foundation](https://en.wikipedia.org/wiki/Free_Software_Foundation); with no Invariant Sections, with no Front-Cover Texts, and with no Back-Cover Texts.",
+			},
+		},
+		wordsApi: {
+			name: "wordsapi.com",
+			link: "https://wordsapi.com",
+			notices: {
+				licence:
+					"You may cache and thus store API Data on your system for up to 24 hours, after which such cached API Data must be purged. Subject to that exception, you will not copy, store, archive, distribute to any third party (other than to End Users as contemplated in this Agreement) any API Data, any metadata or any Link. You agree that any cached API Data will be used by you only for the purpose of populating the Developer Application.",
+			},
+		},
+	},
+	software: {
+		"csv-parse": mit("Copyright (c) 2010 Adaltas"),
+		"dexonline-scraper": mit('Copyright (c) 2023 Dorian "vxern" Oszczęda'),
+		discordeno: apache("Copyright 2021 - 2023 Discordeno"),
+		dotenv: bsd("Copyright (c) 2015, Scott Motte"),
+		"fancy-log": mit(
+			"Copyright (c) 2014, 2015, 2018, 2021 Blaine Bublitz <blaine.bublitz@gmail.com> and Eric Schoffstall <yo@contra.io>",
+		),
+		fauna: mpl("Copyright 2021 Fauna, Inc."),
+		lavaclient: apache("Copyright [yyyy] [name of copyright owner]"),
+		"object-hash": mit("Copyright (c) 2014 object-hash contributors"),
+		"parse-wiktionary": mit(
+			"Copyright (c) 2019 Suyash Behera <Suyash.behera458@gmail.com> 2022 Onsa <csinjan@gmail.com>",
+		),
+		node: mit("Copyright Node.js contributors. All rights reserved."),
+		rome: mit("Copyright (c) Rome Tools, Inc. and its affiliates."),
+		tsx: mit("Copyright (c) Hiroki Osame <hiroki.osame@gmail.com>"),
+		typescript: apache("Copyright Microsoft Corporation. All rights reserved."),
+		"youtube-sr": mit("Copyright (c) 2020 DevAndromeda"),
+		"@sentry/node": mit("Copyright (c) 2022 Functional Software, Inc. dba Sentry"),
+		"@sapphire/snowflake": mit("Copyright (c) 2020 The Sapphire Community and its contributors"),
+	},
+};
+
+type DictionaryLicence = typeof licences.dictionaries[keyof typeof licences.dictionaries];
+
+export default licences;
+export type { DictionaryLicence };

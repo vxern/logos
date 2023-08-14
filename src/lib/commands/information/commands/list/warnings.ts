@@ -153,7 +153,7 @@ function getWarningPage(
 				relative_timestamp: timestamp(warning.data.createdAt),
 			});
 
-			return { name: warningString, value: `*${warning.data.reason}*` };
+			return { name: `${constants.symbols.warn} ${warningString}`, value: `*${warning.data.reason}*` };
 		}),
 		color: constants.colors.blue,
 	};

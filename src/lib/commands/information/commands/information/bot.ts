@@ -3,7 +3,6 @@ import { list } from "../../../../../formatting";
 import * as Logos from "../../../../../types";
 import { Client, localise } from "../../../../client";
 import { reply } from "../../../../interactions";
-import { chunk } from "../../../../utils";
 import * as Discord from "discordeno";
 
 async function handleDisplayBotInformation(
@@ -62,9 +61,6 @@ async function handleDisplayBotInformation(
 				description: localise(client, "information.options.bot.strings.amIOpenSource.description", locale)(),
 			},
 		},
-		translators: {
-			title: localise(client, "information.options.bot.strings.translators.title", locale)(),
-		},
 	};
 
 	const featuresFormatted = list([
@@ -76,66 +72,35 @@ async function handleDisplayBotInformation(
 	reply([client, bot], interaction, {
 		embeds: [
 			{
-				title: botUser.username,
-				thumbnail: {
-					url: Discord.getAvatarURL(bot, bot.id, botUser.discriminator, {
+				author: {
+					iconUrl: Discord.getAvatarURL(bot, bot.id, botUser.discriminator, {
 						avatar: botUser.avatar,
-						size: 4096,
 						format: "png",
 					}),
+					name: botUser.username,
 				},
 				color: constants.colors.blue,
 				fields: [
 					{
-						name: strings.information.whoAmI.title,
+						name: `${constants.symbols.information.bot} ${strings.information.whoAmI.title}`,
 						value: `${strings.information.whoAmI.description}\n${featuresFormatted}`,
 					},
 					{
-						name: strings.information.howWasIMade.title,
+						name: `${constants.symbols.information.build} ${strings.information.howWasIMade.title}`,
 						value: strings.information.howWasIMade.description,
 					},
 					{
-						name: strings.information.howToAddToServer.title,
+						name: `${constants.symbols.information.handshake} ${strings.information.howToAddToServer.title}`,
 						value: strings.information.howToAddToServer.description,
 					},
 					{
-						name: strings.information.amIOpenSource.title,
+						name: `${constants.symbols.information.unlocked} ${strings.information.amIOpenSource.title}`,
 						value: strings.information.amIOpenSource.description,
 					},
 				],
 			},
-			{
-				title: strings.translators.title,
-				color: constants.colors.blue,
-				fields: getContributorString(constants.contributions.translation),
-			},
 		],
 	});
-}
-
-function getContributorString(contributions: typeof constants.contributions.translation): Discord.EmbedField[] {
-	const fields: Discord.EmbedField[] = [];
-	for (const [language, data] of Object.entries(contributions)) {
-		const contributorsFormatted = chunk(
-			data.contributors.map((contributor) => {
-				if ("link" in contributor) {
-					return `**[${contributor.username}](${contributor.link})**`;
-				}
-
-				return `**${contributor.username}**`;
-			}),
-			3,
-		)
-			.map((chunks) => chunks.join(" "))
-			.join("\n");
-
-		fields.push({
-			name: `${language} ${data.flag}`,
-			value: contributorsFormatted,
-			inline: true,
-		});
-	}
-	return fields;
 }
 
 export { handleDisplayBotInformation };

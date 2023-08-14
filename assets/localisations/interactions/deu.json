@@ -1,0 +1,9 @@
+{
+    "interactions.continuedOnNextPage": "Fortsetzung auf der nächsten Seite...",
+    "interactions.page": "Seite",
+    "interactions.invalidUser.title": "Ungültiger Benutzer",
+    "interactions.invalidUser.description": "Der angegebene Benutzer ist ungültig.",
+    "interactions.rateLimited.title": "Deine Aktionsgeschwindigkeit ist jetzt begrenzt",
+    "interactions.rateLimited.description.tooManyUses": "Du hast diesen Befehl in zu kurzer Zeit zu oft verwendet, ({times}) mal.",
+    "interactions.rateLimited.description.cannotUseAgainUntil": "Du wirst den Befehl erneut verwenden können, {relative_timestamp}."
+}

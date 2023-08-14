@@ -9,11 +9,17 @@ export default {
 	information: {
 		information: "ℹ️",
 		inviteLink: "🔗",
+		bot: "🤖",
+		build: "🛠️",
+		handshake: "🤝",
+		unlocked: "🔓",
 	},
 	sigils: {
 		divider: "﹘",
 		separator: "・",
 	},
+	divider: "—",
+	link: "🔗",
 	events: {
 		user: {
 			banned: "⚔️",
@@ -49,6 +55,12 @@ export default {
 			begin: "⚔️",
 			end: "✅",
 		},
+	},
+	word: {
+		word: "📜",
+		definitions: "📚",
+		expressions: "💐",
+		etymology: "🌐",
 	},
 	music: {
 		song: "🎵",
@@ -103,6 +115,7 @@ export default {
 		moderators: "⚖️",
 		proficiencyDistribution: "🎓",
 	},
+	warn: "😖",
 	answer: "📜",
 	correction: "🖋️",
 	interactions: {

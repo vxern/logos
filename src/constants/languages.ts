@@ -3,48 +3,63 @@ import * as Discord from "discordeno";
 const languages = {
 	localisation: {
 		discord: [
+			"Dutch",
 			"English/American",
 			"English/British",
+			"Finnish",
 			"French",
+			"German",
+			"Greek",
 			"Hungarian",
 			"Norwegian/Bokmål",
 			"Polish",
 			"Romanian",
 			"Turkish",
-			"Dutch",
-			"Greek",
-			"Finnish",
 		],
 		logos: ["Armenian/Western", "Armenian/Eastern"],
 	},
-	feature: ["Armenian", "English", "Romanian"],
+	feature: [
+		"Armenian",
+		"Dutch",
+		"English",
+		"French",
+		"German",
+		"Greek",
+		"Hungarian",
+		"Norwegian",
+		"Polish",
+		"Romanian",
+		"Turkish",
+	],
 } as const;
 
 const languageToLocale = {
 	discord: {
+		Dutch: "nl",
 		"English/American": "en-US",
 		"English/British": "en-GB",
+		Finnish: "fi",
 		French: "fr",
+		German: "de",
+		Greek: "el",
 		Hungarian: "hu",
 		"Norwegian/Bokmål": "no",
 		Polish: "pl",
 		Romanian: "ro",
 		Turkish: "tr",
-		Dutch: "nl",
-		Greek: "el",
-		Finnish: "fi",
 	} satisfies Record<DiscordLanguage, Discord.Locale>,
 	logos: {
-		Greek: "ell",
+		"Armenian/Eastern": "hye",
+		"Armenian/Western": "hyw",
+		Dutch: "nld",
 		"English/American": "eng-US",
 		"English/British": "eng-GB",
 		Finnish: "fin",
 		French: "fra",
+		Greek: "ell",
+		German: "deu",
 		Hungarian: "hun",
 		"Norwegian/Bokmål": "nob",
-		"Armenian/Eastern": "hye",
-		"Armenian/Western": "hyw",
-		Dutch: "nld",
 		Polish: "pol",
 		Romanian: "ron",
 		Turkish: "tur",
@@ -61,6 +76,7 @@ type LogosLanguage = typeof languages.localisation.logos[number];
 
 type LocalisationLanguage = DiscordLanguage | LogosLanguage;
 type FeatureLanguage = typeof languages.feature[number];
+type LearningLanguage = LocalisationLanguage;
 
 type DiscordLocale = typeof languageToLocale.discord[keyof typeof languageToLocale.discord];
 type Locale = typeof languageToLocale.logos[keyof typeof languageToLocale.logos];
@@ -113,9 +129,28 @@ function reverseObject<O extends Record<string, string>>(object: O): Reverse<O> 
 	return reversed as unknown as Reverse<O>;
 }
 
+type WithVariants<T> = T extends `${string}/${string}` ? T : never;
+
+function toFeatureLanguage(language: LocalisationLanguage | LearningLanguage): FeatureLanguage | undefined {
+	const baseLanguage = language.split("/").at(0);
+	if (baseLanguage === undefined) {
+		throw "StateError: Base language unexpectedly undefined when getting feature language.";
+	}
+
+	if (isFeatured(baseLanguage)) {
+		return baseLanguage;
+	}
+
+	return undefined;
+}
+
 export default {
-	localisation: [...languages.localisation.discord, ...languages.localisation.logos],
-	feature: languages.feature,
+	languages: {
+		localisation: [...languages.localisation.discord, ...languages.localisation.logos].sort(),
+	},
+	locales: {
+		discord: Object.values(languageToLocale.discord),
+	},
 };
 export {
 	getDiscordLocaleByLanguage,
@@ -123,7 +158,8 @@ export {
 	getDiscordLanguageByDiscordLocale,
 	getLocaleByLanguage,
 	isLocalised,
+	toFeatureLanguage,
 	isFeatured,
 	isBuiltIn,
 };
-export type { FeatureLanguage, LocalisationLanguage, Locale };
+export type { LearningLanguage, FeatureLanguage, LocalisationLanguage, Locale, WithVariants };

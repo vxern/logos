@@ -1,0 +1,22 @@
+{
+    "rules.rule": "Regel",
+    "rules.behaviour.summary": "Versuch, nett zu sein.",
+    "rules.quality.title": "Qualität",
+    "rules.quality.content": "Es wird erwartet, dass die Beiträge zum Server von angemessener Qualität sind. Von Trolling, Spam, Flooding, Shitposting (außerhalb des Kanals für Memes) und anderen Formen nervigen Verhaltens wird dringend abgeraten.",
+    "rules.relevance.summary": "Poste relevante Inhalte.",
+    "rules.suitability.title": "Tauglichkeit",
+    "rules.suitability.content": "Es wird erwartet, dass Beiträge auf dem Server für die Betrachtung durch Minderjährige geeignet sind. Inhalte mit Altersbeschränkung (NSFW) oder grausamer Nature sind streng untersagt. Wenn du den Inhalt einem Minderjährigen nicht zeigen würdest, dann solltest du ihn nicht posten.",
+    "rules.exclusivity.summary": "Mach keine Werbung.",
+    "rules.adherence.title": "Adhärenz",
+    "rules.adherence.content": "Für Mitglieder, die sich nicht an die Serverregeln halten und kein Interesse daran haben, nützliche Beiträge zu leisten, kann eine dauerhafte Sperre ausgesprochen werden.",
+    "rules.behaviour.title": "Verhalten",
+    "rules.tldr": "Kurzum",
+    "rules.quality.summary": "Sei nicht unausstehlich.",
+    "rules.exclusivity.title": "Exklusivität",
+    "rules.adherence.summary": "Beachte die Regeln.",
+    "rules.relevance.title": "Relevanz",
+    "rules.suitability.summary": "Poste Inhalte, die auch für jüngere Mitglider geeignet sind.",
+    "rules.behaviour.content": "Von den Mitgliedern wird ein respektvoller, rücksichtsvoller und verständnisvoller Umgang miteinander erwartet. Böswillgies Verhalten in Form von Missbrauch, Diskriminierung, Belästigung und anderen Formen verletzenden oder toxischen Verhaltens wird nicht toleriert.",
+    "rules.relevance.content": "Es wird erwartet, dass die Beiträge zum Server im entsprechenden Kanal und in der entsprechenden Kategorie platziert werden. Beiträge, die auf unangemessenen Kanälen für ihr Thema eingereicht wurden, werde gebeten, in den entsprechenden Kanal verschoben zu werden.",
+    "rules.exclusivity.content": "Von den Mitgliedern wird erwartet, dass sie diese Fläche nicht für Werbung nutzen, und aktive Versuche, dies zu tun, (Einschließlich unaufgeforderter Direktnachrichten) sind verboten."
+}

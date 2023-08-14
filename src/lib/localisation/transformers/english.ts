@@ -3,7 +3,7 @@ function pluralise(quantity: string, { one: singular, two: plural }: Record<stri
 		return undefined;
 	}
 
-	if (quantity === "1") {
+	if (quantity === "1" || quantity === "-1") {
 		return singular;
 	}
 
