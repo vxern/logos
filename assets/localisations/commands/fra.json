@@ -286,7 +286,7 @@
     "rule.options.rule.description": "La règle à citer.",
     "rule.strings.invalid.title": "Règle non valide",
     "rule.strings.invalid.description": "La règle que vous avez spécifiée est invalide.",
-    "slowmode.name": "mode ralenti",
+    "slowmode.name": "mode-ralenti",
     "slowmode.description": "Active/désactive le mode ralenti pour le salon dans lequel cette commande est exécutée.",
     "slowmode.options.level.name": "niveau",
     "slowmode.options.level.description": "Le niveau du mode ralenti à appliquer.",
