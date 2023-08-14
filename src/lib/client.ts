@@ -15,7 +15,6 @@ import * as Logos from "../types";
 import { Command, CommandTemplate, InteractionHandler, LocalisationProperties, Option } from "./commands/command";
 import commandsRaw from "./commands/commands";
 import { SentencePair } from "./commands/language/commands/game";
-import { DictionaryAdapter } from "./commands/language/dictionaries/adapter";
 import { SupportedLanguage } from "./commands/language/module";
 import entryRequests from "./database/adapters/entry-requests";
 import guilds from "./database/adapters/guilds";
@@ -60,6 +59,7 @@ type Client = {
 			faunaSecret: string;
 			deeplSecret: string;
 			sentrySecret: string;
+			wordsSecret: string;
 			lavalinkHost: string;
 			lavalinkPort: string;
 			lavalinkPassword: string;
@@ -87,7 +87,6 @@ type Client = {
 	};
 	collectors: Map<Event, Set<Collector<Event>>>;
 	features: {
-		dictionaryAdapters: Map<LearningLanguage, DictionaryAdapter[]>;
 		sentencePairs: Map<LearningLanguage, SentencePair[]>;
 		// The keys are user IDs, the values are command usage timestamps mapped by command IDs.
 		rateLimiting: Map<bigint, Map<bigint, number[]>>;

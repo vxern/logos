@@ -18,6 +18,7 @@ export default {
 		divider: "﹘",
 		separator: "・",
 	},
+	divider: "—",
 	link: "🔗",
 	events: {
 		user: {

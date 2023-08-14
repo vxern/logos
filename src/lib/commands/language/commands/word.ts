@@ -21,6 +21,7 @@ import { chunk } from "../../../utils";
 import { CommandTemplate } from "../../command";
 import { show } from "../../parameters";
 import { Definition, DictionaryEntry, Expression } from "../dictionaries/adapter";
+import adapters from "../dictionaries/adapters";
 import { PartOfSpeech, isUnknownPartOfSpeech } from "../dictionaries/part-of-speech";
 import * as Discord from "discordeno";
 
@@ -72,7 +73,7 @@ async function handleFindWord([client, bot]: [Client, Discord.Bot], interaction:
 		return;
 	}
 
-	const dictionaries = client.features.dictionaryAdapters.get(interaction.learningLanguage);
+	const dictionaries = adapters[interaction.learningLanguage];
 	if (dictionaries === undefined) {
 		const strings = {
 			title: localise(client, "word.strings.noDictionaryAdapters.title", locale)(),
@@ -101,8 +102,13 @@ async function handleFindWord([client, bot]: [Client, Discord.Bot], interaction:
 
 	const unclassifiedEntries: DictionaryEntry[] = [];
 	const entriesByPartOfSpeech = new Map<PartOfSpeech, DictionaryEntry[]>();
+	let searchesCompleted = 0;
 	for (const dictionary of dictionaries) {
-		const entries = await dictionary.getEntries(word, interaction.learningLanguage, client, { locale });
+		if (dictionary.isFallback && searchesCompleted !== 0) {
+			continue;
+		}
+
+		const entries = await dictionary.getEntries(client, word, interaction.learningLanguage, { locale });
 		if (entries === undefined) {
 			continue;
 		}
@@ -146,6 +152,8 @@ async function handleFindWord([client, bot]: [Client, Discord.Bot], interaction:
 				existingEntries[index] = { ...existingEntry, ...entry, sources: [...existingEntry.sources, ...entry.sources] };
 			}
 		}
+
+		searchesCompleted++;
 	}
 
 	if (entriesByPartOfSpeech.size === 0) {
@@ -481,7 +489,7 @@ function entryToEmbeds(
 	const fields: NonNullable<Discord.Embed["fields"]> = [];
 
 	if (entry.nativeDefinitions !== undefined && entry.nativeDefinitions.length !== 0) {
-		const definitionsStringified = stringifyEntries(entry.nativeDefinitions, "definitions");
+		const definitionsStringified = stringifyEntries(client, entry.nativeDefinitions, "definitions", { locale });
 		const definitionsFitted = fitTextToFieldSize(client, definitionsStringified, verbose, { language, locale });
 
 		if (verbose) {
@@ -507,7 +515,7 @@ function entryToEmbeds(
 	}
 
 	if (entry.definitions !== undefined && entry.definitions.length !== 0) {
-		const definitionsStringified = stringifyEntries(entry.definitions, "definitions");
+		const definitionsStringified = stringifyEntries(client, entry.definitions, "definitions", { locale });
 		const definitionsFitted = fitTextToFieldSize(client, definitionsStringified, verbose, { language, locale });
 
 		if (verbose) {
@@ -533,7 +541,7 @@ function entryToEmbeds(
 	}
 
 	if (entry.expressions !== undefined && entry.expressions.length !== 0) {
-		const expressionsStringified = stringifyEntries(entry.expressions, "expressions");
+		const expressionsStringified = stringifyEntries(client, entry.expressions, "expressions", { locale });
 		const expressionsFitted = fitTextToFieldSize(client, expressionsStringified, verbose, { language, locale });
 
 		const strings = {
@@ -630,7 +638,13 @@ const parenthesesExpression = RegExp("\\((.+?)\\)", "g");
 function stringifyEntries<
 	T extends EntryType,
 	E extends Definition[] | Expression[] = T extends "definitions" ? Definition[] : Expression[],
->(entries: E, entryType: T, root?: string, depth = 0): string[] {
+>(
+	client: Client,
+	entries: E,
+	entryType: T,
+	{ locale }: { locale: Locale },
+	options?: { root: string; depth: number },
+): string[] {
 	const entriesStringified = entries.map((entry, indexZeroBased) => {
 		const parenthesesContents: string[] = [];
 		for (const [match, contents] of entry.value.matchAll(parenthesesExpression)) {
@@ -650,18 +664,69 @@ function stringifyEntries<
 			entry.value,
 		);
 
-		const anchor = entry.tags === undefined ? value : `${tagsToString(entry.tags)} ${value}`;
+		let anchor = entry.tags === undefined ? value : `${tagsToString(entry.tags)} ${value}`;
+		if (isDefinition(entry, entryType)) {
+			if (entry.relations !== undefined) {
+				const strings = {
+					synonyms: localise(client, "word.strings.relations.synonyms", locale)(),
+					antonyms: localise(client, "word.strings.relations.antonyms", locale)(),
+					diminutives: localise(client, "word.strings.relations.diminutives", locale)(),
+					augmentatives: localise(client, "word.strings.relations.augmentatives", locale)(),
+				};
 
-		if (isDefinition(entry, entryType) && value.endsWith(":")) {
-			const definitions = entry.definitions;
-			if (definitions === undefined) {
-				throw "StateError: Definitions were unexpectedly `undefined`.";
+				const synonyms = entry.relations.synonyms ?? [];
+				const antonyms = entry.relations.antonyms ?? [];
+				const diminutives = entry.relations.diminutives ?? [];
+				const augmentatives = entry.relations.augmentatives ?? [];
+
+				if (synonyms.length !== 0 || antonyms.length !== 0) {
+					anchor += "\n  - ";
+					const columns: string[] = [];
+
+					if (synonyms.length !== 0) {
+						columns.push(`**${strings.synonyms}**: ${synonyms.join(", ")}`);
+					}
+
+					if (antonyms.length !== 0) {
+						columns.push(`**${strings.antonyms}**: ${antonyms.join(", ")}`);
+					}
+
+					anchor += columns.join(` ${constants.symbols.divider} `);
+				}
+
+				if (diminutives.length !== 0 || augmentatives.length !== 0) {
+					anchor += "\n  - ";
+					const columns: string[] = [];
+
+					if (diminutives.length !== 0) {
+						columns.push(`**${strings.diminutives}**: ${diminutives.join(", ")}`);
+					}
+
+					if (augmentatives.length !== 0) {
+						columns.push(`**${strings.augmentatives}**: ${augmentatives.join(", ")}`);
+					}
+
+					anchor += columns.join(` ${constants.symbols.divider} `);
+				}
 			}
 
-			const index = indexZeroBased + 1;
-			const newRoot = root === undefined ? `${index}` : `${root}.${index}`;
-			const entriesStringified = stringifyEntries(definitions, "definitions", newRoot, depth + 1).join("\n");
-			return `${anchor}\n${entriesStringified}`;
+			if (value.endsWith(":")) {
+				const definitions = entry.definitions ?? [];
+				if (definitions.length === 0) {
+					return anchor;
+				}
+
+				const index = indexZeroBased + 1;
+				const newRoot = options === undefined ? `${index}` : `${options.root}.${index}`;
+				const entriesStringified = stringifyEntries(
+					client,
+					definitions,
+					"definitions",
+					{ locale },
+					{ root: newRoot, depth: (options?.depth ?? 0) + 1 },
+				).join("\n");
+				return `${anchor}\n${entriesStringified}`;
+			}
 		}
 
 		return anchor;
@@ -671,16 +736,16 @@ function stringifyEntries<
 		.map((entry, indexZeroBased) => {
 			const index = indexZeroBased + 1;
 
-			if (root === undefined) {
+			if (options === undefined) {
 				return `${index}. ${entry}`;
 			}
 
-			return `${root}.${index}. ${entry}`;
+			return `${options.root}.${index}. ${entry}`;
 		})
 		.join("\n");
 	const entriesDelisted = entriesEnlisted
 		.split("\n")
-		.map((entry) => `${constants.symbols.meta.whitespace.repeat(depth * 2)}${entry}`);
+		.map((entry) => `${constants.symbols.meta.whitespace.repeat((options?.depth ?? 0) * 2)}${entry}`);
 
 	return entriesDelisted;
 }

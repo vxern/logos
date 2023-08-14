@@ -1,29 +1,39 @@
 import constants from "../../../../../constants/constants";
-import languages, { LearningLanguage, Locale } from "../../../../../constants/languages";
+import { LearningLanguage, Locale, WithVariants, toFeatureLanguage } from "../../../../../constants/languages";
 import licences from "../../../../../constants/licences";
-import defaults from "../../../../../defaults";
 import { Client } from "../../../../client";
 import { getPartOfSpeech } from "../../module";
-import { DictionaryAdapter, DictionaryEntry } from "../adapter";
+import { Definition, DictionaryAdapter, DictionaryEntry } from "../adapter";
 import { WiktionaryParser } from "wiktionary";
+
+const newlinesExpression = RegExp("\n{1}", "g");
 
 const wiktionary = new WiktionaryParser();
 
 type WordData = ReturnType<typeof wiktionary["parse"]> extends Promise<(infer U)[]> ? U : never;
 
-const newlinesExpression = RegExp("\n{1}", "g");
+const languageVariantsReduced: Record<string, string> = {
+	"English/American": "English",
+	"English/British": "English",
+	"Norwegian/Bokmål": "Norwegian Bokmål",
+	"Armenian/Western": "Armenian",
+	"Armenian/Eastern": "Armenian",
+} satisfies Record<WithVariants<LearningLanguage>, string>;
+
+function getReduced(language: LearningLanguage): string {
+	return languageVariantsReduced[language] ?? language;
+}
 
 class WiktionaryAdapter extends DictionaryAdapter<WordData[]> {
 	constructor() {
 		super({
 			name: "Wiktionary",
-			supports: languages.localisation,
 			provides: ["definitions", "etymology"],
 		});
 	}
 
-	async fetch(lemma: string, language: LearningLanguage): Promise<WordData[] | undefined> {
-		const data = await wiktionary.parse(lemma, language);
+	async fetch(client: Client, lemma: string, language: LearningLanguage): Promise<WordData[] | undefined> {
+		const data = await wiktionary.parse(lemma, getReduced(language));
 		if (data.length === 0) {
 			// @ts-ignore: Accessing private member.
 			const suggestion = wiktionary.document.getElementById("did-you-mean")?.innerText ?? undefined;
@@ -31,34 +41,31 @@ class WiktionaryAdapter extends DictionaryAdapter<WordData[]> {
 				return undefined;
 			}
 
-			return this.fetch(suggestion, language);
+			return this.fetch(client, suggestion, language);
 		}
 
 		return data;
 	}
 
 	parse(
+		_: Client,
 		lemma: string,
 		language: LearningLanguage,
 		results: WordData[],
-		_: Client,
 		__: { locale: Locale },
 	): DictionaryEntry[] {
 		const entries: DictionaryEntry[] = [];
 		for (const result of results) {
 			for (const definition of result.definitions) {
-				const partOfSpeech = getPartOfSpeech(
-					definition.partOfSpeech,
-					definition.partOfSpeech,
-					defaults.LOCALISATION_LANGUAGE,
-				);
-				const [_, ...definitions] = definition.text as [string, ...string[]];
+				const partOfSpeech = getPartOfSpeech(definition.partOfSpeech, definition.partOfSpeech, "English/American");
+				const [_, ...definitionsRaw] = definition.text as [string, ...string[]];
+
+				const definitions: Definition[] = definitionsRaw.map((definition) => ({ value: definition }));
 
 				entries.push({
-					lemma: lemma,
-					title: "title",
+					lemma,
 					partOfSpeech,
-					definitions: definitions.map((definition) => ({ value: definition })),
+					...(toFeatureLanguage(language) !== "English" ? { definitions } : { nativeDefinitions: definitions }),
 					etymologies: [{ value: result.etymology.replaceAll(newlinesExpression, "\n\n") }],
 					sources: [
 						[constants.links.generateWiktionaryDefinitionLink(lemma, language), licences.dictionaries.wiktionary],

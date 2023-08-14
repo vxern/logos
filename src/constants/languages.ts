@@ -129,6 +129,21 @@ function reverseObject<O extends Record<string, string>>(object: O): Reverse<O> 
 	return reversed as unknown as Reverse<O>;
 }
 
+type WithVariants<T> = T extends `${string}/${string}` ? T : never;
+
+function toFeatureLanguage(language: LocalisationLanguage | LearningLanguage): FeatureLanguage | undefined {
+	const baseLanguage = language.split("/").at(0);
+	if (baseLanguage === undefined) {
+		throw "StateError: Base language unexpectedly undefined when getting feature language.";
+	}
+
+	if (isFeatured(baseLanguage)) {
+		return baseLanguage;
+	}
+
+	return undefined;
+}
+
 export default {
 	localisation: [...languages.localisation.discord, ...languages.localisation.logos],
 	feature: languages.feature,
@@ -139,7 +154,8 @@ export {
 	getDiscordLanguageByDiscordLocale,
 	getLocaleByLanguage,
 	isLocalised,
+	toFeatureLanguage,
 	isFeatured,
 	isBuiltIn,
 };
-export type { LearningLanguage, FeatureLanguage, LocalisationLanguage, Locale };
+export type { LearningLanguage, FeatureLanguage, LocalisationLanguage, Locale, WithVariants };

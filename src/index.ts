@@ -8,8 +8,6 @@ import {
 import { capitalise } from "./formatting";
 import { Client, initialiseClient } from "./lib/client";
 import { SentencePair } from "./lib/commands/language/commands/game";
-import { DictionaryAdapter } from "./lib/commands/language/dictionaries/adapter";
-import dictionaryAdapters from "./lib/commands/language/dictionaries/adapters";
 import { getSupportedLanguages } from "./lib/commands/language/module";
 import * as csv from "csv-parse/sync";
 import * as dotenv from "dotenv";
@@ -214,27 +212,6 @@ async function readSentenceFiles(directoryPath: string): Promise<[LearningLangua
 	return Promise.all(results);
 }
 
-function loadDictionaryAdapters(): Map<LearningLanguage, DictionaryAdapter[]> {
-	console.info("[Dictionaries] Loading dictionary adapters...");
-
-	const result = new Map<LearningLanguage, DictionaryAdapter[]>();
-
-	for (const adapter of dictionaryAdapters) {
-		for (const language of adapter.supports) {
-			result.get(language)?.push(adapter) ?? result.set(language, [adapter]);
-		}
-	}
-
-	for (const adapters of result.values()) {
-		// Sorts adapters in descending order by how much information they provide.
-		adapters.sort((a, b) => b.provides.length - a.provides.length);
-	}
-
-	console.info(`[Dictionaries] Loaded ${dictionaryAdapters.length} dictionar(y/ies)...`);
-
-	return result;
-}
-
 /** Loads dictionary adapters and sentence lists. */
 function loadSentencePairs(languageFileContents: [LearningLanguage, string][]): Map<LearningLanguage, SentencePair[]> {
 	console.info(`[Sentences] Loading sentence pairs for ${languageFileContents.length} language(s)...`);
@@ -285,6 +262,7 @@ async function setup(): Promise<void> {
 		faunaSecret: process.env.FAUNA_SECRET,
 		deeplSecret: process.env.DEEPL_SECRET,
 		sentrySecret: process.env.SENTRY_SECRET,
+		wordsSecret: process.env.WORDS_SECRET,
 		lavalinkHost: process.env.LAVALINK_HOST,
 		lavalinkPort: process.env.LAVALINK_PORT,
 		lavalinkPassword: process.env.LAVALINK_PASSWORD,
@@ -307,13 +285,12 @@ async function setup(): Promise<void> {
 		readSentenceFiles("./assets/sentences"),
 	]);
 
-	const dictionaryAdapters = loadDictionaryAdapters();
 	const sentencePairs = loadSentencePairs(sentenceFiles);
 	const localisations = await loadLocalisations("./assets/localisations");
 
 	initialiseClient(
 		{ environment, supportedTranslationLanguages },
-		{ dictionaryAdapters, sentencePairs, rateLimiting: new Map() },
+		{ sentencePairs, rateLimiting: new Map() },
 		localisations,
 	);
 }

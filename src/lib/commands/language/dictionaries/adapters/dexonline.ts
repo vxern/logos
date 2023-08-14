@@ -20,20 +20,19 @@ class DexonlineAdapter extends DictionaryAdapter<Dexonline.Results> {
 	constructor() {
 		super({
 			name: "Dexonline",
-			supports: ["Romanian"],
 			provides: ["definitions", "etymology"],
 		});
 	}
 
-	fetch(lemma: string, _: LearningLanguage): Promise<Dexonline.Results | undefined> {
+	fetch(_: Client, lemma: string, __: LearningLanguage): Promise<Dexonline.Results | undefined> {
 		return Dexonline.get(lemma, { mode: "strict" });
 	}
 
 	parse(
+		client: Client,
 		_: string,
 		__: LearningLanguage,
 		results: Dexonline.Results,
-		client: Client,
 		{ locale }: { locale: Locale },
 	): DictionaryEntry[] {
 		const entries: DictionaryEntry[] = [];
@@ -47,7 +46,6 @@ class DexonlineAdapter extends DictionaryAdapter<Dexonline.Results> {
 
 			entries.push({
 				lemma: result.lemma,
-				title: result.lemma,
 				partOfSpeech,
 				nativeDefinitions: result.definitions,
 				etymologies: result.etymology,
