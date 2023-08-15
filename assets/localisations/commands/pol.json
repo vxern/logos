@@ -613,5 +613,13 @@
     "settings.strings.languageUpdated.description": "Ustawiono język komunikatów na {language}.",
     "word.strings.sourcedResponsibly.dictionaries.one": "ze słownika powyżej",
     "word.strings.sourcedResponsibly.dictionaries.two": "ze słowników powyżej",
-    "word.strings.sourcedResponsibly.dictionaries.many": "ze słowników powyżej"
+    "word.strings.sourcedResponsibly.dictionaries.many": "ze słowników powyżej",
+    "word.options.language.name": "język",
+    "word.options.language.description": "Język słowa.",
+    "word.strings.invalid.language.title": "Nieprawidłowy język",
+    "word.strings.invalid.language.description": "Język, który wybrałeś/aś, jest nieprawidłowy.",
+    "word.strings.relations.synonyms": "Synonimy",
+    "word.strings.relations.antonyms": "Antonimy",
+    "word.strings.relations.diminutives": "Zmiękczenia",
+    "word.strings.relations.augmentatives": "Zgrubienia"
 }
