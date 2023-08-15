@@ -1,11 +1,13 @@
 import { PartOfSpeech } from "../lib/commands/language/dictionaries/part-of-speech";
-import { LocalisationLanguage } from "./languages";
+import { FeatureLanguage, LocalisationLanguage } from "./languages";
 
 export default {
 	languages: {
+		Armenian: "languages.armenian.eastern",
 		"Armenian/Eastern": "languages.armenian.eastern",
 		"Armenian/Western": "languages.armenian.western",
 		Dutch: "languages.dutch",
+		English: "languages.english",
 		"English/American": "languages.english.american",
 		"English/British": "languages.english.british",
 		Finnish: "languages.finnish",
@@ -13,11 +15,12 @@ export default {
 		German: "languages.german",
 		Greek: "languages.greek",
 		Hungarian: "languages.hungarian",
+		Norwegian: "languages.norwegian",
 		"Norwegian/Bokmål": "languages.norwegian.bokmal",
 		Polish: "languages.polish",
 		Romanian: "languages.romanian",
 		Turkish: "languages.turkish",
-	} as const satisfies Record<LocalisationLanguage, string>,
+	} as const satisfies Record<LocalisationLanguage | FeatureLanguage, string>,
 	deeplLanguages: {
 		Armenian: "languages.armenian",
 		Belarusian: "languages.belarusian",
@@ -64,7 +67,6 @@ export default {
 		adverb: "words.adverb",
 		adposition: "words.adposition",
 		article: "words.article",
-		expression: "words.expression",
 		"proper-noun": "words.properNoun",
 		letter: "words.letter",
 		character: "words.character",

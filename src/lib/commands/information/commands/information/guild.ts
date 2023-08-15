@@ -1,5 +1,6 @@
 import constants from "../../../../../constants/constants";
 import { Locale } from "../../../../../constants/languages";
+import localisations from "../../../../../constants/localisations";
 import { MentionTypes, mention, timestamp } from "../../../../../formatting";
 import * as Logos from "../../../../../types";
 import { Client, localise } from "../../../../client";
@@ -174,9 +175,11 @@ function getLanguageInformationSection(
 	const strings = {
 		home: localise(client, "information.options.server.strings.languageTypes.home", locale)(),
 		target: localise(client, "information.options.server.strings.languageTypes.target", locale)(),
+		localisationLanguage: localise(client, localisations.languages[localisationLanguage], locale)(),
+		featureLanguage: localise(client, localisations.languages[featureLanguage], locale)(),
 	};
 
-	return `${constants.symbols.guild.languages.localisation} ${strings.home} – ${localisationLanguage}\n${constants.symbols.guild.languages.feature} ${strings.target} – ${featureLanguage}`;
+	return `${constants.symbols.guild.languages.localisation} ${strings.home} – ${strings.localisationLanguage}\n${constants.symbols.guild.languages.feature} ${strings.target} – ${strings.featureLanguage}`;
 }
 
 type ProficiencyRoleDistribution = [withRole: [roleId: bigint, frequency: number][], withoutRole: number];
