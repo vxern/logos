@@ -64,6 +64,7 @@ export default {
 		adverb: "words.adverb",
 		adposition: "words.adposition",
 		article: "words.article",
+		expression: "words.expression",
 		"proper-noun": "words.properNoun",
 		letter: "words.letter",
 		character: "words.character",

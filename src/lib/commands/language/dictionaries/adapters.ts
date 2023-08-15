@@ -1,6 +1,7 @@
 import { LearningLanguage } from "../../../../constants/languages";
 import { DictionaryAdapter } from "./adapter";
 import dexonline from "./adapters/dexonline";
+import dicolink from "./adapters/dicolink";
 import wiktionary from "./adapters/wiktionary";
 import wordsApi from "./adapters/words-api";
 
@@ -9,7 +10,7 @@ export default {
 	"English/American": [wiktionary, wordsApi],
 	"English/British": [wiktionary, wordsApi],
 	Finnish: [wiktionary],
-	French: [wiktionary],
+	French: [dicolink, wiktionary],
 	German: [wiktionary],
 	Greek: [wiktionary],
 	Hungarian: [wiktionary],

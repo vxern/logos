@@ -14,6 +14,16 @@ const licences = {
 				copyright: "Copyright © 2004-2023 dexonline (https://dexonline.ro)",
 			},
 		},
+		dicolink: {
+			name: "dicolink.com",
+			link: "https://www.dicolink.com/api/conditionsutilisations",
+			faviconLink: "https://www.dicolink.com/imgs/dicolink_128.png",
+			notices: {
+				licence:
+					"En contrepartie de vous permettre d'accéder à l'API Dicolink et aux données Dicolink, vous acceptez de respecter les exigences d'attribution énoncées à l'annexe A ci-après (exigences d'attribution) et ses modifications ultérieures. Vous acceptez que toutes les modifications apportées aux conditions d'attribution entreront en vigueur à la première date à laquelle Dicolink vous en informera par écrit par e-mail ou 30 jours après leur publication. Sous réserve des termes et conditions de cet accord, Dicolink vous accorde par la présente, une licence non exclusive, révocable, non sous-licenciable et non transférable pour utiliser les marques et logos désignés de Dicolink («Marques Dicolink»), uniquement dans la mesure nécessaire pour exécuter le les exigences d'attribution autorisées aux présentes pendant la durée du présent Contrat. Tous les droits non expressément concédés aux présentes sont réservés par Dicolink, et toute utilisation par Vous des Marques de Dicolink, (y compris toute la bonne volonté qui y est associée), sera au nom de Dicolink et en bénéficiera. À la résiliation de cet accord, Vous devez cesser immédiatement d'utiliser toutes les marques Dicolink.",
+				copyright: "© 2019-2022 Dicolink",
+			},
+		},
 		tatoeba: {
 			name: "tatoeba.org",
 			link: "https://tatoeba.org/en/terms_of_use#section-6",
@@ -26,6 +36,8 @@ const licences = {
 		wiktionary: {
 			name: "wiktionary.org",
 			link: "https://en.wiktionary.org/wiki/Wiktionary:Copyrights",
+			faviconLink:
+				"https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/En.wiktionary_favicon.svg/1024px-En.wiktionary_favicon.svg.png",
 			notices: {
 				licence:
 					"The original texts of Wiktionary entries are dual-licensed to the public under both the [Creative Commons Attribution-ShareAlike 3.0 Unported License (CC-BY-SA)](https://en.wiktionary.org/wiki/Wiktionary:CC-BY-SA) and the [GNU Free Documentation License (GFDL)](https://en.wiktionary.org/wiki/Wiktionary:Text_of_the_GNU_Free_Documentation_License). The full text of both licenses can be found at [Wiktionary:Text of Creative Commons Attribution-ShareAlike 3.0 Unported License](https://en.wiktionary.org/wiki/Wiktionary:Text_of_Creative_Commons_Attribution-ShareAlike_3.0_Unported_License), as well as [Wiktionary:Text of the GNU Free Documentation License](https://en.wiktionary.org/wiki/Wiktionary:Text_of_the_GNU_Free_Documentation_License). Permission is granted to copy, distribute and/or modify the text of all Wiktionary entries under the terms of the Creative Commons Attribution-ShareAlike 3.0 Unported License, and the GNU Free Documentation License, Version 1.1 or any later version published by the [Free Software Foundation](https://en.wikipedia.org/wiki/Free_Software_Foundation); with no Invariant Sections, with no Front-Cover Texts, and with no Back-Cover Texts.",

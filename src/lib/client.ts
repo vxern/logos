@@ -59,7 +59,7 @@ type Client = {
 			faunaSecret: string;
 			deeplSecret: string;
 			sentrySecret: string;
-			wordsSecret: string;
+			rapidApiSecret: string;
 			lavalinkHost: string;
 			lavalinkPort: string;
 			lavalinkPassword: string;

@@ -1,6 +1,7 @@
 import { LearningLanguage } from "../../../../constants/languages";
 import { PartOfSpeech } from "./part-of-speech";
 import english from "./parts-of-speech/english";
+import french from "./parts-of-speech/french";
 import romanian from "./parts-of-speech/romanian";
 
 export default {
@@ -10,7 +11,7 @@ export default {
 	"English/American": english,
 	"English/British": english,
 	Finnish: {},
-	French: {},
+	French: french,
 	German: {},
 	Greek: {},
 	Hungarian: {},

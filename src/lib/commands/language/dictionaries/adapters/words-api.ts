@@ -34,8 +34,8 @@ class WordsAPIAdapter extends DictionaryAdapter<SearchResult> {
 	async fetch(client: Client, lemma: string, _: LearningLanguage): Promise<SearchResult | undefined> {
 		const response = await fetch(constants.endpoints.words.word(lemma), {
 			headers: {
-				"X-RapidAPI-Key": client.metadata.environment.wordsSecret,
-				"X-RapidAPI-Host": constants.links.wordsApiHost,
+				"X-RapidAPI-Key": client.metadata.environment.rapidApiSecret,
+				"X-RapidAPI-Host": constants.endpoints.words.host,
 			},
 		});
 		if (!response.ok) {
@@ -55,7 +55,6 @@ class WordsAPIAdapter extends DictionaryAdapter<SearchResult> {
 	): DictionaryEntry[] {
 		const entries: DictionaryEntry[] = [];
 		for (const result of searchResult.results) {
-			const lastEntry = entries.at(-1);
 			const partOfSpeech = getPartOfSpeech(result.partOfSpeech, result.partOfSpeech, language);
 
 			const definition: Definition = { value: result.definition };
@@ -63,7 +62,11 @@ class WordsAPIAdapter extends DictionaryAdapter<SearchResult> {
 				definition.relations = { synonyms: result.synonyms };
 			}
 
-			if (lastEntry !== undefined && lastEntry.partOfSpeech === partOfSpeech) {
+			const lastEntry = entries.at(-1);
+			if (
+				lastEntry !== undefined &&
+				(lastEntry.partOfSpeech[0] === partOfSpeech[0] || lastEntry.partOfSpeech[1] === partOfSpeech[1])
+			) {
 				lastEntry.nativeDefinitions?.push(definition);
 				continue;
 			}
