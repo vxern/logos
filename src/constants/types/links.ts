@@ -12,6 +12,6 @@ export default {
 	generateDexonlineDefinitionLink: (lemma: string) => `https://dexonline.ro/definitie/${lemma}`,
 	generateWiktionaryDefinitionLink: (lemma: string, language: string) =>
 		`https://en.wiktionary.org/wiki/${lemma}#${language}`,
-	wordsAPILink: "https://www.wordsapi.com/",
-	wordsApiHost: "wordsapiv1.p.rapidapi.com",
+	wordsAPILink: "https://wordsapi.com/",
+	generateDicolinkDefinitionLink: (lemma: string) => `https://dicolink.com/mots/${lemma}`,
 };

@@ -78,7 +78,11 @@ async function handleDisplayDictionaryLicence(
 	reply([client, bot], interaction, {
 		embeds: [
 			{
-				title: strings.title,
+				author: {
+					name: strings.title,
+					iconUrl: "faviconLink" in licenceInformation ? licenceInformation.faviconLink : undefined,
+					url: licenceInformation.link,
+				},
 				description: `*${licenceInformation.notices.licence}*`,
 				color: constants.colors.greenishLightGray,
 				fields: [

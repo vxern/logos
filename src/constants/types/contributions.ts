@@ -136,6 +136,11 @@ export default {
 			completion: 9,
 			contributors: [contributors.victor, contributors.vxern],
 		},
+		Swedish: {
+			flag: "🇸🇪",
+			completion: 0,
+			contributors: [],
+		},
 		Turkish: {
 			flag: "🇹🇷",
 			completion: 9,

@@ -526,13 +526,17 @@ function entryToEmbeds(
 	} else {
 		const [detected, original] = entry.partOfSpeech;
 
-		const strings = {
-			partOfSpeech: localise(client, localisations.partsOfSpeech[detected], locale)(),
-		};
+		if (detected === "unknown") {
+			partOfSpeechDisplayed = original;
+		} else {
+			const strings = {
+				partOfSpeech: localise(client, localisations.partsOfSpeech[detected], locale)(),
+			};
 
-		partOfSpeechDisplayed = strings.partOfSpeech;
-		if (isUnknownPartOfSpeech(detected)) {
-			partOfSpeechDisplayed += ` — '${original}'`;
+			partOfSpeechDisplayed = strings.partOfSpeech;
+			if (isUnknownPartOfSpeech(detected)) {
+				partOfSpeechDisplayed += ` — '${original}'`;
+			}
 		}
 	}
 	const partOfSpeechFormatted = `***${partOfSpeechDisplayed}***`;

@@ -16,14 +16,6 @@ interface Guild {
 	 */
 	isNative: boolean;
 
-	/**
-	 * The bot's default feature language on this guild.
-	 *
-	 * The implicit value is 'English'.
-	 */
-	/** @deprecated since v3.5.0. {@link languages} is used instead. */
-	language?: FeatureLanguage;
-
 	/** @since v3.5.0 */
 	languages?: {
 		localisation: LocalisationLanguage;
