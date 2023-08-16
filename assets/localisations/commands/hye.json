@@ -567,10 +567,7 @@
     "profile.options.view.strings.information.description.sent": "Sent",
     "profile.options.view.strings.information.description.praises": "Praises",
     "profile.options.view.strings.information.description.warnings": "Warnings",
-    "settings.options.language.description": "",
     "settings.strings.settings.fields.language.title": "",
-    "settings.strings.invalid.description": "",
     "license.options.software.name": "",
-    "credits.strings.translation": "",
     "license.options.software.options.package.name": ""
 }
