@@ -567,7 +567,5 @@
     "profile.options.view.strings.information.description.sent": "Sendt",
     "profile.options.view.strings.information.description.praises": "Roser",
     "profile.options.view.strings.information.description.warnings": "Advarsler",
-    "settings.options.language.options.clear.name": "",
-    "license.name": "",
-    "license.strings.source": ""
+    "license.name": ""
 }

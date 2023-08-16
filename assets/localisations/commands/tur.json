@@ -567,7 +567,5 @@
     "profile.options.view.strings.information.description.sent": "Gönderilen",
     "profile.options.view.strings.information.description.praises": "Övgüler",
     "profile.options.view.strings.information.description.warnings": "Uyarılar",
-    "settings.strings.cleared.description": "",
-    "settings.strings.languageUpdated.description": "",
-    "credits.name": ""
+    "settings.strings.languageUpdated.description": ""
 }

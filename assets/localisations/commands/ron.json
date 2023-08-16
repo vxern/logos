@@ -567,7 +567,5 @@
     "profile.options.view.strings.information.description.sent": "Trimise",
     "profile.options.view.strings.information.description.praises": "Laude",
     "profile.options.view.strings.information.description.warnings": "Avertismente",
-    "word.strings.relations.diminutives": "",
-    "settings.strings.cannotClear.title": "",
-    "word.strings.sourcedResponsibly.dictionaries.one": ""
+    "settings.strings.cannotClear.title": ""
 }

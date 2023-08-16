@@ -567,7 +567,5 @@
     "profile.options.view.strings.information.description.sent": "Sent",
     "profile.options.view.strings.information.description.praises": "Praises",
     "profile.options.view.strings.information.description.warnings": "Warnings",
-    "settings.options.language.options.set.options.language.description": "",
-    "license.options.dictionary.options.dictionary.name": "",
-    "settings.options.view.description": ""
+    "license.options.dictionary.options.dictionary.name": ""
 }

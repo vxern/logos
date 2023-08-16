@@ -567,7 +567,5 @@
     "profile.options.view.strings.information.description.sent": "Sent",
     "profile.options.view.strings.information.description.praises": "Praises",
     "profile.options.view.strings.information.description.warnings": "Warnings",
-    "settings.strings.languageUpdated.title": "",
-    "credits.strings.translation": "",
-    "word.strings.sourcedResponsibly.dictionaries.two": ""
+    "credits.strings.translation": ""
 }

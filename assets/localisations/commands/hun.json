@@ -567,7 +567,5 @@
     "profile.options.view.strings.information.description.sent": "Sent",
     "profile.options.view.strings.information.description.praises": "Praises",
     "profile.options.view.strings.information.description.warnings": "Warnings",
-    "settings.strings.cannotClear.description": "",
-    "license.options.software.options.package.description": "",
-    "settings.strings.settings.title": ""
+    "license.options.software.options.package.description": ""
 }

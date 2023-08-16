@@ -469,13 +469,8 @@
     "profile.options.view.strings.information.description.sent": "Sent",
     "profile.options.view.strings.information.description.praises": "Praises",
     "profile.options.view.strings.information.description.warnings": "Warnings",
-    "slowmode.strings.levels.low": "",
     "slowmode.strings.theSame.description.chooseDifferent": "",
-    "settings.strings.settings.title": "",
     "settings.strings.settings.fields.language.description.noLanguageSet.defaultShown": "",
-    "cefr.description": "",
     "correction.options.partial.name": "",
-    "game.strings.sourcedFrom": "",
-    "slowmode.strings.enabled.title": "",
-    "word.strings.relations.synonyms": ""
+    "slowmode.strings.enabled.title": ""
 }
