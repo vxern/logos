@@ -356,6 +356,5 @@
     "slowmode.strings.theSame.description.theSame": "Der aktuelle Slowmode-Level ist dieselbe wie die angeforderte.",
     "slowmode.strings.theSame.description.chooseDifferent": "Wähl einen anderen Level.",
     "timeout.name": "Time-out",
-    "timeout.description": "Dieser Befehl wird verwendet, um Benutzer-Timeouts zu verwalten.",
-    "music.options.skip.strings.skippedSong.description": ""
+    "timeout.description": "Dieser Befehl wird verwendet, um Benutzer-Timeouts zu verwalten."
 }
