@@ -1,21 +1,11 @@
 {
-    "information.options.server.strings.channelTypes.voice": "",
     "cefr.strings.levels.c2.description": "",
-    "translate.description": "",
     "word.strings.noDictionaryAdapters.description": "",
-    "word.strings.verbs.participles.present": "",
     "list.options.warnings.strings.failed.title": "",
-    "purge.strings.invalid.both.description": "",
     "purge.strings.continue.description.allMessages.one": "",
-    "report.strings.submitted.description": "",
     "slowmode.strings.enabled.title": "",
-    "warn.strings.failed.description": "",
     "music.options.now.strings.noSong.title": "",
-    "music.options.play.strings.notFound.description.notFound": "",
     "music.options.replay.name": "",
-    "music.options.skip.strings.skippedSong.title": "",
     "music.options.volume.options.set.strings.set.description": "",
-    "suggestion.strings.tooMany.description": "",
-    "profile.options.view.strings.information.description.dates": "",
-    "license.options.dictionary.name": ""
+    "profile.options.view.strings.information.description.dates": ""
 }
