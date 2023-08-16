@@ -567,17 +567,10 @@
     "profile.options.view.strings.information.description.sent": "Gönderilen",
     "profile.options.view.strings.information.description.praises": "Övgüler",
     "profile.options.view.strings.information.description.warnings": "Uyarılar",
-    "word.strings.invalid.language.title": "",
     "word.strings.relations.augmentatives": "",
-    "settings.strings.settings.fields.language.description.noLanguageSet.noLanguageSet": "",
     "settings.strings.cleared.description": "",
-    "settings.description": "",
     "settings.options.language.description": "",
-    "settings.options.language.options.set.options.language.description": "",
     "settings.strings.languageUpdated.description": "",
-    "license.options.dictionary.description": "",
     "license.options.software.description": "",
-    "license.strings.invalid.description": "",
-    "credits.name": "",
-    "word.strings.sourcedResponsibly.dictionaries.many": ""
+    "credits.name": ""
 }

@@ -567,17 +567,10 @@
     "profile.options.view.strings.information.description.sent": "Sendt",
     "profile.options.view.strings.information.description.praises": "Roser",
     "profile.options.view.strings.information.description.warnings": "Advarsler",
-    "word.options.language.description": "",
     "word.strings.relations.antonyms": "",
-    "settings.options.view.name": "",
     "settings.options.language.options.clear.name": "",
-    "settings.options.language.options.set.options.language.name": "",
     "settings.strings.settings.fields.language.description.noLanguageSet.defaultShown": "",
-    "settings.strings.invalid.title": "",
     "license.name": "",
-    "license.options.dictionary.options.dictionary.description": "",
     "settings.strings.cleared.title": "",
-    "license.options.software.options.package.description": "",
-    "license.strings.source": "",
-    "credits.strings.translation": ""
+    "license.strings.source": ""
 }

@@ -567,17 +567,10 @@
     "profile.options.view.strings.information.description.sent": "Sent",
     "profile.options.view.strings.information.description.praises": "Praises",
     "profile.options.view.strings.information.description.warnings": "Warnings",
-    "settings.description": "",
     "settings.options.language.description": "",
-    "settings.options.language.options.set.description": "",
     "settings.strings.settings.fields.language.title": "",
-    "settings.strings.cannotClear.description": "",
     "settings.strings.invalid.description": "",
-    "license.options.dictionary.name": "",
     "license.options.software.name": "",
-    "license.strings.source": "",
     "credits.strings.translation": "",
-    "word.strings.relations.augmentatives": "",
-    "license.options.software.options.package.name": "",
-    "word.strings.sourcedResponsibly": ""
+    "license.options.software.options.package.name": ""
 }

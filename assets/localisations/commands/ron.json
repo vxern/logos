@@ -567,17 +567,10 @@
     "profile.options.view.strings.information.description.sent": "Trimise",
     "profile.options.view.strings.information.description.praises": "Laude",
     "profile.options.view.strings.information.description.warnings": "Avertismente",
-    "credits.name": "",
     "settings.strings.cleared.title": "",
-    "word.options.language.description": "",
     "word.strings.relations.diminutives": "",
-    "settings.options.language.name": "",
     "settings.options.language.options.set.name": "",
-    "settings.strings.settings.title": "",
     "settings.strings.cannotClear.title": "",
-    "settings.strings.invalid.description": "",
     "license.options.dictionary.name": "",
-    "license.options.software.name": "",
-    "word.strings.sourcedResponsibly.dictionaries.one": "",
-    "word.strings.sourcedResponsibly": ""
+    "word.strings.sourcedResponsibly.dictionaries.one": ""
 }
