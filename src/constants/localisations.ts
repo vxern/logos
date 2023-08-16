@@ -19,6 +19,7 @@ export default {
 		"Norwegian/Bokmål": "languages.norwegian.bokmal",
 		Polish: "languages.polish",
 		Romanian: "languages.romanian",
+		Swedish: "languages.swedish",
 		Turkish: "languages.turkish",
 	} as const satisfies Record<LocalisationLanguage | FeatureLanguage, string>,
 	deeplLanguages: {

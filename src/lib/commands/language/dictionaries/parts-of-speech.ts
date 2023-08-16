@@ -18,5 +18,6 @@ export default {
 	"Norwegian/Bokmål": {},
 	Polish: {},
 	Romanian: romanian,
+	Swedish: {},
 	Turkish: {},
 } satisfies Record<LearningLanguage, Record<string, PartOfSpeech>>;

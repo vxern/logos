@@ -14,6 +14,7 @@ const languages = {
 			"Norwegian/Bokmål",
 			"Polish",
 			"Romanian",
+			"Swedish",
 			"Turkish",
 		],
 		logos: ["Armenian/Western", "Armenian/Eastern"],
@@ -29,6 +30,7 @@ const languages = {
 		"Norwegian",
 		"Polish",
 		"Romanian",
+		"Swedish",
 		"Turkish",
 	],
 } as const;
@@ -46,6 +48,7 @@ const languageToLocale = {
 		"Norwegian/Bokmål": "no",
 		Polish: "pl",
 		Romanian: "ro",
+		Swedish: "sv-SE",
 		Turkish: "tr",
 	} satisfies Record<DiscordLanguage, Discord.Locale>,
 	logos: {
@@ -62,6 +65,7 @@ const languageToLocale = {
 		"Norwegian/Bokmål": "nob",
 		Polish: "pol",
 		Romanian: "ron",
+		Swedish: "swe",
 		Turkish: "tur",
 	} as const satisfies Record<LocalisationLanguage, string>,
 } as const;

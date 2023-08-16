@@ -17,6 +17,7 @@ export default {
 	"Norwegian/Bokmål": [wiktionary],
 	Polish: [wiktionary],
 	Romanian: [dexonline, wiktionary],
+	Swedish: [wiktionary],
 	Turkish: [wiktionary],
 	"Armenian/Western": [wiktionary],
 	"Armenian/Eastern": [wiktionary],
