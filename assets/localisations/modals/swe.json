@@ -1,0 +1,22 @@
+{
+    "verification.title": "",
+    "verification.fields.reason": "",
+    "verification.fields.aim": "",
+    "verification.fields.whereFound": "",
+    "answer.title": "",
+    "answer.fields.question": "",
+    "answer.fields.answer": "",
+    "correction.title": "",
+    "correction.fields.original": "",
+    "correction.fields.corrected": "",
+    "report.title": "",
+    "report.fields.reason": "",
+    "report.fields.users": "",
+    "report.fields.link": "",
+    "suggestion.title": "",
+    "suggestion.fields.suggestion": "",
+    "prompts.continue": "",
+    "prompts.cancel": "",
+    "prompts.stay": "",
+    "prompts.leave": ""
+}
