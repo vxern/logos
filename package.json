@@ -33,22 +33,22 @@
     }
   ],
   "scripts": {
-    "start": "tsx --clear-free-memory --optimize-for-size --expose-gc --gc-global --always-osr --gc-interval=96 src/index.ts",
-    "dev": "tsx --expose-gc src/index.ts",
+    "start": "tsx --clear-free-memory --optimize-for-size --always-osr --gc-interval=96 src/index.ts",
+    "dev": "tsx src/index.ts",
     "lint": "rome check src/"
   },
   "dependencies": {
     "csv-parse": "^5.4.0",
-    "dexonline": "npm:dexonline-scraper@^0.1.0",
+    "dexonline-scraper": "^0.1.0",
     "discordeno": "^18.0.1",
     "dotenv": "^16.3.1",
     "fancy-log": "^2.0.0",
     "fauna": "git+https://github.com/vxern/faunadb-js.git#901fbf6ca7d2fa02af987a6ae64e0b58614923c1",
     "lavaclient": "^4.1.1",
     "object-hash": "^3.0.0",
-    "sentry": "npm:@sentry/node@^7.56.0",
-    "snowflake": "npm:@sapphire/snowflake@^3.5.1",
-    "wiktionary": "npm:parse-wiktionary@^1.0.0",
+    "@sentry/node": "^7.56.0",
+    "@sapphire/snowflake": "^3.5.1",
+    "parse-wiktionary": "^1.0.0",
     "youtube-sr": "^4.3.4"
   },
   "devDependencies": {

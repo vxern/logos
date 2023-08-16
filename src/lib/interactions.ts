@@ -15,7 +15,7 @@ import { Client, addCollector, localise, pluralise } from "./client";
 import { Document } from "./database/document";
 import { Guild } from "./database/structs/guild";
 import * as Discord from "discordeno";
-import { DiscordSnowflake as Snowflake } from "snowflake";
+import { DiscordSnowflake as Snowflake } from "@sapphire/snowflake";
 
 type AutocompleteInteraction = Discord.Interaction & { type: Discord.InteractionTypes.ApplicationCommandAutocomplete };
 

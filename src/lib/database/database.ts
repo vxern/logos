@@ -20,7 +20,7 @@ import { Suggestion } from "./structs/suggestion";
 import { User } from "./structs/user";
 import { Warning } from "./structs/warning";
 import Fauna from "fauna";
-import * as Sentry from "sentry";
+import * as Sentry from "@sentry/node";
 
 type QueryTypes = "read" | "write" | "exists" | "other";
 type GetReturnType<

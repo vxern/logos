@@ -12,7 +12,7 @@ import { getSupportedLanguages } from "./lib/commands/language/module";
 import * as csv from "csv-parse/sync";
 import * as dotenv from "dotenv";
 import * as fs from "fs/promises";
-import * as Sentry from "sentry";
+import * as Sentry from "@sentry/node";
 
 async function readDotEnvFile(fileUri: string, isTemplate = false): Promise<Record<string, string> | undefined> {
 	const kind = isTemplate ? "environment template" : "environment";

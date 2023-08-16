@@ -6,7 +6,7 @@ import { chunk } from "../../../../utils";
 import { getPartOfSpeech } from "../../module";
 import { DictionaryAdapter, DictionaryEntry } from "../adapter";
 import { PartOfSpeech } from "../part-of-speech";
-import * as Dexonline from "dexonline";
+import * as Dexonline from "dexonline-scraper";
 
 const classesWithInflections: PartOfSpeech[] = ["pronoun", "noun", "verb", "adjective", "determiner"];
 

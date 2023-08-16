@@ -48,7 +48,7 @@ import { fetchMembers } from "./utils";
 import * as Discord from "discordeno";
 import FancyLog from "fancy-log";
 import Fauna from "fauna";
-import * as Sentry from "sentry";
+import * as Sentry from "@sentry/node";
 
 type Client = {
 	metadata: {

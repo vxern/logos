@@ -4,7 +4,7 @@ import licences from "../../../../../constants/licences";
 import { Client } from "../../../../client";
 import { getPartOfSpeech } from "../../module";
 import { Definition, DictionaryAdapter, DictionaryEntry } from "../adapter";
-import { WiktionaryParser } from "wiktionary";
+import { WiktionaryParser } from "parse-wiktionary";
 
 const newlinesExpression = RegExp("\n{1}", "g");
 
