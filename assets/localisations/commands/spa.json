@@ -1,11 +1,6 @@
 {
-    "cefr.strings.tabs.examples": "",
     "word.options.verbose.description": "",
-    "music.options.now.strings.sourcedFrom": "",
     "settings.options.language.description": "",
-    "purge.options.start.description": "",
     "slowmode.strings.tooSoon.description.canDisableIn": "",
-    "music.options.now.strings.noSongCollection.description.noSongCollection": "",
-    "music.options.unskip.name": "",
-    "settings.options.view.description": ""
+    "music.options.unskip.name": ""
 }
