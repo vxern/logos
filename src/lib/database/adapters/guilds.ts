@@ -63,68 +63,15 @@ const adapter: Database["adapters"]["guilds"] = {
 				isNative: false,
 				languages: {
 					localisation: defaults.LOCALISATION_LANGUAGE,
+					target: defaults.LOCALISATION_LANGUAGE,
 					feature: defaults.FEATURE_LANGUAGE,
 				},
 				features: {
-					information: {
-						enabled: true,
-						features: {
-							journaling: { enabled: false },
-							notices: {
-								enabled: false,
-								features: {
-									information: { enabled: false },
-									roles: { enabled: false },
-									welcome: { enabled: false },
-								},
-							},
-						},
-					},
-					language: {
-						enabled: true,
-						features: {
-							corrections: { enabled: true },
-							answers: { enabled: true },
-							cefr: { enabled: true, extended: false, examples: { enabled: false } },
-							game: { enabled: false },
-							resources: { enabled: false },
-							translate: { enabled: true },
-							word: { enabled: false },
-						},
-					},
-					moderation: {
-						enabled: true,
-						features: {
-							alerts: { enabled: false },
-							policy: { enabled: false },
-							rules: { enabled: false },
-							slowmode: { enabled: true, journaling: true },
-							timeouts: { enabled: true, journaling: true },
-							purging: { enabled: true, journaling: true },
-							warns: { enabled: true, journaling: true, limit: 3, autoTimeout: { enabled: false } },
-							reports: { enabled: false },
-							verification: { enabled: false },
-						},
-					},
-					server: {
-						enabled: true,
-						features: {
-							dynamicVoiceChannels: { enabled: false },
-							entry: { enabled: false },
-							suggestions: { enabled: false },
-						},
-					},
-					social: {
-						enabled: true,
-						features: {
-							music: {
-								enabled: true,
-								implicitVolume: 100,
-							},
-							praises: { enabled: true, journaling: true },
-							profile: { enabled: false },
-						},
-					},
+					information: { enabled: false },
+					language: { enabled: false },
+					moderation: { enabled: false },
+					server: { enabled: false },
+					social: { enabled: false },
 				},
 			})
 		);
