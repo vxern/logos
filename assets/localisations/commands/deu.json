@@ -357,6 +357,5 @@
     "slowmode.strings.theSame.description.chooseDifferent": "Wähl einen anderen Level.",
     "timeout.name": "Time-out",
     "timeout.description": "Dieser Befehl wird verwendet, um Benutzer-Timeouts zu verwalten.",
-    "praise.strings.praised.title": "",
     "music.options.skip.strings.skippedSong.description": ""
 }
