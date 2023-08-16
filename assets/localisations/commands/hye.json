@@ -566,6 +566,5 @@
     "profile.options.view.strings.information.description.received": "Received",
     "profile.options.view.strings.information.description.sent": "Sent",
     "profile.options.view.strings.information.description.praises": "Praises",
-    "profile.options.view.strings.information.description.warnings": "Warnings",
-    "license.options.software.name": ""
+    "profile.options.view.strings.information.description.warnings": "Warnings"
 }

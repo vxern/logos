@@ -1,21 +1,11 @@
 {
-    "information.options.server.strings.information.title": "",
     "cefr.strings.tabs.examples": "",
-    "resources.description": "",
     "word.options.verbose.description": "",
-    "word.strings.verbs.moods.infinitive": "",
     "music.options.now.strings.sourcedFrom": "",
-    "music.options.stop.description": "",
     "settings.options.language.description": "",
-    "word.strings.verbs.tenses.future": "",
     "purge.options.start.description": "",
-    "purge.strings.posted": "",
     "slowmode.strings.tooSoon.description.canDisableIn": "",
-    "warn.strings.failed.title": "",
     "music.options.now.strings.noSongCollection.description.noSongCollection": "",
-    "music.options.queue.name": "",
     "music.options.unskip.name": "",
-    "praise.strings.praised.description": "",
-    "settings.options.view.description": "",
-    "credits.name": ""
+    "settings.options.view.description": ""
 }

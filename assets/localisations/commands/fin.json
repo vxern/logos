@@ -469,8 +469,6 @@
     "profile.options.view.strings.information.description.sent": "Sent",
     "profile.options.view.strings.information.description.praises": "Praises",
     "profile.options.view.strings.information.description.warnings": "Warnings",
-    "slowmode.strings.theSame.description.chooseDifferent": "",
     "settings.strings.settings.fields.language.description.noLanguageSet.defaultShown": "",
-    "correction.options.partial.name": "",
     "slowmode.strings.enabled.title": ""
 }

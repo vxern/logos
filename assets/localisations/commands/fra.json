@@ -566,6 +566,5 @@
     "profile.options.view.strings.information.description.received": "Reçu",
     "profile.options.view.strings.information.description.sent": "Envoyé",
     "profile.options.view.strings.information.description.praises": "Louanges",
-    "profile.options.view.strings.information.description.warnings": "Avertissements",
-    "license.options.dictionary.description": ""
+    "profile.options.view.strings.information.description.warnings": "Avertissements"
 }
