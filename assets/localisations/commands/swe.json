@@ -1,11 +1,6 @@
 {
-    "cefr.strings.levels.c2.description": "",
     "word.strings.noDictionaryAdapters.description": "",
-    "list.options.warnings.strings.failed.title": "",
     "purge.strings.continue.description.allMessages.one": "",
-    "slowmode.strings.enabled.title": "",
     "music.options.now.strings.noSong.title": "",
-    "music.options.replay.name": "",
-    "music.options.volume.options.set.strings.set.description": "",
-    "profile.options.view.strings.information.description.dates": ""
+    "music.options.volume.options.set.strings.set.description": ""
 }
