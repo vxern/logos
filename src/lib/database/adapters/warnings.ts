@@ -14,13 +14,13 @@ import Fauna from "fauna";
 const $ = Fauna.query;
 
 const cache: CacheAdapter<Warning, WarningIndexes<Map<string, Document<Warning>>>, "delete"> = {
-	has: (client, _parameter, value) => {
+	has: (client, _, value) => {
 		return client.database.cache.warningsByRecipient.has(value);
 	},
-	get: (client, _parameter, value) => {
+	get: (client, _, value) => {
 		return client.database.cache.warningsByRecipient.get(value);
 	},
-	set: (client, _parameter, value, warning) => {
+	set: (client, _, value, warning) => {
 		const warningReferenceId = stringifyValue(warning.ref);
 
 		setNested(client.database.cache.warningsByRecipient, value, warningReferenceId, warning);
@@ -35,7 +35,7 @@ const cache: CacheAdapter<Warning, WarningIndexes<Map<string, Document<Warning>>
 			cache.set(client, parameter, value, warning);
 		}
 	},
-	delete: (client, _parameter, value, warning) => {
+	delete: (client, _, value, warning) => {
 		const warningReferenceId = stringifyValue(warning.ref);
 
 		return client.database.cache.warningsByRecipient.get(value)?.delete(warningReferenceId) ?? false;
@@ -100,6 +100,8 @@ const adapter: Database["adapters"]["warnings"] = {
 			promises.push(adapter.fetch(client, "recipient", warning.recipient));
 		}
 		await Promise.all(promises);
+
+		cache.set(client, "recipient", recipientReferenceId, document);
 
 		client.database.log.debug(`Created warning for ${userMention}.`);
 
