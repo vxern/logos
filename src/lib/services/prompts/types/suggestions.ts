@@ -9,14 +9,14 @@ import { User } from "../../../database/structs/user";
 import { encodeId, getLocaleData, reply } from "../../../interactions";
 import { getGuildIconURLFormatted } from "../../../utils";
 import { PromptService } from "../service";
-import * as Discord from "discordeno";
+import * as Discord from "@discordeno/bot";
 
 type Metadata = { userId: bigint; reference: string };
 type InteractionData = [userId: string, guildId: string, reference: string, isResolved: string];
 
 class SuggestionService extends PromptService<"suggestions", Suggestion, Metadata, InteractionData> {
-	constructor(client: Client, guildId: bigint) {
-		super(client, guildId, { type: "suggestions" });
+	constructor([client, bot]: [Client, Discord.Bot], guildId: bigint) {
+		super([client, bot], guildId, { type: "suggestions" });
 	}
 
 	getAllDocuments(): Document<Suggestion>[] {
@@ -51,11 +51,7 @@ class SuggestionService extends PromptService<"suggestions", Suggestion, Metadat
 		return { userId: BigInt(userId), reference };
 	}
 
-	getPromptContent(
-		bot: Discord.Bot,
-		user: Logos.User,
-		document: Document<Suggestion>,
-	): Discord.CreateMessage | undefined {
+	getPromptContent(user: Logos.User, document: Document<Suggestion>): Discord.CreateMessageOptions | undefined {
 		const guild = this.guild;
 		if (guild === undefined) {
 			return undefined;
@@ -79,7 +75,7 @@ class SuggestionService extends PromptService<"suggestions", Suggestion, Metadat
 					title: document.data.answers.suggestion,
 					color: constants.colors.green,
 					thumbnail: (() => {
-						const iconURL = Discord.getAvatarURL(bot, user.id, user.discriminator, {
+						const iconURL = Discord.avatarUrl(user.id, user.discriminator, {
 							avatar: user.avatar,
 							size: 64,
 							format: "png",
@@ -105,7 +101,6 @@ class SuggestionService extends PromptService<"suggestions", Suggestion, Metadat
 					footer: {
 						text: guild.name,
 						iconUrl: `${getGuildIconURLFormatted(
-							bot,
 							guild,
 						)}&metadata=${`${user.id}${constants.symbols.meta.metadataSeparator}${reference}`}`,
 					},
@@ -145,7 +140,6 @@ class SuggestionService extends PromptService<"suggestions", Suggestion, Metadat
 	}
 
 	async handleInteraction(
-		bot: Discord.Bot,
 		interaction: Discord.Interaction,
 		data: InteractionData,
 	): Promise<Document<Suggestion> | null | undefined> {
@@ -181,7 +175,7 @@ class SuggestionService extends PromptService<"suggestions", Suggestion, Metadat
 				description: localise(this.client, "alreadyMarkedResolved.description", locale)(),
 			};
 
-			reply([this.client, bot], interaction, {
+			reply([this.client, this.bot], interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -199,7 +193,7 @@ class SuggestionService extends PromptService<"suggestions", Suggestion, Metadat
 				description: localise(this.client, "alreadyMarkedUnresolved.description", locale)(),
 			};
 
-			reply([this.client, bot], interaction, {
+			reply([this.client, this.bot], interaction, {
 				embeds: [
 					{
 						title: strings.title,

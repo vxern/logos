@@ -3,7 +3,7 @@ import { Document } from "../../database/document";
 import { Guild } from "../../database/structs/guild";
 import diagnostics from "../../diagnostics";
 import { LocalService } from "../service";
-import * as Discord from "discordeno";
+import * as Discord from "@discordeno/bot";
 import Fauna from "fauna";
 
 type StreamSubscription = Fauna.Subscription<Omit<Fauna.SubscriptionEventHandlers, "snapshot">>;
@@ -12,12 +12,12 @@ class RealtimeUpdateService extends LocalService {
 	readonly documentReference: Fauna.Expr;
 	streamSubscription: StreamSubscription | undefined;
 
-	constructor(client: Client, guildId: bigint, documentReference: Fauna.Expr) {
-		super(client, guildId);
+	constructor([client, bot]: [Client, Discord.Bot], guildId: bigint, documentReference: Fauna.Expr) {
+		super([client, bot], guildId);
 		this.documentReference = documentReference;
 	}
 
-	async start(bot: Discord.Bot): Promise<void> {
+	async start(): Promise<void> {
 		const guild = this.guild;
 		if (guild === undefined) {
 			return;
@@ -40,8 +40,8 @@ class RealtimeUpdateService extends LocalService {
 
 				this.client.database.cache.guildById.set(document.data.id, document);
 
-				await handleGuildDelete(this.client, bot, guild.id);
-				await handleGuildCreate(this.client, bot, guild, { isUpdate: true });
+				await handleGuildDelete(this.client, guild.id);
+				await handleGuildCreate([this.client, this.bot], guild, { isUpdate: true });
 			})
 			.on("error", (_) => {
 				this.client.database.log.info(
@@ -50,14 +50,14 @@ class RealtimeUpdateService extends LocalService {
 				streamSubscription.close();
 				setTimeout(() => {
 					this.client.database.adapters.guilds.fetch(this.client, "id", this.guildIdString);
-					this.start(bot);
+					this.start();
 				}, 10000);
 			});
 		this.streamSubscription = streamSubscription;
 		streamSubscription.start();
 	}
 
-	async stop(_: Discord.Bot): Promise<void> {
+	async stop(): Promise<void> {
 		this.streamSubscription?.close();
 	}
 }

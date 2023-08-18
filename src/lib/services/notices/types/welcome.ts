@@ -2,11 +2,11 @@ import constants from "../../../../constants/constants";
 import { MentionTypes, mention } from "../../../../formatting";
 import { Client, localise } from "../../../client";
 import { HashableMessageContents, NoticeService } from "../service";
-import * as Discord from "discordeno";
+import * as Discord from "@discordeno/bot";
 
 class WelcomeNoticeService extends NoticeService<"welcome"> {
-	constructor(client: Client, guildId: bigint) {
-		super(client, guildId, { type: "welcome" });
+	constructor([client, bot]: [Client, Discord.Bot], guildId: bigint) {
+		super([client, bot], guildId, { type: "welcome" });
 	}
 
 	generateNotice(): HashableMessageContents | undefined {

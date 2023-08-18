@@ -9,7 +9,7 @@ import { chunk } from "../../../utils";
 import { OptionTemplate } from "../../command";
 import { collection, show } from "../../parameters";
 import { Song, SongCollection, SongStream } from "../data/types";
-import * as Discord from "discordeno";
+import * as Discord from "@discordeno/bot";
 
 const command: OptionTemplate = {
 	name: "now",
@@ -35,7 +35,7 @@ async function handleDisplayCurrentlyPlaying(
 		return;
 	}
 
-	const isVoiceStateVerified = musicService.verifyVoiceState(bot, interaction, "check");
+	const isVoiceStateVerified = musicService.verifyVoiceState(interaction, "check");
 	if (!isVoiceStateVerified) {
 		return;
 	}

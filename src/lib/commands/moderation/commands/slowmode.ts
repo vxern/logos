@@ -6,7 +6,7 @@ import { Client, localise } from "../../../client";
 import diagnostics from "../../../diagnostics";
 import { parseArguments, reply, respond } from "../../../interactions";
 import { CommandTemplate } from "../../command";
-import * as Discord from "discordeno";
+import * as Discord from "@discordeno/bot";
 
 const command: CommandTemplate = {
 	name: "slowmode",
@@ -127,12 +127,14 @@ async function handleToggleSlowmode(
 			const newRateLimitDuration = Math.floor(rateLimitDurationByLevel[level] / 1000);
 
 			if (newRateLimitDuration < previousRateLimitDuration) {
-				Discord.editChannel(bot, channel.id, { rateLimitPerUser: newRateLimitDuration }).catch(() =>
-					client.log.warn(`Failed to downgrade slowmode level on ${diagnostics.display.channel(channel)}.`),
-				);
+				bot.rest
+					.editChannel(channel.id, { rateLimitPerUser: newRateLimitDuration })
+					.catch(() =>
+						client.log.warn(`Failed to downgrade slowmode level on ${diagnostics.display.channel(channel)}.`),
+					);
 
 				if (configuration.journaling) {
-					journallingService?.log(bot, "slowmodeDowngrade", {
+					journallingService?.log("slowmodeDowngrade", {
 						args: [interaction.user, channel, previousLevel, level],
 					});
 				}
@@ -158,12 +160,12 @@ async function handleToggleSlowmode(
 				);
 				return;
 			} else if (newRateLimitDuration > previousRateLimitDuration) {
-				Discord.editChannel(bot, channel.id, { rateLimitPerUser: newRateLimitDuration }).catch(() =>
-					client.log.warn(`Failed to upgrade slowmode level on ${diagnostics.display.channel(channel)}.`),
-				);
+				bot.rest
+					.editChannel(channel.id, { rateLimitPerUser: newRateLimitDuration })
+					.catch(() => client.log.warn(`Failed to upgrade slowmode level on ${diagnostics.display.channel(channel)}.`));
 
 				if (configuration.journaling) {
-					journallingService?.log(bot, "slowmodeUpgrade", { args: [interaction.user, channel, previousLevel, level] });
+					journallingService?.log("slowmodeUpgrade", { args: [interaction.user, channel, previousLevel, level] });
 				}
 
 				const strings = {
@@ -241,12 +243,12 @@ async function handleToggleSlowmode(
 			}
 		}
 
-		Discord.editChannel(bot, channel.id, { rateLimitPerUser: null }).catch(() =>
-			client.log.warn(`Failed to disable slowmode on ${diagnostics.display.channel(channel)}.`),
-		);
+		bot.rest
+			.editChannel(channel.id, { rateLimitPerUser: null })
+			.catch(() => client.log.warn(`Failed to disable slowmode on ${diagnostics.display.channel(channel)}.`));
 
 		if (configuration.journaling) {
-			journallingService?.log(bot, "slowmodeDisable", { args: [interaction.user, channel] });
+			journallingService?.log("slowmodeDisable", { args: [interaction.user, channel] });
 		}
 
 		const strings = {
@@ -314,12 +316,12 @@ async function handleToggleSlowmode(
 
 	const rateLimitDuration = Math.floor(rateLimitDurationByLevel[level] / 1000);
 
-	Discord.editChannel(bot, channel.id, { rateLimitPerUser: rateLimitDuration }).catch(() =>
-		client.log.warn(`Failed to enable slowmode on ${diagnostics.display.channel(channel)}.`),
-	);
+	bot.rest
+		.editChannel(channel.id, { rateLimitPerUser: rateLimitDuration })
+		.catch(() => client.log.warn(`Failed to enable slowmode on ${diagnostics.display.channel(channel)}.`));
 
 	if (configuration.journaling) {
-		journallingService?.log(bot, "slowmodeEnable", { args: [interaction.user, channel, level] });
+		journallingService?.log("slowmodeEnable", { args: [interaction.user, channel, level] });
 	}
 
 	const strings = {

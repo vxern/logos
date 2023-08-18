@@ -1,14 +1,14 @@
 import { Client } from "../../client";
 import diagnostics from "../../diagnostics";
 import { GlobalService } from "../service";
-import * as Discord from "discordeno";
+import * as Discord from "@discordeno/bot";
 import * as Lavaclient from "lavaclient";
 
 class LavalinkService extends GlobalService {
 	readonly node: Lavaclient.Node;
 
-	constructor(client: Client, bot: Discord.Bot) {
-		super(client);
+	constructor([client, bot]: [Client, Discord.Bot]) {
+		super([client, bot]);
 		this.node = new Lavaclient.Node({
 			connection: {
 				host: client.metadata.environment.lavalinkHost,
@@ -26,17 +26,17 @@ class LavalinkService extends GlobalService {
 					return;
 				}
 
-				const shard = bot.gateway.manager.shards.find((shard) => shard.id === shardId);
+				const shard = bot.gateway.shards.get(shardId);
 				if (shard === undefined) {
 					return;
 				}
 
-				Discord.send(shard, payload, true);
+				shard.send(payload, true);
 			},
 		});
 	}
 
-	async start(bot: Discord.Bot): Promise<void> {
+	async start(): Promise<void> {
 		this.node.on("error", (error) => {
 			if (error.message.includes("ECONNREFUSED")) {
 				return;
@@ -50,17 +50,17 @@ class LavalinkService extends GlobalService {
 
 			await new Promise((resolve) => setTimeout(resolve, 5000));
 
-			this.node.connect(bot.id.toString());
+			this.node.connect(this.bot.id.toString());
 		});
 
 		this.node.on("connect", ({ took: tookMs }) =>
 			this.client.log.info(`Connected to audio node. Time taken: ${tookMs} ms`),
 		);
 
-		return this.node.connect(bot.id.toString());
+		return this.node.connect(this.bot.id.toString());
 	}
 
-	async voiceStateUpdate(_: Discord.Bot, voiceState: Discord.VoiceState): Promise<void> {
+	async voiceStateUpdate(voiceState: Discord.VoiceState): Promise<void> {
 		return this.node.handleVoiceUpdate({
 			session_id: voiceState.sessionId,
 			channel_id: voiceState.channelId !== undefined ? `${voiceState.channelId}` : null,
@@ -69,7 +69,7 @@ class LavalinkService extends GlobalService {
 		});
 	}
 
-	async voiceServerUpdate(_: Discord.Bot, voiceServerUpdate: Discord.VoiceServerUpdate): Promise<void> {
+	async voiceServerUpdate(voiceServerUpdate: Discord.VoiceServerUpdate): Promise<void> {
 		if (voiceServerUpdate.endpoint === undefined) {
 			this.client.log.info(
 				`Discarding voice server update for ${diagnostics.display.guild(

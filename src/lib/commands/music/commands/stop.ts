@@ -3,7 +3,7 @@ import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
 import { reply } from "../../../interactions";
 import { OptionTemplate } from "../../command";
-import * as Discord from "discordeno";
+import * as Discord from "@discordeno/bot";
 
 const command: OptionTemplate = {
 	name: "stop",
@@ -24,7 +24,7 @@ async function handleStopPlayback([client, bot]: [Client, Discord.Bot], interact
 		return;
 	}
 
-	const isVoiceStateVerified = musicService.verifyCanManagePlayback(bot, interaction);
+	const isVoiceStateVerified = musicService.verifyCanManagePlayback(interaction);
 	if (!isVoiceStateVerified) {
 		return;
 	}

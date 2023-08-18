@@ -14,7 +14,7 @@ import {
 } from "../../../interactions";
 import { CommandTemplate } from "../../command";
 import { show } from "../../parameters";
-import * as Discord from "discordeno";
+import * as Discord from "@discordeno/bot";
 
 const command: CommandTemplate = {
 	name: "cefr",
@@ -66,7 +66,7 @@ async function handleDisplayCefrGuide(
 
 	const data: Data = { bracket: "a", tab: "guide" };
 
-	const getEmbed = (): Discord.Embed => {
+	const getEmbed = (): Discord.CamelizedDiscordEmbed => {
 		let tab;
 		switch (data.tab) {
 			case "guide": {
@@ -180,7 +180,7 @@ async function handleDisplayCefrGuide(
 	const bracketButtonId = createInteractionCollector([client, bot], {
 		type: Discord.InteractionTypes.MessageComponent,
 		userId: interaction.user.id,
-		onCollect: async (_, selection) => {
+		onCollect: async (selection) => {
 			acknowledge([client, bot], selection);
 
 			const selectionCustomId = selection.data?.customId;
@@ -208,7 +208,7 @@ async function handleDisplayCefrGuide(
 	const tabButtonId = createInteractionCollector([client, bot], {
 		type: Discord.InteractionTypes.MessageComponent,
 		userId: interaction.user.id,
-		onCollect: async (_, selection) => {
+		onCollect: async (selection) => {
 			acknowledge([client, bot], selection);
 
 			const selectionCustomId = selection.data?.customId;
@@ -240,7 +240,7 @@ function getBracketGuide(
 	client: Client,
 	options: { isExtended: boolean },
 	{ locale }: { locale: Locale },
-): Record<Bracket, Discord.Embed> {
+): Record<Bracket, Discord.CamelizedDiscordEmbed> {
 	const strings = {
 		brackets: {
 			a: localise(client, "cefr.strings.brackets.a", locale)(),
@@ -350,7 +350,7 @@ function getBracketExamples(
 	levels: NonNullable<CefrConfiguration["examples"]["levels"]>,
 	options: { isExtended: boolean },
 	{ locale }: { locale: Locale },
-): Record<Bracket, Discord.Embed> {
+): Record<Bracket, Discord.CamelizedDiscordEmbed> {
 	const strings = {
 		brackets: {
 			a: localise(client, "cefr.strings.brackets.a", locale)(),

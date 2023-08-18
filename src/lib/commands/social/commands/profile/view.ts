@@ -6,7 +6,7 @@ import { Client, autocompleteMembers, localise, resolveInteractionToMember } fro
 import { parseArguments, reply } from "../../../../interactions";
 import { OptionTemplate } from "../../../command";
 import { show, user } from "../../../parameters";
-import * as Discord from "discordeno";
+import * as Discord from "@discordeno/bot";
 
 const command: OptionTemplate = {
 	name: "view",
@@ -98,7 +98,7 @@ async function handleDisplayProfile(
 				{
 					title: strings.title,
 					thumbnail: (() => {
-						const iconURL = Discord.getAvatarURL(bot, target.id, target.discriminator, {
+						const iconURL = Discord.avatarUrl(target.id, target.discriminator, {
 							avatar: target.avatar,
 							size: 4096,
 							format: "webp",

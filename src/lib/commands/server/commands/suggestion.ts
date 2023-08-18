@@ -18,7 +18,7 @@ import {
 } from "../../../interactions";
 import { verifyIsWithinLimits } from "../../../utils";
 import { CommandTemplate } from "../../command";
-import * as Discord from "discordeno";
+import * as Discord from "@discordeno/bot";
 
 const command: CommandTemplate = {
 	name: "suggestion",
@@ -133,7 +133,7 @@ async function handleMakeSuggestion(
 
 			if (configuration.journaling) {
 				const journallingService = client.services.journalling.get(guild.id);
-				journallingService?.log(bot, "suggestionSend", { args: [member, suggestion.data] });
+				journallingService?.log("suggestionSend", { args: [member, suggestion.data] });
 			}
 
 			const userId = BigInt(userDocument.data.account.id);
@@ -144,7 +144,7 @@ async function handleMakeSuggestion(
 				return "failure";
 			}
 
-			const prompt = await suggestionService.savePrompt(bot, user, suggestion);
+			const prompt = await suggestionService.savePrompt(user, suggestion);
 			if (prompt === undefined) {
 				return "failure";
 			}
@@ -183,7 +183,7 @@ async function handleSubmittedInvalidSuggestion(
 	return new Promise((resolve) => {
 		const continueId = createInteractionCollector([client, bot], {
 			type: Discord.InteractionTypes.MessageComponent,
-			onCollect: async (_, selection) => {
+			onCollect: async (selection) => {
 				deleteReply([client, bot], submission);
 				resolve(selection);
 			},
@@ -191,10 +191,10 @@ async function handleSubmittedInvalidSuggestion(
 
 		const cancelId = createInteractionCollector([client, bot], {
 			type: Discord.InteractionTypes.MessageComponent,
-			onCollect: async (_, cancelSelection) => {
+			onCollect: async (cancelSelection) => {
 				const returnId = createInteractionCollector([client, bot], {
 					type: Discord.InteractionTypes.MessageComponent,
-					onCollect: (_, returnSelection) => {
+					onCollect: async (returnSelection) => {
 						deleteReply([client, bot], submission);
 						deleteReply([client, bot], cancelSelection);
 						resolve(returnSelection);
@@ -203,7 +203,7 @@ async function handleSubmittedInvalidSuggestion(
 
 				const leaveId = createInteractionCollector([client, bot], {
 					type: Discord.InteractionTypes.MessageComponent,
-					onCollect: async (_, _leaveSelection) => {
+					onCollect: async (_) => {
 						deleteReply([client, bot], submission);
 						deleteReply([client, bot], cancelSelection);
 						resolve(undefined);
@@ -248,7 +248,7 @@ async function handleSubmittedInvalidSuggestion(
 			},
 		});
 
-		let embed!: Discord.Embed;
+		let embed!: Discord.CamelizedDiscordEmbed;
 		switch (error) {
 			default: {
 				const strings = {

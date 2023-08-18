@@ -8,7 +8,7 @@ import { addParametersToURL } from "../../../utils";
 import { CommandTemplate } from "../../command";
 import { show } from "../../parameters";
 import { resolveToSupportedLanguage } from "../module";
-import * as Discord from "discordeno";
+import * as Discord from "@discordeno/bot";
 
 const command: CommandTemplate = {
 	name: "translate",
@@ -244,7 +244,7 @@ async function handleTranslateText(
 
 	const translationIndicator = `${strings.sourceLanguageName} ${constants.symbols.indicators.arrowRight} ${strings.targetLanguageName}`;
 
-	let embeds: Discord.Embed[] = [];
+	let embeds: Discord.CamelizedDiscordEmbed[] = [];
 	if (isLong) {
 		embeds = [
 			{

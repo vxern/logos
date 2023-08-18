@@ -14,7 +14,7 @@ import { InteractionLocaleData } from "../types";
 import { Client, addCollector, localise, pluralise } from "./client";
 import { Document } from "./database/document";
 import { Guild } from "./database/structs/guild";
-import * as Discord from "discordeno";
+import * as Discord from "@discordeno/bot";
 import { DiscordSnowflake as Snowflake } from "@sapphire/snowflake";
 
 type AutocompleteInteraction = Discord.Interaction & { type: Discord.InteractionTypes.ApplicationCommandAutocomplete };
@@ -58,7 +58,7 @@ function createInteractionCollector(
 	const customId = settings.customId ?? Snowflake.generate().toString();
 
 	addCollector([client, bot], "interactionCreate", {
-		filter: (_, interaction) => compileChecks(interaction, settings, customId).every((condition) => condition),
+		filter: (interaction) => compileChecks(interaction, settings, customId).every((condition) => condition),
 		limit: settings.limit,
 		removeAfter: settings.doesNotExpire ? undefined : constants.INTERACTION_TOKEN_EXPIRY,
 		onCollect: settings.onCollect ?? (() => {}),
@@ -148,7 +148,7 @@ async function paginate<T>(
 		show,
 	}: {
 		elements: T[];
-		embed: Omit<Discord.Embed, "footer">;
+		embed: Omit<Discord.CamelizedDiscordEmbed, "footer">;
 		view: PaginationDisplayData<T>;
 		show: boolean;
 	},
@@ -169,7 +169,7 @@ async function paginate<T>(
 	const customId = createInteractionCollector([client, bot], {
 		type: Discord.InteractionTypes.MessageComponent,
 		doesNotExpire: true,
-		onCollect: async (bot, selection) => {
+		onCollect: async (selection) => {
 			acknowledge([client, bot], selection);
 
 			const customId = selection.data?.customId;
@@ -224,10 +224,10 @@ interface PaginationData<T> {
 function getPageEmbed<T>(
 	client: Client,
 	data: PaginationData<T>,
-	embed: Discord.Embed,
+	embed: Discord.CamelizedDiscordEmbed,
 	isLast: boolean,
 	locale: Locale,
-): Discord.Embed {
+): Discord.CamelizedDiscordEmbed {
 	const strings = {
 		page: localise(client, "interactions.page", locale)(),
 		continuedOnNextPage: localise(client, "interactions.continuedOnNextPage", locale)(),
@@ -280,13 +280,13 @@ type ComposerActionRow<ComposerContent extends Record<string, unknown>, SectionN
 	];
 };
 
-type Modal<ComposerContent extends Record<string, unknown>, SectionNames = keyof ComposerContent> = {
+type Modal<ComposerContent extends Record<string, string>, SectionNames = keyof ComposerContent> = {
 	title: string;
 	fields: ComposerActionRow<ComposerContent, SectionNames>[];
 };
 
 async function createModalComposer<
-	ComposerContent extends Record<string, unknown>,
+	ComposerContent extends Record<string, string>,
 	SectionNames extends keyof ComposerContent = keyof ComposerContent,
 >(
 	[client, bot]: [Client, Discord.Bot],
@@ -313,7 +313,7 @@ async function createModalComposer<
 				type: Discord.InteractionTypes.ModalSubmit,
 				userId: interaction.user.id,
 				limit: 1,
-				onCollect: async (_, submission) => {
+				onCollect: async (submission) => {
 					content = parseComposerContent(submission);
 					if (content === undefined) {
 						return resolve([submission, false]);
@@ -360,7 +360,7 @@ async function createModalComposer<
 }
 
 function parseComposerContent<
-	ComposerContent extends Record<string, unknown>,
+	ComposerContent extends Record<string, string>,
 	SectionNames extends keyof ComposerContent = keyof ComposerContent,
 >(submission: Discord.Interaction): ComposerContent | undefined {
 	const content: Partial<ComposerContent> = {};
@@ -371,8 +371,12 @@ function parseComposerContent<
 	}
 
 	for (const field of fields) {
+		if (field === undefined) {
+			continue;
+		}
+
 		const key = field.customId as SectionNames;
-		const value = field.value;
+		const value = (field.value ?? "") as ComposerContent[SectionNames];
 
 		if (value.length === 0) {
 			content[key] = undefined;
@@ -589,9 +593,11 @@ async function acknowledge(
 	[client, bot]: [Client, Discord.Bot],
 	interaction: Logos.Interaction | Discord.Interaction,
 ): Promise<void> {
-	return Discord.sendInteractionResponse(bot, interaction.id, interaction.token, {
-		type: Discord.InteractionResponseTypes.DeferredUpdateMessage,
-	}).catch((reason) => client.log.warn(`Failed to acknowledge interaction: ${reason}`));
+	return bot.rest
+		.sendInteractionResponse(interaction.id, interaction.token, {
+			type: Discord.InteractionResponseTypes.DeferredUpdateMessage,
+		})
+		.catch((reason) => client.log.warn("Failed to acknowledge interaction:", reason));
 }
 
 async function postponeReply(
@@ -599,10 +605,12 @@ async function postponeReply(
 	interaction: Logos.Interaction | Discord.Interaction,
 	{ visible = false } = {},
 ): Promise<void> {
-	return Discord.sendInteractionResponse(bot, interaction.id, interaction.token, {
-		type: Discord.InteractionResponseTypes.DeferredChannelMessageWithSource,
-		data: visible ? {} : { flags: Discord.ApplicationCommandFlags.Ephemeral },
-	}).catch((reason) => client.log.warn(`Failed to postpone reply to interaction: ${reason}`));
+	return bot.rest
+		.sendInteractionResponse(interaction.id, interaction.token, {
+			type: Discord.InteractionResponseTypes.DeferredChannelMessageWithSource,
+			data: visible ? {} : { flags: Discord.MessageFlags.Ephemeral },
+		})
+		.catch((reason) => client.log.warn("Failed to postpone reply to interaction:", reason));
 }
 
 async function reply(
@@ -611,10 +619,12 @@ async function reply(
 	data: Omit<Discord.InteractionCallbackData, "flags">,
 	{ visible = false } = {},
 ): Promise<void> {
-	return Discord.sendInteractionResponse(bot, interaction.id, interaction.token, {
-		type: Discord.InteractionResponseTypes.ChannelMessageWithSource,
-		data: { ...data, flags: visible ? undefined : Discord.ApplicationCommandFlags.Ephemeral },
-	}).catch((reason) => client.log.warn(`Failed to reply to interaction: ${reason}`));
+	return bot.rest
+		.sendInteractionResponse(interaction.id, interaction.token, {
+			type: Discord.InteractionResponseTypes.ChannelMessageWithSource,
+			data: { ...data, flags: visible ? undefined : Discord.MessageFlags.Ephemeral },
+		})
+		.catch((reason) => client.log.warn("Failed to reply to interaction:", reason));
 }
 
 async function editReply(
@@ -622,18 +632,19 @@ async function editReply(
 	interaction: Logos.Interaction | Discord.Interaction,
 	data: Omit<Discord.InteractionCallbackData, "flags">,
 ): Promise<void> {
-	return Discord.editOriginalInteractionResponse(bot, interaction.token, data)
+	return bot.rest
+		.editOriginalInteractionResponse(interaction.token, data)
 		.then(() => {})
-		.catch((reason) => client.log.warn(`Failed to edit reply to interaction: ${reason}`));
+		.catch((reason) => client.log.warn("Failed to edit reply to interaction:", reason));
 }
 
 async function deleteReply(
 	[client, bot]: [Client, Discord.Bot],
 	interaction: Logos.Interaction | Discord.Interaction,
 ): Promise<void> {
-	return Discord.deleteOriginalInteractionResponse(bot, interaction.token).catch((reason) =>
-		client.log.warn(`Failed to edit reply to interaction: ${reason}`),
-	);
+	return bot.rest
+		.deleteOriginalInteractionResponse(interaction.token)
+		.catch((reason) => client.log.warn("Failed to edit reply to interaction:", reason));
 }
 
 async function respond(
@@ -641,10 +652,12 @@ async function respond(
 	interaction: Logos.Interaction | Discord.Interaction,
 	choices: Discord.ApplicationCommandOptionChoice[],
 ): Promise<void> {
-	return Discord.sendInteractionResponse(bot, interaction.id, interaction.token, {
-		type: Discord.InteractionResponseTypes.ApplicationCommandAutocompleteResult,
-		data: { choices },
-	}).catch((reason) => client.log.warn(`Failed to respond to autocomplete interaction: ${reason}`));
+	return bot.rest
+		.sendInteractionResponse(interaction.id, interaction.token, {
+			type: Discord.InteractionResponseTypes.ApplicationCommandAutocompleteResult,
+			data: { choices },
+		})
+		.catch((reason) => client.log.warn("Failed to respond to autocomplete interaction:", reason));
 }
 
 async function displayModal(
@@ -652,10 +665,12 @@ async function displayModal(
 	interaction: Logos.Interaction | Discord.Interaction,
 	data: Omit<Discord.InteractionCallbackData, "flags">,
 ): Promise<void> {
-	return Discord.sendInteractionResponse(bot, interaction.id, interaction.token, {
-		type: Discord.InteractionResponseTypes.Modal,
-		data,
-	}).catch((reason) => client.log.warn(`Failed to show modal: ${reason}`));
+	return bot.rest
+		.sendInteractionResponse(interaction.id, interaction.token, {
+			type: Discord.InteractionResponseTypes.Modal,
+			data,
+		})
+		.catch((reason) => client.log.warn("Failed to show modal:", reason));
 }
 
 function getLocalisationLanguage(guildDocument: Document<Guild> | undefined): LocalisationLanguage {

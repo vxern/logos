@@ -6,7 +6,7 @@ import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
 import { reply } from "../../../interactions";
 import { CommandTemplate } from "../../command";
-import * as Discord from "discordeno";
+import * as Discord from "@discordeno/bot";
 
 const command: CommandTemplate = {
 	name: "credits",
@@ -24,8 +24,8 @@ async function handleDisplayCredits(
 	reply([client, bot], interaction, { embeds: [getTranslationView(client, { locale })] });
 }
 
-function getTranslationView(client: Client, { locale }: { locale: Locale }): Discord.Embed {
-	const fields: Discord.EmbedField[] = [];
+function getTranslationView(client: Client, { locale }: { locale: Locale }): Discord.CamelizedDiscordEmbed {
+	const fields: Discord.CamelizedDiscordEmbedField[] = [];
 
 	for (const [language, data] of (
 		Object.entries(constants.contributions.translation) as [LocalisationLanguage, Translation][]

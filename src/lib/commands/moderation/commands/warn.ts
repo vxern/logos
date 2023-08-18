@@ -10,7 +10,7 @@ import { parseArguments, reply } from "../../../interactions";
 import { CommandTemplate } from "../../command";
 import { reason, user } from "../../parameters";
 import { getActiveWarnings } from "../module";
-import * as Discord from "discordeno";
+import * as Discord from "@discordeno/bot";
 
 const command: CommandTemplate = {
 	name: "warn",
@@ -91,7 +91,7 @@ async function handleWarnUser([client, bot]: [Client, Discord.Bot], interaction:
 
 	const moderatorRoleIds = guild.roles
 		.array()
-		.filter((role) => Discord.calculatePermissions(role.permissions).includes("MODERATE_MEMBERS"))
+		.filter((role) => role.permissions.has("MODERATE_MEMBERS"))
 		.map((role) => role.id);
 	if (moderatorRoleIds.length === 0) {
 		return undefined;
@@ -129,7 +129,7 @@ async function handleWarnUser([client, bot]: [Client, Discord.Bot], interaction:
 
 	if (configuration.journaling && document !== undefined) {
 		const journallingService = client.services.journalling.get(guild.id);
-		journallingService?.log(bot, "memberWarnAdd", { args: [member, document.data, interaction.user] });
+		journallingService?.log("memberWarnAdd", { args: [member, document.data, interaction.user] });
 	}
 
 	if (warnings === undefined || document === undefined) {
@@ -189,9 +189,11 @@ async function handleWarnUser([client, bot]: [Client, Discord.Bot], interaction:
 
 			const timeoutMilliseconds = timeStructToMilliseconds(timeout);
 
-			Discord.editMember(bot, guild.id, member.id, {
-				communicationDisabledUntil: Date.now() + timeoutMilliseconds,
-			}).catch(() => client.log.warn(`Failed to edit timeout state of ${diagnostics.display.member(member)}.`));
+			bot.rest
+				.editMember(guild.id, member.id, {
+					communicationDisabledUntil: Date.now() + timeoutMilliseconds,
+				})
+				.catch(() => client.log.warn(`Failed to edit timeout state of ${diagnostics.display.member(member)}.`));
 		} else {
 			const locale = interaction.guildLocale;
 			strings = {
@@ -200,11 +202,15 @@ async function handleWarnUser([client, bot]: [Client, Discord.Bot], interaction:
 					client,
 					"warn.strings.limitSurpassed.description",
 					locale,
-				)({ user_mention: diagnostics.display.user(user), limit: configuration.limit, number: relevantWarnings.size }),
+				)({
+					user_mention: diagnostics.display.user(user),
+					limit: configuration.limit,
+					number: relevantWarnings.size,
+				}),
 			};
 		}
 
-		alertService?.alert(bot, {
+		alertService?.alert({
 			embeds: [
 				{
 					title: `${constants.symbols.indicators.exclamation} ${strings.title}`,
@@ -229,7 +235,7 @@ async function handleWarnUser([client, bot]: [Client, Discord.Bot], interaction:
 			)({ user_mention: diagnostics.display.user(user), limit: defaults.WARN_LIMIT }),
 		};
 
-		alertService?.alert(bot, {
+		alertService?.alert({
 			embeds: [
 				{
 					title: `${constants.symbols.indicators.warning} ${strings.title}`,

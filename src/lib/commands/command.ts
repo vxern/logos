@@ -1,13 +1,13 @@
 import * as Logos from "../../types";
 import { Client } from "../client";
-import * as Discord from "discordeno";
+import * as Discord from "@discordeno/bot";
 
 type WithRequired<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>> & Required<Pick<T, K>>;
 
 /** Describes the handler of an interaction. */
 type InteractionHandler = ([client, bot]: [Client, Discord.Bot], interaction: Logos.Interaction) => Promise<void>;
 
-type Command = Discord.CreateSlashApplicationCommand;
+type Command = Discord.CreateApplicationCommand;
 
 type Option = Discord.ApplicationCommandOption;
 

@@ -13,7 +13,7 @@ import skipTo from "./commands/skip-to";
 import stop from "./commands/stop";
 import unskip from "./commands/unskip";
 import volume from "./commands/volume";
-import * as Discord from "discordeno";
+import * as Discord from "@discordeno/bot";
 
 const music: CommandTemplate = {
 	name: "music",

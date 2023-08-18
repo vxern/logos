@@ -16,15 +16,15 @@ import Fauna from "fauna";
 const $ = Fauna.query;
 
 const cache: CacheAdapter<Suggestion, SuggestionIndexes<Document<Suggestion>>, "delete"> = {
-	get: (client, _parameter, value) => {
+	get: (client, _, value) => {
 		return client.database.cache.suggestionsByAuthorAndGuild.get(value);
 	},
-	set: (client, _parameter, value, suggestion) => {
+	set: (client, _, value, suggestion) => {
 		const suggestionReferenceId = stringifyValue(suggestion.ref);
 
 		setNested(client.database.cache.suggestionsByAuthorAndGuild, value, suggestionReferenceId, suggestion);
 	},
-	delete: (client, _parameter, value, suggestion) => {
+	delete: (client, _, value, suggestion) => {
 		const suggestionReferenceId = stringifyValue(suggestion.ref);
 
 		return client.database.cache.suggestionsByAuthorAndGuild.get(value)?.delete(suggestionReferenceId) ?? false;

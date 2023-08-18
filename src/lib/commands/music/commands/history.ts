@@ -5,7 +5,7 @@ import { parseArguments, reply } from "../../../interactions";
 import { OptionTemplate } from "../../command";
 import { show } from "../../parameters";
 import { displayListings } from "../module";
-import * as Discord from "discordeno";
+import * as Discord from "@discordeno/bot";
 
 const command: OptionTemplate = {
 	name: "history",
@@ -31,7 +31,7 @@ async function handleDisplayPlaybackHistory(
 		return;
 	}
 
-	const isVoiceStateVerified = musicService.verifyVoiceState(bot, interaction, "check");
+	const isVoiceStateVerified = musicService.verifyVoiceState(interaction, "check");
 	if (!isVoiceStateVerified) {
 		return;
 	}

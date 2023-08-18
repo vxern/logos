@@ -10,7 +10,7 @@ import diagnostics from "../../../../diagnostics";
 import { getFeatureLanguage, getLocalisationLanguage, reply } from "../../../../interactions";
 import { getGuildIconURLFormatted, snowflakeToTimestamp } from "../../../../utils";
 import { proficiency } from "../../../social/roles/categories/language";
-import * as Discord from "discordeno";
+import * as Discord from "@discordeno/bot";
 
 /** Displays information about the guild that this command was executed in. */
 async function handleDisplayGuildInformation(
@@ -85,7 +85,7 @@ async function handleDisplayGuildInformation(
 			{
 				author: {
 					iconUrl: (() => {
-						const iconURL = getGuildIconURLFormatted(bot, guild);
+						const iconURL = getGuildIconURLFormatted(guild);
 						if (iconURL === undefined) {
 							return undefined;
 						}
@@ -208,7 +208,7 @@ function getProficiencyRoleDistribution(client: Client, guild: Logos.Guild): Pro
 		.sort((a, b) => a.position - b.position)
 		.map((role) => role.id);
 
-	const members = guild.members.array().filter((member) => !client.cache.users.get(member.id)?.toggles.bot);
+	const members = guild.members.array().filter((member) => !client.cache.users.get(member.id)?.toggles?.bot ?? true);
 
 	let withoutProficiencyRole = 0;
 	const roleFrequencies: Record<`${bigint}`, number> = Object.fromEntries(

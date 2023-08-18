@@ -9,14 +9,14 @@ import { User } from "../../../database/structs/user";
 import { encodeId, getLocaleData, reply } from "../../../interactions";
 import { getGuildIconURLFormatted } from "../../../utils";
 import { PromptService } from "../service";
-import * as Discord from "discordeno";
+import * as Discord from "@discordeno/bot";
 
 type Metadata = { userId: bigint; reference: string };
 type InteractionData = [userId: string, guildId: string, reference: string, isResolved: string];
 
 class ReportService extends PromptService<"reports", Report, Metadata, InteractionData> {
-	constructor(client: Client, guildId: bigint) {
-		super(client, guildId, { type: "reports" });
+	constructor([client, bot]: [Client, Discord.Bot], guildId: bigint) {
+		super([client, bot], guildId, { type: "reports" });
 	}
 
 	getAllDocuments(): Document<Report>[] {
@@ -51,7 +51,7 @@ class ReportService extends PromptService<"reports", Report, Metadata, Interacti
 		return { userId: BigInt(userId), reference };
 	}
 
-	getPromptContent(bot: Discord.Bot, user: Logos.User, document: Document<Report>): Discord.CreateMessage | undefined {
+	getPromptContent(user: Logos.User, document: Document<Report>): Discord.CreateMessageOptions | undefined {
 		const guild = this.guild;
 		if (guild === undefined) {
 			return;
@@ -82,7 +82,7 @@ class ReportService extends PromptService<"reports", Report, Metadata, Interacti
 					title: document.data.answers.reason,
 					color: constants.colors.darkRed,
 					thumbnail: (() => {
-						const iconURL = Discord.getAvatarURL(bot, user.id, user.discriminator, {
+						const iconURL = Discord.avatarUrl(user.id, user.discriminator, {
 							avatar: user.avatar,
 							size: 32,
 							format: "webp",
@@ -120,7 +120,6 @@ class ReportService extends PromptService<"reports", Report, Metadata, Interacti
 					footer: {
 						text: guild.name,
 						iconUrl: `${getGuildIconURLFormatted(
-							bot,
 							guild,
 						)}&metadata=${`${user.id}${constants.symbols.meta.metadataSeparator}${reference}`}`,
 					},
@@ -160,7 +159,6 @@ class ReportService extends PromptService<"reports", Report, Metadata, Interacti
 	}
 
 	async handleInteraction(
-		bot: Discord.Bot,
 		interaction: Discord.Interaction,
 		data: InteractionData,
 	): Promise<Document<Report> | null | undefined> {
@@ -191,7 +189,7 @@ class ReportService extends PromptService<"reports", Report, Metadata, Interacti
 				description: localise(this.client, "alreadyMarkedResolved.description", locale)(),
 			};
 
-			reply([this.client, bot], interaction, {
+			reply([this.client, this.bot], interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -209,7 +207,7 @@ class ReportService extends PromptService<"reports", Report, Metadata, Interacti
 				description: localise(this.client, "alreadyMarkedUnresolved.description", locale)(),
 			};
 
-			reply([this.client, bot], interaction, {
+			reply([this.client, this.bot], interaction, {
 				embeds: [
 					{
 						title: strings.title,

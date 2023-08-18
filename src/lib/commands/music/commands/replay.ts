@@ -5,7 +5,7 @@ import { parseArguments, reply } from "../../../interactions";
 import { isCollection } from "../../../services/music/music";
 import { OptionTemplate } from "../../command";
 import { collection } from "../../parameters";
-import * as Discord from "discordeno";
+import * as Discord from "@discordeno/bot";
 
 const command: OptionTemplate = {
 	name: "replay",
@@ -29,7 +29,7 @@ async function handleReplayAction([client, bot]: [Client, Discord.Bot], interact
 		return;
 	}
 
-	const isVoiceStateVerified = musicService.verifyCanManagePlayback(bot, interaction);
+	const isVoiceStateVerified = musicService.verifyCanManagePlayback(interaction);
 	if (!isVoiceStateVerified) {
 		return;
 	}
@@ -105,7 +105,7 @@ async function handleReplayAction([client, bot]: [Client, Discord.Bot], interact
 		return;
 	}
 
-	musicService.replay(bot, collection ?? false);
+	musicService.replay(collection ?? false);
 
 	const strings = {
 		title: localise(client, "music.options.replay.strings.replaying.title", locale)(),

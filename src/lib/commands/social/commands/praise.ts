@@ -10,7 +10,7 @@ import { editReply, parseArguments, postponeReply, reply } from "../../../intera
 import { verifyIsWithinLimits } from "../../../utils";
 import { CommandTemplate } from "../../command";
 import { user } from "../../parameters";
-import * as Discord from "discordeno";
+import * as Discord from "@discordeno/bot";
 
 const command: CommandTemplate = {
 	name: "praise",
@@ -154,7 +154,7 @@ async function handlePraiseUser([client, bot]: [Client, Discord.Bot], interactio
 
 	if (configuration.journaling) {
 		const journallingService = client.services.journalling.get(guild.id);
-		journallingService?.log(bot, "praiseAdd", { args: [member, praise, interaction.user] });
+		journallingService?.log("praiseAdd", { args: [member, praise, interaction.user] });
 	}
 
 	const strings = {

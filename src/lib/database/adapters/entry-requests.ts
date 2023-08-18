@@ -9,13 +9,13 @@ import Fauna from "fauna";
 const $ = Fauna.query;
 
 const cache: CacheAdapter<EntryRequest, EntryRequestIndexes<Document<EntryRequest>>, "delete"> = {
-	get: (client, _parameter, value) => {
+	get: (client, _, value) => {
 		return client.database.cache.entryRequestBySubmitterAndGuild.get(value);
 	},
-	set: (client, _parameter, value, entryRequest) => {
+	set: (client, _, value, entryRequest) => {
 		client.database.cache.entryRequestBySubmitterAndGuild.set(value, entryRequest);
 	},
-	delete: (client, _parameter, value, _entryRequest) => {
+	delete: (client, _, value, _entryRequest) => {
 		return client.database.cache.entryRequestBySubmitterAndGuild.delete(value) ?? false;
 	},
 };

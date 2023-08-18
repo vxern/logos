@@ -2,10 +2,11 @@ import constants from "../../../../constants/constants";
 import { Client, localise } from "../../../client";
 import { ruleIds } from "../../../commands/moderation/commands/rule";
 import { HashableMessageContents, NoticeService } from "../service";
+import * as Discord from "@discordeno/bot";
 
 class InformationNoticeService extends NoticeService<"information"> {
-	constructor(client: Client, guildId: bigint) {
-		super(client, guildId, { type: "information" });
+	constructor([client, bot]: [Client, Discord.Bot], guildId: bigint) {
+		super([client, bot], guildId, { type: "information" });
 	}
 
 	generateNotice(): HashableMessageContents | undefined {

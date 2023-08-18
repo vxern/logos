@@ -2,7 +2,7 @@ import * as Logos from "../../../../../types";
 import { Client } from "../../../../client";
 import { SongListing } from "../types";
 import youtube from "./youtube";
-import * as Discord from "discordeno";
+import * as Discord from "@discordeno/bot";
 
 /** Obtains a song listing from a source. */
 type ListingResolver = (

@@ -9,10 +9,10 @@ import Fauna from "fauna";
 const $ = Fauna.query;
 
 const cache: CacheAdapter<Guild, GuildIndexes<Document<Guild>>> = {
-	get: (client, _parameter, value) => {
+	get: (client, _, value) => {
 		return client.database.cache.guildById.get(value);
 	},
-	set: (client, _parameter, value, guild) => {
+	set: (client, _, value, guild) => {
 		client.database.cache.guildById.set(value, guild);
 	},
 };

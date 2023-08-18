@@ -1,7 +1,7 @@
 import { CommandTemplate } from "../../command";
 import language from "./settings/language";
 import view from "./settings/view";
-import * as Discord from "discordeno";
+import * as Discord from "@discordeno/bot";
 
 const command: CommandTemplate = {
 	name: "settings",

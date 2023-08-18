@@ -4,7 +4,7 @@ import { Client, localise } from "../../../../client";
 import { parseArguments, reply } from "../../../../interactions";
 import { ListingResolver } from "../../data/sources/sources";
 import { SongListing } from "../../data/types";
-import * as Discord from "discordeno";
+import * as Discord from "@discordeno/bot";
 
 async function handleRequestQueryPlayback(
 	[client, bot]: [Client, Discord.Bot],
@@ -26,7 +26,7 @@ async function handleRequestQueryPlayback(
 		return;
 	}
 
-	const isVoiceStateVerified = musicService.verifyCanRequestPlayback(bot, interaction);
+	const isVoiceStateVerified = musicService.verifyCanRequestPlayback(interaction);
 	if (!isVoiceStateVerified) {
 		return;
 	}
@@ -83,7 +83,7 @@ async function handleRequestPlayback(
 		return;
 	}
 
-	const isVoiceStateVerified = musicService.verifyCanRequestPlayback(bot, interaction);
+	const isVoiceStateVerified = musicService.verifyCanRequestPlayback(interaction);
 	if (!isVoiceStateVerified) {
 		return;
 	}
@@ -94,7 +94,7 @@ async function handleRequestPlayback(
 		return;
 	}
 
-	musicService.receiveNewListing(bot, listing, channelId);
+	musicService.receiveNewListing(listing, channelId);
 }
 
 export { handleRequestPlayback, handleRequestQueryPlayback };

@@ -4,7 +4,7 @@ import { Client, localise } from "../../../client";
 import { parseArguments, reply } from "../../../interactions";
 import { CommandTemplate } from "../../command";
 import { show } from "../../parameters";
-import * as Discord from "discordeno";
+import * as Discord from "@discordeno/bot";
 
 const command: CommandTemplate = {
 	name: "policy",
@@ -62,7 +62,7 @@ async function handleDisplayModerationPolicy(
 function getModerationPolicyPoints(
 	client: Client,
 	{ locale }: { locale: Locale },
-): NonNullable<Discord.Embed["fields"]> {
+): Discord.CamelizedDiscordEmbedField[] {
 	const strings = {
 		introduction: {
 			title: localise(client, "policies.moderation.points.introduction.title", locale)(),

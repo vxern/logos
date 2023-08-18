@@ -24,7 +24,7 @@ import { show } from "../../parameters";
 import { Definition, DictionaryEntry, Expression } from "../dictionaries/adapter";
 import adapters from "../dictionaries/adapters";
 import { PartOfSpeech, isUnknownPartOfSpeech } from "../dictionaries/part-of-speech";
-import * as Discord from "discordeno";
+import * as Discord from "@discordeno/bot";
 
 const command: CommandTemplate = {
 	name: "word",
@@ -303,7 +303,7 @@ function generateEmbeds(
 	data: WordViewData,
 	entry: DictionaryEntry,
 	{ language, locale }: { language: LocalisationLanguage; locale: Locale },
-): Discord.Embed[] {
+): Discord.CamelizedDiscordEmbed[] {
 	switch (data.currentView) {
 		case ContentTabs.Definitions: {
 			return entryToEmbeds(client, entry, data.verbose, { language, locale });
@@ -341,7 +341,7 @@ function generateButtons(
 
 			const previousPageButtonId = createInteractionCollector([client, bot], {
 				type: Discord.InteractionTypes.MessageComponent,
-				onCollect: async (_, selection) => {
+				onCollect: async (selection) => {
 					acknowledge([client, bot], selection);
 
 					if (!isFirst) {
@@ -354,7 +354,7 @@ function generateButtons(
 
 			const nextPageButtonId = createInteractionCollector([client, bot], {
 				type: Discord.InteractionTypes.MessageComponent,
-				onCollect: async (_, selection) => {
+				onCollect: async (selection) => {
 					acknowledge([client, bot], selection);
 
 					if (!isLast) {
@@ -403,7 +403,7 @@ function generateButtons(
 
 			const buttonId = createInteractionCollector([client, bot], {
 				type: Discord.InteractionTypes.MessageComponent,
-				onCollect: async (_, selection) => {
+				onCollect: async (selection) => {
 					acknowledge([client, bot], selection);
 
 					if (entry.inflectionTable === undefined || selection.data === undefined) {
@@ -451,7 +451,7 @@ function generateButtons(
 
 	const definitionsMenuButtonId = createInteractionCollector([client, bot], {
 		type: Discord.InteractionTypes.MessageComponent,
-		onCollect: async (_, selection) => {
+		onCollect: async (selection) => {
 			acknowledge([client, bot], selection);
 
 			data.inflectionTableIndex = 0;
@@ -463,7 +463,7 @@ function generateButtons(
 
 	const inflectionMenuButtonId = createInteractionCollector([client, bot], {
 		type: Discord.InteractionTypes.MessageComponent,
-		onCollect: async (_, selection) => {
+		onCollect: async (selection) => {
 			acknowledge([client, bot], selection);
 
 			data.currentView = ContentTabs.Inflection;
@@ -515,7 +515,7 @@ function entryToEmbeds(
 	entry: DictionaryEntry,
 	verbose: boolean,
 	{ language, locale }: { language: LocalisationLanguage; locale: Locale },
-): Discord.Embed[] {
+): Discord.CamelizedDiscordEmbed[] {
 	let partOfSpeechDisplayed: string;
 	if (entry.partOfSpeech === undefined) {
 		const strings = {
@@ -543,8 +543,8 @@ function entryToEmbeds(
 
 	const word = entry.lemma;
 
-	const embeds: Discord.Embed[] = [];
-	const fields: NonNullable<Discord.Embed["fields"]> = [];
+	const embeds: Discord.CamelizedDiscordEmbed[] = [];
+	const fields: Discord.CamelizedDiscordEmbedField[] = [];
 
 	if (entry.nativeDefinitions !== undefined && entry.nativeDefinitions.length !== 0) {
 		const definitionsStringified = stringifyEntries(client, entry.nativeDefinitions, "definitions", { locale });
@@ -660,7 +660,7 @@ function entryToEmbeds(
 		}),
 	};
 	const sourcesFormatted = entry.sources.map(([link, licence]) => `[${licence.name}](${link})`).join(" · ");
-	const sourceEmbed: Discord.Embed = {
+	const sourceEmbed: Discord.CamelizedDiscordEmbed = {
 		description: `${constants.symbols.link} ${sourcesFormatted}`,
 		color: constants.colors.peach,
 		footer: { text: strings.sourcedResponsibly },

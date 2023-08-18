@@ -1,7 +1,7 @@
 import { Guild } from "../../database/structs/guild";
 import diagnostics from "../../diagnostics";
 import { LocalService } from "../service";
-import * as Discord from "discordeno";
+import * as Discord from "@discordeno/bot";
 
 type Configuration = NonNullable<Guild["features"]["moderation"]["features"]>["alerts"];
 
@@ -33,13 +33,13 @@ class AlertService extends LocalService {
 		return channelId;
 	}
 
-	async alert(bot: Discord.Bot, message: Discord.CreateMessage): Promise<void> {
+	async alert(message: Discord.CreateMessageOptions): Promise<void> {
 		const channelId = this.channelId;
 		if (channelId === undefined) {
 			return;
 		}
 
-		Discord.sendMessage(bot, channelId, message).catch(() => {
+		this.bot.rest.sendMessage(channelId, message).catch(() => {
 			this.client.log.warn(
 				`Failed to send alert to ${diagnostics.display.channel(channelId)} on ${diagnostics.display.guild(
 					this.guildId,

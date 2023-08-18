@@ -3,7 +3,7 @@ import { Client, localise } from "../../../../client";
 import { deleteReply, parseArguments, postponeReply } from "../../../../interactions";
 import { SongListing } from "../../data/types";
 import { handleRequestPlayback } from "./query";
-import * as Discord from "discordeno";
+import * as Discord from "@discordeno/bot";
 
 async function handleRequestFilePlayback(
 	[client, bot]: [Client, Discord.Bot],

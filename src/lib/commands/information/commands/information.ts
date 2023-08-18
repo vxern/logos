@@ -1,7 +1,7 @@
 import { CommandTemplate } from "../../command";
 import { handleDisplayBotInformation } from "./information/bot";
 import { handleDisplayGuildInformation } from "./information/guild";
-import * as Discord from "discordeno";
+import * as Discord from "@discordeno/bot";
 
 const command: CommandTemplate = {
 	name: "information",

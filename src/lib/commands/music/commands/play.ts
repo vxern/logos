@@ -3,7 +3,7 @@ import { query } from "../../parameters";
 import { sources } from "../data/sources/sources";
 import { handleRequestFilePlayback } from "./play/file";
 import { handleRequestQueryPlayback } from "./play/query";
-import * as Discord from "discordeno";
+import * as Discord from "@discordeno/bot";
 
 const command: OptionTemplate = {
 	name: "play",

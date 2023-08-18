@@ -10,9 +10,10 @@ import languages, {
 } from "../constants/languages";
 import time from "../constants/time";
 import defaults from "../defaults";
+import { handleGuildMembersChunk, overrideDefaultEventHandlers, enableDesiredProperties } from "../fixes";
 import { timestamp } from "../formatting";
 import * as Logos from "../types";
-import { Command, CommandTemplate, InteractionHandler, LocalisationProperties, Option } from "./commands/command";
+import { Command, CommandTemplate, InteractionHandler, Option } from "./commands/command";
 import commandsRaw from "./commands/commands";
 import { SentencePair } from "./commands/language/commands/game";
 import { SupportedLanguage } from "./commands/language/module";
@@ -44,11 +45,11 @@ import { RealtimeUpdateService } from "./services/realtime-updates/service";
 import { RoleIndicatorService } from "./services/role-indicators/role-indicators";
 import { Service } from "./services/service";
 import { StatusService } from "./services/status/service";
-import { fetchMembers } from "./utils";
-import * as Discord from "discordeno";
+import { requestMembers } from "./utils";
+import * as Discord from "@discordeno/bot";
+import * as Sentry from "@sentry/node";
 import FancyLog from "fancy-log";
 import Fauna from "fauna";
-import * as Sentry from "@sentry/node";
 
 type Client = {
 	metadata: {
@@ -264,6 +265,7 @@ async function dispatchGlobal<EventName extends keyof Discord.EventHandlers>(
 	{ args }: { args: Parameters<Discord.EventHandlers[EventName]> },
 ): Promise<void> {
 	for (const service of client.services.global) {
+		// @ts-ignore: This is fine.
 		service[eventName](...args);
 	}
 }
@@ -280,6 +282,7 @@ async function dispatchLocal<EventName extends keyof Discord.EventHandlers>(
 	}
 
 	for (const service of services) {
+		// @ts-ignore: This is fine.
 		service[eventName](...args);
 	}
 }
@@ -311,8 +314,8 @@ async function initialiseClient(
 			token: metadata.environment.discordSecret,
 			intents:
 				Discord.Intents.Guilds |
-				Discord.Intents.GuildMembers |
-				Discord.Intents.GuildBans |
+				Discord.Intents.GuildMembers | // Members joining, leaving, changing.
+				Discord.Intents.GuildModeration | // Access to audit log.
 				Discord.Intents.GuildVoiceStates |
 				Discord.Intents.GuildMessages |
 				Discord.Intents.MessageContent,
@@ -320,100 +323,109 @@ async function initialiseClient(
 				async ready(...args) {
 					dispatchGlobal(client, "ready", { args });
 				},
-				async interactionCreate(bot, interaction) {
+				async interactionCreate(interaction) {
 					await handleInteractionCreate([client, bot], interaction);
 
-					dispatchEvent(client, interaction.guildId, "interactionCreate", { args: [bot, interaction] });
+					dispatchEvent(client, interaction.guildId, "interactionCreate", { args: [interaction] });
 				},
-				async guildMemberAdd(bot, member, user) {
-					dispatchEvent(client, member.guildId, "guildMemberAdd", { args: [bot, member, user] });
+				async guildMemberAdd(member, user) {
+					dispatchEvent(client, member.guildId, "guildMemberAdd", { args: [member, user] });
 				},
-				async guildMemberRemove(bot, user, guildId) {
-					dispatchEvent(client, guildId, "guildMemberRemove", { args: [bot, user, guildId] });
+				async guildMemberRemove(user, guildId) {
+					dispatchEvent(client, guildId, "guildMemberRemove", { args: [user, guildId] });
 				},
-				async guildMemberUpdate(bot, member, user) {
-					dispatchEvent(client, member.guildId, "guildMemberUpdate", { args: [bot, member, user] });
+				async guildMemberUpdate(member, user) {
+					dispatchEvent(client, member.guildId, "guildMemberUpdate", { args: [member, user] });
 				},
-				async messageCreate(bot, message) {
-					dispatchEvent(client, message.guildId, "messageCreate", { args: [bot, message] });
+				async messageCreate(message) {
+					dispatchEvent(client, message.guildId, "messageCreate", { args: [message] });
 				},
-				async messageDelete(bot, payload, message) {
-					dispatchEvent(client, payload.guildId, "messageDelete", { args: [bot, payload, message] });
+				async messageDelete(payload, message) {
+					dispatchEvent(client, payload.guildId, "messageDelete", { args: [payload, message] });
 				},
-				async messageDeleteBulk(bot, payload) {
-					dispatchEvent(client, payload.guildId, "messageDeleteBulk", { args: [bot, payload] });
+				async messageDeleteBulk(payload) {
+					dispatchEvent(client, payload.guildId, "messageDeleteBulk", { args: [payload] });
 				},
-				async messageUpdate(bot, message, oldMessage) {
-					dispatchEvent(client, message.guildId, "messageUpdate", { args: [bot, message, oldMessage] });
+				async messageUpdate(message, oldMessage) {
+					dispatchEvent(client, message.guildId, "messageUpdate", { args: [message, oldMessage] });
 				},
-				async voiceServerUpdate(bot, payload) {
-					dispatchEvent(client, payload.guildId, "voiceServerUpdate", { args: [bot, payload] });
+				async voiceServerUpdate(payload) {
+					dispatchEvent(client, payload.guildId, "voiceServerUpdate", { args: [payload] });
 				},
-				async voiceStateUpdate(bot, voiceState) {
-					dispatchEvent(client, voiceState.guildId, "voiceStateUpdate", { args: [bot, voiceState] });
+				async voiceStateUpdate(voiceState) {
+					dispatchEvent(client, voiceState.guildId, "voiceStateUpdate", { args: [voiceState] });
 				},
-				async channelCreate(bot, channel) {
-					dispatchEvent(client, channel.guildId, "channelCreate", { args: [bot, channel] });
+				async channelCreate(channel) {
+					dispatchEvent(client, channel.guildId, "channelCreate", { args: [channel] });
 				},
-				async channelDelete(bot, channel) {
+				async channelDelete(channel) {
 					client.cache.channels.delete(channel.id);
-					client.cache.guilds.get(channel.guildId)?.channels.delete(channel.id);
 
-					dispatchEvent(client, channel.guildId, "channelDelete", { args: [bot, channel] });
-				},
-				async channelPinsUpdate(bot, data) {
-					dispatchEvent(client, data.guildId, "channelPinsUpdate", { args: [bot, data] });
-				},
-				async channelUpdate(bot, channel) {
-					dispatchEvent(client, channel.guildId, "channelUpdate", { args: [bot, channel] });
-				},
-				async guildEmojisUpdate(bot, payload) {
-					dispatchEvent(client, payload.guildId, "guildEmojisUpdate", { args: [bot, payload] });
-				},
-				async guildBanAdd(bot, user, guildId) {
-					dispatchEvent(client, guildId, "guildBanAdd", { args: [bot, user, guildId] });
-				},
-				async guildBanRemove(bot, user, guildId) {
-					dispatchEvent(client, guildId, "guildBanRemove", { args: [bot, user, guildId] });
-				},
-				async guildCreate(bot, guild) {
-					await handleGuildCreate(client, bot, guild);
+					if (channel.guildId !== undefined) {
+						client.cache.guilds.get(channel.guildId)?.channels.delete(channel.id);
+					}
 
-					dispatchEvent(client, guild.id, "guildCreate", { args: [bot, guild] });
+					dispatchEvent(client, channel.guildId, "channelDelete", { args: [channel] });
 				},
-				async guildDelete(bot, id, shardId) {
-					await handleGuildDelete(client, bot, id);
+				async channelPinsUpdate(data) {
+					dispatchEvent(client, data.guildId, "channelPinsUpdate", { args: [data] });
+				},
+				async channelUpdate(channel) {
+					dispatchEvent(client, channel.guildId, "channelUpdate", { args: [channel] });
+				},
+				async guildEmojisUpdate(payload) {
+					dispatchEvent(client, payload.guildId, "guildEmojisUpdate", { args: [payload] });
+				},
+				async guildBanAdd(user, guildId) {
+					dispatchEvent(client, guildId, "guildBanAdd", { args: [user, guildId] });
+				},
+				async guildBanRemove(user, guildId) {
+					dispatchEvent(client, guildId, "guildBanRemove", { args: [user, guildId] });
+				},
+				async guildCreate(guild) {
+					await handleGuildCreate([client, bot], guild);
 
-					dispatchEvent(client, id, "guildDelete", { args: [bot, id, shardId] });
+					dispatchEvent(client, guild.id, "guildCreate", { args: [guild] });
 				},
-				async guildUpdate(bot, guild) {
-					dispatchEvent(client, guild.id, "guildUpdate", { args: [bot, guild] });
+				async guildDelete(id, shardId) {
+					await handleGuildDelete(client, id);
+
+					dispatchEvent(client, id, "guildDelete", { args: [id, shardId] });
 				},
-				async roleCreate(bot, role) {
-					dispatchEvent(client, role.guildId, "roleCreate", { args: [bot, role] });
+				async guildUpdate(guild) {
+					dispatchEvent(client, guild.id, "guildUpdate", { args: [guild] });
 				},
-				async roleDelete(bot, role) {
-					dispatchEvent(client, role.guildId, "roleDelete", { args: [bot, role] });
+				async roleCreate(role) {
+					dispatchEvent(client, role.guildId, "roleCreate", { args: [role] });
 				},
-				async roleUpdate(bot, role) {
-					dispatchEvent(client, role.guildId, "roleUpdate", { args: [bot, role] });
+				async roleDelete(role) {
+					dispatchEvent(client, role.guildId, "roleDelete", { args: [role] });
+				},
+				async roleUpdate(role) {
+					dispatchEvent(client, role.guildId, "roleUpdate", { args: [role] });
 				},
 			},
-			transformers: withCaching(client, Discord.createTransformers({})),
 		}),
 	);
 
-	const lavalinkService = new LavalinkService(client, bot);
+	bot.transformers.desiredProperties = enableDesiredProperties(
+		bot.transformers.desiredProperties,
+	) as Discord.Transformers["desiredProperties"];
+	bot.handlers.GUILD_MEMBERS_CHUNK = handleGuildMembersChunk;
+	bot.gateway.cache.requestMembers = { enabled: true, pending: new Discord.Collection() };
+	bot.transformers = withCaching(client, bot.transformers);
+
+	const lavalinkService = new LavalinkService([client, bot]);
 	client.services.global.push(lavalinkService);
 	client.services.music.lavalink = lavalinkService;
-	await lavalinkService.start(bot);
+	await lavalinkService.start();
 
-	await Discord.startBot(bot);
+	await bot.start();
 
-	const statusService = new StatusService(client);
+	const statusService = new StatusService([client, bot]);
 	client.services.global.push(statusService);
 	client.services.status = statusService;
-	await statusService.start(bot);
+	await statusService.start();
 }
 
 async function prefetchDataFromDatabase(client: Client, database: Database): Promise<void> {
@@ -424,22 +436,8 @@ async function prefetchDataFromDatabase(client: Client, database: Database): Pro
 	]);
 }
 
-function overrideDefaultEventHandlers(bot: Discord.Bot): Discord.Bot {
-	bot.handlers.MESSAGE_UPDATE = (bot, data) => {
-		const messageData = data.d as Discord.DiscordMessage;
-		if (!("author" in messageData)) {
-			return;
-		}
-
-		bot.events.messageUpdate(bot, bot.transformers.message(bot, messageData));
-	};
-
-	return bot;
-}
-
 export async function handleGuildCreate(
-	client: Client,
-	bot: Discord.Bot,
+	[client, bot]: [Client, Discord.Bot],
 	guild: Discord.Guild | Logos.Guild,
 	options: { isUpdate: boolean } = { isUpdate: false },
 ): Promise<void> {
@@ -464,7 +462,7 @@ export async function handleGuildCreate(
 	const guildCommands: Command[] = [commands.information, commands.credits, commands.licence, commands.settings];
 	const services: Service[] = [];
 
-	const realtimeUpdateService = new RealtimeUpdateService(client, guild.id, guildDocument.ref);
+	const realtimeUpdateService = new RealtimeUpdateService([client, bot], guild.id, guildDocument.ref);
 	services.push(realtimeUpdateService);
 
 	client.services.realtimeUpdates.set(guild.id, realtimeUpdateService);
@@ -473,7 +471,7 @@ export async function handleGuildCreate(
 		const information = configuration.features.information.features;
 
 		if (information.journaling.enabled) {
-			const service = new JournallingService(client, guild.id);
+			const service = new JournallingService([client, bot], guild.id);
 			services.push(service);
 
 			client.services.journalling.set(guild.id, service);
@@ -483,21 +481,21 @@ export async function handleGuildCreate(
 			const notices = information.notices.features;
 
 			if (notices.information.enabled) {
-				const service = new InformationNoticeService(client, guild.id);
+				const service = new InformationNoticeService([client, bot], guild.id);
 				services.push(service);
 
 				client.services.notices.information.set(guild.id, service);
 			}
 
 			if (notices.roles.enabled) {
-				const service = new RoleNoticeService(client, guild.id);
+				const service = new RoleNoticeService([client, bot], guild.id);
 				services.push(service);
 
 				client.services.notices.roles.set(guild.id, service);
 			}
 
 			if (notices.welcome.enabled) {
-				const service = new WelcomeNoticeService(client, guild.id);
+				const service = new WelcomeNoticeService([client, bot], guild.id);
 				services.push(service);
 
 				client.services.notices.welcome.set(guild.id, service);
@@ -543,7 +541,7 @@ export async function handleGuildCreate(
 		const moderation = configuration.features.moderation.features;
 
 		if (moderation.alerts.enabled) {
-			const service = new AlertService(client, guild.id);
+			const service = new AlertService([client, bot], guild.id);
 			services.push(service);
 
 			client.services.alerts.set(guild.id, service);
@@ -576,14 +574,14 @@ export async function handleGuildCreate(
 		if (moderation.reports.enabled) {
 			guildCommands.push(commands.report);
 
-			const service = new ReportService(client, guild.id);
+			const service = new ReportService([client, bot], guild.id);
 			services.push(service);
 
 			client.services.prompts.reports.set(guild.id, service);
 		}
 
 		if (moderation.verification.enabled) {
-			const service = new VerificationService(client, guild.id);
+			const service = new VerificationService([client, bot], guild.id);
 			services.push(service);
 
 			client.services.prompts.verification.set(guild.id, service);
@@ -594,21 +592,21 @@ export async function handleGuildCreate(
 		const server = configuration.features.server.features;
 
 		if (server.dynamicVoiceChannels.enabled) {
-			const service = new DynamicVoiceChannelService(client, guild.id);
+			const service = new DynamicVoiceChannelService([client, bot], guild.id);
 			services.push(service);
 
 			client.services.dynamicVoiceChannels.set(guild.id, service);
 		}
 
 		if (server.entry.enabled) {
-			const service = new EntryService(client, guild.id);
+			const service = new EntryService([client, bot], guild.id);
 			services.push(service);
 
 			client.services.entry.set(guild.id, service);
 		}
 
 		if (server.roleIndicators?.enabled) {
-			const service = new RoleIndicatorService(client, guild.id);
+			const service = new RoleIndicatorService([client, bot], guild.id);
 			services.push(service);
 
 			client.services.roleIndicators.set(guild.id, service);
@@ -617,7 +615,7 @@ export async function handleGuildCreate(
 		if (server.suggestions.enabled) {
 			guildCommands.push(commands.suggestion);
 
-			const service = new SuggestionService(client, guild.id);
+			const service = new SuggestionService([client, bot], guild.id);
 			services.push(service);
 
 			client.services.prompts.suggestions.set(guild.id, service);
@@ -630,7 +628,7 @@ export async function handleGuildCreate(
 		if (social.music.enabled) {
 			guildCommands.push(commands.music);
 
-			const service = new MusicService(client, guild.id);
+			const service = new MusicService([client, bot], guild.id);
 			services.push(service);
 
 			client.services.music.music.set(guild.id, service);
@@ -645,15 +643,15 @@ export async function handleGuildCreate(
 		}
 	}
 
-	await Discord.upsertGuildApplicationCommands(bot, guild.id, guildCommands).catch((reason) =>
-		client.log.warn(`Failed to upsert commands on ${diagnostics.display.guild(guild)}: ${reason}`),
-	);
+	await bot.rest
+		.upsertGuildApplicationCommands(guild.id, guildCommands)
+		.catch((reason) => client.log.warn(`Failed to upsert commands on ${diagnostics.display.guild(guild)}:`, reason));
 
 	if (!options.isUpdate) {
 		client.log.info(`Fetching ~${guild.memberCount} members of ${diagnostics.display.guild(guild)}...`);
 
-		await fetchMembers(bot, guild.id, { limit: 0, query: "" }).catch((reason) =>
-			client.log.warn(`Failed to fetch members of ${diagnostics.display.guild(guild)}: ${reason}`),
+		await requestMembers(bot, guild.id, { limit: 0, query: "" }).catch((reason) =>
+			client.log.warn(`Failed to fetch members of ${diagnostics.display.guild(guild)}:`, reason),
 		);
 
 		client.log.info(`Fetched ~${guild.memberCount} members of ${diagnostics.display.guild(guild)}.`);
@@ -662,7 +660,7 @@ export async function handleGuildCreate(
 	client.log.info(`Starting ${services.length} service(s) on ${diagnostics.display.guild(guild)}...`);
 	const promises = [];
 	for (const service of services) {
-		promises.push(service.start(bot));
+		promises.push(service.start());
 	}
 	Promise.all(promises).then((_) => {
 		client.log.info(`Services started on ${diagnostics.display.guild(guild)}.`);
@@ -671,7 +669,7 @@ export async function handleGuildCreate(
 	client.services.local.set(guild.id, services);
 }
 
-export async function handleGuildDelete(client: Client, bot: Discord.Bot, guildId: bigint): Promise<void> {
+export async function handleGuildDelete(client: Client, guildId: bigint): Promise<void> {
 	const guild = client.cache.guilds.get(guildId);
 	if (guild === undefined) {
 		return undefined;
@@ -680,7 +678,7 @@ export async function handleGuildDelete(client: Client, bot: Discord.Bot, guildI
 	const runningServices = client.services.local.get(guild.id) ?? [];
 	client.services.local.delete(guild.id);
 	for (const runningService of runningServices) {
-		runningService.stop(bot);
+		runningService.stop();
 	}
 }
 
@@ -759,7 +757,9 @@ function withCaching(client: Client, transformers: Discord.Transformers): Discor
 
 		client.cache.channels.set(result.id, result);
 
-		client.cache.guilds.get(result.guildId)?.channels.set(result.id, result);
+		if (result.guildId !== undefined) {
+			client.cache.guilds.get(result.guildId)?.channels.set(result.id, result);
+		}
 
 		return resultUnoptimised;
 	};
@@ -773,15 +773,15 @@ function withCaching(client: Client, transformers: Discord.Transformers): Discor
 		return resultUnoptimised;
 	};
 
-	transformers.member = (bot, payload, ...args) => {
-		const resultUnoptimised = member(bot, payload, ...args);
+	transformers.member = (bot, payload, guildId, userId) => {
+		const resultUnoptimised = member(bot, payload, guildId, userId);
 		const result = Logos.slimMember(resultUnoptimised);
 
-		const memberSnowflake = bot.transformers.snowflake(`${result.id}${result.guildId}`);
+		const memberSnowflake = bot.transformers.snowflake(`${userId}${guildId}`);
 
 		client.cache.members.set(memberSnowflake, result);
 
-		client.cache.guilds.get(result.guildId)?.members.set(result.id, result);
+		client.cache.guilds.get(BigInt(guildId))?.members.set(BigInt(userId), result);
 
 		return resultUnoptimised;
 	};
@@ -910,7 +910,7 @@ function localiseCommands<CommandsRaw extends Record<string, CommandTemplate>, C
 	localisations: Client["localisations"],
 	commandsRaw: CommandsRaw,
 ): Record<CommandName, Command> {
-	function localiseCommandOrOption(key: string): Pick<Command, LocalisationProperties> | undefined {
+	function localiseCommandOrOption(key: string, type?: CommandTemplate["type"]): Partial<Command> | undefined {
 		const optionName = key.split(".")?.at(-1);
 		if (optionName === undefined) {
 			console.warn(`Failed to get option name from localisation key '${key}'.`);
@@ -933,6 +933,13 @@ function localiseCommands<CommandsRaw extends Record<string, CommandTemplate>, C
 			nameLocalisations[locale] = name;
 		}
 
+		if (type === Discord.ApplicationCommandTypes.Message) {
+			return {
+				name,
+				nameLocalizations: nameLocalisations ?? {},
+			};
+		}
+
 		const descriptionLocalisationsAll =
 			localisations.get(`${key}.description`) ?? localisations.get(`parameters.${optionName}.description`);
 		const description = descriptionLocalisationsAll?.get(defaults.LOCALISATION_LANGUAGE)?.({});
@@ -953,12 +960,12 @@ function localiseCommands<CommandsRaw extends Record<string, CommandTemplate>, C
 	const commands: Partial<Record<CommandName, Command>> = {};
 	for (const [commandName, commandRaw] of Object.entries(commandsRaw) as [CommandName, CommandTemplate][]) {
 		const commandKey = commandRaw.name;
-		const localisations = localiseCommandOrOption(commandKey);
+		const localisations = localiseCommandOrOption(commandKey, commandRaw.type);
 		if (localisations === undefined) {
 			continue;
 		}
 
-		const command: Command = { ...localisations, ...commandRaw, options: [] };
+		const command: Command = { ...localisations, ...commandRaw, options: [] } as Command;
 
 		for (const optionTemplate of commandRaw.options ?? []) {
 			const optionKey = [commandKey, "options", optionTemplate.name].join(".");
@@ -967,7 +974,7 @@ function localiseCommands<CommandsRaw extends Record<string, CommandTemplate>, C
 				continue;
 			}
 
-			const option: Option = { ...localisations, ...optionTemplate, options: [] };
+			const option: Option = { ...localisations, ...optionTemplate, options: [] } as Option;
 
 			for (const subOptionTemplate of optionTemplate.options ?? []) {
 				const subOptionKey = [optionKey, "options", subOptionTemplate.name].join(".");
@@ -976,7 +983,7 @@ function localiseCommands<CommandsRaw extends Record<string, CommandTemplate>, C
 					continue;
 				}
 
-				const subOption: Option = { ...localisations, ...subOptionTemplate, options: [] };
+				const subOption: Option = { ...localisations, ...subOptionTemplate, options: [] } as Option;
 
 				for (const subSubOptionTemplate of subOptionTemplate.options ?? []) {
 					const subSubOptionKey = [subOptionKey, "options", subSubOptionTemplate.name].join(".");
@@ -985,7 +992,7 @@ function localiseCommands<CommandsRaw extends Record<string, CommandTemplate>, C
 						continue;
 					}
 
-					const subSubOption: Option = { ...localisations, ...subSubOptionTemplate, options: [] };
+					const subSubOption: Option = { ...localisations, ...subSubOptionTemplate, options: [] } as Option;
 
 					subOption.options?.push(subSubOption);
 				}
@@ -993,7 +1000,7 @@ function localiseCommands<CommandsRaw extends Record<string, CommandTemplate>, C
 				option.options?.push(subOption);
 			}
 
-			command.options?.push(option);
+			(command as Discord.CreateSlashApplicationCommand).options?.push(option);
 		}
 
 		commands[commandName] = command;
@@ -1163,7 +1170,7 @@ function resolveIdentifierToMembers(
 
 	const moderatorRoleIds = guild.roles
 		.array()
-		.filter((role) => Discord.calculatePermissions(role.permissions).includes("MODERATE_MEMBERS"))
+		.filter((role) => role.permissions.has("MODERATE_MEMBERS"))
 		.map((role) => role.id);
 	if (moderatorRoleIds.length === 0) {
 		return undefined;
@@ -1224,7 +1231,7 @@ function resolveIdentifierToMembers(
 
 	const identifierLowercase = identifier.toLowerCase();
 	const matchedMembers = members.filter((member) => {
-		if (member.user?.toggles.bot && !options.includeBots) {
+		if (member.user?.toggles?.has("bot") && !options.includeBots) {
 			return false;
 		}
 		if (

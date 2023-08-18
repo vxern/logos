@@ -3,7 +3,7 @@ import * as Logos from "../../../../../types";
 import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../../client";
 import diagnostics from "../../../../diagnostics";
 import { parseArguments, reply } from "../../../../interactions";
-import * as Discord from "discordeno";
+import * as Discord from "@discordeno/bot";
 
 async function handleClearTimeoutAutocomplete(
 	[client, bot]: [Client, Discord.Bot],
@@ -95,13 +95,13 @@ async function handleClearTimeout([client, bot]: [Client, Discord.Bot], interact
 		return;
 	}
 
-	await Discord.editMember(bot, guildId, member.id, { communicationDisabledUntil: null }).catch(() =>
-		client.log.warn(`Failed to remove timeout of ${diagnostics.display.member(member)}.`),
-	);
+	await bot.rest
+		.editMember(guildId, member.id, { communicationDisabledUntil: null })
+		.catch(() => client.log.warn(`Failed to remove timeout of ${diagnostics.display.member(member)}.`));
 
 	if (configuration.journaling) {
 		const journallingService = client.services.journalling.get(guild.id);
-		journallingService?.log(bot, "memberTimeoutRemove", { args: [member, interaction.user] });
+		journallingService?.log("memberTimeoutRemove", { args: [member, interaction.user] });
 	}
 
 	const strings = {

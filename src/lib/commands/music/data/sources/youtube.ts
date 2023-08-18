@@ -5,7 +5,7 @@ import { Client, localise } from "../../../../client";
 import { createInteractionCollector, deleteReply, postponeReply, reply } from "../../../../interactions";
 import { Song, SongListing } from "../types";
 import { ListingResolver } from "./sources";
-import * as Discord from "discordeno";
+import * as Discord from "@discordeno/bot";
 import * as YouTubeSearch from "youtube-sr";
 
 const resolver: ListingResolver = async ([client, bot], interaction, query) => {
@@ -49,7 +49,7 @@ async function search(
 			type: Discord.InteractionTypes.MessageComponent,
 			userId: interaction.user.id,
 			limit: 1,
-			onCollect: async (bot, selection) => {
+			onCollect: async (selection) => {
 				deleteReply([client, bot], interaction);
 
 				const indexString = selection.data?.values?.at(0) as string | undefined;

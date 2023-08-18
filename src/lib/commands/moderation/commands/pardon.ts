@@ -12,7 +12,7 @@ import { parseArguments, reply, respond } from "../../../interactions";
 import { CommandTemplate } from "../../command";
 import { user } from "../../parameters";
 import { getActiveWarnings } from "../module";
-import * as Discord from "discordeno";
+import * as Discord from "@discordeno/bot";
 
 const command: CommandTemplate = {
 	name: "pardon",
@@ -182,7 +182,7 @@ async function handlePardonUser([client, bot]: [Client, Discord.Bot], interactio
 
 	if (configuration.journaling) {
 		const journallingService = client.services.journalling.get(guild.id);
-		journallingService?.log(bot, "memberWarnRemove", { args: [member, deletedWarning.data, interaction.user] });
+		journallingService?.log("memberWarnRemove", { args: [member, deletedWarning.data, interaction.user] });
 	}
 
 	const strings = {

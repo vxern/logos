@@ -14,7 +14,7 @@ import {
 } from "../../../interactions";
 import { getMemberAvatarURL } from "../../../utils";
 import { CommandTemplate } from "../../command";
-import * as Discord from "discordeno";
+import * as Discord from "@discordeno/bot";
 
 const commands = {
 	partial: {
@@ -31,7 +31,7 @@ const commands = {
 	},
 } satisfies Record<string, CommandTemplate>;
 
-interface CorrectionData extends Record<string, unknown> {
+interface CorrectionData extends Record<string, string> {
 	original: string;
 	corrected: string;
 }
@@ -60,7 +60,7 @@ async function handleStartCorrecting(
 		return;
 	}
 
-	if (message.isFromBot || message.content.trim().length === 0) {
+	if (message.author.toggles?.has("bot") || message.content.trim().length === 0) {
 		const strings = {
 			title: localise(client, "correction.strings.cannotCorrect.title", locale)(),
 			description: localise(client, "correction.strings.cannotCorrect.description", locale)(),
@@ -78,7 +78,7 @@ async function handleStartCorrecting(
 		return;
 	}
 
-	if (message.authorId === interaction.user.id) {
+	if (message.author.id === interaction.user.id) {
 		const strings = {
 			title: localise(client, "correction.strings.cannotCorrectOwn.title", locale)(),
 			description: localise(client, "correction.strings.cannotCorrectOwn.description", locale)(),
@@ -144,29 +144,31 @@ async function handleStartCorrecting(
 
 			acknowledge([client, bot], submission);
 
-			Discord.sendMessage(bot, message.channelId, {
-				messageReference: { messageId: message.id, channelId: message.channelId, guildId, failIfNotExists: false },
-				embeds: [
-					{
-						description: data.corrected,
-						color: constants.colors.lightGreen,
-						footer: {
-							text: `${constants.symbols.correction} ${strings.suggestedBy}`,
-							iconUrl: (() => {
-								if (member.avatar !== undefined) {
-									return getMemberAvatarURL(bot, guildId, interaction.user.id, member.avatar);
-								}
+			bot.rest
+				.sendMessage(message.channelId, {
+					messageReference: { messageId: message.id, channelId: message.channelId, guildId, failIfNotExists: false },
+					embeds: [
+						{
+							description: data.corrected,
+							color: constants.colors.lightGreen,
+							footer: {
+								text: `${constants.symbols.correction} ${strings.suggestedBy}`,
+								iconUrl: (() => {
+									if (member.avatar !== undefined) {
+										return getMemberAvatarURL(guildId, interaction.user.id, member.avatar);
+									}
 
-								return Discord.getAvatarURL(bot, interaction.user.id, interaction.user.discriminator, {
-									avatar: interaction.user.avatar,
-								});
-							})(),
+									return Discord.avatarUrl(interaction.user.id, interaction.user.discriminator, {
+										avatar: interaction.user.avatar,
+									});
+								})(),
+							},
 						},
-					},
-				],
-			}).catch(() =>
-				client.log.warn(`Failed to send correction to ${diagnostics.display.channel(message.channelId)}.`),
-			);
+					],
+				})
+				.catch(() =>
+					client.log.warn(`Failed to send correction to ${diagnostics.display.channel(message.channelId)}.`),
+				);
 
 			return true;
 		},
@@ -229,7 +231,7 @@ async function handleSubmittedInvalidCorrection(
 	return new Promise((resolve) => {
 		const continueId = createInteractionCollector([client, bot], {
 			type: Discord.InteractionTypes.MessageComponent,
-			onCollect: async (_, selection) => {
+			onCollect: async (selection) => {
 				deleteReply([client, bot], submission);
 				resolve(selection);
 			},
@@ -237,10 +239,10 @@ async function handleSubmittedInvalidCorrection(
 
 		const cancelId = createInteractionCollector([client, bot], {
 			type: Discord.InteractionTypes.MessageComponent,
-			onCollect: async (_, cancelSelection) => {
+			onCollect: async (cancelSelection) => {
 				const returnId = createInteractionCollector([client, bot], {
 					type: Discord.InteractionTypes.MessageComponent,
-					onCollect: (_, returnSelection) => {
+					onCollect: async (returnSelection) => {
 						deleteReply([client, bot], submission);
 						deleteReply([client, bot], cancelSelection);
 						resolve(returnSelection);
@@ -249,7 +251,7 @@ async function handleSubmittedInvalidCorrection(
 
 				const leaveId = createInteractionCollector([client, bot], {
 					type: Discord.InteractionTypes.MessageComponent,
-					onCollect: async (_, _leaveSelection) => {
+					onCollect: async (_) => {
 						deleteReply([client, bot], submission);
 						deleteReply([client, bot], cancelSelection);
 						resolve(undefined);
@@ -294,7 +296,7 @@ async function handleSubmittedInvalidCorrection(
 			},
 		});
 
-		let embed!: Discord.Embed;
+		let embed!: Discord.CamelizedDiscordEmbed;
 		switch (error) {
 			case "texts_not_different": {
 				const strings = {
@@ -307,6 +309,7 @@ async function handleSubmittedInvalidCorrection(
 					description: strings.description,
 					color: constants.colors.dullYellow,
 				};
+
 				break;
 			}
 			default: {
@@ -324,7 +327,8 @@ async function handleSubmittedInvalidCorrection(
 						},
 					],
 				});
-				break;
+
+				return;
 			}
 		}
 

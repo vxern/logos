@@ -20,7 +20,7 @@ import {
 } from "../../interactions";
 import { snowflakeToTimestamp } from "../../utils";
 import { LocalService } from "../service";
-import * as Discord from "discordeno";
+import * as Discord from "@discordeno/bot";
 
 type EntryStepButtonID = [parameter: string];
 
@@ -48,7 +48,7 @@ class EntryService extends LocalService {
 		return guildDocument.data.features.moderation.features?.verification;
 	}
 
-	async interactionCreate(bot: Discord.Bot, interactionRaw: Discord.Interaction): Promise<void> {
+	async interactionCreate(interactionRaw: Discord.Interaction): Promise<void> {
 		if (interactionRaw.type !== Discord.InteractionTypes.MessageComponent) {
 			return;
 		}
@@ -69,15 +69,15 @@ class EntryService extends LocalService {
 		const [step, parameter] = decodeId<EntryStepButtonID>(customId);
 		switch (step) {
 			case constants.components.entry.acceptedRules: {
-				this.handleAcceptRules(bot, interaction);
+				this.handleAcceptRules(interaction);
 				break;
 			}
 			case constants.components.entry.requestedVerification: {
-				this.handleRequestVerification(bot, interaction, parameter);
+				this.handleRequestVerification(interaction, parameter);
 				break;
 			}
 			case constants.components.entry.selectedLanguageProficiency: {
-				this.handleSelectLanguageProficiency(bot, interaction, parameter);
+				this.handleSelectLanguageProficiency(interaction, parameter);
 				break;
 			}
 			default: {
@@ -87,7 +87,7 @@ class EntryService extends LocalService {
 		}
 	}
 
-	private async handleAcceptRules(bot: Discord.Bot, interaction: Logos.Interaction): Promise<void> {
+	private async handleAcceptRules(interaction: Logos.Interaction): Promise<void> {
 		const locale = interaction.locale;
 
 		const guildDocument = this.guildDocument;
@@ -115,7 +115,7 @@ class EntryService extends LocalService {
 			},
 		};
 
-		reply([this.client, bot], interaction, {
+		reply([this.client, this.bot], interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -145,11 +145,7 @@ class EntryService extends LocalService {
 		});
 	}
 
-	private async handleRequestVerification(
-		bot: Discord.Bot,
-		interaction: Logos.Interaction,
-		parameter: string,
-	): Promise<void> {
+	private async handleRequestVerification(interaction: Logos.Interaction, parameter: string): Promise<void> {
 		const locale = interaction.locale;
 
 		const guild = this.guild;
@@ -184,7 +180,7 @@ class EntryService extends LocalService {
 				description: localise(this.client, "entry.verification.answers.alreadyAnswered.description", locale)(),
 			};
 
-			reply([this.client, bot], interaction, {
+			reply([this.client, this.bot], interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -202,7 +198,7 @@ class EntryService extends LocalService {
 			return;
 		}
 
-		createModalComposer<EntryRequest["answers"]>([this.client, bot], interaction, {
+		createModalComposer<EntryRequest["answers"]>([this.client, this.bot], interaction, {
 			modal: this.generateVerificationQuestionModal(interaction.featureLanguage, { locale }),
 			onSubmit: async (submission, answers) => {
 				const submitterReferenceId = stringifyValue(userDocument.ref);
@@ -217,7 +213,7 @@ class EntryService extends LocalService {
 						description: localise(this.client, "entry.verification.answers.alreadyAnswered.description", locale)(),
 					};
 
-					reply([this.client, bot], submission, {
+					reply([this.client, this.bot], submission, {
 						embeds: [
 							{
 								title: strings.title,
@@ -230,7 +226,7 @@ class EntryService extends LocalService {
 					return true;
 				}
 
-				await postponeReply([this.client, bot], submission);
+				await postponeReply([this.client, this.bot], submission);
 
 				const entryRequest = await this.client.database.adapters.entryRequests.create(this.client, {
 					createdAt: Date.now(),
@@ -247,7 +243,7 @@ class EntryService extends LocalService {
 				}
 
 				const journallingService = this.client.services.journalling.get(this.guildId);
-				journallingService?.log(bot, "entryRequestSubmit", { args: [interaction.user, entryRequest.data] });
+				journallingService?.log("entryRequestSubmit", { args: [interaction.user, entryRequest.data] });
 
 				const userId = BigInt(userDocument.data.account.id);
 				const reference = stringifyValue(entryRequest.ref);
@@ -257,7 +253,7 @@ class EntryService extends LocalService {
 					return "failure";
 				}
 
-				const prompt = await verificationService.savePrompt(bot, user, entryRequest);
+				const prompt = await verificationService.savePrompt(user, entryRequest);
 				if (prompt === undefined) {
 					return "failure";
 				}
@@ -277,7 +273,7 @@ class EntryService extends LocalService {
 					},
 				};
 
-				editReply([this.client, bot], submission, {
+				editReply([this.client, this.bot], submission, {
 					embeds: [
 						{
 							title: strings.title,
@@ -297,7 +293,7 @@ class EntryService extends LocalService {
 							description: localise(this.client, "entry.verification.answers.failed.description", locale)(),
 						};
 
-						editReply([this.client, bot], submission, {
+						editReply([this.client, this.bot], submission, {
 							embeds: [
 								{
 									title: strings.title,
@@ -374,11 +370,7 @@ class EntryService extends LocalService {
 		};
 	}
 
-	private async handleSelectLanguageProficiency(
-		bot: Discord.Bot,
-		interaction: Logos.Interaction,
-		parameter: string,
-	): Promise<void> {
+	private async handleSelectLanguageProficiency(interaction: Logos.Interaction, parameter: string): Promise<void> {
 		const locale = interaction.locale;
 
 		const guild = this.guild;
@@ -397,7 +389,7 @@ class EntryService extends LocalService {
 			return;
 		}
 
-		const canEnter = await this.vetUser(bot, interaction, { locale });
+		const canEnter = await this.vetUser(interaction, { locale });
 		if (!canEnter) {
 			return;
 		}
@@ -433,7 +425,7 @@ class EntryService extends LocalService {
 					},
 				};
 
-				reply([this.client, bot], interaction, {
+				reply([this.client, this.bot], interaction, {
 					embeds: [
 						{
 							title: strings.title,
@@ -476,7 +468,7 @@ class EntryService extends LocalService {
 			},
 		};
 
-		await reply([this.client, bot], interaction, {
+		await reply([this.client, this.bot], interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -487,20 +479,18 @@ class EntryService extends LocalService {
 			],
 		});
 
-		Discord.addRole(bot, guild.id, interaction.user.id, role.id, "User-requested role addition.").catch(() =>
-			this.client.log.warn(
-				`Failed to add ${diagnostics.display.role(role)} to ${diagnostics.display.user(
-					interaction.user,
-				)} on ${diagnostics.display.guild(guild.id)}.`,
-			),
-		);
+		this.bot.rest
+			.addRole(guild.id, interaction.user.id, role.id, "User-requested role addition.")
+			.catch(() =>
+				this.client.log.warn(
+					`Failed to add ${diagnostics.display.role(role)} to ${diagnostics.display.user(
+						interaction.user,
+					)} on ${diagnostics.display.guild(guild.id)}.`,
+				),
+			);
 	}
 
-	private async vetUser(
-		bot: Discord.Bot,
-		interaction: Logos.Interaction,
-		{ locale }: { locale: Locale },
-	): Promise<boolean> {
+	private async vetUser(interaction: Logos.Interaction, { locale }: { locale: Locale }): Promise<boolean> {
 		const userDocument = await this.client.database.adapters.users.getOrFetchOrCreate(
 			this.client,
 			"id",
@@ -513,7 +503,7 @@ class EntryService extends LocalService {
 				description: localise(this.client, "entry.verification.verifyingAccount.failed.description", locale)(),
 			};
 
-			reply([this.client, bot], interaction, {
+			reply([this.client, this.bot], interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -548,7 +538,7 @@ class EntryService extends LocalService {
 				description: localise(this.client, "entry.verification.answers.alreadyAnswered.description", locale)(),
 			};
 
-			reply([this.client, bot], interaction, {
+			reply([this.client, this.bot], interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -570,7 +560,7 @@ class EntryService extends LocalService {
 				description: localise(this.client, "entry.verification.answers.rejectedBefore.description", locale)(),
 			};
 
-			reply([this.client, bot], interaction, {
+			reply([this.client, this.bot], interaction, {
 				embeds: [
 					{
 						title: strings.title,

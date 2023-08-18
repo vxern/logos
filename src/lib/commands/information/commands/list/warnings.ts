@@ -6,7 +6,7 @@ import { Client, autocompleteMembers, localise, resolveInteractionToMember } fro
 import { Document } from "../../../../database/document";
 import { Warning } from "../../../../database/structs/warning";
 import { parseArguments, reply } from "../../../../interactions";
-import * as Discord from "discordeno";
+import * as Discord from "@discordeno/bot";
 
 async function handleDisplayWarningsAutocomplete(
 	[client, bot]: [Client, Discord.Bot],
@@ -22,7 +22,7 @@ async function handleDisplayWarningsAutocomplete(
 		return;
 	}
 
-	const isModerator = Discord.calculatePermissions(permissions).includes("MODERATE_MEMBERS");
+	const isModerator = permissions.has("MODERATE_MEMBERS");
 
 	autocompleteMembers(
 		[client, bot],
@@ -46,7 +46,7 @@ async function handleDisplayWarnings(
 		return;
 	}
 
-	const isModerator = Discord.calculatePermissions(permissions).includes("MODERATE_MEMBERS");
+	const isModerator = permissions.has("MODERATE_MEMBERS");
 
 	const member = resolveInteractionToMember(
 		[client, bot],
@@ -113,7 +113,7 @@ function getWarningPage(
 	warnings: Document<Warning>[],
 	isSelf: boolean,
 	{ locale }: { locale: Locale },
-): Discord.Embed {
+): Discord.CamelizedDiscordEmbed {
 	if (warnings.length === 0) {
 		if (isSelf) {
 			const strings = {

@@ -2,7 +2,7 @@ import constants from "../../../../../constants/constants";
 import * as Logos from "../../../../../types";
 import { Client, localise } from "../../../../client";
 import { parseArguments, reply } from "../../../../interactions";
-import * as Discord from "discordeno";
+import * as Discord from "@discordeno/bot";
 
 async function handleDisplayVolume(
 	[client, bot]: [Client, Discord.Bot],
@@ -22,7 +22,7 @@ async function handleDisplayVolume(
 		return;
 	}
 
-	const isVoiceStateVerified = musicService.verifyVoiceState(bot, interaction, "check");
+	const isVoiceStateVerified = musicService.verifyVoiceState(interaction, "check");
 	if (!isVoiceStateVerified) {
 		return;
 	}

@@ -1,5 +1,5 @@
 import { FeatureLanguage, LearningLanguage, Locale, LocalisationLanguage } from "./constants/languages";
-import * as Discord from "discordeno";
+import * as Discord from "@discordeno/bot";
 
 type Guild = Pick<
 	Discord.Guild,
@@ -75,7 +75,7 @@ function slimMember(member: Discord.Member): Member {
 
 type Message = Pick<
 	Discord.Message,
-	"guildId" | "components" | "id" | "type" | "channelId" | "timestamp" | "content" | "embeds" | "authorId"
+	"guildId" | "components" | "id" | "type" | "channelId" | "timestamp" | "content" | "embeds" | "author"
 >;
 
 function slimMessage(message: Discord.Message): Message {
@@ -88,7 +88,7 @@ function slimMessage(message: Discord.Message): Message {
 		timestamp: message.timestamp,
 		content: message.content,
 		embeds: message.embeds,
-		authorId: message.authorId,
+		author: message.author,
 	};
 }
 

@@ -2,7 +2,7 @@ import { LearningLanguage, Locale } from "../../../../constants/languages";
 import { DictionaryLicence } from "../../../../constants/licences";
 import { Client } from "../../../client";
 import { PartOfSpeech } from "./part-of-speech";
-import * as Discord from "discordeno";
+import * as Discord from "@discordeno/bot";
 
 type DictionaryProvisions =
 	/** Provides definitions of a lemma. */
@@ -30,7 +30,7 @@ interface Definition extends TaggedValue<string> {
 // rome-ignore lint/suspicious/noEmptyInterface: Alias.
 interface Etymology extends TaggedValue<string | undefined> {}
 
-type InflectionTable = { title: string; fields: NonNullable<Discord.Embed["fields"]> }[];
+type InflectionTable = { title: string; fields: Discord.CamelizedDiscordEmbedField[] }[];
 
 interface DictionaryEntry {
 	/** The topic word of an entry. */

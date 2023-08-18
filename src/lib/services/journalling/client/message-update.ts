@@ -5,13 +5,13 @@ import { ClientEvents, MessageGenerators } from "../generator";
 
 export default {
 	title: `${constants.symbols.events.message.updated} Message updated`,
-	message: (client, _, message, __) => {
+	message: (client, message, _) => {
 		const oldMessage = client.cache.messages.previous.get(message.id);
 		if (oldMessage === undefined) {
 			return;
 		}
 
-		const author = client.cache.users.get(message.authorId);
+		const author = client.cache.users.get(message.author.id);
 		if (author === undefined) {
 			return;
 		}
@@ -28,13 +28,13 @@ ${before}
 **AFTER**
 ${codeMultiline(message.content)}`;
 	},
-	filter: (client, originGuildId, _, message, oldMessage) => {
-		const author = client.cache.users.get(message.authorId);
+	filter: (client, originGuildId, message, oldMessage) => {
+		const author = client.cache.users.get(message.author.id);
 		if (author === undefined) {
 			return false;
 		}
 
-		return originGuildId === message.guildId && !author.toggles.bot && message.content !== oldMessage?.content;
+		return originGuildId === message.guildId && !author.toggles?.has("bot") && message.content !== oldMessage?.content;
 	},
 	color: constants.colors.blue,
 } satisfies MessageGenerators<ClientEvents>["messageUpdate"];

@@ -4,7 +4,7 @@ import { Client, localise } from "../../../client";
 import { reply } from "../../../interactions";
 import { OptionTemplate } from "../../command";
 import { handleResumePlayback } from "./resume";
-import * as Discord from "discordeno";
+import * as Discord from "@discordeno/bot";
 
 const command: OptionTemplate = {
 	name: "pause",
@@ -28,7 +28,7 @@ async function handlePausePlayback(
 		return;
 	}
 
-	const isVoiceStateVerified = musicService.verifyCanManagePlayback(bot, interaction);
+	const isVoiceStateVerified = musicService.verifyCanManagePlayback(interaction);
 	if (!isVoiceStateVerified) {
 		return;
 	}

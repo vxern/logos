@@ -5,13 +5,13 @@ import { ClientEvents, MessageGenerators } from "../generator";
 
 export default {
 	title: `${constants.symbols.events.message.deleted} Message deleted`,
-	message: (client, _, payload, __) => {
+	message: (client, payload, _) => {
 		const message = client.cache.messages.latest.get(payload.id);
 		if (message === undefined) {
 			return;
 		}
 
-		const author = client.cache.users.get(message.authorId);
+		const author = client.cache.users.get(message.author.id);
 		if (author === undefined) {
 			return;
 		}
@@ -24,18 +24,18 @@ export default {
 **CONTENT**
 ${codeMultiline(message.content)}`;
 	},
-	filter: (client, originGuildId, _, payload, __) => {
+	filter: (client, originGuildId, payload, __) => {
 		const message = client.cache.messages.latest.get(payload.id);
 		if (message === undefined) {
 			return false;
 		}
 
-		const author = client.cache.users.get(message.authorId);
+		const author = client.cache.users.get(message.author.id);
 		if (author === undefined) {
 			return false;
 		}
 
-		return originGuildId === message.guildId && !author.toggles.bot;
+		return originGuildId === message.guildId && !author.toggles?.has("bot");
 	},
 	color: constants.colors.red,
 } satisfies MessageGenerators<ClientEvents>["messageDelete"];

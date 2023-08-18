@@ -6,7 +6,7 @@ import { Client, localise } from "../../client";
 import { paginate } from "../../interactions";
 import { chunk } from "../../utils";
 import { SongListing, listingTypeToEmoji } from "./data/types";
-import * as Discord from "discordeno";
+import * as Discord from "@discordeno/bot";
 
 async function displayListings(
 	[client, bot]: [Client, Discord.Bot],

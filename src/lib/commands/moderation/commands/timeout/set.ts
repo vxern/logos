@@ -6,7 +6,7 @@ import * as Logos from "../../../../../types";
 import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../../client";
 import diagnostics from "../../../../diagnostics";
 import { parseArguments, parseTimeExpression, reply, respond } from "../../../../interactions";
-import * as Discord from "discordeno";
+import * as Discord from "@discordeno/bot";
 
 async function handleSetTimeoutAutocomplete(
 	[client, bot]: [Client, Discord.Bot],
@@ -118,13 +118,13 @@ async function handleSetTimeout([client, bot]: [Client, Discord.Bot], interactio
 		return;
 	}
 
-	await Discord.editMember(bot, guildId, member.id, { communicationDisabledUntil: until }).catch(() =>
-		client.log.warn(`Failed to time ${diagnostics.display.member(member)} out.`),
-	);
+	await bot.rest
+		.editMember(guildId, member.id, { communicationDisabledUntil: until })
+		.catch((reason) => client.log.warn(`Failed to time ${diagnostics.display.member(member)} out:`, reason));
 
 	if (configuration.journaling) {
 		const journallingService = client.services.journalling.get(guild.id);
-		journallingService?.log(bot, "memberTimeoutAdd", { args: [member, until, reason, interaction.user] });
+		journallingService?.log("memberTimeoutAdd", { args: [member, until, reason, interaction.user] });
 	}
 
 	const strings = {

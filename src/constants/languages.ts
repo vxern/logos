@@ -1,4 +1,4 @@
-import * as Discord from "discordeno";
+import * as Discord from "@discordeno/bot";
 
 const languages = {
 	localisation: {

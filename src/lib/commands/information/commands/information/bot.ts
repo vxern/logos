@@ -3,7 +3,7 @@ import { list } from "../../../../../formatting";
 import * as Logos from "../../../../../types";
 import { Client, localise } from "../../../../client";
 import { reply } from "../../../../interactions";
-import * as Discord from "discordeno";
+import * as Discord from "@discordeno/bot";
 
 async function handleDisplayBotInformation(
 	[client, bot]: [Client, Discord.Bot],
@@ -13,7 +13,7 @@ async function handleDisplayBotInformation(
 
 	const botUser =
 		client.cache.users.get(bot.id) ??
-		(await Discord.getUser(bot, bot.id).catch(() => {
+		(await bot.rest.getUser(bot.id).catch(() => {
 			client.log.warn("Failed to get bot user.");
 			return undefined;
 		}));
@@ -73,8 +73,8 @@ async function handleDisplayBotInformation(
 		embeds: [
 			{
 				author: {
-					iconUrl: Discord.getAvatarURL(bot, bot.id, botUser.discriminator, {
-						avatar: botUser.avatar,
+					iconUrl: Discord.avatarUrl(bot.id, botUser.discriminator, {
+						avatar: botUser.avatar ?? undefined,
 						format: "png",
 					}),
 					name: botUser.username,

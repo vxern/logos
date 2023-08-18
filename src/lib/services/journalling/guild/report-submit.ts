@@ -23,6 +23,6 @@ ${report.answers.users}
 **MESSAGE LINK**
 ${messageLink}`;
 	},
-	filter: (_, originGuildId, author, ___) => originGuildId === author.guildId,
+	filter: (_, originGuildId, author, __) => originGuildId === author.guildId,
 	color: constants.colors.darkRed,
 } satisfies MessageGenerators<GuildEvents>["reportSubmit"];

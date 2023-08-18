@@ -4,7 +4,7 @@ import { Client, localise } from "../../../client";
 import { parseArguments, reply } from "../../../interactions";
 import { CommandTemplate } from "../../command";
 import { show } from "../../parameters";
-import * as Discord from "discordeno";
+import * as Discord from "@discordeno/bot";
 
 const command: CommandTemplate = {
 	name: "resources",

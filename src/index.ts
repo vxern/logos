@@ -9,10 +9,10 @@ import { capitalise } from "./formatting";
 import { Client, initialiseClient } from "./lib/client";
 import { SentencePair } from "./lib/commands/language/commands/game";
 import { getSupportedLanguages } from "./lib/commands/language/module";
+import * as Sentry from "@sentry/node";
 import * as csv from "csv-parse/sync";
 import * as dotenv from "dotenv";
 import * as fs from "fs/promises";
-import * as Sentry from "@sentry/node";
 
 async function readDotEnvFile(fileUri: string, isTemplate = false): Promise<Record<string, string> | undefined> {
 	const kind = isTemplate ? "environment template" : "environment";
@@ -114,10 +114,7 @@ async function loadLocalisations(directoryPath: string): Promise<Map<string, Map
 			.then((contents) => decoder.decode(contents))
 			.then((object) => JSON.parse(object) as Record<string, string>);
 
-		let lastKey: string | undefined = undefined;
 		for (const [key, value] of Object.entries(strings)) {
-			lastKey = key;
-
 			if (!localisations.has(key)) {
 				localisations.set(key, new Map());
 			}
@@ -143,7 +140,11 @@ async function loadLocalisations(directoryPath: string): Promise<Map<string, Map
 					continue;
 				}
 
-				if (key.endsWith(".description") && lastKey.endsWith(".name") && value.length > 100) {
+				if (
+					key.endsWith(".description") &&
+					`${key.replace(/\.description$/, ".name")}` in strings &&
+					value.length > 100
+				) {
 					console.warn(`${language}: '${key}' is too long (>100 characters). Normalising...`);
 
 					const valueNormalised = value.slice(0, 100);

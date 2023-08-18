@@ -7,7 +7,7 @@ import { Client, localise } from "../../../../client";
 import { paginate, parseArguments, reply, respond } from "../../../../interactions";
 import { chunk } from "../../../../utils";
 import { OptionTemplate } from "../../../command";
-import * as Discord from "discordeno";
+import * as Discord from "@discordeno/bot";
 
 const command: OptionTemplate = {
 	name: "software",

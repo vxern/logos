@@ -16,7 +16,7 @@ import {
 	reply,
 } from "../../../interactions";
 import { CommandTemplate } from "../../command";
-import * as Discord from "discordeno";
+import * as Discord from "@discordeno/bot";
 
 const command: CommandTemplate = {
 	name: "game",
@@ -77,7 +77,7 @@ async function handleStartGame([client, bot]: [Client, Discord.Bot], interaction
 	const customId = createInteractionCollector([client, bot], {
 		type: Discord.InteractionTypes.MessageComponent,
 		userId: interaction.user.id,
-		onCollect: async (bot, selection) => {
+		onCollect: async (selection) => {
 			acknowledge([client, bot], selection);
 
 			const selectionCustomId = selection.data?.customId;

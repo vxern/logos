@@ -9,7 +9,7 @@ import diagnostics from "../../diagnostics";
 import { createInteractionCollector, decodeId } from "../../interactions";
 import { getAllMessages } from "../../utils";
 import { LocalService } from "../service";
-import * as Discord from "discordeno";
+import * as Discord from "@discordeno/bot";
 
 type InteractionDataBase = [userId: string, guildId: string, reference: string];
 
@@ -48,16 +48,13 @@ abstract class PromptService<
 	private readonly type: PromptType;
 	private readonly customId: string;
 
-	private readonly handlers: Map<
-		string,
-		(bot: Discord.Bot, interaction: Discord.Interaction, data: InteractionData) => void
-	> = new Map();
+	private readonly handlers: Map<string, (interaction: Discord.Interaction, data: InteractionData) => void> = new Map();
 
-	private readonly prompts: Map</*reference: */ string, Logos.Message> = new Map();
+	private readonly prompts: Map</*reference: */ string, Discord.CamelizedDiscordMessage> = new Map();
 
 	private readonly documents: Document<DataType>[];
-	private readonly documentsByPromptId: Map</*promptId: */ bigint, Document<DataType>> = new Map();
-	private readonly userIds: Map</*promptId: */ bigint, bigint> = new Map();
+	private readonly documentsByPromptId: Map</*promptId: */ string, Document<DataType>> = new Map();
+	private readonly userIds: Map</*promptId: */ string, bigint> = new Map();
 
 	private readonly _configuration: ConfigurationLocators[PromptType];
 	get configuration(): Configurations[PromptType] | undefined {
@@ -87,15 +84,15 @@ abstract class PromptService<
 		return channelId;
 	}
 
-	constructor(client: Client, guildId: bigint, { type }: { type: PromptType }) {
-		super(client, guildId);
+	constructor([client, bot]: [Client, Discord.Bot], guildId: bigint, { type }: { type: PromptType }) {
+		super([client, bot], guildId);
 		this.type = type;
 		this.customId = customIds[type];
 		this.documents = this.getAllDocuments();
 		this._configuration = configurationLocators[type];
 	}
 
-	async start(bot: Discord.Bot): Promise<void> {
+	async start(): Promise<void> {
 		const [channelId, configuration, guild, guildDocument] = [
 			this.channelId,
 			this.configuration,
@@ -108,7 +105,7 @@ abstract class PromptService<
 
 		this.client.log.info(`Registering ${this.type} prompts on ${diagnostics.display.guild(guild)}...`);
 
-		const promptsAll = (await getAllMessages([this.client, bot], channelId)) ?? [];
+		const promptsAll = (await getAllMessages([this.client, this.bot], channelId)) ?? [];
 		const [valid, invalid] = this.filterPrompts(promptsAll);
 
 		const prompts = this.sortPrompts(valid);
@@ -131,7 +128,7 @@ abstract class PromptService<
 					continue;
 				}
 
-				const message = await this.savePrompt(bot, user, document);
+				const message = await this.savePrompt(user, document);
 				if (message === undefined) {
 					continue;
 				}
@@ -146,16 +143,16 @@ abstract class PromptService<
 		const expired = Array.from(prompts.values()).flatMap((map) => Array.from(map.values()));
 
 		for (const prompt of [...invalid, ...expired]) {
-			await Discord.deleteMessage(bot, prompt.channelId, prompt.id).catch(() => {
+			await this.bot.rest.deleteMessage(prompt.channelId, prompt.id).catch(() => {
 				this.client.log.warn("Failed to delete prompt.");
 			});
 		}
 
-		createInteractionCollector([this.client, bot], {
+		createInteractionCollector([this.client, this.bot], {
 			type: Discord.InteractionTypes.MessageComponent,
 			customId: this.customId,
 			doesNotExpire: true,
-			onCollect: async (bot, selection) => {
+			onCollect: async (selection) => {
 				const customId = selection.data?.customId;
 				if (customId === undefined) {
 					return;
@@ -168,24 +165,24 @@ abstract class PromptService<
 					return;
 				}
 
-				handle(bot, selection, [userId, this.guildIdString, reference, ...metadata] as InteractionData);
+				handle(selection, [userId, this.guildIdString, reference, ...metadata] as InteractionData);
 			},
 		});
 	}
 
 	// Anti-tampering feature; detects prompts being deleted.
-	async messageDelete(bot: Discord.Bot, message: Discord.Message): Promise<void> {
+	async messageDelete(message: Discord.Message): Promise<void> {
 		// If the message was deleted from a channel not managed by this prompt manager.
 		if (message.channelId !== this.channelId) {
 			return;
 		}
 
-		const document = this.documentsByPromptId.get(message.id);
+		const document = this.documentsByPromptId.get(message.id.toString());
 		if (document === undefined) {
 			return;
 		}
 
-		const userId = this.userIds.get(message.id);
+		const userId = this.userIds.get(message.id.toString());
 		if (userId === undefined) {
 			return;
 		}
@@ -197,36 +194,38 @@ abstract class PromptService<
 
 		const reference = stringifyValue(document.ref);
 
-		const prompt = await this.savePrompt(bot, user, document);
+		const prompt = await this.savePrompt(user, document);
 		if (prompt === undefined) {
 			return;
 		}
 
 		this.registerPrompt(prompt, userId, reference, document);
 
-		this.documentsByPromptId.delete(message.id);
-		this.userIds.delete(message.id);
+		this.documentsByPromptId.delete(message.id.toString());
+		this.userIds.delete(message.id.toString());
 	}
 
-	async messageUpdate(bot: Discord.Bot, message: Discord.Message): Promise<void> {
+	async messageUpdate(message: Discord.Message): Promise<void> {
 		// If the message was updated in a channel not managed by this prompt manager.
 		if (message.channelId !== this.channelId) {
 			return;
 		}
 
 		// If the embed is still present, it wasn't an embed having been deleted. Do not do anything.
-		if (message.embeds.length === 1) {
+		if (message.embeds?.length === 1) {
 			return;
 		}
 
 		// Delete the message and allow the bot to handle the deletion.
-		Discord.deleteMessage(bot, message.channelId, message.id).catch(() =>
-			this.client.log.warn(
-				`Failed to delete prompt ${diagnostics.display.message(message)} from ${diagnostics.display.channel(
-					message.channelId,
-				)} on ${diagnostics.display.guild(message.guildId ?? 0n)}.`,
-			),
-		);
+		this.bot.rest
+			.deleteMessage(message.channelId, message.id)
+			.catch(() =>
+				this.client.log.warn(
+					`Failed to delete prompt ${diagnostics.display.message(message)} from ${diagnostics.display.channel(
+						message.channelId,
+					)} on ${diagnostics.display.guild(message.guildId ?? 0n)}.`,
+				),
+			);
 	}
 
 	abstract getAllDocuments(): Document<DataType>[];
@@ -234,14 +233,10 @@ abstract class PromptService<
 
 	abstract decodeMetadata(data: string[]): Metadata | undefined;
 
-	abstract getPromptContent(
-		bot: Discord.Bot,
-		user: Logos.User,
-		document: Document<DataType>,
-	): Discord.CreateMessage | undefined;
+	abstract getPromptContent(user: Logos.User, document: Document<DataType>): Discord.CreateMessageOptions | undefined;
 
-	getMetadata(prompt: Logos.Message): string[] | undefined {
-		const metadata = prompt.embeds.at(-1)?.footer?.iconUrl?.split("&metadata=").at(-1);
+	getMetadata(prompt: Discord.CamelizedDiscordMessage): string[] | undefined {
+		const metadata = prompt.embeds?.at(-1)?.footer?.iconUrl?.split("&metadata=").at(-1);
 		if (metadata === undefined) {
 			return undefined;
 		}
@@ -250,9 +245,11 @@ abstract class PromptService<
 		return data;
 	}
 
-	filterPrompts(prompts: Logos.Message[]): [valid: [Logos.Message, Metadata][], invalid: Logos.Message[]] {
-		const valid: [Logos.Message, Metadata][] = [];
-		const invalid: Logos.Message[] = [];
+	filterPrompts(
+		prompts: Discord.CamelizedDiscordMessage[],
+	): [valid: [Discord.CamelizedDiscordMessage, Metadata][], invalid: Discord.CamelizedDiscordMessage[]] {
+		const valid: [Discord.CamelizedDiscordMessage, Metadata][] = [];
+		const invalid: Discord.CamelizedDiscordMessage[] = [];
 		for (const prompt of prompts) {
 			const data = this.getMetadata(prompt);
 			if (data === undefined) {
@@ -272,9 +269,9 @@ abstract class PromptService<
 	}
 
 	sortPrompts(
-		prompts: [Logos.Message, Metadata][],
-	): Map</*userId: */ bigint, Map</*reference: */ string, Logos.Message>> {
-		const promptsSorted = new Map<bigint, Map<string, Logos.Message>>();
+		prompts: [Discord.CamelizedDiscordMessage, Metadata][],
+	): Map</*userId: */ bigint, Map</*reference: */ string, Discord.CamelizedDiscordMessage>> {
+		const promptsSorted = new Map<bigint, Map<string, Discord.CamelizedDiscordMessage>>();
 
 		for (const [prompt, metadata] of prompts) {
 			const { userId, reference } = metadata;
@@ -291,44 +288,46 @@ abstract class PromptService<
 	}
 
 	async savePrompt(
-		bot: Discord.Bot,
 		user: Logos.User,
 		document: Document<DataType>,
-	): Promise<Logos.Message | undefined> {
+	): Promise<Discord.CamelizedDiscordMessage | undefined> {
 		const channelId = this.channelId;
 		if (channelId === undefined) {
 			return undefined;
 		}
 
-		const content = this.getPromptContent(bot, user, document);
+		const content = this.getPromptContent(user, document);
 		if (content === undefined) {
 			return undefined;
 		}
 
-		const message = await Discord.sendMessage(bot, channelId, content)
-			.then((message) => Logos.slimMessage(message))
-			.catch(() => {
-				this.client.log.warn(`Failed to send message to ${diagnostics.display.channel(channelId)}.`);
-				return undefined;
-			});
+		const message = await this.bot.rest.sendMessage(channelId, content).catch(() => {
+			this.client.log.warn(`Failed to send message to ${diagnostics.display.channel(channelId)}.`);
+			return undefined;
+		});
 
 		return message;
 	}
 
-	registerPrompt(prompt: Logos.Message, userId: bigint, reference: string, document: Document<DataType>): void {
+	registerPrompt(
+		prompt: Discord.CamelizedDiscordMessage,
+		userId: bigint,
+		reference: string,
+		document: Document<DataType>,
+	): void {
 		this.documentsByPromptId.set(prompt.id, document);
 		this.userIds.set(prompt.id, userId);
 		this.prompts.set(reference, prompt);
 	}
 
-	unregisterPrompt(prompt: Logos.Message, reference: string): void {
+	unregisterPrompt(prompt: Discord.CamelizedDiscordMessage, reference: string): void {
 		this.documentsByPromptId.delete(prompt.id);
 		this.userIds.delete(prompt.id);
 		this.prompts.delete(reference);
 	}
 
 	registerHandler(data: InteractionDataBase): void {
-		this.handlers.set(data.join(constants.symbols.meta.idSeparator), async (bot, interaction) => {
+		this.handlers.set(data.join(constants.symbols.meta.idSeparator), async (interaction) => {
 			const customId = interaction.data?.customId;
 			if (customId === undefined) {
 				return;
@@ -336,7 +335,7 @@ abstract class PromptService<
 
 			const [_, userId, guildId, reference, ...metadata] = decodeId<InteractionData>(customId);
 
-			const updatedDocument = await this.handleInteraction(bot, interaction, [
+			const updatedDocument = await this.handleInteraction(interaction, [
 				userId,
 				guildId,
 				reference,
@@ -357,14 +356,13 @@ abstract class PromptService<
 				this.documentsByPromptId.set(prompt.id, updatedDocument);
 			}
 
-			Discord.deleteMessage(bot, prompt.channelId, prompt.id).catch(() => {
+			this.bot.rest.deleteMessage(prompt.channelId, prompt.id).catch(() => {
 				this.client.log.warn("Failed to delete prompt.");
 			});
 		});
 	}
 
 	abstract handleInteraction(
-		bot: Discord.Bot,
 		interaction: Discord.Interaction,
 		data: InteractionData,
 	): Promise<Document<DataType> | undefined | null>;

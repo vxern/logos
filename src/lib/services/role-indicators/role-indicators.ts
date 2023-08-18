@@ -3,7 +3,7 @@ import symbols from "../../../constants/types/symbols";
 import * as Logos from "../../../types";
 import { Guild, RoleWithIndicator } from "../../database/structs/guild";
 import { LocalService } from "../service";
-import * as Discord from "discordeno";
+import * as Discord from "@discordeno/bot";
 
 type Configuration = NonNullable<NonNullable<Guild["features"]["server"]["features"]>["roleIndicators"]>;
 
@@ -17,7 +17,7 @@ class RoleIndicatorService extends LocalService {
 		return guildDocument.data.features.server.features?.roleIndicators;
 	}
 
-	async start(bot: Discord.Bot): Promise<void> {
+	async start(): Promise<void> {
 		const [configuration, guild] = [this.configuration, this.guild];
 		if (configuration === undefined || guild === undefined) {
 			return;
@@ -32,15 +32,11 @@ class RoleIndicatorService extends LocalService {
 				continue;
 			}
 
-			await this.guildMemberUpdate(bot, member, member.user);
+			await this.guildMemberUpdate(member, member.user);
 		}
 	}
 
-	async guildMemberUpdate(
-		bot: Discord.Bot,
-		member: Discord.Member | Logos.Member,
-		user: Discord.User | Logos.User,
-	): Promise<void> {
+	async guildMemberUpdate(member: Discord.Member | Logos.Member, user: Discord.User | Logos.User): Promise<void> {
 		const [configuration, guild] = [this.configuration, this.guild];
 		if (configuration === undefined || guild === undefined) {
 			return;
@@ -75,9 +71,9 @@ class RoleIndicatorService extends LocalService {
 			}
 
 			const nickname = applyIndicators(user.username, applicableIndicators);
-			Discord.editMember(bot, member.guildId, user.id, { nick: nickname }).catch(() =>
-				console.warn("Failed to set member's role indicators."),
-			);
+			this.bot.rest
+				.editMember(member.guildId, user.id, { nick: nickname })
+				.catch(() => console.warn("Failed to set member's role indicators."));
 
 			// Fix for Discordeno rate-limiting being broken.
 			await new Promise((resolve) => setTimeout(resolve, 3000));
@@ -93,9 +89,9 @@ class RoleIndicatorService extends LocalService {
 			}
 
 			const nickname = applyIndicators(member.nick, applicableIndicators);
-			Discord.editMember(bot, member.guildId, user.id, { nick: nickname }).catch(() =>
-				console.warn("Failed to set member's role indicators."),
-			);
+			this.bot.rest
+				.editMember(member.guildId, user.id, { nick: nickname })
+				.catch(() => console.warn("Failed to set member's role indicators."));
 
 			// Fix for Discordeno rate-limiting being broken.
 			await new Promise((resolve) => setTimeout(resolve, 3000));
@@ -109,9 +105,9 @@ class RoleIndicatorService extends LocalService {
 		}
 
 		if (!hasApplicableIndicators) {
-			Discord.editMember(bot, member.guildId, user.id, { nick: username }).catch(() =>
-				console.warn("Failed to reset member's role indicators."),
-			);
+			this.bot.rest
+				.editMember(member.guildId, user.id, { nick: username })
+				.catch(() => console.warn("Failed to reset member's role indicators."));
 
 			// Fix for Discordeno rate-limiting being broken.
 			await new Promise((resolve) => setTimeout(resolve, 3000));
@@ -128,9 +124,9 @@ class RoleIndicatorService extends LocalService {
 		}
 
 		const nicknameModified = applyIndicators(username, applicableIndicators);
-		Discord.editMember(bot, member.guildId, user.id, { nick: nicknameModified }).catch(() =>
-			console.warn("Failed to update member's role indicators."),
-		);
+		this.bot.rest
+			.editMember(member.guildId, user.id, { nick: nicknameModified })
+			.catch(() => console.warn("Failed to update member's role indicators."));
 
 		// Fix for Discordeno rate-limiting being broken.
 		await new Promise((resolve) => setTimeout(resolve, 3000));
