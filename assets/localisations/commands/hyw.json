@@ -566,5 +566,19 @@
     "profile.options.view.strings.information.description.received": "Received",
     "profile.options.view.strings.information.description.sent": "Sent",
     "profile.options.view.strings.information.description.praises": "Praises",
-    "profile.options.view.strings.information.description.warnings": "Warnings"
+    "profile.options.view.strings.information.description.warnings": "Warnings",
+    "game.strings.sourcedFrom": "Նախադասութիւնները {source}-էն առնուեցան։",
+    "word.options.language.name": "լեզու",
+    "word.strings.invalid.language.description": "Ձեր մասնաւորած լեզուն անվաւեր է։",
+    "word.strings.sourcedResponsibly": "Տեղեկութիւնները շնորհակալութեամբ {dictionaries}-էն ստանուեցան։",
+    "word.strings.sourcedResponsibly.dictionaries.one": "վերոյիշեալ բառարանը",
+    "word.strings.sourcedResponsibly.dictionaries.two": "վերոյիշեալ բառարանները",
+    "word.strings.relations.antonyms": "Հականիշ",
+    "word.options.language.description": "Բառի լեզուն։",
+    "word.strings.invalid.language.title": "Անվաւեր լեզու",
+    "word.strings.relations.synonyms": "Հոմանիշ",
+    "word.strings.relations.diminutives": "Նուազական անուն",
+    "word.strings.relations.augmentatives": "Յաւելական անուն",
+    "settings.name": "նախընտրութիւններ",
+    "word.strings.sourcedResponsibly.dictionaries.many": "վերոյիշեալ բառարանները"
 }
