@@ -37,6 +37,8 @@ const MAX_VOICE_CHANNELS = 5;
 
 const WARN_MESSAGE_DELETE_TIMEOUT = 1000 * 10; // 10 seconds in milliseconds.
 
+const STATUS_CYCLE = 1000 * 10; // 10 seconds in milliseconds.
+
 export default {
 	LOCALISATION_LANGUAGE,
 	LOCALISATION_LOCALE,
@@ -63,4 +65,5 @@ export default {
 	MIN_VOICE_CHANNELS,
 	MAX_VOICE_CHANNELS,
 	WARN_MESSAGE_DELETE_TIMEOUT,
+	STATUS_CYCLE,
 };

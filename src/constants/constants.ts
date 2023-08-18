@@ -5,6 +5,7 @@ import endpoints from "./types/endpoints";
 import gifs from "./types/gifs";
 import links from "./types/links";
 import patterns from "./types/patterns";
+import statuses from "./types/statuses";
 import symbols from "./types/symbols";
 
 export default {
@@ -18,5 +19,6 @@ export default {
 	gifs,
 	links,
 	patterns,
+	statuses,
 	symbols,
 };
