@@ -3,20 +3,13 @@
     "rules.rule": "Sääntö",
     "rules.behaviour.title": "Käyttäytyminen",
     "rules.behaviour.summary": "Pyri olemaan mukava.",
-    "rules.behaviour.content": "",
     "rules.quality.title": "Laatu",
     "rules.quality.summary": "Älä ole ärsyttävä.",
-    "rules.quality.content": "",
     "rules.relevance.title": "",
-    "rules.relevance.summary": "",
     "rules.relevance.content": "",
-    "rules.suitability.title": "",
     "rules.suitability.summary": "",
-    "rules.suitability.content": "",
     "rules.exclusivity.title": "",
     "rules.exclusivity.summary": "Älä mainosta.",
-    "rules.exclusivity.content": "",
     "rules.adherence.title": "",
-    "rules.adherence.summary": "Kunnioita sääntöjä.",
-    "rules.adherence.content": ""
+    "rules.adherence.summary": "Kunnioita sääntöjä."
 }
