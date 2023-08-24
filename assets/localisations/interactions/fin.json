@@ -1,9 +1,3 @@
 {
-    "interactions.continuedOnNextPage": "",
-    "interactions.page": "",
-    "interactions.invalidUser.title": "",
-    "interactions.invalidUser.description": "",
-    "interactions.rateLimited.title": "",
-    "interactions.rateLimited.description.tooManyUses": "",
-    "interactions.rateLimited.description.cannotUseAgainUntil": ""
+    "interactions.invalidUser.description": ""
 }
