@@ -1,11 +1,4 @@
 {
-    "parameters.user.description": "",
-    "parameters.show.description": "",
-    "parameters.duration.description": "",
     "parameters.reason.description": "",
-    "parameters.query.description": "",
-    "parameters.timestamp.description": "",
-    "parameters.collection.description": "",
-    "parameters.by.description": "",
-    "parameters.to.description": ""
+    "parameters.by.description": ""
 }
