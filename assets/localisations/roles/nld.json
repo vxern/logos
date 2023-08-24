@@ -1,6 +1,6 @@
 {
     "roles.selection.title": "How to pick roles",
-    "roles.selection.description.usingCommand": "You can select roles using the {command} command, which will open a browseable selection menu where you can pick the roles you want.",
+    "roles.selection.description.usingCommand": "Je kunt rollen selecteren met het {command} commando, dat een selectiemenu opent waarin je de gewenste rollen kunt kiezen.",
     "roles.selection.description.runAnywhere": "This command can be run anywhere on the server.",
     "roles.selection.description.pressButton": "Alternatively, you can press the button below to open the role selection menu here.",
     "roles.selection.description.clickHere": "Click here to select roles",
