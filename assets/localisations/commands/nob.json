@@ -563,5 +563,7 @@
     "profile.options.view.strings.information.description.received": "Mottatt",
     "profile.options.view.strings.information.description.sent": "Sendt",
     "profile.options.view.strings.information.description.praises": "Roser",
-    "profile.options.view.strings.information.description.warnings": "Advarsler"
+    "profile.options.view.strings.information.description.warnings": "Advarsler",
+    "word.options.language.name": "språk",
+    "word.options.language.description": "Verdens språk."
 }
