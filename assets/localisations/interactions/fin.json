@@ -1,1 +1,9 @@
-{}
+{
+    "interactions.continuedOnNextPage": "Jatkuu seuraavalla sivulla...",
+    "interactions.page": "Sivu",
+    "interactions.invalidUser.title": "Käyttäjä ei kelpaa",
+    "interactions.invalidUser.description": "Antamasi käyttäjä ei kelpaa.",
+    "interactions.rateLimited.title": "Viestiesi määrää rajoitetaan",
+    "interactions.rateLimited.description.cannotUseAgainUntil": "Voit käyttää komentoa taas {relative_timestamp}.",
+    "interactions.rateLimited.description.tooManyUses": "Olet käyttänyt tätä komentoa liian usein ({times}) liian lyhyen ajan sisällä."
+}
