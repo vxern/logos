@@ -1,4 +1,11 @@
 {
-    "suggestion.suggestion": "",
-    "alreadyMarkedUnresolved.description": ""
+    "suggestion.suggestion": "Ehdotus",
+    "alreadyMarkedUnresolved.description": "",
+    "reports.users": "Ilmiannetut käyttäjät",
+    "reports.reason": "Ilmiannon syy",
+    "reports.link": "Linkki viestiin",
+    "reports.noLinkProvided": "Ei linkkiä viestiin.",
+    "reports.previousInfractions": "{username}:n edelliset rikkeet",
+    "notices.lastUpdate": "Viimeisin päivitys: {date}",
+    "notices.notices.information.invite": "Pysyvä kutsulinkki"
 }
