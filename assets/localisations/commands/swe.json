@@ -1,1 +1,23 @@
-{}
+{
+    "noDescription": "Ingen beskrivning.",
+    "information.name": "information",
+    "information.description": "Används för att visa olika information.",
+    "information.options.bot.name": "bot",
+    "information.options.bot.description": "Används för att visa information om boten.",
+    "information.options.bot.strings.whoAmI.title": "Vem är jag?",
+    "information.options.bot.strings.whoAmI.description": "Jag är **Logos**, en applikation skapad för att erbjuda språklärande Discord-gemenskaper funktioner av högsta kvalitet, som:",
+    "information.options.bot.strings.whoAmI.features.music": "Musikuppspelning",
+    "information.options.bot.strings.howWasIMade.title": "Hur gjorde jag mig?",
+    "information.options.bot.strings.howToAddToServer.title": "Hur kan du lägga till mig på din server?",
+    "information.options.server.name": "server",
+    "information.options.server.description": "Används för att visa information om servern.",
+    "information.options.server.strings.information.title": "Information om **{server_name}**",
+    "information.options.server.strings.information.description.description": "Beskrivning",
+    "information.options.server.strings.information.description.noDescription": "Ingen beskrivning specificerad.",
+    "information.options.server.strings.information.description.languages": "Språk",
+    "information.options.server.strings.information.description.members": "Medlemmar",
+    "information.options.server.strings.information.description.created": "Gjord",
+    "information.options.server.strings.information.description.channels": "Kanaler",
+    "information.options.server.strings.information.description.moderators": "Moderatorer",
+    "information.options.server.strings.information.description.owner": "Ägare"
+}
