@@ -35,5 +35,7 @@
     "languages.spanish": "Spansk",
     "languages.swedish": "Svensk",
     "languages.turkish": "Tyrkisk",
-    "languages.ukrainian": "Ukrainsk"
+    "languages.ukrainian": "Ukrainsk",
+    "languages.armenian.eastern": "Armensk (Østlig)",
+    "languages.armenian.western": "Armensk (Vestlig)"
 }
