@@ -1,9 +1,0 @@
-{
-	"interactions.continuedOnNextPage": "Συνέχεια στην επόμενη σελίδα...",
-	"interactions.page": "Σελίδα",
-	"interactions.invalidUser.title": "Μη έγκυρος χρήστης",
-	"interactions.invalidUser.description": "Ο χρήστης που καθορίσατε δεν είναι έγκυρος.",
-	"interactions.rateLimited.title": "Έχετε περιορισμένο ρυθμό",
-	"interactions.rateLimited.description.tooManyUses": "Έχετε χρησιμοποιήσει αυτή την εντολή πάρα πολλές φορές ({times}) σε πολύ σύντομο χρονικό διάστημα.",
-	"interactions.rateLimited.description.cannotUseAgainUntil": "Θα μπορείτε και πάλι να χρησιμοποιήσετε την εντολή {relative_timestamp}."
-}
