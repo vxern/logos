@@ -1,11 +1,6 @@
 {
-    "cefr.strings.levels.c3.title": "",
     "word.strings.fields.translations": "",
-    "list.options.warnings.strings.noActiveWarnings.description.self": "",
     "purge.strings.purging.title": "",
-    "slowmode.strings.disabled.description": "",
     "music.options.now.strings.noSongCollection.description.noSongCollection": "",
-    "music.options.replay.strings.noSong.description": "",
-    "music.strings.notPlaying.description.toCheck": "",
-    "profile.options.view.strings.information.description.sent": ""
+    "music.strings.notPlaying.description.toCheck": ""
 }
