@@ -75,7 +75,7 @@
     "translate.strings.languagesNotDifferent.title": "Ausgangs- und Zielsprachen sind gleich",
     "translate.options.to.description": "Zielsprache.",
     "translate.strings.textEmpty.description": "Der Quelltext darf nicht leer sein.",
-    "translate.strings.failed.description": "Der angegebene Text konnte nicht korrigiert werden.",
+    "translate.strings.failed.description": "Der angegebene Text konnte nicht übersetzt werden.",
     "translate.strings.invalid.source.title": "Ungültige Ausgangssprache",
     "translate.strings.failed.title": "Der Text konnte nicht korrgiert werden",
     "translate.strings.invalid.target.title": "Ungültige Zielsprache",
@@ -572,7 +572,7 @@
     "warn.strings.warned.description.warnings.many": "{many} Warnungen",
     "warn.strings.limitReached.title": "Warngrenze erreicht",
     "warn.strings.limitReached.description": "{user_mention} hat die Warngrenze erreicht ({limit}).",
-    "music.options.replay.name": "Wiedergeben",
+    "music.options.replay.name": "abspielen",
     "music.options.skip-to.name": "überspringen-zu",
     "music.options.skip.strings.noSongCollection.description.trySongInstead": "Versuch stattdessen, das aktuelle Lied zu überspringen.",
     "music.options.skip.strings.skippedSong.title": "Überspringt",
@@ -610,5 +610,13 @@
     "suggestion.strings.tooMany.description": "Du hast in letzter Zeit bereits einige Vorschläge gemacht. Du solltest ein bisschen warten, bevor du noch einen Vorschlag machst.",
     "music.strings.notPlaying.description.toCheck": "Um wiedergabezogene Informationen zu überprüfen, forder zunächst Musik an.",
     "music.strings.notInVc.description.toCheck": "Um wiedergabebezogene Informationen zu überprüfen, musst du dich zunächst in einem Sprachkanal befinden.",
-    "praise.options.comment.name": "Kommentar"
+    "praise.options.comment.name": "Kommentar",
+    "music.strings.outage.halted.description.outage": "Logos hat momentan einige Probleme mit der Audioverbindung.",
+    "profile.options.roles.strings.limitReached.description.limitReached": "Du hast das Limit an Rollen erreicht, die du innerhalb der Kategorie „{category}“ zuweisen kannst.",
+    "settings.strings.settings.fields.language.description.noLanguageSet.defaultShown": "Logos wird Nachrichten basierend auf Ihrer App-Sprache adaptiv anzeigen.",
+    "license.description": "Ermöglicht dem Benutzer, Hinweise zu Daten und Software anzuzeigen, die vom Logos-Projekt verwendet werden.",
+    "music.strings.outage.halted.description.noLoss": "Keine Sorge: Wenn du Musik gehört hast, ist deine Sitzung noch aktiv und wird wiederhergestellt werden, sobald die Verbindung wiederhergestellt ist.",
+    "music.strings.skips.tooManyArguments.description": "Du darfst nicht __über__ eine bestimmte Anzahl an Liedern springen , und __zu__ einem bestimmten Lied in derselben Abfrage springen.",
+    "music.strings.outage.cannotManage.description.backUpSoon": "Sobald die Audioverbindung wiederhergestellt ist, kannst du die Musik verwalten.",
+    "settings.strings.cleared.description": "Logos wird jetzt Nachrichten in der Sprache anzeigen, die du in der Discord-App festgelegt hast."
 }
