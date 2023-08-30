@@ -64,8 +64,8 @@
     "cefr.strings.levels.c2.description": "I have been studying the language for years now. I speak the language with ease, never finding myself unable to talk about what I want in detail and with nuance. When needed, I can be creative with my language, recognising the different ways to use it. I have very good grasp of what sounds good and what doesn't, and I can easily pick up on mistakes, providing alternatives, and even correcting myself.",
     "cefr.strings.levels.c3.title": "C2+/C3 (Գերազանցութիւն)",
     "cefr.strings.levels.c3.description": "On top of the command over language a C2 user would be expected to display, I have extensive knowledge of creative, poetic, technical or unusual uses of vocabulary generally expected of people with a very high command of language.",
-    "correction.options.partial.name": "Correct",
-    "correction.options.full.name": "Correct All",
+    "correction.options.partial.name": "Կարճ Սրբագրութիւն",
+    "correction.options.full.name": "Ամբողջ Տեքստի Սրբագրութիւն",
     "correction.strings.textsNotDifferent.title": "Original and corrected versions are the same",
     "correction.strings.textsNotDifferent.description": "The corrected version may not be the same as the original.",
     "correction.strings.tooLong.title": "Շատ երկար հաղորդագրութիւն",
@@ -577,5 +577,10 @@
     "word.strings.relations.diminutives": "Նուազական անուն",
     "word.strings.relations.augmentatives": "Յաւելական անուն",
     "settings.name": "նախընտրութիւններ",
-    "word.strings.sourcedResponsibly.dictionaries.many": "վերոյիշեալ բառարանները"
+    "word.strings.sourcedResponsibly.dictionaries.many": "վերոյիշեալ բառարանները",
+    "settings.options.view.name": "տեսարան",
+    "settings.options.language.name": "լեզու",
+    "settings.options.view.description": "Օգտատիրոջ նախընտրումները կը ներկայացնէ։",
+    "settings.options.language.options.clear.name": "ջնջել",
+    "settings.options.language.options.set.options.language.name": "լեզու"
 }
