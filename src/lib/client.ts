@@ -462,10 +462,10 @@ export async function handleGuildCreate(
 	const guildCommands: Command[] = [commands.information, commands.credits, commands.licence, commands.settings];
 	const services: Service[] = [];
 
-	const realtimeUpdateService = new RealtimeUpdateService([client, bot], guild.id, guildDocument.ref);
-	services.push(realtimeUpdateService);
+	// const realtimeUpdateService = new RealtimeUpdateService([client, bot], guild.id, guildDocument.ref);
+	// services.push(realtimeUpdateService);
 
-	client.services.realtimeUpdates.set(guild.id, realtimeUpdateService);
+	// client.services.realtimeUpdates.set(guild.id, realtimeUpdateService);
 
 	if (configuration.features.information.enabled) {
 		const information = configuration.features.information.features;
