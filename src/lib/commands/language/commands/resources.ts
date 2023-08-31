@@ -1,4 +1,3 @@
-import constants from "../../../../constants/constants";
 import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
 import { parseArguments, reply } from "../../../interactions";
@@ -27,6 +26,21 @@ async function handleDisplayResources(
 		return;
 	}
 
+	const guildDocument = await client.database.adapters.guilds.getOrFetchOrCreate(
+		client,
+		"id",
+		guildId.toString(),
+		guildId,
+	);
+	if (guildDocument === undefined) {
+		return;
+	}
+
+	const configuration = guildDocument.data.features.language.features?.resources;
+	if (configuration === undefined || !configuration.enabled) {
+		return;
+	}
+
 	const strings = {
 		redirect: localise(
 			client,
@@ -49,7 +63,7 @@ async function handleDisplayResources(
 							type: Discord.MessageComponentTypes.Button,
 							label: strings.redirect,
 							style: Discord.ButtonStyles.Link,
-							url: constants.links.generateLanguageRepositoryLink(interaction.featureLanguage),
+							url: configuration.url,
 						},
 					],
 				},
