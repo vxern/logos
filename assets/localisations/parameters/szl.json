@@ -1,11 +1,18 @@
 {
-    "parameters.user.description": "",
-    "parameters.show.description": "",
-    "parameters.duration.description": "",
-    "parameters.reason.description": "",
-    "parameters.query.description": "",
-    "parameters.timestamp.description": "",
-    "parameters.collection.description": "",
+    "parameters.user.description": "Miano używacza, jego tag, ID abo spōminka",
+    "parameters.show.description": "Jeli nasztalujesz sie na \"True\", rezultat bydzie pokŏzany tyż inkszym używaczōm",
+    "parameters.duration.description": "Dugość sankcyje",
+    "parameters.reason.description": "Powōd do sankcyje abo jeji symniyniciŏ. Winiyn być akuratny.",
+    "parameters.query.description": "Titel abo link do śpiywki abo zbioru śpiywek.",
+    "parameters.timestamp.description": "Znacznik czasu we śpiywce, podug kerego ôna sie przewinie.",
+    "parameters.collection.description": "Jeli nasztalujesz na \"True\", akcyjŏ ôstanie wykōnanŏ na zbiorze śpiywek.",
     "parameters.by.description": "",
-    "parameters.to.description": ""
+    "parameters.to.description": "",
+    "parameters.show.name": "pokŏż",
+    "parameters.duration.name": "dugość",
+    "parameters.reason.name": "powōd",
+    "parameters.query.name": "spytanie",
+    "parameters.timestamp.name": "znacznik czasu",
+    "parameters.collection.name": "zbiōr",
+    "parameters.user.name": "używacz"
 }
