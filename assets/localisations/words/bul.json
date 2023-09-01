@@ -1,25 +1,13 @@
 {
-    "words.noun": "",
     "words.verb": "",
-    "words.adjective": "",
     "words.adverb": "",
-    "words.adposition": "",
     "words.article": "",
-    "words.properNoun": "",
     "words.letter": "",
-    "words.character": "",
     "words.phrase": "",
-    "words.idiom": "",
     "words.symbol": "",
-    "words.syllable": "",
     "words.numeral": "",
-    "words.initialism": "",
     "words.particle": "",
-    "words.punctuation": "",
     "words.affix": "",
-    "words.pronoun": "",
     "words.determiner": "",
-    "words.conjunction": "",
-    "words.interjection": "",
-    "words.unknown": ""
+    "words.interjection": ""
 }
