@@ -1,6 +1,6 @@
 import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
-import { parseArguments, reply } from "../../../interactions";
+import { getShowButton, parseArguments, reply } from "../../../interactions";
 import { CommandTemplate } from "../../command";
 import { show } from "../../parameters";
 import * as Discord from "@discordeno/bot";
@@ -18,8 +18,10 @@ async function handleDisplayResources(
 	[client, bot]: [Client, Discord.Bot],
 	interaction: Logos.Interaction,
 ): Promise<void> {
-	const [{ show }] = parseArguments(interaction.data?.options, { show: "boolean" });
-	const locale = show ? interaction.guildLocale : interaction.locale;
+	const [{ show: showParameter }] = parseArguments(interaction.data?.options, { show: "boolean" });
+
+	const show = interaction.show ?? showParameter;
+	const locale = interaction.show ?? show ? interaction.guildLocale : interaction.locale;
 
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
@@ -51,6 +53,21 @@ async function handleDisplayResources(
 		}),
 	};
 
+	const showButton = getShowButton(client, interaction, { locale });
+
+	const buttons: Discord.ButtonComponent[] = [
+		{
+			type: Discord.MessageComponentTypes.Button,
+			label: strings.redirect,
+			style: Discord.ButtonStyles.Link,
+			url: configuration.url,
+		},
+	];
+
+	if (!show) {
+		buttons.push(showButton);
+	}
+
 	reply(
 		[client, bot],
 		interaction,
@@ -58,14 +75,7 @@ async function handleDisplayResources(
 			components: [
 				{
 					type: Discord.MessageComponentTypes.ActionRow,
-					components: [
-						{
-							type: Discord.MessageComponentTypes.Button,
-							label: strings.redirect,
-							style: Discord.ButtonStyles.Link,
-							url: configuration.url,
-						},
-					],
+					components: buttons as [Discord.ButtonComponent],
 				},
 			],
 		},

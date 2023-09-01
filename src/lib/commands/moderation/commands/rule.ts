@@ -2,7 +2,7 @@ import constants from "../../../../constants/constants";
 import { Locale } from "../../../../constants/languages";
 import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
-import { parseArguments, reply, respond } from "../../../interactions";
+import { getShowButton, parseArguments, reply, respond } from "../../../interactions";
 import { CommandTemplate } from "../../command";
 import { show } from "../../parameters";
 import * as Discord from "@discordeno/bot";
@@ -69,12 +69,16 @@ async function handleCiteRuleAutocomplete(
 }
 
 async function handleCiteRule([client, bot]: [Client, Discord.Bot], interaction: Logos.Interaction): Promise<void> {
-	const [{ rule: ruleIndex, show }] = parseArguments(interaction.data?.options, { rule: "number", show: "boolean" });
+	const [{ rule: ruleIndex, show: showParameter }] = parseArguments(interaction.data?.options, {
+		rule: "number",
+		show: "boolean",
+	});
 	if (ruleIndex === undefined) {
 		displayError([client, bot], interaction, { locale: interaction.locale });
 		return;
 	}
 
+	const show = interaction.show ?? showParameter;
 	const locale = show ? interaction.guildLocale : interaction.locale;
 
 	const ruleId = ruleIds.at(ruleIndex);
@@ -99,6 +103,12 @@ async function handleCiteRule([client, bot]: [Client, Discord.Bot], interaction:
 		content: localise(client, `rules.${ruleId}.content`, locale)(),
 	};
 
+	const showButton = getShowButton(client, interaction, { locale });
+
+	const components: Discord.ActionRow[] | undefined = show
+		? undefined
+		: [{ type: Discord.MessageComponentTypes.ActionRow, components: [showButton] }];
+
 	reply(
 		[client, bot],
 		interaction,
@@ -112,6 +122,7 @@ async function handleCiteRule([client, bot]: [Client, Discord.Bot], interaction:
 					color: constants.colors.blue,
 				},
 			],
+			components,
 		},
 		{ visible: show },
 	);

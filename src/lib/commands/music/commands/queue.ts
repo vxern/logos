@@ -18,7 +18,9 @@ async function handleDisplayPlaybackQueue(
 	[client, bot]: [Client, Discord.Bot],
 	interaction: Logos.Interaction,
 ): Promise<void> {
-	const [{ show }] = parseArguments(interaction.data?.options, { show: "boolean" });
+	const [{ show: showParameter }] = parseArguments(interaction.data?.options, { show: "boolean" });
+
+	const show = interaction.show ?? showParameter;
 	const locale = show ? interaction.guildLocale : interaction.locale;
 
 	const guildId = interaction.guildId;

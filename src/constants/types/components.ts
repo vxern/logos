@@ -9,4 +9,5 @@ export default {
 	reports: "reports",
 	suggestions: "suggestions",
 	selectRoles: "select_roles",
+	showInChat: "show_in_chat",
 };

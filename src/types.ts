@@ -124,7 +124,11 @@ interface InteractionLocaleData {
 	featureLanguage: FeatureLanguage;
 }
 
-type Interaction = Omit<Discord.Interaction, "locale" | "guildLocale"> & InteractionLocaleData;
+interface InteractionFlags {
+	show?: boolean;
+}
+
+type Interaction = Omit<Discord.Interaction, "locale" | "guildLocale"> & InteractionLocaleData & InteractionFlags;
 
 export {
 	Guild,
@@ -143,4 +147,5 @@ export {
 	slimVoiceState,
 	Interaction,
 	InteractionLocaleData,
+	InteractionFlags,
 };

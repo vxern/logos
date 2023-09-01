@@ -10,13 +10,14 @@ import languages, {
 } from "../constants/languages";
 import time from "../constants/time";
 import defaults from "../defaults";
-import { handleGuildMembersChunk, overrideDefaultEventHandlers, enableDesiredProperties } from "../fixes";
+import { enableDesiredProperties, handleGuildMembersChunk, overrideDefaultEventHandlers } from "../fixes";
 import { timestamp } from "../formatting";
 import * as Logos from "../types";
 import { Command, CommandTemplate, InteractionHandler, Option } from "./commands/command";
-import commandsRaw from "./commands/commands";
+import commandTemplates from "./commands/commands";
 import { SentencePair } from "./commands/language/commands/game";
 import { SupportedLanguage } from "./commands/language/module";
+import { isShowParameter } from "./commands/parameters";
 import entryRequests from "./database/adapters/entry-requests";
 import guilds from "./database/adapters/guilds";
 import praises from "./database/adapters/praises";
@@ -27,11 +28,20 @@ import warnings from "./database/adapters/warnings";
 import { Database } from "./database/database";
 import { timeStructToMilliseconds } from "./database/structs/guild";
 import diagnostics from "./diagnostics";
-import { acknowledge, deleteReply, getLocaleData, isAutocomplete, reply, respond } from "./interactions";
+import {
+	acknowledge,
+	deleteReply,
+	getCommandName,
+	getLocaleData,
+	isAutocomplete,
+	reply,
+	respond,
+} from "./interactions";
 import transformers from "./localisation/transformers";
 import { AlertService } from "./services/alert/alert";
 import { DynamicVoiceChannelService } from "./services/dynamic-voice-channels/dynamic-voice-channels";
 import { EntryService } from "./services/entry/entry";
+import { InteractionRepetitionService } from "./services/interaction-repetition/interaction-repetition";
 import { JournallingService } from "./services/journalling/journalling";
 import { LavalinkService } from "./services/music/lavalink";
 import { MusicService } from "./services/music/music";
@@ -77,10 +87,12 @@ type Client = {
 			latest: Map<bigint, Logos.Message>;
 			previous: Map<bigint, Logos.Message>;
 		};
+		interactions: Map<string, Logos.Interaction | Discord.Interaction>;
 	};
 	database: { log: Logger } & Database;
 	commands: {
-		commands: Record<keyof typeof commandsRaw, Command>;
+		commands: Record<keyof typeof commandTemplates, Command>;
+		showable: string[];
 		handlers: {
 			execute: Map<string, InteractionHandler>;
 			autocomplete: Map<string, InteractionHandler>;
@@ -115,6 +127,7 @@ type Client = {
 			suggestions: Map<bigint, SuggestionService>;
 			verification: Map<bigint, VerificationService>;
 		};
+		interactionRepetition: InteractionRepetitionService;
 		realtimeUpdates: Map<bigint, RealtimeUpdateService>;
 		roleIndicators: Map<bigint, RoleIndicatorService>;
 		status: StatusService;
@@ -140,8 +153,7 @@ function createClient(
 ): Client {
 	const localisations = createLocalisations(localisationsStatic);
 
-	const localised = localiseCommands(localisations, commandsRaw);
-	const handlers = createCommandHandlers(Object.values(commandsRaw));
+	const commands: Client["commands"] = buildCommands(commandTemplates, localisations);
 
 	return {
 		metadata,
@@ -155,6 +167,7 @@ function createClient(
 				latest: new Map(),
 				previous: new Map(),
 			},
+			interactions: new Map(),
 		},
 		database: {
 			log: createLogger("database"),
@@ -193,7 +206,7 @@ function createClient(
 			},
 			adapters: { entryRequests, guilds, reports, praises, suggestions, users, warnings },
 		},
-		commands: { commands: localised, handlers },
+		commands,
 		features,
 		localisations,
 		collectors: new Map(),
@@ -219,6 +232,8 @@ function createClient(
 				suggestions: new Map(),
 				verification: new Map(),
 			},
+			// @ts-ignore: Late assignment.
+			interactionRepetition: "late_assignment",
 			realtimeUpdates: new Map(),
 			roleIndicators: new Map(),
 			// @ts-ignore: Late assignment.
@@ -419,6 +434,11 @@ async function initialiseClient(
 	client.services.global.push(lavalinkService);
 	client.services.music.lavalink = lavalinkService;
 	await lavalinkService.start();
+
+	const interactionRepetitionService = new InteractionRepetitionService([client, bot]);
+	client.services.global.push(interactionRepetitionService);
+	client.services.interactionRepetition = interactionRepetitionService;
+	await interactionRepetitionService.start();
 
 	await bot.start();
 
@@ -685,49 +705,30 @@ export async function handleGuildDelete(client: Client, guildId: bigint): Promis
 async function handleInteractionCreate(
 	[client, bot]: [Client, Discord.Bot],
 	interactionRaw: Discord.Interaction,
+	flags?: Logos.InteractionFlags,
 ): Promise<void> {
 	if (interactionRaw.data?.customId === constants.components.none) {
 		acknowledge([client, bot], interactionRaw);
 		return;
 	}
 
-	const commandName = interactionRaw.data?.name;
+	const commandName = getCommandName(interactionRaw);
 	if (commandName === undefined) {
 		return;
 	}
 
-	const subCommandGroupOption = interactionRaw.data?.options?.find((option) => isSubcommandGroup(option));
-
-	let commandNameFull: string;
-	if (subCommandGroupOption !== undefined) {
-		const subCommandGroupName = subCommandGroupOption.name;
-		const subCommandName = subCommandGroupOption.options?.find((option) => isSubcommand(option))?.name;
-		if (subCommandName === undefined) {
-			return;
-		}
-
-		commandNameFull = `${commandName} ${subCommandGroupName} ${subCommandName}`;
-	} else {
-		const subCommandName = interactionRaw.data?.options?.find((option) => isSubcommand(option))?.name;
-		if (subCommandName === undefined) {
-			commandNameFull = commandName;
-		} else {
-			commandNameFull = `${commandName} ${subCommandName}`;
-		}
-	}
+	const localeData = await getLocaleData(client, interactionRaw);
+	const interaction: Logos.Interaction = { ...interactionRaw, ...localeData, ...(flags !== undefined ? flags : {}) };
 
 	let handle: InteractionHandler | undefined;
 	if (isAutocomplete(interactionRaw)) {
-		handle = client.commands.handlers.autocomplete.get(commandNameFull);
+		handle = client.commands.handlers.autocomplete.get(commandName);
 	} else {
-		handle = client.commands.handlers.execute.get(commandNameFull);
+		handle = client.commands.handlers.execute.get(commandName);
 	}
 	if (handle === undefined) {
 		return;
 	}
-
-	const localeData = await getLocaleData(client, interactionRaw);
-	const interaction: Logos.Interaction = { ...interactionRaw, ...localeData };
 
 	Promise.resolve(handle([client, bot], interaction)).catch((exception) => {
 		Sentry.captureException(exception);
@@ -906,10 +907,10 @@ function withRateLimiting(handle: InteractionHandler): InteractionHandler {
 	};
 }
 
-function localiseCommands<CommandsRaw extends Record<string, CommandTemplate>, CommandName extends keyof CommandsRaw>(
-	localisations: Client["localisations"],
-	commandsRaw: CommandsRaw,
-): Record<CommandName, Command> {
+function buildCommands<
+	CommandTemplates extends Record<keyof typeof commandTemplates, CommandTemplate>,
+	CommandName extends keyof CommandTemplates,
+>(templates: CommandTemplates, localisations: Client["localisations"]): Client["commands"] {
 	function localiseCommandOrOption(key: string, type?: CommandTemplate["type"]): Partial<Command> | undefined {
 		const optionName = key.split(".")?.at(-1);
 		if (optionName === undefined) {
@@ -957,8 +958,10 @@ function localiseCommands<CommandsRaw extends Record<string, CommandTemplate>, C
 		};
 	}
 
-	const commands: Partial<Record<CommandName, Command>> = {};
-	for (const [commandName, commandRaw] of Object.entries(commandsRaw) as [CommandName, CommandTemplate][]) {
+	const showable: string[] = [];
+
+	const commandBuffer: Partial<Record<CommandName, Command>> = {};
+	for (const [commandName, commandRaw] of Object.entries(templates) as [CommandName, CommandTemplate][]) {
 		const commandKey = commandRaw.name;
 		const localisations = localiseCommandOrOption(commandKey, commandRaw.type);
 		if (localisations === undefined) {
@@ -968,6 +971,10 @@ function localiseCommands<CommandsRaw extends Record<string, CommandTemplate>, C
 		const command: Command = { ...localisations, ...commandRaw, options: [] } as Command;
 
 		for (const optionTemplate of commandRaw.options ?? []) {
+			if (isShowParameter(optionTemplate)) {
+				showable.push(`${command.name}`);
+			}
+
 			const optionKey = [commandKey, "options", optionTemplate.name].join(".");
 			const localisations = localiseCommandOrOption(optionKey);
 			if (localisations === undefined) {
@@ -977,6 +984,10 @@ function localiseCommands<CommandsRaw extends Record<string, CommandTemplate>, C
 			const option: Option = { ...localisations, ...optionTemplate, options: [] } as Option;
 
 			for (const subOptionTemplate of optionTemplate.options ?? []) {
+				if (isShowParameter(subOptionTemplate)) {
+					showable.push(`${command.name} ${option.name}`);
+				}
+
 				const subOptionKey = [optionKey, "options", subOptionTemplate.name].join(".");
 				const localisations = localiseCommandOrOption(subOptionKey);
 				if (localisations === undefined) {
@@ -986,6 +997,10 @@ function localiseCommands<CommandsRaw extends Record<string, CommandTemplate>, C
 				const subOption: Option = { ...localisations, ...subOptionTemplate, options: [] } as Option;
 
 				for (const subSubOptionTemplate of subOptionTemplate.options ?? []) {
+					if (isShowParameter(subSubOptionTemplate)) {
+						showable.push(`${command.name} ${option.name} ${subOption.name}`);
+					}
+
 					const subSubOptionKey = [subOptionKey, "options", subSubOptionTemplate.name].join(".");
 					const localisations = localiseCommandOrOption(subSubOptionKey);
 					if (localisations === undefined) {
@@ -1003,10 +1018,13 @@ function localiseCommands<CommandsRaw extends Record<string, CommandTemplate>, C
 			(command as Discord.CreateSlashApplicationCommand).options?.push(option);
 		}
 
-		commands[commandName] = command;
+		commandBuffer[commandName] = command;
 	}
 
-	return commands as Record<CommandName, Command>;
+	const commands = commandBuffer as Record<keyof typeof commandTemplates, Command>;
+	const handlers = createCommandHandlers(Object.values(commandTemplates));
+
+	return { commands, showable, handlers };
 }
 
 function createCommandHandlers(commands: CommandTemplate[]): Client["commands"]["handlers"] {
@@ -1357,14 +1375,6 @@ function extendEventHandler<Event extends keyof Discord.EventHandlers, Handler e
 	) as Handler;
 }
 
-function isSubcommandGroup(option: Discord.InteractionDataOption): boolean {
-	return option.type === Discord.ApplicationCommandOptionTypes.SubCommandGroup;
-}
-
-function isSubcommand(option: Discord.InteractionDataOption): boolean {
-	return option.type === Discord.ApplicationCommandOptionTypes.SubCommand;
-}
-
 function createLocalisations(
 	localisationsRaw: Map<string, Map<LocalisationLanguage, string>>,
 ): Client["localisations"] {
@@ -1459,6 +1469,7 @@ export {
 	isValidSnowflake,
 	localise,
 	resolveIdentifierToMembers,
+	handleInteractionCreate,
 	resolveInteractionToMember,
 	pluralise,
 };

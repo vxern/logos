@@ -8,12 +8,14 @@ import {
 	getLocaleByLanguage,
 } from "../constants/languages";
 import time from "../constants/time";
+import symbols from "../constants/types/symbols";
 import defaults from "../defaults";
 import * as Logos from "../types";
 import { InteractionLocaleData } from "../types";
 import { Client, addCollector, localise, pluralise } from "./client";
 import { Document } from "./database/document";
 import { Guild } from "./database/structs/guild";
+import { InteractionRepetitionButtonID } from "./services/interaction-repetition/interaction-repetition";
 import * as Discord from "@discordeno/bot";
 import { DiscordSnowflake as Snowflake } from "@sapphire/snowflake";
 
@@ -146,23 +148,33 @@ async function paginate<T>(
 		embed,
 		view,
 		show,
+		showable,
 	}: {
 		elements: T[];
 		embed: Omit<Discord.CamelizedDiscordEmbed, "footer">;
 		view: PaginationDisplayData<T>;
 		show: boolean;
+		showable: boolean;
 	},
 	{ locale }: { locale: Locale },
 ): Promise<void> {
 	const data: PaginationData<T> = { elements, view, pageIndex: 0 };
 
+	const showButton = getShowButton(client, interaction, { locale });
+
 	const isFirst = () => data.pageIndex === 0;
 	const isLast = () => data.pageIndex === data.elements.length - 1;
 
-	const generateEmbed = (): Discord.InteractionCallbackData => {
+	const getView = (): Discord.InteractionCallbackData => {
+		const buttons = generateButtons(customId, isFirst(), isLast());
+
+		if (showable && !show) {
+			buttons.push({ type: Discord.MessageComponentTypes.ActionRow, components: [showButton] });
+		}
+
 		return {
 			embeds: [getPageEmbed(client, data, embed, isLast(), locale)],
-			components: generateButtons(customId, isFirst(), isLast()),
+			components: buttons,
 		};
 	};
 
@@ -194,19 +206,11 @@ async function paginate<T>(
 				}
 			}
 
-			editReply([client, bot], interaction, generateEmbed());
+			editReply([client, bot], interaction, getView());
 		},
 	});
 
-	reply(
-		[client, bot],
-		interaction,
-		{
-			embeds: [getPageEmbed(client, data, embed, data.pageIndex === data.elements.length - 1, locale)],
-			components: generateButtons(customId, isFirst(), isLast()),
-		},
-		{ visible: show },
-	);
+	reply([client, bot], interaction, getView(), { visible: show });
 }
 
 interface PaginationDisplayData<T> {
@@ -785,6 +789,61 @@ function getLearningLanguage(
 	return userLearningLanguage;
 }
 
+function getShowButton(
+	client: Client,
+	interaction: Logos.Interaction,
+	{ locale }: { locale: Locale },
+): Discord.ButtonComponent {
+	const strings = {
+		show: localise(client, "interactions.show", locale)(),
+	};
+
+	return {
+		type: Discord.MessageComponentTypes.Button,
+		style: Discord.ButtonStyles.Primary,
+		label: strings.show,
+		emoji: { name: symbols.showInChat },
+		customId: encodeId<InteractionRepetitionButtonID>(constants.components.showInChat, [interaction.id.toString()]),
+	};
+}
+
+function isSubcommandGroup(option: Discord.InteractionDataOption): boolean {
+	return option.type === Discord.ApplicationCommandOptionTypes.SubCommandGroup;
+}
+
+function isSubcommand(option: Discord.InteractionDataOption): boolean {
+	return option.type === Discord.ApplicationCommandOptionTypes.SubCommand;
+}
+
+function getCommandName(interaction: Discord.Interaction | Logos.Interaction): string | undefined {
+	const commandName = interaction.data?.name;
+	if (commandName === undefined) {
+		return;
+	}
+
+	const subCommandGroupOption = interaction.data?.options?.find((option) => isSubcommandGroup(option));
+
+	let commandNameFull: string;
+	if (subCommandGroupOption !== undefined) {
+		const subCommandGroupName = subCommandGroupOption.name;
+		const subCommandName = subCommandGroupOption.options?.find((option) => isSubcommand(option))?.name;
+		if (subCommandName === undefined) {
+			return;
+		}
+
+		commandNameFull = `${commandName} ${subCommandGroupName} ${subCommandName}`;
+	} else {
+		const subCommandName = interaction.data?.options?.find((option) => isSubcommand(option))?.name;
+		if (subCommandName === undefined) {
+			commandNameFull = commandName;
+		} else {
+			commandNameFull = `${commandName} ${subCommandName}`;
+		}
+	}
+
+	return commandNameFull;
+}
+
 export {
 	acknowledge,
 	createInteractionCollector,
@@ -803,6 +862,8 @@ export {
 	postponeReply,
 	reply,
 	respond,
+	getShowButton,
 	getFeatureLanguage,
+	getCommandName,
 };
 export type { ControlButtonID, InteractionCollectorSettings, Modal };

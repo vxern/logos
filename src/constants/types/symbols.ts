@@ -140,6 +140,7 @@ export default {
 		b: "🟨",
 		c: "🟥",
 	},
+	showInChat: "🗨️",
 	roles: {
 		folder: "📁",
 		noCategory: "💭",

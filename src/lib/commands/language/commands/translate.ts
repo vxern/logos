@@ -3,7 +3,7 @@ import localisations from "../../../../constants/localisations";
 import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
 import diagnostics from "../../../diagnostics";
-import { editReply, parseArguments, postponeReply, reply, respond } from "../../../interactions";
+import { editReply, getShowButton, parseArguments, postponeReply, reply, respond } from "../../../interactions";
 import { addParametersToURL } from "../../../utils";
 import { CommandTemplate } from "../../command";
 import { show } from "../../parameters";
@@ -95,11 +95,12 @@ async function handleTranslateText(
 	[client, bot]: [Client, Discord.Bot],
 	interaction: Logos.Interaction,
 ): Promise<void> {
-	const [{ from, to, text, show }] = parseArguments(interaction.data?.options, { show: "boolean" });
+	const [{ from, to, text, show: showParameter }] = parseArguments(interaction.data?.options, { show: "boolean" });
 	if (from === undefined || to === undefined || text === undefined) {
 		return;
 	}
 
+	const show = interaction.show ?? showParameter;
 	const locale = show ? interaction.guildLocale : interaction.locale;
 
 	const sourceLanguage = resolveToSupportedLanguage(client, from);
@@ -280,7 +281,13 @@ async function handleTranslateText(
 		];
 	}
 
-	editReply([client, bot], interaction, { embeds });
+	const showButton = getShowButton(client, interaction, { locale });
+
+	const components: Discord.ActionRow[] | undefined = show
+		? undefined
+		: [{ type: Discord.MessageComponentTypes.ActionRow, components: [showButton] }];
+
+	editReply([client, bot], interaction, { embeds, components });
 }
 
 interface DeepLTranslation {

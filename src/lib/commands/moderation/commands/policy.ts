@@ -1,7 +1,7 @@
 import { Locale } from "../../../../constants/languages";
 import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
-import { parseArguments, reply } from "../../../interactions";
+import { getShowButton, parseArguments, reply } from "../../../interactions";
 import { CommandTemplate } from "../../command";
 import { show } from "../../parameters";
 import * as Discord from "@discordeno/bot";
@@ -40,7 +40,9 @@ async function handleDisplayModerationPolicy(
 		return;
 	}
 
-	const [{ show }] = parseArguments(interaction.data?.options, { show: "boolean" });
+	const [{ show: showParameter }] = parseArguments(interaction.data?.options, { show: "boolean" });
+
+	const show = interaction.show ?? showParameter;
 
 	const guild = client.cache.guilds.get(guildId);
 	if (guild === undefined) {
@@ -51,10 +53,16 @@ async function handleDisplayModerationPolicy(
 		title: localise(client, "policies.moderation.title", locale)(),
 	};
 
+	const showButton = getShowButton(client, interaction, { locale });
+
+	const components: Discord.ActionRow[] | undefined = show
+		? undefined
+		: [{ type: Discord.MessageComponentTypes.ActionRow, components: [showButton] }];
+
 	reply(
 		[client, bot],
 		interaction,
-		{ embeds: [{ title: strings.title, fields: getModerationPolicyPoints(client, { locale }) }] },
+		{ embeds: [{ title: strings.title, fields: getModerationPolicyPoints(client, { locale }) }], components },
 		{ visible: show },
 	);
 }

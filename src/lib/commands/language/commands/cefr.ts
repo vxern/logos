@@ -9,6 +9,7 @@ import {
 	decodeId,
 	editReply,
 	encodeId,
+	getShowButton,
 	parseArguments,
 	reply,
 } from "../../../interactions";
@@ -39,7 +40,9 @@ async function handleDisplayCefrGuide(
 	[client, bot]: [Client, Discord.Bot],
 	interaction: Logos.Interaction,
 ): Promise<void> {
-	const [{ show }] = parseArguments(interaction.data?.options, { show: "boolean" });
+	const [{ show: showParameter }] = parseArguments(interaction.data?.options, { show: "boolean" });
+
+	const show = interaction.show ?? showParameter;
 	const locale = show ? interaction.guildLocale : interaction.locale;
 
 	const guildId = interaction.guildId;
@@ -98,6 +101,8 @@ async function handleDisplayCefrGuide(
 			examples: localise(client, "cefr.strings.tabs.examples", locale)(),
 		},
 	};
+
+	const showButton = getShowButton(client, interaction, { locale });
 
 	const getButtons = (): Discord.MessageComponents => {
 		const bracketButtons: [Discord.ButtonComponent, Discord.ButtonComponent, Discord.ButtonComponent] = [
@@ -167,10 +172,16 @@ async function handleDisplayCefrGuide(
 			}
 		}
 
-		return [
+		if (!show) {
+			tabButtons.push(showButton);
+		}
+
+		const rows: Discord.ActionRow[] = [
 			{ type: Discord.MessageComponentTypes.ActionRow, components: bracketButtons },
 			{ type: Discord.MessageComponentTypes.ActionRow, components: tabButtons },
 		];
+
+		return rows;
 	};
 
 	const refreshView = async () => {

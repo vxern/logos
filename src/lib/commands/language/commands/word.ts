@@ -13,6 +13,7 @@ import {
 	deleteReply,
 	editReply,
 	encodeId,
+	getShowButton,
 	parseArguments,
 	postponeReply,
 	reply,
@@ -81,14 +82,18 @@ async function handleFindWordAutocomplete(
 
 /** Allows the user to look up a word and get information about it. */
 async function handleFindWord([client, bot]: [Client, Discord.Bot], interaction: Logos.Interaction): Promise<void> {
-	const [{ language: languageOrUndefined, word, verbose, show }] = parseArguments(interaction.data?.options, {
-		verbose: "boolean",
-		show: "boolean",
-	});
+	const [{ language: languageOrUndefined, word, verbose, show: showParameter }] = parseArguments(
+		interaction.data?.options,
+		{
+			verbose: "boolean",
+			show: "boolean",
+		},
+	);
 	if (word === undefined) {
 		return;
 	}
 
+	const show = interaction.show ?? showParameter;
 	const language = show ? interaction.guildLanguage : interaction.language;
 	const locale = show ? interaction.guildLocale : interaction.locale;
 
@@ -245,6 +250,8 @@ async function handleFindWord([client, bot]: [Client, Discord.Bot], interaction:
 
 	const entries = sanitiseEntries([...Array.from(entriesByPartOfSpeech.values()).flat(), ...unclassifiedEntries]);
 
+	const showButton = show ? undefined : getShowButton(client, interaction, { locale });
+
 	displayMenu(
 		[client, bot],
 		interaction,
@@ -253,6 +260,7 @@ async function handleFindWord([client, bot]: [Client, Discord.Bot], interaction:
 			currentView: ContentTabs.Definitions,
 			dictionaryEntryIndex: 0,
 			inflectionTableIndex: 0,
+			showButton,
 			verbose: verbose ?? false,
 		},
 		{ language, locale },
@@ -275,6 +283,7 @@ enum ContentTabs {
 
 interface WordViewData {
 	readonly entries: DictionaryEntry[];
+	showButton: Discord.ButtonComponent | undefined;
 	currentView: ContentTabs;
 	dictionaryEntryIndex: number;
 	inflectionTableIndex: number;
@@ -498,6 +507,10 @@ function generateButtons(
 			customId: inflectionMenuButtonId,
 			style: Discord.ButtonStyles.Primary,
 		});
+	}
+
+	if (data.showButton !== undefined) {
+		row.push(data.showButton);
 	}
 
 	if (row.length > 1) {

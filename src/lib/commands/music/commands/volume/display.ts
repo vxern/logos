@@ -1,15 +1,16 @@
 import constants from "../../../../../constants/constants";
 import * as Logos from "../../../../../types";
 import { Client, localise } from "../../../../client";
-import { parseArguments, reply } from "../../../../interactions";
+import { getShowButton, parseArguments, reply } from "../../../../interactions";
 import * as Discord from "@discordeno/bot";
 
 async function handleDisplayVolume(
 	[client, bot]: [Client, Discord.Bot],
 	interaction: Logos.Interaction,
 ): Promise<void> {
-	const [{ show }] = parseArguments(interaction.data?.options, { show: "boolean" });
+	const [{ show: showParameter }] = parseArguments(interaction.data?.options, { show: "boolean" });
 
+	const show = interaction.show ?? showParameter;
 	const locale = show ? interaction.guildLocale : interaction.locale;
 
 	const guildId = interaction.guildId;
@@ -60,6 +61,12 @@ async function handleDisplayVolume(
 		)({ volume }),
 	};
 
+	const showButton = getShowButton(client, interaction, { locale });
+
+	const components: Discord.ActionRow[] | undefined = show
+		? undefined
+		: [{ type: Discord.MessageComponentTypes.ActionRow, components: [showButton] }];
+
 	reply(
 		[client, bot],
 		interaction,
@@ -71,6 +78,7 @@ async function handleDisplayVolume(
 					color: constants.colors.blue,
 				},
 			],
+			components,
 		},
 		{ visible: show },
 	);

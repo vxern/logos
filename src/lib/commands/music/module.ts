@@ -45,6 +45,7 @@ async function displayListings(
 				},
 			},
 			show,
+			showable: true,
 		},
 		{ locale },
 	);

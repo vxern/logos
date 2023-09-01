@@ -5,5 +5,6 @@
 	"interactions.invalidUser.description": "The user you specified is not valid.",
 	"interactions.rateLimited.title": "You are being rate-limited",
 	"interactions.rateLimited.description.tooManyUses": "You have used this command too many times ({times}) in too short of a span of time.",
-	"interactions.rateLimited.description.cannotUseAgainUntil": "You will once again be able to use the command {relative_timestamp}."
+	"interactions.rateLimited.description.cannotUseAgainUntil": "You will once again be able to use the command {relative_timestamp}.",
+  "interactions.show": "Show message in chat"
 }
