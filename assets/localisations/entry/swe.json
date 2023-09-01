@@ -1,9 +1,7 @@
 {
     "entry.proficiency.receivedAccess.description.nowMember": "Du är nu en officiell medlem i {server_name}.",
     "entry.verification.verifyingAccount.failed.title": "Kunde inte verifiera kontot",
-    "entry.verification.answers.submitted.title": "",
     "entry.verification.answersSubmitted": "",
-    "entry.verification.vote.rejectMultiple.votes.one": "",
     "entry.verification.vote.alreadyVoted.inFavour.description": "",
     "entry.proficiency.title": "Språkkunskaper",
     "entry.proficiency.receivedAccess.title": "Grattis!",
