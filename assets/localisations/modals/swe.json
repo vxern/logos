@@ -1,1 +1,4 @@
-{}
+{
+    "verification.title": "Verifieringsfrågor",
+    "verification.fields.reason": "Vad är din anledning till att lära dig {language}?"
+}
