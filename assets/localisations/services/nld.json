@@ -12,7 +12,7 @@
     "markResolved": "Het probleem als opgelost markeren",
     "markUnresolved": "Het probleem als onopgelost markeren",
     "alreadyMarkedResolved.title": "Reeds als opgelost gemarkeerd",
-    "alreadyMarkedResolved.description": "Die probleem is al als opgelost gemarkeerd",
+    "alreadyMarkedResolved.description": "Die probleem is al als opgelost gemarkeerd.",
     "alreadyMarkedUnresolved.title": "Reeds als onopgelost gemarkeerd",
     "alreadyMarkedUnresolved.description": "Dit probleem is al als onopgelost gemarkeerd."
 }
