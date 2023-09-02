@@ -13,5 +13,6 @@
     "parameters.query.name": "spytanie",
     "parameters.timestamp.name": "znacznik czasu",
     "parameters.collection.name": "zbiōr",
-    "parameters.user.name": "używacz"
+    "parameters.user.name": "używacz",
+    "parameters.by.name": ""
 }
