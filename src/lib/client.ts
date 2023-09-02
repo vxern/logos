@@ -57,19 +57,16 @@ import { Service } from "./services/service";
 import { StatusService } from "./services/status/service";
 import { requestMembers } from "./utils";
 import * as Discord from "@discordeno/bot";
-import * as Sentry from "@sentry/node";
 import FancyLog from "fancy-log";
 import Fauna from "fauna";
 
 type Client = {
 	metadata: {
 		environment: {
-			environment: "production" | "staging" | "development" | "restricted";
 			version: string;
 			discordSecret: string;
 			faunaSecret: string;
 			deeplSecret: string;
-			sentrySecret: string;
 			rapidApiSecret: string;
 			lavalinkHost: string;
 			lavalinkPort: string;
@@ -730,10 +727,11 @@ async function handleInteractionCreate(
 		return;
 	}
 
-	Promise.resolve(handle([client, bot], interaction)).catch((exception) => {
-		Sentry.captureException(exception);
+	try {
+		await handle([client, bot], interaction);
+	} catch (exception) {
 		client.log.error(exception);
-	});
+	}
 }
 
 function withCaching(client: Client, transformers: Discord.Transformers): Discord.Transformers {

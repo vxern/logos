@@ -9,7 +9,6 @@ import { capitalise } from "./formatting";
 import { Client, initialiseClient } from "./lib/client";
 import { SentencePair } from "./lib/commands/language/commands/game";
 import { getSupportedLanguages } from "./lib/commands/language/module";
-import * as Sentry from "@sentry/node";
 import * as csv from "csv-parse/sync";
 import * as dotenv from "dotenv";
 import * as fs from "fs/promises";
@@ -259,13 +258,11 @@ async function setup(): Promise<void> {
 	readEnvironment({ envConfiguration, templateEnvConfiguration });
 
 	const environmentProvisional: Record<keyof Client["metadata"]["environment"], string | undefined> = {
-		environment: process.env.ENVIRONMENT,
 		version: process.env.npm_package_version,
-		discordSecret: process.env.DISCORD_SECRET,
-		faunaSecret: process.env.FAUNA_SECRET,
-		deeplSecret: process.env.DEEPL_SECRET,
-		sentrySecret: process.env.SENTRY_SECRET,
-		rapidApiSecret: process.env.RAPID_API_SECRET,
+		discordSecret: process.env.SECRET_DISCORD,
+		faunaSecret: process.env.SECRET_FAUNA,
+		deeplSecret: process.env.SECRET_DEEPL,
+		rapidApiSecret: process.env.SECRET_RAPID_API,
 		lavalinkHost: process.env.LAVALINK_HOST,
 		lavalinkPort: process.env.LAVALINK_PORT,
 		lavalinkPassword: process.env.LAVALINK_PASSWORD,
@@ -278,10 +275,6 @@ async function setup(): Promise<void> {
 	}
 
 	const environment = environmentProvisional as Client["metadata"]["environment"];
-
-	Sentry.init({ dsn: process.env.SENTRY_SECRET, environment: environment.environment });
-
-	console.info(`Running in ${environment.environment} mode.`);
 
 	const [supportedTranslationLanguages, sentenceFiles] = await Promise.all([
 		getSupportedLanguages(environment),

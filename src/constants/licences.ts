@@ -53,9 +53,10 @@ const licences = {
 		},
 	},
 	software: {
+		"@discordeno/bot": apache("Copyright 2021 - 2023 Discordeno"),
+		"@sapphire/snowflake": mit("Copyright (c) 2020 The Sapphire Community and its contributors"),
 		"csv-parse": mit("Copyright (c) 2010 Adaltas"),
 		"dexonline-scraper": mit('Copyright (c) 2023 Dorian "vxern" Oszczęda'),
-		discordeno: apache("Copyright 2021 - 2023 Discordeno"),
 		dotenv: bsd("Copyright (c) 2015, Scott Motte"),
 		"fancy-log": mit(
 			"Copyright (c) 2014, 2015, 2018, 2021 Blaine Bublitz <blaine.bublitz@gmail.com> and Eric Schoffstall <yo@contra.io>",
@@ -71,8 +72,6 @@ const licences = {
 		tsx: mit("Copyright (c) Hiroki Osame <hiroki.osame@gmail.com>"),
 		typescript: apache("Copyright Microsoft Corporation. All rights reserved."),
 		"youtube-sr": mit("Copyright (c) 2020 DevAndromeda"),
-		"@sentry/node": mit("Copyright (c) 2022 Functional Software, Inc. dba Sentry"),
-		"@sapphire/snowflake": mit("Copyright (c) 2020 The Sapphire Community and its contributors"),
 	},
 };
 

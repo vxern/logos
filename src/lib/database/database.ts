@@ -19,7 +19,6 @@ import { Report } from "./structs/report";
 import { Suggestion } from "./structs/suggestion";
 import { User } from "./structs/user";
 import { Warning } from "./structs/warning";
-import * as Sentry from "@sentry/node";
 import Fauna from "fauna";
 
 type QueryTypes = "read" | "write" | "exists" | "other";
@@ -269,7 +268,6 @@ async function dispatchQuery<
 			return undefined;
 		}
 
-		Sentry.captureException(exception);
 		client.database.log.error(`${exception.message} ~ ${exception.description}`);
 
 		return undefined;
