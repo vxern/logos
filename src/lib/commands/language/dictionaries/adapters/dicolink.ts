@@ -26,7 +26,7 @@ class WordsAPIAdapter extends DictionaryAdapter<Result[]> {
 	async fetch(client: Client, lemma: string, _: LearningLanguage): Promise<Result[] | undefined> {
 		const response = await fetch(constants.endpoints.dicolink.definitions(lemma), {
 			headers: {
-				"X-RapidAPI-Key": client.metadata.environment.rapidApiSecret,
+				"X-RapidAPI-Key": client.environment.rapidApiSecret,
 				"X-RapidAPI-Host": constants.endpoints.dicolink.host,
 			},
 		});

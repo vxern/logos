@@ -11,9 +11,9 @@ class LavalinkService extends GlobalService {
 		super([client, bot]);
 		this.node = new Lavaclient.Node({
 			connection: {
-				host: client.metadata.environment.lavalinkHost,
-				port: Number(client.metadata.environment.lavalinkPort),
-				password: client.metadata.environment.lavalinkPassword,
+				host: client.environment.lavalinkHost,
+				port: Number(client.environment.lavalinkPort),
+				password: client.environment.lavalinkPassword,
 			},
 			sendGatewayPayload: async (guildIdString, payload) => {
 				const guildId = BigInt(guildIdString);

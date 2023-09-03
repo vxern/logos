@@ -1,10 +1,14 @@
-import { FeatureLanguage, Locale, LocalisationLanguage } from "./constants/languages";
+import { FeatureLanguage, LearningLanguage, Locale, LocalisationLanguage } from "./constants/languages";
 import { TimeStruct } from "./lib/database/structs/guild";
 
-const LOCALISATION_LOCALE: Locale = "eng-US";
-const LOCALISATION_LANGUAGE: LocalisationLanguage = "English/American";
+const USER_AGENT = "Logos (https://logos.wordcollector.co.uk)";
+
 const FEATURE_LOCALE: Locale = "eng-US";
 const FEATURE_LANGUAGE: FeatureLanguage = "English";
+const LEARNING_LOCALE: Locale = "eng-US";
+const LEARNING_LANGUAGE: LearningLanguage = "English/American";
+const LOCALISATION_LOCALE: Locale = "eng-US";
+const LOCALISATION_LANGUAGE: LocalisationLanguage = "English/American";
 
 const RESULTS_PER_PAGE = 10;
 
@@ -40,8 +44,11 @@ const WARN_MESSAGE_DELETE_TIMEOUT = 1000 * 10; // 10 seconds in milliseconds.
 const STATUS_CYCLE = 1000 * 10; // 10 seconds in milliseconds.
 
 export default {
+	USER_AGENT,
 	LOCALISATION_LANGUAGE,
 	LOCALISATION_LOCALE,
+	LEARNING_LANGUAGE,
+	LEARNING_LOCALE,
 	FEATURE_LANGUAGE,
 	FEATURE_LOCALE,
 	RESULTS_PER_PAGE,

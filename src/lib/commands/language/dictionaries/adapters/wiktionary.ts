@@ -1,5 +1,5 @@
 import constants from "../../../../../constants/constants";
-import { LearningLanguage, Locale, WithVariants, toFeatureLanguage } from "../../../../../constants/languages";
+import { HasVariants, LearningLanguage, Locale, toFeatureLanguage } from "../../../../../constants/languages";
 import licences from "../../../../../constants/licences";
 import { Client } from "../../../../client";
 import { getPartOfSpeech } from "../../module";
@@ -18,7 +18,7 @@ const languageVariantsReduced: Record<string, string> = {
 	"Norwegian/Bokmål": "Norwegian Bokmål",
 	"Armenian/Western": "Armenian",
 	"Armenian/Eastern": "Armenian",
-} satisfies Record<WithVariants<LearningLanguage>, string>;
+} satisfies Record<HasVariants<LearningLanguage>, string>;
 
 function getReduced(language: LearningLanguage): string {
 	return languageVariantsReduced[language] ?? language;

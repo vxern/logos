@@ -4,8 +4,8 @@ import {
 	LearningLanguage,
 	Locale,
 	LocalisationLanguage,
-	getDiscordLanguageByDiscordLocale,
-	getLocaleByLanguage,
+	getDiscordLocalisationLanguageByLocale,
+	getLocaleByLocalisationLanguage,
 } from "../constants/languages";
 import time from "../constants/time";
 import symbols from "../constants/types/symbols";
@@ -692,7 +692,7 @@ function getFeatureLanguage(guildDocument?: Document<Guild>): FeatureLanguage {
 const FALLBACK_LOCALE_DATA: InteractionLocaleData = {
 	language: defaults.LOCALISATION_LANGUAGE,
 	locale: defaults.LOCALISATION_LOCALE,
-	learningLanguage: defaults.LOCALISATION_LANGUAGE,
+	learningLanguage: defaults.LEARNING_LANGUAGE,
 	guildLanguage: defaults.LOCALISATION_LANGUAGE,
 	guildLocale: defaults.LOCALISATION_LOCALE,
 	featureLanguage: defaults.FEATURE_LANGUAGE,
@@ -727,22 +727,22 @@ async function getLocaleData(client: Client, interaction: Discord.Interaction): 
 	const learningLanguage = getLearningLanguage(guildDocument, targetLanguage, member);
 
 	const guildLanguage = isInTargetOnlyChannel ? targetLanguage : getLocalisationLanguage(guildDocument);
-	const guildLocale = getLocaleByLanguage(guildLanguage);
+	const guildLocale = getLocaleByLocalisationLanguage(guildLanguage);
 	const featureLanguage = getFeatureLanguage(guildDocument);
 
 	if (!isAutocomplete(interaction)) {
 		// If the user has configured a custom locale, use the user's preferred locale.
 		if (userDocument?.data.account.language !== undefined) {
 			const language = userDocument?.data.account.language;
-			const locale = getLocaleByLanguage(language);
+			const locale = getLocaleByLocalisationLanguage(language);
 			return { language, locale, learningLanguage, guildLanguage, guildLocale, featureLanguage };
 		}
 	}
 
 	// Otherwise default to the user's app language.
 	const appLocale = interaction.locale;
-	const language = getDiscordLanguageByDiscordLocale(appLocale) ?? defaults.LOCALISATION_LANGUAGE;
-	const locale = getLocaleByLanguage(language);
+	const language = getDiscordLocalisationLanguageByLocale(appLocale) ?? defaults.LOCALISATION_LANGUAGE;
+	const locale = getLocaleByLocalisationLanguage(language);
 	return { language, locale, learningLanguage, guildLanguage, guildLocale, featureLanguage };
 }
 

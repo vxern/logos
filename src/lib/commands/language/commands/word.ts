@@ -1,5 +1,5 @@
 import constants from "../../../../constants/constants";
-import languages, { Locale, LocalisationLanguage, isLocalised } from "../../../../constants/languages";
+import languages, { Locale, LocalisationLanguage, isLocalisationLanguage } from "../../../../constants/languages";
 import localisations from "../../../../constants/localisations";
 import defaults from "../../../../defaults";
 import { code, trim } from "../../../../formatting";
@@ -97,7 +97,7 @@ async function handleFindWord([client, bot]: [Client, Discord.Bot], interaction:
 	const language = show ? interaction.guildLanguage : interaction.language;
 	const locale = show ? interaction.guildLocale : interaction.locale;
 
-	if (languageOrUndefined !== undefined && !isLocalised(languageOrUndefined)) {
+	if (languageOrUndefined !== undefined && !isLocalisationLanguage(languageOrUndefined)) {
 		const strings = {
 			title: localise(client, "word.strings.invalid.language.title", locale)(),
 			description: localise(client, "word.strings.invalid.language.description", locale)(),

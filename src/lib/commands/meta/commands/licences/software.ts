@@ -89,6 +89,7 @@ async function handleDisplaySoftwareLicence(
 					return `*${page}*`;
 				},
 			},
+			showable: false,
 			show: false,
 		},
 		{ locale },

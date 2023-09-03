@@ -3,10 +3,10 @@ import languages, {
 	LearningLanguage,
 	Locale,
 	LocalisationLanguage,
-	getDiscordLocaleByLanguage,
-	getLanguageByLocale,
-	getLocaleByLanguage,
-	isBuiltIn,
+	getDiscordLocaleByLocalisationLanguage,
+	getLocaleByLocalisationLanguage,
+	getLocalisationLanguageByLocale,
+	isDiscordLocalisationLanguage,
 } from "../constants/languages";
 import time from "../constants/time";
 import defaults from "../defaults";
@@ -16,7 +16,6 @@ import * as Logos from "../types";
 import { Command, CommandTemplate, InteractionHandler, Option } from "./commands/command";
 import commandTemplates from "./commands/commands";
 import { SentencePair } from "./commands/language/commands/game";
-import { SupportedLanguage } from "./commands/language/module";
 import { isShowParameter } from "./commands/parameters";
 import entryRequests from "./database/adapters/entry-requests";
 import guilds from "./database/adapters/guilds";
@@ -61,18 +60,16 @@ import FancyLog from "fancy-log";
 import Fauna from "fauna";
 
 type Client = {
-	metadata: {
-		environment: {
-			version: string;
-			discordSecret: string;
-			faunaSecret: string;
-			deeplSecret: string;
-			rapidApiSecret: string;
-			lavalinkHost: string;
-			lavalinkPort: string;
-			lavalinkPassword: string;
-		};
-		supportedTranslationLanguages: SupportedLanguage[];
+	environment: {
+		version: string;
+		discordSecret: string;
+		faunaSecret: string;
+		deeplSecret: string;
+		rapidApiSecret: string;
+		lavalinkHost: string;
+		lavalinkPort: string;
+		lavalinkPassword: string;
+		loadSentences: boolean;
 	};
 	log: Logger;
 	cache: {
@@ -144,7 +141,7 @@ type Event = keyof Discord.EventHandlers;
 type Logger = Record<"debug" | keyof typeof FancyLog, (...args: unknown[]) => void>;
 
 function createClient(
-	metadata: Client["metadata"],
+	environment: Client["environment"],
 	features: Client["features"],
 	localisationsStatic: Map<string, Map<LocalisationLanguage, string>>,
 ): Client {
@@ -153,7 +150,7 @@ function createClient(
 	const commands: Client["commands"] = buildCommands(commandTemplates, localisations);
 
 	return {
-		metadata,
+		environment,
 		log: createLogger("client"),
 		cache: {
 			guilds: new Map(),
@@ -169,7 +166,7 @@ function createClient(
 		database: {
 			log: createLogger("database"),
 			client: new Fauna.Client({
-				secret: metadata.environment.faunaSecret,
+				secret: environment.faunaSecret,
 				domain: "db.us.fauna.com",
 				scheme: "https",
 				port: 443,
@@ -313,17 +310,17 @@ async function dispatchEvent<EventName extends keyof Discord.EventHandlers>(
 }
 
 async function initialiseClient(
-	metadata: Client["metadata"],
+	environment: Client["environment"],
 	features: Client["features"],
 	localisations: Map<string, Map<LocalisationLanguage, string>>,
 ): Promise<void> {
-	const client = createClient(metadata, features, localisations);
+	const client = createClient(environment, features, localisations);
 
 	await prefetchDataFromDatabase(client, client.database);
 
 	const bot = overrideDefaultEventHandlers(
 		Discord.createBot({
-			token: metadata.environment.discordSecret,
+			token: environment.discordSecret,
 			intents:
 				Discord.Intents.Guilds |
 				Discord.Intents.GuildMembers | // Members joining, leaving, changing.
@@ -427,17 +424,21 @@ async function initialiseClient(
 	bot.gateway.cache.requestMembers = { enabled: true, pending: new Discord.Collection() };
 	bot.transformers = withCaching(client, bot.transformers);
 
+	const promises: Promise<unknown>[] = [];
+
 	const lavalinkService = new LavalinkService([client, bot]);
 	client.services.global.push(lavalinkService);
 	client.services.music.lavalink = lavalinkService;
-	await lavalinkService.start();
+	promises.push(lavalinkService.start());
 
 	const interactionRepetitionService = new InteractionRepetitionService([client, bot]);
 	client.services.global.push(interactionRepetitionService);
 	client.services.interactionRepetition = interactionRepetitionService;
-	await interactionRepetitionService.start();
+	promises.push(interactionRepetitionService.start());
 
-	await bot.start();
+	promises.push(bot.start());
+
+	await Promise.all(promises);
 
 	const statusService = new StatusService([client, bot]);
 	client.services.global.push(statusService);
@@ -1399,7 +1400,8 @@ function createLocalisations(
 }
 
 function localise(client: Client, key: string, locale: Locale | undefined): (args?: Record<string, unknown>) => string {
-	const language = (locale !== undefined ? getLanguageByLocale(locale) : undefined) ?? defaults.LOCALISATION_LANGUAGE;
+	const language =
+		(locale !== undefined ? getLocalisationLanguageByLocale(locale) : undefined) ?? defaults.LOCALISATION_LANGUAGE;
 
 	const getLocalisation =
 		client.localisations.get(key)?.get(language) ??
@@ -1422,11 +1424,11 @@ function toDiscordLocalisations(
 	const entries = Array.from(localisations.entries());
 	const result: Discord.Localization = {};
 	for (const [language, localise] of entries) {
-		if (!isBuiltIn(language)) {
+		if (!isDiscordLocalisationLanguage(language)) {
 			continue;
 		}
 
-		const locale = getDiscordLocaleByLanguage(language);
+		const locale = getDiscordLocaleByLocalisationLanguage(language);
 		if (locale === undefined) {
 			continue;
 		}
@@ -1442,7 +1444,7 @@ function toDiscordLocalisations(
 }
 
 function pluralise(client: Client, key: string, language: LocalisationLanguage, number: number): string {
-	const locale = getLocaleByLanguage(language);
+	const locale = getLocaleByLocalisationLanguage(language);
 	const pluralise = transformers[language].pluralise;
 	const { one, two, many } = {
 		one: localise(client, `${key}.one`, locale)?.({ one: number }),

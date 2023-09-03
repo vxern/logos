@@ -117,6 +117,8 @@
 	"translate.strings.invalid.target.description": "The target language is invalid.",
 	"translate.strings.invalid.both.title": "Invalid languages",
 	"translate.strings.invalid.both.description": "Both the source and target languages are invalid.",
+  "translate.strings.noTranslationAdapters.title": "Language pair not supported",
+  "translate.strings.noTranslationAdapters.description": "The selected language pair is not supported.",
 	"translate.strings.sourceText": "Source Text",
 	"translate.strings.translation": "Translation",
 

@@ -1,4 +1,4 @@
-import { FeatureLanguage, LocalisationLanguage } from "../../../constants/languages";
+import { FeatureLanguage, LearningLanguage, LocalisationLanguage } from "../../../constants/languages";
 import time from "../../../constants/time";
 
 /** @since v3.0.0 */
@@ -20,7 +20,7 @@ interface Guild {
 	languages?: {
 		localisation: LocalisationLanguage;
 		/** @since v3.8.0 */
-		target?: LocalisationLanguage;
+		target?: LearningLanguage;
 		feature: FeatureLanguage;
 	};
 

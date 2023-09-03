@@ -176,6 +176,18 @@ function getMemberAvatarURL(guildId: bigint, userId: bigint, avatarHash: bigint)
 	return `https://cdn.discordapp.com/guilds/${guildId}/users/${userId}/avatars/${avatarHash}`;
 }
 
+type Reverse<O extends Record<string, string>> = {
+	[K in keyof O as O[K]]: K;
+};
+function reverseObject<O extends Record<string, string>>(object: O): Reverse<O> {
+	const reversed: Partial<Reverse<O>> = {};
+	for (const key of Object.keys(object) as (keyof O)[]) {
+		// @ts-ignore: This is okay.
+		reversed[object[key]] = key;
+	}
+	return reversed as unknown as Reverse<O>;
+}
+
 export {
 	addParametersToURL,
 	chunk,
@@ -188,4 +200,5 @@ export {
 	snowflakeToTimestamp,
 	verifyIsWithinLimits,
 	getMemberAvatarURL,
+	reverseObject,
 };

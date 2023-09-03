@@ -1,5 +1,5 @@
 import constants from "../../../../constants/constants";
-import { Locale, getLanguageByLocale } from "../../../../constants/languages";
+import { Locale, getLocalisationLanguageByLocale } from "../../../../constants/languages";
 import { MentionTypes, TimestampFormat, mention, timestamp } from "../../../../formatting";
 import * as Logos from "../../../../types";
 import { Client, localise, pluralise } from "../../../client";
@@ -79,7 +79,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 		}
 
 		const guildLocale = this.guildLocale;
-		const guildLanguage = getLanguageByLocale(guildLocale);
+		const guildLanguage = getLocalisationLanguageByLocale(guildLocale);
 
 		const featureLanguage = getFeatureLanguage(guildDocument);
 

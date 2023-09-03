@@ -63,7 +63,7 @@ const adapter: Database["adapters"]["guilds"] = {
 				isNative: false,
 				languages: {
 					localisation: defaults.LOCALISATION_LANGUAGE,
-					target: defaults.LOCALISATION_LANGUAGE,
+					target: defaults.LEARNING_LANGUAGE,
 					feature: defaults.FEATURE_LANGUAGE,
 				},
 				features: {

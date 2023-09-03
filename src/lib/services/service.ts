@@ -1,4 +1,4 @@
-import { Locale, getLocaleByLanguage } from "../../constants/languages";
+import { Locale, getLocaleByLocalisationLanguage } from "../../constants/languages";
 import defaults from "../../defaults";
 import * as Logos from "../../types";
 import { Client } from "../client";
@@ -113,7 +113,7 @@ abstract class LocalService extends Service {
 		}
 
 		const guildLanguage = getLocalisationLanguage(guildDocument);
-		const guildLocale = getLocaleByLanguage(guildLanguage) ?? defaults.LOCALISATION_LOCALE;
+		const guildLocale = getLocaleByLocalisationLanguage(guildLanguage) ?? defaults.LOCALISATION_LOCALE;
 
 		return guildLocale;
 	}

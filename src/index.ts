@@ -2,13 +2,12 @@ import {
 	LearningLanguage,
 	Locale,
 	LocalisationLanguage,
-	getLanguageByLocale,
-	isLocalised,
+	getLocalisationLanguageByLocale,
+	isLocalisationLanguage,
 } from "./constants/languages";
 import { capitalise } from "./formatting";
 import { Client, initialiseClient } from "./lib/client";
 import { SentencePair } from "./lib/commands/language/commands/game";
-import { getSupportedLanguages } from "./lib/commands/language/module";
 import * as csv from "csv-parse/sync";
 import * as dotenv from "dotenv";
 import * as fs from "fs/promises";
@@ -97,7 +96,7 @@ async function loadLocalisations(directoryPath: string): Promise<Map<string, Map
 			}
 
 			const [locale, _] = entryPath.split(".") as [Locale, string];
-			const language = getLanguageByLocale(locale);
+			const language = getLocalisationLanguageByLocale(locale);
 			if (language === undefined) {
 				continue;
 			}
@@ -172,7 +171,16 @@ async function loadLocalisations(directoryPath: string): Promise<Map<string, Map
  * @returns An array of tuples where the first element is a language and the second
  * element is the contents of its sentence file.
  */
-async function readSentenceFiles(directoryPath: string): Promise<[LearningLanguage, string][]> {
+async function readSentenceFiles(
+	environment: Client["environment"],
+	directoryPath: string,
+): Promise<[LearningLanguage, string][]> {
+	if (!environment.loadSentences) {
+		console.info("[Sentences] Skipping reading sentence pairs...");
+
+		return [];
+	}
+
 	const filePaths: string[] = [];
 	for (const entryPath of await fs.readdir(directoryPath)) {
 		const combinedPath = `${directoryPath}/${entryPath}`;
@@ -196,7 +204,7 @@ async function readSentenceFiles(directoryPath: string): Promise<[LearningLangua
 			.map((part) => capitalise(part))
 			.join("/");
 
-		if (!isLocalised(language)) {
+		if (!isLocalisationLanguage(language)) {
 			console.warn(
 				`File '${filePath}' contains sentences for a language '${language}' not supported by the application. Skipping...`,
 			);
@@ -215,7 +223,16 @@ async function readSentenceFiles(directoryPath: string): Promise<[LearningLangua
 }
 
 /** Loads dictionary adapters and sentence lists. */
-function loadSentencePairs(languageFileContents: [LearningLanguage, string][]): Map<LearningLanguage, SentencePair[]> {
+function loadSentencePairs(
+	environment: Client["environment"],
+	languageFileContents: [LearningLanguage, string][],
+): Map<LearningLanguage, SentencePair[]> {
+	if (!environment.loadSentences) {
+		console.info("[Sentences] Skipping loading sentence pairs...");
+
+		return new Map();
+	}
+
 	console.info(`[Sentences] Loading sentence pairs for ${languageFileContents.length} language(s)...`);
 
 	const result = new Map<LearningLanguage, SentencePair[]>();
@@ -257,7 +274,7 @@ async function setup(): Promise<void> {
 
 	readEnvironment({ envConfiguration, templateEnvConfiguration });
 
-	const environmentProvisional: Record<keyof Client["metadata"]["environment"], string | undefined> = {
+	const environmentProvisional: Record<keyof Client["environment"], string | boolean | undefined> = {
 		version: process.env.npm_package_version,
 		discordSecret: process.env.SECRET_DISCORD,
 		faunaSecret: process.env.SECRET_FAUNA,
@@ -266,6 +283,7 @@ async function setup(): Promise<void> {
 		lavalinkHost: process.env.LAVALINK_HOST,
 		lavalinkPort: process.env.LAVALINK_PORT,
 		lavalinkPassword: process.env.LAVALINK_PASSWORD,
+		loadSentences: process.env.LOAD_SENTENCES !== undefined && process.env.LOAD_SENTENCES === "true",
 	};
 
 	for (const [key, value] of Object.entries(environmentProvisional)) {
@@ -274,21 +292,16 @@ async function setup(): Promise<void> {
 		}
 	}
 
-	const environment = environmentProvisional as Client["metadata"]["environment"];
+	const environment = environmentProvisional as Client["environment"];
 
-	const [supportedTranslationLanguages, sentenceFiles] = await Promise.all([
-		getSupportedLanguages(environment),
-		readSentenceFiles("./assets/sentences"),
+	const [localisations, sentenceFiles] = await Promise.all([
+		loadLocalisations("./assets/localisations"),
+		readSentenceFiles(environment, "./assets/sentences"),
 	]);
 
-	const sentencePairs = loadSentencePairs(sentenceFiles);
-	const localisations = await loadLocalisations("./assets/localisations");
+	const sentencePairs = loadSentencePairs(environment, sentenceFiles);
 
-	initialiseClient(
-		{ environment, supportedTranslationLanguages },
-		{ sentencePairs, rateLimiting: new Map() },
-		localisations,
-	);
+	initialiseClient(environment, { sentencePairs, rateLimiting: new Map() }, localisations);
 }
 
 function customiseGlobals(): void {

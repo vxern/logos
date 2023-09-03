@@ -1,5 +1,9 @@
 import constants from "../../../../../../constants/constants";
-import languages, { Locale, getLocaleByLanguage, isLocalised } from "../../../../../../constants/languages";
+import languages, {
+	Locale,
+	getLocaleByLocalisationLanguage,
+	isLocalisationLanguage,
+} from "../../../../../../constants/languages";
 import localisations from "../../../../../../constants/localisations";
 import * as Logos from "../../../../../../types";
 import { Client, localise } from "../../../../../client";
@@ -56,7 +60,7 @@ async function handleSetLanguage([client, bot]: [Client, Discord.Bot], interacti
 		return;
 	}
 
-	if (!isLocalised(languageOrUndefined)) {
+	if (!isLocalisationLanguage(languageOrUndefined)) {
 		displayError([client, bot], interaction, { locale: interaction.locale });
 		return;
 	}
@@ -75,7 +79,7 @@ async function handleSetLanguage([client, bot]: [Client, Discord.Bot], interacti
 		data: { ...userDocument.data, account: { ...userDocument.data.account, language } },
 	});
 
-	const locale = getLocaleByLanguage(language);
+	const locale = getLocaleByLocalisationLanguage(language);
 
 	const strings = {
 		title: localise(client, "settings.strings.languageUpdated.title", locale)(),
