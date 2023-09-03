@@ -1,9 +1,5 @@
 {
-    "units.second.shortest": "",
     "units.minute.shortest": "",
-    "units.hour.shortest": "",
     "units.day.shortest": "",
-    "units.week.shortest": "",
-    "units.month.shortest": "",
-    "units.year.shortest": ""
+    "units.month.shortest": ""
 }
