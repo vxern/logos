@@ -1,12 +1,7 @@
 {
-    "verification.fields.reason": "",
     "verification.fields.whereFound": "",
-    "answer.fields.question": "",
     "correction.title": "",
-    "correction.fields.corrected": "",
     "report.fields.reason": "",
-    "report.fields.link": "",
     "suggestion.fields.suggestion": "",
-    "prompts.cancel": "",
     "prompts.leave": ""
 }
