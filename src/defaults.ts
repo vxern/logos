@@ -1,6 +1,7 @@
 import { FeatureLanguage, LearningLanguage, Locale, LocalisationLanguage } from "./constants/languages";
 import { TimeStruct } from "./lib/database/structs/guild";
 
+const PROJECT_NAME = "Logos";
 const USER_AGENT = "Logos (https://logos.wordcollector.co.uk)";
 
 const FEATURE_LOCALE: Locale = "eng-US";
@@ -44,6 +45,7 @@ const WARN_MESSAGE_DELETE_TIMEOUT = 1000 * 10; // 10 seconds in milliseconds.
 const STATUS_CYCLE = 1000 * 10; // 10 seconds in milliseconds.
 
 export default {
+	PROJECT_NAME,
 	USER_AGENT,
 	LOCALISATION_LANGUAGE,
 	LOCALISATION_LOCALE,

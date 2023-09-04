@@ -1,12 +1,12 @@
 import constants from "../../../../constants/constants";
-import languages, { isTranslationLanguage } from "../../../../constants/languages";
+import languages, { Languages, TranslationLanguage, isTranslationLanguage } from "../../../../constants/languages";
 import localisations from "../../../../constants/localisations";
 import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
 import { editReply, getShowButton, parseArguments, postponeReply, reply, respond } from "../../../interactions";
 import { CommandTemplate } from "../../command";
 import { show } from "../../parameters";
-import { Translation, TranslationAdapter, TranslationLanguages } from "../translators/adapter";
+import { Translation, TranslationAdapter } from "../translators/adapter";
 import { resolveAdapters } from "../translators/adapters";
 import * as Discord from "@discordeno/bot";
 
@@ -199,7 +199,7 @@ async function handleTranslateText(
 		return;
 	}
 
-	const languages: TranslationLanguages = { source: sourceLanguage, target: targetLanguage };
+	const languages: Languages<TranslationLanguage> = { source: sourceLanguage, target: targetLanguage };
 
 	const adapters = resolveAdapters(languages);
 	if (adapters === undefined || adapters.length === 0) {
@@ -318,7 +318,7 @@ type QueryResult = { adapter: TranslationAdapter; translation?: Translation };
 async function* queryAdapters(
 	client: Client,
 	text: string,
-	languages: TranslationLanguages,
+	languages: Languages<TranslationLanguage>,
 	{ adapters }: { adapters: TranslationAdapter[] },
 ): AsyncGenerator<QueryResult, void, void> {
 	const promises: Promise<QueryResult>[] = [];

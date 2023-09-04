@@ -1,3 +1,5 @@
+import { reverseObject } from "../../lib/utils";
+
 const languages = {
 	deepl: [
 		"Bulgarian",
@@ -5,8 +7,8 @@ const languages = {
 		"Danish",
 		"German",
 		"Greek",
-		"English/British",
 		"English/American",
+		"English/British",
 		"Spanish",
 		"Estonian",
 		"Finnish",
@@ -31,6 +33,144 @@ const languages = {
 		"Turkish",
 		"Ukrainian",
 		"Chinese/Simplified",
+	],
+	google: [
+		"Afrikaans",
+		"Albanian",
+		"Amharic",
+		"Arabic",
+		"Armenian",
+		"Assamese",
+		"Aymara",
+		"Azerbaijani",
+		"Bambara",
+		"Basque",
+		"Belarusian",
+		"Bengali",
+		"Bhojpuri",
+		"Bosnian",
+		"Bulgarian",
+		"Burmese",
+		"Catalan",
+		"Chewa", // Nyanja
+		"Chinese/Simplified",
+		"Chinese/Traditional",
+		"Corsican",
+		"Creole/Haitian", // Haitian Creole
+		"Creole/SierraLeone", // Krio
+		"Croatian",
+		"Czech",
+		"Danish",
+		"Dogri",
+		"Dutch",
+		"English/American",
+		"English/British",
+		"Esperanto",
+		"Estonian",
+		"Ewe",
+		"Filipino",
+		"Filipino/Cebuano",
+		"Filipino/Tagalog",
+		"Finnish",
+		"French",
+		"Frisian",
+		"Galician",
+		"Ganda", // Luganda
+		"Georgian",
+		"German",
+		"Greek",
+		"Guarani",
+		"Gujarati",
+		"Hausa",
+		"Hawaiian",
+		"Hebrew",
+		"Hindi",
+		"Hmong",
+		"Hungarian",
+		"Icelandic",
+		"Igbo",
+		"Ilocano",
+		"Indonesian",
+		"Irish",
+		"Italian",
+		"Japanese",
+		"Javanese",
+		"Kannada",
+		"Kazakh",
+		"Khmer",
+		"Kinyarwanda",
+		"Konkani",
+		"Korean",
+		"Kurdish",
+		"Kurdish/Sorani",
+		"Kyrgyz",
+		"Lao",
+		"Latin",
+		"Latvian",
+		"Lingala",
+		"Lithuanian",
+		"Luxembourgish",
+		"Macedonian",
+		"Maithili",
+		"Malagasy",
+		"Malay",
+		"Malayalam",
+		"Maldivian", // Dhivehi
+		"Maltese",
+		"Maori",
+		"Marathi",
+		"Meitei", // Manipuri
+		"Mizo",
+		"Mongolian",
+		"Nepali",
+		"Norwegian",
+		"Odia", // Oriya
+		"Oromo",
+		"Pashto",
+		"Persian",
+		"Polish",
+		"Portuguese/Brazilian",
+		"Portuguese/European",
+		"Punjabi",
+		"Quechua",
+		"Romanian",
+		"Russian",
+		"Samoan",
+		"Sanskrit",
+		"ScottishGaelic",
+		"Serbian",
+		"Shona",
+		"Sindhi",
+		"Sinhala",
+		"Slovak",
+		"Slovenian",
+		"Somali",
+		"Sotho/Northern", // Sepedi
+		"Sotho/Southern", // Sesotho
+		"Spanish",
+		"Sundanese",
+		"Swahili",
+		"Swedish",
+		"Tajik",
+		"Tamil",
+		"Tatar",
+		"Telugu",
+		"Thai",
+		"Tigrinya",
+		"Tsonga",
+		"Turkish",
+		"Turkmen",
+		"Twi", // Akan
+		"Ukrainian",
+		"Urdu",
+		"Uyghur",
+		"Uzbek",
+		"Vietnamese",
+		"Welsh",
+		"Xhosa",
+		"Yiddish",
+		"Yoruba",
+		"Zulu",
 	],
 } as const;
 
@@ -68,21 +208,195 @@ const languageToLocale = {
 		Ukrainian: "UK",
 		"Chinese/Simplified": "ZH",
 	} as const satisfies Record<DeepLLanguage, string>,
+	google: {
+		Afrikaans: "af",
+		Albanian: "sq",
+		Amharic: "am",
+		Arabic: "ar",
+		Armenian: "hy",
+		Assamese: "as",
+		Aymara: "ay",
+		Azerbaijani: "az",
+		Bambara: "bm",
+		Basque: "eu",
+		Belarusian: "be",
+		Bengali: "bn",
+		Bhojpuri: "bho",
+		Bosnian: "bs",
+		Bulgarian: "bg",
+		Burmese: "my",
+		Catalan: "ca",
+		Chewa: "ny",
+		"Chinese/Simplified": "zh-CN",
+		"Chinese/Traditional": "zh-TW",
+		Corsican: "co",
+		"Creole/Haitian": "ht",
+		"Creole/SierraLeone": "kri",
+		Croatian: "hr",
+		Czech: "cs",
+		Danish: "da",
+		Dogri: "doi",
+		Dutch: "nl",
+		"English/American": "en",
+		"English/British": "en",
+		Esperanto: "eo",
+		Estonian: "et",
+		Ewe: "ee",
+		Filipino: "fil",
+		"Filipino/Cebuano": "ceb",
+		"Filipino/Tagalog": "tl",
+		Finnish: "fi",
+		French: "fr",
+		Frisian: "fy",
+		Galician: "gl",
+		Ganda: "lg",
+		Georgian: "ka",
+		German: "de",
+		Greek: "el",
+		Guarani: "gn",
+		Gujarati: "gu",
+		Hausa: "ha",
+		Hawaiian: "haw",
+		Hebrew: "he",
+		Hindi: "hi",
+		Hmong: "hmn",
+		Hungarian: "hu",
+		Icelandic: "is",
+		Igbo: "ig",
+		Ilocano: "ilo",
+		Indonesian: "id",
+		Irish: "ga",
+		Italian: "it",
+		Japanese: "ja",
+		Javanese: "jv",
+		Kannada: "kn",
+		Kazakh: "kk",
+		Khmer: "km",
+		Kinyarwanda: "rw",
+		Konkani: "gom",
+		Korean: "ko",
+		Kurdish: "ku",
+		"Kurdish/Sorani": "ckb",
+		Kyrgyz: "ky",
+		Lao: "lo",
+		Latin: "la",
+		Latvian: "lv",
+		Lingala: "ln",
+		Lithuanian: "lt",
+		Luxembourgish: "lb",
+		Macedonian: "mk",
+		Maithili: "mai",
+		Malagasy: "mg",
+		Malay: "ms",
+		Malayalam: "ml",
+		Maldivian: "dv",
+		Maltese: "mt",
+		Maori: "mi",
+		Marathi: "mr",
+		Meitei: "mni-Mtei",
+		Mizo: "lus",
+		Mongolian: "mn",
+		Nepali: "ne",
+		Norwegian: "no",
+		Odia: "or",
+		Oromo: "om",
+		Pashto: "ps",
+		Persian: "fa",
+		Polish: "pl",
+		"Portuguese/Brazilian": "pt",
+		"Portuguese/European": "pt",
+		Punjabi: "pa",
+		Quechua: "qu",
+		Romanian: "ro",
+		Russian: "ru",
+		Samoan: "sm",
+		Sanskrit: "sa",
+		ScottishGaelic: "gd",
+		Serbian: "sr",
+		Shona: "sn",
+		Sindhi: "sd",
+		Sinhala: "si",
+		Slovak: "sk",
+		Slovenian: "sl",
+		Somali: "so",
+		"Sotho/Southern": "st",
+		"Sotho/Northern": "nso",
+		Spanish: "es",
+		Sundanese: "su",
+		Swahili: "sw",
+		Swedish: "sv",
+		Tajik: "tg",
+		Tamil: "ta",
+		Tatar: "tt",
+		Telugu: "te",
+		Thai: "th",
+		Tigrinya: "ti",
+		Tsonga: "ts",
+		Turkish: "tr",
+		Turkmen: "tk",
+		Twi: "ak",
+		Ukrainian: "uk",
+		Urdu: "ur",
+		Uyghur: "ug",
+		Uzbek: "uz",
+		Vietnamese: "vi",
+		Welsh: "cy",
+		Xhosa: "xh",
+		Yiddish: "yi",
+		Yoruba: "yo",
+		Zulu: "zu",
+	} as const satisfies Record<GoogleTranslateLanguage, string>,
 } as const;
 
 type DeepLLanguage = typeof languages.deepl[number];
-type Language = DeepLLanguage;
+type GoogleTranslateLanguage = typeof languages.google[number];
+type Language = DeepLLanguage | GoogleTranslateLanguage;
 
 type DeepLLocale = typeof languageToLocale.deepl[keyof typeof languageToLocale.deepl];
-type Locale = DeepLLocale;
+type GoogleTranslateLocale = typeof languageToLocale.google[keyof typeof languageToLocale.google];
+type Locale = DeepLLocale | GoogleTranslateLocale;
+
+const localeToLanguage = {
+	deepl: reverseObject(languageToLocale.deepl),
+	google: reverseObject(languageToLocale.google),
+};
 
 function isLanguage(language: string): language is Language {
-	return (languages.deepl as readonly string[]).includes(language);
+	return language in languageToLocale.deepl || language in languageToLocale.google;
 }
 
-function getDeepLLocaleByLanguage(language: Language): Locale {
+function isDeepLLocale(locale: string): locale is DeepLLocale {
+	return locale in localeToLanguage.deepl;
+}
+
+function isGoogleTranslateLocale(locale: string): locale is GoogleTranslateLocale {
+	return locale in localeToLanguage.google;
+}
+
+function getDeepLLocaleByLanguage(language: DeepLLanguage): DeepLLocale {
 	return languageToLocale.deepl[language];
 }
 
-export { languages, isLanguage, getDeepLLocaleByLanguage };
-export type { Language, Locale };
+function getGoogleTranslateLocaleByLanguage(language: GoogleTranslateLanguage): GoogleTranslateLocale {
+	return languageToLocale.google[language];
+}
+
+function getDeepLLanguageByLocale(language: DeepLLocale): DeepLLanguage {
+	return localeToLanguage.deepl[language];
+}
+
+function getGoogleTranslateLanguageByLocale(language: GoogleTranslateLocale): GoogleTranslateLanguage {
+	return localeToLanguage.google[language];
+}
+
+export {
+	languages,
+	isLanguage,
+	getDeepLLocaleByLanguage,
+	getGoogleTranslateLocaleByLanguage,
+	getDeepLLanguageByLocale,
+	getGoogleTranslateLanguageByLocale,
+	isDeepLLocale,
+	isGoogleTranslateLocale,
+};
+export type { Language, DeepLLanguage, DeepLLocale, GoogleTranslateLocale, GoogleTranslateLanguage, Locale };

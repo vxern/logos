@@ -13,8 +13,18 @@ import {
 	languages as localisationLanguages,
 } from "./languages/localisation";
 import {
+	DeepLLanguage,
+	DeepLLocale,
+	GoogleTranslateLanguage,
+	GoogleTranslateLocale,
 	Language as TranslationLanguage,
+	Locale as TranslationLocale,
+	getDeepLLanguageByLocale as getDeepLTranslationLanguageByLocale,
 	getDeepLLocaleByLanguage as getDeepLLocaleByTranslationLanguage,
+	getGoogleTranslateLanguageByLocale as getGoogleTranslateTranslationLanguageByLocale,
+	getGoogleTranslateLocaleByLanguage as getGoogleTranslateLocaleByTranslationLanguage,
+	isDeepLLocale,
+	isGoogleTranslateLocale,
 	isLanguage as isTranslationLanguage,
 	languages as translationLanguages,
 } from "./languages/translation";
@@ -36,10 +46,15 @@ function toFeatureLanguage(language: LocalisationLanguage | LearningLanguage): F
 	return undefined;
 }
 
+interface Languages<Language extends string> {
+	source: Language;
+	target: Language;
+}
+
 export default {
 	languages: {
-		localisation: [...localisationLanguages.discord, ...localisationLanguages.logos].sort(),
-		translation: [...translationLanguages.deepl].sort(),
+		localisation: [...new Set([...localisationLanguages.discord, ...localisationLanguages.logos])].sort(),
+		translation: [...new Set([...translationLanguages.deepl, ...translationLanguages.google])].sort(),
 	},
 	locales: {
 		discord: Object.values(localisationLanguageToLocale.discord),
@@ -55,6 +70,11 @@ export {
 	toFeatureLanguage,
 	isTranslationLanguage,
 	getDeepLLocaleByTranslationLanguage,
+	getGoogleTranslateLocaleByTranslationLanguage,
+	getDeepLTranslationLanguageByLocale,
+	getGoogleTranslateTranslationLanguageByLocale,
+	isGoogleTranslateLocale,
+	isDeepLLocale,
 };
 export type {
 	LearningLanguage,
@@ -64,4 +84,10 @@ export type {
 	Language,
 	Locale,
 	HasVariants,
+	GoogleTranslateLanguage,
+	DeepLLanguage,
+	Languages,
+	TranslationLocale,
+	DeepLLocale,
+	GoogleTranslateLocale,
 };

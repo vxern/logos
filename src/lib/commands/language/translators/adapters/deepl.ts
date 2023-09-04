@@ -1,22 +1,21 @@
 import constants from "../../../../../constants/constants";
-import { getDeepLLocaleByTranslationLanguage } from "../../../../../constants/languages";
+import {
+	DeepLLanguage,
+	Languages,
+	getDeepLLocaleByTranslationLanguage,
+	getDeepLTranslationLanguageByLocale,
+	isDeepLLocale,
+} from "../../../../../constants/languages";
 import defaults from "../../../../../defaults";
 import { Client } from "../../../../client";
-import { Translation, TranslationAdapter, TranslationLanguages } from "../adapter";
+import { Translation, TranslationAdapter } from "../adapter";
 
-interface TranslationResult {
-	translations: {
-		detected_source_language: string;
-		text: string;
-	}[];
-}
-
-class DeepLAdapter extends TranslationAdapter {
+class DeepLAdapter extends TranslationAdapter<DeepLLanguage> {
 	constructor() {
 		super({ identifier: "DeepL" });
 	}
 
-	async translate(client: Client, text: string, languages: TranslationLanguages): Promise<Translation | undefined> {
+	async translate(client: Client, text: string, languages: Languages<DeepLLanguage>): Promise<Translation | undefined> {
 		const sourceLocaleComplete = getDeepLLocaleByTranslationLanguage(languages.source);
 		const targetLocale = getDeepLLocaleByTranslationLanguage(languages.target);
 
@@ -30,9 +29,9 @@ class DeepLAdapter extends TranslationAdapter {
 			response = await fetch(constants.endpoints.deepl.translate, {
 				method: "POST",
 				headers: {
-					Authorization: `DeepL-Auth-Key ${client.environment.deeplSecret}`,
-					"Content-Type": "application/json",
 					"User-Agent": defaults.USER_AGENT,
+					"Content-Type": "application/json",
+					Authorization: `DeepL-Auth-Key ${client.environment.deeplSecret}`,
 				},
 				body: JSON.stringify({
 					text: [text],
@@ -52,7 +51,7 @@ class DeepLAdapter extends TranslationAdapter {
 			return undefined;
 		}
 
-		let data: TranslationResult;
+		let data;
 		try {
 			data = await response.json();
 		} catch (exception) {
@@ -65,10 +64,17 @@ class DeepLAdapter extends TranslationAdapter {
 			return undefined;
 		}
 
-		return {
-			detectedSourceLanguage: translation.detected_source_language,
-			text: translation.text,
-		};
+		const detectedSourceLocale = translation.detected_source_language as string;
+		if (detectedSourceLocale === undefined) {
+			return undefined;
+		}
+
+		const detectedSourceLanguage =
+			detectedSourceLocale === undefined || !isDeepLLocale(detectedSourceLocale)
+				? undefined
+				: getDeepLTranslationLanguageByLocale(detectedSourceLocale);
+
+		return { detectedSourceLanguage, text: translation.text };
 	}
 }
 
