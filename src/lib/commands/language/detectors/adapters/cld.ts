@@ -1,6 +1,6 @@
 import { getCLDDetectionLanguageByLocale, isCLDLocale } from "../../../../../constants/languages";
 import { Detection, LanguageDetectorAdapter } from "../adapter";
-import cld from "cld";
+import cld from "cldpre";
 
 class CLDAdapter extends LanguageDetectorAdapter {
 	constructor() {
