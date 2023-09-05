@@ -20,7 +20,7 @@ async function handleDisplayResources(
 ): Promise<void> {
 	const [{ show: showParameter }] = parseArguments(interaction.data?.options, { show: "boolean" });
 
-	const show = interaction.show ?? showParameter;
+	const show = interaction.show ?? showParameter ?? false;
 	const locale = interaction.show ?? show ? interaction.guildLocale : interaction.locale;
 
 	const guildId = interaction.guildId;

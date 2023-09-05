@@ -42,7 +42,7 @@ async function handleDisplayModerationPolicy(
 
 	const [{ show: showParameter }] = parseArguments(interaction.data?.options, { show: "boolean" });
 
-	const show = interaction.show ?? showParameter;
+	const show = interaction.show ?? showParameter ?? false;
 
 	const guild = client.cache.guilds.get(guildId);
 	if (guild === undefined) {

@@ -1,3 +1,15 @@
+import {
+	CLDLanguage,
+	CLDLocale,
+	Language as DetectionLanguage,
+	Locale as DetectionLocale,
+	TinyLDLanguage,
+	TinyLDLocale,
+	getCLDLanguageByLocale as getCLDDetectionLanguageByLocale,
+	getTinyLDLanguageByLocale as getTinyLDDetectionLanguageByLocale,
+	isCLDLocale,
+	isTinyLDLocale,
+} from "./languages/detection";
 import { Language as FeatureLanguage, isLanguage as isFeatureLanguage } from "./languages/feature";
 import { Language as LearningLanguage } from "./languages/learning";
 import {
@@ -29,7 +41,7 @@ import {
 	languages as translationLanguages,
 } from "./languages/translation";
 
-type Language = FeatureLanguage | LearningLanguage | LocalisationLanguage | TranslationLanguage;
+type Language = DetectionLanguage | FeatureLanguage | LearningLanguage | LocalisationLanguage | TranslationLanguage;
 
 type HasVariants<T> = T extends `${string}/${string}` ? T : never;
 
@@ -75,6 +87,10 @@ export {
 	getGoogleTranslateTranslationLanguageByLocale,
 	isGoogleTranslateLocale,
 	isDeepLLocale,
+	getTinyLDDetectionLanguageByLocale,
+	isTinyLDLocale,
+	getCLDDetectionLanguageByLocale,
+	isCLDLocale,
 };
 export type {
 	LearningLanguage,
@@ -90,4 +106,10 @@ export type {
 	TranslationLocale,
 	DeepLLocale,
 	GoogleTranslateLocale,
+	TinyLDLanguage,
+	TinyLDLocale,
+	CLDLanguage,
+	CLDLocale,
+	DetectionLanguage,
+	DetectionLocale,
 };

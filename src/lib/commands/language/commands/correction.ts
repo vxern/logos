@@ -18,13 +18,13 @@ import * as Discord from "@discordeno/bot";
 
 const commands = {
 	partial: {
-		name: "correction.options.partial",
+		name: "correction.options.partial.message",
 		type: Discord.ApplicationCommandTypes.Message,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
 		handle: (...args) => handleStartCorrecting(...args, "partial"),
 	},
 	full: {
-		name: "correction.options.full",
+		name: "correction.options.full.message",
 		type: Discord.ApplicationCommandTypes.Message,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
 		handle: (...args) => handleStartCorrecting(...args, "full"),

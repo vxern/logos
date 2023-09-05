@@ -20,7 +20,7 @@ const languages = {
 		"Korean",
 		"Lithuanian",
 		"Latvian",
-		"Norwegian",
+		"Norwegian/Bokmål",
 		"Dutch",
 		"Polish",
 		"Portuguese/Brazilian",
@@ -39,7 +39,7 @@ const languages = {
 		"Albanian",
 		"Amharic",
 		"Arabic",
-		"Armenian",
+		"Armenian/Eastern",
 		"Assamese",
 		"Aymara",
 		"Azerbaijani",
@@ -123,7 +123,7 @@ const languages = {
 		"Mizo",
 		"Mongolian",
 		"Nepali",
-		"Norwegian",
+		"Norwegian/Bokmål",
 		"Odia", // Oriya
 		"Oromo",
 		"Pashto",
@@ -194,7 +194,7 @@ const languageToLocale = {
 		Korean: "KO",
 		Lithuanian: "LT",
 		Latvian: "LV",
-		Norwegian: "NB",
+		"Norwegian/Bokmål": "NB",
 		Dutch: "NL",
 		Polish: "PL",
 		"Portuguese/Brazilian": "PT-BR",
@@ -213,7 +213,7 @@ const languageToLocale = {
 		Albanian: "sq",
 		Amharic: "am",
 		Arabic: "ar",
-		Armenian: "hy",
+		"Armenian/Eastern": "hy",
 		Assamese: "as",
 		Aymara: "ay",
 		Azerbaijani: "az",
@@ -297,7 +297,7 @@ const languageToLocale = {
 		Mizo: "lus",
 		Mongolian: "mn",
 		Nepali: "ne",
-		Norwegian: "no",
+		"Norwegian/Bokmål": "no",
 		Odia: "or",
 		Oromo: "om",
 		Pashto: "ps",
@@ -381,12 +381,12 @@ function getGoogleTranslateLocaleByLanguage(language: GoogleTranslateLanguage): 
 	return languageToLocale.google[language];
 }
 
-function getDeepLLanguageByLocale(language: DeepLLocale): DeepLLanguage {
-	return localeToLanguage.deepl[language];
+function getDeepLLanguageByLocale(locale: DeepLLocale): DeepLLanguage {
+	return localeToLanguage.deepl[locale];
 }
 
-function getGoogleTranslateLanguageByLocale(language: GoogleTranslateLocale): GoogleTranslateLanguage {
-	return localeToLanguage.google[language];
+function getGoogleTranslateLanguageByLocale(locale: GoogleTranslateLocale): GoogleTranslateLanguage {
+	return localeToLanguage.google[locale];
 }
 
 export {

@@ -20,7 +20,7 @@ async function handleDisplayPlaybackHistory(
 ): Promise<void> {
 	const [{ show: showParameter }] = parseArguments(interaction.data?.options, { show: "boolean" });
 
-	const show = interaction.show ?? showParameter;
+	const show = interaction.show ?? showParameter ?? false;
 	const locale = show ? interaction.guildLocale : interaction.locale;
 
 	const guildId = interaction.guildId;

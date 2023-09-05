@@ -545,6 +545,7 @@ export async function handleGuildCreate(
 		}
 
 		if (language.translate.enabled) {
+			guildCommands.push(commands.detectLanguageChatInput, commands.detectLanguageMessage);
 			guildCommands.push(commands.translate);
 		}
 
@@ -967,7 +968,7 @@ function buildCommands<
 			continue;
 		}
 
-		const command: Command = { ...localisations, ...commandRaw, options: [] } as Command;
+		const command: Command = { ...commandRaw, ...localisations, options: [] } as Command;
 
 		for (const optionTemplate of commandRaw.options ?? []) {
 			if (isShowParameter(optionTemplate)) {
@@ -980,7 +981,7 @@ function buildCommands<
 				continue;
 			}
 
-			const option: Option = { ...localisations, ...optionTemplate, options: [] } as Option;
+			const option: Option = { ...optionTemplate, ...localisations, options: [] } as Option;
 
 			for (const subOptionTemplate of optionTemplate.options ?? []) {
 				if (isShowParameter(subOptionTemplate)) {
@@ -993,7 +994,7 @@ function buildCommands<
 					continue;
 				}
 
-				const subOption: Option = { ...localisations, ...subOptionTemplate, options: [] } as Option;
+				const subOption: Option = { ...subOptionTemplate, ...localisations, options: [] } as Option;
 
 				for (const subSubOptionTemplate of subOptionTemplate.options ?? []) {
 					if (isShowParameter(subSubOptionTemplate)) {
@@ -1006,7 +1007,7 @@ function buildCommands<
 						continue;
 					}
 
-					const subSubOption: Option = { ...localisations, ...subSubOptionTemplate, options: [] } as Option;
+					const subSubOption: Option = { ...subSubOptionTemplate, ...localisations, options: [] } as Option;
 
 					subOption.options?.push(subSubOption);
 				}
@@ -1021,7 +1022,7 @@ function buildCommands<
 	}
 
 	const commands = commandBuffer as Record<keyof typeof commandTemplates, Command>;
-	const handlers = createCommandHandlers(Object.values(commandTemplates));
+	const handlers = createCommandHandlers(Object.values(commands) as CommandTemplate[]);
 
 	return { commands, showable, handlers };
 }

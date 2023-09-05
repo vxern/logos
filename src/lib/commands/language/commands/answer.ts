@@ -10,7 +10,7 @@ import { CommandTemplate } from "../../command";
 import * as Discord from "@discordeno/bot";
 
 const command: CommandTemplate = {
-	name: "answer.options.answer",
+	name: "answer.message",
 	type: Discord.ApplicationCommandTypes.Message,
 	defaultMemberPermissions: ["VIEW_CHANNEL"],
 	handle: handleStartAnswering,

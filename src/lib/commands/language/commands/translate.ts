@@ -4,9 +4,10 @@ import localisations from "../../../../constants/localisations";
 import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
 import { editReply, getShowButton, parseArguments, postponeReply, reply, respond } from "../../../interactions";
+import { asStream } from "../../../utils";
 import { CommandTemplate } from "../../command";
 import { show } from "../../parameters";
-import { Translation, TranslationAdapter } from "../translators/adapter";
+import { Translation } from "../translators/adapter";
 import { resolveAdapters } from "../translators/adapters";
 import * as Discord from "@discordeno/bot";
 
@@ -43,9 +44,9 @@ async function handleTranslateTextAutocomplete(
 	[client, bot]: [Client, Discord.Bot],
 	interaction: Logos.Interaction,
 ): Promise<void> {
-	const locale = interaction.locale;
-
 	const [_, focused] = parseArguments(interaction.data?.options, { show: "boolean" });
+
+	const locale = interaction.locale;
 
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
@@ -100,7 +101,7 @@ async function handleTranslateText(
 		return;
 	}
 
-	const show = interaction.show ?? showParameter;
+	const show = interaction.show ?? showParameter ?? false;
 	const locale = show ? interaction.guildLocale : interaction.locale;
 
 	const sourceLanguage = from;
@@ -223,12 +224,12 @@ async function handleTranslateText(
 	await postponeReply([client, bot], interaction, { visible: show });
 
 	let translation: Translation | undefined;
-	for await (const result of queryAdapters(client, text, languages, { adapters })) {
-		if (result.translation === undefined) {
+	for await (const element of asStream(adapters, (adapter) => adapter.translate(client, text, languages))) {
+		if (element.result === undefined) {
 			continue;
 		}
 
-		translation = result.translation;
+		translation = element.result;
 
 		break;
 	}
@@ -312,38 +313,6 @@ async function handleTranslateText(
 		: [{ type: Discord.MessageComponentTypes.ActionRow, components: [showButton] }];
 
 	editReply([client, bot], interaction, { embeds, components });
-}
-
-type QueryResult = { adapter: TranslationAdapter; translation?: Translation };
-async function* queryAdapters(
-	client: Client,
-	text: string,
-	languages: Languages<TranslationLanguage>,
-	{ adapters }: { adapters: TranslationAdapter[] },
-): AsyncGenerator<QueryResult, void, void> {
-	const promises: Promise<QueryResult>[] = [];
-	const resolvers: ((_: QueryResult) => void)[] = [];
-	const getResolver = () => resolvers.shift() ?? (() => {});
-
-	for (const _ of Array(adapters.length).keys()) {
-		promises.push(new Promise((resolve) => resolvers.push(resolve)));
-	}
-
-	for (const adapter of adapters) {
-		adapter.translate(client, text, languages).then((translation) => {
-			const yieldResult = getResolver();
-
-			if (translation === undefined) {
-				yieldResult({ adapter });
-			} else {
-				yieldResult({ adapter, translation });
-			}
-		});
-	}
-
-	for (const promise of promises) {
-		yield promise;
-	}
 }
 
 export default command;

@@ -55,6 +55,7 @@ const licences = {
 	software: {
 		"@discordeno/bot": apache("Copyright 2021 - 2023 Discordeno"),
 		"@sapphire/snowflake": mit("Copyright (c) 2020 The Sapphire Community and its contributors"),
+		cld: apache("Copyright [yyyy] [name of copyright owner]"),
 		"csv-parse": mit("Copyright (c) 2010 Adaltas"),
 		"dexonline-scraper": mit('Copyright (c) 2023 Dorian "vxern" Oszczęda'),
 		dotenv: bsd("Copyright (c) 2015, Scott Motte"),
@@ -69,6 +70,7 @@ const licences = {
 		),
 		node: mit("Copyright Node.js contributors. All rights reserved."),
 		rome: mit("Copyright (c) Rome Tools, Inc. and its affiliates."),
+		tinyld: mit("Copyright (c) 2021 Komodo"),
 		tsx: mit("Copyright (c) Hiroki Osame <hiroki.osame@gmail.com>"),
 		typescript: apache("Copyright Microsoft Corporation. All rights reserved."),
 		"youtube-sr": mit("Copyright (c) 2020 DevAndromeda"),

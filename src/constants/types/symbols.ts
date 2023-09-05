@@ -130,7 +130,7 @@ export default {
 			},
 		},
 	},
-	bullet: "➜",
+	bullet: "-",
 	strings: {
 		trail: "...",
 		continued: "(...)",
@@ -139,6 +139,10 @@ export default {
 		a: "🟩",
 		b: "🟨",
 		c: "🟥",
+	},
+	detect: {
+		likely: "💯",
+		possible: "🤔",
 	},
 	showInChat: "🗨️",
 	roles: {

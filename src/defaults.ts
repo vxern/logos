@@ -44,6 +44,8 @@ const WARN_MESSAGE_DELETE_TIMEOUT = 1000 * 10; // 10 seconds in milliseconds.
 
 const STATUS_CYCLE = 1000 * 10; // 10 seconds in milliseconds.
 
+const SHORT_TEXT_LENGTH = 60;
+
 export default {
 	PROJECT_NAME,
 	USER_AGENT,
@@ -75,4 +77,5 @@ export default {
 	MAX_VOICE_CHANNELS,
 	WARN_MESSAGE_DELETE_TIMEOUT,
 	STATUS_CYCLE,
+	SHORT_TEXT_LENGTH,
 };

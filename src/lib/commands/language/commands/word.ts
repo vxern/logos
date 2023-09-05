@@ -93,7 +93,7 @@ async function handleFindWord([client, bot]: [Client, Discord.Bot], interaction:
 		return;
 	}
 
-	const show = interaction.show ?? showParameter;
+	const show = interaction.show ?? showParameter ?? false;
 	const language = show ? interaction.guildLanguage : interaction.language;
 	const locale = show ? interaction.guildLocale : interaction.locale;
 

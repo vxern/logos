@@ -188,6 +188,39 @@ function reverseObject<O extends Record<string, string>>(object: O): Reverse<O> 
 	return reversed as unknown as Reverse<O>;
 }
 
+type ElementResultTuple<ElementType, ResultType> = {
+	element: ElementType;
+	result?: ResultType;
+};
+async function* asStream<ElementType, ResultType>(
+	elements: ElementType[],
+	action: (element: ElementType) => Promise<ResultType | undefined>,
+): AsyncGenerator<ElementResultTuple<ElementType, ResultType>, void, void> {
+	const promises: Promise<ElementResultTuple<ElementType, ResultType>>[] = [];
+	const resolvers: ((_: ElementResultTuple<ElementType, ResultType>) => void)[] = [];
+	const getResolver = () => resolvers.shift() ?? (() => {});
+
+	for (const _ of Array(elements.length).keys()) {
+		promises.push(new Promise((resolve) => resolvers.push(resolve)));
+	}
+
+	for (const element of elements) {
+		action(element).then((result) => {
+			const yieldResult = getResolver();
+
+			if (result === undefined) {
+				yieldResult({ element });
+			} else {
+				yieldResult({ element, result });
+			}
+		});
+	}
+
+	for (const promise of promises) {
+		yield promise;
+	}
+}
+
 export {
 	addParametersToURL,
 	chunk,
@@ -201,4 +234,5 @@ export {
 	verifyIsWithinLimits,
 	getMemberAvatarURL,
 	reverseObject,
+	asStream,
 };
