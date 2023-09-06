@@ -3,8 +3,8 @@ export default {
 		translate: "https://api-free.deepl.com/v2/translate",
 	},
 	googleTranslate: {
-		host: "google-translate1.p.rapidapi.com",
-		translate: "https://google-translate1.p.rapidapi.com/language/translate/v2",
+		host: "google-translator9.p.rapidapi.com",
+		translate: "https://google-translator9.p.rapidapi.com/v2",
 	},
 	words: {
 		host: "wordsapiv1.p.rapidapi.com",

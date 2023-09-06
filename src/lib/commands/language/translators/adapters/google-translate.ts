@@ -79,7 +79,7 @@ class GoogleTranslateAdapter extends TranslationAdapter<GoogleTranslateLanguage>
 		}
 
 		const { detectedSourceLanguage: detectedSourceLocale, translatedText } = translation;
-		if (translatedText === undefined || translatedText === null) {
+		if (translatedText === undefined) {
 			return undefined;
 		}
 
