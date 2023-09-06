@@ -1,5 +1,3 @@
 {
-    "interactions.page": "",
-    "interactions.invalidUser.description": "",
-    "interactions.rateLimited.description.tooManyUses": ""
+    "interactions.invalidUser.description": ""
 }
