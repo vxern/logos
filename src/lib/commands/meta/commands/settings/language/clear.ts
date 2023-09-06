@@ -27,7 +27,7 @@ async function handleClearLanguage(
 	if (userDocument.data.account.language === undefined) {
 		const strings = {
 			title: localise(client, "settings.strings.cannotClear.title", locale)(),
-			description: localise(client, "settings.strings.cannotClear.title", locale)(),
+			description: localise(client, "settings.strings.cannotClear.description", locale)(),
 		};
 
 		editReply([client, bot], interaction, {
