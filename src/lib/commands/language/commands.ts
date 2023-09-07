@@ -9,6 +9,7 @@ import word from "./commands/word";
 
 const { partial: correctionPartial, full: correctionFull } = correction;
 const { chatInput: detectLanguageChatInput, message: detectLanguageMessage } = detect;
+const { chatInput: translateChatInput, message: translateMessage } = translate;
 
 export {
 	answer,
@@ -19,6 +20,7 @@ export {
 	detectLanguageMessage,
 	game,
 	resources,
-	translate,
+	translateChatInput,
+	translateMessage,
 	word,
 };

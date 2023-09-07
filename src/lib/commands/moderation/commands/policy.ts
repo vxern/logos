@@ -10,6 +10,7 @@ const command: CommandTemplate = {
 	name: "policy",
 	type: Discord.ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ["VIEW_CHANNEL"],
+	isShowable: true,
 	handle: handleDisplayModerationPolicy,
 	options: [show],
 };

@@ -13,6 +13,7 @@ type Option = Discord.ApplicationCommandOption;
 
 interface CommandFeatures {
 	isRateLimited?: boolean;
+	isShowable?: boolean;
 	handle?: InteractionHandler;
 	handleAutocomplete?: InteractionHandler;
 	options?: OptionTemplate[];

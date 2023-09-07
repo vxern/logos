@@ -13,6 +13,7 @@ import {
 import { Language as FeatureLanguage, isLanguage as isFeatureLanguage } from "./languages/feature";
 import { Language as LearningLanguage } from "./languages/learning";
 import {
+	DiscordLocale,
 	Language as LocalisationLanguage,
 	Locale,
 	getDiscordLanguageByLocale as getDiscordLocalisationLanguageByLocale,
@@ -23,7 +24,6 @@ import {
 	isLanguage as isLocalisationLanguage,
 	languageToLocale as localisationLanguageToLocale,
 	languages as localisationLanguages,
-	DiscordLocale,
 } from "./languages/localisation";
 import {
 	DeepLLanguage,

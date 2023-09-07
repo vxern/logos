@@ -14,6 +14,7 @@ import * as Discord from "@discordeno/bot";
 const command: OptionTemplate = {
 	name: "now",
 	type: Discord.ApplicationCommandOptionTypes.SubCommand,
+	isShowable: true,
 	handle: handleDisplayCurrentlyPlaying,
 	options: [collection, show],
 };
@@ -155,6 +156,7 @@ async function handleDisplayCurrentlyPlaying(
 					},
 				},
 				show: show ?? false,
+				showable: true,
 			},
 			{ locale },
 		);

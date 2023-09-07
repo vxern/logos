@@ -11,6 +11,7 @@ const command: OptionTemplate = {
 		{
 			name: "display",
 			type: Discord.ApplicationCommandOptionTypes.SubCommand,
+			isShowable: true,
 			handle: handleDisplayVolume,
 			options: [show],
 		},

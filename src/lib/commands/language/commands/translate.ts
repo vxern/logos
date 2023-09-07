@@ -15,37 +15,47 @@ import { CommandTemplate } from "../../command";
 import { show } from "../../parameters";
 import { Translation } from "../translators/adapter";
 import { resolveAdapters } from "../translators/adapters";
-import * as Discord from "@discordeno/bot";
 import { detectLanguages } from "./detect";
+import * as Discord from "@discordeno/bot";
 
-const command: CommandTemplate = {
-	name: "translate",
-	type: Discord.ApplicationCommandTypes.ChatInput,
-	defaultMemberPermissions: ["VIEW_CHANNEL"],
-	isRateLimited: true,
-	handle: handleTranslateText,
-	handleAutocomplete: handleTranslateTextAutocomplete,
-	options: [
-		{
-			name: "text",
-			type: Discord.ApplicationCommandOptionTypes.String,
-			required: true,
-		},
-		{
-			name: "to",
-			type: Discord.ApplicationCommandOptionTypes.String,
-			autocomplete: true,
-		},
-		{
-			name: "from",
-			type: Discord.ApplicationCommandOptionTypes.String,
-			autocomplete: true,
-		},
-		show,
-	],
-};
+const commands = {
+	chatInput: {
+		name: "translate",
+		type: Discord.ApplicationCommandTypes.ChatInput,
+		defaultMemberPermissions: ["VIEW_CHANNEL"],
+		isRateLimited: true,
+		isShowable: true,
+		handle: handleTranslateChatInput,
+		handleAutocomplete: handleTranslateChatInputAutocomplete,
+		options: [
+			{
+				name: "text",
+				type: Discord.ApplicationCommandOptionTypes.String,
+				required: true,
+			},
+			{
+				name: "to",
+				type: Discord.ApplicationCommandOptionTypes.String,
+				autocomplete: true,
+			},
+			{
+				name: "from",
+				type: Discord.ApplicationCommandOptionTypes.String,
+				autocomplete: true,
+			},
+			show,
+		],
+	},
+	message: {
+		name: "translate.message",
+		type: Discord.ApplicationCommandTypes.Message,
+		defaultMemberPermissions: ["VIEW_CHANNEL"],
+		isShowable: true,
+		handle: handleTranslateMessage,
+	},
+} satisfies Record<string, CommandTemplate>;
 
-async function handleTranslateTextAutocomplete(
+async function handleTranslateChatInputAutocomplete(
 	[client, bot]: [Client, Discord.Bot],
 	interaction: Logos.Interaction,
 ): Promise<void> {
@@ -97,7 +107,7 @@ async function handleTranslateTextAutocomplete(
 }
 
 /** Allows the user to translate text from one language to another through the DeepL API. */
-async function handleTranslateText(
+async function handleTranslateChatInput(
 	[client, bot]: [Client, Discord.Bot],
 	interaction: Logos.Interaction,
 ): Promise<void> {
@@ -106,6 +116,51 @@ async function handleTranslateText(
 		return;
 	}
 
+	handleTranslate([client, bot], interaction, text, { from, to }, { showParameter });
+}
+
+async function handleTranslateMessage(
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Logos.Interaction,
+): Promise<void> {
+	const locale = interaction.locale;
+
+	const message = interaction.data?.resolved?.messages?.array()?.at(0);
+	if (message === undefined) {
+		return;
+	}
+
+	const hasEmbeds = message.embeds !== undefined && message.embeds.length !== 0;
+	if (hasEmbeds) {
+		const strings = {
+			title: localise(client, "translate.strings.cannotUse.title", locale)(),
+			description: localise(client, "translate.strings.cannotUse.description", locale)(),
+		};
+
+		reply([client, bot], interaction, {
+			embeds: [
+				{
+					title: strings.title,
+					description: strings.description,
+					color: constants.colors.dullYellow,
+				},
+			],
+		});
+		return;
+	}
+
+	const text = message.content;
+
+	handleTranslate([client, bot], interaction, text, {}, {});
+}
+
+async function handleTranslate(
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Logos.Interaction,
+	text: string,
+	{ from, to }: { from?: string; to?: string },
+	{ showParameter }: { showParameter?: boolean },
+): Promise<void> {
 	const show = interaction.show ?? showParameter ?? false;
 	const language = show ? interaction.guildLanguage : interaction.language;
 	const locale = show ? interaction.guildLocale : interaction.locale;
@@ -512,4 +567,4 @@ async function translateText(
 	editReply([client, bot], interaction, { embeds, components });
 }
 
-export default command;
+export default commands;

@@ -10,6 +10,7 @@ import * as Discord from "@discordeno/bot";
 const command: OptionTemplate = {
 	name: "queue",
 	type: Discord.ApplicationCommandOptionTypes.SubCommand,
+	isShowable: true,
 	handle: handleDisplayPlaybackQueue,
 	options: [show],
 };

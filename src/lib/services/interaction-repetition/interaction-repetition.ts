@@ -23,10 +23,6 @@ class InteractionRepetitionService extends GlobalService {
 			return;
 		}
 
-		if (id !== constants.components.showInChat) {
-			return;
-		}
-
 		const originalInteraction = this.client.cache.interactions.get(interactionId);
 		if (originalInteraction === undefined) {
 			return;

@@ -11,6 +11,7 @@ import * as Discord from "@discordeno/bot";
 const command: OptionTemplate = {
 	name: "view",
 	type: Discord.ApplicationCommandOptionTypes.SubCommand,
+	isShowable: true,
 	handle: handleDisplayProfile,
 	handleAutocomplete: handleDisplayProfileAutocomplete,
 	options: [{ ...user, required: false }, show],

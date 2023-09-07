@@ -32,6 +32,7 @@ const command: CommandTemplate = {
 	type: Discord.ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ["VIEW_CHANNEL"],
 	isRateLimited: true,
+	isShowable: true,
 	handle: handleFindWord,
 	handleAutocomplete: handleFindWordAutocomplete,
 	options: [

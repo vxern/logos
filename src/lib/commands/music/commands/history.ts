@@ -10,6 +10,7 @@ import * as Discord from "@discordeno/bot";
 const command: OptionTemplate = {
 	name: "history",
 	type: Discord.ApplicationCommandOptionTypes.SubCommand,
+	isShowable: true,
 	handle: handleDisplayPlaybackHistory,
 	options: [show],
 };

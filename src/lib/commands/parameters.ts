@@ -54,8 +54,4 @@ const to: OptionTemplate = {
 	type: Discord.ApplicationCommandOptionTypes.Integer,
 };
 
-function isShowParameter(template: OptionTemplate): boolean {
-	return template.type === show.type && template.name === show.name;
-}
-
-export { by, collection, duration, query, reason, show, timestamp, to, user, isShowParameter };
+export { by, collection, duration, query, reason, show, timestamp, to, user };

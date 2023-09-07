@@ -11,6 +11,7 @@ const command: CommandTemplate = {
 	name: "rule",
 	type: Discord.ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ["VIEW_CHANNEL"],
+	isShowable: true,
 	handle: handleCiteRule,
 	handleAutocomplete: handleCiteRuleAutocomplete,
 	options: [

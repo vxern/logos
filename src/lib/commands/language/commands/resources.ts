@@ -9,6 +9,7 @@ const command: CommandTemplate = {
 	name: "resources",
 	type: Discord.ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ["VIEW_CHANNEL"],
+	isShowable: true,
 	handle: handleDisplayResources,
 	options: [show],
 };

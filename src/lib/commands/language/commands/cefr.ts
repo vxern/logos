@@ -21,6 +21,7 @@ const command: CommandTemplate = {
 	name: "cefr",
 	type: Discord.ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ["VIEW_CHANNEL"],
+	isShowable: true,
 	handle: handleDisplayCefrGuide,
 	options: [show],
 };

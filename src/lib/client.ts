@@ -16,7 +16,6 @@ import * as Logos from "../types";
 import { Command, CommandTemplate, InteractionHandler, Option } from "./commands/command";
 import commandTemplates from "./commands/commands";
 import { SentencePair } from "./commands/language/commands/game";
-import { isShowParameter } from "./commands/parameters";
 import entryRequests from "./database/adapters/entry-requests";
 import guilds from "./database/adapters/guilds";
 import praises from "./database/adapters/praises";
@@ -546,7 +545,7 @@ export async function handleGuildCreate(
 
 		if (language.translate.enabled) {
 			guildCommands.push(commands.detectLanguageChatInput, commands.detectLanguageMessage);
-			guildCommands.push(commands.translate);
+			guildCommands.push(commands.translateChatInput, commands.translateMessage);
 		}
 
 		if (language.word.enabled) {
@@ -961,20 +960,16 @@ function buildCommands<
 	const showable: string[] = [];
 
 	const commandBuffer: Partial<Record<CommandName, Command>> = {};
-	for (const [commandName, commandRaw] of Object.entries(templates) as [CommandName, CommandTemplate][]) {
-		const commandKey = commandRaw.name;
-		const localisations = localiseCommandOrOption(commandKey, commandRaw.type);
+	for (const [commandName, commandTemplate] of Object.entries(templates) as [CommandName, CommandTemplate][]) {
+		const commandKey = commandTemplate.name;
+		const localisations = localiseCommandOrOption(commandKey, commandTemplate.type);
 		if (localisations === undefined) {
 			continue;
 		}
 
-		const command: Command = { ...commandRaw, ...localisations, options: [] } as Command;
+		const command: Command = { ...commandTemplate, ...localisations, options: [] } as Command;
 
-		for (const optionTemplate of commandRaw.options ?? []) {
-			if (isShowParameter(optionTemplate)) {
-				showable.push(`${command.name}`);
-			}
-
+		for (const optionTemplate of commandTemplate.options ?? []) {
 			const optionKey = [commandKey, "options", optionTemplate.name].join(".");
 			const localisations = localiseCommandOrOption(optionKey);
 			if (localisations === undefined) {
@@ -984,10 +979,6 @@ function buildCommands<
 			const option: Option = { ...optionTemplate, ...localisations, options: [] } as Option;
 
 			for (const subOptionTemplate of optionTemplate.options ?? []) {
-				if (isShowParameter(subOptionTemplate)) {
-					showable.push(`${command.name} ${option.name}`);
-				}
-
 				const subOptionKey = [optionKey, "options", subOptionTemplate.name].join(".");
 				const localisations = localiseCommandOrOption(subOptionKey);
 				if (localisations === undefined) {
@@ -997,10 +988,6 @@ function buildCommands<
 				const subOption: Option = { ...subOptionTemplate, ...localisations, options: [] } as Option;
 
 				for (const subSubOptionTemplate of subOptionTemplate.options ?? []) {
-					if (isShowParameter(subSubOptionTemplate)) {
-						showable.push(`${command.name} ${option.name} ${subOption.name}`);
-					}
-
 					const subSubOptionKey = [subOptionKey, "options", subSubOptionTemplate.name].join(".");
 					const localisations = localiseCommandOrOption(subSubOptionKey);
 					if (localisations === undefined) {
@@ -1012,10 +999,22 @@ function buildCommands<
 					subOption.options?.push(subSubOption);
 				}
 
+				if (subOptionTemplate.isShowable ?? false) {
+					showable.push(`${command.name} ${option.name} ${subOption.name}`);
+				}
+
 				option.options?.push(subOption);
 			}
 
+			if (optionTemplate.isShowable ?? false) {
+				showable.push(`${command.name} ${option.name}`);
+			}
+
 			(command as Discord.CreateSlashApplicationCommand).options?.push(option);
+		}
+
+		if (commandTemplate.isShowable ?? false) {
+			showable.push(`${command.name}`);
 		}
 
 		commandBuffer[commandName] = command;
