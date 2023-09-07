@@ -157,6 +157,7 @@ export default {
 		"SerboCroatian/Serbian": "languages.serboCroatian.serbian",
 		Seselwa: "languages.seselwa",
 		Shona: "languages.shona",
+		Silesian: "languages.silesian",
 		Sindhi: "languages.sindhi",
 		Sinhala: "languages.sinhala",
 		Sinhalese: "languages.sinhalese",

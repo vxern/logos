@@ -15,7 +15,7 @@ function pluralise(
 		return pluralGenitive;
 	}
 
-	// Numbers ending in 2, 3 and 4
+	// Numbers ending in 2, 3 and 4.
 	if (["2", "3", "4"].some((digit) => quantity.endsWith(digit))) {
 		return pluralNominative;
 	}

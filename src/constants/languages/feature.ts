@@ -9,6 +9,7 @@ const languages = [
 	"Norwegian",
 	"Polish",
 	"Romanian",
+	"Russian",
 	"Swedish",
 	"Turkish",
 ] as const;
