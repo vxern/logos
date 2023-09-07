@@ -18,7 +18,7 @@
 	"information.options.bot.strings.amIOpenSource.description": "No, I am not open-source. There are also no plans to make my codebase public.",
 	"information.options.server.name": "server",
 	"information.options.server.description": "Displays information about the server.",
-	"information.options.server.strings.information.title": "Information about **{server_name}**",
+	"information.options.server.strings.information.title": "Information about {server_name}",
 	"information.options.server.strings.information.description.description": "Description",
 	"information.options.server.strings.information.description.noDescription": "No description specified.",
 	"information.options.server.strings.information.description.members": "Members",
