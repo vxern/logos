@@ -60,7 +60,6 @@
     "languages.corsican": "Korsykański",
     "languages.creole.haitian": "Kreolski haitański",
     "languages.creole.mauritian": "Kreolski mauretański",
-    "languages.bosnian": "Serbsko-chorwacki (Bośnia)",
     "languages.croatian": "Chorwacki",
     "languages.esperanto": "Esperanto",
     "languages.faroese": "Farerski",
@@ -76,7 +75,6 @@
     "languages.hebrew": "Hebrajski",
     "languages.hindi": "Hindi",
     "languages.icelandic": "Islandzki",
-    "languages.ilocano": "Filipiński (ilokański)",
     "languages.irish": "Irlandzki",
     "languages.kashimiri": "Kaszmirski",
     "languages.kazakh": "Kazachski",
@@ -93,7 +91,5 @@
     "languages.occitan": "Prowansalski",
     "languages.persian": "Perski",
     "languages.punjabi": "Pendżabski",
-    "languages.montenegrin": "Serbsko-chorwacki (Czarna Góra)",
-    "languages.sanskrit": "Sanskryt",
-    "languages.serbian": "Serbsko-chorwacki (Serbia)"
+    "languages.sanskrit": "Sanskryt"
 }
