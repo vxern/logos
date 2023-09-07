@@ -170,13 +170,15 @@ async function handleDetectLanguage(
 				throw "StateError: Likely detected language unexpectedly undefined.";
 			}
 
+			const languageNameLocalised = localise(client, localisations.languages[language], locale)();
+
 			const strings = {
 				title: localise(client, "detect.strings.fields.likelyMatches.title", locale)(),
 				description: localise(
 					client,
 					"detect.strings.fields.likelyMatches.description.single",
 					locale,
-				)({ language: localise(client, localisations.languages[language], locale)() }),
+				)({ language: `**${languageNameLocalised}**` }),
 			};
 
 			fields.push({
@@ -208,13 +210,15 @@ async function handleDetectLanguage(
 				throw "StateError: Possible detected language unexpectedly undefined.";
 			}
 
+			const languageNameLocalised = localise(client, localisations.languages[language], locale)();
+
 			const strings = {
 				title: localise(client, "detect.strings.fields.possibleMatches.title", locale)(),
 				description: localise(
 					client,
 					"detect.strings.fields.possibleMatches.description.single",
 					locale,
-				)({ language: localise(client, localisations.languages[language], locale)() }),
+				)({ language: `**${languageNameLocalised}**` }),
 			};
 
 			fields.push({

@@ -98,10 +98,10 @@
   "detect.strings.textEmpty.title": "Text empty",
   "detect.strings.textEmpty.description": "The text must not be empty or consist solely of whitespace.",
   "detect.strings.fields.likelyMatches.title": "Likely matches",
-  "detect.strings.fields.likelyMatches.description.single": "The language is likely to be **{language}**.",
+  "detect.strings.fields.likelyMatches.description.single": "The language is likely to be {language}.",
   "detect.strings.fields.likelyMatches.description.multiple": "The language is likely to be one of:",
   "detect.strings.fields.possibleMatches.title": "Other options",
-  "detect.strings.fields.possibleMatches.description.single": "The language is less likely to be {language}. ",
+  "detect.strings.fields.possibleMatches.description.single": "The language is less likely to be {language}.",
   "detect.strings.fields.possibleMatches.description.multiple": "These choices are less likely, but the language could also be one of:",
 
 	"game.name": "game",
