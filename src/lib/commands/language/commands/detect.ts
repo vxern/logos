@@ -109,23 +109,9 @@ async function handleDetectLanguage(
 
 	await postponeReply([client, bot], interaction);
 
-	const adapters = getAdapters();
+	const detectedLanguages = await detectLanguages(text);
 
-	const detectionFrequencies: Partial<Record<DetectionLanguage, number>> = {};
-	for await (const element of asStream(adapters, (adapter) => adapter.detect(text))) {
-		if (element.result === undefined) {
-			continue;
-		}
-
-		const detection = element.result;
-		const detectedLanguage = detection.language;
-
-		detectionFrequencies[detectedLanguage] = (detectionFrequencies[detectedLanguage] ?? 1) + 1;
-	}
-
-	const detectionCount = Object.keys(detectionFrequencies).length;
-
-	if (detectionCount === 0) {
+	if (detectedLanguages.likely.length === 0 && detectedLanguages.possible.length === 0) {
 		const strings = {
 			title: localise(client, "detect.strings.unknown.title", locale)(),
 			description: {
@@ -148,8 +134,8 @@ async function handleDetectLanguage(
 
 	const embeds: Discord.CamelizedDiscordEmbed[] = [];
 
-	if (detectionCount === 1) {
-		const language = Object.entries(detectionFrequencies).at(0)?.[0] as DetectionLanguage | undefined;
+	if (detectedLanguages.likely.length === 1 && detectedLanguages.possible.length === 0) {
+		const language = detectedLanguages.likely.at(0) as DetectionLanguage | undefined;
 		if (language === undefined) {
 			throw "StateError: Detected language unexpectedly undefined.";
 		}
@@ -166,99 +152,120 @@ async function handleDetectLanguage(
 			description: strings.description,
 			color: constants.colors.blue,
 		});
-	} else {
-		const languagesSorted = getLanguagesSorted(detectionFrequencies);
 
-		{
-			const embed: Discord.CamelizedDiscordEmbed = {
-				color: constants.colors.blue,
+		editReply([client, bot], interaction, { embeds });
+		return;
+	}
+
+	{
+		const embed: Discord.CamelizedDiscordEmbed = {
+			color: constants.colors.blue,
+		};
+
+		const fields: Discord.CamelizedDiscordEmbedField[] = [];
+
+		if (detectedLanguages.likely.length === 1) {
+			const language = detectedLanguages.likely.at(0) as DetectionLanguage | undefined;
+			if (language === undefined) {
+				throw "StateError: Likely detected language unexpectedly undefined.";
+			}
+
+			const strings = {
+				title: localise(client, "detect.strings.fields.likelyMatches.title", locale)(),
+				description: localise(
+					client,
+					"detect.strings.fields.likelyMatches.description.single",
+					locale,
+				)({ language: localise(client, localisations.languages[language], locale)() }),
 			};
 
-			const fields: Discord.CamelizedDiscordEmbedField[] = [];
+			fields.push({
+				name: `${constants.symbols.detect.likely} ${strings.title}`,
+				value: strings.description,
+				inline: false,
+			});
+		} else {
+			const languageNamesLocalised = detectedLanguages.likely.map((language) =>
+				localise(client, localisations.languages[language], locale)(),
+			);
+			const languageNamesFormatted = list(languageNamesLocalised.map((languageName) => `***${languageName}***`));
 
-			if (languagesSorted.likely.length === 1) {
-				const language = languagesSorted.likely.at(0) as DetectionLanguage | undefined;
-				if (language === undefined) {
-					throw "StateError: Likely detected language unexpectedly undefined.";
-				}
+			const strings = {
+				title: localise(client, "detect.strings.fields.likelyMatches.title", locale)(),
+				description: localise(client, "detect.strings.fields.likelyMatches.description.multiple", locale)(),
+			};
 
-				const strings = {
-					title: localise(client, "detect.strings.fields.likelyMatches.title", locale)(),
-					description: localise(
-						client,
-						"detect.strings.fields.likelyMatches.description.single",
-						locale,
-					)({ language: localise(client, localisations.languages[language], locale)() }),
-				};
-
-				fields.push({
-					name: `${constants.symbols.detect.likely} ${strings.title}`,
-					value: strings.description,
-					inline: false,
-				});
-			} else {
-				const languageNamesLocalised = languagesSorted.likely.map((language) =>
-					localise(client, localisations.languages[language], locale)(),
-				);
-				const languageNamesFormatted = list(languageNamesLocalised.map((languageName) => `***${languageName}***`));
-
-				const strings = {
-					title: localise(client, "detect.strings.fields.likelyMatches.title", locale)(),
-					description: localise(client, "detect.strings.fields.likelyMatches.description.multiple", locale)(),
-				};
-
-				fields.push({
-					name: `${constants.symbols.detect.likely} ${strings.title}`,
-					value: `${strings.description}\n${languageNamesFormatted}`,
-					inline: false,
-				});
-			}
-
-			if (languagesSorted.possible.length === 1) {
-				const language = languagesSorted.possible.at(0) as DetectionLanguage | undefined;
-				if (language === undefined) {
-					throw "StateError: Possible detected language unexpectedly undefined.";
-				}
-
-				const strings = {
-					title: localise(client, "detect.strings.fields.possibleMatches.title", locale)(),
-					description: localise(
-						client,
-						"detect.strings.fields.possibleMatches.description.single",
-						locale,
-					)({ language: localise(client, localisations.languages[language], locale)() }),
-				};
-
-				fields.push({
-					name: `${constants.symbols.detect.possible} ${strings.title}`,
-					value: strings.description,
-					inline: false,
-				});
-			} else {
-				const languageNamesLocalised = languagesSorted.possible.map((language) =>
-					localise(client, localisations.languages[language], locale)(),
-				);
-				const languageNamesFormatted = list(languageNamesLocalised.map((languageName) => `***${languageName}***`));
-
-				const strings = {
-					title: localise(client, "detect.strings.fields.possibleMatches.title", locale)(),
-					description: localise(client, "detect.strings.fields.possibleMatches.description.multiple", locale)(),
-				};
-
-				fields.push({
-					name: `${constants.symbols.detect.possible} ${strings.title}`,
-					value: `${strings.description}\n${languageNamesFormatted}`,
-					inline: false,
-				});
-			}
-
-			embed.fields = fields;
-
-			embeds.push(embed);
+			fields.push({
+				name: `${constants.symbols.detect.likely} ${strings.title}`,
+				value: `${strings.description}\n${languageNamesFormatted}`,
+				inline: false,
+			});
 		}
+
+		if (detectedLanguages.possible.length === 1) {
+			const language = detectedLanguages.possible.at(0) as DetectionLanguage | undefined;
+			if (language === undefined) {
+				throw "StateError: Possible detected language unexpectedly undefined.";
+			}
+
+			const strings = {
+				title: localise(client, "detect.strings.fields.possibleMatches.title", locale)(),
+				description: localise(
+					client,
+					"detect.strings.fields.possibleMatches.description.single",
+					locale,
+				)({ language: localise(client, localisations.languages[language], locale)() }),
+			};
+
+			fields.push({
+				name: `${constants.symbols.detect.possible} ${strings.title}`,
+				value: strings.description,
+				inline: false,
+			});
+		} else {
+			const languageNamesLocalised = detectedLanguages.possible.map((language) =>
+				localise(client, localisations.languages[language], locale)(),
+			);
+			const languageNamesFormatted = list(languageNamesLocalised.map((languageName) => `***${languageName}***`));
+
+			const strings = {
+				title: localise(client, "detect.strings.fields.possibleMatches.title", locale)(),
+				description: localise(client, "detect.strings.fields.possibleMatches.description.multiple", locale)(),
+			};
+
+			fields.push({
+				name: `${constants.symbols.detect.possible} ${strings.title}`,
+				value: `${strings.description}\n${languageNamesFormatted}`,
+				inline: false,
+			});
+		}
+
+		embed.fields = fields;
+
+		embeds.push(embed);
 	}
 
 	editReply([client, bot], interaction, { embeds });
+}
+
+async function detectLanguages(text: string): Promise<DetectedLanguagesSorted> {
+	const adapters = getAdapters();
+
+	const detectionFrequencies: Partial<Record<DetectionLanguage, number>> = {};
+	for await (const element of asStream(adapters, (adapter) => adapter.detect(text))) {
+		if (element.result === undefined) {
+			continue;
+		}
+
+		const detection = element.result;
+		const detectedLanguage = detection.language;
+
+		detectionFrequencies[detectedLanguage] = (detectionFrequencies[detectedLanguage] ?? 1) + 1;
+	}
+
+	const languagesSorted = getLanguagesSorted(detectionFrequencies);
+
+	return languagesSorted;
 }
 
 type DetectedLanguagesSorted = {
@@ -282,3 +289,4 @@ function getLanguagesSorted(detectionFrequencies: Partial<Record<DetectionLangua
 }
 
 export default commands;
+export { detectLanguages };

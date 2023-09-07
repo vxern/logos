@@ -1,4 +1,10 @@
-import { FeatureLanguage, LearningLanguage, Locale, LocalisationLanguage } from "./constants/languages";
+import {
+	FeatureLanguage,
+	LearningLanguage,
+	Locale,
+	LocalisationLanguage,
+	TranslationLanguage,
+} from "./constants/languages";
 import { TimeStruct } from "./lib/database/structs/guild";
 
 const PROJECT_NAME = "Logos";
@@ -10,6 +16,7 @@ const LEARNING_LOCALE: Locale = "eng-US";
 const LEARNING_LANGUAGE: LearningLanguage = "English/American";
 const LOCALISATION_LOCALE: Locale = "eng-US";
 const LOCALISATION_LANGUAGE: LocalisationLanguage = "English/American";
+const TRANSLATION_LANGUAGE: TranslationLanguage = "English/American";
 
 const RESULTS_PER_PAGE = 10;
 
@@ -55,6 +62,7 @@ export default {
 	LEARNING_LOCALE,
 	FEATURE_LANGUAGE,
 	FEATURE_LOCALE,
+	TRANSLATION_LANGUAGE,
 	RESULTS_PER_PAGE,
 	RATE_LIMIT,
 	RATE_LIMIT_INTERVAL,

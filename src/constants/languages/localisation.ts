@@ -84,6 +84,10 @@ const localeToLanguage = {
 	logos: reverseObject(languageToLocale.logos),
 };
 
+function isLanguage(language: string): language is Language {
+	return isLogosLanguage(language);
+}
+
 function getDiscordLocaleByLanguage(language: DiscordLanguage): DiscordLocale {
 	return languageToLocale.discord[language];
 }
@@ -120,10 +124,6 @@ function isLogosLanguage(language: string): language is LogosLanguage {
 	return (languages.logos as readonly string[]).includes(language);
 }
 
-function isLanguage(language: string): language is Language {
-	return isLogosLanguage(language);
-}
-
 export {
 	getDiscordLocaleByLanguage,
 	getLocaleByLanguage,
@@ -134,4 +134,4 @@ export {
 	languages,
 	languageToLocale,
 };
-export type { Language, Locale };
+export type { Language, Locale, DiscordLocale };

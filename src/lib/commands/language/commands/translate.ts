@@ -1,5 +1,11 @@
 import constants from "../../../../constants/constants";
-import languages, { Languages, TranslationLanguage, isTranslationLanguage } from "../../../../constants/languages";
+import languages, {
+	Languages,
+	Locale,
+	TranslationLanguage,
+	getTranslationLanguage,
+	isTranslationLanguage,
+} from "../../../../constants/languages";
 import localisations from "../../../../constants/localisations";
 import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
@@ -10,6 +16,7 @@ import { show } from "../../parameters";
 import { Translation } from "../translators/adapter";
 import { resolveAdapters } from "../translators/adapters";
 import * as Discord from "@discordeno/bot";
+import { detectLanguages } from "./detect";
 
 const command: CommandTemplate = {
 	name: "translate",
@@ -20,21 +27,19 @@ const command: CommandTemplate = {
 	handleAutocomplete: handleTranslateTextAutocomplete,
 	options: [
 		{
-			name: "from",
+			name: "text",
 			type: Discord.ApplicationCommandOptionTypes.String,
 			required: true,
-			autocomplete: true,
 		},
 		{
 			name: "to",
 			type: Discord.ApplicationCommandOptionTypes.String,
-			required: true,
 			autocomplete: true,
 		},
 		{
-			name: "text",
+			name: "from",
 			type: Discord.ApplicationCommandOptionTypes.String,
-			required: true,
+			autocomplete: true,
 		},
 		show,
 	],
@@ -97,63 +102,18 @@ async function handleTranslateText(
 	interaction: Logos.Interaction,
 ): Promise<void> {
 	const [{ from, to, text, show: showParameter }] = parseArguments(interaction.data?.options, { show: "boolean" });
-	if (from === undefined || to === undefined || text === undefined) {
+	if (text === undefined) {
 		return;
 	}
 
 	const show = interaction.show ?? showParameter ?? false;
+	const language = show ? interaction.guildLanguage : interaction.language;
 	const locale = show ? interaction.guildLocale : interaction.locale;
 
-	const sourceLanguage = from;
-	const targetLanguage = to;
-	const isSourceLanguageInvalid = !isTranslationLanguage(sourceLanguage);
-	const isTargetLanguageInvalid = !isTranslationLanguage(targetLanguage);
-	if (isSourceLanguageInvalid || isTargetLanguageInvalid) {
+	const isTextEmpty = text.trim().length === 0;
+	if (isTextEmpty) {
 		const locale = interaction.locale;
-		const strings = {
-			source: {
-				title: localise(client, "translate.strings.invalid.source.title", locale)(),
-				description: localise(client, "translate.strings.invalid.source.description", locale)(),
-			},
-			target: {
-				title: localise(client, "translate.strings.invalid.target.title", locale)(),
-				description: localise(client, "translate.strings.invalid.target.description", locale)(),
-			},
-			both: {
-				title: localise(client, "translate.strings.invalid.both.title", locale)(),
-				description: localise(client, "translate.strings.invalid.both.description", locale)(),
-			},
-		};
 
-		const areBothLanguagesInvalid = isSourceLanguageInvalid && isTargetLanguageInvalid;
-
-		reply([client, bot], interaction, {
-			embeds: [
-				{
-					...(areBothLanguagesInvalid
-						? {
-								title: strings.both.title,
-								description: strings.both.description,
-						  }
-						: isSourceLanguageInvalid
-						? {
-								title: strings.source.title,
-								description: strings.source.description,
-						  }
-						: {
-								title: strings.target.title,
-								description: strings.target.description,
-						  }),
-					color: constants.colors.red,
-				},
-			],
-		});
-		return;
-	}
-
-	const isSourceTextEmpty = text.trim().length === 0;
-	if (isSourceTextEmpty) {
-		const locale = interaction.locale;
 		const strings = {
 			title: localise(client, "translate.strings.textEmpty.title", locale)(),
 			description: localise(client, "translate.strings.textEmpty.description", locale)(),
@@ -168,14 +128,251 @@ async function handleTranslateText(
 				},
 			],
 		});
+
 		return;
 	}
 
-	if (from === to) {
+	let sourceLanguage: TranslationLanguage;
+
+	if (from !== undefined || to !== undefined) {
+		const isSourceInvalid = from !== undefined && !isTranslationLanguage(from);
+		const isTargetInvalid = to !== undefined && !isTranslationLanguage(to);
+
 		const locale = interaction.locale;
+
+		if (isSourceInvalid && isTargetInvalid) {
+			const strings = {
+				both: {
+					title: localise(client, "translate.strings.invalid.both.title", locale)(),
+					description: localise(client, "translate.strings.invalid.both.description", locale)(),
+				},
+			};
+
+			reply([client, bot], interaction, {
+				embeds: [
+					{
+						title: strings.both.title,
+						description: strings.both.description,
+						color: constants.colors.red,
+					},
+				],
+			});
+
+			return;
+		} else if (isSourceInvalid) {
+			const strings = {
+				source: {
+					title: localise(client, "translate.strings.invalid.source.title", locale)(),
+					description: localise(client, "translate.strings.invalid.source.description", locale)(),
+				},
+			};
+
+			reply([client, bot], interaction, {
+				embeds: [
+					{
+						title: strings.source.title,
+						description: strings.source.description,
+						color: constants.colors.red,
+					},
+				],
+			});
+
+			return;
+		} else if (isTargetInvalid) {
+			const strings = {
+				target: {
+					title: localise(client, "translate.strings.invalid.target.title", locale)(),
+					description: localise(client, "translate.strings.invalid.target.description", locale)(),
+				},
+			};
+
+			reply([client, bot], interaction, {
+				embeds: [
+					{
+						title: strings.target.title,
+						description: strings.target.description,
+						color: constants.colors.red,
+					},
+				],
+			});
+
+			return;
+		}
+
+		if (from !== undefined && to !== undefined) {
+			if (from === to) {
+				const locale = interaction.locale;
+
+				const strings = {
+					title: localise(client, "translate.strings.languagesNotDifferent.title", locale)(),
+					description: localise(client, "translate.strings.languagesNotDifferent.description", locale)(),
+				};
+
+				reply([client, bot], interaction, {
+					embeds: [
+						{
+							title: strings.title,
+							description: strings.description,
+							color: constants.colors.dullYellow,
+						},
+					],
+				});
+				return;
+			}
+
+			translateText([client, bot], interaction, text, { source: from, target: to }, { show }, { locale });
+			return;
+		} else {
+			if (from === undefined) {
+				const detectedLanguage = await detectLanguage([client, bot], interaction, text);
+				if (detectedLanguage === undefined) {
+					return;
+				}
+
+				sourceLanguage = detectedLanguage;
+			} else {
+				sourceLanguage = from;
+			}
+		}
+	} else {
+		const detectedLanguage = await detectLanguage([client, bot], interaction, text);
+		if (detectedLanguage === undefined) {
+			return;
+		}
+
+		sourceLanguage = detectedLanguage;
+	}
+
+	if (to !== undefined) {
+		if (to !== sourceLanguage) {
+			translateText([client, bot], interaction, text, { source: sourceLanguage, target: to }, { show }, { locale });
+			return;
+		}
+	}
+
+	const learningTranslationLanguage = getTranslationLanguage(interaction.learningLanguage);
+	if (learningTranslationLanguage !== undefined) {
+		if (learningTranslationLanguage !== sourceLanguage) {
+			translateText(
+				[client, bot],
+				interaction,
+				text,
+				{ source: sourceLanguage, target: learningTranslationLanguage },
+				{ show },
+				{ locale },
+			);
+			return;
+		}
+	}
+
+	const translationLanguage = getTranslationLanguage(language);
+	if (translationLanguage === undefined) {
+		const locale = interaction.locale;
+
 		const strings = {
-			title: localise(client, "translate.strings.languagesNotDifferent.title", locale)(),
-			description: localise(client, "translate.strings.languagesNotDifferent.description", locale)(),
+			title: localise(client, "translate.strings.cannotDetermine.target.title", locale)(),
+			description: {
+				cannotDetermine: localise(
+					client,
+					"translate.strings.cannotDetermine.target.description.cannotDetermine",
+					locale,
+				)(),
+				tryAgain: localise(client, "translate.strings.cannotDetermine.target.description.tryAgain", locale)(),
+			},
+		};
+
+		reply([client, bot], interaction, {
+			embeds: [
+				{
+					title: strings.title,
+					description: `${strings.description.cannotDetermine}\n\n${strings.description.tryAgain}`,
+					color: constants.colors.peach,
+				},
+			],
+		});
+
+		return;
+	}
+
+	if (translationLanguage === sourceLanguage) {
+		const locale = interaction.locale;
+
+		const strings = {
+			title: localise(client, "translate.strings.cannotDetermine.target.title", locale)(),
+			description: {
+				cannotDetermine: localise(
+					client,
+					"translate.strings.cannotDetermine.target.description.cannotDetermine",
+					locale,
+				)(),
+				tryAgain: localise(client, "translate.strings.cannotDetermine.target.description.tryAgain", locale)(),
+			},
+		};
+
+		reply([client, bot], interaction, {
+			embeds: [
+				{
+					title: strings.title,
+					description: `${strings.description.cannotDetermine}\n\n${strings.description.tryAgain}`,
+					color: constants.colors.peach,
+				},
+			],
+		});
+
+		return;
+	}
+
+	translateText(
+		[client, bot],
+		interaction,
+		text,
+		{ source: sourceLanguage, target: translationLanguage },
+		{ show },
+		{ locale },
+	);
+}
+
+async function detectLanguage(
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Logos.Interaction,
+	text: string,
+): Promise<TranslationLanguage | undefined> {
+	const detectionResult = (await detectLanguages(text)).likely.at(0);
+	if (detectionResult === undefined) {
+		const locale = interaction.locale;
+
+		const strings = {
+			title: localise(client, "translate.strings.cannotDetermine.source.title", locale)(),
+			description: {
+				cannotDetermine: localise(
+					client,
+					"translate.strings.cannotDetermine.source.description.cannotDetermine",
+					locale,
+				)(),
+				tryAgain: localise(client, "translate.strings.cannotDetermine.source.description.tryAgain", locale)(),
+			},
+		};
+
+		reply([client, bot], interaction, {
+			embeds: [
+				{
+					title: strings.title,
+					description: `${strings.description.cannotDetermine}\n\n${strings.description.tryAgain}`,
+					color: constants.colors.peach,
+				},
+			],
+		});
+
+		return undefined;
+	}
+
+	const detectedLanguage = getTranslationLanguage(detectionResult);
+	if (detectedLanguage === undefined) {
+		const locale = interaction.locale;
+
+		const strings = {
+			title: localise(client, "translate.strings.languageNotSupported.title", locale)(),
+			description: localise(client, "translate.strings.languageNotSupported.description", locale)(),
 		};
 
 		reply([client, bot], interaction, {
@@ -187,21 +384,21 @@ async function handleTranslateText(
 				},
 			],
 		});
-		return;
+
+		return undefined;
 	}
 
-	const guildId = interaction.guildId;
-	if (guildId === undefined) {
-		return;
-	}
+	return detectedLanguage;
+}
 
-	const guild = client.cache.guilds.get(guildId);
-	if (guild === undefined) {
-		return;
-	}
-
-	const languages: Languages<TranslationLanguage> = { source: sourceLanguage, target: targetLanguage };
-
+async function translateText(
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Logos.Interaction,
+	text: string,
+	languages: Languages<TranslationLanguage>,
+	{ show }: { show: boolean },
+	{ locale }: { locale: Locale },
+): Promise<void> {
 	const adapters = resolveAdapters(languages);
 	if (adapters === undefined || adapters.length === 0) {
 		const strings = {

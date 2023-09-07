@@ -1,5 +1,5 @@
 import constants from "../../../../../constants/constants";
-import { HasVariants, LearningLanguage, Locale, toFeatureLanguage } from "../../../../../constants/languages";
+import { HasVariants, LearningLanguage, Locale, getFeatureLanguage } from "../../../../../constants/languages";
 import licences from "../../../../../constants/licences";
 import { Client } from "../../../../client";
 import { getPartOfSpeech } from "../../module";
@@ -65,7 +65,7 @@ class WiktionaryAdapter extends DictionaryAdapter<WordData[]> {
 				entries.push({
 					lemma,
 					partOfSpeech,
-					...(toFeatureLanguage(language) !== "English" ? { definitions } : { nativeDefinitions: definitions }),
+					...(getFeatureLanguage(language) !== "English" ? { definitions } : { nativeDefinitions: definitions }),
 					etymologies: [{ value: result.etymology.replaceAll(newlinesExpression, "\n\n") }],
 					sources: [
 						[constants.links.generateWiktionaryDefinitionLink(lemma, language), licences.dictionaries.wiktionary],

@@ -23,6 +23,7 @@ import {
 	isLanguage as isLocalisationLanguage,
 	languageToLocale as localisationLanguageToLocale,
 	languages as localisationLanguages,
+	DiscordLocale,
 } from "./languages/localisation";
 import {
 	DeepLLanguage,
@@ -41,15 +42,53 @@ import {
 	languages as translationLanguages,
 } from "./languages/translation";
 
+const languages = {
+	languages: {
+		localisation: [
+			...new Set([...localisationLanguages.discord, ...localisationLanguages.logos]),
+		].sort() satisfies LocalisationLanguage[] as LocalisationLanguage[],
+		translation: [
+			...new Set([...translationLanguages.deepl, ...translationLanguages.google]),
+		].sort() satisfies TranslationLanguage[] as TranslationLanguage[],
+	},
+	locales: {
+		discord: Object.values(localisationLanguageToLocale.discord) satisfies DiscordLocale[] as DiscordLocale[],
+	},
+};
+
+const translationLanguagesByBaseLanguage = languages.languages.translation.reduce<
+	Record<string, TranslationLanguage[]>
+>((languages, language) => {
+	const baseLanguage = getBaseLanguage(language);
+
+	if (baseLanguage === language) {
+		return languages;
+	}
+
+	if (baseLanguage in languages) {
+		languages[baseLanguage]?.push(language);
+	} else {
+		languages[baseLanguage] = [language];
+	}
+
+	return languages;
+}, {});
+
 type Language = DetectionLanguage | FeatureLanguage | LearningLanguage | LocalisationLanguage | TranslationLanguage;
 
 type HasVariants<T> = T extends `${string}/${string}` ? T : never;
 
-function toFeatureLanguage(language: LocalisationLanguage | LearningLanguage): FeatureLanguage | undefined {
+function getBaseLanguage(language: string): string {
 	const baseLanguage = language.split("/").at(0);
 	if (baseLanguage === undefined) {
 		throw "StateError: Base language unexpectedly undefined when getting feature language.";
 	}
+
+	return baseLanguage;
+}
+
+function getFeatureLanguage(language: LocalisationLanguage | LearningLanguage): FeatureLanguage | undefined {
+	const baseLanguage = getBaseLanguage(language);
 
 	if (isFeatureLanguage(baseLanguage)) {
 		return baseLanguage;
@@ -58,20 +97,31 @@ function toFeatureLanguage(language: LocalisationLanguage | LearningLanguage): F
 	return undefined;
 }
 
+function getTranslationLanguage(language: string): TranslationLanguage | undefined {
+	if (isTranslationLanguage(language)) {
+		return language;
+	}
+
+	const baseLanguage = getBaseLanguage(language);
+	const otherVariants = translationLanguagesByBaseLanguage[baseLanguage];
+	if (otherVariants === undefined) {
+		return undefined;
+	}
+
+	const otherVariant = otherVariants.at(0);
+	if (otherVariant === undefined) {
+		return undefined;
+	}
+
+	return otherVariant;
+}
+
 interface Languages<Language extends string> {
 	source: Language;
 	target: Language;
 }
 
-export default {
-	languages: {
-		localisation: [...new Set([...localisationLanguages.discord, ...localisationLanguages.logos])].sort(),
-		translation: [...new Set([...translationLanguages.deepl, ...translationLanguages.google])].sort(),
-	},
-	locales: {
-		discord: Object.values(localisationLanguageToLocale.discord),
-	},
-};
+export default languages;
 export {
 	getDiscordLocaleByLocalisationLanguage,
 	getLocaleByLocalisationLanguage,
@@ -79,7 +129,7 @@ export {
 	getLocalisationLanguageByLocale,
 	isDiscordLocalisationLanguage,
 	isLocalisationLanguage,
-	toFeatureLanguage,
+	getFeatureLanguage,
 	isTranslationLanguage,
 	getDeepLLocaleByTranslationLanguage,
 	getGoogleTranslateLocaleByTranslationLanguage,
@@ -91,6 +141,8 @@ export {
 	isTinyLDLocale,
 	getCLDDetectionLanguageByLocale,
 	isCLDLocale,
+	getTranslationLanguage,
+	getBaseLanguage,
 };
 export type {
 	LearningLanguage,
