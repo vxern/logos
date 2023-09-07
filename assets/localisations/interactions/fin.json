@@ -1,9 +1,9 @@
 {
-	"interactions.continuedOnNextPage": "Continued on the next page...",
-	"interactions.page": "Page",
-	"interactions.invalidUser.title": "Invalid user",
-	"interactions.invalidUser.description": "The user you specified is not valid.",
-	"interactions.rateLimited.title": "You are being rate-limited",
-	"interactions.rateLimited.description.tooManyUses": "You have used this command too many times ({times}) in too short of a span of time.",
-	"interactions.rateLimited.description.cannotUseAgainUntil": "You will once again be able to use the command {relative_timestamp}."
+    "interactions.continuedOnNextPage": "Jatkuu seuraavalla sivulla...",
+    "interactions.page": "Sivu",
+    "interactions.invalidUser.title": "Käyttäjä ei kelpaa",
+    "interactions.invalidUser.description": "Antamasi käyttäjä ei kelpaa.",
+    "interactions.rateLimited.title": "Viestiesi määrää rajoitetaan",
+    "interactions.rateLimited.description.cannotUseAgainUntil": "Voit käyttää komentoa taas {relative_timestamp}.",
+    "interactions.rateLimited.description.tooManyUses": "Olet käyttänyt tätä komentoa liian usein ({times}) liian lyhyen ajan sisällä."
 }

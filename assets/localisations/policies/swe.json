@@ -1,13 +1,1 @@
-{
-    "policies.moderation.title": "",
-    "policies.moderation.points.introduction.title": "",
-    "policies.moderation.points.introduction.description": "",
-    "policies.moderation.points.breach.title": "",
-    "policies.moderation.points.breach.description": "",
-    "policies.moderation.points.warnings.title": "",
-    "policies.moderation.points.warnings.description": "",
-    "policies.moderation.points.furtherAction.title": "",
-    "policies.moderation.points.furtherAction.description": "",
-    "policies.moderation.points.ban.title": "",
-    "policies.moderation.points.ban.description": ""
-}
+{}

@@ -1,1 +1,14 @@
-{}
+{
+    "rules.behaviour.title": "Comportamiento",
+    "rules.quality.title": "Calidad",
+    "rules.quality.summary": "No ser molesto.",
+    "rules.relevance.title": "Relevancia",
+    "rules.relevance.summary": "Publique contenido relevante.",
+    "rules.relevance.content": "Se espera que los aportes hechos al servidor tengan lugar en sus respectivos canales y categorías. Contribuciones hechas en los canales inapropiados, se les pedirá a los responsables que las muevan a el canal correspondiente.",
+    "rules.suitability.title": "Adecuación",
+    "rules.suitability.summary": "Publique contenido apropiado para miembros menores.",
+    "rules.rule": "Regla",
+    "rules.behaviour.summary": "Intente ser amable.",
+    "rules.behaviour.content": "Se espera que los miembros traten a otros con respeto, consideración y comprensión. Malos comportamientos en forma de abuso verbal, discriminación, acoso y otras conductas hirientes o comportamientos tóxicos no serán tolerados.",
+    "rules.quality.content": "Se espera que las contribuciones hechas al servidor sean de una calidad acceptable. Ofensas, spam, publicaciones irritantes repetitivas, shitposting (fuera de los canales de memes) y otras conductas molestas son totalmente rechazados."
+}
