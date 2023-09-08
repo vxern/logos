@@ -1,1 +1,10 @@
-{}
+{
+    "interactions.show": "Pokŏż wiadōmości na czacie",
+    "interactions.continuedOnNextPage": "Kōntynuacyjŏ na nastympnyj zajcie...",
+    "interactions.page": "Zajta",
+    "interactions.invalidUser.title": "Niyprawy używacz",
+    "interactions.invalidUser.description": "Używacz, kerego żeś sprecyzowoł/ała, niyma prawy.",
+    "interactions.rateLimited.title": "Przekroczōno limit żōndań",
+    "interactions.rateLimited.description.tooManyUses": "Użōł/użyła żeś tyj kōmyndy zbyt moc razy ({times}) we zbyt krōtkim ôkresie.",
+    "interactions.rateLimited.description.cannotUseAgainUntil": "Bydziesz mōg/mogła zaś użyć kōmyndy {relative_timestamp}."
+}
