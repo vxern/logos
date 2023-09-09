@@ -5,7 +5,6 @@
     "languages.belarusian": "Belarussisch",
     "languages.bulgarian": "Bulgarisch",
     "languages.chinese.simplified": "Chinesisch (Vereinfacht)",
-    "languages.czech": "Tschechisch",
     "languages.danish": "Dänisch",
     "languages.dutch": "Niederländisch",
     "languages.english": "Englisch",
@@ -30,7 +29,6 @@
     "languages.portuguese.european": "Portugiesisch (Europäisch)",
     "languages.romanian": "Rumänisch",
     "languages.russian": "Russisch",
-    "languages.slovak": "Slowakisch",
     "languages.slovenian": "Slowenisch",
     "languages.spanish": "Spanisch",
     "languages.swedish": "Schwedisch",
@@ -110,6 +108,5 @@
     "languages.faroese": "Faroese",
     "languages.fijian": "Fidschianisch",
     "languages.khasi": "Khasi",
-    "languages.laothian": "Laothisch",
     "languages.latin": "Latein"
 }
