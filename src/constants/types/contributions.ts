@@ -18,12 +18,24 @@ const contributors = {
 	asterfields: {
 		username: "@asterfields_",
 		id: "839862207025119252",
-		link: "https://instagram.com/asternight1/",
+		link: "https://instagram.com/asternight1",
+	},
+	balak: {
+		username: "balak2609",
+		id: "418818654529126400",
 	},
 	estheroide: {
 		username: "@estheroide",
 		id: "747900197358665758",
 		link: "https://instagram.com/yosgatian",
+	},
+	kamelNeon: {
+		username: "KamelNeoN#8068",
+		id: "311489852824616961",
+	},
+	megaGlaceon: {
+		username: "@megaglaceon",
+		id: "186212508141355008",
 	},
 	nemokosch: {
 		username: "@nemokosch",
@@ -34,18 +46,30 @@ const contributors = {
 		username: "@noxyys",
 		id: "357538166061924353",
 	},
+	okruchChleba: {
+		username: "@okruchchleba",
+		id: "403581106042961930",
+	},
 	rodutNotira: {
 		username: "@rodutnotira",
 		id: "502427080877801484",
 	},
+	spanish: {
+		username: "@hani_men12",
+		id: "775308215470391317",
+	},
 	victor: {
 		username: "@ferb02",
 		id: "303605019532460033",
-		link: "https://www.youtube.com/channel/UC4aqpjKwQfkqxmQO0Owy2QQ",
+		link: "https://youtube.com/channel/UC4aqpjKwQfkqxmQO0Owy2QQ",
 	},
 	moorddroom: {
 		username: "@moorddroom",
 		id: "656160896607059981",
+	},
+	iiv: {
+		username: "@iiv",
+		id: "99962686766333952",
 	},
 	telemaniak: {
 		username: "@telemaniak",
@@ -54,7 +78,7 @@ const contributors = {
 	vxern: {
 		username: "@vxern",
 		id: "217319536485990400",
-		link: "https://github.com/vxern",
+		link: "https://linkedin.com/in/vxern",
 	},
 	theodeninmuhafizi: {
 		username: "@theodeninmuhafizi",
@@ -74,29 +98,29 @@ type Translation = {
 
 export default {
 	translation: {
-		"Armenian/Western": {
-			flag: "🇦🇲",
-			completion: 6,
-			contributors: [contributors["16wardm"]],
-		},
 		"Armenian/Eastern": {
 			flag: "🇦🇲",
 			completion: 2,
 			contributors: [contributors["16wardm"]],
 		},
+		"Armenian/Western": {
+			flag: "🇺🇳",
+			completion: 5,
+			contributors: [contributors["16wardm"]],
+		},
 		Dutch: {
 			flag: "🇳🇱",
-			completion: 4,
+			completion: 5,
 			contributors: [contributors.moorddroom],
 		},
 		Finnish: {
 			flag: "🇫🇮",
 			completion: 0,
-			contributors: [],
+			contributors: [contributors.megaGlaceon],
 		},
 		French: {
 			flag: "🇫🇷",
-			completion: 9,
+			completion: 8,
 			contributors: [
 				contributors["16wardm"],
 				contributors.asterfields,
@@ -108,7 +132,7 @@ export default {
 		},
 		German: {
 			flag: "🇩🇪",
-			completion: 7,
+			completion: 9,
 			contributors: [contributors.rodutNotira],
 		},
 		Greek: {
@@ -133,17 +157,27 @@ export default {
 		},
 		Romanian: {
 			flag: "🇷🇴",
-			completion: 9,
-			contributors: [contributors.victor, contributors.vxern],
+			completion: 8,
+			contributors: [contributors.vxern, contributors.victor, contributors.kamelNeon],
+		},
+		Russian: {
+			flag: "🇷🇺",
+			completion: 0,
+			contributors: [],
+		},
+		Silesian: {
+			flag: "🇺🇳",
+			completion: 1,
+			contributors: [contributors.okruchChleba, contributors.vxern],
 		},
 		Swedish: {
 			flag: "🇸🇪",
 			completion: 0,
-			contributors: [],
+			contributors: [contributors.iiv, contributors.telemaniak],
 		},
 		Turkish: {
 			flag: "🇹🇷",
-			completion: 9,
+			completion: 7,
 			contributors: [contributors.yeetfe, contributors.theodeninmuhafizi],
 		},
 	} satisfies Record<Exclude<LearningLanguage, "English/American" | "English/British">, Translation>,
