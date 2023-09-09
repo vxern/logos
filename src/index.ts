@@ -140,7 +140,7 @@ async function loadLocalisations(directoryPath: string): Promise<Map<string, Map
 					`${key.replace(/\.description$/, ".name")}` in strings &&
 					value.length > 100
 				) {
-					console.warn(`${language}: '${key}' is too long (>100 characters). Normalising...`);
+					console.warn(`[Localisations] ${language}: '${key}' is too long (>100 characters). Normalising...`);
 
 					const valueNormalised = value.slice(0, 100);
 					localisations.get(key)?.set(language, valueNormalised);
