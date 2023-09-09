@@ -630,5 +630,19 @@
     "translate.strings.cannotUse.description": "Diese Nachricht kann nicht übersetzt werden.",
     "translate.strings.cannotDetermine.source.title": "Kann die Ausgangssprache nicht ermitteln",
     "translate.strings.cannotDetermine.target.title": "Kann die Zielsprache nicht ermitteln",
-    "translate.strings.cannotDetermine.target.description.cannotDetermine": "Die Zielsprache konnte nicht ermittelt werden."
+    "translate.strings.cannotDetermine.target.description.cannotDetermine": "Die Zielsprache konnte nicht ermittelt werden.",
+    "detect.strings.unknown.description.message": "Die Sprache der angegebenen Nachricht konnte nicht erkannt werden.",
+    "detect.strings.textEmpty.description": "Der Text darf nicht leer sein oder ausschließlich aus Leerzeichen bestehen.",
+    "detect.strings.fields.possibleMatches.description.single": "Es ist weniger wahrscheinlich, dass die Sprache {language} ist.",
+    "translate.message.name": "Übersetzen",
+    "translate.strings.cannotUse.title": "Die Nachricht kann nicht übersetzt werden",
+    "translate.strings.cannotDetermine.source.description.tryAgain": "Bitte stell es selber ein, oder versuch nochmal mit einer anderen Eingabe.",
+    "detect.description": "Bei einem Text erkennt es dessen Sprache oder nennt mögliche Kandidaten.",
+    "detect.strings.cannotUse.description": "Diese Nachricht kann nicht zur Spracherkennung verwendet werden.",
+    "detect.strings.textEmpty.title": "Text leer",
+    "detect.strings.fields.likelyMatches.title": "Wahrscheinliche Übereinstimmungen",
+    "detect.strings.fields.likelyMatches.description.multiple": "Die Sprache ist wahrscheinlich eine von:",
+    "detect.strings.fields.likelyMatches.description.single": "Die Sprache ist wahrscheinlich {language}.",
+    "detect.strings.fields.possibleMatches.title": "Andere Optionen",
+    "detect.strings.fields.possibleMatches.description.multiple": "Dies ist weniger wahrscheinlich, aber die Sprache könnte auch eine der folgenden sein:"
 }
