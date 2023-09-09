@@ -8,6 +8,7 @@ import languages, {
 	getLocalisationLanguageByLocale,
 	isDiscordLocalisationLanguage,
 } from "../constants/languages";
+import { getDiscordLanguageByLocale } from "../constants/languages/localisation";
 import time from "../constants/time";
 import defaults from "../defaults";
 import { enableDesiredProperties, handleGuildMembersChunk, overrideDefaultEventHandlers } from "../fixes";
@@ -967,6 +968,24 @@ function buildCommands<
 			continue;
 		}
 
+		if (localisations.name !== undefined && localisations.name in commandBuffer) {
+			throw `Duplicate command "${localisations.name}". Skipping addition...`;
+		}
+
+		if (localisations.nameLocalizations !== undefined) {
+			const duplicateNames = (Object.entries(localisations.nameLocalizations) as [Discord.Locales, string][]).filter(
+				([locale, localisation]) =>
+					(Object.values(commandBuffer) as Command[]).some(
+						(command) => command.nameLocalizations?.[locale] === localisation,
+					),
+			);
+			for (const [locale, name] of duplicateNames) {
+				const language = getDiscordLanguageByLocale(locale);
+				console.error(`Duplicate command "${name}" in ${language}; Excluding...`);
+				delete localisations.nameLocalizations[locale];
+			}
+		}
+
 		const command: Command = { ...commandTemplate, ...localisations, options: [] } as Command;
 
 		for (const optionTemplate of commandTemplate.options ?? []) {
@@ -974,6 +993,27 @@ function buildCommands<
 			const localisations = localiseCommandOrOption(optionKey);
 			if (localisations === undefined) {
 				continue;
+			}
+
+			if (
+				localisations.name !== undefined &&
+				(command as Discord.CreateSlashApplicationCommand).options?.some((option) => option.name === localisations.name)
+			) {
+				throw `Duplicate option "${localisations.name}" in command "${command.name}".`;
+			}
+
+			if (localisations.nameLocalizations !== undefined) {
+				const duplicateNames = (Object.entries(localisations.nameLocalizations) as [Discord.Locales, string][]).filter(
+					([locale, localisation]) =>
+						(command as Discord.CreateSlashApplicationCommand).options?.some(
+							(option) => option.nameLocalizations?.[locale] === localisation,
+						),
+				);
+				for (const [locale, name] of duplicateNames) {
+					const language = getDiscordLanguageByLocale(locale);
+					console.error(`Duplicate option "${name}" in command "${command.name}" in ${language}; Excluding...`);
+					delete localisations.nameLocalizations[locale];
+				}
 			}
 
 			const option: Option = { ...optionTemplate, ...localisations, options: [] } as Option;
@@ -985,6 +1025,25 @@ function buildCommands<
 					continue;
 				}
 
+				if (localisations.name !== undefined && option.options?.some((option) => option.name === localisations.name)) {
+					throw `Duplicate option "${localisations.name}" in command "${command.name} ${option.name}".`;
+				}
+
+				if (localisations.nameLocalizations !== undefined) {
+					const duplicateNames = (
+						Object.entries(localisations.nameLocalizations) as [Discord.Locales, string][]
+					).filter(([locale, localisation]) =>
+						option.options?.some((subOption) => subOption.nameLocalizations?.[locale] === localisation),
+					);
+					for (const [locale, name] of duplicateNames) {
+						const language = getDiscordLanguageByLocale(locale);
+						console.error(
+							`Duplicate option "${name}" in command "${command.name} ${option.name}" in ${language}; Excluding...`,
+						);
+						delete localisations.nameLocalizations[locale];
+					}
+				}
+
 				const subOption: Option = { ...subOptionTemplate, ...localisations, options: [] } as Option;
 
 				for (const subSubOptionTemplate of subOptionTemplate.options ?? []) {
@@ -992,6 +1051,28 @@ function buildCommands<
 					const localisations = localiseCommandOrOption(subSubOptionKey);
 					if (localisations === undefined) {
 						continue;
+					}
+
+					if (
+						localisations.name !== undefined &&
+						option.options?.some((option) => option.name === localisations.name)
+					) {
+						throw `Duplicate option "${localisations.name}" in command "${command.name} ${option.name} ${subOption.name}".`;
+					}
+
+					if (localisations.nameLocalizations !== undefined) {
+						const duplicateNames = (
+							Object.entries(localisations.nameLocalizations) as [Discord.Locales, string][]
+						).filter(([locale, localisation]) =>
+							subOption.options?.some((subSubOption) => subSubOption.nameLocalizations?.[locale] === localisation),
+						);
+						for (const [locale, name] of duplicateNames) {
+							const language = getDiscordLanguageByLocale(locale);
+							console.error(
+								`Duplicate option "${name}" in command "${command.name} ${option.name} ${subOption.name}" in ${language}; Excluding...`,
+							);
+							delete localisations.nameLocalizations[locale];
+						}
 					}
 
 					const subSubOption: Option = { ...subSubOptionTemplate, ...localisations, options: [] } as Option;
