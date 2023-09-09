@@ -22,51 +22,33 @@ async function handleDisplayBotInformation(
 	}
 
 	const strings = {
-		information: {
-			whoAmI: {
-				title: localise(client, "information.options.bot.strings.whoAmI.title", locale)(),
-				description: localise(client, "information.options.bot.strings.whoAmI.description", locale)(),
-				features: {
-					roles: localise(client, "information.options.bot.strings.whoAmI.features.roles", locale)(),
-					language: localise(client, "information.options.bot.strings.whoAmI.features.language", locale)(),
-					music: localise(client, "information.options.bot.strings.whoAmI.features.music", locale)(),
-				},
+		concept: {
+			title: localise(client, "information.options.bot.strings.concept.title", locale)(),
+			description: localise(client, "information.options.bot.strings.concept.description", locale)(),
+		},
+		function: {
+			title: localise(client, "information.options.bot.strings.function.title", locale)(),
+			description: localise(client, "information.options.bot.strings.function.description", locale)(),
+			features: {
+				definitions: localise(client, "information.options.bot.strings.function.features.definitions", locale)(),
+				translations: localise(client, "information.options.bot.strings.function.features.translations", locale)(),
+				games: localise(client, "information.options.bot.strings.function.features.games", locale)(),
+				messages: localise(client, "information.options.bot.strings.function.features.messages", locale)(),
+				guides: localise(client, "information.options.bot.strings.function.features.guides", locale)(),
 			},
-			howWasIMade: {
-				title: localise(client, "information.options.bot.strings.howWasIMade.title", locale)(),
-				description: localise(
-					client,
-					"information.options.bot.strings.howWasIMade.description",
-					locale,
-				)({
-					language_link: constants.links.typescriptWebsite,
-					runtime_link: constants.links.nodeWebsite,
-					api_link: constants.links.discordApiWebsite,
-					library_link: constants.links.discordenoRepository,
-				}),
-			},
-			howToAddToServer: {
-				title: localise(client, "information.options.bot.strings.howToAddToServer.title", locale)(),
-				description: localise(
-					client,
-					"information.options.bot.strings.howToAddToServer.description",
-					locale,
-				)({
-					learn_armenian_link: constants.links.learnArmenianListingWebsite,
-					learn_romanian_link: constants.links.learnRomanianListingWebsite,
-				}),
-			},
-			amIOpenSource: {
-				title: localise(client, "information.options.bot.strings.amIOpenSource.title", locale)(),
-				description: localise(client, "information.options.bot.strings.amIOpenSource.description", locale)(),
-			},
+		},
+		languages: {
+			title: localise(client, "information.options.bot.strings.languages.title", locale)(),
+			description: localise(client, "information.options.bot.strings.languages.description", locale)(),
 		},
 	};
 
 	const featuresFormatted = list([
-		`${constants.symbols.bot.features.roles} ${strings.information.whoAmI.features.roles}`,
-		`${constants.symbols.bot.features.language} ${strings.information.whoAmI.features.language}`,
-		`${constants.symbols.bot.features.music} ${strings.information.whoAmI.features.music}`,
+		`${constants.symbols.bot.features.definitions} ${strings.function.features.definitions}`,
+		`${constants.symbols.bot.features.translations} ${strings.function.features.translations}`,
+		`${constants.symbols.bot.features.games} ${strings.function.features.games}`,
+		`${constants.symbols.bot.features.messages} ${strings.function.features.messages}`,
+		`${constants.symbols.bot.features.guides} ${strings.function.features.guides}`,
 	]);
 
 	reply([client, bot], interaction, {
@@ -82,20 +64,16 @@ async function handleDisplayBotInformation(
 				color: constants.colors.blue,
 				fields: [
 					{
-						name: `${constants.symbols.information.bot} ${strings.information.whoAmI.title}`,
-						value: `${strings.information.whoAmI.description}\n${featuresFormatted}`,
+						name: `${constants.symbols.information.bot} ${strings.concept.title}`,
+						value: strings.concept.description,
 					},
 					{
-						name: `${constants.symbols.information.build} ${strings.information.howWasIMade.title}`,
-						value: strings.information.howWasIMade.description,
+						name: `${constants.symbols.information.function} ${strings.function.title}`,
+						value: `${strings.function.description}\n${featuresFormatted}`,
 					},
 					{
-						name: `${constants.symbols.information.handshake} ${strings.information.howToAddToServer.title}`,
-						value: strings.information.howToAddToServer.description,
-					},
-					{
-						name: `${constants.symbols.information.unlocked} ${strings.information.amIOpenSource.title}`,
-						value: strings.information.amIOpenSource.description,
+						name: `${constants.symbols.information.languages} ${strings.languages.title}`,
+						value: strings.languages.description,
 					},
 				],
 			},

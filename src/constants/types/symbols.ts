@@ -10,9 +10,9 @@ export default {
 		information: "ℹ️",
 		inviteLink: "🔗",
 		bot: "🤖",
-		build: "🛠️",
-		handshake: "🤝",
-		unlocked: "🔓",
+		function: "🛠️",
+		languages: "🌍",
+		add: "🤝",
 	},
 	sigils: {
 		divider: "﹘",
@@ -96,9 +96,19 @@ export default {
 	},
 	bot: {
 		features: {
-			roles: "💼",
-			language: "🎓",
-			music: "🎶",
+			definitions: "🔍",
+			translations: "🌍",
+			games: "🎮",
+			messages: "✍️",
+			guides: "🎓",
+		},
+		multipurpose: {
+			features: {
+				audio: "🎶",
+				roles: "💼",
+				moderation: "💢",
+				social: "💐",
+			},
 		},
 	},
 	guild: {
