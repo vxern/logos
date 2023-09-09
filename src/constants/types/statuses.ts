@@ -1,1 +1,1 @@
-export default ["/cefr", "/detect", "/game", "/resources", "/translate", "/word", "/settings", "/information"];
+export default ["/cefr", "/recognise", "/game", "/resources", "/translate", "/word", "/settings", "/information"];

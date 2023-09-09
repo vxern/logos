@@ -15,7 +15,7 @@ import { CommandTemplate } from "../../command";
 import { show } from "../../parameters";
 import { Translation } from "../translators/adapter";
 import { resolveAdapters } from "../translators/adapters";
-import { detectLanguages } from "./detect";
+import { detectLanguages } from "./recognise";
 import * as Discord from "@discordeno/bot";
 
 const commands = {

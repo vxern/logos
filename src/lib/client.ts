@@ -544,7 +544,7 @@ export async function handleGuildCreate(
 		}
 
 		if (language.translate.enabled) {
-			guildCommands.push(commands.detectLanguageChatInput, commands.detectLanguageMessage);
+			guildCommands.push(commands.recogniseChatInput, commands.recogniseMessage);
 			guildCommands.push(commands.translateChatInput, commands.translateMessage);
 		}
 

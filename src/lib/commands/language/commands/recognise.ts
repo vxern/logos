@@ -12,10 +12,10 @@ import * as Discord from "@discordeno/bot";
 
 const commands = {
 	chatInput: {
-		name: "detect",
+		name: "recognize",
 		type: Discord.ApplicationCommandTypes.ChatInput,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
-		handle: handleDetectLanguageChatInput,
+		handle: handleRecogniseLanguageChatInput,
 		options: [
 			{
 				name: "text",
@@ -25,14 +25,14 @@ const commands = {
 		],
 	},
 	message: {
-		name: "detect.message",
+		name: "recognize.message",
 		type: Discord.ApplicationCommandTypes.Message,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
-		handle: handleDetectLanguageMessage,
+		handle: handleRecogniseLanguageMessage,
 	},
 } satisfies Record<string, CommandTemplate>;
 
-async function handleDetectLanguageChatInput(
+async function handleRecogniseLanguageChatInput(
 	[client, bot]: [Client, Discord.Bot],
 	interaction: Logos.Interaction,
 ): Promise<void> {
@@ -43,10 +43,10 @@ async function handleDetectLanguageChatInput(
 
 	const locale = interaction.locale;
 
-	handleDetectLanguage([client, bot], interaction, text, { isMessage: false }, { locale });
+	handleRecogniseLanguage([client, bot], interaction, text, { isMessage: false }, { locale });
 }
 
-async function handleDetectLanguageMessage(
+async function handleRecogniseLanguageMessage(
 	[client, bot]: [Client, Discord.Bot],
 	interaction: Logos.Interaction,
 ): Promise<void> {
@@ -60,8 +60,8 @@ async function handleDetectLanguageMessage(
 	const hasEmbeds = message.embeds !== undefined && message.embeds.length !== 0;
 	if (hasEmbeds) {
 		const strings = {
-			title: localise(client, "detect.strings.cannotUse.title", locale)(),
-			description: localise(client, "detect.strings.cannotUse.description", locale)(),
+			title: localise(client, "recognize.strings.cannotUse.title", locale)(),
+			description: localise(client, "recognize.strings.cannotUse.description", locale)(),
 		};
 
 		reply([client, bot], interaction, {
@@ -78,10 +78,10 @@ async function handleDetectLanguageMessage(
 
 	const text = message.content;
 
-	handleDetectLanguage([client, bot], interaction, text, { isMessage: true }, { locale });
+	handleRecogniseLanguage([client, bot], interaction, text, { isMessage: true }, { locale });
 }
 
-async function handleDetectLanguage(
+async function handleRecogniseLanguage(
 	[client, bot]: [Client, Discord.Bot],
 	interaction: Logos.Interaction,
 	text: string,
@@ -91,8 +91,8 @@ async function handleDetectLanguage(
 	const isTextEmpty = text.trim().length === 0;
 	if (isTextEmpty) {
 		const strings = {
-			title: localise(client, "detect.strings.textEmpty.title", locale)(),
-			description: localise(client, "detect.strings.textEmpty.description", locale)(),
+			title: localise(client, "recognize.strings.textEmpty.title", locale)(),
+			description: localise(client, "recognize.strings.textEmpty.description", locale)(),
 		};
 
 		reply([client, bot], interaction, {
@@ -113,10 +113,10 @@ async function handleDetectLanguage(
 
 	if (detectedLanguages.likely.length === 0 && detectedLanguages.possible.length === 0) {
 		const strings = {
-			title: localise(client, "detect.strings.unknown.title", locale)(),
+			title: localise(client, "recognize.strings.unknown.title", locale)(),
 			description: {
-				text: localise(client, "detect.strings.unknown.description.text", locale)(),
-				message: localise(client, "detect.strings.unknown.description.message", locale)(),
+				text: localise(client, "recognize.strings.unknown.description.text", locale)(),
+				message: localise(client, "recognize.strings.unknown.description.message", locale)(),
 			},
 		};
 
@@ -143,7 +143,7 @@ async function handleDetectLanguage(
 		const strings = {
 			description: localise(
 				client,
-				"detect.strings.fields.likelyMatches.description.single",
+				"recognize.strings.fields.likelyMatches.description.single",
 				locale,
 			)({ language: localise(client, localisations.languages[language], locale)() }),
 		};
@@ -173,10 +173,10 @@ async function handleDetectLanguage(
 			const languageNameLocalised = localise(client, localisations.languages[language], locale)();
 
 			const strings = {
-				title: localise(client, "detect.strings.fields.likelyMatches.title", locale)(),
+				title: localise(client, "recognize.strings.fields.likelyMatches.title", locale)(),
 				description: localise(
 					client,
-					"detect.strings.fields.likelyMatches.description.single",
+					"recognize.strings.fields.likelyMatches.description.single",
 					locale,
 				)({ language: `**${languageNameLocalised}**` }),
 			};
@@ -193,8 +193,8 @@ async function handleDetectLanguage(
 			const languageNamesFormatted = list(languageNamesLocalised.map((languageName) => `***${languageName}***`));
 
 			const strings = {
-				title: localise(client, "detect.strings.fields.likelyMatches.title", locale)(),
-				description: localise(client, "detect.strings.fields.likelyMatches.description.multiple", locale)(),
+				title: localise(client, "recognize.strings.fields.likelyMatches.title", locale)(),
+				description: localise(client, "recognize.strings.fields.likelyMatches.description.multiple", locale)(),
 			};
 
 			fields.push({
@@ -213,10 +213,10 @@ async function handleDetectLanguage(
 			const languageNameLocalised = localise(client, localisations.languages[language], locale)();
 
 			const strings = {
-				title: localise(client, "detect.strings.fields.possibleMatches.title", locale)(),
+				title: localise(client, "recognize.strings.fields.possibleMatches.title", locale)(),
 				description: localise(
 					client,
-					"detect.strings.fields.possibleMatches.description.single",
+					"recognize.strings.fields.possibleMatches.description.single",
 					locale,
 				)({ language: `**${languageNameLocalised}**` }),
 			};
@@ -233,8 +233,8 @@ async function handleDetectLanguage(
 			const languageNamesFormatted = list(languageNamesLocalised.map((languageName) => `***${languageName}***`));
 
 			const strings = {
-				title: localise(client, "detect.strings.fields.possibleMatches.title", locale)(),
-				description: localise(client, "detect.strings.fields.possibleMatches.description.multiple", locale)(),
+				title: localise(client, "recognize.strings.fields.possibleMatches.title", locale)(),
+				description: localise(client, "recognize.strings.fields.possibleMatches.description.multiple", locale)(),
 			};
 
 			fields.push({

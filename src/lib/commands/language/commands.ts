@@ -1,14 +1,14 @@
 import answer from "./commands/answer";
 import cefr from "./commands/cefr";
 import correction from "./commands/correction";
-import detect from "./commands/detect";
+import recognise from "./commands/recognise";
 import game from "./commands/game";
 import resources from "./commands/resources";
 import translate from "./commands/translate";
 import word from "./commands/word";
 
 const { partial: correctionPartial, full: correctionFull } = correction;
-const { chatInput: detectLanguageChatInput, message: detectLanguageMessage } = detect;
+const { chatInput: recogniseChatInput, message: recogniseMessage } = recognise;
 const { chatInput: translateChatInput, message: translateMessage } = translate;
 
 export {
@@ -16,8 +16,8 @@ export {
 	cefr,
 	correctionPartial,
 	correctionFull,
-	detectLanguageChatInput,
-	detectLanguageMessage,
+	recogniseChatInput,
+	recogniseMessage,
 	game,
 	resources,
 	translateChatInput,
