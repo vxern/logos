@@ -3,7 +3,8 @@ import { reverseObject } from "../../lib/utils";
 const languages = {
 	deepl: [
 		"Bulgarian",
-		"Czech",
+		"CzechoSlovak/Czech",
+		"CzechoSlovak/Slovak",
 		"Danish",
 		"German",
 		"Greek",
@@ -27,7 +28,6 @@ const languages = {
 		"Portuguese/European",
 		"Romanian",
 		"Russian",
-		"Slovak",
 		"Slovenian",
 		"Swedish",
 		"Turkish",
@@ -57,7 +57,8 @@ const languages = {
 		"Corsican",
 		"Creole/Haitian", // Haitian Creole
 		"Creole/SierraLeone", // Krio
-		"Czech",
+		"CzechoSlovak/Czech",
+		"CzechoSlovak/Slovak",
 		"Danish",
 		"Dogri",
 		"Dutch",
@@ -142,7 +143,6 @@ const languages = {
 		"Shona",
 		"Sindhi",
 		"Sinhala",
-		"Slovak",
 		"Slovenian",
 		"Somali",
 		"Sotho/Northern", // Sepedi
@@ -177,7 +177,8 @@ const languages = {
 const languageToLocale = {
 	deepl: {
 		Bulgarian: "BG",
-		Czech: "CS",
+		"CzechoSlovak/Czech": "CS",
+		"CzechoSlovak/Slovak": "SK",
 		Danish: "DA",
 		German: "DE",
 		Greek: "EL",
@@ -201,7 +202,6 @@ const languageToLocale = {
 		"Portuguese/European": "PT-PT",
 		Romanian: "RO",
 		Russian: "RU",
-		Slovak: "SK",
 		Slovenian: "SL",
 		Swedish: "SV",
 		Turkish: "TR",
@@ -231,7 +231,8 @@ const languageToLocale = {
 		Corsican: "co",
 		"Creole/Haitian": "ht",
 		"Creole/SierraLeone": "kri",
-		Czech: "cs",
+		"CzechoSlovak/Czech": "cs",
+		"CzechoSlovak/Slovak": "sk",
 		Danish: "da",
 		Dogri: "doi",
 		Dutch: "nl",
@@ -316,7 +317,6 @@ const languageToLocale = {
 		Shona: "sn",
 		Sindhi: "sd",
 		Sinhala: "si",
-		Slovak: "sk",
 		Slovenian: "sl",
 		Somali: "so",
 		"Sotho/Southern": "st",
