@@ -1,6 +1,6 @@
 {
-    "parameters.user.description": "Miano używacza, jego tag, ID abo spōminka.",
-    "parameters.show.description": "Jeli nasztalujesz sie na \"True\", rezultat bydzie pokŏzany tyż inkszym używaczōm.",
+    "parameters.user.description": "Miano używŏcza, jego tag, ID abo spōminka.",
+    "parameters.show.description": "Jeli nasztalujesz sie na \"True\", rezultat bydzie pokŏzany tyż inkszym używŏczōm.",
     "parameters.duration.description": "Dugość sankcyje.",
     "parameters.reason.description": "Powōd do sankcyje abo jeji symniyniciŏ. Winiyn być akuratny.",
     "parameters.query.description": "Titel abo link do śpiywki abo zbioru śpiywek.",
@@ -12,7 +12,7 @@
     "parameters.query.name": "spytanie",
     "parameters.timestamp.name": "znacznik czasu",
     "parameters.collection.name": "zbiōr",
-    "parameters.user.name": "używacz",
+    "parameters.user.name": "używŏcz",
     "parameters.by.name": "ô",
     "parameters.by.description": "Wielość śpiywek abo wykazōw śpiywek, co majōm ôstać przewiniynte.",
     "parameters.to.name": "do",
