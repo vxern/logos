@@ -4,7 +4,6 @@
     "information.description": "Komenda używana do wyświetlania różnego rodzaju informacji.",
     "information.options.bot.name": "bot",
     "information.options.bot.description": "Wyświetla informacje o bocie.",
-    "information.options.bot.strings.howToAddToServer.title": "Jak mógł(a)bym Cię dodać na własny serwer?",
     "information.options.server.name": "serwer",
     "information.options.server.description": "Wyświetla informacje o serwerze.",
     "information.options.server.strings.information.title": "Informacje o {server_name}",

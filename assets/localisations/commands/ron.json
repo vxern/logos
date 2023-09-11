@@ -4,7 +4,6 @@
     "information.description": "Comandă utilizată pentru a afișa diverse informații.",
     "information.options.bot.name": "bot",
     "information.options.bot.description": "Afișează informații despre bot.",
-    "information.options.bot.strings.howToAddToServer.title": "Cum pot să te adaug pe serverul meu?",
     "information.options.server.name": "server",
     "information.options.server.description": "Afișează informații despre server.",
     "information.options.server.strings.information.title": "Informații despre {server_name}",
