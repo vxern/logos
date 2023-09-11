@@ -10,7 +10,7 @@
     "correction.fields.original": "Textul original",
     "correction.fields.corrected": "Textul modificat",
     "report.title": "Raport",
-    "report.fields.reason": "Care este motivul raportului?",
+    "report.fields.reason": "Care este motivul pentru raport?",
     "report.fields.users": "Utilizatori de raportat",
     "report.fields.link": "Link către mesajul pentru context",
     "suggestion.title": "Sugestie",
