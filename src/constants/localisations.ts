@@ -130,7 +130,6 @@ export default {
 		"Norwegian/Nynorsk": "languages.norwegian.nynorsk",
 		Occitan: "languages.occitan",
 		Odia: "languages.odia",
-		Oriya: "languages.oriya",
 		Oromo: "languages.oromo",
 		Ossetian: "languages.ossetian",
 		Pashto: "languages.pashto",
