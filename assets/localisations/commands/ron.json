@@ -588,5 +588,15 @@
     "word.strings.sourcedResponsibly.dictionaries.two": "dicționarele de mai sus",
     "word.strings.sourcedResponsibly.dictionaries.many": "dicționarele de mai sus",
     "settings.description": "Permite utilizatorului să-și gestioneze setările.",
-    "settings.options.view.name": "afișare"
+    "settings.options.view.name": "afișare",
+    "recognize.message.name": "Identifică limba",
+    "recognize.strings.cannotUse.title": "Nu se poate utiliza mesajul",
+    "recognize.strings.cannotUse.description": "Acest mesaj nu poate fi utilizat pentru identificarea limbii.",
+    "recognize.strings.unknown.description.text": "Nu s-a putut identifica limba-sursă a textului introdus.",
+    "recognize.strings.unknown.description.message": "Nu s-a putut identifica limba-sursă a mesajului selectat.",
+    "recognize.strings.textEmpty.description": "Câmpul de text nu poate fi gol și nu poate constă din spații albe.",
+    "recognize.options.text.description": "Textul a cărui limbă să fie identificată.",
+    "recognize.strings.unknown.title": "Limba necunoscută",
+    "recognize.strings.textEmpty.title": "Câmpul de text gol",
+    "recognize.strings.fields.likelyMatches.title": "Posibilități"
 }
