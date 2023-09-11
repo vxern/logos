@@ -4,7 +4,6 @@
     "information.description": "Տեղեկութիւններ ցոյց տալու համար։",
     "information.options.bot.name": "մեքենա",
     "information.options.bot.description": "Մեքենային տեղեկութիւն ցոյց կու տայ։",
-    "information.options.bot.strings.whoAmI.features.language": "Թարգմանութեան ու քերականութեան օգնութիւնը",
     "information.options.bot.strings.howToAddToServer.title": "Ինչպէս զիս Ձեր սերվերին կցել։",
     "information.options.server.name": "սերվեր",
     "information.options.server.description": "Սերվերին տեղեկութիւն ցոյց կու տայ։",

@@ -4,7 +4,6 @@
     "information.description": "Brukes til å vise forskjellig informasjon.",
     "information.options.bot.name": "bot",
     "information.options.bot.description": "Viser informasjon om boten.",
-    "information.options.bot.strings.whoAmI.features.language": "Oversettelse og morfologiske oppslag",
     "information.options.bot.strings.howToAddToServer.title": "Hvordan kan du legge meg til serveren din?",
     "information.options.server.name": "server",
     "information.options.server.description": "Viser informasjon om serveren.",

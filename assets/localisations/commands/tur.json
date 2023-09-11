@@ -4,7 +4,6 @@
     "information.description": "Çeşitli bilgileri görüntülemek için kullanılır.",
     "information.options.bot.name": "bot",
     "information.options.bot.description": "Botla ilgili bilgileri görüntüleyin.",
-    "information.options.bot.strings.whoAmI.features.language": "Çeviri ve morfolojik aramalar",
     "information.options.bot.strings.howToAddToServer.title": "Beni sunucunuza nasıl ekleyebilirsiniz?",
     "information.options.server.name": "sunucu",
     "information.options.server.description": "Sunucu hakkında bilgi gösterir.",

@@ -4,7 +4,6 @@
     "information.description": "Används för att visa olika information.",
     "information.options.bot.name": "bot",
     "information.options.bot.description": "Används för att visa information om boten.",
-    "information.options.bot.strings.howWasIMade.title": "Hur gjorde jag mig?",
     "information.options.server.name": "server",
     "information.options.server.description": "Används för att visa information om servern.",
     "information.options.server.strings.information.title": "Information om **{server_name}**",
