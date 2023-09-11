@@ -36,7 +36,7 @@ export default {
 		Corsican: "languages.corsican",
 		"Creole/Haitian": "languages.creole.haitian",
 		"Creole/Mauritian": "languages.creole.mauritian",
-		"Creole/SierraLeone": "languages.creole.sierraleone",
+		"Creole/SierraLeone": "languages.creole.sierraLeone",
 		"CzechoSlovak/Czech": "languages.czechoSlovak.czech",
 		"CzechoSlovak/Slovak": "languages.czechoSlovak.slovak",
 		Danish: "languages.danish",
