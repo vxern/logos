@@ -1,3 +1,4 @@
+import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import { Locale } from "../../../../constants/languages";
 import { trim } from "../../../../formatting";
@@ -7,7 +8,6 @@ import diagnostics from "../../../diagnostics";
 import { Modal, acknowledge, createModalComposer, reply } from "../../../interactions";
 import { getMemberAvatarURL } from "../../../utils";
 import { CommandTemplate } from "../../command";
-import * as Discord from "@discordeno/bot";
 
 const command: CommandTemplate = {
 	name: "answer.message",

@@ -1,9 +1,9 @@
+import * as Discord from "@discordeno/bot";
 import constants from "../../../../../constants/constants";
 import { list } from "../../../../../formatting";
 import * as Logos from "../../../../../types";
 import { Client, localise } from "../../../../client";
 import { reply } from "../../../../interactions";
-import * as Discord from "@discordeno/bot";
 
 async function handleDisplayBotInformation(
 	[client, bot]: [Client, Discord.Bot],

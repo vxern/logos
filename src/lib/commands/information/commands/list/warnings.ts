@@ -1,3 +1,4 @@
+import * as Discord from "@discordeno/bot";
 import constants from "../../../../../constants/constants";
 import { Locale } from "../../../../../constants/languages";
 import { timestamp } from "../../../../../formatting";
@@ -6,7 +7,6 @@ import { Client, autocompleteMembers, localise, resolveInteractionToMember } fro
 import { Document } from "../../../../database/document";
 import { Warning } from "../../../../database/structs/warning";
 import { parseArguments, reply } from "../../../../interactions";
-import * as Discord from "@discordeno/bot";
 
 async function handleDisplayWarningsAutocomplete(
 	[client, bot]: [Client, Discord.Bot],

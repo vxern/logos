@@ -1,3 +1,4 @@
+import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import { Locale, LocalisationLanguage } from "../../../../constants/languages";
 import localisations from "../../../../constants/localisations";
@@ -6,7 +7,6 @@ import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
 import { reply } from "../../../interactions";
 import { CommandTemplate } from "../../command";
-import * as Discord from "@discordeno/bot";
 
 const command: CommandTemplate = {
 	name: "credits",

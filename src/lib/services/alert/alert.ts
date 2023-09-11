@@ -1,7 +1,7 @@
+import * as Discord from "@discordeno/bot";
 import { Guild } from "../../database/structs/guild";
 import diagnostics from "../../diagnostics";
 import { LocalService } from "../service";
-import * as Discord from "@discordeno/bot";
 
 type Configuration = NonNullable<Guild["features"]["moderation"]["features"]>["alerts"];
 

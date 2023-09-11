@@ -1,3 +1,6 @@
+import { EventEmitter } from "events";
+import * as Discord from "@discordeno/bot";
+import * as Lavaclient from "lavaclient";
 import constants from "../../../constants/constants";
 import defaults from "../../../defaults";
 import { MentionTypes, mention } from "../../../formatting";
@@ -15,9 +18,6 @@ import { Guild, timeStructToMilliseconds } from "../../database/structs/guild";
 import diagnostics from "../../diagnostics";
 import { reply } from "../../interactions";
 import { LocalService } from "../service";
-import * as Discord from "@discordeno/bot";
-import { EventEmitter } from "events";
-import * as Lavaclient from "lavaclient";
 
 interface PositionControls {
 	by: number;

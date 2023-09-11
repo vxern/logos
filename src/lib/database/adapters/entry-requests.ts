@@ -1,10 +1,10 @@
+import Fauna from "fauna";
 import constants from "../../../constants/constants";
 import diagnostics from "../../diagnostics";
 import { CacheAdapter, Database, dispatchQuery, getUserMentionByReference, stringifyValue } from "../database";
 import { Document } from "../document";
 import { EntryRequestIndexes } from "../indexes";
 import { EntryRequest } from "../structs/entry-request";
-import Fauna from "fauna";
 
 const $ = Fauna.query;
 

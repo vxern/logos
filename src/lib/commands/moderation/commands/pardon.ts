@@ -1,3 +1,4 @@
+import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import { Locale } from "../../../../constants/languages";
 import defaults from "../../../../defaults";
@@ -12,7 +13,6 @@ import { parseArguments, reply, respond } from "../../../interactions";
 import { CommandTemplate } from "../../command";
 import { user } from "../../parameters";
 import { getActiveWarnings } from "../module";
-import * as Discord from "@discordeno/bot";
 
 const command: CommandTemplate = {
 	name: "pardon",

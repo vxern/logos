@@ -1,10 +1,10 @@
+import { WiktionaryParser } from "parse-wiktionary";
 import constants from "../../../../../constants/constants";
 import { HasVariants, LearningLanguage, Locale, getFeatureLanguage } from "../../../../../constants/languages";
 import licences from "../../../../../constants/licences";
 import { Client } from "../../../../client";
 import { getPartOfSpeech } from "../../module";
 import { Definition, DictionaryAdapter, DictionaryEntry } from "../adapter";
-import { WiktionaryParser } from "parse-wiktionary";
 
 const newlinesExpression = RegExp("\n{1}", "g");
 

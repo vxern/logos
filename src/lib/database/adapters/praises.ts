@@ -1,8 +1,8 @@
+import Fauna from "fauna";
 import { CacheAdapter, Database, dispatchQuery, setNested, stringifyValue } from "../database";
 import { Document } from "../document";
 import { PraiseIndexes, praiseIndexParameterToIndex } from "../indexes";
 import { Praise } from "../structs/praise";
-import Fauna from "fauna";
 
 const $ = Fauna.query;
 

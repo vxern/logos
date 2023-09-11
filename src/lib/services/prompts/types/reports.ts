@@ -1,3 +1,4 @@
+import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import { MentionTypes, mention, timestamp } from "../../../../formatting";
 import * as Logos from "../../../../types";
@@ -9,7 +10,6 @@ import { User } from "../../../database/structs/user";
 import { encodeId, getLocaleData, reply } from "../../../interactions";
 import { getGuildIconURLFormatted } from "../../../utils";
 import { PromptService } from "../service";
-import * as Discord from "@discordeno/bot";
 
 type Metadata = { userId: bigint; reference: string };
 type InteractionData = [userId: string, guildId: string, reference: string, isResolved: string];

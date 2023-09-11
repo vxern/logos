@@ -1,3 +1,6 @@
+import * as csv from "csv-parse/sync";
+import * as dotenv from "dotenv";
+import * as fs from "fs/promises";
 import {
 	LearningLanguage,
 	Locale,
@@ -8,9 +11,6 @@ import {
 import { capitalise } from "./formatting";
 import { Client, initialiseClient } from "./lib/client";
 import { SentencePair } from "./lib/commands/language/commands/game";
-import * as csv from "csv-parse/sync";
-import * as dotenv from "dotenv";
-import * as fs from "fs/promises";
 
 async function readDotEnvFile(fileUri: string, isTemplate = false): Promise<Record<string, string> | undefined> {
 	const kind = isTemplate ? "environment template" : "environment";

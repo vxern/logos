@@ -1,3 +1,6 @@
+import * as Discord from "@discordeno/bot";
+import FancyLog from "fancy-log";
+import Fauna from "fauna";
 import constants from "../constants/constants";
 import languages, {
 	LearningLanguage,
@@ -55,9 +58,6 @@ import { RoleIndicatorService } from "./services/role-indicators/role-indicators
 import { Service } from "./services/service";
 import { StatusService } from "./services/status/service";
 import { requestMembers } from "./utils";
-import * as Discord from "@discordeno/bot";
-import FancyLog from "fancy-log";
-import Fauna from "fauna";
 
 type Client = {
 	environment: {

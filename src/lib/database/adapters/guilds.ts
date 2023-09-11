@@ -1,10 +1,10 @@
+import Fauna from "fauna";
 import defaults from "../../../defaults";
 import diagnostics from "../../diagnostics";
 import { CacheAdapter, Database, dispatchQuery, stringifyValue } from "../database";
 import { Document } from "../document";
 import { GuildIndexes, guildIndexParameterToIndex } from "../indexes";
 import { Guild } from "../structs/guild";
-import Fauna from "fauna";
 
 const $ = Fauna.query;
 

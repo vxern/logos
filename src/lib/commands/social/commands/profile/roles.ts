@@ -1,3 +1,4 @@
+import * as Discord from "@discordeno/bot";
 import constants from "../../../../../constants/constants";
 import { Locale } from "../../../../../constants/languages";
 import { trim } from "../../../../../formatting";
@@ -17,7 +18,6 @@ import {
 	isGroup,
 	isSingle,
 } from "../../roles/types";
-import * as Discord from "@discordeno/bot";
 
 const command: OptionTemplate = {
 	name: "roles",

@@ -1,3 +1,4 @@
+import Fauna from "fauna";
 import {
 	CacheAdapter,
 	Database,
@@ -9,7 +10,6 @@ import {
 import { Document } from "../document";
 import { UserIndexes, userIndexParameterToIndex } from "../indexes";
 import { User } from "../structs/user";
-import Fauna from "fauna";
 
 const $ = Fauna.query;
 

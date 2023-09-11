@@ -1,5 +1,5 @@
-import { FeatureLanguage, LearningLanguage, Locale, LocalisationLanguage } from "./constants/languages";
 import * as Discord from "@discordeno/bot";
+import { FeatureLanguage, LearningLanguage, Locale, LocalisationLanguage } from "./constants/languages";
 
 type Guild = Pick<
 	Discord.Guild,

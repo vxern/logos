@@ -1,3 +1,4 @@
+import Fauna from "fauna";
 import constants from "../../../constants/constants";
 import diagnostics from "../../diagnostics";
 import {
@@ -11,7 +12,6 @@ import {
 import { Document } from "../document";
 import { ReportIndexes } from "../indexes";
 import { Report } from "../structs/report";
-import Fauna from "fauna";
 
 const $ = Fauna.query;
 

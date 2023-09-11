@@ -1,3 +1,4 @@
+import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
@@ -5,7 +6,6 @@ import { parseArguments, reply } from "../../../interactions";
 import { OptionTemplate } from "../../command";
 import { show } from "../../parameters";
 import { displayListings } from "../module";
-import * as Discord from "@discordeno/bot";
 
 const command: OptionTemplate = {
 	name: "history",

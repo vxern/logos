@@ -1,3 +1,4 @@
+import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import { DetectionLanguage, Locale } from "../../../../constants/languages";
 import localisations from "../../../../constants/localisations";
@@ -8,7 +9,6 @@ import { editReply, parseArguments, postponeReply, reply } from "../../../intera
 import { asStream } from "../../../utils";
 import { CommandTemplate } from "../../command";
 import { getAdapters } from "../detectors/adapters";
-import * as Discord from "@discordeno/bot";
 
 const commands = {
 	chatInput: {

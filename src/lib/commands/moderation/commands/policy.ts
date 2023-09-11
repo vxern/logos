@@ -1,10 +1,10 @@
+import * as Discord from "@discordeno/bot";
 import { Locale } from "../../../../constants/languages";
 import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
 import { getShowButton, parseArguments, reply } from "../../../interactions";
 import { CommandTemplate } from "../../command";
 import { show } from "../../parameters";
-import * as Discord from "@discordeno/bot";
 
 const command: CommandTemplate = {
 	name: "policy",

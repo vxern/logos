@@ -1,3 +1,4 @@
+import * as Discord from "@discordeno/bot";
 import constants from "../../../../../constants/constants";
 import { Locale } from "../../../../../constants/languages";
 import time from "../../../../../constants/time";
@@ -6,7 +7,6 @@ import * as Logos from "../../../../../types";
 import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../../client";
 import diagnostics from "../../../../diagnostics";
 import { parseArguments, parseTimeExpression, reply, respond } from "../../../../interactions";
-import * as Discord from "@discordeno/bot";
 
 async function handleSetTimeoutAutocomplete(
 	[client, bot]: [Client, Discord.Bot],

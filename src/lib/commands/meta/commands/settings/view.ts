@@ -1,3 +1,4 @@
+import * as Discord from "@discordeno/bot";
 import constants from "../../../../../constants/constants";
 import localisations from "../../../../../constants/localisations";
 import defaults from "../../../../../defaults";
@@ -5,7 +6,6 @@ import * as Logos from "../../../../../types";
 import { Client, localise } from "../../../../client";
 import { reply } from "../../../../interactions";
 import { OptionTemplate } from "../../../command";
-import * as Discord from "@discordeno/bot";
 
 const command: OptionTemplate = {
 	name: "view",

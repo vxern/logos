@@ -1,5 +1,5 @@
-import * as Logos from "../types";
 import * as Discord from "@discordeno/bot";
+import * as Logos from "../types";
 
 type ID = bigint | string;
 type Indexable<T> = T | ID;

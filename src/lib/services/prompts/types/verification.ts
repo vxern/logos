@@ -1,3 +1,4 @@
+import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import { Locale, getLocalisationLanguageByLocale } from "../../../../constants/languages";
 import { MentionTypes, TimestampFormat, mention, timestamp } from "../../../../formatting";
@@ -11,7 +12,6 @@ import diagnostics from "../../../diagnostics";
 import { acknowledge, encodeId, getFeatureLanguage, getLocaleData, reply } from "../../../interactions";
 import { getGuildIconURLFormatted, snowflakeToTimestamp } from "../../../utils";
 import { Configurations, PromptService } from "../service";
-import * as Discord from "@discordeno/bot";
 
 type Metadata = { userId: bigint; reference: string };
 type InteractionData = [userId: string, guildId: string, reference: string, isAccept: string];

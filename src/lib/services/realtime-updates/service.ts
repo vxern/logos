@@ -1,10 +1,10 @@
+import * as Discord from "@discordeno/bot";
+import Fauna from "fauna";
 import { Client, handleGuildCreate, handleGuildDelete } from "../../client";
 import { Document } from "../../database/document";
 import { Guild } from "../../database/structs/guild";
 import diagnostics from "../../diagnostics";
 import { LocalService } from "../service";
-import * as Discord from "@discordeno/bot";
-import Fauna from "fauna";
 
 type StreamSubscription = Fauna.Subscription<Omit<Fauna.SubscriptionEventHandlers, "snapshot">>;
 

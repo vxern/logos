@@ -1,8 +1,8 @@
+import * as Discord from "@discordeno/bot";
 import { OptionTemplate } from "../../command";
 import { show } from "../../parameters";
 import { handleDisplayVolume } from "./volume/display";
 import { handleSetVolume } from "./volume/set";
-import * as Discord from "@discordeno/bot";
 
 const command: OptionTemplate = {
 	name: "volume",

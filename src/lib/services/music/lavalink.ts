@@ -1,8 +1,8 @@
+import * as Discord from "@discordeno/bot";
+import * as Lavaclient from "lavaclient";
 import { Client } from "../../client";
 import diagnostics from "../../diagnostics";
 import { GlobalService } from "../service";
-import * as Discord from "@discordeno/bot";
-import * as Lavaclient from "lavaclient";
 
 class LavalinkService extends GlobalService {
 	readonly node: Lavaclient.Node;

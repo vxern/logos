@@ -1,3 +1,4 @@
+import * as Dexonline from "dexonline-scraper";
 import constants from "../../../../../constants/constants";
 import { LearningLanguage, Locale } from "../../../../../constants/languages";
 import licences from "../../../../../constants/licences";
@@ -6,7 +7,6 @@ import { chunk } from "../../../../utils";
 import { getPartOfSpeech } from "../../module";
 import { DictionaryAdapter, DictionaryEntry } from "../adapter";
 import { PartOfSpeech } from "../part-of-speech";
-import * as Dexonline from "dexonline-scraper";
 
 const classesWithInflections: PartOfSpeech[] = ["pronoun", "noun", "verb", "adjective", "determiner"];
 

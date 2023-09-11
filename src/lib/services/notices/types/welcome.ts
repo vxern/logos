@@ -1,8 +1,8 @@
+import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import { MentionTypes, mention } from "../../../../formatting";
 import { Client, localise } from "../../../client";
 import { HashableMessageContents, NoticeService } from "../service";
-import * as Discord from "@discordeno/bot";
 
 class WelcomeNoticeService extends NoticeService<"welcome"> {
 	constructor([client, bot]: [Client, Discord.Bot], guildId: bigint) {

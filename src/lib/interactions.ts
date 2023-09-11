@@ -1,3 +1,5 @@
+import * as Discord from "@discordeno/bot";
+import { DiscordSnowflake as Snowflake } from "@sapphire/snowflake";
 import constants from "../constants/constants";
 import {
 	FeatureLanguage,
@@ -16,8 +18,6 @@ import { Client, addCollector, localise, pluralise } from "./client";
 import { Document } from "./database/document";
 import { Guild } from "./database/structs/guild";
 import { InteractionRepetitionButtonID } from "./services/interaction-repetition/interaction-repetition";
-import * as Discord from "@discordeno/bot";
-import { DiscordSnowflake as Snowflake } from "@sapphire/snowflake";
 
 type AutocompleteInteraction = Discord.Interaction & { type: Discord.InteractionTypes.ApplicationCommandAutocomplete };
 

@@ -1,9 +1,9 @@
+import * as Discord from "@discordeno/bot";
 import constants from "../../../constants/constants";
 import symbols from "../../../constants/types/symbols";
 import * as Logos from "../../../types";
 import { Guild, RoleWithIndicator } from "../../database/structs/guild";
 import { LocalService } from "../service";
-import * as Discord from "@discordeno/bot";
 
 type Configuration = NonNullable<NonNullable<Guild["features"]["server"]["features"]>["roleIndicators"]>;
 

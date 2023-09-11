@@ -22,7 +22,7 @@ function capitalise(target: string): string {
  * @returns The formatted string of text.
  */
 function code(target: string): string {
-	return "`" + target + "`";
+	return `\`${target}\``;
 }
 
 /**
@@ -32,7 +32,7 @@ function code(target: string): string {
  * @param target - String of text to format.
  */
 function codeMultiline(target: string): string {
-	return "```" + target + "```";
+	return `\`\`\`${target}\`\`\``;
 }
 
 /**

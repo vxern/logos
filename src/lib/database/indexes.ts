@@ -1,3 +1,4 @@
+import Fauna from "fauna";
 import { Document } from "./document";
 import { EntryRequest } from "./structs/entry-request";
 import { Guild } from "./structs/guild";
@@ -6,7 +7,6 @@ import { Report } from "./structs/report";
 import { Suggestion } from "./structs/suggestion";
 import { User } from "./structs/user";
 import { Warning } from "./structs/warning";
-import Fauna from "fauna";
 
 type IndexesSignature<T = unknown> = Record<string, [takes: unknown, returns: T]>;
 

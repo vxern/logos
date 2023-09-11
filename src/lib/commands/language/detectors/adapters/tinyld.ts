@@ -1,6 +1,6 @@
+import * as tinyld from "tinyld";
 import { getTinyLDDetectionLanguageByLocale, isTinyLDLocale } from "../../../../../constants/languages";
 import { Detection, LanguageDetectorAdapter } from "../adapter";
-import * as tinyld from "tinyld";
 
 class TinyLDAdapter extends LanguageDetectorAdapter {
 	constructor() {

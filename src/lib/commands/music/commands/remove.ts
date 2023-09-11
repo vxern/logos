@@ -1,3 +1,4 @@
+import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import { Locale } from "../../../../constants/languages";
 import defaults from "../../../../defaults";
@@ -18,7 +19,6 @@ import { MusicService } from "../../../services/music/music";
 import { chunk } from "../../../utils";
 import { OptionTemplate } from "../../command";
 import { SongListing, listingTypeToEmoji } from "../data/types";
-import * as Discord from "@discordeno/bot";
 
 const command: OptionTemplate = {
 	name: "remove",

@@ -1,6 +1,6 @@
+import * as Discord from "@discordeno/bot";
 import { Client } from "../../client";
 import { GuildEvents } from "./guild-events";
-import * as Discord from "@discordeno/bot";
 
 type Events = ClientEvents & GuildEvents;
 

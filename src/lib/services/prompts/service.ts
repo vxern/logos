@@ -1,3 +1,4 @@
+import * as Discord from "@discordeno/bot";
 import constants from "../../../constants/constants";
 import * as Logos from "../../../types";
 import { Client } from "../../client";
@@ -9,7 +10,6 @@ import diagnostics from "../../diagnostics";
 import { createInteractionCollector, decodeId } from "../../interactions";
 import { getAllMessages } from "../../utils";
 import { LocalService } from "../service";
-import * as Discord from "@discordeno/bot";
 
 type InteractionDataBase = [userId: string, guildId: string, reference: string];
 

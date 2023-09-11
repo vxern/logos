@@ -1,10 +1,10 @@
+import * as Discord from "@discordeno/bot";
 import constants from "../../../../../constants/constants";
 import * as Logos from "../../../../../types";
 import { Client, localise } from "../../../../client";
 import { parseArguments, reply } from "../../../../interactions";
 import { ListingResolver } from "../../data/sources/sources";
 import { SongListing } from "../../data/types";
-import * as Discord from "@discordeno/bot";
 
 async function handleRequestQueryPlayback(
 	[client, bot]: [Client, Discord.Bot],

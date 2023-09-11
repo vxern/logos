@@ -1,8 +1,8 @@
+import * as Discord from "@discordeno/bot";
 import constants from "../../../../../constants/constants";
 import * as Logos from "../../../../../types";
 import { Client, localise } from "../../../../client";
 import { getShowButton, parseArguments, reply } from "../../../../interactions";
-import * as Discord from "@discordeno/bot";
 
 async function handleDisplayVolume(
 	[client, bot]: [Client, Discord.Bot],

@@ -1,8 +1,8 @@
+import * as Discord from "@discordeno/bot";
 import constants from "../../../constants/constants";
 import { handleInteractionCreate } from "../../client";
 import { decodeId, deleteReply, getCommandName } from "../../interactions";
 import { GlobalService } from "../service";
-import * as Discord from "@discordeno/bot";
 
 type InteractionRepetitionButtonID = [interactionId: string];
 

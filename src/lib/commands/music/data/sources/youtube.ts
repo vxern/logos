@@ -1,3 +1,5 @@
+import * as Discord from "@discordeno/bot";
+import * as YouTubeSearch from "youtube-sr";
 import constants from "../../../../../constants/constants";
 import { trim } from "../../../../../formatting";
 import * as Logos from "../../../../../types";
@@ -5,8 +7,6 @@ import { Client, localise } from "../../../../client";
 import { createInteractionCollector, deleteReply, postponeReply, reply } from "../../../../interactions";
 import { Song, SongListing } from "../types";
 import { ListingResolver } from "./sources";
-import * as Discord from "@discordeno/bot";
-import * as YouTubeSearch from "youtube-sr";
 
 const resolver: ListingResolver = async ([client, bot], interaction, query) => {
 	const url = new RegExp(

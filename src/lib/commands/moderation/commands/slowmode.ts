@@ -1,3 +1,4 @@
+import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import time from "../../../../constants/time";
 import { TimestampFormat, timestamp } from "../../../../formatting";
@@ -6,7 +7,6 @@ import { Client, localise } from "../../../client";
 import diagnostics from "../../../diagnostics";
 import { parseArguments, reply, respond } from "../../../interactions";
 import { CommandTemplate } from "../../command";
-import * as Discord from "@discordeno/bot";
 
 const command: CommandTemplate = {
 	name: "slowmode",

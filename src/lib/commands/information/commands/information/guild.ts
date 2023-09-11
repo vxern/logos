@@ -1,3 +1,4 @@
+import * as Discord from "@discordeno/bot";
 import constants from "../../../../../constants/constants";
 import { Locale } from "../../../../../constants/languages";
 import localisations from "../../../../../constants/localisations";
@@ -10,7 +11,6 @@ import diagnostics from "../../../../diagnostics";
 import { getFeatureLanguage, getLocalisationLanguage, reply } from "../../../../interactions";
 import { getGuildIconURLFormatted, snowflakeToTimestamp } from "../../../../utils";
 import { proficiency } from "../../../social/roles/categories/language";
-import * as Discord from "@discordeno/bot";
 
 /** Displays information about the guild that this command was executed in. */
 async function handleDisplayGuildInformation(

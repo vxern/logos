@@ -1,3 +1,4 @@
+import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import languages, {
 	Languages,
@@ -16,7 +17,6 @@ import { show } from "../../parameters";
 import { Translation } from "../translators/adapter";
 import { resolveAdapters } from "../translators/adapters";
 import { detectLanguages } from "./recognise";
-import * as Discord from "@discordeno/bot";
 
 const commands = {
 	chatInput: {

@@ -1,3 +1,4 @@
+import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import { Locale } from "../../../../constants/languages";
 import defaults from "../../../../defaults";
@@ -18,7 +19,6 @@ import {
 } from "../../../interactions";
 import { verifyIsWithinLimits } from "../../../utils";
 import { CommandTemplate } from "../../command";
-import * as Discord from "@discordeno/bot";
 
 const command: CommandTemplate = {
 	name: "report",

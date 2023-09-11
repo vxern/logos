@@ -1,11 +1,11 @@
+import * as Discord from "@discordeno/bot";
+import Hash from "object-hash";
 import { Client } from "../../client";
 import { Document } from "../../database/document";
 import { Guild } from "../../database/structs/guild";
 import diagnostics from "../../diagnostics";
 import { getAllMessages, getGuildIconURLFormatted } from "../../utils";
 import { LocalService } from "../service";
-import * as Discord from "@discordeno/bot";
-import Hash from "object-hash";
 
 type HashableProperties = "embeds" | "components";
 type HashableMessageContents = Pick<Discord.CreateMessageOptions, HashableProperties>;

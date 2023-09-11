@@ -1,3 +1,4 @@
+import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import { Locale } from "../../../../constants/languages";
 import time from "../../../../constants/time";
@@ -24,7 +25,6 @@ import {
 import { chunk, snowflakeToTimestamp } from "../../../utils";
 import { CommandTemplate } from "../../command";
 import { user } from "../../parameters";
-import * as Discord from "@discordeno/bot";
 
 const command: CommandTemplate = {
 	name: "purge",

@@ -1,3 +1,4 @@
+import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import defaults from "../../../../defaults";
 import { MentionTypes, mention, timestamp, trim } from "../../../../formatting";
@@ -9,7 +10,6 @@ import { chunk } from "../../../utils";
 import { OptionTemplate } from "../../command";
 import { collection, show } from "../../parameters";
 import { Song, SongCollection, SongStream } from "../data/types";
-import * as Discord from "@discordeno/bot";
 
 const command: OptionTemplate = {
 	name: "now",

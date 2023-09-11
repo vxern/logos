@@ -1,10 +1,10 @@
+import * as Discord from "@discordeno/bot";
 import defaults from "../../../defaults";
 import * as Logos from "../../../types";
 import { DynamicVoiceChannel, Guild } from "../../database/structs/guild";
 import diagnostics from "../../diagnostics";
 import { isVoice } from "../../utils";
 import { LocalService } from "../service";
-import * as Discord from "@discordeno/bot";
 
 type Configuration = NonNullable<Guild["features"]["server"]["features"]>["dynamicVoiceChannels"];
 

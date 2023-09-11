@@ -1,3 +1,4 @@
+import * as Discord from "@discordeno/bot";
 import constants from "../../../constants/constants";
 import { FeatureLanguage, Locale } from "../../../constants/languages";
 import { trim } from "../../../formatting";
@@ -20,7 +21,6 @@ import {
 } from "../../interactions";
 import { snowflakeToTimestamp } from "../../utils";
 import { LocalService } from "../service";
-import * as Discord from "@discordeno/bot";
 
 type EntryStepButtonID = [parameter: string];
 

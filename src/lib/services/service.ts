@@ -1,3 +1,4 @@
+import * as Discord from "@discordeno/bot";
 import { Locale, getLocaleByLocalisationLanguage } from "../../constants/languages";
 import defaults from "../../defaults";
 import * as Logos from "../../types";
@@ -5,7 +6,6 @@ import { Client } from "../client";
 import { Document } from "../database/document";
 import { Guild } from "../database/structs/guild";
 import { getLocalisationLanguage } from "../interactions";
-import * as Discord from "@discordeno/bot";
 
 type ServiceBase = {
 	[K in keyof Discord.EventHandlers]: (..._: Parameters<Discord.EventHandlers[K]>) => Promise<void>;

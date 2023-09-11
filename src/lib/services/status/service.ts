@@ -1,8 +1,8 @@
+import * as Discord from "@discordeno/bot";
 import constants from "../../../constants/constants";
 import defaults from "../../../defaults";
 import { Client } from "../../client";
 import { GlobalService } from "../service";
-import * as Discord from "@discordeno/bot";
 
 class StatusService extends GlobalService {
 	isActive: boolean;

@@ -1,3 +1,4 @@
+import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import languages, { Locale, LocalisationLanguage, isLocalisationLanguage } from "../../../../constants/languages";
 import localisations from "../../../../constants/localisations";
@@ -25,7 +26,6 @@ import { show } from "../../parameters";
 import { Definition, DictionaryEntry, Expression } from "../dictionaries/adapter";
 import adapters from "../dictionaries/adapters";
 import { PartOfSpeech, isUnknownPartOfSpeech } from "../dictionaries/part-of-speech";
-import * as Discord from "@discordeno/bot";
 
 const command: CommandTemplate = {
 	name: "word",

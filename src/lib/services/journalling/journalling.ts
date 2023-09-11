@@ -1,9 +1,9 @@
+import * as Discord from "@discordeno/bot";
 import { Guild } from "../../database/structs/guild";
 import diagnostics from "../../diagnostics";
 import { LocalService } from "../service";
 import { Events, MessageGenerators } from "./generator";
 import generators from "./generators";
-import * as Discord from "@discordeno/bot";
 
 const messageGenerators: MessageGenerators<Events> = { ...generators.client, ...generators.guild };
 

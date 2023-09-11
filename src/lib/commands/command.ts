@@ -1,6 +1,6 @@
+import * as Discord from "@discordeno/bot";
 import * as Logos from "../../types";
 import { Client } from "../client";
-import * as Discord from "@discordeno/bot";
 
 type WithRequired<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>> & Required<Pick<T, K>>;
 

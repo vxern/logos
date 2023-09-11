@@ -1,8 +1,8 @@
+import * as Discord from "@discordeno/bot";
 import * as Logos from "../types";
 import { Client } from "./client";
 import { Document } from "./database/document";
 import diagnostics from "./diagnostics";
-import * as Discord from "@discordeno/bot";
 
 type TextChannel = Logos.Channel & { type: Discord.ChannelTypes.GuildText };
 type VoiceChannel = Logos.Channel & { type: Discord.ChannelTypes.GuildVoice };

@@ -1,10 +1,10 @@
+import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
 import { reply } from "../../../interactions";
 import { OptionTemplate } from "../../command";
 import { handleResumePlayback } from "./resume";
-import * as Discord from "@discordeno/bot";
 
 const command: OptionTemplate = {
 	name: "pause",

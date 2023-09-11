@@ -1,3 +1,4 @@
+import Fauna from "fauna";
 import * as Logos from "../../types";
 import { Client } from "../client";
 import diagnostics from "../diagnostics";
@@ -19,7 +20,6 @@ import { Report } from "./structs/report";
 import { Suggestion } from "./structs/suggestion";
 import { User } from "./structs/user";
 import { Warning } from "./structs/warning";
-import Fauna from "fauna";
 
 type QueryTypes = "read" | "write" | "exists" | "other";
 type GetReturnType<
