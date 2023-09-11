@@ -63,16 +63,12 @@ const licences = {
 			"Copyright (c) 2014, 2015, 2018, 2021 Blaine Bublitz <blaine.bublitz@gmail.com> and Eric Schoffstall <yo@contra.io>",
 		),
 		fauna: mpl("Copyright 2021 Fauna, Inc."),
-		lavaclient: apache("Copyright [yyyy] [name of copyright owner]"),
+		lavaclient: apache("Copyright 2023 Dimensional Fun & Contributors"),
 		"object-hash": mit("Copyright (c) 2014 object-hash contributors"),
 		"parse-wiktionary": mit(
 			"Copyright (c) 2019 Suyash Behera <Suyash.behera458@gmail.com> 2022 Onsa <csinjan@gmail.com>",
 		),
-		node: mit("Copyright Node.js contributors. All rights reserved."),
-		rome: mit("Copyright (c) Rome Tools, Inc. and its affiliates."),
 		tinyld: mit("Copyright (c) 2021 Komodo"),
-		tsx: mit("Copyright (c) Hiroki Osame <hiroki.osame@gmail.com>"),
-		typescript: apache("Copyright Microsoft Corporation. All rights reserved."),
 		"youtube-sr": mit("Copyright (c) 2020 DevAndromeda"),
 	},
 };
