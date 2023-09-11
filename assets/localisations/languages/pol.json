@@ -140,7 +140,6 @@
     "languages.hausa": "Hausa",
     "languages.khasi": "Khasi",
     "languages.khmer": "Khmerski",
-    "languages.kirundi": "Kirundi",
     "languages.konkani": "Konkani",
     "languages.limbu": "Limbu",
     "languages.lingala": "Lingala",
@@ -187,5 +186,6 @@
     "languages.czechoSlovak.slovak": "Czechosłowacki (Słowacja)",
     "languages.hmong": "Hmong",
     "languages.tonga": "Tonga",
-    "languages.twi": "Twi"
+    "languages.twi": "Twi",
+    "languages.creole.sierraLeone": "Kreolski (Sierra Leone)"
 }
