@@ -179,7 +179,7 @@
     "pardon.strings.pardoned.description": "Utilizatorul {user_mention} a fost grațiat de avertismentul care i-a fost acordat pentru: {reason}",
     "policy.name": "politică",
     "policy.description": "Afișează politica de moderare a serverului.",
-    "purge.name": "curăță",
+    "purge.name": "curățare",
     "purge.description": "Șterge un anumit număr de mesaje dintr-un canal.",
     "purge.options.start.name": "început",
     "purge.options.start.description": "ID-ul mesajului la începutul intervalului.",
