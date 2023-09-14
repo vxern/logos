@@ -1,113 +1,190 @@
 import * as Dexonline from "dexonline-scraper";
 import constants from "../../../../../constants/constants";
-import { LearningLanguage, Locale } from "../../../../../constants/languages";
+import { Locale } from "../../../../../constants/languages";
 import licences from "../../../../../constants/licences";
+import { code } from "../../../../../formatting";
 import { Client, localise } from "../../../../client";
 import { chunk } from "../../../../utils";
-import { getPartOfSpeech } from "../../module";
-import { DictionaryAdapter, DictionaryEntry } from "../adapter";
-import { PartOfSpeech } from "../part-of-speech";
+import { DictionaryAdapter, SearchLanguages } from "../adapter";
+import {
+	DefinitionField,
+	DictionaryEntrySource,
+	EtymologyField,
+	ExampleField,
+	ExpressionField,
+	InflectionField,
+	LemmaField,
+	PartOfSpeechField,
+} from "../dictionary-entry";
+import { PartOfSpeech, tryDetectPartOfSpeech } from "../part-of-speech";
 
-const classesWithInflections: PartOfSpeech[] = ["pronoun", "noun", "verb", "adjective", "determiner"];
+const knownInflectedPartsOfSpeech: readonly PartOfSpeech[] = [
+	"pronoun",
+	"noun",
+	"verb",
+	"adjective",
+	"determiner",
+] as const;
 
-function hasInflections(partOfSpeech: PartOfSpeech): boolean {
-	return classesWithInflections.includes(partOfSpeech);
+function hasKnownInflections(partOfSpeech: PartOfSpeech): boolean {
+	return knownInflectedPartsOfSpeech.includes(partOfSpeech);
 }
 
-type InflectionTable = NonNullable<DictionaryEntry["inflectionTable"]>;
-
-class DexonlineAdapter extends DictionaryAdapter<Dexonline.Results> {
+class DexonlineAdapter extends DictionaryAdapter<
+	Dexonline.Results,
+	"part-of-speech" | "definitions" | "relations" | "expressions" | "examples" | "inflection" | "etymology"
+> {
 	constructor() {
 		super({
-			name: "Dexonline",
-			provides: ["definitions", "etymology"],
+			identifier: "Dexonline",
+			provides: new Set([
+				"part-of-speech",
+				"definitions",
+				"relations",
+				"expressions",
+				"examples",
+				"inflection",
+				"etymology",
+			]),
 		});
 	}
 
-	fetch(_: Client, lemma: string, __: LearningLanguage): Promise<Dexonline.Results | undefined> {
-		return Dexonline.get(lemma, { mode: "strict" });
+	async fetch(client: Client, lemma: string, __: SearchLanguages) {
+		let results: Dexonline.Results | undefined;
+		try {
+			results = await Dexonline.get(lemma, { mode: "strict" });
+		} catch (exception) {
+			client.log.error(`The request for lemma "${lemma}" to ${this.identifier} failed:`, exception);
+			return undefined;
+		}
+
+		if (results === undefined) {
+			return undefined;
+		}
+
+		return results;
 	}
 
 	parse(
 		client: Client,
-		_: string,
-		__: LearningLanguage,
+		lemma: string,
+		languages: SearchLanguages,
 		results: Dexonline.Results,
 		{ locale }: { locale: Locale },
-	): DictionaryEntry[] {
-		const entries: DictionaryEntry[] = [];
-		for (const result of results.synthesis) {
-			const [topicWord] = result.type.split(" ");
-			if (topicWord === undefined) {
-				continue;
-			}
+	) {
+		const lemmaField: LemmaField = { value: lemma };
 
-			const partOfSpeech = getPartOfSpeech(result.type, topicWord, "Romanian");
+		const entries = [];
+
+		for (const result of results.synthesis) {
+			const { type: partOfSpeech, definitions, expressions, examples, etymology } = result;
+			const [partOfSpeechFuzzy] = partOfSpeech.split(" ");
+			const partOfSpeechDetected = tryDetectPartOfSpeech(
+				{ exact: partOfSpeech, approximate: partOfSpeechFuzzy },
+				languages.source,
+			);
+
+			const partOfSpeechField: PartOfSpeechField = { value: partOfSpeech, detected: partOfSpeechDetected };
+			const definitionFields: DefinitionField[] = definitions.map((definition) => ({
+				labels: definition.tags,
+				value: definition.value,
+				definitions: definition.definitions,
+				expressions: definition.expressions,
+				relations: definition.relations,
+			}));
+			const expressionFields: ExpressionField[] = expressions.map((expression) => ({
+				labels: expression.tags,
+				value: expression.value,
+				relations: expression.relations,
+				expressions: expression.expressions,
+				examples: expression.examples,
+			}));
+			const exampleFields: ExampleField[] = examples.map((example) => ({
+				labels: example.tags,
+				value: example.value,
+			}));
+			const etymologyField: EtymologyField = {
+				value: etymology
+					.map((etymology) => {
+						const labels = etymology.tags.map((tag) => code(tag)).join(" ");
+						return `${labels} ${etymology.value}`;
+					})
+					.join("\n"),
+			};
+
+			const source: DictionaryEntrySource = {
+				link: constants.links.generateDexonlineDefinitionLink(lemma),
+				licence: licences.dictionaries.dexonline,
+			};
 
 			entries.push({
-				lemma: result.lemma,
-				partOfSpeech,
-				nativeDefinitions: result.definitions,
-				etymologies: result.etymology,
-				expressions: result.expressions,
-				inflectionTable: undefined,
-				sources: [[constants.links.generateDexonlineDefinitionLink(result.lemma), licences.dictionaries.dexonline]],
+				lemma: lemmaField,
+				partOfSpeech: partOfSpeechField,
+				definitions: definitionFields,
+				expressions: expressionFields,
+				examples: exampleFields,
+				inflection: undefined as InflectionField | undefined,
+				etymology: etymologyField,
+				sources: [source],
 			});
 		}
 
-		for (const { table } of results.inflection) {
-			const partsOfSpeechRaw = table.at(0)?.at(0)?.split("(").at(0)?.trim().split(" / ");
-			if (partsOfSpeechRaw === undefined) {
+		for (const result of results.inflection) {
+			const { index: _, table } = result;
+			const partsOfSpeech = table.at(0)?.at(0)?.split("(").at(0)?.trim().split(" / ");
+			if (partsOfSpeech === undefined) {
 				continue;
 			}
 
-			const partsOfSpeech: [detected: PartOfSpeech, original: string][] = [];
-			for (const partOfSpeechRaw of partsOfSpeechRaw) {
-				const [topicWord] = partOfSpeechRaw.split(" ");
-				if (topicWord === undefined) {
+			const partOfSpeechFields: PartOfSpeechField[] = [];
+			for (const partOfSpeech of partsOfSpeech) {
+				const [partOfSpeechFuzzy] = partOfSpeech.split(" ");
+				const partOfSpeechDetected = tryDetectPartOfSpeech(
+					{ exact: partOfSpeech, approximate: partOfSpeechFuzzy },
+					languages.source,
+				);
+
+				if (partOfSpeechDetected === undefined || !hasKnownInflections(partOfSpeechDetected)) {
 					continue;
 				}
 
-				const partOfSpeech = getPartOfSpeech(partOfSpeechRaw, topicWord, "Romanian");
-				if (partOfSpeech === undefined) {
-					continue;
-				}
+				const partOfSpeechField: PartOfSpeechField = { value: partOfSpeech, detected: partOfSpeechDetected };
 
-				const [detected, _] = partOfSpeech;
-				if (!hasInflections(detected)) {
-					continue;
-				}
-
-				partsOfSpeech.push(partOfSpeech);
+				partOfSpeechFields.push(partOfSpeechField);
 			}
 
-			if (partsOfSpeech.length === 0) {
+			if (partOfSpeechFields.length === 0) {
 				continue;
 			}
 
 			const entry = entries.find((entry) =>
-				partsOfSpeech.some(
-					(partOfSpeech) => entry.partOfSpeech[1] === partOfSpeech[1] || entry.partOfSpeech[0] === partOfSpeech[0],
+				partOfSpeechFields.some(
+					(partOfSpeechField) =>
+						entry.partOfSpeech.detected === partOfSpeechField.detected ||
+						entry.partOfSpeech.value === partOfSpeechField.value,
 				),
 			);
 			if (entry === undefined) {
 				continue;
 			}
 
-			const inflectionTable = this.tableRowsToFields(client, entry.partOfSpeech[0], table, { locale });
+			const inflectionField = this.parseInflectionTable(client, entry.partOfSpeech.detected, table, { locale });
+			if (inflectionField === undefined) {
+				continue;
+			}
 
-			entry.inflectionTable = inflectionTable;
+			entry.inflection = inflectionField;
 		}
 
 		return entries;
 	}
 
-	private tableRowsToFields(
+	private parseInflectionTable(
 		client: Client,
-		partOfSpeech: PartOfSpeech,
+		partOfSpeech: PartOfSpeech | undefined,
 		table: string[][],
 		{ locale }: { locale: Locale },
-	): InflectionTable | undefined {
+	): InflectionField | undefined {
 		switch (partOfSpeech) {
 			case "pronoun": {
 				return this.pronounTableToFields(client, table, { locale });
@@ -126,14 +203,14 @@ class DexonlineAdapter extends DictionaryAdapter<Dexonline.Results> {
 			}
 		}
 
-		return [];
+		return undefined;
 	}
 
 	private pronounTableToFields(
 		client: Client,
 		table: string[][],
 		{ locale }: { locale: Locale },
-	): InflectionTable | undefined {
+	): InflectionField | undefined {
 		const [nominativeAccusative, genitiveDative] = chunk(
 			table.slice(1).map((columns) => columns.slice(2).join(", ")),
 			2,
@@ -157,31 +234,33 @@ class DexonlineAdapter extends DictionaryAdapter<Dexonline.Results> {
 			inline: true,
 		};
 
-		return [
-			{
-				title: strings.title,
-				fields: [
-					numberColumn,
-					{
-						name: strings.nominativeAccusative,
-						value: nominativeAccusative.join("\n"),
-						inline: true,
-					},
-					{
-						name: strings.genitiveDative,
-						value: genitiveDative.map((part) => part.split(", ").at(0)).join("\n"),
-						inline: true,
-					},
-				],
-			},
-		];
+		return {
+			tabs: [
+				{
+					title: strings.title,
+					fields: [
+						numberColumn,
+						{
+							name: strings.nominativeAccusative,
+							value: nominativeAccusative.join("\n"),
+							inline: true,
+						},
+						{
+							name: strings.genitiveDative,
+							value: genitiveDative.map((part) => part.split(", ").at(0)).join("\n"),
+							inline: true,
+						},
+					],
+				},
+			],
+		};
 	}
 
 	private nounTableToFields(
 		client: Client,
 		table: string[][],
 		{ locale }: { locale: Locale },
-	): InflectionTable | undefined {
+	): InflectionField | undefined {
 		const [nominativeAccusative, genitiveDative, vocative] = chunk(
 			table.slice(1).map((columns) => columns.slice(2)),
 			2,
@@ -215,41 +294,43 @@ class DexonlineAdapter extends DictionaryAdapter<Dexonline.Results> {
 			inline: true,
 		};
 
-		return [
-			{
-				title: strings.title,
-				fields: [
-					numberColumn,
-					{
-						name: strings.nominativeAccusative,
-						value: nominativeAccusative.map((terms) => terms.join(", ")).join("\n"),
-						inline: true,
-					},
-					{
-						name: strings.genitiveDative,
-						value: genitiveDative.map((terms) => terms.join(", ")).join("\n"),
-						inline: true,
-					},
-					...(vocative !== undefined
-						? [
-								numberColumn,
-								{
-									name: strings.vocative,
-									value: vocative.map((terms) => terms.join(", ")).join("\n"),
-									inline: true,
-								},
-						  ]
-						: []),
-				],
-			},
-		];
+		return {
+			tabs: [
+				{
+					title: strings.title,
+					fields: [
+						numberColumn,
+						{
+							name: strings.nominativeAccusative,
+							value: nominativeAccusative.map((terms) => terms.join(", ")).join("\n"),
+							inline: true,
+						},
+						{
+							name: strings.genitiveDative,
+							value: genitiveDative.map((terms) => terms.join(", ")).join("\n"),
+							inline: true,
+						},
+						...(vocative !== undefined
+							? [
+									numberColumn,
+									{
+										name: strings.vocative,
+										value: vocative.map((terms) => terms.join(", ")).join("\n"),
+										inline: true,
+									},
+							  ]
+							: []),
+					],
+				},
+			],
+		};
 	}
 
 	private verbTableToFields(
 		client: Client,
 		table: string[][],
 		{ locale }: { locale: Locale },
-	): InflectionTable | undefined {
+	): InflectionField | undefined {
 		const moods = table
 			.slice(2, 3)
 			.map((columns) => columns.slice(2))
@@ -352,160 +433,162 @@ class DexonlineAdapter extends DictionaryAdapter<Dexonline.Results> {
 			},
 		};
 
-		return [
-			{
-				title: strings.moodsAndParticiples.title,
-				fields: [
-					{
-						name: strings.moodsAndParticiples.infinitive,
-						value: `a ${infinitive}`,
-						inline: true,
-					},
-					{
-						name: strings.moodsAndParticiples.longInfinitive,
-						value: longInfinitive,
-						inline: true,
-					},
-					{
-						name: strings.moodsAndParticiples.imperative,
-						value: imperative,
-						inline: true,
-					},
-					{
-						name: strings.moodsAndParticiples.supine,
-						value: supine,
-						inline: true,
-					},
-					{
-						name: strings.moodsAndParticiples.present,
-						value: presentParticiple,
-						inline: true,
-					},
-					{
-						name: strings.moodsAndParticiples.past,
-						value: pastParticiple,
-						inline: true,
-					},
-				],
-			},
-			{
-				title: strings.indicative.title,
-				fields: [
-					{
-						name: strings.indicative.present,
-						value: present.join("\n"),
-						inline: true,
-					},
-					{
-						name: strings.indicative.preterite,
-						value: simplePerfect.join("\n"),
-						inline: true,
-					},
-					{
-						name: strings.indicative.imperfect,
-						value: imperfect.join("\n"),
-						inline: true,
-					},
-					{
-						name: strings.indicative.pluperfect,
-						value: pluperfect.join("\n"),
-						inline: true,
-					},
-					{
-						name: strings.indicative.perfect,
-						value: indicativePerfect.join("\n"),
-						inline: true,
-					},
-					{
-						name: strings.indicative.futureCertain,
-						value: indicativeFutureCertain.join("\n"),
-						inline: true,
-					},
-					{
-						name: strings.indicative.futurePlanned,
-						value: indicativeFuturePlanned.join("\n"),
-						inline: true,
-					},
-					{
-						name: strings.indicative.futureDecided,
-						value: indicativeFutureDecided.join("\n"),
-						inline: true,
-					},
-					{
-						name: `${strings.indicative.futureIntended} (${strings.indicative.popular})`,
-						value: indicativeFutureIntended.join("\n"),
-						inline: true,
-					},
-					{
-						name: strings.indicative.futureInThePast,
-						value: indicativeFutureInThePast.join("\n"),
-						inline: true,
-					},
-					{
-						name: strings.indicative.futurePerfect,
-						value: indicativeFuturePerfect.join("\n"),
-						inline: true,
-					},
-				],
-			},
-			{
-				title: strings.subjunctive.title,
-				fields: [
-					{
-						name: strings.subjunctive.present,
-						value: subjunctivePresent.join("\n"),
-						inline: true,
-					},
-					{
-						name: strings.subjunctive.perfect,
-						value: subjunctivePerfect,
-						inline: true,
-					},
-				],
-			},
-			{
-				title: strings.conditional.title,
-				fields: [
-					{
-						name: strings.conditional.present,
-						value: conditionalPresent.join("\n"),
-						inline: true,
-					},
-					{
-						name: strings.conditional.perfect,
-						value: conditionalPerfect.join("\n"),
-						inline: true,
-					},
-				],
-			},
-			{
-				title: strings.presumptive.title,
-				fields: [
-					{
-						name: strings.presumptive.present,
-						value: presumptivePresent.join("\n"),
-						inline: true,
-					},
-					{
-						name: strings.presumptive.presentContinuous,
-						value: presumptivePresentProgressive.join("\n"),
-						inline: true,
-					},
-					{
-						name: strings.presumptive.perfect,
-						value: presumptivePerfect.join("\n"),
-						inline: true,
-					},
-				],
-			},
-		];
+		return {
+			tabs: [
+				{
+					title: strings.moodsAndParticiples.title,
+					fields: [
+						{
+							name: strings.moodsAndParticiples.infinitive,
+							value: `a ${infinitive}`,
+							inline: true,
+						},
+						{
+							name: strings.moodsAndParticiples.longInfinitive,
+							value: longInfinitive,
+							inline: true,
+						},
+						{
+							name: strings.moodsAndParticiples.imperative,
+							value: imperative,
+							inline: true,
+						},
+						{
+							name: strings.moodsAndParticiples.supine,
+							value: supine,
+							inline: true,
+						},
+						{
+							name: strings.moodsAndParticiples.present,
+							value: presentParticiple,
+							inline: true,
+						},
+						{
+							name: strings.moodsAndParticiples.past,
+							value: pastParticiple,
+							inline: true,
+						},
+					],
+				},
+				{
+					title: strings.indicative.title,
+					fields: [
+						{
+							name: strings.indicative.present,
+							value: present.join("\n"),
+							inline: true,
+						},
+						{
+							name: strings.indicative.preterite,
+							value: simplePerfect.join("\n"),
+							inline: true,
+						},
+						{
+							name: strings.indicative.imperfect,
+							value: imperfect.join("\n"),
+							inline: true,
+						},
+						{
+							name: strings.indicative.pluperfect,
+							value: pluperfect.join("\n"),
+							inline: true,
+						},
+						{
+							name: strings.indicative.perfect,
+							value: indicativePerfect.join("\n"),
+							inline: true,
+						},
+						{
+							name: strings.indicative.futureCertain,
+							value: indicativeFutureCertain.join("\n"),
+							inline: true,
+						},
+						{
+							name: strings.indicative.futurePlanned,
+							value: indicativeFuturePlanned.join("\n"),
+							inline: true,
+						},
+						{
+							name: strings.indicative.futureDecided,
+							value: indicativeFutureDecided.join("\n"),
+							inline: true,
+						},
+						{
+							name: `${strings.indicative.futureIntended} (${strings.indicative.popular})`,
+							value: indicativeFutureIntended.join("\n"),
+							inline: true,
+						},
+						{
+							name: strings.indicative.futureInThePast,
+							value: indicativeFutureInThePast.join("\n"),
+							inline: true,
+						},
+						{
+							name: strings.indicative.futurePerfect,
+							value: indicativeFuturePerfect.join("\n"),
+							inline: true,
+						},
+					],
+				},
+				{
+					title: strings.subjunctive.title,
+					fields: [
+						{
+							name: strings.subjunctive.present,
+							value: subjunctivePresent.join("\n"),
+							inline: true,
+						},
+						{
+							name: strings.subjunctive.perfect,
+							value: subjunctivePerfect,
+							inline: true,
+						},
+					],
+				},
+				{
+					title: strings.conditional.title,
+					fields: [
+						{
+							name: strings.conditional.present,
+							value: conditionalPresent.join("\n"),
+							inline: true,
+						},
+						{
+							name: strings.conditional.perfect,
+							value: conditionalPerfect.join("\n"),
+							inline: true,
+						},
+					],
+				},
+				{
+					title: strings.presumptive.title,
+					fields: [
+						{
+							name: strings.presumptive.present,
+							value: presumptivePresent.join("\n"),
+							inline: true,
+						},
+						{
+							name: strings.presumptive.presentContinuous,
+							value: presumptivePresentProgressive.join("\n"),
+							inline: true,
+						},
+						{
+							name: strings.presumptive.perfect,
+							value: presumptivePerfect.join("\n"),
+							inline: true,
+						},
+					],
+				},
+			],
+		};
 	}
 
 	private adjectiveTableToFields(
 		client: Client,
 		table: string[][],
 		{ locale }: { locale: Locale },
-	): InflectionTable | undefined {
+	): InflectionField | undefined {
 		const [nominativeAccusative, genitiveDative] = chunk(
 			table.slice(2).map((columns) => columns.slice(2, 8)),
 			2,
@@ -528,31 +611,33 @@ class DexonlineAdapter extends DictionaryAdapter<Dexonline.Results> {
 			inline: true,
 		};
 
-		return [
-			{
-				title: strings.title,
-				fields: [
-					numberColumn,
-					{
-						name: strings.nominativeAccusative,
-						value: nominativeAccusative.map((terms) => terms.join(", ")).join("\n"),
-						inline: true,
-					},
-					{
-						name: strings.genitiveDative,
-						value: genitiveDative.map((terms) => terms.join(", ")).join("\n"),
-						inline: true,
-					},
-				],
-			},
-		];
+		return {
+			tabs: [
+				{
+					title: strings.title,
+					fields: [
+						numberColumn,
+						{
+							name: strings.nominativeAccusative,
+							value: nominativeAccusative.map((terms) => terms.join(", ")).join("\n"),
+							inline: true,
+						},
+						{
+							name: strings.genitiveDative,
+							value: genitiveDative.map((terms) => terms.join(", ")).join("\n"),
+							inline: true,
+						},
+					],
+				},
+			],
+		};
 	}
 
 	private determinerTableToFields(
 		client: Client,
 		table: string[][],
 		{ locale }: { locale: Locale },
-	): InflectionTable | undefined {
+	): InflectionField | undefined {
 		const [nominativeAccusative, genitiveDative] = chunk(
 			table.slice(2).map((columns) => columns.slice(2, 8)),
 			2,
@@ -575,24 +660,26 @@ class DexonlineAdapter extends DictionaryAdapter<Dexonline.Results> {
 			inline: true,
 		};
 
-		return [
-			{
-				title: strings.title,
-				fields: [
-					numberColumn,
-					{
-						name: strings.nominativeAccusative,
-						value: nominativeAccusative.map((terms) => terms.join(", ")).join("\n"),
-						inline: true,
-					},
-					{
-						name: strings.genitiveDative,
-						value: genitiveDative.map((terms) => terms.join(", ")).join("\n"),
-						inline: true,
-					},
-				],
-			},
-		];
+		return {
+			tabs: [
+				{
+					title: strings.title,
+					fields: [
+						numberColumn,
+						{
+							name: strings.nominativeAccusative,
+							value: nominativeAccusative.map((terms) => terms.join(", ")).join("\n"),
+							inline: true,
+						},
+						{
+							name: strings.genitiveDative,
+							value: genitiveDative.map((terms) => terms.join(", ")).join("\n"),
+							inline: true,
+						},
+					],
+				},
+			],
+		};
 	}
 }
 

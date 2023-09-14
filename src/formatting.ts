@@ -110,4 +110,19 @@ function trim(string: string, length: number): string {
 	);
 }
 
-export { capitalise, code, codeMultiline, list, mention, MentionTypes, timestamp, TimestampFormat, trim };
+function withTextStylingDisabled(string: string): string {
+	return string.replaceAll("*", "\\*").replaceAll("_", "\\_").replaceAll("~", "\\~");
+}
+
+export {
+	capitalise,
+	code,
+	codeMultiline,
+	list,
+	mention,
+	MentionTypes,
+	timestamp,
+	TimestampFormat,
+	trim,
+	withTextStylingDisabled,
+};

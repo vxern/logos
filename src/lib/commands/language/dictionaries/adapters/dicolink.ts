@@ -1,66 +1,126 @@
 import constants from "../../../../../constants/constants";
-import { LearningLanguage, Locale } from "../../../../../constants/languages";
+import { Locale } from "../../../../../constants/languages";
 import licences from "../../../../../constants/licences";
+import defaults from "../../../../../defaults";
 import { Client } from "../../../../client";
-import { getPartOfSpeech } from "../../module";
-import { Definition, DictionaryAdapter, DictionaryEntry } from "../adapter";
+import { addParametersToURL } from "../../../../utils";
+import { DictionaryAdapter, SearchLanguages } from "../adapter";
+import { DefinitionField, DictionaryEntrySource, LemmaField, PartOfSpeechField } from "../dictionary-entry";
+import { tryDetectPartOfSpeech } from "../part-of-speech";
 
-type Result = {
-	id: string;
+interface Result {
+	// id: string;
 	partOfSpeech: string;
 	source: string;
-	attributionText: string;
-	attributionUrl: string;
+	// attributionText: string;
+	// attributionUrl: string;
+	// word?: string;
 	definition: string;
-	dicolinkUrl: string;
-};
+	// dicolinkUrl: string;
+}
 
-class WordsAPIAdapter extends DictionaryAdapter<Result[]> {
+class DicolinkAdapter extends DictionaryAdapter<Result[], "part-of-speech" | "definitions"> {
 	constructor() {
 		super({
-			name: "Dicolink",
-			provides: ["definitions"],
+			identifier: "Dicolink",
+			provides: new Set(["part-of-speech", "definitions"]),
 		});
 	}
 
-	async fetch(client: Client, lemma: string, _: LearningLanguage): Promise<Result[] | undefined> {
-		const response = await fetch(constants.endpoints.dicolink.definitions(lemma), {
-			headers: {
-				"X-RapidAPI-Key": client.environment.rapidApiSecret,
-				"X-RapidAPI-Host": constants.endpoints.dicolink.host,
-			},
-		});
+	async fetch(client: Client, lemma: string, _: SearchLanguages) {
+		let response: Response;
+		try {
+			response = await fetch(
+				addParametersToURL(constants.endpoints.dicolink.definitions(lemma), {
+					limite: (200).toString(),
+					source: "tous",
+				}),
+				{
+					headers: {
+						"User-Agent": defaults.USER_AGENT,
+						"X-RapidAPI-Key": client.environment.rapidApiSecret,
+						"X-RapidAPI-Host": constants.endpoints.dicolink.host,
+					},
+				},
+			);
+		} catch (exception) {
+			client.log.error(`The request for lemma "${lemma}" to ${this.identifier} failed:`, exception);
+			return undefined;
+		}
+
 		if (!response.ok) {
 			return undefined;
 		}
 
-		const data = await response.json();
-		const resultsAll = data.map((result: Record<string, unknown>) => ({
-			id: result.id,
-			partOfSpeech: result.nature ? result.nature : undefined,
-			source: result.source,
-			attributionText: result.attributionText,
-			attributionUrl: result.attributionUrl,
-			definition: result.definition,
-			dicolinkUrl: result.dicolinkUrl,
-		}));
-		const results = resultsAll.filter(
-			(result: Record<string, unknown>) => result.partOfSpeech !== undefined,
-		) as Result[];
+		let data: Record<string, unknown>[];
+		try {
+			data = await response.json();
+		} catch (exception) {
+			client.log.error(`Reading response data for lemma "${lemma}" to ${this.identifier} failed:`, exception);
+			return undefined;
+		}
+		console.debug(data.filter((data) => data.source === "littre"));
+
+		const resultsAll: Result[] = data
+			.filter((result) => result.nature)
+			.map((result) => ({
+				// id: result.id as string,
+				partOfSpeech: result.nature as string,
+				source: result.source as string,
+				// attributionText: result.attributionText as string,
+				// attributionUrl: result.attributionUrl as string,
+				// word: result.mot as string | undefined,
+				definition: result.definition as string,
+				// dicolinkUrl: result.dicolinkUrl as string,
+			}));
+		const results = this.pickResultsFromBestSource(resultsAll);
 
 		return results;
 	}
 
-	parse(
-		_: Client,
-		lemma: string,
-		language: LearningLanguage,
-		resultsAll: Result[],
-		__: { locale: Locale },
-	): DictionaryEntry[] {
-		const entries: DictionaryEntry[] = [];
+	parse(_: Client, lemma: string, languages: SearchLanguages, results: Result[], __: { locale: Locale }) {
+		const lemmaField: LemmaField = { value: lemma };
 
-		const sources = resultsAll.map((result) => result.source);
+		const entries = [];
+
+		for (const result of results) {
+			const { partOfSpeech, definition } = result;
+			const [partOfSpeechFuzzy] = partOfSpeech.split(" ");
+			const partOfSpeechDetected = tryDetectPartOfSpeech(
+				{ exact: partOfSpeech, approximate: partOfSpeechFuzzy },
+				languages.source,
+			);
+
+			const partOfSpeechField: PartOfSpeechField = { value: partOfSpeech, detected: partOfSpeechDetected };
+			const definitionField: DefinitionField = { value: definition };
+
+			const lastEntry = entries.at(-1);
+			if (lastEntry !== undefined) {
+				if (lastEntry.partOfSpeech.detected === partOfSpeechDetected || lastEntry.partOfSpeech.value === partOfSpeech) {
+					lastEntry.definitions.push(definitionField);
+				}
+				continue;
+			}
+
+			const source: DictionaryEntrySource = {
+				link: constants.links.generateDicolinkDefinitionLink(lemma),
+				licence: licences.dictionaries.dicolink,
+			};
+
+			entries.push({
+				lemma: lemmaField,
+				partOfSpeech: partOfSpeechField,
+				definitions: [definitionField],
+				sources: [source],
+			});
+		}
+		return entries;
+	}
+
+	private pickResultsFromBestSource(resultsAll: Result[]): Result[] {
+		const sourcesAll = Array.from(new Set(resultsAll.map((result) => result.source)).values());
+		const sources = sourcesAll.filter((source) => !defaults.DICOLINK_REMOVE_SOURCES.includes(source));
+
 		const resultsDistributed = resultsAll.reduce((distribution, result) => {
 			distribution[result.source]?.push(result);
 			return distribution;
@@ -69,32 +129,10 @@ class WordsAPIAdapter extends DictionaryAdapter<Result[]> {
 			return a.length > b.length ? a : b;
 		});
 
-		for (const result of results) {
-			const partOfSpeechTopicWord = result.partOfSpeech.split(" ").at(0) ?? result.partOfSpeech;
-			const partOfSpeech = getPartOfSpeech(result.partOfSpeech, partOfSpeechTopicWord, language);
-
-			const definition: Definition = { value: result.definition };
-
-			const lastEntry = entries.at(-1);
-			if (
-				lastEntry !== undefined &&
-				(lastEntry.partOfSpeech[0] === partOfSpeech[0] || lastEntry.partOfSpeech[1] === partOfSpeech[1])
-			) {
-				lastEntry.nativeDefinitions?.push(definition);
-				continue;
-			}
-
-			entries.push({
-				lemma,
-				partOfSpeech,
-				nativeDefinitions: [definition],
-				sources: [[constants.links.generateDicolinkDefinitionLink(lemma), licences.dictionaries.dicolink]],
-			});
-		}
-		return entries;
+		return results;
 	}
 }
 
-const adapter = new WordsAPIAdapter();
+const adapter = new DicolinkAdapter();
 
 export default adapter;

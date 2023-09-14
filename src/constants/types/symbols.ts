@@ -1,6 +1,6 @@
 export default {
 	meta: {
-		whitespace: "⠀",
+		whitespace: " ",
 		metadataSeparator: ",",
 		idSeparator: "|",
 	},
@@ -22,7 +22,8 @@ export default {
 		green: "🟩",
 		white: "⬜",
 	},
-	divider: "—",
+	divider: "―",
+	dividerShort: "-",
 	link: "🔗",
 	events: {
 		user: {
@@ -63,8 +64,17 @@ export default {
 	word: {
 		word: "📜",
 		definitions: "📚",
+		translations: "🌐",
+		relations: "🌳",
+		pronunciation: "🗣️",
 		expressions: "💐",
-		etymology: "🌐",
+		examples: "🏷️",
+		etymology: "🌱",
+		notes: "📝",
+		expanded: {
+			open: "📂",
+			closed: "📁",
+		},
 	},
 	music: {
 		song: "🎵",
@@ -135,8 +145,10 @@ export default {
 	interactions: {
 		menu: {
 			controls: {
-				back: "«",
-				forward: "»",
+				back: "⮜",
+				forward: "⮞",
+				down: "⮟",
+				up: "⮝",
 			},
 		},
 	},

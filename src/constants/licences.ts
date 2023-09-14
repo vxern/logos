@@ -65,10 +65,8 @@ const licences = {
 		fauna: mpl("Copyright 2021 Fauna, Inc."),
 		lavaclient: apache("Copyright 2023 Dimensional Fun & Contributors"),
 		"object-hash": mit("Copyright (c) 2014 object-hash contributors"),
-		"parse-wiktionary": mit(
-			"Copyright (c) 2019 Suyash Behera <Suyash.behera458@gmail.com> 2022 Onsa <csinjan@gmail.com>",
-		),
 		tinyld: mit("Copyright (c) 2021 Komodo"),
+		"wiktionary-scraper": mit('Copyright (c) 2023 Dorian "vxern" Oszczęda'),
 		"youtube-sr": mit("Copyright (c) 2020 DevAndromeda"),
 	},
 };

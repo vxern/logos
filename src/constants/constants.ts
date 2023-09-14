@@ -3,6 +3,7 @@ import components from "./types/components";
 import contributions from "./types/contributions";
 import endpoints from "./types/endpoints";
 import gifs from "./types/gifs";
+import lengths from "./types/lengths";
 import links from "./types/links";
 import patterns from "./types/patterns";
 import statuses from "./types/statuses";
@@ -17,6 +18,7 @@ export default {
 	contributions,
 	endpoints,
 	gifs,
+	lengths,
 	links,
 	patterns,
 	statuses,

@@ -1,142 +1,127 @@
-import * as Discord from "@discordeno/bot";
 import { LearningLanguage, Locale } from "../../../../constants/languages";
-import { DictionaryLicence } from "../../../../constants/licences";
 import { Client } from "../../../client";
-import { PartOfSpeech } from "./part-of-speech";
+import { DictionaryEntry, RequiredDictionaryEntryFields } from "./dictionary-entry";
 
-type DictionaryProvisions =
-	/** Provides definitions of a lemma. */
+type DictionaryProvision =
+	| "part-of-speech"
 	| "definitions"
-	/** Provides a lemma's etymology. */
-	| "etymology";
+	| "translations"
+	| "relations"
+	| "syllables"
+	| "pronunciation"
+	| "rhymes"
+	| "audio"
+	| "expressions"
+	| "examples"
+	| "frequency"
+	| "inflection"
+	| "etymology"
+	| "notes";
 
-type RelationTypes = "synonym" | "antonym" | "diminutive" | "augmentative";
-type Relations = Partial<Record<`${RelationTypes}s`, string[]>>;
-
-interface TaggedValue<T> {
-	tags?: string[];
-	value: T;
+interface DictionaryProvisionToFieldName extends Record<DictionaryProvision, keyof DictionaryEntry> {
+	"part-of-speech": "partOfSpeech";
+	definitions: "definitions";
+	translations: "translations";
+	relations: "relations";
+	syllables: "syllables";
+	pronunciation: "pronunciation";
+	rhymes: "rhymes";
+	audio: "audio";
+	expressions: "expressions";
+	examples: "examples";
+	frequency: "frequency";
+	inflection: "inflection";
+	etymology: "etymology";
+	notes: "notes";
 }
 
-// biome-ignore lint/suspicious/noEmptyInterface: Alias.
-interface Expression extends TaggedValue<string> {}
-
-interface Definition extends TaggedValue<string> {
-	definitions?: Definition[];
-	expressions?: Expression[];
-	relations?: Relations;
+interface SearchLanguages {
+	source: LearningLanguage;
+	target: LearningLanguage;
 }
 
-// biome-ignore lint/suspicious/noEmptyInterface: Alias.
-interface Etymology extends TaggedValue<string | undefined> {}
+type DictionaryAdapterPriority = "primary" | "secondary" | "tertiary";
 
-type InflectionTable = { title: string; fields: Discord.CamelizedDiscordEmbedField[] }[];
+abstract class DictionaryAdapter<
+	WordData = unknown,
+	Provision extends DictionaryProvision = DictionaryProvision,
+	Entry = Pick<DictionaryEntry, RequiredDictionaryEntryFields> &
+		Partial<Pick<DictionaryEntry, DictionaryProvisionToFieldName[Provision]>>,
+> {
+	readonly identifier: string;
+	readonly provides: Set<Provision>;
 
-interface DictionaryEntry {
-	/** The topic word of an entry. */
-	lemma: string;
-
-	/** The part of speech of the lemma. */
-	partOfSpeech: [detected: PartOfSpeech, text: string];
-
-	/** The definitions for the lemma in its native language. */
-	nativeDefinitions?: Definition[];
-
-	/** The definitions for the lemma. */
-	definitions?: Definition[];
-
-	/** The expressions for the lemma. */
-	expressions?: Expression[];
-
-	/** The etymologies for the lemma. */
-	etymologies?: Etymology[];
-
-	/** The inflection of the lemma. */
-	inflectionTable?: InflectionTable;
-
-	sources: [link: string, licence: DictionaryLicence][];
-}
-
-abstract class DictionaryAdapter<DataType = unknown> {
-	readonly name: string;
-	readonly provides: readonly DictionaryProvisions[];
-	readonly isFallback: boolean;
-
-	constructor({
-		name,
-		provides,
-		isFallback = false,
-	}: { name: string; provides: readonly DictionaryProvisions[]; isFallback?: boolean }) {
-		this.name = name;
+	constructor({ identifier, provides }: { identifier: string; provides: Set<Provision> }) {
+		this.identifier = identifier;
 		this.provides = provides;
-		this.isFallback = isFallback;
 	}
 
 	/**
-	 * Fetches data about a {@link lemma} in a {@link language}.
+	 * Fetches data about {@link lemma}.
 	 *
-	 * @param client - The client instance to use.
-	 * @param lemma - The lemma to fetch data about.
-	 * @param language - The language the lemma is in.
+	 * @param client - Client instance to use.
+	 * @param lemma - Lemma to fetch data about.
+	 * @param languages - Languages to use for the request.
 	 */
-	abstract fetch(client: Client, lemma: string, language: LearningLanguage): Promise<DataType | undefined>;
+	abstract fetch(client: Client, lemma: string, languages: SearchLanguages): Promise<WordData | undefined>;
 
 	/**
-	 * Gets dictionary entries for a {@link lemma} in a {@link language}, presenting the information in
-	 * the given {@link locale}.
+	 * Taking {@link data}, converts it to {@link DictionaryEntry | dictionary entries}.
 	 *
-	 * @param client - The client instance to use.
-	 * @param lemma - The word to search for entries about.
-	 * @param language - The language the lemma is in.
-	 * @param locale - The locale to present the dictionary entries in.
+	 * @param client - Client instance to use for localising.
+	 * @param lemma - Lemma the data pertains to.
+	 * @param languages - Languages used to obtain the data.
+	 * @param data - Data to parse.
+	 * @param locale - Locale to present the dictionary entries in.
 	 */
-	async getEntries(
+	abstract parse(
 		client: Client,
 		lemma: string,
-		language: LearningLanguage,
+		languages: SearchLanguages,
+		data: WordData,
 		{ locale }: { locale: Locale },
-	): Promise<DictionaryEntry[] | undefined> {
-		const data = await this.fetch(client, lemma, language).catch((reason) => {
-			client.log.error(`Failed to get results from ${this.name} for lemma '${lemma}' in ${language}.`);
-			client.log.error(reason);
+	): Entry[] | undefined;
+
+	/**
+	 * Gets dictionary entries for {@link lemma} using {@link languages}, presenting the information in
+	 * the given {@link locale}.
+	 *
+	 * @param client - Client instance to use.
+	 * @param lemma - Lemma to search for entries about.
+	 * @param languages - Languages to use for the request.
+	 * @param locale - Locale to present the dictionary entries in.
+	 */
+	async tryGetInformation(
+		client: Client,
+		lemma: string,
+		languages: SearchLanguages,
+		{ locale }: { locale: Locale },
+	): Promise<Entry[] | undefined> {
+		const data = await this.fetch(client, lemma, languages).catch((reason) => {
+			client.log.error(
+				`Failed to fetch word data for lemma "${lemma}" using languages source ${languages.source}, target ${languages.target} and locale ${locale}:`,
+				reason,
+			);
 			return undefined;
 		});
 		if (data === undefined) {
 			return undefined;
 		}
 
-		let entries: DictionaryEntry[];
+		let entries: Entry[] | undefined;
 		try {
-			entries = this.parse(client, lemma, language, data, { locale });
+			entries = this.parse(client, lemma, languages, data, { locale });
 		} catch (exception) {
-			client.log.error(`Failed to format results from ${this.name} for lemma '${lemma}' in ${language}.`);
-			client.log.error(exception);
-			return undefined;
-		}
-		if (entries.length === 0) {
+			client.log.error(
+				`Failed to parse word data for lemma "${lemma}" using languages source ${languages.source}, target ${languages.target} and locale ${locale}:`,
+				exception,
+			);
 			return undefined;
 		}
 
 		return entries;
 	}
-
-	/**
-	 * Taking {@link data}, converts it to {@link DictionaryEntry | dictionary entries}.
-	 *
-	 * @param client - The client instance to use for localising.
-	 * @param lemma - The word the data pertains to.
-	 * @param language - The desired language for the lemma.
-	 * @param data - The data to parse.
-	 * @param locale - The locale to present the dictionary entries in.
-	 */
-	abstract parse(
-		client: Client,
-		lemma: string,
-		language: LearningLanguage,
-		data: DataType,
-		{ locale }: { locale: Locale },
-	): DictionaryEntry[];
 }
 
-export type { Definition, DictionaryEntry, Expression };
-export { DictionaryAdapter, DictionaryProvisions };
+export { DictionaryAdapter };
+export type { DictionaryProvision, SearchLanguages, DictionaryAdapterPriority };

@@ -116,6 +116,10 @@ function getTranslationLanguage(language: string): TranslationLanguage | undefin
 	return otherVariant;
 }
 
+function isLearningLanguage(language: string): language is LearningLanguage {
+	return isLocalisationLanguage(language);
+}
+
 interface Languages<Language extends string> {
 	source: Language;
 	target: Language;
@@ -143,6 +147,7 @@ export {
 	isCLDLocale,
 	getTranslationLanguage,
 	getBaseLanguage,
+	isLearningLanguage,
 };
 export type {
 	LearningLanguage,
