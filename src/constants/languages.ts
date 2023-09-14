@@ -30,14 +30,19 @@ import {
 	DeepLLocale,
 	GoogleTranslateLanguage,
 	GoogleTranslateLocale,
+	LingvanexLanguage,
+	LingvanexLocale,
 	Language as TranslationLanguage,
 	Locale as TranslationLocale,
 	getDeepLLanguageByLocale as getDeepLTranslationLanguageByLocale,
 	getDeepLLocaleByLanguage as getDeepLLocaleByTranslationLanguage,
 	getGoogleTranslateLanguageByLocale as getGoogleTranslateTranslationLanguageByLocale,
 	getGoogleTranslateLocaleByLanguage as getGoogleTranslateLocaleByTranslationLanguage,
+	getLingvanexLanguageByLocale as getLingvanexTranslationLanguageByLocale,
+	getLingvanexLocaleByLanguage as getLingvanexLocaleByTranslationLanguage,
 	isDeepLLocale,
 	isGoogleTranslateLocale,
+	isLingvanexLocale,
 	isLanguage as isTranslationLanguage,
 	languages as translationLanguages,
 } from "./languages/translation";
@@ -48,7 +53,7 @@ const languages = {
 			...new Set([...localisationLanguages.discord, ...localisationLanguages.logos]),
 		].sort() satisfies LocalisationLanguage[] as LocalisationLanguage[],
 		translation: [
-			...new Set([...translationLanguages.deepl, ...translationLanguages.google]),
+			...new Set([...translationLanguages.deepl, ...translationLanguages.google, ...translationLanguages.lingvanex]),
 		].sort() satisfies TranslationLanguage[] as TranslationLanguage[],
 	},
 	locales: {
@@ -148,6 +153,9 @@ export {
 	getTranslationLanguage,
 	getBaseLanguage,
 	isLearningLanguage,
+	getLingvanexTranslationLanguageByLocale,
+	getLingvanexLocaleByTranslationLanguage,
+	isLingvanexLocale,
 };
 export type {
 	LearningLanguage,
@@ -169,4 +177,6 @@ export type {
 	CLDLocale,
 	DetectionLanguage,
 	DetectionLocale,
+	LingvanexLanguage,
+	LingvanexLocale,
 };

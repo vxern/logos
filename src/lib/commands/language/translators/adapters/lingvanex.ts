@@ -1,54 +1,56 @@
 import constants from "../../../../../constants/constants";
 import {
-	GoogleTranslateLanguage,
+	LingvanexLanguage,
 	Languages,
 	TranslationLocale,
-	getGoogleTranslateLocaleByTranslationLanguage,
-	getGoogleTranslateTranslationLanguageByLocale,
-	isGoogleTranslateLocale,
+	getLingvanexLocaleByTranslationLanguage,
+	isLingvanexLocale,
+	getLingvanexTranslationLanguageByLocale,
 } from "../../../../../constants/languages";
 import defaults from "../../../../../defaults";
 import { Client } from "../../../../client";
 import { Translation, TranslationAdapter } from "../adapter";
 
 interface TranslationResult {
-	data: {
-		translations: {
-			detectedSourceLanguage?: string;
-			translatedText: string;
-		}[];
-	};
+	// err: unknown;
+	result?: string;
+	// cacheUse: number;
+	// source: string;
+	from?: string;
+	// sourceTransliteration: string;
+	// targetTransliteration: string;
 }
 
-class GoogleTranslateAdapter extends TranslationAdapter<GoogleTranslateLanguage> {
+class LingvanexAdapter extends TranslationAdapter<LingvanexLanguage> {
 	constructor() {
-		super({ identifier: "GoogleTranslate" });
+		super({ identifier: "Lingvanex" });
 	}
 
 	async translate(
 		client: Client,
 		text: string,
-		languages: Languages<GoogleTranslateLanguage>,
+		languages: Languages<LingvanexLanguage>,
 	): Promise<Translation | undefined> {
-		const sourceLocale = getGoogleTranslateLocaleByTranslationLanguage(languages.source);
-		const targetLocale = getGoogleTranslateLocaleByTranslationLanguage(languages.target);
+		const sourceLocale = getLingvanexLocaleByTranslationLanguage(languages.source);
+		const targetLocale = getLingvanexLocaleByTranslationLanguage(languages.target);
 
 		const locales: Languages<TranslationLocale> = { source: sourceLocale, target: targetLocale };
 
 		let response: Response;
 		try {
-			response = await fetch(constants.endpoints.googleTranslate.translate, {
+			response = await fetch(constants.endpoints.lingvanex.translate, {
 				method: "POST",
 				headers: {
 					"User-Agent": defaults.USER_AGENT,
 					"Content-Type": "application/x-www-form-urlencoded",
 					"X-RapidAPI-Key": client.environment.rapidApiSecret,
-					"X-RapidAPI-Host": constants.endpoints.googleTranslate.host,
+					"X-RapidAPI-Host": constants.endpoints.lingvanex.host,
 				},
 				body: new URLSearchParams({
-					source: locales.source,
-					target: locales.target,
-					q: text,
+					platform: "api",
+					from: locales.source,
+					to: locales.target,
+					data: text,
 				}),
 			});
 		} catch (exception) {
@@ -71,25 +73,20 @@ class GoogleTranslateAdapter extends TranslationAdapter<GoogleTranslateLanguage>
 			return undefined;
 		}
 
-		const translation = result.data.translations?.at(0);
-		if (translation === undefined) {
-			return undefined;
-		}
-
-		const { detectedSourceLanguage: detectedSourceLocale, translatedText } = translation;
+		const { result: translatedText, from: detectedSourceLocale } = result;
 		if (translatedText === undefined) {
 			return undefined;
 		}
 
 		const detectedSourceLanguage =
-			detectedSourceLocale === undefined || !isGoogleTranslateLocale(detectedSourceLocale)
+			detectedSourceLocale === undefined || !isLingvanexLocale(detectedSourceLocale)
 				? undefined
-				: getGoogleTranslateTranslationLanguageByLocale(detectedSourceLocale);
+				: getLingvanexTranslationLanguageByLocale(detectedSourceLocale);
 
 		return { detectedSourceLanguage, text: translatedText };
 	}
 }
 
-const adapter = new GoogleTranslateAdapter();
+const adapter = new LingvanexAdapter();
 
 export default adapter;
