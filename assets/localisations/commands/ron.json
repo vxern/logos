@@ -284,7 +284,7 @@
     "slowmode.strings.tooSoon.title": "Nu se poate dezactiva prea devreme",
     "slowmode.strings.tooSoon.description.justEnabled": "Slowmode doar ce a fost activat adineauri.",
     "slowmode.strings.tooSoon.description.canDisableIn": "Îl vei putea dezactiva din nou {relative_timestamp}.",
-    "slowmode.strings.missing.title": "Livelul trebuie specificat",
+    "slowmode.strings.missing.title": "Nivelul trebuie specificat",
     "slowmode.strings.missing.description": "Pentru a pune pe slowmode, trebuie să specifici nivelul, folosindu-te de parametrul `{parameter}` .",
     "slowmode.strings.invalid.title": "Invalid level",
     "slowmode.strings.invalid.description": "The level you specified is invalid.",
