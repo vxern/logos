@@ -638,5 +638,14 @@
     "recognize.strings.fields.possibleMatches.description.multiple": "Dies ist weniger wahrscheinlich, aber die Sprache könnte auch eine der folgenden sein:",
     "recognize.description": "Bei einem Text erkennt die Ausgangssprache oder nennt mögliche Kandidaten.",
     "translate.strings.languageNotSupported.title": "Sprache nicht unterstüzt",
-    "translate.strings.noTranslationAdapters.title": "Sprachpaar nicht unterstützt"
+    "translate.strings.noTranslationAdapters.title": "Sprachpaar nicht unterstützt",
+    "information.options.bot.strings.concept.title": "Was ist Logos?",
+    "information.options.bot.strings.concept.description": "Logos ist der erste Discord-Bot, der speziell für Sprachgemeinschaften entwickelt wurde. Der Bot wächst kontinuierlich und bedient jetzt 8 Sprachgemeinschaften und über 30.000 Benutzer.",
+    "information.options.bot.strings.function.title": "Was macht Logos?",
+    "information.options.bot.strings.function.description": "Logos hilft Lernenden, indem es ihnen nützliche Lernwerkzeuge zur Vefügnung stellt, darunter:",
+    "information.options.bot.strings.function.features.translations": "Erkennung von fast 200 Sprachen, Übersetungen in über 140 Sprachen.",
+    "information.options.bot.strings.function.features.games": "Sprachspiele wie \"Wähl das richtige Wort\", ähnlich wie Clozemaster oder Memrise.",
+    "information.options.bot.strings.function.features.messages": "Die Fähigkeit, Korrekturen vorzuschlagen und Antworten auf Nachrichten abzugeben.",
+    "information.options.bot.strings.languages.title": "Welche Sprachen umfasst Logos?",
+    "information.options.bot.strings.function.features.guides": "Die Leitfäden zu sprachlichen Konzepten wie Referenzrahmen zur Beurteilung von Fremdsprachenkenntnissen (der CEFR)."
 }
