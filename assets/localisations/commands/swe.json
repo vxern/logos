@@ -1,7 +1,7 @@
 {
     "noDescription": "Ingen beskrivning.",
     "information.name": "information",
-    "information.description": "Används för att visa olika information.",
+    "information.description": "Används för att visa diverse information.",
     "information.options.bot.name": "bot",
     "information.options.bot.description": "Används för att visa information om boten.",
     "information.options.server.name": "server",
@@ -14,5 +14,13 @@
     "information.options.server.strings.information.description.created": "Gjord",
     "information.options.server.strings.information.description.channels": "Kanaler",
     "information.options.server.strings.information.description.moderators": "Moderatorer",
-    "information.options.server.strings.information.description.owner": "Ägare"
+    "information.options.server.strings.information.description.owner": "Ägare",
+    "information.options.bot.strings.concept.title": "Vad är Logos?",
+    "information.options.bot.strings.function.title": "Vad gör man med Logos?",
+    "information.options.bot.strings.function.description": "Logos hjälper dem som lär sig språk genom att ge dem användbara verktyg. Den kan:",
+    "information.options.bot.strings.function.features.translations": "Känna igen nästan 200 språk och översätta mellan över 140 språk.",
+    "information.options.bot.strings.function.features.games": "Spela språkspel som \"Välj rätt ord\", precis som Clozemaster och Memrise.",
+    "information.options.bot.strings.function.features.messages": "Göra så att man kan föreslå rättningar och svar på frågor.",
+    "information.options.bot.strings.function.features.guides": "Dela information om språkliga riktlinjer som Gemensam europeisk referensram för språk (CEFR).",
+    "information.options.bot.strings.function.features.definitions": "Kolla upp definitioner, översättningar, uttal, etymologi och information om hur ord används."
 }
