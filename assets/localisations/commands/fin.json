@@ -2,5 +2,9 @@
     "license.options.dictionary.options.dictionary.name": "sanakirja",
     "credits.strings.translation": "Käännös",
     "noDescription": "Ei kuvausta.",
-    "license.options.dictionary.name": "sanakirja"
+    "license.options.dictionary.name": "sanakirja",
+    "information.name": "Tieto",
+    "information.options.bot.name": "bot",
+    "information.options.bot.description": "Näyttää tietoja botista.",
+    "information.options.bot.strings.concept.title": "Mikä on Logos?"
 }
