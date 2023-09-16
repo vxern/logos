@@ -1,1 +1,16 @@
-{}
+{
+    "noDescription": "Sin descripción.",
+    "information.options.bot.strings.concept.title": "¿Qué es Logos?",
+    "information.options.bot.strings.function.features.definitions": "Búsqueda de información sobre palabras, incluyendo definiciones, traducciones, pronunciación, historia, relaciones, notas sobre el uso, y más.",
+    "information.options.bot.strings.concept.description": "Logos es el primer bot de Discord especialmente creado para las comunidades lingüísticas. Mientras continúa creciendo, por ahora el bot funciona para 8 comunidades lingüísticas y más de 30.000 usuarios.",
+    "information.options.bot.strings.function.title": "¿Qué hace Logos?",
+    "information.options.bot.strings.function.description": "Logos ayuda a los estudiantes dándoles herramientas de aprendizaje, como por ejemplo:",
+    "information.options.bot.strings.function.features.translations": "Reconocimiento de más de 200 idiomas, traducción en más de 140 idiomas.",
+    "information.options.bot.strings.function.features.games": "Juegos como \"Selecciona la palabra correcta\", similar a Clozemaster o Memrise.",
+    "information.options.bot.strings.function.features.messages": "La habilidad de proponer correcciones y enviar respuestas a mensajes.",
+    "information.options.bot.strings.languages.title": "¿Qué idiomas incluye Logos?",
+    "information.name": "información",
+    "information.description": "Permite mostrar información diversa.",
+    "information.options.bot.name": "bot",
+    "information.options.bot.description": "Muestra información sobre el bot."
+}
