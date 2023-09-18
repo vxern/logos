@@ -1,1 +1,5 @@
-{}
+{
+    "parameters.user.name": "käyttäjä",
+    "parameters.user.description": "Käyttäjän nimi, tagi, ID tai maininta.",
+    "parameters.show.name": "näytä"
+}
