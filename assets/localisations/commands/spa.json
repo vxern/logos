@@ -12,5 +12,15 @@
     "information.name": "información",
     "information.description": "Permite mostrar información diversa.",
     "information.options.bot.name": "bot",
-    "information.options.bot.description": "Muestra información sobre el bot."
+    "information.options.bot.description": "Muestra información sobre el bot.",
+    "information.options.bot.strings.languages.description": "Aparte de la amplia gama de recursos que Logos ofrece, gracias a un grupo maravilloso de voluntarios, el bot también tiene un excelente soporte de localización para 🇫🇷 francés, 🇩🇪 alemán, 🇵🇱 polaco,🇹🇷 turco, 🇳🇴 noruego, y 🇷🇴 rumano, con más localizaciones en camino para 🇫🇮 finlandés, 🇸🇪 sueco, 🇭🇺 húngaro, 🇦🇲 armenio (del oeste y del este) y 🇳🇱 danés.",
+    "answer.strings.cannotAnswerOwn.title": "No puede contestar a su propio mensaje",
+    "answer.message.name": "Contesta",
+    "answer.strings.cannotAnswer.description": "No se le puede contestar a ese mensaje.",
+    "answer.strings.cannotAnswerOwn.description": "No puede enviar una respuesta a su propio mensaje.",
+    "information.options.server.name": "servidor",
+    "information.options.server.description": "Muestra información sobre el servidor.",
+    "information.options.server.strings.information.description.description": "Descripción",
+    "answer.strings.cannotAnswer.title": "No se puede contestar al mensaje",
+    "information.options.server.strings.information.title": "Información sobre {server_name}"
 }
