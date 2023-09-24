@@ -569,7 +569,7 @@
     "answer.message.name": "Răspunde",
     "correction.options.partial.message.name": "Corecție rapidă",
     "correction.options.full.message.name": "Corecție completă",
-    "recognize.name": "identifică",
+    "recognize.name": "identificare",
     "recognize.description": "Identifică limba-sursă a textului introdus sau enumerează opțiunile probabile.",
     "recognize.options.text.name": "text",
     "translate.strings.cannotUse.title": "Nu se poate traduce",
