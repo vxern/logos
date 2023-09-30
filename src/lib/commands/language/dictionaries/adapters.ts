@@ -8,6 +8,7 @@ import wordsApi from "./adapters/words-api";
 export default {
 	"Armenian/Eastern": [wiktionary],
 	"Armenian/Western": [wiktionary],
+	Danish: [wiktionary],
 	Dutch: [wiktionary],
 	"English/American": [wiktionary, wordsApi],
 	"English/British": [wiktionary, wordsApi],

@@ -7,6 +7,7 @@ import romanian from "./parts-of-speech/romanian";
 export default {
 	"Armenian/Western": {},
 	"Armenian/Eastern": {},
+	Danish: {},
 	Dutch: {},
 	"English/American": english,
 	"English/British": english,

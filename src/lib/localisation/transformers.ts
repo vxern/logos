@@ -1,6 +1,7 @@
 import { LocalisationLanguage } from "../../constants/languages";
 import { Transformer, TransformerType } from "./transformer";
 import armenian from "./transformers/armenian";
+import danish from "./transformers/danish";
 import dutch from "./transformers/dutch";
 import english from "./transformers/english";
 import finnish from "./transformers/finnish";
@@ -19,6 +20,7 @@ import turkish from "./transformers/turkish";
 export default {
 	"Armenian/Western": armenian,
 	"Armenian/Eastern": armenian,
+	Danish: danish,
 	Dutch: dutch,
 	"English/American": english,
 	"English/British": english,

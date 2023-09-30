@@ -4,6 +4,7 @@ import { reverseObject } from "../../lib/utils";
 const languages = {
 	discord: [
 		"Dutch",
+		"Danish",
 		"English/American",
 		"English/British",
 		"Finnish",
@@ -21,6 +22,7 @@ const languages = {
 	logos: [
 		"Armenian/Eastern",
 		"Armenian/Western",
+		"Danish",
 		"Dutch",
 		"English/American",
 		"English/British",
@@ -42,6 +44,7 @@ const languages = {
 const languageToLocale = {
 	discord: {
 		Dutch: "nl",
+		Danish: "da",
 		"English/American": "en-US",
 		"English/British": "en-GB",
 		Finnish: "fi",
@@ -59,6 +62,7 @@ const languageToLocale = {
 	logos: {
 		"Armenian/Eastern": "hye",
 		"Armenian/Western": "hyw",
+		Danish: "dan",
 		Dutch: "nld",
 		"English/American": "eng-US",
 		"English/British": "eng-GB",
