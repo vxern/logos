@@ -1,5 +1,20 @@
 {
     "parameters.user.name": "käyttäjä",
     "parameters.user.description": "Käyttäjän nimi, tagi, ID tai maininta.",
-    "parameters.show.name": "näytä"
+    "parameters.show.name": "näytä",
+    "parameters.show.description": "Jos \"true\", niin tulos näytetään muille.",
+    "parameters.duration.name": "kesto",
+    "parameters.duration.description": "Rangaistuksen kesto.",
+    "parameters.reason.name": "syy",
+    "parameters.reason.description": "Rangaistuksen syy. Sen tulee olla kuvaava.",
+    "parameters.query.name": "kysely",
+    "parameters.query.description": "Nimi tai linkki kappaleeseen tai kokoelmaan.",
+    "parameters.timestamp.name": "aikaleima",
+    "parameters.timestamp.description": "Etsittävä aikaleima.",
+    "parameters.collection.name": "kokoelma",
+    "parameters.collection.description": "Jos \"true\", niin toiminto tehdään kappalekokoelmalle.",
+    "parameters.by.description": "Kuinka monta kappaletta skipataan.",
+    "parameters.to.name": "asti",
+    "parameters.by.name": "skipataan",
+    "parameters.to.description": "Raidan numero, johon skipataan."
 }
