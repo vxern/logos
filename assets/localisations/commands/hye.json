@@ -4,7 +4,6 @@
     "information.description": "Used to display various information.",
     "information.options.bot.name": "bot",
     "information.options.bot.description": "Displays information about the bot.",
-    "information.options.bot.strings.howToAddToServer.title": "How can you add me to your server?",
     "information.options.server.name": "server",
     "information.options.server.description": "Displays information about the server.",
     "information.options.server.strings.information.title": "Information about **{server_name}**",

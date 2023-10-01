@@ -4,7 +4,6 @@
     "information.description": "Geeft verschillende informatie weer.",
     "information.options.bot.name": "bot",
     "information.options.bot.description": "Geeft informatie over de bot weer.",
-    "information.options.bot.strings.howToAddToServer.title": "Hoe kun je me aan je server toevoegen?",
     "information.options.server.name": "server",
     "information.options.server.description": "Geeft informatie over de server weer.",
     "information.options.server.strings.information.title": "Informatie over **{server_name}**",
