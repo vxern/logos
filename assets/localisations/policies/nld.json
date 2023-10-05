@@ -5,9 +5,9 @@
     "policies.moderation.points.breach.title": "Waar zijn de regels van toepassing?",
     "policies.moderation.points.breach.description": "De serverregels gelden voor de hele server en elke overtreding zal resulteren in een waarschuwing.",
     "policies.moderation.points.warnings.title": "Wat gebeurt er als ik meerdere keren gewaarschuwd word?",
-    "policies.moderation.points.warnings.description": "If a user has already received three warnings, the fourth warning will cause the user to be timed out. Warnings expire after a period of __two months__.",
+    "policies.moderation.points.warnings.description": "Als een gebruiker al drie waarschuwingen heeft gekregen, zal de vierde waarschuwing ervoor zorgen dat de gebruiker wordt uitgeklokt. Waarschuwingen verlopen na een periode van __twee maanden__.",
     "policies.moderation.points.furtherAction.title": "Wat gebeurt er dan?",
     "policies.moderation.points.furtherAction.description": "Het serverpersoneel wordt dan op de hoogte gebracht van het overschrijden van de limiet en zal vervolgens de omstandigheden bekijken en een gepaste actie bepalen.",
     "policies.moderation.points.ban.title": "Wat als het me niet kan schelen?",
-    "policies.moderation.points.ban.description": "In case of it having been found that a user had knowingly and constantly been breaking the server rules and/or ignoring suggestions of the staff, the user will be permanently banned from the server."
+    "policies.moderation.points.ban.description": "Als blijkt dat een gebruiker willens en wetens de serverregels overtreedt en/of suggesties van de staff negeert, zal de gebruiker permanent verbannen worden van de server."
 }
