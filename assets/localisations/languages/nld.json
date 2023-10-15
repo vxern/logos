@@ -32,7 +32,6 @@
     "languages.swedish": "Zweeds",
     "languages.turkish": "Turks",
     "languages.ukrainian": "Oekraïens",
-    "languages.armenian.western": "",
     "languages.abkhazian": "Abchazisch",
     "languages.afrikaans": "Afrikaans",
     "languages.corsican": "Corsicaans",
@@ -175,6 +174,5 @@
     "languages.tibetan": "Tibetaans",
     "languages.tajik": "Tadzjieks",
     "languages.tamil": "Tamil",
-    "languages.tatar": "Tataars",
-    "languages.creole.sierraLeone": ""
+    "languages.tatar": "Tataars"
 }
