@@ -261,7 +261,7 @@
     "purge.strings.no": "Nein",
     "report.name": "melden",
     "report.strings.submitted.title": "Report wurde eingereicht!",
-    "report.strings.submitted.description": "Dein Bericht wurde eingereicht. Der Bericht wird vom Serverpersonal geprüft werden, aber du wirst nicht direkt über das Ergebnis einer bestimmten Meldung benachrichtigt.",
+    "report.strings.submitted.description": "Dein Bericht wurde eingereicht. Er wird vom Serverpersonal geprüft werden, aber du wirst nicht direkt über das Ergebnis einer bestimmten Meldung benachrichtigt.",
     "report.strings.failed.title": "Report konnte nicht gemeldet werden",
     "report.strings.failed.description": "Aus unbekannten Gründen konnte der Report nicht eingereicht werden.",
     "report.strings.sureToCancel.title": "Sicher zum Verlassen?",
@@ -647,5 +647,7 @@
     "information.options.bot.strings.function.features.games": "Sprachspiele wie \"Wähl das richtige Wort\", ähnlich wie Clozemaster oder Memrise.",
     "information.options.bot.strings.function.features.messages": "Die Fähigkeit, Korrekturen vorzuschlagen und Antworten auf Nachrichten abzugeben.",
     "information.options.bot.strings.languages.title": "Welche Sprachen unterstützt Logos?",
-    "information.options.bot.strings.function.features.guides": "Leitfäden zu linguistischen Konzepten, wie zum Gemeinsamen Europäischen Referenzrahmen für Sprachen (CEFR)."
+    "information.options.bot.strings.function.features.guides": "Leitfäden zu linguistischen Konzepten, wie zum Gemeinsamen Europäischen Referenzrahmen für Sprachen (CEFR).",
+    "information.options.bot.strings.languages.description": "Neben der Fülle an Sprache, die Logos bietet, hat der Bot auch hervorragende Lokalisierungsunterstüzung dank eines Teams großartiger Freiwilliger für 🇫🇷 Französisch, 🇩🇪 Deutsch, 🇵🇱 Polnisch, 🇹🇷 Türksich , 🇳🇴 Norwegisch, und 🇷🇴 Rumänisch, weitere Lokalisierungen für 🇫🇮 Finnisch, 🇸🇪 Swedisch, 🇭🇺 Hungarisch, 🇦🇲 Armenisch (Westlich + Östlich) und 🇳🇱 Niederländisch sind noch in Vorbereitung.",
+    "information.options.bot.strings.function.features.definitions": "Nach Informationen über Wörter suchen, das beinhaltet: Definitionen, Übersetzungen, Aussprachen, Geschichte, Beziehungen, Nutzungshinweise usw."
 }
