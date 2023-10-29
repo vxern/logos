@@ -67,7 +67,6 @@
     "correction.strings.sureToCancel.description": "Weet je zeker dat je wilt stoppen met je correctie?",
     "correction.strings.suggestedBy": "Correctie voorgesteld door {username}.",
     "game.name": "spel",
-    "game.description": "",
     "game.strings.sentence": "Zin",
     "game.strings.translation": "Vertaling",
     "game.strings.noSentencesAvailable.title": "Geen zinnen beschikbaar",
