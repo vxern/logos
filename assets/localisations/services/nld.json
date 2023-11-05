@@ -1,5 +1,5 @@
 {
-    "notices.lastUpdate": "Laatst bijgewerkt op: {date}",
+    "notices.lastUpdate": "Laatst bijgewerkt: {date}",
     "notices.notices.information.invite": "Permanente uitnodigingslink",
     "reports.users": "Gerapporteerde gebruikers",
     "reports.reason": "Reden voor het rapport",
