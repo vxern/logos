@@ -5,6 +5,6 @@
     "interactions.invalidUser.title": "Niyprawy używŏcz",
     "interactions.invalidUser.description": "Używŏcz, kerego żeś sprecyzowoł/ała, niyma prawy.",
     "interactions.rateLimited.title": "Przekroczōno limit żōndań",
-    "interactions.rateLimited.description.tooManyUses": "Użōł/użyła żeś tyj kōmyndy zbyt moc razy ({times}) we zbyt krōtkim ôkresie.",
-    "interactions.rateLimited.description.cannotUseAgainUntil": "Bydziesz mōg/mogła zaś użyć kōmyndy {relative_timestamp}."
+    "interactions.rateLimited.description.tooManyUses": "Użōł/użyła żeś tygo żōndaniŏ zbyt moc razy ({times}) we zbyt krōtkim ôkresie.",
+    "interactions.rateLimited.description.cannotUseAgainUntil": "Bydziesz mōg/mogła zaś użyć żōndaniŏ {relative_timestamp}."
 }
