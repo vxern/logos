@@ -1,7 +1,7 @@
 {
     "parameters.user.name": "utilizator",
     "parameters.user.description": "Numele de utilizator, tag-ul, ID-ul sau mențiunea utilizatorului.",
-    "parameters.show.name": "afișează",
+    "parameters.show.name": "afișare",
     "parameters.show.description": "Dacă „da”, rezultatul va fi afișat și la alți utilizatori.",
     "parameters.duration.name": "durată",
     "parameters.duration.description": "Durata sancțiunii.",
