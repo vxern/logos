@@ -1,4 +1,4 @@
-import { LocalisationLanguage } from "../../../constants/languages";
+import { LocalisationLanguage } from "../../constants/languages";
 
 /** Represents a user account. */
 interface Account {
@@ -27,14 +27,16 @@ interface Profile {
 
 /** Represents a user. */
 interface User {
-	/** Unix timestamp of the creation of this user document. */
-	createdAt: number;
+	id: string;
 
 	/** User's account data. */
 	account: Account;
 
 	/** User's profile data. */
 	profile?: Profile;
+
+	/** Unix timestamp of the creation of this user document. */
+	createdAt: number;
 }
 
 export type { User };

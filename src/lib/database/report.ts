@@ -1,12 +1,9 @@
-import Fauna from "fauna";
-
 /** Represents a report submitted against one or multiple users. */
 interface Report {
-	/** Unix timestamp of the creation of this report document. */
-	createdAt: number;
+	id: string;
 
 	/** The document reference to the author of this report. */
-	author: Fauna.values.Ref;
+	author: string;
 
 	/** The ID of the guild this report was submitted on. */
 	guild: string;
@@ -25,6 +22,9 @@ interface Report {
 
 	/** Whether or not this report has been resolved. */
 	isResolved: boolean;
+
+	/** Unix timestamp of the creation of this report document. */
+	createdAt: number;
 }
 
 export type { Report };
