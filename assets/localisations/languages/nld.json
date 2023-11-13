@@ -176,5 +176,16 @@
     "languages.tamil": "Tamil",
     "languages.tatar": "Tataars",
     "languages.serboCroatian.montenegrin": "Servo-Kroatisch (Montenegro)",
-    "languages.serboCroatian.serbian": "Servo-Kroatisch (Servië)"
+    "languages.serboCroatian.serbian": "Servo-Kroatisch (Servië)",
+    "languages.filipino.ilocano": "Filipijns (Ilokano)",
+    "languages.armenian.western": "Armeens (Westers)",
+    "languages.armenian.eastern": "Armeens (Oosters)",
+    "languages.kurdish.sorani": "Koerdisch (Sorani)",
+    "languages.creole.sierraLeone": "Krio",
+    "languages.filipino.kapampangan": "Filipijns (Kapampangan)",
+    "languages.czechoSlovak.czech": "Tsjechoslowaaks (Tsjechië)",
+    "languages.czechoSlovak.slovak": "Tsjechoslowaaks (Slowakije)",
+    "languages.filipino.cebuano": "Filipijns (Cebuano)",
+    "languages.filipino.tagalog": "Filipijns (Tagalog)",
+    "languages.filipino.waray": "Filipijns (Waray)"
 }
