@@ -66,7 +66,7 @@ const adaptersLocalised: Record<TranslationLanguage, TranslationAdapter[]> = {
 	Kannada: [google],
 	Kazakh: [google],
 	Khmer: [google],
-	Kinyarwanda: [google],
+	"RwandaRundi/Kinyarwanda": [google],
 	Konkani: [google],
 	Korean: [deepl, google],
 	Kurdish: [google],

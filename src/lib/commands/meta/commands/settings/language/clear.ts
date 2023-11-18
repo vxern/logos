@@ -4,6 +4,7 @@ import * as Logos from "../../../../../../types";
 import { Client, localise } from "../../../../../client";
 import { editReply, postponeReply } from "../../../../../interactions";
 import { OptionTemplate } from "../../../../command";
+import { User } from "../../../../../database/user";
 
 const command: OptionTemplate = {
 	name: "clear",
@@ -18,13 +19,14 @@ async function handleClearLanguage(
 	const locale = interaction.locale;
 
 	await postponeReply([client, bot], interaction);
-
-	const userDocument = await client.database.adapters.users.getOrFetch(client, "id", interaction.user.id.toString());
+	const userDocument =
+		client.cache.documents.users.get(interaction.user.id.toString()) ??
+		(await client.database.session.load<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined));
 	if (userDocument === undefined) {
 		return;
 	}
 
-	if (userDocument.data.account.language === undefined) {
+	if (userDocument.account.language === undefined) {
 		const strings = {
 			title: localise(client, "settings.strings.cannotClear.title", locale)(),
 			description: localise(client, "settings.strings.cannotClear.description", locale)(),
@@ -42,17 +44,8 @@ async function handleClearLanguage(
 		return;
 	}
 
-	await client.database.adapters.users.update(client, {
-		...userDocument,
-		data: {
-			...userDocument.data,
-			account: {
-				...userDocument.data.account,
-				// @ts-ignore: This is fine, just removing language.
-				language: null,
-			},
-		},
-	});
+	userDocument.account.language = undefined;
+	await client.database.session.saveChanges();
 
 	{
 		const strings = {

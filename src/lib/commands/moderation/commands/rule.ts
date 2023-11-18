@@ -6,6 +6,7 @@ import { Client, localise } from "../../../client";
 import { getShowButton, parseArguments, reply, respond } from "../../../interactions";
 import { CommandTemplate } from "../../command";
 import { show } from "../../parameters";
+import { Guild } from "../../../database/guild";
 
 const command: CommandTemplate = {
 	name: "rule",
@@ -38,17 +39,14 @@ async function handleCiteRuleAutocomplete(
 		return;
 	}
 
-	const guildDocument = await client.database.adapters.guilds.getOrFetchOrCreate(
-		client,
-		"id",
-		guildId.toString(),
-		guildId,
-	);
+	const guildDocument =
+		client.cache.documents.guilds.get(guildId.toString()) ??
+		(await client.database.session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
 	if (guildDocument === undefined) {
 		return;
 	}
 
-	const configuration = guildDocument.data.features.moderation.features?.rules;
+	const configuration = guildDocument.features.moderation.features?.rules;
 	if (configuration === undefined || !configuration.enabled) {
 		return;
 	}

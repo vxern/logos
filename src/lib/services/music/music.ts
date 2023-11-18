@@ -14,7 +14,7 @@ import {
 	SongStream,
 	listingTypeToEmoji,
 } from "../../commands/music/data/types";
-import { Guild, timeStructToMilliseconds } from "../../database/structs/guild";
+import { Guild, timeStructToMilliseconds } from "../../database/guild";
 import diagnostics from "../../diagnostics";
 import { reply } from "../../interactions";
 import { LocalService } from "../service";
@@ -63,7 +63,7 @@ class MusicService extends LocalService {
 			return undefined;
 		}
 
-		return guildDocument.data.features.social.features?.music;
+		return guildDocument.features.social.features?.music;
 	}
 
 	get channelId(): bigint | undefined {

@@ -2,6 +2,7 @@ import constants from "../../../../constants/constants";
 import { getLocaleByLocalisationLanguage } from "../../../../constants/languages";
 import { codeMultiline } from "../../../../formatting";
 import { localise } from "../../../client";
+import { Guild } from "../../../database/guild";
 import diagnostics from "../../../diagnostics";
 import { getFeatureLanguage, getLocalisationLanguage } from "../../../interactions";
 import { GuildEvents, MessageGenerators } from "../generator";
@@ -9,7 +10,9 @@ import { GuildEvents, MessageGenerators } from "../generator";
 export default {
 	title: `${constants.symbols.events.entryRequest.submitted} Entry request submitted`,
 	message: async (client, user, entryRequest) => {
-		const guildDocument = await client.database.adapters.guilds.getOrFetch(client, "id", entryRequest.guild);
+		const guildDocument =
+			client.cache.documents.guilds.get(entryRequest.guildId) ??
+			(await client.database.session.load<Guild>(`guilds/${entryRequest.guildId}`).then((value) => value ?? undefined));
 		if (guildDocument === undefined) {
 			return;
 		}
@@ -35,7 +38,7 @@ ${codeMultiline(entryRequest.answers.whereFound)}
 `;
 	},
 	filter: (client, originGuildId, _user, entryRequest) => {
-		const guild = client.cache.guilds.get(BigInt(entryRequest.guild));
+		const guild = client.cache.guilds.get(BigInt(entryRequest.guildId));
 		if (guild === undefined) {
 			return false;
 		}

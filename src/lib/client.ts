@@ -1,6 +1,7 @@
 import * as Discord from "@discordeno/bot";
+import * as fs from "node:fs/promises";
 import FancyLog from "fancy-log";
-import Fauna from "fauna";
+import * as ravendb from "ravendb";
 import constants from "../constants/constants";
 import languages, {
 	LearningLanguage,
@@ -20,15 +21,6 @@ import * as Logos from "../types";
 import { Command, CommandTemplate, InteractionHandler, Option } from "./commands/command";
 import commandTemplates from "./commands/commands";
 import { SentencePair } from "./commands/language/commands/game";
-import entryRequests from "./database/adapters/entry-requests";
-import guilds from "./database/adapters/guilds";
-import praises from "./database/adapters/praises";
-import reports from "./database/adapters/reports";
-import suggestions from "./database/adapters/suggestions";
-import users from "./database/adapters/users";
-import warnings from "./database/adapters/warnings";
-import { Database } from "./database/database";
-import { timeStructToMilliseconds } from "./database/structs/guild";
 import diagnostics from "./diagnostics";
 import {
 	acknowledge,
@@ -58,14 +50,22 @@ import { RoleIndicatorService } from "./services/role-indicators/role-indicators
 import { Service } from "./services/service";
 import { StatusService } from "./services/status/service";
 import { requestMembers } from "./utils";
+import { EntryRequest } from "./database/entry-request";
+import { Guild, timeStructToMilliseconds } from "./database/guild";
+import { Praise } from "./database/praise";
+import { Report } from "./database/report";
+import { Suggestion } from "./database/suggestion";
+import { User } from "./database/user";
+import { Warning } from "./database/warning";
 
 type Client = {
 	environment: {
 		version: string;
 		discordSecret: string;
-		faunaSecret: string;
 		deeplSecret: string;
 		rapidApiSecret: string;
+		ravendbHost: string;
+		ravendbDatabase: string;
 		lavalinkHost: string;
 		lavalinkPort: string;
 		lavalinkPassword: string;
@@ -82,8 +82,22 @@ type Client = {
 			previous: Map<bigint, Logos.Message>;
 		};
 		interactions: Map<string, Logos.Interaction | Discord.Interaction>;
+
+		documents: {
+			entryRequests: Map<string, EntryRequest>;
+			guilds: Map<string, Guild>;
+			praisesByAuthor: Map<string, Map<string, Praise>>;
+			praisesByTarget: Map<string, Map<string, Praise>>;
+			reports: Map<string, Report>;
+			suggestions: Map<string, Suggestion>;
+			users: Map<string, User>;
+			warningsByTarget: Map<string, Map<string, Warning>>;
+		};
 	};
-	database: { log: Logger } & Database;
+	database: {
+		store: ravendb.IDocumentStore;
+		session: ravendb.IDocumentSession;
+	};
 	commands: {
 		commands: Record<keyof typeof commandTemplates, Command>;
 		showable: string[];
@@ -122,7 +136,7 @@ type Client = {
 			verification: Map<bigint, VerificationService>;
 		};
 		interactionRepetition: InteractionRepetitionService;
-		realtimeUpdates: Map<bigint, RealtimeUpdateService>;
+		realtimeUpdates: RealtimeUpdateService;
 		roleIndicators: Map<bigint, RoleIndicatorService>;
 		status: StatusService;
 	};
@@ -143,6 +157,7 @@ type Logger = Record<"debug" | keyof typeof FancyLog, (...args: unknown[]) => vo
 function createClient(
 	environment: Client["environment"],
 	features: Client["features"],
+	database: Client["database"],
 	localisationsStatic: Map<string, Map<LocalisationLanguage, string>>,
 ): Client {
 	const localisations = createLocalisations(localisationsStatic);
@@ -162,44 +177,18 @@ function createClient(
 				previous: new Map(),
 			},
 			interactions: new Map(),
-		},
-		database: {
-			log: createLogger("database"),
-			client: new Fauna.Client({
-				secret: environment.faunaSecret,
-				domain: "db.us.fauna.com",
-				scheme: "https",
-				port: 443,
-			}),
-			cache: {
-				entryRequestBySubmitterAndGuild: new Map(),
-				guildById: new Map(),
-				praisesBySender: new Map(),
-				praisesByRecipient: new Map(),
-				reportsByAuthorAndGuild: new Map(),
-				suggestionsByAuthorAndGuild: new Map(),
-				usersByReference: new Map(),
-				usersById: new Map(),
-				warningsByRecipient: new Map(),
+			documents: {
+				entryRequests: new Map(),
+				guilds: new Map(),
+				praisesByAuthor: new Map(),
+				praisesByTarget: new Map(),
+				reports: new Map(),
+				suggestions: new Map(),
+				users: new Map(),
+				warningsByTarget: new Map(),
 			},
-			fetchPromises: {
-				guilds: {
-					id: new Map(),
-				},
-				praises: {
-					recipient: new Map(),
-					sender: new Map(),
-				},
-				users: {
-					id: new Map(),
-					reference: new Map(),
-				},
-				warnings: {
-					recipient: new Map(),
-				},
-			},
-			adapters: { entryRequests, guilds, reports, praises, suggestions, users, warnings },
 		},
+		database,
 		commands,
 		features,
 		localisations,
@@ -228,7 +217,8 @@ function createClient(
 			},
 			// @ts-ignore: Late assignment.
 			interactionRepetition: "late_assignment",
-			realtimeUpdates: new Map(),
+			// @ts-ignore: Late assignment.
+			realtimeUpdates: "late_assignment",
 			roleIndicators: new Map(),
 			// @ts-ignore: Late assignment.
 			status: "late_assignment",
@@ -314,9 +304,19 @@ async function initialiseClient(
 	features: Client["features"],
 	localisations: Map<string, Map<LocalisationLanguage, string>>,
 ): Promise<void> {
-	const client = createClient(environment, features, localisations);
+	const certificate = await fs.readFile(".cert.pfx");
+	const store = new ravendb.DocumentStore(environment.ravendbHost, environment.ravendbDatabase, {
+		certificate,
+		type: "pfx",
+	}).initialize();
+	const session = store.openSession();
+	const database: Client["database"] = { store, session };
 
-	await prefetchDataFromDatabase(client, client.database);
+	const client = createClient(environment, features, database, localisations);
+
+	addCacheInterceptors(client, database.session);
+
+	await prefetchDataFromDatabase(client);
 
 	const bot = overrideDefaultEventHandlers(
 		Discord.createBot({
@@ -422,7 +422,7 @@ async function initialiseClient(
 	) as Discord.Transformers["desiredProperties"];
 	bot.handlers.GUILD_MEMBERS_CHUNK = handleGuildMembersChunk;
 	bot.gateway.cache.requestMembers = { enabled: true, pending: new Discord.Collection() };
-	bot.transformers = withCaching(client, bot.transformers);
+	bot.transformers = withCacheInterceptors(client, bot.transformers);
 
 	const promises: Promise<unknown>[] = [];
 
@@ -436,6 +436,11 @@ async function initialiseClient(
 	client.services.interactionRepetition = interactionRepetitionService;
 	promises.push(interactionRepetitionService.start());
 
+	const realtimeUpdateService = new RealtimeUpdateService([client, bot]);
+	client.services.global.push(realtimeUpdateService);
+	client.services.realtimeUpdates = realtimeUpdateService;
+	promises.push(realtimeUpdateService.start());
+
 	promises.push(bot.start());
 
 	await Promise.all(promises);
@@ -446,12 +451,26 @@ async function initialiseClient(
 	await statusService.start();
 }
 
-async function prefetchDataFromDatabase(client: Client, database: Database): Promise<void> {
-	await Promise.all([
-		database.adapters.entryRequests.prefetch(client),
-		database.adapters.reports.prefetch(client),
-		database.adapters.suggestions.prefetch(client),
-	]);
+async function prefetchDataFromDatabase(client: Client): Promise<void> {
+	const entryRequestDocuments = await client.database.session
+		.query<EntryRequest>({ collection: "EntryRequests" })
+		.all();
+
+	for (const document of entryRequestDocuments) {
+		client.cache.documents.entryRequests.set(document.id, document);
+	}
+
+	const reportDocuments = await client.database.session.query<Report>({ collection: "Reports" }).all();
+
+	for (const document of reportDocuments) {
+		client.cache.documents.reports.set(`${document.guildId}/${document.authorId}/${document.createdAt}`, document);
+	}
+
+	const suggestionDocuments = await client.database.session.query<Suggestion>({ collection: "Suggestions" }).all();
+
+	for (const document of suggestionDocuments) {
+		client.cache.documents.suggestions.set(`${document.guildId}/${document.authorId}/${document.createdAt}`, document);
+	}
 }
 
 export async function handleGuildCreate(
@@ -463,30 +482,20 @@ export async function handleGuildCreate(
 		client.log.info(`Logos added to "${guild.name}" (ID ${guild.id}).`);
 	}
 
-	const guildDocument = await client.database.adapters.guilds.getOrFetchOrCreate(
-		client,
-		"id",
-		guild.id.toString(),
-		guild.id,
-	);
+	const guildDocument =
+		client.cache.documents.guilds.get(guild.id.toString()) ??
+		(await client.database.session.load<Guild>(`guilds/${guild.id}`).then((value) => value ?? undefined));
 	if (guildDocument === undefined) {
 		return;
 	}
-
-	const configuration = guildDocument.data;
 
 	const commands = client.commands.commands;
 
 	const guildCommands: Command[] = [commands.information, commands.credits, commands.licence, commands.settings];
 	const services: Service[] = [];
 
-	// const realtimeUpdateService = new RealtimeUpdateService([client, bot], guild.id, guildDocument.ref);
-	// services.push(realtimeUpdateService);
-
-	// client.services.realtimeUpdates.set(guild.id, realtimeUpdateService);
-
-	if (configuration.features.information.enabled) {
-		const information = configuration.features.information.features;
+	if (guildDocument.features.information.enabled) {
+		const information = guildDocument.features.information.features;
 
 		if (information.journaling.enabled) {
 			const service = new JournallingService([client, bot], guild.id);
@@ -521,8 +530,8 @@ export async function handleGuildCreate(
 		}
 	}
 
-	if (configuration.features.language.enabled) {
-		const language = configuration.features.language.features;
+	if (guildDocument.features.language.enabled) {
+		const language = guildDocument.features.language.features;
 
 		if (language.answers?.enabled) {
 			guildCommands.push(commands.answer);
@@ -554,10 +563,10 @@ export async function handleGuildCreate(
 		}
 	}
 
-	if (configuration.features.moderation.enabled) {
+	if (guildDocument.features.moderation.enabled) {
 		guildCommands.push(commands.list);
 
-		const moderation = configuration.features.moderation.features;
+		const moderation = guildDocument.features.moderation.features;
 
 		if (moderation.alerts.enabled) {
 			const service = new AlertService([client, bot], guild.id);
@@ -607,8 +616,8 @@ export async function handleGuildCreate(
 		}
 	}
 
-	if (configuration.features.server.enabled) {
-		const server = configuration.features.server.features;
+	if (guildDocument.features.server.enabled) {
+		const server = guildDocument.features.server.features;
 
 		if (server.dynamicVoiceChannels.enabled) {
 			const service = new DynamicVoiceChannelService([client, bot], guild.id);
@@ -641,8 +650,8 @@ export async function handleGuildCreate(
 		}
 	}
 
-	if (configuration.features.social.enabled) {
-		const social = configuration.features.social.features;
+	if (guildDocument.features.social.enabled) {
+		const social = guildDocument.features.social.features;
 
 		if (social.music.enabled) {
 			guildCommands.push(commands.music);
@@ -736,7 +745,122 @@ async function handleInteractionCreate(
 	}
 }
 
-function withCaching(client: Client, transformers: Discord.Transformers): Discord.Transformers {
+function addCacheInterceptors(client: Client, session: ravendb.IDocumentSession): void {
+	const { load, store } = session;
+
+	// biome-ignore lint: Typing this out in TypeScript is a nonsense and I don't have time to do it right now.
+	function getCompositeId(collection: string, document: any): string {
+		switch (collection) {
+			case "EntryRequests": {
+				return `${document.guildId}/${document.authorId}`;
+			}
+			case "Guilds": {
+				return document.guildId;
+			}
+			case "Praises": {
+				return `${document.targetId}/${document.authorId}/${document.createdAt}`;
+			}
+			case "Reports": {
+				return `${document.guildId}/${document.authorId}/${document.createdAt}`;
+			}
+			case "Suggestions": {
+				return `${document.guildId}/${document.authorId}/${document.createdAt}`;
+			}
+			case "Users": {
+				return document.account.id;
+			}
+			case "Warnings": {
+				return `${document.targetId}/${document.authorId}/${document.createdAt}`;
+			}
+		}
+
+		throw "StateError: Getting composite ID not handled for collection";
+	}
+
+	// biome-ignore lint: Typing this out in TypeScript is a nonsense and I don't have time to do it right now.
+	function saveValue(value: any) {
+		const collection: string | undefined = value["@metadata"]?.["@collection"];
+		if (collection === undefined) {
+			throw "StateError: Collection unexpectedly undefined.";
+		}
+
+		const compositeId = getCompositeId(collection, value);
+
+		switch (collection) {
+			case "EntryRequests": {
+				client.cache.documents.entryRequests.set(compositeId, value as EntryRequest);
+				break;
+			}
+			case "Guilds": {
+				client.cache.documents.guilds.set(compositeId, value as Guild);
+				break;
+			}
+			case "Praises": {
+				const document = value as Praise;
+
+				if (client.cache.documents.praisesByAuthor.has(document.authorId)) {
+					client.cache.documents.praisesByAuthor.get(document.authorId)?.set(compositeId, document);
+				} else {
+					client.cache.documents.praisesByAuthor.set(document.authorId, new Map([[compositeId, document]]));
+				}
+
+				if (client.cache.documents.praisesByTarget.has(document.targetId)) {
+					client.cache.documents.praisesByTarget.get(document.targetId)?.set(compositeId, document);
+				} else {
+					client.cache.documents.praisesByTarget.set(document.targetId, new Map([[compositeId, document]]));
+				}
+
+				break;
+			}
+			case "Reports": {
+				client.cache.documents.reports.set(compositeId, value as Report);
+				break;
+			}
+			case "Suggestions": {
+				client.cache.documents.suggestions.set(compositeId, value as Suggestion);
+				break;
+			}
+			case "Users": {
+				client.cache.documents.users.set(compositeId, value as User);
+				break;
+			}
+			case "Warnings": {
+				const document = value as Warning;
+
+				if (client.cache.documents.warningsByTarget.has(document.targetId)) {
+					client.cache.documents.warningsByTarget.get(document.targetId)?.set(compositeId, document);
+				} else {
+					client.cache.documents.warningsByTarget.set(document.targetId, new Map([[compositeId, document]]));
+				}
+
+				break;
+			}
+		}
+	}
+
+	// @ts-ignore
+	session.load = async (...args) => {
+		// @ts-ignore
+		const value = await load.call(session, ...args);
+		if (value === null) {
+			return value;
+		}
+
+		saveValue(value);
+
+		return value;
+	};
+
+	// @ts-ignore
+	session.store = async (value, ...args) => {
+		// @ts-ignore
+		await store.call(session, value, ...args);
+
+		saveValue(value);
+	};
+}
+
+function withCacheInterceptors(client: Client, transformers: Discord.Transformers): Discord.Transformers {
 	const { guild, channel, user, member, message, role, voiceState } = transformers;
 
 	transformers.guild = (bot, payload) => {

@@ -1,13 +1,12 @@
-import { FeatureLanguage, LearningLanguage, LocalisationLanguage } from "../../../constants/languages";
-import time from "../../../constants/time";
+import { FeatureLanguage, LearningLanguage, LocalisationLanguage } from "../../constants/languages";
+import time from "../../constants/time";
 
 /** @since v3.0.0 */
 interface Guild {
-	/** A timestamp of when Logos began to manage this guild. */
-	createdAt: number;
+	id: string;
 
 	/** This guild's ID. */
-	id: string;
+	guildId: string;
 
 	/**
 	 * Whether the guild is native to Logos.
@@ -209,6 +208,9 @@ interface Guild {
 			};
 		}>;
 	};
+
+	/** A timestamp of when Logos began to manage this guild. */
+	createdAt: number;
 }
 
 type TimeUnit = "second" | "minute" | "hour" | "day" | "week" | "month" | "year";
