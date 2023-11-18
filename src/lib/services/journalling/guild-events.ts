@@ -1,10 +1,10 @@
 import * as Logos from "../../../types";
 import { SlowmodeLevel } from "../../commands/moderation/commands/slowmode";
-import { EntryRequest } from "../../database/structs/entry-request";
-import { Praise } from "../../database/structs/praise";
-import { Report } from "../../database/structs/report";
-import { Suggestion } from "../../database/structs/suggestion";
-import { Warning } from "../../database/structs/warning";
+import { EntryRequest } from "../../database/entry-request";
+import { Praise } from "../../database/praise";
+import { Report } from "../../database/report";
+import { Suggestion } from "../../database/suggestion";
+import { Warning } from "../../database/warning";
 
 /** Type representing events that occur within a guild. */
 type GuildEvents = {

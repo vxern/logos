@@ -86,16 +86,18 @@ type Client = {
 		documents: {
 			entryRequests: Map<string, EntryRequest>;
 			guilds: Map<string, Guild>;
-			praisesBySender: Map<string, Map<string, Praise>>;
-			praisesByRecipient: Map<string, Map<string, Praise>>;
-			reports: Map<string, Map<string, Report>>;
-			suggestions: Map<string, Map<string, Suggestion>>;
-			usersByReference: Map<string, User>;
-			usersById: Map<string, User>;
-			warnings: Map<string, Map<string, Warning>>;
+			praisesByAuthor: Map<string, Map<string, Praise>>;
+			praisesByTarget: Map<string, Map<string, Praise>>;
+			reports: Map<string, Report>;
+			suggestions: Map<string, Suggestion>;
+			users: Map<string, User>;
+			warningsByTarget: Map<string, Map<string, Warning>>;
 		};
 	};
-	database: ravendb.IDocumentSession;
+	database: {
+		store: ravendb.IDocumentStore;
+		session: ravendb.IDocumentSession;
+	};
 	commands: {
 		commands: Record<keyof typeof commandTemplates, Command>;
 		showable: string[];
@@ -134,7 +136,7 @@ type Client = {
 			verification: Map<bigint, VerificationService>;
 		};
 		interactionRepetition: InteractionRepetitionService;
-		realtimeUpdates: Map<bigint, RealtimeUpdateService>;
+		realtimeUpdates: RealtimeUpdateService;
 		roleIndicators: Map<bigint, RoleIndicatorService>;
 		status: StatusService;
 	};
@@ -178,13 +180,12 @@ function createClient(
 			documents: {
 				entryRequests: new Map(),
 				guilds: new Map(),
-				praisesBySender: new Map(),
-				praisesByRecipient: new Map(),
+				praisesByAuthor: new Map(),
+				praisesByTarget: new Map(),
 				reports: new Map(),
 				suggestions: new Map(),
-				usersByReference: new Map(),
-				usersById: new Map(),
-				warnings: new Map(),
+				users: new Map(),
+				warningsByTarget: new Map(),
 			},
 		},
 		database,
@@ -216,7 +217,8 @@ function createClient(
 			},
 			// @ts-ignore: Late assignment.
 			interactionRepetition: "late_assignment",
-			realtimeUpdates: new Map(),
+			// @ts-ignore: Late assignment.
+			realtimeUpdates: "late_assignment",
 			roleIndicators: new Map(),
 			// @ts-ignore: Late assignment.
 			status: "late_assignment",
@@ -303,12 +305,16 @@ async function initialiseClient(
 	localisations: Map<string, Map<LocalisationLanguage, string>>,
 ): Promise<void> {
 	const certificate = await fs.readFile(".cert.pfx");
-	const cluster = new ravendb.DocumentStore(environment.ravendbHost, environment.ravendbDatabase, {
+	const store = new ravendb.DocumentStore(environment.ravendbHost, environment.ravendbDatabase, {
 		certificate,
+		type: "pfx",
 	}).initialize();
-	const database = cluster.openSession();
+	const session = store.openSession();
+	const database: Client["database"] = { store, session };
 
 	const client = createClient(environment, features, database, localisations);
+
+	addCacheInterceptors(client, database.session);
 
 	await prefetchDataFromDatabase(client);
 
@@ -416,7 +422,7 @@ async function initialiseClient(
 	) as Discord.Transformers["desiredProperties"];
 	bot.handlers.GUILD_MEMBERS_CHUNK = handleGuildMembersChunk;
 	bot.gateway.cache.requestMembers = { enabled: true, pending: new Discord.Collection() };
-	bot.transformers = withCaching(client, bot.transformers);
+	bot.transformers = withCacheInterceptors(client, bot.transformers);
 
 	const promises: Promise<unknown>[] = [];
 
@@ -430,6 +436,11 @@ async function initialiseClient(
 	client.services.interactionRepetition = interactionRepetitionService;
 	promises.push(interactionRepetitionService.start());
 
+	const realtimeUpdateService = new RealtimeUpdateService([client, bot]);
+	client.services.global.push(realtimeUpdateService);
+	client.services.realtimeUpdates = realtimeUpdateService;
+	promises.push(realtimeUpdateService.start());
+
 	promises.push(bot.start());
 
 	await Promise.all(promises);
@@ -441,36 +452,24 @@ async function initialiseClient(
 }
 
 async function prefetchDataFromDatabase(client: Client): Promise<void> {
-	const entryRequestDocuments = await client.database.query<EntryRequest>({ collection: "EntryRequests" }).all();
+	const entryRequestDocuments = await client.database.session
+		.query<EntryRequest>({ collection: "EntryRequests" })
+		.all();
 
 	for (const document of entryRequestDocuments) {
 		client.cache.documents.entryRequests.set(document.id, document);
 	}
 
-	const reportDocuments = await client.database.query<Report>({ collection: "Reports" }).all();
+	const reportDocuments = await client.database.session.query<Report>({ collection: "Reports" }).all();
 
 	for (const document of reportDocuments) {
-		const compositeId = `${document.author}/${document.guild}`;
-
-		if (client.cache.documents.reports.has(compositeId)) {
-			client.cache.documents.reports.get(compositeId)?.set(document.id, document);
-			continue;
-		}
-
-		client.cache.documents.reports.set(compositeId, new Map([[document.id, document]]));
+		client.cache.documents.reports.set(`${document.guildId}/${document.authorId}/${document.createdAt}`, document);
 	}
 
-	const suggestionDocuments = await client.database.query<Suggestion>({ collection: "Suggestions" }).all();
+	const suggestionDocuments = await client.database.session.query<Suggestion>({ collection: "Suggestions" }).all();
 
 	for (const document of suggestionDocuments) {
-		const compositeId = `${document.author}/${document.guild}`;
-
-		if (client.cache.documents.suggestions.has(compositeId)) {
-			client.cache.documents.suggestions.get(compositeId)?.set(document.id, document);
-			continue;
-		}
-
-		client.cache.documents.suggestions.set(compositeId, new Map([[document.id, document]]));
+		client.cache.documents.suggestions.set(`${document.guildId}/${document.authorId}/${document.createdAt}`, document);
 	}
 }
 
@@ -485,7 +484,7 @@ export async function handleGuildCreate(
 
 	const guildDocument =
 		client.cache.documents.guilds.get(guild.id.toString()) ??
-		(await client.database.load<Guild>(`guilds/${guild.id}`).then((value) => value ?? undefined));
+		(await client.database.session.load<Guild>(`guilds/${guild.id}`).then((value) => value ?? undefined));
 	if (guildDocument === undefined) {
 		return;
 	}
@@ -494,11 +493,6 @@ export async function handleGuildCreate(
 
 	const guildCommands: Command[] = [commands.information, commands.credits, commands.licence, commands.settings];
 	const services: Service[] = [];
-
-	// const realtimeUpdateService = new RealtimeUpdateService([client, bot], guild.id, guildDocument.ref);
-	// services.push(realtimeUpdateService);
-
-	// client.services.realtimeUpdates.set(guild.id, realtimeUpdateService);
 
 	if (guildDocument.features.information.enabled) {
 		const information = guildDocument.features.information.features;
@@ -751,7 +745,122 @@ async function handleInteractionCreate(
 	}
 }
 
-function withCaching(client: Client, transformers: Discord.Transformers): Discord.Transformers {
+function addCacheInterceptors(client: Client, session: ravendb.IDocumentSession): void {
+	const { load, store } = session;
+
+	// biome-ignore lint: Typing this out in TypeScript is a nonsense and I don't have time to do it right now.
+	function getCompositeId(collection: string, document: any): string {
+		switch (collection) {
+			case "EntryRequests": {
+				return `${document.guildId}/${document.authorId}`;
+			}
+			case "Guilds": {
+				return document.guildId;
+			}
+			case "Praises": {
+				return `${document.targetId}/${document.authorId}/${document.createdAt}`;
+			}
+			case "Reports": {
+				return `${document.guildId}/${document.authorId}/${document.createdAt}`;
+			}
+			case "Suggestions": {
+				return `${document.guildId}/${document.authorId}/${document.createdAt}`;
+			}
+			case "Users": {
+				return document.account.id;
+			}
+			case "Warnings": {
+				return `${document.targetId}/${document.authorId}/${document.createdAt}`;
+			}
+		}
+
+		throw "StateError: Getting composite ID not handled for collection";
+	}
+
+	// biome-ignore lint: Typing this out in TypeScript is a nonsense and I don't have time to do it right now.
+	function saveValue(value: any) {
+		const collection: string | undefined = value["@metadata"]?.["@collection"];
+		if (collection === undefined) {
+			throw "StateError: Collection unexpectedly undefined.";
+		}
+
+		const compositeId = getCompositeId(collection, value);
+
+		switch (collection) {
+			case "EntryRequests": {
+				client.cache.documents.entryRequests.set(compositeId, value as EntryRequest);
+				break;
+			}
+			case "Guilds": {
+				client.cache.documents.guilds.set(compositeId, value as Guild);
+				break;
+			}
+			case "Praises": {
+				const document = value as Praise;
+
+				if (client.cache.documents.praisesByAuthor.has(document.authorId)) {
+					client.cache.documents.praisesByAuthor.get(document.authorId)?.set(compositeId, document);
+				} else {
+					client.cache.documents.praisesByAuthor.set(document.authorId, new Map([[compositeId, document]]));
+				}
+
+				if (client.cache.documents.praisesByTarget.has(document.targetId)) {
+					client.cache.documents.praisesByTarget.get(document.targetId)?.set(compositeId, document);
+				} else {
+					client.cache.documents.praisesByTarget.set(document.targetId, new Map([[compositeId, document]]));
+				}
+
+				break;
+			}
+			case "Reports": {
+				client.cache.documents.reports.set(compositeId, value as Report);
+				break;
+			}
+			case "Suggestions": {
+				client.cache.documents.suggestions.set(compositeId, value as Suggestion);
+				break;
+			}
+			case "Users": {
+				client.cache.documents.users.set(compositeId, value as User);
+				break;
+			}
+			case "Warnings": {
+				const document = value as Warning;
+
+				if (client.cache.documents.warningsByTarget.has(document.targetId)) {
+					client.cache.documents.warningsByTarget.get(document.targetId)?.set(compositeId, document);
+				} else {
+					client.cache.documents.warningsByTarget.set(document.targetId, new Map([[compositeId, document]]));
+				}
+
+				break;
+			}
+		}
+	}
+
+	// @ts-ignore
+	session.load = async (...args) => {
+		// @ts-ignore
+		const value = await load.call(session, ...args);
+		if (value === null) {
+			return value;
+		}
+
+		saveValue(value);
+
+		return value;
+	};
+
+	// @ts-ignore
+	session.store = async (value, ...args) => {
+		// @ts-ignore
+		await store.call(session, value, ...args);
+
+		saveValue(value);
+	};
+}
+
+function withCacheInterceptors(client: Client, transformers: Discord.Transformers): Discord.Transformers {
 	const { guild, channel, user, member, message, role, voiceState } = transformers;
 
 	transformers.guild = (bot, payload) => {

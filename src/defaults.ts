@@ -5,7 +5,7 @@ import {
 	LocalisationLanguage,
 	TranslationLanguage,
 } from "./constants/languages";
-import { TimeStruct } from "./lib/database/structs/guild";
+import { TimeStruct } from "./lib/database/guild";
 
 const PROJECT_NAME = "Logos";
 const USER_AGENT = "Logos (https://logos.wordcollector.co.uk)";

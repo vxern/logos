@@ -3,8 +3,7 @@ import { Locale, getLocaleByLocalisationLanguage } from "../../constants/languag
 import defaults from "../../defaults";
 import * as Logos from "../../types";
 import { Client } from "../client";
-import { Document } from "../database/document";
-import { Guild } from "../database/structs/guild";
+import { Guild } from "../database/guild";
 import { getLocalisationLanguage } from "../interactions";
 
 type ServiceBase = {
@@ -102,8 +101,8 @@ abstract class LocalService extends Service {
 		return this.client.cache.guilds.get(this.guildId);
 	}
 
-	get guildDocument(): Document<Guild> | undefined {
-		return this.client.database.cache.guildById.get(this.guildIdString);
+	get guildDocument(): Guild | undefined {
+		return this.client.cache.documents.guilds.get(this.guildIdString);
 	}
 
 	get guildLocale(): Locale {

@@ -5,12 +5,15 @@ import defaults from "../../../../defaults";
 import { MentionTypes, mention } from "../../../../formatting";
 import * as Logos from "../../../../types";
 import { Client, autocompleteMembers, localise, pluralise, resolveInteractionToMember } from "../../../client";
-import { timeStructToMilliseconds } from "../../../database/structs/guild";
+import { timeStructToMilliseconds } from "../../../database/guild";
 import diagnostics from "../../../diagnostics";
 import { parseArguments, reply } from "../../../interactions";
 import { CommandTemplate } from "../../command";
 import { reason, user } from "../../parameters";
 import { getActiveWarnings } from "../module";
+import { Guild } from "../../../database/guild";
+import { User } from "../../../database/user";
+import { Warning } from "../../../database/warning";
 
 const command: CommandTemplate = {
 	name: "warn",
@@ -45,17 +48,14 @@ async function handleWarnUser([client, bot]: [Client, Discord.Bot], interaction:
 		return;
 	}
 
-	const guildDocument = await client.database.adapters.guilds.getOrFetchOrCreate(
-		client,
-		"id",
-		guildId.toString(),
-		guildId,
-	);
+	const guildDocument =
+		client.cache.documents.guilds.get(guildId.toString()) ??
+		(await client.database.session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
 	if (guildDocument === undefined) {
 		return;
 	}
 
-	const configuration = guildDocument.data.features.moderation.features?.warns;
+	const configuration = guildDocument.features.moderation.features?.warns;
 	if (configuration === undefined || !configuration.enabled) {
 		return;
 	}
@@ -102,44 +102,86 @@ async function handleWarnUser([client, bot]: [Client, Discord.Bot], interaction:
 		return;
 	}
 
-	const [author, recipient] = await Promise.all([
-		client.database.adapters.users.getOrFetchOrCreate(
-			client,
-			"id",
-			interaction.user.id.toString(),
-			interaction.user.id,
-		),
-		client.database.adapters.users.getOrFetchOrCreate(client, "id", member.id.toString(), member.id),
-	]);
+	const [authorDocument, targetDocument] = [
+		client.cache.documents.users.get(interaction.user.id.toString()) ??
+			(await client.database.session.load<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined)) ??
+			(await (async () => {
+				const userDocument = {
+					...({
+						id: `users/${interaction.user.id}`,
+						account: { id: interaction.user.id.toString() },
+						createdAt: Date.now(),
+					} satisfies User),
+					"@metadata": { "@collection": "Users" },
+				};
+				await client.database.session.store(userDocument);
+				await client.database.session.saveChanges();
 
-	if (author === undefined || recipient === undefined) {
+				return userDocument as User;
+			})()),
+		client.cache.documents.users.get(member.id.toString()) ??
+			(await client.database.session.load<User>(`users/${member.id}`).then((value) => value ?? undefined)) ??
+			(await (async () => {
+				const userDocument = {
+					...({
+						id: `users/${member.id}`,
+						account: { id: member.id.toString() },
+						createdAt: Date.now(),
+					} satisfies User),
+					"@metadata": { "@collection": "Users" },
+				};
+				await client.database.session.store(userDocument);
+				await client.database.session.saveChanges();
+
+				return userDocument as User;
+			})()),
+	];
+
+	if (authorDocument === undefined || targetDocument === undefined) {
 		displayError([client, bot], interaction, { locale });
 		return;
 	}
 
-	const [warnings, document] = await Promise.all([
-		client.database.adapters.warnings.getOrFetch(client, "recipient", recipient.ref),
-		client.database.adapters.warnings.create(client, {
-			createdAt: Date.now(),
-			author: author.ref,
-			recipient: recipient.ref,
-			reason,
-		}),
-	]);
+	const warningDocumentsCached = client.cache.documents.warningsByTarget.get(targetDocument.account.id);
 
-	if (configuration.journaling && document !== undefined) {
+	const createdAt = Date.now();
+	const warningDocument = {
+		id: `warnings/${targetDocument.account.id}/${authorDocument.account.id}/${createdAt}`,
+		authorId: authorDocument.account.id,
+		targetId: targetDocument.account.id,
+		reason,
+		createdAt,
+		"@metadata": { "@collection": "Warnings" },
+	};
+	await client.database.session.store(warningDocument);
+	await client.database.session.saveChanges();
+
+	const warningDocuments =
+		warningDocumentsCached !== undefined
+			? Array.from(warningDocumentsCached.values())
+			: await client.database.session
+					.query<Warning>({ collection: "Warnings" })
+					.whereStartsWith("id", `warnings/${targetDocument.account.id}`)
+					.all()
+					.then((warningDocuments) => {
+						const map = new Map(
+							warningDocuments.map((warningDocument) => [
+								`${warningDocument.targetId}/${warningDocument.authorId}/${warningDocument.createdAt}`,
+								warningDocument,
+							]),
+						);
+						client.cache.documents.warningsByTarget.set(member.id.toString(), map);
+						return warningDocuments;
+					});
+
+	if (configuration.journaling) {
 		const journallingService = client.services.journalling.get(guild.id);
-		journallingService?.log("memberWarnAdd", { args: [member, document.data, interaction.user] });
-	}
-
-	if (warnings === undefined || document === undefined) {
-		displayError([client, bot], interaction, { locale });
-		return;
+		journallingService?.log("memberWarnAdd", { args: [member, warningDocument, interaction.user] });
 	}
 
 	const expirationMilliseconds = timeStructToMilliseconds(configuration.expiration ?? defaults.WARN_EXPIRY);
 
-	const relevantWarnings = getActiveWarnings(warnings, expirationMilliseconds);
+	const relevantWarnings = getActiveWarnings(warningDocuments, expirationMilliseconds);
 
 	const strings = {
 		title: localise(client, "warn.strings.warned.title", locale)(),
@@ -149,7 +191,7 @@ async function handleWarnUser([client, bot]: [Client, Discord.Bot], interaction:
 			locale,
 		)({
 			user_mention: mention(member.id, MentionTypes.User),
-			warnings: pluralise(client, "warn.strings.warned.description.warnings", language, relevantWarnings.size),
+			warnings: pluralise(client, "warn.strings.warned.description.warnings", language, relevantWarnings.length),
 		}),
 	};
 
@@ -165,7 +207,7 @@ async function handleWarnUser([client, bot]: [Client, Discord.Bot], interaction:
 
 	const alertService = client.services.alerts.get(guild.id);
 
-	const surpassedLimit = relevantWarnings.size > configuration.limit;
+	const surpassedLimit = relevantWarnings.length > configuration.limit;
 	if (surpassedLimit) {
 		let strings;
 		if (configuration.autoTimeout.enabled) {
@@ -182,7 +224,7 @@ async function handleWarnUser([client, bot]: [Client, Discord.Bot], interaction:
 				)({
 					user_mention: diagnostics.display.user(user),
 					limit: configuration.limit,
-					number: relevantWarnings.size,
+					number: relevantWarnings.length,
 					period: pluralise(client, `units.${timeout[1]}.word`, language, timeout[0]),
 				}),
 			};
@@ -191,6 +233,7 @@ async function handleWarnUser([client, bot]: [Client, Discord.Bot], interaction:
 
 			bot.rest
 				.editMember(guild.id, member.id, {
+					// TODO(vxern): Fix timestamps now being ISO8601.
 					communicationDisabledUntil: Date.now() + timeoutMilliseconds,
 				})
 				.catch(() => client.log.warn(`Failed to edit timeout state of ${diagnostics.display.member(member)}.`));
@@ -205,7 +248,7 @@ async function handleWarnUser([client, bot]: [Client, Discord.Bot], interaction:
 				)({
 					user_mention: diagnostics.display.user(user),
 					limit: configuration.limit,
-					number: relevantWarnings.size,
+					number: relevantWarnings.length,
 				}),
 			};
 		}
@@ -223,7 +266,7 @@ async function handleWarnUser([client, bot]: [Client, Discord.Bot], interaction:
 		return;
 	}
 
-	const reachedLimit = relevantWarnings.size === defaults.WARN_LIMIT;
+	const reachedLimit = relevantWarnings.length === defaults.WARN_LIMIT;
 	if (reachedLimit) {
 		const locale = interaction.guildLocale;
 		const strings = {

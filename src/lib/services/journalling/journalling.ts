@@ -1,5 +1,5 @@
 import * as Discord from "@discordeno/bot";
-import { Guild } from "../../database/structs/guild";
+import { Guild } from "../../database/guild";
 import diagnostics from "../../diagnostics";
 import { LocalService } from "../service";
 import { Events, MessageGenerators } from "./generator";
@@ -16,7 +16,7 @@ class JournallingService extends LocalService {
 			return undefined;
 		}
 
-		return guildDocument.data.features.information.features?.journaling;
+		return guildDocument.features.information.features?.journaling;
 	}
 
 	get channelId(): bigint | undefined {

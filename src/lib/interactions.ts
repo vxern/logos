@@ -15,9 +15,9 @@ import defaults from "../defaults";
 import * as Logos from "../types";
 import { InteractionLocaleData } from "../types";
 import { Client, addCollector, localise, pluralise } from "./client";
-import { Document } from "./database/document";
-import { Guild } from "./database/structs/guild";
+import { Guild } from "./database/guild";
 import { InteractionRepetitionButtonID } from "./services/interaction-repetition/interaction-repetition";
+import { User } from "./database/user";
 
 type AutocompleteInteraction = Discord.Interaction & { type: Discord.InteractionTypes.ApplicationCommandAutocomplete };
 
@@ -677,16 +677,16 @@ async function displayModal(
 		.catch((reason) => client.log.warn("Failed to show modal:", reason));
 }
 
-function getLocalisationLanguage(guildDocument: Document<Guild> | undefined): LocalisationLanguage {
-	return guildDocument?.data.languages?.localisation ?? defaults.LOCALISATION_LANGUAGE;
+function getLocalisationLanguage(guildDocument: Guild | undefined): LocalisationLanguage {
+	return guildDocument?.languages?.localisation ?? defaults.LOCALISATION_LANGUAGE;
 }
 
-function getTargetLanguage(guildDocument: Document<Guild>): LocalisationLanguage {
-	return guildDocument?.data.languages?.target ?? getLocalisationLanguage(guildDocument);
+function getTargetLanguage(guildDocument: Guild): LocalisationLanguage {
+	return guildDocument?.languages?.target ?? getLocalisationLanguage(guildDocument);
 }
 
-function getFeatureLanguage(guildDocument?: Document<Guild>): FeatureLanguage {
-	return guildDocument?.data.languages?.feature ?? defaults.FEATURE_LANGUAGE;
+function getFeatureLanguage(guildDocument?: Guild): FeatureLanguage {
+	return guildDocument?.languages?.feature ?? defaults.FEATURE_LANGUAGE;
 }
 
 const FALLBACK_LOCALE_DATA: InteractionLocaleData = {
@@ -707,13 +707,24 @@ async function getLocaleData(client: Client, interaction: Discord.Interaction): 
 	const member = client.cache.members.get(Discord.snowflakeToBigint(`${interaction.user.id}${guildId}`));
 
 	const [userDocument, guildDocument] = await Promise.all([
-		client.database.adapters.users.getOrFetchOrCreate(
-			client,
-			"id",
-			interaction.user.id.toString(),
-			interaction.user.id,
-		),
-		client.database.adapters.guilds.getOrFetchOrCreate(client, "id", guildId.toString(), guildId),
+		client.cache.documents.users.get(interaction.user.id.toString()) ??
+			(await client.database.session.load<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined)) ??
+			(async () => {
+				const userDocument = {
+					...({
+						id: `users/${interaction.user.id}`,
+						account: { id: interaction.user.id.toString() },
+						createdAt: Date.now(),
+					} satisfies User),
+					"@metadata": { "@collection": "Users" },
+				};
+				await client.database.session.store(userDocument);
+				await client.database.session.saveChanges();
+
+				return userDocument as User;
+			})(),
+		client.cache.documents.guilds.get(guildId.toString()) ??
+			client.database.session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined),
 	]);
 	if (userDocument === undefined || guildDocument === undefined) {
 		return FALLBACK_LOCALE_DATA;
@@ -732,8 +743,8 @@ async function getLocaleData(client: Client, interaction: Discord.Interaction): 
 
 	if (!isAutocomplete(interaction)) {
 		// If the user has configured a custom locale, use the user's preferred locale.
-		if (userDocument?.data.account.language !== undefined) {
-			const language = userDocument?.data.account.language;
+		if (userDocument?.account.language !== undefined) {
+			const language = userDocument?.account.language;
 			const locale = getLocaleByLocalisationLanguage(language);
 			return { language, locale, learningLanguage, guildLanguage, guildLocale, featureLanguage };
 		}
@@ -746,8 +757,8 @@ async function getLocaleData(client: Client, interaction: Discord.Interaction): 
 	return { language, locale, learningLanguage, guildLanguage, guildLocale, featureLanguage };
 }
 
-function getTargetOnlyChannelIds(guildDocument: Document<Guild>): bigint[] {
-	const language = guildDocument.data.features.language;
+function getTargetOnlyChannelIds(guildDocument: Guild): bigint[] {
+	const language = guildDocument.features.language;
 	if (!language.enabled) {
 		return [];
 	}
@@ -761,7 +772,7 @@ function getTargetOnlyChannelIds(guildDocument: Document<Guild>): bigint[] {
 }
 
 function getLearningLanguage(
-	guildDocument: Document<Guild>,
+	guildDocument: Guild,
 	guildLearningLanguage: LearningLanguage,
 	member: Logos.Member | undefined,
 ): LearningLanguage {
@@ -769,7 +780,7 @@ function getLearningLanguage(
 		return guildLearningLanguage;
 	}
 
-	const language = guildDocument.data.features.language;
+	const language = guildDocument.features.language;
 	if (!language.enabled) {
 		return guildLearningLanguage;
 	}

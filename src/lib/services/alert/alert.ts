@@ -1,5 +1,5 @@
 import * as Discord from "@discordeno/bot";
-import { Guild } from "../../database/structs/guild";
+import { Guild } from "../../database/guild";
 import diagnostics from "../../diagnostics";
 import { LocalService } from "../service";
 
@@ -12,7 +12,7 @@ class AlertService extends LocalService {
 			return undefined;
 		}
 
-		return guildDocument.data.features.moderation.features?.alerts;
+		return guildDocument.features.moderation.features?.alerts;
 	}
 
 	get channelId(): bigint | undefined {

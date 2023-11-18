@@ -2,7 +2,7 @@ import * as Discord from "@discordeno/bot";
 import constants from "../../../constants/constants";
 import symbols from "../../../constants/types/symbols";
 import * as Logos from "../../../types";
-import { Guild, RoleWithIndicator } from "../../database/structs/guild";
+import { Guild, RoleWithIndicator } from "../../database/guild";
 import { LocalService } from "../service";
 
 type Configuration = NonNullable<NonNullable<Guild["features"]["server"]["features"]>["roleIndicators"]>;
@@ -14,7 +14,7 @@ class RoleIndicatorService extends LocalService {
 			return undefined;
 		}
 
-		return guildDocument.data.features.server.features?.roleIndicators;
+		return guildDocument.features.server.features?.roleIndicators;
 	}
 
 	async start(): Promise<void> {

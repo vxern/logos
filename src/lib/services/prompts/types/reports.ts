@@ -3,61 +3,45 @@ import constants from "../../../../constants/constants";
 import { MentionTypes, mention, timestamp } from "../../../../formatting";
 import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
-import { stringifyValue } from "../../../database/database";
-import { Document } from "../../../database/document";
-import { Report } from "../../../database/structs/report";
-import { User } from "../../../database/structs/user";
+import { Report } from "../../../database/report";
+import { User } from "../../../database/user";
 import { encodeId, getLocaleData, reply } from "../../../interactions";
 import { getGuildIconURLFormatted } from "../../../utils";
 import { PromptService } from "../service";
 
-type Metadata = { userId: bigint; reference: string };
-type InteractionData = [userId: string, guildId: string, reference: string, isResolved: string];
+type InteractionData = [documentId: string, isResolved: string];
 
-class ReportService extends PromptService<"reports", Report, Metadata, InteractionData> {
+class ReportService extends PromptService<"reports", Report, InteractionData> {
 	constructor([client, bot]: [Client, Discord.Bot], guildId: bigint) {
 		super([client, bot], guildId, { type: "reports" });
 	}
 
-	getAllDocuments(): Document<Report>[] {
-		const reportsAll: Document<Report>[] = [];
+	getAllDocuments(): Map<string, Report> {
+		const reports = new Map<string, Report>();
 
-		for (const [compositeId, reports] of this.client.database.cache.reportsByAuthorAndGuild.entries()) {
-			const [_, guildIdString] = compositeId.split(constants.symbols.meta.idSeparator);
-			if (guildIdString === undefined) {
+		for (const [compositeId, report] of this.client.cache.documents.reports) {
+			if (report.guildId !== this.guildIdString) {
 				continue;
 			}
 
-			if (guildIdString !== this.guildIdString) {
-				continue;
-			}
-
-			reportsAll.push(...reports.values());
+			reports.set(compositeId, report);
 		}
 
-		return reportsAll;
+		return reports;
 	}
 
-	getUserDocument(document: Document<Report>): Promise<Document<User> | undefined> {
-		return this.client.database.adapters.users.getOrFetch(this.client, "reference", document.data.author);
+	async getUserDocument(reportDocument: Report): Promise<User | undefined> {
+		return (
+			this.client.cache.documents.users.get(reportDocument.authorId) ??
+			this.client.database.session.load<User>(`users/${reportDocument.authorId}`).then((value) => value ?? undefined)
+		);
 	}
 
-	decodeMetadata(data: string[]): Metadata | undefined {
-		const [userId, reference] = data;
-		if (userId === undefined || reference === undefined) {
-			return undefined;
-		}
-
-		return { userId: BigInt(userId), reference };
-	}
-
-	getPromptContent(user: Logos.User, document: Document<Report>): Discord.CreateMessageOptions | undefined {
+	getPromptContent(user: Logos.User, reportDocument: Report): Discord.CreateMessageOptions | undefined {
 		const guild = this.guild;
 		if (guild === undefined) {
 			return;
 		}
-
-		const reference = stringifyValue(document.ref);
 
 		const guildLocale = this.guildLocale;
 		const strings = {
@@ -79,7 +63,7 @@ class ReportService extends PromptService<"reports", Report, Metadata, Interacti
 		return {
 			embeds: [
 				{
-					title: document.data.answers.reason,
+					title: reportDocument.answers.reason,
 					color: constants.colors.darkRed,
 					thumbnail: (() => {
 						const iconURL = Discord.avatarUrl(user.id, user.discriminator, {
@@ -96,13 +80,13 @@ class ReportService extends PromptService<"reports", Report, Metadata, Interacti
 					fields: [
 						{
 							name: strings.report.users,
-							value: document.data.answers.users,
+							value: reportDocument.answers.users,
 						},
 						{
 							name: strings.report.link,
 							value:
-								document.data.answers.messageLink !== undefined
-									? document.data.answers.messageLink
+								reportDocument.answers.messageLink !== undefined
+									? reportDocument.answers.messageLink
 									: `*${strings.report.noLinkProvided}*`,
 							inline: false,
 						},
@@ -113,15 +97,15 @@ class ReportService extends PromptService<"reports", Report, Metadata, Interacti
 						},
 						{
 							name: strings.report.submittedAt,
-							value: timestamp(document.data.createdAt),
+							value: timestamp(reportDocument.createdAt),
 							inline: true,
 						},
 					],
 					footer: {
 						text: guild.name,
-						iconUrl: `${getGuildIconURLFormatted(
-							guild,
-						)}&metadata=${`${user.id}${constants.symbols.meta.metadataSeparator}${reference}`}`,
+						iconUrl: `${getGuildIconURLFormatted(guild)}&metadata=${reportDocument.guildId}/${
+							reportDocument.authorId
+						}/${reportDocument.createdAt}`,
 					},
 				},
 			],
@@ -129,15 +113,13 @@ class ReportService extends PromptService<"reports", Report, Metadata, Interacti
 				{
 					type: Discord.MessageComponentTypes.ActionRow,
 					components: [
-						document.data.isResolved
+						reportDocument.isResolved
 							? {
 									type: Discord.MessageComponentTypes.Button,
 									style: Discord.ButtonStyles.Secondary,
 									label: strings.markUnresolved,
 									customId: encodeId<InteractionData>(constants.components.reports, [
-										user.id.toString(),
-										this.guildIdString,
-										reference,
+										`${reportDocument.guildId}/${reportDocument.authorId}/${reportDocument.createdAt}`,
 										`${false}`,
 									]),
 							  }
@@ -146,9 +128,7 @@ class ReportService extends PromptService<"reports", Report, Metadata, Interacti
 									style: Discord.ButtonStyles.Primary,
 									label: strings.markResolved,
 									customId: encodeId<InteractionData>(constants.components.reports, [
-										user.id.toString(),
-										this.guildIdString,
-										reference,
+										`${reportDocument.guildId}/${reportDocument.authorId}/${reportDocument.createdAt}`,
 										`${true}`,
 									]),
 							  },
@@ -158,32 +138,19 @@ class ReportService extends PromptService<"reports", Report, Metadata, Interacti
 		};
 	}
 
-	async handleInteraction(
-		interaction: Discord.Interaction,
-		data: InteractionData,
-	): Promise<Document<Report> | null | undefined> {
+	async handleInteraction(interaction: Discord.Interaction, data: InteractionData): Promise<Report | null | undefined> {
 		const localeData = await getLocaleData(this.client, interaction);
 		const locale = localeData.locale;
 
-		const [userId, guildId, reference, isResolvedString] = data;
+		const [documentId, isResolvedString] = data;
 		const isResolved = isResolvedString === "true";
 
-		const user = await this.client.database.adapters.users.getOrFetch(this.client, "id", userId);
-		if (user === undefined) {
+		const reportDocument = this.documents.get(documentId);
+		if (reportDocument === undefined) {
 			return undefined;
 		}
 
-		const documents = this.client.database.adapters.reports.get(this.client, "authorAndGuild", [user.ref, guildId]);
-		if (documents === undefined) {
-			return undefined;
-		}
-
-		const document = documents.get(reference);
-		if (document === undefined) {
-			return undefined;
-		}
-
-		if (isResolved && document.data.isResolved) {
+		if (isResolved && reportDocument.isResolved) {
 			const strings = {
 				title: localise(this.client, "alreadyMarkedResolved.title", locale)(),
 				description: localise(this.client, "alreadyMarkedResolved.description", locale)(),
@@ -201,7 +168,7 @@ class ReportService extends PromptService<"reports", Report, Metadata, Interacti
 			return;
 		}
 
-		if (!(isResolved || document.data.isResolved)) {
+		if (!(isResolved || reportDocument.isResolved)) {
 			const strings = {
 				title: localise(this.client, "alreadyMarkedUnresolved.title", locale)(),
 				description: localise(this.client, "alreadyMarkedUnresolved.description", locale)(),
@@ -219,12 +186,10 @@ class ReportService extends PromptService<"reports", Report, Metadata, Interacti
 			return;
 		}
 
-		const updatedDocument = await this.client.database.adapters.reports.update(this.client, {
-			...document,
-			data: { ...document.data, isResolved },
-		});
+		reportDocument.isResolved = isResolved;
+		await this.client.database.session.saveChanges();
 
-		return updatedDocument;
+		return reportDocument;
 	}
 }
 

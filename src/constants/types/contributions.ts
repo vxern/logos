@@ -108,6 +108,11 @@ export default {
 			completion: 5,
 			contributors: [contributors["16wardm"]],
 		},
+		Danish: {
+			flag: "🇩🇰",
+			completion: 0,
+			contributors: [],
+		},
 		Dutch: {
 			flag: "🇳🇱",
 			completion: 5,

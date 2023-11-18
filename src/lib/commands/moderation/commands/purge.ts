@@ -25,6 +25,7 @@ import {
 import { chunk, snowflakeToTimestamp } from "../../../utils";
 import { CommandTemplate } from "../../command";
 import { user } from "../../parameters";
+import { Guild } from "../../../database/guild";
 
 const command: CommandTemplate = {
 	name: "purge",
@@ -70,17 +71,14 @@ async function handlePurgeMessages(
 		return;
 	}
 
-	const guildDocument = await client.database.adapters.guilds.getOrFetchOrCreate(
-		client,
-		"id",
-		guildId.toString(),
-		guildId,
-	);
+	const guildDocument =
+		client.cache.documents.guilds.get(guildId.toString()) ??
+		(await client.database.session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
 	if (guildDocument === undefined) {
 		return;
 	}
 
-	const configuration = guildDocument.data.features.moderation.features?.purging;
+	const configuration = guildDocument.features.moderation.features?.purging;
 	if (configuration === undefined || !configuration.enabled) {
 		return;
 	}
@@ -194,6 +192,7 @@ async function handlePurgeMessages(
 			postedStart: (startMessageContent !== undefined
 				? localise(client, "purge.strings.posted", locale)
 				: localise(client, "purge.strings.embedPosted", locale))({
+				// TODO(vxern): Fix timestamps now being ISO8601.
 				relative_timestamp: timestamp(Number(startMessage.timestamp)),
 				user_mention: mention(BigInt(startMessage.author.id), MentionTypes.User),
 			}),
@@ -201,6 +200,7 @@ async function handlePurgeMessages(
 			postedEnd: (endMessageContent !== undefined
 				? localise(client, "purge.strings.posted", locale)
 				: localise(client, "purge.strings.embedPosted", locale))({
+				// TODO(vxern): Fix timestamps now being ISO8601.
 				relative_timestamp: timestamp(Number(endMessage.timestamp)),
 				user_mention: mention(BigInt(endMessage.author.id), MentionTypes.User),
 			}),

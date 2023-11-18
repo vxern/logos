@@ -5,6 +5,7 @@ import { Client, localise } from "../../../client";
 import { getShowButton, parseArguments, reply } from "../../../interactions";
 import { CommandTemplate } from "../../command";
 import { show } from "../../parameters";
+import { Guild } from "../../../database/guild";
 
 const command: CommandTemplate = {
 	name: "policy",
@@ -26,17 +27,14 @@ async function handleDisplayModerationPolicy(
 		return;
 	}
 
-	const guildDocument = await client.database.adapters.guilds.getOrFetchOrCreate(
-		client,
-		"id",
-		guildId.toString(),
-		guildId,
-	);
+	const guildDocument =
+		client.cache.documents.guilds.get(guildId.toString()) ??
+		(await client.database.session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
 	if (guildDocument === undefined) {
 		return;
 	}
 
-	const configuration = guildDocument.data.features.moderation.features?.policy;
+	const configuration = guildDocument.features.moderation.features?.policy;
 	if (configuration === undefined || !configuration.enabled) {
 		return;
 	}

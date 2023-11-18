@@ -10,6 +10,7 @@ import * as Logos from "../../../../../../types";
 import { Client, localise } from "../../../../../client";
 import { editReply, parseArguments, postponeReply, reply, respond } from "../../../../../interactions";
 import { OptionTemplate } from "../../../../command";
+import { User } from "../../../../../database/user";
 
 const command: OptionTemplate = {
 	name: "set",
@@ -68,16 +69,15 @@ async function handleSetLanguage([client, bot]: [Client, Discord.Bot], interacti
 	const language = languageOrUndefined;
 
 	await postponeReply([client, bot], interaction);
-
-	const userDocument = await client.database.adapters.users.getOrFetch(client, "id", interaction.user.id.toString());
+	const userDocument =
+		client.cache.documents.users.get(interaction.user.id.toString()) ??
+		(await client.database.session.load<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined));
 	if (userDocument === undefined) {
 		return;
 	}
 
-	await client.database.adapters.users.update(client, {
-		...userDocument,
-		data: { ...userDocument.data, account: { ...userDocument.data.account, language } },
-	});
+	userDocument.account.language = language;
+	await client.database.session.saveChanges();
 
 	const locale = getLocaleByLocalisationLanguage(language);
 

@@ -1,7 +1,7 @@
 import * as Discord from "@discordeno/bot";
 import defaults from "../../../defaults";
 import * as Logos from "../../../types";
-import { DynamicVoiceChannel, Guild } from "../../database/structs/guild";
+import { DynamicVoiceChannel, Guild } from "../../database/guild";
 import diagnostics from "../../diagnostics";
 import { isVoice } from "../../utils";
 import { LocalService } from "../service";
@@ -24,7 +24,7 @@ class DynamicVoiceChannelService extends LocalService {
 			return undefined;
 		}
 
-		return guildDocument.data.features.server.features?.dynamicVoiceChannels;
+		return guildDocument.features.server.features?.dynamicVoiceChannels;
 	}
 
 	get channels(): DynamicVoiceChannelData[] | undefined {
