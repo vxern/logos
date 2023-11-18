@@ -6,7 +6,7 @@ interface Guild {
 	id: string;
 
 	/** This guild's ID. */
-	guild: string;
+	guildId: string;
 
 	/**
 	 * Whether the guild is native to Logos.
