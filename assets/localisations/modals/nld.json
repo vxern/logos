@@ -2,7 +2,7 @@
     "verification.title": "Verificatievragen",
     "verification.fields.reason": "Wat is jouw reden om {language} te leren?",
     "verification.fields.aim": "How will you benefit from becoming a member?",
-    "verification.fields.whereFound": "Waar heb je de server ontdekt?",
+    "verification.fields.whereFound": "Waar heb je de server gevonden?",
     "answer.title": "Antwoord",
     "answer.fields.question": "Vraag",
     "answer.fields.answer": "Antwoord",
@@ -17,6 +17,6 @@
     "suggestion.fields.suggestion": "Wat is je suggestie?",
     "prompts.continue": "Doorgaan",
     "prompts.cancel": "Annuleren",
-    "prompts.stay": "Take me back",
-    "prompts.leave": "Leave"
+    "prompts.stay": "Teruggaan",
+    "prompts.leave": "Verlaten"
 }

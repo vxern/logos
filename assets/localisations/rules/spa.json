@@ -10,5 +10,13 @@
     "rules.rule": "Regla",
     "rules.behaviour.summary": "Intente ser amable.",
     "rules.behaviour.content": "Se espera que los miembros traten a otros con respeto, consideración y comprensión. Malos comportamientos en forma de abuso verbal, discriminación, acoso y otras conductas hirientes o comportamientos tóxicos no serán tolerados.",
-    "rules.quality.content": "Se espera que las contribuciones hechas al servidor sean de una calidad acceptable. Ofensas, spam, publicaciones irritantes repetitivas, shitposting (fuera de los canales de memes) y otras conductas molestas son totalmente rechazados."
+    "rules.quality.content": "Se espera que las contribuciones hechas al servidor sean de una calidad acceptable. Ofensas, spam, publicaciones irritantes repetitivas, shitposting (fuera de los canales de memes) y otras conductas molestas son totalmente rechazados.",
+    "rules.tldr": "TL;DR",
+    "rules.exclusivity.summary": "No haga publicidad.",
+    "rules.exclusivity.title": "Exclusividad",
+    "rules.exclusivity.content": "Se espera que los miembros no utilicen este espacio para publicidad, y se prohíben los intentos activos al respecto (incluidos los DMD no solicitados).",
+    "rules.adherence.title": "Cumplimiento",
+    "rules.adherence.summary": "Respeta las reglas.",
+    "rules.suitability.content": "Se espera que las contribuciones realizadas al servidor sean apropiadas para la visualización por menores de edad. El contenido restringido por edad (NSFW) y NSFL está estrictamente prohibido. Si no se la mostrarías a un menor, no deberías postearlo.",
+    "rules.adherence.content": "Para los miembros que no muestran ningún respeto por las reglas del servidor, y no están interesados en hacer contribuciones útiles, serán baneados permanentemente."
 }

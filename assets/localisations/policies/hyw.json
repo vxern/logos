@@ -7,7 +7,7 @@
     "policies.moderation.points.warnings.title": "Ի՞նչ կը պատահի բազմաթիւ զգուշացումներու պարագային։",
     "policies.moderation.points.warnings.description": "Եթէ անդամ մը արդէն երեք զգուշացնում կը ստանայ, քիչ անգամ կը համրացնէ չորրորդին պարագային։ Զգուշացնում __երկու ամիսով__ կը լրանայ։",
     "policies.moderation.points.furtherAction.title": "Եւ յետո՞յ։",
-    "policies.moderation.points.furtherAction.description": "Ուրեմն խմպապետները կը տեղեկացուին, որ սահման անցնուած է, եւ յարմար գործողութիւն կ'որոշուի։",
+    "policies.moderation.points.furtherAction.description": "Ուրեմն աշխատակիցներու խումբը կը տեղեկացուի, որ սահման անցնուած է, եւ յարմար գործողութիւն կ'որոշուի։",
     "policies.moderation.points.ban.title": "Եթէ հոգ չեմ ընե՞ր։",
-    "policies.moderation.points.ban.description": "Եթէ անդամ մը գիտութեամբ ու հաստատօրէն անհնազանդած է, կամ խմբապետները անգիտացած է, սերվերէն կը տարագրուի։"
+    "policies.moderation.points.ban.description": "Եթէ անդամ մը գիտութեամբ ու հաստատօրէն անհնազանդած է, կամ աշխատակիցներու խումբին անգիտացած է, սերվերէն կը տարագրուի։"
 }
