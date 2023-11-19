@@ -1,7 +1,7 @@
+import * as Discord from "@discordeno/bot";
 import { CommandTemplate } from "../../command";
 import roles from "./profile/roles";
 import view from "./profile/view";
-import * as Discord from "discordeno";
 
 const command: CommandTemplate = {
 	name: "profile",

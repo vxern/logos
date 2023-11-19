@@ -1,3 +1,4 @@
+import * as Discord from "@discordeno/bot";
 import constants from "../../../../../constants/constants";
 import { Locale } from "../../../../../constants/languages";
 import { trim } from "../../../../../formatting";
@@ -17,7 +18,6 @@ import {
 	isGroup,
 	isSingle,
 } from "../../roles/types";
-import * as Discord from "discordeno";
 
 const command: OptionTemplate = {
 	name: "roles",
@@ -159,7 +159,7 @@ async function createRoleSelectionMenu(
 	const customId = createInteractionCollector([client, bot], {
 		type: Discord.InteractionTypes.MessageComponent,
 		userId: interaction.user.id,
-		onCollect: async (bot, selection) => {
+		onCollect: async (selection) => {
 			acknowledge([client, bot], selection);
 
 			const indexString = selection.data?.values?.at(0);
@@ -223,13 +223,15 @@ async function createRoleSelectionMenu(
 					return;
 				}
 
-				Discord.removeRole(bot, guild.id, member.id, role.id, "User-requested role removal.").catch(() =>
-					client.log.warn(
-						`Failed to remove ${diagnostics.display.role(role)} from ${diagnostics.display.member(
-							member,
-						)} on ${diagnostics.display.guild(guild)}.`,
-					),
-				);
+				bot.rest
+					.removeRole(guild.id, member.id, role.id, "User-requested role removal.")
+					.catch(() =>
+						client.log.warn(
+							`Failed to remove ${diagnostics.display.role(role)} from ${diagnostics.display.member(
+								member,
+							)} on ${diagnostics.display.guild(guild)}.`,
+						),
+					);
 
 				const roleIndex = displayData.roleData.memberRoleIds.findIndex((roleId) => roleId === role.id);
 				const roleInMenuIndex = viewData.memberRolesIncludedInMenu.findIndex((roleId) => roleId === role.id);
@@ -278,23 +280,27 @@ async function createRoleSelectionMenu(
 					return;
 				}
 
-				await Discord.addRole(bot, guild.id, member.id, role.id, "User-requested role addition.").catch(() =>
-					client.log.warn(
-						`Failed to add ${diagnostics.display.role(role)} to ${diagnostics.display.member(
-							member,
-						)} on ${diagnostics.display.guild(guild)}.`,
-					),
-				);
+				await bot.rest
+					.addRole(guild.id, member.id, role.id, "User-requested role addition.")
+					.catch(() =>
+						client.log.warn(
+							`Failed to add ${diagnostics.display.role(role)} to ${diagnostics.display.member(
+								member,
+							)} on ${diagnostics.display.guild(guild)}.`,
+						),
+					);
 
 				if (viewData.category.maximum === 1) {
 					for (const memberRoleId of viewData.memberRolesIncludedInMenu) {
-						Discord.removeRole(bot, guild.id, member.id, memberRoleId).catch(() =>
-							client.log.warn(
-								`Failed to remove ${diagnostics.display.role(role)} from ${diagnostics.display.member(
-									member,
-								)} on ${diagnostics.display.guild(guild)}.`,
-							),
-						);
+						bot.rest
+							.removeRole(guild.id, member.id, memberRoleId)
+							.catch(() =>
+								client.log.warn(
+									`Failed to remove ${diagnostics.display.role(role)} from ${diagnostics.display.member(
+										member,
+									)} on ${diagnostics.display.guild(guild)}.`,
+								),
+							);
 
 						const roleId = displayData.roleData.memberRoleIds.findIndex((roleId) => roleId === memberRoleId);
 

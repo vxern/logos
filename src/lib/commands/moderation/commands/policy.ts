@@ -1,15 +1,17 @@
+import * as Discord from "@discordeno/bot";
 import { Locale } from "../../../../constants/languages";
 import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
-import { parseArguments, reply } from "../../../interactions";
+import { getShowButton, parseArguments, reply } from "../../../interactions";
 import { CommandTemplate } from "../../command";
 import { show } from "../../parameters";
-import * as Discord from "discordeno";
+import { Guild } from "../../../database/guild";
 
 const command: CommandTemplate = {
 	name: "policy",
 	type: Discord.ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ["VIEW_CHANNEL"],
+	isShowable: true,
 	handle: handleDisplayModerationPolicy,
 	options: [show],
 };
@@ -25,22 +27,21 @@ async function handleDisplayModerationPolicy(
 		return;
 	}
 
-	const guildDocument = await client.database.adapters.guilds.getOrFetchOrCreate(
-		client,
-		"id",
-		guildId.toString(),
-		guildId,
-	);
+	const guildDocument =
+		client.cache.documents.guilds.get(guildId.toString()) ??
+		(await client.database.session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
 	if (guildDocument === undefined) {
 		return;
 	}
 
-	const configuration = guildDocument.data.features.moderation.features?.policy;
+	const configuration = guildDocument.features.moderation.features?.policy;
 	if (configuration === undefined || !configuration.enabled) {
 		return;
 	}
 
-	const [{ show }] = parseArguments(interaction.data?.options, { show: "boolean" });
+	const [{ show: showParameter }] = parseArguments(interaction.data?.options, { show: "boolean" });
+
+	const show = interaction.show ?? showParameter ?? false;
 
 	const guild = client.cache.guilds.get(guildId);
 	if (guild === undefined) {
@@ -51,10 +52,16 @@ async function handleDisplayModerationPolicy(
 		title: localise(client, "policies.moderation.title", locale)(),
 	};
 
+	const showButton = getShowButton(client, interaction, { locale });
+
+	const components: Discord.ActionRow[] | undefined = show
+		? undefined
+		: [{ type: Discord.MessageComponentTypes.ActionRow, components: [showButton] }];
+
 	reply(
 		[client, bot],
 		interaction,
-		{ embeds: [{ title: strings.title, fields: getModerationPolicyPoints(client, { locale }) }] },
+		{ embeds: [{ title: strings.title, fields: getModerationPolicyPoints(client, { locale }) }], components },
 		{ visible: show },
 	);
 }
@@ -62,7 +69,7 @@ async function handleDisplayModerationPolicy(
 function getModerationPolicyPoints(
 	client: Client,
 	{ locale }: { locale: Locale },
-): NonNullable<Discord.Embed["fields"]> {
+): Discord.CamelizedDiscordEmbedField[] {
 	const strings = {
 		introduction: {
 			title: localise(client, "policies.moderation.points.introduction.title", locale)(),

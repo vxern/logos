@@ -1,7 +1,12 @@
 export default {
 	meta: {
+		// ! Responsible for inserting whitespace where a standard space would get filtered out.
+		// ! Changing this would break:
+		// ! - Empty translations.
+		// ! - Indentation on the /word command.
 		whitespace: "⠀",
-		metadataSeparator: ",",
+		// ! Responsible for separating pieces of data in component custom IDs.
+		// ! Changing this would break button interactions on all existing prompts/notices.
 		idSeparator: "|",
 	},
 	ruleBullet: "💠",
@@ -10,9 +15,9 @@ export default {
 		information: "ℹ️",
 		inviteLink: "🔗",
 		bot: "🤖",
-		build: "🛠️",
-		handshake: "🤝",
-		unlocked: "🔓",
+		function: "🛠️",
+		languages: "🌍",
+		add: "🤝",
 	},
 	sigils: {
 		divider: "﹘",
@@ -96,9 +101,19 @@ export default {
 	},
 	bot: {
 		features: {
-			roles: "💼",
-			language: "🎓",
-			music: "🎶",
+			definitions: "🔍",
+			translations: "🌍",
+			games: "🎮",
+			messages: "✍️",
+			guides: "🎓",
+		},
+		multipurpose: {
+			features: {
+				audio: "🎶",
+				roles: "💼",
+				moderation: "💢",
+				social: "💐",
+			},
 		},
 	},
 	guild: {
@@ -130,7 +145,7 @@ export default {
 			},
 		},
 	},
-	bullet: "➜",
+	bullet: "-",
 	strings: {
 		trail: "...",
 		continued: "(...)",
@@ -140,6 +155,11 @@ export default {
 		b: "🟨",
 		c: "🟥",
 	},
+	detect: {
+		likely: "💯",
+		possible: "🤔",
+	},
+	showInChat: "🗨️",
 	roles: {
 		folder: "📁",
 		noCategory: "💭",

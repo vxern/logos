@@ -1,12 +1,12 @@
+import * as Discord from "@discordeno/bot";
 import constants from "../../../constants/constants";
 import { FeatureLanguage, Locale } from "../../../constants/languages";
 import { trim } from "../../../formatting";
 import * as Logos from "../../../types";
 import { localise } from "../../client";
 import { proficiency } from "../../commands/social/roles/categories/language";
-import { stringifyValue } from "../../database/database";
-import { EntryRequest } from "../../database/structs/entry-request";
-import { Guild, timeStructToMilliseconds } from "../../database/structs/guild";
+import { EntryRequest } from "../../database/entry-request";
+import { Guild, timeStructToMilliseconds } from "../../database/guild";
 import diagnostics from "../../diagnostics";
 import {
 	Modal,
@@ -20,7 +20,7 @@ import {
 } from "../../interactions";
 import { snowflakeToTimestamp } from "../../utils";
 import { LocalService } from "../service";
-import * as Discord from "discordeno";
+import { User } from "../../database/user";
 
 type EntryStepButtonID = [parameter: string];
 
@@ -36,7 +36,7 @@ class EntryService extends LocalService {
 			return undefined;
 		}
 
-		return guildDocument.data.features.server.features?.entry;
+		return guildDocument.features.server.features?.entry;
 	}
 
 	get verificationConfiguration(): VerificationConfiguration | undefined {
@@ -45,10 +45,10 @@ class EntryService extends LocalService {
 			return undefined;
 		}
 
-		return guildDocument.data.features.moderation.features?.verification;
+		return guildDocument.features.moderation.features?.verification;
 	}
 
-	async interactionCreate(bot: Discord.Bot, interactionRaw: Discord.Interaction): Promise<void> {
+	async interactionCreate(interactionRaw: Discord.Interaction): Promise<void> {
 		if (interactionRaw.type !== Discord.InteractionTypes.MessageComponent) {
 			return;
 		}
@@ -69,15 +69,15 @@ class EntryService extends LocalService {
 		const [step, parameter] = decodeId<EntryStepButtonID>(customId);
 		switch (step) {
 			case constants.components.entry.acceptedRules: {
-				this.handleAcceptRules(bot, interaction);
+				this.handleAcceptRules(interaction);
 				break;
 			}
 			case constants.components.entry.requestedVerification: {
-				this.handleRequestVerification(bot, interaction, parameter);
+				this.handleRequestVerification(interaction, parameter);
 				break;
 			}
 			case constants.components.entry.selectedLanguageProficiency: {
-				this.handleSelectLanguageProficiency(bot, interaction, parameter);
+				this.handleSelectLanguageProficiency(interaction, parameter);
 				break;
 			}
 			default: {
@@ -87,7 +87,7 @@ class EntryService extends LocalService {
 		}
 	}
 
-	private async handleAcceptRules(bot: Discord.Bot, interaction: Logos.Interaction): Promise<void> {
+	private async handleAcceptRules(interaction: Logos.Interaction): Promise<void> {
 		const locale = interaction.locale;
 
 		const guildDocument = this.guildDocument;
@@ -115,7 +115,7 @@ class EntryService extends LocalService {
 			},
 		};
 
-		reply([this.client, bot], interaction, {
+		reply([this.client, this.bot], interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -145,11 +145,7 @@ class EntryService extends LocalService {
 		});
 	}
 
-	private async handleRequestVerification(
-		bot: Discord.Bot,
-		interaction: Logos.Interaction,
-		parameter: string,
-	): Promise<void> {
+	private async handleRequestVerification(interaction: Logos.Interaction, parameter: string): Promise<void> {
 		const locale = interaction.locale;
 
 		const guild = this.guild;
@@ -159,32 +155,34 @@ class EntryService extends LocalService {
 
 		const requestedRoleId = BigInt(parameter);
 
-		const guildDocument = await this.client.database.adapters.guilds.getOrFetch(this.client, "id", guild.id.toString());
+		const guildDocument =
+			this.client.cache.documents.guilds.get(guild.id.toString()) ??
+			(await this.client.database.session.load<Guild>(`guilds/${guild.id}`).then((value) => value ?? undefined));
 		if (guildDocument === undefined) {
 			return;
 		}
 
-		const userDocument = await this.client.database.adapters.users.getOrFetchOrCreate(
-			this.client,
-			"id",
-			interaction.user.id.toString(),
-			interaction.user.id,
-		);
+		const userDocument =
+			this.client.cache.documents.users.get(interaction.user.id.toString()) ??
+			(await this.client.database.session
+				.load<User>(`users/${interaction.user.id}`)
+				.then((value) => value ?? undefined));
 		if (userDocument === undefined) {
 			return;
 		}
 
-		const entryRequest = this.client.database.adapters.entryRequests.get(this.client, "submitterAndGuild", [
-			userDocument.ref,
-			guild.id.toString(),
-		]);
-		if (entryRequest !== undefined) {
+		const entryRequestDocument =
+			this.client.cache.documents.entryRequests.get(`${userDocument.account.id}/${guildDocument.id}`) ??
+			(await this.client.database.session
+				.load<EntryRequest>(`entryRequests/${userDocument.account.id}/${guildDocument.id}`)
+				.then((value) => value ?? undefined));
+		if (entryRequestDocument !== undefined) {
 			const strings = {
 				title: localise(this.client, "entry.verification.answers.alreadyAnswered.title", locale)(),
 				description: localise(this.client, "entry.verification.answers.alreadyAnswered.description", locale)(),
 			};
 
-			reply([this.client, bot], interaction, {
+			reply([this.client, this.bot], interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -202,22 +200,16 @@ class EntryService extends LocalService {
 			return;
 		}
 
-		createModalComposer<EntryRequest["answers"]>([this.client, bot], interaction, {
+		createModalComposer<EntryRequest["answers"]>([this.client, this.bot], interaction, {
 			modal: this.generateVerificationQuestionModal(interaction.featureLanguage, { locale }),
 			onSubmit: async (submission, answers) => {
-				const submitterReferenceId = stringifyValue(userDocument.ref);
-
-				if (
-					this.client.database.cache.entryRequestBySubmitterAndGuild.has(
-						`${submitterReferenceId}${constants.symbols.meta.idSeparator}${guild.id}`,
-					)
-				) {
+				if (this.client.cache.documents.entryRequests.has(`${userDocument.account.id}/${guild.id}`)) {
 					const strings = {
 						title: localise(this.client, "entry.verification.answers.alreadyAnswered.title", locale)(),
 						description: localise(this.client, "entry.verification.answers.alreadyAnswered.description", locale)(),
 					};
 
-					reply([this.client, bot], submission, {
+					reply([this.client, this.bot], submission, {
 						embeds: [
 							{
 								title: strings.title,
@@ -230,40 +222,41 @@ class EntryService extends LocalService {
 					return true;
 				}
 
-				await postponeReply([this.client, bot], submission);
+				await postponeReply([this.client, this.bot], submission);
 
-				const entryRequest = await this.client.database.adapters.entryRequests.create(this.client, {
-					createdAt: Date.now(),
-					submitter: userDocument.ref,
-					guild: guild.id.toString(),
+				const entryRequestDocument = {
+					id: `entryRequests/${userDocument.account.id}/${guild.id}`,
+					authorId: userDocument.account.id,
+					guildId: guild.id.toString(),
 					answers,
-					votedFor: [],
-					votedAgainst: [],
-					requestedRole: requestedRoleId.toString(),
+					requestedRoleId: requestedRoleId.toString(),
 					isFinalised: false,
-				});
-				if (entryRequest === undefined) {
-					return "failure";
-				}
+					createdAt: Date.now(),
+					"@metadata": { "@collection": "EntryRequests" },
+				};
+
+				await this.client.database.session.store(entryRequestDocument);
+				await this.client.database.session.saveChanges();
 
 				const journallingService = this.client.services.journalling.get(this.guildId);
-				journallingService?.log(bot, "entryRequestSubmit", { args: [interaction.user, entryRequest.data] });
+				journallingService?.log("entryRequestSubmit", { args: [interaction.user, entryRequestDocument] });
 
-				const userId = BigInt(userDocument.data.account.id);
-				const reference = stringifyValue(entryRequest.ref);
+				const userId = BigInt(userDocument.account.id);
 
 				const user = this.client.cache.users.get(userId);
 				if (user === undefined) {
 					return "failure";
 				}
 
-				const prompt = await verificationService.savePrompt(bot, user, entryRequest);
+				const prompt = await verificationService.savePrompt(user, entryRequestDocument);
 				if (prompt === undefined) {
 					return "failure";
 				}
 
-				verificationService.registerPrompt(prompt, userId, reference, entryRequest);
-				verificationService.registerHandler([userId.toString(), this.guildIdString, reference]);
+				const compositeId = `${guild.id}/${user.id}`;
+				verificationService.registerDocument(compositeId, entryRequestDocument);
+				verificationService.registerPrompt(prompt, userId, compositeId, entryRequestDocument);
+				verificationService.registerHandler(compositeId);
 
 				const strings = {
 					title: localise(this.client, "entry.verification.answers.submitted.title", locale)(),
@@ -277,7 +270,7 @@ class EntryService extends LocalService {
 					},
 				};
 
-				editReply([this.client, bot], submission, {
+				editReply([this.client, this.bot], submission, {
 					embeds: [
 						{
 							title: strings.title,
@@ -297,7 +290,7 @@ class EntryService extends LocalService {
 							description: localise(this.client, "entry.verification.answers.failed.description", locale)(),
 						};
 
-						editReply([this.client, bot], submission, {
+						editReply([this.client, this.bot], submission, {
 							embeds: [
 								{
 									title: strings.title,
@@ -374,11 +367,7 @@ class EntryService extends LocalService {
 		};
 	}
 
-	private async handleSelectLanguageProficiency(
-		bot: Discord.Bot,
-		interaction: Logos.Interaction,
-		parameter: string,
-	): Promise<void> {
+	private async handleSelectLanguageProficiency(interaction: Logos.Interaction, parameter: string): Promise<void> {
 		const locale = interaction.locale;
 
 		const guild = this.guild;
@@ -397,7 +386,7 @@ class EntryService extends LocalService {
 			return;
 		}
 
-		const canEnter = await this.vetUser(bot, interaction, { locale });
+		const canEnter = await this.vetUser(interaction, { locale });
 		if (!canEnter) {
 			return;
 		}
@@ -408,14 +397,27 @@ class EntryService extends LocalService {
 		}
 
 		if (requiresVerification) {
-			const userDocument = await this.client.database.adapters.users.getOrFetchOrCreate(
-				this.client,
-				"id",
-				interaction.user.id.toString(),
-				interaction.user.id,
-			);
+			const userDocument =
+				this.client.cache.documents.users.get(interaction.user.id.toString()) ??
+				(await this.client.database.session
+					.load<User>(`users/${interaction.user.id}`)
+					.then((value) => value ?? undefined)) ??
+				(await (async () => {
+					const userDocument = {
+						...({
+							id: `users/${interaction.user.id}`,
+							account: { id: interaction.user.id.toString() },
+							createdAt: Date.now(),
+						} satisfies User),
+						"@metadata": { "@collection": "Users" },
+					};
+					await this.client.database.session.store(userDocument);
+					await this.client.database.session.saveChanges();
 
-			const isVerified = userDocument?.data.account.authorisedOn?.includes(this.guildIdString);
+					return userDocument as User;
+				})());
+
+			const isVerified = userDocument?.account.authorisedOn?.includes(this.guildIdString);
 
 			if (!isVerified) {
 				const strings = {
@@ -433,7 +435,7 @@ class EntryService extends LocalService {
 					},
 				};
 
-				reply([this.client, bot], interaction, {
+				reply([this.client, this.bot], interaction, {
 					embeds: [
 						{
 							title: strings.title,
@@ -476,7 +478,7 @@ class EntryService extends LocalService {
 			},
 		};
 
-		await reply([this.client, bot], interaction, {
+		await reply([this.client, this.bot], interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -487,33 +489,44 @@ class EntryService extends LocalService {
 			],
 		});
 
-		Discord.addRole(bot, guild.id, interaction.user.id, role.id, "User-requested role addition.").catch(() =>
-			this.client.log.warn(
-				`Failed to add ${diagnostics.display.role(role)} to ${diagnostics.display.user(
-					interaction.user,
-				)} on ${diagnostics.display.guild(guild.id)}.`,
-			),
-		);
+		this.bot.rest
+			.addRole(guild.id, interaction.user.id, role.id, "User-requested role addition.")
+			.catch(() =>
+				this.client.log.warn(
+					`Failed to add ${diagnostics.display.role(role)} to ${diagnostics.display.user(
+						interaction.user,
+					)} on ${diagnostics.display.guild(guild.id)}.`,
+				),
+			);
 	}
 
-	private async vetUser(
-		bot: Discord.Bot,
-		interaction: Logos.Interaction,
-		{ locale }: { locale: Locale },
-	): Promise<boolean> {
-		const userDocument = await this.client.database.adapters.users.getOrFetchOrCreate(
-			this.client,
-			"id",
-			interaction.user.id.toString(),
-			interaction.user.id,
-		);
+	private async vetUser(interaction: Logos.Interaction, { locale }: { locale: Locale }): Promise<boolean> {
+		const userDocument =
+			this.client.cache.documents.users.get(interaction.user.id.toString()) ??
+			(await this.client.database.session
+				.load<User>(`users/${interaction.user.id}`)
+				.then((value) => value ?? undefined)) ??
+			(await (async () => {
+				const userDocument = {
+					...({
+						id: `users/${interaction.user.id}`,
+						account: { id: interaction.user.id.toString() },
+						createdAt: Date.now(),
+					} satisfies User),
+					"@metadata": { "@collection": "Users" },
+				};
+				await this.client.database.session.store(userDocument);
+				await this.client.database.session.saveChanges();
+
+				return userDocument as User;
+			})());
 		if (userDocument === undefined) {
 			const strings = {
 				title: localise(this.client, "entry.verification.verifyingAccount.failed.title", locale)(),
 				description: localise(this.client, "entry.verification.verifyingAccount.failed.description", locale)(),
 			};
 
-			reply([this.client, bot], interaction, {
+			reply([this.client, this.bot], interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -537,18 +550,14 @@ class EntryService extends LocalService {
 			return false;
 		}
 
-		const entryRequest = this.client.database.adapters.entryRequests.get(this.client, "submitterAndGuild", [
-			userDocument.ref,
-			guildId.toString(),
-		]);
-
-		if (entryRequest !== undefined && !entryRequest.data.isFinalised) {
+		const entryRequestDocument = this.client.cache.documents.entryRequests.get(`${guildId}/${userDocument.id}`);
+		if (entryRequestDocument !== undefined && !entryRequestDocument.isFinalised) {
 			const strings = {
 				title: localise(this.client, "entry.verification.answers.alreadyAnswered.title", locale)(),
 				description: localise(this.client, "entry.verification.answers.alreadyAnswered.description", locale)(),
 			};
 
-			reply([this.client, bot], interaction, {
+			reply([this.client, this.bot], interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -561,16 +570,16 @@ class EntryService extends LocalService {
 			return false;
 		}
 
-		if (userDocument.data.account.authorisedOn?.includes(guildId.toString())) {
+		if (userDocument.account.authorisedOn?.includes(guildId.toString())) {
 			return true;
 		}
-		if (userDocument.data.account.rejectedOn?.includes(guildId.toString())) {
+		if (userDocument.account.rejectedOn?.includes(guildId.toString())) {
 			const strings = {
 				title: localise(this.client, "entry.verification.answers.rejectedBefore.title", locale)(),
 				description: localise(this.client, "entry.verification.answers.rejectedBefore.description", locale)(),
 			};
 
-			reply([this.client, bot], interaction, {
+			reply([this.client, this.bot], interaction, {
 				embeds: [
 					{
 						title: strings.title,

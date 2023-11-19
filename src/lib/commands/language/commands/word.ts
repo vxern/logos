@@ -1,5 +1,6 @@
+import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
-import languages, { Locale, LocalisationLanguage, isLocalised } from "../../../../constants/languages";
+import languages, { Locale, LocalisationLanguage, isLocalisationLanguage } from "../../../../constants/languages";
 import localisations from "../../../../constants/localisations";
 import defaults from "../../../../defaults";
 import { code, trim } from "../../../../formatting";
@@ -13,6 +14,7 @@ import {
 	deleteReply,
 	editReply,
 	encodeId,
+	getShowButton,
 	parseArguments,
 	postponeReply,
 	reply,
@@ -24,13 +26,13 @@ import { show } from "../../parameters";
 import { Definition, DictionaryEntry, Expression } from "../dictionaries/adapter";
 import adapters from "../dictionaries/adapters";
 import { PartOfSpeech, isUnknownPartOfSpeech } from "../dictionaries/part-of-speech";
-import * as Discord from "discordeno";
 
 const command: CommandTemplate = {
 	name: "word",
 	type: Discord.ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ["VIEW_CHANNEL"],
 	isRateLimited: true,
+	isShowable: true,
 	handle: handleFindWord,
 	handleAutocomplete: handleFindWordAutocomplete,
 	options: [
@@ -81,18 +83,22 @@ async function handleFindWordAutocomplete(
 
 /** Allows the user to look up a word and get information about it. */
 async function handleFindWord([client, bot]: [Client, Discord.Bot], interaction: Logos.Interaction): Promise<void> {
-	const [{ language: languageOrUndefined, word, verbose, show }] = parseArguments(interaction.data?.options, {
-		verbose: "boolean",
-		show: "boolean",
-	});
+	const [{ language: languageOrUndefined, word, verbose, show: showParameter }] = parseArguments(
+		interaction.data?.options,
+		{
+			verbose: "boolean",
+			show: "boolean",
+		},
+	);
 	if (word === undefined) {
 		return;
 	}
 
+	const show = interaction.show ?? showParameter ?? false;
 	const language = show ? interaction.guildLanguage : interaction.language;
 	const locale = show ? interaction.guildLocale : interaction.locale;
 
-	if (languageOrUndefined !== undefined && !isLocalised(languageOrUndefined)) {
+	if (languageOrUndefined !== undefined && !isLocalisationLanguage(languageOrUndefined)) {
 		const strings = {
 			title: localise(client, "word.strings.invalid.language.title", locale)(),
 			description: localise(client, "word.strings.invalid.language.description", locale)(),
@@ -114,11 +120,6 @@ async function handleFindWord([client, bot]: [Client, Discord.Bot], interaction:
 
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
-		return;
-	}
-
-	const guildDocument = await client.database.adapters.guilds.getOrFetch(client, "id", guildId.toString());
-	if (guildDocument === undefined) {
 		return;
 	}
 
@@ -245,6 +246,8 @@ async function handleFindWord([client, bot]: [Client, Discord.Bot], interaction:
 
 	const entries = sanitiseEntries([...Array.from(entriesByPartOfSpeech.values()).flat(), ...unclassifiedEntries]);
 
+	const showButton = show ? undefined : getShowButton(client, interaction, { locale });
+
 	displayMenu(
 		[client, bot],
 		interaction,
@@ -253,6 +256,7 @@ async function handleFindWord([client, bot]: [Client, Discord.Bot], interaction:
 			currentView: ContentTabs.Definitions,
 			dictionaryEntryIndex: 0,
 			inflectionTableIndex: 0,
+			showButton,
 			verbose: verbose ?? false,
 		},
 		{ language, locale },
@@ -275,6 +279,7 @@ enum ContentTabs {
 
 interface WordViewData {
 	readonly entries: DictionaryEntry[];
+	showButton: Discord.ButtonComponent | undefined;
 	currentView: ContentTabs;
 	dictionaryEntryIndex: number;
 	inflectionTableIndex: number;
@@ -303,7 +308,7 @@ function generateEmbeds(
 	data: WordViewData,
 	entry: DictionaryEntry,
 	{ language, locale }: { language: LocalisationLanguage; locale: Locale },
-): Discord.Embed[] {
+): Discord.CamelizedDiscordEmbed[] {
 	switch (data.currentView) {
 		case ContentTabs.Definitions: {
 			return entryToEmbeds(client, entry, data.verbose, { language, locale });
@@ -341,7 +346,7 @@ function generateButtons(
 
 			const previousPageButtonId = createInteractionCollector([client, bot], {
 				type: Discord.InteractionTypes.MessageComponent,
-				onCollect: async (_, selection) => {
+				onCollect: async (selection) => {
 					acknowledge([client, bot], selection);
 
 					if (!isFirst) {
@@ -354,7 +359,7 @@ function generateButtons(
 
 			const nextPageButtonId = createInteractionCollector([client, bot], {
 				type: Discord.InteractionTypes.MessageComponent,
-				onCollect: async (_, selection) => {
+				onCollect: async (selection) => {
 					acknowledge([client, bot], selection);
 
 					if (!isLast) {
@@ -403,7 +408,7 @@ function generateButtons(
 
 			const buttonId = createInteractionCollector([client, bot], {
 				type: Discord.InteractionTypes.MessageComponent,
-				onCollect: async (_, selection) => {
+				onCollect: async (selection) => {
 					acknowledge([client, bot], selection);
 
 					if (entry.inflectionTable === undefined || selection.data === undefined) {
@@ -451,7 +456,7 @@ function generateButtons(
 
 	const definitionsMenuButtonId = createInteractionCollector([client, bot], {
 		type: Discord.InteractionTypes.MessageComponent,
-		onCollect: async (_, selection) => {
+		onCollect: async (selection) => {
 			acknowledge([client, bot], selection);
 
 			data.inflectionTableIndex = 0;
@@ -463,7 +468,7 @@ function generateButtons(
 
 	const inflectionMenuButtonId = createInteractionCollector([client, bot], {
 		type: Discord.InteractionTypes.MessageComponent,
-		onCollect: async (_, selection) => {
+		onCollect: async (selection) => {
 			acknowledge([client, bot], selection);
 
 			data.currentView = ContentTabs.Inflection;
@@ -500,6 +505,10 @@ function generateButtons(
 		});
 	}
 
+	if (data.showButton !== undefined) {
+		row.push(data.showButton);
+	}
+
 	if (row.length > 1) {
 		paginationControls.push(row);
 	}
@@ -515,7 +524,7 @@ function entryToEmbeds(
 	entry: DictionaryEntry,
 	verbose: boolean,
 	{ language, locale }: { language: LocalisationLanguage; locale: Locale },
-): Discord.Embed[] {
+): Discord.CamelizedDiscordEmbed[] {
 	let partOfSpeechDisplayed: string;
 	if (entry.partOfSpeech === undefined) {
 		const strings = {
@@ -543,8 +552,8 @@ function entryToEmbeds(
 
 	const word = entry.lemma;
 
-	const embeds: Discord.Embed[] = [];
-	const fields: NonNullable<Discord.Embed["fields"]> = [];
+	const embeds: Discord.CamelizedDiscordEmbed[] = [];
+	const fields: Discord.CamelizedDiscordEmbedField[] = [];
 
 	if (entry.nativeDefinitions !== undefined && entry.nativeDefinitions.length !== 0) {
 		const definitionsStringified = stringifyEntries(client, entry.nativeDefinitions, "definitions", { locale });
@@ -660,7 +669,7 @@ function entryToEmbeds(
 		}),
 	};
 	const sourcesFormatted = entry.sources.map(([link, licence]) => `[${licence.name}](${link})`).join(" · ");
-	const sourceEmbed: Discord.Embed = {
+	const sourceEmbed: Discord.CamelizedDiscordEmbed = {
 		description: `${constants.symbols.link} ${sourcesFormatted}`,
 		color: constants.colors.peach,
 		footer: { text: strings.sourcedResponsibly },

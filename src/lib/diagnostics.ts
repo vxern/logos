@@ -1,5 +1,5 @@
+import * as Discord from "@discordeno/bot";
 import * as Logos from "../types";
-import * as Discord from "discordeno";
 
 type ID = bigint | string;
 type Indexable<T> = T | ID;
@@ -10,7 +10,10 @@ function isId<T>(object: Indexable<T>): object is bigint | string {
 
 const diagnostics = {
 	display: {
-		user: (userOrId: Indexable<Logos.User | Discord.User>, options?: { prettify?: boolean; includeId?: boolean }) => {
+		user: (
+			userOrId: Indexable<Logos.User | Discord.User | Discord.CamelizedDiscordUser>,
+			options?: { prettify?: boolean; includeId?: boolean },
+		) => {
 			if (isId(userOrId)) {
 				return `unnamed user (ID ${userOrId})`;
 			}
@@ -36,7 +39,7 @@ const diagnostics = {
 
 			return `unidentified member (ID ${id})`;
 		},
-		role: (roleOrId: Indexable<Logos.Role | Discord.Role>) => {
+		role: (roleOrId: Indexable<Logos.Role | Discord.Role | Discord.CamelizedDiscordRole>) => {
 			if (isId(roleOrId)) {
 				return `unnamed role (ID ${roleOrId})`;
 			}
@@ -45,7 +48,7 @@ const diagnostics = {
 
 			return `role "${name}" (ID ${id})`;
 		},
-		guild: (guildOrId: Indexable<Logos.Guild | Discord.Guild>) => {
+		guild: (guildOrId: Indexable<Logos.Guild | Discord.Guild | Discord.CamelizedDiscordGuild>) => {
 			if (isId(guildOrId)) {
 				return `unnamed guild (ID ${guildOrId})`;
 			}
@@ -54,7 +57,7 @@ const diagnostics = {
 
 			return `"${name}" (ID ${id})`;
 		},
-		message: (messageOrId: Indexable<Logos.Message | Discord.Message>) => {
+		message: (messageOrId: Indexable<Logos.Message | Discord.Message | Discord.CamelizedDiscordMessage>) => {
 			if (isId(messageOrId)) {
 				return `unidentified message (ID ${messageOrId})`;
 			}
@@ -63,7 +66,7 @@ const diagnostics = {
 
 			return `message (ID ${id})`;
 		},
-		channel: (channelOrId: Indexable<Logos.Channel | Discord.Channel>) => {
+		channel: (channelOrId: Indexable<Logos.Channel | Discord.Channel | Discord.CamelizedDiscordChannel>) => {
 			if (isId(channelOrId)) {
 				return `unidentified channel (ID ${channelOrId})`;
 			}

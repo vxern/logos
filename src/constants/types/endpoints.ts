@@ -1,7 +1,10 @@
 export default {
 	deepl: {
-		languages: "https://api-free.deepl.com/v2/languages",
 		translate: "https://api-free.deepl.com/v2/translate",
+	},
+	googleTranslate: {
+		host: "google-translator9.p.rapidapi.com",
+		translate: "https://google-translator9.p.rapidapi.com/v2",
 	},
 	words: {
 		host: "wordsapiv1.p.rapidapi.com",

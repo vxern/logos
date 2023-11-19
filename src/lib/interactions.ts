@@ -1,21 +1,23 @@
+import * as Discord from "@discordeno/bot";
+import { DiscordSnowflake as Snowflake } from "@sapphire/snowflake";
 import constants from "../constants/constants";
 import {
 	FeatureLanguage,
 	LearningLanguage,
 	Locale,
 	LocalisationLanguage,
-	getDiscordLanguageByDiscordLocale,
-	getLocaleByLanguage,
+	getDiscordLocalisationLanguageByLocale,
+	getLocaleByLocalisationLanguage,
 } from "../constants/languages";
 import time from "../constants/time";
+import symbols from "../constants/types/symbols";
 import defaults from "../defaults";
 import * as Logos from "../types";
 import { InteractionLocaleData } from "../types";
 import { Client, addCollector, localise, pluralise } from "./client";
-import { Document } from "./database/document";
-import { Guild } from "./database/structs/guild";
-import * as Discord from "discordeno";
-import { DiscordSnowflake as Snowflake } from "snowflake";
+import { Guild } from "./database/guild";
+import { InteractionRepetitionButtonID } from "./services/interaction-repetition/interaction-repetition";
+import { User } from "./database/user";
 
 type AutocompleteInteraction = Discord.Interaction & { type: Discord.InteractionTypes.ApplicationCommandAutocomplete };
 
@@ -58,7 +60,7 @@ function createInteractionCollector(
 	const customId = settings.customId ?? Snowflake.generate().toString();
 
 	addCollector([client, bot], "interactionCreate", {
-		filter: (_, interaction) => compileChecks(interaction, settings, customId).every((condition) => condition),
+		filter: (interaction) => compileChecks(interaction, settings, customId).every((condition) => condition),
 		limit: settings.limit,
 		removeAfter: settings.doesNotExpire ? undefined : constants.INTERACTION_TOKEN_EXPIRY,
 		onCollect: settings.onCollect ?? (() => {}),
@@ -146,30 +148,40 @@ async function paginate<T>(
 		embed,
 		view,
 		show,
+		showable,
 	}: {
 		elements: T[];
-		embed: Omit<Discord.Embed, "footer">;
+		embed: Omit<Discord.CamelizedDiscordEmbed, "footer">;
 		view: PaginationDisplayData<T>;
 		show: boolean;
+		showable: boolean;
 	},
 	{ locale }: { locale: Locale },
 ): Promise<void> {
 	const data: PaginationData<T> = { elements, view, pageIndex: 0 };
 
+	const showButton = getShowButton(client, interaction, { locale });
+
 	const isFirst = () => data.pageIndex === 0;
 	const isLast = () => data.pageIndex === data.elements.length - 1;
 
-	const generateEmbed = (): Discord.InteractionCallbackData => {
+	const getView = (): Discord.InteractionCallbackData => {
+		const buttons = generateButtons(customId, isFirst(), isLast());
+
+		if (showable && !show) {
+			buttons.push({ type: Discord.MessageComponentTypes.ActionRow, components: [showButton] });
+		}
+
 		return {
 			embeds: [getPageEmbed(client, data, embed, isLast(), locale)],
-			components: generateButtons(customId, isFirst(), isLast()),
+			components: buttons,
 		};
 	};
 
 	const customId = createInteractionCollector([client, bot], {
 		type: Discord.InteractionTypes.MessageComponent,
 		doesNotExpire: true,
-		onCollect: async (bot, selection) => {
+		onCollect: async (selection) => {
 			acknowledge([client, bot], selection);
 
 			const customId = selection.data?.customId;
@@ -194,19 +206,11 @@ async function paginate<T>(
 				}
 			}
 
-			editReply([client, bot], interaction, generateEmbed());
+			editReply([client, bot], interaction, getView());
 		},
 	});
 
-	reply(
-		[client, bot],
-		interaction,
-		{
-			embeds: [getPageEmbed(client, data, embed, data.pageIndex === data.elements.length - 1, locale)],
-			components: generateButtons(customId, isFirst(), isLast()),
-		},
-		{ visible: show },
-	);
+	reply([client, bot], interaction, getView(), { visible: show });
 }
 
 interface PaginationDisplayData<T> {
@@ -224,10 +228,10 @@ interface PaginationData<T> {
 function getPageEmbed<T>(
 	client: Client,
 	data: PaginationData<T>,
-	embed: Discord.Embed,
+	embed: Discord.CamelizedDiscordEmbed,
 	isLast: boolean,
 	locale: Locale,
-): Discord.Embed {
+): Discord.CamelizedDiscordEmbed {
 	const strings = {
 		page: localise(client, "interactions.page", locale)(),
 		continuedOnNextPage: localise(client, "interactions.continuedOnNextPage", locale)(),
@@ -280,13 +284,13 @@ type ComposerActionRow<ComposerContent extends Record<string, unknown>, SectionN
 	];
 };
 
-type Modal<ComposerContent extends Record<string, unknown>, SectionNames = keyof ComposerContent> = {
+type Modal<ComposerContent extends Record<string, string>, SectionNames = keyof ComposerContent> = {
 	title: string;
 	fields: ComposerActionRow<ComposerContent, SectionNames>[];
 };
 
 async function createModalComposer<
-	ComposerContent extends Record<string, unknown>,
+	ComposerContent extends Record<string, string>,
 	SectionNames extends keyof ComposerContent = keyof ComposerContent,
 >(
 	[client, bot]: [Client, Discord.Bot],
@@ -313,7 +317,7 @@ async function createModalComposer<
 				type: Discord.InteractionTypes.ModalSubmit,
 				userId: interaction.user.id,
 				limit: 1,
-				onCollect: async (_, submission) => {
+				onCollect: async (submission) => {
 					content = parseComposerContent(submission);
 					if (content === undefined) {
 						return resolve([submission, false]);
@@ -360,7 +364,7 @@ async function createModalComposer<
 }
 
 function parseComposerContent<
-	ComposerContent extends Record<string, unknown>,
+	ComposerContent extends Record<string, string>,
 	SectionNames extends keyof ComposerContent = keyof ComposerContent,
 >(submission: Discord.Interaction): ComposerContent | undefined {
 	const content: Partial<ComposerContent> = {};
@@ -371,8 +375,12 @@ function parseComposerContent<
 	}
 
 	for (const field of fields) {
+		if (field === undefined) {
+			continue;
+		}
+
 		const key = field.customId as SectionNames;
-		const value = field.value;
+		const value = (field.value ?? "") as ComposerContent[SectionNames];
 
 		if (value.length === 0) {
 			content[key] = undefined;
@@ -589,9 +597,11 @@ async function acknowledge(
 	[client, bot]: [Client, Discord.Bot],
 	interaction: Logos.Interaction | Discord.Interaction,
 ): Promise<void> {
-	return Discord.sendInteractionResponse(bot, interaction.id, interaction.token, {
-		type: Discord.InteractionResponseTypes.DeferredUpdateMessage,
-	}).catch((reason) => client.log.warn(`Failed to acknowledge interaction: ${reason}`));
+	return bot.rest
+		.sendInteractionResponse(interaction.id, interaction.token, {
+			type: Discord.InteractionResponseTypes.DeferredUpdateMessage,
+		})
+		.catch((reason) => client.log.warn("Failed to acknowledge interaction:", reason));
 }
 
 async function postponeReply(
@@ -599,10 +609,12 @@ async function postponeReply(
 	interaction: Logos.Interaction | Discord.Interaction,
 	{ visible = false } = {},
 ): Promise<void> {
-	return Discord.sendInteractionResponse(bot, interaction.id, interaction.token, {
-		type: Discord.InteractionResponseTypes.DeferredChannelMessageWithSource,
-		data: visible ? {} : { flags: Discord.ApplicationCommandFlags.Ephemeral },
-	}).catch((reason) => client.log.warn(`Failed to postpone reply to interaction: ${reason}`));
+	return bot.rest
+		.sendInteractionResponse(interaction.id, interaction.token, {
+			type: Discord.InteractionResponseTypes.DeferredChannelMessageWithSource,
+			data: visible ? {} : { flags: Discord.MessageFlags.Ephemeral },
+		})
+		.catch((reason) => client.log.warn("Failed to postpone reply to interaction:", reason));
 }
 
 async function reply(
@@ -611,10 +623,12 @@ async function reply(
 	data: Omit<Discord.InteractionCallbackData, "flags">,
 	{ visible = false } = {},
 ): Promise<void> {
-	return Discord.sendInteractionResponse(bot, interaction.id, interaction.token, {
-		type: Discord.InteractionResponseTypes.ChannelMessageWithSource,
-		data: { ...data, flags: visible ? undefined : Discord.ApplicationCommandFlags.Ephemeral },
-	}).catch((reason) => client.log.warn(`Failed to reply to interaction: ${reason}`));
+	return bot.rest
+		.sendInteractionResponse(interaction.id, interaction.token, {
+			type: Discord.InteractionResponseTypes.ChannelMessageWithSource,
+			data: { ...data, flags: visible ? undefined : Discord.MessageFlags.Ephemeral },
+		})
+		.catch((reason) => client.log.warn("Failed to reply to interaction:", reason));
 }
 
 async function editReply(
@@ -622,18 +636,19 @@ async function editReply(
 	interaction: Logos.Interaction | Discord.Interaction,
 	data: Omit<Discord.InteractionCallbackData, "flags">,
 ): Promise<void> {
-	return Discord.editOriginalInteractionResponse(bot, interaction.token, data)
+	return bot.rest
+		.editOriginalInteractionResponse(interaction.token, data)
 		.then(() => {})
-		.catch((reason) => client.log.warn(`Failed to edit reply to interaction: ${reason}`));
+		.catch((reason) => client.log.warn("Failed to edit reply to interaction:", reason));
 }
 
 async function deleteReply(
 	[client, bot]: [Client, Discord.Bot],
 	interaction: Logos.Interaction | Discord.Interaction,
 ): Promise<void> {
-	return Discord.deleteOriginalInteractionResponse(bot, interaction.token).catch((reason) =>
-		client.log.warn(`Failed to edit reply to interaction: ${reason}`),
-	);
+	return bot.rest
+		.deleteOriginalInteractionResponse(interaction.token)
+		.catch((reason) => client.log.warn("Failed to edit reply to interaction:", reason));
 }
 
 async function respond(
@@ -641,10 +656,12 @@ async function respond(
 	interaction: Logos.Interaction | Discord.Interaction,
 	choices: Discord.ApplicationCommandOptionChoice[],
 ): Promise<void> {
-	return Discord.sendInteractionResponse(bot, interaction.id, interaction.token, {
-		type: Discord.InteractionResponseTypes.ApplicationCommandAutocompleteResult,
-		data: { choices },
-	}).catch((reason) => client.log.warn(`Failed to respond to autocomplete interaction: ${reason}`));
+	return bot.rest
+		.sendInteractionResponse(interaction.id, interaction.token, {
+			type: Discord.InteractionResponseTypes.ApplicationCommandAutocompleteResult,
+			data: { choices },
+		})
+		.catch((reason) => client.log.warn("Failed to respond to autocomplete interaction:", reason));
 }
 
 async function displayModal(
@@ -652,28 +669,30 @@ async function displayModal(
 	interaction: Logos.Interaction | Discord.Interaction,
 	data: Omit<Discord.InteractionCallbackData, "flags">,
 ): Promise<void> {
-	return Discord.sendInteractionResponse(bot, interaction.id, interaction.token, {
-		type: Discord.InteractionResponseTypes.Modal,
-		data,
-	}).catch((reason) => client.log.warn(`Failed to show modal: ${reason}`));
+	return bot.rest
+		.sendInteractionResponse(interaction.id, interaction.token, {
+			type: Discord.InteractionResponseTypes.Modal,
+			data,
+		})
+		.catch((reason) => client.log.warn("Failed to show modal:", reason));
 }
 
-function getLocalisationLanguage(guildDocument: Document<Guild> | undefined): LocalisationLanguage {
-	return guildDocument?.data.languages?.localisation ?? defaults.LOCALISATION_LANGUAGE;
+function getLocalisationLanguage(guildDocument: Guild | undefined): LocalisationLanguage {
+	return guildDocument?.languages?.localisation ?? defaults.LOCALISATION_LANGUAGE;
 }
 
-function getTargetLanguage(guildDocument: Document<Guild>): LocalisationLanguage {
-	return guildDocument?.data.languages?.target ?? getLocalisationLanguage(guildDocument);
+function getTargetLanguage(guildDocument: Guild): LocalisationLanguage {
+	return guildDocument?.languages?.target ?? getLocalisationLanguage(guildDocument);
 }
 
-function getFeatureLanguage(guildDocument?: Document<Guild>): FeatureLanguage {
-	return guildDocument?.data.languages?.feature ?? defaults.FEATURE_LANGUAGE;
+function getFeatureLanguage(guildDocument?: Guild): FeatureLanguage {
+	return guildDocument?.languages?.feature ?? defaults.FEATURE_LANGUAGE;
 }
 
 const FALLBACK_LOCALE_DATA: InteractionLocaleData = {
 	language: defaults.LOCALISATION_LANGUAGE,
 	locale: defaults.LOCALISATION_LOCALE,
-	learningLanguage: defaults.LOCALISATION_LANGUAGE,
+	learningLanguage: defaults.LEARNING_LANGUAGE,
 	guildLanguage: defaults.LOCALISATION_LANGUAGE,
 	guildLocale: defaults.LOCALISATION_LOCALE,
 	featureLanguage: defaults.FEATURE_LANGUAGE,
@@ -688,13 +707,24 @@ async function getLocaleData(client: Client, interaction: Discord.Interaction): 
 	const member = client.cache.members.get(Discord.snowflakeToBigint(`${interaction.user.id}${guildId}`));
 
 	const [userDocument, guildDocument] = await Promise.all([
-		client.database.adapters.users.getOrFetchOrCreate(
-			client,
-			"id",
-			interaction.user.id.toString(),
-			interaction.user.id,
-		),
-		client.database.adapters.guilds.getOrFetchOrCreate(client, "id", guildId.toString(), guildId),
+		client.cache.documents.users.get(interaction.user.id.toString()) ??
+			(await client.database.session.load<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined)) ??
+			(async () => {
+				const userDocument = {
+					...({
+						id: `users/${interaction.user.id}`,
+						account: { id: interaction.user.id.toString() },
+						createdAt: Date.now(),
+					} satisfies User),
+					"@metadata": { "@collection": "Users" },
+				};
+				await client.database.session.store(userDocument);
+				await client.database.session.saveChanges();
+
+				return userDocument as User;
+			})(),
+		client.cache.documents.guilds.get(guildId.toString()) ??
+			client.database.session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined),
 	]);
 	if (userDocument === undefined || guildDocument === undefined) {
 		return FALLBACK_LOCALE_DATA;
@@ -708,27 +738,27 @@ async function getLocaleData(client: Client, interaction: Discord.Interaction): 
 	const learningLanguage = getLearningLanguage(guildDocument, targetLanguage, member);
 
 	const guildLanguage = isInTargetOnlyChannel ? targetLanguage : getLocalisationLanguage(guildDocument);
-	const guildLocale = getLocaleByLanguage(guildLanguage);
+	const guildLocale = getLocaleByLocalisationLanguage(guildLanguage);
 	const featureLanguage = getFeatureLanguage(guildDocument);
 
 	if (!isAutocomplete(interaction)) {
 		// If the user has configured a custom locale, use the user's preferred locale.
-		if (userDocument?.data.account.language !== undefined) {
-			const language = userDocument?.data.account.language;
-			const locale = getLocaleByLanguage(language);
+		if (userDocument?.account.language !== undefined) {
+			const language = userDocument?.account.language;
+			const locale = getLocaleByLocalisationLanguage(language);
 			return { language, locale, learningLanguage, guildLanguage, guildLocale, featureLanguage };
 		}
 	}
 
 	// Otherwise default to the user's app language.
 	const appLocale = interaction.locale;
-	const language = getDiscordLanguageByDiscordLocale(appLocale) ?? defaults.LOCALISATION_LANGUAGE;
-	const locale = getLocaleByLanguage(language);
+	const language = getDiscordLocalisationLanguageByLocale(appLocale) ?? defaults.LOCALISATION_LANGUAGE;
+	const locale = getLocaleByLocalisationLanguage(language);
 	return { language, locale, learningLanguage, guildLanguage, guildLocale, featureLanguage };
 }
 
-function getTargetOnlyChannelIds(guildDocument: Document<Guild>): bigint[] {
-	const language = guildDocument.data.features.language;
+function getTargetOnlyChannelIds(guildDocument: Guild): bigint[] {
+	const language = guildDocument.features.language;
 	if (!language.enabled) {
 		return [];
 	}
@@ -742,7 +772,7 @@ function getTargetOnlyChannelIds(guildDocument: Document<Guild>): bigint[] {
 }
 
 function getLearningLanguage(
-	guildDocument: Document<Guild>,
+	guildDocument: Guild,
 	guildLearningLanguage: LearningLanguage,
 	member: Logos.Member | undefined,
 ): LearningLanguage {
@@ -750,7 +780,7 @@ function getLearningLanguage(
 		return guildLearningLanguage;
 	}
 
-	const language = guildDocument.data.features.language;
+	const language = guildDocument.features.language;
 	if (!language.enabled) {
 		return guildLearningLanguage;
 	}
@@ -768,6 +798,61 @@ function getLearningLanguage(
 	}
 
 	return userLearningLanguage;
+}
+
+function getShowButton(
+	client: Client,
+	interaction: Logos.Interaction,
+	{ locale }: { locale: Locale },
+): Discord.ButtonComponent {
+	const strings = {
+		show: localise(client, "interactions.show", locale)(),
+	};
+
+	return {
+		type: Discord.MessageComponentTypes.Button,
+		style: Discord.ButtonStyles.Primary,
+		label: strings.show,
+		emoji: { name: symbols.showInChat },
+		customId: encodeId<InteractionRepetitionButtonID>(constants.components.showInChat, [interaction.id.toString()]),
+	};
+}
+
+function isSubcommandGroup(option: Discord.InteractionDataOption): boolean {
+	return option.type === Discord.ApplicationCommandOptionTypes.SubCommandGroup;
+}
+
+function isSubcommand(option: Discord.InteractionDataOption): boolean {
+	return option.type === Discord.ApplicationCommandOptionTypes.SubCommand;
+}
+
+function getCommandName(interaction: Discord.Interaction | Logos.Interaction): string | undefined {
+	const commandName = interaction.data?.name;
+	if (commandName === undefined) {
+		return;
+	}
+
+	const subCommandGroupOption = interaction.data?.options?.find((option) => isSubcommandGroup(option));
+
+	let commandNameFull: string;
+	if (subCommandGroupOption !== undefined) {
+		const subCommandGroupName = subCommandGroupOption.name;
+		const subCommandName = subCommandGroupOption.options?.find((option) => isSubcommand(option))?.name;
+		if (subCommandName === undefined) {
+			return;
+		}
+
+		commandNameFull = `${commandName} ${subCommandGroupName} ${subCommandName}`;
+	} else {
+		const subCommandName = interaction.data?.options?.find((option) => isSubcommand(option))?.name;
+		if (subCommandName === undefined) {
+			commandNameFull = commandName;
+		} else {
+			commandNameFull = `${commandName} ${subCommandName}`;
+		}
+	}
+
+	return commandNameFull;
 }
 
 export {
@@ -788,6 +873,8 @@ export {
 	postponeReply,
 	reply,
 	respond,
+	getShowButton,
 	getFeatureLanguage,
+	getCommandName,
 };
 export type { ControlButtonID, InteractionCollectorSettings, Modal };

@@ -1,3 +1,4 @@
+import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
@@ -5,11 +6,11 @@ import { parseArguments, reply } from "../../../interactions";
 import { OptionTemplate } from "../../command";
 import { show } from "../../parameters";
 import { displayListings } from "../module";
-import * as Discord from "discordeno";
 
 const command: OptionTemplate = {
 	name: "queue",
 	type: Discord.ApplicationCommandOptionTypes.SubCommand,
+	isShowable: true,
 	handle: handleDisplayPlaybackQueue,
 	options: [show],
 };
@@ -18,7 +19,9 @@ async function handleDisplayPlaybackQueue(
 	[client, bot]: [Client, Discord.Bot],
 	interaction: Logos.Interaction,
 ): Promise<void> {
-	const [{ show }] = parseArguments(interaction.data?.options, { show: "boolean" });
+	const [{ show: showParameter }] = parseArguments(interaction.data?.options, { show: "boolean" });
+
+	const show = interaction.show ?? showParameter ?? false;
 	const locale = show ? interaction.guildLocale : interaction.locale;
 
 	const guildId = interaction.guildId;
@@ -31,7 +34,7 @@ async function handleDisplayPlaybackQueue(
 		return;
 	}
 
-	const isVoiceStateVerified = musicService.verifyVoiceState(bot, interaction, "check");
+	const isVoiceStateVerified = musicService.verifyVoiceState(interaction, "check");
 	if (!isVoiceStateVerified) {
 		return;
 	}

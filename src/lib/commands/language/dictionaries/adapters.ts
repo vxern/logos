@@ -6,6 +6,9 @@ import wiktionary from "./adapters/wiktionary";
 import wordsApi from "./adapters/words-api";
 
 export default {
+	"Armenian/Eastern": [wiktionary],
+	"Armenian/Western": [wiktionary],
+	Danish: [wiktionary],
 	Dutch: [wiktionary],
 	"English/American": [wiktionary, wordsApi],
 	"English/British": [wiktionary, wordsApi],
@@ -17,8 +20,8 @@ export default {
 	"Norwegian/Bokmål": [wiktionary],
 	Polish: [wiktionary],
 	Romanian: [dexonline, wiktionary],
+	Russian: [wiktionary],
+	Silesian: [wiktionary],
 	Swedish: [wiktionary],
 	Turkish: [wiktionary],
-	"Armenian/Western": [wiktionary],
-	"Armenian/Eastern": [wiktionary],
 } satisfies Record<LearningLanguage, DictionaryAdapter[]> as Record<LearningLanguage, DictionaryAdapter[]>;

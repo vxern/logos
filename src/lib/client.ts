@@ -1,36 +1,41 @@
+import * as Discord from "@discordeno/bot";
+import * as fs from "node:fs/promises";
+import FancyLog from "fancy-log";
+import * as ravendb from "ravendb";
 import constants from "../constants/constants";
 import languages, {
 	LearningLanguage,
 	Locale,
 	LocalisationLanguage,
-	getDiscordLocaleByLanguage,
-	getLanguageByLocale,
-	getLocaleByLanguage,
-	isBuiltIn,
+	getDiscordLocaleByLocalisationLanguage,
+	getLocaleByLocalisationLanguage,
+	getLocalisationLanguageByLocale,
+	isDiscordLocalisationLanguage,
 } from "../constants/languages";
+import { getDiscordLanguageByLocale } from "../constants/languages/localisation";
 import time from "../constants/time";
 import defaults from "../defaults";
+import { enableDesiredProperties, handleGuildMembersChunk, overrideDefaultEventHandlers } from "../fixes";
 import { timestamp } from "../formatting";
 import * as Logos from "../types";
-import { Command, CommandTemplate, InteractionHandler, LocalisationProperties, Option } from "./commands/command";
-import commandsRaw from "./commands/commands";
+import { Command, CommandTemplate, InteractionHandler, Option } from "./commands/command";
+import commandTemplates from "./commands/commands";
 import { SentencePair } from "./commands/language/commands/game";
-import { SupportedLanguage } from "./commands/language/module";
-import entryRequests from "./database/adapters/entry-requests";
-import guilds from "./database/adapters/guilds";
-import praises from "./database/adapters/praises";
-import reports from "./database/adapters/reports";
-import suggestions from "./database/adapters/suggestions";
-import users from "./database/adapters/users";
-import warnings from "./database/adapters/warnings";
-import { Database } from "./database/database";
-import { timeStructToMilliseconds } from "./database/structs/guild";
 import diagnostics from "./diagnostics";
-import { acknowledge, deleteReply, getLocaleData, isAutocomplete, reply, respond } from "./interactions";
+import {
+	acknowledge,
+	deleteReply,
+	getCommandName,
+	getLocaleData,
+	isAutocomplete,
+	reply,
+	respond,
+} from "./interactions";
 import transformers from "./localisation/transformers";
 import { AlertService } from "./services/alert/alert";
 import { DynamicVoiceChannelService } from "./services/dynamic-voice-channels/dynamic-voice-channels";
 import { EntryService } from "./services/entry/entry";
+import { InteractionRepetitionService } from "./services/interaction-repetition/interaction-repetition";
 import { JournallingService } from "./services/journalling/journalling";
 import { LavalinkService } from "./services/music/lavalink";
 import { MusicService } from "./services/music/music";
@@ -44,27 +49,27 @@ import { RealtimeUpdateService } from "./services/realtime-updates/service";
 import { RoleIndicatorService } from "./services/role-indicators/role-indicators";
 import { Service } from "./services/service";
 import { StatusService } from "./services/status/service";
-import { fetchMembers } from "./utils";
-import * as Discord from "discordeno";
-import FancyLog from "fancy-log";
-import Fauna from "fauna";
-import * as Sentry from "sentry";
+import { requestMembers } from "./utils";
+import { EntryRequest } from "./database/entry-request";
+import { Guild, timeStructToMilliseconds } from "./database/guild";
+import { Praise } from "./database/praise";
+import { Report } from "./database/report";
+import { Suggestion } from "./database/suggestion";
+import { User } from "./database/user";
+import { Warning } from "./database/warning";
 
 type Client = {
-	metadata: {
-		environment: {
-			environment: "production" | "staging" | "development" | "restricted";
-			version: string;
-			discordSecret: string;
-			faunaSecret: string;
-			deeplSecret: string;
-			sentrySecret: string;
-			rapidApiSecret: string;
-			lavalinkHost: string;
-			lavalinkPort: string;
-			lavalinkPassword: string;
-		};
-		supportedTranslationLanguages: SupportedLanguage[];
+	environment: {
+		version: string;
+		discordSecret: string;
+		deeplSecret: string;
+		rapidApiSecret: string;
+		ravendbHost: string;
+		ravendbDatabase: string;
+		lavalinkHost: string;
+		lavalinkPort: string;
+		lavalinkPassword: string;
+		loadSentences: boolean;
 	};
 	log: Logger;
 	cache: {
@@ -76,10 +81,26 @@ type Client = {
 			latest: Map<bigint, Logos.Message>;
 			previous: Map<bigint, Logos.Message>;
 		};
+		interactions: Map<string, Logos.Interaction | Discord.Interaction>;
+
+		documents: {
+			entryRequests: Map<string, EntryRequest>;
+			guilds: Map<string, Guild>;
+			praisesByAuthor: Map<string, Map<string, Praise>>;
+			praisesByTarget: Map<string, Map<string, Praise>>;
+			reports: Map<string, Report>;
+			suggestions: Map<string, Suggestion>;
+			users: Map<string, User>;
+			warningsByTarget: Map<string, Map<string, Warning>>;
+		};
 	};
-	database: { log: Logger } & Database;
+	database: {
+		store: ravendb.IDocumentStore;
+		session: ravendb.IDocumentSession;
+	};
 	commands: {
-		commands: Record<keyof typeof commandsRaw, Command>;
+		commands: Record<keyof typeof commandTemplates, Command>;
+		showable: string[];
 		handlers: {
 			execute: Map<string, InteractionHandler>;
 			autocomplete: Map<string, InteractionHandler>;
@@ -114,7 +135,8 @@ type Client = {
 			suggestions: Map<bigint, SuggestionService>;
 			verification: Map<bigint, VerificationService>;
 		};
-		realtimeUpdates: Map<bigint, RealtimeUpdateService>;
+		interactionRepetition: InteractionRepetitionService;
+		realtimeUpdates: RealtimeUpdateService;
 		roleIndicators: Map<bigint, RoleIndicatorService>;
 		status: StatusService;
 	};
@@ -133,17 +155,17 @@ type Event = keyof Discord.EventHandlers;
 type Logger = Record<"debug" | keyof typeof FancyLog, (...args: unknown[]) => void>;
 
 function createClient(
-	metadata: Client["metadata"],
+	environment: Client["environment"],
 	features: Client["features"],
+	database: Client["database"],
 	localisationsStatic: Map<string, Map<LocalisationLanguage, string>>,
 ): Client {
 	const localisations = createLocalisations(localisationsStatic);
 
-	const localised = localiseCommands(localisations, commandsRaw);
-	const handlers = createCommandHandlers(Object.values(commandsRaw));
+	const commands: Client["commands"] = buildCommands(commandTemplates, localisations);
 
 	return {
-		metadata,
+		environment,
 		log: createLogger("client"),
 		cache: {
 			guilds: new Map(),
@@ -154,45 +176,20 @@ function createClient(
 				latest: new Map(),
 				previous: new Map(),
 			},
-		},
-		database: {
-			log: createLogger("database"),
-			client: new Fauna.Client({
-				secret: metadata.environment.faunaSecret,
-				domain: "db.us.fauna.com",
-				scheme: "https",
-				port: 443,
-			}),
-			cache: {
-				entryRequestBySubmitterAndGuild: new Map(),
-				guildById: new Map(),
-				praisesBySender: new Map(),
-				praisesByRecipient: new Map(),
-				reportsByAuthorAndGuild: new Map(),
-				suggestionsByAuthorAndGuild: new Map(),
-				usersByReference: new Map(),
-				usersById: new Map(),
-				warningsByRecipient: new Map(),
+			interactions: new Map(),
+			documents: {
+				entryRequests: new Map(),
+				guilds: new Map(),
+				praisesByAuthor: new Map(),
+				praisesByTarget: new Map(),
+				reports: new Map(),
+				suggestions: new Map(),
+				users: new Map(),
+				warningsByTarget: new Map(),
 			},
-			fetchPromises: {
-				guilds: {
-					id: new Map(),
-				},
-				praises: {
-					recipient: new Map(),
-					sender: new Map(),
-				},
-				users: {
-					id: new Map(),
-					reference: new Map(),
-				},
-				warnings: {
-					recipient: new Map(),
-				},
-			},
-			adapters: { entryRequests, guilds, reports, praises, suggestions, users, warnings },
 		},
-		commands: { commands: localised, handlers },
+		database,
+		commands,
 		features,
 		localisations,
 		collectors: new Map(),
@@ -218,7 +215,10 @@ function createClient(
 				suggestions: new Map(),
 				verification: new Map(),
 			},
-			realtimeUpdates: new Map(),
+			// @ts-ignore: Late assignment.
+			interactionRepetition: "late_assignment",
+			// @ts-ignore: Late assignment.
+			realtimeUpdates: "late_assignment",
 			roleIndicators: new Map(),
 			// @ts-ignore: Late assignment.
 			status: "late_assignment",
@@ -264,6 +264,7 @@ async function dispatchGlobal<EventName extends keyof Discord.EventHandlers>(
 	{ args }: { args: Parameters<Discord.EventHandlers[EventName]> },
 ): Promise<void> {
 	for (const service of client.services.global) {
+		// @ts-ignore: This is fine.
 		service[eventName](...args);
 	}
 }
@@ -280,6 +281,7 @@ async function dispatchLocal<EventName extends keyof Discord.EventHandlers>(
 	}
 
 	for (const service of services) {
+		// @ts-ignore: This is fine.
 		service[eventName](...args);
 	}
 }
@@ -298,21 +300,31 @@ async function dispatchEvent<EventName extends keyof Discord.EventHandlers>(
 }
 
 async function initialiseClient(
-	metadata: Client["metadata"],
+	environment: Client["environment"],
 	features: Client["features"],
 	localisations: Map<string, Map<LocalisationLanguage, string>>,
 ): Promise<void> {
-	const client = createClient(metadata, features, localisations);
+	const certificate = await fs.readFile(".cert.pfx");
+	const store = new ravendb.DocumentStore(environment.ravendbHost, environment.ravendbDatabase, {
+		certificate,
+		type: "pfx",
+	}).initialize();
+	const session = store.openSession();
+	const database: Client["database"] = { store, session };
 
-	await prefetchDataFromDatabase(client, client.database);
+	const client = createClient(environment, features, database, localisations);
+
+	addCacheInterceptors(client, database.session);
+
+	await prefetchDataFromDatabase(client);
 
 	const bot = overrideDefaultEventHandlers(
 		Discord.createBot({
-			token: metadata.environment.discordSecret,
+			token: environment.discordSecret,
 			intents:
 				Discord.Intents.Guilds |
-				Discord.Intents.GuildMembers |
-				Discord.Intents.GuildBans |
+				Discord.Intents.GuildMembers | // Members joining, leaving, changing.
+				Discord.Intents.GuildModeration | // Access to audit log.
 				Discord.Intents.GuildVoiceStates |
 				Discord.Intents.GuildMessages |
 				Discord.Intents.MessageContent,
@@ -320,126 +332,149 @@ async function initialiseClient(
 				async ready(...args) {
 					dispatchGlobal(client, "ready", { args });
 				},
-				async interactionCreate(bot, interaction) {
+				async interactionCreate(interaction) {
 					await handleInteractionCreate([client, bot], interaction);
 
-					dispatchEvent(client, interaction.guildId, "interactionCreate", { args: [bot, interaction] });
+					dispatchEvent(client, interaction.guildId, "interactionCreate", { args: [interaction] });
 				},
-				async guildMemberAdd(bot, member, user) {
-					dispatchEvent(client, member.guildId, "guildMemberAdd", { args: [bot, member, user] });
+				async guildMemberAdd(member, user) {
+					dispatchEvent(client, member.guildId, "guildMemberAdd", { args: [member, user] });
 				},
-				async guildMemberRemove(bot, user, guildId) {
-					dispatchEvent(client, guildId, "guildMemberRemove", { args: [bot, user, guildId] });
+				async guildMemberRemove(user, guildId) {
+					dispatchEvent(client, guildId, "guildMemberRemove", { args: [user, guildId] });
 				},
-				async guildMemberUpdate(bot, member, user) {
-					dispatchEvent(client, member.guildId, "guildMemberUpdate", { args: [bot, member, user] });
+				async guildMemberUpdate(member, user) {
+					dispatchEvent(client, member.guildId, "guildMemberUpdate", { args: [member, user] });
 				},
-				async messageCreate(bot, message) {
-					dispatchEvent(client, message.guildId, "messageCreate", { args: [bot, message] });
+				async messageCreate(message) {
+					dispatchEvent(client, message.guildId, "messageCreate", { args: [message] });
 				},
-				async messageDelete(bot, payload, message) {
-					dispatchEvent(client, payload.guildId, "messageDelete", { args: [bot, payload, message] });
+				async messageDelete(payload, message) {
+					dispatchEvent(client, payload.guildId, "messageDelete", { args: [payload, message] });
 				},
-				async messageDeleteBulk(bot, payload) {
-					dispatchEvent(client, payload.guildId, "messageDeleteBulk", { args: [bot, payload] });
+				async messageDeleteBulk(payload) {
+					dispatchEvent(client, payload.guildId, "messageDeleteBulk", { args: [payload] });
 				},
-				async messageUpdate(bot, message, oldMessage) {
-					dispatchEvent(client, message.guildId, "messageUpdate", { args: [bot, message, oldMessage] });
+				async messageUpdate(message, oldMessage) {
+					dispatchEvent(client, message.guildId, "messageUpdate", { args: [message, oldMessage] });
 				},
-				async voiceServerUpdate(bot, payload) {
-					dispatchEvent(client, payload.guildId, "voiceServerUpdate", { args: [bot, payload] });
+				async voiceServerUpdate(payload) {
+					dispatchEvent(client, payload.guildId, "voiceServerUpdate", { args: [payload] });
 				},
-				async voiceStateUpdate(bot, voiceState) {
-					dispatchEvent(client, voiceState.guildId, "voiceStateUpdate", { args: [bot, voiceState] });
+				async voiceStateUpdate(voiceState) {
+					dispatchEvent(client, voiceState.guildId, "voiceStateUpdate", { args: [voiceState] });
 				},
-				async channelCreate(bot, channel) {
-					dispatchEvent(client, channel.guildId, "channelCreate", { args: [bot, channel] });
+				async channelCreate(channel) {
+					dispatchEvent(client, channel.guildId, "channelCreate", { args: [channel] });
 				},
-				async channelDelete(bot, channel) {
+				async channelDelete(channel) {
 					client.cache.channels.delete(channel.id);
-					client.cache.guilds.get(channel.guildId)?.channels.delete(channel.id);
 
-					dispatchEvent(client, channel.guildId, "channelDelete", { args: [bot, channel] });
-				},
-				async channelPinsUpdate(bot, data) {
-					dispatchEvent(client, data.guildId, "channelPinsUpdate", { args: [bot, data] });
-				},
-				async channelUpdate(bot, channel) {
-					dispatchEvent(client, channel.guildId, "channelUpdate", { args: [bot, channel] });
-				},
-				async guildEmojisUpdate(bot, payload) {
-					dispatchEvent(client, payload.guildId, "guildEmojisUpdate", { args: [bot, payload] });
-				},
-				async guildBanAdd(bot, user, guildId) {
-					dispatchEvent(client, guildId, "guildBanAdd", { args: [bot, user, guildId] });
-				},
-				async guildBanRemove(bot, user, guildId) {
-					dispatchEvent(client, guildId, "guildBanRemove", { args: [bot, user, guildId] });
-				},
-				async guildCreate(bot, guild) {
-					await handleGuildCreate(client, bot, guild);
+					if (channel.guildId !== undefined) {
+						client.cache.guilds.get(channel.guildId)?.channels.delete(channel.id);
+					}
 
-					dispatchEvent(client, guild.id, "guildCreate", { args: [bot, guild] });
+					dispatchEvent(client, channel.guildId, "channelDelete", { args: [channel] });
 				},
-				async guildDelete(bot, id, shardId) {
-					await handleGuildDelete(client, bot, id);
+				async channelPinsUpdate(data) {
+					dispatchEvent(client, data.guildId, "channelPinsUpdate", { args: [data] });
+				},
+				async channelUpdate(channel) {
+					dispatchEvent(client, channel.guildId, "channelUpdate", { args: [channel] });
+				},
+				async guildEmojisUpdate(payload) {
+					dispatchEvent(client, payload.guildId, "guildEmojisUpdate", { args: [payload] });
+				},
+				async guildBanAdd(user, guildId) {
+					dispatchEvent(client, guildId, "guildBanAdd", { args: [user, guildId] });
+				},
+				async guildBanRemove(user, guildId) {
+					dispatchEvent(client, guildId, "guildBanRemove", { args: [user, guildId] });
+				},
+				async guildCreate(guild) {
+					await handleGuildCreate([client, bot], guild);
 
-					dispatchEvent(client, id, "guildDelete", { args: [bot, id, shardId] });
+					dispatchEvent(client, guild.id, "guildCreate", { args: [guild] });
 				},
-				async guildUpdate(bot, guild) {
-					dispatchEvent(client, guild.id, "guildUpdate", { args: [bot, guild] });
+				async guildDelete(id, shardId) {
+					await handleGuildDelete(client, id);
+
+					dispatchEvent(client, id, "guildDelete", { args: [id, shardId] });
 				},
-				async roleCreate(bot, role) {
-					dispatchEvent(client, role.guildId, "roleCreate", { args: [bot, role] });
+				async guildUpdate(guild) {
+					dispatchEvent(client, guild.id, "guildUpdate", { args: [guild] });
 				},
-				async roleDelete(bot, role) {
-					dispatchEvent(client, role.guildId, "roleDelete", { args: [bot, role] });
+				async roleCreate(role) {
+					dispatchEvent(client, role.guildId, "roleCreate", { args: [role] });
 				},
-				async roleUpdate(bot, role) {
-					dispatchEvent(client, role.guildId, "roleUpdate", { args: [bot, role] });
+				async roleDelete(role) {
+					dispatchEvent(client, role.guildId, "roleDelete", { args: [role] });
+				},
+				async roleUpdate(role) {
+					dispatchEvent(client, role.guildId, "roleUpdate", { args: [role] });
 				},
 			},
-			transformers: withCaching(client, Discord.createTransformers({})),
 		}),
 	);
 
-	const lavalinkService = new LavalinkService(client, bot);
+	bot.transformers.desiredProperties = enableDesiredProperties(
+		bot.transformers.desiredProperties,
+	) as Discord.Transformers["desiredProperties"];
+	bot.handlers.GUILD_MEMBERS_CHUNK = handleGuildMembersChunk;
+	bot.gateway.cache.requestMembers = { enabled: true, pending: new Discord.Collection() };
+	bot.transformers = withCacheInterceptors(client, bot.transformers);
+
+	const promises: Promise<unknown>[] = [];
+
+	const lavalinkService = new LavalinkService([client, bot]);
 	client.services.global.push(lavalinkService);
 	client.services.music.lavalink = lavalinkService;
-	await lavalinkService.start(bot);
+	promises.push(lavalinkService.start());
 
-	await Discord.startBot(bot);
+	const interactionRepetitionService = new InteractionRepetitionService([client, bot]);
+	client.services.global.push(interactionRepetitionService);
+	client.services.interactionRepetition = interactionRepetitionService;
+	promises.push(interactionRepetitionService.start());
 
-	const statusService = new StatusService(client);
+	const realtimeUpdateService = new RealtimeUpdateService([client, bot]);
+	client.services.global.push(realtimeUpdateService);
+	client.services.realtimeUpdates = realtimeUpdateService;
+	promises.push(realtimeUpdateService.start());
+
+	promises.push(bot.start());
+
+	await Promise.all(promises);
+
+	const statusService = new StatusService([client, bot]);
 	client.services.global.push(statusService);
 	client.services.status = statusService;
-	await statusService.start(bot);
+	await statusService.start();
 }
 
-async function prefetchDataFromDatabase(client: Client, database: Database): Promise<void> {
-	await Promise.all([
-		database.adapters.entryRequests.prefetch(client),
-		database.adapters.reports.prefetch(client),
-		database.adapters.suggestions.prefetch(client),
-	]);
-}
+async function prefetchDataFromDatabase(client: Client): Promise<void> {
+	const entryRequestDocuments = await client.database.session
+		.query<EntryRequest>({ collection: "EntryRequests" })
+		.all();
 
-function overrideDefaultEventHandlers(bot: Discord.Bot): Discord.Bot {
-	bot.handlers.MESSAGE_UPDATE = (bot, data) => {
-		const messageData = data.d as Discord.DiscordMessage;
-		if (!("author" in messageData)) {
-			return;
-		}
+	for (const document of entryRequestDocuments) {
+		client.cache.documents.entryRequests.set(document.id, document);
+	}
 
-		bot.events.messageUpdate(bot, bot.transformers.message(bot, messageData));
-	};
+	const reportDocuments = await client.database.session.query<Report>({ collection: "Reports" }).all();
 
-	return bot;
+	for (const document of reportDocuments) {
+		client.cache.documents.reports.set(`${document.guildId}/${document.authorId}/${document.createdAt}`, document);
+	}
+
+	const suggestionDocuments = await client.database.session.query<Suggestion>({ collection: "Suggestions" }).all();
+
+	for (const document of suggestionDocuments) {
+		client.cache.documents.suggestions.set(`${document.guildId}/${document.authorId}/${document.createdAt}`, document);
+	}
 }
 
 export async function handleGuildCreate(
-	client: Client,
-	bot: Discord.Bot,
+	[client, bot]: [Client, Discord.Bot],
 	guild: Discord.Guild | Logos.Guild,
 	options: { isUpdate: boolean } = { isUpdate: false },
 ): Promise<void> {
@@ -447,33 +482,23 @@ export async function handleGuildCreate(
 		client.log.info(`Logos added to "${guild.name}" (ID ${guild.id}).`);
 	}
 
-	const guildDocument = await client.database.adapters.guilds.getOrFetchOrCreate(
-		client,
-		"id",
-		guild.id.toString(),
-		guild.id,
-	);
+	const guildDocument =
+		client.cache.documents.guilds.get(guild.id.toString()) ??
+		(await client.database.session.load<Guild>(`guilds/${guild.id}`).then((value) => value ?? undefined));
 	if (guildDocument === undefined) {
 		return;
 	}
-
-	const configuration = guildDocument.data;
 
 	const commands = client.commands.commands;
 
 	const guildCommands: Command[] = [commands.information, commands.credits, commands.licence, commands.settings];
 	const services: Service[] = [];
 
-	const realtimeUpdateService = new RealtimeUpdateService(client, guild.id, guildDocument.ref);
-	services.push(realtimeUpdateService);
-
-	client.services.realtimeUpdates.set(guild.id, realtimeUpdateService);
-
-	if (configuration.features.information.enabled) {
-		const information = configuration.features.information.features;
+	if (guildDocument.features.information.enabled) {
+		const information = guildDocument.features.information.features;
 
 		if (information.journaling.enabled) {
-			const service = new JournallingService(client, guild.id);
+			const service = new JournallingService([client, bot], guild.id);
 			services.push(service);
 
 			client.services.journalling.set(guild.id, service);
@@ -483,21 +508,21 @@ export async function handleGuildCreate(
 			const notices = information.notices.features;
 
 			if (notices.information.enabled) {
-				const service = new InformationNoticeService(client, guild.id);
+				const service = new InformationNoticeService([client, bot], guild.id);
 				services.push(service);
 
 				client.services.notices.information.set(guild.id, service);
 			}
 
 			if (notices.roles.enabled) {
-				const service = new RoleNoticeService(client, guild.id);
+				const service = new RoleNoticeService([client, bot], guild.id);
 				services.push(service);
 
 				client.services.notices.roles.set(guild.id, service);
 			}
 
 			if (notices.welcome.enabled) {
-				const service = new WelcomeNoticeService(client, guild.id);
+				const service = new WelcomeNoticeService([client, bot], guild.id);
 				services.push(service);
 
 				client.services.notices.welcome.set(guild.id, service);
@@ -505,8 +530,8 @@ export async function handleGuildCreate(
 		}
 	}
 
-	if (configuration.features.language.enabled) {
-		const language = configuration.features.language.features;
+	if (guildDocument.features.language.enabled) {
+		const language = guildDocument.features.language.features;
 
 		if (language.answers?.enabled) {
 			guildCommands.push(commands.answer);
@@ -529,7 +554,8 @@ export async function handleGuildCreate(
 		}
 
 		if (language.translate.enabled) {
-			guildCommands.push(commands.translate);
+			guildCommands.push(commands.recogniseChatInput, commands.recogniseMessage);
+			guildCommands.push(commands.translateChatInput, commands.translateMessage);
 		}
 
 		if (language.word.enabled) {
@@ -537,13 +563,13 @@ export async function handleGuildCreate(
 		}
 	}
 
-	if (configuration.features.moderation.enabled) {
+	if (guildDocument.features.moderation.enabled) {
 		guildCommands.push(commands.list);
 
-		const moderation = configuration.features.moderation.features;
+		const moderation = guildDocument.features.moderation.features;
 
 		if (moderation.alerts.enabled) {
-			const service = new AlertService(client, guild.id);
+			const service = new AlertService([client, bot], guild.id);
 			services.push(service);
 
 			client.services.alerts.set(guild.id, service);
@@ -576,39 +602,39 @@ export async function handleGuildCreate(
 		if (moderation.reports.enabled) {
 			guildCommands.push(commands.report);
 
-			const service = new ReportService(client, guild.id);
+			const service = new ReportService([client, bot], guild.id);
 			services.push(service);
 
 			client.services.prompts.reports.set(guild.id, service);
 		}
 
 		if (moderation.verification.enabled) {
-			const service = new VerificationService(client, guild.id);
+			const service = new VerificationService([client, bot], guild.id);
 			services.push(service);
 
 			client.services.prompts.verification.set(guild.id, service);
 		}
 	}
 
-	if (configuration.features.server.enabled) {
-		const server = configuration.features.server.features;
+	if (guildDocument.features.server.enabled) {
+		const server = guildDocument.features.server.features;
 
 		if (server.dynamicVoiceChannels.enabled) {
-			const service = new DynamicVoiceChannelService(client, guild.id);
+			const service = new DynamicVoiceChannelService([client, bot], guild.id);
 			services.push(service);
 
 			client.services.dynamicVoiceChannels.set(guild.id, service);
 		}
 
 		if (server.entry.enabled) {
-			const service = new EntryService(client, guild.id);
+			const service = new EntryService([client, bot], guild.id);
 			services.push(service);
 
 			client.services.entry.set(guild.id, service);
 		}
 
 		if (server.roleIndicators?.enabled) {
-			const service = new RoleIndicatorService(client, guild.id);
+			const service = new RoleIndicatorService([client, bot], guild.id);
 			services.push(service);
 
 			client.services.roleIndicators.set(guild.id, service);
@@ -617,20 +643,20 @@ export async function handleGuildCreate(
 		if (server.suggestions.enabled) {
 			guildCommands.push(commands.suggestion);
 
-			const service = new SuggestionService(client, guild.id);
+			const service = new SuggestionService([client, bot], guild.id);
 			services.push(service);
 
 			client.services.prompts.suggestions.set(guild.id, service);
 		}
 	}
 
-	if (configuration.features.social.enabled) {
-		const social = configuration.features.social.features;
+	if (guildDocument.features.social.enabled) {
+		const social = guildDocument.features.social.features;
 
 		if (social.music.enabled) {
 			guildCommands.push(commands.music);
 
-			const service = new MusicService(client, guild.id);
+			const service = new MusicService([client, bot], guild.id);
 			services.push(service);
 
 			client.services.music.music.set(guild.id, service);
@@ -645,15 +671,15 @@ export async function handleGuildCreate(
 		}
 	}
 
-	await Discord.upsertGuildApplicationCommands(bot, guild.id, guildCommands).catch((reason) =>
-		client.log.warn(`Failed to upsert commands on ${diagnostics.display.guild(guild)}: ${reason}`),
-	);
+	await bot.rest
+		.upsertGuildApplicationCommands(guild.id, guildCommands)
+		.catch((reason) => client.log.warn(`Failed to upsert commands on ${diagnostics.display.guild(guild)}:`, reason));
 
 	if (!options.isUpdate) {
 		client.log.info(`Fetching ~${guild.memberCount} members of ${diagnostics.display.guild(guild)}...`);
 
-		await fetchMembers(bot, guild.id, { limit: 0, query: "" }).catch((reason) =>
-			client.log.warn(`Failed to fetch members of ${diagnostics.display.guild(guild)}: ${reason}`),
+		await requestMembers(bot, guild.id, { limit: 0, query: "" }).catch((reason) =>
+			client.log.warn(`Failed to fetch members of ${diagnostics.display.guild(guild)}:`, reason),
 		);
 
 		client.log.info(`Fetched ~${guild.memberCount} members of ${diagnostics.display.guild(guild)}.`);
@@ -662,7 +688,7 @@ export async function handleGuildCreate(
 	client.log.info(`Starting ${services.length} service(s) on ${diagnostics.display.guild(guild)}...`);
 	const promises = [];
 	for (const service of services) {
-		promises.push(service.start(bot));
+		promises.push(service.start());
 	}
 	Promise.all(promises).then((_) => {
 		client.log.info(`Services started on ${diagnostics.display.guild(guild)}.`);
@@ -671,7 +697,7 @@ export async function handleGuildCreate(
 	client.services.local.set(guild.id, services);
 }
 
-export async function handleGuildDelete(client: Client, bot: Discord.Bot, guildId: bigint): Promise<void> {
+export async function handleGuildDelete(client: Client, guildId: bigint): Promise<void> {
 	const guild = client.cache.guilds.get(guildId);
 	if (guild === undefined) {
 		return undefined;
@@ -680,64 +706,161 @@ export async function handleGuildDelete(client: Client, bot: Discord.Bot, guildI
 	const runningServices = client.services.local.get(guild.id) ?? [];
 	client.services.local.delete(guild.id);
 	for (const runningService of runningServices) {
-		runningService.stop(bot);
+		runningService.stop();
 	}
 }
 
 async function handleInteractionCreate(
 	[client, bot]: [Client, Discord.Bot],
 	interactionRaw: Discord.Interaction,
+	flags?: Logos.InteractionFlags,
 ): Promise<void> {
 	if (interactionRaw.data?.customId === constants.components.none) {
 		acknowledge([client, bot], interactionRaw);
 		return;
 	}
 
-	const commandName = interactionRaw.data?.name;
+	const commandName = getCommandName(interactionRaw);
 	if (commandName === undefined) {
 		return;
 	}
 
-	const subCommandGroupOption = interactionRaw.data?.options?.find((option) => isSubcommandGroup(option));
-
-	let commandNameFull: string;
-	if (subCommandGroupOption !== undefined) {
-		const subCommandGroupName = subCommandGroupOption.name;
-		const subCommandName = subCommandGroupOption.options?.find((option) => isSubcommand(option))?.name;
-		if (subCommandName === undefined) {
-			return;
-		}
-
-		commandNameFull = `${commandName} ${subCommandGroupName} ${subCommandName}`;
-	} else {
-		const subCommandName = interactionRaw.data?.options?.find((option) => isSubcommand(option))?.name;
-		if (subCommandName === undefined) {
-			commandNameFull = commandName;
-		} else {
-			commandNameFull = `${commandName} ${subCommandName}`;
-		}
-	}
+	const localeData = await getLocaleData(client, interactionRaw);
+	const interaction: Logos.Interaction = { ...interactionRaw, ...localeData, ...(flags !== undefined ? flags : {}) };
 
 	let handle: InteractionHandler | undefined;
 	if (isAutocomplete(interactionRaw)) {
-		handle = client.commands.handlers.autocomplete.get(commandNameFull);
+		handle = client.commands.handlers.autocomplete.get(commandName);
 	} else {
-		handle = client.commands.handlers.execute.get(commandNameFull);
+		handle = client.commands.handlers.execute.get(commandName);
 	}
 	if (handle === undefined) {
 		return;
 	}
 
-	const localeData = await getLocaleData(client, interactionRaw);
-	const interaction: Logos.Interaction = { ...interactionRaw, ...localeData };
-
-	Promise.resolve(handle([client, bot], interaction)).catch((exception) => {
-		Sentry.captureException(exception);
+	try {
+		await handle([client, bot], interaction);
+	} catch (exception) {
 		client.log.error(exception);
-	});
+	}
 }
 
-function withCaching(client: Client, transformers: Discord.Transformers): Discord.Transformers {
+function addCacheInterceptors(client: Client, session: ravendb.IDocumentSession): void {
+	const { load, store } = session;
+
+	// biome-ignore lint: Typing this out in TypeScript is a nonsense and I don't have time to do it right now.
+	function getCompositeId(collection: string, document: any): string {
+		switch (collection) {
+			case "EntryRequests": {
+				return `${document.guildId}/${document.authorId}`;
+			}
+			case "Guilds": {
+				return document.guildId;
+			}
+			case "Praises": {
+				return `${document.targetId}/${document.authorId}/${document.createdAt}`;
+			}
+			case "Reports": {
+				return `${document.guildId}/${document.authorId}/${document.createdAt}`;
+			}
+			case "Suggestions": {
+				return `${document.guildId}/${document.authorId}/${document.createdAt}`;
+			}
+			case "Users": {
+				return document.account.id;
+			}
+			case "Warnings": {
+				return `${document.targetId}/${document.authorId}/${document.createdAt}`;
+			}
+		}
+
+		throw "StateError: Getting composite ID not handled for collection";
+	}
+
+	// biome-ignore lint: Typing this out in TypeScript is a nonsense and I don't have time to do it right now.
+	function saveValue(value: any) {
+		const collection: string | undefined = value["@metadata"]?.["@collection"];
+		if (collection === undefined) {
+			throw "StateError: Collection unexpectedly undefined.";
+		}
+
+		const compositeId = getCompositeId(collection, value);
+
+		switch (collection) {
+			case "EntryRequests": {
+				client.cache.documents.entryRequests.set(compositeId, value as EntryRequest);
+				break;
+			}
+			case "Guilds": {
+				client.cache.documents.guilds.set(compositeId, value as Guild);
+				break;
+			}
+			case "Praises": {
+				const document = value as Praise;
+
+				if (client.cache.documents.praisesByAuthor.has(document.authorId)) {
+					client.cache.documents.praisesByAuthor.get(document.authorId)?.set(compositeId, document);
+				} else {
+					client.cache.documents.praisesByAuthor.set(document.authorId, new Map([[compositeId, document]]));
+				}
+
+				if (client.cache.documents.praisesByTarget.has(document.targetId)) {
+					client.cache.documents.praisesByTarget.get(document.targetId)?.set(compositeId, document);
+				} else {
+					client.cache.documents.praisesByTarget.set(document.targetId, new Map([[compositeId, document]]));
+				}
+
+				break;
+			}
+			case "Reports": {
+				client.cache.documents.reports.set(compositeId, value as Report);
+				break;
+			}
+			case "Suggestions": {
+				client.cache.documents.suggestions.set(compositeId, value as Suggestion);
+				break;
+			}
+			case "Users": {
+				client.cache.documents.users.set(compositeId, value as User);
+				break;
+			}
+			case "Warnings": {
+				const document = value as Warning;
+
+				if (client.cache.documents.warningsByTarget.has(document.targetId)) {
+					client.cache.documents.warningsByTarget.get(document.targetId)?.set(compositeId, document);
+				} else {
+					client.cache.documents.warningsByTarget.set(document.targetId, new Map([[compositeId, document]]));
+				}
+
+				break;
+			}
+		}
+	}
+
+	// @ts-ignore
+	session.load = async (...args) => {
+		// @ts-ignore
+		const value = await load.call(session, ...args);
+		if (value === null) {
+			return value;
+		}
+
+		saveValue(value);
+
+		return value;
+	};
+
+	// @ts-ignore
+	session.store = async (value, ...args) => {
+		// @ts-ignore
+		await store.call(session, value, ...args);
+
+		saveValue(value);
+	};
+}
+
+function withCacheInterceptors(client: Client, transformers: Discord.Transformers): Discord.Transformers {
 	const { guild, channel, user, member, message, role, voiceState } = transformers;
 
 	transformers.guild = (bot, payload) => {
@@ -759,7 +882,9 @@ function withCaching(client: Client, transformers: Discord.Transformers): Discor
 
 		client.cache.channels.set(result.id, result);
 
-		client.cache.guilds.get(result.guildId)?.channels.set(result.id, result);
+		if (result.guildId !== undefined) {
+			client.cache.guilds.get(result.guildId)?.channels.set(result.id, result);
+		}
 
 		return resultUnoptimised;
 	};
@@ -773,15 +898,15 @@ function withCaching(client: Client, transformers: Discord.Transformers): Discor
 		return resultUnoptimised;
 	};
 
-	transformers.member = (bot, payload, ...args) => {
-		const resultUnoptimised = member(bot, payload, ...args);
+	transformers.member = (bot, payload, guildId, userId) => {
+		const resultUnoptimised = member(bot, payload, guildId, userId);
 		const result = Logos.slimMember(resultUnoptimised);
 
-		const memberSnowflake = bot.transformers.snowflake(`${result.id}${result.guildId}`);
+		const memberSnowflake = bot.transformers.snowflake(`${userId}${guildId}`);
 
 		client.cache.members.set(memberSnowflake, result);
 
-		client.cache.guilds.get(result.guildId)?.members.set(result.id, result);
+		client.cache.guilds.get(BigInt(guildId))?.members.set(BigInt(userId), result);
 
 		return resultUnoptimised;
 	};
@@ -906,11 +1031,11 @@ function withRateLimiting(handle: InteractionHandler): InteractionHandler {
 	};
 }
 
-function localiseCommands<CommandsRaw extends Record<string, CommandTemplate>, CommandName extends keyof CommandsRaw>(
-	localisations: Client["localisations"],
-	commandsRaw: CommandsRaw,
-): Record<CommandName, Command> {
-	function localiseCommandOrOption(key: string): Pick<Command, LocalisationProperties> | undefined {
+function buildCommands<
+	CommandTemplates extends Record<keyof typeof commandTemplates, CommandTemplate>,
+	CommandName extends keyof CommandTemplates,
+>(templates: CommandTemplates, localisations: Client["localisations"]): Client["commands"] {
+	function localiseCommandOrOption(key: string, type?: CommandTemplate["type"]): Partial<Command> | undefined {
 		const optionName = key.split(".")?.at(-1);
 		if (optionName === undefined) {
 			console.warn(`Failed to get option name from localisation key '${key}'.`);
@@ -933,6 +1058,13 @@ function localiseCommands<CommandsRaw extends Record<string, CommandTemplate>, C
 			nameLocalisations[locale] = name;
 		}
 
+		if (type === Discord.ApplicationCommandTypes.Message) {
+			return {
+				name,
+				nameLocalizations: nameLocalisations ?? {},
+			};
+		}
+
 		const descriptionLocalisationsAll =
 			localisations.get(`${key}.description`) ?? localisations.get(`parameters.${optionName}.description`);
 		const description = descriptionLocalisationsAll?.get(defaults.LOCALISATION_LANGUAGE)?.({});
@@ -950,24 +1082,65 @@ function localiseCommands<CommandsRaw extends Record<string, CommandTemplate>, C
 		};
 	}
 
-	const commands: Partial<Record<CommandName, Command>> = {};
-	for (const [commandName, commandRaw] of Object.entries(commandsRaw) as [CommandName, CommandTemplate][]) {
-		const commandKey = commandRaw.name;
-		const localisations = localiseCommandOrOption(commandKey);
+	const showable: string[] = [];
+
+	const commandBuffer: Partial<Record<CommandName, Command>> = {};
+	for (const [commandName, commandTemplate] of Object.entries(templates) as [CommandName, CommandTemplate][]) {
+		const commandKey = commandTemplate.name;
+		const localisations = localiseCommandOrOption(commandKey, commandTemplate.type);
 		if (localisations === undefined) {
 			continue;
 		}
 
-		const command: Command = { ...localisations, ...commandRaw, options: [] };
+		if (localisations.name !== undefined && localisations.name in commandBuffer) {
+			throw `Duplicate command "${localisations.name}". Skipping addition...`;
+		}
 
-		for (const optionTemplate of commandRaw.options ?? []) {
+		if (localisations.nameLocalizations !== undefined) {
+			const duplicateNames = (Object.entries(localisations.nameLocalizations) as [Discord.Locales, string][]).filter(
+				([locale, localisation]) =>
+					(Object.values(commandBuffer) as Command[]).some(
+						(command) => command.nameLocalizations?.[locale] === localisation,
+					),
+			);
+			for (const [locale, name] of duplicateNames) {
+				const language = getDiscordLanguageByLocale(locale);
+				console.error(`Duplicate command "${name}" in ${language}; Excluding...`);
+				delete localisations.nameLocalizations[locale];
+			}
+		}
+
+		const command: Command = { ...commandTemplate, ...localisations, options: [] } as Command;
+
+		for (const optionTemplate of commandTemplate.options ?? []) {
 			const optionKey = [commandKey, "options", optionTemplate.name].join(".");
 			const localisations = localiseCommandOrOption(optionKey);
 			if (localisations === undefined) {
 				continue;
 			}
 
-			const option: Option = { ...localisations, ...optionTemplate, options: [] };
+			if (
+				localisations.name !== undefined &&
+				(command as Discord.CreateSlashApplicationCommand).options?.some((option) => option.name === localisations.name)
+			) {
+				throw `Duplicate option "${localisations.name}" in command "${command.name}".`;
+			}
+
+			if (localisations.nameLocalizations !== undefined) {
+				const duplicateNames = (Object.entries(localisations.nameLocalizations) as [Discord.Locales, string][]).filter(
+					([locale, localisation]) =>
+						(command as Discord.CreateSlashApplicationCommand).options?.some(
+							(option) => option.nameLocalizations?.[locale] === localisation,
+						),
+				);
+				for (const [locale, name] of duplicateNames) {
+					const language = getDiscordLanguageByLocale(locale);
+					console.error(`Duplicate option "${name}" in command "${command.name}" in ${language}; Excluding...`);
+					delete localisations.nameLocalizations[locale];
+				}
+			}
+
+			const option: Option = { ...optionTemplate, ...localisations, options: [] } as Option;
 
 			for (const subOptionTemplate of optionTemplate.options ?? []) {
 				const subOptionKey = [optionKey, "options", subOptionTemplate.name].join(".");
@@ -976,7 +1149,26 @@ function localiseCommands<CommandsRaw extends Record<string, CommandTemplate>, C
 					continue;
 				}
 
-				const subOption: Option = { ...localisations, ...subOptionTemplate, options: [] };
+				if (localisations.name !== undefined && option.options?.some((option) => option.name === localisations.name)) {
+					throw `Duplicate option "${localisations.name}" in command "${command.name} ${option.name}".`;
+				}
+
+				if (localisations.nameLocalizations !== undefined) {
+					const duplicateNames = (
+						Object.entries(localisations.nameLocalizations) as [Discord.Locales, string][]
+					).filter(([locale, localisation]) =>
+						option.options?.some((subOption) => subOption.nameLocalizations?.[locale] === localisation),
+					);
+					for (const [locale, name] of duplicateNames) {
+						const language = getDiscordLanguageByLocale(locale);
+						console.error(
+							`Duplicate option "${name}" in command "${command.name} ${option.name}" in ${language}; Excluding...`,
+						);
+						delete localisations.nameLocalizations[locale];
+					}
+				}
+
+				const subOption: Option = { ...subOptionTemplate, ...localisations, options: [] } as Option;
 
 				for (const subSubOptionTemplate of subOptionTemplate.options ?? []) {
 					const subSubOptionKey = [subOptionKey, "options", subSubOptionTemplate.name].join(".");
@@ -985,21 +1177,58 @@ function localiseCommands<CommandsRaw extends Record<string, CommandTemplate>, C
 						continue;
 					}
 
-					const subSubOption: Option = { ...localisations, ...subSubOptionTemplate, options: [] };
+					if (
+						localisations.name !== undefined &&
+						option.options?.some((option) => option.name === localisations.name)
+					) {
+						throw `Duplicate option "${localisations.name}" in command "${command.name} ${option.name} ${subOption.name}".`;
+					}
+
+					if (localisations.nameLocalizations !== undefined) {
+						const duplicateNames = (
+							Object.entries(localisations.nameLocalizations) as [Discord.Locales, string][]
+						).filter(([locale, localisation]) =>
+							subOption.options?.some((subSubOption) => subSubOption.nameLocalizations?.[locale] === localisation),
+						);
+						for (const [locale, name] of duplicateNames) {
+							const language = getDiscordLanguageByLocale(locale);
+							console.error(
+								`Duplicate option "${name}" in command "${command.name} ${option.name} ${subOption.name}" in ${language}; Excluding...`,
+							);
+							delete localisations.nameLocalizations[locale];
+						}
+					}
+
+					const subSubOption: Option = { ...subSubOptionTemplate, ...localisations, options: [] } as Option;
 
 					subOption.options?.push(subSubOption);
+				}
+
+				if (subOptionTemplate.isShowable ?? false) {
+					showable.push(`${command.name} ${option.name} ${subOption.name}`);
 				}
 
 				option.options?.push(subOption);
 			}
 
-			command.options?.push(option);
+			if (optionTemplate.isShowable ?? false) {
+				showable.push(`${command.name} ${option.name}`);
+			}
+
+			(command as Discord.CreateSlashApplicationCommand).options?.push(option);
 		}
 
-		commands[commandName] = command;
+		if (commandTemplate.isShowable ?? false) {
+			showable.push(`${command.name}`);
+		}
+
+		commandBuffer[commandName] = command;
 	}
 
-	return commands as Record<CommandName, Command>;
+	const commands = commandBuffer as Record<keyof typeof commandTemplates, Command>;
+	const handlers = createCommandHandlers(Object.values(commands) as CommandTemplate[]);
+
+	return { commands, showable, handlers };
 }
 
 function createCommandHandlers(commands: CommandTemplate[]): Client["commands"]["handlers"] {
@@ -1163,7 +1392,7 @@ function resolveIdentifierToMembers(
 
 	const moderatorRoleIds = guild.roles
 		.array()
-		.filter((role) => Discord.calculatePermissions(role.permissions).includes("MODERATE_MEMBERS"))
+		.filter((role) => role.permissions.has("MODERATE_MEMBERS"))
 		.map((role) => role.id);
 	if (moderatorRoleIds.length === 0) {
 		return undefined;
@@ -1224,7 +1453,7 @@ function resolveIdentifierToMembers(
 
 	const identifierLowercase = identifier.toLowerCase();
 	const matchedMembers = members.filter((member) => {
-		if (member.user?.toggles.bot && !options.includeBots) {
+		if (member.user?.toggles?.has("bot") && !options.includeBots) {
 			return false;
 		}
 		if (
@@ -1350,14 +1579,6 @@ function extendEventHandler<Event extends keyof Discord.EventHandlers, Handler e
 	) as Handler;
 }
 
-function isSubcommandGroup(option: Discord.InteractionDataOption): boolean {
-	return option.type === Discord.ApplicationCommandOptionTypes.SubCommandGroup;
-}
-
-function isSubcommand(option: Discord.InteractionDataOption): boolean {
-	return option.type === Discord.ApplicationCommandOptionTypes.SubCommand;
-}
-
 function createLocalisations(
 	localisationsRaw: Map<string, Map<LocalisationLanguage, string>>,
 ): Client["localisations"] {
@@ -1384,7 +1605,8 @@ function createLocalisations(
 }
 
 function localise(client: Client, key: string, locale: Locale | undefined): (args?: Record<string, unknown>) => string {
-	const language = (locale !== undefined ? getLanguageByLocale(locale) : undefined) ?? defaults.LOCALISATION_LANGUAGE;
+	const language =
+		(locale !== undefined ? getLocalisationLanguageByLocale(locale) : undefined) ?? defaults.LOCALISATION_LANGUAGE;
 
 	const getLocalisation =
 		client.localisations.get(key)?.get(language) ??
@@ -1407,11 +1629,11 @@ function toDiscordLocalisations(
 	const entries = Array.from(localisations.entries());
 	const result: Discord.Localization = {};
 	for (const [language, localise] of entries) {
-		if (!isBuiltIn(language)) {
+		if (!isDiscordLocalisationLanguage(language)) {
 			continue;
 		}
 
-		const locale = getDiscordLocaleByLanguage(language);
+		const locale = getDiscordLocaleByLocalisationLanguage(language);
 		if (locale === undefined) {
 			continue;
 		}
@@ -1427,7 +1649,7 @@ function toDiscordLocalisations(
 }
 
 function pluralise(client: Client, key: string, language: LocalisationLanguage, number: number): string {
-	const locale = getLocaleByLanguage(language);
+	const locale = getLocaleByLocalisationLanguage(language);
 	const pluralise = transformers[language].pluralise;
 	const { one, two, many } = {
 		one: localise(client, `${key}.one`, locale)?.({ one: number }),
@@ -1452,6 +1674,7 @@ export {
 	isValidSnowflake,
 	localise,
 	resolveIdentifierToMembers,
+	handleInteractionCreate,
 	resolveInteractionToMember,
 	pluralise,
 };

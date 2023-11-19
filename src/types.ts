@@ -1,5 +1,5 @@
+import * as Discord from "@discordeno/bot";
 import { FeatureLanguage, LearningLanguage, Locale, LocalisationLanguage } from "./constants/languages";
-import * as Discord from "discordeno";
 
 type Guild = Pick<
 	Discord.Guild,
@@ -75,7 +75,7 @@ function slimMember(member: Discord.Member): Member {
 
 type Message = Pick<
 	Discord.Message,
-	"guildId" | "components" | "id" | "type" | "channelId" | "timestamp" | "content" | "embeds" | "authorId"
+	"guildId" | "components" | "id" | "type" | "channelId" | "timestamp" | "content" | "embeds" | "author"
 >;
 
 function slimMessage(message: Discord.Message): Message {
@@ -88,7 +88,7 @@ function slimMessage(message: Discord.Message): Message {
 		timestamp: message.timestamp,
 		content: message.content,
 		embeds: message.embeds,
-		authorId: message.authorId,
+		author: message.author,
 	};
 }
 
@@ -124,7 +124,11 @@ interface InteractionLocaleData {
 	featureLanguage: FeatureLanguage;
 }
 
-type Interaction = Omit<Discord.Interaction, "locale" | "guildLocale"> & InteractionLocaleData;
+interface InteractionFlags {
+	show?: boolean;
+}
+
+type Interaction = Omit<Discord.Interaction, "locale" | "guildLocale"> & InteractionLocaleData & InteractionFlags;
 
 export {
 	Guild,
@@ -143,4 +147,5 @@ export {
 	slimVoiceState,
 	Interaction,
 	InteractionLocaleData,
+	InteractionFlags,
 };

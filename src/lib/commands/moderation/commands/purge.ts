@@ -1,3 +1,4 @@
+import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import { Locale } from "../../../../constants/languages";
 import time from "../../../../constants/time";
@@ -24,7 +25,7 @@ import {
 import { chunk, snowflakeToTimestamp } from "../../../utils";
 import { CommandTemplate } from "../../command";
 import { user } from "../../parameters";
-import * as Discord from "discordeno";
+import { Guild } from "../../../database/guild";
 
 const command: CommandTemplate = {
 	name: "purge",
@@ -70,17 +71,14 @@ async function handlePurgeMessages(
 		return;
 	}
 
-	const guildDocument = await client.database.adapters.guilds.getOrFetchOrCreate(
-		client,
-		"id",
-		guildId.toString(),
-		guildId,
-	);
+	const guildDocument =
+		client.cache.documents.guilds.get(guildId.toString()) ??
+		(await client.database.session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
 	if (guildDocument === undefined) {
 		return;
 	}
 
-	const configuration = guildDocument.data.features.moderation.features?.purging;
+	const configuration = guildDocument.features.moderation.features?.purging;
 	if (configuration === undefined || !configuration.enabled) {
 		return;
 	}
@@ -127,9 +125,10 @@ async function handlePurgeMessages(
 
 	const end =
 		provisionalEnd ??
-		(await Discord.getMessages(bot, channelId, { limit: 1 })
+		(await bot.rest
+			.getMessages(channelId, { limit: 1 })
 			.catch(() => undefined)
-			.then((messages) => messages?.first()?.id?.toString()));
+			.then((messages) => messages?.at(0)?.id?.toString()));
 
 	if (end === undefined) {
 		displayFailedError([client, bot], interaction, { locale });
@@ -159,12 +158,12 @@ async function handlePurgeMessages(
 	}
 
 	const [startMessage, endMessage] = await Promise.all([
-		Discord.getMessage(bot, channelId, startMessageId).catch(() => {
+		bot.rest.getMessage(channelId, startMessageId).catch(() => {
 			client.log.warn(`Failed to get start message, ID ${startMessageId}.`);
 
 			return undefined;
 		}),
-		Discord.getMessage(bot, channelId, endMessageId).catch(() => {
+		bot.rest.getMessage(channelId, endMessageId).catch(() => {
 			client.log.warn(`Failed to get end message, ID ${endMessageId}.`);
 
 			return undefined;
@@ -185,23 +184,25 @@ async function handlePurgeMessages(
 		getMessageContent(client, endMessage, { locale }),
 	];
 
-	let messages: Logos.Message[] = [];
+	let messages: Discord.CamelizedDiscordMessage[] = [];
 
-	const getMessageFields = (): NonNullable<Discord.Embed["fields"]> => {
+	const getMessageFields = (): Discord.CamelizedDiscordEmbedField[] => {
 		const strings = {
 			start: localise(client, "purge.strings.start", locale)(),
 			postedStart: (startMessageContent !== undefined
 				? localise(client, "purge.strings.posted", locale)
 				: localise(client, "purge.strings.embedPosted", locale))({
-				relative_timestamp: timestamp(startMessage.timestamp),
-				user_mention: mention(startMessage.authorId, MentionTypes.User),
+				// TODO(vxern): Fix timestamps now being ISO8601.
+				relative_timestamp: timestamp(Number(startMessage.timestamp)),
+				user_mention: mention(BigInt(startMessage.author.id), MentionTypes.User),
 			}),
 			end: localise(client, "purge.strings.end", locale)(),
 			postedEnd: (endMessageContent !== undefined
 				? localise(client, "purge.strings.posted", locale)
 				: localise(client, "purge.strings.embedPosted", locale))({
-				relative_timestamp: timestamp(endMessage.timestamp),
-				user_mention: mention(endMessage.authorId, MentionTypes.User),
+				// TODO(vxern): Fix timestamps now being ISO8601.
+				relative_timestamp: timestamp(Number(endMessage.timestamp)),
+				user_mention: mention(BigInt(endMessage.author.id), MentionTypes.User),
 			}),
 			messagesFound: localise(client, "purge.strings.messagesFound", locale)(),
 		};
@@ -286,14 +287,16 @@ async function handlePurgeMessages(
 			return;
 		}
 
-		const newMessages = await Discord.getMessages(bot, channelId, {
-			after: messages.length === 0 ? startMessage.id : messages.at(-1)?.id,
-			limit: 100,
-		})
+		const newMessages = await bot.rest
+			.getMessages(channelId, {
+				after: messages.length === 0 ? startMessage.id : messages.at(-1)?.id,
+				limit: 100,
+			})
 			.then((collection) => Array.from(collection.values()).reverse())
 			.catch((reason) => {
 				client.log.warn(
-					`Failed to get messages starting with ${diagnostics.display.message(startMessage.id)}: ${reason}`,
+					`Failed to get messages starting with ${diagnostics.display.message(startMessage.id)}:`,
+					reason,
 				);
 
 				return [];
@@ -311,7 +314,9 @@ async function handlePurgeMessages(
 		}
 
 		const messagesToDelete =
-			authorId !== undefined ? messagesInRange.filter((message) => message.authorId === authorId) : messagesInRange;
+			authorId !== undefined
+				? messagesInRange.filter((message) => BigInt(message.author.id) === authorId)
+				: messagesInRange;
 		messages.push(...messagesToDelete);
 
 		// If the chunk is incomplete or if not all of it is relevant,
@@ -326,7 +331,7 @@ async function handlePurgeMessages(
 		}
 	}
 
-	if (authorId === undefined || startMessage.authorId === authorId) {
+	if (authorId === undefined || BigInt(startMessage.author.id) === authorId) {
 		messages.unshift(startMessage);
 	}
 
@@ -362,7 +367,7 @@ async function handlePurgeMessages(
 		isShouldContinue = await new Promise<boolean>((resolve) => {
 			const continueId = createInteractionCollector([client, bot], {
 				type: Discord.InteractionTypes.MessageComponent,
-				onCollect: async (_, selection) => {
+				onCollect: async (selection) => {
 					acknowledge([client, bot], selection);
 					resolve(true);
 				},
@@ -370,7 +375,7 @@ async function handlePurgeMessages(
 
 			const cancelId = createInteractionCollector([client, bot], {
 				type: Discord.InteractionTypes.MessageComponent,
-				onCollect: async (_, selection) => {
+				onCollect: async (selection) => {
 					acknowledge([client, bot], selection);
 					resolve(false);
 				},
@@ -477,7 +482,7 @@ async function handlePurgeMessages(
 		(await new Promise<boolean>((resolve) => {
 			const continueId = createInteractionCollector([client, bot], {
 				type: Discord.InteractionTypes.MessageComponent,
-				onCollect: async (_, selection) => {
+				onCollect: async (selection) => {
 					acknowledge([client, bot], selection);
 					resolve(true);
 				},
@@ -485,7 +490,7 @@ async function handlePurgeMessages(
 
 			const cancelId = createInteractionCollector([client, bot], {
 				type: Discord.InteractionTypes.MessageComponent,
-				onCollect: async (_, selection) => {
+				onCollect: async (selection) => {
 					acknowledge([client, bot], selection);
 					resolve(false);
 				},
@@ -614,12 +619,12 @@ async function handlePurgeMessages(
 	const journallingService = client.services.journalling.get(guild.id);
 
 	if (configuration.journaling) {
-		journallingService?.log(bot, "purgeBegin", { args: [member, channel, messages.length] });
+		journallingService?.log("purgeBegin", { args: [member, channel, messages.length] });
 	}
 
 	const twoWeeksAgo = now - time.week * 2 + time.hour;
 
-	const firstBulkDeletableIndex = messages.findIndex((message) => message.timestamp > twoWeeksAgo);
+	const firstBulkDeletableIndex = messages.findIndex((message) => Number(message.timestamp) > twoWeeksAgo);
 	const bulkDeletable = firstBulkDeletableIndex !== -1 ? messages.slice(firstBulkDeletableIndex, messages.length) : [];
 	const nonBulkDeletable = messages.slice(
 		0,
@@ -642,9 +647,10 @@ async function handlePurgeMessages(
 		for (const chunk of bulkDeletableChunks) {
 			const messageIds = chunk.map((message) => message.id);
 
-			await Discord.deleteMessages(bot, channelId, messageIds).catch((reason) => {
+			await bot.rest.deleteMessages(channelId, messageIds).catch((reason) => {
 				client.log.warn(
-					`Failed to delete ${messageIds.length} message(s) from ${diagnostics.display.channel(channelId)}: ${reason}`,
+					`Failed to delete ${messageIds.length} message(s) from ${diagnostics.display.channel(channelId)}:`,
+					reason,
 				);
 			});
 
@@ -655,9 +661,9 @@ async function handlePurgeMessages(
 	}
 
 	for (const message of nonBulkDeletable) {
-		await Discord.deleteMessage(bot, channelId, message.id).catch((reason) =>
-			client.log.warn(`Failed to delete ${diagnostics.display.message(message)}: ${reason}`),
-		);
+		await bot.rest
+			.deleteMessage(channelId, message.id)
+			.catch((reason) => client.log.warn(`Failed to delete ${diagnostics.display.message(message)}:`, reason));
 
 		await new Promise((resolve) => setTimeout(resolve, 1000));
 
@@ -671,7 +677,7 @@ async function handlePurgeMessages(
 	);
 
 	if (configuration.journaling) {
-		journallingService?.log(bot, "purgeEnd", { args: [member, channel, deletedCount] });
+		journallingService?.log("purgeEnd", { args: [member, channel, deletedCount] });
 	}
 
 	clearTimeout(responseDeletionTimeoutId);
@@ -796,12 +802,16 @@ async function displayFailedError(
 	});
 }
 
-function getMessageContent(client: Client, message: Logos.Message, { locale }: { locale: Locale }): string | undefined {
-	if (message.content.trim().length === 0 && message.embeds.length !== 0) {
+function getMessageContent(
+	client: Client,
+	message: Discord.CamelizedDiscordMessage,
+	{ locale }: { locale: Locale },
+): string | undefined {
+	if (message.content?.trim().length === 0 && message.embeds.length !== 0) {
 		return undefined;
 	}
 
-	const content = trim(message.content, 500).trim();
+	const content = trim(message.content ?? "", 500).trim();
 	if (content.length === 0) {
 		const strings = {
 			noContent: localise(client, "purge.strings.noContent", locale)(),

@@ -1,5 +1,5 @@
+import * as Discord from "@discordeno/bot";
 import { OptionTemplate } from "./command";
-import * as Discord from "discordeno";
 
 const user: OptionTemplate = {
 	name: "user",

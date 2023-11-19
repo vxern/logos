@@ -1,11 +1,10 @@
-import { Locale, getLocaleByLanguage } from "../../constants/languages";
+import * as Discord from "@discordeno/bot";
+import { Locale, getLocaleByLocalisationLanguage } from "../../constants/languages";
 import defaults from "../../defaults";
 import * as Logos from "../../types";
 import { Client } from "../client";
-import { Document } from "../database/document";
-import { Guild } from "../database/structs/guild";
+import { Guild } from "../database/guild";
 import { getLocalisationLanguage } from "../interactions";
-import * as Discord from "discordeno";
 
 type ServiceBase = {
 	[K in keyof Discord.EventHandlers]: (..._: Parameters<Discord.EventHandlers[K]>) => Promise<void>;
@@ -13,16 +12,19 @@ type ServiceBase = {
 
 abstract class Service implements ServiceBase {
 	readonly client: Client;
+	readonly bot: Discord.Bot;
 
-	constructor(client: Client) {
+	constructor([client, bot]: [Client, Discord.Bot]) {
 		this.client = client;
+		this.bot = bot;
 	}
 
-	async start(_: Discord.Bot): Promise<void> {}
-	async stop(_: Discord.Bot): Promise<void> {}
+	async start(): Promise<void> {}
+	async stop(): Promise<void> {}
 
 	async debug(..._: Parameters<ServiceBase["debug"]>) {}
-	async auditLogEntryCreate(..._: Parameters<ServiceBase["auditLogEntryCreate"]>) {}
+	async applicationCommandPermissionsUpdate(..._: Parameters<ServiceBase["applicationCommandPermissionsUpdate"]>) {}
+	async guildAuditLogEntryCreate(..._: Parameters<ServiceBase["guildAuditLogEntryCreate"]>) {}
 	async automodRuleCreate(..._: Parameters<ServiceBase["automodRuleCreate"]>) {}
 	async automodRuleUpdate(..._: Parameters<ServiceBase["automodRuleUpdate"]>) {}
 	async automodRuleDelete(..._: Parameters<ServiceBase["automodRuleDelete"]>) {}
@@ -47,6 +49,7 @@ abstract class Service implements ServiceBase {
 	async guildMemberAdd(..._: Parameters<ServiceBase["guildMemberAdd"]>) {}
 	async guildMemberRemove(..._: Parameters<ServiceBase["guildMemberRemove"]>) {}
 	async guildMemberUpdate(..._: Parameters<ServiceBase["guildMemberUpdate"]>) {}
+	async guildStickersUpdate(..._: Parameters<ServiceBase["guildStickersUpdate"]>) {}
 	async messageCreate(..._: Parameters<ServiceBase["messageCreate"]>) {}
 	async messageDelete(..._: Parameters<ServiceBase["messageDelete"]>) {}
 	async messageDeleteBulk(..._: Parameters<ServiceBase["messageDeleteBulk"]>) {}
@@ -71,6 +74,7 @@ abstract class Service implements ServiceBase {
 	async guildBanRemove(..._: Parameters<ServiceBase["guildBanRemove"]>) {}
 	async guildCreate(..._: Parameters<ServiceBase["guildCreate"]>) {}
 	async guildDelete(..._: Parameters<ServiceBase["guildDelete"]>) {}
+	async guildUnavailable(..._: Parameters<ServiceBase["guildUnavailable"]>) {}
 	async guildUpdate(..._: Parameters<ServiceBase["guildUpdate"]>) {}
 	async raw(..._: Parameters<ServiceBase["raw"]>) {}
 	async roleCreate(..._: Parameters<ServiceBase["roleCreate"]>) {}
@@ -87,12 +91,18 @@ abstract class LocalService extends Service {
 	protected readonly guildId: bigint;
 	protected readonly guildIdString: string;
 
+	constructor([client, bot]: [Client, Discord.Bot], guildId: bigint) {
+		super([client, bot]);
+		this.guildId = guildId;
+		this.guildIdString = guildId.toString();
+	}
+
 	get guild(): Logos.Guild | undefined {
 		return this.client.cache.guilds.get(this.guildId);
 	}
 
-	get guildDocument(): Document<Guild> | undefined {
-		return this.client.database.cache.guildById.get(this.guildIdString);
+	get guildDocument(): Guild | undefined {
+		return this.client.cache.documents.guilds.get(this.guildIdString);
 	}
 
 	get guildLocale(): Locale {
@@ -102,15 +112,9 @@ abstract class LocalService extends Service {
 		}
 
 		const guildLanguage = getLocalisationLanguage(guildDocument);
-		const guildLocale = getLocaleByLanguage(guildLanguage) ?? defaults.LOCALISATION_LOCALE;
+		const guildLocale = getLocaleByLocalisationLanguage(guildLanguage) ?? defaults.LOCALISATION_LOCALE;
 
 		return guildLocale;
-	}
-
-	constructor(client: Client, guildId: bigint) {
-		super(client);
-		this.guildId = guildId;
-		this.guildIdString = guildId.toString();
 	}
 }
 

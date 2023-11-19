@@ -1,14 +1,14 @@
+import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
 import { handleOpenRoleSelectionMenu } from "../../../commands/social/commands/profile/roles";
 import { decodeId, getLocaleData } from "../../../interactions";
 import { HashableMessageContents, NoticeService } from "../service";
-import * as Discord from "discordeno";
 
 class RoleNoticeService extends NoticeService<"roles"> {
-	constructor(client: Client, guildId: bigint) {
-		super(client, guildId, { type: "roles" });
+	constructor([client, bot]: [Client, Discord.Bot], guildId: bigint) {
+		super([client, bot], guildId, { type: "roles" });
 	}
 
 	generateNotice(): HashableMessageContents | undefined {
@@ -53,7 +53,7 @@ class RoleNoticeService extends NoticeService<"roles"> {
 		};
 	}
 
-	async interactionCreate(bot: Discord.Bot, interactionRaw: Discord.Interaction): Promise<void> {
+	async interactionCreate(interactionRaw: Discord.Interaction): Promise<void> {
 		if (interactionRaw.type !== Discord.InteractionTypes.MessageComponent) {
 			return;
 		}
@@ -71,7 +71,7 @@ class RoleNoticeService extends NoticeService<"roles"> {
 		const localeData = await getLocaleData(this.client, interactionRaw);
 		const interaction: Logos.Interaction = { ...interactionRaw, ...localeData };
 
-		handleOpenRoleSelectionMenu([this.client, bot], interaction);
+		handleOpenRoleSelectionMenu([this.client, this.bot], interaction);
 	}
 }
 

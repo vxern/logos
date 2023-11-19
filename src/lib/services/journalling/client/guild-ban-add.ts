@@ -4,7 +4,7 @@ import { ClientEvents, MessageGenerators } from "../generator";
 
 export default {
 	title: `${constants.symbols.events.user.banned} User banned`,
-	message: (_, __, user, ___) => `${diagnostics.display.user(user)} has been banned.`,
-	filter: (_, originGuildId, __, user, guildId) => originGuildId === guildId && !user.toggles.bot,
+	message: (_, user, __) => `${diagnostics.display.user(user)} has been banned.`,
+	filter: (_, originGuildId, user, guildId) => originGuildId === guildId && !user.toggles?.has("bot"),
 	color: constants.colors.red,
-} satisfies MessageGenerators<ClientEvents>["guildBanAdd"];
+} satisfies MessageGenerators<ClientEvents>["guildBanAdd"] as MessageGenerators<ClientEvents>["guildBanAdd"];

@@ -1,3 +1,4 @@
+import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
@@ -5,7 +6,6 @@ import { parseArguments, reply } from "../../../interactions";
 import { isCollection } from "../../../services/music/music";
 import { OptionTemplate } from "../../command";
 import { by, collection, to } from "../../parameters";
-import * as Discord from "discordeno";
 
 const command: OptionTemplate = {
 	name: "unskip",
@@ -40,7 +40,7 @@ async function handleUnskipAction([client, bot]: [Client, Discord.Bot], interact
 		return;
 	}
 
-	const isVoiceStateVerified = musicService.verifyCanManagePlayback(bot, interaction);
+	const isVoiceStateVerified = musicService.verifyCanManagePlayback(interaction);
 	if (!isVoiceStateVerified) {
 		return;
 	}
@@ -205,7 +205,7 @@ async function handleUnskipAction([client, bot]: [Client, Discord.Bot], interact
 	const isUnskippingCollection = collection ?? false;
 
 	if (isUnskippingListing) {
-		musicService.unskip(bot, isUnskippingCollection, { by: songsToUnskip, to: songToUnskipTo });
+		musicService.unskip(isUnskippingCollection, { by: songsToUnskip, to: songToUnskipTo });
 	} else {
 		if (songsToUnskip !== undefined) {
 			let listingsToUnskip!: number;
@@ -219,7 +219,7 @@ async function handleUnskipAction([client, bot]: [Client, Discord.Bot], interact
 			} else {
 				listingsToUnskip = Math.min(songsToUnskip, history.length);
 			}
-			musicService.unskip(bot, isUnskippingCollection, { by: listingsToUnskip });
+			musicService.unskip(isUnskippingCollection, { by: listingsToUnskip });
 		} else if (songToUnskipTo !== undefined) {
 			let listingToSkipTo!: number;
 			if (
@@ -232,9 +232,9 @@ async function handleUnskipAction([client, bot]: [Client, Discord.Bot], interact
 			} else {
 				listingToSkipTo = Math.min(songToUnskipTo, history.length);
 			}
-			musicService.unskip(bot, isUnskippingCollection, { to: listingToSkipTo });
+			musicService.unskip(isUnskippingCollection, { to: listingToSkipTo });
 		} else {
-			musicService.unskip(bot, isUnskippingCollection, {});
+			musicService.unskip(isUnskippingCollection, {});
 		}
 	}
 

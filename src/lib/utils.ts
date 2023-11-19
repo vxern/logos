@@ -1,8 +1,7 @@
+import * as Discord from "@discordeno/bot";
 import * as Logos from "../types";
 import { Client } from "./client";
-import { Document } from "./database/document";
 import diagnostics from "./diagnostics";
-import * as Discord from "discordeno";
 
 type TextChannel = Logos.Channel & { type: Discord.ChannelTypes.GuildText };
 type VoiceChannel = Logos.Channel & { type: Discord.ChannelTypes.GuildVoice };
@@ -46,8 +45,8 @@ function snowflakeToTimestamp(snowflake: bigint): number {
 	return Number((snowflake >> snowflakeBitsToDiscard) + beginningOfDiscordEpoch);
 }
 
-function getGuildIconURLFormatted(bot: Discord.Bot, guild: Logos.Guild): string | undefined {
-	const iconURL = Discord.getGuildIconURL(bot, guild.id, guild.icon, {
+function getGuildIconURLFormatted(guild: Logos.Guild): string | undefined {
+	const iconURL = Discord.guildIconUrl(guild.id, guild.icon, {
 		size: 4096,
 		format: "png",
 	});
@@ -55,10 +54,8 @@ function getGuildIconURLFormatted(bot: Discord.Bot, guild: Logos.Guild): string 
 	return iconURL;
 }
 
-type Author = NonNullable<Discord.Embed["author"]>;
-
-function getAuthor(bot: Discord.Bot, guild: Logos.Guild): Author | undefined {
-	const iconURL = getGuildIconURLFormatted(bot, guild);
+function getAuthor(guild: Logos.Guild): Discord.CamelizedDiscordEmbedAuthor | undefined {
+	const iconURL = getGuildIconURLFormatted(guild);
 	if (iconURL === undefined) {
 		return undefined;
 	}
@@ -95,36 +92,38 @@ function addParametersToURL(url: string, parameters: Record<string, string>): st
 async function getAllMessages(
 	[client, bot]: [Client, Discord.Bot],
 	channelId: bigint,
-): Promise<Logos.Message[] | undefined> {
-	const messages: Logos.Message[] = [];
+): Promise<Discord.CamelizedDiscordMessage[] | undefined> {
+	const messages: Discord.CamelizedDiscordMessage[] = [];
 	let isFinished = false;
 
 	while (!isFinished) {
-		const bufferUnoptimised = await Discord.getMessages(bot, channelId, {
-			limit: 100,
-			before: messages.length === 0 ? undefined : messages.at(-1)?.id,
-		}).catch(() => {
-			client.log.warn(`Failed to get all messages from ${diagnostics.display.channel(channelId)}.`);
-			return undefined;
-		});
+		const bufferUnoptimised = await bot.rest
+			.getMessages(channelId, {
+				limit: 100,
+				before: messages.length === 0 ? undefined : messages.at(-1)?.id,
+			})
+			.catch(() => {
+				client.log.warn(`Failed to get all messages from ${diagnostics.display.channel(channelId)}.`);
+				return undefined;
+			});
 		if (bufferUnoptimised === undefined) {
 			return undefined;
 		}
 
-		if (bufferUnoptimised.size < 100) {
+		if (bufferUnoptimised.length < 100) {
 			isFinished = true;
 		}
 
-		const buffer = bufferUnoptimised?.map((message) => Logos.slimMessage(message));
+		const buffer = bufferUnoptimised;
 
-		messages.push(...buffer.values());
+		messages.push(...buffer);
 	}
 
 	return messages;
 }
 
-function verifyIsWithinLimits(documents: Document[], limit: number, limitingTimePeriod: number): boolean {
-	const actionTimestamps = documents.map((document) => document.data.createdAt).sort((a, b) => b - a); // From most recent to least recent.
+function verifyIsWithinLimits(timestamps: number[], limit: number, limitingTimePeriod: number): boolean {
+	const actionTimestamps = [...timestamps].sort((a, b) => b - a); // From most recent to least recent.
 	const relevantTimestamps = actionTimestamps.slice(0, limit);
 
 	// Has not reached the limit, regardless of the limiting time period.
@@ -143,17 +142,18 @@ function verifyIsWithinLimits(documents: Document[], limit: number, limitingTime
 	return false;
 }
 
-function fetchMembers(
+// Fix for `bot.gateway.requestMembers()` never resolving.
+async function requestMembers(
 	bot: Discord.Bot,
 	guildId: bigint,
 	options?: Omit<Discord.RequestGuildMembers, "guildId">,
 ): Promise<void> {
-	const shardId = Discord.calculateShardId(bot.gateway, bot.transformers.snowflake(guildId));
-	return new Promise((resolve) => {
+	const shardId = bot.gateway.calculateShardId(guildId);
+	return await new Promise((resolve) => {
 		const nonce = Date.now().toString();
-		bot.cache.fetchAllMembersProcessingRequests.set(nonce, resolve);
-		const shard = bot.gateway.manager.shards.get(shardId);
-		if (!shard) {
+		bot.gateway.cache.requestMembers?.pending.set(nonce, { nonce, resolve: (_) => resolve(), members: [] });
+		const shard = bot.gateway.shards.get(shardId);
+		if (shard === undefined) {
 			throw new Error(`Shard (id: ${shardId}) not found.`);
 		}
 		shard.send({
@@ -161,9 +161,9 @@ function fetchMembers(
 			d: {
 				guild_id: guildId.toString(),
 				// If a query is provided use it, OR if a limit is NOT provided use ""
-				query: options?.query || (options?.limit ? undefined : ""),
-				limit: options?.limit || 0,
-				presences: options?.presences,
+				query: options?.query ?? (options?.limit ? undefined : ""),
+				limit: options?.limit ?? 0,
+				presences: options?.presences ?? false,
 				user_ids: options?.userIds?.map((id) => id.toString()),
 				nonce,
 			},
@@ -171,8 +171,53 @@ function fetchMembers(
 	});
 }
 
-function getMemberAvatarURL(bot: Discord.Bot, guildId: bigint, userId: bigint, avatarHash: bigint): string {
-	return `${bot.constants.CDN_URL}/guilds/${guildId}/users/${userId}/avatars/${avatarHash}`;
+function getMemberAvatarURL(guildId: bigint, userId: bigint, avatarHash: bigint): string {
+	return `https://cdn.discordapp.com/guilds/${guildId}/users/${userId}/avatars/${avatarHash}`;
+}
+
+type Reverse<O extends Record<string, string>> = {
+	[K in keyof O as O[K]]: K;
+};
+function reverseObject<O extends Record<string, string>>(object: O): Reverse<O> {
+	const reversed: Partial<Reverse<O>> = {};
+	for (const key of Object.keys(object) as (keyof O)[]) {
+		// @ts-ignore: This is okay.
+		reversed[object[key]] = key;
+	}
+	return reversed as unknown as Reverse<O>;
+}
+
+type ElementResultTuple<ElementType, ResultType> = {
+	element: ElementType;
+	result?: ResultType;
+};
+async function* asStream<ElementType, ResultType>(
+	elements: ElementType[],
+	action: (element: ElementType) => Promise<ResultType | undefined>,
+): AsyncGenerator<ElementResultTuple<ElementType, ResultType>, void, void> {
+	const promises: Promise<ElementResultTuple<ElementType, ResultType>>[] = [];
+	const resolvers: ((_: ElementResultTuple<ElementType, ResultType>) => void)[] = [];
+	const getResolver = () => resolvers.shift() ?? (() => {});
+
+	for (const _ of Array(elements.length).keys()) {
+		promises.push(new Promise((resolve) => resolvers.push(resolve)));
+	}
+
+	for (const element of elements) {
+		action(element).then((result) => {
+			const yieldResult = getResolver();
+
+			if (result === undefined) {
+				yieldResult({ element });
+			} else {
+				yieldResult({ element, result });
+			}
+		});
+	}
+
+	for (const promise of promises) {
+		yield promise;
+	}
 }
 
 export {
@@ -183,8 +228,10 @@ export {
 	getGuildIconURLFormatted,
 	isText,
 	isVoice,
-	fetchMembers,
+	requestMembers,
 	snowflakeToTimestamp,
 	verifyIsWithinLimits,
 	getMemberAvatarURL,
+	reverseObject,
+	asStream,
 };

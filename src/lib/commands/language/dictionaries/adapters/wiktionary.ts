@@ -1,10 +1,10 @@
+import { WiktionaryParser } from "parse-wiktionary";
 import constants from "../../../../../constants/constants";
-import { LearningLanguage, Locale, WithVariants, toFeatureLanguage } from "../../../../../constants/languages";
+import { HasVariants, LearningLanguage, Locale, getFeatureLanguage } from "../../../../../constants/languages";
 import licences from "../../../../../constants/licences";
 import { Client } from "../../../../client";
 import { getPartOfSpeech } from "../../module";
 import { Definition, DictionaryAdapter, DictionaryEntry } from "../adapter";
-import { WiktionaryParser } from "wiktionary";
 
 const newlinesExpression = RegExp("\n{1}", "g");
 
@@ -18,7 +18,7 @@ const languageVariantsReduced: Record<string, string> = {
 	"Norwegian/Bokmål": "Norwegian Bokmål",
 	"Armenian/Western": "Armenian",
 	"Armenian/Eastern": "Armenian",
-} satisfies Record<WithVariants<LearningLanguage>, string>;
+} satisfies Record<HasVariants<LearningLanguage>, string>;
 
 function getReduced(language: LearningLanguage): string {
 	return languageVariantsReduced[language] ?? language;
@@ -65,7 +65,7 @@ class WiktionaryAdapter extends DictionaryAdapter<WordData[]> {
 				entries.push({
 					lemma,
 					partOfSpeech,
-					...(toFeatureLanguage(language) !== "English" ? { definitions } : { nativeDefinitions: definitions }),
+					...(getFeatureLanguage(language) !== "English" ? { definitions } : { nativeDefinitions: definitions }),
 					etymologies: [{ value: result.etymology.replaceAll(newlinesExpression, "\n\n") }],
 					sources: [
 						[constants.links.generateWiktionaryDefinitionLink(lemma, language), licences.dictionaries.wiktionary],

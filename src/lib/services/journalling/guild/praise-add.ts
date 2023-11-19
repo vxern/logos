@@ -16,6 +16,6 @@ export default {
 			by,
 		)}. Comment: ${comment}`;
 	},
-	filter: (_client, originGuildId, member, _praise, _by) => originGuildId === member.guildId,
+	filter: (_, originGuildId, member, __, ___) => originGuildId === member.guildId,
 	color: constants.colors.lightGreen,
 } satisfies MessageGenerators<GuildEvents>["praiseAdd"];

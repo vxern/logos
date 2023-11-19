@@ -1,18 +1,16 @@
+import * as csv from "csv-parse/sync";
+import * as dotenv from "dotenv";
+import * as fs from "fs/promises";
 import {
 	LearningLanguage,
 	Locale,
 	LocalisationLanguage,
-	getLanguageByLocale,
-	isLocalised,
+	getLocalisationLanguageByLocale,
+	isLocalisationLanguage,
 } from "./constants/languages";
 import { capitalise } from "./formatting";
 import { Client, initialiseClient } from "./lib/client";
 import { SentencePair } from "./lib/commands/language/commands/game";
-import { getSupportedLanguages } from "./lib/commands/language/module";
-import * as csv from "csv-parse/sync";
-import * as dotenv from "dotenv";
-import * as fs from "fs/promises";
-import * as Sentry from "sentry";
 
 async function readDotEnvFile(fileUri: string, isTemplate = false): Promise<Record<string, string> | undefined> {
 	const kind = isTemplate ? "environment template" : "environment";
@@ -98,7 +96,7 @@ async function loadLocalisations(directoryPath: string): Promise<Map<string, Map
 			}
 
 			const [locale, _] = entryPath.split(".") as [Locale, string];
-			const language = getLanguageByLocale(locale);
+			const language = getLocalisationLanguageByLocale(locale);
 			if (language === undefined) {
 				continue;
 			}
@@ -114,10 +112,7 @@ async function loadLocalisations(directoryPath: string): Promise<Map<string, Map
 			.then((contents) => decoder.decode(contents))
 			.then((object) => JSON.parse(object) as Record<string, string>);
 
-		let lastKey: string | undefined = undefined;
 		for (const [key, value] of Object.entries(strings)) {
-			lastKey = key;
-
 			if (!localisations.has(key)) {
 				localisations.set(key, new Map());
 			}
@@ -127,12 +122,9 @@ async function loadLocalisations(directoryPath: string): Promise<Map<string, Map
 					key.endsWith(".name") &&
 					(value.includes(" ") || value.includes("/") || value.includes("'") || value.toLowerCase() !== value)
 				) {
-					if (!key.startsWith("parameters.")) {
-						const command = key.split(".").at(0) ?? "";
-						if (!(`${command}.name` in strings)) {
-							localisations.get(key)?.set(language, value);
-							continue;
-						}
+					if (!key.startsWith("parameters.") && key.endsWith("message.name")) {
+						localisations.get(key)?.set(language, value);
+						continue;
 					}
 
 					console.warn(`[Localisations] ${language}: '${key}' is not normalised. Normalising...`);
@@ -143,8 +135,12 @@ async function loadLocalisations(directoryPath: string): Promise<Map<string, Map
 					continue;
 				}
 
-				if (key.endsWith(".description") && lastKey.endsWith(".name") && value.length > 100) {
-					console.warn(`${language}: '${key}' is too long (>100 characters). Normalising...`);
+				if (
+					key.endsWith(".description") &&
+					`${key.replace(/\.description$/, ".name")}` in strings &&
+					value.length > 100
+				) {
+					console.warn(`[Localisations] ${language}: '${key}' is too long (>100 characters). Normalising...`);
 
 					const valueNormalised = value.slice(0, 100);
 					localisations.get(key)?.set(language, valueNormalised);
@@ -172,7 +168,16 @@ async function loadLocalisations(directoryPath: string): Promise<Map<string, Map
  * @returns An array of tuples where the first element is a language and the second
  * element is the contents of its sentence file.
  */
-async function readSentenceFiles(directoryPath: string): Promise<[LearningLanguage, string][]> {
+async function readSentenceFiles(
+	environment: Client["environment"],
+	directoryPath: string,
+): Promise<[LearningLanguage, string][]> {
+	if (!environment.loadSentences) {
+		console.info("[Sentences] Skipping reading sentence pairs...");
+
+		return [];
+	}
+
 	const filePaths: string[] = [];
 	for (const entryPath of await fs.readdir(directoryPath)) {
 		const combinedPath = `${directoryPath}/${entryPath}`;
@@ -196,7 +201,7 @@ async function readSentenceFiles(directoryPath: string): Promise<[LearningLangua
 			.map((part) => capitalise(part))
 			.join("/");
 
-		if (!isLocalised(language)) {
+		if (!isLocalisationLanguage(language)) {
 			console.warn(
 				`File '${filePath}' contains sentences for a language '${language}' not supported by the application. Skipping...`,
 			);
@@ -215,7 +220,16 @@ async function readSentenceFiles(directoryPath: string): Promise<[LearningLangua
 }
 
 /** Loads dictionary adapters and sentence lists. */
-function loadSentencePairs(languageFileContents: [LearningLanguage, string][]): Map<LearningLanguage, SentencePair[]> {
+function loadSentencePairs(
+	environment: Client["environment"],
+	languageFileContents: [LearningLanguage, string][],
+): Map<LearningLanguage, SentencePair[]> {
+	if (!environment.loadSentences) {
+		console.info("[Sentences] Skipping loading sentence pairs...");
+
+		return new Map();
+	}
+
 	console.info(`[Sentences] Loading sentence pairs for ${languageFileContents.length} language(s)...`);
 
 	const result = new Map<LearningLanguage, SentencePair[]>();
@@ -257,17 +271,17 @@ async function setup(): Promise<void> {
 
 	readEnvironment({ envConfiguration, templateEnvConfiguration });
 
-	const environmentProvisional: Record<keyof Client["metadata"]["environment"], string | undefined> = {
-		environment: process.env.ENVIRONMENT,
+	const environmentProvisional: Record<keyof Client["environment"], string | boolean | undefined> = {
 		version: process.env.npm_package_version,
-		discordSecret: process.env.DISCORD_SECRET,
-		faunaSecret: process.env.FAUNA_SECRET,
-		deeplSecret: process.env.DEEPL_SECRET,
-		sentrySecret: process.env.SENTRY_SECRET,
-		rapidApiSecret: process.env.RAPID_API_SECRET,
+		discordSecret: process.env.SECRET_DISCORD,
+		deeplSecret: process.env.SECRET_DEEPL,
+		rapidApiSecret: process.env.SECRET_RAPID_API,
+		ravendbHost: process.env.RAVENDB_HOST,
+		ravendbDatabase: process.env.RAVENDB_DATABASE,
 		lavalinkHost: process.env.LAVALINK_HOST,
 		lavalinkPort: process.env.LAVALINK_PORT,
 		lavalinkPassword: process.env.LAVALINK_PASSWORD,
+		loadSentences: process.env.LOAD_SENTENCES !== undefined && process.env.LOAD_SENTENCES === "true",
 	};
 
 	for (const [key, value] of Object.entries(environmentProvisional)) {
@@ -276,25 +290,16 @@ async function setup(): Promise<void> {
 		}
 	}
 
-	const environment = environmentProvisional as Client["metadata"]["environment"];
+	const environment = environmentProvisional as Client["environment"];
 
-	Sentry.init({ dsn: process.env.SENTRY_SECRET, environment: environment.environment });
-
-	console.info(`Running in ${environment.environment} mode.`);
-
-	const [supportedTranslationLanguages, sentenceFiles] = await Promise.all([
-		getSupportedLanguages(environment),
-		readSentenceFiles("./assets/sentences"),
+	const [localisations, sentenceFiles] = await Promise.all([
+		loadLocalisations("./assets/localisations"),
+		readSentenceFiles(environment, "./assets/sentences"),
 	]);
 
-	const sentencePairs = loadSentencePairs(sentenceFiles);
-	const localisations = await loadLocalisations("./assets/localisations");
+	const sentencePairs = loadSentencePairs(environment, sentenceFiles);
 
-	initialiseClient(
-		{ environment, supportedTranslationLanguages },
-		{ sentencePairs, rateLimiting: new Map() },
-		localisations,
-	);
+	initialiseClient(environment, { sentencePairs, rateLimiting: new Map() }, localisations);
 }
 
 function customiseGlobals(): void {

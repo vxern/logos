@@ -1,16 +1,18 @@
+import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import { Locale } from "../../../../constants/languages";
 import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
-import { parseArguments, reply, respond } from "../../../interactions";
+import { getShowButton, parseArguments, reply, respond } from "../../../interactions";
 import { CommandTemplate } from "../../command";
 import { show } from "../../parameters";
-import * as Discord from "discordeno";
+import { Guild } from "../../../database/guild";
 
 const command: CommandTemplate = {
 	name: "rule",
 	type: Discord.ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ["VIEW_CHANNEL"],
+	isShowable: true,
 	handle: handleCiteRule,
 	handleAutocomplete: handleCiteRuleAutocomplete,
 	options: [
@@ -37,17 +39,14 @@ async function handleCiteRuleAutocomplete(
 		return;
 	}
 
-	const guildDocument = await client.database.adapters.guilds.getOrFetchOrCreate(
-		client,
-		"id",
-		guildId.toString(),
-		guildId,
-	);
+	const guildDocument =
+		client.cache.documents.guilds.get(guildId.toString()) ??
+		(await client.database.session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
 	if (guildDocument === undefined) {
 		return;
 	}
 
-	const configuration = guildDocument.data.features.moderation.features?.rules;
+	const configuration = guildDocument.features.moderation.features?.rules;
 	if (configuration === undefined || !configuration.enabled) {
 		return;
 	}
@@ -69,12 +68,16 @@ async function handleCiteRuleAutocomplete(
 }
 
 async function handleCiteRule([client, bot]: [Client, Discord.Bot], interaction: Logos.Interaction): Promise<void> {
-	const [{ rule: ruleIndex, show }] = parseArguments(interaction.data?.options, { rule: "number", show: "boolean" });
+	const [{ rule: ruleIndex, show: showParameter }] = parseArguments(interaction.data?.options, {
+		rule: "number",
+		show: "boolean",
+	});
 	if (ruleIndex === undefined) {
 		displayError([client, bot], interaction, { locale: interaction.locale });
 		return;
 	}
 
+	const show = interaction.show ?? showParameter;
 	const locale = show ? interaction.guildLocale : interaction.locale;
 
 	const ruleId = ruleIds.at(ruleIndex);
@@ -99,6 +102,12 @@ async function handleCiteRule([client, bot]: [Client, Discord.Bot], interaction:
 		content: localise(client, `rules.${ruleId}.content`, locale)(),
 	};
 
+	const showButton = getShowButton(client, interaction, { locale });
+
+	const components: Discord.ActionRow[] | undefined = show
+		? undefined
+		: [{ type: Discord.MessageComponentTypes.ActionRow, components: [showButton] }];
+
 	reply(
 		[client, bot],
 		interaction,
@@ -112,6 +121,7 @@ async function handleCiteRule([client, bot]: [Client, Discord.Bot], interaction:
 					color: constants.colors.blue,
 				},
 			],
+			components,
 		},
 		{ visible: show },
 	);

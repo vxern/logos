@@ -1,9 +1,9 @@
+import * as Discord from "@discordeno/bot";
 import constants from "../../../../../constants/constants";
 import defaults from "../../../../../defaults";
 import * as Logos from "../../../../../types";
 import { Client, localise } from "../../../../client";
 import { parseArguments, reply } from "../../../../interactions";
-import * as Discord from "discordeno";
 
 async function handleSetVolume([client, bot]: [Client, Discord.Bot], interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.guildLocale;
@@ -18,7 +18,7 @@ async function handleSetVolume([client, bot]: [Client, Discord.Bot], interaction
 		return;
 	}
 
-	const isVoiceStateVerified = musicService.verifyCanManagePlayback(bot, interaction);
+	const isVoiceStateVerified = musicService.verifyCanManagePlayback(interaction);
 	if (!isVoiceStateVerified) {
 		return;
 	}

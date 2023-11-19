@@ -1,3 +1,6 @@
+import { EventEmitter } from "events";
+import * as Discord from "@discordeno/bot";
+import * as Lavaclient from "lavaclient";
 import constants from "../../../constants/constants";
 import defaults from "../../../defaults";
 import { MentionTypes, mention } from "../../../formatting";
@@ -11,13 +14,10 @@ import {
 	SongStream,
 	listingTypeToEmoji,
 } from "../../commands/music/data/types";
-import { Guild, timeStructToMilliseconds } from "../../database/structs/guild";
+import { Guild, timeStructToMilliseconds } from "../../database/guild";
 import diagnostics from "../../diagnostics";
 import { reply } from "../../interactions";
 import { LocalService } from "../service";
-import * as Discord from "discordeno";
-import { EventEmitter } from "events";
-import * as Lavaclient from "lavaclient";
 
 interface PositionControls {
 	by: number;
@@ -63,7 +63,7 @@ class MusicService extends LocalService {
 			return undefined;
 		}
 
-		return guildDocument.data.features.social.features?.music;
+		return guildDocument.features.social.features?.music;
 	}
 
 	get channelId(): bigint | undefined {
@@ -201,24 +201,24 @@ class MusicService extends LocalService {
 		return session.player.playingSince;
 	}
 
-	constructor(client: Client, guildId: bigint) {
-		super(client, guildId);
+	constructor([client, bot]: [Client, Discord.Bot], guildId: bigint) {
+		super([client, bot], guildId);
 		this.session = undefined;
 	}
 
-	async start(bot: Discord.Bot): Promise<void> {
-		this.client.services.music.lavalink.node.on("disconnect", () => this.handleConnectionLost(bot));
-		this.client.services.music.lavalink.node.on("connect", () => this.handleConnectionRestored(bot));
+	async start(): Promise<void> {
+		this.client.services.music.lavalink.node.on("disconnect", () => this.handleConnectionLost());
+		this.client.services.music.lavalink.node.on("connect", () => this.handleConnectionRestored());
 	}
 
-	async voiceStateUpdate(bot: Discord.Bot, __: Discord.VoiceState): Promise<void> {
+	async voiceStateUpdate(_: Discord.VoiceState): Promise<void> {
 		const [guild, session] = [this.guild, this.session];
 		if (guild === undefined || session === undefined) {
 			return;
 		}
 
 		const voiceStates = guild.voiceStates.array().filter((voiceState) => voiceState.channelId === session.channelId);
-		if (voiceStates.length === 1 && voiceStates.at(0)?.userId === bot.id) {
+		if (voiceStates.length === 1 && voiceStates.at(0)?.userId === this.bot.id) {
 			this.destroySession();
 		}
 	}
@@ -238,7 +238,7 @@ class MusicService extends LocalService {
 		player.setVolume(configuration.implicitVolume);
 
 		const session = {
-			events: oldSession?.events ?? new EventEmitter(),
+			events: oldSession?.events ?? new EventEmitter().setMaxListeners(Infinity),
 			player,
 			disconnectTimeout: undefined,
 			channelId,
@@ -281,8 +281,10 @@ class MusicService extends LocalService {
 		clearTimeout(session.disconnectTimeout);
 	}
 
-	handleConnectionLost(bot: Discord.Bot): void {
-		Discord.leaveVoiceChannel(bot, this.guildId).catch(() => this.client.log.warn("Failed to leave voice channel."));
+	handleConnectionLost(): void {
+		this.bot.gateway
+			.leaveVoiceChannel(this.guildId)
+			.catch(() => this.client.log.warn("Failed to leave voice channel."));
 
 		const session = this.session;
 		if (session === undefined) {
@@ -305,15 +307,17 @@ class MusicService extends LocalService {
 			},
 		};
 
-		Discord.sendMessage(bot, session.channelId, {
-			embeds: [
-				{
-					title: strings.title,
-					description: `${strings.description.outage}\n\n${strings.description.noLoss}`,
-					color: constants.colors.peach,
-				},
-			],
-		}).catch(() => this.client.log.warn("Failed to send audio halted message."));
+		this.bot.rest
+			.sendMessage(session.channelId, {
+				embeds: [
+					{
+						title: strings.title,
+						description: `${strings.description.outage}\n\n${strings.description.noLoss}`,
+						color: constants.colors.peach,
+					},
+				],
+			})
+			.catch(() => this.client.log.warn("Failed to send audio halted message."));
 
 		session.player.removeAllListeners();
 
@@ -327,7 +331,7 @@ class MusicService extends LocalService {
 		session.restoreAt = session.restoreAt + (now - session.startedAt);
 	}
 
-	async handleConnectionRestored(bot: Discord.Bot): Promise<void> {
+	async handleConnectionRestored(): Promise<void> {
 		const oldSession = this.session;
 		if (oldSession === undefined) {
 			return;
@@ -357,7 +361,7 @@ class MusicService extends LocalService {
 
 		newSession.player.connect(newSession.channelId.toString(), { deafened: true });
 
-		this.loadSong(bot, currentSong, { paused: oldSession.player.paused, volume: oldSession.player.volume });
+		this.loadSong(currentSong, { paused: oldSession.player.paused, volume: oldSession.player.volume });
 
 		const guildLocale = this.guildLocale;
 
@@ -366,18 +370,20 @@ class MusicService extends LocalService {
 			description: localise(this.client, "music.strings.outage.restored.description", guildLocale)(),
 		};
 
-		Discord.sendMessage(bot, newSession.channelId, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colors.lightGreen,
-				},
-			],
-		}).catch(() => this.client.log.warn("Failed to send audio restored message."));
+		this.bot.rest
+			.sendMessage(newSession.channelId, {
+				embeds: [
+					{
+						title: strings.title,
+						description: strings.description,
+						color: constants.colors.lightGreen,
+					},
+				],
+			})
+			.catch(() => this.client.log.warn("Failed to send audio restored message."));
 	}
 
-	verifyVoiceState(bot: Discord.Bot, interaction: Logos.Interaction, action: "manage" | "check"): boolean {
+	verifyVoiceState(interaction: Logos.Interaction, action: "manage" | "check"): boolean {
 		const locale = interaction.locale;
 
 		const [guild, session] = [this.guild, this.session];
@@ -394,7 +400,7 @@ class MusicService extends LocalService {
 				},
 			};
 
-			reply([this.client, bot], interaction, {
+			reply([this.client, this.bot], interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -419,7 +425,7 @@ class MusicService extends LocalService {
 				},
 			};
 
-			reply([this.client, bot], interaction, {
+			reply([this.client, this.bot], interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -439,7 +445,7 @@ class MusicService extends LocalService {
 				description: localise(this.client, "music.options.play.strings.inDifferentVc.description", locale)(),
 			};
 
-			reply([this.client, bot], interaction, {
+			reply([this.client, this.bot], interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -455,10 +461,10 @@ class MusicService extends LocalService {
 		return true;
 	}
 
-	verifyCanRequestPlayback(bot: Discord.Bot, interaction: Logos.Interaction): boolean {
+	verifyCanRequestPlayback(interaction: Logos.Interaction): boolean {
 		const locale = interaction.locale;
 
-		const isVoiceStateVerified = this.verifyVoiceState(bot, interaction, "manage");
+		const isVoiceStateVerified = this.verifyVoiceState(interaction, "manage");
 		if (!isVoiceStateVerified) {
 			return false;
 		}
@@ -470,7 +476,7 @@ class MusicService extends LocalService {
 				description: localise(this.client, "music.options.play.strings.queueFull.description", locale)(),
 			};
 
-			reply([this.client, bot], interaction, {
+			reply([this.client, this.bot], interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -486,10 +492,10 @@ class MusicService extends LocalService {
 		return true;
 	}
 
-	verifyCanManagePlayback(bot: Discord.Bot, interaction: Logos.Interaction): boolean {
+	verifyCanManagePlayback(interaction: Logos.Interaction): boolean {
 		const locale = interaction.locale;
 
-		const isVoiceStateVerified = this.verifyVoiceState(bot, interaction, "manage");
+		const isVoiceStateVerified = this.verifyVoiceState(interaction, "manage");
 		if (!isVoiceStateVerified) {
 			return false;
 		}
@@ -505,7 +511,7 @@ class MusicService extends LocalService {
 				description: localise(this.client, "music.strings.cannotChange.description", locale)(),
 			};
 
-			reply([this.client, bot], interaction, {
+			reply([this.client, this.bot], interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -565,7 +571,7 @@ class MusicService extends LocalService {
 		session.disconnectTimeout = setTimeout(() => this.destroySession(), timeoutMilliseconds);
 	}
 
-	async receiveNewListing(bot: Discord.Bot, listing: SongListing, channelId: bigint): Promise<void> {
+	async receiveNewListing(listing: SongListing, channelId: bigint): Promise<void> {
 		const [guild, session] = [this.guild, this.session ?? (await this.createSession(channelId))];
 		if (guild === undefined || session === undefined) {
 			return;
@@ -605,22 +611,22 @@ class MusicService extends LocalService {
 				}),
 			};
 
-			const embed: Discord.Embed = {
+			const embed: Discord.CamelizedDiscordEmbed = {
 				title: `${constants.symbols.music.queued} ${strings.title}`,
 				description: strings.description,
 				color: constants.colors.lightGreen,
 			};
 
-			await Discord.sendMessage(bot, session.channelId, { embeds: [embed] }).catch(() =>
-				this.client.log.warn("Failed to send music feedback message."),
-			);
+			await this.bot.rest
+				.sendMessage(session.channelId, { embeds: [embed] })
+				.catch(() => this.client.log.warn("Failed to send music feedback message."));
 			return;
 		}
 
-		await this.advanceQueueAndPlay(bot);
+		await this.advanceQueueAndPlay();
 	}
 
-	async advanceQueueAndPlay(bot: Discord.Bot): Promise<void> {
+	async advanceQueueAndPlay(): Promise<void> {
 		const [isQueueEmpty, session] = [this.isQueueEmpty, this.session];
 		if (isQueueEmpty === undefined || session === undefined) {
 			return;
@@ -655,7 +661,7 @@ class MusicService extends LocalService {
 					this.moveListingToHistory(session.listings.current);
 					session.listings.current = session.listings.queue.shift();
 					session.events.emit("queueUpdate");
-					return this.advanceQueueAndPlay(bot);
+					return this.advanceQueueAndPlay();
 				}
 			} else {
 				if (session.flags.loop.song) {
@@ -676,14 +682,10 @@ class MusicService extends LocalService {
 			return;
 		}
 
-		this.loadSong(bot, currentSong);
+		this.loadSong(currentSong);
 	}
 
-	async loadSong(
-		bot: Discord.Bot,
-		song: Song | SongStream,
-		restore?: { paused: boolean; volume: number },
-	): Promise<boolean | undefined> {
+	async loadSong(song: Song | SongStream, restore?: { paused: boolean; volume: number }): Promise<boolean | undefined> {
 		const session = this.session;
 		if (session === undefined) {
 			return undefined;
@@ -706,23 +708,25 @@ class MusicService extends LocalService {
 				}),
 			};
 
-			Discord.sendMessage(bot, session.channelId, {
-				embeds: [
-					{
-						title: strings.title,
-						description: strings.description,
-						color: constants.colors.peach,
-					},
-				],
-			}).catch(() =>
-				this.client.log.warn(
-					`Failed to send track load failure to ${diagnostics.display.channel(
-						session.channelId,
-					)} on ${diagnostics.display.guild(this.guildId)}.`,
-				),
-			);
+			this.bot.rest
+				.sendMessage(session.channelId, {
+					embeds: [
+						{
+							title: strings.title,
+							description: strings.description,
+							color: constants.colors.peach,
+						},
+					],
+				})
+				.catch(() =>
+					this.client.log.warn(
+						`Failed to send track load failure to ${diagnostics.display.channel(
+							session.channelId,
+						)} on ${diagnostics.display.guild(this.guildId)}.`,
+					),
+				);
 
-			await this.advanceQueueAndPlay(bot);
+			await this.advanceQueueAndPlay();
 
 			return false;
 		}
@@ -762,21 +766,23 @@ class MusicService extends LocalService {
 				}),
 			};
 
-			Discord.sendMessage(bot, session.channelId, {
-				embeds: [
-					{
-						title: strings.title,
-						description: strings.description,
-						color: constants.colors.peach,
-					},
-				],
-			}).catch(() =>
-				this.client.log.warn(
-					`Failed to send track play failure to ${diagnostics.display.channel(
-						session.channelId,
-					)} on ${diagnostics.display.guild(this.guildId)}.`,
-				),
-			);
+			this.bot.rest
+				.sendMessage(session.channelId, {
+					embeds: [
+						{
+							title: strings.title,
+							description: strings.description,
+							color: constants.colors.peach,
+						},
+					],
+				})
+				.catch(() =>
+					this.client.log.warn(
+						`Failed to send track play failure to ${diagnostics.display.channel(
+							session.channelId,
+						)} on ${diagnostics.display.guild(this.guildId)}.`,
+					),
+				);
 		});
 
 		session.player.once("trackEnd", async () => {
@@ -798,7 +804,7 @@ class MusicService extends LocalService {
 			}
 
 			session.restoreAt = 0;
-			this.advanceQueueAndPlay(bot);
+			this.advanceQueueAndPlay();
 		});
 
 		session.player.once("trackStart", async () => {
@@ -853,26 +859,28 @@ class MusicService extends LocalService {
 		};
 
 		if (session.listings.current !== undefined) {
-			Discord.sendMessage(bot, session.channelId, {
-				embeds: [
-					{
-						title: `${emoji} ${strings.title}`,
-						description: strings.description.nowPlaying({
-							song_information: strings.description.track,
-							title: song.title,
-							url: song.url,
-							user_mention: mention(session.listings.current.requestedBy, MentionTypes.User),
-						}),
-						color: constants.colors.blue,
-					},
-				],
-			}).catch(() =>
-				this.client.log.warn(
-					`Failed to send now playing message to ${diagnostics.display.channel(
-						session.channelId,
-					)} on ${diagnostics.display.guild(this.guildId)}.`,
-				),
-			);
+			this.bot.rest
+				.sendMessage(session.channelId, {
+					embeds: [
+						{
+							title: `${emoji} ${strings.title}`,
+							description: strings.description.nowPlaying({
+								song_information: strings.description.track,
+								title: song.title,
+								url: song.url,
+								user_mention: mention(session.listings.current.requestedBy, MentionTypes.User),
+							}),
+							color: constants.colors.blue,
+						},
+					],
+				})
+				.catch(() =>
+					this.client.log.warn(
+						`Failed to send now playing message to ${diagnostics.display.channel(
+							session.channelId,
+						)} on ${diagnostics.display.guild(this.guildId)}.`,
+					),
+				);
 		}
 
 		return true;
@@ -931,7 +939,7 @@ class MusicService extends LocalService {
 		await session.player.stop();
 	}
 
-	async unskip(bot: Discord.Bot, unskipCollection: boolean, { by, to }: Partial<PositionControls>): Promise<void> {
+	async unskip(unskipCollection: boolean, { by, to }: Partial<PositionControls>): Promise<void> {
 		const session = this.session;
 		if (session === undefined) {
 			return;
@@ -995,11 +1003,11 @@ class MusicService extends LocalService {
 		if (session.player.track !== undefined) {
 			session.player.stop();
 		} else {
-			this.advanceQueueAndPlay(bot);
+			this.advanceQueueAndPlay();
 		}
 	}
 
-	replay(bot: Discord.Bot, replayCollection: boolean): void {
+	replay(replayCollection: boolean): void {
 		const session = this.session;
 		if (session === undefined) {
 			return;
@@ -1034,7 +1042,7 @@ class MusicService extends LocalService {
 		session.flags.breakLoop = true;
 		session.player.stop();
 
-		this.advanceQueueAndPlay(bot);
+		this.advanceQueueAndPlay();
 	}
 
 	setVolume(volume: number): void {

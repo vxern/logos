@@ -1,15 +1,16 @@
-import constants from "../../../../constants/constants";
+import * as Discord from "@discordeno/bot";
 import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
-import { parseArguments, reply } from "../../../interactions";
+import { getShowButton, parseArguments, reply } from "../../../interactions";
 import { CommandTemplate } from "../../command";
 import { show } from "../../parameters";
-import * as Discord from "discordeno";
+import { Guild } from "../../../database/guild";
 
 const command: CommandTemplate = {
 	name: "resources",
 	type: Discord.ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ["VIEW_CHANNEL"],
+	isShowable: true,
 	handle: handleDisplayResources,
 	options: [show],
 };
@@ -19,11 +20,25 @@ async function handleDisplayResources(
 	[client, bot]: [Client, Discord.Bot],
 	interaction: Logos.Interaction,
 ): Promise<void> {
-	const [{ show }] = parseArguments(interaction.data?.options, { show: "boolean" });
-	const locale = show ? interaction.guildLocale : interaction.locale;
+	const [{ show: showParameter }] = parseArguments(interaction.data?.options, { show: "boolean" });
+
+	const show = interaction.show ?? showParameter ?? false;
+	const locale = interaction.show ?? show ? interaction.guildLocale : interaction.locale;
 
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
+		return;
+	}
+
+	const guildDocument =
+		client.cache.documents.guilds.get(guildId.toString()) ??
+		(await client.database.session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
+	if (guildDocument === undefined) {
+		return;
+	}
+
+	const configuration = guildDocument.features.language.features?.resources;
+	if (configuration === undefined || !configuration.enabled) {
 		return;
 	}
 
@@ -37,6 +52,21 @@ async function handleDisplayResources(
 		}),
 	};
 
+	const showButton = getShowButton(client, interaction, { locale });
+
+	const buttons: Discord.ButtonComponent[] = [
+		{
+			type: Discord.MessageComponentTypes.Button,
+			label: strings.redirect,
+			style: Discord.ButtonStyles.Link,
+			url: configuration.url,
+		},
+	];
+
+	if (!show) {
+		buttons.push(showButton);
+	}
+
 	reply(
 		[client, bot],
 		interaction,
@@ -44,14 +74,7 @@ async function handleDisplayResources(
 			components: [
 				{
 					type: Discord.MessageComponentTypes.ActionRow,
-					components: [
-						{
-							type: Discord.MessageComponentTypes.Button,
-							label: strings.redirect,
-							style: Discord.ButtonStyles.Link,
-							url: constants.links.generateLanguageRepositoryLink(interaction.featureLanguage),
-						},
-					],
+					components: buttons as [Discord.ButtonComponent],
 				},
 			],
 		},

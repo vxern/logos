@@ -1,3 +1,4 @@
+import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import { Locale } from "../../../../constants/languages";
 import { trim } from "../../../../formatting";
@@ -7,16 +8,15 @@ import diagnostics from "../../../diagnostics";
 import { Modal, acknowledge, createModalComposer, reply } from "../../../interactions";
 import { getMemberAvatarURL } from "../../../utils";
 import { CommandTemplate } from "../../command";
-import * as Discord from "discordeno";
 
 const command: CommandTemplate = {
-	name: "answer.options.answer",
+	name: "answer.message",
 	type: Discord.ApplicationCommandTypes.Message,
 	defaultMemberPermissions: ["VIEW_CHANNEL"],
 	handle: handleStartAnswering,
 };
 
-interface AnswerData extends Record<string, unknown> {
+interface AnswerData extends Record<string, string> {
 	question: string;
 	answer: string;
 }
@@ -42,7 +42,7 @@ async function handleStartAnswering(
 		return;
 	}
 
-	if (message.isFromBot || message.content.trim().length === 0) {
+	if (message.author.toggles?.has("bot") || message.content.trim().length === 0) {
 		const strings = {
 			title: localise(client, "answer.strings.cannotAnswer.title", locale)(),
 			description: localise(client, "answer.strings.cannotAnswer.description", locale)(),
@@ -60,7 +60,7 @@ async function handleStartAnswering(
 		return;
 	}
 
-	if (message.authorId === interaction.user.id) {
+	if (message.author.id === interaction.user.id) {
 		const strings = {
 			title: localise(client, "answer.strings.cannotAnswerOwn.title", locale)(),
 			description: localise(client, "answer.strings.cannotAnswerOwn.description", locale)(),
@@ -97,27 +97,29 @@ async function handleStartAnswering(
 				)({ username: diagnostics.display.user(interaction.user, { includeId: false }) }),
 			};
 
-			Discord.sendMessage(bot, message.channelId, {
-				messageReference: { messageId: message.id, channelId: message.channelId, guildId, failIfNotExists: false },
-				embeds: [
-					{
-						description: `– *${data.answer}*`,
-						color: constants.colors.lightGreen,
-						footer: {
-							text: `${constants.symbols.answer} ${strings.submittedBy}`,
-							iconUrl: (() => {
-								if (member.avatar !== undefined) {
-									return getMemberAvatarURL(bot, guildId, interaction.user.id, member.avatar);
-								}
+			bot.rest
+				.sendMessage(message.channelId, {
+					messageReference: { messageId: message.id, channelId: message.channelId, guildId, failIfNotExists: false },
+					embeds: [
+						{
+							description: `– *${data.answer}*`,
+							color: constants.colors.lightGreen,
+							footer: {
+								text: `${constants.symbols.answer} ${strings.submittedBy}`,
+								iconUrl: (() => {
+									if (member.avatar !== undefined) {
+										return getMemberAvatarURL(guildId, interaction.user.id, member.avatar);
+									}
 
-								return Discord.getAvatarURL(bot, interaction.user.id, interaction.user.discriminator, {
-									avatar: interaction.user.avatar,
-								});
-							})(),
+									return Discord.avatarUrl(interaction.user.id, interaction.user.discriminator, {
+										avatar: interaction.user.avatar,
+									});
+								})(),
+							},
 						},
-					},
-				],
-			}).catch(() => client.log.warn(`Failed to send answer to ${diagnostics.display.channel(message.channelId)}.`));
+					],
+				})
+				.catch(() => client.log.warn(`Failed to send answer to ${diagnostics.display.channel(message.channelId)}.`));
 
 			return true;
 		},

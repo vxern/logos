@@ -1,17 +1,13 @@
+import * as Discord from "@discordeno/bot";
 import constants from "../../../constants/constants";
 import * as Logos from "../../../types";
 import { Client } from "../../client";
-import { stringifyValue } from "../../database/database";
-import { BaseDocumentProperties, Document } from "../../database/document";
-import { Guild } from "../../database/structs/guild";
-import { User } from "../../database/structs/user";
+import { Guild } from "../../database/guild";
+import { User } from "../../database/user";
 import diagnostics from "../../diagnostics";
 import { createInteractionCollector, decodeId } from "../../interactions";
 import { getAllMessages } from "../../utils";
 import { LocalService } from "../service";
-import * as Discord from "discordeno";
-
-type InteractionDataBase = [userId: string, guildId: string, reference: string];
 
 interface Configurations {
 	reports: NonNullable<Guild["features"]["moderation"]["features"]>["reports"];
@@ -20,13 +16,13 @@ interface Configurations {
 }
 
 type ConfigurationLocators = {
-	[K in keyof Configurations]: (guildDocument: Document<Guild>) => Configurations[K] | undefined;
+	[K in keyof Configurations]: (guildDocument: Guild) => Configurations[K] | undefined;
 };
 
 const configurationLocators: ConfigurationLocators = {
-	reports: (guildDocument) => guildDocument.data.features.moderation.features?.reports,
-	suggestions: (guildDocument) => guildDocument.data.features.server.features?.suggestions,
-	verification: (guildDocument) => guildDocument.data.features.moderation.features?.verification,
+	reports: (guildDocument) => guildDocument.features.moderation.features?.reports,
+	suggestions: (guildDocument) => guildDocument.features.server.features?.suggestions,
+	verification: (guildDocument) => guildDocument.features.moderation.features?.verification,
 };
 
 type CustomIDs = Record<keyof Configurations, string>;
@@ -41,23 +37,21 @@ type PromptTypes = keyof Client["services"]["prompts"];
 
 abstract class PromptService<
 	PromptType extends PromptTypes,
-	DataType extends BaseDocumentProperties,
-	Metadata extends Record<string, unknown> & { userId: bigint; reference: string },
-	InteractionData extends [...InteractionDataBase, ...string[]],
+	DataType extends { id: string },
+	InteractionData extends [compositeId: string, ...data: string[]],
 > extends LocalService {
 	private readonly type: PromptType;
 	private readonly customId: string;
 
-	private readonly handlers: Map<
-		string,
-		(bot: Discord.Bot, interaction: Discord.Interaction, data: InteractionData) => void
+	protected readonly documents: Map<string, DataType>;
+
+	private readonly handlerByCompositeId: Map<
+		/*compositeId: */ string,
+		(interaction: Discord.Interaction, data: InteractionData) => void
 	> = new Map();
-
-	private readonly prompts: Map</*reference: */ string, Logos.Message> = new Map();
-
-	private readonly documents: Document<DataType>[];
-	private readonly documentsByPromptId: Map</*promptId: */ bigint, Document<DataType>> = new Map();
-	private readonly userIds: Map</*promptId: */ bigint, bigint> = new Map();
+	private readonly promptByCompositeId: Map</*compositeId: */ string, Discord.CamelizedDiscordMessage> = new Map();
+	private readonly documentByPromptId: Map</*promptId: */ string, DataType> = new Map();
+	private readonly userIdByPromptId: Map</*promptId: */ string, bigint> = new Map();
 
 	private readonly _configuration: ConfigurationLocators[PromptType];
 	get configuration(): Configurations[PromptType] | undefined {
@@ -87,15 +81,15 @@ abstract class PromptService<
 		return channelId;
 	}
 
-	constructor(client: Client, guildId: bigint, { type }: { type: PromptType }) {
-		super(client, guildId);
+	constructor([client, bot]: [Client, Discord.Bot], guildId: bigint, { type }: { type: PromptType }) {
+		super([client, bot], guildId);
 		this.type = type;
 		this.customId = customIds[type];
 		this.documents = this.getAllDocuments();
 		this._configuration = configurationLocators[type];
 	}
 
-	async start(bot: Discord.Bot): Promise<void> {
+	async start(): Promise<void> {
 		const [channelId, configuration, guild, guildDocument] = [
 			this.channelId,
 			this.configuration,
@@ -108,30 +102,29 @@ abstract class PromptService<
 
 		this.client.log.info(`Registering ${this.type} prompts on ${diagnostics.display.guild(guild)}...`);
 
-		const promptsAll = (await getAllMessages([this.client, bot], channelId)) ?? [];
-		const [valid, invalid] = this.filterPrompts(promptsAll);
+		const promptsAll = (await getAllMessages([this.client, this.bot], channelId)) ?? [];
+		const [validPrompts, invalidPrompts] = this.filterPrompts(promptsAll);
 
-		const prompts = this.sortPrompts(valid);
+		const prompts = new Map(validPrompts);
 
-		for (const document of this.documents) {
-			const userDocument = await this.getUserDocument(document);
+		for (const [compositeId, promptDocument] of this.documents) {
+			const userDocument = await this.getUserDocument(promptDocument);
 			if (userDocument === undefined) {
 				continue;
 			}
 
-			const userId = BigInt(userDocument.data.account.id);
-			const reference = stringifyValue(document.ref);
+			const userId = BigInt(userDocument.account.id);
 
-			let prompt = prompts.get(userId)?.get(reference);
+			let prompt = prompts.get(promptDocument.id);
 			if (prompt !== undefined) {
-				prompts.get(userId)?.delete(reference);
+				prompts.delete(promptDocument.id);
 			} else {
 				const user = this.client.cache.users.get(userId);
 				if (user === undefined) {
 					continue;
 				}
 
-				const message = await this.savePrompt(bot, user, document);
+				const message = await this.savePrompt(user, promptDocument);
 				if (message === undefined) {
 					continue;
 				}
@@ -139,53 +132,57 @@ abstract class PromptService<
 				prompt = message;
 			}
 
-			this.registerPrompt(prompt, userId, reference, document);
-			this.registerHandler([userId.toString(), this.guildIdString, reference]);
+			this.registerDocument(compositeId, promptDocument);
+			this.registerPrompt(prompt, userId, compositeId, promptDocument);
+			this.registerHandler(compositeId);
 		}
 
-		const expired = Array.from(prompts.values()).flatMap((map) => Array.from(map.values()));
+		const expiredPrompts = Array.from(prompts.values());
 
-		for (const prompt of [...invalid, ...expired]) {
-			await Discord.deleteMessage(bot, prompt.channelId, prompt.id).catch(() => {
+		for (const prompt of [...invalidPrompts, ...expiredPrompts]) {
+			await this.bot.rest.deleteMessage(prompt.channelId, prompt.id).catch(() => {
 				this.client.log.warn("Failed to delete prompt.");
 			});
 		}
 
-		createInteractionCollector([this.client, bot], {
+		createInteractionCollector([this.client, this.bot], {
 			type: Discord.InteractionTypes.MessageComponent,
 			customId: this.customId,
 			doesNotExpire: true,
-			onCollect: async (bot, selection) => {
+			onCollect: async (selection) => {
 				const customId = selection.data?.customId;
 				if (customId === undefined) {
 					return;
 				}
 
-				const [_, userId, __, reference, ...metadata] = decodeId<InteractionData>(customId);
+				const [_, compositeId, ...metadata] = decodeId<InteractionData>(customId);
+				if (compositeId === undefined) {
+					return;
+				}
 
-				const handle = this.handlers.get([userId, this.guildId, reference].join(constants.symbols.meta.idSeparator));
+				const handle = this.handlerByCompositeId.get(compositeId);
 				if (handle === undefined) {
 					return;
 				}
 
-				handle(bot, selection, [userId, this.guildIdString, reference, ...metadata] as InteractionData);
+				handle(selection, [compositeId, ...metadata] as InteractionData);
 			},
 		});
 	}
 
 	// Anti-tampering feature; detects prompts being deleted.
-	async messageDelete(bot: Discord.Bot, message: Discord.Message): Promise<void> {
+	async messageDelete(message: Discord.Message): Promise<void> {
 		// If the message was deleted from a channel not managed by this prompt manager.
 		if (message.channelId !== this.channelId) {
 			return;
 		}
 
-		const document = this.documentsByPromptId.get(message.id);
-		if (document === undefined) {
+		const promptDocument = this.documentByPromptId.get(message.id.toString());
+		if (promptDocument === undefined) {
 			return;
 		}
 
-		const userId = this.userIds.get(message.id);
+		const userId = this.userIdByPromptId.get(message.id.toString());
 		if (userId === undefined) {
 			return;
 		}
@@ -195,179 +192,166 @@ abstract class PromptService<
 			return;
 		}
 
-		const reference = stringifyValue(document.ref);
-
-		const prompt = await this.savePrompt(bot, user, document);
+		const prompt = await this.savePrompt(user, promptDocument);
 		if (prompt === undefined) {
 			return;
 		}
 
-		this.registerPrompt(prompt, userId, reference, document);
+		const compositeId = this.getCompositeId(prompt);
+		if (compositeId === undefined) {
+			return;
+		}
 
-		this.documentsByPromptId.delete(message.id);
-		this.userIds.delete(message.id);
+		this.registerPrompt(prompt, userId, compositeId, promptDocument);
+
+		this.documentByPromptId.delete(message.id.toString());
+		this.userIdByPromptId.delete(message.id.toString());
 	}
 
-	async messageUpdate(bot: Discord.Bot, message: Discord.Message): Promise<void> {
+	async messageUpdate(message: Discord.Message): Promise<void> {
 		// If the message was updated in a channel not managed by this prompt manager.
 		if (message.channelId !== this.channelId) {
 			return;
 		}
 
 		// If the embed is still present, it wasn't an embed having been deleted. Do not do anything.
-		if (message.embeds.length === 1) {
+		if (message.embeds?.length === 1) {
 			return;
 		}
 
 		// Delete the message and allow the bot to handle the deletion.
-		Discord.deleteMessage(bot, message.channelId, message.id).catch(() =>
-			this.client.log.warn(
-				`Failed to delete prompt ${diagnostics.display.message(message)} from ${diagnostics.display.channel(
-					message.channelId,
-				)} on ${diagnostics.display.guild(message.guildId ?? 0n)}.`,
-			),
-		);
+		this.bot.rest
+			.deleteMessage(message.channelId, message.id)
+			.catch(() =>
+				this.client.log.warn(
+					`Failed to delete prompt ${diagnostics.display.message(message)} from ${diagnostics.display.channel(
+						message.channelId,
+					)} on ${diagnostics.display.guild(message.guildId ?? 0n)}.`,
+				),
+			);
 	}
 
-	abstract getAllDocuments(): Document<DataType>[];
-	abstract getUserDocument(document: Document<DataType>): Promise<Document<User> | undefined>;
+	abstract getAllDocuments(): Map<string, DataType>;
+	abstract getUserDocument(promptDocument: DataType): Promise<User | undefined>;
 
-	abstract decodeMetadata(data: string[]): Metadata | undefined;
+	abstract getPromptContent(user: Logos.User, promptDocument: DataType): Discord.CreateMessageOptions | undefined;
 
-	abstract getPromptContent(
-		bot: Discord.Bot,
-		user: Logos.User,
-		document: Document<DataType>,
-	): Discord.CreateMessage | undefined;
-
-	getMetadata(prompt: Logos.Message): string[] | undefined {
-		const metadata = prompt.embeds.at(-1)?.footer?.iconUrl?.split("&metadata=").at(-1);
-		if (metadata === undefined) {
+	getCompositeId(prompt: Discord.CamelizedDiscordMessage): string | undefined {
+		const compositeId = prompt.embeds?.at(-1)?.footer?.iconUrl?.split("&metadata=").at(-1);
+		if (compositeId === undefined) {
 			return undefined;
 		}
 
-		const data = metadata.split(constants.symbols.meta.metadataSeparator);
-		return data;
+		return compositeId;
 	}
 
-	filterPrompts(prompts: Logos.Message[]): [valid: [Logos.Message, Metadata][], invalid: Logos.Message[]] {
-		const valid: [Logos.Message, Metadata][] = [];
-		const invalid: Logos.Message[] = [];
+	filterPrompts(
+		prompts: Discord.CamelizedDiscordMessage[],
+	): [
+		valid: [compositeId: string, prompt: Discord.CamelizedDiscordMessage][],
+		invalid: Discord.CamelizedDiscordMessage[],
+	] {
+		const valid: [compositeId: string, prompt: Discord.CamelizedDiscordMessage][] = [];
+		const invalid: Discord.CamelizedDiscordMessage[] = [];
+
 		for (const prompt of prompts) {
-			const data = this.getMetadata(prompt);
-			if (data === undefined) {
+			const compositeId = this.getCompositeId(prompt);
+			if (compositeId === undefined) {
 				invalid.push(prompt);
 				continue;
 			}
 
-			const metadata = this.decodeMetadata(data);
-			if (metadata === undefined) {
-				invalid.push(prompt);
-				continue;
-			}
-
-			valid.push([prompt, metadata]);
+			valid.push([compositeId, prompt]);
 		}
+
 		return [valid, invalid];
 	}
 
-	sortPrompts(
-		prompts: [Logos.Message, Metadata][],
-	): Map</*userId: */ bigint, Map</*reference: */ string, Logos.Message>> {
-		const promptsSorted = new Map<bigint, Map<string, Logos.Message>>();
-
-		for (const [prompt, metadata] of prompts) {
-			const { userId, reference } = metadata;
-
-			if (!promptsSorted.has(userId)) {
-				promptsSorted.set(userId, new Map([[reference, prompt]]));
-				continue;
-			}
-
-			promptsSorted.get(userId)?.set(reference, prompt);
-		}
-
-		return promptsSorted;
-	}
-
-	async savePrompt(
-		bot: Discord.Bot,
-		user: Logos.User,
-		document: Document<DataType>,
-	): Promise<Logos.Message | undefined> {
+	async savePrompt(user: Logos.User, promptDocument: DataType): Promise<Discord.CamelizedDiscordMessage | undefined> {
 		const channelId = this.channelId;
 		if (channelId === undefined) {
 			return undefined;
 		}
 
-		const content = this.getPromptContent(bot, user, document);
+		const content = this.getPromptContent(user, promptDocument);
 		if (content === undefined) {
 			return undefined;
 		}
 
-		const message = await Discord.sendMessage(bot, channelId, content)
-			.then((message) => Logos.slimMessage(message))
-			.catch(() => {
-				this.client.log.warn(`Failed to send message to ${diagnostics.display.channel(channelId)}.`);
-				return undefined;
-			});
+		const message = await this.bot.rest.sendMessage(channelId, content).catch(() => {
+			this.client.log.warn(`Failed to send message to ${diagnostics.display.channel(channelId)}.`);
+			return undefined;
+		});
 
 		return message;
 	}
 
-	registerPrompt(prompt: Logos.Message, userId: bigint, reference: string, document: Document<DataType>): void {
-		this.documentsByPromptId.set(prompt.id, document);
-		this.userIds.set(prompt.id, userId);
-		this.prompts.set(reference, prompt);
+	registerDocument(compositeId: string, promptDocument: DataType): void {
+		this.documents.set(compositeId, promptDocument);
 	}
 
-	unregisterPrompt(prompt: Logos.Message, reference: string): void {
-		this.documentsByPromptId.delete(prompt.id);
-		this.userIds.delete(prompt.id);
-		this.prompts.delete(reference);
+	unregisterDocument(compositeId: string): void {
+		this.documents.delete(compositeId);
 	}
 
-	registerHandler(data: InteractionDataBase): void {
-		this.handlers.set(data.join(constants.symbols.meta.idSeparator), async (bot, interaction) => {
+	registerPrompt(
+		prompt: Discord.CamelizedDiscordMessage,
+		userId: bigint,
+		compositeId: string,
+		promptDocument: DataType,
+	): void {
+		this.documentByPromptId.set(prompt.id, promptDocument);
+		this.userIdByPromptId.set(prompt.id, userId);
+		this.promptByCompositeId.set(compositeId, prompt);
+	}
+
+	unregisterPrompt(prompt: Discord.CamelizedDiscordMessage, compositeId: string): void {
+		this.documentByPromptId.delete(prompt.id);
+		this.userIdByPromptId.delete(prompt.id);
+		this.promptByCompositeId.delete(compositeId);
+	}
+
+	registerHandler(compositeId: string): void {
+		this.handlerByCompositeId.set(compositeId, async (interaction) => {
 			const customId = interaction.data?.customId;
 			if (customId === undefined) {
 				return;
 			}
 
-			const [_, userId, guildId, reference, ...metadata] = decodeId<InteractionData>(customId);
+			const [_, compositeId, ...metadata] = decodeId<InteractionData>(customId);
 
-			const updatedDocument = await this.handleInteraction(bot, interaction, [
-				userId,
-				guildId,
-				reference,
-				...metadata,
-			] as InteractionData);
+			const updatedDocument = await this.handleInteraction(interaction, [compositeId, ...metadata] as InteractionData);
 			if (updatedDocument === undefined) {
 				return;
 			}
 
-			const prompt = this.prompts.get(reference);
+			const prompt = this.promptByCompositeId.get(compositeId);
 			if (prompt === undefined) {
 				return;
 			}
 
 			if (updatedDocument === null) {
-				this.unregisterPrompt(prompt, reference);
+				this.unregisterDocument(compositeId);
+				this.unregisterPrompt(prompt, compositeId);
+				this.unregisterHandler(compositeId);
 			} else {
-				this.documentsByPromptId.set(prompt.id, updatedDocument);
+				this.documentByPromptId.set(prompt.id, updatedDocument);
 			}
 
-			Discord.deleteMessage(bot, prompt.channelId, prompt.id).catch(() => {
+			this.bot.rest.deleteMessage(prompt.channelId, prompt.id).catch(() => {
 				this.client.log.warn("Failed to delete prompt.");
 			});
 		});
 	}
 
+	unregisterHandler(compositeId: string): void {
+		this.handlerByCompositeId.delete(compositeId);
+	}
+
 	abstract handleInteraction(
-		bot: Discord.Bot,
 		interaction: Discord.Interaction,
 		data: InteractionData,
-	): Promise<Document<DataType> | undefined | null>;
+	): Promise<DataType | undefined | null>;
 }
 
 export { PromptService, Configurations };

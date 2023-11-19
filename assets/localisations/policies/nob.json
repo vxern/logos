@@ -1,13 +1,13 @@
 {
-	"policies.moderation.title": "Moderasjonspolitikk",
-	"policies.moderation.points.introduction.title": "Hvordan skal moderatorer moderere serveren?",
-	"policies.moderation.points.introduction.description": "Serveren overholder en modereringspolicy med 3 advarsler, håndhevet av serverens guider.",
-	"policies.moderation.points.breach.title": "Hvor gjelder reglene?",
-	"policies.moderation.points.breach.description": "Serverreglene gjelder for hele serveren, og brudd på dem vil resultere i en advarsel.",
-	"policies.moderation.points.warnings.title": "Hva skjer hvis jeg blir varslet noen ganger?",
-	"policies.moderation.points.warnings.description": "Hvis en bruker allerede har mottatt tre advarsler, vil den fjerde advarselen føre til at brukeren blir tidsavbrutt. Advarsler utløper etter en periode på __to måneder__.",
-	"policies.moderation.points.furtherAction.title": "Hva skjer da?",
-	"policies.moderation.points.furtherAction.description": "Følgelig vil serveren bli informert om at grensene passerer, og deretter vurdere omstendighetene og bestemme en passende fremgangsmåte.",
-	"policies.moderation.points.ban.title": "Hva om jeg ikke bryr meg?",
-	"policies.moderation.points.ban.description": "I tilfelle det har blitt funnet at en bruker med viten og konstant har brutt serverreglene og/eller ignorert forslag fra personalet, vil brukeren bli permanent utestengt fra serveren."
+    "policies.moderation.title": "Moderasjonspolitikk",
+    "policies.moderation.points.introduction.title": "Hvordan skal moderatorer moderere serveren?",
+    "policies.moderation.points.introduction.description": "Serveren overholder en modereringspolicy med 3 advarsler, håndhevet av serverens guider.",
+    "policies.moderation.points.breach.title": "Hvor gjelder reglene?",
+    "policies.moderation.points.breach.description": "Serverreglene gjelder for hele serveren, og brudd på dem vil resultere i en advarsel.",
+    "policies.moderation.points.warnings.title": "Hva skjer hvis jeg blir varslet noen ganger?",
+    "policies.moderation.points.warnings.description": "Hvis en bruker allerede har mottatt tre advarsler, vil den fjerde advarselen føre til at brukeren blir tidsavbrutt. Advarsler utløper etter en periode på __to måneder__.",
+    "policies.moderation.points.furtherAction.title": "Hva skjer da?",
+    "policies.moderation.points.furtherAction.description": "Følgelig vil serveren bli informert om at grensene passerer, og deretter vurdere omstendighetene og bestemme en passende fremgangsmåte.",
+    "policies.moderation.points.ban.title": "Hva om jeg ikke bryr meg?",
+    "policies.moderation.points.ban.description": "I tilfelle det har blitt funnet at en bruker med viten og konstant har brutt serverreglene og/eller ignorert forslag fra personalet, vil brukeren bli permanent utestengt fra serveren."
 }

@@ -1,9 +1,10 @@
 {
-	"interactions.continuedOnNextPage": "Fortsetter på neste side...",
-	"interactions.page": "Side",
-	"interactions.invalidUser.title": "Ugyldig bruker",
-	"interactions.invalidUser.description": "Brukeren du angav er ugyldig.",
-	"interactions.rateLimited.title": "Du er på en takstgrense",
-	"interactions.rateLimited.description.tooManyUses": "Du har brukt denne kommandoen for mange ganger ({times}) i for kort tid.",
-	"interactions.rateLimited.description.cannotUseAgainUntil": "Du vil igjen kunne bruke kommandoen {relative_timestamp}."
+    "interactions.continuedOnNextPage": "Fortsetter på neste side...",
+    "interactions.page": "Side",
+    "interactions.invalidUser.title": "Ugyldig bruker",
+    "interactions.invalidUser.description": "Brukeren du angav er ugyldig.",
+    "interactions.rateLimited.title": "Du er på en takstgrense",
+    "interactions.rateLimited.description.tooManyUses": "Du har brukt denne kommandoen for mange ganger ({times}) i for kort tid.",
+    "interactions.rateLimited.description.cannotUseAgainUntil": "Du vil igjen kunne bruke kommandoen {relative_timestamp}.",
+    "interactions.show": "Vis melding i chat"
 }

@@ -1,3 +1,4 @@
+import * as Discord from "@discordeno/bot";
 import constants from "../../../../../constants/constants";
 import localisations from "../../../../../constants/localisations";
 import defaults from "../../../../../defaults";
@@ -5,7 +6,7 @@ import * as Logos from "../../../../../types";
 import { Client, localise } from "../../../../client";
 import { reply } from "../../../../interactions";
 import { OptionTemplate } from "../../../command";
-import * as Discord from "discordeno";
+import { User } from "../../../../database/user";
 
 const command: OptionTemplate = {
 	name: "view",
@@ -19,12 +20,14 @@ async function handleDisplaySettings(
 ): Promise<void> {
 	const locale = interaction.locale;
 
-	const userDocument = await client.database.adapters.users.getOrFetch(client, "id", interaction.user.id.toString());
+	const userDocument =
+		client.cache.documents.users.get(interaction.user.id.toString()) ??
+		(await client.database.session.load<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined));
 	if (userDocument === undefined) {
 		return;
 	}
 
-	const userLanguage = userDocument.data.account.language ?? defaults.LOCALISATION_LANGUAGE;
+	const userLanguage = userDocument.account.language ?? defaults.LOCALISATION_LANGUAGE;
 
 	const strings = {
 		title: localise(client, "settings.strings.settings.title", locale)(),
@@ -55,7 +58,7 @@ async function handleDisplaySettings(
 					{
 						name: strings.description.language.title,
 						value:
-							userDocument.data.account.language !== undefined
+							userDocument.account.language !== undefined
 								? strings.description.language.language
 								: `${strings.description.language.noLanguageSet} ${strings.description.language.defaultShown}`,
 						inline: true,

@@ -1,3 +1,4 @@
+import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
@@ -5,7 +6,6 @@ import { parseArguments, reply } from "../../../interactions";
 import { isCollection } from "../../../services/music/music";
 import { OptionTemplate } from "../../command";
 import { collection } from "../../parameters";
-import * as Discord from "discordeno";
 
 const command: OptionTemplate = {
 	name: "loop",
@@ -29,7 +29,7 @@ async function handleLoopPlayback([client, bot]: [Client, Discord.Bot], interact
 		return;
 	}
 
-	const isVoiceStateVerified = musicService.verifyCanManagePlayback(bot, interaction);
+	const isVoiceStateVerified = musicService.verifyCanManagePlayback(interaction);
 	if (!isVoiceStateVerified) {
 		return;
 	}

@@ -1,3 +1,4 @@
+import * as Discord from "@discordeno/bot";
 import constants from "../../../../../constants/constants";
 import { Locale } from "../../../../../constants/languages";
 import time from "../../../../../constants/time";
@@ -6,7 +7,7 @@ import * as Logos from "../../../../../types";
 import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../../client";
 import diagnostics from "../../../../diagnostics";
 import { parseArguments, parseTimeExpression, reply, respond } from "../../../../interactions";
-import * as Discord from "discordeno";
+import { Guild } from "../../../../database/guild";
 
 async function handleSetTimeoutAutocomplete(
 	[client, bot]: [Client, Discord.Bot],
@@ -51,17 +52,14 @@ async function handleSetTimeout([client, bot]: [Client, Discord.Bot], interactio
 		return;
 	}
 
-	const guildDocument = await client.database.adapters.guilds.getOrFetchOrCreate(
-		client,
-		"id",
-		guildId.toString(),
-		guildId,
-	);
+	const guildDocument =
+		client.cache.documents.guilds.get(guildId.toString()) ??
+		(await client.database.session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
 	if (guildDocument === undefined) {
 		return;
 	}
 
-	const configuration = guildDocument.data.features.moderation.features?.timeouts;
+	const configuration = guildDocument.features.moderation.features?.timeouts;
 	if (configuration === undefined || !configuration.enabled) {
 		return;
 	}
@@ -118,13 +116,14 @@ async function handleSetTimeout([client, bot]: [Client, Discord.Bot], interactio
 		return;
 	}
 
-	await Discord.editMember(bot, guildId, member.id, { communicationDisabledUntil: until }).catch(() =>
-		client.log.warn(`Failed to time ${diagnostics.display.member(member)} out.`),
-	);
+	await bot.rest
+		// TODO(vxern): Fix timestamps now being ISO8601.
+		.editMember(guildId, member.id, { communicationDisabledUntil: until })
+		.catch((reason) => client.log.warn(`Failed to time ${diagnostics.display.member(member)} out:`, reason));
 
 	if (configuration.journaling) {
 		const journallingService = client.services.journalling.get(guild.id);
-		journallingService?.log(bot, "memberTimeoutAdd", { args: [member, until, reason, interaction.user] });
+		journallingService?.log("memberTimeoutAdd", { args: [member, until, reason, interaction.user] });
 	}
 
 	const strings = {

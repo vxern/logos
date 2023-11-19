@@ -1,3 +1,4 @@
+import * as Discord from "@discordeno/bot";
 import { CommandTemplate } from "../command";
 import history from "./commands/history";
 import loop from "./commands/loop";
@@ -13,7 +14,6 @@ import skipTo from "./commands/skip-to";
 import stop from "./commands/stop";
 import unskip from "./commands/unskip";
 import volume from "./commands/volume";
-import * as Discord from "discordeno";
 
 const music: CommandTemplate = {
 	name: "music",

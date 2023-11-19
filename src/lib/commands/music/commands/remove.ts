@@ -1,3 +1,4 @@
+import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import { Locale } from "../../../../constants/languages";
 import defaults from "../../../../defaults";
@@ -18,7 +19,6 @@ import { MusicService } from "../../../services/music/music";
 import { chunk } from "../../../utils";
 import { OptionTemplate } from "../../command";
 import { SongListing, listingTypeToEmoji } from "../data/types";
-import * as Discord from "discordeno";
 
 const command: OptionTemplate = {
 	name: "remove",
@@ -42,7 +42,7 @@ async function handleRemoveSongListing(
 		return;
 	}
 
-	const isVoiceStateVerified = musicService.verifyCanManagePlayback(bot, interaction);
+	const isVoiceStateVerified = musicService.verifyCanManagePlayback(interaction);
 	if (!isVoiceStateVerified) {
 		return;
 	}
@@ -148,7 +148,7 @@ async function generateEmbed(
 	const buttonsCustomId = createInteractionCollector([client, bot], {
 		type: Discord.InteractionTypes.MessageComponent,
 		userId: interaction.user.id,
-		onCollect: async (bot, selection) => {
+		onCollect: async (selection) => {
 			acknowledge([client, bot], selection);
 
 			const customId = selection.data?.customId;
@@ -189,7 +189,7 @@ async function generateEmbed(
 		type: Discord.InteractionTypes.MessageComponent,
 		userId: interaction.user.id,
 		limit: 1,
-		onCollect: async (bot, selection) => {
+		onCollect: async (selection) => {
 			const indexString = selection.data?.values?.at(0) as string | undefined;
 			if (indexString === undefined) {
 				return;

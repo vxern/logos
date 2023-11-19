@@ -1,25 +1,28 @@
+import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import { Locale } from "../../../../constants/languages";
 import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
-import { CefrConfiguration } from "../../../database/structs/guild";
+import { CefrConfiguration } from "../../../database/guild";
 import {
 	acknowledge,
 	createInteractionCollector,
 	decodeId,
 	editReply,
 	encodeId,
+	getShowButton,
 	parseArguments,
 	reply,
 } from "../../../interactions";
 import { CommandTemplate } from "../../command";
 import { show } from "../../parameters";
-import * as Discord from "discordeno";
+import { Guild } from "../../../database/guild";
 
 const command: CommandTemplate = {
 	name: "cefr",
 	type: Discord.ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ["VIEW_CHANNEL"],
+	isShowable: true,
 	handle: handleDisplayCefrGuide,
 	options: [show],
 };
@@ -39,7 +42,9 @@ async function handleDisplayCefrGuide(
 	[client, bot]: [Client, Discord.Bot],
 	interaction: Logos.Interaction,
 ): Promise<void> {
-	const [{ show }] = parseArguments(interaction.data?.options, { show: "boolean" });
+	const [{ show: showParameter }] = parseArguments(interaction.data?.options, { show: "boolean" });
+
+	const show = interaction.show ?? showParameter ?? false;
 	const locale = show ? interaction.guildLocale : interaction.locale;
 
 	const guildId = interaction.guildId;
@@ -47,17 +52,19 @@ async function handleDisplayCefrGuide(
 		return;
 	}
 
-	const guildDocument = await client.database.adapters.guilds.getOrFetch(client, "id", guildId.toString());
+	const guildDocument =
+		client.cache.documents.guilds.get(guildId.toString()) ??
+		(await client.database.session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
 	if (guildDocument === undefined) {
 		return;
 	}
 
-	const levelExamples = guildDocument.data.features.language.features?.cefr?.examples;
+	const levelExamples = guildDocument.features.language.features?.cefr?.examples;
 	if (levelExamples === undefined) {
 		return;
 	}
 
-	const isExtended = guildDocument.data.features.language.features?.cefr?.extended ?? false;
+	const isExtended = guildDocument.features.language.features?.cefr?.extended ?? false;
 
 	const guide = getBracketGuide(client, { isExtended }, { locale });
 	const examples = levelExamples.enabled
@@ -66,7 +73,7 @@ async function handleDisplayCefrGuide(
 
 	const data: Data = { bracket: "a", tab: "guide" };
 
-	const getEmbed = (): Discord.Embed => {
+	const getEmbed = (): Discord.CamelizedDiscordEmbed => {
 		let tab;
 		switch (data.tab) {
 			case "guide": {
@@ -98,6 +105,8 @@ async function handleDisplayCefrGuide(
 			examples: localise(client, "cefr.strings.tabs.examples", locale)(),
 		},
 	};
+
+	const showButton = getShowButton(client, interaction, { locale });
 
 	const getButtons = (): Discord.MessageComponents => {
 		const bracketButtons: [Discord.ButtonComponent, Discord.ButtonComponent, Discord.ButtonComponent] = [
@@ -167,10 +176,16 @@ async function handleDisplayCefrGuide(
 			}
 		}
 
-		return [
+		if (!show) {
+			tabButtons.push(showButton);
+		}
+
+		const rows: Discord.ActionRow[] = [
 			{ type: Discord.MessageComponentTypes.ActionRow, components: bracketButtons },
 			{ type: Discord.MessageComponentTypes.ActionRow, components: tabButtons },
 		];
+
+		return rows;
 	};
 
 	const refreshView = async () => {
@@ -180,7 +195,7 @@ async function handleDisplayCefrGuide(
 	const bracketButtonId = createInteractionCollector([client, bot], {
 		type: Discord.InteractionTypes.MessageComponent,
 		userId: interaction.user.id,
-		onCollect: async (_, selection) => {
+		onCollect: async (selection) => {
 			acknowledge([client, bot], selection);
 
 			const selectionCustomId = selection.data?.customId;
@@ -208,7 +223,7 @@ async function handleDisplayCefrGuide(
 	const tabButtonId = createInteractionCollector([client, bot], {
 		type: Discord.InteractionTypes.MessageComponent,
 		userId: interaction.user.id,
-		onCollect: async (_, selection) => {
+		onCollect: async (selection) => {
 			acknowledge([client, bot], selection);
 
 			const selectionCustomId = selection.data?.customId;
@@ -240,7 +255,7 @@ function getBracketGuide(
 	client: Client,
 	options: { isExtended: boolean },
 	{ locale }: { locale: Locale },
-): Record<Bracket, Discord.Embed> {
+): Record<Bracket, Discord.CamelizedDiscordEmbed> {
 	const strings = {
 		brackets: {
 			a: localise(client, "cefr.strings.brackets.a", locale)(),
@@ -350,7 +365,7 @@ function getBracketExamples(
 	levels: NonNullable<CefrConfiguration["examples"]["levels"]>,
 	options: { isExtended: boolean },
 	{ locale }: { locale: Locale },
-): Record<Bracket, Discord.Embed> {
+): Record<Bracket, Discord.CamelizedDiscordEmbed> {
 	const strings = {
 		brackets: {
 			a: localise(client, "cefr.strings.brackets.a", locale)(),

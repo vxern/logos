@@ -1,3 +1,4 @@
+import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import { Locale } from "../../../../constants/languages";
 import licences from "../../../../constants/licences";
@@ -16,7 +17,6 @@ import {
 	reply,
 } from "../../../interactions";
 import { CommandTemplate } from "../../command";
-import * as Discord from "discordeno";
 
 const command: CommandTemplate = {
 	name: "game",
@@ -33,11 +33,6 @@ async function handleStartGame([client, bot]: [Client, Discord.Bot], interaction
 
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
-		return;
-	}
-
-	const guildDocument = await client.database.adapters.guilds.getOrFetch(client, "id", guildId.toString());
-	if (guildDocument === undefined) {
 		return;
 	}
 
@@ -77,7 +72,7 @@ async function handleStartGame([client, bot]: [Client, Discord.Bot], interaction
 	const customId = createInteractionCollector([client, bot], {
 		type: Discord.InteractionTypes.MessageComponent,
 		userId: interaction.user.id,
-		onCollect: async (bot, selection) => {
+		onCollect: async (selection) => {
 			acknowledge([client, bot], selection);
 
 			const selectionCustomId = selection.data?.customId;

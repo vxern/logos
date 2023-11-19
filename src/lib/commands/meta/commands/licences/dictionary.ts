@@ -1,3 +1,4 @@
+import * as Discord from "@discordeno/bot";
 import constants from "../../../../../constants/constants";
 import { Locale } from "../../../../../constants/languages";
 import licences from "../../../../../constants/licences";
@@ -5,7 +6,6 @@ import * as Logos from "../../../../../types";
 import { Client, localise } from "../../../../client";
 import { parseArguments, reply, respond } from "../../../../interactions";
 import { OptionTemplate } from "../../../command";
-import * as Discord from "discordeno";
 
 const command: OptionTemplate = {
 	name: "dictionary",

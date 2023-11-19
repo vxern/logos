@@ -1,3 +1,4 @@
+import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import { Locale } from "../../../../constants/languages";
 import * as Logos from "../../../../types";
@@ -5,7 +6,6 @@ import { Client, localise } from "../../../client";
 import { parseArguments, parseTimeExpression, reply, respond } from "../../../interactions";
 import { OptionTemplate } from "../../command";
 import { timestamp } from "../../parameters";
-import * as Discord from "discordeno";
 
 const command: OptionTemplate = {
 	name: "skip-to",
@@ -54,7 +54,7 @@ async function handleSkipToTimestamp(
 		return;
 	}
 
-	const isVoiceStateVerified = musicService.verifyCanManagePlayback(bot, interaction);
+	const isVoiceStateVerified = musicService.verifyCanManagePlayback(interaction);
 	if (!isVoiceStateVerified) {
 		return;
 	}

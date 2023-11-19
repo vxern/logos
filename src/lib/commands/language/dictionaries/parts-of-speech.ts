@@ -7,6 +7,7 @@ import romanian from "./parts-of-speech/romanian";
 export default {
 	"Armenian/Western": {},
 	"Armenian/Eastern": {},
+	Danish: {},
 	Dutch: {},
 	"English/American": english,
 	"English/British": english,
@@ -18,6 +19,8 @@ export default {
 	"Norwegian/Bokmål": {},
 	Polish: {},
 	Romanian: romanian,
+	Russian: {},
+	Silesian: {},
 	Swedish: {},
 	Turkish: {},
 } satisfies Record<LearningLanguage, Record<string, PartOfSpeech>>;

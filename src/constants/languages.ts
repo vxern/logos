@@ -1,169 +1,167 @@
-import * as Discord from "discordeno";
+import {
+	CLDLanguage,
+	CLDLocale,
+	Language as DetectionLanguage,
+	Locale as DetectionLocale,
+	TinyLDLanguage,
+	TinyLDLocale,
+	getCLDLanguageByLocale as getCLDDetectionLanguageByLocale,
+	getTinyLDLanguageByLocale as getTinyLDDetectionLanguageByLocale,
+	isCLDLocale,
+	isTinyLDLocale,
+} from "./languages/detection";
+import { Language as FeatureLanguage, isLanguage as isFeatureLanguage } from "./languages/feature";
+import { Language as LearningLanguage } from "./languages/learning";
+import {
+	DiscordLocale,
+	Language as LocalisationLanguage,
+	Locale,
+	getDiscordLanguageByLocale as getDiscordLocalisationLanguageByLocale,
+	getDiscordLocaleByLanguage as getDiscordLocaleByLocalisationLanguage,
+	getLanguageByLocale as getLocalisationLanguageByLocale,
+	getLocaleByLanguage as getLocaleByLocalisationLanguage,
+	isDiscordLanguage as isDiscordLocalisationLanguage,
+	isLanguage as isLocalisationLanguage,
+	languageToLocale as localisationLanguageToLocale,
+	languages as localisationLanguages,
+} from "./languages/localisation";
+import {
+	DeepLLanguage,
+	DeepLLocale,
+	GoogleTranslateLanguage,
+	GoogleTranslateLocale,
+	Language as TranslationLanguage,
+	Locale as TranslationLocale,
+	getDeepLLanguageByLocale as getDeepLTranslationLanguageByLocale,
+	getDeepLLocaleByLanguage as getDeepLLocaleByTranslationLanguage,
+	getGoogleTranslateLanguageByLocale as getGoogleTranslateTranslationLanguageByLocale,
+	getGoogleTranslateLocaleByLanguage as getGoogleTranslateLocaleByTranslationLanguage,
+	isDeepLLocale,
+	isGoogleTranslateLocale,
+	isLanguage as isTranslationLanguage,
+	languages as translationLanguages,
+} from "./languages/translation";
 
 const languages = {
-	localisation: {
-		discord: [
-			"Dutch",
-			"English/American",
-			"English/British",
-			"Finnish",
-			"French",
-			"German",
-			"Greek",
-			"Hungarian",
-			"Norwegian/Bokmål",
-			"Polish",
-			"Romanian",
-			"Swedish",
-			"Turkish",
-		],
-		logos: ["Armenian/Western", "Armenian/Eastern"],
+	languages: {
+		localisation: [
+			...new Set([...localisationLanguages.discord, ...localisationLanguages.logos]),
+		].sort() satisfies LocalisationLanguage[] as LocalisationLanguage[],
+		translation: [
+			...new Set([...translationLanguages.deepl, ...translationLanguages.google]),
+		].sort() satisfies TranslationLanguage[] as TranslationLanguage[],
 	},
-	feature: [
-		"Armenian",
-		"Dutch",
-		"English",
-		"French",
-		"German",
-		"Greek",
-		"Hungarian",
-		"Norwegian",
-		"Polish",
-		"Romanian",
-		"Swedish",
-		"Turkish",
-	],
-} as const;
-
-const languageToLocale = {
-	discord: {
-		Dutch: "nl",
-		"English/American": "en-US",
-		"English/British": "en-GB",
-		Finnish: "fi",
-		French: "fr",
-		German: "de",
-		Greek: "el",
-		Hungarian: "hu",
-		"Norwegian/Bokmål": "no",
-		Polish: "pl",
-		Romanian: "ro",
-		Swedish: "sv-SE",
-		Turkish: "tr",
-	} satisfies Record<DiscordLanguage, Discord.Locale>,
-	logos: {
-		"Armenian/Eastern": "hye",
-		"Armenian/Western": "hyw",
-		Dutch: "nld",
-		"English/American": "eng-US",
-		"English/British": "eng-GB",
-		Finnish: "fin",
-		French: "fra",
-		Greek: "ell",
-		German: "deu",
-		Hungarian: "hun",
-		"Norwegian/Bokmål": "nob",
-		Polish: "pol",
-		Romanian: "ron",
-		Swedish: "swe",
-		Turkish: "tur",
-	} as const satisfies Record<LocalisationLanguage, string>,
-} as const;
-
-const localeToLanguage = {
-	discord: reverseObject(languageToLocale.discord),
-	logos: reverseObject(languageToLocale.logos),
-} as const;
-
-type DiscordLanguage = typeof languages.localisation.discord[number];
-type LogosLanguage = typeof languages.localisation.logos[number];
-
-type LocalisationLanguage = DiscordLanguage | LogosLanguage;
-type FeatureLanguage = typeof languages.feature[number];
-type LearningLanguage = LocalisationLanguage;
-
-type DiscordLocale = typeof languageToLocale.discord[keyof typeof languageToLocale.discord];
-type Locale = typeof languageToLocale.logos[keyof typeof languageToLocale.logos];
-
-function getDiscordLocaleByLanguage(language: DiscordLanguage): DiscordLocale {
-	return languageToLocale.discord[language];
-}
-
-function getLocaleByLanguage(language: LocalisationLanguage): Locale {
-	return languageToLocale.logos[language];
-}
-
-function getDiscordLanguageByDiscordLocale(locale: string | undefined): DiscordLanguage | undefined {
-	if (locale === undefined || !(locale in localeToLanguage.discord)) {
-		return undefined;
-	}
-
-	return localeToLanguage.discord[locale as keyof typeof localeToLanguage.discord];
-}
-
-function getLanguageByLocale(locale: Locale): LocalisationLanguage {
-	return localeToLanguage.logos[locale];
-}
-
-function isBuiltIn(language: string): language is DiscordLanguage {
-	return (languages.localisation.discord as readonly string[]).includes(language);
-}
-
-function isLocalised(language: string): language is LocalisationLanguage {
-	if (isBuiltIn(language)) {
-		return true;
-	}
-
-	return (languages.localisation.logos as readonly string[]).includes(language);
-}
-
-function isFeatured(language: string): language is FeatureLanguage {
-	return (languages.feature as readonly string[]).includes(language);
-}
-
-type Reverse<O extends Record<string, string>> = {
-	[K in keyof O as O[K]]: K;
+	locales: {
+		discord: Object.values(localisationLanguageToLocale.discord) satisfies DiscordLocale[] as DiscordLocale[],
+	},
 };
-function reverseObject<O extends Record<string, string>>(object: O): Reverse<O> {
-	const reversed: Partial<Reverse<O>> = {};
-	for (const key of Object.keys(object) as (keyof O)[]) {
-		// @ts-ignore: This is okay.
-		reversed[object[key]] = key;
+
+const translationLanguagesByBaseLanguage = languages.languages.translation.reduce<
+	Record<string, TranslationLanguage[]>
+>((languages, language) => {
+	const baseLanguage = getBaseLanguage(language);
+
+	if (baseLanguage === language) {
+		return languages;
 	}
-	return reversed as unknown as Reverse<O>;
-}
 
-type WithVariants<T> = T extends `${string}/${string}` ? T : never;
+	if (baseLanguage in languages) {
+		languages[baseLanguage]?.push(language);
+	} else {
+		languages[baseLanguage] = [language];
+	}
 
-function toFeatureLanguage(language: LocalisationLanguage | LearningLanguage): FeatureLanguage | undefined {
+	return languages;
+}, {});
+
+type Language = DetectionLanguage | FeatureLanguage | LearningLanguage | LocalisationLanguage | TranslationLanguage;
+
+type HasVariants<T> = T extends `${string}/${string}` ? T : never;
+
+function getBaseLanguage(language: string): string {
 	const baseLanguage = language.split("/").at(0);
 	if (baseLanguage === undefined) {
 		throw "StateError: Base language unexpectedly undefined when getting feature language.";
 	}
 
-	if (isFeatured(baseLanguage)) {
+	return baseLanguage;
+}
+
+function getFeatureLanguage(language: LocalisationLanguage | LearningLanguage): FeatureLanguage | undefined {
+	const baseLanguage = getBaseLanguage(language);
+
+	if (isFeatureLanguage(baseLanguage)) {
 		return baseLanguage;
 	}
 
 	return undefined;
 }
 
-export default {
-	languages: {
-		localisation: [...languages.localisation.discord, ...languages.localisation.logos].sort(),
-	},
-	locales: {
-		discord: Object.values(languageToLocale.discord),
-	},
-};
+function getTranslationLanguage(language: string): TranslationLanguage | undefined {
+	if (isTranslationLanguage(language)) {
+		return language;
+	}
+
+	const baseLanguage = getBaseLanguage(language);
+	const otherVariants = translationLanguagesByBaseLanguage[baseLanguage];
+	if (otherVariants === undefined) {
+		return undefined;
+	}
+
+	const otherVariant = otherVariants.at(0);
+	if (otherVariant === undefined) {
+		return undefined;
+	}
+
+	return otherVariant;
+}
+
+interface Languages<Language extends string> {
+	source: Language;
+	target: Language;
+}
+
+export default languages;
 export {
-	getDiscordLocaleByLanguage,
-	getLanguageByLocale,
-	getDiscordLanguageByDiscordLocale,
-	getLocaleByLanguage,
-	isLocalised,
-	toFeatureLanguage,
-	isFeatured,
-	isBuiltIn,
+	getDiscordLocaleByLocalisationLanguage,
+	getLocaleByLocalisationLanguage,
+	getDiscordLocalisationLanguageByLocale,
+	getLocalisationLanguageByLocale,
+	isDiscordLocalisationLanguage,
+	isLocalisationLanguage,
+	getFeatureLanguage,
+	isTranslationLanguage,
+	getDeepLLocaleByTranslationLanguage,
+	getGoogleTranslateLocaleByTranslationLanguage,
+	getDeepLTranslationLanguageByLocale,
+	getGoogleTranslateTranslationLanguageByLocale,
+	isGoogleTranslateLocale,
+	isDeepLLocale,
+	getTinyLDDetectionLanguageByLocale,
+	isTinyLDLocale,
+	getCLDDetectionLanguageByLocale,
+	isCLDLocale,
+	getTranslationLanguage,
+	getBaseLanguage,
 };
-export type { LearningLanguage, FeatureLanguage, LocalisationLanguage, Locale, WithVariants };
+export type {
+	LearningLanguage,
+	FeatureLanguage,
+	LocalisationLanguage,
+	TranslationLanguage,
+	Language,
+	Locale,
+	HasVariants,
+	GoogleTranslateLanguage,
+	DeepLLanguage,
+	Languages,
+	TranslationLocale,
+	DeepLLocale,
+	GoogleTranslateLocale,
+	TinyLDLanguage,
+	TinyLDLocale,
+	CLDLanguage,
+	CLDLocale,
+	DetectionLanguage,
+	DetectionLocale,
+};

@@ -1,8 +1,8 @@
+import * as Discord from "@discordeno/bot";
 import { OptionTemplate } from "../../command";
 import { show } from "../../parameters";
 import { handleDisplayVolume } from "./volume/display";
 import { handleSetVolume } from "./volume/set";
-import * as Discord from "discordeno";
 
 const command: OptionTemplate = {
 	name: "volume",
@@ -11,6 +11,7 @@ const command: OptionTemplate = {
 		{
 			name: "display",
 			type: Discord.ApplicationCommandOptionTypes.SubCommand,
+			isShowable: true,
 			handle: handleDisplayVolume,
 			options: [show],
 		},

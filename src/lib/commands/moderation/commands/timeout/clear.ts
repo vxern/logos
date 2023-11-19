@@ -1,9 +1,10 @@
+import * as Discord from "@discordeno/bot";
 import constants from "../../../../../constants/constants";
 import * as Logos from "../../../../../types";
 import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../../client";
 import diagnostics from "../../../../diagnostics";
 import { parseArguments, reply } from "../../../../interactions";
-import * as Discord from "discordeno";
+import { Guild } from "../../../../database/guild";
 
 async function handleClearTimeoutAutocomplete(
 	[client, bot]: [Client, Discord.Bot],
@@ -25,17 +26,14 @@ async function handleClearTimeout([client, bot]: [Client, Discord.Bot], interact
 		return;
 	}
 
-	const guildDocument = await client.database.adapters.guilds.getOrFetchOrCreate(
-		client,
-		"id",
-		guildId.toString(),
-		guildId,
-	);
+	const guildDocument =
+		client.cache.documents.guilds.get(guildId.toString()) ??
+		(await client.database.session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
 	if (guildDocument === undefined) {
 		return;
 	}
 
-	const configuration = guildDocument.data.features.moderation.features?.timeouts;
+	const configuration = guildDocument.features.moderation.features?.timeouts;
 	if (configuration === undefined || !configuration.enabled) {
 		return;
 	}
@@ -95,13 +93,13 @@ async function handleClearTimeout([client, bot]: [Client, Discord.Bot], interact
 		return;
 	}
 
-	await Discord.editMember(bot, guildId, member.id, { communicationDisabledUntil: null }).catch(() =>
-		client.log.warn(`Failed to remove timeout of ${diagnostics.display.member(member)}.`),
-	);
+	await bot.rest
+		.editMember(guildId, member.id, { communicationDisabledUntil: null })
+		.catch(() => client.log.warn(`Failed to remove timeout of ${diagnostics.display.member(member)}.`));
 
 	if (configuration.journaling) {
 		const journallingService = client.services.journalling.get(guild.id);
-		journallingService?.log(bot, "memberTimeoutRemove", { args: [member, interaction.user] });
+		journallingService?.log("memberTimeoutRemove", { args: [member, interaction.user] });
 	}
 
 	const strings = {

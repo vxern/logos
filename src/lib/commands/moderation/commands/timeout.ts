@@ -1,8 +1,8 @@
+import * as Discord from "@discordeno/bot";
 import { CommandTemplate } from "../../command";
 import { duration, reason, user } from "../../parameters";
 import { handleClearTimeout, handleClearTimeoutAutocomplete } from "./timeout/clear";
 import { handleSetTimeout, handleSetTimeoutAutocomplete } from "./timeout/set";
-import * as Discord from "discordeno";
 
 const command: CommandTemplate = {
 	name: "timeout",

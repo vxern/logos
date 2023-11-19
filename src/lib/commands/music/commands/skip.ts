@@ -1,3 +1,4 @@
+import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
@@ -5,7 +6,6 @@ import { parseArguments, reply } from "../../../interactions";
 import { isCollection } from "../../../services/music/music";
 import { OptionTemplate } from "../../command";
 import { by, collection, to } from "../../parameters";
-import * as Discord from "discordeno";
 
 const command: OptionTemplate = {
 	name: "skip",
@@ -39,7 +39,7 @@ async function handleSkipAction([client, bot]: [Client, Discord.Bot], interactio
 		return;
 	}
 
-	const isVoiceStateVerified = musicService.verifyCanManagePlayback(bot, interaction);
+	const isVoiceStateVerified = musicService.verifyCanManagePlayback(interaction);
 	if (!isVoiceStateVerified) {
 		return;
 	}

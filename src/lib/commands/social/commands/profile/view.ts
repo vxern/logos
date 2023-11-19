@@ -1,16 +1,19 @@
+import * as Discord from "@discordeno/bot";
 import constants from "../../../../../constants/constants";
-import { Locale } from "../../../../../constants/languages";
 import { MentionTypes, mention } from "../../../../../formatting";
 import * as Logos from "../../../../../types";
 import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../../client";
 import { parseArguments, reply } from "../../../../interactions";
 import { OptionTemplate } from "../../../command";
 import { show, user } from "../../../parameters";
-import * as Discord from "discordeno";
+import { User } from "../../../../database/user";
+import { Praise } from "../../../../database/praise";
+import { Warning } from "../../../../database/warning";
 
 const command: OptionTemplate = {
 	name: "view",
 	type: Discord.ApplicationCommandOptionTypes.SubCommand,
+	isShowable: true,
 	handle: handleDisplayProfile,
 	handleAutocomplete: handleDisplayProfileAutocomplete,
 	options: [{ ...user, required: false }, show],
@@ -51,28 +54,80 @@ async function handleDisplayProfile(
 		return;
 	}
 
-	const subject = await client.database.adapters.users.getOrFetchOrCreate(
-		client,
-		"id",
-		member.id.toString(),
-		member.id,
-	);
-	if (subject === undefined) {
-		const locale = interaction.locale;
-		displayError([client, bot], interaction, { locale });
-		return;
-	}
+	const targetDocument =
+		client.cache.documents.users.get(member.id.toString()) ??
+		(await client.database.session.load<User>(`users/${member.id}`).then((value) => value ?? undefined)) ??
+		(await (async () => {
+			const userDocument = {
+				...({
+					id: `users/${member.id}`,
+					account: { id: member.id.toString() },
+					createdAt: Date.now(),
+				} satisfies User),
+				"@metadata": { "@collection": "Users" },
+			};
+			await client.database.session.store(userDocument);
+			await client.database.session.saveChanges();
 
-	const [praisesSent, praisesReceived, warningsReceived] = await Promise.all([
-		client.database.adapters.praises.getOrFetch(client, "sender", subject.ref),
-		client.database.adapters.praises.getOrFetch(client, "recipient", subject.ref),
-		client.database.adapters.warnings.getOrFetch(client, "recipient", subject.ref),
-	]);
-	if (praisesSent === undefined || praisesReceived === undefined || warningsReceived === undefined) {
-		const locale = interaction.locale;
-		displayError([client, bot], interaction, { locale });
-		return;
-	}
+			return userDocument as User;
+		})());
+
+	const praiseDocumentsByAuthorCached = client.cache.documents.praisesByAuthor.get(targetDocument.account.id);
+	const praiseDocumentsByAuthor =
+		praiseDocumentsByAuthorCached !== undefined
+			? Array.from(praiseDocumentsByAuthorCached.values())
+			: await client.database.session
+					.query<Praise>({ collection: "Praises" })
+					.whereRegex("id", `^praises\/\d+\/${targetDocument.account.id}\/\d+$`)
+					.all()
+					.then((praiseDocuments) => {
+						const map = new Map(
+							praiseDocuments.map((praiseDocument) => [
+								`${praiseDocument.targetId}/${praiseDocument.authorId}/${praiseDocument.createdAt}`,
+								praiseDocument,
+							]),
+						);
+						client.cache.documents.praisesByAuthor.set(targetDocument.account.id, map);
+						return praiseDocuments;
+					});
+
+	const praiseDocumentsByTargetCached = client.cache.documents.praisesByTarget.get(targetDocument.account.id);
+	const praiseDocumentsByTarget =
+		praiseDocumentsByTargetCached !== undefined
+			? Array.from(praiseDocumentsByTargetCached.values())
+			: await client.database.session
+					.query<Praise>({ collection: "Praises" })
+					.whereStartsWith("id", `^praises\/${targetDocument.account.id}\/\d+\/\d+$`)
+					.all()
+					.then((praiseDocuments) => {
+						const map = new Map(
+							praiseDocuments.map((praiseDocument) => [
+								`${praiseDocument.targetId}/${praiseDocument.authorId}/${praiseDocument.createdAt}`,
+								praiseDocument,
+							]),
+						);
+						client.cache.documents.praisesByTarget.set(targetDocument.account.id, map);
+						return praiseDocuments;
+					});
+
+	const warningDocumentsCached = client.cache.documents.warningsByTarget.get(targetDocument.account.id);
+	const warningDocuments =
+		warningDocumentsCached !== undefined
+			? Array.from(warningDocumentsCached.values())
+			: await client.database.session
+					.query<Warning>({ collection: "Warnings" })
+					.whereStartsWith("id", `warnings/${targetDocument.account.id}`)
+					.all()
+					.then((warningDocuments) => {
+						const map = new Map(
+							warningDocuments.map((warningDocument) => [
+								`${warningDocument.targetId}/${warningDocument.authorId}/${warningDocument.createdAt}`,
+								warningDocument,
+							]),
+						);
+						client.cache.documents.warningsByTarget.set(targetDocument.account.id, map);
+						return warningDocuments;
+					});
 
 	const strings = {
 		title: localise(
@@ -98,7 +153,7 @@ async function handleDisplayProfile(
 				{
 					title: strings.title,
 					thumbnail: (() => {
-						const iconURL = Discord.getAvatarURL(bot, target.id, target.discriminator, {
+						const iconURL = Discord.avatarUrl(target.id, target.discriminator, {
 							avatar: target.avatar,
 							size: 4096,
 							format: "webp",
@@ -118,8 +173,8 @@ async function handleDisplayProfile(
 						},
 						{
 							name: `${constants.symbols.profile.statistics.statistics} ${strings.statistics}`,
-							value: `${constants.symbols.profile.statistics.praises} ${strings.praises} • ${strings.received} – ${praisesReceived.size} • ${strings.sent} – ${praisesSent.size}
-  ${constants.symbols.profile.statistics.warnings} ${strings.warnings} • ${strings.received} – ${warningsReceived.size}`,
+							value: `${constants.symbols.profile.statistics.praises} ${strings.praises} • ${strings.received} – ${praiseDocumentsByTarget.length} • ${strings.sent} – ${praiseDocumentsByAuthor.length}
+  ${constants.symbols.profile.statistics.warnings} ${strings.warnings} • ${strings.received} – ${warningDocuments.length}`,
 							inline: false,
 						},
 					],
@@ -128,27 +183,6 @@ async function handleDisplayProfile(
 		},
 		{ visible: show },
 	);
-}
-
-async function displayError(
-	[client, bot]: [Client, Discord.Bot],
-	interaction: Logos.Interaction,
-	{ locale }: { locale: Locale },
-): Promise<void> {
-	const strings = {
-		title: localise(client, "profile.options.view.strings.failed.title", locale)(),
-		description: localise(client, "profile.options.view.strings.failed.description", locale)(),
-	};
-
-	reply([client, bot], interaction, {
-		embeds: [
-			{
-				title: strings.title,
-				description: strings.description,
-				color: constants.colors.red,
-			},
-		],
-	});
 }
 
 export default command;

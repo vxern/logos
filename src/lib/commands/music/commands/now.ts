@@ -1,3 +1,4 @@
+import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import defaults from "../../../../defaults";
 import { MentionTypes, mention, timestamp, trim } from "../../../../formatting";
@@ -9,11 +10,11 @@ import { chunk } from "../../../utils";
 import { OptionTemplate } from "../../command";
 import { collection, show } from "../../parameters";
 import { Song, SongCollection, SongStream } from "../data/types";
-import * as Discord from "discordeno";
 
 const command: OptionTemplate = {
 	name: "now",
 	type: Discord.ApplicationCommandOptionTypes.SubCommand,
+	isShowable: true,
 	handle: handleDisplayCurrentlyPlaying,
 	options: [collection, show],
 };
@@ -35,7 +36,7 @@ async function handleDisplayCurrentlyPlaying(
 		return;
 	}
 
-	const isVoiceStateVerified = musicService.verifyVoiceState(bot, interaction, "check");
+	const isVoiceStateVerified = musicService.verifyVoiceState(interaction, "check");
 	if (!isVoiceStateVerified) {
 		return;
 	}
@@ -155,6 +156,7 @@ async function handleDisplayCurrentlyPlaying(
 					},
 				},
 				show: show ?? false,
+				showable: true,
 			},
 			{ locale },
 		);

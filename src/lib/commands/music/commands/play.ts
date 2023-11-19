@@ -1,9 +1,9 @@
+import * as Discord from "@discordeno/bot";
 import { OptionTemplate } from "../../command";
 import { query } from "../../parameters";
 import { sources } from "../data/sources/sources";
 import { handleRequestFilePlayback } from "./play/file";
 import { handleRequestQueryPlayback } from "./play/query";
-import * as Discord from "discordeno";
 
 const command: OptionTemplate = {
 	name: "play",

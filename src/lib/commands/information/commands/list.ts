@@ -1,7 +1,7 @@
+import * as Discord from "@discordeno/bot";
 import { CommandTemplate } from "../../command";
 import { user } from "../../parameters";
 import { handleDisplayWarnings, handleDisplayWarningsAutocomplete } from "./list/warnings";
-import * as Discord from "discordeno";
 
 const command: CommandTemplate = {
 	name: "list",

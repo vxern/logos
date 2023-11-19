@@ -1,20 +1,17 @@
+import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
-import { Locale, getLanguageByLocale } from "../../../../constants/languages";
+import { Locale, getLocalisationLanguageByLocale } from "../../../../constants/languages";
 import { MentionTypes, TimestampFormat, mention, timestamp } from "../../../../formatting";
 import * as Logos from "../../../../types";
 import { Client, localise, pluralise } from "../../../client";
-import { stringifyValue } from "../../../database/database";
-import { Document } from "../../../database/document";
-import { EntryRequest } from "../../../database/structs/entry-request";
-import { User } from "../../../database/structs/user";
+import { EntryRequest } from "../../../database/entry-request";
+import { User } from "../../../database/user";
 import diagnostics from "../../../diagnostics";
 import { acknowledge, encodeId, getFeatureLanguage, getLocaleData, reply } from "../../../interactions";
 import { getGuildIconURLFormatted, snowflakeToTimestamp } from "../../../utils";
 import { Configurations, PromptService } from "../service";
-import * as Discord from "discordeno";
 
-type Metadata = { userId: bigint; reference: string };
-type InteractionData = [userId: string, guildId: string, reference: string, isAccept: string];
+type InteractionData = [documentId: string, isAccept: string];
 
 type Configuration = Configurations["verification"];
 type VoteInformation = {
@@ -24,66 +21,47 @@ type VoteInformation = {
 	};
 };
 
-class VerificationService extends PromptService<"verification", EntryRequest, Metadata, InteractionData> {
-	constructor(client: Client, guildId: bigint) {
-		super(client, guildId, { type: "verification" });
+class VerificationService extends PromptService<"verification", EntryRequest, InteractionData> {
+	constructor([client, bot]: [Client, Discord.Bot], guildId: bigint) {
+		super([client, bot], guildId, { type: "verification" });
 	}
 
-	getAllDocuments(): Document<EntryRequest>[] {
-		const entryRequests: Document<EntryRequest>[] = [];
+	getAllDocuments(): Map<string, EntryRequest> {
+		const entryRequests: Map<string, EntryRequest> = new Map();
 
-		for (const [compositeId, entryRequest] of this.client.database.cache.entryRequestBySubmitterAndGuild.entries()) {
-			const [_, guildIdString] = compositeId.split(constants.symbols.meta.idSeparator);
-			if (guildIdString === undefined) {
+		for (const [compositeId, entryRequest] of this.client.cache.documents.entryRequests) {
+			if (entryRequest.isFinalised) {
 				continue;
 			}
 
-			if (guildIdString !== this.guildIdString) {
-				continue;
-			}
-
-			if (entryRequest.data.isFinalised) {
-				continue;
-			}
-
-			entryRequests.push(entryRequest);
+			entryRequests.set(compositeId, entryRequest);
 		}
 
 		return entryRequests;
 	}
 
-	getUserDocument(document: Document<EntryRequest>): Promise<Document<User> | undefined> {
-		return this.client.database.adapters.users.getOrFetch(this.client, "reference", document.data.submitter);
+	async getUserDocument(entryRequestDocument: EntryRequest): Promise<User | undefined> {
+		return (
+			this.client.cache.documents.users.get(entryRequestDocument.authorId) ??
+			this.client.database.session
+				.load<User>(`users/${entryRequestDocument.authorId}`)
+				.then((value) => value ?? undefined)
+		);
 	}
 
-	decodeMetadata(data: string[]): Metadata | undefined {
-		const [userId, reference] = data;
-		if (userId === undefined || reference === undefined) {
-			return undefined;
-		}
-
-		return { userId: BigInt(userId), reference };
-	}
-
-	getPromptContent(
-		bot: Discord.Bot,
-		user: Logos.User,
-		document: Document<EntryRequest>,
-	): Discord.CreateMessage | undefined {
+	getPromptContent(user: Logos.User, entryRequestDocument: EntryRequest): Discord.CreateMessageOptions | undefined {
 		const [guild, guildDocument] = [this.guild, this.guildDocument];
 		if (guild === undefined || guildDocument === undefined) {
 			return undefined;
 		}
 
-		const reference = stringifyValue(document.ref);
-
-		const voteInformation = this.getVoteInformation(document.data);
+		const voteInformation = this.getVoteInformation(entryRequestDocument);
 		if (voteInformation === undefined) {
 			return undefined;
 		}
 
 		const guildLocale = this.guildLocale;
-		const guildLanguage = getLanguageByLocale(guildLocale);
+		const guildLanguage = getLocalisationLanguageByLocale(guildLocale);
 
 		const featureLanguage = getFeatureLanguage(guildDocument);
 
@@ -134,7 +112,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 					title: strings.answers,
 					color: constants.colors.turquoise,
 					thumbnail: (() => {
-						const iconURL = Discord.getAvatarURL(bot, user.id, user.discriminator, {
+						const iconURL = Discord.avatarUrl(user.id, user.discriminator, {
 							avatar: user.avatar,
 							size: 64,
 							format: "webp",
@@ -148,15 +126,15 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 					fields: [
 						{
 							name: `1. ${strings.verification.reason}`,
-							value: document.data.answers.reason,
+							value: entryRequestDocument.answers.reason,
 						},
 						{
 							name: `2. ${strings.verification.aim}`,
-							value: document.data.answers.aim,
+							value: entryRequestDocument.answers.aim,
 						},
 						{
 							name: `3. ${strings.verification.whereFound}`,
-							value: document.data.answers.whereFound,
+							value: entryRequestDocument.answers.whereFound,
 						},
 					],
 				},
@@ -166,7 +144,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 					fields: [
 						{
 							name: strings.requestedRoles,
-							value: mention(BigInt(document.data.requestedRole), MentionTypes.Role),
+							value: mention(BigInt(entryRequestDocument.requestedRoleId), MentionTypes.Role),
 							inline: true,
 						},
 						{
@@ -176,16 +154,15 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 						},
 						{
 							name: strings.answersSubmitted,
-							value: timestamp(document.data.createdAt, TimestampFormat.Relative),
+							value: timestamp(entryRequestDocument.createdAt, TimestampFormat.Relative),
 							inline: true,
 						},
 					],
 					footer: {
 						text: guild.name,
-						iconUrl: `${getGuildIconURLFormatted(
-							bot,
-							guild,
-						)}&metadata=${`${user.id}${constants.symbols.meta.metadataSeparator}${reference}`}`,
+						iconUrl: `${getGuildIconURLFormatted(guild)}&metadata=${entryRequestDocument.guildId}/${
+							entryRequestDocument.authorId
+						}`,
 					},
 				},
 			],
@@ -198,9 +175,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 							style: Discord.ButtonStyles.Success,
 							label: voteInformation.acceptance.required === 1 ? strings.accept : strings.acceptMultiple,
 							customId: encodeId<InteractionData>(constants.components.verification, [
-								user.id.toString(),
-								this.guildIdString,
-								reference,
+								`${entryRequestDocument.guildId}/${entryRequestDocument.authorId}`,
 								`${true}`,
 							]),
 						},
@@ -209,9 +184,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 							style: Discord.ButtonStyles.Danger,
 							label: voteInformation.rejection.required === 1 ? strings.reject : strings.rejectMultiple,
 							customId: encodeId<InteractionData>(constants.components.verification, [
-								user.id.toString(),
-								this.guildIdString,
-								reference,
+								`${entryRequestDocument.guildId}/${entryRequestDocument.authorId}`,
 								`${false}`,
 							]),
 						},
@@ -222,10 +195,9 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 	}
 
 	async handleInteraction(
-		bot: Discord.Bot,
 		interaction: Discord.Interaction,
 		data: InteractionData,
-	): Promise<Document<EntryRequest> | null | undefined> {
+	): Promise<EntryRequest | null | undefined> {
 		const localeData = await getLocaleData(this.client, interaction);
 		const locale = localeData.locale;
 
@@ -234,19 +206,10 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 			return undefined;
 		}
 
-		const [userId, _, __, isAcceptString] = data;
+		const [compositeId, isAcceptString] = data;
 		const isAccept = isAcceptString === "true";
 
-		const user = await this.client.database.adapters.users.getOrFetchOrCreate(
-			this.client,
-			"id",
-			userId,
-			BigInt(userId),
-		);
-		if (user === undefined) {
-			this.displayUserStateError(bot, interaction, { locale });
-			return undefined;
-		}
+		const userId = compositeId;
 
 		const member = interaction.member;
 		if (member === undefined) {
@@ -260,43 +223,66 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 
 		const guild = this.client.cache.guilds.get(guildId);
 		if (guild === undefined) {
-			this.displayVoteError(bot, interaction, { locale });
+			this.displayVoteError(interaction, { locale });
 			return undefined;
 		}
 
-		const [voter, entryRequest] = await Promise.all([
-			this.client.database.adapters.users.getOrFetchOrCreate(
-				this.client,
-				"id",
-				interaction.user.id.toString(),
-				interaction.user.id,
-			),
-			this.client.database.adapters.entryRequests.get(this.client, "submitterAndGuild", [
-				user.ref,
-				this.guildIdString,
-			]) as Document<EntryRequest> | undefined,
+		const [authorDocument, voterDocument, entryRequestDocument] = await Promise.all([
+			this.client.cache.documents.users.get(userId) ??
+				(await this.client.database.session.load<User>(`users/${userId}`).then((value) => value ?? undefined)) ??
+				(await (async () => {
+					const userDocument = {
+						...({
+							id: `users/${userId}`,
+							account: { id: userId },
+							createdAt: Date.now(),
+						} satisfies User),
+						"@metadata": { "@collection": "Users" },
+					};
+					await this.client.database.session.store(userDocument);
+					await this.client.database.session.saveChanges();
+
+					return userDocument as User;
+				})()),
+			this.client.cache.documents.users.get(interaction.user.id.toString()) ??
+				(await this.client.database.session
+					.load<User>(`users/${interaction.user.id}`)
+					.then((value) => value ?? undefined)) ??
+				(async () => {
+					const userDocument = {
+						...({
+							id: `users/${interaction.user.id}`,
+							account: { id: interaction.user.id.toString() },
+							createdAt: Date.now(),
+						} satisfies User),
+						"@metadata": { "@collection": "Users" },
+					};
+					await this.client.database.session.store(userDocument);
+					await this.client.database.session.saveChanges();
+
+					return userDocument as User;
+				})(),
+			this.client.cache.documents.entryRequests.get(interaction.user.id.toString()),
 		]);
-		if (voter === undefined || entryRequest === undefined) {
-			this.displayVoteError(bot, interaction, { locale });
+		if (voterDocument === undefined || entryRequestDocument === undefined) {
+			this.displayVoteError(interaction, { locale });
 			return undefined;
 		}
-
-		const voterReferenceId = stringifyValue(voter.ref);
 
 		const [alreadyVotedToAccept, alreadyVotedToReject] = [
-			entryRequest.data.votedFor,
-			entryRequest.data.votedAgainst,
-		].map((voters) => voters.some((voterReference) => stringifyValue(voterReference) === voterReferenceId)) as [
-			boolean,
-			boolean,
-		];
+			entryRequestDocument.votedFor ?? [],
+			entryRequestDocument.votedAgainst ?? [],
+		].map((voterIds) => voterIds.some((voterId) => voterId === voterDocument.account.id)) as [boolean, boolean];
 
-		const voteInformation = this.getVoteInformation(entryRequest.data);
+		const voteInformation = this.getVoteInformation(entryRequestDocument);
 		if (voteInformation === undefined) {
 			return undefined;
 		}
 
-		const [votedFor, votedAgainst] = [[...entryRequest.data.votedFor], [...entryRequest.data.votedAgainst]];
+		const [votedFor, votedAgainst] = [
+			[...(entryRequestDocument.votedFor ?? [])],
+			[...(entryRequestDocument.votedAgainst ?? [])],
+		];
 
 		// If the voter has already voted to accept or to reject the user.
 		if (alreadyVotedToAccept || alreadyVotedToReject) {
@@ -307,7 +293,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 					description: localise(this.client, "entry.verification.vote.alreadyVoted.inFavour.description", locale)(),
 				};
 
-				reply([this.client, bot], interaction, {
+				reply([this.client, this.bot], interaction, {
 					embeds: [
 						{
 							title: strings.title,
@@ -325,7 +311,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 					description: localise(this.client, "entry.verification.vote.alreadyVoted.against.description", locale)(),
 				};
 
-				reply([this.client, bot], interaction, {
+				reply([this.client, this.bot], interaction, {
 					embeds: [
 						{
 							title: strings.title,
@@ -338,19 +324,15 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 				return;
 			} else {
 				if (isAccept) {
-					const voterIndex = votedAgainst.findIndex(
-						(voterReference) => stringifyValue(voterReference) === voterReferenceId,
-					);
+					const voterIndex = votedAgainst.findIndex((voterId) => voterId === voterDocument.account.id);
 
 					votedAgainst.splice(voterIndex, 1);
-					votedFor.push(voter.ref);
+					votedFor.push(voterDocument.account.id);
 				} else {
-					const voterIndex = votedFor.findIndex(
-						(voterReference) => stringifyValue(voterReference) === voterReferenceId,
-					);
+					const voterIndex = votedFor.findIndex((voterId) => voterId === voterDocument.account.id);
 
 					votedFor.splice(voterIndex, 1);
-					votedAgainst.push(voter.ref);
+					votedAgainst.push(voterDocument.account.id);
 				}
 
 				const strings = {
@@ -358,7 +340,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 					description: localise(this.client, "entry.verification.vote.stanceChanged.description", locale)(),
 				};
 
-				reply([this.client, bot], interaction, {
+				reply([this.client, this.bot], interaction, {
 					embeds: [
 						{
 							title: strings.title,
@@ -369,12 +351,12 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 				});
 			}
 		} else {
-			acknowledge([this.client, bot], interaction);
+			acknowledge([this.client, this.bot], interaction);
 
 			if (isAccept) {
-				votedFor.push(voter.ref);
+				votedFor.push(voterDocument.account.id);
 			} else {
-				votedAgainst.push(voter.ref);
+				votedAgainst.push(voterDocument.account.id);
 			}
 		}
 
@@ -383,7 +365,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 			votedAgainst.length >= voteInformation.rejection.required,
 		];
 
-		const submitter = this.client.cache.users.get(BigInt(user.data.account.id));
+		const submitter = this.client.cache.users.get(interaction.user.id);
 		if (submitter === undefined) {
 			return undefined;
 		}
@@ -397,23 +379,33 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 				const journallingService = this.client.services.journalling.get(this.guildId);
 
 				if (isAccepted) {
-					journallingService?.log(bot, "entryRequestAccept", { args: [submitter, member] });
+					journallingService?.log("entryRequestAccept", { args: [submitter, member] });
 				} else {
-					journallingService?.log(bot, "entryRequestReject", { args: [submitter, member] });
+					journallingService?.log("entryRequestReject", { args: [submitter, member] });
 				}
 			}
 		}
 
-		const updatedEntryRequest = await this.client.database.adapters.entryRequests.update(this.client, {
-			...entryRequest,
-			data: { ...entryRequest.data, votedAgainst, votedFor, isFinalised },
-		});
-		if (updatedEntryRequest === undefined) {
-			return undefined;
+		if (votedFor.length !== 0) {
+			entryRequestDocument.votedFor = votedFor;
+		} else {
+			entryRequestDocument.votedFor = undefined;
 		}
 
-		let authorisedOn = user.data.account.authorisedOn !== undefined ? [...user.data.account.authorisedOn] : undefined;
-		let rejectedOn = user.data.account.rejectedOn !== undefined ? [...user.data.account.rejectedOn] : undefined;
+		if (votedAgainst.length !== 0) {
+			entryRequestDocument.votedAgainst = votedAgainst;
+		} else {
+			entryRequestDocument.votedAgainst = undefined;
+		}
+
+		entryRequestDocument.isFinalised = isFinalised;
+
+		await this.client.database.session.saveChanges();
+
+		let authorisedOn =
+			authorDocument.account.authorisedOn !== undefined ? [...authorDocument.account.authorisedOn] : undefined;
+		let rejectedOn =
+			authorDocument.account.rejectedOn !== undefined ? [...authorDocument.account.rejectedOn] : undefined;
 
 		if (isAccepted) {
 			if (authorisedOn === undefined) {
@@ -423,22 +415,23 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 			}
 
 			this.client.log.info(
-				`Accepted ${diagnostics.display.user(user.data.account.id)} onto ${diagnostics.display.guild(guild)}.`,
+				`Accepted ${diagnostics.display.user(authorDocument.account.id)} onto ${diagnostics.display.guild(guild)}.`,
 			);
 
-			Discord.addRole(
-				bot,
-				this.guildId,
-				submitter.id,
-				BigInt(entryRequest.data.requestedRole),
-				"User-requested role addition.",
-			).catch(() =>
-				this.client.log.warn(
-					`Failed to add ${diagnostics.display.role(entryRequest.data.requestedRole)} to ${diagnostics.display.user(
-						user.data.account.id,
-					)} on ${diagnostics.display.guild(guild)}.`,
-				),
-			);
+			this.bot.rest
+				.addRole(
+					this.guildId,
+					submitter.id,
+					BigInt(entryRequestDocument.requestedRoleId),
+					"User-requested role addition.",
+				)
+				.catch(() =>
+					this.client.log.warn(
+						`Failed to add ${diagnostics.display.role(
+							entryRequestDocument.requestedRoleId,
+						)} to ${diagnostics.display.user(authorDocument.account.id)} on ${diagnostics.display.guild(guild)}.`,
+					),
+				);
 		} else if (isRejected) {
 			if (rejectedOn === undefined) {
 				rejectedOn = [this.guildIdString];
@@ -447,28 +440,29 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 			}
 
 			this.client.log.info(
-				`Rejected ${diagnostics.display.user(user.data.account.id)} from ${diagnostics.display.guild(guild)}.`,
+				`Rejected ${diagnostics.display.user(authorDocument.account.id)} from ${diagnostics.display.guild(guild)}.`,
 			);
 
-			Discord.banMember(bot, this.guildId, submitter.id, {
-				reason: "Voted to reject entry request.",
-			}).catch(() =>
-				this.client.log.warn(
-					`Failed to ban ${diagnostics.display.user(user.data.account.id)} on ${diagnostics.display.guild(guild)}.`,
-				),
-			);
+			this.bot.rest
+				.banMember(this.guildId, submitter.id, {}, "Voted to reject entry request.")
+				.catch(() =>
+					this.client.log.warn(
+						`Failed to ban ${diagnostics.display.user(authorDocument.account.id)} on ${diagnostics.display.guild(
+							guild,
+						)}.`,
+					),
+				);
 		}
 
-		await this.client.database.adapters.users.update(this.client, {
-			...user,
-			data: { ...user.data, account: { ...user.data.account, authorisedOn, rejectedOn } },
-		});
+		authorDocument.account.authorisedOn = authorisedOn;
+		authorDocument.account.rejectedOn = rejectedOn;
+		await this.client.database.session.saveChanges();
 
 		if (isAccepted || isRejected) {
 			return null;
 		}
 
-		return updatedEntryRequest;
+		return entryRequestDocument;
 	}
 
 	private getVoteInformation(entryRequest: EntryRequest): VoteInformation | undefined {
@@ -488,7 +482,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 
 		const voterCount = guild.members
 			.filter((member) => userIds?.includes(member.id) || roleIds.some((roleId) => member.roles.includes(roleId)))
-			.filter((member) => !member.user?.toggles.bot)
+			.filter((member) => !member.user?.toggles?.has("bot"))
 			.array().length;
 
 		function getVoteInformation<VerdictType extends keyof VoteInformation>(
@@ -512,44 +506,19 @@ class VerificationService extends PromptService<"verification", EntryRequest, Me
 			}
 		}
 
-		const acceptance = getVoteInformation("acceptance", configuration, entryRequest.votedFor.length);
-		const rejection = getVoteInformation("rejection", configuration, entryRequest.votedAgainst.length);
+		const acceptance = getVoteInformation("acceptance", configuration, entryRequest.votedFor?.length ?? 0);
+		const rejection = getVoteInformation("rejection", configuration, entryRequest.votedAgainst?.length ?? 0);
 
 		return { acceptance, rejection };
 	}
 
-	private async displayVoteError(
-		bot: Discord.Bot,
-		interaction: Discord.Interaction,
-		{ locale }: { locale: Locale },
-	): Promise<void> {
+	private async displayVoteError(interaction: Discord.Interaction, { locale }: { locale: Locale }): Promise<void> {
 		const strings = {
 			title: localise(this.client, "entry.verification.vote.failed.title", locale)(),
 			description: localise(this.client, "entry.verification.vote.failed.description", locale)(),
 		};
 
-		reply([this.client, bot], interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colors.red,
-				},
-			],
-		});
-	}
-
-	private async displayUserStateError(
-		bot: Discord.Bot,
-		interaction: Discord.Interaction,
-		{ locale }: { locale: Locale },
-	): Promise<void> {
-		const strings = {
-			title: localise(this.client, "entry.verification.vote.stateUpdateFailed.title", locale)(),
-			description: localise(this.client, "entry.verification.vote.stateUpdateFailed.description", locale)(),
-		};
-
-		reply([this.client, bot], interaction, {
+		reply([this.client, this.bot], interaction, {
 			embeds: [
 				{
 					title: strings.title,
