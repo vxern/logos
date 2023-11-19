@@ -5,6 +5,7 @@ import { Client, autocompleteMembers, localise, resolveInteractionToMember } fro
 import diagnostics from "../../../../diagnostics";
 import { parseArguments, reply } from "../../../../interactions";
 import { Guild } from "../../../../database/guild";
+import { MentionTypes, mention } from "../../../../../formatting";
 
 async function handleClearTimeoutAutocomplete(
 	[client, bot]: [Client, Discord.Bot],
@@ -73,7 +74,7 @@ async function handleClearTimeout([client, bot]: [Client, Discord.Bot], interact
 				client,
 				"timeout.strings.notTimedOut.description",
 				locale,
-			)({ user_mention: diagnostics.display.user(user) }),
+			)({ user_mention: mention(user.id, MentionTypes.User) }),
 		};
 
 		reply([client, bot], interaction, {
@@ -108,7 +109,7 @@ async function handleClearTimeout([client, bot]: [Client, Discord.Bot], interact
 			client,
 			"timeout.strings.timeoutCleared.description",
 			locale,
-		)({ user_mention: diagnostics.display.user(user) }),
+		)({ user_mention: mention(user.id, MentionTypes.User) }),
 	};
 
 	reply([client, bot], interaction, {
