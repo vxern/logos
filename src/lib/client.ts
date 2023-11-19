@@ -844,7 +844,7 @@ function addCacheInterceptors(client: Client, database: ravendb.IDocumentStore):
 	// @ts-ignore
 	database.openSession = () => {
 		// @ts-ignore
-		const session = openSession.call(database, { noTracking: true, noCaching: true });
+		const session = openSession.call(database, { noCaching: true });
 
 		const { load, store } = session;
 
