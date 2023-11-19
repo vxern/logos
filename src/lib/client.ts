@@ -66,6 +66,7 @@ type Client = {
 		rapidApiSecret: string;
 		ravendbHost: string;
 		ravendbDatabase: string;
+		ravendbSecure: boolean;
 		lavalinkHost: string;
 		lavalinkPort: string;
 		lavalinkPassword: string;
@@ -304,11 +305,16 @@ async function initialiseClient(
 	features: Client["features"],
 	localisations: Map<string, Map<LocalisationLanguage, string>>,
 ): Promise<void> {
-	const certificate = await fs.readFile(".cert.pfx");
-	const store = new ravendb.DocumentStore(environment.ravendbHost, environment.ravendbDatabase, {
-		certificate,
-		type: "pfx",
-	}).initialize();
+	const store = new ravendb.DocumentStore(
+		environment.ravendbHost,
+		environment.ravendbDatabase,
+		environment.ravendbSecure
+			? {
+					certificate: await fs.readFile(".cert.pfx"),
+					type: "pfx",
+			  }
+			: {},
+	).initialize();
 	const session = store.openSession();
 	const database: Client["database"] = { store, session };
 

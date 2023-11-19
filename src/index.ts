@@ -278,6 +278,7 @@ async function setup(): Promise<void> {
 		rapidApiSecret: process.env.SECRET_RAPID_API,
 		ravendbHost: process.env.RAVENDB_HOST,
 		ravendbDatabase: process.env.RAVENDB_DATABASE,
+		ravendbSecure: process.env.RAVENDB_SECURE !== undefined && process.env.RAVENDB_SECURE === "true",
 		lavalinkHost: process.env.LAVALINK_HOST,
 		lavalinkPort: process.env.LAVALINK_PORT,
 		lavalinkPassword: process.env.LAVALINK_PASSWORD,

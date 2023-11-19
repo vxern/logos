@@ -222,7 +222,7 @@ async function handleWarnUser([client, bot]: [Client, Discord.Bot], interaction:
 					"warn.strings.limitSurpassedTimedOut.description",
 					locale,
 				)({
-					user_mention: diagnostics.display.user(user),
+					user_mention: mention(user.id, MentionTypes.User),
 					limit: configuration.limit,
 					number: relevantWarnings.length,
 					period: pluralise(client, `units.${timeout[1]}.word`, language, timeout[0]),
@@ -233,8 +233,9 @@ async function handleWarnUser([client, bot]: [Client, Discord.Bot], interaction:
 
 			bot.rest
 				.editMember(guild.id, member.id, {
-					// TODO(vxern): Fix timestamps now being ISO8601.
-					communicationDisabledUntil: Date.now() + timeoutMilliseconds,
+					// TODO(vxern): This is a Discordeno monkey-patch. Remove once fixed in Discordeno.
+					// @ts-ignore
+					communicationDisabledUntil: new Date(Date.now() + timeoutMilliseconds).toISOString(),
 				})
 				.catch(() => client.log.warn(`Failed to edit timeout state of ${diagnostics.display.member(member)}.`));
 		} else {
@@ -246,7 +247,7 @@ async function handleWarnUser([client, bot]: [Client, Discord.Bot], interaction:
 					"warn.strings.limitSurpassed.description",
 					locale,
 				)({
-					user_mention: diagnostics.display.user(user),
+					user_mention: mention(user.id, MentionTypes.User),
 					limit: configuration.limit,
 					number: relevantWarnings.length,
 				}),
@@ -275,7 +276,7 @@ async function handleWarnUser([client, bot]: [Client, Discord.Bot], interaction:
 				client,
 				"warn.strings.limitReached.description",
 				locale,
-			)({ user_mention: diagnostics.display.user(user), limit: defaults.WARN_LIMIT }),
+			)({ user_mention: mention(user.id, MentionTypes.User), limit: defaults.WARN_LIMIT }),
 		};
 
 		alertService?.alert({

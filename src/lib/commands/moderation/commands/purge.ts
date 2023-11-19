@@ -192,16 +192,14 @@ async function handlePurgeMessages(
 			postedStart: (startMessageContent !== undefined
 				? localise(client, "purge.strings.posted", locale)
 				: localise(client, "purge.strings.embedPosted", locale))({
-				// TODO(vxern): Fix timestamps now being ISO8601.
-				relative_timestamp: timestamp(Number(startMessage.timestamp)),
+				relative_timestamp: timestamp(Number(new Date(startMessage.timestamp))),
 				user_mention: mention(BigInt(startMessage.author.id), MentionTypes.User),
 			}),
 			end: localise(client, "purge.strings.end", locale)(),
 			postedEnd: (endMessageContent !== undefined
 				? localise(client, "purge.strings.posted", locale)
 				: localise(client, "purge.strings.embedPosted", locale))({
-				// TODO(vxern): Fix timestamps now being ISO8601.
-				relative_timestamp: timestamp(Number(endMessage.timestamp)),
+				relative_timestamp: timestamp(Number(new Date(endMessage.timestamp))),
 				user_mention: mention(BigInt(endMessage.author.id), MentionTypes.User),
 			}),
 			messagesFound: localise(client, "purge.strings.messagesFound", locale)(),
