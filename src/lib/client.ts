@@ -302,16 +302,16 @@ async function initialiseClient(
 	features: Client["features"],
 	localisations: Map<string, Map<LocalisationLanguage, string>>,
 ): Promise<void> {
-	const database = new ravendb.DocumentStore(
-		environment.ravendbHost,
-		environment.ravendbDatabase,
-		environment.ravendbSecure
-			? {
-					certificate: await fs.readFile(".cert.pfx"),
-					type: "pfx",
-			  }
-			: {},
-	).initialize();
+	let database: ravendb.DocumentStore;
+	if (environment.ravendbSecure) {
+		database = new ravendb.DocumentStore(environment.ravendbHost, environment.ravendbDatabase, {
+			certificate: await fs.readFile(".cert.pfx"),
+			type: "pfx",
+		});
+	} else {
+		database = new ravendb.DocumentStore(environment.ravendbHost, environment.ravendbDatabase);
+	}
+	database.initialize();
 
 	const client = createClient(environment, features, database, localisations);
 
