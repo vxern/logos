@@ -117,8 +117,9 @@ async function handleSetTimeout([client, bot]: [Client, Discord.Bot], interactio
 	}
 
 	await bot.rest
-		// TODO(vxern): Fix timestamps now being ISO8601.
-		.editMember(guildId, member.id, { communicationDisabledUntil: until })
+		// TODO(vxern): This is a Discordeno monkey-patch. Remove once fixed in Discordeno.
+		// @ts-ignore
+		.editMember(guildId, member.id, { communicationDisabledUntil: new Date(until).toISOString() })
 		.catch((reason) => client.log.warn(`Failed to time ${diagnostics.display.member(member)} out:`, reason));
 
 	if (configuration.journaling) {

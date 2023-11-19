@@ -233,8 +233,9 @@ async function handleWarnUser([client, bot]: [Client, Discord.Bot], interaction:
 
 			bot.rest
 				.editMember(guild.id, member.id, {
-					// TODO(vxern): Fix timestamps now being ISO8601.
-					communicationDisabledUntil: Date.now() + timeoutMilliseconds,
+					// TODO(vxern): This is a Discordeno monkey-patch. Remove once fixed in Discordeno.
+					// @ts-ignore
+					communicationDisabledUntil: new Date(Date.now() + timeoutMilliseconds).toISOString(),
 				})
 				.catch(() => client.log.warn(`Failed to edit timeout state of ${diagnostics.display.member(member)}.`));
 		} else {
