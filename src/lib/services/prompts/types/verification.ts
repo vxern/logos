@@ -41,11 +41,11 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 	}
 
 	async getUserDocument(entryRequestDocument: EntryRequest): Promise<User | undefined> {
+		const session = this.client.database.openSession();
+
 		return (
 			this.client.cache.documents.users.get(entryRequestDocument.authorId) ??
-			this.client.database.session
-				.load<User>(`users/${entryRequestDocument.authorId}`)
-				.then((value) => value ?? undefined)
+			session.load<User>(`users/${entryRequestDocument.authorId}`).then((value) => value ?? undefined)
 		);
 	}
 
@@ -227,9 +227,11 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 			return undefined;
 		}
 
+		const session = this.client.database.openSession();
+
 		const [authorDocument, voterDocument, entryRequestDocument] = await Promise.all([
 			this.client.cache.documents.users.get(userId) ??
-				(await this.client.database.session.load<User>(`users/${userId}`).then((value) => value ?? undefined)) ??
+				(await session.load<User>(`users/${userId}`).then((value) => value ?? undefined)) ??
 				(await (async () => {
 					const userDocument = {
 						...({
@@ -239,15 +241,13 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 						} satisfies User),
 						"@metadata": { "@collection": "Users" },
 					};
-					await this.client.database.session.store(userDocument);
-					await this.client.database.session.saveChanges();
+					await session.store(userDocument);
+					await session.saveChanges();
 
 					return userDocument as User;
 				})()),
 			this.client.cache.documents.users.get(interaction.user.id.toString()) ??
-				(await this.client.database.session
-					.load<User>(`users/${interaction.user.id}`)
-					.then((value) => value ?? undefined)) ??
+				(await session.load<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined)) ??
 				(async () => {
 					const userDocument = {
 						...({
@@ -257,8 +257,8 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 						} satisfies User),
 						"@metadata": { "@collection": "Users" },
 					};
-					await this.client.database.session.store(userDocument);
-					await this.client.database.session.saveChanges();
+					await session.store(userDocument);
+					await session.saveChanges();
 
 					return userDocument as User;
 				})(),
@@ -399,8 +399,8 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 		}
 
 		entryRequestDocument.isFinalised = isFinalised;
-
-		await this.client.database.session.saveChanges();
+		await session.store(entryRequestDocument);
+		await session.saveChanges();
 
 		let authorisedOn =
 			authorDocument.account.authorisedOn !== undefined ? [...authorDocument.account.authorisedOn] : undefined;
@@ -456,7 +456,8 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 
 		authorDocument.account.authorisedOn = authorisedOn;
 		authorDocument.account.rejectedOn = rejectedOn;
-		await this.client.database.session.saveChanges();
+		await session.store(authorDocument);
+		await session.saveChanges();
 
 		if (isAccepted || isRejected) {
 			return null;

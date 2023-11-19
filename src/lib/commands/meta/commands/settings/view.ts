@@ -20,9 +20,11 @@ async function handleDisplaySettings(
 ): Promise<void> {
 	const locale = interaction.locale;
 
+	const session = client.database.openSession();
+
 	const userDocument =
 		client.cache.documents.users.get(interaction.user.id.toString()) ??
-		(await client.database.session.load<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined));
+		(await session.load<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined));
 	if (userDocument === undefined) {
 		return;
 	}

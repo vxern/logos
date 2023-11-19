@@ -41,9 +41,11 @@ async function handlePardonUserAutocomplete(
 		return;
 	}
 
+	const session = client.database.openSession();
+
 	const guildDocument =
 		client.cache.documents.guilds.get(guildId.toString()) ??
-		(await client.database.session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
+		(await session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
 	if (guildDocument === undefined) {
 		return;
 	}
@@ -117,9 +119,11 @@ async function handlePardonUser([client, bot]: [Client, Discord.Bot], interactio
 		return;
 	}
 
+	const session = client.database.openSession();
+
 	const guildDocument =
 		client.cache.documents.guilds.get(guildId.toString()) ??
-		(await client.database.session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
+		(await session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
 	if (guildDocument === undefined) {
 		return;
 	}
@@ -162,8 +166,8 @@ async function handlePardonUser([client, bot]: [Client, Discord.Bot], interactio
 		return;
 	}
 
-	await client.database.session.delete(warning.id);
-	await client.database.session.saveChanges();
+	await session.delete(warning.id);
+	await session.saveChanges();
 
 	client.cache.documents.warningsByTarget
 		.get(member.id.toString())
@@ -207,9 +211,11 @@ async function getRelevantWarnings(
 	member: Logos.Member,
 	expirationMilliseconds: number,
 ): Promise<Warning[] | undefined> {
+	const session = client.database.openSession();
+
 	const userDocument =
 		client.cache.documents.users.get(member.id.toString()) ??
-		(await client.database.session.load<User>(`users/${member.id}`).then((value) => value ?? undefined));
+		(await session.load<User>(`users/${member.id}`).then((value) => value ?? undefined));
 	if (userDocument === undefined) {
 		return undefined;
 	}
@@ -218,7 +224,7 @@ async function getRelevantWarnings(
 	const warningDocuments =
 		warningDocumentsCached !== undefined
 			? Array.from(warningDocumentsCached.values())
-			: await client.database.session
+			: await session
 					.query<Warning>({ collection: "Warnings" })
 					.whereStartsWith("id", `warnings/${member.id}`)
 					.all()

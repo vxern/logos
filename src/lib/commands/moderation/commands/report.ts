@@ -38,9 +38,11 @@ async function handleMakeReport([client, bot]: [Client, Discord.Bot], interactio
 		return;
 	}
 
+	const session = client.database.openSession();
+
 	const guildDocument =
 		client.cache.documents.guilds.get(guildId.toString()) ??
-		(await client.database.session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
+		(await session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
 	if (guildDocument === undefined) {
 		return;
 	}
@@ -62,7 +64,7 @@ async function handleMakeReport([client, bot]: [Client, Discord.Bot], interactio
 
 	const userDocument =
 		client.cache.documents.users.get(interaction.user.id.toString()) ??
-		(await client.database.session.load<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined)) ??
+		(await session.load<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined)) ??
 		(await (async () => {
 			const userDocument = {
 				...({
@@ -72,8 +74,8 @@ async function handleMakeReport([client, bot]: [Client, Discord.Bot], interactio
 				} satisfies User),
 				"@metadata": { "@collection": "Users" },
 			};
-			await client.database.session.store(userDocument);
-			await client.database.session.saveChanges();
+			await session.store(userDocument);
+			await session.saveChanges();
 
 			return userDocument as User;
 		})());
@@ -133,8 +135,8 @@ async function handleMakeReport([client, bot]: [Client, Discord.Bot], interactio
 				} satisfies Report),
 				"@metadata": { "@collection": "Reports" },
 			};
-			await client.database.session.store(reportDocument);
-			await client.database.session.saveChanges();
+			await session.store(reportDocument);
+			await session.saveChanges();
 
 			if (configuration.journaling) {
 				const journallingService = client.services.journalling.get(guild.id);

@@ -31,11 +31,11 @@ class SuggestionService extends PromptService<"suggestions", Suggestion, Interac
 	}
 
 	async getUserDocument(suggestionDocument: Suggestion): Promise<User | undefined> {
+		const session = this.client.database.openSession();
+
 		return (
 			this.client.cache.documents.users.get(suggestionDocument.authorId) ??
-			this.client.database.session
-				.load<User>(`users/${suggestionDocument.authorId}`)
-				.then((value) => value ?? undefined)
+			session.load<User>(`users/${suggestionDocument.authorId}`).then((value) => value ?? undefined)
 		);
 	}
 
@@ -172,8 +172,10 @@ class SuggestionService extends PromptService<"suggestions", Suggestion, Interac
 			return;
 		}
 
+		const session = this.client.database.openSession();
 		suggestionDocument.isResolved = isResolved;
-		await this.client.database.session.saveChanges();
+		await session.store(suggestionDocument);
+		await session.saveChanges();
 
 		return suggestionDocument;
 	}

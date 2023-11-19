@@ -15,7 +15,7 @@ class RealtimeUpdateService extends GlobalService {
 	async start(): Promise<void> {
 		this.client.log.info("Streaming updates to guild documents...");
 
-		const changes = this.client.database.store.changes();
+		const changes = this.client.database.changes();
 		const streamSubscription = changes.forDocumentsInCollection("Guilds");
 
 		streamSubscription.on("data", async (data) => {
@@ -36,9 +36,11 @@ class RealtimeUpdateService extends GlobalService {
 
 			this.client.log.info(`Detected update to configuration for ${diagnostics.display.guild(guild)}. Updating...`);
 
-			await this.client.database.session.advanced.refresh(oldGuildDocument);
+			const session = this.client.database.openSession();
 
-			const guildDocument = await this.client.database.session.load<Guild>(data.id).then((value) => value ?? undefined);
+			await session.advanced.refresh(oldGuildDocument);
+
+			const guildDocument = await session.load<Guild>(data.id).then((value) => value ?? undefined);
 			if (guildDocument === undefined) {
 				return;
 			}

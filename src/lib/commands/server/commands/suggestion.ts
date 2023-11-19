@@ -41,9 +41,11 @@ async function handleMakeSuggestion(
 		return;
 	}
 
+	const session = client.database.openSession();
+
 	const guildDocument =
 		client.cache.documents.guilds.get(guildId.toString()) ??
-		(await client.database.session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
+		(await session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
 	if (guildDocument === undefined) {
 		return;
 	}
@@ -65,7 +67,7 @@ async function handleMakeSuggestion(
 
 	const userDocument =
 		client.cache.documents.users.get(interaction.user.id.toString()) ??
-		(await client.database.session.load<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined)) ??
+		(await session.load<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined)) ??
 		(await (async () => {
 			const userDocument = {
 				...({
@@ -75,8 +77,8 @@ async function handleMakeSuggestion(
 				} satisfies User),
 				"@metadata": { "@collection": "Users" },
 			};
-			await client.database.session.store(userDocument);
-			await client.database.session.saveChanges();
+			await session.store(userDocument);
+			await session.saveChanges();
 
 			return userDocument as User;
 		})());
@@ -137,8 +139,8 @@ async function handleMakeSuggestion(
 				} satisfies Suggestion),
 				"@metadata": { "@collection": "Suggestions" },
 			};
-			await client.database.session.store(suggestionDocument);
-			await client.database.session.saveChanges();
+			await session.store(suggestionDocument);
+			await session.saveChanges();
 
 			if (configuration.journaling) {
 				const journallingService = client.services.journalling.get(guild.id);

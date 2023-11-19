@@ -706,9 +706,11 @@ async function getLocaleData(client: Client, interaction: Discord.Interaction): 
 
 	const member = client.cache.members.get(Discord.snowflakeToBigint(`${interaction.user.id}${guildId}`));
 
+	const session = client.database.openSession();
+
 	const [userDocument, guildDocument] = await Promise.all([
 		client.cache.documents.users.get(interaction.user.id.toString()) ??
-			(await client.database.session.load<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined)) ??
+			(await session.load<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined)) ??
 			(async () => {
 				const userDocument = {
 					...({
@@ -718,13 +720,13 @@ async function getLocaleData(client: Client, interaction: Discord.Interaction): 
 					} satisfies User),
 					"@metadata": { "@collection": "Users" },
 				};
-				await client.database.session.store(userDocument);
-				await client.database.session.saveChanges();
+				await session.store(userDocument);
+				await session.saveChanges();
 
 				return userDocument as User;
 			})(),
 		client.cache.documents.guilds.get(guildId.toString()) ??
-			client.database.session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined),
+			session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined),
 	]);
 	if (userDocument === undefined || guildDocument === undefined) {
 		return FALLBACK_LOCALE_DATA;

@@ -31,9 +31,11 @@ class ReportService extends PromptService<"reports", Report, InteractionData> {
 	}
 
 	async getUserDocument(reportDocument: Report): Promise<User | undefined> {
+		const session = this.client.database.openSession();
+
 		return (
 			this.client.cache.documents.users.get(reportDocument.authorId) ??
-			this.client.database.session.load<User>(`users/${reportDocument.authorId}`).then((value) => value ?? undefined)
+			session.load<User>(`users/${reportDocument.authorId}`).then((value) => value ?? undefined)
 		);
 	}
 
@@ -186,8 +188,10 @@ class ReportService extends PromptService<"reports", Report, InteractionData> {
 			return;
 		}
 
+		const session = this.client.database.openSession();
 		reportDocument.isResolved = isResolved;
-		await this.client.database.session.saveChanges();
+		await session.store(reportDocument);
+		await session.saveChanges();
 
 		return reportDocument;
 	}
