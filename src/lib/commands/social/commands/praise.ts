@@ -48,9 +48,11 @@ async function handlePraiseUser([client, bot]: [Client, Discord.Bot], interactio
 		return;
 	}
 
+	const session = client.database.openSession();
+
 	const guildDocument =
 		client.cache.documents.guilds.get(guildId.toString()) ??
-		(await client.database.session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
+		(await session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
 	if (guildDocument === undefined) {
 		return;
 	}
@@ -92,7 +94,7 @@ async function handlePraiseUser([client, bot]: [Client, Discord.Bot], interactio
 
 	const [authorDocument, targetDocument] = [
 		client.cache.documents.users.get(interaction.user.id.toString()) ??
-			(await client.database.session.load<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined)) ??
+			(await session.load<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined)) ??
 			(await (async () => {
 				const userDocument = {
 					...({
@@ -102,13 +104,13 @@ async function handlePraiseUser([client, bot]: [Client, Discord.Bot], interactio
 					} satisfies User),
 					"@metadata": { "@collection": "Users" },
 				};
-				await client.database.session.store(userDocument);
-				await client.database.session.saveChanges();
+				await session.store(userDocument);
+				await session.saveChanges();
 
 				return userDocument as User;
 			})()),
 		client.cache.documents.users.get(member.id.toString()) ??
-			(await client.database.session.load<User>(`users/${member.id}`).then((value) => value ?? undefined)) ??
+			(await session.load<User>(`users/${member.id}`).then((value) => value ?? undefined)) ??
 			(await (async () => {
 				const userDocument = {
 					...({
@@ -118,8 +120,8 @@ async function handlePraiseUser([client, bot]: [Client, Discord.Bot], interactio
 					} satisfies User),
 					"@metadata": { "@collection": "Users" },
 				};
-				await client.database.session.store(userDocument);
-				await client.database.session.saveChanges();
+				await session.store(userDocument);
+				await session.saveChanges();
 
 				return userDocument as User;
 			})()),
@@ -134,7 +136,7 @@ async function handlePraiseUser([client, bot]: [Client, Discord.Bot], interactio
 	const praiseDocuments =
 		praiseDocumentsCached !== undefined
 			? Array.from(praiseDocumentsCached.values())
-			: await client.database.session
+			: await session
 					.query<Praise>({ collection: "Praises" })
 					.whereRegex("id", `^praises\/\d+\/${interaction.user.id}\/\d+$`)
 					.all()
@@ -189,8 +191,8 @@ async function handlePraiseUser([client, bot]: [Client, Discord.Bot], interactio
 		createdAt,
 		"@metadata": { "@collection": "Praises" },
 	};
-	await client.database.session.store(praiseDocument);
-	await client.database.session.saveChanges();
+	await session.store(praiseDocument);
+	await session.saveChanges();
 
 	if (configuration.journaling) {
 		const journallingService = client.services.journalling.get(guild.id);

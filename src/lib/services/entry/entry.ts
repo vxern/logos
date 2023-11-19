@@ -155,25 +155,25 @@ class EntryService extends LocalService {
 
 		const requestedRoleId = BigInt(parameter);
 
+		const session = this.client.database.openSession();
+
 		const guildDocument =
 			this.client.cache.documents.guilds.get(guild.id.toString()) ??
-			(await this.client.database.session.load<Guild>(`guilds/${guild.id}`).then((value) => value ?? undefined));
+			(await session.load<Guild>(`guilds/${guild.id}`).then((value) => value ?? undefined));
 		if (guildDocument === undefined) {
 			return;
 		}
 
 		const userDocument =
 			this.client.cache.documents.users.get(interaction.user.id.toString()) ??
-			(await this.client.database.session
-				.load<User>(`users/${interaction.user.id}`)
-				.then((value) => value ?? undefined));
+			(await session.load<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined));
 		if (userDocument === undefined) {
 			return;
 		}
 
 		const entryRequestDocument =
 			this.client.cache.documents.entryRequests.get(`${userDocument.account.id}/${guildDocument.id}`) ??
-			(await this.client.database.session
+			(await session
 				.load<EntryRequest>(`entryRequests/${userDocument.account.id}/${guildDocument.id}`)
 				.then((value) => value ?? undefined));
 		if (entryRequestDocument !== undefined) {
@@ -235,8 +235,8 @@ class EntryService extends LocalService {
 					"@metadata": { "@collection": "EntryRequests" },
 				};
 
-				await this.client.database.session.store(entryRequestDocument);
-				await this.client.database.session.saveChanges();
+				await session.store(entryRequestDocument);
+				await session.saveChanges();
 
 				const journallingService = this.client.services.journalling.get(this.guildId);
 				journallingService?.log("entryRequestSubmit", { args: [interaction.user, entryRequestDocument] });
@@ -397,11 +397,11 @@ class EntryService extends LocalService {
 		}
 
 		if (requiresVerification) {
+			const session = this.client.database.openSession();
+
 			const userDocument =
 				this.client.cache.documents.users.get(interaction.user.id.toString()) ??
-				(await this.client.database.session
-					.load<User>(`users/${interaction.user.id}`)
-					.then((value) => value ?? undefined)) ??
+				(await session.load<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined)) ??
 				(await (async () => {
 					const userDocument = {
 						...({
@@ -411,8 +411,8 @@ class EntryService extends LocalService {
 						} satisfies User),
 						"@metadata": { "@collection": "Users" },
 					};
-					await this.client.database.session.store(userDocument);
-					await this.client.database.session.saveChanges();
+					await session.store(userDocument);
+					await session.saveChanges();
 
 					return userDocument as User;
 				})());
@@ -501,11 +501,11 @@ class EntryService extends LocalService {
 	}
 
 	private async vetUser(interaction: Logos.Interaction, { locale }: { locale: Locale }): Promise<boolean> {
+		const session = this.client.database.openSession();
+
 		const userDocument =
 			this.client.cache.documents.users.get(interaction.user.id.toString()) ??
-			(await this.client.database.session
-				.load<User>(`users/${interaction.user.id}`)
-				.then((value) => value ?? undefined)) ??
+			(await session.load<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined)) ??
 			(await (async () => {
 				const userDocument = {
 					...({
@@ -515,8 +515,8 @@ class EntryService extends LocalService {
 					} satisfies User),
 					"@metadata": { "@collection": "Users" },
 				};
-				await this.client.database.session.store(userDocument);
-				await this.client.database.session.saveChanges();
+				await session.store(userDocument);
+				await session.saveChanges();
 
 				return userDocument as User;
 			})());

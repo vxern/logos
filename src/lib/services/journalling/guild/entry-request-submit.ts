@@ -10,9 +10,11 @@ import { GuildEvents, MessageGenerators } from "../generator";
 export default {
 	title: `${constants.symbols.events.entryRequest.submitted} Entry request submitted`,
 	message: async (client, user, entryRequest) => {
+		const session = client.database.openSession();
+
 		const guildDocument =
 			client.cache.documents.guilds.get(entryRequest.guildId) ??
-			(await client.database.session.load<Guild>(`guilds/${entryRequest.guildId}`).then((value) => value ?? undefined));
+			(await session.load<Guild>(`guilds/${entryRequest.guildId}`).then((value) => value ?? undefined));
 		if (guildDocument === undefined) {
 			return;
 		}

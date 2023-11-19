@@ -95,10 +95,7 @@ type Client = {
 			warningsByTarget: Map<string, Map<string, Warning>>;
 		};
 	};
-	database: {
-		store: ravendb.IDocumentStore;
-		session: ravendb.IDocumentSession;
-	};
+	database: ravendb.IDocumentStore;
 	commands: {
 		commands: Record<keyof typeof commandTemplates, Command>;
 		showable: string[];
@@ -305,7 +302,7 @@ async function initialiseClient(
 	features: Client["features"],
 	localisations: Map<string, Map<LocalisationLanguage, string>>,
 ): Promise<void> {
-	const store = new ravendb.DocumentStore(
+	const database = new ravendb.DocumentStore(
 		environment.ravendbHost,
 		environment.ravendbDatabase,
 		environment.ravendbSecure
@@ -315,12 +312,10 @@ async function initialiseClient(
 			  }
 			: {},
 	).initialize();
-	const session = store.openSession();
-	const database: Client["database"] = { store, session };
 
 	const client = createClient(environment, features, database, localisations);
 
-	addCacheInterceptors(client, database.session);
+	addCacheInterceptors(client, database);
 
 	await prefetchDataFromDatabase(client);
 
@@ -458,21 +453,21 @@ async function initialiseClient(
 }
 
 async function prefetchDataFromDatabase(client: Client): Promise<void> {
-	const entryRequestDocuments = await client.database.session
-		.query<EntryRequest>({ collection: "EntryRequests" })
-		.all();
+	const session = client.database.openSession();
+
+	const entryRequestDocuments = await session.query<EntryRequest>({ collection: "EntryRequests" }).all();
 
 	for (const document of entryRequestDocuments) {
 		client.cache.documents.entryRequests.set(document.id, document);
 	}
 
-	const reportDocuments = await client.database.session.query<Report>({ collection: "Reports" }).all();
+	const reportDocuments = await session.query<Report>({ collection: "Reports" }).all();
 
 	for (const document of reportDocuments) {
 		client.cache.documents.reports.set(`${document.guildId}/${document.authorId}/${document.createdAt}`, document);
 	}
 
-	const suggestionDocuments = await client.database.session.query<Suggestion>({ collection: "Suggestions" }).all();
+	const suggestionDocuments = await session.query<Suggestion>({ collection: "Suggestions" }).all();
 
 	for (const document of suggestionDocuments) {
 		client.cache.documents.suggestions.set(`${document.guildId}/${document.authorId}/${document.createdAt}`, document);
@@ -488,9 +483,11 @@ export async function handleGuildCreate(
 		client.log.info(`Logos added to "${guild.name}" (ID ${guild.id}).`);
 	}
 
+	const session = client.database.openSession();
+
 	const guildDocument =
 		client.cache.documents.guilds.get(guild.id.toString()) ??
-		(await client.database.session.load<Guild>(`guilds/${guild.id}`).then((value) => value ?? undefined));
+		(await session.load<Guild>(`guilds/${guild.id}`).then((value) => value ?? undefined));
 	if (guildDocument === undefined) {
 		return;
 	}
@@ -751,8 +748,8 @@ async function handleInteractionCreate(
 	}
 }
 
-function addCacheInterceptors(client: Client, session: ravendb.IDocumentSession): void {
-	const { load, store } = session;
+function addCacheInterceptors(client: Client, database: ravendb.IDocumentStore): void {
+	const { openSession } = database;
 
 	// biome-ignore lint: Typing this out in TypeScript is a nonsense and I don't have time to do it right now.
 	function getCompositeId(collection: string, document: any): string {
@@ -845,24 +842,34 @@ function addCacheInterceptors(client: Client, session: ravendb.IDocumentSession)
 	}
 
 	// @ts-ignore
-	session.load = async (...args) => {
+	database.openSession = () => {
 		// @ts-ignore
-		const value = await load.call(session, ...args);
-		if (value === null) {
+		const session = openSession.call(database, { noTracking: true, noCaching: true });
+
+		const { load, store } = session;
+
+		// @ts-ignore
+		session.load = async (...args) => {
+			// @ts-ignore
+			const value = await load.call(session, ...args);
+			if (value === null) {
+				return value;
+			}
+
+			saveValue(value);
+
 			return value;
-		}
+		};
 
-		saveValue(value);
-
-		return value;
-	};
-
-	// @ts-ignore
-	session.store = async (value, ...args) => {
 		// @ts-ignore
-		await store.call(session, value, ...args);
+		session.store = async (value, ...args) => {
+			// @ts-ignore
+			await store.call(session, value, ...args);
 
-		saveValue(value);
+			saveValue(value);
+		};
+
+		return session;
 	};
 }
 

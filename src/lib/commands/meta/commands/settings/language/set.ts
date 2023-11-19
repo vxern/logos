@@ -68,16 +68,19 @@ async function handleSetLanguage([client, bot]: [Client, Discord.Bot], interacti
 
 	const language = languageOrUndefined;
 
+	const session = client.database.openSession();
+
 	await postponeReply([client, bot], interaction);
 	const userDocument =
 		client.cache.documents.users.get(interaction.user.id.toString()) ??
-		(await client.database.session.load<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined));
+		(await session.load<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined));
 	if (userDocument === undefined) {
 		return;
 	}
 
 	userDocument.account.language = language;
-	await client.database.session.saveChanges();
+	await session.store(userDocument);
+	await session.saveChanges();
 
 	const locale = getLocaleByLocalisationLanguage(language);
 

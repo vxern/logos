@@ -27,9 +27,11 @@ async function handleClearTimeout([client, bot]: [Client, Discord.Bot], interact
 		return;
 	}
 
+	const session = client.database.openSession();
+
 	const guildDocument =
 		client.cache.documents.guilds.get(guildId.toString()) ??
-		(await client.database.session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
+		(await session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
 	if (guildDocument === undefined) {
 		return;
 	}

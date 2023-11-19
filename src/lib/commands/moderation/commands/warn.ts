@@ -48,9 +48,11 @@ async function handleWarnUser([client, bot]: [Client, Discord.Bot], interaction:
 		return;
 	}
 
+	const session = client.database.openSession();
+
 	const guildDocument =
 		client.cache.documents.guilds.get(guildId.toString()) ??
-		(await client.database.session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
+		(await session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
 	if (guildDocument === undefined) {
 		return;
 	}
@@ -104,7 +106,7 @@ async function handleWarnUser([client, bot]: [Client, Discord.Bot], interaction:
 
 	const [authorDocument, targetDocument] = [
 		client.cache.documents.users.get(interaction.user.id.toString()) ??
-			(await client.database.session.load<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined)) ??
+			(await session.load<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined)) ??
 			(await (async () => {
 				const userDocument = {
 					...({
@@ -114,13 +116,13 @@ async function handleWarnUser([client, bot]: [Client, Discord.Bot], interaction:
 					} satisfies User),
 					"@metadata": { "@collection": "Users" },
 				};
-				await client.database.session.store(userDocument);
-				await client.database.session.saveChanges();
+				await session.store(userDocument);
+				await session.saveChanges();
 
 				return userDocument as User;
 			})()),
 		client.cache.documents.users.get(member.id.toString()) ??
-			(await client.database.session.load<User>(`users/${member.id}`).then((value) => value ?? undefined)) ??
+			(await session.load<User>(`users/${member.id}`).then((value) => value ?? undefined)) ??
 			(await (async () => {
 				const userDocument = {
 					...({
@@ -130,8 +132,8 @@ async function handleWarnUser([client, bot]: [Client, Discord.Bot], interaction:
 					} satisfies User),
 					"@metadata": { "@collection": "Users" },
 				};
-				await client.database.session.store(userDocument);
-				await client.database.session.saveChanges();
+				await session.store(userDocument);
+				await session.saveChanges();
 
 				return userDocument as User;
 			})()),
@@ -153,13 +155,13 @@ async function handleWarnUser([client, bot]: [Client, Discord.Bot], interaction:
 		createdAt,
 		"@metadata": { "@collection": "Warnings" },
 	};
-	await client.database.session.store(warningDocument);
-	await client.database.session.saveChanges();
+	await session.store(warningDocument);
+	await session.saveChanges();
 
 	const warningDocuments =
 		warningDocumentsCached !== undefined
 			? Array.from(warningDocumentsCached.values())
-			: await client.database.session
+			: await session
 					.query<Warning>({ collection: "Warnings" })
 					.whereStartsWith("id", `warnings/${targetDocument.account.id}`)
 					.all()
