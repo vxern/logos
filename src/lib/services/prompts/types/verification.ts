@@ -262,7 +262,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 
 					return userDocument as User;
 				})(),
-			this.client.cache.documents.entryRequests.get(interaction.user.id.toString()),
+			this.client.cache.documents.entryRequests.get(`${guildId}/${interaction.user.id.toString()}`),
 		]);
 		if (voterDocument === undefined || entryRequestDocument === undefined) {
 			this.displayVoteError(interaction, { locale });

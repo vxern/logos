@@ -172,9 +172,9 @@ class EntryService extends LocalService {
 		}
 
 		const entryRequestDocument =
-			this.client.cache.documents.entryRequests.get(`${userDocument.account.id}/${guildDocument.id}`) ??
+			this.client.cache.documents.entryRequests.get(`${guildDocument.guildId}/${userDocument.account.id}`) ??
 			(await session
-				.load<EntryRequest>(`entryRequests/${userDocument.account.id}/${guildDocument.id}`)
+				.load<EntryRequest>(`entryRequests/${userDocument.account.id}/${guildDocument.guildId}`)
 				.then((value) => value ?? undefined));
 		if (entryRequestDocument !== undefined) {
 			const strings = {
@@ -203,7 +203,7 @@ class EntryService extends LocalService {
 		createModalComposer<EntryRequest["answers"]>([this.client, this.bot], interaction, {
 			modal: this.generateVerificationQuestionModal(interaction.featureLanguage, { locale }),
 			onSubmit: async (submission, answers) => {
-				if (this.client.cache.documents.entryRequests.has(`${userDocument.account.id}/${guild.id}`)) {
+				if (this.client.cache.documents.entryRequests.has(`${guild.id}/${userDocument.account.id}`)) {
 					const strings = {
 						title: localise(this.client, "entry.verification.answers.alreadyAnswered.title", locale)(),
 						description: localise(this.client, "entry.verification.answers.alreadyAnswered.description", locale)(),
@@ -225,7 +225,7 @@ class EntryService extends LocalService {
 				await postponeReply([this.client, this.bot], submission);
 
 				const entryRequestDocument = {
-					id: `entryRequests/${userDocument.account.id}/${guild.id}`,
+					id: `entryRequests/${guild.id}/${userDocument.account.id}`,
 					authorId: userDocument.account.id,
 					guildId: guild.id.toString(),
 					answers,

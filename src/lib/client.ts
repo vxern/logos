@@ -458,7 +458,7 @@ async function prefetchDataFromDatabase(client: Client): Promise<void> {
 	const entryRequestDocuments = await session.query<EntryRequest>({ collection: "EntryRequests" }).all();
 
 	for (const document of entryRequestDocuments) {
-		client.cache.documents.entryRequests.set(document.id, document);
+		client.cache.documents.entryRequests.set(`${document.guildId}/${document.authorId}`, document);
 	}
 
 	const reportDocuments = await session.query<Report>({ collection: "Reports" }).all();
