@@ -209,19 +209,17 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 		const [compositeId, isAcceptString] = data;
 		const isAccept = isAcceptString === "true";
 
-		const userId = compositeId;
+		const [guildId, userId] = compositeId.split("/");
+		if (guildId === undefined || userId === undefined) {
+			return undefined;
+		}
 
 		const member = interaction.member;
 		if (member === undefined) {
 			return undefined;
 		}
 
-		const guildId = interaction.guildId;
-		if (guildId === undefined) {
-			return undefined;
-		}
-
-		const guild = this.client.cache.guilds.get(guildId);
+		const guild = this.client.cache.guilds.get(BigInt(guildId));
 		if (guild === undefined) {
 			this.displayVoteError(interaction, { locale });
 			return undefined;
