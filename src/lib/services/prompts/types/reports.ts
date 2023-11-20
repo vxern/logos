@@ -147,10 +147,10 @@ class ReportService extends PromptService<"reports", Report, InteractionData> {
 		const localeData = await getLocaleData(this.client, interaction);
 		const locale = localeData.locale;
 
-		const [documentId, isResolvedString] = data;
+		const [compositeId, isResolvedString] = data;
 		const isResolved = isResolvedString === "true";
 
-		const reportDocument = this.documents.get(documentId);
+		const reportDocument = this.documents.get(compositeId);
 		if (reportDocument === undefined) {
 			return undefined;
 		}

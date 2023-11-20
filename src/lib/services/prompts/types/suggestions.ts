@@ -131,10 +131,10 @@ class SuggestionService extends PromptService<"suggestions", Suggestion, Interac
 		const localeData = await getLocaleData(this.client, interaction);
 		const locale = localeData.locale;
 
-		const [documentId, isResolvedString] = data;
+		const [compositeId, isResolvedString] = data;
 		const isResolved = isResolvedString === "true";
 
-		const suggestionDocument = this.documents.get(documentId);
+		const suggestionDocument = this.documents.get(compositeId);
 		if (suggestionDocument === undefined) {
 			return undefined;
 		}

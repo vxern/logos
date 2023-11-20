@@ -233,7 +233,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 		const [authorDocument, voterDocument, entryRequestDocument] = await Promise.all([
 			this.client.cache.documents.users.get(userId) ??
 				(await session.load<User>(`users/${userId}`).then((value) => value ?? undefined)) ??
-				(await (async () => {
+				(async () => {
 					const userDocument = {
 						...({
 							id: `users/${userId}`,
@@ -246,7 +246,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 					await session.saveChanges();
 
 					return userDocument as User;
-				})()),
+				})(),
 			this.client.cache.documents.users.get(interaction.user.id.toString()) ??
 				(await session.load<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined)) ??
 				(async () => {
@@ -263,7 +263,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 
 					return userDocument as User;
 				})(),
-			this.client.cache.documents.entryRequests.get(`${guildId}/${interaction.user.id.toString()}`),
+			this.client.cache.documents.entryRequests.get(`${guildId}/${userId}`),
 		]);
 
 		session.dispose();

@@ -141,7 +141,7 @@ abstract class PromptService<
 
 		for (const prompt of [...invalidPrompts, ...expiredPrompts]) {
 			await this.bot.rest.deleteMessage(prompt.channelId, prompt.id).catch(() => {
-				this.client.log.warn("Failed to delete prompt.");
+				this.client.log.warn("Failed to delete invalid or expired prompt.");
 			});
 		}
 
