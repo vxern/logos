@@ -127,7 +127,7 @@
     "languages.oromo": "Afaan Oromo",
     "languages.ossetian": "Ossetisch",
     "languages.pashto": "Pasjtoe",
-    "languages.pedi": "Noord-Sotho",
+    "languages.pedi": "Pedi",
     "languages.persian": "Perzisch",
     "languages.punjabi": "Punjabi",
     "languages.quechua": "Quechua",
@@ -187,5 +187,9 @@
     "languages.czechoSlovak.slovak": "Tsjechoslowaaks (Slowakije)",
     "languages.filipino.cebuano": "Filipijns (Cebuano)",
     "languages.filipino.tagalog": "Filipijns (Tagalog)",
-    "languages.filipino.waray": "Filipijns (Waray)"
+    "languages.filipino.waray": "Filipijns (Waray)",
+    "languages.rwandaRundi.kirundi": "Rwanda-Rundi (Kirundi)",
+    "languages.sotho.northern": "Noord-Sotho",
+    "languages.rwandaRundi.kinyarwanda": "Rwanda-Rundi (Kinyarwanda)",
+    "languages.sotho.southern": "Zuid-Sotho"
 }
