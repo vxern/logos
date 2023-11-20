@@ -41,11 +41,14 @@ async function handleMakeSuggestion(
 		return;
 	}
 
-	const session = client.database.openSession();
+	let session = client.database.openSession();
 
 	const guildDocument =
 		client.cache.documents.guilds.get(guildId.toString()) ??
 		(await session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
+
+	session.dispose();
+
 	if (guildDocument === undefined) {
 		return;
 	}
@@ -65,6 +68,8 @@ async function handleMakeSuggestion(
 		return;
 	}
 
+	session = client.database.openSession();
+
 	const userDocument =
 		client.cache.documents.users.get(interaction.user.id.toString()) ??
 		(await session.load<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined)) ??
@@ -82,6 +87,9 @@ async function handleMakeSuggestion(
 
 			return userDocument as User;
 		})());
+
+	session.dispose();
+
 	if (userDocument === undefined) {
 		return;
 	}
@@ -127,6 +135,8 @@ async function handleMakeSuggestion(
 		onSubmit: async (submission, answers) => {
 			await postponeReply([client, bot], submission);
 
+			const session = client.database.openSession();
+
 			const createdAt = Date.now();
 			const suggestionDocument = {
 				...({
@@ -141,6 +151,7 @@ async function handleMakeSuggestion(
 			};
 			await session.store(suggestionDocument);
 			await session.saveChanges();
+			session.dispose();
 
 			if (configuration.journaling) {
 				const journallingService = client.services.journalling.get(guild.id);

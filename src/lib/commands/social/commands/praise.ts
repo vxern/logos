@@ -48,11 +48,14 @@ async function handlePraiseUser([client, bot]: [Client, Discord.Bot], interactio
 		return;
 	}
 
-	const session = client.database.openSession();
+	let session = client.database.openSession();
 
 	const guildDocument =
 		client.cache.documents.guilds.get(guildId.toString()) ??
 		(await session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
+
+	session.dispose();
+
 	if (guildDocument === undefined) {
 		return;
 	}
@@ -92,6 +95,8 @@ async function handlePraiseUser([client, bot]: [Client, Discord.Bot], interactio
 
 	await postponeReply([client, bot], interaction);
 
+	session = client.database.openSession();
+
 	const [authorDocument, targetDocument] = [
 		client.cache.documents.users.get(interaction.user.id.toString()) ??
 			(await session.load<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined)) ??
@@ -127,10 +132,14 @@ async function handlePraiseUser([client, bot]: [Client, Discord.Bot], interactio
 			})()),
 	];
 
+	session.dispose();
+
 	if (authorDocument === undefined || targetDocument === undefined) {
 		displayError([client, bot], interaction, { locale });
 		return;
 	}
+
+	session = client.database.openSession();
 
 	const praiseDocumentsCached = client.cache.documents.praisesByAuthor.get(interaction.user.id.toString());
 	const praiseDocuments =
@@ -150,6 +159,8 @@ async function handlePraiseUser([client, bot]: [Client, Discord.Bot], interactio
 						client.cache.documents.praisesByAuthor.set(interaction.user.id.toString(), map);
 						return praiseDocuments;
 					});
+
+	session.dispose();
 
 	const intervalMilliseconds = timeStructToMilliseconds(configuration.rateLimit?.within ?? defaults.PRAISE_INTERVAL);
 
@@ -182,6 +193,7 @@ async function handlePraiseUser([client, bot]: [Client, Discord.Bot], interactio
 		return;
 	}
 
+	session = client.database.openSession();
 	const createdAt = Date.now();
 	const praiseDocument = {
 		id: `praises/${targetDocument.account.id}/${authorDocument.account.id}/${createdAt}`,
@@ -193,6 +205,7 @@ async function handlePraiseUser([client, bot]: [Client, Discord.Bot], interactio
 	};
 	await session.store(praiseDocument);
 	await session.saveChanges();
+	session.dispose();
 
 	if (configuration.journaling) {
 		const journallingService = client.services.journalling.get(guild.id);

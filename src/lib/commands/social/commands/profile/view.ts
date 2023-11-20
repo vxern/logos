@@ -131,6 +131,8 @@ async function handleDisplayProfile(
 						return warningDocuments;
 					});
 
+	session.dispose();
+
 	const strings = {
 		title: localise(
 			client,

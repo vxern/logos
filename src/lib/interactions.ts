@@ -728,6 +728,9 @@ async function getLocaleData(client: Client, interaction: Discord.Interaction): 
 		client.cache.documents.guilds.get(guildId.toString()) ??
 			session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined),
 	]);
+
+	session.dispose();
+
 	if (userDocument === undefined || guildDocument === undefined) {
 		return FALLBACK_LOCALE_DATA;
 	}

@@ -33,10 +33,13 @@ class SuggestionService extends PromptService<"suggestions", Suggestion, Interac
 	async getUserDocument(suggestionDocument: Suggestion): Promise<User | undefined> {
 		const session = this.client.database.openSession();
 
-		return (
+		const userDocument =
 			this.client.cache.documents.users.get(suggestionDocument.authorId) ??
-			session.load<User>(`users/${suggestionDocument.authorId}`).then((value) => value ?? undefined)
-		);
+			session.load<User>(`users/${suggestionDocument.authorId}`).then((value) => value ?? undefined);
+
+		session.dispose();
+
+		return userDocument;
 	}
 
 	getPromptContent(user: Logos.User, suggestionDocument: Suggestion): Discord.CreateMessageOptions | undefined {
@@ -173,9 +176,13 @@ class SuggestionService extends PromptService<"suggestions", Suggestion, Interac
 		}
 
 		const session = this.client.database.openSession();
+
 		suggestionDocument.isResolved = isResolved;
+
 		await session.store(suggestionDocument);
 		await session.saveChanges();
+
+		session.dispose();
 
 		return suggestionDocument;
 	}

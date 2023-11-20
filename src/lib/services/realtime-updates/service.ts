@@ -41,6 +41,9 @@ class RealtimeUpdateService extends GlobalService {
 			await session.advanced.refresh(oldGuildDocument);
 
 			const guildDocument = await session.load<Guild>(data.id).then((value) => value ?? undefined);
+
+			session.dispose();
+
 			if (guildDocument === undefined) {
 				return;
 			}

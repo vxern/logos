@@ -57,6 +57,9 @@ async function handleDisplayCefrGuide(
 	const guildDocument =
 		client.cache.documents.guilds.get(guildId.toString()) ??
 		(await session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
+
+	session.dispose();
+
 	if (guildDocument === undefined) {
 		return;
 	}

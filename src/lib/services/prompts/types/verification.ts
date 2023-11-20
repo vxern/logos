@@ -43,10 +43,13 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 	async getUserDocument(entryRequestDocument: EntryRequest): Promise<User | undefined> {
 		const session = this.client.database.openSession();
 
-		return (
+		const userDocument =
 			this.client.cache.documents.users.get(entryRequestDocument.authorId) ??
-			session.load<User>(`users/${entryRequestDocument.authorId}`).then((value) => value ?? undefined)
-		);
+			session.load<User>(`users/${entryRequestDocument.authorId}`).then((value) => value ?? undefined);
+
+		session.dispose();
+
+		return userDocument;
 	}
 
 	getPromptContent(user: Logos.User, entryRequestDocument: EntryRequest): Discord.CreateMessageOptions | undefined {
@@ -225,7 +228,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 			return undefined;
 		}
 
-		const session = this.client.database.openSession();
+		let session = this.client.database.openSession();
 
 		const [authorDocument, voterDocument, entryRequestDocument] = await Promise.all([
 			this.client.cache.documents.users.get(userId) ??
@@ -262,6 +265,9 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 				})(),
 			this.client.cache.documents.entryRequests.get(`${guildId}/${interaction.user.id.toString()}`),
 		]);
+
+		session.dispose();
+
 		if (voterDocument === undefined || entryRequestDocument === undefined) {
 			this.displayVoteError(interaction, { locale });
 			return undefined;
@@ -396,9 +402,14 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 			entryRequestDocument.votedAgainst = undefined;
 		}
 
+		session = this.client.database.openSession();
+
 		entryRequestDocument.isFinalised = isFinalised;
+
 		await session.store(entryRequestDocument);
 		await session.saveChanges();
+
+		session.dispose();
 
 		let authorisedOn =
 			authorDocument.account.authorisedOn !== undefined ? [...authorDocument.account.authorisedOn] : undefined;
@@ -452,10 +463,15 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 				);
 		}
 
+		session = this.client.database.openSession();
+
 		authorDocument.account.authorisedOn = authorisedOn;
 		authorDocument.account.rejectedOn = rejectedOn;
+
 		await session.store(authorDocument);
 		await session.saveChanges();
+
+		session.dispose();
 
 		if (isAccepted || isRejected) {
 			return null;

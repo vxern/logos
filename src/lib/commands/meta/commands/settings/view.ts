@@ -25,6 +25,9 @@ async function handleDisplaySettings(
 	const userDocument =
 		client.cache.documents.users.get(interaction.user.id.toString()) ??
 		(await session.load<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined));
+
+	session.dispose();
+
 	if (userDocument === undefined) {
 		return;
 	}
