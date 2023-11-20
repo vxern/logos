@@ -33,10 +33,13 @@ class ReportService extends PromptService<"reports", Report, InteractionData> {
 	async getUserDocument(reportDocument: Report): Promise<User | undefined> {
 		const session = this.client.database.openSession();
 
-		return (
+		const userDocument =
 			this.client.cache.documents.users.get(reportDocument.authorId) ??
-			session.load<User>(`users/${reportDocument.authorId}`).then((value) => value ?? undefined)
-		);
+			session.load<User>(`users/${reportDocument.authorId}`).then((value) => value ?? undefined);
+
+		session.dispose();
+
+		return userDocument;
 	}
 
 	getPromptContent(user: Logos.User, reportDocument: Report): Discord.CreateMessageOptions | undefined {
@@ -189,9 +192,13 @@ class ReportService extends PromptService<"reports", Report, InteractionData> {
 		}
 
 		const session = this.client.database.openSession();
+
 		reportDocument.isResolved = isResolved;
+
 		await session.store(reportDocument);
 		await session.saveChanges();
+
+		session.dispose();
 
 		return reportDocument;
 	}

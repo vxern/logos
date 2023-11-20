@@ -29,23 +29,23 @@ class RealtimeUpdateService extends GlobalService {
 				return;
 			}
 
-			const oldGuildDocument = this.client.cache.documents.guilds.get(guildId);
-			if (oldGuildDocument === undefined) {
-				return;
-			}
-
 			this.client.log.info(`Detected update to configuration for ${diagnostics.display.guild(guild)}. Updating...`);
 
 			const session = this.client.database.openSession();
 
-			await session.advanced.refresh(oldGuildDocument);
+			const oldGuildDocument = await session.load<Guild>(data.id).then((value) => value ?? undefined);
 
-			const guildDocument = await session.load<Guild>(data.id).then((value) => value ?? undefined);
-			if (guildDocument === undefined) {
+			if (oldGuildDocument !== undefined) {
+				await session.advanced.refresh(oldGuildDocument);
+			}
+
+			session.dispose();
+
+			if (oldGuildDocument === undefined) {
 				return;
 			}
 
-			this.client.cache.documents.guilds.set(guildDocument.guildId, guildDocument);
+			this.client.cache.documents.guilds.set(oldGuildDocument.guildId, oldGuildDocument);
 
 			await handleGuildDelete(this.client, guild.id);
 			await handleGuildCreate([this.client, this.bot], guild, { isUpdate: true });

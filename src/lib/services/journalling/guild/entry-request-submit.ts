@@ -15,6 +15,9 @@ export default {
 		const guildDocument =
 			client.cache.documents.guilds.get(entryRequest.guildId) ??
 			(await session.load<Guild>(`guilds/${entryRequest.guildId}`).then((value) => value ?? undefined));
+
+		session.dispose();
+
 		if (guildDocument === undefined) {
 			return;
 		}

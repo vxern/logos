@@ -63,7 +63,7 @@ async function handleDisplayWarnings(
 
 	const isSelf = member.id === interaction.user.id;
 
-	const session = client.database.openSession();
+	let session = client.database.openSession();
 
 	const userDocument =
 		client.cache.documents.users.get(member.id.toString()) ??
@@ -82,10 +82,15 @@ async function handleDisplayWarnings(
 
 			return userDocument as User;
 		})());
+
+	session.dispose();
+
 	if (userDocument === undefined) {
 		displayError([client, bot], interaction, { locale });
 		return;
 	}
+
+	session = client.database.openSession();
 
 	const warningDocumentsCached = client.cache.documents.warningsByTarget.get(member.id.toString());
 	const warningDocuments =
@@ -105,6 +110,8 @@ async function handleDisplayWarnings(
 						client.cache.documents.warningsByTarget.set(member.id.toString(), map);
 						return documents;
 					});
+
+	session.dispose();
 
 	reply([client, bot], interaction, {
 		embeds: [getWarningPage(client, warningDocuments, isSelf, { locale })],

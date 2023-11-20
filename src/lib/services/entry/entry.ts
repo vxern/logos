@@ -155,27 +155,40 @@ class EntryService extends LocalService {
 
 		const requestedRoleId = BigInt(parameter);
 
-		const session = this.client.database.openSession();
+		let session = this.client.database.openSession();
 
 		const guildDocument =
 			this.client.cache.documents.guilds.get(guild.id.toString()) ??
 			(await session.load<Guild>(`guilds/${guild.id}`).then((value) => value ?? undefined));
+
+		session.dispose();
+
 		if (guildDocument === undefined) {
 			return;
 		}
 
+		session = this.client.database.openSession();
+
 		const userDocument =
 			this.client.cache.documents.users.get(interaction.user.id.toString()) ??
 			(await session.load<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined));
+
+		session.dispose();
+
 		if (userDocument === undefined) {
 			return;
 		}
 
+		session = this.client.database.openSession();
+
 		const entryRequestDocument =
-			this.client.cache.documents.entryRequests.get(`${userDocument.account.id}/${guildDocument.id}`) ??
+			this.client.cache.documents.entryRequests.get(`${guildDocument.guildId}/${userDocument.account.id}`) ??
 			(await session
-				.load<EntryRequest>(`entryRequests/${userDocument.account.id}/${guildDocument.id}`)
+				.load<EntryRequest>(`entryRequests/${userDocument.account.id}/${guildDocument.guildId}`)
 				.then((value) => value ?? undefined));
+
+		session.dispose();
+
 		if (entryRequestDocument !== undefined) {
 			const strings = {
 				title: localise(this.client, "entry.verification.answers.alreadyAnswered.title", locale)(),
@@ -203,7 +216,7 @@ class EntryService extends LocalService {
 		createModalComposer<EntryRequest["answers"]>([this.client, this.bot], interaction, {
 			modal: this.generateVerificationQuestionModal(interaction.featureLanguage, { locale }),
 			onSubmit: async (submission, answers) => {
-				if (this.client.cache.documents.entryRequests.has(`${userDocument.account.id}/${guild.id}`)) {
+				if (this.client.cache.documents.entryRequests.has(`${guild.id}/${userDocument.account.id}`)) {
 					const strings = {
 						title: localise(this.client, "entry.verification.answers.alreadyAnswered.title", locale)(),
 						description: localise(this.client, "entry.verification.answers.alreadyAnswered.description", locale)(),
@@ -224,8 +237,10 @@ class EntryService extends LocalService {
 
 				await postponeReply([this.client, this.bot], submission);
 
+				const session = this.client.database.openSession();
+
 				const entryRequestDocument = {
-					id: `entryRequests/${userDocument.account.id}/${guild.id}`,
+					id: `entryRequests/${guild.id}/${userDocument.account.id}`,
 					authorId: userDocument.account.id,
 					guildId: guild.id.toString(),
 					answers,
@@ -237,6 +252,8 @@ class EntryService extends LocalService {
 
 				await session.store(entryRequestDocument);
 				await session.saveChanges();
+
+				session.dispose();
 
 				const journallingService = this.client.services.journalling.get(this.guildId);
 				journallingService?.log("entryRequestSubmit", { args: [interaction.user, entryRequestDocument] });
@@ -417,6 +434,8 @@ class EntryService extends LocalService {
 					return userDocument as User;
 				})());
 
+			session.dispose();
+
 			const isVerified = userDocument?.account.authorisedOn?.includes(this.guildIdString);
 
 			if (!isVerified) {
@@ -520,6 +539,9 @@ class EntryService extends LocalService {
 
 				return userDocument as User;
 			})());
+
+		session.dispose();
+
 		if (userDocument === undefined) {
 			const strings = {
 				title: localise(this.client, "entry.verification.verifyingAccount.failed.title", locale)(),

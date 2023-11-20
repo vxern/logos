@@ -458,7 +458,7 @@ async function prefetchDataFromDatabase(client: Client): Promise<void> {
 	const entryRequestDocuments = await session.query<EntryRequest>({ collection: "EntryRequests" }).all();
 
 	for (const document of entryRequestDocuments) {
-		client.cache.documents.entryRequests.set(document.id, document);
+		client.cache.documents.entryRequests.set(`${document.guildId}/${document.authorId}`, document);
 	}
 
 	const reportDocuments = await session.query<Report>({ collection: "Reports" }).all();
@@ -472,6 +472,8 @@ async function prefetchDataFromDatabase(client: Client): Promise<void> {
 	for (const document of suggestionDocuments) {
 		client.cache.documents.suggestions.set(`${document.guildId}/${document.authorId}/${document.createdAt}`, document);
 	}
+
+	session.dispose();
 }
 
 export async function handleGuildCreate(
@@ -488,6 +490,9 @@ export async function handleGuildCreate(
 	const guildDocument =
 		client.cache.documents.guilds.get(guild.id.toString()) ??
 		(await session.load<Guild>(`guilds/${guild.id}`).then((value) => value ?? undefined));
+
+	session.dispose();
+
 	if (guildDocument === undefined) {
 		return;
 	}

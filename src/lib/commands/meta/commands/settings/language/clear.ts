@@ -18,12 +18,16 @@ async function handleClearLanguage(
 ): Promise<void> {
 	const locale = interaction.locale;
 
-	const session = client.database.openSession();
-
 	await postponeReply([client, bot], interaction);
+
+	let session = client.database.openSession();
+
 	const userDocument =
 		client.cache.documents.users.get(interaction.user.id.toString()) ??
 		(await session.load<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined));
+
+	session.dispose();
+
 	if (userDocument === undefined) {
 		return;
 	}
@@ -46,9 +50,11 @@ async function handleClearLanguage(
 		return;
 	}
 
+	session = client.database.openSession();
 	userDocument.account.language = undefined;
 	await session.store(userDocument);
 	await session.saveChanges();
+	session.dispose();
 
 	{
 		const strings = {

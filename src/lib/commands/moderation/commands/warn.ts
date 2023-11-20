@@ -48,11 +48,14 @@ async function handleWarnUser([client, bot]: [Client, Discord.Bot], interaction:
 		return;
 	}
 
-	const session = client.database.openSession();
+	let session = client.database.openSession();
 
 	const guildDocument =
 		client.cache.documents.guilds.get(guildId.toString()) ??
 		(await session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
+
+	session.dispose();
+
 	if (guildDocument === undefined) {
 		return;
 	}
@@ -104,6 +107,8 @@ async function handleWarnUser([client, bot]: [Client, Discord.Bot], interaction:
 		return;
 	}
 
+	session = client.database.openSession();
+
 	const [authorDocument, targetDocument] = [
 		client.cache.documents.users.get(interaction.user.id.toString()) ??
 			(await session.load<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined)) ??
@@ -139,12 +144,16 @@ async function handleWarnUser([client, bot]: [Client, Discord.Bot], interaction:
 			})()),
 	];
 
+	session.dispose();
+
 	if (authorDocument === undefined || targetDocument === undefined) {
 		displayError([client, bot], interaction, { locale });
 		return;
 	}
 
 	const warningDocumentsCached = client.cache.documents.warningsByTarget.get(targetDocument.account.id);
+
+	session = client.database.openSession();
 
 	const createdAt = Date.now();
 	const warningDocument = {
@@ -175,6 +184,8 @@ async function handleWarnUser([client, bot]: [Client, Discord.Bot], interaction:
 						client.cache.documents.warningsByTarget.set(member.id.toString(), map);
 						return warningDocuments;
 					});
+
+	session.dispose();
 
 	if (configuration.journaling) {
 		const journallingService = client.services.journalling.get(guild.id);

@@ -46,6 +46,9 @@ async function handlePardonUserAutocomplete(
 	const guildDocument =
 		client.cache.documents.guilds.get(guildId.toString()) ??
 		(await session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
+
+	session.dispose();
+
 	if (guildDocument === undefined) {
 		return;
 	}
@@ -119,11 +122,14 @@ async function handlePardonUser([client, bot]: [Client, Discord.Bot], interactio
 		return;
 	}
 
-	const session = client.database.openSession();
+	let session = client.database.openSession();
 
 	const guildDocument =
 		client.cache.documents.guilds.get(guildId.toString()) ??
 		(await session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
+
+	session.dispose();
+
 	if (guildDocument === undefined) {
 		return;
 	}
@@ -166,8 +172,12 @@ async function handlePardonUser([client, bot]: [Client, Discord.Bot], interactio
 		return;
 	}
 
+	session = client.database.openSession();
+
 	await session.delete(warning.id);
 	await session.saveChanges();
+
+	session.dispose();
 
 	client.cache.documents.warningsByTarget
 		.get(member.id.toString())
@@ -211,14 +221,19 @@ async function getRelevantWarnings(
 	member: Logos.Member,
 	expirationMilliseconds: number,
 ): Promise<Warning[] | undefined> {
-	const session = client.database.openSession();
+	let session = client.database.openSession();
 
 	const userDocument =
 		client.cache.documents.users.get(member.id.toString()) ??
 		(await session.load<User>(`users/${member.id}`).then((value) => value ?? undefined));
+
+	session.dispose();
+
 	if (userDocument === undefined) {
 		return undefined;
 	}
+
+	session = client.database.openSession();
 
 	const warningDocumentsCached = client.cache.documents.warningsByTarget.get(member.id.toString());
 	const warningDocuments =
@@ -238,6 +253,8 @@ async function getRelevantWarnings(
 						client.cache.documents.warningsByTarget.set(member.id.toString(), map);
 						return documents;
 					});
+
+	session.dispose();
 
 	const relevantWarnings = getActiveWarnings(warningDocuments, expirationMilliseconds).reverse();
 	return relevantWarnings;
