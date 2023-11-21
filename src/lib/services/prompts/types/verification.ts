@@ -7,7 +7,7 @@ import { Client, localise, pluralise } from "../../../client";
 import { EntryRequest } from "../../../database/entry-request";
 import { User } from "../../../database/user";
 import diagnostics from "../../../diagnostics";
-import { acknowledge, encodeId, getFeatureLanguage, getLocaleData, reply } from "../../../interactions";
+import { acknowledge, encodeId, getLocaleData, reply } from "../../../interactions";
 import { getGuildIconURLFormatted, snowflakeToTimestamp } from "../../../utils";
 import { Configurations, PromptService } from "../service";
 
@@ -66,18 +66,13 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 		const guildLocale = this.guildLocale;
 		const guildLanguage = getLocalisationLanguageByLocale(guildLocale);
 
-		const featureLanguage = getFeatureLanguage(guildDocument);
-
 		const strings = {
-			verification: {
-				reason: localise(this.client, "verification.fields.reason", guildLocale)({ language: featureLanguage }),
-				aim: localise(this.client, "verification.fields.aim", guildLocale)(),
-				whereFound: localise(this.client, "verification.fields.whereFound", guildLocale)(),
-			},
-			answers: localise(this.client, "entry.verification.answers", guildLocale)(),
 			requestedRoles: localise(this.client, "entry.verification.requestedRoles", guildLocale)(),
 			accountCreated: localise(this.client, "entry.verification.accountCreated", guildLocale)(),
 			answersSubmitted: localise(this.client, "entry.verification.answersSubmitted", guildLocale)(),
+			votesFor: localise(this.client, "entry.verification.votesFor", guildLocale)(),
+			votesAgainst: localise(this.client, "entry.verification.votesAgainst", guildLocale)(),
+			noneYet: localise(this.client, "entry.verification.noneYet", guildLocale)(),
 			accept: localise(this.client, "entry.verification.vote.accept", guildLocale)(),
 			acceptMultiple: localise(
 				this.client,
@@ -109,15 +104,19 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 		const accountCreatedRelativeTimestamp = timestamp(snowflakeToTimestamp(user.id), TimestampFormat.Relative);
 		const accountCreatedLongDateTimestamp = timestamp(snowflakeToTimestamp(user.id), TimestampFormat.LongDate);
 
+		const votedForFormatted = entryRequestDocument.votedFor?.map((userId) => mention(userId, MentionTypes.User));
+		const votedAgainstFormatted = entryRequestDocument.votedAgainst?.map((userId) =>
+			mention(userId, MentionTypes.User),
+		);
+
 		return {
 			embeds: [
 				{
-					title: strings.answers,
-					color: constants.colors.turquoise,
+					color: constants.colors.murrey,
 					thumbnail: (() => {
 						const iconURL = Discord.avatarUrl(user.id, user.discriminator, {
 							avatar: user.avatar,
-							size: 64,
+							size: 128,
 							format: "webp",
 						});
 						if (iconURL === undefined) {
@@ -128,26 +127,21 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 					})(),
 					fields: [
 						{
-							name: `1. ${strings.verification.reason}`,
-							value: entryRequestDocument.answers.reason,
+							name: diagnostics.display.user(user),
+							value:
+								`1. *${entryRequestDocument.answers.reason}*\n` +
+								`2. *${entryRequestDocument.answers.aim}*\n` +
+								`3. *${entryRequestDocument.answers.whereFound}*`,
+							inline: false,
 						},
-						{
-							name: `2. ${strings.verification.aim}`,
-							value: entryRequestDocument.answers.aim,
-						},
-						{
-							name: `3. ${strings.verification.whereFound}`,
-							value: entryRequestDocument.answers.whereFound,
-						},
-					],
-				},
-				{
-					title: diagnostics.display.user(user),
-					color: constants.colors.turquoise,
-					fields: [
 						{
 							name: strings.requestedRoles,
 							value: mention(BigInt(entryRequestDocument.requestedRoleId), MentionTypes.Role),
+							inline: true,
+						},
+						{
+							name: strings.answersSubmitted,
+							value: timestamp(entryRequestDocument.createdAt, TimestampFormat.Relative),
 							inline: true,
 						},
 						{
@@ -156,8 +150,19 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 							inline: true,
 						},
 						{
-							name: strings.answersSubmitted,
-							value: timestamp(entryRequestDocument.createdAt, TimestampFormat.Relative),
+							name: `${constants.symbols.verification.for} ${strings.votesFor}`,
+							value:
+								votedForFormatted !== undefined && votedForFormatted.length !== 0
+									? votedForFormatted.join("\n")
+									: `*${strings.noneYet}*`,
+							inline: true,
+						},
+						{
+							name: `${constants.symbols.verification.against} ${strings.votesAgainst}`,
+							value:
+								votedAgainstFormatted !== undefined && votedAgainstFormatted.length !== 0
+									? votedAgainstFormatted.join("\n")
+									: `*${strings.noneYet}*`,
 							inline: true,
 						},
 					],

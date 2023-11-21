@@ -99,6 +99,10 @@ export default {
 		celebration: "🥳",
 		upset: "😕",
 	},
+	verification: {
+		for: "🟩",
+		against: "🟥",
+	},
 	bot: {
 		features: {
 			definitions: "🔍",
