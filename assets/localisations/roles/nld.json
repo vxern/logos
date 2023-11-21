@@ -7,7 +7,6 @@
     "roles.noCategory.name": "Geen categorie geselecteerd",
     "roles.noCategory.description": "Selecteer een rollencategorie om een lijst met beschikbare rollen te krijgen.",
     "roles.language.name": "Taal",
-    "roles.language.description": "",
     "roles.language.categories.proficiency.name": "Vaardigheid",
     "roles.language.categories.proficiency.description": "Roles representing the user's language proficiency and knowledge of the language.",
     "roles.language.categories.proficiency.roles.beginner.name": "Beginner",
