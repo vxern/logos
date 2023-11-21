@@ -1,13 +1,12 @@
 import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
-import { MentionTypes, mention, timestamp } from "../../../../formatting";
 import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
 import { Suggestion } from "../../../database/suggestion";
 import { User } from "../../../database/user";
 import { encodeId, getLocaleData, reply } from "../../../interactions";
-import { getGuildIconURLFormatted } from "../../../utils";
 import { PromptService } from "../service";
+import diagnostics from "../../../diagnostics";
 
 type InteractionData = [documentId: string, isResolved: string];
 
@@ -50,10 +49,6 @@ class SuggestionService extends PromptService<"suggestions", Suggestion, Interac
 
 		const guildLocale = this.guildLocale;
 		const strings = {
-			suggestion: {
-				submittedBy: localise(this.client, "submittedBy", guildLocale)(),
-				submittedAt: localise(this.client, "submittedAt", guildLocale)(),
-			},
 			markResolved: localise(this.client, "markResolved", guildLocale)(),
 			markUnresolved: localise(this.client, "markUnresolved", guildLocale)(),
 		};
@@ -61,37 +56,24 @@ class SuggestionService extends PromptService<"suggestions", Suggestion, Interac
 		return {
 			embeds: [
 				{
-					title: suggestionDocument.answers.suggestion,
-					color: constants.colors.green,
-					thumbnail: (() => {
-						const iconURL = Discord.avatarUrl(user.id, user.discriminator, {
-							avatar: user.avatar,
-							size: 64,
-							format: "png",
-						});
-						if (iconURL === undefined) {
-							return;
-						}
-
-						return { url: iconURL };
-					})(),
-					fields: [
-						{
-							name: strings.suggestion.submittedBy,
-							value: mention(user.id, MentionTypes.User),
-							inline: true,
-						},
-						{
-							name: strings.suggestion.submittedAt,
-							value: timestamp(suggestionDocument.createdAt),
-							inline: true,
-						},
-					],
+					color: suggestionDocument.isResolved ? constants.colors.green : constants.colors.dullYellow,
+					description: `*${suggestionDocument.answers.suggestion}*`,
 					footer: {
-						text: guild.name,
-						iconUrl: `${getGuildIconURLFormatted(guild)}&metadata=${suggestionDocument.guildId}/${
-							suggestionDocument.authorId
-						}/${suggestionDocument.createdAt}`,
+						text: diagnostics.display.user(user),
+						iconUrl: `${(() => {
+							const iconURL = Discord.avatarUrl(user.id, user.discriminator, {
+								avatar: user.avatar,
+								size: 64,
+								format: "png",
+							});
+							if (iconURL === undefined) {
+								return;
+							}
+
+							return iconURL;
+						})()}&metadata=${suggestionDocument.guildId}/${suggestionDocument.authorId}/${
+							suggestionDocument.createdAt
+						}`,
 					},
 				},
 			],
@@ -102,7 +84,7 @@ class SuggestionService extends PromptService<"suggestions", Suggestion, Interac
 						suggestionDocument.isResolved
 							? {
 									type: Discord.MessageComponentTypes.Button,
-									style: Discord.ButtonStyles.Secondary,
+									style: Discord.ButtonStyles.Success,
 									label: strings.markUnresolved,
 									customId: encodeId<InteractionData>(constants.components.suggestions, [
 										`${suggestionDocument.guildId}/${suggestionDocument.authorId}/${suggestionDocument.createdAt}`,
