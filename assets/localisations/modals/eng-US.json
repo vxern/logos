@@ -20,6 +20,9 @@
 	"suggestion.title": "Suggestion",
 	"suggestion.fields.suggestion": "What is your suggestion?",
 
+	"resource.title": "Resource",
+	"resource.fields.resource": "What resource would you like to submit?",
+
 	"prompts.continue": "Continue",
 	"prompts.cancel": "Cancel",
 	"prompts.stay": "Take me back",

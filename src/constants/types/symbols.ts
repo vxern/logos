@@ -58,8 +58,9 @@ export default {
 			removed: "😇",
 		},
 		praised: "🙏",
-		suggestion: "🌿",
 		report: "💢",
+		resource: "🎓",
+		suggestion: "🌿",
 		purging: {
 			begin: "⚔️",
 			end: "✅",

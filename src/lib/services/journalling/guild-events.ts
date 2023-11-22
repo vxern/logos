@@ -3,6 +3,7 @@ import { SlowmodeLevel } from "../../commands/moderation/commands/slowmode";
 import { EntryRequest } from "../../database/entry-request";
 import { Praise } from "../../database/praise";
 import { Report } from "../../database/report";
+import { Resource } from "../../database/resource";
 import { Suggestion } from "../../database/suggestion";
 import { Warning } from "../../database/warning";
 
@@ -34,6 +35,9 @@ type GuildEvents = {
 
 	/** A suggestion has been made. */
 	suggestionSend: [member: Logos.Member, suggestion: Suggestion];
+
+	/** A resource has been submitted. */
+	resourceSend: [member: Logos.Member, resource: Resource];
 
 	/** A report has been submitted. */
 	reportSubmit: [author: Logos.Member, report: Report];

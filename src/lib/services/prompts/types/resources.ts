@@ -57,7 +57,7 @@ class ResourceService extends PromptService<"resources", Resource, InteractionDa
 		return {
 			embeds: [
 				{
-					color: resourceDocument.isResolved ? constants.colors.green : constants.colors.black,
+					color: resourceDocument.isResolved ? constants.colors.green : constants.colors.gray,
 					description: `*${resourceDocument.answers.resource}*`,
 					footer: {
 						text: diagnostics.display.user(user),

@@ -670,7 +670,7 @@ export async function handleGuildCreate(
 		}
 
 		if (server.resources.enabled) {
-			// TODO(vxern): guildCommands.push(commands.resource);
+			guildCommands.push(commands.resource);
 
 			const service = new ResourceService([client, bot], guild.id);
 			services.push(service);
@@ -792,6 +792,9 @@ function addCacheInterceptors(client: Client, database: ravendb.IDocumentStore):
 			case "Reports": {
 				return `${document.guildId}/${document.authorId}/${document.createdAt}`;
 			}
+			case "Resources": {
+				return `${document.guildId}/${document.authorId}/${document.createdAt}`;
+			}
 			case "Suggestions": {
 				return `${document.guildId}/${document.authorId}/${document.createdAt}`;
 			}
@@ -843,6 +846,10 @@ function addCacheInterceptors(client: Client, database: ravendb.IDocumentStore):
 			}
 			case "Reports": {
 				client.cache.documents.reports.set(compositeId, value as Report);
+				break;
+			}
+			case "Resources": {
+				client.cache.documents.resources.set(compositeId, value as Resource);
 				break;
 			}
 			case "Suggestions": {
