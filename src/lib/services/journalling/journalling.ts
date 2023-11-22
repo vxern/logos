@@ -37,6 +37,10 @@ class JournallingService extends LocalService {
 		return channelId;
 	}
 
+	async start(): Promise<void> {}
+
+	async stop(): Promise<void> {}
+
 	async log<Event extends keyof Events>(event: Event, { args }: { args: Events[Event] }): Promise<void> {
 		const journalEntryGenerator = messageGenerators[event];
 		if (journalEntryGenerator === undefined) {

@@ -58,8 +58,9 @@ export default {
 			removed: "😇",
 		},
 		praised: "🙏",
-		suggestion: "🌿",
 		report: "💢",
+		resource: "🎓",
+		suggestion: "🌿",
 		purging: {
 			begin: "⚔️",
 			end: "✅",
@@ -98,6 +99,10 @@ export default {
 	responses: {
 		celebration: "🥳",
 		upset: "😕",
+	},
+	verification: {
+		for: "🟩",
+		against: "🟥",
 	},
 	bot: {
 		features: {

@@ -57,6 +57,9 @@ import { Report } from "./database/report";
 import { Suggestion } from "./database/suggestion";
 import { User } from "./database/user";
 import { Warning } from "./database/warning";
+import { ResourceService } from "./services/prompts/types/resources";
+import { Resource } from "./database/resource";
+import { ResourceNoticeService } from "./services/notices/types/resources";
 
 type Client = {
 	environment: {
@@ -90,6 +93,7 @@ type Client = {
 			praisesByAuthor: Map<string, Map<string, Praise>>;
 			praisesByTarget: Map<string, Map<string, Praise>>;
 			reports: Map<string, Report>;
+			resources: Map<string, Resource>;
 			suggestions: Map<string, Suggestion>;
 			users: Map<string, User>;
 			warningsByTarget: Map<string, Map<string, Warning>>;
@@ -125,12 +129,14 @@ type Client = {
 		};
 		notices: {
 			information: Map<bigint, InformationNoticeService>;
+			resources: Map<bigint, ResourceNoticeService>;
 			roles: Map<bigint, RoleNoticeService>;
 			welcome: Map<bigint, WelcomeNoticeService>;
 		};
 		prompts: {
 			reports: Map<bigint, ReportService>;
 			suggestions: Map<bigint, SuggestionService>;
+			resources: Map<bigint, ResourceService>;
 			verification: Map<bigint, VerificationService>;
 		};
 		interactionRepetition: InteractionRepetitionService;
@@ -146,6 +152,7 @@ interface Collector<ForEvent extends keyof Discord.EventHandlers> {
 	removeAfter?: number;
 	onCollect: (...args: Parameters<Discord.EventHandlers[ForEvent]>) => void;
 	onEnd: () => void;
+	end?: Promise<void>;
 }
 
 type Event = keyof Discord.EventHandlers;
@@ -181,6 +188,7 @@ function createClient(
 				praisesByAuthor: new Map(),
 				praisesByTarget: new Map(),
 				reports: new Map(),
+				resources: new Map(),
 				suggestions: new Map(),
 				users: new Map(),
 				warningsByTarget: new Map(),
@@ -205,11 +213,13 @@ function createClient(
 			},
 			notices: {
 				information: new Map(),
+				resources: new Map(),
 				roles: new Map(),
 				welcome: new Map(),
 			},
 			prompts: {
 				reports: new Map(),
+				resources: new Map(),
 				suggestions: new Map(),
 				verification: new Map(),
 			},
@@ -461,6 +471,12 @@ async function prefetchDataFromDatabase(client: Client): Promise<void> {
 		client.cache.documents.entryRequests.set(`${document.guildId}/${document.authorId}`, document);
 	}
 
+	const resourceDocuments = await session.query<Resource>({ collection: "Resources" }).all();
+
+	for (const document of resourceDocuments) {
+		client.cache.documents.resources.set(`${document.guildId}/${document.authorId}/${document.createdAt}`, document);
+	}
+
 	const reportDocuments = await session.query<Report>({ collection: "Reports" }).all();
 
 	for (const document of reportDocuments) {
@@ -520,6 +536,13 @@ export async function handleGuildCreate(
 				services.push(service);
 
 				client.services.notices.information.set(guild.id, service);
+			}
+
+			if (notices.resources?.enabled) {
+				const service = new ResourceNoticeService([client, bot], guild.id);
+				services.push(service);
+
+				client.services.notices.resources.set(guild.id, service);
 			}
 
 			if (notices.roles.enabled) {
@@ -656,6 +679,15 @@ export async function handleGuildCreate(
 
 			client.services.prompts.suggestions.set(guild.id, service);
 		}
+
+		if (server.resources?.enabled) {
+			guildCommands.push(commands.resource);
+
+			const service = new ResourceService([client, bot], guild.id);
+			services.push(service);
+
+			client.services.prompts.resources.set(guild.id, service);
+		}
 	}
 
 	if (guildDocument.features.social.enabled) {
@@ -771,6 +803,9 @@ function addCacheInterceptors(client: Client, database: ravendb.IDocumentStore):
 			case "Reports": {
 				return `${document.guildId}/${document.authorId}/${document.createdAt}`;
 			}
+			case "Resources": {
+				return `${document.guildId}/${document.authorId}/${document.createdAt}`;
+			}
 			case "Suggestions": {
 				return `${document.guildId}/${document.authorId}/${document.createdAt}`;
 			}
@@ -822,6 +857,10 @@ function addCacheInterceptors(client: Client, database: ravendb.IDocumentStore):
 			}
 			case "Reports": {
 				client.cache.documents.reports.set(compositeId, value as Report);
+				break;
+			}
+			case "Resources": {
+				client.cache.documents.resources.set(compositeId, value as Resource);
 				break;
 			}
 			case "Suggestions": {
@@ -1312,6 +1351,8 @@ function addCollector<T extends keyof Discord.EventHandlers>(
 		collectors?.delete(collector);
 		onEnd();
 	};
+
+	collector.end?.then(() => collector.onEnd());
 
 	if (collector.limit !== undefined) {
 		let emitCount = 0;

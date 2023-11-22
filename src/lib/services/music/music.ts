@@ -211,6 +211,10 @@ class MusicService extends LocalService {
 		this.client.services.music.lavalink.node.on("connect", () => this.handleConnectionRestored());
 	}
 
+	async stop(): Promise<void> {
+		return this.destroySession();
+	}
+
 	async voiceStateUpdate(_: Discord.VoiceState): Promise<void> {
 		const [guild, session] = [this.guild, this.session];
 		if (guild === undefined || session === undefined) {

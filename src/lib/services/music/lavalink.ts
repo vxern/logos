@@ -34,6 +34,7 @@ class LavalinkService extends GlobalService {
 				shard.send(payload, true);
 			},
 		});
+		this.node.setMaxListeners(0);
 	}
 
 	async start(): Promise<void> {
@@ -58,6 +59,18 @@ class LavalinkService extends GlobalService {
 		);
 
 		return this.node.connect(this.bot.id.toString());
+	}
+
+	async stop(): Promise<void> {
+		this.node.removeAllListeners();
+		for (const player of this.node.players.values()) {
+			player.removeAllListeners();
+			await player.stop();
+			player.disconnect();
+			player.playing = false;
+			player.connected = false;
+			await player.destroy();
+		}
 	}
 
 	async voiceStateUpdate(voiceState: Discord.VoiceState): Promise<void> {

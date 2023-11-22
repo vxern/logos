@@ -48,6 +48,10 @@ class EntryService extends LocalService {
 		return guildDocument.features.moderation.features?.verification;
 	}
 
+	async start(): Promise<void> {}
+
+	async stop(): Promise<void> {}
+
 	async interactionCreate(interactionRaw: Discord.Interaction): Promise<void> {
 		if (interactionRaw.type !== Discord.InteractionTypes.MessageComponent) {
 			return;
@@ -595,6 +599,7 @@ class EntryService extends LocalService {
 		if (userDocument.account.authorisedOn?.includes(guildId.toString())) {
 			return true;
 		}
+
 		if (userDocument.account.rejectedOn?.includes(guildId.toString())) {
 			const strings = {
 				title: localise(this.client, "entry.verification.answers.rejectedBefore.title", locale)(),

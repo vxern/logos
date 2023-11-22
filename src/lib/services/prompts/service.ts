@@ -1,16 +1,17 @@
 import * as Discord from "@discordeno/bot";
 import constants from "../../../constants/constants";
 import * as Logos from "../../../types";
-import { Client } from "../../client";
+import { Client, localise } from "../../client";
 import { Guild } from "../../database/guild";
 import { User } from "../../database/user";
 import diagnostics from "../../diagnostics";
-import { createInteractionCollector, decodeId } from "../../interactions";
+import { acknowledge, createInteractionCollector, decodeId, getLocaleData, reply } from "../../interactions";
 import { getAllMessages } from "../../utils";
 import { LocalService } from "../service";
 
 interface Configurations {
 	reports: NonNullable<Guild["features"]["moderation"]["features"]>["reports"];
+	resources: NonNullable<Guild["features"]["server"]["features"]>["resources"];
 	suggestions: NonNullable<Guild["features"]["server"]["features"]>["suggestions"];
 	verification: NonNullable<Guild["features"]["moderation"]["features"]>["verification"];
 }
@@ -21,6 +22,7 @@ type ConfigurationLocators = {
 
 const configurationLocators: ConfigurationLocators = {
 	reports: (guildDocument) => guildDocument.features.moderation.features?.reports,
+	resources: (guildDocument) => guildDocument.features.server.features?.resources,
 	suggestions: (guildDocument) => guildDocument.features.server.features?.suggestions,
 	verification: (guildDocument) => guildDocument.features.moderation.features?.verification,
 };
@@ -29,6 +31,7 @@ type CustomIDs = Record<keyof Configurations, string>;
 
 const customIds: CustomIDs = {
 	reports: constants.components.reports,
+	resources: constants.components.resources,
 	suggestions: constants.components.suggestions,
 	verification: constants.components.verification,
 };
@@ -42,6 +45,7 @@ abstract class PromptService<
 > extends LocalService {
 	private readonly type: PromptType;
 	private readonly customId: string;
+	private readonly isDeletable: boolean;
 
 	protected readonly documents: Map<string, DataType>;
 
@@ -52,6 +56,11 @@ abstract class PromptService<
 	private readonly promptByCompositeId: Map</*compositeId: */ string, Discord.CamelizedDiscordMessage> = new Map();
 	private readonly documentByPromptId: Map</*promptId: */ string, DataType> = new Map();
 	private readonly userIdByPromptId: Map</*promptId: */ string, bigint> = new Map();
+
+	private readonly collectingInteractions: Promise<void>;
+	private readonly removingPrompts: Promise<void>;
+	private stopCollectingInteractions: (() => void) | undefined;
+	private stopRemovingPrompts: (() => void) | undefined;
 
 	private readonly _configuration: ConfigurationLocators[PromptType];
 	get configuration(): Configurations[PromptType] | undefined {
@@ -81,12 +90,23 @@ abstract class PromptService<
 		return channelId;
 	}
 
-	constructor([client, bot]: [Client, Discord.Bot], guildId: bigint, { type }: { type: PromptType }) {
+	constructor(
+		[client, bot]: [Client, Discord.Bot],
+		guildId: bigint,
+		{ type, isDeletable }: { type: PromptType; isDeletable: boolean },
+	) {
 		super([client, bot], guildId);
 		this.type = type;
+		this.isDeletable = isDeletable;
 		this.customId = customIds[type];
 		this.documents = this.getAllDocuments();
 		this._configuration = configurationLocators[type];
+		this.collectingInteractions = new Promise((resolve) => {
+			this.stopCollectingInteractions = resolve;
+		});
+		this.removingPrompts = new Promise((resolve) => {
+			this.stopRemovingPrompts = resolve;
+		});
 	}
 
 	async start(): Promise<void> {
@@ -115,9 +135,9 @@ abstract class PromptService<
 
 			const userId = BigInt(userDocument.account.id);
 
-			let prompt = prompts.get(promptDocument.id);
+			let prompt = prompts.get(compositeId);
 			if (prompt !== undefined) {
-				prompts.delete(promptDocument.id);
+				prompts.delete(compositeId);
 			} else {
 				const user = this.client.cache.users.get(userId);
 				if (user === undefined) {
@@ -132,8 +152,8 @@ abstract class PromptService<
 				prompt = message;
 			}
 
-			this.registerDocument(compositeId, promptDocument);
 			this.registerPrompt(prompt, userId, compositeId, promptDocument);
+			this.registerDocument(compositeId, promptDocument);
 			this.registerHandler(compositeId);
 		}
 
@@ -167,7 +187,104 @@ abstract class PromptService<
 
 				handle(selection, [compositeId, ...metadata] as InteractionData);
 			},
+			end: this.collectingInteractions,
 		});
+
+		if (!this.isDeletable) {
+			return;
+		}
+
+		createInteractionCollector([this.client, this.bot], {
+			type: Discord.InteractionTypes.MessageComponent,
+			customId: `${constants.components.removePrompt}/${this.customId}`,
+			doesNotExpire: true,
+			onCollect: async (selection) => {
+				const customId = selection.data?.customId;
+				if (customId === undefined) {
+					return;
+				}
+
+				const guildId = selection.guildId;
+				if (guildId === undefined) {
+					return;
+				}
+
+				const member = selection.member;
+				if (member === undefined) {
+					return;
+				}
+
+				let management: { roles?: string[]; users?: string[] } | undefined;
+				switch (this.type) {
+					case "reports": {
+						management = (configuration as Configurations["reports"]).management;
+						break;
+					}
+					case "resources": {
+						management = (configuration as Configurations["resources"])?.management;
+						break;
+					}
+					case "suggestions": {
+						management = (configuration as Configurations["suggestions"]).management;
+						break;
+					}
+					default: {
+						management = undefined;
+						break;
+					}
+				}
+
+				const roleIds = management?.roles?.map((roleId) => BigInt(roleId));
+				const userIds = management?.users?.map((userId) => BigInt(userId));
+
+				const isAuthorised =
+					member.roles.some((roleId) => roleIds?.includes(roleId) ?? false) ||
+					(userIds?.includes(selection.user.id) ?? false);
+				if (!isAuthorised) {
+					const localeData = await getLocaleData(this.client, selection);
+					const locale = localeData.locale;
+
+					const strings = {
+						title: localise(this.client, "cannotRemovePrompt.title", locale)(),
+						description: localise(this.client, "cannotRemovePrompt.description", locale)(),
+					};
+
+					reply([this.client, this.bot], selection, {
+						embeds: [
+							{
+								title: strings.title,
+								description: strings.description,
+								color: constants.colors.peach,
+							},
+						],
+					});
+					return;
+				}
+
+				acknowledge([this.client, this.bot], selection);
+
+				const [_, compositeId] = decodeId(customId);
+				if (compositeId === undefined) {
+					return;
+				}
+
+				this.handleDelete(compositeId);
+			},
+			end: this.removingPrompts,
+		});
+	}
+
+	async stop(): Promise<void> {
+		this.documents.clear();
+		this.handlerByCompositeId.clear();
+		this.promptByCompositeId.clear();
+		this.documentByPromptId.clear();
+		this.userIdByPromptId.clear();
+
+		this.stopCollectingInteractions?.();
+		this.stopRemovingPrompts?.();
+		await this.collectingInteractions;
+		await this.removingPrompts;
 	}
 
 	// Anti-tampering feature; detects prompts being deleted.
@@ -352,6 +469,35 @@ abstract class PromptService<
 		interaction: Discord.Interaction,
 		data: InteractionData,
 	): Promise<DataType | undefined | null>;
+
+	private async handleDelete(compositeId: string): Promise<void> {
+		const session = this.client.database.openSession();
+
+		switch (this.type) {
+			case "reports": {
+				session.delete(`reports/${compositeId}`);
+				break;
+			}
+			case "suggestions": {
+				session.delete(`suggestions/${compositeId}`);
+				break;
+			}
+		}
+
+		await session.saveChanges();
+		session.dispose();
+
+		const prompt = this.promptByCompositeId.get(compositeId);
+		if (prompt !== undefined) {
+			this.bot.rest
+				.deleteMessage(prompt.channelId, prompt.id)
+				.catch(() => this.client.log.warn("Failed to delete prompt after deleting document."));
+			this.unregisterPrompt(prompt, compositeId);
+		}
+
+		this.unregisterDocument(compositeId);
+		this.unregisterHandler(compositeId);
+	}
 }
 
 export { PromptService, Configurations };

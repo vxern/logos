@@ -149,6 +149,10 @@ class DynamicVoiceChannelService extends LocalService {
 		}
 	}
 
+	async stop(): Promise<void> {
+		this.oldVoiceStates.clear();
+	}
+
 	async voiceStateUpdate(newVoiceState: Logos.VoiceState): Promise<void> {
 		const [channels, configuration, guild] = [this.channels, this.configuration, this.guild];
 		if (channels === undefined || configuration === undefined || guild === undefined) {

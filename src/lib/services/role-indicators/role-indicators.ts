@@ -36,6 +36,8 @@ class RoleIndicatorService extends LocalService {
 		}
 	}
 
+	async stop(): Promise<void> {}
+
 	async guildMemberUpdate(member: Discord.Member | Logos.Member, user: Discord.User | Logos.User): Promise<void> {
 		const [configuration, guild] = [this.configuration, this.guild];
 		if (configuration === undefined || guild === undefined) {

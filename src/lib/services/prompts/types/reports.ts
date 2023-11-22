@@ -1,6 +1,5 @@
 import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
-import { MentionTypes, mention, timestamp } from "../../../../formatting";
 import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
 import { Report } from "../../../database/report";
@@ -8,12 +7,13 @@ import { User } from "../../../database/user";
 import { encodeId, getLocaleData, reply } from "../../../interactions";
 import { getGuildIconURLFormatted } from "../../../utils";
 import { PromptService } from "../service";
+import diagnostics from "../../../diagnostics";
 
 type InteractionData = [documentId: string, isResolved: string];
 
 class ReportService extends PromptService<"reports", Report, InteractionData> {
 	constructor([client, bot]: [Client, Discord.Bot], guildId: bigint) {
-		super([client, bot], guildId, { type: "reports" });
+		super([client, bot], guildId, { type: "reports", isDeletable: true });
 	}
 
 	getAllDocuments(): Map<string, Report> {
@@ -63,17 +63,17 @@ class ReportService extends PromptService<"reports", Report, InteractionData> {
 			},
 			markResolved: localise(this.client, "markResolved", guildLocale)(),
 			markUnresolved: localise(this.client, "markUnresolved", guildLocale)(),
+			remove: localise(this.client, "remove", guildLocale)(),
 		};
 
 		return {
 			embeds: [
 				{
-					title: reportDocument.answers.reason,
-					color: constants.colors.darkRed,
+					color: reportDocument.isResolved ? constants.colors.green : constants.colors.peach,
 					thumbnail: (() => {
 						const iconURL = Discord.avatarUrl(user.id, user.discriminator, {
 							avatar: user.avatar,
-							size: 32,
+							size: 128,
 							format: "webp",
 						});
 						if (iconURL === undefined) {
@@ -84,8 +84,14 @@ class ReportService extends PromptService<"reports", Report, InteractionData> {
 					})(),
 					fields: [
 						{
+							name: diagnostics.display.user(user),
+							value: reportDocument.answers.reason,
+							inline: false,
+						},
+						{
 							name: strings.report.users,
 							value: reportDocument.answers.users,
+							inline: true,
 						},
 						{
 							name: strings.report.link,
@@ -93,16 +99,6 @@ class ReportService extends PromptService<"reports", Report, InteractionData> {
 								reportDocument.answers.messageLink !== undefined
 									? reportDocument.answers.messageLink
 									: `*${strings.report.noLinkProvided}*`,
-							inline: false,
-						},
-						{
-							name: strings.report.submittedBy,
-							value: mention(user.id, MentionTypes.User),
-							inline: true,
-						},
-						{
-							name: strings.report.submittedAt,
-							value: timestamp(reportDocument.createdAt),
 							inline: true,
 						},
 					],
@@ -117,18 +113,29 @@ class ReportService extends PromptService<"reports", Report, InteractionData> {
 			components: [
 				{
 					type: Discord.MessageComponentTypes.ActionRow,
-					components: [
-						reportDocument.isResolved
-							? {
+					components: reportDocument.isResolved
+						? [
+								{
 									type: Discord.MessageComponentTypes.Button,
-									style: Discord.ButtonStyles.Secondary,
+									style: Discord.ButtonStyles.Success,
 									label: strings.markUnresolved,
 									customId: encodeId<InteractionData>(constants.components.reports, [
 										`${reportDocument.guildId}/${reportDocument.authorId}/${reportDocument.createdAt}`,
 										`${false}`,
 									]),
-							  }
-							: {
+								},
+
+								{
+									type: Discord.MessageComponentTypes.Button,
+									style: Discord.ButtonStyles.Danger,
+									label: strings.remove,
+									customId: encodeId(`${constants.components.removePrompt}/${constants.components.reports}`, [
+										`${reportDocument.guildId}/${reportDocument.authorId}/${reportDocument.createdAt}`,
+									]),
+								},
+						  ]
+						: [
+								{
 									type: Discord.MessageComponentTypes.Button,
 									style: Discord.ButtonStyles.Primary,
 									label: strings.markResolved,
@@ -136,8 +143,8 @@ class ReportService extends PromptService<"reports", Report, InteractionData> {
 										`${reportDocument.guildId}/${reportDocument.authorId}/${reportDocument.createdAt}`,
 										`${true}`,
 									]),
-							  },
-					],
+								},
+						  ],
 				},
 			],
 		};

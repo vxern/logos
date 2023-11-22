@@ -33,6 +33,10 @@ class AlertService extends LocalService {
 		return channelId;
 	}
 
+	async start(): Promise<void> {}
+
+	async stop(): Promise<void> {}
+
 	async alert(message: Discord.CreateMessageOptions): Promise<void> {
 		const channelId = this.channelId;
 		if (channelId === undefined) {

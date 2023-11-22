@@ -47,6 +47,7 @@ interface InteractionCollectorSettings {
 
 	onCollect?: (...args: Parameters<Discord.EventHandlers["interactionCreate"]>) => void;
 	onEnd?: () => void;
+	end?: Promise<void>;
 }
 
 /**
@@ -65,6 +66,7 @@ function createInteractionCollector(
 		removeAfter: settings.doesNotExpire ? undefined : constants.INTERACTION_TOKEN_EXPIRY,
 		onCollect: settings.onCollect ?? (() => {}),
 		onEnd: settings.onEnd ?? (() => {}),
+		end: settings.end,
 	});
 
 	return customId;

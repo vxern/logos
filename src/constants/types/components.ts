@@ -7,7 +7,9 @@ export default {
 	},
 	verification: "verification",
 	reports: "reports",
+	resources: "resources",
 	suggestions: "suggestions",
+	removePrompt: "remove_prompt",
 	selectRoles: "select_roles",
 	showInChat: "show_in_chat",
 };

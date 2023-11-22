@@ -2,7 +2,7 @@ import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
-import { Suggestion } from "../../../database/suggestion";
+import { Resource } from "../../../database/resource";
 import { User } from "../../../database/user";
 import { encodeId, getLocaleData, reply } from "../../../interactions";
 import { PromptService } from "../service";
@@ -10,38 +10,38 @@ import diagnostics from "../../../diagnostics";
 
 type InteractionData = [documentId: string, isResolved: string];
 
-class SuggestionService extends PromptService<"suggestions", Suggestion, InteractionData> {
+class ResourceService extends PromptService<"resources", Resource, InteractionData> {
 	constructor([client, bot]: [Client, Discord.Bot], guildId: bigint) {
-		super([client, bot], guildId, { type: "suggestions", isDeletable: true });
+		super([client, bot], guildId, { type: "resources", isDeletable: true });
 	}
 
-	getAllDocuments(): Map<string, Suggestion> {
-		const suggestions = new Map<string, Suggestion>();
+	getAllDocuments(): Map<string, Resource> {
+		const resources = new Map<string, Resource>();
 
-		for (const [compositeId, suggestion] of this.client.cache.documents.suggestions) {
-			if (suggestion.guildId !== this.guildIdString) {
+		for (const [compositeId, resource] of this.client.cache.documents.resources) {
+			if (resource.guildId !== this.guildIdString) {
 				continue;
 			}
 
-			suggestions.set(compositeId, suggestion);
+			resources.set(compositeId, resource);
 		}
 
-		return suggestions;
+		return resources;
 	}
 
-	async getUserDocument(suggestionDocument: Suggestion): Promise<User | undefined> {
+	async getUserDocument(resourceDocument: Resource): Promise<User | undefined> {
 		const session = this.client.database.openSession();
 
 		const userDocument =
-			this.client.cache.documents.users.get(suggestionDocument.authorId) ??
-			session.load<User>(`users/${suggestionDocument.authorId}`).then((value) => value ?? undefined);
+			this.client.cache.documents.users.get(resourceDocument.authorId) ??
+			session.load<User>(`users/${resourceDocument.authorId}`).then((value) => value ?? undefined);
 
 		session.dispose();
 
 		return userDocument;
 	}
 
-	getPromptContent(user: Logos.User, suggestionDocument: Suggestion): Discord.CreateMessageOptions | undefined {
+	getPromptContent(user: Logos.User, resourceDocument: Resource): Discord.CreateMessageOptions | undefined {
 		const guild = this.guild;
 		if (guild === undefined) {
 			return undefined;
@@ -57,8 +57,8 @@ class SuggestionService extends PromptService<"suggestions", Suggestion, Interac
 		return {
 			embeds: [
 				{
-					color: suggestionDocument.isResolved ? constants.colors.green : constants.colors.dullYellow,
-					description: `*${suggestionDocument.answers.suggestion}*`,
+					color: resourceDocument.isResolved ? constants.colors.green : constants.colors.gray,
+					description: `*${resourceDocument.answers.resource}*`,
 					footer: {
 						text: diagnostics.display.user(user),
 						iconUrl: `${(() => {
@@ -72,23 +72,21 @@ class SuggestionService extends PromptService<"suggestions", Suggestion, Interac
 							}
 
 							return iconURL;
-						})()}&metadata=${suggestionDocument.guildId}/${suggestionDocument.authorId}/${
-							suggestionDocument.createdAt
-						}`,
+						})()}&metadata=${resourceDocument.guildId}/${resourceDocument.authorId}/${resourceDocument.createdAt}`,
 					},
 				},
 			],
 			components: [
 				{
 					type: Discord.MessageComponentTypes.ActionRow,
-					components: suggestionDocument.isResolved
+					components: resourceDocument.isResolved
 						? [
 								{
 									type: Discord.MessageComponentTypes.Button,
 									style: Discord.ButtonStyles.Success,
 									label: strings.markUnresolved,
-									customId: encodeId<InteractionData>(constants.components.suggestions, [
-										`${suggestionDocument.guildId}/${suggestionDocument.authorId}/${suggestionDocument.createdAt}`,
+									customId: encodeId<InteractionData>(constants.components.resources, [
+										`${resourceDocument.guildId}/${resourceDocument.authorId}/${resourceDocument.createdAt}`,
 										`${false}`,
 									]),
 								},
@@ -96,8 +94,8 @@ class SuggestionService extends PromptService<"suggestions", Suggestion, Interac
 									type: Discord.MessageComponentTypes.Button,
 									style: Discord.ButtonStyles.Danger,
 									label: strings.remove,
-									customId: encodeId(`${constants.components.removePrompt}/${constants.components.suggestions}`, [
-										`${suggestionDocument.guildId}/${suggestionDocument.authorId}/${suggestionDocument.createdAt}`,
+									customId: encodeId(`${constants.components.removePrompt}/${constants.components.resources}`, [
+										`${resourceDocument.guildId}/${resourceDocument.authorId}/${resourceDocument.createdAt}`,
 									]),
 								},
 						  ]
@@ -106,8 +104,8 @@ class SuggestionService extends PromptService<"suggestions", Suggestion, Interac
 									type: Discord.MessageComponentTypes.Button,
 									style: Discord.ButtonStyles.Primary,
 									label: strings.markResolved,
-									customId: encodeId<InteractionData>(constants.components.suggestions, [
-										`${suggestionDocument.guildId}/${suggestionDocument.authorId}/${suggestionDocument.createdAt}`,
+									customId: encodeId<InteractionData>(constants.components.resources, [
+										`${resourceDocument.guildId}/${resourceDocument.authorId}/${resourceDocument.createdAt}`,
 										`${true}`,
 									]),
 								},
@@ -120,19 +118,19 @@ class SuggestionService extends PromptService<"suggestions", Suggestion, Interac
 	async handleInteraction(
 		interaction: Discord.Interaction,
 		data: InteractionData,
-	): Promise<Suggestion | null | undefined> {
+	): Promise<Resource | null | undefined> {
 		const localeData = await getLocaleData(this.client, interaction);
 		const locale = localeData.locale;
 
 		const [compositeId, isResolvedString] = data;
 		const isResolved = isResolvedString === "true";
 
-		const suggestionDocument = this.documents.get(compositeId);
-		if (suggestionDocument === undefined) {
+		const resourceDocument = this.documents.get(compositeId);
+		if (resourceDocument === undefined) {
 			return undefined;
 		}
 
-		if (isResolved && suggestionDocument.isResolved) {
+		if (isResolved && resourceDocument.isResolved) {
 			const strings = {
 				title: localise(this.client, "alreadyMarkedResolved.title", locale)(),
 				description: localise(this.client, "alreadyMarkedResolved.description", locale)(),
@@ -150,7 +148,7 @@ class SuggestionService extends PromptService<"suggestions", Suggestion, Interac
 			return;
 		}
 
-		if (!(isResolved || suggestionDocument.isResolved)) {
+		if (!(isResolved || resourceDocument.isResolved)) {
 			const strings = {
 				title: localise(this.client, "alreadyMarkedUnresolved.title", locale)(),
 				description: localise(this.client, "alreadyMarkedUnresolved.description", locale)(),
@@ -170,15 +168,15 @@ class SuggestionService extends PromptService<"suggestions", Suggestion, Interac
 
 		const session = this.client.database.openSession();
 
-		suggestionDocument.isResolved = isResolved;
+		resourceDocument.isResolved = isResolved;
 
-		await session.store(suggestionDocument);
+		await session.store(resourceDocument);
 		await session.saveChanges();
 
 		session.dispose();
 
-		return suggestionDocument;
+		return resourceDocument;
 	}
 }
 
-export { SuggestionService };
+export { ResourceService };
