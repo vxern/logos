@@ -19,8 +19,8 @@ abstract class Service implements ServiceBase {
 		this.bot = bot;
 	}
 
-	async start(): Promise<void> {}
-	async stop(): Promise<void> {}
+	abstract start(): Promise<void>;
+	abstract stop(): Promise<void>;
 
 	async debug(..._: Parameters<ServiceBase["debug"]>) {}
 	async applicationCommandPermissionsUpdate(..._: Parameters<ServiceBase["applicationCommandPermissionsUpdate"]>) {}
@@ -85,17 +85,14 @@ abstract class Service implements ServiceBase {
 	async typingStart(..._: Parameters<ServiceBase["typingStart"]>) {}
 }
 
-abstract class GlobalService extends Service {}
+abstract class GlobalService extends Service {
+	abstract start(): Promise<void>;
+	abstract stop(): Promise<void>;
+}
 
 abstract class LocalService extends Service {
 	protected readonly guildId: bigint;
 	protected readonly guildIdString: string;
-
-	constructor([client, bot]: [Client, Discord.Bot], guildId: bigint) {
-		super([client, bot]);
-		this.guildId = guildId;
-		this.guildIdString = guildId.toString();
-	}
 
 	get guild(): Logos.Guild | undefined {
 		return this.client.cache.guilds.get(this.guildId);
@@ -116,6 +113,15 @@ abstract class LocalService extends Service {
 
 		return guildLocale;
 	}
+
+	constructor([client, bot]: [Client, Discord.Bot], guildId: bigint) {
+		super([client, bot]);
+		this.guildId = guildId;
+		this.guildIdString = guildId.toString();
+	}
+
+	abstract start(): Promise<void>;
+	abstract stop(): Promise<void>;
 }
 
 export { Service, GlobalService, LocalService, ServiceBase };

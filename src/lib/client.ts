@@ -152,6 +152,7 @@ interface Collector<ForEvent extends keyof Discord.EventHandlers> {
 	removeAfter?: number;
 	onCollect: (...args: Parameters<Discord.EventHandlers[ForEvent]>) => void;
 	onEnd: () => void;
+	end?: Promise<void>;
 }
 
 type Event = keyof Discord.EventHandlers;
@@ -1350,6 +1351,8 @@ function addCollector<T extends keyof Discord.EventHandlers>(
 		collectors?.delete(collector);
 		onEnd();
 	};
+
+	collector.end?.then(() => collector.onEnd());
 
 	if (collector.limit !== undefined) {
 		let emitCount = 0;

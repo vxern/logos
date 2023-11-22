@@ -7,6 +7,10 @@ import { GlobalService } from "../service";
 type InteractionRepetitionButtonID = [interactionId: string];
 
 class InteractionRepetitionService extends GlobalService {
+	async start(): Promise<void> {}
+
+	async stop(): Promise<void> {}
+
 	async interactionCreate(interactionRaw: Discord.Interaction): Promise<void> {
 		if (interactionRaw.type === Discord.InteractionTypes.ApplicationCommand) {
 			this.handleApplicationCommand(interactionRaw);

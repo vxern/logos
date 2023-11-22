@@ -57,6 +57,11 @@ abstract class PromptService<
 	private readonly documentByPromptId: Map</*promptId: */ string, DataType> = new Map();
 	private readonly userIdByPromptId: Map</*promptId: */ string, bigint> = new Map();
 
+	private readonly collectingInteractions: Promise<void>;
+	private readonly removingPrompts: Promise<void>;
+	private stopCollectingInteractions: (() => void) | undefined;
+	private stopRemovingPrompts: (() => void) | undefined;
+
 	private readonly _configuration: ConfigurationLocators[PromptType];
 	get configuration(): Configurations[PromptType] | undefined {
 		const guildDocument = this.guildDocument;
@@ -96,6 +101,12 @@ abstract class PromptService<
 		this.customId = customIds[type];
 		this.documents = this.getAllDocuments();
 		this._configuration = configurationLocators[type];
+		this.collectingInteractions = new Promise((resolve) => {
+			this.stopCollectingInteractions = resolve;
+		});
+		this.removingPrompts = new Promise((resolve) => {
+			this.stopRemovingPrompts = resolve;
+		});
 	}
 
 	async start(): Promise<void> {
@@ -176,6 +187,7 @@ abstract class PromptService<
 
 				handle(selection, [compositeId, ...metadata] as InteractionData);
 			},
+			end: this.collectingInteractions,
 		});
 
 		if (!this.isDeletable) {
@@ -258,7 +270,21 @@ abstract class PromptService<
 
 				this.handleDelete(compositeId);
 			},
+			end: this.removingPrompts,
 		});
+	}
+
+	async stop(): Promise<void> {
+		this.documents.clear();
+		this.handlerByCompositeId.clear();
+		this.promptByCompositeId.clear();
+		this.documentByPromptId.clear();
+		this.userIdByPromptId.clear();
+
+		this.stopCollectingInteractions?.();
+		this.stopRemovingPrompts?.();
+		await this.collectingInteractions;
+		await this.removingPrompts;
 	}
 
 	// Anti-tampering feature; detects prompts being deleted.

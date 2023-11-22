@@ -26,6 +26,11 @@ class StatusService extends GlobalService {
 		this.cycleStatus();
 	}
 
+	async stop(): Promise<void> {
+		this.isActive = false;
+		this.currentIndex = 0;
+	}
+
 	private cycleStatus(): void {
 		const status = this.status;
 		if (status === undefined) {

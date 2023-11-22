@@ -148,6 +148,10 @@ abstract class NoticeService<NoticeType extends NoticeTypes> extends LocalServic
 		}
 	}
 
+	async stop(): Promise<void> {
+		this.noticeData = undefined;
+	}
+
 	// Anti-tampering feature; detects notices being deleted.
 	async messageDelete(message: Discord.Message): Promise<void> {
 		const [channelId, noticeData] = [this.channelId, this.noticeData];
