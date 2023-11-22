@@ -19,12 +19,12 @@ class ReportService extends PromptService<"reports", Report, InteractionData> {
 	getAllDocuments(): Map<string, Report> {
 		const reports = new Map<string, Report>();
 
-		for (const [compositeId, report] of this.client.cache.documents.reports) {
-			if (report.guildId !== this.guildIdString) {
+		for (const [compositeId, reportDocument] of this.client.cache.documents.reports) {
+			if (reportDocument.guildId !== this.guildIdString) {
 				continue;
 			}
 
-			reports.set(compositeId, report);
+			reports.set(compositeId, reportDocument);
 		}
 
 		return reports;

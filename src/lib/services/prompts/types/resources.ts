@@ -18,12 +18,12 @@ class ResourceService extends PromptService<"resources", Resource, InteractionDa
 	getAllDocuments(): Map<string, Resource> {
 		const resources = new Map<string, Resource>();
 
-		for (const [compositeId, resource] of this.client.cache.documents.resources) {
-			if (resource.guildId !== this.guildIdString) {
+		for (const [compositeId, resourceDocument] of this.client.cache.documents.resources) {
+			if (resourceDocument.guildId !== this.guildIdString) {
 				continue;
 			}
 
-			resources.set(compositeId, resource);
+			resources.set(compositeId, resourceDocument);
 		}
 
 		return resources;
