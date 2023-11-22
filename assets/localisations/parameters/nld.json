@@ -12,7 +12,6 @@
     "parameters.timestamp.name": "tijdstempel",
     "parameters.timestamp.description": "Het tijdstempel dat gezocht moet worden.",
     "parameters.collection.name": "collectie",
-    "parameters.collection.description": "",
     "parameters.by.name": "by",
     "parameters.by.description": "Het aantal nummers of nummerlijsten dat moet overgeslagen worden.",
     "parameters.to.name": "to",
