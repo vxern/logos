@@ -17,5 +17,8 @@
 	"alreadyMarkedResolved.title": "Already marked resolved",
 	"alreadyMarkedResolved.description": "This issue has already been marked resolved.",
 	"alreadyMarkedUnresolved.title": "Already marked unresolved",
-	"alreadyMarkedUnresolved.description": "This issue has already been marked unresolved."
+	"alreadyMarkedUnresolved.description": "This issue has already been marked unresolved.",
+  "remove": "Remove",
+  "cannotRemovePrompt.title": "Cannot remove prompt",
+  "cannotRemovePrompt.description": "You cannot remove this prompt."
 }

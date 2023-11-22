@@ -1,11 +1,11 @@
 import * as Discord from "@discordeno/bot";
 import constants from "../../../constants/constants";
 import * as Logos from "../../../types";
-import { Client } from "../../client";
+import { Client, localise } from "../../client";
 import { Guild } from "../../database/guild";
 import { User } from "../../database/user";
 import diagnostics from "../../diagnostics";
-import { createInteractionCollector, decodeId } from "../../interactions";
+import { acknowledge, createInteractionCollector, decodeId, getLocaleData, reply } from "../../interactions";
 import { getAllMessages } from "../../utils";
 import { LocalService } from "../service";
 
@@ -42,6 +42,7 @@ abstract class PromptService<
 > extends LocalService {
 	private readonly type: PromptType;
 	private readonly customId: string;
+	private readonly isDeletable: boolean;
 
 	protected readonly documents: Map<string, DataType>;
 
@@ -81,9 +82,14 @@ abstract class PromptService<
 		return channelId;
 	}
 
-	constructor([client, bot]: [Client, Discord.Bot], guildId: bigint, { type }: { type: PromptType }) {
+	constructor(
+		[client, bot]: [Client, Discord.Bot],
+		guildId: bigint,
+		{ type, isDeletable }: { type: PromptType; isDeletable: boolean },
+	) {
 		super([client, bot], guildId);
 		this.type = type;
+		this.isDeletable = isDeletable;
 		this.customId = customIds[type];
 		this.documents = this.getAllDocuments();
 		this._configuration = configurationLocators[type];
@@ -115,9 +121,9 @@ abstract class PromptService<
 
 			const userId = BigInt(userDocument.account.id);
 
-			let prompt = prompts.get(promptDocument.id);
+			let prompt = prompts.get(compositeId);
 			if (prompt !== undefined) {
-				prompts.delete(promptDocument.id);
+				prompts.delete(compositeId);
 			} else {
 				const user = this.client.cache.users.get(userId);
 				if (user === undefined) {
@@ -132,8 +138,8 @@ abstract class PromptService<
 				prompt = message;
 			}
 
-			this.registerDocument(compositeId, promptDocument);
 			this.registerPrompt(prompt, userId, compositeId, promptDocument);
+			this.registerDocument(compositeId, promptDocument);
 			this.registerHandler(compositeId);
 		}
 
@@ -166,6 +172,84 @@ abstract class PromptService<
 				}
 
 				handle(selection, [compositeId, ...metadata] as InteractionData);
+			},
+		});
+
+		if (!this.isDeletable) {
+			return;
+		}
+
+		createInteractionCollector([this.client, this.bot], {
+			type: Discord.InteractionTypes.MessageComponent,
+			customId: `${constants.components.removePrompt}/${this.customId}`,
+			doesNotExpire: true,
+			onCollect: async (selection) => {
+				const customId = selection.data?.customId;
+				if (customId === undefined) {
+					return;
+				}
+
+				const guildId = selection.guildId;
+				if (guildId === undefined) {
+					return;
+				}
+
+				const member = selection.member;
+				if (member === undefined) {
+					return;
+				}
+
+				let management: { roles?: string[]; users?: string[] } | undefined;
+				switch (this.type) {
+					case "reports": {
+						management = (configuration as Configurations["reports"]).management;
+						break;
+					}
+					case "suggestions": {
+						management = (configuration as Configurations["suggestions"]).management;
+						break;
+					}
+					default: {
+						management = undefined;
+						break;
+					}
+				}
+
+				const roleIds = management?.roles?.map((roleId) => BigInt(roleId));
+				const userIds = management?.users?.map((userId) => BigInt(userId));
+
+				const isAuthorised =
+					member.roles.some((roleId) => roleIds?.includes(roleId) ?? false) ||
+					(userIds?.includes(selection.user.id) ?? false);
+				if (!isAuthorised) {
+					const localeData = await getLocaleData(this.client, selection);
+					const locale = localeData.locale;
+
+					const strings = {
+						title: localise(this.client, "cannotRemovePrompt.title", locale)(),
+						description: localise(this.client, "cannotRemovePrompt.description", locale)(),
+					};
+
+					reply([this.client, this.bot], selection, {
+						embeds: [
+							{
+								title: strings.title,
+								description: strings.description,
+								color: constants.colors.peach,
+							},
+						],
+					});
+					return;
+				}
+
+				acknowledge([this.client, this.bot], selection);
+
+				const [_, compositeId] = decodeId(customId);
+				if (compositeId === undefined) {
+					return;
+				}
+
+				this.handleDelete(compositeId);
 			},
 		});
 	}
@@ -352,6 +436,35 @@ abstract class PromptService<
 		interaction: Discord.Interaction,
 		data: InteractionData,
 	): Promise<DataType | undefined | null>;
+
+	private async handleDelete(compositeId: string): Promise<void> {
+		const session = this.client.database.openSession();
+
+		switch (this.type) {
+			case "reports": {
+				session.delete(`reports/${compositeId}`);
+				break;
+			}
+			case "suggestions": {
+				session.delete(`suggestions/${compositeId}`);
+				break;
+			}
+		}
+
+		await session.saveChanges();
+		session.dispose();
+
+		const prompt = this.promptByCompositeId.get(compositeId);
+		if (prompt !== undefined) {
+			this.bot.rest
+				.deleteMessage(prompt.channelId, prompt.id)
+				.catch(() => this.client.log.warn("Failed to delete prompt after deleting document."));
+			this.unregisterPrompt(prompt, compositeId);
+		}
+
+		this.unregisterDocument(compositeId);
+		this.unregisterHandler(compositeId);
+	}
 }
 
 export { PromptService, Configurations };

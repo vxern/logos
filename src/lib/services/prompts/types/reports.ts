@@ -13,7 +13,7 @@ type InteractionData = [documentId: string, isResolved: string];
 
 class ReportService extends PromptService<"reports", Report, InteractionData> {
 	constructor([client, bot]: [Client, Discord.Bot], guildId: bigint) {
-		super([client, bot], guildId, { type: "reports" });
+		super([client, bot], guildId, { type: "reports", isDeletable: true });
 	}
 
 	getAllDocuments(): Map<string, Report> {
@@ -63,6 +63,7 @@ class ReportService extends PromptService<"reports", Report, InteractionData> {
 			},
 			markResolved: localise(this.client, "markResolved", guildLocale)(),
 			markUnresolved: localise(this.client, "markUnresolved", guildLocale)(),
+			remove: localise(this.client, "remove", guildLocale)(),
 		};
 
 		return {
@@ -112,9 +113,9 @@ class ReportService extends PromptService<"reports", Report, InteractionData> {
 			components: [
 				{
 					type: Discord.MessageComponentTypes.ActionRow,
-					components: [
-						reportDocument.isResolved
-							? {
+					components: reportDocument.isResolved
+						? [
+								{
 									type: Discord.MessageComponentTypes.Button,
 									style: Discord.ButtonStyles.Success,
 									label: strings.markUnresolved,
@@ -122,8 +123,19 @@ class ReportService extends PromptService<"reports", Report, InteractionData> {
 										`${reportDocument.guildId}/${reportDocument.authorId}/${reportDocument.createdAt}`,
 										`${false}`,
 									]),
-							  }
-							: {
+								},
+
+								{
+									type: Discord.MessageComponentTypes.Button,
+									style: Discord.ButtonStyles.Danger,
+									label: strings.remove,
+									customId: encodeId(`${constants.components.removePrompt}/${constants.components.reports}`, [
+										`${reportDocument.guildId}/${reportDocument.authorId}/${reportDocument.createdAt}`,
+									]),
+								},
+						  ]
+						: [
+								{
 									type: Discord.MessageComponentTypes.Button,
 									style: Discord.ButtonStyles.Primary,
 									label: strings.markResolved,
@@ -131,8 +143,8 @@ class ReportService extends PromptService<"reports", Report, InteractionData> {
 										`${reportDocument.guildId}/${reportDocument.authorId}/${reportDocument.createdAt}`,
 										`${true}`,
 									]),
-							  },
-					],
+								},
+						  ],
 				},
 			],
 		};

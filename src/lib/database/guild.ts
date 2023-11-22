@@ -56,6 +56,7 @@ interface Guild {
 			};
 		}>;
 
+		/** Language section of features. */
 		language: Activatable<{
 			features: {
 				/** @since v3.3.0 */
@@ -144,6 +145,11 @@ interface Guild {
 					channelId: string;
 					journaling: boolean;
 					rateLimit?: RateLimit;
+					/** @since v3.28.0 */
+					management?: {
+						roles?: string[];
+						users?: string[];
+					};
 				}>;
 
 				/** User verification. */
@@ -188,6 +194,11 @@ interface Guild {
 					channelId: string;
 					journaling: boolean;
 					rateLimit?: RateLimit;
+					/** @since v3.28.0 */
+					management?: {
+						roles?: string[];
+						users?: string[];
+					};
 				}>;
 			};
 		}>;

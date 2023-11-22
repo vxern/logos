@@ -12,7 +12,7 @@ type InteractionData = [documentId: string, isResolved: string];
 
 class SuggestionService extends PromptService<"suggestions", Suggestion, InteractionData> {
 	constructor([client, bot]: [Client, Discord.Bot], guildId: bigint) {
-		super([client, bot], guildId, { type: "suggestions" });
+		super([client, bot], guildId, { type: "suggestions", isDeletable: true });
 	}
 
 	getAllDocuments(): Map<string, Suggestion> {
@@ -51,6 +51,7 @@ class SuggestionService extends PromptService<"suggestions", Suggestion, Interac
 		const strings = {
 			markResolved: localise(this.client, "markResolved", guildLocale)(),
 			markUnresolved: localise(this.client, "markUnresolved", guildLocale)(),
+			remove: localise(this.client, "remove", guildLocale)(),
 		};
 
 		return {
@@ -80,9 +81,9 @@ class SuggestionService extends PromptService<"suggestions", Suggestion, Interac
 			components: [
 				{
 					type: Discord.MessageComponentTypes.ActionRow,
-					components: [
-						suggestionDocument.isResolved
-							? {
+					components: suggestionDocument.isResolved
+						? [
+								{
 									type: Discord.MessageComponentTypes.Button,
 									style: Discord.ButtonStyles.Success,
 									label: strings.markUnresolved,
@@ -90,8 +91,18 @@ class SuggestionService extends PromptService<"suggestions", Suggestion, Interac
 										`${suggestionDocument.guildId}/${suggestionDocument.authorId}/${suggestionDocument.createdAt}`,
 										`${false}`,
 									]),
-							  }
-							: {
+								},
+								{
+									type: Discord.MessageComponentTypes.Button,
+									style: Discord.ButtonStyles.Danger,
+									label: strings.remove,
+									customId: encodeId(`${constants.components.removePrompt}/${constants.components.suggestions}`, [
+										`${suggestionDocument.guildId}/${suggestionDocument.authorId}/${suggestionDocument.createdAt}`,
+									]),
+								},
+						  ]
+						: [
+								{
 									type: Discord.MessageComponentTypes.Button,
 									style: Discord.ButtonStyles.Primary,
 									label: strings.markResolved,
@@ -99,8 +110,8 @@ class SuggestionService extends PromptService<"suggestions", Suggestion, Interac
 										`${suggestionDocument.guildId}/${suggestionDocument.authorId}/${suggestionDocument.createdAt}`,
 										`${true}`,
 									]),
-							  },
-					],
+								},
+						  ],
 				},
 			],
 		};

@@ -23,7 +23,7 @@ type VoteInformation = {
 
 class VerificationService extends PromptService<"verification", EntryRequest, InteractionData> {
 	constructor([client, bot]: [Client, Discord.Bot], guildId: bigint) {
-		super([client, bot], guildId, { type: "verification" });
+		super([client, bot], guildId, { type: "verification", isDeletable: false });
 	}
 
 	getAllDocuments(): Map<string, EntryRequest> {
