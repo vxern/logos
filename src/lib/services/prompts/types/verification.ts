@@ -29,12 +29,16 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 	getAllDocuments(): Map<string, EntryRequest> {
 		const entryRequests: Map<string, EntryRequest> = new Map();
 
-		for (const [compositeId, entryRequest] of this.client.cache.documents.entryRequests) {
-			if (entryRequest.isFinalised) {
+		for (const [compositeId, entryRequestDocument] of this.client.cache.documents.entryRequests) {
+			if (entryRequestDocument.guildId !== this.guildIdString) {
 				continue;
 			}
 
-			entryRequests.set(compositeId, entryRequest);
+			if (entryRequestDocument.isFinalised) {
+				continue;
+			}
+
+			entryRequests.set(compositeId, entryRequestDocument);
 		}
 
 		return entryRequests;

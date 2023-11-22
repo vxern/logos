@@ -18,12 +18,12 @@ class SuggestionService extends PromptService<"suggestions", Suggestion, Interac
 	getAllDocuments(): Map<string, Suggestion> {
 		const suggestions = new Map<string, Suggestion>();
 
-		for (const [compositeId, suggestion] of this.client.cache.documents.suggestions) {
-			if (suggestion.guildId !== this.guildIdString) {
+		for (const [compositeId, suggestionDocument] of this.client.cache.documents.suggestions) {
+			if (suggestionDocument.guildId !== this.guildIdString) {
 				continue;
 			}
 
-			suggestions.set(compositeId, suggestion);
+			suggestions.set(compositeId, suggestionDocument);
 		}
 
 		return suggestions;
