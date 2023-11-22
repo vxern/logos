@@ -478,6 +478,10 @@ abstract class PromptService<
 				session.delete(`reports/${compositeId}`);
 				break;
 			}
+			case "resources": {
+				session.delete(`resources/${compositeId}`);
+				break;
+			}
 			case "suggestions": {
 				session.delete(`suggestions/${compositeId}`);
 				break;
