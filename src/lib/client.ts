@@ -57,6 +57,8 @@ import { Report } from "./database/report";
 import { Suggestion } from "./database/suggestion";
 import { User } from "./database/user";
 import { Warning } from "./database/warning";
+import { ResourceService } from "./services/prompts/types/resources";
+import { Resource } from "./database/resource";
 
 type Client = {
 	environment: {
@@ -90,6 +92,7 @@ type Client = {
 			praisesByAuthor: Map<string, Map<string, Praise>>;
 			praisesByTarget: Map<string, Map<string, Praise>>;
 			reports: Map<string, Report>;
+			resources: Map<string, Resource>;
 			suggestions: Map<string, Suggestion>;
 			users: Map<string, User>;
 			warningsByTarget: Map<string, Map<string, Warning>>;
@@ -131,6 +134,7 @@ type Client = {
 		prompts: {
 			reports: Map<bigint, ReportService>;
 			suggestions: Map<bigint, SuggestionService>;
+			resources: Map<bigint, ResourceService>;
 			verification: Map<bigint, VerificationService>;
 		};
 		interactionRepetition: InteractionRepetitionService;
@@ -181,6 +185,7 @@ function createClient(
 				praisesByAuthor: new Map(),
 				praisesByTarget: new Map(),
 				reports: new Map(),
+				resources: new Map(),
 				suggestions: new Map(),
 				users: new Map(),
 				warningsByTarget: new Map(),
@@ -210,6 +215,7 @@ function createClient(
 			},
 			prompts: {
 				reports: new Map(),
+				resources: new Map(),
 				suggestions: new Map(),
 				verification: new Map(),
 			},
@@ -461,6 +467,12 @@ async function prefetchDataFromDatabase(client: Client): Promise<void> {
 		client.cache.documents.entryRequests.set(`${document.guildId}/${document.authorId}`, document);
 	}
 
+	const resourceDocuments = await session.query<Resource>({ collection: "Resources" }).all();
+
+	for (const document of resourceDocuments) {
+		client.cache.documents.resources.set(`${document.guildId}/${document.authorId}/${document.createdAt}`, document);
+	}
+
 	const reportDocuments = await session.query<Report>({ collection: "Reports" }).all();
 
 	for (const document of reportDocuments) {
@@ -655,6 +667,15 @@ export async function handleGuildCreate(
 			services.push(service);
 
 			client.services.prompts.suggestions.set(guild.id, service);
+		}
+
+		if (server.resources.enabled) {
+			// TODO(vxern): guildCommands.push(commands.resource);
+
+			const service = new ResourceService([client, bot], guild.id);
+			services.push(service);
+
+			client.services.prompts.resources.set(guild.id, service);
 		}
 	}
 

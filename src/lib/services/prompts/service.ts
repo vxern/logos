@@ -11,6 +11,7 @@ import { LocalService } from "../service";
 
 interface Configurations {
 	reports: NonNullable<Guild["features"]["moderation"]["features"]>["reports"];
+	resources: NonNullable<Guild["features"]["server"]["features"]>["resources"];
 	suggestions: NonNullable<Guild["features"]["server"]["features"]>["suggestions"];
 	verification: NonNullable<Guild["features"]["moderation"]["features"]>["verification"];
 }
@@ -21,6 +22,7 @@ type ConfigurationLocators = {
 
 const configurationLocators: ConfigurationLocators = {
 	reports: (guildDocument) => guildDocument.features.moderation.features?.reports,
+	resources: (guildDocument) => guildDocument.features.server.features?.resources,
 	suggestions: (guildDocument) => guildDocument.features.server.features?.suggestions,
 	verification: (guildDocument) => guildDocument.features.moderation.features?.verification,
 };
@@ -29,6 +31,7 @@ type CustomIDs = Record<keyof Configurations, string>;
 
 const customIds: CustomIDs = {
 	reports: constants.components.reports,
+	resources: constants.components.resources,
 	suggestions: constants.components.suggestions,
 	verification: constants.components.verification,
 };

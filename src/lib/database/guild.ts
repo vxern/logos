@@ -200,6 +200,18 @@ interface Guild {
 						users?: string[];
 					};
 				}>;
+
+				/** User resource submissions for the server. */
+				resources: Activatable<{
+					channelId: string;
+					journaling: boolean;
+					rateLimit?: RateLimit;
+					/** @since v3.28.0 */
+					management?: {
+						roles?: string[];
+						users?: string[];
+					};
+				}>;
 			};
 		}>;
 
