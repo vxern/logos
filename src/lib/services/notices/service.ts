@@ -18,6 +18,7 @@ interface Configurations {
 	information: NonNullable<
 		NonNullable<Guild["features"]["information"]["features"]>["notices"]["features"]
 	>["information"];
+	resources: NonNullable<NonNullable<Guild["features"]["information"]["features"]>["notices"]["features"]>["resources"];
 	roles: NonNullable<NonNullable<Guild["features"]["information"]["features"]>["notices"]["features"]>["roles"];
 	welcome: NonNullable<NonNullable<Guild["features"]["information"]["features"]>["notices"]["features"]>["welcome"];
 }
@@ -28,6 +29,7 @@ type ConfigurationLocators = {
 
 const configurationLocators: ConfigurationLocators = {
 	information: (guildDocument) => guildDocument.features.information.features?.notices.features?.information,
+	resources: (guildDocument) => guildDocument.features.information.features?.notices.features?.resources,
 	roles: (guildDocument) => guildDocument.features.information.features?.notices.features?.roles,
 	welcome: (guildDocument) => guildDocument.features.information.features?.notices.features?.welcome,
 };

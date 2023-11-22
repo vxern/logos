@@ -43,6 +43,12 @@ interface Guild {
 							inviteLink: string;
 						}>;
 
+						/** @since v3.28.0 */
+						/** Relies on guild.features.language.features.resources.url */
+						resources?: Activatable<{
+							channelId: string;
+						}>;
+
 						roles: Activatable<{
 							channelId: string;
 						}>;
@@ -201,12 +207,11 @@ interface Guild {
 					};
 				}>;
 
-				/** User resource submissions for the server. */
-				resources: Activatable<{
+				/** @since v3.28.0 */
+				resources?: Activatable<{
 					channelId: string;
 					journaling: boolean;
 					rateLimit?: RateLimit;
-					/** @since v3.28.0 */
 					management?: {
 						roles?: string[];
 						users?: string[];

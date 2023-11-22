@@ -59,6 +59,7 @@ import { User } from "./database/user";
 import { Warning } from "./database/warning";
 import { ResourceService } from "./services/prompts/types/resources";
 import { Resource } from "./database/resource";
+import { ResourceNoticeService } from "./services/notices/types/resources";
 
 type Client = {
 	environment: {
@@ -128,6 +129,7 @@ type Client = {
 		};
 		notices: {
 			information: Map<bigint, InformationNoticeService>;
+			resources: Map<bigint, ResourceNoticeService>;
 			roles: Map<bigint, RoleNoticeService>;
 			welcome: Map<bigint, WelcomeNoticeService>;
 		};
@@ -210,6 +212,7 @@ function createClient(
 			},
 			notices: {
 				information: new Map(),
+				resources: new Map(),
 				roles: new Map(),
 				welcome: new Map(),
 			},
@@ -534,6 +537,13 @@ export async function handleGuildCreate(
 				client.services.notices.information.set(guild.id, service);
 			}
 
+			if (notices.resources?.enabled) {
+				const service = new ResourceNoticeService([client, bot], guild.id);
+				services.push(service);
+
+				client.services.notices.resources.set(guild.id, service);
+			}
+
 			if (notices.roles.enabled) {
 				const service = new RoleNoticeService([client, bot], guild.id);
 				services.push(service);
@@ -669,7 +679,7 @@ export async function handleGuildCreate(
 			client.services.prompts.suggestions.set(guild.id, service);
 		}
 
-		if (server.resources.enabled) {
+		if (server.resources?.enabled) {
 			guildCommands.push(commands.resource);
 
 			const service = new ResourceService([client, bot], guild.id);

@@ -5,6 +5,7 @@ import { getShowButton, parseArguments, reply } from "../../../interactions";
 import { CommandTemplate } from "../../command";
 import { show } from "../../parameters";
 import { Guild } from "../../../database/guild";
+import localisations from "../../../../constants/localisations";
 
 const command: CommandTemplate = {
 	name: "resources",
@@ -53,7 +54,7 @@ async function handleDisplayResources(
 			"resources.strings.redirect",
 			locale,
 		)({
-			language: localise(client, `languages.${interaction.featureLanguage.toLowerCase()}`, locale)(),
+			language: localise(client, localisations.languages[interaction.featureLanguage], locale)(),
 		}),
 	};
 

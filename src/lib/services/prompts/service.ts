@@ -209,7 +209,7 @@ abstract class PromptService<
 						break;
 					}
 					case "resources": {
-						management = (configuration as Configurations["resources"]).management;
+						management = (configuration as Configurations["resources"])?.management;
 						break;
 					}
 					case "suggestions": {
