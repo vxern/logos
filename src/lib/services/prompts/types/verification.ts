@@ -27,6 +27,21 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 	}
 
 	getAllDocuments(): Map<string, EntryRequest> {
+		const configuration = this.configuration;
+		if (configuration === undefined) {
+			return new Map();
+		}
+
+		const member = this.client.cache.members.get(Discord.snowflakeToBigint(`${this.bot.id}${this.guildIdString}`));
+		if (member === undefined) {
+			return new Map();
+		}
+
+		const guild = this.guild;
+		if (guild === undefined) {
+			return new Map();
+		}
+
 		const entryRequests: Map<string, EntryRequest> = new Map();
 
 		for (const [compositeId, entryRequestDocument] of this.client.cache.documents.entryRequests) {
@@ -35,6 +50,39 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 			}
 
 			if (entryRequestDocument.isFinalised) {
+				continue;
+			}
+
+			const voteInformation = this.getVoteInformation(entryRequestDocument);
+			if (voteInformation === undefined) {
+				continue;
+			}
+
+			const [isAccepted, isRejected] = [
+				voteInformation.acceptance.remaining === 0,
+				voteInformation.rejection.remaining === 0,
+			];
+			if (isAccepted || isRejected) {
+				const submitter = this.client.cache.users.get(BigInt(entryRequestDocument.authorId));
+				if (submitter === undefined) {
+					continue;
+				}
+
+				// unawaited
+				this.getUserDocument(entryRequestDocument).then((authorDocument) => {
+					if (authorDocument === undefined) {
+						return;
+					}
+
+					this.finalise(
+						entryRequestDocument,
+						authorDocument,
+						configuration,
+						[submitter, member, guild],
+						[isAccepted, isRejected],
+					);
+				});
+
 				continue;
 			}
 
@@ -185,7 +233,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 						{
 							type: Discord.MessageComponentTypes.Button,
 							style: Discord.ButtonStyles.Success,
-							label: voteInformation.acceptance.required === 1 ? strings.accept : strings.acceptMultiple,
+							label: voteInformation.acceptance.remaining === 1 ? strings.accept : strings.acceptMultiple,
 							customId: encodeId<InteractionData>(constants.components.verification, [
 								`${entryRequestDocument.guildId}/${entryRequestDocument.authorId}`,
 								`${true}`,
@@ -194,7 +242,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 						{
 							type: Discord.MessageComponentTypes.Button,
 							style: Discord.ButtonStyles.Danger,
-							label: voteInformation.rejection.required === 1 ? strings.reject : strings.rejectMultiple,
+							label: voteInformation.rejection.remaining === 1 ? strings.reject : strings.rejectMultiple,
 							customId: encodeId<InteractionData>(constants.components.verification, [
 								`${entryRequestDocument.guildId}/${entryRequestDocument.authorId}`,
 								`${false}`,
@@ -237,7 +285,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 			return undefined;
 		}
 
-		let session = this.client.database.openSession();
+		const session = this.client.database.openSession();
 
 		const [authorDocument, voterDocument, entryRequestDocument] = await Promise.all([
 			this.client.cache.documents.users.get(userId) ??
@@ -383,6 +431,40 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 			return undefined;
 		}
 
+		if (votedFor.length !== 0) {
+			entryRequestDocument.votedFor = votedFor;
+		} else {
+			entryRequestDocument.votedFor = undefined;
+		}
+
+		if (votedAgainst.length !== 0) {
+			entryRequestDocument.votedAgainst = votedAgainst;
+		} else {
+			entryRequestDocument.votedAgainst = undefined;
+		}
+
+		await this.finalise(
+			entryRequestDocument,
+			authorDocument,
+			configuration,
+			[submitter, member, guild],
+			[isAccepted, isRejected],
+		);
+
+		if (isAccepted || isRejected) {
+			return null;
+		}
+
+		return entryRequestDocument;
+	}
+
+	private async finalise(
+		entryRequestDocument: EntryRequest,
+		authorDocument: User,
+		configuration: Configuration,
+		[submitter, member, guild]: [Logos.User, Logos.Member, Logos.Guild],
+		[isAccepted, isRejected]: [boolean, boolean],
+	): Promise<void> {
 		let isFinalised = false;
 
 		if (isAccepted || isRejected) {
@@ -399,26 +481,16 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 			}
 		}
 
-		if (votedFor.length !== 0) {
-			entryRequestDocument.votedFor = votedFor;
-		} else {
-			entryRequestDocument.votedFor = undefined;
+		{
+			const session = this.client.database.openSession();
+
+			entryRequestDocument.isFinalised = isFinalised;
+
+			await session.store(entryRequestDocument);
+			await session.saveChanges();
+
+			session.dispose();
 		}
-
-		if (votedAgainst.length !== 0) {
-			entryRequestDocument.votedAgainst = votedAgainst;
-		} else {
-			entryRequestDocument.votedAgainst = undefined;
-		}
-
-		session = this.client.database.openSession();
-
-		entryRequestDocument.isFinalised = isFinalised;
-
-		await session.store(entryRequestDocument);
-		await session.saveChanges();
-
-		session.dispose();
 
 		let authorisedOn =
 			authorDocument.account.authorisedOn !== undefined ? [...authorDocument.account.authorisedOn] : undefined;
@@ -472,21 +544,17 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 				);
 		}
 
-		session = this.client.database.openSession();
+		{
+			const session = this.client.database.openSession();
 
-		authorDocument.account.authorisedOn = authorisedOn;
-		authorDocument.account.rejectedOn = rejectedOn;
+			authorDocument.account.authorisedOn = authorisedOn;
+			authorDocument.account.rejectedOn = rejectedOn;
 
-		await session.store(authorDocument);
-		await session.saveChanges();
+			await session.store(authorDocument);
+			await session.saveChanges();
 
-		session.dispose();
-
-		if (isAccepted || isRejected) {
-			return null;
+			session.dispose();
 		}
-
-		return entryRequestDocument;
 	}
 
 	private getVoteInformation(entryRequest: EntryRequest): VoteInformation | undefined {
@@ -519,12 +587,12 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 			switch (verdict.type) {
 				case "fraction": {
 					const required = Math.max(1, Math.ceil(verdict.value * voterCount));
-					const remaining = required - votes;
+					const remaining = Math.max(0, required - votes);
 					return { required, remaining };
 				}
 				case "number": {
 					const required = Math.max(1, verdict.value);
-					const remaining = required - votes;
+					const remaining = Math.max(0, required - votes);
 					return { required, remaining };
 				}
 			}

@@ -99,8 +99,8 @@ abstract class PromptService<
 		this.type = type;
 		this.isDeletable = isDeletable;
 		this.customId = customIds[type];
-		this.documents = this.getAllDocuments();
 		this._configuration = configurationLocators[type];
+		this.documents = this.getAllDocuments();
 		this.collectingInteractions = new Promise((resolve) => {
 			this.stopCollectingInteractions = resolve;
 		});
