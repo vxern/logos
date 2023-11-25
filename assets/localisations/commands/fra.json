@@ -556,7 +556,7 @@
     "settings.strings.settings.fields.language.description.noLanguageSet.defaultShown": "Logos s'adaptera pour afficher des messages en fonction de la langue que vous avez paramétrée sur l'application.",
     "settings.strings.cannotClear.description": "Vous ne pouvez pas réinitialiser la langue d'affiche car vous n'en avez encore définie aucune.",
     "settings.strings.languageUpdated.description": "Votre langue d'affichage a été définie sur {language}.",
-    "license.description": "Autorise l'utilisateur à voir les avis au sujet des données et logiciels utilisés par le projet Logos.",
+    "license.description": "Autorise l'utilisateur à voir les avis au sujet des données et logiciels utilisés par Logos.",
     "license.options.software.options.package.description": "Le package pour lequel voir la licence.",
     "word.options.language.name": "langue",
     "word.options.language.description": "La langue du monde.",
