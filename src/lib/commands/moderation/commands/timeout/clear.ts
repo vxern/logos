@@ -1,11 +1,11 @@
 import * as Discord from "@discordeno/bot";
 import constants from "../../../../../constants/constants";
+import { MentionTypes, mention } from "../../../../../formatting";
 import * as Logos from "../../../../../types";
 import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../../client";
+import { Guild } from "../../../../database/guild";
 import diagnostics from "../../../../diagnostics";
 import { parseArguments, reply } from "../../../../interactions";
-import { Guild } from "../../../../database/guild";
-import { MentionTypes, mention } from "../../../../../formatting";
 
 async function handleClearTimeoutAutocomplete(
 	[client, bot]: [Client, Discord.Bot],

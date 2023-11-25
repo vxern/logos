@@ -6,14 +6,14 @@ import { MentionTypes, mention } from "../../../../formatting";
 import * as Logos from "../../../../types";
 import { Client, autocompleteMembers, localise, pluralise, resolveInteractionToMember } from "../../../client";
 import { timeStructToMilliseconds } from "../../../database/guild";
+import { Guild } from "../../../database/guild";
+import { User } from "../../../database/user";
+import { Warning } from "../../../database/warning";
 import diagnostics from "../../../diagnostics";
 import { parseArguments, reply } from "../../../interactions";
 import { CommandTemplate } from "../../command";
 import { reason, user } from "../../parameters";
 import { getActiveWarnings } from "../module";
-import { Guild } from "../../../database/guild";
-import { User } from "../../../database/user";
-import { Warning } from "../../../database/warning";
 
 const command: CommandTemplate = {
 	name: "warn",

@@ -4,10 +4,10 @@ import time from "../../../../constants/time";
 import { TimestampFormat, timestamp } from "../../../../formatting";
 import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
+import { Guild } from "../../../database/guild";
 import diagnostics from "../../../diagnostics";
 import { parseArguments, reply, respond } from "../../../interactions";
 import { CommandTemplate } from "../../command";
-import { Guild } from "../../../database/guild";
 
 const command: CommandTemplate = {
 	name: "slowmode",

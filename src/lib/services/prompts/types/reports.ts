@@ -4,16 +4,16 @@ import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
 import { Report } from "../../../database/report";
 import { User } from "../../../database/user";
+import diagnostics from "../../../diagnostics";
 import { encodeId, getLocaleData, reply } from "../../../interactions";
 import { getGuildIconURLFormatted } from "../../../utils";
 import { PromptService } from "../service";
-import diagnostics from "../../../diagnostics";
 
 type InteractionData = [documentId: string, isResolved: string];
 
 class ReportService extends PromptService<"reports", Report, InteractionData> {
 	constructor([client, bot]: [Client, Discord.Bot], guildId: bigint) {
-		super([client, bot], guildId, { type: "reports", isDeletable: true });
+		super([client, bot], guildId, { type: "reports", deleteMode: "delete" });
 	}
 
 	getAllDocuments(): Map<string, Report> {

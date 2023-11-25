@@ -7,6 +7,7 @@ import { localise } from "../../client";
 import { proficiency } from "../../commands/social/roles/categories/language";
 import { EntryRequest } from "../../database/entry-request";
 import { Guild, timeStructToMilliseconds } from "../../database/guild";
+import { User } from "../../database/user";
 import diagnostics from "../../diagnostics";
 import {
 	Modal,
@@ -20,7 +21,6 @@ import {
 } from "../../interactions";
 import { snowflakeToTimestamp } from "../../utils";
 import { LocalService } from "../service";
-import { User } from "../../database/user";
 
 type EntryStepButtonID = [parameter: string];
 

@@ -10,10 +10,11 @@ import { getAllMessages } from "../../utils";
 import { LocalService } from "../service";
 
 interface Configurations {
+	verification: NonNullable<Guild["features"]["moderation"]["features"]>["verification"];
 	reports: NonNullable<Guild["features"]["moderation"]["features"]>["reports"];
 	resources: NonNullable<Guild["features"]["server"]["features"]>["resources"];
 	suggestions: NonNullable<Guild["features"]["server"]["features"]>["suggestions"];
-	verification: NonNullable<Guild["features"]["moderation"]["features"]>["verification"];
+	tickets: NonNullable<Guild["features"]["server"]["features"]>["tickets"];
 }
 
 type ConfigurationLocators = {
@@ -21,22 +22,26 @@ type ConfigurationLocators = {
 };
 
 const configurationLocators: ConfigurationLocators = {
+	verification: (guildDocument) => guildDocument.features.moderation.features?.verification,
 	reports: (guildDocument) => guildDocument.features.moderation.features?.reports,
 	resources: (guildDocument) => guildDocument.features.server.features?.resources,
 	suggestions: (guildDocument) => guildDocument.features.server.features?.suggestions,
-	verification: (guildDocument) => guildDocument.features.moderation.features?.verification,
+	tickets: (guildDocument) => guildDocument.features.server.features?.tickets,
 };
 
 type CustomIDs = Record<keyof Configurations, string>;
 
 const customIds: CustomIDs = {
+	verification: constants.components.verification,
 	reports: constants.components.reports,
 	resources: constants.components.resources,
 	suggestions: constants.components.suggestions,
-	verification: constants.components.verification,
+	tickets: constants.components.tickets,
 };
 
 type PromptTypes = keyof Client["services"]["prompts"];
+
+type DeleteMode = "delete" | "close" | "none";
 
 abstract class PromptService<
 	PromptType extends PromptTypes,
@@ -45,7 +50,7 @@ abstract class PromptService<
 > extends LocalService {
 	private readonly type: PromptType;
 	private readonly customId: string;
-	private readonly isDeletable: boolean;
+	private readonly deleteMode: DeleteMode;
 
 	protected readonly documents: Map<string, DataType>;
 
@@ -53,7 +58,7 @@ abstract class PromptService<
 		/*compositeId: */ string,
 		(interaction: Discord.Interaction, data: InteractionData) => void
 	> = new Map();
-	private readonly promptByCompositeId: Map</*compositeId: */ string, Discord.CamelizedDiscordMessage> = new Map();
+	protected readonly promptByCompositeId: Map</*compositeId: */ string, Discord.CamelizedDiscordMessage> = new Map();
 	private readonly documentByPromptId: Map</*promptId: */ string, DataType> = new Map();
 	private readonly userIdByPromptId: Map</*promptId: */ string, bigint> = new Map();
 
@@ -63,6 +68,7 @@ abstract class PromptService<
 	private stopRemovingPrompts: (() => void) | undefined;
 
 	private readonly _configuration: ConfigurationLocators[PromptType];
+
 	get configuration(): Configurations[PromptType] | undefined {
 		const guildDocument = this.guildDocument;
 		if (guildDocument === undefined) {
@@ -93,14 +99,14 @@ abstract class PromptService<
 	constructor(
 		[client, bot]: [Client, Discord.Bot],
 		guildId: bigint,
-		{ type, isDeletable }: { type: PromptType; isDeletable: boolean },
+		{ type, deleteMode }: { type: PromptType; deleteMode: DeleteMode },
 	) {
 		super([client, bot], guildId);
 		this.type = type;
-		this.isDeletable = isDeletable;
+		this.deleteMode = deleteMode;
 		this.customId = customIds[type];
-		this.documents = this.getAllDocuments();
 		this._configuration = configurationLocators[type];
+		this.documents = this.getAllDocuments();
 		this.collectingInteractions = new Promise((resolve) => {
 			this.stopCollectingInteractions = resolve;
 		});
@@ -190,7 +196,7 @@ abstract class PromptService<
 			end: this.collectingInteractions,
 		});
 
-		if (!this.isDeletable) {
+		if (this.deleteMode === "none") {
 			return;
 		}
 
@@ -226,6 +232,10 @@ abstract class PromptService<
 					}
 					case "suggestions": {
 						management = (configuration as Configurations["suggestions"]).management;
+						break;
+					}
+					case "tickets": {
+						management = (configuration as Configurations["tickets"])?.management;
 						break;
 					}
 					default: {
@@ -470,12 +480,16 @@ abstract class PromptService<
 		data: InteractionData,
 	): Promise<DataType | undefined | null>;
 
-	private async handleDelete(compositeId: string): Promise<void> {
+	protected async handleDelete(compositeId: string): Promise<void> {
 		const session = this.client.database.openSession();
 
 		switch (this.type) {
 			case "reports": {
-				session.delete(`reports/${compositeId}`);
+				await session.delete(`reports/${compositeId}`);
+				break;
+			}
+			case "resources": {
+				await session.delete(`resources/${compositeId}`);
 				break;
 			}
 			case "resources": {
@@ -483,7 +497,11 @@ abstract class PromptService<
 				break;
 			}
 			case "suggestions": {
-				session.delete(`suggestions/${compositeId}`);
+				await session.delete(`suggestions/${compositeId}`);
+				break;
+			}
+			case "tickets": {
+				await session.delete(`tickets/${compositeId}`);
 				break;
 			}
 		}

@@ -13,6 +13,7 @@ import {
 	pluralise,
 	resolveInteractionToMember,
 } from "../../../client";
+import { Guild } from "../../../database/guild";
 import diagnostics from "../../../diagnostics";
 import {
 	acknowledge,
@@ -25,7 +26,6 @@ import {
 import { chunk, snowflakeToTimestamp } from "../../../utils";
 import { CommandTemplate } from "../../command";
 import { user } from "../../parameters";
-import { Guild } from "../../../database/guild";
 
 const command: CommandTemplate = {
 	name: "purge",

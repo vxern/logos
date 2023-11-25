@@ -7,11 +7,11 @@ import * as Logos from "../../../../types";
 import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../client";
 import { Guild, timeStructToMilliseconds } from "../../../database/guild";
 import { Praise } from "../../../database/praise";
+import { User } from "../../../database/user";
 import { editReply, parseArguments, postponeReply, reply } from "../../../interactions";
 import { verifyIsWithinLimits } from "../../../utils";
 import { CommandTemplate } from "../../command";
 import { user } from "../../parameters";
-import { User } from "../../../database/user";
 
 const command: CommandTemplate = {
 	name: "praise",

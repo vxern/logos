@@ -1,7 +1,6 @@
 import apache from "./licences/apache";
 import bsd from "./licences/bsd";
 import mit from "./licences/mit";
-import mpl from "./licences/mpl";
 
 const licences = {
 	dictionaries: {
@@ -62,12 +61,12 @@ const licences = {
 		"fancy-log": mit(
 			"Copyright (c) 2014, 2015, 2018, 2021 Blaine Bublitz <blaine.bublitz@gmail.com> and Eric Schoffstall <yo@contra.io>",
 		),
-		fauna: mpl("Copyright 2021 Fauna, Inc."),
 		lavaclient: apache("Copyright 2023 Dimensional Fun & Contributors"),
 		"object-hash": mit("Copyright (c) 2014 object-hash contributors"),
 		"parse-wiktionary": mit(
 			"Copyright (c) 2019 Suyash Behera <Suyash.behera458@gmail.com> 2022 Onsa <csinjan@gmail.com>",
 		),
+		ravendb: mit("Copyright (c) 2017 Hibernating Rhinos LTD"),
 		tinyld: mit("Copyright (c) 2021 Komodo"),
 		"youtube-sr": mit("Copyright (c) 2020 DevAndromeda"),
 	},

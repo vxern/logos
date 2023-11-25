@@ -10,6 +10,7 @@ interface EntryRequest {
 	};
 	votedFor?: string[];
 	votedAgainst?: string[];
+	ticketChannelId?: string;
 	isFinalised: boolean;
 	createdAt: number;
 }

@@ -272,7 +272,6 @@ async function setup(): Promise<void> {
 	readEnvironment({ envConfiguration, templateEnvConfiguration });
 
 	const environmentProvisional: Record<keyof Client["environment"], string | boolean | undefined> = {
-		version: process.env.npm_package_version,
 		discordSecret: process.env.SECRET_DISCORD,
 		deeplSecret: process.env.SECRET_DEEPL,
 		rapidApiSecret: process.env.SECRET_RAPID_API,

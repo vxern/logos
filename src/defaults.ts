@@ -35,6 +35,9 @@ const RESOURCE_INTERVAL: TimeStruct = [30, "second"];
 const SUGGESTION_LIMIT = 3;
 const SUGGESTION_INTERVAL: TimeStruct = [2, "hour"];
 
+const TICKET_LIMIT = 2;
+const TICKET_INTERVAL: TimeStruct = [1, "day"];
+
 const PRAISE_LIMIT = 3;
 const PRAISE_INTERVAL: TimeStruct = [6, "hour"];
 
@@ -75,6 +78,8 @@ export default {
 	REPORT_INTERVAL,
 	RESOURCE_LIMIT,
 	RESOURCE_INTERVAL,
+	TICKET_LIMIT,
+	TICKET_INTERVAL,
 	SUGGESTION_LIMIT,
 	SUGGESTION_INTERVAL,
 	PRAISE_LIMIT,

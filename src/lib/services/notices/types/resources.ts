@@ -1,9 +1,9 @@
 import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
-import { Client, localise } from "../../../client";
-import { HashableMessageContents, NoticeService } from "../service";
 import localisations from "../../../../constants/localisations";
+import { Client, localise } from "../../../client";
 import { getFeatureLanguage } from "../../../interactions";
+import { HashableMessageContents, NoticeService } from "../service";
 
 class ResourceNoticeService extends NoticeService<"resources"> {
 	constructor([client, bot]: [Client, Discord.Bot], guildId: bigint) {

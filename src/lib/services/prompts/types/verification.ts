@@ -4,10 +4,20 @@ import { Locale, getLocalisationLanguageByLocale } from "../../../../constants/l
 import { MentionTypes, TimestampFormat, mention, timestamp } from "../../../../formatting";
 import * as Logos from "../../../../types";
 import { Client, localise, pluralise } from "../../../client";
+import { openTicket } from "../../../commands/server/commands/ticket/open";
 import { EntryRequest } from "../../../database/entry-request";
 import { User } from "../../../database/user";
 import diagnostics from "../../../diagnostics";
-import { acknowledge, encodeId, getLocaleData, reply } from "../../../interactions";
+import {
+	acknowledge,
+	createInteractionCollector,
+	decodeId,
+	editReply,
+	encodeId,
+	getLocaleData,
+	postponeReply,
+	reply,
+} from "../../../interactions";
 import { getGuildIconURLFormatted, snowflakeToTimestamp } from "../../../utils";
 import { Configurations, PromptService } from "../service";
 
@@ -22,11 +32,64 @@ type VoteInformation = {
 };
 
 class VerificationService extends PromptService<"verification", EntryRequest, InteractionData> {
+	private readonly collectingInquiryInteractions: Promise<void>;
+	private stopCollectingInquiryInteractions: (() => void) | undefined;
+
 	constructor([client, bot]: [Client, Discord.Bot], guildId: bigint) {
-		super([client, bot], guildId, { type: "verification", isDeletable: false });
+		super([client, bot], guildId, { type: "verification", deleteMode: "none" });
+
+		this.collectingInquiryInteractions = new Promise((resolve) => {
+			this.stopCollectingInquiryInteractions = resolve;
+		});
+	}
+
+	async start(): Promise<void> {
+		await super.start();
+
+		createInteractionCollector([this.client, this.bot], {
+			type: Discord.InteractionTypes.MessageComponent,
+			customId: constants.components.createInquiry,
+			doesNotExpire: true,
+			onCollect: async (selection) => {
+				const customId = selection.data?.customId;
+				if (customId === undefined) {
+					return;
+				}
+
+				const [_, compositeId] = decodeId(customId);
+				if (compositeId === undefined) {
+					return;
+				}
+
+				this.handleOpenInquiry(selection, compositeId);
+			},
+			end: this.collectingInquiryInteractions,
+		});
+	}
+
+	async stop(): Promise<void> {
+		await super.stop();
+
+		this.stopCollectingInquiryInteractions?.();
+		await this.collectingInquiryInteractions;
 	}
 
 	getAllDocuments(): Map<string, EntryRequest> {
+		const configuration = this.configuration;
+		if (configuration === undefined) {
+			return new Map();
+		}
+
+		const member = this.client.cache.members.get(Discord.snowflakeToBigint(`${this.bot.id}${this.guildIdString}`));
+		if (member === undefined) {
+			return new Map();
+		}
+
+		const guild = this.guild;
+		if (guild === undefined) {
+			return new Map();
+		}
+
 		const entryRequests: Map<string, EntryRequest> = new Map();
 
 		for (const [compositeId, entryRequestDocument] of this.client.cache.documents.entryRequests) {
@@ -35,6 +98,39 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 			}
 
 			if (entryRequestDocument.isFinalised) {
+				continue;
+			}
+
+			const voteInformation = this.getVoteInformation(entryRequestDocument);
+			if (voteInformation === undefined) {
+				continue;
+			}
+
+			const [isAccepted, isRejected] = [
+				voteInformation.acceptance.remaining === 0,
+				voteInformation.rejection.remaining === 0,
+			];
+			if (isAccepted || isRejected) {
+				const submitter = this.client.cache.users.get(BigInt(entryRequestDocument.authorId));
+				if (submitter === undefined) {
+					continue;
+				}
+
+				// unawaited
+				this.getUserDocument(entryRequestDocument).then((authorDocument) => {
+					if (authorDocument === undefined) {
+						return;
+					}
+
+					this.finalise(
+						entryRequestDocument,
+						authorDocument,
+						configuration,
+						[submitter, member, guild],
+						[isAccepted, isRejected],
+					);
+				});
+
 				continue;
 			}
 
@@ -103,6 +199,8 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 					voteInformation.rejection.remaining,
 				),
 			}),
+			inquiry: localise(this.client, "entry.verification.inquiry.inquiry", guildLocale)(),
+			open: localise(this.client, "entry.verification.inquiry.open", guildLocale)(),
 		};
 
 		const accountCreatedRelativeTimestamp = timestamp(snowflakeToTimestamp(user.id), TimestampFormat.Relative);
@@ -185,7 +283,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 						{
 							type: Discord.MessageComponentTypes.Button,
 							style: Discord.ButtonStyles.Success,
-							label: voteInformation.acceptance.required === 1 ? strings.accept : strings.acceptMultiple,
+							label: voteInformation.acceptance.remaining === 1 ? strings.accept : strings.acceptMultiple,
 							customId: encodeId<InteractionData>(constants.components.verification, [
 								`${entryRequestDocument.guildId}/${entryRequestDocument.authorId}`,
 								`${true}`,
@@ -194,13 +292,25 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 						{
 							type: Discord.MessageComponentTypes.Button,
 							style: Discord.ButtonStyles.Danger,
-							label: voteInformation.rejection.required === 1 ? strings.reject : strings.rejectMultiple,
+							label: voteInformation.rejection.remaining === 1 ? strings.reject : strings.rejectMultiple,
 							customId: encodeId<InteractionData>(constants.components.verification, [
 								`${entryRequestDocument.guildId}/${entryRequestDocument.authorId}`,
 								`${false}`,
 							]),
 						},
-					],
+						...((entryRequestDocument.ticketChannelId === undefined
+							? [
+									{
+										type: Discord.MessageComponentTypes.Button,
+										style: Discord.ButtonStyles.Primary,
+										label: strings.open,
+										customId: encodeId(constants.components.createInquiry, [
+											`${entryRequestDocument.guildId}/${entryRequestDocument.authorId}`,
+										]),
+									},
+							  ]
+							: []) as Discord.ButtonComponent[]),
+					] as [Discord.ButtonComponent, Discord.ButtonComponent],
 				},
 			],
 		};
@@ -237,7 +347,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 			return undefined;
 		}
 
-		let session = this.client.database.openSession();
+		const session = this.client.database.openSession();
 
 		const [authorDocument, voterDocument, entryRequestDocument] = await Promise.all([
 			this.client.cache.documents.users.get(userId) ??
@@ -378,11 +488,45 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 			votedAgainst.length >= voteInformation.rejection.required,
 		];
 
-		const submitter = this.client.cache.users.get(interaction.user.id);
+		const submitter = this.client.cache.users.get(BigInt(authorDocument.account.id));
 		if (submitter === undefined) {
 			return undefined;
 		}
 
+		if (votedFor.length !== 0) {
+			entryRequestDocument.votedFor = votedFor;
+		} else {
+			entryRequestDocument.votedFor = undefined;
+		}
+
+		if (votedAgainst.length !== 0) {
+			entryRequestDocument.votedAgainst = votedAgainst;
+		} else {
+			entryRequestDocument.votedAgainst = undefined;
+		}
+
+		await this.finalise(
+			entryRequestDocument,
+			authorDocument,
+			configuration,
+			[submitter, member, guild],
+			[isAccepted, isRejected],
+		);
+
+		if (isAccepted || isRejected) {
+			return null;
+		}
+
+		return entryRequestDocument;
+	}
+
+	private async finalise(
+		entryRequestDocument: EntryRequest,
+		authorDocument: User,
+		configuration: Configuration,
+		[submitter, member, guild]: [Logos.User, Logos.Member, Logos.Guild],
+		[isAccepted, isRejected]: [boolean, boolean],
+	): Promise<void> {
 		let isFinalised = false;
 
 		if (isAccepted || isRejected) {
@@ -399,26 +543,27 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 			}
 		}
 
-		if (votedFor.length !== 0) {
-			entryRequestDocument.votedFor = votedFor;
-		} else {
-			entryRequestDocument.votedFor = undefined;
+		if (entryRequestDocument.ticketChannelId !== undefined) {
+			const ticketService = this.client.services.prompts.tickets.get(this.guildId);
+			if (ticketService !== undefined) {
+				// unawaited
+				ticketService.handleDelete(
+					`${entryRequestDocument.guildId}/${entryRequestDocument.authorId}/${entryRequestDocument.ticketChannelId}`,
+				);
+			}
 		}
 
-		if (votedAgainst.length !== 0) {
-			entryRequestDocument.votedAgainst = votedAgainst;
-		} else {
-			entryRequestDocument.votedAgainst = undefined;
+		{
+			const session = this.client.database.openSession();
+
+			entryRequestDocument.ticketChannelId = undefined;
+			entryRequestDocument.isFinalised = isFinalised;
+
+			await session.store(entryRequestDocument);
+			await session.saveChanges();
+
+			session.dispose();
 		}
-
-		session = this.client.database.openSession();
-
-		entryRequestDocument.isFinalised = isFinalised;
-
-		await session.store(entryRequestDocument);
-		await session.saveChanges();
-
-		session.dispose();
 
 		let authorisedOn =
 			authorDocument.account.authorisedOn !== undefined ? [...authorDocument.account.authorisedOn] : undefined;
@@ -472,21 +617,132 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 				);
 		}
 
-		session = this.client.database.openSession();
+		{
+			const session = this.client.database.openSession();
 
-		authorDocument.account.authorisedOn = authorisedOn;
-		authorDocument.account.rejectedOn = rejectedOn;
+			authorDocument.account.authorisedOn = authorisedOn;
+			authorDocument.account.rejectedOn = rejectedOn;
 
-		await session.store(authorDocument);
-		await session.saveChanges();
+			await session.store(authorDocument);
+			await session.saveChanges();
 
-		session.dispose();
+			session.dispose();
+		}
+	}
 
-		if (isAccepted || isRejected) {
-			return null;
+	private async handleOpenInquiry(interaction: Discord.Interaction, compositeId: string): Promise<void> {
+		await postponeReply([this.client, this.bot], interaction);
+
+		const [configuration, guild, guildDocument] = [this.configuration, this.guild, this.guildDocument];
+		if (configuration === undefined || guild === undefined || guildDocument === undefined) {
+			return;
 		}
 
-		return entryRequestDocument;
+		const ticketConfiguration = guildDocument.features.server.features?.tickets;
+		if (ticketConfiguration === undefined || !ticketConfiguration.enabled) {
+			return;
+		}
+
+		const entryRequestDocument = this.client.cache.documents.entryRequests.get(compositeId);
+		if (entryRequestDocument === undefined) {
+			return;
+		}
+
+		if (entryRequestDocument.ticketChannelId !== undefined) {
+			return;
+		}
+
+		const userDocument = await this.getUserDocument(entryRequestDocument);
+		if (userDocument === undefined) {
+			return;
+		}
+
+		const user = this.client.cache.users.get(BigInt(userDocument.account.id));
+		if (user === undefined) {
+			return;
+		}
+
+		const member = this.client.cache.members.get(Discord.snowflakeToBigint(`${interaction.user.id}${guild.id}`));
+		if (member === undefined) {
+			return;
+		}
+
+		const strings = {
+			inquiryChannel: localise(
+				this.client,
+				"entry.verification.inquiry.channel",
+				this.guildLocale,
+			)({ user: user.username }),
+		};
+
+		const result = await openTicket(
+			[this.client, this.bot],
+			configuration,
+			{ topic: strings.inquiryChannel },
+			[guild, user, member, userDocument],
+			ticketConfiguration.categoryId,
+			"inquiry",
+			{ guildLocale: this.guildLocale },
+		);
+		if (typeof result === "string") {
+			const strings = {
+				title: localise(this.client, "entry.verification.inquiry.failed.title", this.guildLocale)(),
+				description: localise(this.client, "entry.verification.inquiry.failed.description", this.guildLocale)(),
+			};
+
+			editReply([this.client, this.bot], interaction, {
+				embeds: [
+					{
+						title: strings.title,
+						description: strings.description,
+						color: constants.colors.peach,
+					},
+				],
+			});
+
+			return;
+		}
+
+		const session = this.client.database.openSession();
+
+		entryRequestDocument.ticketChannelId = result.channelId;
+
+		await session.store(entryRequestDocument);
+		await session.saveChanges();
+
+		session.saveChanges();
+
+		const prompt = this.promptByCompositeId.get(`${entryRequestDocument.guildId}/${entryRequestDocument.authorId}`);
+		if (prompt === undefined) {
+			return;
+		}
+
+		await this.bot.rest.deleteMessage(prompt.channelId, prompt.id).catch(() => {
+			this.client.log.warn("Failed to delete prompt.");
+		});
+
+		{
+			const strings = {
+				title: localise(this.client, "entry.verification.inquiry.opened.title", this.guildLocale)(),
+				description: localise(
+					this.client,
+					"entry.verification.inquiry.opened.description",
+					this.guildLocale,
+				)({
+					guild_name: guild.name,
+				}),
+			};
+
+			editReply([this.client, this.bot], interaction, {
+				embeds: [
+					{
+						title: strings.title,
+						description: strings.description,
+						color: constants.colors.lightGreen,
+					},
+				],
+			});
+		}
 	}
 
 	private getVoteInformation(entryRequest: EntryRequest): VoteInformation | undefined {
@@ -519,12 +775,12 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 			switch (verdict.type) {
 				case "fraction": {
 					const required = Math.max(1, Math.ceil(verdict.value * voterCount));
-					const remaining = required - votes;
+					const remaining = Math.max(0, required - votes);
 					return { required, remaining };
 				}
 				case "number": {
 					const required = Math.max(1, verdict.value);
-					const remaining = required - votes;
+					const remaining = Math.max(0, required - votes);
 					return { required, remaining };
 				}
 			}

@@ -4,9 +4,9 @@ import localisations from "../../../../../constants/localisations";
 import defaults from "../../../../../defaults";
 import * as Logos from "../../../../../types";
 import { Client, localise } from "../../../../client";
+import { User } from "../../../../database/user";
 import { reply } from "../../../../interactions";
 import { OptionTemplate } from "../../../command";
-import { User } from "../../../../database/user";
 
 const command: OptionTemplate = {
 	name: "view",

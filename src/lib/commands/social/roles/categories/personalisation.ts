@@ -56,16 +56,6 @@ const category: RoleCategory = {
 						},
 					},
 					{
-						id: "roles.personalisation.categories.gender.roles.transgender",
-						emoji: constants.symbols.roles.categories.personalisation.gender.transgender,
-						snowflakes: {
-							"910929726418350110": "910929726535774250",
-							"432173040638623746": "907693818990718988",
-							"1175841125546856608": "1175841125584609429",
-							"1175841481089634476": "1175841481513246760",
-						},
-					},
-					{
 						id: "roles.personalisation.categories.gender.roles.nonBinary",
 						emoji: constants.symbols.roles.categories.personalisation.gender.nonbinary,
 						snowflakes: {

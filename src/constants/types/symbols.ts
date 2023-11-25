@@ -22,6 +22,7 @@ export default {
 	sigils: {
 		divider: "﹘",
 		separator: "・",
+		channelSeparator: "︲",
 	},
 	squares: {
 		green: "🟩",
@@ -61,6 +62,7 @@ export default {
 		report: "💢",
 		resource: "🎓",
 		suggestion: "🌿",
+		ticket: "🎫",
 		purging: {
 			begin: "⚔️",
 			end: "✅",

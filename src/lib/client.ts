@@ -1,5 +1,5 @@
-import * as Discord from "@discordeno/bot";
 import * as fs from "node:fs/promises";
+import * as Discord from "@discordeno/bot";
 import FancyLog from "fancy-log";
 import * as ravendb from "ravendb";
 import constants from "../constants/constants";
@@ -21,6 +21,15 @@ import * as Logos from "../types";
 import { Command, CommandTemplate, InteractionHandler, Option } from "./commands/command";
 import commandTemplates from "./commands/commands";
 import { SentencePair } from "./commands/language/commands/game";
+import { EntryRequest } from "./database/entry-request";
+import { Guild, timeStructToMilliseconds } from "./database/guild";
+import { Praise } from "./database/praise";
+import { Report } from "./database/report";
+import { Resource } from "./database/resource";
+import { Suggestion } from "./database/suggestion";
+import { Ticket } from "./database/ticket";
+import { User } from "./database/user";
+import { Warning } from "./database/warning";
 import diagnostics from "./diagnostics";
 import {
 	acknowledge,
@@ -40,30 +49,22 @@ import { JournallingService } from "./services/journalling/journalling";
 import { LavalinkService } from "./services/music/lavalink";
 import { MusicService } from "./services/music/music";
 import { InformationNoticeService } from "./services/notices/types/information";
+import { ResourceNoticeService } from "./services/notices/types/resources";
 import { RoleNoticeService } from "./services/notices/types/roles";
 import { WelcomeNoticeService } from "./services/notices/types/welcome";
 import { ReportService } from "./services/prompts/types/reports";
+import { ResourceService } from "./services/prompts/types/resources";
 import { SuggestionService } from "./services/prompts/types/suggestions";
+import { TicketService } from "./services/prompts/types/tickets";
 import { VerificationService } from "./services/prompts/types/verification";
 import { RealtimeUpdateService } from "./services/realtime-updates/service";
 import { RoleIndicatorService } from "./services/role-indicators/role-indicators";
 import { Service } from "./services/service";
 import { StatusService } from "./services/status/service";
 import { requestMembers } from "./utils";
-import { EntryRequest } from "./database/entry-request";
-import { Guild, timeStructToMilliseconds } from "./database/guild";
-import { Praise } from "./database/praise";
-import { Report } from "./database/report";
-import { Suggestion } from "./database/suggestion";
-import { User } from "./database/user";
-import { Warning } from "./database/warning";
-import { ResourceService } from "./services/prompts/types/resources";
-import { Resource } from "./database/resource";
-import { ResourceNoticeService } from "./services/notices/types/resources";
 
 type Client = {
 	environment: {
-		version: string;
 		discordSecret: string;
 		deeplSecret: string;
 		rapidApiSecret: string;
@@ -95,6 +96,7 @@ type Client = {
 			reports: Map<string, Report>;
 			resources: Map<string, Resource>;
 			suggestions: Map<string, Suggestion>;
+			tickets: Map<string, Ticket>;
 			users: Map<string, User>;
 			warningsByTarget: Map<string, Map<string, Warning>>;
 		};
@@ -134,10 +136,11 @@ type Client = {
 			welcome: Map<bigint, WelcomeNoticeService>;
 		};
 		prompts: {
-			reports: Map<bigint, ReportService>;
-			suggestions: Map<bigint, SuggestionService>;
-			resources: Map<bigint, ResourceService>;
 			verification: Map<bigint, VerificationService>;
+			reports: Map<bigint, ReportService>;
+			resources: Map<bigint, ResourceService>;
+			suggestions: Map<bigint, SuggestionService>;
+			tickets: Map<bigint, TicketService>;
 		};
 		interactionRepetition: InteractionRepetitionService;
 		realtimeUpdates: RealtimeUpdateService;
@@ -190,6 +193,7 @@ function createClient(
 				reports: new Map(),
 				resources: new Map(),
 				suggestions: new Map(),
+				tickets: new Map(),
 				users: new Map(),
 				warningsByTarget: new Map(),
 			},
@@ -218,10 +222,11 @@ function createClient(
 				welcome: new Map(),
 			},
 			prompts: {
+				verification: new Map(),
 				reports: new Map(),
 				resources: new Map(),
 				suggestions: new Map(),
-				verification: new Map(),
+				tickets: new Map(),
 			},
 			// @ts-ignore: Late assignment.
 			interactionRepetition: "late_assignment",
@@ -471,22 +476,28 @@ async function prefetchDataFromDatabase(client: Client): Promise<void> {
 		client.cache.documents.entryRequests.set(`${document.guildId}/${document.authorId}`, document);
 	}
 
-	const resourceDocuments = await session.query<Resource>({ collection: "Resources" }).all();
-
-	for (const document of resourceDocuments) {
-		client.cache.documents.resources.set(`${document.guildId}/${document.authorId}/${document.createdAt}`, document);
-	}
-
 	const reportDocuments = await session.query<Report>({ collection: "Reports" }).all();
 
 	for (const document of reportDocuments) {
 		client.cache.documents.reports.set(`${document.guildId}/${document.authorId}/${document.createdAt}`, document);
 	}
 
+	const resourceDocuments = await session.query<Resource>({ collection: "Resources" }).all();
+
+	for (const document of resourceDocuments) {
+		client.cache.documents.resources.set(`${document.guildId}/${document.authorId}/${document.createdAt}`, document);
+	}
+
 	const suggestionDocuments = await session.query<Suggestion>({ collection: "Suggestions" }).all();
 
 	for (const document of suggestionDocuments) {
 		client.cache.documents.suggestions.set(`${document.guildId}/${document.authorId}/${document.createdAt}`, document);
+	}
+
+	const ticketDocuments = await session.query<Ticket>({ collection: "Tickets" }).all();
+
+	for (const document of ticketDocuments) {
+		client.cache.documents.tickets.set(`${document.guildId}/${document.authorId}/${document.channelId}`, document);
 	}
 
 	session.dispose();
@@ -680,6 +691,15 @@ export async function handleGuildCreate(
 			client.services.prompts.suggestions.set(guild.id, service);
 		}
 
+		if (server.tickets?.enabled) {
+			guildCommands.push(commands.ticket);
+
+			const service = new TicketService([client, bot], guild.id);
+			services.push(service);
+
+			client.services.prompts.tickets.set(guild.id, service);
+		}
+
 		if (server.resources?.enabled) {
 			guildCommands.push(commands.resource);
 
@@ -809,6 +829,9 @@ function addCacheInterceptors(client: Client, database: ravendb.IDocumentStore):
 			case "Suggestions": {
 				return `${document.guildId}/${document.authorId}/${document.createdAt}`;
 			}
+			case "Tickets": {
+				return `${document.guildId}/${document.authorId}/${document.channelId}`;
+			}
 			case "Users": {
 				return document.account.id;
 			}
@@ -865,6 +888,10 @@ function addCacheInterceptors(client: Client, database: ravendb.IDocumentStore):
 			}
 			case "Suggestions": {
 				client.cache.documents.suggestions.set(compositeId, value as Suggestion);
+				break;
+			}
+			case "Tickets": {
+				client.cache.documents.tickets.set(compositeId, value as Ticket);
 				break;
 			}
 			case "Users": {

@@ -16,8 +16,8 @@ import * as Logos from "../types";
 import { InteractionLocaleData } from "../types";
 import { Client, addCollector, localise, pluralise } from "./client";
 import { Guild } from "./database/guild";
-import { InteractionRepetitionButtonID } from "./services/interaction-repetition/interaction-repetition";
 import { User } from "./database/user";
+import { InteractionRepetitionButtonID } from "./services/interaction-repetition/interaction-repetition";
 
 type AutocompleteInteraction = Discord.Interaction & { type: Discord.InteractionTypes.ApplicationCommandAutocomplete };
 

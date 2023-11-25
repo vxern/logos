@@ -269,7 +269,7 @@
     "rule.options.rule.description": "Regula care să fie citată.",
     "rule.strings.invalid.title": "Regulă invalidă",
     "rule.strings.invalid.description": "Regula menționată este invalidă.",
-    "slowmode.name": "Modul încet",
+    "slowmode.name": "modul-încet",
     "slowmode.description": "Activează slowmode pentru cananlul în care această comandă este folosită.",
     "slowmode.options.level.name": "level",
     "slowmode.options.level.description": "Nivelul de slowmode care să fie pus.",

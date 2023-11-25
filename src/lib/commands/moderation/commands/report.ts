@@ -6,7 +6,9 @@ import { trim } from "../../../../formatting";
 import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
 import { timeStructToMilliseconds } from "../../../database/guild";
+import { Guild } from "../../../database/guild";
 import { Report } from "../../../database/report";
+import { User } from "../../../database/user";
 import {
 	Modal,
 	createInteractionCollector,
@@ -18,8 +20,6 @@ import {
 } from "../../../interactions";
 import { verifyIsWithinLimits } from "../../../utils";
 import { CommandTemplate } from "../../command";
-import { Guild } from "../../../database/guild";
-import { User } from "../../../database/user";
 
 const command: CommandTemplate = {
 	name: "report",

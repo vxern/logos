@@ -159,6 +159,7 @@ interface Guild {
 				}>;
 
 				/** User verification. */
+				/** Relies on guild.features.server.tickets.categoryId */
 				verification: Activatable<{
 					channelId: string;
 
@@ -212,6 +213,19 @@ interface Guild {
 					channelId: string;
 					journaling: boolean;
 					rateLimit?: RateLimit;
+					management?: {
+						roles?: string[];
+						users?: string[];
+					};
+				}>;
+
+				/** @since v3.29.0 */
+				tickets?: Activatable<{
+					channelId: string;
+					categoryId: string;
+					journaling: boolean;
+					rateLimit?: RateLimit;
+					limit?: number;
 					management?: {
 						roles?: string[];
 						users?: string[];
