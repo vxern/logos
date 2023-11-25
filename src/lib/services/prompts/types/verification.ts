@@ -7,9 +7,19 @@ import { Client, localise, pluralise } from "../../../client";
 import { EntryRequest } from "../../../database/entry-request";
 import { User } from "../../../database/user";
 import diagnostics from "../../../diagnostics";
-import { acknowledge, encodeId, getLocaleData, reply } from "../../../interactions";
+import {
+	acknowledge,
+	createInteractionCollector,
+	decodeId,
+	editReply,
+	encodeId,
+	getLocaleData,
+	postponeReply,
+	reply,
+} from "../../../interactions";
 import { getGuildIconURLFormatted, snowflakeToTimestamp } from "../../../utils";
 import { Configurations, PromptService } from "../service";
+import { openTicket } from "../../../commands/server/commands/ticket/open";
 
 type InteractionData = [documentId: string, isAccept: string];
 
@@ -22,8 +32,46 @@ type VoteInformation = {
 };
 
 class VerificationService extends PromptService<"verification", EntryRequest, InteractionData> {
+	private readonly collectingInquiryInteractions: Promise<void>;
+	private stopCollectingInquiryInteractions: (() => void) | undefined;
+
 	constructor([client, bot]: [Client, Discord.Bot], guildId: bigint) {
-		super([client, bot], guildId, { type: "verification", isDeletable: false });
+		super([client, bot], guildId, { type: "verification", deleteMode: "none" });
+
+		this.collectingInquiryInteractions = new Promise((resolve) => {
+			this.stopCollectingInquiryInteractions = resolve;
+		});
+	}
+
+	async start(): Promise<void> {
+		await super.start();
+
+		createInteractionCollector([this.client, this.bot], {
+			type: Discord.InteractionTypes.MessageComponent,
+			customId: constants.components.createInquiry,
+			doesNotExpire: true,
+			onCollect: async (selection) => {
+				const customId = selection.data?.customId;
+				if (customId === undefined) {
+					return;
+				}
+
+				const [_, compositeId] = decodeId(customId);
+				if (compositeId === undefined) {
+					return;
+				}
+
+				this.handleOpenInquiry(selection, compositeId);
+			},
+			end: this.collectingInquiryInteractions,
+		});
+	}
+
+	async stop(): Promise<void> {
+		await super.stop();
+
+		this.stopCollectingInquiryInteractions?.();
+		await this.collectingInquiryInteractions;
 	}
 
 	getAllDocuments(): Map<string, EntryRequest> {
@@ -151,6 +199,8 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 					voteInformation.rejection.remaining,
 				),
 			}),
+			inquiry: localise(this.client, "entry.verification.inquiry.inquiry", guildLocale)(),
+			open: localise(this.client, "entry.verification.inquiry.open", guildLocale)(),
 		};
 
 		const accountCreatedRelativeTimestamp = timestamp(snowflakeToTimestamp(user.id), TimestampFormat.Relative);
@@ -248,7 +298,19 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 								`${false}`,
 							]),
 						},
-					],
+						...((entryRequestDocument.ticketChannelId === undefined
+							? [
+									{
+										type: Discord.MessageComponentTypes.Button,
+										style: Discord.ButtonStyles.Primary,
+										label: strings.open,
+										customId: encodeId(constants.components.createInquiry, [
+											`${entryRequestDocument.guildId}/${entryRequestDocument.authorId}`,
+										]),
+									},
+							  ]
+							: []) as Discord.ButtonComponent[]),
+					] as [Discord.ButtonComponent, Discord.ButtonComponent],
 				},
 			],
 		};
@@ -481,9 +543,20 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 			}
 		}
 
+		if (entryRequestDocument.ticketChannelId !== undefined) {
+			const ticketService = this.client.services.prompts.tickets.get(this.guildId);
+			if (ticketService !== undefined) {
+				// unawaited
+				ticketService.handleDelete(
+					`${entryRequestDocument.guildId}/${entryRequestDocument.authorId}/${entryRequestDocument.ticketChannelId}`,
+				);
+			}
+		}
+
 		{
 			const session = this.client.database.openSession();
 
+			entryRequestDocument.ticketChannelId = undefined;
 			entryRequestDocument.isFinalised = isFinalised;
 
 			await session.store(entryRequestDocument);
@@ -554,6 +627,121 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 			await session.saveChanges();
 
 			session.dispose();
+		}
+	}
+
+	private async handleOpenInquiry(interaction: Discord.Interaction, compositeId: string): Promise<void> {
+		await postponeReply([this.client, this.bot], interaction);
+
+		const [configuration, guild, guildDocument] = [this.configuration, this.guild, this.guildDocument];
+		if (configuration === undefined || guild === undefined || guildDocument === undefined) {
+			return;
+		}
+
+		const ticketConfiguration = guildDocument.features.server.features?.tickets;
+		if (ticketConfiguration === undefined || !ticketConfiguration.enabled) {
+			return;
+		}
+
+		const entryRequestDocument = this.client.cache.documents.entryRequests.get(compositeId);
+		if (entryRequestDocument === undefined) {
+			return;
+		}
+
+		if (entryRequestDocument.ticketChannelId !== undefined) {
+			return;
+		}
+
+		const userDocument = await this.getUserDocument(entryRequestDocument);
+		if (userDocument === undefined) {
+			return;
+		}
+
+		const user = this.client.cache.users.get(BigInt(userDocument.account.id));
+		if (user === undefined) {
+			return;
+		}
+
+		const member = this.client.cache.members.get(Discord.snowflakeToBigint(`${interaction.user.id}${guild.id}`));
+		if (member === undefined) {
+			return;
+		}
+
+		const strings = {
+			inquiryChannel: localise(
+				this.client,
+				"entry.verification.inquiry.channel",
+				this.guildLocale,
+			)({ user: user.username }),
+		};
+
+		const result = await openTicket(
+			[this.client, this.bot],
+			configuration,
+			{ topic: strings.inquiryChannel },
+			[guild, user, member, userDocument],
+			ticketConfiguration.categoryId,
+			"inquiry",
+			{ guildLocale: this.guildLocale },
+		);
+		if (typeof result === "string") {
+			const strings = {
+				title: localise(this.client, "entry.verification.inquiry.failed.title", this.guildLocale)(),
+				description: localise(this.client, "entry.verification.inquiry.failed.description", this.guildLocale)(),
+			};
+
+			editReply([this.client, this.bot], interaction, {
+				embeds: [
+					{
+						title: strings.title,
+						description: strings.description,
+						color: constants.colors.peach,
+					},
+				],
+			});
+
+			return;
+		}
+
+		const session = this.client.database.openSession();
+
+		entryRequestDocument.ticketChannelId = result.channelId;
+
+		await session.store(entryRequestDocument);
+		await session.saveChanges();
+
+		session.saveChanges();
+
+		const prompt = this.promptByCompositeId.get(`${entryRequestDocument.guildId}/${entryRequestDocument.authorId}`);
+		if (prompt === undefined) {
+			return;
+		}
+
+		await this.bot.rest.deleteMessage(prompt.channelId, prompt.id).catch(() => {
+			this.client.log.warn("Failed to delete prompt.");
+		});
+
+		{
+			const strings = {
+				title: localise(this.client, "entry.verification.inquiry.opened.title", this.guildLocale)(),
+				description: localise(
+					this.client,
+					"entry.verification.inquiry.opened.description",
+					this.guildLocale,
+				)({
+					guild_name: guild.name,
+				}),
+			};
+
+			editReply([this.client, this.bot], interaction, {
+				embeds: [
+					{
+						title: strings.title,
+						description: strings.description,
+						color: constants.colors.lightGreen,
+					},
+				],
+			});
 		}
 	}
 

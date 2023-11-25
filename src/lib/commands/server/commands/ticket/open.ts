@@ -16,9 +16,10 @@ import {
 	reply,
 } from "../../../../interactions";
 import constants from "../../../../../constants/constants";
-import { Ticket } from "../../../../database/ticket";
+import { Ticket, TicketType } from "../../../../database/ticket";
 import { Locale } from "../../../../../constants/languages";
 import { MentionTypes, mention, trim } from "../../../../../formatting";
+import { Configurations } from "../../../../services/prompts/service";
 
 const option: OptionTemplate = {
 	name: "open",
@@ -29,7 +30,7 @@ const option: OptionTemplate = {
 type TicketError = "failure";
 
 async function handleOpenTicket([client, bot]: [Client, Discord.Bot], interaction: Logos.Interaction): Promise<void> {
-	const locale = interaction.locale;
+	const { locale, guildLocale } = interaction;
 
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
@@ -118,102 +119,23 @@ async function handleOpenTicket([client, bot]: [Client, Discord.Bot], interactio
 		return;
 	}
 
-	const ticketService = client.services.prompts.tickets.get(guild.id);
-	if (ticketService === undefined) {
-		return;
-	}
-
 	createModalComposer<Ticket["answers"]>([client, bot], interaction, {
 		modal: generateTicketModal(client, { locale }),
 		onSubmit: async (submission, answers) => {
 			await postponeReply([client, bot], submission);
 
-			const session = client.database.openSession();
-
-			const channel = await bot.helpers
-				.createChannel(guild.id, {
-					parentId: configuration.categoryId,
-					name: trim(`${interaction.user.username}${constants.symbols.sigils.channelSeparator}${answers.topic}`, 100),
-					topic: answers.topic,
-				})
-				.catch(() => {
-					client.log.warn("Could not create a channel for ticket.");
-					return undefined;
-				});
-			if (channel === undefined) {
-				return "failure";
+			const result = await openTicket(
+				[client, bot],
+				configuration,
+				answers,
+				[guild, submission.user, member, userDocument],
+				configuration.categoryId,
+				"standalone",
+				{ guildLocale },
+			);
+			if (typeof result === "string") {
+				return result;
 			}
-
-			const mentions: string[] = [];
-
-			for (const roleId of configuration.management?.roles ?? []) {
-				mentions.push(mention(roleId, MentionTypes.Role));
-			}
-
-			for (const userId of configuration.management?.users ?? []) {
-				mentions.push(mention(userId, MentionTypes.User));
-			}
-
-			mentions.push(mention(interaction.user.id, MentionTypes.User));
-
-			const mentionsFormatted = mentions.join(" ");
-
-			bot.helpers.sendMessage(channel.id, { content: mentionsFormatted }).catch(() => {
-				client.log.warn("Failed to mention participants in ticket.");
-				return undefined;
-			});
-
-			bot.helpers
-				.sendMessage(channel.id, {
-					embeds: [
-						{
-							description: `${mention(interaction.user.id, MentionTypes.User)}: *${answers.topic}*`,
-							color: constants.colors.husky,
-						},
-					],
-				})
-				.catch(() => {
-					client.log.warn("Failed to send a topic message in the ticket channel.");
-					return undefined;
-				});
-
-			const ticketDocument = {
-				...({
-					id: `tickets/${guildId}/${userDocument.account.id}/${channel.id}`,
-					guildId: guild.id.toString(),
-					authorId: userDocument.account.id,
-					channelId: channel.id.toString(),
-					answers,
-					isResolved: false,
-					createdAt: Date.now(),
-				} satisfies Ticket),
-				"@metadata": { "@collection": "Tickets" },
-			};
-			await session.store(ticketDocument);
-			await session.saveChanges();
-			session.dispose();
-
-			if (configuration.journaling) {
-				const journallingService = client.services.journalling.get(guild.id);
-				journallingService?.log("ticketOpen", { args: [member, ticketDocument] });
-			}
-
-			const userId = BigInt(userDocument.account.id);
-
-			const user = client.cache.users.get(userId);
-			if (user === undefined) {
-				return "failure";
-			}
-
-			const prompt = await ticketService.savePrompt(user, ticketDocument);
-			if (prompt === undefined) {
-				return "failure";
-			}
-
-			const compositeId = `${guild.id}/${user.id}/${channel.id}`;
-			ticketService.registerDocument(compositeId, ticketDocument);
-			ticketService.registerPrompt(prompt, userId, compositeId, ticketDocument);
-			ticketService.registerHandler(compositeId);
 
 			const strings = {
 				title: localise(client, "ticket.strings.sent.title", locale)(),
@@ -235,6 +157,144 @@ async function handleOpenTicket([client, bot]: [Client, Discord.Bot], interactio
 		onInvalid: async (submission, error) =>
 			handleCouldNotOpenTicket([client, bot], submission, error as TicketError | undefined, { locale }),
 	});
+}
+
+async function openTicket(
+	[client, bot]: [Client, Discord.Bot],
+	configuration: NonNullable<Configurations["tickets"] | Configurations["verification"]>,
+	answers: Ticket["answers"],
+	[guild, user, member, userDocument]: [Logos.Guild, Logos.User, Logos.Member, User],
+	categoryId: string,
+	type: TicketType,
+	{ guildLocale }: { guildLocale: Locale },
+): Promise<Ticket | string> {
+	const categoryChannel = client.cache.channels.get(BigInt(categoryId));
+	if (categoryChannel === undefined) {
+		return "failure";
+	}
+
+	const ticketService = client.services.prompts.tickets.get(guild.id);
+	if (ticketService === undefined) {
+		return "failure";
+	}
+
+	const session = client.database.openSession();
+
+	const strings = {
+		inquiry: localise(client, "entry.verification.inquiry.inquiry", guildLocale)(),
+	};
+
+	const channel = await bot.helpers
+		.createChannel(guild.id, {
+			parentId: categoryId,
+			name: trim(
+				`${user.username}${constants.symbols.sigils.channelSeparator}${
+					type === "standalone" ? answers.topic : strings.inquiry
+				}`,
+				100,
+			),
+			permissionOverwrites: [
+				...categoryChannel.permissionOverwrites,
+				{ type: Discord.OverwriteTypes.Member, id: user.id, allow: ["VIEW_CHANNEL"] },
+			],
+			topic: answers.topic,
+		})
+		.catch(() => {
+			client.log.warn("Could not create a channel for ticket.");
+			return undefined;
+		});
+	if (channel === undefined) {
+		return "failure";
+	}
+
+	const mentions: string[] = [];
+
+	const management =
+		"voting" in configuration
+			? configuration.voting
+			: "management" in configuration
+			? configuration.management
+			: undefined;
+
+	for (const roleId of management?.roles ?? []) {
+		mentions.push(mention(roleId, MentionTypes.Role));
+	}
+
+	for (const userId of management?.users ?? []) {
+		mentions.push(mention(userId, MentionTypes.User));
+	}
+
+	mentions.push(mention(user.id, MentionTypes.User));
+
+	const mentionsFormatted = mentions.join(" ");
+
+	bot.helpers.sendMessage(channel.id, { content: mentionsFormatted }).catch(() => {
+		client.log.warn("Failed to mention participants in ticket.");
+		return undefined;
+	});
+
+	bot.helpers
+		.sendMessage(channel.id, {
+			embeds: [
+				{
+					description: `${mention(user.id, MentionTypes.User)}: *${answers.topic}*`,
+					color: constants.colors.husky,
+				},
+			],
+		})
+		.catch(() => {
+			client.log.warn("Failed to send a topic message in the ticket channel.");
+			return undefined;
+		});
+
+	const ticketDocument = {
+		...({
+			id: `tickets/${guild.id}/${userDocument.account.id}/${channel.id}`,
+			guildId: guild.id.toString(),
+			authorId: userDocument.account.id,
+			channelId: channel.id.toString(),
+			answers,
+			isResolved: false,
+			type,
+			createdAt: Date.now(),
+		} satisfies Ticket),
+		"@metadata": { "@collection": "Tickets" },
+	};
+	await session.store(ticketDocument);
+	await session.saveChanges();
+	session.dispose();
+
+	if (configuration.journaling) {
+		const journallingService = client.services.journalling.get(guild.id);
+
+		switch (type) {
+			case "standalone": {
+				journallingService?.log("ticketOpen", { args: [member, ticketDocument] });
+				break;
+			}
+			case "inquiry": {
+				journallingService?.log("inquiryOpen", { args: [member, ticketDocument] });
+				break;
+			}
+		}
+	}
+
+	const compositeId = `${guild.id}/${user.id}/${channel.id}`;
+	ticketService.registerDocument(compositeId, ticketDocument);
+	ticketService.registerHandler(compositeId);
+
+	if (type === "inquiry") {
+		return ticketDocument;
+	}
+
+	const prompt = await ticketService.savePrompt(user, ticketDocument);
+	if (prompt === undefined) {
+		return "failure";
+	}
+
+	ticketService.registerPrompt(prompt, user.id, compositeId, ticketDocument);
+
+	return ticketDocument;
 }
 
 async function handleCouldNotOpenTicket(
@@ -391,3 +451,4 @@ function generateTicketModal(client: Client, { locale }: { locale: Locale }): Mo
 }
 
 export default option;
+export { openTicket };

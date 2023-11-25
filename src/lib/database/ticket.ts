@@ -6,8 +6,11 @@ interface Ticket {
 	answers: {
 		topic: string;
 	};
+	type: TicketType;
 	isResolved: boolean;
 	createdAt: number;
 }
 
-export type { Ticket };
+type TicketType = "standalone" | "inquiry";
+
+export type { Ticket, TicketType };

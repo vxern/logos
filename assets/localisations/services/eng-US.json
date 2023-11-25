@@ -27,5 +27,8 @@
 	"alreadyMarkedUnresolved.description": "This issue has already been marked unresolved.",
   "remove": "Remove",
   "cannotRemovePrompt.title": "Cannot remove prompt",
-  "cannotRemovePrompt.description": "You cannot remove this prompt."
+  "cannotRemovePrompt.description": "You cannot remove this prompt.",
+  "close": "Close",
+  "cannotCloseIssue.title": "Cannot close issue",
+  "cannotCloseIssue.description": "You cannot close this issue."
 }

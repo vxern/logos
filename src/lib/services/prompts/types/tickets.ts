@@ -12,13 +12,17 @@ type InteractionData = [documentId: string, isResolved: string];
 
 class TicketService extends PromptService<"tickets", Ticket, InteractionData> {
 	constructor([client, bot]: [Client, Discord.Bot], guildId: bigint) {
-		super([client, bot], guildId, { type: "tickets", isDeletable: true });
+		super([client, bot], guildId, { type: "tickets", deleteMode: "close" });
 	}
 
 	getAllDocuments(): Map<string, Ticket> {
 		const tickets = new Map<string, Ticket>();
 
 		for (const [compositeId, ticketDocument] of this.client.cache.documents.tickets) {
+			if (ticketDocument.type !== "standalone") {
+				continue;
+			}
+
 			if (ticketDocument.guildId !== this.guildIdString) {
 				continue;
 			}
@@ -42,6 +46,12 @@ class TicketService extends PromptService<"tickets", Ticket, InteractionData> {
 	}
 
 	getPromptContent(user: Logos.User, ticketDocument: Ticket): Discord.CreateMessageOptions | undefined {
+		// Inquiry tickets are hidden, and are not meant to be interactable.
+		// For all intents and purposes, verification prompts are kind of like their controller.
+		if (ticketDocument.type === "inquiry") {
+			return undefined;
+		}
+
 		const guild = this.guild;
 		if (guild === undefined) {
 			return undefined;
@@ -51,6 +61,7 @@ class TicketService extends PromptService<"tickets", Ticket, InteractionData> {
 		const strings = {
 			markResolved: localise(this.client, "markResolved", guildLocale)(),
 			markUnresolved: localise(this.client, "markUnresolved", guildLocale)(),
+			close: localise(this.client, "close", guildLocale)(),
 			remove: localise(this.client, "remove", guildLocale)(),
 		};
 
@@ -175,7 +186,7 @@ class TicketService extends PromptService<"tickets", Ticket, InteractionData> {
 		return ticketDocument;
 	}
 
-	protected async handleDelete(compositeId: string): Promise<void> {
+	public async handleDelete(compositeId: string): Promise<void> {
 		await super.handleDelete(compositeId);
 
 		const [_, __, channelId] = compositeId.split("/");

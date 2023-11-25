@@ -83,6 +83,7 @@ abstract class Service implements ServiceBase {
 	async webhooksUpdate(..._: Parameters<ServiceBase["webhooksUpdate"]>) {}
 	async botUpdate(..._: Parameters<ServiceBase["botUpdate"]>) {}
 	async typingStart(..._: Parameters<ServiceBase["typingStart"]>) {}
+  async threadListSync(..._: Parameters<ServiceBase["threadListSync"]>) {}
 }
 
 abstract class GlobalService extends Service {

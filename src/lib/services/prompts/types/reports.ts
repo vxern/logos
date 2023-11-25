@@ -13,7 +13,7 @@ type InteractionData = [documentId: string, isResolved: string];
 
 class ReportService extends PromptService<"reports", Report, InteractionData> {
 	constructor([client, bot]: [Client, Discord.Bot], guildId: bigint) {
-		super([client, bot], guildId, { type: "reports", isDeletable: true });
+		super([client, bot], guildId, { type: "reports", deleteMode: "delete" });
 	}
 
 	getAllDocuments(): Map<string, Report> {

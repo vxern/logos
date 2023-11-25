@@ -10,6 +10,7 @@ export default {
 	resources: "resources",
 	suggestions: "suggestions",
 	tickets: "tickets",
+	createInquiry: "create_inquiry",
 	removePrompt: "remove_prompt",
 	selectRoles: "select_roles",
 	showInChat: "show_in_chat",

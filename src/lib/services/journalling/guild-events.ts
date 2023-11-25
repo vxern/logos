@@ -46,6 +46,9 @@ type GuildEvents = {
 	/** A ticket has been opened. */
 	ticketOpen: [member: Logos.Member, ticket: Ticket];
 
+	/** An inquiry has been opened. */
+	inquiryOpen: [member: Logos.Member, ticket: Ticket];
+
 	/** A purging of messages has been initiated. */
 	purgeBegin: [member: Logos.Member, channel: Logos.Channel, messageCount: number, author?: Logos.User];
 

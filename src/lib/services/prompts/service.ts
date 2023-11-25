@@ -41,6 +41,8 @@ const customIds: CustomIDs = {
 
 type PromptTypes = keyof Client["services"]["prompts"];
 
+type DeleteMode = "delete" | "close" | "none";
+
 abstract class PromptService<
 	PromptType extends PromptTypes,
 	DataType extends { id: string },
@@ -48,7 +50,7 @@ abstract class PromptService<
 > extends LocalService {
 	private readonly type: PromptType;
 	private readonly customId: string;
-	private readonly isDeletable: boolean;
+	private readonly deleteMode: DeleteMode;
 
 	protected readonly documents: Map<string, DataType>;
 
@@ -56,7 +58,7 @@ abstract class PromptService<
 		/*compositeId: */ string,
 		(interaction: Discord.Interaction, data: InteractionData) => void
 	> = new Map();
-	private readonly promptByCompositeId: Map</*compositeId: */ string, Discord.CamelizedDiscordMessage> = new Map();
+	protected readonly promptByCompositeId: Map</*compositeId: */ string, Discord.CamelizedDiscordMessage> = new Map();
 	private readonly documentByPromptId: Map</*promptId: */ string, DataType> = new Map();
 	private readonly userIdByPromptId: Map</*promptId: */ string, bigint> = new Map();
 
@@ -66,6 +68,7 @@ abstract class PromptService<
 	private stopRemovingPrompts: (() => void) | undefined;
 
 	private readonly _configuration: ConfigurationLocators[PromptType];
+
 	get configuration(): Configurations[PromptType] | undefined {
 		const guildDocument = this.guildDocument;
 		if (guildDocument === undefined) {
@@ -96,11 +99,11 @@ abstract class PromptService<
 	constructor(
 		[client, bot]: [Client, Discord.Bot],
 		guildId: bigint,
-		{ type, isDeletable }: { type: PromptType; isDeletable: boolean },
+		{ type, deleteMode }: { type: PromptType; deleteMode: DeleteMode },
 	) {
 		super([client, bot], guildId);
 		this.type = type;
-		this.isDeletable = isDeletable;
+		this.deleteMode = deleteMode;
 		this.customId = customIds[type];
 		this._configuration = configurationLocators[type];
 		this.documents = this.getAllDocuments();
@@ -193,7 +196,7 @@ abstract class PromptService<
 			end: this.collectingInteractions,
 		});
 
-		if (!this.isDeletable) {
+		if (this.deleteMode === "none") {
 			return;
 		}
 

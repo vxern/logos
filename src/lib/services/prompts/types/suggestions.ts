@@ -12,7 +12,7 @@ type InteractionData = [documentId: string, isResolved: string];
 
 class SuggestionService extends PromptService<"suggestions", Suggestion, InteractionData> {
 	constructor([client, bot]: [Client, Discord.Bot], guildId: bigint) {
-		super([client, bot], guildId, { type: "suggestions", isDeletable: true });
+		super([client, bot], guildId, { type: "suggestions", deleteMode: "delete" });
 	}
 
 	getAllDocuments(): Map<string, Suggestion> {

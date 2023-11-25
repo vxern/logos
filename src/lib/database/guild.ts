@@ -159,6 +159,7 @@ interface Guild {
 				}>;
 
 				/** User verification. */
+				/** Relies on guild.features.server.tickets.categoryId */
 				verification: Activatable<{
 					channelId: string;
 
