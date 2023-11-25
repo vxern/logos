@@ -475,15 +475,15 @@ abstract class PromptService<
 
 		switch (this.type) {
 			case "reports": {
-				session.delete(`reports/${compositeId}`);
+				await session.delete(`reports/${compositeId}`);
 				break;
 			}
 			case "resources": {
-				session.delete(`resources/${compositeId}`);
+				await session.delete(`resources/${compositeId}`);
 				break;
 			}
 			case "suggestions": {
-				session.delete(`suggestions/${compositeId}`);
+				await session.delete(`suggestions/${compositeId}`);
 				break;
 			}
 		}
