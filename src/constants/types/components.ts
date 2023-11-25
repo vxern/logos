@@ -9,6 +9,7 @@ export default {
 	reports: "reports",
 	resources: "resources",
 	suggestions: "suggestions",
+	tickets: "tickets",
 	removePrompt: "remove_prompt",
 	selectRoles: "select_roles",
 	showInChat: "show_in_chat",

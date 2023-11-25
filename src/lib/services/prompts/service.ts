@@ -10,10 +10,11 @@ import { getAllMessages } from "../../utils";
 import { LocalService } from "../service";
 
 interface Configurations {
+	verification: NonNullable<Guild["features"]["moderation"]["features"]>["verification"];
 	reports: NonNullable<Guild["features"]["moderation"]["features"]>["reports"];
 	resources: NonNullable<Guild["features"]["server"]["features"]>["resources"];
 	suggestions: NonNullable<Guild["features"]["server"]["features"]>["suggestions"];
-	verification: NonNullable<Guild["features"]["moderation"]["features"]>["verification"];
+	tickets: NonNullable<Guild["features"]["server"]["features"]>["tickets"];
 }
 
 type ConfigurationLocators = {
@@ -21,19 +22,21 @@ type ConfigurationLocators = {
 };
 
 const configurationLocators: ConfigurationLocators = {
+	verification: (guildDocument) => guildDocument.features.moderation.features?.verification,
 	reports: (guildDocument) => guildDocument.features.moderation.features?.reports,
 	resources: (guildDocument) => guildDocument.features.server.features?.resources,
 	suggestions: (guildDocument) => guildDocument.features.server.features?.suggestions,
-	verification: (guildDocument) => guildDocument.features.moderation.features?.verification,
+	tickets: (guildDocument) => guildDocument.features.server.features?.tickets,
 };
 
 type CustomIDs = Record<keyof Configurations, string>;
 
 const customIds: CustomIDs = {
+	verification: constants.components.verification,
 	reports: constants.components.reports,
 	resources: constants.components.resources,
 	suggestions: constants.components.suggestions,
-	verification: constants.components.verification,
+	tickets: constants.components.tickets,
 };
 
 type PromptTypes = keyof Client["services"]["prompts"];
@@ -226,6 +229,10 @@ abstract class PromptService<
 					}
 					case "suggestions": {
 						management = (configuration as Configurations["suggestions"]).management;
+						break;
+					}
+					case "tickets": {
+						management = (configuration as Configurations["tickets"])?.management;
 						break;
 					}
 					default: {
@@ -470,7 +477,7 @@ abstract class PromptService<
 		data: InteractionData,
 	): Promise<DataType | undefined | null>;
 
-	private async handleDelete(compositeId: string): Promise<void> {
+	protected async handleDelete(compositeId: string): Promise<void> {
 		const session = this.client.database.openSession();
 
 		switch (this.type) {
@@ -484,6 +491,10 @@ abstract class PromptService<
 			}
 			case "suggestions": {
 				await session.delete(`suggestions/${compositeId}`);
+				break;
+			}
+			case "tickets": {
+				await session.delete(`tickets/${compositeId}`);
 				break;
 			}
 		}

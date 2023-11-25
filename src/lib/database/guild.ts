@@ -219,9 +219,12 @@ interface Guild {
 				}>;
 
 				/** @since v3.29.0 */
-				tickets: Activatable<{
+				tickets?: Activatable<{
+					channelId: string;
 					categoryId: string;
 					journaling: boolean;
+					rateLimit?: RateLimit;
+					limit?: number;
 					management?: {
 						roles?: string[];
 						users?: string[];

@@ -23,6 +23,9 @@
 	"resource.title": "Resource",
 	"resource.fields.resource": "What resource would you like to submit?",
 
+	"ticket.title": "Ticket",
+	"ticket.fields.topic": "What's the topic of your ticket?",
+
 	"prompts.continue": "Continue",
 	"prompts.cancel": "Cancel",
 	"prompts.stay": "Take me back",
