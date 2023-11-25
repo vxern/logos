@@ -426,7 +426,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 			votedAgainst.length >= voteInformation.rejection.required,
 		];
 
-		const submitter = this.client.cache.users.get(interaction.user.id);
+		const submitter = this.client.cache.users.get(BigInt(authorDocument.account.id));
 		if (submitter === undefined) {
 			return undefined;
 		}
