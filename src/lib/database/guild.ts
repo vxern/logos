@@ -217,6 +217,16 @@ interface Guild {
 						users?: string[];
 					};
 				}>;
+
+				/** @since v3.29.0 */
+				tickets: Activatable<{
+					categoryId: string;
+					journaling: boolean;
+					management?: {
+						roles?: string[];
+						users?: string[];
+					};
+				}>;
 			};
 		}>;
 

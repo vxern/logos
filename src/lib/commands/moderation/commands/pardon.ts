@@ -6,12 +6,12 @@ import { MentionTypes, mention } from "../../../../formatting";
 import * as Logos from "../../../../types";
 import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../client";
 import { Guild, timeStructToMilliseconds } from "../../../database/guild";
+import { User } from "../../../database/user";
 import { Warning } from "../../../database/warning";
 import { parseArguments, reply, respond } from "../../../interactions";
 import { CommandTemplate } from "../../command";
 import { user } from "../../parameters";
 import { getActiveWarnings } from "../module";
-import { User } from "../../../database/user";
 
 const command: CommandTemplate = {
 	name: "pardon",

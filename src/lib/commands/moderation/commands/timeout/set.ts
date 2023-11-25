@@ -5,9 +5,9 @@ import time from "../../../../../constants/time";
 import { MentionTypes, mention, timestamp } from "../../../../../formatting";
 import * as Logos from "../../../../../types";
 import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../../client";
+import { Guild } from "../../../../database/guild";
 import diagnostics from "../../../../diagnostics";
 import { parseArguments, parseTimeExpression, reply, respond } from "../../../../interactions";
-import { Guild } from "../../../../database/guild";
 
 async function handleSetTimeoutAutocomplete(
 	[client, bot]: [Client, Discord.Bot],

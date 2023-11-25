@@ -2,9 +2,9 @@ import * as Discord from "@discordeno/bot";
 import constants from "../../../../../../constants/constants";
 import * as Logos from "../../../../../../types";
 import { Client, localise } from "../../../../../client";
+import { User } from "../../../../../database/user";
 import { editReply, postponeReply } from "../../../../../interactions";
 import { OptionTemplate } from "../../../../command";
-import { User } from "../../../../../database/user";
 
 const command: OptionTemplate = {
 	name: "clear",

@@ -39,8 +39,8 @@
   "scripts": {
     "setup": "npm install && npm audit fix",
     "#": "",
-    "format": "biome check src/ --apply-unsafe",
     "dev": "pm2 start ecosystem.config.cjs --instances 1 --no-autorestart --no-daemon",
+    "format": "biome check src/ --apply-unsafe --organize-imports-enabled true",
     "##": "",
     "start": "pm2 start ecosystem.config.cjs --instances 1 --exp-backoff-restart-delay=500"
   },

@@ -3,12 +3,12 @@ import constants from "../../../../../constants/constants";
 import { MentionTypes, mention } from "../../../../../formatting";
 import * as Logos from "../../../../../types";
 import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../../client";
+import { Praise } from "../../../../database/praise";
+import { User } from "../../../../database/user";
+import { Warning } from "../../../../database/warning";
 import { parseArguments, reply } from "../../../../interactions";
 import { OptionTemplate } from "../../../command";
 import { show, user } from "../../../parameters";
-import { User } from "../../../../database/user";
-import { Praise } from "../../../../database/praise";
-import { Warning } from "../../../../database/warning";
 
 const command: OptionTemplate = {
 	name: "view",

@@ -8,9 +8,9 @@ import languages, {
 import localisations from "../../../../../../constants/localisations";
 import * as Logos from "../../../../../../types";
 import { Client, localise } from "../../../../../client";
+import { User } from "../../../../../database/user";
 import { editReply, parseArguments, postponeReply, reply, respond } from "../../../../../interactions";
 import { OptionTemplate } from "../../../../command";
-import { User } from "../../../../../database/user";
 
 const command: OptionTemplate = {
 	name: "set",

@@ -3,10 +3,10 @@ import constants from "../../../../constants/constants";
 import { Locale } from "../../../../constants/languages";
 import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
+import { Guild } from "../../../database/guild";
 import { getShowButton, parseArguments, reply, respond } from "../../../interactions";
 import { CommandTemplate } from "../../command";
 import { show } from "../../parameters";
-import { Guild } from "../../../database/guild";
 
 const command: CommandTemplate = {
 	name: "rule",

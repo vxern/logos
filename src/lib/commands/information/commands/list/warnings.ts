@@ -4,9 +4,9 @@ import { Locale } from "../../../../../constants/languages";
 import { timestamp } from "../../../../../formatting";
 import * as Logos from "../../../../../types";
 import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../../client";
+import { User } from "../../../../database/user";
 import { Warning } from "../../../../database/warning";
 import { parseArguments, reply } from "../../../../interactions";
-import { User } from "../../../../database/user";
 
 async function handleDisplayWarningsAutocomplete(
 	[client, bot]: [Client, Discord.Bot],

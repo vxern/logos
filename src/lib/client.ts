@@ -1,5 +1,5 @@
-import * as Discord from "@discordeno/bot";
 import * as fs from "node:fs/promises";
+import * as Discord from "@discordeno/bot";
 import FancyLog from "fancy-log";
 import * as ravendb from "ravendb";
 import constants from "../constants/constants";
@@ -21,6 +21,14 @@ import * as Logos from "../types";
 import { Command, CommandTemplate, InteractionHandler, Option } from "./commands/command";
 import commandTemplates from "./commands/commands";
 import { SentencePair } from "./commands/language/commands/game";
+import { EntryRequest } from "./database/entry-request";
+import { Guild, timeStructToMilliseconds } from "./database/guild";
+import { Praise } from "./database/praise";
+import { Report } from "./database/report";
+import { Resource } from "./database/resource";
+import { Suggestion } from "./database/suggestion";
+import { User } from "./database/user";
+import { Warning } from "./database/warning";
 import diagnostics from "./diagnostics";
 import {
 	acknowledge,
@@ -40,9 +48,11 @@ import { JournallingService } from "./services/journalling/journalling";
 import { LavalinkService } from "./services/music/lavalink";
 import { MusicService } from "./services/music/music";
 import { InformationNoticeService } from "./services/notices/types/information";
+import { ResourceNoticeService } from "./services/notices/types/resources";
 import { RoleNoticeService } from "./services/notices/types/roles";
 import { WelcomeNoticeService } from "./services/notices/types/welcome";
 import { ReportService } from "./services/prompts/types/reports";
+import { ResourceService } from "./services/prompts/types/resources";
 import { SuggestionService } from "./services/prompts/types/suggestions";
 import { VerificationService } from "./services/prompts/types/verification";
 import { RealtimeUpdateService } from "./services/realtime-updates/service";
@@ -50,16 +60,6 @@ import { RoleIndicatorService } from "./services/role-indicators/role-indicators
 import { Service } from "./services/service";
 import { StatusService } from "./services/status/service";
 import { requestMembers } from "./utils";
-import { EntryRequest } from "./database/entry-request";
-import { Guild, timeStructToMilliseconds } from "./database/guild";
-import { Praise } from "./database/praise";
-import { Report } from "./database/report";
-import { Suggestion } from "./database/suggestion";
-import { User } from "./database/user";
-import { Warning } from "./database/warning";
-import { ResourceService } from "./services/prompts/types/resources";
-import { Resource } from "./database/resource";
-import { ResourceNoticeService } from "./services/notices/types/resources";
 
 type Client = {
 	environment: {
