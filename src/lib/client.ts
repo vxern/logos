@@ -63,7 +63,6 @@ import { ResourceNoticeService } from "./services/notices/types/resources";
 
 type Client = {
 	environment: {
-		version: string;
 		discordSecret: string;
 		deeplSecret: string;
 		rapidApiSecret: string;
