@@ -25,12 +25,15 @@ const command: CommandTemplate = {
 	name: "resource",
 	type: Discord.ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ["VIEW_CHANNEL"],
-	handle: handleMakeResource,
+	handle: handleSubmitResource,
 };
 
 type ResourceError = "failure";
 
-async function handleMakeResource([client, bot]: [Client, Discord.Bot], interaction: Logos.Interaction): Promise<void> {
+async function handleSubmitResource(
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Logos.Interaction,
+): Promise<void> {
 	const locale = interaction.locale;
 
 	const guildId = interaction.guildId;
