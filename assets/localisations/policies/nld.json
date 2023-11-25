@@ -1,6 +1,6 @@
 {
     "policies.moderation.title": "Moderatiebeleid",
-    "policies.moderation.points.introduction.title": "Hoe modereren moderators de server?",
+    "policies.moderation.points.introduction.title": "Hoe modereren de moderators de server?",
     "policies.moderation.points.introduction.description": "De server heeft een moderatiebeleid van 3 waarschuwingen, dat wordt gehandhaafd door de gidsen van de server.",
     "policies.moderation.points.breach.title": "Waar zijn de regels van toepassing?",
     "policies.moderation.points.breach.description": "De serverregels gelden voor de hele server en elke overtreding zal resulteren in een waarschuwing.",

@@ -3,7 +3,6 @@
     "interactions.page": "Pagina",
     "interactions.invalidUser.title": "Ongeldige gebruiker",
     "interactions.invalidUser.description": "De opgegeven gebruiker is ongeldig.",
-    "interactions.rateLimited.title": "You are being rate-limited",
     "interactions.rateLimited.description.tooManyUses": "Je hebt dit commando te vaak ({times}) gebruikt in een te korte tijdspanne.",
     "interactions.rateLimited.description.cannotUseAgainUntil": "Je zult het commando opnieuw kunnen gebruiken {relative_timestamp}.",
     "interactions.show": "Bericht in chat weergeven"

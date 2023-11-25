@@ -1,5 +1,5 @@
 {
-    "rules.tldr": "TL;DR",
+    "rules.tldr": "Kortom",
     "rules.rule": "Regel",
     "rules.behaviour.title": "Gedrag",
     "rules.behaviour.summary": "Probeer vriendelijk te zijn.",
@@ -9,14 +9,13 @@
     "rules.quality.content": "Van bijdragen aan de server wordt verwacht dat ze van fatsoenlijke kwaliteit zijn. Trollen, spammen, flooding, shitposting (buiten het kanaal voor memes) en andere vormen van vervelend gedrag worden ten zeerste ontmoedigd.",
     "rules.relevance.title": "Relevantie",
     "rules.relevance.summary": "Plaats relevante inhoud.",
-    "rules.relevance.content": "It is expected of contributions made to the server to be placed in their relevant channel and category. Contributions made in inappropriate channels for their subject will be asked to be moved to their relevant channel.",
     "rules.suitability.title": "Geschiktheid",
     "rules.suitability.summary": "Plaats inhoud die geschikt is voor jongere leden.",
     "rules.suitability.content": "Van bijdragen aan de server wordt verwacht dat ze geschikt zijn om door minderjarigen te worden bekeken. Leeftijdsgebonden (NSFW) en NSFL-inhoud is ten strengste verboden. Als je het niet aan een minderjarige zou laten zien, mag je het niet posten.",
     "rules.exclusivity.title": "Exclusiviteit",
     "rules.exclusivity.summary": "Maak geen reclame.",
     "rules.exclusivity.content": "Er wordt van de leden verwacht dat ze deze ruimte niet gebruiken voor reclame, actieve pogingen daartoe (inclusief ongevraagde DM's) zijn verboden.",
-    "rules.adherence.title": "Adherence",
+    "rules.adherence.title": "Naleving",
     "rules.adherence.summary": "Respecteer de regels.",
     "rules.adherence.content": "Voor leden die geen respect tonen voor de serverregels en niet geïnteresseerd zijn in het leveren van nuttige bijdragen, kan een permanente ban worden uitgevaardigd."
 }
