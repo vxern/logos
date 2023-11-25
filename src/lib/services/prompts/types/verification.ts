@@ -4,6 +4,7 @@ import { Locale, getLocalisationLanguageByLocale } from "../../../../constants/l
 import { MentionTypes, TimestampFormat, mention, timestamp } from "../../../../formatting";
 import * as Logos from "../../../../types";
 import { Client, localise, pluralise } from "../../../client";
+import { openTicket } from "../../../commands/server/commands/ticket/open";
 import { EntryRequest } from "../../../database/entry-request";
 import { User } from "../../../database/user";
 import diagnostics from "../../../diagnostics";
@@ -19,7 +20,6 @@ import {
 } from "../../../interactions";
 import { getGuildIconURLFormatted, snowflakeToTimestamp } from "../../../utils";
 import { Configurations, PromptService } from "../service";
-import { openTicket } from "../../../commands/server/commands/ticket/open";
 
 type InteractionData = [documentId: string, isAccept: string];
 

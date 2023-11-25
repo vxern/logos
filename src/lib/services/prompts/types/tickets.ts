@@ -2,11 +2,11 @@ import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
+import { Ticket } from "../../../database/ticket";
 import { User } from "../../../database/user";
 import diagnostics from "../../../diagnostics";
 import { encodeId, getLocaleData, reply } from "../../../interactions";
 import { PromptService } from "../service";
-import { Ticket } from "../../../database/ticket";
 
 type InteractionData = [documentId: string, isResolved: string];
 

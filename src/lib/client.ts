@@ -55,13 +55,13 @@ import { WelcomeNoticeService } from "./services/notices/types/welcome";
 import { ReportService } from "./services/prompts/types/reports";
 import { ResourceService } from "./services/prompts/types/resources";
 import { SuggestionService } from "./services/prompts/types/suggestions";
+import { TicketService } from "./services/prompts/types/tickets";
 import { VerificationService } from "./services/prompts/types/verification";
 import { RealtimeUpdateService } from "./services/realtime-updates/service";
 import { RoleIndicatorService } from "./services/role-indicators/role-indicators";
 import { Service } from "./services/service";
 import { StatusService } from "./services/status/service";
 import { requestMembers } from "./utils";
-import { TicketService } from "./services/prompts/types/tickets";
 
 type Client = {
 	environment: {

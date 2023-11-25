@@ -1,11 +1,13 @@
 import * as Discord from "@discordeno/bot";
-import { OptionTemplate } from "../../../command";
-import { Client, localise } from "../../../../client";
-import * as Logos from "../../../../../types";
-import { Guild, timeStructToMilliseconds } from "../../../../database/guild";
-import { User } from "../../../../database/user";
+import constants from "../../../../../constants/constants";
+import { Locale } from "../../../../../constants/languages";
 import defaults from "../../../../../defaults";
-import { verifyIsWithinLimits } from "../../../../utils";
+import { MentionTypes, mention, trim } from "../../../../../formatting";
+import * as Logos from "../../../../../types";
+import { Client, localise } from "../../../../client";
+import { Guild, timeStructToMilliseconds } from "../../../../database/guild";
+import { Ticket, TicketType } from "../../../../database/ticket";
+import { User } from "../../../../database/user";
 import {
 	Modal,
 	createInteractionCollector,
@@ -15,11 +17,9 @@ import {
 	postponeReply,
 	reply,
 } from "../../../../interactions";
-import constants from "../../../../../constants/constants";
-import { Ticket, TicketType } from "../../../../database/ticket";
-import { Locale } from "../../../../../constants/languages";
-import { MentionTypes, mention, trim } from "../../../../../formatting";
 import { Configurations } from "../../../../services/prompts/service";
+import { verifyIsWithinLimits } from "../../../../utils";
+import { OptionTemplate } from "../../../command";
 
 const option: OptionTemplate = {
 	name: "open",
