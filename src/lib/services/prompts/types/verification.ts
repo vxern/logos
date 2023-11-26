@@ -48,7 +48,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 
 		createInteractionCollector([this.client, this.bot], {
 			type: Discord.InteractionTypes.MessageComponent,
-			customId: constants.components.createInquiry,
+			customId: `${constants.components.createInquiry}/${this.guildId}`,
 			doesNotExpire: true,
 			onCollect: async (selection) => {
 				const customId = selection.data?.customId;
@@ -304,7 +304,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 										type: Discord.MessageComponentTypes.Button,
 										style: Discord.ButtonStyles.Primary,
 										label: strings.open,
-										customId: encodeId(constants.components.createInquiry, [
+										customId: encodeId(`${constants.components.createInquiry}/${this.guildId}`, [
 											`${entryRequestDocument.guildId}/${entryRequestDocument.authorId}`,
 										]),
 									},
