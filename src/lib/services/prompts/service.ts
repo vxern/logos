@@ -492,10 +492,6 @@ abstract class PromptService<
 				await session.delete(`resources/${compositeId}`);
 				break;
 			}
-			case "resources": {
-				session.delete(`resources/${compositeId}`);
-				break;
-			}
 			case "suggestions": {
 				await session.delete(`suggestions/${compositeId}`);
 				break;
