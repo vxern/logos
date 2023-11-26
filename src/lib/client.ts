@@ -949,6 +949,8 @@ function withCacheInterceptors(client: Client, transformers: Discord.Transformer
 
 	transformers.guild = (bot, payload) => {
 		const resultUnoptimised = guild(bot, payload);
+		// TODO(vxern): This is a monkey-patch for Discordeno, which filters out shardIds equal to 0.
+		resultUnoptimised.shardId = payload.shardId;
 		const result = Logos.slimGuild(resultUnoptimised);
 
 		for (const channel of payload.guild.channels ?? []) {
