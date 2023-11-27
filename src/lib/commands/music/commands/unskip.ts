@@ -202,6 +202,26 @@ async function handleUnskipAction([client, bot]: [Client, Discord.Bot], interact
 		return;
 	}
 
+	const strings = {
+		title: localise(client, "music.options.unskip.strings.unskipped.title", locale)(),
+		description: localise(client, "music.options.unskip.strings.unskipped.description", locale)(),
+	};
+
+	reply(
+		[client, bot],
+		interaction,
+		{
+			embeds: [
+				{
+					title: `${constants.symbols.music.unskipped} ${strings.title}`,
+					description: strings.description,
+					color: constants.colors.blue,
+				},
+			],
+		},
+		{ visible: true },
+	);
+  
 	const isUnskippingCollection = collection ?? false;
 
 	if (isUnskippingListing) {
@@ -237,26 +257,6 @@ async function handleUnskipAction([client, bot]: [Client, Discord.Bot], interact
 			musicService.unskip(isUnskippingCollection, {});
 		}
 	}
-
-	const strings = {
-		title: localise(client, "music.options.unskip.strings.unskipped.title", locale)(),
-		description: localise(client, "music.options.unskip.strings.unskipped.description", locale)(),
-	};
-
-	reply(
-		[client, bot],
-		interaction,
-		{
-			embeds: [
-				{
-					title: `${constants.symbols.music.unskipped} ${strings.title}`,
-					description: strings.description,
-					color: constants.colors.blue,
-				},
-			],
-		},
-		{ visible: true },
-	);
 }
 
 export default command;

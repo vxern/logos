@@ -157,25 +157,6 @@ async function handleSkipAction([client, bot]: [Client, Discord.Bot], interactio
 
 	const isSkippingCollection = collection ?? false;
 
-	if (songsToSkip !== undefined) {
-		let listingsToSkip!: number;
-		if (isCollection(current.content) && collection === undefined) {
-			listingsToSkip = Math.min(songsToSkip, current.content.songs.length - (current.content.position + 1));
-		} else {
-			listingsToSkip = Math.min(songsToSkip, queue.length);
-		}
-		musicService.skip(isSkippingCollection, { by: listingsToSkip });
-	} else if (songToSkipTo !== undefined) {
-		let listingToSkipTo!: number;
-		if (isCollection(current.content) && collection === undefined) {
-			listingToSkipTo = Math.min(songToSkipTo, current.content.songs.length);
-		} else {
-			listingToSkipTo = Math.min(songToSkipTo, queue.length);
-		}
-		musicService.skip(isSkippingCollection, { to: listingToSkipTo });
-	} else {
-		musicService.skip(isSkippingCollection, {});
-	}
 
 	const strings =
 		collection ?? false
@@ -202,6 +183,26 @@ async function handleSkipAction([client, bot]: [Client, Discord.Bot], interactio
 		},
 		{ visible: true },
 	);
+  
+	if (songsToSkip !== undefined) {
+		let listingsToSkip!: number;
+		if (isCollection(current.content) && collection === undefined) {
+			listingsToSkip = Math.min(songsToSkip, current.content.songs.length - (current.content.position + 1));
+		} else {
+			listingsToSkip = Math.min(songsToSkip, queue.length);
+		}
+		musicService.skip(isSkippingCollection, { by: listingsToSkip });
+	} else if (songToSkipTo !== undefined) {
+		let listingToSkipTo!: number;
+		if (isCollection(current.content) && collection === undefined) {
+			listingToSkipTo = Math.min(songToSkipTo, current.content.songs.length);
+		} else {
+			listingToSkipTo = Math.min(songToSkipTo, queue.length);
+		}
+		musicService.skip(isSkippingCollection, { to: listingToSkipTo });
+	} else {
+		musicService.skip(isSkippingCollection, {});
+	}
 }
 
 export default command;
