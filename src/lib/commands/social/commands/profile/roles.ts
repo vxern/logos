@@ -345,7 +345,7 @@ interface RoleData {
 interface ViewData {
 	category: RoleCategory;
 	menuRoles: Role[];
-	menuRolesResolved: Logos.Role[];
+	menuRolesResolved: (Logos.Role | undefined)[];
 	memberRolesIncludedInMenu: bigint[];
 }
 
@@ -393,15 +393,9 @@ async function traverseRoleTreeAndDisplay(
 				return BigInt(snowflake);
 			});
 		})();
-		const menuRolesResolved = snowflakes.map((snowflake) => {
-			const role = data.roleData.rolesById.get(snowflake);
-			if (role === undefined) {
-				throw `StateError: Could not get ${diagnostics.display.role(snowflake)}.`;
-			}
-			return role;
-		});
+		const menuRolesResolved = snowflakes.map((snowflake) => data.roleData.rolesById.get(snowflake));
 		const memberRolesIncludedInMenu = data.roleData.memberRoleIds.filter((roleId) =>
-			menuRolesResolved.some((role) => role.id === roleId),
+			menuRolesResolved.some((role) => role?.id === roleId),
 		);
 
 		data.viewData = { category, menuRoles, menuRolesResolved, memberRolesIncludedInMenu };
