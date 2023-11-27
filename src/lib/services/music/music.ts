@@ -1038,8 +1038,6 @@ class MusicService extends LocalService {
 		) {
 			if (replayCollection) {
 				session.listings.current.content.position = -1;
-			} else {
-				session.listings.current.content.position--;
 			}
 		}
 
