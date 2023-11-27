@@ -62,7 +62,6 @@ class TicketService extends PromptService<"tickets", Ticket, InteractionData> {
 			markResolved: localise(this.client, "markResolved", guildLocale)(),
 			markUnresolved: localise(this.client, "markUnresolved", guildLocale)(),
 			close: localise(this.client, "close", guildLocale)(),
-			remove: localise(this.client, "remove", guildLocale)(),
 		};
 
 		return {
@@ -104,7 +103,7 @@ class TicketService extends PromptService<"tickets", Ticket, InteractionData> {
 								{
 									type: Discord.MessageComponentTypes.Button,
 									style: Discord.ButtonStyles.Danger,
-									label: strings.remove,
+									label: strings.close,
 									customId: encodeId(`${constants.components.removePrompt}/${constants.components.tickets}/${this.guildId}`, [
 										`${ticketDocument.guildId}/${ticketDocument.authorId}/${ticketDocument.channelId}`,
 									]),
