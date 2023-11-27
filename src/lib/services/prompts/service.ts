@@ -202,7 +202,7 @@ abstract class PromptService<
 
 		createInteractionCollector([this.client, this.bot], {
 			type: Discord.InteractionTypes.MessageComponent,
-			customId: `${constants.components.removePrompt}/${this.customId}`,
+			customId: `${constants.components.removePrompt}/${this.customId}/${this.guildId}`,
 			doesNotExpire: true,
 			onCollect: async (selection) => {
 				const customId = selection.data?.customId;

@@ -96,7 +96,7 @@ class SuggestionService extends PromptService<"suggestions", Suggestion, Interac
 									type: Discord.MessageComponentTypes.Button,
 									style: Discord.ButtonStyles.Danger,
 									label: strings.remove,
-									customId: encodeId(`${constants.components.removePrompt}/${constants.components.suggestions}`, [
+									customId: encodeId(`${constants.components.removePrompt}/${constants.components.suggestions}/${this.guildId}`, [
 										`${suggestionDocument.guildId}/${suggestionDocument.authorId}/${suggestionDocument.createdAt}`,
 									]),
 								},
