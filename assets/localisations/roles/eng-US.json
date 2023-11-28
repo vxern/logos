@@ -6,7 +6,7 @@
 	"roles.selection.description.clickHere": "Click here to select roles",
 
 	"roles.noCategory.name": "No category selected",
-	"roles.noCategory.description": "Select a role category to obtain get a list of the available roles.",
+	"roles.noCategory.description": "Select a role category to get a list of the available roles.",
 
 	"roles.language.name": "Language",
 	"roles.language.description": "Roles identifying one's linguistic ability.",
