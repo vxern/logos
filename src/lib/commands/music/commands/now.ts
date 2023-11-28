@@ -114,7 +114,7 @@ async function handleDisplayCurrentlyPlaying(
 		return;
 	}
 
-	if (isCollection(current.content)) {
+	if (collection) {
 		const collection = current.content as SongCollection;
 
 		const locale = interaction.locale;
