@@ -832,7 +832,7 @@ class MusicService extends LocalService {
 
 		session.player.play(track.track);
 
-		const emoji = listingTypeToEmoji[song.type];
+		const emoji = listingTypeToEmoji[this.current?.content.type ?? song.type];
 
 		const guildLocale = this.guildLocale;
 		const strings = {
@@ -841,7 +841,11 @@ class MusicService extends LocalService {
 				"music.options.play.strings.nowPlaying.title.nowPlaying",
 				guildLocale,
 			)({
-				listing_type: localise(this.client, localisationsBySongListingType[song.type], guildLocale)(),
+				listing_type: localise(
+					this.client,
+					localisationsBySongListingType[this.current?.content.type ?? song.type],
+					guildLocale,
+				)(),
 			}),
 			description: {
 				nowPlaying: localise(this.client, "music.options.play.strings.nowPlaying.description.nowPlaying", guildLocale),
