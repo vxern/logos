@@ -1640,20 +1640,26 @@ function resolveInteractionToMember(
 	}
 
 	if (matchedMembers.length === 0) {
-		const strings = {
-			title: localise(client, "interactions.invalidUser.title", locale)(),
-			description: localise(client, "interactions.invalidUser.description", locale)(),
-		};
+		if (
+			interaction.type === Discord.InteractionTypes.ApplicationCommand ||
+			interaction.type === Discord.InteractionTypes.MessageComponent ||
+			interaction.type === Discord.InteractionTypes.ModalSubmit
+		) {
+			const strings = {
+				title: localise(client, "interactions.invalidUser.title", locale)(),
+				description: localise(client, "interactions.invalidUser.description", locale)(),
+			};
 
-		reply([client, bot], interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colors.red,
-				},
-			],
-		});
+			reply([client, bot], interaction, {
+				embeds: [
+					{
+						title: strings.title,
+						description: strings.description,
+						color: constants.colors.red,
+					},
+				],
+			});
+		}
 
 		return undefined;
 	}
