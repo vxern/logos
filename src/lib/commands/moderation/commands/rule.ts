@@ -57,9 +57,10 @@ async function handleCiteRuleAutocomplete(
 	}
 
 	const [{ rule: ruleOrUndefined }] = parseArguments(interaction.data?.options, {});
-	const ruleQuery = ruleOrUndefined ?? "";
+	const ruleQueryRaw = ruleOrUndefined ?? "";
 
-	const ruleQueryLowercase = ruleQuery.toLowerCase();
+	const ruleQueryTrimmed = ruleQueryRaw.trim();
+	const ruleQueryLowercase = ruleQueryTrimmed.toLowerCase();
 	const choices = ruleIds
 		.map((ruleId, index) => {
 			return {

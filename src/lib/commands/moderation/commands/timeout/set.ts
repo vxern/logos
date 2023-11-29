@@ -2,7 +2,7 @@ import * as Discord from "@discordeno/bot";
 import constants from "../../../../../constants/constants";
 import { Locale } from "../../../../../constants/languages";
 import time from "../../../../../constants/time";
-import { MentionTypes, mention, timestamp } from "../../../../../formatting";
+import { MentionTypes, mention, timestamp, trim } from "../../../../../formatting";
 import * as Logos from "../../../../../types";
 import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../../client";
 import { Guild } from "../../../../database/guild";
@@ -34,7 +34,11 @@ async function handleSetTimeoutAutocomplete(
 
 			const timestamp = parseTimeExpression(client, duration, { language, locale });
 			if (timestamp === undefined) {
-				respond([client, bot], interaction, []);
+				const strings = {
+					autocomplete: localise(client, "autocomplete.timestamp", locale)(),
+				};
+
+				respond([client, bot], interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
 				return;
 			}
 

@@ -32,9 +32,10 @@ async function handleDisplayDictionaryLicenceAutocomplete(
 	}
 
 	const [{ dictionary: dictionaryOrUndefined }] = parseArguments(interaction.data?.options, {});
-	const dictionaryQuery = dictionaryOrUndefined ?? "";
+	const dictionaryQueryRaw = dictionaryOrUndefined ?? "";
 
-	const dictionaryQueryLowercase = dictionaryQuery.toLowerCase();
+	const dictionaryQueryTrimmed = dictionaryQueryRaw.trim();
+	const dictionaryQueryLowercase = dictionaryQueryTrimmed.toLowerCase();
 	const choices = Object.entries(licences.dictionaries)
 		.map(([dictionaryKey, dictionary]) => {
 			return {

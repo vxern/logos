@@ -66,9 +66,19 @@ async function handleFindWordAutocomplete(
 	}
 
 	const [{ language: languageOrUndefined }] = parseArguments(interaction.data?.options, {});
-	const languageQuery = languageOrUndefined ?? "";
+	const languageQueryRaw = languageOrUndefined ?? "";
 
-	const languageQueryLowercase = languageQuery.toLowerCase();
+	const languageQueryTrimmed = languageQueryRaw.trim();
+	if (languageQueryTrimmed.length === 0) {
+		const strings = {
+			autocomplete: localise(client, "autocomplete.language", locale)(),
+		};
+
+		respond([client, bot], interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
+		return;
+	}
+
+	const languageQueryLowercase = languageQueryTrimmed.toLowerCase();
 	const choices = languages.languages.localisation
 		.map((language) => {
 			return {

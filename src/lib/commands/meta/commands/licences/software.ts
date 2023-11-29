@@ -34,9 +34,10 @@ async function handleDisplaySoftwareLicenceAutocomplete(
 	}
 
 	const [{ package: packageOrUndefined }] = parseArguments(interaction.data?.options, {});
-	const packageQuery = packageOrUndefined ?? "";
+	const packageQueryRaw = packageOrUndefined ?? "";
 
-	const packageQueryLowercase = packageQuery.toLowerCase();
+	const packageQueryTrimmed = packageQueryRaw.trim();
+	const packageQueryLowercase = packageQueryTrimmed.toLowerCase();
 	const choices = Object.keys(licences.software)
 		.map((packageName) => {
 			return {

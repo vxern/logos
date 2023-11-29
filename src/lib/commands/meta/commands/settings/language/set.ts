@@ -11,6 +11,7 @@ import { Client, localise } from "../../../../../client";
 import { User } from "../../../../../database/user";
 import { editReply, parseArguments, postponeReply, reply, respond } from "../../../../../interactions";
 import { OptionTemplate } from "../../../../command";
+import { trim } from "../../../../../../formatting";
 
 const command: OptionTemplate = {
 	name: "set",
@@ -39,9 +40,19 @@ async function handleSetLanguageAutocomplete(
 	}
 
 	const [{ language: languageOrUndefined }] = parseArguments(interaction.data?.options, {});
-	const languageQuery = languageOrUndefined ?? "";
+	const languageQueryRaw = languageOrUndefined ?? "";
 
-	const languageQueryLowercase = languageQuery.toLowerCase();
+	const languageQueryTrimmed = languageQueryRaw.trim();
+	if (languageQueryTrimmed.length === 0) {
+		const strings = {
+			autocomplete: localise(client, "autocomplete.language", locale)(),
+		};
+
+		respond([client, bot], interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
+		return;
+	}
+
+	const languageQueryLowercase = languageQueryTrimmed.toLowerCase();
 	const choices = languages.languages.localisation
 		.map((language) => {
 			return {

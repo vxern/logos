@@ -17,6 +17,7 @@ import { show } from "../../parameters";
 import { Translation } from "../translators/adapter";
 import { resolveAdapters } from "../translators/adapters";
 import { detectLanguages } from "./recognise";
+import { trim } from "../../../../formatting";
 
 const commands = {
 	chatInput: {
@@ -77,8 +78,17 @@ async function handleTranslateChatInputAutocomplete(
 		return;
 	}
 
-	const inputLowercase = (focused.value as string).toLowerCase();
+	const languageQueryTrimmed = (focused.value as string).trim();
+	if (languageQueryTrimmed.length === 0) {
+		const strings = {
+			autocomplete: localise(client, "autocomplete.language", locale)(),
+		};
 
+		respond([client, bot], interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
+		return;
+	}
+
+	const languageQueryLowercase = languageQueryTrimmed.toLowerCase();
 	const choices = languages.languages.translation
 		.map((language) => {
 			const languageStringKey = localisations.languages[language];
@@ -99,7 +109,7 @@ async function handleTranslateChatInputAutocomplete(
 				value: language,
 			};
 		})
-		.filter((choice) => choice.name?.toLowerCase().includes(inputLowercase))
+		.filter((choice) => choice.name?.toLowerCase().includes(languageQueryLowercase))
 		.slice(0, 25)
 		.sort((previous, next) => previous.name.localeCompare(next.name));
 

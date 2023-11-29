@@ -6,6 +6,7 @@ import { Client, localise } from "../../../client";
 import { parseArguments, parseTimeExpression, reply, respond } from "../../../interactions";
 import { OptionTemplate } from "../../command";
 import { timestamp } from "../../parameters";
+import { trim } from "../../../../formatting";
 
 const command: OptionTemplate = {
 	name: "skip-to",
@@ -29,7 +30,11 @@ async function handleSkipToTimestampAutocomplete(
 
 	const timestamp = parseTimeExpression(client, timestampExpression, { language, locale });
 	if (timestamp === undefined) {
-		respond([client, bot], interaction, []);
+		const strings = {
+			autocomplete: localise(client, "autocomplete.timestamp", locale)(),
+		};
+
+		respond([client, bot], interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
 		return;
 	}
 

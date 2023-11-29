@@ -16,7 +16,7 @@ import { getDiscordLanguageByLocale } from "../constants/languages/localisation"
 import time from "../constants/time";
 import defaults from "../defaults";
 import { enableDesiredProperties, handleGuildMembersChunk, overrideDefaultEventHandlers } from "../fixes";
-import { timestamp } from "../formatting";
+import { timestamp, trim } from "../formatting";
 import * as Logos from "../types";
 import { Command, CommandTemplate, InteractionHandler, Option } from "./commands/command";
 import commandTemplates from "./commands/commands";
@@ -1468,6 +1468,10 @@ function resolveIdentifierToMembers(
 	identifier: string,
 	options: Partial<MemberNarrowingOptions> = {},
 ): [members: Logos.Member[], isResolved: boolean] | undefined {
+	if (identifier.trim().length === 0) {
+		return [[], false];
+	}
+
 	const asker = client.cache.members.get(Discord.snowflakeToBigint(`${userId}${guildId}`));
 	if (asker === undefined) {
 		return undefined;
@@ -1565,9 +1569,21 @@ function resolveIdentifierToMembers(
 async function autocompleteMembers(
 	[client, bot]: [Client, Discord.Bot],
 	interaction: Logos.Interaction,
-	identifier: string,
+	identifierRaw: string,
 	options?: Partial<MemberNarrowingOptions>,
 ): Promise<void> {
+	const identifier = identifierRaw.trim();
+	if (identifier.length === 0) {
+		const locale = interaction.locale;
+
+		const strings = {
+			autocomplete: localise(client, "autocomplete.user", locale)(),
+		};
+
+		respond([client, bot], interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
+		return;
+	}
+
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
 		return undefined;
