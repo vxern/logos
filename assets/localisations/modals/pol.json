@@ -18,5 +18,9 @@
     "prompts.continue": "Dalej",
     "prompts.cancel": "Anuluj",
     "prompts.stay": "Zabierz mnie z powrotem",
-    "prompts.leave": "Wyjdź"
+    "prompts.leave": "Wyjdź",
+    "resource.title": "Zasób",
+    "resource.fields.resource": "Jaki zasób chcesz przesłać?",
+    "ticket.title": "Bilet usługi",
+    "ticket.fields.topic": "Jaki jest temat Twojego biletu usługi?"
 }

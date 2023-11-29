@@ -50,5 +50,15 @@
     "entry.verification.vote.alreadyVoted.against.title": "Już głosowałeś/aś przeciw",
     "entry.verification.vote.alreadyVoted.against.description": "Już wcześniej głosowałeś/aś przeciwko akceptacji prośby użytkownika o dołączenie do serwera.",
     "entry.verification.vote.stanceChanged.title": "Zmieniłeś/aś swoją decyzję",
-    "entry.verification.vote.stanceChanged.description": "Zmieniłeś/aś decyzję, co do tego, czy prośba użytkownika ma zostać zaakceptowana, czy nie."
+    "entry.verification.vote.stanceChanged.description": "Zmieniłeś/aś decyzję, co do tego, czy prośba użytkownika ma zostać zaakceptowana, czy nie.",
+    "entry.verification.votesAgainst": "Głosy przeciw",
+    "entry.verification.noneYet": "Jeszcze nie ma.",
+    "entry.verification.inquiry.inquiry": "Wywiad",
+    "entry.verification.inquiry.channel": "Wywiad z użytkownikiem {user}.",
+    "entry.verification.inquiry.failed.description": "Z nieznanych przyczyn nie udało się rozpocząć rozmowy z tym użytkownikiem.",
+    "entry.verification.inquiry.opened.title": "Rozmowa rozpoczęta!",
+    "entry.verification.votesFor": "Głosy za",
+    "entry.verification.inquiry.open": "Przeprowadź wywiad",
+    "entry.verification.inquiry.failed.title": "Nie udało się rozpocząć rozmowy",
+    "entry.verification.inquiry.opened.description": "Rozpoczęto rozmowę z użytkownikiem w sprawie jego prośby o dołączenie do {guild_name}."
 }
