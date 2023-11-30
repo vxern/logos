@@ -66,7 +66,6 @@
     "game.strings.noSentencesAvailable.title": "No hay oraciones disponibles",
     "resources.strings.redirect": "Haga clic para obtener recursos para aprender {idioma}",
     "correction.options.partial.message.name": "Corrección Rápida",
-    "translate.description": "",
     "correction.options.full.message.name": "Corrección de texto completo",
     "recognize.strings.fields.likelyMatches.description.single": "La lengua probablemente sea {idioma}.",
     "cefr.strings.levels.c3.title": "C2+/C3 (Experto)",
