@@ -11,6 +11,7 @@ const languages = [
 	"Polish",
 	"Romanian",
 	"Russian",
+	"Spanish",
 	"Swedish",
 	"Turkish",
 ] as const;
