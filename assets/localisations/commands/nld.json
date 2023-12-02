@@ -310,7 +310,6 @@
     "timeout.strings.tooShort.description": "De time-out moet minstens een minuut duren.",
     "timeout.strings.tooLong.title": "Time-out te lang",
     "timeout.strings.tooLong.description": "De looptijd mag niet langer zijn dan een week.",
-    "timeout.strings.timedOut.title": "",
     "timeout.strings.timedOut.description": "Gebruiker {user_mention} heeft een time-out gekregen. De time-out zal {relative_timestamp} verlopen.",
     "timeout.strings.notTimedOut.title": "User not timed out",
     "timeout.strings.notTimedOut.description": "User {user_mention} is not currently timed out.",
