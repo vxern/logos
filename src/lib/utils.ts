@@ -24,11 +24,12 @@ function chunk<T>(array: T[], size: number): T[][] {
 	if (array.length === 0) {
 		return [[]];
 	}
+
 	if (size === 0) {
 		throw "The size of a chunk cannot be zero.";
 	}
 
-	const chunks = array.length <= size ? 1 : Math.floor(array.length / size);
+	const chunks = array.length <= size ? 1 : Math.ceil(array.length / size);
 	const result = [];
 	for (const index of Array(chunks).keys()) {
 		const start = index * size;
