@@ -114,5 +114,11 @@
     "correction.strings.failed.title": "No se puede corregir",
     "translate.options.text.name": "texto",
     "translate.strings.translation": "Traducción",
-    "word.name": "palabra"
+    "word.name": "palabra",
+    "game.strings.sourcedFrom": "Oraciones obtenidas de {source}.",
+    "translate.name": "traducir",
+    "recognize.options.text.description": "El texto a utilizar para el reconocimiento de idiomas.",
+    "recognize.strings.fields.likelyMatches.title": "Coincidencias probables",
+    "recognize.strings.fields.possibleMatches.description.multiple": "Estas opciones son menos probables, pero el idioma también podría ser uno de:",
+    "translate.message.name": "Traducir"
 }
