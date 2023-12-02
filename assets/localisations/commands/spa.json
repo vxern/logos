@@ -120,5 +120,7 @@
     "recognize.options.text.description": "El texto a utilizar para el reconocimiento de idiomas.",
     "recognize.strings.fields.likelyMatches.title": "Coincidencias probables",
     "recognize.strings.fields.possibleMatches.description.multiple": "Estas opciones son menos probables, pero el idioma también podría ser uno de:",
-    "translate.message.name": "Traducir"
+    "translate.message.name": "Traducir",
+    "translate.strings.invalid.both.title": "Idiomas no válidos",
+    "translate.strings.cannotDetermine.source.description.tryAgain": "Por favor, configúralo tú mismo o inténtalo de nuevo con una entrada diferente."
 }
