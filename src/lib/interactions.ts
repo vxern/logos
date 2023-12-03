@@ -136,7 +136,8 @@ function parseArguments<
 	return [args as R, focused];
 }
 
-type ControlButtonID = [type: "previous" | "next"];
+type SkipAction = "previous" | "next";
+type ControlButtonID = [type: SkipAction];
 
 /**
  * Paginates an array of elements, allowing the user to browse between pages
@@ -146,21 +147,21 @@ async function paginate<T>(
 	[client, bot]: [Client, Discord.Bot],
 	interaction: Logos.Interaction,
 	{
-		elements,
+		getElements,
 		embed,
 		view,
 		show,
 		showable,
 	}: {
-		elements: T[];
+		getElements: () => T[];
 		embed: Omit<Discord.CamelizedDiscordEmbed, "footer">;
 		view: PaginationDisplayData<T>;
 		show: boolean;
 		showable: boolean;
 	},
 	{ locale }: { locale: Locale },
-): Promise<void> {
-	const data: PaginationData<T> = { elements, view, pageIndex: 0 };
+): Promise<() => Promise<void>> {
+	const data: PaginationData<T> = { elements: getElements(), view, pageIndex: 0 };
 
 	const showButton = getShowButton(client, interaction, { locale });
 
@@ -180,6 +181,25 @@ async function paginate<T>(
 		};
 	};
 
+	const editView = async (action?: SkipAction) => {
+		switch (action) {
+			case "previous": {
+				if (!isFirst()) {
+					data.pageIndex--;
+				}
+				break;
+			}
+			case "next": {
+				if (!isLast()) {
+					data.pageIndex++;
+				}
+				break;
+			}
+		}
+
+		editReply([client, bot], interaction, getView());
+	};
+
 	const customId = createInteractionCollector([client, bot], {
 		type: Discord.InteractionTypes.MessageComponent,
 		doesNotExpire: true,
@@ -193,26 +213,16 @@ async function paginate<T>(
 
 			const [_, action] = decodeId<ControlButtonID>(customId);
 
-			switch (action) {
-				case "previous": {
-					if (!isFirst()) {
-						data.pageIndex--;
-					}
-					break;
-				}
-				case "next": {
-					if (!isLast()) {
-						data.pageIndex++;
-					}
-					break;
-				}
-			}
-
-			editReply([client, bot], interaction, getView());
+			await editView(action);
 		},
 	});
 
 	reply([client, bot], interaction, getView(), { visible: show });
+
+	return async () => {
+		data.elements = getElements();
+		editView();
+	};
 }
 
 interface PaginationDisplayData<T> {
@@ -221,7 +231,7 @@ interface PaginationDisplayData<T> {
 }
 
 interface PaginationData<T> {
-	readonly elements: T[];
+	elements: T[];
 	readonly view: PaginationDisplayData<T>;
 
 	pageIndex: number;

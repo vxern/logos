@@ -221,7 +221,7 @@ async function handleUnskipAction([client, bot]: [Client, Discord.Bot], interact
 		},
 		{ visible: true },
 	);
-  
+
 	const isUnskippingCollection = collection ?? false;
 
 	if (isUnskippingListing) {

@@ -1,8 +1,10 @@
 import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
+import defaults from "../../../../defaults";
 import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
 import { parseArguments, reply } from "../../../interactions";
+import { chunk } from "../../../utils";
 import { OptionTemplate } from "../../command";
 import { show } from "../../parameters";
 import { displayListings } from "../module";
@@ -61,24 +63,33 @@ async function handleDisplayPlaybackHistory(
 		return;
 	}
 
-	const historyReversed = musicService.history;
-	if (historyReversed === undefined) {
+	const [events, historyReversed] = [musicService.events, musicService.history];
+	if (events === undefined || historyReversed === undefined) {
 		return;
 	}
-
-	const history = structuredClone(historyReversed).reverse();
 
 	const strings = {
 		title: localise(client, "music.options.history.strings.playbackHistory", locale)(),
 	};
 
-	displayListings(
+	const regenerate = await displayListings(
 		[client, bot],
 		interaction,
-		{ title: `${constants.symbols.music.list} ${strings.title}`, songListings: history },
+		{
+			title: `${constants.symbols.music.list} ${strings.title}`,
+			getSongListings: () => chunk(structuredClone(historyReversed).reverse(), defaults.RESULTS_PER_PAGE),
+		},
 		show ?? false,
 		{ locale },
 	);
+
+	events.on("historyUpdate", regenerate);
+	events.on("stop", regenerate);
+
+	setTimeout(() => {
+		events.off("historyUpdate", regenerate);
+		events.off("stop", regenerate);
+	}, constants.INTERACTION_TOKEN_EXPIRY);
 }
 
 export default command;

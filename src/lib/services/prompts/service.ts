@@ -254,37 +254,37 @@ abstract class PromptService<
 					const localeData = await getLocaleData(this.client, selection);
 					const locale = localeData.locale;
 
-          if (this.deleteMode === "delete") {
-            const strings = {
-              title: localise(this.client, "cannotRemovePrompt.title", locale)(),
-              description: localise(this.client, "cannotRemovePrompt.description", locale)(),
-            };
-  
-            reply([this.client, this.bot], selection, {
-              embeds: [
-                {
-                  title: strings.title,
-                  description: strings.description,
-                  color: constants.colors.peach,
-                },
-              ],
-            });
-          } else if (this.deleteMode === "close") {
-            const strings = {
-              title: localise(this.client, "cannotCloseIssue.title", locale)(),
-              description: localise(this.client, "cannotCloseIssue.description", locale)(),
-            };
-  
-            reply([this.client, this.bot], selection, {
-              embeds: [
-                {
-                  title: strings.title,
-                  description: strings.description,
-                  color: constants.colors.peach,
-                },
-              ],
-            });
-          }
+					if (this.deleteMode === "delete") {
+						const strings = {
+							title: localise(this.client, "cannotRemovePrompt.title", locale)(),
+							description: localise(this.client, "cannotRemovePrompt.description", locale)(),
+						};
+
+						reply([this.client, this.bot], selection, {
+							embeds: [
+								{
+									title: strings.title,
+									description: strings.description,
+									color: constants.colors.peach,
+								},
+							],
+						});
+					} else if (this.deleteMode === "close") {
+						const strings = {
+							title: localise(this.client, "cannotCloseIssue.title", locale)(),
+							description: localise(this.client, "cannotCloseIssue.description", locale)(),
+						};
+
+						reply([this.client, this.bot], selection, {
+							embeds: [
+								{
+									title: strings.title,
+									description: strings.description,
+									color: constants.colors.peach,
+								},
+							],
+						});
+					}
 
 					return;
 				}

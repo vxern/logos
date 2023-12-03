@@ -157,7 +157,6 @@ async function handleSkipAction([client, bot]: [Client, Discord.Bot], interactio
 
 	const isSkippingCollection = collection ?? false;
 
-
 	const strings =
 		collection ?? false
 			? {
@@ -183,7 +182,7 @@ async function handleSkipAction([client, bot]: [Client, Discord.Bot], interactio
 		},
 		{ visible: true },
 	);
-  
+
 	if (songsToSkip !== undefined) {
 		let listingsToSkip!: number;
 		if (isCollection(current.content) && collection === undefined) {

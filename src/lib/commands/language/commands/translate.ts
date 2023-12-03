@@ -8,6 +8,7 @@ import languages, {
 	isTranslationLanguage,
 } from "../../../../constants/languages";
 import localisations from "../../../../constants/localisations";
+import { trim } from "../../../../formatting";
 import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
 import { editReply, getShowButton, parseArguments, postponeReply, reply, respond } from "../../../interactions";
@@ -17,7 +18,6 @@ import { show } from "../../parameters";
 import { Translation } from "../translators/adapter";
 import { resolveAdapters } from "../translators/adapters";
 import { detectLanguages } from "./recognise";
-import { trim } from "../../../../formatting";
 
 const commands = {
 	chatInput: {
