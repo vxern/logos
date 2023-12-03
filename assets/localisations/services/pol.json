@@ -15,7 +15,7 @@
     "alreadyMarkedResolved.description": "Ten temat już poprzednio oznaczono jako zamknięty.",
     "alreadyMarkedUnresolved.title": "Już oznaczono jako otwarte",
     "alreadyMarkedUnresolved.description": "Ten temat już poprzednio oznaczono jako otwarty.",
-    "notices.resources.description.easierToManage": "Przechowywanie zasobów poza Discordem czyni je nie tylko łatwiejszymi do zarządzania i organizowania w przyswajalnej formie, ale także dostępnymi do świata zewnętrznego oraz prostymi do poszerzania.",
+    "notices.resources.description.easierToManage": "Przechowywanie zasobów poza Discordem czyni je nie tylko łatwiejszymi do zarządzania i organizowania w przyswajalnej formie, ale także dostępnymi do świata zewnętrznego oraz prostymi do poszerzania o więcej.",
     "notices.resources.description.contributable": "Nowe zasoby można dodawać w jeden z trzech sposobów, uporządkowanych według poziomu trudności:",
     "notices.resources.description.contributable.usingCommand": "Używając komendy {command}.",
     "remove": "Usuń",
@@ -25,7 +25,7 @@
     "cannotCloseIssue.title": "Nie można zamknąć sprawy",
     "cannotCloseIssue.description": "Nie możesz zamknąć tej sprawy.",
     "notices.resources.title": "Gdzie można znaleźć zasoby",
-    "notices.resources.description.storedInRepository": "Nasze zasoby są przechowywane w [repozytorium GitHub]({link}). Przycisk poniżej Cię tam zabierze.",
+    "notices.resources.description.storedInRepository": "Nasze zasoby są przechowywane w [repozytorium GitHub]({link}). Zabierze Cię tam przycisk poniżej.",
     "notices.resources.description.contributable.openingIssue": "Tworząc issue (sprawę) w repozytorium, cytując zasoby, które mają zostać dodane.",
     "notices.resources.description.contributable.makingPullRequest": "Rozwidlając (fork) repozytorium, dodając zasoby, i tworząc prośbę o przyjęcie wkładów (pull request)."
 }
