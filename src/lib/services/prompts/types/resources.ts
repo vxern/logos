@@ -94,9 +94,10 @@ class ResourceService extends PromptService<"resources", Resource, InteractionDa
 									type: Discord.MessageComponentTypes.Button,
 									style: Discord.ButtonStyles.Danger,
 									label: strings.remove,
-									customId: encodeId(`${constants.components.removePrompt}/${constants.components.resources}/${this.guildId}`, [
-										`${resourceDocument.guildId}/${resourceDocument.authorId}/${resourceDocument.createdAt}`,
-									]),
+									customId: encodeId(
+										`${constants.components.removePrompt}/${constants.components.resources}/${this.guildId}`,
+										[`${resourceDocument.guildId}/${resourceDocument.authorId}/${resourceDocument.createdAt}`],
+									),
 								},
 						  ]
 						: [

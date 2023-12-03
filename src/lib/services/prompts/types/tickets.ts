@@ -104,9 +104,10 @@ class TicketService extends PromptService<"tickets", Ticket, InteractionData> {
 									type: Discord.MessageComponentTypes.Button,
 									style: Discord.ButtonStyles.Danger,
 									label: strings.close,
-									customId: encodeId(`${constants.components.removePrompt}/${constants.components.tickets}/${this.guildId}`, [
-										`${ticketDocument.guildId}/${ticketDocument.authorId}/${ticketDocument.channelId}`,
-									]),
+									customId: encodeId(
+										`${constants.components.removePrompt}/${constants.components.tickets}/${this.guildId}`,
+										[`${ticketDocument.guildId}/${ticketDocument.authorId}/${ticketDocument.channelId}`],
+									),
 								},
 						  ]
 						: [

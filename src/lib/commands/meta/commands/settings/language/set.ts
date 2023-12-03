@@ -6,12 +6,12 @@ import languages, {
 	isLocalisationLanguage,
 } from "../../../../../../constants/languages";
 import localisations from "../../../../../../constants/localisations";
+import { trim } from "../../../../../../formatting";
 import * as Logos from "../../../../../../types";
 import { Client, localise } from "../../../../../client";
 import { User } from "../../../../../database/user";
 import { editReply, parseArguments, postponeReply, reply, respond } from "../../../../../interactions";
 import { OptionTemplate } from "../../../../command";
-import { trim } from "../../../../../../formatting";
 
 const command: OptionTemplate = {
 	name: "set",

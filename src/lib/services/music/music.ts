@@ -927,6 +927,7 @@ class MusicService extends LocalService {
 
 			if (session.listings.current !== undefined) {
 				session.listings.history.push(session.listings.current);
+				session.events.emit("historyUpdate");
 				session.events.emit("queueUpdate");
 				session.listings.current = undefined;
 			}

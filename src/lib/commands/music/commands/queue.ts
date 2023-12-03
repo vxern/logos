@@ -1,8 +1,10 @@
 import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
+import defaults from "../../../../defaults";
 import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
 import { parseArguments, reply } from "../../../interactions";
+import { chunk } from "../../../utils";
 import { OptionTemplate } from "../../command";
 import { show } from "../../parameters";
 import { displayListings } from "../module";
@@ -61,8 +63,8 @@ async function handleDisplayPlaybackQueue(
 		return;
 	}
 
-	const queue = musicService.queue;
-	if (queue === undefined) {
+	const [events, queue] = [musicService.events, musicService.queue];
+	if (events === undefined || queue === undefined) {
 		return;
 	}
 
@@ -70,13 +72,24 @@ async function handleDisplayPlaybackQueue(
 		queue: localise(client, "music.options.queue.strings.queue", locale)(),
 	};
 
-	displayListings(
+	const regenerate = await displayListings(
 		[client, bot],
 		interaction,
-		{ title: `${constants.symbols.music.list} ${strings.queue}`, songListings: queue },
+		{
+			title: `${constants.symbols.music.list} ${strings.queue}`,
+			getSongListings: () => chunk(queue, defaults.RESULTS_PER_PAGE),
+		},
 		show ?? false,
 		{ locale },
 	);
+
+	events.on("queueUpdate", regenerate);
+	events.on("stop", regenerate);
+
+	setTimeout(() => {
+		events.off("queueUpdate", regenerate);
+		events.off("stop", regenerate);
+	}, constants.INTERACTION_TOKEN_EXPIRY);
 }
 
 export default command;

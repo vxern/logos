@@ -129,9 +129,10 @@ class ReportService extends PromptService<"reports", Report, InteractionData> {
 									type: Discord.MessageComponentTypes.Button,
 									style: Discord.ButtonStyles.Danger,
 									label: strings.close,
-									customId: encodeId(`${constants.components.removePrompt}/${constants.components.reports}/${this.guildId}`, [
-										`${reportDocument.guildId}/${reportDocument.authorId}/${reportDocument.createdAt}`,
-									]),
+									customId: encodeId(
+										`${constants.components.removePrompt}/${constants.components.reports}/${this.guildId}`,
+										[`${reportDocument.guildId}/${reportDocument.authorId}/${reportDocument.createdAt}`],
+									),
 								},
 						  ]
 						: [

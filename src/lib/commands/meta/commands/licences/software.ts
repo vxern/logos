@@ -78,7 +78,7 @@ async function handleDisplaySoftwareLicence(
 		[client, bot],
 		interaction,
 		{
-			elements: licenceParts,
+			getElements: () => licenceParts,
 			embed: { color: constants.colors.greenishLightGray },
 			view: {
 				title: strings.title,
