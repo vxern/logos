@@ -1,6 +1,8 @@
 import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import languages, {
+	Languages,
+	LearningLanguage,
 	Locale,
 	getLocalisationLanguageByLocale,
 	isLearningLanguage,
@@ -25,51 +27,88 @@ import {
 } from "../../../interactions";
 import { chunk } from "../../../utils";
 import { CommandTemplate } from "../../command";
-import { show } from "../../parameters";
-import { DictionaryAdapter, DictionaryProvision, SearchLanguages } from "../dictionaries/adapter";
-import { areAdaptersMissing, isSearchMonolingual, resolveAdapters } from "../dictionaries/adapters";
+import { language, show, word } from "../../parameters";
+import { DictionaryAdapter, DictionaryProvision } from "../dictionaries/adapter";
+import {
+	AdaptersResolved,
+	areAdaptersMissing,
+	getAdapterSelection,
+	isSearchMonolingual,
+	resolveAdapters,
+} from "../dictionaries/adapters";
 import {
 	AudioField,
-	DefinitionField,
 	DictionaryEntry,
+	DictionaryEntryField,
 	EtymologyField,
 	ExampleField,
 	ExpressionField,
 	FrequencyField,
 	LabelledField,
 	LemmaField,
+	MeaningField,
 	NoteField,
 	PartOfSpeechField,
 	PronunciationField,
 	RelationField,
 	SyllableField,
-	TranslationField,
+	provisionToField,
+	requiredDictionaryEntryFields,
 } from "../dictionaries/dictionary-entry";
+import { createProvisionSupply, getProvisionsWithoutSupply } from "../dictionaries/dictionary-provision";
 
-const command: CommandTemplate = {
-	name: "word",
-	type: Discord.ApplicationCommandTypes.ChatInput,
-	defaultMemberPermissions: ["VIEW_CHANNEL"],
-	isRateLimited: true,
-	isShowable: true,
-	handle: handleFindWord,
-	handleAutocomplete: handleFindWordAutocomplete,
-	options: [
-		{
-			name: "word",
-			type: Discord.ApplicationCommandOptionTypes.String,
-			required: true,
-		},
-		{
-			name: "language",
-			type: Discord.ApplicationCommandOptionTypes.String,
-			autocomplete: true,
-		},
-		show,
-	],
+const sections = [
+	"definitions",
+	"etymology",
+	"examples",
+	"expressions",
+	"inflection",
+	"metadata",
+	"pronunciation",
+	"relations",
+] as const;
+type SectionType = typeof sections[number];
+
+const provisionsBySection: Record<SectionType, DictionaryProvision[]> = {
+	definitions: ["definitions", "translations"],
+	etymology: ["etymology"],
+	examples: ["examples"],
+	expressions: ["expressions"],
+	inflection: ["inflection"],
+	metadata: ["frequency", "notes"],
+	pronunciation: ["pronunciation", "rhymes", "audio"],
+	relations: ["relations"],
 };
 
-async function handleFindWordAutocomplete(
+const commands = {
+	word: {
+		name: "word",
+		type: Discord.ApplicationCommandTypes.ChatInput,
+		defaultMemberPermissions: ["VIEW_CHANNEL"],
+		isRateLimited: true,
+		isShowable: true,
+		handle: handleGetAllSections,
+		handleAutocomplete: handleGetInformationAutocomplete,
+		options: [word, language, show],
+	},
+	...(Object.fromEntries(
+		sections.map((type) => [
+			type,
+			{
+				name: `word.options.${type}`,
+				type: Discord.ApplicationCommandTypes.ChatInput,
+				defaultMemberPermissions: ["VIEW_CHANNEL"],
+				isRateLimited: true,
+				isShowable: true,
+				handle: ([client, bot], interaction) => handleGetSingleSection([client, bot], interaction, type),
+				handleAutocomplete: handleGetInformationAutocomplete,
+				options: [word, language, show],
+			},
+		]),
+	) as Record<SectionType, CommandTemplate>),
+} satisfies Record<string, CommandTemplate>;
+
+async function handleGetInformationAutocomplete(
 	[client, bot]: [Client, Discord.Bot],
 	interaction: Logos.Interaction,
 ): Promise<void> {
@@ -97,7 +136,210 @@ async function handleFindWordAutocomplete(
 }
 
 /** Allows the user to look up a word and get information about it. */
-async function handleFindWord([client, bot]: [Client, Discord.Bot], interaction: Logos.Interaction): Promise<void> {
+async function handleGetAllSections(
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Logos.Interaction,
+): Promise<void> {
+	const lookupData = await resolveData([client, bot], interaction);
+	if (lookupData === undefined) {
+		return undefined;
+	}
+
+	const { lemma, show, locale, searchLanguages, adapters } = lookupData;
+
+	await postponeReply([client, bot], interaction, { visible: show });
+
+	const showButton = show ? undefined : getShowButton(client, interaction, { locale });
+
+	const provisionSupply = createProvisionSupply();
+
+	const menu = new WordMenu({ searchLanguages, showButton });
+
+	for await (const result of queryAdaptersOrdered(
+		client,
+		lemma,
+		searchLanguages,
+		{ adapters: [...adapters.primary], provisionSupply },
+		defaults.PRIMARY_ADAPTER_QUERY_COUNT,
+		{ locale },
+	)) {
+		await menu.receiveResult(result);
+		menu.sortEntries();
+		await menu.updateView([client, bot], interaction, { locale });
+	}
+
+	const secondaryAdapters = getAdapterSelection(
+		getProvisionsWithoutSupply(provisionSupply),
+		adapters.secondary,
+		defaults.SECONDARY_ADAPTER_QUERY_COUNT,
+	);
+	for (const adapter of secondaryAdapters) {
+		for (const provision of adapter.provides) {
+			provisionSupply[provision]++;
+		}
+	}
+
+	for await (const result of queryAdapters(
+		client,
+		lemma,
+		searchLanguages,
+		{ locale },
+		{ adapters: secondaryAdapters },
+	)) {
+		if (result.entries === undefined) {
+			for (const provision of result.adapter.provides) {
+				provisionSupply[provision]--;
+			}
+
+			continue;
+		}
+
+		await menu.receiveResult(result);
+		await menu.updateView([client, bot], interaction, { locale });
+	}
+
+	const tertiaryAdapters = getAdapterSelection(
+		getProvisionsWithoutSupply(provisionSupply),
+		adapters.tertiary,
+		defaults.TERTIARY_ADAPTER_QUERY_COUNT,
+	);
+	for (const adapter of tertiaryAdapters) {
+		for (const provision of adapter.provides) {
+			provisionSupply[provision]++;
+		}
+	}
+
+	for await (const result of queryAdapters(
+		client,
+		lemma,
+		searchLanguages,
+		{ locale },
+		{ adapters: tertiaryAdapters },
+	)) {
+		if (result.entries === undefined) {
+			for (const provision of result.adapter.provides) {
+				provisionSupply[provision]--;
+			}
+
+			continue;
+		}
+
+		await menu.receiveResult(result);
+		await menu.updateView([client, bot], interaction, { locale });
+	}
+
+	if (!menu.displayed) {
+		const strings = {
+			title: localise(client, "word.strings.noResults.title", locale)(),
+			description: {
+				word: localise(client, "word.strings.noResults.description.word", locale)({ word: lemma }),
+			},
+		};
+
+		await editReply([client, bot], interaction, {
+			embeds: [
+				{
+					title: strings.title,
+					description: strings.description.word,
+					color: constants.colors.dullYellow,
+				},
+			],
+		});
+
+		setTimeout(
+			() =>
+				deleteReply([client, bot], interaction).catch(() =>
+					client.log.warn(`Failed to delete "no results for word" message.`),
+				),
+			defaults.WARN_MESSAGE_DELETE_TIMEOUT,
+		);
+
+		return;
+	}
+}
+
+async function handleGetSingleSection(
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Logos.Interaction,
+	sectionType: SectionType,
+): Promise<void> {
+	const lookupData = await resolveData([client, bot], interaction);
+	if (lookupData === undefined) {
+		return undefined;
+	}
+
+	const { lemma, show, locale, searchLanguages, adapters } = lookupData;
+
+	await postponeReply([client, bot], interaction, { visible: show });
+
+	const provisions = provisionsBySection[sectionType];
+
+	const showButton = show ? undefined : getShowButton(client, interaction, { locale });
+
+	const provisionSupply = createProvisionSupply();
+
+	const menu = new WordMenu({ searchLanguages, showButton, sectionType });
+
+	const adaptersSelected = getAdapterSelection(
+		provisions,
+		[...adapters.primary, ...adapters.secondary, ...adapters.tertiary],
+		-1,
+	);
+
+	for await (const result of queryAdaptersOrdered(
+		client,
+		lemma,
+		searchLanguages,
+		{ adapters: adaptersSelected, provisionSupply },
+		defaults.PRIMARY_ADAPTER_QUERY_COUNT,
+		{ locale },
+	)) {
+		await menu.receiveResult(result);
+		menu.sortEntries();
+		await menu.updateView([client, bot], interaction, { locale });
+	}
+
+	if (!menu.displayed) {
+		const strings = {
+			title: localise(client, "word.strings.noResults.title", locale)(),
+			description: {
+				section: localise(client, "word.strings.noResults.description.section", locale)({ word: lemma }),
+			},
+		};
+
+		await editReply([client, bot], interaction, {
+			embeds: [
+				{
+					title: strings.title,
+					description: strings.description.section,
+					color: constants.colors.dullYellow,
+				},
+			],
+		});
+
+		setTimeout(
+			() =>
+				deleteReply([client, bot], interaction).catch(() =>
+					client.log.warn(`Failed to delete "no results for word" message.`),
+				),
+			defaults.WARN_MESSAGE_DELETE_TIMEOUT,
+		);
+
+		return;
+	}
+}
+
+type LookupData = {
+	lemma: string;
+	show: boolean;
+	locale: Locale;
+	searchLanguages: Languages<LearningLanguage>;
+	adapters: AdaptersResolved;
+};
+async function resolveData(
+	[client, bot]: [Client, Discord.Bot],
+	interaction: Logos.Interaction,
+): Promise<LookupData | undefined> {
 	const [{ language: languageOrUndefined, word: lemma, show: showParameter }] = parseArguments(
 		interaction.data?.options,
 		{
@@ -105,7 +347,7 @@ async function handleFindWord([client, bot]: [Client, Discord.Bot], interaction:
 		},
 	);
 	if (lemma === undefined) {
-		return;
+		return undefined;
 	}
 
 	const show = interaction.show ?? showParameter ?? false;
@@ -128,7 +370,7 @@ async function handleFindWord([client, bot]: [Client, Discord.Bot], interaction:
 				},
 			],
 		});
-		return;
+		return undefined;
 	}
 
 	if (languageOrUndefined !== undefined && !isLearningLanguage(languageOrUndefined)) {
@@ -146,27 +388,27 @@ async function handleFindWord([client, bot]: [Client, Discord.Bot], interaction:
 				},
 			],
 		});
-		return;
+		return undefined;
 	}
 
 	const learningLanguage = languageOrUndefined !== undefined ? languageOrUndefined : interaction.learningLanguage;
 
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
-		return;
+		return undefined;
 	}
 
 	const guildDocument = await client.database.adapters.guilds.getOrFetch(client, "id", guildId.toString());
 	if (guildDocument === undefined) {
-		return;
+		return undefined;
 	}
 
 	const guild = client.cache.guilds.get(guildId);
 	if (guild === undefined) {
-		return;
+		return undefined;
 	}
 
-	const searchLanguages: SearchLanguages = { source: language, target: learningLanguage };
+	const searchLanguages: Languages<LearningLanguage> = { source: language, target: learningLanguage };
 
 	const adapters = resolveAdapters(searchLanguages);
 	if (adapters === undefined || areAdaptersMissing(adapters)) {
@@ -184,175 +426,10 @@ async function handleFindWord([client, bot]: [Client, Discord.Bot], interaction:
 				},
 			],
 		});
-		return;
+		return undefined;
 	}
 
-	await postponeReply([client, bot], interaction, { visible: show });
-
-	const data: MenuData = {
-		entries: {},
-		languages: searchLanguages,
-		navigation: {
-			page: { index: 0 },
-			view: {
-				definitions: 0,
-				translations: 0,
-				expressions: 0,
-				examples: 0,
-			},
-			menu: {
-				current: "overview",
-				tabs: {
-					overview: 0,
-					usage: 0,
-					history: 0,
-					inflection: 0,
-				},
-			},
-		},
-	};
-
-	const showButton = show ? undefined : getShowButton(client, interaction, { locale });
-
-	const viewData: MenuViewData = {
-		display: {
-			view: {
-				pageCounts: {
-					definitions: 0,
-					translations: 0,
-					expressions: 0,
-					examples: 0,
-				},
-				views: {
-					overview: [],
-					usage: [],
-					history: [],
-					inflection: [],
-				},
-			},
-		},
-		showButton,
-		flags: { expanded: false },
-	};
-
-	const expectedProvisions: Record<DictionaryProvision, number> = {
-		"part-of-speech": 0,
-		definitions: 0,
-		translations: 0,
-		relations: 0,
-		syllables: 0,
-		pronunciation: 0,
-		rhymes: 0,
-		audio: 0,
-		expressions: 0,
-		examples: 0,
-		frequency: 0,
-		inflection: 0,
-		etymology: 0,
-		notes: 0,
-	};
-
-	for (const adapter of adapters.primary) {
-		for (const provision of adapter.provides) {
-			expectedProvisions[provision]++;
-		}
-	}
-
-	for await (const result of queryAdapters(
-		client,
-		lemma,
-		searchLanguages,
-		{ locale },
-		{ adapters: adapters.primary },
-	)) {
-		if (result.entries === undefined) {
-			for (const provision of result.adapter.provides) {
-				expectedProvisions[provision]--;
-			}
-
-			continue;
-		}
-
-		for (const entry of result.entries) {
-			if (entry.partOfSpeech === undefined) {
-				continue;
-			}
-
-			const partOfSpeech = entry.partOfSpeech.detected ?? entry.partOfSpeech.value;
-
-			if (!(partOfSpeech in data.entries)) {
-				data.entries[partOfSpeech] = [entry];
-				continue;
-			}
-
-			data.entries[partOfSpeech]?.push(entry);
-		}
-
-		displayMenu([client, bot], interaction, data, viewData, { locale });
-	}
-
-	/**
-   * 
-	const unclassifiedEntries: DictionaryEntry[] = [];
-	const entriesByPartOfSpeech = new Map<PartOfSpeech, DictionaryEntry[]>();
-	let searchesCompleted = 0;
-	for (const dictionary of dictionaries) {
-
-		for (const [partOfSpeech, entries] of organised.entries()) {
-			if (!entriesByPartOfSpeech.has(partOfSpeech)) {
-				entriesByPartOfSpeech.set(partOfSpeech, entries);
-				continue;
-			}
-
-			const existingEntries = entriesByPartOfSpeech.get(partOfSpeech) ?? entries;
-
-			for (const index of Array(entries).keys()) {
-				const existingEntry = existingEntries[index];
-				const entry = entries[index];
-				if (entry === undefined) {
-					throw `StateError: Entry at index ${index} for part of speech ${partOfSpeech} unexpectedly undefined.`;
-				}
-
-				if (existingEntry === undefined) {
-					existingEntries[index] = entry;
-					continue;
-				}
-
-				existingEntries[index] = { ...existingEntry, ...entry, sources: [...existingEntry.sources, ...entry.sources] };
-			}
-		}
-
-		searchesCompleted++;
-	}
-
-   */
-
-	if (Object.keys(data.entries).length === 0) {
-		const strings = {
-			title: localise(client, "word.strings.noResults.title", locale)(),
-			description: localise(client, "word.strings.noResults.description", locale)({ word: lemma }),
-		};
-
-		await editReply([client, bot], interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colors.dullYellow,
-				},
-			],
-		});
-
-		setTimeout(
-			() =>
-				deleteReply([client, bot], interaction).catch(() =>
-					client.log.warn(`Failed to delete "no results for word" message.`),
-				),
-			defaults.WARN_MESSAGE_DELETE_TIMEOUT,
-		);
-
-		return;
-	}
+	return { lemma, show, locale, searchLanguages, adapters };
 }
 
 function verifyIsLemmaValid(_: string): boolean {
@@ -363,7 +440,7 @@ type QueryResult = { adapter: DictionaryAdapter; entries?: Partial<DictionaryEnt
 async function* queryAdapters(
 	client: Client,
 	lemma: string,
-	searchLanguages: SearchLanguages,
+	languages: Languages<LearningLanguage>,
 	{ locale }: { locale: Locale },
 	{ adapters }: { adapters: DictionaryAdapter[] },
 ): AsyncGenerator<QueryResult, void, void> {
@@ -376,7 +453,7 @@ async function* queryAdapters(
 	}
 
 	for (const adapter of adapters) {
-		adapter.tryGetInformation(client, lemma, searchLanguages, { locale }).then((entries) => {
+		adapter.tryGetInformation(client, lemma, languages, { locale }).then((entries) => {
 			const yieldResult = getResolver();
 
 			if (entries === undefined) {
@@ -395,224 +472,297 @@ async function* queryAdapters(
 	}
 }
 
-type Menu = "overview" | "usage" | "history" | "inflection";
-type View = "definitions" | "translations" | "expressions" | "examples";
-type MenuFlags = { expanded: boolean };
-type MenuData = {
-	entries: Record<string, Partial<DictionaryEntry>[]>;
-	languages: SearchLanguages;
-	navigation: {
-		page: { partOfSpeech?: string; index: number };
-		view: Record<View, number>;
-		menu: { current?: Menu; tabs: Record<Menu, number> };
-	};
-};
-type MenuViewData = {
-	display: {
-		view: {
-			pageCounts: Record<View, number>;
-			views: Record<Menu, View[]>;
-		};
-	};
-	showButton: Discord.ButtonComponent | undefined;
-	flags: MenuFlags;
-};
-
-async function displayMenu(
-	[client, bot]: [Client, Discord.Bot],
-	interaction: Logos.Interaction,
-	data: MenuData,
-	viewData: MenuViewData,
+async function* queryAdaptersOrdered(
+	client: Client,
+	lemma: string,
+	searchLanguages: Languages<LearningLanguage>,
+	data: { adapters: DictionaryAdapter[]; provisionSupply: Record<DictionaryProvision, number> },
+	count: number,
 	{ locale }: { locale: Locale },
-): Promise<void> {
-	let partOfSpeech: string;
-	if (data.navigation.page.partOfSpeech !== undefined) {
-		partOfSpeech = data.navigation.page.partOfSpeech;
-	} else {
-		const partOfSpeechInitial = Object.keys(data.entries)?.at(0);
-		if (partOfSpeechInitial === undefined) {
-			return;
+): AsyncGenerator<QueryResult, void, void> {
+	let primaryAdaptersToQuery = count;
+	while (data.adapters.length !== 0) {
+		const adapters = [];
+		for (const _ of Array(primaryAdaptersToQuery).keys()) {
+			const adapter = data.adapters.shift();
+			if (adapter === undefined) {
+				break;
+			}
+
+			adapters.push(adapter);
 		}
 
-		data.navigation.page.partOfSpeech = partOfSpeechInitial;
-		partOfSpeech = partOfSpeechInitial;
-	}
+		primaryAdaptersToQuery = 0;
 
-	const entry = data.entries[partOfSpeech]?.at(data.navigation.page.index);
-	if (entry === undefined) {
-		return;
-	}
-
-	const menus = getMenus(client, data, viewData, entry, { locale });
-	if (data.navigation.menu.current === undefined || !(data.navigation.menu.current in menus)) {
-		const firstMenu = Object.keys(menus).at(0) as Menu | undefined;
-		if (firstMenu === undefined) {
-			return;
+		for (const adapter of adapters) {
+			for (const provision of adapter.provides) {
+				data.provisionSupply[provision]++;
+			}
 		}
 
-		data.navigation.menu.current = firstMenu;
+		const fallbacks: QueryResult[] = [];
+		for await (const result of queryAdapters(client, lemma, searchLanguages, { locale }, { adapters })) {
+			if (result.entries === undefined) {
+				primaryAdaptersToQuery++;
+				for (const provision of result.adapter.provides) {
+					data.provisionSupply[provision]--;
+				}
+
+				continue;
+			}
+
+			if (adapters.indexOf(result.adapter) !== 0) {
+				fallbacks.push(result);
+
+				continue;
+			}
+
+			yield result;
+		}
+
+		for (const result of fallbacks) {
+			yield result;
+		}
+
+		if (primaryAdaptersToQuery === 0) {
+			break;
+		}
 	}
-
-	const menu = menus[data.navigation.menu.current];
-	if (menu === undefined) {
-		return undefined;
-	}
-
-	const controls = getControls([client, bot], interaction, data, viewData, { menus, entry }, { locale });
-
-	editReply([client, bot], interaction, { embeds: menu, components: controls });
 }
 
-function getMenus(
-	client: Client,
-	data: MenuData,
-	viewData: MenuViewData,
-	entry: Partial<DictionaryEntry>,
-	{ locale }: { locale: Locale },
-): Partial<Record<Menu, Discord.CamelizedDiscordEmbed[]>> {
-	const menus: Partial<Record<Menu, Discord.CamelizedDiscordEmbed[]>> = {};
+type MenuTab = "overview" | "usage" | "history" | "inflection";
+type ViewTab = "definitions" | "translations" | "expressions" | "examples";
 
-	const overviewViews: View[] = [];
-	const usageViews: View[] = [];
+interface MenuNavigationData {
+	page: { partOfSpeech?: string; index: number };
+	view: Record<ViewTab, number>;
+	menu: { current?: MenuTab; tabs: Record<MenuTab, number> };
+}
 
-	let definitionField: Discord.CamelizedDiscordEmbedField | undefined;
-	if (entry.definitions !== undefined && !areFieldsEmpty(entry.definitions)) {
-		const definitionsAll = getDefinitionFieldsFormatted(client, entry.definitions, { locale }, viewData.flags);
-		const definitionsFitted = distributeEntries(
-			definitionsAll,
-			viewData.flags.expanded ? defaults.DEFINITIONS_PER_EXPANDED_VIEW : defaults.DEFINITIONS_PER_VIEW,
-		);
-		viewData.display.view.pageCounts.definitions = definitionsFitted.length;
+interface MenuDisplayData {
+	view: {
+		pageCounts: Record<ViewTab, number>;
+		views: Record<MenuTab, ViewTab[]>;
+	};
+	expanded: boolean;
+	simplified: boolean;
+	sectionType?: SectionType;
+}
 
-		const strings = {
-			definitions: localise(client, "word.strings.fields.definitions", locale)(),
-		};
+type DictionaryEntryGroup = [string, Partial<DictionaryEntry>[]];
+type DictionaryEntriesAssorted = {
+	previous: DictionaryEntryGroup[];
+	current: DictionaryEntryGroup;
+	next: DictionaryEntryGroup[];
+};
 
-		const view = definitionsFitted.at(data.navigation.view.definitions);
-		if (view !== undefined) {
-			definitionField = {
-				name: `${constants.symbols.word.definitions} ${strings.definitions}`,
-				value: view,
-			};
-		}
-	}
+type ExpandedMode = `${boolean}`;
+type ViewModeButtonID<State extends string> = [state: State];
 
-	let translationField: Discord.CamelizedDiscordEmbedField | undefined;
-	if (entry.translations !== undefined && !areFieldsEmpty(entry.translations)) {
-		const translationsAll = getTranslationFieldsFormatted(entry.translations);
-		const translationsFitted = distributeEntries(
-			translationsAll,
-			viewData.flags.expanded ? defaults.TRANSLATIONS_PER_EXPANDED_VIEW : defaults.TRANSLATIONS_PER_VIEW,
-		);
-		viewData.display.view.pageCounts.translations = translationsFitted.length;
+type InflectionTabButtonID = [index: string];
 
-		const strings = {
-			translations: localise(client, "word.strings.fields.translations", locale)(),
-		};
+class WordMenu {
+	entries: Map<string, Partial<DictionaryEntry>[]>;
+	readonly languages: Languages<LearningLanguage>;
 
-		const view = translationsFitted.at(data.navigation.view.translations);
-		if (view !== undefined) {
-			translationField = {
-				name: `${constants.symbols.word.translations} ${strings.translations}`,
-				value: withTextStylingDisabled(view),
-			};
-		}
-	}
+	readonly navigation: MenuNavigationData;
+	readonly display: MenuDisplayData;
 
-	let expressionField: Discord.CamelizedDiscordEmbedField | undefined;
-	if (entry.expressions !== undefined && !areFieldsEmpty(entry.expressions)) {
-		const expressionsAll = getTranslationFieldsFormatted(entry.expressions);
-		const expressionsFitted = distributeEntries(
-			expressionsAll,
-			viewData.flags.expanded ? defaults.EXPRESSIONS_PER_EXPANDED_VIEW : defaults.EXPRESSIONS_PER_VIEW,
-		);
-		viewData.display.view.pageCounts.expressions = expressionsFitted.length;
+	readonly showButton: Discord.ButtonComponent | undefined;
 
-		const strings = {
-			expressions: localise(client, "word.strings.fields.expressions", locale)(),
-		};
+	displayed: boolean;
 
-		const view = expressionsFitted.at(data.navigation.view.expressions);
-		if (view !== undefined) {
-			translationField = {
-				name: `${constants.symbols.word.expressions} ${strings.expressions}`,
-				value: withTextStylingDisabled(view),
-			};
-		}
-	}
+	constructor({
+		sectionType,
+		searchLanguages,
+		showButton,
+	}: {
+		sectionType?: SectionType;
+		searchLanguages: Languages<LearningLanguage>;
+		showButton: Discord.ButtonComponent | undefined;
+	}) {
+		this.entries = new Map();
+		this.languages = searchLanguages;
 
-	{
-		const embed: Discord.CamelizedDiscordEmbed = {
-			color: constants.colors.husky,
-		};
-
-		if (entry.lemma !== undefined) {
-			embed.title = getLemmaFieldFormatted(entry.lemma);
-		}
-
-		if (entry.partOfSpeech !== undefined) {
-			embed.description = `*${withTextStylingDisabled(getPartOfSpeechFieldFormatted(entry.partOfSpeech))}*`;
-		}
-
-		const fields: Discord.CamelizedDiscordEmbedField[] = [];
-
-		if (isSearchMonolingual(data.languages.source, data.languages.target)) {
-			if (definitionField !== undefined) {
-				fields.push(definitionField);
-				overviewViews.push("definitions");
-			}
-		} else {
-			if (translationField !== undefined) {
-				fields.push(translationField);
-				overviewViews.push("translations");
-			}
-		}
-
-		if (expressionField !== undefined) {
-			fields.push(expressionField);
-			overviewViews.push("expressions");
-		}
-
-		if (entry.relations !== undefined) {
-			const relations = getRelationFieldsFormatted(client, entry.relations, { locale });
-			if (relations !== undefined) {
-				const strings = {
-					relations: localise(client, "word.strings.fields.relations", locale)(),
-				};
-
-				fields.push({
-					name: `${constants.symbols.word.relations} ${strings.relations}`,
-					value: trim(withTextStylingDisabled(relations.join("\n")), constants.lengths.embedField),
-				});
-			}
-		}
-
-		if (
-			entry.syllables !== undefined ||
-			entry.pronunciation !== undefined ||
-			(entry.audio !== undefined && !areFieldsEmpty(entry.audio))
-		) {
-			const text = getPhoneticFieldsFormatted(
-				client,
-				{
-					syllables: entry.syllables,
-					pronunciation: entry.pronunciation,
-					audio: entry.audio,
+		this.navigation = {
+			page: { index: 0 },
+			view: {
+				definitions: 0,
+				translations: 0,
+				expressions: 0,
+				examples: 0,
+			},
+			menu: {
+				current: "overview",
+				tabs: {
+					overview: 0,
+					usage: 0,
+					history: 0,
+					inflection: 0,
 				},
-				{ locale },
-			);
+			},
+		};
+		this.display = {
+			view: {
+				pageCounts: {
+					definitions: 0,
+					translations: 0,
+					expressions: 0,
+					examples: 0,
+				},
+				views: {
+					overview: [],
+					usage: [],
+					history: [],
+					inflection: [],
+				},
+			},
+			expanded: false,
+			simplified: sectionType !== undefined,
+			sectionType,
+		};
 
-			const strings = {
-				pronunciation: localise(client, "word.strings.fields.pronunciation", locale)(),
-			};
+		this.showButton = showButton;
 
-			fields.push({
-				name: `${constants.symbols.word.pronunciation} ${strings.pronunciation}`,
-				value: trim(withTextStylingDisabled(text), constants.lengths.embedField),
-			});
+		this.displayed = false;
+	}
+
+	async receiveResult(result: QueryResult): Promise<void> {
+		if (result.entries === undefined) {
+			return;
 		}
 
-		embed.fields = fields;
+		const desiredFields = [
+			...requiredDictionaryEntryFields,
+			"partOfSpeech",
+			...(this.display.sectionType !== undefined
+				? provisionsBySection[this.display.sectionType].map((provision) => provisionToField[provision])
+				: []),
+		];
+
+		const entriesByPartOfSpeech = new Map<string, Partial<DictionaryEntry>[]>();
+		for (const entry of result.entries) {
+			if (this.display.simplified) {
+				for (const key of Object.keys(entry) as DictionaryEntryField[]) {
+					if (!desiredFields.includes(key)) {
+						delete entry[key];
+					}
+				}
+			}
+
+			const partOfSpeech =
+				entry.partOfSpeech !== undefined ? entry.partOfSpeech.detected ?? entry.partOfSpeech.value : "unknown";
+
+			if (entriesByPartOfSpeech.has(partOfSpeech)) {
+				entriesByPartOfSpeech.get(partOfSpeech)?.push(entry);
+			} else {
+				entriesByPartOfSpeech.set(partOfSpeech, [entry]);
+			}
+		}
+
+		for (const [partOfSpeech, entries] of entriesByPartOfSpeech) {
+			if (!this.entries.has(partOfSpeech)) {
+				this.entries.set(partOfSpeech, entries);
+				continue;
+			}
+
+			const existingEntries = this.entries.get(partOfSpeech);
+			if (existingEntries === undefined) {
+				throw "StateError: Existing entries unexpectedly undefined.";
+			}
+
+			for (const index of Array(entries.length).keys()) {
+				const next = entries[index];
+				if (next === undefined) {
+					throw `StateError: Entry at index ${index} for part of speech ${partOfSpeech} unexpectedly undefined.`;
+				}
+
+				const previous = existingEntries[index];
+				if (previous === undefined) {
+					existingEntries[index] = next;
+					continue;
+				}
+
+				// TODO(vxern): Combine results where possible.
+
+				existingEntries[index] = {
+					sources: [...(previous.sources ?? []), ...(next.sources ?? [])],
+					lemma: previous.lemma,
+					partOfSpeech: previous.partOfSpeech,
+					definitions: previous.definitions ?? next.definitions,
+					translations: previous.translations ?? next.translations,
+					relations: previous.relations ?? next.relations,
+					syllables: previous.syllables ?? next.syllables,
+					pronunciation: previous.pronunciation ?? next.pronunciation,
+					rhymes: previous.rhymes ?? next.rhymes,
+					audio: previous.audio ?? next.audio,
+					expressions: previous.expressions ?? next.expressions,
+					examples: previous.examples ?? next.examples,
+					frequency: previous.frequency ?? next.frequency,
+					inflection: previous.inflection ?? next.inflection,
+					etymology: previous.etymology ?? next.etymology,
+					notes: previous.notes ?? next.notes,
+				};
+			}
+		}
+	}
+
+	async updateView(
+		[client, bot]: [Client, Discord.Bot],
+		interaction: Logos.Interaction,
+		{ locale }: { locale: Locale },
+	): Promise<void> {
+		let partOfSpeech: string;
+		if (this.navigation.page.partOfSpeech !== undefined) {
+			partOfSpeech = this.navigation.page.partOfSpeech;
+		} else {
+			const partOfSpeechInitial = Array.from(this.entries.keys()).at(0);
+			if (partOfSpeechInitial === undefined) {
+				return;
+			}
+
+			this.navigation.page.partOfSpeech = partOfSpeechInitial;
+			partOfSpeech = partOfSpeechInitial;
+		}
+
+		const entry = this.entries.get(partOfSpeech)?.at(this.navigation.page.index);
+		if (entry === undefined) {
+			return;
+		}
+
+		const menus = this.getMenus(client, entry, { locale });
+		if (this.navigation.menu.current === undefined || !(this.navigation.menu.current in menus)) {
+			const firstMenu = Object.keys(menus).at(0) as MenuTab | undefined;
+			if (firstMenu === undefined) {
+				return;
+			}
+
+			this.navigation.menu.current = firstMenu;
+		}
+
+		const menu = menus[this.navigation.menu.current];
+		if (menu === undefined) {
+			return;
+		}
+
+		if (entry.lemma !== undefined || entry.partOfSpeech !== undefined) {
+			const fields: string[] = [];
+
+			if (entry.lemma !== undefined) {
+				fields.push(`**${getLemmaFieldFormatted(entry.lemma)}**`);
+			}
+
+			if (entry.partOfSpeech !== undefined) {
+				fields.push(`*${withTextStylingDisabled(getPartOfSpeechFieldFormatted(entry.partOfSpeech))}*`);
+			}
+
+			const embed = menu.at(0);
+			if (embed === undefined) {
+				return;
+			}
+
+			embed.description = fields.join(constants.symbols.sigils.separator);
+		}
 
 		if (entry.sources !== undefined && entry.sources.length !== 0) {
 			let sourceEmbed: Discord.CamelizedDiscordEmbed;
@@ -641,133 +791,843 @@ function getMenus(
 				};
 			}
 
-			menus.overview = [sourceEmbed, embed];
-		} else {
-			menus.overview = [embed];
+			menu.unshift(sourceEmbed);
 		}
+
+		const controls = this.getControls([client, bot], interaction, { menus, entry }, { locale });
+
+		this.displayed = true;
+
+		await editReply([client, bot], interaction, { embeds: menu, components: controls });
 	}
 
-	{
-		const embed: Discord.CamelizedDiscordEmbed = {
-			color: constants.colors.orangeRed,
-		};
+	getMenus(
+		client: Client,
+		entry: Partial<DictionaryEntry>,
+		{ locale }: { locale: Locale },
+	): Partial<Record<MenuTab, Discord.CamelizedDiscordEmbed[]>> {
+		const menus: Partial<Record<MenuTab, Discord.CamelizedDiscordEmbed[]>> = {};
 
-		if (entry.lemma !== undefined) {
-			embed.title = getLemmaFieldFormatted(entry.lemma);
-		}
+		const overviewViews: ViewTab[] = [];
+		const usageViews: ViewTab[] = [];
 
-		const fields: Discord.CamelizedDiscordEmbedField[] = [];
-
-		if (isSearchMonolingual(data.languages.source, data.languages.target)) {
-			if (translationField !== undefined) {
-				fields.push(translationField);
-				usageViews.push("translations");
-			}
-		} else {
-			if (definitionField !== undefined) {
-				fields.push(definitionField);
-				usageViews.push("definitions");
-			}
-		}
-
-		if (entry.examples !== undefined && !areFieldsEmpty(entry.examples)) {
-			const examplesAll = getExampleFieldsFormatted(entry.examples);
-			const examplesFitted = distributeEntries(
-				examplesAll,
-				viewData.flags.expanded ? defaults.EXAMPLES_PER_EXPANDED_VIEW : defaults.EXAMPLES_PER_VIEW,
+		let definitionField: Discord.CamelizedDiscordEmbedField | undefined;
+		if (entry.definitions !== undefined && !areFieldsEmpty(entry.definitions)) {
+			const definitionsAll = getMeaningFieldsFormatted(
+				client,
+				entry.definitions,
+				{ expanded: this.display.expanded },
+				{ locale },
 			);
-			viewData.display.view.pageCounts.examples = examplesFitted.length;
+			const definitionsFitted = distributeEntries(
+				definitionsAll,
+				this.display.expanded ? defaults.DEFINITIONS_PER_EXPANDED_VIEW : defaults.DEFINITIONS_PER_VIEW,
+			);
+			this.display.view.pageCounts.definitions = definitionsFitted.length;
 
 			const strings = {
-				examples: localise(client, "word.strings.fields.examples", locale)(),
+				definitions: localise(client, "word.strings.fields.definitions", locale)(),
 			};
 
-			const view = examplesFitted.at(data.navigation.view.examples);
+			const view = definitionsFitted.at(this.navigation.view.definitions);
 			if (view !== undefined) {
-				usageViews.push("examples");
+				definitionField = {
+					name: `${constants.symbols.word.definitions} ${strings.definitions}`,
+					value: view,
+				};
+			}
+		}
+
+		let translationField: Discord.CamelizedDiscordEmbedField | undefined;
+		if (entry.translations !== undefined && !areFieldsEmpty(entry.translations)) {
+			const translationsAll = getMeaningFieldsFormatted(
+				client,
+				entry.translations,
+				{ expanded: this.display.expanded },
+				{ locale },
+			);
+			const translationsFitted = distributeEntries(
+				translationsAll,
+				this.display.expanded ? defaults.TRANSLATIONS_PER_EXPANDED_VIEW : defaults.TRANSLATIONS_PER_VIEW,
+			);
+			this.display.view.pageCounts.translations = translationsFitted.length;
+
+			const strings = {
+				translations: localise(client, "word.strings.fields.translations", locale)(),
+			};
+
+			const view = translationsFitted.at(this.navigation.view.translations);
+			if (view !== undefined) {
+				translationField = {
+					name: `${constants.symbols.word.translations} ${strings.translations}`,
+					value: view,
+				};
+			}
+		}
+
+		let expressionField: Discord.CamelizedDiscordEmbedField | undefined;
+		if (entry.expressions !== undefined && !areFieldsEmpty(entry.expressions)) {
+			const expressionsAll = getExpressionFieldsFormatted(client, entry.expressions, { locale });
+			const expressionsFitted = distributeEntries(
+				expressionsAll,
+				this.display.expanded ? defaults.EXPRESSIONS_PER_EXPANDED_VIEW : defaults.EXPRESSIONS_PER_VIEW,
+			);
+			this.display.view.pageCounts.expressions = expressionsFitted.length;
+
+			const strings = {
+				expressions: localise(client, "word.strings.fields.expressions", locale)(),
+			};
+
+			const view = expressionsFitted.at(this.navigation.view.expressions);
+			if (view !== undefined) {
+				expressionField = {
+					name: `${constants.symbols.word.expressions} ${strings.expressions}`,
+					value: view,
+				};
+			}
+		}
+
+		{
+			const embed: Discord.CamelizedDiscordEmbed = {
+				color: constants.colors.husky,
+			};
+
+			const fields: Discord.CamelizedDiscordEmbedField[] = [];
+
+			if (isSearchMonolingual(this.languages.source, this.languages.target)) {
+				if (definitionField !== undefined) {
+					fields.push(definitionField);
+					overviewViews.push("definitions");
+					if (
+						this.display.view.pageCounts.definitions !== 0 &&
+						this.navigation.view.definitions > this.display.view.pageCounts.definitions - 1
+					) {
+						this.navigation.view.definitions = this.display.view.pageCounts.definitions - 1;
+					}
+				}
+			} else {
+				if (translationField !== undefined) {
+					fields.push(translationField);
+					overviewViews.push("translations");
+					if (
+						this.display.view.pageCounts.translations !== 0 &&
+						this.navigation.view.translations > this.display.view.pageCounts.translations - 1
+					) {
+						this.navigation.view.translations = this.display.view.pageCounts.translations - 1;
+					}
+				}
+			}
+
+			if (expressionField !== undefined) {
+				fields.push(expressionField);
+				overviewViews.push("expressions");
+				if (
+					this.display.view.pageCounts.expressions !== 0 &&
+					this.navigation.view.expressions > this.display.view.pageCounts.expressions - 1
+				) {
+					this.navigation.view.expressions = this.display.view.pageCounts.expressions - 1;
+				}
+			}
+
+			if (entry.relations !== undefined) {
+				const relations = getRelationFieldsFormatted(client, entry.relations, { locale });
+				if (relations !== undefined) {
+					const strings = {
+						relations: localise(client, "word.strings.fields.relations", locale)(),
+					};
+
+					fields.push({
+						name: `${constants.symbols.word.relations} ${strings.relations}`,
+						value: trim(relations.join("\n"), constants.lengths.embedField),
+					});
+				}
+			}
+
+			if (
+				entry.syllables !== undefined ||
+				entry.pronunciation !== undefined ||
+				(entry.audio !== undefined && !areFieldsEmpty(entry.audio))
+			) {
+				const text = getPhoneticFieldsFormatted(
+					client,
+					{
+						syllables: entry.syllables,
+						pronunciation: entry.pronunciation,
+						audio: entry.audio,
+					},
+					{ locale },
+				);
+
+				const strings = {
+					pronunciation: localise(client, "word.strings.fields.pronunciation", locale)(),
+				};
 
 				fields.push({
-					name: `${constants.symbols.word.examples} ${strings.examples}`,
-					value: withTextStylingDisabled(view),
+					name: `${constants.symbols.word.pronunciation} ${strings.pronunciation}`,
+					value: trim(text, constants.lengths.embedField),
 				});
+			}
+
+			if (fields.length !== 0) {
+				embed.fields = fields;
+
+				menus.overview = [embed];
 			}
 		}
 
-		if (fields.length !== 0) {
-			embed.fields = fields;
-			menus.usage = [embed];
+		{
+			const embed: Discord.CamelizedDiscordEmbed = {
+				color: constants.colors.orangeRed,
+			};
+
+			const fields: Discord.CamelizedDiscordEmbedField[] = [];
+
+			if (isSearchMonolingual(this.languages.source, this.languages.target)) {
+				if (translationField !== undefined) {
+					fields.push(translationField);
+					usageViews.push("translations");
+					if (
+						this.display.view.pageCounts.translations !== 0 &&
+						this.navigation.view.translations > this.display.view.pageCounts.translations - 1
+					) {
+						this.navigation.view.translations = this.display.view.pageCounts.translations - 1;
+					}
+				}
+			} else {
+				if (definitionField !== undefined) {
+					fields.push(definitionField);
+					usageViews.push("definitions");
+					if (
+						this.display.view.pageCounts.definitions !== 0 &&
+						this.navigation.view.definitions > this.display.view.pageCounts.definitions - 1
+					) {
+						this.navigation.view.definitions = this.display.view.pageCounts.definitions - 1;
+					}
+				}
+			}
+
+			if (entry.examples !== undefined && !areFieldsEmpty(entry.examples)) {
+				const examplesAll = getExampleFieldsFormatted(entry.examples);
+				const examplesFitted = distributeEntries(
+					examplesAll,
+					this.display.expanded ? defaults.EXAMPLES_PER_EXPANDED_VIEW : defaults.EXAMPLES_PER_VIEW,
+				);
+				this.display.view.pageCounts.examples = examplesFitted.length;
+
+				const strings = {
+					examples: localise(client, "word.strings.fields.examples", locale)(),
+				};
+
+				const view = examplesFitted.at(this.navigation.view.examples);
+				if (view !== undefined) {
+					fields.push({
+						name: `${constants.symbols.word.examples} ${strings.examples}`,
+						value: withTextStylingDisabled(view),
+					});
+					usageViews.push("examples");
+					if (
+						this.display.view.pageCounts.examples !== 0 &&
+						this.navigation.view.examples > this.display.view.pageCounts.examples - 1
+					) {
+						this.navigation.view.examples = this.display.view.pageCounts.examples - 1;
+					}
+				}
+			}
+
+			if (fields.length !== 0) {
+				embed.fields = fields;
+				menus.usage = [embed];
+			}
 		}
+
+		{
+			const embed: Discord.CamelizedDiscordEmbed = {
+				color: constants.colors.orangeRed,
+			};
+
+			const fields: Discord.CamelizedDiscordEmbedField[] = [];
+
+			if (entry.frequency !== undefined) {
+				const frequency = getFrequencyFieldFormatted(entry.frequency);
+
+				const strings = {
+					frequency: localise(client, "word.strings.fields.frequency", locale)(),
+				};
+
+				embed.footer = {
+					text: trim(
+						`${strings.frequency} ${constants.symbols.divider} ${withTextStylingDisabled(frequency)}`,
+						constants.lengths.embedFooter,
+					),
+				};
+			}
+
+			if (entry.etymology !== undefined && !isFieldEmpty(entry.etymology)) {
+				const etymology = getEtymologyFieldFormatted(entry.etymology);
+
+				const strings = {
+					etymology: localise(client, "word.strings.fields.etymology", locale)(),
+				};
+
+				fields.push({
+					name: `${constants.symbols.word.etymology} ${strings.etymology}`,
+					value: trim(withTextStylingDisabled(etymology), constants.lengths.embedField),
+				});
+			}
+
+			if (entry.notes !== undefined && !isFieldEmpty(entry.notes)) {
+				const notes = getNoteFieldFormatted(entry.notes);
+
+				const strings = {
+					notes: localise(client, "word.strings.fields.notes", locale)(),
+				};
+
+				fields.push({
+					name: `${constants.symbols.word.notes} ${strings.notes}`,
+					value: trim(withTextStylingDisabled(notes), constants.lengths.embedField),
+				});
+			}
+
+			if (fields.length !== 0) {
+				embed.fields = fields;
+				menus.history = [embed];
+			}
+		}
+
+		if (entry.inflection !== undefined && entry.inflection.tabs.length !== 0) {
+			const embed = entry.inflection.tabs.at(this.navigation.menu.tabs.inflection);
+			if (embed !== undefined) {
+				menus.inflection = [embed];
+			}
+		}
+
+		this.display.view.views.overview = overviewViews;
+		this.display.view.views.usage = usageViews;
+
+		return menus;
 	}
 
-	{
-		const embed: Discord.CamelizedDiscordEmbed = {
-			color: constants.colors.orangeRed,
+	getControls(
+		[client, bot]: [Client, Discord.Bot],
+		interaction: Logos.Interaction,
+		{
+			menus,
+			entry,
+		}: {
+			menus: Partial<Record<MenuTab, Discord.CamelizedDiscordEmbed[]>>;
+			entry: Partial<DictionaryEntry>;
+		},
+		{ locale }: { locale: Locale },
+	): Discord.MessageComponents {
+		const controls: Discord.ActionRow[] = [];
+
+		switch (this.navigation.menu.current) {
+			case "overview":
+			case "usage": {
+				controls.push(...this.getScrollControls([client, bot], interaction, entry, { locale }));
+				break;
+			}
+			case "inflection": {
+				controls.push(...this.getInflectionControls([client, bot], interaction, entry, { locale }));
+				break;
+			}
+		}
+
+		const strings = {
+			overview: localise(client, "word.strings.menus.overview", locale)(),
+			usage: localise(client, "word.strings.menus.usage", locale)(),
+			history: localise(client, "word.strings.menus.history", locale)(),
+			inflection: localise(client, "word.strings.menus.inflection", locale)(),
 		};
 
-		if (entry.lemma !== undefined) {
-			embed.title = getLemmaFieldFormatted(entry.lemma);
-		}
+		const menuButtons: Discord.ButtonComponent[] = [];
+		for (const menu of Object.keys(menus) as MenuTab[]) {
+			const buttonId = createInteractionCollector([client, bot], {
+				type: Discord.InteractionTypes.MessageComponent,
+				onCollect: async (selection) => {
+					acknowledge([client, bot], selection);
 
-		const fields: Discord.CamelizedDiscordEmbedField[] = [];
+					this.navigation.menu.current = menu;
 
-		if (entry.frequency !== undefined) {
-			const frequency = getFrequencyFieldFormatted(entry.frequency);
+					this.updateView([client, bot], interaction, { locale });
+				},
+			});
 
-			const strings = {
-				frequency: localise(client, "word.strings.fields.frequency", locale)(),
-			};
-
-			embed.footer = {
-				text: trim(
-					`${strings.frequency} ${constants.symbols.divider} ${withTextStylingDisabled(frequency)}`,
-					constants.lengths.embedFooter,
-				),
-			};
-		}
-
-		if (entry.etymology !== undefined && !isFieldEmpty(entry.etymology)) {
-			const etymology = getEtymologyFieldFormatted(entry.etymology);
-
-			const strings = {
-				etymology: localise(client, "word.strings.fields.etymology", locale)(),
-			};
-
-			fields.push({
-				name: `${constants.symbols.word.etymology} ${strings.etymology}`,
-				value: trim(withTextStylingDisabled(etymology), constants.lengths.embedField),
+			menuButtons.push({
+				type: Discord.MessageComponentTypes.Button,
+				label: strings[menu],
+				disabled: this.navigation.menu.current === menu,
+				customId: buttonId,
+				style: Discord.ButtonStyles.Primary,
 			});
 		}
 
-		if (entry.notes !== undefined && !isFieldEmpty(entry.notes)) {
-			const notes = getNoteFieldFormatted(entry.notes);
+		if (this.showButton !== undefined) {
+			menuButtons.push(this.showButton);
+		}
 
-			const strings = {
-				notes: localise(client, "word.strings.fields.notes", locale)(),
-			};
-
-			fields.push({
-				name: `${constants.symbols.word.notes} ${strings.notes}`,
-				value: trim(withTextStylingDisabled(notes), constants.lengths.embedField),
+		if (menuButtons.length > 1) {
+			controls.push({
+				type: Discord.MessageComponentTypes.ActionRow,
+				components: menuButtons as unknown as [Discord.ButtonComponent],
 			});
 		}
 
-		if (fields.length !== 0) {
-			embed.fields = fields;
-			menus.history = [embed];
-		}
+		controls.push(...this.getPaginationControls([client, bot], interaction, { locale }));
+
+		return controls;
 	}
 
-	if (entry.inflection !== undefined && entry.inflection.tabs.length !== 0) {
-		const embed = entry.inflection.tabs.at(data.navigation.menu.tabs.inflection);
-		if (embed !== undefined) {
-			menus.inflection = [embed];
+	getPaginationControls(
+		[client, bot]: [Client, Discord.Bot],
+		interaction: Logos.Interaction,
+		{ locale }: { locale: Locale },
+	): Discord.ActionRow[] {
+		const getGroups = (): DictionaryEntriesAssorted => {
+			const groups = Array.from(this.entries.entries());
+			const currentGroupIndex = groups.findIndex(
+				([partOfSpeech, _]) => partOfSpeech === this.navigation.page.partOfSpeech,
+			);
+			const group = groups[currentGroupIndex];
+			if (group === undefined) {
+				throw "StateError: Group unexpectedly undefined.";
+			}
+
+			return {
+				previous: groups.slice(0, currentGroupIndex),
+				current: group,
+				next: groups.slice(currentGroupIndex + 1),
+			};
+		};
+		const getPageNumber = () => {
+			const precedentPageCount = getGroups().previous.flatMap(([_, entries]) => entries).length;
+			return precedentPageCount + this.navigation.page.index + 1;
+		};
+		const getPageCount = () => Array.from(this.entries.values()).flat().length;
+		const isFirstPage = () =>
+			this.navigation.page.partOfSpeech === Array.from(this.entries.keys()).at(0) && this.navigation.page.index === 0;
+		const isLastPage = () =>
+			this.navigation.page.partOfSpeech === Array.from(this.entries.keys()).at(-1) &&
+			getPageNumber() === getPageCount();
+		const isFirstInGroup = () => this.navigation.page.index === 0;
+		const isLastInGroup = () =>
+			this.navigation.page.partOfSpeech !== undefined &&
+			this.navigation.page.index === (this.entries.get(this.navigation.page.partOfSpeech)?.length ?? 0) - 1;
+
+		if (isFirstPage() && isLastPage()) {
+			return [];
 		}
+
+		const previousPageButtonId = createInteractionCollector([client, bot], {
+			type: Discord.InteractionTypes.MessageComponent,
+			onCollect: async (selection) => {
+				acknowledge([client, bot], selection);
+
+				if (!isFirstPage()) {
+					if (isFirstInGroup()) {
+						const previousGroup = getGroups().previous.at(-1);
+						if (previousGroup === undefined) {
+							return;
+						}
+						const [partOfSpeech, entries] = previousGroup;
+
+						this.navigation.page.partOfSpeech = partOfSpeech;
+						this.navigation.page.index = entries.length - 1;
+					} else {
+						this.navigation.page.index--;
+					}
+
+					this.navigation.view = {
+						definitions: 0,
+						translations: 0,
+						expressions: 0,
+						examples: 0,
+					};
+					this.navigation.menu.tabs = {
+						overview: 0,
+						usage: 0,
+						history: 0,
+						inflection: 0,
+					};
+				}
+
+				this.updateView([client, bot], interaction, { locale });
+			},
+		});
+
+		const nextPageButtonId = createInteractionCollector([client, bot], {
+			type: Discord.InteractionTypes.MessageComponent,
+			onCollect: async (selection) => {
+				acknowledge([client, bot], selection);
+
+				if (!isLastPage()) {
+					if (isLastInGroup()) {
+						const nextGroup = getGroups().next.at(0);
+						if (nextGroup === undefined) {
+							return;
+						}
+						const [partOfSpeech, _] = nextGroup;
+
+						this.navigation.page.partOfSpeech = partOfSpeech;
+						this.navigation.page.index = 0;
+					} else {
+						this.navigation.page.index++;
+					}
+
+					this.navigation.view = {
+						definitions: 0,
+						translations: 0,
+						expressions: 0,
+						examples: 0,
+					};
+					this.navigation.menu.tabs = {
+						overview: 0,
+						usage: 0,
+						history: 0,
+						inflection: 0,
+					};
+				}
+
+				this.updateView([client, bot], interaction, { locale });
+			},
+		});
+
+		const groups = getGroups();
+		const [_, entries] = groups.current;
+		const entry = entries[this.navigation.page.index];
+		if (entry === undefined) {
+			throw "StateError: Entry unexpectedly undefined.";
+		}
+
+		const strings = {
+			page: localise(
+				client,
+				"word.strings.page",
+				locale,
+			)({
+				page_number: getPageNumber(),
+				page_count: getPageCount(),
+			}),
+			navigation: {
+				next: localise(client, "word.strings.navigation.next", locale)(),
+				previous: localise(client, "word.strings.navigation.previous", locale)(),
+			},
+		};
+
+		if (isFirstPage() && isLastPage()) {
+			return [];
+		}
+
+		return [
+			{
+				type: Discord.MessageComponentTypes.ActionRow,
+				components: [
+					{
+						type: Discord.MessageComponentTypes.Button,
+						label: `${constants.symbols.interactions.menu.controls.back} ${strings.navigation.previous}`,
+						disabled: isFirstPage(),
+						customId: previousPageButtonId,
+						style: Discord.ButtonStyles.Secondary,
+					},
+					{
+						type: Discord.MessageComponentTypes.Button,
+						label: strings.page,
+						style: Discord.ButtonStyles.Secondary,
+						customId: constants.components.none,
+					},
+					{
+						type: Discord.MessageComponentTypes.Button,
+						label: `${constants.symbols.interactions.menu.controls.forward} ${strings.navigation.next}`,
+						disabled: isLastPage(),
+						customId: nextPageButtonId,
+						style: Discord.ButtonStyles.Secondary,
+					},
+				],
+			},
+		];
 	}
 
-	viewData.display.view.views.overview = overviewViews;
-	viewData.display.view.views.usage = usageViews;
+	getScrollControls(
+		[client, bot]: [Client, Discord.Bot],
+		interaction: Logos.Interaction,
+		entry: Partial<DictionaryEntry>,
+		{ locale }: { locale: Locale },
+	): Discord.ActionRow[] {
+		const isFirstPage = (view?: ViewTab) =>
+			view !== undefined
+				? this.navigation.view[view] === 0
+				: Object.values(this.navigation.view).every((index) => index === 0);
+		const isLastPage = (view?: ViewTab): boolean => {
+			if (this.navigation.menu.current === undefined) {
+				return false;
+			}
 
-	return menus;
+			if (view !== undefined) {
+				return this.navigation.view[view] === this.display.view.pageCounts[view] - 1;
+			}
+
+			return this.display.view.views[this.navigation.menu.current].every(
+				(view) => this.navigation.view[view] === this.display.view.pageCounts[view] - 1,
+			);
+		};
+		const canBeExpanded = () =>
+			entry.definitions?.some(
+				(definition) =>
+					definition.definitions?.length !== 0 ||
+					definition.expressions?.length !== 0 ||
+					definition.examples?.length !== 0 ||
+					definition.relations !== undefined,
+			) ||
+			entry.translations?.some(
+				(expression) =>
+					expression.definitions?.length !== 0 ||
+					expression.expressions?.length !== 0 ||
+					expression.examples?.length !== 0 ||
+					expression.relations !== undefined,
+			) ||
+			entry.expressions?.some(
+				(expression) =>
+					expression.expressions?.length !== 0 ||
+					expression.examples?.length !== 0 ||
+					expression.relations !== undefined,
+			) ||
+			entry.examples?.some((expression) => expression.expressions?.length !== 0);
+
+		const scrollDownButtonId = createInteractionCollector([client, bot], {
+			type: Discord.InteractionTypes.MessageComponent,
+			limit: 1,
+			onCollect: async (selection) => {
+				acknowledge([client, bot], selection);
+
+				if (this.navigation.menu.current === undefined) {
+					return;
+				}
+
+				if (isLastPage()) {
+					return;
+				}
+
+				for (const view of this.display.view.views[this.navigation.menu.current]) {
+					if (isLastPage(view)) {
+						continue;
+					}
+
+					this.navigation.view[view]++;
+				}
+
+				this.updateView([client, bot], interaction, { locale });
+			},
+		});
+
+		const scrollUpButtonId = createInteractionCollector([client, bot], {
+			type: Discord.InteractionTypes.MessageComponent,
+			limit: 1,
+			onCollect: async (selection) => {
+				acknowledge([client, bot], selection);
+
+				if (this.navigation.menu.current === undefined) {
+					return;
+				}
+
+				if (isFirstPage()) {
+					return;
+				}
+
+				for (const view of this.display.view.views[this.navigation.menu.current]) {
+					if (isFirstPage(view)) {
+						continue;
+					}
+
+					this.navigation.view[view]--;
+				}
+
+				this.updateView([client, bot], interaction, { locale });
+			},
+		});
+
+		const toggleExpandedModeButtonId = createInteractionCollector([client, bot], {
+			type: Discord.InteractionTypes.MessageComponent,
+			limit: 1,
+			onCollect: async (selection) => {
+				acknowledge([client, bot], selection);
+
+				if (selection.data === undefined) {
+					this.updateView([client, bot], interaction, { locale });
+					return;
+				}
+
+				const customId = selection.data.customId;
+				if (customId === undefined) {
+					return;
+				}
+
+				const [_, expandedString] = decodeId<ViewModeButtonID<ExpandedMode>>(customId);
+				const expanded = expandedString === "true" ? true : false;
+
+				if (this.display.expanded) {
+					this.navigation.view.definitions = Math.floor(
+						this.navigation.view.definitions / defaults.DEFINITIONS_PER_VIEW,
+					);
+					this.navigation.view.translations = Math.floor(
+						this.navigation.view.translations / defaults.TRANSLATIONS_PER_VIEW,
+					);
+					this.navigation.view.expressions = Math.floor(
+						this.navigation.view.expressions / defaults.EXPRESSIONS_PER_VIEW,
+					);
+					this.navigation.view.examples = Math.floor(this.navigation.view.examples / defaults.EXAMPLES_PER_VIEW);
+				} else {
+					this.navigation.view.definitions = this.navigation.view.definitions * defaults.DEFINITIONS_PER_VIEW;
+					this.navigation.view.translations = this.navigation.view.translations * defaults.TRANSLATIONS_PER_VIEW;
+					this.navigation.view.expressions = this.navigation.view.expressions * defaults.EXPRESSIONS_PER_VIEW;
+					this.navigation.view.examples = this.navigation.view.examples * defaults.EXAMPLES_PER_VIEW;
+				}
+
+				this.display.expanded = expanded;
+
+				this.updateView([client, bot], interaction, { locale });
+			},
+		});
+
+		const strings = {
+			modes: {
+				expanded: {
+					expand: localise(client, "word.strings.modes.expanded.expand", locale)(),
+					contract: localise(client, "word.strings.modes.expanded.contract", locale)(),
+				},
+			},
+			navigation: {
+				up: localise(client, "word.strings.navigation.up", locale)(),
+				down: localise(client, "word.strings.navigation.down", locale)(),
+			},
+		};
+
+		if (isFirstPage() && isLastPage() && !canBeExpanded()) {
+			return [];
+		}
+
+		return [
+			{
+				type: Discord.MessageComponentTypes.ActionRow,
+				components: [
+					{
+						type: Discord.MessageComponentTypes.Button,
+						label: `${constants.symbols.interactions.menu.controls.down} ${strings.navigation.down}`,
+						disabled: isLastPage(),
+						customId: scrollDownButtonId,
+						style: Discord.ButtonStyles.Success,
+					},
+					{
+						type: Discord.MessageComponentTypes.Button,
+						label: `${constants.symbols.interactions.menu.controls.up} ${strings.navigation.up}`,
+						disabled: isFirstPage(),
+						customId: scrollUpButtonId,
+						style: Discord.ButtonStyles.Success,
+					},
+					{
+						type: Discord.MessageComponentTypes.Button,
+						label: this.display.expanded ? strings.modes.expanded.contract : strings.modes.expanded.expand,
+						customId: encodeId<ViewModeButtonID<ExpandedMode>>(toggleExpandedModeButtonId, [
+							`${!this.display.expanded}`,
+						]),
+						disabled: !canBeExpanded(),
+						style: Discord.ButtonStyles.Success,
+					},
+				],
+			},
+		];
+	}
+
+	getInflectionControls(
+		[client, bot]: [Client, Discord.Bot],
+		interaction: Logos.Interaction,
+		entry: Partial<DictionaryEntry>,
+		{ locale }: { locale: Locale },
+	): Discord.ActionRow[] {
+		if (entry.inflection === undefined) {
+			return [];
+		}
+
+		const buttonId = createInteractionCollector([client, bot], {
+			type: Discord.InteractionTypes.MessageComponent,
+			limit: 1,
+			onCollect: async (selection) => {
+				acknowledge([client, bot], selection);
+
+				if (entry.inflection === undefined || selection.data === undefined) {
+					this.updateView([client, bot], interaction, { locale });
+					return;
+				}
+
+				const customId = selection.data?.customId;
+				if (customId === undefined) {
+					return;
+				}
+
+				const [_, indexString] = decodeId<InflectionTabButtonID>(customId);
+				const index = Number(indexString);
+
+				if (index >= 0 && index <= entry.inflection.tabs.length) {
+					this.navigation.menu.tabs.inflection = index;
+				}
+
+				this.updateView([client, bot], interaction, { locale });
+			},
+		});
+
+		const tabsChunked = chunk(entry.inflection.tabs, 5).reverse();
+		const rows: Discord.ActionRow[] = [];
+		for (const [row, rowIndex] of tabsChunked.map<[typeof entry.inflection["tabs"], number]>((r, i) => [r, i])) {
+			const buttons = row.map<Discord.ButtonComponent>((table, index) => {
+				const index_ = rowIndex * 5 + index;
+
+				return {
+					type: Discord.MessageComponentTypes.Button,
+					label: table.title,
+					disabled: this.navigation.menu.tabs.inflection === index_,
+					customId: encodeId<InflectionTabButtonID>(buttonId, [index_.toString()]),
+					style: Discord.ButtonStyles.Danger,
+				};
+			});
+
+			if (buttons.length === 1) {
+				continue;
+			}
+
+			rows.push({
+				type: Discord.MessageComponentTypes.ActionRow,
+				components: buttons as [Discord.ButtonComponent],
+			});
+		}
+
+		return rows;
+	}
+
+	private static getWeight(entry: Partial<DictionaryEntry>): number {
+		return Math.max(entry.definitions?.length ?? 0, entry.translations?.length ?? 0);
+	}
+
+	sortEntries(): void {
+		const entriesByPartOfSpeech = Array.from(this.entries.entries());
+
+		for (const [_, entries] of entriesByPartOfSpeech) {
+			entries.sort((a, b) => WordMenu.getWeight(b) - WordMenu.getWeight(a));
+		}
+
+		entriesByPartOfSpeech.sort(([_, a], [__, b]) => {
+			const [entryA, entryB] = [a.at(0), b.at(0)];
+			if (entryA === undefined && entryB === undefined) {
+				return 0;
+			} else if (entryA === undefined) {
+				return 1;
+			} else if (entryB === undefined) {
+				return -1;
+			}
+
+			return WordMenu.getWeight(entryB) - WordMenu.getWeight(entryA);
+		});
+
+		this.entries = new Map(entriesByPartOfSpeech);
+	}
 }
 
 function isFieldEmpty(field: LabelledField): boolean {
@@ -780,7 +1640,7 @@ function areFieldsEmpty(fields: LabelledField[]): boolean {
 
 function getLabelledFieldFormatted(value: string, labels?: string[]): string {
 	if (labels !== undefined && labels.length !== 0) {
-		const labelsFormatted = labels.map((tag) => code(tag)).join(" ");
+		const labelsFormatted = labels.map((label) => code(label)).join(" ");
 		if (value.length === 0) {
 			return labelsFormatted;
 		}
@@ -809,33 +1669,33 @@ function getPartOfSpeechFieldFormatted(field: PartOfSpeechField): string {
 	return getLabelledFieldFormatted(field.value, field.labels);
 }
 
-function getDefinitionFieldsFormatted(
+function getMeaningFieldsFormatted(
 	client: Client,
-	fields: DefinitionField[],
+	fields: MeaningField[],
+	{ expanded }: { expanded: boolean },
 	{ locale }: { locale: Locale },
-	flags: MenuFlags,
 	stack?: { depth: number },
 ): string[] {
 	return fields
-		.map((field) => getDefinitionFieldFormatted(client, field, { locale }, flags, stack))
+		.map((field) => getMeaningFieldFormatted(client, field, { expanded }, { locale }, stack))
 		.map((entry, index) => `${index + 1}. ${entry}`)
 		.map((entry) => {
 			const depth = stack?.depth ?? 0;
-			const whitespace = constants.symbols.meta.whitespace.repeat(depth * defaults.DEFINITION_ROW_INDENTATION);
+			const whitespace = constants.symbols.meta.whitespace.repeat(depth * defaults.ROW_INDENTATION);
 			return `${whitespace}${entry}`;
 		});
 }
 
-function getDefinitionFieldFormatted(
+function getMeaningFieldFormatted(
 	client: Client,
-	field: DefinitionField,
+	field: MeaningField,
+	{ expanded }: { expanded: boolean },
 	{ locale }: { locale: Locale },
-	flags: MenuFlags,
 	stack?: { depth: number },
 ): string {
-	let root = flags.expanded ? getLabelledFieldFormatted(field.value, field.labels) : field.value;
+	let root = getLabelledFieldFormatted(field.value, field.labels);
 
-	if ((stack === undefined || stack.depth === 0) && !flags.expanded) {
+	if ((stack === undefined || stack.depth === 0) && !expanded) {
 		return root;
 	}
 
@@ -852,11 +1712,11 @@ function getDefinitionFieldFormatted(
 	}
 
 	if (field.definitions !== undefined && field.definitions.length !== 0) {
-		const branch = getDefinitionFieldsFormatted(
+		const branch = getMeaningFieldsFormatted(
 			client,
 			field.definitions,
+			{ expanded },
 			{ locale },
-			flags,
 			stack !== undefined ? { depth: stack.depth + 1 } : { depth: 1 },
 		);
 
@@ -874,13 +1734,16 @@ function getDefinitionFieldFormatted(
 		root = `${root}\n${branch.join("\n")}`;
 	}
 
-	return root;
-}
+	if (field.examples !== undefined && field.examples.length !== 0) {
+		const branch = getExampleFieldsFormatted(
+			field.examples,
+			stack !== undefined ? { depth: stack.depth + 1 } : { depth: 1 },
+		);
 
-function getTranslationFieldsFormatted(fields: TranslationField[]): string[] {
-	return fields
-		.map((field) => getLabelledFieldFormatted(field.value, field.labels))
-		.map((entry, index) => `${index + 1}. ${entry}`);
+		root = `${root}\n${branch.join("\n")}`;
+	}
+
+	return root;
 }
 
 function getExpressionFieldsFormatted(
@@ -893,7 +1756,7 @@ function getExpressionFieldsFormatted(
 		.map((field) => getExpressionFieldFormatted(client, field, { locale }, stack))
 		.map((entry) => {
 			const depth = stack?.depth ?? 0;
-			const whitespace = constants.symbols.meta.whitespace.repeat(depth * defaults.DEFINITION_ROW_INDENTATION);
+			const whitespace = constants.symbols.meta.whitespace.repeat(depth * defaults.ROW_INDENTATION);
 			return `${whitespace}${constants.symbols.bullet} ${entry}`;
 		});
 }
@@ -942,7 +1805,7 @@ function getRelationFieldsFormatted(
 ): string[] | undefined {
 	return getRelationFieldFormatted(client, field, { locale })?.map((entry) => {
 		const depth = stack?.depth ?? 0;
-		const whitespace = constants.symbols.meta.whitespace.repeat(depth * defaults.DEFINITION_ROW_INDENTATION);
+		const whitespace = constants.symbols.meta.whitespace.repeat(depth * defaults.ROW_INDENTATION);
 		return `${whitespace}${constants.symbols.divider} ${entry}`;
 	});
 }
@@ -967,35 +1830,23 @@ function getRelationFieldFormatted(
 	const augmentatives = field.augmentatives ?? [];
 
 	if (synonyms.length !== 0 || antonyms.length !== 0) {
-		const columns: string[] = [];
-
 		if (synonyms.length !== 0) {
-			columns.push(`**${strings.synonyms}**: ${synonyms.join(", ")}`);
+			rows.push(`**${strings.synonyms}**: ${synonyms.join(", ")}`);
 		}
 
 		if (antonyms.length !== 0) {
-			columns.push(`**${strings.antonyms}**: ${antonyms.join(", ")}`);
+			rows.push(`**${strings.antonyms}**: ${antonyms.join(", ")}`);
 		}
-
-		const row = columns.join(` ${constants.symbols.divider} `);
-
-		rows.push(row);
 	}
 
 	if (diminutives.length !== 0 || augmentatives.length !== 0) {
-		const columns: string[] = [];
-
 		if (diminutives.length !== 0) {
-			columns.push(`**${strings.diminutives}**: ${diminutives.join(", ")}`);
+			rows.push(`**${strings.diminutives}**: ${diminutives.join(", ")}`);
 		}
 
 		if (augmentatives.length !== 0) {
-			columns.push(`**${strings.augmentatives}**: ${augmentatives.join(", ")}`);
+			rows.push(`**${strings.augmentatives}**: ${augmentatives.join(", ")}`);
 		}
-
-		const row = columns.join(` ${constants.symbols.divider} `);
-
-		rows.push(row);
 	}
 
 	if (rows.length === 0) {
@@ -1046,12 +1897,18 @@ function getPhoneticFieldsFormatted(
 	return rows.map((row) => `${constants.symbols.bullet} ${row}`).join("\n");
 }
 
-function getExampleFieldsFormatted(fields: ExampleField[]): string[] {
-	return fields.map((field) => getLabelledFieldFormatted(field.value, field.labels));
+function getExampleFieldsFormatted(fields: ExampleField[], stack?: { depth: number }): string[] {
+	return fields
+		.map((field) => `> - ${getLabelledFieldFormatted(field.value, field.labels)}`)
+		.map((entry) => {
+			const depth = stack?.depth ?? 0;
+			const whitespace = constants.symbols.meta.whitespace.repeat(depth * defaults.ROW_INDENTATION);
+			return `${whitespace}${entry}`;
+		});
 }
 
 function getFrequencyFieldFormatted(field: FrequencyField): string {
-	return (field.value * 100).toPrecision();
+	return `${(field.value * 100).toFixed(1)}%`;
 }
 
 function getEtymologyFieldFormatted(field: EtymologyField): string {
@@ -1116,459 +1973,5 @@ function distributeEntries(entries: string[], perView: number): string[] {
 	return fields;
 }
 
-function getControls(
-	[client, bot]: [Client, Discord.Bot],
-	interaction: Logos.Interaction,
-	data: MenuData,
-	viewData: MenuViewData,
-	{
-		menus,
-		entry,
-	}: {
-		menus: Partial<Record<Menu, Discord.CamelizedDiscordEmbed[]>>;
-		entry: Partial<DictionaryEntry>;
-	},
-	{ locale }: { locale: Locale },
-): Discord.MessageComponents {
-	const controls: Discord.ActionRow[] = [];
-
-	switch (data.navigation.menu.current) {
-		case "overview": {
-			controls.push(...getOverviewControls([client, bot], interaction, data, viewData, entry, { locale }));
-			break;
-		}
-		case "inflection": {
-			controls.push(...getInflectionControls([client, bot], interaction, data, viewData, entry, { locale }));
-			break;
-		}
-	}
-
-	const strings = {
-		overview: localise(client, "word.strings.menus.overview", locale)(),
-		usage: localise(client, "word.strings.menus.usage", locale)(),
-		history: localise(client, "word.strings.menus.history", locale)(),
-		inflection: localise(client, "word.strings.menus.inflection", locale)(),
-	};
-
-	const menuButtons: Discord.ButtonComponent[] = [];
-	for (const menu of Object.keys(menus) as Menu[]) {
-		const buttonId = createInteractionCollector([client, bot], {
-			type: Discord.InteractionTypes.MessageComponent,
-			onCollect: async (selection) => {
-				acknowledge([client, bot], selection);
-
-				data.navigation.menu.current = menu;
-
-				displayMenu([client, bot], interaction, data, viewData, { locale });
-			},
-		});
-
-		menuButtons.push({
-			type: Discord.MessageComponentTypes.Button,
-			label: strings[menu],
-			disabled: data.navigation.menu.current === menu,
-			customId: buttonId,
-			style: Discord.ButtonStyles.Primary,
-		});
-	}
-
-	if (viewData.showButton !== undefined) {
-		menuButtons.push(viewData.showButton);
-	}
-
-	if (menuButtons.length > 1) {
-		controls.push({
-			type: Discord.MessageComponentTypes.ActionRow,
-			components: menuButtons as unknown as [Discord.ButtonComponent],
-		});
-	}
-
-	controls.push(...getPaginationControls([client, bot], interaction, data, viewData, { locale }));
-
-	return controls;
-}
-
-type DictionaryEntryGroup = [string, DictionaryEntry[]];
-type DictionaryEntriesAssorted = {
-	previous: DictionaryEntryGroup[];
-	current: DictionaryEntryGroup;
-	next: DictionaryEntryGroup[];
-};
-function getPaginationControls(
-	[client, bot]: [Client, Discord.Bot],
-	interaction: Logos.Interaction,
-	data: MenuData,
-	viewData: MenuViewData,
-	{ locale }: { locale: Locale },
-): Discord.ActionRow[] {
-	const getGroups = (): DictionaryEntriesAssorted => {
-		const groups = Object.entries(data.entries) as [string, DictionaryEntry[]][];
-		const currentGroupIndex = groups.findIndex(
-			([partOfSpeech, _]) => partOfSpeech === data.navigation.page.partOfSpeech,
-		);
-		const group = groups[currentGroupIndex];
-		if (group === undefined) {
-			throw "StateError: Group unexpectedly undefined.";
-		}
-
-		return {
-			previous: groups.slice(0, currentGroupIndex),
-			current: group,
-			next: groups.slice(currentGroupIndex + 1),
-		};
-	};
-	const getPageNumber = () => {
-		const precedentPageCount = getGroups().previous.flatMap(([_, entries]) => entries).length;
-		return precedentPageCount + 1;
-	};
-	const getPageCount = () => Object.values(data.entries).flat().length;
-	const isFirstPage = () =>
-		data.navigation.page.partOfSpeech === Object.keys(data.entries).at(0) && data.navigation.page.index === 0;
-	const isLastPage = () =>
-		data.navigation.page.partOfSpeech === Object.keys(data.entries).at(-1) && getPageNumber() === getPageCount();
-	const isFirstInGroup = () => data.navigation.page.index === 0;
-	const isLastInGroup = () =>
-		data.navigation.page.partOfSpeech !== undefined &&
-		data.navigation.page.index === (data.entries[data.navigation.page.partOfSpeech]?.length ?? 0) - 1;
-
-	if (isFirstPage() && isLastPage()) {
-		return [];
-	}
-
-	const previousPageButtonId = createInteractionCollector([client, bot], {
-		type: Discord.InteractionTypes.MessageComponent,
-		onCollect: async (selection) => {
-			acknowledge([client, bot], selection);
-
-			if (!isFirstPage()) {
-				if (isFirstInGroup()) {
-					const previousGroup = getGroups().previous.at(-1);
-					if (previousGroup === undefined) {
-						return;
-					}
-					const [partOfSpeech, entries] = previousGroup;
-
-					data.navigation.page.partOfSpeech = partOfSpeech;
-					data.navigation.page.index = entries.length - 1;
-				} else {
-					data.navigation.page.index--;
-				}
-
-				data.navigation.view = {
-					definitions: 0,
-					translations: 0,
-					expressions: 0,
-					examples: 0,
-				};
-				data.navigation.menu.tabs = {
-					overview: 0,
-					usage: 0,
-					history: 0,
-					inflection: 0,
-				};
-			}
-
-			displayMenu([client, bot], interaction, data, viewData, { locale });
-		},
-	});
-
-	const nextPageButtonId = createInteractionCollector([client, bot], {
-		type: Discord.InteractionTypes.MessageComponent,
-		onCollect: async (selection) => {
-			acknowledge([client, bot], selection);
-
-			if (!isLastPage()) {
-				if (isLastInGroup()) {
-					const nextGroup = getGroups().next.at(0);
-					if (nextGroup === undefined) {
-						return;
-					}
-					const [partOfSpeech, _] = nextGroup;
-
-					data.navigation.page.partOfSpeech = partOfSpeech;
-					data.navigation.page.index = 0;
-				} else {
-					data.navigation.page.index++;
-				}
-
-				data.navigation.view = {
-					definitions: 0,
-					translations: 0,
-					expressions: 0,
-					examples: 0,
-				};
-				data.navigation.menu.tabs = {
-					overview: 0,
-					usage: 0,
-					history: 0,
-					inflection: 0,
-				};
-			}
-
-			displayMenu([client, bot], interaction, data, viewData, { locale });
-		},
-	});
-
-	const groups = getGroups();
-	const [_, entries] = groups.current;
-	const entry = entries[data.navigation.page.index];
-	if (entry === undefined) {
-		throw "StateError: Entry unexpectedly undefined.";
-	}
-
-	const strings = {
-		page: localise(
-			client,
-			"word.strings.page",
-			locale,
-		)({
-			page_number: getPageNumber(),
-			page_count: getPageCount(),
-		}),
-	};
-
-	return [
-		{
-			type: Discord.MessageComponentTypes.ActionRow,
-			components: [
-				{
-					type: Discord.MessageComponentTypes.Button,
-					label: constants.symbols.interactions.menu.controls.back,
-					disabled: isFirstPage(),
-					customId: previousPageButtonId,
-					style: Discord.ButtonStyles.Secondary,
-				},
-				{
-					type: Discord.MessageComponentTypes.Button,
-					label: strings.page,
-					style: Discord.ButtonStyles.Secondary,
-					customId: constants.components.none,
-				},
-				{
-					type: Discord.MessageComponentTypes.Button,
-					label: constants.symbols.interactions.menu.controls.forward,
-					disabled: isLastPage(),
-					customId: nextPageButtonId,
-					style: Discord.ButtonStyles.Secondary,
-				},
-			],
-		},
-	];
-}
-
-type ExpandedMode = `${boolean}`;
-type OverviewModeButtonID<State extends string> = [state: State];
-
-function getOverviewControls(
-	[client, bot]: [Client, Discord.Bot],
-	interaction: Logos.Interaction,
-	data: MenuData,
-	viewData: MenuViewData,
-	entry: Partial<DictionaryEntry>,
-	{ locale }: { locale: Locale },
-): Discord.ActionRow[] {
-	const isFirstPage = (view?: View) =>
-		view !== undefined
-			? data.navigation.view[view] === 0
-			: Object.values(data.navigation.view).every((index) => index === 0);
-	const isLastPage = (view?: View): boolean => {
-		if (data.navigation.menu.current === undefined) {
-			return false;
-		}
-
-		if (view !== undefined) {
-			return data.navigation.view[view] === viewData.display.view.pageCounts[view] - 1;
-		}
-
-		return viewData.display.view.views[data.navigation.menu.current].every(
-			(view) => data.navigation.view[view] === viewData.display.view.pageCounts[view] - 1,
-		);
-	};
-
-	if (entry.definitions === undefined) {
-		return [];
-	}
-
-	const scrollDownButtonId = createInteractionCollector([client, bot], {
-		type: Discord.InteractionTypes.MessageComponent,
-		limit: 1,
-		onCollect: async (selection) => {
-			acknowledge([client, bot], selection);
-
-			if (data.navigation.menu.current === undefined) {
-				return;
-			}
-
-			if (isLastPage()) {
-				return;
-			}
-
-			for (const view of viewData.display.view.views[data.navigation.menu.current]) {
-				if (isLastPage(view)) {
-					continue;
-				}
-
-				data.navigation.view[view]++;
-			}
-
-			displayMenu([client, bot], interaction, data, viewData, { locale });
-		},
-	});
-
-	const scrollUpButtonId = createInteractionCollector([client, bot], {
-		type: Discord.InteractionTypes.MessageComponent,
-		limit: 1,
-		onCollect: async (selection) => {
-			acknowledge([client, bot], selection);
-
-			if (data.navigation.menu.current === undefined) {
-				return;
-			}
-
-			if (isFirstPage()) {
-				return;
-			}
-
-			for (const view of viewData.display.view.views[data.navigation.menu.current]) {
-				if (isFirstPage(view)) {
-					continue;
-				}
-
-				data.navigation.view[view]--;
-			}
-
-			displayMenu([client, bot], interaction, data, viewData, { locale });
-		},
-	});
-
-	const toggleExpandedModeButtonId = createInteractionCollector([client, bot], {
-		type: Discord.InteractionTypes.MessageComponent,
-		limit: 1,
-		onCollect: async (selection) => {
-			acknowledge([client, bot], selection);
-
-			if (entry.definitions === undefined || selection.data === undefined) {
-				displayMenu([client, bot], interaction, data, viewData, { locale });
-				return;
-			}
-
-			const customId = selection.data.customId;
-			if (customId === undefined) {
-				return;
-			}
-
-			const [_, expandedString] = decodeId<OverviewModeButtonID<ExpandedMode>>(customId);
-			const expanded = expandedString === "true" ? true : false;
-
-			viewData.flags.expanded = expanded;
-
-			displayMenu([client, bot], interaction, data, viewData, { locale });
-		},
-	});
-
-	const strings = {
-		expand: localise(client, "word.strings.modes.expanded.expand", locale)(),
-		contract: localise(client, "word.strings.modes.expanded.contract", locale)(),
-	};
-
-	return [
-		{
-			type: Discord.MessageComponentTypes.ActionRow,
-			components: [
-				{
-					type: Discord.MessageComponentTypes.Button,
-					label: constants.symbols.interactions.menu.controls.down,
-					disabled: isLastPage(),
-					customId: scrollDownButtonId,
-					style: Discord.ButtonStyles.Danger,
-				},
-				{
-					type: Discord.MessageComponentTypes.Button,
-					label: constants.symbols.interactions.menu.controls.up,
-					disabled: isFirstPage(),
-					customId: scrollUpButtonId,
-					style: Discord.ButtonStyles.Danger,
-				},
-				{
-					type: Discord.MessageComponentTypes.Button,
-					label: viewData.flags.expanded ? strings.contract : strings.expand,
-					customId: encodeId<OverviewModeButtonID<ExpandedMode>>(toggleExpandedModeButtonId, [
-						`${!viewData.flags.expanded}`,
-					]),
-					style: Discord.ButtonStyles.Danger,
-				},
-			],
-		},
-	];
-}
-
-type InflectionTabButtonID = [index: string];
-
-function getInflectionControls(
-	[client, bot]: [Client, Discord.Bot],
-	interaction: Logos.Interaction,
-	data: MenuData,
-	viewData: MenuViewData,
-	entry: Partial<DictionaryEntry>,
-	{ locale }: { locale: Locale },
-): Discord.ActionRow[] {
-	if (entry.inflection === undefined) {
-		return [];
-	}
-
-	const buttonId = createInteractionCollector([client, bot], {
-		type: Discord.InteractionTypes.MessageComponent,
-		limit: 1,
-		onCollect: async (selection) => {
-			acknowledge([client, bot], selection);
-
-			if (entry.inflection === undefined || selection.data === undefined) {
-				displayMenu([client, bot], interaction, data, viewData, { locale });
-				return;
-			}
-
-			const customId = selection.data?.customId;
-			if (customId === undefined) {
-				return;
-			}
-
-			const [_, indexString] = decodeId<InflectionTabButtonID>(customId);
-			const index = Number(indexString);
-
-			if (index >= 0 && index <= entry.inflection.tabs.length) {
-				data.navigation.menu.tabs.inflection = index;
-			}
-
-			displayMenu([client, bot], interaction, data, viewData, { locale });
-		},
-	});
-
-	const tabsChunked = chunk(entry.inflection.tabs, 5).reverse();
-	const rows: Discord.ActionRow[] = [];
-	for (const [row, rowIndex] of tabsChunked.map<[typeof entry.inflection["tabs"], number]>((r, i) => [r, i])) {
-		const buttons = row.map<Discord.ButtonComponent>((table, index) => {
-			const index_ = rowIndex * 5 + index;
-
-			return {
-				type: Discord.MessageComponentTypes.Button,
-				label: table.title,
-				disabled: data.navigation.menu.tabs.inflection === index_,
-				customId: encodeId<InflectionTabButtonID>(buttonId, [index_.toString()]),
-				style: Discord.ButtonStyles.Danger,
-			};
-		});
-
-		if (buttons.length === 1) {
-			continue;
-		}
-
-		rows.push({
-			type: Discord.MessageComponentTypes.ActionRow,
-			components: buttons as [Discord.ButtonComponent],
-		});
-	}
-
-	return rows;
-}
-
-export default command;
+export { handleGetInformationAutocomplete as handleFindWordAutocomplete, verifyIsLemmaValid };
+export default commands;
