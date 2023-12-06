@@ -11,7 +11,14 @@ import {
 	isTinyLDLocale,
 } from "./languages/detection";
 import { Language as FeatureLanguage, isLanguage as isFeatureLanguage } from "./languages/feature";
-import { Language as LearningLanguage } from "./languages/learning";
+import {
+	Language as LearningLanguage,
+	Locale as LearningLocale,
+	PonsLanguage,
+	PonsLocale,
+	getPonsLocaleByLanguage as getPonsLocaleByLearningLanguage,
+	isPonsLanguage as isPonsLearningLanguage,
+} from "./languages/learning";
 import {
 	DiscordLocale,
 	Language as LocalisationLanguage,
@@ -30,9 +37,9 @@ import {
 	DeepLLocale,
 	GoogleTranslateLanguage,
 	GoogleTranslateLocale,
+	Language as TranslationLanguage,
 	LingvanexLanguage,
 	LingvanexLocale,
-	Language as TranslationLanguage,
 	Locale as TranslationLocale,
 	getDeepLLanguageByLocale as getDeepLTranslationLanguageByLocale,
 	getDeepLLocaleByLanguage as getDeepLLocaleByTranslationLanguage,
@@ -42,8 +49,8 @@ import {
 	getLingvanexLocaleByLanguage as getLingvanexLocaleByTranslationLanguage,
 	isDeepLLocale,
 	isGoogleTranslateLocale,
-	isLingvanexLocale,
 	isLanguage as isTranslationLanguage,
+	isLingvanexLocale,
 	languages as translationLanguages,
 } from "./languages/translation";
 
@@ -156,9 +163,12 @@ export {
 	getLingvanexTranslationLanguageByLocale,
 	getLingvanexLocaleByTranslationLanguage,
 	isLingvanexLocale,
+	isPonsLearningLanguage,
+	getPonsLocaleByLearningLanguage,
 };
 export type {
 	LearningLanguage,
+	LearningLocale,
 	FeatureLanguage,
 	LocalisationLanguage,
 	TranslationLanguage,
@@ -179,4 +189,6 @@ export type {
 	DetectionLocale,
 	LingvanexLanguage,
 	LingvanexLocale,
+	PonsLanguage,
+	PonsLocale,
 };

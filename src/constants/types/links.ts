@@ -1,3 +1,5 @@
+import { Languages } from "../languages";
+
 export default {
 	typescriptWebsite: "https://www.typescriptlang.org/",
 	nodeWebsite: "https://nodejs.org/en",
@@ -9,8 +11,11 @@ export default {
 	generateDiscordInviteLink: (inviteCode: string) => `https://discord.gg/${inviteCode}`,
 	generateTatoebaSentenceLink: (sentenceId: string) => `https://tatoeba.org/en/sentences/show/${sentenceId}`,
 	generateDexonlineDefinitionLink: (lemma: string) => `https://dexonline.ro/definitie/${lemma}`,
+	generateDicolinkDefinitionLink: (lemma: string) => `https://dicolink.com/mots/${lemma}`,
+	generatePonsDefinitionLink: (lemma: string, languages: Languages<string>) =>
+		`https://en.pons.com/translate/${languages.source}-${languages.target}/${lemma}`,
 	generateWiktionaryDefinitionLink: (lemma: string, language: string) =>
 		`https://en.wiktionary.org/wiki/${lemma}#${language}`,
-	wordsAPILink: "https://wordsapi.com/",
-	generateDicolinkDefinitionLink: (lemma: string) => `https://dicolink.com/mots/${lemma}`,
+	generateWordnikDefinitionLink: (lemma: string) => `https://wordnik.com/words/${lemma}`,
+	wordsApiLink: "https://wordsapi.com/",
 };

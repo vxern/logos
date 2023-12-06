@@ -277,6 +277,8 @@ async function setup(): Promise<void> {
 		faunaSecret: process.env.SECRET_FAUNA,
 		deeplSecret: process.env.SECRET_DEEPL,
 		rapidApiSecret: process.env.SECRET_RAPID_API,
+		wordnikSecret: process.env.SECRET_WORDNIK,
+		ponsSecret: process.env.SECRET_PONS,
 		lavalinkHost: process.env.LAVALINK_HOST,
 		lavalinkPort: process.env.LAVALINK_PORT,
 		lavalinkPassword: process.env.LAVALINK_PASSWORD,

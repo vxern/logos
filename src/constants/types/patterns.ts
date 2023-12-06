@@ -5,4 +5,5 @@ export default {
 		`^(.+)${symbols.sigils.divider}([^${symbols.sigils.separator}]{2,4}(?:${symbols.sigils.separator}[^${symbols.sigils.separator}]{2,4})*)$`,
 	),
 	wiktionaryPronunciationModels: /(?:, )?(\w+(?:\(\w+\))?): /g,
+	ponsHeader: /^\d+\. ?(.*?) ?(?:\(([^()]+)\) ?)?:?$/,
 };
