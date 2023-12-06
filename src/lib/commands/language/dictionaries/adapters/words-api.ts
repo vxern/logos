@@ -1,17 +1,20 @@
 import constants from "../../../../../constants/constants";
-import { Locale } from "../../../../../constants/languages";
+import { Languages, LearningLanguage, Locale } from "../../../../../constants/languages";
 import licences from "../../../../../constants/licences";
 import defaults from "../../../../../defaults";
 import { Client } from "../../../../client";
-import { DictionaryAdapter, SearchLanguages } from "../adapter";
+import { DictionaryAdapter } from "../adapter";
+import { isSearchMonolingual } from "../adapters";
 import {
 	DefinitionField,
 	DictionaryEntrySource,
 	FrequencyField,
 	LemmaField,
+	MeaningField,
 	PartOfSpeechField,
 	PronunciationField,
 	SyllableField,
+	TranslationField,
 } from "../dictionary-entry";
 import { tryDetectPartOfSpeech } from "../part-of-speech";
 
@@ -42,14 +45,14 @@ class WordsAPIAdapter extends DictionaryAdapter<
 		});
 	}
 
-	async fetch(client: Client, lemma: string, _: SearchLanguages) {
+	async fetch(client: Client, lemma: string, _: Languages<LearningLanguage>) {
 		let response: Response;
 		try {
-			response = await fetch(constants.endpoints.words.word(lemma), {
+			response = await fetch(constants.endpoints.wordsApi.word(lemma), {
 				headers: {
 					"User-Agent": defaults.USER_AGENT,
 					"X-RapidAPI-Key": client.environment.rapidApiSecret,
-					"X-RapidAPI-Host": constants.endpoints.words.host,
+					"X-RapidAPI-Host": constants.endpoints.wordsApi.host,
 				},
 			});
 		} catch (exception) {
@@ -72,8 +75,19 @@ class WordsAPIAdapter extends DictionaryAdapter<
 		return searchResult;
 	}
 
-	parse(_: Client, lemma: string, languages: SearchLanguages, searchResult: SearchResult, __: { locale: Locale }) {
+	parse(
+		_: Client,
+		lemma: string,
+		languages: Languages<LearningLanguage>,
+		searchResult: SearchResult,
+		__: { locale: Locale },
+	) {
 		const lemmaField: LemmaField = { value: lemma };
+
+		const source: DictionaryEntrySource = {
+			link: constants.links.wordsApiLink,
+			licence: licences.dictionaries.wordsApi,
+		};
 
 		const { results, pronunciation, syllables, frequency } = searchResult;
 
@@ -98,9 +112,9 @@ class WordsAPIAdapter extends DictionaryAdapter<
 			);
 
 			const partOfSpeechField: PartOfSpeechField = { value: partOfSpeech, detected: partOfSpeechDetected };
-			const definitionField: DefinitionField = { value: definition };
+			const meaningField: MeaningField = { value: definition };
 			if (result.synonyms !== undefined && result.synonyms.length !== 0) {
-				definitionField.relations = { synonyms: result.synonyms };
+				meaningField.relations = { synonyms: result.synonyms };
 			}
 
 			const pronunciationRaw = pronunciation?.[partOfSpeech];
@@ -109,28 +123,37 @@ class WordsAPIAdapter extends DictionaryAdapter<
 				pronunciationField = { labels: ["IPA"], value: pronunciationRaw };
 			}
 
-			const source: DictionaryEntrySource = {
-				link: constants.links.wordsAPILink,
-				licence: licences.dictionaries.wordsApi,
-			};
-
 			const lastEntry = entries.at(-1);
 			if (lastEntry !== undefined) {
 				if (lastEntry.partOfSpeech.detected === partOfSpeechDetected || lastEntry.partOfSpeech.value === partOfSpeech) {
-					lastEntry.definitions.push(definitionField);
+					lastEntry.definitions?.push(meaningField);
 				}
 				continue;
 			}
 
-			entries.push({
-				lemma: lemmaField,
-				partOfSpeech: partOfSpeechField,
-				definitions: [definitionField],
-				syllables: syllableField,
-				pronunciation: pronunciationField,
-				frequency: frequencyField,
-				sources: [source],
-			});
+			if (isSearchMonolingual(languages.source, languages.target)) {
+				entries.push({
+					lemma: lemmaField,
+					partOfSpeech: partOfSpeechField,
+					definitions: [meaningField],
+					translations: undefined as TranslationField[] | undefined,
+					syllables: syllableField,
+					pronunciation: pronunciationField,
+					frequency: frequencyField,
+					sources: [source],
+				});
+			} else {
+				entries.push({
+					lemma: lemmaField,
+					partOfSpeech: partOfSpeechField,
+					definitions: undefined as DefinitionField[] | undefined,
+					translations: [meaningField],
+					syllables: syllableField,
+					pronunciation: pronunciationField,
+					frequency: frequencyField,
+					sources: [source],
+				});
+			}
 		}
 
 		return entries;
