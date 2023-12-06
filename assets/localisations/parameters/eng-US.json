@@ -18,5 +18,10 @@
 	"parameters.by.name": "by",
 	"parameters.by.description": "The number of songs or song listings to skip by.",
 	"parameters.to.name": "to",
-	"parameters.to.description": "The index of the track to skip to."
+	"parameters.to.description": "The index of the track to skip to.",
+  
+	"parameters.word.name": "word",
+	"parameters.word.description": "The word to display information about.",
+  "parameters.language.name": "language",
+  "parameters.language.description": "The language of the word."
 }
