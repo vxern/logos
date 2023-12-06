@@ -75,6 +75,7 @@ export default {
 			open: "📂",
 			closed: "📁",
 		},
+		syllableSeparator: "·",
 	},
 	music: {
 		song: "🎵",
