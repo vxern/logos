@@ -1,22 +1,7 @@
-import { LearningLanguage, Locale } from "../../../../constants/languages";
+import { Languages, LearningLanguage, Locale } from "../../../../constants/languages";
 import { Client } from "../../../client";
 import { DictionaryEntry, RequiredDictionaryEntryFields } from "./dictionary-entry";
-
-type DictionaryProvision =
-	| "part-of-speech"
-	| "definitions"
-	| "translations"
-	| "relations"
-	| "syllables"
-	| "pronunciation"
-	| "rhymes"
-	| "audio"
-	| "expressions"
-	| "examples"
-	| "frequency"
-	| "inflection"
-	| "etymology"
-	| "notes";
+import { DictionaryProvision } from "./dictionary-provision";
 
 interface DictionaryProvisionToFieldName extends Record<DictionaryProvision, keyof DictionaryEntry> {
 	"part-of-speech": "partOfSpeech";
@@ -33,11 +18,6 @@ interface DictionaryProvisionToFieldName extends Record<DictionaryProvision, key
 	inflection: "inflection";
 	etymology: "etymology";
 	notes: "notes";
-}
-
-interface SearchLanguages {
-	source: LearningLanguage;
-	target: LearningLanguage;
 }
 
 type DictionaryAdapterPriority = "primary" | "secondary" | "tertiary";
@@ -63,7 +43,7 @@ abstract class DictionaryAdapter<
 	 * @param lemma - Lemma to fetch data about.
 	 * @param languages - Languages to use for the request.
 	 */
-	abstract fetch(client: Client, lemma: string, languages: SearchLanguages): Promise<WordData | undefined>;
+	abstract fetch(client: Client, lemma: string, languages: Languages<LearningLanguage>): Promise<WordData | undefined>;
 
 	/**
 	 * Taking {@link data}, converts it to {@link DictionaryEntry | dictionary entries}.
@@ -77,7 +57,7 @@ abstract class DictionaryAdapter<
 	abstract parse(
 		client: Client,
 		lemma: string,
-		languages: SearchLanguages,
+		languages: Languages<LearningLanguage>,
 		data: WordData,
 		{ locale }: { locale: Locale },
 	): Entry[] | undefined;
@@ -94,7 +74,7 @@ abstract class DictionaryAdapter<
 	async tryGetInformation(
 		client: Client,
 		lemma: string,
-		languages: SearchLanguages,
+		languages: Languages<LearningLanguage>,
 		{ locale }: { locale: Locale },
 	): Promise<Entry[] | undefined> {
 		const data = await this.fetch(client, lemma, languages).catch((reason) => {
@@ -124,4 +104,4 @@ abstract class DictionaryAdapter<
 }
 
 export { DictionaryAdapter };
-export type { DictionaryProvision, SearchLanguages, DictionaryAdapterPriority };
+export type { DictionaryProvision, DictionaryAdapterPriority };
