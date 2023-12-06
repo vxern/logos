@@ -417,7 +417,7 @@ const languageToLocale = {
 		Yoruba: "yo",
 		Zhuang: "za",
 		Zulu: "zu",
-	},
+	} as const satisfies Record<CLDLanguage, string>,
 	tinyld: {
 		Afrikaans: "afr",
 		Amharic: "amh",
