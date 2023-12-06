@@ -1,11 +1,11 @@
 import * as Dexonline from "dexonline-scraper";
 import constants from "../../../../../constants/constants";
-import { Locale } from "../../../../../constants/languages";
+import { Languages, LearningLanguage, Locale } from "../../../../../constants/languages";
 import licences from "../../../../../constants/licences";
 import { code } from "../../../../../formatting";
 import { Client, localise } from "../../../../client";
 import { chunk } from "../../../../utils";
-import { DictionaryAdapter, SearchLanguages } from "../adapter";
+import { DictionaryAdapter } from "../adapter";
 import {
 	DefinitionField,
 	DictionaryEntrySource,
@@ -49,7 +49,7 @@ class DexonlineAdapter extends DictionaryAdapter<
 		});
 	}
 
-	async fetch(client: Client, lemma: string, __: SearchLanguages) {
+	async fetch(client: Client, lemma: string, __: Languages<LearningLanguage>) {
 		let results: Dexonline.Results | undefined;
 		try {
 			results = await Dexonline.get(lemma, { mode: "strict" });
@@ -68,11 +68,16 @@ class DexonlineAdapter extends DictionaryAdapter<
 	parse(
 		client: Client,
 		lemma: string,
-		languages: SearchLanguages,
+		languages: Languages<LearningLanguage>,
 		results: Dexonline.Results,
 		{ locale }: { locale: Locale },
 	) {
 		const lemmaField: LemmaField = { value: lemma };
+
+		const source: DictionaryEntrySource = {
+			link: constants.links.generateDexonlineDefinitionLink(lemma),
+			licence: licences.dictionaries.dexonline,
+		};
 
 		const entries = [];
 
@@ -85,37 +90,10 @@ class DexonlineAdapter extends DictionaryAdapter<
 			);
 
 			const partOfSpeechField: PartOfSpeechField = { value: partOfSpeech, detected: partOfSpeechDetected };
-			const definitionFields: DefinitionField[] = definitions.map((definition) => ({
-				labels: definition.tags,
-				value: definition.value,
-				definitions: definition.definitions,
-				expressions: definition.expressions,
-				relations: definition.relations,
-			}));
-			const expressionFields: ExpressionField[] = expressions.map((expression) => ({
-				labels: expression.tags,
-				value: expression.value,
-				relations: expression.relations,
-				expressions: expression.expressions,
-				examples: expression.examples,
-			}));
-			const exampleFields: ExampleField[] = examples.map((example) => ({
-				labels: example.tags,
-				value: example.value,
-			}));
-			const etymologyField: EtymologyField = {
-				value: etymology
-					.map((etymology) => {
-						const labels = etymology.tags.map((tag) => code(tag)).join(" ");
-						return `${labels} ${etymology.value}`;
-					})
-					.join("\n"),
-			};
-
-			const source: DictionaryEntrySource = {
-				link: constants.links.generateDexonlineDefinitionLink(lemma),
-				licence: licences.dictionaries.dexonline,
-			};
+			const definitionFields: DefinitionField[] = definitions.map((definition) => this.transformDefinition(definition));
+			const expressionFields: ExpressionField[] = expressions.map((expression) => this.transformExpression(expression));
+			const exampleFields: ExampleField[] = examples.map((example) => this.transformExample(example));
+			const etymologyField: EtymologyField = this.transformEtymology(etymology);
 
 			entries.push({
 				lemma: lemmaField,
@@ -177,6 +155,45 @@ class DexonlineAdapter extends DictionaryAdapter<
 		}
 
 		return entries;
+	}
+
+	private transformDefinition(definition: Dexonline.Definition): DefinitionField {
+		return {
+			labels: definition.tags,
+			value: definition.value,
+			definitions: definition.definitions.map((definition) => this.transformDefinition(definition)),
+			expressions: definition.expressions.map((expression) => this.transformExpression(expression)),
+			examples: definition.examples.map((example) => this.transformExample(example)),
+			relations: definition.relations,
+		};
+	}
+
+	private transformExpression(expression: Dexonline.Expression): ExpressionField {
+		return {
+			labels: expression.tags,
+			value: expression.value,
+			expressions: expression.expressions.map((expression) => this.transformExpression(expression)),
+			examples: expression.examples.map((example) => this.transformExample(example)),
+			relations: expression.relations,
+		};
+	}
+
+	private transformExample(example: Dexonline.Example): ExampleField {
+		return {
+			labels: example.tags,
+			value: example.value,
+		};
+	}
+
+	private transformEtymology(etymology: Dexonline.Etymology[]): EtymologyField {
+		return {
+			value: etymology
+				.map((etymology) => {
+					const labels = etymology.tags.map((tag) => code(tag)).join(" ");
+					return `${labels} ${etymology.value}`;
+				})
+				.join("\n"),
+		};
 	}
 
 	private parseInflectionTable(
