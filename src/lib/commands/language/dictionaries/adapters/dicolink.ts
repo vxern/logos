@@ -1,10 +1,10 @@
 import constants from "../../../../../constants/constants";
-import { Locale } from "../../../../../constants/languages";
+import { Languages, LearningLanguage, Locale } from "../../../../../constants/languages";
 import licences from "../../../../../constants/licences";
 import defaults from "../../../../../defaults";
 import { Client } from "../../../../client";
 import { addParametersToURL } from "../../../../utils";
-import { DictionaryAdapter, SearchLanguages } from "../adapter";
+import { DictionaryAdapter } from "../adapter";
 import { DefinitionField, DictionaryEntrySource, LemmaField, PartOfSpeechField } from "../dictionary-entry";
 import { tryDetectPartOfSpeech } from "../part-of-speech";
 
@@ -27,7 +27,7 @@ class DicolinkAdapter extends DictionaryAdapter<Result[], "part-of-speech" | "de
 		});
 	}
 
-	async fetch(client: Client, lemma: string, _: SearchLanguages) {
+	async fetch(client: Client, lemma: string, _: Languages<LearningLanguage>) {
 		let response: Response;
 		try {
 			response = await fetch(
@@ -59,7 +59,6 @@ class DicolinkAdapter extends DictionaryAdapter<Result[], "part-of-speech" | "de
 			client.log.error(`Reading response data for lemma "${lemma}" to ${this.identifier} failed:`, exception);
 			return undefined;
 		}
-		console.debug(data.filter((data) => data.source === "littre"));
 
 		const resultsAll: Result[] = data
 			.filter((result) => result.nature)
@@ -78,8 +77,13 @@ class DicolinkAdapter extends DictionaryAdapter<Result[], "part-of-speech" | "de
 		return results;
 	}
 
-	parse(_: Client, lemma: string, languages: SearchLanguages, results: Result[], __: { locale: Locale }) {
+	parse(_: Client, lemma: string, languages: Languages<LearningLanguage>, results: Result[], __: { locale: Locale }) {
 		const lemmaField: LemmaField = { value: lemma };
+
+		const source: DictionaryEntrySource = {
+			link: constants.links.generateDicolinkDefinitionLink(lemma),
+			licence: licences.dictionaries.dicolink,
+		};
 
 		const entries = [];
 
@@ -102,11 +106,6 @@ class DicolinkAdapter extends DictionaryAdapter<Result[], "part-of-speech" | "de
 				continue;
 			}
 
-			const source: DictionaryEntrySource = {
-				link: constants.links.generateDicolinkDefinitionLink(lemma),
-				licence: licences.dictionaries.dicolink,
-			};
-
 			entries.push({
 				lemma: lemmaField,
 				partOfSpeech: partOfSpeechField,
@@ -114,6 +113,7 @@ class DicolinkAdapter extends DictionaryAdapter<Result[], "part-of-speech" | "de
 				sources: [source],
 			});
 		}
+
 		return entries;
 	}
 
