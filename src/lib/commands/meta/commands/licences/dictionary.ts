@@ -84,6 +84,7 @@ async function handleDisplayDictionaryLicence(
 					url: licenceInformation.link,
 				},
 				description: `*${licenceInformation.notices.licence}*`,
+				image: "badgeLink" in licenceInformation.notices ? { url: licenceInformation.notices.badgeLink } : undefined,
 				color: constants.colors.greenishLightGray,
 				fields: [
 					{
