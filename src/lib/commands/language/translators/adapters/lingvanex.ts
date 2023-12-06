@@ -1,11 +1,11 @@
 import constants from "../../../../../constants/constants";
 import {
-	LingvanexLanguage,
 	Languages,
+	LingvanexLanguage,
 	TranslationLocale,
 	getLingvanexLocaleByTranslationLanguage,
-	isLingvanexLocale,
 	getLingvanexTranslationLanguageByLocale,
+	isLingvanexLocale,
 } from "../../../../../constants/languages";
 import defaults from "../../../../../defaults";
 import { Client } from "../../../../client";
