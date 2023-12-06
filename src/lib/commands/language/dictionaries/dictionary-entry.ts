@@ -1,6 +1,7 @@
 import * as Discord from "@discordeno/bot";
 import { DictionaryLicence } from "../../../../constants/licences";
 import { PartOfSpeech } from "./part-of-speech";
+import { DictionaryProvision } from "./dictionary-provision";
 
 type LabelledField = {
 	labels?: string[];
@@ -12,13 +13,15 @@ type PartOfSpeechField = LabelledField &
 	Partial<{
 		detected: PartOfSpeech;
 	}>;
-type DefinitionField = LabelledField &
+type MeaningField = LabelledField &
 	Partial<{
 		relations: RelationField;
 		definitions: DefinitionField[];
 		expressions: ExpressionField[];
+		examples: ExampleField[];
 	}>;
-type TranslationField = LabelledField;
+type DefinitionField = MeaningField;
+type TranslationField = MeaningField;
 type RelationField = Partial<{
 	synonyms: string[];
 	antonyms: string[];
@@ -33,8 +36,9 @@ type ExpressionField = LabelledField &
 	Partial<{
 		relations: RelationField;
 		expressions: ExpressionField[];
+		examples: ExampleField[];
 	}>;
-type ExampleField = LabelledField;
+type ExampleField = LabelledField & Partial<{ expressions: ExpressionField[] }>;
 type FrequencyField = { value: number };
 type InflectionField = {
 	tabs: Discord.CamelizedDiscordEmbed[];
@@ -100,11 +104,33 @@ interface DictionaryEntry {
 	notes: NoteField;
 }
 
-type RequiredDictionaryEntryFields = "sources" | "lemma";
+type DictionaryEntryField = keyof DictionaryEntry;
 
+const requiredDictionaryEntryFields = ["sources", "lemma"] satisfies DictionaryEntryField[];
+type RequiredDictionaryEntryFields = typeof requiredDictionaryEntryFields[number];
+
+const provisionToField: Record<DictionaryProvision, DictionaryEntryField> = {
+	"part-of-speech": "partOfSpeech",
+	definitions: "definitions",
+	translations: "translations",
+	relations: "relations",
+	syllables: "syllables",
+	pronunciation: "pronunciation",
+	rhymes: "rhymes",
+	audio: "audio",
+	expressions: "expressions",
+	examples: "examples",
+	frequency: "frequency",
+	inflection: "inflection",
+	etymology: "etymology",
+	notes: "notes",
+};
+
+export { requiredDictionaryEntryFields, provisionToField };
 export type {
 	LemmaField,
 	PartOfSpeechField,
+	MeaningField,
 	DefinitionField,
 	TranslationField,
 	RelationField,
@@ -122,4 +148,5 @@ export type {
 	DictionaryEntry,
 	LabelledField,
 	RequiredDictionaryEntryFields,
+	DictionaryEntryField,
 };
