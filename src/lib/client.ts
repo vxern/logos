@@ -67,6 +67,8 @@ type Client = {
 		faunaSecret: string;
 		deeplSecret: string;
 		rapidApiSecret: string;
+		wordnikSecret: string;
+		ponsSecret: string;
 		lavalinkHost: string;
 		lavalinkPort: string;
 		lavalinkPassword: string;
@@ -551,7 +553,17 @@ export async function handleGuildCreate(
 		}
 
 		if (language.word.enabled) {
-			guildCommands.push(commands.word);
+			guildCommands.push(
+				commands.word,
+				commands.definitions,
+				commands.etymology,
+				commands.examples,
+				commands.expressions,
+				commands.inflection,
+				commands.metadata,
+				commands.pronunciation,
+				commands.relations,
+			);
 		}
 	}
 
