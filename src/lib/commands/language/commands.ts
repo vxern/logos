@@ -5,11 +5,12 @@ import game from "./commands/game";
 import recognise from "./commands/recognise";
 import resources from "./commands/resources";
 import translate from "./commands/translate";
-import word from "./commands/word";
+import word_ from "./commands/word";
 
 const { partial: correctionPartial, full: correctionFull } = correction;
 const { chatInput: recogniseChatInput, message: recogniseMessage } = recognise;
 const { chatInput: translateChatInput, message: translateMessage } = translate;
+const { word, definitions, etymology, examples, expressions, inflection, metadata, pronunciation, relations } = word_;
 
 export {
 	answer,
@@ -22,5 +23,13 @@ export {
 	resources,
 	translateChatInput,
 	translateMessage,
+	definitions,
+	etymology,
+	examples,
+	expressions,
+	inflection,
+	metadata,
+	pronunciation,
+	relations,
 	word,
 };
