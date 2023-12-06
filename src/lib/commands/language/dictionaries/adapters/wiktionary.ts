@@ -1,10 +1,10 @@
 import * as Wiktionary from "wiktionary-scraper";
 import constants from "../../../../../constants/constants";
-import { HasVariants, LearningLanguage, Locale, getFeatureLanguage } from "../../../../../constants/languages";
+import { HasVariants, Languages, LearningLanguage, Locale } from "../../../../../constants/languages";
 import licences from "../../../../../constants/licences";
 import defaults from "../../../../../defaults";
 import { Client } from "../../../../client";
-import { DictionaryAdapter, SearchLanguages } from "../adapter";
+import { DictionaryAdapter } from "../adapter";
 import {
 	// AudioField,
 	DefinitionField,
@@ -17,6 +17,7 @@ import {
 	TranslationField,
 } from "../dictionary-entry";
 import { tryDetectPartOfSpeech } from "../part-of-speech";
+import { isSearchMonolingual } from "../adapters";
 
 const languageVariantsReduced: Record<string, string> = {
 	"English/American": "English",
@@ -41,7 +42,7 @@ class WiktionaryAdapter extends DictionaryAdapter<
 		});
 	}
 
-	async fetch(client: Client, lemma: string, languages: SearchLanguages) {
+	async fetch(client: Client, lemma: string, languages: Languages<LearningLanguage>) {
 		const targetLanguageWiktionary = toWiktionaryLanguage(languages.target);
 
 		let results: Wiktionary.Entry[] | undefined;
@@ -62,8 +63,13 @@ class WiktionaryAdapter extends DictionaryAdapter<
 		return results;
 	}
 
-	parse(_: Client, __: string, languages: SearchLanguages, results: Wiktionary.Entry[], ___: { locale: Locale }) {
-		const sourceFeatureLanguage = getFeatureLanguage(languages.source);
+	parse(
+		_: Client,
+		__: string,
+		languages: Languages<LearningLanguage>,
+		results: Wiktionary.Entry[],
+		___: { locale: Locale },
+	) {
 		const targetLanguageWiktionary = toWiktionaryLanguage(languages.target);
 
 		const entries = [];
@@ -73,23 +79,29 @@ class WiktionaryAdapter extends DictionaryAdapter<
 				lemma,
 				partOfSpeech,
 				etymology: etymologyRaw,
-				definitions,
+				definitions: meanings,
 				/*
 				pronunciations: pronunciationEntries,
 			  audioLink: audioLinksRaw,
         */
 			} = result;
-			if (partOfSpeech === undefined || definitions === undefined) {
+			if (partOfSpeech === undefined || meanings === undefined) {
 				continue;
 			}
 
 			const lemmaField: LemmaField = { labels: lemma.labels, value: lemma.value };
+
+			const source: DictionaryEntrySource = {
+				link: constants.links.generateWiktionaryDefinitionLink(lemma.value, targetLanguageWiktionary),
+				licence: licences.dictionaries.wiktionary,
+			};
 
 			const [partOfSpeechFuzzy, ..._] = partOfSpeech.split(" ").reverse();
 			const partOfSpeechDetected = tryDetectPartOfSpeech(
 				{ exact: partOfSpeech, approximate: partOfSpeechFuzzy },
 				languages.source,
 			);
+			const partOfSpeechField: PartOfSpeechField = { value: partOfSpeech, detected: partOfSpeechDetected };
 
 			const etymology = etymologyRaw !== undefined ? etymologyRaw.paragraphs.join("\n\n") : undefined;
 			/*
@@ -124,45 +136,39 @@ class WiktionaryAdapter extends DictionaryAdapter<
 
 			const etymologyField: EtymologyField | undefined = etymology !== undefined ? { value: etymology } : undefined;
 
-			for (const entry of definitions) {
-				const { fields } = entry;
+			const meaningFields: DefinitionField[] | TranslationField[] = [];
+			for (const meaning of meanings) {
+				const { fields } = meaning;
 
-				const partOfSpeechField: PartOfSpeechField = { value: partOfSpeech, detected: partOfSpeechDetected };
-
-				const source: DictionaryEntrySource = {
-					link: constants.links.generateWiktionaryDefinitionLink(lemma.value, targetLanguageWiktionary),
-					licence: licences.dictionaries.wiktionary,
-				};
-
-				if (sourceFeatureLanguage === "English") {
-					const translationFields: TranslationField[] = fields.map((field) => ({ value: field.value }));
-
-					entries.push({
-						lemma: lemmaField,
-						partOfSpeech: partOfSpeechField,
-						definitions: undefined as DefinitionField[] | undefined,
-						translations: translationFields,
-						// pronunciation: pronunciationField,
-						// rhymes: rhymeField,
-						// audio: audioFields,
-						etymology: etymologyField,
-						sources: [source],
-					});
-				} else {
-					const definitionFields: DefinitionField[] = fields.map((field) => ({ value: field.value }));
-
-					entries.push({
-						lemma: lemmaField,
-						partOfSpeech: partOfSpeechField,
-						definitions: definitionFields,
-						translations: undefined as TranslationField[] | undefined,
-						// pronunciation: pronunciationField,
-						// rhymes: rhymeField,
-						// audio: audioFields,
-						etymology: etymologyField,
-						sources: [source],
-					});
+				for (const field of fields) {
+					meaningFields.push({ value: field.value });
 				}
+			}
+
+			if (isSearchMonolingual(languages.source, languages.target)) {
+				entries.push({
+					lemma: lemmaField,
+					partOfSpeech: partOfSpeechField,
+					definitions: meaningFields,
+					translations: undefined as TranslationField[] | undefined,
+					// pronunciation: pronunciationField,
+					// rhymes: rhymeField,
+					// audio: audioFields,
+					etymology: etymologyField,
+					sources: [source],
+				});
+			} else {
+				entries.push({
+					lemma: lemmaField,
+					partOfSpeech: partOfSpeechField,
+					definitions: undefined as DefinitionField[] | undefined,
+					translations: meaningFields,
+					// pronunciation: pronunciationField,
+					// rhymes: rhymeField,
+					// audio: audioFields,
+					etymology: etymologyField,
+					sources: [source],
+				});
 			}
 		}
 
