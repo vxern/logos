@@ -83,9 +83,6 @@ You must also include, in your app or site, wherever you provide attributions or
 		),
 		lavaclient: apache("Copyright 2023 Dimensional Fun & Contributors"),
 		"object-hash": mit("Copyright (c) 2014 object-hash contributors"),
-		"parse-wiktionary": mit(
-			"Copyright (c) 2019 Suyash Behera <Suyash.behera458@gmail.com> 2022 Onsa <csinjan@gmail.com>",
-		),
 		ravendb: mit("Copyright (c) 2017 Hibernating Rhinos LTD"),
 		tinyld: mit("Copyright (c) 2021 Komodo"),
 		"wiktionary-scraper": mit('Copyright (c) 2023 Dorian "vxern" Oszczęda'),
