@@ -6,5 +6,5 @@
     "interactions.rateLimited.title": "Przekroczono limit żądań",
     "interactions.rateLimited.description.tooManyUses": "Użyłeś/aś tego polecenia zbyt wiele razy ({times}) w zbyt krótkim okresie.",
     "interactions.rateLimited.description.cannotUseAgainUntil": "Będziesz mógł/mogła ponownie użyć polecenia {relative_timestamp}.",
-    "interactions.show": "Wyświetl wiadomość na czacie"
+    "interactions.show": "Pokaż wiadomość na czacie"
 }

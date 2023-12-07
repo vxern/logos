@@ -1,9 +1,10 @@
 {
-	"interactions.continuedOnNextPage": "Continuare pe următoarea pagină...",
-	"interactions.page": "Pagina",
-	"interactions.invalidUser.title": "Utilizator invalid",
-	"interactions.invalidUser.description": "Utilizatorul pe care l-ai specificat nu este valid.",
-	"interactions.rateLimited.title": "Ești limitat(ă) la rată de acțiuni",
-	"interactions.rateLimited.description.tooManyUses": "Ai folosit comanda de prea multe ori ({times}) într-un interval de timp prea scurt.",
-	"interactions.rateLimited.description.cannotUseAgainUntil": "Vei putea folosi comanda din nou {relative_timestamp}."
+    "interactions.continuedOnNextPage": "Continuare pe următoarea pagină...",
+    "interactions.page": "Pagină",
+    "interactions.invalidUser.title": "Utilizator invalid",
+    "interactions.invalidUser.description": "Utilizatorul pe care l-ai specificat nu este valid.",
+    "interactions.rateLimited.title": "Ești limitat(ă) la rată de acțiuni",
+    "interactions.rateLimited.description.tooManyUses": "Ai folosit comanda de prea multe ori ({times}) într-un interval de timp prea scurt.",
+    "interactions.rateLimited.description.cannotUseAgainUntil": "Vei putea folosi comanda din nou {relative_timestamp}.",
+    "interactions.show": "Arată mesajul pe chat"
 }

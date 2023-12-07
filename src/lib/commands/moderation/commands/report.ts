@@ -5,9 +5,10 @@ import defaults from "../../../../defaults";
 import { trim } from "../../../../formatting";
 import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
-import { stringifyValue } from "../../../database/database";
-import { timeStructToMilliseconds } from "../../../database/structs/guild";
-import { Report } from "../../../database/structs/report";
+import { timeStructToMilliseconds } from "../../../database/guild";
+import { Guild } from "../../../database/guild";
+import { Report } from "../../../database/report";
+import { User } from "../../../database/user";
 import {
 	Modal,
 	createInteractionCollector,
@@ -37,17 +38,19 @@ async function handleMakeReport([client, bot]: [Client, Discord.Bot], interactio
 		return;
 	}
 
-	const guildDocument = await client.database.adapters.guilds.getOrFetchOrCreate(
-		client,
-		"id",
-		guildId.toString(),
-		guildId,
-	);
+	let session = client.database.openSession();
+
+	const guildDocument =
+		client.cache.documents.guilds.get(guildId.toString()) ??
+		(await session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
+
+	session.dispose();
+
 	if (guildDocument === undefined) {
 		return;
 	}
 
-	const configuration = guildDocument.data.features.moderation.features?.reports;
+	const configuration = guildDocument.features.moderation.features?.reports;
 	if (configuration === undefined || !configuration.enabled) {
 		return;
 	}
@@ -62,41 +65,59 @@ async function handleMakeReport([client, bot]: [Client, Discord.Bot], interactio
 		return;
 	}
 
-	const userDocument = await client.database.adapters.users.getOrFetchOrCreate(
-		client,
-		"id",
-		interaction.user.id.toString(),
-		interaction.user.id,
-	);
+	session = client.database.openSession();
+
+	const userDocument =
+		client.cache.documents.users.get(interaction.user.id.toString()) ??
+		(await session.load<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined)) ??
+		(await (async () => {
+			const userDocument = {
+				...({
+					id: `users/${interaction.user.id}`,
+					account: { id: interaction.user.id.toString() },
+					createdAt: Date.now(),
+				} satisfies User),
+				"@metadata": { "@collection": "Users" },
+			};
+			await session.store(userDocument);
+			await session.saveChanges();
+
+			return userDocument as User;
+		})());
+
+	session.dispose();
+
 	if (userDocument === undefined) {
 		return;
 	}
 
-	const reportsByAuthorAndGuild = client.database.adapters.reports.get(client, "authorAndGuild", [
-		userDocument.ref,
-		guild.id.toString(),
-	]);
-	if (reportsByAuthorAndGuild !== undefined) {
+	const compositeIdPartial = `${guildId}/${interaction.user.id}`;
+	const reportDocuments = Array.from(client.cache.documents.reports.entries())
+		.filter(([key, _]) => key.startsWith(compositeIdPartial))
+		.map(([_, value]) => value);
+	const intervalMilliseconds = timeStructToMilliseconds(configuration.rateLimit?.within ?? defaults.REPORT_INTERVAL);
+	if (
+		!verifyIsWithinLimits(
+			reportDocuments.map((reportDocument) => reportDocument.createdAt),
+			configuration.rateLimit?.uses ?? defaults.REPORT_LIMIT,
+			intervalMilliseconds,
+		)
+	) {
 		const strings = {
 			title: localise(client, "report.strings.tooMany.title", locale)(),
 			description: localise(client, "report.strings.tooMany.description", locale)(),
 		};
 
-		const intervalMilliseconds = timeStructToMilliseconds(configuration.rateLimit?.within ?? defaults.REPORT_INTERVAL);
-
-		const reports = Array.from(reportsByAuthorAndGuild.values());
-		if (!verifyIsWithinLimits(reports, configuration.rateLimit?.uses ?? defaults.REPORT_LIMIT, intervalMilliseconds)) {
-			reply([client, bot], interaction, {
-				embeds: [
-					{
-						title: strings.title,
-						description: strings.description,
-						color: constants.colors.dullYellow,
-					},
-				],
-			});
-			return;
-		}
+		reply([client, bot], interaction, {
+			embeds: [
+				{
+					title: strings.title,
+					description: strings.description,
+					color: constants.colors.dullYellow,
+				},
+			],
+		});
+		return;
 	}
 
 	const reportService = client.services.prompts.reports.get(guild.id);
@@ -109,37 +130,44 @@ async function handleMakeReport([client, bot]: [Client, Discord.Bot], interactio
 		onSubmit: async (submission, answers) => {
 			await postponeReply([client, bot], submission);
 
-			const report = await client.database.adapters.reports.create(client, {
-				createdAt: Date.now(),
-				author: userDocument.ref,
-				guild: guild.id.toString(),
-				answers,
-				isResolved: false,
-			});
-			if (report === undefined) {
-				return "failure";
-			}
+			const session = client.database.openSession();
+
+			const createdAt = Date.now();
+			const reportDocument = {
+				...({
+					id: `reports/${guildId}/${userDocument.account.id}/${createdAt}`,
+					guildId: guild.id.toString(),
+					authorId: userDocument.account.id,
+					answers,
+					isResolved: false,
+					createdAt,
+				} satisfies Report),
+				"@metadata": { "@collection": "Reports" },
+			};
+			await session.store(reportDocument);
+			await session.saveChanges();
+
+			session.dispose();
 
 			if (configuration.journaling) {
 				const journallingService = client.services.journalling.get(guild.id);
-				journallingService?.log("reportSubmit", { args: [member, report.data] });
+				journallingService?.log("reportSubmit", { args: [member, reportDocument] });
 			}
 
-			const userId = BigInt(userDocument.data.account.id);
-			const reference = stringifyValue(report.ref);
-
-			const user = client.cache.users.get(userId);
+			const user = client.cache.users.get(interaction.user.id);
 			if (user === undefined) {
 				return "failure";
 			}
 
-			const prompt = await reportService.savePrompt(user, report);
+			const prompt = await reportService.savePrompt(user, reportDocument);
 			if (prompt === undefined) {
 				return "failure";
 			}
 
-			reportService.registerPrompt(prompt, userId, reference, report);
-			reportService.registerHandler([userId.toString(), guild.id.toString(), reference]);
+			const compositeId = `${guildId}/${userDocument.account.id}/${createdAt}`;
+			reportService.registerDocument(compositeId, reportDocument);
+			reportService.registerPrompt(prompt, user.id, compositeId, reportDocument);
+			reportService.registerHandler(compositeId);
 
 			const strings = {
 				title: localise(client, "report.strings.submitted.title", locale)(),

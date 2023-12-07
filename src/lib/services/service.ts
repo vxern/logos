@@ -3,8 +3,7 @@ import { Locale, getLocaleByLocalisationLanguage } from "../../constants/languag
 import defaults from "../../defaults";
 import * as Logos from "../../types";
 import { Client } from "../client";
-import { Document } from "../database/document";
-import { Guild } from "../database/structs/guild";
+import { Guild } from "../database/guild";
 import { getLocalisationLanguage } from "../interactions";
 
 type ServiceBase = {
@@ -20,8 +19,8 @@ abstract class Service implements ServiceBase {
 		this.bot = bot;
 	}
 
-	async start(): Promise<void> {}
-	async stop(): Promise<void> {}
+	abstract start(): Promise<void>;
+	abstract stop(): Promise<void>;
 
 	async debug(..._: Parameters<ServiceBase["debug"]>) {}
 	async applicationCommandPermissionsUpdate(..._: Parameters<ServiceBase["applicationCommandPermissionsUpdate"]>) {}
@@ -84,26 +83,24 @@ abstract class Service implements ServiceBase {
 	async webhooksUpdate(..._: Parameters<ServiceBase["webhooksUpdate"]>) {}
 	async botUpdate(..._: Parameters<ServiceBase["botUpdate"]>) {}
 	async typingStart(..._: Parameters<ServiceBase["typingStart"]>) {}
+	async threadListSync(..._: Parameters<ServiceBase["threadListSync"]>) {}
 }
 
-abstract class GlobalService extends Service {}
+abstract class GlobalService extends Service {
+	abstract start(): Promise<void>;
+	abstract stop(): Promise<void>;
+}
 
 abstract class LocalService extends Service {
 	protected readonly guildId: bigint;
 	protected readonly guildIdString: string;
 
-	constructor([client, bot]: [Client, Discord.Bot], guildId: bigint) {
-		super([client, bot]);
-		this.guildId = guildId;
-		this.guildIdString = guildId.toString();
-	}
-
 	get guild(): Logos.Guild | undefined {
 		return this.client.cache.guilds.get(this.guildId);
 	}
 
-	get guildDocument(): Document<Guild> | undefined {
-		return this.client.database.cache.guildById.get(this.guildIdString);
+	get guildDocument(): Guild | undefined {
+		return this.client.cache.documents.guilds.get(this.guildIdString);
 	}
 
 	get guildLocale(): Locale {
@@ -117,6 +114,15 @@ abstract class LocalService extends Service {
 
 		return guildLocale;
 	}
+
+	constructor([client, bot]: [Client, Discord.Bot], guildId: bigint) {
+		super([client, bot]);
+		this.guildId = guildId;
+		this.guildIdString = guildId.toString();
+	}
+
+	abstract start(): Promise<void>;
+	abstract stop(): Promise<void>;
 }
 
 export { Service, GlobalService, LocalService, ServiceBase };

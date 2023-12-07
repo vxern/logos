@@ -105,8 +105,6 @@ async function handleReplayAction([client, bot]: [Client, Discord.Bot], interact
 		return;
 	}
 
-	musicService.replay(collection ?? false);
-
 	const strings = {
 		title: localise(client, "music.options.replay.strings.replaying.title", locale)(),
 		description: localise(client, "music.options.replay.strings.replaying.description", locale)(),
@@ -126,6 +124,8 @@ async function handleReplayAction([client, bot]: [Client, Discord.Bot], interact
 		},
 		{ visible: true },
 	);
+
+	musicService.replay(collection ?? false);
 }
 
 export default command;

@@ -13,6 +13,7 @@ import {
 	pluralise,
 	resolveInteractionToMember,
 } from "../../../client";
+import { Guild } from "../../../database/guild";
 import diagnostics from "../../../diagnostics";
 import {
 	acknowledge,
@@ -70,17 +71,19 @@ async function handlePurgeMessages(
 		return;
 	}
 
-	const guildDocument = await client.database.adapters.guilds.getOrFetchOrCreate(
-		client,
-		"id",
-		guildId.toString(),
-		guildId,
-	);
+	const session = client.database.openSession();
+
+	const guildDocument =
+		client.cache.documents.guilds.get(guildId.toString()) ??
+		(await session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
+
+	session.dispose();
+
 	if (guildDocument === undefined) {
 		return;
 	}
 
-	const configuration = guildDocument.data.features.moderation.features?.purging;
+	const configuration = guildDocument.features.moderation.features?.purging;
 	if (configuration === undefined || !configuration.enabled) {
 		return;
 	}
@@ -194,14 +197,14 @@ async function handlePurgeMessages(
 			postedStart: (startMessageContent !== undefined
 				? localise(client, "purge.strings.posted", locale)
 				: localise(client, "purge.strings.embedPosted", locale))({
-				relative_timestamp: timestamp(Number(startMessage.timestamp)),
+				relative_timestamp: timestamp(Number(new Date(startMessage.timestamp))),
 				user_mention: mention(BigInt(startMessage.author.id), MentionTypes.User),
 			}),
 			end: localise(client, "purge.strings.end", locale)(),
 			postedEnd: (endMessageContent !== undefined
 				? localise(client, "purge.strings.posted", locale)
 				: localise(client, "purge.strings.embedPosted", locale))({
-				relative_timestamp: timestamp(Number(endMessage.timestamp)),
+				relative_timestamp: timestamp(Number(new Date(endMessage.timestamp))),
 				user_mention: mention(BigInt(endMessage.author.id), MentionTypes.User),
 			}),
 			messagesFound: localise(client, "purge.strings.messagesFound", locale)(),

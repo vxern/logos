@@ -4,8 +4,8 @@ import { Locale } from "../../../../../constants/languages";
 import { timestamp } from "../../../../../formatting";
 import * as Logos from "../../../../../types";
 import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../../client";
-import { Document } from "../../../../database/document";
-import { Warning } from "../../../../database/structs/warning";
+import { User } from "../../../../database/user";
+import { Warning } from "../../../../database/warning";
 import { parseArguments, reply } from "../../../../interactions";
 
 async function handleDisplayWarningsAutocomplete(
@@ -63,27 +63,58 @@ async function handleDisplayWarnings(
 
 	const isSelf = member.id === interaction.user.id;
 
-	const recipient = await client.database.adapters.users.getOrFetchOrCreate(
-		client,
-		"id",
-		member.id.toString(),
-		member.id,
-	);
-	if (recipient === undefined) {
+	let session = client.database.openSession();
+
+	const userDocument =
+		client.cache.documents.users.get(member.id.toString()) ??
+		(await session.load<User>(`users/${member.id}`).then((value) => value ?? undefined)) ??
+		(await (async () => {
+			const userDocument = {
+				...({
+					id: `users/${member.id}`,
+					account: { id: member.id.toString() },
+					createdAt: Date.now(),
+				} satisfies User),
+				"@metadata": { "@collection": "Users" },
+			};
+			await session.store(userDocument);
+			await session.saveChanges();
+
+			return userDocument as User;
+		})());
+
+	session.dispose();
+
+	if (userDocument === undefined) {
 		displayError([client, bot], interaction, { locale });
 		return;
 	}
 
-	const warnings = await client.database.adapters.warnings
-		.getOrFetch(client, "recipient", recipient.ref)
-		.then((warnings) => (warnings !== undefined ? Array.from(warnings.values()) : undefined));
-	if (warnings === undefined) {
-		displayError([client, bot], interaction, { locale });
-		return;
-	}
+	session = client.database.openSession();
+
+	const warningDocumentsCached = client.cache.documents.warningsByTarget.get(member.id.toString());
+	const warningDocuments =
+		warningDocumentsCached !== undefined
+			? Array.from(warningDocumentsCached.values())
+			: await session
+					.query<Warning>({ collection: "Warnings" })
+					.whereStartsWith("id", `warnings/${member.id}`)
+					.all()
+					.then((documents) => {
+						const map = new Map(
+							documents.map((document) => [
+								`${document.targetId}/${document.authorId}/${document.createdAt}`,
+								document,
+							]),
+						);
+						client.cache.documents.warningsByTarget.set(member.id.toString(), map);
+						return documents;
+					});
+
+	session.dispose();
 
 	reply([client, bot], interaction, {
-		embeds: [getWarningPage(client, warnings, isSelf, { locale })],
+		embeds: [getWarningPage(client, warningDocuments, isSelf, { locale })],
 	});
 }
 
@@ -110,7 +141,7 @@ async function displayError(
 
 function getWarningPage(
 	client: Client,
-	warnings: Document<Warning>[],
+	warnings: Warning[],
 	isSelf: boolean,
 	{ locale }: { locale: Locale },
 ): Discord.CamelizedDiscordEmbed {
@@ -150,10 +181,10 @@ function getWarningPage(
 		fields: warnings.map((warning, index) => {
 			const warningString = strings.warning({
 				index: index + 1,
-				relative_timestamp: timestamp(warning.data.createdAt),
+				relative_timestamp: timestamp(warning.createdAt),
 			});
 
-			return { name: `${constants.symbols.warn} ${warningString}`, value: `*${warning.data.reason}*` };
+			return { name: `${constants.symbols.warn} ${warningString}`, value: `*${warning.reason}*` };
 		}),
 		color: constants.colors.blue,
 	};

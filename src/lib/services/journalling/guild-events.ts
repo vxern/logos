@@ -1,10 +1,12 @@
 import * as Logos from "../../../types";
 import { SlowmodeLevel } from "../../commands/moderation/commands/slowmode";
-import { EntryRequest } from "../../database/structs/entry-request";
-import { Praise } from "../../database/structs/praise";
-import { Report } from "../../database/structs/report";
-import { Suggestion } from "../../database/structs/suggestion";
-import { Warning } from "../../database/structs/warning";
+import { EntryRequest } from "../../database/entry-request";
+import { Praise } from "../../database/praise";
+import { Report } from "../../database/report";
+import { Resource } from "../../database/resource";
+import { Suggestion } from "../../database/suggestion";
+import { Ticket } from "../../database/ticket";
+import { Warning } from "../../database/warning";
 
 /** Type representing events that occur within a guild. */
 type GuildEvents = {
@@ -32,11 +34,20 @@ type GuildEvents = {
 	/** A member has been praised. */
 	praiseAdd: [member: Logos.Member, praise: Praise, by: Logos.User];
 
+	/** A report has been submitted. */
+	reportSubmit: [author: Logos.Member, report: Report];
+
+	/** A resource has been submitted. */
+	resourceSend: [member: Logos.Member, resource: Resource];
+
 	/** A suggestion has been made. */
 	suggestionSend: [member: Logos.Member, suggestion: Suggestion];
 
-	/** A report has been submitted. */
-	reportSubmit: [author: Logos.Member, report: Report];
+	/** A ticket has been opened. */
+	ticketOpen: [member: Logos.Member, ticket: Ticket];
+
+	/** An inquiry has been opened. */
+	inquiryOpen: [member: Logos.Member, ticket: Ticket];
 
 	/** A purging of messages has been initiated. */
 	purgeBegin: [member: Logos.Member, channel: Logos.Channel, messageCount: number, author?: Logos.User];

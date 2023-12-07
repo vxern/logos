@@ -49,6 +49,7 @@ class GoogleTranslateAdapter extends TranslationAdapter<GoogleTranslateLanguage>
 					source: locales.source,
 					target: locales.target,
 					q: text,
+					format: "text",
 				}),
 			});
 		} catch (exception) {

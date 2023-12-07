@@ -5,9 +5,10 @@ import defaults from "../../../../defaults";
 import { trim } from "../../../../formatting";
 import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
-import { stringifyValue } from "../../../database/database";
-import { timeStructToMilliseconds } from "../../../database/structs/guild";
-import { Suggestion } from "../../../database/structs/suggestion";
+import { timeStructToMilliseconds } from "../../../database/guild";
+import { Guild } from "../../../database/guild";
+import { Suggestion } from "../../../database/suggestion";
+import { User } from "../../../database/user";
 import {
 	Modal,
 	createInteractionCollector,
@@ -40,17 +41,19 @@ async function handleMakeSuggestion(
 		return;
 	}
 
-	const guildDocument = await client.database.adapters.guilds.getOrFetchOrCreate(
-		client,
-		"id",
-		guildId.toString(),
-		guildId,
-	);
+	let session = client.database.openSession();
+
+	const guildDocument =
+		client.cache.documents.guilds.get(guildId.toString()) ??
+		(await session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
+
+	session.dispose();
+
 	if (guildDocument === undefined) {
 		return;
 	}
 
-	const configuration = guildDocument.data.features.server.features?.suggestions;
+	const configuration = guildDocument.features.server.features?.suggestions;
 	if (configuration === undefined || !configuration.enabled) {
 		return;
 	}
@@ -65,49 +68,61 @@ async function handleMakeSuggestion(
 		return;
 	}
 
-	const userDocument = await client.database.adapters.users.getOrFetchOrCreate(
-		client,
-		"id",
-		interaction.user.id.toString(),
-		interaction.user.id,
-	);
+	session = client.database.openSession();
+
+	const userDocument =
+		client.cache.documents.users.get(interaction.user.id.toString()) ??
+		(await session.load<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined)) ??
+		(await (async () => {
+			const userDocument = {
+				...({
+					id: `users/${interaction.user.id}`,
+					account: { id: interaction.user.id.toString() },
+					createdAt: Date.now(),
+				} satisfies User),
+				"@metadata": { "@collection": "Users" },
+			};
+			await session.store(userDocument);
+			await session.saveChanges();
+
+			return userDocument as User;
+		})());
+
+	session.dispose();
+
 	if (userDocument === undefined) {
 		return;
 	}
-	const suggestionsByAuthorAndGuild = client.database.adapters.suggestions.get(client, "authorAndGuild", [
-		userDocument.ref,
-		guild.id.toString(),
-	]);
 
+	const compositeIdPartial = `${guildId}/${interaction.user.id}`;
+	const suggestionDocuments = Array.from(client.cache.documents.suggestions.entries())
+		.filter(([key, _]) => key.startsWith(compositeIdPartial))
+		.map(([_, value]) => value);
 	const intervalMilliseconds = timeStructToMilliseconds(
 		configuration.rateLimit?.within ?? defaults.SUGGESTION_INTERVAL,
 	);
+	if (
+		!verifyIsWithinLimits(
+			suggestionDocuments.map((suggestionDocument) => suggestionDocument.createdAt),
+			configuration.rateLimit?.uses ?? defaults.SUGGESTION_LIMIT,
+			intervalMilliseconds,
+		)
+	) {
+		const strings = {
+			title: localise(client, "suggestion.strings.tooMany.title", locale)(),
+			description: localise(client, "suggestion.strings.tooMany.description", locale)(),
+		};
 
-	if (suggestionsByAuthorAndGuild !== undefined) {
-		const suggestions = Array.from(suggestionsByAuthorAndGuild.values());
-		if (
-			!verifyIsWithinLimits(
-				suggestions,
-				configuration.rateLimit?.uses ?? defaults.SUGGESTION_LIMIT,
-				intervalMilliseconds,
-			)
-		) {
-			const strings = {
-				title: localise(client, "suggestion.strings.tooMany.title", locale)(),
-				description: localise(client, "suggestion.strings.tooMany.description", locale)(),
-			};
-
-			reply([client, bot], interaction, {
-				embeds: [
-					{
-						title: strings.title,
-						description: strings.description,
-						color: constants.colors.dullYellow,
-					},
-				],
-			});
-			return;
-		}
+		reply([client, bot], interaction, {
+			embeds: [
+				{
+					title: strings.title,
+					description: strings.description,
+					color: constants.colors.dullYellow,
+				},
+			],
+		});
+		return;
 	}
 
 	const suggestionService = client.services.prompts.suggestions.get(guild.id);
@@ -120,37 +135,45 @@ async function handleMakeSuggestion(
 		onSubmit: async (submission, answers) => {
 			await postponeReply([client, bot], submission);
 
-			const suggestion = await client.database.adapters.suggestions.create(client, {
-				createdAt: Date.now(),
-				author: userDocument.ref,
-				guild: guild.id.toString(),
-				answers,
-				isResolved: false,
-			});
-			if (suggestion === undefined) {
-				return "failure";
-			}
+			const session = client.database.openSession();
+
+			const createdAt = Date.now();
+			const suggestionDocument = {
+				...({
+					id: `suggestions/${guildId}/${userDocument.account.id}/${createdAt}`,
+					guildId: guild.id.toString(),
+					authorId: userDocument.account.id,
+					answers,
+					isResolved: false,
+					createdAt,
+				} satisfies Suggestion),
+				"@metadata": { "@collection": "Suggestions" },
+			};
+			await session.store(suggestionDocument);
+			await session.saveChanges();
+			session.dispose();
 
 			if (configuration.journaling) {
 				const journallingService = client.services.journalling.get(guild.id);
-				journallingService?.log("suggestionSend", { args: [member, suggestion.data] });
+				journallingService?.log("suggestionSend", { args: [member, suggestionDocument] });
 			}
 
-			const userId = BigInt(userDocument.data.account.id);
-			const reference = stringifyValue(suggestion.ref);
+			const userId = BigInt(userDocument.account.id);
 
 			const user = client.cache.users.get(userId);
 			if (user === undefined) {
 				return "failure";
 			}
 
-			const prompt = await suggestionService.savePrompt(user, suggestion);
+			const prompt = await suggestionService.savePrompt(user, suggestionDocument);
 			if (prompt === undefined) {
 				return "failure";
 			}
 
-			suggestionService.registerPrompt(prompt, userId, reference, suggestion);
-			suggestionService.registerHandler([userId.toString(), guild.id.toString(), reference]);
+			const compositeId = `${guild.id}/${user.id}/${createdAt}`;
+			suggestionService.registerDocument(compositeId, suggestionDocument);
+			suggestionService.registerPrompt(prompt, userId, compositeId, suggestionDocument);
+			suggestionService.registerHandler(compositeId);
 
 			const strings = {
 				title: localise(client, "suggestion.strings.sent.title", locale)(),

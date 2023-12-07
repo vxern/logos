@@ -5,10 +5,9 @@ import defaults from "../../../../defaults";
 import { MentionTypes, mention } from "../../../../formatting";
 import * as Logos from "../../../../types";
 import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../client";
-import { stringifyValue } from "../../../database/database";
-import { Document } from "../../../database/document";
-import { timeStructToMilliseconds } from "../../../database/structs/guild";
-import { Warning } from "../../../database/structs/warning";
+import { Guild, timeStructToMilliseconds } from "../../../database/guild";
+import { User } from "../../../database/user";
+import { Warning } from "../../../database/warning";
 import { parseArguments, reply, respond } from "../../../interactions";
 import { CommandTemplate } from "../../command";
 import { user } from "../../parameters";
@@ -42,17 +41,19 @@ async function handlePardonUserAutocomplete(
 		return;
 	}
 
-	const guildDocument = await client.database.adapters.guilds.getOrFetchOrCreate(
-		client,
-		"id",
-		guildId.toString(),
-		guildId,
-	);
+	const session = client.database.openSession();
+
+	const guildDocument =
+		client.cache.documents.guilds.get(guildId.toString()) ??
+		(await session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
+
+	session.dispose();
+
 	if (guildDocument === undefined) {
 		return;
 	}
 
-	const configuration = guildDocument.data.features.moderation.features?.warns;
+	const configuration = guildDocument.features.moderation.features?.warns;
 	if (configuration === undefined || !configuration.enabled) {
 		return;
 	}
@@ -103,8 +104,8 @@ async function handlePardonUserAutocomplete(
 		const warningLowercase = warning.toLowerCase();
 		const choices = relevantWarnings
 			.map<Discord.ApplicationCommandOptionChoice>((warning) => ({
-				name: warning.data.reason,
-				value: stringifyValue(warning.ref),
+				name: warning.reason,
+				value: warning.id,
 			}))
 			.filter((choice) => choice.name.toLowerCase().includes(warningLowercase));
 
@@ -121,22 +122,24 @@ async function handlePardonUser([client, bot]: [Client, Discord.Bot], interactio
 		return;
 	}
 
-	const guildDocument = await client.database.adapters.guilds.getOrFetchOrCreate(
-		client,
-		"id",
-		guildId.toString(),
-		guildId,
-	);
+	let session = client.database.openSession();
+
+	const guildDocument =
+		client.cache.documents.guilds.get(guildId.toString()) ??
+		(await session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
+
+	session.dispose();
+
 	if (guildDocument === undefined) {
 		return;
 	}
 
-	const configuration = guildDocument.data.features.moderation.features?.warns;
+	const configuration = guildDocument.features.moderation.features?.warns;
 	if (configuration === undefined || !configuration.enabled) {
 		return;
 	}
 
-	const [{ user, warning }] = parseArguments(interaction.data?.options, {});
+	const [{ user, warning: warningId }] = parseArguments(interaction.data?.options, {});
 	if (user === undefined) {
 		return;
 	}
@@ -163,17 +166,22 @@ async function handlePardonUser([client, bot]: [Client, Discord.Bot], interactio
 		return;
 	}
 
-	const warningToDelete = relevantWarnings.find((relevantWarning) => stringifyValue(relevantWarning.ref) === warning);
-	if (warningToDelete === undefined) {
+	const warning = relevantWarnings.find((relevantWarning) => relevantWarning.id === warningId);
+	if (warning === undefined) {
 		displayInvalidWarningError([client, bot], interaction, { locale });
 		return;
 	}
 
-	const deletedWarning = await client.database.adapters.warnings.delete(client, warningToDelete);
-	if (deletedWarning === undefined) {
-		displayFailedError([client, bot], interaction, { locale });
-		return;
-	}
+	session = client.database.openSession();
+
+	await session.delete(warning.id);
+	await session.saveChanges();
+
+	session.dispose();
+
+	client.cache.documents.warningsByTarget
+		.get(member.id.toString())
+		?.delete(`${warning.targetId}/${warning.authorId}/${warning.createdAt}`);
 
 	const guild = client.cache.guilds.get(guildId);
 	if (guild === undefined) {
@@ -182,7 +190,7 @@ async function handlePardonUser([client, bot]: [Client, Discord.Bot], interactio
 
 	if (configuration.journaling) {
 		const journallingService = client.services.journalling.get(guild.id);
-		journallingService?.log("memberWarnRemove", { args: [member, deletedWarning.data, interaction.user] });
+		journallingService?.log("memberWarnRemove", { args: [member, warning, interaction.user] });
 	}
 
 	const strings = {
@@ -193,7 +201,7 @@ async function handlePardonUser([client, bot]: [Client, Discord.Bot], interactio
 			locale,
 		)({
 			user_mention: mention(member.id, MentionTypes.User),
-			reason: deletedWarning.data.reason,
+			reason: warning.reason,
 		}),
 	};
 
@@ -212,23 +220,43 @@ async function getRelevantWarnings(
 	client: Client,
 	member: Logos.Member,
 	expirationMilliseconds: number,
-): Promise<Document<Warning>[] | undefined> {
-	const subject = await client.database.adapters.users.getOrFetchOrCreate(
-		client,
-		"id",
-		member.id.toString(),
-		member.id,
-	);
-	if (subject === undefined) {
+): Promise<Warning[] | undefined> {
+	let session = client.database.openSession();
+
+	const userDocument =
+		client.cache.documents.users.get(member.id.toString()) ??
+		(await session.load<User>(`users/${member.id}`).then((value) => value ?? undefined));
+
+	session.dispose();
+
+	if (userDocument === undefined) {
 		return undefined;
 	}
 
-	const warnings = await client.database.adapters.warnings.getOrFetch(client, "recipient", subject.ref);
-	if (warnings === undefined) {
-		return undefined;
-	}
+	session = client.database.openSession();
 
-	const relevantWarnings = Array.from(getActiveWarnings(warnings, expirationMilliseconds).values()).reverse();
+	const warningDocumentsCached = client.cache.documents.warningsByTarget.get(member.id.toString());
+	const warningDocuments =
+		warningDocumentsCached !== undefined
+			? Array.from(warningDocumentsCached.values())
+			: await session
+					.query<Warning>({ collection: "Warnings" })
+					.whereStartsWith("id", `warnings/${member.id}`)
+					.all()
+					.then((documents) => {
+						const map = new Map(
+							documents.map((document) => [
+								`${document.targetId}/${document.authorId}/${document.createdAt}`,
+								document,
+							]),
+						);
+						client.cache.documents.warningsByTarget.set(member.id.toString(), map);
+						return documents;
+					});
+
+	session.dispose();
+
+	const relevantWarnings = getActiveWarnings(warningDocuments, expirationMilliseconds).reverse();
 	return relevantWarnings;
 }
 

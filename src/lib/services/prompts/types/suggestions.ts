@@ -1,139 +1,118 @@
 import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
-import { MentionTypes, mention, timestamp } from "../../../../formatting";
 import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
-import { stringifyValue } from "../../../database/database";
-import { Document } from "../../../database/document";
-import { Suggestion } from "../../../database/structs/suggestion";
-import { User } from "../../../database/structs/user";
+import { Suggestion } from "../../../database/suggestion";
+import { User } from "../../../database/user";
+import diagnostics from "../../../diagnostics";
 import { encodeId, getLocaleData, reply } from "../../../interactions";
-import { getGuildIconURLFormatted } from "../../../utils";
 import { PromptService } from "../service";
 
-type Metadata = { userId: bigint; reference: string };
-type InteractionData = [userId: string, guildId: string, reference: string, isResolved: string];
+type InteractionData = [documentId: string, isResolved: string];
 
-class SuggestionService extends PromptService<"suggestions", Suggestion, Metadata, InteractionData> {
+class SuggestionService extends PromptService<"suggestions", Suggestion, InteractionData> {
 	constructor([client, bot]: [Client, Discord.Bot], guildId: bigint) {
-		super([client, bot], guildId, { type: "suggestions" });
+		super([client, bot], guildId, { type: "suggestions", deleteMode: "delete" });
 	}
 
-	getAllDocuments(): Document<Suggestion>[] {
-		const suggestionsAll: Document<Suggestion>[] = [];
+	getAllDocuments(): Map<string, Suggestion> {
+		const suggestions = new Map<string, Suggestion>();
 
-		for (const [compositeId, suggestions] of this.client.database.cache.suggestionsByAuthorAndGuild.entries()) {
-			const [_, guildIdString] = compositeId.split(constants.symbols.meta.idSeparator);
-			if (guildIdString === undefined) {
+		for (const [compositeId, suggestionDocument] of this.client.cache.documents.suggestions) {
+			if (suggestionDocument.guildId !== this.guildIdString) {
 				continue;
 			}
 
-			if (guildIdString !== this.guildIdString) {
-				continue;
-			}
-
-			suggestionsAll.push(...suggestions.values());
+			suggestions.set(compositeId, suggestionDocument);
 		}
 
-		return suggestionsAll;
+		return suggestions;
 	}
 
-	getUserDocument(document: Document<Suggestion>): Promise<Document<User> | undefined> {
-		return this.client.database.adapters.users.getOrFetch(this.client, "reference", document.data.author);
+	async getUserDocument(suggestionDocument: Suggestion): Promise<User | undefined> {
+		const session = this.client.database.openSession();
+
+		const userDocument =
+			this.client.cache.documents.users.get(suggestionDocument.authorId) ??
+			session.load<User>(`users/${suggestionDocument.authorId}`).then((value) => value ?? undefined);
+
+		session.dispose();
+
+		return userDocument;
 	}
 
-	decodeMetadata(data: string[]): Metadata | undefined {
-		const [userId, reference] = data;
-		if (userId === undefined || reference === undefined) {
-			return undefined;
-		}
-
-		return { userId: BigInt(userId), reference };
-	}
-
-	getPromptContent(user: Logos.User, document: Document<Suggestion>): Discord.CreateMessageOptions | undefined {
+	getPromptContent(user: Logos.User, suggestionDocument: Suggestion): Discord.CreateMessageOptions | undefined {
 		const guild = this.guild;
 		if (guild === undefined) {
 			return undefined;
 		}
 
-		const reference = stringifyValue(document.ref);
-
 		const guildLocale = this.guildLocale;
 		const strings = {
-			suggestion: {
-				submittedBy: localise(this.client, "submittedBy", guildLocale)(),
-				submittedAt: localise(this.client, "submittedAt", guildLocale)(),
-			},
 			markResolved: localise(this.client, "markResolved", guildLocale)(),
 			markUnresolved: localise(this.client, "markUnresolved", guildLocale)(),
+			remove: localise(this.client, "remove", guildLocale)(),
 		};
 
 		return {
 			embeds: [
 				{
-					title: document.data.answers.suggestion,
-					color: constants.colors.green,
-					thumbnail: (() => {
-						const iconURL = Discord.avatarUrl(user.id, user.discriminator, {
-							avatar: user.avatar,
-							size: 64,
-							format: "png",
-						});
-						if (iconURL === undefined) {
-							return;
-						}
-
-						return { url: iconURL };
-					})(),
-					fields: [
-						{
-							name: strings.suggestion.submittedBy,
-							value: mention(user.id, MentionTypes.User),
-							inline: true,
-						},
-						{
-							name: strings.suggestion.submittedAt,
-							value: timestamp(document.data.createdAt),
-							inline: true,
-						},
-					],
+					color: suggestionDocument.isResolved ? constants.colors.green : constants.colors.dullYellow,
+					description: `*${suggestionDocument.answers.suggestion}*`,
 					footer: {
-						text: guild.name,
-						iconUrl: `${getGuildIconURLFormatted(
-							guild,
-						)}&metadata=${`${user.id}${constants.symbols.meta.metadataSeparator}${reference}`}`,
+						text: diagnostics.display.user(user),
+						iconUrl: `${(() => {
+							const iconURL = Discord.avatarUrl(user.id, user.discriminator, {
+								avatar: user.avatar,
+								size: 64,
+								format: "png",
+							});
+							if (iconURL === undefined) {
+								return;
+							}
+
+							return iconURL;
+						})()}&metadata=${suggestionDocument.guildId}/${suggestionDocument.authorId}/${
+							suggestionDocument.createdAt
+						}`,
 					},
 				},
 			],
 			components: [
 				{
 					type: Discord.MessageComponentTypes.ActionRow,
-					components: [
-						document.data.isResolved
-							? {
+					components: suggestionDocument.isResolved
+						? [
+								{
 									type: Discord.MessageComponentTypes.Button,
-									style: Discord.ButtonStyles.Secondary,
+									style: Discord.ButtonStyles.Success,
 									label: strings.markUnresolved,
 									customId: encodeId<InteractionData>(constants.components.suggestions, [
-										user.id.toString(),
-										this.guildIdString,
-										reference,
+										`${suggestionDocument.guildId}/${suggestionDocument.authorId}/${suggestionDocument.createdAt}`,
 										`${false}`,
 									]),
-							  }
-							: {
+								},
+								{
+									type: Discord.MessageComponentTypes.Button,
+									style: Discord.ButtonStyles.Danger,
+									label: strings.remove,
+									customId: encodeId(
+										`${constants.components.removePrompt}/${constants.components.suggestions}/${this.guildId}`,
+										[`${suggestionDocument.guildId}/${suggestionDocument.authorId}/${suggestionDocument.createdAt}`],
+									),
+								},
+						  ]
+						: [
+								{
 									type: Discord.MessageComponentTypes.Button,
 									style: Discord.ButtonStyles.Primary,
 									label: strings.markResolved,
 									customId: encodeId<InteractionData>(constants.components.suggestions, [
-										user.id.toString(),
-										this.guildIdString,
-										reference,
+										`${suggestionDocument.guildId}/${suggestionDocument.authorId}/${suggestionDocument.createdAt}`,
 										`${true}`,
 									]),
-							  },
-					],
+								},
+						  ],
 				},
 			],
 		};
@@ -142,34 +121,19 @@ class SuggestionService extends PromptService<"suggestions", Suggestion, Metadat
 	async handleInteraction(
 		interaction: Discord.Interaction,
 		data: InteractionData,
-	): Promise<Document<Suggestion> | null | undefined> {
+	): Promise<Suggestion | null | undefined> {
 		const localeData = await getLocaleData(this.client, interaction);
 		const locale = localeData.locale;
 
-		const [userId, guildId, reference, isResolvedString] = data;
+		const [compositeId, isResolvedString] = data;
 		const isResolved = isResolvedString === "true";
 
-		const user = await this.client.database.adapters.users.getOrFetchOrCreate(
-			this.client,
-			"id",
-			userId,
-			BigInt(userId),
-		);
-		if (user === undefined) {
+		const suggestionDocument = this.documents.get(compositeId);
+		if (suggestionDocument === undefined) {
 			return undefined;
 		}
 
-		const documents = this.client.database.adapters.suggestions.get(this.client, "authorAndGuild", [user.ref, guildId]);
-		if (documents === undefined) {
-			return undefined;
-		}
-
-		const document = documents.get(reference);
-		if (document === undefined) {
-			return undefined;
-		}
-
-		if (isResolved && document.data.isResolved) {
+		if (isResolved && suggestionDocument.isResolved) {
 			const strings = {
 				title: localise(this.client, "alreadyMarkedResolved.title", locale)(),
 				description: localise(this.client, "alreadyMarkedResolved.description", locale)(),
@@ -187,7 +151,7 @@ class SuggestionService extends PromptService<"suggestions", Suggestion, Metadat
 			return;
 		}
 
-		if (!(isResolved || document.data.isResolved)) {
+		if (!(isResolved || suggestionDocument.isResolved)) {
 			const strings = {
 				title: localise(this.client, "alreadyMarkedUnresolved.title", locale)(),
 				description: localise(this.client, "alreadyMarkedUnresolved.description", locale)(),
@@ -205,12 +169,16 @@ class SuggestionService extends PromptService<"suggestions", Suggestion, Metadat
 			return;
 		}
 
-		const updatedDocument = await this.client.database.adapters.suggestions.update(this.client, {
-			...document,
-			data: { ...document.data, isResolved },
-		});
+		const session = this.client.database.openSession();
 
-		return updatedDocument;
+		suggestionDocument.isResolved = isResolved;
+
+		await session.store(suggestionDocument);
+		await session.saveChanges();
+
+		session.dispose();
+
+		return suggestionDocument;
 	}
 }
 

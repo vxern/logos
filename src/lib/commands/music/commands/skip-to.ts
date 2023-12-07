@@ -1,6 +1,7 @@
 import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import { Locale } from "../../../../constants/languages";
+import { trim } from "../../../../formatting";
 import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
 import { parseArguments, parseTimeExpression, reply, respond } from "../../../interactions";
@@ -29,7 +30,11 @@ async function handleSkipToTimestampAutocomplete(
 
 	const timestamp = parseTimeExpression(client, timestampExpression, { language, locale });
 	if (timestamp === undefined) {
-		respond([client, bot], interaction, []);
+		const strings = {
+			autocomplete: localise(client, "autocomplete.timestamp", locale)(),
+		};
+
+		respond([client, bot], interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
 		return;
 	}
 

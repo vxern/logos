@@ -14,7 +14,7 @@ import {
 	SongStream,
 	listingTypeToEmoji,
 } from "../../commands/music/data/types";
-import { Guild, timeStructToMilliseconds } from "../../database/structs/guild";
+import { Guild, timeStructToMilliseconds } from "../../database/guild";
 import diagnostics from "../../diagnostics";
 import { reply } from "../../interactions";
 import { LocalService } from "../service";
@@ -63,7 +63,7 @@ class MusicService extends LocalService {
 			return undefined;
 		}
 
-		return guildDocument.data.features.social.features?.music;
+		return guildDocument.features.social.features?.music;
 	}
 
 	get channelId(): bigint | undefined {
@@ -209,6 +209,10 @@ class MusicService extends LocalService {
 	async start(): Promise<void> {
 		this.client.services.music.lavalink.node.on("disconnect", () => this.handleConnectionLost());
 		this.client.services.music.lavalink.node.on("connect", () => this.handleConnectionRestored());
+	}
+
+	async stop(): Promise<void> {
+		return this.destroySession();
 	}
 
 	async voiceStateUpdate(_: Discord.VoiceState): Promise<void> {
@@ -828,7 +832,7 @@ class MusicService extends LocalService {
 
 		session.player.play(track.track);
 
-		const emoji = listingTypeToEmoji[song.type];
+		const emoji = listingTypeToEmoji[this.current?.content.type ?? song.type];
 
 		const guildLocale = this.guildLocale;
 		const strings = {
@@ -837,7 +841,11 @@ class MusicService extends LocalService {
 				"music.options.play.strings.nowPlaying.title.nowPlaying",
 				guildLocale,
 			)({
-				listing_type: localise(this.client, localisationsBySongListingType[song.type], guildLocale)(),
+				listing_type: localise(
+					this.client,
+					localisationsBySongListingType[this.current?.content.type ?? song.type],
+					guildLocale,
+				)(),
 			}),
 			description: {
 				nowPlaying: localise(this.client, "music.options.play.strings.nowPlaying.description.nowPlaying", guildLocale),
@@ -919,6 +927,7 @@ class MusicService extends LocalService {
 
 			if (session.listings.current !== undefined) {
 				session.listings.history.push(session.listings.current);
+				session.events.emit("historyUpdate");
 				session.events.emit("queueUpdate");
 				session.listings.current = undefined;
 			}
@@ -1034,8 +1043,6 @@ class MusicService extends LocalService {
 		) {
 			if (replayCollection) {
 				session.listings.current.content.position = -1;
-			} else {
-				session.listings.current.content.position--;
 			}
 		}
 

@@ -36,11 +36,6 @@ async function handleStartGame([client, bot]: [Client, Discord.Bot], interaction
 		return;
 	}
 
-	const guildDocument = await client.database.adapters.guilds.getOrFetch(client, "id", guildId.toString());
-	if (guildDocument === undefined) {
-		return;
-	}
-
 	const sentencePairs = client.features.sentencePairs.get(interaction.learningLanguage);
 	if (sentencePairs === undefined || sentencePairs.length === 0) {
 		const strings = {

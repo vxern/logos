@@ -33,6 +33,9 @@
   "entry.verification.requestedRoles": "Requested roles",
   "entry.verification.accountCreated": "Account created",
   "entry.verification.answersSubmitted": "Answers submitted",
+  "entry.verification.votesFor": "Votes for",
+  "entry.verification.votesAgainst": "Votes against",
+  "entry.verification.noneYet": "None yet.",
 	"entry.verification.vote.accept": "Accept",
 	"entry.verification.vote.acceptMultiple": "Accept ({votes} needed)",
 	"entry.verification.vote.acceptMultiple.votes.one": "{one} more vote",
@@ -52,5 +55,12 @@
 	"entry.verification.vote.alreadyVoted.against.title": "Already voted against",
 	"entry.verification.vote.alreadyVoted.against.description": "You have already voted against this user's entry request being accepted.",
 	"entry.verification.vote.stanceChanged.title": "Stance changed",
-	"entry.verification.vote.stanceChanged.description": "Your stance in this vote has been changed."
+	"entry.verification.vote.stanceChanged.description": "Your stance in this vote has been changed.",
+	"entry.verification.inquiry.inquiry": "Inquiry",
+	"entry.verification.inquiry.open": "Open Inquiry",
+	"entry.verification.inquiry.channel": "Inquiry channel for {user}.",
+	"entry.verification.inquiry.failed.title": "Failed to open inquiry",
+	"entry.verification.inquiry.failed.description": "Due to unknown reasons, opening an inquiry with this user failed.",
+	"entry.verification.inquiry.opened.title": "Inquiry opened!",
+	"entry.verification.inquiry.opened.description": "An inquiry has been opened to review the user's request to join {guild_name}."
 }

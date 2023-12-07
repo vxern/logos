@@ -1,7 +1,12 @@
 export default {
 	meta: {
-		whitespace: " ",
-		metadataSeparator: ",",
+		// ! Responsible for inserting whitespace where a standard space would get filtered out.
+		// ! Changing this would break:
+		// ! - Empty translations.
+		// ! - Indentation on the /word command.
+		whitespace: "⠀",
+		// ! Responsible for separating pieces of data in component custom IDs.
+		// ! Changing this would break button interactions on all existing prompts/notices.
 		idSeparator: "|",
 	},
 	ruleBullet: "💠",
@@ -17,6 +22,7 @@ export default {
 	sigils: {
 		divider: "﹘",
 		separator: "・",
+		channelSeparator: "︲",
 	},
 	squares: {
 		green: "🟩",
@@ -54,8 +60,10 @@ export default {
 			removed: "😇",
 		},
 		praised: "🙏",
-		suggestion: "🌿",
 		report: "💢",
+		resource: "🎓",
+		suggestion: "🌿",
+		ticket: "🎫",
 		purging: {
 			begin: "⚔️",
 			end: "✅",
@@ -104,6 +112,10 @@ export default {
 	responses: {
 		celebration: "🥳",
 		upset: "😕",
+	},
+	verification: {
+		for: "🟩",
+		against: "🟥",
 	},
 	bot: {
 		features: {

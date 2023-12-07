@@ -2,9 +2,10 @@ import * as Discord from "@discordeno/bot";
 import constants from "../../../../../constants/constants";
 import { Locale } from "../../../../../constants/languages";
 import time from "../../../../../constants/time";
-import { MentionTypes, mention, timestamp } from "../../../../../formatting";
+import { MentionTypes, mention, timestamp, trim } from "../../../../../formatting";
 import * as Logos from "../../../../../types";
 import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../../client";
+import { Guild } from "../../../../database/guild";
 import diagnostics from "../../../../diagnostics";
 import { parseArguments, parseTimeExpression, reply, respond } from "../../../../interactions";
 
@@ -33,7 +34,11 @@ async function handleSetTimeoutAutocomplete(
 
 			const timestamp = parseTimeExpression(client, duration, { language, locale });
 			if (timestamp === undefined) {
-				respond([client, bot], interaction, []);
+				const strings = {
+					autocomplete: localise(client, "autocomplete.timestamp", locale)(),
+				};
+
+				respond([client, bot], interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
 				return;
 			}
 
@@ -51,17 +56,19 @@ async function handleSetTimeout([client, bot]: [Client, Discord.Bot], interactio
 		return;
 	}
 
-	const guildDocument = await client.database.adapters.guilds.getOrFetchOrCreate(
-		client,
-		"id",
-		guildId.toString(),
-		guildId,
-	);
+	const session = client.database.openSession();
+
+	const guildDocument =
+		client.cache.documents.guilds.get(guildId.toString()) ??
+		(await session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
+
+	session.dispose();
+
 	if (guildDocument === undefined) {
 		return;
 	}
 
-	const configuration = guildDocument.data.features.moderation.features?.timeouts;
+	const configuration = guildDocument.features.moderation.features?.timeouts;
 	if (configuration === undefined || !configuration.enabled) {
 		return;
 	}
@@ -119,7 +126,9 @@ async function handleSetTimeout([client, bot]: [Client, Discord.Bot], interactio
 	}
 
 	await bot.rest
-		.editMember(guildId, member.id, { communicationDisabledUntil: until })
+		// TODO(vxern): This is a Discordeno monkey-patch. Remove once fixed in Discordeno.
+		// @ts-ignore
+		.editMember(guildId, member.id, { communicationDisabledUntil: new Date(until).toISOString() })
 		.catch((reason) => client.log.warn(`Failed to time ${diagnostics.display.member(member)} out:`, reason));
 
 	if (configuration.journaling) {

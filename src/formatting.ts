@@ -80,7 +80,7 @@ enum MentionTypes {
  * @param type - What the mention mentions.
  * @returns The formatted string of text.
  */
-function mention(id: bigint, type: MentionTypes): string {
+function mention(id: bigint | string, type: MentionTypes): string {
 	return `<${type}${id}>`;
 }
 

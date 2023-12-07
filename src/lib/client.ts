@@ -1,6 +1,7 @@
+import * as fs from "node:fs/promises";
 import * as Discord from "@discordeno/bot";
 import FancyLog from "fancy-log";
-import Fauna from "fauna";
+import * as ravendb from "ravendb";
 import constants from "../constants/constants";
 import languages, {
 	LearningLanguage,
@@ -15,20 +16,20 @@ import { getDiscordLanguageByLocale } from "../constants/languages/localisation"
 import time from "../constants/time";
 import defaults from "../defaults";
 import { enableDesiredProperties, handleGuildMembersChunk, overrideDefaultEventHandlers } from "../fixes";
-import { timestamp } from "../formatting";
+import { timestamp, trim } from "../formatting";
 import * as Logos from "../types";
 import { Command, CommandTemplate, InteractionHandler, Option } from "./commands/command";
 import commandTemplates from "./commands/commands";
 import { SentencePair } from "./commands/language/commands/game";
-import entryRequests from "./database/adapters/entry-requests";
-import guilds from "./database/adapters/guilds";
-import praises from "./database/adapters/praises";
-import reports from "./database/adapters/reports";
-import suggestions from "./database/adapters/suggestions";
-import users from "./database/adapters/users";
-import warnings from "./database/adapters/warnings";
-import { Database } from "./database/database";
-import { timeStructToMilliseconds } from "./database/structs/guild";
+import { EntryRequest } from "./database/entry-request";
+import { Guild, timeStructToMilliseconds } from "./database/guild";
+import { Praise } from "./database/praise";
+import { Report } from "./database/report";
+import { Resource } from "./database/resource";
+import { Suggestion } from "./database/suggestion";
+import { Ticket } from "./database/ticket";
+import { User } from "./database/user";
+import { Warning } from "./database/warning";
 import diagnostics from "./diagnostics";
 import {
 	acknowledge,
@@ -49,10 +50,13 @@ import { JournallingService } from "./services/journalling/journalling";
 import { LavalinkService } from "./services/music/lavalink";
 import { MusicService } from "./services/music/music";
 import { InformationNoticeService } from "./services/notices/types/information";
+import { ResourceNoticeService } from "./services/notices/types/resources";
 import { RoleNoticeService } from "./services/notices/types/roles";
 import { WelcomeNoticeService } from "./services/notices/types/welcome";
 import { ReportService } from "./services/prompts/types/reports";
+import { ResourceService } from "./services/prompts/types/resources";
 import { SuggestionService } from "./services/prompts/types/suggestions";
+import { TicketService } from "./services/prompts/types/tickets";
 import { VerificationService } from "./services/prompts/types/verification";
 import { RealtimeUpdateService } from "./services/realtime-updates/service";
 import { RoleIndicatorService } from "./services/role-indicators/role-indicators";
@@ -62,13 +66,14 @@ import { requestMembers } from "./utils";
 
 type Client = {
 	environment: {
-		version: string;
 		discordSecret: string;
-		faunaSecret: string;
 		deeplSecret: string;
 		rapidApiSecret: string;
 		wordnikSecret: string;
 		ponsSecret: string;
+    ravendbHost: string;
+		ravendbDatabase: string;
+		ravendbSecure: boolean;
 		lavalinkHost: string;
 		lavalinkPort: string;
 		lavalinkPassword: string;
@@ -85,8 +90,21 @@ type Client = {
 			previous: Map<bigint, Logos.Message>;
 		};
 		interactions: Map<string, Logos.Interaction | Discord.Interaction>;
+
+		documents: {
+			entryRequests: Map<string, EntryRequest>;
+			guilds: Map<string, Guild>;
+			praisesByAuthor: Map<string, Map<string, Praise>>;
+			praisesByTarget: Map<string, Map<string, Praise>>;
+			reports: Map<string, Report>;
+			resources: Map<string, Resource>;
+			suggestions: Map<string, Suggestion>;
+			tickets: Map<string, Ticket>;
+			users: Map<string, User>;
+			warningsByTarget: Map<string, Map<string, Warning>>;
+		};
 	};
-	database: { log: Logger } & Database;
+	database: ravendb.IDocumentStore;
 	commands: {
 		commands: Record<keyof typeof commandTemplates, Command>;
 		showable: string[];
@@ -116,16 +134,19 @@ type Client = {
 		};
 		notices: {
 			information: Map<bigint, InformationNoticeService>;
+			resources: Map<bigint, ResourceNoticeService>;
 			roles: Map<bigint, RoleNoticeService>;
 			welcome: Map<bigint, WelcomeNoticeService>;
 		};
 		prompts: {
-			reports: Map<bigint, ReportService>;
-			suggestions: Map<bigint, SuggestionService>;
 			verification: Map<bigint, VerificationService>;
+			reports: Map<bigint, ReportService>;
+			resources: Map<bigint, ResourceService>;
+			suggestions: Map<bigint, SuggestionService>;
+			tickets: Map<bigint, TicketService>;
 		};
 		interactionRepetition: InteractionRepetitionService;
-		realtimeUpdates: Map<bigint, RealtimeUpdateService>;
+		realtimeUpdates: RealtimeUpdateService;
 		roleIndicators: Map<bigint, RoleIndicatorService>;
 		status: StatusService;
 	};
@@ -137,6 +158,7 @@ interface Collector<ForEvent extends keyof Discord.EventHandlers> {
 	removeAfter?: number;
 	onCollect: (...args: Parameters<Discord.EventHandlers[ForEvent]>) => void;
 	onEnd: () => void;
+	end?: Promise<void>;
 }
 
 type Event = keyof Discord.EventHandlers;
@@ -146,6 +168,7 @@ type Logger = Record<"debug" | keyof typeof FancyLog, (...args: unknown[]) => vo
 function createClient(
 	environment: Client["environment"],
 	features: Client["features"],
+	database: Client["database"],
 	localisationsStatic: Map<string, Map<LocalisationLanguage, string>>,
 ): Client {
 	const localisations = createLocalisations(localisationsStatic);
@@ -165,44 +188,20 @@ function createClient(
 				previous: new Map(),
 			},
 			interactions: new Map(),
-		},
-		database: {
-			log: createLogger("database"),
-			client: new Fauna.Client({
-				secret: environment.faunaSecret,
-				domain: "db.us.fauna.com",
-				scheme: "https",
-				port: 443,
-			}),
-			cache: {
-				entryRequestBySubmitterAndGuild: new Map(),
-				guildById: new Map(),
-				praisesBySender: new Map(),
-				praisesByRecipient: new Map(),
-				reportsByAuthorAndGuild: new Map(),
-				suggestionsByAuthorAndGuild: new Map(),
-				usersByReference: new Map(),
-				usersById: new Map(),
-				warningsByRecipient: new Map(),
+			documents: {
+				entryRequests: new Map(),
+				guilds: new Map(),
+				praisesByAuthor: new Map(),
+				praisesByTarget: new Map(),
+				reports: new Map(),
+				resources: new Map(),
+				suggestions: new Map(),
+				tickets: new Map(),
+				users: new Map(),
+				warningsByTarget: new Map(),
 			},
-			fetchPromises: {
-				guilds: {
-					id: new Map(),
-				},
-				praises: {
-					recipient: new Map(),
-					sender: new Map(),
-				},
-				users: {
-					id: new Map(),
-					reference: new Map(),
-				},
-				warnings: {
-					recipient: new Map(),
-				},
-			},
-			adapters: { entryRequests, guilds, reports, praises, suggestions, users, warnings },
 		},
+		database,
 		commands,
 		features,
 		localisations,
@@ -221,17 +220,21 @@ function createClient(
 			},
 			notices: {
 				information: new Map(),
+				resources: new Map(),
 				roles: new Map(),
 				welcome: new Map(),
 			},
 			prompts: {
-				reports: new Map(),
-				suggestions: new Map(),
 				verification: new Map(),
+				reports: new Map(),
+				resources: new Map(),
+				suggestions: new Map(),
+				tickets: new Map(),
 			},
 			// @ts-ignore: Late assignment.
 			interactionRepetition: "late_assignment",
-			realtimeUpdates: new Map(),
+			// @ts-ignore: Late assignment.
+			realtimeUpdates: "late_assignment",
 			roleIndicators: new Map(),
 			// @ts-ignore: Late assignment.
 			status: "late_assignment",
@@ -317,9 +320,22 @@ async function initialiseClient(
 	features: Client["features"],
 	localisations: Map<string, Map<LocalisationLanguage, string>>,
 ): Promise<void> {
-	const client = createClient(environment, features, localisations);
+	let database: ravendb.DocumentStore;
+	if (environment.ravendbSecure) {
+		database = new ravendb.DocumentStore(environment.ravendbHost, environment.ravendbDatabase, {
+			certificate: await fs.readFile(".cert.pfx"),
+			type: "pfx",
+		});
+	} else {
+		database = new ravendb.DocumentStore(environment.ravendbHost, environment.ravendbDatabase);
+	}
+	database.initialize();
 
-	await prefetchDataFromDatabase(client, client.database);
+	const client = createClient(environment, features, database, localisations);
+
+	addCacheInterceptors(client, database);
+
+	await prefetchDataFromDatabase(client);
 
 	const bot = overrideDefaultEventHandlers(
 		Discord.createBot({
@@ -425,7 +441,7 @@ async function initialiseClient(
 	) as Discord.Transformers["desiredProperties"];
 	bot.handlers.GUILD_MEMBERS_CHUNK = handleGuildMembersChunk;
 	bot.gateway.cache.requestMembers = { enabled: true, pending: new Discord.Collection() };
-	bot.transformers = withCaching(client, bot.transformers);
+	bot.transformers = withCacheInterceptors(client, bot.transformers);
 
 	const promises: Promise<unknown>[] = [];
 
@@ -439,6 +455,11 @@ async function initialiseClient(
 	client.services.interactionRepetition = interactionRepetitionService;
 	promises.push(interactionRepetitionService.start());
 
+	const realtimeUpdateService = new RealtimeUpdateService([client, bot]);
+	client.services.global.push(realtimeUpdateService);
+	client.services.realtimeUpdates = realtimeUpdateService;
+	promises.push(realtimeUpdateService.start());
+
 	promises.push(bot.start());
 
 	await Promise.all(promises);
@@ -449,12 +470,40 @@ async function initialiseClient(
 	await statusService.start();
 }
 
-async function prefetchDataFromDatabase(client: Client, database: Database): Promise<void> {
-	await Promise.all([
-		database.adapters.entryRequests.prefetch(client),
-		database.adapters.reports.prefetch(client),
-		database.adapters.suggestions.prefetch(client),
-	]);
+async function prefetchDataFromDatabase(client: Client): Promise<void> {
+	const session = client.database.openSession();
+
+	const entryRequestDocuments = await session.query<EntryRequest>({ collection: "EntryRequests" }).all();
+
+	for (const document of entryRequestDocuments) {
+		client.cache.documents.entryRequests.set(`${document.guildId}/${document.authorId}`, document);
+	}
+
+	const reportDocuments = await session.query<Report>({ collection: "Reports" }).all();
+
+	for (const document of reportDocuments) {
+		client.cache.documents.reports.set(`${document.guildId}/${document.authorId}/${document.createdAt}`, document);
+	}
+
+	const resourceDocuments = await session.query<Resource>({ collection: "Resources" }).all();
+
+	for (const document of resourceDocuments) {
+		client.cache.documents.resources.set(`${document.guildId}/${document.authorId}/${document.createdAt}`, document);
+	}
+
+	const suggestionDocuments = await session.query<Suggestion>({ collection: "Suggestions" }).all();
+
+	for (const document of suggestionDocuments) {
+		client.cache.documents.suggestions.set(`${document.guildId}/${document.authorId}/${document.createdAt}`, document);
+	}
+
+	const ticketDocuments = await session.query<Ticket>({ collection: "Tickets" }).all();
+
+	for (const document of ticketDocuments) {
+		client.cache.documents.tickets.set(`${document.guildId}/${document.authorId}/${document.channelId}`, document);
+	}
+
+	session.dispose();
 }
 
 export async function handleGuildCreate(
@@ -466,30 +515,25 @@ export async function handleGuildCreate(
 		client.log.info(`Logos added to "${guild.name}" (ID ${guild.id}).`);
 	}
 
-	const guildDocument = await client.database.adapters.guilds.getOrFetchOrCreate(
-		client,
-		"id",
-		guild.id.toString(),
-		guild.id,
-	);
+	const session = client.database.openSession();
+
+	const guildDocument =
+		client.cache.documents.guilds.get(guild.id.toString()) ??
+		(await session.load<Guild>(`guilds/${guild.id}`).then((value) => value ?? undefined));
+
+	session.dispose();
+
 	if (guildDocument === undefined) {
 		return;
 	}
-
-	const configuration = guildDocument.data;
 
 	const commands = client.commands.commands;
 
 	const guildCommands: Command[] = [commands.information, commands.credits, commands.licence, commands.settings];
 	const services: Service[] = [];
 
-	// const realtimeUpdateService = new RealtimeUpdateService([client, bot], guild.id, guildDocument.ref);
-	// services.push(realtimeUpdateService);
-
-	// client.services.realtimeUpdates.set(guild.id, realtimeUpdateService);
-
-	if (configuration.features.information.enabled) {
-		const information = configuration.features.information.features;
+	if (guildDocument.features.information.enabled) {
+		const information = guildDocument.features.information.features;
 
 		if (information.journaling.enabled) {
 			const service = new JournallingService([client, bot], guild.id);
@@ -508,6 +552,13 @@ export async function handleGuildCreate(
 				client.services.notices.information.set(guild.id, service);
 			}
 
+			if (notices.resources?.enabled) {
+				const service = new ResourceNoticeService([client, bot], guild.id);
+				services.push(service);
+
+				client.services.notices.resources.set(guild.id, service);
+			}
+
 			if (notices.roles.enabled) {
 				const service = new RoleNoticeService([client, bot], guild.id);
 				services.push(service);
@@ -524,8 +575,8 @@ export async function handleGuildCreate(
 		}
 	}
 
-	if (configuration.features.language.enabled) {
-		const language = configuration.features.language.features;
+	if (guildDocument.features.language.enabled) {
+		const language = guildDocument.features.language.features;
 
 		if (language.answers?.enabled) {
 			guildCommands.push(commands.answer);
@@ -567,10 +618,10 @@ export async function handleGuildCreate(
 		}
 	}
 
-	if (configuration.features.moderation.enabled) {
+	if (guildDocument.features.moderation.enabled) {
 		guildCommands.push(commands.list);
 
-		const moderation = configuration.features.moderation.features;
+		const moderation = guildDocument.features.moderation.features;
 
 		if (moderation.alerts.enabled) {
 			const service = new AlertService([client, bot], guild.id);
@@ -620,8 +671,8 @@ export async function handleGuildCreate(
 		}
 	}
 
-	if (configuration.features.server.enabled) {
-		const server = configuration.features.server.features;
+	if (guildDocument.features.server.enabled) {
+		const server = guildDocument.features.server.features;
 
 		if (server.dynamicVoiceChannels.enabled) {
 			const service = new DynamicVoiceChannelService([client, bot], guild.id);
@@ -652,10 +703,28 @@ export async function handleGuildCreate(
 
 			client.services.prompts.suggestions.set(guild.id, service);
 		}
+
+		if (server.tickets?.enabled) {
+			guildCommands.push(commands.ticket);
+
+			const service = new TicketService([client, bot], guild.id);
+			services.push(service);
+
+			client.services.prompts.tickets.set(guild.id, service);
+		}
+
+		if (server.resources?.enabled) {
+			guildCommands.push(commands.resource);
+
+			const service = new ResourceService([client, bot], guild.id);
+			services.push(service);
+
+			client.services.prompts.resources.set(guild.id, service);
+		}
 	}
 
-	if (configuration.features.social.enabled) {
-		const social = configuration.features.social.features;
+	if (guildDocument.features.social.enabled) {
+		const social = guildDocument.features.social.features;
 
 		if (social.music.enabled) {
 			guildCommands.push(commands.music);
@@ -750,11 +819,152 @@ async function handleInteractionCreate(
 	}
 }
 
-function withCaching(client: Client, transformers: Discord.Transformers): Discord.Transformers {
+function addCacheInterceptors(client: Client, database: ravendb.IDocumentStore): void {
+	const { openSession } = database;
+
+	// biome-ignore lint: Typing this out in TypeScript is a nonsense and I don't have time to do it right now.
+	function getCompositeId(collection: string, document: any): string {
+		switch (collection) {
+			case "EntryRequests": {
+				return `${document.guildId}/${document.authorId}`;
+			}
+			case "Guilds": {
+				return document.guildId;
+			}
+			case "Praises": {
+				return `${document.targetId}/${document.authorId}/${document.createdAt}`;
+			}
+			case "Reports": {
+				return `${document.guildId}/${document.authorId}/${document.createdAt}`;
+			}
+			case "Resources": {
+				return `${document.guildId}/${document.authorId}/${document.createdAt}`;
+			}
+			case "Suggestions": {
+				return `${document.guildId}/${document.authorId}/${document.createdAt}`;
+			}
+			case "Tickets": {
+				return `${document.guildId}/${document.authorId}/${document.channelId}`;
+			}
+			case "Users": {
+				return document.account.id;
+			}
+			case "Warnings": {
+				return `${document.targetId}/${document.authorId}/${document.createdAt}`;
+			}
+		}
+
+		throw "StateError: Getting composite ID not handled for collection";
+	}
+
+	// biome-ignore lint: Typing this out in TypeScript is a nonsense and I don't have time to do it right now.
+	function saveValue(value: any) {
+		const collection: string | undefined = value["@metadata"]?.["@collection"];
+		if (collection === undefined) {
+			throw "StateError: Collection unexpectedly undefined.";
+		}
+
+		const compositeId = getCompositeId(collection, value);
+
+		switch (collection) {
+			case "EntryRequests": {
+				client.cache.documents.entryRequests.set(compositeId, value as EntryRequest);
+				break;
+			}
+			case "Guilds": {
+				client.cache.documents.guilds.set(compositeId, value as Guild);
+				break;
+			}
+			case "Praises": {
+				const document = value as Praise;
+
+				if (client.cache.documents.praisesByAuthor.has(document.authorId)) {
+					client.cache.documents.praisesByAuthor.get(document.authorId)?.set(compositeId, document);
+				} else {
+					client.cache.documents.praisesByAuthor.set(document.authorId, new Map([[compositeId, document]]));
+				}
+
+				if (client.cache.documents.praisesByTarget.has(document.targetId)) {
+					client.cache.documents.praisesByTarget.get(document.targetId)?.set(compositeId, document);
+				} else {
+					client.cache.documents.praisesByTarget.set(document.targetId, new Map([[compositeId, document]]));
+				}
+
+				break;
+			}
+			case "Reports": {
+				client.cache.documents.reports.set(compositeId, value as Report);
+				break;
+			}
+			case "Resources": {
+				client.cache.documents.resources.set(compositeId, value as Resource);
+				break;
+			}
+			case "Suggestions": {
+				client.cache.documents.suggestions.set(compositeId, value as Suggestion);
+				break;
+			}
+			case "Tickets": {
+				client.cache.documents.tickets.set(compositeId, value as Ticket);
+				break;
+			}
+			case "Users": {
+				client.cache.documents.users.set(compositeId, value as User);
+				break;
+			}
+			case "Warnings": {
+				const document = value as Warning;
+
+				if (client.cache.documents.warningsByTarget.has(document.targetId)) {
+					client.cache.documents.warningsByTarget.get(document.targetId)?.set(compositeId, document);
+				} else {
+					client.cache.documents.warningsByTarget.set(document.targetId, new Map([[compositeId, document]]));
+				}
+
+				break;
+			}
+		}
+	}
+
+	// @ts-ignore
+	database.openSession = () => {
+		// @ts-ignore
+		const session = openSession.call(database, { noCaching: true });
+
+		const { load, store } = session;
+
+		// @ts-ignore
+		session.load = async (...args) => {
+			// @ts-ignore
+			const value = await load.call(session, ...args);
+			if (value === null) {
+				return value;
+			}
+
+			saveValue(value);
+
+			return value;
+		};
+
+		// @ts-ignore
+		session.store = async (value, ...args) => {
+			// @ts-ignore
+			await store.call(session, value, ...args);
+
+			saveValue(value);
+		};
+
+		return session;
+	};
+}
+
+function withCacheInterceptors(client: Client, transformers: Discord.Transformers): Discord.Transformers {
 	const { guild, channel, user, member, message, role, voiceState } = transformers;
 
 	transformers.guild = (bot, payload) => {
 		const resultUnoptimised = guild(bot, payload);
+		// TODO(vxern): This is a monkey-patch for Discordeno, which filters out shardIds equal to 0.
+		resultUnoptimised.shardId = payload.shardId;
 		const result = Logos.slimGuild(resultUnoptimised);
 
 		for (const channel of payload.guild.channels ?? []) {
@@ -1185,6 +1395,8 @@ function addCollector<T extends keyof Discord.EventHandlers>(
 		onEnd();
 	};
 
+	collector.end?.then(() => collector.onEnd());
+
 	if (collector.limit !== undefined) {
 		let emitCount = 0;
 		const onCollect = collector.onCollect;
@@ -1270,6 +1482,10 @@ function resolveIdentifierToMembers(
 	identifier: string,
 	options: Partial<MemberNarrowingOptions> = {},
 ): [members: Logos.Member[], isResolved: boolean] | undefined {
+	if (identifier.trim().length === 0) {
+		return [[], false];
+	}
+
 	const asker = client.cache.members.get(Discord.snowflakeToBigint(`${userId}${guildId}`));
 	if (asker === undefined) {
 		return undefined;
@@ -1367,9 +1583,21 @@ function resolveIdentifierToMembers(
 async function autocompleteMembers(
 	[client, bot]: [Client, Discord.Bot],
 	interaction: Logos.Interaction,
-	identifier: string,
+	identifierRaw: string,
 	options?: Partial<MemberNarrowingOptions>,
 ): Promise<void> {
+	const identifier = identifierRaw.trim();
+	if (identifier.length === 0) {
+		const locale = interaction.locale;
+
+		const strings = {
+			autocomplete: localise(client, "autocomplete.user", locale)(),
+		};
+
+		respond([client, bot], interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
+		return;
+	}
+
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
 		return undefined;
@@ -1426,20 +1654,26 @@ function resolveInteractionToMember(
 	}
 
 	if (matchedMembers.length === 0) {
-		const strings = {
-			title: localise(client, "interactions.invalidUser.title", locale)(),
-			description: localise(client, "interactions.invalidUser.description", locale)(),
-		};
+		if (
+			interaction.type === Discord.InteractionTypes.ApplicationCommand ||
+			interaction.type === Discord.InteractionTypes.MessageComponent ||
+			interaction.type === Discord.InteractionTypes.ModalSubmit
+		) {
+			const strings = {
+				title: localise(client, "interactions.invalidUser.title", locale)(),
+				description: localise(client, "interactions.invalidUser.description", locale)(),
+			};
 
-		reply([client, bot], interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colors.red,
-				},
-			],
-		});
+			reply([client, bot], interaction, {
+				embeds: [
+					{
+						title: strings.title,
+						description: strings.description,
+						color: constants.colors.red,
+					},
+				],
+			});
+		}
 
 		return undefined;
 	}

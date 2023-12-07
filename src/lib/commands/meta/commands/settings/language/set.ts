@@ -6,8 +6,10 @@ import languages, {
 	isLocalisationLanguage,
 } from "../../../../../../constants/languages";
 import localisations from "../../../../../../constants/localisations";
+import { trim } from "../../../../../../formatting";
 import * as Logos from "../../../../../../types";
 import { Client, localise } from "../../../../../client";
+import { User } from "../../../../../database/user";
 import { editReply, parseArguments, postponeReply, reply, respond } from "../../../../../interactions";
 import { OptionTemplate } from "../../../../command";
 
@@ -38,9 +40,19 @@ async function handleSetLanguageAutocomplete(
 	}
 
 	const [{ language: languageOrUndefined }] = parseArguments(interaction.data?.options, {});
-	const languageQuery = languageOrUndefined ?? "";
+	const languageQueryRaw = languageOrUndefined ?? "";
 
-	const languageQueryLowercase = languageQuery.toLowerCase();
+	const languageQueryTrimmed = languageQueryRaw.trim();
+	if (languageQueryTrimmed.length === 0) {
+		const strings = {
+			autocomplete: localise(client, "autocomplete.language", locale)(),
+		};
+
+		respond([client, bot], interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
+		return;
+	}
+
+	const languageQueryLowercase = languageQueryTrimmed.toLowerCase();
 	const choices = languages.languages.localisation
 		.map((language) => {
 			return {
@@ -69,15 +81,20 @@ async function handleSetLanguage([client, bot]: [Client, Discord.Bot], interacti
 
 	await postponeReply([client, bot], interaction);
 
-	const userDocument = await client.database.adapters.users.getOrFetch(client, "id", interaction.user.id.toString());
+	const session = client.database.openSession();
+
+	const userDocument =
+		client.cache.documents.users.get(interaction.user.id.toString()) ??
+		(await session.load<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined));
+
 	if (userDocument === undefined) {
 		return;
 	}
 
-	await client.database.adapters.users.update(client, {
-		...userDocument,
-		data: { ...userDocument.data, account: { ...userDocument.data.account, language } },
-	});
+	userDocument.account.language = language;
+	await session.store(userDocument);
+	await session.saveChanges();
+	session.dispose();
 
 	const locale = getLocaleByLocalisationLanguage(language);
 

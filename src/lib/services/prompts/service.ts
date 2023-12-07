@@ -1,62 +1,74 @@
 import * as Discord from "@discordeno/bot";
 import constants from "../../../constants/constants";
 import * as Logos from "../../../types";
-import { Client } from "../../client";
-import { stringifyValue } from "../../database/database";
-import { BaseDocumentProperties, Document } from "../../database/document";
-import { Guild } from "../../database/structs/guild";
-import { User } from "../../database/structs/user";
+import { Client, localise } from "../../client";
+import { Guild } from "../../database/guild";
+import { User } from "../../database/user";
 import diagnostics from "../../diagnostics";
-import { createInteractionCollector, decodeId } from "../../interactions";
+import { acknowledge, createInteractionCollector, decodeId, getLocaleData, reply } from "../../interactions";
 import { getAllMessages } from "../../utils";
 import { LocalService } from "../service";
 
-type InteractionDataBase = [userId: string, guildId: string, reference: string];
-
 interface Configurations {
-	reports: NonNullable<Guild["features"]["moderation"]["features"]>["reports"];
-	suggestions: NonNullable<Guild["features"]["server"]["features"]>["suggestions"];
 	verification: NonNullable<Guild["features"]["moderation"]["features"]>["verification"];
+	reports: NonNullable<Guild["features"]["moderation"]["features"]>["reports"];
+	resources: NonNullable<Guild["features"]["server"]["features"]>["resources"];
+	suggestions: NonNullable<Guild["features"]["server"]["features"]>["suggestions"];
+	tickets: NonNullable<Guild["features"]["server"]["features"]>["tickets"];
 }
 
 type ConfigurationLocators = {
-	[K in keyof Configurations]: (guildDocument: Document<Guild>) => Configurations[K] | undefined;
+	[K in keyof Configurations]: (guildDocument: Guild) => Configurations[K] | undefined;
 };
 
 const configurationLocators: ConfigurationLocators = {
-	reports: (guildDocument) => guildDocument.data.features.moderation.features?.reports,
-	suggestions: (guildDocument) => guildDocument.data.features.server.features?.suggestions,
-	verification: (guildDocument) => guildDocument.data.features.moderation.features?.verification,
+	verification: (guildDocument) => guildDocument.features.moderation.features?.verification,
+	reports: (guildDocument) => guildDocument.features.moderation.features?.reports,
+	resources: (guildDocument) => guildDocument.features.server.features?.resources,
+	suggestions: (guildDocument) => guildDocument.features.server.features?.suggestions,
+	tickets: (guildDocument) => guildDocument.features.server.features?.tickets,
 };
 
 type CustomIDs = Record<keyof Configurations, string>;
 
 const customIds: CustomIDs = {
-	reports: constants.components.reports,
-	suggestions: constants.components.suggestions,
 	verification: constants.components.verification,
+	reports: constants.components.reports,
+	resources: constants.components.resources,
+	suggestions: constants.components.suggestions,
+	tickets: constants.components.tickets,
 };
 
 type PromptTypes = keyof Client["services"]["prompts"];
 
+type DeleteMode = "delete" | "close" | "none";
+
 abstract class PromptService<
 	PromptType extends PromptTypes,
-	DataType extends BaseDocumentProperties,
-	Metadata extends Record<string, unknown> & { userId: bigint; reference: string },
-	InteractionData extends [...InteractionDataBase, ...string[]],
+	DataType extends { id: string },
+	InteractionData extends [compositeId: string, ...data: string[]],
 > extends LocalService {
 	private readonly type: PromptType;
 	private readonly customId: string;
+	private readonly deleteMode: DeleteMode;
 
-	private readonly handlers: Map<string, (interaction: Discord.Interaction, data: InteractionData) => void> = new Map();
+	protected readonly documents: Map<string, DataType>;
 
-	private readonly prompts: Map</*reference: */ string, Discord.CamelizedDiscordMessage> = new Map();
+	private readonly handlerByCompositeId: Map<
+		/*compositeId: */ string,
+		(interaction: Discord.Interaction, data: InteractionData) => void
+	> = new Map();
+	protected readonly promptByCompositeId: Map</*compositeId: */ string, Discord.CamelizedDiscordMessage> = new Map();
+	private readonly documentByPromptId: Map</*promptId: */ string, DataType> = new Map();
+	private readonly userIdByPromptId: Map</*promptId: */ string, bigint> = new Map();
 
-	private readonly documents: Document<DataType>[];
-	private readonly documentsByPromptId: Map</*promptId: */ string, Document<DataType>> = new Map();
-	private readonly userIds: Map</*promptId: */ string, bigint> = new Map();
+	private readonly collectingInteractions: Promise<void>;
+	private readonly removingPrompts: Promise<void>;
+	private stopCollectingInteractions: (() => void) | undefined;
+	private stopRemovingPrompts: (() => void) | undefined;
 
 	private readonly _configuration: ConfigurationLocators[PromptType];
+
 	get configuration(): Configurations[PromptType] | undefined {
 		const guildDocument = this.guildDocument;
 		if (guildDocument === undefined) {
@@ -84,12 +96,23 @@ abstract class PromptService<
 		return channelId;
 	}
 
-	constructor([client, bot]: [Client, Discord.Bot], guildId: bigint, { type }: { type: PromptType }) {
+	constructor(
+		[client, bot]: [Client, Discord.Bot],
+		guildId: bigint,
+		{ type, deleteMode }: { type: PromptType; deleteMode: DeleteMode },
+	) {
 		super([client, bot], guildId);
 		this.type = type;
+		this.deleteMode = deleteMode;
 		this.customId = customIds[type];
-		this.documents = this.getAllDocuments();
 		this._configuration = configurationLocators[type];
+		this.documents = this.getAllDocuments();
+		this.collectingInteractions = new Promise((resolve) => {
+			this.stopCollectingInteractions = resolve;
+		});
+		this.removingPrompts = new Promise((resolve) => {
+			this.stopRemovingPrompts = resolve;
+		});
 	}
 
 	async start(): Promise<void> {
@@ -106,29 +129,28 @@ abstract class PromptService<
 		this.client.log.info(`Registering ${this.type} prompts on ${diagnostics.display.guild(guild)}...`);
 
 		const promptsAll = (await getAllMessages([this.client, this.bot], channelId)) ?? [];
-		const [valid, invalid] = this.filterPrompts(promptsAll);
+		const [validPrompts, invalidPrompts] = this.filterPrompts(promptsAll);
 
-		const prompts = this.sortPrompts(valid);
+		const prompts = new Map(validPrompts);
 
-		for (const document of this.documents) {
-			const userDocument = await this.getUserDocument(document);
+		for (const [compositeId, promptDocument] of this.documents) {
+			const userDocument = await this.getUserDocument(promptDocument);
 			if (userDocument === undefined) {
 				continue;
 			}
 
-			const userId = BigInt(userDocument.data.account.id);
-			const reference = stringifyValue(document.ref);
+			const userId = BigInt(userDocument.account.id);
 
-			let prompt = prompts.get(userId)?.get(reference);
+			let prompt = prompts.get(compositeId);
 			if (prompt !== undefined) {
-				prompts.get(userId)?.delete(reference);
+				prompts.delete(compositeId);
 			} else {
 				const user = this.client.cache.users.get(userId);
 				if (user === undefined) {
 					continue;
 				}
 
-				const message = await this.savePrompt(user, document);
+				const message = await this.savePrompt(user, promptDocument);
 				if (message === undefined) {
 					continue;
 				}
@@ -136,15 +158,16 @@ abstract class PromptService<
 				prompt = message;
 			}
 
-			this.registerPrompt(prompt, userId, reference, document);
-			this.registerHandler([userId.toString(), this.guildIdString, reference]);
+			this.registerPrompt(prompt, userId, compositeId, promptDocument);
+			this.registerDocument(compositeId, promptDocument);
+			this.registerHandler(compositeId);
 		}
 
-		const expired = Array.from(prompts.values()).flatMap((map) => Array.from(map.values()));
+		const expiredPrompts = Array.from(prompts.values());
 
-		for (const prompt of [...invalid, ...expired]) {
+		for (const prompt of [...invalidPrompts, ...expiredPrompts]) {
 			await this.bot.rest.deleteMessage(prompt.channelId, prompt.id).catch(() => {
-				this.client.log.warn("Failed to delete prompt.");
+				this.client.log.warn("Failed to delete invalid or expired prompt.");
 			});
 		}
 
@@ -158,16 +181,138 @@ abstract class PromptService<
 					return;
 				}
 
-				const [_, userId, __, reference, ...metadata] = decodeId<InteractionData>(customId);
+				const [_, compositeId, ...metadata] = decodeId<InteractionData>(customId);
+				if (compositeId === undefined) {
+					return;
+				}
 
-				const handle = this.handlers.get([userId, this.guildId, reference].join(constants.symbols.meta.idSeparator));
+				const handle = this.handlerByCompositeId.get(compositeId);
 				if (handle === undefined) {
 					return;
 				}
 
-				handle(selection, [userId, this.guildIdString, reference, ...metadata] as InteractionData);
+				handle(selection, [compositeId, ...metadata] as InteractionData);
 			},
+			end: this.collectingInteractions,
 		});
+
+		if (this.deleteMode === "none") {
+			return;
+		}
+
+		createInteractionCollector([this.client, this.bot], {
+			type: Discord.InteractionTypes.MessageComponent,
+			customId: `${constants.components.removePrompt}/${this.customId}/${this.guildId}`,
+			doesNotExpire: true,
+			onCollect: async (selection) => {
+				const customId = selection.data?.customId;
+				if (customId === undefined) {
+					return;
+				}
+
+				const guildId = selection.guildId;
+				if (guildId === undefined) {
+					return;
+				}
+
+				const member = selection.member;
+				if (member === undefined) {
+					return;
+				}
+
+				let management: { roles?: string[]; users?: string[] } | undefined;
+				switch (this.type) {
+					case "reports": {
+						management = (configuration as Configurations["reports"]).management;
+						break;
+					}
+					case "resources": {
+						management = (configuration as Configurations["resources"])?.management;
+						break;
+					}
+					case "suggestions": {
+						management = (configuration as Configurations["suggestions"]).management;
+						break;
+					}
+					case "tickets": {
+						management = (configuration as Configurations["tickets"])?.management;
+						break;
+					}
+					default: {
+						management = undefined;
+						break;
+					}
+				}
+
+				const roleIds = management?.roles?.map((roleId) => BigInt(roleId));
+				const userIds = management?.users?.map((userId) => BigInt(userId));
+
+				const isAuthorised =
+					member.roles.some((roleId) => roleIds?.includes(roleId) ?? false) ||
+					(userIds?.includes(selection.user.id) ?? false);
+				if (!isAuthorised) {
+					const localeData = await getLocaleData(this.client, selection);
+					const locale = localeData.locale;
+
+					if (this.deleteMode === "delete") {
+						const strings = {
+							title: localise(this.client, "cannotRemovePrompt.title", locale)(),
+							description: localise(this.client, "cannotRemovePrompt.description", locale)(),
+						};
+
+						reply([this.client, this.bot], selection, {
+							embeds: [
+								{
+									title: strings.title,
+									description: strings.description,
+									color: constants.colors.peach,
+								},
+							],
+						});
+					} else if (this.deleteMode === "close") {
+						const strings = {
+							title: localise(this.client, "cannotCloseIssue.title", locale)(),
+							description: localise(this.client, "cannotCloseIssue.description", locale)(),
+						};
+
+						reply([this.client, this.bot], selection, {
+							embeds: [
+								{
+									title: strings.title,
+									description: strings.description,
+									color: constants.colors.peach,
+								},
+							],
+						});
+					}
+
+					return;
+				}
+
+				acknowledge([this.client, this.bot], selection);
+
+				const [_, compositeId] = decodeId(customId);
+				if (compositeId === undefined) {
+					return;
+				}
+
+				this.handleDelete(compositeId);
+			},
+			end: this.removingPrompts,
+		});
+	}
+
+	async stop(): Promise<void> {
+		this.documents.clear();
+		this.handlerByCompositeId.clear();
+		this.promptByCompositeId.clear();
+		this.documentByPromptId.clear();
+		this.userIdByPromptId.clear();
+
+		this.stopCollectingInteractions?.();
+		this.stopRemovingPrompts?.();
+		await this.collectingInteractions;
+		await this.removingPrompts;
 	}
 
 	// Anti-tampering feature; detects prompts being deleted.
@@ -177,12 +322,12 @@ abstract class PromptService<
 			return;
 		}
 
-		const document = this.documentsByPromptId.get(message.id.toString());
-		if (document === undefined) {
+		const promptDocument = this.documentByPromptId.get(message.id.toString());
+		if (promptDocument === undefined) {
 			return;
 		}
 
-		const userId = this.userIds.get(message.id.toString());
+		const userId = this.userIdByPromptId.get(message.id.toString());
 		if (userId === undefined) {
 			return;
 		}
@@ -192,17 +337,20 @@ abstract class PromptService<
 			return;
 		}
 
-		const reference = stringifyValue(document.ref);
-
-		const prompt = await this.savePrompt(user, document);
+		const prompt = await this.savePrompt(user, promptDocument);
 		if (prompt === undefined) {
 			return;
 		}
 
-		this.registerPrompt(prompt, userId, reference, document);
+		const compositeId = this.getCompositeId(prompt);
+		if (compositeId === undefined) {
+			return;
+		}
 
-		this.documentsByPromptId.delete(message.id.toString());
-		this.userIds.delete(message.id.toString());
+		this.registerPrompt(prompt, userId, compositeId, promptDocument);
+
+		this.documentByPromptId.delete(message.id.toString());
+		this.userIdByPromptId.delete(message.id.toString());
 	}
 
 	async messageUpdate(message: Discord.Message): Promise<void> {
@@ -228,75 +376,49 @@ abstract class PromptService<
 			);
 	}
 
-	abstract getAllDocuments(): Document<DataType>[];
-	abstract getUserDocument(document: Document<DataType>): Promise<Document<User> | undefined>;
+	abstract getAllDocuments(): Map<string, DataType>;
+	abstract getUserDocument(promptDocument: DataType): Promise<User | undefined>;
 
-	abstract decodeMetadata(data: string[]): Metadata | undefined;
+	abstract getPromptContent(user: Logos.User, promptDocument: DataType): Discord.CreateMessageOptions | undefined;
 
-	abstract getPromptContent(user: Logos.User, document: Document<DataType>): Discord.CreateMessageOptions | undefined;
-
-	getMetadata(prompt: Discord.CamelizedDiscordMessage): string[] | undefined {
-		const metadata = prompt.embeds?.at(-1)?.footer?.iconUrl?.split("&metadata=").at(-1);
-		if (metadata === undefined) {
+	getCompositeId(prompt: Discord.CamelizedDiscordMessage): string | undefined {
+		const compositeId = prompt.embeds?.at(-1)?.footer?.iconUrl?.split("&metadata=").at(-1);
+		if (compositeId === undefined) {
 			return undefined;
 		}
 
-		const data = metadata.split(constants.symbols.meta.metadataSeparator);
-		return data;
+		return compositeId;
 	}
 
 	filterPrompts(
 		prompts: Discord.CamelizedDiscordMessage[],
-	): [valid: [Discord.CamelizedDiscordMessage, Metadata][], invalid: Discord.CamelizedDiscordMessage[]] {
-		const valid: [Discord.CamelizedDiscordMessage, Metadata][] = [];
+	): [
+		valid: [compositeId: string, prompt: Discord.CamelizedDiscordMessage][],
+		invalid: Discord.CamelizedDiscordMessage[],
+	] {
+		const valid: [compositeId: string, prompt: Discord.CamelizedDiscordMessage][] = [];
 		const invalid: Discord.CamelizedDiscordMessage[] = [];
+
 		for (const prompt of prompts) {
-			const data = this.getMetadata(prompt);
-			if (data === undefined) {
+			const compositeId = this.getCompositeId(prompt);
+			if (compositeId === undefined) {
 				invalid.push(prompt);
 				continue;
 			}
 
-			const metadata = this.decodeMetadata(data);
-			if (metadata === undefined) {
-				invalid.push(prompt);
-				continue;
-			}
-
-			valid.push([prompt, metadata]);
+			valid.push([compositeId, prompt]);
 		}
+
 		return [valid, invalid];
 	}
 
-	sortPrompts(
-		prompts: [Discord.CamelizedDiscordMessage, Metadata][],
-	): Map</*userId: */ bigint, Map</*reference: */ string, Discord.CamelizedDiscordMessage>> {
-		const promptsSorted = new Map<bigint, Map<string, Discord.CamelizedDiscordMessage>>();
-
-		for (const [prompt, metadata] of prompts) {
-			const { userId, reference } = metadata;
-
-			if (!promptsSorted.has(userId)) {
-				promptsSorted.set(userId, new Map([[reference, prompt]]));
-				continue;
-			}
-
-			promptsSorted.get(userId)?.set(reference, prompt);
-		}
-
-		return promptsSorted;
-	}
-
-	async savePrompt(
-		user: Logos.User,
-		document: Document<DataType>,
-	): Promise<Discord.CamelizedDiscordMessage | undefined> {
+	async savePrompt(user: Logos.User, promptDocument: DataType): Promise<Discord.CamelizedDiscordMessage | undefined> {
 		const channelId = this.channelId;
 		if (channelId === undefined) {
 			return undefined;
 		}
 
-		const content = this.getPromptContent(user, document);
+		const content = this.getPromptContent(user, promptDocument);
 		if (content === undefined) {
 			return undefined;
 		}
@@ -309,51 +431,56 @@ abstract class PromptService<
 		return message;
 	}
 
+	registerDocument(compositeId: string, promptDocument: DataType): void {
+		this.documents.set(compositeId, promptDocument);
+	}
+
+	unregisterDocument(compositeId: string): void {
+		this.documents.delete(compositeId);
+	}
+
 	registerPrompt(
 		prompt: Discord.CamelizedDiscordMessage,
 		userId: bigint,
-		reference: string,
-		document: Document<DataType>,
+		compositeId: string,
+		promptDocument: DataType,
 	): void {
-		this.documentsByPromptId.set(prompt.id, document);
-		this.userIds.set(prompt.id, userId);
-		this.prompts.set(reference, prompt);
+		this.documentByPromptId.set(prompt.id, promptDocument);
+		this.userIdByPromptId.set(prompt.id, userId);
+		this.promptByCompositeId.set(compositeId, prompt);
 	}
 
-	unregisterPrompt(prompt: Discord.CamelizedDiscordMessage, reference: string): void {
-		this.documentsByPromptId.delete(prompt.id);
-		this.userIds.delete(prompt.id);
-		this.prompts.delete(reference);
+	unregisterPrompt(prompt: Discord.CamelizedDiscordMessage, compositeId: string): void {
+		this.documentByPromptId.delete(prompt.id);
+		this.userIdByPromptId.delete(prompt.id);
+		this.promptByCompositeId.delete(compositeId);
 	}
 
-	registerHandler(data: InteractionDataBase): void {
-		this.handlers.set(data.join(constants.symbols.meta.idSeparator), async (interaction) => {
+	registerHandler(compositeId: string): void {
+		this.handlerByCompositeId.set(compositeId, async (interaction) => {
 			const customId = interaction.data?.customId;
 			if (customId === undefined) {
 				return;
 			}
 
-			const [_, userId, guildId, reference, ...metadata] = decodeId<InteractionData>(customId);
+			const [_, compositeId, ...metadata] = decodeId<InteractionData>(customId);
 
-			const updatedDocument = await this.handleInteraction(interaction, [
-				userId,
-				guildId,
-				reference,
-				...metadata,
-			] as InteractionData);
+			const updatedDocument = await this.handleInteraction(interaction, [compositeId, ...metadata] as InteractionData);
 			if (updatedDocument === undefined) {
 				return;
 			}
 
-			const prompt = this.prompts.get(reference);
+			const prompt = this.promptByCompositeId.get(compositeId);
 			if (prompt === undefined) {
 				return;
 			}
 
 			if (updatedDocument === null) {
-				this.unregisterPrompt(prompt, reference);
+				this.unregisterDocument(compositeId);
+				this.unregisterPrompt(prompt, compositeId);
+				this.unregisterHandler(compositeId);
 			} else {
-				this.documentsByPromptId.set(prompt.id, updatedDocument);
+				this.documentByPromptId.set(prompt.id, updatedDocument);
 			}
 
 			this.bot.rest.deleteMessage(prompt.channelId, prompt.id).catch(() => {
@@ -362,10 +489,51 @@ abstract class PromptService<
 		});
 	}
 
+	unregisterHandler(compositeId: string): void {
+		this.handlerByCompositeId.delete(compositeId);
+	}
+
 	abstract handleInteraction(
 		interaction: Discord.Interaction,
 		data: InteractionData,
-	): Promise<Document<DataType> | undefined | null>;
+	): Promise<DataType | undefined | null>;
+
+	protected async handleDelete(compositeId: string): Promise<void> {
+		const session = this.client.database.openSession();
+
+		switch (this.type) {
+			case "reports": {
+				await session.delete(`reports/${compositeId}`);
+				break;
+			}
+			case "resources": {
+				await session.delete(`resources/${compositeId}`);
+				break;
+			}
+			case "suggestions": {
+				await session.delete(`suggestions/${compositeId}`);
+				break;
+			}
+			case "tickets": {
+				await session.delete(`tickets/${compositeId}`);
+				break;
+			}
+		}
+
+		await session.saveChanges();
+		session.dispose();
+
+		const prompt = this.promptByCompositeId.get(compositeId);
+		if (prompt !== undefined) {
+			this.bot.rest
+				.deleteMessage(prompt.channelId, prompt.id)
+				.catch(() => this.client.log.warn("Failed to delete prompt after deleting document."));
+			this.unregisterPrompt(prompt, compositeId);
+		}
+
+		this.unregisterDocument(compositeId);
+		this.unregisterHandler(compositeId);
+	}
 }
 
 export { PromptService, Configurations };

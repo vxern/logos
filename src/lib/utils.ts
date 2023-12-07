@@ -1,7 +1,6 @@
 import * as Discord from "@discordeno/bot";
 import * as Logos from "../types";
 import { Client } from "./client";
-import { Document } from "./database/document";
 import diagnostics from "./diagnostics";
 
 type TextChannel = Logos.Channel & { type: Discord.ChannelTypes.GuildText };
@@ -25,11 +24,12 @@ function chunk<T>(array: T[], size: number): T[][] {
 	if (array.length === 0) {
 		return [[]];
 	}
+
 	if (size === 0) {
 		throw "The size of a chunk cannot be zero.";
 	}
 
-	const chunks = array.length <= size ? 1 : Math.floor(array.length / size);
+	const chunks = array.length <= size ? 1 : Math.ceil(array.length / size);
 	const result = [];
 	for (const index of Array(chunks).keys()) {
 		const start = index * size;
@@ -123,8 +123,8 @@ async function getAllMessages(
 	return messages;
 }
 
-function verifyIsWithinLimits(documents: Document[], limit: number, limitingTimePeriod: number): boolean {
-	const actionTimestamps = documents.map((document) => document.data.createdAt).sort((a, b) => b - a); // From most recent to least recent.
+function verifyIsWithinLimits(timestamps: number[], limit: number, limitingTimePeriod: number): boolean {
+	const actionTimestamps = [...timestamps].sort((a, b) => b - a); // From most recent to least recent.
 	const relevantTimestamps = actionTimestamps.slice(0, limit);
 
 	// Has not reached the limit, regardless of the limiting time period.

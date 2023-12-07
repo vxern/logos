@@ -1,10 +1,10 @@
 {
-    "verification.title": "Ստուգման Խնդիրներ",
+    "verification.title": "Ստուգման Հարցումներ",
     "verification.fields.reason": "Ի՞նչ պատճառով {language} կը սորվիք։",
     "verification.fields.aim": "Իմչպէ՞ս կ'օգտուիք անդամ դառնալով։",
     "verification.fields.whereFound": "Ինչպէ՞ս սերվերը գտաք։",
     "answer.title": "Պատասխան",
-    "answer.fields.question": "Խնդիր",
+    "answer.fields.question": "Հարցում",
     "answer.fields.answer": "Պատասխան",
     "correction.title": "Սրբագրութիւն",
     "correction.fields.original": "Բնագիր",

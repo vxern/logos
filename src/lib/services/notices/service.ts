@@ -1,8 +1,7 @@
 import * as Discord from "@discordeno/bot";
 import Hash from "object-hash";
 import { Client } from "../../client";
-import { Document } from "../../database/document";
-import { Guild } from "../../database/structs/guild";
+import { Guild } from "../../database/guild";
 import diagnostics from "../../diagnostics";
 import { getAllMessages, getGuildIconURLFormatted } from "../../utils";
 import { LocalService } from "../service";
@@ -19,18 +18,20 @@ interface Configurations {
 	information: NonNullable<
 		NonNullable<Guild["features"]["information"]["features"]>["notices"]["features"]
 	>["information"];
+	resources: NonNullable<NonNullable<Guild["features"]["information"]["features"]>["notices"]["features"]>["resources"];
 	roles: NonNullable<NonNullable<Guild["features"]["information"]["features"]>["notices"]["features"]>["roles"];
 	welcome: NonNullable<NonNullable<Guild["features"]["information"]["features"]>["notices"]["features"]>["welcome"];
 }
 
 type ConfigurationLocators = {
-	[K in keyof Configurations]: (guildDocument: Document<Guild>) => Configurations[K] | undefined;
+	[K in keyof Configurations]: (guildDocument: Guild) => Configurations[K] | undefined;
 };
 
 const configurationLocators: ConfigurationLocators = {
-	information: (guildDocument) => guildDocument.data.features.information.features?.notices.features?.information,
-	roles: (guildDocument) => guildDocument.data.features.information.features?.notices.features?.roles,
-	welcome: (guildDocument) => guildDocument.data.features.information.features?.notices.features?.welcome,
+	information: (guildDocument) => guildDocument.features.information.features?.notices.features?.information,
+	resources: (guildDocument) => guildDocument.features.information.features?.notices.features?.resources,
+	roles: (guildDocument) => guildDocument.features.information.features?.notices.features?.roles,
+	welcome: (guildDocument) => guildDocument.features.information.features?.notices.features?.welcome,
 };
 
 type NoticeTypes = keyof Client["services"]["notices"];
@@ -145,6 +146,10 @@ abstract class NoticeService<NoticeType extends NoticeTypes> extends LocalServic
 			this.registerNotice(BigInt(notice.id), hash);
 			return;
 		}
+	}
+
+	async stop(): Promise<void> {
+		this.noticeData = undefined;
 	}
 
 	// Anti-tampering feature; detects notices being deleted.

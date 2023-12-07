@@ -4,6 +4,7 @@ import { reverseObject } from "../../lib/utils";
 const languages = {
 	discord: [
 		"Dutch",
+		"Danish",
 		"English/American",
 		"English/British",
 		"Finnish",
@@ -15,12 +16,14 @@ const languages = {
 		"Polish",
 		"Romanian",
 		"Russian",
+		"Spanish",
 		"Swedish",
 		"Turkish",
 	],
 	logos: [
 		"Armenian/Eastern",
 		"Armenian/Western",
+		"Danish",
 		"Dutch",
 		"English/American",
 		"English/British",
@@ -34,6 +37,7 @@ const languages = {
 		"Romanian",
 		"Russian",
 		"Silesian",
+		"Spanish",
 		"Swedish",
 		"Turkish",
 	],
@@ -42,6 +46,7 @@ const languages = {
 const languageToLocale = {
 	discord: {
 		Dutch: "nl",
+		Danish: "da",
 		"English/American": "en-US",
 		"English/British": "en-GB",
 		Finnish: "fi",
@@ -53,12 +58,14 @@ const languageToLocale = {
 		Polish: "pl",
 		Romanian: "ro",
 		Russian: "ru",
+		Spanish: "es-ES",
 		Swedish: "sv-SE",
 		Turkish: "tr",
 	} satisfies Record<DiscordLanguage, Discord.Locale>,
 	logos: {
 		"Armenian/Eastern": "hye",
 		"Armenian/Western": "hyw",
+		Danish: "dan",
 		Dutch: "nld",
 		"English/American": "eng-US",
 		"English/British": "eng-GB",
@@ -71,6 +78,7 @@ const languageToLocale = {
 		Polish: "pol",
 		Romanian: "ron",
 		Russian: "rus",
+		Spanish: "spa",
 		Silesian: "szl",
 		Swedish: "swe",
 		Turkish: "tur",

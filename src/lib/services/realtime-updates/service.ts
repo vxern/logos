@@ -1,64 +1,70 @@
 import * as Discord from "@discordeno/bot";
-import Fauna from "fauna";
+import * as ravendb from "ravendb";
 import { Client, handleGuildCreate, handleGuildDelete } from "../../client";
-import { Document } from "../../database/document";
-import { Guild } from "../../database/structs/guild";
+import { Guild } from "../../database/guild";
 import diagnostics from "../../diagnostics";
-import { LocalService } from "../service";
+import { GlobalService } from "../service";
 
-type StreamSubscription = Fauna.Subscription<Omit<Fauna.SubscriptionEventHandlers, "snapshot">>;
+class RealtimeUpdateService extends GlobalService {
+	changes: ravendb.IDatabaseChanges | undefined;
 
-class RealtimeUpdateService extends LocalService {
-	readonly documentReference: Fauna.Expr;
-	streamSubscription: StreamSubscription | undefined;
-
-	constructor([client, bot]: [Client, Discord.Bot], guildId: bigint, documentReference: Fauna.Expr) {
-		super([client, bot], guildId);
-		this.documentReference = documentReference;
+	constructor([client, bot]: [Client, Discord.Bot]) {
+		super([client, bot]);
 	}
 
 	async start(): Promise<void> {
-		const guild = this.guild;
-		if (guild === undefined) {
-			return;
-		}
+		this.client.log.info("Streaming updates to guild documents...");
 
-		this.client.database.log.info(`Streaming updates to guild document on ${diagnostics.display.guild(guild)}...`);
+		const changes = this.client.database.changes();
+		const streamSubscription = changes.forDocumentsInCollection("Guilds");
 
-		const streamSubscription = this.client.database.client
-			.stream(this.documentReference, { fields: ["action", "document"] })
-			.on("start", (_) => {})
-			.on("version", async (data, _) => {
-				this.client.database.log.info(
-					`Detected update to configuration for ${diagnostics.display.guild(guild)}. Updating...`,
-				);
+		streamSubscription.on("data", async (data) => {
+			const guildId = data.id.split("/").at(-1);
+			if (guildId === undefined) {
+				return;
+			}
 
-				const document = data.document as Document<Guild> | undefined;
-				if (document === undefined) {
-					return;
-				}
+			const guild = this.client.cache.guilds.get(BigInt(guildId));
+			if (guild === undefined) {
+				return;
+			}
 
-				this.client.database.cache.guildById.set(document.data.id, document);
+			this.client.log.info(`Detected update to configuration for ${diagnostics.display.guild(guild)}. Updating...`);
 
-				await handleGuildDelete(this.client, guild.id);
-				await handleGuildCreate([this.client, this.bot], guild, { isUpdate: true });
-			})
-			.on("error", (_) => {
-				this.client.database.log.info(
-					`Guild document stream closed for ${diagnostics.display.guild(guild)}. Reopening in 10 seconds...`,
-				);
-				streamSubscription.close();
-				setTimeout(() => {
-					this.client.database.adapters.guilds.fetch(this.client, "id", this.guildIdString);
-					this.start();
-				}, 10000);
-			});
-		this.streamSubscription = streamSubscription;
-		streamSubscription.start();
+			const session = this.client.database.openSession();
+
+			const oldGuildDocument = await session.load<Guild>(data.id).then((value) => value ?? undefined);
+
+			if (oldGuildDocument !== undefined) {
+				await session.advanced.refresh(oldGuildDocument);
+			}
+
+			session.dispose();
+
+			if (oldGuildDocument === undefined) {
+				return;
+			}
+
+			this.client.cache.documents.guilds.set(oldGuildDocument.guildId, oldGuildDocument);
+
+			await handleGuildDelete(this.client, guild.id);
+			await handleGuildCreate([this.client, this.bot], guild, { isUpdate: true });
+		});
+
+		streamSubscription.on("error", (error) => {
+			this.client.log.info(`Guild document stream closed: ${error}`);
+			this.client.log.info("Reopening in 10 seconds...");
+
+			changes.dispose();
+
+			setTimeout(() => this.start(), 10_000);
+		});
+
+		this.changes = changes;
 	}
 
 	async stop(): Promise<void> {
-		this.streamSubscription?.close();
+		this.changes?.dispose();
 	}
 }
 

@@ -1,6 +1,8 @@
 import * as Discord from "@discordeno/bot";
+import localisations from "../../../../constants/localisations";
 import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
+import { Guild } from "../../../database/guild";
 import { getShowButton, parseArguments, reply } from "../../../interactions";
 import { CommandTemplate } from "../../command";
 import { show } from "../../parameters";
@@ -29,17 +31,19 @@ async function handleDisplayResources(
 		return;
 	}
 
-	const guildDocument = await client.database.adapters.guilds.getOrFetchOrCreate(
-		client,
-		"id",
-		guildId.toString(),
-		guildId,
-	);
+	const session = client.database.openSession();
+
+	const guildDocument =
+		client.cache.documents.guilds.get(guildId.toString()) ??
+		(await session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
+
+	session.dispose();
+
 	if (guildDocument === undefined) {
 		return;
 	}
 
-	const configuration = guildDocument.data.features.language.features?.resources;
+	const configuration = guildDocument.features.language.features?.resources;
 	if (configuration === undefined || !configuration.enabled) {
 		return;
 	}
@@ -50,7 +54,7 @@ async function handleDisplayResources(
 			"resources.strings.redirect",
 			locale,
 		)({
-			language: localise(client, `languages.${interaction.featureLanguage.toLowerCase()}`, locale)(),
+			language: localise(client, localisations.languages[interaction.featureLanguage], locale)(),
 		}),
 	};
 

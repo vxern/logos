@@ -1,7 +1,9 @@
 import * as Discord from "@discordeno/bot";
 import constants from "../../../../../constants/constants";
+import { MentionTypes, mention } from "../../../../../formatting";
 import * as Logos from "../../../../../types";
 import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../../client";
+import { Guild } from "../../../../database/guild";
 import diagnostics from "../../../../diagnostics";
 import { parseArguments, reply } from "../../../../interactions";
 
@@ -25,17 +27,19 @@ async function handleClearTimeout([client, bot]: [Client, Discord.Bot], interact
 		return;
 	}
 
-	const guildDocument = await client.database.adapters.guilds.getOrFetchOrCreate(
-		client,
-		"id",
-		guildId.toString(),
-		guildId,
-	);
+	const session = client.database.openSession();
+
+	const guildDocument =
+		client.cache.documents.guilds.get(guildId.toString()) ??
+		(await session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
+
+	session.dispose();
+
 	if (guildDocument === undefined) {
 		return;
 	}
 
-	const configuration = guildDocument.data.features.moderation.features?.timeouts;
+	const configuration = guildDocument.features.moderation.features?.timeouts;
 	if (configuration === undefined || !configuration.enabled) {
 		return;
 	}
@@ -75,7 +79,7 @@ async function handleClearTimeout([client, bot]: [Client, Discord.Bot], interact
 				client,
 				"timeout.strings.notTimedOut.description",
 				locale,
-			)({ user_mention: diagnostics.display.user(user) }),
+			)({ user_mention: mention(user.id, MentionTypes.User) }),
 		};
 
 		reply([client, bot], interaction, {
@@ -110,7 +114,7 @@ async function handleClearTimeout([client, bot]: [Client, Discord.Bot], interact
 			client,
 			"timeout.strings.timeoutCleared.description",
 			locale,
-		)({ user_mention: diagnostics.display.user(user) }),
+		)({ user_mention: mention(user.id, MentionTypes.User) }),
 	};
 
 	reply([client, bot], interaction, {

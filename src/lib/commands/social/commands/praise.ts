@@ -5,8 +5,9 @@ import defaults from "../../../../defaults";
 import { MentionTypes, mention } from "../../../../formatting";
 import * as Logos from "../../../../types";
 import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../client";
-import { timeStructToMilliseconds } from "../../../database/structs/guild";
-import { Praise } from "../../../database/structs/praise";
+import { Guild, timeStructToMilliseconds } from "../../../database/guild";
+import { Praise } from "../../../database/praise";
+import { User } from "../../../database/user";
 import { editReply, parseArguments, postponeReply, reply } from "../../../interactions";
 import { verifyIsWithinLimits } from "../../../utils";
 import { CommandTemplate } from "../../command";
@@ -47,17 +48,19 @@ async function handlePraiseUser([client, bot]: [Client, Discord.Bot], interactio
 		return;
 	}
 
-	const guildDocument = await client.database.adapters.guilds.getOrFetchOrCreate(
-		client,
-		"id",
-		guildId.toString(),
-		guildId,
-	);
+	let session = client.database.openSession();
+
+	const guildDocument =
+		client.cache.documents.guilds.get(guildId.toString()) ??
+		(await session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
+
+	session.dispose();
+
 	if (guildDocument === undefined) {
 		return;
 	}
 
-	const configuration = guildDocument.data.features.social.features?.praises;
+	const configuration = guildDocument.features.social.features?.praises;
 	if (configuration === undefined || !configuration.enabled) {
 		return;
 	}
@@ -92,31 +95,82 @@ async function handlePraiseUser([client, bot]: [Client, Discord.Bot], interactio
 
 	await postponeReply([client, bot], interaction);
 
-	const [author, subject] = await Promise.all([
-		client.database.adapters.users.getOrFetchOrCreate(
-			client,
-			"id",
-			interaction.user.id.toString(),
-			interaction.user.id,
-		),
-		client.database.adapters.users.getOrFetchOrCreate(client, "id", member.id.toString(), member.id),
-	]);
+	session = client.database.openSession();
 
-	if (author === undefined || subject === undefined) {
+	const [authorDocument, targetDocument] = [
+		client.cache.documents.users.get(interaction.user.id.toString()) ??
+			(await session.load<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined)) ??
+			(await (async () => {
+				const userDocument = {
+					...({
+						id: `users/${interaction.user.id}`,
+						account: { id: interaction.user.id.toString() },
+						createdAt: Date.now(),
+					} satisfies User),
+					"@metadata": { "@collection": "Users" },
+				};
+				await session.store(userDocument);
+				await session.saveChanges();
+
+				return userDocument as User;
+			})()),
+		client.cache.documents.users.get(member.id.toString()) ??
+			(await session.load<User>(`users/${member.id}`).then((value) => value ?? undefined)) ??
+			(await (async () => {
+				const userDocument = {
+					...({
+						id: `users/${member.id}`,
+						account: { id: member.id.toString() },
+						createdAt: Date.now(),
+					} satisfies User),
+					"@metadata": { "@collection": "Users" },
+				};
+				await session.store(userDocument);
+				await session.saveChanges();
+
+				return userDocument as User;
+			})()),
+	];
+
+	session.dispose();
+
+	if (authorDocument === undefined || targetDocument === undefined) {
 		displayError([client, bot], interaction, { locale });
 		return;
 	}
 
-	const praisesBySender = await client.database.adapters.praises.getOrFetch(client, "sender", author.ref);
-	if (praisesBySender === undefined) {
-		displayError([client, bot], interaction, { locale });
-		return;
-	}
+	session = client.database.openSession();
+
+	const praiseDocumentsCached = client.cache.documents.praisesByAuthor.get(interaction.user.id.toString());
+	const praiseDocuments =
+		praiseDocumentsCached !== undefined
+			? Array.from(praiseDocumentsCached.values())
+			: await session
+					.query<Praise>({ collection: "Praises" })
+					.whereRegex("id", `^praises\/\d+\/${interaction.user.id}\/\d+$`)
+					.all()
+					.then((praiseDocuments) => {
+						const map = new Map(
+							praiseDocuments.map((praiseDocument) => [
+								`${praiseDocument.targetId}/${praiseDocument.authorId}/${praiseDocument.createdAt}`,
+								praiseDocument,
+							]),
+						);
+						client.cache.documents.praisesByAuthor.set(interaction.user.id.toString(), map);
+						return praiseDocuments;
+					});
+
+	session.dispose();
 
 	const intervalMilliseconds = timeStructToMilliseconds(configuration.rateLimit?.within ?? defaults.PRAISE_INTERVAL);
 
-	const praises = Array.from(praisesBySender.values());
-	if (!verifyIsWithinLimits(praises, configuration.rateLimit?.uses ?? defaults.PRAISE_LIMIT, intervalMilliseconds)) {
+	if (
+		!verifyIsWithinLimits(
+			praiseDocuments.map((suggestionDocument) => suggestionDocument.createdAt),
+			configuration.rateLimit?.uses ?? defaults.PRAISE_LIMIT,
+			intervalMilliseconds,
+		)
+	) {
 		const strings = {
 			title: localise(client, "praise.strings.tooMany.title", locale)(),
 			description: localise(client, "praise.strings.tooMany.description", locale)(),
@@ -134,27 +188,28 @@ async function handlePraiseUser([client, bot]: [Client, Discord.Bot], interactio
 		return;
 	}
 
-	const praise: Praise = {
-		createdAt: Date.now(),
-		sender: author.ref,
-		recipient: subject.ref,
-		comment: comment,
-	};
-
 	const guild = client.cache.guilds.get(guildId);
 	if (guild === undefined) {
 		return;
 	}
 
-	const document = await client.database.adapters.praises.create(client, praise);
-	if (document === undefined) {
-		displayError([client, bot], interaction, { locale });
-		return;
-	}
+	session = client.database.openSession();
+	const createdAt = Date.now();
+	const praiseDocument = {
+		id: `praises/${targetDocument.account.id}/${authorDocument.account.id}/${createdAt}`,
+		authorId: authorDocument.account.id,
+		targetId: targetDocument.account.id,
+		comment,
+		createdAt,
+		"@metadata": { "@collection": "Praises" },
+	};
+	await session.store(praiseDocument);
+	await session.saveChanges();
+	session.dispose();
 
 	if (configuration.journaling) {
 		const journallingService = client.services.journalling.get(guild.id);
-		journallingService?.log("praiseAdd", { args: [member, praise, interaction.user] });
+		journallingService?.log("praiseAdd", { args: [member, praiseDocument, interaction.user] });
 	}
 
 	const strings = {

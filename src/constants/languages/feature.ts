@@ -1,5 +1,6 @@
 const languages = [
 	"Armenian",
+	"Danish",
 	"Dutch",
 	"English",
 	"French",
@@ -10,6 +11,7 @@ const languages = [
 	"Polish",
 	"Romanian",
 	"Russian",
+	"Spanish",
 	"Swedish",
 	"Turkish",
 ] as const;

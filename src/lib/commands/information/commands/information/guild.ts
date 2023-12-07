@@ -5,8 +5,7 @@ import localisations from "../../../../../constants/localisations";
 import { MentionTypes, mention, timestamp } from "../../../../../formatting";
 import * as Logos from "../../../../../types";
 import { Client, localise } from "../../../../client";
-import { Document } from "../../../../database/document";
-import { Guild } from "../../../../database/structs/guild";
+import { Guild } from "../../../../database/guild";
 import diagnostics from "../../../../diagnostics";
 import { getFeatureLanguage, getLocalisationLanguage, reply } from "../../../../interactions";
 import { getGuildIconURLFormatted, snowflakeToTimestamp } from "../../../../utils";
@@ -29,12 +28,14 @@ async function handleDisplayGuildInformation(
 		return;
 	}
 
-	const guildDocument = await client.database.adapters.guilds.getOrFetchOrCreate(
-		client,
-		"id",
-		guildId.toString(),
-		guildId,
-	);
+	const session = client.database.openSession();
+
+	const guildDocument =
+		client.cache.documents.guilds.get(guildId.toString()) ??
+		(await session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
+
+	session.dispose();
+
 	if (guildDocument === undefined) {
 		return;
 	}
@@ -121,7 +122,7 @@ async function handleDisplayGuildInformation(
 						value: getLanguageInformationSection(client, guildDocument, { locale }),
 						inline: true,
 					},
-					...(guildDocument.data.isNative
+					...(guildDocument.isNative
 						? [
 								{
 									name: `${constants.symbols.guild.moderators} ${strings.description.moderators.title}`,
@@ -164,11 +165,7 @@ function getChannelInformationSection(client: Client, guild: Logos.Guild, { loca
 	return `${constants.symbols.guild.channels.text} ${strings.text} – ${textChannelsCount}\n${constants.symbols.guild.channels.voice} ${strings.voice} – ${voiceChannelsCount}`;
 }
 
-function getLanguageInformationSection(
-	client: Client,
-	guildDocument: Document<Guild>,
-	{ locale }: { locale: Locale },
-): string {
+function getLanguageInformationSection(client: Client, guildDocument: Guild, { locale }: { locale: Locale }): string {
 	const localisationLanguage = getLocalisationLanguage(guildDocument);
 	const featureLanguage = getFeatureLanguage(guildDocument);
 

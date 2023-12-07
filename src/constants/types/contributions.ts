@@ -20,9 +20,13 @@ const contributors = {
 		id: "839862207025119252",
 		link: "https://instagram.com/asternight1",
 	},
-	balak: {
-		username: "balak2609",
-		id: "418818654529126400",
+	aura: {
+		username: "@adeniial",
+		id: "868631133263376424",
+	},
+	eagely: {
+		username: "@eagely",
+		id: "747900197358665758",
 	},
 	estheroide: {
 		username: "@estheroide",
@@ -54,7 +58,7 @@ const contributors = {
 		username: "@rodutnotira",
 		id: "502427080877801484",
 	},
-	spanish: {
+	hani: {
 		username: "@hani_men12",
 		id: "775308215470391317",
 	},
@@ -62,6 +66,10 @@ const contributors = {
 		username: "@ferb02",
 		id: "303605019532460033",
 		link: "https://youtube.com/channel/UC4aqpjKwQfkqxmQO0Owy2QQ",
+	},
+	mike: {
+		username: "@rottingrat666",
+		id: "529666071498719242",
 	},
 	moorddroom: {
 		username: "@moorddroom",
@@ -100,8 +108,8 @@ export default {
 	translation: {
 		"Armenian/Eastern": {
 			flag: "🇦🇲",
-			completion: 2,
-			contributors: [contributors["16wardm"]],
+			completion: 3,
+			contributors: [contributors.mike, contributors["16wardm"]],
 		},
 		"Armenian/Western": {
 			flag: "🇺🇳",
@@ -110,12 +118,12 @@ export default {
 		},
 		Dutch: {
 			flag: "🇳🇱",
-			completion: 5,
+			completion: 7,
 			contributors: [contributors.moorddroom],
 		},
 		Finnish: {
 			flag: "🇫🇮",
-			completion: 0,
+			completion: 3,
 			contributors: [contributors.megaGlaceon],
 		},
 		French: {
@@ -132,13 +140,8 @@ export default {
 		},
 		German: {
 			flag: "🇩🇪",
-			completion: 9,
+			completion: 10,
 			contributors: [contributors.rodutNotira],
-		},
-		Greek: {
-			flag: "🇬🇷",
-			completion: 0,
-			contributors: [],
 		},
 		Hungarian: {
 			flag: "🇭🇺",
@@ -157,22 +160,22 @@ export default {
 		},
 		Romanian: {
 			flag: "🇷🇴",
-			completion: 8,
+			completion: 10,
 			contributors: [contributors.vxern, contributors.victor, contributors.kamelNeon],
-		},
-		Russian: {
-			flag: "🇷🇺",
-			completion: 0,
-			contributors: [],
 		},
 		Silesian: {
 			flag: "🇺🇳",
-			completion: 1,
+			completion: 3,
 			contributors: [contributors.okruchChleba, contributors.vxern],
+		},
+		Spanish: {
+			flag: "🇪🇸",
+			completion: 1,
+			contributors: [contributors.aura, contributors.hani],
 		},
 		Swedish: {
 			flag: "🇸🇪",
-			completion: 0,
+			completion: 1,
 			contributors: [contributors.iiv, contributors.telemaniak],
 		},
 		Turkish: {
@@ -180,6 +183,6 @@ export default {
 			completion: 7,
 			contributors: [contributors.yeetfe, contributors.theodeninmuhafizi],
 		},
-	} satisfies Record<Exclude<LearningLanguage, "English/American" | "English/British">, Translation>,
+	} satisfies Partial<Record<Exclude<LearningLanguage, "English/American" | "English/British">, Translation>>,
 };
 export type { Contributor, Translation };

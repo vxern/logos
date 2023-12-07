@@ -114,7 +114,7 @@ async function handleDisplayCurrentlyPlaying(
 		return;
 	}
 
-	if (isCollection(current.content)) {
+	if (collection) {
 		const collection = current.content as SongCollection;
 
 		const locale = interaction.locale;
@@ -128,7 +128,7 @@ async function handleDisplayCurrentlyPlaying(
 			[client, bot],
 			interaction,
 			{
-				elements: chunk(collection.songs, defaults.RESULTS_PER_PAGE),
+				getElements: () => chunk(collection.songs, defaults.RESULTS_PER_PAGE),
 				embed: {
 					color: constants.colors.blue,
 				},

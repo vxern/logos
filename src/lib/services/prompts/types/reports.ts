@@ -1,63 +1,52 @@
 import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
-import { MentionTypes, mention, timestamp } from "../../../../formatting";
 import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
-import { stringifyValue } from "../../../database/database";
-import { Document } from "../../../database/document";
-import { Report } from "../../../database/structs/report";
-import { User } from "../../../database/structs/user";
+import { Report } from "../../../database/report";
+import { User } from "../../../database/user";
+import diagnostics from "../../../diagnostics";
 import { encodeId, getLocaleData, reply } from "../../../interactions";
 import { getGuildIconURLFormatted } from "../../../utils";
 import { PromptService } from "../service";
 
-type Metadata = { userId: bigint; reference: string };
-type InteractionData = [userId: string, guildId: string, reference: string, isResolved: string];
+type InteractionData = [documentId: string, isResolved: string];
 
-class ReportService extends PromptService<"reports", Report, Metadata, InteractionData> {
+class ReportService extends PromptService<"reports", Report, InteractionData> {
 	constructor([client, bot]: [Client, Discord.Bot], guildId: bigint) {
-		super([client, bot], guildId, { type: "reports" });
+		super([client, bot], guildId, { type: "reports", deleteMode: "delete" });
 	}
 
-	getAllDocuments(): Document<Report>[] {
-		const reportsAll: Document<Report>[] = [];
+	getAllDocuments(): Map<string, Report> {
+		const reports = new Map<string, Report>();
 
-		for (const [compositeId, reports] of this.client.database.cache.reportsByAuthorAndGuild.entries()) {
-			const [_, guildIdString] = compositeId.split(constants.symbols.meta.idSeparator);
-			if (guildIdString === undefined) {
+		for (const [compositeId, reportDocument] of this.client.cache.documents.reports) {
+			if (reportDocument.guildId !== this.guildIdString) {
 				continue;
 			}
 
-			if (guildIdString !== this.guildIdString) {
-				continue;
-			}
-
-			reportsAll.push(...reports.values());
+			reports.set(compositeId, reportDocument);
 		}
 
-		return reportsAll;
+		return reports;
 	}
 
-	getUserDocument(document: Document<Report>): Promise<Document<User> | undefined> {
-		return this.client.database.adapters.users.getOrFetch(this.client, "reference", document.data.author);
+	async getUserDocument(reportDocument: Report): Promise<User | undefined> {
+		const session = this.client.database.openSession();
+
+		const userDocument =
+			this.client.cache.documents.users.get(reportDocument.authorId) ??
+			session.load<User>(`users/${reportDocument.authorId}`).then((value) => value ?? undefined);
+
+		session.dispose();
+
+		return userDocument;
 	}
 
-	decodeMetadata(data: string[]): Metadata | undefined {
-		const [userId, reference] = data;
-		if (userId === undefined || reference === undefined) {
-			return undefined;
-		}
-
-		return { userId: BigInt(userId), reference };
-	}
-
-	getPromptContent(user: Logos.User, document: Document<Report>): Discord.CreateMessageOptions | undefined {
+	getPromptContent(user: Logos.User, reportDocument: Report): Discord.CreateMessageOptions | undefined {
 		const guild = this.guild;
 		if (guild === undefined) {
 			return;
 		}
-
-		const reference = stringifyValue(document.ref);
 
 		const guildLocale = this.guildLocale;
 		const strings = {
@@ -74,17 +63,17 @@ class ReportService extends PromptService<"reports", Report, Metadata, Interacti
 			},
 			markResolved: localise(this.client, "markResolved", guildLocale)(),
 			markUnresolved: localise(this.client, "markUnresolved", guildLocale)(),
+			close: localise(this.client, "close", guildLocale)(),
 		};
 
 		return {
 			embeds: [
 				{
-					title: document.data.answers.reason,
-					color: constants.colors.darkRed,
+					color: reportDocument.isResolved ? constants.colors.green : constants.colors.peach,
 					thumbnail: (() => {
 						const iconURL = Discord.avatarUrl(user.id, user.discriminator, {
 							avatar: user.avatar,
-							size: 32,
+							size: 128,
 							format: "webp",
 						});
 						if (iconURL === undefined) {
@@ -95,95 +84,86 @@ class ReportService extends PromptService<"reports", Report, Metadata, Interacti
 					})(),
 					fields: [
 						{
+							name: diagnostics.display.user(user),
+							value: reportDocument.answers.reason,
+							inline: false,
+						},
+						{
 							name: strings.report.users,
-							value: document.data.answers.users,
+							value: reportDocument.answers.users,
+							inline: true,
 						},
 						{
 							name: strings.report.link,
 							value:
-								document.data.answers.messageLink !== undefined
-									? document.data.answers.messageLink
+								reportDocument.answers.messageLink !== undefined
+									? reportDocument.answers.messageLink
 									: `*${strings.report.noLinkProvided}*`,
-							inline: false,
-						},
-						{
-							name: strings.report.submittedBy,
-							value: mention(user.id, MentionTypes.User),
-							inline: true,
-						},
-						{
-							name: strings.report.submittedAt,
-							value: timestamp(document.data.createdAt),
 							inline: true,
 						},
 					],
 					footer: {
 						text: guild.name,
-						iconUrl: `${getGuildIconURLFormatted(
-							guild,
-						)}&metadata=${`${user.id}${constants.symbols.meta.metadataSeparator}${reference}`}`,
+						iconUrl: `${getGuildIconURLFormatted(guild)}&metadata=${reportDocument.guildId}/${
+							reportDocument.authorId
+						}/${reportDocument.createdAt}`,
 					},
 				},
 			],
 			components: [
 				{
 					type: Discord.MessageComponentTypes.ActionRow,
-					components: [
-						document.data.isResolved
-							? {
+					components: reportDocument.isResolved
+						? [
+								{
 									type: Discord.MessageComponentTypes.Button,
-									style: Discord.ButtonStyles.Secondary,
+									style: Discord.ButtonStyles.Success,
 									label: strings.markUnresolved,
 									customId: encodeId<InteractionData>(constants.components.reports, [
-										user.id.toString(),
-										this.guildIdString,
-										reference,
+										`${reportDocument.guildId}/${reportDocument.authorId}/${reportDocument.createdAt}`,
 										`${false}`,
 									]),
-							  }
-							: {
+								},
+
+								{
+									type: Discord.MessageComponentTypes.Button,
+									style: Discord.ButtonStyles.Danger,
+									label: strings.close,
+									customId: encodeId(
+										`${constants.components.removePrompt}/${constants.components.reports}/${this.guildId}`,
+										[`${reportDocument.guildId}/${reportDocument.authorId}/${reportDocument.createdAt}`],
+									),
+								},
+						  ]
+						: [
+								{
 									type: Discord.MessageComponentTypes.Button,
 									style: Discord.ButtonStyles.Primary,
 									label: strings.markResolved,
 									customId: encodeId<InteractionData>(constants.components.reports, [
-										user.id.toString(),
-										this.guildIdString,
-										reference,
+										`${reportDocument.guildId}/${reportDocument.authorId}/${reportDocument.createdAt}`,
 										`${true}`,
 									]),
-							  },
-					],
+								},
+						  ],
 				},
 			],
 		};
 	}
 
-	async handleInteraction(
-		interaction: Discord.Interaction,
-		data: InteractionData,
-	): Promise<Document<Report> | null | undefined> {
+	async handleInteraction(interaction: Discord.Interaction, data: InteractionData): Promise<Report | null | undefined> {
 		const localeData = await getLocaleData(this.client, interaction);
 		const locale = localeData.locale;
 
-		const [userId, guildId, reference, isResolvedString] = data;
+		const [compositeId, isResolvedString] = data;
 		const isResolved = isResolvedString === "true";
 
-		const user = await this.client.database.adapters.users.getOrFetch(this.client, "id", userId);
-		if (user === undefined) {
+		const reportDocument = this.documents.get(compositeId);
+		if (reportDocument === undefined) {
 			return undefined;
 		}
 
-		const documents = this.client.database.adapters.reports.get(this.client, "authorAndGuild", [user.ref, guildId]);
-		if (documents === undefined) {
-			return undefined;
-		}
-
-		const document = documents.get(reference);
-		if (document === undefined) {
-			return undefined;
-		}
-
-		if (isResolved && document.data.isResolved) {
+		if (isResolved && reportDocument.isResolved) {
 			const strings = {
 				title: localise(this.client, "alreadyMarkedResolved.title", locale)(),
 				description: localise(this.client, "alreadyMarkedResolved.description", locale)(),
@@ -201,7 +181,7 @@ class ReportService extends PromptService<"reports", Report, Metadata, Interacti
 			return;
 		}
 
-		if (!(isResolved || document.data.isResolved)) {
+		if (!(isResolved || reportDocument.isResolved)) {
 			const strings = {
 				title: localise(this.client, "alreadyMarkedUnresolved.title", locale)(),
 				description: localise(this.client, "alreadyMarkedUnresolved.description", locale)(),
@@ -219,12 +199,16 @@ class ReportService extends PromptService<"reports", Report, Metadata, Interacti
 			return;
 		}
 
-		const updatedDocument = await this.client.database.adapters.reports.update(this.client, {
-			...document,
-			data: { ...document.data, isResolved },
-		});
+		const session = this.client.database.openSession();
 
-		return updatedDocument;
+		reportDocument.isResolved = isResolved;
+
+		await session.store(reportDocument);
+		await session.saveChanges();
+
+		session.dispose();
+
+		return reportDocument;
 	}
 }
 

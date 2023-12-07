@@ -3,7 +3,8 @@ import constants from "../../../../constants/constants";
 import { Locale } from "../../../../constants/languages";
 import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
-import { CefrConfiguration } from "../../../database/structs/guild";
+import { CefrConfiguration } from "../../../database/guild";
+import { Guild } from "../../../database/guild";
 import {
 	acknowledge,
 	createInteractionCollector,
@@ -51,17 +52,24 @@ async function handleDisplayCefrGuide(
 		return;
 	}
 
-	const guildDocument = await client.database.adapters.guilds.getOrFetch(client, "id", guildId.toString());
+	const session = client.database.openSession();
+
+	const guildDocument =
+		client.cache.documents.guilds.get(guildId.toString()) ??
+		(await session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
+
+	session.dispose();
+
 	if (guildDocument === undefined) {
 		return;
 	}
 
-	const levelExamples = guildDocument.data.features.language.features?.cefr?.examples;
+	const levelExamples = guildDocument.features.language.features?.cefr?.examples;
 	if (levelExamples === undefined) {
 		return;
 	}
 
-	const isExtended = guildDocument.data.features.language.features?.cefr?.extended ?? false;
+	const isExtended = guildDocument.features.language.features?.cefr?.extended ?? false;
 
 	const guide = getBracketGuide(client, { isExtended }, { locale });
 	const examples = levelExamples.enabled

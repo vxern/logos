@@ -4,6 +4,7 @@ import time from "../../../../constants/time";
 import { TimestampFormat, timestamp } from "../../../../formatting";
 import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
+import { Guild } from "../../../database/guild";
 import diagnostics from "../../../diagnostics";
 import { parseArguments, reply, respond } from "../../../interactions";
 import { CommandTemplate } from "../../command";
@@ -80,17 +81,19 @@ async function handleToggleSlowmode(
 		return;
 	}
 
-	const guildDocument = await client.database.adapters.guilds.getOrFetchOrCreate(
-		client,
-		"id",
-		guild.id.toString(),
-		guild.id,
-	);
+	const session = client.database.openSession();
+
+	const guildDocument =
+		client.cache.documents.guilds.get(guildId.toString()) ??
+		(await session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
+
+	session.dispose();
+
 	if (guildDocument === undefined) {
 		return;
 	}
 
-	const configuration = guildDocument.data.features.moderation.features?.slowmode;
+	const configuration = guildDocument.features.moderation.features?.slowmode;
 	if (configuration === undefined || !configuration.enabled) {
 		return;
 	}
@@ -318,7 +321,9 @@ async function handleToggleSlowmode(
 
 	bot.rest
 		.editChannel(channel.id, { rateLimitPerUser: rateLimitDuration })
-		.catch(() => client.log.warn(`Failed to enable slowmode on ${diagnostics.display.channel(channel)}.`));
+		.catch((reason) =>
+			client.log.warn(`Failed to enable slowmode on ${diagnostics.display.channel(channel)}: ${reason}`),
+		);
 
 	if (configuration.journaling) {
 		journallingService?.log("slowmodeEnable", { args: [interaction.user, channel, level] });

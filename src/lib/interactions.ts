@@ -15,8 +15,8 @@ import defaults from "../defaults";
 import * as Logos from "../types";
 import { InteractionLocaleData } from "../types";
 import { Client, addCollector, localise, pluralise } from "./client";
-import { Document } from "./database/document";
-import { Guild } from "./database/structs/guild";
+import { Guild } from "./database/guild";
+import { User } from "./database/user";
 import { InteractionRepetitionButtonID } from "./services/interaction-repetition/interaction-repetition";
 
 type AutocompleteInteraction = Discord.Interaction & { type: Discord.InteractionTypes.ApplicationCommandAutocomplete };
@@ -47,6 +47,7 @@ interface InteractionCollectorSettings {
 
 	onCollect?: (...args: Parameters<Discord.EventHandlers["interactionCreate"]>) => void;
 	onEnd?: () => void;
+	end?: Promise<void>;
 }
 
 /**
@@ -65,6 +66,7 @@ function createInteractionCollector(
 		removeAfter: settings.doesNotExpire ? undefined : constants.INTERACTION_TOKEN_EXPIRY,
 		onCollect: settings.onCollect ?? (() => {}),
 		onEnd: settings.onEnd ?? (() => {}),
+		end: settings.end,
 	});
 
 	return customId;
@@ -134,7 +136,8 @@ function parseArguments<
 	return [args as R, focused];
 }
 
-type ControlButtonID = [type: "previous" | "next"];
+type SkipAction = "previous" | "next";
+type ControlButtonID = [type: SkipAction];
 
 /**
  * Paginates an array of elements, allowing the user to browse between pages
@@ -144,21 +147,21 @@ async function paginate<T>(
 	[client, bot]: [Client, Discord.Bot],
 	interaction: Logos.Interaction,
 	{
-		elements,
+		getElements,
 		embed,
 		view,
 		show,
 		showable,
 	}: {
-		elements: T[];
+		getElements: () => T[];
 		embed: Omit<Discord.CamelizedDiscordEmbed, "footer">;
 		view: PaginationDisplayData<T>;
 		show: boolean;
 		showable: boolean;
 	},
 	{ locale }: { locale: Locale },
-): Promise<void> {
-	const data: PaginationData<T> = { elements, view, pageIndex: 0 };
+): Promise<() => Promise<void>> {
+	const data: PaginationData<T> = { elements: getElements(), view, pageIndex: 0 };
 
 	const showButton = getShowButton(client, interaction, { locale });
 
@@ -178,6 +181,25 @@ async function paginate<T>(
 		};
 	};
 
+	const editView = async (action?: SkipAction) => {
+		switch (action) {
+			case "previous": {
+				if (!isFirst()) {
+					data.pageIndex--;
+				}
+				break;
+			}
+			case "next": {
+				if (!isLast()) {
+					data.pageIndex++;
+				}
+				break;
+			}
+		}
+
+		editReply([client, bot], interaction, getView());
+	};
+
 	const customId = createInteractionCollector([client, bot], {
 		type: Discord.InteractionTypes.MessageComponent,
 		doesNotExpire: true,
@@ -191,26 +213,16 @@ async function paginate<T>(
 
 			const [_, action] = decodeId<ControlButtonID>(customId);
 
-			switch (action) {
-				case "previous": {
-					if (!isFirst()) {
-						data.pageIndex--;
-					}
-					break;
-				}
-				case "next": {
-					if (!isLast()) {
-						data.pageIndex++;
-					}
-					break;
-				}
-			}
-
-			editReply([client, bot], interaction, getView());
+			await editView(action);
 		},
 	});
 
 	reply([client, bot], interaction, getView(), { visible: show });
+
+	return async () => {
+		data.elements = getElements();
+		editView();
+	};
 }
 
 interface PaginationDisplayData<T> {
@@ -219,7 +231,7 @@ interface PaginationDisplayData<T> {
 }
 
 interface PaginationData<T> {
-	readonly elements: T[];
+	elements: T[];
 	readonly view: PaginationDisplayData<T>;
 
 	pageIndex: number;
@@ -677,16 +689,16 @@ async function displayModal(
 		.catch((reason) => client.log.warn("Failed to show modal:", reason));
 }
 
-function getLocalisationLanguage(guildDocument: Document<Guild> | undefined): LocalisationLanguage {
-	return guildDocument?.data.languages?.localisation ?? defaults.LOCALISATION_LANGUAGE;
+function getLocalisationLanguage(guildDocument: Guild | undefined): LocalisationLanguage {
+	return guildDocument?.languages?.localisation ?? defaults.LOCALISATION_LANGUAGE;
 }
 
-function getTargetLanguage(guildDocument: Document<Guild>): LocalisationLanguage {
-	return guildDocument?.data.languages?.target ?? getLocalisationLanguage(guildDocument);
+function getTargetLanguage(guildDocument: Guild): LocalisationLanguage {
+	return guildDocument?.languages?.target ?? getLocalisationLanguage(guildDocument);
 }
 
-function getFeatureLanguage(guildDocument?: Document<Guild>): FeatureLanguage {
-	return guildDocument?.data.languages?.feature ?? defaults.FEATURE_LANGUAGE;
+function getFeatureLanguage(guildDocument?: Guild): FeatureLanguage {
+	return guildDocument?.languages?.feature ?? defaults.FEATURE_LANGUAGE;
 }
 
 const FALLBACK_LOCALE_DATA: InteractionLocaleData = {
@@ -706,15 +718,31 @@ async function getLocaleData(client: Client, interaction: Discord.Interaction): 
 
 	const member = client.cache.members.get(Discord.snowflakeToBigint(`${interaction.user.id}${guildId}`));
 
+	const session = client.database.openSession();
+
 	const [userDocument, guildDocument] = await Promise.all([
-		client.database.adapters.users.getOrFetchOrCreate(
-			client,
-			"id",
-			interaction.user.id.toString(),
-			interaction.user.id,
-		),
-		client.database.adapters.guilds.getOrFetchOrCreate(client, "id", guildId.toString(), guildId),
+		client.cache.documents.users.get(interaction.user.id.toString()) ??
+			(await session.load<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined)) ??
+			(async () => {
+				const userDocument = {
+					...({
+						id: `users/${interaction.user.id}`,
+						account: { id: interaction.user.id.toString() },
+						createdAt: Date.now(),
+					} satisfies User),
+					"@metadata": { "@collection": "Users" },
+				};
+				await session.store(userDocument);
+				await session.saveChanges();
+
+				return userDocument as User;
+			})(),
+		client.cache.documents.guilds.get(guildId.toString()) ??
+			session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined),
 	]);
+
+	session.dispose();
+
 	if (userDocument === undefined || guildDocument === undefined) {
 		return FALLBACK_LOCALE_DATA;
 	}
@@ -732,8 +760,8 @@ async function getLocaleData(client: Client, interaction: Discord.Interaction): 
 
 	if (!isAutocomplete(interaction)) {
 		// If the user has configured a custom locale, use the user's preferred locale.
-		if (userDocument?.data.account.language !== undefined) {
-			const language = userDocument?.data.account.language;
+		if (userDocument?.account.language !== undefined) {
+			const language = userDocument?.account.language;
 			const locale = getLocaleByLocalisationLanguage(language);
 			return { language, locale, learningLanguage, guildLanguage, guildLocale, featureLanguage };
 		}
@@ -746,8 +774,8 @@ async function getLocaleData(client: Client, interaction: Discord.Interaction): 
 	return { language, locale, learningLanguage, guildLanguage, guildLocale, featureLanguage };
 }
 
-function getTargetOnlyChannelIds(guildDocument: Document<Guild>): bigint[] {
-	const language = guildDocument.data.features.language;
+function getTargetOnlyChannelIds(guildDocument: Guild): bigint[] {
+	const language = guildDocument.features.language;
 	if (!language.enabled) {
 		return [];
 	}
@@ -761,7 +789,7 @@ function getTargetOnlyChannelIds(guildDocument: Document<Guild>): bigint[] {
 }
 
 function getLearningLanguage(
-	guildDocument: Document<Guild>,
+	guildDocument: Guild,
 	guildLearningLanguage: LearningLanguage,
 	member: Logos.Member | undefined,
 ): LearningLanguage {
@@ -769,7 +797,7 @@ function getLearningLanguage(
 		return guildLearningLanguage;
 	}
 
-	const language = guildDocument.data.features.language;
+	const language = guildDocument.features.language;
 	if (!language.enabled) {
 		return guildLearningLanguage;
 	}

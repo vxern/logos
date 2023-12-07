@@ -272,13 +272,14 @@ async function setup(): Promise<void> {
 	readEnvironment({ envConfiguration, templateEnvConfiguration });
 
 	const environmentProvisional: Record<keyof Client["environment"], string | boolean | undefined> = {
-		version: process.env.npm_package_version,
 		discordSecret: process.env.SECRET_DISCORD,
-		faunaSecret: process.env.SECRET_FAUNA,
 		deeplSecret: process.env.SECRET_DEEPL,
 		rapidApiSecret: process.env.SECRET_RAPID_API,
 		wordnikSecret: process.env.SECRET_WORDNIK,
 		ponsSecret: process.env.SECRET_PONS,
+		ravendbHost: process.env.RAVENDB_HOST,
+		ravendbDatabase: process.env.RAVENDB_DATABASE,
+		ravendbSecure: process.env.RAVENDB_SECURE !== undefined && process.env.RAVENDB_SECURE === "true",
 		lavalinkHost: process.env.LAVALINK_HOST,
 		lavalinkPort: process.env.LAVALINK_PORT,
 		lavalinkPassword: process.env.LAVALINK_PASSWORD,
