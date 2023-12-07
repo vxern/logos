@@ -46,6 +46,14 @@ const adaptersLocalised: AdaptersLocalised = {
 			},
 		},
 	},
+	Danish: {
+		primary: {
+			targets: {
+				"English/American": [wiktionary],
+				"English/British": [wiktionary],
+			},
+		},
+	},
 	Dutch: {
 		primary: {
 			targets: {
@@ -256,6 +264,14 @@ const adaptersLocalised: AdaptersLocalised = {
 		},
 	},
 	Silesian: {
+		primary: {
+			targets: {
+				"English/American": [wiktionary],
+				"English/British": [wiktionary],
+			},
+		},
+	},
+	Spanish: {
 		primary: {
 			targets: {
 				"English/American": [wiktionary],

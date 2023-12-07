@@ -71,7 +71,7 @@ type Client = {
 		rapidApiSecret: string;
 		wordnikSecret: string;
 		ponsSecret: string;
-    ravendbHost: string;
+		ravendbHost: string;
 		ravendbDatabase: string;
 		ravendbSecure: boolean;
 		lavalinkHost: string;

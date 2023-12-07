@@ -408,11 +408,6 @@ async function resolveData(
 		return undefined;
 	}
 
-	const guildDocument = await client.database.adapters.guilds.getOrFetch(client, "id", guildId.toString());
-	if (guildDocument === undefined) {
-		return undefined;
-	}
-
 	const guild = client.cache.guilds.get(guildId);
 	if (guild === undefined) {
 		return undefined;

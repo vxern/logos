@@ -21,6 +21,7 @@ export default {
 	Romanian: romanian,
 	Russian: {},
 	Silesian: {},
+	Spanish: {},
 	Swedish: {},
 	Turkish: {},
 } satisfies Record<LearningLanguage, Record<string, PartOfSpeech>>;

@@ -14,6 +14,7 @@ import polish from "./transformers/polish";
 import romanian from "./transformers/romanian";
 import russian from "./transformers/russian";
 import silesian from "./transformers/silesian";
+import spanish from "./transformers/spanish";
 import swedish from "./transformers/swedish";
 import turkish from "./transformers/turkish";
 
@@ -34,6 +35,7 @@ export default {
 	Romanian: romanian,
 	Russian: russian,
 	Silesian: silesian,
+	Spanish: spanish,
 	Swedish: swedish,
 	Turkish: turkish,
 } as const satisfies Record<LocalisationLanguage, Record<TransformerType, Transformer>>;
