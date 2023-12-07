@@ -66,6 +66,8 @@ async function handleSetLanguageAutocomplete(
 }
 
 async function handleSetLanguage([client, bot]: [Client, Discord.Bot], interaction: Logos.Interaction): Promise<void> {
+	const localeBefore = interaction.locale;
+
 	const [{ language: languageOrUndefined }] = parseArguments(interaction.data?.options, {});
 	if (languageOrUndefined === undefined) {
 		displayError([client, bot], interaction, { locale: interaction.locale });
@@ -91,21 +93,46 @@ async function handleSetLanguage([client, bot]: [Client, Discord.Bot], interacti
 		return;
 	}
 
+	if (userDocument.account.language === language) {
+		const strings = {
+			title: localise(client, "settings.strings.alreadySet.title", localeBefore)(),
+			description: localise(
+				client,
+				"settings.strings.alreadySet.description",
+				localeBefore,
+			)({
+				language: localise(client, localisations.languages[language], localeBefore)(),
+			}),
+		};
+
+		editReply([client, bot], interaction, {
+			embeds: [
+				{
+					title: strings.title,
+					description: strings.description,
+					color: constants.colors.blue,
+				},
+			],
+		});
+
+		return;
+	}
+
 	userDocument.account.language = language;
 	await session.store(userDocument);
 	await session.saveChanges();
 	session.dispose();
 
-	const locale = getLocaleByLocalisationLanguage(language);
+	const localeAfter = getLocaleByLocalisationLanguage(language);
 
 	const strings = {
-		title: localise(client, "settings.strings.languageUpdated.title", locale)(),
+		title: localise(client, "settings.strings.languageUpdated.title", localeAfter)(),
 		description: localise(
 			client,
 			"settings.strings.languageUpdated.description",
-			locale,
+			localeAfter,
 		)({
-			language: localise(client, localisations.languages[language], locale)(),
+			language: localise(client, localisations.languages[language], localeAfter)(),
 		}),
 	};
 

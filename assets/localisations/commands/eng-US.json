@@ -708,6 +708,8 @@
   "settings.strings.cleared.description": "Logos will now show messages in the language you have set in the Discord app.",
   "settings.strings.invalid.title": "Invalid language",
   "settings.strings.invalid.description": "The language you specified is invalid.",
+  "settings.strings.alreadySet.title": "Already set as display language",
+  "settings.strings.alreadySet.description": "You already have {language} set as your display language.",
   "settings.strings.languageUpdated.title": "Updated display language",
   "settings.strings.languageUpdated.description": "Your display language has been set to {language}.",
 
