@@ -2,6 +2,7 @@ import { DetectionLanguage } from "../../../../constants/languages";
 
 interface Detection {
 	language: DetectionLanguage;
+	source: string;
 }
 
 abstract class LanguageDetectorAdapter {

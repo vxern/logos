@@ -835,6 +835,19 @@ function getShowButton(
 	};
 }
 
+function getSourceButton(client: Client, customId: string, { locale }: { locale: Locale }): Discord.ButtonComponent {
+	const strings = {
+		source: localise(client, "interactions.source", locale)(),
+	};
+
+	return {
+		type: Discord.MessageComponentTypes.Button,
+		label: `${constants.symbols.source} ${strings.source}`,
+		customId: customId,
+		style: Discord.ButtonStyles.Primary,
+	};
+}
+
 function isSubcommandGroup(option: Discord.InteractionDataOption): boolean {
 	return option.type === Discord.ApplicationCommandOptionTypes.SubCommandGroup;
 }
@@ -893,5 +906,6 @@ export {
 	getShowButton,
 	getFeatureLanguage,
 	getCommandName,
+	getSourceButton,
 };
 export type { ControlButtonID, InteractionCollectorSettings, Modal };

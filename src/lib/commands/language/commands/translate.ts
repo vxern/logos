@@ -11,7 +11,16 @@ import localisations from "../../../../constants/localisations";
 import { trim } from "../../../../formatting";
 import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
-import { editReply, getShowButton, parseArguments, postponeReply, reply, respond } from "../../../interactions";
+import {
+	createInteractionCollector,
+	editReply,
+	getShowButton,
+	getSourceButton,
+	parseArguments,
+	postponeReply,
+	reply,
+	respond,
+} from "../../../interactions";
 import { asStream } from "../../../utils";
 import { CommandTemplate } from "../../command";
 import { show } from "../../parameters";
@@ -402,8 +411,8 @@ async function detectLanguage(
 	interaction: Logos.Interaction,
 	text: string,
 ): Promise<TranslationLanguage | undefined> {
-	const detectionResult = (await detectLanguages(text)).likely.at(0);
-	if (detectionResult === undefined) {
+	const detection = (await detectLanguages(text)).likely.at(0);
+	if (detection === undefined) {
 		const locale = interaction.locale;
 
 		const strings = {
@@ -431,7 +440,7 @@ async function detectLanguage(
 		return undefined;
 	}
 
-	const detectedLanguage = getTranslationLanguage(detectionResult);
+	const detectedLanguage = getTranslationLanguage(detection[0]);
 	if (detectedLanguage === undefined) {
 		const locale = interaction.locale;
 
@@ -568,13 +577,35 @@ async function translateText(
 		];
 	}
 
-	const showButton = getShowButton(client, interaction, { locale });
+	const buttons: Discord.ButtonComponent[] = [];
 
-	const components: Discord.ActionRow[] | undefined = show
-		? undefined
-		: [{ type: Discord.MessageComponentTypes.ActionRow, components: [showButton] }];
+	if (!show) {
+		buttons.push(getShowButton(client, interaction, { locale }));
+	}
 
-	editReply([client, bot], interaction, { embeds, components });
+	const showSourceButtonCustomId = createInteractionCollector([client, bot], {
+		type: Discord.InteractionTypes.MessageComponent,
+		onCollect: (selection) => {
+			const strings = {
+				sourcedFrom: localise(
+					client,
+					"translate.strings.sourcedFrom",
+					locale,
+				)({ source: `[${translation?.source.name}](${translation?.source.link})` }),
+			};
+
+			reply([client, bot], selection, { embeds: [{ description: strings.sourcedFrom, color: constants.colors.blue }] });
+		},
+	});
+
+	const sourceButton = getSourceButton(client, showSourceButtonCustomId, { locale });
+
+	buttons.push(sourceButton);
+
+	editReply([client, bot], interaction, {
+		embeds,
+		components: [{ type: Discord.MessageComponentTypes.ActionRow, components: buttons as [Discord.ButtonComponent] }],
+	});
 }
 
 export default commands;

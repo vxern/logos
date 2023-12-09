@@ -7,6 +7,7 @@ import {
 	getLingvanexTranslationLanguageByLocale,
 	isLingvanexLocale,
 } from "../../../../../constants/languages";
+import licences from "../../../../../constants/licences";
 import defaults from "../../../../../defaults";
 import { Client } from "../../../../client";
 import { Translation, TranslationAdapter } from "../adapter";
@@ -83,7 +84,7 @@ class LingvanexAdapter extends TranslationAdapter<LingvanexLanguage> {
 				? undefined
 				: getLingvanexTranslationLanguageByLocale(detectedSourceLocale);
 
-		return { detectedSourceLanguage, text: translatedText };
+		return { detectedSourceLanguage, text: translatedText, source: licences.translators.lingvanex };
 	}
 }
 

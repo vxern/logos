@@ -20,6 +20,7 @@ import {
 	editReply,
 	encodeId,
 	getShowButton,
+	getSourceButton,
 	parseArguments,
 	postponeReply,
 	reply,
@@ -1216,19 +1217,11 @@ class WordMenu {
 		controls.push(...this.getPaginationControls([client, bot], interaction, showLicenceButtonCustomId, { locale }));
 
 		if (entry.sources !== undefined && entry.sources.length !== 0) {
-			const strings = {
-				source: localise(client, "interactions.source", locale)(),
-			};
+			const sourceButton = getSourceButton(client, showLicenceButtonCustomId, { locale });
 
 			for (const row of controls) {
 				if (row.components.length < 5) {
-					row.components.push({
-						type: Discord.MessageComponentTypes.Button,
-						label: `${constants.symbols.source} ${strings.source}`,
-						customId: showLicenceButtonCustomId,
-						style: Discord.ButtonStyles.Primary,
-					});
-
+					row.components.push(sourceButton);
 					break;
 				}
 			}

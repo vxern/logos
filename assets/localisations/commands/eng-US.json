@@ -103,6 +103,7 @@
   "recognize.strings.fields.possibleMatches.title": "Other options",
   "recognize.strings.fields.possibleMatches.description.single": "The language is less likely to be {language}.",
   "recognize.strings.fields.possibleMatches.description.multiple": "These choices are less likely, but the language could also be one of:",
+  "recognize.strings.recognitions": "The languages as well as the language detectors that recognised them are as follows:",
 
 	"game.name": "game",
 	"game.description": "Pick the correct word out of four to fit in the blank.",
@@ -151,6 +152,7 @@
   "translate.strings.noTranslationAdapters.description": "The selected language pair is not supported.",
 	"translate.strings.sourceText": "Source Text",
 	"translate.strings.translation": "Translation",
+  "translate.strings.sourcedFrom": "Translation sourced from {source}.",
 
 	"word.name": "word",
 	"word.description": "Displays information about a given word.",

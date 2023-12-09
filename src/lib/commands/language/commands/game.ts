@@ -13,6 +13,7 @@ import {
 	deleteReply,
 	editReply,
 	encodeId,
+	getSourceButton,
 	postponeReply,
 	reply,
 } from "../../../interactions";
@@ -130,7 +131,7 @@ async function handleStartGame([client, bot]: [Client, Discord.Bot], interaction
 				embeds: [
 					{
 						description: `${constants.symbols.link} [${strings.sentence}](${sentenceSource}) · [${strings.translation}](${translationSource})`,
-						color: constants.colors.peach,
+						color: constants.colors.blue,
 						footer: { text: strings.sourcedFrom },
 					},
 				],
@@ -154,9 +155,7 @@ function getGameView(
 	embedColor: number,
 	{ locale }: { locale: Locale },
 ): Discord.InteractionCallbackData {
-	const strings = {
-		source: localise(client, "interactions.source", locale)(),
-	};
+	const sourceButton = getSourceButton(client, showSourceButtonCustomId, { locale });
 
 	return {
 		embeds: [
@@ -170,12 +169,7 @@ function getGameView(
 			{
 				type: Discord.MessageComponentTypes.ActionRow,
 				components: [
-					{
-						type: Discord.MessageComponentTypes.Button,
-						style: Discord.ButtonStyles.Primary,
-						label: `${constants.symbols.source} ${strings.source}`,
-						customId: showSourceButtonCustomId,
-					},
+					sourceButton,
 					...(sentenceSelection.choices.map((choice, index) => ({
 						type: Discord.MessageComponentTypes.Button,
 						style: Discord.ButtonStyles.Success,

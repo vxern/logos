@@ -19,7 +19,7 @@ class TinyLDAdapter extends LanguageDetectorAdapter {
 			return undefined;
 		}
 
-		return { language: detectedLanguage };
+		return { language: detectedLanguage, source: this.identifier };
 	}
 }
 

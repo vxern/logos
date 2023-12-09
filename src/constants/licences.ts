@@ -70,6 +70,20 @@ You must also include, in your app or site, wherever you provide attributions or
 			},
 		},
 	},
+	translators: {
+		deepl: {
+			name: "DeepL",
+			link: "https://www.deepl.com/translator/",
+		},
+		googleTranslate: {
+			name: "Google Translate",
+			link: "https://translate.google.com/",
+		},
+		lingvanex: {
+			name: "Lingvanex",
+			link: "https://lingvanex.com/translate/",
+		},
+	},
 	software: {
 		"@discordeno/bot": apache("Copyright 2021 - 2023 Discordeno"),
 		"@sapphire/snowflake": mit("Copyright (c) 2020 The Sapphire Community and its contributors"),

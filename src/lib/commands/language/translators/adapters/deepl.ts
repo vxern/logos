@@ -6,6 +6,7 @@ import {
 	getDeepLTranslationLanguageByLocale,
 	isDeepLLocale,
 } from "../../../../../constants/languages";
+import licences from "../../../../../constants/licences";
 import defaults from "../../../../../defaults";
 import { Client } from "../../../../client";
 import { Translation, TranslationAdapter } from "../adapter";
@@ -74,7 +75,7 @@ class DeepLAdapter extends TranslationAdapter<DeepLLanguage> {
 				? undefined
 				: getDeepLTranslationLanguageByLocale(detectedSourceLocale);
 
-		return { detectedSourceLanguage, text: translation.text };
+		return { detectedSourceLanguage, text: translation.text, source: licences.translators.deepl };
 	}
 }
 

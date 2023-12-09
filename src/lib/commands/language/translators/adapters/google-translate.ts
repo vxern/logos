@@ -7,6 +7,7 @@ import {
 	getGoogleTranslateTranslationLanguageByLocale,
 	isGoogleTranslateLocale,
 } from "../../../../../constants/languages";
+import licences from "../../../../../constants/licences";
 import defaults from "../../../../../defaults";
 import { Client } from "../../../../client";
 import { Translation, TranslationAdapter } from "../adapter";
@@ -87,7 +88,7 @@ class GoogleTranslateAdapter extends TranslationAdapter<GoogleTranslateLanguage>
 				? undefined
 				: getGoogleTranslateTranslationLanguageByLocale(detectedSourceLocale);
 
-		return { detectedSourceLanguage, text: translatedText };
+		return { detectedSourceLanguage, text: translatedText, source: licences.translators.googleTranslate };
 	}
 }
 

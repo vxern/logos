@@ -7,6 +7,11 @@ interface Translation {
 
 	/** The translation result. */
 	text: string;
+
+	source: {
+		name: string;
+		link: string;
+	};
 }
 
 abstract class TranslationAdapter<Language extends string = TranslationLanguage> {
