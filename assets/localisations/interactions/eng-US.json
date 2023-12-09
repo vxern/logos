@@ -7,5 +7,9 @@
 	"interactions.rateLimited.description.tooManyUses": "You have used this command too many times ({times}) in too short of a span of time.",
 	"interactions.rateLimited.description.cannotUseAgainUntil": "You will once again be able to use the command {relative_timestamp}.",
   "interactions.show": "Show message in chat",
+  "interactions.show.sureToShow.title": "Sure to show?",
+  "interactions.show.sureToShow.description": "Are you sure you want to show the message in chat?",
+  "interactions.show.sureToShow.yes": "Yes, show",
+  "interactions.show.sureToShow.no": "No, do not show",
   "interactions.source": "Source"
 }
