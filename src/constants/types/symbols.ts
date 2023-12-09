@@ -134,6 +134,7 @@ export default {
 			},
 		},
 	},
+	source: "©️",
 	guild: {
 		description: "🖋️",
 		members: "🧑",

@@ -254,6 +254,8 @@
   "word.strings.sourcedResponsibly.dictionaries.one": "the dictionary above",
   "word.strings.sourcedResponsibly.dictionaries.two": "the dictionaries above",
   "word.strings.sourcedResponsibly.dictionaries.many": "the dictionaries above",
+  "word.strings.noLicenseInformation.title": "No licence information",
+  "word.strings.noLicenseInformation.description": "There is no licence information available for this entry.",
 
 	"list.name": "list",
 	"list.description": "Allows the viewing of various information about users.",

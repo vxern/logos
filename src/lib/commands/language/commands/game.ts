@@ -101,38 +101,65 @@ async function handleStartGame([client, bot]: [Client, Discord.Bot], interaction
 
 			sentenceSelection = createSentenceSelection(sentencePairs);
 
-			editReply([client, bot], interaction, getGameView(client, customId, sentenceSelection, embedColor, { locale }));
+			editReply(
+				[client, bot],
+				interaction,
+				getGameView(client, [customId, showSourceButtonCustomId], sentenceSelection, embedColor, { locale }),
+			);
+		},
+	});
+
+	const showSourceButtonCustomId = createInteractionCollector([client, bot], {
+		type: Discord.InteractionTypes.MessageComponent,
+		userId: interaction.user.id,
+		onCollect: async (selection) => {
+			const strings = {
+				sentence: localise(client, "game.strings.sentence", locale)(),
+				translation: localise(client, "game.strings.translation", locale)(),
+				sourcedFrom: localise(
+					client,
+					"game.strings.sourcedFrom",
+					locale,
+				)({ source: licences.dictionaries.tatoeba.name }),
+			};
+
+			const sentenceSource = constants.links.generateTatoebaSentenceLink(sentenceSelection.pair.sentenceId);
+			const translationSource = constants.links.generateTatoebaSentenceLink(sentenceSelection.pair.translationId);
+
+			reply([client, bot], selection, {
+				embeds: [
+					{
+						description: `${constants.symbols.link} [${strings.sentence}](${sentenceSource}) · [${strings.translation}](${translationSource})`,
+						color: constants.colors.peach,
+						footer: { text: strings.sourcedFrom },
+					},
+				],
+			});
 		},
 	});
 
 	sentenceSelection = createSentenceSelection(sentencePairs);
 
-	editReply([client, bot], interaction, getGameView(client, customId, sentenceSelection, embedColor, { locale }));
+	editReply(
+		[client, bot],
+		interaction,
+		getGameView(client, [customId, showSourceButtonCustomId], sentenceSelection, embedColor, { locale }),
+	);
 }
 
 function getGameView(
 	client: Client,
-	customId: string,
+	[customId, showSourceButtonCustomId]: [string, string],
 	sentenceSelection: SentenceSelection,
 	embedColor: number,
 	{ locale }: { locale: Locale },
 ): Discord.InteractionCallbackData {
 	const strings = {
-		sentence: localise(client, "game.strings.sentence", locale)(),
-		translation: localise(client, "game.strings.translation", locale)(),
-		sourcedFrom: localise(client, "game.strings.sourcedFrom", locale)({ source: licences.dictionaries.tatoeba.name }),
+		source: localise(client, "interactions.source", locale)(),
 	};
-
-	const sentenceSource = constants.links.generateTatoebaSentenceLink(sentenceSelection.pair.sentenceId);
-	const translationSource = constants.links.generateTatoebaSentenceLink(sentenceSelection.pair.translationId);
 
 	return {
 		embeds: [
-			{
-				description: `${constants.symbols.link} [${strings.sentence}](${sentenceSource}) · [${strings.translation}](${translationSource})`,
-				color: constants.colors.peach,
-				footer: { text: strings.sourcedFrom },
-			},
 			{
 				title: sentenceSelection.pair.sentence,
 				footer: { text: sentenceSelection.pair.translation },
@@ -142,12 +169,20 @@ function getGameView(
 		components: [
 			{
 				type: Discord.MessageComponentTypes.ActionRow,
-				components: sentenceSelection.choices.map((choice, index) => ({
-					type: Discord.MessageComponentTypes.Button,
-					style: Discord.ButtonStyles.Success,
-					label: choice,
-					customId: encodeId<WordButtonID>(customId, [index.toString()]),
-				})) as [Discord.ButtonComponent],
+				components: [
+					{
+						type: Discord.MessageComponentTypes.Button,
+						style: Discord.ButtonStyles.Primary,
+						label: `${constants.symbols.source} ${strings.source}`,
+						customId: showSourceButtonCustomId,
+					},
+					...(sentenceSelection.choices.map((choice, index) => ({
+						type: Discord.MessageComponentTypes.Button,
+						style: Discord.ButtonStyles.Success,
+						label: choice,
+						customId: encodeId<WordButtonID>(customId, [index.toString()]),
+					})) as [Discord.ButtonComponent]),
+				],
 			},
 		],
 	};

@@ -165,6 +165,11 @@ async function handleGetAllSections(
 
 	const menu = new WordMenu({ searchLanguages, showButton });
 
+	const showLicenceButtonCustomId = createInteractionCollector([client, bot], {
+		type: Discord.InteractionTypes.MessageComponent,
+		onCollect: (selection) => handleShowLicenceInformation([client, bot], selection, menu, { locale }),
+	});
+
 	for await (const result of queryAdaptersOrdered(
 		client,
 		lemma,
@@ -175,7 +180,7 @@ async function handleGetAllSections(
 	)) {
 		await menu.receiveResult(result);
 		menu.sortEntries();
-		await menu.updateView([client, bot], interaction, { locale });
+		await menu.updateView([client, bot], interaction, showLicenceButtonCustomId, { locale });
 	}
 
 	const secondaryAdapters = getAdapterSelection(
@@ -205,7 +210,7 @@ async function handleGetAllSections(
 		}
 
 		await menu.receiveResult(result);
-		await menu.updateView([client, bot], interaction, { locale });
+		await menu.updateView([client, bot], interaction, showLicenceButtonCustomId, { locale });
 	}
 
 	const tertiaryAdapters = getAdapterSelection(
@@ -235,7 +240,7 @@ async function handleGetAllSections(
 		}
 
 		await menu.receiveResult(result);
-		await menu.updateView([client, bot], interaction, { locale });
+		await menu.updateView([client, bot], interaction, showLicenceButtonCustomId, { locale });
 	}
 
 	if (!menu.displayed) {
@@ -290,6 +295,11 @@ async function handleGetSingleSection(
 
 	const menu = new WordMenu({ searchLanguages, showButton, sectionType });
 
+	const showLicenceButtonCustomId = createInteractionCollector([client, bot], {
+		type: Discord.InteractionTypes.MessageComponent,
+		onCollect: (selection) => handleShowLicenceInformation([client, bot], selection, menu, { locale }),
+	});
+
 	const adaptersSelected = getAdapterSelection(
 		provisions,
 		[...adapters.primary, ...adapters.secondary, ...adapters.tertiary],
@@ -306,7 +316,7 @@ async function handleGetSingleSection(
 	)) {
 		await menu.receiveResult(result);
 		menu.sortEntries();
-		await menu.updateView([client, bot], interaction, { locale });
+		await menu.updateView([client, bot], interaction, showLicenceButtonCustomId, { locale });
 	}
 
 	if (!menu.displayed) {
@@ -339,6 +349,55 @@ async function handleGetSingleSection(
 	}
 }
 
+async function handleShowLicenceInformation(
+	[client, bot]: [Client, Discord.Bot],
+	selection: Discord.Interaction,
+	menu: WordMenu,
+	{ locale }: { locale: Locale },
+) {
+	if (menu.navigation.page.partOfSpeech === undefined) {
+		return;
+	}
+
+	const entry = menu.entries.get(menu.navigation.page.partOfSpeech)?.[menu.navigation.page.index];
+	if (entry === undefined) {
+		return;
+	}
+
+	if (entry.sources === undefined) {
+		const strings = {
+			title: localise(client, "word.strings.noLicenseInformation.title", locale)(),
+			description: localise(client, "word.strings.noLicenseInformation.description", locale)(),
+		};
+
+		reply([client, bot], selection, {
+			embeds: [{ title: strings.title, description: strings.description, color: constants.colors.blue }],
+		});
+
+		return;
+	}
+
+	const language = getLocalisationLanguageByLocale(locale);
+	const strings = {
+		sourcedResponsibly: localise(
+			client,
+			"word.strings.sourcedResponsibly",
+			locale,
+		)({
+			dictionaries: pluralise(client, "word.strings.sourcedResponsibly.dictionaries", language, entry.sources.length),
+		}),
+	};
+	const sourcesFormatted = entry.sources.map(({ link, licence }) => `[${licence.name}](${link})`).join(" · ");
+
+	const sourceEmbed: Discord.CamelizedDiscordEmbed = {
+		description: `${constants.symbols.link} ${sourcesFormatted}`,
+		color: constants.colors.peach,
+		footer: { text: strings.sourcedResponsibly },
+	};
+
+	reply([client, bot], selection, { embeds: [sourceEmbed] });
+}
+
 type LookupData = {
 	lemma: string;
 	show: boolean;
@@ -352,9 +411,7 @@ async function resolveData(
 ): Promise<LookupData | undefined> {
 	const [{ language: languageOrUndefined, word: lemma, show: showParameter }] = parseArguments(
 		interaction.data?.options,
-		{
-			show: "boolean",
-		},
+		{ show: "boolean" },
 	);
 	if (lemma === undefined) {
 		return undefined;
@@ -715,6 +772,7 @@ class WordMenu {
 	async updateView(
 		[client, bot]: [Client, Discord.Bot],
 		interaction: Logos.Interaction,
+		showLicenceButtonCustomId: string,
 		{ locale }: { locale: Locale },
 	): Promise<void> {
 		let partOfSpeech: string;
@@ -769,37 +827,9 @@ class WordMenu {
 			embed.description = fields.join(constants.symbols.sigils.separator);
 		}
 
-		if (entry.sources !== undefined && entry.sources.length !== 0) {
-			let sourceEmbed: Discord.CamelizedDiscordEmbed;
-			{
-				const language = getLocalisationLanguageByLocale(locale);
-				const strings = {
-					sourcedResponsibly: localise(
-						client,
-						"word.strings.sourcedResponsibly",
-						locale,
-					)({
-						dictionaries: pluralise(
-							client,
-							"word.strings.sourcedResponsibly.dictionaries",
-							language,
-							entry.sources.length,
-						),
-					}),
-				};
-				const sourcesFormatted = entry.sources.map(({ link, licence }) => `[${licence.name}](${link})`).join(" · ");
-
-				sourceEmbed = {
-					description: `${constants.symbols.link} ${sourcesFormatted}`,
-					color: constants.colors.peach,
-					footer: { text: strings.sourcedResponsibly },
-				};
-			}
-
-			menu.unshift(sourceEmbed);
-		}
-
-		const controls = this.getControls([client, bot], interaction, { menus, entry }, { locale });
+		const controls = this.getControls([client, bot], interaction, { menus, entry }, showLicenceButtonCustomId, {
+			locale,
+		});
 
 		this.displayed = true;
 
@@ -1122,6 +1152,7 @@ class WordMenu {
 			menus: Partial<Record<MenuTab, Discord.CamelizedDiscordEmbed[]>>;
 			entry: Partial<DictionaryEntry>;
 		},
+		showLicenceButtonCustomId: string,
 		{ locale }: { locale: Locale },
 	): Discord.MessageComponents {
 		const controls: Discord.ActionRow[] = [];
@@ -1129,11 +1160,15 @@ class WordMenu {
 		switch (this.navigation.menu.current) {
 			case "overview":
 			case "usage": {
-				controls.push(...this.getScrollControls([client, bot], interaction, entry, { locale }));
+				controls.push(
+					...this.getScrollControls([client, bot], interaction, entry, showLicenceButtonCustomId, { locale }),
+				);
 				break;
 			}
 			case "inflection": {
-				controls.push(...this.getInflectionControls([client, bot], interaction, entry, { locale }));
+				controls.push(
+					...this.getInflectionControls([client, bot], interaction, entry, showLicenceButtonCustomId, { locale }),
+				);
 				break;
 			}
 		}
@@ -1154,7 +1189,7 @@ class WordMenu {
 
 					this.navigation.menu.current = menu;
 
-					this.updateView([client, bot], interaction, { locale });
+					this.updateView([client, bot], interaction, showLicenceButtonCustomId, { locale });
 				},
 			});
 
@@ -1178,7 +1213,26 @@ class WordMenu {
 			});
 		}
 
-		controls.push(...this.getPaginationControls([client, bot], interaction, { locale }));
+		controls.push(...this.getPaginationControls([client, bot], interaction, showLicenceButtonCustomId, { locale }));
+
+		if (entry.sources !== undefined && entry.sources.length !== 0) {
+			const strings = {
+				source: localise(client, "interactions.source", locale)(),
+			};
+
+			for (const row of controls) {
+				if (row.components.length < 5) {
+					row.components.push({
+						type: Discord.MessageComponentTypes.Button,
+						label: `${constants.symbols.source} ${strings.source}`,
+						customId: showLicenceButtonCustomId,
+						style: Discord.ButtonStyles.Primary,
+					});
+
+					break;
+				}
+			}
+		}
 
 		return controls;
 	}
@@ -1186,6 +1240,7 @@ class WordMenu {
 	getPaginationControls(
 		[client, bot]: [Client, Discord.Bot],
 		interaction: Logos.Interaction,
+		showLicenceButtonCustomId: string,
 		{ locale }: { locale: Locale },
 	): Discord.ActionRow[] {
 		const getGroups = (): DictionaryEntriesAssorted => {
@@ -1256,7 +1311,7 @@ class WordMenu {
 					};
 				}
 
-				this.updateView([client, bot], interaction, { locale });
+				this.updateView([client, bot], interaction, showLicenceButtonCustomId, { locale });
 			},
 		});
 
@@ -1293,7 +1348,7 @@ class WordMenu {
 					};
 				}
 
-				this.updateView([client, bot], interaction, { locale });
+				this.updateView([client, bot], interaction, showLicenceButtonCustomId, { locale });
 			},
 		});
 
@@ -1356,6 +1411,7 @@ class WordMenu {
 		[client, bot]: [Client, Discord.Bot],
 		interaction: Logos.Interaction,
 		entry: Partial<DictionaryEntry>,
+		showLicenceButtonCustomId: string,
 		{ locale }: { locale: Locale },
 	): Discord.ActionRow[] {
 		const isFirstPage = (view?: ViewTab) =>
@@ -1420,7 +1476,7 @@ class WordMenu {
 					this.navigation.view[view]++;
 				}
 
-				this.updateView([client, bot], interaction, { locale });
+				this.updateView([client, bot], interaction, showLicenceButtonCustomId, { locale });
 			},
 		});
 
@@ -1446,7 +1502,7 @@ class WordMenu {
 					this.navigation.view[view]--;
 				}
 
-				this.updateView([client, bot], interaction, { locale });
+				this.updateView([client, bot], interaction, showLicenceButtonCustomId, { locale });
 			},
 		});
 
@@ -1457,7 +1513,7 @@ class WordMenu {
 				acknowledge([client, bot], selection);
 
 				if (selection.data === undefined) {
-					this.updateView([client, bot], interaction, { locale });
+					this.updateView([client, bot], interaction, showLicenceButtonCustomId, { locale });
 					return;
 				}
 
@@ -1489,7 +1545,7 @@ class WordMenu {
 
 				this.display.expanded = expanded;
 
-				this.updateView([client, bot], interaction, { locale });
+				this.updateView([client, bot], interaction, showLicenceButtonCustomId, { locale });
 			},
 		});
 
@@ -1546,6 +1602,7 @@ class WordMenu {
 		[client, bot]: [Client, Discord.Bot],
 		interaction: Logos.Interaction,
 		entry: Partial<DictionaryEntry>,
+		showLicenceButtonCustomId: string,
 		{ locale }: { locale: Locale },
 	): Discord.ActionRow[] {
 		if (entry.inflection === undefined) {
@@ -1559,7 +1616,7 @@ class WordMenu {
 				acknowledge([client, bot], selection);
 
 				if (entry.inflection === undefined || selection.data === undefined) {
-					this.updateView([client, bot], interaction, { locale });
+					this.updateView([client, bot], interaction, showLicenceButtonCustomId, { locale });
 					return;
 				}
 
@@ -1575,7 +1632,7 @@ class WordMenu {
 					this.navigation.menu.tabs.inflection = index;
 				}
 
-				this.updateView([client, bot], interaction, { locale });
+				this.updateView([client, bot], interaction, showLicenceButtonCustomId, { locale });
 			},
 		});
 
