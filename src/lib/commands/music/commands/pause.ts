@@ -33,8 +33,8 @@ async function handlePausePlayback(
 		return;
 	}
 
-	const [isOccupied, isPaused] = [musicService.isOccupied, musicService.isPaused];
-	if (!isOccupied) {
+	const [isOccupied, current, isPaused] = [musicService.isOccupied, musicService.current, musicService.isPaused];
+	if (!isOccupied || current === undefined) {
 		const locale = interaction.locale;
 		const strings = {
 			title: localise(client, "music.strings.notPlaying.title", locale)(),
