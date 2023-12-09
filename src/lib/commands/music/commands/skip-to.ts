@@ -64,8 +64,12 @@ async function handleSkipToTimestamp(
 		return;
 	}
 
-	const [isOccupied, playingSince] = [musicService.isOccupied, musicService.playingSince];
-	if (!isOccupied) {
+	const [isOccupied, current, playingSince] = [
+		musicService.isOccupied,
+		musicService.current,
+		musicService.playingSince,
+	];
+	if (!isOccupied || current === undefined) {
 		const locale = interaction.locale;
 		const strings = {
 			title: localise(client, "music.strings.notPlaying.title", locale)(),
