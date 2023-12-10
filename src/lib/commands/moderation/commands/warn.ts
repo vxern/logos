@@ -8,12 +8,14 @@ import { Client, autocompleteMembers, localise, pluralise, resolveInteractionToM
 import { timeStructToMilliseconds } from "../../../database/guild";
 import { Guild } from "../../../database/guild";
 import { User } from "../../../database/user";
-import { Warning } from "../../../database/warning";
+import { Rule, Warning } from "../../../database/warning";
 import diagnostics from "../../../diagnostics";
-import { parseArguments, reply } from "../../../interactions";
+import { parseArguments, reply, respond } from "../../../interactions";
 import { CommandTemplate } from "../../command";
 import { reason, user } from "../../parameters";
 import { getActiveWarnings } from "../module";
+import { getRuleTitleFormatted, rules } from "./rule";
+import components from "../../../../constants/types/components";
 
 const command: CommandTemplate = {
 	name: "warn",
@@ -21,22 +23,90 @@ const command: CommandTemplate = {
 	defaultMemberPermissions: ["MODERATE_MEMBERS"],
 	handle: handleWarnUser,
 	handleAutocomplete: handleWarnUserAutocomplete,
-	options: [user, reason],
+	options: [
+		user,
+		{
+			name: "rule",
+			type: Discord.ApplicationCommandOptionTypes.String,
+			required: true,
+			autocomplete: true,
+		},
+		reason,
+	],
 };
 
 async function handleWarnUserAutocomplete(
 	[client, bot]: [Client, Discord.Bot],
 	interaction: Logos.Interaction,
 ): Promise<void> {
-	const [{ user }] = parseArguments(interaction.data?.options, {});
-	if (user === undefined) {
+	const guildId = interaction.guildId;
+	if (guildId === undefined) {
 		return;
 	}
 
-	autocompleteMembers([client, bot], interaction, user, {
-		restrictToNonSelf: true,
-		excludeModerators: true,
-	});
+	const session = client.database.openSession();
+
+	const guildDocument =
+		client.cache.documents.guilds.get(guildId.toString()) ??
+		(await session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
+
+	session.dispose();
+
+	if (guildDocument === undefined) {
+		return;
+	}
+
+	const configuration = guildDocument.features.moderation.features?.warns;
+	if (configuration === undefined || !configuration.enabled) {
+		return;
+	}
+
+	const [{ user, rule: ruleOrUndefined }, focused] = parseArguments(interaction.data?.options, {});
+
+	if (focused?.name === "user") {
+		if (user === undefined) {
+			return;
+		}
+
+		autocompleteMembers([client, bot], interaction, user, {
+			restrictToNonSelf: true,
+			excludeModerators: true,
+		});
+
+		return;
+	}
+
+	if (focused?.name === "rule") {
+		if (ruleOrUndefined === undefined) {
+			return;
+		}
+
+		const locale = interaction.locale;
+
+		const strings = {
+			other: localise(client, "warn.options.rule.strings.other", locale)(),
+		};
+
+		const ruleQueryRaw = ruleOrUndefined ?? "";
+
+		const ruleQueryTrimmed = ruleQueryRaw.trim();
+		const ruleQueryLowercase = ruleQueryTrimmed.toLowerCase();
+		const choices = [
+			...rules
+				.map((rule, index) => {
+					return {
+						name: getRuleTitleFormatted(client, rule, index, "option", { locale }),
+						value: rule,
+					};
+				})
+				.filter((choice) => choice.name.toLowerCase().includes(ruleQueryLowercase)),
+			{ name: strings.other, value: components.none },
+		];
+
+		respond([client, bot], interaction, choices);
+
+		return;
+	}
 }
 
 async function handleWarnUser([client, bot]: [Client, Discord.Bot], interaction: Logos.Interaction): Promise<void> {
@@ -65,8 +135,21 @@ async function handleWarnUser([client, bot]: [Client, Discord.Bot], interaction:
 		return;
 	}
 
-	const [{ user: userSearchQuery, reason }] = parseArguments(interaction.data?.options, {});
-	if (userSearchQuery === undefined || reason === undefined) {
+	const [{ user: userSearchQuery, rule, reason }] = parseArguments(interaction.data?.options, {});
+	if (userSearchQuery === undefined || rule === undefined || reason === undefined) {
+		return;
+	}
+
+	if (rule !== components.none && !(rules as string[]).includes(rule)) {
+		const strings = {
+			title: localise(client, "warn.strings.invalidRule.title", locale)(),
+			description: localise(client, "warn.strings.invalidRule.description", locale)(),
+		};
+
+		reply([client, bot], interaction, {
+			embeds: [{ title: strings.title, description: strings.description, color: constants.colors.red }],
+		});
+
 		return;
 	}
 
@@ -160,6 +243,7 @@ async function handleWarnUser([client, bot]: [Client, Discord.Bot], interaction:
 		id: `warnings/${targetDocument.account.id}/${authorDocument.account.id}/${createdAt}`,
 		authorId: authorDocument.account.id,
 		targetId: targetDocument.account.id,
+		rule: rule === components.none ? undefined : (rule as Rule),
 		reason,
 		createdAt,
 		"@metadata": { "@collection": "Warnings" },

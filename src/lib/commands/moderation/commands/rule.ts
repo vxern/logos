@@ -3,10 +3,11 @@ import constants from "../../../../constants/constants";
 import { Locale } from "../../../../constants/languages";
 import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
-import { Guild } from "../../../database/guild";
 import { getShowButton, parseArguments, reply, respond } from "../../../interactions";
 import { CommandTemplate } from "../../command";
 import { show } from "../../parameters";
+import { Rule } from "../../../database/warning";
+import { Guild } from "../../../database/guild";
 
 const command: CommandTemplate = {
 	name: "rule",
@@ -26,14 +27,12 @@ const command: CommandTemplate = {
 	],
 };
 
-const ruleIds = ["behaviour", "quality", "relevance", "suitability", "exclusivity", "adherence"] as const;
+const rules: Rule[] = ["behaviour", "quality", "relevance", "suitability", "exclusivity", "adherence"];
 
 async function handleCiteRuleAutocomplete(
 	[client, bot]: [Client, Discord.Bot],
 	interaction: Logos.Interaction,
 ): Promise<void> {
-	const locale = interaction.locale;
-
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
 		return;
@@ -51,17 +50,19 @@ async function handleCiteRuleAutocomplete(
 		return;
 	}
 
-	const configuration = guildDocument.features.moderation.features?.rules;
+	const configuration = guildDocument.features.moderation.features?.warns;
 	if (configuration === undefined || !configuration.enabled) {
 		return;
 	}
+
+	const locale = interaction.locale;
 
 	const [{ rule: ruleOrUndefined }] = parseArguments(interaction.data?.options, {});
 	const ruleQueryRaw = ruleOrUndefined ?? "";
 
 	const ruleQueryTrimmed = ruleQueryRaw.trim();
 	const ruleQueryLowercase = ruleQueryTrimmed.toLowerCase();
-	const choices = ruleIds
+	const choices = rules
 		.map((ruleId, index) => {
 			return {
 				name: getRuleTitleFormatted(client, ruleId, index, "option", { locale }),
@@ -86,7 +87,7 @@ async function handleCiteRule([client, bot]: [Client, Discord.Bot], interaction:
 	const show = interaction.show ?? showParameter;
 	const locale = show ? interaction.guildLocale : interaction.locale;
 
-	const ruleId = ruleIds.at(ruleIndex);
+	const ruleId = rules.at(ruleIndex);
 	if (ruleId === undefined) {
 		displayError([client, bot], interaction, { locale: interaction.locale });
 		return;
@@ -175,4 +176,4 @@ async function displayError(
 }
 
 export default command;
-export { ruleIds };
+export { rules, getRuleTitleFormatted };
