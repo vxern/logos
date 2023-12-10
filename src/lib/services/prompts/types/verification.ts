@@ -505,15 +505,15 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 			entryRequestDocument.votedAgainst = undefined;
 		}
 
-		await this.finalise(
-			entryRequestDocument,
-			authorDocument,
-			configuration,
-			[submitter, member, guild],
-			[isAccepted, isRejected],
-		);
-
 		if (isAccepted || isRejected) {
+      await this.finalise(
+        entryRequestDocument,
+        authorDocument,
+        configuration,
+        [submitter, member, guild],
+        [isAccepted, isRejected],
+      );
+
 			return null;
 		}
 
