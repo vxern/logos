@@ -526,7 +526,13 @@ export async function handleGuildCreate(
 
 	const commands = client.commands.commands;
 
-	const guildCommands: Command[] = [commands.information, commands.credits, commands.licence, commands.settings];
+	const guildCommands: Command[] = [
+		commands.information,
+		commands.acknowledgements,
+		commands.credits,
+		commands.licence,
+		commands.settings,
+	];
 	const services: Service[] = [];
 
 	if (guildDocument.features.information.enabled) {
