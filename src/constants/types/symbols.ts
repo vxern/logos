@@ -212,8 +212,9 @@ export default {
 			},
 			learning: {
 				category: "📖",
-				classroomAttendee: "📖",
 				correctMe: "✍️",
+				doNotCorrectMe: "🙅",
+				classroomAttendee: "📖",
 				dailyPhrase: "🌞",
 				voicechatter: "🗣️",
 			},

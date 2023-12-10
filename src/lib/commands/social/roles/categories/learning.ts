@@ -10,16 +10,6 @@ const category: RoleCategory = {
 		type: "implicit",
 		list: [
 			{
-				id: "roles.learning.roles.classroomAttendee",
-				emoji: constants.symbols.roles.categories.learning.classroomAttendee,
-				snowflakes: {
-					"910929726418350110": "910929726485434394",
-					"432173040638623746": "725653430848323584",
-					"1175841125546856608": "1175841125605572756",
-					"1175841481089634476": "1175841481530036300",
-				},
-			},
-			{
 				id: "roles.learning.roles.correctMe",
 				emoji: constants.symbols.roles.categories.learning.correctMe,
 				snowflakes: {
@@ -27,6 +17,26 @@ const category: RoleCategory = {
 					"432173040638623746": "841405470337269761",
 					"1175841125546856608": "1175841125605572758",
 					"1175841481089634476": "1175841481530036302",
+				},
+			},
+			{
+				id: "roles.learning.roles.doNotCorrectMe",
+				emoji: constants.symbols.roles.categories.learning.doNotCorrectMe,
+				snowflakes: {
+					"910929726418350110": "1183179255144796192",
+					"432173040638623746": "1183178246112677969",
+					"1175841125546856608": "1183367415824908319",
+					"1175841481089634476": "1183367622507634698",
+				},
+			},
+			{
+				id: "roles.learning.roles.classroomAttendee",
+				emoji: constants.symbols.roles.categories.learning.classroomAttendee,
+				snowflakes: {
+					"910929726418350110": "910929726485434394",
+					"432173040638623746": "725653430848323584",
+					"1175841125546856608": "1175841125605572756",
+					"1175841481089634476": "1175841481530036300",
 				},
 			},
 			{
