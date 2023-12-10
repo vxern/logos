@@ -70,6 +70,7 @@ const contributors = {
 	mike: {
 		username: "@rottingrat666",
 		id: "529666071498719242",
+    link: "https://instagram.com/mike_dishakjian",
 	},
 	moorddroom: {
 		username: "@moorddroom",
