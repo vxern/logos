@@ -165,6 +165,12 @@ interface Guild {
 
 					journaling: boolean;
 
+					/** @since v3.35.0 */
+					management?: {
+						roles?: string[];
+						users?: string[];
+					};
+
 					/** Users that can partake in accepting / rejecting verification answers. */
 					voting: {
 						roles: string[];

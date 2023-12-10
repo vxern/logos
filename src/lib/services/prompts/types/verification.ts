@@ -12,6 +12,7 @@ import {
 	acknowledge,
 	createInteractionCollector,
 	decodeId,
+	deleteReply,
 	editReply,
 	encodeId,
 	getLocaleData,
@@ -407,10 +408,95 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 			[...(entryRequestDocument.votedAgainst ?? [])],
 		];
 
+		const submitter = this.client.cache.users.get(BigInt(authorDocument.account.id));
+		if (submitter === undefined) {
+			return undefined;
+		}
+
+		const management = configuration.management;
+
+		const roleIds = management?.roles?.map((roleId) => BigInt(roleId));
+		const userIds = management?.users?.map((userId) => BigInt(userId));
+
 		// If the voter has already voted to accept or to reject the user.
 		if (alreadyVotedToAccept || alreadyVotedToReject) {
 			// If the voter has already voted to accept, and is voting to accept again.
 			if (alreadyVotedToAccept && isAccept) {
+				const isAuthorised =
+					member.roles.some((roleId) => roleIds?.includes(roleId) ?? false) ||
+					(userIds?.includes(interaction.user.id) ?? false);
+
+				if (isAuthorised) {
+					const strings = {
+						title: localise(this.client, "entry.verification.vote.sureToForce.accept.title", locale)(),
+						description: localise(this.client, "entry.verification.vote.sureToForce.accept.description", locale)(),
+						yes: localise(this.client, "entry.verification.vote.sureToForce.yes", locale)(),
+						no: localise(this.client, "entry.verification.vote.sureToForce.no", locale)(),
+					};
+
+					const promise = new Promise<null | undefined>((resolve) => {
+						const confirmCustomId = createInteractionCollector([this.client, this.bot], {
+							type: Discord.InteractionTypes.MessageComponent,
+							userId: interaction.user.id,
+							limit: 1,
+							onCollect: async (_) => {
+								deleteReply([this.client, this.bot], interaction);
+
+								if (entryRequestDocument.isFinalised) {
+									resolve(undefined);
+									return;
+								}
+
+								await this.finalise(
+									entryRequestDocument,
+									authorDocument,
+									configuration,
+									[submitter, member, guild],
+									[true, false],
+								);
+
+								resolve(null);
+							},
+						});
+
+						const cancelCustomId = createInteractionCollector([this.client, this.bot], {
+							type: Discord.InteractionTypes.MessageComponent,
+							userId: interaction.user.id,
+							limit: 1,
+							onCollect: async (_) => {
+								deleteReply([this.client, this.bot], interaction);
+
+								resolve(undefined);
+							},
+						});
+
+						reply([this.client, this.bot], interaction, {
+							embeds: [{ title: strings.title, description: strings.description, color: constants.colors.peach }],
+							components: [
+								{
+									type: Discord.MessageComponentTypes.ActionRow,
+									components: [
+										{
+											type: Discord.MessageComponentTypes.Button,
+											customId: confirmCustomId,
+											label: strings.yes,
+											style: Discord.ButtonStyles.Success,
+										},
+										{
+											type: Discord.MessageComponentTypes.Button,
+											customId: cancelCustomId,
+											label: strings.no,
+											style: Discord.ButtonStyles.Danger,
+										},
+									],
+								},
+							],
+						});
+					});
+
+					return promise;
+				}
+
 				const strings = {
 					title: localise(this.client, "entry.verification.vote.alreadyVoted.inFavour.title", locale)(),
 					description: localise(this.client, "entry.verification.vote.alreadyVoted.inFavour.description", locale)(),
@@ -426,9 +512,84 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 					],
 				});
 
-				return;
+				return undefined;
 				// If the voter has already voted to reject, and is voting to reject again.
 			} else if (alreadyVotedToReject && !isAccept) {
+				const isAuthorised =
+					member.roles.some((roleId) => roleIds?.includes(roleId) ?? false) ||
+					(userIds?.includes(interaction.user.id) ?? false);
+
+				if (isAuthorised) {
+					const strings = {
+						title: localise(this.client, "entry.verification.vote.sureToForce.reject.title", locale)(),
+						description: localise(this.client, "entry.verification.vote.sureToForce.reject.description", locale)(),
+						yes: localise(this.client, "entry.verification.vote.sureToForce.yes", locale)(),
+						no: localise(this.client, "entry.verification.vote.sureToForce.no", locale)(),
+					};
+
+					const promise = new Promise<null | undefined>((resolve) => {
+						const confirmCustomId = createInteractionCollector([this.client, this.bot], {
+							type: Discord.InteractionTypes.MessageComponent,
+							userId: interaction.user.id,
+							limit: 1,
+							onCollect: async (_) => {
+								deleteReply([this.client, this.bot], interaction);
+
+								if (entryRequestDocument.isFinalised) {
+									resolve(undefined);
+									return;
+								}
+
+								await this.finalise(
+									entryRequestDocument,
+									authorDocument,
+									configuration,
+									[submitter, member, guild],
+									[false, true],
+								);
+
+								resolve(null);
+							},
+						});
+
+						const cancelCustomId = createInteractionCollector([this.client, this.bot], {
+							type: Discord.InteractionTypes.MessageComponent,
+							userId: interaction.user.id,
+							limit: 1,
+							onCollect: async (_) => {
+								deleteReply([this.client, this.bot], interaction);
+
+								resolve(undefined);
+							},
+						});
+
+						reply([this.client, this.bot], interaction, {
+							embeds: [{ title: strings.title, description: strings.description, color: constants.colors.peach }],
+							components: [
+								{
+									type: Discord.MessageComponentTypes.ActionRow,
+									components: [
+										{
+											type: Discord.MessageComponentTypes.Button,
+											customId: confirmCustomId,
+											label: strings.yes,
+											style: Discord.ButtonStyles.Success,
+										},
+										{
+											type: Discord.MessageComponentTypes.Button,
+											customId: cancelCustomId,
+											label: strings.no,
+											style: Discord.ButtonStyles.Danger,
+										},
+									],
+								},
+							],
+						});
+					});
+
+					return promise;
+				}
+
 				const strings = {
 					title: localise(this.client, "entry.verification.vote.alreadyVoted.against.title", locale)(),
 					description: localise(this.client, "entry.verification.vote.alreadyVoted.against.description", locale)(),
@@ -444,7 +605,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 					],
 				});
 
-				return;
+				return undefined;
 			} else {
 				if (isAccept) {
 					const voterIndex = votedAgainst.findIndex((voterId) => voterId === voterDocument.account.id);
@@ -488,11 +649,6 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 			votedAgainst.length >= voteInformation.rejection.required,
 		];
 
-		const submitter = this.client.cache.users.get(BigInt(authorDocument.account.id));
-		if (submitter === undefined) {
-			return undefined;
-		}
-
 		if (votedFor.length !== 0) {
 			entryRequestDocument.votedFor = votedFor;
 		} else {
@@ -506,13 +662,13 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 		}
 
 		if (isAccepted || isRejected) {
-      await this.finalise(
-        entryRequestDocument,
-        authorDocument,
-        configuration,
-        [submitter, member, guild],
-        [isAccepted, isRejected],
-      );
+			await this.finalise(
+				entryRequestDocument,
+				authorDocument,
+				configuration,
+				[submitter, member, guild],
+				[isAccepted, isRejected],
+			);
 
 			return null;
 		}
