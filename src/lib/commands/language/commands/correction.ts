@@ -15,6 +15,8 @@ import {
 } from "../../../interactions";
 import { getMemberAvatarURL } from "../../../utils";
 import { CommandTemplate } from "../../command";
+import categories from "../../social/roles/roles";
+import { isImplicit, isSingle } from "../../social/roles/types";
 
 const commands = {
 	partial: {
@@ -95,6 +97,35 @@ async function handleStartCorrecting(
 		});
 		return;
 	}
+
+  const correctedMember = client.cache.members.get(Discord.snowflakeToBigint(`${message.author.id}${guildId}`));
+  if (correctedMember === undefined) {
+    return;
+  }
+
+  const learningRoleCategory = categories.find((category) => category.id === "roles.learning")
+  if (learningRoleCategory !== undefined && isSingle(learningRoleCategory) && isImplicit(learningRoleCategory.collection)) {
+    const doNotCorrectMeRoleId = learningRoleCategory.collection.list.find((role) => role.id === "roles.learning.roles.doNotCorrectMe")?.snowflakes[guildId.toString()];
+    if (doNotCorrectMeRoleId !== undefined) {
+      if (correctedMember.roles.some((roleId) => roleId.toString() === doNotCorrectMeRoleId)) {
+        const strings = {
+          title: localise(client, "correction.strings.userDoesNotWantCorrections.title", locale)(),
+          description: localise(client, "correction.strings.userDoesNotWantCorrections.description", locale)(),
+        };
+    
+        reply([client, bot], interaction, {
+          embeds: [
+            {
+              title: strings.title,
+              description: strings.description,
+              color: constants.colors.dullYellow,
+            },
+          ],
+        });
+        return;
+      }
+    }
+  }
 
 	if (message.content.length > constants.MAXIMUM_CORRECTION_MESSAGE_LENGTH) {
 		const strings = {
