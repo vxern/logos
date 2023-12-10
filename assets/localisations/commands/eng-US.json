@@ -675,5 +675,8 @@
   "license.strings.copyright": "Copyright Notice",
   "credits.name": "credits",
   "credits.description": "Shows the credits menu.",
-  "credits.strings.translation": "Translation"
+  "credits.strings.translation": "Translation",
+  "acknowledgements.name": "acknowledgements",
+  "acknowledgements.description": "Shows the acknowledgements menu.",
+  "acknowledgements.strings.acknowledgements": "Acknowledgements"
 }
