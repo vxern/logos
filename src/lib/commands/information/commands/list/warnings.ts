@@ -7,6 +7,7 @@ import { Client, autocompleteMembers, localise, resolveInteractionToMember } fro
 import { User } from "../../../../database/user";
 import { Warning } from "../../../../database/warning";
 import { parseArguments, reply } from "../../../../interactions";
+import { getRuleTitleFormatted, rules } from "../../../moderation/commands/rule";
 
 async function handleDisplayWarningsAutocomplete(
 	[client, bot]: [Client, Discord.Bot],
@@ -184,7 +185,10 @@ function getWarningPage(
 				relative_timestamp: timestamp(warning.createdAt),
 			});
 
-			return { name: `${constants.symbols.warn} ${warningString}`, value: `*${warning.reason}*` };
+			const ruleIndex = rules.findIndex((rule) => rule === warning.rule);
+			const ruleTitle = getRuleTitleFormatted(client, warning.rule ?? "other", ruleIndex, "option", { locale });
+
+			return { name: warningString, value: `${ruleTitle}\n> *${warning.reason}*` };
 		}),
 		color: constants.colors.blue,
 	};

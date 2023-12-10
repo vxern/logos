@@ -1,7 +1,7 @@
 import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import { Client, localise } from "../../../client";
-import { ruleIds } from "../../../commands/moderation/commands/rule";
+import { rules } from "../../../commands/moderation/commands/rule";
 import { HashableMessageContents, NoticeService } from "../service";
 
 class InformationNoticeService extends NoticeService<"information"> {
@@ -20,12 +20,12 @@ class InformationNoticeService extends NoticeService<"information"> {
 		}
 
 		const guildLocale = this.guildLocale;
-		const informationFields = ruleIds.map((ruleId, index) => {
+		const informationFields = rules.map((rule, index) => {
 			const strings = {
-				title: localise(this.client, `rules.${ruleId}.title`, guildLocale)(),
+				title: localise(this.client, `rules.${rule}.title`, guildLocale)(),
 				tldr: localise(this.client, "rules.tldr", guildLocale)(),
-				summary: localise(this.client, `rules.${ruleId}.summary`, guildLocale)(),
-				content: localise(this.client, `rules.${ruleId}.content`, guildLocale)(),
+				summary: localise(this.client, `rules.${rule}.summary`, guildLocale)(),
+				content: localise(this.client, `rules.${rule}.content`, guildLocale)(),
 			};
 
 			return {
