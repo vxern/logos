@@ -8,6 +8,16 @@ import { User } from "../../../../database/user";
 import { Warning } from "../../../../database/warning";
 import { parseArguments, reply } from "../../../../interactions";
 import { getRuleTitleFormatted, rules } from "../../../moderation/commands/rule";
+import { OptionTemplate } from "../../../command";
+import { user } from "../../../parameters";
+
+const option: OptionTemplate = {
+	name: "warnings",
+	type: Discord.ApplicationCommandOptionTypes.SubCommand,
+	handle: handleDisplayWarnings,
+	handleAutocomplete: handleDisplayWarningsAutocomplete,
+	options: [{ ...user, required: false }],
+};
 
 async function handleDisplayWarningsAutocomplete(
 	[client, bot]: [Client, Discord.Bot],
@@ -195,3 +205,4 @@ function getWarningPage(
 }
 
 export { getWarningPage, handleDisplayWarnings, handleDisplayWarningsAutocomplete };
+export default option;

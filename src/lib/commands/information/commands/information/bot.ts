@@ -4,6 +4,13 @@ import { list } from "../../../../../formatting";
 import * as Logos from "../../../../../types";
 import { Client, localise } from "../../../../client";
 import { reply } from "../../../../interactions";
+import { OptionTemplate } from "../../../command";
+
+const option: OptionTemplate = {
+	name: "bot",
+	type: Discord.ApplicationCommandOptionTypes.SubCommand,
+	handle: handleDisplayBotInformation,
+};
 
 async function handleDisplayBotInformation(
 	[client, bot]: [Client, Discord.Bot],
@@ -82,3 +89,4 @@ async function handleDisplayBotInformation(
 }
 
 export { handleDisplayBotInformation };
+export default option;
