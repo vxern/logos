@@ -147,7 +147,7 @@ async function handlePraiseUser([client, bot]: [Client, Discord.Bot], interactio
 			? Array.from(praiseDocumentsCached.values())
 			: await session
 					.query<Praise>({ collection: "Praises" })
-					.whereRegex("id", `^praises\/\d+\/${interaction.user.id}\/\d+$`)
+					.whereRegex("id", `^praises/\\d+/${interaction.user.id}/\\d+$`)
 					.all()
 					.then((praiseDocuments) => {
 						const map = new Map(
