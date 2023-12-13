@@ -18,5 +18,7 @@
     "prompts.continue": "Doorgaan",
     "prompts.cancel": "Annuleren",
     "prompts.stay": "Teruggaan",
-    "prompts.leave": "Verlaten"
+    "prompts.leave": "Verlaten",
+    "resource.title": "Bron",
+    "resource.fields.resource": "Welke bron wil je indienen?"
 }
