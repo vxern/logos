@@ -80,7 +80,7 @@ async function handleDisplayProfile(
 			? Array.from(praiseDocumentsByAuthorCached.values())
 			: await session
 					.query<Praise>({ collection: "Praises" })
-					.whereRegex("id", `^praises\/\d+\/${targetDocument.account.id}\/\d+$`)
+					.whereRegex("id", `^praises/\\d+/${targetDocument.account.id}/\\d+$`)
 					.all()
 					.then((praiseDocuments) => {
 						const map = new Map(
@@ -99,7 +99,7 @@ async function handleDisplayProfile(
 			? Array.from(praiseDocumentsByTargetCached.values())
 			: await session
 					.query<Praise>({ collection: "Praises" })
-					.whereStartsWith("id", `^praises\/${targetDocument.account.id}\/\d+\/\d+$`)
+					.whereStartsWith("id", `^praises/${targetDocument.account.id}/\\d+/\\d+$`)
 					.all()
 					.then((praiseDocuments) => {
 						const map = new Map(
