@@ -849,7 +849,7 @@
 1371837	Βαριέμαι.	431539	I'm bored.
 1371894	Κάνε μου ένα καφεδάκι.	62223	Please make me a cup of coffee.
 1383167	Όμοιος στον όμοιο κι η κοπριά στα λάχανα.	280288	Birds of a feather flock together.
-1383417	«Πώς ονομάζεται το σημείο @ σ' αυτή τη γλώσσα;» «Παπάκι.»	703712	"How do you pronounce the sign @ in this language?" "at"
+1383417	«Πώς ονομάζεται το σημείο @ σ' αυτή τη γλώσσα;» «Παπάκι.»	703712	"How do you pronounce the sign @ in this language?" "'At.'"
 1383584	Ο πελάτης έχει πάντα δίκιο.	462670	The customer is always right.
 1383610	Τι μικρός που είναι ο κόσμος!	36078	What a small world!
 1383653	Έχεις φωτιά;	607944	Do you have a light?
@@ -1654,33 +1654,12 @@
 1518260	Έχετε κινητό τηλέφωνο;	535419	Do you have a cellphone?
 2467868	Έχεις δύο λουλούδια.	70263	You have two flowers.
 2467869	Έχετε δύο λουλούδια.	70263	You have two flowers.
-2468018	Αυτή είναι ακόμα ζωντανή.	2030112	She's still alive.
 2468019	Είναι ακόμα ζωντανός.	2030113	He's still alive.
 2468020	Είναι τεμπέλα.	2030109	She's lazy.
 2468021	Είναι τεμπέλης.	2030108	He's lazy.
 2468024	Είναι εθισμένος.	2030116	He's addicted.
 2468031	Είναι εθισμένη.	2030117	She's addicted.
 2468050	Είμαι εθισμένος.	2030115	I'm addicted.
-2468052	Είμαι εθισμένη.	2030115	I'm addicted.
-2468054	Παρακολούθησε μια σουηδική ταινία.	2030121	He watched a Swedish movie.
-2468059	Πλύνε τα χέρια σου.	464330	Wash your hands.
-2468085	Αυτός υπέβαλε καταγγελία.	2064129	He filed a complaint.
-2468091	Έλαβα ένα γράμμα από τον αδελφό μου.	2059933	I received a letter from my brother.
-2468092	Έλαβα ένα γράμμα από την αδελφή μου.	2059932	I received a letter from my sister.
-2468094	Δεν φαίνεσαι καλά.	2059938	You don't look well.
-2468095	Αισθάνομαι τον πόνο σου.	1533866	I feel your pain.
-2468096	Αισθάνομαι τον πόνο σας.	1533866	I feel your pain.
-2468101	Είμαι ο άντρας του σπιτιού.	2077738	I'm the man of the house.
-2468103	Είναι ο άντρας του σπιτιού.	2077737	He's the man of the house.
-2468104	Δεν μπορεί να οδηγεί.	2077782	She can't drive.
-2468106	Θα το κάνω αύριο.	2077751	I'll do it tomorrow.
-2468109	Πρέπει να μου πεις.	2038400	You must tell me.
-2468113	Ο Τομ κλείδωσε την αδελφή του στη ντουλάπα.	2038330	Tom locked his sister in the closet.
-2468120	Η Γκρέτα Γκάρμπο ήταν Σουηδή ηθοποιός.	2030124	Greta Garbo was a Swedish actress.
-2468180	Θέλω να χορέψω.	1348673	I want to dance.
-2468185	Πόσο κάνει η είσοδος;	281941	How much is the entrance fee?
-2468201	Είμαι πολύ απασχολημένη.	433991	I'm very busy.
-2468298	Ο ήλιος είναι ένα αστέρι.	2300598	The sun is a star.
 2475307	Πού αγόρασες εκείνο;	2475080	Where did you buy that?
 2475309	Θα είσαι ακόμη εδώ προσεχές έτος;	2474838	Will you still be here next year?
 2489796	Μην ανοίξετε το παράθυρο.	274217	Don't open the window.
@@ -1722,8 +1701,6 @@
 2523501	Διάβασα το γράμμα.	2011083	I read a letter.
 2524455	Τι στο καλό σκεφτόμουν;	2181274	What was I thinking?
 2534014	Τα μπισκότα είναι στο βάζο.	2533782	The cookies are in the jar.
-2534323	Υπάρχει κανένα κατάστημα του ενθύμιου εδώ;	894804	Are there any souvenir shops here?
-2535389	Πόσα αυγά χρειαζόμαστε;	2535326	How many eggs do we need?
 2535920	Αυτό είναι άλογο ή φοράδα;	2535309	Is this a stallion or a mare?
 2551709	Ο Θωμάς κοκκίνισε.	1027009	Tom blushed.
 2551750	Η Αιμιλία πηγαίνει στο σχολείο.	2551737	Emily goes to school.
@@ -1736,16 +1713,9 @@
 2555849	Σας παρακαλώ μετακινήσετε το θρανίο στα αριστερά.	48838	Please move the desk to the left.
 2555959	Μένω στο Μιλάνο.	500293	I live in Milan.
 2561187	Ο Τομ συνέθεσε ένα σονέτο.	1538702	Tom composed a sonnet.
-2563609	Η Αιμιλία μισεί τις τουαλέτες.	2535415	Emily hates toilets.
-2563612	Η Ελλάδα έχει μια μεγάλη ιστορία.	2535408	Greece has a great history.
 2563624	Θα πάω στην Ελλάδα.	2535406	I'll go to Greece.
-2563636	Περίπου επτά τοις εκατό του πληθυσμού της Γουιάνας είναι Μουσουλμάνοι.	2535208	About seven percent of Guyana's population is Muslim.
 2428143	Φοβήθηκα.	2247480	I was frightened.
 2566836	Αγαπάω αυτήν την πόλη.	1887558	I love this town.
-2566869	Της Αιμιλίας της αρέσει οι καραμέλες.	2535394	Emily loves sweets.
-2567137	Αυτός δούλεψε ως ανακριτής στο Γκουαντάναμο.	2535243	He worked as an interrogator at Guantanamo.
-2567143	Πόσο χαρτί χρειαζόμαστε;	2535328	How much paper do we need?
-2568405	Αγαπάω το κίτρινο μου σουέτερ.	682509	I love my yellow sweater.
 2568406	Ο κήπος ήταν γεμάτος από όμορφα κίτρινα λουλούδια.	682510	The garden was full of beautiful yellow flowers.
 2568407	Στις Ηνωμένες Πολιτείες, τα σχολικά λεωφορεία είναι κίτρινα.	682511	In the United States, school buses are yellow.
 2568408	Αυτή είναι αθώα.	1690674	She's innocent.
@@ -1753,10 +1723,6 @@
 2568410	Είδα τα πάντα.	1887640	I saw everything.
 2568411	Αυτή είναι με τους γονείς της.	2568338	She's with her parents.
 2568412	Αυτός είναι με τους γονείς του.	2568337	He's with his parents.
-2568413	Τα αυτοκίνητα Diesel είναι δημοφιλή στην Ευρώπη.	2568336	Diesel cars are popular in Europe.
-2568416	Αυτός είναι ο πρόεδρος μιας μεγάλης γερμανικής εταιρείας.	2568288	He's the president of a large German company.
-2568420	Το επαγγελματικό μου ταξίδι ακυρώθηκε.	2568276	My business trip was canceled.
-2568438	Όταν ήταν έξι χρόνων, αυτός είχε μάθει να χρησιμοποιήσει τη γραφομηχανή και είπε στον δάσκαλο πως δε χρειάζεται να μάθει να γράψει με το χέρι.	1828	At the age of six he had learned to use the typewriter and told the teacher that he did not need to learn to write by hand.
 2570810	Μου αρέσουν οι ταινίες.	521655	I like movies.
 2570811	Είμαι ψηλότερος από εσένα.	257131	I'm taller than you.
 2570816	Είμαι ψηλότερη από εσένα.	257131	I'm taller than you.
@@ -2835,85 +2801,14 @@
 3245475	Η Ολλανδία κέρδισε το Παγκόσμιο Κύπελλο του 2010.	638360	The Netherlands won the 2010 World Cup.
 3248790	Διάβασα εφημερίδα ενώ έτωγα.	3059775	I read a newspaper while eating.
 3249171	Γεννήθηκα στο Ισραήλ.	3249149	I was born in Israel.
-3276944	Περπατάω στην οδό.	3263360	I'm walking on the street.
-3276949	Αυτοί δεν έτρεξαν.	2243100	They didn't run.
-3276950	Αυτές δεν έτρεξαν.	2243100	They didn't run.
 3277417	Αυτό είναι επικίνδυνο.	2111451	That's dangerous.
 3286172	Η κυβέρνηση εκτελεί τις εντολές των τραπεζιτών.	3287844	The government executes the orders of the bankers.
 3306834	Του επιτέθηκε με ένα ψαλίδι.	886994	She attacked him with a pair of scissors.
-3309790	Θέλεις να πιείς τσάι ή καφέ;	373154	You want to drink tea or coffee?
-3309800	Πώς λένε την κόρη σου;	64364	What's your daughter's name?
-3309802	Πώς λένε την κόρη σας;	64364	What's your daughter's name?
-3309806	Ο Θωμάς δεν είναι στο νοσοκομείο.	2544503	Tom's not in the hospital.
-3309807	Μιλούν αγγλικά στον Καναδά;	26296	Is English spoken in Canada?
-3317262	Η κόρη μου υποφέρει από την οστεοπόρωση.	3317196	My daughter suffers from osteoporosis.
-3317264	Ο γιος μου υποφέρει από την οστεοπόρωση.	3317194	My son suffers from osteoporosis.
-3317266	Η Μαίρη υποφέρει από την οστεοπόρωση.	3317216	Mary suffers from osteoporosis.
-3317269	Η φιλενάδα μου υποφέρει από την οστεοπόρωση.	3317192	My girlfriend suffers from osteoporosis.
-3317272	Ο φίλος μου υποφέρει από την οστεοπόρωση.	3317190	My boyfriend suffers from osteoporosis.
-3317276	Ο γείτονας μου υποφέρει από την οστεοπόρωση.	3317188	My neighbor suffers from osteoporosis.
-3317278	Ο σύζυγος μου υποφέρει από την οστεοπόρωση.	3317186	My husband suffers from osteoporosis.
-3317281	Η σύζυγος μου υποφέρει από την οστεοπόρωση.	3317184	My wife suffers from osteoporosis.
-3317283	Η αδελφή μου υποφέρει από την οστεοπόρωση.	3317182	My sister suffers from osteoporosis.
-3317286	Ο αδελφός μου υποφέρει από την οστεοπόρωση.	3317180	My brother suffers from osteoporosis.
-3317288	Ο ξάδελφος μου υποφέρει από την οστεοπόρωση.	3317178	My cousin suffers from osteoporosis.
-3317290	Η ξαδέλφη μου υποφέρει από την οστεοπόρωση.	3317178	My cousin suffers from osteoporosis.
-3317292	Η θεία μου υποφέρει από την οστεοπόρωση.	3317176	My aunt suffers from osteoporosis.
-3317294	Ο θείος μου υποφέρει από την οστεοπόρωση.	3317174	My uncle suffers from osteoporosis.
-3317296	Αυτοί υποφέρουν από την οστεοπόρωση.	3317172	They suffer from osteoporosis.
-3317297	Αυτές υποφέρουν από την οστεοπόρωση.	3317172	They suffer from osteoporosis.
-3317299	Υποφέρουμε από την οστεοπόρωση.	3317170	We suffer from osteoporosis.
-3317300	Υποφέρεις από την οστεοπόρωση.	3317168	You suffer from osteoporosis.
-3317302	Υποφέρετε από την οστεοπόρωση.	3317168	You suffer from osteoporosis.
-3317303	Αυτή υποφέρει από την οστεοπόρωση.	3317166	She suffers from osteoporosis.
-3317305	Αυτός υποφέρει από την οστεοπόρωση.	3317164	He suffers from osteoporosis.
-3317307	Υποφέρω από την οστεοπόρωση.	3317162	I suffer from osteoporosis.
-3317308	Η μητέρα μου υποφέρει από την οστεοπόρωση.	3317160	My mother suffers from osteoporosis.
-3317310	Ο πατέρας μου υποφέρει από την οστεοπόρωση.	3317158	My father suffers from osteoporosis.
-3317311	Η γιαγιά μου υποφέρει από την οστεοπόρωση.	3317156	My grandmother suffers from osteoporosis.
-3317332	Μίλησα με τον πολωνό πρεσβευτή.	3317061	I talked with the Polish ambassador.
-3317334	Όλα τα λεξικά περιέχουν λάθη.	3317044	All dictionaries contain errors.
-3317336	Το σχολείο αρχίζει την άνοιξη.	3316836	School begins in the spring.
-3317337	Έχει το σπίτι σου ένα υπόγειο;	3316630	Does your house have a basement?
-3317338	Υπάρχει ένα υπόγειο στο σπίτι σου;	3316630	Does your house have a basement?
-3317340	Έχει το σπίτι σας ένα υπόγειο;	3316630	Does your house have a basement?
-3317341	Υπάρχει ένα υπόγειο στο σπίτι σας;	3316630	Does your house have a basement?
-3317343	Αυτό το υπόγειο είναι τεράστιο.	3316615	This basement is huge.
-3317344	Θωμά, είμαι στο υπόγειο.	3316608	Tom, I'm in the basement.
-3317346	Θα ήθελα να παραγγείλω το ίδιο.	262364	I'd like to order the same.
 3317349	Βλέπω το σπίτι του.	871804	I see his house.
-3317402	Μπορείς να αγοράσεις το βιβλίο.	3294650	You can buy the book.
-3317411	Μπορείτε να αγοράσετε το βιβλίο.	3294650	You can buy the book.
-3317417	Αυτός διέσχισε τη γέφυρα.	3294503	He crossed the bridge.
-3317418	Ήρθαμε από το σπίτι.	3294500	We came from the house.
-3317419	Δούλεψα στο εργοστάσιο.	3294496	I worked at the factory.
-3317421	Είδα την κόρη του στην πόλη.	3294493	I saw his daughter in town.
-3317424	Οι μαθητές κάθονται στο θρανίο.	3294491	The students sit at the desk.
-3317426	Ανέβηκα στο άλογο.	3294488	I got on the horse.
-3317427	Ήπια το τσάι.	3294486	I drank the tea.
-3317429	Έφαγα το μήλο μου.	3294483	I ate my apple.
-3317430	Έφαγα το μήλο.	770172	I ate the apple.
-3317432	Έφαγα αυτό το μήλο.	3294477	I ate this apple.
-3317433	Έφαγα ένα μήλο.	3294474	I ate an apple.
-3317437	Ήπια τσάι.	3294472	I drank tea.
-3317438	Αυτός ο άντρας είναι εργάτης.	3294469	This man is a worker.
-3317439	Αυτός ο άντρας είναι πλούσιος.	3294467	This man is wealthy.
-3317441	Αυτός ο άντρας ήρθε.	3294464	This man came.
-3317443	Πήγα στο σπίτι.	3294461	I went into the house.
-3319900	Η γυναίκα τηλεφωνεί τον άντρα.	3319700	The woman calls the man.
 3321224	Δεν έχω ποτέ δει ουράνιο τόξο.	2360078	I've never seen a rainbow.
-3324347	Σου αρέσει να κοιτάξεις τον εαυτό σου στον καθρέφτη;	3324311	Do you like looking at yourself in the mirror?
-3324348	Ο Θωμάς είδε τον εαυτό του στον καθρέφτη.	1164242	Tom saw himself in the mirror.
-3324349	Αυτή ήταν μια πολύ θλιβερή ιστορία.	3324329	That was a very sad story.
-3324350	Υπάρχουν χίλια μέτρα σε ένα χιλιόμετρο.	3259479	There are a thousand meters in a kilometer.
-3331160	Δε θα πρέπει να μιλήσετε εδώ.	2645128	You shouldn't talk here.
 3335214	Θέλω να πάω.	1977717	I want to go.
 3335555	Ο αδελφός του πατέρα μου είναι ο θείος μου.	1809399	The brother of my father is my uncle.
 3337880	Θέλω να πάω με τον Τομ.	2011675	I want to go with Tom.
-3343910	Το αγόρι έχει μια εφημερίδα.	879598	The boy has a newspaper.
-3346452	Φοβάσαι τον Θωμά, έτσι δεν είναι;	3346376	You're afraid of Tom, aren't you?
-3346453	Φοβάστε τον Θωμά, έτσι δεν είναι;	3346376	You're afraid of Tom, aren't you?
-3346459	Δεν είσαι ακόμη καλά.	3346373	You're still not well.
 3350218	Μιλάς Κινέζικα;	434626	Do you speak Chinese?
 2880483	Ο Τζον έχει δύο γιούς.	52764	John has two sons.
 1287218	Δεν έχω χρόνο.	249910	I have no time.
@@ -2996,7 +2891,6 @@
 3489202	Έχει τατουάζ μια σαύρα στον μηρό της.	543551	She has a tattoo of a lizard on her thigh.
 3502626	Μπορείς να δανειστείς το αυτοκίνητό μου.	3502492	You may borrow my car.
 3503676	Πρέπει να πάω στο θέατρο τώρα.	3503156	I must go to the theatre now.
-3512644	Το μεγάλο δέντρο δεν είναι πράσινο.	3298563	The big tree isn't green.
 3513034	Δεν υπάρχει σχέδιο Β, καθότι δεν υπάρχει πλανήτης Β.	3512622	There is no Plan B because there is no Planet B.
 3513035	Τα παπούτσια μου είναι πάρα πολύ μικρά.	3512591	My shoes are too small.
 3513036	Χαίρομαι που μπόρεσες να βρίσκεσαι εδώ.	3512568	I'm glad you could be here.
@@ -3372,8 +3266,6 @@
 4048818	Πόσα μήλα;	1164076	How many apples are there?
 1371772	Πού το ξέρεις;	2891273	How can you tell?
 3593929	Γελάω όταν ο κόσμος τα κάνει θάλασσα.	4191094	I laugh when people mess up.
-4258944	Πού βρίσκεται το νοσοκομείο;	2063647	Where is the hospital?
-4751002	Πίνω νερό.	4275681	I'm drinking water.
 1611553	Μου αρέσει το παγωτό.	740936	I love ice cream.
 4265902	Το βιβλίο που αγόρασα είναι πάνω στο τραπέζι	4265824	The book I bought is on the table.
 4265919	Ηταν μόνο ένα φιλί στο μάγουλο	4265772	It was only a kiss on the cheek.
@@ -3961,7 +3853,6 @@
 4714929	Μοιάζει με μοντέλο.	3391256	He looks like a male model.
 4731998	Καλησπέρα!	499689	Good afternoon.
 4732004	Το όνομά μου είναι Cyril. Χαρά μου να σε γνωρίσω!	514496	My name's Cyril; pleased to meet you!
-4743770	Δε συμφωνώ εντελώς μαζί σας.	4743700	I don't agree with you completely.
 4746209	Η Αιμιλία φοβάται τα ύψη.	2535411	Emily is afraid of heights.
 4746211	Η Αιμιλία μισεί τα κρεμμύδια.	2535395	Emily hates onions.
 4746248	Είσαι μια καλή χορεύτρια;	3396462	Are you a good dancer?
@@ -4022,7 +3913,6 @@
 4750999	'Ολοι έπιναν.	2547418	Everyone was drinking.
 4751000	Ο Τομ πίνει καφέ.	2549010	Tom drinks coffee.
 4751001	Ο Τομ πίνει μπύρα.	2549472	Tom drinks beer.
-4751002	Πίνω νερό.	7932256	I drink water.
 4750993	Πίνεις;	2782057	Do you drink?
 4751005	Φάε!	3628784	Eat!
 3081519	Τρώω.	1120797	I eat.
@@ -4749,7 +4639,6 @@
 3231929	Ο Θωμάς είναι το μόνο άτομο που μπορεί να σε βοηθήσει τώρα.	1874261	Tom is the only one who can help you now.
 4310513	Ενα καλό φόρεμα εξασφαλίζει μια συνάντηση , αλλα ενα καλό μυαλο μια ουσιαστική σχέση	3084410	Fine dress helps impress, but intelligence makes steady friends.
 3579767	Εγώ δεν χρειάζομαι τη βοήθειά σας, αλλά εσείς χρειάζεστε τη δική μου βοήθεια.	3350173	I don't need your help, but you need mine.
-3314467	Αν δεν είσαι πολύ απασχολημένος, θα μπορούσε να με βοηθήσεις για ένα λεπτό;	3314138	If you're not too busy, could you help me for just a minute?
 5216084	Όσα ακούμε είναι μια γνώμη, όχι γεγονός. Όσα βλέπουμε είναι μια προοπτική όχι η αλήθεια.	2945461	Everything we hear is an opinion, not a fact. Everything we see is a perspective, not the truth.
 5217268	Αν έρθεις στο Ρίο, μην ξεχάσεις να με πάρεις τηλέφωνο, για να γίνω ο ξεναγός σου!	2428548	If you come to Rio, don't forget to call me to be your guide!
 4707977	Ευχαριστώ πού ήρθες!	64536	Thank you for coming.
@@ -8789,7 +8678,6 @@
 3223983	Μπορούμε να το κάνουμε;	2549796	Can we do it?
 5478833	Λάθος.	28129	Wrong.
 5478835	Πιο δυνατά.	30397	Louder.
-5478836	Σχεδόν.	31567	Almost.
 5478840	Επιτέλους!	392296	Finally!
 5478846	Ο Τομ μου ζήτησε ν' ανοίξω το παράθυρο.	3403155	Tom asked me to open the window.
 5478848	Ο Τομ μου ζήτησε να ανοίξω το παράθυρο.	3403155	Tom asked me to open the window.
@@ -12762,7 +12650,7 @@
 5550998	Ξέρετε να ράβετε;	3022637	Do you know how to sew?
 5551003	Δε θα ξεχάσω ποτέ αυτή τη μέρα.	3689732	I will never forget this day.
 5551004	Ποτέ δε θα ξεχάσω αυτή τη μέρα.	3689732	I will never forget this day.
-5551006	Κανείς δε θέλει να πιει;	3501465	Nobody wants to drink?
+5551006	Κανείς δε θέλει να πιει;	3501465	Is anybody thirsty?
 5551052	Συγχαρητήρια!	1437	Congratulations!
 4327498	Γιατί;	36419	Why?
 1387478	Αλήθεια;	373216	Really?
@@ -20035,7 +19923,6 @@
 7332054	Σιγανότερα.	30433	Quieter!
 7332055	Πιο σιγά!	30433	Quieter!
 7332058	Οπωσδήποτε!	30542	Definitely!
-7332061	Περίπου.	31567	Almost.
 7332062	Ορίστε;	36088	What?
 7332065	Λυπάμαι...	39996	Sorry...
 7332069	Κρίμα...	39996	Sorry...
@@ -21310,7 +21197,6 @@
 7776448	Μάλλον σε κάποια πρέπει να αρέσει ο Τομ.	7775632	I guess someone must like Tom.
 7776449	Ήρθα εδώ στην τρίτη τάξη.	7775633	I came here in third grade.
 7776534	Πού είναι ο φούρνος;	687626	Where is a bakery?
-2468017	Η γάτα είναι τεμπέλα.	2030110	The cat is lazy.
 7776540	Το γατί είναι τεμπέλικο.	2030110	The cat is lazy.
 7776541	Ο γάτος είναι τεμπέλης.	2030110	The cat is lazy.
 7776544	Έχω σπουδάσει Γαλλικά εδώ και χρόνια.	2542298	I've studied French for years.
@@ -23279,7 +23165,6 @@
 8716142	Μείνετε σπίτι.	8624434	Stay home.
 8761504	Ο φίλος μου μένει στου διαόλου τον κώλο.	8761143	My friend lives in Buttfuck.
 8761509	Μα χρειαζόταν δουλειά.	53622	But he needed a job.
-8573577	Αυτό είναι παλαιστινιακό έδαφος.	8573327	This is Palestinian land.
 8776949	Πότε ο Τομ είδε την Μαίρη;	7538407	When did Tom see Mary?
 8778341	Αυτή μίλησε με μένα στα σπανικά.	371581	She spoke to me in Spanish.
 8778354	Μόνο εσύ ξέρεις τι πρέπει να κάνουμε, έτσι;	6912971	You're the only one who knows what we have to do, aren't you?
@@ -24790,7 +24675,6 @@
 3014629	Ένα μεγάλο ευχαριστώ για το ενδιαφέρον σου.	9341989	A big thank you for your interest.
 9172709	Τύχαινε να μετακινούμαι από τη μια πόλη στην άλλη.	9342000	I happened to be moving from one city to the other.
 9339603	Στη ζωή μου συνάντησα πολλές δυσκολίες.	9342013	I encountered many difficulties in my life.
-2939315	Ο καιρός είναι καλύτερος από χθες.	4406796	The weather is better than yesterday.
 3638472	Καλημέρα, τι θέλεις;	9342029	Good morning, what do you want?
 2950408	Έχω ξεχάσει ήδη το πρόσωπο της γιαγιάς μου.	9342098	I've already forgotten my grandmother's face.
 3746076	Η κατάκτηση μιας ξένης γλώσσας χρειάζεται υπομονή.	9342104	The acquisition of a foreign language requires patience.
@@ -26735,7 +26619,6 @@
 1370377	Μούσκεμα τα έκανε στις εξετάσεις.	9968411	He blew it at the exams.
 9954385	Το υπερεκτιμημένο πολυτελές αυτοκίνητο δεν απέδωσε καλά.	9968508	The overrated luxury car didn't perform well.
 9934578	Μ' αρέσει η μυρωδιά απ' το θειάφι.	9968515	I like the smell of sulfur.
-4751002	Πίνω νερό.	2659225	I drink the water.
 9971233	Νομίζετε ότι ο Τομ ξέρει όταν η Μαίρη το έκανε;	8180330	Do you think that Tom knows when Mary did that?
 9971234	Νομίζεις ότι ο Τομ ξέρει όταν η Μαίρη το έκανε;	8180330	Do you think that Tom knows when Mary did that?
 2291026	Πού είναι ο γιός μου;	2254653	Where's my son?
@@ -30417,7 +30300,7 @@
 11699786	Όλοι εξελιχθήκαμε από ψάρια.	5419832	We all evolved from fish.
 11699957	Οι γυναίκες είναι τόσο έξυπνες όσο οι άνδρες.	11699566	Women are as smart as men.
 11701276	Φοράω παντελόνι, πουκάμισο και παπούτσια.	11701023	I wear pants, a shirt, and shoes.
-11707936	Με εξαιρετικά ακριβείς επιδόσεις και από τους δύο παίκτες, ο ενδέκατος αγώνας του Παγκόσμιου Πρωταθλήματος Σκάκι 2023 της FIDE έληξε ισόπαλος. Τώρα (24 Απριλίου): Νίπο 6, Ντινγκ Λιρέν 5. Για τον Ρώσο, τρεις ακόμη ισοπαλίες θα είναι αρκετές για να φτάσει στο σκορ (7,5) που θα του δώσει τον τίτλο του Παγκόσμιου Πρωταθλητή.	11707886	With high-precision performances from both players, the eleventh match of the FIDE World Chess Championship 2023 ended in a draw. Now (April 24): Nepo 6, Ding Liren 5. Three more draws will be enough for the Russian to reach the tally (7.5) which will give him the title of World Champion
+11707936	Με εξαιρετικά ακριβείς επιδόσεις και από τους δύο παίκτες, ο ενδέκατος αγώνας του Παγκόσμιου Πρωταθλήματος Σκάκι 2023 της FIDE έληξε ισόπαλος. Τώρα (24 Απριλίου): Νίπο 6, Ντινγκ Λιρέν 5. Για τον Ρώσο, τρεις ακόμη ισοπαλίες θα είναι αρκετές για να φτάσει στο σκορ (7,5) που θα του δώσει τον τίτλο του Παγκόσμιου Πρωταθλητή.	11707886	With high-precision performances from both players, the eleventh match of the FIDE World Chess Championship 2023 ended in a draw. Now (April 24): Nepo 6, Ding Liren 5. Three more draws will be enough for the Russian to reach the tally (7.5) which will give him the title of World Champion.
 11715732	Μερικές γυναίκες είναι ψηλότερες από τους άνδρες.	11715679	Some women are taller than men.
 11466109	Ο Ιανουάριος είναι ο μήνας μου.	11466081	January is my month.
 11726709	Έχω χρόνο αύριο το πρωί.	510850	I have time tomorrow morning.
@@ -30656,3 +30539,434 @@
 11990057	Έχω ένα πράσινο μήλο.	11990035	I have a green apple.
 11990353	Γέλασε πολύ.	11990326	He laughed a lot.
 11990373	Το σκάκι είναι το πάθος μου.	11990364	Chess is my passion.
+1743434	Τι διαβάζεις;	24676	What are you reading?
+1743433	Τι διαβάζετε;	24676	What are you reading?
+11995235	Σε ξύπνησα;	2309380	Did I wake you up?
+11995235	Σε ξύπνησα;	3333863	Did I wake you?
+11995237	Φτιάχνει μπισκότα.	289712	He is making cookies.
+11995239	Ήμουν στο γυμναστήριο.	2549374	I was in the gym.
+11995242	Είναι πέντε ετών.	2764336	She's five.
+11995244	Πώς πάει η νέα δουλειά;	3264675	How's the new job?
+11998086	Οι χοίροι είναι παμφάγοι;	11998074	Are pigs omnivores?
+11998114	Ποιος θα μπορούσε να τον ξεχάσει;	11998103	Who could forget him?
+11998121	Ο σκύλος είναι στο σπίτι.	882704	The dog is in the house.
+11998491	Αλλάζω την οδοντόβουρτσα μου κάθε τρεις μήνες.	11998475	I change my toothbrush every three months.
+11998689	Δεν εμπιστεύομαι αυτές τις έρευνες.	3820425	I don't trust these surveys.
+11998709	Αυτά είναι πολύ ζεστά.	11998685	These are too hot.
+11998735	Ο παππούς μου έχει σκύλο.	6818593	My grandfather has a dog.
+11998753	Η γιαγιά μου έχει μια γάτα.	11998739	My grandmother has a cat.
+12000306	Τι ώρα ξυπνάς κάθε μέρα;	1230476	What time do you wake up every day?
+12000368	Ανησυχείτε για την κατανάλωση νερού;	12000349	Are you concerned about water consumption?
+12000497	Πόσο συχνά ξυρίζεις τα γένια σου;	12000465	How often do you shave your beard?
+12001322	Τι δεν σου αρέσει;	738773	What don't you like?
+12001430	Ο κίνδυνος είναι πάρα πολύ μεγάλος.	497959	The risk is too great.
+12001666	Το φορτίο του παγωτού έλιωσε μετά την ανατροπή του φορτηγού στον αυτοκινητόδρομο.	6887269	The load of ice cream melted after the truck overturned on the highway.
+12001705	Το δωμάτιο ήταν σε χάος. Τα χαρτιά ήταν σκορπισμένα παντού, οι καρέκλες αναποδογυρίστηκαν και το παράθυρο έσπασε.	11476136	The room was in chaos. Papers were strewn everywhere, chairs were overturned, and the window was shattered.
+12002008	Πόσο καιρό χρειάζεται για να ανοίξει το φανάρι;	12001990	How long do the traffic lights take to change?
+12002034	Μπορώ εύκολα να μεταφράσω οποιοδήποτε κείμενο της Γαλικίας στα πορτογαλικά.	12002026	I can easily translate any Galician text into Portuguese.
+12002052	Η Λίζα έκανε ότι δεν άκουσε.	5695949	Lisa pretended not to hear.
+12003186	Κάθε τόσο παίρνω έναν συνάδελφο που είναι στον ίδιο δρόμο με εμένα.	12003177	Every now and then I take a co-worker who is on the same path as me.
+12004423	Τι νέο βρήκατε στο νησί;	12004407	What did you find new on the island?
+12004484	Τα παιδιά αντιπάθησαν τον δάσκαλό τους.	12004451	The children disliked their teacher.
+12004488	Τα παιδιά αντιπάθησαν τη δασκάλα τους.	12004451	The children disliked their teacher.
+12004525	Το πιάνο είναι βαρύ.	12004512	The piano is heavy.
+12004561	Θα σου αρέσει το γήπεδο.	12004546	You'll like the stadium.
+12004605	Οι μέλισσες συλλέγουν τη γύρη από τα λουλούδια.	12004589	The bees collect the pollen from the flowers.
+12004707	Δεν θα κολυμπήσουμε σε αυτό το κρύο νερό.	12004619	We will not swim in this cold water.
+12004737	Ο πρωθυπουργός είναι ο αρχηγός της κυβέρνησης.	12004714	The prime minister is the head of the government.
+12004812	Ο πατέρας μου είναι βουλευτής, όχι υπουργός.	12004788	My father is a deputy, not a minister.
+12004849	Φαντάζομαι πολλά όμορφα πράγματα.	12004825	I imagine a lot of beautiful things.
+12004916	Ο πρίγκιπας είναι ο γιος του βασιλιά.	12004898	The prince is the son of the king.
+12005027	Θα δείξει την πόλη στους τουρίστες.	12005006	He will show the city to the tourists.
+12005072	Ποιος θα υποφέρει περισσότερο, εγώ ή εσύ;	12005047	Who will suffer more, I or you?
+12007924	Το ουράνιο τόξο θα εξαφανιστεί σε λίγο.	12007893	The rainbow will disappear in little time.
+12008257	Έχω αλλεργία στο σιτάρι.	12008214	I have a wheat allergy.
+12009441	Αυτό το μέρος είναι όμορφο.	2045764	This place is beautiful.
+12009541	Τα βιβλιοπωλεία δεν είναι βιβλιοθήκες.	12009510	The bookstores are not libraries.
+12009573	Τι ώρα είναι η πτήση;	5588395	What time is the flight?
+12010024	Τι τρώτε κατά τη διάρκεια της νηστείας;	12010003	What do you eat during fasting?
+12012319	Τραγουδάει με το λαιμό, τη γλώσσα και τα δόντια.	12012306	He sings with the throat, tongue, and teeth.
+12012569	Θα αγωνιστούμε ξανά!	12012563	We will fight again!
+12012570	Θα ξαναπαλέψουμε!	12012563	We will fight again!
+12013315	Για μένα, ως Βραζιλιάνο, είναι πραγματικά νόστιμο και συναρπαστικό να μαθαίνω τη Γαλικιανή γλώσσα.	12013291	For me, as a Brazilian, studying the Galician language is something truly delicious and captivating.
+12013350	Τα κουνούπια αυτά μεταδίδουν την ελονοσία.	12013336	Those mosquitoes transmit malaria.
+12013538	Η Μαρία είναι η γυναίκα του αδερφού μου. Η Ρόζα είναι η αδερφή της γυναίκας μου. Η Μαρία και η Ρόζα είναι κουνιάδες μου.	12013530	Maria is my brother's wife. Rosa is my wife's sister. Maria and Rosa are my sisters-in-law.
+12013671	Ο Πέτρος είναι αδερφός του άντρα μου. Ο Παύλος είναι ο σύζυγος της αδερφής μου. Ο Πέτρος και ο Παύλος είναι κουνιάδοι μου.	12013548	Peter is my husband's brother. Paul is my sister's husband. Peter and Paul are my brothers-in-law.
+12013855	Έχω ένα καφέ άλογο.	12013765	I have a brown horse.
+12013900	Τρώω γιατί πεινάω.	1148011	I eat because I'm hungry.
+12013933	Το δέντρο είναι καλό.	12013912	The tree is good.
+12014452	Δεν μπορώ να γυρίσω πίσω.	1108057	I can't go back.
+12014466	Είναι η μοίρα μας.	1108032	It's our destiny.
+12015291	Ο ουρανός δεν είναι καθαρός.	12015254	The sky is not clear.
+12015319	Ο άντρας και η γυναίκα είναι ζευγάρι.	12015303	The man and the woman are a couple.
+12015343	Αυτά τα κόκκινα μήλα ανήκουν σε κάποιον.	12015329	These red apples belong to someone.
+12015392	Οι δύο φίλοι ήπιαν επτά μπύρες μαζί.	12015354	The two friends drank seven beers together.
+12015446	Οι περισσότερες από τις προτάσεις που βλέπω στα Γαλικιανά μου φαίνονται ότι είναι γραμμένες στα Πορτογαλικά.	12015405	Most of the sentences I see in Galician seem to me to be written in Portuguese.
+12015508	Αυτός ο σκύλος δεν είναι κανενός.	10846505	This dog is nobody's.
+12015750	Το παντελόνι μου είναι μπλε.	12015720	My pants are blue.
+12015805	Είναι δέκα η ώρα ακριβώς.	73434	It's ten o'clock sharp.
+12015904	Βλέπει μια αράχνη και λιποθυμάει.	12015861	She sees a spider and she faints.
+12015938	Το μεσημεριανό γεύμα ξεκινά στις δώδεκα.	12015924	Lunch starts at twelve.
+12016135	Η αγάπη αγαπά να αγαπά την αγάπη.	3587702	Love loves to love love.
+12016181	Η Αγγλία δεν έχει φίλους, μόνο συμφέροντα.	11470708	England doesn't have friends, only interests.
+12016231	Οι γονείς είναι υπεύθυνοι για τα παιδιά τους.	11559675	Parents are responsible for their children.
+12016348	Ο υδράργυρος, πάντα υγρός, διαβρώνει τα μέταλλα.	7305728	Quicksilver, always liquid, corrodes metals.
+12017296	Ο κορμός της αχλαδιάς είναι μεγαλύτερος από αυτόν της δαμασκηνιάς.	12017279	The trunk of the pear tree is bigger than that of the plum tree.
+12017557	Ο αέρας είναι πιο καθαρός μετά τη βροχή.	12017521	The air is cleaner after rain.
+12017988	Αυτός ο διαιτητής δεν είναι καλός.	12017954	This referee is not good.
+12018113	Ο ωκεανός είναι πολύ μεγάλος και γαλάζιος.	12018094	The ocean is very big and blue.
+12018114	Ο ωκεανός είναι πολύ μεγάλος και μπλε.	12018094	The ocean is very big and blue.
+12019381	Στην τράπεζα, υπάρχουν πολλά χρήματα.	12019353	At the bank, there is a lot of money.
+12019463	Δεν νομίζω ότι το μαγείρεμα είναι δύσκολο.	12019431	I don't believe that cooking is hard.
+12019619	Τα εικονίδια είναι όμορφα.	12019600	The icons are beautiful.
+12019649	Η αναχώρηση είναι τώρα.	12019638	The departure is now.
+12019737	Το κουτί είναι στο τραπέζι.	12019714	The box is on the table.
+12019777	Πηγαίναμε προς την κουζίνα.	12019751	We were going towards the kitchen.
+12019987	Αυτό το τρένο δεν σταματά εδώ.	12019944	This train does not stop here.
+12020019	Είμαι το αφεντικό του γραφείου πληροφοριών.	12020001	I am the boss of the information desk.
+12021979	Η άνοιξη είναι η εποχή της αγάπης.	12021957	Spring is the season of love.
+12022036	Παντού, οι μέρες είναι μικρότερες και οι θερμοκρασίες χαμηλότερες το χειμώνα.	12022006	Everywhere, the days are shorter and the temperatures are lower in winter.
+12023340	Τις Πέμπτες πίνουμε μπύρα.	12023275	On Thursdays, we drink beer.
+12023383	Δεν υποσχόμαστε, το κάνουμε!	12023370	We do not promise, we do!
+12025598	Είναι δύο ξαδέρφια.	12025561	They are two cousins.
+12025680	Γνωρίζετε αυτά τα μέρη;	8825351	Do you know these places?
+12026489	Η μητέρα μου με μάλωσε.	10193102	My mother scolded me.
+12029553	Δεν μαθαίνατε πολύ καλά.	12029535	You were not learning very well.
+12031317	Είμαι εργάτης.	12031195	I am a worker.
+12031438	Δύο βιβλιοθηκονόμοι ψάχνουν για δύο βιβλία.	12031357	Two librarians search for two books.
+12031569	Ο καλός υπάλληλος είναι περήφανος.	12031514	The good employee is proud.
+12031570	Ο καλός εργαζόμενος είναι υπερήφανος.	12031514	The good employee is proud.
+12032293	Γιατί άκουσες τον αδερφό σου;	12031876	Why did you listen to your brother?
+12032353	Το δέντρο πέφτει.	6381166	The tree falls.
+12034478	Σε θυμάμαι.	2247386	I remember you.
+12034525	Φανταζόμαστε αμέσως τι είναι το χειρότερο.	12034492	We imagine immediately what is the worst.
+12034909	Η συνεισφορά του στο σώμα Tatoeba περιέχει 700 προτάσεις περισσότερες στα ρουμανικά από ό,τι στα γαλικιανά.	12034873	His contribution to the Tatoeba corpus contains 700 sentences more in Romanian than in Galician.
+12034964	Γνωρίζετε ο ένας τον άλλον;	64229	Do you know each other?
+12035305	Ο πιλότος αστειεύεται με την αεροσυνοδό.	12035287	The pilot jokes with the stewardess.
+12036408	Ο φυσικός δουλεύει πολύ.	12036390	The physicist works a lot.
+12036409	Ο φυσικός εργάζεται πολύ.	12036390	The physicist works a lot.
+12036442	Μοιάζει με φοιτήτρια.	12036423	She looks like a student.
+12036764	Έχω ένα κουτάβι στον κτηνίατρο.	12036685	I have a puppy at the vet.
+12036794	Ήταν καιρός.	1725542	It was about time.
+12036798	Καιρός ήταν.	1725542	It was about time.
+12036923	Οι ερευνητές διάβασαν πολλά βιβλία.	12036863	The researchers read many books.
+12037384	Οι μουσικοί είναι κουρασμένοι.	12037367	The musicians are tired.
+2404795	Έχει ο πελάτης πάντα δίκιο;	3252081	Is the customer always right?
+12038447	Ο λογιστής και ο ταμίας είναι αδέλφια.	12038409	The accountant and the cashier are brothers.
+12040118	Μπείτε ήδη!	3729740	Come in already.
+12040165	Ο Τομ ήταν κάποτε μεταφραστής.	9056826	Tom was once a translator.
+12040195	Με την ηλικία αποκτάμε σοφία.	248734	We gain wisdom with age.
+12040304	Υπάρχουν ορισμένα αεροσκάφη, τα λεγόμενα ανεμόπτερα, που δεν έχουν καθόλου κινητήρες, αλλά πετούν μια χαρά.	5325776	There are some aircraft, called gliders, that have no engines at all, but fly just fine.
+12040764	Η εικόνα είναι πολύ όμορφη.	12040744	The image is very beautiful.
+12040959	Το δέντρο πήρε φωτιά εξαιτίας του κεραυνού.	12040859	The tree was set on fire because of the lightning.
+12041357	Αυτό το καπέλο είναι μεγαλύτερο.	12041344	That hat is bigger.
+12041603	Μισώ τους εφιάλτες.	9546789	I hate nightmares.
+12042362	Ήμασταν διαφορετικοί.	4495091	We were different.
+12042387	Είναι πολύ όμορφο όνομα.	4014234	That's a very pretty name.
+12042441	Προσέχετε πού περπατάτε.	12042400	Be careful where you walk.
+7970703	Δεν καταλαβαίνω τι έχει πει.	261260	I can't make out what she said.
+12042890	Ο φίλος μου ο Αλέξανδρος μιλάει ισπανικά.	6379285	My friend Alexander speaks Spanish.
+12044465	Έχω τη λύση.	4499978	I have the solution.
+12044919	Ο άντρας σου δεν ήταν σε αυτή τη χώρα.	12044902	Your husband was not in this country.
+12044955	Το αγόρι μέτρησε τα βήματά του καθώς περπατούσε.	12044926	The boy counted his steps as he walked.
+12045127	Πες μου τι σκέφτεσαι.	843225	Tell me what you're thinking.
+12045129	Πείτε μου τι σκέφτεστε.	843225	Tell me what you're thinking.
+12045132	Ζω στο παρόν.	11461744	I live in the present moment.
+12045135	Η απάντησή του είναι σωστή.	12044960	His answer is correct.
+12046239	Στέκομαι φρουρός.	12046201	I stand guard.
+12046239	Στέκομαι φρουρός.	12046202	I'm standing guard.
+12047039	Ο Γιόργκεν μαθαίνει ελληνικά.	3215777	Jørgen is learning Greek.
+12048411	Ο γιατρός μου έδωσε τη διεύθυνση του νοσοκομείου.	12048382	The physician gave me the address of the hospital.
+12048747	Είμαι σίγουρος ότι καταλαβαίνεις τι εννοώ.	2542320	I'm sure you know what I mean.
+12049062	Έβαλαν τη λάμπα στο κομοδίνο.	12048982	They put the lamp on the nightstand.
+12049247	Μη καταλαβαίνοντας τι έλεγε, δεν άκουγα πια.	12049197	Not understanding what he said, I did not listen anymore.
+12049425	Ο δρόμος δεν είναι καλός.	12049395	The road is not good.
+12051244	Δεν μπορούσε να κάνει περισσότερα.	12051216	He could not do more.
+12051517	Ας δούμε τι κάνουν.	12048456	Let's see what they're up to.
+12052923	Είπε ότι θα επέστρεφε σύντομα.	290216	He said that he would be back soon.
+12054301	Δεν ήμουν διατεθειμένος να περιμένω.	8597038	I wasn't willing to wait.
+12055263	Την χτύπησε μια σφαίρα την ώρα που κοιμόταν.	2944325	She was shot in her sleep.
+12055298	Υπάρχουν πολλές βάρκες σε εκείνο το ποτάμι.	12055198	There are many boats on that river.
+12055687	Είναι το γρασίδι πράσινο μόνο το καλοκαίρι;	12055673	Is the grass green only in the summer?
+12057481	Άλλαξα τα σεντόνια.	12057457	I changed the sheets.
+12057557	Η γνώση μας απελευθερώνει και μας κάνει καλύτερους ανθρώπους.	4238256	Knowledge sets us free and makes us better people.
+12057599	Πες μου μια ιστορία με μια φράση.	12057192	Tell me a story in one sentence.
+12057966	Δεν ξέρω γιατί θύμωσα.	12057919	I do not know why I am angry.
+12057967	Δεν ξέρω γιατί είμαι θυμωμένος.	12057919	I do not know why I am angry.
+12057969	Δεν ξέρω γιατί είμαι θυμωμένη.	12057919	I do not know why I am angry.
+12057972	Ήξερα ότι ήταν θυμωμένος μαζί μου.	12057916	I knew he was angry with me.
+12057978	Γύρισα σπίτι στις δυόμιση.	12057847	I came home at two-thirty.
+12057981	Είμαι γέρος, αλλά όχι τόσο γέρος.	12057832	I'm old but not that old.
+12057982	Δεν έχω βγει ποτέ με τη Μαίρη.	12057826	I've never dated Mary.
+12057983	Αγόρασαν γάτα.	12057689	They bought a cat.
+12057984	Αγόρασαν μια γάτα.	12057689	They bought a cat.
+12057991	Τ' αμάξι μας κλάπηκε.	12057622	Our car got stolen.
+12057992	Τ' αυτοκίνητό μας κλάπηκε.	12057622	Our car got stolen.
+12057995	Η επιχείρησή μας ακμάζει.	12057628	Our business is booming.
+12057996	Η επιχείρησή μας ανθεί.	12057628	Our business is booming.
+12057997	Ο σεφ μας μόλις παραιτήθηκε.	12057625	Our chef has just quit.
+12058000	Θα γίνει η πρώτη Γιαπωνέζα αστροναύτισσα.	316086	She will be the first Japanese woman astronaut.
+12058388	Τραγουδούσες πολύ όμορφα.	12058352	You were singing very beautifully.
+12058465	Τα άνθη του νούφαρου ανοίγουν κατά την ανατολή και κλείνουν κατά τη δύση του ηλίου.	8855756	The water lily's flowers open at sunrise and close at sunset.
+12058554	Τα φύλλα του νούφαρου επιπλέουν στην επιφάνεια του νερού.	9990516	The leaves of the water lily float on the surface of the water.
+12058718	Βλέπεις αυτό το αστέρι;	12058703	Do you see that star?
+12058794	Το καλαμπόκι μεγαλώνει πολύ το καλοκαίρι.	12058748	Corn grows a lot in the summer.
+12058868	Οι γιοι τους πέθαναν κατά τη διάρκεια του πολέμου.	12058814	Their sons died during the war.
+12058954	Ο παππούς μου αποκοιμήθηκε καθισμένος στον καναπέ.	12058934	My grandfather fell asleep sitting on the couch.
+12059807	Τα νέα σας έπιπλα είναι πολύ όμορφα.	12059781	Your new furniture is very beautiful.
+11959532	Ο παππούς της πέθανε γράφοντας ένα γράμμα.	12059896	Her grandfather died writing a letter.
+12060153	Κάναμε μια ταινία για το σκάκι.	12060114	We made a movie about chess.
+12061734	Η ζωή είναι αγώνας ενάντια στο θάνατο.	12061694	Life is a fight against death.
+12061806	Αποφάσισε να μείνει.	11234775	He decided to stay.
+12063001	Άλλαξες το μαξιλάρι;	12062961	Did you change the pillow?
+12066271	Αυτή η νεαρή κοπέλα με αγαπάει!	12066235	This young lady loves me!
+12066592	Το σπίτι του περιβάλλεται από χωράφια με ηλιοτρόπια.	6834864	His house is surrounded by fields of sunflowers.
+12066664	Στον παπαγάλο μου δεν αρέσουν οι ηλιόσποροι.	7737715	My parrot doesn't like sunflower seeds.
+12069106	Δεν σου λείπει η μητέρα σου;	12069008	Don't you miss your mother?
+12069257	Οι στρουθοκάμηλοι δεν μπορούν να πετάξουν.	40839	Ostriches are incapable of flight.
+12071247	Η γειτονιά μας έχει τρεις λεωφόρους.	12071200	Our neighborhood has three avenues.
+12071460	Αγοράζει και πουλά μεταχειρισμένα αυτοκίνητα.	12071357	He buys and sells used cars.
+12071595	Βρίσκομαι κοντά σε ένα ρουμανικό εστιατόριο.	12071553	I am near a Romanian restaurant.
+12071630	Το μεγαλύτερο πρόβλημα για τις λιγότερο γνωστές γλώσσες είναι ο αμελητέος αριθμός πόρων ή η παντελής έλλειψη τους.	12054774	The biggest problem for lesser known languages is the negligible number of resources or a complete lack thereof.
+12072003	Ο μοναχός είναι σαράντα χρονών.	12071975	The monk is forty years old.
+12072103	Θα έχουμε ψωμί στο τραπέζι;	12072067	Will we have bread on the table?
+12072334	Θα μείνουν στο σπίτι μου.	12072302	They are going to stay in my home.
+12072353	Ποιο είναι το αγαπημένο σου φρούτο;	10800015	What's your favourite fruit?
+12072464	Η πολίτες προσφεύγουν στο δικαστήριο για να δικαιωθούν.	12072395	The citizens go to court for justice.
+12072545	Το σπίτι μου είναι και σπίτι σου.	1702642	My house is your house.
+12072594	Τους είδα να δουλεύουν με τα παιδιά στον κήπο.	12072579	I saw them working with the children in the garden.
+12073967	Δεν τον είδα ποτέ να σιωπά.	12073930	I never saw him being silent.
+12074131	Θα έρθω αύριο στο σπίτι σας.	12074113	I will come tomorrow to your house.
+12074162	Είναι αυτό μια απειλή;	1886912	Is that a threat?
+12074555	Tα 150 ποιήματα του Βιβλίου των Ψαλμών αντιπροσωπεύουν ένα ευρύ φάσμα ανθρώπινων φωνών και συναισθημάτων και συγκαταλέγονται στους πιο πολυδιαβασμένους στίχους της Βίβλου.	12071211	The 150 poems in the Book of Psalms represent a range of human voices and emotions, and are among the Bible’s most widely read verses.
+12076291	Δεν είμαι ιατρός !	12076292	I am not a doctor!
+12076346	Ο Τομ δεν μου χαμογελάει πια.	6349920	Tom doesn't smile at me anymore.
+12076347	Η καταιγίδα διήρκησε αρκετές μέρες.	10868489	The storm lasted several days.
+12076360	Δεν μου αρέσει το ψάρι.	12076362	I do not like the fish.
+12076367	Εγώ ονομάζομαι Νίκη.	12076370	My name is Niki.
+12076373	Θέλω να φύγω.	12076374	I want to go away.
+12076373	Θέλω να φύγω.	1465184	I want to leave.
+12076377	Δεν μου αρέσεις!	12076378	I do not like you!
+12076377	Δεν μου αρέσεις!	2628913	I don't like you!
+12076380	Βραζιλία.	12076381	Brazil.
+12076387	Θα ήθελα να πάμε στην Αίγυπτο.	12076393	I would like to go to Egypt.
+12076394	Μην με αφήνεις μόνο μου !	1911994	Don't leave me alone!
+12076402	Σε φοβάμαι !	12076404	I am afraid of you!
+12076379	Θέλω να πάω στην Βραζιλια.	12076409	I want to go to Brazil.
+12076411	Μου είπες ψέματα!	2276427	You lied to me!
+3662526	Είμαι από την Ελλάδα.	12076436	I am from Greece.
+12076450	Ο Τομ θα μπορούσε να είναι μεθυσμένος.	6274795	Tom could be drunk.
+12076451	Ο Τομ ίσως μέθυσε.	6274795	Tom could be drunk.
+12076456	Ήθελα να δω αυτή την ταινία εδώ και πολύ καιρό.	10301912	I've wanted to see this movie for a long time.
+12076466	Ο εγκέφαλος.	12076469	The brain.
+12076491	Το γνωρίζω ότι ήταν εκείνος.	3904362	I know it was him.
+12076492	Το ξέρω ότι ήταν αυτός.	3904362	I know it was him.
+12078045	Η ισπανική γλώσσα είναι αδελφή με τη γαλλική.	12078019	The Spanish language is sister to the French language.
+12078120	Οι ακουαρέλες μου δεν ήταν ακριβές.	12078110	My watercolors were not expensive.
+12078498	Δεν τρώω κρέας ο ίδιος.	12078462	I don't eat meat myself.
+12078636	Το να είσαι βίαιος δεν βοηθάει.	12078567	To be violent does not help.
+12080830	Βλέπετε τον δρόμο στον χάρτη;	12080743	Do you see the road on the map?
+12080984	Τα πάθη της ήταν το διάβασμα και το γράψιμο.	12080931	Her passions were reading and writing.
+12081576	Είμαι η καινούργια δασκάλα.	1891148	I'm the new teacher.
+12083778	Άρχισα να συλλέγω γραμματόσημα σε ηλικία επτά ετών.	12081007	I started collecting stamps at the age of seven.
+12083872	Το νοσοκομείο είναι ανοιχτό κάθε φορά.	12083844	The hospital is open whenever.
+12083993	Ο Τομ μελετά δεκαπέντε γλώσσες, με καλή βοήθεια από τον Tatoeba.	12083942	Tom studies fifteen languages, with good help from Tatoeba.
+7854110	Πάντα έτσι ήταν.	7883506	It was always like that.
+12085225	Πού είναι τα φάρμακα για το κρυολόγημα;	12085168	Where are the medicines for the cold?
+12085306	Βοήθησες αυτή τη γυναίκα;	12085251	Did you help that woman?
+12085307	Βοηθήσατε αυτή τη γυναίκα;	12085251	Did you help that woman?
+12085845	Ο φτωχός είναι μια άσχημη λέξη.	12085644	Poor is an ugly word.
+12087291	Κάποτε ζούσες κοντά μας.	12087236	You used to live near us.
+12087360	Το Tatoeba είναι ένα σχολείο ξένων γλωσσών για μένα.	12087312	I think of Tatoeba as a language school.
+12089765	Μια από τις αδερφές του είναι νοσοκόμα.	12089693	One of his sisters is a nurse.
+12095463	Πόσα θέλετε να δώσετε για αυτό το ποδήλατο;	12095419	How much do you want to give for this bike?
+12100504	Τρώω λίγο κρέας.	6173229	I eat little meat.
+12102187	Τι έμαθες στο σχολείο σήμερα;	2960454	What did you learn at school today?
+12102188	Τι μάθατε στο σχολείο σήμερα;	2960454	What did you learn at school today?
+12102198	Κλάπηκε τ' αυτοκίνητό μας.	12057622	Our car got stolen.
+12102199	Κλάπηκε τ' αμάξι μας.	12057622	Our car got stolen.
+12103943	Όταν βρέχει καρεκλοπόδαρα, βγαίνετε έξω;	12103940	When it rains cats and dogs, do you go out?
+12104063	Είσαι μια πραγματική νεράιδα.	12104061	You are a real fairy.
+12104066	Είσαι μια αληθινή νεράιδα.	12104061	You are a real fairy.
+12104922	Το κορίτσι έχει ένα κουνέλι σαν κατοικίδιο.	12104920	The girl has a rabbit as a pet.
+12105008	Το όνειρό μου είναι να πετάξω.	12105007	My dream is to fly.
+12105153	Έρχεται μια νέα μαζική εξαφάνιση; Όλα με κάνουν να φοβάμαι ότι η καταραμένη πολεμική βιομηχανία είναι έτοιμη να επιτύχει, με το μοχθηρό πυρηνικό της οπλοστάσιο, τον ηλίθιο στόχο της εξαφάνισης της ζωής στη Γη.	12105126	Is a new mass extinction coming? Everything leads me to fear that the damned war industry is about to achieve, with its sinister nuclear arsenal, the stupid goal of extinguishing life on Earth.
+12076327	Μου αρέσει πολύ το Tatoeba.	6778868	I really like Tatoeba.
+9577701	Έχεις καλή καρδιά .	2546883	You have a good heart.
+12076353	Είμαι στο μπάνιο.	2548239	I'm in the bathroom.
+12105579	Δεν έχεις πλύνει ακόμα τα πιάτα;	5263737	Haven't you washed the dishes yet?
+12105769	Αυτός ο όρος δεν βρίσκεται στο λεξικό.	12105757	This term is not found in the dictionary.
+12105802	Χρησιμοποιείτε τα μέσα μαζικής μεταφοράς;	12105800	Do you use the modes of public transportation?
+12109123	Η πόρτα της εξόδου βρίσκεται στα δεξιά.	12107283	The exit door is on the right.
+12109181	Φοβάμαι λόγω των ανασφαλειών μου.	12109180	I am afraid because of my insecurities.
+12110312	Όλος ο καφές που είχε πιει δεν είχε κανένα αποτέλεσμα.	12108765	All the coffee she had had had had no effect.
+12110843	Δεν μου επέτρεψε ούτε να τη φιλήσω.	12108229	She didn't even let me kiss her.
+12110912	Όλοι οι γονείς θέλουν τα παιδιά τους να είναι ευτυχισμένα.	12096329	All parents want their kids to be happy.
+12112062	Αν οι ελιές ήξεραν τα χέρια που τις φύτεψαν, το λάδι τους θα γινόταν δάκρυα.	12111952	If olive trees knew the hands that planted them, their oil would become tears.
+12114166	Μπήκαμε δωρεάν στον κινηματογράφο.	12114034	We entered the cinema for free.
+12114169	Μπήκαμε δωρεάν στο σινεμά.	12114034	We entered the cinema for free.
+12114575	Έχω τρεις ζωές. Μπορώ να χάσω έως και δύο.	12114528	I have three lives; I can lose up to two.
+12117050	Δεν μπορώ να ζήσω στο εξωτερικό.	12117036	I can't live abroad.
+12118117	Το οξυγόνο είναι πολύ σημαντικό για τη ζωή στη γη.	12118078	Oxygen is very important for life on Earth.
+12118146	Τα σκυλιά δεν προσπαθούν να πιάσουν ποντίκια.	12118128	Dogs don't try to catch mice.
+12118709	Τώρα είμαστε μπροστά στο μουσείο.	12118686	We are now in front of the museum.
+12120225	Βάλτε την ντουλάπα στα δεξιά και το κρεβάτι στα αριστερά.	12120193	Put the wardrobe on the right and the bed on the left.
+12122487	Μας περιμένει στη γωνία κοντά στην τράπεζα.	12122458	She is waiting for us at the corner near the bank.
+12123726	Έχουμε δείπνο μαζί.	12123698	We have dinner together.
+12124610	Πότε έγινε η εκτόξευση του πρώτου δορυφόρου;	12124584	When did the launch of the first satellite take place?
+12125690	Πότε προσεύχεσαι;	12125658	When do you pray?
+12125748	Ο παππούς μας είναι ενενήντα χρονών.	12125724	Our grandfather is ninety years old.
+12125805	Κολυμπάτε στη λίμνη;	12125778	Do you swim in the lake?
+12126120	"Δωρεάν" σημαίνει ότι δεν χρειάζεται να πληρώσετε για αυτό.	12126089	"Free" means that you don't need to pay for it.
+12126273	Έζησα πολύ καιρό στη Σιβηρία.	12126192	I lived in Siberia for a long time.
+12127421	Το φως είναι ζωή.	10772152	Light is life.
+12127440	Μπορείτε να διαβάσετε αυτές τις προτάσεις;	10865750	Can you read these sentences?
+12127476	Κοντά στο χωριό υπάρχει μια μεγάλη στρογγυλή λίμνη.	12127447	There is a large round lake near the village.
+12127522	Η γιαγιά μας πέθανε πριν από πολλά χρόνια.	12127490	Our grandmother died many years ago.
+12128970	Μην κολυμπάτε μακριά!	12128953	Do not swim far!
+12129070	Ο δάσκαλός μας λέει ότι όλοι χρειάζονται τη Φυσική.	12129045	Our teacher says that everybody needs Physics.
+12129124	Σήμερα είναι είκοσι έξι Οκτωβρίου.	12129091	Today is October twenty-sixth.
+12129342	Είναι καλύτερο να φορέσετε τη μπλε μπλούζα.	12129297	It is best you put on the blue blouse.
+12129551	Όλοι εκτός από τον δικαστή έφυγαν από την αίθουσα.	12129504	Everyone except the judge left the courtroom.
+12129819	Ο αδερφός μου έπεσε από το δέντρο αλλά δεν έσπασε τίποτα.	12129762	My brother fell out of the tree but didn't break anything.
+12129897	Γιατί ο καπνός είναι σκούρο γκρι;	12129857	Why is the smoke dark grey?
+12129961	Βλέπεις τον μαύρο καπνό εκεί πέρα;	12129924	Do you see the black smoke over there?
+12130004	Βλέπω σκιές από τα σύννεφα στο έδαφος.	12129974	I see shadows from the clouds on the ground.
+12130619	Δεν υπάρχει τίποτα να φοβηθείς εκεί.	12130599	There is nothing to be afraid of there.
+12130750	Η εκτόξευση θα γίνει αύριο.	12130739	The launch will take place tomorrow.
+12130818	Αυτό το βιβλίο δεν είναι μόνο άχρηστο αλλά και επιβλαβές.	12130790	This book is not only useless but even harmful.
+12130901	Από όσο μπορεί κανείς να πει, είναι καλλιτέχνης.	10876375	As far as one can tell, she is an artist.
+12131309	Αυτό δεν μπορεί να φανεί με ένα συνηθισμένο μικροσκόπιο.	12131260	This can't be seen through an ordinary microscope.
+12131973	Ο πίνακας περιεχομένων βρίσκεται στο τέλος του βιβλίου.	12131909	The table of contents is at the end of the book.
+12132800	Σε παρακαλώ κάτσε και θα φτιάξω τσάι.	12132731	Please sit down, and I will make tea.
+12132855	Είμαι σίγουρος ότι αυτό είναι ψέμα.	12132820	I am sure this is a lie.
+12132935	Κάποτε θα τα καταλάβεις όλα.	12132896	Someday you will understand everything.
+12132966	Το σημαντικό είναι ότι είμαστε ομάδα.	12132949	The important thing is we are a team.
+12132982	Πιστεύετε ότι είναι πολύ γρήγορο;	12122438	Do you think it is too fast?
+12133031	Το ασανσέρ έχει πράσινους τοίχους.	12133008	The elevator has green walls.
+12133768	Ο σκίουρος είναι στη στέγη.	12133726	The squirrel is on the roof.
+12133812	Ζωγράφισε μου έναν μεγάλο κύκλο.	12133781	Draw me a large circle.
+12134432	Αυτό το τυρί είναι νόστιμο.	11964628	This cheese is delicious.
+12134683	Σύμφωνα με τον Tarrasch, το καλύτερο επιθετικό κομμάτι είναι ο επίσκοπος του βασιλιά.	10320550	According to Tarrasch, the best attacking piece is the king's bishop.
+12134742	Η πρόταση δεν έχει νόημα.	6207899	The sentence makes no sense.
+12134865	Ένα άτομο που ζωγραφίζει άσχημα δεν είναι καλλιτέχνης.	12134830	A person who draws poorly is not an artist.
+12134931	Για χρόνια πάλευε με τον εθισμό. Και άνοιξε ένα κέντρο αποθεραπείας για άτομα που θέλουν να σταματήσουν τους εθισμούς.	12134892	For years he struggled with addiction. And he opened a recovery center for people looking to get rid of addictions.
+12135745	Δεν έχουν μείνει άλλες θέσεις.	10806614	There are no more seats left.
+12135785	Αγοράσαμε ένα τετράγωνο κρεβάτι.	12135762	We bought a square bed.
+12137057	Ζει στη σκιά του διάσημου πατέρα του.	12137038	He lives in the shadow of his famous father.
+12137132	Μελετάω τις ιδιότητες αυτού του υγρού.	12137110	I am studying the properties of this liquid.
+12137882	Η Ιαπωνία είναι μια χώρα όπου υπάρχουν πολλά βουνά.	10750827	Japan is a country where there are many mountains.
+12137896	Ποια είναι η διαφορά μεταξύ ενός τραπεζιού και μιας καρέκλας;	10768681	What is the difference between a table and a chair?
+12138014	Η γυναίκα που βγήκε έξω είναι μηχανικός.	12137969	The woman who went outdoors is an engineer.
+12138351	Η σόμπα είναι στην κουζίνα, αριστερά από το ψυγείο.	12138305	The stove is in the kitchen, to the left of the refrigerator.
+12138496	Παρακαλώ διαγράψτε αυτή την ανάρτηση.	12138411	Please delete this post.
+12138902	Η ελπίδα είναι ο λόγος της ζωής.	12138862	Hope is the reason for life.
+12139478	Εδώ πωλούνται ρούχα και παπούτσια.	12139416	Clothes and footwear are sold here.
+12139586	Η είσοδος του σταθμού βρίσκεται στη γωνία.	12139559	The entrance to the station is around the corner.
+12140027	Αυτό το υγρό έχει μια παράξενη ιδιότητα.	12140003	This liquid possesses one strange property.
+12140306	Νομίζω ότι είναι λίγο κουρασμένη.	12140257	I think she is just a bit tired.
+12140514	Τι όμορφο δαχτυλίδι αρραβώνων!	12140481	What a beautiful engagement ring!
+12141680	Δεν χρειάζεται να μάθω γαλλικά.	2451535	I don't have to study French.
+12143589	Όλοι μέναμε στην ίδια γειτονιά.	11205587	We all lived in the same neighborhood.
+12143678	Δυστυχώς, δεν υπάρχει πουθενά να αλλάξετε στην παραλία.	12143646	Unfortunately, there's nowhere to get changed on the beach.
+12144302	Γιατί φεύγεις από τη χώρα;	12144286	Why are you leaving the country?
+12144574	Νομίζω ότι ο Τομ είναι ικανός.	7168504	I think that Tom is competent.
+12144739	Το πρόσωπο είναι ο καθρέφτης της προσωπικότητάς μας.	11162092	The face is the mirror of our personality.
+12144906	Υπέστη βλάβη στο εξήντα χιλιόμετρο του αγώνα.	12144891	He suffered a breakdown in the sixtieth kilometer of the race.
+12145070	Πήγαν να δουλέψουν στα κοντινά χωράφια.	12145009	They went to work in nearby fields.
+12145579	Μπορούμε να συνεχίσουμε αυτό το παιχνίδι αύριο.	10823990	We can continue this game tomorrow.
+12145627	Έσπειραν ένα χωράφι με σίκαλη.	12145597	They sowed a field of rye.
+12147112	Κράτα τα βιβλία για μια στιγμή όσο ψάχνω να βρω μια θέση για αυτά.	12147092	Hold the books for a moment while I find a place for them.
+12147170	Τα ποντίκια αναζητούν δωρεάν τυρί.	12147153	Mice are looking for free cheese.
+12147700	Ο κύριος μεταφραστής εργάστηκε ως δημοσιογράφος στο παρελθόν.	12147652	The main translator worked as a journalist in the past.
+12147739	Οι τοίχοι στηρίζουν την οροφή.	12147709	The walls support the ceiling.
+12148704	Αυτό πρέπει να είναι ένα όνειρο.	11451264	This must be a dream.
+12148762	Είχα μια κοπέλα, αλλά χωρίσαμε πριν από τρεις μήνες.	12148729	I had a girlfriend, but we broke up three months ago.
+12148819	Δεν με ενδιαφέρει πια το ποδόσφαιρο. Το παιχνίδι έγινε πολύ βαρετό.	12148779	I'm not interested in soccer anymore. The game became very boring.
+12148970	Ο χορός είναι ένα σύνολο κινήσεων που εκτελούνται ακολουθώντας το ρυθμό της μουσικής.	12148931	Dance is a set of movements that are performed following the rhythm of the music.
+12149021	Ήταν εδώ, αλλά έφυγε σύντομα γιατί βιαζόταν.	12149002	He was here but left soon because he was in a hurry.
+12149305	Η γυμνάστρια εκτέλεσε την άσκησή της πολύ καλά.	12149289	The gymnast executed her exercise very well.
+12149377	Εργαστείτε πιο ήρεμα για να κάνετε λιγότερα λάθη.	12149360	Work more calmly to make fewer mistakes.
+12151201	Ο αετός πετά κόντρα στον άνεμο.	12151181	The eagle is flying against the wind.
+12151840	Είμαστε πολύ μακριά από το κέντρο.	12151821	We are a long way from the center.
+12152664	Έριξα μια ματιά στην εφημερίδα.	12152646	I took a look at the newspaper.
+12153211	Θα φύγουμε αμέσως μετά το δείπνο.	12153189	We will leave right after dinner.
+12154301	Μου αρέσουν οι σαύρες.	6824219	I like lizards.
+12154324	Είναι δηλητήριο.	1894564	It's poison.
+12154681	Πόσο είναι πέντε επί επτά;	12154613	How much is five times seven?
+12155495	Και εδώ θα βάλουμε τον καναπέ.	12154698	And here we will put the couch.
+12155550	Μπορείς να πάρεις τηλέφωνο τη Μαίρη και να της πεις ότι είμαστε εδώ;	12155393	Can you call Mary and tell her that we are here?
+12156452	Η γυναίκα μου είναι Χριστιανή αλλά εγώ ο ίδιος δεν πιστεύω στον Θεό.	12156339	My wife is Christian but I do not believe in God myself.
+12156579	Όχι, δεν υπάρχει χώρος στο ξενοδοχείο.	12156531	No, there is no room in the hotel.
+12156983	Είναι διαρροή.	12156717	It's a leak.
+12157168	Καταπολεμώ τις δασικές πυρκαγιές.	12157029	I fight forest fires.
+12159010	Το θέατρο στο κέντρο είναι παλιό, αλλά καθόλου κακό.	12159001	The theater in the center is old but it is not bad.
+12159114	Πιστεύουν ότι σε αυτή τη θερμοκρασία δεν υπάρχουν κρύσταλλοι.	12159059	It is thought that at this temperature there are no crystals.
+12161074	Θα πας με τα πόδια;	9700710	Are you going on foot?
+12162143	Όποιος πίνει νερό είναι πάντα υγιής.	12162109	A man who drinks water is always healthy.
+12166238	Κακόμοιρο σκυλί!	10246049	Poor dog.
+12166242	Αύριο είναι η γιορτή του πατέρα.	3737093	Tomorrow is Father's Day.
+12167353	Νομίζει ότι υπάρχουν εξωγήινοι.	12167324	He thinks that aliens exist.
+9498775	Ο πατέρας μου πηγαίνει στη δουλειά µε αυτοκίνητο.	12167720	My father goes to work by car.
+9498775	Ο πατέρας μου πηγαίνει στη δουλειά µε αυτοκίνητο.	497115	My father drives to work.
+9501260	Θέλω να μάθω Ρώσικα.	4519720	I want to learn Russian.
+12169933	Πειράματα έδειξαν ότι αυτή η δήλωση είναι σωστή.	12169917	Experiments have shown that this statement is correct.
+12171161	Δεν μου αρέσει να μεταφράζω μεγάλες προτάσεις.	12171152	I don't like to translate long sentences.
+12172432	Ο μισοκοιμισμένος θέλει να πιει καφέ.	12172428	The half-asleep man wants to drink coffee.
+12172529	Πού κολυμπάτε συνήθως;	10704842	Where do you usually swim?
+12172997	Η μικρή πράσινη κουκουβάγια έχει την καλύτερη σχολή ξένων γλωσσών που ξέρω.	12172747	The little green owl has the best language school I know.
+12173320	Μια νυφίτσα προσπαθεί να αρπάξει το χοντρό ποντίκι.	12173303	A weasel tries to grab the fat mouse.
+12173704	Τα ρούχα είναι στην ντουλάπα.	12173700	The clothes are in the closet.
+12173834	Ο σκύλος μου συνήθως κοιμάται στο πάτωμα.	12173832	My dog usually sleeps on the floor.
+12174406	Είθε ο Θεός να με συγχωρήσει.	11435667	May God forgive me.
+12174485	Ο κλέφτης δεν θέλει να αγοράσει τα παπούτσια.	12174472	The thief does not want to buy the shoes.
+12174776	Λυπάμαι αλλά οι δικαιολογίες σου είναι απαράδεκτες.	12174749	I'm sorry but your excuses are unacceptable.
+12178342	Δεν μου αρέσει να χρωστάω χρήματα στους φίλους μου.	12178306	I don't like owing money to my friends.
+12186946	Το σπίτι μου απέχει μόλις πέντε λεπτά με τα πόδια από το σταθμό.	250540	My house is only five minutes' walk from the station.
+12188463	Ο κεραυνός μπορεί πραγματικά να είναι επικίνδυνος.	12188446	Lightning can really be dangerous.
+12192696	Έχετε δειπνήσει;	324657	Have you had dinner?
+12192707	Έφαγες βραδινό;	324657	Have you had dinner?
+7970751	Ποιες σχέσεις έχεις με τους γείτονές σου;	12192780	What are your relations with your neighbors?
+12194446	Το πλαίσιο του νέου κτιρίου παίρνει σιγά σιγά μορφή.	269142	The framework of the new building is slowly taking form.
+12194474	Θα πάμε μια βόλτα στην πόλη.	9475893	We're going for a stroll around town.
+12195123	Χρειάζεστε μαξιλάρι;	6796856	Do you need a cushion?
+12195594	Το πουλί σήκωσε το κλαδάκι με το ράμφος του και πέταξε στη φωλιά του.	657149	The bird picked up the twig with its beak and flew to its nest.
+12196287	Δεν είσαι η γυναίκα μου.	10729977	You're not my wife.
+12196317	Καλώς ήρθατε στην ταπεινή μου κατοικία.	7221545	Welcome to my humble abode.
+12196351	Ας μην παρεκκλίνουμε από το θέμα.	322136	Let's not deviate from the subject.
+12196519	Αν έλεγα στον γιατρό την αλήθεια, τότε η διάγνωση θα ήταν πιο ακριβής.	9473907	If I'd told the doctor the truth, then the diagnosis would've been more accurate.
+12196547	Αυτή η τιμή περιλαμβάνει γεύματα;	10472617	Does this price include meals?
+12199122	Πρέπει να σας μιλήσουμε αμέσως.	11807086	We need to talk to you immediately.
+12199198	Γιατί δεν μένουμε σπίτι;	9944815	Why don't we stay home?
+12199243	Μας αρέσει ο γαμπρός μας.	10041952	We like our son-in-law.
+12200635	Δυσκολεύομαι να σκάψω λόγω των πετρών.	12200624	I'm having trouble digging because of the stones.
+12200795	Δεν αντιμετωπίζει περίπλοκες καταστάσεις.	10540267	He doesn't cope with complicated situations.
+12200797	Πονάει το κεφάλι κι ο λαιμός σου;	280178	Do you have a headache and a sore throat?
+12200799	Πονάει το κεφάλι κι ο λαιμός σας;	280178	Do you have a headache and a sore throat?
+12201651	Δεν χρειάζεται πλέον να μετράτε.	12201630	No need to count anymore.
+12201748	Έκανες ένα λάθος αλλά δεν είναι σοβαρό.	12201726	You made a mistake but it's not serious.
+12201777	Μαντέψτε, πήραν λάθος λεωφορείο!	12201766	Guess what, they got the wrong bus!
+12202983	Θα φύγουμε σε μια ώρα περίπου.	7993891	We'll leave in an hour or so.
+12203356	Αν θέλετε τα φυτά να αναπτυχθούν, πρέπει να τα ποτίζετε.	12203339	If you want the plants to grow, you must water them.
+12204689	Δεν θα διαμαρτυρόμασταν.	12204676	We wouldn't protest.
+12209431	Τα νιάτα είναι όνειρο και τα γηρατειά ένας εφιάλτης.	12209356	Youth is a dream, and old age is a nightmare.
+7970755	Ψεύδεται χωρίς τύψεις.	12209596	He lies without conscience.
+7970761	Η διδασκαλία είναι η καλύτερη μορφή της μάθησης.	12209598	Teaching is the best form of learning.
+7970764	Διατήρισες την ισορροπία σου.	8866691	You kept your balance.
+7970768	Παραιτήθηκε απ' όλα τα δικαιώματά του.	12209661	He gave up all his rights.
+7970909	Κάθε πρωί πίνω καφέ με γάλα.	12210016	Every morning I drink coffee with milk.
+8222280	πιστεύω ότι εκείνο είναι ένα μεγάλο λάθος.	12210985	I think that is a big mistake.
+8277859	Τι είναι αυτό το πράγμα που λέγεται αγάπη;	12211005	What is this thing called love?
+1313896	Πονάει το κεφάλι μου.	456425	My head hurts.
+12211234	Πονάει το δάχτυλό μου.	12063693	I have a pain in my finger.
+12211238	Έχω πόνο στο δάχτυλό μου.	12063693	I have a pain in my finger.
+12211239	Φτάνει.	12063660	It's enough.
+12211243	Τι φυτεύεις στον κήπο;	11873701	What do you plant in the garden?
+12211245	Τι φυτεύετε στον κήπο;	11873701	What do you plant in the garden?
+12211247	Ένας κήπος τι είναι;	11873677	What is a garden?
+12211248	Τι είναι ένας κήπος;	11873677	What is a garden?
+8359698	Υποφέρω εξαιτίας σου.	11146042	I suffer because of you.
+8359710	Δεν κοιμάμαι εξαιτίας σου.	12211404	I'm not sleeping because of you.
+8534583	Πάρτε τα βιβλία απ' εκεί.	12211431	Take the books from there.
+8534600	Αγοράστε δέκα λίρες βενζίνη.	12211454	Buy ten pounds of gas.
+8534624	Θέλω ένα καλύτερο αυτού.	12211475	I want a better one than this.
