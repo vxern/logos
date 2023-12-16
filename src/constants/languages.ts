@@ -11,7 +11,7 @@ import {
 	isTinyLDLocale,
 } from "./languages/detection";
 import { Language as FeatureLanguage, isLanguage as isFeatureLanguage } from "./languages/feature";
-import { Language as LearningLanguage } from "./languages/learning";
+import { Language as LearningLanguage, isLanguage as isLearningLanguage } from "./languages/learning";
 import {
 	DiscordLocale,
 	Language as LocalisationLanguage,
@@ -129,6 +129,7 @@ export {
 	getLocalisationLanguageByLocale,
 	isDiscordLocalisationLanguage,
 	isLocalisationLanguage,
+	isLearningLanguage,
 	getFeatureLanguage,
 	isTranslationLanguage,
 	getDeepLLocaleByTranslationLanguage,
