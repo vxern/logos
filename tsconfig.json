@@ -2,6 +2,7 @@
 	"compilerOptions": {
     "moduleResolution": "Node",
     "target": "ESNext",
+    "module": "ESNext",
     "outDir": "dist/",
 		"allowJs": true,
 		"allowUnreachableCode": false,
