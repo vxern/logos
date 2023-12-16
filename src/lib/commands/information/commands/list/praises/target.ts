@@ -3,11 +3,11 @@ import constants from "../../../../../../constants/constants";
 import { Locale } from "../../../../../../constants/languages";
 import * as Logos from "../../../../../../types";
 import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../../../client";
+import { Praise } from "../../../../../database/praise";
 import { User } from "../../../../../database/user";
 import { parseArguments, reply } from "../../../../../interactions";
 import { OptionTemplate } from "../../../../command";
 import { user } from "../../../../parameters";
-import { Praise } from "../../../../../database/praise";
 import { getPraisePage } from "../praises";
 
 const option: OptionTemplate = {

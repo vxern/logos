@@ -1,10 +1,10 @@
 import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
+import acknowledgements from "../../../../constants/types/acknowledgements";
 import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
 import { reply } from "../../../interactions";
 import { CommandTemplate } from "../../command";
-import acknowledgements from "../../../../constants/types/acknowledgements";
 
 const command: CommandTemplate = {
 	name: "acknowledgements",

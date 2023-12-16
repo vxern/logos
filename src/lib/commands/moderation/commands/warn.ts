@@ -1,6 +1,7 @@
 import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import { Locale } from "../../../../constants/languages";
+import components from "../../../../constants/types/components";
 import defaults from "../../../../defaults";
 import { MentionTypes, mention } from "../../../../formatting";
 import * as Logos from "../../../../types";
@@ -15,7 +16,6 @@ import { CommandTemplate } from "../../command";
 import { reason, user } from "../../parameters";
 import { getActiveWarnings } from "../module";
 import { getRuleTitleFormatted, rules } from "./rule";
-import components from "../../../../constants/types/components";
 
 const command: CommandTemplate = {
 	name: "warn",
