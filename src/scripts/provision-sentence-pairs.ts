@@ -3,7 +3,7 @@ import * as stream from "stream";
 import eventStream from "event-stream";
 import * as fs from "fs/promises";
 import Redis from "ioredis";
-import { LearningLanguage, LocalisationLanguage, isLearningLanguage } from "../constants/languages";
+import { Locale, getLocaleByLearningLanguage, isLearningLanguage } from "../constants/languages";
 import defaults from "../defaults";
 import { capitalise } from "../formatting";
 
@@ -11,7 +11,7 @@ const DELIMITER = "	";
 
 interface SentencePairFile {
 	path: string;
-	language: LocalisationLanguage;
+	locale: Locale;
 }
 async function getFiles(directoryPath: string): Promise<SentencePairFile[]> {
 	console.info(`Looking for files in ${directoryPath}...`);
@@ -36,7 +36,9 @@ async function getFiles(directoryPath: string): Promise<SentencePairFile[]> {
 			continue;
 		}
 
-		files.push({ path: filePath, language });
+		const locale = getLocaleByLearningLanguage(language);
+
+		files.push({ path: filePath, locale });
 	}
 
 	console.info(`Found ${files.length} sentence pair files in ${directoryPath}.`);
@@ -45,19 +47,23 @@ async function getFiles(directoryPath: string): Promise<SentencePairFile[]> {
 }
 
 type SentencePairRecord = [sentenceId: string, sentence: string, translationId: string, translation: string];
-type RecordWithLanguage = [language: LearningLanguage, record: SentencePairRecord];
+type RecordWithLanguage = [locale: Locale, record: SentencePairRecord];
 
 async function subscribeToReadStream(readStream: stream.Writable, file: SentencePairFile): Promise<void> {
 	return new Promise((resolve, reject) =>
 		fsSync
 			.createReadStream(file.path, { encoding: "utf-8", autoClose: true, emitClose: true })
 			.once("close", () => {
-				console.info(`Finished reading sentence pairs for ${file.language}.`);
+				console.info(`Finished reading sentence pairs for ${file.locale}.`);
 				resolve();
 			})
 			.once("error", () => reject())
 			.pipe(eventStream.split())
-			.pipe(eventStream.map((line: string) => readStream.write([file.language, line.split(DELIMITER)]))),
+			.pipe(
+				eventStream.map((line: string) =>
+					readStream.write([file.locale, line.split(DELIMITER) as SentencePairRecord] satisfies RecordWithLanguage),
+				),
+			),
 	);
 }
 

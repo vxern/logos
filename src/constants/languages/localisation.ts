@@ -102,6 +102,10 @@ function isLanguage(language: string): language is Language {
 	return isLogosLanguage(language);
 }
 
+function isLocale(locale: string): locale is Locale {
+	return isLogosLocale(locale);
+}
+
 function getDiscordLocaleByLanguage(language: DiscordLanguage): DiscordLocale {
 	return languageToLocale.discord[language];
 }
@@ -138,6 +142,10 @@ function isLogosLanguage(language: string): language is LogosLanguage {
 	return (languages.logos as readonly string[]).includes(language);
 }
 
+function isLogosLocale(locale: string): locale is LogosLocale {
+	return locale in localeToLanguage.logos;
+}
+
 export {
 	getDiscordLocaleByLanguage,
 	getLocaleByLanguage,
@@ -145,6 +153,7 @@ export {
 	getLanguageByLocale,
 	isDiscordLanguage,
 	isLanguage,
+	isLocale,
 	languages,
 	languageToLocale,
 };
