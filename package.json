@@ -50,7 +50,6 @@
     "@discordeno/bot": "^19.0.0-next",
     "@sapphire/snowflake": "^3.5.1",
     "cldpre": "^2.9.0",
-    "csv-parse": "^5.5.0",
     "dexonline-scraper": "^0.1.0",
     "dotenv": "^16.3.1",
     "event-stream": "^4.0.1",

@@ -55,7 +55,6 @@ const licences = {
 		"@discordeno/bot": apache("Copyright 2021 - 2023 Discordeno"),
 		"@sapphire/snowflake": mit("Copyright (c) 2020 The Sapphire Community and its contributors"),
 		cldpre: apache("Copyright [yyyy] [name of copyright owner]"),
-		"csv-parse": mit("Copyright (c) 2010 Adaltas"),
 		"dexonline-scraper": mit('Copyright (c) 2023 Dorian "vxern" Oszczęda'),
 		dotenv: bsd("Copyright (c) 2015, Scott Motte"),
 		"event-stream": mit("Copyright (c) 2011 Dominic Tarr"),
