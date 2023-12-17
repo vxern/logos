@@ -3,7 +3,7 @@ import * as stream from "stream";
 import eventStream from "event-stream";
 import * as fs from "fs/promises";
 import Redis from "ioredis";
-import { Locale, getLocaleByLearningLanguage, isLearningLanguage } from "../constants/languages";
+import { Locale, getLocaleByLearningLanguage, isLearningLanguage, locales } from "../constants/languages";
 import defaults from "../defaults";
 import { capitalise } from "../formatting";
 
@@ -49,7 +49,12 @@ async function getFiles(directoryPath: string): Promise<SentencePairFile[]> {
 	return files;
 }
 
-type SentencePairRecord = [sentenceId: string, sentence: string, translationId: string, translation: string];
+type SentencePairRecord = [
+	sentenceId: string | number,
+	sentence: string,
+	translationId: string | number,
+	translation: string,
+];
 type RecordWithLanguage = [locale: Locale, record: SentencePairRecord];
 async function subscribeToReadStream(readStream: stream.Writable, file: SentencePairFile): Promise<void> {
 	return new Promise((resolve, reject) =>
@@ -62,31 +67,38 @@ async function subscribeToReadStream(readStream: stream.Writable, file: Sentence
 			.once("error", () => reject())
 			.pipe(eventStream.split())
 			.pipe(
-				eventStream.map((line: string) =>
-					readStream.write([
-						file.locale,
-						line.split(RECORD_DELIMETER) as SentencePairRecord,
-					] satisfies RecordWithLanguage),
-				),
+				eventStream.map((line: string) => {
+					const record = line.split(RECORD_DELIMETER) as SentencePairRecord;
+					record[0] = parseInt(record[0] as string);
+					record[2] = parseInt(record[2] as string);
+
+					line.length !== 0 && readStream.write([file.locale, record] satisfies RecordWithLanguage);
+				}),
 			),
 	);
 }
 
 console.time("provision-sentence-pairs");
 
+const indexes: Record<Locale, number[]> = Object.fromEntries(
+	locales.map<[Locale, number[]]>((locale) => [locale, []]),
+) as Record<Locale, number[]>;
+
 interface EntryBuffer {
 	entries: Record<string, string>;
 	size: number;
-	add(key: string, value: string): void;
+	add(record: RecordWithLanguage): void;
 	reset(): void;
 	flush(): Promise<void>;
 }
 const entryBuffer: EntryBuffer = {
 	entries: {},
 	size: 0,
-	add(key, value) {
-		this.entries[key] = value;
+	add(record: RecordWithLanguage) {
+		this.entries[`${record[0]}:${record[1][0]}`] = JSON.stringify(record[1]);
 		this.size++;
+
+		indexes[record[0]].push(record[1][0] as number);
 
 		this.size === MAX_BUFFER_SIZE && this.flush();
 	},
@@ -103,8 +115,8 @@ const entryBuffer: EntryBuffer = {
 
 const readStream = new stream.Writable({
 	objectMode: true,
-	write: (data: RecordWithLanguage, _, next) => {
-		entryBuffer.add(`${data[0]}:${data[1][0]}`, JSON.stringify(data[1]));
+	write: (record: RecordWithLanguage, _, next) => {
+		entryBuffer.add(record);
 		next();
 	},
 	final() {
@@ -118,6 +130,25 @@ for (const file of await getFiles(defaults.SENTENCE_PAIRS_DIRECTORY)) {
 }
 await Promise.all(promises);
 readStream.end();
+
+// Remove the NaN element created by trying to parse the last, empty line.
+{
+	const pipeline = client.pipeline();
+	for (const locale of locales) {
+		indexes[locale].pop();
+		pipeline.del(`${locale}:NaN`);
+	}
+	await pipeline.exec();
+}
+
+// Save new entries to the index.
+{
+	const pipeline = client.pipeline();
+	for (const locale of locales) {
+		pipeline.sadd(`${locale}:index`, indexes[locale]);
+	}
+	await pipeline.exec();
+}
 
 console.timeEnd("provision-sentence-pairs");
 

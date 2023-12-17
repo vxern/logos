@@ -29,6 +29,7 @@ import {
 	isLanguage as isLocalisationLanguage,
 	languageToLocale as localisationLanguageToLocale,
 	languages as localisationLanguages,
+	locales,
 } from "./languages/localisation";
 import {
 	DeepLLanguage,
@@ -151,6 +152,7 @@ export {
 	isCLDLocale,
 	getTranslationLanguage,
 	getBaseLanguage,
+	locales,
 };
 export type {
 	LearningLanguage,
