@@ -4,7 +4,6 @@ import FancyLog from "fancy-log";
 import * as ravendb from "ravendb";
 import constants from "../constants/constants";
 import languages, {
-	LearningLanguage,
 	Locale,
 	LocalisationLanguage,
 	getDiscordLocaleByLocalisationLanguage,
@@ -20,7 +19,6 @@ import { timestamp, trim } from "../formatting";
 import * as Logos from "../types";
 import { Command, CommandTemplate, InteractionHandler, Option } from "./commands/command";
 import commandTemplates from "./commands/commands";
-import { SentencePair } from "./commands/language/commands/game";
 import { EntryRequest } from "./database/entry-request";
 import { Guild, timeStructToMilliseconds } from "./database/guild";
 import { Praise } from "./database/praise";
@@ -112,7 +110,6 @@ type Client = {
 	};
 	collectors: Map<Event, Set<Collector<Event>>>;
 	features: {
-		sentencePairs: Map<LearningLanguage, SentencePair[]>;
 		// The keys are user IDs, the values are command usage timestamps mapped by command IDs.
 		rateLimiting: Map<bigint, Map<bigint, number[]>>;
 	};

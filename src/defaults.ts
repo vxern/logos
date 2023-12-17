@@ -10,6 +10,8 @@ import { TimeStruct } from "./lib/database/guild";
 const PROJECT_NAME = "Logos";
 const USER_AGENT = "Logos (https://logos.wordcollector.co.uk)";
 
+const SENTENCE_PAIRS_DIRECTORY = "./assets/sentences";
+
 const FEATURE_LOCALE: Locale = "eng-US";
 const FEATURE_LANGUAGE: FeatureLanguage = "English";
 const LEARNING_LOCALE: Locale = "eng-US";
@@ -62,6 +64,7 @@ const SHORT_TEXT_LENGTH = 60;
 export default {
 	PROJECT_NAME,
 	USER_AGENT,
+	SENTENCE_PAIRS_DIRECTORY,
 	LOCALISATION_LANGUAGE,
 	LOCALISATION_LOCALE,
 	LEARNING_LANGUAGE,

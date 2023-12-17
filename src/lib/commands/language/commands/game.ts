@@ -155,15 +155,15 @@ function getGameView(
 
 /** Represents a pair of a sentence and its translation. */
 interface SentencePair {
-	sentenceId: string;
-
 	/** The source sentence. */
 	sentence: string;
 
-	translationId: string;
-
 	/** The translation of the sentence. */
 	translation: string;
+
+	sentenceId: string;
+
+	translationId: string;
 }
 
 /**

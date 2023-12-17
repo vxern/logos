@@ -38,7 +38,7 @@
   ],
   "scripts": {
     "get": "npm install && npm audit fix",
-    "provision": "tsx src/scripts/load-sentences.ts",
+    "provision": "tsx src/scripts/provision-sentence-pairs.ts",
     "setup": "npm run get && npm run provision",
     "#": "",
     "dev": "pm2 start ecosystem.config.cjs --instances 1 --no-autorestart --no-daemon",

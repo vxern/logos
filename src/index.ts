@@ -1,16 +1,7 @@
-import * as csv from "csv-parse/sync";
 import * as dotenv from "dotenv";
 import * as fs from "fs/promises";
-import {
-	LearningLanguage,
-	Locale,
-	LocalisationLanguage,
-	getLocalisationLanguageByLocale,
-	isLocalisationLanguage,
-} from "./constants/languages";
-import { capitalise } from "./formatting";
+import { Locale, LocalisationLanguage, getLocalisationLanguageByLocale } from "./constants/languages";
 import { Client, initialiseClient } from "./lib/client";
-import { SentencePair } from "./lib/commands/language/commands/game";
 
 async function readDotEnvFile(fileUri: string, isTemplate = false): Promise<Record<string, string> | undefined> {
 	const kind = isTemplate ? "environment template" : "environment";
@@ -164,101 +155,6 @@ async function loadLocalisations(directoryPath: string): Promise<Map<string, Map
 	return localisations;
 }
 
-/**
- * @returns An array of tuples where the first element is a language and the second
- * element is the contents of its sentence file.
- */
-async function readSentenceFiles(
-	environment: Client["environment"],
-	directoryPath: string,
-): Promise<[LearningLanguage, string][]> {
-	if (!environment.loadSentences) {
-		console.info("[Sentences] Skipping reading sentence pairs...");
-
-		return [];
-	}
-
-	const filePaths: string[] = [];
-	for (const entryPath of await fs.readdir(directoryPath)) {
-		const combinedPath = `${directoryPath}/${entryPath}`;
-		if ((await fs.stat(combinedPath)).isDirectory()) {
-			continue;
-		}
-
-		filePaths.push(combinedPath);
-	}
-
-	const results: Promise<[LearningLanguage, string]>[] = [];
-	for (const filePath of filePaths) {
-		const [_, fileName] = /^.+\/(.+)\.tsv$/.exec(filePath) ?? [];
-		if (fileName === undefined) {
-			console.warn(`Sentence file '${filePath}' has an invalid format.`);
-			continue;
-		}
-
-		const language = fileName
-			.split("-")
-			.map((part) => capitalise(part))
-			.join("/");
-
-		if (!isLocalisationLanguage(language)) {
-			console.warn(
-				`File '${filePath}' contains sentences for a language '${language}' not supported by the application. Skipping...`,
-			);
-			continue;
-		}
-
-		results.push(
-			fs.readFile(filePath).then((buffer) => {
-				const contents = decoder.decode(buffer);
-				return [language, contents];
-			}),
-		);
-	}
-
-	return Promise.all(results);
-}
-
-/** Loads dictionary adapters and sentence lists. */
-function loadSentencePairs(
-	environment: Client["environment"],
-	languageFileContents: [LearningLanguage, string][],
-): Map<LearningLanguage, SentencePair[]> {
-	if (!environment.loadSentences) {
-		console.info("[Sentences] Skipping loading sentence pairs...");
-
-		return new Map();
-	}
-
-	console.info(`[Sentences] Loading sentence pairs for ${languageFileContents.length} language(s)...`);
-
-	const result = new Map<LearningLanguage, SentencePair[]>();
-
-	for (const [language, contents] of languageFileContents) {
-		let records;
-		try {
-			records = csv.parse(contents, { relaxQuotes: true, relaxColumnCount: true, delimiter: "	" }) as
-				| [sentenceId: string, sentence: string, translationId: string, translation: string][];
-		} catch {
-			console.warn(`Failed to load sentences for ${language}.`);
-			continue;
-		}
-
-		for (const [sentenceId, sentence, translationId, translation] of records) {
-			const sentencePair = { sentenceId, sentence, translationId, translation };
-			result.get(language)?.push(sentencePair) ?? result.set(language, [sentencePair]);
-		}
-	}
-
-	console.info(
-		`[Sentences] Loaded ${Array.from(result.values()).flat().length} sentence pair(s) spanning ${
-			languageFileContents.length
-		} language(s).`,
-	);
-
-	return result;
-}
-
 async function setup(): Promise<void> {
 	const [envConfiguration, templateEnvConfiguration] = await Promise.all([
 		readDotEnvFile(".env"),
@@ -292,14 +188,9 @@ async function setup(): Promise<void> {
 
 	const environment = environmentProvisional as Client["environment"];
 
-	const [localisations, sentenceFiles] = await Promise.all([
-		loadLocalisations("./assets/localisations"),
-		readSentenceFiles(environment, "./assets/sentences"),
-	]);
+	const localisations = await loadLocalisations("./assets/localisations");
 
-	const sentencePairs = loadSentencePairs(environment, sentenceFiles);
-
-	initialiseClient(environment, { sentencePairs, rateLimiting: new Map() }, localisations);
+	initialiseClient(environment, { rateLimiting: new Map() }, localisations);
 }
 
 function customiseGlobals(): void {
