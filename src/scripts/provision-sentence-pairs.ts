@@ -7,7 +7,10 @@ import { Locale, getLocaleByLearningLanguage, isLearningLanguage } from "../cons
 import defaults from "../defaults";
 import { capitalise } from "../formatting";
 
-const DELIMITER = "	";
+const RECORD_DELIMETER = "	";
+const MAX_BUFFER_SIZE = 1024 * 128;
+
+const client = new Redis();
 
 interface SentencePairFile {
 	path: string;
@@ -48,7 +51,6 @@ async function getFiles(directoryPath: string): Promise<SentencePairFile[]> {
 
 type SentencePairRecord = [sentenceId: string, sentence: string, translationId: string, translation: string];
 type RecordWithLanguage = [locale: Locale, record: SentencePairRecord];
-
 async function subscribeToReadStream(readStream: stream.Writable, file: SentencePairFile): Promise<void> {
 	return new Promise((resolve, reject) =>
 		fsSync
@@ -61,44 +63,52 @@ async function subscribeToReadStream(readStream: stream.Writable, file: Sentence
 			.pipe(eventStream.split())
 			.pipe(
 				eventStream.map((line: string) =>
-					readStream.write([file.locale, line.split(DELIMITER) as SentencePairRecord] satisfies RecordWithLanguage),
+					readStream.write([
+						file.locale,
+						line.split(RECORD_DELIMETER) as SentencePairRecord,
+					] satisfies RecordWithLanguage),
 				),
 			),
 	);
 }
 
-const client = new Redis();
-
 console.time("provision-sentence-pairs");
 
-const writeStream = new stream.Writable({
-	objectMode: true,
-	write: async (data: Record<string, string>, _, next) => {
-		await client.mset(data);
-		keyCount = 0;
-		next();
-	},
-});
+interface EntryBuffer {
+	entries: Record<string, string>;
+	size: number;
+	add(key: string, value: string): void;
+	reset(): void;
+	flush(): Promise<void>;
+}
+const entryBuffer: EntryBuffer = {
+	entries: {},
+	size: 0,
+	add(key, value) {
+		this.entries[key] = value;
+		this.size++;
 
-let writeObject: Record<string, string> = {};
-let keyCount = 0;
+		this.size === MAX_BUFFER_SIZE && this.flush();
+	},
+	reset() {
+		this.entries = {};
+		this.size = 0;
+	},
+	async flush() {
+		console.info(`Flushing buffer (${this.size} entries)...`);
+		client.mset(this.entries);
+		this.reset();
+	},
+};
+
 const readStream = new stream.Writable({
 	objectMode: true,
 	write: (data: RecordWithLanguage, _, next) => {
-		writeObject[`${data[0]}:${data[1][0]}`] = JSON.stringify(data[1]);
-		keyCount++;
-
-		if (keyCount === 102400) {
-			writeStream.write(writeObject);
-			writeObject = {};
-			keyCount = 0;
-		}
-
+		entryBuffer.add(`${data[0]}:${data[1][0]}`, JSON.stringify(data[1]));
 		next();
 	},
 	final() {
-		writeStream.write(writeObject);
-		writeStream.end();
+		entryBuffer.flush();
 	},
 });
 
