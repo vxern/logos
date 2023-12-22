@@ -122,5 +122,13 @@
     "recognize.strings.fields.possibleMatches.description.multiple": "Estas opciones son menos probables, pero el idioma también podría ser uno de:",
     "translate.message.name": "Traducir",
     "translate.strings.invalid.both.title": "Idiomas no válidos",
-    "translate.strings.cannotDetermine.source.description.tryAgain": "Por favor, configúralo tú mismo o inténtalo de nuevo con una entrada diferente."
+    "translate.strings.cannotDetermine.source.description.tryAgain": "Por favor, configúralo tú mismo o inténtalo de nuevo con una entrada diferente.",
+    "correction.strings.userDoesNotWantCorrections.description": "Este usuario ha especificado que no desea ser corregido.",
+    "correction.strings.userDoesNotWantCorrections.title": "El usuario no desea correcciones",
+    "translate.strings.cannotUse.title": "No se puede traducir el mensaje",
+    "translate.strings.cannotUse.description": "Ese mensaje no se puede traducir.",
+    "translate.strings.cannotDetermine.target.description.tryAgain": "Por favor, ajústalo manualmente al idioma al que te gustaría traducir.",
+    "word.description": "Muestra información sobre una palabra dada.",
+    "resources.description": "Redirige al repositorio de recursos para aprender el idioma.",
+    "correction.strings.cannotCorrectOwn.title": "No puede corregir su propio mensaje"
 }
