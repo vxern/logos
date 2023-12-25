@@ -18,5 +18,7 @@
     "rules.exclusivity.content": "Oczekuje się, że członkowie nie będą używać tej przestrzeni do autopromocji, w tym samego/samej siebie. Zabrania się aktywnych prób reklamacji (w tym niechcianych wiadomości prywatnych).",
     "rules.adherence.title": "Przestrzeganie zasad",
     "rules.adherence.summary": "Szanuj zasady.",
-    "rules.adherence.content": "Członkowie, którzy nie liczą się z regułami serwera i nie są zainteresowani wnoszeniem produktywnego wkładu na serwer, mogą dostać permabana."
+    "rules.adherence.content": "Członkowie, którzy nie liczą się z regułami serwera i nie są zainteresowani wnoszeniem produktywnego wkładu na serwer, mogą dostać permabana.",
+    "rules.other.title": "Inne",
+    "rules.other.summary": "Do uzasadnienia w komentarzu."
 }
