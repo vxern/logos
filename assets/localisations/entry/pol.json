@@ -60,5 +60,11 @@
     "entry.verification.votesFor": "Głosy za",
     "entry.verification.inquiry.open": "Przeprowadź wywiad",
     "entry.verification.inquiry.failed.title": "Nie udało się rozpocząć rozmowy",
-    "entry.verification.inquiry.opened.description": "Rozpoczęto rozmowę z użytkownikiem w sprawie jego prośby o dołączenie do {guild_name}."
+    "entry.verification.inquiry.opened.description": "Rozpoczęto rozmowę z użytkownikiem w sprawie jego prośby o dołączenie do {guild_name}.",
+    "entry.verification.vote.sureToForce.accept.title": "Na pewno wymusić przyjęcie?",
+    "entry.verification.vote.sureToForce.accept.description": "Czy na pewno chcesz wymusić przyjęcie tej prośby o dołączenie?",
+    "entry.verification.vote.sureToForce.reject.title": "Na pewno wymusić odrzucenie?",
+    "entry.verification.vote.sureToForce.reject.description": "Czy na pewno chcesz wymusić odrzucenie tej prośby o dołączenie?",
+    "entry.verification.vote.sureToForce.yes": "Tak, wymuś",
+    "entry.verification.vote.sureToForce.no": "Nie, nie wymuszaj"
 }
