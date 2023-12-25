@@ -6,5 +6,6 @@
     "interactions.rateLimited.title": "Ești limitat(ă) la rată de acțiuni",
     "interactions.rateLimited.description.tooManyUses": "Ai folosit comanda de prea multe ori ({times}) într-un interval de timp prea scurt.",
     "interactions.rateLimited.description.cannotUseAgainUntil": "Vei putea folosi comanda din nou {relative_timestamp}.",
-    "interactions.show": "Arată mesajul pe chat"
+    "interactions.show": "Arată mesajul pe chat",
+    "interactions.show.sureToShow.title": ""
 }
