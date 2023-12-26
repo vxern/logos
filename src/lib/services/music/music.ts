@@ -201,6 +201,24 @@ class MusicService extends LocalService {
 		return session.player.playingSince;
 	}
 
+	get position(): number | undefined {
+		const session = this.session;
+		if (session === undefined) {
+			return undefined;
+		}
+
+		return session.player.position;
+	}
+
+	get length(): number | undefined {
+		const session = this.session;
+		if (session === undefined) {
+			return undefined;
+		}
+
+		return session.player.trackData?.length;
+	}
+
 	constructor([client, bot]: [Client, Discord.Bot], guildId: bigint) {
 		super([client, bot], guildId);
 		this.session = undefined;
@@ -1074,6 +1092,7 @@ class MusicService extends LocalService {
 		}
 
 		session.flags.breakLoop = true;
+		session.restoreAt = 0;
 		session.player.stop();
 
 		this.advanceQueueAndPlay();
@@ -1106,14 +1125,14 @@ class MusicService extends LocalService {
 		session.player.pause(false);
 	}
 
-	skipTo(timestampMilliseconds: number): void {
+	async skipTo(timestampMilliseconds: number): Promise<void> {
 		const session = this.session;
 		if (session === undefined) {
 			return;
 		}
 
 		session.restoreAt = timestampMilliseconds;
-		session.player.seek(timestampMilliseconds);
+		await session.player.seek(timestampMilliseconds);
 	}
 
 	remove(index: number): SongListing | undefined {

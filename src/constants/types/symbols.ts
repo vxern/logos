@@ -89,6 +89,8 @@ export default {
 		resumed: "▶️",
 		skippedTo: "🔍",
 		skipped: "⏭️",
+		fastForwarded: "⏩",
+		rewound: "⏪",
 		stopped: "⏹️",
 		unskipped: "⏮️",
 		volume: "🔊",
