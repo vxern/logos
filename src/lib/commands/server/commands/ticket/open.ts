@@ -207,25 +207,7 @@ async function openTicket(
 		return "failure";
 	}
 
-	const mentions: string[] = [];
-
-	const management =
-		"voting" in configuration
-			? configuration.voting
-			: "management" in configuration
-			? configuration.management
-			: undefined;
-
-	for (const roleId of management?.roles ?? []) {
-		mentions.push(mention(roleId, MentionTypes.Role));
-	}
-
-	for (const userId of management?.users ?? []) {
-		mentions.push(mention(userId, MentionTypes.User));
-	}
-
-	mentions.push(mention(user.id, MentionTypes.User));
-
+	const mentions = [mention(member.id, MentionTypes.User), mention(user.id, MentionTypes.User)];
 	const mentionsFormatted = mentions.join(" ");
 
 	bot.helpers.sendMessage(channel.id, { content: mentionsFormatted }).catch(() => {
