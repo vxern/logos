@@ -769,11 +769,17 @@ export async function handleGuildDelete(client: Client, guildId: bigint): Promis
 		return undefined;
 	}
 
-	const runningServices = client.services.local.get(guild.id) ?? [];
+	const services = client.services.local.get(guild.id) ?? [];
 	client.services.local.delete(guild.id);
-	for (const runningService of runningServices) {
-		runningService.stop();
+
+	client.log.info(`Stopping ${services.length} service(s) on ${diagnostics.display.guild(guild)}...`);
+	const promises: Promise<void>[] = [];
+	for (const runningService of services) {
+		promises.push(runningService.stop());
 	}
+	await Promise.all(promises).then((_) => {
+		client.log.info(`Services stopped on ${diagnostics.display.guild(guild)}.`);
+	});
 }
 
 async function handleInteractionCreate(
