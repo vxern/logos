@@ -51,7 +51,7 @@ async function handleStopPlayback([client, bot]: [Client, Discord.Bot], interact
 		return;
 	}
 
-	musicService.destroySession();
+	musicService.stop();
 
 	const strings = {
 		title: localise(client, "music.options.stop.strings.stopped.title", locale)(),

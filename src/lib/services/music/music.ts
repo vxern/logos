@@ -212,7 +212,7 @@ class MusicService extends LocalService {
 	}
 
 	async stop(): Promise<void> {
-		return this.destroySession();
+		await this.destroySession();
 	}
 
 	async voiceStateUpdate(_: Discord.VoiceState): Promise<void> {
@@ -222,9 +222,36 @@ class MusicService extends LocalService {
 		}
 
 		const voiceStates = guild.voiceStates.array().filter((voiceState) => voiceState.channelId === session.channelId);
-		if (voiceStates.length === 1 && voiceStates.at(0)?.userId === this.bot.id) {
-			this.destroySession();
+		const hasSessionBeenAbandoned = voiceStates.length === 1 && voiceStates.at(0)?.userId === this.bot.id;
+		if (hasSessionBeenAbandoned) {
+			this.handleSessionAbandoned();
 		}
+	}
+
+	async handleSessionAbandoned(): Promise<void> {
+		const session = this.session;
+		if (session === undefined) {
+			return;
+		}
+
+		const strings = {
+			title: localise(this.client, "music.options.stop.strings.stopped.title", this.guildLocale)(),
+			description: localise(this.client, "music.options.stop.strings.stopped.description", this.guildLocale)(),
+		};
+
+		await this.bot.helpers
+			.sendMessage(session.channelId, {
+				embeds: [
+					{
+						title: `${constants.symbols.music.stopped} ${strings.title}`,
+						description: strings.description,
+						color: constants.colors.blue,
+					},
+				],
+			})
+			.catch(() => this.client.log.warn("Failed to send stopped music message."));
+
+		this.destroySession();
 	}
 
 	async createSession(channelId: bigint): Promise<Session | undefined> {
