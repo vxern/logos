@@ -106,6 +106,7 @@
   "game.strings.translation": "Translation",
   "game.strings.noSentencesAvailable.title": "No sentences available",
   "game.strings.noSentencesAvailable.description": "There are no sentences available in the requested language.",
+  "game.strings.skip": "Skip",
   "game.strings.sourcedFrom": "Sentences sourced from {source}.",
   "resources.name": "resources",
   "resources.description": "Redirects to the repository of resources to learn the language.",

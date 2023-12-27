@@ -96,18 +96,42 @@ async function handleStartGame([client, bot]: [Client, Discord.Bot], interaction
 
 			sentenceSelection = await getSentenceSelection(client, learningLocale);
 
-			editReply([client, bot], interaction, getGameView(client, customId, sentenceSelection, embedColor, { locale }));
+			editReply(
+				[client, bot],
+				interaction,
+				getGameView(client, { customId, skipButtonCustomId }, sentenceSelection, embedColor, { locale }),
+			);
+		},
+	});
+
+	const skipButtonCustomId = createInteractionCollector([client, bot], {
+		type: Discord.InteractionTypes.MessageComponent,
+		userId: interaction.user.id,
+		onCollect: async (selection) => {
+			acknowledge([client, bot], selection);
+
+			sentenceSelection = await getSentenceSelection(client, learningLocale);
+
+			editReply(
+				[client, bot],
+				interaction,
+				getGameView(client, { customId, skipButtonCustomId }, sentenceSelection, embedColor, { locale }),
+			);
 		},
 	});
 
 	sentenceSelection = await getSentenceSelection(client, learningLocale);
 
-	editReply([client, bot], interaction, getGameView(client, customId, sentenceSelection, embedColor, { locale }));
+	editReply(
+		[client, bot],
+		interaction,
+		getGameView(client, { customId, skipButtonCustomId }, sentenceSelection, embedColor, { locale }),
+	);
 }
 
 function getGameView(
 	client: Client,
-	customId: string,
+	{ customId, skipButtonCustomId }: { customId: string; skipButtonCustomId: string },
 	sentenceSelection: SentenceSelection,
 	embedColor: number,
 	{ locale }: { locale: Locale },
@@ -115,6 +139,7 @@ function getGameView(
 	const strings = {
 		sentence: localise(client, "game.strings.sentence", locale)(),
 		translation: localise(client, "game.strings.translation", locale)(),
+		skip: localise(client, "game.strings.skip", locale)(),
 		sourcedFrom: localise(client, "game.strings.sourcedFrom", locale)({ source: licences.dictionaries.tatoeba.name }),
 	};
 
@@ -144,10 +169,21 @@ function getGameView(
 				type: Discord.MessageComponentTypes.ActionRow,
 				components: sentenceSelection.allPicks.map((pick) => ({
 					type: Discord.MessageComponentTypes.Button,
-					style: Discord.ButtonStyles.Success,
+					style: Discord.ButtonStyles.Primary,
 					label: pick[1],
 					customId: encodeId<WordButtonID>(customId, [pick[0]]),
 				})) as [Discord.ButtonComponent],
+			},
+			{
+				type: Discord.MessageComponentTypes.ActionRow,
+				components: [
+					{
+						type: Discord.MessageComponentTypes.Button,
+						style: Discord.ButtonStyles.Secondary,
+						label: `${constants.symbols.interactions.menu.controls.forward} ${strings.skip}`,
+						customId: skipButtonCustomId,
+					},
+				] as [Discord.ButtonComponent],
 			},
 		],
 	};
