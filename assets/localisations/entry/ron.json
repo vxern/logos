@@ -50,5 +50,7 @@
     "entry.verification.vote.alreadyVoted.against.title": "Deja ai votat împotrivă",
     "entry.verification.vote.alreadyVoted.against.description": "Ai votat deja împotriva cererii utilizatorului de a se alătura serverului.",
     "entry.verification.vote.stanceChanged.title": "Poziție schimbată",
-    "entry.verification.vote.stanceChanged.description": "Ți s-a schimba poziția în acest vot."
+    "entry.verification.vote.stanceChanged.description": "Ți s-a schimba poziția în acest vot.",
+    "entry.verification.votesAgainst": "Voturi împotrivă",
+    "entry.verification.votesFor": "Voturi pentru"
 }

@@ -1,8 +1,8 @@
 {
     "roles.selection.title": "Cum să alegi rolurile",
-    "roles.selection.description.usingCommand": "Poți selecta rolurile folosind comanda {command}, care va deschide o fereastră de meniu, de unde vei putea selecta rolurile dorite.",
+    "roles.selection.description.usingCommand": "Poți selecta rolurile folosind comanda {command}, care deschide un meniu de selectat roluri.",
     "roles.selection.description.runAnywhere": "Această comandă poate fi folosită oriunde în server.",
-    "roles.selection.description.pressButton": "În mod alternativ, poți apăsa butonul de mai jos pentru a deschide fereastra de roluri.",
+    "roles.selection.description.pressButton": "În mod alternativ, poți apăsa butonul de mai jos pentru a deschide meniul chiar aici.",
     "roles.selection.description.clickHere": "Apasă aici pentru a selecta rolurile",
     "roles.noCategory.name": "Nicio categorie selectată",
     "roles.noCategory.description": "Selectează o categorie pentru a primi lista cu rolurile disponibile.",
@@ -132,5 +132,7 @@
     "roles.regions.languages.romanian.roles.oltenia.name": "Oltenia",
     "roles.regions.languages.romanian.roles.oltenia.description": "Sunt originar(ă) din Oltenia.",
     "roles.regions.languages.romanian.roles.transilvania.name": "Transilvania",
-    "roles.regions.languages.romanian.roles.transilvania.description": "Sunt originar(ă) din Transilvania."
+    "roles.regions.languages.romanian.roles.transilvania.description": "Sunt originar(ă) din Transilvania.",
+    "roles.learning.roles.doNotCorrectMe.name": "Nu mă corecta",
+    "roles.learning.roles.doNotCorrectMe.description": "Învăț prin înteracțiune naturală și nu vreau să fiu corectat/ă."
 }
