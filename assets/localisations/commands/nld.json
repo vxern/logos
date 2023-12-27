@@ -268,7 +268,7 @@
     "rule.options.rule.description": "The rule to cite.",
     "rule.strings.invalid.title": "Ongeldige regel",
     "rule.strings.invalid.description": "De regel die je hebt opgegeven is ongeldig",
-    "slowmode.name": "Slow-modus",
+    "slowmode.name": "slow-modus",
     "slowmode.description": "Schakelt slow-modus in voor het kanaal waarin dit commando wordt uitgevoerd.",
     "slowmode.options.level.name": "niveau",
     "slowmode.options.level.description": "The level of slowmode to apply.",
