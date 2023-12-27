@@ -3,7 +3,7 @@
   "name": "logos",
   "description": "A multi-purpose community bot built to cater to language-learning communities on Discord.",
   "license": "ISC",
-  "version": "3.40.0",
+  "version": "3.41.0",
   "type": "module",
   "keywords": [
     "discord",
@@ -37,7 +37,9 @@
     }
   ],
   "scripts": {
-    "setup": "npm install && npm audit fix",
+    "get": "npm install && npm audit fix",
+    "provision": "tsx src/scripts/provision-sentence-pairs.ts",
+    "setup": "npm run get && npm run provision",
     "#": "",
     "dev": "pm2 start ecosystem.config.cjs --instances 1 --no-autorestart --no-daemon",
     "format": "biome check src/ --apply-unsafe --organize-imports-enabled true",
@@ -48,10 +50,11 @@
     "@discordeno/bot": "^19.0.0-next",
     "@sapphire/snowflake": "^3.5.1",
     "cldpre": "^2.9.0",
-    "csv-parse": "^5.5.0",
     "dexonline-scraper": "^0.1.0",
     "dotenv": "^16.3.1",
+    "event-stream": "^4.0.1",
     "fancy-log": "^2.0.0",
+    "ioredis": "^5.3.2",
     "lavaclient": "^4.1.1",
     "object-hash": "^3.0.0",
     "parse-wiktionary": "^1.0.0",
@@ -61,6 +64,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "1.1.2",
+    "@types/event-stream": "^4.0.5",
     "@types/fancy-log": "^2.0.0",
     "@types/node": "^20.6.0",
     "@types/object-hash": "^3.0.4",

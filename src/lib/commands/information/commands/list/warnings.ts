@@ -7,8 +7,8 @@ import { Client, autocompleteMembers, localise, resolveInteractionToMember } fro
 import { User } from "../../../../database/user";
 import { Warning } from "../../../../database/warning";
 import { parseArguments, reply } from "../../../../interactions";
-import { getRuleTitleFormatted, rules } from "../../../moderation/commands/rule";
 import { OptionTemplate } from "../../../command";
+import { getRuleTitleFormatted, rules } from "../../../moderation/commands/rule";
 import { user } from "../../../parameters";
 
 const option: OptionTemplate = {

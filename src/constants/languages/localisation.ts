@@ -93,13 +93,19 @@ type DiscordLocale = typeof languageToLocale.discord[keyof typeof languageToLoca
 type LogosLocale = typeof languageToLocale.logos[keyof typeof languageToLocale.logos];
 type Locale = LogosLocale;
 
-const localeToLanguage = {
+const localeToLanguage = Object.freeze({
 	discord: reverseObject(languageToLocale.discord),
 	logos: reverseObject(languageToLocale.logos),
-};
+});
+
+const locales = Object.freeze(Object.keys(localeToLanguage.logos) as Locale[]);
 
 function isLanguage(language: string): language is Language {
 	return isLogosLanguage(language);
+}
+
+function isLocale(locale: string): locale is Locale {
+	return isLogosLocale(locale);
 }
 
 function getDiscordLocaleByLanguage(language: DiscordLanguage): DiscordLocale {
@@ -138,6 +144,10 @@ function isLogosLanguage(language: string): language is LogosLanguage {
 	return (languages.logos as readonly string[]).includes(language);
 }
 
+function isLogosLocale(locale: string): locale is LogosLocale {
+	return locale in localeToLanguage.logos;
+}
+
 export {
 	getDiscordLocaleByLanguage,
 	getLocaleByLanguage,
@@ -145,7 +155,9 @@ export {
 	getLanguageByLocale,
 	isDiscordLanguage,
 	isLanguage,
+	isLocale,
 	languages,
 	languageToLocale,
+	locales,
 };
 export type { Language, Locale, DiscordLocale };

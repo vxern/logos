@@ -10,6 +10,8 @@ import { TimeStruct } from "./lib/database/guild";
 const PROJECT_NAME = "Logos";
 const USER_AGENT = "Logos (https://logos.wordcollector.co.uk)";
 
+const SENTENCE_PAIRS_DIRECTORY = "./assets/sentences";
+
 const FEATURE_LOCALE: Locale = "eng-US";
 const FEATURE_LANGUAGE: FeatureLanguage = "English";
 const LEARNING_LOCALE: Locale = "eng-US";
@@ -57,11 +59,15 @@ const WARN_MESSAGE_DELETE_TIMEOUT = 1000 * 10; // 10 seconds in milliseconds.
 
 const STATUS_CYCLE = 1000 * 10; // 10 seconds in milliseconds.
 
+const GAME_WORD_SELECTION = 5;
+const GAME_WORD_MASK_LENGTH = 5;
+
 const SHORT_TEXT_LENGTH = 60;
 
 export default {
 	PROJECT_NAME,
 	USER_AGENT,
+	SENTENCE_PAIRS_DIRECTORY,
 	LOCALISATION_LANGUAGE,
 	LOCALISATION_LOCALE,
 	LEARNING_LANGUAGE,
@@ -94,6 +100,8 @@ export default {
 	MIN_VOICE_CHANNELS,
 	MAX_VOICE_CHANNELS,
 	WARN_MESSAGE_DELETE_TIMEOUT,
+	GAME_WORD_SELECTION,
+  GAME_WORD_MASK_LENGTH,
 	STATUS_CYCLE,
 	SHORT_TEXT_LENGTH,
 };

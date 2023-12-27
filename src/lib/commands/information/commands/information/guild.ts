@@ -9,8 +9,8 @@ import { Guild } from "../../../../database/guild";
 import diagnostics from "../../../../diagnostics";
 import { getFeatureLanguage, getLocalisationLanguage, reply } from "../../../../interactions";
 import { getGuildIconURLFormatted, snowflakeToTimestamp } from "../../../../utils";
-import { proficiency } from "../../../social/roles/categories/language";
 import { OptionTemplate } from "../../../command";
+import { proficiency } from "../../../social/roles/categories/language";
 
 const option: OptionTemplate = {
 	name: "server",

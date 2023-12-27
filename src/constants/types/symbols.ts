@@ -231,6 +231,9 @@ export default {
 			},
 		},
 	},
+	game: {
+		mask: "░",
+	},
 	profile: {
 		roles: "💼",
 		statistics: {

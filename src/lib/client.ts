@@ -4,7 +4,6 @@ import FancyLog from "fancy-log";
 import * as ravendb from "ravendb";
 import constants from "../constants/constants";
 import languages, {
-	LearningLanguage,
 	Locale,
 	LocalisationLanguage,
 	getDiscordLocaleByLocalisationLanguage,
@@ -20,7 +19,6 @@ import { timestamp, trim } from "../formatting";
 import * as Logos from "../types";
 import { Command, CommandTemplate, InteractionHandler, Option } from "./commands/command";
 import commandTemplates from "./commands/commands";
-import { SentencePair } from "./commands/language/commands/game";
 import { EntryRequest } from "./database/entry-request";
 import { Guild, timeStructToMilliseconds } from "./database/guild";
 import { Praise } from "./database/praise";
@@ -62,6 +60,7 @@ import { RoleIndicatorService } from "./services/role-indicators/role-indicators
 import { Service } from "./services/service";
 import { StatusService } from "./services/status/service";
 import { requestMembers } from "./utils";
+import { Redis } from "ioredis";
 
 type Client = {
 	environment: {
@@ -74,10 +73,11 @@ type Client = {
 		lavalinkHost: string;
 		lavalinkPort: string;
 		lavalinkPassword: string;
-		loadSentences: boolean;
 	};
 	log: Logger;
 	cache: {
+		database: Redis;
+
 		guilds: Map<bigint, Logos.Guild>;
 		users: Map<bigint, Logos.User>;
 		members: Map<bigint, Logos.Member>;
@@ -112,7 +112,6 @@ type Client = {
 	};
 	collectors: Map<Event, Set<Collector<Event>>>;
 	features: {
-		sentencePairs: Map<LearningLanguage, SentencePair[]>;
 		// The keys are user IDs, the values are command usage timestamps mapped by command IDs.
 		rateLimiting: Map<bigint, Map<bigint, number[]>>;
 	};
@@ -176,6 +175,7 @@ function createClient(
 		environment,
 		log: createLogger("client"),
 		cache: {
+			database: new Redis(),
 			guilds: new Map(),
 			users: new Map(),
 			members: new Map(),

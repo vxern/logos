@@ -1,12 +1,12 @@
 import * as Discord from "@discordeno/bot";
+import constants from "../../../../../constants/constants";
+import { Locale } from "../../../../../constants/languages";
+import { Client, localise } from "../../../../client";
+import { Praise } from "../../../../database/praise";
+import diagnostics from "../../../../diagnostics";
 import { OptionTemplate } from "../../../command";
 import author from "./praises/author";
 import target from "./praises/target";
-import { Client, localise } from "../../../../client";
-import { Praise } from "../../../../database/praise";
-import { Locale } from "../../../../../constants/languages";
-import constants from "../../../../../constants/constants";
-import diagnostics from "../../../../diagnostics";
 
 const option: OptionTemplate = {
 	name: "praises",
