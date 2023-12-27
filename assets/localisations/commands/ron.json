@@ -650,12 +650,8 @@
     "settings.strings.cleared.title": "Limba de afișare eliminată",
     "settings.strings.languageUpdated.title": "Limba de afișare actualizată",
     "settings.strings.languageUpdated.description": "Limba de afișare a fost setată în {language}.",
-    "music.options.fast-forward.strings.fastForwarded.title": "",
     "music.options.rewind.strings.rewound.title": "",
-    "resource.strings.sureToCancel.description": "",
     "ticket.strings.failed.title": "",
-    "acknowledgements.description": "",
     "list.options.praises.options.target.name": "",
-    "list.options.praises.strings.noPraises.description.other.target": "",
     "resource.strings.sureToCancel.title": ""
 }

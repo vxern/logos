@@ -604,17 +604,10 @@
     "license.strings.invalid.description": "La licence que vous avez essayé de voir est invalide.",
     "license.strings.invalid.title": "Licence invalide",
     "license.options.software.options.package.name": "package",
-    "music.options.fast-forward.strings.invalidTimestamp.title": "",
     "music.options.rewind.strings.invalidTimestamp.title": "",
-    "resource.strings.failed.description": "",
     "ticket.strings.sent.description": "",
-    "acknowledgements.name": "",
     "recognize.strings.cannotUse.description": "",
-    "recognize.strings.fields.likelyMatches.description.multiple": "",
     "translate.strings.noTranslationAdapters.title": "",
-    "translate.strings.cannotDetermine.source.title": "",
     "list.options.praises.options.author.description": "",
-    "recognize.name": "",
-    "list.options.praises.strings.noPraises.description.other.target": "",
-    "information.options.bot.strings.function.description": ""
+    "list.options.praises.strings.noPraises.description.other.target": ""
 }

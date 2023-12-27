@@ -620,15 +620,9 @@
     "settings.options.language.options.clear.name": "clear",
     "settings.strings.invalid.description": "De taal die je hebt opgegeven is ongeldig.",
     "license.strings.source": "Bron",
-    "resource.name": "",
     "music.options.rewind.name": "",
-    "resource.description": "",
     "ticket.description": "",
-    "ticket.strings.tooMany.description": "",
     "settings.strings.settings.fields.language.description.noLanguageSet.noLanguageSet": "",
-    "license.options.software.options.package.description": "",
     "acknowledgements.strings.acknowledgements": "",
-    "license.options.software.options.package.name": "",
-    "list.options.praises.options.target.name": "",
-    "list.options.praises.strings.noPraises.description.other.target": ""
+    "list.options.praises.options.target.name": ""
 }

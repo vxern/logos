@@ -605,17 +605,10 @@
     "credits.strings.translation": "Oversettelse",
     "license.options.dictionary.name": "ordbok",
     "settings.strings.cleared.title": "Visningsspråk er tilbakestilt",
-    "music.options.fast-forward.strings.invalidTimestamp.title": "",
     "music.options.rewind.strings.invalidTimestamp.title": "",
-    "resource.strings.sureToCancel.title": "",
     "ticket.strings.sureToCancel.title": "",
-    "recognize.description": "",
     "recognize.strings.unknown.description.message": "",
-    "recognize.strings.fields.possibleMatches.description.multiple": "",
     "list.options.praises.description": "",
-    "list.options.praises.strings.noPraises.description.self.author": "",
     "warn.options.rule.strings.other": "",
-    "acknowledgements.strings.acknowledgements": "",
-    "information.options.bot.strings.function.features.games": "",
-    "translate.strings.cannotDetermine.source.title": ""
+    "information.options.bot.strings.function.features.games": ""
 }
