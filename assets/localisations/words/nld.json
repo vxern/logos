@@ -20,5 +20,6 @@
     "words.determiner": "determinator",
     "words.conjunction": "voegwoord",
     "words.interjection": "tussenwerpsel",
-    "words.unknown": "woordsoort onbekend"
+    "words.unknown": "woordsoort onbekend",
+    "words.idiom": "uitdrukking"
 }
