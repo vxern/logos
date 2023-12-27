@@ -17,6 +17,7 @@ import {
 } from "../../../interactions";
 import { random } from "../../../utils";
 import { CommandTemplate } from "../../command";
+import { capitalise } from "../../../../formatting";
 
 const command: CommandTemplate = {
 	name: "game",
@@ -24,6 +25,8 @@ const command: CommandTemplate = {
 	defaultMemberPermissions: ["VIEW_CHANNEL"],
 	handle: handleStartGame,
 };
+
+const wordSegmenter = new Intl.Segmenter(undefined, { granularity: "word" });
 
 type WordButtonID = [index: string];
 
@@ -186,8 +189,6 @@ async function getRandomIds(client: Client, locale: Locale): Promise<string[]> {
 	return indexes;
 }
 
-const segmenter = new Intl.Segmenter(undefined, { granularity: "word" });
-
 async function getSentencePairById(client: Client, locale: Locale, id: string): Promise<SentencePair> {
 	const pairRaw = await client.cache.database.get(`${locale}:${id}`).then((sentencePair) => sentencePair ?? undefined);
 	if (pairRaw === undefined) {
@@ -212,7 +213,7 @@ function getWords(...sentences: string[]): string[] {
 	const wordsAll: string[] = [];
 
 	for (const sentence of sentences) {
-		const segmentsRaw = Array.from(segmenter.segment(sentence));
+		const segmentsRaw = Array.from(wordSegmenter.segment(sentence));
 
 		const segmentsProcessedSeparate: Intl.SegmentData[][] = [];
 		let isCompound = false;
@@ -270,6 +271,27 @@ function extractRandomWord(words: string[]): string {
 	return word;
 }
 
+function camouflageDecoys(likeness: string, decoys: string[]): string[] {
+	let results = [...decoys];
+
+	const isUppercase = likeness.toUpperCase() === likeness;
+	if (isUppercase) {
+		results = results.map((result) => result.toUpperCase());
+	}
+
+	const isLowercase = likeness.toLowerCase() === likeness;
+	if (isLowercase) {
+		results = results.map((result) => result.toLowerCase());
+	}
+
+	const isFirstCapitalised = capitalise(likeness) === likeness;
+	if (isFirstCapitalised) {
+		results = results.map((result) => capitalise(result));
+	}
+
+	return results;
+}
+
 type Selection = [id: string, word: string];
 interface SentenceSelection {
 	correctPick: Selection;
@@ -309,13 +331,13 @@ async function getSentenceSelection(client: Client, locale: Locale): Promise<Sen
 		}
 	}
 
-	const decoys: string[] = [];
-	while (decoys.length < defaults.GAME_WORD_SELECTION - 1) {
+	const decoysExposed: string[] = [];
+	while (decoysExposed.length < defaults.GAME_WORD_SELECTION - 1) {
 		const word = extractRandomWord(words);
-		decoys.push(word);
+		decoysExposed.push(word);
 	}
 
-	// TODO(vxern): Process decoys to make them more similar to the correct word.
+	const decoys = camouflageDecoys(mainWord, decoysExposed);
 
 	const correctPick: Selection = [mainId, mainWord];
 	const allPicksRaw: Selection[] = [correctPick];
