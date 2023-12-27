@@ -223,6 +223,10 @@ async function* asStream<ElementType, ResultType>(
 	}
 }
 
+function random(max: number): number {
+	return Math.floor(Math.random() * max);
+}
+
 export {
 	addParametersToURL,
 	chunk,
@@ -238,4 +242,5 @@ export {
 	getMemberAvatarURL,
 	reverseObject,
 	asStream,
+	random,
 };

@@ -177,7 +177,6 @@ async function setup(): Promise<void> {
 		lavalinkHost: process.env.LAVALINK_HOST,
 		lavalinkPort: process.env.LAVALINK_PORT,
 		lavalinkPassword: process.env.LAVALINK_PASSWORD,
-		loadSentences: process.env.LOAD_SENTENCES !== undefined && process.env.LOAD_SENTENCES === "true",
 	};
 
 	for (const [key, value] of Object.entries(environmentProvisional)) {

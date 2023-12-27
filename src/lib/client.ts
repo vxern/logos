@@ -60,6 +60,7 @@ import { RoleIndicatorService } from "./services/role-indicators/role-indicators
 import { Service } from "./services/service";
 import { StatusService } from "./services/status/service";
 import { requestMembers } from "./utils";
+import { Redis } from "ioredis";
 
 type Client = {
 	environment: {
@@ -72,10 +73,11 @@ type Client = {
 		lavalinkHost: string;
 		lavalinkPort: string;
 		lavalinkPassword: string;
-		loadSentences: boolean;
 	};
 	log: Logger;
 	cache: {
+		database: Redis;
+
 		guilds: Map<bigint, Logos.Guild>;
 		users: Map<bigint, Logos.User>;
 		members: Map<bigint, Logos.Member>;
@@ -173,6 +175,7 @@ function createClient(
 		environment,
 		log: createLogger("client"),
 		cache: {
+			database: new Redis(),
 			guilds: new Map(),
 			users: new Map(),
 			members: new Map(),
