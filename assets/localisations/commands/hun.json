@@ -580,6 +580,5 @@
     "settings.strings.cannotClear.description": "Nem tudod visszaállítani a megjelenítési nyelvet, ha nem is állítottad be.",
     "license.options.dictionary.name": "szótár",
     "license.strings.invalid.title": "Érvénytelen licenc",
-    "word.options.language.name": "nyelv",
-    "license.options.dictionary.options.dictionary.description": ""
+    "word.options.language.name": "nyelv"
 }

@@ -568,6 +568,5 @@
     "settings.options.language.name": "լեզու",
     "settings.options.view.description": "Օգտատիրոջ նախընտրումները կը ներկայացնէ։",
     "settings.options.language.options.clear.name": "ջնջել",
-    "settings.options.language.options.set.options.language.name": "լեզու",
-    "settings.strings.languageUpdated.description": ""
+    "settings.options.language.options.set.options.language.name": "լեզու"
 }
