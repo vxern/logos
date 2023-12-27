@@ -569,13 +569,8 @@
     "settings.options.view.description": "Օգտատիրոջ նախընտրումները կը ներկայացնէ։",
     "settings.options.language.options.clear.name": "ջնջել",
     "settings.options.language.options.set.options.language.name": "լեզու",
-    "music.options.rewind.strings.rewound.title": "",
     "ticket.strings.sent.description": "",
-    "settings.strings.cleared.description": "",
     "credits.description": "",
-    "recognize.strings.unknown.description.text": "",
     "information.options.bot.strings.languages.description": "",
-    "list.options.praises.strings.noPraises.description.self.author": "",
-    "settings.strings.languageUpdated.description": "",
-    "information.options.bot.strings.function.features.guides": ""
+    "settings.strings.languageUpdated.description": ""
 }

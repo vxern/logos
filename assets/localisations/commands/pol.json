@@ -698,6 +698,5 @@
     "warn.strings.invalidRule.description": "Reguła, którą sprecyzowałeś/aś, jest nieprawidłowa.",
     "settings.strings.alreadySet.title": "Już ustawiono jako język komunikatów",
     "acknowledgements.name": "podziękowania",
-    "acknowledgements.strings.acknowledgements": "Podziękowania",
-    "music.options.rewind.strings.rewound.description": ""
+    "acknowledgements.strings.acknowledgements": "Podziękowania"
 }

@@ -620,9 +620,6 @@
     "settings.options.language.options.clear.name": "clear",
     "settings.strings.invalid.description": "De taal die je hebt opgegeven is ongeldig.",
     "license.strings.source": "Bron",
-    "music.options.rewind.name": "",
     "ticket.description": "",
-    "settings.strings.settings.fields.language.description.noLanguageSet.noLanguageSet": "",
-    "acknowledgements.strings.acknowledgements": "",
-    "list.options.praises.options.target.name": ""
+    "acknowledgements.strings.acknowledgements": ""
 }

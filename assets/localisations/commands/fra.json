@@ -604,10 +604,7 @@
     "license.strings.invalid.description": "La licence que vous avez essayé de voir est invalide.",
     "license.strings.invalid.title": "Licence invalide",
     "license.options.software.options.package.name": "package",
-    "music.options.rewind.strings.invalidTimestamp.title": "",
     "ticket.strings.sent.description": "",
-    "recognize.strings.cannotUse.description": "",
     "translate.strings.noTranslationAdapters.title": "",
-    "list.options.praises.options.author.description": "",
     "list.options.praises.strings.noPraises.description.other.target": ""
 }

@@ -581,12 +581,8 @@
     "license.options.dictionary.name": "szótár",
     "license.strings.invalid.title": "Érvénytelen licenc",
     "word.options.language.name": "nyelv",
-    "music.options.rewind.strings.rewound.title": "",
     "settings.options.language.options.set.options.language.description": "",
-    "recognize.strings.textEmpty.title": "",
     "translate.strings.cannotDetermine.target.description.tryAgain": "",
-    "information.options.bot.strings.function.features.messages": "",
     "list.options.praises.options.target.description": "",
-    "translate.strings.noTranslationAdapters.description": "",
     "license.options.dictionary.options.dictionary.description": ""
 }

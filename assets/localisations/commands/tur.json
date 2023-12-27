@@ -550,14 +550,9 @@
     "profile.options.view.strings.information.description.sent": "Gönderilen",
     "profile.options.view.strings.information.description.praises": "Övgüler",
     "profile.options.view.strings.information.description.warnings": "Uyarılar",
-    "recognize.strings.fields.likelyMatches.title": "",
     "translate.strings.languageNotSupported.title": "",
-    "license.options.software.name": "",
     "music.options.rewind.strings.rewound.title": "",
-    "ticket.strings.sent.title": "",
     "license.description": "",
-    "information.options.bot.strings.languages.description": "",
     "credits.name": "",
-    "list.options.praises.strings.praises.title": "",
     "settings.strings.settings.fields.language.title": ""
 }
