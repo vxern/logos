@@ -22,6 +22,7 @@ export default {
 	Romanian: [dexonline, wiktionary],
 	Russian: [wiktionary],
 	Silesian: [wiktionary],
+	Spanish: [wiktionary],
 	Swedish: [wiktionary],
 	Turkish: [wiktionary],
 } satisfies Record<LearningLanguage, DictionaryAdapter[]> as Record<LearningLanguage, DictionaryAdapter[]>;

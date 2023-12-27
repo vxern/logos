@@ -1,6 +1,7 @@
 import * as fs from "node:fs/promises";
 import * as Discord from "@discordeno/bot";
 import FancyLog from "fancy-log";
+import { Redis } from "ioredis";
 import * as ravendb from "ravendb";
 import constants from "../constants/constants";
 import languages, {
@@ -60,7 +61,6 @@ import { RoleIndicatorService } from "./services/role-indicators/role-indicators
 import { Service } from "./services/service";
 import { StatusService } from "./services/status/service";
 import { requestMembers } from "./utils";
-import { Redis } from "ioredis";
 
 type Client = {
 	environment: {

@@ -15,8 +15,8 @@ import {
 	postponeReply,
 	reply,
 } from "../../../interactions";
-import { CommandTemplate } from "../../command";
 import { random } from "../../../utils";
+import { CommandTemplate } from "../../command";
 
 const command: CommandTemplate = {
 	name: "game",
