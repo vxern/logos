@@ -605,7 +605,5 @@
     "credits.strings.translation": "Oversettelse",
     "license.options.dictionary.name": "ordbok",
     "settings.strings.cleared.title": "Visningsspråk er tilbakestilt",
-    "ticket.strings.sureToCancel.title": "",
-    "list.options.praises.description": "",
-    "information.options.bot.strings.function.features.games": ""
+    "list.options.praises.description": ""
 }

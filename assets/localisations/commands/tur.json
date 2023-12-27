@@ -550,9 +550,6 @@
     "profile.options.view.strings.information.description.sent": "Gönderilen",
     "profile.options.view.strings.information.description.praises": "Övgüler",
     "profile.options.view.strings.information.description.warnings": "Uyarılar",
-    "translate.strings.languageNotSupported.title": "",
     "music.options.rewind.strings.rewound.title": "",
-    "license.description": "",
-    "credits.name": "",
-    "settings.strings.settings.fields.language.title": ""
+    "credits.name": ""
 }

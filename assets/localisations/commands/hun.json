@@ -581,8 +581,6 @@
     "license.options.dictionary.name": "szótár",
     "license.strings.invalid.title": "Érvénytelen licenc",
     "word.options.language.name": "nyelv",
-    "settings.options.language.options.set.options.language.description": "",
     "translate.strings.cannotDetermine.target.description.tryAgain": "",
-    "list.options.praises.options.target.description": "",
     "license.options.dictionary.options.dictionary.description": ""
 }

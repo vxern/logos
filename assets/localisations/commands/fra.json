@@ -604,7 +604,5 @@
     "license.strings.invalid.description": "La licence que vous avez essayé de voir est invalide.",
     "license.strings.invalid.title": "Licence invalide",
     "license.options.software.options.package.name": "package",
-    "ticket.strings.sent.description": "",
-    "translate.strings.noTranslationAdapters.title": "",
-    "list.options.praises.strings.noPraises.description.other.target": ""
+    "translate.strings.noTranslationAdapters.title": ""
 }

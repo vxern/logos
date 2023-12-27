@@ -650,6 +650,5 @@
     "settings.strings.cleared.title": "Limba de afișare eliminată",
     "settings.strings.languageUpdated.title": "Limba de afișare actualizată",
     "settings.strings.languageUpdated.description": "Limba de afișare a fost setată în {language}.",
-    "ticket.strings.failed.title": "",
     "resource.strings.sureToCancel.title": ""
 }

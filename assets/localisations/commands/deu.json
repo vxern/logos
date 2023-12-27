@@ -650,6 +650,5 @@
     "information.options.bot.strings.function.features.guides": "Leitfäden zu linguistischen Konzepten, wie zum Gemeinsamen Europäischen Referenzrahmen für Sprachen (CEFR).",
     "information.options.bot.strings.languages.description": "Neben der Fülle an Sprache, die Logos bietet, hat der Bot auch hervorragende Lokalisierungsunterstüzung dank eines Teams großartiger Freiwilliger für 🇫🇷 Französisch, 🇩🇪 Deutsch, 🇵🇱 Polnisch, 🇹🇷 Türksich , 🇳🇴 Norwegisch, und 🇷🇴 Rumänisch, weitere Lokalisierungen für 🇫🇮 Finnisch, 🇸🇪 Swedisch, 🇭🇺 Hungarisch, 🇦🇲 Armenisch (Westlich + Östlich) und 🇳🇱 Niederländisch sind noch in Vorbereitung.",
     "information.options.bot.strings.function.features.definitions": "Nach Informationen über Wörter suchen, das beinhaltet: Definitionen, Übersetzungen, Aussprachen, Geschichte, Beziehungen, Nutzungshinweise usw.",
-    "ticket.strings.sureToCancel.description": "",
     "warn.strings.invalidRule.title": ""
 }
