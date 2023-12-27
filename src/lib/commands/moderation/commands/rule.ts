@@ -8,6 +8,8 @@ import { Rule } from "../../../database/warning";
 import { getShowButton, parseArguments, reply, respond } from "../../../interactions";
 import { CommandTemplate } from "../../command";
 import { show } from "../../parameters";
+import { Rule } from "../../../database/warning";
+import { Guild } from "../../../database/guild";
 
 const command: CommandTemplate = {
 	name: "rule",

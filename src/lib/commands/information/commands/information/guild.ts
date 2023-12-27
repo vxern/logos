@@ -11,6 +11,13 @@ import { getFeatureLanguage, getLocalisationLanguage, reply } from "../../../../
 import { getGuildIconURLFormatted, snowflakeToTimestamp } from "../../../../utils";
 import { OptionTemplate } from "../../../command";
 import { proficiency } from "../../../social/roles/categories/language";
+import { OptionTemplate } from "../../../command";
+
+const option: OptionTemplate = {
+	name: "server",
+	type: Discord.ApplicationCommandOptionTypes.SubCommand,
+	handle: handleDisplayGuildInformation,
+};
 
 const option: OptionTemplate = {
 	name: "server",
