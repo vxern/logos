@@ -1,5 +1,5 @@
 {
-    "roles.selection.title": "Hoe je roller kiest",
+    "roles.selection.title": "Hoe je rollen kiest",
     "roles.selection.description.usingCommand": "Je kunt rollen selecteren met het commando {command}, dat een selectiemenu opent waarin je de gewenste rollen kunt kiezen.",
     "roles.selection.description.runAnywhere": "Dit commando kan overal op de server worden uitgevoerd.",
     "roles.selection.description.pressButton": "Je kunt ook op de knop hieronder drukken om het rolselectiemenu hier te openen.",
