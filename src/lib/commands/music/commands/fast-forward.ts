@@ -9,14 +9,14 @@ import { OptionTemplate } from "../../command";
 import { timestamp } from "../../parameters";
 
 const command: OptionTemplate = {
-	name: "skip-to",
+	name: "fast-forward",
 	type: Discord.ApplicationCommandOptionTypes.SubCommand,
-	handle: handleSkipToTimestamp,
-	handleAutocomplete: handleSkipToTimestampAutocomplete,
+	handle: handleFastForward,
+	handleAutocomplete: handleFastForwardAutocomplete,
 	options: [timestamp],
 };
 
-async function handleSkipToTimestampAutocomplete(
+async function handleFastForwardAutocomplete(
 	[client, bot]: [Client, Discord.Bot],
 	interaction: Logos.Interaction,
 ): Promise<void> {
@@ -41,10 +41,7 @@ async function handleSkipToTimestampAutocomplete(
 	respond([client, bot], interaction, [{ name: timestamp[0], value: timestamp[1].toString() }]);
 }
 
-async function handleSkipToTimestamp(
-	[client, bot]: [Client, Discord.Bot],
-	interaction: Logos.Interaction,
-): Promise<void> {
+async function handleFastForward([client, bot]: [Client, Discord.Bot], interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.guildLocale;
 
 	const [{ timestamp: timestampExpression }] = parseArguments(interaction.data?.options, {});
@@ -64,12 +61,12 @@ async function handleSkipToTimestamp(
 		return;
 	}
 
-	const [isOccupied, current] = [musicService.isOccupied, musicService.current];
+	const [isOccupied, current, position] = [musicService.isOccupied, musicService.current, musicService.position];
 	if (!isOccupied || current === undefined) {
 		const locale = interaction.locale;
 		const strings = {
-			title: localise(client, "music.options.skip-to.strings.noSong.title", locale)(),
-			description: localise(client, "music.options.skip-to.strings.noSong.description", locale)(),
+			title: localise(client, "music.options.fast-forward.strings.noSong.title", locale)(),
+			description: localise(client, "music.options.fast-forward.strings.noSong.description", locale)(),
 		};
 
 		reply([client, bot], interaction, {
@@ -84,17 +81,21 @@ async function handleSkipToTimestamp(
 		return;
 	}
 
+	if (position === undefined) {
+		return;
+	}
+
 	const timestamp = Number(timestampExpression);
 	if (!Number.isSafeInteger(timestamp)) {
 		displayInvalidTimestampError([client, bot], interaction, { locale });
 		return;
 	}
 
-	await musicService.skipTo(timestamp);
+	await musicService.skipTo(Math.round((position + timestamp) / 1000) * 1000);
 
 	const strings = {
-		title: localise(client, "music.options.skip-to.strings.skippedTo.title", locale)(),
-		description: localise(client, "music.options.skip-to.strings.skippedTo.description", locale)(),
+		title: localise(client, "music.options.fast-forward.strings.fastForwarded.title", locale)(),
+		description: localise(client, "music.options.fast-forward.strings.fastForwarded.description", locale)(),
 	};
 
 	reply(
@@ -103,7 +104,7 @@ async function handleSkipToTimestamp(
 		{
 			embeds: [
 				{
-					title: `${constants.symbols.music.skippedTo} ${strings.title}`,
+					title: `${constants.symbols.music.fastForwarded} ${strings.title}`,
 					description: strings.description,
 					color: constants.colors.blue,
 				},
@@ -119,8 +120,8 @@ async function displayInvalidTimestampError(
 	{ locale }: { locale: Locale },
 ): Promise<void> {
 	const strings = {
-		title: localise(client, "music.options.skip-to.strings.invalidTimestamp.title", locale)(),
-		description: localise(client, "music.options.skip-to.strings.invalidTimestamp.description", locale)(),
+		title: localise(client, "music.options.fast-forward.strings.invalidTimestamp.title", locale)(),
+		description: localise(client, "music.options.fast-forward.strings.invalidTimestamp.description", locale)(),
 	};
 
 	reply([client, bot], interaction, {
