@@ -130,6 +130,5 @@
     "translate.strings.cannotDetermine.target.description.tryAgain": "Por favor, ajústalo manualmente al idioma al que te gustaría traducir.",
     "word.description": "Muestra información sobre una palabra dada.",
     "resources.description": "Redirige al repositorio de recursos para aprender el idioma.",
-    "correction.strings.cannotCorrectOwn.title": "No puede corregir su propio mensaje",
-    "music.options.now.strings.runningTime": ""
+    "correction.strings.cannotCorrectOwn.title": "No puede corregir su propio mensaje"
 }

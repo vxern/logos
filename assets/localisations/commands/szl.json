@@ -94,6 +94,5 @@
     "correction.strings.failed.title": "Niy idzie sprŏwić",
     "correction.strings.sureToCancel.title": "Na isto chcesz wylyź?",
     "correction.strings.sureToCancel.description": "Je żeś zicher, co chcesz sztopnōńć sprŏwiać wiadōmości?",
-    "correction.strings.suggestedBy": "Poprŏwka zasugerowanŏ ôd {username}.",
-    "warn.strings.warned.description.warnings.two": ""
+    "correction.strings.suggestedBy": "Poprŏwka zasugerowanŏ ôd {username}."
 }

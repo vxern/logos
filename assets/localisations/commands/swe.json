@@ -116,6 +116,5 @@
     "word.options.language.description": "Språket ordet tillhör.",
     "word.options.verbose.name": "detaljerat",
     "word.options.verbose.description": "Om vald som sann visas mer (möjligen onödig) information.",
-    "word.strings.invalid.language.title": "Ogiltigt språk",
-    "music.options.resume.strings.notPaused.description": ""
+    "word.strings.invalid.language.title": "Ogiltigt språk"
 }
