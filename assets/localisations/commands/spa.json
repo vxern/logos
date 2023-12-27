@@ -131,6 +131,5 @@
     "word.description": "Muestra información sobre una palabra dada.",
     "resources.description": "Redirige al repositorio de recursos para aprender el idioma.",
     "correction.strings.cannotCorrectOwn.title": "No puede corregir su propio mensaje",
-    "license.options.software.options.package.description": "",
     "music.options.now.strings.runningTime": ""
 }

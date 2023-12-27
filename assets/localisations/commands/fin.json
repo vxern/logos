@@ -45,6 +45,5 @@
     "information.options.bot.strings.function.features.definitions": "Sanojen määritelmien, käännösten, ääntämisen, historian, käyttötapojen jne. etsiminen.",
     "information.options.server.strings.information.title": "Tietoa {server_name}:sta",
     "answer.message.name": "Vastaus",
-    "word.strings.verbs.tenses.pluperfect": "",
     "warn.strings.limitSurpassedTimedOut.title": ""
 }
