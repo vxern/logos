@@ -604,6 +604,5 @@
     "credits.description": "Viser studiepoengmenyen.",
     "credits.strings.translation": "Oversettelse",
     "license.options.dictionary.name": "ordbok",
-    "settings.strings.cleared.title": "Visningsspråk er tilbakestilt",
-    "list.options.praises.description": ""
+    "settings.strings.cleared.title": "Visningsspråk er tilbakestilt"
 }

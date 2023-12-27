@@ -95,13 +95,8 @@
     "correction.strings.sureToCancel.title": "Na isto chcesz wylyź?",
     "correction.strings.sureToCancel.description": "Je żeś zicher, co chcesz sztopnōńć sprŏwiać wiadōmości?",
     "correction.strings.suggestedBy": "Poprŏwka zasugerowanŏ ôd {username}.",
-    "word.strings.fields.definitions": "",
     "pardon.strings.failed.title": "",
-    "music.options.play.strings.queued.description.private": "",
     "music.strings.notInVc.title": "",
-    "profile.options.view.strings.failed.title": "",
     "music.options.skip-to.strings.skippedTo.title": "",
-    "report.name": "",
-    "warn.strings.warned.description.warnings.two": "",
-    "music.options.remove.name": ""
+    "warn.strings.warned.description.warnings.two": ""
 }

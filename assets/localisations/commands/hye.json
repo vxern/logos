@@ -550,6 +550,5 @@
     "profile.options.view.strings.information.description.sent": "Sent",
     "profile.options.view.strings.information.description.praises": "Praises",
     "profile.options.view.strings.information.description.warnings": "Warnings",
-    "settings.strings.invalid.description": "",
     "list.options.praises.strings.noPraises.description.self.author": ""
 }

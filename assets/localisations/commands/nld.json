@@ -619,6 +619,5 @@
     "settings.options.view.description": "Geeft de instellingen van de gebruiker weer.",
     "settings.options.language.options.clear.name": "clear",
     "settings.strings.invalid.description": "De taal die je hebt opgegeven is ongeldig.",
-    "license.strings.source": "Bron",
-    "acknowledgements.strings.acknowledgements": ""
+    "license.strings.source": "Bron"
 }

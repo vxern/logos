@@ -117,13 +117,8 @@
     "word.options.verbose.name": "detaljerat",
     "word.options.verbose.description": "Om vald som sann visas mer (möjligen onödig) information.",
     "word.strings.invalid.language.title": "Ogiltigt språk",
-    "word.strings.verbs.tenses.futurePerfect": "",
     "music.options.rewind.strings.noSong.description": "",
-    "resource.strings.sent.description": "",
     "license.description": "",
-    "purge.strings.indexed.title": "",
     "slowmode.strings.levels.low": "",
-    "music.options.now.strings.nowPlaying": "",
-    "music.options.resume.strings.notPaused.description": "",
-    "music.options.now.strings.startTimeUnknown": ""
+    "music.options.resume.strings.notPaused.description": ""
 }

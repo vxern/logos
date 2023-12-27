@@ -649,6 +649,5 @@
     "credits.strings.translation": "Traduceri",
     "settings.strings.cleared.title": "Limba de afișare eliminată",
     "settings.strings.languageUpdated.title": "Limba de afișare actualizată",
-    "settings.strings.languageUpdated.description": "Limba de afișare a fost setată în {language}.",
-    "resource.strings.sureToCancel.title": ""
+    "settings.strings.languageUpdated.description": "Limba de afișare a fost setată în {language}."
 }

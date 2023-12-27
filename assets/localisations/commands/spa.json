@@ -131,13 +131,8 @@
     "word.description": "Muestra información sobre una palabra dada.",
     "resources.description": "Redirige al repositorio de recursos para aprender el idioma.",
     "correction.strings.cannotCorrectOwn.title": "No puede corregir su propio mensaje",
-    "word.strings.verbs.moodsAndParticiples": "",
     "music.options.skip.strings.noSongCollection.title": "",
-    "ticket.strings.sureToCancel.title": "",
     "license.options.software.options.package.description": "",
-    "word.strings.verbs.tenses.preterite": "",
     "purge.strings.rangeTooBig.description.trySmaller": "",
-    "timeout.strings.notTimedOut.title": "",
-    "music.options.now.strings.runningTime": "",
-    "music.options.resume.description": ""
+    "music.options.now.strings.runningTime": ""
 }

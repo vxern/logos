@@ -603,6 +603,5 @@
     "license.strings.license": "Licence – {entity}",
     "license.strings.invalid.description": "La licence que vous avez essayé de voir est invalide.",
     "license.strings.invalid.title": "Licence invalide",
-    "license.options.software.options.package.name": "package",
-    "translate.strings.noTranslationAdapters.title": ""
+    "license.options.software.options.package.name": "package"
 }
