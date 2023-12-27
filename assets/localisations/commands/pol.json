@@ -699,8 +699,6 @@
     "settings.strings.alreadySet.title": "Już ustawiono jako język komunikatów",
     "acknowledgements.name": "podziękowania",
     "acknowledgements.strings.acknowledgements": "Podziękowania",
-    "music.options.fast-forward.strings.noSong.description": "",
     "music.options.fast-forward.strings.fastForwarded.description": "",
-    "music.options.rewind.strings.noSong.description": "",
     "music.options.rewind.strings.rewound.description": ""
 }
