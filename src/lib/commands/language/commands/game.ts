@@ -18,6 +18,7 @@ import {
 import { random } from "../../../utils";
 import { CommandTemplate } from "../../command";
 import { capitalise } from "../../../../formatting";
+import { User } from "../../../database/user";
 
 const command: CommandTemplate = {
 	name: "game",
@@ -29,6 +30,14 @@ const command: CommandTemplate = {
 const wordSegmenter = new Intl.Segmenter(undefined, { granularity: "word" });
 
 type WordButtonID = [index: string];
+
+interface GameData {
+	sentenceSelection: SentenceSelection;
+	embedColour: number;
+	customId: string;
+	skipButtonCustomId: string;
+	sessionScore: number;
+}
 
 /** Starts a simple game of 'choose the correct word to fit in the blank'. */
 async function handleStartGame([client, bot]: [Client, Discord.Bot], interaction: Logos.Interaction): Promise<void> {
@@ -68,10 +77,78 @@ async function handleStartGame([client, bot]: [Client, Discord.Bot], interaction
 		return;
 	}
 
-	await postponeReply([client, bot], interaction);
+	const session = client.database.openSession();
 
-	let sentenceSelection: SentenceSelection;
-	let embedColor = constants.colors.blue;
+	const userDocument =
+		client.cache.documents.users.get(interaction.user.id.toString()) ??
+		(await session.load<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined)) ??
+		(await (async () => {
+			const userDocument = {
+				...({
+					id: `users/${interaction.user.id}`,
+					account: { id: interaction.user.id.toString() },
+					createdAt: Date.now(),
+				} satisfies User),
+				"@metadata": { "@collection": "Users" },
+			};
+			await session.store(userDocument);
+			await session.saveChanges();
+
+			return userDocument as User;
+		})());
+
+	const guildStatsDocument = client.cache.documents.guildStats.get(guildId.toString());
+	if (guildStatsDocument === undefined) {
+		session.dispose();
+		return;
+	}
+
+	const stats = guildStatsDocument.stats;
+	if (stats === undefined) {
+		guildStatsDocument.stats = {
+			[learningLocale]: { pickMissingWord: { totalSessions: 1, totalScore: 0, uniquePlayers: 1 } },
+		};
+	} else {
+		const statsForLanguage = stats[learningLocale];
+		if (statsForLanguage === undefined) {
+			stats[learningLocale] = { pickMissingWord: { totalSessions: 1, totalScore: 0, uniquePlayers: 1 } };
+		} else {
+			const pickMissingWord = statsForLanguage.pickMissingWord;
+			if (pickMissingWord === undefined) {
+				statsForLanguage.pickMissingWord = { totalSessions: 1, totalScore: 0, uniquePlayers: 1 };
+			} else {
+				pickMissingWord.totalSessions++;
+				if (userDocument.scores?.[learningLocale]?.pickMissingWord === undefined) {
+					pickMissingWord.uniquePlayers++;
+				}
+			}
+		}
+	}
+
+	const scores = userDocument.scores;
+	if (scores === undefined) {
+		userDocument.scores = { [learningLocale]: { pickMissingWord: { totalScore: 0, sessionCount: 1 } } };
+	} else {
+		const scoreForLanguage = scores[learningLocale];
+		if (scoreForLanguage === undefined) {
+			scores[learningLocale] = { pickMissingWord: { totalScore: 0, sessionCount: 1 } };
+		} else {
+			const pickMissingWord = scoreForLanguage.pickMissingWord;
+			if (pickMissingWord === undefined) {
+				scoreForLanguage.pickMissingWord = { totalScore: 0, sessionCount: 1 };
+			} else {
+				pickMissingWord.sessionCount++;
+			}
+		}
+	}
+
+	await session.store(guildStatsDocument);
+	await session.store(userDocument);
+	await session.saveChanges();
+
+	session.dispose();
+
+	await postponeReply([client, bot], interaction);
 
 	const customId = createInteractionCollector([client, bot], {
 		type: Discord.InteractionTypes.MessageComponent,
@@ -89,18 +166,46 @@ async function handleStartGame([client, bot]: [Client, Discord.Bot], interaction
 				return;
 			}
 
-			const pick = sentenceSelection.allPicks.find((pick) => pick[0] === id);
-			const isCorrect = pick === sentenceSelection.correctPick;
+			const pick = data.sentenceSelection.allPicks.find((pick) => pick[0] === id);
+			const isCorrect = pick === data.sentenceSelection.correctPick;
 
-			embedColor = isCorrect ? constants.colors.lightGreen : constants.colors.red;
+			const session = client.database.openSession();
 
-			sentenceSelection = await getSentenceSelection(client, learningLocale);
+			const guildStatsDocument = client.cache.documents.guildStats.get(guildId.toString());
+			const userDocument = client.cache.documents.users.get(interaction.user.id.toString());
+			if (guildStatsDocument === undefined || userDocument === undefined) {
+				return;
+			}
 
-			editReply(
-				[client, bot],
-				interaction,
-				getGameView(client, { customId, skipButtonCustomId }, sentenceSelection, embedColor, { locale }),
-			);
+			const pickMissingWord = {
+				guildStats: guildStatsDocument?.stats?.[learningLocale]?.pickMissingWord,
+				user: userDocument?.scores?.[learningLocale]?.pickMissingWord,
+			};
+			if (pickMissingWord.guildStats === undefined || pickMissingWord.user === undefined) {
+				return;
+			}
+
+			if (isCorrect) {
+				pickMissingWord.guildStats.totalScore++;
+				pickMissingWord.user.totalScore++;
+			}
+
+			await session.store(guildStatsDocument);
+			await session.store(userDocument);
+			await session.saveChanges();
+
+			session.dispose();
+
+			if (isCorrect) {
+				data.embedColour = constants.colors.lightGreen;
+				data.sessionScore++;
+			} else {
+				data.embedColour = constants.colors.red;
+			}
+
+			data.sentenceSelection = await getSentenceSelection(client, learningLocale);
+
+			editReply([client, bot], interaction, await getGameView(client, data, userDocument, { locale, learningLocale }));
 		},
 	});
 
@@ -110,32 +215,29 @@ async function handleStartGame([client, bot]: [Client, Discord.Bot], interaction
 		onCollect: async (selection) => {
 			acknowledge([client, bot], selection);
 
-			sentenceSelection = await getSentenceSelection(client, learningLocale);
+			data.sentenceSelection = await getSentenceSelection(client, learningLocale);
 
-			editReply(
-				[client, bot],
-				interaction,
-				getGameView(client, { customId, skipButtonCustomId }, sentenceSelection, embedColor, { locale }),
-			);
+			editReply([client, bot], interaction, await getGameView(client, data, userDocument, { locale, learningLocale }));
 		},
 	});
 
-	sentenceSelection = await getSentenceSelection(client, learningLocale);
+	const data: GameData = {
+		sentenceSelection: await getSentenceSelection(client, learningLocale),
+		embedColour: constants.colors.blue,
+		customId,
+		skipButtonCustomId,
+		sessionScore: 0,
+	};
 
-	editReply(
-		[client, bot],
-		interaction,
-		getGameView(client, { customId, skipButtonCustomId }, sentenceSelection, embedColor, { locale }),
-	);
+	editReply([client, bot], interaction, await getGameView(client, data, userDocument, { locale, learningLocale }));
 }
 
-function getGameView(
+async function getGameView(
 	client: Client,
-	{ customId, skipButtonCustomId }: { customId: string; skipButtonCustomId: string },
-	sentenceSelection: SentenceSelection,
-	embedColor: number,
-	{ locale }: { locale: Locale },
-): Discord.InteractionCallbackData {
+	data: GameData,
+	userDocument: User,
+	{ locale, learningLocale }: { locale: Locale; learningLocale: Locale },
+): Promise<Discord.InteractionCallbackData> {
 	const strings = {
 		sentence: localise(client, "game.strings.sentence", locale)(),
 		translation: localise(client, "game.strings.translation", locale)(),
@@ -143,10 +245,14 @@ function getGameView(
 		sourcedFrom: localise(client, "game.strings.sourcedFrom", locale)({ source: licences.dictionaries.tatoeba.name }),
 	};
 
-	const sentenceSource = constants.links.generateTatoebaSentenceLink(sentenceSelection.sentencePair.sentenceId);
-	const translationSource = constants.links.generateTatoebaSentenceLink(sentenceSelection.sentencePair.translationId);
+	const sentenceSource = constants.links.generateTatoebaSentenceLink(data.sentenceSelection.sentencePair.sentenceId);
+	const translationSource = constants.links.generateTatoebaSentenceLink(
+		data.sentenceSelection.sentencePair.translationId,
+	);
 
-	const mask = constants.symbols.game.mask.repeat(sentenceSelection.correctPick[1].length);
+	const mask = constants.symbols.game.mask.repeat(data.sentenceSelection.correctPick[1].length);
+
+	const totalScore = userDocument.scores?.[learningLocale]?.pickMissingWord?.totalScore ?? 0;
 
 	return {
 		embeds: [
@@ -156,22 +262,23 @@ function getGameView(
 				footer: { text: strings.sourcedFrom },
 			},
 			{
-				title: sentenceSelection.sentencePair.sentence.replaceAll(
-					constants.patterns.wholeWord(sentenceSelection.correctPick[1]),
+				title: data.sentenceSelection.sentencePair.sentence.replaceAll(
+					constants.patterns.wholeWord(data.sentenceSelection.correctPick[1]),
 					mask,
 				),
-				footer: { text: sentenceSelection.sentencePair.translation },
-				color: embedColor,
+				description: data.sentenceSelection.sentencePair.translation,
+				footer: { text: `Correct guesses: ${data.sessionScore} · All time: ${totalScore}` },
+				color: data.embedColour,
 			},
 		],
 		components: [
 			{
 				type: Discord.MessageComponentTypes.ActionRow,
-				components: sentenceSelection.allPicks.map((pick) => ({
+				components: data.sentenceSelection.allPicks.map((pick) => ({
 					type: Discord.MessageComponentTypes.Button,
 					style: Discord.ButtonStyles.Primary,
 					label: pick[1],
-					customId: encodeId<WordButtonID>(customId, [pick[0]]),
+					customId: encodeId<WordButtonID>(data.customId, [pick[0]]),
 				})) as [Discord.ButtonComponent],
 			},
 			{
@@ -181,25 +288,12 @@ function getGameView(
 						type: Discord.MessageComponentTypes.Button,
 						style: Discord.ButtonStyles.Secondary,
 						label: `${constants.symbols.interactions.menu.controls.forward} ${strings.skip}`,
-						customId: skipButtonCustomId,
+						customId: data.skipButtonCustomId,
 					},
 				] as [Discord.ButtonComponent],
 			},
 		],
 	};
-}
-
-/** Represents a pair of a sentence and its translation. */
-interface SentencePair {
-	sentenceId: number;
-
-	/** The source sentence. */
-	sentence: string;
-
-	translationId: number;
-
-	/** The translation of the sentence. */
-	translation: string;
 }
 
 async function getRandomIds(client: Client, locale: Locale): Promise<string[]> {
@@ -223,6 +317,19 @@ async function getRandomIds(client: Client, locale: Locale): Promise<string[]> {
 	});
 
 	return indexes;
+}
+
+/** Represents a pair of a sentence and its translation. */
+interface SentencePair {
+	sentenceId: number;
+
+	/** The source sentence. */
+	sentence: string;
+
+	translationId: number;
+
+	/** The translation of the sentence. */
+	translation: string;
 }
 
 async function getSentencePairById(client: Client, locale: Locale, id: string): Promise<SentencePair> {
