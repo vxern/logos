@@ -473,7 +473,7 @@ function extractRandomWord(words: string[]): string {
 function camouflageDecoys(likeness: string, decoys: string[]): string[] {
 	let results = [...decoys];
 
-	const isUppercase = likeness.toUpperCase() === likeness;
+	const isUppercase = likeness.length > 1 && likeness.toUpperCase() === likeness;
 	if (isUppercase) {
 		results = results.map((result) => result.toUpperCase());
 	}
