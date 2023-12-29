@@ -59,8 +59,7 @@ const WARN_MESSAGE_DELETE_TIMEOUT = 1000 * 10; // 10 seconds in milliseconds.
 
 const STATUS_CYCLE = 1000 * 10; // 10 seconds in milliseconds.
 
-const GAME_WORD_SELECTION = 5;
-const GAME_WORD_MASK_LENGTH = 5;
+const GAME_WORD_SELECTION = 4;
 
 const SHORT_TEXT_LENGTH = 60;
 
@@ -101,7 +100,6 @@ export default {
 	MAX_VOICE_CHANNELS,
 	WARN_MESSAGE_DELETE_TIMEOUT,
 	GAME_WORD_SELECTION,
-	GAME_WORD_MASK_LENGTH,
 	STATUS_CYCLE,
 	SHORT_TEXT_LENGTH,
 };

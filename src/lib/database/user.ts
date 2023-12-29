@@ -1,4 +1,4 @@
-import { LocalisationLanguage } from "../../constants/languages";
+import { Locale, LocalisationLanguage } from "../../constants/languages";
 
 /** Represents a user. */
 interface User {
@@ -23,8 +23,18 @@ interface User {
 		rejectedOn?: string[];
 	};
 
+	/** @since v3.42.0 */
+	scores?: Partial<Record<Locale, Scores>>;
+
 	/** Unix timestamp of the creation of this user document. */
 	createdAt: number;
+}
+
+interface Scores {
+	pickMissingWord?: {
+		totalScore: number;
+		sessionCount: number;
+	};
 }
 
 export type { User };

@@ -32,6 +32,7 @@ import { Warning } from "./database/warning";
 import diagnostics from "./diagnostics";
 import {
 	acknowledge,
+	decodeId,
 	deleteReply,
 	getCommandName,
 	getLocaleData,
@@ -61,6 +62,7 @@ import { RoleIndicatorService } from "./services/role-indicators/role-indicators
 import { Service } from "./services/service";
 import { StatusService } from "./services/status/service";
 import { requestMembers } from "./utils";
+import { GuildStats } from "./database/guild-stats";
 
 type Client = {
 	environment: {
@@ -90,6 +92,7 @@ type Client = {
 
 		documents: {
 			entryRequests: Map<string, EntryRequest>;
+			guildStats: Map<string, GuildStats>;
 			guilds: Map<string, Guild>;
 			praisesByAuthor: Map<string, Map<string, Praise>>;
 			praisesByTarget: Map<string, Map<string, Praise>>;
@@ -187,6 +190,7 @@ function createClient(
 			interactions: new Map(),
 			documents: {
 				entryRequests: new Map(),
+				guildStats: new Map(),
 				guilds: new Map(),
 				praisesByAuthor: new Map(),
 				praisesByTarget: new Map(),
@@ -518,6 +522,20 @@ export async function handleGuildCreate(
 		client.cache.documents.guilds.get(guild.id.toString()) ??
 		(await session.load<Guild>(`guilds/${guild.id}`).then((value) => value ?? undefined));
 
+	const guildStatsExist = ((await session.load(`guildStats/${guild.id}`)) ?? undefined) !== undefined;
+	if (!guildStatsExist) {
+		const guildStatsDocument = {
+			...({
+				id: `guildStats/${guild.id}`,
+				guildId: guild.id.toString(),
+				createdAt: Date.now(),
+			} satisfies GuildStats),
+			"@metadata": { "@collection": "GuildStats" },
+		};
+		await session.store(guildStatsDocument);
+		await session.saveChanges();
+	}
+
 	session.dispose();
 
 	if (guildDocument === undefined) {
@@ -787,7 +805,8 @@ async function handleInteractionCreate(
 	interactionRaw: Discord.Interaction,
 	flags?: Logos.InteractionFlags,
 ): Promise<void> {
-	if (interactionRaw.data?.customId === constants.components.none) {
+	const customId = interactionRaw.data?.customId;
+	if (customId !== undefined && decodeId(customId)[0] === constants.components.none) {
 		acknowledge([client, bot], interactionRaw);
 		return;
 	}
@@ -825,6 +844,9 @@ function addCacheInterceptors(client: Client, database: ravendb.IDocumentStore):
 		switch (collection) {
 			case "EntryRequests": {
 				return `${document.guildId}/${document.authorId}`;
+			}
+			case "GuildStats": {
+				return document.guildId;
 			}
 			case "Guilds": {
 				return document.guildId;
@@ -868,6 +890,10 @@ function addCacheInterceptors(client: Client, database: ravendb.IDocumentStore):
 			case "EntryRequests": {
 				client.cache.documents.entryRequests.set(compositeId, value as EntryRequest);
 				break;
+			}
+			case "GuildStats": {
+				client.cache.documents.guildStats.set(compositeId, value as GuildStats);
+				return;
 			}
 			case "Guilds": {
 				client.cache.documents.guilds.set(compositeId, value as Guild);

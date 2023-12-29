@@ -149,8 +149,10 @@ export default {
 	interactions: {
 		menu: {
 			controls: {
-				back: "«",
-				forward: "»",
+				back: "⮜",
+				forward: "⮞",
+				down: "⮟",
+				up: "⮝",
 			},
 		},
 	},

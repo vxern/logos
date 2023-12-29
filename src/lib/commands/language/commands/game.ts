@@ -5,6 +5,7 @@ import licences from "../../../../constants/licences";
 import defaults from "../../../../defaults";
 import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
+import * as levenshtein from "fastest-levenshtein";
 import {
 	acknowledge,
 	createInteractionCollector,
@@ -17,6 +18,8 @@ import {
 } from "../../../interactions";
 import { random } from "../../../utils";
 import { CommandTemplate } from "../../command";
+import { capitalise } from "../../../../formatting";
+import { User } from "../../../database/user";
 
 const command: CommandTemplate = {
 	name: "game",
@@ -25,7 +28,17 @@ const command: CommandTemplate = {
 	handle: handleStartGame,
 };
 
+const wordSegmenter = new Intl.Segmenter(undefined, { granularity: "word" });
+
 type WordButtonID = [index: string];
+
+interface GameData {
+	sentenceSelection: SentenceSelection;
+	embedColour: number;
+	customId: string;
+	skipButtonCustomId: string;
+	sessionScore: number;
+}
 
 /** Starts a simple game of 'choose the correct word to fit in the blank'. */
 async function handleStartGame([client, bot]: [Client, Discord.Bot], interaction: Logos.Interaction): Promise<void> {
@@ -65,10 +78,78 @@ async function handleStartGame([client, bot]: [Client, Discord.Bot], interaction
 		return;
 	}
 
-	await postponeReply([client, bot], interaction);
+	const session = client.database.openSession();
 
-	let sentenceSelection: SentenceSelection;
-	let embedColor = constants.colors.blue;
+	const userDocument =
+		client.cache.documents.users.get(interaction.user.id.toString()) ??
+		(await session.load<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined)) ??
+		(await (async () => {
+			const userDocument = {
+				...({
+					id: `users/${interaction.user.id}`,
+					account: { id: interaction.user.id.toString() },
+					createdAt: Date.now(),
+				} satisfies User),
+				"@metadata": { "@collection": "Users" },
+			};
+			await session.store(userDocument);
+			await session.saveChanges();
+
+			return userDocument as User;
+		})());
+
+	const guildStatsDocument = client.cache.documents.guildStats.get(guildId.toString());
+	if (guildStatsDocument === undefined) {
+		session.dispose();
+		return;
+	}
+
+	const stats = guildStatsDocument.stats;
+	if (stats === undefined) {
+		guildStatsDocument.stats = {
+			[learningLocale]: { pickMissingWord: { totalSessions: 1, totalScore: 0, uniquePlayers: 1 } },
+		};
+	} else {
+		const statsForLanguage = stats[learningLocale];
+		if (statsForLanguage === undefined) {
+			stats[learningLocale] = { pickMissingWord: { totalSessions: 1, totalScore: 0, uniquePlayers: 1 } };
+		} else {
+			const pickMissingWord = statsForLanguage.pickMissingWord;
+			if (pickMissingWord === undefined) {
+				statsForLanguage.pickMissingWord = { totalSessions: 1, totalScore: 0, uniquePlayers: 1 };
+			} else {
+				pickMissingWord.totalSessions++;
+				if (userDocument.scores?.[learningLocale]?.pickMissingWord === undefined) {
+					pickMissingWord.uniquePlayers++;
+				}
+			}
+		}
+	}
+
+	const scores = userDocument.scores;
+	if (scores === undefined) {
+		userDocument.scores = { [learningLocale]: { pickMissingWord: { totalScore: 0, sessionCount: 1 } } };
+	} else {
+		const scoreForLanguage = scores[learningLocale];
+		if (scoreForLanguage === undefined) {
+			scores[learningLocale] = { pickMissingWord: { totalScore: 0, sessionCount: 1 } };
+		} else {
+			const pickMissingWord = scoreForLanguage.pickMissingWord;
+			if (pickMissingWord === undefined) {
+				scoreForLanguage.pickMissingWord = { totalScore: 0, sessionCount: 1 };
+			} else {
+				pickMissingWord.sessionCount++;
+			}
+		}
+	}
+
+	await session.store(guildStatsDocument);
+	await session.store(userDocument);
+	await session.saveChanges();
+
+	session.dispose();
+
+	await postponeReply([client, bot], interaction);
 
 	const customId = createInteractionCollector([client, bot], {
 		type: Discord.InteractionTypes.MessageComponent,
@@ -86,39 +167,116 @@ async function handleStartGame([client, bot]: [Client, Discord.Bot], interaction
 				return;
 			}
 
-			const pick = sentenceSelection.allPicks.find((pick) => pick[0] === id);
-			const isCorrect = pick === sentenceSelection.correctPick;
+			const pick = data.sentenceSelection.allPicks.find((pick) => pick[0] === id);
+			const isCorrect = pick === data.sentenceSelection.correctPick;
 
-			embedColor = isCorrect ? constants.colors.lightGreen : constants.colors.red;
+			const session = client.database.openSession();
 
-			sentenceSelection = await getSentenceSelection(client, learningLocale);
+			const guildStatsDocument = client.cache.documents.guildStats.get(guildId.toString());
+			const userDocument = client.cache.documents.users.get(interaction.user.id.toString());
+			if (guildStatsDocument === undefined || userDocument === undefined) {
+				return;
+			}
 
-			editReply([client, bot], interaction, getGameView(client, customId, sentenceSelection, embedColor, { locale }));
+			const pickMissingWord = {
+				guildStats: guildStatsDocument?.stats?.[learningLocale]?.pickMissingWord,
+				user: userDocument?.scores?.[learningLocale]?.pickMissingWord,
+			};
+			if (pickMissingWord.guildStats === undefined || pickMissingWord.user === undefined) {
+				return;
+			}
+
+			if (isCorrect) {
+				pickMissingWord.guildStats.totalScore++;
+				pickMissingWord.user.totalScore++;
+			}
+
+			await session.store(guildStatsDocument);
+			await session.store(userDocument);
+			await session.saveChanges();
+
+			session.dispose();
+
+			if (isCorrect) {
+				data.sessionScore++;
+				data.embedColour = constants.colors.lightGreen;
+				data.sentenceSelection = await getSentenceSelection(client, learningLocale);
+
+				editReply(
+					[client, bot],
+					interaction,
+					await getGameView(client, data, userDocument, "hide", { locale, learningLocale }),
+				);
+			} else {
+				data.embedColour = constants.colors.red;
+
+				editReply(
+					[client, bot],
+					interaction,
+					await getGameView(client, data, userDocument, "reveal", { locale, learningLocale }),
+				);
+			}
 		},
 	});
 
-	sentenceSelection = await getSentenceSelection(client, learningLocale);
+	const skipButtonCustomId = createInteractionCollector([client, bot], {
+		type: Discord.InteractionTypes.MessageComponent,
+		userId: interaction.user.id,
+		onCollect: async (selection) => {
+			acknowledge([client, bot], selection);
 
-	editReply([client, bot], interaction, getGameView(client, customId, sentenceSelection, embedColor, { locale }));
+			data.embedColour = constants.colors.blue;
+			data.sentenceSelection = await getSentenceSelection(client, learningLocale);
+
+			editReply(
+				[client, bot],
+				interaction,
+				await getGameView(client, data, userDocument, "hide", { locale, learningLocale }),
+			);
+		},
+	});
+
+	const data: GameData = {
+		sentenceSelection: await getSentenceSelection(client, learningLocale),
+		embedColour: constants.colors.blue,
+		customId,
+		skipButtonCustomId,
+		sessionScore: 0,
+	};
+
+	editReply(
+		[client, bot],
+		interaction,
+		await getGameView(client, data, userDocument, "hide", { locale, learningLocale }),
+	);
 }
 
-function getGameView(
+async function getGameView(
 	client: Client,
-	customId: string,
-	sentenceSelection: SentenceSelection,
-	embedColor: number,
-	{ locale }: { locale: Locale },
-): Discord.InteractionCallbackData {
+	data: GameData,
+	userDocument: User,
+	mode: "hide" | "reveal",
+	{ locale, learningLocale }: { locale: Locale; learningLocale: Locale },
+): Promise<Discord.InteractionCallbackData> {
+	const totalScore = userDocument.scores?.[learningLocale]?.pickMissingWord?.totalScore ?? 0;
+
 	const strings = {
 		sentence: localise(client, "game.strings.sentence", locale)(),
 		translation: localise(client, "game.strings.translation", locale)(),
+		skip: localise(client, "game.strings.skip", locale)(),
 		sourcedFrom: localise(client, "game.strings.sourcedFrom", locale)({ source: licences.dictionaries.tatoeba.name }),
+		correctGuesses: localise(client, "game.strings.correctGuesses", locale)({ number: data.sessionScore }),
+		allTime: localise(client, "game.strings.allTime", locale)({ number: totalScore }),
+		next: localise(client, "game.strings.next", locale)(),
 	};
 
-	const sentenceSource = constants.links.generateTatoebaSentenceLink(sentenceSelection.sentencePair.sentenceId);
-	const translationSource = constants.links.generateTatoebaSentenceLink(sentenceSelection.sentencePair.translationId);
+	const sentenceSource = constants.links.generateTatoebaSentenceLink(data.sentenceSelection.sentencePair.sentenceId);
+	const translationSource = constants.links.generateTatoebaSentenceLink(
+		data.sentenceSelection.sentencePair.translationId,
+	);
 
-	const mask = constants.symbols.game.mask.repeat(sentenceSelection.correctPick[1].length);
+	const wholeWordPattern = constants.patterns.wholeWord(data.sentenceSelection.correctPick[1]);
+	const mask = constants.symbols.game.mask.repeat(data.sentenceSelection.correctPick[1].length);
 
 	return {
 		embeds: [
@@ -128,39 +286,70 @@ function getGameView(
 				footer: { text: strings.sourcedFrom },
 			},
 			{
-				title: sentenceSelection.sentencePair.sentence.replaceAll(
-					constants.patterns.wholeWord(sentenceSelection.correctPick[1]),
-					mask,
-				),
-				footer: { text: sentenceSelection.sentencePair.translation },
-				color: embedColor,
+				title:
+					mode === "reveal"
+						? data.sentenceSelection.sentencePair.sentence.replaceAll(
+								wholeWordPattern,
+								`__${data.sentenceSelection.correctPick[1]}__`,
+						  )
+						: data.sentenceSelection.sentencePair.sentence.replaceAll(wholeWordPattern, mask),
+				description: data.sentenceSelection.sentencePair.translation,
+				footer: { text: `${strings.correctGuesses} · ${strings.allTime}` },
+				color: data.embedColour,
 			},
 		],
 		components: [
 			{
 				type: Discord.MessageComponentTypes.ActionRow,
-				components: sentenceSelection.allPicks.map((pick) => ({
-					type: Discord.MessageComponentTypes.Button,
-					style: Discord.ButtonStyles.Success,
-					label: pick[1],
-					customId: encodeId<WordButtonID>(customId, [pick[0]]),
-				})) as [Discord.ButtonComponent],
+				components: data.sentenceSelection.allPicks.map((pick) => {
+					let style: Discord.ButtonStyles;
+					if (mode === "hide") {
+						style = Discord.ButtonStyles.Primary;
+					} else {
+						const isCorrect = pick[0] === data.sentenceSelection.correctPick[0];
+						if (isCorrect) {
+							style = Discord.ButtonStyles.Success;
+						} else {
+							style = Discord.ButtonStyles.Danger;
+						}
+					}
+
+					let customId: string;
+					if (mode === "hide") {
+						customId = encodeId<WordButtonID>(data.customId, [pick[0]]);
+					} else {
+						customId = encodeId<WordButtonID>(constants.components.none, [pick[0]]);
+					}
+
+					return {
+						type: Discord.MessageComponentTypes.Button,
+						style,
+						disabled: mode === "reveal",
+						label: pick[1],
+						customId,
+					};
+				}) as [Discord.ButtonComponent],
+			},
+			{
+				type: Discord.MessageComponentTypes.ActionRow,
+				components: [
+					mode === "reveal"
+						? {
+								type: Discord.MessageComponentTypes.Button,
+								style: Discord.ButtonStyles.Primary,
+								label: `${constants.symbols.interactions.menu.controls.forward} ${strings.next}`,
+								customId: data.skipButtonCustomId,
+						  }
+						: {
+								type: Discord.MessageComponentTypes.Button,
+								style: Discord.ButtonStyles.Secondary,
+								label: `${constants.symbols.interactions.menu.controls.forward} ${strings.skip}`,
+								customId: data.skipButtonCustomId,
+						  },
+				] as [Discord.ButtonComponent],
 			},
 		],
 	};
-}
-
-/** Represents a pair of a sentence and its translation. */
-interface SentencePair {
-	sentenceId: number;
-
-	/** The source sentence. */
-	sentence: string;
-
-	translationId: number;
-
-	/** The translation of the sentence. */
-	translation: string;
 }
 
 async function getRandomIds(client: Client, locale: Locale): Promise<string[]> {
@@ -186,7 +375,18 @@ async function getRandomIds(client: Client, locale: Locale): Promise<string[]> {
 	return indexes;
 }
 
-const segmenter = new Intl.Segmenter(undefined, { granularity: "word" });
+/** Represents a pair of a sentence and its translation. */
+interface SentencePair {
+	sentenceId: number;
+
+	/** The source sentence. */
+	sentence: string;
+
+	translationId: number;
+
+	/** The translation of the sentence. */
+	translation: string;
+}
 
 async function getSentencePairById(client: Client, locale: Locale, id: string): Promise<SentencePair> {
 	const pairRaw = await client.cache.database.get(`${locale}:${id}`).then((sentencePair) => sentencePair ?? undefined);
@@ -212,7 +412,7 @@ function getWords(...sentences: string[]): string[] {
 	const wordsAll: string[] = [];
 
 	for (const sentence of sentences) {
-		const segmentsRaw = Array.from(segmenter.segment(sentence));
+		const segmentsRaw = Array.from(wordSegmenter.segment(sentence));
 
 		const segmentsProcessedSeparate: Intl.SegmentData[][] = [];
 		let isCompound = false;
@@ -270,6 +470,27 @@ function extractRandomWord(words: string[]): string {
 	return word;
 }
 
+function camouflageDecoys(likeness: string, decoys: string[]): string[] {
+	let results = [...decoys];
+
+	const isUppercase = likeness.length > 1 && likeness.toUpperCase() === likeness;
+	if (isUppercase) {
+		results = results.map((result) => result.toUpperCase());
+	}
+
+	const isLowercase = likeness.toLowerCase() === likeness;
+	if (isLowercase) {
+		results = results.map((result) => result.toLowerCase());
+	}
+
+	const isFirstCapitalised = capitalise(likeness) === likeness;
+	if (isFirstCapitalised) {
+		results = results.map((result) => capitalise(result));
+	}
+
+	return results;
+}
+
 type Selection = [id: string, word: string];
 interface SentenceSelection {
 	correctPick: Selection;
@@ -299,23 +520,34 @@ async function getSentenceSelection(client: Client, locale: Locale): Promise<Sen
 	const mainSentenceWords = Array.from(new Set(getWords(mainSentencePair.sentence)));
 	const mainWord = extractRandomWord(mainSentenceWords);
 
-	const words = Array.from(new Set(getWords(...sentencePairs.map((pair) => pair.sentence))))
+	const mainWordLowercase = mainWord.toLowerCase();
+	const wordsUnordered = Array.from(new Set(getWords(...sentencePairs.map((pair) => pair.sentence))))
+		.filter((word) => word.toLowerCase() !== mainWordLowercase)
 		.map((word) => ({ word, sort: Math.random() }))
 		.sort((a, b) => a.sort - b.sort)
 		.map(({ word }) => word);
-	if (words.length < defaults.GAME_WORD_SELECTION - 1) {
-		for (const _ of Array(defaults.GAME_WORD_SELECTION - 1 - words.length).keys()) {
-			words.push("?");
+	if (wordsUnordered.length < defaults.GAME_WORD_SELECTION - 1) {
+		for (const _ of Array(defaults.GAME_WORD_SELECTION - 1 - wordsUnordered.length).keys()) {
+			wordsUnordered.push("?");
 		}
 	}
 
-	const decoys: string[] = [];
-	while (decoys.length < defaults.GAME_WORD_SELECTION - 1) {
-		const word = extractRandomWord(words);
-		decoys.push(word);
+	const words = Array.from(wordsUnordered)
+		.map((word) => ({ word, sort: levenshtein.distance(mainWord, word) }))
+		.sort((a, b) => b.sort - a.sort)
+		.map(({ word }) => word);
+
+	const decoysExposed: string[] = [];
+	while (decoysExposed.length < defaults.GAME_WORD_SELECTION - 1) {
+		const word = words.pop();
+		if (word === undefined) {
+			continue;
+		}
+
+		decoysExposed.push(word);
 	}
 
-	// TODO(vxern): Process decoys to make them more similar to the correct word.
+	const decoys = camouflageDecoys(mainWord, decoysExposed);
 
 	const correctPick: Selection = [mainId, mainWord];
 	const allPicksRaw: Selection[] = [correctPick];
