@@ -32,6 +32,7 @@ import { Warning } from "./database/warning";
 import diagnostics from "./diagnostics";
 import {
 	acknowledge,
+	decodeId,
 	deleteReply,
 	getCommandName,
 	getLocaleData,
@@ -804,7 +805,8 @@ async function handleInteractionCreate(
 	interactionRaw: Discord.Interaction,
 	flags?: Logos.InteractionFlags,
 ): Promise<void> {
-	if (interactionRaw.data?.customId === constants.components.none) {
+	const customId = interactionRaw.data?.customId;
+	if (customId !== undefined && decodeId(customId)[0] === constants.components.none) {
 		acknowledge([client, bot], interactionRaw);
 		return;
 	}

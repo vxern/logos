@@ -198,15 +198,24 @@ async function handleStartGame([client, bot]: [Client, Discord.Bot], interaction
 			session.dispose();
 
 			if (isCorrect) {
-				data.embedColour = constants.colors.lightGreen;
 				data.sessionScore++;
+				data.embedColour = constants.colors.lightGreen;
+				data.sentenceSelection = await getSentenceSelection(client, learningLocale);
+
+				editReply(
+					[client, bot],
+					interaction,
+					await getGameView(client, data, userDocument, "hide", { locale, learningLocale }),
+				);
 			} else {
 				data.embedColour = constants.colors.red;
+
+				editReply(
+					[client, bot],
+					interaction,
+					await getGameView(client, data, userDocument, "reveal", { locale, learningLocale }),
+				);
 			}
-
-			data.sentenceSelection = await getSentenceSelection(client, learningLocale);
-
-			editReply([client, bot], interaction, await getGameView(client, data, userDocument, { locale, learningLocale }));
 		},
 	});
 
@@ -216,9 +225,14 @@ async function handleStartGame([client, bot]: [Client, Discord.Bot], interaction
 		onCollect: async (selection) => {
 			acknowledge([client, bot], selection);
 
+			data.embedColour = constants.colors.blue;
 			data.sentenceSelection = await getSentenceSelection(client, learningLocale);
 
-			editReply([client, bot], interaction, await getGameView(client, data, userDocument, { locale, learningLocale }));
+			editReply(
+				[client, bot],
+				interaction,
+				await getGameView(client, data, userDocument, "hide", { locale, learningLocale }),
+			);
 		},
 	});
 
@@ -230,13 +244,18 @@ async function handleStartGame([client, bot]: [Client, Discord.Bot], interaction
 		sessionScore: 0,
 	};
 
-	editReply([client, bot], interaction, await getGameView(client, data, userDocument, { locale, learningLocale }));
+	editReply(
+		[client, bot],
+		interaction,
+		await getGameView(client, data, userDocument, "hide", { locale, learningLocale }),
+	);
 }
 
 async function getGameView(
 	client: Client,
 	data: GameData,
 	userDocument: User,
+	mode: "hide" | "reveal",
 	{ locale, learningLocale }: { locale: Locale; learningLocale: Locale },
 ): Promise<Discord.InteractionCallbackData> {
 	const totalScore = userDocument.scores?.[learningLocale]?.pickMissingWord?.totalScore ?? 0;
@@ -248,6 +267,7 @@ async function getGameView(
 		sourcedFrom: localise(client, "game.strings.sourcedFrom", locale)({ source: licences.dictionaries.tatoeba.name }),
 		correctGuesses: localise(client, "game.strings.correctGuesses", locale)({ number: data.sessionScore }),
 		allTime: localise(client, "game.strings.allTime", locale)({ number: totalScore }),
+		next: localise(client, "game.strings.next", locale)(),
 	};
 
 	const sentenceSource = constants.links.generateTatoebaSentenceLink(data.sentenceSelection.sentencePair.sentenceId);
@@ -255,6 +275,7 @@ async function getGameView(
 		data.sentenceSelection.sentencePair.translationId,
 	);
 
+	const wholeWordPattern = constants.patterns.wholeWord(data.sentenceSelection.correctPick[1]);
 	const mask = constants.symbols.game.mask.repeat(data.sentenceSelection.correctPick[1].length);
 
 	return {
@@ -265,10 +286,13 @@ async function getGameView(
 				footer: { text: strings.sourcedFrom },
 			},
 			{
-				title: data.sentenceSelection.sentencePair.sentence.replaceAll(
-					constants.patterns.wholeWord(data.sentenceSelection.correctPick[1]),
-					mask,
-				),
+				title:
+					mode === "reveal"
+						? data.sentenceSelection.sentencePair.sentence.replaceAll(
+								wholeWordPattern,
+								`__${data.sentenceSelection.correctPick[1]}__`,
+						  )
+						: data.sentenceSelection.sentencePair.sentence.replaceAll(wholeWordPattern, mask),
 				description: data.sentenceSelection.sentencePair.translation,
 				footer: { text: `${strings.correctGuesses} · ${strings.allTime}` },
 				color: data.embedColour,
@@ -277,22 +301,51 @@ async function getGameView(
 		components: [
 			{
 				type: Discord.MessageComponentTypes.ActionRow,
-				components: data.sentenceSelection.allPicks.map((pick) => ({
-					type: Discord.MessageComponentTypes.Button,
-					style: Discord.ButtonStyles.Primary,
-					label: pick[1],
-					customId: encodeId<WordButtonID>(data.customId, [pick[0]]),
-				})) as [Discord.ButtonComponent],
+				components: data.sentenceSelection.allPicks.map((pick) => {
+					let style: Discord.ButtonStyles;
+					if (mode === "hide") {
+						style = Discord.ButtonStyles.Primary;
+					} else {
+						const isCorrect = pick[0] === data.sentenceSelection.correctPick[0];
+						if (isCorrect) {
+							style = Discord.ButtonStyles.Success;
+						} else {
+							style = Discord.ButtonStyles.Danger;
+						}
+					}
+
+					let customId: string;
+					if (mode === "hide") {
+						customId = encodeId<WordButtonID>(data.customId, [pick[0]]);
+					} else {
+						customId = encodeId<WordButtonID>(constants.components.none, [pick[0]]);
+					}
+
+					return {
+						type: Discord.MessageComponentTypes.Button,
+						style,
+						disabled: mode === "reveal",
+						label: pick[1],
+						customId,
+					};
+				}) as [Discord.ButtonComponent],
 			},
 			{
 				type: Discord.MessageComponentTypes.ActionRow,
 				components: [
-					{
-						type: Discord.MessageComponentTypes.Button,
-						style: Discord.ButtonStyles.Secondary,
-						label: `${constants.symbols.interactions.menu.controls.forward} ${strings.skip}`,
-						customId: data.skipButtonCustomId,
-					},
+					mode === "reveal"
+						? {
+								type: Discord.MessageComponentTypes.Button,
+								style: Discord.ButtonStyles.Primary,
+								label: `${constants.symbols.interactions.menu.controls.forward} ${strings.next}`,
+								customId: data.skipButtonCustomId,
+						  }
+						: {
+								type: Discord.MessageComponentTypes.Button,
+								style: Discord.ButtonStyles.Secondary,
+								label: `${constants.symbols.interactions.menu.controls.forward} ${strings.skip}`,
+								customId: data.skipButtonCustomId,
+						  },
 				] as [Discord.ButtonComponent],
 			},
 		],

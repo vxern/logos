@@ -110,6 +110,7 @@
   "game.strings.sourcedFrom": "Sentences sourced from {source}.",
   "game.strings.correctGuesses": "Correct guesses: {number}",
   "game.strings.allTime": "All time: {number}",
+  "game.strings.next": "Next",
   "resources.name": "resources",
   "resources.description": "Redirects to the repository of resources to learn the language.",
   "resources.strings.redirect": "Click for resources to learn {language}",
