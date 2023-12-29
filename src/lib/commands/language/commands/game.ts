@@ -239,11 +239,15 @@ async function getGameView(
 	userDocument: User,
 	{ locale, learningLocale }: { locale: Locale; learningLocale: Locale },
 ): Promise<Discord.InteractionCallbackData> {
+	const totalScore = userDocument.scores?.[learningLocale]?.pickMissingWord?.totalScore ?? 0;
+
 	const strings = {
 		sentence: localise(client, "game.strings.sentence", locale)(),
 		translation: localise(client, "game.strings.translation", locale)(),
 		skip: localise(client, "game.strings.skip", locale)(),
 		sourcedFrom: localise(client, "game.strings.sourcedFrom", locale)({ source: licences.dictionaries.tatoeba.name }),
+		correctGuesses: localise(client, "game.strings.correctGuesses", locale)({ number: data.sessionScore }),
+		allTime: localise(client, "game.strings.allTime", locale)({ number: totalScore }),
 	};
 
 	const sentenceSource = constants.links.generateTatoebaSentenceLink(data.sentenceSelection.sentencePair.sentenceId);
@@ -252,8 +256,6 @@ async function getGameView(
 	);
 
 	const mask = constants.symbols.game.mask.repeat(data.sentenceSelection.correctPick[1].length);
-
-	const totalScore = userDocument.scores?.[learningLocale]?.pickMissingWord?.totalScore ?? 0;
 
 	return {
 		embeds: [
@@ -268,7 +270,7 @@ async function getGameView(
 					mask,
 				),
 				description: data.sentenceSelection.sentencePair.translation,
-				footer: { text: `Correct guesses: ${data.sessionScore} · All time: ${totalScore}` },
+				footer: { text: `${strings.correctGuesses} · ${strings.allTime}` },
 				color: data.embedColour,
 			},
 		],
