@@ -18,6 +18,9 @@ import {
 	PonsLocale,
 	getPonsLocaleByLanguage as getPonsLocaleByLearningLanguage,
 	isPonsLanguage as isPonsLearningLanguage,
+	getLocaleByLanguage as getLocaleByLearningLanguage,
+	isLanguage as isLearningLanguage,
+	isLocale as isLearningLocale,
 } from "./languages/learning";
 import {
 	DiscordLocale,
@@ -31,6 +34,7 @@ import {
 	isLanguage as isLocalisationLanguage,
 	languageToLocale as localisationLanguageToLocale,
 	languages as localisationLanguages,
+	locales,
 } from "./languages/localisation";
 import {
 	DeepLLanguage,
@@ -128,10 +132,6 @@ function getTranslationLanguage(language: string): TranslationLanguage | undefin
 	return otherVariant;
 }
 
-function isLearningLanguage(language: string): language is LearningLanguage {
-	return isLocalisationLanguage(language);
-}
-
 interface Languages<Language extends string> {
 	source: Language;
 	target: Language;
@@ -145,6 +145,9 @@ export {
 	getLocalisationLanguageByLocale,
 	isDiscordLocalisationLanguage,
 	isLocalisationLanguage,
+	getLocaleByLearningLanguage,
+	isLearningLanguage,
+	isLearningLocale,
 	getFeatureLanguage,
 	isTranslationLanguage,
 	getDeepLLocaleByTranslationLanguage,
@@ -159,12 +162,12 @@ export {
 	isCLDLocale,
 	getTranslationLanguage,
 	getBaseLanguage,
-	isLearningLanguage,
 	getLingvanexTranslationLanguageByLocale,
 	getLingvanexLocaleByTranslationLanguage,
 	isLingvanexLocale,
 	isPonsLearningLanguage,
 	getPonsLocaleByLearningLanguage,
+	locales,
 };
 export type {
 	LearningLanguage,

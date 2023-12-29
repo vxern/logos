@@ -70,6 +70,7 @@ const contributors = {
 	mike: {
 		username: "@rottingrat666",
 		id: "529666071498719242",
+		link: "https://instagram.com/mike_dishakjian",
 	},
 	moorddroom: {
 		username: "@moorddroom",
@@ -87,6 +88,14 @@ const contributors = {
 		username: "@vxern",
 		id: "217319536485990400",
 		link: "https://linkedin.com/in/vxern",
+	},
+	pascu: {
+		username: "@pseudonimeni",
+		id: "768748522878533632",
+	},
+	mymy: {
+		username: "@mymy1590",
+		id: "859452448191545364",
 	},
 	theodeninmuhafizi: {
 		username: "@theodeninmuhafizi",
@@ -185,4 +194,5 @@ export default {
 		},
 	} satisfies Partial<Record<Exclude<LearningLanguage, "English/American" | "English/British">, Translation>>,
 };
+export { contributors };
 export type { Contributor, Translation };

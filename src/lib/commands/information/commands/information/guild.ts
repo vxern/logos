@@ -9,7 +9,14 @@ import { Guild } from "../../../../database/guild";
 import diagnostics from "../../../../diagnostics";
 import { getFeatureLanguage, getLocalisationLanguage, reply } from "../../../../interactions";
 import { getGuildIconURLFormatted, snowflakeToTimestamp } from "../../../../utils";
+import { OptionTemplate } from "../../../command";
 import { proficiency } from "../../../social/roles/categories/language";
+
+const option: OptionTemplate = {
+	name: "server",
+	type: Discord.ApplicationCommandOptionTypes.SubCommand,
+	handle: handleDisplayGuildInformation,
+};
 
 /** Displays information about the guild that this command was executed in. */
 async function handleDisplayGuildInformation(
@@ -267,3 +274,4 @@ function formatDistribution(
 }
 
 export { handleDisplayGuildInformation };
+export default option;

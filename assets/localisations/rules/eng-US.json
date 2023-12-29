@@ -24,5 +24,8 @@
 
 	"rules.adherence.title": "Adherence",
 	"rules.adherence.summary": "Respect the rules.",
-	"rules.adherence.content": "For members who show no regard for the server rules, and are not interested in making useful contributions, a permanent ban may be issued."
+	"rules.adherence.content": "For members who show no regard for the server rules, and are not interested in making useful contributions, a permanent ban may be issued.",
+
+  "rules.other.title": "Other",
+  "rules.other.summary": "Justified in the reason."
 }

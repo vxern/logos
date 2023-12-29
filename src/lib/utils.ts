@@ -21,8 +21,12 @@ function isVoice(channel: Logos.Channel): channel is VoiceChannel {
  * @returns The chunked array.
  */
 function chunk<T>(array: T[], size: number): T[][] {
+	return Array.from(chunked(array, size));
+}
+
+function* chunked<T>(array: T[], size: number): Generator<T[], void, void> {
 	if (array.length === 0) {
-		return [[]];
+		return;
 	}
 
 	if (size === 0) {
@@ -30,13 +34,11 @@ function chunk<T>(array: T[], size: number): T[][] {
 	}
 
 	const chunks = array.length <= size ? 1 : Math.ceil(array.length / size);
-	const result = [];
 	for (const index of Array(chunks).keys()) {
 		const start = index * size;
 		const end = start + size;
-		result.push(array.slice(start, end));
+		yield array.slice(start, end);
 	}
-	return result;
 }
 
 const beginningOfDiscordEpoch = 1420070400000n;
@@ -221,9 +223,14 @@ async function* asStream<ElementType, ResultType>(
 	}
 }
 
+function random(max: number): number {
+	return Math.floor(Math.random() * max);
+}
+
 export {
 	addParametersToURL,
 	chunk,
+	chunked,
 	getAllMessages,
 	getAuthor,
 	getGuildIconURLFormatted,
@@ -235,4 +242,5 @@ export {
 	getMemberAvatarURL,
 	reverseObject,
 	asStream,
+	random,
 };

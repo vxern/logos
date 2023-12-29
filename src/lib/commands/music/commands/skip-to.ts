@@ -64,33 +64,23 @@ async function handleSkipToTimestamp(
 		return;
 	}
 
-	const [isOccupied, current, playingSince] = [
-		musicService.isOccupied,
-		musicService.current,
-		musicService.playingSince,
-	];
+	const [isOccupied, current] = [musicService.isOccupied, musicService.current];
 	if (!isOccupied || current === undefined) {
 		const locale = interaction.locale;
 		const strings = {
-			title: localise(client, "music.strings.notPlaying.title", locale)(),
-			description: {
-				toManage: localise(client, "music.strings.notPlaying.description.toManage", locale)(),
-			},
+			title: localise(client, "music.options.skip-to.strings.noSong.title", locale)(),
+			description: localise(client, "music.options.skip-to.strings.noSong.description", locale)(),
 		};
 
 		reply([client, bot], interaction, {
 			embeds: [
 				{
 					title: strings.title,
-					description: strings.description.toManage,
+					description: strings.description,
 					color: constants.colors.dullYellow,
 				},
 			],
 		});
-		return;
-	}
-
-	if (playingSince === undefined) {
 		return;
 	}
 
@@ -100,13 +90,7 @@ async function handleSkipToTimestamp(
 		return;
 	}
 
-	if (timestamp < 0) {
-		musicService.skipTo(0);
-	} else if (timestamp > playingSince) {
-		musicService.skipTo(playingSince);
-	} else {
-		musicService.skipTo(timestamp);
-	}
+	await musicService.skipTo(timestamp);
 
 	const strings = {
 		title: localise(client, "music.options.skip-to.strings.skippedTo.title", locale)(),

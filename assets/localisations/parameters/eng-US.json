@@ -12,7 +12,7 @@
 	"parameters.query.name": "query",
 	"parameters.query.description": "The title or a link to the song or song collection.",
 	"parameters.timestamp.name": "timestamp",
-	"parameters.timestamp.description": "The timestamp to seek.",
+	"parameters.timestamp.description": "The timestamp to use for seeking.",
 	"parameters.collection.name": "collection",
 	"parameters.collection.description": "If set to true, the action will be taken on the song collection instead.",
 	"parameters.by.name": "by",

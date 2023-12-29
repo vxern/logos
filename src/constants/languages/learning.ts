@@ -1,5 +1,12 @@
-import { LearningLanguage } from "../languages";
-import { Language as LocalisationLanguage } from "./localisation";
+import {
+	Language as LocalisationLanguage,
+	Locale,
+	getLocaleByLanguage as getLocaleByLocalisationLanguage,
+	isLanguage as isLocalisationLanguage,
+	isLocale as isLocalisationLocale,
+} from "./localisation";
+
+type Language = LocalisationLanguage;
 
 const languageToLocale = {
 	pons: {
@@ -16,14 +23,11 @@ const languageToLocale = {
 		// "Spanish": "es",
 		Turkish: "tr",
 		// "Chinese": "zh",
-	} as const satisfies Partial<Record<LearningLanguage, string>>,
+	} as const satisfies Partial<Record<Language, string>>,
 };
 
 type PonsLanguage = keyof typeof languageToLocale.pons;
-type Language = LocalisationLanguage;
-
 type PonsLocale = typeof languageToLocale.pons[keyof typeof languageToLocale.pons];
-type Locale = PonsLocale;
 
 function isPonsLanguage(locale: string): locale is PonsLanguage {
 	return locale in languageToLocale.pons;
@@ -33,5 +37,17 @@ function getPonsLocaleByLanguage(language: PonsLanguage): PonsLocale {
 	return languageToLocale.pons[language];
 }
 
-export { isPonsLanguage, getPonsLocaleByLanguage };
+function getLocaleByLanguage(language: Language): Locale {
+	return getLocaleByLocalisationLanguage(language);
+}
+
+function isLanguage(language: string): language is Language {
+	return isLocalisationLanguage(language);
+}
+
+function isLocale(locale: string): locale is Locale {
+	return isLocalisationLocale(locale);
+}
+
+export { isPonsLanguage, getPonsLocaleByLanguage, getLocaleByLanguage, isLanguage, isLocale };
 export type { PonsLanguage, Language, PonsLocale, Locale };

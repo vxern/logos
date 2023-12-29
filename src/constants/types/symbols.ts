@@ -100,6 +100,8 @@ export default {
 		resumed: "▶️",
 		skippedTo: "🔍",
 		skipped: "⏭️",
+		fastForwarded: "⏩",
+		rewound: "⏪",
 		stopped: "⏹️",
 		unskipped: "⏮️",
 		volume: "🔊",
@@ -226,8 +228,9 @@ export default {
 			},
 			learning: {
 				category: "📖",
-				classroomAttendee: "📖",
 				correctMe: "✍️",
+				doNotCorrectMe: "🙅",
+				classroomAttendee: "📖",
 				dailyPhrase: "🌞",
 				voicechatter: "🗣️",
 			},
@@ -241,6 +244,9 @@ export default {
 				category: "🤷‍♂️",
 			},
 		},
+	},
+	game: {
+		mask: "░",
 	},
 	profile: {
 		roles: "💼",

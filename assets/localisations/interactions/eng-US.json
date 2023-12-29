@@ -10,6 +10,5 @@
   "interactions.show.sureToShow.title": "Sure to show?",
   "interactions.show.sureToShow.description": "Are you sure you want to show the message in chat?",
   "interactions.show.sureToShow.yes": "Yes, show",
-  "interactions.show.sureToShow.no": "No, do not show",
-  "interactions.source": "Source"
+  "interactions.show.sureToShow.no": "No, do not show"
 }

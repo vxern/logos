@@ -1,21 +1,13 @@
 import * as Discord from "@discordeno/bot";
 import { CommandTemplate } from "../../command";
-import { user } from "../../parameters";
-import { handleDisplayWarnings, handleDisplayWarningsAutocomplete } from "./list/warnings";
+import praises from "./list/praises";
+import warnings from "./list/warnings";
 
 const command: CommandTemplate = {
 	name: "list",
 	type: Discord.ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ["VIEW_CHANNEL"],
-	options: [
-		{
-			name: "warnings",
-			type: Discord.ApplicationCommandOptionTypes.SubCommand,
-			handle: handleDisplayWarnings,
-			handleAutocomplete: handleDisplayWarningsAutocomplete,
-			options: [{ ...user, required: false }],
-		},
-	],
+	options: [praises, warnings],
 };
 
 export default command;

@@ -9,7 +9,7 @@ export default {
 	learnRomanianListingWebsite: "https://discord.me/learnromanian",
 	talonRepositoryLink: "https://github.com/vxern/talon",
 	generateDiscordInviteLink: (inviteCode: string) => `https://discord.gg/${inviteCode}`,
-	generateTatoebaSentenceLink: (sentenceId: string) => `https://tatoeba.org/en/sentences/show/${sentenceId}`,
+	generateTatoebaSentenceLink: (sentenceId: number) => `https://tatoeba.org/en/sentences/show/${sentenceId}`,
 	generateDexonlineDefinitionLink: (lemma: string) => `https://dexonline.ro/definitie/${lemma}`,
 	generateDicolinkDefinitionLink: (lemma: string) => `https://dicolink.com/mots/${lemma}`,
 	generatePonsDefinitionLink: (lemma: string, languages: Languages<string>) =>

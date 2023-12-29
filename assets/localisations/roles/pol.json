@@ -1,8 +1,8 @@
 {
     "roles.selection.title": "Jak wybierać rangi",
-    "roles.selection.description.usingCommand": "Rangi możesz wybierać za pomocą polecenia {command}. To polecenie otworzy menu, w którym będziesz mógł/mogła wybrać te rangi, które do Ciebie pasują.",
+    "roles.selection.description.usingCommand": "Rangi możesz wybierać za pomocą polecenia {command}, które otwiera menu do wybierania ich.",
     "roles.selection.description.runAnywhere": "To polecenie można wykonywać w którymkolwiek kanale na serwerze.",
-    "roles.selection.description.pressButton": "Możesz także użyć przycisku poniżej, aby otworzyć menu wybierania rang właśnie tu.",
+    "roles.selection.description.pressButton": "Możesz także użyć przycisku poniżej, aby otworzyć menu właśnie tutaj.",
     "roles.selection.description.clickHere": "Kliknij tutaj, by zacząć wybierać rangi",
     "roles.noCategory.name": "Nie wybrano żadnej kategorii",
     "roles.noCategory.description": "Wybierz kategorię, aby otrzymać listę dostępnych dla niej rang.",
@@ -132,5 +132,7 @@
     "roles.regions.languages.romanian.roles.oltenia.name": "Oltenia",
     "roles.regions.languages.romanian.roles.oltenia.description": "Pochodzę z Oltenii.",
     "roles.regions.languages.romanian.roles.transilvania.name": "Transylwania",
-    "roles.regions.languages.romanian.roles.transilvania.description": "Pochodzę z Transylwanii."
+    "roles.regions.languages.romanian.roles.transilvania.description": "Pochodzę z Transylwanii.",
+    "roles.learning.roles.doNotCorrectMe.name": "Nie poprawiaj mnie",
+    "roles.learning.roles.doNotCorrectMe.description": "Uczę się poprzez naturalną interakcję i nie życzę sobie, aby mnie poprawiano."
 }

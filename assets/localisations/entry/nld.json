@@ -50,5 +50,8 @@
     "entry.verification.vote.alreadyVoted.against.title": "Reeds tegen gestemd",
     "entry.verification.vote.alreadyVoted.against.description": "Je hebt er al voor gestemd dat de aanvraag van deze gebruiker wordt geweigerd.",
     "entry.verification.vote.stanceChanged.title": "Standpunt veranderd",
-    "entry.verification.vote.stanceChanged.description": "Je standpunt in deze stemming is gewijzigd."
+    "entry.verification.vote.stanceChanged.description": "Je standpunt in deze stemming is gewijzigd.",
+    "entry.verification.votesAgainst": "Stemmen tegen",
+    "entry.verification.noneYet": "Nog geen.",
+    "entry.verification.votesFor": "Stemmen voor"
 }

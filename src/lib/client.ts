@@ -1,10 +1,10 @@
 import * as fs from "node:fs/promises";
 import * as Discord from "@discordeno/bot";
 import FancyLog from "fancy-log";
+import { Redis } from "ioredis";
 import * as ravendb from "ravendb";
 import constants from "../constants/constants";
 import languages, {
-	LearningLanguage,
 	Locale,
 	LocalisationLanguage,
 	getDiscordLocaleByLocalisationLanguage,
@@ -20,7 +20,6 @@ import { timestamp, trim } from "../formatting";
 import * as Logos from "../types";
 import { Command, CommandTemplate, InteractionHandler, Option } from "./commands/command";
 import commandTemplates from "./commands/commands";
-import { SentencePair } from "./commands/language/commands/game";
 import { EntryRequest } from "./database/entry-request";
 import { Guild, timeStructToMilliseconds } from "./database/guild";
 import { Praise } from "./database/praise";
@@ -63,6 +62,7 @@ import { RoleIndicatorService } from "./services/role-indicators/role-indicators
 import { Service } from "./services/service";
 import { StatusService } from "./services/status/service";
 import { requestMembers } from "./utils";
+import { GuildStats } from "./database/guild-stats";
 
 type Client = {
 	environment: {
@@ -77,10 +77,11 @@ type Client = {
 		lavalinkHost: string;
 		lavalinkPort: string;
 		lavalinkPassword: string;
-		loadSentences: boolean;
 	};
 	log: Logger;
 	cache: {
+		database: Redis;
+
 		guilds: Map<bigint, Logos.Guild>;
 		users: Map<bigint, Logos.User>;
 		members: Map<bigint, Logos.Member>;
@@ -93,6 +94,7 @@ type Client = {
 
 		documents: {
 			entryRequests: Map<string, EntryRequest>;
+			guildStats: Map<string, GuildStats>;
 			guilds: Map<string, Guild>;
 			praisesByAuthor: Map<string, Map<string, Praise>>;
 			praisesByTarget: Map<string, Map<string, Praise>>;
@@ -115,7 +117,6 @@ type Client = {
 	};
 	collectors: Map<Event, Set<Collector<Event>>>;
 	features: {
-		sentencePairs: Map<LearningLanguage, SentencePair[]>;
 		// The keys are user IDs, the values are command usage timestamps mapped by command IDs.
 		rateLimiting: Map<bigint, Map<bigint, number[]>>;
 	};
@@ -179,6 +180,7 @@ function createClient(
 		environment,
 		log: createLogger("client"),
 		cache: {
+			database: new Redis(),
 			guilds: new Map(),
 			users: new Map(),
 			members: new Map(),
@@ -190,6 +192,7 @@ function createClient(
 			interactions: new Map(),
 			documents: {
 				entryRequests: new Map(),
+				guildStats: new Map(),
 				guilds: new Map(),
 				praisesByAuthor: new Map(),
 				praisesByTarget: new Map(),
@@ -521,6 +524,20 @@ export async function handleGuildCreate(
 		client.cache.documents.guilds.get(guild.id.toString()) ??
 		(await session.load<Guild>(`guilds/${guild.id}`).then((value) => value ?? undefined));
 
+	const guildStatsExist = ((await session.load(`guildStats/${guild.id}`)) ?? undefined) !== undefined;
+	if (!guildStatsExist) {
+		const guildStatsDocument = {
+			...({
+				id: `guildStats/${guild.id}`,
+				guildId: guild.id.toString(),
+				createdAt: Date.now(),
+			} satisfies GuildStats),
+			"@metadata": { "@collection": "GuildStats" },
+		};
+		await session.store(guildStatsDocument);
+		await session.saveChanges();
+	}
+
 	session.dispose();
 
 	if (guildDocument === undefined) {
@@ -529,7 +546,13 @@ export async function handleGuildCreate(
 
 	const commands = client.commands.commands;
 
-	const guildCommands: Command[] = [commands.information, commands.credits, commands.licence, commands.settings];
+	const guildCommands: Command[] = [
+		commands.information,
+		commands.acknowledgements,
+		commands.credits,
+		commands.licence,
+		commands.settings,
+	];
 	const services: Service[] = [];
 
 	if (guildDocument.features.information.enabled) {
@@ -776,11 +799,17 @@ export async function handleGuildDelete(client: Client, guildId: bigint): Promis
 		return undefined;
 	}
 
-	const runningServices = client.services.local.get(guild.id) ?? [];
+	const services = client.services.local.get(guild.id) ?? [];
 	client.services.local.delete(guild.id);
-	for (const runningService of runningServices) {
-		runningService.stop();
+
+	client.log.info(`Stopping ${services.length} service(s) on ${diagnostics.display.guild(guild)}...`);
+	const promises: Promise<void>[] = [];
+	for (const runningService of services) {
+		promises.push(runningService.stop());
 	}
+	await Promise.all(promises).then((_) => {
+		client.log.info(`Services stopped on ${diagnostics.display.guild(guild)}.`);
+	});
 }
 
 async function handleInteractionCreate(
@@ -828,6 +857,9 @@ function addCacheInterceptors(client: Client, database: ravendb.IDocumentStore):
 			case "EntryRequests": {
 				return `${document.guildId}/${document.authorId}`;
 			}
+			case "GuildStats": {
+				return document.guildId;
+			}
 			case "Guilds": {
 				return document.guildId;
 			}
@@ -870,6 +902,10 @@ function addCacheInterceptors(client: Client, database: ravendb.IDocumentStore):
 			case "EntryRequests": {
 				client.cache.documents.entryRequests.set(compositeId, value as EntryRequest);
 				break;
+			}
+			case "GuildStats": {
+				client.cache.documents.guildStats.set(compositeId, value as GuildStats);
+				return;
 			}
 			case "Guilds": {
 				client.cache.documents.guilds.set(compositeId, value as Guild);
