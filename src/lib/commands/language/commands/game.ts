@@ -5,6 +5,7 @@ import licences from "../../../../constants/licences";
 import defaults from "../../../../defaults";
 import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
+import * as levenshtein from "fastest-levenshtein";
 import {
 	acknowledge,
 	createInteractionCollector,
@@ -464,19 +465,30 @@ async function getSentenceSelection(client: Client, locale: Locale): Promise<Sen
 	const mainSentenceWords = Array.from(new Set(getWords(mainSentencePair.sentence)));
 	const mainWord = extractRandomWord(mainSentenceWords);
 
-	const words = Array.from(new Set(getWords(...sentencePairs.map((pair) => pair.sentence))))
+	const mainWordLowercase = mainWord.toLowerCase();
+	const wordsUnordered = Array.from(new Set(getWords(...sentencePairs.map((pair) => pair.sentence))))
+		.filter((word) => word.toLowerCase() !== mainWordLowercase)
 		.map((word) => ({ word, sort: Math.random() }))
 		.sort((a, b) => a.sort - b.sort)
 		.map(({ word }) => word);
-	if (words.length < defaults.GAME_WORD_SELECTION - 1) {
-		for (const _ of Array(defaults.GAME_WORD_SELECTION - 1 - words.length).keys()) {
-			words.push("?");
+	if (wordsUnordered.length < defaults.GAME_WORD_SELECTION - 1) {
+		for (const _ of Array(defaults.GAME_WORD_SELECTION - 1 - wordsUnordered.length).keys()) {
+			wordsUnordered.push("?");
 		}
 	}
 
+	const words = Array.from(wordsUnordered)
+		.map((word) => ({ word, sort: levenshtein.distance(mainWord, word) }))
+		.sort((a, b) => b.sort - a.sort)
+		.map(({ word }) => word);
+
 	const decoysExposed: string[] = [];
 	while (decoysExposed.length < defaults.GAME_WORD_SELECTION - 1) {
-		const word = extractRandomWord(words);
+		const word = words.pop();
+		if (word === undefined) {
+			continue;
+		}
+
 		decoysExposed.push(word);
 	}
 
