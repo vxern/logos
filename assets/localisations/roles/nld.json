@@ -132,5 +132,6 @@
     "roles.regions.languages.romanian.roles.oltenia.description": "Ik kom oorspronkelijk uit Oltenië.",
     "roles.regions.languages.romanian.roles.transilvania.name": "Transsylvanië",
     "roles.regions.languages.romanian.roles.transilvania.description": "Ik kom oorspronkelijk uit Transsylvanië.",
-    "roles.language.description": "Rollen die iemands taalvaardigheid aangeven."
+    "roles.language.description": "Rollen die iemands taalvaardigheid aangeven.",
+    "roles.learning.roles.doNotCorrectMe.name": "Verbeter mij niet"
 }
