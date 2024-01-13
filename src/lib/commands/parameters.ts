@@ -54,4 +54,17 @@ const to: OptionTemplate = {
 	type: Discord.ApplicationCommandOptionTypes.Integer,
 };
 
-export { by, collection, duration, query, reason, show, timestamp, to, user };
+const article: OptionTemplate = {
+	name: "article",
+	type: Discord.ApplicationCommandOptionTypes.String,
+	required: true,
+	autocomplete: true,
+};
+
+const dialect: OptionTemplate = {
+	name: "dialect",
+	type: Discord.ApplicationCommandOptionTypes.String,
+	autocomplete: true,
+};
+
+export { by, collection, duration, query, reason, show, timestamp, to, user, article, dialect };

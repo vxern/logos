@@ -18,5 +18,10 @@
 	"parameters.by.name": "by",
 	"parameters.by.description": "The number of songs or song listings to skip by.",
 	"parameters.to.name": "to",
-	"parameters.to.description": "The index of the track to skip to."
+	"parameters.to.description": "The index of the track to skip to.",
+
+  "parameters.dialect.name": "dialect",
+  "parameters.dialect.description": "The dialect of the article to view or edit.",
+  "parameters.article.name": "article",
+  "parameters.article.description": "The article to view or edit."
 }

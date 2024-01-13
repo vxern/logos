@@ -84,6 +84,9 @@ interface Guild {
 
 				word: Activatable;
 
+				/** @since v3.43.0 */
+				articles?: Activatable;
+
 				/** @since v3.8.0 */
 				targetOnly?: Activatable<{
 					channelIds: string[];

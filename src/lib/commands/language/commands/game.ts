@@ -1,11 +1,13 @@
 import * as Discord from "@discordeno/bot";
+import * as levenshtein from "fastest-levenshtein";
 import constants from "../../../../constants/constants";
 import { Locale, getLocaleByLearningLanguage } from "../../../../constants/languages";
 import licences from "../../../../constants/licences";
 import defaults from "../../../../defaults";
+import { capitalise } from "../../../../formatting";
 import * as Logos from "../../../../types";
 import { Client, localise } from "../../../client";
-import * as levenshtein from "fastest-levenshtein";
+import { User } from "../../../database/user";
 import {
 	acknowledge,
 	createInteractionCollector,
@@ -18,8 +20,6 @@ import {
 } from "../../../interactions";
 import { random } from "../../../utils";
 import { CommandTemplate } from "../../command";
-import { capitalise } from "../../../../formatting";
-import { User } from "../../../database/user";
 
 const command: CommandTemplate = {
 	name: "game",

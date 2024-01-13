@@ -8,6 +8,7 @@ import languages, {
 	Locale,
 	LocalisationLanguage,
 	getDiscordLocaleByLocalisationLanguage,
+	getFeatureLanguage,
 	getLocaleByLocalisationLanguage,
 	getLocalisationLanguageByLocale,
 	isDiscordLocalisationLanguage,
@@ -22,6 +23,7 @@ import { Command, CommandTemplate, InteractionHandler, Option } from "./commands
 import commandTemplates from "./commands/commands";
 import { EntryRequest } from "./database/entry-request";
 import { Guild, timeStructToMilliseconds } from "./database/guild";
+import { GuildStats } from "./database/guild-stats";
 import { Praise } from "./database/praise";
 import { Report } from "./database/report";
 import { Resource } from "./database/resource";
@@ -62,7 +64,7 @@ import { RoleIndicatorService } from "./services/role-indicators/role-indicators
 import { Service } from "./services/service";
 import { StatusService } from "./services/status/service";
 import { requestMembers } from "./utils";
-import { GuildStats } from "./database/guild-stats";
+import { Article } from "./database/article";
 
 type Client = {
 	environment: {
@@ -91,6 +93,7 @@ type Client = {
 		interactions: Map<string, Logos.Interaction | Discord.Interaction>;
 
 		documents: {
+			articles: Map<string, Article>;
 			entryRequests: Map<string, EntryRequest>;
 			guildStats: Map<string, GuildStats>;
 			guilds: Map<string, Guild>;
@@ -189,6 +192,7 @@ function createClient(
 			},
 			interactions: new Map(),
 			documents: {
+				articles: new Map(),
 				entryRequests: new Map(),
 				guildStats: new Map(),
 				guilds: new Map(),
@@ -627,6 +631,10 @@ export async function handleGuildCreate(
 		if (language.word.enabled) {
 			guildCommands.push(commands.word);
 		}
+
+		if (language.articles?.enabled) {
+			guildCommands.push(commands.article);
+		}
 	}
 
 	if (guildDocument.features.moderation.enabled) {
@@ -842,6 +850,19 @@ function addCacheInterceptors(client: Client, database: ravendb.IDocumentStore):
 	// biome-ignore lint: Typing this out in TypeScript is a nonsense and I don't have time to do it right now.
 	function getCompositeId(collection: string, document: any): string {
 		switch (collection) {
+			case "Articles": {
+				const language = document.languages.at(0);
+				if (language === undefined) {
+					throw "StateError: An article did not have an assigned language.";
+				}
+
+				const featureLanguage = getFeatureLanguage(language);
+				if (featureLanguage === undefined) {
+					throw "StateError: Could not resolve an assigned article language to a feature language.";
+				}
+
+				return `${featureLanguage}/${document.createdAt}`;
+			}
 			case "EntryRequests": {
 				return `${document.guildId}/${document.authorId}`;
 			}
@@ -887,13 +908,17 @@ function addCacheInterceptors(client: Client, database: ravendb.IDocumentStore):
 		const compositeId = getCompositeId(collection, value);
 
 		switch (collection) {
+			case "Articles": {
+				client.cache.documents.articles.set(compositeId, value as Article);
+				break;
+			}
 			case "EntryRequests": {
 				client.cache.documents.entryRequests.set(compositeId, value as EntryRequest);
 				break;
 			}
 			case "GuildStats": {
 				client.cache.documents.guildStats.set(compositeId, value as GuildStats);
-				return;
+				break;
 			}
 			case "Guilds": {
 				client.cache.documents.guilds.set(compositeId, value as Guild);

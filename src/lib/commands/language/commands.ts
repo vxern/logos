@@ -1,4 +1,5 @@
 import answer from "./commands/answer";
+import article from "./commands/article";
 import cefr from "./commands/cefr";
 import correction from "./commands/correction";
 import game from "./commands/game";
@@ -23,4 +24,5 @@ export {
 	translateChatInput,
 	translateMessage,
 	word,
+	article,
 };
