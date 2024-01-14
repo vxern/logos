@@ -84,7 +84,7 @@ async function handleCiteRule([client, bot]: [Client, Discord.Bot], interaction:
 		return;
 	}
 
-	const show = interaction.show ?? showParameter;
+	const show = interaction.show ?? showParameter ?? false;
 	const locale = show ? interaction.guildLocale : interaction.locale;
 
 	const ruleId = rules.at(ruleIndex);

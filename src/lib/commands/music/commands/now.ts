@@ -23,7 +23,12 @@ async function handleDisplayCurrentlyPlaying(
 	[client, bot]: [Client, Discord.Bot],
 	interaction: Logos.Interaction,
 ): Promise<void> {
-	const [{ collection, show }] = parseArguments(interaction.data?.options, { collection: "boolean", show: "boolean" });
+	const [{ collection, show: showParameter }] = parseArguments(interaction.data?.options, {
+		collection: "boolean",
+		show: "boolean",
+	});
+
+	const show = interaction.show ?? showParameter ?? false;
 	const locale = show ? interaction.guildLocale : interaction.locale;
 
 	const guildId = interaction.guildId;

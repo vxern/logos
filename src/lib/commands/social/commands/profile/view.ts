@@ -6,7 +6,7 @@ import { Client, autocompleteMembers, localise, resolveInteractionToMember } fro
 import { Praise } from "../../../../database/praise";
 import { User } from "../../../../database/user";
 import { Warning } from "../../../../database/warning";
-import { parseArguments, reply } from "../../../../interactions";
+import { getShowButton, parseArguments, reply } from "../../../../interactions";
 import { OptionTemplate } from "../../../command";
 import { show, user } from "../../../parameters";
 
@@ -35,7 +35,9 @@ async function handleDisplayProfile(
 	[client, bot]: [Client, Discord.Bot],
 	interaction: Logos.Interaction,
 ): Promise<void> {
-	const [{ user, show }] = parseArguments(interaction.data?.options, { show: "boolean" });
+	const [{ user, show: showParameter }] = parseArguments(interaction.data?.options, { show: "boolean" });
+
+	const show = interaction.show ?? showParameter ?? false;
 	const locale = show ? interaction.guildLocale : interaction.locale;
 
 	const member = resolveInteractionToMember(
@@ -149,6 +151,12 @@ async function handleDisplayProfile(
 		sent: localise(client, "profile.options.view.strings.information.description.sent", locale)(),
 	};
 
+	const showButton = getShowButton(client, interaction, { locale });
+
+	const components: Discord.ActionRow[] | undefined = show
+		? undefined
+		: [{ type: Discord.MessageComponentTypes.ActionRow, components: [showButton] }];
+
 	reply(
 		[client, bot],
 		interaction,
@@ -184,6 +192,7 @@ async function handleDisplayProfile(
 					],
 				},
 			],
+			components,
 		},
 		{ visible: show },
 	);
