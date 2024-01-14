@@ -714,5 +714,9 @@
     "music.options.rewind.strings.invalidTimestamp.title": "Nieprawidłowy znacznik czasu",
     "music.options.rewind.strings.noSong.description": "Nie ma utworu, który można byłoby przewinąć.",
     "music.options.rewind.strings.noSong.title": "Nie ma utworu do przewinięcia",
-    "music.options.rewind.description": "Przewija odtwarzanie obecnego utworu do tyłu o daną ilość czasu."
+    "music.options.rewind.description": "Przewija odtwarzanie obecnego utworu do tyłu o daną ilość czasu.",
+    "game.strings.skip": "Pomiń",
+    "game.strings.correctGuesses": "Poprawne odpowiedzi: {number}",
+    "game.strings.allTime": "Cały czas: {number}",
+    "game.strings.next": "Dalej"
 }
