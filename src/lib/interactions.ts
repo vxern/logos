@@ -172,7 +172,7 @@ async function paginate<T>(
 		const buttons = generateButtons(customId, isFirst(), isLast());
 
 		if (showable && !show) {
-			buttons.push({ type: Discord.MessageComponentTypes.ActionRow, components: [showButton] });
+			buttons.at(0)?.components.push(showButton);
 		}
 
 		return {
