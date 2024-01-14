@@ -31,6 +31,9 @@ const MAX_INDEXABLE_MESSAGES = 1000;
 const REPORT_LIMIT = 2;
 const REPORT_INTERVAL: TimeStruct = [30, "minute"];
 
+const ARTICLE_LIMIT = 2;
+const ARTICLE_INTERVAL: TimeStruct = [1, "minute"];
+
 const RESOURCE_LIMIT = 2;
 const RESOURCE_INTERVAL: TimeStruct = [30, "second"];
 
@@ -81,6 +84,8 @@ export default {
 	MAX_INDEXABLE_MESSAGES,
 	REPORT_LIMIT,
 	REPORT_INTERVAL,
+	ARTICLE_LIMIT,
+	ARTICLE_INTERVAL,
 	RESOURCE_LIMIT,
 	RESOURCE_INTERVAL,
 	TICKET_LIMIT,

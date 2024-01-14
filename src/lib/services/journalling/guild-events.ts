@@ -1,5 +1,6 @@
 import * as Logos from "../../../types";
 import { SlowmodeLevel } from "../../commands/moderation/commands/slowmode";
+import { Article } from "../../database/article";
 import { EntryRequest } from "../../database/entry-request";
 import { Praise } from "../../database/praise";
 import { Report } from "../../database/report";
@@ -76,6 +77,9 @@ type GuildEvents = {
 		previousLevel: SlowmodeLevel,
 		currentLevel: SlowmodeLevel,
 	];
+
+	/** A user has submitted an article. */
+	articleSubmit: [user: Logos.User, article: Article];
 };
 
 export type { GuildEvents };

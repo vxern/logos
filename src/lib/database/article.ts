@@ -7,8 +7,7 @@ interface Article {
 	languages: LearningLanguage[];
 	/** @remarks Guaranteed to contain at least one version; the first version is the original author. */
 	versions: ArticleVersion[];
-	editedAt: number;
-	createdAt: number;
+	editedAt?: number;
 }
 
 interface ArticleVersion {

@@ -5,6 +5,7 @@ import { Redis } from "ioredis";
 import * as ravendb from "ravendb";
 import constants from "../constants/constants";
 import languages, {
+	FeatureLanguage,
 	Locale,
 	LocalisationLanguage,
 	getDiscordLocaleByLocalisationLanguage,
@@ -93,7 +94,7 @@ type Client = {
 		interactions: Map<string, Logos.Interaction | Discord.Interaction>;
 
 		documents: {
-			articles: Map<string, Article>;
+			articlesByLanguage: Map<FeatureLanguage, Map<string, Article>>;
 			entryRequests: Map<string, EntryRequest>;
 			guildStats: Map<string, GuildStats>;
 			guilds: Map<string, Guild>;
@@ -192,7 +193,7 @@ function createClient(
 			},
 			interactions: new Map(),
 			documents: {
-				articles: new Map(),
+				articlesByLanguage: new Map(),
 				entryRequests: new Map(),
 				guildStats: new Map(),
 				guilds: new Map(),
@@ -477,6 +478,35 @@ async function initialiseClient(
 
 async function prefetchDataFromDatabase(client: Client): Promise<void> {
 	const session = client.database.openSession();
+
+	const articleDocuments = await session.query<Article>({ collection: "Articles" }).all();
+
+	for (const document of articleDocuments) {
+		const language = document.languages.at(0);
+		if (language === undefined) {
+			throw "StateError: An article did not have an assigned language.";
+		}
+
+		const featureLanguage = getFeatureLanguage(language);
+		if (featureLanguage === undefined) {
+			throw "StateError: Could not resolve an assigned article language to a feature language.";
+		}
+
+		const initialVersion = document.versions.at(0);
+		if (initialVersion === undefined) {
+			throw "StateError: Article document did not have an initial version.";
+		}
+
+		const compositeId = `${featureLanguage}/${initialVersion.createdAt}`;
+
+		const map = client.cache.documents.articlesByLanguage.get(featureLanguage);
+		if (map === undefined) {
+			client.cache.documents.articlesByLanguage.set(featureLanguage, new Map([[compositeId, document]]));
+			continue;
+		}
+
+		map.set(compositeId, document);
+	}
 
 	const entryRequestDocuments = await session.query<EntryRequest>({ collection: "EntryRequests" }).all();
 
@@ -861,7 +891,12 @@ function addCacheInterceptors(client: Client, database: ravendb.IDocumentStore):
 					throw "StateError: Could not resolve an assigned article language to a feature language.";
 				}
 
-				return `${featureLanguage}/${document.createdAt}`;
+				const initialVersion = document.versions.at(0);
+				if (initialVersion === undefined) {
+					throw "StateError: Article document did not have an initial version.";
+				}
+
+				return `${featureLanguage}/${initialVersion.createdAt}`;
 			}
 			case "EntryRequests": {
 				return `${document.guildId}/${document.authorId}`;
@@ -909,7 +944,23 @@ function addCacheInterceptors(client: Client, database: ravendb.IDocumentStore):
 
 		switch (collection) {
 			case "Articles": {
-				client.cache.documents.articles.set(compositeId, value as Article);
+				const language = value.languages.at(0);
+				if (language === undefined) {
+					throw "StateError: An article did not have an assigned language.";
+				}
+
+				const featureLanguage = getFeatureLanguage(language);
+				if (featureLanguage === undefined) {
+					throw "StateError: Could not resolve an assigned article language to a feature language.";
+				}
+
+				const map = client.cache.documents.articlesByLanguage.get(featureLanguage);
+				if (map === undefined) {
+					client.cache.documents.articlesByLanguage.set(featureLanguage, new Map([[compositeId, value]]));
+					break;
+				}
+
+				map.set(compositeId, value);
 				break;
 			}
 			case "EntryRequests": {
