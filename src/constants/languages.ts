@@ -138,6 +138,7 @@ export {
 	getLocaleByLearningLanguage,
 	isLearningLanguage,
 	isLearningLocale,
+	isFeatureLanguage,
 	getFeatureLanguage,
 	isTranslationLanguage,
 	getDeepLLocaleByTranslationLanguage,

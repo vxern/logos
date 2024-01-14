@@ -1,14 +1,14 @@
 import * as Discord from "@discordeno/bot";
+import constants from "../../../../../constants/constants";
+import { LocalisationLanguage } from "../../../../../constants/languages";
+import defaults from "../../../../../defaults";
 import * as Logos from "../../../../../types";
 import { Client, localise } from "../../../../client";
-import { OptionTemplate } from "../../../command";
-import { LocalisationLanguage } from "../../../../../constants/languages";
-import { reply } from "../../../../interactions";
-import constants from "../../../../../constants/constants";
-import { Guild, timeStructToMilliseconds } from "../../../../database/guild";
-import defaults from "../../../../../defaults";
-import { verifyIsWithinLimits } from "../../../../utils";
 import { Article } from "../../../../database/article";
+import { Guild, timeStructToMilliseconds } from "../../../../database/guild";
+import { reply } from "../../../../interactions";
+import { verifyIsWithinLimits } from "../../../../utils";
+import { OptionTemplate } from "../../../command";
 
 const command: OptionTemplate = {
 	name: "submit",

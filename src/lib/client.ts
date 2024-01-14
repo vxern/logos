@@ -22,6 +22,7 @@ import { timestamp, trim } from "../formatting";
 import * as Logos from "../types";
 import { Command, CommandTemplate, InteractionHandler, Option } from "./commands/command";
 import commandTemplates from "./commands/commands";
+import { Article } from "./database/article";
 import { EntryRequest } from "./database/entry-request";
 import { Guild, timeStructToMilliseconds } from "./database/guild";
 import { GuildStats } from "./database/guild-stats";
@@ -65,7 +66,6 @@ import { RoleIndicatorService } from "./services/role-indicators/role-indicators
 import { Service } from "./services/service";
 import { StatusService } from "./services/status/service";
 import { requestMembers } from "./utils";
-import { Article } from "./database/article";
 
 type Client = {
 	environment: {

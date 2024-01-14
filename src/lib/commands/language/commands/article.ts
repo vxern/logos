@@ -8,7 +8,6 @@ const command: CommandTemplate = {
 	name: "article",
 	type: Discord.ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ["VIEW_CHANNEL"],
-	isShowable: true,
 	options: [submit, edit, view],
 };
 
