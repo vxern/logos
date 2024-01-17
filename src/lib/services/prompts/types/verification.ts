@@ -40,7 +40,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 		super([client, bot], guildId, { type: "verification", deleteMode: "none" });
 
 		this.collectingInquiryInteractions = new Promise((resolve) => {
-			this.stopCollectingInquiryInteractions = resolve;
+			this.stopCollectingInquiryInteractions = () => resolve();
 		});
 	}
 

@@ -108,10 +108,10 @@ abstract class PromptService<
 		this._configuration = configurationLocators[type];
 		this.documents = this.getAllDocuments();
 		this.collectingInteractions = new Promise((resolve) => {
-			this.stopCollectingInteractions = resolve;
+			this.stopCollectingInteractions = () => resolve();
 		});
 		this.removingPrompts = new Promise((resolve) => {
-			this.stopRemovingPrompts = resolve;
+			this.stopRemovingPrompts = () => resolve();
 		});
 	}
 
