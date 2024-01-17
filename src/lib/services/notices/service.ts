@@ -37,7 +37,6 @@ const configurationLocators: ConfigurationLocators = {
 type NoticeTypes = keyof Client["services"]["notices"];
 
 abstract class NoticeService<NoticeType extends NoticeTypes> extends LocalService {
-	private readonly type: NoticeType;
 	private noticeData: NoticeData | undefined;
 
 	private readonly _configuration: ConfigurationLocators[NoticeType];
@@ -70,7 +69,6 @@ abstract class NoticeService<NoticeType extends NoticeTypes> extends LocalServic
 
 	constructor([client, bot]: [Client, Discord.Bot], guildId: bigint, { type }: { type: NoticeType }) {
 		super([client, bot], guildId);
-		this.type = type;
 		this.noticeData = undefined;
 		this._configuration = configurationLocators[type];
 	}
@@ -85,8 +83,6 @@ abstract class NoticeService<NoticeType extends NoticeTypes> extends LocalServic
 		if (channelId === undefined || configuration === undefined || guild === undefined || guildDocument === undefined) {
 			return;
 		}
-
-		this.client.log.info(`Registering ${this.type} notices on ${diagnostics.display.guild(guild)}...`);
 
 		const expectedContents = this.generateNotice();
 		if (expectedContents === undefined) {
