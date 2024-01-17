@@ -755,7 +755,9 @@ export async function handleGuildCreate(
 		}
 	}
 
-	await bot.rest
+	client.services.local.set(guild.id, services);
+
+	bot.rest
 		.upsertGuildApplicationCommands(guild.id, guildCommands)
 		.catch((reason) => client.log.warn(`Failed to upsert commands on ${diagnostics.display.guild(guild)}:`, reason));
 
@@ -774,11 +776,9 @@ export async function handleGuildCreate(
 	for (const service of services) {
 		promises.push(service.start());
 	}
-	Promise.all(promises).then((_) => {
-		client.log.info(`Services started on ${diagnostics.display.guild(guild)}.`);
-	});
+	await Promise.all(promises);
 
-	client.services.local.set(guild.id, services);
+	client.log.info(`Services started on ${diagnostics.display.guild(guild)}.`);
 }
 
 export async function handleGuildDelete(client: Client, guildId: bigint): Promise<void> {
@@ -788,16 +788,18 @@ export async function handleGuildDelete(client: Client, guildId: bigint): Promis
 	}
 
 	const services = client.services.local.get(guild.id) ?? [];
+
 	client.services.local.delete(guild.id);
 
 	client.log.info(`Stopping ${services.length} service(s) on ${diagnostics.display.guild(guild)}...`);
+
 	const promises: Promise<void>[] = [];
 	for (const runningService of services) {
 		promises.push(runningService.stop());
 	}
-	await Promise.all(promises).then((_) => {
-		client.log.info(`Services stopped on ${diagnostics.display.guild(guild)}.`);
-	});
+	await Promise.all(promises);
+
+	client.log.info(`Services stopped on ${diagnostics.display.guild(guild)}.`);
 }
 
 async function handleInteractionCreate(
