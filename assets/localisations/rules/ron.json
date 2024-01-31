@@ -18,5 +18,7 @@
     "rules.exclusivity.content": "Este de așteptat de la membrii serverului să nu se folosească de acest spațiu pentru a-și face reclamă. Încercările de a face publicitate (inclusiv mesajele private nesolicitate) sunt interzise.",
     "rules.adherence.title": "Aderență",
     "rules.adherence.summary": "Respectă regulamentul.",
-    "rules.adherence.content": "Membrii care nu arată nicio considerație față de regulament și cei care nu sunt deloc interesați în a face contribuții constructive pentru server, pot primi un ban permanent."
+    "rules.adherence.content": "Membrii care nu arată nicio considerație față de regulament și cei care nu sunt deloc interesați în a face contribuții constructive pentru server, pot primi un ban permanent.",
+    "rules.other.title": "Altă regulă",
+    "rules.other.summary": "De justificat în comentariu."
 }
