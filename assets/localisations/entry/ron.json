@@ -52,5 +52,17 @@
     "entry.verification.vote.stanceChanged.title": "Poziție schimbată",
     "entry.verification.vote.stanceChanged.description": "Ți s-a schimba poziția în acest vot.",
     "entry.verification.votesAgainst": "Voturi împotrivă",
-    "entry.verification.votesFor": "Voturi pentru"
+    "entry.verification.votesFor": "Voturi pentru",
+    "entry.verification.inquiry.failed.description": "Din motive necunoscute, începerea interogării acestui utilizator a eșuat.",
+    "entry.verification.inquiry.inquiry": "Interogare",
+    "entry.verification.inquiry.open": "Începe o interogare",
+    "entry.verification.inquiry.channel": "Canal de interogare pentru {user}.",
+    "entry.verification.inquiry.failed.title": "Nu s-a putut începe interogarea",
+    "entry.verification.vote.sureToForce.accept.title": "Sigur forțezi acceptarea?",
+    "entry.verification.vote.sureToForce.accept.description": "Sigur dorești să forțezi acceptarea acestei solicitării de intrare?",
+    "entry.verification.vote.sureToForce.reject.title": "Sigur forțezi respingerea?",
+    "entry.verification.vote.sureToForce.reject.description": "Sigur dorești să forțezi respingerea acestei solicitării de intrare?",
+    "entry.verification.vote.sureToForce.yes": "Da, forțează",
+    "entry.verification.vote.sureToForce.no": "Nu, anulează",
+    "entry.verification.inquiry.opened.title": "Interogare începută!"
 }
