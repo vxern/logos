@@ -10,7 +10,7 @@
     "parameters.query.name": "interogare",
     "parameters.query.description": "Titlul melodiei, link-ul către aceasta sau către un set de melodii.",
     "parameters.timestamp.name": "marcaj-de-timp",
-    "parameters.timestamp.description": "Marcajul de timp din melodie la care să se treacă.",
+    "parameters.timestamp.description": "Marcajul de timp din melodie.",
     "parameters.collection.name": "set",
     "parameters.collection.description": "Dacă „da”, acțiunea va fi efectuată pe set de melodii.",
     "parameters.by.name": "cu",
