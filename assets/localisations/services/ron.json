@@ -26,5 +26,6 @@
     "cannotRemovePrompt.description": "Nu poți șterge acest mesaj.",
     "close": "Închide",
     "cannotCloseIssue.title": "Nu se poate închide chestiunea",
-    "cannotCloseIssue.description": "Nu poți închide această chestiune."
+    "cannotCloseIssue.description": "Nu poți închide această chestiune.",
+    "notices.resources.description.easierToManage": "Stocarea resurselor extern (în afara Discordului) le face nu numai mai ușor gestionabile și organizabile, dar și accesibile la lumea exterioară și simple de extins."
 }
