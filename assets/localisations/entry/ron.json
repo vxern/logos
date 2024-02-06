@@ -64,5 +64,7 @@
     "entry.verification.vote.sureToForce.reject.description": "Sigur dorești să forțezi respingerea acestei solicitării de intrare?",
     "entry.verification.vote.sureToForce.yes": "Da, forțează",
     "entry.verification.vote.sureToForce.no": "Nu, anulează",
-    "entry.verification.inquiry.opened.title": "Interogare începută!"
+    "entry.verification.inquiry.opened.title": "Interogare începută!",
+    "entry.verification.noneYet": "Nu există încă.",
+    "entry.verification.inquiry.opened.description": "O investigație a fost deschisă privind solicitarea de intrare a utilizatorului pe {guild_name}."
 }
