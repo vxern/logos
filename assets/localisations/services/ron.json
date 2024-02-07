@@ -19,7 +19,7 @@
     "notices.resources.description.storedInRepository": "Resursele noastre sunt stocate într-un [repozitoriu GitHub]({link}). Butonul de mai jos te va și duce acolo.",
     "notices.resources.description.contributable": "Poți trimite noi resurse într-unul din cele trei moduri, aranjate după bătaia de cap implicată:",
     "notices.resources.description.contributable.usingCommand": "Folosind comanda {command}.",
-    "notices.resources.description.contributable.openingIssue": "Deschizând un issue (chestiune) în repozitoriu, citând resursele care să fie adăugate.",
+    "notices.resources.description.contributable.openingIssue": "Deschizând o chestiune (issue) în repozitoriu, evidențiind resursele de adăugat.",
     "notices.resources.description.contributable.makingPullRequest": "Bifurcând (fork) repozitoriul, adăugând resursele și creând o solicitare de acceptare a contribuțiilor (pull request).",
     "remove": "Șterge",
     "cannotRemovePrompt.title": "Nu se poate șterge mesajul",
