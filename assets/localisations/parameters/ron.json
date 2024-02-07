@@ -1,7 +1,7 @@
 {
     "parameters.user.name": "utilizator",
     "parameters.user.description": "Numele de utilizator, tag-ul, ID-ul sau mențiunea utilizatorului.",
-    "parameters.show.name": "afișare",
+    "parameters.show.name": "afișează",
     "parameters.show.description": "Dacă „da”, rezultatul va fi afișat și la alți utilizatori.",
     "parameters.duration.name": "durată",
     "parameters.duration.description": "Durata sancțiunii.",
@@ -10,7 +10,7 @@
     "parameters.query.name": "interogare",
     "parameters.query.description": "Titlul melodiei, link-ul către aceasta sau către un set de melodii.",
     "parameters.timestamp.name": "marcaj-de-timp",
-    "parameters.timestamp.description": "Marcajul de timp din melodie.",
+    "parameters.timestamp.description": "Marcajul de timp de folosit pentru căutare.",
     "parameters.collection.name": "set",
     "parameters.collection.description": "Dacă „da”, acțiunea va fi efectuată pe set de melodii.",
     "parameters.by.name": "cu",
