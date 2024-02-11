@@ -539,7 +539,7 @@ interface NameLocalisations {
 	nameLocalizations?: Partial<Record<Discord.Locales, string>>;
 }
 interface DescriptionLocalisations {
-	description?: string;
+	description: string;
 	descriptionLocalizations?: Partial<Record<Discord.Locales, string>>;
 }
 class LocalisationStore {
@@ -894,6 +894,9 @@ class CommandStore {
 		}
 
 		const descriptionLocalisations = localisations.getDescriptionLocalisations({ key });
+		if (descriptionLocalisations === undefined) {
+			return undefined;
+		}
 
 		if (template.options === undefined || template.options.length === 0) {
 			const localisedNamesWithMetadata: LocalisedNamesWithMetadata = [nameLocalisations, template];
@@ -998,11 +1001,9 @@ class CommandStore {
 	}: {
 		template: CommandTemplate;
 		nameLocalisations: NameLocalisations;
-		descriptionLocalisations?: DescriptionLocalisations;
+		descriptionLocalisations: DescriptionLocalisations;
 		options?: Option[];
 	}): Command {
-		// TODO(vxern): Remove this.
-		// @ts-ignore: The Discordeno type declares `description` as a required property, which it isn't.
 		return {
 			...nameLocalisations,
 			...descriptionLocalisations,
@@ -1022,11 +1023,9 @@ class CommandStore {
 	}: {
 		template: OptionTemplate;
 		nameLocalisations: NameLocalisations;
-		descriptionLocalisations?: DescriptionLocalisations;
+		descriptionLocalisations: DescriptionLocalisations;
 		options?: Option[];
 	}): Option {
-		// TODO(vxern): Remove this.
-		// @ts-ignore: The Discordeno type declares `description` as a required property, which it isn't.
 		return {
 			...nameLocalisations,
 			...descriptionLocalisations,
