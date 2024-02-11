@@ -3,28 +3,25 @@ import constants from "../../../../../constants/constants";
 import localisations from "../../../../../constants/localisations";
 import defaults from "../../../../../defaults";
 import * as Logos from "../../../../../types";
-import { Client, localise } from "../../../../client";
+import { Client } from "../../../../client";
 import { User } from "../../../../database/user";
 import { reply } from "../../../../interactions";
 import { OptionTemplate } from "../../../command";
 
 const command: OptionTemplate = {
-	name: "view",
+	id: "view",
 	type: Discord.ApplicationCommandOptionTypes.SubCommand,
 	handle: handleDisplaySettings,
 };
 
-async function handleDisplaySettings(
-	[client, bot]: [Client, Discord.Bot],
-	interaction: Logos.Interaction,
-): Promise<void> {
+async function handleDisplaySettings(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.locale;
 
 	const session = client.database.openSession();
 
 	const userDocument =
-		client.cache.documents.users.get(interaction.user.id.toString()) ??
-		(await session.load<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined));
+		client.documents.users.get(interaction.user.id.toString()) ??
+		(await session.get<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined));
 
 	session.dispose();
 
@@ -35,26 +32,24 @@ async function handleDisplaySettings(
 	const userLanguage = userDocument.account.language ?? defaults.LOCALISATION_LANGUAGE;
 
 	const strings = {
-		title: localise(client, "settings.strings.settings.title", locale)(),
+		title: client.localise("settings.strings.settings.title", locale)(),
 		description: {
 			language: {
-				title: localise(client, "settings.strings.settings.fields.language.title", locale)(),
-				noLanguageSet: localise(
-					client,
+				title: client.localise("settings.strings.settings.fields.language.title", locale)(),
+				noLanguageSet: client.localise(
 					"settings.strings.settings.fields.language.description.noLanguageSet.noLanguageSet",
 					locale,
 				)(),
-				defaultShown: localise(
-					client,
+				defaultShown: client.localise(
 					"settings.strings.settings.fields.language.description.noLanguageSet.defaultShown",
 					locale,
 				)(),
-				language: localise(client, localisations.languages[userLanguage], locale)(),
+				language: client.localise(localisations.languages[userLanguage], locale)(),
 			},
 		},
 	};
 
-	reply([client, bot], interaction, {
+	reply(client, interaction, {
 		embeds: [
 			{
 				title: strings.title,

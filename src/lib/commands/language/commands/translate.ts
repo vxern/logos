@@ -10,7 +10,7 @@ import languages, {
 import localisations from "../../../../constants/localisations";
 import { trim } from "../../../../formatting";
 import * as Logos from "../../../../types";
-import { Client, localise } from "../../../client";
+import { Client } from "../../../client";
 import { editReply, getShowButton, parseArguments, postponeReply, reply, respond } from "../../../interactions";
 import { asStream } from "../../../utils";
 import { CommandTemplate } from "../../command";
@@ -21,45 +21,46 @@ import { detectLanguages } from "./recognise";
 
 const commands = {
 	chatInput: {
-		name: "translate",
+		id: "translate",
 		type: Discord.ApplicationCommandTypes.ChatInput,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
-		isRateLimited: true,
-		isShowable: true,
 		handle: handleTranslateChatInput,
 		handleAutocomplete: handleTranslateChatInputAutocomplete,
 		options: [
 			{
-				name: "text",
+				id: "text",
 				type: Discord.ApplicationCommandOptionTypes.String,
 				required: true,
 			},
 			{
-				name: "to",
+				id: "to",
 				type: Discord.ApplicationCommandOptionTypes.String,
 				autocomplete: true,
 			},
 			{
-				name: "from",
+				id: "from",
 				type: Discord.ApplicationCommandOptionTypes.String,
 				autocomplete: true,
 			},
 			show,
 		],
+		flags: {
+			hasRateLimit: true,
+			isShowable: true,
+		},
 	},
 	message: {
-		name: "translate.message",
+		id: "translate.message",
 		type: Discord.ApplicationCommandTypes.Message,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
-		isShowable: true,
 		handle: handleTranslateMessage,
+		flags: {
+			isShowable: true,
+		},
 	},
 } satisfies Record<string, CommandTemplate>;
 
-async function handleTranslateChatInputAutocomplete(
-	[client, bot]: [Client, Discord.Bot],
-	interaction: Logos.Interaction,
-): Promise<void> {
+async function handleTranslateChatInputAutocomplete(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const [_, focused] = parseArguments(interaction.data?.options, { show: "boolean" });
 
 	const locale = interaction.locale;
@@ -69,7 +70,7 @@ async function handleTranslateChatInputAutocomplete(
 		return;
 	}
 
-	const guild = client.cache.guilds.get(guildId);
+	const guild = client.entities.guilds.get(guildId);
 	if (guild === undefined) {
 		return;
 	}
@@ -81,10 +82,10 @@ async function handleTranslateChatInputAutocomplete(
 	const languageQueryTrimmed = (focused.value as string).trim();
 	if (languageQueryTrimmed.length === 0) {
 		const strings = {
-			autocomplete: localise(client, "autocomplete.language", locale)(),
+			autocomplete: client.localise("autocomplete.language", locale)(),
 		};
 
-		respond([client, bot], interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
+		respond(client, interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
 		return;
 	}
 
@@ -101,7 +102,7 @@ async function handleTranslateChatInputAutocomplete(
 			}
 
 			const strings = {
-				language: localise(client, languageStringKey, locale)(),
+				language: client.localise(languageStringKey, locale)(),
 			};
 
 			return {
@@ -113,26 +114,20 @@ async function handleTranslateChatInputAutocomplete(
 		.slice(0, 25)
 		.sort((previous, next) => previous.name.localeCompare(next.name));
 
-	respond([client, bot], interaction, choices);
+	respond(client, interaction, choices);
 }
 
 /** Allows the user to translate text from one language to another through the DeepL API. */
-async function handleTranslateChatInput(
-	[client, bot]: [Client, Discord.Bot],
-	interaction: Logos.Interaction,
-): Promise<void> {
+async function handleTranslateChatInput(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const [{ from, to, text, show: showParameter }] = parseArguments(interaction.data?.options, { show: "boolean" });
 	if (text === undefined) {
 		return;
 	}
 
-	handleTranslate([client, bot], interaction, text, { from, to }, { showParameter });
+	handleTranslate(client, interaction, text, { from, to }, { showParameter });
 }
 
-async function handleTranslateMessage(
-	[client, bot]: [Client, Discord.Bot],
-	interaction: Logos.Interaction,
-): Promise<void> {
+async function handleTranslateMessage(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.locale;
 
 	const message = interaction.data?.resolved?.messages?.array()?.at(0);
@@ -143,11 +138,11 @@ async function handleTranslateMessage(
 	const hasEmbeds = message.embeds !== undefined && message.embeds.length !== 0;
 	if (hasEmbeds) {
 		const strings = {
-			title: localise(client, "translate.strings.cannotUse.title", locale)(),
-			description: localise(client, "translate.strings.cannotUse.description", locale)(),
+			title: client.localise("translate.strings.cannotUse.title", locale)(),
+			description: client.localise("translate.strings.cannotUse.description", locale)(),
 		};
 
-		reply([client, bot], interaction, {
+		reply(client, interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -161,11 +156,11 @@ async function handleTranslateMessage(
 
 	const text = message.content;
 
-	handleTranslate([client, bot], interaction, text, {}, {});
+	handleTranslate(client, interaction, text, {}, {});
 }
 
 async function handleTranslate(
-	[client, bot]: [Client, Discord.Bot],
+	client: Client,
 	interaction: Logos.Interaction,
 	text: string,
 	{ from, to }: { from?: string; to?: string },
@@ -180,11 +175,11 @@ async function handleTranslate(
 		const locale = interaction.locale;
 
 		const strings = {
-			title: localise(client, "translate.strings.textEmpty.title", locale)(),
-			description: localise(client, "translate.strings.textEmpty.description", locale)(),
+			title: client.localise("translate.strings.textEmpty.title", locale)(),
+			description: client.localise("translate.strings.textEmpty.description", locale)(),
 		};
 
-		reply([client, bot], interaction, {
+		reply(client, interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -208,12 +203,12 @@ async function handleTranslate(
 		if (isSourceInvalid && isTargetInvalid) {
 			const strings = {
 				both: {
-					title: localise(client, "translate.strings.invalid.both.title", locale)(),
-					description: localise(client, "translate.strings.invalid.both.description", locale)(),
+					title: client.localise("translate.strings.invalid.both.title", locale)(),
+					description: client.localise("translate.strings.invalid.both.description", locale)(),
 				},
 			};
 
-			reply([client, bot], interaction, {
+			reply(client, interaction, {
 				embeds: [
 					{
 						title: strings.both.title,
@@ -224,15 +219,17 @@ async function handleTranslate(
 			});
 
 			return;
-		} else if (isSourceInvalid) {
+		}
+
+		if (isSourceInvalid) {
 			const strings = {
 				source: {
-					title: localise(client, "translate.strings.invalid.source.title", locale)(),
-					description: localise(client, "translate.strings.invalid.source.description", locale)(),
+					title: client.localise("translate.strings.invalid.source.title", locale)(),
+					description: client.localise("translate.strings.invalid.source.description", locale)(),
 				},
 			};
 
-			reply([client, bot], interaction, {
+			reply(client, interaction, {
 				embeds: [
 					{
 						title: strings.source.title,
@@ -243,15 +240,17 @@ async function handleTranslate(
 			});
 
 			return;
-		} else if (isTargetInvalid) {
+		}
+
+		if (isTargetInvalid) {
 			const strings = {
 				target: {
-					title: localise(client, "translate.strings.invalid.target.title", locale)(),
-					description: localise(client, "translate.strings.invalid.target.description", locale)(),
+					title: client.localise("translate.strings.invalid.target.title", locale)(),
+					description: client.localise("translate.strings.invalid.target.description", locale)(),
 				},
 			};
 
-			reply([client, bot], interaction, {
+			reply(client, interaction, {
 				embeds: [
 					{
 						title: strings.target.title,
@@ -269,11 +268,11 @@ async function handleTranslate(
 				const locale = interaction.locale;
 
 				const strings = {
-					title: localise(client, "translate.strings.languagesNotDifferent.title", locale)(),
-					description: localise(client, "translate.strings.languagesNotDifferent.description", locale)(),
+					title: client.localise("translate.strings.languagesNotDifferent.title", locale)(),
+					description: client.localise("translate.strings.languagesNotDifferent.description", locale)(),
 				};
 
-				reply([client, bot], interaction, {
+				reply(client, interaction, {
 					embeds: [
 						{
 							title: strings.title,
@@ -285,22 +284,22 @@ async function handleTranslate(
 				return;
 			}
 
-			translateText([client, bot], interaction, text, { source: from, target: to }, { show }, { locale });
+			translateText(client, interaction, text, { source: from, target: to }, { show }, { locale });
 			return;
-		} else {
-			if (from === undefined) {
-				const detectedLanguage = await detectLanguage([client, bot], interaction, text);
-				if (detectedLanguage === undefined) {
-					return;
-				}
+		}
 
-				sourceLanguage = detectedLanguage;
-			} else {
-				sourceLanguage = from;
+		if (from === undefined) {
+			const detectedLanguage = await detectLanguage(client, interaction, text);
+			if (detectedLanguage === undefined) {
+				return;
 			}
+
+			sourceLanguage = detectedLanguage;
+		} else {
+			sourceLanguage = from;
 		}
 	} else {
-		const detectedLanguage = await detectLanguage([client, bot], interaction, text);
+		const detectedLanguage = await detectLanguage(client, interaction, text);
 		if (detectedLanguage === undefined) {
 			return;
 		}
@@ -310,7 +309,7 @@ async function handleTranslate(
 
 	if (to !== undefined) {
 		if (to !== sourceLanguage) {
-			translateText([client, bot], interaction, text, { source: sourceLanguage, target: to }, { show }, { locale });
+			translateText(client, interaction, text, { source: sourceLanguage, target: to }, { show }, { locale });
 			return;
 		}
 	}
@@ -319,7 +318,7 @@ async function handleTranslate(
 	if (learningTranslationLanguage !== undefined) {
 		if (learningTranslationLanguage !== sourceLanguage) {
 			translateText(
-				[client, bot],
+				client,
 				interaction,
 				text,
 				{ source: sourceLanguage, target: learningTranslationLanguage },
@@ -335,18 +334,17 @@ async function handleTranslate(
 		const locale = interaction.locale;
 
 		const strings = {
-			title: localise(client, "translate.strings.cannotDetermine.target.title", locale)(),
+			title: client.localise("translate.strings.cannotDetermine.target.title", locale)(),
 			description: {
-				cannotDetermine: localise(
-					client,
+				cannotDetermine: client.localise(
 					"translate.strings.cannotDetermine.target.description.cannotDetermine",
 					locale,
 				)(),
-				tryAgain: localise(client, "translate.strings.cannotDetermine.target.description.tryAgain", locale)(),
+				tryAgain: client.localise("translate.strings.cannotDetermine.target.description.tryAgain", locale)(),
 			},
 		};
 
-		reply([client, bot], interaction, {
+		reply(client, interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -363,18 +361,17 @@ async function handleTranslate(
 		const locale = interaction.locale;
 
 		const strings = {
-			title: localise(client, "translate.strings.cannotDetermine.target.title", locale)(),
+			title: client.localise("translate.strings.cannotDetermine.target.title", locale)(),
 			description: {
-				cannotDetermine: localise(
-					client,
+				cannotDetermine: client.localise(
 					"translate.strings.cannotDetermine.target.description.cannotDetermine",
 					locale,
 				)(),
-				tryAgain: localise(client, "translate.strings.cannotDetermine.target.description.tryAgain", locale)(),
+				tryAgain: client.localise("translate.strings.cannotDetermine.target.description.tryAgain", locale)(),
 			},
 		};
 
-		reply([client, bot], interaction, {
+		reply(client, interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -388,7 +385,7 @@ async function handleTranslate(
 	}
 
 	translateText(
-		[client, bot],
+		client,
 		interaction,
 		text,
 		{ source: sourceLanguage, target: translationLanguage },
@@ -398,7 +395,7 @@ async function handleTranslate(
 }
 
 async function detectLanguage(
-	[client, bot]: [Client, Discord.Bot],
+	client: Client,
 	interaction: Logos.Interaction,
 	text: string,
 ): Promise<TranslationLanguage | undefined> {
@@ -407,18 +404,17 @@ async function detectLanguage(
 		const locale = interaction.locale;
 
 		const strings = {
-			title: localise(client, "translate.strings.cannotDetermine.source.title", locale)(),
+			title: client.localise("translate.strings.cannotDetermine.source.title", locale)(),
 			description: {
-				cannotDetermine: localise(
-					client,
+				cannotDetermine: client.localise(
 					"translate.strings.cannotDetermine.source.description.cannotDetermine",
 					locale,
 				)(),
-				tryAgain: localise(client, "translate.strings.cannotDetermine.source.description.tryAgain", locale)(),
+				tryAgain: client.localise("translate.strings.cannotDetermine.source.description.tryAgain", locale)(),
 			},
 		};
 
-		reply([client, bot], interaction, {
+		reply(client, interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -436,11 +432,11 @@ async function detectLanguage(
 		const locale = interaction.locale;
 
 		const strings = {
-			title: localise(client, "translate.strings.languageNotSupported.title", locale)(),
-			description: localise(client, "translate.strings.languageNotSupported.description", locale)(),
+			title: client.localise("translate.strings.languageNotSupported.title", locale)(),
+			description: client.localise("translate.strings.languageNotSupported.description", locale)(),
 		};
 
-		reply([client, bot], interaction, {
+		reply(client, interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -457,7 +453,7 @@ async function detectLanguage(
 }
 
 async function translateText(
-	[client, bot]: [Client, Discord.Bot],
+	client: Client,
 	interaction: Logos.Interaction,
 	text: string,
 	languages: Languages<TranslationLanguage>,
@@ -467,11 +463,11 @@ async function translateText(
 	const adapters = resolveAdapters(languages);
 	if (adapters === undefined || adapters.length === 0) {
 		const strings = {
-			title: localise(client, "translate.strings.noTranslationAdapters.title", locale)(),
-			description: localise(client, "translate.strings.noTranslationAdapters.description", locale)(),
+			title: client.localise("translate.strings.noTranslationAdapters.title", locale)(),
+			description: client.localise("translate.strings.noTranslationAdapters.description", locale)(),
 		};
 
-		reply([client, bot], interaction, {
+		reply(client, interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -483,7 +479,7 @@ async function translateText(
 		return;
 	}
 
-	await postponeReply([client, bot], interaction, { visible: show });
+	await postponeReply(client, interaction, { visible: show });
 
 	let translation: Translation | undefined;
 	for await (const element of asStream(adapters, (adapter) => adapter.translate(client, text, languages))) {
@@ -498,11 +494,11 @@ async function translateText(
 
 	if (translation === undefined) {
 		const strings = {
-			title: localise(client, "translate.strings.failed.title", locale)(),
-			description: localise(client, "translate.strings.failed.description", locale)(),
+			title: client.localise("translate.strings.failed.title", locale)(),
+			description: client.localise("translate.strings.failed.description", locale)(),
 		};
 
-		editReply([client, bot], interaction, {
+		editReply(client, interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -519,11 +515,11 @@ async function translateText(
 
 	const strings = {
 		languages: {
-			source: localise(client, localisations.languages[languages.source], locale)(),
-			target: localise(client, localisations.languages[languages.target], locale)(),
+			source: client.localise(localisations.languages[languages.source], locale)(),
+			target: client.localise(localisations.languages[languages.target], locale)(),
 		},
-		sourceText: localise(client, "translate.strings.sourceText", locale)(),
-		translation: localise(client, "translate.strings.translation", locale)(),
+		sourceText: client.localise("translate.strings.sourceText", locale)(),
+		translation: client.localise("translate.strings.translation", locale)(),
 	};
 
 	const isLong = text.length > 896; // 7/8 of 1024. Leaves room for text overhead.
@@ -574,7 +570,7 @@ async function translateText(
 		? undefined
 		: [{ type: Discord.MessageComponentTypes.ActionRow, components: [showButton] }];
 
-	editReply([client, bot], interaction, { embeds, components });
+	editReply(client, interaction, { embeds, components });
 }
 
 export default commands;

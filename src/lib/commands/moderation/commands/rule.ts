@@ -2,7 +2,7 @@ import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import { Locale } from "../../../../constants/languages";
 import * as Logos from "../../../../types";
-import { Client, localise } from "../../../client";
+import { Client } from "../../../client";
 import { Guild } from "../../../database/guild";
 import { Rule } from "../../../database/warning";
 import { getShowButton, parseArguments, reply, respond } from "../../../interactions";
@@ -10,29 +10,28 @@ import { CommandTemplate } from "../../command";
 import { show } from "../../parameters";
 
 const command: CommandTemplate = {
-	name: "rule",
+	id: "rule",
 	type: Discord.ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ["VIEW_CHANNEL"],
-	isShowable: true,
 	handle: handleCiteRule,
 	handleAutocomplete: handleCiteRuleAutocomplete,
 	options: [
 		{
-			name: "rule",
+			id: "rule",
 			type: Discord.ApplicationCommandOptionTypes.String,
 			required: true,
 			autocomplete: true,
 		},
 		show,
 	],
+	flags: {
+		isShowable: true,
+	},
 };
 
 const rules: Rule[] = ["behaviour", "quality", "relevance", "suitability", "exclusivity", "adherence"];
 
-async function handleCiteRuleAutocomplete(
-	[client, bot]: [Client, Discord.Bot],
-	interaction: Logos.Interaction,
-): Promise<void> {
+async function handleCiteRuleAutocomplete(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
 		return;
@@ -41,8 +40,8 @@ async function handleCiteRuleAutocomplete(
 	const session = client.database.openSession();
 
 	const guildDocument =
-		client.cache.documents.guilds.get(guildId.toString()) ??
-		(await session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
+		client.documents.guilds.get(guildId.toString()) ??
+		(await session.get<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
 
 	session.dispose();
 
@@ -71,16 +70,16 @@ async function handleCiteRuleAutocomplete(
 		})
 		.filter((choice) => choice.name.toLowerCase().includes(ruleQueryLowercase));
 
-	respond([client, bot], interaction, choices);
+	respond(client, interaction, choices);
 }
 
-async function handleCiteRule([client, bot]: [Client, Discord.Bot], interaction: Logos.Interaction): Promise<void> {
+async function handleCiteRule(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const [{ rule: ruleIndex, show: showParameter }] = parseArguments(interaction.data?.options, {
 		rule: "number",
 		show: "boolean",
 	});
 	if (ruleIndex === undefined) {
-		displayError([client, bot], interaction, { locale: interaction.locale });
+		displayError(client, interaction, { locale: interaction.locale });
 		return;
 	}
 
@@ -89,7 +88,7 @@ async function handleCiteRule([client, bot]: [Client, Discord.Bot], interaction:
 
 	const ruleId = rules.at(ruleIndex);
 	if (ruleId === undefined) {
-		displayError([client, bot], interaction, { locale: interaction.locale });
+		displayError(client, interaction, { locale: interaction.locale });
 		return;
 	}
 
@@ -98,15 +97,15 @@ async function handleCiteRule([client, bot]: [Client, Discord.Bot], interaction:
 		return;
 	}
 
-	const guild = client.cache.guilds.get(guildId);
+	const guild = client.entities.guilds.get(guildId);
 	if (guild === undefined) {
 		return;
 	}
 
 	const strings = {
-		tldr: localise(client, "rules.tldr", locale)(),
-		summary: localise(client, `rules.${ruleId}.summary`, locale)(),
-		content: localise(client, `rules.${ruleId}.content`, locale)(),
+		tldr: client.localise("rules.tldr", locale)(),
+		summary: client.localise(`rules.${ruleId}.summary`, locale)(),
+		content: client.localise(`rules.${ruleId}.content`, locale)(),
 	};
 
 	const showButton = getShowButton(client, interaction, { locale });
@@ -116,7 +115,7 @@ async function handleCiteRule([client, bot]: [Client, Discord.Bot], interaction:
 		: [{ type: Discord.MessageComponentTypes.ActionRow, components: [showButton] }];
 
 	reply(
-		[client, bot],
+		client,
 		interaction,
 		{
 			embeds: [
@@ -142,8 +141,8 @@ function getRuleTitleFormatted(
 	{ locale }: { locale: Locale },
 ): string {
 	const strings = {
-		title: localise(client, `rules.${ruleId}.title`, locale)(),
-		summary: localise(client, `rules.${ruleId}.summary`, locale)(),
+		title: client.localise(`rules.${ruleId}.title`, locale)(),
+		summary: client.localise(`rules.${ruleId}.summary`, locale)(),
 	};
 
 	switch (mode) {
@@ -155,16 +154,16 @@ function getRuleTitleFormatted(
 }
 
 async function displayError(
-	[client, bot]: [Client, Discord.Bot],
+	client: Client,
 	interaction: Logos.Interaction,
 	{ locale }: { locale: Locale },
 ): Promise<void> {
 	const strings = {
-		title: localise(client, "rule.strings.invalid.title", locale)(),
-		description: localise(client, "rule.strings.invalid.description", locale)(),
+		title: client.localise("rule.strings.invalid.title", locale)(),
+		description: client.localise("rule.strings.invalid.description", locale)(),
 	};
 
-	reply([client, bot], interaction, {
+	reply(client, interaction, {
 		embeds: [
 			{
 				title: strings.title,

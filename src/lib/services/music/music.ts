@@ -5,7 +5,7 @@ import constants from "../../../constants/constants";
 import defaults from "../../../defaults";
 import { MentionTypes, mention } from "../../../formatting";
 import * as Logos from "../../../types";
-import { Client, localise } from "../../client";
+import { Client } from "../../client";
 import {
 	Song,
 	SongCollection,
@@ -54,6 +54,7 @@ interface Session {
 
 type Configuration = NonNullable<Guild["features"]["social"]["features"]>["music"];
 
+// TODO(vxern): This needs cleaning up.
 class MusicService extends LocalService {
 	private session: Session | undefined;
 
@@ -219,14 +220,14 @@ class MusicService extends LocalService {
 		return session.player.trackData?.length;
 	}
 
-	constructor([client, bot]: [Client, Discord.Bot], guildId: bigint) {
-		super([client, bot], guildId);
+	constructor(client: Client, guildId: bigint) {
+		super(client, guildId);
 		this.session = undefined;
 	}
 
 	async start(): Promise<void> {
-		this.client.services.music.lavalink.node.on("disconnect", () => this.handleConnectionLost());
-		this.client.services.music.lavalink.node.on("connect", () => this.handleConnectionRestored());
+		this.client.lavalinkService.node.on("disconnect", () => this.handleConnectionLost());
+		this.client.lavalinkService.node.on("connect", () => this.handleConnectionRestored());
 	}
 
 	async stop(): Promise<void> {
@@ -240,7 +241,7 @@ class MusicService extends LocalService {
 		}
 
 		const voiceStates = guild.voiceStates.array().filter((voiceState) => voiceState.channelId === session.channelId);
-		const hasSessionBeenAbandoned = voiceStates.length === 1 && voiceStates.at(0)?.userId === this.bot.id;
+		const hasSessionBeenAbandoned = voiceStates.length === 1 && voiceStates.at(0)?.userId === this.client.bot.id;
 		if (hasSessionBeenAbandoned) {
 			this.handleSessionAbandoned();
 		}
@@ -253,11 +254,11 @@ class MusicService extends LocalService {
 		}
 
 		const strings = {
-			title: localise(this.client, "music.options.stop.strings.stopped.title", this.guildLocale)(),
-			description: localise(this.client, "music.options.stop.strings.stopped.description", this.guildLocale)(),
+			title: this.client.localise("music.options.stop.strings.stopped.title", this.guildLocale)(),
+			description: this.client.localise("music.options.stop.strings.stopped.description", this.guildLocale)(),
 		};
 
-		await this.bot.helpers
+		await this.client.bot.helpers
 			.sendMessage(session.channelId, {
 				embeds: [
 					{
@@ -282,7 +283,7 @@ class MusicService extends LocalService {
 			return undefined;
 		}
 
-		const player = this.client.services.music.lavalink.node.createPlayer(this.guildIdString);
+		const player = this.client.lavalinkService.node.createPlayer(this.guildIdString);
 
 		player.setVolume(configuration.implicitVolume);
 
@@ -331,7 +332,7 @@ class MusicService extends LocalService {
 	}
 
 	handleConnectionLost(): void {
-		this.bot.gateway
+		this.client.bot.gateway
 			.leaveVoiceChannel(this.guildId)
 			.catch(() => this.client.log.warn("Failed to leave voice channel."));
 
@@ -349,14 +350,14 @@ class MusicService extends LocalService {
 		const now = Date.now();
 
 		const strings = {
-			title: localise(this.client, "music.strings.outage.halted.title", guildLocale)(),
+			title: this.client.localise("music.strings.outage.halted.title", guildLocale)(),
 			description: {
-				outage: localise(this.client, "music.strings.outage.halted.description.outage", guildLocale)(),
-				noLoss: localise(this.client, "music.strings.outage.halted.description.noLoss", guildLocale)(),
+				outage: this.client.localise("music.strings.outage.halted.description.outage", guildLocale)(),
+				noLoss: this.client.localise("music.strings.outage.halted.description.noLoss", guildLocale)(),
 			},
 		};
 
-		this.bot.rest
+		this.client.bot.rest
 			.sendMessage(session.channelId, {
 				embeds: [
 					{
@@ -415,11 +416,11 @@ class MusicService extends LocalService {
 		const guildLocale = this.guildLocale;
 
 		const strings = {
-			title: localise(this.client, "music.strings.outage.restored.title", guildLocale)(),
-			description: localise(this.client, "music.strings.outage.restored.description", guildLocale)(),
+			title: this.client.localise("music.strings.outage.restored.title", guildLocale)(),
+			description: this.client.localise("music.strings.outage.restored.description", guildLocale)(),
 		};
 
-		this.bot.rest
+		this.client.bot.rest
 			.sendMessage(newSession.channelId, {
 				embeds: [
 					{
@@ -442,14 +443,14 @@ class MusicService extends LocalService {
 
 		if (session?.flags.isDisconnected) {
 			const strings = {
-				title: localise(this.client, "music.strings.outage.cannotManage.title", locale)(),
+				title: this.client.localise("music.strings.outage.cannotManage.title", locale)(),
 				description: {
-					outage: localise(this.client, "music.strings.outage.cannotManage.description.outage", locale)(),
-					backUpSoon: localise(this.client, "music.strings.outage.cannotManage.description.backUpSoon", locale)(),
+					outage: this.client.localise("music.strings.outage.cannotManage.description.outage", locale)(),
+					backUpSoon: this.client.localise("music.strings.outage.cannotManage.description.backUpSoon", locale)(),
 				},
 			};
 
-			reply([this.client, this.bot], interaction, {
+			reply(this.client, interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -467,14 +468,14 @@ class MusicService extends LocalService {
 
 		if (voiceState === undefined || userChannelId === undefined) {
 			const strings = {
-				title: localise(this.client, "music.strings.notInVc.title", locale)(),
+				title: this.client.localise("music.strings.notInVc.title", locale)(),
 				description: {
-					toManage: localise(this.client, "music.strings.notInVc.description.toManage", locale)(),
-					toCheck: localise(this.client, "music.strings.notInVc.description.toCheck", locale)(),
+					toManage: this.client.localise("music.strings.notInVc.description.toManage", locale)(),
+					toCheck: this.client.localise("music.strings.notInVc.description.toCheck", locale)(),
 				},
 			};
 
-			reply([this.client, this.bot], interaction, {
+			reply(this.client, interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -490,11 +491,11 @@ class MusicService extends LocalService {
 		const [isOccupied, channelId] = [this.isOccupied, this.channelId];
 		if (isOccupied !== undefined && isOccupied && voiceState.channelId !== channelId) {
 			const strings = {
-				title: localise(this.client, "music.options.play.strings.inDifferentVc.title", locale)(),
-				description: localise(this.client, "music.options.play.strings.inDifferentVc.description", locale)(),
+				title: this.client.localise("music.options.play.strings.inDifferentVc.title", locale)(),
+				description: this.client.localise("music.options.play.strings.inDifferentVc.description", locale)(),
 			};
 
-			reply([this.client, this.bot], interaction, {
+			reply(this.client, interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -521,11 +522,11 @@ class MusicService extends LocalService {
 		const isQueueVacant = this.isQueueVacant;
 		if (isQueueVacant !== undefined && !isQueueVacant) {
 			const strings = {
-				title: localise(this.client, "music.options.play.strings.queueFull.title", locale)(),
-				description: localise(this.client, "music.options.play.strings.queueFull.description", locale)(),
+				title: this.client.localise("music.options.play.strings.queueFull.title", locale)(),
+				description: this.client.localise("music.options.play.strings.queueFull.description", locale)(),
 			};
 
-			reply([this.client, this.bot], interaction, {
+			reply(this.client, interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -556,11 +557,11 @@ class MusicService extends LocalService {
 
 		if (!current.managerIds.includes(interaction.user.id)) {
 			const strings = {
-				title: localise(this.client, "music.strings.cannotChange.title", locale)(),
-				description: localise(this.client, "music.strings.cannotChange.description", locale)(),
+				title: this.client.localise("music.strings.cannotChange.title", locale)(),
+				description: this.client.localise("music.strings.cannotChange.description", locale)(),
 			};
 
-			reply([this.client, this.bot], interaction, {
+			reply(this.client, interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -649,9 +650,8 @@ class MusicService extends LocalService {
 
 		if (session.listings.current !== undefined) {
 			const strings = {
-				title: localise(this.client, "music.options.play.strings.queued.title", guildLocale)(),
-				description: localise(
-					this.client,
+				title: this.client.localise("music.options.play.strings.queued.title", guildLocale)(),
+				description: this.client.localise(
 					"music.options.play.strings.queued.description.public",
 					guildLocale,
 				)({
@@ -666,7 +666,7 @@ class MusicService extends LocalService {
 				color: constants.colors.lightGreen,
 			};
 
-			await this.bot.rest
+			await this.client.bot.rest
 				.sendMessage(session.channelId, { embeds: [embed] })
 				.catch(() => this.client.log.warn("Failed to send music feedback message."));
 			return;
@@ -747,9 +747,8 @@ class MusicService extends LocalService {
 
 			const guildLocale = this.guildLocale;
 			const strings = {
-				title: localise(this.client, "music.options.play.strings.failedToLoad.title", guildLocale)(),
-				description: localise(
-					this.client,
+				title: this.client.localise("music.options.play.strings.failedToLoad.title", guildLocale)(),
+				description: this.client.localise(
 					"music.options.play.strings.failedToLoad.description",
 					guildLocale,
 				)({
@@ -757,7 +756,7 @@ class MusicService extends LocalService {
 				}),
 			};
 
-			this.bot.rest
+			this.client.bot.rest
 				.sendMessage(session.channelId, {
 					embeds: [
 						{
@@ -805,9 +804,8 @@ class MusicService extends LocalService {
 
 			const guildLocale = this.guildLocale;
 			const strings = {
-				title: localise(this.client, "music.options.play.strings.failedToPlay.title", guildLocale)(),
-				description: localise(
-					this.client,
+				title: this.client.localise("music.options.play.strings.failedToPlay.title", guildLocale)(),
+				description: this.client.localise(
 					"music.options.play.strings.failedToPlay.description",
 					guildLocale,
 				)({
@@ -815,7 +813,7 @@ class MusicService extends LocalService {
 				}),
 			};
 
-			this.bot.rest
+			this.client.bot.rest
 				.sendMessage(session.channelId, {
 					embeds: [
 						{
@@ -881,25 +879,22 @@ class MusicService extends LocalService {
 
 		const guildLocale = this.guildLocale;
 		const strings = {
-			title: localise(
-				this.client,
+			title: this.client.localise(
 				"music.options.play.strings.nowPlaying.title.nowPlaying",
 				guildLocale,
 			)({
-				listing_type: localise(
-					this.client,
+				listing_type: this.client.localise(
 					localisationsBySongListingType[this.current?.content.type ?? song.type],
 					guildLocale,
 				)(),
 			}),
 			description: {
-				nowPlaying: localise(this.client, "music.options.play.strings.nowPlaying.description.nowPlaying", guildLocale),
+				nowPlaying: this.client.localise("music.options.play.strings.nowPlaying.description.nowPlaying", guildLocale),
 				track:
 					session.listings.current !== undefined &&
 					session.listings.current.content !== undefined &&
 					isCollection(session.listings.current.content)
-						? localise(
-								this.client,
+						? this.client.localise(
 								"music.options.play.strings.nowPlaying.description.track",
 								guildLocale,
 						  )({
@@ -912,7 +907,7 @@ class MusicService extends LocalService {
 		};
 
 		if (session.listings.current !== undefined) {
-			this.bot.rest
+			this.client.bot.rest
 				.sendMessage(session.channelId, {
 					embeds: [
 						{
@@ -1156,10 +1151,9 @@ class MusicService extends LocalService {
 		if (isCollection) {
 			session.flags.loop.collection = !session.flags.loop.collection;
 			return session.flags.loop.collection;
-		} else {
-			session.flags.loop.song = !session.flags.loop.song;
-			return session.flags.loop.song;
 		}
+		session.flags.loop.song = !session.flags.loop.song;
+		return session.flags.loop.song;
 	}
 }
 

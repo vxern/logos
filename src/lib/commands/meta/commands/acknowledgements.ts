@@ -2,25 +2,22 @@ import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import acknowledgements from "../../../../constants/types/acknowledgements";
 import * as Logos from "../../../../types";
-import { Client, localise } from "../../../client";
+import { Client } from "../../../client";
 import { reply } from "../../../interactions";
 import { CommandTemplate } from "../../command";
 
 const command: CommandTemplate = {
-	name: "acknowledgements",
+	id: "acknowledgements",
 	type: Discord.ApplicationCommandTypes.ChatInput,
 	handle: handleDisplayAcknowledgements,
 	defaultMemberPermissions: ["VIEW_CHANNEL"],
 };
 
-async function handleDisplayAcknowledgements(
-	[client, bot]: [Client, Discord.Bot],
-	interaction: Logos.Interaction,
-): Promise<void> {
+async function handleDisplayAcknowledgements(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.locale;
 
 	const strings = {
-		acknowledgements: localise(client, "acknowledgements.strings.acknowledgements", locale)(),
+		acknowledgements: client.localise("acknowledgements.strings.acknowledgements", locale)(),
 	};
 
 	const fields = acknowledgements.map<Discord.CamelizedDiscordEmbedField>((acknowledgement) => {
@@ -33,7 +30,7 @@ async function handleDisplayAcknowledgements(
 		};
 	});
 
-	reply([client, bot], interaction, {
+	reply(client, interaction, {
 		embeds: [
 			{
 				title: strings.acknowledgements,

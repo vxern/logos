@@ -1,20 +1,20 @@
 import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import * as Logos from "../../../../types";
-import { Client, localise } from "../../../client";
+import { Client } from "../../../client";
 import { parseArguments, reply } from "../../../interactions";
 import { isCollection } from "../../../services/music/music";
 import { OptionTemplate } from "../../command";
 import { by, collection, to } from "../../parameters";
 
 const command: OptionTemplate = {
-	name: "skip",
+	id: "skip",
 	type: Discord.ApplicationCommandOptionTypes.SubCommand,
 	handle: handleSkipAction,
 	options: [collection, by, to],
 };
 
-async function handleSkipAction([client, bot]: [Client, Discord.Bot], interaction: Logos.Interaction): Promise<void> {
+async function handleSkipAction(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.guildLocale;
 
 	const [{ collection, by: songsToSkip, to: songToSkipTo }] = parseArguments(interaction.data?.options, {
@@ -34,7 +34,7 @@ async function handleSkipAction([client, bot]: [Client, Discord.Bot], interactio
 		return;
 	}
 
-	const musicService = client.services.music.music.get(guildId);
+	const musicService = client.getMusicService(guildId);
 	if (musicService === undefined) {
 		return;
 	}
@@ -48,13 +48,13 @@ async function handleSkipAction([client, bot]: [Client, Discord.Bot], interactio
 	if (!isOccupied || current === undefined || queue === undefined) {
 		const locale = interaction.locale;
 		const strings = {
-			title: localise(client, "music.strings.notPlaying.title", locale)(),
+			title: client.localise("music.strings.notPlaying.title", locale)(),
 			description: {
-				toManage: localise(client, "music.strings.notPlaying.description.toManage", locale)(),
+				toManage: client.localise("music.strings.notPlaying.description.toManage", locale)(),
 			},
 		};
 
-		reply([client, bot], interaction, {
+		reply(client, interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -70,22 +70,20 @@ async function handleSkipAction([client, bot]: [Client, Discord.Bot], interactio
 		if (current?.content === undefined || !isCollection(current.content)) {
 			const locale = interaction.locale;
 			const strings = {
-				title: localise(client, "music.options.skip.strings.noSongCollection.title", locale)(),
+				title: client.localise("music.options.skip.strings.noSongCollection.title", locale)(),
 				description: {
-					noSongCollection: localise(
-						client,
+					noSongCollection: client.localise(
 						"music.options.skip.strings.noSongCollection.description.noSongCollection",
 						locale,
 					)(),
-					trySongInstead: localise(
-						client,
+					trySongInstead: client.localise(
 						"music.options.skip.strings.noSongCollection.description.trySongInstead",
 						locale,
 					)(),
 				},
 			};
 
-			reply([client, bot], interaction, {
+			reply(client, interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -99,11 +97,11 @@ async function handleSkipAction([client, bot]: [Client, Discord.Bot], interactio
 	} else if (current?.content === undefined) {
 		const locale = interaction.locale;
 		const strings = {
-			title: localise(client, "music.options.skip.strings.noSong.title", locale)(),
-			description: localise(client, "music.options.skip.strings.noSong.description", locale)(),
+			title: client.localise("music.options.skip.strings.noSong.title", locale)(),
+			description: client.localise("music.options.skip.strings.noSong.description", locale)(),
 		};
 
-		reply([client, bot], interaction, {
+		reply(client, interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -119,11 +117,11 @@ async function handleSkipAction([client, bot]: [Client, Discord.Bot], interactio
 	if (songsToSkip !== undefined && songToSkipTo !== undefined) {
 		const locale = interaction.locale;
 		const strings = {
-			title: localise(client, "music.strings.skips.tooManyArguments.title", locale)(),
-			description: localise(client, "music.strings.skips.tooManyArguments.description", locale)(),
+			title: client.localise("music.strings.skips.tooManyArguments.title", locale)(),
+			description: client.localise("music.strings.skips.tooManyArguments.description", locale)(),
 		};
 
-		reply([client, bot], interaction, {
+		reply(client, interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -139,11 +137,11 @@ async function handleSkipAction([client, bot]: [Client, Discord.Bot], interactio
 	if ((songsToSkip !== undefined && songsToSkip <= 0) || (songToSkipTo !== undefined && songToSkipTo <= 0)) {
 		const locale = interaction.locale;
 		const strings = {
-			title: localise(client, "music.strings.skips.invalid.title", locale)(),
-			description: localise(client, "music.strings.skips.invalid.description", locale)(),
+			title: client.localise("music.strings.skips.invalid.title", locale)(),
+			description: client.localise("music.strings.skips.invalid.description", locale)(),
 		};
 
-		reply([client, bot], interaction, {
+		reply(client, interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -160,16 +158,16 @@ async function handleSkipAction([client, bot]: [Client, Discord.Bot], interactio
 	const strings =
 		collection ?? false
 			? {
-					title: localise(client, "music.options.skip.strings.skippedSongCollection.title", locale)(),
-					description: localise(client, "music.options.skip.strings.skippedSongCollection.description", locale)(),
+					title: client.localise("music.options.skip.strings.skippedSongCollection.title", locale)(),
+					description: client.localise("music.options.skip.strings.skippedSongCollection.description", locale)(),
 			  }
 			: {
-					title: localise(client, "music.options.skip.strings.skippedSong.title", locale)(),
-					description: localise(client, "music.options.skip.strings.skippedSong.description", locale)(),
+					title: client.localise("music.options.skip.strings.skippedSong.title", locale)(),
+					description: client.localise("music.options.skip.strings.skippedSong.description", locale)(),
 			  };
 
 	reply(
-		[client, bot],
+		client,
 		interaction,
 		{
 			embeds: [

@@ -3,7 +3,7 @@ import constants from "../../../../../constants/constants";
 import { Locale } from "../../../../../constants/languages";
 import { timestamp } from "../../../../../formatting";
 import * as Logos from "../../../../../types";
-import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../../client";
+import { Client } from "../../../../client";
 import { User } from "../../../../database/user";
 import { Warning } from "../../../../database/warning";
 import { parseArguments, reply } from "../../../../interactions";
@@ -12,17 +12,14 @@ import { getRuleTitleFormatted, rules } from "../../../moderation/commands/rule"
 import { user } from "../../../parameters";
 
 const option: OptionTemplate = {
-	name: "warnings",
+	id: "warnings",
 	type: Discord.ApplicationCommandOptionTypes.SubCommand,
 	handle: handleDisplayWarnings,
 	handleAutocomplete: handleDisplayWarningsAutocomplete,
 	options: [{ ...user, required: false }],
 };
 
-async function handleDisplayWarningsAutocomplete(
-	[client, bot]: [Client, Discord.Bot],
-	interaction: Logos.Interaction,
-): Promise<void> {
+async function handleDisplayWarningsAutocomplete(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const [{ user }] = parseArguments(interaction.data?.options, {});
 	if (user === undefined) {
 		return;
@@ -35,19 +32,16 @@ async function handleDisplayWarningsAutocomplete(
 
 	const isModerator = permissions.has("MODERATE_MEMBERS");
 
-	autocompleteMembers(
-		[client, bot],
-		interaction,
-		user,
-		// Stops normal members from viewing other people's warnings.
-		{ restrictToSelf: !isModerator },
-	);
+	client.autocompleteMembers(interaction, {
+		identifier: user,
+		options: {
+			// Stops normal members from viewing other people's warnings.
+			restrictToSelf: !isModerator,
+		},
+	});
 }
 
-async function handleDisplayWarnings(
-	[client, bot]: [Client, Discord.Bot],
-	interaction: Logos.Interaction,
-): Promise<void> {
+async function handleDisplayWarnings(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.locale;
 
 	const [{ user }] = parseArguments(interaction.data?.options, {});
@@ -59,12 +53,14 @@ async function handleDisplayWarnings(
 
 	const isModerator = permissions.has("MODERATE_MEMBERS");
 
-	const member = resolveInteractionToMember(
-		[client, bot],
+	const member = client.resolveInteractionToMember(
 		interaction,
-		user ?? interaction.user.id.toString(),
 		{
-			restrictToSelf: !isModerator,
+			identifier: user ?? interaction.user.id.toString(),
+			options: {
+				// Stops normal members from viewing other people's warnings.
+				restrictToSelf: !isModerator,
+			},
 		},
 		{ locale },
 	);
@@ -77,8 +73,8 @@ async function handleDisplayWarnings(
 	let session = client.database.openSession();
 
 	const userDocument =
-		client.cache.documents.users.get(member.id.toString()) ??
-		(await session.load<User>(`users/${member.id}`).then((value) => value ?? undefined)) ??
+		client.documents.users.get(member.id.toString()) ??
+		(await session.get<User>(`users/${member.id}`).then((value) => value ?? undefined)) ??
 		(await (async () => {
 			const userDocument = {
 				...({
@@ -88,7 +84,7 @@ async function handleDisplayWarnings(
 				} satisfies User),
 				"@metadata": { "@collection": "Users" },
 			};
-			await session.store(userDocument);
+			await session.set(userDocument);
 			await session.saveChanges();
 
 			return userDocument as User;
@@ -97,13 +93,13 @@ async function handleDisplayWarnings(
 	session.dispose();
 
 	if (userDocument === undefined) {
-		displayError([client, bot], interaction, { locale });
+		displayError(client, interaction, { locale });
 		return;
 	}
 
 	session = client.database.openSession();
 
-	const warningDocumentsCached = client.cache.documents.warningsByTarget.get(member.id.toString());
+	const warningDocumentsCached = client.documents.warningsByTarget.get(member.id.toString());
 	const warningDocuments =
 		warningDocumentsCached !== undefined
 			? Array.from(warningDocumentsCached.values())
@@ -118,28 +114,28 @@ async function handleDisplayWarnings(
 								document,
 							]),
 						);
-						client.cache.documents.warningsByTarget.set(member.id.toString(), map);
+						client.documents.warningsByTarget.set(member.id.toString(), map);
 						return documents;
 					});
 
 	session.dispose();
 
-	reply([client, bot], interaction, {
+	reply(client, interaction, {
 		embeds: [getWarningPage(client, warningDocuments, isSelf, { locale })],
 	});
 }
 
 async function displayError(
-	[client, bot]: [Client, Discord.Bot],
+	client: Client,
 	interaction: Logos.Interaction,
 	{ locale }: { locale: Locale },
 ): Promise<void> {
 	const strings = {
-		title: localise(client, "list.options.warnings.strings.failed.title", locale)(),
-		description: localise(client, "list.options.warnings.strings.failed.description", locale)(),
+		title: client.localise("list.options.warnings.strings.failed.title", locale)(),
+		description: client.localise("list.options.warnings.strings.failed.description", locale)(),
 	};
 
-	reply([client, bot], interaction, {
+	reply(client, interaction, {
 		embeds: [
 			{
 				title: strings.title,
@@ -159,19 +155,8 @@ function getWarningPage(
 	if (warnings.length === 0) {
 		if (isSelf) {
 			const strings = {
-				title: localise(client, "list.options.warnings.strings.noActiveWarnings.title", locale)(),
-				description: localise(client, "list.options.warnings.strings.noActiveWarnings.description.self", locale)(),
-			};
-
-			return {
-				title: strings.title,
-				description: strings.description,
-				color: constants.colors.blue,
-			};
-		} else {
-			const strings = {
-				title: localise(client, "list.options.warnings.strings.noActiveWarnings.title", locale)(),
-				description: localise(client, "list.options.warnings.strings.noActiveWarnings.description.other", locale)(),
+				title: client.localise("list.options.warnings.strings.noActiveWarnings.title", locale)(),
+				description: client.localise("list.options.warnings.strings.noActiveWarnings.description.self", locale)(),
 			};
 
 			return {
@@ -180,11 +165,21 @@ function getWarningPage(
 				color: constants.colors.blue,
 			};
 		}
+		const strings = {
+			title: client.localise("list.options.warnings.strings.noActiveWarnings.title", locale)(),
+			description: client.localise("list.options.warnings.strings.noActiveWarnings.description.other", locale)(),
+		};
+
+		return {
+			title: strings.title,
+			description: strings.description,
+			color: constants.colors.blue,
+		};
 	}
 
 	const strings = {
-		title: localise(client, "list.options.warnings.strings.warnings.title", locale)(),
-		warning: localise(client, "list.options.warnings.strings.warnings.description.warning", locale),
+		title: client.localise("list.options.warnings.strings.warnings.title", locale)(),
+		warning: client.localise("list.options.warnings.strings.warnings.description.warning", locale),
 	};
 
 	return {

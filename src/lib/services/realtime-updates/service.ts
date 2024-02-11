@@ -1,12 +1,11 @@
-import * as Discord from "@discordeno/bot";
 import * as ravendb from "ravendb";
-import { Client, handleGuildCreate, handleGuildDelete } from "../../client";
 import { Guild } from "../../database/guild";
 import diagnostics from "../../diagnostics";
 import { GlobalService } from "../service";
 
 type DocumentChangeHandler = (data: ravendb.DocumentChange) => Promise<void>;
 
+// TODO(vxern): This definitely can be improved or somehow extended to other objects.
 class RealtimeUpdateService extends GlobalService {
 	changes?: ravendb.IDatabaseChanges;
 	streamSubscription?: ravendb.IChangesObservable<ravendb.DocumentChange>;
@@ -16,10 +15,6 @@ class RealtimeUpdateService extends GlobalService {
 
 	isHandlingUpdate = false;
 	readonly handlerQueue: (() => Promise<void>)[] = [];
-
-	constructor([client, bot]: [Client, Discord.Bot]) {
-		super([client, bot]);
-	}
 
 	async start(): Promise<void> {
 		this.client.log.info("Streaming updates to guild documents...");
@@ -71,7 +66,7 @@ class RealtimeUpdateService extends GlobalService {
 			return;
 		}
 
-		const guild = this.client.cache.guilds.get(BigInt(guildId));
+		const guild = this.client.entities.guilds.get(BigInt(guildId));
 		if (guild === undefined) {
 			return;
 		}
@@ -80,7 +75,7 @@ class RealtimeUpdateService extends GlobalService {
 
 		const session = this.client.database.openSession();
 
-		const oldGuildDocument = await session.load<Guild>(data.id).then((value) => value ?? undefined);
+		const oldGuildDocument = await session.get<Guild>(data.id).then((value) => value ?? undefined);
 
 		if (oldGuildDocument !== undefined) {
 			await session.advanced.refresh(oldGuildDocument);
@@ -92,10 +87,9 @@ class RealtimeUpdateService extends GlobalService {
 			return;
 		}
 
-		this.client.cache.documents.guilds.set(oldGuildDocument.guildId, oldGuildDocument);
+		this.client.documents.guilds.set(oldGuildDocument.guildId, oldGuildDocument);
 
-		await handleGuildDelete(this.client, guild.id);
-		await handleGuildCreate([this.client, this.bot], guild, { isUpdate: true });
+		await this.client.reloadGuild(guild.id);
 
 		const nextHandler = this.handlerQueue.shift();
 		if (nextHandler === undefined) {

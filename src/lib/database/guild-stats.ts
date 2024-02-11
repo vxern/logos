@@ -1,5 +1,6 @@
 import { Locale } from "../../constants/languages";
 
+// TODO(vxern): Improve.
 interface GuildStats {
 	id: string;
 

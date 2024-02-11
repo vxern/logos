@@ -1,6 +1,6 @@
 import * as Discord from "@discordeno/bot";
 import Hash from "object-hash";
-import { Client } from "../../client";
+import { Client, ServiceStore } from "../../client";
 import { Guild } from "../../database/guild";
 import diagnostics from "../../diagnostics";
 import { getAllMessages, getGuildIconURLFormatted } from "../../utils";
@@ -34,7 +34,7 @@ const configurationLocators: ConfigurationLocators = {
 	welcome: (guildDocument) => guildDocument.features.information.features?.notices.features?.welcome,
 };
 
-type NoticeTypes = keyof Client["services"]["notices"];
+type NoticeTypes = keyof ServiceStore["local"]["notices"];
 
 abstract class NoticeService<NoticeType extends NoticeTypes> extends LocalService {
 	private noticeData: NoticeData | undefined;
@@ -67,8 +67,8 @@ abstract class NoticeService<NoticeType extends NoticeTypes> extends LocalServic
 		return channelId;
 	}
 
-	constructor([client, bot]: [Client, Discord.Bot], guildId: bigint, { type }: { type: NoticeType }) {
-		super([client, bot], guildId);
+	constructor(client: Client, guildId: bigint, { type }: { type: NoticeType }) {
+		super(client, guildId);
 		this.noticeData = undefined;
 		this._configuration = configurationLocators[type];
 	}
@@ -91,7 +91,7 @@ abstract class NoticeService<NoticeType extends NoticeTypes> extends LocalServic
 
 		const expectedHash = NoticeService.hash(expectedContents);
 
-		const noticesAll = (await getAllMessages([this.client, this.bot], channelId)) ?? [];
+		const noticesAll = (await getAllMessages(this.client, channelId)) ?? [];
 		if (noticesAll.length > 1) {
 			while (noticesAll.length !== 0) {
 				const notice = noticesAll.pop();
@@ -99,7 +99,7 @@ abstract class NoticeService<NoticeType extends NoticeTypes> extends LocalServic
 					return;
 				}
 
-				await this.bot.rest.deleteMessage(channelId, notice.id).catch(() => {
+				await this.client.bot.rest.deleteMessage(channelId, notice.id).catch(() => {
 					this.client.log.warn("Failed to delete notice.");
 				});
 			}
@@ -126,7 +126,7 @@ abstract class NoticeService<NoticeType extends NoticeTypes> extends LocalServic
 
 			const hash = contents.embeds?.at(-1)?.footer?.iconUrl?.split("&hash=").at(-1);
 			if (hash === undefined || hash !== expectedHash) {
-				await this.bot.rest.deleteMessage(channelId, notice.id).catch(() => {
+				await this.client.bot.rest.deleteMessage(channelId, notice.id).catch(() => {
 					this.client.log.warn("Failed to delete notice.");
 				});
 
@@ -186,7 +186,7 @@ abstract class NoticeService<NoticeType extends NoticeTypes> extends LocalServic
 		}
 
 		// Delete the message and allow the bot to handle the deletion.
-		this.bot.rest
+		this.client.bot.rest
 			.deleteMessage(message.channelId, message.id)
 			.catch(() =>
 				this.client.log.warn(
@@ -215,7 +215,7 @@ abstract class NoticeService<NoticeType extends NoticeTypes> extends LocalServic
 
 		lastEmbed.footer = { text: guild.name, iconUrl: `${getGuildIconURLFormatted(guild)}&hash=${hash}` };
 
-		const message = await this.bot.rest.sendMessage(channelId, contents).catch(() => {
+		const message = await this.client.bot.rest.sendMessage(channelId, contents).catch(() => {
 			this.client.log.warn(`Failed to send message to ${diagnostics.display.channel(channelId)}.`);
 			return undefined;
 		});

@@ -4,7 +4,7 @@ import { Locale } from "../../../../constants/languages";
 import defaults from "../../../../defaults";
 import { trim } from "../../../../formatting";
 import * as Logos from "../../../../types";
-import { Client, localise } from "../../../client";
+import { Client } from "../../../client";
 import { timeStructToMilliseconds } from "../../../database/guild";
 import { Guild } from "../../../database/guild";
 import { Suggestion } from "../../../database/suggestion";
@@ -22,7 +22,7 @@ import { verifyIsWithinLimits } from "../../../utils";
 import { CommandTemplate } from "../../command";
 
 const command: CommandTemplate = {
-	name: "suggestion",
+	id: "suggestion",
 	type: Discord.ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ["VIEW_CHANNEL"],
 	handle: handleMakeSuggestion,
@@ -30,10 +30,7 @@ const command: CommandTemplate = {
 
 type SuggestionError = "failure";
 
-async function handleMakeSuggestion(
-	[client, bot]: [Client, Discord.Bot],
-	interaction: Logos.Interaction,
-): Promise<void> {
+async function handleMakeSuggestion(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.locale;
 
 	const guildId = interaction.guildId;
@@ -44,8 +41,8 @@ async function handleMakeSuggestion(
 	let session = client.database.openSession();
 
 	const guildDocument =
-		client.cache.documents.guilds.get(guildId.toString()) ??
-		(await session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
+		client.documents.guilds.get(guildId.toString()) ??
+		(await session.get<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
 
 	session.dispose();
 
@@ -58,7 +55,7 @@ async function handleMakeSuggestion(
 		return;
 	}
 
-	const guild = client.cache.guilds.get(guildId);
+	const guild = client.entities.guilds.get(guildId);
 	if (guild === undefined) {
 		return;
 	}
@@ -71,8 +68,8 @@ async function handleMakeSuggestion(
 	session = client.database.openSession();
 
 	const userDocument =
-		client.cache.documents.users.get(interaction.user.id.toString()) ??
-		(await session.load<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined)) ??
+		client.documents.users.get(interaction.user.id.toString()) ??
+		(await session.get<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined)) ??
 		(await (async () => {
 			const userDocument = {
 				...({
@@ -82,7 +79,7 @@ async function handleMakeSuggestion(
 				} satisfies User),
 				"@metadata": { "@collection": "Users" },
 			};
-			await session.store(userDocument);
+			await session.set(userDocument);
 			await session.saveChanges();
 
 			return userDocument as User;
@@ -95,7 +92,7 @@ async function handleMakeSuggestion(
 	}
 
 	const compositeIdPartial = `${guildId}/${interaction.user.id}`;
-	const suggestionDocuments = Array.from(client.cache.documents.suggestions.entries())
+	const suggestionDocuments = Array.from(client.documents.suggestions.entries())
 		.filter(([key, _]) => key.startsWith(compositeIdPartial))
 		.map(([_, value]) => value);
 	const intervalMilliseconds = timeStructToMilliseconds(
@@ -109,11 +106,11 @@ async function handleMakeSuggestion(
 		)
 	) {
 		const strings = {
-			title: localise(client, "suggestion.strings.tooMany.title", locale)(),
-			description: localise(client, "suggestion.strings.tooMany.description", locale)(),
+			title: client.localise("suggestion.strings.tooMany.title", locale)(),
+			description: client.localise("suggestion.strings.tooMany.description", locale)(),
 		};
 
-		reply([client, bot], interaction, {
+		reply(client, interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -125,15 +122,15 @@ async function handleMakeSuggestion(
 		return;
 	}
 
-	const suggestionService = client.services.prompts.suggestions.get(guild.id);
+	const suggestionService = client.getPromptService(guild.id, { type: "suggestions" });
 	if (suggestionService === undefined) {
 		return;
 	}
 
-	createModalComposer<Suggestion["answers"]>([client, bot], interaction, {
+	createModalComposer<Suggestion["answers"]>(client, interaction, {
 		modal: generateSuggestionModal(client, { locale }),
 		onSubmit: async (submission, answers) => {
-			await postponeReply([client, bot], submission);
+			await postponeReply(client, submission);
 
 			const session = client.database.openSession();
 
@@ -149,18 +146,18 @@ async function handleMakeSuggestion(
 				} satisfies Suggestion),
 				"@metadata": { "@collection": "Suggestions" },
 			};
-			await session.store(suggestionDocument);
+			await session.set(suggestionDocument);
 			await session.saveChanges();
 			session.dispose();
 
 			if (configuration.journaling) {
-				const journallingService = client.services.journalling.get(guild.id);
+				const journallingService = client.getJournallingService(guild.id);
 				journallingService?.log("suggestionSend", { args: [member, suggestionDocument] });
 			}
 
 			const userId = BigInt(userDocument.account.id);
 
-			const user = client.cache.users.get(userId);
+			const user = client.entities.users.get(userId);
 			if (user === undefined) {
 				return "failure";
 			}
@@ -176,11 +173,11 @@ async function handleMakeSuggestion(
 			suggestionService.registerHandler(compositeId);
 
 			const strings = {
-				title: localise(client, "suggestion.strings.sent.title", locale)(),
-				description: localise(client, "suggestion.strings.sent.description", locale)(),
+				title: client.localise("suggestion.strings.sent.title", locale)(),
+				description: client.localise("suggestion.strings.sent.description", locale)(),
 			};
 
-			editReply([client, bot], submission, {
+			editReply(client, submission, {
 				embeds: [
 					{
 						title: strings.title,
@@ -193,54 +190,54 @@ async function handleMakeSuggestion(
 			return true;
 		},
 		onInvalid: async (submission, error) =>
-			handleSubmittedInvalidSuggestion([client, bot], submission, error as SuggestionError | undefined, { locale }),
+			handleSubmittedInvalidSuggestion(client, submission, error as SuggestionError | undefined, { locale }),
 	});
 }
 
 async function handleSubmittedInvalidSuggestion(
-	[client, bot]: [Client, Discord.Bot],
+	client: Client,
 	submission: Discord.Interaction,
 	error: SuggestionError | undefined,
 	{ locale }: { locale: Locale },
 ): Promise<Discord.Interaction | undefined> {
 	return new Promise((resolve) => {
-		const continueId = createInteractionCollector([client, bot], {
+		const continueId = createInteractionCollector(client, {
 			type: Discord.InteractionTypes.MessageComponent,
 			onCollect: async (selection) => {
-				deleteReply([client, bot], submission);
+				deleteReply(client, submission);
 				resolve(selection);
 			},
 		});
 
-		const cancelId = createInteractionCollector([client, bot], {
+		const cancelId = createInteractionCollector(client, {
 			type: Discord.InteractionTypes.MessageComponent,
 			onCollect: async (cancelSelection) => {
-				const returnId = createInteractionCollector([client, bot], {
+				const returnId = createInteractionCollector(client, {
 					type: Discord.InteractionTypes.MessageComponent,
 					onCollect: async (returnSelection) => {
-						deleteReply([client, bot], submission);
-						deleteReply([client, bot], cancelSelection);
+						deleteReply(client, submission);
+						deleteReply(client, cancelSelection);
 						resolve(returnSelection);
 					},
 				});
 
-				const leaveId = createInteractionCollector([client, bot], {
+				const leaveId = createInteractionCollector(client, {
 					type: Discord.InteractionTypes.MessageComponent,
 					onCollect: async (_) => {
-						deleteReply([client, bot], submission);
-						deleteReply([client, bot], cancelSelection);
+						deleteReply(client, submission);
+						deleteReply(client, cancelSelection);
 						resolve(undefined);
 					},
 				});
 
 				const strings = {
-					title: localise(client, "suggestion.strings.sureToCancel.title", locale)(),
-					description: localise(client, "suggestion.strings.sureToCancel.description", locale)(),
-					stay: localise(client, "prompts.stay", locale)(),
-					leave: localise(client, "prompts.leave", locale)(),
+					title: client.localise("suggestion.strings.sureToCancel.title", locale)(),
+					description: client.localise("suggestion.strings.sureToCancel.description", locale)(),
+					stay: client.localise("prompts.stay", locale)(),
+					leave: client.localise("prompts.leave", locale)(),
 				};
 
-				reply([client, bot], cancelSelection, {
+				reply(client, cancelSelection, {
 					embeds: [
 						{
 							title: strings.title,
@@ -275,11 +272,11 @@ async function handleSubmittedInvalidSuggestion(
 		switch (error) {
 			default: {
 				const strings = {
-					title: localise(client, "suggestion.strings.failed", locale)(),
-					description: localise(client, "suggestion.strings.failed", locale)(),
+					title: client.localise("suggestion.strings.failed", locale)(),
+					description: client.localise("suggestion.strings.failed", locale)(),
 				};
 
-				editReply([client, bot], submission, {
+				editReply(client, submission, {
 					embeds: [
 						{
 							title: strings.title,
@@ -294,11 +291,11 @@ async function handleSubmittedInvalidSuggestion(
 		}
 
 		const strings = {
-			continue: localise(client, "prompts.continue", locale)(),
-			cancel: localise(client, "prompts.cancel", locale)(),
+			continue: client.localise("prompts.continue", locale)(),
+			cancel: client.localise("prompts.cancel", locale)(),
 		};
 
-		editReply([client, bot], submission, {
+		editReply(client, submission, {
 			embeds: [embed],
 			components: [
 				{
@@ -325,8 +322,8 @@ async function handleSubmittedInvalidSuggestion(
 
 function generateSuggestionModal(client: Client, { locale }: { locale: Locale }): Modal<Suggestion["answers"]> {
 	const strings = {
-		title: localise(client, "suggestion.title", locale)(),
-		suggestion: localise(client, "suggestion.fields.suggestion", locale)(),
+		title: client.localise("suggestion.title", locale)(),
+		suggestion: client.localise("suggestion.fields.suggestion", locale)(),
 	};
 
 	return {

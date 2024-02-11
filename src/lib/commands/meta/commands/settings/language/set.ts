@@ -8,19 +8,19 @@ import languages, {
 import localisations from "../../../../../../constants/localisations";
 import { trim } from "../../../../../../formatting";
 import * as Logos from "../../../../../../types";
-import { Client, localise } from "../../../../../client";
+import { Client } from "../../../../../client";
 import { User } from "../../../../../database/user";
 import { editReply, parseArguments, postponeReply, reply, respond } from "../../../../../interactions";
 import { OptionTemplate } from "../../../../command";
 
 const command: OptionTemplate = {
-	name: "set",
+	id: "set",
 	type: Discord.ApplicationCommandOptionTypes.SubCommand,
 	handle: handleSetLanguage,
 	handleAutocomplete: handleSetLanguageAutocomplete,
 	options: [
 		{
-			name: "language",
+			id: "language",
 			type: Discord.ApplicationCommandOptionTypes.String,
 			required: true,
 			autocomplete: true,
@@ -28,10 +28,7 @@ const command: OptionTemplate = {
 	],
 };
 
-async function handleSetLanguageAutocomplete(
-	[client, bot]: [Client, Discord.Bot],
-	interaction: Logos.Interaction,
-): Promise<void> {
+async function handleSetLanguageAutocomplete(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.locale;
 
 	const guildId = interaction.guildId;
@@ -45,10 +42,10 @@ async function handleSetLanguageAutocomplete(
 	const languageQueryTrimmed = languageQueryRaw.trim();
 	if (languageQueryTrimmed.length === 0) {
 		const strings = {
-			autocomplete: localise(client, "autocomplete.language", locale)(),
+			autocomplete: client.localise("autocomplete.language", locale)(),
 		};
 
-		respond([client, bot], interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
+		respond(client, interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
 		return;
 	}
 
@@ -56,38 +53,38 @@ async function handleSetLanguageAutocomplete(
 	const choices = languages.languages.localisation
 		.map((language) => {
 			return {
-				name: localise(client, localisations.languages[language], locale)(),
+				name: client.localise(localisations.languages[language], locale)(),
 				value: language,
 			};
 		})
 		.filter((choice) => choice.name.toLowerCase().includes(languageQueryLowercase));
 
-	respond([client, bot], interaction, choices);
+	respond(client, interaction, choices);
 }
 
-async function handleSetLanguage([client, bot]: [Client, Discord.Bot], interaction: Logos.Interaction): Promise<void> {
+async function handleSetLanguage(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const localeBefore = interaction.locale;
 
 	const [{ language: languageOrUndefined }] = parseArguments(interaction.data?.options, {});
 	if (languageOrUndefined === undefined) {
-		displayError([client, bot], interaction, { locale: interaction.locale });
+		displayError(client, interaction, { locale: interaction.locale });
 		return;
 	}
 
 	if (!isLocalisationLanguage(languageOrUndefined)) {
-		displayError([client, bot], interaction, { locale: interaction.locale });
+		displayError(client, interaction, { locale: interaction.locale });
 		return;
 	}
 
 	const language = languageOrUndefined;
 
-	await postponeReply([client, bot], interaction);
+	await postponeReply(client, interaction);
 
 	const session = client.database.openSession();
 
 	const userDocument =
-		client.cache.documents.users.get(interaction.user.id.toString()) ??
-		(await session.load<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined));
+		client.documents.users.get(interaction.user.id.toString()) ??
+		(await session.get<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined));
 
 	if (userDocument === undefined) {
 		return;
@@ -95,17 +92,16 @@ async function handleSetLanguage([client, bot]: [Client, Discord.Bot], interacti
 
 	if (userDocument.account.language === language) {
 		const strings = {
-			title: localise(client, "settings.strings.alreadySet.title", localeBefore)(),
-			description: localise(
-				client,
+			title: client.localise("settings.strings.alreadySet.title", localeBefore)(),
+			description: client.localise(
 				"settings.strings.alreadySet.description",
 				localeBefore,
 			)({
-				language: localise(client, localisations.languages[language], localeBefore)(),
+				language: client.localise(localisations.languages[language], localeBefore)(),
 			}),
 		};
 
-		editReply([client, bot], interaction, {
+		editReply(client, interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -119,24 +115,23 @@ async function handleSetLanguage([client, bot]: [Client, Discord.Bot], interacti
 	}
 
 	userDocument.account.language = language;
-	await session.store(userDocument);
+	await session.set(userDocument);
 	await session.saveChanges();
 	session.dispose();
 
 	const localeAfter = getLocaleByLocalisationLanguage(language);
 
 	const strings = {
-		title: localise(client, "settings.strings.languageUpdated.title", localeAfter)(),
-		description: localise(
-			client,
+		title: client.localise("settings.strings.languageUpdated.title", localeAfter)(),
+		description: client.localise(
 			"settings.strings.languageUpdated.description",
 			localeAfter,
 		)({
-			language: localise(client, localisations.languages[language], localeAfter)(),
+			language: client.localise(localisations.languages[language], localeAfter)(),
 		}),
 	};
 
-	editReply([client, bot], interaction, {
+	editReply(client, interaction, {
 		embeds: [
 			{
 				title: strings.title,
@@ -148,16 +143,16 @@ async function handleSetLanguage([client, bot]: [Client, Discord.Bot], interacti
 }
 
 async function displayError(
-	[client, bot]: [Client, Discord.Bot],
+	client: Client,
 	interaction: Logos.Interaction,
 	{ locale }: { locale: Locale },
 ): Promise<void> {
 	const strings = {
-		title: localise(client, "settings.strings.invalid.title", locale)(),
-		description: localise(client, "settings.strings.invalid.description", locale)(),
+		title: client.localise("settings.strings.invalid.title", locale)(),
+		description: client.localise("settings.strings.invalid.description", locale)(),
 	};
 
-	reply([client, bot], interaction, {
+	reply(client, interaction, {
 		embeds: [
 			{
 				title: strings.title,

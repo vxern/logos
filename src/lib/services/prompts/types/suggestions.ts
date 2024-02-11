@@ -1,7 +1,7 @@
 import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import * as Logos from "../../../../types";
-import { Client, localise } from "../../../client";
+import { Client } from "../../../client";
 import { Suggestion } from "../../../database/suggestion";
 import { User } from "../../../database/user";
 import diagnostics from "../../../diagnostics";
@@ -11,14 +11,14 @@ import { PromptService } from "../service";
 type InteractionData = [documentId: string, isResolved: string];
 
 class SuggestionService extends PromptService<"suggestions", Suggestion, InteractionData> {
-	constructor([client, bot]: [Client, Discord.Bot], guildId: bigint) {
-		super([client, bot], guildId, { type: "suggestions", deleteMode: "delete" });
+	constructor(client: Client, guildId: bigint) {
+		super(client, guildId, { type: "suggestions", deleteMode: "delete" });
 	}
 
 	getAllDocuments(): Map<string, Suggestion> {
 		const suggestions = new Map<string, Suggestion>();
 
-		for (const [compositeId, suggestionDocument] of this.client.cache.documents.suggestions) {
+		for (const [compositeId, suggestionDocument] of this.client.documents.suggestions) {
 			if (suggestionDocument.guildId !== this.guildIdString) {
 				continue;
 			}
@@ -33,8 +33,8 @@ class SuggestionService extends PromptService<"suggestions", Suggestion, Interac
 		const session = this.client.database.openSession();
 
 		const userDocument =
-			this.client.cache.documents.users.get(suggestionDocument.authorId) ??
-			session.load<User>(`users/${suggestionDocument.authorId}`).then((value) => value ?? undefined);
+			this.client.documents.users.get(suggestionDocument.authorId) ??
+			session.get<User>(`users/${suggestionDocument.authorId}`).then((value) => value ?? undefined);
 
 		session.dispose();
 
@@ -49,9 +49,9 @@ class SuggestionService extends PromptService<"suggestions", Suggestion, Interac
 
 		const guildLocale = this.guildLocale;
 		const strings = {
-			markResolved: localise(this.client, "markResolved", guildLocale)(),
-			markUnresolved: localise(this.client, "markUnresolved", guildLocale)(),
-			remove: localise(this.client, "remove", guildLocale)(),
+			markResolved: this.client.localise("markResolved", guildLocale)(),
+			markUnresolved: this.client.localise("markUnresolved", guildLocale)(),
+			remove: this.client.localise("remove", guildLocale)(),
 		};
 
 		return {
@@ -135,11 +135,11 @@ class SuggestionService extends PromptService<"suggestions", Suggestion, Interac
 
 		if (isResolved && suggestionDocument.isResolved) {
 			const strings = {
-				title: localise(this.client, "alreadyMarkedResolved.title", locale)(),
-				description: localise(this.client, "alreadyMarkedResolved.description", locale)(),
+				title: this.client.localise("alreadyMarkedResolved.title", locale)(),
+				description: this.client.localise("alreadyMarkedResolved.description", locale)(),
 			};
 
-			reply([this.client, this.bot], interaction, {
+			reply(this.client, interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -153,11 +153,11 @@ class SuggestionService extends PromptService<"suggestions", Suggestion, Interac
 
 		if (!(isResolved || suggestionDocument.isResolved)) {
 			const strings = {
-				title: localise(this.client, "alreadyMarkedUnresolved.title", locale)(),
-				description: localise(this.client, "alreadyMarkedUnresolved.description", locale)(),
+				title: this.client.localise("alreadyMarkedUnresolved.title", locale)(),
+				description: this.client.localise("alreadyMarkedUnresolved.description", locale)(),
 			};
 
-			reply([this.client, this.bot], interaction, {
+			reply(this.client, interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -173,7 +173,7 @@ class SuggestionService extends PromptService<"suggestions", Suggestion, Interac
 
 		suggestionDocument.isResolved = isResolved;
 
-		await session.store(suggestionDocument);
+		await session.set(suggestionDocument);
 		await session.saveChanges();
 
 		session.dispose();

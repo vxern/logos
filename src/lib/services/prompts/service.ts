@@ -1,7 +1,7 @@
 import * as Discord from "@discordeno/bot";
 import constants from "../../../constants/constants";
 import * as Logos from "../../../types";
-import { Client, localise } from "../../client";
+import { Client, ServiceStore } from "../../client";
 import { Guild } from "../../database/guild";
 import { User } from "../../database/user";
 import diagnostics from "../../diagnostics";
@@ -39,12 +39,14 @@ const customIds: CustomIDs = {
 	tickets: constants.components.tickets,
 };
 
-type PromptTypes = keyof Client["services"]["prompts"];
+type PromptTypes = keyof ServiceStore["local"]["prompts"];
 
 type DeleteMode = "delete" | "close" | "none";
 
+// TODO(vxern): Use hashing and registering old prompts.
 abstract class PromptService<
 	PromptType extends PromptTypes,
+	// TODO(vxern): This is a hack, get the fuck rid of this.
 	DataType extends { id: string },
 	InteractionData extends [compositeId: string, ...data: string[]],
 > extends LocalService {
@@ -96,12 +98,8 @@ abstract class PromptService<
 		return channelId;
 	}
 
-	constructor(
-		[client, bot]: [Client, Discord.Bot],
-		guildId: bigint,
-		{ type, deleteMode }: { type: PromptType; deleteMode: DeleteMode },
-	) {
-		super([client, bot], guildId);
+	constructor(client: Client, guildId: bigint, { type, deleteMode }: { type: PromptType; deleteMode: DeleteMode }) {
+		super(client, guildId);
 		this.type = type;
 		this.deleteMode = deleteMode;
 		this.customId = customIds[type];
@@ -126,7 +124,7 @@ abstract class PromptService<
 			return;
 		}
 
-		const promptsAll = (await getAllMessages([this.client, this.bot], channelId)) ?? [];
+		const promptsAll = (await getAllMessages(this.client, channelId)) ?? [];
 		const [validPrompts, invalidPrompts] = this.filterPrompts(promptsAll);
 
 		const prompts = new Map(validPrompts);
@@ -143,7 +141,7 @@ abstract class PromptService<
 			if (prompt !== undefined) {
 				prompts.delete(compositeId);
 			} else {
-				const user = this.client.cache.users.get(userId);
+				const user = this.client.entities.users.get(userId);
 				if (user === undefined) {
 					continue;
 				}
@@ -164,12 +162,12 @@ abstract class PromptService<
 		const expiredPrompts = Array.from(prompts.values());
 
 		for (const prompt of [...invalidPrompts, ...expiredPrompts]) {
-			await this.bot.rest.deleteMessage(prompt.channelId, prompt.id).catch(() => {
+			await this.client.bot.rest.deleteMessage(prompt.channelId, prompt.id).catch(() => {
 				this.client.log.warn("Failed to delete invalid or expired prompt.");
 			});
 		}
 
-		createInteractionCollector([this.client, this.bot], {
+		createInteractionCollector(this.client, {
 			type: Discord.InteractionTypes.MessageComponent,
 			customId: this.customId,
 			doesNotExpire: true,
@@ -198,7 +196,7 @@ abstract class PromptService<
 			return;
 		}
 
-		createInteractionCollector([this.client, this.bot], {
+		createInteractionCollector(this.client, {
 			type: Discord.InteractionTypes.MessageComponent,
 			customId: `${constants.components.removePrompt}/${this.customId}/${this.guildId}`,
 			doesNotExpire: true,
@@ -254,11 +252,11 @@ abstract class PromptService<
 
 					if (this.deleteMode === "delete") {
 						const strings = {
-							title: localise(this.client, "cannotRemovePrompt.title", locale)(),
-							description: localise(this.client, "cannotRemovePrompt.description", locale)(),
+							title: this.client.localise("cannotRemovePrompt.title", locale)(),
+							description: this.client.localise("cannotRemovePrompt.description", locale)(),
 						};
 
-						reply([this.client, this.bot], selection, {
+						reply(this.client, selection, {
 							embeds: [
 								{
 									title: strings.title,
@@ -269,11 +267,11 @@ abstract class PromptService<
 						});
 					} else if (this.deleteMode === "close") {
 						const strings = {
-							title: localise(this.client, "cannotCloseIssue.title", locale)(),
-							description: localise(this.client, "cannotCloseIssue.description", locale)(),
+							title: this.client.localise("cannotCloseIssue.title", locale)(),
+							description: this.client.localise("cannotCloseIssue.description", locale)(),
 						};
 
-						reply([this.client, this.bot], selection, {
+						reply(this.client, selection, {
 							embeds: [
 								{
 									title: strings.title,
@@ -287,7 +285,7 @@ abstract class PromptService<
 					return;
 				}
 
-				acknowledge([this.client, this.bot], selection);
+				acknowledge(this.client, selection);
 
 				const [_, compositeId] = decodeId(customId);
 				if (compositeId === undefined) {
@@ -330,7 +328,7 @@ abstract class PromptService<
 			return;
 		}
 
-		const user = this.client.cache.users.get(userId);
+		const user = this.client.entities.users.get(userId);
 		if (user === undefined) {
 			return;
 		}
@@ -363,7 +361,7 @@ abstract class PromptService<
 		}
 
 		// Delete the message and allow the bot to handle the deletion.
-		this.bot.rest
+		this.client.bot.rest
 			.deleteMessage(message.channelId, message.id)
 			.catch(() =>
 				this.client.log.warn(
@@ -421,7 +419,7 @@ abstract class PromptService<
 			return undefined;
 		}
 
-		const message = await this.bot.rest.sendMessage(channelId, content).catch(() => {
+		const message = await this.client.bot.rest.sendMessage(channelId, content).catch(() => {
 			this.client.log.warn(`Failed to send message to ${diagnostics.display.channel(channelId)}.`);
 			return undefined;
 		});
@@ -481,7 +479,7 @@ abstract class PromptService<
 				this.documentByPromptId.set(prompt.id, updatedDocument);
 			}
 
-			this.bot.rest.deleteMessage(prompt.channelId, prompt.id).catch(() => {
+			this.client.bot.rest.deleteMessage(prompt.channelId, prompt.id).catch(() => {
 				this.client.log.warn("Failed to delete prompt.");
 			});
 		});
@@ -523,7 +521,7 @@ abstract class PromptService<
 
 		const prompt = this.promptByCompositeId.get(compositeId);
 		if (prompt !== undefined) {
-			this.bot.rest
+			this.client.bot.rest
 				.deleteMessage(prompt.channelId, prompt.id)
 				.catch(() => this.client.log.warn("Failed to delete prompt after deleting document."));
 			this.unregisterPrompt(prompt, compositeId);

@@ -1,3 +1,4 @@
+// TODO(vxern): Make the whole thing nullable.
 interface Suggestion {
 	id: string;
 	guildId: string;

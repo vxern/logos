@@ -113,6 +113,7 @@ abstract class DictionaryAdapter<DataType = unknown> {
 			client.log.error(exception);
 			return undefined;
 		}
+
 		if (entries.length === 0) {
 			return undefined;
 		}

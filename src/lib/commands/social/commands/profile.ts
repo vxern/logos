@@ -4,7 +4,7 @@ import roles from "./profile/roles";
 import view from "./profile/view";
 
 const command: CommandTemplate = {
-	name: "profile",
+	id: "profile",
 	type: Discord.ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ["VIEW_CHANNEL"],
 	options: [view, roles],

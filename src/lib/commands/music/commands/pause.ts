@@ -1,21 +1,18 @@
 import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import * as Logos from "../../../../types";
-import { Client, localise } from "../../../client";
+import { Client } from "../../../client";
 import { reply } from "../../../interactions";
 import { OptionTemplate } from "../../command";
 import { handleResumePlayback } from "./resume";
 
 const command: OptionTemplate = {
-	name: "pause",
+	id: "pause",
 	type: Discord.ApplicationCommandOptionTypes.SubCommand,
 	handle: handlePausePlayback,
 };
 
-async function handlePausePlayback(
-	[client, bot]: [Client, Discord.Bot],
-	interaction: Logos.Interaction,
-): Promise<void> {
+async function handlePausePlayback(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.guildLocale;
 
 	const guildId = interaction.guildId;
@@ -23,7 +20,7 @@ async function handlePausePlayback(
 		return;
 	}
 
-	const musicService = client.services.music.music.get(guildId);
+	const musicService = client.getMusicService(guildId);
 	if (musicService === undefined) {
 		return;
 	}
@@ -37,13 +34,13 @@ async function handlePausePlayback(
 	if (!isOccupied || current === undefined) {
 		const locale = interaction.locale;
 		const strings = {
-			title: localise(client, "music.strings.notPlaying.title", locale)(),
+			title: client.localise("music.strings.notPlaying.title", locale)(),
 			description: {
-				toManage: localise(client, "music.strings.notPlaying.description.toManage", locale)(),
+				toManage: client.localise("music.strings.notPlaying.description.toManage", locale)(),
 			},
 		};
 
-		reply([client, bot], interaction, {
+		reply(client, interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -60,19 +57,19 @@ async function handlePausePlayback(
 	}
 
 	if (isPaused) {
-		handleResumePlayback([client, bot], interaction);
+		handleResumePlayback(client, interaction);
 		return;
 	}
 
 	musicService.pause();
 
 	const strings = {
-		title: localise(client, "music.options.pause.strings.paused.title", locale)(),
-		description: localise(client, "music.options.pause.strings.paused.description", locale)(),
+		title: client.localise("music.options.pause.strings.paused.title", locale)(),
+		description: client.localise("music.options.pause.strings.paused.description", locale)(),
 	};
 
 	reply(
-		[client, bot],
+		client,
 		interaction,
 		{
 			embeds: [

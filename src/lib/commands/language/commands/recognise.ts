@@ -4,7 +4,7 @@ import { DetectionLanguage, Locale } from "../../../../constants/languages";
 import localisations from "../../../../constants/localisations";
 import { list } from "../../../../formatting";
 import * as Logos from "../../../../types";
-import { Client, localise } from "../../../client";
+import { Client } from "../../../client";
 import { editReply, parseArguments, postponeReply, reply } from "../../../interactions";
 import { asStream } from "../../../utils";
 import { CommandTemplate } from "../../command";
@@ -12,30 +12,27 @@ import { getAdapters } from "../detectors/adapters";
 
 const commands = {
 	chatInput: {
-		name: "recognize",
+		id: "recognize",
 		type: Discord.ApplicationCommandTypes.ChatInput,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
 		handle: handleRecogniseLanguageChatInput,
 		options: [
 			{
-				name: "text",
+				id: "text",
 				type: Discord.ApplicationCommandOptionTypes.String,
 				required: true,
 			},
 		],
 	},
 	message: {
-		name: "recognize.message",
+		id: "recognize.message",
 		type: Discord.ApplicationCommandTypes.Message,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
 		handle: handleRecogniseLanguageMessage,
 	},
 } satisfies Record<string, CommandTemplate>;
 
-async function handleRecogniseLanguageChatInput(
-	[client, bot]: [Client, Discord.Bot],
-	interaction: Logos.Interaction,
-): Promise<void> {
+async function handleRecogniseLanguageChatInput(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const [{ text }] = parseArguments(interaction.data?.options, {});
 	if (text === undefined) {
 		return;
@@ -43,13 +40,10 @@ async function handleRecogniseLanguageChatInput(
 
 	const locale = interaction.locale;
 
-	handleRecogniseLanguage([client, bot], interaction, text, { isMessage: false }, { locale });
+	handleRecogniseLanguage(client, interaction, text, { isMessage: false }, { locale });
 }
 
-async function handleRecogniseLanguageMessage(
-	[client, bot]: [Client, Discord.Bot],
-	interaction: Logos.Interaction,
-): Promise<void> {
+async function handleRecogniseLanguageMessage(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.locale;
 
 	const message = interaction.data?.resolved?.messages?.array()?.at(0);
@@ -60,11 +54,11 @@ async function handleRecogniseLanguageMessage(
 	const hasEmbeds = message.embeds !== undefined && message.embeds.length !== 0;
 	if (hasEmbeds) {
 		const strings = {
-			title: localise(client, "recognize.strings.cannotUse.title", locale)(),
-			description: localise(client, "recognize.strings.cannotUse.description", locale)(),
+			title: client.localise("recognize.strings.cannotUse.title", locale)(),
+			description: client.localise("recognize.strings.cannotUse.description", locale)(),
 		};
 
-		reply([client, bot], interaction, {
+		reply(client, interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -78,11 +72,11 @@ async function handleRecogniseLanguageMessage(
 
 	const text = message.content;
 
-	handleRecogniseLanguage([client, bot], interaction, text, { isMessage: true }, { locale });
+	handleRecogniseLanguage(client, interaction, text, { isMessage: true }, { locale });
 }
 
 async function handleRecogniseLanguage(
-	[client, bot]: [Client, Discord.Bot],
+	client: Client,
 	interaction: Logos.Interaction,
 	text: string,
 	{ isMessage }: { isMessage: boolean },
@@ -91,11 +85,11 @@ async function handleRecogniseLanguage(
 	const isTextEmpty = text.trim().length === 0;
 	if (isTextEmpty) {
 		const strings = {
-			title: localise(client, "recognize.strings.textEmpty.title", locale)(),
-			description: localise(client, "recognize.strings.textEmpty.description", locale)(),
+			title: client.localise("recognize.strings.textEmpty.title", locale)(),
+			description: client.localise("recognize.strings.textEmpty.description", locale)(),
 		};
 
-		reply([client, bot], interaction, {
+		reply(client, interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -107,20 +101,20 @@ async function handleRecogniseLanguage(
 		return;
 	}
 
-	await postponeReply([client, bot], interaction);
+	await postponeReply(client, interaction);
 
 	const detectedLanguages = await detectLanguages(text);
 
 	if (detectedLanguages.likely.length === 0 && detectedLanguages.possible.length === 0) {
 		const strings = {
-			title: localise(client, "recognize.strings.unknown.title", locale)(),
+			title: client.localise("recognize.strings.unknown.title", locale)(),
 			description: {
-				text: localise(client, "recognize.strings.unknown.description.text", locale)(),
-				message: localise(client, "recognize.strings.unknown.description.message", locale)(),
+				text: client.localise("recognize.strings.unknown.description.text", locale)(),
+				message: client.localise("recognize.strings.unknown.description.message", locale)(),
 			},
 		};
 
-		editReply([client, bot], interaction, {
+		editReply(client, interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -141,11 +135,10 @@ async function handleRecogniseLanguage(
 		}
 
 		const strings = {
-			description: localise(
-				client,
+			description: client.localise(
 				"recognize.strings.fields.likelyMatches.description.single",
 				locale,
-			)({ language: localise(client, localisations.languages[language], locale)() }),
+			)({ language: client.localise(localisations.languages[language], locale)() }),
 		};
 
 		embeds.push({
@@ -153,7 +146,7 @@ async function handleRecogniseLanguage(
 			color: constants.colors.blue,
 		});
 
-		editReply([client, bot], interaction, { embeds });
+		editReply(client, interaction, { embeds });
 		return;
 	}
 
@@ -170,12 +163,11 @@ async function handleRecogniseLanguage(
 				throw "StateError: Likely detected language unexpectedly undefined.";
 			}
 
-			const languageNameLocalised = localise(client, localisations.languages[language], locale)();
+			const languageNameLocalised = client.localise(localisations.languages[language], locale)();
 
 			const strings = {
-				title: localise(client, "recognize.strings.fields.likelyMatches.title", locale)(),
-				description: localise(
-					client,
+				title: client.localise("recognize.strings.fields.likelyMatches.title", locale)(),
+				description: client.localise(
 					"recognize.strings.fields.likelyMatches.description.single",
 					locale,
 				)({ language: `**${languageNameLocalised}**` }),
@@ -188,13 +180,13 @@ async function handleRecogniseLanguage(
 			});
 		} else {
 			const languageNamesLocalised = detectedLanguages.likely.map((language) =>
-				localise(client, localisations.languages[language], locale)(),
+				client.localise(localisations.languages[language], locale)(),
 			);
 			const languageNamesFormatted = list(languageNamesLocalised.map((languageName) => `***${languageName}***`));
 
 			const strings = {
-				title: localise(client, "recognize.strings.fields.likelyMatches.title", locale)(),
-				description: localise(client, "recognize.strings.fields.likelyMatches.description.multiple", locale)(),
+				title: client.localise("recognize.strings.fields.likelyMatches.title", locale)(),
+				description: client.localise("recognize.strings.fields.likelyMatches.description.multiple", locale)(),
 			};
 
 			fields.push({
@@ -210,12 +202,11 @@ async function handleRecogniseLanguage(
 				throw "StateError: Possible detected language unexpectedly undefined.";
 			}
 
-			const languageNameLocalised = localise(client, localisations.languages[language], locale)();
+			const languageNameLocalised = client.localise(localisations.languages[language], locale)();
 
 			const strings = {
-				title: localise(client, "recognize.strings.fields.possibleMatches.title", locale)(),
-				description: localise(
-					client,
+				title: client.localise("recognize.strings.fields.possibleMatches.title", locale)(),
+				description: client.localise(
 					"recognize.strings.fields.possibleMatches.description.single",
 					locale,
 				)({ language: `**${languageNameLocalised}**` }),
@@ -228,13 +219,13 @@ async function handleRecogniseLanguage(
 			});
 		} else {
 			const languageNamesLocalised = detectedLanguages.possible.map((language) =>
-				localise(client, localisations.languages[language], locale)(),
+				client.localise(localisations.languages[language], locale)(),
 			);
 			const languageNamesFormatted = list(languageNamesLocalised.map((languageName) => `***${languageName}***`));
 
 			const strings = {
-				title: localise(client, "recognize.strings.fields.possibleMatches.title", locale)(),
-				description: localise(client, "recognize.strings.fields.possibleMatches.description.multiple", locale)(),
+				title: client.localise("recognize.strings.fields.possibleMatches.title", locale)(),
+				description: client.localise("recognize.strings.fields.possibleMatches.description.multiple", locale)(),
 			};
 
 			fields.push({
@@ -249,7 +240,7 @@ async function handleRecogniseLanguage(
 		embeds.push(embed);
 	}
 
-	editReply([client, bot], interaction, { embeds });
+	editReply(client, interaction, { embeds });
 }
 
 async function detectLanguages(text: string): Promise<DetectedLanguagesSorted> {

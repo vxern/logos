@@ -52,7 +52,9 @@ class DynamicVoiceChannelService extends LocalService {
 
 				if (a.position === undefined) {
 					return b.position ?? -1;
-				} else if (b.position === undefined) {
+				}
+
+				if (b.position === undefined) {
 					return a.position ?? 1;
 				}
 
@@ -144,7 +146,7 @@ class DynamicVoiceChannelService extends LocalService {
 				.slice(Math.min((minimumVoiceChannels === 0 ? 0 : minimumVoiceChannels - 1) - surplusVacantChannels, 0))
 				.map((channel) => channel.id);
 			for (const channelId of channelIdsToDelete) {
-				await this.bot.rest.deleteChannel(channelId);
+				await this.client.bot.rest.deleteChannel(channelId);
 			}
 		}
 	}
@@ -217,7 +219,7 @@ class DynamicVoiceChannelService extends LocalService {
 			return;
 		}
 
-		this.bot.rest
+		this.client.bot.rest
 			.createChannel(this.guildId, {
 				name: parent.channel.name,
 				type: Discord.ChannelTypes.GuildVoice,
@@ -271,7 +273,7 @@ class DynamicVoiceChannelService extends LocalService {
 			return;
 		}
 
-		this.bot.rest
+		this.client.bot.rest
 			.deleteChannel(lastVacantChannelId)
 			.catch(() =>
 				this.client.log.warn(`Failed to delete voice channel on ${diagnostics.display.guild(this.guildId)}.`),

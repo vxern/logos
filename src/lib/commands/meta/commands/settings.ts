@@ -4,7 +4,7 @@ import language from "./settings/language";
 import view from "./settings/view";
 
 const command: CommandTemplate = {
-	name: "settings",
+	id: "settings",
 	type: Discord.ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ["VIEW_CHANNEL"],
 	options: [language, view],

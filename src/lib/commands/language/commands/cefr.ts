@@ -2,7 +2,7 @@ import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import { Locale } from "../../../../constants/languages";
 import * as Logos from "../../../../types";
-import { Client, localise } from "../../../client";
+import { Client } from "../../../client";
 import { CefrConfiguration } from "../../../database/guild";
 import { Guild } from "../../../database/guild";
 import {
@@ -19,12 +19,14 @@ import { CommandTemplate } from "../../command";
 import { show } from "../../parameters";
 
 const command: CommandTemplate = {
-	name: "cefr",
+	id: "cefr",
 	type: Discord.ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ["VIEW_CHANNEL"],
-	isShowable: true,
 	handle: handleDisplayCefrGuide,
 	options: [show],
+	flags: {
+		isShowable: true,
+	},
 };
 
 type Bracket = "a" | "b" | "c";
@@ -38,10 +40,7 @@ interface Data {
 type BracketButtonMetadata = [bracket: Bracket];
 type TabButtonMetadata = [tab: Tab];
 
-async function handleDisplayCefrGuide(
-	[client, bot]: [Client, Discord.Bot],
-	interaction: Logos.Interaction,
-): Promise<void> {
+async function handleDisplayCefrGuide(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const [{ show: showParameter }] = parseArguments(interaction.data?.options, { show: "boolean" });
 
 	const show = interaction.show ?? showParameter ?? false;
@@ -55,8 +54,8 @@ async function handleDisplayCefrGuide(
 	const session = client.database.openSession();
 
 	const guildDocument =
-		client.cache.documents.guilds.get(guildId.toString()) ??
-		(await session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
+		client.documents.guilds.get(guildId.toString()) ??
+		(await session.get<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
 
 	session.dispose();
 
@@ -79,7 +78,7 @@ async function handleDisplayCefrGuide(
 	const data: Data = { bracket: "a", tab: "guide" };
 
 	const getEmbed = (): Discord.CamelizedDiscordEmbed => {
-		let tab;
+		let tab: Record<Bracket, Discord.CamelizedDiscordEmbed>;
 		switch (data.tab) {
 			case "guide": {
 				tab = guide;
@@ -101,13 +100,13 @@ async function handleDisplayCefrGuide(
 
 	const strings = {
 		brackets: {
-			a: localise(client, "cefr.strings.brackets.a", locale)(),
-			b: localise(client, "cefr.strings.brackets.b", locale)(),
-			c: localise(client, "cefr.strings.brackets.c", locale)(),
+			a: client.localise("cefr.strings.brackets.a", locale)(),
+			b: client.localise("cefr.strings.brackets.b", locale)(),
+			c: client.localise("cefr.strings.brackets.c", locale)(),
 		},
 		tabs: {
-			guide: localise(client, "cefr.strings.tabs.guide", locale)(),
-			examples: localise(client, "cefr.strings.tabs.examples", locale)(),
+			guide: client.localise("cefr.strings.tabs.guide", locale)(),
+			examples: client.localise("cefr.strings.tabs.examples", locale)(),
 		},
 	};
 
@@ -194,14 +193,14 @@ async function handleDisplayCefrGuide(
 	};
 
 	const refreshView = async () => {
-		editReply([client, bot], interaction, { embeds: [getEmbed()], components: getButtons() });
+		editReply(client, interaction, { embeds: [getEmbed()], components: getButtons() });
 	};
 
-	const bracketButtonId = createInteractionCollector([client, bot], {
+	const bracketButtonId = createInteractionCollector(client, {
 		type: Discord.InteractionTypes.MessageComponent,
 		userId: interaction.user.id,
 		onCollect: async (selection) => {
-			acknowledge([client, bot], selection);
+			acknowledge(client, selection);
 
 			const selectionCustomId = selection.data?.customId;
 			if (selectionCustomId === undefined) {
@@ -225,11 +224,11 @@ async function handleDisplayCefrGuide(
 		},
 	});
 
-	const tabButtonId = createInteractionCollector([client, bot], {
+	const tabButtonId = createInteractionCollector(client, {
 		type: Discord.InteractionTypes.MessageComponent,
 		userId: interaction.user.id,
 		onCollect: async (selection) => {
-			acknowledge([client, bot], selection);
+			acknowledge(client, selection);
 
 			const selectionCustomId = selection.data?.customId;
 			if (selectionCustomId === undefined) {
@@ -253,7 +252,7 @@ async function handleDisplayCefrGuide(
 		},
 	});
 
-	reply([client, bot], interaction, { embeds: [getEmbed()], components: getButtons() }, { visible: show });
+	reply(client, interaction, { embeds: [getEmbed()], components: getButtons() }, { visible: show });
 }
 
 function getBracketGuide(
@@ -263,42 +262,42 @@ function getBracketGuide(
 ): Record<Bracket, Discord.CamelizedDiscordEmbed> {
 	const strings = {
 		brackets: {
-			a: localise(client, "cefr.strings.brackets.a", locale)(),
-			b: localise(client, "cefr.strings.brackets.b", locale)(),
-			c: localise(client, "cefr.strings.brackets.c", locale)(),
+			a: client.localise("cefr.strings.brackets.a", locale)(),
+			b: client.localise("cefr.strings.brackets.b", locale)(),
+			c: client.localise("cefr.strings.brackets.c", locale)(),
 		},
 		levels: {
 			a0: {
-				title: localise(client, "cefr.strings.levels.a0.title", locale)(),
-				description: localise(client, "cefr.strings.levels.a0.description", locale)(),
+				title: client.localise("cefr.strings.levels.a0.title", locale)(),
+				description: client.localise("cefr.strings.levels.a0.description", locale)(),
 			},
 			a1: {
-				title: localise(client, "cefr.strings.levels.a1.title", locale)(),
-				description: localise(client, "cefr.strings.levels.a1.description", locale)(),
+				title: client.localise("cefr.strings.levels.a1.title", locale)(),
+				description: client.localise("cefr.strings.levels.a1.description", locale)(),
 			},
 			a2: {
-				title: localise(client, "cefr.strings.levels.a2.title", locale)(),
-				description: localise(client, "cefr.strings.levels.a2.description", locale)(),
+				title: client.localise("cefr.strings.levels.a2.title", locale)(),
+				description: client.localise("cefr.strings.levels.a2.description", locale)(),
 			},
 			b1: {
-				title: localise(client, "cefr.strings.levels.b1.title", locale)(),
-				description: localise(client, "cefr.strings.levels.b1.description", locale)(),
+				title: client.localise("cefr.strings.levels.b1.title", locale)(),
+				description: client.localise("cefr.strings.levels.b1.description", locale)(),
 			},
 			b2: {
-				title: localise(client, "cefr.strings.levels.b2.title", locale)(),
-				description: localise(client, "cefr.strings.levels.b2.description", locale)(),
+				title: client.localise("cefr.strings.levels.b2.title", locale)(),
+				description: client.localise("cefr.strings.levels.b2.description", locale)(),
 			},
 			c1: {
-				title: localise(client, "cefr.strings.levels.c1.title", locale)(),
-				description: localise(client, "cefr.strings.levels.c1.description", locale)(),
+				title: client.localise("cefr.strings.levels.c1.title", locale)(),
+				description: client.localise("cefr.strings.levels.c1.description", locale)(),
 			},
 			c2: {
-				title: localise(client, "cefr.strings.levels.c2.title", locale)(),
-				description: localise(client, "cefr.strings.levels.c2.description", locale)(),
+				title: client.localise("cefr.strings.levels.c2.title", locale)(),
+				description: client.localise("cefr.strings.levels.c2.description", locale)(),
 			},
 			c3: {
-				title: localise(client, "cefr.strings.levels.c3.title", locale)(),
-				description: localise(client, "cefr.strings.levels.c3.description", locale)(),
+				title: client.localise("cefr.strings.levels.c3.title", locale)(),
+				description: client.localise("cefr.strings.levels.c3.description", locale)(),
 			},
 		},
 	};
@@ -373,34 +372,34 @@ function getBracketExamples(
 ): Record<Bracket, Discord.CamelizedDiscordEmbed> {
 	const strings = {
 		brackets: {
-			a: localise(client, "cefr.strings.brackets.a", locale)(),
-			b: localise(client, "cefr.strings.brackets.b", locale)(),
-			c: localise(client, "cefr.strings.brackets.c", locale)(),
+			a: client.localise("cefr.strings.brackets.a", locale)(),
+			b: client.localise("cefr.strings.brackets.b", locale)(),
+			c: client.localise("cefr.strings.brackets.c", locale)(),
 		},
 		levels: {
 			a0: {
-				title: localise(client, "cefr.strings.levels.a0.title", locale)(),
+				title: client.localise("cefr.strings.levels.a0.title", locale)(),
 			},
 			a1: {
-				title: localise(client, "cefr.strings.levels.a1.title", locale)(),
+				title: client.localise("cefr.strings.levels.a1.title", locale)(),
 			},
 			a2: {
-				title: localise(client, "cefr.strings.levels.a2.title", locale)(),
+				title: client.localise("cefr.strings.levels.a2.title", locale)(),
 			},
 			b1: {
-				title: localise(client, "cefr.strings.levels.b1.title", locale)(),
+				title: client.localise("cefr.strings.levels.b1.title", locale)(),
 			},
 			b2: {
-				title: localise(client, "cefr.strings.levels.b2.title", locale)(),
+				title: client.localise("cefr.strings.levels.b2.title", locale)(),
 			},
 			c1: {
-				title: localise(client, "cefr.strings.levels.c1.title", locale)(),
+				title: client.localise("cefr.strings.levels.c1.title", locale)(),
 			},
 			c2: {
-				title: localise(client, "cefr.strings.levels.c2.title", locale)(),
+				title: client.localise("cefr.strings.levels.c2.title", locale)(),
 			},
 			c3: {
-				title: localise(client, "cefr.strings.levels.c3.title", locale)(),
+				title: client.localise("cefr.strings.levels.c3.title", locale)(),
 			},
 		},
 	};

@@ -2,25 +2,22 @@ import * as Discord from "@discordeno/bot";
 import constants from "../../../../../constants/constants";
 import { list } from "../../../../../formatting";
 import * as Logos from "../../../../../types";
-import { Client, localise } from "../../../../client";
+import { Client } from "../../../../client";
 import { reply } from "../../../../interactions";
 import { OptionTemplate } from "../../../command";
 
 const option: OptionTemplate = {
-	name: "bot",
+	id: "bot",
 	type: Discord.ApplicationCommandOptionTypes.SubCommand,
 	handle: handleDisplayBotInformation,
 };
 
-async function handleDisplayBotInformation(
-	[client, bot]: [Client, Discord.Bot],
-	interaction: Logos.Interaction,
-): Promise<void> {
+async function handleDisplayBotInformation(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.locale;
 
 	const botUser =
-		client.cache.users.get(bot.id) ??
-		(await bot.rest.getUser(bot.id).catch(() => {
+		client.entities.users.get(client.bot.id) ??
+		(await client.bot.rest.getUser(client.bot.id).catch(() => {
 			client.log.warn("Failed to get bot user.");
 			return undefined;
 		}));
@@ -30,23 +27,23 @@ async function handleDisplayBotInformation(
 
 	const strings = {
 		concept: {
-			title: localise(client, "information.options.bot.strings.concept.title", locale)(),
-			description: localise(client, "information.options.bot.strings.concept.description", locale)(),
+			title: client.localise("information.options.bot.strings.concept.title", locale)(),
+			description: client.localise("information.options.bot.strings.concept.description", locale)(),
 		},
 		function: {
-			title: localise(client, "information.options.bot.strings.function.title", locale)(),
-			description: localise(client, "information.options.bot.strings.function.description", locale)(),
+			title: client.localise("information.options.bot.strings.function.title", locale)(),
+			description: client.localise("information.options.bot.strings.function.description", locale)(),
 			features: {
-				definitions: localise(client, "information.options.bot.strings.function.features.definitions", locale)(),
-				translations: localise(client, "information.options.bot.strings.function.features.translations", locale)(),
-				games: localise(client, "information.options.bot.strings.function.features.games", locale)(),
-				messages: localise(client, "information.options.bot.strings.function.features.messages", locale)(),
-				guides: localise(client, "information.options.bot.strings.function.features.guides", locale)(),
+				definitions: client.localise("information.options.bot.strings.function.features.definitions", locale)(),
+				translations: client.localise("information.options.bot.strings.function.features.translations", locale)(),
+				games: client.localise("information.options.bot.strings.function.features.games", locale)(),
+				messages: client.localise("information.options.bot.strings.function.features.messages", locale)(),
+				guides: client.localise("information.options.bot.strings.function.features.guides", locale)(),
 			},
 		},
 		languages: {
-			title: localise(client, "information.options.bot.strings.languages.title", locale)(),
-			description: localise(client, "information.options.bot.strings.languages.description", locale)(),
+			title: client.localise("information.options.bot.strings.languages.title", locale)(),
+			description: client.localise("information.options.bot.strings.languages.description", locale)(),
 		},
 	};
 
@@ -58,11 +55,11 @@ async function handleDisplayBotInformation(
 		`${constants.symbols.bot.features.guides} ${strings.function.features.guides}`,
 	]);
 
-	reply([client, bot], interaction, {
+	reply(client, interaction, {
 		embeds: [
 			{
 				author: {
-					iconUrl: Discord.avatarUrl(bot.id, botUser.discriminator, {
+					iconUrl: Discord.avatarUrl(client.bot.id, botUser.discriminator, {
 						avatar: botUser.avatar ?? undefined,
 						format: "png",
 					}),

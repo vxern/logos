@@ -17,8 +17,8 @@ import stop from "./commands/stop";
 import unskip from "./commands/unskip";
 import volume from "./commands/volume";
 
-const music: CommandTemplate = {
-	name: "music",
+const command: CommandTemplate = {
+	id: "music",
 	type: Discord.ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ["VIEW_CHANNEL"],
 	options: [
@@ -41,4 +41,4 @@ const music: CommandTemplate = {
 	],
 };
 
-export { music };
+export { command as music };

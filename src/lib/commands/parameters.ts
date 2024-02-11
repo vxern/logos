@@ -2,55 +2,55 @@ import * as Discord from "@discordeno/bot";
 import { OptionTemplate } from "./command";
 
 const user: OptionTemplate = {
-	name: "user",
+	id: "user",
 	type: Discord.ApplicationCommandOptionTypes.String,
 	required: true,
 	autocomplete: true,
 };
 
 const show: OptionTemplate = {
-	name: "show",
+	id: "show",
 	type: Discord.ApplicationCommandOptionTypes.Boolean,
 };
 
 const duration: OptionTemplate = {
-	name: "duration",
+	id: "duration",
 	type: Discord.ApplicationCommandOptionTypes.String,
 	required: true,
 	autocomplete: true,
 };
 
 const reason: OptionTemplate = {
-	name: "reason",
+	id: "reason",
 	type: Discord.ApplicationCommandOptionTypes.String,
 	required: true,
 };
 
 const query: OptionTemplate = {
-	name: "query",
+	id: "query",
 	type: Discord.ApplicationCommandOptionTypes.String,
 	required: true,
 };
 
 const timestamp: OptionTemplate = {
-	name: "timestamp",
+	id: "timestamp",
 	type: Discord.ApplicationCommandOptionTypes.String,
 	required: true,
 	autocomplete: true,
 };
 
 const collection: OptionTemplate = {
-	name: "collection",
+	id: "collection",
 	type: Discord.ApplicationCommandOptionTypes.Boolean,
 };
 
 const by: OptionTemplate = {
-	name: "by",
+	id: "by",
 	type: Discord.ApplicationCommandOptionTypes.Integer,
 };
 
 const to: OptionTemplate = {
-	name: "to",
+	id: "to",
 	type: Discord.ApplicationCommandOptionTypes.Integer,
 };
 

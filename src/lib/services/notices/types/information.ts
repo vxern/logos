@@ -1,12 +1,11 @@
-import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
-import { Client, localise } from "../../../client";
+import { Client } from "../../../client";
 import { rules } from "../../../commands/moderation/commands/rule";
 import { HashableMessageContents, NoticeService } from "../service";
 
 class InformationNoticeService extends NoticeService<"information"> {
-	constructor([client, bot]: [Client, Discord.Bot], guildId: bigint) {
-		super([client, bot], guildId, { type: "information" });
+	constructor(client: Client, guildId: bigint) {
+		super(client, guildId, { type: "information" });
 	}
 
 	generateNotice(): HashableMessageContents | undefined {
@@ -22,10 +21,10 @@ class InformationNoticeService extends NoticeService<"information"> {
 		const guildLocale = this.guildLocale;
 		const informationFields = rules.map((rule, index) => {
 			const strings = {
-				title: localise(this.client, `rules.${rule}.title`, guildLocale)(),
-				tldr: localise(this.client, "rules.tldr", guildLocale)(),
-				summary: localise(this.client, `rules.${rule}.summary`, guildLocale)(),
-				content: localise(this.client, `rules.${rule}.content`, guildLocale)(),
+				title: this.client.localise(`rules.${rule}.title`, guildLocale)(),
+				tldr: this.client.localise("rules.tldr", guildLocale)(),
+				summary: this.client.localise(`rules.${rule}.summary`, guildLocale)(),
+				content: this.client.localise(`rules.${rule}.content`, guildLocale)(),
 			};
 
 			return {
@@ -38,7 +37,7 @@ class InformationNoticeService extends NoticeService<"information"> {
 		});
 
 		const strings = {
-			invite: localise(this.client, "notices.notices.information.invite", guildLocale)(),
+			invite: this.client.localise("notices.notices.information.invite", guildLocale)(),
 		};
 
 		return {

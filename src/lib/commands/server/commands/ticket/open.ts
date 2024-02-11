@@ -4,7 +4,7 @@ import { Locale } from "../../../../../constants/languages";
 import defaults from "../../../../../defaults";
 import { MentionTypes, mention, trim } from "../../../../../formatting";
 import * as Logos from "../../../../../types";
-import { Client, localise } from "../../../../client";
+import { Client } from "../../../../client";
 import { Guild, timeStructToMilliseconds } from "../../../../database/guild";
 import { Ticket, TicketType } from "../../../../database/ticket";
 import { User } from "../../../../database/user";
@@ -22,14 +22,14 @@ import { verifyIsWithinLimits } from "../../../../utils";
 import { OptionTemplate } from "../../../command";
 
 const option: OptionTemplate = {
-	name: "open",
+	id: "open",
 	type: Discord.ApplicationCommandOptionTypes.SubCommand,
 	handle: handleOpenTicket,
 };
 
 type TicketError = "failure";
 
-async function handleOpenTicket([client, bot]: [Client, Discord.Bot], interaction: Logos.Interaction): Promise<void> {
+async function handleOpenTicket(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const { locale, guildLocale } = interaction;
 
 	const guildId = interaction.guildId;
@@ -40,8 +40,8 @@ async function handleOpenTicket([client, bot]: [Client, Discord.Bot], interactio
 	let session = client.database.openSession();
 
 	const guildDocument =
-		client.cache.documents.guilds.get(guildId.toString()) ??
-		(await session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
+		client.documents.guilds.get(guildId.toString()) ??
+		(await session.get<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
 
 	session.dispose();
 
@@ -54,7 +54,7 @@ async function handleOpenTicket([client, bot]: [Client, Discord.Bot], interactio
 		return;
 	}
 
-	const guild = client.cache.guilds.get(guildId);
+	const guild = client.entities.guilds.get(guildId);
 	if (guild === undefined) {
 		return;
 	}
@@ -67,8 +67,8 @@ async function handleOpenTicket([client, bot]: [Client, Discord.Bot], interactio
 	session = client.database.openSession();
 
 	const userDocument =
-		client.cache.documents.users.get(interaction.user.id.toString()) ??
-		(await session.load<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined)) ??
+		client.documents.users.get(interaction.user.id.toString()) ??
+		(await session.get<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined)) ??
 		(await (async () => {
 			const userDocument = {
 				...({
@@ -78,7 +78,7 @@ async function handleOpenTicket([client, bot]: [Client, Discord.Bot], interactio
 				} satisfies User),
 				"@metadata": { "@collection": "Users" },
 			};
-			await session.store(userDocument);
+			await session.set(userDocument);
 			await session.saveChanges();
 
 			return userDocument as User;
@@ -91,7 +91,7 @@ async function handleOpenTicket([client, bot]: [Client, Discord.Bot], interactio
 	}
 
 	const compositeIdPartial = `${guildId}/${interaction.user.id}`;
-	const ticketDocuments = Array.from(client.cache.documents.tickets.entries())
+	const ticketDocuments = Array.from(client.documents.tickets.entries())
 		.filter(([key, _]) => key.startsWith(compositeIdPartial))
 		.map(([_, value]) => value);
 	const intervalMilliseconds = timeStructToMilliseconds(configuration.rateLimit?.within ?? defaults.TICKET_INTERVAL);
@@ -103,11 +103,11 @@ async function handleOpenTicket([client, bot]: [Client, Discord.Bot], interactio
 		)
 	) {
 		const strings = {
-			title: localise(client, "ticket.strings.tooMany.title", locale)(),
-			description: localise(client, "ticket.strings.tooMany.description", locale)(),
+			title: client.localise("ticket.strings.tooMany.title", locale)(),
+			description: client.localise("ticket.strings.tooMany.description", locale)(),
 		};
 
-		reply([client, bot], interaction, {
+		reply(client, interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -119,13 +119,13 @@ async function handleOpenTicket([client, bot]: [Client, Discord.Bot], interactio
 		return;
 	}
 
-	createModalComposer<Ticket["answers"]>([client, bot], interaction, {
+	createModalComposer<Ticket["answers"]>(client, interaction, {
 		modal: generateTicketModal(client, { locale }),
 		onSubmit: async (submission, answers) => {
-			await postponeReply([client, bot], submission);
+			await postponeReply(client, submission);
 
 			const result = await openTicket(
-				[client, bot],
+				client,
 				configuration,
 				answers,
 				[guild, submission.user, member, userDocument],
@@ -138,11 +138,11 @@ async function handleOpenTicket([client, bot]: [Client, Discord.Bot], interactio
 			}
 
 			const strings = {
-				title: localise(client, "ticket.strings.sent.title", locale)(),
-				description: localise(client, "ticket.strings.sent.description", locale)(),
+				title: client.localise("ticket.strings.sent.title", locale)(),
+				description: client.localise("ticket.strings.sent.description", locale)(),
 			};
 
-			editReply([client, bot], submission, {
+			editReply(client, submission, {
 				embeds: [
 					{
 						title: strings.title,
@@ -155,12 +155,12 @@ async function handleOpenTicket([client, bot]: [Client, Discord.Bot], interactio
 			return true;
 		},
 		onInvalid: async (submission, error) =>
-			handleCouldNotOpenTicket([client, bot], submission, error as TicketError | undefined, { locale }),
+			handleCouldNotOpenTicket(client, submission, error as TicketError | undefined, { locale }),
 	});
 }
 
 async function openTicket(
-	[client, bot]: [Client, Discord.Bot],
+	client: Client,
 	configuration: NonNullable<Configurations["tickets"] | Configurations["verification"]>,
 	answers: Ticket["answers"],
 	[guild, user, member, userDocument]: [Logos.Guild, Logos.User, Logos.Member, User],
@@ -168,12 +168,12 @@ async function openTicket(
 	type: TicketType,
 	{ guildLocale }: { guildLocale: Locale },
 ): Promise<Ticket | string> {
-	const categoryChannel = client.cache.channels.get(BigInt(categoryId));
+	const categoryChannel = client.entities.channels.get(BigInt(categoryId));
 	if (categoryChannel === undefined) {
 		return "failure";
 	}
 
-	const ticketService = client.services.prompts.tickets.get(guild.id);
+	const ticketService = client.getPromptService(guild.id, { type: "tickets" });
 	if (ticketService === undefined) {
 		return "failure";
 	}
@@ -181,10 +181,10 @@ async function openTicket(
 	const session = client.database.openSession();
 
 	const strings = {
-		inquiry: localise(client, "entry.verification.inquiry.inquiry", guildLocale)(),
+		inquiry: client.localise("entry.verification.inquiry.inquiry", guildLocale)(),
 	};
 
-	const channel = await bot.helpers
+	const channel = await client.bot.helpers
 		.createChannel(guild.id, {
 			parentId: categoryId,
 			name: trim(
@@ -210,12 +210,12 @@ async function openTicket(
 	const mentions = [mention(member.id, MentionTypes.User), mention(user.id, MentionTypes.User)];
 	const mentionsFormatted = mentions.join(" ");
 
-	bot.helpers.sendMessage(channel.id, { content: mentionsFormatted }).catch(() => {
+	client.bot.helpers.sendMessage(channel.id, { content: mentionsFormatted }).catch(() => {
 		client.log.warn("Failed to mention participants in ticket.");
 		return undefined;
 	});
 
-	bot.helpers
+	client.bot.helpers
 		.sendMessage(channel.id, {
 			embeds: [
 				{
@@ -242,12 +242,12 @@ async function openTicket(
 		} satisfies Ticket),
 		"@metadata": { "@collection": "Tickets" },
 	};
-	await session.store(ticketDocument);
+	await session.set(ticketDocument);
 	await session.saveChanges();
 	session.dispose();
 
 	if (configuration.journaling) {
-		const journallingService = client.services.journalling.get(guild.id);
+		const journallingService = client.getJournallingService(guild.id);
 
 		switch (type) {
 			case "standalone": {
@@ -280,49 +280,49 @@ async function openTicket(
 }
 
 async function handleCouldNotOpenTicket(
-	[client, bot]: [Client, Discord.Bot],
+	client: Client,
 	submission: Discord.Interaction,
 	error: TicketError | undefined,
 	{ locale }: { locale: Locale },
 ): Promise<Discord.Interaction | undefined> {
 	return new Promise((resolve) => {
-		const continueId = createInteractionCollector([client, bot], {
+		const continueId = createInteractionCollector(client, {
 			type: Discord.InteractionTypes.MessageComponent,
 			onCollect: async (selection) => {
-				deleteReply([client, bot], submission);
+				deleteReply(client, submission);
 				resolve(selection);
 			},
 		});
 
-		const cancelId = createInteractionCollector([client, bot], {
+		const cancelId = createInteractionCollector(client, {
 			type: Discord.InteractionTypes.MessageComponent,
 			onCollect: async (cancelSelection) => {
-				const returnId = createInteractionCollector([client, bot], {
+				const returnId = createInteractionCollector(client, {
 					type: Discord.InteractionTypes.MessageComponent,
 					onCollect: async (returnSelection) => {
-						deleteReply([client, bot], submission);
-						deleteReply([client, bot], cancelSelection);
+						deleteReply(client, submission);
+						deleteReply(client, cancelSelection);
 						resolve(returnSelection);
 					},
 				});
 
-				const leaveId = createInteractionCollector([client, bot], {
+				const leaveId = createInteractionCollector(client, {
 					type: Discord.InteractionTypes.MessageComponent,
 					onCollect: async (_) => {
-						deleteReply([client, bot], submission);
-						deleteReply([client, bot], cancelSelection);
+						deleteReply(client, submission);
+						deleteReply(client, cancelSelection);
 						resolve(undefined);
 					},
 				});
 
 				const strings = {
-					title: localise(client, "ticket.strings.sureToCancel.title", locale)(),
-					description: localise(client, "ticket.strings.sureToCancel.description", locale)(),
-					stay: localise(client, "prompts.stay", locale)(),
-					leave: localise(client, "prompts.leave", locale)(),
+					title: client.localise("ticket.strings.sureToCancel.title", locale)(),
+					description: client.localise("ticket.strings.sureToCancel.description", locale)(),
+					stay: client.localise("prompts.stay", locale)(),
+					leave: client.localise("prompts.leave", locale)(),
 				};
 
-				reply([client, bot], cancelSelection, {
+				reply(client, cancelSelection, {
 					embeds: [
 						{
 							title: strings.title,
@@ -357,11 +357,11 @@ async function handleCouldNotOpenTicket(
 		switch (error) {
 			default: {
 				const strings = {
-					title: localise(client, "ticket.strings.failed", locale)(),
-					description: localise(client, "ticket.strings.failed", locale)(),
+					title: client.localise("ticket.strings.failed", locale)(),
+					description: client.localise("ticket.strings.failed", locale)(),
 				};
 
-				editReply([client, bot], submission, {
+				editReply(client, submission, {
 					embeds: [
 						{
 							title: strings.title,
@@ -376,11 +376,11 @@ async function handleCouldNotOpenTicket(
 		}
 
 		const strings = {
-			continue: localise(client, "prompts.continue", locale)(),
-			cancel: localise(client, "prompts.cancel", locale)(),
+			continue: client.localise("prompts.continue", locale)(),
+			cancel: client.localise("prompts.cancel", locale)(),
 		};
 
-		editReply([client, bot], submission, {
+		editReply(client, submission, {
 			embeds: [embed],
 			components: [
 				{
@@ -407,8 +407,8 @@ async function handleCouldNotOpenTicket(
 
 function generateTicketModal(client: Client, { locale }: { locale: Locale }): Modal<Ticket["answers"]> {
 	const strings = {
-		title: localise(client, "ticket.title", locale)(),
-		topic: localise(client, "ticket.fields.topic", locale)(),
+		title: client.localise("ticket.title", locale)(),
+		topic: client.localise("ticket.fields.topic", locale)(),
 	};
 
 	return {

@@ -3,7 +3,7 @@ import { CommandTemplate } from "../../command";
 import open from "./ticket/open";
 
 const command: CommandTemplate = {
-	name: "ticket",
+	id: "ticket",
 	type: Discord.ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ["VIEW_CHANNEL"],
 	options: [open],

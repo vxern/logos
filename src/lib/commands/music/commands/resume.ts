@@ -1,20 +1,17 @@
 import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import * as Logos from "../../../../types";
-import { Client, localise } from "../../../client";
+import { Client } from "../../../client";
 import { reply } from "../../../interactions";
 import { OptionTemplate } from "../../command";
 
 const command: OptionTemplate = {
-	name: "resume",
+	id: "resume",
 	type: Discord.ApplicationCommandOptionTypes.SubCommand,
 	handle: handleResumePlayback,
 };
 
-async function handleResumePlayback(
-	[client, bot]: [Client, Discord.Bot],
-	interaction: Logos.Interaction,
-): Promise<void> {
+async function handleResumePlayback(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.guildLocale;
 
 	const guildId = interaction.guildId;
@@ -22,7 +19,7 @@ async function handleResumePlayback(
 		return;
 	}
 
-	const musicService = client.services.music.music.get(guildId);
+	const musicService = client.getMusicService(guildId);
 	if (musicService === undefined) {
 		return;
 	}
@@ -36,13 +33,13 @@ async function handleResumePlayback(
 	if (!isOccupied || current === undefined) {
 		const locale = interaction.locale;
 		const strings = {
-			title: localise(client, "music.strings.notPlaying.title", locale)(),
+			title: client.localise("music.strings.notPlaying.title", locale)(),
 			description: {
-				toManage: localise(client, "music.strings.notPlaying.description.toManage", locale)(),
+				toManage: client.localise("music.strings.notPlaying.description.toManage", locale)(),
 			},
 		};
 
-		reply([client, bot], interaction, {
+		reply(client, interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -61,11 +58,11 @@ async function handleResumePlayback(
 	if (!isPaused) {
 		const locale = interaction.locale;
 		const strings = {
-			title: localise(client, "music.options.resume.strings.notPaused.title", locale)(),
-			description: localise(client, "music.options.resume.strings.notPaused.description", locale)(),
+			title: client.localise("music.options.resume.strings.notPaused.title", locale)(),
+			description: client.localise("music.options.resume.strings.notPaused.description", locale)(),
 		};
 
-		reply([client, bot], interaction, {
+		reply(client, interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -80,12 +77,12 @@ async function handleResumePlayback(
 	musicService.resume();
 
 	const strings = {
-		title: localise(client, "music.options.resume.strings.resumed.title", locale)(),
-		description: localise(client, "music.options.resume.strings.resumed.description", locale)(),
+		title: client.localise("music.options.resume.strings.resumed.title", locale)(),
+		description: client.localise("music.options.resume.strings.resumed.description", locale)(),
 	};
 
 	reply(
-		[client, bot],
+		client,
 		interaction,
 		{
 			embeds: [

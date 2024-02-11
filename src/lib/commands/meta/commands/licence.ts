@@ -4,7 +4,7 @@ import dictionary from "./licences/dictionary";
 import software from "./licences/software";
 
 const command: CommandTemplate = {
-	name: "license",
+	id: "license",
 	type: Discord.ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ["VIEW_CHANNEL"],
 	options: [dictionary, software],

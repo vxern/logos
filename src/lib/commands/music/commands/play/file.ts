@@ -1,14 +1,10 @@
-import * as Discord from "@discordeno/bot";
 import * as Logos from "../../../../../types";
-import { Client, localise } from "../../../../client";
+import { Client } from "../../../../client";
 import { deleteReply, parseArguments, postponeReply } from "../../../../interactions";
 import { SongListing } from "../../data/types";
 import { handleRequestPlayback } from "./query";
 
-async function handleRequestFilePlayback(
-	[client, bot]: [Client, Discord.Bot],
-	interaction: Logos.Interaction,
-): Promise<void> {
+async function handleRequestFilePlayback(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.locale;
 
 	const [{ url }] = parseArguments(interaction.data?.options, {});
@@ -16,11 +12,11 @@ async function handleRequestFilePlayback(
 		return;
 	}
 
-	postponeReply([client, bot], interaction);
-	deleteReply([client, bot], interaction);
+	postponeReply(client, interaction);
+	deleteReply(client, interaction);
 
 	const strings = {
-		externalFile: localise(client, "music.options.play.strings.externalFile", locale)(),
+		externalFile: client.localise("music.options.play.strings.externalFile", locale)(),
 	};
 
 	const listing: SongListing = {
@@ -33,7 +29,7 @@ async function handleRequestFilePlayback(
 		},
 	};
 
-	handleRequestPlayback([client, bot], interaction, listing);
+	handleRequestPlayback(client, interaction, listing);
 }
 
 export { handleRequestFilePlayback };

@@ -2,7 +2,7 @@ import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import defaults from "../../../../defaults";
 import * as Logos from "../../../../types";
-import { Client, localise } from "../../../client";
+import { Client } from "../../../client";
 import { parseArguments, reply } from "../../../interactions";
 import { chunk } from "../../../utils";
 import { OptionTemplate } from "../../command";
@@ -10,17 +10,16 @@ import { show } from "../../parameters";
 import { displayListings } from "../module";
 
 const command: OptionTemplate = {
-	name: "history",
+	id: "history",
 	type: Discord.ApplicationCommandOptionTypes.SubCommand,
-	isShowable: true,
 	handle: handleDisplayPlaybackHistory,
 	options: [show],
+	flags: {
+		isShowable: true,
+	},
 };
 
-async function handleDisplayPlaybackHistory(
-	[client, bot]: [Client, Discord.Bot],
-	interaction: Logos.Interaction,
-): Promise<void> {
+async function handleDisplayPlaybackHistory(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const [{ show: showParameter }] = parseArguments(interaction.data?.options, { show: "boolean" });
 
 	const show = interaction.show ?? showParameter ?? false;
@@ -31,7 +30,7 @@ async function handleDisplayPlaybackHistory(
 		return;
 	}
 
-	const musicService = client.services.music.music.get(guildId);
+	const musicService = client.getMusicService(guildId);
 	if (musicService === undefined) {
 		return;
 	}
@@ -45,13 +44,13 @@ async function handleDisplayPlaybackHistory(
 	if (!isOccupied) {
 		const locale = interaction.locale;
 		const strings = {
-			title: localise(client, "music.strings.notPlaying.title", locale)(),
+			title: client.localise("music.strings.notPlaying.title", locale)(),
 			description: {
-				toCheck: localise(client, "music.strings.notPlaying.description.toCheck", locale)(),
+				toCheck: client.localise("music.strings.notPlaying.description.toCheck", locale)(),
 			},
 		};
 
-		reply([client, bot], interaction, {
+		reply(client, interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -69,11 +68,11 @@ async function handleDisplayPlaybackHistory(
 	}
 
 	const strings = {
-		title: localise(client, "music.options.history.strings.playbackHistory", locale)(),
+		title: client.localise("music.options.history.strings.playbackHistory", locale)(),
 	};
 
 	const regenerate = await displayListings(
-		[client, bot],
+		client,
 		interaction,
 		{
 			title: `${constants.symbols.music.list} ${strings.title}`,

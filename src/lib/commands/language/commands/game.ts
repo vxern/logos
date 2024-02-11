@@ -1,11 +1,13 @@
 import * as Discord from "@discordeno/bot";
+import * as levenshtein from "fastest-levenshtein";
 import constants from "../../../../constants/constants";
 import { Locale, getLocaleByLearningLanguage } from "../../../../constants/languages";
 import licences from "../../../../constants/licences";
 import defaults from "../../../../defaults";
+import { capitalise } from "../../../../formatting";
 import * as Logos from "../../../../types";
-import { Client, localise } from "../../../client";
-import * as levenshtein from "fastest-levenshtein";
+import { Client } from "../../../client";
+import { User } from "../../../database/user";
 import {
 	acknowledge,
 	createInteractionCollector,
@@ -18,11 +20,9 @@ import {
 } from "../../../interactions";
 import { random } from "../../../utils";
 import { CommandTemplate } from "../../command";
-import { capitalise } from "../../../../formatting";
-import { User } from "../../../database/user";
 
 const command: CommandTemplate = {
-	name: "game",
+	id: "game",
 	type: Discord.ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ["VIEW_CHANNEL"],
 	handle: handleStartGame,
@@ -41,7 +41,7 @@ interface GameData {
 }
 
 /** Starts a simple game of 'choose the correct word to fit in the blank'. */
-async function handleStartGame([client, bot]: [Client, Discord.Bot], interaction: Logos.Interaction): Promise<void> {
+async function handleStartGame(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.locale;
 	const learningLocale = getLocaleByLearningLanguage(interaction.learningLanguage);
 
@@ -53,11 +53,11 @@ async function handleStartGame([client, bot]: [Client, Discord.Bot], interaction
 	const sentencePairCount = await client.cache.database.scard(`${learningLocale}:index`);
 	if (sentencePairCount === 0) {
 		const strings = {
-			title: localise(client, "game.strings.noSentencesAvailable.title", locale)(),
-			description: localise(client, "game.strings.noSentencesAvailable.description", locale)(),
+			title: client.localise("game.strings.noSentencesAvailable.title", locale)(),
+			description: client.localise("game.strings.noSentencesAvailable.description", locale)(),
 		};
 
-		await reply([client, bot], interaction, {
+		await reply(client, interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -69,7 +69,7 @@ async function handleStartGame([client, bot]: [Client, Discord.Bot], interaction
 
 		setTimeout(
 			() =>
-				deleteReply([client, bot], interaction).catch(() => {
+				deleteReply(client, interaction).catch(() => {
 					client.log.warn(`Failed to delete "no results for word" message.`);
 				}),
 			defaults.WARN_MESSAGE_DELETE_TIMEOUT,
@@ -81,8 +81,8 @@ async function handleStartGame([client, bot]: [Client, Discord.Bot], interaction
 	const session = client.database.openSession();
 
 	const userDocument =
-		client.cache.documents.users.get(interaction.user.id.toString()) ??
-		(await session.load<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined)) ??
+		client.documents.users.get(interaction.user.id.toString()) ??
+		(await session.get<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined)) ??
 		(await (async () => {
 			const userDocument = {
 				...({
@@ -92,13 +92,13 @@ async function handleStartGame([client, bot]: [Client, Discord.Bot], interaction
 				} satisfies User),
 				"@metadata": { "@collection": "Users" },
 			};
-			await session.store(userDocument);
+			await session.set(userDocument);
 			await session.saveChanges();
 
 			return userDocument as User;
 		})());
 
-	const guildStatsDocument = client.cache.documents.guildStats.get(guildId.toString());
+	const guildStatsDocument = client.documents.guildStats.get(guildId.toString());
 	if (guildStatsDocument === undefined) {
 		session.dispose();
 		return;
@@ -143,19 +143,19 @@ async function handleStartGame([client, bot]: [Client, Discord.Bot], interaction
 		}
 	}
 
-	await session.store(guildStatsDocument);
-	await session.store(userDocument);
+	await session.set(guildStatsDocument);
+	await session.set(userDocument);
 	await session.saveChanges();
 
 	session.dispose();
 
-	await postponeReply([client, bot], interaction);
+	await postponeReply(client, interaction);
 
-	const customId = createInteractionCollector([client, bot], {
+	const customId = createInteractionCollector(client, {
 		type: Discord.InteractionTypes.MessageComponent,
 		userId: interaction.user.id,
 		onCollect: async (selection) => {
-			acknowledge([client, bot], selection);
+			acknowledge(client, selection);
 
 			const selectionCustomId = selection.data?.customId;
 			if (selectionCustomId === undefined) {
@@ -172,8 +172,8 @@ async function handleStartGame([client, bot]: [Client, Discord.Bot], interaction
 
 			const session = client.database.openSession();
 
-			const guildStatsDocument = client.cache.documents.guildStats.get(guildId.toString());
-			const userDocument = client.cache.documents.users.get(interaction.user.id.toString());
+			const guildStatsDocument = client.documents.guildStats.get(guildId.toString());
+			const userDocument = client.documents.users.get(interaction.user.id.toString());
 			if (guildStatsDocument === undefined || userDocument === undefined) {
 				return;
 			}
@@ -191,8 +191,8 @@ async function handleStartGame([client, bot]: [Client, Discord.Bot], interaction
 				pickMissingWord.user.totalScore++;
 			}
 
-			await session.store(guildStatsDocument);
-			await session.store(userDocument);
+			await session.set(guildStatsDocument);
+			await session.set(userDocument);
 			await session.saveChanges();
 
 			session.dispose();
@@ -203,7 +203,7 @@ async function handleStartGame([client, bot]: [Client, Discord.Bot], interaction
 				data.sentenceSelection = await getSentenceSelection(client, learningLocale);
 
 				editReply(
-					[client, bot],
+					client,
 					interaction,
 					await getGameView(client, data, userDocument, "hide", { locale, learningLocale }),
 				);
@@ -211,7 +211,7 @@ async function handleStartGame([client, bot]: [Client, Discord.Bot], interaction
 				data.embedColour = constants.colors.red;
 
 				editReply(
-					[client, bot],
+					client,
 					interaction,
 					await getGameView(client, data, userDocument, "reveal", { locale, learningLocale }),
 				);
@@ -219,20 +219,16 @@ async function handleStartGame([client, bot]: [Client, Discord.Bot], interaction
 		},
 	});
 
-	const skipButtonCustomId = createInteractionCollector([client, bot], {
+	const skipButtonCustomId = createInteractionCollector(client, {
 		type: Discord.InteractionTypes.MessageComponent,
 		userId: interaction.user.id,
 		onCollect: async (selection) => {
-			acknowledge([client, bot], selection);
+			acknowledge(client, selection);
 
 			data.embedColour = constants.colors.blue;
 			data.sentenceSelection = await getSentenceSelection(client, learningLocale);
 
-			editReply(
-				[client, bot],
-				interaction,
-				await getGameView(client, data, userDocument, "hide", { locale, learningLocale }),
-			);
+			editReply(client, interaction, await getGameView(client, data, userDocument, "hide", { locale, learningLocale }));
 		},
 	});
 
@@ -244,11 +240,7 @@ async function handleStartGame([client, bot]: [Client, Discord.Bot], interaction
 		sessionScore: 0,
 	};
 
-	editReply(
-		[client, bot],
-		interaction,
-		await getGameView(client, data, userDocument, "hide", { locale, learningLocale }),
-	);
+	editReply(client, interaction, await getGameView(client, data, userDocument, "hide", { locale, learningLocale }));
 }
 
 async function getGameView(
@@ -261,13 +253,13 @@ async function getGameView(
 	const totalScore = userDocument.scores?.[learningLocale]?.pickMissingWord?.totalScore ?? 0;
 
 	const strings = {
-		sentence: localise(client, "game.strings.sentence", locale)(),
-		translation: localise(client, "game.strings.translation", locale)(),
-		skip: localise(client, "game.strings.skip", locale)(),
-		sourcedFrom: localise(client, "game.strings.sourcedFrom", locale)({ source: licences.dictionaries.tatoeba.name }),
-		correctGuesses: localise(client, "game.strings.correctGuesses", locale)({ number: data.sessionScore }),
-		allTime: localise(client, "game.strings.allTime", locale)({ number: totalScore }),
-		next: localise(client, "game.strings.next", locale)(),
+		sentence: client.localise("game.strings.sentence", locale)(),
+		translation: client.localise("game.strings.translation", locale)(),
+		skip: client.localise("game.strings.skip", locale)(),
+		sourcedFrom: client.localise("game.strings.sourcedFrom", locale)({ source: licences.dictionaries.tatoeba.name }),
+		correctGuesses: client.localise("game.strings.correctGuesses", locale)({ number: data.sessionScore }),
+		allTime: client.localise("game.strings.allTime", locale)({ number: totalScore }),
+		next: client.localise("game.strings.next", locale)(),
 	};
 
 	const sentenceSource = constants.links.generateTatoebaSentenceLink(data.sentenceSelection.sentencePair.sentenceId);

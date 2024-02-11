@@ -21,6 +21,7 @@ import slowmodeEnable from "./guild/slowmode-enable";
 import slowmodeUpgrade from "./guild/slowmode-upgrade";
 import suggestionSend from "./guild/suggestion-send";
 
+// TODO(vxern): These log message generators need the fuck cleaned up out of them.
 export default {
 	client: {
 		guildBanAdd,

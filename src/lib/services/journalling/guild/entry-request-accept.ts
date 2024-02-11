@@ -5,7 +5,7 @@ import { GuildEvents, MessageGenerators } from "../generator";
 export default {
 	title: `${constants.symbols.events.entryRequest.accepted} Entry request accepted`,
 	message: (client, user, by) => {
-		const byUser = client.cache.users.get(by.id);
+		const byUser = client.entities.users.get(by.id);
 		if (byUser === undefined) {
 			return;
 		}

@@ -14,14 +14,14 @@ import symbols from "../constants/types/symbols";
 import defaults from "../defaults";
 import * as Logos from "../types";
 import { InteractionLocaleData } from "../types";
-import { Client, addCollector, localise, pluralise } from "./client";
+import { Client } from "./client";
 import { Guild } from "./database/guild";
 import { User } from "./database/user";
 import { InteractionRepetitionButtonID } from "./services/interaction-repetition/interaction-repetition";
 
 type AutocompleteInteraction = Discord.Interaction & { type: Discord.InteractionTypes.ApplicationCommandAutocomplete };
 
-function isAutocomplete(interaction: Discord.Interaction): interaction is AutocompleteInteraction {
+function isAutocomplete(interaction: Discord.Interaction | Logos.Interaction): interaction is AutocompleteInteraction {
 	return interaction.type === Discord.InteractionTypes.ApplicationCommandAutocomplete;
 }
 
@@ -54,13 +54,10 @@ interface InteractionCollectorSettings {
  * Taking a {@link Client} and {@link InteractionCollectorSettings}, creates an
  * interaction collector.
  */
-function createInteractionCollector(
-	[client, bot]: [Client, Discord.Bot],
-	settings: InteractionCollectorSettings,
-): string {
+function createInteractionCollector(client: Client, settings: InteractionCollectorSettings): string {
 	const customId = settings.customId ?? Snowflake.generate().toString();
 
-	addCollector([client, bot], "interactionCreate", {
+	client.addCollector("interactionCreate", {
 		filter: (interaction) => compileChecks(interaction, settings, customId).every((condition) => condition),
 		limit: settings.limit,
 		removeAfter: settings.doesNotExpire ? undefined : constants.INTERACTION_TOKEN_EXPIRY,
@@ -91,6 +88,7 @@ type CustomTypeIndicatorsTyped<C extends CustomTypeIndicators> = {
 	[key in keyof C]: (C[key] extends "number" ? number : boolean) | undefined;
 };
 
+// TODO(vxern): Do this better.
 function parseArguments<
 	T extends Record<string, string | undefined>,
 	R extends CustomTypeIndicatorsTyped<C> & T,
@@ -144,7 +142,7 @@ type ControlButtonID = [type: SkipAction];
  * in an embed view.
  */
 async function paginate<T>(
-	[client, bot]: [Client, Discord.Bot],
+	client: Client,
 	interaction: Logos.Interaction,
 	{
 		getElements,
@@ -197,14 +195,14 @@ async function paginate<T>(
 			}
 		}
 
-		editReply([client, bot], interaction, getView());
+		editReply(client, interaction, getView());
 	};
 
-	const customId = createInteractionCollector([client, bot], {
+	const customId = createInteractionCollector(client, {
 		type: Discord.InteractionTypes.MessageComponent,
 		doesNotExpire: true,
 		onCollect: async (selection) => {
-			acknowledge([client, bot], selection);
+			acknowledge(client, selection);
 
 			const customId = selection.data?.customId;
 			if (customId === undefined) {
@@ -217,7 +215,7 @@ async function paginate<T>(
 		},
 	});
 
-	reply([client, bot], interaction, getView(), { visible: show });
+	reply(client, interaction, getView(), { visible: show });
 
 	return async () => {
 		data.elements = getElements();
@@ -245,8 +243,8 @@ function getPageEmbed<T>(
 	locale: Locale,
 ): Discord.CamelizedDiscordEmbed {
 	const strings = {
-		page: localise(client, "interactions.page", locale)(),
-		continuedOnNextPage: localise(client, "interactions.continuedOnNextPage", locale)(),
+		page: client.localise("interactions.page", locale)(),
+		continuedOnNextPage: client.localise("interactions.continuedOnNextPage", locale)(),
 	};
 
 	const elements = data.elements.at(data.pageIndex);
@@ -301,12 +299,13 @@ type Modal<ComposerContent extends Record<string, string>, SectionNames = keyof 
 	fields: ComposerActionRow<ComposerContent, SectionNames>[];
 };
 
+// TODO(vxern): This can absolutely be improved.
 async function createModalComposer<
 	ComposerContent extends Record<string, string>,
 	SectionNames extends keyof ComposerContent = keyof ComposerContent,
 >(
-	[client, bot]: [Client, Discord.Bot],
-	interaction: Discord.Interaction,
+	client: Client,
+	interaction: Logos.Interaction,
 	{
 		onSubmit,
 		onInvalid,
@@ -319,13 +318,13 @@ async function createModalComposer<
 ): Promise<void> {
 	const fields = structuredClone(modal.fields);
 
-	let anchor = interaction;
+	let anchor: Discord.Interaction | Logos.Interaction = interaction;
 	let content: ComposerContent | undefined = undefined;
 
 	let isSubmitting = true;
 	while (isSubmitting) {
 		const [submission, result] = await new Promise<[Discord.Interaction, boolean | string]>((resolve) => {
-			const modalId = createInteractionCollector([client, bot], {
+			const modalId = createInteractionCollector(client, {
 				type: Discord.InteractionTypes.ModalSubmit,
 				userId: interaction.user.id,
 				limit: 1,
@@ -353,7 +352,7 @@ async function createModalComposer<
 				}
 			}
 
-			displayModal([client, bot], anchor, {
+			displayModal(client, anchor, {
 				title: modal.title,
 				customId: modalId,
 				components: fields,
@@ -438,23 +437,26 @@ function parseConciseTimeExpression(
 	];
 
 	const verboseExpressionParts = [];
+
 	if (seconds !== 0) {
 		const strings = {
-			second: pluralise(client, "units.second.word", language, seconds),
+			second: client.pluralise("units.second.word", language, seconds),
 		};
 
 		verboseExpressionParts.push(strings.second);
 	}
+
 	if (minutes !== undefined && minutes !== 0) {
 		const strings = {
-			minute: pluralise(client, "units.minute.word", language, minutes),
+			minute: client.pluralise("units.minute.word", language, minutes),
 		};
 
 		verboseExpressionParts.push(strings.minute);
 	}
+
 	if (hours !== undefined && hours !== 0) {
 		const strings = {
-			hour: pluralise(client, "units.hour.word", language, hours),
+			hour: client.pluralise("units.hour.word", language, hours),
 		};
 
 		verboseExpressionParts.push(strings.hour);
@@ -507,7 +509,7 @@ function parseVerboseTimeExpressionPhrase(
 					`units.${timeUnit}.many`,
 					`units.${timeUnit}.short`,
 					`units.${timeUnit}.shortest`,
-				].map((key) => localise(client, key, locale)()),
+				].map((key) => client.localise(key, locale)()),
 			]);
 		}
 
@@ -583,7 +585,7 @@ function parseVerboseTimeExpressionPhrase(
 	let total = 0;
 	for (const [timeUnit, quantifier] of timeUnitQuantifierTuples) {
 		const strings = {
-			unit: pluralise(client, `units.${timeUnit}.word`, language, quantifier),
+			unit: client.pluralise(`units.${timeUnit}.word`, language, quantifier),
 		};
 
 		timeExpressions.push(strings.unit);
@@ -605,11 +607,8 @@ function decodeId<T extends ComponentIDMetadata, R = [string, ...T]>(customId: s
 	return customId.split(constants.symbols.meta.idSeparator) as R;
 }
 
-async function acknowledge(
-	[client, bot]: [Client, Discord.Bot],
-	interaction: Logos.Interaction | Discord.Interaction,
-): Promise<void> {
-	return bot.rest
+async function acknowledge(client: Client, interaction: Logos.Interaction | Discord.Interaction): Promise<void> {
+	return client.bot.rest
 		.sendInteractionResponse(interaction.id, interaction.token, {
 			type: Discord.InteractionResponseTypes.DeferredUpdateMessage,
 		})
@@ -617,11 +616,11 @@ async function acknowledge(
 }
 
 async function postponeReply(
-	[client, bot]: [Client, Discord.Bot],
+	client: Client,
 	interaction: Logos.Interaction | Discord.Interaction,
 	{ visible = false } = {},
 ): Promise<void> {
-	return bot.rest
+	return client.bot.rest
 		.sendInteractionResponse(interaction.id, interaction.token, {
 			type: Discord.InteractionResponseTypes.DeferredChannelMessageWithSource,
 			data: visible ? {} : { flags: Discord.MessageFlags.Ephemeral },
@@ -630,12 +629,12 @@ async function postponeReply(
 }
 
 async function reply(
-	[client, bot]: [Client, Discord.Bot],
+	client: Client,
 	interaction: Logos.Interaction | Discord.Interaction,
 	data: Omit<Discord.InteractionCallbackData, "flags">,
 	{ visible = false } = {},
 ): Promise<void> {
-	return bot.rest
+	return client.bot.rest
 		.sendInteractionResponse(interaction.id, interaction.token, {
 			type: Discord.InteractionResponseTypes.ChannelMessageWithSource,
 			data: { ...data, flags: visible ? undefined : Discord.MessageFlags.Ephemeral },
@@ -644,31 +643,28 @@ async function reply(
 }
 
 async function editReply(
-	[client, bot]: [Client, Discord.Bot],
+	client: Client,
 	interaction: Logos.Interaction | Discord.Interaction,
 	data: Omit<Discord.InteractionCallbackData, "flags">,
 ): Promise<void> {
-	return bot.rest
+	return client.bot.rest
 		.editOriginalInteractionResponse(interaction.token, data)
 		.then(() => {})
 		.catch((reason) => client.log.warn("Failed to edit reply to interaction:", reason));
 }
 
-async function deleteReply(
-	[client, bot]: [Client, Discord.Bot],
-	interaction: Logos.Interaction | Discord.Interaction,
-): Promise<void> {
-	return bot.rest
+async function deleteReply(client: Client, interaction: Logos.Interaction | Discord.Interaction): Promise<void> {
+	return client.bot.rest
 		.deleteOriginalInteractionResponse(interaction.token)
 		.catch((reason) => client.log.warn("Failed to edit reply to interaction:", reason));
 }
 
 async function respond(
-	[client, bot]: [Client, Discord.Bot],
+	client: Client,
 	interaction: Logos.Interaction | Discord.Interaction,
 	choices: Discord.ApplicationCommandOptionChoice[],
 ): Promise<void> {
-	return bot.rest
+	return client.bot.rest
 		.sendInteractionResponse(interaction.id, interaction.token, {
 			type: Discord.InteractionResponseTypes.ApplicationCommandAutocompleteResult,
 			data: { choices },
@@ -677,11 +673,11 @@ async function respond(
 }
 
 async function displayModal(
-	[client, bot]: [Client, Discord.Bot],
+	client: Client,
 	interaction: Logos.Interaction | Discord.Interaction,
 	data: Omit<Discord.InteractionCallbackData, "flags">,
 ): Promise<void> {
-	return bot.rest
+	return client.bot.rest
 		.sendInteractionResponse(interaction.id, interaction.token, {
 			type: Discord.InteractionResponseTypes.Modal,
 			data,
@@ -710,19 +706,22 @@ const FALLBACK_LOCALE_DATA: InteractionLocaleData = {
 	featureLanguage: defaults.FEATURE_LANGUAGE,
 };
 
-async function getLocaleData(client: Client, interaction: Discord.Interaction): Promise<InteractionLocaleData> {
+async function getLocaleData(
+	client: Client,
+	interaction: Discord.Interaction | Logos.Interaction,
+): Promise<InteractionLocaleData> {
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
 		return FALLBACK_LOCALE_DATA;
 	}
 
-	const member = client.cache.members.get(Discord.snowflakeToBigint(`${interaction.user.id}${guildId}`));
+	const member = client.entities.members.get(Discord.snowflakeToBigint(`${interaction.user.id}${guildId}`));
 
 	const session = client.database.openSession();
 
 	const [userDocument, guildDocument] = await Promise.all([
-		client.cache.documents.users.get(interaction.user.id.toString()) ??
-			(await session.load<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined)) ??
+		client.documents.users.get(interaction.user.id.toString()) ??
+			(await session.get<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined)) ??
 			(async () => {
 				const userDocument = {
 					...({
@@ -732,13 +731,13 @@ async function getLocaleData(client: Client, interaction: Discord.Interaction): 
 					} satisfies User),
 					"@metadata": { "@collection": "Users" },
 				};
-				await session.store(userDocument);
+				await session.set(userDocument);
 				await session.saveChanges();
 
 				return userDocument as User;
 			})(),
-		client.cache.documents.guilds.get(guildId.toString()) ??
-			session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined),
+		client.documents.guilds.get(guildId.toString()) ??
+			session.get<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined),
 	]);
 
 	session.dispose();
@@ -823,7 +822,7 @@ function getShowButton(
 	{ locale }: { locale: Locale },
 ): Discord.ButtonComponent {
 	const strings = {
-		show: localise(client, "interactions.show", locale)(),
+		show: client.localise("interactions.show", locale)(),
 	};
 
 	return {

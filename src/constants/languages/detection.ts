@@ -484,12 +484,12 @@ const languageToLocale = {
 	} as const satisfies Record<TinyLDLanguage, string>,
 } as const;
 
-type CLDLanguage = typeof languages.cld[number];
-type TinyLDLanguage = typeof languages.tinyld[number];
+type CLDLanguage = (typeof languages.cld)[number];
+type TinyLDLanguage = (typeof languages.tinyld)[number];
 type Language = CLDLanguage | TinyLDLanguage;
 
-type CLDLocale = typeof languageToLocale.cld[keyof typeof languageToLocale.cld];
-type TinyLDLocale = typeof languageToLocale.tinyld[keyof typeof languageToLocale.tinyld];
+type CLDLocale = (typeof languageToLocale.cld)[keyof typeof languageToLocale.cld];
+type TinyLDLocale = (typeof languageToLocale.tinyld)[keyof typeof languageToLocale.tinyld];
 type Locale = CLDLocale | TinyLDLocale;
 
 const localeToLanguage = {

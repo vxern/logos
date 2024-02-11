@@ -4,7 +4,7 @@ import { Locale } from "../../../../constants/languages";
 import defaults from "../../../../defaults";
 import { MentionTypes, mention, trim } from "../../../../formatting";
 import * as Logos from "../../../../types";
-import { Client, localise } from "../../../client";
+import { Client } from "../../../client";
 import {
 	ControlButtonID,
 	acknowledge,
@@ -21,15 +21,12 @@ import { OptionTemplate } from "../../command";
 import { SongListing, listingTypeToEmoji } from "../data/types";
 
 const command: OptionTemplate = {
-	name: "remove",
+	id: "remove",
 	type: Discord.ApplicationCommandOptionTypes.SubCommand,
 	handle: handleRemoveSongListing,
 };
 
-async function handleRemoveSongListing(
-	[client, bot]: [Client, Discord.Bot],
-	interaction: Logos.Interaction,
-): Promise<void> {
+async function handleRemoveSongListing(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.locale;
 
 	const guildId = interaction.guildId;
@@ -37,7 +34,7 @@ async function handleRemoveSongListing(
 		return;
 	}
 
-	const musicService = client.services.music.music.get(guildId);
+	const musicService = client.getMusicService(guildId);
 	if (musicService === undefined) {
 		return;
 	}
@@ -50,13 +47,13 @@ async function handleRemoveSongListing(
 	const isOccupied = musicService.isOccupied;
 	if (!isOccupied) {
 		const strings = {
-			title: localise(client, "music.strings.notPlaying.title", locale)(),
+			title: client.localise("music.strings.notPlaying.title", locale)(),
 			description: {
-				toManage: localise(client, "music.strings.notPlaying.description.toManage", locale)(),
+				toManage: client.localise("music.strings.notPlaying.description.toManage", locale)(),
 			},
 		};
 
-		reply([client, bot], interaction, {
+		reply(client, interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -75,11 +72,11 @@ async function handleRemoveSongListing(
 
 	if (isQueueEmpty) {
 		const strings = {
-			title: localise(client, "music.options.remove.strings.queueEmpty.description", locale)(),
-			description: localise(client, "music.options.remove.strings.queueEmpty.description", locale)(),
+			title: client.localise("music.options.remove.strings.queueEmpty.description", locale)(),
+			description: client.localise("music.options.remove.strings.queueEmpty.description", locale)(),
 		};
 
-		reply([client, bot], interaction, {
+		reply(client, interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -93,7 +90,7 @@ async function handleRemoveSongListing(
 
 	const removeListingData = { pageIndex: 0 };
 
-	const interactionResponseData = await generateEmbed([client, bot], interaction, musicService, removeListingData, {
+	const interactionResponseData = await generateEmbed(client, interaction, musicService, removeListingData, {
 		locale,
 		guildLocale: interaction.guildLocale,
 	});
@@ -102,16 +99,16 @@ async function handleRemoveSongListing(
 	}
 
 	const onQueueUpdateListener = async () => {
-		const interactionResponseData = await generateEmbed([client, bot], interaction, musicService, removeListingData, {
+		const interactionResponseData = await generateEmbed(client, interaction, musicService, removeListingData, {
 			locale,
 			guildLocale: interaction.guildLocale,
 		});
 		if (interactionResponseData !== undefined) {
-			editReply([client, bot], interaction, interactionResponseData);
+			editReply(client, interaction, interactionResponseData);
 		}
 	};
 
-	const onStopListener = async () => deleteReply([client, bot], interaction);
+	const onStopListener = async () => deleteReply(client, interaction);
 
 	events.on("queueUpdate", onQueueUpdateListener);
 	events.on("stop", onStopListener);
@@ -121,7 +118,7 @@ async function handleRemoveSongListing(
 		events.off("stop", onStopListener);
 	}, constants.INTERACTION_TOKEN_EXPIRY);
 
-	reply([client, bot], interaction, interactionResponseData);
+	reply(client, interaction, interactionResponseData);
 }
 
 interface RemoveListingData {
@@ -129,7 +126,7 @@ interface RemoveListingData {
 }
 
 async function generateEmbed(
-	[client, bot]: [Client, Discord.Bot],
+	client: Client,
 	interaction: Logos.Interaction,
 	musicService: MusicService,
 	data: RemoveListingData,
@@ -145,11 +142,11 @@ async function generateEmbed(
 	const isFirst = data.pageIndex === 0;
 	const isLast = data.pageIndex === pages.length - 1;
 
-	const buttonsCustomId = createInteractionCollector([client, bot], {
+	const buttonsCustomId = createInteractionCollector(client, {
 		type: Discord.InteractionTypes.MessageComponent,
 		userId: interaction.user.id,
 		onCollect: async (selection) => {
-			acknowledge([client, bot], selection);
+			acknowledge(client, selection);
 
 			const customId = selection.data?.customId;
 			if (customId === undefined) {
@@ -173,7 +170,7 @@ async function generateEmbed(
 				}
 			}
 
-			const interactionResponseData = await generateEmbed([client, bot], interaction, musicService, data, {
+			const interactionResponseData = await generateEmbed(client, interaction, musicService, data, {
 				locale,
 				guildLocale,
 			});
@@ -181,11 +178,11 @@ async function generateEmbed(
 				return;
 			}
 
-			editReply([client, bot], interaction, interactionResponseData);
+			editReply(client, interaction, interactionResponseData);
 		},
 	});
 
-	const selectMenuCustomId = createInteractionCollector([client, bot], {
+	const selectMenuCustomId = createInteractionCollector(client, {
 		type: Discord.InteractionTypes.MessageComponent,
 		userId: interaction.user.id,
 		limit: 1,
@@ -203,11 +200,11 @@ async function generateEmbed(
 			const songListing = musicService.remove(index);
 			if (songListing === undefined) {
 				const strings = {
-					title: localise(client, "music.options.remove.strings.failed.title", locale)(),
-					description: localise(client, "music.options.remove.strings.failed.description", locale)(),
+					title: client.localise("music.options.remove.strings.failed.title", locale)(),
+					description: client.localise("music.options.remove.strings.failed.description", locale)(),
 				};
 
-				reply([client, bot], selection, {
+				reply(client, selection, {
 					embeds: [
 						{
 							title: strings.title,
@@ -220,9 +217,8 @@ async function generateEmbed(
 			}
 
 			const strings = {
-				title: localise(client, "music.options.remove.strings.removed.title", guildLocale)(),
-				description: localise(
-					client,
+				title: client.localise("music.options.remove.strings.removed.title", guildLocale)(),
+				description: client.localise(
 					"music.options.remove.strings.removed.description",
 					guildLocale,
 				)({
@@ -232,7 +228,7 @@ async function generateEmbed(
 			};
 
 			reply(
-				[client, bot],
+				client,
 				selection,
 				{
 					embeds: [
@@ -250,8 +246,8 @@ async function generateEmbed(
 
 	if (pages.at(0)?.length === 0) {
 		const strings = {
-			title: localise(client, "music.options.remove.strings.queueEmpty.title", locale)(),
-			description: localise(client, "music.options.remove.strings.queueEmpty.description", locale)(),
+			title: client.localise("music.options.remove.strings.queueEmpty.title", locale)(),
+			description: client.localise("music.options.remove.strings.queueEmpty.description", locale)(),
 		};
 
 		return {
@@ -267,9 +263,9 @@ async function generateEmbed(
 	}
 
 	const strings = {
-		title: localise(client, "music.options.remove.strings.selectSong.title", locale)(),
-		description: localise(client, "music.options.remove.strings.selectSong.description", locale)(),
-		continuedOnNextPage: localise(client, "interactions.continuedOnNextPage", locale)(),
+		title: client.localise("music.options.remove.strings.selectSong.title", locale)(),
+		description: client.localise("music.options.remove.strings.selectSong.description", locale)(),
+		continuedOnNextPage: client.localise("interactions.continuedOnNextPage", locale)(),
 	};
 
 	return {

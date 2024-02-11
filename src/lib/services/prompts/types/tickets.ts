@@ -1,7 +1,7 @@
 import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import * as Logos from "../../../../types";
-import { Client, localise } from "../../../client";
+import { Client } from "../../../client";
 import { Ticket } from "../../../database/ticket";
 import { User } from "../../../database/user";
 import diagnostics from "../../../diagnostics";
@@ -11,14 +11,14 @@ import { PromptService } from "../service";
 type InteractionData = [documentId: string, isResolved: string];
 
 class TicketService extends PromptService<"tickets", Ticket, InteractionData> {
-	constructor([client, bot]: [Client, Discord.Bot], guildId: bigint) {
-		super([client, bot], guildId, { type: "tickets", deleteMode: "close" });
+	constructor(client: Client, guildId: bigint) {
+		super(client, guildId, { type: "tickets", deleteMode: "close" });
 	}
 
 	getAllDocuments(): Map<string, Ticket> {
 		const tickets = new Map<string, Ticket>();
 
-		for (const [compositeId, ticketDocument] of this.client.cache.documents.tickets) {
+		for (const [compositeId, ticketDocument] of this.client.documents.tickets) {
 			if (ticketDocument.type !== "standalone") {
 				continue;
 			}
@@ -37,8 +37,8 @@ class TicketService extends PromptService<"tickets", Ticket, InteractionData> {
 		const session = this.client.database.openSession();
 
 		const userDocument =
-			this.client.cache.documents.users.get(ticketDocument.authorId) ??
-			session.load<User>(`users/${ticketDocument.authorId}`).then((value) => value ?? undefined);
+			this.client.documents.users.get(ticketDocument.authorId) ??
+			session.get<User>(`users/${ticketDocument.authorId}`).then((value) => value ?? undefined);
 
 		session.dispose();
 
@@ -59,9 +59,9 @@ class TicketService extends PromptService<"tickets", Ticket, InteractionData> {
 
 		const guildLocale = this.guildLocale;
 		const strings = {
-			markResolved: localise(this.client, "markResolved", guildLocale)(),
-			markUnresolved: localise(this.client, "markUnresolved", guildLocale)(),
-			close: localise(this.client, "close", guildLocale)(),
+			markResolved: this.client.localise("markResolved", guildLocale)(),
+			markUnresolved: this.client.localise("markUnresolved", guildLocale)(),
+			close: this.client.localise("close", guildLocale)(),
 		};
 
 		return {
@@ -140,11 +140,11 @@ class TicketService extends PromptService<"tickets", Ticket, InteractionData> {
 
 		if (isResolved && ticketDocument.isResolved) {
 			const strings = {
-				title: localise(this.client, "alreadyMarkedResolved.title", locale)(),
-				description: localise(this.client, "alreadyMarkedResolved.description", locale)(),
+				title: this.client.localise("alreadyMarkedResolved.title", locale)(),
+				description: this.client.localise("alreadyMarkedResolved.description", locale)(),
 			};
 
-			reply([this.client, this.bot], interaction, {
+			reply(this.client, interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -158,11 +158,11 @@ class TicketService extends PromptService<"tickets", Ticket, InteractionData> {
 
 		if (!(isResolved || ticketDocument.isResolved)) {
 			const strings = {
-				title: localise(this.client, "alreadyMarkedUnresolved.title", locale)(),
-				description: localise(this.client, "alreadyMarkedUnresolved.description", locale)(),
+				title: this.client.localise("alreadyMarkedUnresolved.title", locale)(),
+				description: this.client.localise("alreadyMarkedUnresolved.description", locale)(),
 			};
 
-			reply([this.client, this.bot], interaction, {
+			reply(this.client, interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -178,7 +178,7 @@ class TicketService extends PromptService<"tickets", Ticket, InteractionData> {
 
 		ticketDocument.isResolved = isResolved;
 
-		await session.store(ticketDocument);
+		await session.set(ticketDocument);
 		await session.saveChanges();
 
 		session.dispose();
@@ -194,7 +194,7 @@ class TicketService extends PromptService<"tickets", Ticket, InteractionData> {
 			return;
 		}
 
-		await this.bot.helpers.deleteChannel(channelId).catch(() => {
+		await this.client.bot.helpers.deleteChannel(channelId).catch(() => {
 			this.client.log.warn("Failed to delete ticket channel.");
 		});
 	}

@@ -1,20 +1,20 @@
 import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import * as Logos from "../../../../types";
-import { Client, localise } from "../../../client";
+import { Client } from "../../../client";
 import { parseArguments, reply } from "../../../interactions";
 import { isCollection } from "../../../services/music/music";
 import { OptionTemplate } from "../../command";
 import { collection } from "../../parameters";
 
 const command: OptionTemplate = {
-	name: "loop",
+	id: "loop",
 	type: Discord.ApplicationCommandOptionTypes.SubCommand,
 	handle: handleLoopPlayback,
 	options: [collection],
 };
 
-async function handleLoopPlayback([client, bot]: [Client, Discord.Bot], interaction: Logos.Interaction): Promise<void> {
+async function handleLoopPlayback(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.guildLocale;
 
 	const [{ collection }] = parseArguments(interaction.data?.options, { collection: "boolean" });
@@ -24,7 +24,7 @@ async function handleLoopPlayback([client, bot]: [Client, Discord.Bot], interact
 		return;
 	}
 
-	const musicService = client.services.music.music.get(guildId);
+	const musicService = client.getMusicService(guildId);
 	if (musicService === undefined) {
 		return;
 	}
@@ -38,13 +38,13 @@ async function handleLoopPlayback([client, bot]: [Client, Discord.Bot], interact
 	if (!isOccupied) {
 		const locale = interaction.locale;
 		const strings = {
-			title: localise(client, "music.strings.notPlaying.title", locale)(),
+			title: client.localise("music.strings.notPlaying.title", locale)(),
 			description: {
-				toManage: localise(client, "music.strings.notPlaying.description.toManage", locale)(),
+				toManage: client.localise("music.strings.notPlaying.description.toManage", locale)(),
 			},
 		};
 
-		reply([client, bot], interaction, {
+		reply(client, interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -60,22 +60,20 @@ async function handleLoopPlayback([client, bot]: [Client, Discord.Bot], interact
 		if (current?.content === undefined || !isCollection(current.content)) {
 			const locale = interaction.locale;
 			const strings = {
-				title: localise(client, "music.options.loop.strings.noSongCollection.title", locale)(),
+				title: client.localise("music.options.loop.strings.noSongCollection.title", locale)(),
 				description: {
-					noSongCollection: localise(
-						client,
+					noSongCollection: client.localise(
 						"music.options.loop.strings.noSongCollection.description.noSongCollection",
 						locale,
 					)(),
-					trySongInstead: localise(
-						client,
+					trySongInstead: client.localise(
 						"music.options.loop.strings.noSongCollection.description.trySongInstead",
 						locale,
 					)(),
 				},
 			};
 
-			reply([client, bot], interaction, {
+			reply(client, interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -89,11 +87,11 @@ async function handleLoopPlayback([client, bot]: [Client, Discord.Bot], interact
 	} else if (current?.content === undefined) {
 		const locale = interaction.locale;
 		const strings = {
-			title: localise(client, "music.options.loop.strings.noSong.title", locale)(),
-			description: localise(client, "music.options.loop.strings.noSong.description", locale)(),
+			title: client.localise("music.options.loop.strings.noSong.title", locale)(),
+			description: client.localise("music.options.loop.strings.noSong.description", locale)(),
 		};
 
-		reply([client, bot], interaction, {
+		reply(client, interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -113,12 +111,12 @@ async function handleLoopPlayback([client, bot]: [Client, Discord.Bot], interact
 
 		if (!isLooped) {
 			const strings = {
-				title: localise(client, "music.options.loop.strings.disabled.title", locale)(),
-				description: localise(client, "music.options.loop.strings.disabled.description.songCollection", locale)(),
+				title: client.localise("music.options.loop.strings.disabled.title", locale)(),
+				description: client.localise("music.options.loop.strings.disabled.description.songCollection", locale)(),
 			};
 
 			reply(
-				[client, bot],
+				client,
 				interaction,
 				{
 					embeds: [
@@ -135,12 +133,12 @@ async function handleLoopPlayback([client, bot]: [Client, Discord.Bot], interact
 		}
 
 		const strings = {
-			title: localise(client, "music.options.loop.strings.enabled.title", locale)(),
-			description: localise(client, "music.options.loop.strings.enabled.description.songCollection", locale)(),
+			title: client.localise("music.options.loop.strings.enabled.title", locale)(),
+			description: client.localise("music.options.loop.strings.enabled.description.songCollection", locale)(),
 		};
 
 		reply(
-			[client, bot],
+			client,
 			interaction,
 			{
 				embeds: [
@@ -163,12 +161,12 @@ async function handleLoopPlayback([client, bot]: [Client, Discord.Bot], interact
 
 	if (!isLooped) {
 		const strings = {
-			title: localise(client, "music.options.loop.strings.disabled.title", locale)(),
-			description: localise(client, "music.options.loop.strings.disabled.description.song", locale)(),
+			title: client.localise("music.options.loop.strings.disabled.title", locale)(),
+			description: client.localise("music.options.loop.strings.disabled.description.song", locale)(),
 		};
 
 		reply(
-			[client, bot],
+			client,
 			interaction,
 			{
 				embeds: [
@@ -185,12 +183,12 @@ async function handleLoopPlayback([client, bot]: [Client, Discord.Bot], interact
 	}
 
 	const strings = {
-		title: localise(client, "music.options.loop.strings.enabled.title", locale)(),
-		description: localise(client, "music.options.loop.strings.enabled.description.song", locale)(),
+		title: client.localise("music.options.loop.strings.enabled.title", locale)(),
+		description: client.localise("music.options.loop.strings.enabled.description.song", locale)(),
 	};
 
 	reply(
-		[client, bot],
+		client,
 		interaction,
 		{
 			embeds: [

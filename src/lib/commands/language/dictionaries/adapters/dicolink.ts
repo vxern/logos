@@ -61,10 +61,13 @@ class WordsAPIAdapter extends DictionaryAdapter<Result[]> {
 		const entries: DictionaryEntry[] = [];
 
 		const sources = resultsAll.map((result) => result.source);
-		const resultsDistributed = resultsAll.reduce((distribution, result) => {
-			distribution[result.source]?.push(result);
-			return distribution;
-		}, Object.fromEntries(sources.map((source) => [source, []])) as Record<string, Result[]>);
+		const resultsDistributed = resultsAll.reduce(
+			(distribution, result) => {
+				distribution[result.source]?.push(result);
+				return distribution;
+			},
+			Object.fromEntries(sources.map((source) => [source, []])) as Record<string, Result[]>,
+		);
 		const results = Object.values(resultsDistributed).reduce((a, b) => {
 			return a.length > b.length ? a : b;
 		});

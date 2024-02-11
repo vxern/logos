@@ -1,6 +1,7 @@
 import { FeatureLanguage, LearningLanguage, LocalisationLanguage } from "../../constants/languages";
 import time from "../../constants/time";
 
+// TODO(vxern): Improve.
 /** @since v3.0.0 */
 interface Guild {
 	id: string;
@@ -321,14 +322,13 @@ type VerificationVerdictRequirement = {
 } & ({ type: "fraction"; value: number } | { type: "number"; value: number });
 
 type VerificationActivationRuleType = "account-age";
-type VerificationActivationRule =
-	| {
-			type: VerificationActivationRuleType;
-			value: unknown;
-	  } & {
-			type: "account-age";
-			value: TimeStruct;
-	  };
+type VerificationActivationRule = {
+	type: VerificationActivationRuleType;
+	value: unknown;
+} & {
+	type: "account-age";
+	value: TimeStruct;
+};
 
 type RoleWithIndicator = { roleId: string; indicator: string };
 

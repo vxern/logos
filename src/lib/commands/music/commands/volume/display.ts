@@ -1,13 +1,10 @@
 import * as Discord from "@discordeno/bot";
 import constants from "../../../../../constants/constants";
 import * as Logos from "../../../../../types";
-import { Client, localise } from "../../../../client";
+import { Client } from "../../../../client";
 import { getShowButton, parseArguments, reply } from "../../../../interactions";
 
-async function handleDisplayVolume(
-	[client, bot]: [Client, Discord.Bot],
-	interaction: Logos.Interaction,
-): Promise<void> {
+async function handleDisplayVolume(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const [{ show: showParameter }] = parseArguments(interaction.data?.options, { show: "boolean" });
 
 	const show = interaction.show ?? showParameter ?? false;
@@ -18,7 +15,7 @@ async function handleDisplayVolume(
 		return;
 	}
 
-	const musicService = client.services.music.music.get(guildId);
+	const musicService = client.getMusicService(guildId);
 	if (musicService === undefined) {
 		return;
 	}
@@ -32,13 +29,13 @@ async function handleDisplayVolume(
 	if (!isOccupied) {
 		const locale = interaction.locale;
 		const strings = {
-			title: localise(client, "music.strings.notPlaying.title", locale)(),
+			title: client.localise("music.strings.notPlaying.title", locale)(),
 			description: {
-				toCheck: localise(client, "music.strings.notPlaying.description.toCheck", locale)(),
+				toCheck: client.localise("music.strings.notPlaying.description.toCheck", locale)(),
 			},
 		};
 
-		reply([client, bot], interaction, {
+		reply(client, interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -53,12 +50,8 @@ async function handleDisplayVolume(
 	const volume = musicService.volume;
 
 	const strings = {
-		title: localise(client, "music.options.volume.options.display.strings.volume.title", locale)(),
-		description: localise(
-			client,
-			"music.options.volume.options.display.strings.volume.description",
-			locale,
-		)({ volume }),
+		title: client.localise("music.options.volume.options.display.strings.volume.title", locale)(),
+		description: client.localise("music.options.volume.options.display.strings.volume.description", locale)({ volume }),
 	};
 
 	const showButton = getShowButton(client, interaction, { locale });
@@ -68,7 +61,7 @@ async function handleDisplayVolume(
 		: [{ type: Discord.MessageComponentTypes.ActionRow, components: [showButton] }];
 
 	reply(
-		[client, bot],
+		client,
 		interaction,
 		{
 			embeds: [

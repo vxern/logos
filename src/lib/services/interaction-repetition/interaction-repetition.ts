@@ -1,6 +1,6 @@
 import * as Discord from "@discordeno/bot";
 import constants from "../../../constants/constants";
-import { handleInteractionCreate, localise } from "../../client";
+import * as Logos from "../../../types";
 import {
 	createInteractionCollector,
 	decodeId,
@@ -35,40 +35,35 @@ class InteractionRepetitionService extends GlobalService {
 			return;
 		}
 
-		await postponeReply([this.client, this.bot], interactionRaw);
+		await postponeReply(this.client, interactionRaw);
 
-		const confirmCustomId = createInteractionCollector([this.client, this.bot], {
+		const confirmCustomId = createInteractionCollector(this.client, {
 			type: Discord.InteractionTypes.MessageComponent,
 			userId: interactionRaw.user.id,
 			limit: 1,
 			onCollect: async (selection) => {
-				deleteReply([this.client, this.bot], interactionRaw);
+				deleteReply(this.client, interactionRaw);
 
-				const originalInteraction = this.client.cache.interactions.get(interactionId);
+				const originalInteraction = this.client.unregisterInteraction(BigInt(interactionId));
 				if (originalInteraction === undefined) {
 					return;
 				}
 
-				this.client.cache.interactions.delete(interactionId);
+				deleteReply(this.client, originalInteraction);
 
-				deleteReply([this.client, this.bot], originalInteraction);
+				const interactionSpoofed = InteractionRepetitionService.#spoofInteraction(originalInteraction, {
+					using: selection,
+				});
 
-				const interactionSpoofed: Discord.Interaction = {
-					...originalInteraction,
-					type: Discord.InteractionTypes.ApplicationCommand,
-					token: selection.token,
-					id: selection.id,
-				};
-
-				await handleInteractionCreate([this.client, this.bot], interactionSpoofed, { show: true });
+				await this.client.handleInteraction(interactionSpoofed, { show: true });
 			},
 		});
 
-		const cancelCustomId = createInteractionCollector([this.client, this.bot], {
+		const cancelCustomId = createInteractionCollector(this.client, {
 			type: Discord.InteractionTypes.MessageComponent,
 			userId: interactionRaw.user.id,
 			limit: 1,
-			onCollect: async (_) => deleteReply([this.client, this.bot], interactionRaw),
+			onCollect: async (_) => deleteReply(this.client, interactionRaw),
 		});
 
 		const localeData = await getLocaleData(this.client, interactionRaw);
@@ -76,13 +71,13 @@ class InteractionRepetitionService extends GlobalService {
 		const locale = localeData.locale;
 
 		const strings = {
-			title: localise(this.client, "interactions.show.sureToShow.title", locale)(),
-			description: localise(this.client, "interactions.show.sureToShow.description", locale)(),
-			yes: localise(this.client, "interactions.show.sureToShow.yes", locale)(),
-			no: localise(this.client, "interactions.show.sureToShow.no", locale)(),
+			title: this.client.localise("interactions.show.sureToShow.title", locale)(),
+			description: this.client.localise("interactions.show.sureToShow.description", locale)(),
+			yes: this.client.localise("interactions.show.sureToShow.yes", locale)(),
+			no: this.client.localise("interactions.show.sureToShow.no", locale)(),
 		};
 
-		editReply([this.client, this.bot], interactionRaw, {
+		editReply(this.client, interactionRaw, {
 			embeds: [{ title: strings.title, description: strings.description, color: constants.colors.dullYellow }],
 			components: [
 				{
@@ -112,11 +107,23 @@ class InteractionRepetitionService extends GlobalService {
 			return;
 		}
 
-		if (!this.client.commands.showable.includes(commandName)) {
+		if (!this.client.isShowable(commandName)) {
 			return;
 		}
 
-		this.client.cache.interactions.set(interaction.id.toString(), interaction);
+		this.client.registerInteraction(interaction);
+	}
+
+	static #spoofInteraction(
+		interaction: Discord.Interaction | Logos.Interaction,
+		{ using }: { using: Discord.Interaction },
+	): Discord.Interaction | Logos.Interaction {
+		return {
+			...interaction,
+			type: Discord.InteractionTypes.ApplicationCommand,
+			token: using.token,
+			id: using.id,
+		};
 	}
 }
 

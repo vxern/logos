@@ -1,7 +1,7 @@
 import * as dotenv from "dotenv";
 import * as fs from "fs/promises";
 import { Locale, LocalisationLanguage, getLocalisationLanguageByLocale } from "./constants/languages";
-import { Client, initialiseClient } from "./lib/client";
+import { Client } from "./lib/client";
 
 async function readDotEnvFile(fileUri: string, isTemplate = false): Promise<Record<string, string> | undefined> {
 	const kind = isTemplate ? "environment template" : "environment";
@@ -168,6 +168,7 @@ async function setup(): Promise<void> {
 	readEnvironment({ envConfiguration, templateEnvConfiguration });
 
 	const environmentProvisional: Record<keyof Client["environment"], string | boolean | undefined> = {
+		isDebug: process.env.DEBUG !== undefined && process.env.DEBUG === "true",
 		discordSecret: process.env.SECRET_DISCORD,
 		deeplSecret: process.env.SECRET_DEEPL,
 		rapidApiSecret: process.env.SECRET_RAPID_API,
@@ -189,19 +190,21 @@ async function setup(): Promise<void> {
 
 	const localisations = await loadLocalisations("./assets/localisations");
 
-	initialiseClient(environment, { rateLimiting: new Map() }, localisations);
+	let certificate: Buffer | undefined;
+	if (environment.ravendbSecure) {
+		certificate = await fs.readFile(".cert.pfx");
+	}
+
+	Client.create({ environment, localisations, certificate });
 }
 
 function customiseGlobals(): void {
-	const { info, warn, error } = console;
+	const { info, warn } = console;
 	console.info = (message, ...params) => {
 		return info(`[i] ${message}`, ...params);
 	};
 	console.warn = (message, ...params) => {
 		return warn(`[?] ${message}`, ...params);
-	};
-	console.error = (message, ...params) => {
-		return error(`[!] ${message}`, ...params);
 	};
 }
 

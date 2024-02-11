@@ -1,3 +1,4 @@
+// TODO(vxern): Improve.
 interface EntryRequest {
 	id: string;
 	guildId: string;

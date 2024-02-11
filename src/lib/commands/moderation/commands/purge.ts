@@ -5,14 +5,7 @@ import time from "../../../../constants/time";
 import defaults from "../../../../defaults";
 import { MentionTypes, mention, timestamp, trim } from "../../../../formatting";
 import * as Logos from "../../../../types";
-import {
-	Client,
-	autocompleteMembers,
-	isValidSnowflake,
-	localise,
-	pluralise,
-	resolveInteractionToMember,
-} from "../../../client";
+import { Client, isValidSnowflake } from "../../../client";
 import { Guild } from "../../../database/guild";
 import diagnostics from "../../../diagnostics";
 import {
@@ -28,41 +21,35 @@ import { CommandTemplate } from "../../command";
 import { user } from "../../parameters";
 
 const command: CommandTemplate = {
-	name: "purge",
+	id: "purge",
 	type: Discord.ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ["MODERATE_MEMBERS"],
 	handle: handlePurgeMessages,
 	handleAutocomplete: handlePurgeMessagesAutocomplete,
 	options: [
 		{
-			name: "start",
+			id: "start",
 			type: Discord.ApplicationCommandOptionTypes.String,
 			required: true,
 		},
 		{
-			name: "end",
+			id: "end",
 			type: Discord.ApplicationCommandOptionTypes.String,
 		},
-		{ ...user, name: "author", required: false },
+		{ ...user, id: "author", required: false },
 	],
 };
 
-async function handlePurgeMessagesAutocomplete(
-	[client, bot]: [Client, Discord.Bot],
-	interaction: Logos.Interaction,
-): Promise<void> {
+async function handlePurgeMessagesAutocomplete(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const [{ author }] = parseArguments(interaction.data?.options, {});
 	if (author === undefined) {
 		return;
 	}
 
-	autocompleteMembers([client, bot], interaction, author, { includeBots: true });
+	client.autocompleteMembers(interaction, { identifier: author, options: { includeBots: true } });
 }
 
-async function handlePurgeMessages(
-	[client, bot]: [Client, Discord.Bot],
-	interaction: Logos.Interaction,
-): Promise<void> {
+async function handlePurgeMessages(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const language = interaction.language;
 	const locale = interaction.locale;
 
@@ -74,8 +61,8 @@ async function handlePurgeMessages(
 	const session = client.database.openSession();
 
 	const guildDocument =
-		client.cache.documents.guilds.get(guildId.toString()) ??
-		(await session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
+		client.documents.guilds.get(guildId.toString()) ??
+		(await session.get<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
 
 	session.dispose();
 
@@ -93,17 +80,18 @@ async function handlePurgeMessages(
 		return;
 	}
 
-	postponeReply([client, bot], interaction);
+	postponeReply(client, interaction);
 
 	let authorId: bigint | undefined;
 
 	if (user !== undefined) {
-		const authorMember = resolveInteractionToMember(
-			[client, bot],
+		const authorMember = client.resolveInteractionToMember(
 			interaction,
-			user,
 			{
-				includeBots: true,
+				identifier: user,
+				options: {
+					includeBots: true,
+				},
 			},
 			{ locale },
 		);
@@ -119,7 +107,7 @@ async function handlePurgeMessages(
 	const isStartValid = isValidSnowflake(start);
 	const isEndValid = provisionalEnd === undefined || isValidSnowflake(provisionalEnd);
 	if (!(isStartValid && isEndValid)) {
-		displaySnowflakesInvalidError([client, bot], interaction, [!isStartValid, !isEndValid], { locale });
+		displaySnowflakesInvalidError(client, interaction, [!isStartValid, !isEndValid], { locale });
 		return;
 	}
 
@@ -130,18 +118,18 @@ async function handlePurgeMessages(
 
 	const end =
 		provisionalEnd ??
-		(await bot.rest
+		(await client.bot.rest
 			.getMessages(channelId, { limit: 1 })
 			.catch(() => undefined)
 			.then((messages) => messages?.at(0)?.id?.toString()));
 
 	if (end === undefined) {
-		displayFailedError([client, bot], interaction, { locale });
+		displayFailedError(client, interaction, { locale });
 		return;
 	}
 
 	if (start === end) {
-		displayIdsNotDifferentError([client, bot], interaction, { locale });
+		displayIdsNotDifferentError(client, interaction, { locale });
 		return;
 	}
 
@@ -158,17 +146,17 @@ async function handlePurgeMessages(
 	const isStartInFuture = startTimestamp > now;
 	const isEndInFuture = endTimestamp > now;
 	if (isStartInFuture || isEndInFuture) {
-		displaySnowflakesInvalidError([client, bot], interaction, [isStartInFuture, isEndInFuture], { locale });
+		displaySnowflakesInvalidError(client, interaction, [isStartInFuture, isEndInFuture], { locale });
 		return;
 	}
 
 	const [startMessage, endMessage] = await Promise.all([
-		bot.rest.getMessage(channelId, startMessageId).catch(() => {
+		client.bot.rest.getMessage(channelId, startMessageId).catch(() => {
 			client.log.warn(`Failed to get start message, ID ${startMessageId}.`);
 
 			return undefined;
 		}),
-		bot.rest.getMessage(channelId, endMessageId).catch(() => {
+		client.bot.rest.getMessage(channelId, endMessageId).catch(() => {
 			client.log.warn(`Failed to get end message, ID ${endMessageId}.`);
 
 			return undefined;
@@ -178,7 +166,7 @@ async function handlePurgeMessages(
 	const notExistsStart = startMessage === undefined;
 	const notExistsEnd = endMessage === undefined;
 	if (notExistsStart || notExistsEnd) {
-		displaySnowflakesInvalidError([client, bot], interaction, [notExistsStart, notExistsEnd], { locale });
+		displaySnowflakesInvalidError(client, interaction, [notExistsStart, notExistsEnd], { locale });
 		return;
 	}
 
@@ -193,21 +181,21 @@ async function handlePurgeMessages(
 
 	const getMessageFields = (): Discord.CamelizedDiscordEmbedField[] => {
 		const strings = {
-			start: localise(client, "purge.strings.start", locale)(),
+			start: client.localise("purge.strings.start", locale)(),
 			postedStart: (startMessageContent !== undefined
-				? localise(client, "purge.strings.posted", locale)
-				: localise(client, "purge.strings.embedPosted", locale))({
-				relative_timestamp: timestamp(Number(new Date(startMessage.timestamp))),
+				? client.localise("purge.strings.posted", locale)
+				: client.localise("purge.strings.embedPosted", locale))({
+				relative_timestamp: timestamp(Date.parse(startMessage.timestamp)),
 				user_mention: mention(BigInt(startMessage.author.id), MentionTypes.User),
 			}),
-			end: localise(client, "purge.strings.end", locale)(),
+			end: client.localise("purge.strings.end", locale)(),
 			postedEnd: (endMessageContent !== undefined
-				? localise(client, "purge.strings.posted", locale)
-				: localise(client, "purge.strings.embedPosted", locale))({
-				relative_timestamp: timestamp(Number(new Date(endMessage.timestamp))),
+				? client.localise("purge.strings.posted", locale)
+				: client.localise("purge.strings.embedPosted", locale))({
+				relative_timestamp: timestamp(Date.parse(endMessage.timestamp)),
 				user_mention: mention(BigInt(endMessage.author.id), MentionTypes.User),
 			}),
-			messagesFound: localise(client, "purge.strings.messagesFound", locale)(),
+			messagesFound: client.localise("purge.strings.messagesFound", locale)(),
 		};
 
 		return [
@@ -230,8 +218,8 @@ async function handlePurgeMessages(
 	const getIndexingProgressResponse = (): Discord.InteractionCallbackData => {
 		const strings = {
 			indexing: {
-				title: localise(client, "purge.strings.indexing.title", locale)(),
-				description: localise(client, "purge.strings.indexing.description", locale)(),
+				title: client.localise("purge.strings.indexing.title", locale)(),
+				description: client.localise("purge.strings.indexing.description", locale)(),
 			},
 		};
 
@@ -247,10 +235,10 @@ async function handlePurgeMessages(
 		};
 	};
 
-	editReply([client, bot], interaction, getIndexingProgressResponse());
+	editReply(client, interaction, getIndexingProgressResponse());
 
 	const indexProgressIntervalId = setInterval(
-		() => editReply([client, bot], interaction, getIndexingProgressResponse()),
+		() => editReply(client, interaction, getIndexingProgressResponse()),
 		1500,
 	);
 
@@ -260,25 +248,23 @@ async function handlePurgeMessages(
 			clearInterval(indexProgressIntervalId);
 
 			const strings = {
-				title: localise(client, "purge.strings.rangeTooBig.title", locale)(),
+				title: client.localise("purge.strings.rangeTooBig.title", locale)(),
 				description: {
-					rangeTooBig: localise(
-						client,
+					rangeTooBig: client.localise(
 						"purge.strings.rangeTooBig.description.rangeTooBig",
 						locale,
 					)({
-						messages: pluralise(
-							client,
+						messages: client.pluralise(
 							"purge.strings.rangeTooBig.description.rangeTooBig.messages",
 							language,
 							defaults.MAX_INDEXABLE_MESSAGES,
 						),
 					}),
-					trySmaller: localise(client, "purge.strings.rangeTooBig.description.trySmaller", locale)(),
+					trySmaller: client.localise("purge.strings.rangeTooBig.description.trySmaller", locale)(),
 				},
 			};
 
-			editReply([client, bot], interaction, {
+			editReply(client, interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -290,7 +276,7 @@ async function handlePurgeMessages(
 			return;
 		}
 
-		const newMessages = await bot.rest
+		const newMessages = await client.bot.rest
 			.getMessages(channelId, {
 				after: messages.length === 0 ? startMessage.id : messages.at(-1)?.id,
 				limit: 100,
@@ -343,15 +329,15 @@ async function handlePurgeMessages(
 	if (messages.length === 0) {
 		const strings = {
 			indexed: {
-				title: localise(client, "purge.strings.indexed.title", locale)(),
+				title: client.localise("purge.strings.indexed.title", locale)(),
 				description: {
-					none: localise(client, "purge.strings.indexed.description.none", locale)(),
-					tryDifferentQuery: localise(client, "purge.strings.indexed.description.tryDifferentQuery", locale)(),
+					none: client.localise("purge.strings.indexed.description.none", locale)(),
+					tryDifferentQuery: client.localise("purge.strings.indexed.description.tryDifferentQuery", locale)(),
 				},
 			},
 		};
 
-		editReply([client, bot], interaction, {
+		editReply(client, interaction, {
 			embeds: [
 				{
 					title: strings.indexed.title,
@@ -368,46 +354,42 @@ async function handlePurgeMessages(
 
 	if (messages.length >= defaults.MAX_DELETABLE_MESSAGES) {
 		isShouldContinue = await new Promise<boolean>((resolve) => {
-			const continueId = createInteractionCollector([client, bot], {
+			const continueId = createInteractionCollector(client, {
 				type: Discord.InteractionTypes.MessageComponent,
 				onCollect: async (selection) => {
-					acknowledge([client, bot], selection);
+					acknowledge(client, selection);
 					resolve(true);
 				},
 			});
 
-			const cancelId = createInteractionCollector([client, bot], {
+			const cancelId = createInteractionCollector(client, {
 				type: Discord.InteractionTypes.MessageComponent,
 				onCollect: async (selection) => {
-					acknowledge([client, bot], selection);
+					acknowledge(client, selection);
 					resolve(false);
 				},
 			});
 
 			const strings = {
 				indexed: {
-					title: localise(client, "purge.strings.indexed.title", locale)(),
+					title: client.localise("purge.strings.indexed.title", locale)(),
 					description: {
-						tooMany: localise(
-							client,
+						tooMany: client.localise(
 							"purge.strings.indexed.description.tooMany",
 							locale,
 						)({
-							messages: pluralise(
-								client,
+							messages: client.pluralise(
 								"purge.strings.indexed.description.tooMany.messages",
 								language,
 								messages.length,
 							),
 							maximum_deletable: defaults.MAX_DELETABLE_MESSAGES,
 						}),
-						limited: localise(
-							client,
+						limited: client.localise(
 							"purge.strings.indexed.description.limited",
 							locale,
 						)({
-							messages: pluralise(
-								client,
+							messages: client.pluralise(
 								"purge.strings.indexed.description.limited.messages",
 								language,
 								defaults.MAX_DELETABLE_MESSAGES,
@@ -416,27 +398,25 @@ async function handlePurgeMessages(
 					},
 				},
 				continue: {
-					title: localise(client, "purge.strings.continue.title", locale)(),
-					description: localise(
-						client,
+					title: client.localise("purge.strings.continue.title", locale)(),
+					description: client.localise(
 						"purge.strings.continue.description",
 						locale,
 					)({
-						messages: pluralise(
-							client,
+						messages: client.pluralise(
 							"purge.strings.continue.description.messages",
 							language,
 							defaults.MAX_DELETABLE_MESSAGES,
 						),
-						allMessages: pluralise(client, "purge.strings.continue.description.allMessages", language, messages.length),
+						allMessages: client.pluralise("purge.strings.continue.description.allMessages", language, messages.length),
 						channel_mention: channelMention,
 					}),
 				},
-				yes: localise(client, "purge.strings.yes", locale)(),
-				no: localise(client, "purge.strings.no", locale)(),
+				yes: client.localise("purge.strings.yes", locale)(),
+				no: client.localise("purge.strings.no", locale)(),
 			};
 
-			editReply([client, bot], interaction, {
+			editReply(client, interaction, {
 				embeds: [
 					{
 						title: strings.indexed.title,
@@ -473,7 +453,7 @@ async function handlePurgeMessages(
 		});
 
 		if (!isShouldContinue) {
-			deleteReply([client, bot], interaction);
+			deleteReply(client, interaction);
 			return;
 		}
 
@@ -483,51 +463,49 @@ async function handlePurgeMessages(
 	const isShouldPurge =
 		isShouldContinue ||
 		(await new Promise<boolean>((resolve) => {
-			const continueId = createInteractionCollector([client, bot], {
+			const continueId = createInteractionCollector(client, {
 				type: Discord.InteractionTypes.MessageComponent,
 				onCollect: async (selection) => {
-					acknowledge([client, bot], selection);
+					acknowledge(client, selection);
 					resolve(true);
 				},
 			});
 
-			const cancelId = createInteractionCollector([client, bot], {
+			const cancelId = createInteractionCollector(client, {
 				type: Discord.InteractionTypes.MessageComponent,
 				onCollect: async (selection) => {
-					acknowledge([client, bot], selection);
+					acknowledge(client, selection);
 					resolve(false);
 				},
 			});
 
 			const strings = {
 				indexed: {
-					title: localise(client, "purge.strings.indexed.title", locale)(),
+					title: client.localise("purge.strings.indexed.title", locale)(),
 					description: {
-						some: localise(
-							client,
+						some: client.localise(
 							"purge.strings.indexed.description.some",
 							locale,
 						)({
-							messages: pluralise(client, "purge.strings.indexed.description.some.messages", language, messages.length),
+							messages: client.pluralise("purge.strings.indexed.description.some.messages", language, messages.length),
 						}),
 					},
 				},
 				sureToPurge: {
-					title: localise(client, "purge.strings.sureToPurge.title", locale)(),
-					description: localise(
-						client,
+					title: client.localise("purge.strings.sureToPurge.title", locale)(),
+					description: client.localise(
 						"purge.strings.sureToPurge.description",
 						locale,
 					)({
-						messages: pluralise(client, "purge.strings.sureToPurge.description.messages", language, messages.length),
+						messages: client.pluralise("purge.strings.sureToPurge.description.messages", language, messages.length),
 						channel_mention: channelMention,
 					}),
 				},
-				yes: localise(client, "purge.strings.yes", locale)(),
-				no: localise(client, "purge.strings.no", locale)(),
+				yes: client.localise("purge.strings.yes", locale)(),
+				no: client.localise("purge.strings.no", locale)(),
 			};
 
-			editReply([client, bot], interaction, {
+			editReply(client, interaction, {
 				embeds: [
 					{
 						title: strings.indexed.title,
@@ -564,35 +542,29 @@ async function handlePurgeMessages(
 		}));
 
 	if (!isShouldPurge) {
-		deleteReply([client, bot], interaction);
+		deleteReply(client, interaction);
 		return;
 	}
 
 	{
 		const strings = {
 			purging: {
-				title: localise(client, "purge.strings.purging.title", locale)(),
+				title: client.localise("purge.strings.purging.title", locale)(),
 				description: {
-					purging: localise(
-						client,
+					purging: client.localise(
 						"purge.strings.purging.description.purging",
 						locale,
 					)({
-						messages: pluralise(
-							client,
-							"purge.strings.purging.description.purging.messages",
-							language,
-							messages.length,
-						),
+						messages: client.pluralise("purge.strings.purging.description.purging.messages", language, messages.length),
 						channel_mention: channelMention,
 					}),
-					mayTakeTime: localise(client, "purge.strings.purging.description.mayTakeTime", locale)(),
-					onceComplete: localise(client, "purge.strings.purging.description.onceComplete", locale)(),
+					mayTakeTime: client.localise("purge.strings.purging.description.mayTakeTime", locale)(),
+					onceComplete: client.localise("purge.strings.purging.description.onceComplete", locale)(),
 				},
 			},
 		};
 
-		editReply([client, bot], interaction, {
+		editReply(client, interaction, {
 			embeds: [
 				{
 					title: strings.purging.title,
@@ -611,15 +583,15 @@ async function handlePurgeMessages(
 	);
 
 	const [guild, member, channel] = [
-		client.cache.guilds.get(guildId),
-		client.cache.members.get(Discord.snowflakeToBigint(`${interaction.user.id}${guildId}`)),
-		client.cache.channels.get(channelId),
+		client.entities.guilds.get(guildId),
+		client.entities.members.get(Discord.snowflakeToBigint(`${interaction.user.id}${guildId}`)),
+		client.entities.channels.get(channelId),
 	];
 	if (guild === undefined || member === undefined || channel === undefined) {
 		return;
 	}
 
-	const journallingService = client.services.journalling.get(guild.id);
+	const journallingService = client.getJournallingService(guild.id);
 
 	if (configuration.journaling) {
 		journallingService?.log("purgeBegin", { args: [member, channel, messages.length] });
@@ -627,7 +599,7 @@ async function handlePurgeMessages(
 
 	const twoWeeksAgo = now - time.week * 2 + time.hour;
 
-	const firstBulkDeletableIndex = messages.findIndex((message) => Number(message.timestamp) > twoWeeksAgo);
+	const firstBulkDeletableIndex = messages.findIndex((message) => Date.parse(message.timestamp) > twoWeeksAgo);
 	const bulkDeletable = firstBulkDeletableIndex !== -1 ? messages.slice(firstBulkDeletableIndex, messages.length) : [];
 	const nonBulkDeletable = messages.slice(
 		0,
@@ -638,7 +610,7 @@ async function handlePurgeMessages(
 
 	const responseDeletionTimeoutId = setTimeout(async () => {
 		responseDeleted = true;
-		deleteReply([client, bot], interaction);
+		deleteReply(client, interaction);
 	}, time.minute * 1);
 
 	let deletedCount = 0;
@@ -650,7 +622,7 @@ async function handlePurgeMessages(
 		for (const chunk of bulkDeletableChunks) {
 			const messageIds = chunk.map((message) => message.id);
 
-			await bot.rest.deleteMessages(channelId, messageIds).catch((reason) => {
+			await client.bot.rest.deleteMessages(channelId, messageIds).catch((reason) => {
 				client.log.warn(
 					`Failed to delete ${messageIds.length} message(s) from ${diagnostics.display.channel(channelId)}:`,
 					reason,
@@ -664,7 +636,7 @@ async function handlePurgeMessages(
 	}
 
 	for (const message of nonBulkDeletable) {
-		await bot.rest
+		await client.bot.rest
 			.deleteMessage(channelId, message.id)
 			.catch((reason) => client.log.warn(`Failed to delete ${diagnostics.display.message(message)}:`, reason));
 
@@ -692,19 +664,18 @@ async function handlePurgeMessages(
 	{
 		const strings = {
 			purged: {
-				title: localise(client, "purge.strings.purged.title", locale)(),
-				description: localise(
-					client,
+				title: client.localise("purge.strings.purged.title", locale)(),
+				description: client.localise(
 					"purge.strings.purged.description",
 					locale,
 				)({
-					messages: pluralise(client, "purge.strings.purged.description.messages", language, deletedCount),
+					messages: client.pluralise("purge.strings.purged.description.messages", language, deletedCount),
 					channel_mention: channelMention,
 				}),
 			},
 		};
 
-		editReply([client, bot], interaction, {
+		editReply(client, interaction, {
 			embeds: [
 				{
 					title: strings.purged.title,
@@ -718,29 +689,29 @@ async function handlePurgeMessages(
 }
 
 async function displaySnowflakesInvalidError(
-	[client, bot]: [Client, Discord.Bot],
+	client: Client,
 	interaction: Logos.Interaction,
 	[isStartInvalid, isEndInvalid]: [boolean, boolean],
 	{ locale }: { locale: Locale },
 ): Promise<void> {
 	const strings = {
 		start: {
-			title: localise(client, "purge.strings.invalid.start.title", locale)(),
-			description: localise(client, "purge.strings.invalid.start.description", locale)(),
+			title: client.localise("purge.strings.invalid.start.title", locale)(),
+			description: client.localise("purge.strings.invalid.start.description", locale)(),
 		},
 		end: {
-			title: localise(client, "purge.strings.invalid.end.title", locale)(),
-			description: localise(client, "purge.strings.invalid.end.description", locale)(),
+			title: client.localise("purge.strings.invalid.end.title", locale)(),
+			description: client.localise("purge.strings.invalid.end.description", locale)(),
 		},
 		both: {
-			title: localise(client, "purge.strings.invalid.both.title", locale)(),
-			description: localise(client, "purge.strings.invalid.both.description", locale)(),
+			title: client.localise("purge.strings.invalid.both.title", locale)(),
+			description: client.localise("purge.strings.invalid.both.description", locale)(),
 		},
 	};
 
 	const areBothInvalid = isStartInvalid && isEndInvalid;
 
-	editReply([client, bot], interaction, {
+	editReply(client, interaction, {
 		embeds: [
 			{
 				...(areBothInvalid
@@ -749,14 +720,14 @@ async function displaySnowflakesInvalidError(
 							description: strings.both.description,
 					  }
 					: isStartInvalid
-					? {
-							title: strings.start.title,
-							description: strings.start.description,
-					  }
-					: {
-							title: strings.end.title,
-							description: strings.end.description,
-					  }),
+					  ? {
+								title: strings.start.title,
+								description: strings.start.description,
+						  }
+					  : {
+								title: strings.end.title,
+								description: strings.end.description,
+						  }),
 				color: constants.colors.red,
 			},
 		],
@@ -764,16 +735,16 @@ async function displaySnowflakesInvalidError(
 }
 
 async function displayIdsNotDifferentError(
-	[client, bot]: [Client, Discord.Bot],
+	client: Client,
 	interaction: Logos.Interaction,
 	{ locale }: { locale: Locale },
 ): Promise<void> {
 	const strings = {
-		title: localise(client, "purge.strings.idsNotDifferent.title", locale)(),
-		description: localise(client, "purge.strings.idsNotDifferent.description", locale)(),
+		title: client.localise("purge.strings.idsNotDifferent.title", locale)(),
+		description: client.localise("purge.strings.idsNotDifferent.description", locale)(),
 	};
 
-	editReply([client, bot], interaction, {
+	editReply(client, interaction, {
 		embeds: [
 			{
 				title: strings.title,
@@ -785,16 +756,16 @@ async function displayIdsNotDifferentError(
 }
 
 async function displayFailedError(
-	[client, bot]: [Client, Discord.Bot],
+	client: Client,
 	interaction: Logos.Interaction,
 	{ locale }: { locale: Locale },
 ): Promise<void> {
 	const strings = {
-		title: localise(client, "purge.strings.failed.title", locale)(),
-		description: localise(client, "purge.strings.failed.description", locale)(),
+		title: client.localise("purge.strings.failed.title", locale)(),
+		description: client.localise("purge.strings.failed.description", locale)(),
 	};
 
-	editReply([client, bot], interaction, {
+	editReply(client, interaction, {
 		embeds: [
 			{
 				title: strings.title,
@@ -817,7 +788,7 @@ function getMessageContent(
 	const content = trim(message.content ?? "", 500).trim();
 	if (content.length === 0) {
 		const strings = {
-			noContent: localise(client, "purge.strings.noContent", locale)(),
+			noContent: client.localise("purge.strings.noContent", locale)(),
 		};
 
 		return `> *${strings.noContent}*`;

@@ -4,7 +4,7 @@ import { Locale } from "../../../../constants/languages";
 import defaults from "../../../../defaults";
 import { trim } from "../../../../formatting";
 import * as Logos from "../../../../types";
-import { Client, localise } from "../../../client";
+import { Client } from "../../../client";
 import { timeStructToMilliseconds } from "../../../database/guild";
 import { Guild } from "../../../database/guild";
 import { Resource } from "../../../database/resource";
@@ -22,7 +22,7 @@ import { verifyIsWithinLimits } from "../../../utils";
 import { CommandTemplate } from "../../command";
 
 const command: CommandTemplate = {
-	name: "resource",
+	id: "resource",
 	type: Discord.ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ["VIEW_CHANNEL"],
 	handle: handleSubmitResource,
@@ -30,10 +30,7 @@ const command: CommandTemplate = {
 
 type ResourceError = "failure";
 
-async function handleSubmitResource(
-	[client, bot]: [Client, Discord.Bot],
-	interaction: Logos.Interaction,
-): Promise<void> {
+async function handleSubmitResource(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.locale;
 
 	const guildId = interaction.guildId;
@@ -44,8 +41,8 @@ async function handleSubmitResource(
 	let session = client.database.openSession();
 
 	const guildDocument =
-		client.cache.documents.guilds.get(guildId.toString()) ??
-		(await session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
+		client.documents.guilds.get(guildId.toString()) ??
+		(await session.get<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
 
 	session.dispose();
 
@@ -58,7 +55,7 @@ async function handleSubmitResource(
 		return;
 	}
 
-	const guild = client.cache.guilds.get(guildId);
+	const guild = client.entities.guilds.get(guildId);
 	if (guild === undefined) {
 		return;
 	}
@@ -71,8 +68,8 @@ async function handleSubmitResource(
 	session = client.database.openSession();
 
 	const userDocument =
-		client.cache.documents.users.get(interaction.user.id.toString()) ??
-		(await session.load<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined)) ??
+		client.documents.users.get(interaction.user.id.toString()) ??
+		(await session.get<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined)) ??
 		(await (async () => {
 			const userDocument = {
 				...({
@@ -82,7 +79,7 @@ async function handleSubmitResource(
 				} satisfies User),
 				"@metadata": { "@collection": "Users" },
 			};
-			await session.store(userDocument);
+			await session.set(userDocument);
 			await session.saveChanges();
 
 			return userDocument as User;
@@ -95,7 +92,7 @@ async function handleSubmitResource(
 	}
 
 	const compositeIdPartial = `${guildId}/${interaction.user.id}`;
-	const resourceDocuments = Array.from(client.cache.documents.resources.entries())
+	const resourceDocuments = Array.from(client.documents.resources.entries())
 		.filter(([key, _]) => key.startsWith(compositeIdPartial))
 		.map(([_, value]) => value);
 	const intervalMilliseconds = timeStructToMilliseconds(configuration.rateLimit?.within ?? defaults.RESOURCE_INTERVAL);
@@ -107,11 +104,11 @@ async function handleSubmitResource(
 		)
 	) {
 		const strings = {
-			title: localise(client, "resource.strings.tooMany.title", locale)(),
-			description: localise(client, "resource.strings.tooMany.description", locale)(),
+			title: client.localise("resource.strings.tooMany.title", locale)(),
+			description: client.localise("resource.strings.tooMany.description", locale)(),
 		};
 
-		reply([client, bot], interaction, {
+		reply(client, interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -123,15 +120,15 @@ async function handleSubmitResource(
 		return;
 	}
 
-	const resourceService = client.services.prompts.resources.get(guild.id);
+	const resourceService = client.getPromptService(guild.id, { type: "resources" });
 	if (resourceService === undefined) {
 		return;
 	}
 
-	createModalComposer<Resource["answers"]>([client, bot], interaction, {
+	createModalComposer<Resource["answers"]>(client, interaction, {
 		modal: generateResourceModal(client, { locale }),
 		onSubmit: async (submission, answers) => {
-			await postponeReply([client, bot], submission);
+			await postponeReply(client, submission);
 
 			const session = client.database.openSession();
 
@@ -147,18 +144,18 @@ async function handleSubmitResource(
 				} satisfies Resource),
 				"@metadata": { "@collection": "Resources" },
 			};
-			await session.store(resourceDocument);
+			await session.set(resourceDocument);
 			await session.saveChanges();
 			session.dispose();
 
 			if (configuration.journaling) {
-				const journallingService = client.services.journalling.get(guild.id);
+				const journallingService = client.getJournallingService(guild.id);
 				journallingService?.log("resourceSend", { args: [member, resourceDocument] });
 			}
 
 			const userId = BigInt(userDocument.account.id);
 
-			const user = client.cache.users.get(userId);
+			const user = client.entities.users.get(userId);
 			if (user === undefined) {
 				return "failure";
 			}
@@ -174,11 +171,11 @@ async function handleSubmitResource(
 			resourceService.registerHandler(compositeId);
 
 			const strings = {
-				title: localise(client, "resource.strings.sent.title", locale)(),
-				description: localise(client, "resource.strings.sent.description", locale)(),
+				title: client.localise("resource.strings.sent.title", locale)(),
+				description: client.localise("resource.strings.sent.description", locale)(),
 			};
 
-			editReply([client, bot], submission, {
+			editReply(client, submission, {
 				embeds: [
 					{
 						title: strings.title,
@@ -191,54 +188,54 @@ async function handleSubmitResource(
 			return true;
 		},
 		onInvalid: async (submission, error) =>
-			handleSubmittedInvalidResource([client, bot], submission, error as ResourceError | undefined, { locale }),
+			handleSubmittedInvalidResource(client, submission, error as ResourceError | undefined, { locale }),
 	});
 }
 
 async function handleSubmittedInvalidResource(
-	[client, bot]: [Client, Discord.Bot],
+	client: Client,
 	submission: Discord.Interaction,
 	error: ResourceError | undefined,
 	{ locale }: { locale: Locale },
 ): Promise<Discord.Interaction | undefined> {
 	return new Promise((resolve) => {
-		const continueId = createInteractionCollector([client, bot], {
+		const continueId = createInteractionCollector(client, {
 			type: Discord.InteractionTypes.MessageComponent,
 			onCollect: async (selection) => {
-				deleteReply([client, bot], submission);
+				deleteReply(client, submission);
 				resolve(selection);
 			},
 		});
 
-		const cancelId = createInteractionCollector([client, bot], {
+		const cancelId = createInteractionCollector(client, {
 			type: Discord.InteractionTypes.MessageComponent,
 			onCollect: async (cancelSelection) => {
-				const returnId = createInteractionCollector([client, bot], {
+				const returnId = createInteractionCollector(client, {
 					type: Discord.InteractionTypes.MessageComponent,
 					onCollect: async (returnSelection) => {
-						deleteReply([client, bot], submission);
-						deleteReply([client, bot], cancelSelection);
+						deleteReply(client, submission);
+						deleteReply(client, cancelSelection);
 						resolve(returnSelection);
 					},
 				});
 
-				const leaveId = createInteractionCollector([client, bot], {
+				const leaveId = createInteractionCollector(client, {
 					type: Discord.InteractionTypes.MessageComponent,
 					onCollect: async (_) => {
-						deleteReply([client, bot], submission);
-						deleteReply([client, bot], cancelSelection);
+						deleteReply(client, submission);
+						deleteReply(client, cancelSelection);
 						resolve(undefined);
 					},
 				});
 
 				const strings = {
-					title: localise(client, "resource.strings.sureToCancel.title", locale)(),
-					description: localise(client, "resource.strings.sureToCancel.description", locale)(),
-					stay: localise(client, "prompts.stay", locale)(),
-					leave: localise(client, "prompts.leave", locale)(),
+					title: client.localise("resource.strings.sureToCancel.title", locale)(),
+					description: client.localise("resource.strings.sureToCancel.description", locale)(),
+					stay: client.localise("prompts.stay", locale)(),
+					leave: client.localise("prompts.leave", locale)(),
 				};
 
-				reply([client, bot], cancelSelection, {
+				reply(client, cancelSelection, {
 					embeds: [
 						{
 							title: strings.title,
@@ -273,11 +270,11 @@ async function handleSubmittedInvalidResource(
 		switch (error) {
 			default: {
 				const strings = {
-					title: localise(client, "resource.strings.failed", locale)(),
-					description: localise(client, "resource.strings.failed", locale)(),
+					title: client.localise("resource.strings.failed", locale)(),
+					description: client.localise("resource.strings.failed", locale)(),
 				};
 
-				editReply([client, bot], submission, {
+				editReply(client, submission, {
 					embeds: [
 						{
 							title: strings.title,
@@ -292,11 +289,11 @@ async function handleSubmittedInvalidResource(
 		}
 
 		const strings = {
-			continue: localise(client, "prompts.continue", locale)(),
-			cancel: localise(client, "prompts.cancel", locale)(),
+			continue: client.localise("prompts.continue", locale)(),
+			cancel: client.localise("prompts.cancel", locale)(),
 		};
 
-		editReply([client, bot], submission, {
+		editReply(client, submission, {
 			embeds: [embed],
 			components: [
 				{
@@ -323,8 +320,8 @@ async function handleSubmittedInvalidResource(
 
 function generateResourceModal(client: Client, { locale }: { locale: Locale }): Modal<Resource["answers"]> {
 	const strings = {
-		title: localise(client, "resource.title", locale)(),
-		resource: localise(client, "resource.fields.resource", locale)(),
+		title: client.localise("resource.title", locale)(),
+		resource: client.localise("resource.fields.resource", locale)(),
 	};
 
 	return {

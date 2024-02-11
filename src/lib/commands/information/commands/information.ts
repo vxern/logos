@@ -4,7 +4,7 @@ import bot from "./information/bot";
 import guild from "./information/guild";
 
 const command: CommandTemplate = {
-	name: "information",
+	id: "information",
 	type: Discord.ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ["VIEW_CHANNEL"],
 	options: [bot, guild],

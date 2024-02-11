@@ -3,14 +3,14 @@ import constants from "../../../../constants/constants";
 import { Locale } from "../../../../constants/languages";
 import { trim } from "../../../../formatting";
 import * as Logos from "../../../../types";
-import { Client, localise } from "../../../client";
+import { Client } from "../../../client";
 import diagnostics from "../../../diagnostics";
 import { Modal, acknowledge, createModalComposer, reply } from "../../../interactions";
 import { getMemberAvatarURL } from "../../../utils";
 import { CommandTemplate } from "../../command";
 
 const command: CommandTemplate = {
-	name: "answer.message",
+	id: "answer.message",
 	type: Discord.ApplicationCommandTypes.Message,
 	defaultMemberPermissions: ["VIEW_CHANNEL"],
 	handle: handleStartAnswering,
@@ -21,10 +21,7 @@ interface AnswerData extends Record<string, string> {
 	answer: string;
 }
 
-async function handleStartAnswering(
-	[client, bot]: [Client, Discord.Bot],
-	interaction: Logos.Interaction,
-): Promise<void> {
+async function handleStartAnswering(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.locale;
 
 	const guildId = interaction.guildId;
@@ -32,7 +29,7 @@ async function handleStartAnswering(
 		return;
 	}
 
-	const member = client.cache.members.get(Discord.snowflakeToBigint(`${interaction.user.id}${guildId}`));
+	const member = client.entities.members.get(Discord.snowflakeToBigint(`${interaction.user.id}${guildId}`));
 	if (member === undefined) {
 		return;
 	}
@@ -44,11 +41,11 @@ async function handleStartAnswering(
 
 	if (message.author.toggles?.has("bot") || message.content.trim().length === 0) {
 		const strings = {
-			title: localise(client, "answer.strings.cannotAnswer.title", locale)(),
-			description: localise(client, "answer.strings.cannotAnswer.description", locale)(),
+			title: client.localise("answer.strings.cannotAnswer.title", locale)(),
+			description: client.localise("answer.strings.cannotAnswer.description", locale)(),
 		};
 
-		reply([client, bot], interaction, {
+		reply(client, interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -62,11 +59,11 @@ async function handleStartAnswering(
 
 	if (message.author.id === interaction.user.id) {
 		const strings = {
-			title: localise(client, "answer.strings.cannotAnswerOwn.title", locale)(),
-			description: localise(client, "answer.strings.cannotAnswerOwn.description", locale)(),
+			title: client.localise("answer.strings.cannotAnswerOwn.title", locale)(),
+			description: client.localise("answer.strings.cannotAnswerOwn.description", locale)(),
 		};
 
-		reply([client, bot], interaction, {
+		reply(client, interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -83,21 +80,20 @@ async function handleStartAnswering(
 		answer: "",
 	};
 
-	createModalComposer([client, bot], interaction, {
+	createModalComposer(client, interaction, {
 		modal: generateAnswerModal(client, data, { locale }),
 		onSubmit: async (submission, data) => {
-			acknowledge([client, bot], submission);
+			acknowledge(client, submission);
 
 			const strings = {
-				answer: localise(client, "answer.strings.answer", locale)(),
-				submittedBy: localise(
-					client,
+				answer: client.localise("answer.strings.answer", locale)(),
+				submittedBy: client.localise(
 					"answer.strings.submittedBy",
 					locale,
 				)({ username: diagnostics.display.user(interaction.user, { includeId: false }) }),
 			};
 
-			bot.rest
+			client.bot.rest
 				.sendMessage(message.channelId, {
 					messageReference: { messageId: message.id, channelId: message.channelId, guildId, failIfNotExists: false },
 					embeds: [
@@ -129,9 +125,9 @@ async function handleStartAnswering(
 
 function generateAnswerModal(client: Client, data: AnswerData, { locale }: { locale: Locale }): Modal<AnswerData> {
 	const strings = {
-		title: localise(client, "answer.title", locale)(),
-		question: localise(client, "answer.fields.question", locale)(),
-		answer: localise(client, "answer.fields.answer", locale)(),
+		title: client.localise("answer.title", locale)(),
+		question: client.localise("answer.fields.question", locale)(),
+		answer: client.localise("answer.fields.answer", locale)(),
 	};
 
 	return {

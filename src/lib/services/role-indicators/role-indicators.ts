@@ -73,12 +73,9 @@ class RoleIndicatorService extends LocalService {
 			}
 
 			const nickname = applyIndicators(user.username, applicableIndicators);
-			this.bot.rest
+			this.client.bot.rest
 				.editMember(member.guildId, user.id, { nick: nickname })
 				.catch(() => console.warn("Failed to set member's role indicators."));
-
-			// Fix for Discordeno rate-limiting being broken.
-			await new Promise((resolve) => setTimeout(resolve, 3000));
 
 			return;
 		}
@@ -91,12 +88,9 @@ class RoleIndicatorService extends LocalService {
 			}
 
 			const nickname = applyIndicators(member.nick, applicableIndicators);
-			this.bot.rest
+			this.client.bot.rest
 				.editMember(member.guildId, user.id, { nick: nickname })
 				.catch(() => console.warn("Failed to set member's role indicators."));
-
-			// Fix for Discordeno rate-limiting being broken.
-			await new Promise((resolve) => setTimeout(resolve, 3000));
 
 			return;
 		}
@@ -107,12 +101,9 @@ class RoleIndicatorService extends LocalService {
 		}
 
 		if (!hasApplicableIndicators) {
-			this.bot.rest
+			this.client.bot.rest
 				.editMember(member.guildId, user.id, { nick: username })
 				.catch(() => console.warn("Failed to reset member's role indicators."));
-
-			// Fix for Discordeno rate-limiting being broken.
-			await new Promise((resolve) => setTimeout(resolve, 3000));
 
 			return;
 		}
@@ -126,20 +117,15 @@ class RoleIndicatorService extends LocalService {
 		}
 
 		const nicknameModified = applyIndicators(username, applicableIndicators);
-		this.bot.rest
+		this.client.bot.rest
 			.editMember(member.guildId, user.id, { nick: nicknameModified })
 			.catch(() => console.warn("Failed to update member's role indicators."));
-
-		// Fix for Discordeno rate-limiting being broken.
-		await new Promise((resolve) => setTimeout(resolve, 3000));
 	}
 }
 
-const MAXIMUM_USERNAME_LENGTH = 32;
-
 function applyIndicators(username: string, sigils: string[]): string {
 	const modification = `${symbols.sigils.divider}${sigils.join(symbols.sigils.separator)}`;
-	const usernameSlice = username.slice(0, MAXIMUM_USERNAME_LENGTH - modification.length);
+	const usernameSlice = username.slice(0, constants.MAXIMUM_USERNAME_LENGTH - modification.length);
 
 	return `${usernameSlice}${modification}`;
 }

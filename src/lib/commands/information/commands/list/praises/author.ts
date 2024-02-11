@@ -2,7 +2,7 @@ import * as Discord from "@discordeno/bot";
 import constants from "../../../../../../constants/constants";
 import { Locale } from "../../../../../../constants/languages";
 import * as Logos from "../../../../../../types";
-import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../../../client";
+import { Client } from "../../../../../client";
 import { Praise } from "../../../../../database/praise";
 import { User } from "../../../../../database/user";
 import { parseArguments, reply } from "../../../../../interactions";
@@ -11,38 +11,30 @@ import { user } from "../../../../parameters";
 import { getPraisePage } from "../praises";
 
 const option: OptionTemplate = {
-	name: "author",
+	id: "author",
 	type: Discord.ApplicationCommandOptionTypes.SubCommand,
 	handle: handleDisplayPraises,
 	handleAutocomplete: handleDisplayPraisesAutocomplete,
 	options: [{ ...user, required: false }],
 };
 
-async function handleDisplayPraisesAutocomplete(
-	[client, bot]: [Client, Discord.Bot],
-	interaction: Logos.Interaction,
-): Promise<void> {
+async function handleDisplayPraisesAutocomplete(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const [{ user }] = parseArguments(interaction.data?.options, {});
 	if (user === undefined) {
 		return;
 	}
 
-	autocompleteMembers([client, bot], interaction, user);
+	client.autocompleteMembers(interaction, { identifier: user });
 }
 
-async function handleDisplayPraises(
-	[client, bot]: [Client, Discord.Bot],
-	interaction: Logos.Interaction,
-): Promise<void> {
+async function handleDisplayPraises(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.locale;
 
 	const [{ user: userQuery }] = parseArguments(interaction.data?.options, {});
 
-	const member = resolveInteractionToMember(
-		[client, bot],
+	const member = client.resolveInteractionToMember(
 		interaction,
-		userQuery ?? interaction.user.id.toString(),
-		{},
+		{ identifier: userQuery ?? interaction.user.id.toString() },
 		{ locale },
 	);
 	if (member === undefined) {
@@ -59,8 +51,8 @@ async function handleDisplayPraises(
 	let session = client.database.openSession();
 
 	const userDocument =
-		client.cache.documents.users.get(member.id.toString()) ??
-		(await session.load<User>(`users/${member.id}`).then((value) => value ?? undefined)) ??
+		client.documents.users.get(member.id.toString()) ??
+		(await session.get<User>(`users/${member.id}`).then((value) => value ?? undefined)) ??
 		(await (async () => {
 			const userDocument = {
 				...({
@@ -70,7 +62,7 @@ async function handleDisplayPraises(
 				} satisfies User),
 				"@metadata": { "@collection": "Users" },
 			};
-			await session.store(userDocument);
+			await session.set(userDocument);
 			await session.saveChanges();
 
 			return userDocument as User;
@@ -79,13 +71,13 @@ async function handleDisplayPraises(
 	session.dispose();
 
 	if (userDocument === undefined) {
-		displayError([client, bot], interaction, { locale });
+		displayError(client, interaction, { locale });
 		return;
 	}
 
 	session = client.database.openSession();
 
-	const praisesDocumentsCached = client.cache.documents.praisesByAuthor.get(member.id.toString());
+	const praisesDocumentsCached = client.documents.praisesByAuthor.get(member.id.toString());
 	const praiseDocuments =
 		praisesDocumentsCached !== undefined
 			? Array.from(praisesDocumentsCached.values())
@@ -100,28 +92,28 @@ async function handleDisplayPraises(
 								document,
 							]),
 						);
-						client.cache.documents.praisesByAuthor.set(member.id.toString(), map);
+						client.documents.praisesByAuthor.set(member.id.toString(), map);
 						return documents;
 					});
 
 	session.dispose();
 
-	reply([client, bot], interaction, {
+	reply(client, interaction, {
 		embeds: [getPraisePage(client, praiseDocuments, isSelf, "author", { locale })],
 	});
 }
 
 async function displayError(
-	[client, bot]: [Client, Discord.Bot],
+	client: Client,
 	interaction: Logos.Interaction,
 	{ locale }: { locale: Locale },
 ): Promise<void> {
 	const strings = {
-		title: localise(client, "list.options.praises.strings.failed.title", locale)(),
-		description: localise(client, "list.options.praises.strings.failed.description", locale)(),
+		title: client.localise("list.options.praises.strings.failed.title", locale)(),
+		description: client.localise("list.options.praises.strings.failed.description", locale)(),
 	};
 
-	reply([client, bot], interaction, {
+	reply(client, interaction, {
 		embeds: [
 			{
 				title: strings.title,

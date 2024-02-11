@@ -4,7 +4,7 @@ import { Locale } from "../../../../constants/languages";
 import defaults from "../../../../defaults";
 import { trim } from "../../../../formatting";
 import * as Logos from "../../../../types";
-import { Client, localise } from "../../../client";
+import { Client } from "../../../client";
 import { timeStructToMilliseconds } from "../../../database/guild";
 import { Guild } from "../../../database/guild";
 import { Report } from "../../../database/report";
@@ -22,7 +22,7 @@ import { verifyIsWithinLimits } from "../../../utils";
 import { CommandTemplate } from "../../command";
 
 const command: CommandTemplate = {
-	name: "report",
+	id: "report",
 	type: Discord.ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ["VIEW_CHANNEL"],
 	handle: handleMakeReport,
@@ -30,7 +30,7 @@ const command: CommandTemplate = {
 
 type ReportError = "failure" | "cannot_report_self";
 
-async function handleMakeReport([client, bot]: [Client, Discord.Bot], interaction: Logos.Interaction): Promise<void> {
+async function handleMakeReport(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.locale;
 
 	const guildId = interaction.guildId;
@@ -41,8 +41,8 @@ async function handleMakeReport([client, bot]: [Client, Discord.Bot], interactio
 	let session = client.database.openSession();
 
 	const guildDocument =
-		client.cache.documents.guilds.get(guildId.toString()) ??
-		(await session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
+		client.documents.guilds.get(guildId.toString()) ??
+		(await session.get<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
 
 	session.dispose();
 
@@ -55,7 +55,7 @@ async function handleMakeReport([client, bot]: [Client, Discord.Bot], interactio
 		return;
 	}
 
-	const guild = client.cache.guilds.get(guildId);
+	const guild = client.entities.guilds.get(guildId);
 	if (guild === undefined) {
 		return;
 	}
@@ -68,8 +68,8 @@ async function handleMakeReport([client, bot]: [Client, Discord.Bot], interactio
 	session = client.database.openSession();
 
 	const userDocument =
-		client.cache.documents.users.get(interaction.user.id.toString()) ??
-		(await session.load<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined)) ??
+		client.documents.users.get(interaction.user.id.toString()) ??
+		(await session.get<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined)) ??
 		(await (async () => {
 			const userDocument = {
 				...({
@@ -79,7 +79,7 @@ async function handleMakeReport([client, bot]: [Client, Discord.Bot], interactio
 				} satisfies User),
 				"@metadata": { "@collection": "Users" },
 			};
-			await session.store(userDocument);
+			await session.set(userDocument);
 			await session.saveChanges();
 
 			return userDocument as User;
@@ -92,7 +92,7 @@ async function handleMakeReport([client, bot]: [Client, Discord.Bot], interactio
 	}
 
 	const compositeIdPartial = `${guildId}/${interaction.user.id}`;
-	const reportDocuments = Array.from(client.cache.documents.reports.entries())
+	const reportDocuments = Array.from(client.documents.reports.entries())
 		.filter(([key, _]) => key.startsWith(compositeIdPartial))
 		.map(([_, value]) => value);
 	const intervalMilliseconds = timeStructToMilliseconds(configuration.rateLimit?.within ?? defaults.REPORT_INTERVAL);
@@ -104,11 +104,11 @@ async function handleMakeReport([client, bot]: [Client, Discord.Bot], interactio
 		)
 	) {
 		const strings = {
-			title: localise(client, "report.strings.tooMany.title", locale)(),
-			description: localise(client, "report.strings.tooMany.description", locale)(),
+			title: client.localise("report.strings.tooMany.title", locale)(),
+			description: client.localise("report.strings.tooMany.description", locale)(),
 		};
 
-		reply([client, bot], interaction, {
+		reply(client, interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -120,15 +120,15 @@ async function handleMakeReport([client, bot]: [Client, Discord.Bot], interactio
 		return;
 	}
 
-	const reportService = client.services.prompts.reports.get(guild.id);
+	const reportService = client.getPromptService(guild.id, { type: "reports" });
 	if (reportService === undefined) {
 		return;
 	}
 
-	createModalComposer<Report["answers"]>([client, bot], interaction, {
+	createModalComposer<Report["answers"]>(client, interaction, {
 		modal: generateReportModal(client, { locale }),
 		onSubmit: async (submission, answers) => {
-			await postponeReply([client, bot], submission);
+			await postponeReply(client, submission);
 
 			const session = client.database.openSession();
 
@@ -144,17 +144,17 @@ async function handleMakeReport([client, bot]: [Client, Discord.Bot], interactio
 				} satisfies Report),
 				"@metadata": { "@collection": "Reports" },
 			};
-			await session.store(reportDocument);
+			await session.set(reportDocument);
 			await session.saveChanges();
 
 			session.dispose();
 
 			if (configuration.journaling) {
-				const journallingService = client.services.journalling.get(guild.id);
+				const journallingService = client.getJournallingService(guild.id);
 				journallingService?.log("reportSubmit", { args: [member, reportDocument] });
 			}
 
-			const user = client.cache.users.get(interaction.user.id);
+			const user = client.entities.users.get(interaction.user.id);
 			if (user === undefined) {
 				return "failure";
 			}
@@ -170,11 +170,11 @@ async function handleMakeReport([client, bot]: [Client, Discord.Bot], interactio
 			reportService.registerHandler(compositeId);
 
 			const strings = {
-				title: localise(client, "report.strings.submitted.title", locale)(),
-				description: localise(client, "report.strings.submitted.description", locale)(),
+				title: client.localise("report.strings.submitted.title", locale)(),
+				description: client.localise("report.strings.submitted.description", locale)(),
 			};
 
-			editReply([client, bot], submission, {
+			editReply(client, submission, {
 				embeds: [
 					{
 						title: strings.title,
@@ -187,54 +187,54 @@ async function handleMakeReport([client, bot]: [Client, Discord.Bot], interactio
 			return true;
 		},
 		onInvalid: async (submission, error) =>
-			handleSubmittedInvalidReport([client, bot], submission, error as ReportError | undefined, { locale }),
+			handleSubmittedInvalidReport(client, submission, error as ReportError | undefined, { locale }),
 	});
 }
 
 async function handleSubmittedInvalidReport(
-	[client, bot]: [Client, Discord.Bot],
+	client: Client,
 	submission: Discord.Interaction,
 	error: ReportError | undefined,
 	{ locale }: { locale: Locale },
 ): Promise<Discord.Interaction | undefined> {
 	return new Promise((resolve) => {
-		const continueId = createInteractionCollector([client, bot], {
+		const continueId = createInteractionCollector(client, {
 			type: Discord.InteractionTypes.MessageComponent,
 			onCollect: async (selection) => {
-				deleteReply([client, bot], submission);
+				deleteReply(client, submission);
 				resolve(selection);
 			},
 		});
 
-		const cancelId = createInteractionCollector([client, bot], {
+		const cancelId = createInteractionCollector(client, {
 			type: Discord.InteractionTypes.MessageComponent,
 			onCollect: async (cancelSelection) => {
-				const returnId = createInteractionCollector([client, bot], {
+				const returnId = createInteractionCollector(client, {
 					type: Discord.InteractionTypes.MessageComponent,
 					onCollect: async (returnSelection) => {
-						deleteReply([client, bot], submission);
-						deleteReply([client, bot], cancelSelection);
+						deleteReply(client, submission);
+						deleteReply(client, cancelSelection);
 						resolve(returnSelection);
 					},
 				});
 
-				const leaveId = createInteractionCollector([client, bot], {
+				const leaveId = createInteractionCollector(client, {
 					type: Discord.InteractionTypes.MessageComponent,
 					onCollect: async (_) => {
-						deleteReply([client, bot], submission);
-						deleteReply([client, bot], cancelSelection);
+						deleteReply(client, submission);
+						deleteReply(client, cancelSelection);
 						resolve(undefined);
 					},
 				});
 
 				const strings = {
-					title: localise(client, "report.strings.sureToCancel.title", locale)(),
-					description: localise(client, "report.strings.sureToCancel.description", locale)(),
-					stay: localise(client, "prompts.stay", locale)(),
-					leave: localise(client, "prompts.leave", locale)(),
+					title: client.localise("report.strings.sureToCancel.title", locale)(),
+					description: client.localise("report.strings.sureToCancel.description", locale)(),
+					stay: client.localise("prompts.stay", locale)(),
+					leave: client.localise("prompts.leave", locale)(),
 				};
 
-				reply([client, bot], cancelSelection, {
+				reply(client, cancelSelection, {
 					embeds: [
 						{
 							title: strings.title,
@@ -269,8 +269,8 @@ async function handleSubmittedInvalidReport(
 		switch (error) {
 			case "cannot_report_self": {
 				const strings = {
-					title: localise(client, "report.strings.cannotReportSelf.title", locale)(),
-					description: localise(client, "report.strings.cannotReportSelf.description", locale)(),
+					title: client.localise("report.strings.cannotReportSelf.title", locale)(),
+					description: client.localise("report.strings.cannotReportSelf.description", locale)(),
 				};
 
 				embed = {
@@ -282,11 +282,11 @@ async function handleSubmittedInvalidReport(
 			}
 			default: {
 				const strings = {
-					title: localise(client, "report.strings.failed.title", locale)(),
-					description: localise(client, "report.strings.failed.description", locale)(),
+					title: client.localise("report.strings.failed.title", locale)(),
+					description: client.localise("report.strings.failed.description", locale)(),
 				};
 
-				editReply([client, bot], submission, {
+				editReply(client, submission, {
 					embeds: [
 						{
 							title: strings.title,
@@ -301,11 +301,11 @@ async function handleSubmittedInvalidReport(
 		}
 
 		const strings = {
-			continue: localise(client, "prompts.continue", locale)(),
-			cancel: localise(client, "prompts.cancel", locale)(),
+			continue: client.localise("prompts.continue", locale)(),
+			cancel: client.localise("prompts.cancel", locale)(),
 		};
 
-		editReply([client, bot], submission, {
+		editReply(client, submission, {
 			embeds: [embed],
 			components: [
 				{
@@ -332,10 +332,10 @@ async function handleSubmittedInvalidReport(
 
 function generateReportModal(client: Client, { locale }: { locale: Locale }): Modal<Report["answers"]> {
 	const strings = {
-		title: localise(client, "report.title", locale)(),
-		reason: localise(client, "report.fields.reason", locale)(),
-		users: localise(client, "report.fields.users", locale)(),
-		link: localise(client, "report.fields.link", locale)(),
+		title: client.localise("report.title", locale)(),
+		reason: client.localise("report.fields.reason", locale)(),
+		users: client.localise("report.fields.users", locale)(),
+		link: client.localise("report.fields.link", locale)(),
 	};
 
 	return {

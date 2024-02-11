@@ -4,7 +4,7 @@ import { Locale } from "../../../../constants/languages";
 import defaults from "../../../../defaults";
 import { MentionTypes, mention } from "../../../../formatting";
 import * as Logos from "../../../../types";
-import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../client";
+import { Client } from "../../../client";
 import { Guild, timeStructToMilliseconds } from "../../../database/guild";
 import { Praise } from "../../../database/praise";
 import { User } from "../../../database/user";
@@ -14,7 +14,7 @@ import { CommandTemplate } from "../../command";
 import { user } from "../../parameters";
 
 const command: CommandTemplate = {
-	name: "praise",
+	id: "praise",
 	type: Discord.ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ["VIEW_CHANNEL"],
 	handle: handlePraiseUser,
@@ -22,25 +22,22 @@ const command: CommandTemplate = {
 	options: [
 		user,
 		{
-			name: "comment",
+			id: "comment",
 			type: Discord.ApplicationCommandOptionTypes.String,
 		},
 	],
 };
 
-async function handlePraiseUserAutocomplete(
-	[client, bot]: [Client, Discord.Bot],
-	interaction: Logos.Interaction,
-): Promise<void> {
+async function handlePraiseUserAutocomplete(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const [{ user }] = parseArguments(interaction.data?.options, {});
 	if (user === undefined) {
 		return;
 	}
 
-	autocompleteMembers([client, bot], interaction, user);
+	client.autocompleteMembers(interaction, { identifier: user });
 }
 
-async function handlePraiseUser([client, bot]: [Client, Discord.Bot], interaction: Logos.Interaction): Promise<void> {
+async function handlePraiseUser(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.locale;
 
 	const guildId = interaction.guildId;
@@ -51,8 +48,8 @@ async function handlePraiseUser([client, bot]: [Client, Discord.Bot], interactio
 	let session = client.database.openSession();
 
 	const guildDocument =
-		client.cache.documents.guilds.get(guildId.toString()) ??
-		(await session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
+		client.documents.guilds.get(guildId.toString()) ??
+		(await session.get<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
 
 	session.dispose();
 
@@ -70,18 +67,18 @@ async function handlePraiseUser([client, bot]: [Client, Discord.Bot], interactio
 		return;
 	}
 
-	const member = resolveInteractionToMember([client, bot], interaction, user, {}, { locale });
+	const member = client.resolveInteractionToMember(interaction, { identifier: user }, { locale });
 	if (member === undefined) {
 		return;
 	}
 
 	if (member.id === interaction.member?.id) {
 		const strings = {
-			title: localise(client, "praise.strings.cannotPraiseSelf.title", locale)(),
-			description: localise(client, "praise.strings.cannotPraiseSelf.description", locale)(),
+			title: client.localise("praise.strings.cannotPraiseSelf.title", locale)(),
+			description: client.localise("praise.strings.cannotPraiseSelf.description", locale)(),
 		};
 
-		reply([client, bot], interaction, {
+		reply(client, interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -93,13 +90,13 @@ async function handlePraiseUser([client, bot]: [Client, Discord.Bot], interactio
 		return;
 	}
 
-	await postponeReply([client, bot], interaction);
+	await postponeReply(client, interaction);
 
 	session = client.database.openSession();
 
 	const [authorDocument, targetDocument] = [
-		client.cache.documents.users.get(interaction.user.id.toString()) ??
-			(await session.load<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined)) ??
+		client.documents.users.get(interaction.user.id.toString()) ??
+			(await session.get<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined)) ??
 			(await (async () => {
 				const userDocument = {
 					...({
@@ -109,13 +106,13 @@ async function handlePraiseUser([client, bot]: [Client, Discord.Bot], interactio
 					} satisfies User),
 					"@metadata": { "@collection": "Users" },
 				};
-				await session.store(userDocument);
+				await session.set(userDocument);
 				await session.saveChanges();
 
 				return userDocument as User;
 			})()),
-		client.cache.documents.users.get(member.id.toString()) ??
-			(await session.load<User>(`users/${member.id}`).then((value) => value ?? undefined)) ??
+		client.documents.users.get(member.id.toString()) ??
+			(await session.get<User>(`users/${member.id}`).then((value) => value ?? undefined)) ??
 			(await (async () => {
 				const userDocument = {
 					...({
@@ -125,7 +122,7 @@ async function handlePraiseUser([client, bot]: [Client, Discord.Bot], interactio
 					} satisfies User),
 					"@metadata": { "@collection": "Users" },
 				};
-				await session.store(userDocument);
+				await session.set(userDocument);
 				await session.saveChanges();
 
 				return userDocument as User;
@@ -135,13 +132,13 @@ async function handlePraiseUser([client, bot]: [Client, Discord.Bot], interactio
 	session.dispose();
 
 	if (authorDocument === undefined || targetDocument === undefined) {
-		displayError([client, bot], interaction, { locale });
+		displayError(client, interaction, { locale });
 		return;
 	}
 
 	session = client.database.openSession();
 
-	const praiseDocumentsCached = client.cache.documents.praisesByAuthor.get(interaction.user.id.toString());
+	const praiseDocumentsCached = client.documents.praisesByAuthor.get(interaction.user.id.toString());
 	const praiseDocuments =
 		praiseDocumentsCached !== undefined
 			? Array.from(praiseDocumentsCached.values())
@@ -156,7 +153,7 @@ async function handlePraiseUser([client, bot]: [Client, Discord.Bot], interactio
 								praiseDocument,
 							]),
 						);
-						client.cache.documents.praisesByAuthor.set(interaction.user.id.toString(), map);
+						client.documents.praisesByAuthor.set(interaction.user.id.toString(), map);
 						return praiseDocuments;
 					});
 
@@ -172,11 +169,11 @@ async function handlePraiseUser([client, bot]: [Client, Discord.Bot], interactio
 		)
 	) {
 		const strings = {
-			title: localise(client, "praise.strings.tooMany.title", locale)(),
-			description: localise(client, "praise.strings.tooMany.description", locale)(),
+			title: client.localise("praise.strings.tooMany.title", locale)(),
+			description: client.localise("praise.strings.tooMany.description", locale)(),
 		};
 
-		editReply([client, bot], interaction, {
+		editReply(client, interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -188,7 +185,7 @@ async function handlePraiseUser([client, bot]: [Client, Discord.Bot], interactio
 		return;
 	}
 
-	const guild = client.cache.guilds.get(guildId);
+	const guild = client.entities.guilds.get(guildId);
 	if (guild === undefined) {
 		return;
 	}
@@ -203,25 +200,24 @@ async function handlePraiseUser([client, bot]: [Client, Discord.Bot], interactio
 		createdAt,
 		"@metadata": { "@collection": "Praises" },
 	};
-	await session.store(praiseDocument);
+	await session.set(praiseDocument);
 	await session.saveChanges();
 	session.dispose();
 
 	if (configuration.journaling) {
-		const journallingService = client.services.journalling.get(guild.id);
+		const journallingService = client.getJournallingService(guild.id);
 		journallingService?.log("praiseAdd", { args: [member, praiseDocument, interaction.user] });
 	}
 
 	const strings = {
-		title: localise(client, "praise.strings.praised.title", locale)(),
-		description: localise(
-			client,
+		title: client.localise("praise.strings.praised.title", locale)(),
+		description: client.localise(
 			"praise.strings.praised.description",
 			locale,
 		)({ user_mention: mention(member.id, MentionTypes.User) }),
 	};
 
-	editReply([client, bot], interaction, {
+	editReply(client, interaction, {
 		embeds: [
 			{
 				title: strings.title,
@@ -233,16 +229,16 @@ async function handlePraiseUser([client, bot]: [Client, Discord.Bot], interactio
 }
 
 async function displayError(
-	[client, bot]: [Client, Discord.Bot],
+	client: Client,
 	interaction: Logos.Interaction,
 	{ locale }: { locale: Locale },
 ): Promise<void> {
 	const strings = {
-		title: localise(client, "praise.strings.failed.title", locale)(),
-		description: localise(client, "praise.strings.failed.description", locale)(),
+		title: client.localise("praise.strings.failed.title", locale)(),
+		description: client.localise("praise.strings.failed.description", locale)(),
 	};
 
-	editReply([client, bot], interaction, {
+	editReply(client, interaction, {
 		embeds: [
 			{
 				title: strings.title,

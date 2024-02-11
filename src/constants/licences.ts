@@ -74,7 +74,7 @@ const licences = {
 	},
 };
 
-type DictionaryLicence = typeof licences.dictionaries[keyof typeof licences.dictionaries];
+type DictionaryLicence = (typeof licences.dictionaries)[keyof typeof licences.dictionaries];
 
 export default licences;
 export type { DictionaryLicence };

@@ -3,23 +3,20 @@ import constants from "../../../../constants/constants";
 import { Locale } from "../../../../constants/languages";
 import { trim } from "../../../../formatting";
 import * as Logos from "../../../../types";
-import { Client, localise } from "../../../client";
+import { Client } from "../../../client";
 import { parseArguments, parseTimeExpression, reply, respond } from "../../../interactions";
 import { OptionTemplate } from "../../command";
 import { timestamp } from "../../parameters";
 
 const command: OptionTemplate = {
-	name: "rewind",
+	id: "rewind",
 	type: Discord.ApplicationCommandOptionTypes.SubCommand,
 	handle: handleRewind,
 	handleAutocomplete: handleRewindAutocomplete,
 	options: [timestamp],
 };
 
-async function handleRewindAutocomplete(
-	[client, bot]: [Client, Discord.Bot],
-	interaction: Logos.Interaction,
-): Promise<void> {
+async function handleRewindAutocomplete(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const language = interaction.language;
 	const locale = interaction.locale;
 
@@ -31,17 +28,17 @@ async function handleRewindAutocomplete(
 	const timestamp = parseTimeExpression(client, timestampExpression, { language, locale });
 	if (timestamp === undefined) {
 		const strings = {
-			autocomplete: localise(client, "autocomplete.timestamp", locale)(),
+			autocomplete: client.localise("autocomplete.timestamp", locale)(),
 		};
 
-		respond([client, bot], interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
+		respond(client, interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
 		return;
 	}
 
-	respond([client, bot], interaction, [{ name: timestamp[0], value: timestamp[1].toString() }]);
+	respond(client, interaction, [{ name: timestamp[0], value: timestamp[1].toString() }]);
 }
 
-async function handleRewind([client, bot]: [Client, Discord.Bot], interaction: Logos.Interaction): Promise<void> {
+async function handleRewind(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.guildLocale;
 
 	const [{ timestamp: timestampExpression }] = parseArguments(interaction.data?.options, {});
@@ -51,7 +48,7 @@ async function handleRewind([client, bot]: [Client, Discord.Bot], interaction: L
 		return;
 	}
 
-	const musicService = client.services.music.music.get(guildId);
+	const musicService = client.getMusicService(guildId);
 	if (musicService === undefined) {
 		return;
 	}
@@ -65,11 +62,11 @@ async function handleRewind([client, bot]: [Client, Discord.Bot], interaction: L
 	if (!isOccupied || current === undefined) {
 		const locale = interaction.locale;
 		const strings = {
-			title: localise(client, "music.options.rewind.strings.noSong.title", locale)(),
-			description: localise(client, "music.options.rewind.strings.noSong.description", locale)(),
+			title: client.localise("music.options.rewind.strings.noSong.title", locale)(),
+			description: client.localise("music.options.rewind.strings.noSong.description", locale)(),
 		};
 
-		reply([client, bot], interaction, {
+		reply(client, interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -87,19 +84,19 @@ async function handleRewind([client, bot]: [Client, Discord.Bot], interaction: L
 
 	const timestamp = Number(timestampExpression);
 	if (!Number.isSafeInteger(timestamp)) {
-		displayInvalidTimestampError([client, bot], interaction, { locale });
+		displayInvalidTimestampError(client, interaction, { locale });
 		return;
 	}
 
 	await musicService.skipTo(Math.round((position - timestamp) / 1000) * 1000);
 
 	const strings = {
-		title: localise(client, "music.options.rewind.strings.rewound.title", locale)(),
-		description: localise(client, "music.options.rewind.strings.rewound.description", locale)(),
+		title: client.localise("music.options.rewind.strings.rewound.title", locale)(),
+		description: client.localise("music.options.rewind.strings.rewound.description", locale)(),
 	};
 
 	reply(
-		[client, bot],
+		client,
 		interaction,
 		{
 			embeds: [
@@ -115,16 +112,16 @@ async function handleRewind([client, bot]: [Client, Discord.Bot], interaction: L
 }
 
 async function displayInvalidTimestampError(
-	[client, bot]: [Client, Discord.Bot],
+	client: Client,
 	interaction: Logos.Interaction,
 	{ locale }: { locale: Locale },
 ): Promise<void> {
 	const strings = {
-		title: localise(client, "music.options.rewind.strings.invalidTimestamp.title", locale)(),
-		description: localise(client, "music.options.rewind.strings.invalidTimestamp.description", locale)(),
+		title: client.localise("music.options.rewind.strings.invalidTimestamp.title", locale)(),
+		description: client.localise("music.options.rewind.strings.invalidTimestamp.description", locale)(),
 	};
 
-	reply([client, bot], interaction, {
+	reply(client, interaction, {
 		embeds: [{ title: strings.title, description: strings.description, color: constants.colors.red }],
 	});
 }

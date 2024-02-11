@@ -3,21 +3,21 @@ import constants from "../../../../constants/constants";
 import time from "../../../../constants/time";
 import { TimestampFormat, timestamp } from "../../../../formatting";
 import * as Logos from "../../../../types";
-import { Client, localise } from "../../../client";
+import { Client } from "../../../client";
 import { Guild } from "../../../database/guild";
 import diagnostics from "../../../diagnostics";
 import { parseArguments, reply, respond } from "../../../interactions";
 import { CommandTemplate } from "../../command";
 
 const command: CommandTemplate = {
-	name: "slowmode",
+	id: "slowmode",
 	type: Discord.ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ["MODERATE_MEMBERS"],
 	handle: handleToggleSlowmode,
 	handleAutocomplete: handleToggleSlowmodeAutocomplete,
 	options: [
 		{
-			name: "level",
+			id: "level",
 			type: Discord.ApplicationCommandOptionTypes.String,
 			autocomplete: true,
 		},
@@ -29,7 +29,7 @@ const lastUseByGuildId = new Map<bigint, number>();
 const levels = ["lowest", "low", "medium", "high", "highest", "emergency", "lockdown", "beyond"] as const;
 
 // In milliseconds
-const rateLimitDurationByLevel: Record<typeof levels[number], number> = {
+const rateLimitDurationByLevel: Record<(typeof levels)[number], number> = {
 	lowest: time.second * 5,
 	low: time.second * 10,
 	medium: time.second * 30,
@@ -41,10 +41,7 @@ const rateLimitDurationByLevel: Record<typeof levels[number], number> = {
 };
 type SlowmodeLevel = keyof typeof rateLimitDurationByLevel | "unknown";
 
-async function handleToggleSlowmodeAutocomplete(
-	[client, bot]: [Client, Discord.Bot],
-	interaction: Logos.Interaction,
-): Promise<void> {
+async function handleToggleSlowmodeAutocomplete(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.locale;
 
 	const [{ level: levelOrUndefined }] = parseArguments(interaction.data?.options, {});
@@ -54,19 +51,16 @@ async function handleToggleSlowmodeAutocomplete(
 	const choices = levels
 		.map((level, index) => {
 			return {
-				name: localise(client, `slowmode.strings.levels.${level}`, locale)(),
+				name: client.localise(`slowmode.strings.levels.${level}`, locale)(),
 				value: index.toString(),
 			};
 		})
 		.filter((choice) => choice.name.toLowerCase().includes(levelQueryLowercase));
 
-	respond([client, bot], interaction, choices);
+	respond(client, interaction, choices);
 }
 
-async function handleToggleSlowmode(
-	[client, bot]: [Client, Discord.Bot],
-	interaction: Logos.Interaction,
-): Promise<void> {
+async function handleToggleSlowmode(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.guildLocale;
 
 	const [{ level: levelIndex }] = parseArguments(interaction.data?.options, { level: "number" });
@@ -76,7 +70,7 @@ async function handleToggleSlowmode(
 		return;
 	}
 
-	const [guild, channel] = [client.cache.guilds.get(guildId), client.cache.channels.get(channelId)];
+	const [guild, channel] = [client.entities.guilds.get(guildId), client.entities.channels.get(channelId)];
 	if (guild === undefined || channel === undefined) {
 		return;
 	}
@@ -84,8 +78,8 @@ async function handleToggleSlowmode(
 	const session = client.database.openSession();
 
 	const guildDocument =
-		client.cache.documents.guilds.get(guildId.toString()) ??
-		(await session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
+		client.documents.guilds.get(guildId.toString()) ??
+		(await session.get<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
 
 	session.dispose();
 
@@ -98,7 +92,7 @@ async function handleToggleSlowmode(
 		return;
 	}
 
-	const journallingService = client.services.journalling.get(guild.id);
+	const journallingService = client.getJournallingService(guild.id);
 
 	const isEnabled = channel.rateLimitPerUser !== undefined && channel.rateLimitPerUser !== 0;
 	if (isEnabled) {
@@ -110,11 +104,11 @@ async function handleToggleSlowmode(
 			const level = levels.at(levelIndex);
 			if (level === undefined) {
 				const strings = {
-					title: localise(client, "slowmode.strings.invalid.title", locale)(),
-					description: localise(client, "slowmode.strings.invalid.description", locale)(),
+					title: client.localise("slowmode.strings.invalid.title", locale)(),
+					description: client.localise("slowmode.strings.invalid.description", locale)(),
 				};
 
-				reply([client, bot], interaction, {
+				reply(client, interaction, {
 					embeds: [
 						{
 							title: strings.title,
@@ -130,7 +124,7 @@ async function handleToggleSlowmode(
 			const newRateLimitDuration = Math.floor(rateLimitDurationByLevel[level] / 1000);
 
 			if (newRateLimitDuration < previousRateLimitDuration) {
-				bot.rest
+				client.bot.rest
 					.editChannel(channel.id, { rateLimitPerUser: newRateLimitDuration })
 					.catch(() =>
 						client.log.warn(`Failed to downgrade slowmode level on ${diagnostics.display.channel(channel)}.`),
@@ -143,12 +137,12 @@ async function handleToggleSlowmode(
 				}
 
 				const strings = {
-					title: localise(client, "slowmode.strings.downgraded.title", locale)(),
-					description: localise(client, "slowmode.strings.downgraded.description", locale)(),
+					title: client.localise("slowmode.strings.downgraded.title", locale)(),
+					description: client.localise("slowmode.strings.downgraded.description", locale)(),
 				};
 
 				reply(
-					[client, bot],
+					client,
 					interaction,
 					{
 						embeds: [
@@ -162,8 +156,10 @@ async function handleToggleSlowmode(
 					{ visible: true },
 				);
 				return;
-			} else if (newRateLimitDuration > previousRateLimitDuration) {
-				bot.rest
+			}
+
+			if (newRateLimitDuration > previousRateLimitDuration) {
+				client.bot.rest
 					.editChannel(channel.id, { rateLimitPerUser: newRateLimitDuration })
 					.catch(() => client.log.warn(`Failed to upgrade slowmode level on ${diagnostics.display.channel(channel)}.`));
 
@@ -172,12 +168,12 @@ async function handleToggleSlowmode(
 				}
 
 				const strings = {
-					title: localise(client, "slowmode.strings.upgraded.title", locale)(),
-					description: localise(client, "slowmode.strings.upgraded.description", locale)(),
+					title: client.localise("slowmode.strings.upgraded.title", locale)(),
+					description: client.localise("slowmode.strings.upgraded.description", locale)(),
 				};
 
 				reply(
-					[client, bot],
+					client,
 					interaction,
 					{
 						embeds: [
@@ -191,17 +187,19 @@ async function handleToggleSlowmode(
 					{ visible: true },
 				);
 				return;
-			} else {
+			}
+
+			{
 				const locale = interaction.locale;
 				const strings = {
-					title: localise(client, "slowmode.strings.theSame.title", locale)(),
+					title: client.localise("slowmode.strings.theSame.title", locale)(),
 					description: {
-						theSame: localise(client, "slowmode.strings.theSame.description.theSame", locale)(),
-						chooseDifferent: localise(client, "slowmode.strings.theSame.description.chooseDifferent", locale)(),
+						theSame: client.localise("slowmode.strings.theSame.description.theSame", locale)(),
+						chooseDifferent: client.localise("slowmode.strings.theSame.description.chooseDifferent", locale)(),
 					},
 				};
 
-				reply([client, bot], interaction, {
+				reply(client, interaction, {
 					embeds: [
 						{
 							title: strings.title,
@@ -210,43 +208,43 @@ async function handleToggleSlowmode(
 						},
 					],
 				});
-				return;
 			}
-		} else {
-			const lastUse = lastUseByGuildId.get(guildId);
-			if (lastUse !== undefined) {
-				const timeElapsedSinceUse = Date.now() - lastUse;
-				if (timeElapsedSinceUse < constants.SLOWMODE_COLLISION_TIMEOUT) {
-					const canDisableIn = Date.now() + (timeElapsedSinceUse - constants.SLOWMODE_COLLISION_TIMEOUT);
+			return;
+		}
 
-					const locale = interaction.locale;
-					const strings = {
-						title: localise(client, "slowmode.strings.tooSoon.title", locale)(),
-						description: {
-							justEnabled: localise(client, "slowmode.strings.tooSoon.description.justEnabled", locale)(),
-							canDisableIn: localise(
-								client,
-								"slowmode.strings.tooSoon.description.canDisableIn",
-								locale,
-							)({ relative_timestamp: timestamp(canDisableIn, TimestampFormat.Relative) }),
+		const lastUse = lastUseByGuildId.get(guildId);
+		if (lastUse !== undefined) {
+			const now = Date.now();
+			const timeElapsedSinceUse = now - lastUse;
+			if (timeElapsedSinceUse < constants.SLOWMODE_COLLISION_TIMEOUT) {
+				const canDisableIn = now + (constants.SLOWMODE_COLLISION_TIMEOUT - timeElapsedSinceUse);
+
+				const locale = interaction.locale;
+				const strings = {
+					title: client.localise("slowmode.strings.tooSoon.title", locale)(),
+					description: {
+						justEnabled: client.localise("slowmode.strings.tooSoon.description.justEnabled", locale)(),
+						canDisableIn: client.localise(
+							"slowmode.strings.tooSoon.description.canDisableIn",
+							locale,
+						)({ relative_timestamp: timestamp(canDisableIn, TimestampFormat.Relative) }),
+					},
+				};
+
+				reply(client, interaction, {
+					embeds: [
+						{
+							title: strings.title,
+							description: `${strings.description.justEnabled} ${strings.description.canDisableIn}`,
+							color: constants.colors.peach,
 						},
-					};
-
-					reply([client, bot], interaction, {
-						embeds: [
-							{
-								title: strings.title,
-								description: `${strings.description.justEnabled} ${strings.description.canDisableIn}`,
-								color: constants.colors.peach,
-							},
-						],
-					});
-					return;
-				}
+					],
+				});
+				return;
 			}
 		}
 
-		bot.rest
+		client.bot.rest
 			.editChannel(channel.id, { rateLimitPerUser: null })
 			.catch(() => client.log.warn(`Failed to disable slowmode on ${diagnostics.display.channel(channel)}.`));
 
@@ -255,12 +253,12 @@ async function handleToggleSlowmode(
 		}
 
 		const strings = {
-			title: localise(client, "slowmode.strings.disabled.title", locale)(),
-			description: localise(client, "slowmode.strings.disabled.description", locale)(),
+			title: client.localise("slowmode.strings.disabled.title", locale)(),
+			description: client.localise("slowmode.strings.disabled.description", locale)(),
 		};
 
 		reply(
-			[client, bot],
+			client,
 			interaction,
 			{
 				embeds: [
@@ -279,11 +277,11 @@ async function handleToggleSlowmode(
 	if (levelIndex === undefined) {
 		const locale = interaction.locale;
 		const strings = {
-			title: localise(client, "slowmode.strings.missing.title", locale)(),
-			description: localise(client, "slowmode.strings.missing.description", locale)({ parameter: "level" }),
+			title: client.localise("slowmode.strings.missing.title", locale)(),
+			description: client.localise("slowmode.strings.missing.description", locale)({ parameter: "level" }),
 		};
 
-		reply([client, bot], interaction, {
+		reply(client, interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -299,11 +297,11 @@ async function handleToggleSlowmode(
 	if (level === undefined) {
 		const locale = interaction.locale;
 		const strings = {
-			title: localise(client, "slowmode.strings.invalid.title", locale)(),
-			description: localise(client, "slowmode.strings.invalid.description", locale)(),
+			title: client.localise("slowmode.strings.invalid.title", locale)(),
+			description: client.localise("slowmode.strings.invalid.description", locale)(),
 		};
 
-		reply([client, bot], interaction, {
+		reply(client, interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -319,7 +317,7 @@ async function handleToggleSlowmode(
 
 	const rateLimitDuration = Math.floor(rateLimitDurationByLevel[level] / 1000);
 
-	bot.rest
+	client.bot.rest
 		.editChannel(channel.id, { rateLimitPerUser: rateLimitDuration })
 		.catch((reason) =>
 			client.log.warn(`Failed to enable slowmode on ${diagnostics.display.channel(channel)}: ${reason}`),
@@ -330,12 +328,12 @@ async function handleToggleSlowmode(
 	}
 
 	const strings = {
-		title: localise(client, "slowmode.strings.enabled.title", locale)(),
-		description: localise(client, "slowmode.strings.enabled.description", locale)(),
+		title: client.localise("slowmode.strings.enabled.title", locale)(),
+		description: client.localise("slowmode.strings.enabled.description", locale)(),
 	};
 
 	reply(
-		[client, bot],
+		client,
 		interaction,
 		{
 			embeds: [

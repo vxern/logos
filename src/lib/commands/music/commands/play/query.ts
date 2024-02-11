@@ -1,13 +1,12 @@
-import * as Discord from "@discordeno/bot";
 import constants from "../../../../../constants/constants";
 import * as Logos from "../../../../../types";
-import { Client, localise } from "../../../../client";
+import { Client } from "../../../../client";
 import { parseArguments, reply } from "../../../../interactions";
 import { ListingResolver } from "../../data/sources/sources";
 import { SongListing } from "../../data/types";
 
 async function handleRequestQueryPlayback(
-	[client, bot]: [Client, Discord.Bot],
+	client: Client,
 	interaction: Logos.Interaction,
 	resolveToSongListing: ListingResolver,
 ): Promise<void> {
@@ -21,7 +20,7 @@ async function handleRequestQueryPlayback(
 		return;
 	}
 
-	const musicService = client.services.music.music.get(guildId);
+	const musicService = client.getMusicService(guildId);
 	if (musicService === undefined) {
 		return;
 	}
@@ -31,13 +30,13 @@ async function handleRequestQueryPlayback(
 		return;
 	}
 
-	const listing = await resolveToSongListing([client, bot], interaction, query);
+	const listing = await resolveToSongListing(client, interaction, query);
 
-	handleRequestPlayback([client, bot], interaction, listing);
+	handleRequestPlayback(client, interaction, listing);
 }
 
 async function handleRequestPlayback(
-	[client, bot]: [Client, Discord.Bot],
+	client: Client,
 	interaction: Logos.Interaction,
 	listing: SongListing | undefined,
 ): Promise<void> {
@@ -45,18 +44,17 @@ async function handleRequestPlayback(
 
 	if (listing === undefined) {
 		const strings = {
-			title: localise(client, "music.options.play.strings.notFound.title", locale)(),
+			title: client.localise("music.options.play.strings.notFound.title", locale)(),
 			description: {
-				notFound: localise(client, "music.options.play.strings.notFound.description.notFound", locale)(),
-				tryDifferentQuery: localise(
-					client,
+				notFound: client.localise("music.options.play.strings.notFound.description.notFound", locale)(),
+				tryDifferentQuery: client.localise(
 					"music.options.play.strings.notFound.description.tryDifferentQuery",
 					locale,
 				)(),
 			},
 		};
 
-		reply([client, bot], interaction, {
+		reply(client, interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -73,12 +71,12 @@ async function handleRequestPlayback(
 		return;
 	}
 
-	const guild = client.cache.guilds.get(guildId);
+	const guild = client.entities.guilds.get(guildId);
 	if (guild === undefined) {
 		return;
 	}
 
-	const musicService = client.services.music.music.get(guildId);
+	const musicService = client.getMusicService(guildId);
 	if (musicService === undefined) {
 		return;
 	}

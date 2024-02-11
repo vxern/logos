@@ -5,23 +5,25 @@ import { handleDisplayVolume } from "./volume/display";
 import { handleSetVolume } from "./volume/set";
 
 const command: OptionTemplate = {
-	name: "volume",
+	id: "volume",
 	type: Discord.ApplicationCommandOptionTypes.SubCommandGroup,
 	options: [
 		{
-			name: "display",
+			id: "display",
 			type: Discord.ApplicationCommandOptionTypes.SubCommand,
-			isShowable: true,
 			handle: handleDisplayVolume,
 			options: [show],
+			flags: {
+				isShowable: true,
+			},
 		},
 		{
-			name: "set",
+			id: "set",
 			type: Discord.ApplicationCommandOptionTypes.SubCommand,
 			handle: handleSetVolume,
 			options: [
 				{
-					name: "volume",
+					id: "volume",
 					type: Discord.ApplicationCommandOptionTypes.Integer,
 					required: true,
 				},

@@ -2,7 +2,7 @@ import * as Discord from "@discordeno/bot";
 import constants from "../../../../../constants/constants";
 import { MentionTypes, mention } from "../../../../../formatting";
 import * as Logos from "../../../../../types";
-import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../../client";
+import { Client } from "../../../../client";
 import { Praise } from "../../../../database/praise";
 import { User } from "../../../../database/user";
 import { Warning } from "../../../../database/warning";
@@ -11,40 +11,34 @@ import { OptionTemplate } from "../../../command";
 import { show, user } from "../../../parameters";
 
 const command: OptionTemplate = {
-	name: "view",
+	id: "view",
 	type: Discord.ApplicationCommandOptionTypes.SubCommand,
-	isShowable: true,
 	handle: handleDisplayProfile,
 	handleAutocomplete: handleDisplayProfileAutocomplete,
 	options: [{ ...user, required: false }, show],
+	flags: {
+		isShowable: true,
+	},
 };
 
-async function handleDisplayProfileAutocomplete(
-	[client, bot]: [Client, Discord.Bot],
-	interaction: Logos.Interaction,
-): Promise<void> {
+async function handleDisplayProfileAutocomplete(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const [{ user }] = parseArguments(interaction.data?.options, {});
 	if (user === undefined) {
 		return;
 	}
 
-	autocompleteMembers([client, bot], interaction, user);
+	client.autocompleteMembers(interaction, { identifier: user });
 }
 
-async function handleDisplayProfile(
-	[client, bot]: [Client, Discord.Bot],
-	interaction: Logos.Interaction,
-): Promise<void> {
+async function handleDisplayProfile(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const [{ user, show: showParameter }] = parseArguments(interaction.data?.options, { show: "boolean" });
 
 	const show = interaction.show ?? showParameter ?? false;
 	const locale = show ? interaction.guildLocale : interaction.locale;
 
-	const member = resolveInteractionToMember(
-		[client, bot],
+	const member = client.resolveInteractionToMember(
 		interaction,
-		user ?? interaction.user.id.toString(),
-		{},
+		{ identifier: user ?? interaction.user.id.toString() },
 		{ locale },
 	);
 	if (member === undefined) {
@@ -59,8 +53,8 @@ async function handleDisplayProfile(
 	const session = client.database.openSession();
 
 	const targetDocument =
-		client.cache.documents.users.get(member.id.toString()) ??
-		(await session.load<User>(`users/${member.id}`).then((value) => value ?? undefined)) ??
+		client.documents.users.get(member.id.toString()) ??
+		(await session.get<User>(`users/${member.id}`).then((value) => value ?? undefined)) ??
 		(await (async () => {
 			const userDocument = {
 				...({
@@ -70,13 +64,13 @@ async function handleDisplayProfile(
 				} satisfies User),
 				"@metadata": { "@collection": "Users" },
 			};
-			await session.store(userDocument);
+			await session.set(userDocument);
 			await session.saveChanges();
 
 			return userDocument as User;
 		})());
 
-	const praiseDocumentsByAuthorCached = client.cache.documents.praisesByAuthor.get(targetDocument.account.id);
+	const praiseDocumentsByAuthorCached = client.documents.praisesByAuthor.get(targetDocument.account.id);
 	const praiseDocumentsByAuthor =
 		praiseDocumentsByAuthorCached !== undefined
 			? Array.from(praiseDocumentsByAuthorCached.values())
@@ -91,11 +85,11 @@ async function handleDisplayProfile(
 								praiseDocument,
 							]),
 						);
-						client.cache.documents.praisesByAuthor.set(targetDocument.account.id, map);
+						client.documents.praisesByAuthor.set(targetDocument.account.id, map);
 						return praiseDocuments;
 					});
 
-	const praiseDocumentsByTargetCached = client.cache.documents.praisesByTarget.get(targetDocument.account.id);
+	const praiseDocumentsByTargetCached = client.documents.praisesByTarget.get(targetDocument.account.id);
 	const praiseDocumentsByTarget =
 		praiseDocumentsByTargetCached !== undefined
 			? Array.from(praiseDocumentsByTargetCached.values())
@@ -110,11 +104,11 @@ async function handleDisplayProfile(
 								praiseDocument,
 							]),
 						);
-						client.cache.documents.praisesByTarget.set(targetDocument.account.id, map);
+						client.documents.praisesByTarget.set(targetDocument.account.id, map);
 						return praiseDocuments;
 					});
 
-	const warningDocumentsCached = client.cache.documents.warningsByTarget.get(targetDocument.account.id);
+	const warningDocumentsCached = client.documents.warningsByTarget.get(targetDocument.account.id);
 	const warningDocuments =
 		warningDocumentsCached !== undefined
 			? Array.from(warningDocumentsCached.values())
@@ -129,26 +123,25 @@ async function handleDisplayProfile(
 								warningDocument,
 							]),
 						);
-						client.cache.documents.warningsByTarget.set(targetDocument.account.id, map);
+						client.documents.warningsByTarget.set(targetDocument.account.id, map);
 						return warningDocuments;
 					});
 
 	session.dispose();
 
 	const strings = {
-		title: localise(
-			client,
+		title: client.localise(
 			"profile.options.view.strings.information.title",
 			locale,
 		)({
 			username: target.username,
 		}),
-		roles: localise(client, "profile.options.view.strings.information.description.roles", locale)(),
-		statistics: localise(client, "profile.options.view.strings.information.description.statistics", locale)(),
-		praises: localise(client, "profile.options.view.strings.information.description.praises", locale)(),
-		warnings: localise(client, "profile.options.view.strings.information.description.warnings", locale)(),
-		received: localise(client, "profile.options.view.strings.information.description.received", locale)(),
-		sent: localise(client, "profile.options.view.strings.information.description.sent", locale)(),
+		roles: client.localise("profile.options.view.strings.information.description.roles", locale)(),
+		statistics: client.localise("profile.options.view.strings.information.description.statistics", locale)(),
+		praises: client.localise("profile.options.view.strings.information.description.praises", locale)(),
+		warnings: client.localise("profile.options.view.strings.information.description.warnings", locale)(),
+		received: client.localise("profile.options.view.strings.information.description.received", locale)(),
+		sent: client.localise("profile.options.view.strings.information.description.sent", locale)(),
 	};
 
 	const showButton = getShowButton(client, interaction, { locale });
@@ -158,7 +151,7 @@ async function handleDisplayProfile(
 		: [{ type: Discord.MessageComponentTypes.ActionRow, components: [showButton] }];
 
 	reply(
-		[client, bot],
+		client,
 		interaction,
 		{
 			embeds: [

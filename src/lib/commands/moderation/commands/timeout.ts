@@ -5,19 +5,19 @@ import { handleClearTimeout, handleClearTimeoutAutocomplete } from "./timeout/cl
 import { handleSetTimeout, handleSetTimeoutAutocomplete } from "./timeout/set";
 
 const command: CommandTemplate = {
-	name: "timeout",
+	id: "timeout",
 	type: Discord.ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ["MODERATE_MEMBERS"],
 	options: [
 		{
-			name: "set",
+			id: "set",
 			type: Discord.ApplicationCommandOptionTypes.SubCommand,
 			handle: handleSetTimeout,
 			handleAutocomplete: handleSetTimeoutAutocomplete,
 			options: [user, duration, reason],
 		},
 		{
-			name: "clear",
+			id: "clear",
 			type: Discord.ApplicationCommandOptionTypes.SubCommand,
 			handle: handleClearTimeout,
 			handleAutocomplete: handleClearTimeoutAutocomplete,

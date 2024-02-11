@@ -12,11 +12,9 @@ type ServiceBase = {
 
 abstract class Service implements ServiceBase {
 	readonly client: Client;
-	readonly bot: Discord.Bot;
 
-	constructor([client, bot]: [Client, Discord.Bot]) {
+	constructor(client: Client) {
 		this.client = client;
-		this.bot = bot;
 	}
 
 	abstract start(): Promise<void>;
@@ -84,6 +82,9 @@ abstract class Service implements ServiceBase {
 	async botUpdate(..._: Parameters<ServiceBase["botUpdate"]>) {}
 	async typingStart(..._: Parameters<ServiceBase["typingStart"]>) {}
 	async threadListSync(..._: Parameters<ServiceBase["threadListSync"]>) {}
+	async entitlementCreate(..._: Parameters<ServiceBase["entitlementCreate"]>) {}
+	async entitlementUpdate(..._: Parameters<ServiceBase["entitlementUpdate"]>) {}
+	async entitlementDelete(..._: Parameters<ServiceBase["entitlementDelete"]>) {}
 }
 
 abstract class GlobalService extends Service {
@@ -96,11 +97,11 @@ abstract class LocalService extends Service {
 	protected readonly guildIdString: string;
 
 	get guild(): Logos.Guild | undefined {
-		return this.client.cache.guilds.get(this.guildId);
+		return this.client.entities.guilds.get(this.guildId);
 	}
 
 	get guildDocument(): Guild | undefined {
-		return this.client.cache.documents.guilds.get(this.guildIdString);
+		return this.client.documents.guilds.get(this.guildIdString);
 	}
 
 	get guildLocale(): Locale {
@@ -115,8 +116,8 @@ abstract class LocalService extends Service {
 		return guildLocale;
 	}
 
-	constructor([client, bot]: [Client, Discord.Bot], guildId: bigint) {
-		super([client, bot]);
+	constructor(client: Client, guildId: bigint) {
+		super(client);
 		this.guildId = guildId;
 		this.guildIdString = guildId.toString();
 	}

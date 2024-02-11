@@ -5,7 +5,7 @@ import { GuildEvents, MessageGenerators } from "../generator";
 export default {
 	title: `${constants.symbols.events.report} Report submitted`,
 	message: (client, author, report) => {
-		const authorUser = client.cache.users.get(author.id);
+		const authorUser = client.entities.users.get(author.id);
 		if (authorUser === undefined) {
 			return;
 		}

@@ -1,7 +1,7 @@
 import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import * as Logos from "../../../../types";
-import { Client, localise } from "../../../client";
+import { Client } from "../../../client";
 import { Resource } from "../../../database/resource";
 import { User } from "../../../database/user";
 import diagnostics from "../../../diagnostics";
@@ -11,14 +11,14 @@ import { PromptService } from "../service";
 type InteractionData = [documentId: string, isResolved: string];
 
 class ResourceService extends PromptService<"resources", Resource, InteractionData> {
-	constructor([client, bot]: [Client, Discord.Bot], guildId: bigint) {
-		super([client, bot], guildId, { type: "resources", deleteMode: "delete" });
+	constructor(client: Client, guildId: bigint) {
+		super(client, guildId, { type: "resources", deleteMode: "delete" });
 	}
 
 	getAllDocuments(): Map<string, Resource> {
 		const resources = new Map<string, Resource>();
 
-		for (const [compositeId, resourceDocument] of this.client.cache.documents.resources) {
+		for (const [compositeId, resourceDocument] of this.client.documents.resources) {
 			if (resourceDocument.guildId !== this.guildIdString) {
 				continue;
 			}
@@ -33,8 +33,8 @@ class ResourceService extends PromptService<"resources", Resource, InteractionDa
 		const session = this.client.database.openSession();
 
 		const userDocument =
-			this.client.cache.documents.users.get(resourceDocument.authorId) ??
-			session.load<User>(`users/${resourceDocument.authorId}`).then((value) => value ?? undefined);
+			this.client.documents.users.get(resourceDocument.authorId) ??
+			session.get<User>(`users/${resourceDocument.authorId}`).then((value) => value ?? undefined);
 
 		session.dispose();
 
@@ -49,9 +49,9 @@ class ResourceService extends PromptService<"resources", Resource, InteractionDa
 
 		const guildLocale = this.guildLocale;
 		const strings = {
-			markResolved: localise(this.client, "markResolved", guildLocale)(),
-			markUnresolved: localise(this.client, "markUnresolved", guildLocale)(),
-			remove: localise(this.client, "remove", guildLocale)(),
+			markResolved: this.client.localise("markResolved", guildLocale)(),
+			markUnresolved: this.client.localise("markUnresolved", guildLocale)(),
+			remove: this.client.localise("remove", guildLocale)(),
 		};
 
 		return {
@@ -133,11 +133,11 @@ class ResourceService extends PromptService<"resources", Resource, InteractionDa
 
 		if (isResolved && resourceDocument.isResolved) {
 			const strings = {
-				title: localise(this.client, "alreadyMarkedResolved.title", locale)(),
-				description: localise(this.client, "alreadyMarkedResolved.description", locale)(),
+				title: this.client.localise("alreadyMarkedResolved.title", locale)(),
+				description: this.client.localise("alreadyMarkedResolved.description", locale)(),
 			};
 
-			reply([this.client, this.bot], interaction, {
+			reply(this.client, interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -151,11 +151,11 @@ class ResourceService extends PromptService<"resources", Resource, InteractionDa
 
 		if (!(isResolved || resourceDocument.isResolved)) {
 			const strings = {
-				title: localise(this.client, "alreadyMarkedUnresolved.title", locale)(),
-				description: localise(this.client, "alreadyMarkedUnresolved.description", locale)(),
+				title: this.client.localise("alreadyMarkedUnresolved.title", locale)(),
+				description: this.client.localise("alreadyMarkedUnresolved.description", locale)(),
 			};
 
-			reply([this.client, this.bot], interaction, {
+			reply(this.client, interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -171,7 +171,7 @@ class ResourceService extends PromptService<"resources", Resource, InteractionDa
 
 		resourceDocument.isResolved = isResolved;
 
-		await session.store(resourceDocument);
+		await session.set(resourceDocument);
 		await session.saveChanges();
 
 		session.dispose();

@@ -3,18 +3,18 @@ import constants from "../../../../../constants/constants";
 import { Locale } from "../../../../../constants/languages";
 import licences from "../../../../../constants/licences";
 import * as Logos from "../../../../../types";
-import { Client, localise } from "../../../../client";
+import { Client } from "../../../../client";
 import { parseArguments, reply, respond } from "../../../../interactions";
 import { OptionTemplate } from "../../../command";
 
 const command: OptionTemplate = {
-	name: "dictionary",
+	id: "dictionary",
 	type: Discord.ApplicationCommandOptionTypes.SubCommand,
 	handle: handleDisplayDictionaryLicence,
 	handleAutocomplete: handleDisplayDictionaryLicenceAutocomplete,
 	options: [
 		{
-			name: "dictionary",
+			id: "dictionary",
 			type: Discord.ApplicationCommandOptionTypes.String,
 			required: true,
 			autocomplete: true,
@@ -23,7 +23,7 @@ const command: OptionTemplate = {
 };
 
 async function handleDisplayDictionaryLicenceAutocomplete(
-	[client, bot]: [Client, Discord.Bot],
+	client: Client,
 	interaction: Logos.Interaction,
 ): Promise<void> {
 	const guildId = interaction.guildId;
@@ -45,23 +45,20 @@ async function handleDisplayDictionaryLicenceAutocomplete(
 		})
 		.filter((choice) => choice.name.toLowerCase().includes(dictionaryQueryLowercase));
 
-	respond([client, bot], interaction, choices);
+	respond(client, interaction, choices);
 }
 
-async function handleDisplayDictionaryLicence(
-	[client, bot]: [Client, Discord.Bot],
-	interaction: Logos.Interaction,
-): Promise<void> {
+async function handleDisplayDictionaryLicence(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.locale;
 
 	const [{ dictionary: dictionaryOrUndefined }] = parseArguments(interaction.data?.options, {});
 	if (dictionaryOrUndefined === undefined) {
-		displayError([client, bot], interaction, { locale: interaction.locale });
+		displayError(client, interaction, { locale: interaction.locale });
 		return;
 	}
 
 	if (!(dictionaryOrUndefined in licences.dictionaries)) {
-		displayError([client, bot], interaction, { locale: interaction.locale });
+		displayError(client, interaction, { locale: interaction.locale });
 		return;
 	}
 
@@ -69,14 +66,14 @@ async function handleDisplayDictionaryLicence(
 	const licenceInformation = licences.dictionaries[dictionaryName];
 
 	const strings = {
-		title: localise(client, "license.strings.license", locale)({ entity: licenceInformation.name }),
+		title: client.localise("license.strings.license", locale)({ entity: licenceInformation.name }),
 		fields: {
-			source: localise(client, "license.strings.source", locale)(),
-			copyright: localise(client, "license.strings.copyright", locale)(),
+			source: client.localise("license.strings.source", locale)(),
+			copyright: client.localise("license.strings.copyright", locale)(),
 		},
 	};
 
-	reply([client, bot], interaction, {
+	reply(client, interaction, {
 		embeds: [
 			{
 				author: {
@@ -106,16 +103,16 @@ async function handleDisplayDictionaryLicence(
 }
 
 async function displayError(
-	[client, bot]: [Client, Discord.Bot],
+	client: Client,
 	interaction: Logos.Interaction,
 	{ locale }: { locale: Locale },
 ): Promise<void> {
 	const strings = {
-		title: localise(client, "licenses.strings.invalid.title", locale)(),
-		description: localise(client, "licenses.strings.invalid.description", locale)(),
+		title: client.localise("licenses.strings.invalid.title", locale)(),
+		description: client.localise("licenses.strings.invalid.description", locale)(),
 	};
 
-	reply([client, bot], interaction, {
+	reply(client, interaction, {
 		embeds: [
 			{
 				title: strings.title,

@@ -3,22 +3,18 @@ import * as YouTubeSearch from "youtube-sr";
 import constants from "../../../../../constants/constants";
 import { trim } from "../../../../../formatting";
 import * as Logos from "../../../../../types";
-import { Client, localise } from "../../../../client";
+import { Client } from "../../../../client";
 import { createInteractionCollector, deleteReply, postponeReply, reply } from "../../../../interactions";
 import { Song, SongListing } from "../types";
 import { ListingResolver } from "./sources";
 
-const resolver: ListingResolver = async ([client, bot], interaction, query) => {
-	const url = new RegExp(
-		/^(?:https?:)?(?:\/\/)?(?:youtu\.be\/|(?:www\.|m\.)?youtube\.com\/(?:watch|v|embed)(?:\.php)?(?:\?.*v=|\/))([a-zA-Z0-9\_-]{7,15})(?:[\?&][a-zA-Z0-9\_-]+=[a-zA-Z0-9\_-]+)*$/,
-	);
-
-	if (!url.test(query)) {
-		return search([client, bot], interaction, query);
+const resolver: ListingResolver = async (client, interaction, query) => {
+	if (!constants.patterns.youtubeUrl.test(query)) {
+		return search(client, interaction, query);
 	}
 
-	postponeReply([client, bot], interaction);
-	deleteReply([client, bot], interaction);
+	postponeReply(client, interaction);
+	deleteReply(client, interaction);
 
 	if (query.includes("list=")) {
 		const playlist = await YouTubeSearch.YouTube.getPlaylist(query);
@@ -29,11 +25,7 @@ const resolver: ListingResolver = async ([client, bot], interaction, query) => {
 	return fromYouTubeVideo(video, interaction.user.id);
 };
 
-async function search(
-	[client, bot]: [Client, Discord.Bot],
-	interaction: Logos.Interaction,
-	query: string,
-): Promise<SongListing | undefined> {
+async function search(client: Client, interaction: Logos.Interaction, query: string): Promise<SongListing | undefined> {
 	const locale = interaction.locale;
 
 	const resultsAll = await YouTubeSearch.YouTube.search(query, { limit: 20, type: "all", safeSearch: false });
@@ -45,12 +37,12 @@ async function search(
 	}
 
 	return new Promise<SongListing | undefined>((resolve) => {
-		const customId = createInteractionCollector([client, bot], {
+		const customId = createInteractionCollector(client, {
 			type: Discord.InteractionTypes.MessageComponent,
 			userId: interaction.user.id,
 			limit: 1,
 			onCollect: async (selection) => {
-				deleteReply([client, bot], interaction);
+				deleteReply(client, interaction);
 
 				const indexString = selection.data?.values?.at(0) as string | undefined;
 				if (indexString === undefined) {
@@ -82,8 +74,8 @@ async function search(
 		});
 
 		const strings = {
-			title: localise(client, "music.options.play.strings.selectSong.title", locale)(),
-			description: localise(client, "music.options.play.strings.selectSong.description", locale)(),
+			title: client.localise("music.options.play.strings.selectSong.title", locale)(),
+			description: client.localise("music.options.play.strings.selectSong.description", locale)(),
 		};
 
 		const options = [];
@@ -102,7 +94,7 @@ async function search(
 			});
 		}
 
-		reply([client, bot], interaction, {
+		reply(client, interaction, {
 			embeds: [
 				{
 					title: strings.title,

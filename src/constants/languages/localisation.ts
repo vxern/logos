@@ -85,12 +85,12 @@ const languageToLocale = {
 	} as const satisfies Record<LogosLanguage, string>,
 };
 
-type DiscordLanguage = typeof languages.discord[number];
-type LogosLanguage = typeof languages.logos[number];
+type DiscordLanguage = (typeof languages.discord)[number];
+type LogosLanguage = (typeof languages.logos)[number];
 type Language = LogosLanguage;
 
-type DiscordLocale = typeof languageToLocale.discord[keyof typeof languageToLocale.discord];
-type LogosLocale = typeof languageToLocale.logos[keyof typeof languageToLocale.logos];
+type DiscordLocale = (typeof languageToLocale.discord)[keyof typeof languageToLocale.discord];
+type LogosLocale = (typeof languageToLocale.logos)[keyof typeof languageToLocale.logos];
 type Locale = LogosLocale;
 
 const localeToLanguage = Object.freeze({

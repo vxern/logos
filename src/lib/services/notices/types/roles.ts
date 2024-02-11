@@ -1,31 +1,30 @@
 import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import * as Logos from "../../../../types";
-import { Client, localise } from "../../../client";
+import { Client } from "../../../client";
 import { handleOpenRoleSelectionMenu } from "../../../commands/social/commands/profile/roles";
 import { decodeId, getLocaleData } from "../../../interactions";
 import { HashableMessageContents, NoticeService } from "../service";
 
 class RoleNoticeService extends NoticeService<"roles"> {
-	constructor([client, bot]: [Client, Discord.Bot], guildId: bigint) {
-		super([client, bot], guildId, { type: "roles" });
+	constructor(client: Client, guildId: bigint) {
+		super(client, guildId, { type: "roles" });
 	}
 
 	generateNotice(): HashableMessageContents | undefined {
 		const guildLocale = this.guildLocale;
 		const strings = {
-			title: localise(this.client, "roles.selection.title", guildLocale)(),
+			title: this.client.localise("roles.selection.title", guildLocale)(),
 			description: {
-				usingCommand: localise(
-					this.client,
+				usingCommand: this.client.localise(
 					"roles.selection.description.usingCommand",
 					guildLocale,
 				)({
 					command: "`/profile roles`",
 				}),
-				runAnywhere: localise(this.client, "roles.selection.description.runAnywhere", guildLocale)(),
-				pressButton: localise(this.client, "roles.selection.description.pressButton", guildLocale)(),
-				clickHere: localise(this.client, "roles.selection.description.clickHere", guildLocale)(),
+				runAnywhere: this.client.localise("roles.selection.description.runAnywhere", guildLocale)(),
+				pressButton: this.client.localise("roles.selection.description.pressButton", guildLocale)(),
+				clickHere: this.client.localise("roles.selection.description.clickHere", guildLocale)(),
 			},
 		};
 
@@ -71,7 +70,7 @@ class RoleNoticeService extends NoticeService<"roles"> {
 		const localeData = await getLocaleData(this.client, interactionRaw);
 		const interaction: Logos.Interaction = { ...interactionRaw, ...localeData };
 
-		handleOpenRoleSelectionMenu([this.client, this.bot], interaction);
+		handleOpenRoleSelectionMenu(this.client, interaction);
 	}
 }
 

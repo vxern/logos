@@ -1,5 +1,6 @@
 import { Locale, LocalisationLanguage } from "../../constants/languages";
 
+// TODO(vxern): Make the whole thing nullable.
 /** Represents a user. */
 interface User {
 	id: string;

@@ -43,7 +43,7 @@ class AlertService extends LocalService {
 			return;
 		}
 
-		this.bot.rest.sendMessage(channelId, message).catch(() => {
+		this.client.bot.rest.sendMessage(channelId, message).catch(() => {
 			this.client.log.warn(
 				`Failed to send alert to ${diagnostics.display.channel(channelId)} on ${diagnostics.display.guild(
 					this.guildId,

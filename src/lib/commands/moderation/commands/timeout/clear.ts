@@ -1,25 +1,24 @@
-import * as Discord from "@discordeno/bot";
 import constants from "../../../../../constants/constants";
 import { MentionTypes, mention } from "../../../../../formatting";
 import * as Logos from "../../../../../types";
-import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../../client";
+import { Client } from "../../../../client";
 import { Guild } from "../../../../database/guild";
 import diagnostics from "../../../../diagnostics";
 import { parseArguments, reply } from "../../../../interactions";
 
-async function handleClearTimeoutAutocomplete(
-	[client, bot]: [Client, Discord.Bot],
-	interaction: Logos.Interaction,
-): Promise<void> {
+async function handleClearTimeoutAutocomplete(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const [{ user }] = parseArguments(interaction.data?.options, {});
 	if (user === undefined) {
 		return;
 	}
 
-	autocompleteMembers([client, bot], interaction, user, { restrictToNonSelf: true, excludeModerators: true });
+	client.autocompleteMembers(interaction, {
+		identifier: user,
+		options: { restrictToNonSelf: true, excludeModerators: true },
+	});
 }
 
-async function handleClearTimeout([client, bot]: [Client, Discord.Bot], interaction: Logos.Interaction): Promise<void> {
+async function handleClearTimeout(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.locale;
 
 	const guildId = interaction.guildId;
@@ -30,8 +29,8 @@ async function handleClearTimeout([client, bot]: [Client, Discord.Bot], interact
 	const session = client.database.openSession();
 
 	const guildDocument =
-		client.cache.documents.guilds.get(guildId.toString()) ??
-		(await session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
+		client.documents.guilds.get(guildId.toString()) ??
+		(await session.get<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
 
 	session.dispose();
 
@@ -49,13 +48,11 @@ async function handleClearTimeout([client, bot]: [Client, Discord.Bot], interact
 		return;
 	}
 
-	const member = resolveInteractionToMember(
-		[client, bot],
+	const member = client.resolveInteractionToMember(
 		interaction,
-		userSearchQuery,
 		{
-			restrictToNonSelf: true,
-			excludeModerators: true,
+			identifier: userSearchQuery,
+			options: { restrictToNonSelf: true, excludeModerators: true },
 		},
 		{ locale },
 	);
@@ -74,15 +71,14 @@ async function handleClearTimeout([client, bot]: [Client, Discord.Bot], interact
 
 	if (notTimedOut) {
 		const strings = {
-			title: localise(client, "timeout.strings.notTimedOut.title", locale)(),
-			description: localise(
-				client,
+			title: client.localise("timeout.strings.notTimedOut.title", locale)(),
+			description: client.localise(
 				"timeout.strings.notTimedOut.description",
 				locale,
 			)({ user_mention: mention(user.id, MentionTypes.User) }),
 		};
 
-		reply([client, bot], interaction, {
+		reply(client, interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -94,30 +90,29 @@ async function handleClearTimeout([client, bot]: [Client, Discord.Bot], interact
 		return;
 	}
 
-	const guild = client.cache.guilds.get(guildId);
+	const guild = client.entities.guilds.get(guildId);
 	if (guild === undefined) {
 		return;
 	}
 
-	await bot.rest
+	await client.bot.rest
 		.editMember(guildId, member.id, { communicationDisabledUntil: null })
 		.catch(() => client.log.warn(`Failed to remove timeout of ${diagnostics.display.member(member)}.`));
 
 	if (configuration.journaling) {
-		const journallingService = client.services.journalling.get(guild.id);
+		const journallingService = client.getJournallingService(guild.id);
 		journallingService?.log("memberTimeoutRemove", { args: [member, interaction.user] });
 	}
 
 	const strings = {
-		title: localise(client, "timeout.strings.timeoutCleared.title", locale)(),
-		description: localise(
-			client,
+		title: client.localise("timeout.strings.timeoutCleared.title", locale)(),
+		description: client.localise(
 			"timeout.strings.timeoutCleared.description",
 			locale,
 		)({ user_mention: mention(user.id, MentionTypes.User) }),
 	};
 
-	reply([client, bot], interaction, {
+	reply(client, interaction, {
 		embeds: [
 			{
 				title: strings.title,

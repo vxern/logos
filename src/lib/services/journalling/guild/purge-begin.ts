@@ -6,7 +6,7 @@ import { GuildEvents, MessageGenerators } from "../generator";
 export default {
 	title: `${constants.symbols.events.purging.begin} Purging started`,
 	message: (client, member, channel, messageCount, author) => {
-		const user = client.cache.users.get(member.id);
+		const user = client.entities.users.get(member.id);
 		if (user === undefined) {
 			return;
 		}

@@ -1,26 +1,25 @@
 import * as Discord from "@discordeno/bot";
 import localisations from "../../../../constants/localisations";
 import * as Logos from "../../../../types";
-import { Client, localise } from "../../../client";
+import { Client } from "../../../client";
 import { Guild } from "../../../database/guild";
 import { getShowButton, parseArguments, reply } from "../../../interactions";
 import { CommandTemplate } from "../../command";
 import { show } from "../../parameters";
 
 const command: CommandTemplate = {
-	name: "resources",
+	id: "resources",
 	type: Discord.ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ["VIEW_CHANNEL"],
-	isShowable: true,
 	handle: handleDisplayResources,
 	options: [show],
+	flags: {
+		isShowable: true,
+	},
 };
 
 /** Displays a message with information on where to find the resources for a given language. */
-async function handleDisplayResources(
-	[client, bot]: [Client, Discord.Bot],
-	interaction: Logos.Interaction,
-): Promise<void> {
+async function handleDisplayResources(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const [{ show: showParameter }] = parseArguments(interaction.data?.options, { show: "boolean" });
 
 	const show = interaction.show ?? showParameter ?? false;
@@ -34,8 +33,8 @@ async function handleDisplayResources(
 	const session = client.database.openSession();
 
 	const guildDocument =
-		client.cache.documents.guilds.get(guildId.toString()) ??
-		(await session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
+		client.documents.guilds.get(guildId.toString()) ??
+		(await session.get<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
 
 	session.dispose();
 
@@ -49,12 +48,11 @@ async function handleDisplayResources(
 	}
 
 	const strings = {
-		redirect: localise(
-			client,
+		redirect: client.localise(
 			"resources.strings.redirect",
 			locale,
 		)({
-			language: localise(client, localisations.languages[interaction.featureLanguage], locale)(),
+			language: client.localise(localisations.languages[interaction.featureLanguage], locale)(),
 		}),
 	};
 
@@ -74,7 +72,7 @@ async function handleDisplayResources(
 	}
 
 	reply(
-		[client, bot],
+		client,
 		interaction,
 		{
 			components: [

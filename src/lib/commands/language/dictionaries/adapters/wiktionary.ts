@@ -6,11 +6,11 @@ import { Client } from "../../../../client";
 import { getPartOfSpeech } from "../../module";
 import { Definition, DictionaryAdapter, DictionaryEntry } from "../adapter";
 
-const newlinesExpression = RegExp("\n{1}", "g");
+const newlinesExpression = /\n{1}/g;
 
 const wiktionary = new WiktionaryParser();
 
-type WordData = ReturnType<typeof wiktionary["parse"]> extends Promise<(infer U)[]> ? U : never;
+type WordData = ReturnType<(typeof wiktionary)["parse"]> extends Promise<(infer U)[]> ? U : never;
 
 const languageVariantsReduced: Record<string, string> = {
 	"English/American": "English",

@@ -2,31 +2,49 @@ import * as Discord from "@discordeno/bot";
 import * as Logos from "../../types";
 import { Client } from "../client";
 
+// TODO(vxern): This whole file could be improved.
+
 type WithRequired<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>> & Required<Pick<T, K>>;
 
 /** Describes the handler of an interaction. */
-type InteractionHandler = ([client, bot]: [Client, Discord.Bot], interaction: Logos.Interaction) => Promise<void>;
+type InteractionHandler = (client: Client, interaction: Logos.Interaction) => Promise<void>;
 
 type Command = Discord.CreateApplicationCommand;
 
 type Option = Discord.ApplicationCommandOption;
 
-interface CommandFeatures {
-	isRateLimited?: boolean;
+interface CommandOptionFlags {
+	hasRateLimit?: boolean;
 	isShowable?: boolean;
+}
+
+interface CommandMetadata {
+	id: string;
 	handle?: InteractionHandler;
 	handleAutocomplete?: InteractionHandler;
-	options?: OptionTemplate[];
+	flags?: CommandOptionFlags;
 }
 
 type LocalisationProperties = "name" | "nameLocalizations" | "description" | "descriptionLocalizations";
 
+// TODO(vxern): Rename to builder.
 type CommandTemplate = WithRequired<
-	Omit<Command, "options" | Exclude<LocalisationProperties, "name">>,
+	Omit<Command, "options" | LocalisationProperties>,
 	"defaultMemberPermissions" | "type"
-> &
-	CommandFeatures;
+> & {
+	options?: OptionTemplate[];
+} & CommandMetadata;
 
-type OptionTemplate = Omit<Option, "options" | Exclude<LocalisationProperties, "name">> & CommandFeatures;
+type OptionTemplate = Omit<Option, "options" | LocalisationProperties> & {
+	options?: OptionTemplate[];
+} & CommandMetadata;
 
-export type { Command, CommandTemplate, InteractionHandler, LocalisationProperties, Option, OptionTemplate };
+export type {
+	Command,
+	CommandTemplate,
+	CommandMetadata,
+	InteractionHandler,
+	LocalisationProperties,
+	Option,
+	OptionTemplate,
+};

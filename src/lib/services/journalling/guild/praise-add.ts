@@ -5,7 +5,7 @@ import { GuildEvents, MessageGenerators } from "../generator";
 export default {
 	title: `${constants.symbols.events.praised} Member praised`,
 	message: (client, member, praise, by) => {
-		const memberUser = client.cache.users.get(member.id);
+		const memberUser = client.entities.users.get(member.id);
 		if (memberUser === undefined) {
 			return;
 		}

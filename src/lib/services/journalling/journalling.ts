@@ -61,7 +61,7 @@ class JournallingService extends LocalService {
 			return;
 		}
 
-		await this.bot.rest
+		await this.client.bot.rest
 			.sendMessage(channelId, {
 				embeds: [
 					{

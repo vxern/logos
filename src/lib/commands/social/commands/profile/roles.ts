@@ -3,7 +3,7 @@ import constants from "../../../../../constants/constants";
 import { Locale } from "../../../../../constants/languages";
 import { trim } from "../../../../../formatting";
 import * as Logos from "../../../../../types";
-import { Client, localise } from "../../../../client";
+import { Client } from "../../../../client";
 import diagnostics from "../../../../diagnostics";
 import { acknowledge, createInteractionCollector, editReply, reply } from "../../../../interactions";
 import { OptionTemplate } from "../../../command";
@@ -20,7 +20,7 @@ import {
 } from "../../roles/types";
 
 const command: OptionTemplate = {
-	name: "roles",
+	id: "roles",
 	type: Discord.ApplicationCommandOptionTypes.SubCommand,
 	handle: handleOpenRoleSelectionMenu,
 };
@@ -29,23 +29,20 @@ const command: OptionTemplate = {
  * Displays a role selection menu to the user and allows them to assign or unassign roles
  * from within it.
  */
-async function handleOpenRoleSelectionMenu(
-	[client, bot]: [Client, Discord.Bot],
-	interaction: Logos.Interaction,
-): Promise<void> {
+async function handleOpenRoleSelectionMenu(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
 		return;
 	}
 
-	const guild = client.cache.guilds.get(guildId);
+	const guild = client.entities.guilds.get(guildId);
 	if (guild === undefined) {
 		return;
 	}
 
 	const rootCategories = getRoleCategories(roles, guild.id).map(([category, _index]) => category);
 
-	createRoleSelectionMenu([client, bot], interaction, {
+	createRoleSelectionMenu(client, interaction, {
 		navigationData: {
 			root: {
 				type: "group",
@@ -124,7 +121,7 @@ function traverseRoleSelectionTree(data: NavigationData): [RoleCategory, ...Role
  * Creates a browsing menu for selecting roles.
  */
 async function createRoleSelectionMenu(
-	[client, bot]: [Client, Discord.Bot],
+	client: Client,
 	interaction: Logos.Interaction,
 	data: BrowsingData,
 ): Promise<void> {
@@ -135,7 +132,7 @@ async function createRoleSelectionMenu(
 		return;
 	}
 
-	const guild = client.cache.guilds.get(guildId);
+	const guild = client.entities.guilds.get(guildId);
 	if (guild === undefined) {
 		return;
 	}
@@ -149,18 +146,18 @@ async function createRoleSelectionMenu(
 		emojiIdsByName.set(name, id);
 	}
 
-	const member = client.cache.members.get(Discord.snowflakeToBigint(`${interaction.user.id}${guild.id}`));
+	const member = client.entities.members.get(Discord.snowflakeToBigint(`${interaction.user.id}${guild.id}`));
 	if (member === undefined) {
 		return;
 	}
 
 	const rolesById = new Map(guild.roles.array().map((role) => [role.id, role]));
 
-	const customId = createInteractionCollector([client, bot], {
+	const customId = createInteractionCollector(client, {
 		type: Discord.InteractionTypes.MessageComponent,
 		userId: interaction.user.id,
 		onCollect: async (selection) => {
-			acknowledge([client, bot], selection);
+			acknowledge(client, selection);
 
 			const indexString = selection.data?.values?.at(0);
 			if (indexString === undefined) {
@@ -175,7 +172,7 @@ async function createRoleSelectionMenu(
 			if (index === -1) {
 				data.navigationData.indexesAccessed.pop();
 				displayData = await traverseRoleTreeAndDisplay(
-					[client, bot],
+					client,
 					selection,
 					displayData,
 					{ editResponse: true },
@@ -192,7 +189,7 @@ async function createRoleSelectionMenu(
 			if (isGroup(viewData.category)) {
 				data.navigationData.indexesAccessed.push(index);
 				displayData = await traverseRoleTreeAndDisplay(
-					[client, bot],
+					client,
 					selection,
 					displayData,
 					{ editResponse: true },
@@ -214,7 +211,7 @@ async function createRoleSelectionMenu(
 					viewData.memberRolesIncludedInMenu.length <= viewData.category.minimum
 				) {
 					displayData = await traverseRoleTreeAndDisplay(
-						[client, bot],
+						client,
 						interaction,
 						displayData,
 						{ editResponse: true },
@@ -223,7 +220,7 @@ async function createRoleSelectionMenu(
 					return;
 				}
 
-				bot.rest
+				client.bot.rest
 					.removeRole(guild.id, member.id, role.id, "User-requested role removal.")
 					.catch(() =>
 						client.log.warn(
@@ -246,22 +243,20 @@ async function createRoleSelectionMenu(
 					viewData.memberRolesIncludedInMenu.length >= viewData.category.maximum
 				) {
 					const strings = {
-						title: localise(client, "warn.strings.limitReached.title", locale)(),
+						title: client.localise("warn.strings.limitReached.title", locale)(),
 						description: {
-							limitReached: localise(
-								client,
+							limitReached: client.localise(
 								"profile.options.roles.strings.limitReached.description.limitReached",
 								locale,
-							)({ category: localise(client, `${viewData.category.id}.name`, locale)() }),
-							toChooseNew: localise(
-								client,
+							)({ category: client.localise(`${viewData.category.id}.name`, locale)() }),
+							toChooseNew: client.localise(
 								"profile.options.roles.strings.limitReached.description.toChooseNew",
 								locale,
 							)(),
 						},
 					};
 
-					reply([client, bot], interaction, {
+					reply(client, interaction, {
 						embeds: [
 							{
 								title: strings.title,
@@ -271,7 +266,7 @@ async function createRoleSelectionMenu(
 					});
 
 					displayData = await traverseRoleTreeAndDisplay(
-						[client, bot],
+						client,
 						interaction,
 						displayData,
 						{ editResponse: true },
@@ -280,7 +275,7 @@ async function createRoleSelectionMenu(
 					return;
 				}
 
-				await bot.rest
+				await client.bot.rest
 					.addRole(guild.id, member.id, role.id, "User-requested role addition.")
 					.catch(() =>
 						client.log.warn(
@@ -292,7 +287,7 @@ async function createRoleSelectionMenu(
 
 				if (viewData.category.maximum === 1) {
 					for (const memberRoleId of viewData.memberRolesIncludedInMenu) {
-						bot.rest
+						client.bot.rest
 							.removeRole(guild.id, member.id, memberRoleId)
 							.catch(() =>
 								client.log.warn(
@@ -314,7 +309,7 @@ async function createRoleSelectionMenu(
 			}
 
 			displayData = await traverseRoleTreeAndDisplay(
-				[client, bot],
+				client,
 				interaction,
 				displayData,
 				{ editResponse: true },
@@ -324,7 +319,7 @@ async function createRoleSelectionMenu(
 	});
 
 	let displayData = await traverseRoleTreeAndDisplay(
-		[client, bot],
+		client,
 		interaction,
 		{
 			customId,
@@ -358,8 +353,8 @@ interface RoleDisplayData {
 }
 
 async function traverseRoleTreeAndDisplay(
-	[client, bot]: [Client, Discord.Bot],
-	interaction: Discord.Interaction,
+	client: Client,
+	interaction: Discord.Interaction | Logos.Interaction,
 	data: RoleDisplayData,
 	{ editResponse }: { editResponse: boolean },
 	{ locale }: { locale: Locale },
@@ -416,12 +411,12 @@ async function traverseRoleTreeAndDisplay(
 	const menu = await displaySelectMenu(client, data, categories, selectOptions, { locale });
 
 	if (editResponse) {
-		editReply([client, bot], interaction, menu);
+		editReply(client, interaction, menu);
 
 		return data;
 	}
 
-	reply([client, bot], interaction, menu);
+	reply(client, interaction, menu);
 
 	return data;
 }
@@ -436,7 +431,7 @@ async function displaySelectMenu(
 	const isInRootCategory = data.browsingData.navigationData.indexesAccessed.length === 0;
 	if (!isInRootCategory) {
 		const strings = {
-			back: localise(client, "profile.options.roles.strings.back", locale)(),
+			back: client.localise("profile.options.roles.strings.back", locale)(),
 		};
 
 		selectOptions.push({ label: trim(strings.back, 25), value: `${-1}` });
@@ -450,7 +445,7 @@ async function displaySelectMenu(
 	const title = (categories.length > 1 ? categories.slice(1) : categories)
 		.map((category) => {
 			const strings = {
-				categoryName: localise(client, `${category.id}.name`, locale)(),
+				categoryName: client.localise(`${category.id}.name`, locale)(),
 			};
 
 			return `${category.emoji}  ${strings.categoryName}`;
@@ -458,9 +453,9 @@ async function displaySelectMenu(
 		.join(` ${constants.symbols.indicators.arrowRight}  `);
 
 	const strings = {
-		description: localise(client, `${category.id}.description`, locale)(),
-		chooseCategory: localise(client, "profile.options.roles.strings.chooseCategory", locale)(),
-		chooseRole: localise(client, "profile.options.roles.strings.chooseRole", locale)(),
+		description: client.localise(`${category.id}.description`, locale)(),
+		chooseCategory: client.localise("profile.options.roles.strings.chooseCategory", locale)(),
+		chooseRole: client.localise("profile.options.roles.strings.chooseRole", locale)(),
 	};
 
 	return {
@@ -498,8 +493,8 @@ function createSelectOptionsFromCategories(
 	const selections: Discord.SelectOption[] = [];
 	for (const [category, index] of categorySelections) {
 		const strings = {
-			name: localise(client, `${category.id}.name`, locale)(),
-			description: localise(client, `${category.id}.description`, locale)(),
+			name: client.localise(`${category.id}.name`, locale)(),
+			description: client.localise(`${category.id}.description`, locale)(),
 		};
 
 		selections.push({
@@ -536,19 +531,20 @@ function createSelectOptionsFromCollection(
 		const memberHasRole = viewData.memberRolesIncludedInMenu.includes(roleResolved.id);
 
 		const strings = {
-			assigned: localise(client, "profile.options.roles.strings.assigned", locale)(),
-			name: localise(client, `${role.id}.name`, locale)(),
-			description: localise(client, `${role.id}.description`, locale),
+			assigned: client.localise("profile.options.roles.strings.assigned", locale)(),
+			name: client.localise(`${role.id}.name`, locale)(),
+			description: client.localiseUnsafe(`${role.id}.description`, locale),
 		};
 
 		selectOptions.push({
 			label: trim(memberHasRole ? `[${strings.assigned}] ${strings.name}` : strings.name, 25),
 			value: index.toString(),
-			description: client.localisations.has(`${role.id}.description`) ? trim(strings.description(), 100) : undefined,
+			description: strings.description !== undefined ? trim(strings.description(), 100) : undefined,
 			emoji: (() => {
 				if (role.emoji === undefined) {
 					return;
 				}
+
 				if (emojiExpression.test(role.emoji)) {
 					return { name: role.emoji };
 				}

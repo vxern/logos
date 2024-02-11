@@ -7,20 +7,20 @@ import resources from "./commands/resources";
 import translate from "./commands/translate";
 import word from "./commands/word";
 
-const { partial: correctionPartial, full: correctionFull } = correction;
+const { partial: correctionPartialMessage, full: correctionFullMessage } = correction;
 const { chatInput: recogniseChatInput, message: recogniseMessage } = recognise;
 const { chatInput: translateChatInput, message: translateMessage } = translate;
 
 export {
-	answer,
+	answer as answerMessage,
 	cefr,
-	correctionPartial,
-	correctionFull,
-	recogniseChatInput,
+	correctionPartialMessage,
+	correctionFullMessage,
+	recogniseChatInput as recognise,
 	recogniseMessage,
 	game,
 	resources,
-	translateChatInput,
+	translateChatInput as translate,
 	translateMessage,
 	word,
 };

@@ -348,12 +348,12 @@ const languageToLocale = {
 	} as const satisfies Record<GoogleTranslateLanguage, string>,
 } as const;
 
-type DeepLLanguage = typeof languages.deepl[number];
-type GoogleTranslateLanguage = typeof languages.google[number];
+type DeepLLanguage = (typeof languages.deepl)[number];
+type GoogleTranslateLanguage = (typeof languages.google)[number];
 type Language = DeepLLanguage | GoogleTranslateLanguage;
 
-type DeepLLocale = typeof languageToLocale.deepl[keyof typeof languageToLocale.deepl];
-type GoogleTranslateLocale = typeof languageToLocale.google[keyof typeof languageToLocale.google];
+type DeepLLocale = (typeof languageToLocale.deepl)[keyof typeof languageToLocale.deepl];
+type GoogleTranslateLocale = (typeof languageToLocale.google)[keyof typeof languageToLocale.google];
 type Locale = DeepLLocale | GoogleTranslateLocale;
 
 const localeToLanguage = {

@@ -1,7 +1,6 @@
 import constants from "../../../../constants/constants";
 import { getLocaleByLocalisationLanguage } from "../../../../constants/languages";
 import { codeMultiline } from "../../../../formatting";
-import { localise } from "../../../client";
 import { Guild } from "../../../database/guild";
 import diagnostics from "../../../diagnostics";
 import { getFeatureLanguage, getLocalisationLanguage } from "../../../interactions";
@@ -13,8 +12,8 @@ export default {
 		const session = client.database.openSession();
 
 		const guildDocument =
-			client.cache.documents.guilds.get(entryRequest.guildId) ??
-			(await session.load<Guild>(`guilds/${entryRequest.guildId}`).then((value) => value ?? undefined));
+			client.documents.guilds.get(entryRequest.guildId) ??
+			(await session.get<Guild>(`guilds/${entryRequest.guildId}`).then((value) => value ?? undefined));
 
 		session.dispose();
 
@@ -27,9 +26,9 @@ export default {
 		const featureLanguage = getFeatureLanguage(guildDocument);
 
 		const strings = {
-			reason: localise(client, "verification.fields.reason", guildLocale)({ language: featureLanguage }),
-			aim: localise(client, "verification.fields.aim", guildLocale)(),
-			whereFound: localise(client, "verification.fields.whereFound", guildLocale)(),
+			reason: client.localise("verification.fields.reason", guildLocale)({ language: featureLanguage }),
+			aim: client.localise("verification.fields.aim", guildLocale)(),
+			whereFound: client.localise("verification.fields.whereFound", guildLocale)(),
 		};
 
 		return `${diagnostics.display.user(user)} has submitted a request to join the server.
@@ -43,7 +42,7 @@ ${codeMultiline(entryRequest.answers.whereFound)}
 `;
 	},
 	filter: (client, originGuildId, _user, entryRequest) => {
-		const guild = client.cache.guilds.get(BigInt(entryRequest.guildId));
+		const guild = client.entities.guilds.get(BigInt(entryRequest.guildId));
 		if (guild === undefined) {
 			return false;
 		}

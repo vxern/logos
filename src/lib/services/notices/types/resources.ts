@@ -1,13 +1,13 @@
 import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import localisations from "../../../../constants/localisations";
-import { Client, localise } from "../../../client";
+import { Client } from "../../../client";
 import { getFeatureLanguage } from "../../../interactions";
 import { HashableMessageContents, NoticeService } from "../service";
 
 class ResourceNoticeService extends NoticeService<"resources"> {
-	constructor([client, bot]: [Client, Discord.Bot], guildId: bigint) {
-		super([client, bot], guildId, { type: "resources" });
+	constructor(client: Client, guildId: bigint) {
+		super(client, guildId, { type: "resources" });
 	}
 
 	generateNotice(): HashableMessageContents | undefined {
@@ -20,39 +20,31 @@ class ResourceNoticeService extends NoticeService<"resources"> {
 		}
 
 		const strings = {
-			title: localise(this.client, "notices.resources.title", guildLocale)(),
+			title: this.client.localise("notices.resources.title", guildLocale)(),
 			description: {
-				storedInRepository: localise(
-					this.client,
+				storedInRepository: this.client.localise(
 					"notices.resources.description.storedInRepository",
 					guildLocale,
 				)({ link: configuration.url }),
-				easierToManage: localise(this.client, "notices.resources.description.easierToManage", guildLocale)(),
+				easierToManage: this.client.localise("notices.resources.description.easierToManage", guildLocale)(),
 				contributable: {
-					contributable: localise(this.client, "notices.resources.description.contributable", guildLocale)(),
-					usingCommand: localise(
-						this.client,
+					contributable: this.client.localise("notices.resources.description.contributable", guildLocale)(),
+					usingCommand: this.client.localise(
 						"notices.resources.description.contributable.usingCommand",
 						guildLocale,
 					)({ command: "`/resource`" }),
-					openingIssue: localise(
-						this.client,
-						"notices.resources.description.contributable.openingIssue",
-						guildLocale,
-					)(),
-					pullRequest: localise(
-						this.client,
+					openingIssue: this.client.localise("notices.resources.description.contributable.openingIssue", guildLocale)(),
+					pullRequest: this.client.localise(
 						"notices.resources.description.contributable.makingPullRequest",
 						guildLocale,
 					)(),
 				},
 			},
-			redirect: localise(
-				this.client,
+			redirect: this.client.localise(
 				"resources.strings.redirect",
 				guildLocale,
 			)({
-				language: localise(this.client, localisations.languages[featureLanguage], guildLocale)(),
+				language: this.client.localise(localisations.languages[featureLanguage], guildLocale)(),
 			}),
 		};
 

@@ -3,7 +3,7 @@ import constants from "../../../../constants/constants";
 import defaults from "../../../../defaults";
 import { MentionTypes, mention, timestamp, trim } from "../../../../formatting";
 import * as Logos from "../../../../types";
-import { Client, localise } from "../../../client";
+import { Client } from "../../../client";
 import { paginate, parseArguments, reply } from "../../../interactions";
 import { isCollection } from "../../../services/music/music";
 import { chunk } from "../../../utils";
@@ -12,17 +12,16 @@ import { collection, show } from "../../parameters";
 import { Song, SongCollection, SongStream } from "../data/types";
 
 const command: OptionTemplate = {
-	name: "now",
+	id: "now",
 	type: Discord.ApplicationCommandOptionTypes.SubCommand,
-	isShowable: true,
 	handle: handleDisplayCurrentlyPlaying,
 	options: [collection, show],
+	flags: {
+		isShowable: true,
+	},
 };
 
-async function handleDisplayCurrentlyPlaying(
-	[client, bot]: [Client, Discord.Bot],
-	interaction: Logos.Interaction,
-): Promise<void> {
+async function handleDisplayCurrentlyPlaying(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const [{ collection, show: showParameter }] = parseArguments(interaction.data?.options, {
 		collection: "boolean",
 		show: "boolean",
@@ -36,7 +35,7 @@ async function handleDisplayCurrentlyPlaying(
 		return;
 	}
 
-	const musicService = client.services.music.music.get(guildId);
+	const musicService = client.getMusicService(guildId);
 	if (musicService === undefined) {
 		return;
 	}
@@ -50,13 +49,13 @@ async function handleDisplayCurrentlyPlaying(
 	if (!isOccupied) {
 		const locale = interaction.locale;
 		const strings = {
-			title: localise(client, "music.strings.notPlaying.title", locale)(),
+			title: client.localise("music.strings.notPlaying.title", locale)(),
 			description: {
-				toCheck: localise(client, "music.strings.notPlaying.description.toCheck", locale)(),
+				toCheck: client.localise("music.strings.notPlaying.description.toCheck", locale)(),
 			},
 		};
 
-		reply([client, bot], interaction, {
+		reply(client, interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -74,22 +73,20 @@ async function handleDisplayCurrentlyPlaying(
 		if (current?.content === undefined || !isCollection(current.content)) {
 			const locale = interaction.locale;
 			const strings = {
-				title: localise(client, "music.options.now.strings.noSongCollection.title", locale)(),
+				title: client.localise("music.options.now.strings.noSongCollection.title", locale)(),
 				description: {
-					noSongCollection: localise(
-						client,
+					noSongCollection: client.localise(
 						"music.options.now.strings.noSongCollection.description.noSongCollection",
 						locale,
 					)(),
-					trySongInstead: localise(
-						client,
+					trySongInstead: client.localise(
 						"music.options.now.strings.noSongCollection.description.trySongInstead",
 						locale,
 					)(),
 				},
 			};
 
-			reply([client, bot], interaction, {
+			reply(client, interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -103,11 +100,11 @@ async function handleDisplayCurrentlyPlaying(
 	} else if (current?.content === undefined) {
 		const locale = interaction.locale;
 		const strings = {
-			title: localise(client, "music.options.now.strings.noSong.title", locale)(),
-			description: localise(client, "music.options.now.strings.noSong.description", locale)(),
+			title: client.localise("music.options.now.strings.noSong.title", locale)(),
+			description: client.localise("music.options.now.strings.noSong.description", locale)(),
 		};
 
-		reply([client, bot], interaction, {
+		reply(client, interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -124,13 +121,13 @@ async function handleDisplayCurrentlyPlaying(
 
 		const locale = interaction.locale;
 		const strings = {
-			nowPlaying: localise(client, "music.options.now.strings.nowPlaying", locale)(),
-			songs: localise(client, "music.options.now.strings.songs", locale)(),
-			listEmpty: localise(client, "music.strings.listEmpty", locale)(),
+			nowPlaying: client.localise("music.options.now.strings.nowPlaying", locale)(),
+			songs: client.localise("music.options.now.strings.songs", locale)(),
+			listEmpty: client.localise("music.strings.listEmpty", locale)(),
 		};
 
 		paginate(
-			[client, bot],
+			client,
 			interaction,
 			{
 				getElements: () => chunk(collection.songs, defaults.RESULTS_PER_PAGE),
@@ -171,29 +168,27 @@ async function handleDisplayCurrentlyPlaying(
 	const song = current.content as Song | SongStream;
 
 	const strings = {
-		nowPlaying: localise(client, "music.options.now.strings.nowPlaying", locale)(),
-		collection: localise(client, "music.options.now.strings.collection", locale)(),
-		track: localise(client, "music.options.now.strings.track", locale)(),
-		title: localise(client, "music.options.now.strings.title", locale)(),
-		requestedBy: localise(client, "music.options.now.strings.requestedBy", locale)(),
-		runningTime: localise(client, "music.options.now.strings.runningTime", locale)(),
-		playingSince: localise(
-			client,
+		nowPlaying: client.localise("music.options.now.strings.nowPlaying", locale)(),
+		collection: client.localise("music.options.now.strings.collection", locale)(),
+		track: client.localise("music.options.now.strings.track", locale)(),
+		title: client.localise("music.options.now.strings.title", locale)(),
+		requestedBy: client.localise("music.options.now.strings.requestedBy", locale)(),
+		runningTime: client.localise("music.options.now.strings.runningTime", locale)(),
+		playingSince: client.localise(
 			"music.options.now.strings.playingSince",
 			locale,
 		)({ relative_timestamp: timestamp(playingSince ?? 0) }),
-		startTimeUnknown: localise(client, "music.options.now.strings.startTimeUnknown", locale)(),
-		sourcedFrom: localise(
-			client,
+		startTimeUnknown: client.localise("music.options.now.strings.startTimeUnknown", locale)(),
+		sourcedFrom: client.localise(
 			"music.options.now.strings.sourcedFrom",
 			locale,
 		)({
-			source: current.source ?? localise(client, "music.options.now.strings.theInternet", locale)(),
+			source: current.source ?? client.localise("music.options.now.strings.theInternet", locale)(),
 		}),
 	};
 
 	reply(
-		[client, bot],
+		client,
 		interaction,
 		{
 			embeds: [

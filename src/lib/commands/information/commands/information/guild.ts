@@ -4,7 +4,7 @@ import { Locale } from "../../../../../constants/languages";
 import localisations from "../../../../../constants/localisations";
 import { MentionTypes, mention, timestamp } from "../../../../../formatting";
 import * as Logos from "../../../../../types";
-import { Client, localise } from "../../../../client";
+import { Client } from "../../../../client";
 import { Guild } from "../../../../database/guild";
 import diagnostics from "../../../../diagnostics";
 import { getFeatureLanguage, getLocalisationLanguage, reply } from "../../../../interactions";
@@ -13,16 +13,13 @@ import { OptionTemplate } from "../../../command";
 import { proficiency } from "../../../social/roles/categories/language";
 
 const option: OptionTemplate = {
-	name: "server",
+	id: "server",
 	type: Discord.ApplicationCommandOptionTypes.SubCommand,
 	handle: handleDisplayGuildInformation,
 };
 
 /** Displays information about the guild that this command was executed in. */
-async function handleDisplayGuildInformation(
-	[client, bot]: [Client, Discord.Bot],
-	interaction: Logos.Interaction,
-): Promise<void> {
+async function handleDisplayGuildInformation(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.locale;
 
 	const guildId = interaction.guildId;
@@ -30,7 +27,7 @@ async function handleDisplayGuildInformation(
 		return;
 	}
 
-	const guild = client.cache.guilds.get(guildId);
+	const guild = client.entities.guilds.get(guildId);
 	if (guild === undefined) {
 		return;
 	}
@@ -38,8 +35,8 @@ async function handleDisplayGuildInformation(
 	const session = client.database.openSession();
 
 	const guildDocument =
-		client.cache.documents.guilds.get(guildId.toString()) ??
-		(await session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
+		client.documents.guilds.get(guildId.toString()) ??
+		(await session.get<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
 
 	session.dispose();
 
@@ -47,48 +44,41 @@ async function handleDisplayGuildInformation(
 		return;
 	}
 
-	const owner = client.cache.users.get(guild.ownerId);
+	const owner = client.entities.users.get(guild.ownerId);
 	if (owner === undefined) {
 		return;
 	}
 
 	const strings = {
-		title: localise(
-			client,
-			"information.options.server.strings.information.title",
-			locale,
-		)({ server_name: guild.name }),
+		title: client.localise("information.options.server.strings.information.title", locale)({ server_name: guild.name }),
 		description: {
 			description: {
-				title: localise(client, "information.options.server.strings.information.description.description", locale)(),
-				noDescription: localise(
-					client,
+				title: client.localise("information.options.server.strings.information.description.description", locale)(),
+				noDescription: client.localise(
 					"information.options.server.strings.information.description.noDescription",
 					locale,
 				)(),
 			},
-			members: localise(client, "information.options.server.strings.information.description.members", locale)(),
-			created: localise(client, "information.options.server.strings.information.description.created", locale)(),
-			channels: localise(client, "information.options.server.strings.information.description.channels", locale)(),
-			languages: localise(client, "information.options.server.strings.information.description.languages", locale)(),
-			owner: localise(client, "information.options.server.strings.information.description.owner", locale)(),
+			members: client.localise("information.options.server.strings.information.description.members", locale)(),
+			created: client.localise("information.options.server.strings.information.description.created", locale)(),
+			channels: client.localise("information.options.server.strings.information.description.channels", locale)(),
+			languages: client.localise("information.options.server.strings.information.description.languages", locale)(),
+			owner: client.localise("information.options.server.strings.information.description.owner", locale)(),
 			moderators: {
-				title: localise(client, "information.options.server.strings.information.description.moderators", locale)(),
-				overseenByModerators: localise(
-					client,
+				title: client.localise("information.options.server.strings.information.description.moderators", locale)(),
+				overseenByModerators: client.localise(
 					"information.options.server.strings.information.description.overseenByModerators",
 					locale,
 				)(),
 			},
-			distribution: localise(
-				client,
+			distribution: client.localise(
 				"information.options.server.strings.information.description.distribution",
 				locale,
 			)(),
 		},
 	};
 
-	reply([client, bot], interaction, {
+	reply(client, interaction, {
 		embeds: [
 			{
 				author: {
@@ -165,8 +155,8 @@ function getChannelInformationSection(client: Client, guild: Logos.Guild, { loca
 	const voiceChannelsCount = getChannelCountByType(channels, Discord.ChannelTypes.GuildVoice);
 
 	const strings = {
-		text: localise(client, "information.options.server.strings.channelTypes.text", locale)(),
-		voice: localise(client, "information.options.server.strings.channelTypes.voice", locale)(),
+		text: client.localise("information.options.server.strings.channelTypes.text", locale)(),
+		voice: client.localise("information.options.server.strings.channelTypes.voice", locale)(),
 	};
 
 	return `${constants.symbols.guild.channels.text} ${strings.text} – ${textChannelsCount}\n${constants.symbols.guild.channels.voice} ${strings.voice} – ${voiceChannelsCount}`;
@@ -177,10 +167,10 @@ function getLanguageInformationSection(client: Client, guildDocument: Guild, { l
 	const featureLanguage = getFeatureLanguage(guildDocument);
 
 	const strings = {
-		home: localise(client, "information.options.server.strings.languageTypes.home", locale)(),
-		target: localise(client, "information.options.server.strings.languageTypes.target", locale)(),
-		localisationLanguage: localise(client, localisations.languages[localisationLanguage], locale)(),
-		featureLanguage: localise(client, localisations.languages[featureLanguage], locale)(),
+		home: client.localise("information.options.server.strings.languageTypes.home", locale)(),
+		target: client.localise("information.options.server.strings.languageTypes.target", locale)(),
+		localisationLanguage: client.localise(localisations.languages[localisationLanguage], locale)(),
+		featureLanguage: client.localise(localisations.languages[featureLanguage], locale)(),
 	};
 
 	return `${constants.symbols.guild.languages.localisation} ${strings.home} – ${strings.localisationLanguage}\n${constants.symbols.guild.languages.feature} ${strings.target} – ${strings.featureLanguage}`;
@@ -212,7 +202,7 @@ function getProficiencyRoleDistribution(client: Client, guild: Logos.Guild): Pro
 		.sort((a, b) => a.position - b.position)
 		.map((role) => role.id);
 
-	const members = guild.members.array().filter((member) => !client.cache.users.get(member.id)?.toggles?.bot ?? true);
+	const members = guild.members.array().filter((member) => !client.entities.users.get(member.id)?.bot ?? true);
 
 	let withoutProficiencyRole = 0;
 	const roleFrequencies: Record<`${bigint}`, number> = Object.fromEntries(
@@ -253,8 +243,7 @@ function formatDistribution(
 	const total = roleFrequencies.map(([_, value]) => value).reduce((a, b) => a + b, withoutRole);
 
 	const strings = {
-		withoutProficiency: localise(
-			client,
+		withoutProficiency: client.localise(
 			"information.options.server.strings.information.description.withoutProficiency",
 			locale,
 		)(),

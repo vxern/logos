@@ -4,7 +4,7 @@ import clear from "./language/clear";
 import set from "./language/set";
 
 const command: OptionTemplate = {
-	name: "language",
+	id: "language",
 	type: Discord.ApplicationCommandOptionTypes.SubCommandGroup,
 	options: [clear, set],
 };

@@ -1,20 +1,20 @@
 import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import * as Logos from "../../../../types";
-import { Client, localise } from "../../../client";
+import { Client } from "../../../client";
 import { parseArguments, reply } from "../../../interactions";
 import { isCollection } from "../../../services/music/music";
 import { OptionTemplate } from "../../command";
 import { by, collection, to } from "../../parameters";
 
 const command: OptionTemplate = {
-	name: "unskip",
+	id: "unskip",
 	type: Discord.ApplicationCommandOptionTypes.SubCommand,
 	handle: handleUnskipAction,
 	options: [collection, by, to],
 };
 
-async function handleUnskipAction([client, bot]: [Client, Discord.Bot], interaction: Logos.Interaction): Promise<void> {
+async function handleUnskipAction(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.guildLocale;
 
 	const [{ collection, by: songsToUnskip, to: songToUnskipTo }] = parseArguments(interaction.data?.options, {
@@ -26,6 +26,7 @@ async function handleUnskipAction([client, bot]: [Client, Discord.Bot], interact
 	if (songsToUnskip !== undefined && !Number.isSafeInteger(songsToUnskip)) {
 		return;
 	}
+
 	if (songToUnskipTo !== undefined && !Number.isSafeInteger(songToUnskipTo)) {
 		return;
 	}
@@ -35,7 +36,7 @@ async function handleUnskipAction([client, bot]: [Client, Discord.Bot], interact
 		return;
 	}
 
-	const musicService = client.services.music.music.get(guildId);
+	const musicService = client.getMusicService(guildId);
 	if (musicService === undefined) {
 		return;
 	}
@@ -49,13 +50,13 @@ async function handleUnskipAction([client, bot]: [Client, Discord.Bot], interact
 	if (!isOccupied) {
 		const locale = interaction.locale;
 		const strings = {
-			title: localise(client, "music.strings.notPlaying.title", locale)(),
+			title: client.localise("music.strings.notPlaying.title", locale)(),
 			description: {
-				toManage: localise(client, "music.strings.notPlaying.description.toManage", locale)(),
+				toManage: client.localise("music.strings.notPlaying.description.toManage", locale)(),
 			},
 		};
 
-		reply([client, bot], interaction, {
+		reply(client, interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -81,9 +82,11 @@ async function handleUnskipAction([client, bot]: [Client, Discord.Bot], interact
 		if (current === undefined) {
 			return true;
 		}
+
 		if (!isCollection(current.content)) {
 			return true;
 		}
+
 		if (collection !== undefined || current.content.position === 0) {
 			return true;
 		}
@@ -94,11 +97,11 @@ async function handleUnskipAction([client, bot]: [Client, Discord.Bot], interact
 	if (isUnskippingListing && isHistoryEmpty) {
 		const locale = interaction.locale;
 		const strings = {
-			title: localise(client, "music.options.unskip.strings.historyEmpty.title", locale)(),
-			description: localise(client, "music.options.unskip.strings.historyEmpty.description", locale)(),
+			title: client.localise("music.options.unskip.strings.historyEmpty.title", locale)(),
+			description: client.localise("music.options.unskip.strings.historyEmpty.description", locale)(),
 		};
 
-		reply([client, bot], interaction, {
+		reply(client, interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -116,22 +119,20 @@ async function handleUnskipAction([client, bot]: [Client, Discord.Bot], interact
 	) {
 		const locale = interaction.locale;
 		const strings = {
-			title: localise(client, "music.options.unskip.strings.noSongCollection.title", locale)(),
+			title: client.localise("music.options.unskip.strings.noSongCollection.title", locale)(),
 			description: {
-				noSongCollection: localise(
-					client,
+				noSongCollection: client.localise(
 					"music.options.unskip.strings.noSongCollection.description.noSongCollection",
 					locale,
 				)(),
-				trySongInstead: localise(
-					client,
+				trySongInstead: client.localise(
 					"music.options.unskip.strings.noSongCollection.description.trySongInstead",
 					locale,
 				)(),
 			},
 		};
 
-		reply([client, bot], interaction, {
+		reply(client, interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -146,11 +147,11 @@ async function handleUnskipAction([client, bot]: [Client, Discord.Bot], interact
 	if (!isQueueVacant) {
 		const locale = interaction.locale;
 		const strings = {
-			title: localise(client, "music.options.unskip.strings.queueFull.title", locale)(),
-			description: localise(client, "music.options.unskip.strings.queueFull.description", locale)(),
+			title: client.localise("music.options.unskip.strings.queueFull.title", locale)(),
+			description: client.localise("music.options.unskip.strings.queueFull.description", locale)(),
 		};
 
-		reply([client, bot], interaction, {
+		reply(client, interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -166,11 +167,11 @@ async function handleUnskipAction([client, bot]: [Client, Discord.Bot], interact
 	if (songsToUnskip !== undefined && songToUnskipTo !== undefined) {
 		const locale = interaction.locale;
 		const strings = {
-			title: localise(client, "music.strings.skips.tooManyArguments.title", locale)(),
-			description: localise(client, "music.strings.skips.tooManyArguments.description", locale)(),
+			title: client.localise("music.strings.skips.tooManyArguments.title", locale)(),
+			description: client.localise("music.strings.skips.tooManyArguments.description", locale)(),
 		};
 
-		reply([client, bot], interaction, {
+		reply(client, interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -186,11 +187,11 @@ async function handleUnskipAction([client, bot]: [Client, Discord.Bot], interact
 	if ((songsToUnskip !== undefined && songsToUnskip <= 0) || (songToUnskipTo !== undefined && songToUnskipTo <= 0)) {
 		const locale = interaction.locale;
 		const strings = {
-			title: localise(client, "music.strings.skips.invalid.title", locale)(),
-			description: localise(client, "music.strings.skips.invalid.description", locale)(),
+			title: client.localise("music.strings.skips.invalid.title", locale)(),
+			description: client.localise("music.strings.skips.invalid.description", locale)(),
 		};
 
-		reply([client, bot], interaction, {
+		reply(client, interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -203,12 +204,12 @@ async function handleUnskipAction([client, bot]: [Client, Discord.Bot], interact
 	}
 
 	const strings = {
-		title: localise(client, "music.options.unskip.strings.unskipped.title", locale)(),
-		description: localise(client, "music.options.unskip.strings.unskipped.description", locale)(),
+		title: client.localise("music.options.unskip.strings.unskipped.title", locale)(),
+		description: client.localise("music.options.unskip.strings.unskipped.description", locale)(),
 	};
 
 	reply(
-		[client, bot],
+		client,
 		interaction,
 		{
 			embeds: [

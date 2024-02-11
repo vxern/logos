@@ -3,7 +3,7 @@ import constants from "../../../../constants/constants";
 import { Locale } from "../../../../constants/languages";
 import { trim } from "../../../../formatting";
 import * as Logos from "../../../../types";
-import { Client, localise } from "../../../client";
+import { Client } from "../../../client";
 import diagnostics from "../../../diagnostics";
 import {
 	Modal,
@@ -20,13 +20,13 @@ import { isImplicit, isSingle } from "../../social/roles/types";
 
 const commands = {
 	partial: {
-		name: "correction.options.partial.message",
+		id: "correction.options.partial.message",
 		type: Discord.ApplicationCommandTypes.Message,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
 		handle: (...args) => handleStartCorrecting(...args, "partial"),
 	},
 	full: {
-		name: "correction.options.full.message",
+		id: "correction.options.full.message",
 		type: Discord.ApplicationCommandTypes.Message,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
 		handle: (...args) => handleStartCorrecting(...args, "full"),
@@ -41,7 +41,7 @@ interface CorrectionData extends Record<string, string> {
 type OpenMode = "partial" | "full";
 
 async function handleStartCorrecting(
-	[client, bot]: [Client, Discord.Bot],
+	client: Client,
 	interaction: Logos.Interaction,
 	openMode: OpenMode,
 ): Promise<void> {
@@ -52,7 +52,7 @@ async function handleStartCorrecting(
 		return;
 	}
 
-	const member = client.cache.members.get(Discord.snowflakeToBigint(`${interaction.user.id}${guildId}`));
+	const member = client.entities.members.get(Discord.snowflakeToBigint(`${interaction.user.id}${guildId}`));
 	if (member === undefined) {
 		return;
 	}
@@ -64,11 +64,11 @@ async function handleStartCorrecting(
 
 	if (message.author.toggles?.has("bot") || message.content.trim().length === 0) {
 		const strings = {
-			title: localise(client, "correction.strings.cannotCorrect.title", locale)(),
-			description: localise(client, "correction.strings.cannotCorrect.description", locale)(),
+			title: client.localise("correction.strings.cannotCorrect.title", locale)(),
+			description: client.localise("correction.strings.cannotCorrect.description", locale)(),
 		};
 
-		reply([client, bot], interaction, {
+		reply(client, interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -82,11 +82,11 @@ async function handleStartCorrecting(
 
 	if (message.author.id === interaction.user.id) {
 		const strings = {
-			title: localise(client, "correction.strings.cannotCorrectOwn.title", locale)(),
-			description: localise(client, "correction.strings.cannotCorrectOwn.description", locale)(),
+			title: client.localise("correction.strings.cannotCorrectOwn.title", locale)(),
+			description: client.localise("correction.strings.cannotCorrectOwn.description", locale)(),
 		};
 
-		reply([client, bot], interaction, {
+		reply(client, interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -98,7 +98,7 @@ async function handleStartCorrecting(
 		return;
 	}
 
-	const correctedMember = client.cache.members.get(Discord.snowflakeToBigint(`${message.author.id}${guildId}`));
+	const correctedMember = client.entities.members.get(Discord.snowflakeToBigint(`${message.author.id}${guildId}`));
 	if (correctedMember === undefined) {
 		return;
 	}
@@ -115,11 +115,11 @@ async function handleStartCorrecting(
 		if (doNotCorrectMeRoleId !== undefined) {
 			if (correctedMember.roles.some((roleId) => roleId.toString() === doNotCorrectMeRoleId)) {
 				const strings = {
-					title: localise(client, "correction.strings.userDoesNotWantCorrections.title", locale)(),
-					description: localise(client, "correction.strings.userDoesNotWantCorrections.description", locale)(),
+					title: client.localise("correction.strings.userDoesNotWantCorrections.title", locale)(),
+					description: client.localise("correction.strings.userDoesNotWantCorrections.description", locale)(),
 				};
 
-				reply([client, bot], interaction, {
+				reply(client, interaction, {
 					embeds: [
 						{
 							title: strings.title,
@@ -135,18 +135,17 @@ async function handleStartCorrecting(
 
 	if (message.content.length > constants.MAXIMUM_CORRECTION_MESSAGE_LENGTH) {
 		const strings = {
-			title: localise(client, "correction.strings.tooLong.title", locale)(),
+			title: client.localise("correction.strings.tooLong.title", locale)(),
 			description: {
-				tooLong: localise(client, "correction.strings.tooLong.description.tooLong", locale)(),
-				maximumLength: localise(
-					client,
+				tooLong: client.localise("correction.strings.tooLong.description.tooLong", locale)(),
+				maximumLength: client.localise(
 					"correction.strings.tooLong.description.maximumLength",
 					locale,
 				)({ character_limit: constants.MAXIMUM_CORRECTION_MESSAGE_LENGTH }),
 			},
 		};
 
-		reply([client, bot], interaction, {
+		reply(client, interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -163,7 +162,7 @@ async function handleStartCorrecting(
 		corrected: "",
 	};
 
-	createModalComposer([client, bot], interaction, {
+	createModalComposer(client, interaction, {
 		modal: generateCorrectionModal(client, data, openMode, { locale }),
 		onSubmit: async (submission, data) => {
 			if (data.corrected === data.original) {
@@ -171,17 +170,16 @@ async function handleStartCorrecting(
 			}
 
 			const strings = {
-				correction: localise(client, "correction.strings.correction", locale)(),
-				suggestedBy: localise(
-					client,
+				correction: client.localise("correction.strings.correction", locale)(),
+				suggestedBy: client.localise(
 					"correction.strings.suggestedBy",
 					locale,
 				)({ username: diagnostics.display.user(interaction.user, { includeId: false }) }),
 			};
 
-			acknowledge([client, bot], submission);
+			acknowledge(client, submission);
 
-			bot.rest
+			client.bot.rest
 				.sendMessage(message.channelId, {
 					messageReference: { messageId: message.id, channelId: message.channelId, guildId, failIfNotExists: false },
 					embeds: [
@@ -209,8 +207,7 @@ async function handleStartCorrecting(
 
 			return true;
 		},
-		onInvalid: async (submission, error) =>
-			handleSubmittedInvalidCorrection([client, bot], submission, error, { locale }),
+		onInvalid: async (submission, error) => handleSubmittedInvalidCorrection(client, submission, error, { locale }),
 	});
 }
 
@@ -221,9 +218,9 @@ function generateCorrectionModal(
 	{ locale }: { locale: Locale },
 ): Modal<CorrectionData> {
 	const strings = {
-		title: localise(client, "correction.title", locale)(),
-		original: localise(client, "correction.fields.original", locale)(),
-		corrected: localise(client, "correction.fields.corrected", locale)(),
+		title: client.localise("correction.title", locale)(),
+		original: client.localise("correction.fields.original", locale)(),
+		corrected: client.localise("correction.fields.corrected", locale)(),
 	};
 
 	return {
@@ -260,49 +257,49 @@ function generateCorrectionModal(
 }
 
 async function handleSubmittedInvalidCorrection(
-	[client, bot]: [Client, Discord.Bot],
+	client: Client,
 	submission: Discord.Interaction,
 	error: string | undefined,
 	{ locale }: { locale: Locale },
 ): Promise<Discord.Interaction | undefined> {
 	return new Promise((resolve) => {
-		const continueId = createInteractionCollector([client, bot], {
+		const continueId = createInteractionCollector(client, {
 			type: Discord.InteractionTypes.MessageComponent,
 			onCollect: async (selection) => {
-				deleteReply([client, bot], submission);
+				deleteReply(client, submission);
 				resolve(selection);
 			},
 		});
 
-		const cancelId = createInteractionCollector([client, bot], {
+		const cancelId = createInteractionCollector(client, {
 			type: Discord.InteractionTypes.MessageComponent,
 			onCollect: async (cancelSelection) => {
-				const returnId = createInteractionCollector([client, bot], {
+				const returnId = createInteractionCollector(client, {
 					type: Discord.InteractionTypes.MessageComponent,
 					onCollect: async (returnSelection) => {
-						deleteReply([client, bot], submission);
-						deleteReply([client, bot], cancelSelection);
+						deleteReply(client, submission);
+						deleteReply(client, cancelSelection);
 						resolve(returnSelection);
 					},
 				});
 
-				const leaveId = createInteractionCollector([client, bot], {
+				const leaveId = createInteractionCollector(client, {
 					type: Discord.InteractionTypes.MessageComponent,
 					onCollect: async (_) => {
-						deleteReply([client, bot], submission);
-						deleteReply([client, bot], cancelSelection);
+						deleteReply(client, submission);
+						deleteReply(client, cancelSelection);
 						resolve(undefined);
 					},
 				});
 
 				const strings = {
-					title: localise(client, "correction.strings.sureToCancel.title", locale)(),
-					description: localise(client, "correction.strings.sureToCancel.description", locale)(),
-					stay: localise(client, "prompts.stay", locale)(),
-					leave: localise(client, "prompts.leave", locale)(),
+					title: client.localise("correction.strings.sureToCancel.title", locale)(),
+					description: client.localise("correction.strings.sureToCancel.description", locale)(),
+					stay: client.localise("prompts.stay", locale)(),
+					leave: client.localise("prompts.leave", locale)(),
 				};
 
-				reply([client, bot], cancelSelection, {
+				reply(client, cancelSelection, {
 					embeds: [
 						{
 							title: strings.title,
@@ -337,8 +334,8 @@ async function handleSubmittedInvalidCorrection(
 		switch (error) {
 			case "texts_not_different": {
 				const strings = {
-					title: localise(client, "correction.strings.textsNotDifferent.title", locale)(),
-					description: localise(client, "correction.strings.textsNotDifferent.description", locale)(),
+					title: client.localise("correction.strings.textsNotDifferent.title", locale)(),
+					description: client.localise("correction.strings.textsNotDifferent.description", locale)(),
 				};
 
 				embed = {
@@ -351,11 +348,11 @@ async function handleSubmittedInvalidCorrection(
 			}
 			default: {
 				const strings = {
-					title: localise(client, "correction.strings.failed.title", locale)(),
-					description: localise(client, "correction.strings.failed.description", locale)(),
+					title: client.localise("correction.strings.failed.title", locale)(),
+					description: client.localise("correction.strings.failed.description", locale)(),
 				};
 
-				reply([client, bot], submission, {
+				reply(client, submission, {
 					embeds: [
 						{
 							title: strings.title,
@@ -370,11 +367,11 @@ async function handleSubmittedInvalidCorrection(
 		}
 
 		const strings = {
-			continue: localise(client, "prompts.continue", locale)(),
-			cancel: localise(client, "prompts.cancel", locale)(),
+			continue: client.localise("prompts.continue", locale)(),
+			cancel: client.localise("prompts.cancel", locale)(),
 		};
 
-		reply([client, bot], submission, {
+		reply(client, submission, {
 			embeds: [embed],
 			components: [
 				{

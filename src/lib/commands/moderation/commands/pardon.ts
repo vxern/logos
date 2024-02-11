@@ -4,7 +4,7 @@ import { Locale } from "../../../../constants/languages";
 import defaults from "../../../../defaults";
 import { MentionTypes, mention } from "../../../../formatting";
 import * as Logos from "../../../../types";
-import { Client, autocompleteMembers, localise, resolveInteractionToMember } from "../../../client";
+import { Client } from "../../../client";
 import { Guild, timeStructToMilliseconds } from "../../../database/guild";
 import { User } from "../../../database/user";
 import { Warning } from "../../../database/warning";
@@ -14,7 +14,7 @@ import { user } from "../../parameters";
 import { getActiveWarnings } from "../module";
 
 const command: CommandTemplate = {
-	name: "pardon",
+	id: "pardon",
 	type: Discord.ApplicationCommandTypes.ChatInput,
 	defaultMemberPermissions: ["MODERATE_MEMBERS"],
 	handle: handlePardonUser,
@@ -22,7 +22,7 @@ const command: CommandTemplate = {
 	options: [
 		user,
 		{
-			name: "warning",
+			id: "warning",
 			type: Discord.ApplicationCommandOptionTypes.String,
 			required: true,
 			autocomplete: true,
@@ -30,10 +30,7 @@ const command: CommandTemplate = {
 	],
 };
 
-async function handlePardonUserAutocomplete(
-	[client, bot]: [Client, Discord.Bot],
-	interaction: Logos.Interaction,
-): Promise<void> {
+async function handlePardonUserAutocomplete(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.locale;
 
 	const guildId = interaction.guildId;
@@ -44,8 +41,8 @@ async function handlePardonUserAutocomplete(
 	const session = client.database.openSession();
 
 	const guildDocument =
-		client.cache.documents.guilds.get(guildId.toString()) ??
-		(await session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
+		client.documents.guilds.get(guildId.toString()) ??
+		(await session.get<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
 
 	session.dispose();
 
@@ -65,31 +62,35 @@ async function handlePardonUserAutocomplete(
 			return;
 		}
 
-		autocompleteMembers([client, bot], interaction, user, {
-			restrictToNonSelf: true,
-			excludeModerators: true,
+		client.autocompleteMembers(interaction, {
+			identifier: user,
+			options: {
+				restrictToNonSelf: true,
+				excludeModerators: true,
+			},
 		});
 		return;
 	}
 
 	if (focused?.name === "warning") {
 		if (user === undefined || warning === undefined) {
-			respond([client, bot], interaction, []);
+			respond(client, interaction, []);
 			return;
 		}
 
-		const member = resolveInteractionToMember(
-			[client, bot],
+		const member = client.resolveInteractionToMember(
 			interaction,
-			user,
 			{
-				restrictToNonSelf: true,
-				excludeModerators: true,
+				identifier: user,
+				options: {
+					restrictToNonSelf: true,
+					excludeModerators: true,
+				},
 			},
 			{ locale },
 		);
 		if (member === undefined) {
-			respond([client, bot], interaction, []);
+			respond(client, interaction, []);
 			return;
 		}
 
@@ -97,7 +98,7 @@ async function handlePardonUserAutocomplete(
 
 		const relevantWarnings = await getRelevantWarnings(client, member, expiryMilliseconds);
 		if (relevantWarnings === undefined) {
-			respond([client, bot], interaction, []);
+			respond(client, interaction, []);
 			return;
 		}
 
@@ -109,12 +110,12 @@ async function handlePardonUserAutocomplete(
 			}))
 			.filter((choice) => choice.name.toLowerCase().includes(warningLowercase));
 
-		respond([client, bot], interaction, choices);
+		respond(client, interaction, choices);
 		return;
 	}
 }
 
-async function handlePardonUser([client, bot]: [Client, Discord.Bot], interaction: Logos.Interaction): Promise<void> {
+async function handlePardonUser(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.locale;
 
 	const guildId = interaction.guildId;
@@ -125,8 +126,8 @@ async function handlePardonUser([client, bot]: [Client, Discord.Bot], interactio
 	let session = client.database.openSession();
 
 	const guildDocument =
-		client.cache.documents.guilds.get(guildId.toString()) ??
-		(await session.load<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
+		client.documents.guilds.get(guildId.toString()) ??
+		(await session.get<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
 
 	session.dispose();
 
@@ -144,13 +145,14 @@ async function handlePardonUser([client, bot]: [Client, Discord.Bot], interactio
 		return;
 	}
 
-	const member = resolveInteractionToMember(
-		[client, bot],
+	const member = client.resolveInteractionToMember(
 		interaction,
-		user,
 		{
-			restrictToNonSelf: true,
-			excludeModerators: true,
+			identifier: user,
+			options: {
+				restrictToNonSelf: true,
+				excludeModerators: true,
+			},
 		},
 		{ locale },
 	);
@@ -162,13 +164,13 @@ async function handlePardonUser([client, bot]: [Client, Discord.Bot], interactio
 
 	const relevantWarnings = await getRelevantWarnings(client, member, expiryMilliseconds);
 	if (relevantWarnings === undefined) {
-		displayFailedError([client, bot], interaction, { locale });
+		displayFailedError(client, interaction, { locale });
 		return;
 	}
 
 	const warning = relevantWarnings.find((relevantWarning) => relevantWarning.id === warningId);
 	if (warning === undefined) {
-		displayInvalidWarningError([client, bot], interaction, { locale });
+		displayInvalidWarningError(client, interaction, { locale });
 		return;
 	}
 
@@ -179,24 +181,23 @@ async function handlePardonUser([client, bot]: [Client, Discord.Bot], interactio
 
 	session.dispose();
 
-	client.cache.documents.warningsByTarget
+	client.documents.warningsByTarget
 		.get(member.id.toString())
 		?.delete(`${warning.targetId}/${warning.authorId}/${warning.createdAt}`);
 
-	const guild = client.cache.guilds.get(guildId);
+	const guild = client.entities.guilds.get(guildId);
 	if (guild === undefined) {
 		return;
 	}
 
 	if (configuration.journaling) {
-		const journallingService = client.services.journalling.get(guild.id);
+		const journallingService = client.getJournallingService(guild.id);
 		journallingService?.log("memberWarnRemove", { args: [member, warning, interaction.user] });
 	}
 
 	const strings = {
-		title: localise(client, "pardon.strings.pardoned.title", locale)(),
-		description: localise(
-			client,
+		title: client.localise("pardon.strings.pardoned.title", locale)(),
+		description: client.localise(
 			"pardon.strings.pardoned.description",
 			locale,
 		)({
@@ -205,7 +206,7 @@ async function handlePardonUser([client, bot]: [Client, Discord.Bot], interactio
 		}),
 	};
 
-	reply([client, bot], interaction, {
+	reply(client, interaction, {
 		embeds: [
 			{
 				title: strings.title,
@@ -224,8 +225,8 @@ async function getRelevantWarnings(
 	let session = client.database.openSession();
 
 	const userDocument =
-		client.cache.documents.users.get(member.id.toString()) ??
-		(await session.load<User>(`users/${member.id}`).then((value) => value ?? undefined));
+		client.documents.users.get(member.id.toString()) ??
+		(await session.get<User>(`users/${member.id}`).then((value) => value ?? undefined));
 
 	session.dispose();
 
@@ -235,7 +236,7 @@ async function getRelevantWarnings(
 
 	session = client.database.openSession();
 
-	const warningDocumentsCached = client.cache.documents.warningsByTarget.get(member.id.toString());
+	const warningDocumentsCached = client.documents.warningsByTarget.get(member.id.toString());
 	const warningDocuments =
 		warningDocumentsCached !== undefined
 			? Array.from(warningDocumentsCached.values())
@@ -250,7 +251,7 @@ async function getRelevantWarnings(
 								document,
 							]),
 						);
-						client.cache.documents.warningsByTarget.set(member.id.toString(), map);
+						client.documents.warningsByTarget.set(member.id.toString(), map);
 						return documents;
 					});
 
@@ -261,16 +262,16 @@ async function getRelevantWarnings(
 }
 
 async function displayInvalidWarningError(
-	[client, bot]: [Client, Discord.Bot],
+	client: Client,
 	interaction: Logos.Interaction,
 	{ locale }: { locale: Locale },
 ): Promise<void> {
 	const strings = {
-		title: localise(client, "pardon.strings.invalidWarning.title", locale)(),
-		description: localise(client, "pardon.strings.invalidWarning.description", locale)(),
+		title: client.localise("pardon.strings.invalidWarning.title", locale)(),
+		description: client.localise("pardon.strings.invalidWarning.description", locale)(),
 	};
 
-	reply([client, bot], interaction, {
+	reply(client, interaction, {
 		embeds: [
 			{
 				title: strings.title,
@@ -282,16 +283,16 @@ async function displayInvalidWarningError(
 }
 
 async function displayFailedError(
-	[client, bot]: [Client, Discord.Bot],
+	client: Client,
 	interaction: Logos.Interaction,
 	{ locale }: { locale: Locale },
 ): Promise<void> {
 	const strings = {
-		title: localise(client, "pardon.strings.failed.title", locale)(),
-		description: localise(client, "pardon.strings.failed.description", locale)(),
+		title: client.localise("pardon.strings.failed.title", locale)(),
+		description: client.localise("pardon.strings.failed.description", locale)(),
 	};
 
-	reply([client, bot], interaction, {
+	reply(client, interaction, {
 		embeds: [
 			{
 				title: strings.title,

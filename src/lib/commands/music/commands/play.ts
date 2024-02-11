@@ -6,25 +6,25 @@ import { handleRequestFilePlayback } from "./play/file";
 import { handleRequestQueryPlayback } from "./play/query";
 
 const command: OptionTemplate = {
-	name: "play",
+	id: "play",
 	type: Discord.ApplicationCommandOptionTypes.SubCommandGroup,
 	options: [
 		{
-			name: "file",
+			id: "file",
 			type: Discord.ApplicationCommandOptionTypes.SubCommand,
 			handle: handleRequestFilePlayback,
 			options: [
 				{
-					name: "url",
+					id: "url",
 					type: Discord.ApplicationCommandOptionTypes.String,
 					required: true,
 				},
 			],
 		},
 		...Object.entries(sources).map<OptionTemplate>(([name, resolve]) => ({
-			name: name.toLowerCase(),
+			id: name.toLowerCase(),
 			type: Discord.ApplicationCommandOptionTypes.SubCommand,
-			handle: async ([client, bot], interaction) => handleRequestQueryPlayback([client, bot], interaction, resolve),
+			handle: async (client, interaction) => handleRequestQueryPlayback(client, interaction, resolve),
 			options: [query],
 		})),
 	],

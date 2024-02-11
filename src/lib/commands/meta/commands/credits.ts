@@ -4,24 +4,21 @@ import { Locale, LocalisationLanguage } from "../../../../constants/languages";
 import localisations from "../../../../constants/localisations";
 import { Translation } from "../../../../constants/types/contributions";
 import * as Logos from "../../../../types";
-import { Client, localise } from "../../../client";
+import { Client } from "../../../client";
 import { reply } from "../../../interactions";
 import { CommandTemplate } from "../../command";
 
 const command: CommandTemplate = {
-	name: "credits",
+	id: "credits",
 	type: Discord.ApplicationCommandTypes.ChatInput,
 	handle: handleDisplayCredits,
 	defaultMemberPermissions: ["VIEW_CHANNEL"],
 };
 
-async function handleDisplayCredits(
-	[client, bot]: [Client, Discord.Bot],
-	interaction: Logos.Interaction,
-): Promise<void> {
+async function handleDisplayCredits(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.locale;
 
-	reply([client, bot], interaction, { embeds: [getTranslationView(client, { locale })] });
+	reply(client, interaction, { embeds: [getTranslationView(client, { locale })] });
 }
 
 function getTranslationView(client: Client, { locale }: { locale: Locale }): Discord.CamelizedDiscordEmbed {
@@ -42,7 +39,7 @@ function getTranslationView(client: Client, { locale }: { locale: Locale }): Dis
 			.join("\n");
 
 		const strings = {
-			language: localise(client, localisations.languages[language], locale)(),
+			language: client.localise(localisations.languages[language], locale)(),
 		};
 
 		fields.push({
@@ -53,7 +50,7 @@ function getTranslationView(client: Client, { locale }: { locale: Locale }): Dis
 	}
 
 	const strings = {
-		translation: localise(client, "credits.strings.translation", locale)(),
+		translation: client.localise("credits.strings.translation", locale)(),
 	};
 
 	return { title: strings.translation, fields, color: constants.colors.blue };

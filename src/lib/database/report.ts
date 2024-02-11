@@ -1,3 +1,4 @@
+// TODO(vxern): Make the whole thing nullable.
 interface Report {
 	id: string;
 	guildId: string;

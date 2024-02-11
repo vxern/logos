@@ -26,6 +26,7 @@ function chunk<T>(array: T[], size: number): T[][] {
 
 function* chunked<T>(array: T[], size: number): Generator<T[], void, void> {
 	if (array.length === 0) {
+		yield [];
 		return;
 	}
 
@@ -93,14 +94,14 @@ function addParametersToURL(url: string, parameters: Record<string, string>): st
 }
 
 async function getAllMessages(
-	[client, bot]: [Client, Discord.Bot],
+	client: Client,
 	channelId: bigint,
 ): Promise<Discord.CamelizedDiscordMessage[] | undefined> {
 	const messages: Discord.CamelizedDiscordMessage[] = [];
 	let isFinished = false;
 
 	while (!isFinished) {
-		const bufferUnoptimised = await bot.rest
+		const bufferUnoptimised = await client.bot.rest
 			.getMessages(channelId, {
 				limit: 100,
 				before: messages.length === 0 ? undefined : messages.at(-1)?.id,
@@ -143,35 +144,6 @@ function verifyIsWithinLimits(timestamps: number[], limit: number, limitingTimeP
 	}
 
 	return false;
-}
-
-// Fix for `bot.gateway.requestMembers()` never resolving.
-async function requestMembers(
-	bot: Discord.Bot,
-	guildId: bigint,
-	options?: Omit<Discord.RequestGuildMembers, "guildId">,
-): Promise<void> {
-	const shardId = bot.gateway.calculateShardId(guildId);
-	return await new Promise((resolve) => {
-		const nonce = Date.now().toString();
-		bot.gateway.cache.requestMembers?.pending.set(nonce, { nonce, resolve: (_) => resolve(), members: [] });
-		const shard = bot.gateway.shards.get(shardId);
-		if (shard === undefined) {
-			throw new Error(`Shard (id: ${shardId}) not found.`);
-		}
-		shard.send({
-			op: Discord.GatewayOpcodes.RequestGuildMembers,
-			d: {
-				guild_id: guildId.toString(),
-				// If a query is provided use it, OR if a limit is NOT provided use ""
-				query: options?.query ?? (options?.limit ? undefined : ""),
-				limit: options?.limit ?? 0,
-				presences: options?.presences ?? false,
-				user_ids: options?.userIds?.map((id) => id.toString()),
-				nonce,
-			},
-		});
-	});
 }
 
 function getMemberAvatarURL(guildId: bigint, userId: bigint, avatarHash: bigint): string {
@@ -227,6 +199,10 @@ function random(max: number): number {
 	return Math.floor(Math.random() * max);
 }
 
+function compact<T>(array: T[]): Exclude<T, undefined>[] {
+	return array.filter((element) => element !== undefined) as Exclude<T, undefined>[];
+}
+
 export {
 	addParametersToURL,
 	chunk,
@@ -236,11 +212,11 @@ export {
 	getGuildIconURLFormatted,
 	isText,
 	isVoice,
-	requestMembers,
 	snowflakeToTimestamp,
 	verifyIsWithinLimits,
 	getMemberAvatarURL,
 	reverseObject,
 	asStream,
 	random,
+	compact,
 };

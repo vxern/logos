@@ -8,8 +8,8 @@ class StatusService extends GlobalService {
 	isActive: boolean;
 	currentIndex: number;
 
-	constructor([client, bot]: [Client, Discord.Bot]) {
-		super([client, bot]);
+	constructor(client: Client) {
+		super(client);
 		this.isActive = true;
 		this.currentIndex = 0;
 	}
@@ -45,7 +45,7 @@ class StatusService extends GlobalService {
 			this.currentIndex++;
 		}
 
-		this.bot.gateway
+		this.client.bot.gateway
 			.editBotStatus({
 				activities: [
 					{

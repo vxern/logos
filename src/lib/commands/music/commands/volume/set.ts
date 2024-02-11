@@ -1,11 +1,10 @@
-import * as Discord from "@discordeno/bot";
 import constants from "../../../../../constants/constants";
 import defaults from "../../../../../defaults";
 import * as Logos from "../../../../../types";
-import { Client, localise } from "../../../../client";
+import { Client } from "../../../../client";
 import { parseArguments, reply } from "../../../../interactions";
 
-async function handleSetVolume([client, bot]: [Client, Discord.Bot], interaction: Logos.Interaction): Promise<void> {
+async function handleSetVolume(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.guildLocale;
 
 	const guildId = interaction.guildId;
@@ -13,7 +12,7 @@ async function handleSetVolume([client, bot]: [Client, Discord.Bot], interaction
 		return;
 	}
 
-	const musicService = client.services.music.music.get(guildId);
+	const musicService = client.getMusicService(guildId);
 	if (musicService === undefined) {
 		return;
 	}
@@ -27,13 +26,13 @@ async function handleSetVolume([client, bot]: [Client, Discord.Bot], interaction
 	if (!isOccupied) {
 		const locale = interaction.locale;
 		const strings = {
-			title: localise(client, "music.strings.notPlaying.title", locale)(),
+			title: client.localise("music.strings.notPlaying.title", locale)(),
 			description: {
-				toManage: localise(client, "music.strings.notPlaying.description.toManage", locale)(),
+				toManage: client.localise("music.strings.notPlaying.description.toManage", locale)(),
 			},
 		};
 
-		reply([client, bot], interaction, {
+		reply(client, interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -53,15 +52,14 @@ async function handleSetVolume([client, bot]: [Client, Discord.Bot], interaction
 	if (volume < 0 || volume > defaults.MAX_VOLUME) {
 		const locale = interaction.locale;
 		const strings = {
-			title: localise(client, "music.options.volume.options.set.strings.invalid.title", locale)(),
-			description: localise(
-				client,
+			title: client.localise("music.options.volume.options.set.strings.invalid.title", locale)(),
+			description: client.localise(
 				"music.options.volume.options.set.strings.invalid.description",
 				locale,
 			)({ volume: defaults.MAX_VOLUME }),
 		};
 
-		reply([client, bot], interaction, {
+		reply(client, interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -76,12 +74,12 @@ async function handleSetVolume([client, bot]: [Client, Discord.Bot], interaction
 	musicService.setVolume(volume);
 
 	const strings = {
-		title: localise(client, "music.options.volume.options.set.strings.set.title", locale)(),
-		description: localise(client, "music.options.volume.options.set.strings.set.description", locale)({ volume }),
+		title: client.localise("music.options.volume.options.set.strings.set.title", locale)(),
+		description: client.localise("music.options.volume.options.set.strings.set.description", locale)({ volume }),
 	};
 
 	reply(
-		[client, bot],
+		client,
 		interaction,
 		{
 			embeds: [

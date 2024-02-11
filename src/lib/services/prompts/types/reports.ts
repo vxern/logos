@@ -1,7 +1,7 @@
 import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import * as Logos from "../../../../types";
-import { Client, localise } from "../../../client";
+import { Client } from "../../../client";
 import { Report } from "../../../database/report";
 import { User } from "../../../database/user";
 import diagnostics from "../../../diagnostics";
@@ -12,14 +12,14 @@ import { PromptService } from "../service";
 type InteractionData = [documentId: string, isResolved: string];
 
 class ReportService extends PromptService<"reports", Report, InteractionData> {
-	constructor([client, bot]: [Client, Discord.Bot], guildId: bigint) {
-		super([client, bot], guildId, { type: "reports", deleteMode: "delete" });
+	constructor(client: Client, guildId: bigint) {
+		super(client, guildId, { type: "reports", deleteMode: "delete" });
 	}
 
 	getAllDocuments(): Map<string, Report> {
 		const reports = new Map<string, Report>();
 
-		for (const [compositeId, reportDocument] of this.client.cache.documents.reports) {
+		for (const [compositeId, reportDocument] of this.client.documents.reports) {
 			if (reportDocument.guildId !== this.guildIdString) {
 				continue;
 			}
@@ -34,8 +34,8 @@ class ReportService extends PromptService<"reports", Report, InteractionData> {
 		const session = this.client.database.openSession();
 
 		const userDocument =
-			this.client.cache.documents.users.get(reportDocument.authorId) ??
-			session.load<User>(`users/${reportDocument.authorId}`).then((value) => value ?? undefined);
+			this.client.documents.users.get(reportDocument.authorId) ??
+			session.get<User>(`users/${reportDocument.authorId}`).then((value) => value ?? undefined);
 
 		session.dispose();
 
@@ -51,19 +51,19 @@ class ReportService extends PromptService<"reports", Report, InteractionData> {
 		const guildLocale = this.guildLocale;
 		const strings = {
 			report: {
-				submittedBy: localise(this.client, "submittedBy", guildLocale)(),
-				submittedAt: localise(this.client, "submittedAt", guildLocale)(),
-				users: localise(this.client, "reports.users", guildLocale)(),
-				reason: localise(this.client, "reports.reason", guildLocale)(),
-				link: localise(this.client, "reports.link", guildLocale)(),
-				noLinkProvided: localise(this.client, "reports.noLinkProvided", guildLocale)(),
+				submittedBy: this.client.localise("submittedBy", guildLocale)(),
+				submittedAt: this.client.localise("submittedAt", guildLocale)(),
+				users: this.client.localise("reports.users", guildLocale)(),
+				reason: this.client.localise("reports.reason", guildLocale)(),
+				link: this.client.localise("reports.link", guildLocale)(),
+				noLinkProvided: this.client.localise("reports.noLinkProvided", guildLocale)(),
 			},
 			previousInfractions: {
-				title: localise(this.client, "reports.previousInfractions", guildLocale),
+				title: this.client.localise("reports.previousInfractions", guildLocale),
 			},
-			markResolved: localise(this.client, "markResolved", guildLocale)(),
-			markUnresolved: localise(this.client, "markUnresolved", guildLocale)(),
-			close: localise(this.client, "close", guildLocale)(),
+			markResolved: this.client.localise("markResolved", guildLocale)(),
+			markUnresolved: this.client.localise("markUnresolved", guildLocale)(),
+			close: this.client.localise("close", guildLocale)(),
 		};
 
 		return {
@@ -165,11 +165,11 @@ class ReportService extends PromptService<"reports", Report, InteractionData> {
 
 		if (isResolved && reportDocument.isResolved) {
 			const strings = {
-				title: localise(this.client, "alreadyMarkedResolved.title", locale)(),
-				description: localise(this.client, "alreadyMarkedResolved.description", locale)(),
+				title: this.client.localise("alreadyMarkedResolved.title", locale)(),
+				description: this.client.localise("alreadyMarkedResolved.description", locale)(),
 			};
 
-			reply([this.client, this.bot], interaction, {
+			reply(this.client, interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -183,11 +183,11 @@ class ReportService extends PromptService<"reports", Report, InteractionData> {
 
 		if (!(isResolved || reportDocument.isResolved)) {
 			const strings = {
-				title: localise(this.client, "alreadyMarkedUnresolved.title", locale)(),
-				description: localise(this.client, "alreadyMarkedUnresolved.description", locale)(),
+				title: this.client.localise("alreadyMarkedUnresolved.title", locale)(),
+				description: this.client.localise("alreadyMarkedUnresolved.description", locale)(),
 			};
 
-			reply([this.client, this.bot], interaction, {
+			reply(this.client, interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -203,7 +203,7 @@ class ReportService extends PromptService<"reports", Report, InteractionData> {
 
 		reportDocument.isResolved = isResolved;
 
-		await session.store(reportDocument);
+		await session.set(reportDocument);
 		await session.saveChanges();
 
 		session.dispose();

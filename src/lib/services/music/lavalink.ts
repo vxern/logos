@@ -7,8 +7,8 @@ import { GlobalService } from "../service";
 class LavalinkService extends GlobalService {
 	readonly node: Lavaclient.Node;
 
-	constructor([client, bot]: [Client, Discord.Bot]) {
-		super([client, bot]);
+	constructor(client: Client) {
+		super(client);
 		this.node = new Lavaclient.Node({
 			connection: {
 				host: client.environment.lavalinkHost,
@@ -17,16 +17,16 @@ class LavalinkService extends GlobalService {
 			},
 			sendGatewayPayload: async (guildIdString, payload) => {
 				const guildId = BigInt(guildIdString);
-				if (!this.client.services.music.music.has(guildId)) {
+				if (this.client.getMusicService(guildId) === undefined) {
 					return;
 				}
 
-				const shardId = this.client.cache.guilds.get(guildId)?.shardId;
+				const shardId = this.client.entities.guilds.get(guildId)?.shardId;
 				if (shardId === undefined) {
 					return;
 				}
 
-				const shard = bot.gateway.shards.get(shardId);
+				const shard = this.client.bot.gateway.shards.get(shardId);
 				if (shard === undefined) {
 					return;
 				}
@@ -51,14 +51,14 @@ class LavalinkService extends GlobalService {
 
 			await new Promise((resolve) => setTimeout(resolve, 5000));
 
-			this.node.connect(this.bot.id.toString());
+			this.node.connect(this.client.bot.id.toString());
 		});
 
 		this.node.on("connect", ({ took: tookMs }) =>
 			this.client.log.info(`Connected to audio node. Time taken: ${tookMs} ms`),
 		);
 
-		return this.node.connect(this.bot.id.toString());
+		return this.node.connect(this.client.bot.id.toString());
 	}
 
 	async stop(): Promise<void> {

@@ -1,12 +1,12 @@
 import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import { MentionTypes, mention } from "../../../../formatting";
-import { Client, localise } from "../../../client";
+import { Client } from "../../../client";
 import { HashableMessageContents, NoticeService } from "../service";
 
 class WelcomeNoticeService extends NoticeService<"welcome"> {
-	constructor([client, bot]: [Client, Discord.Bot], guildId: bigint) {
-		super([client, bot], guildId, { type: "welcome" });
+	constructor(client: Client, guildId: bigint) {
+		super(client, guildId, { type: "welcome" });
 	}
 
 	generateNotice(): HashableMessageContents | undefined {
@@ -23,14 +23,13 @@ class WelcomeNoticeService extends NoticeService<"welcome"> {
 
 		const guildLocale = this.guildLocale;
 		const strings = {
-			title: localise(this.client, "entry.welcome.title", guildLocale)({ server_name: guild.name }),
+			title: this.client.localise("entry.welcome.title", guildLocale)({ server_name: guild.name }),
 			description: {
-				toEnter: localise(
-					this.client,
+				toEnter: this.client.localise(
 					"entry.welcome.description.toEnter",
 					guildLocale,
 				)({ information_channel_mention: mention(ruleChannelId, MentionTypes.Channel) }),
-				acceptedRules: localise(this.client, "entry.welcome.description.acceptedRules", guildLocale)(),
+				acceptedRules: this.client.localise("entry.welcome.description.acceptedRules", guildLocale)(),
 			},
 		};
 
