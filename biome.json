@@ -1,21 +1,27 @@
 {
-	"$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
-  "organizeImports": {
-    "enabled": true
-  },
-	"linter": {
-		"enabled": true,
-		"rules": {
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "linter": {
+    "enabled": true,
+    "rules": {
       "all": true,
       "nursery": {
         "useImportRestrictions": "off"
+      },
+      "style": {
+        "noNonNullAssertion": "off"
+      },
+      "suspicious": {
+        "noExplicitAny": "off"
+      },
+      "complexity": {
+        "noExcessiveCognitiveComplexity": "off"
       }
-		}
-	},
+    }
+  },
   "formatter": {
     "enabled": true,
     "formatWithErrors": true,
-    "indentSize": 2,
+    "indentWidth": 2,
     "indentStyle": "tab",
     "lineWidth": 120
   }
