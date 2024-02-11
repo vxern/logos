@@ -57,7 +57,7 @@ interface InteractionCollectorSettings {
 function createInteractionCollector(client: Client, settings: InteractionCollectorSettings): string {
 	const customId = settings.customId ?? Snowflake.generate().toString();
 
-	client.addCollector("interactionCreate", {
+	client.listen("interactionCreate", {
 		filter: (interaction) => compileChecks(interaction, settings, customId).every((condition) => condition),
 		limit: settings.limit,
 		removeAfter: settings.doesNotExpire ? undefined : constants.INTERACTION_TOKEN_EXPIRY,

@@ -1264,11 +1264,11 @@ class Collector<Event extends keyof Discord.EventHandlers> {
 	readonly limit?: number;
 	readonly removeAfter?: number;
 
-	readonly filter: (...args: Parameters<Discord.EventHandlers[Event]>) => boolean;
+	readonly filter?: (...args: Parameters<Discord.EventHandlers[Event]>) => boolean;
 	// TODO(vxern): Make readonly.
 	onCollect: (...args: Parameters<Discord.EventHandlers[Event]>) => void;
 	// TODO(vxern): Make readonly.
-	onEnd: () => void;
+	onEnd?: () => void;
 	readonly end?: Promise<void>;
 
 	constructor({
@@ -1333,10 +1333,10 @@ class EventStore {
 		const onEnd = collector.onEnd;
 		collector.onEnd = () => {
 			collectors?.delete(collector);
-			onEnd();
+			onEnd?.();
 		};
 
-		collector.end?.then(() => collector.onEnd());
+		collector.end?.then(() => collector.onEnd?.());
 
 		if (collector.limit !== undefined) {
 			let emitCount = 0;
@@ -1345,7 +1345,7 @@ class EventStore {
 				emitCount++;
 
 				if (emitCount === collector.limit) {
-					collector.onEnd();
+					collector.onEnd?.();
 				}
 
 				onCollect(...args);
@@ -1363,7 +1363,7 @@ class EventStore {
 
 			this.#extendEventHandler(event, { prepend: true }, (...args) => {
 				for (const collector of collectors) {
-					if (!collector.filter(...args)) {
+					if (collector.filter !== undefined && !collector.filter(...args)) {
 						continue;
 					}
 
@@ -1441,6 +1441,85 @@ class ServiceStore {
 				tickets: new Map(),
 			},
 			roleIndicators: new Map(),
+		};
+	}
+
+	buildEventHandlers(): Partial<Discord.EventHandlers> {
+		const services = this;
+
+		return {
+			async ready(...args) {
+				services.dispatchToGlobal("ready", { args });
+			},
+			async interactionCreate(interactionRaw) {
+				services.dispatchEvent(interactionRaw.guildId, "interactionCreate", { args: [interactionRaw] });
+			},
+			async guildMemberAdd(member, user) {
+				services.dispatchEvent(member.guildId, "guildMemberAdd", { args: [member, user] });
+			},
+			async guildMemberRemove(user, guildId) {
+				services.dispatchEvent(guildId, "guildMemberRemove", { args: [user, guildId] });
+			},
+			async guildMemberUpdate(member, user) {
+				services.dispatchEvent(member.guildId, "guildMemberUpdate", { args: [member, user] });
+			},
+			async messageCreate(message) {
+				services.dispatchEvent(message.guildId, "messageCreate", { args: [message] });
+			},
+			async messageDelete(payload, message) {
+				services.dispatchEvent(payload.guildId, "messageDelete", { args: [payload, message] });
+			},
+			async messageDeleteBulk(payload) {
+				services.dispatchEvent(payload.guildId, "messageDeleteBulk", { args: [payload] });
+			},
+			async messageUpdate(message, oldMessage) {
+				services.dispatchEvent(message.guildId, "messageUpdate", { args: [message, oldMessage] });
+			},
+			async voiceServerUpdate(payload) {
+				services.dispatchEvent(payload.guildId, "voiceServerUpdate", { args: [payload] });
+			},
+			async voiceStateUpdate(voiceState) {
+				services.dispatchEvent(voiceState.guildId, "voiceStateUpdate", { args: [voiceState] });
+			},
+			async channelCreate(channel) {
+				services.dispatchEvent(channel.guildId, "channelCreate", { args: [channel] });
+			},
+			async channelDelete(channel) {
+				services.dispatchEvent(channel.guildId, "channelDelete", { args: [channel] });
+			},
+			async channelPinsUpdate(data) {
+				services.dispatchEvent(data.guildId, "channelPinsUpdate", { args: [data] });
+			},
+			async channelUpdate(channel) {
+				services.dispatchEvent(channel.guildId, "channelUpdate", { args: [channel] });
+			},
+			async guildEmojisUpdate(payload) {
+				services.dispatchEvent(payload.guildId, "guildEmojisUpdate", { args: [payload] });
+			},
+			async guildBanAdd(user, guildId) {
+				services.dispatchEvent(guildId, "guildBanAdd", { args: [user, guildId] });
+			},
+			async guildBanRemove(user, guildId) {
+				services.dispatchEvent(guildId, "guildBanRemove", { args: [user, guildId] });
+			},
+			async guildCreate(guild) {
+				services.dispatchEvent(guild.id, "guildCreate", { args: [guild] });
+			},
+			async guildDelete(id, shardId) {
+				services.dispatchEvent(id, "guildDelete", { args: [id, shardId] });
+			},
+			async guildUpdate(guild) {
+				services.dispatchEvent(guild.id, "guildUpdate", { args: [guild] });
+			},
+			async roleCreate(role) {
+				services.dispatchEvent(role.guildId, "roleCreate", { args: [role] });
+			},
+			async roleDelete(role) {
+				services.dispatchEvent(role.guildId, "roleDelete", { args: [role] });
+			},
+			async roleUpdate(role) {
+				services.dispatchEvent(role.guildId, "roleUpdate", { args: [role] });
+			},
 		};
 	}
 
@@ -1805,7 +1884,7 @@ class Client {
 		return this.#interactions.unregisterInteraction.bind(this.#interactions);
 	}
 
-	get addCollector(): EventStore["registerCollector"] {
+	get listen(): EventStore["registerCollector"] {
 		return this.#events.registerCollector.bind(this.#events);
 	}
 
@@ -1884,98 +1963,6 @@ class Client {
 		this.#services = new ServiceStore();
 	}
 
-	// TODO(vxern): This links to a few things, services, events, it could be improved.
-	#getEvents(): Partial<Discord.EventHandlers> {
-		const client = this;
-
-		return {
-			async ready(...args) {
-				client.#services.dispatchToGlobal("ready", { args });
-			},
-			async interactionCreate(interactionRaw) {
-				await client.handleInteraction(interactionRaw);
-
-				client.#services.dispatchEvent(interactionRaw.guildId, "interactionCreate", { args: [interactionRaw] });
-			},
-			async guildMemberAdd(member, user) {
-				client.#services.dispatchEvent(member.guildId, "guildMemberAdd", { args: [member, user] });
-			},
-			async guildMemberRemove(user, guildId) {
-				client.#services.dispatchEvent(guildId, "guildMemberRemove", { args: [user, guildId] });
-			},
-			async guildMemberUpdate(member, user) {
-				client.#services.dispatchEvent(member.guildId, "guildMemberUpdate", { args: [member, user] });
-			},
-			async messageCreate(message) {
-				client.#services.dispatchEvent(message.guildId, "messageCreate", { args: [message] });
-			},
-			async messageDelete(payload, message) {
-				client.#services.dispatchEvent(payload.guildId, "messageDelete", { args: [payload, message] });
-			},
-			async messageDeleteBulk(payload) {
-				client.#services.dispatchEvent(payload.guildId, "messageDeleteBulk", { args: [payload] });
-			},
-			async messageUpdate(message, oldMessage) {
-				client.#services.dispatchEvent(message.guildId, "messageUpdate", { args: [message, oldMessage] });
-			},
-			async voiceServerUpdate(payload) {
-				client.#services.dispatchEvent(payload.guildId, "voiceServerUpdate", { args: [payload] });
-			},
-			async voiceStateUpdate(voiceState) {
-				client.#services.dispatchEvent(voiceState.guildId, "voiceStateUpdate", { args: [voiceState] });
-			},
-			async channelCreate(channel) {
-				client.#services.dispatchEvent(channel.guildId, "channelCreate", { args: [channel] });
-			},
-			async channelDelete(channel) {
-				client.discord.cache.channels.delete(channel.id);
-
-				if (channel.guildId !== undefined) {
-					client.discord.cache.guilds.get(channel.guildId)?.channels.delete(channel.id);
-				}
-
-				client.#services.dispatchEvent(channel.guildId, "channelDelete", { args: [channel] });
-			},
-			async channelPinsUpdate(data) {
-				client.#services.dispatchEvent(data.guildId, "channelPinsUpdate", { args: [data] });
-			},
-			async channelUpdate(channel) {
-				client.#services.dispatchEvent(channel.guildId, "channelUpdate", { args: [channel] });
-			},
-			async guildEmojisUpdate(payload) {
-				client.#services.dispatchEvent(payload.guildId, "guildEmojisUpdate", { args: [payload] });
-			},
-			async guildBanAdd(user, guildId) {
-				client.#services.dispatchEvent(guildId, "guildBanAdd", { args: [user, guildId] });
-			},
-			async guildBanRemove(user, guildId) {
-				client.#services.dispatchEvent(guildId, "guildBanRemove", { args: [user, guildId] });
-			},
-			async guildCreate(guild) {
-				await client.#setupGuild(guild);
-
-				client.#services.dispatchEvent(guild.id, "guildCreate", { args: [guild] });
-			},
-			async guildDelete(id, shardId) {
-				await client.#teardownGuild(id);
-
-				client.#services.dispatchEvent(id, "guildDelete", { args: [id, shardId] });
-			},
-			async guildUpdate(guild) {
-				client.#services.dispatchEvent(guild.id, "guildUpdate", { args: [guild] });
-			},
-			async roleCreate(role) {
-				client.#services.dispatchEvent(role.guildId, "roleCreate", { args: [role] });
-			},
-			async roleDelete(role) {
-				client.#services.dispatchEvent(role.guildId, "roleDelete", { args: [role] });
-			},
-			async roleUpdate(role) {
-				client.#services.dispatchEvent(role.guildId, "roleUpdate", { args: [role] });
-			},
-		};
-	}
-
 	static async create({
 		environment,
 		localisations,
@@ -2032,8 +2019,30 @@ class Client {
 			bot.events.messageUpdate?.(bot.transformers.message(bot, payload));
 		};
 
-		bot.events = client.#getEvents();
+		bot.events = client.#services.buildEventHandlers();
 		bot.transformers = client.discord.buildTransformers();
+
+		client.listen("interactionCreate", {
+			onCollect: (interaction) => client.handleInteraction(interaction),
+		});
+
+		client.listen("channelDelete", {
+			onCollect: (channel) => {
+				client.discord.cache.channels.delete(channel.id);
+
+				if (channel.guildId !== undefined) {
+					client.discord.cache.guilds.get(channel.guildId)?.channels.delete(channel.id);
+				}
+			},
+		});
+
+		client.listen("guildCreate", {
+			onCollect: (guild) => client.#setupGuild(guild),
+		});
+
+		client.listen("guildDelete", {
+			onCollect: (id, _) => client.#teardownGuild(id),
+		});
 
 		await bot.start();
 
