@@ -422,8 +422,6 @@ class DiscordConnection {
 
 	#transformGuild(_: Discord.Bot, payload: Parameters<Discord.Transformers["guild"]>[1]): Discord.Guild {
 		const result = Discord.transformGuild(this.bot, payload);
-		// TODO(vxern): This is a monkey-patch for Discordeno, which filters out shardIds equal to 0.
-		result.shardId = payload.shardId;
 
 		for (const channel of payload.guild.channels ?? []) {
 			this.bot.transformers.channel(this.bot, { channel, guildId: result.id });
