@@ -3,8 +3,8 @@ import * as YouTubeSearch from "youtube-sr";
 import constants from "../../../../../constants/constants";
 import { trim } from "../../../../../formatting";
 import * as Logos from "../../../../../types";
-import { Client } from "../../../../client";
-import { createInteractionCollector, deleteReply, postponeReply, reply } from "../../../../interactions";
+import { Client, InteractionCollector } from "../../../../client";
+import { deleteReply, postponeReply, reply } from "../../../../interactions";
 import { Song, SongListing } from "../types";
 import { ListingResolver } from "./sources";
 
@@ -36,88 +36,90 @@ async function search(client: Client, interaction: Logos.Interaction, query: str
 		return undefined;
 	}
 
-	return new Promise<SongListing | undefined>((resolve) => {
-		const customId = createInteractionCollector(client, {
-			type: Discord.InteractionTypes.MessageComponent,
-			userId: interaction.user.id,
-			limit: 1,
-			onCollect: async (selection) => {
-				deleteReply(client, interaction);
+	const { promise, resolve } = Promise.withResolvers<SongListing | undefined>();
 
-				const indexString = selection.data?.values?.at(0) as string | undefined;
-				if (indexString === undefined) {
-					return resolve(undefined);
-				}
+	const selectMenuSelection = new InteractionCollector({ only: [interaction.user.id], isSingle: true });
 
-				const index = Number(indexString);
-				if (!Number.isSafeInteger(index)) {
-					return resolve(undefined);
-				}
+	selectMenuSelection.onCollect(async (selection) => {
+		deleteReply(client, interaction);
 
-				const result = results.at(index);
-				if (result === undefined) {
-					return resolve(undefined);
-				}
-
-				if (isPlaylist(result)) {
-					const url = result.url;
-					if (url === undefined) {
-						return resolve(undefined);
-					}
-
-					const playlist = await YouTubeSearch.YouTube.getPlaylist(url);
-					return resolve(fromYouTubePlaylist(playlist, interaction.user.id));
-				}
-
-				return resolve(fromYouTubeVideo(result, interaction.user.id));
-			},
-		});
-
-		const strings = {
-			title: client.localise("music.options.play.strings.selectSong.title", locale)(),
-			description: client.localise("music.options.play.strings.selectSong.description", locale)(),
-		};
-
-		const options = [];
-		for (const [result, index] of results.map<[YouTubeSearch.Playlist | YouTubeSearch.Video, number]>(
-			(result, index) => [result, index],
-		)) {
-			const title = result.title;
-			if (title === undefined) {
-				continue;
-			}
-
-			options.push({
-				emoji: { name: isVideo(result) ? constants.symbols.music.song : constants.symbols.music.collection },
-				label: trim(title, 100),
-				value: index.toString(),
-			});
+		const indexString = selection.data?.values?.at(0) as string | undefined;
+		if (indexString === undefined) {
+			return resolve(undefined);
 		}
 
-		reply(client, interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colors.blue,
-				},
-			],
-			components: [
-				{
-					type: Discord.MessageComponentTypes.ActionRow,
-					components: [
-						{
-							type: Discord.MessageComponentTypes.SelectMenu,
-							customId: customId,
-							minValues: 1,
-							maxValues: 1,
-							options,
-						},
-					],
-				},
-			],
-		});
+		const index = Number(indexString);
+		if (!Number.isSafeInteger(index)) {
+			return resolve(undefined);
+		}
+
+		const result = results.at(index);
+		if (result === undefined) {
+			return resolve(undefined);
+		}
+
+		if (isPlaylist(result)) {
+			const url = result.url;
+			if (url === undefined) {
+				return resolve(undefined);
+			}
+
+			const playlist = await YouTubeSearch.YouTube.getPlaylist(url);
+			return resolve(fromYouTubePlaylist(playlist, interaction.user.id));
+		}
+
+		return resolve(fromYouTubeVideo(result, interaction.user.id));
 	});
+
+	client.registerInteractionCollector(selectMenuSelection);
+
+	const strings = {
+		title: client.localise("music.options.play.strings.selectSong.title", locale)(),
+		description: client.localise("music.options.play.strings.selectSong.description", locale)(),
+	};
+
+	const options = [];
+	for (const [result, index] of results.map<[YouTubeSearch.Playlist | YouTubeSearch.Video, number]>((result, index) => [
+		result,
+		index,
+	])) {
+		const title = result.title;
+		if (title === undefined) {
+			continue;
+		}
+
+		options.push({
+			emoji: { name: isVideo(result) ? constants.symbols.music.song : constants.symbols.music.collection },
+			label: trim(title, 100),
+			value: index.toString(),
+		});
+	}
+
+	reply(client, interaction, {
+		embeds: [
+			{
+				title: strings.title,
+				description: strings.description,
+				color: constants.colors.blue,
+			},
+		],
+		components: [
+			{
+				type: Discord.MessageComponentTypes.ActionRow,
+				components: [
+					{
+						type: Discord.MessageComponentTypes.SelectMenu,
+						customId: selectMenuSelection.customId,
+						minValues: 1,
+						maxValues: 1,
+						options,
+					},
+				],
+			},
+		],
+	});
+
+	return promise;
 }
 
 type Result = YouTubeSearch.Playlist | YouTubeSearch.Video | YouTubeSearch.Channel;

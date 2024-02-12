@@ -3,16 +3,9 @@ import constants from "../../../../constants/constants";
 import { Locale } from "../../../../constants/languages";
 import { trim } from "../../../../formatting";
 import * as Logos from "../../../../types";
-import { Client } from "../../../client";
+import { Client, InteractionCollector } from "../../../client";
 import diagnostics from "../../../diagnostics";
-import {
-	Modal,
-	acknowledge,
-	createInteractionCollector,
-	createModalComposer,
-	deleteReply,
-	reply,
-} from "../../../interactions";
+import { Modal, acknowledge, createModalComposer, deleteReply, reply } from "../../../interactions";
 import { getMemberAvatarURL } from "../../../utils";
 import { CommandTemplate } from "../../command";
 import categories from "../../social/roles/roles";
@@ -262,131 +255,68 @@ async function handleSubmittedInvalidCorrection(
 	error: string | undefined,
 	{ locale }: { locale: Locale },
 ): Promise<Discord.Interaction | undefined> {
-	return new Promise((resolve) => {
-		const continueId = createInteractionCollector(client, {
-			type: Discord.InteractionTypes.MessageComponent,
-			onCollect: async (selection) => {
-				deleteReply(client, submission);
-				resolve(selection);
-			},
+	const { promise, resolve } = Promise.withResolvers<Discord.Interaction | undefined>();
+
+	const continueButton = new InteractionCollector({ only: [submission.user.id], isSingle: true });
+	const cancelButton = new InteractionCollector({ only: [submission.user.id] });
+	const returnButton = new InteractionCollector({
+		only: [submission.user.id],
+		isSingle: true,
+		dependsOn: cancelButton,
+	});
+	const leaveButton = new InteractionCollector({
+		only: [submission.user.id],
+		isSingle: true,
+		dependsOn: cancelButton,
+	});
+
+	continueButton.onCollect(async (buttonPress) => {
+		deleteReply(client, submission);
+		resolve(buttonPress);
+	});
+
+	cancelButton.onCollect(async (cancelButtonPress) => {
+		returnButton.onCollect(async (returnButtonPress) => {
+			deleteReply(client, submission);
+			deleteReply(client, cancelButtonPress);
+			resolve(returnButtonPress);
 		});
 
-		const cancelId = createInteractionCollector(client, {
-			type: Discord.InteractionTypes.MessageComponent,
-			onCollect: async (cancelSelection) => {
-				const returnId = createInteractionCollector(client, {
-					type: Discord.InteractionTypes.MessageComponent,
-					onCollect: async (returnSelection) => {
-						deleteReply(client, submission);
-						deleteReply(client, cancelSelection);
-						resolve(returnSelection);
-					},
-				});
-
-				const leaveId = createInteractionCollector(client, {
-					type: Discord.InteractionTypes.MessageComponent,
-					onCollect: async (_) => {
-						deleteReply(client, submission);
-						deleteReply(client, cancelSelection);
-						resolve(undefined);
-					},
-				});
-
-				const strings = {
-					title: client.localise("correction.strings.sureToCancel.title", locale)(),
-					description: client.localise("correction.strings.sureToCancel.description", locale)(),
-					stay: client.localise("prompts.stay", locale)(),
-					leave: client.localise("prompts.leave", locale)(),
-				};
-
-				reply(client, cancelSelection, {
-					embeds: [
-						{
-							title: strings.title,
-							description: strings.description,
-							color: constants.colors.dullYellow,
-						},
-					],
-					components: [
-						{
-							type: Discord.MessageComponentTypes.ActionRow,
-							components: [
-								{
-									type: Discord.MessageComponentTypes.Button,
-									customId: returnId,
-									label: strings.stay,
-									style: Discord.ButtonStyles.Success,
-								},
-								{
-									type: Discord.MessageComponentTypes.Button,
-									customId: leaveId,
-									label: strings.leave,
-									style: Discord.ButtonStyles.Danger,
-								},
-							],
-						},
-					],
-				});
-			},
+		leaveButton.onCollect(async (_) => {
+			deleteReply(client, submission);
+			deleteReply(client, cancelButtonPress);
+			resolve(undefined);
 		});
 
-		let embed!: Discord.CamelizedDiscordEmbed;
-		switch (error) {
-			case "texts_not_different": {
-				const strings = {
-					title: client.localise("correction.strings.textsNotDifferent.title", locale)(),
-					description: client.localise("correction.strings.textsNotDifferent.description", locale)(),
-				};
+		const strings = {
+			title: client.localise("correction.strings.sureToCancel.title", locale)(),
+			description: client.localise("correction.strings.sureToCancel.description", locale)(),
+			stay: client.localise("prompts.stay", locale)(),
+			leave: client.localise("prompts.leave", locale)(),
+		};
 
-				embed = {
+		reply(client, cancelButtonPress, {
+			embeds: [
+				{
 					title: strings.title,
 					description: strings.description,
 					color: constants.colors.dullYellow,
-				};
-
-				break;
-			}
-			default: {
-				const strings = {
-					title: client.localise("correction.strings.failed.title", locale)(),
-					description: client.localise("correction.strings.failed.description", locale)(),
-				};
-
-				reply(client, submission, {
-					embeds: [
-						{
-							title: strings.title,
-							description: strings.description,
-							color: constants.colors.dullYellow,
-						},
-					],
-				});
-
-				return;
-			}
-		}
-
-		const strings = {
-			continue: client.localise("prompts.continue", locale)(),
-			cancel: client.localise("prompts.cancel", locale)(),
-		};
-
-		reply(client, submission, {
-			embeds: [embed],
+				},
+			],
 			components: [
 				{
 					type: Discord.MessageComponentTypes.ActionRow,
 					components: [
 						{
 							type: Discord.MessageComponentTypes.Button,
-							customId: continueId,
-							label: strings.continue,
+							customId: returnButton.customId,
+							label: strings.stay,
 							style: Discord.ButtonStyles.Success,
 						},
 						{
 							type: Discord.MessageComponentTypes.Button,
-							customId: cancelId,
-							label: strings.cancel,
+							customId: leaveButton.customId,
+							label: strings.leave,
 							style: Discord.ButtonStyles.Danger,
 						},
 					],
@@ -394,6 +324,77 @@ async function handleSubmittedInvalidCorrection(
 			],
 		});
 	});
+
+	client.registerInteractionCollector(continueButton);
+	client.registerInteractionCollector(cancelButton);
+	client.registerInteractionCollector(returnButton);
+	client.registerInteractionCollector(leaveButton);
+
+	let embed!: Discord.CamelizedDiscordEmbed;
+	switch (error) {
+		case "texts_not_different": {
+			const strings = {
+				title: client.localise("correction.strings.textsNotDifferent.title", locale)(),
+				description: client.localise("correction.strings.textsNotDifferent.description", locale)(),
+			};
+
+			embed = {
+				title: strings.title,
+				description: strings.description,
+				color: constants.colors.dullYellow,
+			};
+
+			break;
+		}
+		default: {
+			const strings = {
+				title: client.localise("correction.strings.failed.title", locale)(),
+				description: client.localise("correction.strings.failed.description", locale)(),
+			};
+
+			reply(client, submission, {
+				embeds: [
+					{
+						title: strings.title,
+						description: strings.description,
+						color: constants.colors.dullYellow,
+					},
+				],
+			});
+
+			return;
+		}
+	}
+
+	const strings = {
+		continue: client.localise("prompts.continue", locale)(),
+		cancel: client.localise("prompts.cancel", locale)(),
+	};
+
+	reply(client, submission, {
+		embeds: [embed],
+		components: [
+			{
+				type: Discord.MessageComponentTypes.ActionRow,
+				components: [
+					{
+						type: Discord.MessageComponentTypes.Button,
+						customId: continueButton.customId,
+						label: strings.continue,
+						style: Discord.ButtonStyles.Success,
+					},
+					{
+						type: Discord.MessageComponentTypes.Button,
+						customId: cancelButton.customId,
+						label: strings.cancel,
+						style: Discord.ButtonStyles.Danger,
+					},
+				],
+			},
+		],
+	});
+
+	return promise;
 }
 
 export default commands;

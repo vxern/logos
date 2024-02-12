@@ -4,11 +4,10 @@ import { Locale } from "../../../../constants/languages";
 import defaults from "../../../../defaults";
 import { MentionTypes, mention, trim } from "../../../../formatting";
 import * as Logos from "../../../../types";
-import { Client } from "../../../client";
+import { Client, InteractionCollector } from "../../../client";
 import {
 	ControlButtonID,
 	acknowledge,
-	createInteractionCollector,
 	decodeId,
 	deleteReply,
 	editReply,
@@ -142,107 +141,104 @@ async function generateEmbed(
 	const isFirst = data.pageIndex === 0;
 	const isLast = data.pageIndex === pages.length - 1;
 
-	const buttonsCustomId = createInteractionCollector(client, {
-		type: Discord.InteractionTypes.MessageComponent,
-		userId: interaction.user.id,
-		onCollect: async (selection) => {
-			acknowledge(client, selection);
+	const pageButtons = new InteractionCollector({ only: [interaction.user.id] });
+	const selectMenuSelection = new InteractionCollector({ only: [interaction.user.id], isSingle: true });
 
-			const customId = selection.data?.customId;
-			if (customId === undefined) {
-				return;
-			}
+	pageButtons.onCollect(async (buttonPress) => {
+		acknowledge(client, buttonPress);
 
-			const [_, action] = decodeId<ControlButtonID>(customId);
+		const customId = buttonPress.data?.customId;
+		if (customId === undefined) {
+			return;
+		}
 
-			switch (action) {
-				case "previous": {
-					if (!isFirst) {
-						data.pageIndex--;
-					}
-					break;
+		const [_, action] = decodeId<ControlButtonID>(customId);
+
+		switch (action) {
+			case "previous": {
+				if (!isFirst) {
+					data.pageIndex--;
 				}
-				case "next": {
-					if (!isLast) {
-						data.pageIndex++;
-					}
-					break;
+				break;
+			}
+			case "next": {
+				if (!isLast) {
+					data.pageIndex++;
 				}
+				break;
 			}
+		}
 
-			const interactionResponseData = await generateEmbed(client, interaction, musicService, data, {
-				locale,
-				guildLocale,
-			});
-			if (interactionResponseData === undefined) {
-				return;
-			}
+		const interactionResponseData = await generateEmbed(client, interaction, musicService, data, {
+			locale,
+			guildLocale,
+		});
+		if (interactionResponseData === undefined) {
+			return;
+		}
 
-			editReply(client, interaction, interactionResponseData);
-		},
+		editReply(client, interaction, interactionResponseData);
 	});
 
-	const selectMenuCustomId = createInteractionCollector(client, {
-		type: Discord.InteractionTypes.MessageComponent,
-		userId: interaction.user.id,
-		limit: 1,
-		onCollect: async (selection) => {
-			const indexString = selection.data?.values?.at(0) as string | undefined;
-			if (indexString === undefined) {
-				return;
-			}
+	selectMenuSelection.onCollect(async (buttonPress) => {
+		const indexString = buttonPress.data?.values?.at(0) as string | undefined;
+		if (indexString === undefined) {
+			return;
+		}
 
-			const index = Number(indexString);
-			if (!Number.isSafeInteger(index)) {
-				return;
-			}
+		const index = Number(indexString);
+		if (!Number.isSafeInteger(index)) {
+			return;
+		}
 
-			const songListing = musicService.remove(index);
-			if (songListing === undefined) {
-				const strings = {
-					title: client.localise("music.options.remove.strings.failed.title", locale)(),
-					description: client.localise("music.options.remove.strings.failed.description", locale)(),
-				};
-
-				reply(client, selection, {
-					embeds: [
-						{
-							title: strings.title,
-							description: strings.description,
-							color: constants.colors.dullYellow,
-						},
-					],
-				});
-				return;
-			}
-
+		const songListing = musicService.remove(index);
+		if (songListing === undefined) {
 			const strings = {
-				title: client.localise("music.options.remove.strings.removed.title", guildLocale)(),
-				description: client.localise(
-					"music.options.remove.strings.removed.description",
-					guildLocale,
-				)({
-					title: songListing.content.title,
-					user_mention: mention(selection.user.id, MentionTypes.User),
-				}),
+				title: client.localise("music.options.remove.strings.failed.title", locale)(),
+				description: client.localise("music.options.remove.strings.failed.description", locale)(),
 			};
 
-			reply(
-				client,
-				selection,
-				{
-					embeds: [
-						{
-							title: `${constants.symbols.music.removed} ${strings.title}`,
-							description: strings.description,
-							color: constants.colors.blue,
-						},
-					],
-				},
-				{ visible: true },
-			);
-		},
+			reply(client, buttonPress, {
+				embeds: [
+					{
+						title: strings.title,
+						description: strings.description,
+						color: constants.colors.dullYellow,
+					},
+				],
+			});
+			return;
+		}
+
+		const strings = {
+			title: client.localise("music.options.remove.strings.removed.title", guildLocale)(),
+			description: client.localise(
+				"music.options.remove.strings.removed.description",
+				guildLocale,
+			)({
+				title: songListing.content.title,
+				user_mention: mention(buttonPress.user.id, MentionTypes.User),
+			}),
+		};
+
+		reply(
+			client,
+			buttonPress,
+			{
+				embeds: [
+					{
+						title: `${constants.symbols.music.removed} ${strings.title}`,
+						description: strings.description,
+						color: constants.colors.blue,
+					},
+				],
+			},
+			{ visible: true },
+		);
 	});
+
+	client.registerInteractionCollector(pageButtons);
+	client.registerInteractionCollector(selectMenuSelection);
 
 	if (pages.at(0)?.length === 0) {
 		const strings = {
@@ -278,8 +274,8 @@ async function generateEmbed(
 			},
 		],
 		components: [
-			generateSelectMenu(data, pages, selectMenuCustomId),
-			...generateButtons(buttonsCustomId, isFirst, isLast),
+			generateSelectMenu(data, pages, selectMenuSelection.customId),
+			...generateButtons(pageButtons.customId, isFirst, isLast),
 		],
 	};
 }

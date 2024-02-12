@@ -1,31 +1,25 @@
 import * as Discord from "@discordeno/bot";
 import constants from "../../../constants/constants";
 import * as Logos from "../../../types";
-import {
-	createInteractionCollector,
-	decodeId,
-	deleteReply,
-	editReply,
-	getCommandName,
-	getLocaleData,
-	postponeReply,
-} from "../../interactions";
+import { decodeId, deleteReply, editReply, getCommandName, getLocaleData, postponeReply } from "../../interactions";
 import { GlobalService } from "../service";
+import { InteractionCollector } from "../../client";
 
 type InteractionRepetitionButtonID = [interactionId: string];
 
+// TODO(vxern): Improve this by getting rid of the "message could not be loaded" text.
 class InteractionRepetitionService extends GlobalService {
 	async start(): Promise<void> {}
 
 	async stop(): Promise<void> {}
 
-	async interactionCreate(interactionRaw: Discord.Interaction): Promise<void> {
-		if (interactionRaw.type === Discord.InteractionTypes.ApplicationCommand) {
-			this.handleApplicationCommand(interactionRaw);
+	async interactionCreate(interaction: Discord.Interaction): Promise<void> {
+		if (interaction.type === Discord.InteractionTypes.ApplicationCommand) {
+			this.handleApplicationCommand(interaction);
 			return;
 		}
 
-		const customId = interactionRaw.data?.customId;
+		const customId = interaction.data?.customId;
 		if (customId === undefined) {
 			return;
 		}
@@ -35,38 +29,34 @@ class InteractionRepetitionService extends GlobalService {
 			return;
 		}
 
-		await postponeReply(this.client, interactionRaw);
+		await postponeReply(this.client, interaction);
 
-		const confirmCustomId = createInteractionCollector(this.client, {
-			type: Discord.InteractionTypes.MessageComponent,
-			userId: interactionRaw.user.id,
-			limit: 1,
-			onCollect: async (selection) => {
-				deleteReply(this.client, interactionRaw);
+		const confirmButton = new InteractionCollector({ only: [interaction.user.id], isSingle: true });
+		const cancelButton = new InteractionCollector({ only: [interaction.user.id], isSingle: true });
 
-				const originalInteraction = this.client.unregisterInteraction(BigInt(interactionId));
-				if (originalInteraction === undefined) {
-					return;
-				}
+		confirmButton.onCollect(async (buttonPress) => {
+			deleteReply(this.client, interaction);
 
-				deleteReply(this.client, originalInteraction);
+			const originalInteraction = this.client.unregisterInteraction(BigInt(interactionId));
+			if (originalInteraction === undefined) {
+				return;
+			}
 
-				const interactionSpoofed = InteractionRepetitionService.#spoofInteraction(originalInteraction, {
-					using: selection,
-				});
+			deleteReply(this.client, originalInteraction);
 
-				await this.client.handleInteraction(interactionSpoofed, { show: true });
-			},
+			const interactionSpoofed = InteractionRepetitionService.#spoofInteraction(originalInteraction, {
+				using: buttonPress,
+			});
+
+			await this.client.handleInteraction(interactionSpoofed, { show: true });
 		});
 
-		const cancelCustomId = createInteractionCollector(this.client, {
-			type: Discord.InteractionTypes.MessageComponent,
-			userId: interactionRaw.user.id,
-			limit: 1,
-			onCollect: async (_) => deleteReply(this.client, interactionRaw),
-		});
+		cancelButton.onCollect(async (_) => deleteReply(this.client, interaction));
 
-		const localeData = await getLocaleData(this.client, interactionRaw);
+		this.client.registerInteractionCollector(confirmButton);
+		this.client.registerInteractionCollector(cancelButton);
+
+		const localeData = await getLocaleData(this.client, interaction);
 
 		const locale = localeData.locale;
 
@@ -77,7 +67,7 @@ class InteractionRepetitionService extends GlobalService {
 			no: this.client.localise("interactions.show.sureToShow.no", locale)(),
 		};
 
-		editReply(this.client, interactionRaw, {
+		editReply(this.client, interaction, {
 			embeds: [{ title: strings.title, description: strings.description, color: constants.colors.dullYellow }],
 			components: [
 				{
@@ -85,13 +75,13 @@ class InteractionRepetitionService extends GlobalService {
 					components: [
 						{
 							type: Discord.MessageComponentTypes.Button,
-							customId: confirmCustomId,
+							customId: confirmButton.customId,
 							label: strings.yes,
 							style: Discord.ButtonStyles.Success,
 						},
 						{
 							type: Discord.MessageComponentTypes.Button,
-							customId: cancelCustomId,
+							customId: cancelButton.customId,
 							label: strings.no,
 							style: Discord.ButtonStyles.Danger,
 						},

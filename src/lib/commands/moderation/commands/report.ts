@@ -4,20 +4,12 @@ import { Locale } from "../../../../constants/languages";
 import defaults from "../../../../defaults";
 import { trim } from "../../../../formatting";
 import * as Logos from "../../../../types";
-import { Client } from "../../../client";
+import { Client, InteractionCollector } from "../../../client";
 import { timeStructToMilliseconds } from "../../../database/guild";
 import { Guild } from "../../../database/guild";
 import { Report } from "../../../database/report";
 import { User } from "../../../database/user";
-import {
-	Modal,
-	createInteractionCollector,
-	createModalComposer,
-	deleteReply,
-	editReply,
-	postponeReply,
-	reply,
-} from "../../../interactions";
+import { Modal, createModalComposer, deleteReply, editReply, postponeReply, reply } from "../../../interactions";
 import { verifyIsWithinLimits } from "../../../utils";
 import { CommandTemplate } from "../../command";
 
@@ -191,136 +183,75 @@ async function handleMakeReport(client: Client, interaction: Logos.Interaction):
 	});
 }
 
+// TODO(vxern): This is repeated in several places. Refactor it.
 async function handleSubmittedInvalidReport(
 	client: Client,
 	submission: Discord.Interaction,
 	error: ReportError | undefined,
 	{ locale }: { locale: Locale },
 ): Promise<Discord.Interaction | undefined> {
-	return new Promise((resolve) => {
-		const continueId = createInteractionCollector(client, {
-			type: Discord.InteractionTypes.MessageComponent,
-			onCollect: async (selection) => {
-				deleteReply(client, submission);
-				resolve(selection);
-			},
+	const { promise, resolve } = Promise.withResolvers<Discord.Interaction | undefined>();
+
+	const continueButton = new InteractionCollector({ only: [submission.user.id], isSingle: true });
+	const cancelButton = new InteractionCollector({ only: [submission.user.id] });
+	const returnButton = new InteractionCollector({
+		only: [submission.user.id],
+		isSingle: true,
+		dependsOn: cancelButton,
+	});
+	const leaveButton = new InteractionCollector({
+		only: [submission.user.id],
+		isSingle: true,
+		dependsOn: cancelButton,
+	});
+
+	continueButton.onCollect(async (buttonPress) => {
+		deleteReply(client, submission);
+		resolve(buttonPress);
+	});
+
+	cancelButton.onCollect(async (cancelButtonPress) => {
+		returnButton.onCollect(async (returnButtonPress) => {
+			deleteReply(client, submission);
+			deleteReply(client, cancelButtonPress);
+			resolve(returnButtonPress);
 		});
 
-		const cancelId = createInteractionCollector(client, {
-			type: Discord.InteractionTypes.MessageComponent,
-			onCollect: async (cancelSelection) => {
-				const returnId = createInteractionCollector(client, {
-					type: Discord.InteractionTypes.MessageComponent,
-					onCollect: async (returnSelection) => {
-						deleteReply(client, submission);
-						deleteReply(client, cancelSelection);
-						resolve(returnSelection);
-					},
-				});
-
-				const leaveId = createInteractionCollector(client, {
-					type: Discord.InteractionTypes.MessageComponent,
-					onCollect: async (_) => {
-						deleteReply(client, submission);
-						deleteReply(client, cancelSelection);
-						resolve(undefined);
-					},
-				});
-
-				const strings = {
-					title: client.localise("report.strings.sureToCancel.title", locale)(),
-					description: client.localise("report.strings.sureToCancel.description", locale)(),
-					stay: client.localise("prompts.stay", locale)(),
-					leave: client.localise("prompts.leave", locale)(),
-				};
-
-				reply(client, cancelSelection, {
-					embeds: [
-						{
-							title: strings.title,
-							description: strings.description,
-							color: constants.colors.dullYellow,
-						},
-					],
-					components: [
-						{
-							type: Discord.MessageComponentTypes.ActionRow,
-							components: [
-								{
-									type: Discord.MessageComponentTypes.Button,
-									customId: returnId,
-									label: strings.stay,
-									style: Discord.ButtonStyles.Success,
-								},
-								{
-									type: Discord.MessageComponentTypes.Button,
-									customId: leaveId,
-									label: strings.leave,
-									style: Discord.ButtonStyles.Danger,
-								},
-							],
-						},
-					],
-				});
-			},
+		leaveButton.onCollect(async (_) => {
+			deleteReply(client, submission);
+			deleteReply(client, cancelButtonPress);
+			resolve(undefined);
 		});
 
-		let embed!: Discord.CamelizedDiscordEmbed;
-		switch (error) {
-			case "cannot_report_self": {
-				const strings = {
-					title: client.localise("report.strings.cannotReportSelf.title", locale)(),
-					description: client.localise("report.strings.cannotReportSelf.description", locale)(),
-				};
+		const strings = {
+			title: client.localise("report.strings.sureToCancel.title", locale)(),
+			description: client.localise("report.strings.sureToCancel.description", locale)(),
+			stay: client.localise("prompts.stay", locale)(),
+			leave: client.localise("prompts.leave", locale)(),
+		};
 
-				embed = {
+		reply(client, cancelButtonPress, {
+			embeds: [
+				{
 					title: strings.title,
 					description: strings.description,
 					color: constants.colors.dullYellow,
-				};
-				break;
-			}
-			default: {
-				const strings = {
-					title: client.localise("report.strings.failed.title", locale)(),
-					description: client.localise("report.strings.failed.description", locale)(),
-				};
-
-				editReply(client, submission, {
-					embeds: [
-						{
-							title: strings.title,
-							description: strings.description,
-							color: constants.colors.dullYellow,
-						},
-					],
-				});
-
-				return;
-			}
-		}
-
-		const strings = {
-			continue: client.localise("prompts.continue", locale)(),
-			cancel: client.localise("prompts.cancel", locale)(),
-		};
-
-		editReply(client, submission, {
-			embeds: [embed],
+				},
+			],
 			components: [
 				{
 					type: Discord.MessageComponentTypes.ActionRow,
 					components: [
 						{
 							type: Discord.MessageComponentTypes.Button,
-							customId: continueId,
-							label: strings.continue,
+							customId: returnButton.customId,
+							label: strings.stay,
 							style: Discord.ButtonStyles.Success,
 						},
 						{
 							type: Discord.MessageComponentTypes.Button,
-							customId: cancelId,
-							label: strings.cancel,
+							customId: leaveButton.customId,
+							label: strings.leave,
 							style: Discord.ButtonStyles.Danger,
 						},
 					],
@@ -328,6 +259,76 @@ async function handleSubmittedInvalidReport(
 			],
 		});
 	});
+
+	client.registerInteractionCollector(continueButton);
+	client.registerInteractionCollector(cancelButton);
+	client.registerInteractionCollector(returnButton);
+	client.registerInteractionCollector(leaveButton);
+
+	let embed!: Discord.CamelizedDiscordEmbed;
+	switch (error) {
+		case "cannot_report_self": {
+			const strings = {
+				title: client.localise("report.strings.cannotReportSelf.title", locale)(),
+				description: client.localise("report.strings.cannotReportSelf.description", locale)(),
+			};
+
+			embed = {
+				title: strings.title,
+				description: strings.description,
+				color: constants.colors.dullYellow,
+			};
+			break;
+		}
+		default: {
+			const strings = {
+				title: client.localise("report.strings.failed.title", locale)(),
+				description: client.localise("report.strings.failed.description", locale)(),
+			};
+
+			editReply(client, submission, {
+				embeds: [
+					{
+						title: strings.title,
+						description: strings.description,
+						color: constants.colors.dullYellow,
+					},
+				],
+			});
+
+			return;
+		}
+	}
+
+	const strings = {
+		continue: client.localise("prompts.continue", locale)(),
+		cancel: client.localise("prompts.cancel", locale)(),
+	};
+
+	editReply(client, submission, {
+		embeds: [embed],
+		components: [
+			{
+				type: Discord.MessageComponentTypes.ActionRow,
+				components: [
+					{
+						type: Discord.MessageComponentTypes.Button,
+						customId: continueButton.customId,
+						label: strings.continue,
+						style: Discord.ButtonStyles.Success,
+					},
+					{
+						type: Discord.MessageComponentTypes.Button,
+						customId: cancelButton.customId,
+						label: strings.cancel,
+						style: Discord.ButtonStyles.Danger,
+					},
+				],
+			},
+		],
+	});
+
+	return promise;
 }
 
 function generateReportModal(client: Client, { locale }: { locale: Locale }): Modal<Report["answers"]> {

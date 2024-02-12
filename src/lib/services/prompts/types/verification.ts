@@ -3,14 +3,13 @@ import constants from "../../../../constants/constants";
 import { Locale, getLocalisationLanguageByLocale } from "../../../../constants/languages";
 import { MentionTypes, TimestampFormat, mention, timestamp } from "../../../../formatting";
 import * as Logos from "../../../../types";
-import { Client } from "../../../client";
+import { Client, InteractionCollector } from "../../../client";
 import { openTicket } from "../../../commands/server/commands/ticket/open";
 import { EntryRequest } from "../../../database/entry-request";
 import { User } from "../../../database/user";
 import diagnostics from "../../../diagnostics";
 import {
 	acknowledge,
-	createInteractionCollector,
 	decodeId,
 	deleteReply,
 	editReply,
@@ -47,25 +46,27 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 	async start(): Promise<void> {
 		await super.start();
 
-		createInteractionCollector(this.client, {
-			type: Discord.InteractionTypes.MessageComponent,
+		// TODO(vxern): Dispose when the service is disposed!!!!!!!!!!!!
+		const openInquiryButton = new InteractionCollector({
 			customId: `${constants.components.createInquiry}/${this.guildId}`,
-			doesNotExpire: true,
-			onCollect: async (selection) => {
-				const customId = selection.data?.customId;
-				if (customId === undefined) {
-					return;
-				}
-
-				const [_, compositeId] = decodeId(customId);
-				if (compositeId === undefined) {
-					return;
-				}
-
-				this.handleOpenInquiry(selection, compositeId);
-			},
-			end: this.collectingInquiryInteractions,
+			isPermanent: true,
 		});
+
+		openInquiryButton.onCollect(async (selection) => {
+			const customId = selection.data?.customId;
+			if (customId === undefined) {
+				return;
+			}
+
+			const [_, compositeId] = decodeId(customId);
+			if (compositeId === undefined) {
+				return;
+			}
+
+			this.handleOpenInquiry(selection, compositeId);
+		});
+
+		this.client.registerInteractionCollector(openInquiryButton);
 	}
 
 	async stop(): Promise<void> {
@@ -433,64 +434,60 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 						no: this.client.localise("entry.verification.vote.sureToForce.no", locale)(),
 					};
 
-					const promise = new Promise<null | undefined>((resolve) => {
-						const confirmCustomId = createInteractionCollector(this.client, {
-							type: Discord.InteractionTypes.MessageComponent,
-							userId: interaction.user.id,
-							limit: 1,
-							onCollect: async (_) => {
-								deleteReply(this.client, interaction);
+					const { promise, resolve } = Promise.withResolvers<null | undefined>();
 
-								if (entryRequestDocument.isFinalised) {
-									resolve(undefined);
-									return;
-								}
+					const confirmButton = new InteractionCollector({ only: [interaction.user.id], isSingle: true });
+					const cancelButton = new InteractionCollector({ only: [interaction.user.id], isSingle: true });
 
-								await this.finalise(
-									entryRequestDocument,
-									authorDocument,
-									configuration,
-									[submitter, member, guild],
-									[true, false],
-								);
+					confirmButton.onCollect(async (_) => {
+						deleteReply(this.client, interaction);
 
-								resolve(null);
+						if (entryRequestDocument.isFinalised) {
+							resolve(undefined);
+							return;
+						}
+
+						await this.finalise(
+							entryRequestDocument,
+							authorDocument,
+							configuration,
+							[submitter, member, guild],
+							[true, false],
+						);
+
+						resolve(null);
+					});
+
+					cancelButton.onCollect(async (_) => {
+						deleteReply(this.client, interaction);
+
+						resolve(undefined);
+					});
+
+					this.client.registerInteractionCollector(confirmButton);
+					this.client.registerInteractionCollector(cancelButton);
+
+					reply(this.client, interaction, {
+						embeds: [{ title: strings.title, description: strings.description, color: constants.colors.peach }],
+						components: [
+							{
+								type: Discord.MessageComponentTypes.ActionRow,
+								components: [
+									{
+										type: Discord.MessageComponentTypes.Button,
+										customId: confirmButton.customId,
+										label: strings.yes,
+										style: Discord.ButtonStyles.Success,
+									},
+									{
+										type: Discord.MessageComponentTypes.Button,
+										customId: cancelButton.customId,
+										label: strings.no,
+										style: Discord.ButtonStyles.Danger,
+									},
+								],
 							},
-						});
-
-						const cancelCustomId = createInteractionCollector(this.client, {
-							type: Discord.InteractionTypes.MessageComponent,
-							userId: interaction.user.id,
-							limit: 1,
-							onCollect: async (_) => {
-								deleteReply(this.client, interaction);
-
-								resolve(undefined);
-							},
-						});
-
-						reply(this.client, interaction, {
-							embeds: [{ title: strings.title, description: strings.description, color: constants.colors.peach }],
-							components: [
-								{
-									type: Discord.MessageComponentTypes.ActionRow,
-									components: [
-										{
-											type: Discord.MessageComponentTypes.Button,
-											customId: confirmCustomId,
-											label: strings.yes,
-											style: Discord.ButtonStyles.Success,
-										},
-										{
-											type: Discord.MessageComponentTypes.Button,
-											customId: cancelCustomId,
-											label: strings.no,
-											style: Discord.ButtonStyles.Danger,
-										},
-									],
-								},
-							],
-						});
+						],
 					});
 
 					return promise;
@@ -528,64 +525,60 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 						no: this.client.localise("entry.verification.vote.sureToForce.no", locale)(),
 					};
 
-					const promise = new Promise<null | undefined>((resolve) => {
-						const confirmCustomId = createInteractionCollector(this.client, {
-							type: Discord.InteractionTypes.MessageComponent,
-							userId: interaction.user.id,
-							limit: 1,
-							onCollect: async (_) => {
-								deleteReply(this.client, interaction);
+					const { promise, resolve } = Promise.withResolvers<null | undefined>();
 
-								if (entryRequestDocument.isFinalised) {
-									resolve(undefined);
-									return;
-								}
+					const confirmButton = new InteractionCollector({ only: [interaction.user.id], isSingle: true });
+					const cancelButton = new InteractionCollector({ only: [interaction.user.id], isSingle: true });
 
-								await this.finalise(
-									entryRequestDocument,
-									authorDocument,
-									configuration,
-									[submitter, member, guild],
-									[false, true],
-								);
+					confirmButton.onCollect(async (_) => {
+						deleteReply(this.client, interaction);
 
-								resolve(null);
+						if (entryRequestDocument.isFinalised) {
+							resolve(undefined);
+							return;
+						}
+
+						await this.finalise(
+							entryRequestDocument,
+							authorDocument,
+							configuration,
+							[submitter, member, guild],
+							[false, true],
+						);
+
+						resolve(null);
+					});
+
+					cancelButton.onCollect(async (_) => {
+						deleteReply(this.client, interaction);
+
+						resolve(undefined);
+					});
+
+					this.client.registerInteractionCollector(confirmButton);
+					this.client.registerInteractionCollector(cancelButton);
+
+					reply(this.client, interaction, {
+						embeds: [{ title: strings.title, description: strings.description, color: constants.colors.peach }],
+						components: [
+							{
+								type: Discord.MessageComponentTypes.ActionRow,
+								components: [
+									{
+										type: Discord.MessageComponentTypes.Button,
+										customId: confirmButton.customId,
+										label: strings.yes,
+										style: Discord.ButtonStyles.Success,
+									},
+									{
+										type: Discord.MessageComponentTypes.Button,
+										customId: cancelButton.customId,
+										label: strings.no,
+										style: Discord.ButtonStyles.Danger,
+									},
+								],
 							},
-						});
-
-						const cancelCustomId = createInteractionCollector(this.client, {
-							type: Discord.InteractionTypes.MessageComponent,
-							userId: interaction.user.id,
-							limit: 1,
-							onCollect: async (_) => {
-								deleteReply(this.client, interaction);
-
-								resolve(undefined);
-							},
-						});
-
-						reply(this.client, interaction, {
-							embeds: [{ title: strings.title, description: strings.description, color: constants.colors.peach }],
-							components: [
-								{
-									type: Discord.MessageComponentTypes.ActionRow,
-									components: [
-										{
-											type: Discord.MessageComponentTypes.Button,
-											customId: confirmCustomId,
-											label: strings.yes,
-											style: Discord.ButtonStyles.Success,
-										},
-										{
-											type: Discord.MessageComponentTypes.Button,
-											customId: cancelCustomId,
-											label: strings.no,
-											style: Discord.ButtonStyles.Danger,
-										},
-									],
-								},
-							],
-						});
+						],
 					});
 
 					return promise;

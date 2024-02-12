@@ -6,18 +6,9 @@ import licences from "../../../../constants/licences";
 import defaults from "../../../../defaults";
 import { capitalise } from "../../../../formatting";
 import * as Logos from "../../../../types";
-import { Client } from "../../../client";
+import { Client, InteractionCollector } from "../../../client";
 import { User } from "../../../database/user";
-import {
-	acknowledge,
-	createInteractionCollector,
-	decodeId,
-	deleteReply,
-	editReply,
-	encodeId,
-	postponeReply,
-	reply,
-} from "../../../interactions";
+import { acknowledge, decodeId, deleteReply, editReply, encodeId, postponeReply, reply } from "../../../interactions";
 import { random } from "../../../utils";
 import { CommandTemplate } from "../../command";
 
@@ -151,92 +142,86 @@ async function handleStartGame(client: Client, interaction: Logos.Interaction): 
 
 	await postponeReply(client, interaction);
 
-	const customId = createInteractionCollector(client, {
-		type: Discord.InteractionTypes.MessageComponent,
-		userId: interaction.user.id,
-		onCollect: async (selection) => {
-			acknowledge(client, selection);
+	const guessButton = new InteractionCollector({ only: [interaction.user.id], isSingle: true });
+	const skipButton = new InteractionCollector({ only: [interaction.user.id], isSingle: true });
 
-			const selectionCustomId = selection.data?.customId;
-			if (selectionCustomId === undefined) {
-				return;
-			}
+	guessButton.onCollect(async (buttonPress) => {
+		acknowledge(client, buttonPress);
 
-			const [_, id] = decodeId<WordButtonID>(selectionCustomId);
-			if (id === undefined) {
-				return;
-			}
+		const selectionCustomId = buttonPress.data?.customId;
+		if (selectionCustomId === undefined) {
+			return;
+		}
 
-			const pick = data.sentenceSelection.allPicks.find((pick) => pick[0] === id);
-			const isCorrect = pick === data.sentenceSelection.correctPick;
+		const [_, id] = decodeId<WordButtonID>(selectionCustomId);
+		if (id === undefined) {
+			return;
+		}
 
-			const session = client.database.openSession();
+		const pick = data.sentenceSelection.allPicks.find((pick) => pick[0] === id);
+		const isCorrect = pick === data.sentenceSelection.correctPick;
 
-			const guildStatsDocument = client.documents.guildStats.get(guildId.toString());
-			const userDocument = client.documents.users.get(interaction.user.id.toString());
-			if (guildStatsDocument === undefined || userDocument === undefined) {
-				return;
-			}
+		const session = client.database.openSession();
 
-			const pickMissingWord = {
-				guildStats: guildStatsDocument?.stats?.[learningLocale]?.pickMissingWord,
-				user: userDocument?.scores?.[learningLocale]?.pickMissingWord,
-			};
-			if (pickMissingWord.guildStats === undefined || pickMissingWord.user === undefined) {
-				return;
-			}
+		const guildStatsDocument = client.documents.guildStats.get(guildId.toString());
+		const userDocument = client.documents.users.get(interaction.user.id.toString());
+		if (guildStatsDocument === undefined || userDocument === undefined) {
+			return;
+		}
 
-			if (isCorrect) {
-				pickMissingWord.guildStats.totalScore++;
-				pickMissingWord.user.totalScore++;
-			}
+		const pickMissingWord = {
+			guildStats: guildStatsDocument?.stats?.[learningLocale]?.pickMissingWord,
+			user: userDocument?.scores?.[learningLocale]?.pickMissingWord,
+		};
+		if (pickMissingWord.guildStats === undefined || pickMissingWord.user === undefined) {
+			return;
+		}
 
-			await session.set(guildStatsDocument);
-			await session.set(userDocument);
-			await session.saveChanges();
+		if (isCorrect) {
+			pickMissingWord.guildStats.totalScore++;
+			pickMissingWord.user.totalScore++;
+		}
 
-			session.dispose();
+		await session.set(guildStatsDocument);
+		await session.set(userDocument);
+		await session.saveChanges();
 
-			if (isCorrect) {
-				data.sessionScore++;
-				data.embedColour = constants.colors.lightGreen;
-				data.sentenceSelection = await getSentenceSelection(client, learningLocale);
+		session.dispose();
 
-				editReply(
-					client,
-					interaction,
-					await getGameView(client, data, userDocument, "hide", { locale, learningLocale }),
-				);
-			} else {
-				data.embedColour = constants.colors.red;
-
-				editReply(
-					client,
-					interaction,
-					await getGameView(client, data, userDocument, "reveal", { locale, learningLocale }),
-				);
-			}
-		},
-	});
-
-	const skipButtonCustomId = createInteractionCollector(client, {
-		type: Discord.InteractionTypes.MessageComponent,
-		userId: interaction.user.id,
-		onCollect: async (selection) => {
-			acknowledge(client, selection);
-
-			data.embedColour = constants.colors.blue;
+		if (isCorrect) {
+			data.sessionScore++;
+			data.embedColour = constants.colors.lightGreen;
 			data.sentenceSelection = await getSentenceSelection(client, learningLocale);
 
 			editReply(client, interaction, await getGameView(client, data, userDocument, "hide", { locale, learningLocale }));
-		},
+		} else {
+			data.embedColour = constants.colors.red;
+
+			editReply(
+				client,
+				interaction,
+				await getGameView(client, data, userDocument, "reveal", { locale, learningLocale }),
+			);
+		}
 	});
+
+	skipButton.onCollect(async (buttonPress) => {
+		acknowledge(client, buttonPress);
+
+		data.embedColour = constants.colors.blue;
+		data.sentenceSelection = await getSentenceSelection(client, learningLocale);
+
+		editReply(client, interaction, await getGameView(client, data, userDocument, "hide", { locale, learningLocale }));
+	});
+
+	client.registerInteractionCollector(guessButton);
+	client.registerInteractionCollector(skipButton);
 
 	const data: GameData = {
 		sentenceSelection: await getSentenceSelection(client, learningLocale),
 		embedColour: constants.colors.blue,
-		customId,
-		skipButtonCustomId,
+		customId: guessButton.customId,
+		skipButtonCustomId: skipButton.customId,
 		sessionScore: 0,
 	};
 

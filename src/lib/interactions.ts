@@ -1,5 +1,4 @@
 import * as Discord from "@discordeno/bot";
-import { DiscordSnowflake as Snowflake } from "@sapphire/snowflake";
 import constants from "../constants/constants";
 import {
 	FeatureLanguage,
@@ -14,7 +13,7 @@ import symbols from "../constants/types/symbols";
 import defaults from "../defaults";
 import * as Logos from "../types";
 import { InteractionLocaleData } from "../types";
-import { Client } from "./client";
+import { Client, InteractionCollector } from "./client";
 import { Guild } from "./database/guild";
 import { User } from "./database/user";
 import { InteractionRepetitionButtonID } from "./services/interaction-repetition/interaction-repetition";
@@ -23,64 +22,6 @@ type AutocompleteInteraction = Discord.Interaction & { type: Discord.Interaction
 
 function isAutocomplete(interaction: Discord.Interaction | Logos.Interaction): interaction is AutocompleteInteraction {
 	return interaction.type === Discord.InteractionTypes.ApplicationCommandAutocomplete;
-}
-
-/** Settings for interaction collection. */
-interface InteractionCollectorSettings {
-	/** The type of interaction to listen for. */
-	type: Discord.InteractionTypes;
-
-	/**
-	 * The accepted respondent to the collector. If unset, any user will be able
-	 * to respond.
-	 */
-	userId?: bigint;
-
-	/** The ID of the interaction to listen for. */
-	customId?: string;
-
-	/** Whether this collector is to last forever or not. */
-	doesNotExpire?: boolean;
-
-	/** How many interactions to collect before de-initialising. */
-	limit?: number;
-
-	onCollect?: (...args: Parameters<Discord.EventHandlers["interactionCreate"]>) => void;
-	onEnd?: () => void;
-	end?: Promise<void>;
-}
-
-/**
- * Taking a {@link Client} and {@link InteractionCollectorSettings}, creates an
- * interaction collector.
- */
-function createInteractionCollector(client: Client, settings: InteractionCollectorSettings): string {
-	const customId = settings.customId ?? Snowflake.generate().toString();
-
-	client.listen("interactionCreate", {
-		filter: (interaction) => compileChecks(interaction, settings, customId).every((condition) => condition),
-		limit: settings.limit,
-		removeAfter: settings.doesNotExpire ? undefined : constants.INTERACTION_TOKEN_EXPIRY,
-		onCollect: settings.onCollect ?? (() => {}),
-		onEnd: settings.onEnd ?? (() => {}),
-		end: settings.end,
-	});
-
-	return customId;
-}
-
-function compileChecks(
-	interaction: Discord.Interaction,
-	settings: InteractionCollectorSettings,
-	customId: string,
-): boolean[] {
-	return [
-		interaction.type === settings.type,
-		interaction.data !== undefined &&
-			interaction.data.customId !== undefined &&
-			decodeId(interaction.data.customId)[0] === decodeId(customId)[0],
-		settings.userId === undefined ? true : interaction.user.id === settings.userId,
-	];
 }
 
 type CustomTypeIndicators = Record<string, "number" | "boolean">;
@@ -159,6 +100,8 @@ async function paginate<T>(
 	},
 	{ locale }: { locale: Locale },
 ): Promise<() => Promise<void>> {
+	const buttonPresses = new InteractionCollector({ isPermanent: true });
+
 	const data: PaginationData<T> = { elements: getElements(), view, pageIndex: 0 };
 
 	const showButton = getShowButton(client, interaction, { locale });
@@ -167,7 +110,7 @@ async function paginate<T>(
 	const isLast = () => data.pageIndex === data.elements.length - 1;
 
 	const getView = (): Discord.InteractionCallbackData => {
-		const buttons = generateButtons(customId, isFirst(), isLast());
+		const buttons = generateButtons(buttonPresses.customId, isFirst(), isLast());
 
 		if (showable && !show) {
 			buttons.push({ type: Discord.MessageComponentTypes.ActionRow, components: [showButton] });
@@ -198,22 +141,20 @@ async function paginate<T>(
 		editReply(client, interaction, getView());
 	};
 
-	const customId = createInteractionCollector(client, {
-		type: Discord.InteractionTypes.MessageComponent,
-		doesNotExpire: true,
-		onCollect: async (selection) => {
-			acknowledge(client, selection);
+	buttonPresses.onCollect(async (buttonPress) => {
+		acknowledge(client, buttonPress);
 
-			const customId = selection.data?.customId;
-			if (customId === undefined) {
-				return;
-			}
+		const customId = buttonPress.data?.customId;
+		if (customId === undefined) {
+			return;
+		}
 
-			const [_, action] = decodeId<ControlButtonID>(customId);
+		const [_, action] = decodeId<ControlButtonID>(customId);
 
-			await editView(action);
-		},
+		await editView(action);
 	});
+
+	client.registerInteractionCollector(buttonPresses);
 
 	reply(client, interaction, getView(), { visible: show });
 
@@ -324,21 +265,24 @@ async function createModalComposer<
 	let isSubmitting = true;
 	while (isSubmitting) {
 		const [submission, result] = await new Promise<[Discord.Interaction, boolean | string]>((resolve) => {
-			const modalId = createInteractionCollector(client, {
+			const modalSubmits = new InteractionCollector({
 				type: Discord.InteractionTypes.ModalSubmit,
-				userId: interaction.user.id,
-				limit: 1,
-				onCollect: async (submission) => {
-					content = parseComposerContent(submission);
-					if (content === undefined) {
-						return resolve([submission, false]);
-					}
-
-					const result = await onSubmit(submission, content);
-
-					resolve([submission, result]);
-				},
+				only: [interaction.user.id],
+				isSingle: true,
 			});
+
+			modalSubmits.onCollect(async (modalSubmit) => {
+				content = parseComposerContent(modalSubmit);
+				if (content === undefined) {
+					return resolve([modalSubmit, false]);
+				}
+
+				const result = await onSubmit(modalSubmit, content);
+
+				resolve([modalSubmit, result]);
+			});
+
+			client.registerInteractionCollector(modalSubmits);
 
 			if (content !== undefined) {
 				const answers = Object.values(content) as (string | undefined)[];
@@ -354,7 +298,7 @@ async function createModalComposer<
 
 			displayModal(client, anchor, {
 				title: modal.title,
-				customId: modalId,
+				customId: modalSubmits.customId,
 				components: fields,
 			});
 		});
@@ -599,10 +543,12 @@ function parseVerboseTimeExpressionPhrase(
 
 type ComponentIDMetadata = [arg: string, ...args: string[]];
 
+// TODO(vxern): Improve.
 function encodeId<T extends ComponentIDMetadata>(customId: string, args: T): string {
 	return [customId, ...args].join(constants.symbols.meta.idSeparator);
 }
 
+// TODO(vxern): Improve.
 function decodeId<T extends ComponentIDMetadata, R = [string, ...T]>(customId: string): R {
 	return customId.split(constants.symbols.meta.idSeparator) as R;
 }
@@ -873,7 +819,6 @@ function getCommandName(interaction: Discord.Interaction | Logos.Interaction): s
 
 export {
 	acknowledge,
-	createInteractionCollector,
 	createModalComposer,
 	decodeId,
 	deleteReply,
@@ -893,4 +838,4 @@ export {
 	getFeatureLanguage,
 	getCommandName,
 };
-export type { ControlButtonID, InteractionCollectorSettings, Modal };
+export type { ControlButtonID, Modal };

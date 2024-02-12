@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { DiscordSnowflake as Snowflake } from "@sapphire/snowflake";
 import * as Discord from "@discordeno/bot";
 import FancyLog from "fancy-log";
 import { Redis } from "ioredis";
@@ -1259,39 +1260,160 @@ class InteractionStore {
 	}
 }
 
-// TODO(vxern): Turn this more into an OOP thingie with `onCollect()` and `onEnd()` being overriden.
+type CollectEvent<Event extends keyof Discord.EventHandlers = keyof Discord.EventHandlers> = (
+	...args: Parameters<Discord.EventHandlers[Event]>
+) => unknown;
+type DoneEvent = () => unknown;
 class Collector<Event extends keyof Discord.EventHandlers> {
-	readonly limit?: number;
-	readonly removeAfter?: number;
+	readonly #isSingle: boolean;
+	readonly #removeAfter?: number;
 
-	readonly filter?: (...args: Parameters<Discord.EventHandlers[Event]>) => boolean;
-	// TODO(vxern): Make readonly.
-	onCollect: (...args: Parameters<Discord.EventHandlers[Event]>) => void;
-	// TODO(vxern): Make readonly.
-	onEnd?: () => void;
-	readonly end?: Promise<void>;
+	readonly #dependsOn?: Collector<any>;
+
+	#onCollect?: CollectEvent<Event>;
+	#onDone?: DoneEvent;
+
+	readonly done: Promise<void>;
+	readonly #_resolveDone: () => void;
+
+	#isClosed = false;
+
+	get close(): DoneEvent {
+		return this.dispatchDone.bind(this);
+	}
 
 	constructor({
-		limit,
+		isSingle,
 		removeAfter,
-		filter,
-		onCollect,
-		onEnd,
-		end,
+		dependsOn,
 	}: {
-		limit?: number;
+		isSingle?: boolean;
 		removeAfter?: number;
-		filter: (...args: Parameters<Discord.EventHandlers[Event]>) => boolean;
-		onCollect: (...args: Parameters<Discord.EventHandlers[Event]>) => void;
-		onEnd: () => void;
-		end?: Promise<void>;
-	}) {
-		this.limit = limit;
-		this.removeAfter = removeAfter;
-		this.filter = filter;
-		this.onCollect = onCollect;
-		this.onEnd = onEnd;
-		this.end = end;
+		dependsOn?: Collector<any>;
+	} = {}) {
+		this.#isSingle = isSingle ?? false;
+		this.#removeAfter = removeAfter;
+		this.#dependsOn = dependsOn;
+
+		const done = Promise.withResolvers<void>();
+		this.done = done.promise;
+		this.#_resolveDone = done.resolve;
+	}
+
+	initialise(): void {
+		if (this.#removeAfter !== undefined) {
+			setTimeout(() => this.close());
+		}
+
+		if (this.#dependsOn !== undefined) {
+			this.#dependsOn.done.then(() => this.close());
+		}
+	}
+
+	filter(..._: Parameters<Discord.EventHandlers[Event]>): boolean {
+		return true;
+	}
+
+	dispatchCollect(...args: Parameters<Discord.EventHandlers[Event]>): void {
+		if (this.#isClosed) {
+			return;
+		}
+
+		this.#onCollect?.(...args);
+
+		if (this.#isSingle) {
+			this.close();
+			return;
+		}
+	}
+
+	dispatchDone(): void {
+		if (this.#isClosed) {
+			return;
+		}
+
+		const dispatchDone = this.#onDone;
+
+		this.#isClosed = true;
+		this.#onCollect = undefined;
+		this.#onDone = undefined;
+
+		dispatchDone?.();
+		this.#_resolveDone();
+	}
+
+	onCollect(callback: CollectEvent<Event>): void {
+		this.#onCollect = callback;
+	}
+
+	onDone(callback: DoneEvent): void {
+		if (this.#onDone !== undefined) {
+			return;
+		}
+
+		this.#onDone = callback;
+	}
+}
+
+class InteractionCollector extends Collector<"interactionCreate"> {
+	readonly type: Discord.InteractionTypes;
+	readonly customId: string;
+	readonly only: Set<bigint>;
+
+	readonly #_baseId: string;
+	readonly #_acceptAnyUser: boolean;
+
+	constructor({
+		type,
+		customId,
+		only,
+		dependsOn,
+		isSingle,
+		isPermanent,
+	}: {
+		type?: Discord.InteractionTypes;
+		customId?: string;
+		only?: bigint[];
+		dependsOn?: Collector<any>;
+		isSingle?: boolean;
+		isPermanent?: boolean;
+	} = {}) {
+		super({ isSingle, removeAfter: !isPermanent ? constants.INTERACTION_TOKEN_EXPIRY : undefined, dependsOn });
+
+		this.type = type ?? Discord.InteractionTypes.MessageComponent;
+		this.customId = customId ?? Snowflake.generate().toString();
+		this.only = only !== undefined ? new Set(only) : new Set();
+		this.#_baseId = decodeId(this.customId)[0];
+		this.#_acceptAnyUser = this.only.values.length === 0;
+	}
+
+	filter(interaction: Discord.Interaction): boolean {
+		if (interaction.type !== this.type) {
+			return false;
+		}
+
+		if (!this.only.has(interaction.user.id) && !this.#_acceptAnyUser) {
+			return false;
+		}
+
+		if (interaction.data === undefined) {
+			return false;
+		}
+
+		if (interaction.data.customId === undefined) {
+			return false;
+		}
+
+		const data = decodeId(interaction.data.customId);
+		if (data[0] !== this.#_baseId) {
+			return false;
+		}
+
+		return true;
+	}
+
+	onCollect(callback: (interaction: Discord.Interaction) => Promise<void>): void {
+		super.onCollect(callback);
 	}
 }
 
@@ -1299,11 +1421,11 @@ type Event = keyof Discord.EventHandlers;
 class EventStore {
 	readonly #bot: Discord.Bot;
 
-	readonly collectors: Map<Event, Set<Collector<Event>>>;
+	readonly #collectors: Map<Event, Set<Collector<Event>>>;
 
 	constructor({ bot }: { bot: Discord.Bot }) {
 		this.#bot = bot;
-		this.collectors = new Map();
+		this.#collectors = new Map();
 	}
 
 	// TODO(vxern): This should probably be better done by just getting rid of wrapping callbacks and just executing them iteratively.
@@ -1328,56 +1450,55 @@ class EventStore {
 		) as Handler;
 	}
 
-	// TODO(vxern): I don't like how this function looks.
-	registerCollector<Event extends keyof Discord.EventHandlers>(event: Event, collector: Collector<Event>): void {
-		const onEnd = collector.onEnd;
-		collector.onEnd = () => {
-			collectors?.delete(collector);
-			onEnd?.();
-		};
+	#startCollectingEvents<Event extends keyof Discord.EventHandlers>(event: Event): void {
+		const collectors = new Set<Collector<Event>>();
 
-		collector.end?.then(() => collector.onEnd?.());
+		this.#collectors.set(event, collectors);
 
-		if (collector.limit !== undefined) {
-			let emitCount = 0;
-			const onCollect = collector.onCollect;
-			collector.onCollect = (...args) => {
-				emitCount++;
-
-				if (emitCount === collector.limit) {
-					collector.onEnd?.();
+		this.#extendEventHandler(event, { prepend: true }, (...args) => {
+			for (const collector of collectors) {
+				if (collector.filter !== undefined && !collector.filter(...args)) {
+					continue;
 				}
 
-				onCollect(...args);
-			};
-		}
+				collector.dispatchCollect?.(...args);
+			}
+		});
+	}
 
-		const { removeAfter } = collector;
-		if (removeAfter !== undefined) {
-			setTimeout(collector.onEnd, removeAfter);
-		}
-
-		if (!this.collectors.has(event)) {
-			const collectors: Set<Collector<keyof Discord.EventHandlers>> = new Set();
-			this.collectors.set(event, collectors);
-
-			this.#extendEventHandler(event, { prepend: true }, (...args) => {
-				for (const collector of collectors) {
-					if (collector.filter !== undefined && !collector.filter(...args)) {
-						continue;
-					}
-
-					collector.onCollect(...args);
-				}
-			});
-		}
-
-		const collectors = this.collectors.get(event);
+	#registerCollector(event: Event, collector: Collector<Event>): void {
+		const collectors = this.#collectors.get(event);
 		if (collectors === undefined) {
-			return;
+			throw `StateError: Collectors for event "${event}" unexpectedly missing.`;
 		}
 
 		collectors.add(collector);
+	}
+
+	#unregisterCollector(event: Event, collector: Collector<Event>): void {
+		const collectors = this.#collectors.get(event);
+		if (collectors === undefined) {
+			throw `StateError: Collectors for event "${event}" unexpectedly missing.`;
+		}
+
+		collectors.delete(collector);
+	}
+
+	async registerCollector<Event extends keyof Discord.EventHandlers>(
+		event: Event,
+		collector: Collector<Event>,
+	): Promise<void> {
+		if (!this.#collectors.has(event)) {
+			this.#startCollectingEvents(event);
+		}
+
+		collector.initialise();
+
+		this.#registerCollector(event, collector);
+
+		await collector.done;
+
+		this.#unregisterCollector(event, collector);
 	}
 }
 
@@ -1840,6 +1961,11 @@ class Client {
 	readonly #events: EventStore;
 	readonly #services: ServiceStore;
 
+	readonly #_interactionCreateCollector: Collector<"interactionCreate">;
+	readonly #_channelDeleteCollector: Collector<"channelDelete">;
+	readonly #_guildCreateCollector: Collector<"guildCreate">;
+	readonly #_guildDeleteCollector: Collector<"guildDelete">;
+
 	static #client?: Client;
 
 	get bot(): Discord.Bot {
@@ -1884,8 +2010,12 @@ class Client {
 		return this.#interactions.unregisterInteraction.bind(this.#interactions);
 	}
 
-	get listen(): EventStore["registerCollector"] {
+	get registerCollector(): EventStore["registerCollector"] {
 		return this.#events.registerCollector.bind(this.#events);
+	}
+
+	get registerInteractionCollector(): (collector: InteractionCollector) => void {
+		return (collector) => this.#events.registerCollector("interactionCreate", collector);
 	}
 
 	get lavalinkService(): LavalinkService {
@@ -1961,6 +2091,11 @@ class Client {
 		this.#interactions = new InteractionStore();
 		this.#events = new EventStore({ bot });
 		this.#services = new ServiceStore();
+
+		this.#_interactionCreateCollector = new Collector<"interactionCreate">();
+		this.#_channelDeleteCollector = new Collector<"channelDelete">();
+		this.#_guildCreateCollector = new Collector<"guildCreate">();
+		this.#_guildDeleteCollector = new Collector<"guildDelete">();
 	}
 
 	static async create({
@@ -2022,31 +2157,32 @@ class Client {
 		bot.events = client.#services.buildEventHandlers();
 		bot.transformers = client.discord.buildTransformers();
 
-		client.listen("interactionCreate", {
-			onCollect: (interaction) => client.handleInteraction(interaction),
-		});
-
-		client.listen("channelDelete", {
-			onCollect: (channel) => {
-				client.discord.cache.channels.delete(channel.id);
-
-				if (channel.guildId !== undefined) {
-					client.discord.cache.guilds.get(channel.guildId)?.channels.delete(channel.id);
-				}
-			},
-		});
-
-		client.listen("guildCreate", {
-			onCollect: (guild) => client.#setupGuild(guild),
-		});
-
-		client.listen("guildDelete", {
-			onCollect: (id, _) => client.#teardownGuild(id),
-		});
+		client.#setupListeners();
 
 		await bot.start();
 
 		return client;
+	}
+
+	#setupListeners() {
+		this.#_interactionCreateCollector.onCollect((interaction) => this.handleInteraction(interaction));
+
+		this.#_channelDeleteCollector.onCollect((channel) => {
+			this.discord.cache.channels.delete(channel.id);
+
+			if (channel.guildId !== undefined) {
+				this.discord.cache.guilds.get(channel.guildId)?.channels.delete(channel.id);
+			}
+		});
+
+		this.#_guildCreateCollector.onCollect((guild) => this.#setupGuild(guild));
+
+		this.#_guildDeleteCollector.onCollect((guildId, _) => this.#teardownGuild(guildId));
+
+		this.registerCollector("interactionCreate", this.#_interactionCreateCollector);
+		this.registerCollector("channelDelete", this.#_channelDeleteCollector);
+		this.registerCollector("guildCreate", this.#_guildCreateCollector);
+		this.registerCollector("guildDelete", this.#_guildDeleteCollector);
 	}
 
 	async #setupGuild(
@@ -2440,4 +2576,4 @@ function isValidIdentifier(identifier: string): boolean {
 	);
 }
 
-export { Client, Collector, isValidIdentifier, isValidSnowflake, ServiceStore };
+export { Client, Collector, InteractionCollector, isValidIdentifier, isValidSnowflake, ServiceStore };

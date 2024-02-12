@@ -5,17 +5,10 @@ import time from "../../../../constants/time";
 import defaults from "../../../../defaults";
 import { MentionTypes, mention, timestamp, trim } from "../../../../formatting";
 import * as Logos from "../../../../types";
-import { Client, isValidSnowflake } from "../../../client";
+import { Client, InteractionCollector, isValidSnowflake } from "../../../client";
 import { Guild } from "../../../database/guild";
 import diagnostics from "../../../diagnostics";
-import {
-	acknowledge,
-	createInteractionCollector,
-	deleteReply,
-	editReply,
-	parseArguments,
-	postponeReply,
-} from "../../../interactions";
+import { acknowledge, deleteReply, editReply, parseArguments, postponeReply } from "../../../interactions";
 import { chunk, snowflakeToTimestamp } from "../../../utils";
 import { CommandTemplate } from "../../command";
 import { user } from "../../parameters";
@@ -350,109 +343,107 @@ async function handlePurgeMessages(client: Client, interaction: Logos.Interactio
 		return;
 	}
 
-	let isShouldContinue = false;
+	let shouldContinue = false;
 
 	if (messages.length >= defaults.MAX_DELETABLE_MESSAGES) {
-		isShouldContinue = await new Promise<boolean>((resolve) => {
-			const continueId = createInteractionCollector(client, {
-				type: Discord.InteractionTypes.MessageComponent,
-				onCollect: async (selection) => {
-					acknowledge(client, selection);
-					resolve(true);
-				},
-			});
+		const { promise, resolve } = Promise.withResolvers<boolean>();
 
-			const cancelId = createInteractionCollector(client, {
-				type: Discord.InteractionTypes.MessageComponent,
-				onCollect: async (selection) => {
-					acknowledge(client, selection);
-					resolve(false);
-				},
-			});
+		const continueButton = new InteractionCollector({ only: [interaction.user.id], isSingle: true });
+		const cancelButton = new InteractionCollector({ only: [interaction.user.id], isSingle: true });
 
-			const strings = {
-				indexed: {
-					title: client.localise("purge.strings.indexed.title", locale)(),
-					description: {
-						tooMany: client.localise(
-							"purge.strings.indexed.description.tooMany",
-							locale,
-						)({
-							messages: client.pluralise(
-								"purge.strings.indexed.description.tooMany.messages",
-								language,
-								messages.length,
-							),
-							maximum_deletable: defaults.MAX_DELETABLE_MESSAGES,
-						}),
-						limited: client.localise(
-							"purge.strings.indexed.description.limited",
-							locale,
-						)({
-							messages: client.pluralise(
-								"purge.strings.indexed.description.limited.messages",
-								language,
-								defaults.MAX_DELETABLE_MESSAGES,
-							),
-						}),
-					},
-				},
-				continue: {
-					title: client.localise("purge.strings.continue.title", locale)(),
-					description: client.localise(
-						"purge.strings.continue.description",
+		continueButton.onCollect(async (buttonPress) => {
+			acknowledge(client, buttonPress);
+			resolve(true);
+		});
+
+		cancelButton.onCollect(async (buttonPress) => {
+			acknowledge(client, buttonPress);
+			resolve(false);
+		});
+
+		client.registerInteractionCollector(continueButton);
+		client.registerInteractionCollector(cancelButton);
+
+		const strings = {
+			indexed: {
+				title: client.localise("purge.strings.indexed.title", locale)(),
+				description: {
+					tooMany: client.localise(
+						"purge.strings.indexed.description.tooMany",
+						locale,
+					)({
+						messages: client.pluralise("purge.strings.indexed.description.tooMany.messages", language, messages.length),
+						maximum_deletable: defaults.MAX_DELETABLE_MESSAGES,
+					}),
+					limited: client.localise(
+						"purge.strings.indexed.description.limited",
 						locale,
 					)({
 						messages: client.pluralise(
-							"purge.strings.continue.description.messages",
+							"purge.strings.indexed.description.limited.messages",
 							language,
 							defaults.MAX_DELETABLE_MESSAGES,
 						),
-						allMessages: client.pluralise("purge.strings.continue.description.allMessages", language, messages.length),
-						channel_mention: channelMention,
 					}),
 				},
-				yes: client.localise("purge.strings.yes", locale)(),
-				no: client.localise("purge.strings.no", locale)(),
-			};
+			},
+			continue: {
+				title: client.localise("purge.strings.continue.title", locale)(),
+				description: client.localise(
+					"purge.strings.continue.description",
+					locale,
+				)({
+					messages: client.pluralise(
+						"purge.strings.continue.description.messages",
+						language,
+						defaults.MAX_DELETABLE_MESSAGES,
+					),
+					allMessages: client.pluralise("purge.strings.continue.description.allMessages", language, messages.length),
+					channel_mention: channelMention,
+				}),
+			},
+			yes: client.localise("purge.strings.yes", locale)(),
+			no: client.localise("purge.strings.no", locale)(),
+		};
 
-			editReply(client, interaction, {
-				embeds: [
-					{
-						title: strings.indexed.title,
-						description: `${strings.indexed.description.tooMany}\n\n${strings.indexed.description.limited}`,
-						fields: getMessageFields(),
-						color: constants.colors.yellow,
-					},
-					{
-						title: strings.continue.title,
-						description: strings.continue.description,
-						color: constants.colors.husky,
-					},
-				],
-				components: [
-					{
-						type: Discord.MessageComponentTypes.ActionRow,
-						components: [
-							{
-								type: Discord.MessageComponentTypes.Button,
-								customId: continueId,
-								label: strings.yes,
-								style: Discord.ButtonStyles.Success,
-							},
-							{
-								type: Discord.MessageComponentTypes.Button,
-								customId: cancelId,
-								label: strings.no,
-								style: Discord.ButtonStyles.Danger,
-							},
-						],
-					},
-				],
-			});
+		editReply(client, interaction, {
+			embeds: [
+				{
+					title: strings.indexed.title,
+					description: `${strings.indexed.description.tooMany}\n\n${strings.indexed.description.limited}`,
+					fields: getMessageFields(),
+					color: constants.colors.yellow,
+				},
+				{
+					title: strings.continue.title,
+					description: strings.continue.description,
+					color: constants.colors.husky,
+				},
+			],
+			components: [
+				{
+					type: Discord.MessageComponentTypes.ActionRow,
+					components: [
+						{
+							type: Discord.MessageComponentTypes.Button,
+							customId: continueButton.customId,
+							label: strings.yes,
+							style: Discord.ButtonStyles.Success,
+						},
+						{
+							type: Discord.MessageComponentTypes.Button,
+							customId: cancelButton.customId,
+							label: strings.no,
+							style: Discord.ButtonStyles.Danger,
+						},
+					],
+				},
+			],
 		});
 
-		if (!isShouldContinue) {
+		// TODO(vxern): This is currently unsafe because it will hang indefinitely if the user never presses a button.
+		shouldContinue = await promise;
+		if (!shouldContinue) {
 			deleteReply(client, interaction);
 			return;
 		}
@@ -460,90 +451,91 @@ async function handlePurgeMessages(client: Client, interaction: Logos.Interactio
 		messages = messages.slice(0, defaults.MAX_DELETABLE_MESSAGES);
 	}
 
-	const isShouldPurge =
-		isShouldContinue ||
-		(await new Promise<boolean>((resolve) => {
-			const continueId = createInteractionCollector(client, {
-				type: Discord.InteractionTypes.MessageComponent,
-				onCollect: async (selection) => {
-					acknowledge(client, selection);
-					resolve(true);
-				},
-			});
+	if (!shouldContinue) {
+		const { promise, resolve } = Promise.withResolvers<boolean>();
 
-			const cancelId = createInteractionCollector(client, {
-				type: Discord.InteractionTypes.MessageComponent,
-				onCollect: async (selection) => {
-					acknowledge(client, selection);
-					resolve(false);
-				},
-			});
+		const continueButton = new InteractionCollector({ only: [interaction.user.id], isSingle: true });
+		const cancelButton = new InteractionCollector({ only: [interaction.user.id], isSingle: true });
 
-			const strings = {
-				indexed: {
-					title: client.localise("purge.strings.indexed.title", locale)(),
-					description: {
-						some: client.localise(
-							"purge.strings.indexed.description.some",
-							locale,
-						)({
-							messages: client.pluralise("purge.strings.indexed.description.some.messages", language, messages.length),
-						}),
-					},
-				},
-				sureToPurge: {
-					title: client.localise("purge.strings.sureToPurge.title", locale)(),
-					description: client.localise(
-						"purge.strings.sureToPurge.description",
+		continueButton.onCollect(async (buttonPress) => {
+			acknowledge(client, buttonPress);
+			resolve(true);
+		});
+
+		cancelButton.onCollect(async (buttonPress) => {
+			acknowledge(client, buttonPress);
+			resolve(false);
+		});
+
+		client.registerInteractionCollector(continueButton);
+		client.registerInteractionCollector(cancelButton);
+
+		const strings = {
+			indexed: {
+				title: client.localise("purge.strings.indexed.title", locale)(),
+				description: {
+					some: client.localise(
+						"purge.strings.indexed.description.some",
 						locale,
 					)({
-						messages: client.pluralise("purge.strings.sureToPurge.description.messages", language, messages.length),
-						channel_mention: channelMention,
+						messages: client.pluralise("purge.strings.indexed.description.some.messages", language, messages.length),
 					}),
 				},
-				yes: client.localise("purge.strings.yes", locale)(),
-				no: client.localise("purge.strings.no", locale)(),
-			};
+			},
+			sureToPurge: {
+				title: client.localise("purge.strings.sureToPurge.title", locale)(),
+				description: client.localise(
+					"purge.strings.sureToPurge.description",
+					locale,
+				)({
+					messages: client.pluralise("purge.strings.sureToPurge.description.messages", language, messages.length),
+					channel_mention: channelMention,
+				}),
+			},
+			yes: client.localise("purge.strings.yes", locale)(),
+			no: client.localise("purge.strings.no", locale)(),
+		};
 
-			editReply(client, interaction, {
-				embeds: [
-					{
-						title: strings.indexed.title,
-						description: strings.indexed.description.some,
-						fields: getMessageFields(),
-						color: constants.colors.blue,
-					},
-					{
-						title: strings.sureToPurge.title,
-						description: strings.sureToPurge.description,
-						color: constants.colors.husky,
-					},
-				],
-				components: [
-					{
-						type: Discord.MessageComponentTypes.ActionRow,
-						components: [
-							{
-								type: Discord.MessageComponentTypes.Button,
-								customId: continueId,
-								label: strings.yes,
-								style: Discord.ButtonStyles.Success,
-							},
-							{
-								type: Discord.MessageComponentTypes.Button,
-								customId: cancelId,
-								label: strings.no,
-								style: Discord.ButtonStyles.Danger,
-							},
-						],
-					},
-				],
-			});
-		}));
+		editReply(client, interaction, {
+			embeds: [
+				{
+					title: strings.indexed.title,
+					description: strings.indexed.description.some,
+					fields: getMessageFields(),
+					color: constants.colors.blue,
+				},
+				{
+					title: strings.sureToPurge.title,
+					description: strings.sureToPurge.description,
+					color: constants.colors.husky,
+				},
+			],
+			components: [
+				{
+					type: Discord.MessageComponentTypes.ActionRow,
+					components: [
+						{
+							type: Discord.MessageComponentTypes.Button,
+							customId: continueButton.customId,
+							label: strings.yes,
+							style: Discord.ButtonStyles.Success,
+						},
+						{
+							type: Discord.MessageComponentTypes.Button,
+							customId: cancelButton.customId,
+							label: strings.no,
+							style: Discord.ButtonStyles.Danger,
+						},
+					],
+				},
+			],
+		});
 
-	if (!isShouldPurge) {
-		deleteReply(client, interaction);
-		return;
+		const isShouldPurge = await promise;
+		if (!isShouldPurge) {
+			deleteReply(client, interaction);
+			return;
+		}
 	}
 
 	{

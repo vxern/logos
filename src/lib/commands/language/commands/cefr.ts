@@ -2,12 +2,11 @@ import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import { Locale } from "../../../../constants/languages";
 import * as Logos from "../../../../types";
-import { Client } from "../../../client";
+import { Client, InteractionCollector } from "../../../client";
 import { CefrConfiguration } from "../../../database/guild";
 import { Guild } from "../../../database/guild";
 import {
 	acknowledge,
-	createInteractionCollector,
 	decodeId,
 	editReply,
 	encodeId,
@@ -112,81 +111,86 @@ async function handleDisplayCefrGuide(client: Client, interaction: Logos.Interac
 
 	const showButton = getShowButton(client, interaction, { locale });
 
+	const bracketButtons = new InteractionCollector({ only: !show ? [interaction.user.id] : undefined });
+	const tabButtons = new InteractionCollector({ only: !show ? [interaction.user.id] : undefined });
+
 	const getButtons = (): Discord.MessageComponents => {
-		const bracketButtons: [Discord.ButtonComponent, Discord.ButtonComponent, Discord.ButtonComponent] = [
+		const bracketButtonComponents: [Discord.ButtonComponent, Discord.ButtonComponent, Discord.ButtonComponent] = [
 			{
 				type: Discord.MessageComponentTypes.Button,
 				label: strings.brackets.a,
-				customId: encodeId<BracketButtonMetadata>(bracketButtonId, ["a"]),
+				customId: encodeId<BracketButtonMetadata>(bracketButtons.customId, ["a"]),
 				emoji: { name: constants.symbols.cefr.a },
 				style: Discord.ButtonStyles.Secondary,
 			},
 			{
 				type: Discord.MessageComponentTypes.Button,
 				label: strings.brackets.b,
-				customId: encodeId<BracketButtonMetadata>(bracketButtonId, ["b"]),
+				customId: encodeId<BracketButtonMetadata>(bracketButtons.customId, ["b"]),
 				emoji: { name: constants.symbols.cefr.b },
 				style: Discord.ButtonStyles.Secondary,
 			},
 			{
 				type: Discord.MessageComponentTypes.Button,
 				label: strings.brackets.c,
-				customId: encodeId<BracketButtonMetadata>(bracketButtonId, ["c"]),
+				customId: encodeId<BracketButtonMetadata>(bracketButtons.customId, ["c"]),
 				emoji: { name: constants.symbols.cefr.c },
 				style: Discord.ButtonStyles.Secondary,
 			},
 		];
+
 		switch (data.bracket) {
 			case "a": {
-				bracketButtons[0].disabled = true;
+				bracketButtonComponents[0].disabled = true;
 				break;
 			}
 			case "b": {
-				bracketButtons[1].disabled = true;
+				bracketButtonComponents[1].disabled = true;
 				break;
 			}
 			case "c": {
-				bracketButtons[2].disabled = true;
+				bracketButtonComponents[2].disabled = true;
 				break;
 			}
 		}
 
 		if (!levelExamples.enabled) {
-			return [{ type: Discord.MessageComponentTypes.ActionRow, components: bracketButtons }];
+			return [{ type: Discord.MessageComponentTypes.ActionRow, components: bracketButtonComponents }];
 		}
 
-		const tabButtons: [Discord.ButtonComponent, Discord.ButtonComponent] = [
+		const tabButtonComponents: [Discord.ButtonComponent, Discord.ButtonComponent] = [
 			{
 				type: Discord.MessageComponentTypes.Button,
 				label: strings.tabs.guide,
-				customId: encodeId<TabButtonMetadata>(tabButtonId, ["guide"]),
+				customId: encodeId<TabButtonMetadata>(tabButtons.customId, ["guide"]),
 				style: Discord.ButtonStyles.Primary,
 			},
 			{
 				type: Discord.MessageComponentTypes.Button,
 				label: strings.tabs.examples,
-				customId: encodeId<TabButtonMetadata>(tabButtonId, ["examples"]),
+				customId: encodeId<TabButtonMetadata>(tabButtons.customId, ["examples"]),
 				style: Discord.ButtonStyles.Primary,
 			},
 		];
+
 		switch (data.tab) {
 			case "guide": {
-				tabButtons[0].disabled = true;
+				tabButtonComponents[0].disabled = true;
 				break;
 			}
 			case "examples": {
-				tabButtons[1].disabled = true;
+				tabButtonComponents[1].disabled = true;
 				break;
 			}
 		}
 
 		if (!show) {
-			tabButtons.push(showButton);
+			tabButtonComponents.push(showButton);
 		}
 
 		const rows: Discord.ActionRow[] = [
-			{ type: Discord.MessageComponentTypes.ActionRow, components: bracketButtons },
-			{ type: Discord.MessageComponentTypes.ActionRow, components: tabButtons },
+			{ type: Discord.MessageComponentTypes.ActionRow, components: bracketButtonComponents },
+			{ type: Discord.MessageComponentTypes.ActionRow, components: tabButtonComponents },
 		];
 
 		return rows;
@@ -196,61 +200,56 @@ async function handleDisplayCefrGuide(client: Client, interaction: Logos.Interac
 		editReply(client, interaction, { embeds: [getEmbed()], components: getButtons() });
 	};
 
-	const bracketButtonId = createInteractionCollector(client, {
-		type: Discord.InteractionTypes.MessageComponent,
-		userId: interaction.user.id,
-		onCollect: async (selection) => {
-			acknowledge(client, selection);
+	bracketButtons.onCollect(async (buttonPress) => {
+		acknowledge(client, buttonPress);
 
-			const selectionCustomId = selection.data?.customId;
-			if (selectionCustomId === undefined) {
-				return;
-			}
+		const selectionCustomId = buttonPress.data?.customId;
+		if (selectionCustomId === undefined) {
+			return;
+		}
 
-			const [__, bracketRaw] = decodeId<BracketButtonMetadata>(selectionCustomId);
-			if (bracketRaw === undefined) {
-				return;
-			}
+		const [__, bracketRaw] = decodeId<BracketButtonMetadata>(selectionCustomId);
+		if (bracketRaw === undefined) {
+			return;
+		}
 
-			if (!Object.keys(guide).includes(bracketRaw)) {
-				return;
-			}
+		if (!Object.keys(guide).includes(bracketRaw)) {
+			return;
+		}
 
-			const bracket = bracketRaw as Bracket;
+		const bracket = bracketRaw as Bracket;
 
-			data.bracket = bracket;
+		data.bracket = bracket;
 
-			refreshView();
-		},
+		refreshView();
 	});
 
-	const tabButtonId = createInteractionCollector(client, {
-		type: Discord.InteractionTypes.MessageComponent,
-		userId: interaction.user.id,
-		onCollect: async (selection) => {
-			acknowledge(client, selection);
+	tabButtons.onCollect(async (buttonPress) => {
+		acknowledge(client, buttonPress);
 
-			const selectionCustomId = selection.data?.customId;
-			if (selectionCustomId === undefined) {
-				return;
-			}
+		const selectionCustomId = buttonPress.data?.customId;
+		if (selectionCustomId === undefined) {
+			return;
+		}
 
-			const [__, tabRaw] = decodeId<TabButtonMetadata>(selectionCustomId);
-			if (tabRaw === undefined) {
-				return;
-			}
+		const [__, tabRaw] = decodeId<TabButtonMetadata>(selectionCustomId);
+		if (tabRaw === undefined) {
+			return;
+		}
 
-			if (!["guide", "examples"].includes(tabRaw)) {
-				return;
-			}
+		if (!["guide", "examples"].includes(tabRaw)) {
+			return;
+		}
 
-			const tab = tabRaw as Tab;
+		const tab = tabRaw as Tab;
 
-			data.tab = tab;
+		data.tab = tab;
 
-			refreshView();
-		},
+		refreshView();
 	});
+
+	client.registerInteractionCollector(bracketButtons);
+	client.registerInteractionCollector(tabButtons);
 
 	reply(client, interaction, { embeds: [getEmbed()], components: getButtons() }, { visible: show });
 }
