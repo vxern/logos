@@ -1,8 +1,8 @@
 import { randomUUID } from "node:crypto";
-import { DiscordSnowflake as Snowflake } from "@sapphire/snowflake";
 import * as Discord from "@discordeno/bot";
 import FancyLog from "fancy-log";
 import { Redis } from "ioredis";
+import { nanoid } from "nanoid";
 import * as ravendb from "ravendb";
 import constants from "../constants/constants";
 import languages, {
@@ -1381,7 +1381,7 @@ class InteractionCollector extends Collector<"interactionCreate"> {
 		super({ isSingle, removeAfter: !isPermanent ? constants.INTERACTION_TOKEN_EXPIRY : undefined, dependsOn });
 
 		this.type = type ?? Discord.InteractionTypes.MessageComponent;
-		this.customId = customId ?? Snowflake.generate().toString();
+		this.customId = customId ?? nanoid();
 		this.only = only !== undefined ? new Set(only) : new Set();
 		this.#_baseId = decodeId(this.customId)[0];
 		this.#_acceptAnyUser = this.only.values.length === 0;

@@ -1,9 +1,9 @@
 import * as Discord from "@discordeno/bot";
 import constants from "../../../constants/constants";
 import * as Logos from "../../../types";
+import { InteractionCollector } from "../../client";
 import { decodeId, deleteReply, editReply, getCommandName, getLocaleData, postponeReply } from "../../interactions";
 import { GlobalService } from "../service";
-import { InteractionCollector } from "../../client";
 
 type InteractionRepetitionButtonID = [interactionId: string];
 
