@@ -264,44 +264,46 @@ async function createModalComposer<
 
 	let isSubmitting = true;
 	while (isSubmitting) {
-		const [submission, result] = await new Promise<[Discord.Interaction, boolean | string]>((resolve) => {
-			const modalSubmits = new InteractionCollector({
-				type: Discord.InteractionTypes.ModalSubmit,
-				only: [interaction.user.id],
-				isSingle: true,
-			});
+		const { promise, resolve } = Promise.withResolvers<[Discord.Interaction, boolean | string]>();
 
-			modalSubmits.onCollect(async (modalSubmit) => {
-				content = parseComposerContent(modalSubmit);
-				if (content === undefined) {
-					return resolve([modalSubmit, false]);
-				}
+		const modalSubmits = new InteractionCollector({
+			type: Discord.InteractionTypes.ModalSubmit,
+			only: [interaction.user.id],
+			isSingle: true,
+		});
 
-				const result = await onSubmit(modalSubmit, content);
-
-				resolve([modalSubmit, result]);
-			});
-
-			client.registerInteractionCollector(modalSubmits);
-
-			if (content !== undefined) {
-				const answers = Object.values(content) as (string | undefined)[];
-				for (const [value, index] of answers.map<[string | undefined, number]>((v, i) => [v, i])) {
-					const field = fields[index];
-					if (field === undefined) {
-						throw `StateError: The number of modal fields (${fields.length}) does not correspond to the number of answers (${answers.length}).`;
-					}
-
-					field.components[0].value = value;
-				}
+		modalSubmits.onCollect(async (modalSubmit) => {
+			content = parseComposerContent(modalSubmit);
+			if (content === undefined) {
+				return resolve([modalSubmit, false]);
 			}
 
-			displayModal(client, anchor, {
-				title: modal.title,
-				customId: modalSubmits.customId,
-				components: fields,
-			});
+			const result = await onSubmit(modalSubmit, content);
+
+			resolve([modalSubmit, result]);
 		});
+
+		client.registerInteractionCollector(modalSubmits);
+
+		if (content !== undefined) {
+			const answers = Object.values(content) as (string | undefined)[];
+			for (const [value, index] of answers.map<[string | undefined, number]>((v, i) => [v, i])) {
+				const field = fields[index];
+				if (field === undefined) {
+					throw `StateError: The number of modal fields (${fields.length}) does not correspond to the number of answers (${answers.length}).`;
+				}
+
+				field.components[0].value = value;
+			}
+		}
+
+		displayModal(client, anchor, {
+			title: modal.title,
+			customId: modalSubmits.customId,
+			components: fields,
+		});
+
+		const [submission, result] = await promise;
 
 		if (typeof result === "boolean" && result) {
 			isSubmitting = false;

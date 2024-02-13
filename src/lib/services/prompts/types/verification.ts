@@ -32,27 +32,21 @@ type VoteInformation = {
 };
 
 class VerificationService extends PromptService<"verification", EntryRequest, InteractionData> {
-	private readonly collectingInquiryInteractions: Promise<void>;
-	private stopCollectingInquiryInteractions: (() => void) | undefined;
+	readonly #_openInquiry: InteractionCollector;
 
 	constructor(client: Client, guildId: bigint) {
 		super(client, guildId, { type: "verification", deleteMode: "none" });
 
-		this.collectingInquiryInteractions = new Promise((resolve) => {
-			this.stopCollectingInquiryInteractions = () => resolve();
+		this.#_openInquiry = new InteractionCollector({
+			customId: `${constants.components.createInquiry}/${this.guildId}`,
+			isPermanent: true,
 		});
 	}
 
 	async start(): Promise<void> {
 		await super.start();
 
-		// TODO(vxern): Dispose when the service is disposed!!!!!!!!!!!!
-		const openInquiryButton = new InteractionCollector({
-			customId: `${constants.components.createInquiry}/${this.guildId}`,
-			isPermanent: true,
-		});
-
-		openInquiryButton.onCollect(async (selection) => {
+		this.#_openInquiry.onCollect(async (selection) => {
 			const customId = selection.data?.customId;
 			if (customId === undefined) {
 				return;
@@ -66,14 +60,13 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 			this.handleOpenInquiry(selection, compositeId);
 		});
 
-		this.client.registerInteractionCollector(openInquiryButton);
+		this.client.registerInteractionCollector(this.#_openInquiry);
 	}
 
 	async stop(): Promise<void> {
 		await super.stop();
 
-		this.stopCollectingInquiryInteractions?.();
-		await this.collectingInquiryInteractions;
+		this.#_openInquiry.close();
 	}
 
 	getAllDocuments(): Map<string, EntryRequest> {

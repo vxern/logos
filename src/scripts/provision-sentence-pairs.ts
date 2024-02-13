@@ -57,25 +57,27 @@ type SentencePairRecord = [
 ];
 type RecordWithLanguage = [locale: Locale, record: SentencePairRecord];
 async function subscribeToReadStream(readStream: stream.Writable, file: SentencePairFile): Promise<void> {
-	return new Promise((resolve, reject) =>
-		fsSync
-			.createReadStream(file.path, { encoding: "utf-8", autoClose: true, emitClose: true })
-			.once("close", () => {
-				console.info(`Finished reading sentence pairs for ${file.locale}.`);
-				resolve();
-			})
-			.once("error", () => reject())
-			.pipe(eventStream.split())
-			.pipe(
-				eventStream.map((line: string) => {
-					const record = line.split(RECORD_DELIMETER) as SentencePairRecord;
-					record[0] = parseInt(record[0] as string);
-					record[2] = parseInt(record[2] as string);
+	const { promise, resolve, reject } = Promise.withResolvers<void>();
 
-					line.length !== 0 && readStream.write([file.locale, record] satisfies RecordWithLanguage);
-				}),
-			),
-	);
+	fsSync
+		.createReadStream(file.path, { encoding: "utf-8", autoClose: true, emitClose: true })
+		.once("close", () => {
+			console.info(`Finished reading sentence pairs for ${file.locale}.`);
+			resolve();
+		})
+		.once("error", () => reject())
+		.pipe(eventStream.split())
+		.pipe(
+			eventStream.map((line: string) => {
+				const record = line.split(RECORD_DELIMETER) as SentencePairRecord;
+				record[0] = parseInt(record[0] as string);
+				record[2] = parseInt(record[2] as string);
+
+				line.length !== 0 && readStream.write([file.locale, record] satisfies RecordWithLanguage);
+			}),
+		);
+
+	return promise;
 }
 
 console.time("provision-sentence-pairs");
