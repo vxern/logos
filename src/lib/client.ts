@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import * as Discord from "@discordeno/bot";
-import FancyLog from "fancy-log";
+import * as log from "loglevel";
 import { Redis } from "ioredis";
 import { nanoid } from "nanoid";
 import * as ravendb from "ravendb";
@@ -106,19 +106,19 @@ class Logger {
 	}
 
 	debug(...args: unknown[]) {
-		this.#isDebug && FancyLog.info(this.#identifierDisplayed, ...args);
+		this.#isDebug && log.info(this.#identifierDisplayed, ...args);
 	}
 
 	info(...args: unknown[]) {
-		FancyLog.info(this.#identifierDisplayed, ...args);
+		log.info(this.#identifierDisplayed, ...args);
 	}
 
 	error(...args: unknown[]) {
-		FancyLog.error(this.#identifierDisplayed, ...args);
+		log.error(this.#identifierDisplayed, ...args);
 	}
 
 	warn(...args: unknown[]) {
-		FancyLog.warn(this.#identifierDisplayed, ...args);
+		log.warn(this.#identifierDisplayed, ...args);
 	}
 }
 
