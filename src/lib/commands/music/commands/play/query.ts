@@ -1,7 +1,7 @@
 import constants from "../../../../../constants/constants";
 import * as Logos from "../../../../../types";
 import { Client } from "../../../../client";
-import { parseArguments, reply } from "../../../../interactions";
+import { parseArguments } from "../../../../interactions";
 import { ListingResolver } from "../../data/sources/sources";
 import { SongListing } from "../../data/types";
 
@@ -54,7 +54,7 @@ async function handleRequestPlayback(
 			},
 		};
 
-		reply(client, interaction, {
+		client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,

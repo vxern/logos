@@ -8,7 +8,7 @@ import { Client } from "../../../client";
 import { Guild, timeStructToMilliseconds } from "../../../database/guild";
 import { User } from "../../../database/user";
 import { Warning } from "../../../database/warning";
-import { parseArguments, reply, respond } from "../../../interactions";
+import { parseArguments } from "../../../interactions";
 import { CommandTemplate } from "../../command";
 import { user } from "../../parameters";
 import { getActiveWarnings } from "../module";
@@ -74,7 +74,7 @@ async function handlePardonUserAutocomplete(client: Client, interaction: Logos.I
 
 	if (focused?.name === "warning") {
 		if (user === undefined || warning === undefined) {
-			respond(client, interaction, []);
+			client.respond(interaction, []);
 			return;
 		}
 
@@ -90,7 +90,7 @@ async function handlePardonUserAutocomplete(client: Client, interaction: Logos.I
 			{ locale },
 		);
 		if (member === undefined) {
-			respond(client, interaction, []);
+			client.respond(interaction, []);
 			return;
 		}
 
@@ -98,7 +98,7 @@ async function handlePardonUserAutocomplete(client: Client, interaction: Logos.I
 
 		const relevantWarnings = await getRelevantWarnings(client, member, expiryMilliseconds);
 		if (relevantWarnings === undefined) {
-			respond(client, interaction, []);
+			client.respond(interaction, []);
 			return;
 		}
 
@@ -110,7 +110,7 @@ async function handlePardonUserAutocomplete(client: Client, interaction: Logos.I
 			}))
 			.filter((choice) => choice.name.toLowerCase().includes(warningLowercase));
 
-		respond(client, interaction, choices);
+		client.respond(interaction, choices);
 		return;
 	}
 }
@@ -206,7 +206,7 @@ async function handlePardonUser(client: Client, interaction: Logos.Interaction):
 		}),
 	};
 
-	reply(client, interaction, {
+	client.reply(interaction, {
 		embeds: [
 			{
 				title: strings.title,
@@ -271,7 +271,7 @@ async function displayInvalidWarningError(
 		description: client.localise("pardon.strings.invalidWarning.description", locale)(),
 	};
 
-	reply(client, interaction, {
+	client.reply(interaction, {
 		embeds: [
 			{
 				title: strings.title,
@@ -292,7 +292,7 @@ async function displayFailedError(
 		description: client.localise("pardon.strings.failed.description", locale)(),
 	};
 
-	reply(client, interaction, {
+	client.reply(interaction, {
 		embeds: [
 			{
 				title: strings.title,

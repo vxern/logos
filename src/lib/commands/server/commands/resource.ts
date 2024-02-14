@@ -9,7 +9,7 @@ import { timeStructToMilliseconds } from "../../../database/guild";
 import { Guild } from "../../../database/guild";
 import { Resource } from "../../../database/resource";
 import { User } from "../../../database/user";
-import { Modal, createModalComposer, deleteReply, editReply, postponeReply, reply } from "../../../interactions";
+import { Modal, createModalComposer } from "../../../interactions";
 import { verifyIsWithinLimits } from "../../../utils";
 import { CommandTemplate } from "../../command";
 
@@ -100,7 +100,7 @@ async function handleSubmitResource(client: Client, interaction: Logos.Interacti
 			description: client.localise("resource.strings.tooMany.description", locale)(),
 		};
 
-		reply(client, interaction, {
+		client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -120,7 +120,7 @@ async function handleSubmitResource(client: Client, interaction: Logos.Interacti
 	createModalComposer<Resource["answers"]>(client, interaction, {
 		modal: generateResourceModal(client, { locale }),
 		onSubmit: async (submission, answers) => {
-			await postponeReply(client, submission);
+			await client.postponeReply(submission);
 
 			const session = client.database.openSession();
 
@@ -167,7 +167,7 @@ async function handleSubmitResource(client: Client, interaction: Logos.Interacti
 				description: client.localise("resource.strings.sent.description", locale)(),
 			};
 
-			editReply(client, submission, {
+			client.editReply(submission, {
 				embeds: [
 					{
 						title: strings.title,
@@ -206,20 +206,20 @@ async function handleSubmittedInvalidResource(
 	});
 
 	continueButton.onCollect(async (buttonPress) => {
-		deleteReply(client, submission);
+		client.deleteReply(submission);
 		resolve(buttonPress);
 	});
 
 	cancelButton.onCollect(async (cancelButtonPress) => {
 		returnButton.onCollect(async (returnButtonPress) => {
-			deleteReply(client, submission);
-			deleteReply(client, cancelButtonPress);
+			client.deleteReply(submission);
+			client.deleteReply(cancelButtonPress);
 			resolve(returnButtonPress);
 		});
 
 		leaveButton.onCollect(async (_) => {
-			deleteReply(client, submission);
-			deleteReply(client, cancelButtonPress);
+			client.deleteReply(submission);
+			client.deleteReply(cancelButtonPress);
 			resolve(undefined);
 		});
 
@@ -230,7 +230,7 @@ async function handleSubmittedInvalidResource(
 			leave: client.localise("prompts.leave", locale)(),
 		};
 
-		reply(client, cancelButtonPress, {
+		client.reply(cancelButtonPress, {
 			embeds: [
 				{
 					title: strings.title,
@@ -273,7 +273,7 @@ async function handleSubmittedInvalidResource(
 				description: client.localise("resource.strings.failed", locale)(),
 			};
 
-			editReply(client, submission, {
+			client.editReply(submission, {
 				embeds: [
 					{
 						title: strings.title,
@@ -292,7 +292,7 @@ async function handleSubmittedInvalidResource(
 		cancel: client.localise("prompts.cancel", locale)(),
 	};
 
-	editReply(client, submission, {
+	client.editReply(submission, {
 		embeds: [embed],
 		components: [
 			{

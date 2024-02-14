@@ -1,6 +1,6 @@
 import * as Logos from "../../../../../types";
 import { Client } from "../../../../client";
-import { deleteReply, parseArguments, postponeReply } from "../../../../interactions";
+import { parseArguments } from "../../../../interactions";
 import { SongListing } from "../../data/types";
 import { handleRequestPlayback } from "./query";
 
@@ -12,8 +12,8 @@ async function handleRequestFilePlayback(client: Client, interaction: Logos.Inte
 		return;
 	}
 
-	postponeReply(client, interaction);
-	deleteReply(client, interaction);
+	client.postponeReply(interaction);
+	client.deleteReply(interaction);
 
 	const strings = {
 		externalFile: client.localise("music.options.play.strings.externalFile", locale)(),

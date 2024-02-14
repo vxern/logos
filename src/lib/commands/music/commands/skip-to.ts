@@ -4,7 +4,7 @@ import { Locale } from "../../../../constants/languages";
 import { trim } from "../../../../formatting";
 import * as Logos from "../../../../types";
 import { Client } from "../../../client";
-import { parseArguments, parseTimeExpression, reply, respond } from "../../../interactions";
+import { parseArguments, parseTimeExpression } from "../../../interactions";
 import { OptionTemplate } from "../../command";
 import { timestamp } from "../../parameters";
 
@@ -31,11 +31,11 @@ async function handleSkipToTimestampAutocomplete(client: Client, interaction: Lo
 			autocomplete: client.localise("autocomplete.timestamp", locale)(),
 		};
 
-		respond(client, interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
+		client.respond(interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
 		return;
 	}
 
-	respond(client, interaction, [{ name: timestamp[0], value: timestamp[1].toString() }]);
+	client.respond(interaction, [{ name: timestamp[0], value: timestamp[1].toString() }]);
 }
 
 async function handleSkipToTimestamp(client: Client, interaction: Logos.Interaction): Promise<void> {
@@ -66,7 +66,7 @@ async function handleSkipToTimestamp(client: Client, interaction: Logos.Interact
 			description: client.localise("music.options.skip-to.strings.noSong.description", locale)(),
 		};
 
-		reply(client, interaction, {
+		client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -91,8 +91,7 @@ async function handleSkipToTimestamp(client: Client, interaction: Logos.Interact
 		description: client.localise("music.options.skip-to.strings.skippedTo.description", locale)(),
 	};
 
-	reply(
-		client,
+	client.reply(
 		interaction,
 		{
 			embeds: [
@@ -117,7 +116,7 @@ async function displayInvalidTimestampError(
 		description: client.localise("music.options.skip-to.strings.invalidTimestamp.description", locale)(),
 	};
 
-	reply(client, interaction, {
+	client.reply(interaction, {
 		embeds: [{ title: strings.title, description: strings.description, color: constants.colors.red }],
 	});
 }

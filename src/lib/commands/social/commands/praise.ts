@@ -8,7 +8,7 @@ import { Client } from "../../../client";
 import { Guild, timeStructToMilliseconds } from "../../../database/guild";
 import { Praise } from "../../../database/praise";
 import { User } from "../../../database/user";
-import { editReply, parseArguments, postponeReply, reply } from "../../../interactions";
+import { parseArguments } from "../../../interactions";
 import { verifyIsWithinLimits } from "../../../utils";
 import { CommandTemplate } from "../../command";
 import { user } from "../../parameters";
@@ -78,7 +78,7 @@ async function handlePraiseUser(client: Client, interaction: Logos.Interaction):
 			description: client.localise("praise.strings.cannotPraiseSelf.description", locale)(),
 		};
 
-		reply(client, interaction, {
+		client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -90,7 +90,7 @@ async function handlePraiseUser(client: Client, interaction: Logos.Interaction):
 		return;
 	}
 
-	await postponeReply(client, interaction);
+	await client.postponeReply(interaction);
 
 	session = client.database.openSession();
 
@@ -173,7 +173,7 @@ async function handlePraiseUser(client: Client, interaction: Logos.Interaction):
 			description: client.localise("praise.strings.tooMany.description", locale)(),
 		};
 
-		editReply(client, interaction, {
+		client.editReply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -217,7 +217,7 @@ async function handlePraiseUser(client: Client, interaction: Logos.Interaction):
 		)({ user_mention: mention(member.id, MentionTypes.User) }),
 	};
 
-	editReply(client, interaction, {
+	client.editReply(interaction, {
 		embeds: [
 			{
 				title: strings.title,
@@ -238,7 +238,7 @@ async function displayError(
 		description: client.localise("praise.strings.failed.description", locale)(),
 	};
 
-	editReply(client, interaction, {
+	client.editReply(interaction, {
 		embeds: [
 			{
 				title: strings.title,

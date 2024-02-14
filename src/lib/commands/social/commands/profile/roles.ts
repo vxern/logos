@@ -5,7 +5,6 @@ import { trim } from "../../../../../formatting";
 import * as Logos from "../../../../../types";
 import { Client, InteractionCollector } from "../../../../client";
 import diagnostics from "../../../../diagnostics";
-import { acknowledge, editReply, reply } from "../../../../interactions";
 import { OptionTemplate } from "../../../command";
 import roles, { getRoleCategories, getRoles } from "../../roles/roles";
 import {
@@ -156,7 +155,7 @@ async function createRoleSelectionMenu(
 	const selectionMenuSelection = new InteractionCollector({ only: [interaction.user.id], isSingle: true });
 
 	selectionMenuSelection.onCollect(async (selection) => {
-		acknowledge(client, selection);
+		client.acknowledge(selection);
 
 		const indexString = selection.data?.values?.at(0);
 		if (indexString === undefined) {
@@ -255,7 +254,7 @@ async function createRoleSelectionMenu(
 					},
 				};
 
-				reply(client, interaction, {
+				client.reply(interaction, {
 					embeds: [
 						{
 							title: strings.title,
@@ -411,12 +410,12 @@ async function traverseRoleTreeAndDisplay(
 	const menu = await displaySelectMenu(client, data, categories, selectOptions, { locale });
 
 	if (editResponse) {
-		editReply(client, interaction, menu);
+		client.editReply(interaction, menu);
 
 		return data;
 	}
 
-	reply(client, interaction, menu);
+	client.reply(interaction, menu);
 
 	return data;
 }

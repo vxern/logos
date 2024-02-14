@@ -8,7 +8,7 @@ import * as Logos from "../../../../types";
 import { Client, InteractionCollector, isValidSnowflake } from "../../../client";
 import { Guild } from "../../../database/guild";
 import diagnostics from "../../../diagnostics";
-import { acknowledge, deleteReply, editReply, parseArguments, postponeReply } from "../../../interactions";
+import { parseArguments } from "../../../interactions";
 import { chunk, snowflakeToTimestamp } from "../../../utils";
 import { CommandTemplate } from "../../command";
 import { user } from "../../parameters";
@@ -73,7 +73,7 @@ async function handlePurgeMessages(client: Client, interaction: Logos.Interactio
 		return;
 	}
 
-	postponeReply(client, interaction);
+	client.postponeReply(interaction);
 
 	let authorId: bigint | undefined;
 
@@ -228,12 +228,9 @@ async function handlePurgeMessages(client: Client, interaction: Logos.Interactio
 		};
 	};
 
-	editReply(client, interaction, getIndexingProgressResponse());
+	client.editReply(interaction, getIndexingProgressResponse());
 
-	const indexProgressIntervalId = setInterval(
-		() => editReply(client, interaction, getIndexingProgressResponse()),
-		1500,
-	);
+	const indexProgressIntervalId = setInterval(() => client.editReply(interaction, getIndexingProgressResponse()), 1500);
 
 	let isFinished = false;
 	while (!isFinished) {
@@ -257,7 +254,7 @@ async function handlePurgeMessages(client: Client, interaction: Logos.Interactio
 				},
 			};
 
-			editReply(client, interaction, {
+			client.editReply(interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -330,7 +327,7 @@ async function handlePurgeMessages(client: Client, interaction: Logos.Interactio
 			},
 		};
 
-		editReply(client, interaction, {
+		client.editReply(interaction, {
 			embeds: [
 				{
 					title: strings.indexed.title,
@@ -352,12 +349,12 @@ async function handlePurgeMessages(client: Client, interaction: Logos.Interactio
 		const cancelButton = new InteractionCollector({ only: [interaction.user.id], isSingle: true });
 
 		continueButton.onCollect(async (buttonPress) => {
-			acknowledge(client, buttonPress);
+			client.acknowledge(buttonPress);
 			resolve(true);
 		});
 
 		cancelButton.onCollect(async (buttonPress) => {
-			acknowledge(client, buttonPress);
+			client.acknowledge(buttonPress);
 			resolve(false);
 		});
 
@@ -406,7 +403,7 @@ async function handlePurgeMessages(client: Client, interaction: Logos.Interactio
 			no: client.localise("purge.strings.no", locale)(),
 		};
 
-		editReply(client, interaction, {
+		client.editReply(interaction, {
 			embeds: [
 				{
 					title: strings.indexed.title,
@@ -444,7 +441,7 @@ async function handlePurgeMessages(client: Client, interaction: Logos.Interactio
 		// TODO(vxern): This is currently unsafe because it will hang indefinitely if the user never presses a button.
 		shouldContinue = await promise;
 		if (!shouldContinue) {
-			deleteReply(client, interaction);
+			client.deleteReply(interaction);
 			return;
 		}
 
@@ -458,12 +455,12 @@ async function handlePurgeMessages(client: Client, interaction: Logos.Interactio
 		const cancelButton = new InteractionCollector({ only: [interaction.user.id], isSingle: true });
 
 		continueButton.onCollect(async (buttonPress) => {
-			acknowledge(client, buttonPress);
+			client.acknowledge(buttonPress);
 			resolve(true);
 		});
 
 		cancelButton.onCollect(async (buttonPress) => {
-			acknowledge(client, buttonPress);
+			client.acknowledge(buttonPress);
 			resolve(false);
 		});
 
@@ -496,7 +493,7 @@ async function handlePurgeMessages(client: Client, interaction: Logos.Interactio
 			no: client.localise("purge.strings.no", locale)(),
 		};
 
-		editReply(client, interaction, {
+		client.editReply(interaction, {
 			embeds: [
 				{
 					title: strings.indexed.title,
@@ -533,7 +530,7 @@ async function handlePurgeMessages(client: Client, interaction: Logos.Interactio
 
 		const isShouldPurge = await promise;
 		if (!isShouldPurge) {
-			deleteReply(client, interaction);
+			client.deleteReply(interaction);
 			return;
 		}
 	}
@@ -556,7 +553,7 @@ async function handlePurgeMessages(client: Client, interaction: Logos.Interactio
 			},
 		};
 
-		editReply(client, interaction, {
+		client.editReply(interaction, {
 			embeds: [
 				{
 					title: strings.purging.title,
@@ -602,7 +599,7 @@ async function handlePurgeMessages(client: Client, interaction: Logos.Interactio
 
 	const responseDeletionTimeoutId = setTimeout(async () => {
 		responseDeleted = true;
-		deleteReply(client, interaction);
+		client.deleteReply(interaction);
 	}, time.minute * 1);
 
 	let deletedCount = 0;
@@ -667,7 +664,7 @@ async function handlePurgeMessages(client: Client, interaction: Logos.Interactio
 			},
 		};
 
-		editReply(client, interaction, {
+		client.editReply(interaction, {
 			embeds: [
 				{
 					title: strings.purged.title,
@@ -703,7 +700,7 @@ async function displaySnowflakesInvalidError(
 
 	const areBothInvalid = isStartInvalid && isEndInvalid;
 
-	editReply(client, interaction, {
+	client.editReply(interaction, {
 		embeds: [
 			{
 				...(areBothInvalid
@@ -736,7 +733,7 @@ async function displayIdsNotDifferentError(
 		description: client.localise("purge.strings.idsNotDifferent.description", locale)(),
 	};
 
-	editReply(client, interaction, {
+	client.editReply(interaction, {
 		embeds: [
 			{
 				title: strings.title,
@@ -757,7 +754,7 @@ async function displayFailedError(
 		description: client.localise("purge.strings.failed.description", locale)(),
 	};
 
-	editReply(client, interaction, {
+	client.editReply(interaction, {
 		embeds: [
 			{
 				title: strings.title,

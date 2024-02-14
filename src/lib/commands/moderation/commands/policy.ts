@@ -3,7 +3,7 @@ import { Locale } from "../../../../constants/languages";
 import * as Logos from "../../../../types";
 import { Client } from "../../../client";
 import { Guild } from "../../../database/guild";
-import { getShowButton, parseArguments, reply } from "../../../interactions";
+import { getShowButton, parseArguments } from "../../../interactions";
 import { CommandTemplate } from "../../command";
 import { show } from "../../parameters";
 
@@ -62,8 +62,7 @@ async function handleDisplayModerationPolicy(client: Client, interaction: Logos.
 		? undefined
 		: [{ type: Discord.MessageComponentTypes.ActionRow, components: [showButton] }];
 
-	reply(
-		client,
+	client.reply(
 		interaction,
 		{ embeds: [{ title: strings.title, fields: getModerationPolicyPoints(client, { locale }) }], components },
 		{ visible: show },

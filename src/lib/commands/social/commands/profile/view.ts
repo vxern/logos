@@ -6,7 +6,7 @@ import { Client } from "../../../../client";
 import { Praise } from "../../../../database/praise";
 import { User } from "../../../../database/user";
 import { Warning } from "../../../../database/warning";
-import { getShowButton, parseArguments, reply } from "../../../../interactions";
+import { getShowButton, parseArguments } from "../../../../interactions";
 import { OptionTemplate } from "../../../command";
 import { show, user } from "../../../parameters";
 
@@ -150,8 +150,7 @@ async function handleDisplayProfile(client: Client, interaction: Logos.Interacti
 		? undefined
 		: [{ type: Discord.MessageComponentTypes.ActionRow, components: [showButton] }];
 
-	reply(
-		client,
+	client.reply(
 		interaction,
 		{
 			embeds: [

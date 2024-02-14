@@ -5,7 +5,7 @@ import * as Logos from "../../../../../../types";
 import { Client } from "../../../../../client";
 import { Praise } from "../../../../../database/praise";
 import { User } from "../../../../../database/user";
-import { parseArguments, reply } from "../../../../../interactions";
+import { parseArguments } from "../../../../../interactions";
 import { OptionTemplate } from "../../../../command";
 import { user } from "../../../../parameters";
 import { getPraisePage } from "../praises";
@@ -98,7 +98,7 @@ async function handleDisplayPraises(client: Client, interaction: Logos.Interacti
 
 	session.dispose();
 
-	reply(client, interaction, {
+	client.reply(interaction, {
 		embeds: [getPraisePage(client, praiseDocuments, isSelf, "target", { locale })],
 	});
 }
@@ -113,7 +113,7 @@ async function displayError(
 		description: client.localise("list.options.praises.strings.failed.description", locale)(),
 	};
 
-	reply(client, interaction, {
+	client.reply(interaction, {
 		embeds: [
 			{
 				title: strings.title,

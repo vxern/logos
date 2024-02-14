@@ -11,7 +11,7 @@ import localisations from "../../../../constants/localisations";
 import { trim } from "../../../../formatting";
 import * as Logos from "../../../../types";
 import { Client } from "../../../client";
-import { editReply, getShowButton, parseArguments, postponeReply, reply, respond } from "../../../interactions";
+import { getShowButton, parseArguments } from "../../../interactions";
 import { asStream } from "../../../utils";
 import { CommandTemplate } from "../../command";
 import { show } from "../../parameters";
@@ -85,7 +85,7 @@ async function handleTranslateChatInputAutocomplete(client: Client, interaction:
 			autocomplete: client.localise("autocomplete.language", locale)(),
 		};
 
-		respond(client, interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
+		client.respond(interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
 		return;
 	}
 
@@ -114,7 +114,7 @@ async function handleTranslateChatInputAutocomplete(client: Client, interaction:
 		.slice(0, 25)
 		.sort((previous, next) => previous.name.localeCompare(next.name));
 
-	respond(client, interaction, choices);
+	client.respond(interaction, choices);
 }
 
 /** Allows the user to translate text from one language to another through the DeepL API. */
@@ -142,7 +142,7 @@ async function handleTranslateMessage(client: Client, interaction: Logos.Interac
 			description: client.localise("translate.strings.cannotUse.description", locale)(),
 		};
 
-		reply(client, interaction, {
+		client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -179,7 +179,7 @@ async function handleTranslate(
 			description: client.localise("translate.strings.textEmpty.description", locale)(),
 		};
 
-		reply(client, interaction, {
+		client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -208,7 +208,7 @@ async function handleTranslate(
 				},
 			};
 
-			reply(client, interaction, {
+			client.reply(interaction, {
 				embeds: [
 					{
 						title: strings.both.title,
@@ -229,7 +229,7 @@ async function handleTranslate(
 				},
 			};
 
-			reply(client, interaction, {
+			client.reply(interaction, {
 				embeds: [
 					{
 						title: strings.source.title,
@@ -250,7 +250,7 @@ async function handleTranslate(
 				},
 			};
 
-			reply(client, interaction, {
+			client.reply(interaction, {
 				embeds: [
 					{
 						title: strings.target.title,
@@ -272,7 +272,7 @@ async function handleTranslate(
 					description: client.localise("translate.strings.languagesNotDifferent.description", locale)(),
 				};
 
-				reply(client, interaction, {
+				client.reply(interaction, {
 					embeds: [
 						{
 							title: strings.title,
@@ -344,7 +344,7 @@ async function handleTranslate(
 			},
 		};
 
-		reply(client, interaction, {
+		client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -371,7 +371,7 @@ async function handleTranslate(
 			},
 		};
 
-		reply(client, interaction, {
+		client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -414,7 +414,7 @@ async function detectLanguage(
 			},
 		};
 
-		reply(client, interaction, {
+		client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -436,7 +436,7 @@ async function detectLanguage(
 			description: client.localise("translate.strings.languageNotSupported.description", locale)(),
 		};
 
-		reply(client, interaction, {
+		client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -467,7 +467,7 @@ async function translateText(
 			description: client.localise("translate.strings.noTranslationAdapters.description", locale)(),
 		};
 
-		reply(client, interaction, {
+		client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -479,7 +479,7 @@ async function translateText(
 		return;
 	}
 
-	await postponeReply(client, interaction, { visible: show });
+	await client.postponeReply(interaction, { visible: show });
 
 	let translation: Translation | undefined;
 	for await (const element of asStream(adapters, (adapter) => adapter.translate(client, text, languages))) {
@@ -498,7 +498,7 @@ async function translateText(
 			description: client.localise("translate.strings.failed.description", locale)(),
 		};
 
-		editReply(client, interaction, {
+		client.editReply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -570,7 +570,7 @@ async function translateText(
 		? undefined
 		: [{ type: Discord.MessageComponentTypes.ActionRow, components: [showButton] }];
 
-	editReply(client, interaction, { embeds, components });
+	client.editReply(interaction, { embeds, components });
 }
 
 export default commands;

@@ -3,7 +3,6 @@ import constants from "../../../../../../constants/constants";
 import * as Logos from "../../../../../../types";
 import { Client } from "../../../../../client";
 import { User } from "../../../../../database/user";
-import { editReply, postponeReply } from "../../../../../interactions";
 import { OptionTemplate } from "../../../../command";
 
 const command: OptionTemplate = {
@@ -15,7 +14,7 @@ const command: OptionTemplate = {
 async function handleClearLanguage(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.locale;
 
-	await postponeReply(client, interaction);
+	await client.postponeReply(interaction);
 
 	let session = client.database.openSession();
 
@@ -35,7 +34,7 @@ async function handleClearLanguage(client: Client, interaction: Logos.Interactio
 			description: client.localise("settings.strings.cannotClear.description", locale)(),
 		};
 
-		editReply(client, interaction, {
+		client.editReply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -59,7 +58,7 @@ async function handleClearLanguage(client: Client, interaction: Logos.Interactio
 			description: client.localise("settings.strings.cleared.description", locale)(),
 		};
 
-		editReply(client, interaction, {
+		client.editReply(interaction, {
 			embeds: [
 				{
 					title: strings.title,

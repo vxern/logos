@@ -2,7 +2,7 @@ import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import * as Logos from "../../../../types";
 import { Client } from "../../../client";
-import { parseArguments, reply } from "../../../interactions";
+import { parseArguments } from "../../../interactions";
 import { isCollection } from "../../../services/music/music";
 import { OptionTemplate } from "../../command";
 import { collection } from "../../parameters";
@@ -44,7 +44,7 @@ async function handleLoopPlayback(client: Client, interaction: Logos.Interaction
 			},
 		};
 
-		reply(client, interaction, {
+		client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -73,7 +73,7 @@ async function handleLoopPlayback(client: Client, interaction: Logos.Interaction
 				},
 			};
 
-			reply(client, interaction, {
+			client.reply(interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -91,7 +91,7 @@ async function handleLoopPlayback(client: Client, interaction: Logos.Interaction
 			description: client.localise("music.options.loop.strings.noSong.description", locale)(),
 		};
 
-		reply(client, interaction, {
+		client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -115,8 +115,7 @@ async function handleLoopPlayback(client: Client, interaction: Logos.Interaction
 				description: client.localise("music.options.loop.strings.disabled.description.songCollection", locale)(),
 			};
 
-			reply(
-				client,
+			client.reply(
 				interaction,
 				{
 					embeds: [
@@ -137,8 +136,7 @@ async function handleLoopPlayback(client: Client, interaction: Logos.Interaction
 			description: client.localise("music.options.loop.strings.enabled.description.songCollection", locale)(),
 		};
 
-		reply(
-			client,
+		client.reply(
 			interaction,
 			{
 				embeds: [
@@ -165,8 +163,7 @@ async function handleLoopPlayback(client: Client, interaction: Logos.Interaction
 			description: client.localise("music.options.loop.strings.disabled.description.song", locale)(),
 		};
 
-		reply(
-			client,
+		client.reply(
 			interaction,
 			{
 				embeds: [
@@ -187,8 +184,7 @@ async function handleLoopPlayback(client: Client, interaction: Logos.Interaction
 		description: client.localise("music.options.loop.strings.enabled.description.song", locale)(),
 	};
 
-	reply(
-		client,
+	client.reply(
 		interaction,
 		{
 			embeds: [

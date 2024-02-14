@@ -138,11 +138,11 @@ async function paginate<T>(
 			}
 		}
 
-		editReply(client, interaction, getView());
+		client.editReply(interaction, getView());
 	};
 
 	buttonPresses.onCollect(async (buttonPress) => {
-		acknowledge(client, buttonPress);
+		client.acknowledge(buttonPress);
 
 		const customId = buttonPress.data?.customId;
 		if (customId === undefined) {
@@ -156,7 +156,7 @@ async function paginate<T>(
 
 	client.registerInteractionCollector(buttonPresses);
 
-	reply(client, interaction, getView(), { visible: show });
+	client.reply(interaction, getView(), { visible: show });
 
 	return async () => {
 		data.elements = getElements();
@@ -297,7 +297,7 @@ async function createModalComposer<
 			}
 		}
 
-		displayModal(client, anchor, {
+		client.displayModal(anchor, {
 			title: modal.title,
 			customId: modalSubmits.customId,
 			components: fields,
@@ -555,84 +555,6 @@ function decodeId<T extends ComponentIDMetadata, R = [string, ...T]>(customId: s
 	return customId.split(constants.symbols.meta.idSeparator) as R;
 }
 
-async function acknowledge(client: Client, interaction: Logos.Interaction | Discord.Interaction): Promise<void> {
-	return client.bot.rest
-		.sendInteractionResponse(interaction.id, interaction.token, {
-			type: Discord.InteractionResponseTypes.DeferredUpdateMessage,
-		})
-		.catch((reason) => client.log.warn("Failed to acknowledge interaction:", reason));
-}
-
-async function postponeReply(
-	client: Client,
-	interaction: Logos.Interaction | Discord.Interaction,
-	{ visible = false } = {},
-): Promise<void> {
-	return client.bot.rest
-		.sendInteractionResponse(interaction.id, interaction.token, {
-			type: Discord.InteractionResponseTypes.DeferredChannelMessageWithSource,
-			data: visible ? {} : { flags: Discord.MessageFlags.Ephemeral },
-		})
-		.catch((reason) => client.log.warn("Failed to postpone reply to interaction:", reason));
-}
-
-async function reply(
-	client: Client,
-	interaction: Logos.Interaction | Discord.Interaction,
-	data: Omit<Discord.InteractionCallbackData, "flags">,
-	{ visible = false } = {},
-): Promise<void> {
-	return client.bot.rest
-		.sendInteractionResponse(interaction.id, interaction.token, {
-			type: Discord.InteractionResponseTypes.ChannelMessageWithSource,
-			data: { ...data, flags: visible ? undefined : Discord.MessageFlags.Ephemeral },
-		})
-		.catch((reason) => client.log.warn("Failed to reply to interaction:", reason));
-}
-
-async function editReply(
-	client: Client,
-	interaction: Logos.Interaction | Discord.Interaction,
-	data: Omit<Discord.InteractionCallbackData, "flags">,
-): Promise<void> {
-	return client.bot.rest
-		.editOriginalInteractionResponse(interaction.token, data)
-		.then(() => {})
-		.catch((reason) => client.log.warn("Failed to edit reply to interaction:", reason));
-}
-
-async function deleteReply(client: Client, interaction: Logos.Interaction | Discord.Interaction): Promise<void> {
-	return client.bot.rest
-		.deleteOriginalInteractionResponse(interaction.token)
-		.catch((reason) => client.log.warn("Failed to edit reply to interaction:", reason));
-}
-
-async function respond(
-	client: Client,
-	interaction: Logos.Interaction | Discord.Interaction,
-	choices: Discord.ApplicationCommandOptionChoice[],
-): Promise<void> {
-	return client.bot.rest
-		.sendInteractionResponse(interaction.id, interaction.token, {
-			type: Discord.InteractionResponseTypes.ApplicationCommandAutocompleteResult,
-			data: { choices },
-		})
-		.catch((reason) => client.log.warn("Failed to respond to autocomplete interaction:", reason));
-}
-
-async function displayModal(
-	client: Client,
-	interaction: Logos.Interaction | Discord.Interaction,
-	data: Omit<Discord.InteractionCallbackData, "flags">,
-): Promise<void> {
-	return client.bot.rest
-		.sendInteractionResponse(interaction.id, interaction.token, {
-			type: Discord.InteractionResponseTypes.Modal,
-			data,
-		})
-		.catch((reason) => client.log.warn("Failed to show modal:", reason));
-}
-
 function getLocalisationLanguage(guildDocument: Guild | undefined): LocalisationLanguage {
 	return guildDocument?.languages?.localisation ?? defaults.LOCALISATION_LANGUAGE;
 }
@@ -820,11 +742,8 @@ function getCommandName(interaction: Discord.Interaction | Logos.Interaction): s
 }
 
 export {
-	acknowledge,
 	createModalComposer,
 	decodeId,
-	deleteReply,
-	editReply,
 	encodeId,
 	generateButtons,
 	getLocalisationLanguage,
@@ -833,9 +752,6 @@ export {
 	parseArguments,
 	getLocaleData,
 	parseTimeExpression,
-	postponeReply,
-	reply,
-	respond,
 	getShowButton,
 	getFeatureLanguage,
 	getCommandName,

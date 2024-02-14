@@ -8,7 +8,7 @@ import { Client, InteractionCollector } from "../../../../client";
 import { Guild, timeStructToMilliseconds } from "../../../../database/guild";
 import { Ticket, TicketType } from "../../../../database/ticket";
 import { User } from "../../../../database/user";
-import { Modal, createModalComposer, deleteReply, editReply, postponeReply, reply } from "../../../../interactions";
+import { Modal, createModalComposer } from "../../../../interactions";
 import { Configurations } from "../../../../services/prompts/service";
 import { verifyIsWithinLimits } from "../../../../utils";
 import { OptionTemplate } from "../../../command";
@@ -99,7 +99,7 @@ async function handleOpenTicket(client: Client, interaction: Logos.Interaction):
 			description: client.localise("ticket.strings.tooMany.description", locale)(),
 		};
 
-		reply(client, interaction, {
+		client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -114,7 +114,7 @@ async function handleOpenTicket(client: Client, interaction: Logos.Interaction):
 	createModalComposer<Ticket["answers"]>(client, interaction, {
 		modal: generateTicketModal(client, { locale }),
 		onSubmit: async (submission, answers) => {
-			await postponeReply(client, submission);
+			await client.postponeReply(submission);
 
 			const result = await openTicket(
 				client,
@@ -134,7 +134,7 @@ async function handleOpenTicket(client: Client, interaction: Logos.Interaction):
 				description: client.localise("ticket.strings.sent.description", locale)(),
 			};
 
-			editReply(client, submission, {
+			client.editReply(submission, {
 				embeds: [
 					{
 						title: strings.title,
@@ -293,20 +293,20 @@ async function handleCouldNotOpenTicket(
 	});
 
 	continueButton.onCollect(async (buttonPress) => {
-		deleteReply(client, submission);
+		client.deleteReply(submission);
 		resolve(buttonPress);
 	});
 
 	cancelButton.onCollect(async (cancelButtonPress) => {
 		returnButton.onCollect(async (returnButtonPress) => {
-			deleteReply(client, submission);
-			deleteReply(client, cancelButtonPress);
+			client.deleteReply(submission);
+			client.deleteReply(cancelButtonPress);
 			resolve(returnButtonPress);
 		});
 
 		leaveButton.onCollect(async (_) => {
-			deleteReply(client, submission);
-			deleteReply(client, cancelButtonPress);
+			client.deleteReply(submission);
+			client.deleteReply(cancelButtonPress);
 			resolve(undefined);
 		});
 
@@ -317,7 +317,7 @@ async function handleCouldNotOpenTicket(
 			leave: client.localise("prompts.leave", locale)(),
 		};
 
-		reply(client, cancelButtonPress, {
+		client.reply(cancelButtonPress, {
 			embeds: [
 				{
 					title: strings.title,
@@ -360,7 +360,7 @@ async function handleCouldNotOpenTicket(
 				description: client.localise("ticket.strings.failed", locale)(),
 			};
 
-			editReply(client, submission, {
+			client.editReply(submission, {
 				embeds: [
 					{
 						title: strings.title,
@@ -379,7 +379,7 @@ async function handleCouldNotOpenTicket(
 		cancel: client.localise("prompts.cancel", locale)(),
 	};
 
-	editReply(client, submission, {
+	client.editReply(submission, {
 		embeds: [embed],
 		components: [
 			{

@@ -5,7 +5,7 @@ import localisations from "../../../../constants/localisations";
 import { list } from "../../../../formatting";
 import * as Logos from "../../../../types";
 import { Client } from "../../../client";
-import { editReply, parseArguments, postponeReply, reply } from "../../../interactions";
+import { parseArguments } from "../../../interactions";
 import { asStream } from "../../../utils";
 import { CommandTemplate } from "../../command";
 import { getAdapters } from "../detectors/adapters";
@@ -58,7 +58,7 @@ async function handleRecogniseLanguageMessage(client: Client, interaction: Logos
 			description: client.localise("recognize.strings.cannotUse.description", locale)(),
 		};
 
-		reply(client, interaction, {
+		client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -89,7 +89,7 @@ async function handleRecogniseLanguage(
 			description: client.localise("recognize.strings.textEmpty.description", locale)(),
 		};
 
-		reply(client, interaction, {
+		client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -101,7 +101,7 @@ async function handleRecogniseLanguage(
 		return;
 	}
 
-	await postponeReply(client, interaction);
+	await client.postponeReply(interaction);
 
 	const detectedLanguages = await detectLanguages(text);
 
@@ -114,7 +114,7 @@ async function handleRecogniseLanguage(
 			},
 		};
 
-		editReply(client, interaction, {
+		client.editReply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -146,7 +146,7 @@ async function handleRecogniseLanguage(
 			color: constants.colors.blue,
 		});
 
-		editReply(client, interaction, { embeds });
+		client.editReply(interaction, { embeds });
 		return;
 	}
 
@@ -240,7 +240,7 @@ async function handleRecogniseLanguage(
 		embeds.push(embed);
 	}
 
-	editReply(client, interaction, { embeds });
+	client.editReply(interaction, { embeds });
 }
 
 async function detectLanguages(text: string): Promise<DetectedLanguagesSorted> {

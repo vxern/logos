@@ -5,7 +5,6 @@ import localisations from "../../../../constants/localisations";
 import { Translation } from "../../../../constants/types/contributions";
 import * as Logos from "../../../../types";
 import { Client } from "../../../client";
-import { reply } from "../../../interactions";
 import { CommandTemplate } from "../../command";
 
 const command: CommandTemplate = {
@@ -18,7 +17,7 @@ const command: CommandTemplate = {
 async function handleDisplayCredits(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.locale;
 
-	reply(client, interaction, { embeds: [getTranslationView(client, { locale })] });
+	client.reply(interaction, { embeds: [getTranslationView(client, { locale })] });
 }
 
 function getTranslationView(client: Client, { locale }: { locale: Locale }): Discord.CamelizedDiscordEmbed {

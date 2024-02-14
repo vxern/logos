@@ -5,7 +5,7 @@ import { trim } from "../../../../formatting";
 import * as Logos from "../../../../types";
 import { Client, InteractionCollector } from "../../../client";
 import diagnostics from "../../../diagnostics";
-import { Modal, acknowledge, createModalComposer, deleteReply, reply } from "../../../interactions";
+import { Modal, createModalComposer } from "../../../interactions";
 import { getMemberAvatarURL } from "../../../utils";
 import { CommandTemplate } from "../../command";
 import categories from "../../social/roles/roles";
@@ -61,7 +61,7 @@ async function handleStartCorrecting(
 			description: client.localise("correction.strings.cannotCorrect.description", locale)(),
 		};
 
-		reply(client, interaction, {
+		client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -79,7 +79,7 @@ async function handleStartCorrecting(
 			description: client.localise("correction.strings.cannotCorrectOwn.description", locale)(),
 		};
 
-		reply(client, interaction, {
+		client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -112,7 +112,7 @@ async function handleStartCorrecting(
 					description: client.localise("correction.strings.userDoesNotWantCorrections.description", locale)(),
 				};
 
-				reply(client, interaction, {
+				client.reply(interaction, {
 					embeds: [
 						{
 							title: strings.title,
@@ -138,7 +138,7 @@ async function handleStartCorrecting(
 			},
 		};
 
-		reply(client, interaction, {
+		client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -170,7 +170,7 @@ async function handleStartCorrecting(
 				)({ username: diagnostics.display.user(interaction.user, { includeId: false }) }),
 			};
 
-			acknowledge(client, submission);
+			client.acknowledge(submission);
 
 			client.bot.rest
 				.sendMessage(message.channelId, {
@@ -271,20 +271,20 @@ async function handleSubmittedInvalidCorrection(
 	});
 
 	continueButton.onCollect(async (buttonPress) => {
-		deleteReply(client, submission);
+		client.deleteReply(submission);
 		resolve(buttonPress);
 	});
 
 	cancelButton.onCollect(async (cancelButtonPress) => {
 		returnButton.onCollect(async (returnButtonPress) => {
-			deleteReply(client, submission);
-			deleteReply(client, cancelButtonPress);
+			client.deleteReply(submission);
+			client.deleteReply(cancelButtonPress);
 			resolve(returnButtonPress);
 		});
 
 		leaveButton.onCollect(async (_) => {
-			deleteReply(client, submission);
-			deleteReply(client, cancelButtonPress);
+			client.deleteReply(submission);
+			client.deleteReply(cancelButtonPress);
 			resolve(undefined);
 		});
 
@@ -295,7 +295,7 @@ async function handleSubmittedInvalidCorrection(
 			leave: client.localise("prompts.leave", locale)(),
 		};
 
-		reply(client, cancelButtonPress, {
+		client.reply(cancelButtonPress, {
 			embeds: [
 				{
 					title: strings.title,
@@ -352,7 +352,7 @@ async function handleSubmittedInvalidCorrection(
 				description: client.localise("correction.strings.failed.description", locale)(),
 			};
 
-			reply(client, submission, {
+			client.reply(submission, {
 				embeds: [
 					{
 						title: strings.title,
@@ -371,7 +371,7 @@ async function handleSubmittedInvalidCorrection(
 		cancel: client.localise("prompts.cancel", locale)(),
 	};
 
-	reply(client, submission, {
+	client.reply(submission, {
 		embeds: [embed],
 		components: [
 			{

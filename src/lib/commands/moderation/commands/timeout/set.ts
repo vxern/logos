@@ -6,7 +6,7 @@ import * as Logos from "../../../../../types";
 import { Client } from "../../../../client";
 import { Guild } from "../../../../database/guild";
 import diagnostics from "../../../../diagnostics";
-import { parseArguments, parseTimeExpression, reply, respond } from "../../../../interactions";
+import { parseArguments, parseTimeExpression } from "../../../../interactions";
 
 async function handleSetTimeoutAutocomplete(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const language = interaction.language;
@@ -37,11 +37,11 @@ async function handleSetTimeoutAutocomplete(client: Client, interaction: Logos.I
 					autocomplete: client.localise("autocomplete.timestamp", locale)(),
 				};
 
-				respond(client, interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
+				client.respond(interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
 				return;
 			}
 
-			respond(client, interaction, [{ name: timestamp[0], value: timestamp[1].toString() }]);
+			client.respond(interaction, [{ name: timestamp[0], value: timestamp[1].toString() }]);
 		}
 	}
 }
@@ -145,7 +145,7 @@ async function handleSetTimeout(client: Client, interaction: Logos.Interaction):
 		}),
 	};
 
-	reply(client, interaction, {
+	client.reply(interaction, {
 		embeds: [
 			{
 				title: strings.title,
@@ -166,7 +166,7 @@ async function displayDurationInvalidError(
 		description: client.localise("timeout.strings.durationInvalid.description", locale)(),
 	};
 
-	reply(client, interaction, {
+	client.reply(interaction, {
 		embeds: [{ title: strings.title, description: strings.description, color: constants.colors.darkRed }],
 	});
 }
@@ -181,7 +181,7 @@ async function displayTooShortWarning(
 		description: client.localise("timeout.strings.tooShort.description", locale)(),
 	};
 
-	reply(client, interaction, {
+	client.reply(interaction, {
 		embeds: [{ title: strings.title, description: strings.description, color: constants.colors.yellow }],
 	});
 }
@@ -196,7 +196,7 @@ async function displayTooLongWarning(
 		description: client.localise("timeout.strings.tooLong.description", locale)(),
 	};
 
-	reply(client, interaction, {
+	client.reply(interaction, {
 		embeds: [{ title: strings.title, description: strings.description, color: constants.colors.yellow }],
 	});
 }

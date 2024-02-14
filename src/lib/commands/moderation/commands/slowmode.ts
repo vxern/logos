@@ -6,7 +6,7 @@ import * as Logos from "../../../../types";
 import { Client } from "../../../client";
 import { Guild } from "../../../database/guild";
 import diagnostics from "../../../diagnostics";
-import { parseArguments, reply, respond } from "../../../interactions";
+import { parseArguments } from "../../../interactions";
 import { CommandTemplate } from "../../command";
 
 const command: CommandTemplate = {
@@ -57,7 +57,7 @@ async function handleToggleSlowmodeAutocomplete(client: Client, interaction: Log
 		})
 		.filter((choice) => choice.name.toLowerCase().includes(levelQueryLowercase));
 
-	respond(client, interaction, choices);
+	client.respond(interaction, choices);
 }
 
 async function handleToggleSlowmode(client: Client, interaction: Logos.Interaction): Promise<void> {
@@ -108,7 +108,7 @@ async function handleToggleSlowmode(client: Client, interaction: Logos.Interacti
 					description: client.localise("slowmode.strings.invalid.description", locale)(),
 				};
 
-				reply(client, interaction, {
+				client.reply(interaction, {
 					embeds: [
 						{
 							title: strings.title,
@@ -141,8 +141,7 @@ async function handleToggleSlowmode(client: Client, interaction: Logos.Interacti
 					description: client.localise("slowmode.strings.downgraded.description", locale)(),
 				};
 
-				reply(
-					client,
+				client.reply(
 					interaction,
 					{
 						embeds: [
@@ -172,8 +171,7 @@ async function handleToggleSlowmode(client: Client, interaction: Logos.Interacti
 					description: client.localise("slowmode.strings.upgraded.description", locale)(),
 				};
 
-				reply(
-					client,
+				client.reply(
 					interaction,
 					{
 						embeds: [
@@ -199,7 +197,7 @@ async function handleToggleSlowmode(client: Client, interaction: Logos.Interacti
 					},
 				};
 
-				reply(client, interaction, {
+				client.reply(interaction, {
 					embeds: [
 						{
 							title: strings.title,
@@ -231,7 +229,7 @@ async function handleToggleSlowmode(client: Client, interaction: Logos.Interacti
 					},
 				};
 
-				reply(client, interaction, {
+				client.reply(interaction, {
 					embeds: [
 						{
 							title: strings.title,
@@ -257,8 +255,7 @@ async function handleToggleSlowmode(client: Client, interaction: Logos.Interacti
 			description: client.localise("slowmode.strings.disabled.description", locale)(),
 		};
 
-		reply(
-			client,
+		client.reply(
 			interaction,
 			{
 				embeds: [
@@ -281,7 +278,7 @@ async function handleToggleSlowmode(client: Client, interaction: Logos.Interacti
 			description: client.localise("slowmode.strings.missing.description", locale)({ parameter: "level" }),
 		};
 
-		reply(client, interaction, {
+		client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -301,7 +298,7 @@ async function handleToggleSlowmode(client: Client, interaction: Logos.Interacti
 			description: client.localise("slowmode.strings.invalid.description", locale)(),
 		};
 
-		reply(client, interaction, {
+		client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -332,8 +329,7 @@ async function handleToggleSlowmode(client: Client, interaction: Logos.Interacti
 		description: client.localise("slowmode.strings.enabled.description", locale)(),
 	};
 
-	reply(
-		client,
+	client.reply(
 		interaction,
 		{
 			embeds: [

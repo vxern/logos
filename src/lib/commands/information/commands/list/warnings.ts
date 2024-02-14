@@ -6,7 +6,7 @@ import * as Logos from "../../../../../types";
 import { Client } from "../../../../client";
 import { User } from "../../../../database/user";
 import { Warning } from "../../../../database/warning";
-import { parseArguments, reply } from "../../../../interactions";
+import { parseArguments } from "../../../../interactions";
 import { OptionTemplate } from "../../../command";
 import { getRuleTitleFormatted, rules } from "../../../moderation/commands/rule";
 import { user } from "../../../parameters";
@@ -120,7 +120,7 @@ async function handleDisplayWarnings(client: Client, interaction: Logos.Interact
 
 	session.dispose();
 
-	reply(client, interaction, {
+	client.reply(interaction, {
 		embeds: [getWarningPage(client, warningDocuments, isSelf, { locale })],
 	});
 }
@@ -135,7 +135,7 @@ async function displayError(
 		description: client.localise("list.options.warnings.strings.failed.description", locale)(),
 	};
 
-	reply(client, interaction, {
+	client.reply(interaction, {
 		embeds: [
 			{
 				title: strings.title,

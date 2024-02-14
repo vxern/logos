@@ -5,7 +5,7 @@ import { trim } from "../../../../formatting";
 import * as Logos from "../../../../types";
 import { Client } from "../../../client";
 import diagnostics from "../../../diagnostics";
-import { Modal, acknowledge, createModalComposer, reply } from "../../../interactions";
+import { Modal, createModalComposer } from "../../../interactions";
 import { getMemberAvatarURL } from "../../../utils";
 import { CommandTemplate } from "../../command";
 
@@ -45,7 +45,7 @@ async function handleStartAnswering(client: Client, interaction: Logos.Interacti
 			description: client.localise("answer.strings.cannotAnswer.description", locale)(),
 		};
 
-		reply(client, interaction, {
+		client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -63,7 +63,7 @@ async function handleStartAnswering(client: Client, interaction: Logos.Interacti
 			description: client.localise("answer.strings.cannotAnswerOwn.description", locale)(),
 		};
 
-		reply(client, interaction, {
+		client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -83,7 +83,7 @@ async function handleStartAnswering(client: Client, interaction: Logos.Interacti
 	createModalComposer(client, interaction, {
 		modal: generateAnswerModal(client, data, { locale }),
 		onSubmit: async (submission, data) => {
-			acknowledge(client, submission);
+			client.acknowledge(submission);
 
 			const strings = {
 				answer: client.localise("answer.strings.answer", locale)(),

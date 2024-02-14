@@ -3,7 +3,7 @@ import constants from "../../../../constants/constants";
 import defaults from "../../../../defaults";
 import * as Logos from "../../../../types";
 import { Client } from "../../../client";
-import { parseArguments, reply } from "../../../interactions";
+import { parseArguments } from "../../../interactions";
 import { chunk } from "../../../utils";
 import { OptionTemplate } from "../../command";
 import { show } from "../../parameters";
@@ -50,7 +50,7 @@ async function handleDisplayPlaybackQueue(client: Client, interaction: Logos.Int
 			},
 		};
 
-		reply(client, interaction, {
+		client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,

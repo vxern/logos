@@ -2,7 +2,6 @@ import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import * as Logos from "../../../../types";
 import { Client } from "../../../client";
-import { reply } from "../../../interactions";
 import { OptionTemplate } from "../../command";
 
 const command: OptionTemplate = {
@@ -39,7 +38,7 @@ async function handleStopPlayback(client: Client, interaction: Logos.Interaction
 			},
 		};
 
-		reply(client, interaction, {
+		client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -58,8 +57,7 @@ async function handleStopPlayback(client: Client, interaction: Logos.Interaction
 		description: client.localise("music.options.stop.strings.stopped.description", locale)(),
 	};
 
-	reply(
-		client,
+	client.reply(
 		interaction,
 		{
 			embeds: [

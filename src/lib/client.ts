@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import * as Discord from "@discordeno/bot";
-import * as log from "loglevel";
 import { Redis } from "ioredis";
+import * as log from "loglevel";
 import { nanoid } from "nanoid";
 import * as ravendb from "ravendb";
 import constants from "../constants/constants";
@@ -38,16 +38,7 @@ import { Ticket } from "./database/ticket";
 import { User } from "./database/user";
 import { Warning } from "./database/warning";
 import diagnostics from "./diagnostics";
-import {
-	acknowledge,
-	decodeId,
-	deleteReply,
-	getCommandName,
-	getLocaleData,
-	isAutocomplete,
-	reply,
-	respond,
-} from "./interactions";
+import { decodeId, getCommandName, getLocaleData, isAutocomplete } from "./interactions";
 import transformers from "./localisation/transformers";
 import { AlertService } from "./services/alert/alert";
 import { DynamicVoiceChannelService } from "./services/dynamic-voice-channels/dynamic-voice-channels";
@@ -1238,25 +1229,100 @@ class CommandStore {
 }
 
 class InteractionStore {
-	readonly interactions: Map<bigint, Logos.Interaction | Discord.Interaction>;
+	readonly log: Logger;
 
-	constructor() {
-		this.interactions = new Map();
+	readonly #bot: Discord.Bot;
+	readonly #interactions: Map<bigint, Logos.Interaction | Discord.Interaction>;
+
+	constructor({ bot, isDebug }: { bot: Discord.Bot; isDebug: boolean }) {
+		this.log = Logger.create({ identifier: "Interactions", isDebug });
+
+		this.#bot = bot;
+		this.#interactions = new Map();
 	}
 
 	registerInteraction(interaction: Logos.Interaction | Discord.Interaction): void {
-		this.interactions.set(interaction.id, interaction);
+		this.#interactions.set(interaction.id, interaction);
 	}
 
 	unregisterInteraction(interactionId: bigint): Logos.Interaction | Discord.Interaction | undefined {
-		const interaction = this.interactions.get(interactionId);
+		const interaction = this.#interactions.get(interactionId);
 		if (interaction === undefined) {
 			return undefined;
 		}
 
-		this.interactions.delete(interactionId);
+		this.#interactions.delete(interactionId);
 
 		return interaction;
+	}
+
+	async acknowledge(interaction: Logos.Interaction | Discord.Interaction): Promise<void> {
+		await this.#bot.rest
+			.sendInteractionResponse(interaction.id, interaction.token, {
+				type: Discord.InteractionResponseTypes.DeferredUpdateMessage,
+			})
+			.catch((reason) => this.log.warn("Failed to acknowledge interaction:", reason));
+	}
+
+	async postponeReply(interaction: Logos.Interaction | Discord.Interaction, { visible = false } = {}): Promise<void> {
+		await this.#bot.rest
+			.sendInteractionResponse(interaction.id, interaction.token, {
+				type: Discord.InteractionResponseTypes.DeferredChannelMessageWithSource,
+				data: visible ? {} : { flags: Discord.MessageFlags.Ephemeral },
+			})
+			.catch((reason) => this.log.warn("Failed to postpone reply to interaction:", reason));
+	}
+
+	async reply(
+		interaction: Logos.Interaction | Discord.Interaction,
+		data: Omit<Discord.InteractionCallbackData, "flags">,
+		{ visible = false } = {},
+	): Promise<void> {
+		await this.#bot.rest
+			.sendInteractionResponse(interaction.id, interaction.token, {
+				type: Discord.InteractionResponseTypes.ChannelMessageWithSource,
+				data: { ...data, flags: visible ? undefined : Discord.MessageFlags.Ephemeral },
+			})
+			.catch((reason) => this.log.warn("Failed to reply to interaction:", reason));
+	}
+
+	async editReply(
+		interaction: Logos.Interaction | Discord.Interaction,
+		data: Omit<Discord.InteractionCallbackData, "flags">,
+	): Promise<void> {
+		await this.#bot.rest
+			.editOriginalInteractionResponse(interaction.token, data)
+			.catch((reason) => this.log.warn("Failed to edit reply to interaction:", reason));
+	}
+
+	async deleteReply(interaction: Logos.Interaction | Discord.Interaction): Promise<void> {
+		await this.#bot.rest
+			.deleteOriginalInteractionResponse(interaction.token)
+			.catch((reason) => this.log.warn("Failed to delete reply to interaction:", reason));
+	}
+
+	async respond(
+		interaction: Logos.Interaction | Discord.Interaction,
+		choices: Discord.ApplicationCommandOptionChoice[],
+	): Promise<void> {
+		return this.#bot.rest
+			.sendInteractionResponse(interaction.id, interaction.token, {
+				type: Discord.InteractionResponseTypes.ApplicationCommandAutocompleteResult,
+				data: { choices },
+			})
+			.catch((reason) => this.log.warn("Failed to respond to autocomplete interaction:", reason));
+	}
+
+	async displayModal(
+		interaction: Logos.Interaction | Discord.Interaction,
+		data: Omit<Discord.InteractionCallbackData, "flags">,
+	): Promise<void> {
+		return this.#bot.rest
+			.sendInteractionResponse(interaction.id, interaction.token, {
+				type: Discord.InteractionResponseTypes.Modal,
+				data,
+			})
+			.catch((reason) => this.log.warn("Failed to show modal:", reason));
 	}
 }
 
@@ -2010,6 +2076,34 @@ class Client {
 		return this.#interactions.unregisterInteraction.bind(this.#interactions);
 	}
 
+	get acknowledge(): InteractionStore["acknowledge"] {
+		return this.#interactions.acknowledge.bind(this.#interactions);
+	}
+
+	get postponeReply(): InteractionStore["postponeReply"] {
+		return this.#interactions.postponeReply.bind(this.#interactions);
+	}
+
+	get reply(): InteractionStore["reply"] {
+		return this.#interactions.reply.bind(this.#interactions);
+	}
+
+	get editReply(): InteractionStore["editReply"] {
+		return this.#interactions.editReply.bind(this.#interactions);
+	}
+
+	get deleteReply(): InteractionStore["deleteReply"] {
+		return this.#interactions.deleteReply.bind(this.#interactions);
+	}
+
+	get respond(): InteractionStore["respond"] {
+		return this.#interactions.respond.bind(this.#interactions);
+	}
+
+	get displayModal(): InteractionStore["displayModal"] {
+		return this.#interactions.displayModal.bind(this.#interactions);
+	}
+
 	get registerCollector(): EventStore["registerCollector"] {
 		return this.#events.registerCollector.bind(this.#events);
 	}
@@ -2088,7 +2182,7 @@ class Client {
 			localisations: this.#localisations,
 			templates: Array.from(Object.values(commandTemplates)),
 		});
-		this.#interactions = new InteractionStore();
+		this.#interactions = new InteractionStore({ bot, isDebug: environment.isDebug });
 		this.#events = new EventStore({ bot });
 		this.#services = new ServiceStore();
 
@@ -2263,7 +2357,7 @@ class Client {
 	): Promise<void> {
 		const customId = interactionRaw.data?.customId;
 		if (customId !== undefined && decodeId(customId)[0] === constants.components.none) {
-			acknowledge(this, interactionRaw);
+			this.acknowledge(interactionRaw);
 			return;
 		}
 
@@ -2303,12 +2397,9 @@ class Client {
 					},
 				};
 
-				setTimeout(
-					() => deleteReply(this, interaction),
-					rateLimit.nextAllowedUsageTimestamp - executedAt - time.second,
-				);
+				setTimeout(() => this.deleteReply(interaction), rateLimit.nextAllowedUsageTimestamp - executedAt - time.second);
 
-				reply(this, interaction, {
+				this.reply(interaction, {
 					embeds: [
 						{
 							title: strings.title,
@@ -2476,7 +2567,7 @@ class Client {
 					description: this.localise("interactions.invalidUser.description", locale)(),
 				};
 
-				reply(this, interaction, {
+				this.reply(interaction, {
 					embeds: [
 						{
 							title: strings.title,
@@ -2511,7 +2602,7 @@ class Client {
 				autocomplete: this.localise("autocomplete.user", locale)(),
 			};
 
-			respond(this, interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
+			this.respond(interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
 			return;
 		}
 
@@ -2546,8 +2637,7 @@ class Client {
 			users.push(user);
 		}
 
-		respond(
-			this,
+		this.respond(
 			interaction,
 			users.map((user) => ({ name: diagnostics.display.user(user, { prettify: true }), value: user.id.toString() })),
 		);

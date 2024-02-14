@@ -10,7 +10,7 @@ import { trim } from "../../../../../../formatting";
 import * as Logos from "../../../../../../types";
 import { Client } from "../../../../../client";
 import { User } from "../../../../../database/user";
-import { editReply, parseArguments, postponeReply, reply, respond } from "../../../../../interactions";
+import { parseArguments } from "../../../../../interactions";
 import { OptionTemplate } from "../../../../command";
 
 const command: OptionTemplate = {
@@ -45,7 +45,7 @@ async function handleSetLanguageAutocomplete(client: Client, interaction: Logos.
 			autocomplete: client.localise("autocomplete.language", locale)(),
 		};
 
-		respond(client, interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
+		client.respond(interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
 		return;
 	}
 
@@ -59,7 +59,7 @@ async function handleSetLanguageAutocomplete(client: Client, interaction: Logos.
 		})
 		.filter((choice) => choice.name.toLowerCase().includes(languageQueryLowercase));
 
-	respond(client, interaction, choices);
+	client.respond(interaction, choices);
 }
 
 async function handleSetLanguage(client: Client, interaction: Logos.Interaction): Promise<void> {
@@ -78,7 +78,7 @@ async function handleSetLanguage(client: Client, interaction: Logos.Interaction)
 
 	const language = languageOrUndefined;
 
-	await postponeReply(client, interaction);
+	await client.postponeReply(interaction);
 
 	const session = client.database.openSession();
 
@@ -101,7 +101,7 @@ async function handleSetLanguage(client: Client, interaction: Logos.Interaction)
 			}),
 		};
 
-		editReply(client, interaction, {
+		client.editReply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -131,7 +131,7 @@ async function handleSetLanguage(client: Client, interaction: Logos.Interaction)
 		}),
 	};
 
-	editReply(client, interaction, {
+	client.editReply(interaction, {
 		embeds: [
 			{
 				title: strings.title,
@@ -152,7 +152,7 @@ async function displayError(
 		description: client.localise("settings.strings.invalid.description", locale)(),
 	};
 
-	reply(client, interaction, {
+	client.reply(interaction, {
 		embeds: [
 			{
 				title: strings.title,

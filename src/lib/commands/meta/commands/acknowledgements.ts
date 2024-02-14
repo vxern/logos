@@ -3,7 +3,6 @@ import constants from "../../../../constants/constants";
 import acknowledgements from "../../../../constants/types/acknowledgements";
 import * as Logos from "../../../../types";
 import { Client } from "../../../client";
-import { reply } from "../../../interactions";
 import { CommandTemplate } from "../../command";
 
 const command: CommandTemplate = {
@@ -30,7 +29,7 @@ async function handleDisplayAcknowledgements(client: Client, interaction: Logos.
 		};
 	});
 
-	reply(client, interaction, {
+	client.reply(interaction, {
 		embeds: [
 			{
 				title: strings.acknowledgements,

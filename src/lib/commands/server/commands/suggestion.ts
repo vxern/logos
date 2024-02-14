@@ -9,7 +9,7 @@ import { timeStructToMilliseconds } from "../../../database/guild";
 import { Guild } from "../../../database/guild";
 import { Suggestion } from "../../../database/suggestion";
 import { User } from "../../../database/user";
-import { Modal, createModalComposer, deleteReply, editReply, postponeReply, reply } from "../../../interactions";
+import { Modal, createModalComposer } from "../../../interactions";
 import { verifyIsWithinLimits } from "../../../utils";
 import { CommandTemplate } from "../../command";
 
@@ -102,7 +102,7 @@ async function handleMakeSuggestion(client: Client, interaction: Logos.Interacti
 			description: client.localise("suggestion.strings.tooMany.description", locale)(),
 		};
 
-		reply(client, interaction, {
+		client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -122,7 +122,7 @@ async function handleMakeSuggestion(client: Client, interaction: Logos.Interacti
 	createModalComposer<Suggestion["answers"]>(client, interaction, {
 		modal: generateSuggestionModal(client, { locale }),
 		onSubmit: async (submission, answers) => {
-			await postponeReply(client, submission);
+			await client.postponeReply(submission);
 
 			const session = client.database.openSession();
 
@@ -169,7 +169,7 @@ async function handleMakeSuggestion(client: Client, interaction: Logos.Interacti
 				description: client.localise("suggestion.strings.sent.description", locale)(),
 			};
 
-			editReply(client, submission, {
+			client.editReply(submission, {
 				embeds: [
 					{
 						title: strings.title,
@@ -208,20 +208,20 @@ async function handleSubmittedInvalidSuggestion(
 	});
 
 	continueButton.onCollect(async (buttonPress) => {
-		deleteReply(client, submission);
+		client.deleteReply(submission);
 		resolve(buttonPress);
 	});
 
 	cancelButton.onCollect(async (cancelButtonPress) => {
 		returnButton.onCollect(async (returnButtonPress) => {
-			deleteReply(client, submission);
-			deleteReply(client, cancelButtonPress);
+			client.deleteReply(submission);
+			client.deleteReply(cancelButtonPress);
 			resolve(returnButtonPress);
 		});
 
 		leaveButton.onCollect(async (_) => {
-			deleteReply(client, submission);
-			deleteReply(client, cancelButtonPress);
+			client.deleteReply(submission);
+			client.deleteReply(cancelButtonPress);
 			resolve(undefined);
 		});
 
@@ -232,7 +232,7 @@ async function handleSubmittedInvalidSuggestion(
 			leave: client.localise("prompts.leave", locale)(),
 		};
 
-		reply(client, cancelButtonPress, {
+		client.reply(cancelButtonPress, {
 			embeds: [
 				{
 					title: strings.title,
@@ -275,7 +275,7 @@ async function handleSubmittedInvalidSuggestion(
 				description: client.localise("suggestion.strings.failed", locale)(),
 			};
 
-			editReply(client, submission, {
+			client.editReply(submission, {
 				embeds: [
 					{
 						title: strings.title,
@@ -294,7 +294,7 @@ async function handleSubmittedInvalidSuggestion(
 		cancel: client.localise("prompts.cancel", locale)(),
 	};
 
-	editReply(client, submission, {
+	client.editReply(submission, {
 		embeds: [embed],
 		components: [
 			{

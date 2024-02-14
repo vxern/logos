@@ -5,7 +5,7 @@ import licences from "../../../../../constants/licences";
 import { code } from "../../../../../formatting";
 import * as Logos from "../../../../../types";
 import { Client } from "../../../../client";
-import { paginate, parseArguments, reply, respond } from "../../../../interactions";
+import { paginate, parseArguments } from "../../../../interactions";
 import { chunk } from "../../../../utils";
 import { OptionTemplate } from "../../../command";
 
@@ -44,7 +44,7 @@ async function handleDisplaySoftwareLicenceAutocomplete(client: Client, interact
 		})
 		.filter((choice) => choice.name.toLowerCase().includes(packageQueryLowercase));
 
-	respond(client, interaction, choices);
+	client.respond(interaction, choices);
 }
 
 async function handleDisplaySoftwareLicence(client: Client, interaction: Logos.Interaction): Promise<void> {
@@ -101,7 +101,7 @@ async function displayError(
 		description: client.localise("license.strings.invalid.description", locale)(),
 	};
 
-	reply(client, interaction, {
+	client.reply(interaction, {
 		embeds: [
 			{
 				title: strings.title,

@@ -2,7 +2,7 @@ import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import * as Logos from "../../../../types";
 import { Client } from "../../../client";
-import { parseArguments, reply } from "../../../interactions";
+import { parseArguments } from "../../../interactions";
 import { isCollection } from "../../../services/music/music";
 import { OptionTemplate } from "../../command";
 import { by, collection, to } from "../../parameters";
@@ -54,7 +54,7 @@ async function handleSkipAction(client: Client, interaction: Logos.Interaction):
 			},
 		};
 
-		reply(client, interaction, {
+		client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -83,7 +83,7 @@ async function handleSkipAction(client: Client, interaction: Logos.Interaction):
 				},
 			};
 
-			reply(client, interaction, {
+			client.reply(interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -101,7 +101,7 @@ async function handleSkipAction(client: Client, interaction: Logos.Interaction):
 			description: client.localise("music.options.skip.strings.noSong.description", locale)(),
 		};
 
-		reply(client, interaction, {
+		client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -121,7 +121,7 @@ async function handleSkipAction(client: Client, interaction: Logos.Interaction):
 			description: client.localise("music.strings.skips.tooManyArguments.description", locale)(),
 		};
 
-		reply(client, interaction, {
+		client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -141,7 +141,7 @@ async function handleSkipAction(client: Client, interaction: Logos.Interaction):
 			description: client.localise("music.strings.skips.invalid.description", locale)(),
 		};
 
-		reply(client, interaction, {
+		client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -166,8 +166,7 @@ async function handleSkipAction(client: Client, interaction: Logos.Interaction):
 					description: client.localise("music.options.skip.strings.skippedSong.description", locale)(),
 			  };
 
-	reply(
-		client,
+	client.reply(
 		interaction,
 		{
 			embeds: [

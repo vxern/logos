@@ -11,7 +11,7 @@ import { Guild } from "../../../database/guild";
 import { User } from "../../../database/user";
 import { Rule, Warning } from "../../../database/warning";
 import diagnostics from "../../../diagnostics";
-import { parseArguments, reply, respond } from "../../../interactions";
+import { parseArguments } from "../../../interactions";
 import { CommandTemplate } from "../../command";
 import { reason, user } from "../../parameters";
 import { getActiveWarnings } from "../module";
@@ -103,7 +103,7 @@ async function handleWarnUserAutocomplete(client: Client, interaction: Logos.Int
 			{ name: strings.other, value: components.none },
 		];
 
-		respond(client, interaction, choices);
+		client.respond(interaction, choices);
 
 		return;
 	}
@@ -146,7 +146,7 @@ async function handleWarnUser(client: Client, interaction: Logos.Interaction): P
 			description: client.localise("warn.strings.invalidRule.description", locale)(),
 		};
 
-		reply(client, interaction, {
+		client.reply(interaction, {
 			embeds: [{ title: strings.title, description: strings.description, color: constants.colors.red }],
 		});
 
@@ -292,7 +292,7 @@ async function handleWarnUser(client: Client, interaction: Logos.Interaction): P
 		}),
 	};
 
-	reply(client, interaction, {
+	client.reply(interaction, {
 		embeds: [
 			{
 				title: strings.title,
@@ -395,7 +395,7 @@ async function displayError(
 		description: client.localise("warn.strings.failed.description", locale)(),
 	};
 
-	reply(client, interaction, {
+	client.reply(interaction, {
 		embeds: [
 			{
 				title: strings.title,

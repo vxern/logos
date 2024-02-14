@@ -8,7 +8,7 @@ import { capitalise } from "../../../../formatting";
 import * as Logos from "../../../../types";
 import { Client, InteractionCollector } from "../../../client";
 import { User } from "../../../database/user";
-import { acknowledge, decodeId, deleteReply, editReply, encodeId, postponeReply, reply } from "../../../interactions";
+import { decodeId, encodeId } from "../../../interactions";
 import { random } from "../../../utils";
 import { CommandTemplate } from "../../command";
 
@@ -48,7 +48,7 @@ async function handleStartGame(client: Client, interaction: Logos.Interaction): 
 			description: client.localise("game.strings.noSentencesAvailable.description", locale)(),
 		};
 
-		await reply(client, interaction, {
+		await client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -60,7 +60,7 @@ async function handleStartGame(client: Client, interaction: Logos.Interaction): 
 
 		setTimeout(
 			() =>
-				deleteReply(client, interaction).catch(() => {
+				client.deleteReply(interaction).catch(() => {
 					client.log.warn(`Failed to delete "no results for word" message.`);
 				}),
 			defaults.WARN_MESSAGE_DELETE_TIMEOUT,
@@ -140,13 +140,13 @@ async function handleStartGame(client: Client, interaction: Logos.Interaction): 
 
 	session.dispose();
 
-	await postponeReply(client, interaction);
+	await client.postponeReply(interaction);
 
 	const guessButton = new InteractionCollector({ only: [interaction.user.id], isSingle: true });
 	const skipButton = new InteractionCollector({ only: [interaction.user.id], isSingle: true });
 
 	guessButton.onCollect(async (buttonPress) => {
-		acknowledge(client, buttonPress);
+		client.acknowledge(buttonPress);
 
 		const selectionCustomId = buttonPress.data?.customId;
 		if (selectionCustomId === undefined) {
@@ -193,12 +193,11 @@ async function handleStartGame(client: Client, interaction: Logos.Interaction): 
 			data.embedColour = constants.colors.lightGreen;
 			data.sentenceSelection = await getSentenceSelection(client, learningLocale);
 
-			editReply(client, interaction, await getGameView(client, data, userDocument, "hide", { locale, learningLocale }));
+			client.editReply(interaction, await getGameView(client, data, userDocument, "hide", { locale, learningLocale }));
 		} else {
 			data.embedColour = constants.colors.red;
 
-			editReply(
-				client,
+			client.editReply(
 				interaction,
 				await getGameView(client, data, userDocument, "reveal", { locale, learningLocale }),
 			);
@@ -206,12 +205,12 @@ async function handleStartGame(client: Client, interaction: Logos.Interaction): 
 	});
 
 	skipButton.onCollect(async (buttonPress) => {
-		acknowledge(client, buttonPress);
+		client.acknowledge(buttonPress);
 
 		data.embedColour = constants.colors.blue;
 		data.sentenceSelection = await getSentenceSelection(client, learningLocale);
 
-		editReply(client, interaction, await getGameView(client, data, userDocument, "hide", { locale, learningLocale }));
+		client.editReply(interaction, await getGameView(client, data, userDocument, "hide", { locale, learningLocale }));
 	});
 
 	client.registerInteractionCollector(guessButton);
@@ -225,7 +224,7 @@ async function handleStartGame(client: Client, interaction: Logos.Interaction): 
 		sessionScore: 0,
 	};
 
-	editReply(client, interaction, await getGameView(client, data, userDocument, "hide", { locale, learningLocale }));
+	client.editReply(interaction, await getGameView(client, data, userDocument, "hide", { locale, learningLocale }));
 }
 
 async function getGameView(

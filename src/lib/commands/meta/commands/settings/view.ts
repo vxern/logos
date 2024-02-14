@@ -5,7 +5,6 @@ import defaults from "../../../../../defaults";
 import * as Logos from "../../../../../types";
 import { Client } from "../../../../client";
 import { User } from "../../../../database/user";
-import { reply } from "../../../../interactions";
 import { OptionTemplate } from "../../../command";
 
 const command: OptionTemplate = {
@@ -49,7 +48,7 @@ async function handleDisplaySettings(client: Client, interaction: Logos.Interact
 		},
 	};
 
-	reply(client, interaction, {
+	client.reply(interaction, {
 		embeds: [
 			{
 				title: strings.title,

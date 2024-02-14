@@ -2,7 +2,7 @@ import * as Discord from "@discordeno/bot";
 import constants from "../../../../../constants/constants";
 import * as Logos from "../../../../../types";
 import { Client } from "../../../../client";
-import { getShowButton, parseArguments, reply } from "../../../../interactions";
+import { getShowButton, parseArguments } from "../../../../interactions";
 
 async function handleDisplayVolume(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const [{ show: showParameter }] = parseArguments(interaction.data?.options, { show: "boolean" });
@@ -35,7 +35,7 @@ async function handleDisplayVolume(client: Client, interaction: Logos.Interactio
 			},
 		};
 
-		reply(client, interaction, {
+		client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -60,8 +60,7 @@ async function handleDisplayVolume(client: Client, interaction: Logos.Interactio
 		? undefined
 		: [{ type: Discord.MessageComponentTypes.ActionRow, components: [showButton] }];
 
-	reply(
-		client,
+	client.reply(
 		interaction,
 		{
 			embeds: [

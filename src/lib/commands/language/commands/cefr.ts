@@ -5,15 +5,7 @@ import * as Logos from "../../../../types";
 import { Client, InteractionCollector } from "../../../client";
 import { CefrConfiguration } from "../../../database/guild";
 import { Guild } from "../../../database/guild";
-import {
-	acknowledge,
-	decodeId,
-	editReply,
-	encodeId,
-	getShowButton,
-	parseArguments,
-	reply,
-} from "../../../interactions";
+import { decodeId, encodeId, getShowButton, parseArguments } from "../../../interactions";
 import { CommandTemplate } from "../../command";
 import { show } from "../../parameters";
 
@@ -197,11 +189,11 @@ async function handleDisplayCefrGuide(client: Client, interaction: Logos.Interac
 	};
 
 	const refreshView = async () => {
-		editReply(client, interaction, { embeds: [getEmbed()], components: getButtons() });
+		client.editReply(interaction, { embeds: [getEmbed()], components: getButtons() });
 	};
 
 	bracketButtons.onCollect(async (buttonPress) => {
-		acknowledge(client, buttonPress);
+		client.acknowledge(buttonPress);
 
 		const selectionCustomId = buttonPress.data?.customId;
 		if (selectionCustomId === undefined) {
@@ -225,7 +217,7 @@ async function handleDisplayCefrGuide(client: Client, interaction: Logos.Interac
 	});
 
 	tabButtons.onCollect(async (buttonPress) => {
-		acknowledge(client, buttonPress);
+		client.acknowledge(buttonPress);
 
 		const selectionCustomId = buttonPress.data?.customId;
 		if (selectionCustomId === undefined) {
@@ -251,7 +243,7 @@ async function handleDisplayCefrGuide(client: Client, interaction: Logos.Interac
 	client.registerInteractionCollector(bracketButtons);
 	client.registerInteractionCollector(tabButtons);
 
-	reply(client, interaction, { embeds: [getEmbed()], components: getButtons() }, { visible: show });
+	client.reply(interaction, { embeds: [getEmbed()], components: getButtons() }, { visible: show });
 }
 
 function getBracketGuide(

@@ -4,7 +4,7 @@ import * as Logos from "../../../../../types";
 import { Client } from "../../../../client";
 import { Guild } from "../../../../database/guild";
 import diagnostics from "../../../../diagnostics";
-import { parseArguments, reply } from "../../../../interactions";
+import { parseArguments } from "../../../../interactions";
 
 async function handleClearTimeoutAutocomplete(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const [{ user }] = parseArguments(interaction.data?.options, {});
@@ -78,7 +78,7 @@ async function handleClearTimeout(client: Client, interaction: Logos.Interaction
 			)({ user_mention: mention(user.id, MentionTypes.User) }),
 		};
 
-		reply(client, interaction, {
+		client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -112,7 +112,7 @@ async function handleClearTimeout(client: Client, interaction: Logos.Interaction
 		)({ user_mention: mention(user.id, MentionTypes.User) }),
 	};
 
-	reply(client, interaction, {
+	client.reply(interaction, {
 		embeds: [
 			{
 				title: strings.title,

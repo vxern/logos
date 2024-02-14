@@ -5,15 +5,7 @@ import defaults from "../../../../defaults";
 import { MentionTypes, mention, trim } from "../../../../formatting";
 import * as Logos from "../../../../types";
 import { Client, InteractionCollector } from "../../../client";
-import {
-	ControlButtonID,
-	acknowledge,
-	decodeId,
-	deleteReply,
-	editReply,
-	generateButtons,
-	reply,
-} from "../../../interactions";
+import { ControlButtonID, decodeId, generateButtons } from "../../../interactions";
 import { MusicService } from "../../../services/music/music";
 import { chunk } from "../../../utils";
 import { OptionTemplate } from "../../command";
@@ -52,7 +44,7 @@ async function handleRemoveSongListing(client: Client, interaction: Logos.Intera
 			},
 		};
 
-		reply(client, interaction, {
+		client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -75,7 +67,7 @@ async function handleRemoveSongListing(client: Client, interaction: Logos.Intera
 			description: client.localise("music.options.remove.strings.queueEmpty.description", locale)(),
 		};
 
-		reply(client, interaction, {
+		client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -103,11 +95,11 @@ async function handleRemoveSongListing(client: Client, interaction: Logos.Intera
 			guildLocale: interaction.guildLocale,
 		});
 		if (interactionResponseData !== undefined) {
-			editReply(client, interaction, interactionResponseData);
+			client.editReply(interaction, interactionResponseData);
 		}
 	};
 
-	const onStopListener = async () => deleteReply(client, interaction);
+	const onStopListener = async () => client.deleteReply(interaction);
 
 	events.on("queueUpdate", onQueueUpdateListener);
 	events.on("stop", onStopListener);
@@ -117,7 +109,7 @@ async function handleRemoveSongListing(client: Client, interaction: Logos.Intera
 		events.off("stop", onStopListener);
 	}, constants.INTERACTION_TOKEN_EXPIRY);
 
-	reply(client, interaction, interactionResponseData);
+	client.reply(interaction, interactionResponseData);
 }
 
 interface RemoveListingData {
@@ -145,7 +137,7 @@ async function generateEmbed(
 	const selectMenuSelection = new InteractionCollector({ only: [interaction.user.id], isSingle: true });
 
 	pageButtons.onCollect(async (buttonPress) => {
-		acknowledge(client, buttonPress);
+		client.acknowledge(buttonPress);
 
 		const customId = buttonPress.data?.customId;
 		if (customId === undefined) {
@@ -177,7 +169,7 @@ async function generateEmbed(
 			return;
 		}
 
-		editReply(client, interaction, interactionResponseData);
+		client.editReply(interaction, interactionResponseData);
 	});
 
 	selectMenuSelection.onCollect(async (buttonPress) => {
@@ -198,7 +190,7 @@ async function generateEmbed(
 				description: client.localise("music.options.remove.strings.failed.description", locale)(),
 			};
 
-			reply(client, buttonPress, {
+			client.reply(buttonPress, {
 				embeds: [
 					{
 						title: strings.title,
@@ -221,8 +213,7 @@ async function generateEmbed(
 			}),
 		};
 
-		reply(
-			client,
+		client.reply(
 			buttonPress,
 			{
 				embeds: [

@@ -9,7 +9,7 @@ import { timeStructToMilliseconds } from "../../../database/guild";
 import { Guild } from "../../../database/guild";
 import { Report } from "../../../database/report";
 import { User } from "../../../database/user";
-import { Modal, createModalComposer, deleteReply, editReply, postponeReply, reply } from "../../../interactions";
+import { Modal, createModalComposer } from "../../../interactions";
 import { verifyIsWithinLimits } from "../../../utils";
 import { CommandTemplate } from "../../command";
 
@@ -100,7 +100,7 @@ async function handleMakeReport(client: Client, interaction: Logos.Interaction):
 			description: client.localise("report.strings.tooMany.description", locale)(),
 		};
 
-		reply(client, interaction, {
+		client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -120,7 +120,7 @@ async function handleMakeReport(client: Client, interaction: Logos.Interaction):
 	createModalComposer<Report["answers"]>(client, interaction, {
 		modal: generateReportModal(client, { locale }),
 		onSubmit: async (submission, answers) => {
-			await postponeReply(client, submission);
+			await client.postponeReply(submission);
 
 			const session = client.database.openSession();
 
@@ -166,7 +166,7 @@ async function handleMakeReport(client: Client, interaction: Logos.Interaction):
 				description: client.localise("report.strings.submitted.description", locale)(),
 			};
 
-			editReply(client, submission, {
+			client.editReply(submission, {
 				embeds: [
 					{
 						title: strings.title,
@@ -206,20 +206,20 @@ async function handleSubmittedInvalidReport(
 	});
 
 	continueButton.onCollect(async (buttonPress) => {
-		deleteReply(client, submission);
+		client.deleteReply(submission);
 		resolve(buttonPress);
 	});
 
 	cancelButton.onCollect(async (cancelButtonPress) => {
 		returnButton.onCollect(async (returnButtonPress) => {
-			deleteReply(client, submission);
-			deleteReply(client, cancelButtonPress);
+			client.deleteReply(submission);
+			client.deleteReply(cancelButtonPress);
 			resolve(returnButtonPress);
 		});
 
 		leaveButton.onCollect(async (_) => {
-			deleteReply(client, submission);
-			deleteReply(client, cancelButtonPress);
+			client.deleteReply(submission);
+			client.deleteReply(cancelButtonPress);
 			resolve(undefined);
 		});
 
@@ -230,7 +230,7 @@ async function handleSubmittedInvalidReport(
 			leave: client.localise("prompts.leave", locale)(),
 		};
 
-		reply(client, cancelButtonPress, {
+		client.reply(cancelButtonPress, {
 			embeds: [
 				{
 					title: strings.title,
@@ -286,7 +286,7 @@ async function handleSubmittedInvalidReport(
 				description: client.localise("report.strings.failed.description", locale)(),
 			};
 
-			editReply(client, submission, {
+			client.editReply(submission, {
 				embeds: [
 					{
 						title: strings.title,
@@ -305,7 +305,7 @@ async function handleSubmittedInvalidReport(
 		cancel: client.localise("prompts.cancel", locale)(),
 	};
 
-	editReply(client, submission, {
+	client.editReply(submission, {
 		embeds: [embed],
 		components: [
 			{

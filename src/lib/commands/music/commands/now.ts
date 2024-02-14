@@ -4,7 +4,7 @@ import defaults from "../../../../defaults";
 import { MentionTypes, mention, timestamp, trim } from "../../../../formatting";
 import * as Logos from "../../../../types";
 import { Client } from "../../../client";
-import { paginate, parseArguments, reply } from "../../../interactions";
+import { paginate, parseArguments } from "../../../interactions";
 import { isCollection } from "../../../services/music/music";
 import { chunk } from "../../../utils";
 import { OptionTemplate } from "../../command";
@@ -55,7 +55,7 @@ async function handleDisplayCurrentlyPlaying(client: Client, interaction: Logos.
 			},
 		};
 
-		reply(client, interaction, {
+		client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -86,7 +86,7 @@ async function handleDisplayCurrentlyPlaying(client: Client, interaction: Logos.
 				},
 			};
 
-			reply(client, interaction, {
+			client.reply(interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -104,7 +104,7 @@ async function handleDisplayCurrentlyPlaying(client: Client, interaction: Logos.
 			description: client.localise("music.options.now.strings.noSong.description", locale)(),
 		};
 
-		reply(client, interaction, {
+		client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -187,8 +187,7 @@ async function handleDisplayCurrentlyPlaying(client: Client, interaction: Logos.
 		}),
 	};
 
-	reply(
-		client,
+	client.reply(
 		interaction,
 		{
 			embeds: [

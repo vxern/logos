@@ -5,7 +5,7 @@ import * as Logos from "../../../../types";
 import { Client } from "../../../client";
 import { Guild } from "../../../database/guild";
 import { Rule } from "../../../database/warning";
-import { getShowButton, parseArguments, reply, respond } from "../../../interactions";
+import { getShowButton, parseArguments } from "../../../interactions";
 import { CommandTemplate } from "../../command";
 import { show } from "../../parameters";
 
@@ -70,7 +70,7 @@ async function handleCiteRuleAutocomplete(client: Client, interaction: Logos.Int
 		})
 		.filter((choice) => choice.name.toLowerCase().includes(ruleQueryLowercase));
 
-	respond(client, interaction, choices);
+	client.respond(interaction, choices);
 }
 
 async function handleCiteRule(client: Client, interaction: Logos.Interaction): Promise<void> {
@@ -114,8 +114,7 @@ async function handleCiteRule(client: Client, interaction: Logos.Interaction): P
 		? undefined
 		: [{ type: Discord.MessageComponentTypes.ActionRow, components: [showButton] }];
 
-	reply(
-		client,
+	client.reply(
 		interaction,
 		{
 			embeds: [
@@ -163,7 +162,7 @@ async function displayError(
 		description: client.localise("rule.strings.invalid.description", locale)(),
 	};
 
-	reply(client, interaction, {
+	client.reply(interaction, {
 		embeds: [
 			{
 				title: strings.title,

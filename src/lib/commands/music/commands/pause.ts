@@ -2,7 +2,6 @@ import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import * as Logos from "../../../../types";
 import { Client } from "../../../client";
-import { reply } from "../../../interactions";
 import { OptionTemplate } from "../../command";
 import { handleResumePlayback } from "./resume";
 
@@ -40,7 +39,7 @@ async function handlePausePlayback(client: Client, interaction: Logos.Interactio
 			},
 		};
 
-		reply(client, interaction, {
+		client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -68,8 +67,7 @@ async function handlePausePlayback(client: Client, interaction: Logos.Interactio
 		description: client.localise("music.options.pause.strings.paused.description", locale)(),
 	};
 
-	reply(
-		client,
+	client.reply(
 		interaction,
 		{
 			embeds: [

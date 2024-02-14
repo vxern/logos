@@ -7,19 +7,7 @@ import { code, trim } from "../../../../formatting";
 import * as Logos from "../../../../types";
 import { Client } from "../../../client";
 import diagnostics from "../../../diagnostics";
-import {
-	acknowledge,
-	createInteractionCollector,
-	decodeId,
-	deleteReply,
-	editReply,
-	encodeId,
-	getShowButton,
-	parseArguments,
-	postponeReply,
-	reply,
-	respond,
-} from "../../../interactions";
+import { decodeId, encodeId, getShowButton, parseArguments } from "../../../interactions";
 import { chunk } from "../../../utils";
 import { CommandTemplate } from "../../command";
 import { show } from "../../parameters";
@@ -73,7 +61,7 @@ async function handleFindWordAutocomplete(client: Client, interaction: Logos.Int
 			autocomplete: client.localise("autocomplete.language", locale)(),
 		};
 
-		respond(client, interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
+		client.respond(interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
 		return;
 	}
 
@@ -87,7 +75,7 @@ async function handleFindWordAutocomplete(client: Client, interaction: Logos.Int
 		})
 		.filter((choice) => choice.name.toLowerCase().includes(languageQueryLowercase));
 
-	respond(client, interaction, choices);
+	client.respond(interaction, choices);
 }
 
 /** Allows the user to look up a word and get information about it. */
@@ -113,7 +101,7 @@ async function handleFindWord(client: Client, interaction: Logos.Interaction): P
 			description: client.localise("word.strings.invalid.language.description", locale)(),
 		};
 
-		reply(client, interaction, {
+		client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -144,7 +132,7 @@ async function handleFindWord(client: Client, interaction: Logos.Interaction): P
 			description: client.localise("word.strings.noDictionaryAdapters.description", locale)(),
 		};
 
-		reply(client, interaction, {
+		client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -156,7 +144,7 @@ async function handleFindWord(client: Client, interaction: Logos.Interaction): P
 		return;
 	}
 
-	await postponeReply(client, interaction, { visible: show });
+	await client.postponeReply(interaction, { visible: show });
 
 	client.log.info(
 		`Looking up the word '${word}' from ${dictionaries.length} dictionaries as requested by ${diagnostics.display.user(
@@ -226,7 +214,7 @@ async function handleFindWord(client: Client, interaction: Logos.Interaction): P
 			description: client.localise("word.strings.noResults.description", locale)({ word: word }),
 		};
 
-		await editReply(client, interaction, {
+		await client.editReply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -238,7 +226,7 @@ async function handleFindWord(client: Client, interaction: Logos.Interaction): P
 
 		setTimeout(
 			() =>
-				deleteReply(client, interaction).catch(() => {
+				client.deleteReply(interaction).catch(() => {
 					client.log.warn(`Failed to delete "no results for word" message.`);
 				}),
 			defaults.WARN_MESSAGE_DELETE_TIMEOUT,
@@ -300,7 +288,7 @@ async function displayMenu(
 		return;
 	}
 
-	editReply(client, interaction, {
+	client.editReply(interaction, {
 		embeds: generateEmbeds(client, data, entry, { language, locale }),
 		components: generateButtons(client, interaction, data, entry, { language, locale }),
 	});
@@ -350,7 +338,7 @@ function generateButtons(
 			const previousPageButtonId = createInteractionCollector(client, {
 				type: Discord.InteractionTypes.MessageComponent,
 				onCollect: async (selection) => {
-					acknowledge(client, selection);
+					client.acknowledge(selection);
 
 					if (!isFirst) {
 						data.dictionaryEntryIndex--;
@@ -363,7 +351,7 @@ function generateButtons(
 			const nextPageButtonId = createInteractionCollector(client, {
 				type: Discord.InteractionTypes.MessageComponent,
 				onCollect: async (selection) => {
-					acknowledge(client, selection);
+					client.acknowledge(selection);
 
 					if (!isLast) {
 						data.dictionaryEntryIndex++;
@@ -412,7 +400,7 @@ function generateButtons(
 			const buttonId = createInteractionCollector(client, {
 				type: Discord.InteractionTypes.MessageComponent,
 				onCollect: async (selection) => {
-					acknowledge(client, selection);
+					client.acknowledge(selection);
 
 					if (entry.inflectionTable === undefined || selection.data === undefined) {
 						displayMenu(client, interaction, data, { language, locale });
@@ -460,7 +448,7 @@ function generateButtons(
 	const definitionsMenuButtonId = createInteractionCollector(client, {
 		type: Discord.InteractionTypes.MessageComponent,
 		onCollect: async (selection) => {
-			acknowledge(client, selection);
+			client.acknowledge(selection);
 
 			data.inflectionTableIndex = 0;
 			data.currentView = ContentTabs.Definitions;
@@ -472,7 +460,7 @@ function generateButtons(
 	const inflectionMenuButtonId = createInteractionCollector(client, {
 		type: Discord.InteractionTypes.MessageComponent,
 		onCollect: async (selection) => {
-			acknowledge(client, selection);
+			client.acknowledge(selection);
 
 			data.currentView = ContentTabs.Inflection;
 

@@ -7,7 +7,7 @@ import * as Logos from "../../../../../types";
 import { Client } from "../../../../client";
 import { Guild } from "../../../../database/guild";
 import diagnostics from "../../../../diagnostics";
-import { getFeatureLanguage, getLocalisationLanguage, reply } from "../../../../interactions";
+import { getFeatureLanguage, getLocalisationLanguage } from "../../../../interactions";
 import { getGuildIconURLFormatted, snowflakeToTimestamp } from "../../../../utils";
 import { OptionTemplate } from "../../../command";
 import { proficiency } from "../../../social/roles/categories/language";
@@ -78,7 +78,7 @@ async function handleDisplayGuildInformation(client: Client, interaction: Logos.
 		},
 	};
 
-	reply(client, interaction, {
+	client.reply(interaction, {
 		embeds: [
 			{
 				author: {

@@ -2,7 +2,7 @@ import constants from "../../../../../constants/constants";
 import defaults from "../../../../../defaults";
 import * as Logos from "../../../../../types";
 import { Client } from "../../../../client";
-import { parseArguments, reply } from "../../../../interactions";
+import { parseArguments } from "../../../../interactions";
 
 async function handleSetVolume(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.guildLocale;
@@ -32,7 +32,7 @@ async function handleSetVolume(client: Client, interaction: Logos.Interaction): 
 			},
 		};
 
-		reply(client, interaction, {
+		client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -59,7 +59,7 @@ async function handleSetVolume(client: Client, interaction: Logos.Interaction): 
 			)({ volume: defaults.MAX_VOLUME }),
 		};
 
-		reply(client, interaction, {
+		client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -78,8 +78,7 @@ async function handleSetVolume(client: Client, interaction: Logos.Interaction): 
 		description: client.localise("music.options.volume.options.set.strings.set.description", locale)({ volume }),
 	};
 
-	reply(
-		client,
+	client.reply(
 		interaction,
 		{
 			embeds: [

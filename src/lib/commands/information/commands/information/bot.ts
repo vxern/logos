@@ -3,7 +3,6 @@ import constants from "../../../../../constants/constants";
 import { list } from "../../../../../formatting";
 import * as Logos from "../../../../../types";
 import { Client } from "../../../../client";
-import { reply } from "../../../../interactions";
 import { OptionTemplate } from "../../../command";
 
 const option: OptionTemplate = {
@@ -55,7 +54,7 @@ async function handleDisplayBotInformation(client: Client, interaction: Logos.In
 		`${constants.symbols.bot.features.guides} ${strings.function.features.guides}`,
 	]);
 
-	reply(client, interaction, {
+	client.reply(interaction, {
 		embeds: [
 			{
 				author: {

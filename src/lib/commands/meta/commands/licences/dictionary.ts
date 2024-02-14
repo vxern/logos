@@ -4,7 +4,7 @@ import { Locale } from "../../../../../constants/languages";
 import licences from "../../../../../constants/licences";
 import * as Logos from "../../../../../types";
 import { Client } from "../../../../client";
-import { parseArguments, reply, respond } from "../../../../interactions";
+import { parseArguments } from "../../../../interactions";
 import { OptionTemplate } from "../../../command";
 
 const command: OptionTemplate = {
@@ -45,7 +45,7 @@ async function handleDisplayDictionaryLicenceAutocomplete(
 		})
 		.filter((choice) => choice.name.toLowerCase().includes(dictionaryQueryLowercase));
 
-	respond(client, interaction, choices);
+	client.respond(interaction, choices);
 }
 
 async function handleDisplayDictionaryLicence(client: Client, interaction: Logos.Interaction): Promise<void> {
@@ -73,7 +73,7 @@ async function handleDisplayDictionaryLicence(client: Client, interaction: Logos
 		},
 	};
 
-	reply(client, interaction, {
+	client.reply(interaction, {
 		embeds: [
 			{
 				author: {
@@ -112,7 +112,7 @@ async function displayError(
 		description: client.localise("licenses.strings.invalid.description", locale)(),
 	};
 
-	reply(client, interaction, {
+	client.reply(interaction, {
 		embeds: [
 			{
 				title: strings.title,

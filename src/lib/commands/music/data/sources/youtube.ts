@@ -4,7 +4,6 @@ import constants from "../../../../../constants/constants";
 import { trim } from "../../../../../formatting";
 import * as Logos from "../../../../../types";
 import { Client, InteractionCollector } from "../../../../client";
-import { deleteReply, postponeReply, reply } from "../../../../interactions";
 import { Song, SongListing } from "../types";
 import { ListingResolver } from "./sources";
 
@@ -13,8 +12,8 @@ const resolver: ListingResolver = async (client, interaction, query) => {
 		return search(client, interaction, query);
 	}
 
-	postponeReply(client, interaction);
-	deleteReply(client, interaction);
+	client.postponeReply(interaction);
+	client.deleteReply(interaction);
 
 	if (query.includes("list=")) {
 		const playlist = await YouTubeSearch.YouTube.getPlaylist(query);
@@ -41,7 +40,7 @@ async function search(client: Client, interaction: Logos.Interaction, query: str
 	const selectMenuSelection = new InteractionCollector({ only: [interaction.user.id], isSingle: true });
 
 	selectMenuSelection.onCollect(async (selection) => {
-		deleteReply(client, interaction);
+		client.deleteReply(interaction);
 
 		const indexString = selection.data?.values?.at(0) as string | undefined;
 		if (indexString === undefined) {
@@ -95,7 +94,7 @@ async function search(client: Client, interaction: Logos.Interaction, query: str
 		});
 	}
 
-	reply(client, interaction, {
+	client.reply(interaction, {
 		embeds: [
 			{
 				title: strings.title,

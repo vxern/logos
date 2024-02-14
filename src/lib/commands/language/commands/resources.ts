@@ -3,7 +3,7 @@ import localisations from "../../../../constants/localisations";
 import * as Logos from "../../../../types";
 import { Client } from "../../../client";
 import { Guild } from "../../../database/guild";
-import { getShowButton, parseArguments, reply } from "../../../interactions";
+import { getShowButton, parseArguments } from "../../../interactions";
 import { CommandTemplate } from "../../command";
 import { show } from "../../parameters";
 
@@ -71,8 +71,7 @@ async function handleDisplayResources(client: Client, interaction: Logos.Interac
 		buttons.push(showButton);
 	}
 
-	reply(
-		client,
+	client.reply(
 		interaction,
 		{
 			components: [
