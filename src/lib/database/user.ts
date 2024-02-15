@@ -27,11 +27,14 @@ interface GameScores {
 	};
 }
 
-class User extends Model<{ idParts: [] }> {
+class User extends Model<{ idParts: [userId: string] }> {
 	static readonly collection = "Users";
 
-	/** User's account data. */
-	account: Account;
+	get userId(): string {
+		return this._idParts[0]!;
+	}
+
+	readonly account: Account;
 
 	scores?: Partial<Record<Locale, GameScores>>;
 
