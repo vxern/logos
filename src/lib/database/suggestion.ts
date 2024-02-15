@@ -1,13 +1,36 @@
-// TODO(vxern): Make the whole thing nullable.
-interface Suggestion {
-	id: string;
-	guildId: string;
-	authorId: string;
-	answers: {
-		suggestion: string;
-	};
-	isResolved: boolean;
-	createdAt: number;
+import { Model } from "./model";
+
+interface SuggestionFormData {
+	readonly suggestion: string;
 }
 
-export type { Suggestion };
+class Suggestion extends Model<{ idParts: [guildId: string, authorId: string] }> {
+	static readonly collection = "Suggestions";
+
+	get guildId(): string {
+		return this._idParts[0]!;
+	}
+
+	get authorId(): string {
+		return this._idParts[1]!;
+	}
+
+	// TODO(vxern): Rename this to `formData`.
+	readonly answers: SuggestionFormData;
+
+	isResolved: boolean;
+
+	constructor({
+		id,
+		createdAt,
+		answers,
+		isResolved,
+	}: { id: string; createdAt: number; answers: SuggestionFormData; isResolved: boolean }) {
+		super({ id, createdAt });
+
+		this.answers = answers;
+		this.isResolved = isResolved;
+	}
+}
+
+export { Suggestion };

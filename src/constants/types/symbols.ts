@@ -9,6 +9,9 @@ export default {
 		// ! Changing this would break button interactions on all existing prompts/notices.
 		idSeparator: "|",
 	},
+	database: {
+		separator: "/",
+	},
 	ruleBullet: "💠",
 	understood: "✅",
 	information: {
