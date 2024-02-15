@@ -26,4 +26,4 @@ class GuildStats extends Model<{ idParts: [guildId: string] }> {
 	}
 }
 
-export type { GuildStats };
+export { GuildStats };

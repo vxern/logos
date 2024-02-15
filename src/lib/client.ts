@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import * as Discord from "@discordeno/bot";
 import { Redis } from "ioredis";
-import * as log from "loglevel";
+import log from "loglevel";
 import { nanoid } from "nanoid";
 import * as ravendb from "ravendb";
 import constants from "../constants/constants";
@@ -63,6 +63,7 @@ import { RoleIndicatorService } from "./services/role-indicators/role-indicators
 import { Service } from "./services/service";
 import { StatusService } from "./services/status/service";
 import { compact } from "./utils";
+import { Model, RawDocument } from "./database/model";
 
 interface Environment {
 	isDebug: boolean;
@@ -116,26 +117,28 @@ class Logger {
 class DocumentSession extends ravendb.DocumentSession {
 	readonly #database: Database;
 
-	async get<TEntity extends object = ravendb.IRavenObject>(id: string): Promise<TEntity | undefined>;
-	async get<TEntity extends object = ravendb.IRavenObject>(
-		ids: string[],
-	): Promise<ravendb.EntitiesCollectionObject<TEntity>>;
-	async get<TEntity extends object = ravendb.IRavenObject>(
-		idOrIds: string | string[],
-	): Promise<TEntity | undefined | (TEntity | undefined)[]> {
-		const result = await this.load<TEntity>(Array.isArray(idOrIds) ? idOrIds : [idOrIds]);
+	async get<M extends Model<any>>(id: string): Promise<M | undefined>;
+	async get<M extends Model<any>>(ids: string[]): Promise<(M | undefined)[]>;
+	async get<M extends Model<any>>(idOrIds: string | string[]): Promise<M | undefined | (M | undefined)[]> {
+		const result = (await this.load(Array.isArray(idOrIds) ? idOrIds : [idOrIds])) as Record<
+			string,
+			RawDocument | null
+		>;
 		if (result === null) {
 			return undefined;
 		}
 
-		const documents = Object.values(result).map((document) => document ?? undefined);
+		const documentsRaw = Object.values(result).map((documentRaw) => documentRaw ?? undefined);
 
-		for (const document of documents) {
-			if ((document ?? undefined) === undefined) {
+		const documents: (M | undefined)[] = [];
+		for (const documentRaw of documentsRaw) {
+			if ((documentRaw ?? undefined) === undefined) {
+				documents.push(undefined);
 				continue;
 			}
 
-			this.#database.cacheDocument(document);
+			const document = Model.from(documentRaw!) as M;
+			documents.push(document);
 		}
 
 		if (Array.isArray(idOrIds)) {
@@ -145,8 +148,8 @@ class DocumentSession extends ravendb.DocumentSession {
 		return documents.at(0)!;
 	}
 
-	async set<TEntity extends object>(document: TEntity): Promise<void> {
-		await this.store<TEntity>(document);
+	async set<M extends Model<any>>(document: M): Promise<void> {
+		await this.store<M>(document);
 
 		this.#database.cacheDocument(document);
 	}
@@ -209,11 +212,11 @@ class Database extends ravendb.DocumentStore {
 		const session = this.openSession();
 
 		const result = await Promise.all([
-			session.query<EntryRequest>({ collection: "EntryRequests" }).all(),
-			session.query<Report>({ collection: "Reports" }).all(),
-			session.query<Resource>({ collection: "Resources" }).all(),
-			session.query<Suggestion>({ collection: "Suggestions" }).all(),
-			session.query<Ticket>({ collection: "Tickets" }).all(),
+			session.query<EntryRequest>({ collection: EntryRequest.collection }).all(),
+			session.query<Report>({ collection: Report.collection }).all(),
+			session.query<Resource>({ collection: Resource.collection }).all(),
+			session.query<Suggestion>({ collection: Suggestion.collection }).all(),
+			session.query<Ticket>({ collection: Ticket.collection }).all(),
 		]);
 		const documents = result.flat();
 
@@ -222,68 +225,60 @@ class Database extends ravendb.DocumentStore {
 		session.dispose();
 	}
 
-	// TODO(vxern): This will need to be improved.
 	cacheDocument(document: any): void {
-		const collection: string | undefined = document["@metadata"]?.["@collection"];
-		if (collection === undefined) {
-			throw "StateError: Collection unexpectedly undefined.";
-		}
-
-		const partialId = Database.getPartialId({ collection, document });
-
-		switch (collection) {
-			case "EntryRequests": {
-				this.cache.entryRequests.set(partialId, document as EntryRequest);
+		switch (document.constructor) {
+			case EntryRequest: {
+				this.cache.entryRequests.set(document.partialId, document);
 				break;
 			}
-			case "GuildStats": {
-				this.cache.guildStats.set(partialId, document as GuildStats);
+			case GuildStats: {
+				this.cache.guildStats.set(document.partialId, document);
 				return;
 			}
-			case "Guilds": {
-				this.cache.guilds.set(partialId, document as Guild);
+			case Guild: {
+				this.cache.guilds.set(document.partialId, document);
 				break;
 			}
-			case "Praises": {
+			case Praise: {
 				if (this.cache.praisesByAuthor.has(document.authorId)) {
-					this.cache.praisesByAuthor.get(document.authorId)?.set(partialId, document);
+					this.cache.praisesByAuthor.get(document.authorId)?.set(document.partialId, document);
 				} else {
-					this.cache.praisesByAuthor.set(document.authorId, new Map([[partialId, document]]));
+					this.cache.praisesByAuthor.set(document.authorId, new Map([[document.partialId, document]]));
 				}
 
 				if (this.cache.praisesByTarget.has(document.targetId)) {
-					this.cache.praisesByTarget.get(document.targetId)?.set(partialId, document);
+					this.cache.praisesByTarget.get(document.targetId)?.set(document.partialId, document);
 				} else {
-					this.cache.praisesByTarget.set(document.targetId, new Map([[partialId, document]]));
+					this.cache.praisesByTarget.set(document.targetId, new Map([[document.partialId, document]]));
 				}
 
 				break;
 			}
-			case "Reports": {
-				this.cache.reports.set(partialId, document);
+			case Report: {
+				this.cache.reports.set(document.partialId, document);
 				break;
 			}
-			case "Resources": {
-				this.cache.resources.set(partialId, document);
+			case Resource: {
+				this.cache.resources.set(document.partialId, document);
 				break;
 			}
-			case "Suggestions": {
-				this.cache.suggestions.set(partialId, document);
+			case Suggestion: {
+				this.cache.suggestions.set(document.partialId, document);
 				break;
 			}
-			case "Tickets": {
-				this.cache.tickets.set(partialId, document);
+			case Ticket: {
+				this.cache.tickets.set(document.partialId, document);
 				break;
 			}
-			case "Users": {
-				this.cache.users.set(partialId, document);
+			case User: {
+				this.cache.users.set(document.partialId, document);
 				break;
 			}
-			case "Warnings": {
+			case Warning: {
 				if (this.cache.warningsByTarget.has(document.targetId)) {
-					this.cache.warningsByTarget.get(document.targetId)?.set(partialId, document);
+					this.cache.warningsByTarget.get(document.targetId)?.set(document.partialId, document);
 				} else {
-					this.cache.warningsByTarget.set(document.targetId, new Map([[partialId, document]]));
+					this.cache.warningsByTarget.set(document.targetId, new Map([[document.partialId, document]]));
 				}
 
 				break;
@@ -295,44 +290,6 @@ class Database extends ravendb.DocumentStore {
 		for (const document of documents) {
 			this.cacheDocument(document);
 		}
-	}
-
-	// TODO(vxern): This will need to be improved.
-	static getPartialId({ collection, document }: { collection: string; document: any }): string {
-		switch (collection) {
-			case "EntryRequests": {
-				return `${document.guildId}/${document.authorId}`;
-			}
-			case "GuildStats": {
-				return document.guildId;
-			}
-			case "Guilds": {
-				return document.guildId;
-			}
-			case "Praises": {
-				return `${document.targetId}/${document.authorId}/${document.createdAt}`;
-			}
-			case "Reports": {
-				return `${document.guildId}/${document.authorId}/${document.createdAt}`;
-			}
-			case "Resources": {
-				return `${document.guildId}/${document.authorId}/${document.createdAt}`;
-			}
-			case "Suggestions": {
-				return `${document.guildId}/${document.authorId}/${document.createdAt}`;
-			}
-			case "Tickets": {
-				return `${document.guildId}/${document.authorId}/${document.channelId}`;
-			}
-			case "Users": {
-				return document.account.id;
-			}
-			case "Warnings": {
-				return `${document.targetId}/${document.authorId}/${document.createdAt}`;
-			}
-		}
-
-		throw `StateError: Getting partial ID not handled for collection "${collection}".`;
 	}
 
 	/**
