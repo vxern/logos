@@ -1,5 +1,6 @@
 import { Locale, LocalisationLanguage } from "../../constants/languages";
-import { MetadataOrIdentifierData, Model } from "./model";
+import {IdentifierData, MetadataOrIdentifierData, Model} from "./model";
+import {Client} from "../client";
 
 interface Account {
 	/** User's Discord ID. */
@@ -42,18 +43,53 @@ class User extends Model<{ idParts: ["userId"] }> {
 		scores,
 		...data
 	}: {
-		createdAt: number;
-		account: Account;
+		createdAt?: number;
+		account?: Account;
 		scores?: Partial<Record<Locale, GameScores>>;
 	} & MetadataOrIdentifierData<User>) {
-		super({
-			createdAt,
-			"@metadata":
-				"@metadata" in data ? data["@metadata"] : { "@collection": "Users", "@id": Model.buildPartialId<User>(data) },
+		if ("@metadata" in data) {
+			super({
+				createdAt,
+				"@metadata": data["@metadata"],
+			});
+			this.account = account ?? { id: data["@metadata"]["@id"] }
+		} else {
+			super({
+				createdAt,
+				"@metadata": { "@collection": "Users", "@id": Model.buildPartialId<User>(data) },
+			});
+			this.account = account ?? { id: data.userId };
+		}
+
+		this.scores = scores;
+	}
+
+	static async getOrCreate(client: Client, data: IdentifierData<User>): Promise<User> {
+		if (client.documents.users.has(data.userId)) {
+			return client.documents.users.get(data.userId)!;
+		}
+
+		const { promise, resolve } = Promise.withResolvers<User>();
+
+		await client.database.withSession(async (session) => {
+			const userDocument = await session.get<User>(Model.buildId<User>(data, { collection: "Users" }));
+			if (userDocument === undefined) {
+				return;
+			}
+
+			resolve(userDocument);
 		});
 
-		this.account = account;
-		this.scores = scores;
+		await client.database.withSession(async (session) => {
+			const userDocument = new User(data);
+
+			await session.set(userDocument);
+			await session.saveChanges();
+
+			resolve(userDocument);
+		});
+
+		return promise;
 	}
 }
 
