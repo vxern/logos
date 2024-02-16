@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="8bfdf181-98e8-4231-9e4f-291859c93081" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/src/formatting.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/formatting.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/client.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/client.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/commands/information/commands/information/guild.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/commands/information/commands/information/guild.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/commands/information/commands/list/praises/author.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/commands/information/commands/list/praises/author.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/commands/information/commands/list/praises/target.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/commands/information/commands/list/praises/target.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/commands/information/commands/list/warnings.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/commands/information/commands/list/warnings.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/commands/language/commands/cefr.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/commands/language/commands/cefr.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/commands/language/commands/game.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/commands/language/commands/game.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/commands/language/commands/resources.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/commands/language/commands/resources.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/commands/meta/commands/settings/language/clear.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/commands/meta/commands/settings/language/clear.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/commands/meta/commands/settings/language/set.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/commands/meta/commands/settings/language/set.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/commands/meta/commands/settings/view.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/commands/meta/commands/settings/view.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/commands/moderation/commands/pardon.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/commands/moderation/commands/pardon.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/commands/moderation/commands/policy.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/commands/moderation/commands/policy.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/commands/moderation/commands/purge.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/commands/moderation/commands/purge.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/commands/moderation/commands/report.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/commands/moderation/commands/report.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/commands/moderation/commands/rule.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/commands/moderation/commands/rule.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/commands/moderation/commands/slowmode.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/commands/moderation/commands/slowmode.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/commands/moderation/commands/timeout/clear.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/commands/moderation/commands/timeout/clear.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/commands/moderation/commands/timeout/set.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/commands/moderation/commands/timeout/set.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/commands/moderation/commands/warn.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/commands/moderation/commands/warn.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/commands/server/commands/resource.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/commands/server/commands/resource.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/commands/server/commands/suggestion.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/commands/server/commands/suggestion.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/commands/server/commands/ticket/open.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/commands/server/commands/ticket/open.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/commands/social/commands/praise.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/commands/social/commands/praise.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/commands/social/commands/profile/view.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/commands/social/commands/profile/view.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/database/guild.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/database/guild.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/database/model.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/database/model.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/database/user.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/database/user.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/interactions.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/interactions.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/services/entry/entry.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/services/entry/entry.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/services/journalling/guild/entry-request-submit.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/services/journalling/guild/entry-request-submit.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/services/prompts/service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/services/prompts/service.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/services/prompts/types/reports.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/services/prompts/types/reports.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/services/prompts/types/resources.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/services/prompts/types/resources.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/services/prompts/types/suggestions.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/services/prompts/types/suggestions.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/services/prompts/types/tickets.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/services/prompts/types/tickets.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/services/prompts/types/verification.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/services/prompts/types/verification.ts" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitToolBoxStore">
+    <option name="projectConfigVersion" value="5" />
+  </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 3
+}</component>
+  <component name="ProjectId" id="2cGY7P5wIRP9eMCFAMJikLrth0i" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "dart.analysis.tool.window.visible": "false",
+    "git-widget-placeholder": "clean-up-codebase",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "/Users/vxern/Documents/GitHub/logos",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "project.structure.last.edited": "Modules",
+    "project.structure.proportion": "0.0",
+    "project.structure.side.proportion": "0.2",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
+    "show.migrate.to.gradle.popup": "false",
+    "ts.external.directory.path": "/Users/vxern/Documents/GitHub/logos/node_modules/typescript/lib",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="RubyModuleManagerSettings">
+    <option name="blackListedRootsPaths">
+      <list>
+        <option value="$PROJECT_DIR$" />
+      </list>
+    </option>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="8bfdf181-98e8-4231-9e4f-291859c93081" name="Changes" comment="" />
+      <created>1707739214177</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1707739214177</updated>
+      <workItem from="1707739215199" duration="1705000" />
+      <workItem from="1707814501054" duration="6000" />
+      <workItem from="1708097539639" duration="411000" />
+      <workItem from="1708097971159" duration="646000" />
+      <workItem from="1708098625454" duration="3000" />
+      <workItem from="1708098646890" duration="7386000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>
