@@ -30,6 +30,7 @@ import commandTemplates from "./commands/commands";
 import { EntryRequest } from "./database/entry-request";
 import { Guild, timeStructToMilliseconds } from "./database/guild";
 import { GuildStats } from "./database/guild-stats";
+import { Model, RawDocument } from "./database/model";
 import { Praise } from "./database/praise";
 import { Report } from "./database/report";
 import { Resource } from "./database/resource";
@@ -63,7 +64,6 @@ import { RoleIndicatorService } from "./services/role-indicators/role-indicators
 import { Service } from "./services/service";
 import { StatusService } from "./services/status/service";
 import { compact } from "./utils";
-import { Model, RawDocument } from "./database/model";
 
 interface Environment {
 	isDebug: boolean;
@@ -212,11 +212,11 @@ class Database extends ravendb.DocumentStore {
 		const session = this.openSession();
 
 		const result = await Promise.all([
-			session.query<EntryRequest>({ collection: EntryRequest.collection }).all(),
-			session.query<Report>({ collection: Report.collection }).all(),
-			session.query<Resource>({ collection: Resource.collection }).all(),
-			session.query<Suggestion>({ collection: Suggestion.collection }).all(),
-			session.query<Ticket>({ collection: Ticket.collection }).all(),
+			session.query<EntryRequest>({ collection: "EntryRequests" }).all(),
+			session.query<Report>({ collection: "Reports" }).all(),
+			session.query<Resource>({ collection: "Resources" }).all(),
+			session.query<Suggestion>({ collection: "Suggestions" }).all(),
+			session.query<Ticket>({ collection: "Tickets" }).all(),
 		]);
 		const documents = result.flat();
 
@@ -293,6 +293,10 @@ class Database extends ravendb.DocumentStore {
 	}
 
 	/**
+	 * @deprecated
+	 *
+	 * Use {@link Database.withSession()} instead.
+	 *
 	 * @remarks
 	 *
 	 * This method was reconstructed from the original implementation of the RavenDB `DocumentStore.openSession()`.
