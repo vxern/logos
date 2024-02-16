@@ -83,9 +83,9 @@ async function handleSubmitResource(client: Client, interaction: Logos.Interacti
 		return;
 	}
 
-	const compositeIdPartial = `${guildId}/${interaction.user.id}`;
+	const partialId = `${guildId}/${interaction.user.id}`;
 	const resourceDocuments = Array.from(client.documents.resources.entries())
-		.filter(([key, _]) => key.startsWith(compositeIdPartial))
+		.filter(([key, _]) => key.startsWith(partialId))
 		.map(([_, value]) => value);
 	const intervalMilliseconds = timeStructToMilliseconds(configuration.rateLimit?.within ?? defaults.RESOURCE_INTERVAL);
 	if (
@@ -157,10 +157,10 @@ async function handleSubmitResource(client: Client, interaction: Logos.Interacti
 				return "failure";
 			}
 
-			const compositeId = `${guild.id}/${user.id}/${createdAt}`;
-			resourceService.registerDocument(compositeId, resourceDocument);
-			resourceService.registerPrompt(prompt, userId, compositeId, resourceDocument);
-			resourceService.registerHandler(compositeId);
+			const partialId = `${guild.id}/${user.id}/${createdAt}`;
+			resourceService.registerDocument(partialId, resourceDocument);
+			resourceService.registerPrompt(prompt, userId, partialId, resourceDocument);
+			resourceService.registerHandler(partialId);
 
 			const strings = {
 				title: client.localise("resource.strings.sent.title", locale)(),

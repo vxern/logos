@@ -83,9 +83,9 @@ async function handleMakeSuggestion(client: Client, interaction: Logos.Interacti
 		return;
 	}
 
-	const compositeIdPartial = `${guildId}/${interaction.user.id}`;
+	const partialId = `${guildId}/${interaction.user.id}`;
 	const suggestionDocuments = Array.from(client.documents.suggestions.entries())
-		.filter(([key, _]) => key.startsWith(compositeIdPartial))
+		.filter(([key, _]) => key.startsWith(partialId))
 		.map(([_, value]) => value);
 	const intervalMilliseconds = timeStructToMilliseconds(
 		configuration.rateLimit?.within ?? defaults.SUGGESTION_INTERVAL,
@@ -159,10 +159,10 @@ async function handleMakeSuggestion(client: Client, interaction: Logos.Interacti
 				return "failure";
 			}
 
-			const compositeId = `${guild.id}/${user.id}/${createdAt}`;
-			suggestionService.registerDocument(compositeId, suggestionDocument);
-			suggestionService.registerPrompt(prompt, userId, compositeId, suggestionDocument);
-			suggestionService.registerHandler(compositeId);
+			const partialId = `${guild.id}/${user.id}/${createdAt}`;
+			suggestionService.registerDocument(partialId, suggestionDocument);
+			suggestionService.registerPrompt(prompt, userId, partialId, suggestionDocument);
+			suggestionService.registerHandler(partialId);
 
 			const strings = {
 				title: client.localise("suggestion.strings.sent.title", locale)(),

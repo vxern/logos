@@ -271,10 +271,10 @@ class EntryService extends LocalService {
 					return "failure";
 				}
 
-				const compositeId = `${guild.id}/${user.id}`;
-				verificationService.registerDocument(compositeId, entryRequestDocument);
-				verificationService.registerPrompt(prompt, userId, compositeId, entryRequestDocument);
-				verificationService.registerHandler(compositeId);
+				const partialId = `${guild.id}/${user.id}`;
+				verificationService.registerDocument(partialId, entryRequestDocument);
+				verificationService.registerPrompt(prompt, userId, partialId, entryRequestDocument);
+				verificationService.registerHandler(partialId);
 
 				const strings = {
 					title: this.client.localise("entry.verification.answers.submitted.title", locale)(),

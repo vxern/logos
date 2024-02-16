@@ -48,7 +48,7 @@ abstract class PromptService<
 	PromptType extends PromptTypes,
 	// TODO(vxern): This is a hack, get the fuck rid of this.
 	DataType extends { id: string },
-	InteractionData extends [compositeId: string, ...data: string[]],
+	InteractionData extends [partialId: string, ...data: string[]],
 > extends LocalService {
 	private readonly type: PromptType;
 	private readonly customId: string;
@@ -56,11 +56,11 @@ abstract class PromptService<
 
 	protected readonly documents: Map<string, DataType>;
 
-	private readonly handlerByCompositeId: Map<
-		/*compositeId: */ string,
+	private readonly handlerByPartialId: Map<
+		/*partialId: */ string,
 		(interaction: Discord.Interaction, data: InteractionData) => void
 	>;
-	protected readonly promptByCompositeId: Map</*compositeId: */ string, Discord.CamelizedDiscordMessage>;
+	protected readonly promptByPartialId: Map</*partialId: */ string, Discord.CamelizedDiscordMessage>;
 	private readonly documentByPromptId: Map</*promptId: */ string, DataType>;
 	private readonly userIdByPromptId: Map</*promptId: */ string, bigint>;
 
@@ -104,8 +104,8 @@ abstract class PromptService<
 
 		this.documents = this.getAllDocuments();
 
-		this.handlerByCompositeId = new Map();
-		this.promptByCompositeId = new Map();
+		this.handlerByPartialId = new Map();
+		this.promptByPartialId = new Map();
 		this.documentByPromptId = new Map();
 		this.userIdByPromptId = new Map();
 
@@ -137,7 +137,7 @@ abstract class PromptService<
 
 		const prompts = new Map(validPrompts);
 
-		for (const [compositeId, promptDocument] of this.documents) {
+		for (const [partialId, promptDocument] of this.documents) {
 			const userDocument = await this.getUserDocument(promptDocument);
 			if (userDocument === undefined) {
 				continue;
@@ -145,9 +145,9 @@ abstract class PromptService<
 
 			const userId = BigInt(userDocument.account.id);
 
-			let prompt = prompts.get(compositeId);
+			let prompt = prompts.get(partialId);
 			if (prompt !== undefined) {
-				prompts.delete(compositeId);
+				prompts.delete(partialId);
 			} else {
 				const user = this.client.entities.users.get(userId);
 				if (user === undefined) {
@@ -162,9 +162,9 @@ abstract class PromptService<
 				prompt = message;
 			}
 
-			this.registerPrompt(prompt, userId, compositeId, promptDocument);
-			this.registerDocument(compositeId, promptDocument);
-			this.registerHandler(compositeId);
+			this.registerPrompt(prompt, userId, partialId, promptDocument);
+			this.registerDocument(partialId, promptDocument);
+			this.registerHandler(partialId);
 		}
 
 		const expiredPrompts = Array.from(prompts.values());
@@ -181,17 +181,17 @@ abstract class PromptService<
 				return;
 			}
 
-			const [_, compositeId, ...metadata] = decodeId<InteractionData>(customId);
-			if (compositeId === undefined) {
+			const [_, partialId, ...metadata] = decodeId<InteractionData>(customId);
+			if (partialId === undefined) {
 				return;
 			}
 
-			const handle = this.handlerByCompositeId.get(compositeId);
+			const handle = this.handlerByPartialId.get(partialId);
 			if (handle === undefined) {
 				return;
 			}
 
-			handle(buttonPress, [compositeId, ...metadata] as InteractionData);
+			handle(buttonPress, [partialId, ...metadata] as InteractionData);
 		});
 
 		this.client.registerInteractionCollector(this.#_magicButton);
@@ -284,12 +284,12 @@ abstract class PromptService<
 
 				acknowledge(this.client, buttonPress);
 
-				const [_, compositeId] = decodeId(customId);
-				if (compositeId === undefined) {
+				const [_, partialId] = decodeId(customId);
+				if (partialId === undefined) {
 					return;
 				}
 
-				this.handleDelete(compositeId);
+				this.handleDelete(partialId);
 			});
 
 			this.client.registerInteractionCollector(this.#_removeButton);
@@ -299,8 +299,8 @@ abstract class PromptService<
 	async stop(): Promise<void> {
 		this.documents.clear();
 
-		this.handlerByCompositeId.clear();
-		this.promptByCompositeId.clear();
+		this.handlerByPartialId.clear();
+		this.promptByPartialId.clear();
 		this.documentByPromptId.clear();
 		this.userIdByPromptId.clear();
 
@@ -335,12 +335,12 @@ abstract class PromptService<
 			return;
 		}
 
-		const compositeId = this.getCompositeId(prompt);
-		if (compositeId === undefined) {
+		const partialId = this.extractPartialId(prompt);
+		if (partialId === undefined) {
 			return;
 		}
 
-		this.registerPrompt(prompt, userId, compositeId, promptDocument);
+		this.registerPrompt(prompt, userId, partialId, promptDocument);
 
 		this.documentByPromptId.delete(message.id.toString());
 		this.userIdByPromptId.delete(message.id.toString());
@@ -374,32 +374,32 @@ abstract class PromptService<
 
 	abstract getPromptContent(user: Logos.User, promptDocument: DataType): Discord.CreateMessageOptions | undefined;
 
-	getCompositeId(prompt: Discord.CamelizedDiscordMessage): string | undefined {
-		const compositeId = prompt.embeds?.at(-1)?.footer?.iconUrl?.split("&metadata=").at(-1);
-		if (compositeId === undefined) {
+	extractPartialId(prompt: Discord.CamelizedDiscordMessage): string | undefined {
+		const partialId = prompt.embeds?.at(-1)?.footer?.iconUrl?.split("&metadata=").at(-1);
+		if (partialId === undefined) {
 			return undefined;
 		}
 
-		return compositeId;
+		return partialId;
 	}
 
 	filterPrompts(
 		prompts: Discord.CamelizedDiscordMessage[],
 	): [
-		valid: [compositeId: string, prompt: Discord.CamelizedDiscordMessage][],
+		valid: [partialId: string, prompt: Discord.CamelizedDiscordMessage][],
 		invalid: Discord.CamelizedDiscordMessage[],
 	] {
-		const valid: [compositeId: string, prompt: Discord.CamelizedDiscordMessage][] = [];
+		const valid: [partialId: string, prompt: Discord.CamelizedDiscordMessage][] = [];
 		const invalid: Discord.CamelizedDiscordMessage[] = [];
 
 		for (const prompt of prompts) {
-			const compositeId = this.getCompositeId(prompt);
-			if (compositeId === undefined) {
+			const partialId = this.extractPartialId(prompt);
+			if (partialId === undefined) {
 				invalid.push(prompt);
 				continue;
 			}
 
-			valid.push([compositeId, prompt]);
+			valid.push([partialId, prompt]);
 		}
 
 		return [valid, invalid];
@@ -424,54 +424,54 @@ abstract class PromptService<
 		return message;
 	}
 
-	registerDocument(compositeId: string, promptDocument: DataType): void {
-		this.documents.set(compositeId, promptDocument);
+	registerDocument(partialId: string, promptDocument: DataType): void {
+		this.documents.set(partialId, promptDocument);
 	}
 
-	unregisterDocument(compositeId: string): void {
-		this.documents.delete(compositeId);
+	unregisterDocument(partialId: string): void {
+		this.documents.delete(partialId);
 	}
 
 	registerPrompt(
 		prompt: Discord.CamelizedDiscordMessage,
 		userId: bigint,
-		compositeId: string,
+		partialId: string,
 		promptDocument: DataType,
 	): void {
 		this.documentByPromptId.set(prompt.id, promptDocument);
 		this.userIdByPromptId.set(prompt.id, userId);
-		this.promptByCompositeId.set(compositeId, prompt);
+		this.promptByPartialId.set(partialId, prompt);
 	}
 
-	unregisterPrompt(prompt: Discord.CamelizedDiscordMessage, compositeId: string): void {
+	unregisterPrompt(prompt: Discord.CamelizedDiscordMessage, partialId: string): void {
 		this.documentByPromptId.delete(prompt.id);
 		this.userIdByPromptId.delete(prompt.id);
-		this.promptByCompositeId.delete(compositeId);
+		this.promptByPartialId.delete(partialId);
 	}
 
-	registerHandler(compositeId: string): void {
-		this.handlerByCompositeId.set(compositeId, async (interaction) => {
+	registerHandler(partialId: string): void {
+		this.handlerByPartialId.set(partialId, async (interaction) => {
 			const customId = interaction.data?.customId;
 			if (customId === undefined) {
 				return;
 			}
 
-			const [_, compositeId, ...metadata] = decodeId<InteractionData>(customId);
+			const [_, partialId, ...metadata] = decodeId<InteractionData>(customId);
 
-			const updatedDocument = await this.handleInteraction(interaction, [compositeId, ...metadata] as InteractionData);
+			const updatedDocument = await this.handleInteraction(interaction, [partialId, ...metadata] as InteractionData);
 			if (updatedDocument === undefined) {
 				return;
 			}
 
-			const prompt = this.promptByCompositeId.get(compositeId);
+			const prompt = this.promptByPartialId.get(partialId);
 			if (prompt === undefined) {
 				return;
 			}
 
 			if (updatedDocument === null) {
-				this.unregisterDocument(compositeId);
-				this.unregisterPrompt(prompt, compositeId);
-				this.unregisterHandler(compositeId);
+				this.unregisterDocument(partialId);
+				this.unregisterPrompt(prompt, partialId);
+				this.unregisterHandler(partialId);
 			} else {
 				this.documentByPromptId.set(prompt.id, updatedDocument);
 			}
@@ -482,8 +482,8 @@ abstract class PromptService<
 		});
 	}
 
-	unregisterHandler(compositeId: string): void {
-		this.handlerByCompositeId.delete(compositeId);
+	unregisterHandler(partialId: string): void {
+		this.handlerByPartialId.delete(partialId);
 	}
 
 	abstract handleInteraction(
@@ -491,24 +491,24 @@ abstract class PromptService<
 		data: InteractionData,
 	): Promise<DataType | undefined | null>;
 
-	protected async handleDelete(compositeId: string): Promise<void> {
+	protected async handleDelete(partialId: string): Promise<void> {
 		const session = this.client.database.openSession();
 
 		switch (this.type) {
 			case "reports": {
-				await session.delete(`reports/${compositeId}`);
+				await session.delete(`reports/${partialId}`);
 				break;
 			}
 			case "resources": {
-				await session.delete(`resources/${compositeId}`);
+				await session.delete(`resources/${partialId}`);
 				break;
 			}
 			case "suggestions": {
-				await session.delete(`suggestions/${compositeId}`);
+				await session.delete(`suggestions/${partialId}`);
 				break;
 			}
 			case "tickets": {
-				await session.delete(`tickets/${compositeId}`);
+				await session.delete(`tickets/${partialId}`);
 				break;
 			}
 		}
@@ -516,16 +516,16 @@ abstract class PromptService<
 		await session.saveChanges();
 		session.dispose();
 
-		const prompt = this.promptByCompositeId.get(compositeId);
+		const prompt = this.promptByPartialId.get(partialId);
 		if (prompt !== undefined) {
 			this.client.bot.rest
 				.deleteMessage(prompt.channelId, prompt.id)
 				.catch(() => this.client.log.warn("Failed to delete prompt after deleting document."));
-			this.unregisterPrompt(prompt, compositeId);
+			this.unregisterPrompt(prompt, partialId);
 		}
 
-		this.unregisterDocument(compositeId);
-		this.unregisterHandler(compositeId);
+		this.unregisterDocument(partialId);
+		this.unregisterHandler(partialId);
 	}
 }
 

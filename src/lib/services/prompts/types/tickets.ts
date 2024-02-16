@@ -18,7 +18,7 @@ class TicketService extends PromptService<"tickets", Ticket, InteractionData> {
 	getAllDocuments(): Map<string, Ticket> {
 		const tickets = new Map<string, Ticket>();
 
-		for (const [compositeId, ticketDocument] of this.client.documents.tickets) {
+		for (const [partialId, ticketDocument] of this.client.documents.tickets) {
 			if (ticketDocument.type !== "standalone") {
 				continue;
 			}
@@ -27,7 +27,7 @@ class TicketService extends PromptService<"tickets", Ticket, InteractionData> {
 				continue;
 			}
 
-			tickets.set(compositeId, ticketDocument);
+			tickets.set(partialId, ticketDocument);
 		}
 
 		return tickets;
@@ -130,10 +130,10 @@ class TicketService extends PromptService<"tickets", Ticket, InteractionData> {
 		const localeData = await getLocaleData(this.client, interaction);
 		const locale = localeData.locale;
 
-		const [compositeId, isResolvedString] = data;
+		const [partialId, isResolvedString] = data;
 		const isResolved = isResolvedString === "true";
 
-		const ticketDocument = this.documents.get(compositeId);
+		const ticketDocument = this.documents.get(partialId);
 		if (ticketDocument === undefined) {
 			return undefined;
 		}
@@ -186,10 +186,10 @@ class TicketService extends PromptService<"tickets", Ticket, InteractionData> {
 		return ticketDocument;
 	}
 
-	public async handleDelete(compositeId: string): Promise<void> {
-		await super.handleDelete(compositeId);
+	public async handleDelete(partialId: string): Promise<void> {
+		await super.handleDelete(partialId);
 
-		const [_, __, channelId] = compositeId.split("/");
+		const [_, __, channelId] = partialId.split("/");
 		if (channelId === undefined) {
 			return;
 		}

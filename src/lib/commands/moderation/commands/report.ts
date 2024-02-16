@@ -7,7 +7,7 @@ import * as Logos from "../../../../types";
 import { Client, InteractionCollector } from "../../../client";
 import { timeStructToMilliseconds } from "../../../database/guild";
 import { Guild } from "../../../database/guild";
-import { Report } from "../../../database/report";
+import { Report, ReportFormData } from "../../../database/report";
 import { User } from "../../../database/user";
 import { Modal, createModalComposer } from "../../../interactions";
 import { verifyIsWithinLimits } from "../../../utils";
@@ -83,9 +83,9 @@ async function handleMakeReport(client: Client, interaction: Logos.Interaction):
 		return;
 	}
 
-	const compositeIdPartial = `${guildId}/${interaction.user.id}`;
+	const partialId = `${guildId}/${interaction.user.id}`;
 	const reportDocuments = Array.from(client.documents.reports.entries())
-		.filter(([key, _]) => key.startsWith(compositeIdPartial))
+		.filter(([key, _]) => key.startsWith(partialId))
 		.map(([_, value]) => value);
 	const intervalMilliseconds = timeStructToMilliseconds(configuration.rateLimit?.within ?? defaults.REPORT_INTERVAL);
 	if (
@@ -117,7 +117,7 @@ async function handleMakeReport(client: Client, interaction: Logos.Interaction):
 		return;
 	}
 
-	createModalComposer<Report["answers"]>(client, interaction, {
+	createModalComposer<ReportFormData>(client, interaction, {
 		modal: generateReportModal(client, { locale }),
 		onSubmit: async (submission, answers) => {
 			await client.postponeReply(submission);
@@ -156,10 +156,10 @@ async function handleMakeReport(client: Client, interaction: Logos.Interaction):
 				return "failure";
 			}
 
-			const compositeId = `${guildId}/${userDocument.account.id}/${createdAt}`;
-			reportService.registerDocument(compositeId, reportDocument);
-			reportService.registerPrompt(prompt, user.id, compositeId, reportDocument);
-			reportService.registerHandler(compositeId);
+			const partialId = `${guildId}/${userDocument.account.id}/${createdAt}`;
+			reportService.registerDocument(partialId, reportDocument);
+			reportService.registerPrompt(prompt, user.id, partialId, reportDocument);
+			reportService.registerHandler(partialId);
 
 			const strings = {
 				title: client.localise("report.strings.submitted.title", locale)(),
@@ -331,7 +331,7 @@ async function handleSubmittedInvalidReport(
 	return promise;
 }
 
-function generateReportModal(client: Client, { locale }: { locale: Locale }): Modal<Report["answers"]> {
+function generateReportModal(client: Client, { locale }: { locale: Locale }): Modal<ReportFormData> {
 	const strings = {
 		title: client.localise("report.title", locale)(),
 		reason: client.localise("report.fields.reason", locale)(),

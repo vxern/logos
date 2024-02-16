@@ -18,12 +18,12 @@ class SuggestionService extends PromptService<"suggestions", Suggestion, Interac
 	getAllDocuments(): Map<string, Suggestion> {
 		const suggestions = new Map<string, Suggestion>();
 
-		for (const [compositeId, suggestionDocument] of this.client.documents.suggestions) {
+		for (const [partialId, suggestionDocument] of this.client.documents.suggestions) {
 			if (suggestionDocument.guildId !== this.guildIdString) {
 				continue;
 			}
 
-			suggestions.set(compositeId, suggestionDocument);
+			suggestions.set(partialId, suggestionDocument);
 		}
 
 		return suggestions;
@@ -125,10 +125,10 @@ class SuggestionService extends PromptService<"suggestions", Suggestion, Interac
 		const localeData = await getLocaleData(this.client, interaction);
 		const locale = localeData.locale;
 
-		const [compositeId, isResolvedString] = data;
+		const [partialId, isResolvedString] = data;
 		const isResolved = isResolvedString === "true";
 
-		const suggestionDocument = this.documents.get(compositeId);
+		const suggestionDocument = this.documents.get(partialId);
 		if (suggestionDocument === undefined) {
 			return undefined;
 		}

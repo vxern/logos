@@ -82,9 +82,9 @@ async function handleOpenTicket(client: Client, interaction: Logos.Interaction):
 		return;
 	}
 
-	const compositeIdPartial = `${guildId}/${interaction.user.id}`;
+	const partialId = `${guildId}/${interaction.user.id}`;
 	const ticketDocuments = Array.from(client.documents.tickets.entries())
-		.filter(([key, _]) => key.startsWith(compositeIdPartial))
+		.filter(([key, _]) => key.startsWith(partialId))
 		.map(([_, value]) => value);
 	const intervalMilliseconds = timeStructToMilliseconds(configuration.rateLimit?.within ?? defaults.TICKET_INTERVAL);
 	if (
@@ -253,9 +253,9 @@ async function openTicket(
 		}
 	}
 
-	const compositeId = `${guild.id}/${user.id}/${channel.id}`;
-	ticketService.registerDocument(compositeId, ticketDocument);
-	ticketService.registerHandler(compositeId);
+	const partialId = `${guild.id}/${user.id}/${channel.id}`;
+	ticketService.registerDocument(partialId, ticketDocument);
+	ticketService.registerHandler(partialId);
 
 	if (type === "inquiry") {
 		return ticketDocument;
@@ -266,7 +266,7 @@ async function openTicket(
 		return "failure";
 	}
 
-	ticketService.registerPrompt(prompt, user.id, compositeId, ticketDocument);
+	ticketService.registerPrompt(prompt, user.id, partialId, ticketDocument);
 
 	return ticketDocument;
 }

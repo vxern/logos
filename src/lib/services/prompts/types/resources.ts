@@ -18,12 +18,12 @@ class ResourceService extends PromptService<"resources", Resource, InteractionDa
 	getAllDocuments(): Map<string, Resource> {
 		const resources = new Map<string, Resource>();
 
-		for (const [compositeId, resourceDocument] of this.client.documents.resources) {
+		for (const [partialId, resourceDocument] of this.client.documents.resources) {
 			if (resourceDocument.guildId !== this.guildIdString) {
 				continue;
 			}
 
-			resources.set(compositeId, resourceDocument);
+			resources.set(partialId, resourceDocument);
 		}
 
 		return resources;
@@ -123,10 +123,10 @@ class ResourceService extends PromptService<"resources", Resource, InteractionDa
 		const localeData = await getLocaleData(this.client, interaction);
 		const locale = localeData.locale;
 
-		const [compositeId, isResolvedString] = data;
+		const [partialId, isResolvedString] = data;
 		const isResolved = isResolvedString === "true";
 
-		const resourceDocument = this.documents.get(compositeId);
+		const resourceDocument = this.documents.get(partialId);
 		if (resourceDocument === undefined) {
 			return undefined;
 		}

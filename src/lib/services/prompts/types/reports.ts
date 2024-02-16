@@ -19,12 +19,12 @@ class ReportService extends PromptService<"reports", Report, InteractionData> {
 	getAllDocuments(): Map<string, Report> {
 		const reports = new Map<string, Report>();
 
-		for (const [compositeId, reportDocument] of this.client.documents.reports) {
+		for (const [partialId, reportDocument] of this.client.documents.reports) {
 			if (reportDocument.guildId !== this.guildIdString) {
 				continue;
 			}
 
-			reports.set(compositeId, reportDocument);
+			reports.set(partialId, reportDocument);
 		}
 
 		return reports;
@@ -155,10 +155,10 @@ class ReportService extends PromptService<"reports", Report, InteractionData> {
 		const localeData = await getLocaleData(this.client, interaction);
 		const locale = localeData.locale;
 
-		const [compositeId, isResolvedString] = data;
+		const [partialId, isResolvedString] = data;
 		const isResolved = isResolvedString === "true";
 
-		const reportDocument = this.documents.get(compositeId);
+		const reportDocument = this.documents.get(partialId);
 		if (reportDocument === undefined) {
 			return undefined;
 		}

@@ -52,12 +52,12 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 				return;
 			}
 
-			const [_, compositeId] = decodeId(customId);
-			if (compositeId === undefined) {
+			const [_, partialId] = decodeId(customId);
+			if (partialId === undefined) {
 				return;
 			}
 
-			this.handleOpenInquiry(selection, compositeId);
+			this.handleOpenInquiry(selection, partialId);
 		});
 
 		this.client.registerInteractionCollector(this.#_openInquiry);
@@ -90,7 +90,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 
 		const entryRequests: Map<string, EntryRequest> = new Map();
 
-		for (const [compositeId, entryRequestDocument] of this.client.documents.entryRequests) {
+		for (const [partialId, entryRequestDocument] of this.client.documents.entryRequests) {
 			if (entryRequestDocument.guildId !== this.guildIdString) {
 				continue;
 			}
@@ -132,7 +132,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 				continue;
 			}
 
-			entryRequests.set(compositeId, entryRequestDocument);
+			entryRequests.set(partialId, entryRequestDocument);
 		}
 
 		return entryRequests;
@@ -322,10 +322,10 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 			return undefined;
 		}
 
-		const [compositeId, isAcceptString] = data;
+		const [partialId, isAcceptString] = data;
 		const isAccept = isAcceptString === "true";
 
-		const [guildId, userId] = compositeId.split("/");
+		const [guildId, userId] = partialId.split("/");
 		if (guildId === undefined || userId === undefined) {
 			return undefined;
 		}
@@ -773,7 +773,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 		}
 	}
 
-	private async handleOpenInquiry(interaction: Discord.Interaction, compositeId: string): Promise<void> {
+	private async handleOpenInquiry(interaction: Discord.Interaction, partialId: string): Promise<void> {
 		await postponeReply(this.client, interaction);
 
 		const [configuration, guild, guildDocument] = [this.configuration, this.guild, this.guildDocument];
@@ -786,7 +786,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 			return;
 		}
 
-		const entryRequestDocument = this.client.documents.entryRequests.get(compositeId);
+		const entryRequestDocument = this.client.documents.entryRequests.get(partialId);
 		if (entryRequestDocument === undefined) {
 			return;
 		}
@@ -854,7 +854,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 
 		session.saveChanges();
 
-		const prompt = this.promptByCompositeId.get(`${entryRequestDocument.guildId}/${entryRequestDocument.authorId}`);
+		const prompt = this.promptByPartialId.get(`${entryRequestDocument.guildId}/${entryRequestDocument.authorId}`);
 		if (prompt === undefined) {
 			return;
 		}
