@@ -1,5 +1,5 @@
 import { Locale, LocalisationLanguage } from "../../constants/languages";
-import { Model } from "./model";
+import { MetadataOrIdentifierData, Model } from "./model";
 
 interface Account {
 	/** User's Discord ID. */
@@ -27,9 +27,7 @@ interface GameScores {
 	};
 }
 
-class User extends Model<{ idParts: [userId: string] }> {
-	static readonly collection = "Users";
-
+class User extends Model<{ idParts: ["userId"] }> {
 	get userId(): string {
 		return this._idParts[0]!;
 	}
@@ -39,12 +37,20 @@ class User extends Model<{ idParts: [userId: string] }> {
 	scores?: Partial<Record<Locale, GameScores>>;
 
 	constructor({
-		id,
 		createdAt,
 		account,
 		scores,
-	}: { id: string; createdAt: number; account: Account; scores?: Partial<Record<Locale, GameScores>> }) {
-		super({ id, createdAt });
+		...data
+	}: {
+		createdAt: number;
+		account: Account;
+		scores?: Partial<Record<Locale, GameScores>>;
+	} & MetadataOrIdentifierData<User>) {
+		super({
+			createdAt,
+			"@metadata":
+				"@metadata" in data ? data["@metadata"] : { "@collection": "Users", "@id": Model.buildPartialId<User>(data) },
+		});
 
 		this.account = account;
 		this.scores = scores;

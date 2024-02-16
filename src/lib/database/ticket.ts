@@ -1,4 +1,4 @@
-import { Model } from "./model";
+import { MetadataOrIdentifierData, Model } from "./model";
 
 type TicketType = "standalone" | "inquiry";
 
@@ -6,9 +6,7 @@ interface TicketFormData {
 	readonly topic: string;
 }
 
-class Ticket extends Model<{ idParts: [guildId: string, authorId: string, channelId: string] }> {
-	static readonly collection = "Tickets";
-
+class Ticket extends Model<{ idParts: ["guildId", "authorId", "channelId"] }> {
 	get guildId(): string {
 		return this._idParts[0]!;
 	}
@@ -28,13 +26,24 @@ class Ticket extends Model<{ idParts: [guildId: string, authorId: string, channe
 	isResolved: boolean;
 
 	constructor({
-		id,
 		createdAt,
 		type,
 		answers,
 		isResolved,
-	}: { id: string; createdAt: number; type: TicketType; answers: TicketFormData; isResolved: boolean }) {
-		super({ id, createdAt });
+		...data
+	}: {
+		createdAt: number;
+		type: TicketType;
+		answers: TicketFormData;
+		isResolved: boolean;
+	} & MetadataOrIdentifierData<Ticket>) {
+		super({
+			createdAt,
+			"@metadata":
+				"@metadata" in data
+					? data["@metadata"]
+					: { "@collection": "Tickets", "@id": Model.buildPartialId<Ticket>(data) },
+		});
 
 		this.type = type;
 		this.answers = answers;
@@ -43,4 +52,4 @@ class Ticket extends Model<{ idParts: [guildId: string, authorId: string, channe
 }
 
 export { Ticket };
-export type { TicketType };
+export type { TicketType, TicketFormData };

@@ -1,6 +1,6 @@
 import { FeatureLanguage, LearningLanguage, LocalisationLanguage } from "../../constants/languages";
 import time from "../../constants/time";
-import { Model } from "./model";
+import { MetadataOrIdentifierData, Model } from "./model";
 
 /** @since v3.5.0 */
 interface GuildLanguages {
@@ -318,9 +318,7 @@ type VerificationActivationRule = {
 type RoleWithIndicator = { roleId: string; indicator: string };
 
 /** @since v3.0.0 */
-class Guild extends Model<{ idParts: [guildId: string] }> {
-	static readonly collection = "Guilds";
-
+class Guild extends Model<{ idParts: ["guildId"] }> {
 	get guildId(): string {
 		return this._idParts[0]!;
 	}
@@ -335,13 +333,22 @@ class Guild extends Model<{ idParts: [guildId: string] }> {
 	readonly isNative: boolean;
 
 	constructor({
-		id,
 		createdAt,
 		languages,
 		features,
 		isNative,
-	}: { id: string; createdAt: number; languages: GuildLanguages; features: GuildFeatures; isNative: boolean }) {
-		super({ id, createdAt });
+		...data
+	}: {
+		createdAt: number;
+		languages: GuildLanguages;
+		features: GuildFeatures;
+		isNative: boolean;
+	} & MetadataOrIdentifierData<Guild>) {
+		super({
+			createdAt,
+			"@metadata":
+				"@metadata" in data ? data["@metadata"] : { "@collection": "Guilds", "@id": Model.buildPartialId<Guild>(data) },
+		});
 
 		this.languages = languages;
 		this.features = features;

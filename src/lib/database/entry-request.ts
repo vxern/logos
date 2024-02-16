@@ -1,4 +1,4 @@
-import { Model } from "./model";
+import { MetadataOrIdentifierData, Model } from "./model";
 
 interface EntryRequestFormData {
 	readonly reason: string;
@@ -6,11 +6,9 @@ interface EntryRequestFormData {
 	readonly whereFound: string;
 }
 
-type Vote = "for" | "against";
+type VoteType = "for" | "against";
 
-class EntryRequest extends Model<{ idParts: [guildId: string, userId: string] }> {
-	static readonly collection = "EntryRequests";
-
+class EntryRequest extends Model<{ idParts: ["guildId", "authorId"] }> {
 	get guildId(): string {
 		return this._idParts[0]!;
 	}
@@ -30,7 +28,6 @@ class EntryRequest extends Model<{ idParts: [guildId: string, userId: string] }>
 	votedAgainst?: string[];
 
 	constructor({
-		id,
 		createdAt,
 		requestedRoleId,
 		answers,
@@ -38,17 +35,23 @@ class EntryRequest extends Model<{ idParts: [guildId: string, userId: string] }>
 		ticketChannelId,
 		votedFor,
 		votedAgainst,
+		...data
 	}: {
-		id: string;
 		createdAt: number;
 		requestedRoleId: string;
-		isFinalised: boolean;
 		answers: EntryRequestFormData;
+		isFinalised: boolean;
 		ticketChannelId?: string;
 		votedFor?: string[];
 		votedAgainst?: string[];
-	}) {
-		super({ id, createdAt });
+	} & MetadataOrIdentifierData<EntryRequest>) {
+		super({
+			createdAt,
+			"@metadata":
+				"@metadata" in data
+					? data["@metadata"]
+					: { "@collection": "EntryRequests", "@id": Model.buildPartialId<EntryRequest>(data) },
+		});
 
 		this.requestedRoleId = requestedRoleId;
 		this.isFinalised = isFinalised;
@@ -59,7 +62,7 @@ class EntryRequest extends Model<{ idParts: [guildId: string, userId: string] }>
 		this.votedAgainst = votedAgainst;
 	}
 
-	getUserVote({ userId }: { userId: string }): Vote | undefined {
+	getUserVote({ userId }: { userId: string }): VoteType | undefined {
 		if (this.votedFor?.includes(userId)) {
 			return "for";
 		}
@@ -71,7 +74,7 @@ class EntryRequest extends Model<{ idParts: [guildId: string, userId: string] }>
 		return undefined;
 	}
 
-	addVote({ userId, vote }: { userId: string; vote: Vote }): void {
+	addVote({ userId, vote }: { userId: string; vote: VoteType }): void {
 		const previousVote = this.getUserVote({ userId });
 		if (previousVote !== undefined) {
 			if (vote === previousVote) {
@@ -103,7 +106,7 @@ class EntryRequest extends Model<{ idParts: [guildId: string, userId: string] }>
 		}
 	}
 
-	removeVote({ userId, vote }: { userId: string; vote: Vote }): void {
+	removeVote({ userId, vote }: { userId: string; vote: VoteType }): void {
 		switch (vote) {
 			case "for": {
 				this.votedFor!.splice(this.votedFor!.indexOf(userId), 1);
@@ -118,3 +121,4 @@ class EntryRequest extends Model<{ idParts: [guildId: string, userId: string] }>
 }
 
 export { EntryRequest };
+export type { EntryRequestFormData, VoteType };

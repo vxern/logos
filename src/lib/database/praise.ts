@@ -1,9 +1,7 @@
-import { Model } from "./model";
+import { MetadataOrIdentifierData, Model } from "./model";
 
 // TODO(vxern): This needs a guild in the ID as well.
-class Praise extends Model<{ idParts: [authorId: string, targetId: string] }> {
-	static readonly collection = "Praises";
-
+class Praise extends Model<{ idParts: ["authorId", "targetId"] }> {
 	get authorId(): string {
 		return this._idParts[0]!;
 	}
@@ -14,8 +12,18 @@ class Praise extends Model<{ idParts: [authorId: string, targetId: string] }> {
 
 	comment?: string;
 
-	constructor({ id, createdAt, comment }: { id: string; createdAt: number; comment: string }) {
-		super({ id, createdAt });
+	constructor({
+		createdAt,
+		comment,
+		...data
+	}: { createdAt: number; comment: string } & MetadataOrIdentifierData<Praise>) {
+		super({
+			createdAt,
+			"@metadata":
+				"@metadata" in data
+					? data["@metadata"]
+					: { "@collection": "Praises", "@id": Model.buildPartialId<Praise>(data) },
+		});
 
 		this.comment = comment;
 	}

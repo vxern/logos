@@ -12,13 +12,13 @@ import { Warning } from "./warning";
 
 interface DocumentMetadata {
 	"@id": string;
-	"@collection": string;
+	"@collection": Collection;
 	// TODO(vxern): Put "is-deleted" here
 }
 
 interface RawDocument {
 	[key: string]: unknown;
-	"@metadata": DocumentMetadata;
+	"@metadata": Omit<DocumentMetadata, "@collection"> & { "@collection": string };
 }
 
 type Collection =
@@ -33,8 +33,11 @@ type Collection =
 	| "Users"
 	| "Warnings";
 
+type IdentifierData<M> = M extends Model<any> ? { [K in M["_idParts"][number]]: string } : never;
+type MetadataOrIdentifierData<M> = { "@metadata": DocumentMetadata } | IdentifierData<M>;
+
 // TODO(vxern): Add soft-deletion.
-abstract class Model<Generic extends { idParts: string[] }> {
+abstract class Model<Generic extends { idParts: readonly string[] }> {
 	static readonly #_classes: Record<Collection, { new (parameter: any): Model<any> }> = {
 		EntryRequests: EntryRequest,
 		GuildStats: GuildStats,
@@ -55,20 +58,21 @@ abstract class Model<Generic extends { idParts: string[] }> {
 	readonly "@metadata": DocumentMetadata;
 
 	get partialId(): string {
-		return this._idParts.join();
+		return this._idParts.join(constants.symbols.database.separator);
 	}
 
 	get id(): string {
-		return this["@metadata"]["@collection"];
+		return this["@metadata"]["@id"];
 	}
 
 	get collection(): string {
 		return this["@metadata"]["@collection"];
 	}
 
-	constructor({ id, createdAt }: { id: string; createdAt: number }) {
-		this._idParts = id.split(constants.symbols.database.separator).slice(1) as Generic["idParts"];
+	constructor({ createdAt, "@metadata": metadata }: { createdAt: number; "@metadata": DocumentMetadata }) {
+		this._idParts = metadata["@id"].split(constants.symbols.database.separator).slice(1) as Generic["idParts"];
 		this.createdAt = createdAt;
+		this["@metadata"] = metadata;
 	}
 
 	static from<M extends Model<any>>(data: RawDocument): M {
@@ -84,7 +88,11 @@ abstract class Model<Generic extends { idParts: string[] }> {
 
 		return new Class(data) as M;
 	}
+
+	static buildPartialId<M extends Model<any>>(data: IdentifierData<M>): string {
+		return Object.values(data).join(constants.symbols.database.separator);
+	}
 }
 
 export { Model };
-export type { Collection, RawDocument };
+export type { Collection, RawDocument, DocumentMetadata, MetadataOrIdentifierData };

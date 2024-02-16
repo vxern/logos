@@ -1,14 +1,12 @@
-import { Model } from "./model";
+import { MetadataOrIdentifierData, Model } from "./model";
 
 interface ReportFormData {
 	readonly reason: string;
-	readonly aim: string;
-	readonly whereFound: string;
+	readonly users: string;
+	messageLink?: string;
 }
 
-class Report extends Model<{ idParts: [guildId: string, authorId: string] }> {
-	static readonly collection = "Reports";
-
+class Report extends Model<{ idParts: ["guildId", "authorId"] }> {
 	get guildId(): string {
 		return this._idParts[0]!;
 	}
@@ -23,12 +21,18 @@ class Report extends Model<{ idParts: [guildId: string, authorId: string] }> {
 	isResolved: boolean;
 
 	constructor({
-		id,
 		createdAt,
 		answers,
 		isResolved,
-	}: { id: string; createdAt: number; answers: ReportFormData; isResolved: boolean }) {
-		super({ id, createdAt });
+		...data
+	}: { createdAt: number; answers: ReportFormData; isResolved: boolean } & MetadataOrIdentifierData<Report>) {
+		super({
+			createdAt,
+			"@metadata":
+				"@metadata" in data
+					? data["@metadata"]
+					: { "@collection": "Reports", "@id": Model.buildPartialId<Report>(data) },
+		});
 
 		this.answers = answers;
 		this.isResolved = isResolved;
@@ -36,3 +40,4 @@ class Report extends Model<{ idParts: [guildId: string, authorId: string] }> {
 }
 
 export { Report };
+export type { ReportFormData };

@@ -1,4 +1,4 @@
-import { Model } from "./model";
+import { MetadataOrIdentifierData, Model } from "./model";
 
 interface ResourceFormData {
 	readonly reason: string;
@@ -6,9 +6,7 @@ interface ResourceFormData {
 	readonly whereFound: string;
 }
 
-class Resource extends Model<{ idParts: [guildId: string, authorId: string] }> {
-	static readonly collection = "Resources";
-
+class Resource extends Model<{ idParts: ["guildId", "authorId"] }> {
 	get guildId(): string {
 		return this._idParts[0]!;
 	}
@@ -23,12 +21,18 @@ class Resource extends Model<{ idParts: [guildId: string, authorId: string] }> {
 	isResolved: boolean;
 
 	constructor({
-		id,
 		createdAt,
 		answers,
 		isResolved,
-	}: { id: string; createdAt: number; answers: ResourceFormData; isResolved: boolean }) {
-		super({ id, createdAt });
+		...data
+	}: { createdAt: number; answers: ResourceFormData; isResolved: boolean } & MetadataOrIdentifierData<Resource>) {
+		super({
+			createdAt,
+			"@metadata":
+				"@metadata" in data
+					? data["@metadata"]
+					: { "@collection": "Resources", "@id": Model.buildPartialId<Resource>(data) },
+		});
 
 		this.answers = answers;
 		this.isResolved = isResolved;
@@ -36,3 +40,4 @@ class Resource extends Model<{ idParts: [guildId: string, authorId: string] }> {
 }
 
 export { Resource };
+export type { ResourceFormData };

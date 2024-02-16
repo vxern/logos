@@ -1,5 +1,5 @@
 import { Locale } from "../../constants/languages";
-import { Model } from "./model";
+import { MetadataOrIdentifierData, Model } from "./model";
 
 interface GameStats {
 	/** @since v3.42.0 */
@@ -10,20 +10,32 @@ interface GameStats {
 	};
 }
 
-class GuildStats extends Model<{ idParts: [guildId: string] }> {
-	static readonly collection = "GuildStats";
-
+class GuildStats extends Model<{ idParts: ["guildId"] }> {
 	get guildId(): string {
 		return this._idParts[0]!;
 	}
 
 	stats?: Partial<Record<Locale, GameStats>>;
 
-	constructor({ id, createdAt, stats }: { id: string; createdAt: number; stats: Partial<Record<Locale, GameStats>> }) {
-		super({ id, createdAt });
+	constructor({
+		createdAt,
+		stats,
+		...data
+	}: {
+		createdAt: number;
+		stats: Partial<Record<Locale, GameStats>>;
+	} & MetadataOrIdentifierData<GuildStats>) {
+		super({
+			createdAt,
+			"@metadata":
+				"@metadata" in data
+					? data["@metadata"]
+					: { "@collection": "GuildStats", "@id": Model.buildPartialId<GuildStats>(data) },
+		});
 
 		this.stats = stats;
 	}
 }
 
 export { GuildStats };
+export type { GameStats };

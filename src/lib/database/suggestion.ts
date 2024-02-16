@@ -1,12 +1,10 @@
-import { Model } from "./model";
+import { MetadataOrIdentifierData, Model } from "./model";
 
 interface SuggestionFormData {
 	readonly suggestion: string;
 }
 
-class Suggestion extends Model<{ idParts: [guildId: string, authorId: string] }> {
-	static readonly collection = "Suggestions";
-
+class Suggestion extends Model<{ idParts: ["guildId", "authorId"] }> {
 	get guildId(): string {
 		return this._idParts[0]!;
 	}
@@ -21,12 +19,18 @@ class Suggestion extends Model<{ idParts: [guildId: string, authorId: string] }>
 	isResolved: boolean;
 
 	constructor({
-		id,
 		createdAt,
 		answers,
 		isResolved,
-	}: { id: string; createdAt: number; answers: SuggestionFormData; isResolved: boolean }) {
-		super({ id, createdAt });
+		...data
+	}: { createdAt: number; answers: SuggestionFormData; isResolved: boolean } & MetadataOrIdentifierData<Suggestion>) {
+		super({
+			createdAt,
+			"@metadata":
+				"@metadata" in data
+					? data["@metadata"]
+					: { "@collection": "Suggestions", "@id": Model.buildPartialId<Suggestion>(data) },
+		});
 
 		this.answers = answers;
 		this.isResolved = isResolved;
@@ -34,3 +38,4 @@ class Suggestion extends Model<{ idParts: [guildId: string, authorId: string] }>
 }
 
 export { Suggestion };
+export type { SuggestionFormData };
