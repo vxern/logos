@@ -1,9 +1,7 @@
 import { MetadataOrIdentifierData, Model } from "./model";
 
 interface ResourceFormData {
-	readonly reason: string;
-	readonly aim: string;
-	readonly whereFound: string;
+	readonly resource: string;
 }
 
 class Resource extends Model<{ idParts: ["guildId", "authorId"] }> {
