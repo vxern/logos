@@ -16,17 +16,7 @@ const command: OptionTemplate = {
 async function handleDisplaySettings(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.locale;
 
-	const session = client.database.openSession();
-
-	const userDocument =
-		client.documents.users.get(interaction.user.id.toString()) ??
-		(await session.get<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined));
-
-	session.dispose();
-
-	if (userDocument === undefined) {
-		return;
-	}
+	const userDocument = await User.getOrCreate(client, { userId: interaction.user.id.toString() });
 
 	const userLanguage = userDocument.account.language ?? defaults.LOCALISATION_LANGUAGE;
 

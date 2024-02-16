@@ -153,29 +153,8 @@ class EntryService extends LocalService {
 
 		const requestedRoleId = BigInt(parameter);
 
-		let session = this.client.database.openSession();
-
-		const guildDocument =
-			this.client.documents.guilds.get(guild.id.toString()) ??
-			(await session.get<Guild>(`guilds/${guild.id}`).then((value) => value ?? undefined));
-
-		session.dispose();
-
-		if (guildDocument === undefined) {
-			return;
-		}
-
-		session = this.client.database.openSession();
-
-		const userDocument =
-			this.client.documents.users.get(interaction.user.id.toString()) ??
-			(await session.get<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined));
-
-		session.dispose();
-
-		if (userDocument === undefined) {
-			return;
-		}
+		const guildDocument = await Guild.getOrCreate(client, { guildId: guildId.toString() });
+		const userDocument = await User.getOrCreate(client, { userId: interaction.user.id.toString() });
 
 		session = this.client.database.openSession();
 
@@ -411,30 +390,9 @@ class EntryService extends LocalService {
 		}
 
 		if (requiresVerification) {
-			const session = this.client.database.openSession();
-
-			const userDocument =
-				this.client.documents.users.get(interaction.user.id.toString()) ??
-				(await session.get<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined)) ??
-				(await (async () => {
-					const userDocument = {
-						...({
-							id: `users/${interaction.user.id}`,
-							account: { id: interaction.user.id.toString() },
-							createdAt: Date.now(),
-						} satisfies User),
-						"@metadata": { "@collection": "Users" },
-					};
-					await session.set(userDocument);
-					await session.saveChanges();
-
-					return userDocument as User;
-				})());
-
-			session.dispose();
+			const userDocument = await User.getOrCreate(client, { userId: interaction.user.id.toString() });
 
 			const isVerified = userDocument?.account.authorisedOn?.includes(this.guildIdString);
-
 			if (!isVerified) {
 				const strings = {
 					title: this.client.localise("entry.verification.getVerified.title", locale)(),
@@ -515,52 +473,7 @@ class EntryService extends LocalService {
 	}
 
 	private async vetUser(interaction: Logos.Interaction, { locale }: { locale: Locale }): Promise<boolean> {
-		const session = this.client.database.openSession();
-
-		const userDocument =
-			this.client.documents.users.get(interaction.user.id.toString()) ??
-			(await session.get<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined)) ??
-			(await (async () => {
-				const userDocument = {
-					...({
-						id: `users/${interaction.user.id}`,
-						account: { id: interaction.user.id.toString() },
-						createdAt: Date.now(),
-					} satisfies User),
-					"@metadata": { "@collection": "Users" },
-				};
-				await session.set(userDocument);
-				await session.saveChanges();
-
-				return userDocument as User;
-			})());
-
-		session.dispose();
-
-		if (userDocument === undefined) {
-			const strings = {
-				title: this.client.localise("entry.verification.verifyingAccount.failed.title", locale)(),
-				description: this.client.localise("entry.verification.verifyingAccount.failed.description", locale)(),
-			};
-
-			this.client.reply(interaction, {
-				embeds: [
-					{
-						title: strings.title,
-						description: strings.description,
-						color: constants.colors.red,
-					},
-				],
-			});
-
-			this.client.log.error(
-				`Failed to vet ${diagnostics.display.user(
-					interaction.user,
-				)} trying to enter the server due to their user document having been returned as undefined.`,
-			);
-
-			return false;
-		}
+		const userDocument = await User.getOrCreate(client, { userId: interaction.user.id.toString() });
 
 		const guildId = interaction.guildId;
 		if (guildId === undefined) {

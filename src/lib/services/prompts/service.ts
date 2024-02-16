@@ -139,9 +139,6 @@ abstract class PromptService<
 
 		for (const [partialId, promptDocument] of this.documents) {
 			const userDocument = await this.getUserDocument(promptDocument);
-			if (userDocument === undefined) {
-				continue;
-			}
 
 			const userId = BigInt(userDocument.account.id);
 
@@ -370,7 +367,7 @@ abstract class PromptService<
 	}
 
 	abstract getAllDocuments(): Map<string, DataType>;
-	abstract getUserDocument(promptDocument: DataType): Promise<User | undefined>;
+	abstract getUserDocument(promptDocument: DataType): Promise<User>;
 
 	abstract getPromptContent(user: Logos.User, promptDocument: DataType): Discord.CreateMessageOptions | undefined;
 

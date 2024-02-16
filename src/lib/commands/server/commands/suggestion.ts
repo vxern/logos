@@ -30,17 +30,7 @@ async function handleMakeSuggestion(client: Client, interaction: Logos.Interacti
 		return;
 	}
 
-	let session = client.database.openSession();
-
-	const guildDocument =
-		client.documents.guilds.get(guildId.toString()) ??
-		(await session.get<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
-
-	session.dispose();
-
-	if (guildDocument === undefined) {
-		return;
-	}
+	const guildDocument = await Guild.getOrCreate(client, { guildId: guildId.toString() });
 
 	const configuration = guildDocument.features.server.features?.suggestions;
 	if (configuration === undefined || !configuration.enabled) {
@@ -57,31 +47,7 @@ async function handleMakeSuggestion(client: Client, interaction: Logos.Interacti
 		return;
 	}
 
-	session = client.database.openSession();
-
-	const userDocument =
-		client.documents.users.get(interaction.user.id.toString()) ??
-		(await session.get<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined)) ??
-		(await (async () => {
-			const userDocument = {
-				...({
-					id: `users/${interaction.user.id}`,
-					account: { id: interaction.user.id.toString() },
-					createdAt: Date.now(),
-				} satisfies User),
-				"@metadata": { "@collection": "Users" },
-			};
-			await session.set(userDocument);
-			await session.saveChanges();
-
-			return userDocument as User;
-		})());
-
-	session.dispose();
-
-	if (userDocument === undefined) {
-		return;
-	}
+	const userDocument = await User.getOrCreate(client, { userId: interaction.user.id.toString() });
 
 	const partialId = `${guildId}/${interaction.user.id}`;
 	const suggestionDocuments = Array.from(client.documents.suggestions.entries())

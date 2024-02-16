@@ -30,17 +30,7 @@ async function handleDisplayResources(client: Client, interaction: Logos.Interac
 		return;
 	}
 
-	const session = client.database.openSession();
-
-	const guildDocument =
-		client.documents.guilds.get(guildId.toString()) ??
-		(await session.get<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
-
-	session.dispose();
-
-	if (guildDocument === undefined) {
-		return;
-	}
+	const guildDocument = await Guild.getOrCreate(client, { guildId: guildId.toString() });
 
 	const configuration = guildDocument.features.language.features?.resources;
 	if (configuration === undefined || !configuration.enabled) {

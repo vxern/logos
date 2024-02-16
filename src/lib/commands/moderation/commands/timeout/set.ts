@@ -55,17 +55,7 @@ async function handleSetTimeout(client: Client, interaction: Logos.Interaction):
 		return;
 	}
 
-	const session = client.database.openSession();
-
-	const guildDocument =
-		client.documents.guilds.get(guildId.toString()) ??
-		(await session.get<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
-
-	session.dispose();
-
-	if (guildDocument === undefined) {
-		return;
-	}
+	const guildDocument = await Guild.getOrCreate(client, { guildId: guildId.toString() });
 
 	const configuration = guildDocument.features.moderation.features?.timeouts;
 	if (configuration === undefined || !configuration.enabled) {

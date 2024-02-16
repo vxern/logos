@@ -30,14 +30,8 @@ class ReportService extends PromptService<"reports", Report, InteractionData> {
 		return reports;
 	}
 
-	async getUserDocument(reportDocument: Report): Promise<User | undefined> {
-		const session = this.client.database.openSession();
-
-		const userDocument =
-			this.client.documents.users.get(reportDocument.authorId) ??
-			session.get<User>(`users/${reportDocument.authorId}`).then((value) => value ?? undefined);
-
-		session.dispose();
+	async getUserDocument(reportDocument: Report): Promise<User> {
+		const userDocument = await User.getOrCreate(this.client, { userId: reportDocument.authorId });
 
 		return userDocument;
 	}

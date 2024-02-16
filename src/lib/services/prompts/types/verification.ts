@@ -15,6 +15,7 @@ import {
 } from "../../../interactions";
 import { getGuildIconURLFormatted, snowflakeToTimestamp } from "../../../utils";
 import { Configurations, PromptService } from "../service";
+import {Ticket} from "../../../database/ticket";
 
 type InteractionData = [documentId: string, isAccept: string];
 
@@ -133,14 +134,8 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 		return entryRequests;
 	}
 
-	async getUserDocument(entryRequestDocument: EntryRequest): Promise<User | undefined> {
-		const session = this.client.database.openSession();
-
-		const userDocument =
-			this.client.documents.users.get(entryRequestDocument.authorId) ??
-			session.get<User>(`users/${entryRequestDocument.authorId}`).then((value) => value ?? undefined);
-
-		session.dispose();
+	async getUserDocument(entryRequestDocument: EntryRequest): Promise<User> {
+		const userDocument = await User.getOrCreate(this.client, { userId: entryRequestDocument.authorId });
 
 		return userDocument;
 	}
@@ -336,50 +331,16 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 			return undefined;
 		}
 
-		const session = this.client.database.openSession();
-
-		const [authorDocument, voterDocument, entryRequestDocument] = await Promise.all([
-			this.client.documents.users.get(userId) ??
-				(await session.get<User>(`users/${userId}`).then((value) => value ?? undefined)) ??
-				(async () => {
-					const userDocument = {
-						...({
-							id: `users/${userId}`,
-							account: { id: userId },
-							createdAt: Date.now(),
-						} satisfies User),
-						"@metadata": { "@collection": "Users" },
-					};
-					await session.set(userDocument);
-					await session.saveChanges();
-
-					return userDocument as User;
-				})(),
-			this.client.documents.users.get(interaction.user.id.toString()) ??
-				(await session.get<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined)) ??
-				(async () => {
-					const userDocument = {
-						...({
-							id: `users/${interaction.user.id}`,
-							account: { id: interaction.user.id.toString() },
-							createdAt: Date.now(),
-						} satisfies User),
-						"@metadata": { "@collection": "Users" },
-					};
-					await session.set(userDocument);
-					await session.saveChanges();
-
-					return userDocument as User;
-				})(),
-			this.client.documents.entryRequests.get(`${guildId}/${userId}`),
-		]);
-
-		session.dispose();
-
-		if (voterDocument === undefined || entryRequestDocument === undefined) {
+		const entryRequestDocument = this.client.documents.entryRequests.get(`${guildId}/${userId}`);
+		if (entryRequestDocument === undefined) {
 			this.displayVoteError(interaction, { locale });
 			return undefined;
 		}
+
+		const [authorDocument, voterDocument] = await Promise.all([
+			User.getOrCreate(client, { userId }),
+			User.getOrCreate(client, { userId: interaction.user.id.toString() }),
+		]);
 
 		const [alreadyVotedToAccept, alreadyVotedToReject] = [
 			entryRequestDocument.votedFor ?? [],
@@ -791,9 +752,6 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 		}
 
 		const userDocument = await this.getUserDocument(entryRequestDocument);
-		if (userDocument === undefined) {
-			return;
-		}
 
 		const user = this.client.entities.users.get(BigInt(userDocument.account.id));
 		if (user === undefined) {

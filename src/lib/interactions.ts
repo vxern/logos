@@ -587,34 +587,10 @@ async function getLocaleData(
 
 	const member = client.entities.members.get(Discord.snowflakeToBigint(`${interaction.user.id}${guildId}`));
 
-	const session = client.database.openSession();
-
 	const [userDocument, guildDocument] = await Promise.all([
-		client.documents.users.get(interaction.user.id.toString()) ??
-			(await session.get<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined)) ??
-			(async () => {
-				const userDocument = {
-					...({
-						id: `users/${interaction.user.id}`,
-						account: { id: interaction.user.id.toString() },
-						createdAt: Date.now(),
-					} satisfies User),
-					"@metadata": { "@collection": "Users" },
-				};
-				await session.set(userDocument);
-				await session.saveChanges();
-
-				return userDocument as User;
-			})(),
-		client.documents.guilds.get(guildId.toString()) ??
-			session.get<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined),
+		User.getOrCreate(client, { userId: interaction.user.id.toString() }),
+		Guild.getOrCreate(client, { guildId: guildId.toString() }),
 	]);
-
-	session.dispose();
-
-	if (userDocument === undefined || guildDocument === undefined) {
-		return FALLBACK_LOCALE_DATA;
-	}
 
 	const targetOnlyChannelIds = getTargetOnlyChannelIds(guildDocument);
 	const isInTargetOnlyChannel =

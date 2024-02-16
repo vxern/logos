@@ -70,34 +70,7 @@ async function handleDisplayWarnings(client: Client, interaction: Logos.Interact
 
 	const isSelf = member.id === interaction.user.id;
 
-	let session = client.database.openSession();
-
-	const userDocument =
-		client.documents.users.get(member.id.toString()) ??
-		(await session.get<User>(`users/${member.id}`).then((value) => value ?? undefined)) ??
-		(await (async () => {
-			const userDocument = {
-				...({
-					id: `users/${member.id}`,
-					account: { id: member.id.toString() },
-					createdAt: Date.now(),
-				} satisfies User),
-				"@metadata": { "@collection": "Users" },
-			};
-			await session.set(userDocument);
-			await session.saveChanges();
-
-			return userDocument as User;
-		})());
-
-	session.dispose();
-
-	if (userDocument === undefined) {
-		displayError(client, interaction, { locale });
-		return;
-	}
-
-	session = client.database.openSession();
+	const session = client.database.openSession();
 
 	const warningDocumentsCached = client.documents.warningsByTarget.get(member.id.toString());
 	const warningDocuments =

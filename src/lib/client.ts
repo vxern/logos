@@ -2248,11 +2248,9 @@ class Client {
 			this.log.info(`Logos added to "${guild.name}" (ID ${guild.id}).`);
 		}
 
-		const session = this.database.openSession();
+		const guildDocument = await Guild.getOrCreate(client, { guildId: guild.id.toString() });
 
-		const guildDocument =
-			this.database.cache.guilds.get(guild.id.toString()) ??
-			(await session.get<Guild>(`guilds/${guild.id}`).then((value) => value ?? undefined));
+		const session = this.database.openSession();
 
 		const guildStatsExist = ((await session.get(`guildStats/${guild.id}`)) ?? undefined) !== undefined;
 		if (!guildStatsExist) {
@@ -2269,10 +2267,6 @@ class Client {
 		}
 
 		session.dispose();
-
-		if (guildDocument === undefined) {
-			return;
-		}
 
 		await this.#services.startServices(this, { guildId: guild.id, guildDocument });
 

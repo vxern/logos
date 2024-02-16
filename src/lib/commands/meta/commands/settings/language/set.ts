@@ -80,16 +80,7 @@ async function handleSetLanguage(client: Client, interaction: Logos.Interaction)
 
 	await client.postponeReply(interaction);
 
-	const session = client.database.openSession();
-
-	const userDocument =
-		client.documents.users.get(interaction.user.id.toString()) ??
-		(await session.get<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined));
-
-	if (userDocument === undefined) {
-		return;
-	}
-
+	const userDocument = await User.getOrCreate(client, { userId: interaction.user.id.toString() });
 	if (userDocument.account.language === language) {
 		const strings = {
 			title: client.localise("settings.strings.alreadySet.title", localeBefore)(),
@@ -114,10 +105,9 @@ async function handleSetLanguage(client: Client, interaction: Logos.Interaction)
 		return;
 	}
 
-	userDocument.account.language = language;
-	await session.set(userDocument);
-	await session.saveChanges();
-	session.dispose();
+	await userDocument.update(client, () => {
+		userDocument.account.language = language;
+	});
 
 	const localeAfter = getLocaleByLocalisationLanguage(language);
 

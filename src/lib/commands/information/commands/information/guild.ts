@@ -32,17 +32,7 @@ async function handleDisplayGuildInformation(client: Client, interaction: Logos.
 		return;
 	}
 
-	const session = client.database.openSession();
-
-	const guildDocument =
-		client.documents.guilds.get(guildId.toString()) ??
-		(await session.get<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
-
-	session.dispose();
-
-	if (guildDocument === undefined) {
-		return;
-	}
+	const guildDocument = await Guild.getOrCreate(client, { guildId: guildId.toString() });
 
 	const owner = client.entities.users.get(guild.ownerId);
 	if (owner === undefined) {

@@ -38,17 +38,7 @@ async function handlePardonUserAutocomplete(client: Client, interaction: Logos.I
 		return;
 	}
 
-	const session = client.database.openSession();
-
-	const guildDocument =
-		client.documents.guilds.get(guildId.toString()) ??
-		(await session.get<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
-
-	session.dispose();
-
-	if (guildDocument === undefined) {
-		return;
-	}
+	const guildDocument = await Guild.getOrCreate(client, { guildId: guildId.toString() });
 
 	const configuration = guildDocument.features.moderation.features?.warns;
 	if (configuration === undefined || !configuration.enabled) {
@@ -123,17 +113,7 @@ async function handlePardonUser(client: Client, interaction: Logos.Interaction):
 		return;
 	}
 
-	let session = client.database.openSession();
-
-	const guildDocument =
-		client.documents.guilds.get(guildId.toString()) ??
-		(await session.get<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
-
-	session.dispose();
-
-	if (guildDocument === undefined) {
-		return;
-	}
+	const guildDocument = await Guild.getOrCreate(client, { guildId: guildId.toString() });
 
 	const configuration = guildDocument.features.moderation.features?.warns;
 	if (configuration === undefined || !configuration.enabled) {
@@ -174,6 +154,7 @@ async function handlePardonUser(client: Client, interaction: Logos.Interaction):
 		return;
 	}
 
+	// TODO(vxern): Urgent - Fix this deletion.
 	session = client.database.openSession();
 
 	await session.delete(warning.id);
@@ -222,19 +203,7 @@ async function getRelevantWarnings(
 	member: Logos.Member,
 	expirationMilliseconds: number,
 ): Promise<Warning[] | undefined> {
-	let session = client.database.openSession();
-
-	const userDocument =
-		client.documents.users.get(member.id.toString()) ??
-		(await session.get<User>(`users/${member.id}`).then((value) => value ?? undefined));
-
-	session.dispose();
-
-	if (userDocument === undefined) {
-		return undefined;
-	}
-
-	session = client.database.openSession();
+	const session = client.database.openSession();
 
 	const warningDocumentsCached = client.documents.warningsByTarget.get(member.id.toString());
 	const warningDocuments =

@@ -16,18 +16,7 @@ async function handleClearLanguage(client: Client, interaction: Logos.Interactio
 
 	await client.postponeReply(interaction);
 
-	let session = client.database.openSession();
-
-	const userDocument =
-		client.documents.users.get(interaction.user.id.toString()) ??
-		(await session.get<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined));
-
-	session.dispose();
-
-	if (userDocument === undefined) {
-		return;
-	}
-
+	const userDocument = await User.getOrCreate(client, { userId: interaction.user.id.toString() });
 	if (userDocument.account.language === undefined) {
 		const strings = {
 			title: client.localise("settings.strings.cannotClear.title", locale)(),
@@ -46,11 +35,9 @@ async function handleClearLanguage(client: Client, interaction: Logos.Interactio
 		return;
 	}
 
-	session = client.database.openSession();
-	userDocument.account.language = undefined;
-	await session.set(userDocument);
-	await session.saveChanges();
-	session.dispose();
+	await userDocument.update(client, () => {
+		userDocument.account.language = undefined;
+	});
 
 	{
 		const strings = {

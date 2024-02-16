@@ -69,25 +69,7 @@ async function handleStartGame(client: Client, interaction: Logos.Interaction): 
 		return;
 	}
 
-	const session = client.database.openSession();
-
-	const userDocument =
-		client.documents.users.get(interaction.user.id.toString()) ??
-		(await session.get<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined)) ??
-		(await (async () => {
-			const userDocument = {
-				...({
-					id: `users/${interaction.user.id}`,
-					account: { id: interaction.user.id.toString() },
-					createdAt: Date.now(),
-				} satisfies User),
-				"@metadata": { "@collection": "Users" },
-			};
-			await session.set(userDocument);
-			await session.saveChanges();
-
-			return userDocument as User;
-		})());
+	const userDocument = await User.getOrCreate(client, { userId: interaction.user.id.toString() });
 
 	const guildStatsDocument = client.documents.guildStats.get(guildId.toString());
 	if (guildStatsDocument === undefined) {
@@ -134,8 +116,10 @@ async function handleStartGame(client: Client, interaction: Logos.Interaction): 
 		}
 	}
 
+	// TODO(vxern): Urgent - Fix this update.
+	const session = client.database.openSession();
+
 	await session.set(guildStatsDocument);
-	await session.set(userDocument);
 	await session.saveChanges();
 
 	session.dispose();
@@ -161,8 +145,6 @@ async function handleStartGame(client: Client, interaction: Logos.Interaction): 
 		const pick = data.sentenceSelection.allPicks.find((pick) => pick[0] === id);
 		const isCorrect = pick === data.sentenceSelection.correctPick;
 
-		const session = client.database.openSession();
-
 		const guildStatsDocument = client.documents.guildStats.get(guildId.toString());
 		const userDocument = client.documents.users.get(interaction.user.id.toString());
 		if (guildStatsDocument === undefined || userDocument === undefined) {
@@ -181,6 +163,8 @@ async function handleStartGame(client: Client, interaction: Logos.Interaction): 
 			pickMissingWord.guildStats.totalScore++;
 			pickMissingWord.user.totalScore++;
 		}
+
+		// TODO(vxern): Urgent - Fix this update.
 
 		await session.set(guildStatsDocument);
 		await session.set(userDocument);

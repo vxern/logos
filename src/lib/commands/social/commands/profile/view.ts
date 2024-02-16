@@ -50,33 +50,17 @@ async function handleDisplayProfile(client: Client, interaction: Logos.Interacti
 		return;
 	}
 
+	const targetUserDocument = await User.getOrCreate(client, { userId: member.id.toString() });
+
 	const session = client.database.openSession();
 
-	const targetDocument =
-		client.documents.users.get(member.id.toString()) ??
-		(await session.get<User>(`users/${member.id}`).then((value) => value ?? undefined)) ??
-		(await (async () => {
-			const userDocument = {
-				...({
-					id: `users/${member.id}`,
-					account: { id: member.id.toString() },
-					createdAt: Date.now(),
-				} satisfies User),
-				"@metadata": { "@collection": "Users" },
-			};
-			await session.set(userDocument);
-			await session.saveChanges();
-
-			return userDocument as User;
-		})());
-
-	const praiseDocumentsByAuthorCached = client.documents.praisesByAuthor.get(targetDocument.account.id);
+	const praiseDocumentsByAuthorCached = client.documents.praisesByAuthor.get(targetUserDocument.account.id);
 	const praiseDocumentsByAuthor =
 		praiseDocumentsByAuthorCached !== undefined
 			? Array.from(praiseDocumentsByAuthorCached.values())
 			: await session
 					.query<Praise>({ collection: "Praises" })
-					.whereRegex("id", `^praises/\\d+/${targetDocument.account.id}/\\d+$`)
+					.whereRegex("id", `^praises/\\d+/${targetUserDocument.account.id}/\\d+$`)
 					.all()
 					.then((praiseDocuments) => {
 						const map = new Map(
@@ -85,17 +69,17 @@ async function handleDisplayProfile(client: Client, interaction: Logos.Interacti
 								praiseDocument,
 							]),
 						);
-						client.documents.praisesByAuthor.set(targetDocument.account.id, map);
+						client.documents.praisesByAuthor.set(targetUserDocument.account.id, map);
 						return praiseDocuments;
 					});
 
-	const praiseDocumentsByTargetCached = client.documents.praisesByTarget.get(targetDocument.account.id);
+	const praiseDocumentsByTargetCached = client.documents.praisesByTarget.get(targetUserDocument.account.id);
 	const praiseDocumentsByTarget =
 		praiseDocumentsByTargetCached !== undefined
 			? Array.from(praiseDocumentsByTargetCached.values())
 			: await session
 					.query<Praise>({ collection: "Praises" })
-					.whereStartsWith("id", `^praises/${targetDocument.account.id}/\\d+/\\d+$`)
+					.whereStartsWith("id", `^praises/${targetUserDocument.account.id}/\\d+/\\d+$`)
 					.all()
 					.then((praiseDocuments) => {
 						const map = new Map(
@@ -104,17 +88,17 @@ async function handleDisplayProfile(client: Client, interaction: Logos.Interacti
 								praiseDocument,
 							]),
 						);
-						client.documents.praisesByTarget.set(targetDocument.account.id, map);
+						client.documents.praisesByTarget.set(targetUserDocument.account.id, map);
 						return praiseDocuments;
 					});
 
-	const warningDocumentsCached = client.documents.warningsByTarget.get(targetDocument.account.id);
+	const warningDocumentsCached = client.documents.warningsByTarget.get(targetUserDocument.account.id);
 	const warningDocuments =
 		warningDocumentsCached !== undefined
 			? Array.from(warningDocumentsCached.values())
 			: await session
 					.query<Warning>({ collection: "Warnings" })
-					.whereStartsWith("id", `warnings/${targetDocument.account.id}`)
+					.whereStartsWith("id", `warnings/${targetUserDocument.account.id}`)
 					.all()
 					.then((warningDocuments) => {
 						const map = new Map(
@@ -123,7 +107,7 @@ async function handleDisplayProfile(client: Client, interaction: Logos.Interacti
 								warningDocument,
 							]),
 						);
-						client.documents.warningsByTarget.set(targetDocument.account.id, map);
+						client.documents.warningsByTarget.set(targetUserDocument.account.id, map);
 						return warningDocuments;
 					});
 

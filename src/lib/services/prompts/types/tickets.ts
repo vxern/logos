@@ -7,6 +7,7 @@ import { User } from "../../../database/user";
 import diagnostics from "../../../diagnostics";
 import { encodeId, getLocaleData } from "../../../interactions";
 import { PromptService } from "../service";
+import {Suggestion} from "../../../database/suggestion";
 
 type InteractionData = [documentId: string, isResolved: string];
 
@@ -33,14 +34,8 @@ class TicketService extends PromptService<"tickets", Ticket, InteractionData> {
 		return tickets;
 	}
 
-	async getUserDocument(ticketDocument: Ticket): Promise<User | undefined> {
-		const session = this.client.database.openSession();
-
-		const userDocument =
-			this.client.documents.users.get(ticketDocument.authorId) ??
-			session.get<User>(`users/${ticketDocument.authorId}`).then((value) => value ?? undefined);
-
-		session.dispose();
+	async getUserDocument(ticketDocument: Ticket): Promise<User> {
+		const userDocument = await User.getOrCreate(this.client, { userId: ticketDocument.authorId });
 
 		return userDocument;
 	}

@@ -45,17 +45,7 @@ async function handlePraiseUser(client: Client, interaction: Logos.Interaction):
 		return;
 	}
 
-	let session = client.database.openSession();
-
-	const guildDocument =
-		client.documents.guilds.get(guildId.toString()) ??
-		(await session.get<Guild>(`guilds/${guildId}`).then((value) => value ?? undefined));
-
-	session.dispose();
-
-	if (guildDocument === undefined) {
-		return;
-	}
+	const guildDocument = await Guild.getOrCreate(client, { guildId: guildId.toString() });
 
 	const configuration = guildDocument.features.social.features?.praises;
 	if (configuration === undefined || !configuration.enabled) {
@@ -92,51 +82,12 @@ async function handlePraiseUser(client: Client, interaction: Logos.Interaction):
 
 	await client.postponeReply(interaction);
 
-	session = client.database.openSession();
+	const [authorDocument, targetDocument] = await Promise.all([
+		User.getOrCreate(client, { userId: interaction.user.id.toString() }),
+		User.getOrCreate(client, { userId: member.id.toString() }),
+	]);
 
-	const [authorDocument, targetDocument] = [
-		client.documents.users.get(interaction.user.id.toString()) ??
-			(await session.get<User>(`users/${interaction.user.id}`).then((value) => value ?? undefined)) ??
-			(await (async () => {
-				const userDocument = {
-					...({
-						id: `users/${interaction.user.id}`,
-						account: { id: interaction.user.id.toString() },
-						createdAt: Date.now(),
-					} satisfies User),
-					"@metadata": { "@collection": "Users" },
-				};
-				await session.set(userDocument);
-				await session.saveChanges();
-
-				return userDocument as User;
-			})()),
-		client.documents.users.get(member.id.toString()) ??
-			(await session.get<User>(`users/${member.id}`).then((value) => value ?? undefined)) ??
-			(await (async () => {
-				const userDocument = {
-					...({
-						id: `users/${member.id}`,
-						account: { id: member.id.toString() },
-						createdAt: Date.now(),
-					} satisfies User),
-					"@metadata": { "@collection": "Users" },
-				};
-				await session.set(userDocument);
-				await session.saveChanges();
-
-				return userDocument as User;
-			})()),
-	];
-
-	session.dispose();
-
-	if (authorDocument === undefined || targetDocument === undefined) {
-		displayError(client, interaction, { locale });
-		return;
-	}
-
-	session = client.database.openSession();
+	const session = client.database.openSession();
 
 	const praiseDocumentsCached = client.documents.praisesByAuthor.get(interaction.user.id.toString());
 	const praiseDocuments =

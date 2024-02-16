@@ -9,17 +9,7 @@ import { GuildEvents, MessageGenerators } from "../generator";
 export default {
 	title: `${constants.symbols.events.entryRequest.submitted} Entry request submitted`,
 	message: async (client, user, entryRequest) => {
-		const session = client.database.openSession();
-
-		const guildDocument =
-			client.documents.guilds.get(entryRequest.guildId) ??
-			(await session.get<Guild>(`guilds/${entryRequest.guildId}`).then((value) => value ?? undefined));
-
-		session.dispose();
-
-		if (guildDocument === undefined) {
-			return;
-		}
+		const guildDocument = await Guild.getOrCreate(client, { guildId: entryRequest.guildId });
 
 		const guildLanguage = getLocalisationLanguage(guildDocument);
 		const guildLocale = getLocaleByLocalisationLanguage(guildLanguage);
