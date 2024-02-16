@@ -9,6 +9,8 @@ import { Suggestion } from "./suggestion";
 import { Ticket } from "./ticket";
 import { User } from "./user";
 import { Warning } from "./warning";
+import {decapitalise} from "../../formatting";
+import {Client} from "../client";
 
 interface DocumentMetadata {
 	"@id": string;
@@ -69,10 +71,10 @@ abstract class Model<Generic extends { idParts: readonly string[] }> {
 		return this["@metadata"]["@collection"];
 	}
 
-	constructor({ createdAt, "@metadata": metadata }: { createdAt: number; "@metadata": DocumentMetadata }) {
-		this._idParts = metadata["@id"].split(constants.symbols.database.separator).slice(1) as Generic["idParts"];
-		this.createdAt = createdAt;
+	constructor({ createdAt, "@metadata": metadata }: { createdAt?: number; "@metadata": DocumentMetadata }) {
+		this.createdAt = createdAt ?? Date.now();
 		this["@metadata"] = metadata;
+		this._idParts = metadata["@id"].split(constants.symbols.database.separator).slice(1) as Generic["idParts"];
 	}
 
 	static from<M extends Model<any>>(data: RawDocument): M {
@@ -92,7 +94,22 @@ abstract class Model<Generic extends { idParts: readonly string[] }> {
 	static buildPartialId<M extends Model<any>>(data: IdentifierData<M>): string {
 		return Object.values(data).join(constants.symbols.database.separator);
 	}
+
+	static buildId<M extends Model<any>>(data: IdentifierData<M>, { collection }: { collection: Collection }): string {
+		const collectionCamelCase = decapitalise(collection);
+		const partialId = Model.buildPartialId<M>(data);
+
+		return `${collectionCamelCase}${constants.symbols.database.separator}${partialId}`;
+	}
+
+	async update(client: Client, callback: () => void): Promise<void> {
+		await client.database.withSession(async (session) => {
+			callback();
+			await session.set(this);
+			await session.saveChanges();
+		});
+	}
 }
 
 export { Model };
-export type { Collection, RawDocument, DocumentMetadata, MetadataOrIdentifierData };
+export type { Collection, RawDocument, DocumentMetadata, IdentifierData, MetadataOrIdentifierData };
