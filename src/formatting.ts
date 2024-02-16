@@ -15,6 +15,15 @@ function capitalise(target: string): string {
 	return first.toUpperCase() + rest.join("");
 }
 
+function decapitalise(target: string): string {
+	const [first, ...rest] = target;
+	if (first === undefined) {
+		return target;
+	}
+
+	return first.toLowerCase() + rest.join("");
+}
+
 /**
  * Modifies a string of text to appear within Discord as an embedded code block.
  *
@@ -110,4 +119,4 @@ function trim(string: string, length: number): string {
 	);
 }
 
-export { capitalise, code, codeMultiline, list, mention, MentionTypes, timestamp, TimestampFormat, trim };
+export { capitalise, decapitalise, code, codeMultiline, list, mention, MentionTypes, timestamp, TimestampFormat, trim };
