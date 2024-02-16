@@ -2,7 +2,7 @@ import * as Discord from "@discordeno/bot";
 import constants from "../../../constants/constants";
 import * as Logos from "../../../types";
 import { InteractionCollector } from "../../client";
-import { decodeId, deleteReply, editReply, getCommandName, getLocaleData, postponeReply } from "../../interactions";
+import { decodeId, getCommandName, getLocaleData } from "../../interactions";
 import { GlobalService } from "../service";
 
 type InteractionRepetitionButtonID = [interactionId: string];
@@ -29,20 +29,20 @@ class InteractionRepetitionService extends GlobalService {
 			return;
 		}
 
-		await postponeReply(this.client, interaction);
+		await this.client.postponeReply(interaction);
 
 		const confirmButton = new InteractionCollector({ only: [interaction.user.id], isSingle: true });
 		const cancelButton = new InteractionCollector({ only: [interaction.user.id], isSingle: true });
 
 		confirmButton.onCollect(async (buttonPress) => {
-			deleteReply(this.client, interaction);
+			this.client.deleteReply(interaction);
 
 			const originalInteraction = this.client.unregisterInteraction(BigInt(interactionId));
 			if (originalInteraction === undefined) {
 				return;
 			}
 
-			deleteReply(this.client, originalInteraction);
+			this.client.deleteReply(originalInteraction);
 
 			const interactionSpoofed = InteractionRepetitionService.#spoofInteraction(originalInteraction, {
 				using: buttonPress,
@@ -51,7 +51,7 @@ class InteractionRepetitionService extends GlobalService {
 			await this.client.handleInteraction(interactionSpoofed, { show: true });
 		});
 
-		cancelButton.onCollect(async (_) => deleteReply(this.client, interaction));
+		cancelButton.onCollect(async (_) => this.client.deleteReply(interaction));
 
 		this.client.registerInteractionCollector(confirmButton);
 		this.client.registerInteractionCollector(cancelButton);
@@ -67,7 +67,7 @@ class InteractionRepetitionService extends GlobalService {
 			no: this.client.localise("interactions.show.sureToShow.no", locale)(),
 		};
 
-		editReply(this.client, interaction, {
+		this.client.editReply(interaction, {
 			embeds: [{ title: strings.title, description: strings.description, color: constants.colors.dullYellow }],
 			components: [
 				{

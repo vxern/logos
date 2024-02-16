@@ -5,7 +5,7 @@ import { Client } from "../../../client";
 import { Report } from "../../../database/report";
 import { User } from "../../../database/user";
 import diagnostics from "../../../diagnostics";
-import { encodeId, getLocaleData, reply } from "../../../interactions";
+import { encodeId, getLocaleData } from "../../../interactions";
 import { getGuildIconURLFormatted } from "../../../utils";
 import { PromptService } from "../service";
 
@@ -169,7 +169,7 @@ class ReportService extends PromptService<"reports", Report, InteractionData> {
 				description: this.client.localise("alreadyMarkedResolved.description", locale)(),
 			};
 
-			reply(this.client, interaction, {
+			this.client.reply(interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -187,7 +187,7 @@ class ReportService extends PromptService<"reports", Report, InteractionData> {
 				description: this.client.localise("alreadyMarkedUnresolved.description", locale)(),
 			};
 
-			reply(this.client, interaction, {
+			this.client.reply(interaction, {
 				embeds: [
 					{
 						title: strings.title,

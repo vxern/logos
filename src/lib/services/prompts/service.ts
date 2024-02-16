@@ -5,7 +5,7 @@ import { Client, InteractionCollector, ServiceStore } from "../../client";
 import { Guild } from "../../database/guild";
 import { User } from "../../database/user";
 import diagnostics from "../../diagnostics";
-import { acknowledge, decodeId, getLocaleData, reply } from "../../interactions";
+import { decodeId, getLocaleData } from "../../interactions";
 import { getAllMessages } from "../../utils";
 import { LocalService } from "../service";
 
@@ -253,7 +253,7 @@ abstract class PromptService<
 							description: this.client.localise("cannotRemovePrompt.description", locale)(),
 						};
 
-						reply(this.client, buttonPress, {
+						this.client.reply(buttonPress, {
 							embeds: [
 								{
 									title: strings.title,
@@ -268,7 +268,7 @@ abstract class PromptService<
 							description: this.client.localise("cannotCloseIssue.description", locale)(),
 						};
 
-						reply(this.client, buttonPress, {
+						this.client.reply(buttonPress, {
 							embeds: [
 								{
 									title: strings.title,
@@ -282,7 +282,7 @@ abstract class PromptService<
 					return;
 				}
 
-				acknowledge(this.client, buttonPress);
+				this.client.acknowledge(buttonPress);
 
 				const [_, partialId] = decodeId(customId);
 				if (partialId === undefined) {

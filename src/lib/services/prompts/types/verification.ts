@@ -9,14 +9,9 @@ import { EntryRequest } from "../../../database/entry-request";
 import { User } from "../../../database/user";
 import diagnostics from "../../../diagnostics";
 import {
-	acknowledge,
 	decodeId,
-	deleteReply,
-	editReply,
 	encodeId,
 	getLocaleData,
-	postponeReply,
-	reply,
 } from "../../../interactions";
 import { getGuildIconURLFormatted, snowflakeToTimestamp } from "../../../utils";
 import { Configurations, PromptService } from "../service";
@@ -433,7 +428,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 					const cancelButton = new InteractionCollector({ only: [interaction.user.id], isSingle: true });
 
 					confirmButton.onCollect(async (_) => {
-						deleteReply(this.client, interaction);
+						this.client.deleteReply(interaction);
 
 						if (entryRequestDocument.isFinalised) {
 							resolve(undefined);
@@ -452,7 +447,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 					});
 
 					cancelButton.onCollect(async (_) => {
-						deleteReply(this.client, interaction);
+						this.client.deleteReply(interaction);
 
 						resolve(undefined);
 					});
@@ -460,7 +455,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 					this.client.registerInteractionCollector(confirmButton);
 					this.client.registerInteractionCollector(cancelButton);
 
-					reply(this.client, interaction, {
+					this.client.reply(interaction, {
 						embeds: [{ title: strings.title, description: strings.description, color: constants.colors.peach }],
 						components: [
 							{
@@ -491,7 +486,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 					description: this.client.localise("entry.verification.vote.alreadyVoted.inFavour.description", locale)(),
 				};
 
-				reply(this.client, interaction, {
+				this.client.reply(interaction, {
 					embeds: [
 						{
 							title: strings.title,
@@ -524,7 +519,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 					const cancelButton = new InteractionCollector({ only: [interaction.user.id], isSingle: true });
 
 					confirmButton.onCollect(async (_) => {
-						deleteReply(this.client, interaction);
+						this.client.deleteReply(interaction);
 
 						if (entryRequestDocument.isFinalised) {
 							resolve(undefined);
@@ -543,7 +538,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 					});
 
 					cancelButton.onCollect(async (_) => {
-						deleteReply(this.client, interaction);
+						this.client.deleteReply(interaction);
 
 						resolve(undefined);
 					});
@@ -551,7 +546,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 					this.client.registerInteractionCollector(confirmButton);
 					this.client.registerInteractionCollector(cancelButton);
 
-					reply(this.client, interaction, {
+					this.client.reply(interaction, {
 						embeds: [{ title: strings.title, description: strings.description, color: constants.colors.peach }],
 						components: [
 							{
@@ -582,7 +577,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 					description: this.client.localise("entry.verification.vote.alreadyVoted.against.description", locale)(),
 				};
 
-				reply(this.client, interaction, {
+				this.client.reply(interaction, {
 					embeds: [
 						{
 							title: strings.title,
@@ -612,7 +607,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 				description: this.client.localise("entry.verification.vote.stanceChanged.description", locale)(),
 			};
 
-			reply(this.client, interaction, {
+			this.client.reply(interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -622,7 +617,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 				],
 			});
 		} else {
-			acknowledge(this.client, interaction);
+			this.client.acknowledge(interaction);
 
 			if (isAccept) {
 				votedFor.push(voterDocument.account.id);
@@ -774,7 +769,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 	}
 
 	private async handleOpenInquiry(interaction: Discord.Interaction, partialId: string): Promise<void> {
-		await postponeReply(this.client, interaction);
+		await this.client.postponeReply(interaction);
 
 		const [configuration, guild, guildDocument] = [this.configuration, this.guild, this.guildDocument];
 		if (configuration === undefined || guild === undefined || guildDocument === undefined) {
@@ -832,7 +827,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 				description: this.client.localise("entry.verification.inquiry.failed.description", this.guildLocale)(),
 			};
 
-			editReply(this.client, interaction, {
+			this.client.editReply(interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -874,7 +869,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 				}),
 			};
 
-			editReply(this.client, interaction, {
+			this.client.editReply(interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -939,7 +934,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 			description: this.client.localise("entry.verification.vote.failed.description", locale)(),
 		};
 
-		reply(this.client, interaction, {
+		this.client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,

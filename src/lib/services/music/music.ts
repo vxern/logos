@@ -16,7 +16,6 @@ import {
 } from "../../commands/music/data/types";
 import { Guild, timeStructToMilliseconds } from "../../database/guild";
 import diagnostics from "../../diagnostics";
-import { reply } from "../../interactions";
 import { LocalService } from "../service";
 
 interface PositionControls {
@@ -450,7 +449,7 @@ class MusicService extends LocalService {
 				},
 			};
 
-			reply(this.client, interaction, {
+			this.client.reply(interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -475,7 +474,7 @@ class MusicService extends LocalService {
 				},
 			};
 
-			reply(this.client, interaction, {
+			this.client.reply(interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -495,7 +494,7 @@ class MusicService extends LocalService {
 				description: this.client.localise("music.options.play.strings.inDifferentVc.description", locale)(),
 			};
 
-			reply(this.client, interaction, {
+			this.client.reply(interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -526,7 +525,7 @@ class MusicService extends LocalService {
 				description: this.client.localise("music.options.play.strings.queueFull.description", locale)(),
 			};
 
-			reply(this.client, interaction, {
+			this.client.reply(interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -561,7 +560,7 @@ class MusicService extends LocalService {
 				description: this.client.localise("music.strings.cannotChange.description", locale)(),
 			};
 
-			reply(this.client, interaction, {
+			this.client.reply(interaction, {
 				embeds: [
 					{
 						title: strings.title,

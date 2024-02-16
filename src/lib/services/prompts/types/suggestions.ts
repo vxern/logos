@@ -5,7 +5,7 @@ import { Client } from "../../../client";
 import { Suggestion } from "../../../database/suggestion";
 import { User } from "../../../database/user";
 import diagnostics from "../../../diagnostics";
-import { encodeId, getLocaleData, reply } from "../../../interactions";
+import { encodeId, getLocaleData } from "../../../interactions";
 import { PromptService } from "../service";
 
 type InteractionData = [documentId: string, isResolved: string];
@@ -139,7 +139,7 @@ class SuggestionService extends PromptService<"suggestions", Suggestion, Interac
 				description: this.client.localise("alreadyMarkedResolved.description", locale)(),
 			};
 
-			reply(this.client, interaction, {
+			this.client.reply(interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -157,7 +157,7 @@ class SuggestionService extends PromptService<"suggestions", Suggestion, Interac
 				description: this.client.localise("alreadyMarkedUnresolved.description", locale)(),
 			};
 
-			reply(this.client, interaction, {
+			this.client.reply(interaction, {
 				embeds: [
 					{
 						title: strings.title,

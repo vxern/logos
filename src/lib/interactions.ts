@@ -228,21 +228,21 @@ function generateButtons(customId: string, isFirst: boolean, isLast: boolean): D
 	];
 }
 
-type ComposerActionRow<ComposerContent extends Record<string, unknown>, SectionNames = keyof ComposerContent> = {
+type ComposerActionRow<ComposerContent, SectionNames = keyof ComposerContent> = {
 	type: Discord.MessageComponentTypes.ActionRow;
 	components: [
 		Discord.ActionRow["components"][0] & { type: Discord.MessageComponentTypes.InputText; customId: SectionNames },
 	];
 };
 
-type Modal<ComposerContent extends Record<string, string>, SectionNames = keyof ComposerContent> = {
+type Modal<ComposerContent, SectionNames = keyof ComposerContent> = {
 	title: string;
 	fields: ComposerActionRow<ComposerContent, SectionNames>[];
 };
 
 // TODO(vxern): This can absolutely be improved.
 async function createModalComposer<
-	ComposerContent extends Record<string, string>,
+	ComposerContent,
 	SectionNames extends keyof ComposerContent = keyof ComposerContent,
 >(
 	client: Client,
@@ -321,7 +321,7 @@ async function createModalComposer<
 }
 
 function parseComposerContent<
-	ComposerContent extends Record<string, string>,
+	ComposerContent,
 	SectionNames extends keyof ComposerContent = keyof ComposerContent,
 >(submission: Discord.Interaction): ComposerContent | undefined {
 	const content: Partial<ComposerContent> = {};

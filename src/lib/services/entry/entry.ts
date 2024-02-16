@@ -4,7 +4,7 @@ import { FeatureLanguage, Locale } from "../../../constants/languages";
 import { trim } from "../../../formatting";
 import * as Logos from "../../../types";
 import { proficiency } from "../../commands/social/roles/categories/language";
-import { EntryRequest } from "../../database/entry-request";
+import {EntryRequest, EntryRequestFormData} from "../../database/entry-request";
 import { Guild, timeStructToMilliseconds } from "../../database/guild";
 import { User } from "../../database/user";
 import diagnostics from "../../diagnostics";
@@ -12,11 +12,8 @@ import {
 	Modal,
 	createModalComposer,
 	decodeId,
-	editReply,
 	encodeId,
 	getLocaleData,
-	postponeReply,
-	reply,
 } from "../../interactions";
 import { snowflakeToTimestamp } from "../../utils";
 import { LocalService } from "../service";
@@ -116,7 +113,7 @@ class EntryService extends LocalService {
 			},
 		};
 
-		reply(this.client, interaction, {
+		this.client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -196,7 +193,7 @@ class EntryService extends LocalService {
 				description: this.client.localise("entry.verification.answers.alreadyAnswered.description", locale)(),
 			};
 
-			reply(this.client, interaction, {
+			this.client.reply(interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -223,7 +220,7 @@ class EntryService extends LocalService {
 						description: this.client.localise("entry.verification.answers.alreadyAnswered.description", locale)(),
 					};
 
-					reply(this.client, submission, {
+					this.client.reply(submission, {
 						embeds: [
 							{
 								title: strings.title,
@@ -236,7 +233,7 @@ class EntryService extends LocalService {
 					return true;
 				}
 
-				await postponeReply(this.client, submission);
+				await this.client.postponeReply(submission);
 
 				const session = this.client.database.openSession();
 
@@ -287,7 +284,7 @@ class EntryService extends LocalService {
 					},
 				};
 
-				editReply(this.client, submission, {
+				this.client.editReply(submission, {
 					embeds: [
 						{
 							title: strings.title,
@@ -307,7 +304,7 @@ class EntryService extends LocalService {
 							description: this.client.localise("entry.verification.answers.failed.description", locale)(),
 						};
 
-						editReply(this.client, submission, {
+						this.client.editReply(submission, {
 							embeds: [
 								{
 									title: strings.title,
@@ -453,7 +450,7 @@ class EntryService extends LocalService {
 					},
 				};
 
-				reply(this.client, interaction, {
+				this.client.reply(interaction, {
 					embeds: [
 						{
 							title: strings.title,
@@ -495,7 +492,7 @@ class EntryService extends LocalService {
 			},
 		};
 
-		await reply(this.client, interaction, {
+		await this.client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -546,7 +543,7 @@ class EntryService extends LocalService {
 				description: this.client.localise("entry.verification.verifyingAccount.failed.description", locale)(),
 			};
 
-			reply(this.client, interaction, {
+			this.client.reply(interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -577,7 +574,7 @@ class EntryService extends LocalService {
 				description: this.client.localise("entry.verification.answers.alreadyAnswered.description", locale)(),
 			};
 
-			reply(this.client, interaction, {
+			this.client.reply(interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -600,7 +597,7 @@ class EntryService extends LocalService {
 				description: this.client.localise("entry.verification.answers.rejectedBefore.description", locale)(),
 			};
 
-			reply(this.client, interaction, {
+			this.client.reply(interaction, {
 				embeds: [
 					{
 						title: strings.title,
