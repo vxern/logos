@@ -4,17 +4,11 @@ import { FeatureLanguage, Locale } from "../../../constants/languages";
 import { trim } from "../../../formatting";
 import * as Logos from "../../../types";
 import { proficiency } from "../../commands/social/roles/categories/language";
-import {EntryRequest, EntryRequestFormData} from "../../database/entry-request";
+import { EntryRequest } from "../../database/entry-request";
 import { Guild, timeStructToMilliseconds } from "../../database/guild";
 import { User } from "../../database/user";
 import diagnostics from "../../diagnostics";
-import {
-	Modal,
-	createModalComposer,
-	decodeId,
-	encodeId,
-	getLocaleData,
-} from "../../interactions";
+import { Modal, createModalComposer, decodeId, encodeId, getLocaleData } from "../../interactions";
 import { snowflakeToTimestamp } from "../../utils";
 import { LocalService } from "../service";
 
@@ -153,18 +147,10 @@ class EntryService extends LocalService {
 
 		const requestedRoleId = BigInt(parameter);
 
-		const guildDocument = await Guild.getOrCreate(client, { guildId: guildId.toString() });
-		const userDocument = await User.getOrCreate(client, { userId: interaction.user.id.toString() });
-
-		session = this.client.database.openSession();
-
-		const entryRequestDocument =
-			this.client.documents.entryRequests.get(`${guildDocument.guildId}/${userDocument.account.id}`) ??
-			(await session
-				.get<EntryRequest>(`entryRequests/${userDocument.account.id}/${guildDocument.guildId}`)
-				.then((value) => value ?? undefined));
-
-		session.dispose();
+		const entryRequestDocument = await EntryRequest.get(this.client, {
+			guildId: this.guildId.toString(),
+			authorId: interaction.user.id.toString(),
+		});
 
 		if (entryRequestDocument !== undefined) {
 			const strings = {
@@ -190,10 +176,16 @@ class EntryService extends LocalService {
 			return;
 		}
 
+		// TODO(vxern): Again, is this user document thing needed?
+		const [userDocument, entryRequest] = await Promise.all([
+			User.getOrCreate(this.client, { userId: interaction.user.id.toString() }),
+			EntryRequest.get(this.client, { guildId: guild.id.toString(), authorId: interaction.user.id.toString() }),
+		]);
+
 		createModalComposer<EntryRequest["answers"]>(this.client, interaction, {
 			modal: this.generateVerificationQuestionModal(interaction.featureLanguage, { locale }),
 			onSubmit: async (submission, answers) => {
-				if (this.client.documents.entryRequests.has(`${guild.id}/${userDocument.account.id}`)) {
+				if (entryRequest !== undefined) {
 					const strings = {
 						title: this.client.localise("entry.verification.answers.alreadyAnswered.title", locale)(),
 						description: this.client.localise("entry.verification.answers.alreadyAnswered.description", locale)(),
@@ -214,23 +206,12 @@ class EntryService extends LocalService {
 
 				await this.client.postponeReply(submission);
 
-				const session = this.client.database.openSession();
-
-				const entryRequestDocument = {
-					id: `entryRequests/${guild.id}/${userDocument.account.id}`,
-					authorId: userDocument.account.id,
+				const entryRequestDocument = await EntryRequest.create(this.client, {
 					guildId: guild.id.toString(),
-					answers,
+					authorId: userDocument.account.id,
 					requestedRoleId: requestedRoleId.toString(),
-					isFinalised: false,
-					createdAt: Date.now(),
-					"@metadata": { "@collection": "EntryRequests" },
-				};
-
-				await session.set(entryRequestDocument);
-				await session.saveChanges();
-
-				session.dispose();
+					answers,
+				});
 
 				const journallingService = this.client.getJournallingService(this.guildId);
 				journallingService?.log("entryRequestSubmit", { args: [interaction.user, entryRequestDocument] });
@@ -247,10 +228,9 @@ class EntryService extends LocalService {
 					return "failure";
 				}
 
-				const partialId = `${guild.id}/${user.id}`;
-				verificationService.registerDocument(partialId, entryRequestDocument);
-				verificationService.registerPrompt(prompt, userId, partialId, entryRequestDocument);
-				verificationService.registerHandler(partialId);
+				verificationService.registerDocument(entryRequestDocument);
+				verificationService.registerPrompt(prompt, userId, entryRequestDocument);
+				verificationService.registerHandler(entryRequestDocument);
 
 				const strings = {
 					title: this.client.localise("entry.verification.answers.submitted.title", locale)(),
@@ -390,7 +370,7 @@ class EntryService extends LocalService {
 		}
 
 		if (requiresVerification) {
-			const userDocument = await User.getOrCreate(client, { userId: interaction.user.id.toString() });
+			const userDocument = await User.getOrCreate(this.client, { userId: interaction.user.id.toString() });
 
 			const isVerified = userDocument?.account.authorisedOn?.includes(this.guildIdString);
 			if (!isVerified) {
@@ -473,14 +453,16 @@ class EntryService extends LocalService {
 	}
 
 	private async vetUser(interaction: Logos.Interaction, { locale }: { locale: Locale }): Promise<boolean> {
-		const userDocument = await User.getOrCreate(client, { userId: interaction.user.id.toString() });
-
 		const guildId = interaction.guildId;
 		if (guildId === undefined) {
 			return false;
 		}
 
-		const entryRequestDocument = this.client.documents.entryRequests.get(`${guildId}/${userDocument.id}`);
+		const [userDocument, entryRequestDocument] = await Promise.all([
+			User.getOrCreate(this.client, { userId: interaction.user.id.toString() }),
+			EntryRequest.get(this.client, { guildId: guildId.toString(), authorId: interaction.user.id.toString() }),
+		]);
+
 		if (entryRequestDocument !== undefined && !entryRequestDocument.isFinalised) {
 			const strings = {
 				title: this.client.localise("entry.verification.answers.alreadyAnswered.title", locale)(),

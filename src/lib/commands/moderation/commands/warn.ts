@@ -171,47 +171,18 @@ async function handleWarnUser(client: Client, interaction: Logos.Interaction): P
 		return;
 	}
 
-	const [authorDocument, targetDocument] = await Promise.all([
+	const [authorDocument, targetDocument, warningDocuments] = await Promise.all([
 		User.getOrCreate(client, { userId: interaction.user.id.toString() }),
 		User.getOrCreate(client, { userId: member.id.toString() }),
+		Warning.getAll(client, { where: { targetId: member.id.toString() } }),
 	]);
 
-	const warningDocumentsCached = client.documents.warningsByTarget.get(targetDocument.account.id);
-
-	const session = client.database.openSession();
-
-	const createdAt = Date.now();
-	const warningDocument = {
-		id: `warnings/${targetDocument.account.id}/${authorDocument.account.id}/${createdAt}`,
+	const warningDocument = await Warning.create(client, {
 		authorId: authorDocument.account.id,
 		targetId: targetDocument.account.id,
-		rule: rule === components.none ? undefined : (rule as Rule),
 		reason,
-		createdAt,
-		"@metadata": { "@collection": "Warnings" },
-	};
-	await session.set(warningDocument);
-	await session.saveChanges();
-
-	const warningDocuments =
-		warningDocumentsCached !== undefined
-			? Array.from(warningDocumentsCached.values())
-			: await session
-					.query<Warning>({ collection: "Warnings" })
-					.whereStartsWith("id", `warnings/${targetDocument.account.id}`)
-					.all()
-					.then((warningDocuments) => {
-						const map = new Map(
-							warningDocuments.map((warningDocument) => [
-								`${warningDocument.targetId}/${warningDocument.authorId}/${warningDocument.createdAt}`,
-								warningDocument,
-							]),
-						);
-						client.documents.warningsByTarget.set(member.id.toString(), map);
-						return warningDocuments;
-					});
-
-	session.dispose();
+		rule: rule === components.none ? undefined : (rule as Rule),
+	});
 
 	if (configuration.journaling) {
 		const journallingService = client.getJournallingService(guild.id);

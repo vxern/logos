@@ -50,68 +50,12 @@ async function handleDisplayProfile(client: Client, interaction: Logos.Interacti
 		return;
 	}
 
-	const targetUserDocument = await User.getOrCreate(client, { userId: member.id.toString() });
-
-	const session = client.database.openSession();
-
-	const praiseDocumentsByAuthorCached = client.documents.praisesByAuthor.get(targetUserDocument.account.id);
-	const praiseDocumentsByAuthor =
-		praiseDocumentsByAuthorCached !== undefined
-			? Array.from(praiseDocumentsByAuthorCached.values())
-			: await session
-					.query<Praise>({ collection: "Praises" })
-					.whereRegex("id", `^praises/\\d+/${targetUserDocument.account.id}/\\d+$`)
-					.all()
-					.then((praiseDocuments) => {
-						const map = new Map(
-							praiseDocuments.map((praiseDocument) => [
-								`${praiseDocument.targetId}/${praiseDocument.authorId}/${praiseDocument.createdAt}`,
-								praiseDocument,
-							]),
-						);
-						client.documents.praisesByAuthor.set(targetUserDocument.account.id, map);
-						return praiseDocuments;
-					});
-
-	const praiseDocumentsByTargetCached = client.documents.praisesByTarget.get(targetUserDocument.account.id);
-	const praiseDocumentsByTarget =
-		praiseDocumentsByTargetCached !== undefined
-			? Array.from(praiseDocumentsByTargetCached.values())
-			: await session
-					.query<Praise>({ collection: "Praises" })
-					.whereStartsWith("id", `^praises/${targetUserDocument.account.id}/\\d+/\\d+$`)
-					.all()
-					.then((praiseDocuments) => {
-						const map = new Map(
-							praiseDocuments.map((praiseDocument) => [
-								`${praiseDocument.targetId}/${praiseDocument.authorId}/${praiseDocument.createdAt}`,
-								praiseDocument,
-							]),
-						);
-						client.documents.praisesByTarget.set(targetUserDocument.account.id, map);
-						return praiseDocuments;
-					});
-
-	const warningDocumentsCached = client.documents.warningsByTarget.get(targetUserDocument.account.id);
-	const warningDocuments =
-		warningDocumentsCached !== undefined
-			? Array.from(warningDocumentsCached.values())
-			: await session
-					.query<Warning>({ collection: "Warnings" })
-					.whereStartsWith("id", `warnings/${targetUserDocument.account.id}`)
-					.all()
-					.then((warningDocuments) => {
-						const map = new Map(
-							warningDocuments.map((warningDocument) => [
-								`${warningDocument.targetId}/${warningDocument.authorId}/${warningDocument.createdAt}`,
-								warningDocument,
-							]),
-						);
-						client.documents.warningsByTarget.set(targetUserDocument.account.id, map);
-						return warningDocuments;
-					});
-
-	session.dispose();
+	const [_, praiseDocumentsByAuthor, praiseDocumentsByTarget, warningDocuments] = await Promise.all([
+		User.getOrCreate(client, { userId: member.id.toString() }),
+		Praise.getAll(client, { where: { authorId: member.id.toString() } }),
+		Praise.getAll(client, { where: { targetId: member.id.toString() } }),
+		Warning.getAll(client, { where: { targetId: member.id.toString() } }),
+	]);
 
 	const strings = {
 		title: client.localise(

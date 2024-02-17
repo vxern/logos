@@ -98,9 +98,8 @@ class ReportService extends PromptService<"reports", Report, InteractionData> {
 					],
 					footer: {
 						text: guild.name,
-						iconUrl: `${getGuildIconURLFormatted(guild)}&metadata=${reportDocument.guildId}/${
-							reportDocument.authorId
-						}/${reportDocument.createdAt}`,
+						// TODO(vxern): Create a function for this
+						iconUrl: `${getGuildIconURLFormatted(guild)}&metadata=${reportDocument.partialId}`,
 					},
 				},
 			],
@@ -114,7 +113,7 @@ class ReportService extends PromptService<"reports", Report, InteractionData> {
 									style: Discord.ButtonStyles.Success,
 									label: strings.markUnresolved,
 									customId: encodeId<InteractionData>(constants.components.reports, [
-										`${reportDocument.guildId}/${reportDocument.authorId}/${reportDocument.createdAt}`,
+										reportDocument.partialId,
 										`${false}`,
 									]),
 								},
@@ -125,7 +124,7 @@ class ReportService extends PromptService<"reports", Report, InteractionData> {
 									label: strings.close,
 									customId: encodeId(
 										`${constants.components.removePrompt}/${constants.components.reports}/${this.guildId}`,
-										[`${reportDocument.guildId}/${reportDocument.authorId}/${reportDocument.createdAt}`],
+										[reportDocument.partialId],
 									),
 								},
 						  ]
@@ -135,7 +134,7 @@ class ReportService extends PromptService<"reports", Report, InteractionData> {
 									style: Discord.ButtonStyles.Primary,
 									label: strings.markResolved,
 									customId: encodeId<InteractionData>(constants.components.reports, [
-										`${reportDocument.guildId}/${reportDocument.authorId}/${reportDocument.createdAt}`,
+										reportDocument.partialId,
 										`${true}`,
 									]),
 								},
@@ -193,14 +192,9 @@ class ReportService extends PromptService<"reports", Report, InteractionData> {
 			return;
 		}
 
-		const session = this.client.database.openSession();
-
-		reportDocument.isResolved = isResolved;
-
-		await session.set(reportDocument);
-		await session.saveChanges();
-
-		session.dispose();
+		await reportDocument.update(this.client, () => {
+			reportDocument.isResolved = isResolved;
+		});
 
 		return reportDocument;
 	}

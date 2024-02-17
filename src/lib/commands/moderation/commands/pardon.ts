@@ -6,7 +6,6 @@ import { MentionTypes, mention } from "../../../../formatting";
 import * as Logos from "../../../../types";
 import { Client } from "../../../client";
 import { Guild, timeStructToMilliseconds } from "../../../database/guild";
-import { User } from "../../../database/user";
 import { Warning } from "../../../database/warning";
 import { parseArguments } from "../../../interactions";
 import { CommandTemplate } from "../../command";
@@ -154,17 +153,7 @@ async function handlePardonUser(client: Client, interaction: Logos.Interaction):
 		return;
 	}
 
-	// TODO(vxern): Urgent - Fix this deletion.
-	session = client.database.openSession();
-
-	await session.delete(warning.id);
-	await session.saveChanges();
-
-	session.dispose();
-
-	client.documents.warningsByTarget
-		.get(member.id.toString())
-		?.delete(`${warning.targetId}/${warning.authorId}/${warning.createdAt}`);
+	await warning.delete(client);
 
 	const guild = client.entities.guilds.get(guildId);
 	if (guild === undefined) {
@@ -203,28 +192,7 @@ async function getRelevantWarnings(
 	member: Logos.Member,
 	expirationMilliseconds: number,
 ): Promise<Warning[] | undefined> {
-	const session = client.database.openSession();
-
-	const warningDocumentsCached = client.documents.warningsByTarget.get(member.id.toString());
-	const warningDocuments =
-		warningDocumentsCached !== undefined
-			? Array.from(warningDocumentsCached.values())
-			: await session
-					.query<Warning>({ collection: "Warnings" })
-					.whereStartsWith("id", `warnings/${member.id}`)
-					.all()
-					.then((documents) => {
-						const map = new Map(
-							documents.map((document) => [
-								`${document.targetId}/${document.authorId}/${document.createdAt}`,
-								document,
-							]),
-						);
-						client.documents.warningsByTarget.set(member.id.toString(), map);
-						return documents;
-					});
-
-	session.dispose();
+	const warningDocuments = await Warning.getAll(client, { where: { targetId: member.id.toString() } });
 
 	const relevantWarnings = getActiveWarnings(warningDocuments, expirationMilliseconds).reverse();
 	return relevantWarnings;

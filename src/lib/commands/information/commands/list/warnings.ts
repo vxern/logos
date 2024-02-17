@@ -4,7 +4,6 @@ import { Locale } from "../../../../../constants/languages";
 import { timestamp } from "../../../../../formatting";
 import * as Logos from "../../../../../types";
 import { Client } from "../../../../client";
-import { User } from "../../../../database/user";
 import { Warning } from "../../../../database/warning";
 import { parseArguments } from "../../../../interactions";
 import { OptionTemplate } from "../../../command";
@@ -70,28 +69,7 @@ async function handleDisplayWarnings(client: Client, interaction: Logos.Interact
 
 	const isSelf = member.id === interaction.user.id;
 
-	const session = client.database.openSession();
-
-	const warningDocumentsCached = client.documents.warningsByTarget.get(member.id.toString());
-	const warningDocuments =
-		warningDocumentsCached !== undefined
-			? Array.from(warningDocumentsCached.values())
-			: await session
-					.query<Warning>({ collection: "Warnings" })
-					.whereStartsWith("id", `warnings/${member.id}`)
-					.all()
-					.then((documents) => {
-						const map = new Map(
-							documents.map((document) => [
-								`${document.targetId}/${document.authorId}/${document.createdAt}`,
-								document,
-							]),
-						);
-						client.documents.warningsByTarget.set(member.id.toString(), map);
-						return documents;
-					});
-
-	session.dispose();
+	const warningDocuments = await Warning.getAll(client, { where: { targetId: member.id.toString() } });
 
 	client.reply(interaction, {
 		embeds: [getWarningPage(client, warningDocuments, isSelf, { locale })],

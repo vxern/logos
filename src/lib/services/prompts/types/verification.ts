@@ -6,16 +6,13 @@ import * as Logos from "../../../../types";
 import { Client, InteractionCollector } from "../../../client";
 import { openTicket } from "../../../commands/server/commands/ticket/open";
 import { EntryRequest } from "../../../database/entry-request";
+import { Model } from "../../../database/model";
+import { Ticket } from "../../../database/ticket";
 import { User } from "../../../database/user";
 import diagnostics from "../../../diagnostics";
-import {
-	decodeId,
-	encodeId,
-	getLocaleData,
-} from "../../../interactions";
+import { decodeId, encodeId, getLocaleData } from "../../../interactions";
 import { getGuildIconURLFormatted, snowflakeToTimestamp } from "../../../utils";
 import { Configurations, PromptService } from "../service";
-import {Ticket} from "../../../database/ticket";
 
 type InteractionData = [documentId: string, isAccept: string];
 
@@ -254,9 +251,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 					],
 					footer: {
 						text: guild.name,
-						iconUrl: `${getGuildIconURLFormatted(guild)}&metadata=${entryRequestDocument.guildId}/${
-							entryRequestDocument.authorId
-						}`,
+						iconUrl: `${getGuildIconURLFormatted(guild)}&metadata=${entryRequestDocument.partialId}`,
 					},
 				},
 			],
@@ -269,7 +264,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 							style: Discord.ButtonStyles.Success,
 							label: voteInformation.acceptance.remaining === 1 ? strings.accept : strings.acceptMultiple,
 							customId: encodeId<InteractionData>(constants.components.verification, [
-								`${entryRequestDocument.guildId}/${entryRequestDocument.authorId}`,
+								entryRequestDocument.partialId,
 								`${true}`,
 							]),
 						},
@@ -278,7 +273,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 							style: Discord.ButtonStyles.Danger,
 							label: voteInformation.rejection.remaining === 1 ? strings.reject : strings.rejectMultiple,
 							customId: encodeId<InteractionData>(constants.components.verification, [
-								`${entryRequestDocument.guildId}/${entryRequestDocument.authorId}`,
+								entryRequestDocument.partialId,
 								`${false}`,
 							]),
 						},
@@ -289,7 +284,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 										style: Discord.ButtonStyles.Primary,
 										label: strings.open,
 										customId: encodeId(`${constants.components.createInquiry}/${this.guildId}`, [
-											`${entryRequestDocument.guildId}/${entryRequestDocument.authorId}`,
+											entryRequestDocument.partialId,
 										]),
 									},
 							  ]
@@ -331,15 +326,17 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 			return undefined;
 		}
 
-		const entryRequestDocument = this.client.documents.entryRequests.get(`${guildId}/${userId}`);
+		const entryRequestDocument = this.client.documents.entryRequests.get(
+			Model.buildPartialId<EntryRequest>({ guildId, authorId: userId }),
+		);
 		if (entryRequestDocument === undefined) {
 			this.displayVoteError(interaction, { locale });
 			return undefined;
 		}
 
 		const [authorDocument, voterDocument] = await Promise.all([
-			User.getOrCreate(client, { userId }),
-			User.getOrCreate(client, { userId: interaction.user.id.toString() }),
+			User.getOrCreate(this.client, { userId }),
+			User.getOrCreate(this.client, { userId: interaction.user.id.toString() }),
 		]);
 
 		const [alreadyVotedToAccept, alreadyVotedToReject] = [
@@ -645,24 +642,22 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 		if (entryRequestDocument.ticketChannelId !== undefined) {
 			const ticketService = this.client.getPromptService(this.guildId, { type: "tickets" });
 			if (ticketService !== undefined) {
+				const [ticketDocument] = await Ticket.getAll(this.client, {
+					where: { channelId: entryRequestDocument.ticketChannelId },
+				});
+				if (ticketDocument === undefined) {
+					throw "StateError: Unable to find ticket document.";
+				}
+
 				// unawaited
-				ticketService.handleDelete(
-					`${entryRequestDocument.guildId}/${entryRequestDocument.authorId}/${entryRequestDocument.ticketChannelId}`,
-				);
+				ticketService.handleDelete(ticketDocument);
 			}
 		}
 
-		{
-			const session = this.client.database.openSession();
-
+		await entryRequestDocument.update(this.client, () => {
 			entryRequestDocument.ticketChannelId = undefined;
 			entryRequestDocument.isFinalised = isFinalised;
-
-			await session.set(entryRequestDocument);
-			await session.saveChanges();
-
-			session.dispose();
-		}
+		});
 
 		let authorisedOn =
 			authorDocument.account.authorisedOn !== undefined ? [...authorDocument.account.authorisedOn] : undefined;
@@ -716,17 +711,10 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 				);
 		}
 
-		{
-			const session = this.client.database.openSession();
-
+		await authorDocument.update(this.client, () => {
 			authorDocument.account.authorisedOn = authorisedOn;
 			authorDocument.account.rejectedOn = rejectedOn;
-
-			await session.set(authorDocument);
-			await session.saveChanges();
-
-			session.dispose();
-		}
+		});
 	}
 
 	private async handleOpenInquiry(interaction: Discord.Interaction, partialId: string): Promise<void> {
@@ -798,16 +786,11 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 			return;
 		}
 
-		const session = this.client.database.openSession();
+		await entryRequestDocument.update(this.client, () => {
+			entryRequestDocument.ticketChannelId = result.channelId;
+		});
 
-		entryRequestDocument.ticketChannelId = result.channelId;
-
-		await session.set(entryRequestDocument);
-		await session.saveChanges();
-
-		session.saveChanges();
-
-		const prompt = this.promptByPartialId.get(`${entryRequestDocument.guildId}/${entryRequestDocument.authorId}`);
+		const prompt = this.promptByPartialId.get(entryRequestDocument.partialId);
 		if (prompt === undefined) {
 			return;
 		}

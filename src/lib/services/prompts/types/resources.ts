@@ -7,7 +7,6 @@ import { User } from "../../../database/user";
 import diagnostics from "../../../diagnostics";
 import { encodeId, getLocaleData } from "../../../interactions";
 import { PromptService } from "../service";
-import {Report} from "../../../database/report";
 
 type InteractionData = [documentId: string, isResolved: string];
 
@@ -67,7 +66,7 @@ class ResourceService extends PromptService<"resources", Resource, InteractionDa
 							}
 
 							return iconURL;
-						})()}&metadata=${resourceDocument.guildId}/${resourceDocument.authorId}/${resourceDocument.createdAt}`,
+						})()}&metadata=${resourceDocument.partialId}`,
 					},
 				},
 			],
@@ -81,7 +80,7 @@ class ResourceService extends PromptService<"resources", Resource, InteractionDa
 									style: Discord.ButtonStyles.Success,
 									label: strings.markUnresolved,
 									customId: encodeId<InteractionData>(constants.components.resources, [
-										`${resourceDocument.guildId}/${resourceDocument.authorId}/${resourceDocument.createdAt}`,
+										resourceDocument.partialId,
 										`${false}`,
 									]),
 								},
@@ -91,7 +90,7 @@ class ResourceService extends PromptService<"resources", Resource, InteractionDa
 									label: strings.remove,
 									customId: encodeId(
 										`${constants.components.removePrompt}/${constants.components.resources}/${this.guildId}`,
-										[`${resourceDocument.guildId}/${resourceDocument.authorId}/${resourceDocument.createdAt}`],
+										[resourceDocument.partialId],
 									),
 								},
 						  ]
@@ -101,7 +100,7 @@ class ResourceService extends PromptService<"resources", Resource, InteractionDa
 									style: Discord.ButtonStyles.Primary,
 									label: strings.markResolved,
 									customId: encodeId<InteractionData>(constants.components.resources, [
-										`${resourceDocument.guildId}/${resourceDocument.authorId}/${resourceDocument.createdAt}`,
+										resourceDocument.partialId,
 										`${true}`,
 									]),
 								},
@@ -162,14 +161,9 @@ class ResourceService extends PromptService<"resources", Resource, InteractionDa
 			return;
 		}
 
-		const session = this.client.database.openSession();
-
-		resourceDocument.isResolved = isResolved;
-
-		await session.set(resourceDocument);
-		await session.saveChanges();
-
-		session.dispose();
+		await resourceDocument.update(this.client, () => {
+			resourceDocument.isResolved = isResolved;
+		});
 
 		return resourceDocument;
 	}

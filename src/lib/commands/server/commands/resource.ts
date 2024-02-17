@@ -47,12 +47,12 @@ async function handleSubmitResource(client: Client, interaction: Logos.Interacti
 		return;
 	}
 
-	const userDocument = await User.getOrCreate(client, { userId: interaction.user.id.toString() });
+	const [userDocument, resourceDocuments] = await Promise.all([
+		// TODO(vxern): Think whether this is even necessary anymore.
+		User.getOrCreate(client, { userId: interaction.user.id.toString() }),
+		Resource.getAll(client, { where: { authorId: interaction.user.id.toString() } }),
+	]);
 
-	const partialId = `${guildId}/${interaction.user.id}`;
-	const resourceDocuments = Array.from(client.documents.resources.entries())
-		.filter(([key, _]) => key.startsWith(partialId))
-		.map(([_, value]) => value);
 	const intervalMilliseconds = timeStructToMilliseconds(configuration.rateLimit?.within ?? defaults.RESOURCE_INTERVAL);
 	if (
 		!verifyIsWithinLimits(
@@ -88,23 +88,11 @@ async function handleSubmitResource(client: Client, interaction: Logos.Interacti
 		onSubmit: async (submission, answers) => {
 			await client.postponeReply(submission);
 
-			const session = client.database.openSession();
-
-			const createdAt = Date.now();
-			const resourceDocument = {
-				...({
-					id: `resources/${guildId}/${userDocument.account.id}/${createdAt}`,
-					guildId: guild.id.toString(),
-					authorId: userDocument.account.id,
-					answers,
-					isResolved: false,
-					createdAt,
-				} satisfies Resource),
-				"@metadata": { "@collection": "Resources" },
-			};
-			await session.set(resourceDocument);
-			await session.saveChanges();
-			session.dispose();
+			const resourceDocument = await Resource.create(client, {
+				guildId: guild.id.toString(),
+				authorId: userDocument.account.id,
+				answers,
+			});
 
 			if (configuration.journaling) {
 				const journallingService = client.getJournallingService(guild.id);
@@ -123,10 +111,9 @@ async function handleSubmitResource(client: Client, interaction: Logos.Interacti
 				return "failure";
 			}
 
-			const partialId = `${guild.id}/${user.id}/${createdAt}`;
-			resourceService.registerDocument(partialId, resourceDocument);
-			resourceService.registerPrompt(prompt, userId, partialId, resourceDocument);
-			resourceService.registerHandler(partialId);
+			resourceService.registerDocument(resourceDocument);
+			resourceService.registerPrompt(prompt, userId, resourceDocument);
+			resourceService.registerHandler(resourceDocument);
 
 			const strings = {
 				title: client.localise("resource.strings.sent.title", locale)(),

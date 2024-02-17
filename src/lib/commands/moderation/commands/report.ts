@@ -47,12 +47,12 @@ async function handleMakeReport(client: Client, interaction: Logos.Interaction):
 		return;
 	}
 
-	const userDocument = await User.getOrCreate(client, { userId: interaction.user.id.toString() });
+	const [userDocument, reportDocuments] = await Promise.all([
+		// TODO(vxern): Think whether this is even necessary anymore.
+		User.getOrCreate(client, { userId: interaction.user.id.toString() }),
+		Report.getAll(client, { where: { authorId: interaction.user.id.toString() } }),
+	]);
 
-	const partialId = `${guildId}/${interaction.user.id}`;
-	const reportDocuments = Array.from(client.documents.reports.entries())
-		.filter(([key, _]) => key.startsWith(partialId))
-		.map(([_, value]) => value);
 	const intervalMilliseconds = timeStructToMilliseconds(configuration.rateLimit?.within ?? defaults.REPORT_INTERVAL);
 	if (
 		!verifyIsWithinLimits(
@@ -88,24 +88,11 @@ async function handleMakeReport(client: Client, interaction: Logos.Interaction):
 		onSubmit: async (submission, answers) => {
 			await client.postponeReply(submission);
 
-			const session = client.database.openSession();
-
-			const createdAt = Date.now();
-			const reportDocument = {
-				...({
-					id: `reports/${guildId}/${userDocument.account.id}/${createdAt}`,
-					guildId: guild.id.toString(),
-					authorId: userDocument.account.id,
-					answers,
-					isResolved: false,
-					createdAt,
-				} satisfies Report),
-				"@metadata": { "@collection": "Reports" },
-			};
-			await session.set(reportDocument);
-			await session.saveChanges();
-
-			session.dispose();
+			const reportDocument = await Report.create(client, {
+				guildId: guild.id.toString(),
+				authorId: userDocument.account.id,
+				answers,
+			});
 
 			if (configuration.journaling) {
 				const journallingService = client.getJournallingService(guild.id);
@@ -122,10 +109,9 @@ async function handleMakeReport(client: Client, interaction: Logos.Interaction):
 				return "failure";
 			}
 
-			const partialId = `${guildId}/${userDocument.account.id}/${createdAt}`;
-			reportService.registerDocument(partialId, reportDocument);
-			reportService.registerPrompt(prompt, user.id, partialId, reportDocument);
-			reportService.registerHandler(partialId);
+			reportService.registerDocument(reportDocument);
+			reportService.registerPrompt(prompt, user.id, reportDocument);
+			reportService.registerHandler(reportDocument);
 
 			const strings = {
 				title: client.localise("report.strings.submitted.title", locale)(),

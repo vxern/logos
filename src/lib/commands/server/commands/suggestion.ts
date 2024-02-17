@@ -47,12 +47,12 @@ async function handleMakeSuggestion(client: Client, interaction: Logos.Interacti
 		return;
 	}
 
-	const userDocument = await User.getOrCreate(client, { userId: interaction.user.id.toString() });
+	const [userDocument, suggestionDocuments] = await Promise.all([
+		// TODO(vxern): Think whether this is even necessary anymore.
+		User.getOrCreate(client, { userId: interaction.user.id.toString() }),
+		Suggestion.getAll(client, { where: { authorId: interaction.user.id.toString() } }),
+	]);
 
-	const partialId = `${guildId}/${interaction.user.id}`;
-	const suggestionDocuments = Array.from(client.documents.suggestions.entries())
-		.filter(([key, _]) => key.startsWith(partialId))
-		.map(([_, value]) => value);
 	const intervalMilliseconds = timeStructToMilliseconds(
 		configuration.rateLimit?.within ?? defaults.SUGGESTION_INTERVAL,
 	);
@@ -90,23 +90,11 @@ async function handleMakeSuggestion(client: Client, interaction: Logos.Interacti
 		onSubmit: async (submission, answers) => {
 			await client.postponeReply(submission);
 
-			const session = client.database.openSession();
-
-			const createdAt = Date.now();
-			const suggestionDocument = {
-				...({
-					id: `suggestions/${guildId}/${userDocument.account.id}/${createdAt}`,
-					guildId: guild.id.toString(),
-					authorId: userDocument.account.id,
-					answers,
-					isResolved: false,
-					createdAt,
-				} satisfies Suggestion),
-				"@metadata": { "@collection": "Suggestions" },
-			};
-			await session.set(suggestionDocument);
-			await session.saveChanges();
-			session.dispose();
+			const suggestionDocument = await Suggestion.create(client, {
+				guildId: guild.id.toString(),
+				authorId: userDocument.account.id,
+				answers,
+			});
 
 			if (configuration.journaling) {
 				const journallingService = client.getJournallingService(guild.id);
@@ -125,10 +113,9 @@ async function handleMakeSuggestion(client: Client, interaction: Logos.Interacti
 				return "failure";
 			}
 
-			const partialId = `${guild.id}/${user.id}/${createdAt}`;
-			suggestionService.registerDocument(partialId, suggestionDocument);
-			suggestionService.registerPrompt(prompt, userId, partialId, suggestionDocument);
-			suggestionService.registerHandler(partialId);
+			suggestionService.registerDocument(suggestionDocument);
+			suggestionService.registerPrompt(prompt, userId, suggestionDocument);
+			suggestionService.registerHandler(suggestionDocument);
 
 			const strings = {
 				title: client.localise("suggestion.strings.sent.title", locale)(),

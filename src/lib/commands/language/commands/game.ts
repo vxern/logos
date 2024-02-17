@@ -7,6 +7,7 @@ import defaults from "../../../../defaults";
 import { capitalise } from "../../../../formatting";
 import * as Logos from "../../../../types";
 import { Client, InteractionCollector } from "../../../client";
+import { GuildStats } from "../../../database/guild-stats";
 import { User } from "../../../database/user";
 import { decodeId, encodeId } from "../../../interactions";
 import { random } from "../../../utils";
@@ -69,60 +70,20 @@ async function handleStartGame(client: Client, interaction: Logos.Interaction): 
 		return;
 	}
 
+	const guildStatsDocument = await GuildStats.getOrCreate(client, { guildId: guildId.toString() });
 	const userDocument = await User.getOrCreate(client, { userId: interaction.user.id.toString() });
 
-	const guildStatsDocument = client.documents.guildStats.get(guildId.toString());
-	if (guildStatsDocument === undefined) {
-		session.dispose();
-		return;
-	}
+	await guildStatsDocument.update(client, () => {
+		guildStatsDocument.registerSession({
+			game: "pickMissingWord",
+			learningLocale,
+			isUnique: userDocument.getGameScore({ game: "pickMissingWord", learningLocale }) === undefined,
+		});
+	});
 
-	const stats = guildStatsDocument.stats;
-	if (stats === undefined) {
-		guildStatsDocument.stats = {
-			[learningLocale]: { pickMissingWord: { totalSessions: 1, totalScore: 0, uniquePlayers: 1 } },
-		};
-	} else {
-		const statsForLanguage = stats[learningLocale];
-		if (statsForLanguage === undefined) {
-			stats[learningLocale] = { pickMissingWord: { totalSessions: 1, totalScore: 0, uniquePlayers: 1 } };
-		} else {
-			const pickMissingWord = statsForLanguage.pickMissingWord;
-			if (pickMissingWord === undefined) {
-				statsForLanguage.pickMissingWord = { totalSessions: 1, totalScore: 0, uniquePlayers: 1 };
-			} else {
-				pickMissingWord.totalSessions++;
-				if (userDocument.scores?.[learningLocale]?.pickMissingWord === undefined) {
-					pickMissingWord.uniquePlayers++;
-				}
-			}
-		}
-	}
-
-	const scores = userDocument.scores;
-	if (scores === undefined) {
-		userDocument.scores = { [learningLocale]: { pickMissingWord: { totalScore: 0, sessionCount: 1 } } };
-	} else {
-		const scoreForLanguage = scores[learningLocale];
-		if (scoreForLanguage === undefined) {
-			scores[learningLocale] = { pickMissingWord: { totalScore: 0, sessionCount: 1 } };
-		} else {
-			const pickMissingWord = scoreForLanguage.pickMissingWord;
-			if (pickMissingWord === undefined) {
-				scoreForLanguage.pickMissingWord = { totalScore: 0, sessionCount: 1 };
-			} else {
-				pickMissingWord.sessionCount++;
-			}
-		}
-	}
-
-	// TODO(vxern): Urgent - Fix this update.
-	const session = client.database.openSession();
-
-	await session.set(guildStatsDocument);
-	await session.saveChanges();
-
-	session.dispose();
+	await userDocument.update(client, () => {
+		userDocument.registerSession({ game: "pickMissingWord", learningLocale });
+	});
 
 	await client.postponeReply(interaction);
 
@@ -145,32 +106,13 @@ async function handleStartGame(client: Client, interaction: Logos.Interaction): 
 		const pick = data.sentenceSelection.allPicks.find((pick) => pick[0] === id);
 		const isCorrect = pick === data.sentenceSelection.correctPick;
 
-		const guildStatsDocument = client.documents.guildStats.get(guildId.toString());
-		const userDocument = client.documents.users.get(interaction.user.id.toString());
-		if (guildStatsDocument === undefined || userDocument === undefined) {
-			return;
-		}
+		await guildStatsDocument.update(client, () => {
+			guildStatsDocument.incrementScore({ game: "pickMissingWord", learningLocale });
+		});
 
-		const pickMissingWord = {
-			guildStats: guildStatsDocument?.stats?.[learningLocale]?.pickMissingWord,
-			user: userDocument?.scores?.[learningLocale]?.pickMissingWord,
-		};
-		if (pickMissingWord.guildStats === undefined || pickMissingWord.user === undefined) {
-			return;
-		}
-
-		if (isCorrect) {
-			pickMissingWord.guildStats.totalScore++;
-			pickMissingWord.user.totalScore++;
-		}
-
-		// TODO(vxern): Urgent - Fix this update.
-
-		await session.set(guildStatsDocument);
-		await session.set(userDocument);
-		await session.saveChanges();
-
-		session.dispose();
+		await userDocument.update(client, () => {
+			userDocument.incrementScore({ game: "pickMissingWord", learningLocale });
+		});
 
 		if (isCorrect) {
 			data.sessionScore++;

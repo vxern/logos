@@ -7,7 +7,6 @@ import { User } from "../../../database/user";
 import diagnostics from "../../../diagnostics";
 import { encodeId, getLocaleData } from "../../../interactions";
 import { PromptService } from "../service";
-import {Resource} from "../../../database/resource";
 
 type InteractionData = [documentId: string, isResolved: string];
 
@@ -67,9 +66,7 @@ class SuggestionService extends PromptService<"suggestions", Suggestion, Interac
 							}
 
 							return iconURL;
-						})()}&metadata=${suggestionDocument.guildId}/${suggestionDocument.authorId}/${
-							suggestionDocument.createdAt
-						}`,
+						})()}&metadata=${suggestionDocument.partialId}`,
 					},
 				},
 			],
@@ -83,7 +80,7 @@ class SuggestionService extends PromptService<"suggestions", Suggestion, Interac
 									style: Discord.ButtonStyles.Success,
 									label: strings.markUnresolved,
 									customId: encodeId<InteractionData>(constants.components.suggestions, [
-										`${suggestionDocument.guildId}/${suggestionDocument.authorId}/${suggestionDocument.createdAt}`,
+										suggestionDocument.partialId,
 										`${false}`,
 									]),
 								},
@@ -93,7 +90,7 @@ class SuggestionService extends PromptService<"suggestions", Suggestion, Interac
 									label: strings.remove,
 									customId: encodeId(
 										`${constants.components.removePrompt}/${constants.components.suggestions}/${this.guildId}`,
-										[`${suggestionDocument.guildId}/${suggestionDocument.authorId}/${suggestionDocument.createdAt}`],
+										[suggestionDocument.partialId],
 									),
 								},
 						  ]
@@ -103,7 +100,7 @@ class SuggestionService extends PromptService<"suggestions", Suggestion, Interac
 									style: Discord.ButtonStyles.Primary,
 									label: strings.markResolved,
 									customId: encodeId<InteractionData>(constants.components.suggestions, [
-										`${suggestionDocument.guildId}/${suggestionDocument.authorId}/${suggestionDocument.createdAt}`,
+										suggestionDocument.partialId,
 										`${true}`,
 									]),
 								},
@@ -164,14 +161,9 @@ class SuggestionService extends PromptService<"suggestions", Suggestion, Interac
 			return;
 		}
 
-		const session = this.client.database.openSession();
-
-		suggestionDocument.isResolved = isResolved;
-
-		await session.set(suggestionDocument);
-		await session.saveChanges();
-
-		session.dispose();
+		await suggestionDocument.update(this.client, () => {
+			suggestionDocument.isResolved = isResolved;
+		});
 
 		return suggestionDocument;
 	}

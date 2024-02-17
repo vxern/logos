@@ -7,7 +7,6 @@ import { User } from "../../../database/user";
 import diagnostics from "../../../diagnostics";
 import { encodeId, getLocaleData } from "../../../interactions";
 import { PromptService } from "../service";
-import {Suggestion} from "../../../database/suggestion";
 
 type InteractionData = [documentId: string, isResolved: string];
 
@@ -77,7 +76,7 @@ class TicketService extends PromptService<"tickets", Ticket, InteractionData> {
 							}
 
 							return iconURL;
-						})()}&metadata=${ticketDocument.guildId}/${ticketDocument.authorId}/${ticketDocument.channelId}`,
+						})()}&metadata=${ticketDocument.partialId}`,
 					},
 				},
 			],
@@ -91,7 +90,7 @@ class TicketService extends PromptService<"tickets", Ticket, InteractionData> {
 									style: Discord.ButtonStyles.Success,
 									label: strings.markUnresolved,
 									customId: encodeId<InteractionData>(constants.components.tickets, [
-										`${ticketDocument.guildId}/${ticketDocument.authorId}/${ticketDocument.channelId}`,
+										ticketDocument.partialId,
 										`${false}`,
 									]),
 								},
@@ -101,7 +100,7 @@ class TicketService extends PromptService<"tickets", Ticket, InteractionData> {
 									label: strings.close,
 									customId: encodeId(
 										`${constants.components.removePrompt}/${constants.components.tickets}/${this.guildId}`,
-										[`${ticketDocument.guildId}/${ticketDocument.authorId}/${ticketDocument.channelId}`],
+										[ticketDocument.partialId],
 									),
 								},
 						  ]
@@ -111,7 +110,7 @@ class TicketService extends PromptService<"tickets", Ticket, InteractionData> {
 									style: Discord.ButtonStyles.Primary,
 									label: strings.markResolved,
 									customId: encodeId<InteractionData>(constants.components.tickets, [
-										`${ticketDocument.guildId}/${ticketDocument.authorId}/${ticketDocument.channelId}`,
+										ticketDocument.partialId,
 										`${true}`,
 									]),
 								},
@@ -169,27 +168,17 @@ class TicketService extends PromptService<"tickets", Ticket, InteractionData> {
 			return;
 		}
 
-		const session = this.client.database.openSession();
-
-		ticketDocument.isResolved = isResolved;
-
-		await session.set(ticketDocument);
-		await session.saveChanges();
-
-		session.dispose();
+		await ticketDocument.update(this.client, () => {
+			ticketDocument.isResolved = isResolved;
+		});
 
 		return ticketDocument;
 	}
 
-	public async handleDelete(partialId: string): Promise<void> {
-		await super.handleDelete(partialId);
+	public async handleDelete(ticketDocument: Ticket): Promise<void> {
+		await super.handleDelete(ticketDocument);
 
-		const [_, __, channelId] = partialId.split("/");
-		if (channelId === undefined) {
-			return;
-		}
-
-		await this.client.bot.helpers.deleteChannel(channelId).catch(() => {
+		await this.client.bot.helpers.deleteChannel(ticketDocument.channelId).catch(() => {
 			this.client.log.warn("Failed to delete ticket channel.");
 		});
 	}

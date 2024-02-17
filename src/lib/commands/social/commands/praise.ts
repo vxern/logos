@@ -82,33 +82,11 @@ async function handlePraiseUser(client: Client, interaction: Logos.Interaction):
 
 	await client.postponeReply(interaction);
 
-	const [authorDocument, targetDocument] = await Promise.all([
+	const [authorDocument, targetDocument, praiseDocuments] = await Promise.all([
 		User.getOrCreate(client, { userId: interaction.user.id.toString() }),
 		User.getOrCreate(client, { userId: member.id.toString() }),
+		Praise.getAll(client, { where: { authorId: interaction.user.id.toString() } }),
 	]);
-
-	const session = client.database.openSession();
-
-	const praiseDocumentsCached = client.documents.praisesByAuthor.get(interaction.user.id.toString());
-	const praiseDocuments =
-		praiseDocumentsCached !== undefined
-			? Array.from(praiseDocumentsCached.values())
-			: await session
-					.query<Praise>({ collection: "Praises" })
-					.whereRegex("id", `^praises/\\d+/${interaction.user.id}/\\d+$`)
-					.all()
-					.then((praiseDocuments) => {
-						const map = new Map(
-							praiseDocuments.map((praiseDocument) => [
-								`${praiseDocument.targetId}/${praiseDocument.authorId}/${praiseDocument.createdAt}`,
-								praiseDocument,
-							]),
-						);
-						client.documents.praisesByAuthor.set(interaction.user.id.toString(), map);
-						return praiseDocuments;
-					});
-
-	session.dispose();
 
 	const intervalMilliseconds = timeStructToMilliseconds(configuration.rateLimit?.within ?? defaults.PRAISE_INTERVAL);
 
@@ -141,19 +119,11 @@ async function handlePraiseUser(client: Client, interaction: Logos.Interaction):
 		return;
 	}
 
-	session = client.database.openSession();
-	const createdAt = Date.now();
-	const praiseDocument = {
-		id: `praises/${targetDocument.account.id}/${authorDocument.account.id}/${createdAt}`,
+	const praiseDocument = await Praise.create(client, {
 		authorId: authorDocument.account.id,
 		targetId: targetDocument.account.id,
 		comment,
-		createdAt,
-		"@metadata": { "@collection": "Praises" },
-	};
-	await session.set(praiseDocument);
-	await session.saveChanges();
-	session.dispose();
+	});
 
 	if (configuration.journaling) {
 		const journallingService = client.getJournallingService(guild.id);

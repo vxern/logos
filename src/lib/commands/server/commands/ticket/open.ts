@@ -46,12 +46,12 @@ async function handleOpenTicket(client: Client, interaction: Logos.Interaction):
 		return;
 	}
 
-	const userDocument = await User.getOrCreate(client, { userId: interaction.user.id.toString() });
+	const [userDocument, ticketDocuments] = await Promise.all([
+		// TODO(vxern): Think whether this is even necessary anymore.
+		User.getOrCreate(client, { userId: interaction.user.id.toString() }),
+		Ticket.getAll(client, { where: { authorId: interaction.user.id.toString() } }),
+	]);
 
-	const partialId = `${guildId}/${interaction.user.id}`;
-	const ticketDocuments = Array.from(client.documents.tickets.entries())
-		.filter(([key, _]) => key.startsWith(partialId))
-		.map(([_, value]) => value);
 	const intervalMilliseconds = timeStructToMilliseconds(configuration.rateLimit?.within ?? defaults.TICKET_INTERVAL);
 	if (
 		!verifyIsWithinLimits(
@@ -136,8 +136,6 @@ async function openTicket(
 		return "failure";
 	}
 
-	const session = client.database.openSession();
-
 	const strings = {
 		inquiry: client.localise("entry.verification.inquiry.inquiry", guildLocale)(),
 	};
@@ -187,22 +185,13 @@ async function openTicket(
 			return undefined;
 		});
 
-	const ticketDocument = {
-		...({
-			id: `tickets/${guild.id}/${userDocument.account.id}/${channel.id}`,
-			guildId: guild.id.toString(),
-			authorId: userDocument.account.id,
-			channelId: channel.id.toString(),
-			answers,
-			isResolved: false,
-			type,
-			createdAt: Date.now(),
-		} satisfies Ticket),
-		"@metadata": { "@collection": "Tickets" },
-	};
-	await session.set(ticketDocument);
-	await session.saveChanges();
-	session.dispose();
+	const ticketDocument = await Ticket.create(client, {
+		guildId: guild.id.toString(),
+		authorId: userDocument.account.id,
+		channelId: channel.id.toString(),
+		type,
+		answers,
+	});
 
 	if (configuration.journaling) {
 		const journallingService = client.getJournallingService(guild.id);
@@ -219,9 +208,8 @@ async function openTicket(
 		}
 	}
 
-	const partialId = `${guild.id}/${user.id}/${channel.id}`;
-	ticketService.registerDocument(partialId, ticketDocument);
-	ticketService.registerHandler(partialId);
+	ticketService.registerDocument(ticketDocument);
+	ticketService.registerHandler(ticketDocument);
 
 	if (type === "inquiry") {
 		return ticketDocument;
@@ -232,7 +220,7 @@ async function openTicket(
 		return "failure";
 	}
 
-	ticketService.registerPrompt(prompt, user.id, partialId, ticketDocument);
+	ticketService.registerPrompt(prompt, user.id, ticketDocument);
 
 	return ticketDocument;
 }
