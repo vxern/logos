@@ -154,6 +154,12 @@ class DocumentSession extends ravendb.DocumentSession {
 		this.#database.cacheDocument(document);
 	}
 
+	async remove<M extends Model<any>>(document: M): Promise<void> {
+		// We don't call `delete()` here because we don't actually delete from the database.
+
+		this.#database.unloadDocument(document);
+	}
+
 	constructor({ database, id, options }: { database: Database; id: string; options: ravendb.SessionOptions }) {
 		super(database, id, options);
 
@@ -209,37 +215,39 @@ class Database extends ravendb.DocumentStore {
 	}
 
 	async #prefetchData(): Promise<void> {
-		const session = this.openSession();
-
 		const result = await Promise.all([
-			session.query<EntryRequest>({ collection: "EntryRequests" }).all(),
-			session.query<Report>({ collection: "Reports" }).all(),
-			session.query<Resource>({ collection: "Resources" }).all(),
-			session.query<Suggestion>({ collection: "Suggestions" }).all(),
-			session.query<Ticket>({ collection: "Tickets" }).all(),
+			EntryRequest.getAll(this),
+			Report.getAll(this),
+			Resource.getAll(this),
+			Suggestion.getAll(this),
+			Ticket.getAll(this),
 		]);
 		const documents = result.flat();
 
 		this.cacheDocuments(documents);
-
-		session.dispose();
 	}
 
-	cacheDocument(document: any): void {
-		switch (document.constructor) {
-			case EntryRequest: {
+	cacheDocuments<M extends Model<any>>(documents: M[]): void {
+		for (const document of documents) {
+			this.cacheDocument(document);
+		}
+	}
+
+	cacheDocument<M extends Model<any>>(document: M): void {
+		switch (true) {
+			case document instanceof EntryRequest: {
 				this.cache.entryRequests.set(document.partialId, document);
 				break;
 			}
-			case GuildStats: {
+			case document instanceof GuildStats: {
 				this.cache.guildStats.set(document.partialId, document);
-				return;
+				break;
 			}
-			case Guild: {
+			case document instanceof Guild: {
 				this.cache.guilds.set(document.partialId, document);
 				break;
 			}
-			case Praise: {
+			case document instanceof Praise: {
 				if (this.cache.praisesByAuthor.has(document.authorId)) {
 					this.cache.praisesByAuthor.get(document.authorId)?.set(document.partialId, document);
 				} else {
@@ -254,41 +262,88 @@ class Database extends ravendb.DocumentStore {
 
 				break;
 			}
-			case Report: {
+			case document instanceof Report: {
 				this.cache.reports.set(document.partialId, document);
 				break;
 			}
-			case Resource: {
+			case document instanceof Resource: {
 				this.cache.resources.set(document.partialId, document);
 				break;
 			}
-			case Suggestion: {
+			case document instanceof Suggestion: {
 				this.cache.suggestions.set(document.partialId, document);
 				break;
 			}
-			case Ticket: {
+			case document instanceof Ticket: {
 				this.cache.tickets.set(document.partialId, document);
 				break;
 			}
-			case User: {
+			case document instanceof User: {
 				this.cache.users.set(document.partialId, document);
 				break;
 			}
-			case Warning: {
+			case document instanceof Warning: {
 				if (this.cache.warningsByTarget.has(document.targetId)) {
 					this.cache.warningsByTarget.get(document.targetId)?.set(document.partialId, document);
 				} else {
 					this.cache.warningsByTarget.set(document.targetId, new Map([[document.partialId, document]]));
 				}
-
 				break;
 			}
 		}
 	}
 
-	cacheDocuments(documents: any[]): void {
-		for (const document of documents) {
-			this.cacheDocument(document);
+	unloadDocument<M extends Model<any>>(document: M): void {
+		switch (true) {
+			case document instanceof EntryRequest: {
+				this.cache.entryRequests.delete(document.partialId);
+				break;
+			}
+			case document instanceof GuildStats: {
+				this.cache.guildStats.delete(document.partialId);
+				break;
+			}
+			case document instanceof Guild: {
+				this.cache.guilds.delete(document.partialId);
+				break;
+			}
+			case document instanceof Praise: {
+				if (this.cache.praisesByAuthor.has(document.authorId)) {
+					this.cache.praisesByAuthor.get(document.authorId)?.delete(document.partialId);
+				}
+
+				if (this.cache.praisesByTarget.has(document.targetId)) {
+					this.cache.praisesByTarget.get(document.targetId)?.delete(document.partialId);
+				}
+
+				break;
+			}
+			case document instanceof Report: {
+				this.cache.reports.delete(document.partialId);
+				break;
+			}
+			case document instanceof Resource: {
+				this.cache.resources.delete(document.partialId);
+				break;
+			}
+			case document instanceof Suggestion: {
+				this.cache.suggestions.delete(document.partialId);
+				break;
+			}
+			case document instanceof Ticket: {
+				this.cache.tickets.delete(document.partialId);
+				break;
+			}
+			case document instanceof User: {
+				this.cache.users.delete(document.partialId);
+				break;
+			}
+			case document instanceof Warning: {
+				if (this.cache.warningsByTarget.has(document.targetId)) {
+					this.cache.warningsByTarget.get(document.targetId)?.delete(document.partialId);
+				}
+				break;
+			}
 		}
 	}
 
@@ -2248,25 +2303,9 @@ class Client {
 			this.log.info(`Logos added to "${guild.name}" (ID ${guild.id}).`);
 		}
 
-		const guildDocument = await Guild.getOrCreate(client, { guildId: guild.id.toString() });
+		const guildDocument = await Guild.getOrCreate(this, { guildId: guild.id.toString() });
 
-		const session = this.database.openSession();
-
-		const guildStatsExist = ((await session.get(`guildStats/${guild.id}`)) ?? undefined) !== undefined;
-		if (!guildStatsExist) {
-			const guildStatsDocument = {
-				...({
-					id: `guildStats/${guild.id}`,
-					guildId: guild.id.toString(),
-					createdAt: Date.now(),
-				} satisfies GuildStats),
-				"@metadata": { "@collection": "GuildStats" },
-			};
-			await session.set(guildStatsDocument);
-			await session.saveChanges();
-		}
-
-		session.dispose();
+		await GuildStats.getOrCreate(this, { guildId: guild.id.toString() });
 
 		await this.#services.startServices(this, { guildId: guild.id, guildDocument });
 
@@ -2621,4 +2660,4 @@ function isValidIdentifier(identifier: string): boolean {
 	);
 }
 
-export { Client, Collector, InteractionCollector, isValidIdentifier, isValidSnowflake, ServiceStore };
+export { Client, Collector, Database, InteractionCollector, isValidIdentifier, isValidSnowflake, ServiceStore };
