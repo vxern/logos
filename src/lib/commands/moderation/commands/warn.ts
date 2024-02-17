@@ -8,7 +8,6 @@ import * as Logos from "../../../../types";
 import { Client } from "../../../client";
 import { timeStructToMilliseconds } from "../../../database/guild";
 import { Guild } from "../../../database/guild";
-import { User } from "../../../database/user";
 import { Rule, Warning } from "../../../database/warning";
 import diagnostics from "../../../diagnostics";
 import { parseArguments } from "../../../interactions";
@@ -171,15 +170,12 @@ async function handleWarnUser(client: Client, interaction: Logos.Interaction): P
 		return;
 	}
 
-	const [authorDocument, targetDocument, warningDocuments] = await Promise.all([
-		User.getOrCreate(client, { userId: interaction.user.id.toString() }),
-		User.getOrCreate(client, { userId: member.id.toString() }),
-		Warning.getAll(client, { where: { targetId: member.id.toString() } }),
-	]);
+	// TODO(vxern): Test this.
+	const warningDocuments = await Warning.getAll(client, { where: { targetId: member.id.toString() } });
 
 	const warningDocument = await Warning.create(client, {
-		authorId: authorDocument.account.id,
-		targetId: targetDocument.account.id,
+		authorId: interaction.user.id.toString(),
+		targetId: member.id.toString(),
 		reason,
 		rule: rule === components.none ? undefined : (rule as Rule),
 	});

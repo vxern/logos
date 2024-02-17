@@ -369,7 +369,7 @@ class EntryService extends LocalService {
 		if (requiresVerification) {
 			const userDocument = await User.getOrCreate(this.client, { userId: interaction.user.id.toString() });
 
-			const isVerified = userDocument?.account.authorisedOn?.includes(this.guildIdString);
+			const isVerified = userDocument.isAuthorisedOn(this.guildIdString);
 			if (!isVerified) {
 				const strings = {
 					title: this.client.localise("entry.verification.getVerified.title", locale)(),

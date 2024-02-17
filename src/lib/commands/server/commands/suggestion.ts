@@ -8,7 +8,6 @@ import { Client, InteractionCollector } from "../../../client";
 import { timeStructToMilliseconds } from "../../../database/guild";
 import { Guild } from "../../../database/guild";
 import { Suggestion } from "../../../database/suggestion";
-import { User } from "../../../database/user";
 import { Modal, createModalComposer } from "../../../interactions";
 import { verifyIsWithinLimits } from "../../../utils";
 import { CommandTemplate } from "../../command";

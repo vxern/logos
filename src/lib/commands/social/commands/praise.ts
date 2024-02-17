@@ -7,7 +7,6 @@ import * as Logos from "../../../../types";
 import { Client } from "../../../client";
 import { Guild, timeStructToMilliseconds } from "../../../database/guild";
 import { Praise } from "../../../database/praise";
-import { User } from "../../../database/user";
 import { parseArguments } from "../../../interactions";
 import { verifyIsWithinLimits } from "../../../utils";
 import { CommandTemplate } from "../../command";
@@ -82,14 +81,8 @@ async function handlePraiseUser(client: Client, interaction: Logos.Interaction):
 
 	await client.postponeReply(interaction);
 
-	const [authorDocument, targetDocument, praiseDocuments] = await Promise.all([
-		User.getOrCreate(client, { userId: interaction.user.id.toString() }),
-		User.getOrCreate(client, { userId: member.id.toString() }),
-		Praise.getAll(client, { where: { authorId: interaction.user.id.toString() } }),
-	]);
-
+	const praiseDocuments = await Praise.getAll(client, { where: { authorId: interaction.user.id.toString() } });
 	const intervalMilliseconds = timeStructToMilliseconds(configuration.rateLimit?.within ?? defaults.PRAISE_INTERVAL);
-
 	if (
 		!verifyIsWithinLimits(
 			praiseDocuments.map((suggestionDocument) => suggestionDocument.createdAt),
@@ -120,8 +113,8 @@ async function handlePraiseUser(client: Client, interaction: Logos.Interaction):
 	}
 
 	const praiseDocument = await Praise.create(client, {
-		authorId: authorDocument.account.id,
-		targetId: targetDocument.account.id,
+		authorId: interaction.user.id.toString(),
+		targetId: member.id.toString(),
 		comment,
 	});
 

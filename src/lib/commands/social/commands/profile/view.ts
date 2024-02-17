@@ -4,7 +4,6 @@ import { MentionTypes, mention } from "../../../../../formatting";
 import * as Logos from "../../../../../types";
 import { Client } from "../../../../client";
 import { Praise } from "../../../../database/praise";
-import { User } from "../../../../database/user";
 import { Warning } from "../../../../database/warning";
 import { getShowButton, parseArguments } from "../../../../interactions";
 import { OptionTemplate } from "../../../command";
@@ -50,8 +49,7 @@ async function handleDisplayProfile(client: Client, interaction: Logos.Interacti
 		return;
 	}
 
-	const [_, praiseDocumentsByAuthor, praiseDocumentsByTarget, warningDocuments] = await Promise.all([
-		User.getOrCreate(client, { userId: member.id.toString() }),
+	const [praiseDocumentsByAuthor, praiseDocumentsByTarget, warningDocuments] = await Promise.all([
 		Praise.getAll(client, { where: { authorId: member.id.toString() } }),
 		Praise.getAll(client, { where: { targetId: member.id.toString() } }),
 		Warning.getAll(client, { where: { targetId: member.id.toString() } }),

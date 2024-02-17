@@ -113,13 +113,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 						return;
 					}
 
-					this.finalise(
-						entryRequestDocument,
-						authorDocument,
-						configuration,
-						[submitter, member, guild],
-						[isAccepted, isRejected],
-					);
+					this.finalise(entryRequestDocument, configuration, [submitter, member, guild], [isAccepted, isRejected]);
 				});
 
 				continue;
@@ -334,15 +328,10 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 			return undefined;
 		}
 
-		const [authorDocument, voterDocument] = await Promise.all([
-			User.getOrCreate(this.client, { userId }),
-			User.getOrCreate(this.client, { userId: interaction.user.id.toString() }),
-		]);
-
 		const [alreadyVotedToAccept, alreadyVotedToReject] = [
 			entryRequestDocument.votedFor ?? [],
 			entryRequestDocument.votedAgainst ?? [],
-		].map((voterIds) => voterIds.some((voterId) => voterId === voterDocument.account.id)) as [boolean, boolean];
+		].map((voterIds) => voterIds.some((voterId) => voterId === interaction.user.id.toString())) as [boolean, boolean];
 
 		const voteInformation = this.getVoteInformation(entryRequestDocument);
 		if (voteInformation === undefined) {
@@ -354,7 +343,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 			[...(entryRequestDocument.votedAgainst ?? [])],
 		];
 
-		const submitter = this.client.entities.users.get(BigInt(authorDocument.account.id));
+		const submitter = this.client.entities.users.get(BigInt(userId));
 		if (submitter === undefined) {
 			return undefined;
 		}
@@ -393,13 +382,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 							return;
 						}
 
-						await this.finalise(
-							entryRequestDocument,
-							authorDocument,
-							configuration,
-							[submitter, member, guild],
-							[true, false],
-						);
+						await this.finalise(entryRequestDocument, configuration, [submitter, member, guild], [true, false]);
 
 						resolve(null);
 					});
@@ -484,13 +467,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 							return;
 						}
 
-						await this.finalise(
-							entryRequestDocument,
-							authorDocument,
-							configuration,
-							[submitter, member, guild],
-							[false, true],
-						);
+						await this.finalise(entryRequestDocument, configuration, [submitter, member, guild], [false, true]);
 
 						resolve(null);
 					});
@@ -549,15 +526,15 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 			}
 
 			if (isAccept) {
-				const voterIndex = votedAgainst.findIndex((voterId) => voterId === voterDocument.account.id);
+				const voterIndex = votedAgainst.findIndex((voterId) => voterId === interaction.user.id.toString());
 
 				votedAgainst.splice(voterIndex, 1);
-				votedFor.push(voterDocument.account.id);
+				votedFor.push(interaction.user.id.toString());
 			} else {
-				const voterIndex = votedFor.findIndex((voterId) => voterId === voterDocument.account.id);
+				const voterIndex = votedFor.findIndex((voterId) => voterId === interaction.user.id.toString());
 
 				votedFor.splice(voterIndex, 1);
-				votedAgainst.push(voterDocument.account.id);
+				votedAgainst.push(interaction.user.id.toString());
 			}
 
 			const strings = {
@@ -578,9 +555,9 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 			this.client.acknowledge(interaction);
 
 			if (isAccept) {
-				votedFor.push(voterDocument.account.id);
+				votedFor.push(interaction.user.id.toString());
 			} else {
-				votedAgainst.push(voterDocument.account.id);
+				votedAgainst.push(interaction.user.id.toString());
 			}
 		}
 
@@ -602,13 +579,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 		}
 
 		if (isAccepted || isRejected) {
-			await this.finalise(
-				entryRequestDocument,
-				authorDocument,
-				configuration,
-				[submitter, member, guild],
-				[isAccepted, isRejected],
-			);
+			await this.finalise(entryRequestDocument, configuration, [submitter, member, guild], [isAccepted, isRejected]);
 
 			return null;
 		}
@@ -616,13 +587,15 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 		return entryRequestDocument;
 	}
 
+	// TODO(vxern): Improve how authorised.
 	private async finalise(
 		entryRequestDocument: EntryRequest,
-		authorDocument: User,
 		configuration: Configuration,
-		[submitter, member, guild]: [Logos.User, Logos.Member, Logos.Guild],
+		[author, voter, guild]: [Logos.User, Logos.Member, Logos.Guild],
 		[isAccepted, isRejected]: [boolean, boolean],
 	): Promise<void> {
+		const authorDocument = await User.getOrCreate(this.client, { userId: author.id.toString() });
+
 		let isFinalised = false;
 
 		if (isAccepted || isRejected) {
@@ -632,9 +605,9 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 				const journallingService = this.client.getJournallingService(this.guildId);
 
 				if (isAccepted) {
-					journallingService?.log("entryRequestAccept", { args: [submitter, member] });
+					journallingService?.log("entryRequestAccept", { args: [author, voter] });
 				} else {
-					journallingService?.log("entryRequestReject", { args: [submitter, member] });
+					journallingService?.log("entryRequestReject", { args: [author, voter] });
 				}
 			}
 		}
@@ -676,12 +649,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 			);
 
 			this.client.bot.rest
-				.addRole(
-					this.guildId,
-					submitter.id,
-					BigInt(entryRequestDocument.requestedRoleId),
-					"User-requested role addition.",
-				)
+				.addRole(this.guildId, author.id, BigInt(entryRequestDocument.requestedRoleId), "User-requested role addition.")
 				.catch(() =>
 					this.client.log.warn(
 						`Failed to add ${diagnostics.display.role(
@@ -701,7 +669,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 			);
 
 			this.client.bot.rest
-				.banMember(this.guildId, submitter.id, {}, "Voted to reject entry request.")
+				.banMember(this.guildId, author.id, {}, "Voted to reject entry request.")
 				.catch(() =>
 					this.client.log.warn(
 						`Failed to ban ${diagnostics.display.user(authorDocument.account.id)} on ${diagnostics.display.guild(
