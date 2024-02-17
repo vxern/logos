@@ -241,10 +241,7 @@ type Modal<ComposerContent, SectionNames = keyof ComposerContent> = {
 };
 
 // TODO(vxern): This can absolutely be improved.
-async function createModalComposer<
-	ComposerContent,
-	SectionNames extends keyof ComposerContent = keyof ComposerContent,
->(
+async function createModalComposer<ComposerContent, SectionNames extends keyof ComposerContent = keyof ComposerContent>(
 	client: Client,
 	interaction: Logos.Interaction,
 	{
@@ -320,10 +317,9 @@ async function createModalComposer<
 	}
 }
 
-function parseComposerContent<
-	ComposerContent,
-	SectionNames extends keyof ComposerContent = keyof ComposerContent,
->(submission: Discord.Interaction): ComposerContent | undefined {
+function parseComposerContent<ComposerContent, SectionNames extends keyof ComposerContent = keyof ComposerContent>(
+	submission: Discord.Interaction,
+): ComposerContent | undefined {
 	const content: Partial<ComposerContent> = {};
 
 	const fields = submission?.data?.components?.map((component) => component.components?.at(0));
@@ -337,12 +333,12 @@ function parseComposerContent<
 		}
 
 		const key = field.customId as SectionNames;
-		const value = (field.value ?? "") as ComposerContent[SectionNames];
+		const value = field.value ?? "";
 
 		if (value.length === 0) {
 			content[key] = undefined;
 		} else {
-			content[key] = value;
+			content[key] = value as ComposerContent[SectionNames];
 		}
 	}
 
