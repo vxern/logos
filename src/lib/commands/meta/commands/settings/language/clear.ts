@@ -17,7 +17,7 @@ async function handleClearLanguage(client: Client, interaction: Logos.Interactio
 	await client.postponeReply(interaction);
 
 	const userDocument = await User.getOrCreate(client, { userId: interaction.user.id.toString() });
-	if (userDocument.account.language === undefined) {
+	if (userDocument.preferredLanguage === undefined) {
 		const strings = {
 			title: client.localise("settings.strings.cannotClear.title", locale)(),
 			description: client.localise("settings.strings.cannotClear.description", locale)(),
@@ -36,7 +36,7 @@ async function handleClearLanguage(client: Client, interaction: Logos.Interactio
 	}
 
 	await userDocument.update(client, () => {
-		userDocument.account.language = undefined;
+		userDocument.preferredLanguage = undefined;
 	});
 
 	{

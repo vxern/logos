@@ -1,7 +1,6 @@
 import * as Discord from "@discordeno/bot";
 import constants from "../../../../../constants/constants";
 import localisations from "../../../../../constants/localisations";
-import defaults from "../../../../../defaults";
 import * as Logos from "../../../../../types";
 import { Client } from "../../../../client";
 import { User } from "../../../../database/user";
@@ -14,11 +13,9 @@ const command: OptionTemplate = {
 };
 
 async function handleDisplaySettings(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const locale = interaction.locale;
+	const { locale, language } = interaction;
 
 	const userDocument = await User.getOrCreate(client, { userId: interaction.user.id.toString() });
-
-	const userLanguage = userDocument.account.language ?? defaults.LOCALISATION_LANGUAGE;
 
 	const strings = {
 		title: client.localise("settings.strings.settings.title", locale)(),
@@ -33,7 +30,7 @@ async function handleDisplaySettings(client: Client, interaction: Logos.Interact
 					"settings.strings.settings.fields.language.description.noLanguageSet.defaultShown",
 					locale,
 				)(),
-				language: client.localise(localisations.languages[userLanguage], locale)(),
+				language: client.localise(localisations.languages[userDocument.preferredLanguage ?? language], locale)(),
 			},
 		},
 	};
@@ -47,7 +44,7 @@ async function handleDisplaySettings(client: Client, interaction: Logos.Interact
 					{
 						name: strings.description.language.title,
 						value:
-							userDocument.account.language !== undefined
+							userDocument.preferredLanguage !== undefined
 								? strings.description.language.language
 								: `${strings.description.language.noLanguageSet} ${strings.description.language.defaultShown}`,
 						inline: true,

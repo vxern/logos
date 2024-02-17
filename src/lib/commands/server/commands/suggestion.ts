@@ -47,12 +47,7 @@ async function handleMakeSuggestion(client: Client, interaction: Logos.Interacti
 		return;
 	}
 
-	const [userDocument, suggestionDocuments] = await Promise.all([
-		// TODO(vxern): Think whether this is even necessary anymore.
-		User.getOrCreate(client, { userId: interaction.user.id.toString() }),
-		Suggestion.getAll(client, { where: { authorId: interaction.user.id.toString() } }),
-	]);
-
+	const suggestionDocuments = await Suggestion.getAll(client, { where: { authorId: interaction.user.id.toString() } });
 	const intervalMilliseconds = timeStructToMilliseconds(
 		configuration.rateLimit?.within ?? defaults.SUGGESTION_INTERVAL,
 	);
@@ -92,7 +87,7 @@ async function handleMakeSuggestion(client: Client, interaction: Logos.Interacti
 
 			const suggestionDocument = await Suggestion.create(client, {
 				guildId: guild.id.toString(),
-				authorId: userDocument.account.id,
+				authorId: interaction.user.id.toString(),
 				answers,
 			});
 
@@ -101,9 +96,7 @@ async function handleMakeSuggestion(client: Client, interaction: Logos.Interacti
 				journallingService?.log("suggestionSend", { args: [member, suggestionDocument] });
 			}
 
-			const userId = BigInt(userDocument.account.id);
-
-			const user = client.entities.users.get(userId);
+			const user = client.entities.users.get(interaction.user.id);
 			if (user === undefined) {
 				return "failure";
 			}
@@ -114,7 +107,7 @@ async function handleMakeSuggestion(client: Client, interaction: Logos.Interacti
 			}
 
 			suggestionService.registerDocument(suggestionDocument);
-			suggestionService.registerPrompt(prompt, userId, suggestionDocument);
+			suggestionService.registerPrompt(prompt, interaction.user.id, suggestionDocument);
 			suggestionService.registerHandler(suggestionDocument);
 
 			const strings = {

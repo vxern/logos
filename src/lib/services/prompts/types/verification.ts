@@ -739,9 +739,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 			return;
 		}
 
-		const userDocument = await this.getUserDocument(entryRequestDocument);
-
-		const user = this.client.entities.users.get(BigInt(userDocument.account.id));
+		const user = this.client.entities.users.get(BigInt(entryRequestDocument.authorId));
 		if (user === undefined) {
 			return;
 		}
@@ -762,7 +760,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 			this.client,
 			configuration,
 			{ topic: strings.inquiryChannel },
-			[guild, user, member, userDocument],
+			[guild, user, member],
 			ticketConfiguration.categoryId,
 			"inquiry",
 			{ guildLocale: this.guildLocale },

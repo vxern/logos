@@ -77,7 +77,7 @@ async function handleStartGame(client: Client, interaction: Logos.Interaction): 
 		guildStatsDocument.registerSession({
 			game: "pickMissingWord",
 			learningLocale,
-			isUnique: userDocument.getGameScore({ game: "pickMissingWord", learningLocale }) === undefined,
+			isUnique: userDocument.getGameScores({ game: "pickMissingWord", learningLocale }) === undefined,
 		});
 	});
 
@@ -160,7 +160,7 @@ async function getGameView(
 	mode: "hide" | "reveal",
 	{ locale, learningLocale }: { locale: Locale; learningLocale: Locale },
 ): Promise<Discord.InteractionCallbackData> {
-	const totalScore = userDocument.scores?.[learningLocale]?.pickMissingWord?.totalScore ?? 0;
+	const totalScore = userDocument.getGameScores({ game: "pickMissingWord", learningLocale })?.totalScore ?? 0;
 
 	const strings = {
 		sentence: client.localise("game.strings.sentence", locale)(),

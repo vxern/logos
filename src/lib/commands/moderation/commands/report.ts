@@ -8,7 +8,6 @@ import { Client, InteractionCollector } from "../../../client";
 import { timeStructToMilliseconds } from "../../../database/guild";
 import { Guild } from "../../../database/guild";
 import { Report, ReportFormData } from "../../../database/report";
-import { User } from "../../../database/user";
 import { Modal, createModalComposer } from "../../../interactions";
 import { verifyIsWithinLimits } from "../../../utils";
 import { CommandTemplate } from "../../command";
@@ -47,12 +46,7 @@ async function handleMakeReport(client: Client, interaction: Logos.Interaction):
 		return;
 	}
 
-	const [userDocument, reportDocuments] = await Promise.all([
-		// TODO(vxern): Think whether this is even necessary anymore.
-		User.getOrCreate(client, { userId: interaction.user.id.toString() }),
-		Report.getAll(client, { where: { authorId: interaction.user.id.toString() } }),
-	]);
-
+	const reportDocuments = await Report.getAll(client, { where: { authorId: interaction.user.id.toString() } });
 	const intervalMilliseconds = timeStructToMilliseconds(configuration.rateLimit?.within ?? defaults.REPORT_INTERVAL);
 	if (
 		!verifyIsWithinLimits(
@@ -90,7 +84,7 @@ async function handleMakeReport(client: Client, interaction: Logos.Interaction):
 
 			const reportDocument = await Report.create(client, {
 				guildId: guild.id.toString(),
-				authorId: userDocument.account.id,
+				authorId: interaction.user.id.toString(),
 				answers,
 			});
 

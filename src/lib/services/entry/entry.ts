@@ -176,11 +176,10 @@ class EntryService extends LocalService {
 			return;
 		}
 
-		// TODO(vxern): Again, is this user document thing needed?
-		const [userDocument, entryRequest] = await Promise.all([
-			User.getOrCreate(this.client, { userId: interaction.user.id.toString() }),
-			EntryRequest.get(this.client, { guildId: guild.id.toString(), authorId: interaction.user.id.toString() }),
-		]);
+		const entryRequest = await EntryRequest.get(this.client, {
+			guildId: guild.id.toString(),
+			authorId: interaction.user.id.toString(),
+		});
 
 		createModalComposer<EntryRequest["answers"]>(this.client, interaction, {
 			modal: this.generateVerificationQuestionModal(interaction.featureLanguage, { locale }),
@@ -208,7 +207,7 @@ class EntryService extends LocalService {
 
 				const entryRequestDocument = await EntryRequest.create(this.client, {
 					guildId: guild.id.toString(),
-					authorId: userDocument.account.id,
+					authorId: interaction.user.id.toString(),
 					requestedRoleId: requestedRoleId.toString(),
 					answers,
 				});
@@ -216,9 +215,7 @@ class EntryService extends LocalService {
 				const journallingService = this.client.getJournallingService(this.guildId);
 				journallingService?.log("entryRequestSubmit", { args: [interaction.user, entryRequestDocument] });
 
-				const userId = BigInt(userDocument.account.id);
-
-				const user = this.client.entities.users.get(userId);
+				const user = this.client.entities.users.get(interaction.user.id);
 				if (user === undefined) {
 					return "failure";
 				}
@@ -229,7 +226,7 @@ class EntryService extends LocalService {
 				}
 
 				verificationService.registerDocument(entryRequestDocument);
-				verificationService.registerPrompt(prompt, userId, entryRequestDocument);
+				verificationService.registerPrompt(prompt, interaction.user.id, entryRequestDocument);
 				verificationService.registerHandler(entryRequestDocument);
 
 				const strings = {
@@ -482,11 +479,11 @@ class EntryService extends LocalService {
 			return false;
 		}
 
-		if (userDocument.account.authorisedOn?.includes(guildId.toString())) {
+		if (userDocument.isAuthorisedOn(guildId.toString())) {
 			return true;
 		}
 
-		if (userDocument.account.rejectedOn?.includes(guildId.toString())) {
+		if (userDocument.isRejectedOn(guildId.toString())) {
 			const strings = {
 				title: this.client.localise("entry.verification.answers.rejectedBefore.title", locale)(),
 				description: this.client.localise("entry.verification.answers.rejectedBefore.description", locale)(),

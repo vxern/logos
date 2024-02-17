@@ -1,7 +1,6 @@
 import * as Discord from "@discordeno/bot";
 import constants from "../constants/constants";
 import {
-	FeatureLanguage,
 	LearningLanguage,
 	Locale,
 	LocalisationLanguage,
@@ -551,18 +550,6 @@ function decodeId<T extends ComponentIDMetadata, R = [string, ...T]>(customId: s
 	return customId.split(constants.symbols.meta.idSeparator) as R;
 }
 
-function getLocalisationLanguage(guildDocument: Guild | undefined): LocalisationLanguage {
-	return guildDocument?.languages?.localisation ?? defaults.LOCALISATION_LANGUAGE;
-}
-
-function getTargetLanguage(guildDocument: Guild): LocalisationLanguage {
-	return guildDocument?.languages?.target ?? getLocalisationLanguage(guildDocument);
-}
-
-function getFeatureLanguage(guildDocument?: Guild): FeatureLanguage {
-	return guildDocument?.languages?.feature ?? defaults.FEATURE_LANGUAGE;
-}
-
 const FALLBACK_LOCALE_DATA: InteractionLocaleData = {
 	language: defaults.LOCALISATION_LANGUAGE,
 	locale: defaults.LOCALISATION_LOCALE,
@@ -592,17 +579,17 @@ async function getLocaleData(
 	const isInTargetOnlyChannel =
 		interaction.channelId !== undefined && targetOnlyChannelIds.includes(interaction.channelId);
 
-	const targetLanguage = getTargetLanguage(guildDocument);
+	const targetLanguage = guildDocument.targetLanguage;
 	const learningLanguage = getLearningLanguage(guildDocument, targetLanguage, member);
 
-	const guildLanguage = isInTargetOnlyChannel ? targetLanguage : getLocalisationLanguage(guildDocument);
+	const guildLanguage = isInTargetOnlyChannel ? targetLanguage : guildDocument.localisationLanguage;
 	const guildLocale = getLocaleByLocalisationLanguage(guildLanguage);
-	const featureLanguage = getFeatureLanguage(guildDocument);
+	const featureLanguage = guildDocument.featureLanguage;
 
 	if (!isAutocomplete(interaction)) {
 		// If the user has configured a custom locale, use the user's preferred locale.
-		if (userDocument?.account.language !== undefined) {
-			const language = userDocument?.account.language;
+		if (userDocument.preferredLanguage !== undefined) {
+			const language = userDocument.preferredLanguage;
 			const locale = getLocaleByLocalisationLanguage(language);
 			return { language, locale, learningLanguage, guildLanguage, guildLocale, featureLanguage };
 		}
@@ -718,14 +705,12 @@ export {
 	decodeId,
 	encodeId,
 	generateButtons,
-	getLocalisationLanguage,
 	isAutocomplete,
 	paginate,
 	parseArguments,
 	getLocaleData,
 	parseTimeExpression,
 	getShowButton,
-	getFeatureLanguage,
 	getCommandName,
 };
 export type { ControlButtonID, Modal };

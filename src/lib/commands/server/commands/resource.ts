@@ -8,7 +8,6 @@ import { Client, InteractionCollector } from "../../../client";
 import { timeStructToMilliseconds } from "../../../database/guild";
 import { Guild } from "../../../database/guild";
 import { Resource } from "../../../database/resource";
-import { User } from "../../../database/user";
 import { Modal, createModalComposer } from "../../../interactions";
 import { verifyIsWithinLimits } from "../../../utils";
 import { CommandTemplate } from "../../command";
@@ -47,12 +46,7 @@ async function handleSubmitResource(client: Client, interaction: Logos.Interacti
 		return;
 	}
 
-	const [userDocument, resourceDocuments] = await Promise.all([
-		// TODO(vxern): Think whether this is even necessary anymore.
-		User.getOrCreate(client, { userId: interaction.user.id.toString() }),
-		Resource.getAll(client, { where: { authorId: interaction.user.id.toString() } }),
-	]);
-
+	const resourceDocuments = await Resource.getAll(client, { where: { authorId: interaction.user.id.toString() } });
 	const intervalMilliseconds = timeStructToMilliseconds(configuration.rateLimit?.within ?? defaults.RESOURCE_INTERVAL);
 	if (
 		!verifyIsWithinLimits(
@@ -90,7 +84,7 @@ async function handleSubmitResource(client: Client, interaction: Logos.Interacti
 
 			const resourceDocument = await Resource.create(client, {
 				guildId: guild.id.toString(),
-				authorId: userDocument.account.id,
+				authorId: interaction.user.id.toString(),
 				answers,
 			});
 
@@ -99,9 +93,7 @@ async function handleSubmitResource(client: Client, interaction: Logos.Interacti
 				journallingService?.log("resourceSend", { args: [member, resourceDocument] });
 			}
 
-			const userId = BigInt(userDocument.account.id);
-
-			const user = client.entities.users.get(userId);
+			const user = client.entities.users.get(interaction.user.id);
 			if (user === undefined) {
 				return "failure";
 			}
@@ -112,7 +104,7 @@ async function handleSubmitResource(client: Client, interaction: Logos.Interacti
 			}
 
 			resourceService.registerDocument(resourceDocument);
-			resourceService.registerPrompt(prompt, userId, resourceDocument);
+			resourceService.registerPrompt(prompt, interaction.user.id, resourceDocument);
 			resourceService.registerHandler(resourceDocument);
 
 			const strings = {

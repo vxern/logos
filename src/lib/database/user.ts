@@ -37,6 +37,14 @@ class User extends Model<{ idParts: ["userId"] }> {
 
 	scores?: Partial<Record<Locale, Partial<Record<GameType, GameScores>>>>;
 
+	get preferredLanguage(): LocalisationLanguage | undefined {
+		return this.account.language;
+	}
+
+	set preferredLanguage(language: LocalisationLanguage | undefined) {
+		this.account.language = language;
+	}
+
 	constructor({
 		createdAt,
 		account,
@@ -125,8 +133,24 @@ class User extends Model<{ idParts: ["userId"] }> {
 		scoresForGame.totalScore++;
 	}
 
-	getGameScore({ game, learningLocale }: { game: GameType; learningLocale: Locale }): GameScores | undefined {
+	getGameScores({ game, learningLocale }: { game: GameType; learningLocale: Locale }): GameScores | undefined {
 		return this.scores?.[learningLocale]?.[game];
+	}
+
+	isAuthorisedOn(guildId: string): boolean {
+		if (this.account.authorisedOn === undefined) {
+			return false;
+		}
+
+		return this.account.authorisedOn.includes(guildId);
+	}
+
+	isRejectedOn(guildId: string): boolean {
+		if (this.account.rejectedOn === undefined) {
+			return false;
+		}
+
+		return this.account.rejectedOn.includes(guildId);
 	}
 }
 

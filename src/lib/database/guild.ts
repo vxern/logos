@@ -1,5 +1,6 @@
 import { FeatureLanguage, LearningLanguage, LocalisationLanguage } from "../../constants/languages";
 import time from "../../constants/time";
+import defaults from "../../defaults";
 import { Client } from "../client";
 import { IdentifierData, MetadataOrIdentifierData, Model } from "./model";
 
@@ -332,6 +333,18 @@ class Guild extends Model<{ idParts: ["guildId"] }> {
 	 * Includes Learn Romanian and Learn Armenian.
 	 */
 	readonly isNative: boolean;
+
+	get localisationLanguage(): LocalisationLanguage {
+		return this.languages?.localisation ?? defaults.LOCALISATION_LANGUAGE;
+	}
+
+	get targetLanguage(): LocalisationLanguage {
+		return this.languages?.target ?? this.localisationLanguage;
+	}
+
+	get featureLanguage(): FeatureLanguage {
+		return this.languages?.feature ?? defaults.LOCALISATION_LANGUAGE;
+	}
 
 	constructor({
 		createdAt,

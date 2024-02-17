@@ -81,7 +81,7 @@ async function handleSetLanguage(client: Client, interaction: Logos.Interaction)
 	await client.postponeReply(interaction);
 
 	const userDocument = await User.getOrCreate(client, { userId: interaction.user.id.toString() });
-	if (userDocument.account.language === language) {
+	if (userDocument.preferredLanguage === language) {
 		const strings = {
 			title: client.localise("settings.strings.alreadySet.title", localeBefore)(),
 			description: client.localise(
@@ -106,7 +106,7 @@ async function handleSetLanguage(client: Client, interaction: Logos.Interaction)
 	}
 
 	await userDocument.update(client, () => {
-		userDocument.account.language = language;
+		userDocument.preferredLanguage = language;
 	});
 
 	const localeAfter = getLocaleByLocalisationLanguage(language);

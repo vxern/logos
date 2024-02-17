@@ -7,7 +7,6 @@ import * as Logos from "../../../../../types";
 import { Client, InteractionCollector } from "../../../../client";
 import { Guild, timeStructToMilliseconds } from "../../../../database/guild";
 import { Ticket, TicketType } from "../../../../database/ticket";
-import { User } from "../../../../database/user";
 import { Modal, createModalComposer } from "../../../../interactions";
 import { Configurations } from "../../../../services/prompts/service";
 import { verifyIsWithinLimits } from "../../../../utils";
@@ -46,12 +45,7 @@ async function handleOpenTicket(client: Client, interaction: Logos.Interaction):
 		return;
 	}
 
-	const [userDocument, ticketDocuments] = await Promise.all([
-		// TODO(vxern): Think whether this is even necessary anymore.
-		User.getOrCreate(client, { userId: interaction.user.id.toString() }),
-		Ticket.getAll(client, { where: { authorId: interaction.user.id.toString() } }),
-	]);
-
+	const ticketDocuments = await Ticket.getAll(client, { where: { authorId: interaction.user.id.toString() } });
 	const intervalMilliseconds = timeStructToMilliseconds(configuration.rateLimit?.within ?? defaults.TICKET_INTERVAL);
 	if (
 		!verifyIsWithinLimits(
@@ -86,7 +80,7 @@ async function handleOpenTicket(client: Client, interaction: Logos.Interaction):
 				client,
 				configuration,
 				answers,
-				[guild, submission.user, member, userDocument],
+				[guild, submission.user, member],
 				configuration.categoryId,
 				"standalone",
 				{ guildLocale },
@@ -121,7 +115,7 @@ async function openTicket(
 	client: Client,
 	configuration: NonNullable<Configurations["tickets"] | Configurations["verification"]>,
 	answers: Ticket["answers"],
-	[guild, user, member, userDocument]: [Logos.Guild, Logos.User, Logos.Member, User],
+	[guild, user, member]: [Logos.Guild, Logos.User, Logos.Member],
 	categoryId: string,
 	type: TicketType,
 	{ guildLocale }: { guildLocale: Locale },
@@ -187,7 +181,7 @@ async function openTicket(
 
 	const ticketDocument = await Ticket.create(client, {
 		guildId: guild.id.toString(),
-		authorId: userDocument.account.id,
+		authorId: member.id.toString(),
 		channelId: channel.id.toString(),
 		type,
 		answers,
