@@ -1,4 +1,5 @@
-import { MetadataOrIdentifierData, Model } from "./model";
+import { Client } from "../client";
+import { ClientOrDatabase, IdentifierData, MetadataOrIdentifierData, Model } from "./model";
 
 interface EntryRequestFormData {
 	readonly reason: string;
@@ -37,10 +38,10 @@ class EntryRequest extends Model<{ idParts: ["guildId", "authorId"] }> {
 		votedAgainst,
 		...data
 	}: {
-		createdAt: number;
+		createdAt?: number;
 		requestedRoleId: string;
 		answers: EntryRequestFormData;
-		isFinalised: boolean;
+		isFinalised?: boolean;
 		ticketChannelId?: string;
 		votedFor?: string[];
 		votedAgainst?: string[];
@@ -54,12 +55,54 @@ class EntryRequest extends Model<{ idParts: ["guildId", "authorId"] }> {
 		});
 
 		this.requestedRoleId = requestedRoleId;
-		this.isFinalised = isFinalised;
 		this.answers = answers;
 
+		this.isFinalised = isFinalised ?? false;
 		this.ticketChannelId = ticketChannelId;
 		this.votedFor = votedFor;
 		this.votedAgainst = votedAgainst;
+	}
+
+	static async get(client: Client, data: IdentifierData<EntryRequest>): Promise<EntryRequest | undefined> {
+		const partialId = Model.buildPartialId(data);
+		if (client.documents.entryRequests.has(partialId)) {
+			return client.documents.entryRequests.get(partialId)!;
+		}
+
+		const { promise, resolve } = Promise.withResolvers<EntryRequest | undefined>();
+
+		await client.database.withSession(async (session) => {
+			const entryRequestDocument = await session.get<EntryRequest>(
+				Model.buildId(data, { collection: "EntryRequests" }),
+			);
+
+			resolve(entryRequestDocument);
+		});
+
+		return promise;
+	}
+
+	static async getAll(
+		clientOrDatabase: ClientOrDatabase,
+		clauses?: { where?: Partial<IdentifierData<EntryRequest>> },
+	): Promise<EntryRequest[]> {
+		const result = await Model.all<EntryRequest>(clientOrDatabase, {
+			collection: "EntryRequests",
+			where: Object.assign({ ...clauses?.where }, { guildId: undefined, authorId: undefined }),
+		});
+
+		return result;
+	}
+
+	static async create(
+		client: Client,
+		data: IdentifierData<EntryRequest> & { requestedRoleId: string; answers: EntryRequestFormData },
+	): Promise<EntryRequest> {
+		const entryRequestDocument = new EntryRequest(data);
+
+		await entryRequestDocument.create(client);
+
+		return entryRequestDocument;
 	}
 
 	getUserVote({ userId }: { userId: string }): VoteType | undefined {

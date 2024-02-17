@@ -1,9 +1,11 @@
-import { MetadataOrIdentifierData, Model } from "./model";
+import { Client } from "../client";
+import { ClientOrDatabase, IdentifierData, MetadataOrIdentifierData, Model } from "./model";
 
 interface ResourceFormData {
 	readonly resource: string;
 }
 
+// TODO(vxern): Does this not have a createdAt in the ID?
 class Resource extends Model<{ idParts: ["guildId", "authorId"] }> {
 	get guildId(): string {
 		return this._idParts[0]!;
@@ -23,7 +25,7 @@ class Resource extends Model<{ idParts: ["guildId", "authorId"] }> {
 		answers,
 		isResolved,
 		...data
-	}: { createdAt: number; answers: ResourceFormData; isResolved: boolean } & MetadataOrIdentifierData<Resource>) {
+	}: { createdAt?: number; answers: ResourceFormData; isResolved?: boolean } & MetadataOrIdentifierData<Resource>) {
 		super({
 			createdAt,
 			"@metadata":
@@ -33,7 +35,30 @@ class Resource extends Model<{ idParts: ["guildId", "authorId"] }> {
 		});
 
 		this.answers = answers;
-		this.isResolved = isResolved;
+		this.isResolved = isResolved ?? false;
+	}
+
+	static async getAll(
+		clientOrDatabase: ClientOrDatabase,
+		clauses?: { where?: Partial<IdentifierData<Resource>> },
+	): Promise<Resource[]> {
+		const result = await Model.all<Resource>(clientOrDatabase, {
+			collection: "Resources",
+			where: Object.assign({ ...clauses?.where }, { guildId: undefined, authorId: undefined }),
+		});
+
+		return result;
+	}
+
+	static async create(
+		client: Client,
+		data: IdentifierData<Resource> & { answers: ResourceFormData },
+	): Promise<Resource> {
+		const resourceDocument = new Resource(data);
+
+		await resourceDocument.create(client);
+
+		return resourceDocument;
 	}
 }
 

@@ -1,7 +1,7 @@
 import { FeatureLanguage, LearningLanguage, LocalisationLanguage } from "../../constants/languages";
 import time from "../../constants/time";
-import {IdentifierData, MetadataOrIdentifierData, Model} from "./model";
-import {Client} from "../client";
+import { Client } from "../client";
+import { IdentifierData, MetadataOrIdentifierData, Model } from "./model";
 
 /** @since v3.5.0 */
 interface GuildLanguages {
@@ -354,24 +354,25 @@ class Guild extends Model<{ idParts: ["guildId"] }> {
 		// TODO(vxern): At some point, remove this when the object becomes nullable.
 		this.languages = languages ?? { localisation: "English/American", feature: "English" };
 		this.features = features ?? {
-			information: {enabled: false},
-			moderation: {enabled: false},
-			language: {enabled: false},
-			server: {enabled: false},
-			social: {enabled: false},
+			information: { enabled: false },
+			moderation: { enabled: false },
+			language: { enabled: false },
+			server: { enabled: false },
+			social: { enabled: false },
 		};
 		this.isNative = isNative ?? false;
 	}
 
 	static async getOrCreate(client: Client, data: IdentifierData<Guild>): Promise<Guild> {
-		if (client.documents.guilds.has(data.guildId)) {
-			return client.documents.guilds.get(data.guildId)!;
+		const partialId = Model.buildPartialId(data);
+		if (client.documents.guilds.has(partialId)) {
+			return client.documents.guilds.get(partialId)!;
 		}
 
 		const { promise, resolve } = Promise.withResolvers<Guild>();
 
 		await client.database.withSession(async (session) => {
-			const guildDocument = await session.get<Guild>(Model.buildId<Guild>(data, { collection: "Guilds" }));
+			const guildDocument = await session.get<Guild>(Model.buildId(data, { collection: "Guilds" }));
 			if (guildDocument === undefined) {
 				return;
 			}

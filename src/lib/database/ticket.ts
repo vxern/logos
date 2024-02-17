@@ -1,4 +1,5 @@
-import { MetadataOrIdentifierData, Model } from "./model";
+import { Client } from "../client";
+import { ClientOrDatabase, IdentifierData, MetadataOrIdentifierData, Model } from "./model";
 
 type TicketType = "standalone" | "inquiry";
 
@@ -6,6 +7,7 @@ interface TicketFormData {
 	readonly topic: string;
 }
 
+// TODO(vxern): Does this not have a createdAt in the ID?
 class Ticket extends Model<{ idParts: ["guildId", "authorId", "channelId"] }> {
 	get guildId(): string {
 		return this._idParts[0]!;
@@ -32,10 +34,10 @@ class Ticket extends Model<{ idParts: ["guildId", "authorId", "channelId"] }> {
 		isResolved,
 		...data
 	}: {
-		createdAt: number;
+		createdAt?: number;
 		type: TicketType;
 		answers: TicketFormData;
-		isResolved: boolean;
+		isResolved?: boolean;
 	} & MetadataOrIdentifierData<Ticket>) {
 		super({
 			createdAt,
@@ -47,7 +49,30 @@ class Ticket extends Model<{ idParts: ["guildId", "authorId", "channelId"] }> {
 
 		this.type = type;
 		this.answers = answers;
-		this.isResolved = isResolved;
+		this.isResolved = isResolved ?? false;
+	}
+
+	static async getAll(
+		clientOrDatabase: ClientOrDatabase,
+		clauses?: { where?: Partial<IdentifierData<Ticket>> },
+	): Promise<Ticket[]> {
+		const result = await Model.all<Ticket>(clientOrDatabase, {
+			collection: "Tickets",
+			where: Object.assign({ ...clauses?.where }, { guildId: undefined, authorId: undefined, channelId: undefined }),
+		});
+
+		return result;
+	}
+
+	static async create(
+		client: Client,
+		data: IdentifierData<Ticket> & { type: TicketType; answers: TicketFormData },
+	): Promise<Ticket> {
+		const ticketDocument = new Ticket(data);
+
+		await ticketDocument.create(client);
+
+		return ticketDocument;
 	}
 }
 
