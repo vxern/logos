@@ -198,6 +198,20 @@ async function setup(): Promise<void> {
 	Client.create({ environment, localisations, certificate });
 }
 
+function addPolyfills(): void {
+	Promise.withResolvers = <T>() => {
+		let resolve!: (value: T) => void;
+		let reject!: () => void;
+
+		const promise = new Promise<T>((resolve_, reject_) => {
+			resolve = resolve_;
+			reject = reject_;
+		});
+
+		return { promise, resolve, reject };
+	};
+}
+
 function customiseGlobals(): void {
 	const { info, warn } = console;
 	console.info = (message, ...params) => {
@@ -208,5 +222,6 @@ function customiseGlobals(): void {
 	};
 }
 
+addPolyfills();
 customiseGlobals();
 setup();
