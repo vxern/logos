@@ -102,8 +102,8 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 				voteInformation.rejection.remaining === 0,
 			];
 			if (isAccepted || isRejected) {
-				const submitter = this.client.entities.users.get(BigInt(entryRequestDocument.authorId));
-				if (submitter === undefined) {
+				const author = this.client.entities.users.get(BigInt(entryRequestDocument.authorId));
+				if (author === undefined) {
 					continue;
 				}
 
@@ -113,7 +113,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 						return;
 					}
 
-					this.finalise(entryRequestDocument, configuration, [submitter, member, guild], [isAccepted, isRejected]);
+					this.finalise(entryRequestDocument, configuration, [author, member, guild], [isAccepted, isRejected]);
 				});
 
 				continue;
@@ -343,8 +343,8 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 			[...(entryRequestDocument.votedAgainst ?? [])],
 		];
 
-		const submitter = this.client.entities.users.get(BigInt(userId));
-		if (submitter === undefined) {
+		const author = this.client.entities.users.get(BigInt(userId));
+		if (author === undefined) {
 			return undefined;
 		}
 
@@ -382,7 +382,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 							return;
 						}
 
-						await this.finalise(entryRequestDocument, configuration, [submitter, member, guild], [true, false]);
+						await this.finalise(entryRequestDocument, configuration, [author, member, guild], [true, false]);
 
 						resolve(null);
 					});
@@ -467,7 +467,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 							return;
 						}
 
-						await this.finalise(entryRequestDocument, configuration, [submitter, member, guild], [false, true]);
+						await this.finalise(entryRequestDocument, configuration, [author, member, guild], [false, true]);
 
 						resolve(null);
 					});
@@ -579,7 +579,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 		}
 
 		if (isAccepted || isRejected) {
-			await this.finalise(entryRequestDocument, configuration, [submitter, member, guild], [isAccepted, isRejected]);
+			await this.finalise(entryRequestDocument, configuration, [author, member, guild], [isAccepted, isRejected]);
 
 			return null;
 		}
