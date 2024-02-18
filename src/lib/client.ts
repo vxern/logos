@@ -1501,43 +1501,101 @@ class InteractionCollector extends Collector<"interactionCreate"> {
 
 type Event = keyof Discord.EventHandlers;
 class EventStore {
-	readonly #bot: Discord.Bot;
+	readonly #services: ServiceStore;
 
 	readonly #collectors: Map<Event, Set<Collector<Event>>>;
 
-	constructor({ bot }: { bot: Discord.Bot }) {
-		this.#bot = bot;
+	constructor({ services }: { services: ServiceStore }) {
+		this.#services = services;
 		this.#collectors = new Map();
 	}
 
-	// TODO(vxern): This should probably be better done by just getting rid of wrapping callbacks and just executing them iteratively.
-	#extendEventHandler<Event extends keyof Discord.EventHandlers, Handler extends Discord.EventHandlers[Event]>(
-		eventName: Event,
-		{ prepend = false, append = false }: { prepend: true; append?: false } | { prepend?: false; append: true },
-		extension: (...args: Parameters<Handler>) => unknown,
-	): void {
-		const events = this.#bot.events;
+	buildEventHandlers(): Partial<Discord.EventHandlers> {
+		const events = this;
 
-		const handler = events[eventName] as (...args: Parameters<Handler>) => unknown;
-		events[eventName] = (
-			prepend || !append
-				? (...args: Parameters<Handler>) => {
-						extension(...args);
-						handler(...args);
-				  }
-				: (...args: Parameters<Handler>) => {
-						handler(...args);
-						extension(...args);
-				  }
-		) as Handler;
+		return {
+			async ready(...args) {
+				events.#services.dispatchToGlobal("ready", { args });
+			},
+			async interactionCreate(interactionRaw) {
+				events.dispatchEvent(interactionRaw.guildId, "interactionCreate", { args: [interactionRaw] });
+			},
+			async guildMemberAdd(member, user) {
+				events.dispatchEvent(member.guildId, "guildMemberAdd", { args: [member, user] });
+			},
+			async guildMemberRemove(user, guildId) {
+				events.dispatchEvent(guildId, "guildMemberRemove", { args: [user, guildId] });
+			},
+			async guildMemberUpdate(member, user) {
+				events.dispatchEvent(member.guildId, "guildMemberUpdate", { args: [member, user] });
+			},
+			async messageCreate(message) {
+				events.dispatchEvent(message.guildId, "messageCreate", { args: [message] });
+			},
+			async messageDelete(payload, message) {
+				events.dispatchEvent(payload.guildId, "messageDelete", { args: [payload, message] });
+			},
+			async messageDeleteBulk(payload) {
+				events.dispatchEvent(payload.guildId, "messageDeleteBulk", { args: [payload] });
+			},
+			async messageUpdate(message, oldMessage) {
+				events.dispatchEvent(message.guildId, "messageUpdate", { args: [message, oldMessage] });
+			},
+			async voiceServerUpdate(payload) {
+				events.dispatchEvent(payload.guildId, "voiceServerUpdate", { args: [payload] });
+			},
+			async voiceStateUpdate(voiceState) {
+				events.dispatchEvent(voiceState.guildId, "voiceStateUpdate", { args: [voiceState] });
+			},
+			async channelCreate(channel) {
+				events.dispatchEvent(channel.guildId, "channelCreate", { args: [channel] });
+			},
+			async channelDelete(channel) {
+				events.dispatchEvent(channel.guildId, "channelDelete", { args: [channel] });
+			},
+			async channelPinsUpdate(data) {
+				events.dispatchEvent(data.guildId, "channelPinsUpdate", { args: [data] });
+			},
+			async channelUpdate(channel) {
+				events.dispatchEvent(channel.guildId, "channelUpdate", { args: [channel] });
+			},
+			async guildEmojisUpdate(payload) {
+				events.dispatchEvent(payload.guildId, "guildEmojisUpdate", { args: [payload] });
+			},
+			async guildBanAdd(user, guildId) {
+				events.dispatchEvent(guildId, "guildBanAdd", { args: [user, guildId] });
+			},
+			async guildBanRemove(user, guildId) {
+				events.dispatchEvent(guildId, "guildBanRemove", { args: [user, guildId] });
+			},
+			async guildCreate(guild) {
+				events.dispatchEvent(guild.id, "guildCreate", { args: [guild] });
+			},
+			async guildDelete(id, shardId) {
+				events.dispatchEvent(id, "guildDelete", { args: [id, shardId] });
+			},
+			async guildUpdate(guild) {
+				events.dispatchEvent(guild.id, "guildUpdate", { args: [guild] });
+			},
+			async roleCreate(role) {
+				events.dispatchEvent(role.guildId, "roleCreate", { args: [role] });
+			},
+			async roleDelete(role) {
+				events.dispatchEvent(role.guildId, "roleDelete", { args: [role] });
+			},
+			async roleUpdate(role) {
+				events.dispatchEvent(role.guildId, "roleUpdate", { args: [role] });
+			},
+		};
 	}
 
-	#startCollectingEvents<Event extends keyof Discord.EventHandlers>(event: Event): void {
-		const collectors = new Set<Collector<Event>>();
-
-		this.#collectors.set(event, collectors);
-
-		this.#extendEventHandler(event, { prepend: true }, (...args) => {
+	async dispatchEvent<Event extends keyof Discord.EventHandlers>(
+		guildId: bigint | undefined,
+		event: Event,
+		{ args }: { args: Parameters<Discord.EventHandlers[Event]> },
+	): Promise<void> {
+		const collectors = this.#collectors.get(event);
+		if (collectors !== undefined) {
 			for (const collector of collectors) {
 				if (collector.filter !== undefined && !collector.filter(...args)) {
 					continue;
@@ -1545,13 +1603,16 @@ class EventStore {
 
 				collector.dispatchCollect?.(...args);
 			}
-		});
+		}
+
+		await this.#services.dispatchEvent(guildId, event, { args });
 	}
 
 	#registerCollector(event: Event, collector: Collector<Event>): void {
 		const collectors = this.#collectors.get(event);
 		if (collectors === undefined) {
-			throw `StateError: Collectors for event "${event}" unexpectedly missing.`;
+			this.#collectors.set(event, new Set([collector]));
+			return;
 		}
 
 		collectors.add(collector);
@@ -1570,13 +1631,9 @@ class EventStore {
 		event: Event,
 		collector: Collector<Event>,
 	): Promise<void> {
-		if (!this.#collectors.has(event)) {
-			this.#startCollectingEvents(event);
-		}
+		this.#registerCollector(event, collector);
 
 		collector.initialise();
-
-		this.#registerCollector(event, collector);
 
 		await collector.done;
 
@@ -1644,85 +1701,6 @@ class ServiceStore {
 				tickets: new Map(),
 			},
 			roleIndicators: new Map(),
-		};
-	}
-
-	buildEventHandlers(): Partial<Discord.EventHandlers> {
-		const services = this;
-
-		return {
-			async ready(...args) {
-				services.dispatchToGlobal("ready", { args });
-			},
-			async interactionCreate(interactionRaw) {
-				services.dispatchEvent(interactionRaw.guildId, "interactionCreate", { args: [interactionRaw] });
-			},
-			async guildMemberAdd(member, user) {
-				services.dispatchEvent(member.guildId, "guildMemberAdd", { args: [member, user] });
-			},
-			async guildMemberRemove(user, guildId) {
-				services.dispatchEvent(guildId, "guildMemberRemove", { args: [user, guildId] });
-			},
-			async guildMemberUpdate(member, user) {
-				services.dispatchEvent(member.guildId, "guildMemberUpdate", { args: [member, user] });
-			},
-			async messageCreate(message) {
-				services.dispatchEvent(message.guildId, "messageCreate", { args: [message] });
-			},
-			async messageDelete(payload, message) {
-				services.dispatchEvent(payload.guildId, "messageDelete", { args: [payload, message] });
-			},
-			async messageDeleteBulk(payload) {
-				services.dispatchEvent(payload.guildId, "messageDeleteBulk", { args: [payload] });
-			},
-			async messageUpdate(message, oldMessage) {
-				services.dispatchEvent(message.guildId, "messageUpdate", { args: [message, oldMessage] });
-			},
-			async voiceServerUpdate(payload) {
-				services.dispatchEvent(payload.guildId, "voiceServerUpdate", { args: [payload] });
-			},
-			async voiceStateUpdate(voiceState) {
-				services.dispatchEvent(voiceState.guildId, "voiceStateUpdate", { args: [voiceState] });
-			},
-			async channelCreate(channel) {
-				services.dispatchEvent(channel.guildId, "channelCreate", { args: [channel] });
-			},
-			async channelDelete(channel) {
-				services.dispatchEvent(channel.guildId, "channelDelete", { args: [channel] });
-			},
-			async channelPinsUpdate(data) {
-				services.dispatchEvent(data.guildId, "channelPinsUpdate", { args: [data] });
-			},
-			async channelUpdate(channel) {
-				services.dispatchEvent(channel.guildId, "channelUpdate", { args: [channel] });
-			},
-			async guildEmojisUpdate(payload) {
-				services.dispatchEvent(payload.guildId, "guildEmojisUpdate", { args: [payload] });
-			},
-			async guildBanAdd(user, guildId) {
-				services.dispatchEvent(guildId, "guildBanAdd", { args: [user, guildId] });
-			},
-			async guildBanRemove(user, guildId) {
-				services.dispatchEvent(guildId, "guildBanRemove", { args: [user, guildId] });
-			},
-			async guildCreate(guild) {
-				services.dispatchEvent(guild.id, "guildCreate", { args: [guild] });
-			},
-			async guildDelete(id, shardId) {
-				services.dispatchEvent(id, "guildDelete", { args: [id, shardId] });
-			},
-			async guildUpdate(guild) {
-				services.dispatchEvent(guild.id, "guildUpdate", { args: [guild] });
-			},
-			async roleCreate(role) {
-				services.dispatchEvent(role.guildId, "roleCreate", { args: [role] });
-			},
-			async roleDelete(role) {
-				services.dispatchEvent(role.guildId, "roleDelete", { args: [role] });
-			},
-			async roleUpdate(role) {
-				services.dispatchEvent(role.guildId, "roleUpdate", { args: [role] });
-			},
 		};
 	}
 
@@ -2040,8 +2018,8 @@ class Client {
 	readonly #localisations: LocalisationStore;
 	readonly #commands: CommandStore;
 	readonly #interactions: InteractionStore;
-	readonly #events: EventStore;
 	readonly #services: ServiceStore;
+	readonly #events: EventStore;
 
 	readonly #_interactionCreateCollector: Collector<"interactionCreate">;
 	readonly #_channelDeleteCollector: Collector<"channelDelete">;
@@ -2120,14 +2098,6 @@ class Client {
 		return this.#interactions.displayModal.bind(this.#interactions);
 	}
 
-	get registerCollector(): EventStore["registerCollector"] {
-		return this.#events.registerCollector.bind(this.#events);
-	}
-
-	get registerInteractionCollector(): (collector: InteractionCollector) => void {
-		return (collector) => this.#events.registerCollector("interactionCreate", collector);
-	}
-
 	get lavalinkService(): LavalinkService {
 		return this.#services.global.lavalink;
 	}
@@ -2176,6 +2146,14 @@ class Client {
 		return this.#services.getPromptService.bind(this.#services);
 	}
 
+	get registerCollector(): EventStore["registerCollector"] {
+		return this.#events.registerCollector.bind(this.#events);
+	}
+
+	get registerInteractionCollector(): (collector: InteractionCollector) => void {
+		return (collector) => this.#events.registerCollector("interactionCreate", collector);
+	}
+
 	private constructor({
 		environment,
 		bot,
@@ -2199,8 +2177,8 @@ class Client {
 			templates: Array.from(Object.values(commandTemplates)),
 		});
 		this.#interactions = new InteractionStore({ bot, isDebug: environment.isDebug });
-		this.#events = new EventStore({ bot });
 		this.#services = new ServiceStore();
+		this.#events = new EventStore({ services: this.#services });
 
 		this.#_interactionCreateCollector = new Collector<"interactionCreate">();
 		this.#_channelDeleteCollector = new Collector<"channelDelete">();
@@ -2264,7 +2242,7 @@ class Client {
 			bot.events.messageUpdate?.(bot.transformers.message(bot, payload));
 		};
 
-		bot.events = client.#services.buildEventHandlers();
+		bot.events = client.#events.buildEventHandlers();
 		bot.transformers = client.discord.buildTransformers();
 
 		client.#setupListeners();
