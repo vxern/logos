@@ -5,12 +5,13 @@ import { Client } from "../../../client";
 import { Suggestion } from "../../../database/suggestion";
 import { User } from "../../../database/user";
 import diagnostics from "../../../diagnostics";
-import { encodeId, getLocaleData } from "../../../interactions";
 import { PromptService } from "../service";
 
-type InteractionData = [documentId: string, isResolved: string];
-
-class SuggestionService extends PromptService<"suggestions", Suggestion, InteractionData> {
+class SuggestionService extends PromptService<{
+	type: "suggestions";
+	model: Suggestion;
+	metadata: [partialId: string, isResolve: string];
+}> {
 	constructor(client: Client, guildId: bigint) {
 		super(client, guildId, { type: "suggestions", deleteMode: "delete" });
 	}
@@ -110,22 +111,19 @@ class SuggestionService extends PromptService<"suggestions", Suggestion, Interac
 		};
 	}
 
-	async handleInteraction(
-		interaction: Logos.Interaction,
-		data: InteractionData,
+	async handlePromptInteraction(
+		interaction: Logos.Interaction<[partialId: string, isResolve: string]>,
 	): Promise<Suggestion | null | undefined> {
-		const localeData = await getLocaleData(this.client, interaction);
-		const locale = localeData.locale;
+		const locale = interaction.locale;
 
-		const [partialId, isResolvedString] = data;
-		const isResolved = isResolvedString === "true";
-
-		const suggestionDocument = this.documents.get(partialId);
+		const suggestionDocument = this.documents.get(interaction.metadata[0]);
 		if (suggestionDocument === undefined) {
 			return undefined;
 		}
 
-		if (isResolved && suggestionDocument.isResolved) {
+		const isResolve = interaction.metadata[1] === "true";
+
+		if (isResolve && suggestionDocument.isResolved) {
 			const strings = {
 				title: this.client.localise("alreadyMarkedResolved.title", locale)(),
 				description: this.client.localise("alreadyMarkedResolved.description", locale)(),
@@ -143,7 +141,7 @@ class SuggestionService extends PromptService<"suggestions", Suggestion, Interac
 			return;
 		}
 
-		if (!(isResolved || suggestionDocument.isResolved)) {
+		if (!(isResolve || suggestionDocument.isResolved)) {
 			const strings = {
 				title: this.client.localise("alreadyMarkedUnresolved.title", locale)(),
 				description: this.client.localise("alreadyMarkedUnresolved.description", locale)(),
@@ -162,7 +160,7 @@ class SuggestionService extends PromptService<"suggestions", Suggestion, Interac
 		}
 
 		await suggestionDocument.update(this.client, () => {
-			suggestionDocument.isResolved = isResolved;
+			suggestionDocument.isResolved = isResolve;
 		});
 
 		return suggestionDocument;

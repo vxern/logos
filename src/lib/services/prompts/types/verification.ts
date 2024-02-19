@@ -10,11 +10,8 @@ import { Model } from "../../../database/model";
 import { Ticket } from "../../../database/ticket";
 import { User } from "../../../database/user";
 import diagnostics from "../../../diagnostics";
-import { decodeId, encodeId, getLocaleData } from "../../../interactions";
 import { getGuildIconURLFormatted, snowflakeToTimestamp } from "../../../utils";
 import { Configurations, PromptService } from "../service";
-
-type InteractionData = [documentId: string, isAccept: string];
 
 type Configuration = Configurations["verification"];
 type VoteInformation = {
@@ -24,7 +21,11 @@ type VoteInformation = {
 	};
 };
 
-class VerificationService extends PromptService<"verification", EntryRequest, InteractionData> {
+class VerificationService extends PromptService<{
+	type: "verification";
+	model: EntryRequest;
+	metadata: [partialId: string, isAccept: string];
+}> {
 	readonly #_openInquiry: InteractionCollector;
 
 	constructor(client: Client, guildId: bigint) {
@@ -40,17 +41,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 		await super.start();
 
 		this.#_openInquiry.onCollect(async (selection) => {
-			const customId = selection.data?.customId;
-			if (customId === undefined) {
-				return;
-			}
-
-			const [_, partialId] = decodeId(customId);
-			if (partialId === undefined) {
-				return;
-			}
-
-			this.handleOpenInquiry(selection, partialId);
+			this.handleOpenInquiry(selection, selection.metadata[1]);
 		});
 
 		this.client.registerInteractionCollector(this.#_openInquiry);
@@ -289,25 +280,22 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 		};
 	}
 
-	async handleInteraction(
-		interaction: Logos.Interaction,
-		data: InteractionData,
+	async handlePromptInteraction(
+		interaction: Logos.Interaction<[partialId: string, isAccept: string]>,
 	): Promise<EntryRequest | null | undefined> {
-		const localeData = await getLocaleData(this.client, interaction);
-		const locale = localeData.locale;
+		const locale = interaction.locale;
 
 		const configuration = this.configuration;
 		if (configuration === undefined || !configuration.enabled) {
 			return undefined;
 		}
 
-		const [partialId, isAcceptString] = data;
-		const isAccept = isAcceptString === "true";
-
-		const [guildId, userId] = partialId.split("/");
+		const [guildId, userId] = interaction.metadata[0].split("/");
 		if (guildId === undefined || userId === undefined) {
 			return undefined;
 		}
+
+		const isAccept = interaction.metadata[1] === "true";
 
 		const member = interaction.member;
 		if (member === undefined) {
@@ -371,8 +359,8 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 
 					const { promise, resolve } = Promise.withResolvers<null | undefined>();
 
-					const confirmButton = new InteractionCollector(client, { only: [interaction.user.id], isSingle: true });
-					const cancelButton = new InteractionCollector(client, { only: [interaction.user.id], isSingle: true });
+					const confirmButton = new InteractionCollector(this.client, { only: [interaction.user.id], isSingle: true });
+					const cancelButton = new InteractionCollector(this.client, { only: [interaction.user.id], isSingle: true });
 
 					confirmButton.onCollect(async (_) => {
 						this.client.deleteReply(interaction);
@@ -456,8 +444,8 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 
 					const { promise, resolve } = Promise.withResolvers<null | undefined>();
 
-					const confirmButton = new InteractionCollector(client, { only: [interaction.user.id], isSingle: true });
-					const cancelButton = new InteractionCollector(client, { only: [interaction.user.id], isSingle: true });
+					const confirmButton = new InteractionCollector(this.client, { only: [interaction.user.id], isSingle: true });
+					const cancelButton = new InteractionCollector(this.client, { only: [interaction.user.id], isSingle: true });
 
 					confirmButton.onCollect(async (_) => {
 						this.client.deleteReply(interaction);

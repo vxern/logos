@@ -5,12 +5,13 @@ import { Client } from "../../../client";
 import { Resource } from "../../../database/resource";
 import { User } from "../../../database/user";
 import diagnostics from "../../../diagnostics";
-import { encodeId, getLocaleData } from "../../../interactions";
 import { PromptService } from "../service";
 
-type InteractionData = [documentId: string, isResolved: string];
-
-class ResourceService extends PromptService<"resources", Resource, InteractionData> {
+class ResourceService extends PromptService<{
+	type: "resources";
+	model: Resource;
+	metadata: [partialId: string, isResolve: string];
+}> {
 	constructor(client: Client, guildId: bigint) {
 		super(client, guildId, { type: "resources", deleteMode: "delete" });
 	}
@@ -110,17 +111,17 @@ class ResourceService extends PromptService<"resources", Resource, InteractionDa
 		};
 	}
 
-	async handleInteraction(interaction: Logos.Interaction, data: InteractionData): Promise<Resource | null | undefined> {
-		const localeData = await getLocaleData(this.client, interaction);
-		const locale = localeData.locale;
+	async handlePromptInteraction(
+		interaction: Logos.Interaction<[partialId: string, isResolve: string]>,
+	): Promise<Resource | null | undefined> {
+		const locale = interaction.locale;
 
-		const [partialId, isResolvedString] = data;
-		const isResolved = isResolvedString === "true";
-
-		const resourceDocument = this.documents.get(partialId);
+		const resourceDocument = this.documents.get(interaction.metadata[0]);
 		if (resourceDocument === undefined) {
 			return undefined;
 		}
+
+		const isResolved = interaction.metadata[1] === "true";
 
 		if (isResolved && resourceDocument.isResolved) {
 			const strings = {

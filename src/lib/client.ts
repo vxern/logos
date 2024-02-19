@@ -119,9 +119,9 @@ class Logger {
 class DocumentSession extends ravendb.DocumentSession {
 	readonly #database: Database;
 
-	async get<M extends Model<any>>(id: string): Promise<M | undefined>;
-	async get<M extends Model<any>>(ids: string[]): Promise<(M | undefined)[]>;
-	async get<M extends Model<any>>(idOrIds: string | string[]): Promise<M | undefined | (M | undefined)[]> {
+	async get<M extends Model>(id: string): Promise<M | undefined>;
+	async get<M extends Model>(ids: string[]): Promise<(M | undefined)[]>;
+	async get<M extends Model>(idOrIds: string | string[]): Promise<M | undefined | (M | undefined)[]> {
 		const result = (await this.load(Array.isArray(idOrIds) ? idOrIds : [idOrIds])) as Record<
 			string,
 			RawDocument | null
@@ -150,13 +150,13 @@ class DocumentSession extends ravendb.DocumentSession {
 		return documents.at(0)!;
 	}
 
-	async set<M extends Model<any>>(document: M): Promise<void> {
+	async set<M extends Model>(document: M): Promise<void> {
 		await this.store<M>(document);
 
 		this.#database.cacheDocument(document);
 	}
 
-	async remove<M extends Model<any>>(document: M): Promise<void> {
+	async remove<M extends Model>(document: M): Promise<void> {
 		// We don't call `delete()` here because we don't actually delete from the database.
 
 		this.#database.unloadDocument(document);
@@ -229,13 +229,13 @@ class Database extends ravendb.DocumentStore {
 		this.cacheDocuments(documents);
 	}
 
-	cacheDocuments<M extends Model<any>>(documents: M[]): void {
+	cacheDocuments<M extends Model>(documents: M[]): void {
 		for (const document of documents) {
 			this.cacheDocument(document);
 		}
 	}
 
-	cacheDocument<M extends Model<any>>(document: M): void {
+	cacheDocument<M extends Model>(document: M): void {
 		switch (true) {
 			case document instanceof EntryRequest: {
 				this.cache.entryRequests.set(document.partialId, document);
@@ -295,7 +295,7 @@ class Database extends ravendb.DocumentStore {
 		}
 	}
 
-	unloadDocument<M extends Model<any>>(document: M): void {
+	unloadDocument<M extends Model>(document: M): void {
 		switch (true) {
 			case document instanceof EntryRequest: {
 				this.cache.entryRequests.delete(document.partialId);
@@ -1256,6 +1256,15 @@ class InteractionStore {
 		this.#interactions = new Map();
 	}
 
+	static spoofInteraction(interaction: Logos.Interaction, { using }: { using: Logos.Interaction }): Logos.Interaction {
+		return {
+			...interaction,
+			type: Discord.InteractionTypes.ApplicationCommand,
+			token: using.token,
+			id: using.id,
+		};
+	}
+
 	registerInteraction(interaction: Logos.Interaction): void {
 		this.#interactions.set(interaction.id, interaction);
 	}
@@ -1339,11 +1348,11 @@ type CollectEvent<Event extends keyof Discord.EventHandlers = keyof Discord.Even
 	...args: Parameters<Discord.EventHandlers[Event]>
 ) => unknown;
 type DoneEvent = () => unknown;
-class Collector<Event extends keyof Discord.EventHandlers> {
+class Collector<Event extends keyof Discord.EventHandlers = any> {
 	readonly #isSingle: boolean;
 	readonly #removeAfter?: number;
 
-	readonly #dependsOn?: Collector<any>;
+	readonly #dependsOn?: Collector;
 
 	#onCollect?: CollectEvent<Event>;
 	#onDone?: DoneEvent;
@@ -1364,7 +1373,7 @@ class Collector<Event extends keyof Discord.EventHandlers> {
 	}: {
 		isSingle?: boolean;
 		removeAfter?: number;
-		dependsOn?: Collector<any>;
+		dependsOn?: Collector;
 	} = {}) {
 		this.#isSingle = isSingle ?? false;
 		this.#removeAfter = removeAfter;
@@ -1453,7 +1462,7 @@ class InteractionCollector<Metadata extends string[] = any> extends Collector<"i
 			type?: Discord.InteractionTypes;
 			customId?: string;
 			only?: bigint[];
-			dependsOn?: Collector<any>;
+			dependsOn?: Collector;
 			isSingle?: boolean;
 			isPermanent?: boolean;
 		} = {},
@@ -1466,7 +1475,6 @@ class InteractionCollector<Metadata extends string[] = any> extends Collector<"i
 
 		this.#client = client;
 
-		// TODO(vxern): Is this needed?
 		this.#_baseId = InteractionCollector.decodeId(this.customId)[0];
 		this.#_acceptAnyUser = this.only.values.length === 0;
 	}
@@ -1512,7 +1520,6 @@ class InteractionCollector<Metadata extends string[] = any> extends Collector<"i
 	#getMetadata(interaction: Discord.Interaction): Logos.Interaction<Metadata>["metadata"] {
 		const idEncoded = interaction.data?.customId;
 		if (idEncoded === undefined) {
-			// TODO(vxern): Something better than this.
 			return [constants.components.none] as unknown as Logos.Interaction<Metadata>["metadata"];
 		}
 
@@ -1620,12 +1627,10 @@ class InteractionCollector<Metadata extends string[] = any> extends Collector<"i
 		return commandNameFull;
 	}
 
-	// TODO(vxern): Should this be in the `CommandStore`?
-	static encodeId<Metadata extends string[] = any>(customId: string, metadata: Metadata): string {
-		return [customId, ...metadata].join(constants.symbols.interaction.separator);
+	encodeId<Metadata extends string[] = any>(metadata: Metadata): string {
+		return [this.customId, ...metadata].join(constants.symbols.interaction.separator);
 	}
 
-	// TODO(vxern): Should this be in the `CommandStore`?
 	static decodeId<Metadata extends string[] = any>(idEncoded: string): [customId: string, ...metadata: Metadata] {
 		return idEncoded.split(constants.symbols.interaction.separator) as [customId: string, ...metadata: Metadata];
 	}
@@ -1952,7 +1957,7 @@ class ServiceStore {
 	getPromptService(
 		guildId: bigint,
 		{ type }: { type: keyof ServiceStore["local"]["prompts"] },
-	): PromptService<typeof type, any, any> | undefined {
+	): PromptService | undefined {
 		switch (type) {
 			case "verification": {
 				return this.local.prompts.verification.get(guildId);
@@ -2383,7 +2388,7 @@ class Client {
 	}
 
 	#setupListeners() {
-		this.#_interactionCreateCollector.onCollect((interaction) => this.handleInteraction(interaction));
+		this.#_interactionCreateCollector.onCollect(this.handleInteraction.bind(this));
 
 		this.#_channelDeleteCollector.onCollect((channel) => {
 			this.discord.cache.channels.delete(channel.id);
@@ -2393,7 +2398,7 @@ class Client {
 			}
 		});
 
-		this.#_guildCreateCollector.onCollect((guild) => this.#setupGuild(guild));
+		this.#_guildCreateCollector.onCollect(this.#setupGuild.bind(this));
 
 		this.#_guildDeleteCollector.onCollect((guildId, _) => this.#teardownGuild(guildId));
 
@@ -2760,4 +2765,13 @@ function isValidIdentifier(identifier: string): boolean {
 	);
 }
 
-export { Client, Collector, Database, InteractionCollector, isValidIdentifier, isValidSnowflake, ServiceStore };
+export {
+	Client,
+	Collector,
+	Database,
+	InteractionCollector,
+	isValidIdentifier,
+	isValidSnowflake,
+	ServiceStore,
+	InteractionStore,
+};

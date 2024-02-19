@@ -6,7 +6,6 @@ import { Guild } from "../../database/guild";
 import { Model } from "../../database/model";
 import { User } from "../../database/user";
 import diagnostics from "../../diagnostics";
-import { decodeId, getLocaleData } from "../../interactions";
 import { getAllMessages } from "../../utils";
 import { LocalService } from "../service";
 
@@ -40,36 +39,42 @@ const customIds: CustomIDs = {
 	tickets: constants.components.tickets,
 };
 
-type PromptTypes = keyof ServiceStore["local"]["prompts"];
+type PromptType = keyof ServiceStore["local"]["prompts"];
 
-type DeleteMode = "delete" | "close" | "none";
+type PromptDeleteMode = "delete" | "close" | "none";
 
 // TODO(vxern): Use hashing and registering old prompts.
 abstract class PromptService<
-	PromptType extends PromptTypes,
-	M extends Model<any>,
-	InteractionData extends [partialId: string, ...data: string[]],
+	Generic extends {
+		type: PromptType;
+		model: Model;
+		metadata: [partialId: string, ...data: string[]];
+	} = {
+		type: PromptType;
+		model: Model;
+		metadata: [partialId: string, isResolve: string];
+	},
 > extends LocalService {
-	private readonly type: PromptType;
+	private readonly type: Generic["type"];
 	private readonly customId: string;
-	private readonly deleteMode: DeleteMode;
+	private readonly deleteMode: PromptDeleteMode;
 
-	protected readonly documents: Map<string, M>;
+	protected readonly documents: Map<string, Generic["model"]>;
 
 	private readonly handlerByPartialId: Map<
 		/*partialId: */ string,
-		(interaction: Logos.Interaction, data: InteractionData) => void
+		(interaction: Logos.Interaction<Generic["metadata"]>) => void
 	>;
 	protected readonly promptByPartialId: Map</*partialId: */ string, Discord.CamelizedDiscordMessage>;
-	private readonly documentByPromptId: Map</*promptId: */ string, M>;
+	private readonly documentByPromptId: Map</*promptId: */ string, Generic["model"]>;
 	private readonly userIdByPromptId: Map</*promptId: */ string, bigint>;
 
-	private readonly _configuration: ConfigurationLocators[PromptType];
+	private readonly _configuration: ConfigurationLocators[Generic["type"]];
 
-	readonly #_magicButton: InteractionCollector;
+	readonly #_magicButton: InteractionCollector<Generic["metadata"]>;
 	readonly #_removeButton?: InteractionCollector;
 
-	get configuration(): Configurations[PromptType] | undefined {
+	get configuration(): Configurations[Generic["type"]] | undefined {
 		const guildDocument = this.guildDocument;
 		if (guildDocument === undefined) {
 			return undefined;
@@ -96,7 +101,11 @@ abstract class PromptService<
 		return channelId;
 	}
 
-	constructor(client: Client, guildId: bigint, { type, deleteMode }: { type: PromptType; deleteMode: DeleteMode }) {
+	constructor(
+		client: Client,
+		guildId: bigint,
+		{ type, deleteMode }: { type: Generic["type"]; deleteMode: PromptDeleteMode },
+	) {
 		super(client, guildId);
 		this.type = type;
 		this.deleteMode = deleteMode;
@@ -174,28 +183,18 @@ abstract class PromptService<
 		}
 
 		this.#_magicButton.onCollect(async (buttonPress) => {
-			const customId = buttonPress.data?.customId;
-			if (customId === undefined) {
-				return;
-			}
-
-			const [_, partialId, ...metadata] = decodeId<InteractionData>(customId);
-			if (partialId === undefined) {
-				return;
-			}
-
-			const handle = this.handlerByPartialId.get(partialId);
+			const handle = this.handlerByPartialId.get(buttonPress.metadata[1]);
 			if (handle === undefined) {
 				return;
 			}
 
-			handle(buttonPress, [partialId, ...metadata] as InteractionData);
+			handle(buttonPress);
 		});
 
 		this.client.registerInteractionCollector(this.#_magicButton);
 
 		if (this.#_removeButton !== undefined) {
-			this.#_removeButton?.onCollect(async (buttonPress) => {
+			this.#_removeButton.onCollect(async (buttonPress) => {
 				const customId = buttonPress.data?.customId;
 				if (customId === undefined) {
 					return;
@@ -242,8 +241,7 @@ abstract class PromptService<
 					member.roles.some((roleId) => roleIds?.includes(roleId) ?? false) ||
 					(userIds?.includes(buttonPress.user.id) ?? false);
 				if (!isAuthorised) {
-					const localeData = await getLocaleData(this.client, buttonPress);
-					const locale = localeData.locale;
+					const locale = buttonPress.locale;
 
 					if (this.deleteMode === "delete") {
 						const strings = {
@@ -282,12 +280,7 @@ abstract class PromptService<
 
 				this.client.acknowledge(buttonPress);
 
-				const [_, partialId] = decodeId(customId);
-				if (partialId === undefined) {
-					return;
-				}
-
-				const prompt = this.promptByPartialId.get(partialId);
+				const prompt = this.promptByPartialId.get(buttonPress.metadata[1]);
 				if (prompt === undefined) {
 					return;
 				}
@@ -312,8 +305,8 @@ abstract class PromptService<
 		this.documentByPromptId.clear();
 		this.userIdByPromptId.clear();
 
-		this.#_magicButton.close();
-		this.#_removeButton?.close();
+		await this.#_magicButton.close();
+		await this.#_removeButton?.close();
 	}
 
 	// Anti-tampering feature; detects prompts being deleted.
@@ -377,10 +370,13 @@ abstract class PromptService<
 			);
 	}
 
-	abstract getAllDocuments(): Map<string, M>;
-	abstract getUserDocument(promptDocument: M): Promise<User>;
+	abstract getAllDocuments(): Map<string, Generic["model"]>;
+	abstract getUserDocument(promptDocument: Generic["model"]): Promise<User>;
 
-	abstract getPromptContent(user: Logos.User, promptDocument: M): Discord.CreateMessageOptions | undefined;
+	abstract getPromptContent(
+		user: Logos.User,
+		promptDocument: Generic["model"],
+	): Discord.CreateMessageOptions | undefined;
 
 	extractPartialId(prompt: Discord.CamelizedDiscordMessage): string | undefined {
 		const partialId = prompt.embeds?.at(-1)?.footer?.iconUrl?.split("&metadata=").at(-1);
@@ -413,7 +409,10 @@ abstract class PromptService<
 		return [valid, invalid];
 	}
 
-	async savePrompt(user: Logos.User, promptDocument: M): Promise<Discord.CamelizedDiscordMessage | undefined> {
+	async savePrompt(
+		user: Logos.User,
+		promptDocument: Generic["model"],
+	): Promise<Discord.CamelizedDiscordMessage | undefined> {
 		const channelId = this.channelId;
 		if (channelId === undefined) {
 			return undefined;
@@ -432,41 +431,34 @@ abstract class PromptService<
 		return message;
 	}
 
-	registerDocument(promptDocument: M): void {
+	registerDocument(promptDocument: Generic["model"]): void {
 		this.documents.set(promptDocument.partialId, promptDocument);
 	}
 
-	unregisterDocument(promptDocument: M): void {
+	unregisterDocument(promptDocument: Generic["model"]): void {
 		this.documents.delete(promptDocument.partialId);
 	}
 
-	registerPrompt(prompt: Discord.CamelizedDiscordMessage, userId: bigint, promptDocument: M): void {
+	registerPrompt(prompt: Discord.CamelizedDiscordMessage, userId: bigint, promptDocument: Generic["model"]): void {
 		this.documentByPromptId.set(prompt.id, promptDocument);
 		this.userIdByPromptId.set(prompt.id, userId);
 		this.promptByPartialId.set(promptDocument.partialId, prompt);
 	}
 
-	unregisterPrompt(prompt: Discord.CamelizedDiscordMessage, promptDocument: M): void {
+	unregisterPrompt(prompt: Discord.CamelizedDiscordMessage, promptDocument: Generic["model"]): void {
 		this.documentByPromptId.delete(prompt.id);
 		this.userIdByPromptId.delete(prompt.id);
 		this.promptByPartialId.delete(promptDocument.partialId);
 	}
 
-	registerHandler(promptDocument: M): void {
+	registerHandler(promptDocument: Generic["model"]): void {
 		this.handlerByPartialId.set(promptDocument.partialId, async (interaction) => {
-			const customId = interaction.data?.customId;
-			if (customId === undefined) {
-				return;
-			}
-
-			const [_, partialId, ...metadata] = decodeId<InteractionData>(customId);
-
-			const updatedDocument = await this.handleInteraction(interaction, [partialId, ...metadata] as InteractionData);
+			const updatedDocument = await this.handlePromptInteraction(interaction);
 			if (updatedDocument === undefined) {
 				return;
 			}
 
-			const prompt = this.promptByPartialId.get(partialId);
+			const prompt = this.promptByPartialId.get(interaction.metadata[1]);
 			if (prompt === undefined) {
 				return;
 			}
@@ -485,13 +477,15 @@ abstract class PromptService<
 		});
 	}
 
-	unregisterHandler(promptDocument: M): void {
+	unregisterHandler(promptDocument: Generic["model"]): void {
 		this.handlerByPartialId.delete(promptDocument.partialId);
 	}
 
-	abstract handleInteraction(interaction: Logos.Interaction, data: InteractionData): Promise<M | undefined | null>;
+	abstract handlePromptInteraction(
+		interaction: Logos.Interaction<Generic["metadata"]>,
+	): Promise<Generic["model"] | undefined | null>;
 
-	protected async handleDelete(promptDocument: M): Promise<void> {
+	protected async handleDelete(promptDocument: Generic["model"]): Promise<void> {
 		await promptDocument.delete(this.client);
 
 		const prompt = this.promptByPartialId.get(promptDocument.partialId);

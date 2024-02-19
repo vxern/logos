@@ -1,14 +1,31 @@
 import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
-import * as Logos from "../../../../types";
-import { Client } from "../../../client";
+import { Client, InteractionCollector } from "../../../client";
 import { handleOpenRoleSelectionMenu } from "../../../commands/social/commands/profile/roles";
-import { decodeId, getLocaleData } from "../../../interactions";
 import { HashableMessageContents, NoticeService } from "../service";
 
 class RoleNoticeService extends NoticeService<"roles"> {
+	readonly #_selectRolesButtonPresses: InteractionCollector;
+
 	constructor(client: Client, guildId: bigint) {
 		super(client, guildId, { type: "roles" });
+
+		this.#_selectRolesButtonPresses = new InteractionCollector(client, {
+			customId: constants.components.selectRoles,
+			isPermanent: true,
+		});
+	}
+
+	async start(): Promise<void> {
+		this.#_selectRolesButtonPresses.onCollect(async (buttonPress) => {
+			handleOpenRoleSelectionMenu(this.client, buttonPress);
+		});
+
+		this.client.registerInteractionCollector(this.#_selectRolesButtonPresses);
+	}
+
+	async stop(): Promise<void> {
+		await this.#_selectRolesButtonPresses.close();
 	}
 
 	generateNotice(): HashableMessageContents | undefined {
@@ -50,25 +67,6 @@ class RoleNoticeService extends NoticeService<"roles"> {
 				},
 			],
 		};
-	}
-
-	async interactionCreate(interaction: Logos.Interaction): Promise<void> {
-		// TODO(vxern): Use helper.
-		if (interaction.type !== Discord.InteractionTypes.MessageComponent) {
-			return;
-		}
-
-		const customId = interaction.data?.customId;
-		if (customId === undefined) {
-			return;
-		}
-
-		const [id, ..._] = decodeId(customId);
-		if (id !== constants.components.selectRoles) {
-			return;
-		}
-
-		handleOpenRoleSelectionMenu(this.client, interaction);
 	}
 }
 

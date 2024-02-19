@@ -35,17 +35,17 @@ type Collection =
 	| "Users"
 	| "Warnings";
 
-type IdentifierParts<M extends Model<any>> = M["_idParts"];
-type IdentifierData<M extends Model<any>> = { [K in IdentifierParts<M>[number]]: string };
-type IdentifierDataWithDummies<M extends Model<any>> = { [K in IdentifierParts<M>[number]]: string | undefined };
-type MetadataOrIdentifierData<M extends Model<any>> = { "@metadata": DocumentMetadata } | IdentifierData<M>;
+type IdentifierParts<M extends Model> = M["_idParts"];
+type IdentifierData<M extends Model> = { [K in IdentifierParts<M>[number]]: string };
+type IdentifierDataWithDummies<M extends Model> = { [K in IdentifierParts<M>[number]]: string | undefined };
+type MetadataOrIdentifierData<M extends Model> = { "@metadata": DocumentMetadata } | IdentifierData<M>;
 
 type ClientOrDatabase = Client | Database;
 
 const IDENTIFIER_PARTS_ORDERED: string[] = ["guildId", "userId", "authorId", "targetId", "createdAt"];
 
-abstract class Model<Generic extends { idParts: readonly string[] }> {
-	static readonly #_classes: Record<Collection, { new (data: any): Model<any> }> = {
+abstract class Model<Generic extends { idParts: readonly string[] } = any> {
+	static readonly #_classes: Record<Collection, { new (data: any): Model }> = {
 		EntryRequests: EntryRequest,
 		GuildStats: GuildStats,
 		Guilds: Guild,
@@ -84,7 +84,7 @@ abstract class Model<Generic extends { idParts: readonly string[] }> {
 		this._idParts = idParts;
 	}
 
-	static from<M extends Model<any>>(payload: RawDocument): M {
+	static from<M extends Model>(payload: RawDocument): M {
 		if (payload["@metadata"]["@collection"] === "@empty") {
 			throw `Document ${payload["@metadata"]["@collection"]} is not part of any collection.`;
 		}
@@ -98,7 +98,7 @@ abstract class Model<Generic extends { idParts: readonly string[] }> {
 		return new Class(payload) as M;
 	}
 
-	static buildPartialId<M extends Model<any>>(data: IdentifierData<M>): string {
+	static buildPartialId<M extends Model>(data: IdentifierData<M>): string {
 		const parts: string[] = [];
 		for (const part of IDENTIFIER_PARTS_ORDERED) {
 			if (!(part in data)) {
@@ -111,14 +111,14 @@ abstract class Model<Generic extends { idParts: readonly string[] }> {
 		return parts.join(constants.symbols.database.separator);
 	}
 
-	static buildId<M extends Model<any>>(data: IdentifierData<M>, { collection }: { collection: Collection }): string {
+	static buildId<M extends Model>(data: IdentifierData<M>, { collection }: { collection: Collection }): string {
 		const collectionCamelCase = decapitalise(collection);
 		const partialId = Model.buildPartialId(data);
 
 		return `${collectionCamelCase}${constants.symbols.database.separator}${partialId}`;
 	}
 
-	static getDataFromId<M extends Model<any>>(id: string): [collection: Collection, data: IdentifierParts<M>] {
+	static getDataFromId<M extends Model>(id: string): [collection: Collection, data: IdentifierParts<M>] {
 		const [collectionCamelCase, ...data] = id.split(constants.symbols.database.separator);
 		const collection = capitalise(collectionCamelCase!);
 		if (!(collection in Model.#_classes)) {
@@ -128,14 +128,14 @@ abstract class Model<Generic extends { idParts: readonly string[] }> {
 		return [collection as Collection, data];
 	}
 
-	static #withDummiesReplaced<M extends Model<any>>(
+	static #withDummiesReplaced<M extends Model>(
 		data: IdentifierDataWithDummies<M>,
 		{ value }: { value: string },
 	): IdentifierData<M> {
 		return Object.fromEntries(Object.entries(data).map(([key, value_]) => [key, value_ ?? value])) as IdentifierData<M>;
 	}
 
-	static async all<M extends Model<any>>(
+	static async all<M extends Model>(
 		clientOrDatabase: ClientOrDatabase,
 		{ collection, where }: { collection: Collection; where?: IdentifierDataWithDummies<M> },
 	): Promise<M[]> {

@@ -4,7 +4,6 @@ import defaults from "../../defaults";
 import * as Logos from "../../types";
 import { Client } from "../client";
 import { Guild } from "../database/guild";
-import { getLocalisationLanguage } from "../interactions";
 
 type ServiceBase = {
 	[K in keyof Discord.EventHandlers]: (..._: Parameters<Discord.EventHandlers[K]>) => Promise<void>;
@@ -110,8 +109,8 @@ abstract class LocalService extends Service {
 			return defaults.LOCALISATION_LOCALE;
 		}
 
-		const guildLanguage = getLocalisationLanguage(guildDocument);
-		const guildLocale = getLocaleByLocalisationLanguage(guildLanguage) ?? defaults.LOCALISATION_LOCALE;
+		const guildLanguage = guildDocument.localisationLanguage;
+		const guildLocale = getLocaleByLocalisationLanguage(guildLanguage);
 
 		return guildLocale;
 	}

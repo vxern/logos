@@ -1,64 +1,86 @@
 import * as Discord from "@discordeno/bot";
 import constants from "../../../constants/constants";
 import * as Logos from "../../../types";
-import { InteractionCollector } from "../../client";
-import { decodeId, getCommandName, getLocaleData } from "../../interactions";
+import { Client, InteractionCollector, InteractionStore } from "../../client";
 import { GlobalService } from "../service";
-
-type InteractionRepetitionButtonID = [interactionId: string];
 
 // TODO(vxern): Improve this by getting rid of the "message could not be loaded" text.
 class InteractionRepetitionService extends GlobalService {
-	async start(): Promise<void> {}
+	readonly #_commandInteractions: InteractionCollector;
+	readonly #_showInChatButtonPresses: InteractionCollector;
 
-	async stop(): Promise<void> {}
+	constructor(client: Client) {
+		super(client);
 
-	async interactionCreate(interaction: Logos.Interaction): Promise<void> {
-		if (interaction.type === Discord.InteractionTypes.ApplicationCommand) {
-			this.handleApplicationCommand(interaction);
+		// TODO(vxern): Does this actually register command interactions without a custom ID?
+		this.#_commandInteractions = new InteractionCollector(client, {
+			type: Discord.InteractionTypes.ApplicationCommand,
+			isPermanent: true,
+		});
+		this.#_showInChatButtonPresses = new InteractionCollector<[interactionId: string]>(client, {
+			customId: constants.components.showInChat,
+			isPermanent: true,
+		});
+	}
+
+	async start(): Promise<void> {
+		this.#_commandInteractions.onCollect(this.#handleCommandInteraction.bind(this));
+		this.#_showInChatButtonPresses.onCollect(this.#handleShowInChat.bind(this));
+
+		this.client.registerInteractionCollector(this.#_commandInteractions);
+		this.client.registerInteractionCollector(this.#_showInChatButtonPresses);
+	}
+
+	async stop(): Promise<void> {
+		await this.#_commandInteractions.close();
+		await this.#_showInChatButtonPresses.close();
+	}
+
+	async #handleCommandInteraction(interaction: Logos.Interaction): Promise<void> {
+		if (!this.client.isShowable(interaction)) {
 			return;
 		}
 
-		const customId = interaction.data?.customId;
-		if (customId === undefined) {
-			return;
-		}
+		this.client.registerInteraction(interaction);
+	}
 
-		const [id, interactionId] = decodeId<InteractionRepetitionButtonID>(customId);
-		if (id !== constants.components.showInChat) {
-			return;
-		}
+	async #handleShowInChat(buttonPress: Logos.Interaction): Promise<void> {
+		await this.client.postponeReply(buttonPress);
 
-		await this.client.postponeReply(interaction);
+		const confirmButton = new InteractionCollector(this.client, {
+			only: [buttonPress.user.id],
+			dependsOn: this.#_showInChatButtonPresses,
+			isSingle: true,
+		});
+		const cancelButton = new InteractionCollector(this.client, {
+			only: [buttonPress.user.id],
+			dependsOn: this.#_showInChatButtonPresses,
+			isSingle: true,
+		});
 
-		const confirmButton = new InteractionCollector(client, { only: [interaction.user.id], isSingle: true });
-		const cancelButton = new InteractionCollector(client, { only: [interaction.user.id], isSingle: true });
+		confirmButton.onCollect(async (confirmButtonPress) => {
+			this.client.deleteReply(buttonPress);
 
-		confirmButton.onCollect(async (buttonPress) => {
-			this.client.deleteReply(interaction);
-
-			const originalInteraction = this.client.unregisterInteraction(BigInt(interactionId));
+			const originalInteraction = this.client.unregisterInteraction(BigInt(buttonPress.metadata[1]));
 			if (originalInteraction === undefined) {
 				return;
 			}
 
 			this.client.deleteReply(originalInteraction);
 
-			const interactionSpoofed = InteractionRepetitionService.#spoofInteraction(originalInteraction, {
-				using: buttonPress,
+			const interactionSpoofed = InteractionStore.spoofInteraction(originalInteraction, {
+				using: confirmButtonPress,
 			});
 
 			await this.client.handleInteraction(interactionSpoofed, { show: true });
 		});
 
-		cancelButton.onCollect(async (_) => this.client.deleteReply(interaction));
+		cancelButton.onCollect(async (_) => this.client.deleteReply(buttonPress));
 
 		this.client.registerInteractionCollector(confirmButton);
 		this.client.registerInteractionCollector(cancelButton);
 
-		const localeData = await getLocaleData(this.client, interaction);
-
-		const locale = localeData.locale;
+		const locale = buttonPress.locale;
 
 		const strings = {
 			title: this.client.localise("interactions.show.sureToShow.title", locale)(),
@@ -67,7 +89,7 @@ class InteractionRepetitionService extends GlobalService {
 			no: this.client.localise("interactions.show.sureToShow.no", locale)(),
 		};
 
-		this.client.editReply(interaction, {
+		this.client.editReply(buttonPress, {
 			embeds: [{ title: strings.title, description: strings.description, color: constants.colors.dullYellow }],
 			components: [
 				{
@@ -90,29 +112,6 @@ class InteractionRepetitionService extends GlobalService {
 			],
 		});
 	}
-
-	async handleApplicationCommand(interaction: Logos.Interaction): Promise<void> {
-		const commandName = getCommandName(interaction);
-		if (commandName === undefined) {
-			return;
-		}
-
-		if (!this.client.isShowable(commandName)) {
-			return;
-		}
-
-		this.client.registerInteraction(interaction);
-	}
-
-	static #spoofInteraction(interaction: Logos.Interaction, { using }: { using: Logos.Interaction }): Logos.Interaction {
-		return {
-			...interaction,
-			type: Discord.InteractionTypes.ApplicationCommand,
-			token: using.token,
-			id: using.id,
-		};
-	}
 }
 
 export { InteractionRepetitionService };
-export type { InteractionRepetitionButtonID };

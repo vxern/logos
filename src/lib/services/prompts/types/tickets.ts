@@ -5,12 +5,13 @@ import { Client } from "../../../client";
 import { Ticket } from "../../../database/ticket";
 import { User } from "../../../database/user";
 import diagnostics from "../../../diagnostics";
-import { encodeId, getLocaleData } from "../../../interactions";
 import { PromptService } from "../service";
 
-type InteractionData = [documentId: string, isResolved: string];
-
-class TicketService extends PromptService<"tickets", Ticket, InteractionData> {
+class TicketService extends PromptService<{
+	type: "tickets";
+	model: Ticket;
+	metadata: [partialId: string, isResolve: string];
+}> {
 	constructor(client: Client, guildId: bigint) {
 		super(client, guildId, { type: "tickets", deleteMode: "close" });
 	}
@@ -120,19 +121,19 @@ class TicketService extends PromptService<"tickets", Ticket, InteractionData> {
 		};
 	}
 
-	async handleInteraction(interaction: Logos.Interaction, data: InteractionData): Promise<Ticket | null | undefined> {
-		const localeData = await getLocaleData(this.client, interaction);
-		const locale = localeData.locale;
+	async handlePromptInteraction(
+		interaction: Logos.Interaction<[partialId: string, isResolve: string]>,
+	): Promise<Ticket | null | undefined> {
+		const locale = interaction.locale;
 
-		const [partialId, isResolvedString] = data;
-		const isResolved = isResolvedString === "true";
-
-		const ticketDocument = this.documents.get(partialId);
+		const ticketDocument = this.documents.get(interaction.metadata[0]);
 		if (ticketDocument === undefined) {
 			return undefined;
 		}
 
-		if (isResolved && ticketDocument.isResolved) {
+		const isResolve = interaction.metadata[1] === "true";
+
+		if (isResolve && ticketDocument.isResolved) {
 			const strings = {
 				title: this.client.localise("alreadyMarkedResolved.title", locale)(),
 				description: this.client.localise("alreadyMarkedResolved.description", locale)(),
@@ -150,7 +151,7 @@ class TicketService extends PromptService<"tickets", Ticket, InteractionData> {
 			return;
 		}
 
-		if (!(isResolved || ticketDocument.isResolved)) {
+		if (!(isResolve || ticketDocument.isResolved)) {
 			const strings = {
 				title: this.client.localise("alreadyMarkedUnresolved.title", locale)(),
 				description: this.client.localise("alreadyMarkedUnresolved.description", locale)(),
@@ -169,7 +170,7 @@ class TicketService extends PromptService<"tickets", Ticket, InteractionData> {
 		}
 
 		await ticketDocument.update(this.client, () => {
-			ticketDocument.isResolved = isResolved;
+			ticketDocument.isResolved = isResolve;
 		});
 
 		return ticketDocument;

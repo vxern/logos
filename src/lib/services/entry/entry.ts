@@ -11,15 +11,16 @@ import diagnostics from "../../diagnostics";
 import { Modal, createModalComposer } from "../../interactions";
 import { snowflakeToTimestamp } from "../../utils";
 import { LocalService } from "../service";
+import { Client, InteractionCollector } from "../../client";
 
 type EntryStepButtonID = [parameter: string];
 
 type EntryConfiguration = NonNullable<Guild["features"]["server"]["features"]>["entry"];
 type VerificationConfiguration = NonNullable<Guild["features"]["moderation"]["features"]>["verification"];
 
-const steps = Object.values(constants.components.entry);
-
 class EntryService extends LocalService {
+	readonly #_acceptedRulesButtonPresses: InteractionCollector;
+
 	get configuration(): EntryConfiguration | undefined {
 		const guildDocument = this.guildDocument;
 		if (guildDocument === undefined) {
@@ -38,77 +39,61 @@ class EntryService extends LocalService {
 		return guildDocument.features.moderation.features?.verification;
 	}
 
-	async start(): Promise<void> {}
+	constructor(client: Client, guildId: bigint) {
+		super(client, guildId);
 
-	async stop(): Promise<void> {}
-
-	// TODO(vxern): Switch to Logos interaction.
-	async interactionCreate(interactionRaw: Logos.Interaction): Promise<void> {
-		if (interactionRaw.type !== Discord.InteractionTypes.MessageComponent) {
-			return;
-		}
-
-		const customId = interactionRaw.data?.customId;
-		if (customId === undefined) {
-			return;
-		}
-
-		const [id, ..._] = decodeId(customId);
-		if (!steps.includes(id)) {
-			return;
-		}
-
-		const localeData = await getLocaleData(this.client, interactionRaw);
-		const interaction: Logos.Interaction = { ...interactionRaw, ...localeData };
-
-		const [step, parameter] = decodeId<EntryStepButtonID>(customId);
-		switch (step) {
-			case constants.components.entry.acceptedRules: {
-				this.handleAcceptRules(interaction);
-				break;
-			}
-			case constants.components.entry.requestedVerification: {
-				this.handleRequestVerification(interaction, parameter);
-				break;
-			}
-			case constants.components.entry.selectedLanguageProficiency: {
-				this.handleSelectLanguageProficiency(interaction, parameter);
-				break;
-			}
-			default: {
-				this.client.log.warn(`Entry step with ID '${step}' not handled.`);
-				return;
-			}
-		}
+		this.#_acceptedRulesButtonPresses = new InteractionCollector(client, {
+			customId: constants.components.entry.acceptedRules,
+			isPermanent: true,
+		});
 	}
 
-	private async handleAcceptRules(interaction: Logos.Interaction): Promise<void> {
-		const locale = interaction.locale;
+	async start(): Promise<void> {
+		this.#_acceptedRulesButtonPresses.onCollect(this.#handleAcceptRules.bind(this));
 
+		this.client.registerInteractionCollector(this.#_acceptedRulesButtonPresses);
+	}
+
+	async stop(): Promise<void> {
+		await this.#_acceptedRulesButtonPresses.close();
+	}
+
+	async #handleAcceptRules(buttonPress: Logos.Interaction): Promise<void> {
 		const guildDocument = this.guildDocument;
 		if (guildDocument === undefined) {
 			return;
 		}
 
+		const requestedVerificationButtonPresses = new InteractionCollector<[requestedRoleId: string]>(this.client, {
+			only: [buttonPress.user.id],
+			dependsOn: this.#_acceptedRulesButtonPresses,
+			isSingle: true,
+		});
+
+		requestedVerificationButtonPresses.onCollect(this.#handleRequestVerification.bind(this));
+
+		this.client.registerInteractionCollector(requestedVerificationButtonPresses);
+
 		const strings = {
-			title: this.client.localise("entry.proficiency.title", locale)(),
+			title: this.client.localise("entry.proficiency.title", buttonPress.locale)(),
 			description: {
 				chooseProficiency: this.client.localise(
 					"entry.proficiency.description.chooseProficiency",
-					locale,
+					buttonPress.locale,
 				)({
-					language: interaction.featureLanguage,
+					language: buttonPress.featureLanguage,
 				}),
 				canChangeLater: this.client.localise(
 					"entry.proficiency.description.canChangeLater",
-					locale,
+					buttonPress.locale,
 				)({
+					// TODO(vxern): Localise commands?
 					command: "`/profile roles`",
 				}),
 			},
 		};
 
-		this.client.reply(interaction, {
+		this.client.reply(buttonPress, {
 			embeds: [
 				{
 					title: strings.title,
@@ -120,7 +105,7 @@ class EntryService extends LocalService {
 					type: Discord.MessageComponentTypes.ActionRow,
 					components: proficiency.collection.list.map<Discord.ButtonComponent>((proficiencyRole, index) => {
 						const strings = {
-							name: this.client.localise(`${proficiencyRole.id}.name`, locale)(),
+							name: this.client.localise(`${proficiencyRole.id}.name`, buttonPress.locale)(),
 						};
 
 						return {
@@ -135,146 +120,6 @@ class EntryService extends LocalService {
 					}) as [Discord.ButtonComponent],
 				},
 			],
-		});
-	}
-
-	private async handleRequestVerification(interaction: Logos.Interaction, parameter: string): Promise<void> {
-		const locale = interaction.locale;
-
-		const guild = this.guild;
-		if (guild === undefined) {
-			return;
-		}
-
-		const requestedRoleId = BigInt(parameter);
-
-		const entryRequestDocument = await EntryRequest.get(this.client, {
-			guildId: this.guildId.toString(),
-			authorId: interaction.user.id.toString(),
-		});
-
-		if (entryRequestDocument !== undefined) {
-			const strings = {
-				title: this.client.localise("entry.verification.answers.alreadyAnswered.title", locale)(),
-				description: this.client.localise("entry.verification.answers.alreadyAnswered.description", locale)(),
-			};
-
-			this.client.reply(interaction, {
-				embeds: [
-					{
-						title: strings.title,
-						description: strings.description,
-						color: constants.colors.dullYellow,
-					},
-				],
-			});
-
-			return;
-		}
-
-		const verificationService = this.client.getPromptService(this.guildId, { type: "verification" });
-		if (verificationService === undefined) {
-			return;
-		}
-
-		const entryRequest = await EntryRequest.get(this.client, {
-			guildId: guild.id.toString(),
-			authorId: interaction.user.id.toString(),
-		});
-
-		createModalComposer<EntryRequest["answers"]>(this.client, interaction, {
-			modal: this.generateVerificationQuestionModal(interaction.featureLanguage, { locale }),
-			onSubmit: async (submission, answers) => {
-				if (entryRequest !== undefined) {
-					const strings = {
-						title: this.client.localise("entry.verification.answers.alreadyAnswered.title", locale)(),
-						description: this.client.localise("entry.verification.answers.alreadyAnswered.description", locale)(),
-					};
-
-					this.client.reply(submission, {
-						embeds: [
-							{
-								title: strings.title,
-								description: strings.description,
-								color: constants.colors.darkRed,
-							},
-						],
-					});
-
-					return true;
-				}
-
-				await this.client.postponeReply(submission);
-
-				const entryRequestDocument = await EntryRequest.create(this.client, {
-					guildId: guild.id.toString(),
-					authorId: interaction.user.id.toString(),
-					requestedRoleId: requestedRoleId.toString(),
-					answers,
-				});
-
-				const journallingService = this.client.getJournallingService(this.guildId);
-				journallingService?.log("entryRequestSubmit", { args: [interaction.user, entryRequestDocument] });
-
-				const user = this.client.entities.users.get(interaction.user.id);
-				if (user === undefined) {
-					return "failure";
-				}
-
-				const prompt = await verificationService.savePrompt(user, entryRequestDocument);
-				if (prompt === undefined) {
-					return "failure";
-				}
-
-				verificationService.registerDocument(entryRequestDocument);
-				verificationService.registerPrompt(prompt, interaction.user.id, entryRequestDocument);
-				verificationService.registerHandler(entryRequestDocument);
-
-				const strings = {
-					title: this.client.localise("entry.verification.answers.submitted.title", locale)(),
-					description: {
-						submitted: this.client.localise("entry.verification.answers.submitted.description.submitted", locale)(),
-						willBeReviewed: this.client.localise(
-							"entry.verification.answers.submitted.description.willBeReviewed",
-							locale,
-						)(),
-					},
-				};
-
-				this.client.editReply(submission, {
-					embeds: [
-						{
-							title: strings.title,
-							description: `${strings.description.submitted}\n\n${strings.description.willBeReviewed}`,
-							color: constants.colors.lightGreen,
-						},
-					],
-				});
-
-				return true;
-			},
-			onInvalid: async (submission, error) => {
-				switch (error) {
-					default: {
-						const strings = {
-							title: this.client.localise("entry.verification.answers.failed.title", locale)(),
-							description: this.client.localise("entry.verification.answers.failed.description", locale)(),
-						};
-
-						this.client.editReply(submission, {
-							embeds: [
-								{
-									title: strings.title,
-									description: strings.description,
-									color: constants.colors.red,
-								},
-							],
-						});
-
-						return undefined;
-					}
-				}
-			},
 		});
 	}
 
@@ -338,15 +183,16 @@ class EntryService extends LocalService {
 		};
 	}
 
-	private async handleSelectLanguageProficiency(interaction: Logos.Interaction, parameter: string): Promise<void> {
-		const locale = interaction.locale;
+	async #handleSelectLanguageProficiency(buttonPress: Logos.Interaction<[index: string]>): Promise<void> {
+		const locale = buttonPress.locale;
 
 		const guild = this.guild;
 		if (guild === undefined) {
 			return;
 		}
 
-		const snowflake = proficiency.collection.list[parseInt(parameter)]?.snowflakes[this.guildIdString];
+		// TODO(vxern): Improve.
+		const snowflake = proficiency.collection.list[parseInt(buttonPress.metadata[1])]?.snowflakes[this.guildIdString];
 		if (snowflake === undefined) {
 			return;
 		}
@@ -357,18 +203,18 @@ class EntryService extends LocalService {
 			return;
 		}
 
-		const canEnter = await this.vetUser(interaction, { locale });
+		const canEnter = await this.vetUser(buttonPress, { locale });
 		if (!canEnter) {
 			return;
 		}
 
-		const requiresVerification = this.requiresVerification(interaction.user);
+		const requiresVerification = this.requiresVerification(buttonPress.user);
 		if (requiresVerification === undefined) {
 			return;
 		}
 
 		if (requiresVerification) {
-			const userDocument = await User.getOrCreate(this.client, { userId: interaction.user.id.toString() });
+			const userDocument = await User.getOrCreate(this.client, { userId: buttonPress.user.id.toString() });
 
 			const isVerified = userDocument.isAuthorisedOn(this.guildIdString);
 			if (!isVerified) {
@@ -386,7 +232,7 @@ class EntryService extends LocalService {
 					},
 				};
 
-				this.client.reply(interaction, {
+				this.client.reply(buttonPress, {
 					embeds: [
 						{
 							title: strings.title,
@@ -428,7 +274,7 @@ class EntryService extends LocalService {
 			},
 		};
 
-		await this.client.reply(interaction, {
+		await this.client.reply(buttonPress, {
 			embeds: [
 				{
 					title: strings.title,
@@ -440,14 +286,154 @@ class EntryService extends LocalService {
 		});
 
 		this.client.bot.rest
-			.addRole(guild.id, interaction.user.id, role.id, "User-requested role addition.")
+			.addRole(guild.id, buttonPress.user.id, role.id, "User-requested role addition.")
 			.catch(() =>
 				this.client.log.warn(
 					`Failed to add ${diagnostics.display.role(role)} to ${diagnostics.display.user(
-						interaction.user,
+						buttonPress.user,
 					)} on ${diagnostics.display.guild(guild.id)}.`,
 				),
 			);
+	}
+
+	async #handleRequestVerification(buttonPress: Logos.Interaction<[requestedRoleId: string]>): Promise<void> {
+		const locale = buttonPress.locale;
+
+		const guild = this.guild;
+		if (guild === undefined) {
+			return;
+		}
+
+		const requestedRoleId = BigInt(buttonPress.metadata[1]);
+
+		const entryRequestDocument = await EntryRequest.get(this.client, {
+			guildId: this.guildId.toString(),
+			authorId: buttonPress.user.id.toString(),
+		});
+
+		if (entryRequestDocument !== undefined) {
+			const strings = {
+				title: this.client.localise("entry.verification.answers.alreadyAnswered.title", locale)(),
+				description: this.client.localise("entry.verification.answers.alreadyAnswered.description", locale)(),
+			};
+
+			this.client.reply(buttonPress, {
+				embeds: [
+					{
+						title: strings.title,
+						description: strings.description,
+						color: constants.colors.dullYellow,
+					},
+				],
+			});
+
+			return;
+		}
+
+		const verificationService = this.client.getPromptService(this.guildId, { type: "verification" });
+		if (verificationService === undefined) {
+			return;
+		}
+
+		const entryRequest = await EntryRequest.get(this.client, {
+			guildId: guild.id.toString(),
+			authorId: buttonPress.user.id.toString(),
+		});
+
+		createModalComposer<EntryRequest["answers"]>(this.client, buttonPress, {
+			modal: this.generateVerificationQuestionModal(buttonPress.featureLanguage, { locale }),
+			onSubmit: async (submission, answers) => {
+				if (entryRequest !== undefined) {
+					const strings = {
+						title: this.client.localise("entry.verification.answers.alreadyAnswered.title", locale)(),
+						description: this.client.localise("entry.verification.answers.alreadyAnswered.description", locale)(),
+					};
+
+					this.client.reply(submission, {
+						embeds: [
+							{
+								title: strings.title,
+								description: strings.description,
+								color: constants.colors.darkRed,
+							},
+						],
+					});
+
+					return true;
+				}
+
+				await this.client.postponeReply(submission);
+
+				const entryRequestDocument = await EntryRequest.create(this.client, {
+					guildId: guild.id.toString(),
+					authorId: buttonPress.user.id.toString(),
+					requestedRoleId: requestedRoleId.toString(),
+					answers,
+				});
+
+				const journallingService = this.client.getJournallingService(this.guildId);
+				journallingService?.log("entryRequestSubmit", { args: [buttonPress.user, entryRequestDocument] });
+
+				const user = this.client.entities.users.get(buttonPress.user.id);
+				if (user === undefined) {
+					return "failure";
+				}
+
+				const prompt = await verificationService.savePrompt(user, entryRequestDocument);
+				if (prompt === undefined) {
+					return "failure";
+				}
+
+				verificationService.registerDocument(entryRequestDocument);
+				verificationService.registerPrompt(prompt, buttonPress.user.id, entryRequestDocument);
+				verificationService.registerHandler(entryRequestDocument);
+
+				const strings = {
+					title: this.client.localise("entry.verification.answers.submitted.title", locale)(),
+					description: {
+						submitted: this.client.localise("entry.verification.answers.submitted.description.submitted", locale)(),
+						willBeReviewed: this.client.localise(
+							"entry.verification.answers.submitted.description.willBeReviewed",
+							locale,
+						)(),
+					},
+				};
+
+				this.client.editReply(submission, {
+					embeds: [
+						{
+							title: strings.title,
+							description: `${strings.description.submitted}\n\n${strings.description.willBeReviewed}`,
+							color: constants.colors.lightGreen,
+						},
+					],
+				});
+
+				return true;
+			},
+			onInvalid: async (submission, error) => {
+				switch (error) {
+					default: {
+						const strings = {
+							title: this.client.localise("entry.verification.answers.failed.title", locale)(),
+							description: this.client.localise("entry.verification.answers.failed.description", locale)(),
+						};
+
+						this.client.editReply(submission, {
+							embeds: [
+								{
+									title: strings.title,
+									description: strings.description,
+									color: constants.colors.red,
+								},
+							],
+						});
+
+						return undefined;
+					}
+				}
+			},
+		});
 	}
 
 	private async vetUser(interaction: Logos.Interaction, { locale }: { locale: Locale }): Promise<boolean> {

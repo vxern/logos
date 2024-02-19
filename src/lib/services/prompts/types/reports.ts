@@ -5,13 +5,14 @@ import { Client } from "../../../client";
 import { Report } from "../../../database/report";
 import { User } from "../../../database/user";
 import diagnostics from "../../../diagnostics";
-import { encodeId, getLocaleData } from "../../../interactions";
 import { getGuildIconURLFormatted } from "../../../utils";
 import { PromptService } from "../service";
 
-type InteractionData = [documentId: string, isResolved: string];
-
-class ReportService extends PromptService<"reports", Report, InteractionData> {
+class ReportService extends PromptService<{
+	type: "reports";
+	model: Report;
+	metadata: [partialId: string, isResolve: string];
+}> {
 	constructor(client: Client, guildId: bigint) {
 		super(client, guildId, { type: "reports", deleteMode: "delete" });
 	}
@@ -144,17 +145,17 @@ class ReportService extends PromptService<"reports", Report, InteractionData> {
 		};
 	}
 
-	async handleInteraction(interaction: Logos.Interaction, data: InteractionData): Promise<Report | null | undefined> {
-		const localeData = await getLocaleData(this.client, interaction);
-		const locale = localeData.locale;
+	async handlePromptInteraction(
+		interaction: Logos.Interaction<[partialId: string, isResolve: string]>,
+	): Promise<Report | null | undefined> {
+		const locale = interaction.locale;
 
-		const [partialId, isResolvedString] = data;
-		const isResolved = isResolvedString === "true";
-
-		const reportDocument = this.documents.get(partialId);
+		const reportDocument = this.documents.get(interaction.metadata[0]);
 		if (reportDocument === undefined) {
 			return undefined;
 		}
+
+		const isResolved = interaction.metadata[1] === "true";
 
 		if (isResolved && reportDocument.isResolved) {
 			const strings = {
