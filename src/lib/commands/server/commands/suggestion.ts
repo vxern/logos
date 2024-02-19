@@ -133,20 +133,20 @@ async function handleMakeSuggestion(client: Client, interaction: Logos.Interacti
 
 async function handleSubmittedInvalidSuggestion(
 	client: Client,
-	submission: Discord.Interaction,
+	submission: Logos.Interaction,
 	error: SuggestionError | undefined,
 	{ locale }: { locale: Locale },
-): Promise<Discord.Interaction | undefined> {
-	const { promise, resolve } = Promise.withResolvers<Discord.Interaction | undefined>();
+): Promise<Logos.Interaction | undefined> {
+	const { promise, resolve } = Promise.withResolvers<Logos.Interaction | undefined>();
 
-	const continueButton = new InteractionCollector({ only: [submission.user.id], isSingle: true });
-	const cancelButton = new InteractionCollector({ only: [submission.user.id] });
-	const returnButton = new InteractionCollector({
+	const continueButton = new InteractionCollector(client, { only: [submission.user.id], isSingle: true });
+	const cancelButton = new InteractionCollector(client, { only: [submission.user.id] });
+	const returnButton = new InteractionCollector(client, {
 		only: [submission.user.id],
 		isSingle: true,
 		dependsOn: cancelButton,
 	});
-	const leaveButton = new InteractionCollector({
+	const leaveButton = new InteractionCollector(client, {
 		only: [submission.user.id],
 		isSingle: true,
 		dependsOn: cancelButton,

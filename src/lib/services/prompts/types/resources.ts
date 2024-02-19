@@ -110,10 +110,7 @@ class ResourceService extends PromptService<"resources", Resource, InteractionDa
 		};
 	}
 
-	async handleInteraction(
-		interaction: Discord.Interaction,
-		data: InteractionData,
-	): Promise<Resource | null | undefined> {
+	async handleInteraction(interaction: Logos.Interaction, data: InteractionData): Promise<Resource | null | undefined> {
 		const localeData = await getLocaleData(this.client, interaction);
 		const locale = localeData.locale;
 

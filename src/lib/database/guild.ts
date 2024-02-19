@@ -346,6 +346,20 @@ class Guild extends Model<{ idParts: ["guildId"] }> {
 		return this.languages?.feature ?? defaults.LOCALISATION_LANGUAGE;
 	}
 
+	get #targetLanguageOnlyChannelIds(): string[] {
+		const language = this.features.language;
+		if (!language.enabled) {
+			return [];
+		}
+
+		const targetOnly = language.features.targetOnly;
+		if (targetOnly === undefined || !targetOnly.enabled) {
+			return [];
+		}
+
+		return targetOnly.channelIds;
+	}
+
 	constructor({
 		createdAt,
 		languages,
@@ -403,6 +417,10 @@ class Guild extends Model<{ idParts: ["guildId"] }> {
 		});
 
 		return promise;
+	}
+
+	isTargetLanguageOnly(channelId: string): boolean {
+		return this.#targetLanguageOnlyChannelIds.includes(channelId);
 	}
 }
 

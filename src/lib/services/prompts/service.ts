@@ -58,7 +58,7 @@ abstract class PromptService<
 
 	private readonly handlerByPartialId: Map<
 		/*partialId: */ string,
-		(interaction: Discord.Interaction, data: InteractionData) => void
+		(interaction: Logos.Interaction, data: InteractionData) => void
 	>;
 	protected readonly promptByPartialId: Map</*partialId: */ string, Discord.CamelizedDiscordMessage>;
 	private readonly documentByPromptId: Map</*promptId: */ string, M>;
@@ -111,10 +111,10 @@ abstract class PromptService<
 
 		this._configuration = configurationLocators[type];
 
-		this.#_magicButton = new InteractionCollector({ customId: this.customId, isPermanent: true });
+		this.#_magicButton = new InteractionCollector(client, { customId: this.customId, isPermanent: true });
 		this.#_removeButton =
 			this.deleteMode !== undefined
-				? new InteractionCollector({
+				? new InteractionCollector(client, {
 						// TODO(vxern): Better ID.
 						customId: `${constants.components.removePrompt}/${this.customId}/${this.guildId}`,
 						isPermanent: true,
@@ -489,7 +489,7 @@ abstract class PromptService<
 		this.handlerByPartialId.delete(promptDocument.partialId);
 	}
 
-	abstract handleInteraction(interaction: Discord.Interaction, data: InteractionData): Promise<M | undefined | null>;
+	abstract handleInteraction(interaction: Logos.Interaction, data: InteractionData): Promise<M | undefined | null>;
 
 	protected async handleDelete(promptDocument: M): Promise<void> {
 		await promptDocument.delete(this.client);

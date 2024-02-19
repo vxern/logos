@@ -111,7 +111,7 @@ class SuggestionService extends PromptService<"suggestions", Suggestion, Interac
 	}
 
 	async handleInteraction(
-		interaction: Discord.Interaction,
+		interaction: Logos.Interaction,
 		data: InteractionData,
 	): Promise<Suggestion | null | undefined> {
 		const localeData = await getLocaleData(this.client, interaction);

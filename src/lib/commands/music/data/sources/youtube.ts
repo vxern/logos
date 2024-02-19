@@ -37,7 +37,7 @@ async function search(client: Client, interaction: Logos.Interaction, query: str
 
 	const { promise, resolve } = Promise.withResolvers<SongListing | undefined>();
 
-	const selectMenuSelection = new InteractionCollector({ only: [interaction.user.id], isSingle: true });
+	const selectMenuSelection = new InteractionCollector(client, { only: [interaction.user.id], isSingle: true });
 
 	selectMenuSelection.onCollect(async (selection) => {
 		client.deleteReply(interaction);

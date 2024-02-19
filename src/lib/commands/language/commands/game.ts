@@ -87,8 +87,8 @@ async function handleStartGame(client: Client, interaction: Logos.Interaction): 
 
 	await client.postponeReply(interaction);
 
-	const guessButton = new InteractionCollector({ only: [interaction.user.id], isSingle: true });
-	const skipButton = new InteractionCollector({ only: [interaction.user.id], isSingle: true });
+	const guessButton = new InteractionCollector(client, { only: [interaction.user.id], isSingle: true });
+	const skipButton = new InteractionCollector(client, { only: [interaction.user.id], isSingle: true });
 
 	guessButton.onCollect(async (buttonPress) => {
 		client.acknowledge(buttonPress);

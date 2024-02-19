@@ -144,7 +144,7 @@ class ReportService extends PromptService<"reports", Report, InteractionData> {
 		};
 	}
 
-	async handleInteraction(interaction: Discord.Interaction, data: InteractionData): Promise<Report | null | undefined> {
+	async handleInteraction(interaction: Logos.Interaction, data: InteractionData): Promise<Report | null | undefined> {
 		const localeData = await getLocaleData(this.client, interaction);
 		const locale = localeData.locale;
 

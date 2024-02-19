@@ -13,7 +13,7 @@ class InteractionRepetitionService extends GlobalService {
 
 	async stop(): Promise<void> {}
 
-	async interactionCreate(interaction: Discord.Interaction): Promise<void> {
+	async interactionCreate(interaction: Logos.Interaction): Promise<void> {
 		if (interaction.type === Discord.InteractionTypes.ApplicationCommand) {
 			this.handleApplicationCommand(interaction);
 			return;
@@ -31,8 +31,8 @@ class InteractionRepetitionService extends GlobalService {
 
 		await this.client.postponeReply(interaction);
 
-		const confirmButton = new InteractionCollector({ only: [interaction.user.id], isSingle: true });
-		const cancelButton = new InteractionCollector({ only: [interaction.user.id], isSingle: true });
+		const confirmButton = new InteractionCollector(client, { only: [interaction.user.id], isSingle: true });
+		const cancelButton = new InteractionCollector(client, { only: [interaction.user.id], isSingle: true });
 
 		confirmButton.onCollect(async (buttonPress) => {
 			this.client.deleteReply(interaction);
@@ -91,7 +91,7 @@ class InteractionRepetitionService extends GlobalService {
 		});
 	}
 
-	async handleApplicationCommand(interaction: Discord.Interaction): Promise<void> {
+	async handleApplicationCommand(interaction: Logos.Interaction): Promise<void> {
 		const commandName = getCommandName(interaction);
 		if (commandName === undefined) {
 			return;
@@ -104,10 +104,7 @@ class InteractionRepetitionService extends GlobalService {
 		this.client.registerInteraction(interaction);
 	}
 
-	static #spoofInteraction(
-		interaction: Discord.Interaction | Logos.Interaction,
-		{ using }: { using: Discord.Interaction },
-	): Discord.Interaction | Logos.Interaction {
+	static #spoofInteraction(interaction: Logos.Interaction, { using }: { using: Logos.Interaction }): Logos.Interaction {
 		return {
 			...interaction,
 			type: Discord.InteractionTypes.ApplicationCommand,

@@ -141,9 +141,9 @@ interface InteractionLocaleData {
 	locale: Locale;
 	language: LocalisationLanguage;
 	learningLanguage: LearningLanguage;
+	featureLanguage: FeatureLanguage;
 	guildLocale: Locale;
 	guildLanguage: LocalisationLanguage;
-	featureLanguage: FeatureLanguage;
 }
 
 // TODO(vxern): Way to improve this?
@@ -151,12 +151,15 @@ interface InteractionFlags {
 	show?: boolean;
 }
 
-type Interaction = Omit<
+type Interaction<Metadata extends string[] = []> = Omit<
 	Pick<Discord.Interaction, keyof LogosDesiredProperties["interaction"]>,
-	"locale" | "guildLocale"
+	"channelId" | "locale" | "guildLocale"
 > &
 	InteractionLocaleData &
-	InteractionFlags;
+	InteractionFlags & {
+		commandName: string;
+		metadata: [customId: string, ...data: Metadata];
+	};
 
 export { desiredProperties };
 export type {

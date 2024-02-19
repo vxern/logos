@@ -94,7 +94,7 @@ async function handlePurgeMessages(client: Client, interaction: Logos.Interactio
 		return;
 	}
 
-	const channelId = interaction.channelId;
+	const channelId = interaction.channel.id;
 	if (channelId === undefined) {
 		return;
 	}
@@ -335,8 +335,8 @@ async function handlePurgeMessages(client: Client, interaction: Logos.Interactio
 	if (messages.length >= defaults.MAX_DELETABLE_MESSAGES) {
 		const { promise, resolve } = Promise.withResolvers<boolean>();
 
-		const continueButton = new InteractionCollector({ only: [interaction.user.id], isSingle: true });
-		const cancelButton = new InteractionCollector({ only: [interaction.user.id], isSingle: true });
+		const continueButton = new InteractionCollector(client, { only: [interaction.user.id], isSingle: true });
+		const cancelButton = new InteractionCollector(client, { only: [interaction.user.id], isSingle: true });
 
 		continueButton.onCollect(async (buttonPress) => {
 			client.acknowledge(buttonPress);
@@ -441,8 +441,8 @@ async function handlePurgeMessages(client: Client, interaction: Logos.Interactio
 	if (!shouldContinue) {
 		const { promise, resolve } = Promise.withResolvers<boolean>();
 
-		const continueButton = new InteractionCollector({ only: [interaction.user.id], isSingle: true });
-		const cancelButton = new InteractionCollector({ only: [interaction.user.id], isSingle: true });
+		const continueButton = new InteractionCollector(client, { only: [interaction.user.id], isSingle: true });
+		const cancelButton = new InteractionCollector(client, { only: [interaction.user.id], isSingle: true });
 
 		continueButton.onCollect(async (buttonPress) => {
 			client.acknowledge(buttonPress);

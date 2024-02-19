@@ -6,9 +6,11 @@ import { nanoid } from "nanoid";
 import * as ravendb from "ravendb";
 import constants from "../constants/constants";
 import languages, {
+	LearningLanguage,
 	Locale,
 	LocalisationLanguage,
 	getDiscordLocaleByLocalisationLanguage,
+	getDiscordLocalisationLanguageByLocale,
 	getLocaleByLocalisationLanguage,
 	getLocalisationLanguageByLocale,
 	isDiscordLocalisationLanguage,
@@ -39,7 +41,7 @@ import { Ticket } from "./database/ticket";
 import { User } from "./database/user";
 import { Warning } from "./database/warning";
 import diagnostics from "./diagnostics";
-import { decodeId, getCommandName, getLocaleData, isAutocomplete } from "./interactions";
+import { isAutocomplete, isSubcommand, isSubcommandGroup } from "./interactions";
 import transformers from "./localisation/transformers";
 import { AlertService } from "./services/alert/alert";
 import { DynamicVoiceChannelService } from "./services/dynamic-voice-channels/dynamic-voice-channels";
@@ -1050,23 +1052,20 @@ class CommandStore {
 		};
 	}
 
-	getHandler(
-		interaction: Discord.Interaction | Logos.Interaction,
-		commandName: string,
-	): InteractionHandler | undefined {
+	getHandler(interaction: Logos.Interaction): InteractionHandler | undefined {
 		if (isAutocomplete(interaction)) {
-			return this.#handlers.autocomplete.get(commandName);
+			return this.#handlers.autocomplete.get(interaction.commandName);
 		}
 
-		return this.#handlers.execute.get(commandName);
+		return this.#handlers.execute.get(interaction.commandName);
 	}
 
-	isShowable(commandName: string) {
-		return this.#collection.showable.has(commandName);
+	isShowable(interaction: Logos.Interaction) {
+		return this.#collection.showable.has(interaction.commandName);
 	}
 
-	hasRateLimit(commandName: string) {
-		return this.#collection.withRateLimit.has(commandName);
+	hasRateLimit(interaction: Logos.Interaction) {
+		return this.#collection.withRateLimit.has(interaction.commandName);
 	}
 
 	getEnabledCommands(guildDocument: Guild): Command[] {
@@ -1248,7 +1247,7 @@ class InteractionStore {
 	readonly log: Logger;
 
 	readonly #bot: Discord.Bot;
-	readonly #interactions: Map<bigint, Logos.Interaction | Discord.Interaction>;
+	readonly #interactions: Map<bigint, Logos.Interaction>;
 
 	constructor({ bot, isDebug }: { bot: Discord.Bot; isDebug: boolean }) {
 		this.log = Logger.create({ identifier: "Interactions", isDebug });
@@ -1257,11 +1256,11 @@ class InteractionStore {
 		this.#interactions = new Map();
 	}
 
-	registerInteraction(interaction: Logos.Interaction | Discord.Interaction): void {
+	registerInteraction(interaction: Logos.Interaction): void {
 		this.#interactions.set(interaction.id, interaction);
 	}
 
-	unregisterInteraction(interactionId: bigint): Logos.Interaction | Discord.Interaction | undefined {
+	unregisterInteraction(interactionId: bigint): Logos.Interaction | undefined {
 		const interaction = this.#interactions.get(interactionId);
 		if (interaction === undefined) {
 			return undefined;
@@ -1272,7 +1271,7 @@ class InteractionStore {
 		return interaction;
 	}
 
-	async acknowledge(interaction: Logos.Interaction | Discord.Interaction): Promise<void> {
+	async acknowledge(interaction: Logos.Interaction): Promise<void> {
 		await this.#bot.rest
 			.sendInteractionResponse(interaction.id, interaction.token, {
 				type: Discord.InteractionResponseTypes.DeferredUpdateMessage,
@@ -1280,7 +1279,7 @@ class InteractionStore {
 			.catch((reason) => this.log.warn("Failed to acknowledge interaction:", reason));
 	}
 
-	async postponeReply(interaction: Logos.Interaction | Discord.Interaction, { visible = false } = {}): Promise<void> {
+	async postponeReply(interaction: Logos.Interaction, { visible = false } = {}): Promise<void> {
 		await this.#bot.rest
 			.sendInteractionResponse(interaction.id, interaction.token, {
 				type: Discord.InteractionResponseTypes.DeferredChannelMessageWithSource,
@@ -1290,7 +1289,7 @@ class InteractionStore {
 	}
 
 	async reply(
-		interaction: Logos.Interaction | Discord.Interaction,
+		interaction: Logos.Interaction,
 		data: Omit<Discord.InteractionCallbackData, "flags">,
 		{ visible = false } = {},
 	): Promise<void> {
@@ -1302,25 +1301,19 @@ class InteractionStore {
 			.catch((reason) => this.log.warn("Failed to reply to interaction:", reason));
 	}
 
-	async editReply(
-		interaction: Logos.Interaction | Discord.Interaction,
-		data: Omit<Discord.InteractionCallbackData, "flags">,
-	): Promise<void> {
+	async editReply(interaction: Logos.Interaction, data: Omit<Discord.InteractionCallbackData, "flags">): Promise<void> {
 		await this.#bot.rest
 			.editOriginalInteractionResponse(interaction.token, data)
 			.catch((reason) => this.log.warn("Failed to edit reply to interaction:", reason));
 	}
 
-	async deleteReply(interaction: Logos.Interaction | Discord.Interaction): Promise<void> {
+	async deleteReply(interaction: Logos.Interaction): Promise<void> {
 		await this.#bot.rest
 			.deleteOriginalInteractionResponse(interaction.token)
 			.catch((reason) => this.log.warn("Failed to delete reply to interaction:", reason));
 	}
 
-	async respond(
-		interaction: Logos.Interaction | Discord.Interaction,
-		choices: Discord.ApplicationCommandOptionChoice[],
-	): Promise<void> {
+	async respond(interaction: Logos.Interaction, choices: Discord.ApplicationCommandOptionChoice[]): Promise<void> {
 		return this.#bot.rest
 			.sendInteractionResponse(interaction.id, interaction.token, {
 				type: Discord.InteractionResponseTypes.ApplicationCommandAutocompleteResult,
@@ -1330,7 +1323,7 @@ class InteractionStore {
 	}
 
 	async displayModal(
-		interaction: Logos.Interaction | Discord.Interaction,
+		interaction: Logos.Interaction,
 		data: Omit<Discord.InteractionCallbackData, "flags">,
 	): Promise<void> {
 		return this.#bot.rest
@@ -1437,35 +1430,44 @@ class Collector<Event extends keyof Discord.EventHandlers> {
 	}
 }
 
-class InteractionCollector extends Collector<"interactionCreate"> {
+class InteractionCollector<Metadata extends string[] = []> extends Collector<"interactionCreate"> {
 	readonly type: Discord.InteractionTypes;
 	readonly customId: string;
 	readonly only: Set<bigint>;
 
+	readonly #client: Client;
+
 	readonly #_baseId: string;
 	readonly #_acceptAnyUser: boolean;
 
-	constructor({
-		type,
-		customId,
-		only,
-		dependsOn,
-		isSingle,
-		isPermanent,
-	}: {
-		type?: Discord.InteractionTypes;
-		customId?: string;
-		only?: bigint[];
-		dependsOn?: Collector<any>;
-		isSingle?: boolean;
-		isPermanent?: boolean;
-	} = {}) {
+	constructor(
+		client: Client,
+		{
+			type,
+			customId,
+			only,
+			dependsOn,
+			isSingle,
+			isPermanent,
+		}: {
+			type?: Discord.InteractionTypes;
+			customId?: string;
+			only?: bigint[];
+			dependsOn?: Collector<any>;
+			isSingle?: boolean;
+			isPermanent?: boolean;
+		} = {},
+	) {
 		super({ isSingle, removeAfter: !isPermanent ? constants.INTERACTION_TOKEN_EXPIRY : undefined, dependsOn });
 
 		this.type = type ?? Discord.InteractionTypes.MessageComponent;
 		this.customId = customId ?? nanoid();
 		this.only = only !== undefined ? new Set(only) : new Set();
-		this.#_baseId = decodeId(this.customId)[0];
+
+		this.#client = client;
+
+		// TODO(vxern): Is this needed?
+		this.#_baseId = InteractionCollector.decodeId(this.customId)[0];
 		this.#_acceptAnyUser = this.only.values.length === 0;
 	}
 
@@ -1486,7 +1488,7 @@ class InteractionCollector extends Collector<"interactionCreate"> {
 			return false;
 		}
 
-		const data = decodeId(interaction.data.customId);
+		const data = InteractionCollector.decodeId(interaction.data.customId);
 		if (data[0] !== this.#_baseId) {
 			return false;
 		}
@@ -1494,8 +1496,138 @@ class InteractionCollector extends Collector<"interactionCreate"> {
 		return true;
 	}
 
-	onCollect(callback: (interaction: Discord.Interaction) => Promise<void>): void {
-		super.onCollect(callback);
+	// @ts-ignore
+	onCollect(callback: (interaction: Logos.Interaction<Metadata>) => Promise<void>): void {
+		super.onCollect(async (interactionRaw) => {
+			const locales = await this.#getLocaleData(interactionRaw);
+			const name = InteractionCollector.getCommandName(interactionRaw);
+			const metadata = this.#getMetadata(interactionRaw);
+
+			const interaction: Logos.Interaction<Metadata> = { ...interactionRaw, ...locales, commandName: name, metadata };
+
+			callback(interaction);
+		});
+	}
+
+	#getMetadata(interaction: Discord.Interaction): Logos.Interaction<Metadata>["metadata"] {
+		const idEncoded = interaction.data?.customId;
+		if (idEncoded === undefined) {
+			// TODO(vxern): Something better than this.
+			return [constants.components.none] as unknown as Logos.Interaction<Metadata>["metadata"];
+		}
+
+		return InteractionCollector.decodeId(idEncoded);
+	}
+
+	async #getLocaleData(interaction: Discord.Interaction): Promise<Logos.InteractionLocaleData> {
+		const [guildId, channelId, member] = [
+			interaction.guildId,
+			interaction.channel.id,
+			this.#client.entities.members.get(Discord.snowflakeToBigint(`${interaction.user.id}${interaction.guildId}`)),
+		];
+		if (guildId === undefined || channelId === undefined || member === undefined) {
+			return {
+				language: defaults.LOCALISATION_LANGUAGE,
+				locale: defaults.LOCALISATION_LOCALE,
+				guildLanguage: defaults.LOCALISATION_LANGUAGE,
+				guildLocale: defaults.LOCALISATION_LOCALE,
+				learningLanguage: defaults.LEARNING_LANGUAGE,
+				featureLanguage: defaults.FEATURE_LANGUAGE,
+			};
+		}
+
+		const [userDocument, guildDocument] = await Promise.all([
+			User.getOrCreate(this.#client, { userId: interaction.user.id.toString() }),
+			Guild.getOrCreate(this.#client, { guildId: guildId.toString() }),
+		]);
+
+		const targetLanguage = guildDocument.targetLanguage;
+		const learningLanguage = this.#determineLearningLanguage(guildDocument, member) ?? targetLanguage;
+
+		const guildLanguage = guildDocument.isTargetLanguageOnly(channelId.toString())
+			? targetLanguage
+			: guildDocument.localisationLanguage;
+		const guildLocale = getLocaleByLocalisationLanguage(guildLanguage);
+		const featureLanguage = guildDocument.featureLanguage;
+
+		if (!isAutocomplete(interaction)) {
+			// If the user has configured a custom locale, use the user's preferred locale.
+			if (userDocument.preferredLanguage !== undefined) {
+				const language = userDocument.preferredLanguage;
+				const locale = getLocaleByLocalisationLanguage(language);
+				return { language, locale, learningLanguage, guildLanguage, guildLocale, featureLanguage };
+			}
+		}
+
+		// Otherwise default to the user's app language.
+		const appLocale = interaction.locale;
+		const language = getDiscordLocalisationLanguageByLocale(appLocale) ?? defaults.LOCALISATION_LANGUAGE;
+		const locale = getLocaleByLocalisationLanguage(language);
+		return { language, locale, learningLanguage, guildLanguage, guildLocale, featureLanguage };
+	}
+
+	#determineLearningLanguage(guildDocument: Guild, member: Logos.Member): LearningLanguage | undefined {
+		if (member === undefined) {
+			return undefined;
+		}
+
+		const language = guildDocument.features.language;
+		if (!language.enabled) {
+			return undefined;
+		}
+
+		const roleLanguages = language.features.roleLanguages;
+		if (roleLanguages === undefined || !roleLanguages.enabled) {
+			return undefined;
+		}
+
+		const userLearningLanguage = Object.entries(roleLanguages.ids).find(([key, _]) =>
+			member.roles.includes(BigInt(key)),
+		)?.[1];
+		if (userLearningLanguage === undefined) {
+			return undefined;
+		}
+
+		return userLearningLanguage;
+	}
+
+	static getCommandName(interaction: Discord.Interaction): string {
+		const commandName = interaction.data?.name;
+		if (commandName === undefined) {
+			throw "Command did not have a name.";
+		}
+
+		const subCommandGroupOption = interaction.data?.options?.find((option) => isSubcommandGroup(option));
+
+		let commandNameFull: string;
+		if (subCommandGroupOption !== undefined) {
+			const subCommandGroupName = subCommandGroupOption.name;
+			const subCommandName = subCommandGroupOption.options?.find((option) => isSubcommand(option))?.name;
+			if (subCommandName === undefined) {
+				throw "Sub-command did not have a name.";
+			}
+
+			commandNameFull = `${commandName} ${subCommandGroupName} ${subCommandName}`;
+		} else {
+			const subCommandName = interaction.data?.options?.find((option) => isSubcommand(option))?.name;
+			if (subCommandName === undefined) {
+				commandNameFull = commandName;
+			} else {
+				commandNameFull = `${commandName} ${subCommandName}`;
+			}
+		}
+
+		return commandNameFull;
+	}
+
+	// TODO(vxern): Should this be in the `CommandStore`?
+	static encodeId<Metadata extends string[] = []>(customId: string, metadata: Metadata): string {
+		return [customId, ...metadata].join(constants.symbols.interaction.separator);
+	}
+
+	// TODO(vxern): Should this be in the `CommandStore`?
+	static decodeId<Metadata extends string[] = []>(idEncoded: string): [customId: string, ...metadata: Metadata] {
+		return idEncoded.split(constants.symbols.interaction.separator) as [customId: string, ...metadata: Metadata];
 	}
 }
 
@@ -2021,7 +2153,7 @@ class Client {
 	readonly #services: ServiceStore;
 	readonly #events: EventStore;
 
-	readonly #_interactionCreateCollector: Collector<"interactionCreate">;
+	readonly #_interactionCreateCollector: InteractionCollector;
 	readonly #_channelDeleteCollector: Collector<"channelDelete">;
 	readonly #_guildCreateCollector: Collector<"guildCreate">;
 	readonly #_guildDeleteCollector: Collector<"guildDelete">;
@@ -2150,7 +2282,9 @@ class Client {
 		return this.#events.registerCollector.bind(this.#events);
 	}
 
-	get registerInteractionCollector(): (collector: InteractionCollector) => void {
+	get registerInteractionCollector(): <Metadata extends string[]>(collector: InteractionCollector<Metadata>) => void {
+		// TODO(vxern): Find a way to get rid of ts-ignore?
+		// @ts-ignore: This is fine.
 		return (collector) => this.#events.registerCollector("interactionCreate", collector);
 	}
 
@@ -2180,7 +2314,7 @@ class Client {
 		this.#services = new ServiceStore();
 		this.#events = new EventStore({ services: this.#services });
 
-		this.#_interactionCreateCollector = new Collector<"interactionCreate">();
+		this.#_interactionCreateCollector = new InteractionCollector(this);
 		this.#_channelDeleteCollector = new Collector<"channelDelete">();
 		this.#_guildCreateCollector = new Collector<"guildCreate">();
 		this.#_guildDeleteCollector = new Collector<"guildDelete">();
@@ -2267,7 +2401,7 @@ class Client {
 
 		this.#_guildDeleteCollector.onCollect((guildId, _) => this.#teardownGuild(guildId));
 
-		this.registerCollector("interactionCreate", this.#_interactionCreateCollector);
+		this.registerInteractionCollector(this.#_interactionCreateCollector);
 		this.registerCollector("channelDelete", this.#_channelDeleteCollector);
 		this.registerCollector("guildCreate", this.#_guildCreateCollector);
 		this.registerCollector("guildDelete", this.#_guildDeleteCollector);
@@ -2323,32 +2457,24 @@ class Client {
 		await this.#setupGuild(guild, { isUpdate: true });
 	}
 
-	async handleInteraction(
-		interactionRaw: Discord.Interaction | Logos.Interaction,
-		flags: Logos.InteractionFlags = {},
-	): Promise<void> {
-		const customId = interactionRaw.data?.customId;
-		if (customId !== undefined && decodeId(customId)[0] === constants.components.none) {
-			this.acknowledge(interactionRaw);
+	async handleInteraction(interaction: Logos.Interaction, flags: Logos.InteractionFlags = {}): Promise<void> {
+		// If it's a "none" interaction, just acknowledge and good to go.
+		if (interaction.metadata[0] === constants.components.none) {
+			this.acknowledge(interaction);
 			return;
 		}
 
-		const commandName = getCommandName(interactionRaw);
-		if (commandName === undefined) {
-			return;
-		}
-
-		const handle = this.#commands.getHandler(interactionRaw, commandName);
+		const handle = this.#commands.getHandler(interaction);
 		if (handle === undefined) {
 			return;
 		}
 
-		const localeData = await getLocaleData(this, interactionRaw);
-		const interaction = { ...interactionRaw, ...localeData, ...flags };
+		// TODO(vxern): Find better way to do this.
+		interaction.show = flags.show;
 
 		const executedAt = Date.now();
 
-		if (this.#commands.hasRateLimit(commandName)) {
+		if (this.#commands.hasRateLimit(interaction)) {
 			const rateLimit = this.#commands.getRateLimit(this, interaction, { executedAt });
 			if (rateLimit !== undefined) {
 				const nextAllowedUsageTimestampFormatted = timestamp(rateLimit.nextAllowedUsageTimestamp);

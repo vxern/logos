@@ -1,26 +1,24 @@
 import * as Discord from "@discordeno/bot";
 import constants from "../constants/constants";
-import {
-	LearningLanguage,
-	Locale,
-	LocalisationLanguage,
-	getDiscordLocalisationLanguageByLocale,
-	getLocaleByLocalisationLanguage,
-} from "../constants/languages";
+import { Locale, LocalisationLanguage } from "../constants/languages";
 import time from "../constants/time";
 import symbols from "../constants/types/symbols";
-import defaults from "../defaults";
 import * as Logos from "../types";
-import { InteractionLocaleData } from "../types";
 import { Client, InteractionCollector } from "./client";
-import { Guild } from "./database/guild";
-import { User } from "./database/user";
 import { InteractionRepetitionButtonID } from "./services/interaction-repetition/interaction-repetition";
 
-type AutocompleteInteraction = Discord.Interaction & { type: Discord.InteractionTypes.ApplicationCommandAutocomplete };
+type AutocompleteInteraction = Logos.Interaction & { type: Discord.InteractionTypes.ApplicationCommandAutocomplete };
 
-function isAutocomplete(interaction: Discord.Interaction | Logos.Interaction): interaction is AutocompleteInteraction {
+function isAutocomplete(interaction: Logos.Interaction): interaction is AutocompleteInteraction {
 	return interaction.type === Discord.InteractionTypes.ApplicationCommandAutocomplete;
+}
+
+function isSubcommandGroup(option: Discord.InteractionDataOption): boolean {
+	return option.type === Discord.ApplicationCommandOptionTypes.SubCommandGroup;
+}
+
+function isSubcommand(option: Discord.InteractionDataOption): boolean {
+	return option.type === Discord.ApplicationCommandOptionTypes.SubCommand;
 }
 
 type CustomTypeIndicators = Record<string, "number" | "boolean">;
@@ -99,7 +97,7 @@ async function paginate<T>(
 	},
 	{ locale }: { locale: Locale },
 ): Promise<() => Promise<void>> {
-	const buttonPresses = new InteractionCollector({ isPermanent: true });
+	const buttonPresses = new InteractionCollector(client, { isPermanent: true });
 
 	const data: PaginationData<T> = { elements: getElements(), view, pageIndex: 0 };
 
@@ -248,21 +246,21 @@ async function createModalComposer<ComposerContent, SectionNames extends keyof C
 		onInvalid,
 		modal,
 	}: {
-		onSubmit: (submission: Discord.Interaction, data: ComposerContent) => Promise<true | string>;
-		onInvalid: (submission: Discord.Interaction, error?: string) => Promise<Discord.Interaction | undefined>;
+		onSubmit: (submission: Logos.Interaction, data: ComposerContent) => Promise<true | string>;
+		onInvalid: (submission: Logos.Interaction, error?: string) => Promise<Logos.Interaction | undefined>;
 		modal: Modal<ComposerContent, SectionNames>;
 	},
 ): Promise<void> {
 	const fields = structuredClone(modal.fields);
 
-	let anchor: Discord.Interaction | Logos.Interaction = interaction;
+	let anchor: Logos.Interaction = interaction;
 	let content: ComposerContent | undefined = undefined;
 
 	let isSubmitting = true;
 	while (isSubmitting) {
-		const { promise, resolve } = Promise.withResolvers<[Discord.Interaction, boolean | string]>();
+		const { promise, resolve } = Promise.withResolvers<[Logos.Interaction, boolean | string]>();
 
-		const modalSubmits = new InteractionCollector({
+		const modalSubmits = new InteractionCollector(client, {
 			type: Discord.InteractionTypes.ModalSubmit,
 			only: [interaction.user.id],
 			isSingle: true,
@@ -317,7 +315,7 @@ async function createModalComposer<ComposerContent, SectionNames extends keyof C
 }
 
 function parseComposerContent<ComposerContent, SectionNames extends keyof ComposerContent = keyof ComposerContent>(
-	submission: Discord.Interaction,
+	submission: Logos.Interaction,
 ): ComposerContent | undefined {
 	const content: Partial<ComposerContent> = {};
 
@@ -538,113 +536,6 @@ function parseVerboseTimeExpressionPhrase(
 	return [correctedExpression, total];
 }
 
-type ComponentIDMetadata = [arg: string, ...args: string[]];
-
-// TODO(vxern): Improve.
-function encodeId<T extends ComponentIDMetadata>(customId: string, args: T): string {
-	return [customId, ...args].join(constants.symbols.meta.idSeparator);
-}
-
-// TODO(vxern): Improve.
-function decodeId<T extends ComponentIDMetadata, R = [string, ...T]>(customId: string): R {
-	return customId.split(constants.symbols.meta.idSeparator) as R;
-}
-
-const FALLBACK_LOCALE_DATA: InteractionLocaleData = {
-	language: defaults.LOCALISATION_LANGUAGE,
-	locale: defaults.LOCALISATION_LOCALE,
-	learningLanguage: defaults.LEARNING_LANGUAGE,
-	guildLanguage: defaults.LOCALISATION_LANGUAGE,
-	guildLocale: defaults.LOCALISATION_LOCALE,
-	featureLanguage: defaults.FEATURE_LANGUAGE,
-};
-
-async function getLocaleData(
-	client: Client,
-	interaction: Discord.Interaction | Logos.Interaction,
-): Promise<InteractionLocaleData> {
-	const guildId = interaction.guildId;
-	if (guildId === undefined) {
-		return FALLBACK_LOCALE_DATA;
-	}
-
-	const member = client.entities.members.get(Discord.snowflakeToBigint(`${interaction.user.id}${guildId}`));
-
-	const [userDocument, guildDocument] = await Promise.all([
-		User.getOrCreate(client, { userId: interaction.user.id.toString() }),
-		Guild.getOrCreate(client, { guildId: guildId.toString() }),
-	]);
-
-	const targetOnlyChannelIds = getTargetOnlyChannelIds(guildDocument);
-	const isInTargetOnlyChannel =
-		interaction.channelId !== undefined && targetOnlyChannelIds.includes(interaction.channelId);
-
-	const targetLanguage = guildDocument.targetLanguage;
-	const learningLanguage = getLearningLanguage(guildDocument, targetLanguage, member);
-
-	const guildLanguage = isInTargetOnlyChannel ? targetLanguage : guildDocument.localisationLanguage;
-	const guildLocale = getLocaleByLocalisationLanguage(guildLanguage);
-	const featureLanguage = guildDocument.featureLanguage;
-
-	if (!isAutocomplete(interaction)) {
-		// If the user has configured a custom locale, use the user's preferred locale.
-		if (userDocument.preferredLanguage !== undefined) {
-			const language = userDocument.preferredLanguage;
-			const locale = getLocaleByLocalisationLanguage(language);
-			return { language, locale, learningLanguage, guildLanguage, guildLocale, featureLanguage };
-		}
-	}
-
-	// Otherwise default to the user's app language.
-	const appLocale = interaction.locale;
-	const language = getDiscordLocalisationLanguageByLocale(appLocale) ?? defaults.LOCALISATION_LANGUAGE;
-	const locale = getLocaleByLocalisationLanguage(language);
-	return { language, locale, learningLanguage, guildLanguage, guildLocale, featureLanguage };
-}
-
-function getTargetOnlyChannelIds(guildDocument: Guild): bigint[] {
-	const language = guildDocument.features.language;
-	if (!language.enabled) {
-		return [];
-	}
-
-	const targetOnly = language.features.targetOnly;
-	if (targetOnly === undefined || !targetOnly.enabled) {
-		return [];
-	}
-
-	return targetOnly.channelIds.map((channelId) => BigInt(channelId));
-}
-
-function getLearningLanguage(
-	guildDocument: Guild,
-	guildLearningLanguage: LearningLanguage,
-	member: Logos.Member | undefined,
-): LearningLanguage {
-	if (member === undefined) {
-		return guildLearningLanguage;
-	}
-
-	const language = guildDocument.features.language;
-	if (!language.enabled) {
-		return guildLearningLanguage;
-	}
-
-	const roleLanguages = language.features.roleLanguages;
-	if (roleLanguages === undefined || !roleLanguages.enabled) {
-		return guildLearningLanguage;
-	}
-
-	const userLearningLanguage = Object.entries(roleLanguages.ids).find(([key, _]) =>
-		member.roles.includes(BigInt(key)),
-	)?.[1];
-	if (userLearningLanguage === undefined) {
-		return guildLearningLanguage;
-	}
-
-	return userLearningLanguage;
-}
-
 function getShowButton(
 	client: Client,
 	interaction: Logos.Interaction,
@@ -663,54 +554,15 @@ function getShowButton(
 	};
 }
 
-function isSubcommandGroup(option: Discord.InteractionDataOption): boolean {
-	return option.type === Discord.ApplicationCommandOptionTypes.SubCommandGroup;
-}
-
-function isSubcommand(option: Discord.InteractionDataOption): boolean {
-	return option.type === Discord.ApplicationCommandOptionTypes.SubCommand;
-}
-
-function getCommandName(interaction: Discord.Interaction | Logos.Interaction): string | undefined {
-	const commandName = interaction.data?.name;
-	if (commandName === undefined) {
-		return;
-	}
-
-	const subCommandGroupOption = interaction.data?.options?.find((option) => isSubcommandGroup(option));
-
-	let commandNameFull: string;
-	if (subCommandGroupOption !== undefined) {
-		const subCommandGroupName = subCommandGroupOption.name;
-		const subCommandName = subCommandGroupOption.options?.find((option) => isSubcommand(option))?.name;
-		if (subCommandName === undefined) {
-			return;
-		}
-
-		commandNameFull = `${commandName} ${subCommandGroupName} ${subCommandName}`;
-	} else {
-		const subCommandName = interaction.data?.options?.find((option) => isSubcommand(option))?.name;
-		if (subCommandName === undefined) {
-			commandNameFull = commandName;
-		} else {
-			commandNameFull = `${commandName} ${subCommandName}`;
-		}
-	}
-
-	return commandNameFull;
-}
-
 export {
 	createModalComposer,
-	decodeId,
-	encodeId,
 	generateButtons,
 	isAutocomplete,
 	paginate,
 	parseArguments,
-	getLocaleData,
 	parseTimeExpression,
+	isSubcommand,
+	isSubcommandGroup,
 	getShowButton,
-	getCommandName,
 };
 export type { ControlButtonID, Modal };

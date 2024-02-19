@@ -133,8 +133,8 @@ async function generateEmbed(
 	const isFirst = data.pageIndex === 0;
 	const isLast = data.pageIndex === pages.length - 1;
 
-	const pageButtons = new InteractionCollector({ only: [interaction.user.id] });
-	const selectMenuSelection = new InteractionCollector({ only: [interaction.user.id], isSingle: true });
+	const pageButtons = new InteractionCollector(client, { only: [interaction.user.id] });
+	const selectMenuSelection = new InteractionCollector(client, { only: [interaction.user.id], isSingle: true });
 
 	pageButtons.onCollect(async (buttonPress) => {
 		client.acknowledge(buttonPress);

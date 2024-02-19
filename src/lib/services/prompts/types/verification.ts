@@ -30,7 +30,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 	constructor(client: Client, guildId: bigint) {
 		super(client, guildId, { type: "verification", deleteMode: "none" });
 
-		this.#_openInquiry = new InteractionCollector({
+		this.#_openInquiry = new InteractionCollector(client, {
 			customId: `${constants.components.createInquiry}/${this.guildId}`,
 			isPermanent: true,
 		});
@@ -290,7 +290,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 	}
 
 	async handleInteraction(
-		interaction: Discord.Interaction,
+		interaction: Logos.Interaction,
 		data: InteractionData,
 	): Promise<EntryRequest | null | undefined> {
 		const localeData = await getLocaleData(this.client, interaction);
@@ -371,8 +371,8 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 
 					const { promise, resolve } = Promise.withResolvers<null | undefined>();
 
-					const confirmButton = new InteractionCollector({ only: [interaction.user.id], isSingle: true });
-					const cancelButton = new InteractionCollector({ only: [interaction.user.id], isSingle: true });
+					const confirmButton = new InteractionCollector(client, { only: [interaction.user.id], isSingle: true });
+					const cancelButton = new InteractionCollector(client, { only: [interaction.user.id], isSingle: true });
 
 					confirmButton.onCollect(async (_) => {
 						this.client.deleteReply(interaction);
@@ -456,8 +456,8 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 
 					const { promise, resolve } = Promise.withResolvers<null | undefined>();
 
-					const confirmButton = new InteractionCollector({ only: [interaction.user.id], isSingle: true });
-					const cancelButton = new InteractionCollector({ only: [interaction.user.id], isSingle: true });
+					const confirmButton = new InteractionCollector(client, { only: [interaction.user.id], isSingle: true });
+					const cancelButton = new InteractionCollector(client, { only: [interaction.user.id], isSingle: true });
 
 					confirmButton.onCollect(async (_) => {
 						this.client.deleteReply(interaction);
@@ -685,7 +685,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 		});
 	}
 
-	private async handleOpenInquiry(interaction: Discord.Interaction, partialId: string): Promise<void> {
+	private async handleOpenInquiry(interaction: Logos.Interaction, partialId: string): Promise<void> {
 		await this.client.postponeReply(interaction);
 
 		const [configuration, guild, guildDocument] = [this.configuration, this.guild, this.guildDocument];
@@ -835,7 +835,7 @@ class VerificationService extends PromptService<"verification", EntryRequest, In
 		return { acceptance, rejection };
 	}
 
-	private async displayVoteError(interaction: Discord.Interaction, { locale }: { locale: Locale }): Promise<void> {
+	private async displayVoteError(interaction: Logos.Interaction, { locale }: { locale: Locale }): Promise<void> {
 		const strings = {
 			title: this.client.localise("entry.verification.vote.failed.title", locale)(),
 			description: this.client.localise("entry.verification.vote.failed.description", locale)(),

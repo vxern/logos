@@ -52,12 +52,13 @@ class RoleNoticeService extends NoticeService<"roles"> {
 		};
 	}
 
-	async interactionCreate(interactionRaw: Discord.Interaction): Promise<void> {
-		if (interactionRaw.type !== Discord.InteractionTypes.MessageComponent) {
+	async interactionCreate(interaction: Logos.Interaction): Promise<void> {
+		// TODO(vxern): Use helper.
+		if (interaction.type !== Discord.InteractionTypes.MessageComponent) {
 			return;
 		}
 
-		const customId = interactionRaw.data?.customId;
+		const customId = interaction.data?.customId;
 		if (customId === undefined) {
 			return;
 		}
@@ -66,9 +67,6 @@ class RoleNoticeService extends NoticeService<"roles"> {
 		if (id !== constants.components.selectRoles) {
 			return;
 		}
-
-		const localeData = await getLocaleData(this.client, interactionRaw);
-		const interaction: Logos.Interaction = { ...interactionRaw, ...localeData };
 
 		handleOpenRoleSelectionMenu(this.client, interaction);
 	}

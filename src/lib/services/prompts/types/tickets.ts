@@ -120,7 +120,7 @@ class TicketService extends PromptService<"tickets", Ticket, InteractionData> {
 		};
 	}
 
-	async handleInteraction(interaction: Discord.Interaction, data: InteractionData): Promise<Ticket | null | undefined> {
+	async handleInteraction(interaction: Logos.Interaction, data: InteractionData): Promise<Ticket | null | undefined> {
 		const localeData = await getLocaleData(this.client, interaction);
 		const locale = localeData.locale;
 

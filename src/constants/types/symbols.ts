@@ -5,9 +5,11 @@ export default {
 		// ! - Empty translations.
 		// ! - Indentation on the /word command.
 		whitespace: "⠀",
+	},
+	interaction: {
 		// ! Responsible for separating pieces of data in component custom IDs.
 		// ! Changing this would break button interactions on all existing prompts/notices.
-		idSeparator: "|",
+		separator: "|",
 	},
 	database: {
 		separator: "/",

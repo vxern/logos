@@ -93,8 +93,8 @@ async function handleDisplayCefrGuide(client: Client, interaction: Logos.Interac
 
 	const showButton = getShowButton(client, interaction, { locale });
 
-	const bracketButtons = new InteractionCollector({ only: !show ? [interaction.user.id] : undefined });
-	const tabButtons = new InteractionCollector({ only: !show ? [interaction.user.id] : undefined });
+	const bracketButtons = new InteractionCollector(client, { only: !show ? [interaction.user.id] : undefined });
+	const tabButtons = new InteractionCollector(client, { only: !show ? [interaction.user.id] : undefined });
 
 	const getButtons = (): Discord.MessageComponents => {
 		const bracketButtonComponents: [Discord.ButtonComponent, Discord.ButtonComponent, Discord.ButtonComponent] = [

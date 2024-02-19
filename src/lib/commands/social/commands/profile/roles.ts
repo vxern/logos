@@ -152,7 +152,7 @@ async function createRoleSelectionMenu(
 
 	const rolesById = new Map(guild.roles.array().map((role) => [role.id, role]));
 
-	const selectionMenuSelection = new InteractionCollector({ only: [interaction.user.id], isSingle: true });
+	const selectionMenuSelection = new InteractionCollector(client, { only: [interaction.user.id], isSingle: true });
 
 	selectionMenuSelection.onCollect(async (selection) => {
 		client.acknowledge(selection);
@@ -353,7 +353,7 @@ interface RoleDisplayData {
 
 async function traverseRoleTreeAndDisplay(
 	client: Client,
-	interaction: Discord.Interaction | Logos.Interaction,
+	interaction: Logos.Interaction,
 	data: RoleDisplayData,
 	{ editResponse }: { editResponse: boolean },
 	{ locale }: { locale: Locale },

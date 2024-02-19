@@ -42,7 +42,8 @@ class EntryService extends LocalService {
 
 	async stop(): Promise<void> {}
 
-	async interactionCreate(interactionRaw: Discord.Interaction): Promise<void> {
+	// TODO(vxern): Switch to Logos interaction.
+	async interactionCreate(interactionRaw: Logos.Interaction): Promise<void> {
 		if (interactionRaw.type !== Discord.InteractionTypes.MessageComponent) {
 			return;
 		}
