@@ -1430,7 +1430,7 @@ class Collector<Event extends keyof Discord.EventHandlers> {
 	}
 }
 
-class InteractionCollector<Metadata extends string[] = []> extends Collector<"interactionCreate"> {
+class InteractionCollector<Metadata extends string[] = any> extends Collector<"interactionCreate"> {
 	readonly type: Discord.InteractionTypes;
 	readonly customId: string;
 	readonly only: Set<bigint>;
@@ -1621,12 +1621,12 @@ class InteractionCollector<Metadata extends string[] = []> extends Collector<"in
 	}
 
 	// TODO(vxern): Should this be in the `CommandStore`?
-	static encodeId<Metadata extends string[] = []>(customId: string, metadata: Metadata): string {
+	static encodeId<Metadata extends string[] = any>(customId: string, metadata: Metadata): string {
 		return [customId, ...metadata].join(constants.symbols.interaction.separator);
 	}
 
 	// TODO(vxern): Should this be in the `CommandStore`?
-	static decodeId<Metadata extends string[] = []>(idEncoded: string): [customId: string, ...metadata: Metadata] {
+	static decodeId<Metadata extends string[] = any>(idEncoded: string): [customId: string, ...metadata: Metadata] {
 		return idEncoded.split(constants.symbols.interaction.separator) as [customId: string, ...metadata: Metadata];
 	}
 }
@@ -1782,7 +1782,7 @@ class ServiceStore {
 		readonly local: Map<bigint, Service[]>;
 	};
 
-	readonly global!: {
+	readonly global: {
 		readonly lavalink: LavalinkService;
 		readonly interactionRepetition: InteractionRepetitionService;
 		readonly realtimeUpdates: RealtimeUpdateService;
@@ -1811,7 +1811,13 @@ class ServiceStore {
 		readonly roleIndicators: Map<bigint, RoleIndicatorService>;
 	};
 
-	constructor() {
+	constructor({ client }: { client: Client }) {
+		this.global = {
+			lavalink: new LavalinkService(client),
+			interactionRepetition: new InteractionRepetitionService(client),
+			realtimeUpdates: new RealtimeUpdateService(client),
+			status: new StatusService(client),
+		};
 		this.collection = { global: [], local: new Map() };
 		this.local = {
 			alerts: new Map(),
@@ -1836,17 +1842,7 @@ class ServiceStore {
 		};
 	}
 
-	// TODO(vxern): Is there any better way to do this?
-	// TODO(vxern): The issue comes down to the client instance being required for global services, but obviously not existing at the time of their registration.
-	async setupGlobalServices({ client }: { client: Client }): Promise<void> {
-		// @ts-ignore: This is fine.
-		this.global = {
-			lavalink: new LavalinkService(client),
-			interactionRepetition: new InteractionRepetitionService(client),
-			realtimeUpdates: new RealtimeUpdateService(client),
-			status: new StatusService(client),
-		};
-
+	async setupGlobalServices(): Promise<void> {
 		const services = Object.values(this.global);
 
 		const promises = [];
@@ -2311,7 +2307,7 @@ class Client {
 			templates: Array.from(Object.values(commandTemplates)),
 		});
 		this.#interactions = new InteractionStore({ bot, isDebug: environment.isDebug });
-		this.#services = new ServiceStore();
+		this.#services = new ServiceStore({ client: this });
 		this.#events = new EventStore({ services: this.#services });
 
 		this.#_interactionCreateCollector = new InteractionCollector(this);
@@ -2366,7 +2362,7 @@ class Client {
 
 		const client = new Client({ environment, bot, database, localisations });
 
-		client.#services.setupGlobalServices({ client });
+		await client.#services.setupGlobalServices();
 
 		// TODO(vxern): This is a fix for the Discordeno MESSAGE_UPDATE handler filtering out cases where an embed was removed from a message.
 		bot.handlers.MESSAGE_UPDATE = (bot, data) => {

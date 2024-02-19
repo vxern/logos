@@ -9,7 +9,6 @@ import * as Logos from "../../../../types";
 import { Client, InteractionCollector } from "../../../client";
 import { GuildStats } from "../../../database/guild-stats";
 import { User } from "../../../database/user";
-import { decodeId, encodeId } from "../../../interactions";
 import { random } from "../../../utils";
 import { CommandTemplate } from "../../command";
 
@@ -22,7 +21,7 @@ const command: CommandTemplate = {
 
 const wordSegmenter = new Intl.Segmenter(undefined, { granularity: "word" });
 
-type WordButtonID = [index: string];
+type GuessButtonMetadata = [index: string];
 
 interface GameData {
 	sentenceSelection: SentenceSelection;
@@ -87,23 +86,13 @@ async function handleStartGame(client: Client, interaction: Logos.Interaction): 
 
 	await client.postponeReply(interaction);
 
-	const guessButton = new InteractionCollector(client, { only: [interaction.user.id], isSingle: true });
+	const guessButton = new InteractionCollector<GuessButtonMetadata>(client, { only: [interaction.user.id], isSingle: true });
 	const skipButton = new InteractionCollector(client, { only: [interaction.user.id], isSingle: true });
 
 	guessButton.onCollect(async (buttonPress) => {
 		client.acknowledge(buttonPress);
 
-		const selectionCustomId = buttonPress.data?.customId;
-		if (selectionCustomId === undefined) {
-			return;
-		}
-
-		const [_, id] = decodeId<WordButtonID>(selectionCustomId);
-		if (id === undefined) {
-			return;
-		}
-
-		const pick = data.sentenceSelection.allPicks.find((pick) => pick[0] === id);
+		const pick = data.sentenceSelection.allPicks.find((pick) => pick[0] === buttonPress.metadata[1]);
 		const isCorrect = pick === data.sentenceSelection.correctPick;
 
 		await guildStatsDocument.update(client, () => {
@@ -218,9 +207,9 @@ async function getGameView(
 
 					let customId: string;
 					if (mode === "hide") {
-						customId = encodeId<WordButtonID>(data.customId, [pick[0]]);
+						customId = encodeId<GuessButtonMetadata>(data.customId, [pick[0]]);
 					} else {
-						customId = encodeId<WordButtonID>(constants.components.none, [pick[0]]);
+						customId = encodeId<GuessButtonMetadata>(constants.components.none, [pick[0]]);
 					}
 
 					return {

@@ -8,7 +8,7 @@ import { EntryRequest } from "../../database/entry-request";
 import { Guild, timeStructToMilliseconds } from "../../database/guild";
 import { User } from "../../database/user";
 import diagnostics from "../../diagnostics";
-import { Modal, createModalComposer, decodeId, encodeId, getLocaleData } from "../../interactions";
+import { Modal, createModalComposer } from "../../interactions";
 import { snowflakeToTimestamp } from "../../utils";
 import { LocalService } from "../service";
 

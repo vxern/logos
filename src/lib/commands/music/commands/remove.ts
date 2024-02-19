@@ -5,7 +5,7 @@ import defaults from "../../../../defaults";
 import { MentionTypes, mention, trim } from "../../../../formatting";
 import * as Logos from "../../../../types";
 import { Client, InteractionCollector } from "../../../client";
-import { ControlButtonID, decodeId, generateButtons } from "../../../interactions";
+import { PageButtonMetadata, generateButtons } from "../../../interactions";
 import { MusicService } from "../../../services/music/music";
 import { chunk } from "../../../utils";
 import { OptionTemplate } from "../../command";
@@ -133,20 +133,13 @@ async function generateEmbed(
 	const isFirst = data.pageIndex === 0;
 	const isLast = data.pageIndex === pages.length - 1;
 
-	const pageButtons = new InteractionCollector(client, { only: [interaction.user.id] });
+	const pageButtons = new InteractionCollector<PageButtonMetadata>(client, { only: [interaction.user.id] });
 	const selectMenuSelection = new InteractionCollector(client, { only: [interaction.user.id], isSingle: true });
 
 	pageButtons.onCollect(async (buttonPress) => {
 		client.acknowledge(buttonPress);
 
-		const customId = buttonPress.data?.customId;
-		if (customId === undefined) {
-			return;
-		}
-
-		const [_, action] = decodeId<ControlButtonID>(customId);
-
-		switch (action) {
+		switch (buttonPress.metadata[1]) {
 			case "previous": {
 				if (!isFirst) {
 					data.pageIndex--;

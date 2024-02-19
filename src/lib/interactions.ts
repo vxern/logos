@@ -7,9 +7,9 @@ import * as Logos from "../types";
 import { Client, InteractionCollector } from "./client";
 import { InteractionRepetitionButtonID } from "./services/interaction-repetition/interaction-repetition";
 
-type AutocompleteInteraction = Logos.Interaction & { type: Discord.InteractionTypes.ApplicationCommandAutocomplete };
+type AutocompleteInteraction = (Discord.Interaction | Logos.Interaction) & { type: Discord.InteractionTypes.ApplicationCommandAutocomplete };
 
-function isAutocomplete(interaction: Logos.Interaction): interaction is AutocompleteInteraction {
+function isAutocomplete(interaction: Discord.Interaction | Logos.Interaction): interaction is AutocompleteInteraction {
 	return interaction.type === Discord.InteractionTypes.ApplicationCommandAutocomplete;
 }
 
@@ -73,7 +73,7 @@ function parseArguments<
 }
 
 type SkipAction = "previous" | "next";
-type ControlButtonID = [type: SkipAction];
+type PageButtonMetadata = [type: SkipAction];
 
 /**
  * Paginates an array of elements, allowing the user to browse between pages
@@ -97,7 +97,7 @@ async function paginate<T>(
 	},
 	{ locale }: { locale: Locale },
 ): Promise<() => Promise<void>> {
-	const buttonPresses = new InteractionCollector(client, { isPermanent: true });
+	const buttonPresses = new InteractionCollector<PageButtonMetadata>(client, { isPermanent: true });
 
 	const data: PaginationData<T> = { elements: getElements(), view, pageIndex: 0 };
 
@@ -141,14 +141,7 @@ async function paginate<T>(
 	buttonPresses.onCollect(async (buttonPress) => {
 		client.acknowledge(buttonPress);
 
-		const customId = buttonPress.data?.customId;
-		if (customId === undefined) {
-			return;
-		}
-
-		const [_, action] = decodeId<ControlButtonID>(customId);
-
-		await editView(action);
+		await editView(buttonPress.metadata[1]);
 	});
 
 	client.registerInteractionCollector(buttonPresses);
@@ -208,14 +201,14 @@ function generateButtons(customId: string, isFirst: boolean, isLast: boolean): D
 			components: [
 				{
 					type: Discord.MessageComponentTypes.Button,
-					customId: encodeId<ControlButtonID>(customId, ["previous"]),
+					customId: encodeId<PageButtonMetadata>(customId, ["previous"]),
 					disabled: isFirst,
 					style: Discord.ButtonStyles.Secondary,
 					label: constants.symbols.interactions.menu.controls.back,
 				},
 				{
 					type: Discord.MessageComponentTypes.Button,
-					customId: encodeId<ControlButtonID>(customId, ["next"]),
+					customId: encodeId<PageButtonMetadata>(customId, ["next"]),
 					disabled: isLast,
 					style: Discord.ButtonStyles.Secondary,
 					label: constants.symbols.interactions.menu.controls.forward,
@@ -565,4 +558,4 @@ export {
 	isSubcommandGroup,
 	getShowButton,
 };
-export type { ControlButtonID, Modal };
+export type { PageButtonMetadata, Modal };

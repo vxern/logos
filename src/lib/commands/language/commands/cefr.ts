@@ -5,7 +5,7 @@ import * as Logos from "../../../../types";
 import { Client, InteractionCollector } from "../../../client";
 import { CefrConfiguration } from "../../../database/guild";
 import { Guild } from "../../../database/guild";
-import { decodeId, encodeId, getShowButton, parseArguments } from "../../../interactions";
+import { getShowButton, parseArguments } from "../../../interactions";
 import { CommandTemplate } from "../../command";
 import { show } from "../../parameters";
 
@@ -93,8 +93,8 @@ async function handleDisplayCefrGuide(client: Client, interaction: Logos.Interac
 
 	const showButton = getShowButton(client, interaction, { locale });
 
-	const bracketButtons = new InteractionCollector(client, { only: !show ? [interaction.user.id] : undefined });
-	const tabButtons = new InteractionCollector(client, { only: !show ? [interaction.user.id] : undefined });
+	const bracketButtons = new InteractionCollector<BracketButtonMetadata>(client, { only: !show ? [interaction.user.id] : undefined });
+	const tabButtons = new InteractionCollector<TabButtonMetadata>(client, { only: !show ? [interaction.user.id] : undefined });
 
 	const getButtons = (): Discord.MessageComponents => {
 		const bracketButtonComponents: [Discord.ButtonComponent, Discord.ButtonComponent, Discord.ButtonComponent] = [
@@ -185,23 +185,7 @@ async function handleDisplayCefrGuide(client: Client, interaction: Logos.Interac
 	bracketButtons.onCollect(async (buttonPress) => {
 		client.acknowledge(buttonPress);
 
-		const selectionCustomId = buttonPress.data?.customId;
-		if (selectionCustomId === undefined) {
-			return;
-		}
-
-		const [__, bracketRaw] = decodeId<BracketButtonMetadata>(selectionCustomId);
-		if (bracketRaw === undefined) {
-			return;
-		}
-
-		if (!Object.keys(guide).includes(bracketRaw)) {
-			return;
-		}
-
-		const bracket = bracketRaw as Bracket;
-
-		data.bracket = bracket;
+		data.bracket = buttonPress.metadata[1];
 
 		refreshView();
 	});
@@ -209,23 +193,7 @@ async function handleDisplayCefrGuide(client: Client, interaction: Logos.Interac
 	tabButtons.onCollect(async (buttonPress) => {
 		client.acknowledge(buttonPress);
 
-		const selectionCustomId = buttonPress.data?.customId;
-		if (selectionCustomId === undefined) {
-			return;
-		}
-
-		const [__, tabRaw] = decodeId<TabButtonMetadata>(selectionCustomId);
-		if (tabRaw === undefined) {
-			return;
-		}
-
-		if (!["guide", "examples"].includes(tabRaw)) {
-			return;
-		}
-
-		const tab = tabRaw as Tab;
-
-		data.tab = tab;
+		data.tab = buttonPress.metadata[1];
 
 		refreshView();
 	});

@@ -151,7 +151,7 @@ interface InteractionFlags {
 	show?: boolean;
 }
 
-type Interaction<Metadata extends string[] = []> = Omit<
+type Interaction<Metadata extends string[] = any> = Omit<
 	Pick<Discord.Interaction, keyof LogosDesiredProperties["interaction"]>,
 	"channelId" | "locale" | "guildLocale"
 > &
