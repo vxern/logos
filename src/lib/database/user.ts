@@ -26,6 +26,8 @@ interface GameScores {
 	sessionCount: number;
 }
 
+type AuthorisationStatus = "authorised" | "rejected";
+
 class User extends Model<{ idParts: ["userId"] }> {
 	static readonly #_initialScores: GameScores = { totalScore: 0, sessionCount: 1 };
 
@@ -137,7 +139,7 @@ class User extends Model<{ idParts: ["userId"] }> {
 		return this.scores?.[learningLocale]?.[game];
 	}
 
-	isAuthorisedOn(guildId: string): boolean {
+	isAuthorisedOn({ guildId }: { guildId: string }): boolean {
 		if (this.account.authorisedOn === undefined) {
 			return false;
 		}
@@ -145,12 +147,69 @@ class User extends Model<{ idParts: ["userId"] }> {
 		return this.account.authorisedOn.includes(guildId);
 	}
 
-	isRejectedOn(guildId: string): boolean {
+	isRejectedOn({ guildId }: { guildId: string }): boolean {
 		if (this.account.rejectedOn === undefined) {
 			return false;
 		}
 
 		return this.account.rejectedOn.includes(guildId);
+	}
+
+	getAuthorisationStatus({ guildId }: { guildId: string }): AuthorisationStatus | undefined {
+		if (this.isAuthorisedOn({ guildId })) {
+			return "authorised";
+		}
+
+		if (this.isRejectedOn({ guildId })) {
+			return "rejected";
+		}
+
+		return undefined;
+	}
+
+	setAuthorisationStatus({ guildId, status }: { guildId: string; status: AuthorisationStatus }): void {
+		const previousState = this.getAuthorisationStatus({ guildId });
+		if (previousState !== undefined) {
+			if (previousState === "authorised") {
+				return;
+			}
+
+			this.clearAuthorisationStatus({ guildId, status: previousState });
+		}
+
+		switch (status) {
+			case "authorised": {
+				if (this.account.authorisedOn === undefined) {
+					this.account.authorisedOn = [guildId];
+					return;
+				}
+
+				this.account.authorisedOn.push(guildId);
+				break;
+			}
+			case "rejected": {
+				if (this.account.rejectedOn === undefined) {
+					this.account.rejectedOn = [guildId];
+					return;
+				}
+
+				this.account.rejectedOn.push(guildId);
+				break;
+			}
+		}
+	}
+
+	clearAuthorisationStatus({ guildId, status }: { guildId: string; status: AuthorisationStatus }): void {
+		switch (status) {
+			case "authorised": {
+				this.account.authorisedOn!.splice(this.account.authorisedOn!.indexOf(guildId), 1);
+				break;
+			}
+			case "rejected": {
+				this.account.rejectedOn!.splice(this.account.rejectedOn!.indexOf(guildId), 1);
+				break;
+			}
+		}
 	}
 }
 

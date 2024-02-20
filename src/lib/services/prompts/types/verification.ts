@@ -612,17 +612,10 @@ class VerificationService extends PromptService<{
 			entryRequestDocument.isFinalised = isFinalised;
 		});
 
-		let authorisedOn =
-			authorDocument.account.authorisedOn !== undefined ? [...authorDocument.account.authorisedOn] : undefined;
-		let rejectedOn =
-			authorDocument.account.rejectedOn !== undefined ? [...authorDocument.account.rejectedOn] : undefined;
-
 		if (isAccepted) {
-			if (authorisedOn === undefined) {
-				authorisedOn = [this.guildIdString];
-			} else if (!authorisedOn.includes(this.guildIdString)) {
-				authorisedOn.push(this.guildIdString);
-			}
+			await authorDocument.update(this.client, () => {
+				authorDocument.setAuthorisationStatus({ guildId: this.guildIdString, status: "authorised" });
+			});
 
 			this.client.log.info(
 				`Accepted ${diagnostics.display.user(authorDocument.account.id)} onto ${diagnostics.display.guild(guild)}.`,
@@ -638,11 +631,9 @@ class VerificationService extends PromptService<{
 					),
 				);
 		} else if (isRejected) {
-			if (rejectedOn === undefined) {
-				rejectedOn = [this.guildIdString];
-			} else if (!rejectedOn.includes(this.guildIdString)) {
-				rejectedOn.push(this.guildIdString);
-			}
+			await authorDocument.update(this.client, () => {
+				authorDocument.setAuthorisationStatus({ guildId: this.guildIdString, status: "rejected" });
+			});
 
 			this.client.log.info(
 				`Rejected ${diagnostics.display.user(authorDocument.account.id)} from ${diagnostics.display.guild(guild)}.`,
@@ -658,11 +649,6 @@ class VerificationService extends PromptService<{
 					),
 				);
 		}
-
-		await authorDocument.update(this.client, () => {
-			authorDocument.account.authorisedOn = authorisedOn;
-			authorDocument.account.rejectedOn = rejectedOn;
-		});
 	}
 
 	private async handleOpenInquiry(interaction: Logos.Interaction, partialId: string): Promise<void> {

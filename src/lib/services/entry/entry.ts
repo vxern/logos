@@ -229,7 +229,7 @@ class EntryService extends LocalService {
 
 			this.client.registerInteractionCollector(requestVerificationButton);
 
-			const isVerified = userDocument.isAuthorisedOn(this.guildIdString);
+			const isVerified = userDocument.isAuthorisedOn({ guildId: this.guildIdString });
 			if (!isVerified) {
 				const strings = {
 					title: this.client.localise("entry.verification.getVerified.title", locale)(),
@@ -454,14 +454,9 @@ class EntryService extends LocalService {
 	}
 
 	private async vetUser(interaction: Logos.Interaction, { locale }: { locale: Locale }): Promise<boolean> {
-		const guildId = interaction.guildId;
-		if (guildId === undefined) {
-			return false;
-		}
-
 		const [userDocument, entryRequestDocument] = await Promise.all([
 			User.getOrCreate(this.client, { userId: interaction.user.id.toString() }),
-			EntryRequest.get(this.client, { guildId: guildId.toString(), authorId: interaction.user.id.toString() }),
+			EntryRequest.get(this.client, { guildId: this.guildIdString, authorId: interaction.user.id.toString() }),
 		]);
 
 		if (entryRequestDocument !== undefined && !entryRequestDocument.isFinalised) {
@@ -483,11 +478,11 @@ class EntryService extends LocalService {
 			return false;
 		}
 
-		if (userDocument.isAuthorisedOn(guildId.toString())) {
+		if (userDocument.isAuthorisedOn({ guildId: this.guildIdString })) {
 			return true;
 		}
 
-		if (userDocument.isRejectedOn(guildId.toString())) {
+		if (userDocument.isRejectedOn({ guildId: this.guildIdString })) {
 			const strings = {
 				title: this.client.localise("entry.verification.answers.rejectedBefore.title", locale)(),
 				description: this.client.localise("entry.verification.answers.rejectedBefore.description", locale)(),
