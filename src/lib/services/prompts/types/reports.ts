@@ -113,10 +113,7 @@ class ReportService extends PromptService<{
 									type: Discord.MessageComponentTypes.Button,
 									style: Discord.ButtonStyles.Success,
 									label: strings.markUnresolved,
-									customId: encodeId<InteractionData>(constants.components.reports, [
-										reportDocument.partialId,
-										`${false}`,
-									]),
+									customId: this.magicButton.encodeId([reportDocument.partialId, `${false}`]),
 								},
 
 								{
@@ -134,10 +131,7 @@ class ReportService extends PromptService<{
 									type: Discord.MessageComponentTypes.Button,
 									style: Discord.ButtonStyles.Primary,
 									label: strings.markResolved,
-									customId: encodeId<InteractionData>(constants.components.reports, [
-										reportDocument.partialId,
-										`${true}`,
-									]),
+									customId: this.magicButton.encodeId([reportDocument.partialId, `${true}`]),
 								},
 						  ],
 				},

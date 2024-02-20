@@ -248,19 +248,13 @@ class VerificationService extends PromptService<{
 							type: Discord.MessageComponentTypes.Button,
 							style: Discord.ButtonStyles.Success,
 							label: voteInformation.acceptance.remaining === 1 ? strings.accept : strings.acceptMultiple,
-							customId: encodeId<InteractionData>(constants.components.verification, [
-								entryRequestDocument.partialId,
-								`${true}`,
-							]),
+							customId: this.magicButton.encodeId([entryRequestDocument.partialId, `${true}`]),
 						},
 						{
 							type: Discord.MessageComponentTypes.Button,
 							style: Discord.ButtonStyles.Danger,
 							label: voteInformation.rejection.remaining === 1 ? strings.reject : strings.rejectMultiple,
-							customId: encodeId<InteractionData>(constants.components.verification, [
-								entryRequestDocument.partialId,
-								`${false}`,
-							]),
+							customId: this.magicButton.encodeId([entryRequestDocument.partialId, `${false}`]),
 						},
 						...((entryRequestDocument.ticketChannelId === undefined
 							? [

@@ -76,6 +76,7 @@ async function handleDisplayCefrGuide(client: Client, interaction: Logos.Interac
 		}
 
 		const embed = tab[data.bracket];
+		
 		return embed;
 	};
 
@@ -101,21 +102,21 @@ async function handleDisplayCefrGuide(client: Client, interaction: Logos.Interac
 			{
 				type: Discord.MessageComponentTypes.Button,
 				label: strings.brackets.a,
-				customId: encodeId<BracketButtonMetadata>(bracketButtons.customId, ["a"]),
+				customId: bracketButtons.encodeId(["a"]),
 				emoji: { name: constants.symbols.cefr.a },
 				style: Discord.ButtonStyles.Secondary,
 			},
 			{
 				type: Discord.MessageComponentTypes.Button,
 				label: strings.brackets.b,
-				customId: encodeId<BracketButtonMetadata>(bracketButtons.customId, ["b"]),
+				customId: bracketButtons.encodeId(["b"]),
 				emoji: { name: constants.symbols.cefr.b },
 				style: Discord.ButtonStyles.Secondary,
 			},
 			{
 				type: Discord.MessageComponentTypes.Button,
 				label: strings.brackets.c,
-				customId: encodeId<BracketButtonMetadata>(bracketButtons.customId, ["c"]),
+				customId: bracketButtons.encodeId(["c"]),
 				emoji: { name: constants.symbols.cefr.c },
 				style: Discord.ButtonStyles.Secondary,
 			},
@@ -144,13 +145,13 @@ async function handleDisplayCefrGuide(client: Client, interaction: Logos.Interac
 			{
 				type: Discord.MessageComponentTypes.Button,
 				label: strings.tabs.guide,
-				customId: encodeId<TabButtonMetadata>(tabButtons.customId, ["guide"]),
+				customId: tabButtons.encodeId(["guide"]),
 				style: Discord.ButtonStyles.Primary,
 			},
 			{
 				type: Discord.MessageComponentTypes.Button,
 				label: strings.tabs.examples,
-				customId: encodeId<TabButtonMetadata>(tabButtons.customId, ["examples"]),
+				customId: tabButtons.encodeId(["examples"]),
 				style: Discord.ButtonStyles.Primary,
 			},
 		];

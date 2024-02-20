@@ -80,10 +80,7 @@ class SuggestionService extends PromptService<{
 									type: Discord.MessageComponentTypes.Button,
 									style: Discord.ButtonStyles.Success,
 									label: strings.markUnresolved,
-									customId: encodeId<InteractionData>(constants.components.suggestions, [
-										suggestionDocument.partialId,
-										`${false}`,
-									]),
+									customId: this.magicButton.encodeId([suggestionDocument.partialId, `${false}`]),
 								},
 								{
 									type: Discord.MessageComponentTypes.Button,
@@ -100,10 +97,7 @@ class SuggestionService extends PromptService<{
 									type: Discord.MessageComponentTypes.Button,
 									style: Discord.ButtonStyles.Primary,
 									label: strings.markResolved,
-									customId: encodeId<InteractionData>(constants.components.suggestions, [
-										suggestionDocument.partialId,
-										`${true}`,
-									]),
+									customId: this.magicButton.encodeId([suggestionDocument.partialId, `${true}`]),
 								},
 						  ],
 				},

@@ -90,10 +90,7 @@ class TicketService extends PromptService<{
 									type: Discord.MessageComponentTypes.Button,
 									style: Discord.ButtonStyles.Success,
 									label: strings.markUnresolved,
-									customId: encodeId<InteractionData>(constants.components.tickets, [
-										ticketDocument.partialId,
-										`${false}`,
-									]),
+									customId: this.magicButton.encodeId([ticketDocument.partialId, `${false}`]),
 								},
 								{
 									type: Discord.MessageComponentTypes.Button,
@@ -110,10 +107,7 @@ class TicketService extends PromptService<{
 									type: Discord.MessageComponentTypes.Button,
 									style: Discord.ButtonStyles.Primary,
 									label: strings.markResolved,
-									customId: encodeId<InteractionData>(constants.components.tickets, [
-										ticketDocument.partialId,
-										`${true}`,
-									]),
+									customId: this.magicButton.encodeId([ticketDocument.partialId, `${true}`]),
 								},
 						  ],
 				},

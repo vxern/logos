@@ -80,10 +80,7 @@ class ResourceService extends PromptService<{
 									type: Discord.MessageComponentTypes.Button,
 									style: Discord.ButtonStyles.Success,
 									label: strings.markUnresolved,
-									customId: encodeId<InteractionData>(constants.components.resources, [
-										resourceDocument.partialId,
-										`${false}`,
-									]),
+									customId: this.magicButton.encodeId([resourceDocument.partialId, `${false}`]),
 								},
 								{
 									type: Discord.MessageComponentTypes.Button,
@@ -100,10 +97,7 @@ class ResourceService extends PromptService<{
 									type: Discord.MessageComponentTypes.Button,
 									style: Discord.ButtonStyles.Primary,
 									label: strings.markResolved,
-									customId: encodeId<InteractionData>(constants.components.resources, [
-										resourceDocument.partialId,
-										`${true}`,
-									]),
+									customId: this.magicButton.encodeId([resourceDocument.partialId, `${true}`]),
 								},
 						  ],
 				},

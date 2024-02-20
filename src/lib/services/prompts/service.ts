@@ -71,7 +71,7 @@ abstract class PromptService<
 
 	private readonly _configuration: ConfigurationLocators[Generic["type"]];
 
-	readonly #_magicButton: InteractionCollector<Generic["metadata"]>;
+	readonly magicButton: InteractionCollector<Generic["metadata"]>;
 	readonly #_removeButton?: InteractionCollector;
 
 	get configuration(): Configurations[Generic["type"]] | undefined {
@@ -120,7 +120,7 @@ abstract class PromptService<
 
 		this._configuration = configurationLocators[type];
 
-		this.#_magicButton = new InteractionCollector(client, { customId: this.customId, isPermanent: true });
+		this.magicButton = new InteractionCollector(client, { customId: this.customId, isPermanent: true });
 		this.#_removeButton =
 			this.deleteMode !== undefined
 				? new InteractionCollector(client, {
@@ -182,7 +182,7 @@ abstract class PromptService<
 			});
 		}
 
-		this.#_magicButton.onCollect(async (buttonPress) => {
+		this.magicButton.onCollect(async (buttonPress) => {
 			const handle = this.handlerByPartialId.get(buttonPress.metadata[1]);
 			if (handle === undefined) {
 				return;
@@ -191,7 +191,7 @@ abstract class PromptService<
 			handle(buttonPress);
 		});
 
-		this.client.registerInteractionCollector(this.#_magicButton);
+		this.client.registerInteractionCollector(this.magicButton);
 
 		if (this.#_removeButton !== undefined) {
 			this.#_removeButton.onCollect(async (buttonPress) => {
@@ -305,7 +305,7 @@ abstract class PromptService<
 		this.documentByPromptId.clear();
 		this.userIdByPromptId.clear();
 
-		await this.#_magicButton.close();
+		await this.magicButton.close();
 		await this.#_removeButton?.close();
 	}
 
