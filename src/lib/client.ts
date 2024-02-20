@@ -2283,7 +2283,7 @@ class Client {
 		return this.#events.registerCollector.bind(this.#events);
 	}
 
-	get registerInteractionCollector(): <Metadata extends string[]>(collector: InteractionCollector<Metadata>) => void {
+	get registerInteractionCollector(): <Metadata extends string[]>(collector: InteractionCollector<Metadata>) => Promise<void> {
 		// TODO(vxern): Find a way to get rid of ts-ignore?
 		// @ts-ignore: This is fine.
 		return (collector) => this.#events.registerCollector("interactionCreate", collector);
