@@ -2,7 +2,6 @@ import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import localisations from "../../../../constants/localisations";
 import { Client } from "../../../client";
-import { getFeatureLanguage } from "../../../interactions";
 import { HashableMessageContents, NoticeService } from "../service";
 
 class ResourceNoticeService extends NoticeService<"resources"> {
@@ -11,13 +10,18 @@ class ResourceNoticeService extends NoticeService<"resources"> {
 	}
 
 	generateNotice(): HashableMessageContents | undefined {
-		const guildLocale = this.guildLocale;
-		const featureLanguage = getFeatureLanguage(this.guildDocument);
+		const guildDocument = this.guildDocument;
+		if (guildDocument === undefined) {
+			return undefined;
+		}
 
-		const configuration = this.guildDocument?.features.language.features?.resources;
+		const configuration = guildDocument.features.language.features?.resources;
 		if (configuration === undefined || !configuration.enabled) {
 			return;
 		}
+
+		const guildLocale = this.guildLocale;
+		const featureLanguage = guildDocument.featureLanguage;
 
 		const strings = {
 			title: this.client.localise("notices.resources.title", guildLocale)(),

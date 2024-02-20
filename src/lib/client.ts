@@ -1440,6 +1440,8 @@ class Collector<Event extends keyof Discord.EventHandlers = any> {
 }
 
 class InteractionCollector<Metadata extends string[] = any> extends Collector<"interactionCreate"> {
+	static readonly noneId = constants.components.none;
+
 	readonly type: Discord.InteractionTypes;
 	readonly customId: string;
 	readonly only: Set<bigint>;
@@ -1625,6 +1627,10 @@ class InteractionCollector<Metadata extends string[] = any> extends Collector<"i
 		}
 
 		return commandNameFull;
+	}
+
+	static encodeCustomId<Parts extends string[] = any>(parts: Parts): string {
+		return parts.join(constants.symbols.interaction.divider);
 	}
 
 	encodeId<Metadata extends string[] = any>(metadata: Metadata): string {
@@ -2283,7 +2289,9 @@ class Client {
 		return this.#events.registerCollector.bind(this.#events);
 	}
 
-	get registerInteractionCollector(): <Metadata extends string[]>(collector: InteractionCollector<Metadata>) => Promise<void> {
+	get registerInteractionCollector(): <Metadata extends string[]>(
+		collector: InteractionCollector<Metadata>,
+	) => Promise<void> {
 		// TODO(vxern): Find a way to get rid of ts-ignore?
 		// @ts-ignore: This is fine.
 		return (collector) => this.#events.registerCollector("interactionCreate", collector);

@@ -5,27 +5,27 @@ import { handleOpenRoleSelectionMenu } from "../../../commands/social/commands/p
 import { HashableMessageContents, NoticeService } from "../service";
 
 class RoleNoticeService extends NoticeService<"roles"> {
-	readonly #_selectRolesButtonPresses: InteractionCollector;
+	readonly #_selectRolesButton: InteractionCollector;
 
 	constructor(client: Client, guildId: bigint) {
 		super(client, guildId, { type: "roles" });
 
-		this.#_selectRolesButtonPresses = new InteractionCollector(client, {
+		this.#_selectRolesButton = new InteractionCollector(client, {
 			customId: constants.components.selectRoles,
 			isPermanent: true,
 		});
 	}
 
 	async start(): Promise<void> {
-		this.#_selectRolesButtonPresses.onCollect(async (buttonPress) => {
+		this.#_selectRolesButton.onCollect(async (buttonPress) => {
 			handleOpenRoleSelectionMenu(this.client, buttonPress);
 		});
 
-		this.client.registerInteractionCollector(this.#_selectRolesButtonPresses);
+		this.client.registerInteractionCollector(this.#_selectRolesButton);
 	}
 
 	async stop(): Promise<void> {
-		await this.#_selectRolesButtonPresses.close();
+		await this.#_selectRolesButton.close();
 	}
 
 	generateNotice(): HashableMessageContents | undefined {

@@ -96,10 +96,7 @@ class TicketService extends PromptService<{
 									type: Discord.MessageComponentTypes.Button,
 									style: Discord.ButtonStyles.Danger,
 									label: strings.close,
-									customId: encodeId(
-										`${constants.components.removePrompt}/${constants.components.tickets}/${this.guildId}`,
-										[ticketDocument.partialId],
-									),
+									customId: this.removeButton!.encodeId([ticketDocument.partialId]),
 								},
 						  ]
 						: [

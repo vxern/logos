@@ -10,6 +10,7 @@ export default {
 		// ! Responsible for separating pieces of data in component custom IDs.
 		// ! Changing this would break button interactions on all existing prompts/notices.
 		separator: "|",
+		divider: "/",
 	},
 	database: {
 		separator: "/",

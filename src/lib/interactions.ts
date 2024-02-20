@@ -2,12 +2,12 @@ import * as Discord from "@discordeno/bot";
 import constants from "../constants/constants";
 import { Locale, LocalisationLanguage } from "../constants/languages";
 import time from "../constants/time";
-import symbols from "../constants/types/symbols";
 import * as Logos from "../types";
 import { Client, InteractionCollector } from "./client";
-import { InteractionRepetitionButtonID } from "./services/interaction-repetition/interaction-repetition";
 
-type AutocompleteInteraction = (Discord.Interaction | Logos.Interaction) & { type: Discord.InteractionTypes.ApplicationCommandAutocomplete };
+type AutocompleteInteraction = (Discord.Interaction | Logos.Interaction) & {
+	type: Discord.InteractionTypes.ApplicationCommandAutocomplete;
+};
 
 function isAutocomplete(interaction: Discord.Interaction | Logos.Interaction): interaction is AutocompleteInteraction {
 	return interaction.type === Discord.InteractionTypes.ApplicationCommandAutocomplete;
@@ -97,17 +97,19 @@ async function paginate<T>(
 	},
 	{ locale }: { locale: Locale },
 ): Promise<() => Promise<void>> {
-	const buttonPresses = new InteractionCollector<PageButtonMetadata>(client, { isPermanent: true });
+	const pageButtons = new InteractionCollector<PageButtonMetadata>(client, {
+		only: show ? [interaction.user.id] : undefined,
+	});
 
 	const data: PaginationData<T> = { elements: getElements(), view, pageIndex: 0 };
 
-	const showButton = getShowButton(client, interaction, { locale });
+	const showButton = client.interactionRepetitionService.getShowButton(interaction, { locale });
 
 	const isFirst = () => data.pageIndex === 0;
 	const isLast = () => data.pageIndex === data.elements.length - 1;
 
 	const getView = (): Discord.InteractionCallbackData => {
-		const buttons = generateButtons(buttonPresses.customId, isFirst(), isLast());
+		const buttons = getPageButtons({ pageButtons, isFirst: isFirst(), isLast: isLast() });
 
 		if (showable && !show) {
 			buttons.push({ type: Discord.MessageComponentTypes.ActionRow, components: [showButton] });
@@ -138,13 +140,13 @@ async function paginate<T>(
 		client.editReply(interaction, getView());
 	};
 
-	buttonPresses.onCollect(async (buttonPress) => {
+	pageButtons.onCollect(async (buttonPress) => {
 		client.acknowledge(buttonPress);
 
 		await editView(buttonPress.metadata[1]);
 	});
 
-	client.registerInteractionCollector(buttonPresses);
+	client.registerInteractionCollector(pageButtons);
 
 	client.reply(interaction, getView(), { visible: show });
 
@@ -194,21 +196,29 @@ function getPageEmbed<T>(
 	};
 }
 
-function generateButtons(customId: string, isFirst: boolean, isLast: boolean): Discord.MessageComponents {
+function getPageButtons({
+	pageButtons,
+	isFirst,
+	isLast,
+}: {
+	pageButtons: InteractionCollector<PageButtonMetadata>;
+	isFirst: boolean;
+	isLast: boolean;
+}): Discord.MessageComponents {
 	return [
 		{
 			type: Discord.MessageComponentTypes.ActionRow,
 			components: [
 				{
 					type: Discord.MessageComponentTypes.Button,
-					customId: encodeId<PageButtonMetadata>(customId, ["previous"]),
+					customId: pageButtons.encodeId(["previous"]),
 					disabled: isFirst,
 					style: Discord.ButtonStyles.Secondary,
 					label: constants.symbols.interactions.menu.controls.back,
 				},
 				{
 					type: Discord.MessageComponentTypes.Button,
-					customId: encodeId<PageButtonMetadata>(customId, ["next"]),
+					customId: pageButtons.encodeId(["next"]),
 					disabled: isLast,
 					style: Discord.ButtonStyles.Secondary,
 					label: constants.symbols.interactions.menu.controls.forward,
@@ -253,13 +263,13 @@ async function createModalComposer<ComposerContent, SectionNames extends keyof C
 	while (isSubmitting) {
 		const { promise, resolve } = Promise.withResolvers<[Logos.Interaction, boolean | string]>();
 
-		const modalSubmits = new InteractionCollector(client, {
+		const modalSubmit = new InteractionCollector(client, {
 			type: Discord.InteractionTypes.ModalSubmit,
 			only: [interaction.user.id],
 			isSingle: true,
 		});
 
-		modalSubmits.onCollect(async (modalSubmit) => {
+		modalSubmit.onCollect(async (modalSubmit) => {
 			content = parseComposerContent(modalSubmit);
 			if (content === undefined) {
 				return resolve([modalSubmit, false]);
@@ -270,7 +280,7 @@ async function createModalComposer<ComposerContent, SectionNames extends keyof C
 			resolve([modalSubmit, result]);
 		});
 
-		client.registerInteractionCollector(modalSubmits);
+		client.registerInteractionCollector(modalSubmit);
 
 		if (content !== undefined) {
 			const answers = Object.values(content) as (string | undefined)[];
@@ -286,7 +296,7 @@ async function createModalComposer<ComposerContent, SectionNames extends keyof C
 
 		client.displayModal(anchor, {
 			title: modal.title,
-			customId: modalSubmits.customId,
+			customId: modalSubmit.customId,
 			components: fields,
 		});
 
@@ -529,33 +539,14 @@ function parseVerboseTimeExpressionPhrase(
 	return [correctedExpression, total];
 }
 
-function getShowButton(
-	client: Client,
-	interaction: Logos.Interaction,
-	{ locale }: { locale: Locale },
-): Discord.ButtonComponent {
-	const strings = {
-		show: client.localise("interactions.show", locale)(),
-	};
-
-	return {
-		type: Discord.MessageComponentTypes.Button,
-		style: Discord.ButtonStyles.Primary,
-		label: strings.show,
-		emoji: { name: symbols.showInChat },
-		customId: encodeId<InteractionRepetitionButtonID>(constants.components.showInChat, [interaction.id.toString()]),
-	};
-}
-
 export {
 	createModalComposer,
-	generateButtons,
+	getPageButtons,
 	isAutocomplete,
 	paginate,
 	parseArguments,
 	parseTimeExpression,
 	isSubcommand,
 	isSubcommandGroup,
-	getShowButton,
 };
 export type { PageButtonMetadata, Modal };

@@ -76,7 +76,7 @@ async function handleDisplayCefrGuide(client: Client, interaction: Logos.Interac
 		}
 
 		const embed = tab[data.bracket];
-		
+
 		return embed;
 	};
 
@@ -94,8 +94,12 @@ async function handleDisplayCefrGuide(client: Client, interaction: Logos.Interac
 
 	const showButton = getShowButton(client, interaction, { locale });
 
-	const bracketButtons = new InteractionCollector<BracketButtonMetadata>(client, { only: !show ? [interaction.user.id] : undefined });
-	const tabButtons = new InteractionCollector<TabButtonMetadata>(client, { only: !show ? [interaction.user.id] : undefined });
+	const bracketButtons = new InteractionCollector<BracketButtonMetadata>(client, {
+		only: !show ? [interaction.user.id] : undefined,
+	});
+	const tabButtons = new InteractionCollector<TabButtonMetadata>(client, {
+		only: !show ? [interaction.user.id] : undefined,
+	});
 
 	const getButtons = (): Discord.MessageComponents => {
 		const bracketButtonComponents: [Discord.ButtonComponent, Discord.ButtonComponent, Discord.ButtonComponent] = [

@@ -21,13 +21,11 @@ const command: CommandTemplate = {
 
 const wordSegmenter = new Intl.Segmenter(undefined, { granularity: "word" });
 
-type GuessButtonMetadata = [index: string];
-
 interface GameData {
 	sentenceSelection: SentenceSelection;
 	embedColour: number;
-	customId: string;
-	skipButtonCustomId: string;
+	guessButton: InteractionCollector<[index: string]>;
+	skipButton: InteractionCollector<[index: string]>;
 	sessionScore: number;
 }
 
@@ -86,7 +84,10 @@ async function handleStartGame(client: Client, interaction: Logos.Interaction): 
 
 	await client.postponeReply(interaction);
 
-	const guessButton = new InteractionCollector<GuessButtonMetadata>(client, { only: [interaction.user.id], isSingle: true });
+	const guessButton = new InteractionCollector<[index: string]>(client, {
+		only: [interaction.user.id],
+		isSingle: true,
+	});
 	const skipButton = new InteractionCollector(client, { only: [interaction.user.id], isSingle: true });
 
 	guessButton.onCollect(async (buttonPress) => {
@@ -134,8 +135,8 @@ async function handleStartGame(client: Client, interaction: Logos.Interaction): 
 	const data: GameData = {
 		sentenceSelection: await getSentenceSelection(client, learningLocale),
 		embedColour: constants.colors.blue,
-		customId: guessButton.customId,
-		skipButtonCustomId: skipButton.customId,
+		guessButton: guessButton,
+		skipButton: skipButton,
 		sessionScore: 0,
 	};
 
@@ -205,11 +206,12 @@ async function getGameView(
 						}
 					}
 
+					// TODO(vxern): Possibly insecure? The user could tell the right answer from the button IDs.
 					let customId: string;
 					if (mode === "hide") {
-						customId = encodeId<GuessButtonMetadata>(data.customId, [pick[0]]);
+						customId = data.guessButton.encodeId([pick[0]]);
 					} else {
-						customId = encodeId<GuessButtonMetadata>(constants.components.none, [pick[0]]);
+						customId = InteractionCollector.noneId;
 					}
 
 					return {
@@ -229,13 +231,13 @@ async function getGameView(
 								type: Discord.MessageComponentTypes.Button,
 								style: Discord.ButtonStyles.Primary,
 								label: `${constants.symbols.interactions.menu.controls.forward} ${strings.next}`,
-								customId: data.skipButtonCustomId,
+								customId: data.skipButton.encodeId([]),
 						  }
 						: {
 								type: Discord.MessageComponentTypes.Button,
 								style: Discord.ButtonStyles.Secondary,
 								label: `${constants.symbols.interactions.menu.controls.forward} ${strings.skip}`,
-								customId: data.skipButtonCustomId,
+								customId: data.skipButton.encodeId([]),
 						  },
 				] as [Discord.ButtonComponent],
 			},

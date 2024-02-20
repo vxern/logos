@@ -3,6 +3,7 @@ import constants from "../../../constants/constants";
 import { FeatureLanguage, Locale } from "../../../constants/languages";
 import { trim } from "../../../formatting";
 import * as Logos from "../../../types";
+import { Client, InteractionCollector } from "../../client";
 import { proficiency } from "../../commands/social/roles/categories/language";
 import { EntryRequest } from "../../database/entry-request";
 import { Guild, timeStructToMilliseconds } from "../../database/guild";
@@ -11,7 +12,6 @@ import diagnostics from "../../diagnostics";
 import { Modal, createModalComposer } from "../../interactions";
 import { snowflakeToTimestamp } from "../../utils";
 import { LocalService } from "../service";
-import { Client, InteractionCollector } from "../../client";
 
 type EntryStepButtonID = [parameter: string];
 
@@ -19,7 +19,7 @@ type EntryConfiguration = NonNullable<Guild["features"]["server"]["features"]>["
 type VerificationConfiguration = NonNullable<Guild["features"]["moderation"]["features"]>["verification"];
 
 class EntryService extends LocalService {
-	readonly #_acceptedRulesButtonPresses: InteractionCollector;
+	readonly #_acceptedRulesButton: InteractionCollector;
 
 	get configuration(): EntryConfiguration | undefined {
 		const guildDocument = this.guildDocument;
@@ -42,20 +42,20 @@ class EntryService extends LocalService {
 	constructor(client: Client, guildId: bigint) {
 		super(client, guildId);
 
-		this.#_acceptedRulesButtonPresses = new InteractionCollector(client, {
+		this.#_acceptedRulesButton = new InteractionCollector(client, {
 			customId: constants.components.entry.acceptedRules,
 			isPermanent: true,
 		});
 	}
 
 	async start(): Promise<void> {
-		this.#_acceptedRulesButtonPresses.onCollect(this.#handleAcceptRules.bind(this));
+		this.#_acceptedRulesButton.onCollect(this.#handleAcceptRules.bind(this));
 
-		this.client.registerInteractionCollector(this.#_acceptedRulesButtonPresses);
+		this.client.registerInteractionCollector(this.#_acceptedRulesButton);
 	}
 
 	async stop(): Promise<void> {
-		await this.#_acceptedRulesButtonPresses.close();
+		await this.#_acceptedRulesButton.close();
 	}
 
 	async #handleAcceptRules(buttonPress: Logos.Interaction): Promise<void> {
@@ -64,15 +64,17 @@ class EntryService extends LocalService {
 			return;
 		}
 
-		const requestedVerificationButtonPresses = new InteractionCollector<[requestedRoleId: string]>(this.client, {
+		const languageProficiencyButtons = new InteractionCollector<[index: string]>(this.client, {
 			only: [buttonPress.user.id],
-			dependsOn: this.#_acceptedRulesButtonPresses,
+			dependsOn: this.#_acceptedRulesButton,
 			isSingle: true,
 		});
 
-		requestedVerificationButtonPresses.onCollect(this.#handleRequestVerification.bind(this));
+		languageProficiencyButtons.onCollect((buttonPress) =>
+			this.#handlePickLanguageProficiency(buttonPress, { collector: languageProficiencyButtons }),
+		);
 
-		this.client.registerInteractionCollector(requestedVerificationButtonPresses);
+		this.client.registerInteractionCollector(languageProficiencyButtons);
 
 		const strings = {
 			title: this.client.localise("entry.proficiency.title", buttonPress.locale)(),
@@ -111,9 +113,7 @@ class EntryService extends LocalService {
 						return {
 							type: Discord.MessageComponentTypes.Button,
 							label: strings.name,
-							customId: encodeId<EntryStepButtonID>(constants.components.entry.selectedLanguageProficiency, [
-								index.toString(),
-							]),
+							customId: languageProficiencyButtons.encodeId([index.toString()]),
 							style: Discord.ButtonStyles.Secondary,
 							emoji: { name: proficiencyRole.emoji },
 						};
@@ -183,7 +183,10 @@ class EntryService extends LocalService {
 		};
 	}
 
-	async #handleSelectLanguageProficiency(buttonPress: Logos.Interaction<[index: string]>): Promise<void> {
+	async #handlePickLanguageProficiency(
+		buttonPress: Logos.Interaction<[index: string]>,
+		{ collector }: { collector: InteractionCollector },
+	): Promise<void> {
 		const locale = buttonPress.locale;
 
 		const guild = this.guild;
@@ -215,6 +218,16 @@ class EntryService extends LocalService {
 
 		if (requiresVerification) {
 			const userDocument = await User.getOrCreate(this.client, { userId: buttonPress.user.id.toString() });
+
+			const requestVerificationButton = new InteractionCollector<[index: string]>(this.client, {
+				only: [buttonPress.user.id],
+				dependsOn: collector,
+				isSingle: true,
+			});
+
+			requestVerificationButton.onCollect(this.#handleRequestVerification.bind(this));
+
+			this.client.registerInteractionCollector(requestVerificationButton);
 
 			const isVerified = userDocument.isAuthorisedOn(this.guildIdString);
 			if (!isVerified) {
@@ -248,9 +261,7 @@ class EntryService extends LocalService {
 									type: Discord.MessageComponentTypes.Button,
 									style: Discord.ButtonStyles.Secondary,
 									label: strings.description.understood,
-									customId: encodeId<EntryStepButtonID>(constants.components.entry.requestedVerification, [
-										role.id.toString(),
-									]),
+									customId: requestVerificationButton.encodeId([buttonPress.metadata[1]]),
 									emoji: { name: constants.symbols.understood },
 								},
 							],
@@ -296,7 +307,7 @@ class EntryService extends LocalService {
 			);
 	}
 
-	async #handleRequestVerification(buttonPress: Logos.Interaction<[requestedRoleId: string]>): Promise<void> {
+	async #handleRequestVerification(buttonPress: Logos.Interaction<[index: string]>): Promise<void> {
 		const locale = buttonPress.locale;
 
 		const guild = this.guild;
@@ -304,7 +315,13 @@ class EntryService extends LocalService {
 			return;
 		}
 
-		const requestedRoleId = BigInt(buttonPress.metadata[1]);
+		// TODO: Improve.
+		const snowflake = proficiency.collection.list[parseInt(buttonPress.metadata[1])]?.snowflakes[this.guildIdString];
+		if (snowflake === undefined) {
+			return;
+		}
+
+		const requestedRoleId = BigInt(snowflake);
 
 		const entryRequestDocument = await EntryRequest.get(this.client, {
 			guildId: this.guildId.toString(),

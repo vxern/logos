@@ -72,7 +72,7 @@ abstract class PromptService<
 	private readonly _configuration: ConfigurationLocators[Generic["type"]];
 
 	readonly magicButton: InteractionCollector<Generic["metadata"]>;
-	readonly #_removeButton?: InteractionCollector;
+	readonly removeButton: InteractionCollector<[partialId: string]>;
 
 	get configuration(): Configurations[Generic["type"]] | undefined {
 		const guildDocument = this.guildDocument;
@@ -121,14 +121,14 @@ abstract class PromptService<
 		this._configuration = configurationLocators[type];
 
 		this.magicButton = new InteractionCollector(client, { customId: this.customId, isPermanent: true });
-		this.#_removeButton =
-			this.deleteMode !== undefined
-				? new InteractionCollector(client, {
-						// TODO(vxern): Better ID.
-						customId: `${constants.components.removePrompt}/${this.customId}/${this.guildId}`,
-						isPermanent: true,
-				  })
-				: undefined;
+		this.removeButton = new InteractionCollector(client, {
+			customId: InteractionCollector.encodeCustomId([
+				constants.components.removePrompt,
+				this.customId,
+				this.guildId.toString(),
+			]),
+			isPermanent: true,
+		});
 	}
 
 	async start(): Promise<void> {
@@ -191,110 +191,107 @@ abstract class PromptService<
 			handle(buttonPress);
 		});
 
+		this.removeButton.onCollect(async (buttonPress) => {
+			const customId = buttonPress.data?.customId;
+			if (customId === undefined) {
+				return;
+			}
+
+			const guildId = buttonPress.guildId;
+			if (guildId === undefined) {
+				return;
+			}
+
+			const member = buttonPress.member;
+			if (member === undefined) {
+				return;
+			}
+
+			let management: { roles?: string[]; users?: string[] } | undefined;
+			switch (this.type) {
+				case "reports": {
+					management = (configuration as Configurations["reports"]).management;
+					break;
+				}
+				case "resources": {
+					management = (configuration as Configurations["resources"])?.management;
+					break;
+				}
+				case "suggestions": {
+					management = (configuration as Configurations["suggestions"]).management;
+					break;
+				}
+				case "tickets": {
+					management = (configuration as Configurations["tickets"])?.management;
+					break;
+				}
+				default: {
+					management = undefined;
+					break;
+				}
+			}
+
+			const roleIds = management?.roles?.map((roleId) => BigInt(roleId));
+			const userIds = management?.users?.map((userId) => BigInt(userId));
+
+			const isAuthorised =
+				member.roles.some((roleId) => roleIds?.includes(roleId) ?? false) ||
+				(userIds?.includes(buttonPress.user.id) ?? false);
+			if (!isAuthorised) {
+				const locale = buttonPress.locale;
+
+				if (this.deleteMode === "delete") {
+					const strings = {
+						title: this.client.localise("cannotRemovePrompt.title", locale)(),
+						description: this.client.localise("cannotRemovePrompt.description", locale)(),
+					};
+
+					this.client.reply(buttonPress, {
+						embeds: [
+							{
+								title: strings.title,
+								description: strings.description,
+								color: constants.colors.peach,
+							},
+						],
+					});
+				} else if (this.deleteMode === "close") {
+					const strings = {
+						title: this.client.localise("cannotCloseIssue.title", locale)(),
+						description: this.client.localise("cannotCloseIssue.description", locale)(),
+					};
+
+					this.client.reply(buttonPress, {
+						embeds: [
+							{
+								title: strings.title,
+								description: strings.description,
+								color: constants.colors.peach,
+							},
+						],
+					});
+				}
+
+				return;
+			}
+
+			this.client.acknowledge(buttonPress);
+
+			const prompt = this.promptByPartialId.get(buttonPress.metadata[1]);
+			if (prompt === undefined) {
+				return;
+			}
+
+			const promptDocument = this.documentByPromptId.get(prompt.id);
+			if (promptDocument === undefined) {
+				return;
+			}
+
+			this.handleDelete(promptDocument);
+		});
+
 		this.client.registerInteractionCollector(this.magicButton);
-
-		if (this.#_removeButton !== undefined) {
-			this.#_removeButton.onCollect(async (buttonPress) => {
-				const customId = buttonPress.data?.customId;
-				if (customId === undefined) {
-					return;
-				}
-
-				const guildId = buttonPress.guildId;
-				if (guildId === undefined) {
-					return;
-				}
-
-				const member = buttonPress.member;
-				if (member === undefined) {
-					return;
-				}
-
-				let management: { roles?: string[]; users?: string[] } | undefined;
-				switch (this.type) {
-					case "reports": {
-						management = (configuration as Configurations["reports"]).management;
-						break;
-					}
-					case "resources": {
-						management = (configuration as Configurations["resources"])?.management;
-						break;
-					}
-					case "suggestions": {
-						management = (configuration as Configurations["suggestions"]).management;
-						break;
-					}
-					case "tickets": {
-						management = (configuration as Configurations["tickets"])?.management;
-						break;
-					}
-					default: {
-						management = undefined;
-						break;
-					}
-				}
-
-				const roleIds = management?.roles?.map((roleId) => BigInt(roleId));
-				const userIds = management?.users?.map((userId) => BigInt(userId));
-
-				const isAuthorised =
-					member.roles.some((roleId) => roleIds?.includes(roleId) ?? false) ||
-					(userIds?.includes(buttonPress.user.id) ?? false);
-				if (!isAuthorised) {
-					const locale = buttonPress.locale;
-
-					if (this.deleteMode === "delete") {
-						const strings = {
-							title: this.client.localise("cannotRemovePrompt.title", locale)(),
-							description: this.client.localise("cannotRemovePrompt.description", locale)(),
-						};
-
-						this.client.reply(buttonPress, {
-							embeds: [
-								{
-									title: strings.title,
-									description: strings.description,
-									color: constants.colors.peach,
-								},
-							],
-						});
-					} else if (this.deleteMode === "close") {
-						const strings = {
-							title: this.client.localise("cannotCloseIssue.title", locale)(),
-							description: this.client.localise("cannotCloseIssue.description", locale)(),
-						};
-
-						this.client.reply(buttonPress, {
-							embeds: [
-								{
-									title: strings.title,
-									description: strings.description,
-									color: constants.colors.peach,
-								},
-							],
-						});
-					}
-
-					return;
-				}
-
-				this.client.acknowledge(buttonPress);
-
-				const prompt = this.promptByPartialId.get(buttonPress.metadata[1]);
-				if (prompt === undefined) {
-					return;
-				}
-
-				const promptDocument = this.documentByPromptId.get(prompt.id);
-				if (promptDocument === undefined) {
-					return;
-				}
-
-				this.handleDelete(promptDocument);
-			});
-
-			this.client.registerInteractionCollector(this.#_removeButton);
-		}
+		this.client.registerInteractionCollector(this.removeButton);
 	}
 
 	async stop(): Promise<void> {
@@ -306,7 +303,7 @@ abstract class PromptService<
 		this.userIdByPromptId.clear();
 
 		await this.magicButton.close();
-		await this.#_removeButton?.close();
+		await this.removeButton.close();
 	}
 
 	// Anti-tampering feature; detects prompts being deleted.

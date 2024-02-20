@@ -1,5 +1,6 @@
 import * as Discord from "@discordeno/bot";
 import constants from "../../../constants/constants";
+import { Locale } from "../../../constants/languages";
 import * as Logos from "../../../types";
 import { Client, InteractionCollector, InteractionStore } from "../../client";
 import { GlobalService } from "../service";
@@ -7,7 +8,7 @@ import { GlobalService } from "../service";
 // TODO(vxern): Improve this by getting rid of the "message could not be loaded" text.
 class InteractionRepetitionService extends GlobalService {
 	readonly #_commandInteractions: InteractionCollector;
-	readonly #_showInChatButtonPresses: InteractionCollector;
+	readonly #_showInChatButtons: InteractionCollector;
 
 	constructor(client: Client) {
 		super(client);
@@ -17,7 +18,7 @@ class InteractionRepetitionService extends GlobalService {
 			type: Discord.InteractionTypes.ApplicationCommand,
 			isPermanent: true,
 		});
-		this.#_showInChatButtonPresses = new InteractionCollector<[interactionId: string]>(client, {
+		this.#_showInChatButtons = new InteractionCollector<[interactionId: string]>(client, {
 			customId: constants.components.showInChat,
 			isPermanent: true,
 		});
@@ -25,15 +26,15 @@ class InteractionRepetitionService extends GlobalService {
 
 	async start(): Promise<void> {
 		this.#_commandInteractions.onCollect(this.#handleCommandInteraction.bind(this));
-		this.#_showInChatButtonPresses.onCollect(this.#handleShowInChat.bind(this));
+		this.#_showInChatButtons.onCollect(this.#handleShowInChat.bind(this));
 
 		this.client.registerInteractionCollector(this.#_commandInteractions);
-		this.client.registerInteractionCollector(this.#_showInChatButtonPresses);
+		this.client.registerInteractionCollector(this.#_showInChatButtons);
 	}
 
 	async stop(): Promise<void> {
 		await this.#_commandInteractions.close();
-		await this.#_showInChatButtonPresses.close();
+		await this.#_showInChatButtons.close();
 	}
 
 	async #handleCommandInteraction(interaction: Logos.Interaction): Promise<void> {
@@ -49,12 +50,12 @@ class InteractionRepetitionService extends GlobalService {
 
 		const confirmButton = new InteractionCollector(this.client, {
 			only: [buttonPress.user.id],
-			dependsOn: this.#_showInChatButtonPresses,
+			dependsOn: this.#_showInChatButtons,
 			isSingle: true,
 		});
 		const cancelButton = new InteractionCollector(this.client, {
 			only: [buttonPress.user.id],
-			dependsOn: this.#_showInChatButtonPresses,
+			dependsOn: this.#_showInChatButtons,
 			isSingle: true,
 		});
 
@@ -111,6 +112,20 @@ class InteractionRepetitionService extends GlobalService {
 				},
 			],
 		});
+	}
+
+	getShowButton(interaction: Logos.Interaction, { locale }: { locale: Locale }): Discord.ButtonComponent {
+		const strings = {
+			show: this.client.localise("interactions.show", locale)(),
+		};
+
+		return {
+			type: Discord.MessageComponentTypes.Button,
+			style: Discord.ButtonStyles.Primary,
+			label: strings.show,
+			emoji: { name: constants.symbols.showInChat },
+			customId: this.#_showInChatButtons.encodeId([interaction.id.toString()]),
+		};
 	}
 }
 
