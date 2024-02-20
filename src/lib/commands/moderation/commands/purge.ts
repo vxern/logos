@@ -94,7 +94,7 @@ async function handlePurgeMessages(client: Client, interaction: Logos.Interactio
 		return;
 	}
 
-	const channelId = interaction.channel.id;
+	const channelId = interaction.channelId;
 	if (channelId === undefined) {
 		return;
 	}

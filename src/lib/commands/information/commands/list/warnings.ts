@@ -76,6 +76,7 @@ async function handleDisplayWarnings(client: Client, interaction: Logos.Interact
 	});
 }
 
+// TODO(vxern): Will be used.
 async function displayError(
 	client: Client,
 	interaction: Logos.Interaction,

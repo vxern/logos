@@ -5,7 +5,7 @@ import * as Logos from "../../../../types";
 import { Client } from "../../../client";
 import { Guild } from "../../../database/guild";
 import { Rule } from "../../../database/warning";
-import { getShowButton, parseArguments } from "../../../interactions";
+import { parseArguments } from "../../../interactions";
 import { CommandTemplate } from "../../command";
 import { show } from "../../parameters";
 
@@ -98,11 +98,14 @@ async function handleCiteRule(client: Client, interaction: Logos.Interaction): P
 		content: client.localise(`rules.${ruleId}.content`, locale)(),
 	};
 
-	const showButton = getShowButton(client, interaction, { locale });
-
 	const components: Discord.ActionRow[] | undefined = show
 		? undefined
-		: [{ type: Discord.MessageComponentTypes.ActionRow, components: [showButton] }];
+		: [
+				{
+					type: Discord.MessageComponentTypes.ActionRow,
+					components: [client.interactionRepetitionService.getShowButton(interaction, { locale })],
+				},
+		  ];
 
 	client.reply(
 		interaction,

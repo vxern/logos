@@ -3,7 +3,6 @@ import { getLocaleByLocalisationLanguage } from "../../../../constants/languages
 import { codeMultiline } from "../../../../formatting";
 import { Guild } from "../../../database/guild";
 import diagnostics from "../../../diagnostics";
-import { getFeatureLanguage, getLocalisationLanguage } from "../../../interactions";
 import { GuildEvents, MessageGenerators } from "../generator";
 
 export default {
@@ -11,9 +10,9 @@ export default {
 	message: async (client, user, entryRequest) => {
 		const guildDocument = await Guild.getOrCreate(client, { guildId: entryRequest.guildId });
 
-		const guildLanguage = getLocalisationLanguage(guildDocument);
+		const guildLanguage = guildDocument.localisationLanguage;
 		const guildLocale = getLocaleByLocalisationLanguage(guildLanguage);
-		const featureLanguage = getFeatureLanguage(guildDocument);
+		const featureLanguage = guildDocument.featureLanguage;
 
 		const strings = {
 			reason: client.localise("verification.fields.reason", guildLocale)({ language: featureLanguage }),

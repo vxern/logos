@@ -1531,7 +1531,7 @@ class InteractionCollector<Metadata extends string[] = any> extends Collector<"i
 	async #getLocaleData(interaction: Discord.Interaction): Promise<Logos.InteractionLocaleData> {
 		const [guildId, channelId, member] = [
 			interaction.guildId,
-			interaction.channel.id,
+			interaction.channelId,
 			this.#client.entities.members.get(Discord.snowflakeToBigint(`${interaction.user.id}${interaction.guildId}`)),
 		];
 		if (guildId === undefined || channelId === undefined || member === undefined) {

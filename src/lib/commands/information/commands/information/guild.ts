@@ -7,7 +7,6 @@ import * as Logos from "../../../../../types";
 import { Client } from "../../../../client";
 import { Guild } from "../../../../database/guild";
 import diagnostics from "../../../../diagnostics";
-import { getFeatureLanguage, getLocalisationLanguage } from "../../../../interactions";
 import { getGuildIconURLFormatted, snowflakeToTimestamp } from "../../../../utils";
 import { OptionTemplate } from "../../../command";
 import { proficiency } from "../../../social/roles/categories/language";
@@ -153,14 +152,11 @@ function getChannelInformationSection(client: Client, guild: Logos.Guild, { loca
 }
 
 function getLanguageInformationSection(client: Client, guildDocument: Guild, { locale }: { locale: Locale }): string {
-	const localisationLanguage = getLocalisationLanguage(guildDocument);
-	const featureLanguage = getFeatureLanguage(guildDocument);
-
 	const strings = {
 		home: client.localise("information.options.server.strings.languageTypes.home", locale)(),
 		target: client.localise("information.options.server.strings.languageTypes.target", locale)(),
-		localisationLanguage: client.localise(localisations.languages[localisationLanguage], locale)(),
-		featureLanguage: client.localise(localisations.languages[featureLanguage], locale)(),
+		localisationLanguage: client.localise(localisations.languages[guildDocument.localisationLanguage], locale)(),
+		featureLanguage: client.localise(localisations.languages[guildDocument.featureLanguage], locale)(),
 	};
 
 	return `${constants.symbols.guild.languages.localisation} ${strings.home} – ${strings.localisationLanguage}\n${constants.symbols.guild.languages.feature} ${strings.target} – ${strings.featureLanguage}`;

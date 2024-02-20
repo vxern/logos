@@ -2,7 +2,7 @@ import * as Discord from "@discordeno/bot";
 import constants from "../../../../../constants/constants";
 import * as Logos from "../../../../../types";
 import { Client } from "../../../../client";
-import { getShowButton, parseArguments } from "../../../../interactions";
+import { parseArguments } from "../../../../interactions";
 
 async function handleDisplayVolume(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const [{ show: showParameter }] = parseArguments(interaction.data?.options, { show: "boolean" });
@@ -54,11 +54,14 @@ async function handleDisplayVolume(client: Client, interaction: Logos.Interactio
 		description: client.localise("music.options.volume.options.display.strings.volume.description", locale)({ volume }),
 	};
 
-	const showButton = getShowButton(client, interaction, { locale });
-
 	const components: Discord.ActionRow[] | undefined = show
 		? undefined
-		: [{ type: Discord.MessageComponentTypes.ActionRow, components: [showButton] }];
+		: [
+				{
+					type: Discord.MessageComponentTypes.ActionRow,
+					components: [client.interactionRepetitionService.getShowButton(interaction, { locale })],
+				},
+		  ];
 
 	client.reply(
 		interaction,

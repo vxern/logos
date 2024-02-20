@@ -5,7 +5,7 @@ import * as Logos from "../../../../../types";
 import { Client } from "../../../../client";
 import { Praise } from "../../../../database/praise";
 import { Warning } from "../../../../database/warning";
-import { getShowButton, parseArguments } from "../../../../interactions";
+import { parseArguments } from "../../../../interactions";
 import { OptionTemplate } from "../../../command";
 import { show, user } from "../../../parameters";
 
@@ -70,11 +70,14 @@ async function handleDisplayProfile(client: Client, interaction: Logos.Interacti
 		sent: client.localise("profile.options.view.strings.information.description.sent", locale)(),
 	};
 
-	const showButton = getShowButton(client, interaction, { locale });
-
 	const components: Discord.ActionRow[] | undefined = show
 		? undefined
-		: [{ type: Discord.MessageComponentTypes.ActionRow, components: [showButton] }];
+		: [
+				{
+					type: Discord.MessageComponentTypes.ActionRow,
+					components: [client.interactionRepetitionService.getShowButton(interaction, { locale })],
+				},
+		  ];
 
 	client.reply(
 		interaction,

@@ -142,6 +142,7 @@ async function handlePraiseUser(client: Client, interaction: Logos.Interaction):
 	});
 }
 
+// TODO(vxern): Will be used.
 async function displayError(
 	client: Client,
 	interaction: Logos.Interaction,

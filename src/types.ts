@@ -153,7 +153,7 @@ interface InteractionFlags {
 
 type Interaction<Metadata extends string[] = any> = Omit<
 	Pick<Discord.Interaction, keyof LogosDesiredProperties["interaction"]>,
-	"channelId" | "locale" | "guildLocale"
+	"locale" | "guildLocale"
 > &
 	InteractionLocaleData &
 	InteractionFlags & {

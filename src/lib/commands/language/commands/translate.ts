@@ -11,7 +11,7 @@ import localisations from "../../../../constants/localisations";
 import { trim } from "../../../../formatting";
 import * as Logos from "../../../../types";
 import { Client } from "../../../client";
-import { getShowButton, parseArguments } from "../../../interactions";
+import { parseArguments } from "../../../interactions";
 import { asStream } from "../../../utils";
 import { CommandTemplate } from "../../command";
 import { show } from "../../parameters";
@@ -564,11 +564,14 @@ async function translateText(
 		];
 	}
 
-	const showButton = getShowButton(client, interaction, { locale });
-
 	const components: Discord.ActionRow[] | undefined = show
 		? undefined
-		: [{ type: Discord.MessageComponentTypes.ActionRow, components: [showButton] }];
+		: [
+				{
+					type: Discord.MessageComponentTypes.ActionRow,
+					components: [client.interactionRepetitionService.getShowButton(interaction, { locale })],
+				},
+		  ];
 
 	client.editReply(interaction, { embeds, components });
 }

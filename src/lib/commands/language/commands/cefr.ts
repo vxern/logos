@@ -5,7 +5,7 @@ import * as Logos from "../../../../types";
 import { Client, InteractionCollector } from "../../../client";
 import { CefrConfiguration } from "../../../database/guild";
 import { Guild } from "../../../database/guild";
-import { getShowButton, parseArguments } from "../../../interactions";
+import { parseArguments } from "../../../interactions";
 import { CommandTemplate } from "../../command";
 import { show } from "../../parameters";
 
@@ -92,8 +92,6 @@ async function handleDisplayCefrGuide(client: Client, interaction: Logos.Interac
 		},
 	};
 
-	const showButton = getShowButton(client, interaction, { locale });
-
 	const bracketButtons = new InteractionCollector<BracketButtonMetadata>(client, {
 		only: !show ? [interaction.user.id] : undefined,
 	});
@@ -172,7 +170,7 @@ async function handleDisplayCefrGuide(client: Client, interaction: Logos.Interac
 		}
 
 		if (!show) {
-			tabButtonComponents.push(showButton);
+			tabButtonComponents.push(client.interactionRepetitionService.getShowButton(interaction, { locale }));
 		}
 
 		const rows: Discord.ActionRow[] = [

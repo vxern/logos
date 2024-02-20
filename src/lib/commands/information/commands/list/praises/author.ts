@@ -54,6 +54,7 @@ async function handleDisplayPraises(client: Client, interaction: Logos.Interacti
 	});
 }
 
+// TODO(vxern): Will be used.
 async function displayError(
 	client: Client,
 	interaction: Logos.Interaction,

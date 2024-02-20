@@ -3,7 +3,7 @@ import localisations from "../../../../constants/localisations";
 import * as Logos from "../../../../types";
 import { Client } from "../../../client";
 import { Guild } from "../../../database/guild";
-import { getShowButton, parseArguments } from "../../../interactions";
+import { parseArguments } from "../../../interactions";
 import { CommandTemplate } from "../../command";
 import { show } from "../../parameters";
 
@@ -46,8 +46,6 @@ async function handleDisplayResources(client: Client, interaction: Logos.Interac
 		}),
 	};
 
-	const showButton = getShowButton(client, interaction, { locale });
-
 	const buttons: Discord.ButtonComponent[] = [
 		{
 			type: Discord.MessageComponentTypes.Button,
@@ -58,7 +56,7 @@ async function handleDisplayResources(client: Client, interaction: Logos.Interac
 	];
 
 	if (!show) {
-		buttons.push(showButton);
+		buttons.push(client.interactionRepetitionService.getShowButton(interaction, { locale }));
 	}
 
 	client.reply(
