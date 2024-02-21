@@ -123,66 +123,6 @@ class EntryService extends LocalService {
 		});
 	}
 
-	private generateVerificationQuestionModal(
-		language: FeatureLanguage,
-		{ locale }: { locale: Locale },
-	): Modal<EntryRequest["answers"]> {
-		const strings = {
-			title: this.client.localise("verification.title", locale)(),
-			reason: this.client.localise("verification.fields.reason", locale)({ language }),
-			aim: this.client.localise("verification.fields.aim", locale)(),
-			whereFound: this.client.localise("verification.fields.whereFound", locale)(),
-		};
-
-		return {
-			title: strings.title,
-			fields: [
-				{
-					type: Discord.MessageComponentTypes.ActionRow,
-					components: [
-						{
-							customId: "reason",
-							type: Discord.MessageComponentTypes.InputText,
-							label: trim(strings.reason, 45),
-							style: Discord.TextStyles.Paragraph,
-							required: true,
-							minLength: 20,
-							maxLength: 300,
-						},
-					],
-				},
-				{
-					type: Discord.MessageComponentTypes.ActionRow,
-					components: [
-						{
-							customId: "aim",
-							type: Discord.MessageComponentTypes.InputText,
-							label: trim(strings.aim, 45),
-							style: Discord.TextStyles.Paragraph,
-							required: true,
-							minLength: 20,
-							maxLength: 300,
-						},
-					],
-				},
-				{
-					type: Discord.MessageComponentTypes.ActionRow,
-					components: [
-						{
-							customId: "whereFound",
-							type: Discord.MessageComponentTypes.InputText,
-							label: trim(strings.whereFound, 45),
-							style: Discord.TextStyles.Short,
-							required: true,
-							minLength: 5,
-							maxLength: 50,
-						},
-					],
-				},
-			],
-		};
-	}
-
 	async #handlePickLanguageProficiency(
 		buttonPress: Logos.Interaction<[index: string]>,
 		{ collector }: { collector: InteractionCollector },
@@ -194,8 +134,8 @@ class EntryService extends LocalService {
 			return;
 		}
 
-		// TODO(vxern): Improve.
-		const snowflake = proficiency.collection.list[parseInt(buttonPress.metadata[1])]?.snowflakes[this.guildIdString];
+		const index = parseInt(buttonPress.metadata[1]);
+		const snowflake = proficiency.collection.list[index]?.snowflakes[this.guildIdString];
 		if (snowflake === undefined) {
 			return;
 		}
@@ -315,8 +255,8 @@ class EntryService extends LocalService {
 			return;
 		}
 
-		// TODO: Improve.
-		const snowflake = proficiency.collection.list[parseInt(buttonPress.metadata[1])]?.snowflakes[this.guildIdString];
+		const index = parseInt(buttonPress.metadata[1]);
+		const snowflake = proficiency.collection.list[index]?.snowflakes[this.guildIdString];
 		if (snowflake === undefined) {
 			return;
 		}
@@ -451,6 +391,66 @@ class EntryService extends LocalService {
 				}
 			},
 		});
+	}
+
+	private generateVerificationQuestionModal(
+		language: FeatureLanguage,
+		{ locale }: { locale: Locale },
+	): Modal<EntryRequest["answers"]> {
+		const strings = {
+			title: this.client.localise("verification.title", locale)(),
+			reason: this.client.localise("verification.fields.reason", locale)({ language }),
+			aim: this.client.localise("verification.fields.aim", locale)(),
+			whereFound: this.client.localise("verification.fields.whereFound", locale)(),
+		};
+
+		return {
+			title: strings.title,
+			fields: [
+				{
+					type: Discord.MessageComponentTypes.ActionRow,
+					components: [
+						{
+							customId: "reason",
+							type: Discord.MessageComponentTypes.InputText,
+							label: trim(strings.reason, 45),
+							style: Discord.TextStyles.Paragraph,
+							required: true,
+							minLength: 20,
+							maxLength: 300,
+						},
+					],
+				},
+				{
+					type: Discord.MessageComponentTypes.ActionRow,
+					components: [
+						{
+							customId: "aim",
+							type: Discord.MessageComponentTypes.InputText,
+							label: trim(strings.aim, 45),
+							style: Discord.TextStyles.Paragraph,
+							required: true,
+							minLength: 20,
+							maxLength: 300,
+						},
+					],
+				},
+				{
+					type: Discord.MessageComponentTypes.ActionRow,
+					components: [
+						{
+							customId: "whereFound",
+							type: Discord.MessageComponentTypes.InputText,
+							label: trim(strings.whereFound, 45),
+							style: Discord.TextStyles.Short,
+							required: true,
+							minLength: 5,
+							maxLength: 50,
+						},
+					],
+				},
+			],
+		};
 	}
 
 	private async vetUser(interaction: Logos.Interaction, { locale }: { locale: Locale }): Promise<boolean> {
