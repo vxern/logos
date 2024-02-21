@@ -5,7 +5,6 @@ import localisations from "../../../../constants/localisations";
 import { list } from "../../../../formatting";
 import * as Logos from "../../../../types";
 import { Client } from "../../../client";
-import { parseArguments } from "../../../interactions";
 import { asStream } from "../../../utils";
 import { CommandTemplate } from "../../command";
 import { getAdapters } from "../detectors/adapters";
@@ -32,15 +31,13 @@ const commands = {
 	},
 } satisfies Record<string, CommandTemplate>;
 
-async function handleRecogniseLanguageChatInput(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const [{ text }] = parseArguments(interaction.data?.options, {});
-	if (text === undefined) {
-		return;
-	}
-
+async function handleRecogniseLanguageChatInput(
+	client: Client,
+	interaction: Logos.Interaction<any, { text: string }>,
+): Promise<void> {
 	const locale = interaction.locale;
 
-	handleRecogniseLanguage(client, interaction, text, { isMessage: false }, { locale });
+	handleRecogniseLanguage(client, interaction, { text: interaction.parameters.text, isMessage: false }, { locale });
 }
 
 async function handleRecogniseLanguageMessage(client: Client, interaction: Logos.Interaction): Promise<void> {
@@ -72,14 +69,13 @@ async function handleRecogniseLanguageMessage(client: Client, interaction: Logos
 
 	const text = message.content;
 
-	handleRecogniseLanguage(client, interaction, text, { isMessage: true }, { locale });
+	handleRecogniseLanguage(client, interaction, { text, isMessage: true }, { locale });
 }
 
 async function handleRecogniseLanguage(
 	client: Client,
 	interaction: Logos.Interaction,
-	text: string,
-	{ isMessage }: { isMessage: boolean },
+	{ text, isMessage }: { text: string; isMessage: boolean },
 	{ locale }: { locale: Locale },
 ): Promise<void> {
 	const isTextEmpty = text.trim().length === 0;
@@ -103,7 +99,7 @@ async function handleRecogniseLanguage(
 
 	await client.postponeReply(interaction);
 
-	const detectedLanguages = await detectLanguages(text);
+	const detectedLanguages = await detectLanguages({ text });
 
 	if (detectedLanguages.likely.length === 0 && detectedLanguages.possible.length === 0) {
 		const strings = {
@@ -243,7 +239,7 @@ async function handleRecogniseLanguage(
 	client.editReply(interaction, { embeds });
 }
 
-async function detectLanguages(text: string): Promise<DetectedLanguagesSorted> {
+async function detectLanguages({ text }: { text: string }): Promise<DetectedLanguagesSorted> {
 	const adapters = getAdapters();
 
 	const detectionFrequencies: Partial<Record<DetectionLanguage, number>> = {};

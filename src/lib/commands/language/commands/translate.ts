@@ -11,7 +11,6 @@ import localisations from "../../../../constants/localisations";
 import { trim } from "../../../../formatting";
 import * as Logos from "../../../../types";
 import { Client } from "../../../client";
-import { parseArguments } from "../../../interactions";
 import { asStream } from "../../../utils";
 import { CommandTemplate } from "../../command";
 import { show } from "../../parameters";
@@ -60,9 +59,10 @@ const commands = {
 	},
 } satisfies Record<string, CommandTemplate>;
 
-async function handleTranslateChatInputAutocomplete(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const [_, focused] = parseArguments(interaction.data?.options, { show: "boolean" });
-
+async function handleTranslateChatInputAutocomplete(
+	client: Client,
+	interaction: Logos.Interaction<any, { to: string; from: string }>,
+): Promise<void> {
 	const locale = interaction.locale;
 
 	const guildId = interaction.guildId;
@@ -75,11 +75,14 @@ async function handleTranslateChatInputAutocomplete(client: Client, interaction:
 		return;
 	}
 
-	if (focused === undefined || focused.value === undefined) {
+	if (
+		interaction.parameters.focused === undefined ||
+		interaction.parameters[interaction.parameters.focused] === undefined
+	) {
 		return;
 	}
 
-	const languageQueryTrimmed = (focused.value as string).trim();
+	const languageQueryTrimmed = interaction.parameters[interaction.parameters.focused].trim();
 	if (languageQueryTrimmed.length === 0) {
 		const strings = {
 			autocomplete: client.localise("autocomplete.language", locale)(),
@@ -117,14 +120,11 @@ async function handleTranslateChatInputAutocomplete(client: Client, interaction:
 	client.respond(interaction, choices);
 }
 
-/** Allows the user to translate text from one language to another through the DeepL API. */
-async function handleTranslateChatInput(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const [{ from, to, text, show: showParameter }] = parseArguments(interaction.data?.options, { show: "boolean" });
-	if (text === undefined) {
-		return;
-	}
-
-	handleTranslate(client, interaction, text, { from, to }, { showParameter });
+async function handleTranslateChatInput(
+	client: Client,
+	interaction: Logos.Interaction<any, { text: string; from: string | undefined; to: string | undefined }>,
+): Promise<void> {
+	handleTranslate(client, interaction, interaction.parameters);
 }
 
 async function handleTranslateMessage(client: Client, interaction: Logos.Interaction): Promise<void> {
@@ -154,21 +154,16 @@ async function handleTranslateMessage(client: Client, interaction: Logos.Interac
 		return;
 	}
 
-	const text = message.content;
-
-	handleTranslate(client, interaction, text, {}, {});
+	handleTranslate(client, interaction, { text: message.content });
 }
 
 async function handleTranslate(
 	client: Client,
 	interaction: Logos.Interaction,
-	text: string,
-	{ from, to }: { from?: string; to?: string },
-	{ showParameter }: { showParameter?: boolean },
+	{ text, from, to }: { text: string; from?: string; to?: string },
 ): Promise<void> {
-	const show = interaction.show ?? showParameter ?? false;
-	const language = show ? interaction.guildLanguage : interaction.language;
-	const locale = show ? interaction.guildLocale : interaction.locale;
+	const language = interaction.parameters.show ? interaction.guildLanguage : interaction.language;
+	const locale = interaction.parameters.show ? interaction.guildLocale : interaction.locale;
 
 	const isTextEmpty = text.trim().length === 0;
 	if (isTextEmpty) {
@@ -284,12 +279,12 @@ async function handleTranslate(
 				return;
 			}
 
-			translateText(client, interaction, text, { source: from, target: to }, { show }, { locale });
+			translateText(client, interaction, { text, languages: { source: from, target: to } }, { locale });
 			return;
 		}
 
 		if (from === undefined) {
-			const detectedLanguage = await detectLanguage(client, interaction, text);
+			const detectedLanguage = await detectLanguage(client, interaction, { text });
 			if (detectedLanguage === undefined) {
 				return;
 			}
@@ -299,7 +294,7 @@ async function handleTranslate(
 			sourceLanguage = from;
 		}
 	} else {
-		const detectedLanguage = await detectLanguage(client, interaction, text);
+		const detectedLanguage = await detectLanguage(client, interaction, { text });
 		if (detectedLanguage === undefined) {
 			return;
 		}
@@ -309,7 +304,7 @@ async function handleTranslate(
 
 	if (to !== undefined) {
 		if (to !== sourceLanguage) {
-			translateText(client, interaction, text, { source: sourceLanguage, target: to }, { show }, { locale });
+			translateText(client, interaction, { text, languages: { source: sourceLanguage, target: to } }, { locale });
 			return;
 		}
 	}
@@ -320,9 +315,7 @@ async function handleTranslate(
 			translateText(
 				client,
 				interaction,
-				text,
-				{ source: sourceLanguage, target: learningTranslationLanguage },
-				{ show },
+				{ text, languages: { source: sourceLanguage, target: learningTranslationLanguage } },
 				{ locale },
 			);
 			return;
@@ -387,77 +380,15 @@ async function handleTranslate(
 	translateText(
 		client,
 		interaction,
-		text,
-		{ source: sourceLanguage, target: translationLanguage },
-		{ show },
+		{ text, languages: { source: sourceLanguage, target: translationLanguage } },
 		{ locale },
 	);
-}
-
-async function detectLanguage(
-	client: Client,
-	interaction: Logos.Interaction,
-	text: string,
-): Promise<TranslationLanguage | undefined> {
-	const detectionResult = (await detectLanguages(text)).likely.at(0);
-	if (detectionResult === undefined) {
-		const locale = interaction.locale;
-
-		const strings = {
-			title: client.localise("translate.strings.cannotDetermine.source.title", locale)(),
-			description: {
-				cannotDetermine: client.localise(
-					"translate.strings.cannotDetermine.source.description.cannotDetermine",
-					locale,
-				)(),
-				tryAgain: client.localise("translate.strings.cannotDetermine.source.description.tryAgain", locale)(),
-			},
-		};
-
-		client.reply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: `${strings.description.cannotDetermine}\n\n${strings.description.tryAgain}`,
-					color: constants.colors.peach,
-				},
-			],
-		});
-
-		return undefined;
-	}
-
-	const detectedLanguage = getTranslationLanguage(detectionResult);
-	if (detectedLanguage === undefined) {
-		const locale = interaction.locale;
-
-		const strings = {
-			title: client.localise("translate.strings.languageNotSupported.title", locale)(),
-			description: client.localise("translate.strings.languageNotSupported.description", locale)(),
-		};
-
-		client.reply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colors.dullYellow,
-				},
-			],
-		});
-
-		return undefined;
-	}
-
-	return detectedLanguage;
 }
 
 async function translateText(
 	client: Client,
 	interaction: Logos.Interaction,
-	text: string,
-	languages: Languages<TranslationLanguage>,
-	{ show }: { show: boolean },
+	{ text, languages }: { text: string; languages: Languages<TranslationLanguage> },
 	{ locale }: { locale: Locale },
 ): Promise<void> {
 	const adapters = resolveAdapters(languages);
@@ -479,7 +410,7 @@ async function translateText(
 		return;
 	}
 
-	await client.postponeReply(interaction, { visible: show });
+	await client.postponeReply(interaction, { visible: interaction.parameters.show });
 
 	let translation: Translation | undefined;
 	for await (const element of asStream(adapters, (adapter) => adapter.translate(client, text, languages))) {
@@ -574,6 +505,64 @@ async function translateText(
 		  ];
 
 	client.editReply(interaction, { embeds, components });
+}
+
+async function detectLanguage(
+	client: Client,
+	interaction: Logos.Interaction,
+	{ text }: { text: string },
+): Promise<TranslationLanguage | undefined> {
+	const detectionResult = (await detectLanguages({ text })).likely.at(0);
+	if (detectionResult === undefined) {
+		const locale = interaction.locale;
+
+		const strings = {
+			title: client.localise("translate.strings.cannotDetermine.source.title", locale)(),
+			description: {
+				cannotDetermine: client.localise(
+					"translate.strings.cannotDetermine.source.description.cannotDetermine",
+					locale,
+				)(),
+				tryAgain: client.localise("translate.strings.cannotDetermine.source.description.tryAgain", locale)(),
+			},
+		};
+
+		client.reply(interaction, {
+			embeds: [
+				{
+					title: strings.title,
+					description: `${strings.description.cannotDetermine}\n\n${strings.description.tryAgain}`,
+					color: constants.colors.peach,
+				},
+			],
+		});
+
+		return undefined;
+	}
+
+	const detectedLanguage = getTranslationLanguage(detectionResult);
+	if (detectedLanguage === undefined) {
+		const locale = interaction.locale;
+
+		const strings = {
+			title: client.localise("translate.strings.languageNotSupported.title", locale)(),
+			description: client.localise("translate.strings.languageNotSupported.description", locale)(),
+		};
+
+		client.reply(interaction, {
+			embeds: [
+				{
+					title: strings.title,
+					description: strings.description,
+					color: constants.colors.dullYellow,
+				},
+			],
+		});
+
+		return undefined;
+	}
+
+	return detectedLanguage;
 }
 
 export default commands;

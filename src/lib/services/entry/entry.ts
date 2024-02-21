@@ -125,7 +125,7 @@ class EntryService extends LocalService {
 
 	async #handlePickLanguageProficiency(
 		buttonPress: Logos.Interaction<[index: string]>,
-		{ collector }: { collector: InteractionCollector },
+		{ collector }: { collector: InteractionCollector<[index: string]> },
 	): Promise<void> {
 		const locale = buttonPress.locale;
 

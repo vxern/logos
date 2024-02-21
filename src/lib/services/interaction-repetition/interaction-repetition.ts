@@ -8,7 +8,7 @@ import { GlobalService } from "../service";
 // TODO(vxern): Improve this by getting rid of the "message could not be loaded" text.
 class InteractionRepetitionService extends GlobalService {
 	readonly #_commandInteractions: InteractionCollector;
-	readonly #_showInChatButtons: InteractionCollector;
+	readonly #_showInChatButtons: InteractionCollector<[interactionId: string]>;
 
 	constructor(client: Client) {
 		super(client);
@@ -45,7 +45,7 @@ class InteractionRepetitionService extends GlobalService {
 		this.client.registerInteraction(interaction);
 	}
 
-	async #handleShowInChat(buttonPress: Logos.Interaction): Promise<void> {
+	async #handleShowInChat(buttonPress: Logos.Interaction<[interactionId: string]>): Promise<void> {
 		await this.client.postponeReply(buttonPress);
 
 		const confirmButton = new InteractionCollector(this.client, {
@@ -71,9 +71,10 @@ class InteractionRepetitionService extends GlobalService {
 
 			const interactionSpoofed = InteractionStore.spoofInteraction(originalInteraction, {
 				using: confirmButtonPress,
+				parameters: { show: true },
 			});
 
-			await this.client.handleInteraction(interactionSpoofed, { show: true });
+			await this.client.handleInteraction(interactionSpoofed);
 		});
 
 		cancelButton.onCollect(async (_) => this.client.deleteReply(buttonPress));

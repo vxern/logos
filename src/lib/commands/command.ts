@@ -7,7 +7,7 @@ import { Client } from "../client";
 type WithRequired<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>> & Required<Pick<T, K>>;
 
 /** Describes the handler of an interaction. */
-type InteractionHandler = (client: Client, interaction: Logos.Interaction) => Promise<void>;
+type InteractionHandler = (client: Client, interaction: Logos.Interaction<any, any>) => Promise<void>;
 
 type Command = Discord.CreateApplicationCommand;
 

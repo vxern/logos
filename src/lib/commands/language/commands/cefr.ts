@@ -5,7 +5,6 @@ import * as Logos from "../../../../types";
 import { Client, InteractionCollector } from "../../../client";
 import { CefrConfiguration } from "../../../database/guild";
 import { Guild } from "../../../database/guild";
-import { parseArguments } from "../../../interactions";
 import { CommandTemplate } from "../../command";
 import { show } from "../../parameters";
 
@@ -32,10 +31,7 @@ type BracketButtonMetadata = [bracket: Bracket];
 type TabButtonMetadata = [tab: Tab];
 
 async function handleDisplayCefrGuide(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const [{ show: showParameter }] = parseArguments(interaction.data?.options, { show: "boolean" });
-
-	const show = interaction.show ?? showParameter ?? false;
-	const locale = show ? interaction.guildLocale : interaction.locale;
+	const locale = interaction.parameters.show ? interaction.guildLocale : interaction.locale;
 
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
@@ -204,7 +200,11 @@ async function handleDisplayCefrGuide(client: Client, interaction: Logos.Interac
 	client.registerInteractionCollector(bracketButtons);
 	client.registerInteractionCollector(tabButtons);
 
-	client.reply(interaction, { embeds: [getEmbed()], components: getButtons() }, { visible: show });
+	client.reply(
+		interaction,
+		{ embeds: [getEmbed()], components: getButtons() },
+		{ visible: interaction.parameters.show },
+	);
 }
 
 function getBracketGuide(

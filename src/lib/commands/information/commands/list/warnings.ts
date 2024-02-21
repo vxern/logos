@@ -5,7 +5,6 @@ import { timestamp } from "../../../../../formatting";
 import * as Logos from "../../../../../types";
 import { Client } from "../../../../client";
 import { Warning } from "../../../../database/warning";
-import { parseArguments } from "../../../../interactions";
 import { OptionTemplate } from "../../../command";
 import { getRuleTitleFormatted, rules } from "../../../moderation/commands/rule";
 import { user } from "../../../parameters";
@@ -18,9 +17,11 @@ const option: OptionTemplate = {
 	options: [{ ...user, required: false }],
 };
 
-async function handleDisplayWarningsAutocomplete(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const [{ user }] = parseArguments(interaction.data?.options, {});
-	if (user === undefined) {
+async function handleDisplayWarningsAutocomplete(
+	client: Client,
+	interaction: Logos.Interaction<any, { user: string | undefined }>,
+): Promise<void> {
+	if (interaction.parameters.user === undefined) {
 		return;
 	}
 
@@ -32,7 +33,7 @@ async function handleDisplayWarningsAutocomplete(client: Client, interaction: Lo
 	const isModerator = permissions.has("MODERATE_MEMBERS");
 
 	client.autocompleteMembers(interaction, {
-		identifier: user,
+		identifier: interaction.parameters.user,
 		options: {
 			// Stops normal members from viewing other people's warnings.
 			restrictToSelf: !isModerator,
@@ -40,10 +41,11 @@ async function handleDisplayWarningsAutocomplete(client: Client, interaction: Lo
 	});
 }
 
-async function handleDisplayWarnings(client: Client, interaction: Logos.Interaction): Promise<void> {
+async function handleDisplayWarnings(
+	client: Client,
+	interaction: Logos.Interaction<any, { user: string | undefined }>,
+): Promise<void> {
 	const locale = interaction.locale;
-
-	const [{ user }] = parseArguments(interaction.data?.options, {});
 
 	const permissions = interaction.member?.permissions;
 	if (permissions === undefined) {
@@ -55,7 +57,7 @@ async function handleDisplayWarnings(client: Client, interaction: Logos.Interact
 	const member = client.resolveInteractionToMember(
 		interaction,
 		{
-			identifier: user ?? interaction.user.id.toString(),
+			identifier: interaction.parameters.user ?? interaction.user.id.toString(),
 			options: {
 				// Stops normal members from viewing other people's warnings.
 				restrictToSelf: !isModerator,

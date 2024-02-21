@@ -3,7 +3,6 @@ import localisations from "../../../../constants/localisations";
 import * as Logos from "../../../../types";
 import { Client } from "../../../client";
 import { Guild } from "../../../database/guild";
-import { parseArguments } from "../../../interactions";
 import { CommandTemplate } from "../../command";
 import { show } from "../../parameters";
 
@@ -20,10 +19,7 @@ const command: CommandTemplate = {
 
 /** Displays a message with information on where to find the resources for a given language. */
 async function handleDisplayResources(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const [{ show: showParameter }] = parseArguments(interaction.data?.options, { show: "boolean" });
-
-	const show = interaction.show ?? showParameter ?? false;
-	const locale = interaction.show ?? show ? interaction.guildLocale : interaction.locale;
+	const locale = interaction.parameters.show ?? show ? interaction.guildLocale : interaction.locale;
 
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
@@ -69,7 +65,7 @@ async function handleDisplayResources(client: Client, interaction: Logos.Interac
 				},
 			],
 		},
-		{ visible: show },
+		{ visible: interaction.parameters.show },
 	);
 }
 

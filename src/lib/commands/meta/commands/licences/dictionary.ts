@@ -4,7 +4,6 @@ import { Locale } from "../../../../../constants/languages";
 import licences from "../../../../../constants/licences";
 import * as Logos from "../../../../../types";
 import { Client } from "../../../../client";
-import { parseArguments } from "../../../../interactions";
 import { OptionTemplate } from "../../../command";
 
 const command: OptionTemplate = {
@@ -24,18 +23,14 @@ const command: OptionTemplate = {
 
 async function handleDisplayDictionaryLicenceAutocomplete(
 	client: Client,
-	interaction: Logos.Interaction,
+	interaction: Logos.Interaction<any, { dictionary: string }>,
 ): Promise<void> {
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
 		return;
 	}
 
-	const [{ dictionary: dictionaryOrUndefined }] = parseArguments(interaction.data?.options, {});
-	const dictionaryQueryRaw = dictionaryOrUndefined ?? "";
-
-	const dictionaryQueryTrimmed = dictionaryQueryRaw.trim();
-	const dictionaryQueryLowercase = dictionaryQueryTrimmed.toLowerCase();
+	const dictionaryLowercase = interaction.parameters.dictionary.trim().toLowerCase();
 	const choices = Object.entries(licences.dictionaries)
 		.map(([dictionaryKey, dictionary]) => {
 			return {
@@ -43,26 +38,23 @@ async function handleDisplayDictionaryLicenceAutocomplete(
 				value: dictionaryKey,
 			};
 		})
-		.filter((choice) => choice.name.toLowerCase().includes(dictionaryQueryLowercase));
+		.filter((choice) => choice.name.toLowerCase().includes(dictionaryLowercase));
 
 	client.respond(interaction, choices);
 }
 
-async function handleDisplayDictionaryLicence(client: Client, interaction: Logos.Interaction): Promise<void> {
+async function handleDisplayDictionaryLicence(
+	client: Client,
+	interaction: Logos.Interaction<any, { dictionary: string }>,
+): Promise<void> {
 	const locale = interaction.locale;
 
-	const [{ dictionary: dictionaryOrUndefined }] = parseArguments(interaction.data?.options, {});
-	if (dictionaryOrUndefined === undefined) {
+	if (!(interaction.parameters.dictionary in licences.dictionaries)) {
 		displayError(client, interaction, { locale: interaction.locale });
 		return;
 	}
 
-	if (!(dictionaryOrUndefined in licences.dictionaries)) {
-		displayError(client, interaction, { locale: interaction.locale });
-		return;
-	}
-
-	const dictionaryName = dictionaryOrUndefined as keyof typeof licences.dictionaries;
+	const dictionaryName = interaction.parameters.dictionary as keyof typeof licences.dictionaries;
 	const licenceInformation = licences.dictionaries[dictionaryName];
 
 	const strings = {

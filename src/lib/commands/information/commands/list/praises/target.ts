@@ -4,7 +4,6 @@ import { Locale } from "../../../../../../constants/languages";
 import * as Logos from "../../../../../../types";
 import { Client } from "../../../../../client";
 import { Praise } from "../../../../../database/praise";
-import { parseArguments } from "../../../../../interactions";
 import { OptionTemplate } from "../../../../command";
 import { user } from "../../../../parameters";
 import { getPraisePage } from "../praises";
@@ -17,23 +16,26 @@ const option: OptionTemplate = {
 	options: [{ ...user, required: false }],
 };
 
-async function handleDisplayPraisesAutocomplete(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const [{ user }] = parseArguments(interaction.data?.options, {});
-	if (user === undefined) {
+async function handleDisplayPraisesAutocomplete(
+	client: Client,
+	interaction: Logos.Interaction<any, { user: string | undefined }>,
+): Promise<void> {
+	if (interaction.parameters.user === undefined) {
 		return;
 	}
 
-	client.autocompleteMembers(interaction, { identifier: user });
+	client.autocompleteMembers(interaction, { identifier: interaction.parameters.user });
 }
 
-async function handleDisplayPraises(client: Client, interaction: Logos.Interaction): Promise<void> {
+async function handleDisplayPraises(
+	client: Client,
+	interaction: Logos.Interaction<any, { user: string | undefined }>,
+): Promise<void> {
 	const locale = interaction.locale;
-
-	const [{ user: userQuery }] = parseArguments(interaction.data?.options, {});
 
 	const member = client.resolveInteractionToMember(
 		interaction,
-		{ identifier: userQuery ?? interaction.user.id.toString() },
+		{ identifier: interaction.parameters.user ?? interaction.user.id.toString() },
 		{ locale },
 	);
 	if (member === undefined) {

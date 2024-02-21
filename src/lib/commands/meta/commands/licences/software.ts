@@ -5,7 +5,7 @@ import licences from "../../../../../constants/licences";
 import { code } from "../../../../../formatting";
 import * as Logos from "../../../../../types";
 import { Client } from "../../../../client";
-import { paginate, parseArguments } from "../../../../interactions";
+import { paginate } from "../../../../interactions";
 import { chunk } from "../../../../utils";
 import { OptionTemplate } from "../../../command";
 
@@ -24,17 +24,16 @@ const command: OptionTemplate = {
 	],
 };
 
-async function handleDisplaySoftwareLicenceAutocomplete(client: Client, interaction: Logos.Interaction): Promise<void> {
+async function handleDisplaySoftwareLicenceAutocomplete(
+	client: Client,
+	interaction: Logos.Interaction<any, { package: string }>,
+): Promise<void> {
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
 		return;
 	}
 
-	const [{ package: packageOrUndefined }] = parseArguments(interaction.data?.options, {});
-	const packageQueryRaw = packageOrUndefined ?? "";
-
-	const packageQueryTrimmed = packageQueryRaw.trim();
-	const packageQueryLowercase = packageQueryTrimmed.toLowerCase();
+	const packageLowercase = interaction.parameters.package.trim().toLowerCase();
 	const choices = Object.keys(licences.software)
 		.map((packageName) => {
 			return {
@@ -42,26 +41,23 @@ async function handleDisplaySoftwareLicenceAutocomplete(client: Client, interact
 				value: packageName,
 			};
 		})
-		.filter((choice) => choice.name.toLowerCase().includes(packageQueryLowercase));
+		.filter((choice) => choice.name.toLowerCase().includes(packageLowercase));
 
 	client.respond(interaction, choices);
 }
 
-async function handleDisplaySoftwareLicence(client: Client, interaction: Logos.Interaction): Promise<void> {
+async function handleDisplaySoftwareLicence(
+	client: Client,
+	interaction: Logos.Interaction<any, { package: string }>,
+): Promise<void> {
 	const locale = interaction.locale;
 
-	const [{ package: packageOrUndefined }] = parseArguments(interaction.data?.options, {});
-	if (packageOrUndefined === undefined) {
+	if (!(interaction.parameters.package in licences.software)) {
 		displayError(client, interaction, { locale: interaction.locale });
 		return;
 	}
 
-	if (!(packageOrUndefined in licences.software)) {
-		displayError(client, interaction, { locale: interaction.locale });
-		return;
-	}
-
-	const packageName = packageOrUndefined as keyof typeof licences.software;
+	const packageName = interaction.parameters.package as keyof typeof licences.software;
 	const licenceParts = chunk(licences.software[packageName], 1);
 
 	const strings = {
