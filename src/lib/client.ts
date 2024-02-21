@@ -1256,9 +1256,13 @@ class InteractionStore {
 		this.#interactions = new Map();
 	}
 
-	static spoofInteraction(interaction: Logos.Interaction, { using }: { using: Logos.Interaction }): Logos.Interaction {
+	static spoofInteraction<Interaction extends Logos.Interaction>(
+		interaction: Interaction,
+		{ using, parameters }: { using: Logos.Interaction; parameters?: Interaction["parameters"] },
+	): Interaction {
 		return {
 			...interaction,
+			parameters: { ...interaction.parameters, ...parameters },
 			type: Discord.InteractionTypes.ApplicationCommand,
 			token: using.token,
 			id: using.id,
@@ -1439,8 +1443,13 @@ class Collector<Event extends keyof Discord.EventHandlers = any> {
 	}
 }
 
-class InteractionCollector<Metadata extends string[] = any> extends Collector<"interactionCreate"> {
+class InteractionCollector<
+	Metadata extends string[] = [],
+	Parameters extends Record<string, string | number | boolean | undefined> = Record<string, string>,
+> extends Collector<"interactionCreate"> {
 	static readonly noneId = constants.components.none;
+
+	static readonly #_defaultParameters: Logos.InteractionParameters<Record<string, unknown>> = { show: false };
 
 	readonly type: Discord.InteractionTypes;
 	readonly anyCustomId: boolean;
@@ -1485,6 +1494,39 @@ class InteractionCollector<Metadata extends string[] = any> extends Collector<"i
 		this.#_acceptAnyUser = this.only.values.length === 0;
 	}
 
+	static getCommandName(interaction: Discord.Interaction): string {
+		const commandName = interaction.data?.name;
+		if (commandName === undefined) {
+			throw "Command did not have a name.";
+		}
+
+		const subCommandGroupOption = interaction.data?.options?.find((option) => isSubcommandGroup(option));
+
+		let commandNameFull: string;
+		if (subCommandGroupOption !== undefined) {
+			const subCommandGroupName = subCommandGroupOption.name;
+			const subCommandName = subCommandGroupOption.options?.find((option) => isSubcommand(option))?.name;
+			if (subCommandName === undefined) {
+				throw "Sub-command did not have a name.";
+			}
+
+			commandNameFull = `${commandName} ${subCommandGroupName} ${subCommandName}`;
+		} else {
+			const subCommandName = interaction.data?.options?.find((option) => isSubcommand(option))?.name;
+			if (subCommandName === undefined) {
+				commandNameFull = commandName;
+			} else {
+				commandNameFull = `${commandName} ${subCommandName}`;
+			}
+		}
+
+		return commandNameFull;
+	}
+
+	static encodeCustomId<Parts extends string[] = []>(parts: Parts): string {
+		return parts.join(constants.symbols.interaction.divider);
+	}
+
 	filter(interaction: Discord.Interaction): boolean {
 		if (interaction.type !== this.type) {
 			return false;
@@ -1515,25 +1557,23 @@ class InteractionCollector<Metadata extends string[] = any> extends Collector<"i
 	}
 
 	// @ts-ignore
-	onCollect(callback: (interaction: Logos.Interaction<Metadata>) => Promise<void>): void {
+	onCollect(callback: (interaction: Logos.Interaction<Metadata, Parameters>) => Promise<void>): void {
 		super.onCollect(async (interactionRaw) => {
 			const locales = await this.#getLocaleData(interactionRaw);
 			const name = InteractionCollector.getCommandName(interactionRaw);
 			const metadata = this.#getMetadata(interactionRaw);
+			const parameters = this.#getParameters<Parameters>(interactionRaw);
 
-			const interaction: Logos.Interaction<Metadata> = { ...interactionRaw, ...locales, commandName: name, metadata };
+			const interaction: Logos.Interaction<Metadata, Parameters> = {
+				...interactionRaw,
+				...locales,
+				commandName: name,
+				metadata,
+				parameters,
+			};
 
 			callback(interaction);
 		});
-	}
-
-	#getMetadata(interaction: Discord.Interaction): Logos.Interaction<Metadata>["metadata"] {
-		const idEncoded = interaction.data?.customId;
-		if (idEncoded === undefined) {
-			return [constants.components.none] as unknown as Logos.Interaction<Metadata>["metadata"];
-		}
-
-		return InteractionCollector.decodeId(idEncoded);
 	}
 
 	async #getLocaleData(interaction: Discord.Interaction): Promise<Logos.InteractionLocaleData> {
@@ -1583,6 +1623,55 @@ class InteractionCollector<Metadata extends string[] = any> extends Collector<"i
 		return { language, locale, learningLanguage, guildLanguage, guildLocale, featureLanguage };
 	}
 
+	#getMetadata(interaction: Discord.Interaction): Logos.Interaction<Metadata>["metadata"] {
+		const idEncoded = interaction.data?.customId;
+		if (idEncoded === undefined) {
+			return [constants.components.none] as unknown as Logos.Interaction<Metadata>["metadata"];
+		}
+
+		return InteractionCollector.decodeId(idEncoded);
+	}
+
+	#getParameters<Parameters extends Record<string, string | number | boolean | undefined>>(
+		interaction: Discord.Interaction,
+	): Logos.InteractionParameters<Parameters> {
+		const options = interaction.data?.options;
+		if (options === undefined) {
+			return { show: false } as Logos.InteractionParameters<Parameters>;
+		}
+
+		return Object.assign(
+			InteractionCollector.#parseParameters(options),
+			InteractionCollector.#_defaultParameters,
+		) as Logos.InteractionParameters<Parameters>;
+	}
+
+	static #parseParameters<Parameters extends Record<string, string | number | boolean | undefined>>(
+		options: Discord.InteractionDataOption[],
+	): Partial<Parameters> {
+		const result: Partial<Record<string, string | number | boolean | undefined>> = {};
+
+		// TODO(vxern): Do something with the focused option.
+		for (const option of options) {
+			if (option.focused) {
+				result.focused = option.name;
+			}
+
+			if (option.options !== undefined) {
+				const parameters = InteractionCollector.#parseParameters(option.options);
+				for (const [key, value] of Object.entries(parameters)) {
+					result[key] = value;
+				}
+
+				continue;
+			}
+
+			result[option.name] = option.value;
+		}
+
+		return result as unknown as Partial<Parameters>;
+	}
+
 	#determineLearningLanguage(guildDocument: Guild, member: Logos.Member): LearningLanguage | undefined {
 		if (member === undefined) {
 			return undefined;
@@ -1608,44 +1697,11 @@ class InteractionCollector<Metadata extends string[] = any> extends Collector<"i
 		return userLearningLanguage;
 	}
 
-	static getCommandName(interaction: Discord.Interaction): string {
-		const commandName = interaction.data?.name;
-		if (commandName === undefined) {
-			throw "Command did not have a name.";
-		}
-
-		const subCommandGroupOption = interaction.data?.options?.find((option) => isSubcommandGroup(option));
-
-		let commandNameFull: string;
-		if (subCommandGroupOption !== undefined) {
-			const subCommandGroupName = subCommandGroupOption.name;
-			const subCommandName = subCommandGroupOption.options?.find((option) => isSubcommand(option))?.name;
-			if (subCommandName === undefined) {
-				throw "Sub-command did not have a name.";
-			}
-
-			commandNameFull = `${commandName} ${subCommandGroupName} ${subCommandName}`;
-		} else {
-			const subCommandName = interaction.data?.options?.find((option) => isSubcommand(option))?.name;
-			if (subCommandName === undefined) {
-				commandNameFull = commandName;
-			} else {
-				commandNameFull = `${commandName} ${subCommandName}`;
-			}
-		}
-
-		return commandNameFull;
-	}
-
-	static encodeCustomId<Parts extends string[] = any>(parts: Parts): string {
-		return parts.join(constants.symbols.interaction.divider);
-	}
-
-	encodeId<Metadata extends string[] = any>(metadata: Metadata): string {
+	encodeId<Metadata extends string[] = []>(metadata: Metadata): string {
 		return [this.customId, ...metadata].join(constants.symbols.interaction.separator);
 	}
 
-	static decodeId<Metadata extends string[] = any>(idEncoded: string): [customId: string, ...metadata: Metadata] {
+	static decodeId<Metadata extends string[] = []>(idEncoded: string): [customId: string, ...metadata: Metadata] {
 		return idEncoded.split(constants.symbols.interaction.separator) as [customId: string, ...metadata: Metadata];
 	}
 }
@@ -2474,7 +2530,7 @@ class Client {
 		await this.#setupGuild(guild, { isUpdate: true });
 	}
 
-	async handleInteraction(interaction: Logos.Interaction, flags: Logos.InteractionFlags = {}): Promise<void> {
+	async handleInteraction(interaction: Logos.Interaction): Promise<void> {
 		// If it's a "none" interaction, just acknowledge and good to go.
 		if (interaction.metadata[0] === constants.components.none) {
 			this.acknowledge(interaction);
@@ -2485,9 +2541,6 @@ class Client {
 		if (handle === undefined) {
 			return;
 		}
-
-		// TODO(vxern): Find better way to do this.
-		interaction.show = flags.show;
 
 		const executedAt = Date.now();
 

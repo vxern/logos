@@ -146,19 +146,16 @@ interface InteractionLocaleData {
 	guildLanguage: LocalisationLanguage;
 }
 
-// TODO(vxern): Way to improve this?
-interface InteractionFlags {
-	show?: boolean;
-}
+type InteractionParameters<Parameters> = Parameters & { show: boolean; focused?: keyof Parameters };
 
-type Interaction<Metadata extends string[] = any> = Omit<
-	Pick<Discord.Interaction, keyof LogosDesiredProperties["interaction"]>,
-	"locale" | "guildLocale"
-> &
-	InteractionLocaleData &
-	InteractionFlags & {
+type Interaction<
+	Metadata extends string[] = any,
+	Parameters extends Record<string, string | number | boolean | undefined> = any,
+> = Omit<Pick<Discord.Interaction, keyof LogosDesiredProperties["interaction"]>, "locale" | "guildLocale"> &
+	InteractionLocaleData & {
 		commandName: string;
 		metadata: [customId: string, ...data: Metadata];
+		parameters: InteractionParameters<Parameters>;
 	};
 
 export { desiredProperties };
@@ -172,5 +169,5 @@ export type {
 	VoiceState,
 	Interaction,
 	InteractionLocaleData,
-	InteractionFlags,
+	InteractionParameters,
 };

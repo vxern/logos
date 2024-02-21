@@ -21,57 +21,6 @@ function isSubcommand(option: Discord.InteractionDataOption): boolean {
 	return option.type === Discord.ApplicationCommandOptionTypes.SubCommand;
 }
 
-type CustomTypeIndicators = Record<string, "number" | "boolean">;
-type CustomTypeIndicatorsTyped<C extends CustomTypeIndicators> = {
-	[key in keyof C]: (C[key] extends "number" ? number : boolean) | undefined;
-};
-
-// TODO(vxern): Do this better.
-function parseArguments<
-	T extends Record<string, string | undefined>,
-	R extends CustomTypeIndicatorsTyped<C> & T,
-	C extends Record<string, "number" | "boolean">,
->(
-	options: Discord.InteractionDataOption[] | undefined,
-	customTypes: C,
-): [R, Discord.InteractionDataOption | undefined] {
-	let args: Record<string, unknown> = {};
-
-	let focused: Discord.InteractionDataOption | undefined = undefined;
-	for (const option of options ?? []) {
-		if (option.focused) {
-			focused = option;
-		}
-
-		if (option.options !== undefined) {
-			const [parsedArgs, parsedFocused] = parseArguments(option.options, customTypes);
-			focused = parsedFocused ?? focused;
-			args = { ...args, ...parsedArgs };
-			continue;
-		}
-
-		if (option.value === undefined) {
-			args[option.name] = undefined;
-			continue;
-		}
-
-		switch (customTypes[option.name]) {
-			case "boolean": {
-				args[option.name] = option.value as boolean;
-				continue;
-			}
-			case "number": {
-				args[option.name] = parseInt(option.value as string);
-				continue;
-			}
-		}
-
-		args[option.name] = option.value as string;
-	}
-
-	return [args as R, focused];
-}
-
 type SkipAction = "previous" | "next";
 type PageButtonMetadata = [type: SkipAction];
 
@@ -544,7 +493,6 @@ export {
 	getPageButtons,
 	isAutocomplete,
 	paginate,
-	parseArguments,
 	parseTimeExpression,
 	isSubcommand,
 	isSubcommandGroup,
