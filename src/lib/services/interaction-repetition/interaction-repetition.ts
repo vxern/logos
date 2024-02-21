@@ -13,9 +13,9 @@ class InteractionRepetitionService extends GlobalService {
 	constructor(client: Client) {
 		super(client);
 
-		// TODO(vxern): Does this actually register command interactions without a custom ID?
 		this.#_commandInteractions = new InteractionCollector(client, {
 			type: Discord.InteractionTypes.ApplicationCommand,
+			anyCustomId: true,
 			isPermanent: true,
 		});
 		this.#_showInChatButtons = new InteractionCollector<[interactionId: string]>(client, {

@@ -1443,6 +1443,7 @@ class InteractionCollector<Metadata extends string[] = any> extends Collector<"i
 	static readonly noneId = constants.components.none;
 
 	readonly type: Discord.InteractionTypes;
+	readonly anyCustomId: boolean;
 	readonly customId: string;
 	readonly only: Set<bigint>;
 
@@ -1455,6 +1456,7 @@ class InteractionCollector<Metadata extends string[] = any> extends Collector<"i
 		client: Client,
 		{
 			type,
+			anyCustomId,
 			customId,
 			only,
 			dependsOn,
@@ -1462,6 +1464,7 @@ class InteractionCollector<Metadata extends string[] = any> extends Collector<"i
 			isPermanent,
 		}: {
 			type?: Discord.InteractionTypes;
+			anyCustomId?: boolean;
 			customId?: string;
 			only?: bigint[];
 			dependsOn?: Collector;
@@ -1472,6 +1475,7 @@ class InteractionCollector<Metadata extends string[] = any> extends Collector<"i
 		super({ isSingle, removeAfter: !isPermanent ? constants.INTERACTION_TOKEN_EXPIRY : undefined, dependsOn });
 
 		this.type = type ?? Discord.InteractionTypes.MessageComponent;
+		this.anyCustomId = anyCustomId ?? false;
 		this.customId = customId ?? nanoid();
 		this.only = only !== undefined ? new Set(only) : new Set();
 
@@ -1492,6 +1496,10 @@ class InteractionCollector<Metadata extends string[] = any> extends Collector<"i
 
 		if (interaction.data === undefined) {
 			return false;
+		}
+
+		if (this.anyCustomId) {
+			return true;
 		}
 
 		if (interaction.data.customId === undefined) {
