@@ -5,11 +5,9 @@ import defaults from "../../../../defaults";
 import { trim } from "../../../../formatting";
 import * as Logos from "../../../../types";
 import { Client, InteractionCollector } from "../../../client";
-import { timeStructToMilliseconds } from "../../../database/guild";
 import { Guild } from "../../../database/guild";
 import { Report, ReportFormData } from "../../../database/report";
 import { Modal, createModalComposer } from "../../../interactions";
-import { verifyIsWithinLimits } from "../../../utils";
 import { CommandTemplate } from "../../command";
 
 const command: CommandTemplate = {
@@ -46,15 +44,11 @@ async function handleMakeReport(client: Client, interaction: Logos.Interaction):
 		return;
 	}
 
-	const reportDocuments = await Report.getAll(client, { where: { authorId: interaction.user.id.toString() } });
-	const intervalMilliseconds = timeStructToMilliseconds(configuration.rateLimit?.within ?? defaults.REPORT_INTERVAL);
-	if (
-		!verifyIsWithinLimits(
-			reportDocuments.map((reportDocument) => reportDocument.createdAt),
-			configuration.rateLimit?.uses ?? defaults.REPORT_LIMIT,
-			intervalMilliseconds,
-		)
-	) {
+	const crossesRateLimit = Guild.crossesRateLimit(
+		await Report.getAll(client, { where: { authorId: interaction.user.id.toString() } }),
+		configuration.rateLimit ?? defaults.REPORT_RATE_LIMIT,
+	);
+	if (!crossesRateLimit) {
 		const strings = {
 			title: client.localise("report.strings.tooMany.title", locale)(),
 			description: client.localise("report.strings.tooMany.description", locale)(),

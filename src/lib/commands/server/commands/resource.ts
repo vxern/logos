@@ -5,11 +5,9 @@ import defaults from "../../../../defaults";
 import { trim } from "../../../../formatting";
 import * as Logos from "../../../../types";
 import { Client, InteractionCollector } from "../../../client";
-import { timeStructToMilliseconds } from "../../../database/guild";
 import { Guild } from "../../../database/guild";
 import { Resource } from "../../../database/resource";
 import { Modal, createModalComposer } from "../../../interactions";
-import { verifyIsWithinLimits } from "../../../utils";
 import { CommandTemplate } from "../../command";
 
 const command: CommandTemplate = {
@@ -46,15 +44,11 @@ async function handleSubmitResource(client: Client, interaction: Logos.Interacti
 		return;
 	}
 
-	const resourceDocuments = await Resource.getAll(client, { where: { authorId: interaction.user.id.toString() } });
-	const intervalMilliseconds = timeStructToMilliseconds(configuration.rateLimit?.within ?? defaults.RESOURCE_INTERVAL);
-	if (
-		!verifyIsWithinLimits(
-			resourceDocuments.map((resourceDocument) => resourceDocument.createdAt),
-			configuration.rateLimit?.uses ?? defaults.RESOURCE_LIMIT,
-			intervalMilliseconds,
-		)
-	) {
+	const crossesRateLimit = Guild.crossesRateLimit(
+		await Resource.getAll(client, { where: { authorId: interaction.user.id.toString() } }),
+		configuration.rateLimit ?? defaults.RESOURCE_RATE_LIMIT,
+	);
+	if (!crossesRateLimit) {
 		const strings = {
 			title: client.localise("resource.strings.tooMany.title", locale)(),
 			description: client.localise("resource.strings.tooMany.description", locale)(),

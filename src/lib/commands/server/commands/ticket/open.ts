@@ -5,11 +5,10 @@ import defaults from "../../../../../defaults";
 import { MentionTypes, mention, trim } from "../../../../../formatting";
 import * as Logos from "../../../../../types";
 import { Client, InteractionCollector } from "../../../../client";
-import { Guild, timeStructToMilliseconds } from "../../../../database/guild";
+import { Guild } from "../../../../database/guild";
 import { Ticket, TicketType } from "../../../../database/ticket";
 import { Modal, createModalComposer } from "../../../../interactions";
 import { Configurations } from "../../../../services/prompts/service";
-import { verifyIsWithinLimits } from "../../../../utils";
 import { OptionTemplate } from "../../../command";
 
 const option: OptionTemplate = {
@@ -45,15 +44,11 @@ async function handleOpenTicket(client: Client, interaction: Logos.Interaction):
 		return;
 	}
 
-	const ticketDocuments = await Ticket.getAll(client, { where: { authorId: interaction.user.id.toString() } });
-	const intervalMilliseconds = timeStructToMilliseconds(configuration.rateLimit?.within ?? defaults.TICKET_INTERVAL);
-	if (
-		!verifyIsWithinLimits(
-			ticketDocuments.map((ticketDocument) => ticketDocument.createdAt),
-			configuration.rateLimit?.uses ?? defaults.TICKET_LIMIT,
-			intervalMilliseconds,
-		)
-	) {
+	const crossesRateLimit = Guild.crossesRateLimit(
+		await Ticket.getAll(client, { where: { authorId: interaction.user.id.toString() } }),
+		configuration.rateLimit ?? defaults.TICKET_RATE_LIMIT,
+	);
+	if (!crossesRateLimit) {
 		const strings = {
 			title: client.localise("ticket.strings.tooMany.title", locale)(),
 			description: client.localise("ticket.strings.tooMany.description", locale)(),

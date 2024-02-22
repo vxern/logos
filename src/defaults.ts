@@ -5,7 +5,7 @@ import {
 	LocalisationLanguage,
 	TranslationLanguage,
 } from "./constants/languages";
-import { TimeStruct } from "./lib/database/guild";
+import { RateLimit, TimeStruct } from "./lib/database/guild";
 
 const PROJECT_NAME = "Logos";
 const USER_AGENT = "Logos (https://logos.wordcollector.co.uk)";
@@ -22,26 +22,16 @@ const TRANSLATION_LANGUAGE: TranslationLanguage = "English/American";
 
 const RESULTS_PER_PAGE = 10;
 
-const RATE_LIMIT = 3;
-const RATE_LIMIT_INTERVAL: TimeStruct = [30, "second"];
-
 const MAX_DELETABLE_MESSAGES = 500;
 const MAX_INDEXABLE_MESSAGES = 1000;
 
-const REPORT_LIMIT = 2;
-const REPORT_INTERVAL: TimeStruct = [30, "minute"];
-
-const RESOURCE_LIMIT = 2;
-const RESOURCE_INTERVAL: TimeStruct = [30, "second"];
-
-const SUGGESTION_LIMIT = 3;
-const SUGGESTION_INTERVAL: TimeStruct = [2, "hour"];
-
-const TICKET_LIMIT = 2;
-const TICKET_INTERVAL: TimeStruct = [1, "day"];
-
-const PRAISE_LIMIT = 3;
-const PRAISE_INTERVAL: TimeStruct = [6, "hour"];
+// TODO(vxern): Loosen these way up.
+const COMMAND_RATE_LIMIT: RateLimit = { uses: 3, within: [30, "second"] };
+const REPORT_RATE_LIMIT: RateLimit = { uses: 2, within: [30, "minute"] };
+const RESOURCE_RATE_LIMIT: RateLimit = { uses: 2, within: [30, "second"] };
+const SUGGESTION_RATE_LIMIT: RateLimit = { uses: 3, within: [2, "hour"] };
+const TICKET_RATE_LIMIT: RateLimit = { uses: 2, within: [1, "day"] };
+const PRAISE_RATE_LIMIT: RateLimit = { uses: 3, within: [6, "hour"] };
 
 const WARN_LIMIT = 3;
 const WARN_EXPIRY: TimeStruct = [2, "month"];
@@ -75,20 +65,14 @@ export default {
 	FEATURE_LOCALE,
 	TRANSLATION_LANGUAGE,
 	RESULTS_PER_PAGE,
-	RATE_LIMIT,
-	RATE_LIMIT_INTERVAL,
 	MAX_DELETABLE_MESSAGES,
 	MAX_INDEXABLE_MESSAGES,
-	REPORT_LIMIT,
-	REPORT_INTERVAL,
-	RESOURCE_LIMIT,
-	RESOURCE_INTERVAL,
-	TICKET_LIMIT,
-	TICKET_INTERVAL,
-	SUGGESTION_LIMIT,
-	SUGGESTION_INTERVAL,
-	PRAISE_LIMIT,
-	PRAISE_INTERVAL,
+	COMMAND_RATE_LIMIT,
+	REPORT_RATE_LIMIT,
+	RESOURCE_RATE_LIMIT,
+	TICKET_RATE_LIMIT,
+	SUGGESTION_RATE_LIMIT,
+	PRAISE_RATE_LIMIT,
 	WARN_LIMIT,
 	WARN_EXPIRY,
 	WARN_TIMEOUT,

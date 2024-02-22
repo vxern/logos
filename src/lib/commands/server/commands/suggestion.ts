@@ -5,11 +5,9 @@ import defaults from "../../../../defaults";
 import { trim } from "../../../../formatting";
 import * as Logos from "../../../../types";
 import { Client, InteractionCollector } from "../../../client";
-import { timeStructToMilliseconds } from "../../../database/guild";
 import { Guild } from "../../../database/guild";
 import { Suggestion } from "../../../database/suggestion";
 import { Modal, createModalComposer } from "../../../interactions";
-import { verifyIsWithinLimits } from "../../../utils";
 import { CommandTemplate } from "../../command";
 
 const command: CommandTemplate = {
@@ -46,17 +44,11 @@ async function handleMakeSuggestion(client: Client, interaction: Logos.Interacti
 		return;
 	}
 
-	const suggestionDocuments = await Suggestion.getAll(client, { where: { authorId: interaction.user.id.toString() } });
-	const intervalMilliseconds = timeStructToMilliseconds(
-		configuration.rateLimit?.within ?? defaults.SUGGESTION_INTERVAL,
+	const crossesRateLimit = Guild.crossesRateLimit(
+		await Suggestion.getAll(client, { where: { authorId: interaction.user.id.toString() } }),
+		configuration.rateLimit ?? defaults.SUGGESTION_RATE_LIMIT,
 	);
-	if (
-		!verifyIsWithinLimits(
-			suggestionDocuments.map((suggestionDocument) => suggestionDocument.createdAt),
-			configuration.rateLimit?.uses ?? defaults.SUGGESTION_LIMIT,
-			intervalMilliseconds,
-		)
-	) {
+	if (!crossesRateLimit) {
 		const strings = {
 			title: client.localise("suggestion.strings.tooMany.title", locale)(),
 			description: client.localise("suggestion.strings.tooMany.description", locale)(),

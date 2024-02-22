@@ -425,4 +425,4 @@ class Guild extends Model<{ idParts: ["guildId"] }> {
 }
 
 export { timeStructToMilliseconds, Guild };
-export type { DynamicVoiceChannel, CefrConfiguration, TimeStruct, RoleWithIndicator };
+export type { DynamicVoiceChannel, CefrConfiguration, TimeStruct, RoleWithIndicator, RateLimit };

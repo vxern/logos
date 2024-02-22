@@ -5,9 +5,8 @@ import defaults from "../../../../defaults";
 import { MentionTypes, mention } from "../../../../formatting";
 import * as Logos from "../../../../types";
 import { Client } from "../../../client";
-import { Guild, timeStructToMilliseconds } from "../../../database/guild";
+import { Guild } from "../../../database/guild";
 import { Praise } from "../../../database/praise";
-import { verifyIsWithinLimits } from "../../../utils";
 import { CommandTemplate } from "../../command";
 import { user } from "../../parameters";
 
@@ -80,15 +79,11 @@ async function handlePraiseUser(
 
 	await client.postponeReply(interaction);
 
-	const praiseDocuments = await Praise.getAll(client, { where: { authorId: interaction.user.id.toString() } });
-	const intervalMilliseconds = timeStructToMilliseconds(configuration.rateLimit?.within ?? defaults.PRAISE_INTERVAL);
-	if (
-		!verifyIsWithinLimits(
-			praiseDocuments.map((suggestionDocument) => suggestionDocument.createdAt),
-			configuration.rateLimit?.uses ?? defaults.PRAISE_LIMIT,
-			intervalMilliseconds,
-		)
-	) {
+	const crossesRateLimit = Guild.crossesRateLimit(
+		await Praise.getAll(client, { where: { authorId: interaction.user.id.toString() } }),
+		configuration.rateLimit ?? defaults.PRAISE_RATE_LIMIT,
+	);
+	if (!crossesRateLimit) {
 		const strings = {
 			title: client.localise("praise.strings.tooMany.title", locale)(),
 			description: client.localise("praise.strings.tooMany.description", locale)(),

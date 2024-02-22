@@ -126,26 +126,6 @@ async function getAllMessages(
 	return messages;
 }
 
-function verifyIsWithinLimits(timestamps: number[], limit: number, limitingTimePeriod: number): boolean {
-	const actionTimestamps = [...timestamps].sort((a, b) => b - a); // From most recent to least recent.
-	const relevantTimestamps = actionTimestamps.slice(0, limit);
-
-	// Has not reached the limit, regardless of the limiting time period.
-	if (relevantTimestamps.length < limit) {
-		return true;
-	}
-
-	const now = Date.now();
-	for (const timestamp of relevantTimestamps) {
-		if (now - timestamp < limitingTimePeriod) {
-			continue;
-		}
-		return true;
-	}
-
-	return false;
-}
-
 function getMemberAvatarURL(guildId: bigint, userId: bigint, avatarHash: bigint): string {
 	return `https://cdn.discordapp.com/guilds/${guildId}/users/${userId}/avatars/${avatarHash}`;
 }
@@ -213,7 +193,6 @@ export {
 	isText,
 	isVoice,
 	snowflakeToTimestamp,
-	verifyIsWithinLimits,
 	getMemberAvatarURL,
 	reverseObject,
 	asStream,

@@ -2,7 +2,7 @@ import constants from "../../constants/constants";
 import { capitalise, decapitalise } from "../../formatting";
 import { Client, Database } from "../client";
 import { EntryRequest } from "./entry-request";
-import { Guild } from "./guild";
+import { Guild, RateLimit, timeStructToMilliseconds } from "./guild";
 import { GuildStats } from "./guild-stats";
 import { Praise } from "./praise";
 import { Report } from "./report";
@@ -155,6 +155,29 @@ abstract class Model<Generic extends { idParts: readonly string[] } = any> {
 		});
 
 		return promise;
+	}
+
+	static crossesRateLimit<M extends Model>(documents: M[], rateLimit: RateLimit): boolean {
+		const timestamps = documents.map((document) => document.createdAt);
+
+		const actionTimestamps = timestamps.sort((a, b) => b - a); // From most recent to least recent.
+		const relevantTimestamps = actionTimestamps.slice(0, rateLimit.uses);
+
+		// Has not reached the limit, regardless of the limiting time period.
+		if (relevantTimestamps.length < rateLimit.uses) {
+			return true;
+		}
+
+		const now = Date.now();
+		const interval = timeStructToMilliseconds(rateLimit.within);
+		for (const timestamp of relevantTimestamps) {
+			if (now - timestamp < interval) {
+				continue;
+			}
+			return true;
+		}
+
+		return false;
 	}
 
 	async create(clientOrDatabase: ClientOrDatabase): Promise<void> {
