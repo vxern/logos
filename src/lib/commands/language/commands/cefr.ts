@@ -89,10 +89,10 @@ async function handleDisplayCefrGuide(client: Client, interaction: Logos.Interac
 	};
 
 	const bracketButtons = new InteractionCollector<BracketButtonMetadata>(client, {
-		only: !show ? [interaction.user.id] : undefined,
+		only: !interaction.parameters.show ? [interaction.user.id] : undefined,
 	});
 	const tabButtons = new InteractionCollector<TabButtonMetadata>(client, {
-		only: !show ? [interaction.user.id] : undefined,
+		only: !interaction.parameters.show ? [interaction.user.id] : undefined,
 	});
 
 	const getButtons = (): Discord.MessageComponents => {
@@ -165,7 +165,7 @@ async function handleDisplayCefrGuide(client: Client, interaction: Logos.Interac
 			}
 		}
 
-		if (!show) {
+		if (!interaction.parameters.show) {
 			tabButtonComponents.push(client.interactionRepetitionService.getShowButton(interaction, { locale }));
 		}
 

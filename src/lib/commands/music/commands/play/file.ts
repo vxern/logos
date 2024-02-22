@@ -1,16 +1,13 @@
 import * as Logos from "../../../../../types";
 import { Client } from "../../../../client";
-import { parseArguments } from "../../../../interactions";
 import { SongListing } from "../../data/types";
 import { handleRequestPlayback } from "./query";
 
-async function handleRequestFilePlayback(client: Client, interaction: Logos.Interaction): Promise<void> {
+async function handleRequestFilePlayback(
+	client: Client,
+	interaction: Logos.Interaction<any, { url: string }>,
+): Promise<void> {
 	const locale = interaction.locale;
-
-	const [{ url }] = parseArguments(interaction.data?.options, {});
-	if (url === undefined) {
-		return;
-	}
 
 	client.postponeReply(interaction);
 	client.deleteReply(interaction);
@@ -25,7 +22,7 @@ async function handleRequestFilePlayback(client: Client, interaction: Logos.Inte
 		content: {
 			type: "file",
 			title: strings.externalFile,
-			url,
+			url: interaction.parameters.url,
 		},
 	};
 

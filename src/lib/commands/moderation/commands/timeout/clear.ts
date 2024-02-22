@@ -4,21 +4,21 @@ import * as Logos from "../../../../../types";
 import { Client } from "../../../../client";
 import { Guild } from "../../../../database/guild";
 import diagnostics from "../../../../diagnostics";
-import { parseArguments } from "../../../../interactions";
 
-async function handleClearTimeoutAutocomplete(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const [{ user }] = parseArguments(interaction.data?.options, {});
-	if (user === undefined) {
-		return;
-	}
-
+async function handleClearTimeoutAutocomplete(
+	client: Client,
+	interaction: Logos.Interaction<any, { user: string }>,
+): Promise<void> {
 	client.autocompleteMembers(interaction, {
-		identifier: user,
+		identifier: interaction.parameters.user,
 		options: { restrictToNonSelf: true, excludeModerators: true },
 	});
 }
 
-async function handleClearTimeout(client: Client, interaction: Logos.Interaction): Promise<void> {
+async function handleClearTimeout(
+	client: Client,
+	interaction: Logos.Interaction<any, { user: string }>,
+): Promise<void> {
 	const locale = interaction.locale;
 
 	const guildId = interaction.guildId;
@@ -33,15 +33,10 @@ async function handleClearTimeout(client: Client, interaction: Logos.Interaction
 		return;
 	}
 
-	const [{ user: userSearchQuery }] = parseArguments(interaction.data?.options, {});
-	if (userSearchQuery === undefined) {
-		return;
-	}
-
 	const member = client.resolveInteractionToMember(
 		interaction,
 		{
-			identifier: userSearchQuery,
+			identifier: interaction.parameters.user,
 			options: { restrictToNonSelf: true, excludeModerators: true },
 		},
 		{ locale },

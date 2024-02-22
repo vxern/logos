@@ -4,7 +4,7 @@ import defaults from "../../../../defaults";
 import { MentionTypes, mention, timestamp, trim } from "../../../../formatting";
 import * as Logos from "../../../../types";
 import { Client } from "../../../client";
-import { paginate, parseArguments } from "../../../interactions";
+import { paginate } from "../../../interactions";
 import { isCollection } from "../../../services/music/music";
 import { chunk } from "../../../utils";
 import { OptionTemplate } from "../../command";
@@ -21,14 +21,11 @@ const command: OptionTemplate = {
 	},
 };
 
-async function handleDisplayCurrentlyPlaying(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const [{ collection, show: showParameter }] = parseArguments(interaction.data?.options, {
-		collection: "boolean",
-		show: "boolean",
-	});
-
-	const show = interaction.show ?? showParameter ?? false;
-	const locale = show ? interaction.guildLocale : interaction.locale;
+async function handleDisplayCurrentlyPlaying(
+	client: Client,
+	interaction: Logos.Interaction<any, { collection: boolean | undefined }>,
+): Promise<void> {
+	const locale = interaction.parameters.show ? interaction.guildLocale : interaction.locale;
 
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
@@ -69,7 +66,7 @@ async function handleDisplayCurrentlyPlaying(client: Client, interaction: Logos.
 
 	const [current, playingSince] = [musicService.current, musicService.playingSince];
 
-	if (collection) {
+	if (interaction.parameters.collection) {
 		if (current?.content === undefined || !isCollection(current.content)) {
 			const locale = interaction.locale;
 			const strings = {
@@ -116,7 +113,7 @@ async function handleDisplayCurrentlyPlaying(client: Client, interaction: Logos.
 		return;
 	}
 
-	if (collection) {
+	if (interaction.parameters.collection) {
 		const collection = current.content as SongCollection;
 
 		const locale = interaction.locale;
@@ -157,7 +154,7 @@ async function handleDisplayCurrentlyPlaying(client: Client, interaction: Logos.
 							.join("\n");
 					},
 				},
-				show: show ?? false,
+				show: interaction.parameters.show,
 				showable: true,
 			},
 			{ locale },
@@ -215,7 +212,7 @@ async function handleDisplayCurrentlyPlaying(client: Client, interaction: Logos.
 				},
 			],
 		},
-		{ visible: show },
+		{ visible: interaction.parameters.show },
 	);
 }
 

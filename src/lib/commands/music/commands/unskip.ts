@@ -2,7 +2,6 @@ import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import * as Logos from "../../../../types";
 import { Client } from "../../../client";
-import { parseArguments } from "../../../interactions";
 import { isCollection } from "../../../services/music/music";
 import { OptionTemplate } from "../../command";
 import { by, collection, to } from "../../parameters";
@@ -14,20 +13,20 @@ const command: OptionTemplate = {
 	options: [collection, by, to],
 };
 
-async function handleUnskipAction(client: Client, interaction: Logos.Interaction): Promise<void> {
+async function handleUnskipAction(
+	client: Client,
+	interaction: Logos.Interaction<
+		any,
+		{ collection: boolean | undefined; by: number | undefined; to: number | undefined }
+	>,
+): Promise<void> {
 	const locale = interaction.guildLocale;
 
-	const [{ collection, by: songsToUnskip, to: songToUnskipTo }] = parseArguments(interaction.data?.options, {
-		collection: "boolean",
-		by: "number",
-		to: "number",
-	});
-
-	if (songsToUnskip !== undefined && !Number.isSafeInteger(songsToUnskip)) {
+	if (interaction.parameters.by !== undefined && !Number.isSafeInteger(interaction.parameters.by)) {
 		return;
 	}
 
-	if (songToUnskipTo !== undefined && !Number.isSafeInteger(songToUnskipTo)) {
+	if (interaction.parameters.to !== undefined && !Number.isSafeInteger(interaction.parameters.to)) {
 		return;
 	}
 
@@ -87,7 +86,7 @@ async function handleUnskipAction(client: Client, interaction: Logos.Interaction
 			return true;
 		}
 
-		if (collection !== undefined || current.content.position === 0) {
+		if (interaction.parameters.collection !== undefined || current.content.position === 0) {
 			return true;
 		}
 
@@ -114,7 +113,7 @@ async function handleUnskipAction(client: Client, interaction: Logos.Interaction
 	}
 
 	if (
-		collection !== undefined &&
+		interaction.parameters.collection !== undefined &&
 		(current === undefined || current.content === undefined || !isCollection(current.content))
 	) {
 		const locale = interaction.locale;
@@ -164,7 +163,7 @@ async function handleUnskipAction(client: Client, interaction: Logos.Interaction
 	}
 
 	// If both the 'to' and the 'by' parameter have been supplied.
-	if (songsToUnskip !== undefined && songToUnskipTo !== undefined) {
+	if (interaction.parameters.by !== undefined && interaction.parameters.to !== undefined) {
 		const locale = interaction.locale;
 		const strings = {
 			title: client.localise("music.strings.skips.tooManyArguments.title", locale)(),
@@ -184,7 +183,10 @@ async function handleUnskipAction(client: Client, interaction: Logos.Interaction
 	}
 
 	// If either the 'to' parameter or the 'by' parameter are negative.
-	if ((songsToUnskip !== undefined && songsToUnskip <= 0) || (songToUnskipTo !== undefined && songToUnskipTo <= 0)) {
+	if (
+		(interaction.parameters.by !== undefined && interaction.parameters.by <= 0) ||
+		(interaction.parameters.to !== undefined && interaction.parameters.to <= 0)
+	) {
 		const locale = interaction.locale;
 		const strings = {
 			title: client.localise("music.strings.skips.invalid.title", locale)(),
@@ -222,35 +224,35 @@ async function handleUnskipAction(client: Client, interaction: Logos.Interaction
 		{ visible: true },
 	);
 
-	const isUnskippingCollection = collection ?? false;
+	const isUnskippingCollection = interaction.parameters.collection ?? false;
 
 	if (isUnskippingListing) {
-		musicService.unskip(isUnskippingCollection, { by: songsToUnskip, to: songToUnskipTo });
+		musicService.unskip(isUnskippingCollection, { by: interaction.parameters.by, to: interaction.parameters.to });
 	} else {
-		if (songsToUnskip !== undefined) {
+		if (interaction.parameters.by !== undefined) {
 			let listingsToUnskip!: number;
 			if (
 				current !== undefined &&
 				current.content !== undefined &&
 				isCollection(current.content) &&
-				collection === undefined
+				interaction.parameters.collection === undefined
 			) {
-				listingsToUnskip = Math.min(songsToUnskip, current.content.position);
+				listingsToUnskip = Math.min(interaction.parameters.by, current.content.position);
 			} else {
-				listingsToUnskip = Math.min(songsToUnskip, history.length);
+				listingsToUnskip = Math.min(interaction.parameters.by, history.length);
 			}
 			musicService.unskip(isUnskippingCollection, { by: listingsToUnskip });
-		} else if (songToUnskipTo !== undefined) {
+		} else if (interaction.parameters.to !== undefined) {
 			let listingToSkipTo!: number;
 			if (
 				current !== undefined &&
 				current.content !== undefined &&
 				isCollection(current.content) &&
-				collection === undefined
+				interaction.parameters.collection === undefined
 			) {
-				listingToSkipTo = Math.max(songToUnskipTo, 1);
+				listingToSkipTo = Math.max(interaction.parameters.to, 1);
 			} else {
-				listingToSkipTo = Math.min(songToUnskipTo, history.length);
+				listingToSkipTo = Math.min(interaction.parameters.to, history.length);
 			}
 			musicService.unskip(isUnskippingCollection, { to: listingToSkipTo });
 		} else {

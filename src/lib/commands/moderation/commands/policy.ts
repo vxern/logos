@@ -3,7 +3,6 @@ import { Locale } from "../../../../constants/languages";
 import * as Logos from "../../../../types";
 import { Client } from "../../../client";
 import { Guild } from "../../../database/guild";
-import { parseArguments } from "../../../interactions";
 import { CommandTemplate } from "../../command";
 import { show } from "../../parameters";
 
@@ -33,10 +32,6 @@ async function handleDisplayModerationPolicy(client: Client, interaction: Logos.
 		return;
 	}
 
-	const [{ show: showParameter }] = parseArguments(interaction.data?.options, { show: "boolean" });
-
-	const show = interaction.show ?? showParameter ?? false;
-
 	const guild = client.entities.guilds.get(guildId);
 	if (guild === undefined) {
 		return;
@@ -46,7 +41,7 @@ async function handleDisplayModerationPolicy(client: Client, interaction: Logos.
 		title: client.localise("policies.moderation.title", locale)(),
 	};
 
-	const components: Discord.ActionRow[] | undefined = show
+	const components: Discord.ActionRow[] | undefined = interaction.parameters.show
 		? undefined
 		: [
 				{
@@ -58,7 +53,7 @@ async function handleDisplayModerationPolicy(client: Client, interaction: Logos.
 	client.reply(
 		interaction,
 		{ embeds: [{ title: strings.title, fields: getModerationPolicyPoints(client, { locale }) }], components },
-		{ visible: show },
+		{ visible: interaction.parameters.show },
 	);
 }
 

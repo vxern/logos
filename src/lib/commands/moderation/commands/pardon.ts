@@ -7,7 +7,6 @@ import * as Logos from "../../../../types";
 import { Client } from "../../../client";
 import { Guild, timeStructToMilliseconds } from "../../../database/guild";
 import { Warning } from "../../../database/warning";
-import { parseArguments } from "../../../interactions";
 import { CommandTemplate } from "../../command";
 import { user } from "../../parameters";
 import { getActiveWarnings } from "../module";
@@ -29,7 +28,10 @@ const command: CommandTemplate = {
 	],
 };
 
-async function handlePardonUserAutocomplete(client: Client, interaction: Logos.Interaction): Promise<void> {
+async function handlePardonUserAutocomplete(
+	client: Client,
+	interaction: Logos.Interaction<any, { user: string; warning: string }>,
+): Promise<void> {
 	const locale = interaction.locale;
 
 	const guildId = interaction.guildId;
@@ -44,67 +46,64 @@ async function handlePardonUserAutocomplete(client: Client, interaction: Logos.I
 		return;
 	}
 
-	const [{ user, warning }, focused] = parseArguments(interaction.data?.options, {});
-
-	if (focused?.name === "user") {
-		if (user === undefined) {
-			return;
-		}
-
-		client.autocompleteMembers(interaction, {
-			identifier: user,
-			options: {
-				restrictToNonSelf: true,
-				excludeModerators: true,
-			},
-		});
+	if (interaction.parameters.focused === undefined) {
 		return;
 	}
 
-	if (focused?.name === "warning") {
-		if (user === undefined || warning === undefined) {
-			client.respond(interaction, []);
-			return;
-		}
-
-		const member = client.resolveInteractionToMember(
-			interaction,
-			{
-				identifier: user,
+	switch (interaction.parameters.focused) {
+		case "user": {
+			client.autocompleteMembers(interaction, {
+				identifier: interaction.parameters.user,
 				options: {
 					restrictToNonSelf: true,
 					excludeModerators: true,
 				},
-			},
-			{ locale },
-		);
-		if (member === undefined) {
-			client.respond(interaction, []);
-			return;
+			});
+			break;
 		}
+		case "warning": {
+			const member = client.resolveInteractionToMember(
+				interaction,
+				{
+					identifier: interaction.parameters.user,
+					options: {
+						restrictToNonSelf: true,
+						excludeModerators: true,
+					},
+				},
+				{ locale },
+			);
+			if (member === undefined) {
+				client.respond(interaction, []);
+				return;
+			}
 
-		const expiryMilliseconds = timeStructToMilliseconds(configuration.expiration ?? defaults.WARN_EXPIRY);
+			const expiryMilliseconds = timeStructToMilliseconds(configuration.expiration ?? defaults.WARN_EXPIRY);
 
-		const relevantWarnings = await getRelevantWarnings(client, member, expiryMilliseconds);
-		if (relevantWarnings === undefined) {
-			client.respond(interaction, []);
-			return;
+			const relevantWarnings = await getRelevantWarnings(client, member, expiryMilliseconds);
+			if (relevantWarnings === undefined) {
+				client.respond(interaction, []);
+				return;
+			}
+
+			const warningLowercase = interaction.parameters.warning.toLowerCase();
+			const choices = relevantWarnings
+				.map<Discord.ApplicationCommandOptionChoice>((warning) => ({
+					name: warning.reason,
+					value: warning.partialId,
+				}))
+				.filter((choice) => choice.name.toLowerCase().includes(warningLowercase));
+
+			client.respond(interaction, choices);
+			break;
 		}
-
-		const warningLowercase = warning.toLowerCase();
-		const choices = relevantWarnings
-			.map<Discord.ApplicationCommandOptionChoice>((warning) => ({
-				name: warning.reason,
-				value: warning.id,
-			}))
-			.filter((choice) => choice.name.toLowerCase().includes(warningLowercase));
-
-		client.respond(interaction, choices);
-		return;
 	}
 }
 
-async function handlePardonUser(client: Client, interaction: Logos.Interaction): Promise<void> {
+async function handlePardonUser(
+	client: Client,
+	interaction: Logos.Interaction<any, { user: string; warning: string }>,
+): Promise<void> {
 	const locale = interaction.locale;
 
 	const guildId = interaction.guildId;
@@ -116,18 +115,13 @@ async function handlePardonUser(client: Client, interaction: Logos.Interaction):
 
 	const configuration = guildDocument.features.moderation.features?.warns;
 	if (configuration === undefined || !configuration.enabled) {
-		return;
-	}
-
-	const [{ user, warning: warningId }] = parseArguments(interaction.data?.options, {});
-	if (user === undefined) {
 		return;
 	}
 
 	const member = client.resolveInteractionToMember(
 		interaction,
 		{
-			identifier: user,
+			identifier: interaction.parameters.user,
 			options: {
 				restrictToNonSelf: true,
 				excludeModerators: true,
@@ -147,7 +141,9 @@ async function handlePardonUser(client: Client, interaction: Logos.Interaction):
 		return;
 	}
 
-	const warning = relevantWarnings.find((relevantWarning) => relevantWarning.id === warningId);
+	const warning = relevantWarnings.find(
+		(relevantWarning) => relevantWarning.partialId === interaction.parameters.warning,
+	);
 	if (warning === undefined) {
 		displayInvalidWarningError(client, interaction, { locale });
 		return;

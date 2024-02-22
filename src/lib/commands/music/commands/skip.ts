@@ -2,7 +2,6 @@ import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import * as Logos from "../../../../types";
 import { Client } from "../../../client";
-import { parseArguments } from "../../../interactions";
 import { isCollection } from "../../../services/music/music";
 import { OptionTemplate } from "../../command";
 import { by, collection, to } from "../../parameters";
@@ -14,18 +13,20 @@ const command: OptionTemplate = {
 	options: [collection, by, to],
 };
 
-async function handleSkipAction(client: Client, interaction: Logos.Interaction): Promise<void> {
+async function handleSkipAction(
+	client: Client,
+	interaction: Logos.Interaction<
+		any,
+		{ collection: boolean | undefined; by: number | undefined; to: number | undefined }
+	>,
+): Promise<void> {
 	const locale = interaction.guildLocale;
 
-	const [{ collection, by: songsToSkip, to: songToSkipTo }] = parseArguments(interaction.data?.options, {
-		collection: "boolean",
-		by: "number",
-		to: "number",
-	});
-	if (songsToSkip !== undefined && !Number.isSafeInteger(songsToSkip)) {
+	if (interaction.parameters.by !== undefined && !Number.isSafeInteger(interaction.parameters.by)) {
 		return;
 	}
-	if (songToSkipTo !== undefined && !Number.isSafeInteger(songToSkipTo)) {
+
+	if (interaction.parameters.to !== undefined && !Number.isSafeInteger(interaction.parameters.to)) {
 		return;
 	}
 
@@ -66,7 +67,7 @@ async function handleSkipAction(client: Client, interaction: Logos.Interaction):
 		return;
 	}
 
-	if (collection) {
+	if (interaction.parameters.collection) {
 		if (current?.content === undefined || !isCollection(current.content)) {
 			const locale = interaction.locale;
 			const strings = {
@@ -114,7 +115,7 @@ async function handleSkipAction(client: Client, interaction: Logos.Interaction):
 	}
 
 	// If both the 'to' and the 'by' parameter have been supplied.
-	if (songsToSkip !== undefined && songToSkipTo !== undefined) {
+	if (interaction.parameters.by !== undefined && interaction.parameters.to !== undefined) {
 		const locale = interaction.locale;
 		const strings = {
 			title: client.localise("music.strings.skips.tooManyArguments.title", locale)(),
@@ -134,7 +135,10 @@ async function handleSkipAction(client: Client, interaction: Logos.Interaction):
 	}
 
 	// If either the 'to' parameter or the 'by' parameter are negative.
-	if ((songsToSkip !== undefined && songsToSkip <= 0) || (songToSkipTo !== undefined && songToSkipTo <= 0)) {
+	if (
+		(interaction.parameters.by !== undefined && interaction.parameters.by <= 0) ||
+		(interaction.parameters.to !== undefined && interaction.parameters.to <= 0)
+	) {
 		const locale = interaction.locale;
 		const strings = {
 			title: client.localise("music.strings.skips.invalid.title", locale)(),
@@ -153,18 +157,16 @@ async function handleSkipAction(client: Client, interaction: Logos.Interaction):
 		return;
 	}
 
-	const isSkippingCollection = collection ?? false;
-
-	const strings =
-		collection ?? false
-			? {
-					title: client.localise("music.options.skip.strings.skippedSongCollection.title", locale)(),
-					description: client.localise("music.options.skip.strings.skippedSongCollection.description", locale)(),
-			  }
-			: {
-					title: client.localise("music.options.skip.strings.skippedSong.title", locale)(),
-					description: client.localise("music.options.skip.strings.skippedSong.description", locale)(),
-			  };
+	const isSkippingCollection = interaction.parameters.collection ?? false;
+	const strings = isSkippingCollection
+		? {
+				title: client.localise("music.options.skip.strings.skippedSongCollection.title", locale)(),
+				description: client.localise("music.options.skip.strings.skippedSongCollection.description", locale)(),
+		  }
+		: {
+				title: client.localise("music.options.skip.strings.skippedSong.title", locale)(),
+				description: client.localise("music.options.skip.strings.skippedSong.description", locale)(),
+		  };
 
 	client.reply(
 		interaction,
@@ -180,20 +182,23 @@ async function handleSkipAction(client: Client, interaction: Logos.Interaction):
 		{ visible: true },
 	);
 
-	if (songsToSkip !== undefined) {
+	if (interaction.parameters.by !== undefined) {
 		let listingsToSkip!: number;
-		if (isCollection(current.content) && collection === undefined) {
-			listingsToSkip = Math.min(songsToSkip, current.content.songs.length - (current.content.position + 1));
+		if (isCollection(current.content) && interaction.parameters.collection === undefined) {
+			listingsToSkip = Math.min(
+				interaction.parameters.by,
+				current.content.songs.length - (current.content.position + 1),
+			);
 		} else {
-			listingsToSkip = Math.min(songsToSkip, queue.length);
+			listingsToSkip = Math.min(interaction.parameters.by, queue.length);
 		}
 		musicService.skip(isSkippingCollection, { by: listingsToSkip });
-	} else if (songToSkipTo !== undefined) {
+	} else if (interaction.parameters.to !== undefined) {
 		let listingToSkipTo!: number;
-		if (isCollection(current.content) && collection === undefined) {
-			listingToSkipTo = Math.min(songToSkipTo, current.content.songs.length);
+		if (isCollection(current.content) && interaction.parameters.collection === undefined) {
+			listingToSkipTo = Math.min(interaction.parameters.to, current.content.songs.length);
 		} else {
-			listingToSkipTo = Math.min(songToSkipTo, queue.length);
+			listingToSkipTo = Math.min(interaction.parameters.to, queue.length);
 		}
 		musicService.skip(isSkippingCollection, { to: listingToSkipTo });
 	} else {

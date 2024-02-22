@@ -495,7 +495,7 @@ async function translateText(
 		];
 	}
 
-	const components: Discord.ActionRow[] | undefined = show
+	const components: Discord.ActionRow[] | undefined = interaction.parameters.show
 		? undefined
 		: [
 				{

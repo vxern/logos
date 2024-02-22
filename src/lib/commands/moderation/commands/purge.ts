@@ -8,7 +8,6 @@ import * as Logos from "../../../../types";
 import { Client, InteractionCollector, isValidSnowflake } from "../../../client";
 import { Guild } from "../../../database/guild";
 import diagnostics from "../../../diagnostics";
-import { parseArguments } from "../../../interactions";
 import { chunk, snowflakeToTimestamp } from "../../../utils";
 import { CommandTemplate } from "../../command";
 import { user } from "../../parameters";
@@ -33,16 +32,24 @@ const command: CommandTemplate = {
 	],
 };
 
-async function handlePurgeMessagesAutocomplete(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const [{ author }] = parseArguments(interaction.data?.options, {});
-	if (author === undefined) {
+async function handlePurgeMessagesAutocomplete(
+	client: Client,
+	interaction: Logos.Interaction<any, { author: string | undefined }>,
+): Promise<void> {
+	if (interaction.parameters.author === undefined) {
 		return;
 	}
 
-	client.autocompleteMembers(interaction, { identifier: author, options: { includeBots: true } });
+	client.autocompleteMembers(interaction, {
+		identifier: interaction.parameters.author,
+		options: { includeBots: true },
+	});
 }
 
-async function handlePurgeMessages(client: Client, interaction: Logos.Interaction): Promise<void> {
+async function handlePurgeMessages(
+	client: Client,
+	interaction: Logos.Interaction<any, { start: string; end: string; author: string | undefined }>,
+): Promise<void> {
 	const language = interaction.language;
 	const locale = interaction.locale;
 
@@ -58,23 +65,15 @@ async function handlePurgeMessages(client: Client, interaction: Logos.Interactio
 		return;
 	}
 
-	const [{ start, end: provisionalEnd, author: user }] = parseArguments(interaction.data?.options, {});
-	if (start === undefined) {
-		return;
-	}
-
 	client.postponeReply(interaction);
 
 	let authorId: bigint | undefined;
-
-	if (user !== undefined) {
+	if (interaction.parameters.author !== undefined) {
 		const authorMember = client.resolveInteractionToMember(
 			interaction,
 			{
-				identifier: user,
-				options: {
-					includeBots: true,
-				},
+				identifier: interaction.parameters.author,
+				options: { includeBots: true },
 			},
 			{ locale },
 		);
@@ -87,8 +86,8 @@ async function handlePurgeMessages(client: Client, interaction: Logos.Interactio
 		authorId = undefined;
 	}
 
-	const isStartValid = isValidSnowflake(start);
-	const isEndValid = provisionalEnd === undefined || isValidSnowflake(provisionalEnd);
+	const isStartValid = isValidSnowflake(interaction.parameters.start);
+	const isEndValid = interaction.parameters.end === undefined || isValidSnowflake(interaction.parameters.end);
 	if (!(isStartValid && isEndValid)) {
 		displaySnowflakesInvalidError(client, interaction, [!isStartValid, !isEndValid], { locale });
 		return;
@@ -100,7 +99,7 @@ async function handlePurgeMessages(client: Client, interaction: Logos.Interactio
 	}
 
 	const end =
-		provisionalEnd ??
+		interaction.parameters.end ??
 		(await client.bot.rest
 			.getMessages(channelId, { limit: 1 })
 			.catch(() => undefined)
@@ -111,12 +110,15 @@ async function handlePurgeMessages(client: Client, interaction: Logos.Interactio
 		return;
 	}
 
-	if (start === end) {
+	if (interaction.parameters.start === end) {
 		displayIdsNotDifferentError(client, interaction, { locale });
 		return;
 	}
 
-	let [startMessageId, endMessageId] = [Discord.snowflakeToBigint(start), Discord.snowflakeToBigint(end)];
+	let [startMessageId, endMessageId] = [
+		Discord.snowflakeToBigint(interaction.parameters.start),
+		Discord.snowflakeToBigint(end),
+	];
 
 	if (startMessageId > endMessageId) {
 		[startMessageId, endMessageId] = [endMessageId, startMessageId];

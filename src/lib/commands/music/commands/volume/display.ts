@@ -2,13 +2,12 @@ import * as Discord from "@discordeno/bot";
 import constants from "../../../../../constants/constants";
 import * as Logos from "../../../../../types";
 import { Client } from "../../../../client";
-import { parseArguments } from "../../../../interactions";
 
-async function handleDisplayVolume(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const [{ show: showParameter }] = parseArguments(interaction.data?.options, { show: "boolean" });
-
-	const show = interaction.show ?? showParameter ?? false;
-	const locale = show ? interaction.guildLocale : interaction.locale;
+async function handleDisplayVolume(
+	client: Client,
+	interaction: Logos.Interaction<any, { show: boolean | undefined }>,
+): Promise<void> {
+	const locale = interaction.parameters.show ? interaction.guildLocale : interaction.locale;
 
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
@@ -54,7 +53,7 @@ async function handleDisplayVolume(client: Client, interaction: Logos.Interactio
 		description: client.localise("music.options.volume.options.display.strings.volume.description", locale)({ volume }),
 	};
 
-	const components: Discord.ActionRow[] | undefined = show
+	const components: Discord.ActionRow[] | undefined = interaction.parameters.show
 		? undefined
 		: [
 				{
@@ -75,7 +74,7 @@ async function handleDisplayVolume(client: Client, interaction: Logos.Interactio
 			],
 			components,
 		},
-		{ visible: show },
+		{ visible: interaction.parameters.show },
 	);
 }
 

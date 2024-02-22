@@ -5,7 +5,6 @@ import * as Logos from "../../../../../types";
 import { Client } from "../../../../client";
 import { Praise } from "../../../../database/praise";
 import { Warning } from "../../../../database/warning";
-import { parseArguments } from "../../../../interactions";
 import { OptionTemplate } from "../../../command";
 import { show, user } from "../../../parameters";
 
@@ -20,24 +19,22 @@ const command: OptionTemplate = {
 	},
 };
 
-async function handleDisplayProfileAutocomplete(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const [{ user }] = parseArguments(interaction.data?.options, {});
-	if (user === undefined) {
-		return;
-	}
-
-	client.autocompleteMembers(interaction, { identifier: user });
+async function handleDisplayProfileAutocomplete(
+	client: Client,
+	interaction: Logos.Interaction<any, { user: string }>,
+): Promise<void> {
+	client.autocompleteMembers(interaction, { identifier: interaction.parameters.user });
 }
 
-async function handleDisplayProfile(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const [{ user, show: showParameter }] = parseArguments(interaction.data?.options, { show: "boolean" });
-
-	const show = interaction.show ?? showParameter ?? false;
-	const locale = show ? interaction.guildLocale : interaction.locale;
+async function handleDisplayProfile(
+	client: Client,
+	interaction: Logos.Interaction<any, { user: string | undefined }>,
+): Promise<void> {
+	const locale = interaction.parameters.show ? interaction.guildLocale : interaction.locale;
 
 	const member = client.resolveInteractionToMember(
 		interaction,
-		{ identifier: user ?? interaction.user.id.toString() },
+		{ identifier: interaction.parameters.user ?? interaction.user.id.toString() },
 		{ locale },
 	);
 	if (member === undefined) {
@@ -70,7 +67,7 @@ async function handleDisplayProfile(client: Client, interaction: Logos.Interacti
 		sent: client.localise("profile.options.view.strings.information.description.sent", locale)(),
 	};
 
-	const components: Discord.ActionRow[] | undefined = show
+	const components: Discord.ActionRow[] | undefined = interaction.parameters.show
 		? undefined
 		: [
 				{
@@ -115,7 +112,7 @@ async function handleDisplayProfile(client: Client, interaction: Logos.Interacti
 			],
 			components,
 		},
-		{ visible: show },
+		{ visible: interaction.parameters.show },
 	);
 }
 

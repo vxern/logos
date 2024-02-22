@@ -6,7 +6,6 @@ import * as Logos from "../../../../types";
 import { Client } from "../../../client";
 import { Guild } from "../../../database/guild";
 import diagnostics from "../../../diagnostics";
-import { parseArguments } from "../../../interactions";
 import { CommandTemplate } from "../../command";
 
 const command: CommandTemplate = {
@@ -41,13 +40,13 @@ const rateLimitDurationByLevel: Record<(typeof levels)[number], number> = {
 };
 type SlowmodeLevel = keyof typeof rateLimitDurationByLevel | "unknown";
 
-async function handleToggleSlowmodeAutocomplete(client: Client, interaction: Logos.Interaction): Promise<void> {
+async function handleToggleSlowmodeAutocomplete(
+	client: Client,
+	interaction: Logos.Interaction<any, { level: string }>,
+): Promise<void> {
 	const locale = interaction.locale;
 
-	const [{ level: levelOrUndefined }] = parseArguments(interaction.data?.options, {});
-	const levelQuery = levelOrUndefined ?? "";
-
-	const levelQueryLowercase = levelQuery.toLowerCase();
+	const levelLowercase = interaction.parameters.level.trim().toLowerCase();
 	const choices = levels
 		.map((level, index) => {
 			return {
@@ -55,15 +54,21 @@ async function handleToggleSlowmodeAutocomplete(client: Client, interaction: Log
 				value: index.toString(),
 			};
 		})
-		.filter((choice) => choice.name.toLowerCase().includes(levelQueryLowercase));
+		.filter((choice) => choice.name.toLowerCase().includes(levelLowercase));
 
 	client.respond(interaction, choices);
 }
 
-async function handleToggleSlowmode(client: Client, interaction: Logos.Interaction): Promise<void> {
+async function handleToggleSlowmode(
+	client: Client,
+	interaction: Logos.Interaction<any, { level: string }>,
+): Promise<void> {
 	const locale = interaction.guildLocale;
 
-	const [{ level: levelIndex }] = parseArguments(interaction.data?.options, { level: "number" });
+	const levelIndex = Number(interaction.parameters.level);
+	if (!Number.isSafeInteger(levelIndex)) {
+		return;
+	}
 
 	const { guildId, channelId } = interaction;
 	if (guildId === undefined || channelId === undefined) {

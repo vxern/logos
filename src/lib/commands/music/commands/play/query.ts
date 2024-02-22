@@ -1,20 +1,14 @@
 import constants from "../../../../../constants/constants";
 import * as Logos from "../../../../../types";
 import { Client } from "../../../../client";
-import { parseArguments } from "../../../../interactions";
 import { ListingResolver } from "../../data/sources/sources";
 import { SongListing } from "../../data/types";
 
 async function handleRequestQueryPlayback(
 	client: Client,
-	interaction: Logos.Interaction,
+	interaction: Logos.Interaction<any, { query: string }>,
 	resolveToSongListing: ListingResolver,
 ): Promise<void> {
-	const [{ query }] = parseArguments(interaction.data?.options, {});
-	if (query === undefined) {
-		return;
-	}
-
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
 		return;
@@ -30,7 +24,7 @@ async function handleRequestQueryPlayback(
 		return;
 	}
 
-	const listing = await resolveToSongListing(client, interaction, query);
+	const listing = await resolveToSongListing(client, interaction, interaction.parameters.query);
 
 	handleRequestPlayback(client, interaction, listing);
 }

@@ -3,7 +3,6 @@ import constants from "../../../../constants/constants";
 import defaults from "../../../../defaults";
 import * as Logos from "../../../../types";
 import { Client } from "../../../client";
-import { parseArguments } from "../../../interactions";
 import { chunk } from "../../../utils";
 import { OptionTemplate } from "../../command";
 import { show } from "../../parameters";
@@ -20,10 +19,7 @@ const command: OptionTemplate = {
 };
 
 async function handleDisplayPlaybackQueue(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const [{ show: showParameter }] = parseArguments(interaction.data?.options, { show: "boolean" });
-
-	const show = interaction.show ?? showParameter ?? false;
-	const locale = show ? interaction.guildLocale : interaction.locale;
+	const locale = interaction.parameters.show ? interaction.guildLocale : interaction.locale;
 
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
@@ -78,7 +74,7 @@ async function handleDisplayPlaybackQueue(client: Client, interaction: Logos.Int
 			title: `${constants.symbols.music.list} ${strings.queue}`,
 			getSongListings: () => chunk(queue, defaults.RESULTS_PER_PAGE),
 		},
-		show ?? false,
+		interaction.parameters.show,
 		{ locale },
 	);
 

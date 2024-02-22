@@ -2,7 +2,6 @@ import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import * as Logos from "../../../../types";
 import { Client } from "../../../client";
-import { parseArguments } from "../../../interactions";
 import { isCollection } from "../../../services/music/music";
 import { OptionTemplate } from "../../command";
 import { collection } from "../../parameters";
@@ -14,10 +13,11 @@ const command: OptionTemplate = {
 	options: [collection],
 };
 
-async function handleReplayAction(client: Client, interaction: Logos.Interaction): Promise<void> {
+async function handleReplayAction(
+	client: Client,
+	interaction: Logos.Interaction<any, { collection: boolean | undefined }>,
+): Promise<void> {
 	const locale = interaction.guildLocale;
-
-	const [{ collection }] = parseArguments(interaction.data?.options, { collection: "boolean" });
 
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
@@ -56,7 +56,7 @@ async function handleReplayAction(client: Client, interaction: Logos.Interaction
 		return;
 	}
 
-	if (collection) {
+	if (interaction.parameters.collection) {
 		if (current?.content === undefined || !isCollection(current.content)) {
 			const locale = interaction.locale;
 			const strings = {
@@ -122,7 +122,7 @@ async function handleReplayAction(client: Client, interaction: Logos.Interaction
 		{ visible: true },
 	);
 
-	musicService.replay(collection ?? false);
+	musicService.replay(interaction.parameters.collection ?? false);
 }
 
 export default command;

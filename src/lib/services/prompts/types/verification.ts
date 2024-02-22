@@ -26,13 +26,13 @@ class VerificationService extends PromptService<{
 	model: EntryRequest;
 	metadata: [partialId: string, isAccept: string];
 }> {
-	readonly #_openInquiry: InteractionCollector;
+	readonly #_openInquiry: InteractionCollector<[partialId: string]>;
 
 	constructor(client: Client, guildId: bigint) {
 		super(client, guildId, { type: "verification", deleteMode: "none" });
 
 		this.#_openInquiry = new InteractionCollector(client, {
-			customId: `${constants.components.createInquiry}/${this.guildId}`,
+			customId: InteractionCollector.encodeCustomId([constants.components.createInquiry, this.guildIdString]),
 			isPermanent: true,
 		});
 	}

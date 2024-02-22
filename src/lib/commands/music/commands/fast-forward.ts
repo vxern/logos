@@ -4,7 +4,7 @@ import { Locale } from "../../../../constants/languages";
 import { trim } from "../../../../formatting";
 import * as Logos from "../../../../types";
 import { Client } from "../../../client";
-import { parseArguments, parseTimeExpression } from "../../../interactions";
+import { parseTimeExpression } from "../../../interactions";
 import { OptionTemplate } from "../../command";
 import { timestamp } from "../../parameters";
 
@@ -16,16 +16,14 @@ const command: OptionTemplate = {
 	options: [timestamp],
 };
 
-async function handleFastForwardAutocomplete(client: Client, interaction: Logos.Interaction): Promise<void> {
+async function handleFastForwardAutocomplete(
+	client: Client,
+	interaction: Logos.Interaction<any, { timestamp: string }>,
+): Promise<void> {
 	const language = interaction.language;
 	const locale = interaction.locale;
 
-	const [{ timestamp: timestampExpression }] = parseArguments(interaction.data?.options, {});
-	if (timestampExpression === undefined) {
-		return;
-	}
-
-	const timestamp = parseTimeExpression(client, timestampExpression, { language, locale });
+	const timestamp = parseTimeExpression(client, interaction.parameters.timestamp, { language, locale });
 	if (timestamp === undefined) {
 		const strings = {
 			autocomplete: client.localise("autocomplete.timestamp", locale)(),
@@ -38,10 +36,11 @@ async function handleFastForwardAutocomplete(client: Client, interaction: Logos.
 	client.respond(interaction, [{ name: timestamp[0], value: timestamp[1].toString() }]);
 }
 
-async function handleFastForward(client: Client, interaction: Logos.Interaction): Promise<void> {
+async function handleFastForward(
+	client: Client,
+	interaction: Logos.Interaction<any, { timestamp: string }>,
+): Promise<void> {
 	const locale = interaction.guildLocale;
-
-	const [{ timestamp: timestampExpression }] = parseArguments(interaction.data?.options, {});
 
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
@@ -82,7 +81,7 @@ async function handleFastForward(client: Client, interaction: Logos.Interaction)
 		return;
 	}
 
-	const timestamp = Number(timestampExpression);
+	const timestamp = Number(interaction.parameters.timestamp);
 	if (!Number.isSafeInteger(timestamp)) {
 		displayInvalidTimestampError(client, interaction, { locale });
 		return;

@@ -5,7 +5,6 @@ import * as Logos from "../../../../types";
 import { Client } from "../../../client";
 import { Guild } from "../../../database/guild";
 import { Rule } from "../../../database/warning";
-import { parseArguments } from "../../../interactions";
 import { CommandTemplate } from "../../command";
 import { show } from "../../parameters";
 
@@ -31,7 +30,10 @@ const command: CommandTemplate = {
 
 const rules: Rule[] = ["behaviour", "quality", "relevance", "suitability", "exclusivity", "adherence"];
 
-async function handleCiteRuleAutocomplete(client: Client, interaction: Logos.Interaction): Promise<void> {
+async function handleCiteRuleAutocomplete(
+	client: Client,
+	interaction: Logos.Interaction<any, { rule: string }>,
+): Promise<void> {
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
 		return;
@@ -46,11 +48,7 @@ async function handleCiteRuleAutocomplete(client: Client, interaction: Logos.Int
 
 	const locale = interaction.locale;
 
-	const [{ rule: ruleOrUndefined }] = parseArguments(interaction.data?.options, {});
-	const ruleQueryRaw = ruleOrUndefined ?? "";
-
-	const ruleQueryTrimmed = ruleQueryRaw.trim();
-	const ruleQueryLowercase = ruleQueryTrimmed.toLowerCase();
+	const ruleLowercase = interaction.parameters.rule.trim().toLowerCase();
 	const choices = rules
 		.map((ruleId, index) => {
 			return {
@@ -58,23 +56,18 @@ async function handleCiteRuleAutocomplete(client: Client, interaction: Logos.Int
 				value: index.toString(),
 			};
 		})
-		.filter((choice) => choice.name.toLowerCase().includes(ruleQueryLowercase));
+		.filter((choice) => choice.name.toLowerCase().includes(ruleLowercase));
 
 	client.respond(interaction, choices);
 }
 
-async function handleCiteRule(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const [{ rule: ruleIndex, show: showParameter }] = parseArguments(interaction.data?.options, {
-		rule: "number",
-		show: "boolean",
-	});
-	if (ruleIndex === undefined) {
-		displayError(client, interaction, { locale: interaction.locale });
+async function handleCiteRule(client: Client, interaction: Logos.Interaction<any, { rule: string }>): Promise<void> {
+	const locale = interaction.parameters.show ? interaction.guildLocale : interaction.locale;
+
+	const ruleIndex = Number(interaction.parameters.rule);
+	if (!Number.isSafeInteger(ruleIndex)) {
 		return;
 	}
-
-	const show = interaction.show ?? showParameter ?? false;
-	const locale = show ? interaction.guildLocale : interaction.locale;
 
 	const ruleId = rules.at(ruleIndex);
 	if (ruleId === undefined) {
@@ -98,7 +91,7 @@ async function handleCiteRule(client: Client, interaction: Logos.Interaction): P
 		content: client.localise(`rules.${ruleId}.content`, locale)(),
 	};
 
-	const components: Discord.ActionRow[] | undefined = show
+	const components: Discord.ActionRow[] | undefined = interaction.parameters.show
 		? undefined
 		: [
 				{
@@ -121,7 +114,7 @@ async function handleCiteRule(client: Client, interaction: Logos.Interaction): P
 			],
 			components,
 		},
-		{ visible: show },
+		{ visible: interaction.parameters.show },
 	);
 }
 

@@ -25,7 +25,7 @@ interface GameData {
 	sentenceSelection: SentenceSelection;
 	embedColour: number;
 	guessButton: InteractionCollector<[index: string]>;
-	skipButton: InteractionCollector<[index: string]>;
+	skipButton: InteractionCollector;
 	sessionScore: number;
 }
 

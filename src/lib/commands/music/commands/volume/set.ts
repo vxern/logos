@@ -2,9 +2,8 @@ import constants from "../../../../../constants/constants";
 import defaults from "../../../../../defaults";
 import * as Logos from "../../../../../types";
 import { Client } from "../../../../client";
-import { parseArguments } from "../../../../interactions";
 
-async function handleSetVolume(client: Client, interaction: Logos.Interaction): Promise<void> {
+async function handleSetVolume(client: Client, interaction: Logos.Interaction<any, { volume: number }>): Promise<void> {
 	const locale = interaction.guildLocale;
 
 	const guildId = interaction.guildId;
@@ -44,12 +43,11 @@ async function handleSetVolume(client: Client, interaction: Logos.Interaction): 
 		return;
 	}
 
-	const [{ volume }] = parseArguments(interaction.data?.options, { volume: "number" });
-	if (volume === undefined || !Number.isSafeInteger(volume)) {
+	if (!Number.isSafeInteger(interaction.parameters.volume)) {
 		return;
 	}
 
-	if (volume < 0 || volume > defaults.MAX_VOLUME) {
+	if (interaction.parameters.volume < 0 || interaction.parameters.volume > defaults.MAX_VOLUME) {
 		const locale = interaction.locale;
 		const strings = {
 			title: client.localise("music.options.volume.options.set.strings.invalid.title", locale)(),
@@ -71,11 +69,14 @@ async function handleSetVolume(client: Client, interaction: Logos.Interaction): 
 		return;
 	}
 
-	musicService.setVolume(volume);
+	musicService.setVolume(interaction.parameters.volume);
 
 	const strings = {
 		title: client.localise("music.options.volume.options.set.strings.set.title", locale)(),
-		description: client.localise("music.options.volume.options.set.strings.set.description", locale)({ volume }),
+		description: client.localise(
+			"music.options.volume.options.set.strings.set.description",
+			locale,
+		)({ volume: interaction.parameters.volume }),
 	};
 
 	client.reply(

@@ -7,7 +7,6 @@ import * as Logos from "../../../../types";
 import { Client } from "../../../client";
 import { Guild, timeStructToMilliseconds } from "../../../database/guild";
 import { Praise } from "../../../database/praise";
-import { parseArguments } from "../../../interactions";
 import { verifyIsWithinLimits } from "../../../utils";
 import { CommandTemplate } from "../../command";
 import { user } from "../../parameters";
@@ -27,16 +26,17 @@ const command: CommandTemplate = {
 	],
 };
 
-async function handlePraiseUserAutocomplete(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const [{ user }] = parseArguments(interaction.data?.options, {});
-	if (user === undefined) {
-		return;
-	}
-
-	client.autocompleteMembers(interaction, { identifier: user });
+async function handlePraiseUserAutocomplete(
+	client: Client,
+	interaction: Logos.Interaction<any, { user: string }>,
+): Promise<void> {
+	client.autocompleteMembers(interaction, { identifier: interaction.parameters.user });
 }
 
-async function handlePraiseUser(client: Client, interaction: Logos.Interaction): Promise<void> {
+async function handlePraiseUser(
+	client: Client,
+	interaction: Logos.Interaction<any, { user: string; comment: string | undefined }>,
+): Promise<void> {
 	const locale = interaction.locale;
 
 	const guildId = interaction.guildId;
@@ -51,12 +51,11 @@ async function handlePraiseUser(client: Client, interaction: Logos.Interaction):
 		return;
 	}
 
-	const [{ user, comment }] = parseArguments(interaction.data?.options, {});
-	if (user === undefined) {
-		return;
-	}
-
-	const member = client.resolveInteractionToMember(interaction, { identifier: user }, { locale });
+	const member = client.resolveInteractionToMember(
+		interaction,
+		{ identifier: interaction.parameters.user },
+		{ locale },
+	);
 	if (member === undefined) {
 		return;
 	}
@@ -115,7 +114,7 @@ async function handlePraiseUser(client: Client, interaction: Logos.Interaction):
 	const praiseDocument = await Praise.create(client, {
 		authorId: interaction.user.id.toString(),
 		targetId: member.id.toString(),
-		comment,
+		comment: interaction.parameters.comment,
 	});
 
 	if (configuration.journaling) {

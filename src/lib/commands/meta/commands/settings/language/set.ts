@@ -10,7 +10,6 @@ import { trim } from "../../../../../../formatting";
 import * as Logos from "../../../../../../types";
 import { Client } from "../../../../../client";
 import { User } from "../../../../../database/user";
-import { parseArguments } from "../../../../../interactions";
 import { OptionTemplate } from "../../../../command";
 
 const command: OptionTemplate = {
@@ -28,7 +27,10 @@ const command: OptionTemplate = {
 	],
 };
 
-async function handleSetLanguageAutocomplete(client: Client, interaction: Logos.Interaction): Promise<void> {
+async function handleSetLanguageAutocomplete(
+	client: Client,
+	interaction: Logos.Interaction<any, { language: string }>,
+): Promise<void> {
 	const locale = interaction.locale;
 
 	const guildId = interaction.guildId;
@@ -36,11 +38,8 @@ async function handleSetLanguageAutocomplete(client: Client, interaction: Logos.
 		return;
 	}
 
-	const [{ language: languageOrUndefined }] = parseArguments(interaction.data?.options, {});
-	const languageQueryRaw = languageOrUndefined ?? "";
-
-	const languageQueryTrimmed = languageQueryRaw.trim();
-	if (languageQueryTrimmed.length === 0) {
+	const languageLowercase = interaction.parameters.language.trim().toLowerCase();
+	if (languageLowercase.length === 0) {
 		const strings = {
 			autocomplete: client.localise("autocomplete.language", locale)(),
 		};
@@ -49,7 +48,6 @@ async function handleSetLanguageAutocomplete(client: Client, interaction: Logos.
 		return;
 	}
 
-	const languageQueryLowercase = languageQueryTrimmed.toLowerCase();
 	const choices = languages.languages.localisation
 		.map((language) => {
 			return {
@@ -57,26 +55,23 @@ async function handleSetLanguageAutocomplete(client: Client, interaction: Logos.
 				value: language,
 			};
 		})
-		.filter((choice) => choice.name.toLowerCase().includes(languageQueryLowercase));
+		.filter((choice) => choice.name.toLowerCase().includes(languageLowercase));
 
 	client.respond(interaction, choices);
 }
 
-async function handleSetLanguage(client: Client, interaction: Logos.Interaction): Promise<void> {
+async function handleSetLanguage(
+	client: Client,
+	interaction: Logos.Interaction<any, { language: string }>,
+): Promise<void> {
 	const localeBefore = interaction.locale;
 
-	const [{ language: languageOrUndefined }] = parseArguments(interaction.data?.options, {});
-	if (languageOrUndefined === undefined) {
+	if (!isLocalisationLanguage(interaction.parameters.language)) {
 		displayError(client, interaction, { locale: interaction.locale });
 		return;
 	}
 
-	if (!isLocalisationLanguage(languageOrUndefined)) {
-		displayError(client, interaction, { locale: interaction.locale });
-		return;
-	}
-
-	const language = languageOrUndefined;
+	const language = interaction.parameters.language;
 
 	await client.postponeReply(interaction);
 

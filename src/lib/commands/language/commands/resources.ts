@@ -19,7 +19,7 @@ const command: CommandTemplate = {
 
 /** Displays a message with information on where to find the resources for a given language. */
 async function handleDisplayResources(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const locale = interaction.parameters.show ?? show ? interaction.guildLocale : interaction.locale;
+	const locale = interaction.parameters.show ? interaction.guildLocale : interaction.locale;
 
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
@@ -51,7 +51,7 @@ async function handleDisplayResources(client: Client, interaction: Logos.Interac
 		},
 	];
 
-	if (!show) {
+	if (!interaction.parameters.show) {
 		buttons.push(client.interactionRepetitionService.getShowButton(interaction, { locale }));
 	}
 

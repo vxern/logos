@@ -6,32 +6,29 @@ import * as Logos from "../../../../../types";
 import { Client } from "../../../../client";
 import { Guild } from "../../../../database/guild";
 import diagnostics from "../../../../diagnostics";
-import { parseArguments, parseTimeExpression } from "../../../../interactions";
+import { parseTimeExpression } from "../../../../interactions";
 
-async function handleSetTimeoutAutocomplete(client: Client, interaction: Logos.Interaction): Promise<void> {
+async function handleSetTimeoutAutocomplete(
+	client: Client,
+	interaction: Logos.Interaction<any, { user: string; duration: string }>,
+): Promise<void> {
 	const language = interaction.language;
 	const locale = interaction.locale;
 
-	const [{ user, duration }, focused] = parseArguments(interaction.data?.options, {});
+	if (interaction.parameters.focused === undefined) {
+		return;
+	}
 
-	switch (focused?.name) {
+	switch (interaction.parameters.focused) {
 		case "user": {
-			if (user === undefined) {
-				return;
-			}
-
 			client.autocompleteMembers(interaction, {
-				identifier: user,
+				identifier: interaction.parameters.focused,
 				options: { restrictToNonSelf: true, excludeModerators: true },
 			});
 			return;
 		}
 		case "duration": {
-			if (duration === undefined) {
-				return;
-			}
-
-			const timestamp = parseTimeExpression(client, duration, { language, locale });
+			const timestamp = parseTimeExpression(client, interaction.parameters.duration, { language, locale });
 			if (timestamp === undefined) {
 				const strings = {
 					autocomplete: client.localise("autocomplete.timestamp", locale)(),
@@ -46,7 +43,10 @@ async function handleSetTimeoutAutocomplete(client: Client, interaction: Logos.I
 	}
 }
 
-async function handleSetTimeout(client: Client, interaction: Logos.Interaction): Promise<void> {
+async function handleSetTimeout(
+	client: Client,
+	interaction: Logos.Interaction<any, { user: string; duration: string; reason: string }>,
+): Promise<void> {
 	const language = interaction.language;
 	const locale = interaction.locale;
 
@@ -62,15 +62,10 @@ async function handleSetTimeout(client: Client, interaction: Logos.Interaction):
 		return;
 	}
 
-	const [{ user, duration, reason }] = parseArguments(interaction.data?.options, {});
-	if (user === undefined || duration === undefined) {
-		return;
-	}
-
 	const member = client.resolveInteractionToMember(
 		interaction,
 		{
-			identifier: user,
+			identifier: interaction.parameters.user,
 			options: {
 				restrictToNonSelf: true,
 				excludeModerators: true,
@@ -82,10 +77,9 @@ async function handleSetTimeout(client: Client, interaction: Logos.Interaction):
 		return;
 	}
 
-	let durationParsed = Number(duration);
-
+	let durationParsed = Number(interaction.parameters.duration);
 	if (!Number.isSafeInteger(durationParsed)) {
-		const timestamp = parseTimeExpression(client, duration, { language, locale });
+		const timestamp = parseTimeExpression(client, interaction.parameters.duration, { language, locale });
 		if (timestamp === undefined) {
 			displayDurationInvalidError(client, interaction, { locale });
 			return;
@@ -104,10 +98,6 @@ async function handleSetTimeout(client: Client, interaction: Logos.Interaction):
 		return;
 	}
 
-	if (reason === undefined) {
-		return;
-	}
-
 	const until = Date.now() + durationParsed;
 
 	const guild = client.entities.guilds.get(guildId);
@@ -121,7 +111,9 @@ async function handleSetTimeout(client: Client, interaction: Logos.Interaction):
 
 	if (configuration.journaling) {
 		const journallingService = client.getJournallingService(guild.id);
-		journallingService?.log("memberTimeoutAdd", { args: [member, until, reason, interaction.user] });
+		journallingService?.log("memberTimeoutAdd", {
+			args: [member, until, interaction.parameters.reason, interaction.user],
+		});
 	}
 
 	const strings = {

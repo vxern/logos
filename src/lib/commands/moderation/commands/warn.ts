@@ -10,7 +10,6 @@ import { timeStructToMilliseconds } from "../../../database/guild";
 import { Guild } from "../../../database/guild";
 import { Rule, Warning } from "../../../database/warning";
 import diagnostics from "../../../diagnostics";
-import { parseArguments } from "../../../interactions";
 import { CommandTemplate } from "../../command";
 import { reason, user } from "../../parameters";
 import { getActiveWarnings } from "../module";
@@ -34,7 +33,10 @@ const command: CommandTemplate = {
 	],
 };
 
-async function handleWarnUserAutocomplete(client: Client, interaction: Logos.Interaction): Promise<void> {
+async function handleWarnUserAutocomplete(
+	client: Client,
+	interaction: Logos.Interaction<any, { user: string; rule: string; reason: string }>,
+): Promise<void> {
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
 		return;
@@ -47,58 +49,51 @@ async function handleWarnUserAutocomplete(client: Client, interaction: Logos.Int
 		return;
 	}
 
-	const [{ user, rule: ruleOrUndefined }, focused] = parseArguments(interaction.data?.options, {});
-
-	if (focused?.name === "user") {
-		if (user === undefined) {
-			return;
-		}
-
-		client.autocompleteMembers(interaction, {
-			identifier: user,
-			options: {
-				restrictToNonSelf: true,
-				excludeModerators: true,
-			},
-		});
-
+	if (interaction.parameters.focused === undefined) {
 		return;
 	}
 
-	if (focused?.name === "rule") {
-		if (ruleOrUndefined === undefined) {
-			return;
+	switch (interaction.parameters.focused) {
+		case "user": {
+			client.autocompleteMembers(interaction, {
+				identifier: interaction.parameters.user,
+				options: {
+					restrictToNonSelf: true,
+					excludeModerators: true,
+				},
+			});
+			break;
 		}
+		case "rule": {
+			const locale = interaction.locale;
 
-		const locale = interaction.locale;
+			const strings = {
+				other: client.localise("warn.options.rule.strings.other", locale)(),
+			};
 
-		const strings = {
-			other: client.localise("warn.options.rule.strings.other", locale)(),
-		};
+			const ruleLowercase = interaction.parameters.rule.trim().toLowerCase();
+			const choices = [
+				...rules
+					.map((rule, index) => {
+						return {
+							name: getRuleTitleFormatted(client, rule, index, "option", { locale }),
+							value: rule,
+						};
+					})
+					.filter((choice) => choice.name.toLowerCase().includes(ruleLowercase)),
+				{ name: strings.other, value: components.none },
+			];
 
-		const ruleQueryRaw = ruleOrUndefined ?? "";
-
-		const ruleQueryTrimmed = ruleQueryRaw.trim();
-		const ruleQueryLowercase = ruleQueryTrimmed.toLowerCase();
-		const choices = [
-			...rules
-				.map((rule, index) => {
-					return {
-						name: getRuleTitleFormatted(client, rule, index, "option", { locale }),
-						value: rule,
-					};
-				})
-				.filter((choice) => choice.name.toLowerCase().includes(ruleQueryLowercase)),
-			{ name: strings.other, value: components.none },
-		];
-
-		client.respond(interaction, choices);
-
-		return;
+			client.respond(interaction, choices);
+			break;
+		}
 	}
 }
 
-async function handleWarnUser(client: Client, interaction: Logos.Interaction): Promise<void> {
+async function handleWarnUser(
+	client: Client,
+	interaction: Logos.Interaction<any, { user: string; rule: string; reason: string }>,
+): Promise<void> {
 	const language = interaction.language;
 	const locale = interaction.locale;
 
@@ -114,12 +109,7 @@ async function handleWarnUser(client: Client, interaction: Logos.Interaction): P
 		return;
 	}
 
-	const [{ user: userSearchQuery, rule, reason }] = parseArguments(interaction.data?.options, {});
-	if (userSearchQuery === undefined || rule === undefined || reason === undefined) {
-		return;
-	}
-
-	if (rule !== components.none && !(rules as string[]).includes(rule)) {
+	if (interaction.parameters.rule !== components.none && !(rules as string[]).includes(interaction.parameters.rule)) {
 		const strings = {
 			title: client.localise("warn.strings.invalidRule.title", locale)(),
 			description: client.localise("warn.strings.invalidRule.description", locale)(),
@@ -135,7 +125,7 @@ async function handleWarnUser(client: Client, interaction: Logos.Interaction): P
 	const member = client.resolveInteractionToMember(
 		interaction,
 		{
-			identifier: userSearchQuery,
+			identifier: interaction.parameters.user,
 			options: {
 				restrictToNonSelf: true,
 				excludeModerators: true,
@@ -165,20 +155,16 @@ async function handleWarnUser(client: Client, interaction: Logos.Interaction): P
 		return undefined;
 	}
 
-	if (reason.length === 0) {
-		displayError(client, interaction, { locale });
-		return;
-	}
-
 	// TODO(vxern): Test this.
-	const warningDocuments = await Warning.getAll(client, { where: { targetId: member.id.toString() } });
-
-	const warningDocument = await Warning.create(client, {
-		authorId: interaction.user.id.toString(),
-		targetId: member.id.toString(),
-		reason,
-		rule: rule === components.none ? undefined : (rule as Rule),
-	});
+	const [warningDocuments, warningDocument] = await Promise.all([
+		Warning.getAll(client, { where: { targetId: member.id.toString() } }),
+		Warning.create(client, {
+			authorId: interaction.user.id.toString(),
+			targetId: member.id.toString(),
+			reason: interaction.parameters.reason,
+			rule: interaction.parameters.rule === components.none ? undefined : (interaction.parameters.rule as Rule),
+		}),
+	]);
 
 	if (configuration.journaling) {
 		const journallingService = client.getJournallingService(guild.id);
