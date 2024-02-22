@@ -1099,7 +1099,8 @@ class CommandStore {
 			}
 
 			if (language.word.enabled) {
-				commands.push(this.commands.word);
+				// TODO(vxern): Re-enable
+				// commands.push(this.commands.word);
 			}
 		}
 

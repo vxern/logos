@@ -5,7 +5,8 @@ import game from "./commands/game";
 import recognise from "./commands/recognise";
 import resources from "./commands/resources";
 import translate from "./commands/translate";
-import word from "./commands/word";
+// TODO(vxern): Re-export
+// import word from "./commands/word";
 
 const { partial: correctionPartialMessage, full: correctionFullMessage } = correction;
 const { chatInput: recogniseChatInput, message: recogniseMessage } = recognise;
@@ -22,5 +23,5 @@ export {
 	resources,
 	translateChatInput as translate,
 	translateMessage,
-	word,
+	//word,
 };
