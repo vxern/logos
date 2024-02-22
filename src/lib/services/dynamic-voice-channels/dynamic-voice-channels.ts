@@ -3,8 +3,13 @@ import defaults from "../../../defaults";
 import * as Logos from "../../../types";
 import { DynamicVoiceChannel, Guild } from "../../database/guild";
 import diagnostics from "../../diagnostics";
-import { isVoice } from "../../utils";
 import { LocalService } from "../service";
+
+type VoiceChannel = Logos.Channel & { type: Discord.ChannelTypes.GuildVoice };
+
+function isVoice(channel: Logos.Channel): channel is VoiceChannel {
+	return channel.type === Discord.ChannelTypes.GuildVoice;
+}
 
 type Configuration = NonNullable<Guild["features"]["server"]["features"]>["dynamicVoiceChannels"];
 

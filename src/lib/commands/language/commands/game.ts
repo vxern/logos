@@ -9,7 +9,6 @@ import * as Logos from "../../../../types";
 import { Client, InteractionCollector } from "../../../client";
 import { GuildStats } from "../../../database/guild-stats";
 import { User } from "../../../database/user";
-import { random } from "../../../utils";
 import { CommandTemplate } from "../../command";
 
 const command: CommandTemplate = {
@@ -18,6 +17,10 @@ const command: CommandTemplate = {
 	defaultMemberPermissions: ["VIEW_CHANNEL"],
 	handle: handleStartGame,
 };
+
+function random(max: number): number {
+	return Math.floor(Math.random() * max);
+}
 
 const wordSegmenter = new Intl.Segmenter(undefined, { granularity: "word" });
 

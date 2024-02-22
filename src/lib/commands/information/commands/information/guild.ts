@@ -7,7 +7,6 @@ import * as Logos from "../../../../../types";
 import { Client } from "../../../../client";
 import { Guild } from "../../../../database/guild";
 import diagnostics from "../../../../diagnostics";
-import { getGuildIconURLFormatted } from "../../../../utils";
 import { OptionTemplate } from "../../../command";
 import { proficiency } from "../../../social/roles/categories/language";
 
@@ -71,14 +70,7 @@ async function handleDisplayGuildInformation(client: Client, interaction: Logos.
 		embeds: [
 			{
 				author: {
-					iconUrl: (() => {
-						const iconURL = getGuildIconURLFormatted(guild);
-						if (iconURL === undefined) {
-							return undefined;
-						}
-
-						return iconURL;
-					})(),
+					iconUrl: Discord.guildIconUrl(guild.id, guild.icon, { size: 4096, format: "png" }),
 					name: strings.title,
 				},
 				color: constants.colors.blue,

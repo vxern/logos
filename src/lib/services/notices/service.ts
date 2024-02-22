@@ -3,7 +3,7 @@ import Hash from "object-hash";
 import { Client, ServiceStore } from "../../client";
 import { Guild } from "../../database/guild";
 import diagnostics from "../../diagnostics";
-import { getAllMessages, getGuildIconURLFormatted } from "../../utils";
+import { getAllMessages } from "../../utils";
 import { LocalService } from "../service";
 
 type HashableProperties = "embeds" | "components";
@@ -213,7 +213,7 @@ abstract class NoticeService<NoticeType extends NoticeTypes> extends LocalServic
 			return undefined;
 		}
 
-		lastEmbed.footer = { text: guild.name, iconUrl: `${getGuildIconURLFormatted(guild)}&hash=${hash}` };
+		lastEmbed.footer = { text: guild.name, iconUrl: `${Discord.guildIconUrl(guild.id, guild.icon)}&hash=${hash}` };
 
 		const message = await this.client.bot.rest.sendMessage(channelId, contents).catch(() => {
 			this.client.log.warn(`Failed to send message to ${diagnostics.display.channel(channelId)}.`);

@@ -1,17 +1,6 @@
 import * as Discord from "@discordeno/bot";
-import * as Logos from "../types";
 import { Client } from "./client";
 import diagnostics from "./diagnostics";
-
-type TextChannel = Logos.Channel & { type: Discord.ChannelTypes.GuildText };
-type VoiceChannel = Logos.Channel & { type: Discord.ChannelTypes.GuildVoice };
-
-function isText(channel: Logos.Channel): channel is TextChannel {
-	return channel.type === Discord.ChannelTypes.GuildText;
-}
-function isVoice(channel: Logos.Channel): channel is VoiceChannel {
-	return channel.type === Discord.ChannelTypes.GuildVoice;
-}
 
 /**
  * Taking an array, splits it into parts of equal sizes.
@@ -40,50 +29,6 @@ function* chunked<T>(array: T[], size: number): Generator<T[], void, void> {
 		const end = start + size;
 		yield array.slice(start, end);
 	}
-}
-
-function getGuildIconURLFormatted(guild: Logos.Guild): string | undefined {
-	const iconURL = Discord.guildIconUrl(guild.id, guild.icon, {
-		size: 4096,
-		format: "png",
-	});
-
-	return iconURL;
-}
-
-function getAuthor(guild: Logos.Guild): Discord.CamelizedDiscordEmbedAuthor | undefined {
-	const iconURL = getGuildIconURLFormatted(guild);
-	if (iconURL === undefined) {
-		return undefined;
-	}
-
-	return {
-		name: guild.name,
-		iconUrl: iconURL,
-	};
-}
-
-/**
- * Taking a URL and a list of parameters, returns the URL with the parameters appended
- * to it.
- *
- * @param url - The URL to format.
- * @param parameters - The parameters to append to the URL.
- * @returns The formatted URL.
- */
-function addParametersToURL(url: string, parameters: Record<string, string>): string {
-	const query = Object.entries(parameters)
-		.map(([key, value]) => {
-			const valueEncoded = encodeURIComponent(value);
-			return `${key}=${valueEncoded}`;
-		})
-		.join("&");
-
-	if (query.length === 0) {
-		return url;
-	}
-
-	return `${url}?${query}`;
 }
 
 async function getAllMessages(
@@ -117,10 +62,6 @@ async function getAllMessages(
 	}
 
 	return messages;
-}
-
-function getMemberAvatarURL(guildId: bigint, userId: bigint, avatarHash: bigint): string {
-	return `https://cdn.discordapp.com/guilds/${guildId}/users/${userId}/avatars/${avatarHash}`;
 }
 
 type Reverse<O extends Record<string, string>> = {
@@ -168,26 +109,9 @@ async function* asStream<ElementType, ResultType>(
 	}
 }
 
-function random(max: number): number {
-	return Math.floor(Math.random() * max);
-}
-
+// TODO(vxern): Create type guard "isDefined" instead of this.
 function compact<T>(array: T[]): Exclude<T, undefined>[] {
 	return array.filter((element) => element !== undefined) as Exclude<T, undefined>[];
 }
 
-export {
-	addParametersToURL,
-	chunk,
-	chunked,
-	getAllMessages,
-	getAuthor,
-	getGuildIconURLFormatted,
-	isText,
-	isVoice,
-	getMemberAvatarURL,
-	reverseObject,
-	asStream,
-	random,
-	compact,
-};
+export { chunk, chunked, getAllMessages, reverseObject, asStream, compact };

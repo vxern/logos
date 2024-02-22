@@ -6,7 +6,6 @@ import * as Logos from "../../../../types";
 import { Client, InteractionCollector } from "../../../client";
 import diagnostics from "../../../diagnostics";
 import { Modal, createModalComposer } from "../../../interactions";
-import { getMemberAvatarURL } from "../../../utils";
 import { CommandTemplate } from "../../command";
 import categories from "../../social/roles/roles";
 import { isImplicit, isSingle } from "../../social/roles/types";
@@ -181,15 +180,9 @@ async function handleStartCorrecting(
 							color: constants.colors.lightGreen,
 							footer: {
 								text: `${constants.symbols.correction} ${strings.suggestedBy}`,
-								iconUrl: (() => {
-									if (member.avatar !== undefined) {
-										return getMemberAvatarURL(guildId, interaction.user.id, member.avatar);
-									}
-
-									return Discord.avatarUrl(interaction.user.id, interaction.user.discriminator, {
-										avatar: interaction.user.avatar,
-									});
-								})(),
+								iconUrl: Discord.avatarUrl(interaction.user.id, interaction.user.discriminator, {
+									avatar: interaction.user.avatar,
+								}),
 							},
 						},
 					],

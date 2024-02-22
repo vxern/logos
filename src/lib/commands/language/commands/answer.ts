@@ -6,7 +6,6 @@ import * as Logos from "../../../../types";
 import { Client } from "../../../client";
 import diagnostics from "../../../diagnostics";
 import { Modal, createModalComposer } from "../../../interactions";
-import { getMemberAvatarURL } from "../../../utils";
 import { CommandTemplate } from "../../command";
 
 const command: CommandTemplate = {
@@ -102,15 +101,9 @@ async function handleStartAnswering(client: Client, interaction: Logos.Interacti
 							color: constants.colors.lightGreen,
 							footer: {
 								text: `${constants.symbols.answer} ${strings.submittedBy}`,
-								iconUrl: (() => {
-									if (member.avatar !== undefined) {
-										return getMemberAvatarURL(guildId, interaction.user.id, member.avatar);
-									}
-
-									return Discord.avatarUrl(interaction.user.id, interaction.user.discriminator, {
-										avatar: interaction.user.avatar,
-									});
-								})(),
+								iconUrl: Discord.avatarUrl(interaction.user.id, interaction.user.discriminator, {
+									avatar: interaction.user.avatar,
+								}),
 							},
 						},
 					],

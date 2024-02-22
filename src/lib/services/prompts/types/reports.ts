@@ -5,7 +5,6 @@ import { Client } from "../../../client";
 import { Report } from "../../../database/report";
 import { User } from "../../../database/user";
 import diagnostics from "../../../diagnostics";
-import { getGuildIconURLFormatted } from "../../../utils";
 import { PromptService } from "../service";
 
 class ReportService extends PromptService<{
@@ -100,7 +99,7 @@ class ReportService extends PromptService<{
 					footer: {
 						text: guild.name,
 						// TODO(vxern): Create a function for this
-						iconUrl: `${getGuildIconURLFormatted(guild)}&metadata=${reportDocument.partialId}`,
+						iconUrl: `${Discord.guildIconUrl(guild.id, guild.icon)}&metadata=${reportDocument.partialId}`,
 					},
 				},
 			],

@@ -10,7 +10,6 @@ import { Model } from "../../../database/model";
 import { Ticket } from "../../../database/ticket";
 import { User } from "../../../database/user";
 import diagnostics from "../../../diagnostics";
-import { getGuildIconURLFormatted } from "../../../utils";
 import { Configurations, PromptService } from "../service";
 
 type Configuration = Configurations["verification"];
@@ -236,7 +235,7 @@ class VerificationService extends PromptService<{
 					],
 					footer: {
 						text: guild.name,
-						iconUrl: `${getGuildIconURLFormatted(guild)}&metadata=${entryRequestDocument.partialId}`,
+						iconUrl: `${Discord.guildIconUrl(guild.id, guild.icon)}&metadata=${entryRequestDocument.partialId}`,
 					},
 				},
 			],
