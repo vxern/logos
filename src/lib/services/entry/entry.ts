@@ -10,7 +10,6 @@ import { Guild, timeStructToMilliseconds } from "../../database/guild";
 import { User } from "../../database/user";
 import diagnostics from "../../diagnostics";
 import { Modal, createModalComposer } from "../../interactions";
-import { snowflakeToTimestamp } from "../../utils";
 import { LocalService } from "../service";
 
 type EntryStepButtonID = [parameter: string];
@@ -517,7 +516,7 @@ class EntryService extends LocalService {
 		for (const rule of verificationConfiguration.activation) {
 			switch (rule.type) {
 				case "account-age": {
-					const createdAt = snowflakeToTimestamp(user.id);
+					const createdAt = Discord.snowflakeToTimestamp(user.id);
 					const age = Date.now() - createdAt;
 
 					if (age < timeStructToMilliseconds(rule.value)) {

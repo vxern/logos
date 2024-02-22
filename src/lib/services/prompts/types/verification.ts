@@ -10,7 +10,7 @@ import { Model } from "../../../database/model";
 import { Ticket } from "../../../database/ticket";
 import { User } from "../../../database/user";
 import diagnostics from "../../../diagnostics";
-import { getGuildIconURLFormatted, snowflakeToTimestamp } from "../../../utils";
+import { getGuildIconURLFormatted } from "../../../utils";
 import { Configurations, PromptService } from "../service";
 
 type Configuration = Configurations["verification"];
@@ -169,8 +169,8 @@ class VerificationService extends PromptService<{
 			open: this.client.localise("entry.verification.inquiry.open", guildLocale)(),
 		};
 
-		const accountCreatedRelativeTimestamp = timestamp(snowflakeToTimestamp(user.id), TimestampFormat.Relative);
-		const accountCreatedLongDateTimestamp = timestamp(snowflakeToTimestamp(user.id), TimestampFormat.LongDate);
+		const accountCreatedRelativeTimestamp = timestamp(Discord.snowflakeToTimestamp(user.id), TimestampFormat.Relative);
+		const accountCreatedLongDateTimestamp = timestamp(Discord.snowflakeToTimestamp(user.id), TimestampFormat.LongDate);
 
 		const votedForFormatted = entryRequestDocument.votedFor?.map((userId) => mention(userId, MentionTypes.User));
 		const votedAgainstFormatted = entryRequestDocument.votedAgainst?.map((userId) =>

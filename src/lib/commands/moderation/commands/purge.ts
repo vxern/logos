@@ -8,7 +8,7 @@ import * as Logos from "../../../../types";
 import { Client, InteractionCollector, isValidSnowflake } from "../../../client";
 import { Guild } from "../../../database/guild";
 import diagnostics from "../../../diagnostics";
-import { chunk, snowflakeToTimestamp } from "../../../utils";
+import { chunk } from "../../../utils";
 import { CommandTemplate } from "../../command";
 import { user } from "../../parameters";
 
@@ -124,7 +124,10 @@ async function handlePurgeMessages(
 		[startMessageId, endMessageId] = [endMessageId, startMessageId];
 	}
 
-	const [startTimestamp, endTimestamp] = [snowflakeToTimestamp(startMessageId), snowflakeToTimestamp(endMessageId)];
+	const [startTimestamp, endTimestamp] = [
+		Discord.snowflakeToTimestamp(startMessageId),
+		Discord.snowflakeToTimestamp(endMessageId),
+	];
 
 	const now = Date.now();
 

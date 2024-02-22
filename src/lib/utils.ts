@@ -42,13 +42,6 @@ function* chunked<T>(array: T[], size: number): Generator<T[], void, void> {
 	}
 }
 
-const beginningOfDiscordEpoch = 1420070400000n;
-const snowflakeBitsToDiscard = 22n;
-
-function snowflakeToTimestamp(snowflake: bigint): number {
-	return Number((snowflake >> snowflakeBitsToDiscard) + beginningOfDiscordEpoch);
-}
-
 function getGuildIconURLFormatted(guild: Logos.Guild): string | undefined {
 	const iconURL = Discord.guildIconUrl(guild.id, guild.icon, {
 		size: 4096,
@@ -192,7 +185,6 @@ export {
 	getGuildIconURLFormatted,
 	isText,
 	isVoice,
-	snowflakeToTimestamp,
 	getMemberAvatarURL,
 	reverseObject,
 	asStream,
